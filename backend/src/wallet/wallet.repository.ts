@@ -157,7 +157,8 @@ export class PostgresWalletRepository {
   readonly pool: Queryable;
 
   constructor(pool: Queryable) {
-    if (!pool || typeof pool.query !== 'function') throw new TypeError('a PostgreSQL pool is required');
+    if (!pool || typeof pool.query !== 'function')
+      throw new TypeError('a PostgreSQL pool is required');
     this.pool = pool;
   }
 
@@ -227,7 +228,12 @@ export class PostgresWalletRepository {
     return row?.user_id ? { userId: requireUuid(row.user_id, 'database recipient user id') } : null;
   }
 
-  async transfer({ actorUserId, recipientUserId, amount, idempotencyKey }: WalletTransferInput): Promise<{ transactionId: string }> {
+  async transfer({
+    actorUserId,
+    recipientUserId,
+    amount,
+    idempotencyKey,
+  }: WalletTransferInput): Promise<{ transactionId: string }> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const recipient = requireUuid(recipientUserId, 'recipient user id');
     const transferAmount = requirePositiveSafeInteger(amount, 'amount');
@@ -243,7 +249,11 @@ export class PostgresWalletRepository {
     return { transactionId: requireUuid(row.transaction_id, 'database transaction id') };
   }
 
-  async claimDaily({ actorUserId, rewardDate, idempotencyKey }: WalletClaimDailyInput): Promise<WalletRewardRow> {
+  async claimDaily({
+    actorUserId,
+    rewardDate,
+    idempotencyKey,
+  }: WalletClaimDailyInput): Promise<WalletRewardRow> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const date = requireRewardDate(rewardDate);
     const key = requireUuid(idempotencyKey, 'idempotency key');
@@ -270,11 +280,17 @@ export class PostgresWalletRepository {
     return row;
   }
 
-  async moveBankBalance({ actorUserId, direction, amount, idempotencyKey }: WalletMoveBankBalanceInput): Promise<WalletBankMoveRow> {
+  async moveBankBalance({
+    actorUserId,
+    direction,
+    amount,
+    idempotencyKey,
+  }: WalletMoveBankBalanceInput): Promise<WalletBankMoveRow> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
     const transferAmount = requirePositiveSafeInteger(amount, 'amount');
-    if (direction !== 'deposit' && direction !== 'withdraw') throw new WalletInputError('invalid bank direction');
+    if (direction !== 'deposit' && direction !== 'withdraw')
+      throw new WalletInputError('invalid bank direction');
     const row = await queryOne<WalletBankMoveRow>(
       this.pool,
       'SELECT public.bank_move_balance($1,$2,$3,$4)::text AS transaction_id',
@@ -293,7 +309,11 @@ export class PostgresWalletRepository {
     );
   }
 
-  async borrow({ actorUserId, principalAmount, idempotencyKey }: WalletBorrowInput): Promise<WalletBorrowRow> {
+  async borrow({
+    actorUserId,
+    principalAmount,
+    idempotencyKey,
+  }: WalletBorrowInput): Promise<WalletBorrowRow> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
     const principal = requirePositiveSafeInteger(principalAmount, 'principal amount');
@@ -306,7 +326,12 @@ export class PostgresWalletRepository {
     return row;
   }
 
-  async repay({ actorUserId, loanId, amount, idempotencyKey }: WalletRepayInput): Promise<WalletRepayRow> {
+  async repay({
+    actorUserId,
+    loanId,
+    amount,
+    idempotencyKey,
+  }: WalletRepayInput): Promise<WalletRepayRow> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
     const loan = requireUuid(loanId, 'loan id');

@@ -77,7 +77,8 @@ export interface EconomyReconciliationHealthView {
   readonly integrityHash: string;
 }
 
-export type EconomyReconciliationHealth = EconomyReconciliationHealthView | { readonly available: false };
+export type EconomyReconciliationHealth =
+  EconomyReconciliationHealthView | { readonly available: false };
 
 /**
  * Validates a database-sourced integer count (not a money amount) as a
@@ -85,12 +86,19 @@ export type EconomyReconciliationHealth = EconomyReconciliationHealthView | { re
  * proofs, so this revalidates from scratch rather than trusting the
  * repository's declared row type.
  */
-function integerString(value: unknown, field: string, { nonNegative = false }: { nonNegative?: boolean } = {}): string {
-  const normalized = typeof value === 'bigint'
-    ? value.toString()
-    : typeof value === 'number' && Number.isSafeInteger(value)
-      ? String(value)
-      : typeof value === 'string' ? value : null;
+function integerString(
+  value: unknown,
+  field: string,
+  { nonNegative = false }: { nonNegative?: boolean } = {},
+): string {
+  const normalized =
+    typeof value === 'bigint'
+      ? value.toString()
+      : typeof value === 'number' && Number.isSafeInteger(value)
+        ? String(value)
+        : typeof value === 'string'
+          ? value
+          : null;
   const pattern = nonNegative ? NON_NEGATIVE_INTEGER_PATTERN : INTEGER_PATTERN;
   if (!normalized || !pattern.test(normalized)) {
     throw new EconomyReconciliationReadModelError(`${field} must be an integer`);
@@ -103,12 +111,19 @@ function integerString(value: unknown, field: string, { nonNegative = false }: {
  * Unlike `integerString` above, this is for genuinely money-denominated
  * fields (balances, flows, supply), not row/owner counts.
  */
-function moneyAmount(value: unknown, field: string, { nonNegative = false }: { nonNegative?: boolean } = {}): WldAmount {
-  const normalized = typeof value === 'bigint'
-    ? value.toString()
-    : typeof value === 'number' && Number.isSafeInteger(value)
-      ? String(value)
-      : typeof value === 'string' ? value : null;
+function moneyAmount(
+  value: unknown,
+  field: string,
+  { nonNegative = false }: { nonNegative?: boolean } = {},
+): WldAmount {
+  const normalized =
+    typeof value === 'bigint'
+      ? value.toString()
+      : typeof value === 'number' && Number.isSafeInteger(value)
+        ? String(value)
+        : typeof value === 'string'
+          ? value
+          : null;
   const canonical = normalized === '-0' ? '0' : normalized;
   if (canonical === null || !isWldAmount(canonical) || (nonNegative && canonical.startsWith('-'))) {
     throw new EconomyReconciliationReadModelError(`${field} must be an integer`);
@@ -117,8 +132,14 @@ function moneyAmount(value: unknown, field: string, { nonNegative = false }: { n
 }
 
 function basisPoints(value: unknown, field: string): number {
-  const normalized: unknown = typeof value === 'string' && /^[0-9]+$/.test(value) ? Number(value) : value;
-  if (typeof normalized !== 'number' || !Number.isSafeInteger(normalized) || normalized < 0 || normalized > 10_000) {
+  const normalized: unknown =
+    typeof value === 'string' && /^[0-9]+$/.test(value) ? Number(value) : value;
+  if (
+    typeof normalized !== 'number' ||
+    !Number.isSafeInteger(normalized) ||
+    normalized < 0 ||
+    normalized > 10_000
+  ) {
     throw new EconomyReconciliationReadModelError(`${field} must be between 0 and 10000`);
   }
   return normalized;
@@ -179,42 +200,108 @@ function normalizedHealth(row: unknown): EconomyReconciliationHealthView {
     calculatedAt: timestamp(row.calculated_at),
     integrity: {
       ok: boolean(row.integrity_ok, 'integrity ok'),
-      ledgerTransactionCount: integerString(row.ledger_transaction_count, 'ledger transaction count', { nonNegative: true }),
-      ledgerPostingCount: integerString(row.ledger_posting_count, 'ledger posting count', { nonNegative: true }),
-      unbalancedTransactionCount: integerString(row.ledger_unbalanced_transaction_count, 'unbalanced transaction count', { nonNegative: true }),
-      missingBalanceAccountCount: integerString(row.missing_balance_account_count, 'missing balance account count', { nonNegative: true }),
-      balanceMismatchAccountCount: integerString(row.balance_mismatch_account_count, 'balance mismatch account count', { nonNegative: true }),
-      disallowedNegativeBalanceAccountCount: integerString(row.disallowed_negative_balance_account_count, 'disallowed negative balance account count', { nonNegative: true }),
-      accountBalanceTotalAmount: moneyAmount(row.account_balance_total_amount, 'account balance total amount'),
-      ledgerBalanceTotalAmount: moneyAmount(row.ledger_balance_total_amount, 'ledger balance total amount'),
-      balanceTotalDeltaAmount: moneyAmount(row.balance_total_delta_amount, 'balance total delta amount'),
+      ledgerTransactionCount: integerString(
+        row.ledger_transaction_count,
+        'ledger transaction count',
+        { nonNegative: true },
+      ),
+      ledgerPostingCount: integerString(row.ledger_posting_count, 'ledger posting count', {
+        nonNegative: true,
+      }),
+      unbalancedTransactionCount: integerString(
+        row.ledger_unbalanced_transaction_count,
+        'unbalanced transaction count',
+        { nonNegative: true },
+      ),
+      missingBalanceAccountCount: integerString(
+        row.missing_balance_account_count,
+        'missing balance account count',
+        { nonNegative: true },
+      ),
+      balanceMismatchAccountCount: integerString(
+        row.balance_mismatch_account_count,
+        'balance mismatch account count',
+        { nonNegative: true },
+      ),
+      disallowedNegativeBalanceAccountCount: integerString(
+        row.disallowed_negative_balance_account_count,
+        'disallowed negative balance account count',
+        { nonNegative: true },
+      ),
+      accountBalanceTotalAmount: moneyAmount(
+        row.account_balance_total_amount,
+        'account balance total amount',
+      ),
+      ledgerBalanceTotalAmount: moneyAmount(
+        row.ledger_balance_total_amount,
+        'ledger balance total amount',
+      ),
+      balanceTotalDeltaAmount: moneyAmount(
+        row.balance_total_delta_amount,
+        'balance total delta amount',
+      ),
     },
     supply: {
       m2Amount: moneyAmount(row.m2_amount, 'm2 amount'),
       netMintIssuanceAmount: moneyAmount(row.net_mint_issuance_amount, 'net mint issuance amount'),
       sinkAbsorbedAmount: moneyAmount(row.sink_absorbed_amount, 'sink absorbed amount'),
-      effectiveIssuedLessSinkAmount: moneyAmount(row.effective_issued_less_sink_amount, 'effective issued less sink amount'),
+      effectiveIssuedLessSinkAmount: moneyAmount(
+        row.effective_issued_less_sink_amount,
+        'effective issued less sink amount',
+      ),
       treasuryBalanceAmount: moneyAmount(row.treasury_balance_amount, 'treasury balance amount'),
     },
     treasury24h: {
-      inflowAmount: moneyAmount(row.treasury_inflow_24h_amount, 'treasury inflow amount', { nonNegative: true }),
-      outflowAmount: moneyAmount(row.treasury_outflow_24h_amount, 'treasury outflow amount', { nonNegative: true }),
+      inflowAmount: moneyAmount(row.treasury_inflow_24h_amount, 'treasury inflow amount', {
+        nonNegative: true,
+      }),
+      outflowAmount: moneyAmount(row.treasury_outflow_24h_amount, 'treasury outflow amount', {
+        nonNegative: true,
+      }),
       netFlowAmount: moneyAmount(row.treasury_net_flow_24h_amount, 'treasury net flow amount'),
     },
     concentration: {
-      userWalletOwnerCount: integerString(row.user_wallet_owner_count, 'user wallet owner count', { nonNegative: true }),
-      positiveWalletOwnerCount: integerString(row.positive_wallet_owner_count, 'positive wallet owner count', { nonNegative: true }),
-      positiveUserBalanceTotalAmount: moneyAmount(row.positive_user_balance_total_amount, 'positive user balance total amount', { nonNegative: true }),
-      top1UserBalanceAmount: moneyAmount(row.top_1_user_balance_amount, 'top 1 user balance amount', { nonNegative: true }),
+      userWalletOwnerCount: integerString(row.user_wallet_owner_count, 'user wallet owner count', {
+        nonNegative: true,
+      }),
+      positiveWalletOwnerCount: integerString(
+        row.positive_wallet_owner_count,
+        'positive wallet owner count',
+        { nonNegative: true },
+      ),
+      positiveUserBalanceTotalAmount: moneyAmount(
+        row.positive_user_balance_total_amount,
+        'positive user balance total amount',
+        { nonNegative: true },
+      ),
+      top1UserBalanceAmount: moneyAmount(
+        row.top_1_user_balance_amount,
+        'top 1 user balance amount',
+        { nonNegative: true },
+      ),
       top1ShareBasisPoints: basisPoints(row.top_1_share_basis_points, 'top 1 share basis points'),
-      top10UserBalanceAmount: moneyAmount(row.top_10_user_balance_amount, 'top 10 user balance amount', { nonNegative: true }),
-      top10ShareBasisPoints: basisPoints(row.top_10_share_basis_points, 'top 10 share basis points'),
+      top10UserBalanceAmount: moneyAmount(
+        row.top_10_user_balance_amount,
+        'top 10 user balance amount',
+        { nonNegative: true },
+      ),
+      top10ShareBasisPoints: basisPoints(
+        row.top_10_share_basis_points,
+        'top 10 share basis points',
+      ),
     },
     flow24h: {
-      transactionCount: integerString(row.flow_24h_transaction_count, '24h transaction count', { nonNegative: true }),
-      volumeAmount: moneyAmount(row.flow_24h_volume_amount, '24h volume amount', { nonNegative: true }),
+      transactionCount: integerString(row.flow_24h_transaction_count, '24h transaction count', {
+        nonNegative: true,
+      }),
+      volumeAmount: moneyAmount(row.flow_24h_volume_amount, '24h volume amount', {
+        nonNegative: true,
+      }),
       mintIssuanceAmount: moneyAmount(row.mint_issuance_24h_amount, '24h mint issuance amount'),
-      sinkAbsorptionAmount: moneyAmount(row.sink_absorption_24h_amount, '24h sink absorption amount'),
+      sinkAbsorptionAmount: moneyAmount(
+        row.sink_absorption_24h_amount,
+        '24h sink absorption amount',
+      ),
     },
     integrityHash: requireHash(row.integrity_hash),
   };

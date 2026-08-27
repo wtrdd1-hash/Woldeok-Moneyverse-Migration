@@ -44,9 +44,10 @@ describe.skipIf(!DATABASE_URL)('board, privacy and reconciliation against a real
   });
 
   it('reports nothing deleted for a post that does not exist', async () => {
-    const outcome = await board
-      .remove(UNKNOWN, randomUUID(), randomUUID())
-      .then((value) => value, () => 'threw' as const);
+    const outcome = await board.remove(UNKNOWN, randomUUID(), randomUUID()).then(
+      (value) => value,
+      () => 'threw' as const,
+    );
     expect(outcome === false || outcome === 'threw').toBe(true);
   });
 

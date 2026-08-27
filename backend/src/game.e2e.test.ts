@@ -29,7 +29,9 @@ describe('stock, business and season routes', () => {
       new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
     );
     app.useGlobalFilters(new ProblemFilter(false));
-    app.setGlobalPrefix('api', { exclude: ['health'] });
+    app.setGlobalPrefix('api', {
+      exclude: ['health', 'auth/:provider/authorize', 'auth/:provider/callback'],
+    });
     app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
     await app.init();
   });

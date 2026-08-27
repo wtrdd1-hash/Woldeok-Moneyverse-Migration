@@ -11,7 +11,8 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 // let TypeScript treat the comparisons after this guard as safe; it does not
 // change which values pass, since isSafeInteger already rejects anything
 // that is not a number.
-const positive = (value: unknown): value is number => typeof value === 'number' && Number.isSafeInteger(value) && value > 0;
+const positive = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isSafeInteger(value) && value > 0;
 const uuid = (value: unknown, name: string): string => {
   if (typeof value !== 'string' || !UUID.test(value)) throw new Error(`${name} must be a UUID`);
   return value;
@@ -187,7 +188,10 @@ export class PostgresStockRepository {
 
   async history(userId: unknown, limit: unknown = 50): Promise<readonly StockHistoryRow[]> {
     uuid(userId, 'user id');
-    const n = typeof limit === 'number' && Number.isSafeInteger(limit) ? Math.min(100, Math.max(1, limit)) : 50;
+    const n =
+      typeof limit === 'number' && Number.isSafeInteger(limit)
+        ? Math.min(100, Math.max(1, limit))
+        : 50;
     return queryRows<StockHistoryRow>(
       this.pool,
       'SELECT trade_id::text, symbol, side, quantity::text, unit_price::text, gross_amount::text, tax_amount::text, created_at FROM public.stock_my_trades($1,$2)',
@@ -195,9 +199,15 @@ export class PostgresStockRepository {
     );
   }
 
-  async priceHistory(stockId: unknown, limit: unknown = 80): Promise<readonly StockPriceHistoryRow[]> {
+  async priceHistory(
+    stockId: unknown,
+    limit: unknown = 80,
+  ): Promise<readonly StockPriceHistoryRow[]> {
     uuid(stockId, 'stock id');
-    const n = typeof limit === 'number' && Number.isSafeInteger(limit) ? Math.min(240, Math.max(1, limit)) : 80;
+    const n =
+      typeof limit === 'number' && Number.isSafeInteger(limit)
+        ? Math.min(240, Math.max(1, limit))
+        : 80;
     return queryRows<StockPriceHistoryRow>(
       this.pool,
       'SELECT recorded_at, price::text AS price FROM public.stock_price_history($1,$2)',
@@ -205,11 +215,18 @@ export class PostgresStockRepository {
     );
   }
 
-  async trade({ userId, stockId, side, quantity, idempotencyKey = randomUUID() }: StockTradeInput): Promise<StockTradeResultRow> {
+  async trade({
+    userId,
+    stockId,
+    side,
+    quantity,
+    idempotencyKey = randomUUID(),
+  }: StockTradeInput): Promise<StockTradeResultRow> {
     uuid(userId, 'user id');
     uuid(stockId, 'stock id');
     uuid(idempotencyKey, 'idempotency key');
-    if ((side !== 'buy' && side !== 'sell') || !positive(quantity)) throw new StockInputError('invalid stock trade');
+    if ((side !== 'buy' && side !== 'sell') || !positive(quantity))
+      throw new StockInputError('invalid stock trade');
     const row = await queryOne<StockTradeResultRow>(
       this.pool,
       'SELECT trade_id::text, unit_price::text, gross_amount::text, tax_amount::text, current_price::text FROM public.stock_trade($1,$2,$3,$4,$5)',
@@ -223,9 +240,20 @@ export class PostgresStockRepository {
     return row;
   }
 
-  async create({ userId, symbol, name, description = '', price }: StockCreateInput): Promise<StockCreateResultRow> {
+  async create({
+    userId,
+    symbol,
+    name,
+    description = '',
+    price,
+  }: StockCreateInput): Promise<StockCreateResultRow> {
     uuid(userId, 'user id');
-    if (typeof symbol !== 'string' || !/^[A-Z][A-Z0-9]{1,7}$/.test(symbol) || typeof name !== 'string' || !positive(price)) {
+    if (
+      typeof symbol !== 'string' ||
+      !/^[A-Z][A-Z0-9]{1,7}$/.test(symbol) ||
+      typeof name !== 'string' ||
+      !positive(price)
+    ) {
       throw new StockInputError('invalid stock');
     }
     const row = await queryOne<StockCreateResultRow>(
@@ -237,13 +265,23 @@ export class PostgresStockRepository {
     return row;
   }
 
-  async update({ userId, stockId, name = null, description = null, active = null }: StockUpdateInput): Promise<StockUpdateResultRow> {
+  async update({
+    userId,
+    stockId,
+    name = null,
+    description = null,
+    active = null,
+  }: StockUpdateInput): Promise<StockUpdateResultRow> {
     uuid(userId, 'user id');
     uuid(stockId, 'stock id');
-    if (name !== null && (typeof name !== 'string' || !name.trim() || name.length > 80)) throw new StockInputError('invalid stock name');
-    if (description !== null && (typeof description !== 'string' || description.length > 500)) throw new StockInputError('invalid stock description');
-    if (active !== null && typeof active !== 'boolean') throw new StockInputError('invalid stock active value');
-    if (name === null && description === null && active === null) throw new StockInputError('stock change required');
+    if (name !== null && (typeof name !== 'string' || !name.trim() || name.length > 80))
+      throw new StockInputError('invalid stock name');
+    if (description !== null && (typeof description !== 'string' || description.length > 500))
+      throw new StockInputError('invalid stock description');
+    if (active !== null && typeof active !== 'boolean')
+      throw new StockInputError('invalid stock active value');
+    if (name === null && description === null && active === null)
+      throw new StockInputError('stock change required');
     const row = await queryOne<StockUpdateResultRow>(
       this.pool,
       'SELECT public.stock_admin_update($1,$2,$3,$4,$5) AS changed',
@@ -252,16 +290,22 @@ export class PostgresStockRepository {
     return row ?? { changed: false };
   }
 
-  async corporateAction({ userId, stockId, action, factor, idempotencyKey = randomUUID() }: StockCorporateActionInput): Promise<StockCorporateActionResultRow> {
+  async corporateAction({
+    userId,
+    stockId,
+    action,
+    factor,
+    idempotencyKey = randomUUID(),
+  }: StockCorporateActionInput): Promise<StockCorporateActionResultRow> {
     uuid(userId, 'user id');
     uuid(stockId, 'stock id');
     uuid(idempotencyKey, 'idempotency key');
     if (
-      (action !== 'split' && action !== 'reverse_split')
-      || typeof factor !== 'number'
-      || !Number.isSafeInteger(factor)
-      || factor < 2
-      || factor > 100
+      (action !== 'split' && action !== 'reverse_split') ||
+      typeof factor !== 'number' ||
+      !Number.isSafeInteger(factor) ||
+      factor < 2 ||
+      factor > 100
     ) {
       throw new StockInputError('invalid stock corporate action');
     }
@@ -270,7 +314,8 @@ export class PostgresStockRepository {
       'SELECT corporate_action_id::text,replayed FROM public.stock_admin_corporate_action($1,$2,$3,$4,$5)',
       [idempotencyKey, userId, stockId, action, factor],
     );
-    if (!row?.corporate_action_id || typeof row.replayed !== 'boolean') throw new Error('database did not return a corporate-action receipt');
+    if (!row?.corporate_action_id || typeof row.replayed !== 'boolean')
+      throw new Error('database did not return a corporate-action receipt');
     return row;
   }
 }

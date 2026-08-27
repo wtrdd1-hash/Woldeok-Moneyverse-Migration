@@ -37,7 +37,12 @@ export class PostgresBoardRepository implements BoardRepository {
     );
   }
 
-  async create(actorUserId: string, title: string, body: string, idempotencyKey: string): Promise<BoardPostRow> {
+  async create(
+    actorUserId: string,
+    title: string,
+    body: string,
+    idempotencyKey: string,
+  ): Promise<BoardPostRow> {
     const row = await queryOne<BoardPostRow>(
       this.pool,
       'SELECT post_id::text,title,body,author_name,created_at,mine FROM public.member_board_create($1,$2,$3,$4)',

@@ -18,10 +18,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { PRIVACY_REQUEST_TYPES, PrivacyRequestInputError } from './privacy.repository';
-import {
-  PrivacyRequestAccountUnavailableError,
-  PrivacyRequestService,
-} from './privacy.service';
+import { PrivacyRequestAccountUnavailableError, PrivacyRequestService } from './privacy.service';
 
 /**
  * The allowed values come from PRIVACY_REQUEST_TYPES rather than a literal

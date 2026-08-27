@@ -134,9 +134,15 @@ export class ShopService {
   readonly repository: ShopRepositoryLike;
 
   constructor(repository: ShopRepositoryLike) {
-    const requiredMethods: readonly (keyof ShopRepositoryLike)[] = ['listActiveItems', 'purchasesForUser', 'purchase'];
-    if (!(repository instanceof PostgresShopRepository)
-      && (!repository || !requiredMethods.every(method => typeof repository[method] === 'function'))) {
+    const requiredMethods: readonly (keyof ShopRepositoryLike)[] = [
+      'listActiveItems',
+      'purchasesForUser',
+      'purchase',
+    ];
+    if (
+      !(repository instanceof PostgresShopRepository) &&
+      (!repository || !requiredMethods.every((method) => typeof repository[method] === 'function'))
+    ) {
       throw new TypeError('a shop repository is required');
     }
     this.repository = repository;
@@ -148,14 +154,20 @@ export class ShopService {
     return rows.map(normalizeCatalogItem);
   }
 
-  async myPurchases(authenticatedUserId: string, { limit = 30 }: ShopPurchasesOptions = {}): Promise<ShopPurchaseView[]> {
+  async myPurchases(
+    authenticatedUserId: string,
+    { limit = 30 }: ShopPurchasesOptions = {},
+  ): Promise<ShopPurchaseView[]> {
     const userId = requireShopUuid(authenticatedUserId, 'authenticated user id');
     const purchaseLimit = requireShopLimit(limit, 'purchase limit');
     const rows = await this.repository.purchasesForUser(userId, { limit: purchaseLimit });
     return rows.map(normalizePurchase);
   }
 
-  async purchase(authenticatedUserId: string, { itemId, idempotencyKey }: ShopPurchaseRequest = {}): Promise<ShopPurchaseReceipt> {
+  async purchase(
+    authenticatedUserId: string,
+    { itemId, idempotencyKey }: ShopPurchaseRequest = {},
+  ): Promise<ShopPurchaseReceipt> {
     const actorUserId = requireShopUuid(authenticatedUserId, 'authenticated user id');
     const selectedItemId = requireShopUuid(itemId, 'item id');
     const key = requireShopUuid(idempotencyKey, 'idempotency key');
@@ -165,7 +177,8 @@ export class ShopService {
         itemId: selectedItemId,
         idempotencyKey: key,
       });
-      if (typeof receipt.replayed !== 'boolean') throw new Error('database returned an invalid shop receipt');
+      if (typeof receipt.replayed !== 'boolean')
+        throw new Error('database returned an invalid shop receipt');
       return {
         purchaseId: requireShopUuid(receipt.purchase_id, 'database purchase id'),
         transactionId: requireShopUuid(receipt.transaction_id, 'database transaction id'),

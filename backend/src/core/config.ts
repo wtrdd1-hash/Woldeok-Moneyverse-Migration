@@ -2,12 +2,20 @@ const LOCAL_HTTP_HOSTS = new Set(['127.0.0.1', 'localhost', '::1', '[::1]']);
 const DISCORD_PUBLIC_KEY = /^[0-9a-f]{64}$/i;
 const DISCORD_SNOWFLAKE = /^\d{16,22}$/;
 
-export interface OAuthProviderConfig {
-  readonly enabled: boolean;
-  readonly clientId?: string;
-  readonly clientSecret?: string;
-  readonly redirectUri?: string;
-}
+/**
+ * A discriminated union, not an interface with optional fields: a disabled
+ * provider carries no credentials, so checking `.enabled` narrows the
+ * credential fields in without a cast. Weakening this to optional properties
+ * forces every consumer to re-assert what the check already proved.
+ */
+export type OAuthProviderConfig =
+  | { readonly enabled: false }
+  | {
+      readonly enabled: true;
+      readonly clientId: string;
+      readonly clientSecret: string;
+      readonly redirectUri: string;
+    };
 
 export interface DiscordInteractionsPolicy {
   readonly guilds: Record<
@@ -16,16 +24,19 @@ export interface DiscordInteractionsPolicy {
   >;
 }
 
-export interface DiscordInteractionsConfig {
-  readonly enabled: boolean;
-  readonly publicKey?: string;
-  readonly policy?: DiscordInteractionsPolicy;
-  readonly rateLimit?: {
-    readonly limit: number;
-    readonly windowMs: number;
-    readonly maxEntries: number;
-  };
-}
+/** A discriminated union for the same reason as OAuthProviderConfig. */
+export type DiscordInteractionsConfig =
+  | { readonly enabled: false }
+  | {
+      readonly enabled: true;
+      readonly publicKey: string;
+      readonly policy: DiscordInteractionsPolicy;
+      readonly rateLimit: {
+        readonly limit: number;
+        readonly windowMs: number;
+        readonly maxEntries: number;
+      };
+    };
 
 export interface AppConfig {
   readonly port: number;

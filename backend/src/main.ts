@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { raw } from 'express';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
@@ -17,6 +18,13 @@ async function bootstrap(): Promise<void> {
   // a legitimate client nothing.
   app.getHttpAdapter().getInstance().disable('x-powered-by');
 
+  // Raw bytes for the two paths whose bodies are not JSON to us. Discord
+  // signs the exact request bytes, and a JSON round trip re-serialises key
+  // order and whitespace, after which the Ed25519 check can never pass. The
+  // photo upload is image data and PrivateImageStorage sniffs it itself.
+  app.use('/api/v1/integrations/discord/interactions', raw({ type: '*/*', limit: '32kb' }));
+  app.use('/api/v1/admin/photos', raw({ type: '*/*', limit: '8mb' }));
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -32,7 +40,9 @@ async function bootstrap(): Promise<void> {
 
   // /health keeps the short path a container probe has always used; every
   // other route lives under /api/v{n}.
-  app.setGlobalPrefix('api', { exclude: ['health'] });
+  app.setGlobalPrefix('api', {
+    exclude: ['health', 'auth/:provider/authorize', 'auth/:provider/callback'],
+  });
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
   mountOpenApi(app, config.production);
 

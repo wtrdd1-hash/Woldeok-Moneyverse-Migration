@@ -218,7 +218,7 @@ function normalizeBalances(rows: readonly WalletBalanceRow[]): WalletBalancesVie
 }
 
 function normalizeTransactions(rows: readonly WalletTransactionRow[]): WalletTransactionView[] {
-  return rows.map(row => {
+  return rows.map((row) => {
     const netAmount = wldAmount(row.net_amount, 'transaction amount');
     return {
       transactionId: requireUuid(row.transaction_id, 'database transaction id'),
@@ -232,13 +232,17 @@ function normalizeTransactions(rows: readonly WalletTransactionRow[]): WalletTra
 }
 
 function koreaDate(now: Date): string {
-  if (!(now instanceof Date) || Number.isNaN(now.valueOf())) throw new TypeError('clock must return a valid Date');
+  if (!(now instanceof Date) || Number.isNaN(now.valueOf()))
+    throw new TypeError('clock must return a valid Date');
   const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
   }).formatToParts(now);
-  const year = parts.find(part => part.type === 'year')?.value;
-  const month = parts.find(part => part.type === 'month')?.value;
-  const day = parts.find(part => part.type === 'day')?.value;
+  const year = parts.find((part) => part.type === 'year')?.value;
+  const month = parts.find((part) => part.type === 'month')?.value;
+  const day = parts.find((part) => part.type === 'day')?.value;
   return `${year}-${month}-${day}`;
 }
 
@@ -251,7 +255,10 @@ export class WalletService {
   readonly repository: WalletRepositoryLike;
   readonly clock: () => Date;
 
-  constructor(repository: WalletRepositoryLike, { clock = () => new Date() }: { clock?: () => Date } = {}) {
+  constructor(
+    repository: WalletRepositoryLike,
+    { clock = () => new Date() }: { clock?: () => Date } = {},
+  ) {
     const requiredMethods: readonly (keyof WalletRepositoryLike)[] = [
       'balancesForUser',
       'recentTransactionsForUser',
@@ -259,8 +266,10 @@ export class WalletService {
       'transfer',
       'claimDaily',
     ];
-    if (!(repository instanceof PostgresWalletRepository)
-      && (!repository || !requiredMethods.every(method => typeof repository[method] === 'function'))) {
+    if (
+      !(repository instanceof PostgresWalletRepository) &&
+      (!repository || !requiredMethods.every((method) => typeof repository[method] === 'function'))
+    ) {
       throw new TypeError('a wallet repository is required');
     }
     if (typeof clock !== 'function') throw new TypeError('clock must be a function');
@@ -268,17 +277,26 @@ export class WalletService {
     this.clock = clock;
   }
 
-  async overview(authenticatedUserId: string, { recentLimit = 10 }: WalletOverviewOptions = {}): Promise<WalletOverview> {
+  async overview(
+    authenticatedUserId: string,
+    { recentLimit = 10 }: WalletOverviewOptions = {},
+  ): Promise<WalletOverview> {
     const userId = requireUuid(authenticatedUserId, 'authenticated user id');
     const limit = requireRecentLimit(recentLimit);
     const [balances, transactions] = await Promise.all([
       this.repository.balancesForUser(userId),
       this.repository.recentTransactionsForUser(userId, limit),
     ]);
-    return { balances: normalizeBalances(balances), recentTransactions: normalizeTransactions(transactions) };
+    return {
+      balances: normalizeBalances(balances),
+      recentTransactions: normalizeTransactions(transactions),
+    };
   }
 
-  async transfer(authenticatedUserId: string, { recipientUserId, amount, idempotencyKey }: WalletTransferRequest = {}): Promise<WalletTransferReceipt> {
+  async transfer(
+    authenticatedUserId: string,
+    { recipientUserId, amount, idempotencyKey }: WalletTransferRequest = {},
+  ): Promise<WalletTransferReceipt> {
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
     const recipient = requireUuid(recipientUserId, 'recipient user id');
     const transferAmount = requirePositiveSafeInteger(amount, 'amount');
@@ -299,7 +317,10 @@ export class WalletService {
     return { transactionId: requireUuid(receipt.transactionId, 'database transaction id') };
   }
 
-  async claimDaily(authenticatedUserId: string, { idempotencyKey }: WalletClaimRequest = {}): Promise<WalletRewardReceipt> {
+  async claimDaily(
+    authenticatedUserId: string,
+    { idempotencyKey }: WalletClaimRequest = {},
+  ): Promise<WalletRewardReceipt> {
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
     const reward = await this.repository.claimDaily({
@@ -307,7 +328,8 @@ export class WalletService {
       rewardDate: koreaDate(this.clock()),
       idempotencyKey: key,
     });
-    if (typeof reward.replayed !== 'boolean') throw new Error('database returned an invalid daily-reward receipt');
+    if (typeof reward.replayed !== 'boolean')
+      throw new Error('database returned an invalid daily-reward receipt');
     return {
       transactionId: requireUuid(reward.transaction_id, 'database transaction id'),
       amount: positiveWldAmount(reward.amount, 'daily reward amount'),
@@ -315,11 +337,15 @@ export class WalletService {
     };
   }
 
-  async claimWork(authenticatedUserId: string, { idempotencyKey }: WalletClaimRequest = {}): Promise<WalletRewardReceipt> {
+  async claimWork(
+    authenticatedUserId: string,
+    { idempotencyKey }: WalletClaimRequest = {},
+  ): Promise<WalletRewardReceipt> {
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
     const reward = await this.repository.claimWork({ actorUserId, idempotencyKey: key });
-    if (typeof reward.replayed !== 'boolean') throw new Error('database returned an invalid work-reward receipt');
+    if (typeof reward.replayed !== 'boolean')
+      throw new Error('database returned an invalid work-reward receipt');
     return {
       transactionId: requireUuid(reward.transaction_id, 'database transaction id'),
       amount: positiveWldAmount(reward.amount, 'work reward amount'),
@@ -327,7 +353,10 @@ export class WalletService {
     };
   }
 
-  async bankMove(authenticatedUserId: string, { direction, amount, idempotencyKey }: WalletBankMoveRequest = {}): Promise<WalletTransferReceipt> {
+  async bankMove(
+    authenticatedUserId: string,
+    { direction, amount, idempotencyKey }: WalletBankMoveRequest = {},
+  ): Promise<WalletTransferReceipt> {
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
     const receipt = await this.repository.moveBankBalance({
       actorUserId,
@@ -343,18 +372,26 @@ export class WalletService {
     if (typeof this.repository.loansForUser !== 'function') return [];
     const rows = await this.repository.loansForUser(actorUserId);
     if (!Array.isArray(rows)) throw new Error('database returned invalid loans');
-    return rows.map(row => ({
+    return rows.map((row) => ({
       loanId: requireUuid(row.loan_id, 'loan id'),
       principalAmount: positiveWldAmount(row.principal_amount, 'loan principal'),
       interestAmount: wldAmount(row.interest_amount, 'loan interest'),
       outstandingAmount: wldAmount(row.outstanding_amount, 'loan outstanding'),
-      status: row.status === 'active' || row.status === 'repaid' ? row.status : (() => { throw new Error('database returned invalid loan status'); })(),
+      status:
+        row.status === 'active' || row.status === 'repaid'
+          ? row.status
+          : (() => {
+              throw new Error('database returned invalid loan status');
+            })(),
       issuedAt: timestamp(row.issued_at, 'loan issued timestamp'),
       repaidAt: row.repaid_at ? timestamp(row.repaid_at, 'loan repaid timestamp') : null,
     }));
   }
 
-  async borrow(authenticatedUserId: string, { principalAmount, idempotencyKey }: WalletBorrowRequest = {}): Promise<WalletBorrowReceipt> {
+  async borrow(
+    authenticatedUserId: string,
+    { principalAmount, idempotencyKey }: WalletBorrowRequest = {},
+  ): Promise<WalletBorrowReceipt> {
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
     const receipt = await this.repository.borrow({
       actorUserId,
@@ -370,7 +407,10 @@ export class WalletService {
     };
   }
 
-  async repayLoan(authenticatedUserId: string, { loanId, amount, idempotencyKey }: WalletRepayRequest = {}): Promise<WalletRepayReceipt> {
+  async repayLoan(
+    authenticatedUserId: string,
+    { loanId, amount, idempotencyKey }: WalletRepayRequest = {},
+  ): Promise<WalletRepayReceipt> {
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
     const receipt = await this.repository.repay({
       actorUserId,

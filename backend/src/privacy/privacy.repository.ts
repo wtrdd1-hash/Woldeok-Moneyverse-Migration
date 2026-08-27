@@ -20,7 +20,10 @@ export class PrivacyRequestInputError extends Error {
   }
 }
 
-function assertPlainObject(value: unknown, field: string): asserts value is Record<string, unknown> {
+function assertPlainObject(
+  value: unknown,
+  field: string,
+): asserts value is Record<string, unknown> {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     throw new PrivacyRequestInputError(`${field} must be an object`);
   }
@@ -30,7 +33,11 @@ function assertPlainObject(value: unknown, field: string): asserts value is Reco
   }
 }
 
-function exactInput(value: unknown, field: string, allowedKeys: ReadonlySet<string>): Record<string, unknown> {
+function exactInput(
+  value: unknown,
+  field: string,
+  allowedKeys: ReadonlySet<string>,
+): Record<string, unknown> {
   assertPlainObject(value, field);
   for (const key of Object.keys(value)) {
     if (!allowedKeys.has(key)) {
@@ -82,9 +89,13 @@ export function normalizePrivacyRequestDetail(value: unknown, field = 'detail'):
     .trim();
 
   if (normalized.length === 0) return null;
-  if (normalized.length > 1_000
-    || /[<>\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(normalized)) {
-    throw new PrivacyRequestInputError(`${field} must be safe plain text of at most 1000 characters`);
+  if (
+    normalized.length > 1_000 ||
+    /[<>\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(normalized)
+  ) {
+    throw new PrivacyRequestInputError(
+      `${field} must be safe plain text of at most 1000 characters`,
+    );
   }
   return normalized;
 }
@@ -149,9 +160,11 @@ export class PostgresPrivacyRequestRepository {
       requestType,
       detail = null,
       idempotencyKey,
-    } = exactInput(input, 'privacy request', new Set([
-      'actorUserId', 'requestType', 'detail', 'idempotencyKey',
-    ]));
+    } = exactInput(
+      input,
+      'privacy request',
+      new Set(['actorUserId', 'requestType', 'detail', 'idempotencyKey']),
+    );
     const actor = requirePrivacyRequestUuid(actorUserId, 'authenticated user id');
     const type = requirePrivacyRequestType(requestType);
     const safeDetail = normalizePrivacyRequestDetail(detail);
@@ -161,7 +174,9 @@ export class PostgresPrivacyRequestRepository {
     const key = requirePrivacyRequestUuid(idempotencyKey, 'idempotency key');
 
     /** public.privacy_create_my_request RETURNS TABLE: packages/database/migrations/015-privacy-data-subject-requests.sql */
-    const { rows: [row] } = await this.pool.query<PrivacyRequestReceiptRow>(
+    const {
+      rows: [row],
+    } = await this.pool.query<PrivacyRequestReceiptRow>(
       `SELECT
          request_id::text AS request_id,
          request_type,

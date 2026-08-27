@@ -5,7 +5,8 @@ import type { SeasonEventRow, SeasonLeaderboardRow, SeasonRepository } from './s
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export class SeasonInputError extends Error {}
 const id = (value: unknown, field: string): string => {
-  if (typeof value !== 'string' || !UUID.test(value)) throw new SeasonInputError(`${field} must be a UUID`);
+  if (typeof value !== 'string' || !UUID.test(value))
+    throw new SeasonInputError(`${field} must be a UUID`);
   return value;
 };
 
@@ -60,14 +61,29 @@ export class PostgresSeasonRepository implements SeasonRepository {
     );
   }
 
-  async consume({ userId, eventId, quantity, idempotencyKey }: SeasonConsumeInput): Promise<SeasonConsumeRow> {
-    if (typeof quantity !== 'number' || !Number.isSafeInteger(quantity) || quantity < 1 || quantity > 100) {
+  async consume({
+    userId,
+    eventId,
+    quantity,
+    idempotencyKey,
+  }: SeasonConsumeInput): Promise<SeasonConsumeRow> {
+    if (
+      typeof quantity !== 'number' ||
+      !Number.isSafeInteger(quantity) ||
+      quantity < 1 ||
+      quantity > 100
+    ) {
       throw new SeasonInputError('quantity must be between 1 and 100');
     }
     const row = await queryOne<SeasonConsumeRow>(
       this.pool,
       'SELECT event_id::text,points_earned::text,transaction_id::text,replayed FROM public.season_consume($1,$2,$3,$4)',
-      [id(idempotencyKey, 'idempotency key'), id(userId, 'user id'), id(eventId, 'event id'), quantity],
+      [
+        id(idempotencyKey, 'idempotency key'),
+        id(userId, 'user id'),
+        id(eventId, 'event id'),
+        quantity,
+      ],
     );
     if (!row) throw new Error('database did not return an event receipt');
     return row;

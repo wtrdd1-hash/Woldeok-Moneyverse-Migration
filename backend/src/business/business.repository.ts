@@ -6,7 +6,8 @@ import type { BusinessRepository } from './business.service';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export class BusinessInputError extends Error {}
 const uuid = (value: unknown, field: string): string => {
-  if (typeof value !== 'string' || !UUID.test(value)) throw new BusinessInputError(`${field} must be a UUID`);
+  if (typeof value !== 'string' || !UUID.test(value))
+    throw new BusinessInputError(`${field} must be a UUID`);
   return value.toLowerCase();
 };
 
@@ -95,23 +96,40 @@ export class PostgresBusinessRepository implements BusinessRepository {
     );
   }
 
-  async purchase({ userId, businessTypeId, idempotencyKey = randomUUID() }: PurchaseInput): Promise<BusinessPurchaseRow> {
+  async purchase({
+    userId,
+    businessTypeId,
+    idempotencyKey = randomUUID(),
+  }: PurchaseInput): Promise<BusinessPurchaseRow> {
     const row = await queryOne<BusinessPurchaseRow>(
       this.pool,
       'SELECT ownership_id::text,business_type_id::text,purchase_cost::text,transaction_id::text,replayed FROM public.business_purchase($1,$2,$3)',
-      [uuid(idempotencyKey, 'idempotency key'), uuid(userId, 'user id'), uuid(businessTypeId, 'business type id')],
+      [
+        uuid(idempotencyKey, 'idempotency key'),
+        uuid(userId, 'user id'),
+        uuid(businessTypeId, 'business type id'),
+      ],
     );
     if (!row?.ownership_id) throw new Error('database did not return a business purchase receipt');
     return row;
   }
 
-  async settle({ userId, ownershipId, idempotencyKey = randomUUID() }: SettleInput): Promise<BusinessSettleRow> {
+  async settle({
+    userId,
+    ownershipId,
+    idempotencyKey = randomUUID(),
+  }: SettleInput): Promise<BusinessSettleRow> {
     const row = await queryOne<BusinessSettleRow>(
       this.pool,
       'SELECT ownership_id::text,settlement_date,gross_revenue::text,operating_cost::text,net_amount::text,transaction_id::text,replayed FROM public.business_settle_daily($1,$2,$3)',
-      [uuid(idempotencyKey, 'idempotency key'), uuid(userId, 'user id'), uuid(ownershipId, 'ownership id')],
+      [
+        uuid(idempotencyKey, 'idempotency key'),
+        uuid(userId, 'user id'),
+        uuid(ownershipId, 'ownership id'),
+      ],
     );
-    if (!row?.ownership_id) throw new Error('database did not return a business settlement receipt');
+    if (!row?.ownership_id)
+      throw new Error('database did not return a business settlement receipt');
     return row;
   }
 }

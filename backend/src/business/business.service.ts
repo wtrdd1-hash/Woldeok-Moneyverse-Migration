@@ -6,7 +6,8 @@ import type { WldAmount } from '@moneyverse/contract';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const validId = (value: unknown, field: string): string => {
-  if (typeof value !== 'string' || !UUID.test(value)) throw new BusinessInputError(`${field} must be a UUID`);
+  if (typeof value !== 'string' || !UUID.test(value))
+    throw new BusinessInputError(`${field} must be a UUID`);
   return value.toLowerCase();
 };
 
@@ -25,9 +26,10 @@ const iso = (value: unknown, field: string): string => {
   // in production and a plain ISO string in test doubles, so both are
   // handled explicitly and anything else is treated as the invalid
   // timestamp it would produce.
-  const date = typeof value === 'string' || typeof value === 'number' || value instanceof Date
-    ? new Date(value)
-    : new Date(NaN);
+  const date =
+    typeof value === 'string' || typeof value === 'number' || value instanceof Date
+      ? new Date(value)
+      : new Date(NaN);
   if (Number.isNaN(date.valueOf())) throw new Error(`database returned invalid ${field}`);
   return date.toISOString();
 };
@@ -172,7 +174,7 @@ export class BusinessService {
 
   async mine(userId: unknown): Promise<BusinessOwnership[]> {
     const rows = await this.repository.mine(validId(userId, 'user id'));
-    return rows.map(row => ({
+    return rows.map((row) => ({
       ownershipId: validId(row?.ownership_id, 'ownership id'),
       businessTypeId: validId(row?.business_type_id, 'business id'),
       symbol: String(row?.symbol ?? ''),
@@ -186,7 +188,10 @@ export class BusinessService {
     }));
   }
 
-  async purchase(userId: unknown, input: CreateBusinessPurchaseInput = {}): Promise<BusinessPurchaseResult> {
+  async purchase(
+    userId: unknown,
+    input: CreateBusinessPurchaseInput = {},
+  ): Promise<BusinessPurchaseResult> {
     const row = await this.repository.purchase({
       userId: validId(userId, 'user id'),
       businessTypeId: validId(input.businessTypeId, 'business type id'),
@@ -201,7 +206,10 @@ export class BusinessService {
     };
   }
 
-  async settle(userId: unknown, input: CreateBusinessSettleInput = {}): Promise<BusinessSettleResult> {
+  async settle(
+    userId: unknown,
+    input: CreateBusinessSettleInput = {},
+  ): Promise<BusinessSettleResult> {
     const row = await this.repository.settle({
       userId: validId(userId, 'user id'),
       ownershipId: validId(input.ownershipId, 'ownership id'),

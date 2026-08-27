@@ -71,9 +71,13 @@ export interface SeasonConsumeResult {
 export class SeasonService {
   readonly repository: SeasonRepository;
 
-  constructor(repository: SeasonRepository) { this.repository = repository; }
+  constructor(repository: SeasonRepository) {
+    this.repository = repository;
+  }
 
-  events(): Promise<readonly SeasonEventRow[]> { return this.repository.events(); }
+  events(): Promise<readonly SeasonEventRow[]> {
+    return this.repository.events();
+  }
 
   leaderboard(eventId: unknown): Promise<readonly SeasonLeaderboardRow[]> {
     return this.repository.leaderboard(id(eventId, 'event id'));

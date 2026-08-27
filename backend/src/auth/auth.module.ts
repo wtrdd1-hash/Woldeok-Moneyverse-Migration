@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import { AdminRolesRepository } from './admin-roles.repository';
@@ -9,6 +9,9 @@ import { CsrfGuard } from './guards/csrf.guard';
 import { InternalTokenGuard } from './guards/internal-token.guard';
 import { ReauthGuard } from './guards/reauth.guard';
 import { SessionGuard } from './guards/session.guard';
+import { AccountModule } from '../account/account.module';
+import { AuthController } from './auth.controller';
+import { OAuthClient } from './oauth-client';
 import { SessionRepository } from './session.repository';
 
 const GUARDS = [
@@ -22,7 +25,16 @@ const GUARDS = [
 ];
 
 @Module({
+  imports: [forwardRef(() => AccountModule)],
+  controllers: [AuthController],
   providers: [
+    {
+      // Constructed, not injected: its constructor takes an options object
+      // with defaults (fetch implementation, JWKS endpoint, timeout) rather
+      // than provider tokens, so Nest has nothing to resolve for it.
+      provide: OAuthClient,
+      useFactory: () => new OAuthClient(),
+    },
     {
       provide: SessionRepository,
       inject: [PG_POOL],
@@ -31,6 +43,6 @@ const GUARDS = [
     AdminRolesRepository,
     ...GUARDS,
   ],
-  exports: [SessionRepository, AdminRolesRepository, ...GUARDS],
+  exports: [SessionRepository, AdminRolesRepository, OAuthClient, ...GUARDS],
 })
 export class AuthModule {}

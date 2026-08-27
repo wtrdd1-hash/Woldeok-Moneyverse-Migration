@@ -70,7 +70,8 @@ export class PostgresShopRepository {
   readonly pool: Queryable;
 
   constructor(pool: Queryable) {
-    if (!pool || typeof pool.query !== 'function') throw new TypeError('a PostgreSQL pool is required');
+    if (!pool || typeof pool.query !== 'function')
+      throw new TypeError('a PostgreSQL pool is required');
     this.pool = pool;
   }
 
@@ -84,7 +85,10 @@ export class PostgresShopRepository {
     );
   }
 
-  async purchasesForUser(userId: string, { limit = 30 }: { limit?: number } = {}): Promise<ShopPurchaseRow[]> {
+  async purchasesForUser(
+    userId: string,
+    { limit = 30 }: { limit?: number } = {},
+  ): Promise<ShopPurchaseRow[]> {
     const authenticatedUserId = requireShopUuid(userId, 'authenticated user id');
     const purchaseLimit = requireShopLimit(limit, 'purchase limit');
     return queryRows<ShopPurchaseRow>(
@@ -101,7 +105,11 @@ export class PostgresShopRepository {
     );
   }
 
-  async purchase({ actorUserId, itemId, idempotencyKey }: ShopPurchaseInput): Promise<ShopPurchaseReceiptRow> {
+  async purchase({
+    actorUserId,
+    itemId,
+    idempotencyKey,
+  }: ShopPurchaseInput): Promise<ShopPurchaseReceiptRow> {
     const actor = requireShopUuid(actorUserId, 'authenticated user id');
     const item = requireShopUuid(itemId, 'item id');
     const key = requireShopUuid(idempotencyKey, 'idempotency key');

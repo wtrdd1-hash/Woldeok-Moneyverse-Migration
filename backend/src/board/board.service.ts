@@ -6,14 +6,19 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 export class BoardInputError extends Error {}
 
 const uuid = (value: unknown, field: string): string => {
-  if (typeof value !== 'string' || !UUID.test(value)) throw new BoardInputError(`${field} is invalid`);
+  if (typeof value !== 'string' || !UUID.test(value))
+    throw new BoardInputError(`${field} is invalid`);
   return value.toLowerCase();
 };
 
 export function boardText(value: unknown, field: string, max: number, multiline = false): string {
   if (typeof value !== 'string') throw new BoardInputError(`${field} must be text`);
-  const text = value.replace(/\r\n?/g, '\n').replace(multiline ? /[\t ]+/g : /\s+/g, ' ').trim();
-  if (!text || text.length > max || /[<>\u0000-\u001f\u007f]/.test(text.replace(/\n/g, ''))) throw new BoardInputError(`${field} is invalid`);
+  const text = value
+    .replace(/\r\n?/g, '\n')
+    .replace(multiline ? /[\t ]+/g : /\s+/g, ' ')
+    .trim();
+  if (!text || text.length > max || /[<>\u0000-\u001f\u007f]/.test(text.replace(/\n/g, '')))
+    throw new BoardInputError(`${field} is invalid`);
   return text;
 }
 
@@ -47,9 +52,12 @@ function post(row: BoardPostRow): BoardPost {
   // `unknown`; row.created_at is a driver-returned Date in production and a
   // plain ISO string in test doubles, so both are handled explicitly and
   // anything else is treated as the invalid timestamp it would produce.
-  const date = typeof createdAtValue === 'string' || typeof createdAtValue === 'number' || createdAtValue instanceof Date
-    ? new Date(createdAtValue)
-    : new Date(NaN);
+  const date =
+    typeof createdAtValue === 'string' ||
+    typeof createdAtValue === 'number' ||
+    createdAtValue instanceof Date
+      ? new Date(createdAtValue)
+      : new Date(NaN);
   if (Number.isNaN(date.valueOf())) throw new Error('database returned an invalid timestamp');
   return {
     postId: uuid(row?.post_id, 'post id'),
@@ -63,7 +71,12 @@ function post(row: BoardPostRow): BoardPost {
 
 export interface BoardRepository {
   list(actorUserId: string, limit: number): Promise<readonly BoardPostRow[]>;
-  create(actorUserId: string, title: string, body: string, idempotencyKey: string): Promise<BoardPostRow>;
+  create(
+    actorUserId: string,
+    title: string,
+    body: string,
+    idempotencyKey: string,
+  ): Promise<BoardPostRow>;
   remove(actorUserId: string, postId: string, idempotencyKey: string): Promise<boolean>;
 }
 
@@ -78,7 +91,12 @@ export class BoardService {
   readonly repository: BoardRepository;
 
   constructor(repository: BoardRepository) {
-    if (!repository || !(['list', 'create', 'remove'] as const).every(name => typeof repository[name] === 'function')) {
+    if (
+      !repository ||
+      !(['list', 'create', 'remove'] as const).every(
+        (name) => typeof repository[name] === 'function',
+      )
+    ) {
       throw new TypeError('board repository is required');
     }
     this.repository = repository;
@@ -89,15 +107,21 @@ export class BoardService {
   }
 
   async create(userId: unknown, input?: CreateBoardPostInput): Promise<BoardPost> {
-    return post(await this.repository.create(
-      uuid(userId, 'user id'),
-      boardText(input?.title, 'title', 120),
-      boardText(input?.body, 'body', 5000, true),
-      uuid(input?.idempotencyKey ?? randomUUID(), 'idempotency key'),
-    ));
+    return post(
+      await this.repository.create(
+        uuid(userId, 'user id'),
+        boardText(input?.title, 'title', 120),
+        boardText(input?.body, 'body', 5000, true),
+        uuid(input?.idempotencyKey ?? randomUUID(), 'idempotency key'),
+      ),
+    );
   }
 
   async remove(userId: unknown, postId: unknown, idempotencyKey: unknown): Promise<boolean> {
-    return this.repository.remove(uuid(userId, 'user id'), uuid(postId, 'post id'), uuid(idempotencyKey, 'idempotency key'));
+    return this.repository.remove(
+      uuid(userId, 'user id'),
+      uuid(postId, 'post id'),
+      uuid(idempotencyKey, 'idempotency key'),
+    );
   }
 }

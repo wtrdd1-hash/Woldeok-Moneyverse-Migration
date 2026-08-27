@@ -15,7 +15,10 @@ import {
   normalizePrivacyRequestDetail,
 } from './privacy.repository';
 
-function assertPlainObject(value: unknown, field: string): asserts value is Record<string, unknown> {
+function assertPlainObject(
+  value: unknown,
+  field: string,
+): asserts value is Record<string, unknown> {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     throw new PrivacyRequestInputError(`${field} must be an object`);
   }
@@ -25,7 +28,11 @@ function assertPlainObject(value: unknown, field: string): asserts value is Reco
   }
 }
 
-function exactObject(value: unknown, field: string, allowedKeys: ReadonlySet<string>): Record<string, unknown> {
+function exactObject(
+  value: unknown,
+  field: string,
+  allowedKeys: ReadonlySet<string>,
+): Record<string, unknown> {
   assertPlainObject(value, field);
   for (const key of Object.keys(value)) {
     if (!allowedKeys.has(key)) {
@@ -82,12 +89,14 @@ export interface PrivacyRequestListedItem {
 }
 
 function normalizeListedRequest(row: PrivacyRequestListedRow): PrivacyRequestListedItem {
-  const detail = row?.detail === null || row?.detail === undefined
-    ? null
-    : normalizePrivacyRequestDetail(row.detail, 'database request detail');
+  const detail =
+    row?.detail === null || row?.detail === undefined
+      ? null
+      : normalizePrivacyRequestDetail(row.detail, 'database request detail');
   // The table canonicalizes stored details. If an unexpected privileged path
   // wrote a noncanonical value, do not surface it through an account page.
-  if (detail !== row?.detail) throw new Error('database returned a noncanonical privacy request detail');
+  if (detail !== row?.detail)
+    throw new Error('database returned a noncanonical privacy request detail');
 
   return Object.freeze({
     requestId: requirePrivacyRequestUuid(row?.request_id, 'database request id'),
@@ -144,19 +153,29 @@ export class PrivacyRequestService {
   readonly repository: PrivacyRequestRepositoryLike;
 
   constructor(repository: PrivacyRequestRepositoryLike) {
-    const methods: readonly (keyof PrivacyRequestRepositoryLike)[] = ['createMyRequest', 'listMyRequests'];
-    if (!(repository instanceof PostgresPrivacyRequestRepository)
-      && (!repository || !methods.every(method => typeof repository[method] === 'function'))) {
+    const methods: readonly (keyof PrivacyRequestRepositoryLike)[] = [
+      'createMyRequest',
+      'listMyRequests',
+    ];
+    if (
+      !(repository instanceof PostgresPrivacyRequestRepository) &&
+      (!repository || !methods.every((method) => typeof repository[method] === 'function'))
+    ) {
       throw new TypeError('a privacy-request repository is required');
     }
     this.repository = repository;
   }
 
-  async createRequest(authenticatedUserId: unknown, input: PrivacyRequestCreateDto): Promise<PrivacyRequestReceipt> {
+  async createRequest(
+    authenticatedUserId: unknown,
+    input: PrivacyRequestCreateDto,
+  ): Promise<PrivacyRequestReceipt> {
     const actorUserId = requirePrivacyRequestUuid(authenticatedUserId, 'authenticated user id');
-    const dto = exactObject(input, 'privacy request', new Set([
-      'requestType', 'detail', 'idempotencyKey',
-    ]));
+    const dto = exactObject(
+      input,
+      'privacy request',
+      new Set(['requestType', 'detail', 'idempotencyKey']),
+    );
     const requestType = requirePrivacyRequestType(dto.requestType);
     const detail = normalizePrivacyRequestDetail(dto.detail);
     if (requestType === 'correction' && detail === null) {
@@ -165,19 +184,24 @@ export class PrivacyRequestService {
     const idempotencyKey = requirePrivacyRequestUuid(dto.idempotencyKey, 'idempotency key');
 
     try {
-      return normalizeReceipt(await this.repository.createMyRequest({
-        actorUserId,
-        requestType,
-        detail,
-        idempotencyKey,
-      }));
+      return normalizeReceipt(
+        await this.repository.createMyRequest({
+          actorUserId,
+          requestType,
+          detail,
+          idempotencyKey,
+        }),
+      );
     } catch (error) {
       if (accountUnavailable(error)) throw new PrivacyRequestAccountUnavailableError();
       throw error;
     }
   }
 
-  async myRequests(authenticatedUserId: unknown, input: PrivacyRequestListDto = {}): Promise<PrivacyRequestListedItem[]> {
+  async myRequests(
+    authenticatedUserId: unknown,
+    input: PrivacyRequestListDto = {},
+  ): Promise<PrivacyRequestListedItem[]> {
     const actorUserId = requirePrivacyRequestUuid(authenticatedUserId, 'authenticated user id');
     const dto = exactObject(input, 'privacy request list', new Set(['limit']));
     const requestLimit = requirePrivacyRequestLimit(dto.limit ?? 30);

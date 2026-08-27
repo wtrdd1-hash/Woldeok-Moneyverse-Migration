@@ -51,4 +51,4 @@ describe.skipIf(!DATABASE_URL)('shop against a real database', () => {
       );
     expect(isMissingGrant(error), 'the role lost a grant').toBe(false);
   });
-})
+});

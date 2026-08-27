@@ -171,8 +171,7 @@ describe.skipIf(!DATABASE_URL)('game modules against a real database', () => {
           businessTypeId: randomUUID(),
           idempotencyKey: randomUUID(),
         }),
-      () =>
-        businesses.settle(UNKNOWN, { ownershipId: randomUUID(), idempotencyKey: randomUUID() }),
+      () => businesses.settle(UNKNOWN, { ownershipId: randomUUID(), idempotencyKey: randomUUID() }),
       () =>
         seasons.consume(UNKNOWN, {
           eventId: randomUUID(),

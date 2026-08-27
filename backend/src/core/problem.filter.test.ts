@@ -94,9 +94,7 @@ describe('ProblemFilter', () => {
       host,
     );
     expect(status).toHaveBeenCalledWith(428);
-    expect(json).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Precondition Required' }),
-    );
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ title: 'Precondition Required' }));
   });
 
   it('omits detail and errors rather than emitting undefined values', () => {
