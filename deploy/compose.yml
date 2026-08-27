@@ -1,0 +1,92 @@
+name: woldeok-moneyverse-migration
+
+# Deployed by .github/workflows/deploy.yml. The images are private on GHCR, so
+# the host needs `docker login ghcr.io` once with a token that can read
+# packages; the workflow does that as part of each deploy.
+
+services:
+  db:
+    image: postgres:17.5-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: moneyverse_migrator
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
+      POSTGRES_DB: ${DB_NAME:?required}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?required}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U moneyverse_migrator -d ${DB_NAME}']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Runs to completion on every deploy. migrate.sh records a sha256 per file
+  # and refuses one that changed, so re-running it is safe and applying a new
+  # migration needs no separate step.
+  migrate:
+    image: postgres:17.5-alpine
+    restart: 'no'
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: moneyverse_migrator
+      PGPASSWORD: ${POSTGRES_PASSWORD:?required}
+      PGDATABASE: ${DB_NAME:?required}
+    volumes:
+      - ./migrations:/migrations:ro
+      - ./migrate.sh:/usr/local/bin/migrate.sh:ro
+    entrypoint: ['/bin/sh', '/usr/local/bin/migrate.sh']
+    depends_on:
+      db:
+        condition: service_healthy
+
+  backend:
+    # No `:?required`: an unset value would make every later `docker compose`
+    # call fail, including `ps` and `logs`, which is exactly when an operator
+    # needs them. The deploy writes the resolved reference into .env instead.
+    image: ${BACKEND_IMAGE:-ghcr.io/ridanit-ruma/woldeok-moneyverse-migration/backend:latest}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+      # The application connects as the least-privileged role, never as the
+      # migrator that owns the schema.
+      DATABASE_URL: postgresql://moneyverse_app:${APP_DB_PASSWORD:?required}@db:5432/${DB_NAME:?required}
+      APP_BASE_URL: ${APP_BASE_URL:?required}
+      INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?required}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      TRUST_PROXY_X_FORWARDED_FOR: ${TRUST_PROXY_X_FORWARDED_FOR:-false}
+      SEO_INDEXING_ENABLED: ${SEO_INDEXING_ENABLED:-false}
+      ADS_ENABLED: ${ADS_ENABLED:-false}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
+      DISCORD_REDIRECT_URI: ${DISCORD_REDIRECT_URI:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
+      PHOTO_STORAGE_DIR: /data/moneyverse/photos
+    volumes:
+      - photo-data:/data/moneyverse/photos
+    # Bound to loopback: the reverse proxy on this host is what publishes it.
+    # Binding 0.0.0.0 here would expose the API directly, and the design has
+    # it reachable only through the front end.
+    ports:
+      - '127.0.0.1:${BACKEND_PORT:-3020}:3000'
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD', 'node', '-e', "require('http').get('http://127.0.0.1:3000/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+volumes:
+  db-data:
+  photo-data:
