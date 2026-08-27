@@ -109,49 +109,24 @@ jobs:
           CONFIG
           chmod 600 ~/.ssh/config
 
-      - name: Ship the compose file and the migrations
+      - name: Ship the deployment files
         run: |
           ssh target 'mkdir -p ~/moneyverse-migration'
           tar czf - \
-            -C deploy compose.yml \
+            -C deploy compose.yml roll.sh \
             -C "${GITHUB_WORKSPACE}/packages/database" init migrations migrate.sh \
             | ssh target 'tar xzf - -C ~/moneyverse-migration'
 
+      # The script runs on the host and reads its inputs from the environment.
+      # Passing it as a here-doc let the runner's shell expand the body first,
+      # which rewrote the script before it ever arrived.
       - name: Roll the deployment
         run: |
-          ssh target bash -euo pipefail -s <<REMOTE
-          cd ~/moneyverse-migration
-
-          # The host cannot use the workflow's GITHUB_TOKEN, so it logs in
-          # with a read:packages token of its own.
-          echo '${{ secrets.GHCR_PULL_TOKEN }}' \
-            | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
-
-          # Recorded in .env rather than exported for one command, so that a
-          # later `docker compose ps` or `logs` resolves the same image an
-          # operator is looking at.
-          sed -i '/^BACKEND_IMAGE=/d' .env
-          echo "BACKEND_IMAGE=${{ needs.build.outputs.image }}" >> .env
-          docker compose pull backend
-          docker compose up -d --wait --wait-timeout 180
-          docker logout ghcr.io
-          REMOTE
-
-      - name: Verify the deployment answers
-        run: |
-          ssh target bash -euo pipefail -s <<'REMOTE'
-          cd ~/moneyverse-migration
-          port="\${BACKEND_PORT:-3020}"
-          # --wait above already required the healthcheck to pass; this asks
-          # from outside the container, which is how the reverse proxy will.
-          code=\$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "http://127.0.0.1:\${port}/health")
-          if [ "\$code" != "200" ]; then
-            echo "health check answered \$code" >&2
-            docker compose logs --tail 50 backend >&2
-            exit 1
-          fi
-          echo "deployment healthy"
-          REMOTE
+          ssh target \
+            "BACKEND_IMAGE='${{ needs.build.outputs.image }}'" \
+            "GHCR_USER='${{ github.actor }}'" \
+            "GHCR_TOKEN='${{ secrets.GHCR_PULL_TOKEN }}'" \
+            'bash ~/moneyverse-migration/roll.sh'
 
       - name: Report what is running
         if: always()
