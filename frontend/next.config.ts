@@ -18,6 +18,26 @@ const config: NextConfig = {
     // The contract package ships CommonJS from a workspace path.
     externalDir: true,
   },
+
+  /**
+   * Keeps an unindexed deployment unindexed.
+   *
+   * robots.txt alone is not enough here. Cloudflare prepends its own managed
+   * block, which opens with `User-agent: * / Allow: /`; a crawler merging
+   * that group with ours sees an Allow and a Disallow for the same path and
+   * the permissive one can win. `X-Robots-Tag` is not a hint that has to be
+   * reconciled with anything — it applies to the response it arrives on,
+   * including files robots.txt cannot describe.
+   */
+  async headers() {
+    if (process.env.SEO_INDEXING_ENABLED === 'true') return [];
+    return [
+      {
+        source: '/:path*',
+        headers: [{ key: 'x-robots-tag', value: 'noindex, nofollow' }],
+      },
+    ];
+  },
 };
 
 export default config;
