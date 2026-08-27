@@ -1419,7 +1419,13 @@ export const poolProvider: Provider = {
 };
 ```
 
-Correct the stray character in that comment before saving: it should read "the original application's public pages". Comments are English; verify no non-ASCII slipped in with `grep -nP '[^\x00-\x7f]' backend/src/core/pool.provider.ts`, which must print nothing.
+Comments are English. The check that matters is that no Korean leaks into source — typographic punctuation such as an em-dash is fine and is carried over verbatim from the original:
+
+```bash
+grep -rnP '[\x{AC00}-\x{D7A3}\x{1100}-\x{11FF}\x{3130}-\x{318F}]' backend/src
+```
+
+Must print nothing. Korean belongs in user-facing product strings and in `docs/`, never in a comment or identifier.
 
 Modify `backend/src/core/core.module.ts` to register it:
 
@@ -1442,12 +1448,12 @@ Run:
 
 ```bash
 pnpm --filter @moneyverse/backend typecheck
-grep -nP '[^\x00-\x7f]' backend/src/core/*.ts && echo 'NON-ASCII IN SOURCE' && exit 1
-grep -nP '[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]' backend/src/core/*.ts && echo 'CONTROL BYTE' && exit 1
+grep -rnP '[\x{AC00}-\x{D7A3}\x{1100}-\x{11FF}\x{3130}-\x{318F}]' backend/src && echo 'HANGUL IN SOURCE' && exit 1
+grep -rnP '[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]' backend/src && echo 'CONTROL BYTE' && exit 1
 echo 'clean'
 ```
 
-Expected: zero type errors, `clean` printed.
+Expected: zero type errors, `clean` printed. The control-byte check is the one that has actually caught a defect in this codebase's history: an editing tool replaced a backslash-`u` escape *text* with the raw control byte it denotes, leaving input-sanitisation code that read correctly but no longer meant what it said.
 
 - [ ] **Step 7: Commit**
 
