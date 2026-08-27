@@ -5,6 +5,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { loadConfig } from './core/config';
 import { ProblemFilter } from './core/problem.filter';
+import { applyServerTimeouts } from './server-timeouts';
 
 async function bootstrap(): Promise<void> {
   const config = loadConfig(process.env);
@@ -27,6 +28,8 @@ async function bootstrap(): Promise<void> {
     }),
   );
   app.useGlobalFilters(new ProblemFilter(config.production));
+
+  applyServerTimeouts(app.getHttpServer());
 
   // Loopback by default, not 0.0.0.0. This is an internal service; binding it
   // to every interface by default is how an "internal" service becomes

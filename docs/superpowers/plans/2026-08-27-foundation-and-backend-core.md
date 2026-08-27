@@ -3084,9 +3084,10 @@ export function applyServerTimeouts(server: Server): void {
   // single-digit seconds rather than Node's 60s default.
   server.headersTimeout = 8_000;
   // Covers the body too, so it must fit the largest request the application
-  // accepts — the 8MB image upload. 20s covers that on a ~3.3Mbps link and
-  // is a fraction of Node's 5-minute default. Must stay >= headersTimeout or
-  // it can fire before headers finish parsing.
+  // accepts -- the 8 MiB image upload. 20s asks 3.36 Mbps of that client,
+  // within ordinary broadband, while staying a fraction of Node's 5-minute
+  // default. Must stay >= headersTimeout or it can fire before headers
+  // finish parsing.
   server.requestTimeout = 20_000;
   // Node enforces both through a periodic sweep that defaults to 30s, so
   // without this a connection past its 8s headersTimeout could still sit
