@@ -31,7 +31,7 @@
 ### Task 1: Workspace skeleton and tooling
 
 **Files:**
-- Create: `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `eslint.config.js`, `.prettierrc.json`, `.editorconfig`, `.npmrc`, `.nvmrc`
+- Create: `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `eslint.config.mjs`, `.prettierrc.json`, `.editorconfig`, `.npmrc`, `.nvmrc`
 - Create: `.github/workflows/ci.yml`
 
 **Interfaces:**
@@ -145,7 +145,7 @@ trim_trailing_whitespace = false
 
 - [ ] **Step 3: Create the ESLint flat configuration**
 
-`eslint.config.js`:
+`eslint.config.mjs`:
 
 ```js
 import js from '@eslint/js';
@@ -249,7 +249,7 @@ The development machine has no container runtime and no PostgreSQL server, so CI
 - [ ] **Step 6: Commit**
 
 ```bash
-git add package.json pnpm-workspace.yaml tsconfig.base.json eslint.config.js \
+git add package.json pnpm-workspace.yaml tsconfig.base.json eslint.config.mjs \
         .prettierrc.json .editorconfig .npmrc .nvmrc .github/workflows/ci.yml pnpm-lock.yaml
 git commit -m "build: set up the pnpm workspace and shared toolchain"
 git log -1 --format=%B | grep -iE 'claude|generated with' && echo 'FORBIDDEN TRAILER' && exit 1

@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17.5-alpine
+        env:
+          POSTGRES_USER: moneyverse_migrator
+          POSTGRES_PASSWORD: ci_migrator_password
+          POSTGRES_DB: woldeok_moneyverse_ci
+        options: >-
+          --health-cmd "pg_isready -U moneyverse_migrator -d woldeok_moneyverse_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
+
+      # The development machine has no container runtime and no PostgreSQL
+      # server, so CI is where database-backed tests actually execute.
+      - name: Apply database migrations
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: moneyverse_migrator
+          PGPASSWORD: ci_migrator_password
+          PGDATABASE: woldeok_moneyverse_ci
+          APP_DB_PASSWORD: ci_app_password
+        run: packages/database/ci-apply.sh
+
+      - name: Test
+        env:
+          DATABASE_URL: postgresql://moneyverse_app:ci_app_password@localhost:5432/woldeok_moneyverse_ci
+        run: pnpm test
+
+      # Prisma introspects the schema; it never owns it. A Prisma migration
+      # would drop the SECURITY DEFINER functions and the role grants that
+      # keep the application unable to move money directly.
+      - name: Reject prisma migrate
+        run: |
+          if grep -rn --include='*.json' --include='*.ts' --include='*.yml' \
+               --include='*.sh' 'prisma migrate' . \
+               --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=docs; then
+            echo 'prisma migrate must never run: the numbered SQL files own the schema' >&2
+            exit 1
+          fi
