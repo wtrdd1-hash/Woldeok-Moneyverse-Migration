@@ -20,23 +20,63 @@ the origin for exactly that reason.
 
 ## What the workflow does
 
-`.github/workflows/deploy.yml` runs CI, then over SSH:
+`.github/workflows/deploy.yml` **runs only when someone asks it to.** There is
+no push trigger: a commit on main is built and tested by `ci.yml` and stays
+there until a person decides the host should take it.
 
-1. ships `compose.yml`, `edge/default.conf`, the two scripts, and the database
-   migrations;
-2. ships `git archive HEAD` as `src.tar.gz` — tracked files only, so no
-   `node_modules`, no `.next`, and no local `.env`;
-3. runs `roll.sh`, which extracts the source, fills in `.env`, builds both
-   images, and rolls the stack with `--wait`.
+```bash
+gh workflow run deploy.yml            # or the Run workflow button in Actions
+gh run watch                          # follow it
+```
 
-### Why there is no registry
+It runs CI, then:
 
-Publishing to GHCR would buy SHA-tagged images and a one-line rollback. It
-costs a `read:packages` token the host has to hold, and a package page that
-needs curating. Measured on this host: sixteen cores, eleven gigabytes free,
-a cold build of 31 seconds and a warm rebuild of about one. With no
-deployment history to roll back to, the trade is not worth its one manual
-setup step. If rollback becomes a real need, `deploy.yml` is what changes.
+1. builds both images and pushes them to GHCR, tagged with the commit **and**
+   with `latest`;
+2. ships `compose.yml`, `edge/default.conf`, the scripts, and the database
+   migrations over SSH;
+3. runs `roll.sh`, which fills in `.env`, records the exact image references
+   it is deploying, pulls them, and rolls the stack with `--wait`.
+
+Because the tag is the commit, a rollback is one edited line:
+
+```bash
+cd ~/moneyverse-migration
+sed -i 's#/backend:.*#/backend:<older-sha>#;s#/frontend:.*#/frontend:<older-sha>#' .env
+docker compose up -d --wait
+```
+
+## Updating the host to `latest` without the workflow
+
+When a deploy has already published new images and you just want this host on
+them:
+
+```bash
+ssh <host>
+bash ~/moneyverse-migration/update.sh
+```
+
+Or, without the script:
+
+```bash
+cd ~/moneyverse-migration
+sed -i '/^BACKEND_IMAGE=/d;/^FRONTEND_IMAGE=/d' .env   # drop the pinned commit
+docker compose pull backend frontend
+docker compose up -d --wait
+```
+
+Both forms move images only. They do not ship files, so `compose.yml`, the
+nginx config and the SQL under `migrations/` stay as the last workflow run
+left them. **A release that adds a database migration needs the workflow**,
+which ships the migration alongside the image; `update.sh` alone would start
+a backend expecting a column the database does not have. It prints the
+newest migration the host holds so the difference is visible.
+
+The host has to be logged in to pull a private package. Once is enough:
+
+```bash
+printf '%s' '<read:packages token>' | docker login ghcr.io -u <user> --password-stdin
+```
 
 ## Secrets
 
@@ -103,28 +143,3 @@ APP_BASE_URL=https://migration.easy-scraping.com \
 ```
 
 `docker compose ps`, `logs`, and `exec` all work from that directory.
-
-## The Minecraft sidecars
-
-`packages/minecraft-agent` and `packages/minecraft-executor` are **not** part
-of this stack and never will be. They are systemd units on the machine the
-Minecraft server actually runs on:
-
-```
-operator → two-person approval → PostgreSQL approved record
-                                        │
-                                        ▼
-                    minecraft-executor (that host's systemd)
-                                        │  fixed operation only
-                                        ▼
-                    minecraft-agent on 127.0.0.1 → systemctl
-```
-
-The agent calls `systemctl` and `journalctl` behind a sudoers allowlist and
-binds loopback only. Inside a container, `127.0.0.1` is the container — not
-the Minecraft host — so running either here would reach nothing, which is why
-their own READMEs say not to. Each package carries its unit file and, for the
-agent, its sudoers example.
-
-The web tier requests an operation and shows its receipt; it never calls the
-agent and holds no credential that could.

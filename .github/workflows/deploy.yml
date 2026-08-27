@@ -14,12 +14,17 @@ name: Deploy
 # Every image is tagged with the commit that produced it, which is what makes
 # a rollback one edited line in the host's .env rather than a rebuild.
 #
-# Deployment is gated on the CI workflow passing, and on a manual dispatch or
-# a push to main.
+# Deployment is gated on the CI workflow passing, and it runs only when
+# someone asks for it. There is no push trigger: a commit on main builds and
+# tests through ci.yml, and stays there until a person decides the host should
+# take it. Run it from the Actions tab, or:
+#
+#   gh workflow run deploy.yml
+#
+# The host can also be updated without this workflow at all, from whatever is
+# already tagged `latest` in the registry -- see deploy/README.md.
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       environment:
