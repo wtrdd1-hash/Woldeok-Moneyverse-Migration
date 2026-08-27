@@ -663,11 +663,18 @@ POSTGRES_USER="$PGUSER" POSTGRES_DB="$PGDATABASE" APP_DB_PASSWORD="$APP_DB_PASSW
 
 psql -X -v ON_ERROR_STOP=1 -f "$script_dir/init/001-economy-core.sql"
 
-ln -sfn "$script_dir/migrations" /tmp/migrations
+# migrate.sh iterates /migrations/*.sql -- an absolute path, because in
+# production it runs inside a container with that bind mount. The link below
+# lets the same unmodified script run in CI. Editing migrate.sh instead would
+# change the very checksum discipline it exists to enforce.
+if [ ! -e /migrations ]; then
+  ln -sfn "$script_dir/migrations" /migrations 2>/dev/null \
+    || sudo ln -sfn "$script_dir/migrations" /migrations
+fi
 sh "$script_dir/migrate.sh"
 ```
 
-`migrate.sh` reads from the absolute path `/migrations` because it runs inside a container in production. The symlink lets the same unmodified script run in CI — the alternative is editing `migrate.sh`, which would change its checksum discipline.
+The link target is `/migrations`, not somewhere under `/tmp`: `migrate.sh` iterates the literal path `/migrations/*.sql`. Creating it at the filesystem root needs privilege the CI runner has through `sudo`, hence the fallback.
 
 ```bash
 chmod +x packages/database/ci-apply.sh
