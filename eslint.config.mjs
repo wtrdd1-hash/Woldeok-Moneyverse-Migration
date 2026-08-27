@@ -43,6 +43,15 @@ export default tseslint.config(
     rules: { 'no-control-regex': 'off' },
   },
   {
+    // Operator scripts. Plain Node ESM, run inside a container on the
+    // deployment host rather than bundled or executed here, so the browser
+    // and Node globals they use are simply present.
+    files: ['ops/**/*.mjs'],
+    languageOptions: {
+      globals: { console: 'readonly', fetch: 'readonly', process: 'readonly' },
+    },
+  },
+  {
     // The backend compiles with emitDecoratorMetadata, and Nest resolves
     // constructor dependencies from the design:paramtypes that metadata
     // emits. A class named only in a constructor parameter position therefore

@@ -86,10 +86,29 @@ describe('ROUTE_MAP', () => {
     }
   });
 
+  /**
+   * Everything the backend serves lives under `/api/v1/`, except for paths
+   * something outside this codebase already knows and cannot be asked to
+   * relearn. Each exception is named here rather than allowed by a pattern,
+   * so adding one is a deliberate edit to this list.
+   */
   it('keeps every API replacement under the versioned prefix', () => {
+    const UNVERSIONED = new Set([
+      // A container probe has always used this path.
+      'GET /health',
+      // Discord and Google redirect to these, and the URIs are registered
+      // with them.
+      'GET /auth/{provider}/authorize',
+      'GET /auth/{provider}/callback',
+      // Every photo row already in production stores this exact path as its
+      // imageUrl.
+      'GET /media/{key}',
+    ]);
+
     for (const mapping of ROUTE_MAP) {
-      if (mapping.module === 'frontend' || mapping.module === 'health') continue;
+      if (mapping.module === 'frontend') continue;
       if (mapping.replacement === null) continue;
+      if (UNVERSIONED.has(mapping.replacement)) continue;
       const [, path] = mapping.replacement.split(' ');
       expect(path?.startsWith('/api/v1/') || path?.startsWith('/auth/'), mapping.replacement).toBe(
         true,
