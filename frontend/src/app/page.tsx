@@ -3,16 +3,10 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { Lobby } from '@/components/lobby';
-import { Badge } from '@/components/ui/badge';
+import { LobbyCount } from '@/components/lobby-count';
+import { StatusDot } from '@/components/status-dot';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
 import { STATUS_LABEL, asStatusState } from '@/lib/status';
@@ -55,96 +49,131 @@ export default async function HomePage() {
 
   const notices = announcements?.announcements.slice(0, 3) ?? [];
   const minecraft = status?.status.find((row) => row.sourceKey === 'minecraft');
+  const minecraftState = asStatusState(minecraft?.state);
 
   return (
-    <div className="grid gap-8">
-      <section aria-labelledby="hero-title" className="grid gap-4">
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          Woldeok Moneyverse
-        </p>
-        <h1 id="hero-title" className="text-3xl font-bold sm:text-4xl">
-          우리가 함께 만드는
-          <br />
-          <em className="not-italic text-primary">작고 단단한 경제.</em>
-        </h1>
-        <p className="max-w-prose text-muted-foreground">
-          월덕 머니버스는 Discord와 마인크래프트를 잇는 커뮤니티 장부입니다. 활동은 기록으로
-          남고, 로그인 후 실제 잔액과 이용 기록을 확인할 수 있어요.
-        </p>
+    <div className="grid gap-20">
+      <section
+        aria-labelledby="hero-title"
+        className="grid items-center gap-10 py-6 lg:grid-cols-[1.1fr_0.78fr] lg:gap-[6vw] lg:py-12"
+      >
+        <div>
+          <p className="eyebrow mb-5">Woldeok Moneyverse</p>
+          <h1
+            id="hero-title"
+            className="max-w-[680px] text-[clamp(2.25rem,4.6vw,3.5rem)] leading-[1.13] tracking-[-0.065em]"
+          >
+            우리가 함께 만드는
+            <br />
+            <em className="not-italic text-forest-soft">작고 단단한 경제.</em>
+          </h1>
+          <p className="mt-6 max-w-[590px] text-[clamp(1rem,1.5vw,1.125rem)] leading-[1.8] text-muted-foreground [word-break:keep-all]">
+            월덕 머니버스는 Discord와 마인크래프트를 잇는 커뮤니티 장부입니다. 활동은 기록으로
+            남고, 로그인 후 실제 잔액과 이용 기록을 확인할 수 있어요.
+          </p>
 
-        <div className="flex flex-wrap gap-3">
-          <Button asChild className="min-h-11">
-            <Link href="/login">
-              Discord · Google로 시작하기
-              <ArrowRight />
-            </Link>
-          </Button>
-          <Button asChild variant="outline" className="min-h-11">
-            <Link href="/announcements">알아보기</Link>
-          </Button>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button asChild className="h-12 rounded-[12px] px-5 text-sm font-extrabold shadow-plate">
+              <Link href="/login">
+                Discord · Google로 시작하기
+                <ArrowRight />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="h-12 rounded-[12px] bg-surface/50 px-5 text-sm font-extrabold"
+            >
+              <Link href="/announcements">
+                알아보기
+                <ArrowRight />
+              </Link>
+            </Button>
+          </div>
+
+          <p className="mt-7 max-w-[590px] text-xs text-muted-foreground">
+            모든 WLD와 보상은 게임 안에서만 사용하는 가상 데이터이며, 현금 거래나 환전 기능은
+            제공하지 않습니다.
+          </p>
         </div>
 
-        <p className="max-w-prose text-xs text-muted-foreground">
-          모든 WLD와 보상은 게임 안에서만 사용하는 가상 데이터이며, 현금 거래나 환전 기능은
-          제공하지 않습니다.
-        </p>
-      </section>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>오늘의 현황</CardTitle>
-          <CardAction>
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/status">전체 보기 →</Link>
-            </Button>
-          </CardAction>
-        </CardHeader>
-        <CardContent>
-          <dl className="grid gap-3">
-            <Row
+        {/* The panel the original tilted a degree off the grid: the one place
+            the page stops being a document and looks like a ledger card. */}
+        <aside
+          aria-labelledby="status-panel-title"
+          className="rounded-[28px] border border-[#153625] bg-forest p-6 text-white shadow-raised lg:rotate-[1deg]"
+        >
+          <p className="eyebrow text-[#e8b39a]">Today at a glance</p>
+          <h2 id="status-panel-title" className="mt-3 text-2xl text-white">
+            오늘의 현황
+          </h2>
+          <ul className="mt-6 grid gap-3">
+            <StatusRowItem
+              glyph="▦"
               term={minecraft?.displayName ?? '마인크래프트 서버'}
               detail={minecraft?.detail ?? '신뢰된 상태 기록을 확인해요.'}
-              // An absent status reads as 확인 중, never as 정상: an unreachable
-              // source and a healthy one are different facts.
-              value={STATUS_LABEL[asStatusState(minecraft?.state)]}
               href="/status"
-            />
-            <Row
+            >
+              <StatusDot state={minecraftState} />
+              {/* An absent status reads as 확인 중, never as 정상: an
+                  unreachable source and a healthy one are different facts. */}
+              {STATUS_LABEL[minecraftState]}
+            </StatusRowItem>
+
+            <StatusRowItem
+              glyph="▣"
               term="내 지갑"
               detail="원장 기준의 실제 잔액과 기록"
-              value="로그인 후 확인"
               href="/wallet"
-            />
-          </dl>
-        </CardContent>
-      </Card>
+            >
+              로그인 후 확인
+            </StatusRowItem>
 
-      <section aria-labelledby="home-updates-title" className="grid gap-3">
-        <div className="flex items-baseline justify-between gap-3">
-          <h2 id="home-updates-title" className="text-lg font-medium">
-            월간 소식
-          </h2>
-          <Link href="/announcements" className="text-sm text-muted-foreground">
+            <StatusRowItem
+              glyph="⌁"
+              term="커뮤니티 로비"
+              detail="인증된 웹 로비 참여자"
+              href="#community"
+            >
+              <LobbyCount />
+            </StatusRowItem>
+          </ul>
+        </aside>
+      </section>
+
+      <section aria-labelledby="home-updates-title" className="grid gap-8">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="eyebrow mb-3">Monthly notes</p>
+            <h2 id="home-updates-title" className="text-[clamp(2rem,4vw,3rem)]">
+              월간 소식
+            </h2>
+          </div>
+          <Link href="/announcements" className="text-sm font-extrabold text-clay">
             전체 보기 →
           </Link>
         </div>
 
         {notices.length > 0 ? (
-          <div className="grid gap-3">
+          <div className="grid gap-4 md:grid-cols-3">
             {notices.map((notice) => (
-              <Card key={notice.announcementId} className="gap-3 py-4">
+              <Card key={notice.announcementId} className="gap-4 rounded-[18px] shadow-plate">
                 <CardHeader>
                   {notice.publishedAt && (
                     <time
                       dateTime={notice.publishedAt}
-                      className="text-xs text-muted-foreground"
+                      className="font-mono text-[11px] font-bold tracking-[0.1em] text-muted-foreground"
                     >
                       {formatDay(notice.publishedAt, '최근 게시')}
                     </time>
                   )}
-                  <CardTitle className="text-base">{notice.title}</CardTitle>
-                  <CardDescription className="line-clamp-3">{notice.body}</CardDescription>
+                  <CardTitle className="text-xl">{notice.title}</CardTitle>
                 </CardHeader>
+                <CardContent>
+                  <p className="line-clamp-4 text-sm leading-[1.7] text-muted-foreground">
+                    {notice.body}
+                  </p>
+                </CardContent>
               </Card>
             ))}
           </div>
@@ -156,51 +185,77 @@ export default async function HomePage() {
         )}
       </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>가볍게 인사하고, 함께 이어 가요.</CardTitle>
-          <CardDescription>
-            머니버스 로비는 지금 접속한 사람들과 짧게 인사하는 공간입니다. 개인정보나 계정
-            정보는 남기지 말아 주세요.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <Lobby />
-          <div className="grid gap-1">
-            <PolicyLink href="/terms" title="커뮤니티 이용 규칙" detail="서로 존중하는 대화 기준" />
-            <PolicyLink href="/privacy" title="개인정보 안내" detail="수집 정보와 이용자 권리" />
+      <section id="community" aria-labelledby="community-title" className="grid gap-8">
+        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
+          <div>
+            <p className="eyebrow mb-3">Community lobby</p>
+            <h2 id="community-title" className="text-[clamp(2rem,4vw,3rem)]">
+              가볍게 인사하고,
+              <br />
+              함께 이어 가요.
+            </h2>
+            <p className="mt-5 max-w-prose leading-[1.8] text-muted-foreground [word-break:keep-all]">
+              머니버스 로비는 지금 접속한 사람들과 짧게 인사하는 공간입니다. 메시지는 서버에
+              저장하지 않고 접속 중인 사람에게만 전달돼요. 개인정보나 계정 정보는 남기지 말아
+              주세요.
+            </p>
+            <div className="mt-6 grid gap-2">
+              <PolicyLink
+                href="/terms"
+                title="커뮤니티 이용 규칙"
+                detail="서로 존중하는 대화 기준"
+              />
+              <PolicyLink
+                href="/privacy"
+                title="개인정보 안내"
+                detail="수집 정보와 이용자 권리"
+              />
+            </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <Card className="rounded-[18px] shadow-plate">
+            <CardContent>
+              <Lobby />
+            </CardContent>
+          </Card>
+        </div>
+      </section>
     </div>
   );
 }
 
-function Row({
+function StatusRowItem({
+  glyph,
   term,
   detail,
-  value,
   href,
+  children,
 }: {
+  readonly glyph: string;
   readonly term: string;
   readonly detail: string;
-  readonly value: string;
   readonly href: string;
+  readonly children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 border-b pb-3 last:border-b-0 last:pb-0">
-      <div>
-        <dt className="text-sm font-medium">{term}</dt>
-        <dd className="text-xs text-muted-foreground">{detail}</dd>
-      </div>
-      <dd className="shrink-0">
-        <Link href={href}>
-          <Badge variant="outline" className="font-normal">
-            {value}
-          </Badge>
-        </Link>
-      </dd>
-    </div>
+    <li className="flex items-center gap-3 rounded-[14px] bg-white/[0.06] p-3">
+      <span
+        aria-hidden
+        className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-white/10 text-sm"
+      >
+        {glyph}
+      </span>
+      <span className="min-w-0 grid gap-0.5">
+        <b className="truncate text-sm">{term}</b>
+        <small className="truncate text-xs text-[#b4c5b8]">{detail}</small>
+      </span>
+      <Link
+        href={href}
+        className="ml-auto flex shrink-0 items-center gap-1.5 text-xs font-extrabold text-[#ffdfd1]"
+      >
+        {children}
+      </Link>
+    </li>
   );
 }
 
@@ -214,14 +269,15 @@ function PolicyLink({
   readonly detail: string;
 }) {
   return (
-    <Button asChild variant="ghost" className="h-auto min-h-11 justify-between px-2 py-2">
-      <Link href={href}>
-        <span className="text-left">
-          <span className="block font-medium">{title}</span>
-          <span className="block text-xs font-normal text-muted-foreground">{detail}</span>
-        </span>
-        <ArrowRight className="text-muted-foreground" />
-      </Link>
-    </Button>
+    <Link
+      href={href}
+      className="flex min-h-11 items-center justify-between gap-3 rounded-[12px] border bg-surface px-4 py-3 text-sm shadow-plate transition-transform hover:-translate-y-0.5"
+    >
+      <span>
+        <b className="font-extrabold">{title}</b>
+        <span className="block text-xs text-muted-foreground">{detail}</span>
+      </span>
+      <ArrowRight className="size-4 text-clay" />
+    </Link>
   );
 }
