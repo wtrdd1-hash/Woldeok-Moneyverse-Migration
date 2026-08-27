@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
+import { Lobby } from '@/components/lobby';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -163,9 +164,12 @@ export default async function HomePage() {
             정보는 남기지 말아 주세요.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-1">
-          <PolicyLink href="/terms" title="커뮤니티 이용 규칙" detail="서로 존중하는 대화 기준" />
-          <PolicyLink href="/privacy" title="개인정보 안내" detail="수집 정보와 이용자 권리" />
+        <CardContent className="grid gap-4">
+          <Lobby />
+          <div className="grid gap-1">
+            <PolicyLink href="/terms" title="커뮤니티 이용 규칙" detail="서로 존중하는 대화 기준" />
+            <PolicyLink href="/privacy" title="개인정보 안내" detail="수집 정보와 이용자 권리" />
+          </div>
         </CardContent>
       </Card>
     </div>

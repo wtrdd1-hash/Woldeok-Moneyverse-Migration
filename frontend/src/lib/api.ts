@@ -190,6 +190,42 @@ export async function apiWithCookie<T>(
   return { payload: payload as T, setCookie: response.headers.getSetCookie() };
 }
 
+/**
+ * Posts raw bytes.
+ *
+ * The photo upload is the one request in this application whose body is not
+ * JSON. The API's storage layer sniffs the image itself rather than trusting
+ * a declared type, so the bytes have to arrive untouched — a JSON round trip
+ * would re-encode them and a multipart wrapper would prepend a boundary the
+ * sniffer would then read as the file's first bytes.
+ */
+export async function apiBytes<T>(
+  path: string,
+  bytes: ArrayBuffer,
+  { contentType, csrfToken }: { readonly contentType: string; readonly csrfToken: string },
+): Promise<T> {
+  const response = await fetch(`${API_ORIGIN}${path}`, {
+    method: 'POST',
+    headers: {
+      'x-internal-token': internalToken(),
+      'x-csrf-token': csrfToken,
+      'content-type': contentType,
+      accept: 'application/json',
+      ...(await callerCookies().then((cookie) => (cookie ? { cookie } : {}))),
+    },
+    body: bytes,
+    cache: 'no-store',
+  });
+
+  const text = await response.text();
+  const payload: unknown = text ? JSON.parse(text) : null;
+  if (!response.ok) {
+    const problem = payload as ProblemDocument | null;
+    throw new ApiError(response.status, problem?.detail ?? problem?.title);
+  }
+  return payload as T;
+}
+
 /** Per-caller, and forgiving. Use `publicApi` for anything a crawler sees. */
 export async function apiOrNull<T>(path: string, request: ApiRequest = {}): Promise<T | null> {
   try {
