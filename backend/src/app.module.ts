@@ -4,6 +4,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { CoreModule } from './core/core.module';
 import { HealthModule } from './health/health.module';
+import { WalletModule } from './wallet/wallet.module';
 import { AUTH_LIMIT, READ_LIMIT, SENSITIVE_LIMIT } from './security/rate-limit';
 
 const ONE_MINUTE_MS = 60_000;
@@ -13,6 +14,7 @@ const ONE_MINUTE_MS = 60_000;
     CoreModule,
     AuthModule,
     HealthModule,
+    WalletModule,
     // Process-local, exactly as in the original application. That is correct
     // for the single-instance deployment and becomes N times weaker on any
     // scale-out: a known limitation, tracked rather than overlooked. A shared
