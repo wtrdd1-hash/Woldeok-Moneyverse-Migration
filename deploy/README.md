@@ -82,6 +82,23 @@ ssh-keyscan -p 34567 -t ed25519,rsa <host> | grep -v '^#' | gh secret set DEPLOY
 ssh -o StrictHostKeyChecking=yes -o UserKnownHostsFile=<file> ... <host> true
 ```
 
+## 이미지 매니페스트
+
+`provenance`와 `sbom`을 꺼 둔다. buildx는 기본으로 attestation을 붙이는데, 그것이
+`unknown/unknown` 플랫폼을 가진 별도 매니페스트로 올라가 패키지 페이지에 뜻 모를
+OS/Arch 행으로 표시된다. 이 배포에서 그것을 읽는 것은 아무것도 없다.
+
+빌드 출력으로 확인한 차이:
+
+```
+기본값        exporting manifest / config / attestation manifest / manifest list
+끈 경우       exporting manifest / config
+```
+
+이미지 다이제스트는 양쪽이 같다 — 사라지는 것은 부가 매니페스트뿐이고 이미지
+내용은 그대로다. 호스트가 하나이고 x86-64이므로 `platforms: linux/amd64`도 함께
+명시해, 단일 이미지가 매니페스트 리스트로 감싸이지 않게 한다.
+
 ## 알아둘 것
 
 **`--wait`가 배포의 관문이다.** `docker compose up -d --wait`는 헬스체크가 통과할

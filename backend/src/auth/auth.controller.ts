@@ -106,6 +106,27 @@ export class AuthController {
     return providerConfig;
   }
 
+  /**
+   * What the front end needs to render an authenticated page: a fresh CSRF
+   * token, and whether this session may write.
+   *
+   * New. The original rendered EJS server-side and planted the token into the
+   * markup with `rotateCsrf` on every page render; a Next page cannot reach
+   * into the session store, so the token needs a route. Rotating on read keeps
+   * the original's behaviour — a token belongs to one page load.
+   *
+   * It deliberately returns no user id, display name or balance. Everything
+   * about the member comes from the endpoint that owns it, so this cannot
+   * become a second, staler source of the same facts.
+   */
+  @Get('auth/session')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+  @ApiOperation({ summary: 'CSRF token for the current session' })
+  async session(@Req() request: RequestWithSession) {
+    const csrfToken = await this.store().rotateCsrf(requireSession(request).id);
+    return { csrfToken };
+  }
+
   @Put('auth/consent')
   @UseGuards(SessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Record pre-login policy acknowledgement' })

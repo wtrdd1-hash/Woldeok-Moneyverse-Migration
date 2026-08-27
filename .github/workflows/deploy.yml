@@ -76,6 +76,15 @@ jobs:
           context: .
           file: backend/Dockerfile
           push: true
+          # One platform, because there is one host and it is x86-64. Naming
+          # it also stops buildx wrapping a single image in a manifest list.
+          platforms: linux/amd64
+          # buildx attaches provenance and SBOM attestations by default. They
+          # arrive as extra manifests whose platform is unknown/unknown, which
+          # is what shows up as a nonsensical OS/Arch row on the package page.
+          # Nothing here consumes them, so they are only noise.
+          provenance: false
+          sbom: false
           tags: |
             ${{ steps.meta.outputs.image }}
             ${{ steps.meta.outputs.name }}:latest
