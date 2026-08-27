@@ -66,6 +66,22 @@ https://moneyverse-migration.easy-scraping.com/auth/google/callback
 - 스택을 실제로 한 번 굴려 확인했다: 마이그레이션 46개 적용, DB·백엔드 healthy,
   `/health` 200, API가 problem+json 401.
 
+## 호스트 키
+
+`DEPLOY_KNOWN_HOSTS`는 `ssh-keyscan`의 출력에서 **주석 줄을 걸러낸 것**이어야 한다.
+
+```bash
+ssh-keyscan -p 34567 -t ed25519,rsa <host> | grep -v '^#' | gh secret set DEPLOY_KNOWN_HOSTS
+```
+
+첫 줄만 잘라 넣으면 서버 배너 주석이 들어가고, 배포가
+`Host key verification failed`로 죽는다. 실제로 한 번 그렇게 실패했다.
+넣은 뒤에는 그 파일로 접속이 되는지 확인한다:
+
+```bash
+ssh -o StrictHostKeyChecking=yes -o UserKnownHostsFile=<file> ... <host> true
+```
+
 ## 알아둘 것
 
 **`--wait`가 배포의 관문이다.** `docker compose up -d --wait`는 헬스체크가 통과할
