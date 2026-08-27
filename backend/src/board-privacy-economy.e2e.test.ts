@@ -33,10 +33,15 @@ describe('board, privacy and reconciliation routes', () => {
     process.env = { ...ORIGINAL_ENV };
   });
 
-  const ROUTES: readonly (readonly ['get' | 'post' | 'delete', string])[] = [
+  const ROUTES: readonly (readonly ['get' | 'post' | 'put' | 'delete', string])[] = [
     ['get', '/api/v1/board/posts'],
     ['post', '/api/v1/board/posts'],
+    ['get', `/api/v1/board/posts/${ID}`],
+    ['put', `/api/v1/board/posts/${ID}`],
     ['delete', `/api/v1/board/posts/${ID}`],
+    ['get', `/api/v1/board/posts/${ID}/comments`],
+    ['post', `/api/v1/board/posts/${ID}/comments`],
+    ['delete', `/api/v1/board/posts/${ID}/comments/${ID}`],
     ['get', '/api/v1/privacy/requests'],
     ['post', '/api/v1/privacy/requests'],
     ['get', '/api/v1/admin/economy/reconciliations/latest'],

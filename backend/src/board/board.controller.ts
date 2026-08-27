@@ -10,6 +10,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   Req,
   ServiceUnavailableException,
   UseGuards,
@@ -43,7 +44,28 @@ export class CreatePostDto {
   readonly idempotencyKey!: string;
 }
 
+/** Same fields as writing one: an edit replaces the post, it does not patch it. */
+export class UpdatePostDto extends CreatePostDto {}
+
 export class DeletePostDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  readonly idempotencyKey!: string;
+}
+
+export class CreateCommentDto {
+  @ApiProperty({ maxLength: 1000 })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(1000)
+  readonly body!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  readonly idempotencyKey!: string;
+}
+
+export class DeleteCommentDto {
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
   readonly idempotencyKey!: string;
@@ -64,11 +86,23 @@ export class BoardController {
    * New. The original had no list endpoint because the /board page rendered
    * the posts server-side from EJS; a Next page cannot, so the data needs a
    * route of its own. The guards match what that page required.
+   *
+   * Summaries only — a title, an author, a date and a reply count. The body
+   * belongs to the post's own route, which is what stops a list of fifty
+   * posts carrying a quarter of a megabyte of text nothing renders.
    */
   @Get()
   @ApiOperation({ summary: 'Recent member board posts' })
   async list(@Req() request: RequestWithSession) {
     return { posts: await this.service().list(requireUserId(request)) };
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'One post, with its body' })
+  async read(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) postId: string) {
+    const post = await this.service().get(requireUserId(request), postId);
+    if (!post) throw new NotFoundException('post not found');
+    return { post };
   }
 
   @Post()
@@ -80,6 +114,31 @@ export class BoardController {
     } catch (error: unknown) {
       throw this.asClientError(error);
     }
+  }
+
+  /**
+   * PUT, not PATCH: the body carries the whole post and replaces it, so
+   * repeating the request leaves the same post behind.
+   */
+  @Put(':id')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Rewrite your own post' })
+  async update(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) postId: string,
+    @Body() body: UpdatePostDto,
+  ) {
+    let post;
+    try {
+      post = await this.service().update(requireUserId(request), postId, { ...body });
+    } catch (error: unknown) {
+      throw this.asClientError(error);
+    }
+    // 404 for a post that is not the caller's as well as for one that does
+    // not exist, the rule the original set for delete: answering 403 for the
+    // first would confirm that the id is real.
+    if (!post) throw new NotFoundException('post not found');
+    return { post };
   }
 
   @Delete(':id')
@@ -101,6 +160,52 @@ export class BoardController {
     // as for one that does not exist, which is what stops the endpoint being
     // used to discover whether a post id is real.
     if (!deleted) throw new NotFoundException('post not found');
+  }
+
+  @Get(':id/comments')
+  @ApiOperation({ summary: 'The replies on a post, oldest first' })
+  async comments(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) postId: string) {
+    return { comments: await this.service().listComments(requireUserId(request), postId) };
+  }
+
+  @Post(':id/comments')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Reply to a post' })
+  async reply(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) postId: string,
+    @Body() body: CreateCommentDto,
+  ) {
+    try {
+      return {
+        comment: await this.service().createComment(requireUserId(request), postId, { ...body }),
+      };
+    } catch (error: unknown) {
+      throw this.asClientError(error);
+    }
+  }
+
+  @Delete(':id/comments/:commentId')
+  @HttpCode(204)
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Delete your own reply' })
+  async removeComment(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) _postId: string,
+    @Param('commentId', ParseUUIDPipe) commentId: string,
+    @Body() body: DeleteCommentDto,
+  ): Promise<void> {
+    let deleted: boolean;
+    try {
+      deleted = await this.service().removeComment(
+        requireUserId(request),
+        commentId,
+        body.idempotencyKey,
+      );
+    } catch (error: unknown) {
+      throw this.asClientError(error);
+    }
+    if (!deleted) throw new NotFoundException('comment not found');
   }
 
   private asClientError(error: unknown): Error {
