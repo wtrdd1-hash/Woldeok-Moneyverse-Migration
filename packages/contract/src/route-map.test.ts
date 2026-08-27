@@ -21,7 +21,7 @@ const MODULES = new Set([
 
 describe('ROUTE_MAP', () => {
   it('covers every application route of the original', () => {
-    expect(originalRoutes()).toHaveLength(82);
+    expect(originalRoutes()).toHaveLength(92);
   });
 
   it('has no duplicate original routes', () => {
@@ -29,11 +29,24 @@ describe('ROUTE_MAP', () => {
     expect(new Set(seen).size).toBe(seen.length);
   });
 
-  it('maps no two originals onto the same replacement', () => {
-    const replacements = ROUTE_MAP.map((mapping) => mapping.replacement).filter(
-      (replacement): replacement is string => replacement !== null,
-    );
-    expect(new Set(replacements).size).toBe(replacements.length);
+  // Two originals may share a replacement only when the merge is stated:
+  // bank deposit and withdraw became one endpoint carrying a direction.
+  it('shares a replacement only where the row says why', () => {
+    const byReplacement = new Map<string, typeof ROUTE_MAP>();
+    for (const mapping of ROUTE_MAP) {
+      if (mapping.replacement === null) continue;
+      byReplacement.set(mapping.replacement, [
+        ...(byReplacement.get(mapping.replacement) ?? []),
+        mapping,
+      ]);
+    }
+    for (const [replacement, group] of byReplacement) {
+      if (group.length === 1) continue;
+      expect(
+        group.some((mapping) => Boolean(mapping.reason)),
+        `${replacement} serves ${group.length} originals with no reason given`,
+      ).toBe(true);
+    }
   });
 
   // A route may be dropped, but never silently.

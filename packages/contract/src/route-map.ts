@@ -7,6 +7,14 @@
  * exactly once, paired with the route that now serves it, or with `null` and
  * a reason if it was deliberately dropped.
  *
+ * The snapshot is NOT the source of this list, and an earlier version of this
+ * map that took it at face value was ten routes short. That file is a
+ * hand-maintained list of probes: it never exercised the `google` half of any
+ * `(discord|google)` alternation, `/api/v1/bank/withdraw`, either reward
+ * command, `/sitemap.xml`, `/discord/interactions` or `/media/*`. The list
+ * below is derived from the route modules themselves by
+ * `scripts/extract-original-routes.py`.
+ *
  * `replacement: null` with no `reason` fails the test. That is the point: a
  * route cannot disappear quietly.
  *
@@ -332,6 +340,60 @@ export const ROUTE_MAP: readonly RouteMapping[] = [
     original: 'GET /api/v1/admin/minecraft/operations/00000000-0000-4000-8000-000000000000',
     replacement: 'GET /api/v1/admin/minecraft/operations/{id}',
     module: 'minecraft',
+  },
+  {
+    original: 'GET /sitemap.xml',
+    replacement: 'GET /sitemap.xml',
+    module: 'frontend',
+  },
+  {
+    original: 'POST /discord/interactions',
+    replacement: 'POST /api/v1/integrations/discord/interactions',
+    module: 'discord',
+  },
+  {
+    original: 'GET /auth/google/start',
+    replacement: 'GET /auth/google/authorize',
+    module: 'auth',
+  },
+  {
+    original: 'GET /auth/google/callback',
+    replacement: 'GET /auth/google/callback',
+    module: 'auth',
+  },
+  {
+    original: 'POST /api/v1/account/link/google/start',
+    replacement: 'POST /api/v1/account/identities/google/link',
+    module: 'account',
+  },
+  {
+    original: 'POST /api/v1/account/reauth/google/start',
+    replacement: 'POST /api/v1/auth/google/reauthentication',
+    module: 'auth',
+  },
+  {
+    original: 'POST /api/v1/bank/withdraw',
+    replacement: 'POST /api/v1/bank/movements',
+    reason: 'merged with bank/deposit into one movements endpoint carrying a direction',
+    module: 'wallet',
+  },
+  {
+    original: 'POST /api/v1/rewards/daily',
+    replacement: 'POST /api/v1/rewards/daily/claims',
+    module: 'wallet',
+  },
+  {
+    original: 'POST /api/v1/rewards/work',
+    replacement: 'POST /api/v1/rewards/work/claims',
+    module: 'wallet',
+  },
+  {
+    original: 'GET /media/{key}',
+    replacement: 'GET /media/{key}',
+    // Served by Next: a private image reaches the browser as an <img src>, so
+    // the path stays on the public origin. The bytes still come from the
+    // content module's storage behind it.
+    module: 'frontend',
   },
 ];
 
