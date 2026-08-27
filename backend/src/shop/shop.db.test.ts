@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Pool } from 'pg';
-import { databaseUrl, isMissingGrant, rejectionOf } from '../testing/database';
+import { databaseUrl, isMissingGrant } from '../testing/database';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PostgresShopRepository } from './shop.repository';
 import { ShopService } from './shop.service';

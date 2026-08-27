@@ -14,6 +14,24 @@ export default tseslint.config(
     },
   },
   {
+    // Input-sanitisation regexes name control characters on purpose: stripping
+    // C0 and DEL is the point of /[<>\u0000-\u001f\u007f]/. no-control-regex
+    // exists to catch a control character written by accident, which is the
+    // opposite case.
+    //
+    // These literals are the repository's most delicate text. Editing tools
+    // have, on at least four occasions in the original, replaced a
+    // backslash-u escape with the raw byte it denotes -- the file still reads
+    // correctly while the literal no longer means what it says. That hazard is
+    // guarded by a byte-level check, not by this rule:
+    //
+    //   grep -rnP '[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]' backend/src
+    //
+    // which must print nothing, and which CI runs.
+    files: ['**/*.ts'],
+    rules: { 'no-control-regex': 'off' },
+  },
+  {
     // The backend compiles with emitDecoratorMetadata, and Nest resolves
     // constructor dependencies from the design:paramtypes that metadata
     // emits. A class named only in a constructor parameter position therefore

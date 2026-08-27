@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { databaseUrl, isMissingGrant, rejectionOf } from '../testing/database';
+import { databaseUrl } from '../testing/database';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AdminRolesRepository } from './admin-roles.repository';
 import { SessionRepository } from './session.repository';

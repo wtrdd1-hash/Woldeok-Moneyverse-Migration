@@ -32,6 +32,12 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
+
+      # ESLint cannot tell a backslash-u escape from the raw byte it denotes.
+      # This can, and that substitution has silently broken input sanitisation
+      # in this codebase's history.
+      - name: Reject raw control bytes in source
+        run: scripts/check-control-bytes.sh
       - run: pnpm typecheck
       - run: pnpm build
 
