@@ -223,7 +223,16 @@ export const ROUTE_MAP: readonly RouteMapping[] = [
   },
   { original: 'GET /admin', replacement: 'GET /admin', module: 'frontend' },
   { original: 'GET /admin/content', replacement: 'GET /admin/content', module: 'frontend' },
-  { original: 'GET /admin/minecraft', replacement: 'GET /admin/minecraft', module: 'frontend' },
+  {
+    original: 'GET /admin/minecraft',
+    replacement: null,
+    module: 'minecraft',
+    reason:
+      'The Minecraft host control plane is out of scope for this rebuild. The ' +
+      'operator console, its two API routes and the host sidecars are all ' +
+      'dropped together; the database objects 014/017/020 created stay, ' +
+      'because production has applied them.',
+  },
   { original: 'GET /api/v1/admin/me', replacement: 'GET /api/v1/admin/me', module: 'admin' },
   { original: 'GET /api/v1/admin/users', replacement: 'GET /api/v1/admin/users', module: 'admin' },
   {
@@ -333,13 +342,15 @@ export const ROUTE_MAP: readonly RouteMapping[] = [
   },
   {
     original: 'POST /api/v1/admin/minecraft/operations',
-    replacement: 'POST /api/v1/admin/minecraft/operations',
+    replacement: null,
     module: 'minecraft',
+    reason: 'Dropped with the rest of the Minecraft host control plane.',
   },
   {
     original: 'GET /api/v1/admin/minecraft/operations/00000000-0000-4000-8000-000000000000',
-    replacement: 'GET /api/v1/admin/minecraft/operations/{id}',
+    replacement: null,
     module: 'minecraft',
+    reason: 'Dropped with the rest of the Minecraft host control plane.',
   },
   {
     original: 'GET /sitemap.xml',

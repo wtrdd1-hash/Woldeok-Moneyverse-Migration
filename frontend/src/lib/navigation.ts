@@ -26,7 +26,6 @@ export const MEMBER_NAV: readonly NavEntry[] = [
 export const ADMIN_NAV: readonly NavEntry[] = [
   { href: '/admin', label: '운영' },
   { href: '/admin/content', label: '콘텐츠' },
-  { href: '/admin/minecraft', label: '마인크래프트' },
 ];
 
 /**

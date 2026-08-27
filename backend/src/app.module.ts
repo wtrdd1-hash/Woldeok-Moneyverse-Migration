@@ -11,7 +11,6 @@ import { BusinessModule } from './business/business.module';
 import { ContentModule } from './content/content.module';
 import { DiscordModule } from './discord/discord.module';
 import { EconomyModule } from './economy/economy.module';
-import { MinecraftModule } from './minecraft/minecraft.module';
 import { PrivacyModule } from './privacy/privacy.module';
 import { SeasonModule } from './season/season.module';
 import { ShopModule } from './shop/shop.module';
@@ -37,7 +36,6 @@ const ONE_MINUTE_MS = 60_000;
     AdminModule,
     AccountModule,
     ContentModule,
-    MinecraftModule,
     DiscordModule,
     // Process-local, exactly as in the original application. That is correct
     // for the single-instance deployment and becomes N times weaker on any

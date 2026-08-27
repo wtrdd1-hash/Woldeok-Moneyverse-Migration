@@ -8,25 +8,20 @@ RUN corepack enable
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json tsconfig.base.json .npmrc ./
 COPY packages/contract/package.json packages/contract/
-COPY packages/minecraft-core/package.json packages/minecraft-core/
 COPY backend/package.json backend/
 RUN pnpm install --frozen-lockfile \
       --filter @moneyverse/contract \
-      --filter @moneyverse/minecraft-core \
       --filter @moneyverse/backend
 
 COPY packages/contract packages/contract
-COPY packages/minecraft-core packages/minecraft-core
 COPY backend backend
 RUN pnpm --filter @moneyverse/contract build \
- && pnpm --filter @moneyverse/minecraft-core build \
  && pnpm --filter @moneyverse/backend build
 
 # Prune to runtime dependencies. This rewrites node_modules in place, so it
 # must come after the build.
 RUN pnpm install --frozen-lockfile --prod \
       --filter @moneyverse/contract \
-      --filter @moneyverse/minecraft-core \
       --filter @moneyverse/backend
 
 FROM node:20.19.2-alpine
@@ -40,8 +35,6 @@ ENV NODE_ENV=production
 COPY --from=build /repo/node_modules ./node_modules
 COPY --from=build /repo/packages/contract/dist ./packages/contract/dist
 COPY --from=build /repo/packages/contract/package.json ./packages/contract/
-COPY --from=build /repo/packages/minecraft-core/dist ./packages/minecraft-core/dist
-COPY --from=build /repo/packages/minecraft-core/package.json ./packages/minecraft-core/
 COPY --from=build /repo/backend/dist ./backend/dist
 COPY --from=build /repo/backend/package.json ./backend/
 COPY --from=build /repo/backend/node_modules ./backend/node_modules

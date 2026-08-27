@@ -70,7 +70,7 @@
 | `POST /api/v1/privacy/requests` | `POST /api/v1/privacy/requests` | privacy |  |
 | `GET /admin` | `GET /admin` | frontend |  |
 | `GET /admin/content` | `GET /admin/content` | frontend |  |
-| `GET /admin/minecraft` | `GET /admin/minecraft` | frontend |  |
+| `GET /admin/minecraft` | — | minecraft | 이 리빌드에서 제외. 마인크래프트 호스트 제어 화면·API·사이드카를 함께 들어냈다. 014/017/020이 만든 DB 객체는 프로덕션에 이미 적용되어 있어 그대로 둔다. |
 | `GET /api/v1/admin/me` | `GET /api/v1/admin/me` | admin |  |
 | `GET /api/v1/admin/users` | `GET /api/v1/admin/users` | admin |  |
 | `POST /api/v1/admin/users/00000000-0000-4000-8000-000000000000/restriction` | `PUT /api/v1/admin/users/{id}/restriction` | admin |  |
@@ -94,8 +94,8 @@
 | `POST /api/v1/admin/content/announcements/00000000-0000-4000-8000-000000000000/publication` | `PUT /api/v1/admin/announcements/{id}/publication` | content |  |
 | `POST /api/v1/admin/content/photos` | `POST /api/v1/admin/photos/metadata` | content |  |
 | `POST /api/v1/admin/content/photos/00000000-0000-4000-8000-000000000000/publication` | `PUT /api/v1/admin/photos/{id}/publication` | content |  |
-| `POST /api/v1/admin/minecraft/operations` | `POST /api/v1/admin/minecraft/operations` | minecraft |  |
-| `GET /api/v1/admin/minecraft/operations/00000000-0000-4000-8000-000000000000` | `GET /api/v1/admin/minecraft/operations/{id}` | minecraft |  |
+| `POST /api/v1/admin/minecraft/operations` | — | minecraft | 마인크래프트 호스트 제어와 함께 제외. |
+| `GET /api/v1/admin/minecraft/operations/00000000-0000-4000-8000-000000000000` | — | minecraft | 마인크래프트 호스트 제어와 함께 제외. |
 | `GET /sitemap.xml` | `GET /sitemap.xml` | frontend |  |
 | `POST /discord/interactions` | `POST /api/v1/integrations/discord/interactions` | discord |  |
 | `GET /auth/google/start` | `GET /auth/google/authorize` | auth |  |

@@ -29,9 +29,6 @@ importers:
       '@moneyverse/contract':
         specifier: workspace:*
         version: link:../packages/contract
-      '@moneyverse/minecraft-core':
-        specifier: workspace:*
-        version: link:../packages/minecraft-core
       '@nestjs/common':
         specifier: ^11.0.0
         version: 11.2.3(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -208,59 +205,6 @@ importers:
       '@types/node':
         specifier: ^20.19.9
         version: 20.19.43
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.0.0
-        version: 3.2.7(@types/node@20.19.43)(jiti@2.7.0)(jsdom@25.0.1)(lightningcss@1.32.0)(terser@5.51.2)
-
-  packages/minecraft-agent:
-    devDependencies:
-      '@types/node':
-        specifier: ^20.19.9
-        version: 20.19.43
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.0.0
-        version: 3.2.7(@types/node@20.19.43)(jiti@2.7.0)(jsdom@25.0.1)(lightningcss@1.32.0)(terser@5.51.2)
-
-  packages/minecraft-core:
-    dependencies:
-      pg:
-        specifier: ^8.16.3
-        version: 8.23.0
-    devDependencies:
-      '@types/node':
-        specifier: ^20.19.9
-        version: 20.19.43
-      '@types/pg':
-        specifier: ^8.11.10
-        version: 8.23.1
-      typescript:
-        specifier: ^5.9.0
-        version: 5.9.3
-      vitest:
-        specifier: ^3.0.0
-        version: 3.2.7(@types/node@20.19.43)(jiti@2.7.0)(jsdom@25.0.1)(lightningcss@1.32.0)(terser@5.51.2)
-
-  packages/minecraft-executor:
-    dependencies:
-      '@moneyverse/minecraft-core':
-        specifier: workspace:*
-        version: link:../minecraft-core
-      pg:
-        specifier: ^8.16.3
-        version: 8.23.0
-    devDependencies:
-      '@types/node':
-        specifier: ^20.19.9
-        version: 20.19.43
-      '@types/pg':
-        specifier: ^8.11.10
-        version: 8.23.1
       typescript:
         specifier: ^5.9.0
         version: 5.9.3
