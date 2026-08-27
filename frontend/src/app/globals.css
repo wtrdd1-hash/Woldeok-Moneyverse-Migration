@@ -1,4 +1,7 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
 
 /**
  * Ledger Plate.
@@ -9,6 +12,11 @@
  * editorial-serif / terracotta combination that generated interfaces converge
  * on.
  *
+ * The variables below are shadcn/ui's token contract, so every component from
+ * the registry inherits this identity instead of arriving in the registry's
+ * default stone. Anything named here that shadcn does not know about — `rise`,
+ * `fall`, the raw plate colours — is ours.
+ *
  * `--rise` and `--fall` follow Korean market convention, red for up and blue
  * for down, which is the opposite of the Western default. This audience reads
  * a red number as a gain; using the Western pair here would invert the meaning
@@ -16,62 +24,167 @@
  * and a direction glyph always accompany it.
  */
 
-@theme {
+:root {
+  --radius: 0.375rem;
+
   /* Accounting paper: grey-green, not cream. */
-  --color-ledger: #e8eae3;
-  --color-plate: #fafaf7;
-  --color-ink: #1b2a24;
-  --color-ink-soft: #4a5c54;
-  --color-ink-faint: #7d8b84;
-  --color-rule: #cdd2c9;
+  --background: #e8eae3;
+  --foreground: #1b2a24;
+  --card: #fafaf7;
+  --card-foreground: #1b2a24;
+  --popover: #fafaf7;
+  --popover-foreground: #1b2a24;
+
   /* Struck brass, for the currency mark and primary actions. */
-  --color-brass: #a67c2e;
-  --color-brass-bright: #d6a34a;
+  --primary: #8f6a24;
+  --primary-foreground: #fafaf7;
+
+  --secondary: #dcdfd6;
+  --secondary-foreground: #1b2a24;
+
+  /* shadcn's `muted` is a surface and `muted-foreground` is the text on it.
+     The text tone is pine ink lightened only as far as it stays legible on
+     paper — the fainter grey this palette started with fell under 3:1. */
+  --muted: #dcdfd6;
+  --muted-foreground: #4a5c54;
+
+  --accent: #dcdfd6;
+  --accent-foreground: #1b2a24;
+
+  /* Distinct from `--rise`: a destructive control is not a price going up. */
+  --destructive: #8f2f22;
+  --destructive-foreground: #fafaf7;
+
+  --border: #cdd2c9;
+  --input: #c2c8bd;
+  --ring: #8f6a24;
+
   /* Korean market convention. */
-  --color-rise: #c6382c;
-  --color-fall: #2f5fa8;
+  --rise: #b5301f;
+  --fall: #2f5fa8;
+
+  --chart-1: #8f6a24;
+  --chart-2: #2f5fa8;
+  --chart-3: #4a5c54;
+  --chart-4: #b5301f;
+  --chart-5: #7d8b84;
+
+  --sidebar: #fafaf7;
+  --sidebar-foreground: #1b2a24;
+  --sidebar-primary: #8f6a24;
+  --sidebar-primary-foreground: #fafaf7;
+  --sidebar-accent: #dcdfd6;
+  --sidebar-accent-foreground: #1b2a24;
+  --sidebar-border: #cdd2c9;
+  --sidebar-ring: #8f6a24;
+}
+
+/*
+ * Ink becomes the ground. The brass brightens because a struck-metal tone that
+ * reads as warm on paper reads as mud on a dark field.
+ */
+.dark {
+  --background: #12181a;
+  --foreground: #e4e8e3;
+  --card: #1a2223;
+  --card-foreground: #e4e8e3;
+  --popover: #1a2223;
+  --popover-foreground: #e4e8e3;
+
+  --primary: #d6a34a;
+  --primary-foreground: #12181a;
+
+  --secondary: #232d2e;
+  --secondary-foreground: #e4e8e3;
+
+  --muted: #232d2e;
+  --muted-foreground: #a3aeaa;
+
+  --accent: #232d2e;
+  --accent-foreground: #e4e8e3;
+
+  --destructive: #d05f49;
+  --destructive-foreground: #12181a;
+
+  --border: #2b3634;
+  --input: #37423f;
+  --ring: #d6a34a;
+
+  --rise: #e2604f;
+  --fall: #6f9ee0;
+
+  --chart-1: #d6a34a;
+  --chart-2: #6f9ee0;
+  --chart-3: #a3aeaa;
+  --chart-4: #e2604f;
+  --chart-5: #7d8b84;
+
+  --sidebar: #1a2223;
+  --sidebar-foreground: #e4e8e3;
+  --sidebar-primary: #d6a34a;
+  --sidebar-primary-foreground: #12181a;
+  --sidebar-accent: #232d2e;
+  --sidebar-accent-foreground: #e4e8e3;
+  --sidebar-border: #2b3634;
+  --sidebar-ring: #d6a34a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-rise: var(--rise);
+  --color-fall: var(--fall);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 
   --font-display: var(--font-hahmlet), Georgia, serif;
   --font-sans: var(--font-plex-kr), system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 
-  --radius-plate: 0.375rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 @layer base {
-  :root {
-    --background: var(--color-ledger);
-    --foreground: var(--color-ink);
-    --card: var(--color-plate);
-    --muted: var(--color-ink-faint);
-    --border: var(--color-rule);
-    --primary: var(--color-brass);
-    --ring: var(--color-brass);
-  }
-
-  /*
-   * Ink becomes the ground. The brass brightens because a struck-metal tone
-   * that reads as warm on paper reads as mud on a dark field.
-   */
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --background: #12181a;
-      --foreground: #e4e8e3;
-      --card: #1a2223;
-      --muted: #8b9691;
-      --border: #2b3634;
-      --primary: var(--color-brass-bright);
-      --ring: var(--color-brass-bright);
-    }
-  }
-
   * {
-    border-color: var(--border);
+    @apply border-border outline-ring/50;
   }
 
   body {
-    background: var(--background);
-    color: var(--foreground);
+    @apply bg-background text-foreground;
     font-family: var(--font-sans);
     /* Korean text sits better with slightly looser leading than Latin. */
     line-height: 1.7;
@@ -95,13 +208,97 @@
     font-feature-settings: 'tnum' 1;
   }
 
-  :focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
+  /*
+   * The two policy documents.
+   *
+   * Long-form prose is the one thing on this site the registry has no
+   * component for — Card and Table describe an application's controls, and a
+   * legal document is a document. Scoped so it can never leak onto a page
+   * that isn't one.
+   */
+  .policy-document section {
+    display: grid;
+    gap: 0.75rem;
   }
 
-  /* The posting strip is the one animated element in the product. Anyone who
-     has asked not to see motion sees the settled state instead. */
+  .policy-document h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
+
+  .policy-document h3 {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .policy-document p,
+  .policy-document li {
+    font-size: 0.875rem;
+    max-width: 68ch;
+  }
+
+  .policy-document ol,
+  .policy-document ul {
+    display: grid;
+    gap: 0.5rem;
+    padding-left: 1.25rem;
+  }
+
+  .policy-document ol {
+    list-style: decimal;
+  }
+
+  .policy-document ul {
+    list-style: disc;
+  }
+
+  .policy-document a {
+    color: var(--primary);
+    text-underline-offset: 3px;
+    text-decoration-line: underline;
+  }
+
+  .policy-document dt {
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+  }
+
+  .policy-document strong {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  /* The table scrolls inside its own container so the page body never does. */
+  .policy-document table {
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+    min-width: 40rem;
+    width: 100%;
+  }
+
+  .policy-document th,
+  .policy-document td {
+    border-bottom: 1px solid var(--border);
+    padding: 0.625rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .policy-document thead th {
+    background: var(--muted);
+    font-weight: 600;
+  }
+
+  .policy-document tbody th {
+    color: var(--muted-foreground);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* Anyone who has asked not to see motion sees the settled state instead. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

@@ -390,10 +390,11 @@ export const ROUTE_MAP: readonly RouteMapping[] = [
   {
     original: 'GET /media/{key}',
     replacement: 'GET /media/{key}',
-    // Served by Next: a private image reaches the browser as an <img src>, so
-    // the path stays on the public origin. The bytes still come from the
-    // content module's storage behind it.
-    module: 'frontend',
+    // Backend, unprefixed and unversioned. Every photo row already stored in
+    // production holds this exact path as its imageUrl, and the bytes live on
+    // the volume the API container mounts, so the path could move neither to
+    // /api nor to Next.
+    module: 'content',
   },
 ];
 

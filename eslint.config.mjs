@@ -11,6 +11,13 @@ export default tseslint.config(
       // bare `any`. This project starts from that baseline, so it is an error.
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
+      // A server action's first parameter is the previous state, which most
+      // actions have no use for — but React decides the signature, not the
+      // action. Naming it `_previous` says so.
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
     },
   },
   {

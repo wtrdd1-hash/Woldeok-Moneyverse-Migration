@@ -91,6 +91,13 @@ export interface WalletTransactionView {
 }
 
 export interface WalletOverview {
+  /**
+   * The caller's own Moneyverse id, which is what another member types to
+   * send them WLD. The original wallet page displayed it beside a copy
+   * control, and it belongs here rather than on the session route: this is
+   * the caller's wallet, and the id *is* the wallet's name.
+   */
+  readonly userId: string;
   readonly balances: WalletBalancesView;
   readonly recentTransactions: WalletTransactionView[];
 }
@@ -288,6 +295,7 @@ export class WalletService {
       this.repository.recentTransactionsForUser(userId, limit),
     ]);
     return {
+      userId,
       balances: normalizeBalances(balances),
       recentTransactions: normalizeTransactions(transactions),
     };

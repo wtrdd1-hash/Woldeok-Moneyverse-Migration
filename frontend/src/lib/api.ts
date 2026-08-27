@@ -45,12 +45,28 @@ function internalToken(): string {
   return token;
 }
 
+async function callerCookies(): Promise<string> {
+  const store = await cookies();
+  return store
+    .getAll()
+    .map((entry) => `${entry.name}=${encodeURIComponent(entry.value)}`)
+    .join('; ');
+}
+
 export interface ApiRequest {
   readonly method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   readonly body?: unknown;
   readonly csrfToken?: string;
   /** Seconds. Omit for no caching, which is right for anything per-caller. */
   readonly revalidate?: number;
+  /**
+   * Sends this cookie header instead of the caller's.
+   *
+   * For the one case that needs it: a server action that has just caused the
+   * API to issue a session and must make a second call *as* that session,
+   * within the same request, before the browser has ever sent the cookie back.
+   */
+  readonly cookieHeader?: string;
 }
 
 /**
@@ -61,11 +77,7 @@ export interface ApiRequest {
 export async function api<T>(path: string, request: ApiRequest = {}): Promise<T> {
   const { method = 'GET', body, csrfToken, revalidate } = request;
 
-  const cookieStore = await cookies();
-  const cookieHeader = cookieStore
-    .getAll()
-    .map((entry) => `${entry.name}=${encodeURIComponent(entry.value)}`)
-    .join('; ');
+  const cookieHeader = request.cookieHeader ?? (await callerCookies());
 
   const requestHeaders: Record<string, string> = {
     'x-internal-token': internalToken(),
@@ -130,6 +142,52 @@ export async function publicApi<T>(path: string, revalidate: number): Promise<T 
   } catch {
     return null;
   }
+}
+
+/**
+ * The same request as `api`, with the response's `set-cookie` handed back
+ * instead of dropped.
+ *
+ * Only the auth routes need this: they are the ones that issue or clear the
+ * session, and a server action has to relay that header to the browser itself
+ * because the API's response never reaches it directly.
+ */
+export async function apiWithCookie<T>(
+  path: string,
+  request: ApiRequest = {},
+): Promise<{ readonly payload: T; readonly setCookie: readonly string[] }> {
+  const { method = 'GET', body, csrfToken } = request;
+
+  const cookieHeader = request.cookieHeader ?? (await callerCookies());
+
+  const requestHeaders: Record<string, string> = {
+    'x-internal-token': internalToken(),
+    accept: 'application/json',
+  };
+  if (cookieHeader) requestHeaders.cookie = cookieHeader;
+  if (body !== undefined) requestHeaders['content-type'] = 'application/json';
+  if (csrfToken) requestHeaders['x-csrf-token'] = csrfToken;
+
+  const incoming = await headers();
+  const forwardedFor = incoming.get('x-forwarded-for');
+  if (forwardedFor) requestHeaders['x-forwarded-for'] = forwardedFor;
+
+  const response = await fetch(`${API_ORIGIN}${path}`, {
+    method,
+    headers: requestHeaders,
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    cache: 'no-store',
+  });
+
+  const text = await response.text();
+  const payload: unknown = text ? JSON.parse(text) : null;
+
+  if (!response.ok) {
+    const problem = payload as ProblemDocument | null;
+    throw new ApiError(response.status, problem?.detail ?? problem?.title);
+  }
+
+  return { payload: payload as T, setCookie: response.headers.getSetCookie() };
 }
 
 /** Per-caller, and forgiving. Use `publicApi` for anything a crawler sees. */

@@ -1,6 +1,9 @@
 import type { Metadata } from 'next';
-import { Plate, Unavailable } from '@/components/ui/plate';
+import { EmptyState } from '@/components/empty-state';
+import { PageHeader } from '@/components/page-header';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
+import { formatDay } from '@/lib/money';
 
 export const revalidate = 60;
 
@@ -11,10 +14,10 @@ export const metadata: Metadata = {
 };
 
 interface Announcement {
-  readonly id: string;
+  readonly announcementId: string;
   readonly title: string;
   readonly body: string;
-  readonly publishedAt: string;
+  readonly publishedAt: string | null;
 }
 
 export default async function AnnouncementsPage() {
@@ -22,7 +25,9 @@ export default async function AnnouncementsPage() {
 
   return (
     <div className="grid gap-4">
-      <h1 className="pt-4 text-2xl font-bold">운영 소식</h1>
+      <PageHeader eyebrow="OPERATIONS LOG" title="운영 소식">
+        검토를 마친 공지만 이곳에 게시됩니다.
+      </PageHeader>
 
       {/* Structured data for the announcement list. Only emitted when there is
           something published — describing an empty list to a crawler is noise. */}
@@ -49,20 +54,33 @@ export default async function AnnouncementsPage() {
 
       {data === null ? (
         // Offline is not the same as empty, and the page says which.
-        <Unavailable>지금은 공지를 불러올 수 없어요. 잠시 후 다시 확인해 주세요.</Unavailable>
+        <EmptyState
+          title="지금은 공지를 불러올 수 없어요."
+          description="잠시 후 다시 확인해 주세요."
+        />
       ) : data.announcements.length === 0 ? (
-        <Unavailable>공개된 운영 소식을 준비하고 있어요.</Unavailable>
+        <EmptyState
+          title="공개된 운영 소식을 준비하고 있어요."
+          description="검토를 마친 공지부터 이곳에 표시됩니다."
+        />
       ) : (
         data.announcements.map((notice) => (
-          <Plate as="article" key={notice.id}>
-            <time dateTime={notice.publishedAt} className="text-xs text-[var(--muted)]">
-              {new Intl.DateTimeFormat('ko-KR', { dateStyle: 'long' }).format(
-                new Date(notice.publishedAt),
-              )}
-            </time>
-            <h2 className="mt-1 text-lg font-medium">{notice.title}</h2>
-            <p className="mt-2 whitespace-pre-wrap text-sm">{notice.body}</p>
-          </Plate>
+          <Card key={notice.announcementId} className="gap-4">
+            <CardHeader>
+                {notice.publishedAt && (
+                  <time
+                    dateTime={notice.publishedAt}
+                    className="text-xs text-muted-foreground"
+                  >
+                    {formatDay(notice.publishedAt, '게시 시간 확인 중')}
+                  </time>
+                )}
+              <CardTitle className="text-lg">{notice.title}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="whitespace-pre-wrap text-sm">{notice.body}</p>
+            </CardContent>
+          </Card>
         ))
       )}
     </div>
