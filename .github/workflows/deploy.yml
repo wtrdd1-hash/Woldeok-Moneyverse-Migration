@@ -1,13 +1,18 @@
 name: Deploy
 
-# Ships the source to the host over SSH and rebuilds there.
+# Builds both images in Actions, publishes them to GHCR, and rolls the host
+# over SSH.
 #
-# Deliberately no registry. Publishing would buy SHA-tagged images and a
-# one-line rollback, at the cost of a pull credential the host must hold and a
-# package that has to be curated. The host has sixteen cores and spare memory,
-# a warm rebuild takes about a second, and this deployment has no history to
-# roll back to — so the trade is not worth its one manual setup step. If
-# rollback becomes a real need, this file is what changes.
+# The repository is private, so the packages are private too, and two
+# different credentials are involved. They are not interchangeable:
+#
+#   - Publishing uses the workflow's own GITHUB_TOKEN with packages: write.
+#     Nothing has to be configured for it.
+#   - Pulling happens on the host, which is outside GitHub and cannot use that
+#     token. It logs in with GHCR_PULL_TOKEN, which needs only read:packages.
+#
+# Every image is tagged with the commit that produced it, which is what makes
+# a rollback one edited line in the host's .env rather than a rebuild.
 #
 # Deployment is gated on the CI workflow passing, and on a manual dispatch or
 # a push to main.
@@ -30,12 +35,88 @@ concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/wdmv
+
 jobs:
   verify:
     uses: ./.github/workflows/ci.yml
 
-  deploy:
+  build:
     needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      backend: ${{ steps.meta.outputs.backend }}
+      frontend: ${{ steps.meta.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute the image references
+        id: meta
+        run: |
+          # Lowercase: a repository owner may contain capitals, an image name
+          # may not.
+          prefix=$(echo "${REGISTRY}/${IMAGE_PREFIX}" | tr '[:upper:]' '[:lower:]')
+          echo "prefix=${prefix}" >> "$GITHUB_OUTPUT"
+          echo "backend=${prefix}/backend:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "frontend=${prefix}/frontend:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push the backend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          # One platform, because there is one host and it is x86-64. Naming
+          # it also stops buildx wrapping a single image in a manifest list.
+          platforms: linux/amd64
+          # buildx attaches provenance and SBOM attestations by default. They
+          # arrive as extra manifests whose platform is unknown/unknown, which
+          # is what shows up as a nonsensical OS/Arch row on the package page.
+          # Nothing here consumes them, so they are only noise.
+          provenance: false
+          sbom: false
+          tags: |
+            ${{ steps.meta.outputs.backend }}
+            ${{ steps.meta.outputs.prefix }}/backend:latest
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      - name: Build and push the frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: frontend/Dockerfile
+          push: true
+          platforms: linux/amd64
+          provenance: false
+          sbom: false
+          # robots.txt and sitemap.xml are generated during the build and have
+          # to name the public host, so the origin is a build argument. It is
+          # a repository variable, not a secret: it is the site's own address.
+          build-args: |
+            APP_BASE_URL=${{ vars.APP_BASE_URL }}
+            SEO_INDEXING_ENABLED=${{ vars.SEO_INDEXING_ENABLED || 'false' }}
+          tags: |
+            ${{ steps.meta.outputs.frontend }}
+            ${{ steps.meta.outputs.prefix }}/frontend:latest
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+  deploy:
+    needs: build
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'staging' }}
     steps:
@@ -69,24 +150,21 @@ jobs:
             -C "${GITHUB_WORKSPACE}/packages/database" init migrations migrate.sh \
             | ssh target 'tar xzf - -C ~/moneyverse-migration'
 
-      - name: Ship the source the host builds from
-        run: |
-          # git archive, so only tracked files travel: no node_modules, no
-          # .next, no local .env that happens to be lying around.
-          git archive --format=tar.gz -o /tmp/src.tar.gz HEAD
-          ssh target 'cat > ~/moneyverse-migration/src.tar.gz' < /tmp/src.tar.gz
-
       # The script runs on the host and reads its inputs from the environment.
       # Passing it as a here-doc let the runner's shell expand the body first,
       # which rewrote the script before it ever arrived.
       #
-      # ADOPT_FROM names a container already running on the host whose OAuth
-      # client credentials this deployment reuses. The values are copied
+      # ADOPT_FROM names a container already on the host whose OAuth client
+      # credentials this deployment reuses. Those values are copied
       # host-locally and never pass through this runner.
       - name: Roll the deployment
         run: |
           ssh target \
-            "APP_BASE_URL='${{ vars.APP_BASE_URL || 'https://migration.easy-scraping.com' }}'" \
+            "BACKEND_IMAGE='${{ needs.build.outputs.backend }}'" \
+            "FRONTEND_IMAGE='${{ needs.build.outputs.frontend }}'" \
+            "GHCR_USER='${{ github.actor }}'" \
+            "GHCR_TOKEN='${{ secrets.GHCR_PULL_TOKEN }}'" \
+            "APP_BASE_URL='${{ vars.APP_BASE_URL }}'" \
             "ADOPT_FROM='${{ vars.ADOPT_FROM }}'" \
             'bash ~/moneyverse-migration/roll.sh'
 

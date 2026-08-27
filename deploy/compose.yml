@@ -8,9 +8,10 @@ name: wdmv
 # published, because the browser is not supposed to reach it directly — that
 # is what keeps the session a same-origin HttpOnly cookie.
 #
-# Images are built on this host rather than pulled. The host has 16 cores and
-# spare memory, a warm rebuild takes about a second, and building here means
-# the deployment needs no registry, no package, and no pull credential.
+# Images are built by Actions and pulled here, tagged with the commit that
+# produced them. `docker compose build` still works for a local experiment,
+# but a deploy never uses it: the tag is what makes a rollback one edited
+# line in .env instead of a rebuild.
 
 services:
   db:
@@ -53,10 +54,10 @@ services:
         condition: service_healthy
 
   backend:
-    build:
-      context: ./src
-      dockerfile: backend/Dockerfile
-    image: wdmv/backend:latest
+    # No `:?required`: an unset value would make every later `docker compose`
+    # call fail, including `ps` and `logs`, which is exactly when an operator
+    # needs them. roll.sh writes the resolved reference into .env.
+    image: ${BACKEND_IMAGE:-ghcr.io/ridanit-ruma/wdmv/backend:latest}
     container_name: wdmv-backend
     restart: unless-stopped
     environment:
@@ -96,15 +97,10 @@ services:
       start_period: 20s
 
   frontend:
-    build:
-      context: ./src
-      dockerfile: frontend/Dockerfile
-      args:
-        # Baked in because robots.txt and sitemap.xml are generated during the
-        # build and have to name the public host.
-        APP_BASE_URL: ${APP_BASE_URL:?required}
-        SEO_INDEXING_ENABLED: ${SEO_INDEXING_ENABLED:-false}
-    image: wdmv/frontend:latest
+    # Built with APP_BASE_URL baked in, because robots.txt and sitemap.xml are
+    # generated during the build and have to name the public host. Changing
+    # the origin therefore needs a rebuild, not just a restart.
+    image: ${FRONTEND_IMAGE:-ghcr.io/ridanit-ruma/wdmv/frontend:latest}
     container_name: wdmv-frontend
     restart: unless-stopped
     environment:
