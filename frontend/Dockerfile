@@ -39,6 +39,12 @@ COPY --from=build /repo/frontend/.next/standalone ./
 COPY --from=build /repo/frontend/.next/static ./frontend/.next/static
 
 RUN addgroup -S moneyverse && adduser -S moneyverse -G moneyverse
+# The ISR cache is written at runtime, under .next/cache, by this user. The
+# COPY above lands as root, so without this every revalidation fails with
+# EACCES and the page is re-rendered from scratch on every request -- which
+# is the whole benefit of ISR, lost silently in a log line.
+RUN mkdir -p frontend/.next/cache \
+ && chown -R moneyverse:moneyverse frontend/.next
 USER moneyverse
 
 EXPOSE 3000
