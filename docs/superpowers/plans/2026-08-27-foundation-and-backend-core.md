@@ -249,17 +249,15 @@ jobs:
           DATABASE_URL: postgresql://moneyverse_app:ci_app_password@localhost:5432/woldeok_moneyverse_ci
         run: pnpm test
 
-      - name: Reject prisma migrate
-        run: |
-          if grep -rn --include='*.json' --include='*.ts' --include='*.yml' \
-               --include='*.sh' 'prisma migrate' . \
-               --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=docs; then
-            echo 'prisma migrate must never run: the numbered SQL files own the schema' >&2
-            exit 1
-          fi
+      # Prisma introspects the schema; it never owns it. The guard lives in a
+      # script so it cannot match its own source.
+      - name: Reject Prisma schema mutation
+        run: scripts/reject-prisma-migrate.sh
 ```
 
-The development machine has no container runtime and no PostgreSQL server, so CI is where database-backed tests actually execute. `packages/database/ci-apply.sh` is written in Task 3; until then this step fails, which is correct — CI is not expected to be green until Task 3 lands.
+The development machine has no container runtime and no PostgreSQL server, so CI is where database-backed tests actually execute.
+
+`scripts/reject-prisma-migrate.sh` assembles the forbidden phrase at runtime instead of spelling it out. Writing the check inline in the workflow made it match its own source three times and fail on every run. Verify the guard both ways — it must exit 1 when a violation is planted and 0 once it is removed — because a guard that only ever passes proves nothing. `packages/database/ci-apply.sh` is written in Task 3; until then this step fails, which is correct — CI is not expected to be green until Task 3 lands.
 
 - [ ] **Step 6: Commit**
 

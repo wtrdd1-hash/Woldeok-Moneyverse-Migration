@@ -52,14 +52,8 @@ jobs:
           DATABASE_URL: postgresql://moneyverse_app:ci_app_password@localhost:5432/woldeok_moneyverse_ci
         run: pnpm test
 
-      # Prisma introspects the schema; it never owns it. A Prisma migration
-      # would drop the SECURITY DEFINER functions and the role grants that
-      # keep the application unable to move money directly.
-      - name: Reject prisma migrate
-        run: |
-          if grep -rn --include='*.json' --include='*.ts' --include='*.yml' \
-               --include='*.sh' 'prisma migrate' . \
-               --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=docs; then
-            echo 'prisma migrate must never run: the numbered SQL files own the schema' >&2
-            exit 1
-          fi
+      # Prisma introspects the schema; it never owns it. The guard lives in a
+      # script so it cannot match its own source -- spelling the phrase
+      # inline here made the first version fail on every run.
+      - name: Reject Prisma schema mutation
+        run: scripts/reject-prisma-migrate.sh
