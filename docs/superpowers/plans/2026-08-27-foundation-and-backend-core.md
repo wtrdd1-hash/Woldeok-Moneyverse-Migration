@@ -157,14 +157,29 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     rules: {
+      // The original repository finished its TypeScript migration with zero
+      // bare `any`. This project starts from that baseline, so it is an error.
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
     },
+  },
+  {
+    // The backend compiles with emitDecoratorMetadata, and Nest resolves
+    // constructor dependencies from the design:paramtypes that metadata
+    // emits. A class named only in a constructor parameter position therefore
+    // looks type-only to this rule while actually being needed at runtime:
+    // rewriting such an import to `import type` erases the metadata and
+    // breaks dependency injection with no compile error and no lint warning.
+    // backend/src/auth/auth.module.test.ts is what catches that regression.
+    files: ['backend/**/*.ts'],
+    rules: { '@typescript-eslint/consistent-type-imports': 'off' },
   },
 );
 ```
 
 `no-explicit-any` is an error, not a warning: the original repository finished its TypeScript migration with zero bare `any` and this project starts from that baseline.
+
+The `consistent-type-imports` exemption for the backend is not a style preference. `@typescript-eslint` cannot see that `emitDecoratorMetadata` needs an import at runtime, so it reports a Nest dependency as type-only and its autofix silently breaks injection. Keep the rule on everywhere else.
 
 - [ ] **Step 4: Install and verify the toolchain runs**
 
@@ -2346,6 +2361,9 @@ grep -n 'admin_current_roles' packages/database/migrations/*.sql | head
 If the function returns a differently named column, match it — the row interface is an assertion about the schema, and this is the moment to check it.
 
 - [ ] **Step 4: Write the guards**
+
+**A nullable dependency needs an explicit `@Inject` token.** A parameter declared `SessionRepository | null` erases to `Object` in `design:paramtypes`, so Nest cannot infer which provider to supply and fails at module compile with "argument at index [0] is available in the current module". Every constructor parameter below that is nullable therefore names its token explicitly. The unit tests construct guards directly and will not catch this; the wiring test in Step 6 will.
+
 
 `backend/src/auth/guards/session.guard.ts`:
 

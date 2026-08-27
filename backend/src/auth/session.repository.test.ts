@@ -80,7 +80,9 @@ describe('SessionRepository.get', () => {
 describe('SessionRepository.verifyCsrf', () => {
   it('rejects a malformed CSRF token without querying', async () => {
     const { pool, queries } = recordingPool(() => [{ id: 'x' }]);
-    await expect(new SessionRepository(pool).verifyCsrf('session-id', 'short')).resolves.toBe(false);
+    await expect(new SessionRepository(pool).verifyCsrf('session-id', 'short')).resolves.toBe(
+      false,
+    );
     expect(queries).toHaveLength(0);
   });
 
@@ -95,9 +97,9 @@ describe('SessionRepository.verifyCsrf', () => {
 
   it('returns false when no row matches', async () => {
     const { pool } = recordingPool(() => []);
-    await expect(new SessionRepository(pool).verifyCsrf('session-id', 'z'.repeat(64))).resolves.toBe(
-      false,
-    );
+    await expect(
+      new SessionRepository(pool).verifyCsrf('session-id', 'z'.repeat(64)),
+    ).resolves.toBe(false);
   });
 });
 
@@ -189,9 +191,9 @@ describe('SessionRepository.hasRecentReauthentication', () => {
 
   it('is false when the function returns anything other than true', async () => {
     const { pool } = recordingPool(() => [{ recent: 'yes' }]);
-    await expect(
-      new SessionRepository(pool).hasRecentReauthentication('session-id'),
-    ).resolves.toBe(false);
+    await expect(new SessionRepository(pool).hasRecentReauthentication('session-id')).resolves.toBe(
+      false,
+    );
   });
 });
 
