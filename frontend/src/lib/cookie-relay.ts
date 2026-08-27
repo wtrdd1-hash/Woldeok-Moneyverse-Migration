@@ -35,6 +35,22 @@ export async function relaySetCookie(headers: readonly string[]): Promise<void> 
   }
 }
 
+/**
+ * The `name=value` pair from a `set-cookie`, ready to be sent straight back
+ * as a request cookie. A server action that has just been issued a session
+ * needs it to make its next call as that session, before the browser has had
+ * any chance to send the cookie itself.
+ */
+export function sessionCookiePair(headers: readonly string[]): string | null {
+  for (const header of headers) {
+    const parsed = parseSetCookie(header);
+    if (parsed && parsed.value !== '') {
+      return `${parsed.name}=${encodeURIComponent(parsed.value)}`;
+    }
+  }
+  return null;
+}
+
 interface ParsedCookie {
   readonly name: string;
   readonly value: string;

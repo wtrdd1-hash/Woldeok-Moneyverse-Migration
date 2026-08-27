@@ -19,7 +19,18 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       // Everything behind a session, and the API itself. None of it is useful
       // to a crawler and some of it is per-member.
-      disallow: ['/admin', '/account', '/wallet', '/login', '/api/', '/auth/'],
+      disallow: [
+        '/admin',
+        '/account',
+        '/wallet',
+        '/stocks',
+        '/businesses',
+        '/seasons',
+        '/board',
+        '/login',
+        '/api/',
+        '/auth/',
+      ],
     },
     sitemap: `${base}/sitemap.xml`,
   };
