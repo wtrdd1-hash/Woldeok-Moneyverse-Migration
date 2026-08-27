@@ -22,7 +22,7 @@ the origin for exactly that reason.
 
 `.github/workflows/deploy.yml` runs CI, then over SSH:
 
-1. ships `compose.yml`, `nginx.conf`, the two scripts, and the database
+1. ships `compose.yml`, `edge/default.conf`, the two scripts, and the database
    migrations;
 2. ships `git archive HEAD` as `src.tar.gz` — tracked files only, so no
    `node_modules`, no `.next`, and no local `.env`;

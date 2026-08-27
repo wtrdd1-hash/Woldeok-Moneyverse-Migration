@@ -131,7 +131,12 @@ services:
     container_name: wdmv-edge
     restart: unless-stopped
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # The directory, not the file. A bind mount of a single file binds its
+      # inode, and shipping a new config replaces the file rather than editing
+      # it — after which the container goes on serving the old, unlinked one
+      # with no error anywhere. Binding the directory makes a replacement
+      # visible, so `nginx -s reload` is enough.
+      - ./edge:/etc/nginx/conf.d:ro
     depends_on:
       frontend:
         condition: service_healthy

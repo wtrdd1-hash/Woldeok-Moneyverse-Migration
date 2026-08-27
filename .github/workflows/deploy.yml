@@ -65,7 +65,7 @@ jobs:
         run: |
           ssh target 'mkdir -p ~/moneyverse-migration'
           tar czf - \
-            -C deploy compose.yml nginx.conf roll.sh bootstrap-env.sh \
+            -C deploy compose.yml roll.sh bootstrap-env.sh edge \
             -C "${GITHUB_WORKSPACE}/packages/database" init migrations migrate.sh \
             | ssh target 'tar xzf - -C ~/moneyverse-migration'
 
