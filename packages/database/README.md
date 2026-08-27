@@ -52,17 +52,30 @@ present regardless: a database rebuilt from this repository has to reach the
 same schema production is on, and leaving 041–043 unused would let a future
 migration silently claim one of those numbers.
 
-## Prisma
+## No ORM
 
-`prisma/schema.prisma` carries the generator and datasource blocks but no
-models yet: introspection needs a live database.
+Access is through `pg` and nothing else. An ORM was considered and measured
+against this schema rather than assumed:
 
-```bash
-DATABASE_URL=... pnpm --filter @moneyverse/database introspect
-```
+| | |
+| --- | --- |
+| Tables in `public` | 52 |
+| Tables `moneyverse_app` may SELECT | 11 |
+| Tables it may INSERT / UPDATE / DELETE | 3 / 3 / 0 |
+| Functions it may EXECUTE | 69 |
+| Repository code: function calls vs plain table reads | 46 vs 8 |
 
-Commit the generated models in their own commit. Never run a Prisma
-migration — CI fails the build if the phrase appears in a script or manifest.
+An ORM here would generate 52 models to serve 8 queries against 11 tables of
+internal plumbing, and the row types those 8 need are already hand-declared
+next to the migration that defines their columns. The cost — a query engine
+binary, a generate step, and a standing risk that someone runs a schema
+migration through it — bought nothing.
+
+Row interfaces are assertions about the schema, not proofs. Annotate each one
+with the migration that defines its columns, as the existing repositories do.
+
+CI still refuses any reference to a Prisma migration command, so
+reintroducing one is a deliberate act rather than an accident.
 
 ## Local development
 

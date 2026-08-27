@@ -1,0 +1,26 @@
+# Schema fingerprint
+
+`schema-fingerprint.sql` prints one line per table (with every column, its
+type and nullability), per function (with its identity arguments and whether
+it is `SECURITY DEFINER`), per enum type, and per table grant held by
+`moneyverse_app` or `moneyverse_executor`.
+
+Two databases that print the same set of lines have the same schema in every
+respect this application depends on.
+
+## Proving a port
+
+Build a database from `../init` plus `../migrations`, then diff its
+fingerprint against the reference database:
+
+```bash
+psql -qAt -f schema-fingerprint.sql > built.txt      # against the new database
+psql -qAt -f schema-fingerprint.sql > reference.txt  # against production
+diff <(sort built.txt) <(sort reference.txt) && echo 'schemas identical'
+```
+
+Run on 2026-08-27 against `woldeok-moneyverse-production-db-1`: 200 lines
+each, zero differences. That is what establishes this repository can rebuild
+production's schema from scratch — a checksum manifest only proves the files
+are the ones that were applied, not that applying them lands in the same
+place.

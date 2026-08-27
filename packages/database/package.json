@@ -5,12 +5,10 @@
   "scripts": {
     "build": "echo 'no build step: SQL is the artifact'",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "vitest run",
-    "introspect": "prisma db pull --schema prisma/schema.prisma"
+    "test": "vitest run"
   },
   "devDependencies": {
     "@types/node": "^20.19.9",
-    "prisma": "^6.0.0",
     "typescript": "^5.9.0",
     "vitest": "^3.0.0"
   }
