@@ -12,7 +12,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import {
   BankPanel,
-  DailyRewardButton,
+  RewardButtons,
   LoanList,
   MoneyverseId,
   TransferForm,
@@ -126,7 +126,7 @@ export default async function WalletPage() {
               amount={balances.bank.availableAmount}
             />
           </dl>
-          <DailyRewardButton />
+          <RewardButtons />
         </CardContent>
       </Card>
 

@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { IDLE } from '@/lib/action-state';
 import { formatDay } from '@/lib/money';
-import { borrow, claimDaily, moveBank, repay, transfer } from './actions';
+import { borrow, claimDaily, claimWork, moveBank, repay, transfer } from './actions';
 
 /**
  * The wallet's write surface.
@@ -22,14 +22,22 @@ import { borrow, claimDaily, moveBank, repay, transfer } from './actions';
  * one on the server and spends it in the same call.
  */
 
-export function DailyRewardButton() {
-  const [state, action] = useActionState(claimDaily, IDLE);
+export function RewardButtons() {
+  const [dailyState, daily] = useActionState(claimDaily, IDLE);
+  const [workState, work] = useActionState(claimWork, IDLE);
+
   return (
     <div className="grid gap-2">
-      <form action={action}>
-        <SubmitButton className="w-full sm:w-auto">✦ 오늘의 보상 받기</SubmitButton>
-      </form>
-      <ActionAlert state={state} />
+      <div className="flex flex-wrap gap-2">
+        <form action={daily}>
+          <SubmitButton>✦ 오늘의 보상 받기</SubmitButton>
+        </form>
+        <form action={work}>
+          <SubmitButton variant="outline">◈ 작업 보상 받기</SubmitButton>
+        </form>
+      </div>
+      <ActionAlert state={dailyState} />
+      <ActionAlert state={workState} />
     </div>
   );
 }

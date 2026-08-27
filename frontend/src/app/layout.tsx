@@ -1,29 +1,30 @@
 import type { Metadata } from 'next';
-import { Hahmlet, IBM_Plex_Mono, IBM_Plex_Sans_KR } from 'next/font/google';
+import { IBM_Plex_Mono, Nanum_Myeongjo, Noto_Sans_KR } from 'next/font/google';
 import { SiteShell } from '@/components/site-shell';
 import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
 
 /**
- * Self-hosted through next/font: the files are served from this origin, so
- * there is no third-party request on any page load and no layout shift while a
- * face arrives. It also keeps the CSP free of a font host.
+ * The product's own pairing, kept: a Korean serif for display and a Korean
+ * sans for body. The original named Iropke Batang and Pretendard, neither of
+ * which Google Fonts serves; Nanum Myeongjo and Noto Sans KR are the closest
+ * available faces and were the original's own declared fallbacks.
  *
- * Hahmlet is a Korean-and-Latin serif with strong vertical stress — chosen
- * over the editorial serif that generated pages default to, and over Inter or
- * Geist, neither of which was drawn with Hangul as a first-class concern.
+ * Self-hosted through next/font, so the files come from this origin: no
+ * third-party request on any page load, no layout shift while a face
+ * arrives, and no font host to admit in the content security policy.
  */
-const hahmlet = Hahmlet({
+const myeongjo = Nanum_Myeongjo({
   subsets: ['latin'],
-  weight: ['500', '700'],
-  variable: '--font-hahmlet',
+  weight: ['700', '800'],
+  variable: '--font-myeongjo',
   display: 'swap',
 });
 
-const plexKr = IBM_Plex_Sans_KR({
+const notoKr = Noto_Sans_KR({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-plex-kr',
+  weight: ['400', '500', '700', '800'],
+  variable: '--font-noto-kr',
   display: 'swap',
 });
 
@@ -50,13 +51,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={`${hahmlet.variable} ${plexKr.variable} ${plexMono.variable}`}>
+    <html lang="ko" className={`${myeongjo.variable} ${notoKr.variable} ${plexMono.variable}`}>
       <body>
         {/* A keyboard user should not have to walk the whole rail to reach the
             page. */}
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-card focus:px-4 focus:py-2"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-0 focus:z-[100] focus:rounded-b-lg focus:bg-forest focus:px-4 focus:py-3 focus:text-white"
         >
           본문으로 건너뛰기
         </a>

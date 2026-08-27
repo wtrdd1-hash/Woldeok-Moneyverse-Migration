@@ -94,21 +94,39 @@ export async function repay(_previous: ActionState, formData: FormData): Promise
   }
 }
 
-export async function claimDaily(_previous: ActionState): Promise<ActionState> {
+/**
+ * The two reward claims.
+ *
+ * Both are the same shape and both are idempotent at the database, which
+ * returns the original receipt for a repeat rather than paying twice — so a
+ * second press on the same day is an ordinary outcome the member is told
+ * about, not a fault.
+ */
+async function claimReward(
+  path: string,
+  { already, granted }: { readonly already: string; readonly granted: string },
+): Promise<ActionState> {
   try {
-    const receipt = await mutate<{ amount: string; replayed: boolean }>(
-      '/api/v1/rewards/daily/claims',
-      { body: { idempotencyKey: idempotencyKey() } },
-    );
+    const receipt = await mutate<{ amount: string; replayed: boolean }>(path, {
+      body: { idempotencyKey: idempotencyKey() },
+    });
     revalidatePath('/wallet');
-    return {
-      status: 'ok',
-      message: receipt.replayed
-        ? '오늘 보상은 이미 받았어요.'
-        : '오늘의 보상을 지갑에 넣었어요.',
-    };
+    return { status: 'ok', message: receipt.replayed ? already : granted };
   } catch (error) {
-    // A second claim on the same day is the ordinary outcome, not a fault.
-    return failure(error, '오늘은 이미 보상을 받았거나, 지금은 받을 수 없어요.');
+    return failure(error, already);
   }
+}
+
+export async function claimWork(_previous: ActionState): Promise<ActionState> {
+  return claimReward('/api/v1/rewards/work/claims', {
+    already: '지금은 작업 보상을 받을 수 없어요. 잠시 후 다시 시도해 주세요.',
+    granted: '작업 보상을 지갑에 넣었어요.',
+  });
+}
+
+export async function claimDaily(_previous: ActionState): Promise<ActionState> {
+  return claimReward('/api/v1/rewards/daily/claims', {
+    already: '오늘은 이미 보상을 받았거나, 지금은 받을 수 없어요.',
+    granted: '오늘의 보상을 지갑에 넣었어요.',
+  });
 }

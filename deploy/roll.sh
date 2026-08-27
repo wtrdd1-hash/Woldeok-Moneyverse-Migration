@@ -5,7 +5,10 @@
 # expanded by the runner's shell before it reaches the host, which silently
 # rewrote this script and produced errors describing neither machine.
 #
-# Reads BACKEND_IMAGE, GHCR_USER and GHCR_TOKEN from the environment.
+# Builds on this host. The alternative was publishing to a registry, which
+# buys a SHA-tagged image and a one-line rollback at the cost of a pull
+# credential the host would have to hold. There is no deployment history to
+# roll back to yet, and a warm rebuild here takes about a second.
 set -euo pipefail
 
 # The deployment directory is named, not inferred from the script's own
@@ -13,30 +16,30 @@ set -euo pipefail
 # happened to be beside it.
 cd "${DEPLOY_DIR:-$HOME/moneyverse-migration}"
 
-: "${BACKEND_IMAGE:?BACKEND_IMAGE is required}"
-: "${GHCR_USER:?GHCR_USER is required}"
-: "${GHCR_TOKEN:?GHCR_TOKEN is required — the host cannot use the workflow token}"
+if [ -f src.tar.gz ]; then
+  # Replaced wholesale rather than merged: a file deleted upstream must not
+  # survive here and end up in the image.
+  rm -rf src
+  mkdir -p src
+  tar xzf src.tar.gz -C src
+  rm -f src.tar.gz
+fi
 
-# The host is outside GitHub, so it logs in with its own read:packages token.
-printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
-trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
+[ -d src ] || { echo 'no source tree to build from' >&2; exit 1; }
 
-# Recorded rather than exported for one command, so a later `docker compose
-# ps` or `logs` resolves the same image an operator is looking at.
-sed -i '/^BACKEND_IMAGE=/d' .env
-printf 'BACKEND_IMAGE=%s\n' "$BACKEND_IMAGE" >> .env
+bash ./bootstrap-env.sh
 
-docker compose pull backend
+docker compose build backend frontend
 # --wait is the gate: a rollout that never becomes healthy fails here rather
 # than being reported as a success.
-docker compose up -d --wait --wait-timeout 180
+docker compose up -d --wait --wait-timeout 300
 
-port="$(grep -E '^BACKEND_PORT=' .env | cut -d= -f2)"
-port="${port:-3020}"
-code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "http://127.0.0.1:${port}/health" || true)"
+port="$(grep -E '^EDGE_PORT=' .env | cut -d= -f2)"
+port="${port:-3021}"
+code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "http://127.0.0.1:${port}/" || true)"
 if [ "$code" != "200" ]; then
-  echo "health check answered ${code:-nothing}" >&2
-  docker compose logs --tail 50 backend >&2
+  echo "the site answered ${code:-nothing} through the edge" >&2
+  docker compose logs --tail 50 edge frontend backend >&2
   exit 1
 fi
 

@@ -8,6 +8,9 @@ import { loadConfig } from './core/config';
 import { ProblemFilter } from './core/problem.filter';
 import { mountOpenApi } from './openapi';
 import { applyServerTimeouts } from './server-timeouts';
+import { sessionToken } from './auth/cookies';
+import { SessionRepository } from './auth/session.repository';
+import { attachLobby } from './lobby/lobby';
 import { UNPREFIXED_ROUTES } from './http/prefix';
 
 async function bootstrap(): Promise<void> {
@@ -46,6 +49,20 @@ async function bootstrap(): Promise<void> {
   mountOpenApi(app, config.production);
 
   applyServerTimeouts(app.getHttpServer());
+
+  // The lobby shares this listener. It is attached after the HTTP surface is
+  // configured because Engine.IO re-wraps the server's own request and
+  // upgrade listeners when it attaches, and it must wrap the finished ones.
+  //
+  // A null session store is not an error here: the lobby degrades to
+  // read-only rather than refusing to start, which is what the public
+  // landing page needs when the database is briefly unavailable.
+  attachLobby(app.getHttpServer(), {
+    baseUrl: config.baseUrl,
+    trustForwardedFor: config.trustProxyForwardedFor,
+    sessions: app.get(SessionRepository, { strict: false }),
+    sessionToken: (headers) => sessionToken(headers, config),
+  });
 
   // Loopback by default, not 0.0.0.0. This is an internal service; binding it
   // to every interface by default is how an "internal" service becomes
