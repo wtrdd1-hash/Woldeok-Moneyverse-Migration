@@ -1,0 +1,142 @@
+import 'server-only';
+
+import { cookies, headers } from 'next/headers';
+
+/**
+ * The only way this application reaches the API.
+ *
+ * `server-only` is not decoration: importing this from a client component is a
+ * build error, and it needs to be, because the module reads the internal token
+ * out of the environment. A client bundle that contained it would publish the
+ * credential that separates the API from the internet.
+ *
+ * The browser never talks to the API. It talks to Next, and Next talks to the
+ * API over the internal network — which is what lets the session stay a
+ * same-origin HttpOnly cookie and keeps CSRF a same-origin problem.
+ */
+
+const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
+
+export class ApiError extends Error {
+  readonly status: number;
+  readonly detail: string | undefined;
+
+  constructor(status: number, detail?: string) {
+    super(detail ?? `API responded ${status}`);
+    this.name = 'ApiError';
+    this.status = status;
+    this.detail = detail;
+  }
+}
+
+interface ProblemDocument {
+  readonly title?: string;
+  readonly detail?: string;
+  readonly errors?: string[];
+}
+
+function internalToken(): string {
+  const token = process.env.INTERNAL_API_TOKEN;
+  if (!token) {
+    // Failing loudly beats sending an unauthenticated request the API will
+    // refuse with a message that describes the wrong problem.
+    throw new Error('INTERNAL_API_TOKEN is not configured');
+  }
+  return token;
+}
+
+export interface ApiRequest {
+  readonly method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  readonly body?: unknown;
+  readonly csrfToken?: string;
+  /** Seconds. Omit for no caching, which is right for anything per-caller. */
+  readonly revalidate?: number;
+}
+
+/**
+ * Forwards the caller's session cookie so the API can resolve who they are.
+ * Everything the API decides about a request — session, consent, role, CSRF —
+ * it decides from what is forwarded here, not from anything Next asserts.
+ */
+export async function api<T>(path: string, request: ApiRequest = {}): Promise<T> {
+  const { method = 'GET', body, csrfToken, revalidate } = request;
+
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((entry) => `${entry.name}=${encodeURIComponent(entry.value)}`)
+    .join('; ');
+
+  const requestHeaders: Record<string, string> = {
+    'x-internal-token': internalToken(),
+    accept: 'application/json',
+  };
+  if (cookieHeader) requestHeaders.cookie = cookieHeader;
+  if (body !== undefined) requestHeaders['content-type'] = 'application/json';
+  if (csrfToken) requestHeaders['x-csrf-token'] = csrfToken;
+
+  // The real client address, so the API's rate limiter counts the visitor
+  // rather than counting this process once for everybody.
+  const incoming = await headers();
+  const forwardedFor = incoming.get('x-forwarded-for');
+  if (forwardedFor) requestHeaders['x-forwarded-for'] = forwardedFor;
+
+  const response = await fetch(`${API_ORIGIN}${path}`, {
+    method,
+    headers: requestHeaders,
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    // A per-caller response must never be cached: it carries one member's
+    // balances. Only pages that pass an explicit revalidate are public.
+    ...(revalidate === undefined
+      ? { cache: 'no-store' as const }
+      : { next: { revalidate } }),
+  });
+
+  if (response.status === 204) return undefined as T;
+
+  const text = await response.text();
+  const payload: unknown = text ? JSON.parse(text) : null;
+
+  if (!response.ok) {
+    const problem = payload as ProblemDocument | null;
+    throw new ApiError(response.status, problem?.detail ?? problem?.title);
+  }
+
+  return payload as T;
+}
+
+/**
+ * For public data, which is the same for everybody.
+ *
+ * It sends no cookie and reads no header, and that is what lets a page calling
+ * it stay statically generated: touching `cookies()` marks a route dynamic in
+ * Next, so a landing page that forwarded a session it does not use would give
+ * up its prerender — and with it the finished HTML a crawler needs and the
+ * instant first paint a visitor gets.
+ *
+ * Returning null rather than throwing preserves the original's behaviour: the
+ * public pages stayed readable with the content service offline and showed an
+ * explicitly unknown state instead of inventing a healthy one.
+ */
+export async function publicApi<T>(path: string, revalidate: number): Promise<T | null> {
+  try {
+    const response = await fetch(`${API_ORIGIN}${path}`, {
+      headers: { 'x-internal-token': internalToken(), accept: 'application/json' },
+      next: { revalidate },
+    });
+    if (!response.ok) return null;
+    const text = await response.text();
+    return (text ? JSON.parse(text) : null) as T;
+  } catch {
+    return null;
+  }
+}
+
+/** Per-caller, and forgiving. Use `publicApi` for anything a crawler sees. */
+export async function apiOrNull<T>(path: string, request: ApiRequest = {}): Promise<T | null> {
+  try {
+    return await api<T>(path, request);
+  } catch {
+    return null;
+  }
+}

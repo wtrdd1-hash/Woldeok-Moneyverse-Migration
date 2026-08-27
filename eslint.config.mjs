@@ -14,6 +14,10 @@ export default tseslint.config(
     },
   },
   {
+    // Next generates these; they are build output, not source.
+    ignores: ['frontend/.next/**', 'frontend/next-env.d.ts'],
+  },
+  {
     // Input-sanitisation regexes name control characters on purpose: stripping
     // C0 and DEL is the point of /[<>\u0000-\u001f\u007f]/. no-control-regex
     // exists to catch a control character written by accident, which is the
