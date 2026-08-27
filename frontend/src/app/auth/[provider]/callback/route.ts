@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { ApiError, apiWithCookie } from '@/lib/api';
 import { relaySetCookie } from '@/lib/cookie-relay';
+import { publicUrl } from '@/lib/public-url';
 
 /**
  * Where Discord and Google send the browser back.
@@ -33,8 +34,9 @@ export async function GET(
   context: { readonly params: Promise<{ readonly provider: string }> },
 ): Promise<NextResponse> {
   const { provider } = await context.params;
-  const url = new URL(request.url);
-  const query = url.searchParams;
+  // The query is read from the request; only its origin was wrong, and
+  // publicUrl now supplies that.
+  const query = new URL(request.url).searchParams;
 
   const forwarded = new URLSearchParams();
   for (const name of ['state', 'code', 'error'] as const) {
@@ -51,15 +53,15 @@ export async function GET(
     await relaySetCookie(setCookie);
 
     if (payload.outcome === 'linked') {
-      return NextResponse.redirect(new URL(`/account?linked=${provider}`, url.origin));
+      return NextResponse.redirect(publicUrl(`/account?linked=${provider}`));
     }
     if (payload.outcome === 'reauthenticated') {
-      return NextResponse.redirect(new URL('/account?reauth=done', url.origin));
+      return NextResponse.redirect(publicUrl('/account?reauth=done'));
     }
-    return NextResponse.redirect(new URL('/?account=signed-in', url.origin));
+    return NextResponse.redirect(publicUrl('/?account=signed-in'));
   } catch (error) {
     const detail = error instanceof ApiError ? (error.detail ?? '') : '';
     const code = KNOWN_ERRORS.has(detail) ? detail : 'oauth_login';
-    return NextResponse.redirect(new URL(`/login?error=${code}`, url.origin));
+    return NextResponse.redirect(publicUrl(`/login?error=${code}`));
   }
 }
