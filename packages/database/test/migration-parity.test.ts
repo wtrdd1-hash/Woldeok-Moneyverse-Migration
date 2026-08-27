@@ -46,9 +46,21 @@ describe('migration parity with the production database', () => {
     expect(missing, 'applied in production but absent here').toEqual([]);
   });
 
-  it('ports no migration production has never applied', () => {
-    const extra = [...ported.keys()].filter((name) => !(name in MANIFEST.migrations));
-    expect(extra, 'present here but never applied in production').toEqual([]);
+  /**
+   * The manifest is a floor, not an exact match. Everything production has
+   * applied must be here and unchanged; migrations numbered above it are new
+   * work and are how the project moves forward. What must never happen is a
+   * new file claiming a number production already used, because migrate.sh
+   * matches on filename and would skip it as already applied.
+   */
+  it('numbers every new migration above the production baseline', () => {
+    const baseline = Math.max(
+      ...Object.keys(MANIFEST.migrations).map((name) => Number(name.slice(0, 3))),
+    );
+    const tooLow = [...ported.keys()]
+      .filter((name) => name.endsWith('.sql') && !(name in MANIFEST.migrations))
+      .filter((name) => Number(name.slice(0, 3)) <= baseline);
+    expect(tooLow, `a new migration must be numbered above ${baseline}`).toEqual([]);
   });
 
   it('reproduces every migration byte-for-byte', () => {
@@ -58,15 +70,13 @@ describe('migration parity with the production database', () => {
     expect(mismatched, 'same name, different bytes — migrate.sh would refuse these').toEqual([]);
   });
 
-  it('carries the full contiguous range 002 through 046', () => {
+  it('carries a contiguous, duplicate-free sequence from 002', () => {
     const numbers = [...ported.keys()]
       .filter((name) => name.endsWith('.sql'))
       .map((name) => Number(name.slice(0, 3)))
       .sort((a, b) => a - b);
-    // Numbers may repeat only if two files legitimately share one; production
-    // has none, so the sequence is exactly 2..46 with no gap and no duplicate.
-    const expected = Array.from({ length: 45 }, (_, index) => index + 2);
-    expect(numbers).toEqual(expected);
+    const expected = Array.from({ length: numbers.length }, (_, index) => index + 2);
+    expect(numbers, 'a gap or a repeated number').toEqual(expected);
   });
 
   it('ports the two init scripts', () => {

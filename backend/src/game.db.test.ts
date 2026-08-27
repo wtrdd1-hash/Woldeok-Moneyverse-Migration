@@ -47,35 +47,51 @@ describe.skipIf(!DATABASE_URL)('game modules against a real database', () => {
 
   describe('stocks', () => {
     /**
-     * KNOWN DEFECT, carried over from the original and confirmed live in
-     * production on 2026-08-28. See docs/findings/stock-reads-lack-grants.md.
-     *
-     * These three reads query virtual_stocks, virtual_stock_positions and
-     * virtual_stock_trades directly instead of going through a SECURITY
-     * DEFINER function, and moneyverse_app holds no privilege on any of them.
-     * The port is faithful: the SQL is byte-identical to the original, so the
-     * failure is the original's, not the port's.
-     *
-     * They assert the failure rather than skipping it, so the defect stays
-     * visible. When it is fixed, these turn red and must be rewritten to
-     * assert success — which is the intended prompt.
+     * These four reads were refused with 42501 in the original: they queried
+     * virtual_stocks, virtual_stock_positions and virtual_stock_trades
+     * directly, and 023-virtual-stock-game.sql had revoked all three from
+     * moneyverse_app on purpose. 047-virtual-stock-read-functions.sql adds
+     * the read functions the write path always had.
+     * See docs/findings/stock-reads-lack-grants.md.
      */
-    it('list is refused: the role has no privilege on virtual_stocks', async () => {
-      await expect(stocks.list()).rejects.toMatchObject({ code: '42501' });
+    it('lists active stocks through a function', async () => {
+      await expect(stocks.list()).resolves.toBeInstanceOf(Array);
     });
 
-    it('portfolio is refused: the role has no privilege on virtual_stock_positions', async () => {
-      await expect(stocks.portfolio(UNKNOWN)).rejects.toMatchObject({ code: '42501' });
+    it('reads an empty portfolio for an unknown user', async () => {
+      await expect(stocks.portfolio(UNKNOWN)).resolves.toEqual([]);
     });
 
-    it('history is refused: the role has no privilege on virtual_stock_trades', async () => {
-      await expect(stocks.history(UNKNOWN)).rejects.toMatchObject({ code: '42501' });
+    it('reads empty trade history for an unknown user', async () => {
+      await expect(stocks.history(UNKNOWN)).resolves.toEqual([]);
     });
 
-    // The contrast that identifies the cause: the same module's function-based
-    // read works, because EXECUTE is granted where table privileges are not.
-    it('reads price history, which goes through a function and works', async () => {
+    it('reads price history through a function', async () => {
       await expect(stocks.priceHistory(randomUUID())).resolves.toBeInstanceOf(Array);
+    });
+
+    // The point of the fix: the reads work, and the tables stay unreadable.
+    // If a later change grants the role SELECT to make some query easier,
+    // this is what notices.
+    it('still cannot read the underlying tables directly', async () => {
+      for (const table of ['virtual_stocks', 'virtual_stock_positions', 'virtual_stock_trades']) {
+        await expect(
+          pool.query(`SELECT 1 FROM public.${table} LIMIT 1`),
+          `${table} became readable`,
+        ).rejects.toMatchObject({ code: '42501' });
+      }
+    });
+
+    // The operator check now lives in the function rather than in the route,
+    // so a caller who reaches this method without the role is still refused.
+    it('refuses the admin catalogue to a caller with no operator role', async () => {
+      await expect(stocks.adminList(UNKNOWN)).rejects.toMatchObject({ code: '42501' });
+    });
+
+    it('bounds the trade history limit inside the function', async () => {
+      await expect(
+        pool.query('SELECT * FROM public.stock_my_trades($1, $2)', [UNKNOWN, 500]),
+      ).rejects.toMatchObject({ code: '22023' });
     });
 
     it('refuses a trade on a stock that does not exist', async () => {

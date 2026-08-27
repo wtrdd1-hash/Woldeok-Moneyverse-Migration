@@ -139,17 +139,34 @@ export class PostgresStockRepository {
     this.pool = pool;
   }
 
+  // These four reads go through functions rather than querying
+  // virtual_stocks, virtual_stock_positions and virtual_stock_trades
+  // directly. 023-virtual-stock-game.sql revoked those tables from
+  // moneyverse_app deliberately, so the direct queries the original used were
+  // refused with 42501 in production; 047-virtual-stock-read-functions.sql
+  // supplies the reads the write path always had. See
+  // docs/findings/stock-reads-lack-grants.md.
+
   async list(): Promise<readonly StockRow[]> {
     return queryRows<StockRow>(
       this.pool,
-      'SELECT id::text, symbol, name, description, current_price::text AS current_price, day_open_price::text AS day_open_price, active, updated_at FROM public.virtual_stocks WHERE active ORDER BY symbol',
+      'SELECT id::text, symbol, name, description, current_price::text AS current_price, day_open_price::text AS day_open_price, active, updated_at FROM public.stock_list_active()',
     );
   }
 
-  async adminList(): Promise<readonly StockRow[]> {
+  /**
+   * Takes the actor because `stock_admin_list` performs the operator check
+   * itself, the same way `business_admin_list` and `season_event_admin_list`
+   * do. The original had no parameter and relied on the route having checked
+   * the role first; moving the check into the function means a caller cannot
+   * reach the full catalogue by finding another path to this method.
+   */
+  async adminList(actorUserId: unknown): Promise<readonly StockRow[]> {
+    uuid(actorUserId, 'actor user id');
     return queryRows<StockRow>(
       this.pool,
-      'SELECT id::text, symbol, name, description, current_price::text AS current_price, day_open_price::text AS day_open_price, active, updated_at FROM public.virtual_stocks ORDER BY active DESC, symbol',
+      'SELECT id::text, symbol, name, description, current_price::text AS current_price, day_open_price::text AS day_open_price, active, updated_at FROM public.stock_admin_list($1)',
+      [actorUserId],
     );
   }
 
@@ -163,7 +180,7 @@ export class PostgresStockRepository {
     uuid(userId, 'user id');
     return queryRows<StockPortfolioRow>(
       this.pool,
-      'SELECT p.stock_id::text, s.symbol, s.name, p.quantity::text, p.average_cost::text, (p.quantity*s.current_price)::text AS market_value, s.current_price::text FROM public.virtual_stock_positions p JOIN public.virtual_stocks s ON s.id=p.stock_id WHERE p.user_id=$1 AND p.quantity>0 ORDER BY s.symbol',
+      'SELECT stock_id::text, symbol, name, quantity::text, average_cost::text, market_value::text, current_price::text FROM public.stock_my_positions($1)',
       [userId],
     );
   }
@@ -173,7 +190,7 @@ export class PostgresStockRepository {
     const n = typeof limit === 'number' && Number.isSafeInteger(limit) ? Math.min(100, Math.max(1, limit)) : 50;
     return queryRows<StockHistoryRow>(
       this.pool,
-      'SELECT t.id::text AS trade_id,s.symbol,t.side,t.quantity::text,t.unit_price::text,t.gross_amount::text,t.tax_amount::text,t.created_at FROM public.virtual_stock_trades t JOIN public.virtual_stocks s ON s.id=t.stock_id WHERE t.user_id=$1 ORDER BY t.created_at DESC LIMIT $2',
+      'SELECT trade_id::text, symbol, side, quantity::text, unit_price::text, gross_amount::text, tax_amount::text, created_at FROM public.stock_my_trades($1,$2)',
       [userId, n],
     );
   }

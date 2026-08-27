@@ -1,4 +1,4 @@
-# 주식 조회 3개가 프로덕션에서 권한 부족으로 실패한다
+# 주식 조회가 프로덕션에서 권한 부족으로 실패한다 — 수정됨
 
 발견 2026-08-28. 이식 중 실제 데이터베이스에 대고 검증하다 드러났다.
 **이식 과정에서 생긴 문제가 아니라 원본에 살아 있는 결함이다.**
@@ -75,5 +75,41 @@ FROM public.virtual_stocks WHERE active ORDER BY symbol;
 안에서 강제할 수 있다. 지금처럼 애플리케이션이 `WHERE user_id = $1`을 붙이는
 것을 신뢰하는 구조보다 강하다.
 
-**미결정 사항이다.** 이 저장소는 아직 원본 동작을 그대로 옮겨두었고, 수정 여부는
-사용자 결정을 기다린다.
+## 수정 (2026-08-28)
+
+사용자 승인 후 위 권장안대로 고쳤다. `047-virtual-stock-read-functions.sql`이
+읽기 함수 넷을 추가하고 `EXECUTE`만 부여한다:
+
+- `stock_list_active()`
+- `stock_admin_list(p_actor uuid)` — `game_catalog_operator(p_actor)`로 운영자 확인
+- `stock_my_positions(p_actor uuid)` — `WHERE user_id = p_actor`를 함수가 강제
+- `stock_my_trades(p_actor uuid, p_limit integer)` — limit 범위도 함수가 강제
+
+`GRANT SELECT`는 쓰지 않았다. 023이 세 테이블을 `moneyverse_app`에서 회수한 것은
+의도였고, 047은 그 회수를 **다시 명시**하여 이 마이그레이션이 완화로 읽히지 않게
+한다.
+
+### 확인한 것
+
+스크래치 DB에 적용한 뒤 `SET ROLE moneyverse_app`으로 직접 확인했다:
+
+| 검사 | 결과 |
+| --- | --- |
+| `stock_list_active()` | 동작 |
+| `stock_my_positions()` | 동작 |
+| `stock_my_trades()` | 동작 |
+| `stock_my_trades(..., 500)` | 거절 — limit 범위 밖 |
+| 비운영자의 `stock_admin_list()` | 거절 — operator role required |
+| `SELECT FROM virtual_stocks` 직접 | **여전히 거절** |
+
+스키마 지문 대조: 프로덕션 200줄 대비 **함수 4개만 추가, 제거 0**. 테이블도
+grant도 그대로다.
+
+`backend/src/game.db.test.ts`가 조회 성공과 테이블 접근 거절을 **동시에** 단언한다.
+나중에 누군가 쿼리를 편하게 하려고 `GRANT SELECT`를 붙이면 그 테스트가 잡는다.
+
+### 부수 변경
+
+`adminList()`가 이제 actor를 인자로 받는다. 원본은 인자가 없었고 라우트가 역할을
+먼저 확인했으리라 신뢰했다. 확인이 함수 안으로 들어가면, 다른 경로로 이 메서드에
+도달해도 전체 목록을 얻을 수 없다.

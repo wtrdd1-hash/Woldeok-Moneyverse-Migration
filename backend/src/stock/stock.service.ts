@@ -20,7 +20,7 @@ import type {
 // the service can be constructed with a test double without importing pg.
 export interface StockRepository {
   list(): Promise<readonly StockRow[]>;
-  adminList(): Promise<readonly StockRow[]>;
+  adminList(actorUserId: unknown): Promise<readonly StockRow[]>;
   portfolio(userId: unknown): Promise<readonly StockPortfolioRow[]>;
   history(userId: unknown, limit?: unknown): Promise<readonly StockHistoryRow[]>;
   priceHistory(stockId: unknown, limit?: unknown): Promise<readonly StockPriceHistoryRow[]>;
@@ -42,8 +42,8 @@ export class StockService {
     return this.repository.list();
   }
 
-  adminList(): Promise<readonly StockRow[]> {
-    return this.repository.adminList();
+  adminList(actorUserId: unknown): Promise<readonly StockRow[]> {
+    return this.repository.adminList(actorUserId);
   }
 
   portfolio(userId: unknown): Promise<readonly StockPortfolioRow[]> {
