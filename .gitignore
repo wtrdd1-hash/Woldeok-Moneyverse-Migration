@@ -1,0 +1,31 @@
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# Generated
+packages/database/prisma/generated/
+packages/contract/src/generated/
+
+# Environment — real values never enter Git
+.env
+.env.*
+!.env.example
+
+# Test and tooling artifacts
+coverage/
+.vitest/
+playwright-report/
+test-results/
+.eslintcache
+
+# Editor and OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
