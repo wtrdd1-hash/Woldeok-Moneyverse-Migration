@@ -1,20 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { Pool } from 'pg';
+import { databaseUrl, isMissingGrant, rejectionOf } from '../testing/database';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PostgresWalletRepository } from './wallet.repository';
 import { WalletService } from './wallet.service';
-
-function databaseUrl(): string | undefined {
-  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
-  try {
-    const text = readFileSync(join(__dirname, '../../../packages/database/.env'), 'utf8');
-    return /^DATABASE_URL=(.+)$/m.exec(text)?.[1]?.trim();
-  } catch {
-    return undefined;
-  }
-}
 
 const DATABASE_URL = databaseUrl();
 
@@ -145,12 +134,8 @@ describe.skipIf(!DATABASE_URL)('wallet against a real database', () => {
       () => service.borrow(UNKNOWN_USER, { principalAmount: 1, idempotencyKey: randomUUID() }),
     ];
     for (const attempt of attempts) {
-      const error = await attempt().then(
-        () => null,
-        (caught: unknown) => caught,
-      );
-      const code = (error as { code?: string } | null)?.code;
-      expect(code, 'permission denied means the role lost a grant').not.toBe('42501');
+      const error = await rejectionOf(attempt);
+      expect(isMissingGrant(error), 'the role lost a grant').toBe(false);
     }
   });
 });

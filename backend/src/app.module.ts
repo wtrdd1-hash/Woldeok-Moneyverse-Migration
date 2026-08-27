@@ -4,7 +4,10 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { CoreModule } from './core/core.module';
 import { HealthModule } from './health/health.module';
+import { BoardModule } from './board/board.module';
 import { BusinessModule } from './business/business.module';
+import { EconomyModule } from './economy/economy.module';
+import { PrivacyModule } from './privacy/privacy.module';
 import { SeasonModule } from './season/season.module';
 import { ShopModule } from './shop/shop.module';
 import { StockModule } from './stock/stock.module';
@@ -23,6 +26,9 @@ const ONE_MINUTE_MS = 60_000;
     StockModule,
     BusinessModule,
     SeasonModule,
+    BoardModule,
+    PrivacyModule,
+    EconomyModule,
     // Process-local, exactly as in the original application. That is correct
     // for the single-instance deployment and becomes N times weaker on any
     // scale-out: a known limitation, tracked rather than overlooked. A shared

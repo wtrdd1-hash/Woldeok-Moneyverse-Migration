@@ -1,6 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { Pool } from 'pg';
+import { databaseUrl, isMissingGrant, rejectionOf } from '../testing/database';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AdminRolesRepository } from './admin-roles.repository';
 import { SessionRepository } from './session.repository';
@@ -17,21 +16,6 @@ import { SessionRepository } from './session.repository';
  * machine has no local PostgreSQL. A skipped test is never reported as a
  * passing one.
  */
-function databaseUrl(): string | undefined {
-  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
-  // Convenience for local runs: packages/database/.env is gitignored and
-  // holds the scratch database's URL.
-  try {
-    const text = readFileSync(
-      join(__dirname, '../../../packages/database/.env'),
-      'utf8',
-    );
-    return /^DATABASE_URL=(.+)$/m.exec(text)?.[1]?.trim();
-  } catch {
-    return undefined;
-  }
-}
-
 const DATABASE_URL = databaseUrl();
 
 describe.skipIf(!DATABASE_URL)('against a real database', () => {

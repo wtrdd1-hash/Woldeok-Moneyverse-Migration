@@ -1,20 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { Pool } from 'pg';
+import { databaseUrl, isMissingGrant, rejectionOf } from '../testing/database';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PostgresShopRepository } from './shop.repository';
 import { ShopService } from './shop.service';
-
-function databaseUrl(): string | undefined {
-  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
-  try {
-    const text = readFileSync(join(__dirname, '../../../packages/database/.env'), 'utf8');
-    return /^DATABASE_URL=(.+)$/m.exec(text)?.[1]?.trim();
-  } catch {
-    return undefined;
-  }
-}
 
 const DATABASE_URL = databaseUrl();
 
@@ -60,6 +49,6 @@ describe.skipIf(!DATABASE_URL)('shop against a real database', () => {
         () => null,
         (caught: unknown) => caught,
       );
-    expect((error as { code?: string } | null)?.code).not.toBe('42501');
+    expect(isMissingGrant(error), 'the role lost a grant').toBe(false);
   });
 })

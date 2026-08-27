@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { Pool } from 'pg';
+import { databaseUrl, isMissingGrant, rejectionOf } from './testing/database';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { BusinessService } from './business/business.service';
 import { PostgresBusinessRepository } from './business/business.repository';
@@ -9,16 +8,6 @@ import { SeasonService } from './season/season.service';
 import { PostgresSeasonRepository } from './season/season.repository';
 import { StockService } from './stock/stock.service';
 import { PostgresStockRepository } from './stock/stock.repository';
-
-function databaseUrl(): string | undefined {
-  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
-  try {
-    const text = readFileSync(join(__dirname, '../../packages/database/.env'), 'utf8');
-    return /^DATABASE_URL=(.+)$/m.exec(text)?.[1]?.trim();
-  } catch {
-    return undefined;
-  }
-}
 
 const DATABASE_URL = databaseUrl();
 const UNKNOWN = '00000000-0000-4000-8000-000000000000';
@@ -192,11 +181,8 @@ describe.skipIf(!DATABASE_URL)('game modules against a real database', () => {
         }),
     ];
     for (const attempt of attempts) {
-      const error = await attempt().then(
-        () => null,
-        (caught: unknown) => caught,
-      );
-      expect((error as { code?: string } | null)?.code).not.toBe('42501');
+      const error = await rejectionOf(attempt);
+      expect(isMissingGrant(error), 'the role lost a grant').toBe(false);
     }
   });
 });
