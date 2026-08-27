@@ -3,10 +3,33 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-const ORIGINAL_ROOT = process.env.ORIGINAL_REPO ?? '/home/ruma/Woldeok-Moneyverse';
 const PORTED_ROOT = join(__dirname, '..');
 
-function digestsOf(directory: string): Map<string, string> {
+interface ProductionManifest {
+  readonly source: string;
+  readonly readAt: string;
+  readonly migrations: Record<string, string>;
+}
+
+/**
+ * The authoritative baseline is the production database, not a git checkout.
+ *
+ * The branch this repository was ported from did not contain 041, 042 or 043
+ * at all. An earlier version of this test compared the ported files against
+ * that same checkout, so it agreed with itself and reported a complete port
+ * while three migrations were missing — including one that redefines
+ * `grant_bootstrap_discord_administrator`, which the application calls.
+ *
+ * `production-checksums.json` was read from `public.schema_migrations` on the
+ * live production database. `migrate.sh` refuses to run a migration whose
+ * sha256 differs from the recorded one, so any mismatch here is a deployment
+ * that would fail, not a formatting difference.
+ */
+const MANIFEST = JSON.parse(
+  readFileSync(join(PORTED_ROOT, 'production-checksums.json'), 'utf8'),
+) as ProductionManifest;
+
+function portedDigests(directory: string): Map<string, string> {
   const digests = new Map<string, string>();
   for (const name of readdirSync(directory).sort()) {
     if (!name.endsWith('.sql') && !name.endsWith('.sh')) continue;
@@ -15,49 +38,43 @@ function digestsOf(directory: string): Map<string, string> {
   return digests;
 }
 
-function directoryExists(path: string): boolean {
-  try {
-    readdirSync(path);
-    return true;
-  } catch {
-    return false;
-  }
-}
+describe('migration parity with the production database', () => {
+  const ported = portedDigests(join(PORTED_ROOT, 'migrations'));
 
-describe('migration parity with the original repository', () => {
-  // 42, not 45: the numbering deliberately skips 041, 042 and 043. Numbers are
-  // never reused, so the gap is expected and must not be "fixed".
-  it('ports exactly 42 numbered migrations', () => {
-    expect(digestsOf(join(PORTED_ROOT, 'migrations')).size).toBe(42);
+  it('ports every migration production has applied', () => {
+    const missing = Object.keys(MANIFEST.migrations).filter((name) => !ported.has(name));
+    expect(missing, 'applied in production but absent here').toEqual([]);
   });
 
-  it('preserves the deliberate numbering gap at 041 through 043', () => {
-    const numbers = [...digestsOf(join(PORTED_ROOT, 'migrations')).keys()].map((name) =>
-      Number(name.slice(0, 3)),
-    );
-    expect(numbers).not.toContain(41);
-    expect(numbers).not.toContain(42);
-    expect(numbers).not.toContain(43);
-    expect(Math.max(...numbers)).toBe(46);
+  it('ports no migration production has never applied', () => {
+    const extra = [...ported.keys()].filter((name) => !(name in MANIFEST.migrations));
+    expect(extra, 'present here but never applied in production').toEqual([]);
+  });
+
+  it('reproduces every migration byte-for-byte', () => {
+    const mismatched = [...ported.entries()]
+      .filter(([name, digest]) => name in MANIFEST.migrations && MANIFEST.migrations[name] !== digest)
+      .map(([name]) => name);
+    expect(mismatched, 'same name, different bytes — migrate.sh would refuse these').toEqual([]);
+  });
+
+  it('carries the full contiguous range 002 through 046', () => {
+    const numbers = [...ported.keys()]
+      .filter((name) => name.endsWith('.sql'))
+      .map((name) => Number(name.slice(0, 3)))
+      .sort((a, b) => a - b);
+    // Numbers may repeat only if two files legitimately share one; production
+    // has none, so the sequence is exactly 2..46 with no gap and no duplicate.
+    const expected = Array.from({ length: 45 }, (_, index) => index + 2);
+    expect(numbers).toEqual(expected);
   });
 
   it('ports the two init scripts', () => {
-    expect([...digestsOf(join(PORTED_ROOT, 'init')).keys()]).toEqual([
+    expect([...portedDigests(join(PORTED_ROOT, 'init')).keys()]).toEqual([
       '000-create-app-role.sh',
       '001-economy-core.sql',
     ]);
   });
-
-  it.skipIf(!directoryExists(ORIGINAL_ROOT))(
-    'reproduces every original SQL file byte-for-byte',
-    () => {
-      for (const relative of ['init', 'migrations']) {
-        const original = digestsOf(join(ORIGINAL_ROOT, 'test/db', relative));
-        const ported = digestsOf(join(PORTED_ROOT, relative));
-        expect(ported).toEqual(original);
-      }
-    },
-  );
 
   // An unpinned SECURITY DEFINER function is a privilege-escalation
   // primitive: it runs as its owner with whatever search_path the caller

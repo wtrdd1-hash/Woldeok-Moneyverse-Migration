@@ -465,10 +465,18 @@ git commit -m "feat(contract): add the branded WldAmount money type"
 
 ### Task 3: Database package — migrations ported byte-for-byte
 
+> **Corrected during execution.** This task originally said 42 migrations with
+> a deliberate gap at 041–043, and its parity test compared the port against
+> the same git checkout it was copied from. Both were wrong. The production
+> database has 45 migrations with no gap; the branch simply never contained
+> 041, 042 and 043. Compare against `public.schema_migrations` on the live
+> database, captured as `production-checksums.json`, never against a checkout.
+
 **Files:**
 - Create: `packages/database/package.json`
 - Create: `packages/database/init/000-create-app-role.sh`, `packages/database/init/001-economy-core.sql`
-- Create: `packages/database/migrations/002-…-046-….sql` (42 files, copied)
+- Create: `packages/database/migrations/002-…-046-….sql` (45 files, copied)
+- Create: `packages/database/production-checksums.json`
 - Create: `packages/database/migrate.sh`, `packages/database/ci-apply.sh`
 - Create: `packages/database/compose.yml`, `packages/database/.env.example`, `packages/database/README.md`
 - Create: `packages/database/prisma/schema.prisma`
