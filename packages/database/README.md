@@ -79,13 +79,25 @@ reintroducing one is a deliberate act rather than an accident.
 
 ## Local development
 
-Requires a container runtime, which the current development machine does not
-have. Where one is available:
+The development machine has no container runtime. Two ways to get a database:
+
+**A container elsewhere.** Build one from `init/` plus `migrations/` and reach
+it over an SSH tunnel:
+
+```bash
+ssh -N -L 15439:127.0.0.1:5439 <host> &
+printf 'DATABASE_URL=postgresql://moneyverse_app:...@127.0.0.1:15439/<db>\n' > .env
+```
+
+`.env` is gitignored. Point it at a scratch database, never at production.
+
+**Locally, where a runtime exists:**
 
 ```bash
 cp .env.example .env      # set real passwords
 docker compose -f compose.yml up -d
 ```
 
-Without one, database-backed tests skip locally and run in CI, which has a
-PostgreSQL service. A skipped test is never reported as a passing one.
+Database-backed tests skip without `DATABASE_URL` rather than failing, and
+also run in CI, which has a PostgreSQL service. A skipped test is never
+reported as a passing one.
