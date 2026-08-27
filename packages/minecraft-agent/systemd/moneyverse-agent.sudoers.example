@@ -1,0 +1,12 @@
+# Install after replacing minecraft-server.service with the exact service name
+# used in /etc/woldeok-minecraft-agent.env. Do not use wildcards here.
+# Validate with: visudo -cf /etc/sudoers.d/moneyverse-minecraft-agent
+
+Cmnd_Alias MINECRAFT_CONTROL = \
+  /usr/bin/systemctl show --no-pager --property=LoadState --property=ActiveState --property=SubState --property=MainPID --property=ActiveEnterTimestamp minecraft-server.service, \
+  /usr/bin/systemctl start minecraft-server.service, \
+  /usr/bin/systemctl stop minecraft-server.service, \
+  /usr/bin/systemctl restart minecraft-server.service, \
+  /usr/bin/journalctl --no-pager --output=short-iso -n 200 -u minecraft-server.service
+
+moneyverse-agent ALL=(root) NOPASSWD: MINECRAFT_CONTROL

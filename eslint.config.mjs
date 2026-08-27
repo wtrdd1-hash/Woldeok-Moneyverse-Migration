@@ -18,6 +18,12 @@ export default tseslint.config(
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
+      // A timer handle and the callback that clears it refer to each other:
+      // the callback has to be defined before the timer that calls it, and
+      // the timer's handle has to exist for the callback to clear. Declaring
+      // the handle first and assigning it once is the only order that works,
+      // and rewriting it to satisfy the rule would obscure why.
+      'prefer-const': ['error', { ignoreReadBeforeAssign: true }],
     },
   },
   {

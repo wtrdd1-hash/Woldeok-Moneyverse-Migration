@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import type { MinecraftResultSummary } from './approved-operation.repository';
 import {
@@ -219,7 +218,6 @@ function resolveRepository(repository: unknown): MinecraftApprovedOperationRepos
  * by the session or verified interaction boundary; DTOs cannot choose another
  * requester and cannot contain a host, URL, command, or agent request.
  */
-@Injectable()
 export class MinecraftApprovedOperationService {
   readonly repository: MinecraftApprovedOperationRepositoryLike;
 

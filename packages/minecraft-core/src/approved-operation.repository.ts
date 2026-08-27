@@ -1,6 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import type { Queryable } from '../core/db';
-import { queryOne } from '../core/db';
+import type { Queryable } from './db';
+import { queryOne } from './db';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const AGENT_REQUEST_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
@@ -300,7 +299,6 @@ export interface CompleteApprovedOperationRow {
  * Narrow gateway for web-facing request/read use cases.  It has no query that
  * mentions a Minecraft table, host, endpoint, URL, or arbitrary command.
  */
-@Injectable()
 export class PostgresMinecraftApprovedOperationRepository {
   readonly pool: Queryable;
 

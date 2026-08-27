@@ -25,8 +25,8 @@ import { isExpectedCommandFailure } from '../core/pg-error';
 import {
   MINECRAFT_APPROVED_OPERATIONS,
   MinecraftApprovedOperationInputError,
-} from './approved-operation.repository';
-import { MinecraftApprovedOperationService } from './approved-operation.service';
+} from '@moneyverse/minecraft-core';
+import { MinecraftApprovedOperationService } from '@moneyverse/minecraft-core';
 
 export class RequestOperationDto {
   @ApiProperty({ enum: MINECRAFT_APPROVED_OPERATIONS })

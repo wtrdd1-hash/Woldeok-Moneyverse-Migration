@@ -1,0 +1,30 @@
+[Unit]
+Description=Woldeok Moneyverse restricted Minecraft control agent
+After=network.target
+
+[Service]
+Type=simple
+User=moneyverse-agent
+Group=moneyverse-agent
+WorkingDirectory=/opt/woldeok-minecraft-agent
+EnvironmentFile=/etc/woldeok-minecraft-agent.env
+ExecStart=/usr/bin/node /opt/woldeok-minecraft-agent/dist/src/server.js
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=35
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

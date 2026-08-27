@@ -103,3 +103,28 @@ APP_BASE_URL=https://migration.easy-scraping.com \
 ```
 
 `docker compose ps`, `logs`, and `exec` all work from that directory.
+
+## The Minecraft sidecars
+
+`packages/minecraft-agent` and `packages/minecraft-executor` are **not** part
+of this stack and never will be. They are systemd units on the machine the
+Minecraft server actually runs on:
+
+```
+operator → two-person approval → PostgreSQL approved record
+                                        │
+                                        ▼
+                    minecraft-executor (that host's systemd)
+                                        │  fixed operation only
+                                        ▼
+                    minecraft-agent on 127.0.0.1 → systemctl
+```
+
+The agent calls `systemctl` and `journalctl` behind a sudoers allowlist and
+binds loopback only. Inside a container, `127.0.0.1` is the container — not
+the Minecraft host — so running either here would reach nothing, which is why
+their own READMEs say not to. Each package carries its unit file and, for the
+agent, its sudoers example.
+
+The web tier requests an operation and shows its receipt; it never calls the
+agent and holds no credential that could.

@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
-import { PostgresMinecraftApprovedOperationRepository } from './approved-operation.repository';
-import { MinecraftApprovedOperationService } from './approved-operation.service';
+import { PostgresMinecraftApprovedOperationRepository } from '@moneyverse/minecraft-core';
+import { MinecraftApprovedOperationService } from '@moneyverse/minecraft-core';
 import { MinecraftController } from './minecraft.controller';
 
 @Module({
