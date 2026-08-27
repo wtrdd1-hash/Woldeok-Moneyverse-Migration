@@ -1,10 +1,11 @@
 import 'reflect-metadata';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { loadConfig } from './core/config';
 import { ProblemFilter } from './core/problem.filter';
+import { mountOpenApi } from './openapi';
 import { applyServerTimeouts } from './server-timeouts';
 
 async function bootstrap(): Promise<void> {
@@ -28,6 +29,12 @@ async function bootstrap(): Promise<void> {
     }),
   );
   app.useGlobalFilters(new ProblemFilter(config.production));
+
+  // /health keeps the short path a container probe has always used; every
+  // other route lives under /api/v{n}.
+  app.setGlobalPrefix('api', { exclude: ['health'] });
+  app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
+  mountOpenApi(app, config.production);
 
   applyServerTimeouts(app.getHttpServer());
 

@@ -3248,7 +3248,25 @@ In `backend/src/main.ts`, after the global filter and before `applyServerTimeout
   mountOpenApi(app, config.production);
 ```
 
-Import `VersioningType` from `@nestjs/common` and `mountOpenApi` from `./openapi`. `/health` is excluded from the prefix so a container probe keeps the short path it has always had.
+Import `VersioningType` from `@nestjs/common` and `mountOpenApi` from `./openapi`.
+
+**Excluding `/health` from the global prefix is not enough.** URI versioning applies independently, so the route lands at `/v1/health` and the bare `/health` a container probe uses returns 404 — which reads as a dead service. The controller must also be version neutral:
+
+```ts
+import { Controller, Get, VERSION_NEUTRAL, Version } from '@nestjs/common';
+
+@Controller({ path: 'health', version: VERSION_NEUTRAL })
+export class HealthController {
+  @Get()
+  @Version(VERSION_NEUTRAL)
+  @ApiOperation({ summary: 'Liveness probe' })
+  check(): { status: 'ok' } {
+    return { status: 'ok' };
+  }
+}
+```
+
+Verify against a running server rather than by reading the config — probe `/health`, `/v1/health` and `/api/v1/health` and confirm only the first answers 200.
 
 Update the health test expectation in `backend/src/openapi.test.ts` only if the path in the generated document changes — run the test and read the actual document rather than guessing which form the exclusion produces.
 
