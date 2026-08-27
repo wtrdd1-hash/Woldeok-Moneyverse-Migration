@@ -1504,7 +1504,7 @@ describe('randomToken', () => {
 
 describe('pkceChallenge', () => {
   it('is the base64url SHA-256 of the verifier', () => {
-    expect(pkceChallenge('verifier')).toBe('OK6ofX_2h9L4qFcxYNTU7Ae4NNhO_2ZgqjnQCkVtCFo');
+    expect(pkceChallenge('verifier')).toBe('iMnq5o6zALKXGivsnlom_0F5_WYda32GHkxlV7mq7hQ');
   });
 });
 
@@ -1625,7 +1625,7 @@ export function authorizationUrl(
 - [ ] **Step 4: Run the crypto test to verify it passes**
 
 Run: `pnpm --filter @moneyverse/backend test src/auth/crypto.test.ts`
-Expected: PASS — 8 tests.
+Expected: PASS — 12 tests.
 
 - [ ] **Step 5: Write the failing session repository test**
 
