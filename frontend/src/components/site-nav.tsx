@@ -2,123 +2,162 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { LogOut, Menu } from 'lucide-react';
+import { logout } from '@/app/actions';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import { cn } from '@/lib/cn';
+import type { NavEntry } from '@/lib/navigation';
+import { ADMIN_NAV, MEMBER_NAV, PUBLIC_NAV, isCurrent } from '@/lib/navigation';
+import { useViewer } from '@/lib/use-viewer';
+import type { Viewer } from '@/lib/viewer-state';
 
 /**
- * A ledger's index tabs on desktop, a bottom bar on mobile.
+ * The application's index tabs.
  *
- * It lives in the root layout so navigating between pages never remounts it —
- * that is most of what makes the app feel immediate, alongside the prefetch
- * `<Link>` does on its own.
+ * A rail on desktop and a Sheet behind one control on a phone, which is the
+ * shape the original had — a `<details>` hamburger — expressed with the
+ * registry's own drawer so it traps focus and closes on Escape without this
+ * file re-implementing either.
+ *
+ * It lives in the root layout, so moving between pages never remounts it.
+ * That, plus the prefetch `<Link>` does on its own, is most of what makes
+ * navigation feel immediate — the reason this application is on Next at all.
+ *
+ * The viewer arrives after hydration rather than from the server: see
+ * `SiteShell`. Until it does, the member and administrator groups are absent
+ * and the session control is a placeholder of its final size, so nothing on
+ * the page moves when the answer lands.
  */
 
-interface Entry {
-  readonly href: string;
-  readonly label: string;
-  /** Shown in the mobile bar, which has room for far fewer. */
-  readonly primary?: boolean;
-}
-
-const PUBLIC: readonly Entry[] = [
-  { href: '/', label: '홈', primary: true },
-  { href: '/announcements', label: '공지' },
-  { href: '/gallery', label: '갤러리' },
-  { href: '/status', label: '서버 상태' },
-];
-
-const MEMBER: readonly Entry[] = [
-  { href: '/wallet', label: '내 지갑', primary: true },
-  { href: '/shop', label: '상점', primary: true },
-  { href: '/stocks', label: '주식' },
-  { href: '/businesses', label: '사업' },
-  { href: '/seasons', label: '시즌' },
-  { href: '/board', label: '게시판', primary: true },
-  { href: '/account', label: '계정' },
-];
-
-function isCurrent(pathname: string, href: string): boolean {
-  return href === '/' ? pathname === '/' : pathname.startsWith(href);
+interface NavGroup {
+  readonly title: string;
+  readonly entries: readonly NavEntry[];
 }
 
 export function SiteNav() {
   const pathname = usePathname();
+  const viewer = useViewer();
+
+  const groups: NavGroup[] = [{ title: '공개', entries: PUBLIC_NAV }];
+  if (viewer?.signedIn) groups.push({ title: '회원', entries: MEMBER_NAV });
+  if (viewer && viewer.consentCurrent && viewer.adminRoles.length > 0) {
+    groups.push({ title: '운영', entries: ADMIN_NAV });
+  }
 
   return (
     <>
+      <div className="sticky top-0 z-40 flex items-center justify-between gap-2 border-b bg-card px-3 py-2 md:hidden">
+        <Brand />
+        <div className="flex items-center gap-1">
+          <SessionAction viewer={viewer} compact />
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="size-11" aria-label="메뉴 열기">
+                <Menu />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-72 gap-0">
+              <SheetHeader>
+                <SheetTitle>메뉴</SheetTitle>
+              </SheetHeader>
+              <nav aria-label="주요 메뉴" className="grid gap-4 overflow-y-auto px-3 pb-6">
+                {groups.map((group) => (
+                  <Group key={group.title} group={group} pathname={pathname} />
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
+
       <nav
         aria-label="주요 메뉴"
-        className="sticky top-0 hidden h-dvh flex-col gap-6 border-r border-[var(--border)] px-4 py-6 md:flex"
+        className="sticky top-0 hidden h-dvh flex-col gap-4 overflow-y-auto border-r bg-card px-3 py-5 md:flex"
       >
-        <Link href="/" className="font-[family-name:var(--font-display)] text-lg font-bold">
-          월덕 머니버스
-        </Link>
-
-        <Group title="공개" entries={PUBLIC} pathname={pathname} />
-        <Group title="회원" entries={MEMBER} pathname={pathname} />
-      </nav>
-
-      {/* Only the primary entries fit a phone; the rest stay reachable from the
-          pages themselves rather than being crushed into an unusable row. */}
-      <nav
-        aria-label="주요 메뉴"
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-4 border-t border-[var(--border)] bg-[var(--card)] md:hidden"
-      >
-        {[...PUBLIC, ...MEMBER]
-          .filter((entry) => entry.primary)
-          .map((entry) => (
-            <Link
-              key={entry.href}
-              href={entry.href}
-              aria-current={isCurrent(pathname, entry.href) ? 'page' : undefined}
-              // 44px is the minimum comfortable tap target; the original had a
-              // control that missed it and it was raised for the same reason.
-              className={cn(
-                'flex min-h-[44px] items-center justify-center px-2 py-3 text-sm',
-                isCurrent(pathname, entry.href)
-                  ? 'text-[var(--primary)] font-medium'
-                  : 'text-[var(--muted)]',
-              )}
-            >
-              {entry.label}
-            </Link>
-          ))}
+        <Brand />
+        <Separator />
+        {groups.map((group) => (
+          <Group key={group.title} group={group} pathname={pathname} />
+        ))}
+        <div className="mt-auto pt-2">
+          <SessionAction viewer={viewer} />
+        </div>
       </nav>
     </>
   );
 }
 
-function Group({
-  title,
-  entries,
-  pathname,
-}: {
-  readonly title: string;
-  readonly entries: readonly Entry[];
-  readonly pathname: string;
-}) {
+function Brand() {
   return (
-    <div className="grid gap-1">
-      <h2 className="px-2 text-xs font-medium uppercase tracking-wide text-[var(--muted)]">
-        {title}
+    <Link href="/" className="px-1 font-[family-name:var(--font-display)] text-lg font-bold">
+      월덕 <span className="text-primary">머니버스</span>
+    </Link>
+  );
+}
+
+function Group({ group, pathname }: { readonly group: NavGroup; readonly pathname: string }) {
+  return (
+    <div className="grid gap-0.5">
+      <h2 className="px-2 pb-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {group.title}
       </h2>
-      {entries.map((entry) => {
+      {group.entries.map((entry) => {
         const current = isCurrent(pathname, entry.href);
         return (
-          <Link
+          <Button
             key={entry.href}
-            href={entry.href}
-            aria-current={current ? 'page' : undefined}
-            className={cn(
-              'flex min-h-[44px] items-center rounded-[var(--radius-plate)] px-2 text-sm',
-              current
-                ? 'bg-[var(--background)] font-medium text-[var(--foreground)]'
-                : 'text-[var(--muted)] hover:text-[var(--foreground)]',
-            )}
+            asChild
+            variant={current ? 'secondary' : 'ghost'}
+            // 44px is the minimum comfortable tap target, and the registry's
+            // default control is shorter than that.
+            className={cn('h-11 justify-start', !current && 'text-muted-foreground')}
           >
-            {entry.label}
-          </Link>
+            <Link href={entry.href} aria-current={current ? 'page' : undefined}>
+              {entry.label}
+            </Link>
+          </Button>
         );
       })}
     </div>
+  );
+}
+
+function SessionAction({
+  viewer,
+  compact = false,
+}: {
+  readonly viewer: Viewer | null;
+  readonly compact?: boolean;
+}) {
+  if (!viewer) return <Skeleton className={cn('h-11', compact ? 'w-20' : 'w-full')} />;
+
+  if (!viewer.signedIn) {
+    return (
+      <Button asChild className={cn('h-11', compact ? 'px-4' : 'w-full')}>
+        <Link href="/login">로그인</Link>
+      </Button>
+    );
+  }
+
+  return (
+    <form action={logout} className={compact ? undefined : 'w-full'}>
+      <Button
+        type="submit"
+        variant="ghost"
+        className={cn('h-11 text-muted-foreground', compact ? 'px-3' : 'w-full justify-start')}
+      >
+        <LogOut />
+        <span className={compact ? 'sr-only' : undefined}>로그아웃</span>
+      </Button>
+    </form>
   );
 }

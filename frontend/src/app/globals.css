@@ -208,6 +208,96 @@
     font-feature-settings: 'tnum' 1;
   }
 
+  /*
+   * The two policy documents.
+   *
+   * Long-form prose is the one thing on this site the registry has no
+   * component for — Card and Table describe an application's controls, and a
+   * legal document is a document. Scoped so it can never leak onto a page
+   * that isn't one.
+   */
+  .policy-document section {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .policy-document h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
+
+  .policy-document h3 {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .policy-document p,
+  .policy-document li {
+    font-size: 0.875rem;
+    max-width: 68ch;
+  }
+
+  .policy-document ol,
+  .policy-document ul {
+    display: grid;
+    gap: 0.5rem;
+    padding-left: 1.25rem;
+  }
+
+  .policy-document ol {
+    list-style: decimal;
+  }
+
+  .policy-document ul {
+    list-style: disc;
+  }
+
+  .policy-document a {
+    color: var(--primary);
+    text-underline-offset: 3px;
+    text-decoration-line: underline;
+  }
+
+  .policy-document dt {
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+  }
+
+  .policy-document strong {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  /* The table scrolls inside its own container so the page body never does. */
+  .policy-document table {
+    border-collapse: collapse;
+    font-size: 0.8125rem;
+    min-width: 40rem;
+    width: 100%;
+  }
+
+  .policy-document th,
+  .policy-document td {
+    border-bottom: 1px solid var(--border);
+    padding: 0.625rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .policy-document thead th {
+    background: var(--muted);
+    font-weight: 600;
+  }
+
+  .policy-document tbody th {
+    color: var(--muted-foreground);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
   /* Anyone who has asked not to see motion sees the settled state instead. */
   @media (prefers-reduced-motion: reduce) {
     *,

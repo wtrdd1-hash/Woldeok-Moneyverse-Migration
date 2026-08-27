@@ -11,11 +11,17 @@ import { useTheme } from "next-themes"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  // next-themes types this as `string | undefined`, and under this
+  // workspace's exactOptionalPropertyTypes an explicit undefined cannot be
+  // handed to an optional prop. Narrowing to the three values Sonner accepts
+  // keeps the setting on for the code we write.
+  const { theme } = useTheme()
+  const resolved: ToasterProps["theme"] =
+    theme === "light" || theme === "dark" ? theme : "system"
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme={resolved}
       className="toaster group"
       icons={{
         success: <CircleCheckIcon className="size-4" />,

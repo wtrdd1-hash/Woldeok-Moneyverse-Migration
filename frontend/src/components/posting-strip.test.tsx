@@ -4,7 +4,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 // Without this each render stacks onto the previous one's DOM, and a query
 // finds an element an earlier test left behind rather than the one under test.
 afterEach(cleanup);
-import { Amount, PostingStrip } from './posting-strip';
+import { Amount } from './amount';
+import { PostingStrip } from './posting-strip';
 
 describe('Amount', () => {
   it('groups thousands', () => {

@@ -132,6 +132,56 @@ export async function publicApi<T>(path: string, revalidate: number): Promise<T 
   }
 }
 
+/**
+ * The same request as `api`, with the response's `set-cookie` handed back
+ * instead of dropped.
+ *
+ * Only the auth routes need this: they are the ones that issue or clear the
+ * session, and a server action has to relay that header to the browser itself
+ * because the API's response never reaches it directly.
+ */
+export async function apiWithCookie<T>(
+  path: string,
+  request: ApiRequest = {},
+): Promise<{ readonly payload: T; readonly setCookie: readonly string[] }> {
+  const { method = 'GET', body, csrfToken } = request;
+
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((entry) => `${entry.name}=${encodeURIComponent(entry.value)}`)
+    .join('; ');
+
+  const requestHeaders: Record<string, string> = {
+    'x-internal-token': internalToken(),
+    accept: 'application/json',
+  };
+  if (cookieHeader) requestHeaders.cookie = cookieHeader;
+  if (body !== undefined) requestHeaders['content-type'] = 'application/json';
+  if (csrfToken) requestHeaders['x-csrf-token'] = csrfToken;
+
+  const incoming = await headers();
+  const forwardedFor = incoming.get('x-forwarded-for');
+  if (forwardedFor) requestHeaders['x-forwarded-for'] = forwardedFor;
+
+  const response = await fetch(`${API_ORIGIN}${path}`, {
+    method,
+    headers: requestHeaders,
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    cache: 'no-store',
+  });
+
+  const text = await response.text();
+  const payload: unknown = text ? JSON.parse(text) : null;
+
+  if (!response.ok) {
+    const problem = payload as ProblemDocument | null;
+    throw new ApiError(response.status, problem?.detail ?? problem?.title);
+  }
+
+  return { payload: payload as T, setCookie: response.headers.getSetCookie() };
+}
+
 /** Per-caller, and forgiving. Use `publicApi` for anything a crawler sees. */
 export async function apiOrNull<T>(path: string, request: ApiRequest = {}): Promise<T | null> {
   try {

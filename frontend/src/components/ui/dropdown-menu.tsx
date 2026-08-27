@@ -95,7 +95,13 @@ function DropdownMenuCheckboxItem({
         "relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
-      checked={checked}
+      // Spread conditionally rather than passed as `checked={checked}`: this
+      // workspace compiles with exactOptionalPropertyTypes, under which an
+      // explicit `undefined` is not the same as an absent prop, and the
+      // registry's components are not written against that setting. Radix
+      // treats the absent prop as uncontrolled, which is what an undefined
+      // `checked` was always meant to mean.
+      {...(checked === undefined ? {} : { checked })}
       {...props}
     >
       <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">

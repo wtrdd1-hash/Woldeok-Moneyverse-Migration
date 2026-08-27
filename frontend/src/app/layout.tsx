@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Hahmlet, IBM_Plex_Mono, IBM_Plex_Sans_KR } from 'next/font/google';
-import { SiteNav } from '@/components/site-nav';
+import { SiteShell } from '@/components/site-shell';
+import { Toaster } from '@/components/ui/sonner';
 import './globals.css';
 
 /**
@@ -55,16 +56,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             page. */}
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-[var(--card)] focus:px-4 focus:py-2"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-card focus:px-4 focus:py-2"
         >
           본문으로 건너뛰기
         </a>
-        <div className="min-h-dvh md:grid md:grid-cols-[13rem_1fr]">
-          <SiteNav />
-          <main id="main" className="mx-auto w-full max-w-3xl px-4 pb-24 pt-6 md:pb-10">
-            {children}
-          </main>
-        </div>
+        <SiteShell>{children}</SiteShell>
+        <Toaster />
       </body>
     </html>
   );

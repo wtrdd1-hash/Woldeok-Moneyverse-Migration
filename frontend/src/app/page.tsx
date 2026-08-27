@@ -1,7 +1,19 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Plate, PlateTitle } from '@/components/ui/plate';
+import { ArrowRight } from 'lucide-react';
+import { EmptyState } from '@/components/empty-state';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
+import { formatDay } from '@/lib/money';
 import { STATUS_LABEL, asStatusState } from '@/lib/status';
 
 /**
@@ -18,10 +30,10 @@ export const metadata: Metadata = {
 };
 
 interface Announcement {
-  readonly id: string;
+  readonly announcementId: string;
   readonly title: string;
   readonly body: string;
-  readonly publishedAt: string;
+  readonly publishedAt: string | null;
 }
 
 interface StatusRow {
@@ -29,13 +41,6 @@ interface StatusRow {
   readonly displayName: string;
   readonly state: string;
   readonly detail: string | null;
-}
-
-function noticeDate(value: string): string {
-  const date = new Date(value);
-  return Number.isNaN(date.valueOf())
-    ? '최근 게시'
-    : new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric' }).format(date);
 }
 
 export default async function HomePage() {
@@ -51,70 +56,74 @@ export default async function HomePage() {
   const minecraft = status?.status.find((row) => row.sourceKey === 'minecraft');
 
   return (
-    <div className="grid gap-6">
-      <section aria-labelledby="hero-title" className="grid gap-4 pt-4">
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--muted)]">
+    <div className="grid gap-8">
+      <section aria-labelledby="hero-title" className="grid gap-4">
+        <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
           Woldeok Moneyverse
         </p>
         <h1 id="hero-title" className="text-3xl font-bold sm:text-4xl">
           우리가 함께 만드는
           <br />
-          <em className="not-italic text-[var(--primary)]">작고 단단한 경제.</em>
+          <em className="not-italic text-primary">작고 단단한 경제.</em>
         </h1>
-        <p className="max-w-prose text-[var(--muted)]">
+        <p className="max-w-prose text-muted-foreground">
           월덕 머니버스는 Discord와 마인크래프트를 잇는 커뮤니티 장부입니다. 활동은 기록으로
           남고, 로그인 후 실제 잔액과 이용 기록을 확인할 수 있어요.
         </p>
 
         <div className="flex flex-wrap gap-3">
-          <Link
-            href="/login"
-            className="flex min-h-[44px] items-center rounded-[var(--radius-plate)] bg-[var(--primary)] px-4 text-sm font-medium text-[var(--color-plate)]"
-          >
-            Discord · Google로 시작하기 →
-          </Link>
-          <Link
-            href="/announcements"
-            className="flex min-h-[44px] items-center rounded-[var(--radius-plate)] border border-[var(--border)] px-4 text-sm"
-          >
-            알아보기 →
-          </Link>
+          <Button asChild className="min-h-11">
+            <Link href="/login">
+              Discord · Google로 시작하기
+              <ArrowRight />
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="min-h-11">
+            <Link href="/announcements">알아보기</Link>
+          </Button>
         </div>
 
-        <p className="max-w-prose text-xs text-[var(--muted)]">
+        <p className="max-w-prose text-xs text-muted-foreground">
           모든 WLD와 보상은 게임 안에서만 사용하는 가상 데이터이며, 현금 거래나 환전 기능은
           제공하지 않습니다.
         </p>
       </section>
 
-      <Plate aria-labelledby="status-panel-title">
-        <PlateTitle hint={<Link href="/status">전체 보기 →</Link>}>
-          <span id="status-panel-title">오늘의 현황</span>
-        </PlateTitle>
-        <dl className="grid gap-3">
-          <Row
-            term={minecraft?.displayName ?? '마인크래프트 서버'}
-            detail={minecraft?.detail ?? '신뢰된 상태 기록을 확인해요.'}
-            // An absent status reads as 확인 중, never as 정상: an unreachable
-            // source and a healthy one are different facts.
-            value={STATUS_LABEL[asStatusState(minecraft?.state)]}
-            href="/status"
-          />
-          <Row
-            term="내 지갑"
-            detail="원장 기준의 실제 잔액과 기록"
-            value="로그인 후 확인"
-            href="/wallet"
-          />
-        </dl>
-      </Plate>
+      <Card>
+        <CardHeader>
+          <CardTitle>오늘의 현황</CardTitle>
+          <CardAction>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/status">전체 보기 →</Link>
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <dl className="grid gap-3">
+            <Row
+              term={minecraft?.displayName ?? '마인크래프트 서버'}
+              detail={minecraft?.detail ?? '신뢰된 상태 기록을 확인해요.'}
+              // An absent status reads as 확인 중, never as 정상: an unreachable
+              // source and a healthy one are different facts.
+              value={STATUS_LABEL[asStatusState(minecraft?.state)]}
+              href="/status"
+            />
+            <Row
+              term="내 지갑"
+              detail="원장 기준의 실제 잔액과 기록"
+              value="로그인 후 확인"
+              href="/wallet"
+            />
+          </dl>
+        </CardContent>
+      </Card>
 
       <section aria-labelledby="home-updates-title" className="grid gap-3">
-        <div className="flex items-baseline justify-between">
+        <div className="flex items-baseline justify-between gap-3">
           <h2 id="home-updates-title" className="text-lg font-medium">
             월간 소식
           </h2>
-          <Link href="/announcements" className="text-sm text-[var(--muted)]">
+          <Link href="/announcements" className="text-sm text-muted-foreground">
             전체 보기 →
           </Link>
         </div>
@@ -122,38 +131,43 @@ export default async function HomePage() {
         {notices.length > 0 ? (
           <div className="grid gap-3">
             {notices.map((notice) => (
-              <Plate as="article" key={notice.id}>
-                <time dateTime={notice.publishedAt} className="text-xs text-[var(--muted)]">
-                  {noticeDate(notice.publishedAt)}
-                </time>
-                <h3 className="mt-1 text-base font-medium">{notice.title}</h3>
-                <p className="mt-1 line-clamp-3 text-sm text-[var(--muted)]">{notice.body}</p>
-              </Plate>
+              <Card key={notice.announcementId} className="gap-3 py-4">
+                <CardHeader>
+                  {notice.publishedAt && (
+                    <time
+                      dateTime={notice.publishedAt}
+                      className="text-xs text-muted-foreground"
+                    >
+                      {formatDay(notice.publishedAt, '최근 게시')}
+                    </time>
+                  )}
+                  <CardTitle className="text-base">{notice.title}</CardTitle>
+                  <CardDescription className="line-clamp-3">{notice.body}</CardDescription>
+                </CardHeader>
+              </Card>
             ))}
           </div>
         ) : (
-          <Plate>
-            <h3 className="text-base font-medium">공개된 운영 소식을 준비하고 있어요.</h3>
-            <p className="mt-1 text-sm text-[var(--muted)]">
-              검토를 마친 공지부터 이곳에 표시됩니다.
-            </p>
-          </Plate>
+          <EmptyState
+            title="공개된 운영 소식을 준비하고 있어요."
+            description="검토를 마친 공지부터 이곳에 표시됩니다."
+          />
         )}
       </section>
 
-      <Plate aria-labelledby="community-title">
-        <PlateTitle>
-          <span id="community-title">가볍게 인사하고, 함께 이어 가요.</span>
-        </PlateTitle>
-        <p className="text-sm text-[var(--muted)]">
-          머니버스 로비는 지금 접속한 사람들과 짧게 인사하는 공간입니다. 개인정보나 계정
-          정보는 남기지 말아 주세요.
-        </p>
-        <div className="mt-3 grid gap-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>가볍게 인사하고, 함께 이어 가요.</CardTitle>
+          <CardDescription>
+            머니버스 로비는 지금 접속한 사람들과 짧게 인사하는 공간입니다. 개인정보나 계정
+            정보는 남기지 말아 주세요.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-1">
           <PolicyLink href="/terms" title="커뮤니티 이용 규칙" detail="서로 존중하는 대화 기준" />
           <PolicyLink href="/privacy" title="개인정보 안내" detail="수집 정보와 이용자 권리" />
-        </div>
-      </Plate>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -170,14 +184,18 @@ function Row({
   readonly href: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-3 last:border-b-0 last:pb-0">
+    <div className="flex items-center justify-between gap-3 border-b pb-3 last:border-b-0 last:pb-0">
       <div>
         <dt className="text-sm font-medium">{term}</dt>
-        <dd className="text-xs text-[var(--muted)]">{detail}</dd>
+        <dd className="text-xs text-muted-foreground">{detail}</dd>
       </div>
-      <Link href={href} className="shrink-0 text-sm text-[var(--primary)]">
-        {value}
-      </Link>
+      <dd className="shrink-0">
+        <Link href={href}>
+          <Badge variant="outline" className="font-normal">
+            {value}
+          </Badge>
+        </Link>
+      </dd>
     </div>
   );
 }
@@ -192,12 +210,14 @@ function PolicyLink({
   readonly detail: string;
 }) {
   return (
-    <Link href={href} className="flex min-h-[44px] items-center justify-between gap-3 text-sm">
-      <span>
-        <b className="font-medium">{title}</b>
-        <span className="block text-xs text-[var(--muted)]">{detail}</span>
-      </span>
-      <span aria-hidden>↗</span>
-    </Link>
+    <Button asChild variant="ghost" className="h-auto min-h-11 justify-between px-2 py-2">
+      <Link href={href}>
+        <span className="text-left">
+          <span className="block font-medium">{title}</span>
+          <span className="block text-xs font-normal text-muted-foreground">{detail}</span>
+        </span>
+        <ArrowRight className="text-muted-foreground" />
+      </Link>
+    </Button>
   );
 }
