@@ -31,7 +31,7 @@
 ### Task 1: Workspace skeleton and tooling
 
 **Files:**
-- Create: `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `eslint.config.js`, `.prettierrc.json`, `.editorconfig`, `.npmrc`, `.nvmrc`
+- Create: `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `eslint.config.mjs`, `.prettierrc.json`, `.editorconfig`, `.npmrc`, `.nvmrc`
 - Create: `.github/workflows/ci.yml`
 
 **Interfaces:**
@@ -145,7 +145,7 @@ trim_trailing_whitespace = false
 
 - [ ] **Step 3: Create the ESLint flat configuration**
 
-`eslint.config.js`:
+`eslint.config.mjs`:
 
 ```js
 import js from '@eslint/js';
@@ -157,14 +157,29 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     rules: {
+      // The original repository finished its TypeScript migration with zero
+      // bare `any`. This project starts from that baseline, so it is an error.
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
     },
+  },
+  {
+    // The backend compiles with emitDecoratorMetadata, and Nest resolves
+    // constructor dependencies from the design:paramtypes that metadata
+    // emits. A class named only in a constructor parameter position therefore
+    // looks type-only to this rule while actually being needed at runtime:
+    // rewriting such an import to `import type` erases the metadata and
+    // breaks dependency injection with no compile error and no lint warning.
+    // backend/src/auth/auth.module.test.ts is what catches that regression.
+    files: ['backend/**/*.ts'],
+    rules: { '@typescript-eslint/consistent-type-imports': 'off' },
   },
 );
 ```
 
 `no-explicit-any` is an error, not a warning: the original repository finished its TypeScript migration with zero bare `any` and this project starts from that baseline.
+
+The `consistent-type-imports` exemption for the backend is not a style preference. `@typescript-eslint` cannot see that `emitDecoratorMetadata` needs an import at runtime, so it reports a Nest dependency as type-only and its autofix silently breaks injection. Keep the rule on everywhere else.
 
 - [ ] **Step 4: Install and verify the toolchain runs**
 
@@ -234,22 +249,20 @@ jobs:
           DATABASE_URL: postgresql://moneyverse_app:ci_app_password@localhost:5432/woldeok_moneyverse_ci
         run: pnpm test
 
-      - name: Reject prisma migrate
-        run: |
-          if grep -rn --include='*.json' --include='*.ts' --include='*.yml' \
-               --include='*.sh' 'prisma migrate' . \
-               --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=docs; then
-            echo 'prisma migrate must never run: the numbered SQL files own the schema' >&2
-            exit 1
-          fi
+      # Prisma introspects the schema; it never owns it. The guard lives in a
+      # script so it cannot match its own source.
+      - name: Reject Prisma schema mutation
+        run: scripts/reject-prisma-migrate.sh
 ```
 
-The development machine has no container runtime and no PostgreSQL server, so CI is where database-backed tests actually execute. `packages/database/ci-apply.sh` is written in Task 3; until then this step fails, which is correct — CI is not expected to be green until Task 3 lands.
+The development machine has no container runtime and no PostgreSQL server, so CI is where database-backed tests actually execute.
+
+`scripts/reject-prisma-migrate.sh` assembles the forbidden phrase at runtime instead of spelling it out. Writing the check inline in the workflow made it match its own source three times and fail on every run. Verify the guard both ways — it must exit 1 when a violation is planted and 0 once it is removed — because a guard that only ever passes proves nothing. `packages/database/ci-apply.sh` is written in Task 3; until then this step fails, which is correct — CI is not expected to be green until Task 3 lands.
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add package.json pnpm-workspace.yaml tsconfig.base.json eslint.config.js \
+git add package.json pnpm-workspace.yaml tsconfig.base.json eslint.config.mjs \
         .prettierrc.json .editorconfig .npmrc .nvmrc .github/workflows/ci.yml pnpm-lock.yaml
 git commit -m "build: set up the pnpm workspace and shared toolchain"
 git log -1 --format=%B | grep -iE 'claude|generated with' && echo 'FORBIDDEN TRAILER' && exit 1
@@ -452,10 +465,18 @@ git commit -m "feat(contract): add the branded WldAmount money type"
 
 ### Task 3: Database package — migrations ported byte-for-byte
 
+> **Corrected during execution.** This task originally said 42 migrations with
+> a deliberate gap at 041–043, and its parity test compared the port against
+> the same git checkout it was copied from. Both were wrong. The production
+> database has 45 migrations with no gap; the branch simply never contained
+> 041, 042 and 043. Compare against `public.schema_migrations` on the live
+> database, captured as `production-checksums.json`, never against a checkout.
+
 **Files:**
 - Create: `packages/database/package.json`
 - Create: `packages/database/init/000-create-app-role.sh`, `packages/database/init/001-economy-core.sql`
-- Create: `packages/database/migrations/002-…-046-….sql` (42 files, copied)
+- Create: `packages/database/migrations/002-…-046-….sql` (45 files, copied)
+- Create: `packages/database/production-checksums.json`
 - Create: `packages/database/migrate.sh`, `packages/database/ci-apply.sh`
 - Create: `packages/database/compose.yml`, `packages/database/.env.example`, `packages/database/README.md`
 - Create: `packages/database/prisma/schema.prisma`
@@ -663,11 +684,18 @@ POSTGRES_USER="$PGUSER" POSTGRES_DB="$PGDATABASE" APP_DB_PASSWORD="$APP_DB_PASSW
 
 psql -X -v ON_ERROR_STOP=1 -f "$script_dir/init/001-economy-core.sql"
 
-ln -sfn "$script_dir/migrations" /tmp/migrations
+# migrate.sh iterates /migrations/*.sql -- an absolute path, because in
+# production it runs inside a container with that bind mount. The link below
+# lets the same unmodified script run in CI. Editing migrate.sh instead would
+# change the very checksum discipline it exists to enforce.
+if [ ! -e /migrations ]; then
+  ln -sfn "$script_dir/migrations" /migrations 2>/dev/null \
+    || sudo ln -sfn "$script_dir/migrations" /migrations
+fi
 sh "$script_dir/migrate.sh"
 ```
 
-`migrate.sh` reads from the absolute path `/migrations` because it runs inside a container in production. The symlink lets the same unmodified script run in CI — the alternative is editing `migrate.sh`, which would change its checksum discipline.
+The link target is `/migrations`, not somewhere under `/tmp`: `migrate.sh` iterates the literal path `/migrations/*.sql`. Creating it at the filesystem root needs privilege the CI runner has through `sudo`, hence the fallback.
 
 ```bash
 chmod +x packages/database/ci-apply.sh
@@ -1220,19 +1248,27 @@ export class AppModule {}
 ```ts
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { loadConfig } from './core/config';
 
 async function bootstrap(): Promise<void> {
   const config = loadConfig(process.env);
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Express advertises itself in every response by default. Naming the stack
+  // and its version tells an attacker which advisories to try first and buys
+  // a legitimate client nothing.
+  app.getHttpAdapter().getInstance().disable('x-powered-by');
+
+  // Loopback by default, not 0.0.0.0. This is an internal service; binding it
+  // to every interface by default is how an "internal" service becomes
+  // reachable from outside.
   await app.listen(config.port, process.env.HOST ?? '127.0.0.1');
 }
 
 void bootstrap();
 ```
-
-The default bind address is loopback, not `0.0.0.0`. NestJS is an internal service; binding it to every interface by default is how an "internal" service becomes reachable.
 
 - [ ] **Step 7: Verify the application boots**
 
@@ -1404,7 +1440,13 @@ export const poolProvider: Provider = {
 };
 ```
 
-Correct the stray character in that comment before saving: it should read "the original application's public pages". Comments are English; verify no non-ASCII slipped in with `grep -nP '[^\x00-\x7f]' backend/src/core/pool.provider.ts`, which must print nothing.
+Comments are English. The check that matters is that no Korean leaks into source — typographic punctuation such as an em-dash is fine and is carried over verbatim from the original:
+
+```bash
+grep -rnP '[\x{AC00}-\x{D7A3}\x{1100}-\x{11FF}\x{3130}-\x{318F}]' backend/src
+```
+
+Must print nothing. Korean belongs in user-facing product strings and in `docs/`, never in a comment or identifier.
 
 Modify `backend/src/core/core.module.ts` to register it:
 
@@ -1427,12 +1469,12 @@ Run:
 
 ```bash
 pnpm --filter @moneyverse/backend typecheck
-grep -nP '[^\x00-\x7f]' backend/src/core/*.ts && echo 'NON-ASCII IN SOURCE' && exit 1
-grep -nP '[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]' backend/src/core/*.ts && echo 'CONTROL BYTE' && exit 1
+grep -rnP '[\x{AC00}-\x{D7A3}\x{1100}-\x{11FF}\x{3130}-\x{318F}]' backend/src && echo 'HANGUL IN SOURCE' && exit 1
+grep -rnP '[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]' backend/src && echo 'CONTROL BYTE' && exit 1
 echo 'clean'
 ```
 
-Expected: zero type errors, `clean` printed.
+Expected: zero type errors, `clean` printed. The control-byte check is the one that has actually caught a defect in this codebase's history: an editing tool replaced a backslash-`u` escape *text* with the raw control byte it denotes, leaving input-sanitisation code that read correctly but no longer meant what it said.
 
 - [ ] **Step 7: Commit**
 
@@ -1483,7 +1525,7 @@ describe('randomToken', () => {
 
 describe('pkceChallenge', () => {
   it('is the base64url SHA-256 of the verifier', () => {
-    expect(pkceChallenge('verifier')).toBe('OK6ofX_2h9L4qFcxYNTU7Ae4NNhO_2ZgqjnQCkVtCFo');
+    expect(pkceChallenge('verifier')).toBe('iMnq5o6zALKXGivsnlom_0F5_WYda32GHkxlV7mq7hQ');
   });
 });
 
@@ -1604,7 +1646,7 @@ export function authorizationUrl(
 - [ ] **Step 4: Run the crypto test to verify it passes**
 
 Run: `pnpm --filter @moneyverse/backend test src/auth/crypto.test.ts`
-Expected: PASS — 8 tests.
+Expected: PASS — 12 tests.
 
 - [ ] **Step 5: Write the failing session repository test**
 
@@ -2326,6 +2368,9 @@ If the function returns a differently named column, match it — the row interfa
 
 - [ ] **Step 4: Write the guards**
 
+**A nullable dependency needs an explicit `@Inject` token.** A parameter declared `SessionRepository | null` erases to `Object` in `design:paramtypes`, so Nest cannot infer which provider to supply and fails at module compile with "argument at index [0] is available in the current module". Every constructor parameter below that is nullable therefore names its token explicitly. The unit tests construct guards directly and will not catch this; the wiring test in Step 6 will.
+
+
 `backend/src/auth/guards/session.guard.ts`:
 
 ```ts
@@ -3045,9 +3090,10 @@ export function applyServerTimeouts(server: Server): void {
   // single-digit seconds rather than Node's 60s default.
   server.headersTimeout = 8_000;
   // Covers the body too, so it must fit the largest request the application
-  // accepts — the 8MB image upload. 20s covers that on a ~3.3Mbps link and
-  // is a fraction of Node's 5-minute default. Must stay >= headersTimeout or
-  // it can fire before headers finish parsing.
+  // accepts -- the 8 MiB image upload. 20s asks 3.36 Mbps of that client,
+  // within ordinary broadband, while staying a fraction of Node's 5-minute
+  // default. Must stay >= headersTimeout or it can fire before headers
+  // finish parsing.
   server.requestTimeout = 20_000;
   // Node enforces both through a periodic sweep that defaults to 30s, so
   // without this a connection past its 8s headersTimeout could still sit
@@ -3208,7 +3254,25 @@ In `backend/src/main.ts`, after the global filter and before `applyServerTimeout
   mountOpenApi(app, config.production);
 ```
 
-Import `VersioningType` from `@nestjs/common` and `mountOpenApi` from `./openapi`. `/health` is excluded from the prefix so a container probe keeps the short path it has always had.
+Import `VersioningType` from `@nestjs/common` and `mountOpenApi` from `./openapi`.
+
+**Excluding `/health` from the global prefix is not enough.** URI versioning applies independently, so the route lands at `/v1/health` and the bare `/health` a container probe uses returns 404 — which reads as a dead service. The controller must also be version neutral:
+
+```ts
+import { Controller, Get, VERSION_NEUTRAL, Version } from '@nestjs/common';
+
+@Controller({ path: 'health', version: VERSION_NEUTRAL })
+export class HealthController {
+  @Get()
+  @Version(VERSION_NEUTRAL)
+  @ApiOperation({ summary: 'Liveness probe' })
+  check(): { status: 'ok' } {
+    return { status: 'ok' };
+  }
+}
+```
+
+Verify against a running server rather than by reading the config — probe `/health`, `/v1/health` and `/api/v1/health` and confirm only the first answers 200.
 
 Update the health test expectation in `backend/src/openapi.test.ts` only if the path in the generated document changes — run the test and read the actual document rather than guessing which form the exclusion produces.
 

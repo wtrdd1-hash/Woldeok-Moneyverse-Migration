@@ -60,7 +60,7 @@ ORM으로 쓰기를 옮기려면 지금 **일부러 회수해 둔 권한을 도�
 | 축 | 결정 | 근거 |
 |---|---|---|
 | DB | SQL 함수 88개 유지. **쓰기는 전부 함수 호출** | §1.2 |
-| Prisma | `db pull` introspect 전용. 읽기 쿼리와 타입 생성만. 마이그레이션 소유권 없음 | ORM DX를 얻되 권한 경계 불변 |
+| ORM | **쓰지 않는다.** `pg`만 사용 (2026-08-27 프로덕션 스키마 실측 후 변경) | 아래 §3.2 |
 | 토폴로지 | Next.js가 유일한 공개 출처, NestJS는 내부망 | 세션 쿠키·CSRF·CSP 모델 보존, SEO 확보 |
 | API | NestJS 관례로 전면 재설계 + OpenAPI. 외부 등록 URL도 변경 | 사용자 결정 |
 | UI | 정보구조·흐름 계승, 시각 실행은 새로 | 사용자 결정 |
@@ -74,7 +74,7 @@ Woldeok-Moneyverse-Migration/                 pnpm workspace
 ├─ frontend/                Next.js 15 App Router · shadcn/ui · Tailwind v4
 ├─ backend/                 NestJS 11 · pg · Prisma(읽기) · socket.io
 ├─ packages/
-│  ├─ database/             SQL 마이그레이션 47개(그대로) + prisma/schema.prisma
+│  ├─ database/             SQL 마이그레이션 45개 + production-checksums.json
 │  └─ contract/             공유 타입 — WldAmount, OpenAPI 생성 클라이언트
 ├─ services/
 │  ├─ minecraft-agent/      원본 그대로 이식
@@ -108,16 +108,30 @@ packages/database/
 
 이식 후 검증: 원본과 새 위치의 SQL 파일 집합이 `sha256`으로 동일해야 한다.
 
-### 3.2 Prisma의 역할 — 좁게 한정
+### 3.2 ORM은 쓰지 않는다 — 실측 결과
 
-- `prisma db pull`로 기존 스키마를 읽어 `schema.prisma`를 **생성**한다
-- `prisma generate`로 타입과 클라이언트를 얻는다
-- `prisma migrate`는 **절대 실행하지 않는다.** 스키마 소유권은 번호 SQL에 있다
-- Prisma Client는 **SELECT에만** 쓴다. 롤에 SELECT 권한이 있는 테이블에 한정
-- 모든 쓰기는 `SELECT * FROM <function>(...)` — `pg` Pool 또는 `$queryRaw`
+당초 계획은 "쓰기는 SQL 함수, 읽기는 Prisma"였다. 2026-08-27에 프로덕션
+스키마를 실제로 측정한 뒤 그 근거가 성립하지 않는다고 판단해 철회했다.
 
-`schema.prisma` 상단에 이 제약을 주석으로 못 박고, CI가 `prisma migrate`
-호출을 grep으로 거부한다.
+| 항목 | 값 |
+|---|---|
+| `public` 전체 테이블 | 52 |
+| `moneyverse_app`이 SELECT 가능 | 11 |
+| INSERT / UPDATE / DELETE 가능 | 3 / 3 / 0 |
+| EXECUTE 가능 함수 | 69 |
+| 저장소 코드의 함수 호출 : 평범한 테이블 읽기 | 46 : 8 |
+
+읽을 수 있는 11개는 전부 내부 배관이고(`auth_sessions`, `oauth_challenges`,
+`ledger_*`, `accounts` …), 그 8개 쿼리는 이미 손으로 타입을 붙인 저장소가
+처리한다. ORM은 모델 52개를 만들어 쿼리 8개를 서비스하게 되며, 대가는 쿼리
+엔진 바이너리와 generate 단계, 그리고 누군가 스키마 마이그레이션을 ORM으로
+돌릴 상시 위험이다.
+
+행 타입은 스키마에 대한 주장이지 증명이 아니다. 각 행 인터페이스에 그 컬럼을
+정의한 마이그레이션을 주석으로 단다.
+
+CI는 Prisma 마이그레이션 명령의 등장을 계속 거부한다 — 재도입이 사고가 아니라
+의도적 행위가 되도록.
 
 ### 3.3 불변식 — 그대로 유지
 
@@ -137,7 +151,7 @@ packages/database/
 
 | 모듈 | 담당 |
 |---|---|
-| `CoreModule` | `ConfigService`(zod 검증) · `PgPool` provider · `PrismaService`(읽기) |
+| `CoreModule` | `ConfigService` · `PgPool` provider |
 | `AuthModule` | 세션 · CSRF · OAuth(Discord/Google) · 동의 게이트 · step-up 재인증 |
 | `WalletModule` | 잔액 · 송금 · 일일/작업 보상 · 은행 입출금 · 대출 |
 | `StockModule` | 시세 · 포트폴리오 · 거래 · 가격 이력 · 시장 스케줄러 |
@@ -468,7 +482,7 @@ grep -nP '[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]' <files>   # 출력 없음 = 정상
 | # | 내용 | 완료 기준 |
 |---|---|---|
 | 0 | 저장소 · pnpm workspace · 툴링 · CI | 빈 앱 둘이 빌드·린트·테스트를 통과 |
-| 1 | `packages/database` — 마이그레이션 이식, prisma introspect | SQL `sha256` 일치 |
+| 1 | `packages/database` — 마이그레이션 이식 | 프로덕션 DB 기록과 `sha256` 일치 |
 | 2 | 백엔드 코어 — config · pool · 세션 · CSRF · 가드 · 예외필터 · OpenAPI | 인증 왕복 성립 |
 | 3 | 도메인 모듈 13개 | 대조표의 새 경로 전량 실재 |
 | 4 | 로비 게이트웨이 | 채팅 · 접속자 수 · 모든 상한 유지 |
@@ -486,7 +500,7 @@ grep -nP '[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]' <files>   # 출력 없음 = 정상
 ## 11. 이 설계가 의도적으로 하지 않는 것
 
 - **SQL 함수를 TypeScript로 재구현하지 않는다** (§1.2)
-- **Prisma에 스키마 소유권을 주지 않는다** — `prisma migrate`를 실행하지 않는다
+- **ORM을 쓰지 않는다** — 스키마 소유권은 번호 붙은 SQL에만 있다 (§3.2)
 - **NestJS를 공개 노출하지 않는다** — 브라우저는 Next.js에만 접속한다
 - **원본의 시각 디테일을 그대로 복제하지 않는다** — 정보구조와 흐름만 계승한다
 - **레이트 리미터를 분산 저장소로 옮기지 않는다** — 원본과 동일한 알려진 한계로

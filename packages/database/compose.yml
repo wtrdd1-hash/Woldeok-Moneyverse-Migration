@@ -1,0 +1,41 @@
+name: woldeok-moneyverse-dev
+
+services:
+  db:
+    image: postgres:17.5-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: moneyverse_migrator
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
+      POSTGRES_DB: ${DB_NAME:-woldeok_moneyverse_dev}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?required}
+    ports:
+      - '5433:5432'
+    volumes:
+      - moneyverse-dev-db:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U moneyverse_migrator -d ${DB_NAME:-woldeok_moneyverse_dev}']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    image: postgres:17.5-alpine
+    restart: 'no'
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: moneyverse_migrator
+      PGPASSWORD: ${POSTGRES_PASSWORD:?required}
+      PGDATABASE: ${DB_NAME:-woldeok_moneyverse_dev}
+    volumes:
+      - ./migrations:/migrations:ro
+      - ./migrate.sh:/usr/local/bin/migrate.sh:ro
+    entrypoint: ['/bin/sh', '/usr/local/bin/migrate.sh']
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  moneyverse-dev-db:

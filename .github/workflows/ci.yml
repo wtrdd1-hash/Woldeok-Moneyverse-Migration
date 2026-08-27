@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # Called by deploy.yml so a deployment cannot skip the checks.
+  workflow_call:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17.5-alpine
+        env:
+          POSTGRES_USER: moneyverse_migrator
+          POSTGRES_PASSWORD: ci_migrator_password
+          POSTGRES_DB: woldeok_moneyverse_ci
+        options: >-
+          --health-cmd "pg_isready -U moneyverse_migrator -d woldeok_moneyverse_ci"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # A stale dist from an earlier run hides an ordering defect: a consumer
+      # typechecks against build output that a clean checkout would not have.
+      # That is exactly what got through review once, so the checks below run
+      # from nothing.
+      - name: Remove any build output
+        run: rm -rf packages/*/dist backend/dist frontend/.next
+      - run: pnpm lint
+
+      # ESLint cannot tell a backslash-u escape from the raw byte it denotes.
+      # This can, and that substitution has silently broken input sanitisation
+      # in this codebase's history.
+      - name: Reject raw control bytes in source
+        run: scripts/check-control-bytes.sh
+      - run: pnpm typecheck
+      - run: pnpm build
+
+      # The development machine has no container runtime and no PostgreSQL
+      # server, so CI is where database-backed tests actually execute.
+      - name: Apply database migrations
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: moneyverse_migrator
+          PGPASSWORD: ci_migrator_password
+          PGDATABASE: woldeok_moneyverse_ci
+          APP_DB_PASSWORD: ci_app_password
+        run: packages/database/ci-apply.sh
+
+      - name: Test
+        env:
+          DATABASE_URL: postgresql://moneyverse_app:ci_app_password@localhost:5432/woldeok_moneyverse_ci
+        run: pnpm test
+
+      # Prisma introspects the schema; it never owns it. The guard lives in a
+      # script so it cannot match its own source -- spelling the phrase
+      # inline here made the first version fail on every run.
+      - name: Reject Prisma schema mutation
+        run: scripts/reject-prisma-migrate.sh
