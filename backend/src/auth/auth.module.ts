@@ -10,6 +10,7 @@ import { InternalTokenGuard } from './guards/internal-token.guard';
 import { ReauthGuard } from './guards/reauth.guard';
 import { SessionGuard } from './guards/session.guard';
 import { AccountModule } from '../account/account.module';
+import { AuthBootstrapController } from './bootstrap.controller';
 import { AuthController } from './auth.controller';
 import { OAuthClient } from './oauth-client';
 import { SessionRepository } from './session.repository';
@@ -26,7 +27,7 @@ const GUARDS = [
 
 @Module({
   imports: [forwardRef(() => AccountModule)],
-  controllers: [AuthController],
+  controllers: [AuthController, AuthBootstrapController],
   providers: [
     {
       // Constructed, not injected: its constructor takes an options object

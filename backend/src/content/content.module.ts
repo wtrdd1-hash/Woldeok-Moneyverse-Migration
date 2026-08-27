@@ -3,6 +3,7 @@ import { AuthModule } from '../auth/auth.module';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import { ContentController } from './content.controller';
+import { MediaController } from './media.controller';
 import { PhotoUploadController } from './photo-upload.controller';
 import { PrivateImageStorage } from './private-image-storage';
 import { PostgresContentRepository } from './content.repository';
@@ -10,7 +11,7 @@ import { ContentService } from './content.service';
 
 @Module({
   imports: [AuthModule],
-  controllers: [ContentController, PhotoUploadController],
+  controllers: [ContentController, MediaController, PhotoUploadController],
   providers: [
     {
       provide: PrivateImageStorage,

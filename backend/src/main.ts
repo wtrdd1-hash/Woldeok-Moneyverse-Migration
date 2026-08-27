@@ -8,6 +8,7 @@ import { loadConfig } from './core/config';
 import { ProblemFilter } from './core/problem.filter';
 import { mountOpenApi } from './openapi';
 import { applyServerTimeouts } from './server-timeouts';
+import { UNPREFIXED_ROUTES } from './http/prefix';
 
 async function bootstrap(): Promise<void> {
   const config = loadConfig(process.env);
@@ -40,9 +41,7 @@ async function bootstrap(): Promise<void> {
 
   // /health keeps the short path a container probe has always used; every
   // other route lives under /api/v{n}.
-  app.setGlobalPrefix('api', {
-    exclude: ['health', 'auth/:provider/authorize', 'auth/:provider/callback'],
-  });
+  app.setGlobalPrefix('api', { exclude: [...UNPREFIXED_ROUTES] });
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
   mountOpenApi(app, config.production);
 

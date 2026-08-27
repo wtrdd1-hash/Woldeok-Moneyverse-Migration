@@ -5,6 +5,7 @@ import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { AppModule } from '../app.module';
 import { ProblemFilter } from '../core/problem.filter';
+import { UNPREFIXED_ROUTES } from '../http/prefix';
 
 const ORIGINAL_ENV = { ...process.env };
 
@@ -21,9 +22,7 @@ describe('shop routes', () => {
       new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
     );
     app.useGlobalFilters(new ProblemFilter(false));
-    app.setGlobalPrefix('api', {
-      exclude: ['health', 'auth/:provider/authorize', 'auth/:provider/callback'],
-    });
+    app.setGlobalPrefix('api', { exclude: [...UNPREFIXED_ROUTES] });
     app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
     await app.init();
   });
