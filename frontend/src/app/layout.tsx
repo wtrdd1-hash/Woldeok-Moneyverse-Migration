@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { IBM_Plex_Mono, Nanum_Myeongjo, Noto_Sans_KR } from 'next/font/google';
 import { SiteShell } from '@/components/site-shell';
 import { Toaster } from '@/components/ui/sonner';
+import { NOTICE_PREFERENCE_SCRIPT } from '@/lib/notice-preference';
 import './globals.css';
 
 /**
@@ -53,6 +54,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko" className={`${myeongjo.variable} ${notoKr.variable} ${plexMono.variable}`}>
       <body>
+        {/* Applies the reader's dismissal of the notice strip before the strip
+            is painted. An effect would run after it is already on screen, and
+            taking it away again is worse than never showing it. */}
+        <script dangerouslySetInnerHTML={{ __html: NOTICE_PREFERENCE_SCRIPT }} />
         {/* A keyboard user should not have to walk the whole rail to reach the
             page. */}
         <a

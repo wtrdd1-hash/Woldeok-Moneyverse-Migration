@@ -347,3 +347,11 @@
     white-space: nowrap;
   }
 }
+
+/* The notice strip, once the reader has closed it. Set before first paint by
+   the script in the root layout and on a click by the strip's own button, so
+   there is one rule and one attribute rather than a rule and a React state
+   that can disagree. */
+html[data-notice='dismissed'] [data-notice-bar] {
+  display: none;
+}

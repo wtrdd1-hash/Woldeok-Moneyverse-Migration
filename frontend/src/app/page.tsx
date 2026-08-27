@@ -2,14 +2,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
+import { HomeCta } from '@/components/home-cta';
 import { Lobby } from '@/components/lobby';
 import { LobbyCount } from '@/components/lobby-count';
-import { StatusDot } from '@/components/status-dot';
-import { Button } from '@/components/ui/button';
+import { WalletGlance } from '@/components/wallet-glance';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
-import { STATUS_LABEL, asStatusState } from '@/lib/status';
 
 /**
  * Server-rendered and revalidated rather than fetched per request: this is the
@@ -20,7 +19,7 @@ export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: '월덕 머니버스 — 우리 서버의 작은 경제',
-  description: 'Discord와 마인크래프트에서 함께 즐기는 월덕 머니버스 커뮤니티 가상 경제',
+  description: 'Discord로 이어지는 월덕 머니버스 커뮤니티 가상 경제',
   alternates: { canonical: '/' },
 };
 
@@ -31,25 +30,16 @@ interface Announcement {
   readonly publishedAt: string | null;
 }
 
-interface StatusRow {
-  readonly sourceKey: string;
-  readonly displayName: string;
-  readonly state: string;
-  readonly detail: string | null;
-}
-
 export default async function HomePage() {
-  // Both fall back to null rather than throwing. A public landing page stays
-  // readable when the content service is offline, and must not invent a
-  // healthy status while it is — the original made the same choice.
-  const [announcements, status] = await Promise.all([
-    publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60),
-    publicApi<{ status: StatusRow[] }>('/api/v1/status', 60),
-  ]);
+  // Falls back to null rather than throwing. A public landing page stays
+  // readable when the content service is offline — the original made the same
+  // choice, and an empty section is honest where an invented one is not.
+  const announcements = await publicApi<{ announcements: Announcement[] }>(
+    '/api/v1/announcements',
+    60,
+  );
 
   const notices = announcements?.announcements.slice(0, 3) ?? [];
-  const minecraft = status?.status.find((row) => row.sourceKey === 'minecraft');
-  const minecraftState = asStatusState(minecraft?.state);
 
   return (
     <div className="grid gap-20">
@@ -68,28 +58,11 @@ export default async function HomePage() {
             <em className="not-italic text-forest-soft">작고 단단한 경제.</em>
           </h1>
           <p className="mt-6 max-w-[590px] text-[clamp(1rem,1.5vw,1.125rem)] leading-[1.8] text-muted-foreground [word-break:keep-all]">
-            월덕 머니버스는 Discord와 마인크래프트를 잇는 커뮤니티 장부입니다. 활동은 기록으로
-            남고, 로그인 후 실제 잔액과 이용 기록을 확인할 수 있어요.
+            월덕 머니버스는 Discord로 이어지는 커뮤니티 장부입니다. 활동은 기록으로 남고,
+            로그인 후 실제 잔액과 이용 기록을 확인할 수 있어요.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild className="h-12 rounded-[12px] px-5 text-sm font-extrabold shadow-plate">
-              <Link href="/login">
-                Discord · Google로 시작하기
-                <ArrowRight />
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="outline"
-              className="h-12 rounded-[12px] bg-surface/50 px-5 text-sm font-extrabold"
-            >
-              <Link href="/announcements">
-                알아보기
-                <ArrowRight />
-              </Link>
-            </Button>
-          </div>
+          <HomeCta />
 
           <p className="mt-7 max-w-[590px] text-xs text-muted-foreground">
             모든 WLD와 보상은 게임 안에서만 사용하는 가상 데이터이며, 현금 거래나 환전 기능은
@@ -109,24 +82,23 @@ export default async function HomePage() {
           </h2>
           <ul className="mt-6 grid gap-3">
             <StatusRowItem
-              glyph="▦"
-              term={minecraft?.displayName ?? '마인크래프트 서버'}
-              detail={minecraft?.detail ?? '신뢰된 상태 기록을 확인해요.'}
-              href="/status"
-            >
-              <StatusDot state={minecraftState} />
-              {/* An absent status reads as 확인 중, never as 정상: an
-                  unreachable source and a healthy one are different facts. */}
-              {STATUS_LABEL[minecraftState]}
-            </StatusRowItem>
-
-            <StatusRowItem
               glyph="▣"
               term="내 지갑"
               detail="원장 기준의 실제 잔액과 기록"
               href="/wallet"
             >
-              로그인 후 확인
+              {/* Signed in, this is the member's own balance; signed out, it
+                  stays the invitation the prerendered HTML carries. */}
+              <WalletGlance />
+            </StatusRowItem>
+
+            <StatusRowItem
+              glyph="▤"
+              term="서비스 상태"
+              detail="운영이 기록한 상태만 표시해요"
+              href="/status"
+            >
+              상태 보기
             </StatusRowItem>
 
             <StatusRowItem
