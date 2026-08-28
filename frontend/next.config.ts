@@ -1,6 +1,14 @@
 import path from 'node:path';
 import type { NextConfig } from 'next';
 
+/**
+ * Cloudflare Web Analytics. The beacon is served from one origin and reports
+ * to another, so both are named: `script-src` for the file and `connect-src`
+ * for the measurement it posts back.
+ */
+const BEACON_SCRIPT = 'https://static.cloudflareinsights.com';
+const BEACON_REPORT = 'https://cloudflareinsights.com';
+
 const config: NextConfig = {
   reactStrictMode: true,
   // The API is internal. Nothing here should ever construct a browser-facing
@@ -36,6 +44,15 @@ const config: NextConfig = {
    * `base-uri`, `object-src`, `form-action`, `frame-ancestors`, `connect-src`
    * — are all strict. Revisit if a page ever renders HTML it did not author.
    *
+   * On the two Cloudflare origins. Every deployed environment sits behind
+   * Cloudflare, and Cloudflare injects its Web Analytics beacon into the
+   * response on the way out. A policy that then refuses the script does not
+   * prevent anything — the proxy terminates TLS for this site and can already
+   * rewrite the document it is serving — it only writes a violation to the
+   * console on every page load. Naming the origins is therefore an admission
+   * of what already runs, not a new grant. Turning Web Analytics off in the
+   * Cloudflare dashboard makes both names removable again.
+   *
    * `img-src` admits any HTTPS origin because a gallery photo's URL is
    * whatever host an operator was allowed to register, and that allowlist
    * lives in PostgreSQL where this build cannot read it. An image is not a
@@ -61,11 +78,11 @@ const config: NextConfig = {
       "frame-ancestors 'none'",
       "frame-src 'none'",
       "form-action 'self'",
-      "script-src 'self' 'unsafe-inline'",
+      `script-src 'self' 'unsafe-inline' ${BEACON_SCRIPT}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self'",
-      `connect-src 'self' ${socket}`,
+      `connect-src 'self' ${socket} ${BEACON_REPORT}`,
       "manifest-src 'self'",
       'upgrade-insecure-requests',
     ].join('; ');
