@@ -86,17 +86,36 @@ export function tierFor(pathname: string, method: string): RateLimitTier {
   return { name: 'read', limit: READ_LIMIT };
 }
 
+const single = (value: string | string[] | undefined): string | undefined =>
+  (Array.isArray(value) ? value[0] : value)?.trim() || undefined;
+
 /**
+ * Who to count a request against.
+ *
  * Enabling `trustForwardedFor` without a reverse proxy that strips and
  * rewrites `X-Forwarded-For` lets a client forge the header and evade rate
  * limiting entirely, so the default is false and the header is ignored
  * outright rather than merely deprioritised.
+ *
+ * `CF-Connecting-IP` is preferred over it where both are present. Cloudflare
+ * writes that header itself and overwrites whatever a client sent, whereas it
+ * *appends* to a client-supplied `X-Forwarded-For` — so the first entry of
+ * that list is a value the visitor chose. Reading it means one visitor can
+ * spend another's budget by naming them, which on this deployment is the
+ * difference between a reader staying signed in and being told they are not.
+ *
+ * The `X-Forwarded-For` fallback still takes the first entry rather than the
+ * last. The last entry is only the client behind a chain of exactly one
+ * appending proxy, and this application is reached through more than one on
+ * some paths; a wrong guess there collapses every visitor onto a single key,
+ * which is worse than the forgery it would prevent.
  */
 export function requestClientKey(request: KeyableRequest, options: ClientKeyOptions): string {
   if (options.trustForwardedFor) {
-    const forwarded = request.headers['x-forwarded-for'];
-    const raw = Array.isArray(forwarded) ? forwarded[0] : forwarded;
-    const first = raw?.split(',')[0]?.trim();
+    const connecting = single(request.headers['cf-connecting-ip']);
+    if (connecting) return connecting;
+    const forwarded = single(request.headers['x-forwarded-for']);
+    const first = forwarded?.split(',')[0]?.trim();
     if (first) return first;
   }
   return request.socket.remoteAddress ?? 'unknown';

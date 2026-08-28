@@ -75,6 +75,39 @@ describe('requestClientKey', () => {
     const request = { headers: {}, socket: {} };
     expect(requestClientKey(request, { trustForwardedFor: false })).toBe('unknown');
   });
+
+  /**
+   * Cloudflare writes CF-Connecting-IP itself and overwrites whatever the
+   * visitor sent; it *appends* to a visitor-supplied X-Forwarded-For. So the
+   * first entry of that list is a value the visitor chose, and preferring it
+   * would let one visitor spend another's budget by naming them.
+   */
+  it('prefers the address the proxy wrote over the one the visitor could have', () => {
+    const request = {
+      headers: {
+        'cf-connecting-ip': '203.0.113.9',
+        'x-forwarded-for': '198.51.100.7, 203.0.113.9',
+      },
+      socket: { remoteAddress: '10.0.0.4' },
+    };
+    expect(requestClientKey(request, { trustForwardedFor: true })).toBe('203.0.113.9');
+  });
+
+  it('ignores the proxy-written address when no proxy is trusted', () => {
+    const request = {
+      headers: { 'cf-connecting-ip': '203.0.113.9' },
+      socket: { remoteAddress: '10.0.0.4' },
+    };
+    expect(requestClientKey(request, { trustForwardedFor: false })).toBe('10.0.0.4');
+  });
+
+  it('still reads the forwarded list when the proxy wrote nothing', () => {
+    const request = {
+      headers: { 'cf-connecting-ip': '   ', 'x-forwarded-for': '203.0.113.9' },
+      socket: { remoteAddress: '10.0.0.4' },
+    };
+    expect(requestClientKey(request, { trustForwardedFor: true })).toBe('203.0.113.9');
+  });
 });
 
 describe('tierFor, on the reads a page makes every time', () => {
