@@ -238,6 +238,19 @@
     text-transform: uppercase;
   }
 
+  /*
+   * The label inside a policy document. Same clay mono as `.eyebrow` and
+   * deliberately without its leading rule: the original gave documents their
+   * own `.section-label` for exactly this, and the rule is a section-head
+   * device. It also stays out of `text-transform`, because these labels are
+   * Korean and uppercasing does nothing to Hangul but the tracking does.
+   */
+  .section-label {
+    color: var(--clay);
+    font: 700 11px/1.45 var(--font-mono);
+    letter-spacing: 0.115em;
+  }
+
   .eyebrow::before {
     content: '';
     display: inline-block;

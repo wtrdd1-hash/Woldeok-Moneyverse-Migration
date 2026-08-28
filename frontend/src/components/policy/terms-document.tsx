@@ -16,7 +16,7 @@ import Link from 'next/link';
 export function TermsDocument() {
   return (
       <article className="policy-document grid gap-6">
-      <p className="eyebrow">WOLDEOK MONEYVERSE · TEST POLICY</p>
+      <p className="section-label">WOLDEOK MONEYVERSE · TEST POLICY</p>
       <p className="max-w-prose text-sm text-muted-foreground">
       월덕 머니버스는 Discord와 웹에서 함께 사용하는 커뮤니티형 가상경제 서비스입니다.
       이 문서는 테스트 서버에서 적용할 MVP 이용 기준을 분명히 설명합니다.
@@ -31,7 +31,7 @@ export function TermsDocument() {
       <p>서비스 안의 화폐·아이템·잔액·보상은 게임 안에서만 쓰는 가상 데이터입니다. 현금 환전, 출금, 실제 투자 수익, 실제 금융상품 또는 외부 재화의 구매수단을 제공하지 않습니다.</p>
       </aside>
       <section className="grid gap-2" aria-labelledby="terms-summary-title">
-      <p className="eyebrow">먼저 확인하세요</p>
+      <p className="section-label">먼저 확인하세요</p>
       <h2 id="terms-summary-title">서비스 이용의 세 가지 기준</h2>
       <ul>
       <li>만 14세 이상만 이용할 수 있습니다. 법정대리인 동의 절차가 준비되기 전까지 만 14세 미만 가입은 허용하지 않습니다.</li>
