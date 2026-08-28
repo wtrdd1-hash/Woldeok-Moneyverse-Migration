@@ -16,7 +16,7 @@ import Link from 'next/link';
 export function PrivacyDocument() {
   return (
       <article className="policy-document grid gap-6">
-      <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">WOLDEOK MONEYVERSE · TEST POLICY</p>
+      <p className="eyebrow">WOLDEOK MONEYVERSE · TEST POLICY</p>
       <p className="max-w-prose text-sm text-muted-foreground">
       월덕 머니버스는 로그인, 가상경제 원장, 보안에 필요한 정보만 최소한으로 처리합니다.
       무엇을 왜 처리하고 언제 지우는지 테스트 서버 기준으로 공개합니다.

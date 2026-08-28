@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
-import { Accent, PageHeader } from '@/components/page-header';
+import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
@@ -65,19 +65,16 @@ export default async function ShopPage() {
       </div>
 
       <section aria-labelledby="catalog-title" className="grid gap-3">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              CATALOG
+        <SectionHeader
+          eyebrow="CATALOG"
+          title="등록된 상점 목록"
+          id="catalog-title"
+          action={
+            <p className="text-xs text-muted-foreground">
+              가격과 재고 판단은 브라우저가 아닌 서버에서 처리합니다.
             </p>
-            <h2 id="catalog-title" className="text-lg font-medium">
-              등록된 상점 목록
-            </h2>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            가격과 재고 판단은 브라우저가 아닌 서버에서 처리합니다.
-          </p>
-        </div>
+          }
+        />
 
         {data === null ? (
           <EmptyState

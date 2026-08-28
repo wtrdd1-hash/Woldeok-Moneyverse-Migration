@@ -1,5 +1,6 @@
 'use client';
 
+import { SectionHeader } from '@/components/page-header';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Amount } from '@/components/amount';
@@ -48,19 +49,16 @@ export function MyReceipts() {
 
   return (
     <section aria-labelledby="purchase-title" className="grid gap-3">
-      <div className="flex items-baseline justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            MY RECEIPTS
-          </p>
-          <h2 id="purchase-title" className="text-lg font-medium">
-            내 구매 기록
-          </h2>
-        </div>
-        <Link href="/wallet" className="shrink-0 text-sm text-primary">
-          지갑 원장 보기 →
-        </Link>
-      </div>
+      <SectionHeader
+        eyebrow="MY RECEIPTS"
+        title="내 구매 기록"
+        id="purchase-title"
+        action={
+          <Link href="/wallet" className="shrink-0 text-sm font-extrabold text-clay">
+            지갑 원장 보기 →
+          </Link>
+        }
+      />
 
       {receipts === null ? (
         <Skeleton className="h-24 w-full" />

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
-import { PageHeader } from '@/components/page-header';
+import { PageHeader, SectionHeader } from '@/components/page-header';
 import { PostingStrip } from '@/components/posting-strip';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -153,19 +153,16 @@ export default async function WalletPage() {
       <TransferForm currency={balances.currency} />
 
       <section aria-labelledby="activity-title" className="grid gap-3">
-        <div className="flex items-baseline justify-between gap-3">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              최근 내역
+        <SectionHeader
+          eyebrow="RECENT ACTIVITY"
+          title="내 지갑 기록"
+          id="activity-title"
+          action={
+            <p className="shrink-0 text-xs text-muted-foreground">
+              최근 {recentTransactions.length}건
             </p>
-            <h2 id="activity-title" className="text-lg font-medium">
-              내 지갑 기록
-            </h2>
-          </div>
-          <p className="shrink-0 text-xs text-muted-foreground">
-            최근 {recentTransactions.length}건
-          </p>
-        </div>
+          }
+        />
         {/* The transaction list is the ledger, so it renders as postings
             rather than as rows with badges: each entry shows what the money
             left, what it reached, and the amount that balanced them. */}

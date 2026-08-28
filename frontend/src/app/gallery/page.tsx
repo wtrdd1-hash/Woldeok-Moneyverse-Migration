@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
-import { Accent, PageHeader } from '@/components/page-header';
+import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
 
@@ -40,50 +40,57 @@ export default async function GalleryPage() {
         허용한 곳만 사용해요.
       </PageHeader>
 
-      {data === null ? (
-        <EmptyState title="지금은 사진을 불러올 수 없어요." />
-      ) : photos.length === 0 ? (
-        <EmptyState
-          title="아직 공개된 사진이 없어요."
-          description="운영자가 검토해 게시한 사진이 이곳에 나타납니다."
+      <section aria-labelledby="gallery-title" className="grid gap-3">
+        <SectionHeader
+          eyebrow="PUBLISHED GALLERY"
+          title="사진 모음"
+          id="gallery-title"
+          action={
+            <Link href="/announcements" className="shrink-0 text-sm font-extrabold text-clay">
+              운영 소식 →
+            </Link>
+          }
         />
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {photos.map((photo) => (
-            <figure key={photo.photoId} className="overflow-hidden rounded-lg border bg-card">
-              {/*
-                A plain <img>, not next/image. These files are served by the
-                API from a private store behind an authorisation check, and
-                the optimiser would need to fetch and cache them itself —
-                which would put an unreviewed photo into a public cache the
-                moment its publication was revoked.
-              */}
-              <img
-                src={photo.imageUrl}
-                alt={photo.altText}
-                loading="lazy"
-                decoding="async"
-                referrerPolicy="no-referrer"
-                className="aspect-video w-full object-cover"
-              />
-              <figcaption className="grid gap-0.5 p-3">
-                <span className="text-sm">{photo.altText}</span>
-                {photo.publishedAt && (
-                  <time dateTime={photo.publishedAt} className="text-xs text-muted-foreground">
-                    {formatDay(photo.publishedAt, '게시 시간 확인 중')}
-                  </time>
-                )}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      )}
 
-      <p className="text-sm text-muted-foreground">
-        <Link href="/announcements" className="text-primary">
-          운영 소식 보기 →
-        </Link>
-      </p>
+        {data === null ? (
+          <EmptyState title="지금은 사진을 불러올 수 없어요." />
+        ) : photos.length === 0 ? (
+          <EmptyState
+            title="아직 공개된 사진이 없어요."
+            description="운영자가 검토해 게시한 사진이 이곳에 나타납니다."
+          />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {photos.map((photo) => (
+              <figure key={photo.photoId} className="overflow-hidden rounded-lg border bg-card">
+                {/*
+                  A plain <img>, not next/image. These files are served by the
+                  API from a private store behind an authorisation check, and
+                  the optimiser would need to fetch and cache them itself —
+                  which would put an unreviewed photo into a public cache the
+                  moment its publication was revoked.
+                */}
+                <img
+                  src={photo.imageUrl}
+                  alt={photo.altText}
+                  loading="lazy"
+                  decoding="async"
+                  referrerPolicy="no-referrer"
+                  className="aspect-video w-full object-cover"
+                />
+                <figcaption className="grid gap-0.5 p-3">
+                  <span className="text-sm">{photo.altText}</span>
+                  {photo.publishedAt && (
+                    <time dateTime={photo.publishedAt} className="text-xs text-muted-foreground">
+                      {formatDay(photo.publishedAt, '게시 시간 확인 중')}
+                    </time>
+                  )}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

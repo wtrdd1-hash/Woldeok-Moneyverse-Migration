@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
-import { Accent, PageHeader } from '@/components/page-header';
+import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
@@ -56,42 +57,55 @@ export default async function StatusPage() {
         기록된 상태만 표시합니다. 확인되지 않은 항목은 추정하지 않고 확인 중으로 둡니다.
       </PageHeader>
 
-      {data === null ? (
-        <EmptyState title="지금은 상태를 불러올 수 없어요." />
-      ) : data.status.length === 0 ? (
-        <EmptyState title="아직 기록된 상태가 없어요." />
-      ) : (
-        <Card>
-          <CardContent>
-            <dl className="grid gap-3">
-              {data.status.map((row) => {
-                const state = asStatusState(row.state);
-                return (
-                  <div
-                    key={row.sourceKey}
-                    className="flex items-start justify-between gap-3 border-b pb-3 last:border-b-0 last:pb-0"
-                  >
-                    <div className="grid gap-0.5">
-                      <dt className="text-sm font-medium">{row.displayName}</dt>
-                      {row.detail && (
-                        <dd className="text-xs text-muted-foreground">{row.detail}</dd>
-                      )}
-                      {row.observedAt && (
-                        <dd className="text-xs text-muted-foreground">
-                          <time dateTime={row.observedAt}>{formatMoment(row.observedAt)}</time> 기준
-                        </dd>
-                      )}
+      <section aria-labelledby="status-list-title" className="grid gap-3">
+        <SectionHeader
+          eyebrow="CURRENT SNAPSHOTS"
+          title="연결 상태"
+          id="status-list-title"
+          action={
+            <Link href="/announcements" className="shrink-0 text-sm font-extrabold text-clay">
+              점검 공지 보기 →
+            </Link>
+          }
+        />
+
+        {data === null ? (
+          <EmptyState title="지금은 상태를 불러올 수 없어요." />
+        ) : data.status.length === 0 ? (
+          <EmptyState title="아직 기록된 상태가 없어요." />
+        ) : (
+          <Card>
+            <CardContent>
+              <dl className="grid gap-3">
+                {data.status.map((row) => {
+                  const state = asStatusState(row.state);
+                  return (
+                    <div
+                      key={row.sourceKey}
+                      className="flex items-start justify-between gap-3 border-b pb-3 last:border-b-0 last:pb-0"
+                    >
+                      <div className="grid gap-0.5">
+                        <dt className="text-sm font-medium">{row.displayName}</dt>
+                        {row.detail && (
+                          <dd className="text-xs text-muted-foreground">{row.detail}</dd>
+                        )}
+                        {row.observedAt && (
+                          <dd className="text-xs text-muted-foreground">
+                            <time dateTime={row.observedAt}>{formatMoment(row.observedAt)}</time> 기준
+                          </dd>
+                        )}
+                      </div>
+                      <dd className="shrink-0">
+                        <Badge variant={VARIANT[state]}>{STATUS_LABEL[state]}</Badge>
+                      </dd>
                     </div>
-                    <dd className="shrink-0">
-                      <Badge variant={VARIANT[state]}>{STATUS_LABEL[state]}</Badge>
-                    </dd>
-                  </div>
-                );
-              })}
-            </dl>
-          </CardContent>
-        </Card>
-      )}
+                  );
+                })}
+              </dl>
+            </CardContent>
+          </Card>
+        )}
+      </section>
     </div>
   );
 }

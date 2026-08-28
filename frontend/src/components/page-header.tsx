@@ -40,3 +40,41 @@ export function PageHeader({
 export function Accent({ children }: { readonly children: React.ReactNode }) {
   return <em className="not-italic text-forest-soft">{children}</em>;
 }
+
+/**
+ * The head of a section inside a page: the same mono eyebrow, a serif h2, and
+ * an optional link out to where the section continues.
+ *
+ * It exists because six pages had hand-rolled this and drifted into a second
+ * eyebrow style -- grey sans, no leading rule -- sitting a few hundred pixels
+ * below the real one. There is one eyebrow in this product.
+ *
+ * The h2 carries no font-weight of its own on purpose: `globals.css` already
+ * sets the display face at 800 for every heading, and the hand-rolled copies
+ * were overriding it back down to 500.
+ */
+export function SectionHeader({
+  eyebrow,
+  title,
+  id,
+  action,
+}: {
+  readonly eyebrow: string;
+  readonly title: React.ReactNode;
+  /** Pair with `aria-labelledby` on the section this heads. */
+  readonly id?: string;
+  /** A link out, shown at the far end of the row. */
+  readonly action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <p className="eyebrow mb-2">{eyebrow}</p>
+        <h2 id={id} className="text-lg">
+          {title}
+        </h2>
+      </div>
+      {action}
+    </div>
+  );
+}

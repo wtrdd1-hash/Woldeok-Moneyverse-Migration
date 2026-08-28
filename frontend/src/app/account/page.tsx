@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
-import { Accent, PageHeader } from '@/components/page-header';
+import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -100,19 +100,16 @@ export default async function AccountPage({
       )}
 
       <section id="sign-in-methods" className="grid gap-3" aria-labelledby="identity-title">
-        <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              SIGN-IN METHODS
+        <SectionHeader
+          eyebrow="SIGN-IN METHODS"
+          title="연결된 로그인 수단"
+          id="identity-title"
+          action={
+            <p className="text-xs text-muted-foreground">
+              최소 하나의 로그인 수단은 남겨 두어야 해요.
             </p>
-            <h2 id="identity-title" className="text-lg font-medium">
-              연결된 로그인 수단
-            </h2>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            최소 하나의 로그인 수단은 남겨 두어야 해요.
-          </p>
-        </div>
+          }
+        />
 
         {identityData === null ? (
           <EmptyState
@@ -210,12 +207,11 @@ export default async function AccountPage({
 
       <section id="privacy-requests" className="grid gap-3" aria-labelledby="privacy-request-title">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-            PRIVACY REQUESTS
-          </p>
-          <h2 id="privacy-request-title" className="text-lg font-medium">
-            내 정보에 관한 요청 남기기.
-          </h2>
+          <SectionHeader
+            eyebrow="PRIVACY REQUESTS"
+            title="내 정보에 관한 요청 남기기."
+            id="privacy-request-title"
+          />
           <p className="max-w-prose text-sm text-muted-foreground">
             열람·정정·처리 제한·동의 철회·삭제 요청을 내 계정으로 기록할 수 있어요. 이 양식은
             이메일·파일·데이터 전달 주소를 받지 않으며, 요청 자체가 즉시 처리 완료를 뜻하지는
