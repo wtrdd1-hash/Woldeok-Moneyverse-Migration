@@ -1,4 +1,5 @@
 import {
+  Query,
   BadRequestException,
   Body,
   ConflictException,
@@ -63,10 +64,24 @@ export class WalletController {
     }
   }
 
+  /**
+   * `recent` decides how many ledger entries come back, 1 to 50.
+   *
+   * The wallet screen wants a handful under the balance and the activity page
+   * wants the lot, and both are the same resource — a second endpoint would
+   * be a second thing to keep in step with this one. The bound lives in the
+   * service, so a value outside it is rejected there rather than turning into
+   * an unbounded query.
+   */
   @Get('wallet')
   @ApiOperation({ summary: 'Balances and recent ledger entries for the caller' })
-  overview(@Req() request: RequestWithSession) {
-    return this.service().overview(requireUserId(request));
+  overview(@Req() request: RequestWithSession, @Query('recent') recent?: string) {
+    if (recent === undefined) return this.service().overview(requireUserId(request));
+    const parsed = Number(recent);
+    if (!Number.isSafeInteger(parsed)) {
+      throw new BadRequestException('recent must be a whole number');
+    }
+    return this.service().overview(requireUserId(request), { recentLimit: parsed });
   }
 
   @Get('bank/loans')

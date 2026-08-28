@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
+import { sides } from './sides';
+import type { Overview } from './sides';
 import {
   BankPanel,
   RewardButtons,
@@ -22,50 +24,17 @@ import type { LoanView } from './wallet-forms';
 /** Per-member data. Never cached, and never offered to a crawler. */
 export const dynamic = 'force-dynamic';
 
+/**
+ * How much of the ledger the wallet screen shows before handing over to
+ * /wallet/activity. Enough to answer "did that go through?", short enough
+ * that the balance and the transfer form stay on the first screen.
+ */
+const LATEST_ON_WALLET = 5;
+
 export const metadata: Metadata = {
   title: '내 지갑',
   robots: { index: false, follow: false },
 };
-
-interface BalanceView {
-  readonly availableAmount: string;
-  readonly updatedAt: string;
-}
-
-interface TransactionView {
-  readonly transactionId: string;
-  readonly type: string;
-  readonly label: string;
-  readonly netAmount: string;
-  readonly direction: 'in' | 'out' | 'neutral';
-  readonly occurredAt: string;
-}
-
-interface Overview {
-  readonly userId: string;
-  readonly balances: {
-    readonly currency: string;
-    readonly cash: BalanceView;
-    readonly bank: BalanceView;
-    readonly totalAvailableAmount: string;
-  };
-  readonly recentTransactions: readonly TransactionView[];
-}
-
-/**
- * The API reports a direction and a net amount rather than the two accounts a
- * posting names, because the underlying ledger transaction has more than two
- * legs and only the member's own side is theirs to see.
- *
- * The strip still shows both ends — one of them is the member's wallet and
- * the other is where the money came from or went — so the entry reads as the
- * balanced movement it is rather than as a signed number.
- */
-function sides(entry: TransactionView): { debit: string; credit: string } {
-  return entry.direction === 'out'
-    ? { debit: '내 지갑', credit: entry.label }
-    : { debit: entry.label, credit: '내 지갑' };
-}
 
 export default async function WalletPage() {
   await requireMember();
@@ -158,9 +127,9 @@ export default async function WalletPage() {
           title="내 지갑 기록"
           id="activity-title"
           action={
-            <p className="shrink-0 text-xs text-muted-foreground">
-              최근 {recentTransactions.length}건
-            </p>
+            <Link href="/wallet/activity" className="shrink-0 text-sm font-extrabold text-clay">
+              전체 보기 →
+            </Link>
           }
         />
         {/* The transaction list is the ledger, so it renders as postings
@@ -174,7 +143,7 @@ export default async function WalletPage() {
                 description="보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다."
               />
             ) : (
-              recentTransactions.map((entry) => {
+              recentTransactions.slice(0, LATEST_ON_WALLET).map((entry) => {
                 const { debit, credit } = sides(entry);
                 return (
                   <PostingStrip
