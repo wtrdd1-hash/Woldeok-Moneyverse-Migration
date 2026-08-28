@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
-import { Sparkline } from '@/components/sparkline';
 import type { PricePoint } from '@/components/price-chart';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,10 +14,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { apiOrNull } from '@/lib/api';
-import { formatMoment, groupDigits, priceDirection } from '@/lib/money';
+import { formatMoment, groupDigits } from '@/lib/money';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
 import { requireMember } from '@/lib/session';
-import { LiveBadge, LiveHoldingValue, LiveQuote } from './live';
+import { LiveBadge, LiveHoldingValue, LiveQuote, LiveSparkline } from './live';
 import { StockDetailDialog } from './stock-detail-dialog';
 import { TradeDialog } from './trade-dialog';
 
@@ -143,11 +142,15 @@ export default async function StocksPage() {
                       price={row.current_price}
                       open={row.day_open_price}
                     />
-                    {/* The shape of the last few minutes. The figures beside
-                        it carry the same information, so it is decorative. */}
-                    <Sparkline
+                    {/* The shape of the last few minutes, extended by the
+                        broadcast. The figures beside it carry the same
+                        information, so it is decorative. */}
+                    <LiveSparkline
+                      stockId={row.id}
                       points={seriesFor.get(row.id) ?? []}
-                      direction={priceDirection(row.current_price, row.day_open_price)}
+                      price={row.current_price}
+                      open={row.day_open_price}
+                      limit={SPARK_POINTS}
                       className="w-28 shrink-0"
                     />
                   </div>

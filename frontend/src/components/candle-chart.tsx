@@ -25,6 +25,17 @@ export interface Candle {
 
 const WIDTH = 720;
 const HEIGHT = 260;
+/**
+ * The pitch a candle sits at when there is room for it.
+ *
+ * Without a cap the slot is the full width divided by the count, so two
+ * candles landed 360px apart with 14px of body between them — a chart that
+ * stretched whatever it was given to fill the frame. Real charts keep the
+ * pitch and let the drawing be as wide as it needs to be.
+ */
+const SLOT_MAX = 20;
+/** Below this the figure is too narrow to read as a chart at all. */
+const MIN_WIDTH = 260;
 const PADDING_Y = 16;
 const SCALE = 100_000n;
 const INTEGER = /^-?\d+$/;
@@ -72,16 +83,28 @@ export function CandleChart({
   const write = label ?? ((at: string) => at);
 
   // One slot per candle, with the body taking a little over half of it so
-  // neighbouring candles stay separate at any count.
-  const slot = WIDTH / ordered.length;
+  // neighbouring candles stay separate at any count. The slot shrinks when
+  // there are more candles than the frame fits and stops growing when there
+  // are fewer, so a handful of candles cluster at a readable pitch instead of
+  // being spread across the whole width.
+  const slot = Math.min(WIDTH / ordered.length, SLOT_MAX);
+  const drawn = slot * ordered.length;
+  const chartWidth = Math.max(MIN_WIDTH, drawn);
+  // Centred, so a short series sits in the middle of its figure rather than
+  // hugging the left edge with empty space after it.
+  const offset = (chartWidth - drawn) / 2;
   const body = Math.max(1.5, Math.min(14, slot * 0.6));
 
   return (
     <figure className="grid gap-2">
       <div className="overflow-x-auto">
         <svg
-          viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-          className="h-[260px] w-full min-w-[420px]"
+          viewBox={`0 0 ${chartWidth} ${HEIGHT}`}
+          // Sized in pixels rather than stretched to the container: the
+          // parent scrolls when the series is long, and a short one simply
+          // draws narrower.
+          style={{ width: chartWidth, maxWidth: '100%' }}
+          className="h-[260px]"
           role="img"
           aria-label={`캔들 ${ordered.length}개. 최고 ${groupDigits(max.toString())}, 최저 ${groupDigits(min.toString())}.`}
         >
@@ -90,7 +113,7 @@ export function CandleChart({
             const close = BigInt(candle.close_price);
             const down = close < open;
             const colour = down ? 'var(--fall)' : 'var(--rise)';
-            const centre = index * slot + slot / 2;
+            const centre = offset + index * slot + slot / 2;
             const top = y(close > open ? close : open);
             const bottom = y(close > open ? open : close);
             return (

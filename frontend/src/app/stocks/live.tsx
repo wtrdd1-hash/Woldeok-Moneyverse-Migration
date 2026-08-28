@@ -1,6 +1,9 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Amount } from '@/components/amount';
+import { Sparkline } from '@/components/sparkline';
+import type { SparkPoint } from '@/components/sparkline';
 import { cn } from '@/lib/cn';
 import { changeAmount, changePercent, groupDigits, priceDirection } from '@/lib/money';
 import { useMarketConnected, useQuote } from '@/lib/use-market-prices';
@@ -98,5 +101,56 @@ export function LiveBadge() {
       <span aria-hidden className="size-1.5 animate-pulse rounded-full bg-rise" />
       실시간
     </span>
+  );
+}
+
+/**
+ * The preview line, drawn from the broadcast rather than from the load.
+ *
+ * The server renders the last few minutes and the socket then moves only the
+ * price beside it, so the line used to sit still until the thirty-second
+ * refresh redrew it — the one figure on the card that looked frozen while
+ * everything around it moved.
+ *
+ * The server's series is the seed and every broadcast is pushed onto the
+ * front of it, oldest falling off the end. A refresh arriving underneath does
+ * not reset it: what is held here is newer than what the server just sent.
+ *
+ * A tick that repeats the price adds no point. The window is therefore the
+ * last N *changes* rather than the last N seconds, which is what a line of
+ * this size is answering anyway — it has no time axis to be wrong about.
+ */
+export function LiveSparkline({
+  stockId,
+  points,
+  price,
+  open,
+  limit,
+  className,
+}: {
+  readonly stockId: string;
+  /** Most recent first, as the API returns them. */
+  readonly points: readonly SparkPoint[];
+  readonly price: string;
+  readonly open: string;
+  readonly limit: number;
+  readonly className?: string;
+}) {
+  const quote = useQuote(stockId, { price, open });
+  const [series, setSeries] = useState<readonly SparkPoint[]>(() => points.slice(0, limit));
+
+  useEffect(() => {
+    setSeries((previous) => {
+      if (previous[0]?.price === quote.price) return previous;
+      return [{ price: quote.price }, ...previous].slice(0, limit);
+    });
+  }, [quote.price, limit]);
+
+  return (
+    <Sparkline
+      points={series}
+      direction={priceDirection(quote.price, quote.open)}
+      {...(className === undefined ? {} : { className })}
+    />
   );
 }

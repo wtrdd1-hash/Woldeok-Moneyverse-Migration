@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { CandleChart } from '@/components/candle-chart';
 import type { Candle } from '@/components/candle-chart';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { groupDigits } from '@/lib/money';
+import { useQuote } from '@/lib/use-market-prices';
 import { TradeForm } from './trade-form';
 
 interface Range {
@@ -122,13 +123,65 @@ export function StockDetailDialog({
   }, [open, interval, stockId]);
 
   const intraday = interval < 86400;
-  const candles: Candle[] = (data?.candles ?? []).map((row) => ({
-    at: row.bucket_at,
-    open_price: row.open_price,
-    high_price: row.high_price,
-    low_price: row.low_price,
-    close_price: row.close_price,
-  }));
+  const quote = useQuote(stockId, { price: currentPrice, open: dayOpenPrice });
+
+  /**
+   * The fetched candles with the one still open brought up to the live price.
+   *
+   * A candle for a bucket that has not closed is a running total, and the
+   * chart was showing whatever it was when the dialog opened while the price
+   * beside it moved every second. The last bucket's close follows the
+   * broadcast and its high and low stretch to admit it, which is exactly what
+   * the database does to the same row on the next tick.
+   *
+   * When a bucket boundary passes with the dialog open a fresh candle is
+   * started, but only below a day: the day and week buckets are aligned to
+   * Seoul in SQL and guessing that alignment here would date the candle
+   * wrong. Waiting for the next fetch is the better error.
+   */
+  const candles: Candle[] = useMemo(() => {
+    const rows: Candle[] = (data?.candles ?? []).map((row) => ({
+      at: row.bucket_at,
+      open_price: row.open_price,
+      high_price: row.high_price,
+      low_price: row.low_price,
+      close_price: row.close_price,
+    }));
+
+    const live = quote.price;
+    const last = rows[rows.length - 1];
+    if (!last || !/^\d+$/.test(live)) return rows;
+
+    const started = new Date(last.at).getTime();
+    if (Number.isNaN(started)) return rows;
+
+    const width = interval * 1000;
+    const now = Date.now();
+
+    if (now < started + width) {
+      const bigger = (a: string, b: string) => (BigInt(a) >= BigInt(b) ? a : b);
+      const smaller = (a: string, b: string) => (BigInt(a) <= BigInt(b) ? a : b);
+      rows[rows.length - 1] = {
+        ...last,
+        high_price: bigger(last.high_price, live),
+        low_price: smaller(last.low_price, live),
+        close_price: live,
+      };
+      return rows;
+    }
+
+    if (interval < 86400) {
+      const opened = Math.floor(now / width) * width;
+      rows.push({
+        at: new Date(opened).toISOString(),
+        open_price: live,
+        high_price: live,
+        low_price: live,
+        close_price: live,
+      });
+    }
+    return rows;
+  }, [data, quote.price, interval]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
