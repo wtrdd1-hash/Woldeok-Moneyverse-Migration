@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module';
 import { CoreModule } from './core/core.module';
 import { HealthModule } from './health/health.module';
@@ -19,6 +19,7 @@ import { StockModule } from './stock/stock.module';
 import { MarketTickerModule } from './stock/market-ticker.module';
 import { WalletModule } from './wallet/wallet.module';
 import { AUTH_LIMIT, READ_LIMIT, SENSITIVE_LIMIT } from './security/rate-limit';
+import { TieredThrottlerGuard } from './security/tiered-throttler.guard';
 
 const ONE_MINUTE_MS = 60_000;
 
@@ -53,6 +54,6 @@ const ONE_MINUTE_MS = 60_000;
       ],
     }),
   ],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [{ provide: APP_GUARD, useClass: TieredThrottlerGuard }],
 })
 export class AppModule {}

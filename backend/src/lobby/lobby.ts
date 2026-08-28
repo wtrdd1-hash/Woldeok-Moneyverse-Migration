@@ -46,19 +46,32 @@ interface LobbySocketData {
 export const MAX_LOBBY_CONNECTIONS = 250;
 /** Of those, how many may belong to nobody. Keeps room for members. */
 export const MAX_UNAUTHENTICATED_LOBBY_CONNECTIONS = 50;
-/** One person with several tabs is normal; one session with fifty is not. */
-export const MAX_LOBBY_CONNECTIONS_PER_SESSION = 5;
+/**
+ * One person with several tabs is normal; one session with fifty is not.
+ *
+ * Five was sized when the lobby was the only thing on the socket. The market
+ * screen now opens one of its own, a refresh makes a new one before the old
+ * has finished closing, and a member with the home page and the market open
+ * in two tabs is at four before doing anything unusual.
+ */
+export const MAX_LOBBY_CONNECTIONS_PER_SESSION = 12;
 /**
  * A backstop below the accounting above, checked before Engine.IO allocates
  * a transport for the connection at all.
  */
 export const MAX_SOCKET_CONNECTIONS = 300;
 /**
- * Each accepted handshake costs one session lookup in the database -- the
- * same order of cost as an auth route -- so it gets that tier's budget. A
- * reconnecting tab needs a handful per minute; a flood needs thousands.
+ * Each accepted handshake costs one session lookup in the database, so this
+ * is a request budget rather than a connection cap.
+ *
+ * It was the auth tier's twenty, from when a page load cost at most one
+ * handshake. Now the market screen opens a socket too, and a rejected
+ * handshake is not a quiet degradation: Engine.IO refuses before allocating a
+ * transport and the browser reports `WebSocket connection failed`, so the
+ * cost of setting this too low is a reader watching their live prices stop.
+ * Sixty is a page load every second for a minute; a flood is still thousands.
  */
-export const MAX_SOCKET_HANDSHAKES_PER_MINUTE = 20;
+export const MAX_SOCKET_HANDSHAKES_PER_MINUTE = 60;
 
 /** Five messages per ten seconds, per socket. */
 export const MESSAGE_BURST = 5;

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { currentViewer } from '@/lib/viewer';
+import { viewerOrUnknown } from '@/lib/viewer';
 
 /**
  * Session state for the navigation, and nothing else.
@@ -19,7 +19,19 @@ import { currentViewer } from '@/lib/viewer';
 export const dynamic = 'force-dynamic';
 
 export async function GET(): Promise<NextResponse> {
-  const viewer = await currentViewer();
+  const viewer = await viewerOrUnknown();
+
+  // Not knowing is reported as not knowing. Answering `signedIn: false`
+  // because the lookup failed would take a member's session away from them on
+  // screen while it was still perfectly valid, and the caller keeps whatever
+  // it already had when this is not ok.
+  if (!viewer) {
+    return NextResponse.json(
+      { detail: 'viewer unavailable' },
+      { status: 503, headers: { 'cache-control': 'private, no-store' } },
+    );
+  }
+
   return NextResponse.json(viewer, {
     headers: { 'cache-control': 'private, no-store' },
   });
