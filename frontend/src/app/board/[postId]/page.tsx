@@ -100,7 +100,7 @@ export default async function PostPage({
       </article>
 
       <section aria-labelledby="comments-title" className="grid gap-4">
-        <h2 id="comments-title" className="text-lg font-bold">
+        <h2 id="comments-title" className="text-lg">
           댓글 {comments.length > 0 && <span className="text-clay">{comments.length}</span>}
         </h2>
 

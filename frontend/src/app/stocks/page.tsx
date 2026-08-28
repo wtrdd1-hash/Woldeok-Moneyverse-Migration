@@ -91,7 +91,7 @@ export default async function StocksPage({
       </PageHeader>
 
       <section aria-labelledby="market-title" className="grid gap-3">
-        <h2 id="market-title" className="text-lg font-medium">
+        <h2 id="market-title" className="text-lg">
           거래 가능 종목
         </h2>
         {market === null ? (

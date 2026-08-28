@@ -51,21 +51,17 @@ skipped otherwise, and a skipped test is never reported as a passing one.
 
 ## Deploying
 
-Deployment runs only when someone asks for it — there is no push trigger.
+Two deployments from one compose file, and neither runs on a push:
+
+| | Test | Production |
+| --- | --- | --- |
+| | `test.easy-scraping.com` | `easy-scraping.com` |
 
 ```bash
-gh workflow run deploy.yml
+gh workflow run deploy.yml -f environment=test          # then, once confirmed:
+gh workflow run deploy.yml -f environment=production
 ```
 
-The workflow builds both images, publishes them to GHCR tagged with the commit
-and with `latest`, ships the compose file and the migrations, and rolls the
-host. To move an already-deployed host onto `latest` without a full run:
-
-```bash
-ssh <host> bash ~/moneyverse-migration/update.sh
-```
-
-That moves images only. A release that adds a database migration needs the
-workflow, which ships the migration with it. See
-[deploy/README.md](deploy/README.md) for the whole picture, including
-rollback.
+They share no database and no secret. **[docs/RELEASING.md](docs/RELEASING.md)
+is the procedure**, including rollback and what to do when a release carries a
+migration. [deploy/README.md](deploy/README.md) describes the stack itself.

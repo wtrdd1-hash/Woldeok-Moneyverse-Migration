@@ -61,7 +61,7 @@ export default async function SeasonsPage({
       </PageHeader>
 
       <section aria-labelledby="events-title" className="grid gap-3">
-        <h2 id="events-title" className="text-lg font-medium">
+        <h2 id="events-title" className="text-lg">
           진행 중인 이벤트
         </h2>
         {data === null ? (

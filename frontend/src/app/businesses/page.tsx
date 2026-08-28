@@ -56,7 +56,7 @@ export default async function BusinessesPage() {
       </PageHeader>
 
       <section aria-labelledby="catalog-title" className="grid gap-3">
-        <h2 id="catalog-title" className="text-lg font-medium">
+        <h2 id="catalog-title" className="text-lg">
           구입 가능한 사업
         </h2>
         {catalog === null ? (
@@ -94,7 +94,7 @@ export default async function BusinessesPage() {
 
       <section aria-labelledby="mine-title" className="grid gap-3">
         <div>
-          <h2 id="mine-title" className="text-lg font-medium">
+          <h2 id="mine-title" className="text-lg">
             내 사업
           </h2>
           <p className="text-sm text-muted-foreground">

@@ -20,33 +20,52 @@ umask 077
 touch .env
 
 have() { grep -qE "^$1=" .env; }
+# Writes a value once and never again: a generated secret must survive every
+# later deploy, or the database would be unreachable with the password the
+# volume was initialised with.
 put() { have "$1" || printf '%s=%s\n' "$1" "$2" >> .env; }
+# Replaces a value the caller named. For the handful of settings that are a
+# deliberate operator decision rather than a generated constant -- the public
+# origin above all, since renaming the site is exactly the case `put` would
+# silently ignore.
+set_to() { sed -i "/^$1=/d" .env; printf '%s=%s\n' "$1" "$2" >> .env; }
 
 # 32 bytes of urandom, hex encoded. The API requires at least 32 characters
 # for the internal token and rejects anything shorter at startup.
 secret() { head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n'; }
 
-put DB_NAME 'moneyverse_migration'
+put DB_NAME "${DB_NAME:-moneyverse_migration}"
 put POSTGRES_PASSWORD "$(secret)"
 put APP_DB_PASSWORD "$(secret)"
 put INTERNAL_API_TOKEN "$(secret)"
-put APP_BASE_URL "${APP_BASE_URL:-https://migration.easy-scraping.com}"
+# The status collector's own credential. Its role may execute exactly one
+# function and nothing else, so this is not a second copy of the application's
+# access — see 050-status-collector.sql.
+put STATUS_COLLECTOR_PASSWORD "$(secret)"
+set_to APP_BASE_URL "${APP_BASE_URL:?APP_BASE_URL is required — it decides the OAuth redirect URIs}"
 put COOKIE_SECURE 'true'
 put TRUST_PROXY_X_FORWARDED_FOR 'true'
-# A test deployment must never be indexed. Turning this on would put a second
-# copy of the product's Korean copy into search results under a hostname that
-# is not the canonical one.
-put SEO_INDEXING_ENABLED 'false'
-put ADS_ENABLED 'false'
-put EDGE_PORT '3021'
+# Only the production deployment may be indexed, and only when it is told to.
+# A second host serving the same Korean copy under a different name is a
+# duplicate in search results, so this defaults off and production turns it on.
+set_to SEO_INDEXING_ENABLED "${SEO_INDEXING_ENABLED:-false}"
+put ADS_ENABLED "${ADS_ENABLED:-false}"
+set_to EDGE_PORT "${EDGE_PORT:-3021}"
+# Administrators this deployment grants on top of the two every database has.
+# Empty on production by design: an operator who should hold roles there is
+# granted them through the console, not by a deployment variable.
+set_to BOOTSTRAP_DISCORD_ADMIN_IDS "${BOOTSTRAP_DISCORD_ADMIN_IDS:-}"
 
 base_url="$(grep -E '^APP_BASE_URL=' .env | cut -d= -f2-)"
 
 # The redirect URI is derived, not configured: the API refuses to enable a
 # provider whose redirect URI does not match APP_BASE_URL's origin and the
 # exact callback path, so a hand-written one is a silent disable.
-put DISCORD_REDIRECT_URI "${base_url%/}/auth/discord/callback"
-put GOOGLE_REDIRECT_URI "${base_url%/}/auth/google/callback"
+# Derived from the origin above, and rewritten with it: after a rename these
+# must follow, or the API silently disables both providers because their
+# redirect URI no longer matches APP_BASE_URL.
+set_to DISCORD_REDIRECT_URI "${base_url%/}/auth/discord/callback"
+set_to GOOGLE_REDIRECT_URI "${base_url%/}/auth/google/callback"
 
 adopt_from="${ADOPT_FROM:-}"
 if [ -n "$adopt_from" ]; then

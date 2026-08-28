@@ -30,9 +30,9 @@ on:
       environment:
         description: Which deployment to roll
         required: true
-        default: staging
+        default: test
         type: choice
-        options: [staging, production]
+        options: [test, production]
 
 concurrency:
   # Never let two deploys touch the host at once; the later one waits rather
@@ -51,6 +51,11 @@ jobs:
   build:
     needs: verify
     runs-on: ubuntu-latest
+    # The frontend image has the public origin compiled into it -- robots.txt
+    # and sitemap.xml are generated at build time and have to name the host --
+    # so the two deployments cannot share a tag. The environment is part of
+    # the tag rather than a hidden difference between two images called the
+    # same thing.
     permissions:
       contents: read
       packages: write
@@ -75,8 +80,10 @@ jobs:
           # may not.
           prefix=$(echo "${REGISTRY}/${IMAGE_PREFIX}" | tr '[:upper:]' '[:lower:]')
           echo "prefix=${prefix}" >> "$GITHUB_OUTPUT"
-          echo "backend=${prefix}/backend:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
-          echo "frontend=${prefix}/frontend:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          suffix="${{ inputs.environment || 'test' }}"
+          echo "suffix=${suffix}" >> "$GITHUB_OUTPUT"
+          echo "backend=${prefix}/backend:${GITHUB_SHA}-${suffix}" >> "$GITHUB_OUTPUT"
+          echo "frontend=${prefix}/frontend:${GITHUB_SHA}-${suffix}" >> "$GITHUB_OUTPUT"
 
       - name: Build and push the backend
         uses: docker/build-push-action@v6
@@ -95,7 +102,7 @@ jobs:
           sbom: false
           tags: |
             ${{ steps.meta.outputs.backend }}
-            ${{ steps.meta.outputs.prefix }}/backend:latest
+            ${{ steps.meta.outputs.prefix }}/backend:latest-${{ steps.meta.outputs.suffix }}
           cache-from: type=gha,scope=backend
           cache-to: type=gha,mode=max,scope=backend
 
@@ -112,20 +119,57 @@ jobs:
           # to name the public host, so the origin is a build argument. It is
           # a repository variable, not a secret: it is the site's own address.
           build-args: |
-            APP_BASE_URL=${{ vars.APP_BASE_URL }}
-            SEO_INDEXING_ENABLED=${{ vars.SEO_INDEXING_ENABLED || 'false' }}
+            APP_BASE_URL=${{ inputs.environment == 'production' && 'https://easy-scraping.com' || 'https://test.easy-scraping.com' }}
+            SEO_INDEXING_ENABLED=${{ inputs.environment == 'production' && 'true' || 'false' }}
           tags: |
             ${{ steps.meta.outputs.frontend }}
-            ${{ steps.meta.outputs.prefix }}/frontend:latest
-          cache-from: type=gha,scope=frontend
-          cache-to: type=gha,mode=max,scope=frontend
+            ${{ steps.meta.outputs.prefix }}/frontend:latest-${{ steps.meta.outputs.suffix }}
+          cache-from: type=gha,scope=frontend-${{ steps.meta.outputs.suffix }}
+          cache-to: type=gha,mode=max,scope=frontend-${{ steps.meta.outputs.suffix }}
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'staging' }}
+    environment: ${{ inputs.environment || 'test' }}
     steps:
       - uses: actions/checkout@v4
+
+      # The two deployments differ in six values and nothing else. They are
+      # here rather than in environment variables because none of them is a
+      # secret -- they are hostnames, a directory and a port -- and a reader
+      # asking "what is different about production?" should find the answer in
+      # the file that does it.
+      #
+      # `test` keeps the stack name `wdmv` and the directory the migration
+      # deployment already uses: its compose project, and therefore its
+      # database volume, is named after the stack, so renaming it would strand
+      # the data. Only the public origin moves.
+      - name: Choose the deployment
+        id: target
+        run: |
+          if [ "${{ inputs.environment || 'test' }}" = production ]; then
+            {
+              echo 'stack=wdmvp'
+              echo 'dir=moneyverse-production'
+              echo 'base_url=https://easy-scraping.com'
+              echo 'edge_port=3022'
+              echo 'seo=true'
+              echo 'db_name=moneyverse_production'
+              echo 'admin_ids='
+            } >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo 'stack=wdmv'
+              echo 'dir=moneyverse-migration'
+              echo 'base_url=https://test.easy-scraping.com'
+              echo 'edge_port=3021'
+              echo 'seo=false'
+              # The name the existing volume was initialised with. Changing it
+              # would point the application at a database that does not exist.
+              echo 'db_name=moneyverse_migration'
+              echo "admin_ids=${{ vars.TEST_BOOTSTRAP_DISCORD_ADMIN_IDS }}"
+            } >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Open an SSH session to the host
         run: |
@@ -149,11 +193,11 @@ jobs:
 
       - name: Ship the deployment files
         run: |
-          ssh target 'mkdir -p ~/moneyverse-migration'
+          ssh target 'mkdir -p ~/${{ steps.target.outputs.dir }}'
           tar czf - \
-            -C deploy compose.yml roll.sh bootstrap-env.sh edge \
+            -C deploy compose.yml roll.sh bootstrap-env.sh seed.sh update.sh edge \
             -C "${GITHUB_WORKSPACE}/packages/database" init migrations migrate.sh \
-            | ssh target 'tar xzf - -C ~/moneyverse-migration'
+            | ssh target 'tar xzf - -C ~/${{ steps.target.outputs.dir }}'
 
       # The script runs on the host and reads its inputs from the environment.
       # Passing it as a here-doc let the runner's shell expand the body first,
@@ -169,10 +213,18 @@ jobs:
             "FRONTEND_IMAGE='${{ needs.build.outputs.frontend }}'" \
             "GHCR_USER='${{ github.actor }}'" \
             "GHCR_TOKEN='${{ secrets.GHCR_PULL_TOKEN }}'" \
-            "APP_BASE_URL='${{ vars.APP_BASE_URL }}'" \
+            "STACK='${{ steps.target.outputs.stack }}'" \
+            "DEPLOY_DIR=\"\$HOME/${{ steps.target.outputs.dir }}\"" \
+            "APP_BASE_URL='${{ steps.target.outputs.base_url }}'" \
+            "EDGE_PORT='${{ steps.target.outputs.edge_port }}'" \
+            "SEO_INDEXING_ENABLED='${{ steps.target.outputs.seo }}'" \
+            "DB_NAME='${{ steps.target.outputs.db_name }}'" \
+            "BOOTSTRAP_DISCORD_ADMIN_IDS='${{ steps.target.outputs.admin_ids }}'" \
             "ADOPT_FROM='${{ vars.ADOPT_FROM }}'" \
-            'bash ~/moneyverse-migration/roll.sh'
+            'bash ~/${{ steps.target.outputs.dir }}/roll.sh'
 
       - name: Report what is running
         if: always()
-        run: ssh target 'cd ~/moneyverse-migration && docker compose ps'
+        run: |
+          ssh target "cd ~/${{ steps.target.outputs.dir }} \
+            && STACK='${{ steps.target.outputs.stack }}' docker compose ps"

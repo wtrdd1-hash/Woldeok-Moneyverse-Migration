@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <!--
+    The wordmark's glyph on its own: the ledger cup with the stroked M.
+
+    A tab icon is seen at 16px, so the shape is drawn on its own background
+    rather than transparent — a transparent forest-green mark disappears
+    against a dark browser chrome, and the plate is what makes it findable in
+    a row of twenty tabs.
+  -->
+  <rect width="40" height="40" rx="9" fill="#214b38"/>
+  <path d="m11 14 4.6 10L20 16.5 24.4 24 29 14" fill="none" stroke="#f7f4ed"
+        stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

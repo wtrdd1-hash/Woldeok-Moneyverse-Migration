@@ -14,9 +14,24 @@ set -euo pipefail
 
 cd "${DEPLOY_DIR:-$HOME/moneyverse-migration}"
 
-# roll.sh records the exact commit it deployed. Removing those two lines lets
-# compose.yml's own defaults apply again, and those name `:latest`.
-sed -i '/^BACKEND_IMAGE=/d;/^FRONTEND_IMAGE=/d' .env
+# The image tag carries the environment, because the frontend has the public
+# origin compiled into it and one tag cannot mean both sites. Which one this
+# directory is was recorded by roll.sh.
+stack="$(grep -E '^STACK=' .env | cut -d= -f2)"
+stack="${stack:-wdmv}"
+case "${CHANNEL:-${stack}}" in
+  wdmvp | production) channel=production ;;
+  *) channel=test ;;
+esac
+
+prefix=ghcr.io/ridanit-ruma/wdmv
+record() {
+  sed -i "/^$1=/d" .env
+  printf '%s=%s\n' "$1" "$2" >> .env
+}
+record BACKEND_IMAGE "${prefix}/backend:latest-${channel}"
+record FRONTEND_IMAGE "${prefix}/frontend:latest-${channel}"
+export STACK="$stack"
 
 # Optional: `docker login` already stores a credential for anyone who has run
 # it once. Pass GHCR_USER and GHCR_TOKEN to log in for this run only.
@@ -40,6 +55,6 @@ if [ "$code" != "200" ]; then
   exit 1
 fi
 
-echo "running on :latest, healthy on port ${port}"
+echo "running ${channel} on :latest-${channel}, healthy on port ${port}"
 echo "newest migration on this host: $(ls migrations/*.sql | tail -1)"
 docker compose ps

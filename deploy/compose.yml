@@ -1,6 +1,12 @@
-name: wdmv
+name: ${STACK:-wdmv}
 
-# The migration deployment. Five containers and one external network.
+# One deployment of the rebuild. Six containers and one external network.
+#
+# The same file runs twice on this host: STACK=wdmv is the test deployment at
+# test.easy-scraping.com, STACK=wdmvp is production at easy-scraping.com. The
+# stack name prefixes every container and is the alias the Cloudflare tunnel
+# resolves, so the two are separate projects with separate volumes, separate
+# databases and separate secrets, from one file.
 #
 # Only `edge` is reachable from outside the stack: it is the single member of
 # the Cloudflare tunnel's network, and it is what decides that `/socket.io/`
@@ -16,7 +22,7 @@ name: wdmv
 services:
   db:
     image: postgres:17.5-alpine
-    container_name: wdmv-db
+    container_name: ${STACK:-wdmv}-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: moneyverse_migrator
@@ -37,7 +43,7 @@ services:
   # migration needs no separate step.
   migrate:
     image: postgres:17.5-alpine
-    container_name: wdmv-migrate
+    container_name: ${STACK:-wdmv}-migrate
     restart: 'no'
     environment:
       PGHOST: db
@@ -53,12 +59,35 @@ services:
       db:
         condition: service_healthy
 
+  # Per-deployment configuration a migration must not carry: the status
+  # collector's credential, and the administrator list that differs between
+  # this deployment and the other one. Runs to completion on every deploy and
+  # is idempotent.
+  seed:
+    image: postgres:17.5-alpine
+    container_name: ${STACK:-wdmv}-seed
+    restart: 'no'
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: moneyverse_migrator
+      PGPASSWORD: ${POSTGRES_PASSWORD:?required}
+      PGDATABASE: ${DB_NAME:?required}
+      STATUS_COLLECTOR_PASSWORD: ${STATUS_COLLECTOR_PASSWORD:-}
+      BOOTSTRAP_DISCORD_ADMIN_IDS: ${BOOTSTRAP_DISCORD_ADMIN_IDS:-}
+    volumes:
+      - ./seed.sh:/usr/local/bin/seed.sh:ro
+    entrypoint: ['/bin/sh', '/usr/local/bin/seed.sh']
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
   backend:
     # No `:?required`: an unset value would make every later `docker compose`
     # call fail, including `ps` and `logs`, which is exactly when an operator
     # needs them. roll.sh writes the resolved reference into .env.
-    image: ${BACKEND_IMAGE:-ghcr.io/ridanit-ruma/wdmv/backend:latest}
-    container_name: wdmv-backend
+    image: ${BACKEND_IMAGE:-ghcr.io/ridanit-ruma/wdmv/backend:latest-test}
+    container_name: ${STACK:-wdmv}-backend
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -82,12 +111,20 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
       PHOTO_STORAGE_DIR: /data/moneyverse/photos
+      # A second connection, with one privilege: recording a status snapshot.
+      # The application role is refused that write on purpose (013), so the
+      # collector cannot borrow the pool every other query uses. Absent, the
+      # collector does not run and /status keeps saying 확인 중.
+      STATUS_COLLECTOR_DATABASE_URL: ${STATUS_COLLECTOR_PASSWORD:+postgresql://moneyverse_status_collector:${STATUS_COLLECTOR_PASSWORD}@db:5432/${DB_NAME}}
+      STATUS_COLLECT_INTERVAL_MS: ${STATUS_COLLECT_INTERVAL_MS:-30000}
     volumes:
       - photo-data:/data/moneyverse/photos
     depends_on:
       db:
         condition: service_healthy
       migrate:
+        condition: service_completed_successfully
+      seed:
         condition: service_completed_successfully
     healthcheck:
       test: ['CMD', 'node', '-e', "require('http').get('http://127.0.0.1:3000/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
@@ -100,8 +137,8 @@ services:
     # Built with APP_BASE_URL baked in, because robots.txt and sitemap.xml are
     # generated during the build and have to name the public host. Changing
     # the origin therefore needs a rebuild, not just a restart.
-    image: ${FRONTEND_IMAGE:-ghcr.io/ridanit-ruma/wdmv/frontend:latest}
-    container_name: wdmv-frontend
+    image: ${FRONTEND_IMAGE:-ghcr.io/ridanit-ruma/wdmv/frontend:latest-test}
+    container_name: ${STACK:-wdmv}-frontend
     restart: unless-stopped
     environment:
       NODE_ENV: production
@@ -124,7 +161,7 @@ services:
 
   edge:
     image: nginx:1.27-alpine
-    container_name: wdmv-edge
+    container_name: ${STACK:-wdmv}-edge
     restart: unless-stopped
     volumes:
       # The directory, not the file. A bind mount of a single file binds its
@@ -143,7 +180,7 @@ services:
     networks:
       default:
       tunnel:
-        aliases: [wdmv]
+        aliases: ["${STACK:-wdmv}"]
 
 volumes:
   db-data:

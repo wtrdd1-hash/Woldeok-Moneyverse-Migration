@@ -30,11 +30,17 @@ record() {
 }
 record BACKEND_IMAGE "$BACKEND_IMAGE"
 record FRONTEND_IMAGE "$FRONTEND_IMAGE"
+# The stack name prefixes every container, names the compose project its
+# volumes belong to, and is the alias the Cloudflare tunnel resolves.
+# Recorded so a later `docker compose ps` or `logs` run in this directory
+# addresses the same stack the deploy did.
+record STACK "${STACK:-wdmv}"
 
 # The host is outside GitHub, so it logs in with its own read:packages token.
 printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
 trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
 
+export STACK="${STACK:-wdmv}"
 docker compose pull backend frontend
 # --wait is the gate: a rollout that never becomes healthy fails here rather
 # than being reported as a success.

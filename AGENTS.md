@@ -140,6 +140,17 @@ page dynamic.
 Member pages are `force-dynamic` and `noindex`. They carry one member's
 balances; nothing about them may be cached.
 
+## Deploying
+
+Two deployments, one compose file, `STACK` telling them apart: `wdmv` is test
+at test.easy-scraping.com, `wdmvp` is production at easy-scraping.com. They
+share no database and no secret.
+
+Neither deploys on a push. `gh workflow run deploy.yml -f environment=test`,
+then production once test is confirmed. **[docs/RELEASING.md](docs/RELEASING.md)
+is the procedure** — read it before deploying anything, and before changing
+anything under `deploy/`.
+
 ## This machine
 
 3.6 GB RAM, four threads. It freezes under a parallel build and recovery
