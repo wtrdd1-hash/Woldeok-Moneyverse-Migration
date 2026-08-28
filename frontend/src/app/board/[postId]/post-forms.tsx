@@ -171,7 +171,7 @@ export function DeleteCommentButton({
       <form action={action}>
         <input type="hidden" name="postId" value={postId} />
         <input type="hidden" name="commentId" value={commentId} />
-        <SubmitButton variant="ghost" size="sm" className="text-muted-foreground">
+        <SubmitButton variant="ghost" size="sm" className="min-h-11 text-muted-foreground">
           삭제
         </SubmitButton>
       </form>

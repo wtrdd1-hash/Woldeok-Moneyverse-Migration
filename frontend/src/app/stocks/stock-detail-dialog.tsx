@@ -159,8 +159,15 @@ export function StockDetailDialog({
     const now = Date.now();
 
     if (now < started + width) {
-      const bigger = (a: string, b: string) => (BigInt(a) >= BigInt(b) ? a : b);
-      const smaller = (a: string, b: string) => (BigInt(a) <= BigInt(b) ? a : b);
+      // The candle's own figures are checked too, not just the live one: they
+      // cross the network as strings, and a BigInt() that throws in here
+      // throws during a render, which takes the whole page down rather than
+      // just the chart.
+      const integer = (value: string) => /^\d+$/.test(value);
+      const bigger = (a: string, b: string) =>
+        integer(a) ? (BigInt(a) >= BigInt(b) ? a : b) : b;
+      const smaller = (a: string, b: string) =>
+        integer(a) ? (BigInt(a) <= BigInt(b) ? a : b) : b;
       rows[rows.length - 1] = {
         ...last,
         high_price: bigger(last.high_price, live),

@@ -4,6 +4,7 @@ import { EmptyState } from '@/components/empty-state';
 import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
+import { jsonLd } from '@/lib/json-ld';
 import { formatDay } from '@/lib/money';
 
 export const revalidate = 60;
@@ -45,7 +46,7 @@ export default async function AnnouncementsPage() {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
+            __html: jsonLd({
               '@context': 'https://schema.org',
               '@type': 'ItemList',
               itemListElement: data.announcements.map((notice, index) => ({

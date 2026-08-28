@@ -102,10 +102,10 @@ export function ApprovalDecision({ approvalRequestId }: { readonly approvalReque
           </FieldLabel>
           <Input id={`decision-reason-${approvalRequestId}`} name="reason" maxLength={2000} />
         </Field>
-        <SubmitButton name="decision" value="approve" size="sm">
+        <SubmitButton name="decision" value="approve" size="sm" className="min-h-11">
           승인
         </SubmitButton>
-        <SubmitButton name="decision" value="reject" variant="outline" size="sm">
+        <SubmitButton name="decision" value="reject" variant="outline" size="sm" className="min-h-11">
           반려
         </SubmitButton>
       </form>
@@ -203,7 +203,7 @@ export function ToggleActive({
       <form action={action}>
         <input type="hidden" name={handler.field} value={id} />
         <input type="hidden" name="active" value={String(!active)} />
-        <SubmitButton variant="outline" size="sm">
+        <SubmitButton variant="outline" size="sm" className="min-h-11">
           {active ? handler.off : handler.on}
         </SubmitButton>
       </form>
