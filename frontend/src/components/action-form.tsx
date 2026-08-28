@@ -1,7 +1,8 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { CircleAlert, CircleCheck } from 'lucide-react';
+import { CircleAlert, CircleCheck, X } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -56,9 +57,42 @@ export function SubmitButton({
   );
 }
 
+/** How long an outcome stays on screen before it takes itself away. */
+const DISMISS_AFTER_MS = 5000;
+
 export function ActionAlert({ state }: { readonly state: ActionState }) {
-  if (state.status === 'idle' || !state.message) return null;
+  // Keyed on the state object rather than its text: `useActionState` hands
+  // back a new object per submission, so submitting twice and getting the
+  // same answer twice shows it twice, which is what tells the member the
+  // second attempt was heard.
+  const [dismissed, setDismissed] = useState(false);
+  const paused = useRef(false);
+
+  useEffect(() => {
+    setDismissed(false);
+    if (state.status === 'idle' || !state.message) return;
+
+    // Re-checked on a tick rather than one timeout, so hovering or focusing
+    // the alert holds it: five seconds is not long for a sentence explaining
+    // what went wrong, and reading it should not be a race.
+    const started = Date.now();
+    let elapsed = 0;
+    let last = started;
+    const timer = setInterval(() => {
+      const now = Date.now();
+      if (!paused.current) elapsed += now - last;
+      last = now;
+      if (elapsed >= DISMISS_AFTER_MS) {
+        clearInterval(timer);
+        setDismissed(true);
+      }
+    }, 250);
+    return () => clearInterval(timer);
+  }, [state]);
+
+  if (state.status === 'idle' || !state.message || dismissed) return null;
   const failed = state.status === 'error';
+
   return (
     <Alert
       variant={failed ? 'destructive' : 'default'}
@@ -66,9 +100,30 @@ export function ActionAlert({ state }: { readonly state: ActionState }) {
       // and the outcome must reach them without their having to hunt for it.
       role="status"
       aria-live="polite"
+      className="pr-12"
+      onMouseEnter={() => {
+        paused.current = true;
+      }}
+      onMouseLeave={() => {
+        paused.current = false;
+      }}
+      onFocusCapture={() => {
+        paused.current = true;
+      }}
+      onBlurCapture={() => {
+        paused.current = false;
+      }}
     >
       {failed ? <CircleAlert /> : <CircleCheck />}
       <AlertDescription>{state.message}</AlertDescription>
+      <button
+        type="button"
+        onClick={() => setDismissed(true)}
+        aria-label="알림 닫기"
+        className="absolute right-2 top-2 grid size-8 place-items-center rounded-md text-current opacity-60 transition-opacity hover:opacity-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current"
+      >
+        <X className="size-4" />
+      </button>
     </Alert>
   );
 }
