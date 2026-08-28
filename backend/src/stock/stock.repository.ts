@@ -36,6 +36,32 @@ export interface StockRow {
   readonly updated_at: Date;
 }
 
+/** A market row: StockRow plus the day's range, from today's candle. */
+export interface StockMarketRow extends Omit<StockRow, 'active'> {
+  readonly day_high_price: WldAmount;
+  readonly day_low_price: WldAmount;
+}
+
+// One day of trading, from virtual_stock_daily_candles (052). Prices are
+// bigint columns cast to text for the same reason every other amount is.
+export interface StockCandleRow {
+  readonly trade_date: string;
+  readonly open_price: WldAmount;
+  readonly high_price: WldAmount;
+  readonly low_price: WldAmount;
+  readonly close_price: WldAmount;
+}
+
+// The highs and lows a detail view quotes. Every field is null for a stock
+// with no candle yet, which is a real state and not an error.
+export interface StockRangeRow {
+  readonly day_high: WldAmount | null;
+  readonly day_low: WldAmount | null;
+  readonly year_high: WldAmount | null;
+  readonly year_low: WldAmount | null;
+  readonly first_trade_date: string | null;
+}
+
 // virtual_stock_positions joined with virtual_stocks (see migration
 // 023-virtual-stock-game.sql). quantity is a share count, not money, so it
 // stays a plain string like season's points/entries tallies; average_cost,
@@ -148,11 +174,56 @@ export class PostgresStockRepository {
   // supplies the reads the write path always had. See
   // docs/findings/stock-reads-lack-grants.md.
 
-  async list(): Promise<readonly StockRow[]> {
-    return queryRows<StockRow>(
+  /**
+   * The market screen's list.
+   *
+   * `stock_market_overview` rather than `stock_list_active`: it is the same
+   * set of stocks with today's high and low joined from the candle the ticker
+   * maintains, so the screen showing a day's movement is one query.
+   */
+  async list(): Promise<readonly StockMarketRow[]> {
+    return queryRows<StockMarketRow>(
       this.pool,
-      'SELECT id::text, symbol, name, description, current_price::text AS current_price, day_open_price::text AS day_open_price, active, updated_at FROM public.stock_list_active()',
+      'SELECT id::text, symbol, name, description, current_price::text AS current_price, day_open_price::text AS day_open_price, day_high_price::text AS day_high_price, day_low_price::text AS day_low_price, updated_at FROM public.stock_market_overview()',
     );
+  }
+
+  /** Newest first, as the function returns them; the chart reverses. */
+  async dailyCandles(stockId: unknown, days: unknown = 60): Promise<readonly StockCandleRow[]> {
+    uuid(stockId, 'stock id');
+    const n =
+      typeof days === 'number' && Number.isSafeInteger(days)
+        ? Math.min(365, Math.max(1, days))
+        : 60;
+    return queryRows<StockCandleRow>(
+      this.pool,
+      'SELECT trade_date::text AS trade_date, open_price::text AS open_price, high_price::text AS high_price, low_price::text AS low_price, close_price::text AS close_price FROM public.stock_daily_candles($1,$2)',
+      [stockId, n],
+    );
+  }
+
+  async priceRange(stockId: unknown): Promise<StockRangeRow | null> {
+    uuid(stockId, 'stock id');
+    return queryOne<StockRangeRow>(
+      this.pool,
+      'SELECT day_high::text AS day_high, day_low::text AS day_low, year_high::text AS year_high, year_low::text AS year_low, first_trade_date::text AS first_trade_date FROM public.stock_price_range($1)',
+      [stockId],
+    );
+  }
+
+  /**
+   * One step of the market, applied by the ticker.
+   *
+   * Returns how many stocks moved. Zero is a normal answer: the function
+   * takes an advisory lock, so a second caller in the same second does
+   * nothing rather than applying a second walk.
+   */
+  async liveTick(): Promise<number> {
+    const row = await queryOne<{ moved: string }>(
+      this.pool,
+      'SELECT public.stock_market_live_tick()::text AS moved',
+    );
+    return Number(row?.moved ?? 0);
   }
 
   /**

@@ -16,6 +16,7 @@ import { PrivacyModule } from './privacy/privacy.module';
 import { SeasonModule } from './season/season.module';
 import { ShopModule } from './shop/shop.module';
 import { StockModule } from './stock/stock.module';
+import { MarketTickerModule } from './stock/market-ticker.module';
 import { WalletModule } from './wallet/wallet.module';
 import { AUTH_LIMIT, READ_LIMIT, SENSITIVE_LIMIT } from './security/rate-limit';
 
@@ -29,6 +30,7 @@ const ONE_MINUTE_MS = 60_000;
     WalletModule,
     ShopModule,
     StockModule,
+    MarketTickerModule,
     BusinessModule,
     SeasonModule,
     BoardModule,

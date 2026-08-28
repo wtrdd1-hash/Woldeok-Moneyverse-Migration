@@ -3,6 +3,7 @@
 import { useActionState, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
+import { AmountInput } from '@/components/amount-input';
 import { Amount } from '@/components/amount';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -120,19 +121,7 @@ export function BankPanel() {
         <form action={moveAction} className="grid gap-3">
           <Field>
             <FieldLabel htmlFor="bank-move-amount">입출금 WLD</FieldLabel>
-            <InputGroup>
-              <InputGroupInput
-                id="bank-move-amount"
-                name="amount"
-                type="number"
-                inputMode="numeric"
-                min={1}
-                step={1}
-                placeholder="0"
-                required
-              />
-              <InputGroupAddon align="inline-end">WLD</InputGroupAddon>
-            </InputGroup>
+            <AmountInput id="bank-move-amount" name="amount" placeholder="0" required />
           </Field>
           <div className="flex flex-wrap gap-2">
             {/* One form, two intents. The direction is exactly what the
@@ -151,20 +140,7 @@ export function BankPanel() {
         <form action={borrowAction} className="grid gap-3">
           <Field>
             <FieldLabel htmlFor="loan-principal">대출 WLD (100~500,000)</FieldLabel>
-            <InputGroup>
-              <InputGroupInput
-                id="loan-principal"
-                name="principalAmount"
-                type="number"
-                inputMode="numeric"
-                min={100}
-                max={500000}
-                step={1}
-                placeholder="0"
-                required
-              />
-              <InputGroupAddon align="inline-end">WLD</InputGroupAddon>
-            </InputGroup>
+            <AmountInput id="loan-principal" name="principalAmount" placeholder="0" required />
             <FieldDescription>대출 원금에 5% 이자가 더해집니다.</FieldDescription>
           </Field>
           <SubmitButton className="w-fit">대출 신청</SubmitButton>
@@ -210,19 +186,13 @@ export function LoanList({ loans }: { readonly loans: readonly LoanView[] }) {
           {loan.status === 'active' && (
             <form action={action} className="flex flex-wrap items-end gap-2">
               <input type="hidden" name="loanId" value={loan.loanId} />
-              <InputGroup className="w-40">
-                <InputGroupInput
-                  name="amount"
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  step={1}
-                  placeholder="상환할 WLD"
-                  aria-label="상환할 WLD"
-                  required
-                />
-                <InputGroupAddon align="inline-end">WLD</InputGroupAddon>
-              </InputGroup>
+              <AmountInput
+                name="amount"
+                className="w-40"
+                placeholder="상환할 WLD"
+                ariaLabel="상환할 WLD"
+                required
+              />
               <SubmitButton variant="outline">상환</SubmitButton>
             </form>
           )}

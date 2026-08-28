@@ -1,4 +1,5 @@
 import {
+  Query,
   BadRequestException,
   Body,
   ConflictException,
@@ -69,10 +70,31 @@ export class StockController {
     return { trades: await this.service().history(requireUserId(request)) };
   }
 
+  /** `limit` bounds the series, 1 to 240; the repository clamps it. */
   @Get(':id/prices')
   @ApiOperation({ summary: 'Recorded price history for one stock' })
-  async prices(@Param('id', ParseUUIDPipe) stockId: string) {
-    return { prices: await this.service().priceHistory(stockId) };
+  async prices(@Param('id', ParseUUIDPipe) stockId: string, @Query('limit') limit?: string) {
+    const requested = limit === undefined ? undefined : Number(limit);
+    if (requested !== undefined && !Number.isSafeInteger(requested)) {
+      throw new BadRequestException('limit must be a whole number');
+    }
+    return { prices: await this.service().priceHistory(stockId, requested) };
+  }
+
+  /**
+   * Daily candles and the highs and lows that go beside them.
+   *
+   * One route rather than two: the detail chart draws nothing useful with
+   * half of this, so asking for half would only ever be a mistake.
+   */
+  @Get(':id/candles')
+  @ApiOperation({ summary: 'Daily open/high/low/close for one stock' })
+  async candles(@Param('id', ParseUUIDPipe) stockId: string) {
+    const [candles, range] = await Promise.all([
+      this.service().dailyCandles(stockId),
+      this.service().priceRange(stockId),
+    ]);
+    return { candles, range };
   }
 
   @Post(':id/orders')

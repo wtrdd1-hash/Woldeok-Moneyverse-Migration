@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
-import { PriceChart } from '@/components/price-chart';
+import { Sparkline } from '@/components/sparkline';
 import type { PricePoint } from '@/components/price-chart';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -17,8 +15,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { apiOrNull } from '@/lib/api';
-import { formatMoment, priceDirection } from '@/lib/money';
+import { cn } from '@/lib/cn';
+import { changeAmount, changePercent, formatMoment, groupDigits, priceDirection } from '@/lib/money';
 import { requireMember } from '@/lib/session';
+import { StockDetailDialog } from './stock-detail-dialog';
 import { TradeDialog } from './trade-dialog';
 
 export const dynamic = 'force-dynamic';
@@ -36,7 +36,9 @@ interface StockRow {
   readonly description: string;
   readonly current_price: string;
   readonly day_open_price: string;
-  readonly active: boolean;
+  /** Today's range, from the candle the market ticker keeps. */
+  readonly day_high_price: string;
+  readonly day_low_price: string;
 }
 
 interface HoldingRow {
@@ -60,13 +62,19 @@ interface TradeRow {
   readonly created_at: string;
 }
 
-export default async function StocksPage({
-  searchParams,
-}: {
-  readonly searchParams: Promise<{ readonly stock?: string }>;
-}) {
+/**
+ * The market moves every second, so this page is never cached and revalidates
+ * itself while it is open. Thirty seconds is a compromise: often enough that
+ * the figures are not stale, rare enough that a reader filling in a trade
+ * form is not interrupted by a re-render every second.
+ */
+export const revalidate = 0;
+
+/** How much recent movement each card's sparkline draws. */
+const SPARK_POINTS = 40;
+
+export default async function StocksPage() {
   await requireMember();
-  const { stock: requested } = await searchParams;
 
   const [market, portfolio, history] = await Promise.all([
     apiOrNull<{ stocks: StockRow[] }>('/api/v1/stocks'),
@@ -75,13 +83,17 @@ export default async function StocksPage({
   ]);
 
   const stocks = market?.stocks ?? [];
-  // The chart follows a query parameter rather than client state, so the view
-  // is linkable and works before hydration — the original could only reach it
-  // by clicking.
-  const selected = stocks.find((row) => row.id === requested) ?? stocks[0];
-  const prices = selected
-    ? await apiOrNull<{ prices: PricePoint[] }>(`/api/v1/stocks/${selected.id}/prices`)
-    : null;
+
+  // One small series per card. The detail dialog fetches its own candles when
+  // it opens, so this is the only price history the page carries.
+  const sparks = await Promise.all(
+    stocks.map((row) =>
+      apiOrNull<{ prices: PricePoint[] }>(
+        `/api/v1/stocks/${row.id}/prices?limit=${SPARK_POINTS}`,
+      ),
+    ),
+  );
+  const seriesFor = new Map(stocks.map((row, index) => [row.id, sparks[index]?.prices ?? []]));
 
   return (
     <div className="grid gap-6">
@@ -104,10 +116,12 @@ export default async function StocksPage({
               <Card key={row.id} className="gap-4">
                 <CardHeader>
                   <div className="flex items-center gap-2">
+                    {/* Only tradable stocks reach this list — a suspended one
+                        is absent rather than shown greyed out — so there is no
+                        거래 정지 badge here. The operator console shows both. */}
                     <Badge variant="secondary" className="font-mono">
                       {row.symbol}
                     </Badge>
-                    {!row.active && <Badge variant="outline">거래 정지</Badge>}
                   </div>
                   <CardTitle className="text-base">{row.name}</CardTitle>
                   <CardDescription>
@@ -115,12 +129,31 @@ export default async function StocksPage({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-3">
-                  <p className="text-xl font-medium">
-                    <Amount
-                      value={row.current_price}
+                  <div className="flex items-end justify-between gap-3">
+                    <div className="grid gap-0.5">
+                      <p className="text-xl font-medium">
+                        <Amount
+                          value={row.current_price}
+                          direction={priceDirection(row.current_price, row.day_open_price)}
+                          currency
+                        />
+                      </p>
+                      <TodayMove
+                        current={row.current_price}
+                        open={row.day_open_price}
+                      />
+                    </div>
+                    {/* The shape of the last few minutes. The figures beside
+                        it carry the same information, so it is decorative. */}
+                    <Sparkline
+                      points={seriesFor.get(row.id) ?? []}
                       direction={priceDirection(row.current_price, row.day_open_price)}
-                      currency
+                      className="w-28 shrink-0"
                     />
+                  </div>
+                  <p className="tabular text-xs text-muted-foreground">
+                    오늘 고가 {groupDigits(row.day_high_price)} · 저가{' '}
+                    {groupDigits(row.day_low_price)}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     <TradeDialog
@@ -137,11 +170,7 @@ export default async function StocksPage({
                       currentPrice={row.current_price}
                       side="sell"
                     />
-                    <Button asChild variant="ghost" className="min-h-11">
-                      <Link href={`/stocks?stock=${row.id}`} scroll={false}>
-                        차트 보기
-                      </Link>
-                    </Button>
+                    <StockDetailDialog stockId={row.id} symbol={row.symbol} name={row.name} />
                   </div>
                 </CardContent>
               </Card>
@@ -149,22 +178,6 @@ export default async function StocksPage({
           </div>
         )}
       </section>
-
-      {selected && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{selected.symbol} 가격 추이</CardTitle>
-            <CardDescription>최근 최대 80개 가격 기록</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {prices === null ? (
-              <EmptyState title="가격 기록을 불러오지 못했어요." />
-            ) : (
-              <PriceChart points={prices.prices} symbol={selected.symbol} />
-            )}
-          </CardContent>
-        </Card>
-      )}
 
       <Card>
         <CardHeader>
@@ -266,5 +279,37 @@ export default async function StocksPage({
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+/**
+ * Today's move, in WLD and in percent.
+ *
+ * Both, because neither answers the question alone: a hundred WLD is a lot on
+ * a cheap stock and nothing on an expensive one, and a percentage without the
+ * amount is hard to act on when the reader is about to buy a quantity.
+ */
+function TodayMove({ current, open }: { readonly current: string; readonly open: string }) {
+  const direction = priceDirection(current, open);
+  const amount = changeAmount(current, open);
+  const percent = changePercent(current, open);
+
+  if (direction === null) {
+    return <p className="tabular text-xs text-muted-foreground">오늘 변동 없음</p>;
+  }
+
+  return (
+    <p
+      className={cn(
+        'tabular text-xs font-bold',
+        direction === 'rise' ? 'text-rise' : 'text-fall',
+      )}
+    >
+      {/* groupDigits renders a leading minus as U+2212, so the sign is the
+          amount's own and is not prefixed twice. */}
+      오늘 {direction === 'rise' ? '+' : ''}
+      {groupDigits(amount)}
+      {percent && <span className="ml-1 font-normal">({percent}%)</span>}
+    </p>
   );
 }

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LogOut, Menu } from 'lucide-react';
+import { ChevronDown, LogOut, Menu } from 'lucide-react';
 import { logout } from '@/app/actions';
 import { Brand } from '@/components/brand';
 import { Button } from '@/components/ui/button';
@@ -16,8 +16,24 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { cn } from '@/lib/cn';
-import type { NavEntry } from '@/lib/navigation';
-import { ADMIN_NAV, MEMBER_NAV, PUBLIC_NAV, isCurrent } from '@/lib/navigation';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import type { NavEntry, NavGroup, NavItem } from '@/lib/navigation';
+import {
+  ADMIN_NAV,
+  HEADER_ADMIN,
+  HEADER_MEMBER,
+  HEADER_PUBLIC,
+  MEMBER_NAV,
+  PUBLIC_NAV,
+  isCurrent,
+  isGroup,
+  isGroupCurrent,
+} from '@/lib/navigation';
 import { useViewer } from '@/lib/use-viewer';
 import type { Viewer } from '@/lib/viewer-state';
 
@@ -43,21 +59,31 @@ export function SiteHeader() {
   const pathname = usePathname();
   const viewer = useViewer();
 
-  const entries: NavEntry[] = [...PUBLIC_NAV];
-  if (viewer?.signedIn) entries.push(...MEMBER_NAV);
+  const isAdmin = Boolean(viewer && viewer.consentCurrent && viewer.adminRoles.length > 0);
 
-  const admin =
-    viewer && viewer.consentCurrent && viewer.adminRoles.length > 0 ? ADMIN_NAV : [];
+  // The wide bar, grouped. Thirteen flat links wrapped onto a second row and
+  // pushed the wordmark out of line.
+  const items: NavItem[] = [...HEADER_PUBLIC];
+  if (viewer?.signedIn) items.push(...HEADER_MEMBER);
+  if (isAdmin) items.push(...HEADER_ADMIN);
+
+  // The sheet stays flat: a drawer has the room, and a menu inside a menu is
+  // worse than a long list.
+  const admin = isAdmin ? ADMIN_NAV : [];
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/94 backdrop-blur-lg">
       <div className="mx-auto flex h-[76px] w-full max-w-[1180px] items-center gap-6 px-6">
         <Brand />
 
-        <nav aria-label="주요 메뉴" className="ml-auto hidden items-center gap-7 lg:flex">
-          {[...entries, ...admin].map((entry) => (
-            <HeaderLink key={entry.href} entry={entry} pathname={pathname} />
-          ))}
+        <nav aria-label="주요 메뉴" className="ml-auto hidden items-center gap-6 lg:flex">
+          {items.map((item) =>
+            isGroup(item) ? (
+              <HeaderGroup key={item.label} group={item} pathname={pathname} />
+            ) : (
+              <HeaderLink key={item.href} entry={item} pathname={pathname} />
+            ),
+          )}
         </nav>
 
         <div className={cn('flex items-center gap-3', 'lg:ml-4', 'ml-auto lg:ml-4')}>
@@ -131,6 +157,54 @@ function HeaderLink({
     >
       {entry.label}
     </Link>
+  );
+}
+
+/**
+ * A group of links behind one label.
+ *
+ * The label underlines while the reader is anywhere inside the group, so the
+ * bar still answers "where am I" without the destination being visible.
+ */
+function HeaderGroup({
+  group,
+  pathname,
+}: {
+  readonly group: NavGroup;
+  readonly pathname: string;
+}) {
+  const current = isGroupCurrent(pathname, group);
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className={cn(
+          'relative flex items-center gap-1 py-[26px] text-sm font-semibold transition-colors outline-none',
+          'after:absolute after:inset-x-0 after:bottom-[17px] after:h-0.5 after:bg-forest after:transition-transform',
+          'after:origin-left after:scale-x-0 hover:after:scale-x-100',
+          'focus-visible:after:scale-x-100',
+          current ? 'text-foreground after:scale-x-100' : 'text-muted-foreground',
+        )}
+      >
+        {group.label}
+        <ChevronDown className="size-3.5" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="min-w-44">
+        {group.entries.map((entry) => (
+          <DropdownMenuItem key={entry.href} asChild>
+            <Link
+              href={entry.href}
+              aria-current={isCurrent(pathname, entry.href) ? 'page' : undefined}
+              className={cn(
+                'min-h-10 font-bold',
+                isCurrent(pathname, entry.href) && 'text-forest',
+              )}
+            >
+              {entry.label}
+            </Link>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

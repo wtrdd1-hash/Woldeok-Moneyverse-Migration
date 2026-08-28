@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from 'react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
+import { AmountInput } from '@/components/amount-input';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -155,18 +156,7 @@ export function NewStockForm() {
       </Field>
       <Field>
         <FieldLabel htmlFor="stock-price">시작 가격</FieldLabel>
-        <InputGroup>
-          <InputGroupInput
-            id="stock-price"
-            name="price"
-            type="number"
-            inputMode="numeric"
-            min={1}
-            step={1}
-            required
-          />
-          <InputGroupAddon align="inline-end">WLD</InputGroupAddon>
-        </InputGroup>
+        <AmountInput id="stock-price" name="price" required />
       </Field>
       <div className="flex items-end">
         <SubmitButton>종목 등록</SubmitButton>
@@ -294,18 +284,7 @@ export function NewSeasonEventForm() {
       </Field>
       <Field>
         <FieldLabel htmlFor="event-cost">참가비</FieldLabel>
-        <InputGroup>
-          <InputGroupInput
-            id="event-cost"
-            name="costWld"
-            type="number"
-            inputMode="numeric"
-            min={1}
-            step={1}
-            required
-          />
-          <InputGroupAddon align="inline-end">WLD</InputGroupAddon>
-        </InputGroup>
+        <AmountInput id="event-cost" name="costWld" required />
       </Field>
       <Field>
         <FieldLabel htmlFor="event-points">회당 점수</FieldLabel>

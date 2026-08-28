@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import type {
+  StockCandleRow,
   StockCorporateActionInput,
   StockCorporateActionResultRow,
   StockCreateInput,
   StockCreateResultRow,
   StockHistoryRow,
   StockPortfolioRow,
+  StockMarketRow,
   StockPriceHistoryRow,
+  StockRangeRow,
   StockRow,
   StockTradeInput,
   StockTradeResultRow,
@@ -19,7 +22,10 @@ import type {
 // invariants (see postgres-stock-repository.ts). This interface exists so
 // the service can be constructed with a test double without importing pg.
 export interface StockRepository {
-  list(): Promise<readonly StockRow[]>;
+  list(): Promise<readonly StockMarketRow[]>;
+  dailyCandles(stockId: unknown, days?: unknown): Promise<readonly StockCandleRow[]>;
+  priceRange(stockId: unknown): Promise<StockRangeRow | null>;
+  liveTick(): Promise<number>;
   adminList(actorUserId: unknown): Promise<readonly StockRow[]>;
   portfolio(userId: unknown): Promise<readonly StockPortfolioRow[]>;
   history(userId: unknown, limit?: unknown): Promise<readonly StockHistoryRow[]>;
@@ -38,8 +44,21 @@ export class StockService {
     this.repository = repository;
   }
 
-  list(): Promise<readonly StockRow[]> {
+  list(): Promise<readonly StockMarketRow[]> {
     return this.repository.list();
+  }
+
+  dailyCandles(stockId: unknown, days?: unknown): Promise<readonly StockCandleRow[]> {
+    return this.repository.dailyCandles(stockId, days);
+  }
+
+  priceRange(stockId: unknown): Promise<StockRangeRow | null> {
+    return this.repository.priceRange(stockId);
+  }
+
+  /** One step of the market. The ticker owns the schedule; this owns nothing. */
+  liveTick(): Promise<number> {
+    return this.repository.liveTick();
   }
 
   adminList(actorUserId: unknown): Promise<readonly StockRow[]> {
