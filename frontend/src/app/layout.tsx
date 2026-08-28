@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { IBM_Plex_Mono, Nanum_Myeongjo, Noto_Sans_KR } from 'next/font/google';
 import { SiteShell } from '@/components/site-shell';
+import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { NOTICE_PREFERENCE_SCRIPT } from '@/lib/notice-preference';
+import { POINT_PREFERENCE_SCRIPT } from '@/lib/theme';
 import './globals.css';
 
 /**
@@ -52,12 +54,22 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" className={`${myeongjo.variable} ${notoKr.variable} ${plexMono.variable}`}>
+    <html
+      lang="ko"
+      // The theme scripts below write to this element before hydration, which
+      // is the whole point of them; React is told not to report the
+      // difference it will find.
+      suppressHydrationWarning
+      className={`${myeongjo.variable} ${notoKr.variable} ${plexMono.variable}`}
+    >
       <body>
         {/* Applies the reader's dismissal of the notice strip before the strip
             is painted. An effect would run after it is already on screen, and
             taking it away again is worse than never showing it. */}
         <script dangerouslySetInnerHTML={{ __html: NOTICE_PREFERENCE_SCRIPT }} />
+        {/* And the reader's point colour, for the same reason: a colour
+            applied after paint is a colour the reader watches change. */}
+        <script dangerouslySetInnerHTML={{ __html: POINT_PREFERENCE_SCRIPT }} />
         {/* A keyboard user should not have to walk the whole rail to reach the
             page. */}
         <a
@@ -66,8 +78,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           본문으로 건너뛰기
         </a>
-        <SiteShell>{children}</SiteShell>
-        <Toaster />
+        <ThemeProvider>
+          <SiteShell>{children}</SiteShell>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

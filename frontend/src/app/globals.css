@@ -36,6 +36,13 @@
   --clay: #d36c45;
   --clay-soft: #f2dfd5;
   --mint: #dcebe1;
+  /*
+   * The accent for text on a dark brand panel — the hero card and the notice
+   * strip, both of which are dark in either mode. It is the one brand colour
+   * that must NOT flip with the theme: a token that darkens for night would
+   * darken onto a surface that was already dark.
+   */
+  --highlight: #f2dfd5;
   --ink: #18231d;
   --ink-soft: #5c6861;
   --line: #dcd8ce;
@@ -102,6 +109,23 @@
   --ink-soft: #a3b0a8;
   --line: #2b382f;
 
+  /*
+   * The brand family, restated for a dark ground.
+   *
+   * Leaving these at their daylight values is what a dark mode looks like
+   * when only the greys were considered: the masthead's underline and the
+   * wordmark's cup are both the deep forest, and on a near-black page they
+   * are the page. The two roles pull in opposite directions here — `forest`
+   * is a panel that white text sits on, so it stays dark, while `forest-soft`
+   * is a mark drawn *on* the page, so it goes light.
+   */
+  --forest: #1c4032;
+  --forest-deep: #14291f;
+  --forest-soft: #8fbfa6;
+  --clay: #e28c68;
+  --clay-soft: #3a2a23;
+  --mint: #23342a;
+
   --background: var(--paper);
   --foreground: var(--ink);
   --card: var(--surface);
@@ -111,11 +135,11 @@
 
   --primary: #6da58a;
   --primary-foreground: #0e1611;
-  --secondary: #23342a;
+  --secondary: var(--mint);
   --secondary-foreground: #dce9e1;
   --muted: #1f2b24;
   --muted-foreground: var(--ink-soft);
-  --accent: #3a2a23;
+  --accent: var(--clay-soft);
   --accent-foreground: #f0c7b3;
   --destructive: #d97256;
   --destructive-foreground: #121a15;
@@ -125,6 +149,73 @@
 
   --rise: #e0705f;
   --fall: #79a6e6;
+
+  /* A chart line has to be legible against the ground it is drawn on, and
+     the daylight forest is not. */
+  --chart-1: var(--forest-soft);
+  --chart-2: var(--clay);
+  --chart-3: #6da58a;
+  --chart-5: var(--ink-soft);
+}
+
+/*
+ * The reader's point colour.
+ *
+ * `--point` is one hex, set on the document element by the pre-paint script
+ * in the root layout or by the panel in the masthead. Every shade below is
+ * derived from it here rather than in JavaScript, so there is no colour
+ * arithmetic in the application to drift out of step with this palette.
+ *
+ * Lightness is fixed per role and only chroma and hue are taken from the
+ * reader's colour. That is the whole contrast guarantee: in OKLCH the L
+ * channel is perceived lightness, so a role that always renders at L 0.62
+ * keeps its relationship to the paper behind it no matter which hue lands in
+ * it. Chroma is clamped rather than copied, because a deep structural green
+ * borrowed from a fluorescent pick would be a different design.
+ *
+ * Nothing here touches --background, --foreground, --card or --muted. The
+ * reader chooses what draws the eye; they do not get to choose whether the
+ * text is readable.
+ *
+ * The @supports test is the exact form used below, clamp and all, rather than
+ * the bare `oklch(from red l c h)`. A browser that takes relative colours but
+ * not a math function in a channel would pass the looser test and then drop
+ * every declaration inside it one at a time — which is the same palette as
+ * skipping the block, arrived at less predictably. Testing what is actually
+ * written means the block is all applied or none of it is.
+ */
+@supports (color: oklch(from red 0.5 clamp(0.02, c * 0.5, 0.09) h)) {
+  :root[data-point] {
+    --forest: oklch(from var(--point) 0.34 clamp(0.02, c * 0.55, 0.09) h);
+    --forest-deep: oklch(from var(--point) 0.26 clamp(0.02, c * 0.5, 0.08) h);
+    --forest-soft: oklch(from var(--point) 0.47 clamp(0.03, c * 0.7, 0.11) h);
+    --clay: oklch(from var(--point) 0.62 clamp(0.04, c, 0.15) h);
+    --clay-soft: oklch(from var(--point) 0.91 clamp(0.01, c * 0.2, 0.04) h);
+    --mint: oklch(from var(--point) 0.92 clamp(0.01, c * 0.2, 0.04) h);
+    --highlight: oklch(from var(--point) 0.90 clamp(0.02, c * 0.45, 0.07) h);
+
+    --accent-foreground: oklch(from var(--point) 0.40 clamp(0.03, c * 0.8, 0.11) h);
+    --ring: oklch(from var(--point) 0.62 clamp(0.04, c, 0.15) h / 0.7);
+    --chart-4: oklch(from var(--point) 0.70 clamp(0.06, c, 0.14) calc(h + 45));
+  }
+
+  /* Dark restates every role the dark block set literally, because a literal
+     cannot be reached by redefining the token it was copied from. */
+  .dark[data-point] {
+    --forest: oklch(from var(--point) 0.30 clamp(0.02, c * 0.5, 0.08) h);
+    --forest-deep: oklch(from var(--point) 0.22 clamp(0.01, c * 0.45, 0.06) h);
+    --forest-soft: oklch(from var(--point) 0.75 clamp(0.03, c * 0.6, 0.10) h);
+    --clay: oklch(from var(--point) 0.71 clamp(0.04, c * 0.9, 0.13) h);
+    --clay-soft: oklch(from var(--point) 0.27 clamp(0.01, c * 0.4, 0.05) h);
+    --mint: oklch(from var(--point) 0.28 clamp(0.01, c * 0.35, 0.05) h);
+
+    --primary: oklch(from var(--point) 0.65 clamp(0.04, c * 0.7, 0.11) h);
+    --secondary-foreground: oklch(from var(--point) 0.88 clamp(0.01, c * 0.3, 0.05) h);
+    --accent-foreground: oklch(from var(--point) 0.83 clamp(0.03, c * 0.6, 0.09) h);
+    --ring: oklch(from var(--point) 0.71 clamp(0.04, c * 0.9, 0.13) h / 0.7);
+    --chart-3: oklch(from var(--point) 0.65 clamp(0.04, c * 0.7, 0.11) h);
+    --chart-4: oklch(from var(--point) 0.72 clamp(0.06, c, 0.14) calc(h + 45));
+  }
 }
 
 @theme inline {
@@ -157,6 +248,7 @@
   --color-clay: var(--clay);
   --color-clay-soft: var(--clay-soft);
   --color-mint: var(--mint);
+  --color-highlight: var(--highlight);
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
   --color-rise: var(--rise);

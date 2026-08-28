@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { ChevronDown, LogOut, Menu } from 'lucide-react';
 import { logout } from '@/app/actions';
 import { Brand } from '@/components/brand';
+import { ThemeMenu, ThemePanel } from '@/components/theme-controls';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -87,6 +88,9 @@ export function SiteHeader() {
         </nav>
 
         <div className={cn('flex items-center gap-3', 'lg:ml-4', 'ml-auto lg:ml-4')}>
+          <div className="hidden sm:block">
+            <ThemeMenu />
+          </div>
           <SessionControl viewer={viewer} />
 
           <Sheet>
@@ -113,6 +117,10 @@ export function SiteHeader() {
                 {/* Signing out lives here on a phone. Four controls beside the
                     wordmark left nothing room to breathe, and this is the one
                     of them nobody reaches for in a hurry. */}
+                <div className="px-3 py-2 sm:hidden">
+                  <ThemePanel />
+                  <Separator className="mt-5" />
+                </div>
                 {viewer?.signedIn && (
                   <form action={logout} className="px-3 pt-2 sm:hidden">
                     <Button
@@ -150,7 +158,7 @@ function HeaderLink({
       // page — the original's one piece of navigation motion, kept.
       className={cn(
         'relative py-[26px] text-sm font-semibold transition-colors',
-        'after:absolute after:inset-x-0 after:bottom-[17px] after:h-0.5 after:bg-forest after:transition-transform',
+        'after:absolute after:inset-x-0 after:bottom-[17px] after:h-0.5 after:bg-primary after:transition-transform',
         'after:origin-left after:scale-x-0 hover:after:scale-x-100',
         current ? 'text-foreground after:scale-x-100' : 'text-muted-foreground',
       )}
@@ -179,7 +187,7 @@ function HeaderGroup({
       <DropdownMenuTrigger
         className={cn(
           'relative flex items-center gap-1 py-[26px] text-sm font-semibold transition-colors outline-none',
-          'after:absolute after:inset-x-0 after:bottom-[17px] after:h-0.5 after:bg-forest after:transition-transform',
+          'after:absolute after:inset-x-0 after:bottom-[17px] after:h-0.5 after:bg-primary after:transition-transform',
           'after:origin-left after:scale-x-0 hover:after:scale-x-100',
           'focus-visible:after:scale-x-100',
           current ? 'text-foreground after:scale-x-100' : 'text-muted-foreground',
@@ -196,7 +204,7 @@ function HeaderGroup({
               aria-current={isCurrent(pathname, entry.href) ? 'page' : undefined}
               className={cn(
                 'min-h-10 font-bold',
-                isCurrent(pathname, entry.href) && 'text-forest',
+                isCurrent(pathname, entry.href) && 'text-primary',
               )}
             >
               {entry.label}
@@ -230,7 +238,7 @@ function Group({
             // 44px is the minimum comfortable tap target.
             className={cn(
               'flex min-h-11 items-center rounded-[8px] px-3 text-sm font-bold',
-              current ? 'bg-mint text-forest-deep' : 'hover:bg-paper-dark',
+              current ? 'bg-secondary text-secondary-foreground' : 'hover:bg-paper-dark',
             )}
           >
             {entry.label}

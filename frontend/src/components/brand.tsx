@@ -26,7 +26,7 @@ export function Brand({
       )}
     >
       <svg viewBox="0 0 40 40" aria-hidden className="w-[35px] shrink-0">
-        <path d="M8 7h24v17c0 6.6-5.4 12-12 12S8 30.6 8 24V7Z" className="fill-forest" />
+        <path d="M8 7h24v17c0 6.6-5.4 12-12 12S8 30.6 8 24V7Z" className="fill-primary" />
         <path
           d="m13 15 4.3 9.3L20 18l2.7 6.3L27 15"
           className="fill-none stroke-surface"

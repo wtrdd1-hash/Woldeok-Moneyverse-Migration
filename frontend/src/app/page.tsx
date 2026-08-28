@@ -75,9 +75,9 @@ export default async function HomePage() {
             the page stops being a document and looks like a ledger card. */}
         <aside
           aria-labelledby="status-panel-title"
-          className="rounded-[28px] border border-[#153625] bg-forest p-6 text-white shadow-raised lg:rotate-[1deg]"
+          className="rounded-[28px] border border-forest-deep bg-forest p-6 text-white shadow-raised lg:rotate-[1deg]"
         >
-          <p className="eyebrow text-[#e8b39a]">Today at a glance</p>
+          <p className="eyebrow text-highlight">Today at a glance</p>
           <h2 id="status-panel-title" className="mt-3 text-2xl text-white">
             오늘의 현황
           </h2>
@@ -220,11 +220,11 @@ function StatusRowItem({
       </span>
       <span className="min-w-0 grid gap-0.5">
         <b className="truncate text-sm">{term}</b>
-        <small className="truncate text-xs text-[#b4c5b8]">{detail}</small>
+        <small className="truncate text-xs text-white/65">{detail}</small>
       </span>
       <Link
         href={href}
-        className="ml-auto flex shrink-0 items-center gap-1.5 text-xs font-extrabold text-[#ffdfd1]"
+        className="ml-auto flex shrink-0 items-center gap-1.5 text-xs font-extrabold text-highlight"
       >
         {children}
       </Link>

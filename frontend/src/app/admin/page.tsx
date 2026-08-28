@@ -166,7 +166,7 @@ function Attention({
       {attention ? (
         <CircleAlert className="size-5 shrink-0 text-clay" />
       ) : (
-        <CircleCheck className="size-5 shrink-0 text-forest" />
+        <CircleCheck className="size-5 shrink-0 text-primary" />
       )}
       <span className="grid gap-0.5">
         <span className="text-xs text-muted-foreground">{term}</span>

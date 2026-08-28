@@ -28,7 +28,7 @@ export function NoticeBar() {
           labels what the sentence already says, and 이용 기준 is in the
           footer of every page. The sentence and the way out both stay. */}
       <div className="mx-auto flex min-h-10 w-full max-w-[1180px] items-center gap-3 px-4 py-1.5 sm:px-6">
-        <span className="hidden shrink-0 rounded-full bg-[#cfe4d6] px-2 py-[3px] text-[10px] font-extrabold tracking-[0.06em] text-forest-deep sm:inline-block">
+        <span className="hidden shrink-0 rounded-full bg-white/90 px-2 py-[3px] text-[10px] font-extrabold tracking-[0.06em] text-[#1a2b22] sm:inline-block">
           커뮤니티 가상경제
         </span>
         <p className="min-w-0 flex-1 text-[12px] leading-[1.5] opacity-90 sm:text-[13px]">
