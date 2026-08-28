@@ -122,7 +122,7 @@ export default async function HomePage() {
               월간 소식
             </h2>
           </div>
-          <Link href="/announcements" className="text-sm font-extrabold text-clay">
+          <Link href="/announcements" className="text-sm font-extrabold text-clay-ink">
             전체 보기 →
           </Link>
         </div>

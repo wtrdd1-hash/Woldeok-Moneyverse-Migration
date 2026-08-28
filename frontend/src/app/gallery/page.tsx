@@ -46,7 +46,7 @@ export default async function GalleryPage() {
           title="사진 모음"
           id="gallery-title"
           action={
-            <Link href="/announcements" className="shrink-0 text-sm font-extrabold text-clay">
+            <Link href="/announcements" className="shrink-0 text-sm font-extrabold text-clay-ink">
               운영 소식 →
             </Link>
           }

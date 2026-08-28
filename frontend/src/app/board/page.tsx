@@ -67,7 +67,7 @@ export default async function BoardPage() {
                           <b className="truncate font-bold">{post.title}</b>
                           {post.commentCount > 0 && (
                             <span
-                              className="flex shrink-0 items-center gap-1 text-xs font-bold text-clay"
+                              className="flex shrink-0 items-center gap-1 text-xs font-bold text-clay-ink"
                               aria-label={`댓글 ${post.commentCount}개`}
                             >
                               <MessageSquare className="size-3.5" aria-hidden />

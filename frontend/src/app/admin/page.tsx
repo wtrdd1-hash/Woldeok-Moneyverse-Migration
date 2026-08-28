@@ -133,7 +133,7 @@ export default async function AdminPage() {
                   {area.summary}
                 </span>
                 {counts[area.href] && (
-                  <span className="text-xs font-bold text-clay">{counts[area.href]}</span>
+                  <span className="text-xs font-bold text-clay-ink">{counts[area.href]}</span>
                 )}
               </span>
             </Link>

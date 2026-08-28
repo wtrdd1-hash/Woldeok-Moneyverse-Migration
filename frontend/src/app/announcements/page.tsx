@@ -69,7 +69,7 @@ export default async function AnnouncementsPage() {
           title="공지사항"
           id="notice-list-title"
           action={
-            <Link href="/status" className="shrink-0 text-sm font-extrabold text-clay">
+            <Link href="/status" className="shrink-0 text-sm font-extrabold text-clay-ink">
               현재 상태 보기 →
             </Link>
           }

@@ -132,7 +132,7 @@ export default async function WalletPage() {
           title="내 지갑 기록"
           id="activity-title"
           action={
-            <Link href="/wallet/activity" className="shrink-0 text-sm font-extrabold text-clay">
+            <Link href="/wallet/activity" className="shrink-0 text-sm font-extrabold text-clay-ink">
               전체 보기 →
             </Link>
           }

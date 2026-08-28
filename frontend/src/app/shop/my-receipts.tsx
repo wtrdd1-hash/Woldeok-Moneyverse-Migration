@@ -54,7 +54,7 @@ export function MyReceipts() {
         title="내 구매 기록"
         id="purchase-title"
         action={
-          <Link href="/wallet" className="shrink-0 text-sm font-extrabold text-clay">
+          <Link href="/wallet" className="shrink-0 text-sm font-extrabold text-clay-ink">
             지갑 원장 보기 →
           </Link>
         }

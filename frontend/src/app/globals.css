@@ -35,6 +35,19 @@
   --forest-soft: #3c7258;
   --clay: #d36c45;
   --clay-soft: #f2dfd5;
+  /*
+   * The terracotta at reading size.
+   *
+   * --clay is 3.19:1 on paper. That clears the 3:1 a large mark or a control's
+   * border has to meet, and the wordmark and the icons keep it. It does not
+   * clear the 4.5:1 that body-sized text has to meet, and the accent is used
+   * for section labels at 11px and for links at 14px, which are body-sized
+   * however bold they are set. This is the same hue and chroma at OKLCH
+   * L 0.52 — 5.34:1 on paper, 5.77:1 on a card — and it is what those roles
+   * use. Two tokens rather than one darker --clay, because darkening the
+   * brand colour everywhere to fix small text would be a different palette.
+   */
+  --clay-ink: #a9461d;
   --mint: #dcebe1;
   /*
    * The accent for text on a dark brand panel — the hero card and the notice
@@ -124,6 +137,9 @@
   --forest-soft: #8fbfa6;
   --clay: #e28c68;
   --clay-soft: #3a2a23;
+  /* On a dark ground the accent is a light colour, and light on near-black is
+     6.9:1 on the page and 6.2:1 on a card. Nothing to separate here. */
+  --clay-ink: var(--clay);
   --mint: #23342a;
 
   --background: var(--paper);
@@ -177,11 +193,11 @@
  * pick cannot put text and its ground at the same lightness. Measured across
  * the six presets the derived contrasts land within 0.3 of each other and
  * within 0.3 of the product's own palette — the point colour never reads
- * worse than the accent it replaces. It is not an accessibility floor: the
- * product's own --clay is 3.19:1 on paper and L 0.62 reproduces that (3.5:1),
- * so small clay text was below AA before this and still is. Raising it is a
- * product decision about the terracotta, not one this block should make
- * quietly.
+ * worse than the accent it replaces. Where a role carries body-sized text it
+ * is an AA floor as well: --clay-ink is fixed at L 0.52, which measures at or
+ * above 4.6:1 on paper for every hue on the wheel. --clay itself stays at
+ * L 0.62, the lightness that reproduces the product's own terracotta, and is
+ * used where 3:1 is the bar — the wordmark, icons, borders, chart lines.
  *
  * The @supports test is the exact form used below, clamp and all, rather than
  * the bare `oklch(from red l c h)`. A browser that takes relative colours but
@@ -196,6 +212,10 @@
     --forest-deep: oklch(from var(--point) 0.26 clamp(0.02, c * 0.5, 0.08) h);
     --forest-soft: oklch(from var(--point) 0.47 clamp(0.03, c * 0.7, 0.11) h);
     --clay: oklch(from var(--point) 0.62 clamp(0.04, c, 0.15) h);
+    /* L 0.52 with the chroma held below 0.11: measured across the wheel the
+       worst hue lands at 4.60:1 on paper, so this role is an AA floor for any
+       colour a reader can pick, not only for the six offered. */
+    --clay-ink: oklch(from var(--point) 0.52 clamp(0.04, c * 0.8, 0.11) h);
     --clay-soft: oklch(from var(--point) 0.91 clamp(0.01, c * 0.2, 0.04) h);
     --mint: oklch(from var(--point) 0.92 clamp(0.01, c * 0.2, 0.04) h);
     --highlight: oklch(from var(--point) 0.90 clamp(0.02, c * 0.45, 0.07) h);
@@ -212,6 +232,9 @@
     --forest-deep: oklch(from var(--point) 0.22 clamp(0.01, c * 0.45, 0.06) h);
     --forest-soft: oklch(from var(--point) 0.75 clamp(0.03, c * 0.6, 0.10) h);
     --clay: oklch(from var(--point) 0.71 clamp(0.04, c * 0.9, 0.13) h);
+    /* Restated rather than inherited from `.dark`: `:root[data-point]` above
+       is the more specific selector and would otherwise win here. */
+    --clay-ink: var(--clay);
     --clay-soft: oklch(from var(--point) 0.27 clamp(0.01, c * 0.4, 0.05) h);
     --mint: oklch(from var(--point) 0.28 clamp(0.01, c * 0.35, 0.05) h);
 
@@ -252,6 +275,7 @@
   --color-forest-deep: var(--forest-deep);
   --color-forest-soft: var(--forest-soft);
   --color-clay: var(--clay);
+  --color-clay-ink: var(--clay-ink);
   --color-clay-soft: var(--clay-soft);
   --color-mint: var(--mint);
   --color-highlight: var(--highlight);
@@ -330,7 +354,7 @@
 
   /* The mono eyebrow with its leading rule, from the original. */
   .eyebrow {
-    color: var(--clay);
+    color: var(--clay-ink);
     font: 700 11px/1.2 var(--font-mono);
     letter-spacing: 0.13em;
     text-transform: uppercase;
@@ -344,7 +368,7 @@
    * Korean and uppercasing does nothing to Hangul but the tracking does.
    */
   .section-label {
-    color: var(--clay);
+    color: var(--clay-ink);
     font: 700 11px/1.45 var(--font-mono);
     letter-spacing: 0.115em;
   }
@@ -413,7 +437,7 @@
   }
 
   .policy-document a {
-    color: var(--clay);
+    color: var(--clay-ink);
     font-weight: 700;
     text-decoration-line: underline;
     text-underline-offset: 3px;

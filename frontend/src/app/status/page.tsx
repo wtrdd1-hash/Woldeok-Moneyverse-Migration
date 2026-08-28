@@ -85,7 +85,7 @@ export default async function StatusPage() {
           title="연결 상태"
           id="status-list-title"
           action={
-            <Link href="/announcements" className="shrink-0 text-sm font-extrabold text-clay">
+            <Link href="/announcements" className="shrink-0 text-sm font-extrabold text-clay-ink">
               점검 공지 보기 →
             </Link>
           }

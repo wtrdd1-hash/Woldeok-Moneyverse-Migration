@@ -200,7 +200,7 @@ export function StockDetailDialog({
       <DialogContent className="max-h-[90dvh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            <span className="font-mono text-sm text-clay">{symbol}</span> {name}
+            <span className="font-mono text-sm text-clay-ink">{symbol}</span> {name}
           </DialogTitle>
           <DialogDescription>
             봉의 몸통은 시가와 종가, 위아래 선은 그 구간의 고가와 저가예요. 오른 봉은 빨강,
