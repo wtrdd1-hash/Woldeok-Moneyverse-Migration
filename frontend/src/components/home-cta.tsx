@@ -20,9 +20,14 @@ export function HomeCta() {
   const viewer = useViewer();
   const signedIn = viewer?.signedIn === true;
 
+  // Full width while they are stacked: two buttons of different widths under
+  // one another read as an accident rather than as a pair.
   return (
-    <div className="mt-8 flex flex-wrap gap-3">
-      <Button asChild className="h-12 rounded-[12px] px-5 text-sm font-extrabold shadow-plate">
+    <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+      <Button
+        asChild
+        className="h-12 w-full rounded-[12px] px-5 text-sm font-extrabold shadow-plate sm:w-auto"
+      >
         {signedIn ? (
           <Link href="/wallet">
             내 지갑 열기
@@ -38,7 +43,7 @@ export function HomeCta() {
       <Button
         asChild
         variant="outline"
-        className="h-12 rounded-[12px] bg-surface/50 px-5 text-sm font-extrabold"
+        className="h-12 w-full rounded-[12px] bg-surface/50 px-5 text-sm font-extrabold sm:w-auto"
       >
         <Link href="/announcements">
           알아보기

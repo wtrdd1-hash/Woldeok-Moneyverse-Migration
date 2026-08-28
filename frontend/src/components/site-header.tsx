@@ -84,6 +84,21 @@ export function SiteHeader() {
                   <Group title="회원" entries={MEMBER_NAV} pathname={pathname} />
                 )}
                 {admin.length > 0 && <Group title="운영" entries={admin} pathname={pathname} />}
+                {/* Signing out lives here on a phone. Four controls beside the
+                    wordmark left nothing room to breathe, and this is the one
+                    of them nobody reaches for in a hurry. */}
+                {viewer?.signedIn && (
+                  <form action={logout} className="px-3 pt-2 sm:hidden">
+                    <Button
+                      type="submit"
+                      variant="outline"
+                      className="min-h-11 w-full justify-start font-bold"
+                    >
+                      <LogOut />
+                      로그아웃
+                    </Button>
+                  </form>
+                )}
               </nav>
             </SheetContent>
           </Sheet>
@@ -173,10 +188,11 @@ function SessionControl({ viewer }: { readonly viewer: Viewer | null }) {
       >
         <Link href="/account">내 계정</Link>
       </Button>
-      <Button asChild className="h-11 rounded-[12px] px-5 font-extrabold shadow-plate">
+      <Button asChild className="h-11 rounded-[12px] px-4 font-extrabold shadow-plate sm:px-5">
         <Link href="/wallet">내 지갑</Link>
       </Button>
-      <form action={logout}>
+      {/* Hidden on a phone, where it is the last item in the menu instead. */}
+      <form action={logout} className="hidden sm:block">
         <Button
           type="submit"
           variant="ghost"
