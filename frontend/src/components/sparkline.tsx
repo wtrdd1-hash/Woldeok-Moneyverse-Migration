@@ -3,7 +3,7 @@ import { cn } from '@/lib/cn';
 /**
  * The shape of a price over the last few minutes, at the size of a caption.
  *
- * Geometry from BigInt for the same reason `PriceChart` uses it: a price is a
+ * Geometry from BigInt for the same reason `CandleChart` uses it: a price is a
  * `numeric(38,0)`, and running the points through `Number()` draws two
  * distinct prices at the same height once they pass 2^53.
  *

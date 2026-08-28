@@ -44,6 +44,7 @@ describe('stock, business and season routes', () => {
     ['get', '/api/v1/stocks'],
     ['get', '/api/v1/stocks/portfolio'],
     ['get', '/api/v1/stocks/history'],
+    ['get', '/api/v1/stocks/sparklines'],
     ['get', `/api/v1/stocks/${ID}/prices`],
     ['post', `/api/v1/stocks/${ID}/orders`],
     ['get', '/api/v1/business-types'],
@@ -72,7 +73,11 @@ describe('stock, business and season routes', () => {
   // UUID, so the fixed segment must win. Route order is behaviour, and this
   // is the pair most likely to flip.
   it('routes portfolio and history to their own handlers, not to :id/prices', async () => {
-    for (const path of ['/api/v1/stocks/portfolio', '/api/v1/stocks/history']) {
+    for (const path of [
+      '/api/v1/stocks/portfolio',
+      '/api/v1/stocks/history',
+      '/api/v1/stocks/sparklines',
+    ]) {
       const response = await request(app.getHttpServer()).get(path);
       expect(response.status, `${path} fell through to a parameterised route`).not.toBe(400);
     }

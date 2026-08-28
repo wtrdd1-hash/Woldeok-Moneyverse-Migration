@@ -70,6 +70,24 @@ export class StockController {
     return { trades: await this.service().history(requireUserId(request)) };
   }
 
+  /**
+   * The preview series for every listed stock, in one call.
+   *
+   * The market screen draws a small line on each card. Asking for them one at
+   * a time made the cost of the screen grow with the number of listed stocks,
+   * on a page that refreshes itself while it is open. `limit` bounds each
+   * series the way it does on `:id/prices`.
+   */
+  @Get('sparklines')
+  @ApiOperation({ summary: 'Recent prices for every listed stock' })
+  async sparklines(@Query('limit') limit?: string) {
+    const requested = limit === undefined ? undefined : Number(limit);
+    if (requested !== undefined && !Number.isSafeInteger(requested)) {
+      throw new BadRequestException('limit must be a whole number');
+    }
+    return { series: await this.service().sparkSeries(requested) };
+  }
+
   /** `limit` bounds the series, 1 to 240; the repository clamps it. */
   @Get(':id/prices')
   @ApiOperation({ summary: 'Recorded price history for one stock' })

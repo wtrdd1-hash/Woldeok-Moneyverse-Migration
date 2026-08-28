@@ -59,6 +59,31 @@ describe.skipIf(!DATABASE_URL)('game modules against a real database', () => {
       await expect(stocks.priceHistory(randomUUID())).resolves.toBeInstanceOf(Array);
     });
 
+    /**
+     * The market screen's preview lines, for every listed stock at once
+     * (055). The development machine has no PostgreSQL server, so this is
+     * where the function's SQL is executed at all — a lateral that does not
+     * parse or an array cast the planner refuses shows up here and nowhere
+     * earlier.
+     */
+    it('reads every listed stock\'s preview series in one call', async () => {
+      const series = await stocks.sparkSeries(40);
+      expect(series).toBeInstanceOf(Array);
+      for (const row of series) {
+        expect(typeof row.stock_id).toBe('string');
+        expect(row.prices).toBeInstanceOf(Array);
+        // Prices stay strings: a bigint rounded into a double draws two
+        // distinct prices at the same height.
+        for (const price of row.prices) expect(typeof price).toBe('string');
+      }
+    });
+
+    it('clamps a nonsensical series length rather than refusing it', async () => {
+      await expect(stocks.sparkSeries(-5)).resolves.toBeInstanceOf(Array);
+      await expect(stocks.sparkSeries(10_000)).resolves.toBeInstanceOf(Array);
+      await expect(stocks.sparkSeries('forty')).resolves.toBeInstanceOf(Array);
+    });
+
     // The point of the fix: the reads work, and the tables stay unreadable.
     // If a later change grants the role SELECT to make some query easier,
     // this is what notices.

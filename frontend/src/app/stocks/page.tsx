@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
-import type { PricePoint } from '@/components/price-chart';
+import type { SparkPoint } from '@/components/sparkline';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -44,6 +44,12 @@ interface StockRow {
   readonly shares_available: string;
 }
 
+/** Every listed stock's recent prices, most recent first (055). */
+interface SparkSeries {
+  readonly stock_id: string;
+  readonly prices: readonly string[];
+}
+
 interface HoldingRow {
   readonly stock_id: string;
   readonly symbol: string;
@@ -79,24 +85,28 @@ const SPARK_POINTS = 40;
 export default async function StocksPage() {
   await requireMember();
 
-  const [market, portfolio, history] = await Promise.all([
+  // Four calls, not three plus one per listed stock. The preview lines used
+  // to be fetched a card at a time, after the list came back, so the page
+  // cost grew with the catalogue and paid that cost again on every
+  // thirty-second refresh. They now arrive together and in the same round as
+  // everything else.
+  const [market, portfolio, history, sparks] = await Promise.all([
     apiOrNull<{ stocks: StockRow[] }>('/api/v1/stocks'),
     apiOrNull<{ holdings: HoldingRow[] }>('/api/v1/stocks/portfolio'),
     apiOrNull<{ trades: TradeRow[] }>('/api/v1/stocks/history'),
+    apiOrNull<{ series: SparkSeries[] }>(`/api/v1/stocks/sparklines?limit=${SPARK_POINTS}`),
   ]);
 
   const stocks = market?.stocks ?? [];
 
-  // One small series per card. The detail dialog fetches its own candles when
-  // it opens, so this is the only price history the page carries.
-  const sparks = await Promise.all(
-    stocks.map((row) =>
-      apiOrNull<{ prices: PricePoint[] }>(
-        `/api/v1/stocks/${row.id}/prices?limit=${SPARK_POINTS}`,
-      ),
-    ),
+  // The detail dialog fetches its own candles when it opens, so this is the
+  // only price history the page carries.
+  const seriesFor = new Map<string, readonly SparkPoint[]>(
+    (sparks?.series ?? []).map((row) => [
+      row.stock_id,
+      (row.prices ?? []).map((price) => ({ price })),
+    ]),
   );
-  const seriesFor = new Map(stocks.map((row, index) => [row.id, sparks[index]?.prices ?? []]));
 
   return (
     <MarketPricesProvider>

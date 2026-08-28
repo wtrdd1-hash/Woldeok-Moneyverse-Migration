@@ -13,6 +13,7 @@ import type {
   StockPriceHistoryRow,
   StockRangeRow,
   StockSetPriceInput,
+  StockSparkSeriesRow,
   StockTradeInput,
   StockTradeResultRow,
   StockUpdateInput,
@@ -38,6 +39,7 @@ export interface StockRepository {
   portfolio(userId: unknown): Promise<readonly StockPortfolioRow[]>;
   history(userId: unknown, limit?: unknown): Promise<readonly StockHistoryRow[]>;
   priceHistory(stockId: unknown, limit?: unknown): Promise<readonly StockPriceHistoryRow[]>;
+  sparkSeries(limit?: unknown): Promise<readonly StockSparkSeriesRow[]>;
   trade(input: StockTradeInput): Promise<StockTradeResultRow>;
   create(input: StockCreateInput): Promise<StockCreateResultRow>;
   update(input: StockUpdateInput): Promise<StockUpdateResultRow>;
@@ -93,6 +95,11 @@ export class StockService {
 
   priceHistory(stockId: unknown, limit?: unknown): Promise<readonly StockPriceHistoryRow[]> {
     return this.repository.priceHistory(stockId, limit);
+  }
+
+  /** Every listed stock's preview series, for the market screen's cards. */
+  sparkSeries(limit?: unknown): Promise<readonly StockSparkSeriesRow[]> {
+    return this.repository.sparkSeries(limit);
   }
 
   trade(input: StockTradeInput): Promise<StockTradeResultRow> {
