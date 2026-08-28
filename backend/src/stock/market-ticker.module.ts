@@ -3,6 +3,7 @@ import type { OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/comm
 import { StockModule } from './stock.module';
 import { StockService } from './stock.service';
 import { MarketTicker } from './market-ticker';
+import { MarketBroadcast } from './market-broadcast';
 
 /**
  * Runs the market, if this deployment is told to.
@@ -38,16 +39,30 @@ export class MarketTickerRunner implements OnApplicationBootstrap, OnApplication
 @Module({
   imports: [StockModule],
   providers: [
+    // One instance, shared: the bootstrap attaches the socket server to it
+    // and the ticker publishes through it. It exists whether or not the
+    // ticker does, because a deployment that does not run the market can
+    // still be the one a reader is connected to.
+    MarketBroadcast,
     {
       provide: MARKET_TICKER,
-      inject: [StockService],
-      useFactory: (stocks: StockService | null): MarketTicker | null => {
+      inject: [StockService, MarketBroadcast],
+      useFactory: (
+        stocks: StockService | null,
+        broadcast: MarketBroadcast,
+      ): MarketTicker | null => {
         if (process.env.MARKET_TICKER_ENABLED !== 'true' || !stocks) return null;
 
         const configured = Number(process.env.MARKET_TICK_INTERVAL_MS ?? 1000);
         const logger = new Logger('MarketTicker');
         return new MarketTicker({
-          tick: () => stocks.liveTick(),
+          tick: async () => {
+            const moved = await stocks.liveTick();
+            // Read the prices only when somebody is connected to receive
+            // them. An idle deployment pays for the walk and nothing else.
+            if (broadcast.shouldPublish) broadcast.publish(await stocks.livePrices());
+            return moved;
+          },
           intervalMs: Number.isFinite(configured) && configured >= 200 ? configured : 1000,
           onError: (error) =>
             logger.warn(error instanceof Error ? error.message : String(error)),
@@ -56,5 +71,6 @@ export class MarketTickerRunner implements OnApplicationBootstrap, OnApplication
     },
     MarketTickerRunner,
   ],
+  exports: [MarketBroadcast],
 })
 export class MarketTickerModule {}

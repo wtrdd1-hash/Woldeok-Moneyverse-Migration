@@ -18,15 +18,18 @@ import { Input } from '@/components/ui/input';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { Textarea } from '@/components/ui/textarea';
 import { IDLE } from '@/lib/action-state';
+import { groupDigits } from '@/lib/money';
 import {
   applyCorporateAction,
   createApproval,
   createSeasonEvent,
   createStock,
   decideApproval,
+  deleteStock,
   setBusinessActive,
   setSeasonEventActive,
   setStockActive,
+  setStockPrice,
   setUserRestriction,
 } from './actions';
 
@@ -158,7 +161,17 @@ export function NewStockForm() {
         <FieldLabel htmlFor="stock-price">시작 가격</FieldLabel>
         <AmountInput id="stock-price" name="price" required />
       </Field>
-      <div className="flex items-end">
+      <Field>
+        <FieldLabel htmlFor="stock-shares">발행 주식 수</FieldLabel>
+        <AmountInput id="stock-shares" name="shares" defaultValue="1000000" required />
+        {/* The float is the ceiling on how much of this company the members
+            can own between them, so it is worth deciding rather than
+            inheriting. */}
+        <p className="text-xs text-muted-foreground">
+          아무도 보유하지 않은 수량만 매수할 수 있어요.
+        </p>
+      </Field>
+      <div className="flex items-end sm:col-span-2">
         <SubmitButton>종목 등록</SubmitButton>
       </div>
       <div className="sm:col-span-2">
@@ -308,5 +321,111 @@ export function NewSeasonEventForm() {
         <ActionAlert state={state} />
       </div>
     </form>
+  );
+}
+
+
+/**
+ * Sets a price by hand, behind a confirmation.
+ *
+ * Not an inline field in the table: this is the one control on the page that
+ * changes what every holder's position is worth, and a number that applies as
+ * soon as it loses focus is the wrong shape for that.
+ */
+export function SetPriceDialog({
+  stockId,
+  symbol,
+  currentPrice,
+}: {
+  readonly stockId: string;
+  readonly symbol: string;
+  readonly currentPrice: string;
+}) {
+  const [state, action] = useActionState(setStockPrice, IDLE);
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm" className="min-h-11">
+          주가 조정
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <form action={action} className="grid gap-4">
+          <input type="hidden" name="stockId" value={stockId} />
+          <DialogHeader>
+            <DialogTitle>{symbol} 주가 조정</DialogTitle>
+            <DialogDescription>
+              현재가는 {groupDigits(currentPrice)} WLD 입니다. 조정한 가격이 오늘의 시가가 되고,
+              시장은 그 가격을 기준으로 다시 움직입니다.
+            </DialogDescription>
+          </DialogHeader>
+          <Field>
+            <FieldLabel htmlFor={`price-${stockId}`}>조정할 가격</FieldLabel>
+            <AmountInput
+              id={`price-${stockId}`}
+              name="price"
+              defaultValue={currentPrice}
+              required
+            />
+          </Field>
+          <ActionAlert state={state} />
+          <DialogFooter>
+            <SubmitButton>주가 적용</SubmitButton>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * Deletes a stock, when the database will allow it.
+ *
+ * A stock that has traded cannot be removed — the trades are a ledger — so
+ * the button says so before it is pressed rather than after. Retiring one
+ * with a history is what 거래 정지 is for, and it is on the same row.
+ */
+export function DeleteStockDialog({
+  stockId,
+  symbol,
+  holders,
+  trades,
+}: {
+  readonly stockId: string;
+  readonly symbol: string;
+  readonly holders: number;
+  readonly trades: number;
+}) {
+  const [state, action] = useActionState(deleteStock, IDLE);
+  const blocked = holders > 0 || trades > 0;
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm" className="min-h-11 text-destructive">
+          삭제
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <form action={action} className="grid gap-4">
+          <input type="hidden" name="stockId" value={stockId} />
+          <DialogHeader>
+            <DialogTitle>{symbol} 삭제</DialogTitle>
+            <DialogDescription>
+              {blocked
+                ? `보유자 ${holders}명, 거래 기록 ${trades}건이 있어 삭제할 수 없어요. 거래 정지를 사용해 주세요.`
+                : '거래 기록도 보유자도 없는 종목입니다. 삭제하면 되돌릴 수 없어요.'}
+            </DialogDescription>
+          </DialogHeader>
+          <ActionAlert state={state} />
+          <DialogFooter>
+            <SubmitButton variant="destructive" disabled={blocked}>
+              삭제 확정
+            </SubmitButton>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }

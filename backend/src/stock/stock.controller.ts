@@ -23,7 +23,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure } from '../core/pg-error';
-import { StockInputError } from './stock.repository';
+import { StockInputError, isCandleInterval } from './stock.repository';
 import { StockService } from './stock.service';
 
 export class OrderDto {
@@ -82,19 +82,36 @@ export class StockController {
   }
 
   /**
-   * Daily candles and the highs and lows that go beside them.
+   * Candles at the requested width, and the highs and lows that go beside
+   * them.
    *
    * One route rather than two: the detail chart draws nothing useful with
-   * half of this, so asking for half would only ever be a mistake.
+   * half of this, so asking for half would only ever be a mistake. The range
+   * does not depend on the width — a year's high is a year's high however the
+   * chart is bucketed — so it is returned unchanged as the reader switches.
    */
   @Get(':id/candles')
-  @ApiOperation({ summary: 'Daily open/high/low/close for one stock' })
-  async candles(@Param('id', ParseUUIDPipe) stockId: string) {
-    const [candles, range] = await Promise.all([
-      this.service().dailyCandles(stockId),
-      this.service().priceRange(stockId),
-    ]);
-    return { candles, range };
+  @ApiOperation({ summary: 'Open/high/low/close for one stock at a given interval' })
+  async candles(
+    @Param('id', ParseUUIDPipe) stockId: string,
+    @Query('interval') interval?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const seconds = interval === undefined ? 86400 : Number(interval);
+    const count = limit === undefined ? undefined : Number(limit);
+    if (!isCandleInterval(seconds)) {
+      throw new BadRequestException('unsupported candle interval');
+    }
+    try {
+      const [candles, range] = await Promise.all([
+        this.service().candles(stockId, seconds, count),
+        this.service().priceRange(stockId),
+      ]);
+      return { interval: seconds, candles, range };
+    } catch (error: unknown) {
+      if (error instanceof StockInputError) throw new BadRequestException(error.message);
+      throw error;
+    }
   }
 
   @Post(':id/orders')

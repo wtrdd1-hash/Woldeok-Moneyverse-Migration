@@ -1,21 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import type {
-  StockCandleRow,
+  StockAdminRow,
   StockCorporateActionInput,
   StockCorporateActionResultRow,
   StockCreateInput,
   StockCreateResultRow,
+  StockDeleteInput,
   StockHistoryRow,
+  StockIntervalCandleRow,
   StockPortfolioRow,
   StockMarketRow,
   StockPriceHistoryRow,
   StockRangeRow,
-  StockRow,
+  StockSetPriceInput,
   StockTradeInput,
   StockTradeResultRow,
   StockUpdateInput,
   StockUpdateResultRow,
 } from './stock.repository';
+import type { LivePriceRow } from './market-broadcast';
 
 // StockService adds no validation of its own — every check lives in
 // PostgresStockRepository, which owns the SQL and the money-shaped
@@ -23,10 +26,15 @@ import type {
 // the service can be constructed with a test double without importing pg.
 export interface StockRepository {
   list(): Promise<readonly StockMarketRow[]>;
-  dailyCandles(stockId: unknown, days?: unknown): Promise<readonly StockCandleRow[]>;
+  candles(
+    stockId: unknown,
+    bucketSeconds: unknown,
+    limit?: unknown,
+  ): Promise<readonly StockIntervalCandleRow[]>;
   priceRange(stockId: unknown): Promise<StockRangeRow | null>;
+  livePrices(): Promise<readonly LivePriceRow[]>;
   liveTick(): Promise<number>;
-  adminList(actorUserId: unknown): Promise<readonly StockRow[]>;
+  adminList(actorUserId: unknown): Promise<readonly StockAdminRow[]>;
   portfolio(userId: unknown): Promise<readonly StockPortfolioRow[]>;
   history(userId: unknown, limit?: unknown): Promise<readonly StockHistoryRow[]>;
   priceHistory(stockId: unknown, limit?: unknown): Promise<readonly StockPriceHistoryRow[]>;
@@ -34,6 +42,8 @@ export interface StockRepository {
   create(input: StockCreateInput): Promise<StockCreateResultRow>;
   update(input: StockUpdateInput): Promise<StockUpdateResultRow>;
   corporateAction(input: StockCorporateActionInput): Promise<StockCorporateActionResultRow>;
+  setPrice(input: StockSetPriceInput): Promise<{ readonly price: string }>;
+  remove(input: StockDeleteInput): Promise<{ readonly deleted: boolean }>;
 }
 
 @Injectable()
@@ -48,12 +58,20 @@ export class StockService {
     return this.repository.list();
   }
 
-  dailyCandles(stockId: unknown, days?: unknown): Promise<readonly StockCandleRow[]> {
-    return this.repository.dailyCandles(stockId, days);
+  candles(
+    stockId: unknown,
+    bucketSeconds: unknown,
+    limit?: unknown,
+  ): Promise<readonly StockIntervalCandleRow[]> {
+    return this.repository.candles(stockId, bucketSeconds, limit);
   }
 
   priceRange(stockId: unknown): Promise<StockRangeRow | null> {
     return this.repository.priceRange(stockId);
+  }
+
+  livePrices(): Promise<readonly LivePriceRow[]> {
+    return this.repository.livePrices();
   }
 
   /** One step of the market. The ticker owns the schedule; this owns nothing. */
@@ -61,7 +79,7 @@ export class StockService {
     return this.repository.liveTick();
   }
 
-  adminList(actorUserId: unknown): Promise<readonly StockRow[]> {
+  adminList(actorUserId: unknown): Promise<readonly StockAdminRow[]> {
     return this.repository.adminList(actorUserId);
   }
 
@@ -91,5 +109,13 @@ export class StockService {
 
   corporateAction(input: StockCorporateActionInput): Promise<StockCorporateActionResultRow> {
     return this.repository.corporateAction(input);
+  }
+
+  setPrice(input: StockSetPriceInput): Promise<{ readonly price: string }> {
+    return this.repository.setPrice(input);
+  }
+
+  remove(input: StockDeleteInput): Promise<{ readonly deleted: boolean }> {
+    return this.repository.remove(input);
   }
 }

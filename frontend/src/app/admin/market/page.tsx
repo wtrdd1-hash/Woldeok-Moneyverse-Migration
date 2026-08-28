@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
+import { LiveRefresh } from '@/components/live-refresh';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,11 +14,18 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { apiOrNull } from '@/lib/api';
+import { groupDigits } from '@/lib/money';
 import { requireAdministrator } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
 import type { AdminStock } from '../types';
-import { CorporateActionDialog, NewStockForm, ToggleActive } from '../admin-forms';
+import {
+  CorporateActionDialog,
+  DeleteStockDialog,
+  NewStockForm,
+  SetPriceDialog,
+  ToggleActive,
+} from '../admin-forms';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +43,7 @@ export default async function AdminMarketPage() {
   return (
     <div className="grid gap-5">
       <AdminBack />
+      <LiveRefresh />
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}
       </PageHeader>
@@ -56,6 +65,7 @@ export default async function AdminMarketPage() {
                       <TableHead>코드</TableHead>
                       <TableHead>이름</TableHead>
                       <TableHead className="text-right">현재가</TableHead>
+                      <TableHead className="text-right">유통 / 발행</TableHead>
                       <TableHead>상태</TableHead>
                       <TableHead />
                     </TableRow>
@@ -68,6 +78,13 @@ export default async function AdminMarketPage() {
                         <TableCell className="text-right">
                           <Amount value={stock.current_price} />
                         </TableCell>
+                        <TableCell className="tabular whitespace-nowrap text-right text-xs">
+                          {groupDigits(stock.shares_available)} /{' '}
+                          {groupDigits(stock.shares_outstanding)}
+                          <span className="block text-muted-foreground">
+                            보유자 {stock.holders}명 · 거래 {stock.trades}건
+                          </span>
+                        </TableCell>
                         <TableCell>
                           <Badge variant={stock.active ? 'secondary' : 'outline'}>
                             {stock.active ? '거래 중' : '정지'}
@@ -76,7 +93,18 @@ export default async function AdminMarketPage() {
                         <TableCell>
                           <div className="flex flex-wrap justify-end gap-2">
                             <ToggleActive id={stock.id} active={stock.active} kind="stock" />
+                            <SetPriceDialog
+                              stockId={stock.id}
+                              symbol={stock.symbol}
+                              currentPrice={stock.current_price}
+                            />
                             <CorporateActionDialog stockId={stock.id} symbol={stock.symbol} />
+                            <DeleteStockDialog
+                              stockId={stock.id}
+                              symbol={stock.symbol}
+                              holders={stock.holders}
+                              trades={stock.trades}
+                            />
                           </div>
                         </TableCell>
                       </TableRow>

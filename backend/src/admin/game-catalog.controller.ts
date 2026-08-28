@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -18,6 +19,7 @@ import {
   IsIn,
   IsInt,
   IsOptional,
+  Min,
   IsPositive,
   IsString,
   IsUUID,
@@ -59,6 +61,30 @@ export class CreateStockDto {
   @IsInt()
   @IsPositive()
   readonly price!: number;
+
+  /**
+   * How many shares exist. The float — what nobody is holding — is what a buy
+   * draws from, so this is the ceiling on how much of the company the members
+   * can own between them. Optional so an operator who has no view on it gets
+   * the default rather than a required field they have to guess at.
+   */
+  @ApiProperty({ type: Number, required: false, minimum: 1 })
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  readonly shares?: number;
+}
+
+export class SetStockPriceDto {
+  @ApiProperty({ type: Number, minimum: 10 })
+  @IsInt()
+  @Min(10)
+  readonly price!: number;
+
+  @ApiProperty({ required: false, format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  readonly idempotencyKey?: string;
 }
 
 export class UpdateCatalogEntryDto {
@@ -207,6 +233,42 @@ export class GameCatalogController {
     return this.guarded(
       () => this.stockService().update({ userId: requireUserId(request), stockId, ...body }),
       'invalid stock update',
+    );
+  }
+
+  /**
+   * Sets a price by hand. The day's open moves with it, because the market's
+   * walk clamps to a band around that open — see migration 053.
+   */
+  @Post('stocks/:id/price')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Set a stock price by hand' })
+  setStockPrice(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) stockId: string,
+    @Body() body: SetStockPriceDto,
+  ) {
+    return this.guarded(
+      () => this.stockService().setPrice({ userId: requireUserId(request), stockId, ...body }),
+      'invalid stock price',
+    );
+  }
+
+  /**
+   * Removes a stock that has never traded and that nobody holds. The database
+   * refuses anything else — the trades are a ledger — so the message a
+   * refusal carries is the one the operator needs to read.
+   */
+  @Delete('stocks/:id')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Delete a stock that has no history' })
+  deleteStock(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) stockId: string,
+  ) {
+    return this.guarded(
+      () => this.stockService().remove({ userId: requireUserId(request), stockId }),
+      'this stock cannot be deleted',
     );
   }
 

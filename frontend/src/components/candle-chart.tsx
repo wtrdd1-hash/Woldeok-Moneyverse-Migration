@@ -1,15 +1,22 @@
 import { groupDigits } from '@/lib/money';
 
 /**
- * Daily candles, drawn the way a market draws them: a wick from the day's low
- * to its high, a body from open to close, filled when the day closed down.
+ * Candles, drawn the way a Korean market draws them: a wick from the low to
+ * the high, a body from open to close, and both directions filled — a red
+ * body for a session that closed up, a blue one for a session that closed
+ * down. Hollow-for-up is the Western convention and reads here as "this one
+ * is missing something".
+ *
+ * Candles arrive oldest first, which is the order `stock_candles` returns and
+ * the order a chart reads.
  *
  * Geometry from BigInt, like every other chart here — a price is a
  * `numeric(38,0)` and `Number()` rounds silently past 2^53, which on a chart
  * puts two different prices at the same height.
  */
 export interface Candle {
-  readonly trade_date: string;
+  /** Start of the bucket. A date for daily and weekly, a timestamp below that. */
+  readonly at: string;
   readonly open_price: string;
   readonly high_price: string;
   readonly low_price: string;
@@ -22,11 +29,15 @@ const PADDING_Y = 16;
 const SCALE = 100_000n;
 const INTEGER = /^-?\d+$/;
 
-export function CandleChart({ candles }: { readonly candles: readonly Candle[] }) {
-  // Oldest first: the API returns newest first, and a chart reads left to
-  // right through time.
-  const ordered = [...candles]
-    .reverse()
+export function CandleChart({
+  candles,
+  label,
+}: {
+  readonly candles: readonly Candle[];
+  /** How to write a bucket's start under the axis. Raw, if not given. */
+  readonly label?: (at: string) => string;
+}) {
+  const ordered = candles
     .filter(
       (candle) =>
         INTEGER.test(candle.open_price) &&
@@ -58,7 +69,9 @@ export function CandleChart({ candles }: { readonly candles: readonly Candle[] }
     return HEIGHT - PADDING_Y - ratio * (HEIGHT - PADDING_Y * 2);
   };
 
-  // One slot per day, with the body taking a little over half of it so
+  const write = label ?? ((at: string) => at);
+
+  // One slot per candle, with the body taking a little over half of it so
   // neighbouring candles stay separate at any count.
   const slot = WIDTH / ordered.length;
   const body = Math.max(1.5, Math.min(14, slot * 0.6));
@@ -70,7 +83,7 @@ export function CandleChart({ candles }: { readonly candles: readonly Candle[] }
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
           className="h-[260px] w-full min-w-[420px]"
           role="img"
-          aria-label={`일봉 ${ordered.length}개. 최고 ${groupDigits(max.toString())}, 최저 ${groupDigits(min.toString())}.`}
+          aria-label={`캔들 ${ordered.length}개. 최고 ${groupDigits(max.toString())}, 최저 ${groupDigits(min.toString())}.`}
         >
           {ordered.map((candle, index) => {
             const open = BigInt(candle.open_price);
@@ -81,7 +94,7 @@ export function CandleChart({ candles }: { readonly candles: readonly Candle[] }
             const top = y(close > open ? close : open);
             const bottom = y(close > open ? open : close);
             return (
-              <g key={candle.trade_date}>
+              <g key={candle.at}>
                 <line
                   x1={centre}
                   x2={centre}
@@ -97,7 +110,9 @@ export function CandleChart({ candles }: { readonly candles: readonly Candle[] }
                   // A day that opened and closed level still has to be
                   // visible, so a zero-height body becomes a line.
                   height={Math.max(1, bottom - top)}
-                  fill={down ? colour : 'var(--surface)'}
+                  // Both directions filled. A hollow body is the Western
+                  // "up" and reads here as an unfinished candle.
+                  fill={colour}
                   stroke={colour}
                   strokeWidth={1}
                 />
@@ -107,11 +122,11 @@ export function CandleChart({ candles }: { readonly candles: readonly Candle[] }
         </svg>
       </div>
       <figcaption className="flex justify-between text-[11px] text-muted-foreground">
-        <span>{ordered[0]?.trade_date}</span>
+        <span>{write(ordered[0]?.at ?? '')}</span>
         <span className="tabular">
           최저 {groupDigits(min.toString())} · 최고 {groupDigits(max.toString())}
         </span>
-        <span>{ordered[ordered.length - 1]?.trade_date}</span>
+        <span>{write(ordered[ordered.length - 1]?.at ?? '')}</span>
       </figcaption>
     </figure>
   );

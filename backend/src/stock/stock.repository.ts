@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 import type { WldAmount } from '@moneyverse/contract';
+import type { LivePriceRow } from './market-broadcast';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -36,21 +37,58 @@ export interface StockRow {
   readonly updated_at: Date;
 }
 
-/** A market row: StockRow plus the day's range, from today's candle. */
-export interface StockMarketRow extends Omit<StockRow, 'active'> {
+/**
+ * Share counts (053). Not money — a share is a unit, not an amount — so these
+ * stay plain strings the way portfolio quantities do, rather than being
+ * branded WldAmount. They are still strings rather than numbers because
+ * `shares_outstanding` is a bigint and a billion million shares is past what a
+ * double can count exactly.
+ */
+export interface StockFloat {
+  readonly shares_outstanding: string;
+  readonly shares_available: string;
+}
+
+/** A market row: StockRow plus the day's range and the float. */
+export interface StockMarketRow extends Omit<StockRow, 'active'>, StockFloat {
   readonly day_high_price: WldAmount;
   readonly day_low_price: WldAmount;
 }
 
-// One day of trading, from virtual_stock_daily_candles (052). Prices are
-// bigint columns cast to text for the same reason every other amount is.
-export interface StockCandleRow {
-  readonly trade_date: string;
+/**
+ * The console's row. `holders` and `trades` are what decide whether a stock
+ * can be deleted, so they travel with it rather than being discovered by
+ * pressing the button.
+ */
+export interface StockAdminRow extends StockRow, StockFloat {
+  readonly holders: number;
+  readonly trades: number;
+}
+
+/**
+ * One candle at whichever width was asked for (053). `bucket_at` is the start
+ * of the bucket, so a caller can place it on an axis without knowing how wide
+ * it was.
+ */
+export interface StockIntervalCandleRow {
+  readonly bucket_at: Date;
   readonly open_price: WldAmount;
   readonly high_price: WldAmount;
   readonly low_price: WldAmount;
   readonly close_price: WldAmount;
 }
+
+/**
+ * The widths `stock_candles` accepts, in seconds. Anything else is refused by
+ * the function, so the list is repeated here to refuse it a round trip
+ * earlier and to give the route something to validate against.
+ */
+export const CANDLE_INTERVALS = [60, 300, 1800, 3600, 7200, 14400, 86400, 604800] as const;
+
+export type CandleInterval = (typeof CANDLE_INTERVALS)[number];
+
+export const isCandleInterval = (value: unknown): value is CandleInterval =>
+  typeof value === 'number' && (CANDLE_INTERVALS as readonly number[]).includes(value);
 
 // The highs and lows a detail view quotes. Every field is null for a stock
 // with no candle yet, which is a real state and not an error.
@@ -139,6 +177,20 @@ export interface StockCreateInput {
   readonly name: unknown;
   readonly description?: unknown;
   readonly price: unknown;
+  readonly shares?: unknown;
+}
+
+export interface StockSetPriceInput {
+  readonly userId: unknown;
+  readonly stockId: unknown;
+  readonly price: unknown;
+  readonly idempotencyKey?: unknown;
+}
+
+export interface StockDeleteInput {
+  readonly userId: unknown;
+  readonly stockId: unknown;
+  readonly idempotencyKey?: unknown;
 }
 
 export interface StockUpdateInput {
@@ -184,21 +236,32 @@ export class PostgresStockRepository {
   async list(): Promise<readonly StockMarketRow[]> {
     return queryRows<StockMarketRow>(
       this.pool,
-      'SELECT id::text, symbol, name, description, current_price::text AS current_price, day_open_price::text AS day_open_price, day_high_price::text AS day_high_price, day_low_price::text AS day_low_price, updated_at FROM public.stock_market_overview()',
+      'SELECT id::text, symbol, name, description, current_price::text AS current_price, day_open_price::text AS day_open_price, day_high_price::text AS day_high_price, day_low_price::text AS day_low_price, shares_outstanding::text AS shares_outstanding, shares_available::text AS shares_available, updated_at FROM public.stock_market_overview()',
     );
   }
 
-  /** Newest first, as the function returns them; the chart reverses. */
-  async dailyCandles(stockId: unknown, days: unknown = 60): Promise<readonly StockCandleRow[]> {
+  /**
+   * Candles at one of the supported widths, oldest first.
+   *
+   * The width is checked here as well as in the function so an unsupported
+   * one is a 400 from this process rather than a 22023 raised in the database
+   * and translated back out again.
+   */
+  async candles(
+    stockId: unknown,
+    bucketSeconds: unknown,
+    limit: unknown = 120,
+  ): Promise<readonly StockIntervalCandleRow[]> {
     uuid(stockId, 'stock id');
+    if (!isCandleInterval(bucketSeconds)) throw new StockInputError('unsupported candle interval');
     const n =
-      typeof days === 'number' && Number.isSafeInteger(days)
-        ? Math.min(365, Math.max(1, days))
-        : 60;
-    return queryRows<StockCandleRow>(
+      typeof limit === 'number' && Number.isSafeInteger(limit)
+        ? Math.min(400, Math.max(1, limit))
+        : 120;
+    return queryRows<StockIntervalCandleRow>(
       this.pool,
-      'SELECT trade_date::text AS trade_date, open_price::text AS open_price, high_price::text AS high_price, low_price::text AS low_price, close_price::text AS close_price FROM public.stock_daily_candles($1,$2)',
-      [stockId, n],
+      'SELECT bucket_at, open_price::text AS open_price, high_price::text AS high_price, low_price::text AS low_price, close_price::text AS close_price FROM public.stock_candles($1,$2,$3)',
+      [stockId, bucketSeconds, n],
     );
   }
 
@@ -208,6 +271,18 @@ export class PostgresStockRepository {
       this.pool,
       'SELECT day_high::text AS day_high, day_low::text AS day_low, year_high::text AS year_high, year_low::text AS year_low, first_trade_date::text AS first_trade_date FROM public.stock_price_range($1)',
       [stockId],
+    );
+  }
+
+  /**
+   * Prices only, for the broadcast. Deliberately not `list()`: that one sums
+   * every position to work out the float, which is not worth doing every
+   * second to send two numbers per stock.
+   */
+  async livePrices(): Promise<readonly LivePriceRow[]> {
+    return queryRows<LivePriceRow>(
+      this.pool,
+      'SELECT id::text, current_price::text AS current_price, day_open_price::text AS day_open_price FROM public.stock_live_prices()',
     );
   }
 
@@ -233,11 +308,11 @@ export class PostgresStockRepository {
    * the role first; moving the check into the function means a caller cannot
    * reach the full catalogue by finding another path to this method.
    */
-  async adminList(actorUserId: unknown): Promise<readonly StockRow[]> {
+  async adminList(actorUserId: unknown): Promise<readonly StockAdminRow[]> {
     uuid(actorUserId, 'actor user id');
-    return queryRows<StockRow>(
+    return queryRows<StockAdminRow>(
       this.pool,
-      'SELECT id::text, symbol, name, description, current_price::text AS current_price, day_open_price::text AS day_open_price, active, updated_at FROM public.stock_admin_list($1)',
+      'SELECT id::text, symbol, name, description, current_price::text AS current_price, day_open_price::text AS day_open_price, shares_outstanding::text AS shares_outstanding, shares_available::text AS shares_available, holders, trades, active, updated_at FROM public.stock_admin_list($1)',
       [actorUserId],
     );
   }
@@ -317,20 +392,22 @@ export class PostgresStockRepository {
     name,
     description = '',
     price,
+    shares = 1000000,
   }: StockCreateInput): Promise<StockCreateResultRow> {
     uuid(userId, 'user id');
     if (
       typeof symbol !== 'string' ||
       !/^[A-Z][A-Z0-9]{1,7}$/.test(symbol) ||
       typeof name !== 'string' ||
-      !positive(price)
+      !positive(price) ||
+      !positive(shares)
     ) {
       throw new StockInputError('invalid stock');
     }
     const row = await queryOne<StockCreateResultRow>(
       this.pool,
-      'SELECT public.stock_admin_create($1,$2,$3,$4,$5)::text AS id',
-      [userId, symbol, name, description, price],
+      'SELECT public.stock_admin_create($1,$2,$3,$4,$5,$6)::text AS id',
+      [userId, symbol, name, description, price, shares],
     );
     if (!row) throw new Error('database did not return a new stock id');
     return row;
@@ -388,5 +465,49 @@ export class PostgresStockRepository {
     if (!row?.corporate_action_id || typeof row.replayed !== 'boolean')
       throw new Error('database did not return a corporate-action receipt');
     return row;
+  }
+
+  /**
+   * Sets a price by hand. The day's open moves with it — see 053: the walk
+   * clamps to a band around the open, so a price set outside it would be
+   * pulled back within the second.
+   */
+  async setPrice({
+    userId,
+    stockId,
+    price,
+    idempotencyKey = randomUUID(),
+  }: StockSetPriceInput): Promise<{ readonly price: WldAmount }> {
+    uuid(userId, 'user id');
+    uuid(stockId, 'stock id');
+    uuid(idempotencyKey, 'idempotency key');
+    if (!positive(price) || price < 10) throw new StockInputError('invalid stock price');
+    const row = await queryOne<{ price: WldAmount }>(
+      this.pool,
+      'SELECT public.stock_admin_set_price($1,$2,$3,$4)::text AS price',
+      [idempotencyKey, userId, stockId, price],
+    );
+    if (!row) throw new Error('database did not return the price it set');
+    return row;
+  }
+
+  /**
+   * Removes a stock nobody has held or traded. The function refuses anything
+   * else, because the trades are a ledger — see 053.
+   */
+  async remove({
+    userId,
+    stockId,
+    idempotencyKey = randomUUID(),
+  }: StockDeleteInput): Promise<{ readonly deleted: boolean }> {
+    uuid(userId, 'user id');
+    uuid(stockId, 'stock id');
+    uuid(idempotencyKey, 'idempotency key');
+    const row = await queryOne<{ deleted: boolean }>(
+      this.pool,
+      'SELECT public.stock_admin_delete($1,$2,$3) AS deleted',
+      [idempotencyKey, userId, stockId],
+    );
+    return row ?? { deleted: false };
   }
 }

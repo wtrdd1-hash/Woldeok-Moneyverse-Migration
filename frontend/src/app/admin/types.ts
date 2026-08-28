@@ -55,6 +55,12 @@ export interface AdminStock {
   readonly symbol: string;
   readonly name: string;
   readonly current_price: string;
+  /** The size of the company, and what nobody is holding of it (053). */
+  readonly shares_outstanding: string;
+  readonly shares_available: string;
+  /** What decides whether the stock can be deleted, shown next to the button. */
+  readonly holders: number;
+  readonly trades: number;
   readonly active: boolean;
 }
 

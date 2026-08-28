@@ -110,6 +110,7 @@ export async function createStock(_previous: ActionState, formData: FormData): P
   const name = text(formData.get('name'));
   const description = text(formData.get('description'));
   const price = wholeAmount(formData.get('price'));
+  const shares = wholeAmount(formData.get('shares'));
 
   if (symbol === '' || symbol.length > 12) {
     return { status: 'error', message: '종목 코드를 1~12자로 입력해 주세요.' };
@@ -118,15 +119,78 @@ export async function createStock(_previous: ActionState, formData: FormData): P
     return { status: 'error', message: '종목명을 1~100자로 입력해 주세요.' };
   }
   if (price === null) return { status: 'error', message: '시작 가격은 1 이상 정수여야 해요.' };
+  if (shares === null) {
+    return { status: 'error', message: '발행 주식 수는 1 이상 정수여야 해요.' };
+  }
 
   try {
     await mutate('/api/v1/admin/stocks', {
-      body: { symbol, name, price, ...(description === '' ? {} : { description }) },
+      body: { symbol, name, price, shares, ...(description === '' ? {} : { description }) },
     });
     revalidatePath('/admin');
+    revalidatePath('/admin/market');
     return { status: 'ok', message: `${symbol} 종목을 등록했어요.` };
   } catch (error) {
     return failure(error, '종목을 등록하지 못했어요. 코드가 이미 있는지 확인해 주세요.');
+  }
+}
+
+/**
+ * Sets a price by hand.
+ *
+ * The day's open moves with it, because the market's walk clamps to a band
+ * around that open — a price set outside it would be dragged back within the
+ * second. The message says so, because an operator who is not told will read
+ * the reset day change as the control having half-worked.
+ */
+export async function setStockPrice(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const stockId = text(formData.get('stockId'));
+  const price = wholeAmount(formData.get('price'));
+
+  if (stockId === '') return { status: 'error', message: '종목을 찾을 수 없어요.' };
+  if (price === null || Number(price) < 10) {
+    return { status: 'error', message: '가격은 10 이상 정수여야 해요.' };
+  }
+
+  try {
+    await mutate(`/api/v1/admin/stocks/${encodeURIComponent(stockId)}/price`, {
+      body: { price, idempotencyKey: idempotencyKey() },
+    });
+    revalidatePath('/admin/market');
+    revalidatePath('/stocks');
+    return { status: 'ok', message: '주가를 조정했어요. 오늘의 시가도 이 가격으로 옮겼습니다.' };
+  } catch (error) {
+    return failure(error, '주가를 조정하지 못했어요.');
+  }
+}
+
+/**
+ * Deletes a stock that has no history.
+ *
+ * The database refuses anything that has traded or that somebody holds — the
+ * trades are a ledger — so the fallback sentence says what to do instead
+ * rather than asking the operator to try again.
+ */
+export async function deleteStock(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const stockId = text(formData.get('stockId'));
+  if (stockId === '') return { status: 'error', message: '종목을 찾을 수 없어요.' };
+
+  try {
+    await mutate(`/api/v1/admin/stocks/${encodeURIComponent(stockId)}`, { method: 'DELETE' });
+    revalidatePath('/admin/market');
+    revalidatePath('/stocks');
+    return { status: 'ok', message: '종목을 삭제했어요.' };
+  } catch (error) {
+    return failure(
+      error,
+      '거래 기록이 있거나 보유자가 있는 종목은 삭제할 수 없어요. 거래 정지를 사용해 주세요.',
+    );
   }
 }
 

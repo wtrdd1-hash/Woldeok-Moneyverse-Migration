@@ -11,6 +11,7 @@ import { applyServerTimeouts } from './server-timeouts';
 import { sessionToken } from './auth/cookies';
 import { SessionRepository } from './auth/session.repository';
 import { attachLobby } from './lobby/lobby';
+import { MarketBroadcast } from './stock/market-broadcast';
 import { UNPREFIXED_ROUTES } from './http/prefix';
 
 async function bootstrap(): Promise<void> {
@@ -57,12 +58,23 @@ async function bootstrap(): Promise<void> {
   // A null session store is not an error here: the lobby degrades to
   // read-only rather than refusing to start, which is what the public
   // landing page needs when the database is briefly unavailable.
-  attachLobby(app.getHttpServer(), {
+  const io = attachLobby(app.getHttpServer(), {
     baseUrl: config.baseUrl,
     trustForwardedFor: config.trustProxyForwardedFor,
     sessions: app.get(SessionRepository, { strict: false }),
     sessionToken: (headers) => sessionToken(headers, config),
   });
+
+  // The market's price push rides the same socket server. It is handed the
+  // emitter here rather than creating one, because the lobby owns the
+  // server's limits — connection caps, handshake rate, the origin check — and
+  // a second server would be a second door with none of them.
+  app
+    .get(MarketBroadcast, { strict: false })
+    ?.attach(
+      (event, payload) => io.emit(event, payload),
+      () => io.engine.clientsCount > 0,
+    );
 
   // Loopback by default, not 0.0.0.0. This is an internal service; binding it
   // to every interface by default is how an "internal" service becomes

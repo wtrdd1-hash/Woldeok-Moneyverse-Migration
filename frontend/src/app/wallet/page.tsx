@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
+import { LiveRefresh } from '@/components/live-refresh';
 import { PageHeader, SectionHeader } from '@/components/page-header';
 import { PostingStrip } from '@/components/posting-strip';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -61,6 +62,10 @@ export default async function WalletPage() {
 
   return (
     <div className="grid gap-6">
+      {/* Balances move without the reader doing anything — a sale settles,
+          interest accrues, somebody sends WLD — so the page asks again rather
+          than showing what was true when it loaded. */}
+      <LiveRefresh />
       <PageHeader title="내 지갑">
         WLD는 게임 안에서만 사용하는 가상 데이터입니다. 실제 화폐가 아닙니다.
       </PageHeader>

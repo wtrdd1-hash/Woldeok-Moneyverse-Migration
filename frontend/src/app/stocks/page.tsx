@@ -15,9 +15,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { apiOrNull } from '@/lib/api';
-import { cn } from '@/lib/cn';
-import { changeAmount, changePercent, formatMoment, groupDigits, priceDirection } from '@/lib/money';
+import { formatMoment, groupDigits, priceDirection } from '@/lib/money';
+import { MarketPricesProvider } from '@/lib/use-market-prices';
 import { requireMember } from '@/lib/session';
+import { LiveBadge, LiveHoldingValue, LiveQuote } from './live';
 import { StockDetailDialog } from './stock-detail-dialog';
 import { TradeDialog } from './trade-dialog';
 
@@ -39,6 +40,9 @@ interface StockRow {
   /** Today's range, from the candle the market ticker keeps. */
   readonly day_high_price: string;
   readonly day_low_price: string;
+  /** How many shares exist, and how many nobody is holding (053). */
+  readonly shares_outstanding: string;
+  readonly shares_available: string;
 }
 
 interface HoldingRow {
@@ -96,6 +100,7 @@ export default async function StocksPage() {
   const seriesFor = new Map(stocks.map((row, index) => [row.id, sparks[index]?.prices ?? []]));
 
   return (
+    <MarketPricesProvider>
     <div className="grid gap-6">
       <PageHeader eyebrow="VIRTUAL MARKET" title="가상 주식 시장">
         경제 상황에 따라 가격이 바뀌는 게임 전용 시장입니다. 실제 주식·현금·투자 상품이
@@ -103,9 +108,12 @@ export default async function StocksPage() {
       </PageHeader>
 
       <section aria-labelledby="market-title" className="grid gap-3">
-        <h2 id="market-title" className="text-lg">
-          거래 가능 종목
-        </h2>
+        <div className="flex items-center gap-3">
+          <h2 id="market-title" className="text-lg">
+            거래 가능 종목
+          </h2>
+          <LiveBadge />
+        </div>
         {market === null ? (
           <EmptyState title="주식 정보를 불러오지 못했어요." description="잠시 후 다시 시도해 주세요." />
         ) : stocks.length === 0 ? (
@@ -130,19 +138,11 @@ export default async function StocksPage() {
                 </CardHeader>
                 <CardContent className="grid gap-3">
                   <div className="flex items-end justify-between gap-3">
-                    <div className="grid gap-0.5">
-                      <p className="text-xl font-medium">
-                        <Amount
-                          value={row.current_price}
-                          direction={priceDirection(row.current_price, row.day_open_price)}
-                          currency
-                        />
-                      </p>
-                      <TodayMove
-                        current={row.current_price}
-                        open={row.day_open_price}
-                      />
-                    </div>
+                    <LiveQuote
+                      stockId={row.id}
+                      price={row.current_price}
+                      open={row.day_open_price}
+                    />
                     {/* The shape of the last few minutes. The figures beside
                         it carry the same information, so it is decorative. */}
                     <Sparkline
@@ -155,12 +155,20 @@ export default async function StocksPage() {
                     오늘 고가 {groupDigits(row.day_high_price)} · 저가{' '}
                     {groupDigits(row.day_low_price)}
                   </p>
+                  {/* The float. A buy draws from what nobody is holding, so
+                      this is the ceiling on the order the reader is about to
+                      place — worth saying before they type a quantity. */}
+                  <p className="tabular text-xs text-muted-foreground">
+                    거래 가능 {groupDigits(row.shares_available)}주 · 총 발행{' '}
+                    {groupDigits(row.shares_outstanding)}주
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     <TradeDialog
                       stockId={row.id}
                       symbol={row.symbol}
                       name={row.name}
                       currentPrice={row.current_price}
+                      available={row.shares_available}
                       side="buy"
                     />
                     <TradeDialog
@@ -168,9 +176,17 @@ export default async function StocksPage() {
                       symbol={row.symbol}
                       name={row.name}
                       currentPrice={row.current_price}
+                      available={row.shares_available}
                       side="sell"
                     />
-                    <StockDetailDialog stockId={row.id} symbol={row.symbol} name={row.name} />
+                    <StockDetailDialog
+                      stockId={row.id}
+                      symbol={row.symbol}
+                      name={row.name}
+                      currentPrice={row.current_price}
+                      dayOpenPrice={row.day_open_price}
+                      available={row.shares_available}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -215,9 +231,11 @@ export default async function StocksPage() {
                         <Amount value={holding.average_cost} />
                       </TableCell>
                       <TableCell className="text-right">
-                        <Amount
-                          value={holding.market_value}
-                          direction={priceDirection(holding.current_price, holding.average_cost)}
+                        <LiveHoldingValue
+                          stockId={holding.stock_id}
+                          quantity={holding.quantity}
+                          price={holding.current_price}
+                          averageCost={holding.average_cost}
                         />
                       </TableCell>
                     </TableRow>
@@ -279,37 +297,6 @@ export default async function StocksPage() {
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-/**
- * Today's move, in WLD and in percent.
- *
- * Both, because neither answers the question alone: a hundred WLD is a lot on
- * a cheap stock and nothing on an expensive one, and a percentage without the
- * amount is hard to act on when the reader is about to buy a quantity.
- */
-function TodayMove({ current, open }: { readonly current: string; readonly open: string }) {
-  const direction = priceDirection(current, open);
-  const amount = changeAmount(current, open);
-  const percent = changePercent(current, open);
-
-  if (direction === null) {
-    return <p className="tabular text-xs text-muted-foreground">오늘 변동 없음</p>;
-  }
-
-  return (
-    <p
-      className={cn(
-        'tabular text-xs font-bold',
-        direction === 'rise' ? 'text-rise' : 'text-fall',
-      )}
-    >
-      {/* groupDigits renders a leading minus as U+2212, so the sign is the
-          amount's own and is not prefixed twice. */}
-      오늘 {direction === 'rise' ? '+' : ''}
-      {groupDigits(amount)}
-      {percent && <span className="ml-1 font-normal">({percent}%)</span>}
-    </p>
+    </MarketPricesProvider>
   );
 }
