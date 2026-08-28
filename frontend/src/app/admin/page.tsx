@@ -139,7 +139,7 @@ export default async function AdminPage() {
 
   return (
     <div className="grid gap-6">
-      <PageHeader eyebrow="OPERATOR CONSOLE" title="운영">
+      <PageHeader eyebrow="WOLDEOK MONEYVERSE · OPERATIONS" title="운영 승인 콘솔">
         모든 작업은 감사 기록에 남고, 데이터베이스가 역할을 다시 확인합니다. 이 화면은 무엇을
         보여 줄지만 정하고, 무엇을 허용할지는 정하지 않습니다.
       </PageHeader>

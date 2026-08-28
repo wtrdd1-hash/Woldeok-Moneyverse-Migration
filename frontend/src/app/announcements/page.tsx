@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { EmptyState } from '@/components/empty-state';
-import { PageHeader } from '@/components/page-header';
+import { Accent, PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
@@ -25,7 +25,16 @@ export default async function AnnouncementsPage() {
 
   return (
     <div className="grid gap-4">
-      <PageHeader eyebrow="OPERATIONS LOG" title="운영 소식">
+      <PageHeader
+        eyebrow="COMMUNITY NOTICE"
+        title={
+          <>
+            우리 세계의
+            <br />
+            <Accent>새로운 소식.</Accent>
+          </>
+        }
+      >
         검토를 마친 공지만 이곳에 게시됩니다.
       </PageHeader>
 

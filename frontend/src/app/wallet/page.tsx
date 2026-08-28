@@ -78,7 +78,7 @@ export default async function WalletPage() {
   if (!wallet) {
     return (
       <div className="grid gap-4">
-        <PageHeader eyebrow="WOLDEOK MONEYVERSE · WALLET" title="내 지갑" />
+        <PageHeader title="내 지갑" />
         <EmptyState
           title="지금은 지갑을 불러올 수 없어요."
           description="잔액을 추정해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
@@ -92,7 +92,7 @@ export default async function WalletPage() {
 
   return (
     <div className="grid gap-6">
-      <PageHeader eyebrow="WOLDEOK MONEYVERSE · WALLET" title="내 지갑">
+      <PageHeader title="내 지갑">
         WLD는 게임 안에서만 사용하는 가상 데이터입니다. 실제 화폐가 아닙니다.
       </PageHeader>
 

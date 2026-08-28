@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { EmptyState } from '@/components/empty-state';
-import { PageHeader } from '@/components/page-header';
+import { Accent, PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
@@ -43,7 +43,16 @@ export default async function StatusPage() {
 
   return (
     <div className="grid gap-4">
-      <PageHeader eyebrow="SERVICE STATUS" title="서비스 상태">
+      <PageHeader
+        eyebrow="LIVE SERVICE STATUS"
+        title={
+          <>
+            추측하지 않고,
+            <br />
+            <Accent>기록으로 확인해요.</Accent>
+          </>
+        }
+      >
         기록된 상태만 표시합니다. 확인되지 않은 항목은 추정하지 않고 확인 중으로 둡니다.
       </PageHeader>
 

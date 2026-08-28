@@ -49,7 +49,7 @@ export default async function LoginPage({
 
   return (
     <div className="grid gap-6">
-      <PageHeader eyebrow="WOLDEOK MONEYVERSE" title="로그인 전 필수 동의">
+      <PageHeader title="로그인 전 필수 동의">
         서비스 화폐·보상은 게임 내 가상 데이터이며 현금 환전이나 실제 투자 수익을 제공하지
         않습니다.
       </PageHeader>

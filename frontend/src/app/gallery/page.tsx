@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
-import { PageHeader } from '@/components/page-header';
+import { Accent, PageHeader } from '@/components/page-header';
 import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
 
@@ -26,7 +26,16 @@ export default async function GalleryPage() {
 
   return (
     <div className="grid gap-4">
-      <PageHeader eyebrow="COMMUNITY ARCHIVE" title="함께 만든 우리 세계의 장면.">
+      <PageHeader
+        eyebrow="COMMUNITY ARCHIVE"
+        title={
+          <>
+            함께 만든
+            <br />
+            <Accent>우리 세계의 장면.</Accent>
+          </>
+        }
+      >
         사진은 운영자가 검토한 뒤에만 공개합니다. 이미지 제공 주소도 운영 환경에서 사전에
         허용한 곳만 사용해요.
       </PageHeader>

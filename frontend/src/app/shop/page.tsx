@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
-import { PageHeader } from '@/components/page-header';
+import { Accent, PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
@@ -40,7 +40,16 @@ export default async function ShopPage() {
   return (
     <div className="grid gap-8">
       <div className="grid gap-4">
-        <PageHeader eyebrow="WOLDEOK MARKET · LEDGER" title={<>모은 WLD로, 우리 세계를 꾸며요.</>}>
+        <PageHeader
+          eyebrow="WOLDEOK MARKET · LEDGER"
+          title={
+            <>
+              모은 WLD로,
+              <br />
+              <Accent>우리 세계를 꾸며요.</Accent>
+            </>
+          }
+        >
           상점 가격과 결제 기록은 서버 경제 원장 기준으로 처리됩니다. 실제 현금 결제나 환전
           기능은 제공하지 않습니다.
         </PageHeader>

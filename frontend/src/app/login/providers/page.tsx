@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
-import { PageHeader } from '@/components/page-header';
+import { Accent, PageHeader } from '@/components/page-header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -50,7 +50,15 @@ export default async function LoginProvidersPage() {
 
   return (
     <div className="grid gap-6">
-      <PageHeader eyebrow="WELCOME TO WOLDEOK" title="어떤 계정으로 시작할까요?">
+      <PageHeader
+        title={
+          <>
+            어떤 계정으로
+            <br />
+            <Accent>시작할까요?</Accent>
+          </>
+        }
+      >
         Discord 또는 Google 계정으로 로그인할 수 있어요. 선택한 제공자의 고유 식별자와 표시명만
         서비스 계정 연결에 사용합니다.
       </PageHeader>

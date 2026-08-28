@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { PageHeader } from '@/components/page-header';
+import { Accent, PageHeader } from '@/components/page-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { requireAdministrator } from '@/lib/session';
@@ -18,7 +18,16 @@ export default async function ContentAdminPage() {
 
   return (
     <div className="grid gap-6">
-      <PageHeader eyebrow="PUBLISHED CONTENT CONTROL" title="보여 줄 소식만, 차분히 꺼내 놓아요.">
+      <PageHeader
+        eyebrow="PUBLISHED CONTENT CONTROL"
+        title={
+          <>
+            보여 줄 소식만,
+            <br />
+            <Accent>차분히 꺼내 놓아요.</Accent>
+          </>
+        }
+      >
         초안 저장과 공개는 별도 기록으로 처리됩니다. 이 화면은 외부 이미지 호스트나 서버 상태를
         설정하지 않으며, 운영 환경에서 이미 승인한 대상만 사용할 수 있어요.
       </PageHeader>

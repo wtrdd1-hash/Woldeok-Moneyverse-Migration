@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { HomeCta } from '@/components/home-cta';
 import { Lobby } from '@/components/lobby';
+import { Accent } from '@/components/page-header';
 import { LobbyCount } from '@/components/lobby-count';
 import { WalletGlance } from '@/components/wallet-glance';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -55,7 +56,7 @@ export default async function HomePage() {
           >
             우리가 함께 만드는
             <br />
-            <em className="not-italic text-forest-soft">작고 단단한 경제.</em>
+            <Accent>작고 단단한 경제.</Accent>
           </h1>
           <p className="mt-6 max-w-[590px] text-[clamp(1rem,1.5vw,1.125rem)] leading-[1.8] text-muted-foreground [word-break:keep-all]">
             월덕 머니버스는 Discord로 이어지는 커뮤니티 장부입니다. 활동은 기록으로 남고,

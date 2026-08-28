@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
-import { PageHeader } from '@/components/page-header';
+import { Accent, PageHeader } from '@/components/page-header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -72,7 +72,16 @@ export default async function AccountPage({
 
   return (
     <div className="grid gap-8">
-      <PageHeader eyebrow="ACCOUNT & ACCESS" title="내 계정은 내가 직접 관리해요.">
+      <PageHeader
+        eyebrow="ACCOUNT & ACCESS"
+        title={
+          <>
+            내 계정은
+            <br />
+            <Accent>내가 직접 관리해요.</Accent>
+          </>
+        }
+      >
         로그인 수단을 연결하거나 해제하고, 서비스 이용을 중단할 수 있어요. 중요한 변경은
         서버에서 다시 확인하고 기록합니다.
       </PageHeader>
