@@ -39,6 +39,22 @@ docker run --rm \
 The tunnel's configuration is shared with every other site on that host. The
 script reads the existing rules, preserves them, and adds exactly one.
 
+## `cloudflare-unpublish.mjs`
+
+Takes one hostname back off the tunnel: its ingress rule and the CNAME that
+aimed it there. Backs the tunnel up first, refuses to write a configuration
+with no catch-all, and deletes a DNS record only when it is a CNAME pointing
+at this tunnel — anything else belongs to another site and is left alone.
+
+```bash
+docker run --rm \
+  -e UNPUBLISH_HOSTNAME=migration.easy-scraping.com \
+  -v /root/Wolduk_Moneyverse/.env:/e:ro \
+  -v "$PWD/ops/cloudflare-unpublish.mjs:/s.mjs:ro" \
+  -v "$HOME/moneyverse-migration/cf-backup:/backup" \
+  node:20-alpine node /s.mjs
+```
+
 ## What cannot be automated
 
 The two OAuth providers keep their redirect allowlists outside any API this

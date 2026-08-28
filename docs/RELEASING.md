@@ -165,7 +165,9 @@ API는 `APP_BASE_URL`의 origin과 정확한 콜백 경로가 일치하지 않�
   운영 콘솔에서 부여한다. 테스트에서만 이 변수로 자동 부여한다.
 - **Cloudflare 경로 변경.** 터널 ingress와 DNS는 `ops/`의 스크립트로 따로 한다.
   터널 설정은 이 호스트의 다른 사이트들과 공유하므로, 규칙을 추가할 때는 반드시
-  기존 규칙을 보존하고 catch-all 앞에 넣는다.
+  기존 규칙을 보존하고 catch-all 앞에 넣는다. 붙이는 것은
+  `cloudflare-publish.mjs`, 떼는 것은 `cloudflare-unpublish.mjs`이며 둘 다
+  보내기 전에 터널 설정 전체를 `cf-backup/`에 저장한다.
 
 ## 시크릿이 사는 곳
 
