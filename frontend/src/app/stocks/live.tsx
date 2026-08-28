@@ -29,8 +29,10 @@ export function LiveQuote({
   const direction = priceDirection(quote.price, quote.open);
 
   return (
-    <div className="grid gap-0.5">
-      <p className="text-xl font-medium">
+    // The sparkline beside this one does not shrink, so without `min-w-0` a
+    // large enough price pushes it out of the card rather than wrapping.
+    <div className="grid min-w-0 gap-0.5">
+      <p className="text-xl leading-tight font-medium [overflow-wrap:anywhere]">
         <Amount value={quote.price} direction={direction} currency />
       </p>
       <TodayMove current={quote.price} open={quote.open} />

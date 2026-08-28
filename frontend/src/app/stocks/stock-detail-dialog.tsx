@@ -288,11 +288,18 @@ function Figure({
   readonly value: string | null | undefined;
 }) {
   return (
-    <div className="rounded-[10px] border bg-surface p-3">
+    // `min-w-0`, because a grid track sizes itself to its content by default
+    // and a grouped price has no break opportunity in it — a stock worth a
+    // billion pushed the card past its column and the dialog clipped the
+    // digits off the end. The card may now be narrower than its number, and
+    // the number wraps inside it.
+    <div className="min-w-0 rounded-[10px] border bg-surface p-3">
       <dt className="text-xs text-muted-foreground">{term}</dt>
       {/* A stock with no candle yet has no high, and saying so is better than
           showing a zero that reads as a real price. */}
-      <dd className="tabular text-base font-bold">{value ? groupDigits(value) : '기록 없음'}</dd>
+      <dd className="tabular text-base leading-tight font-bold [overflow-wrap:anywhere]">
+        {value ? groupDigits(value) : '기록 없음'}
+      </dd>
     </div>
   );
 }

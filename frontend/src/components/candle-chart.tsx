@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
 import { groupDigits } from '@/lib/money';
 
 /**
@@ -34,11 +37,48 @@ const HEIGHT = 260;
  * pitch and let the drawing be as wide as it needs to be.
  */
 const SLOT_MAX = 20;
+/**
+ * And the pitch below which a candle stops being one.
+ *
+ * The cap above was the only bound, so the slot was still the frame divided
+ * by the count once the count grew: two hundred minute candles came out at a
+ * 3.6px pitch with a 2px body, which reads as a dashed rule along the chart
+ * rather than as two hundred candles. Past this the drawing is wider than the
+ * frame and the frame scrolls, which is what its overflow is for and what the
+ * cap's own reasoning already said charts do.
+ */
+const SLOT_MIN = 9;
 /** Below this the figure is too narrow to read as a chart at all. */
 const MIN_WIDTH = 260;
 const PADDING_Y = 16;
 const SCALE = 100_000n;
 const INTEGER = /^-?\d+$/;
+
+/**
+ * When the axis stops being linear.
+ *
+ * A linear axis has to give the whole height to the largest move in view, so
+ * one bucket that went up a hundredfold leaves every other candle a hairline
+ * on the floor — which is the shape a reader sees as "the chart is broken",
+ * not as "the price was flat". A price is multiplicative anyway: 10 to 20 is
+ * the same event as 1000 to 2000, and only a log axis draws them the same
+ * height. Narrow ranges stay linear, because that is the axis people read
+ * without being told.
+ */
+const LOG_SPREAD = 8n;
+
+/**
+ * log10 of a price.
+ *
+ * A price is a `numeric(38,0)`, so it cannot go through `Number()` whole —
+ * that rounds past 2^53. The exponent comes from the digit count and only the
+ * leading digits are handed to a double.
+ */
+function log10(value: bigint): number {
+  const digits = value.toString();
+  if (digits.length <= 15) return Math.log10(Number(digits));
+  return digits.length - 15 + Math.log10(Number(digits.slice(0, 15)));
+}
 
 export function CandleChart({
   candles,
@@ -48,6 +88,18 @@ export function CandleChart({
   /** How to write a bucket's start under the axis. Raw, if not given. */
   readonly label?: (at: string) => string;
 }) {
+  const frame = useRef<HTMLDivElement | null>(null);
+  // Whether the newest candle is the one in view. A live tick rewrites the
+  // series once a second, and scrolling back to the right on each of those
+  // would take the chart out of the hands of a reader looking at something
+  // older — so the chart follows only while they are already at that end.
+  const pinned = useRef(true);
+
+  useEffect(() => {
+    const element = frame.current;
+    if (element && pinned.current) element.scrollLeft = element.scrollWidth;
+  }, [candles]);
+
   const ordered = candles
     .filter(
       (candle) =>
@@ -75,19 +127,28 @@ export function CandleChart({
   }
   const span = max - min === 0n ? 1n : max - min;
 
+  // A price is never zero or negative here, but the axis is only defined for
+  // positive values, so the guard is on the data rather than on the schema.
+  const logarithmic = min > 0n && max / min >= LOG_SPREAD;
+  const logMin = logarithmic ? log10(min) : 0;
+  const logSpan = logarithmic ? Math.max(log10(max) - logMin, Number.EPSILON) : 1;
+
   const y = (value: bigint): number => {
-    const ratio = Number(((value - min) * SCALE) / span) / Number(SCALE);
+    const ratio = logarithmic
+      ? (log10(value) - logMin) / logSpan
+      : Number(((value - min) * SCALE) / span) / Number(SCALE);
     return HEIGHT - PADDING_Y - ratio * (HEIGHT - PADDING_Y * 2);
   };
 
   const write = label ?? ((at: string) => at);
 
   // One slot per candle, with the body taking a little over half of it so
-  // neighbouring candles stay separate at any count. The slot shrinks when
-  // there are more candles than the frame fits and stops growing when there
-  // are fewer, so a handful of candles cluster at a readable pitch instead of
-  // being spread across the whole width.
-  const slot = Math.min(WIDTH / ordered.length, SLOT_MAX);
+  // neighbouring candles stay separate at any count. The pitch is bounded at
+  // both ends: a handful of candles cluster instead of being spread across
+  // the whole width, and a great many of them make the drawing wider than the
+  // frame instead of thinning to a hairline. The frame scrolls in the second
+  // case, and the effect below starts it at the newest candle.
+  const slot = Math.min(Math.max(WIDTH / ordered.length, SLOT_MIN), SLOT_MAX);
   const drawn = slot * ordered.length;
   const chartWidth = Math.max(MIN_WIDTH, drawn);
   // Centred, so a short series sits in the middle of its figure rather than
@@ -97,16 +158,26 @@ export function CandleChart({
 
   return (
     <figure className="grid gap-2">
-      <div className="overflow-x-auto">
+      <div
+        ref={frame}
+        className="overflow-x-auto"
+        onScroll={(event) => {
+          const element = event.currentTarget;
+          pinned.current = element.scrollWidth - element.clientWidth - element.scrollLeft < 4;
+        }}
+      >
         <svg
           viewBox={`0 0 ${chartWidth} ${HEIGHT}`}
-          // Sized in pixels rather than stretched to the container: the
-          // parent scrolls when the series is long, and a short one simply
-          // draws narrower.
-          style={{ width: chartWidth, maxWidth: '100%' }}
+          // Sized in pixels and deliberately not capped at the container's
+          // width: capping it scaled the whole drawing back down, which is
+          // the squeeze the pitch floor exists to prevent. A drawing wider
+          // than the frame scrolls; a shorter one simply draws narrower.
+          style={{ width: chartWidth }}
           className="h-[260px]"
           role="img"
-          aria-label={`캔들 ${ordered.length}개. 최고 ${groupDigits(max.toString())}, 최저 ${groupDigits(min.toString())}.`}
+          aria-label={`캔들 ${ordered.length}개. 최고 ${groupDigits(max.toString())}, 최저 ${groupDigits(min.toString())}.${
+            logarithmic ? ' 세로 눈금은 로그입니다.' : ''
+          }`}
         >
           {ordered.map((candle, index) => {
             const open = BigInt(candle.open_price);
@@ -148,6 +219,9 @@ export function CandleChart({
         <span>{write(ordered[0]?.at ?? '')}</span>
         <span className="tabular">
           최저 {groupDigits(min.toString())} · 최고 {groupDigits(max.toString())}
+          {/* Said outright rather than left to be inferred. A reader who
+              takes a log axis for a linear one misreads every height on it. */}
+          {logarithmic && <span className="ml-1">· 로그 눈금</span>}
         </span>
         <span>{write(ordered[ordered.length - 1]?.at ?? '')}</span>
       </figcaption>
