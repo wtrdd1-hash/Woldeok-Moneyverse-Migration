@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
+import { acquireSiteSocket, lastOnlineCount, readOnlineCount, releaseSiteSocket } from '@/lib/site-socket';
 
 /**
  * How many members are in the lobby right now.
@@ -15,13 +15,18 @@ export function LobbyCount() {
   const [online, setOnline] = useState<number | null>(null);
 
   useEffect(() => {
-    const socket = io({ transports: ['websocket', 'polling'] });
-    socket.on('online', (value: unknown) => {
-      const parsed = Number(value);
-      setOnline(Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0);
-    });
+    const socket = acquireSiteSocket();
+    // The socket is shared, so it may already be open and may already have
+    // heard a count. Starting from it is the difference between showing the
+    // number now and showing 확인 중 until the next person comes or goes.
+    setOnline(lastOnlineCount());
+
+    const update = (value: unknown) => setOnline(readOnlineCount(value));
+    socket.on('online', update);
     return () => {
-      socket.close();
+      // Never close: other components on the page may still be holding it.
+      socket.off('online', update);
+      releaseSiteSocket();
     };
   }, []);
 

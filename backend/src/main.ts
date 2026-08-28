@@ -11,7 +11,7 @@ import { applyServerTimeouts } from './server-timeouts';
 import { sessionToken } from './auth/cookies';
 import { SessionRepository } from './auth/session.repository';
 import { attachLobby } from './lobby/lobby';
-import { MarketBroadcast } from './stock/market-broadcast';
+import { MARKET_ROOM, MarketBroadcast } from './stock/market-broadcast';
 import { UNPREFIXED_ROUTES } from './http/prefix';
 
 async function bootstrap(): Promise<void> {
@@ -72,8 +72,11 @@ async function bootstrap(): Promise<void> {
   app
     .get(MarketBroadcast, { strict: false })
     ?.attach(
-      (event, payload) => io.emit(event, payload),
-      () => io.engine.clientsCount > 0,
+      (event, payload) => io.to(MARKET_ROOM).emit(event, payload),
+      // The room, not the whole server: `clientsCount` counts every visitor
+      // on every page, so the market was read once a second whenever anybody
+      // was anywhere on the site.
+      () => (io.sockets.adapter.rooms.get(MARKET_ROOM)?.size ?? 0) > 0,
     );
 
   // Loopback by default, not 0.0.0.0. This is an internal service; binding it

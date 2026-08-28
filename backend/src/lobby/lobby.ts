@@ -3,6 +3,11 @@ import { Server } from 'socket.io';
 import { createFixedWindowLimiter } from './rate-limiter';
 import type { FixedWindowLimiter } from './rate-limiter';
 import { requestClientKey } from '../security/rate-limit';
+import {
+  MARKET_ROOM,
+  MARKET_SUBSCRIBE_EVENT,
+  MARKET_UNSUBSCRIBE_EVENT,
+} from '../stock/market-broadcast';
 
 /**
  * The real-time lobby.
@@ -77,6 +82,31 @@ export const MAX_SOCKET_HANDSHAKES_PER_MINUTE = 60;
 export const MESSAGE_BURST = 5;
 export const MESSAGE_WINDOW_MS = 10_000;
 export const MAX_MESSAGE_LENGTH = 180;
+
+/**
+ * A socket's membership of the market room.
+ *
+ * The market's price push rides this server, and a reader who is not looking
+ * at the market has no use for a message a second. Membership is asked for
+ * rather than assumed, and it is re-asked for after a reconnect, because a
+ * new connection is a new socket with no rooms.
+ *
+ * Separate from the connection handler so it can be tested without a server.
+ */
+export interface MarketRoomSocket {
+  on(event: string, listener: () => void): unknown;
+  join(room: string): unknown;
+  leave(room: string): unknown;
+}
+
+export function attachMarketRoom(socket: MarketRoomSocket): void {
+  socket.on(MARKET_SUBSCRIBE_EVENT, () => {
+    socket.join(MARKET_ROOM);
+  });
+  socket.on(MARKET_UNSUBSCRIBE_EVENT, () => {
+    socket.leave(MARKET_ROOM);
+  });
+}
 
 export function attachLobby(httpServer: HttpServer, options: LobbyOptions): Server {
   const { baseUrl, trustForwardedFor, sessions, sessionToken } = options;
@@ -202,6 +232,8 @@ export function attachLobby(httpServer: HttpServer, options: LobbyOptions): Serv
 
     io.emit('online', authenticatedLobbyUsers);
     socket.emit('lobby:permissions', { canChat: data.canChat });
+
+    attachMarketRoom(socket);
 
     socket.on('message', (text: unknown) => {
       void (async () => {

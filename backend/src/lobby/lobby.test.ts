@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { createFixedWindowLimiter } from './rate-limiter';
-import { MAX_MESSAGE_LENGTH, sanitizeMessage } from './lobby';
+import { MAX_MESSAGE_LENGTH, attachMarketRoom, sanitizeMessage } from './lobby';
+import {
+  MARKET_ROOM,
+  MARKET_SUBSCRIBE_EVENT,
+  MARKET_UNSUBSCRIBE_EVENT,
+} from '../stock/market-broadcast';
 
 /** A C0 sample written as escapes: a literal one here is what CI greps for. */
 const CONTROL_SAMPLE = '\u0000\u001f';
@@ -76,5 +81,54 @@ describe('lobby message sanitiser', () => {
   it('turns a non-string into the empty string rather than "undefined"', () => {
     expect(sanitizeMessage(undefined)).toBe('');
     expect(sanitizeMessage(null)).toBe('');
+  });
+});
+
+describe('market room membership', () => {
+  function fakeSocket() {
+    const listeners = new Map<string, () => void>();
+    const rooms = new Set<string>();
+    return {
+      rooms,
+      fire: (event: string) => listeners.get(event)?.(),
+      on(event: string, listener: () => void) {
+        listeners.set(event, listener);
+      },
+      join(room: string) {
+        rooms.add(room);
+      },
+      leave(room: string) {
+        rooms.delete(room);
+      },
+    };
+  }
+
+  // A socket is not in the market room until it asks. Every visitor on every
+  // page holds one of these, and the prices move once a second.
+  it('joins nobody by default', () => {
+    const socket = fakeSocket();
+    attachMarketRoom(socket);
+    expect(socket.rooms.has(MARKET_ROOM)).toBe(false);
+  });
+
+  it('joins on request and leaves when the page is done with it', () => {
+    const socket = fakeSocket();
+    attachMarketRoom(socket);
+
+    socket.fire(MARKET_SUBSCRIBE_EVENT);
+    expect(socket.rooms.has(MARKET_ROOM)).toBe(true);
+
+    socket.fire(MARKET_UNSUBSCRIBE_EVENT);
+    expect(socket.rooms.has(MARKET_ROOM)).toBe(false);
+  });
+
+  // Asking twice is what a reconnect looks like from the client's side.
+  it('is unchanged by a repeated request', () => {
+    const socket = fakeSocket();
+    attachMarketRoom(socket);
+
+    socket.fire(MARKET_SUBSCRIBE_EVENT);
+    socket.fire(MARKET_SUBSCRIBE_EVENT);
+    expect(socket.rooms.size).toBe(1);
   });
 });

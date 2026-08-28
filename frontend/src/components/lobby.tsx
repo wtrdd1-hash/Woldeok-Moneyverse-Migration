@@ -1,13 +1,19 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { io } from 'socket.io-client';
 import type { Socket } from 'socket.io-client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/cn';
+import {
+  acquireSiteSocket,
+  lastLobbyPermissions,
+  lastOnlineCount,
+  readOnlineCount,
+  releaseSiteSocket,
+} from '@/lib/site-socket';
 
 /**
  * The real-time lobby.
@@ -54,25 +60,26 @@ export function Lobby() {
   const nextId = useRef(0);
 
   useEffect(() => {
-    const connected = io({ transports: ['websocket', 'polling'] });
+    // Shared with the headcount above it and with the market's price feed, so
+    // the home page opens one socket rather than two. It may already be
+    // connected, in which case no `connect` event is coming and the state has
+    // to be read rather than waited for.
+    const connected = acquireSiteSocket();
     socket.current = connected;
+    setConnection(connected.connected ? 'open' : 'connecting');
+    setOnline(lastOnlineCount());
+    setCanChat(lastLobbyPermissions() === true);
 
-    connected.on('connect', () => setConnection('open'));
-    connected.on('disconnect', () => setConnection('degraded'));
-    connected.on('connect_error', () => setConnection('closed'));
-    connected.on('lobby:permissions', (value: { canChat?: boolean }) => {
-      setCanChat(value?.canChat === true);
-    });
-    connected.on('message:error', (message: unknown) => {
+    const opened = () => setConnection('open');
+    const dropped = () => setConnection('degraded');
+    const failed = () => setConnection('closed');
+    const permissions = (value: { canChat?: boolean }) => setCanChat(value?.canChat === true);
+    const refused = (message: unknown) =>
       setNotice(typeof message === 'string' ? message : '메시지를 보낼 수 없어요.');
-    });
-    connected.on('online', (value: unknown) => {
-      const parsed = Number(value);
-      // This event is the only source for the count. Until it arrives the
-      // page says 확인 중 rather than inventing a zero.
-      setOnline(Number.isFinite(parsed) ? Math.max(0, Math.floor(parsed)) : 0);
-    });
-    connected.on('message', (value: unknown) => {
+    // This event is the only source for the count. Until it arrives the page
+    // says 확인 중 rather than inventing a zero.
+    const headcount = (value: unknown) => setOnline(readOnlineCount(value));
+    const said = (value: unknown) => {
       const text = String(value ?? '')
         .trim()
         .slice(0, MAX_MESSAGE_LENGTH);
@@ -84,11 +91,28 @@ export function Lobby() {
         // list without limit.
         [...current, { id, text, at: new Date().toISOString() }].slice(-100),
       );
-    });
+    };
+
+    connected.on('connect', opened);
+    connected.on('disconnect', dropped);
+    connected.on('connect_error', failed);
+    connected.on('lobby:permissions', permissions);
+    connected.on('message:error', refused);
+    connected.on('online', headcount);
+    connected.on('message', said);
 
     return () => {
-      connected.close();
+      // Listeners off, socket left open: it is shared, and closing it here
+      // would take the headcount and the market feed down with it.
+      connected.off('connect', opened);
+      connected.off('disconnect', dropped);
+      connected.off('connect_error', failed);
+      connected.off('lobby:permissions', permissions);
+      connected.off('message:error', refused);
+      connected.off('online', headcount);
+      connected.off('message', said);
       socket.current = null;
+      releaseSiteSocket();
     };
   }, []);
 

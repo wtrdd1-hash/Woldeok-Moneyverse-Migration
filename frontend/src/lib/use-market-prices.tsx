@@ -1,9 +1,8 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useSyncExternalStore } from 'react';
-import { io } from 'socket.io-client';
-import type { Socket } from 'socket.io-client';
 import { LiveRefresh } from '@/components/live-refresh';
+import { acquireSiteSocket, releaseSiteSocket } from '@/lib/site-socket';
 
 /**
  * The market, as it moves.
@@ -106,11 +105,24 @@ export function MarketPricesProvider({ children }: { readonly children: React.Re
   const [store] = useState(() => new QuoteStore());
 
   useEffect(() => {
-    let socket: Socket | null = io({ transports: ['websocket', 'polling'] });
-    socket.on('market:prices', (payload: PricePayload) => store.apply(payload));
+    // The socket the lobby already runs, shared. The prices go to a room
+    // rather than to everybody, so this asks to be in it — and asks again
+    // after a reconnect, because a reconnect is a new socket with no rooms.
+    const socket = acquireSiteSocket();
+    const apply = (payload: PricePayload) => store.apply(payload);
+    const subscribe = () => socket.emit('market:subscribe');
+
+    socket.on('market:prices', apply);
+    socket.on('connect', subscribe);
+    if (socket.connected) subscribe();
+
     return () => {
-      socket?.close();
-      socket = null;
+      socket.off('market:prices', apply);
+      socket.off('connect', subscribe);
+      // Only the room is left. The socket is shared, and the lobby on the
+      // same page is still using it.
+      if (socket.connected) socket.emit('market:unsubscribe');
+      releaseSiteSocket();
     };
   }, [store]);
 

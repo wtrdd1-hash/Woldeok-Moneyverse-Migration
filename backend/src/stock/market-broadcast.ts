@@ -15,10 +15,21 @@
  * Only prices travel. The float moves only when somebody trades, and the
  * names and descriptions never do, so a reader keeps what the page loaded
  * with and this carries the two numbers that changed.
+ *
+ * And it travels only to the readers who asked for it. The socket is the same
+ * one the lobby runs, so every visitor on every page holds one; broadcasting
+ * to all of them would send a payload a second to somebody reading the privacy
+ * policy. A reader watching the market joins a room, and an empty room means
+ * the ticker does not even read the prices.
  */
 export type MarketEmit = (event: string, payload: unknown) => void;
 
 export const MARKET_PRICES_EVENT = 'market:prices';
+
+/** Who the prices go to. Joined on request, left when the page is closed. */
+export const MARKET_ROOM = 'market';
+export const MARKET_SUBSCRIBE_EVENT = 'market:subscribe';
+export const MARKET_UNSUBSCRIBE_EVENT = 'market:unsubscribe';
 
 export interface LivePriceRow {
   readonly id: string;
