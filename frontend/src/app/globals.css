@@ -173,9 +173,15 @@
  * it. Chroma is clamped rather than copied, because a deep structural green
  * borrowed from a fluorescent pick would be a different design.
  *
- * Nothing here touches --background, --foreground, --card or --muted. The
- * reader chooses what draws the eye; they do not get to choose whether the
- * text is readable.
+ * Nothing here touches --background, --foreground, --card or --muted, so a
+ * pick cannot put text and its ground at the same lightness. Measured across
+ * the six presets the derived contrasts land within 0.3 of each other and
+ * within 0.3 of the product's own palette — the point colour never reads
+ * worse than the accent it replaces. It is not an accessibility floor: the
+ * product's own --clay is 3.19:1 on paper and L 0.62 reproduces that (3.5:1),
+ * so small clay text was below AA before this and still is. Raising it is a
+ * product decision about the terracotta, not one this block should make
+ * quietly.
  *
  * The @supports test is the exact form used below, clamp and all, rather than
  * the bare `oklch(from red l c h)`. A browser that takes relative colours but

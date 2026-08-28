@@ -155,7 +155,7 @@ export function ThemePanel({ className }: { readonly className?: string }) {
 
         <p className="text-xs leading-[1.6] text-muted-foreground">
           {supported
-            ? '바탕과 글자색은 바뀌지 않아요. 어떤 색을 골라도 글은 읽을 수 있습니다.'
+            ? '바탕과 글자색은 바뀌지 않아요. 어떤 색을 골라도 지금과 같은 정도로 읽힙니다.'
             : '이 브라우저는 포인트 색을 지원하지 않아 기본 색으로 보입니다. 화면 밝기 설정은 그대로 쓸 수 있어요.'}
         </p>
       </fieldset>
