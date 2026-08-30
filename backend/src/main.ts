@@ -1,10 +1,13 @@
 import 'reflect-metadata';
 import { raw } from 'express';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { adminAuditTrail } from './admin/audit-trail.middleware';
+import { AuditRepository } from './admin/audit.repository';
 import { loadConfig } from './core/config';
+import { requestContext } from './core/request-context';
 import { ProblemFilter } from './core/problem.filter';
 import { mountOpenApi } from './openapi';
 import { applyServerTimeouts } from './server-timeouts';
@@ -22,6 +25,25 @@ async function bootstrap(): Promise<void> {
   // and its version tells an attacker which advisories to try first and buys
   // a legitimate client nothing.
   app.getHttpAdapter().getInstance().disable('x-powered-by');
+
+  // Correlation first, so every audit row written while serving a request --
+  // by the trail below or by a SECURITY DEFINER function three layers down --
+  // carries the same request id. Spec 14.9 asks for that thread to exist.
+  app.use(requestContext({ trustForwardedHeaders: config.trustProxyForwardedFor }));
+
+  // Spec 14.9: every console view and execution is recorded, including the
+  // request an authorization guard refused. Middleware rather than an
+  // interceptor, for the reason written above adminAuditTrail.
+  const auditTrailLog = new Logger('AdminAuditTrail');
+  app.use(
+    '/api/v1/admin',
+    adminAuditTrail({
+      repository: app.get(AuditRepository, { strict: false }),
+      pepper: app.get<string>('ADMIN_DEVICE_PEPPER', { strict: false }),
+      trustForwardedFor: config.trustProxyForwardedFor,
+      onFailure: (error) => auditTrailLog.error('console access was not recorded', error),
+    }),
+  );
 
   // Raw bytes for the two paths whose bodies are not JSON to us. Discord
   // signs the exact request bytes, and a JSON round trip re-serialises key

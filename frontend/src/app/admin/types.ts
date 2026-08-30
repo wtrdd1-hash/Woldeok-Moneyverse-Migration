@@ -79,13 +79,117 @@ export interface AdminConsole {
   }[];
 }
 
-export interface AuditEvent {
+/**
+ * One entry of the audit trail, as the console searches it.
+ *
+ * Every bigint here is a decimal string and stays one. `sequence` is a chain
+ * position, and `Number()` on it would round past 2^53 into a row that does
+ * not exist -- the same reason amounts are strings.
+ *
+ * `session_hash` and `client_ip` arrive already masked: twelve characters of
+ * the hash, and the address cut back to its /24 or /48 network. Reading the
+ * originals is a separate, recorded request.
+ *
+ * packages/database/migrations/063-audit-event-context.sql defines the
+ * columns and the context envelope; 064-audit-search-and-verification.sql
+ * defines this projection.
+ */
+export interface AuditSearchRow {
+  readonly sequence: string;
   readonly audit_id: string;
+  readonly created_at: string;
+  /** 1 for rows written before 062, which the verifier reproduces differently. */
+  readonly hash_version: number;
   readonly actor_user_id: string | null;
   readonly action: string;
+  readonly feature: string | null;
+  readonly target_kind: string | null;
   readonly target_id: string | null;
-  readonly created_at: string;
+  readonly subject_user_id: string | null;
+  readonly transaction_id: string | null;
+  readonly request_id: string | null;
+  readonly trace_id: string | null;
+  readonly session_hash: string | null;
+  readonly client_ip: string | null;
+  readonly outcome: string | null;
+  readonly response_status: number | null;
+  readonly metadata: Readonly<Record<string, unknown>>;
+  readonly context: Readonly<Record<string, unknown>>;
+  readonly previous_integrity_hash: string | null;
   readonly integrity_hash: string;
+}
+
+/**
+ * packages/database/migrations/064-audit-search-and-verification.sql -- the
+ * same entry unmasked, which the database only returns after recording who
+ * asked and why.
+ */
+export interface AuditRevealedEvent {
+  readonly sequence: string;
+  readonly audit_id: string;
+  readonly created_at: string;
+  readonly actor_user_id: string | null;
+  readonly action: string;
+  readonly session_hash: string | null;
+  readonly client_ip: string | null;
+  readonly context: Readonly<Record<string, unknown>>;
+  readonly metadata: Readonly<Record<string, unknown>>;
+}
+
+/**
+ * packages/database/migrations/064-audit-search-and-verification.sql.
+ *
+ * The three failure counts are kept apart because they mean different
+ * things: a broken link says a row was removed or inserted, a mismatch that
+ * a row's body was edited, a drift that a column was edited around the
+ * envelope that was signed. `legacy_count` is none of those.
+ */
+export interface ChainVerification {
+  readonly verification_id: string;
+  readonly from_sequence: string;
+  readonly to_sequence: string;
+  readonly checked_count: string;
+  readonly verified_count: string;
+  readonly legacy_count: string;
+  readonly mismatch_count: string;
+  readonly link_break_count: string;
+  readonly column_drift_count: string;
+  readonly first_bad_sequence: string | null;
+  readonly status: 'passed' | 'failed' | 'empty';
+}
+
+/** packages/database/migrations/064-audit-search-and-verification.sql */
+export interface ChainVerificationHistory extends ChainVerification {
+  readonly requested_by: string | null;
+  readonly started_at: string;
+  readonly completed_at: string;
+}
+
+/** packages/database/migrations/065-audit-retention-and-destruction.sql */
+export interface AuditRetentionCategory {
+  readonly category: string;
+  readonly retention_days: number;
+  readonly cutoff_at: string;
+  readonly total_rows: string;
+  readonly expired_rows: string;
+  readonly oldest_expired_sequence: string | null;
+  readonly newest_expired_sequence: string | null;
+  readonly last_disposition: string | null;
+  readonly last_disposition_at: string | null;
+}
+
+/** packages/database/migrations/065-audit-retention-and-destruction.sql */
+export interface AuditDisposition {
+  readonly record_id: string;
+  readonly category: string;
+  readonly from_sequence: string;
+  readonly to_sequence: string;
+  readonly row_count: string;
+  readonly method: string;
+  readonly note: string;
+  readonly evidence_hash: string | null;
+  readonly performed_by: string;
+  readonly performed_at: string;
 }
 
 export interface OutboxEvent {

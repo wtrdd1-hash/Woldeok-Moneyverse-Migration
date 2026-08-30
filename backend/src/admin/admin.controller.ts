@@ -26,6 +26,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure } from '../core/pg-error';
+import { contextOf } from '../core/request-context';
 import { AdminInputError } from './admin.repository';
 import { AdminService } from './admin.service';
 
@@ -149,6 +150,10 @@ export class AdminController {
         this.service().setUserRestriction({
           actorUserId: requireUserId(request),
           userId,
+          // The audit row this writes one layer down and the console access
+          // row the trail middleware writes are the same administrator
+          // action seen from two heights; the request id is what says so.
+          requestId: contextOf(request)?.requestId ?? null,
           ...body,
         }),
       'invalid restriction request',
