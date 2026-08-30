@@ -11,6 +11,14 @@ CREATE TABLE public.engagement_progress (
   period_key text NOT NULL CHECK (char_length(period_key) BETWEEN 1 AND 32), progress integer NOT NULL DEFAULT 0 CHECK (progress >= 0),
   completed_at timestamptz, PRIMARY KEY(user_id, catalog_id, period_key)
 );
+-- Progress is recorded with an idempotency key, like every other command in
+-- this schema: a retried request must not count twice.
+CREATE TABLE public.engagement_progress_receipts (
+  idempotency_key uuid PRIMARY KEY, user_id uuid NOT NULL REFERENCES public.users(id),
+  catalog_id uuid NOT NULL REFERENCES public.engagement_catalog(id),
+  period_key text NOT NULL, amount integer NOT NULL CHECK (amount > 0),
+  created_at timestamptz NOT NULL DEFAULT clock_timestamp()
+);
 CREATE TABLE public.npc_profiles (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(), code text NOT NULL UNIQUE CHECK (code ~ '^[a-z0-9_]{3,64}$'), name text NOT NULL, card jsonb NOT NULL DEFAULT '{}'::jsonb CHECK (jsonb_typeof(card) = 'object'), active boolean NOT NULL DEFAULT true
 );
@@ -31,7 +39,8 @@ ON CONFLICT (code) DO NOTHING;
 INSERT INTO public.npc_profiles(code, name, card) VALUES
   ('market_keeper','Market keeper','{"role":"daily orders"}'), ('courier','Courier','{"role":"delivery requests"}')
 ON CONFLICT (code) DO NOTHING;
-REVOKE ALL PRIVILEGES ON TABLE public.engagement_catalog, public.engagement_progress, public.npc_profiles,
+REVOKE ALL PRIVILEGES ON TABLE public.engagement_catalog, public.engagement_progress,
+  public.engagement_progress_receipts, public.npc_profiles,
   public.npc_relationships, public.collection_entries, public.member_engagement_preferences,
   public.member_activity_signals, public.virtual_seasons FROM PUBLIC, moneyverse_app;
 
