@@ -418,3 +418,5 @@ reason and the test fails without one.
 | "Tests passed" after a local run | The scratch DB tunnel was down; they errored | CI is the only place SQL runs. |
 | A repository rename | Hardcoded `ghcr.io/<old-owner>/...` still pulls | Derive from `github.repository_owner`; grep for the old name. |
 | Silencing a gate to make it green | The gate stops meaning anything | Fix the finding. `postcss` was pinned, not exempted. |
+| `pg_catalog.greatest` / `least` / `coalesce` / `nullif` / `extract` | `function pg_catalog.greatest(...) does not exist`, or a syntax error at `FROM` | They are SQL constructs, not functions. Write them bare — `search_path` does not change what they mean. In a plpgsql body it fails at execution, not at deploy: 054 exists because three background jobs failed that way for weeks. |
+| A plpgsql OUT parameter sharing a column name | 42702 at run time, from `ON CONFLICT (…)` or an unqualified reference | plpgsql substitutes parameters into the conflict target too. Rename the OUT parameter, or drop the target when the table has one constraint. |

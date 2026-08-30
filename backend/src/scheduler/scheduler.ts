@@ -42,6 +42,25 @@ export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
       'SELECT run.status, run.checked_count::text AS checked_count FROM public.audit_run_daily_verification() AS run',
   },
   {
+    // Measures yesterday, so it has to have run before the weekly proposal
+    // half an hour later reads the week it closes.
+    job: 'economy.metric_snapshot',
+    cadence: 'daily',
+    notBefore: 0,
+    connection: 'app',
+    statement:
+      'SELECT snapshot.snapshot_date::text AS snapshot_date, snapshot.sample_ok FROM public.economy_record_metric_snapshot() AS snapshot',
+  },
+  {
+    // 15.2: Monday 04:30 KST. The window arithmetic counts from the daily
+    // 04:00 boundary, so thirty minutes into it is half past four.
+    job: 'economy.auto_policy',
+    cadence: 'weekly',
+    notBefore: 30,
+    connection: 'app',
+    statement: 'SELECT public.economy_run_auto_policy() AS result',
+  },
+  {
     job: 'economy.reconciliation',
     cadence: 'daily',
     notBefore: 0,
