@@ -6,5 +6,11 @@ INSERT INTO public.shop_catalog(code,name,description,category,base_price,effect
 ('used_bicycle','중고 자전거','배달 작업용 이동수단입니다.','vehicle',5000,'convenience','account_one'),('scooter','소형 스쿠터','고급 운송 작업용 이동수단입니다.','vehicle',15000,'convenience','account_one'),('cargo_van','소형 화물차','사업 물류용 이동수단입니다.','vehicle',45000,'convenience','account_one'),('personal_storage','개인 창고','사업 재고 한도를 늘립니다.','vehicle',20000,'convenience','account_one'),('workshop_lease','작업실 임대권','기술 계약용 임대권입니다.','vehicle',35000,'convenience','timed'),('office_lease','사무실 임대권','중형 사업 확장용 임대권입니다.','vehicle',80000,'convenience','timed'),
 ('season_frame','시즌 프로필 테두리','시즌 장식품입니다.','season',2000,'decoration','permanent'),('master_tag','직업 마스터 명찰','직업 조건 장식품입니다.','season',5000,'decoration','state_based'),('digital_poster','한정 디지털 포스터','시즌 수집품입니다.','season',8000,'display','limited'),('watch_icon','명품 시계 아이콘','프로필 장식품입니다.','luxury',25000,'decoration','permanent'),('vehicle_skin','한정 차량 스킨','이동수단 장식품입니다.','luxury',40000,'decoration','limited'),('business_sign','사업 브랜드 간판','사업 페이지 장식품입니다.','luxury',50000,'decoration','limited'),('season_sculpture','시즌 기념 조형물','후반 수집품입니다.','season',100000,'display','limited')
 ON CONFLICT(code) DO NOTHING;
+-- Every item ships with unlimited stock, including the four whose
+-- purchase_limit reads 'limited'. That is deliberate for now: there is no
+-- administrator path to set or restock a quantity yet, so a finite number
+-- seeded here could never be changed afterwards. The catalogue is not
+-- reachable from any screen either. When the shop page and its administrator
+-- controls land, the limited items get a real allocation in that change.
 INSERT INTO public.shop_inventory(catalog_id,quantity,restock_rule) SELECT id,NULL,'continuous' FROM public.shop_catalog ON CONFLICT(catalog_id) DO NOTHING;
 COMMIT;

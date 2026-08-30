@@ -82,9 +82,8 @@ B1 → B3 → B5, 그리고 B1 → B4. 각 PR은 `main`이 아니라 **바로 �
 
 ### B implementation notes
 
-- The B stack is rebased only after A's 062–078 migrations are present on
-  `main`; the migration-parity gate rejects an otherwise-valid B branch while
-  that contiguous prefix is absent.
+- B는 066부터 쓴다. 이전 판은 A의 062–078을 기다리라고 적었지만 066–078은
+  쓰이지 않았고, 연속성 게이트는 `main` 기준이므로 기다림은 영원했다.
 - Shop effects use a closed database vocabulary and reject fields that could
   influence casino odds, stock returns, or competitive outcomes.
 - Progression measures completed work and job level separately from balances,

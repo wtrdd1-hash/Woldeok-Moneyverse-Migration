@@ -3,10 +3,55 @@ BEGIN;
 -- Item effects are intentionally a closed vocabulary.  Storing arbitrary
 -- multipliers would make it possible to add a wagering or market advantage
 -- without a schema review.
+--
+-- `?|` only looks at top-level keys, so `{"bonus": {"casinoOdds": 2}}` walked
+-- straight through the constraint it was written to fail. This walks the
+-- document.
+CREATE OR REPLACE FUNCTION public.shop_effect_is_permitted(p_effect jsonb)
+RETURNS boolean
+LANGUAGE plpgsql
+IMMUTABLE
+SET search_path = pg_catalog, pg_temp
+AS $$
+DECLARE
+  v_forbidden constant text[] := ARRAY['casinoOdds', 'stockReturn', 'competitionMultiplier'];
+  v_key text;
+BEGIN
+  IF p_effect IS NULL THEN
+    RETURN false;
+  END IF;
+
+  IF pg_catalog.jsonb_typeof(p_effect) = 'object' THEN
+    FOR v_key IN
+      SELECT keys.effect_key FROM pg_catalog.jsonb_object_keys(p_effect) AS keys(effect_key)
+    LOOP
+      IF v_key = ANY (v_forbidden) THEN
+        RETURN false;
+      END IF;
+      IF NOT public.shop_effect_is_permitted(p_effect -> v_key) THEN
+        RETURN false;
+      END IF;
+    END LOOP;
+  ELSIF pg_catalog.jsonb_typeof(p_effect) = 'array' THEN
+    IF EXISTS (
+      SELECT 1 FROM pg_catalog.jsonb_array_elements(p_effect) AS element(value)
+      WHERE NOT public.shop_effect_is_permitted(element.value)
+    ) THEN
+      RETURN false;
+    END IF;
+  END IF;
+
+  RETURN true;
+END;
+$$;
+
+ALTER FUNCTION public.shop_effect_is_permitted(jsonb) OWNER TO moneyverse_migrator;
+REVOKE ALL PRIVILEGES ON FUNCTION public.shop_effect_is_permitted(jsonb)
+  FROM PUBLIC, moneyverse_app;
+
 ALTER TABLE public.shop_catalog
   ADD CONSTRAINT shop_catalog_effect_shape_check CHECK (
-    jsonb_typeof(effect) = 'object'
-    AND NOT (effect ?| ARRAY['casinoOdds', 'stockReturn', 'competitionMultiplier'])
+    jsonb_typeof(effect) = 'object' AND public.shop_effect_is_permitted(effect)
   );
 
 ALTER TABLE public.shop_catalog
