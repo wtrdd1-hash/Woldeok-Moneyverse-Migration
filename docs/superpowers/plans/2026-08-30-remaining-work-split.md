@@ -80,6 +80,16 @@ B1 → B3 → B5, 그리고 B1 → B4. 각 PR은 `main`이 아니라 **바로 �
 | B4 | `feat/member-profile` | 079–080 | 프로필 공개 3단계 · 칭호 · 카지노 자기 한도 · 열람·정정 경로 |
 | B5 | `feat/engagement-loop` | 081–082 | 퀘스트 · NPC · 도감 · 주간목표 · 시즌 수명주기 · 복귀 · 이탈감지 |
 
+### B implementation notes
+
+- The B stack is rebased only after A's 062–078 migrations are present on
+  `main`; the migration-parity gate rejects an otherwise-valid B branch while
+  that contiguous prefix is absent.
+- Shop effects use a closed database vocabulary and reject fields that could
+  influence casino odds, stock returns, or competitive outcomes.
+- Progression measures completed work and job level separately from balances,
+  so loan, administrator, and casino activity cannot satisfy stage requirements.
+
 각 항목의 상세 요구사항은 [구현 계획](2026-08-30-spec-v2-implementation.md)의
 해당 PR 절에 있다. 계획서의 번호(PR3·PR4…)와 여기 번호(A2·A3…)는 **내용이 같고
 마이그레이션 번호만 다르다** — 계획서 쪽 번호는 무시하고 이 표를 따른다.
