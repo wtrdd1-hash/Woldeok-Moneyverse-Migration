@@ -27,8 +27,11 @@
 -- matches on key names, so it is a coarse net: it will also refuse a
 -- harmless `tokenCount`. That is the intended direction of error -- a
 -- rejected audit write is a bug report, a recorded bot token is an incident.
--- Every metadata key the existing fifteen writers use was checked against
--- the pattern before this landed.
+-- The pattern is matched unanchored, so an alternative that is a common English
+-- word matches far more than it means to: an earlier revision of this file
+-- carried a bare `credential`, which refused 058's own enrolment metadata and
+-- would have locked every administrator out of the second factor. Any new
+-- alternative has to be checked against every key the existing writers send.
 --
 -- SESSIONS. 17.10 lists the session id itself as forbidden, but 14.9 wants
 -- to correlate a session's actions. `session_hash` is a one-way hash the
@@ -105,8 +108,16 @@ IMMUTABLE
 SET search_path = pg_catalog, pg_temp
 AS $$
 DECLARE
+  -- No bare `credential`: `~*` is unanchored, and 058 already writes
+  -- `replacedConfirmedCredential` on every TOTP enrolment, so that alternative
+  -- refused the audit write inside `admin_totp_begin_enrolment` and rolled the
+  -- enrolment back with it -- locking every administrator out of the second
+  -- factor that 057 made the only remaining control. Nothing is lost: a key
+  -- that actually holds a credential still matches `password`, `passphrase`,
+  -- `secret`, `token` or one of the `_key` forms, and the scan recurses, so a
+  -- `credentials` object is caught by the key inside it.
   v_forbidden constant text :=
-    '(password|passphrase|secret|token|cookie|authorization|credential|'
+    '(password|passphrase|secret|token|cookie|authorization|'
     || 'session_?id|private_?key|api_?key|access_?key|bearer|totp|'
     || 'recovery_?code|db_?url|database_?url|connection_?string)';
   v_key text;
@@ -228,7 +239,7 @@ SECURITY DEFINER
 SET search_path = pg_catalog, pg_temp
 AS $$
 DECLARE
-  v_audit_id uuid;
+  v_audit_id uuid := pg_catalog.gen_random_uuid();
   v_previous_hash text;
   v_previous_sequence bigint;
   v_sequence bigint;
@@ -296,6 +307,16 @@ BEGIN
     EXCEPTION WHEN invalid_text_representation THEN
       RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'audit context clientIp must be an address';
     END;
+
+    -- Canonicalise before hashing. `inet` accepts spellings it does not
+    -- reproduce -- `::ffff:203.0.113.7`, a redundant `/32` -- and 064 checks
+    -- the column against this envelope. Storing what the caller typed would
+    -- make an untouched row read as drifted for the rest of its life.
+    p_context := pg_catalog.jsonb_set(
+      p_context,
+      ARRAY['clientIp'],
+      pg_catalog.to_jsonb(pg_catalog.host(v_client_ip))
+    );
   END IF;
 
   v_session_hash := p_context ->> 'sessionHash';
@@ -338,6 +359,7 @@ BEGIN
   v_sequence := coalesce(v_previous_sequence, 0) + 1;
 
   v_integrity_hash := public.audit_event_digest(
+    v_audit_id,
     v_sequence,
     v_previous_hash,
     p_actor_user_id,
@@ -372,7 +394,7 @@ BEGIN
     previous_integrity_hash,
     integrity_hash
   ) VALUES (
-    pg_catalog.gen_random_uuid(),
+    v_audit_id,
     v_sequence,
     2,
     p_actor_user_id,
@@ -393,8 +415,7 @@ BEGIN
     v_created_at,
     v_previous_hash,
     v_integrity_hash
-  )
-  RETURNING id INTO v_audit_id;
+  );
 
   RETURN v_audit_id;
 END;

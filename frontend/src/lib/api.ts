@@ -105,6 +105,14 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
   // The API does not trust it: it matches this against the origins registered
   // in OAUTH_ALLOWED_REDIRECT_URIS and falls back to the canonical URI when it
   // matches none, so relaying it can only ever select, never introduce.
+  // The visitor's browser, not this process's. Server-side fetch sends its own
+  // `user-agent`, so without this the API derived every administrator's device
+  // family and hash from the string "node" -- one constant for the whole
+  // deployment, which is worse than recording nothing because it looks like a
+  // fingerprint.
+  const userAgent = incoming.get('user-agent');
+  if (userAgent) requestHeaders['user-agent'] = userAgent;
+
   const forwardedHost = incoming.get('x-forwarded-host') ?? incoming.get('host');
   if (forwardedHost) {
     const proto = incoming.get('x-forwarded-proto') ?? 'https';
@@ -195,6 +203,14 @@ export async function apiWithCookie<T>(
   // The API does not trust it: it matches this against the origins registered
   // in OAUTH_ALLOWED_REDIRECT_URIS and falls back to the canonical URI when it
   // matches none, so relaying it can only ever select, never introduce.
+  // The visitor's browser, not this process's. Server-side fetch sends its own
+  // `user-agent`, so without this the API derived every administrator's device
+  // family and hash from the string "node" -- one constant for the whole
+  // deployment, which is worse than recording nothing because it looks like a
+  // fingerprint.
+  const userAgent = incoming.get('user-agent');
+  if (userAgent) requestHeaders['user-agent'] = userAgent;
+
   const forwardedHost = incoming.get('x-forwarded-host') ?? incoming.get('host');
   if (forwardedHost) {
     const proto = incoming.get('x-forwarded-proto') ?? 'https';

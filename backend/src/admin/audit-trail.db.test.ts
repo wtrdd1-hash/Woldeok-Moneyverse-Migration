@@ -332,6 +332,62 @@ describe.skipIf(!DATABASE_URL)('the audit trail against a real database', () => 
       });
     });
 
+    it('refuses a row that claims to be checked by the retired formula', async () => {
+      await rolledBack(async (client) => {
+        const actor = await member(client, 'approver');
+        const event = await append(client, actor, 'admin.test.first');
+
+        // Without the CHECK this is how the chain gets defeated: edit the row
+        // behind the disabled trigger, set hash_version to 1, and the verifier
+        // takes the legacy arm, where a failed reproduction counts as
+        // `legacy` -- which the status does not test. A CHECK survives the
+        // trigger being off; that is the whole reason it is a CHECK.
+        await client.query('ALTER TABLE public.audit_logs DISABLE TRIGGER audit_logs_immutable');
+        const error = await rejectionOf(() =>
+          client.query('UPDATE public.audit_logs SET hash_version = 1 WHERE id = $1', [event.id]),
+        );
+        expect(code(error)).toBe('23514');
+      });
+    });
+
+    it('reports an address planted on a row that was signed without one', async () => {
+      await rolledBack(async (client) => {
+        const actor = await member(client, 'approver');
+        const event = await append(client, actor, 'admin.test.first', {}, { feature: 'console' });
+
+        await client.query('ALTER TABLE public.audit_logs DISABLE TRIGGER audit_logs_immutable');
+        await client.query(
+          "UPDATE public.audit_logs SET client_ip = '203.0.113.9'::inet WHERE id = $1",
+          [event.id],
+        );
+        await client.query('ALTER TABLE public.audit_logs ENABLE TRIGGER audit_logs_immutable');
+
+        // This is the direction that ADDS an attribution -- it makes the trail
+        // say an administrator acted from an address they never used. The
+        // comparison returns NULL here rather than false, and `IF NOT NULL` is
+        // not true, so without a coalesce the drift went unreported.
+        const result = await verify(client, actor, event.sequence, event.sequence);
+        expect(result.column_drift_count).toBe('1');
+        expect(result.status).toBe('failed');
+      });
+    });
+
+    it('clamps a generous window instead of refusing it or inventing a break', async () => {
+      await rolledBack(async (client) => {
+        const actor = await member(client, 'approver');
+        const event = await append(client, actor, 'admin.test.first');
+        const beyond = (BigInt(event.sequence) + 500000n).toString();
+
+        // A caller who does not know where the chain ends asks for everything
+        // above their row. Measuring the span against the raw bound would
+        // refuse a window that covers one row.
+        const result = await verify(client, actor, event.sequence, beyond);
+        expect(result.status).toBe('passed');
+        expect(result.link_break_count).toBe('0');
+        expect(result.checked_count).toBe('1');
+      });
+    });
+
     it('keeps its own verification history append-only', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client, 'approver');
@@ -457,6 +513,61 @@ describe.skipIf(!DATABASE_URL)('the audit trail against a real database', () => 
       }
     });
 
+    it('accepts every metadata key the writers already in the schema send', async () => {
+      // The regression that made this necessary: the forbidden pattern is
+      // matched unanchored, so a bare `credential` alternative matched
+      // migration 058's own `replacedConfirmedCredential` and refused the
+      // audit write inside `admin_totp_begin_enrolment` -- which rolled the
+      // enrolment back with it, locking every administrator out of the second
+      // factor. Nothing in the suite covered a successful enrolment, so CI
+      // stayed green. A new alternative belongs here before it belongs in 063.
+      const shipped = [
+        'action', 'announcementId', 'approvalRequestId', 'decision', 'discord',
+        'displacedUserId', 'effectiveAt', 'entries', 'failedAttempts', 'featureKey',
+        'guildId', 'imageHost', 'keyId', 'lockedUntil', 'nextState', 'operation',
+        'outcome', 'photoId', 'previousState', 'previousVersion', 'published',
+        'reason', 'replacedConfirmedCredential', 'requesterId', 'requestType',
+        'requiresTwoPersonApproval', 'restoredVersion', 'revokedSessions', 'role',
+        'rolledBackVersion', 'rotatedFrom', 'step', 'surface', 'version',
+      ];
+
+      const { rows } = await migrator.query<{ key: string | null }>(
+        'SELECT public.audit_first_sensitive_key($1::jsonb) AS key',
+        [Object.fromEntries(shipped.map((key) => [key, 'value']))],
+      );
+      expect(rows[0]?.key, 'a key an existing writer already sends is refused').toBeNull();
+    });
+
+    it('canonicalises the address it stores, so an untouched row never reads as drifted', async () => {
+      const client = await migrator.connect();
+      try {
+        await client.query('BEGIN');
+        const actor = randomUUID();
+        await client.query('INSERT INTO public.users (id) VALUES ($1)', [actor]);
+        await client.query('INSERT INTO public.user_roles (user_id, role) VALUES ($1, $2)', [
+          actor,
+          'approver',
+        ]);
+        // A spelling `inet` accepts and does not reproduce. Storing it as
+        // typed would leave the column and the signed envelope disagreeing for
+        // the life of the row.
+        const { rows } = await client.query<{ audit_id: string }>(
+          'SELECT public.admin_append_audit_event($1,$2,NULL,NULL,$3::jsonb,$4::jsonb) AS audit_id',
+          [actor, 'admin.test.canonical', {}, { clientIp: '::ffff:203.0.113.7' }],
+        );
+        const { rows: stored } = await client.query<{ sequence: string; matches: boolean }>(
+          `SELECT audit_row.sequence::text AS sequence,
+                  public.audit_columns_match_context(audit_row) AS matches
+           FROM public.audit_logs AS audit_row WHERE audit_row.id = $1`,
+          [rows[0]?.audit_id],
+        );
+        expect(stored[0]?.matches).toBe(true);
+      } finally {
+        await client.query('ROLLBACK');
+        client.release();
+      }
+    });
+
     it('lets a member with no role record that the console refused them', async () => {
       const client = await migrator.connect();
       try {
@@ -518,8 +629,12 @@ describe.skipIf(!DATABASE_URL)('the audit trail against a real database', () => 
           ],
         );
 
-        const { rows } = await client.query<{ client_ip: string; session_hash: string }>(
-          `SELECT event.client_ip, event.session_hash
+        const { rows } = await client.query<{
+          client_ip: string;
+          session_hash: string;
+          context: unknown;
+        }>(
+          `SELECT event.client_ip, event.session_hash, event.context
            FROM public.admin_search_audit_events(
              $1, NULL, NULL, $1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1
            ) AS event`,
@@ -527,6 +642,11 @@ describe.skipIf(!DATABASE_URL)('the audit trail against a real database', () => 
         );
         expect(rows[0]?.client_ip).toBe('203.0.113.0/24');
         expect(rows[0]?.session_hash).toBe('a'.repeat(12));
+        // The column and the envelope carry the same value, so masking one and
+        // returning the other whole hands the reader exactly what was hidden.
+        const context = rows[0]?.context as Record<string, unknown>;
+        expect(context.sessionHash).toBe('a'.repeat(12));
+        expect(context.clientIp).toBe('203.0.113.0/24');
       } finally {
         await client.query('ROLLBACK');
         client.release();
@@ -630,18 +750,30 @@ describe.skipIf(!DATABASE_URL)('the audit trail against a real database', () => 
       }
     });
 
-    it('files an authorization denial under the ninety-day promise', async () => {
-      const { rows } = await migrator.query<{ category: string }>(
-        `SELECT public.audit_retention_category($1) AS category`,
-        ['admin.wallet.denied'],
-      );
-      expect(rows[0]?.category).toBe('authentication');
+    it('files each action under the period the privacy document promises for it', async () => {
+      // The two 'administration' cases at the end are the ones an unanchored
+      // pattern got wrong: `login_policy` is an administrator changing policy,
+      // not a sign-in, and the trail writes `.failed` for every ordinary
+      // administrative error. Both carry the one-year promise, and filing them
+      // at ninety days would have a superadmin sign an immutable destruction
+      // record over records that were not due.
+      const expected: ReadonlyArray<readonly [string, string]> = [
+        ['admin.wallet.denied', 'authentication'],
+        ['admin.login.blocked', 'authentication'],
+        ['admin.second_factor.failed', 'authentication'],
+        ['admin.session.force_logout', 'authentication'],
+        ['economy.policy.activated', 'administration'],
+        ['admin.login_policy.allowlist_set', 'administration'],
+        ['admin.wallet.failed', 'administration'],
+      ];
 
-      const { rows: administration } = await migrator.query<{ category: string }>(
-        `SELECT public.audit_retention_category($1) AS category`,
-        ['economy.policy.activated'],
-      );
-      expect(administration[0]?.category).toBe('administration');
+      for (const [action, category] of expected) {
+        const { rows } = await migrator.query<{ category: string }>(
+          'SELECT public.audit_retention_category($1) AS category',
+          [action],
+        );
+        expect(rows[0]?.category, action).toBe(category);
+      }
     });
   });
 });

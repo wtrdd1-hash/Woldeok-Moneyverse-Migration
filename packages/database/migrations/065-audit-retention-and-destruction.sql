@@ -115,8 +115,14 @@ SET search_path = pg_catalog, pg_temp
 AS $$
   SELECT CASE
     WHEN p_action IS NULL THEN 'administration'
-    WHEN p_action ~ '^admin\.(login|second_factor|session)' THEN 'authentication'
-    WHEN p_action ~ '\.(denied|blocked|failed|rejected)$' THEN 'authentication'
+    -- The trailing separator matters: without it `admin.login_policy.
+    -- allowlist_set` -- an administrator changing policy, a one-year record --
+    -- matched `login` and was filed under the ninety-day promise.
+    WHEN p_action ~ '^admin\.(login|second_factor|session)\.' THEN 'authentication'
+    -- `denied` only. The trail middleware writes `admin.<feature>.failed` for
+    -- every status at or above 400 that is not a refusal, so `failed` swept
+    -- ordinary administrative errors into the shorter period as well.
+    WHEN p_action ~ '\.denied$' THEN 'authentication'
     ELSE 'administration'
   END
 $$;
