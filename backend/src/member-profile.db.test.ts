@@ -90,10 +90,14 @@ describe.skipIf(!DATABASE_URL)('member profiles against a real database', () => 
           [subject],
         );
 
+        // A savepoint, because a failed statement aborts the transaction and
+        // everything after it would answer 25P02 instead of what it was asked.
+        await client.query('SAVEPOINT before_refusal');
         const error = await rejectionOf(() =>
           client.query('SELECT * FROM public.member_profile_view($1, $2)', [viewer, subject]),
         );
         expect(code(error)).toBe('28000');
+        await client.query('ROLLBACK TO SAVEPOINT before_refusal');
 
         const { rows } = await client.query<{ display_name: string }>(
           'SELECT profile.display_name FROM public.member_profile_view($1, $2) AS profile',
@@ -150,7 +154,9 @@ describe.skipIf(!DATABASE_URL)('member profiles against a real database', () => 
           [subject],
         );
         await client.query(
-          "UPDATE public.users SET status = 'deleted'::public.user_status WHERE id = $1",
+          `UPDATE public.users
+           SET status = 'deleted'::public.user_status, deleted_at = clock_timestamp()
+           WHERE id = $1`,
           [subject],
         );
 
