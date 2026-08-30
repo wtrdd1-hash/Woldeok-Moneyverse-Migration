@@ -10,9 +10,11 @@ import { PG_POOL } from '../core/pool.provider';
 import { StockModule } from '../stock/stock.module';
 import { AdminController } from './admin.controller';
 import { AdminRepository } from './admin.repository';
+import { AdminAuditController } from './audit.controller';
 import { AdminSecurityController } from './admin-security.controller';
 import { AdminSecurityService } from './admin-security.service';
 import { AdminService } from './admin.service';
+import { AuditRepository } from './audit.repository';
 import { AdminControlsController } from './controls.controller';
 import { ControlsRepository } from './controls.repository';
 import { GameCatalogController } from './game-catalog.controller';
@@ -38,6 +40,7 @@ function devicePepper(config: AppConfig): string {
   imports: [AuthModule, StockModule],
   controllers: [
     AdminController,
+    AdminAuditController,
     AdminControlsController,
     AdminSecurityController,
     GameCatalogController,
@@ -48,6 +51,11 @@ function devicePepper(config: AppConfig): string {
       inject: [PG_POOL],
       useFactory: (pool: Queryable | null) =>
         pool ? new AdminService({ repository: new AdminRepository(pool) }) : null,
+    },
+    {
+      provide: AuditRepository,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => (pool ? new AuditRepository(pool) : null),
     },
     {
       provide: ControlsRepository,
@@ -88,6 +96,6 @@ function devicePepper(config: AppConfig): string {
         pool ? new PostgresGameCatalogRepository(pool) : null,
     },
   ],
-  exports: [AdminService],
+  exports: [AdminService, AuditRepository],
 })
 export class AdminModule {}

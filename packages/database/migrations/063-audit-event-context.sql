@@ -464,12 +464,68 @@ BEGIN
 END;
 $$;
 
+-- Someone touched the console surface.
+--
+-- `admin_record_audit_event` requires the actor to hold a role, which is
+-- right for an administrative action and wrong for the event 14.9 most wants
+-- recorded: a signed-in member who reached an administrator route and was
+-- refused. That caller has no role by definition, so the role check would
+-- reject the very write that documents the refusal.
+--
+-- This function therefore requires only an active account, and in exchange
+-- constrains what may be written: the action must be namespaced `admin.`, so
+-- it cannot be used to forge a row that looks like a domain event.
+CREATE OR REPLACE FUNCTION public.admin_record_console_access(
+  p_actor_user_id uuid,
+  p_action text,
+  p_target_id uuid,
+  p_request_id uuid,
+  p_metadata jsonb,
+  p_context jsonb
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp
+AS $$
+BEGIN
+  IF p_actor_user_id IS NULL THEN
+    RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'actor user id is required';
+  END IF;
+
+  IF p_action IS NULL OR p_action !~ '^admin\.' THEN
+    RAISE EXCEPTION USING ERRCODE = '22023',
+      MESSAGE = 'console access actions are namespaced admin.';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.users AS user_row
+    WHERE user_row.id = p_actor_user_id
+      AND user_row.status = 'active'::public.user_status
+  ) THEN
+    RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'an active account is required';
+  END IF;
+
+  RETURN public.admin_append_audit_event(
+    p_actor_user_id,
+    p_action,
+    p_target_id,
+    p_request_id,
+    p_metadata,
+    p_context
+  );
+END;
+$$;
+
 ALTER FUNCTION public.audit_normalize_text(text, integer) OWNER TO moneyverse_migrator;
 ALTER FUNCTION public.audit_first_sensitive_key(jsonb) OWNER TO moneyverse_migrator;
 ALTER FUNCTION public.audit_assert_context(jsonb) OWNER TO moneyverse_migrator;
 ALTER FUNCTION public.admin_append_audit_event(uuid, text, uuid, uuid, jsonb, jsonb)
   OWNER TO moneyverse_migrator;
 ALTER FUNCTION public.admin_record_audit_event(uuid, text, uuid, uuid, jsonb, jsonb)
+  OWNER TO moneyverse_migrator;
+ALTER FUNCTION public.admin_record_console_access(uuid, text, uuid, uuid, jsonb, jsonb)
   OWNER TO moneyverse_migrator;
 
 REVOKE ALL PRIVILEGES ON FUNCTION public.audit_normalize_text(text, integer)
@@ -482,10 +538,14 @@ REVOKE ALL PRIVILEGES ON FUNCTION public.admin_append_audit_event(uuid, text, uu
   FROM PUBLIC, moneyverse_app;
 REVOKE ALL PRIVILEGES ON FUNCTION public.admin_record_audit_event(uuid, text, uuid, uuid, jsonb, jsonb)
   FROM PUBLIC, moneyverse_app;
+REVOKE ALL PRIVILEGES ON FUNCTION public.admin_record_console_access(uuid, text, uuid, uuid, jsonb, jsonb)
+  FROM PUBLIC, moneyverse_app;
 
 -- `admin_record_audit_event` is the application's one door into the chain,
 -- and 007 already grants the five-argument form.
 GRANT EXECUTE ON FUNCTION public.admin_record_audit_event(uuid, text, uuid, uuid, jsonb, jsonb)
+  TO moneyverse_app;
+GRANT EXECUTE ON FUNCTION public.admin_record_console_access(uuid, text, uuid, uuid, jsonb, jsonb)
   TO moneyverse_app;
 
 COMMIT;
