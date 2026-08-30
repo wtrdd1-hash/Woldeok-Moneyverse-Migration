@@ -44,11 +44,11 @@ BEGIN
   END IF;
 
   IF p_limit ~ '^daily_[0-9]{1,2}$' THEN
-    v_allowed := pg_catalog.substring(p_limit from 7)::integer;
+    v_allowed := pg_catalog.substr(p_limit, 7)::integer;
     v_since := date_trunc('day', pg_catalog.clock_timestamp() AT TIME ZONE 'Asia/Seoul')
       AT TIME ZONE 'Asia/Seoul';
   ELSIF p_limit ~ '^weekly_[0-9]{1,2}$' THEN
-    v_allowed := pg_catalog.substring(p_limit from 8)::integer;
+    v_allowed := pg_catalog.substr(p_limit, 8)::integer;
     v_since := date_trunc('week', pg_catalog.clock_timestamp() AT TIME ZONE 'Asia/Seoul')
       AT TIME ZONE 'Asia/Seoul';
   ELSE
