@@ -1,13 +1,18 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { ContentModule } from '../content/content.module';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import { ProfileController } from './profile.controller';
+import { ProfileImageController } from './profile-image.controller';
 import { ProfileRepository } from './profile.repository';
 
 @Module({
-  imports: [AuthModule],
-  controllers: [ProfileController],
+  // ContentModule for `PrivateImageStorage`: a profile picture and a gallery
+  // photo share one directory, one validator and one key shape, and a second
+  // store would be a second set of all three to keep in step.
+  imports: [AuthModule, ContentModule],
+  controllers: [ProfileController, ProfileImageController],
   providers: [
     {
       // A factory, not a class provider. `ProfileRepository`'s constructor

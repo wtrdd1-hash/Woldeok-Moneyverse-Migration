@@ -3,12 +3,16 @@ import {
   Body,
   ConflictException,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
+  HttpCode,
+  HttpException,
   Inject,
   NotFoundException,
   Param,
   ParseUUIDPipe,
+  Post,
   Put,
   Req,
   ServiceUnavailableException,
@@ -22,6 +26,8 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
+import { HttpError } from '../http/errors';
+import { PrivateImageStorage } from '../content/private-image-storage';
 import { ProfileUpdateDto } from './profile.dto';
 import { ProfileInputError, ProfileRepository } from './profile.repository';
 
@@ -60,11 +66,19 @@ interface Refusal {
 @Controller('profile')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
 export class ProfileController {
-  constructor(@Inject(ProfileRepository) private readonly profiles: ProfileRepository | null) {}
+  constructor(
+    @Inject(ProfileRepository) private readonly profiles: ProfileRepository | null,
+    @Inject(PrivateImageStorage) private readonly storage: PrivateImageStorage | null,
+  ) {}
 
   private repository(): ProfileRepository {
     if (!this.profiles) throw new ServiceUnavailableException('profiles are unavailable');
     return this.profiles;
+  }
+
+  private imageStorage(): PrivateImageStorage {
+    if (!this.storage) throw new ServiceUnavailableException('the image store is unavailable');
+    return this.storage;
   }
 
   /**
@@ -138,6 +152,64 @@ export class ProfileController {
         ProfileController.HIDDEN,
       ),
     };
+  }
+
+  /**
+   * Uploading a picture, in place of typing an address for one.
+   *
+   * The bytes go through the same store and the same validator the gallery
+   * uses -- magic numbers, a size cap, a server-generated key -- and the file
+   * this replaces is deleted, because a store that only ever grows fills the
+   * disk it was put on. The delete happens after the row is updated: an
+   * orphaned file is bytes nobody can reach, while a row pointing at a file
+   * that is gone is a broken picture on somebody's profile.
+   */
+  @Post('image')
+  @HttpCode(201)
+  @ApiOperation({ summary: 'Upload a profile picture, replacing the current one' })
+  async uploadImage(@Req() request: RequestWithSession, @Body() body: Buffer) {
+    const repository = this.repository();
+    const storage = this.imageStorage();
+    const actor = requireUserId(request);
+
+    let stored;
+    try {
+      stored = await storage.save(body);
+    } catch (error: unknown) {
+      // Preserve the status the validator chose: too large and not an image
+      // are different answers and the member can act on each.
+      if (error instanceof HttpError) throw new HttpException(error.message, error.status);
+      throw error;
+    }
+
+    let change;
+    try {
+      change = await this.guarded(
+        () => repository.setImage(actor, stored.storageKey),
+        ProfileController.HIDDEN,
+      );
+    } catch (error: unknown) {
+      // The row was not updated, so nothing points at these bytes. Leaving
+      // them would be an orphan created by a failure.
+      await storage.remove(stored.storageKey);
+      throw error;
+    }
+
+    if (change.replaced_key) await storage.remove(change.replaced_key);
+    return { imagePath: change.image_path };
+  }
+
+  @Delete('image')
+  @HttpCode(204)
+  @ApiOperation({ summary: 'Remove the profile picture' })
+  async removeImage(@Req() request: RequestWithSession): Promise<void> {
+    const repository = this.repository();
+    const storage = this.imageStorage();
+    const change = await this.guarded(
+      () => repository.clearImage(requireUserId(request)),
+      ProfileController.HIDDEN,
+    );
+    if (change.replaced_key) await storage.remove(change.replaced_key);
   }
 
   /**

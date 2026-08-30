@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
+import { api, apiBytes } from '@/lib/api';
 import { failure, mutate } from '@/lib/mutate';
 import type { ProfileSettings } from './profile';
 import {
@@ -104,5 +105,60 @@ export async function saveProfile(
       error,
       '프로필을 저장하지 못했어요. 받은 적이 없는 칭호를 골랐는지 확인해 주세요.',
     );
+  }
+}
+
+/** Four megabytes, the cap the API applies to the same route. */
+const IMAGE_MAX_BYTES = 4 * 1024 * 1024;
+
+/**
+ * Uploading a picture instead of naming one.
+ *
+ * Its own action and its own form: the settings form replaces every column
+ * from what it holds, and a file input inside it would mean choosing a
+ * picture and saving a display name were one submission that half-failed
+ * together. This one writes a single column and leaves the rest alone.
+ *
+ * Bytes rather than JSON, through `apiBytes`, the way the gallery's upload
+ * goes -- the API reads this route's body raw and decides from the magic
+ * numbers whether it is an image at all.
+ */
+export async function uploadProfileImage(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const file = formData.get('image');
+  if (!(file instanceof File) || file.size === 0) {
+    return { status: 'error', message: '올릴 이미지 파일을 선택해 주세요.' };
+  }
+  // Checked here so the member is told before four megabytes travel, and
+  // again by the API, which is the one that decides.
+  if (file.size > IMAGE_MAX_BYTES) {
+    return { status: 'error', message: '이미지는 4MB 이하여야 해요.' };
+  }
+
+  try {
+    const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session');
+    await apiBytes<{ imagePath: string }>('/api/v1/profile/image', await file.arrayBuffer(), {
+      contentType: file.type || 'application/octet-stream',
+      csrfToken,
+    });
+    revalidatePath('/profile');
+    return { status: 'ok', message: '프로필 사진을 바꿨어요.' };
+  } catch (error) {
+    return failure(error, '사진을 올리지 못했어요. PNG · JPEG · WebP만 올릴 수 있어요.');
+  }
+}
+
+export async function removeProfileImage(
+  _previous: ActionState,
+  _formData: FormData,
+): Promise<ActionState> {
+  try {
+    await mutate('/api/v1/profile/image', { method: 'DELETE' });
+    revalidatePath('/profile');
+    return { status: 'ok', message: '프로필 사진을 내렸어요.' };
+  } catch (error) {
+    return failure(error, '사진을 내리지 못했어요.');
   }
 }

@@ -202,6 +202,12 @@ export interface ProfileSettingsRow {
   readonly featured_title: string | null;
 }
 
+/** public.member_set_profile_image RETURNS TABLE: migration 094. */
+export interface ProfileImageChange {
+  readonly image_path: string;
+  readonly replaced_key: string | null;
+}
+
 /** A replacement, not a patch: see `update`. */
 export interface ProfileUpdate {
   readonly visibility: unknown;
@@ -282,6 +288,51 @@ export class ProfileRepository {
    * cannot read it back republishes everything the member had hidden the
    * moment they change their display name. 093 added the read.
    */
+  /**
+   * Points the profile at bytes already in the store, and reports what it
+   * replaced. 094 hands back the previous storage key when the old value was
+   * an upload; an address the member typed points at somebody else's server
+   * and is not ours to delete.
+   */
+  async setImage(actor: unknown, storageKey: string): Promise<ProfileImageChange> {
+    assertUuid(actor, 'actor user id');
+    const row = await queryOne<ProfileImageChange>(
+      this.pool,
+      `SELECT image_path, replaced_key
+       FROM public.member_set_profile_image($1::uuid, $2)`,
+      [actor, storageKey],
+    );
+    if (!row) throw new Error('member_set_profile_image did not return a row');
+    return row;
+  }
+
+  async clearImage(actor: unknown): Promise<{ readonly replaced_key: string | null }> {
+    assertUuid(actor, 'actor user id');
+    const row = await queryOne<{ readonly replaced_key: string | null }>(
+      this.pool,
+      'SELECT replaced_key FROM public.member_clear_profile_image($1::uuid)',
+      [actor],
+    );
+    if (!row) throw new Error('member_clear_profile_image did not return a row');
+    return row;
+  }
+
+  /**
+   * Whether these bytes may be served to this viewer. One boolean and no
+   * reason, because the route has to answer the same 404 to "no such key",
+   * "not a profile image" and "not yours to see" -- telling them apart
+   * confirms that somebody has a picture they chose not to show.
+   */
+  async imageVisible(viewer: string | null, storageKey: string): Promise<boolean> {
+    if (viewer !== null) assertUuid(viewer, 'viewer user id');
+    const row = await queryOne<{ readonly visible: boolean }>(
+      this.pool,
+      'SELECT public.member_profile_image_visible($1::uuid, $2) AS visible',
+      [viewer, storageKey],
+    );
+    return row?.visible === true;
+  }
+
   async settings(actor: unknown): Promise<ProfileSettingsRow> {
     assertUuid(actor, 'actor user id');
     const row = await queryOne<ProfileSettingsRow>(
