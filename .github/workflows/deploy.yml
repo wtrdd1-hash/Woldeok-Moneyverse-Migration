@@ -155,6 +155,10 @@ jobs:
               echo 'edge_port=3022'
               echo 'seo=true'
               echo 'db_name=moneyverse_production'
+              # Production does not roll without something to return to.
+              # Migrations do not roll back, and this is the only moment
+              # anybody is looking.
+              echo 'require_backup=1'
               echo 'admin_ids='
             } >> "$GITHUB_OUTPUT"
           else
@@ -167,6 +171,9 @@ jobs:
               # The name the existing volume was initialised with. Changing it
               # would point the application at a database that does not exist.
               echo 'db_name=moneyverse_migration'
+              # The test server is rebuilt from seed when it breaks, so a
+              # missing backup is a warning there rather than a refusal.
+              echo 'require_backup=0'
               echo "admin_ids=${{ vars.TEST_BOOTSTRAP_DISCORD_ADMIN_IDS }}"
             } >> "$GITHUB_OUTPUT"
           fi
@@ -227,6 +234,7 @@ jobs:
             "EDGE_PORT='${{ steps.target.outputs.edge_port }}'" \
             "SEO_INDEXING_ENABLED='${{ steps.target.outputs.seo }}'" \
             "DB_NAME='${{ steps.target.outputs.db_name }}'" \
+            "REQUIRE_BACKUP='${{ steps.target.outputs.require_backup }}'" \
             "BOOTSTRAP_DISCORD_ADMIN_IDS='${{ steps.target.outputs.admin_ids }}'" \
             "ADOPT_FROM='${{ vars.ADOPT_FROM }}'" \
             "DISCORD_APPLICATION_ID='${{ vars.DISCORD_APPLICATION_ID }}'" \

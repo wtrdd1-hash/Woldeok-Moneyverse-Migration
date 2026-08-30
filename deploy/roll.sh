@@ -41,6 +41,29 @@ printf '%s' "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdi
 trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
 
 export STACK="${STACK:-wdmv}"
+
+# A backup BEFORE the roll, not after it. `docker compose up` runs the
+# migrations, and a migration does not roll back -- so a dump taken at the end
+# of this script is a dump of the state the migration produced, which is not
+# the state anybody would want to return to. The check that used to be at the
+# bottom said a true thing at a useless moment.
+#
+# A host with no database has nothing to dump, and a first deploy must not
+# fail for the absence of a backup that could not have existed.
+if [ -n "$(docker compose ps -q db 2>/dev/null || true)" ]; then
+  if bash ./backup.sh run; then
+    echo "backed up before the roll"
+  elif [ "${REQUIRE_BACKUP:-0}" = "1" ]; then
+    echo "refusing to roll: this carries migrations and there is nothing to return to" >&2
+    echo "take a backup by hand, or run ./backup.sh init-key if this host has no key" >&2
+    exit 1
+  else
+    echo "warning: rolling without a backup, and migrations do not roll back" >&2
+  fi
+else
+  echo "no database container yet, so there is nothing to back up"
+fi
+
 docker compose pull backend frontend
 # --wait is the gate: a rollout that never becomes healthy fails here rather
 # than being reported as a success.
@@ -57,12 +80,12 @@ fi
 
 echo "deployment healthy on port ${port}"
 
-# Says out loud whether this host holds a recent, readable backup. It never
-# fails the deploy -- a rollout is not the moment to refuse over last night's
-# cron -- but a deploy that never mentions backups at all is how a host ends up
-# without any. backup.sh prints its own reason. See docs/BACKUP.md.
+# Reads the backup back after the roll. Taking one and never opening it is how
+# a host ends up holding a fortnight of files that do not decrypt; this is the
+# cheap half of the rehearsal in docs/BACKUP.md, and it never fails the deploy
+# because by now the roll has already happened.
 if ! bash ./backup.sh verify; then
-  echo "warning: this host has no verified backup, and migrations do not roll back" >&2
+  echo "warning: this host holds no backup that reads back" >&2
 fi
 
 docker compose ps
