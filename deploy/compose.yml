@@ -127,7 +127,7 @@ services:
     # No `:?required`: an unset value would make every later `docker compose`
     # call fail, including `ps` and `logs`, which is exactly when an operator
     # needs them. roll.sh writes the resolved reference into .env.
-    image: ${BACKEND_IMAGE:-ghcr.io/ridanit-ruma/wdmv/backend:latest-test}
+    image: ${BACKEND_IMAGE:-ghcr.io/wtrdd1-hash/wdmv/backend:latest-test}
     container_name: ${STACK:-wdmv}-backend
     restart: unless-stopped
     environment:
@@ -221,7 +221,7 @@ services:
     # Built with APP_BASE_URL baked in, because robots.txt and sitemap.xml are
     # generated during the build and have to name the public host. Changing
     # the origin therefore needs a rebuild, not just a restart.
-    image: ${FRONTEND_IMAGE:-ghcr.io/ridanit-ruma/wdmv/frontend:latest-test}
+    image: ${FRONTEND_IMAGE:-ghcr.io/wtrdd1-hash/wdmv/frontend:latest-test}
     container_name: ${STACK:-wdmv}-frontend
     restart: unless-stopped
     environment:

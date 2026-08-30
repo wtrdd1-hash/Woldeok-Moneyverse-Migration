@@ -24,7 +24,7 @@ case "${CHANNEL:-${stack}}" in
   *) channel=test ;;
 esac
 
-prefix=ghcr.io/ridanit-ruma/wdmv
+prefix=ghcr.io/wtrdd1-hash/wdmv
 record() {
   sed -i "/^$1=/d" .env
   printf '%s=%s\n' "$1" "$2" >> .env

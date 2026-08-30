@@ -156,8 +156,8 @@ ssh <host>
 cd ~/moneyverse-migration
 APP_BASE_URL=https://migration.easy-scraping.com \
   ADOPT_FROM=woldeok-moneyverse-local-app-test-1 \
-  BACKEND_IMAGE=ghcr.io/ridanit-ruma/wdmv/backend:latest \
-  FRONTEND_IMAGE=ghcr.io/ridanit-ruma/wdmv/frontend:latest \
+  BACKEND_IMAGE=ghcr.io/wtrdd1-hash/wdmv/backend:latest \
+  FRONTEND_IMAGE=ghcr.io/wtrdd1-hash/wdmv/frontend:latest \
   GHCR_USER=<user> GHCR_TOKEN=<read:packages token> \
   bash ./roll.sh
 ```
