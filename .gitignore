@@ -29,3 +29,6 @@ test-results/
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Claude Code local state: agent worktrees and machine-local settings
+.claude/
