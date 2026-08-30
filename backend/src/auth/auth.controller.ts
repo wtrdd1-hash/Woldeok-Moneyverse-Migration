@@ -33,6 +33,7 @@ import { CsrfGuard } from './guards/csrf.guard';
 import { SessionGuard } from './guards/session.guard';
 import { OAuthClient, OAuthProviderError } from './oauth-client';
 import type { RequestWithSession } from './session.context';
+import { selectRedirectUri } from '../core/config';
 import { requireSession } from './session.context';
 import { SessionRepository } from './session.repository';
 
@@ -169,6 +170,26 @@ export class AuthController {
     return this.startChallenge(request, providerName, 'link');
   }
 
+  /**
+   * The origin the browser used, relayed by the frontend as `x-public-origin`.
+   *
+   * Untrusted on its own and not treated as trusted: `selectRedirectUri`
+   * matches it against the registered list and falls back to the canonical URI
+   * when it matches nothing, so a forged header buys the ordinary sign-in
+   * rather than a redirect anywhere else. The API is reachable only from the
+   * compose network and only with the internal token, so the header's author
+   * is the frontend.
+   */
+  private publicOrigin(request: RequestWithSession): string | undefined {
+    const header = (request.headers as Record<string, unknown>)['x-public-origin'];
+    if (typeof header !== 'string' || header.length === 0) return undefined;
+    try {
+      return new URL(header).origin;
+    } catch {
+      return undefined;
+    }
+  }
+
   private async startChallenge(
     request: RequestWithSession,
     providerName: string,
@@ -177,7 +198,10 @@ export class AuthController {
     const provider = asProvider(providerName);
     if (!provider) throw new ServiceUnavailableException('OAuth is not configured');
     const providerConfig = this.providerConfig(provider);
-    const challenge = createOAuthChallenge(provider, providerConfig.redirectUri);
+    const challenge = createOAuthChallenge(
+      provider,
+      selectRedirectUri(providerConfig, this.publicOrigin(request)),
+    );
     await this.store().createChallenge(requireSession(request).id, challenge, purpose);
     return {
       authorizationUrl: authorizationUrl(provider, challenge, providerConfig.clientId),
@@ -201,7 +225,10 @@ export class AuthController {
     if (!(await this.store().hasCurrentPreloginConsent(session.id))) {
       throw new ForbiddenException('consent required');
     }
-    const challenge = createOAuthChallenge(provider, providerConfig.redirectUri);
+    const challenge = createOAuthChallenge(
+      provider,
+      selectRedirectUri(providerConfig, this.publicOrigin(request)),
+    );
     await this.store().createChallenge(session.id, challenge, 'login');
     return { authorizationUrl: authorizationUrl(provider, challenge, providerConfig.clientId) };
   }
@@ -230,7 +257,11 @@ export class AuthController {
       provider,
       state,
     });
-    if (!challenge || challenge.redirect_uri !== providerConfig.redirectUri) {
+    // Membership rather than equality: the round trip may legitimately have
+    // started on any registered origin, and the stored challenge is what says
+    // which. Still a closed set -- a challenge naming an origin that has since
+    // been withdrawn no longer completes.
+    if (!challenge || !providerConfig.redirectUris.includes(challenge.redirect_uri)) {
       throw new BadRequestException('oauth_state');
     }
     if (providerError) throw new BadRequestException('oauth_cancelled');
@@ -247,6 +278,7 @@ export class AuthController {
         codeVerifier: challenge.code_verifier,
         nonceHash: challenge.nonce_hash,
         providerConfig,
+        redirectUri: challenge.redirect_uri,
       });
     } catch (error: unknown) {
       if (error instanceof OAuthProviderError) throw new BadRequestException('oauth_verification');
