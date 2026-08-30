@@ -19,6 +19,7 @@ import { ShopModule } from './shop/shop.module';
 import { StockModule } from './stock/stock.module';
 import { MarketTickerModule } from './stock/market-ticker.module';
 import { WalletModule } from './wallet/wallet.module';
+import { WorkModule } from './work/work.module';
 import { AUTH_LIMIT, READ_LIMIT, SENSITIVE_LIMIT } from './security/rate-limit';
 import { TieredThrottlerGuard } from './security/tiered-throttler.guard';
 
@@ -30,6 +31,7 @@ const ONE_MINUTE_MS = 60_000;
     AuthModule,
     HealthModule,
     WalletModule,
+    WorkModule,
     ShopModule,
     StockModule,
     MarketTickerModule,
