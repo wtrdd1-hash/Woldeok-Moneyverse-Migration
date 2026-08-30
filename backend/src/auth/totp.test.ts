@@ -140,7 +140,14 @@ describe('base32Encode and otpauthUri', () => {
       digits: 6,
       periodSeconds: 30,
     });
-    expect(uri.startsWith('otpauth://totp/easy-scraping.com%3A')).toBe(true);
+    // The Key Uri Format separates the issuer from the account name with "a
+    // literal or url-encoded colon", so both spellings are conformant and an
+    // authenticator reads either. Asserting one of them pins an encoding this
+    // code has no reason to promise -- what matters is that the label is the
+    // issuer, a separator, then the account.
+    expect(uri).toMatch(
+      /^otpauth:\/\/totp\/easy-scraping\.com(:|%3A)00000000-0000-4000-8000-000000000000\?/,
+    );
     expect(uri).toContain(`secret=${base32Encode(RFC_SECRET)}`);
     expect(uri).toContain('algorithm=SHA1');
     expect(uri).toContain('period=30');
