@@ -22,6 +22,7 @@
 | 검색 노출 | 꺼짐 | 켜짐 |
 | 이미지 태그 | `<sha>-test`, `latest-test` | `<sha>-production`, `latest-production` |
 | 부트스트랩 관리자 | `TEST_BOOTSTRAP_DISCORD_ADMIN_IDS` 변수 | 없음 (콘솔에서 부여) |
+| Discord 봇 | 테스트 애플리케이션·토큰 | 운영 애플리케이션·토큰 (별개) |
 
 **두 배포는 데이터를 공유하지 않는다.** 테스트에서 만든 계정·잔액·게시글은 운영에
 나타나지 않고, 그 반대도 마찬가지다.
@@ -186,6 +187,38 @@ API는 `APP_BASE_URL`의 origin과 정확한 콜백 경로가 일치하지 않�
 
 ---
 
+## Discord 봇
+
+**테스트와 운영은 서로 다른 Discord 애플리케이션을 쓴다.** 봇 토큰을 공유하면 테스트
+배포가 운영 길드에 글을 쓴다. 그래서 토큰은 GitHub 환경 시크릿이고, 백엔드는 부팅할 때
+토큰의 첫 조각(애플리케이션 id가 base64url로 들어 있다)이 `DISCORD_APPLICATION_ID`와
+같은지 확인한다. 다르면 아웃박스를 켜지 않고 로그에 이유를 남긴다 — 토큰은 찍지 않는다.
+
+| 변수 | 무엇 |
+|---|---|
+| `DISCORD_APPLICATION_ID` | 이 배포의 애플리케이션 id |
+| `DISCORD_BOT_TOKEN` | 그 애플리케이션의 봇 토큰 (시크릿) |
+| `DISCORD_INTERACTIONS_ENABLED` | 슬래시 명령 수신 여부 (`true`) |
+| `DISCORD_INTERACTIONS_PUBLIC_KEY` | 포털의 Public Key (64 hex). 서명 검증에 쓴다 |
+| `DISCORD_INTERACTIONS_GUILD_ID` | 명령을 받을 길드 |
+| `DISCORD_INTERACTIONS_ROLE_IDS` | 명령을 쓸 수 있는 역할 (쉼표 구분) |
+| `DISCORD_OUTBOX_ENABLED` | 아웃박스 알림 발송 여부 (`true`) |
+| `DISCORD_OUTBOX_CHANNEL_ID` | `default` 라우트가 글을 쓰는 채널 |
+
+사람이 콘솔에서 해야 하는 것 (API로 대신할 수 없다):
+
+1. Developer Portal → 앱 → General Information → **Interactions Endpoint URL**에
+   `https://<host>/api/v1/integrations/discord/interactions`. 저장할 때 Discord가 서명된
+   PING을 보내므로, **배포가 먼저 올라가 있어야 저장된다.**
+2. 봇을 길드에 초대한다. 필요한 권한은 아웃박스 채널의 메시지 전송뿐이다.
+3. 슬래시 명령 등록은 아직 수동이다:
+   `DISCORD_APPLICATION_ID=… DISCORD_GUILD_ID=… DISCORD_BOT_TOKEN=… node -e "require('./dist/discord/command-registration').registerDiscordGuildCommands()"`
+   (`backend/src/discord/command-registration.ts` — 허용된 호출은 길드 일괄 덮어쓰기 하나뿐이다.)
+
+어떤 이벤트를 알릴지는 `.env`가 아니라 `discord_outbox_routes` 테이블이 정한다
+(마이그레이션 066). 행이 없거나 `enabled=false`인 종류는 발송 대상이 아니며,
+아웃박스에서 `suppressed`로 정리된다.
+
 ## 배포가 하지 않는 것
 
 - **데이터 이전.** 두 스택의 DB는 별개다. 옮기려면 `pg_dump`를 직접 쓴다.
@@ -208,6 +241,8 @@ API는 `APP_BASE_URL`의 origin과 정확한 콜백 경로가 일치하지 않�
 | `BACKUP_ENCRYPTION_KEY` | **`.env`에 넣지 않는다.** `backup.sh init-key`가 `~/.moneyverse-backup-key`에 만들고, 사본 하나는 호스트 밖에 둔다. `.env`에 있으면 `backup.sh`가 거부한다 — [BACKUP.md](BACKUP.md) |
 | Discord·Google 클라이언트 자격증명 | `ADOPT_FROM`이 가리키는 기존 컨테이너에서 호스트 안에서 복사 |
 | `GHCR_PULL_TOKEN` | GitHub 시크릿. `read:packages`만. 호스트 디스크에 남지 않는다 |
+| `DISCORD_BOT_TOKEN` | GitHub **환경 시크릿**(`test`·`production` 각각). 워크플로의 참조는 하나이고 GitHub가 배포한 환경의 값을 고른다. **절대 `ADOPT_FROM`으로 복사하지 않는다** — 위의 「Discord 봇」 절 |
+| `DISCORD_APPLICATION_ID`, `DISCORD_INTERACTIONS_*`, `DISCORD_OUTBOX_*` | GitHub **환경 변수**(`vars`). 시크릿이 아니다 — 애플리케이션·길드·역할·채널 id뿐이다 |
 
 **어떤 값도 저장소·CI 로그·이 문서에 들어가지 않는다.** 스크립트는 어떤 키가
 설정됐는지만 출력하고 값은 출력하지 않는다.

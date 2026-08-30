@@ -29,6 +29,11 @@ put() { have "$1" || printf '%s=%s\n' "$1" "$2" >> .env; }
 # origin above all, since renaming the site is exactly the case `put` would
 # silently ignore.
 set_to() { sed -i "/^$1=/d" .env; printf '%s=%s\n' "$1" "$2" >> .env; }
+# For the values the workflow supplies from the GitHub environment it was run
+# against. An empty one means "this deployment did not configure it", not
+# "erase what somebody set on the host by hand", so an empty value writes a
+# placeholder and leaves an existing entry alone.
+supplied() { if [ -n "${2:-}" ]; then set_to "$1" "$2"; else put "$1" ''; fi; }
 
 # 32 bytes of urandom, hex encoded. The API requires at least 32 characters
 # for the internal token and rejects anything shorter at startup.
@@ -119,6 +124,25 @@ fi
 for name in DISCORD_CLIENT_ID DISCORD_CLIENT_SECRET GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET; do
   put "$name" ''
 done
+
+# The Discord bot.
+#
+# Deliberately NOT part of the ADOPT_FROM loop above. The OAuth client
+# credentials are shared by both deployments because both log a member in to
+# the same Discord application; a bot token is the opposite -- test and
+# production must run different bots, or the test stack announces into the
+# production guild. Adopting one from a container on this host is precisely
+# the accident to avoid, so the token arrives from the GitHub environment this
+# deploy was run against and the API refuses it if its application id is not
+# DISCORD_APPLICATION_ID.
+supplied DISCORD_APPLICATION_ID "${DISCORD_APPLICATION_ID:-}"
+supplied DISCORD_BOT_TOKEN "${DISCORD_BOT_TOKEN:-}"
+supplied DISCORD_INTERACTIONS_ENABLED "${DISCORD_INTERACTIONS_ENABLED:-}"
+supplied DISCORD_INTERACTIONS_PUBLIC_KEY "${DISCORD_INTERACTIONS_PUBLIC_KEY:-}"
+supplied DISCORD_INTERACTIONS_GUILD_ID "${DISCORD_INTERACTIONS_GUILD_ID:-}"
+supplied DISCORD_INTERACTIONS_ROLE_IDS "${DISCORD_INTERACTIONS_ROLE_IDS:-}"
+supplied DISCORD_OUTBOX_ENABLED "${DISCORD_OUTBOX_ENABLED:-}"
+supplied DISCORD_OUTBOX_CHANNEL_ID "${DISCORD_OUTBOX_CHANNEL_ID:-}"
 
 # Report presence, never contents.
 echo "--- .env ---"
