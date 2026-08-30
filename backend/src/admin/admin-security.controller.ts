@@ -35,7 +35,11 @@ import type { RequestWithSession } from '../auth/session.context';
 import { requireSession, requireUserId } from '../auth/session.context';
 import type { AppConfig } from '../core/config';
 import { CONFIG } from '../core/config';
-import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
+import {
+  isAuthorizationFailure,
+  isExpectedCommandFailure,
+  roleRefusalReason,
+} from '../core/pg-error';
 import { requestClientKey } from '../security/rate-limit';
 import {
   AdminSecurityService,
@@ -150,6 +154,27 @@ export class AdminSecurityController {
         throw new UnauthorizedException('the authentication code is not valid');
       }
       if (error instanceof SecondFactorInputError) throw new BadRequestException(error.message);
+      // 057 and 058 refuse with 42501 when the step-up has expired. Nothing
+      // mapped it, so opening the console after a five-minute-old sign-in
+      // confirmation arrived as a 500 and the operator was told the service
+      // was unstable -- while the thing they had to do, confirm again, was on
+      // the same screen behind a button.
+      switch (roleRefusalReason(error)) {
+        case 'reauthentication':
+          throw new UnauthorizedException({
+            message: 'recent reauthentication required',
+            code: 'reauthentication_required',
+          });
+        case 'second_factor':
+          throw new UnauthorizedException({
+            message: 'recent second factor required',
+            code: 'second_factor_required',
+          });
+        case 'role':
+          throw new ForbiddenException('an administrative role is required');
+        default:
+          break;
+      }
       if (isAuthorizationFailure(error)) throw new BadRequestException(message);
       if (isExpectedCommandFailure(error)) throw new BadRequestException(message);
       throw error;

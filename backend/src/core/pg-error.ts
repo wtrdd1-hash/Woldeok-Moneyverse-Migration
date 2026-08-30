@@ -61,6 +61,32 @@ export function isRoleRefusal(error: unknown): boolean {
 }
 
 /**
+ * Which of the admin functions' three refusals this is.
+ *
+ * 057 and 058 raise 42501 for three different reasons -- no administrative
+ * role, a sign-in confirmation older than five minutes, a second factor older
+ * than five minutes -- and a caller that cannot tell them apart can only say
+ * "refused", which is the one thing the operator already knows. There is no
+ * SQLSTATE that separates them, so the message does; those strings are
+ * written in this repository's own migrations and are as stable as the
+ * SQLSTATE beside them.
+ *
+ * The windows differ from `ReauthGuard`'s deliberately. The guard admits
+ * anything inside fifteen minutes and the functions require five, so on an
+ * admin route the function is always the binding constraint -- which is why
+ * its refusal has to be legible rather than arriving as a 500.
+ */
+export function roleRefusalReason(
+  error: unknown,
+): 'reauthentication' | 'second_factor' | 'role' | null {
+  if (!isRoleRefusal(error)) return null;
+  const message = pgErrorMessage(error);
+  if (message.includes('second factor')) return 'second_factor';
+  if (message.includes('reauthentication')) return 'reauthentication';
+  return 'role';
+}
+
+/**
  * 22P02 is `invalid_text_representation`: a value the application accepted and
  * PostgreSQL would not parse — an address filter shaped like an address but
  * not one. It is the caller's typo, not a fault.
