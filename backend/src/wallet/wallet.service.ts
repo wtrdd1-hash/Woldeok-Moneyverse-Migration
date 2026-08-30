@@ -112,12 +112,19 @@ export interface WalletRewardReceipt {
   readonly replayed: boolean;
 }
 
+/**
+ * 076 gave a loan a third status. `overdue` is not a failure to report: it is
+ * the state the maturity sweep puts a loan into, the borrower can still repay
+ * it, and the screen has to be able to tell it apart from `active`.
+ */
+export type WalletLoanStatus = 'active' | 'repaid' | 'overdue';
+
 export interface WalletLoanView {
   readonly loanId: string;
   readonly principalAmount: WldAmount;
   readonly interestAmount: WldAmount;
   readonly outstandingAmount: WldAmount;
-  readonly status: 'active' | 'repaid';
+  readonly status: WalletLoanStatus;
   readonly issuedAt: string;
   readonly repaidAt: string | null;
 }
@@ -184,6 +191,18 @@ function timestamp(value: Date | string, field: string): string {
   const parsed = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(parsed.valueOf())) throw new Error(`database returned an invalid ${field}`);
   return parsed.toISOString();
+}
+
+/**
+ * Until this accepted `overdue`, the first loan the maturity sweep marked
+ * turned the whole of GET /bank/loans into a 500 for that member -- the list,
+ * not the one row. The throw is kept for a value the table's own CHECK
+ * constraint would refuse, which would mean the schema and this file had
+ * drifted apart.
+ */
+function loanStatus(value: string): WalletLoanStatus {
+  if (value === 'active' || value === 'repaid' || value === 'overdue') return value;
+  throw new Error('database returned invalid loan status');
 }
 
 function transactionLabel(type: string): string {
@@ -385,12 +404,7 @@ export class WalletService {
       principalAmount: positiveWldAmount(row.principal_amount, 'loan principal'),
       interestAmount: wldAmount(row.interest_amount, 'loan interest'),
       outstandingAmount: wldAmount(row.outstanding_amount, 'loan outstanding'),
-      status:
-        row.status === 'active' || row.status === 'repaid'
-          ? row.status
-          : (() => {
-              throw new Error('database returned invalid loan status');
-            })(),
+      status: loanStatus(row.status),
       issuedAt: timestamp(row.issued_at, 'loan issued timestamp'),
       repaidAt: row.repaid_at ? timestamp(row.repaid_at, 'loan repaid timestamp') : null,
     }));

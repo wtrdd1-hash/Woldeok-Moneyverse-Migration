@@ -52,6 +52,18 @@ export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
       'SELECT snapshot.snapshot_date::text AS snapshot_date, snapshot.sample_ok FROM public.economy_record_metric_snapshot() AS snapshot',
   },
   {
+    // Without this nothing ever sets a loan to `overdue`. 076 added the
+    // status, 078 added the sweep that applies it, and 077 records a
+    // `maturity_at` on every new loan -- but the sweep had no caller, so a
+    // loan stayed `active` past its maturity for ever and the distinction the
+    // borrower is shown was decorative. Daily, because a maturity is a date.
+    job: 'bank.loan_maturity',
+    cadence: 'daily',
+    notBefore: 0,
+    connection: 'app',
+    statement: 'SELECT public.bank_mark_overdue_loans()::text AS marked',
+  },
+  {
     // 15.2: Monday 04:30 KST. The window arithmetic counts from the daily
     // 04:00 boundary, so thirty minutes into it is half past four.
     job: 'economy.auto_policy',

@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { Pool, type PoolClient } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { databaseUrl, rejectionOf } from '../testing/database';
+import { databaseUrl, isMissingGrant, rejectionOf } from '../testing/database';
+import { ShopCatalogRepository } from './shop.repository';
 
 /**
  * Migrations 071-075, executed.
@@ -45,6 +46,66 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
         `${table} must be reachable only through a function`,
       ).toMatch(/permission denied/i);
     }
+  });
+
+  /**
+   * The four functions the API calls, called the way the API calls them:
+   * through `moneyverse_app`, with the SQL text `ShopCatalogRepository`
+   * ships. A renamed OUT parameter or a dropped GRANT is invisible to every
+   * unit test in this module -- a test double does not read the SQL string --
+   * and only shows up here.
+   */
+  describe('the read models the application role calls', () => {
+    const UNKNOWN_MEMBER = '00000000-0000-4000-8000-000000000000';
+    const catalogue = (): ShopCatalogRepository => new ShopCatalogRepository(pool);
+
+    it('lists the seeded catalogue with every amount still a string', async () => {
+      const rows = await catalogue().catalog(UNKNOWN_MEMBER);
+      expect(rows.length, 'migration 073 seeds the catalogue').toBeGreaterThan(0);
+
+      const gloves = rows.find((row) => row.code === 'work_gloves');
+      expect(gloves, 'work_gloves is seeded by 073').toBeDefined();
+      expect(gloves?.category).toBe('general');
+      expect(gloves?.purchase_limit).toBe('once');
+      expect(gloves?.effect_kind).toBe('convenience');
+      expect(gloves?.quantity, '073 seeds every line with unlimited stock').toBeNull();
+      expect(gloves?.maintenance_cost).toBe('0');
+      // A bigint that lost its ::text cast arrives as a JavaScript number and
+      // rounds silently once the economy grows past a safe integer.
+      expect(typeof gloves?.price, 'price must survive as a string').toBe('string');
+      expect(BigInt(gloves?.price ?? '0') > 0n).toBe(true);
+    });
+
+    it('carries the weekly upkeep 075 attaches to a vehicle', async () => {
+      const rows = await catalogue().catalog(UNKNOWN_MEMBER);
+      const bicycle = rows.find((row) => row.code === 'used_bicycle');
+      expect(bicycle, 'used_bicycle is seeded by 073').toBeDefined();
+      expect(typeof bicycle?.maintenance_cost, 'upkeep must survive as a string').toBe('string');
+      expect(
+        BigInt(bicycle?.maintenance_cost ?? '0') > 0n,
+        '075 gives the vehicles and leases an upkeep',
+      ).toBe(true);
+    });
+
+    it('answers a member who holds nothing with an empty list', async () => {
+      await expect(catalogue().holdings(UNKNOWN_MEMBER)).resolves.toEqual([]);
+    });
+
+    it('is refused by the purchase function itself, never by a missing grant', async () => {
+      const error = await rejectionOf(() =>
+        catalogue().purchase(randomUUID(), UNKNOWN_MEMBER, randomUUID(), 1),
+      );
+      expect(isMissingGrant(error), 'shop_purchase_catalog lost its grant').toBe(false);
+      expect(code(error), 'a stranger buying nothing is a refused request').toBe('22023');
+    });
+
+    it('is refused by the consumption function itself, never by a missing grant', async () => {
+      const error = await rejectionOf(() =>
+        catalogue().use(randomUUID(), UNKNOWN_MEMBER, randomUUID()),
+      );
+      expect(isMissingGrant(error), 'shop_use_item lost its grant').toBe(false);
+      expect(code(error), 'consuming an item nobody owns is a refused request').toBe('22023');
+    });
   });
 
   describe.skipIf(!MIGRATOR_DATABASE_URL)('buying and using', () => {
@@ -298,6 +359,102 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
           ),
         );
         expect(code(error)).toBe('23514');
+      });
+    });
+
+    it('lists a bought item under its buyer and under nobody else', async () => {
+      await rolledBack(async (client) => {
+        const actor = await buyer(client, 1000);
+        const stranger = await buyer(client, 1000);
+        const kit = await item(client, 'repair_kit');
+
+        await client.query('SELECT * FROM public.shop_purchase_catalog($1, $2, $3, 2)', [
+          randomUUID(),
+          actor,
+          kit,
+        ]);
+
+        const { rows } = await client.query<{ code: string; quantity: number }>(
+          'SELECT held.code, held.quantity FROM public.shop_my_items($1) AS held',
+          [actor],
+        );
+        expect(rows).toHaveLength(1);
+        expect(rows[0]?.code).toBe('repair_kit');
+        expect(rows[0]?.quantity).toBe(2);
+
+        const { rows: theirs } = await client.query(
+          'SELECT * FROM public.shop_my_items($1) AS held',
+          [stranger],
+        );
+        expect(theirs, 'shop_my_items filters by the actor it is given').toHaveLength(0);
+      });
+    });
+
+    it('drops an item from the holdings when the last one is consumed', async () => {
+      await rolledBack(async (client) => {
+        const actor = await buyer(client, 1000);
+        const kit = await item(client, 'repair_kit');
+        await client.query('SELECT * FROM public.shop_purchase_catalog($1, $2, $3, 1)', [
+          randomUUID(),
+          actor,
+          kit,
+        ]);
+        await client.query('SELECT * FROM public.shop_use_item($1, $2, $3)', [
+          randomUUID(),
+          actor,
+          kit,
+        ]);
+
+        // The row survives at quantity zero; the read model is what hides it,
+        // so a page never offers a member an item they have already used up.
+        const { rows } = await client.query('SELECT * FROM public.shop_my_items($1) AS held', [
+          actor,
+        ]);
+        expect(rows).toHaveLength(0);
+      });
+    });
+
+    it('hides an item the catalogue has switched off', async () => {
+      await rolledBack(async (client) => {
+        await client.query(
+          "UPDATE public.shop_catalog SET active = false WHERE code = 'work_gloves'",
+        );
+        const { rows } = await client.query(
+          `SELECT * FROM public.shop_catalog_list($1) AS listing WHERE listing.code = 'work_gloves'`,
+          [randomUUID()],
+        );
+        expect(rows).toHaveLength(0);
+      });
+    });
+
+    it('hides an item whose sale window has closed, and refuses to sell it', async () => {
+      await rolledBack(async (client) => {
+        const actor = await buyer(client, 1000);
+        const kit = await item(client, 'repair_kit');
+        await client.query(
+          `UPDATE public.shop_inventory
+           SET ends_at = clock_timestamp() - interval '1 day'
+           WHERE catalog_id = $1`,
+          [kit],
+        );
+
+        const { rows } = await client.query(
+          `SELECT * FROM public.shop_catalog_list($1) AS listing WHERE listing.code = 'repair_kit'`,
+          [actor],
+        );
+        expect(rows).toHaveLength(0);
+
+        // The listing and the purchase must agree. An item the catalogue no
+        // longer shows and the purchase still sells is the worse of the two
+        // failures, because only the second one takes money.
+        const error = await rejectionOf(() =>
+          client.query('SELECT * FROM public.shop_purchase_catalog($1, $2, $3, 1)', [
+            randomUUID(),
+            actor,
+            kit,
+          ]),
+        );
+        expect(code(error)).toBe('22023');
       });
     });
   });

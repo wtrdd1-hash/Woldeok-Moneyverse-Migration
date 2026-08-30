@@ -18,6 +18,11 @@ export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/stocks', label: '가상 주식' },
   { href: '/businesses', label: '게임 사업' },
   { href: '/seasons', label: '시즌' },
+  { href: '/quests', label: '퀘스트' },
+  { href: '/casino', label: '코인 게임' },
+  { href: '/progression', label: '성장 단계' },
+  { href: '/profile', label: '내 프로필' },
+  { href: '/shop/catalog', label: '상점 카탈로그' },
   { href: '/board', label: '게시판' },
   { href: '/account', label: '내 계정' },
 ];
@@ -25,6 +30,7 @@ export const MEMBER_NAV: readonly NavEntry[] = [
 /** Shown only to a member holding at least one administrator role. */
 export const ADMIN_NAV: readonly NavEntry[] = [
   { href: '/admin', label: '운영' },
+  { href: '/admin/economy', label: '경제' },
   { href: '/admin/content', label: '콘텐츠' },
 ];
 
@@ -74,6 +80,18 @@ export const HEADER_MEMBER: readonly NavItem[] = [
       { href: '/stocks', label: '가상 주식' },
       { href: '/businesses', label: '게임 사업' },
       { href: '/seasons', label: '시즌' },
+      { href: '/quests', label: '퀘스트' },
+      // Behind a feature switch that is off in production until the stage-3
+      // gates pass. The link stays, and the page says so in a sentence --
+      // hiding it would make "why can I not find it" a support question.
+      { href: '/casino', label: '코인 게임' },
+    ],
+  },
+  {
+    label: '성장',
+    entries: [
+      { href: '/progression', label: '성장 단계' },
+      { href: '/profile', label: '내 프로필' },
     ],
   },
   { href: '/board', label: '게시판' },
@@ -84,6 +102,7 @@ export const HEADER_ADMIN: readonly NavItem[] = [
     label: '운영',
     entries: [
       { href: '/admin', label: '운영 콘솔' },
+      { href: '/admin/economy', label: '경제' },
       { href: '/admin/content', label: '콘텐츠' },
     ],
   },
