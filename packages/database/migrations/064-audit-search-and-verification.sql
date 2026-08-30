@@ -155,6 +155,16 @@ AS $$
               )
             ELSE '{}'::jsonb
           END)
+      -- The column is cut to twelve characters two functions down. Leaving the
+      -- whole digest in the envelope handed it back on the same row, under a
+      -- heading that says it is masked.
+      || (CASE
+            WHEN p_context ? 'sessionHash'
+              THEN pg_catalog.jsonb_build_object(
+                'sessionHash', pg_catalog.left(p_context ->> 'sessionHash', 12)
+              )
+            ELSE '{}'::jsonb
+          END)
   END
 $$;
 
@@ -176,13 +186,18 @@ AS $$
     AND (p_row.transaction_id::text IS NOT DISTINCT FROM nullif(p_row.context ->> 'transactionId', ''))
     AND (p_row.outcome IS NOT DISTINCT FROM nullif(p_row.context ->> 'outcome', ''))
     AND (p_row.response_status::text IS NOT DISTINCT FROM nullif(p_row.context ->> 'responseStatus', ''))
-    AND (
+    -- `coalesce`, because `x IN (...)` is NULL when x is NULL, the AND chain
+    -- then yields NULL, and `IF NOT <null>` in the caller is not-true: an
+    -- address planted on a row whose signed envelope carries none would have
+    -- been reported as no drift at all.
+    AND coalesce(
       CASE
         WHEN p_row.client_ip IS NULL
           THEN nullif(p_row.context ->> 'clientIp', '') IS NULL
         ELSE nullif(p_row.context ->> 'clientIp', '')
           IN (p_row.client_ip::text, pg_catalog.host(p_row.client_ip))
-      END
+      END,
+      false
     )
 $$;
 
@@ -429,8 +444,13 @@ BEGIN
     RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'chain verification requires an administrator';
   END IF;
 
-  SELECT coalesce(p_from_sequence, min(audit_row.sequence)),
-         coalesce(p_to_sequence, max(audit_row.sequence))
+  -- Clamp to rows that exist, before the span is measured. Asking to verify
+  -- from sequence 1 on a chain whose first surviving row is 40 is a reasonable
+  -- request; answering it with an invented link break would report a forgery,
+  -- and measuring the span against the raw request would refuse a window that
+  -- covers ten rows because the caller wrote a large upper bound.
+  SELECT greatest(coalesce(p_from_sequence, min(audit_row.sequence)), min(audit_row.sequence)),
+         least(coalesce(p_to_sequence, max(audit_row.sequence)), max(audit_row.sequence))
   INTO v_from, v_to
   FROM public.audit_logs AS audit_row;
 
@@ -470,6 +490,7 @@ BEGIN
 
       IF v_row.hash_version >= 2 THEN
         v_recomputed := public.audit_event_digest(
+          v_row.id,
           v_row.sequence,
           v_row.previous_integrity_hash,
           v_row.actor_user_id,

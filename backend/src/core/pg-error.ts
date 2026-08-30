@@ -35,3 +35,36 @@ export function isExpectedCommandFailure(error: unknown): boolean {
 export function isAuthorizationFailure(error: unknown): boolean {
   return pgErrorCode(error) === '28000';
 }
+
+function pgErrorMessage(error: unknown): string {
+  if (typeof error !== 'object' || error === null || !('message' in error)) return '';
+  const { message } = error;
+  return typeof message === 'string' ? message : '';
+}
+
+/**
+ * 42501 arrives from two places that mean opposite things.
+ *
+ * PostgreSQL's own privilege check phrases it as "permission denied for ...",
+ * and that means a GRANT is missing — the deployment is broken and the caller
+ * cannot fix it, so it must stay a 500 and page somebody. Every other 42501 in
+ * this schema is a function deliberately refusing the caller's role
+ * (`admin_require_superadmin`, `admin_role_holder`, a dozen others), which is
+ * the security model working and belongs to the caller as a 403.
+ *
+ * The same distinction is drawn in `testing/database.ts`; an earlier version of
+ * the tests treated all 42501 alike and would have failed on every correct
+ * refusal.
+ */
+export function isRoleRefusal(error: unknown): boolean {
+  return pgErrorCode(error) === '42501' && !pgErrorMessage(error).startsWith('permission denied');
+}
+
+/**
+ * 22P02 is `invalid_text_representation`: a value the application accepted and
+ * PostgreSQL would not parse — an address filter shaped like an address but
+ * not one. It is the caller's typo, not a fault.
+ */
+export function isMalformedInput(error: unknown): boolean {
+  return pgErrorCode(error) === '22P02';
+}

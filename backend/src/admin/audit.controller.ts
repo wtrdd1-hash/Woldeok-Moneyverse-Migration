@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Inject,
   Param,
@@ -36,7 +37,12 @@ import { SecondFactorGuard } from '../auth/guards/second-factor.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
-import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
+import {
+  isAuthorizationFailure,
+  isExpectedCommandFailure,
+  isMalformedInput,
+  isRoleRefusal,
+} from '../core/pg-error';
 import { AdminInputError } from './admin.repository';
 import { AuditRepository } from './audit.repository';
 
@@ -167,6 +173,11 @@ export class AdminAuditController {
       return await work();
     } catch (error: unknown) {
       if (error instanceof AdminInputError) throw new BadRequestException(error.message);
+      // Every function on this surface refuses a role with 42501. Without this
+      // the refusal fell through to a 500, and the console rendered "try again
+      // later" for something that would never succeed.
+      if (isRoleRefusal(error)) throw new ForbiddenException('this action needs a higher role');
+      if (isMalformedInput(error)) throw new BadRequestException(message);
       if (isAuthorizationFailure(error)) throw new BadRequestException(message);
       if (isExpectedCommandFailure(error)) throw new BadRequestException(message);
       throw error;

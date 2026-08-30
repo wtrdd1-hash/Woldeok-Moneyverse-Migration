@@ -68,6 +68,35 @@ ALTER TABLE public.audit_logs ALTER COLUMN sequence SET NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS audit_logs_sequence_key
   ON public.audit_logs (sequence);
 
+-- `hash_version` decides which formula 064 verifies a row with, so a row that
+-- can set its own version can choose to be checked by a formula that no longer
+-- reproduces -- and 064 reports a failed legacy reproduction as `legacy`, not
+-- as a mismatch. Editing a row behind a disabled trigger and flipping its
+-- version to 1 would therefore certify the edit. A CHECK closes that, because
+-- unlike a trigger a CHECK is still enforced when the trigger is off. Version 1
+-- exists only below the watermark: every row that existed before this ran.
+DO $do$
+DECLARE
+  v_watermark bigint;
+BEGIN
+  SELECT coalesce(max(audit_row.sequence), 0) INTO v_watermark
+  FROM public.audit_logs AS audit_row;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_catalog.pg_constraint AS constraint_row
+    WHERE constraint_row.conrelid = 'public.audit_logs'::pg_catalog.regclass
+      AND constraint_row.conname = 'audit_logs_hash_version_check'
+  ) THEN
+    EXECUTE pg_catalog.format(
+      'ALTER TABLE public.audit_logs ADD CONSTRAINT audit_logs_hash_version_check '
+      || 'CHECK (hash_version = 2 OR sequence <= %s)',
+      v_watermark
+    );
+  END IF;
+END;
+$do$;
+
 -- The digest of a version 2 row. Split out of the append function because
 -- 064's verifier has to compute exactly the same bytes; two copies of a hash
 -- formula drift, and the drift only shows up as a false tamper alarm.
@@ -77,6 +106,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS audit_logs_sequence_key
 -- varies with lc_time, but claiming IMMUTABLE over a STABLE callee is the
 -- kind of lie that is repaid at planning time.
 CREATE OR REPLACE FUNCTION public.audit_event_digest(
+  p_audit_id uuid,
   p_sequence bigint,
   p_previous_hash text,
   p_actor_user_id uuid,
@@ -96,6 +126,7 @@ AS $$
     public.digest(
       pg_catalog.jsonb_build_object(
         'hashVersion', 2,
+        'auditId', p_audit_id::text,
         'sequence', p_sequence,
         'previousIntegrityHash', p_previous_hash,
         'actorUserId', p_actor_user_id::text,
@@ -170,7 +201,7 @@ SECURITY DEFINER
 SET search_path = pg_catalog, pg_temp
 AS $$
 DECLARE
-  v_audit_id uuid;
+  v_audit_id uuid := pg_catalog.gen_random_uuid();
   v_previous_hash text;
   v_previous_sequence bigint;
   v_sequence bigint;
@@ -202,6 +233,7 @@ BEGIN
   v_sequence := coalesce(v_previous_sequence, 0) + 1;
 
   v_integrity_hash := public.audit_event_digest(
+    v_audit_id,
     v_sequence,
     v_previous_hash,
     p_actor_user_id,
@@ -226,7 +258,7 @@ BEGIN
     previous_integrity_hash,
     integrity_hash
   ) VALUES (
-    pg_catalog.gen_random_uuid(),
+    v_audit_id,
     v_sequence,
     2,
     p_actor_user_id,
@@ -237,8 +269,7 @@ BEGIN
     v_created_at,
     v_previous_hash,
     v_integrity_hash
-  )
-  RETURNING id INTO v_audit_id;
+  );
 
   RETURN v_audit_id;
 END;
@@ -278,7 +309,7 @@ BEGIN
 END;
 $do$;
 
-ALTER FUNCTION public.audit_event_digest(bigint, text, uuid, text, uuid, uuid, jsonb, timestamptz, jsonb)
+ALTER FUNCTION public.audit_event_digest(uuid, bigint, text, uuid, text, uuid, uuid, jsonb, timestamptz, jsonb)
   OWNER TO moneyverse_migrator;
 ALTER FUNCTION public.audit_event_digest_v1(text, uuid, text, uuid, uuid, jsonb, timestamptz)
   OWNER TO moneyverse_migrator;
@@ -286,7 +317,7 @@ ALTER FUNCTION public.audit_reject_log_mutation() OWNER TO moneyverse_migrator;
 
 -- The digest helpers stay internal: the application never recomputes a hash,
 -- and a role that can compute one is a role that can forge a plausible chain.
-REVOKE ALL PRIVILEGES ON FUNCTION public.audit_event_digest(bigint, text, uuid, text, uuid, uuid, jsonb, timestamptz, jsonb)
+REVOKE ALL PRIVILEGES ON FUNCTION public.audit_event_digest(uuid, bigint, text, uuid, text, uuid, uuid, jsonb, timestamptz, jsonb)
   FROM PUBLIC, moneyverse_app;
 REVOKE ALL PRIVILEGES ON FUNCTION public.audit_event_digest_v1(text, uuid, text, uuid, uuid, jsonb, timestamptz)
   FROM PUBLIC, moneyverse_app;
