@@ -1,6 +1,7 @@
 const LOCAL_HTTP_HOSTS = new Set(['127.0.0.1', 'localhost', '::1', '[::1]']);
 const DISCORD_PUBLIC_KEY = /^[0-9a-f]{64}$/i;
 const DISCORD_SNOWFLAKE = /^\d{16,22}$/;
+const DISCORD_ROUTE_KEY = /^[a-z][a-z0-9_-]{1,31}$/;
 
 /**
  * A discriminated union, not an interface with optional fields: a disabled
@@ -31,11 +32,28 @@ export type DiscordInteractionsConfig =
       readonly enabled: true;
       readonly publicKey: string;
       readonly policy: DiscordInteractionsPolicy;
-      readonly rateLimit: {
-        readonly limit: number;
-        readonly windowMs: number;
-        readonly maxEntries: number;
-      };
+      readonly rateLimit: { readonly limit: number; readonly windowMs: number };
+    };
+
+/**
+ * The outbox worker's half of the Discord surface.
+ *
+ * The disabled variant carries a reason, which the other unions here do not.
+ * A background job that quietly does not run is how the outbox went unnoticed
+ * for the eleven migrations between 027 and 054, and "it is off because
+ * DISCORD_OUTBOX_ENABLED is not true" is a different problem from "it is off
+ * because the token belongs to the other deployment". The runner logs it at
+ * boot; the reason never contains the token.
+ */
+export type DiscordOutboxConfig =
+  | { readonly enabled: false; readonly reason: string }
+  | {
+      readonly enabled: true;
+      readonly botToken: string;
+      readonly applicationId: string;
+      /** Route key to channel id. `outbox_claim_pending` returns the key. */
+      readonly channels: Readonly<Record<string, string>>;
+      readonly intervalMs: number;
     };
 
 export interface AppConfig {
@@ -50,6 +68,7 @@ export interface AppConfig {
   readonly internalToken: string;
   readonly oauth: { readonly discord: OAuthProviderConfig; readonly google: OAuthProviderConfig };
   readonly discordInteractions: DiscordInteractionsConfig;
+  readonly discordOutbox: DiscordOutboxConfig;
 }
 
 export const CONFIG = Symbol('CONFIG');
@@ -89,14 +108,18 @@ function oauthProvider(options: {
   return { enabled: true, clientId, clientSecret, redirectUri: callbackUrl.toString() };
 }
 
-function discordInteractions(
-  env: NodeJS.ProcessEnv,
-  production: boolean,
-): DiscordInteractionsConfig {
-  // The bundled limiter is intentionally single-process only. Keep the public
-  // endpoint unavailable in production until a shared, atomic limiter is
-  // provided and reviewed; test deployments may opt in with exact IDs.
-  if (env.DISCORD_INTERACTIONS_ENABLED !== 'true' || production) return { enabled: false };
+function discordInteractions(env: NodeJS.ProcessEnv): DiscordInteractionsConfig {
+  // This used to return disabled for every production deployment, whatever the
+  // flag said, because the only limiter in front of a public endpoint was a Map
+  // in one process. 066 moves the counter into a row and
+  // `createPostgresDiscordRateLimiter` consumes from it, so the budget is one
+  // budget however many instances exist -- and the single-process limiter was
+  // deleted rather than kept as a fallback, because a fallback that silently
+  // weakens the limit is exactly what this block was holding the line against.
+  //
+  // What remains fail-closed: DiscordModule builds no handler without a
+  // database pool, and without one there is nowhere to count.
+  if (env.DISCORD_INTERACTIONS_ENABLED !== 'true') return { enabled: false };
 
   const publicKey = env.DISCORD_INTERACTIONS_PUBLIC_KEY;
   const guildId = env.DISCORD_INTERACTIONS_GUILD_ID;
@@ -124,9 +147,107 @@ function discordInteractions(
     enabled: true,
     publicKey,
     policy: { guilds: { [guildId]: { requiredRoleIds: roleIds, roleMode } } },
-    // Deliberately fixed here. Production requires a separate shared limiter
-    // rather than an environment switch that weakens limits.
-    rateLimit: { limit: 5, windowMs: 10_000, maxEntries: 10_000 },
+    // Deliberately fixed here rather than exposed as an environment variable:
+    // a deployment that can widen its own throttle has no throttle.
+    rateLimit: { limit: 5, windowMs: 10_000 },
+  };
+}
+
+/**
+ * The application id a bot token was issued for.
+ *
+ * A Discord bot token is three dot-separated segments and the first is the
+ * application's snowflake in base64url. Reading it back is what lets a
+ * deployment refuse a token that belongs to the other one: production names
+ * its own DISCORD_APPLICATION_ID, and a test token pasted next to it does not
+ * decode to that id. Nothing here logs, returns or compares the token itself.
+ */
+function botTokenApplicationId(token: string): string | null {
+  const segment = token.split('.')[0];
+  if (segment === undefined || segment.length === 0 || segment.length > 64) return null;
+  if (!/^[A-Za-z0-9_-]+$/.test(segment)) return null;
+  try {
+    const decoded = Buffer.from(segment, 'base64url').toString('utf8');
+    return DISCORD_SNOWFLAKE.test(decoded) ? decoded : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Route key to channel id, from `DISCORD_OUTBOX_CHANNEL_ID` plus any extra
+ * keys in `DISCORD_OUTBOX_CHANNEL_IDS` (`key=id,key=id`). Returns null when
+ * anything is malformed, so a typo disables the worker instead of silently
+ * announcing into whichever channel did parse.
+ */
+function outboxChannels(env: NodeJS.ProcessEnv): Readonly<Record<string, string>> | null {
+  const channels: Record<string, string> = {};
+  const defaultChannelId = env.DISCORD_OUTBOX_CHANNEL_ID;
+  if (defaultChannelId !== undefined && defaultChannelId !== '') {
+    if (!DISCORD_SNOWFLAKE.test(defaultChannelId)) return null;
+    channels.default = defaultChannelId;
+  }
+  const extra = String(env.DISCORD_OUTBOX_CHANNEL_IDS ?? '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+  if (extra.length > 16) return null;
+  for (const entry of extra) {
+    const separator = entry.indexOf('=');
+    const key = entry.slice(0, separator);
+    const channelId = entry.slice(separator + 1);
+    if (
+      separator < 1 ||
+      !DISCORD_ROUTE_KEY.test(key) ||
+      !DISCORD_SNOWFLAKE.test(channelId) ||
+      key in channels
+    ) {
+      return null;
+    }
+    channels[key] = channelId;
+  }
+  return Object.keys(channels).length > 0 ? channels : null;
+}
+
+function discordOutbox(env: NodeJS.ProcessEnv): DiscordOutboxConfig {
+  if (env.DISCORD_OUTBOX_ENABLED !== 'true') {
+    return { enabled: false, reason: 'DISCORD_OUTBOX_ENABLED is not true' };
+  }
+
+  const botToken = env.DISCORD_BOT_TOKEN ?? '';
+  const applicationId = env.DISCORD_APPLICATION_ID ?? '';
+  const channels = outboxChannels(env);
+  if (!botToken || !DISCORD_SNOWFLAKE.test(applicationId) || !channels) {
+    return {
+      enabled: false,
+      reason: 'DISCORD_BOT_TOKEN, DISCORD_APPLICATION_ID and an outbox channel are all required',
+    };
+  }
+
+  // The one mistake this check exists for: a token copied from the other
+  // deployment, which would post this stack's events into that stack's guild
+  // under that stack's bot. The two deployments share no database and no
+  // secret, and they must not share a bot either.
+  if (botTokenApplicationId(botToken) !== applicationId) {
+    return {
+      enabled: false,
+      reason: 'DISCORD_BOT_TOKEN was not issued for DISCORD_APPLICATION_ID',
+    };
+  }
+
+  const configured = Number(env.DISCORD_OUTBOX_INTERVAL_MS ?? 5_000);
+  return {
+    enabled: true,
+    botToken,
+    applicationId,
+    channels,
+    // Floor of a second, ceiling of five minutes: below the floor this is a
+    // busy loop against Discord's rate limiter, above the ceiling an
+    // announcement arrives long after the thing it announces.
+    intervalMs:
+      Number.isFinite(configured) && configured >= 1_000 && configured <= 300_000
+        ? Math.trunc(configured)
+        : 5_000,
   };
 }
 
@@ -175,6 +296,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
         callbackPath: '/auth/google/callback',
       }),
     },
-    discordInteractions: discordInteractions(env, production),
+    discordInteractions: discordInteractions(env),
+    discordOutbox: discordOutbox(env),
   };
 }

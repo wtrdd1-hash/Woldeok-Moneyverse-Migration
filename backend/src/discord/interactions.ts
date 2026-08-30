@@ -4,6 +4,7 @@ import {
   verify as verifySignature,
   type KeyObject,
 } from 'node:crypto';
+import { NO_MENTIONS, withoutMentions } from './mentions';
 
 const ED25519_PUBLIC_KEY_HEX = /^[0-9a-f]{64}$/i;
 const ED25519_SIGNATURE_HEX = /^[0-9a-f]{128}$/i;
@@ -271,6 +272,35 @@ function normalizeWalletService(
   return walletService;
 }
 
+/** What every command writes, whatever it did. */
+export type DiscordCommandOutcome = 'completed' | 'rejected' | 'failed';
+
+export interface DiscordCommandAuditEntry {
+  readonly actorUserId: string;
+  readonly command: string;
+  readonly guildId: string;
+  /** The member a command acted on -- the recipient of a transfer, or null. */
+  readonly targetUserId: string | null;
+  readonly idempotencyKey: string;
+  readonly outcome: DiscordCommandOutcome;
+}
+
+interface CommandAuditorLike {
+  record(entry: DiscordCommandAuditEntry): Promise<unknown>;
+}
+
+function normalizeCommandAuditor(
+  commandAuditor: CommandAuditorLike | null | undefined,
+): CommandAuditorLike {
+  // Required, not optional: spec 9 and 15 want a row for every command, and a
+  // handler built without an auditor would satisfy that silently for as long
+  // as nobody looked.
+  if (!commandAuditor || typeof commandAuditor.record !== 'function') {
+    throw new DiscordInteractionConfigError('a Discord command auditor with record() is required');
+  }
+  return commandAuditor;
+}
+
 export interface DiscordInteractionResponse {
   status: number;
   body: unknown;
@@ -287,19 +317,33 @@ function invalidSignature(): DiscordInteractionResponse {
 function ephemeral(content: unknown): DiscordInteractionResponse {
   // Every message in this module is deliberately plain text and bounded. It
   // keeps balances and command outcomes out of public Discord channels.
-  const safeContent =
+  //
+  // The mention guards are here rather than at each call site because one of
+  // these replies renders text this module did not write -- `/history` prints
+  // a transaction label -- and a reply is a message like any other: without
+  // `allowed_mentions` Discord parses whatever the content contains.
+  const rendered =
     typeof content === 'string' && content.length <= MAX_CONTENT_LENGTH
-      ? content
-      : '요청을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.';
+      ? withoutMentions(content)
+      : '';
+  const safeContent = rendered || '요청을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.';
   return {
     status: 200,
-    body: { type: RESPONSE_CHANNEL_MESSAGE, data: { flags: EPHEMERAL, content: safeContent } },
+    body: {
+      type: RESPONSE_CHANNEL_MESSAGE,
+      data: { flags: EPHEMERAL, content: safeContent, allowed_mentions: NO_MENTIONS },
+    },
   };
 }
 
 type CommandName = 'balance' | 'history' | 'daily' | 'send';
 
-function isCommandName(value: string): value is CommandName {
+/**
+ * The complete slash-command allowlist, exported so the shared rate limiter
+ * checks the same set this module dispatches on rather than a second copy of
+ * it that has to be kept in step.
+ */
+export function isDiscordCommandName(value: string): value is CommandName {
   return COMMANDS.has(value);
 }
 
@@ -439,7 +483,7 @@ function parseInteraction(parsed: unknown, maxTransferAmount: number): ParsedDis
   const commandName =
     typeof rawCommandName === 'string' &&
     rawCommandName.length <= 32 &&
-    isCommandName(rawCommandName)
+    isDiscordCommandName(rawCommandName)
       ? rawCommandName
       : null;
   const userId = exactSnowflake(optionalProperty(optionalProperty(parsed.member, 'user'), 'id'));
@@ -689,76 +733,6 @@ export async function readDiscordInteractionBody(
   return Buffer.concat(chunks);
 }
 
-/**
- * Small bounded in-memory limiter for one-process development/testing only.
- * Production must inject a shared, atomic limiter (for example Redis) with
- * the same `consume({ userId, guildId, command }) => Promise<boolean>`
- * contract so multiple application instances enforce one budget per user.
- */
-export function createFixedWindowDiscordRateLimiter({
-  limit = 5,
-  windowMs = 10_000,
-  maxEntries = 10_000,
-  clock = Date.now,
-}: {
-  limit?: number;
-  windowMs?: number;
-  maxEntries?: number;
-  clock?: () => number;
-} = {}): RateLimiterLike {
-  const countLimit = boundedInteger(limit, 'limit', { min: 1, max: 100 });
-  const duration = boundedInteger(windowMs, 'windowMs', { min: 1_000, max: 60 * 60 * 1_000 });
-  const entryLimit = boundedInteger(maxEntries, 'maxEntries', { min: 1, max: 100_000 });
-  if (typeof clock !== 'function')
-    throw new DiscordInteractionConfigError('clock must be a function');
-  const entries = new Map<string, { windowStart: number; count: number }>();
-
-  const prune = (now: number): void => {
-    for (const [key, entry] of entries) {
-      if (now - entry.windowStart >= duration) entries.delete(key);
-    }
-  };
-
-  return Object.freeze({
-    consume({
-      userId,
-      guildId,
-      command,
-    }: {
-      userId: unknown;
-      guildId: unknown;
-      command: unknown;
-    }): boolean {
-      const normalizedUserId = exactSnowflake(userId);
-      const normalizedGuildId = exactSnowflake(guildId);
-      if (
-        !normalizedUserId ||
-        !normalizedGuildId ||
-        typeof command !== 'string' ||
-        !COMMANDS.has(command)
-      )
-        return false;
-      const now = nowMilliseconds(clock);
-      // A member gets one shared budget in each guild, rather than an
-      // independent quota for every command name.
-      const key = `${normalizedGuildId}:${normalizedUserId}`;
-      let entry = entries.get(key);
-      if (!entry || now - entry.windowStart >= duration) {
-        prune(now);
-        // Refusing a new key at capacity is safer than evicting a live
-        // member's budget: account churn must not reset someone else's
-        // throttle or turn this bounded map into a memory-pressure tool.
-        if (entries.size >= entryLimit) return false;
-        entry = { windowStart: now, count: 0 };
-      }
-      // Keep both the map and every entry bounded under sustained spam.
-      entry.count = Math.min(entry.count + 1, countLimit + 1);
-      entries.set(key, entry);
-      return entry.count <= countLimit;
-    },
-  });
-}
-
 interface DiscordInteractionHandler {
   handle(request: { headers?: unknown; rawBody?: unknown }): Promise<DiscordInteractionResponse>;
 }
@@ -778,6 +752,8 @@ export function createDiscordInteractionHandler({
   identityRepository,
   walletService,
   rateLimiter,
+  commandAuditor,
+  onAuditError,
   clock = Date.now,
   maxBodyBytes = 32 * 1024,
   maxTimestampAgeSeconds = 300,
@@ -789,6 +765,8 @@ export function createDiscordInteractionHandler({
   identityRepository?: IdentityRepositoryLike | null;
   walletService?: WalletServiceLike | null;
   rateLimiter?: RateLimiterLike | null;
+  commandAuditor?: CommandAuditorLike | null;
+  onAuditError?: (error: unknown) => void;
   clock?: () => number;
   maxBodyBytes?: number;
   maxTimestampAgeSeconds?: number;
@@ -800,6 +778,7 @@ export function createDiscordInteractionHandler({
   const identities = normalizeIdentityRepository(identityRepository);
   const wallet = normalizeWalletService(walletService);
   const limiter = normalizeRateLimiter(rateLimiter);
+  const auditor = normalizeCommandAuditor(commandAuditor);
   if (typeof clock !== 'function')
     throw new DiscordInteractionConfigError('clock must be a function');
   const bodyLimit = boundedInteger(maxBodyBytes, 'maxBodyBytes', { min: 1, max: MAX_BODY_BYTES });
@@ -845,6 +824,102 @@ export function createDiscordInteractionHandler({
     }
   };
 
+  /**
+   * One audit row per command, and never a failed command because of one.
+   *
+   * The write is after the fact, so it can fail after the money has already
+   * moved. Failing the command then would tell a member their transfer did not
+   * happen when it did -- and the retry would replay the same receipt and say
+   * the same thing. An audit gap that the error log names is the lesser of the
+   * two, so the write is reported and swallowed.
+   */
+  const recordCommand = async (entry: DiscordCommandAuditEntry): Promise<void> => {
+    try {
+      await auditor.record(entry);
+    } catch (error: unknown) {
+      onAuditError?.(error);
+    }
+  };
+
+  /**
+   * Run one authorized command for a resolved member.
+   *
+   * Split out of `handle` so there is exactly one place that decides what
+   * happened -- `completed` or `rejected` -- and one place that audits it.
+   * Inlining it would put an audit call on each of eight return paths.
+   */
+  const executeCommand = async (
+    interaction: DiscordCommandInteraction,
+    actorUserId: string,
+    idempotencyKey: string,
+    /**
+     * Written the moment a target is resolved, rather than returned with the
+     * response, so that a transfer that throws is still audited against the
+     * member it was for. A `/send` that fails inside WalletService is exactly
+     * the row an investigation wants the recipient on.
+     */
+    acted: { targetUserId: string | null },
+  ): Promise<{ response: DiscordInteractionResponse; outcome: DiscordCommandOutcome }> => {
+    if (interaction.command === 'balance') {
+      const message = balanceMessage(await wallet.overview(actorUserId));
+      return message
+        ? { response: ephemeral(message), outcome: 'completed' }
+        : {
+            response: ephemeral('지갑 정보를 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.'),
+            outcome: 'rejected',
+          };
+    }
+    if (interaction.command === 'history') {
+      const message = historyMessage(await wallet.overview(actorUserId));
+      return message
+        ? { response: ephemeral(message), outcome: 'completed' }
+        : {
+            response: ephemeral('지갑 기록을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.'),
+            outcome: 'rejected',
+          };
+    }
+    if (interaction.command === 'daily') {
+      const message = dailyMessage(await wallet.claimDaily(actorUserId, { idempotencyKey }));
+      return message
+        ? { response: ephemeral(message), outcome: 'completed' }
+        : {
+            response: ephemeral('출석 보상을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.'),
+            outcome: 'rejected',
+          };
+    }
+
+    // The only remaining possibility per parseInteraction's CommandName
+    // union; kept explicit so `interaction.options` narrows to the send
+    // shape below instead of relying on unreachable-code elimination.
+    if (interaction.command !== 'send') throw new DiscordInteractionInputError();
+
+    if (interaction.options.recipientDiscordUserId === interaction.discordUserId) {
+      return { response: ephemeral('자신에게는 송금할 수 없습니다.'), outcome: 'rejected' };
+    }
+    const recipientUserId = await internalUserId(
+      identities,
+      interaction.options.recipientDiscordUserId,
+    );
+    if (!recipientUserId) {
+      return {
+        response: ephemeral('송금을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.'),
+        outcome: 'rejected',
+      };
+    }
+    acted.targetUserId = recipientUserId;
+    await wallet.transfer(actorUserId, {
+      recipientUserId,
+      amount: interaction.options.amount,
+      idempotencyKey,
+    });
+    return {
+      response: ephemeral(
+        `${interaction.options.amount.toLocaleString('ko-KR')} WLD 송금 요청을 처리했습니다.`,
+      ),
+      outcome: 'completed',
+    };
+  };
+
   return Object.freeze({
     async handle({
       headers,
@@ -886,57 +961,42 @@ export function createDiscordInteractionHandler({
         return ephemeral('요청을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.');
       }
 
+      // Derived for every command, not only the two that move money: it is
+      // the identity of this interaction, so it is what the audit row records
+      // as the request, and a Discord retry derives the same one.
+      const idempotencyKey = receiptKey(interaction.interactionId, interaction.command);
+      const acted: { targetUserId: string | null } = { targetUserId: null };
+      let actorUserId: string | null = null;
       try {
-        const actorUserId = await internalUserId(identities, interaction.discordUserId);
+        actorUserId = await internalUserId(identities, interaction.discordUserId);
         if (!actorUserId)
           return ephemeral(
             '머니버스 계정 연동 또는 최신 약관 동의가 필요합니다. 웹에서 로그인해 확인해 주세요.',
           );
 
-        if (interaction.command === 'balance') {
-          const message = balanceMessage(await wallet.overview(actorUserId));
-          return message
-            ? ephemeral(message)
-            : ephemeral('지갑 정보를 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.');
-        }
-        if (interaction.command === 'history') {
-          const message = historyMessage(await wallet.overview(actorUserId));
-          return message
-            ? ephemeral(message)
-            : ephemeral('지갑 기록을 불러올 수 없습니다. 잠시 후 다시 시도해 주세요.');
-        }
-
-        const idempotencyKey = receiptKey(interaction.interactionId, interaction.command);
-        if (interaction.command === 'daily') {
-          const message = dailyMessage(await wallet.claimDaily(actorUserId, { idempotencyKey }));
-          return message
-            ? ephemeral(message)
-            : ephemeral('출석 보상을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.');
-        }
-
-        // The only remaining possibility per parseInteraction's CommandName
-        // union; kept explicit so `interaction.options` narrows to the send
-        // shape below instead of relying on unreachable-code elimination.
-        if (interaction.command !== 'send') throw new DiscordInteractionInputError();
-
-        if (interaction.options.recipientDiscordUserId === interaction.discordUserId) {
-          return ephemeral('자신에게는 송금할 수 없습니다.');
-        }
-        const recipientUserId = await internalUserId(
-          identities,
-          interaction.options.recipientDiscordUserId,
-        );
-        if (!recipientUserId)
-          return ephemeral('송금을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.');
-        await wallet.transfer(actorUserId, {
-          recipientUserId,
-          amount: interaction.options.amount,
+        const executed = await executeCommand(interaction, actorUserId, idempotencyKey, acted);
+        await recordCommand({
+          actorUserId,
+          command: interaction.command,
+          guildId: interaction.guildId,
+          targetUserId: acted.targetUserId,
           idempotencyKey,
+          outcome: executed.outcome,
         });
-        return ephemeral(
-          `${interaction.options.amount.toLocaleString('ko-KR')} WLD 송금 요청을 처리했습니다.`,
-        );
+        return executed.response;
       } catch {
+        // A member with no linked account has nothing to audit against: the
+        // audit row names an internal user, and there is none.
+        if (actorUserId) {
+          await recordCommand({
+            actorUserId,
+            command: interaction.command,
+            guildId: interaction.guildId,
+            targetUserId: acted.targetUserId,
+            idempotencyKey,
+            outcome: 'failed',
+          });
+        }
         // In particular, do not forward database codes, user IDs, balance
         // values, provider subjects, or WalletService error text into Discord.
         return ephemeral('요청을 처리할 수 없습니다. 잠시 후 다시 시도해 주세요.');

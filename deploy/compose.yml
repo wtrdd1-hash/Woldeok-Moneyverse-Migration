@@ -176,6 +176,31 @@ services:
       # Salts the hash that recognises a returning administrator device.
       # Falls back to INTERNAL_API_TOKEN, which every deployment already has.
       ADMIN_DEVICE_HASH_PEPPER: ${ADMIN_DEVICE_HASH_PEPPER:-}
+      # The Discord bot. These were absent entirely, which is the other half
+      # of why the bot did nothing in production: the code was switched off and
+      # the deployment could not have configured it anyway.
+      #
+      # The application id and the bot token belong to ONE deployment. They
+      # come from the GitHub environment the deploy was run against, so test
+      # and production resolve different values through the same reference,
+      # and the API refuses a token whose application id is not the one below
+      # rather than posting this stack's events into the other stack's guild.
+      DISCORD_APPLICATION_ID: ${DISCORD_APPLICATION_ID:-}
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:-}
+      # The public interaction webhook. Off unless this deployment says
+      # otherwise, and disabled by the API on any malformed id.
+      DISCORD_INTERACTIONS_ENABLED: ${DISCORD_INTERACTIONS_ENABLED:-false}
+      DISCORD_INTERACTIONS_PUBLIC_KEY: ${DISCORD_INTERACTIONS_PUBLIC_KEY:-}
+      DISCORD_INTERACTIONS_GUILD_ID: ${DISCORD_INTERACTIONS_GUILD_ID:-}
+      DISCORD_INTERACTIONS_ROLE_IDS: ${DISCORD_INTERACTIONS_ROLE_IDS:-}
+      DISCORD_INTERACTIONS_ROLE_MODE: ${DISCORD_INTERACTIONS_ROLE_MODE:-any}
+      # The outbox worker: which channel the `default` route posts to, and how
+      # often it looks. DISCORD_OUTBOX_CHANNEL_IDS adds further route keys as
+      # `key=id,key=id` for the routes 066 leaves room for.
+      DISCORD_OUTBOX_ENABLED: ${DISCORD_OUTBOX_ENABLED:-false}
+      DISCORD_OUTBOX_CHANNEL_ID: ${DISCORD_OUTBOX_CHANNEL_ID:-}
+      DISCORD_OUTBOX_CHANNEL_IDS: ${DISCORD_OUTBOX_CHANNEL_IDS:-}
+      DISCORD_OUTBOX_INTERVAL_MS: ${DISCORD_OUTBOX_INTERVAL_MS:-5000}
     volumes:
       - photo-data:/data/moneyverse/photos
     depends_on:

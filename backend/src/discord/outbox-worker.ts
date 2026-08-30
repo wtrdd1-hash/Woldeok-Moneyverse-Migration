@@ -1,83 +1,396 @@
 import type { Queryable } from '../core/db';
-import { queryRows } from '../core/db';
+import { queryOne, queryRows } from '../core/db';
+import { NO_MENTIONS, withoutMentions } from './mentions';
 
-const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+/**
+ * Delivers outbox events to Discord, and knows when to stop trying.
+ *
+ * The ledger writes an `outbox_events` row inside the same transaction as the
+ * postings, which is what makes an announcement impossible to lose and
+ * impossible to send for a transaction that rolled back. Everything after that
+ * is this loop: claim a lease, post, mark delivered.
+ *
+ * What it now does that it did not before, each of which was a way for the
+ * previous version to stall forever:
+ *
+ *   - The `fetch` is inside a try/catch. A DNS failure used to escape
+ *     `runOnce` with the whole claimed batch still leased for two minutes.
+ *   - A failure is recorded. `delivery_attempts` counted up with no ceiling
+ *     and no terminal state, so an event Discord will never accept was retried
+ *     for the life of the deployment.
+ *   - A 429 is obeyed rather than slept through. Discord says how long to wait
+ *     in `retry-after`; a fixed delay against a bucket that is still empty is
+ *     how a bot earns a longer ban.
+ *   - The message depends on the event type. One line reading
+ *     "머니버스 이벤트: shop.purchase.completed" told a reader nothing.
+ *
+ * It is never handed a payload: `outbox_claim_pending` returns the type and
+ * the receipt id only, so no amount, member or transaction detail can reach a
+ * Discord channel through this path even by mistake — the same rule 039 keeps
+ * for the operator console.
+ */
 
-// public.outbox_claim_pending($1) (packages/database/migrations/027-discord-outbox-worker.sql)
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const EVENT_TYPE = /^[a-z][a-z0-9_.]{2,79}$/;
+const CHANNEL_KEY = /^[a-z][a-z0-9_-]{1,31}$/;
+const SNOWFLAKE = /^\d{16,22}$/;
+const DISCORD_API_ORIGIN = 'https://discord.com';
+const REQUEST_TIMEOUT_MS = 10_000;
+/** Discord's own ceiling for a global 429; longer than this is a bug upstream. */
+const MAX_BACKOFF_MS = 15 * 60_000;
+
+// public.outbox_claim_pending($1)
+// (packages/database/migrations/061-discord-bot-revival.sql)
 interface OutboxEventRow {
   id: string;
   event_type: string;
-  payload: unknown;
+  channel_key: string;
+}
+
+// public.outbox_record_delivery_failure($1,$2,$3)
+interface DeliveryFailureRow {
+  state: string | null;
 }
 
 /** The subset of the global `fetch` signature this worker actually calls. */
-type FetchLike = (url: string, init: RequestInit) => Promise<{ ok: boolean; status: number }>;
+export type FetchLike = (
+  url: string,
+  init: RequestInit,
+) => Promise<{
+  ok: boolean;
+  status: number;
+  headers: { get(name: string): string | null };
+}>;
 
-function messageFor(event: OutboxEventRow): string {
-  const type =
-    typeof event.event_type === 'string' && /^[a-z0-9._-]{1,80}$/i.test(event.event_type)
-      ? event.event_type
-      : 'unknown';
-  return `머니버스 이벤트: ${type}\n영수증: ${event.id}`;
+/**
+ * One headline per event type.
+ *
+ * Korean, because the channel is read by members, and deliberately without an
+ * amount or a name: the worker is not given the payload, and a channel that
+ * announces who moved how much is a different product decision from a channel
+ * that says the economy is alive. `discord_outbox_routes` decides which of
+ * these are announced at all.
+ */
+const HEADLINES: Readonly<Record<string, string>> = Object.freeze({
+  'wallet.transfer.completed': '송금이 완료되었습니다.',
+  'game.daily_reward.claimed': '출석 보상이 지급되었습니다.',
+  'game.work_reward.claimed': '작업 보상이 지급되었습니다.',
+  'shop.purchase.completed': '상점 구매가 완료되었습니다.',
+  'business.purchased': '사업체를 인수했습니다.',
+  'business.daily_settled': '사업체 정산이 완료되었습니다.',
+  'bank.loan.issued': '대출이 실행되었습니다.',
+  'bank.loan.repaid': '대출이 상환되었습니다.',
+  'bank.balance.moved': '은행 잔액이 이동했습니다.',
+  'bank.interest.accrued': '예금 이자가 지급되었습니다.',
+  'season.event.consumed': '시즌 이벤트 참여가 기록되었습니다.',
+  'stock.trade.completed': '주식 거래가 체결되었습니다.',
+  'casino.coin.played': '동전 게임 결과가 기록되었습니다.',
+});
+
+/**
+ * The message for one event.
+ *
+ * A type with no headline keeps the line the previous worker sent for
+ * everything, because an event this deployment does not recognise is still
+ * worth announcing as itself rather than as a lie. Both lines go through the
+ * mention filter: the type is regex-checked and the id is a UUID, so nothing
+ * can reach `@everyone` today — the filter is there so the next person to add
+ * a payload-derived field does not have to remember.
+ */
+export function messageFor(event: { id: string; event_type: string }): string {
+  const type = EVENT_TYPE.test(event.event_type) ? event.event_type : 'unknown';
+  const headline = HEADLINES[type] ?? `머니버스 이벤트: ${type}`;
+  return withoutMentions(`${headline}\n영수증: ${event.id}`);
 }
 
-export class DiscordOutboxWorker {
+function positiveMilliseconds(seconds: unknown): number | null {
+  if (typeof seconds !== 'string' || !/^\d{1,6}(\.\d{1,3})?$/.test(seconds)) return null;
+  const value = Math.ceil(Number(seconds) * 1_000);
+  if (!Number.isFinite(value) || value <= 0) return null;
+  return Math.min(value, MAX_BACKOFF_MS);
+}
+
+/**
+ * How long Discord asked this bot to wait, in milliseconds.
+ *
+ * `retry-after` is the documented answer to a 429 and is seconds, possibly
+ * fractional. `x-ratelimit-reset-after` carries the same number for the bucket
+ * that is about to be exhausted, which is what lets the worker stop *before*
+ * being told to. Neither header is trusted as a number without being read as
+ * one first: a proxy can return anything.
+ */
+export function retryDelayMs(headers: { get(name: string): string | null }): number | null {
+  const retryAfter = positiveMilliseconds(headers.get('retry-after'));
+  if (retryAfter !== null) return retryAfter;
+  return positiveMilliseconds(headers.get('x-ratelimit-reset-after'));
+}
+
+function exhausted(headers: { get(name: string): string | null }): boolean {
+  return headers.get('x-ratelimit-remaining') === '0';
+}
+
+export interface DiscordOutboxWorkerOptions {
   readonly pool: Queryable;
   readonly token: string;
-  readonly channelId: string;
-  readonly fetch: FetchLike;
+  /** Route key to Discord channel id. `outbox_claim_pending` returns the key. */
+  readonly channels: Readonly<Record<string, string>>;
+  readonly intervalMs: number;
+  readonly batchSize?: number;
+  readonly fetchImpl?: FetchLike;
+  readonly clock?: () => number;
+  readonly onError?: (error: unknown) => void;
+}
 
-  constructor({
-    pool,
-    token,
-    channelId,
-    fetchImpl = fetch,
-  }: {
-    pool: Queryable;
-    token: string;
-    channelId: string;
-    fetchImpl?: FetchLike;
-  }) {
-    if (
-      !pool?.query ||
-      typeof token !== 'string' ||
-      !token ||
-      typeof channelId !== 'string' ||
-      !channelId ||
-      typeof fetchImpl !== 'function'
-    )
-      throw new TypeError('pool, Discord token, channel and fetch are required');
-    this.pool = pool;
-    this.token = token;
-    this.channelId = channelId;
+export interface OutboxRunSummary {
+  readonly claimed: number;
+  readonly delivered: number;
+  readonly failed: number;
+  readonly deadLettered: number;
+}
+
+const EMPTY_RUN: OutboxRunSummary = Object.freeze({
+  claimed: 0,
+  delivered: 0,
+  failed: 0,
+  deadLettered: 0,
+});
+
+export class DiscordOutboxWorker {
+  private readonly options: DiscordOutboxWorkerOptions;
+  private readonly fetch: FetchLike;
+  private readonly clock: () => number;
+  private readonly batchSize: number;
+  private timer: ReturnType<typeof setInterval> | null = null;
+  private running = false;
+  private skipped = 0;
+  private pausedUntilMs = 0;
+
+  constructor(options: DiscordOutboxWorkerOptions) {
+    const { pool, token, channels, intervalMs } = options;
+    if (!pool?.query || typeof token !== 'string' || !token) {
+      throw new TypeError('a PostgreSQL pool and a Discord bot token are required');
+    }
+    if (!channels || typeof channels !== 'object' || Object.keys(channels).length === 0) {
+      throw new TypeError('at least one outbox channel is required');
+    }
+    for (const [key, channelId] of Object.entries(channels)) {
+      if (!CHANNEL_KEY.test(key) || typeof channelId !== 'string' || !SNOWFLAKE.test(channelId)) {
+        throw new TypeError('every outbox channel must be a route key and an exact snowflake');
+      }
+    }
+    if (!Number.isSafeInteger(intervalMs) || intervalMs < 1_000) {
+      throw new TypeError('interval must be at least 1000ms');
+    }
+    const batchSize = options.batchSize ?? 20;
+    if (!Number.isSafeInteger(batchSize) || batchSize < 1 || batchSize > 100) {
+      throw new TypeError('batch size must be between 1 and 100');
+    }
+    const fetchImpl = options.fetchImpl ?? fetch;
+    if (typeof fetchImpl !== 'function') throw new TypeError('a fetch implementation is required');
+    const clock = options.clock ?? Date.now;
+    if (typeof clock !== 'function') throw new TypeError('clock must be a function');
+
+    this.options = options;
     this.fetch = fetchImpl;
+    this.clock = clock;
+    this.batchSize = batchSize;
   }
 
-  async runOnce(limit = 20): Promise<{ claimed: number; delivered: number }> {
-    const rows = await queryRows<OutboxEventRow>(
-      this.pool,
-      'SELECT id::text,event_type,payload FROM public.outbox_claim_pending($1)',
-      [limit],
+  /** How many beats were dropped because the previous run was still going. */
+  get skippedBeats(): number {
+    return this.skipped;
+  }
+
+  /** When the worker will next talk to Discord, if a 429 pushed it back. */
+  get pausedUntil(): number {
+    return this.pausedUntilMs;
+  }
+
+  private async recordFailure(
+    id: string,
+    reason: string,
+    permanent: boolean,
+  ): Promise<'dead_letter' | 'retry' | 'settled'> {
+    const row = await queryOne<DeliveryFailureRow>(
+      this.options.pool,
+      'SELECT public.outbox_record_delivery_failure($1,$2,$3) AS state',
+      [id, reason, permanent],
     );
-    let delivered = 0;
-    for (const event of rows) {
-      if (!uuid.test(event?.id)) continue;
+    const state = row?.state;
+    return state === 'dead_letter' || state === 'settled' ? state : 'retry';
+  }
+
+  /**
+   * One delivery attempt, with the network failure turned into a value.
+   *
+   * The previous worker had no try/catch here at all, so a DNS failure escaped
+   * `runOnce` with the whole claimed batch still leased for two minutes and
+   * nothing recorded anywhere. Returning the failure rather than throwing it
+   * is what lets the caller decide between "this event" and "this batch".
+   */
+  private async post(
+    channelId: string,
+    event: OutboxEventRow,
+  ): Promise<
+    | { sent: true; ok: boolean; status: number; headers: { get(name: string): string | null } }
+    | { sent: false; error: unknown }
+  > {
+    try {
       const response = await this.fetch(
-        `https://discord.com/api/v10/channels/${this.channelId}/messages`,
+        `${DISCORD_API_ORIGIN}/api/v10/channels/${channelId}/messages`,
         {
           method: 'POST',
-          headers: { authorization: `Bot ${this.token}`, 'content-type': 'application/json' },
-          body: JSON.stringify({ content: messageFor(event) }),
+          headers: {
+            authorization: `Bot ${this.options.token}`,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({
+            content: messageFor(event),
+            allowed_mentions: NO_MENTIONS,
+          }),
+          signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
         },
       );
-      if (response.status === 429) break;
-      if (!response.ok) {
-        await this.pool.query('SELECT public.outbox_release_claim($1)', [event.id]);
+      return { sent: true, ok: response.ok, status: response.status, headers: response.headers };
+    } catch (error: unknown) {
+      return { sent: false, error };
+    }
+  }
+
+  private async releaseUntried(ids: readonly string[]): Promise<void> {
+    for (const id of ids) {
+      // One failed release must not strand the rest: the lease expires in two
+      // minutes either way, so this is a courtesy, not a correctness step.
+      try {
+        await this.options.pool.query('SELECT public.outbox_release_claim_untried($1)', [id]);
+      } catch (error: unknown) {
+        this.options.onError?.(error);
+      }
+    }
+  }
+
+  private pauseFor(delayMs: number | null): void {
+    const delay = delayMs ?? this.options.intervalMs;
+    this.pausedUntilMs = this.clock() + Math.min(delay, MAX_BACKOFF_MS);
+  }
+
+  async runOnce(): Promise<OutboxRunSummary> {
+    if (this.running) {
+      this.skipped += 1;
+      return EMPTY_RUN;
+    }
+    if (this.clock() < this.pausedUntilMs) return EMPTY_RUN;
+    this.running = true;
+    try {
+      return await this.deliverBatch();
+    } catch (error: unknown) {
+      // Claiming failed, or the database went away mid-batch. The lease
+      // expires on its own; the next beat tries again.
+      this.options.onError?.(error);
+      return EMPTY_RUN;
+    } finally {
+      this.running = false;
+    }
+  }
+
+  private async deliverBatch(): Promise<OutboxRunSummary> {
+    const rows = await queryRows<OutboxEventRow>(
+      this.options.pool,
+      'SELECT id::text,event_type,channel_key FROM public.outbox_claim_pending($1)',
+      [this.batchSize],
+    );
+    let delivered = 0;
+    let failed = 0;
+    let deadLettered = 0;
+
+    for (let index = 0; index < rows.length; index += 1) {
+      const event = rows[index];
+      if (!event || !UUID.test(event.id)) continue;
+
+      const channelId = this.options.channels[event.channel_key];
+      if (!channelId) {
+        // The route names a key this deployment did not configure. That is an
+        // operator error rather than a Discord refusal, so it retries and ends
+        // up in the dead letter with a reason that names the missing key.
+        const state = await this.recordFailure(
+          event.id,
+          `no channel configured for route ${event.channel_key}`,
+          false,
+        );
+        failed += 1;
+        if (state === 'dead_letter') deadLettered += 1;
         continue;
       }
-      await this.pool.query('SELECT public.outbox_mark_delivered($1)', [event.id]);
+
+      const attempt = await this.post(channelId, event);
+      if (!attempt.sent) {
+        // Transport, not content: the next event would fail the same way, so
+        // stop the batch and hand back every lease that was never used.
+        this.options.onError?.(attempt.error);
+        const state = await this.recordFailure(event.id, 'delivery request failed', false);
+        failed += 1;
+        if (state === 'dead_letter') deadLettered += 1;
+        await this.releaseUntried(rows.slice(index + 1).map((row) => row.id));
+        this.pauseFor(null);
+        break;
+      }
+
+      if (attempt.status === 429) {
+        this.pauseFor(retryDelayMs(attempt.headers));
+        const state = await this.recordFailure(event.id, 'rate limited by Discord', false);
+        failed += 1;
+        if (state === 'dead_letter') deadLettered += 1;
+        await this.releaseUntried(rows.slice(index + 1).map((row) => row.id));
+        break;
+      }
+
+      if (attempt.status >= 500) {
+        // Discord's problem, not this event's. Give the rest back rather than
+        // burning an attempt each on a server that is already unwell.
+        const state = await this.recordFailure(event.id, `discord ${attempt.status}`, false);
+        failed += 1;
+        if (state === 'dead_letter') deadLettered += 1;
+        await this.releaseUntried(rows.slice(index + 1).map((row) => row.id));
+        this.pauseFor(null);
+        break;
+      }
+
+      if (!attempt.ok) {
+        // 401, 403, 404: a revoked token, a channel the bot cannot post in, a
+        // channel that no longer exists. Repeating the request cannot change
+        // any of those, so this one goes straight to the dead letter and the
+        // batch continues — the next event may be routed elsewhere.
+        const state = await this.recordFailure(event.id, `discord ${attempt.status}`, true);
+        failed += 1;
+        if (state === 'dead_letter') deadLettered += 1;
+        continue;
+      }
+
+      await this.options.pool.query('SELECT public.outbox_mark_delivered($1)', [event.id]);
       delivered += 1;
+
+      // Told, before being refused, that this bucket has nothing left. Stop
+      // here rather than spend the next request earning a 429.
+      if (exhausted(attempt.headers)) {
+        this.pauseFor(retryDelayMs(attempt.headers));
+        await this.releaseUntried(rows.slice(index + 1).map((row) => row.id));
+        break;
+      }
     }
-    return { claimed: rows.length, delivered };
+
+    return { claimed: rows.length, delivered, failed, deadLettered };
+  }
+
+  start(): void {
+    if (this.timer) return;
+    this.timer = setInterval(() => void this.runOnce(), this.options.intervalMs);
+    // An announcement is never a reason to keep the process alive.
+    this.timer.unref?.();
+  }
+
+  stop(): void {
+    if (!this.timer) return;
+    clearInterval(this.timer);
+    this.timer = null;
   }
 }

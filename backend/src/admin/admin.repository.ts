@@ -87,6 +87,9 @@ interface AdminUserRow {
 }
 
 // packages/database/migrations/039-admin-discord-outbox-read.sql (admin_recent_discord_outbox_events)
+// delivery_status gained `suppressed` and `dead_letter` in 066: an event no
+// route announces, and one the worker has given up on. Rendered as it arrives,
+// like the four that were already there.
 interface AdminDiscordOutboxEventRow {
   event_id: string;
   event_type: string;
