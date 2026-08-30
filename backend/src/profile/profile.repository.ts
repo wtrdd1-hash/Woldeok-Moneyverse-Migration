@@ -131,7 +131,11 @@ function optionalImageUrl(value: unknown): string | null {
   } catch {
     throw rejected;
   }
-  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') throw rejected;
+  // https only. The site's own CSP is `img-src 'self' data: https:`, so an
+  // http address is refused by the browser after it is saved -- the member
+  // sees a broken picture and nothing tells them why. Refusing it here is the
+  // only place that can say so.
+  if (parsed.protocol !== 'https:') throw rejected;
   return text;
 }
 
@@ -268,6 +272,29 @@ export class ProfileRepository {
    * upsert of one row keyed by the member rather than an event: sending it
    * twice stores the same settings twice, which is the same settings.
    */
+  /**
+   * The stored settings, including the per-field visibility map.
+   *
+   * `view` deliberately answers what a *reader* may see, which is the wrong
+   * question for the owner editing their own controls: a field they have
+   * hidden is absent there, and a form built from that cannot tell "hidden"
+   * from "never set". `update` replaces the map wholesale, so a form that
+   * cannot read it back republishes everything the member had hidden the
+   * moment they change their display name. 093 added the read.
+   */
+  async settings(actor: unknown): Promise<ProfileSettingsRow> {
+    assertUuid(actor, 'actor user id');
+    const row = await queryOne<ProfileSettingsRow>(
+      this.pool,
+      `SELECT settings.visibility, settings.display_name, settings.image_url,
+              settings.field_visibility, settings.featured_title
+       FROM public.member_profile_settings($1::uuid) AS settings`,
+      [actor],
+    );
+    if (!row) throw new Error('member_profile_settings did not return a row');
+    return row;
+  }
+
   async update(actor: unknown, input: ProfileUpdate): Promise<ProfileSettingsRow> {
     assertUuid(actor, 'actor');
     const visibility = requireVisibility(input.visibility, 'the profile visibility');

@@ -53,12 +53,16 @@ describe('engagement routes', () => {
     expect(response.status).toBeGreaterThanOrEqual(400);
   });
 
-  it('mounts recording progress as a write', async () => {
+  // `engagement_record_progress` grants a title once a count reaches its
+  // target and verifies nothing about the activity behind the count, so a
+  // route to it is a button a member presses to award themselves. The caller
+  // has to be whatever records the activity; until one exists there is no
+  // route, and this is the assertion that keeps it that way.
+  it('does not expose recording progress to the member it counts for', async () => {
     const response = await request(app.getHttpServer())
       .post('/api/v1/engagement/goals/first_wage/progress')
       .send({ idempotencyKey: KEY, amount: 1 });
-    expect(response.status).not.toBe(404);
-    expect([400, 401, 403, 409, 428, 503]).toContain(response.status);
+    expect(response.status).toBe(404);
   });
 
   it('mounts taking an NPC order as a write', async () => {
@@ -113,11 +117,4 @@ describe('engagement routes', () => {
   // to reach the repository and be refused there as a bad field. What must
   // not happen is the router losing it: a 404 here would report a mistyped
   // code as a missing endpoint.
-  it('routes a malformed goal code to the handler rather than to a 404', async () => {
-    const response = await request(app.getHttpServer())
-      .post('/api/v1/engagement/goals/AB/progress')
-      .send({ idempotencyKey: KEY });
-    expect(response.status).not.toBe(404);
-    expect([400, 401, 403, 409, 428, 503]).toContain(response.status);
-  });
 });

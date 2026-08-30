@@ -185,7 +185,9 @@ export interface ShopCatalogReceiptRow {
 /** public.shop_use_item RETURNS TABLE: packages/database/migrations/074-shop-item-effects.sql */
 export interface ShopItemUseRow {
   readonly catalog_id: string;
-  readonly remaining_quantity: number;
+  // Null on a replay whose key was spent on a different item: 074 leaves the
+  // OUT parameter unset there rather than guessing a count.
+  readonly remaining_quantity: number | null;
   readonly expires_at: Date | null;
   readonly replayed: boolean;
 }

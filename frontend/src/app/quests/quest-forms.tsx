@@ -5,7 +5,7 @@ import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { IDLE } from '@/lib/action-state';
-import { orderFromNpc, recordProgress, setNotifications } from './actions';
+import { orderFromNpc, setNotifications } from './actions';
 
 /**
  * The engagement loop's write surface.
@@ -17,26 +17,6 @@ import { orderFromNpc, recordProgress, setNotifications } from './actions';
  * progress being recorded by a double click; the idempotency key the action
  * mints per submission is the second line of defence, not the first.
  */
-
-/**
- * One step of progress, recorded by the member.
- *
- * One button and no number field. The API accepts an amount and defaults it
- * to one, and a press of this button means exactly one thing done -- a member
- * who could type 1,000 into it would be finishing goals rather than playing.
- */
-export function RecordProgressButton({ code }: { readonly code: string }) {
-  const [state, action] = useActionState(recordProgress, IDLE);
-  return (
-    <div className="grid w-full gap-2">
-      <form action={action}>
-        <input type="hidden" name="code" value={code} />
-        <SubmitButton>진행 1회 기록</SubmitButton>
-      </form>
-      <ActionAlert state={state} />
-    </div>
-  );
-}
 
 export function NpcOrderButton({ code }: { readonly code: string }) {
   const [state, action] = useActionState(orderFromNpc, IDLE);

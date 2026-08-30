@@ -27,6 +27,8 @@ export default function robots(): MetadataRoute.Robots {
         '/businesses',
         '/seasons',
         '/casino',
+        '/quests',
+        '/shop/catalog',
         '/progression',
         '/board',
         '/profile',

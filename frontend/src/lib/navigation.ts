@@ -19,10 +19,10 @@ export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/businesses', label: '게임 사업' },
   { href: '/seasons', label: '시즌' },
   { href: '/quests', label: '퀘스트' },
-  { href: '/casino', label: '코인 게임' },
+  { href: '/casino', label: '동전 게임' },
   { href: '/progression', label: '성장 단계' },
   { href: '/profile', label: '내 프로필' },
-  { href: '/shop/catalog', label: '상점 카탈로그' },
+  { href: '/shop/catalog', label: '아이템 상점' },
   { href: '/board', label: '게시판' },
   { href: '/account', label: '내 계정' },
 ];
@@ -81,10 +81,11 @@ export const HEADER_MEMBER: readonly NavItem[] = [
       { href: '/businesses', label: '게임 사업' },
       { href: '/seasons', label: '시즌' },
       { href: '/quests', label: '퀘스트' },
+      { href: '/shop/catalog', label: '아이템 상점' },
       // Behind a feature switch that is off in production until the stage-3
       // gates pass. The link stays, and the page says so in a sentence --
       // hiding it would make "why can I not find it" a support question.
-      { href: '/casino', label: '코인 게임' },
+      { href: '/casino', label: '동전 게임' },
     ],
   },
   {
@@ -119,6 +120,9 @@ export function isGroupCurrent(pathname: string, group: NavGroup): boolean {
  */
 export function isCurrent(pathname: string, href: string): boolean {
   if (href === '/') return pathname === '/';
-  if (pathname === href) return true;
-  return pathname.startsWith(`${href}/`);
+  // `/shop` is the only entry with another entry beneath it. A subtree match
+  // would put `aria-current="page"` on both links at once when the reader is
+  // in the catalogue, which reads to a screen reader as two current pages.
+  if (href === '/shop') return pathname === '/shop';
+  return pathname === href || pathname.startsWith(`${href}/`);
 }

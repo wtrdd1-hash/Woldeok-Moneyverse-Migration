@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { IDLE } from '@/lib/action-state';
-import type { ProfileView } from './profile';
+import type { ProfileSettings, ProfileView } from './profile';
 import {
   DISPLAY_NAME_MAX,
   FIELD_CHOICES,
@@ -48,7 +48,13 @@ import { saveProfile } from './actions';
  * `member_update_profile` replaces every column from its arguments: a control
  * that started blank would clear the field it belongs to on the first save.
  */
-export function ProfileSettingsForm({ profile }: { readonly profile: ProfileView }) {
+export function ProfileSettingsForm({
+  profile,
+  settings,
+}: {
+  readonly profile: ProfileView;
+  readonly settings: ProfileSettings;
+}) {
   const [state, action] = useActionState(saveProfile, IDLE);
   const [visibility, setVisibility] = useState<string>(profile.visibility);
   const [featuredTitle, setFeaturedTitle] = useState<string>(profile.featured_title ?? NO_TITLE);
@@ -56,14 +62,17 @@ export function ProfileSettingsForm({ profile }: { readonly profile: ProfileView
   // One record rather than five hooks: the five controls differ only by which
   // key they carry, and the action reads them back the same way.
   //
-  // They all start at '프로필 설정 따름' because there is nothing to start
-  // them at. No granted function returns `field_visibility` -- only the write
-  // answers with it -- so this screen cannot know what the member chose last
-  // time. Defaulting to the schema's own default and saying so out loud is
-  // the honest version; guessing from the last response would be a value the
-  // page invented.
+  // Started from what is stored, not from the default. `member_update_profile`
+  // replaces the whole map, so a control that opened at '프로필 설정 따름'
+  // would publish a field the member had hidden the moment they saved a change
+  // to their display name -- a privacy control failing open, and silently.
+  // 093's `member_profile_settings` is the read that makes this possible.
   const [fields, setFields] = useState<Readonly<Record<string, string>>>(() =>
-    Object.fromEntries(VISIBILITY_FIELDS.map((field) => [field.key, INHERIT] as const)),
+    Object.fromEntries(
+      VISIBILITY_FIELDS.map(
+        (field) => [field.key, settings.field_visibility[field.key] ?? INHERIT] as const,
+      ),
+    ),
   );
 
   const chosen = VISIBILITY_CHOICES.find((choice) => choice.value === visibility);
@@ -116,7 +125,7 @@ export function ProfileSettingsForm({ profile }: { readonly profile: ProfileView
             className="min-h-11"
           />
           <FieldDescription>
-            http로 시작하는 주소나 이 사이트의 경로를 넣을 수 있어요. 아직 이미지를 직접 올리는
+            https로 시작하는 주소나 이 사이트의 경로를 넣을 수 있어요. 아직 이미지를 직접 올리는
             기능은 없어요.
           </FieldDescription>
         </Field>

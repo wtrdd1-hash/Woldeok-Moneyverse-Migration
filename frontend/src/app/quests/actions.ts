@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
-import { npcOrderMessage, preferenceMessage, progressMessage } from './quests';
-import type { NpcOrderReceipt, ProgressReceipt } from './quests';
+import { npcOrderMessage, preferenceMessage } from './quests';
+import type { NpcOrderReceipt } from './quests';
 
 /**
  * The engagement loop's three writes.
@@ -29,37 +29,6 @@ import type { NpcOrderReceipt, ProgressReceipt } from './quests';
  */
 const CODE = /^[a-z0-9_]{3,64}$/;
 
-/**
- * One step of progress against one goal.
- *
- * No amount is sent. The API's field is optional and defaults to one, and one
- * report of one thing done is what a button press means -- offering the
- * member a number to type would let them finish a goal in a single
- * submission, which is not a decision a form should be making.
- */
-export async function recordProgress(
-  _previous: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const code = String(formData.get('code') ?? '');
-  if (!CODE.test(code)) return { status: 'error', message: '목표를 확인할 수 없어요.' };
-
-  try {
-    const receipt = await mutate<ProgressReceipt>(
-      `/api/v1/engagement/goals/${encodeURIComponent(code)}/progress`,
-      { body: { idempotencyKey: idempotencyKey() } },
-    );
-    revalidatePath('/quests');
-    return { status: 'ok', message: progressMessage(receipt) };
-  } catch (error) {
-    return failure(
-      error,
-      '지금은 진행을 기록할 수 없어요. 이미 끝난 목표이거나 오늘은 더 기록할 수 없는 목표일 수 있어요.',
-    );
-  }
-}
-
-/** One order taken from one NPC. */
 export async function orderFromNpc(
   _previous: ActionState,
   formData: FormData,

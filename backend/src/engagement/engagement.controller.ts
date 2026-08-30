@@ -21,11 +21,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
-import {
-  EngagementNpcOrderDto,
-  EngagementPreferencesDto,
-  EngagementProgressDto,
-} from './engagement.dto';
+import { EngagementNpcOrderDto, EngagementPreferencesDto } from './engagement.dto';
 import { EngagementInputError, EngagementRepository } from './engagement.repository';
 
 /**
@@ -98,34 +94,18 @@ export class EngagementController {
     );
   }
 
-  /**
-   * A collection of progress records under the goal they belong to, following
-   * the convention the route map records: the action becomes a sub-resource
-   * and the verb moves into the method. The goal code sits in the path rather
-   * than the body for the same reason a purchase names its item there.
+  /*
+   * There is no route that records progress.
    *
-   * The catalogue code is not a UUID, so no ParseUUIDPipe: the repository
-   * checks it against 081's own CHECK and a mistyped code becomes a 400.
+   * `engagement_record_progress` grants a collection entry and a title when a
+   * count reaches its target, and it verifies nothing about the activity that
+   * supposedly produced the count. Exposed to the member it counts for, it is
+   * a button that awards `starter` on one press and `neighbour_help` without
+   * ever helping anybody. The function is right; the caller has to be
+   * whatever records the activity -- a completed work assignment, a purchase,
+   * an accepted order -- and none of those call it yet. Until one does, the
+   * board reports and does not grant.
    */
-  @Post('goals/:code/progress')
-  @ApiOperation({ summary: 'Record progress against one goal' })
-  recordProgress(
-    @Req() request: RequestWithSession,
-    @Param('code') goalCode: string,
-    @Body() body: EngagementProgressDto,
-  ) {
-    return this.guarded(
-      () =>
-        this.repository().recordProgress(
-          body.idempotencyKey,
-          requireUserId(request),
-          goalCode,
-          body.amount ?? 1,
-        ),
-      'the progress was not recorded',
-    );
-  }
-
   /**
    * Taking an order from an NPC. The order is worth one point of affinity and
    * one step of `neighbour_help`, both decided by 082 rather than sent from
@@ -155,10 +135,7 @@ export class EngagementController {
    */
   @Put('preferences')
   @ApiOperation({ summary: 'Set whether the member hears about their goals' })
-  async setPreferences(
-    @Req() request: RequestWithSession,
-    @Body() body: EngagementPreferencesDto,
-  ) {
+  async setPreferences(@Req() request: RequestWithSession, @Body() body: EngagementPreferencesDto) {
     const notificationsEnabled = await this.guarded(
       () => this.repository().setPreferences(requireUserId(request), body.notificationsEnabled),
       'the preference was not changed',

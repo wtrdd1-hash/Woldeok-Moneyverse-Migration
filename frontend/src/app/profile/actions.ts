@@ -59,7 +59,7 @@ export async function saveProfile(
   if (imageUrl !== '' && !isImageAddress(imageUrl)) {
     return {
       status: 'error',
-      message: '이미지 주소는 http로 시작하는 주소이거나 이 사이트의 경로여야 해요.',
+      message: '이미지 주소는 https로 시작하는 주소이거나 이 사이트의 경로여야 해요.',
     };
   }
 

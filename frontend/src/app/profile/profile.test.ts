@@ -142,7 +142,7 @@ describe('titles', () => {
 describe('isImageAddress', () => {
   it('accepts an absolute http or https address', () => {
     expect(isImageAddress('https://example.test/a.png')).toBe(true);
-    expect(isImageAddress('http://example.test/a.png')).toBe(true);
+    expect(isImageAddress('http://example.test/a.png')).toBe(false);
   });
 
   it('accepts a path on this site, which is how a served photo addresses itself', () => {

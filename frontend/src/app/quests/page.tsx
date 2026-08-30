@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
-import { NotificationForm, NpcOrderButton, RecordProgressButton } from './quest-forms';
+import { NotificationForm, NpcOrderButton } from './quest-forms';
 import { GoalCard, NextUnlock, NpcCard } from './quest-parts';
 import { NPCS } from './quests';
 import type { EngagementBoard } from './quests';
@@ -18,6 +18,15 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+/*
+ * The progress cards are read-only. `engagement_record_progress` grants a
+ * collection entry and a title once a count reaches its target, and nothing
+ * verifies that the underlying activity ever happened -- so a button wired to
+ * it let a member award themselves `starter` by pressing it once, and
+ * `neighbour_help` without ever helping anybody. Progress belongs to whatever
+ * records the activity; until that caller exists this section reports and
+ * does not grant.
+ */
 export default async function QuestsPage() {
   await requireMember();
 
@@ -61,9 +70,7 @@ export default async function QuestsPage() {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {board.today_tasks.map((goal) => (
-              <GoalCard key={goal.code} goal={goal}>
-                <RecordProgressButton code={goal.code} />
-              </GoalCard>
+              <GoalCard key={goal.code} goal={goal} />
             ))}
           </div>
         )}
@@ -90,9 +97,7 @@ export default async function QuestsPage() {
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
             {board.weekly_goals.map((goal) => (
-              <GoalCard key={goal.code} goal={goal}>
-                <RecordProgressButton code={goal.code} />
-              </GoalCard>
+              <GoalCard key={goal.code} goal={goal} />
             ))}
           </div>
         )}

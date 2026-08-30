@@ -123,6 +123,24 @@ export class ProfileController {
   }
 
   /**
+   * The caller's own settings, including the per-field visibility map that
+   * `GET /profile` cannot return -- that route answers what a reader sees,
+   * and a control panel needs what is stored. Its own route rather than a
+   * field on the profile, because only the owner may ever read this and
+   * putting it on a shape another member also receives invites the mistake.
+   */
+  @Get('settings')
+  @ApiOperation({ summary: 'The caller’s own profile settings, as stored' })
+  async settings(@Req() request: RequestWithSession) {
+    return {
+      settings: await this.guarded(
+        () => this.repository().settings(requireUserId(request)),
+        ProfileController.HIDDEN,
+      ),
+    };
+  }
+
+  /**
    * Somebody else's profile, on their terms. A field they withhold arrives as
    * null, which is a fact about what is shown rather than about what exists.
    */

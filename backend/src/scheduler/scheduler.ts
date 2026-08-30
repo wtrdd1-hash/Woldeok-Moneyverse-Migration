@@ -52,6 +52,19 @@ export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
       'SELECT snapshot.snapshot_date::text AS snapshot_date, snapshot.sample_ok FROM public.economy_record_metric_snapshot() AS snapshot',
   },
   {
+    // `progression_refresh` is the only writer of `user_progression`, and
+    // until this its only caller was a button on the member's own page --
+    // so the stage screen, the engagement dashboard's next unlock and the
+    // bulk payout's stage filter all answered "not calculated yet" for
+    // everybody who had never pressed it. A stage is a consequence of
+    // activity that already happened; it belongs on a clock.
+    job: 'progression.refresh',
+    cadence: 'daily',
+    notBefore: 0,
+    connection: 'app',
+    statement: 'SELECT public.progression_refresh_all()::text AS refreshed',
+  },
+  {
     // Without this nothing ever sets a loan to `overdue`. 076 added the
     // status, 078 added the sweep that applies it, and 077 records a
     // `maturity_at` on every new loan -- but the sweep had no caller, so a

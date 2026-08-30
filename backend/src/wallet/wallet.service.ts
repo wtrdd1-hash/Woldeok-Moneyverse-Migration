@@ -39,6 +39,20 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   MARKET_SETTLEMENT: '시장 정산',
   ADMIN_ADJUSTMENT: '관리자 조정',
   WORK_REWARD: '작업 보상',
+  // Types the newer features write. Without a label each of these reads as
+  // '경제 활동' in the ledger, which is the one line a member checks when they
+  // want to know where their money went.
+  WORK_TASK_REWARD: '작업 보상',
+  BANK_DEPOSIT_INTEREST: '예금 이자',
+  BUSINESS_PURCHASE: '사업 인수',
+  BUSINESS_SETTLEMENT: '사업 정산',
+  CONSUMPTION_EVENT: '시즌 소비',
+  SHOP_PURCHASE: '상점 구매',
+  SHOP_CATALOG_PURCHASE: '상점 구매',
+  VIRTUAL_COIN_GAME: '동전 게임',
+  // 024 composes the type as 'VIRTUAL_STOCK_' || upper(side).
+  VIRTUAL_STOCK_BUY: '주식 매수',
+  VIRTUAL_STOCK_SELL: '주식 매도',
 });
 
 export class WalletRecipientError extends Error {

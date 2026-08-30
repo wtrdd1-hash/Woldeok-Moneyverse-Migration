@@ -43,10 +43,11 @@ export interface ProfileView {
 }
 
 /**
- * `public.member_update_profile` RETURNS TABLE, under `settings` rather than
- * `profile` because it is a different shape: what the member stored, not what
- * a reader is shown. It is the only place `field_visibility` can be observed
- * at all -- no read function in the schema gives that map back.
+ * `public.member_update_profile` and `public.member_profile_settings` RETURNS
+ * TABLE, under `settings` rather than `profile` because it is a different
+ * shape: what the member stored, not what a reader is shown. It is the only
+ * place `field_visibility` can be observed -- `member_profile_view` answers
+ * what a reader may see and cannot tell "hidden" from "never set".
  */
 export interface ProfileSettings {
   readonly visibility: ProfileVisibility;
@@ -264,7 +265,10 @@ export function isImageAddress(value: string): boolean {
   if (value.startsWith('/')) return !/^\/[/\\]/.test(value);
   try {
     const parsed = new URL(value);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    // https only, mirroring the API. The site's CSP refuses an http image,
+    // so accepting one here would let a member save a picture the browser
+    // will never render.
+    return parsed.protocol === 'https:';
   } catch {
     return false;
   }

@@ -215,10 +215,18 @@ export class CasinoController {
    * so that the day a read function exists this shape does not change under
    * whoever is already rendering it.
    */
+  /**
+   * Not behind the feature switch, unlike everything else here. A
+   * self-exclusion is a protective control: refusing to let a member
+   * strengthen one because the game is closed fails in the wrong direction,
+   * and the switch is seeded off, so gating this would mean the table could
+   * never receive a row at all. `member_set_casino_self_limit` agrees -- it
+   * checks an active membership and deliberately does not read the switch.
+   */
   @Put('self-limit')
   @ApiOperation({ summary: 'Set the daily caps and the lock the member holds themselves to' })
   async setSelfLimit(@Req() request: RequestWithSession, @Body() body: CasinoSelfLimitDto) {
-    const repository = await this.requireOpenCasino();
+    const repository = this.repository();
     await this.guarded(
       () =>
         repository.setSelfLimit(

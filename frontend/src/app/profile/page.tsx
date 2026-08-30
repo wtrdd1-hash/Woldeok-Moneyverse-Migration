@@ -4,7 +4,7 @@ import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
-import type { ProfileView } from './profile';
+import type { ProfileSettings, ProfileView } from './profile';
 import { ProfileSettingsForm } from './profile-forms';
 import { ProfileCard } from './profile-parts';
 
@@ -19,12 +19,19 @@ export const metadata: Metadata = {
 export default async function ProfilePage() {
   await requireMember();
 
-  // `member_profile_view` answers with every field when the actor is the
-  // subject, so this one read is both the card and the form's starting
-  // values -- with the exception of the per-field map, which no read function
-  // in the schema returns. `ProfileSettingsForm` says what it does about that.
-  const data = await apiOrNull<{ profile: ProfileView }>('/api/v1/profile');
+  // Two reads, because they answer different questions. `member_profile_view`
+  // answers what a reader sees -- which for the owner is every field, and is
+  // what the card renders. The settings read answers what is stored,
+  // including the per-field visibility map: without it the form would render
+  // every control as "inherit" and saving a display name would republish an
+  // image the member had made private, because the write replaces the map
+  // rather than patching it.
+  const [data, stored] = await Promise.all([
+    apiOrNull<{ profile: ProfileView }>('/api/v1/profile'),
+    apiOrNull<{ settings: ProfileSettings }>('/api/v1/profile/settings'),
+  ]);
   const profile = data?.profile ?? null;
+  const settings = stored?.settings ?? null;
 
   return (
     <div className="grid gap-8">
@@ -58,7 +65,7 @@ export default async function ProfilePage() {
       <section aria-labelledby="visibility-title" className="grid gap-3">
         <SectionHeader eyebrow="WHO SEES WHAT" title="공개 범위 설정" id="visibility-title" />
 
-        {profile === null ? (
+        {profile === null || settings === null ? (
           // Deliberately not a blank form. Saving replaces every column from
           // what the form holds, so an empty one submitted over a failed read
           // would clear the name, the image and the title that are still
@@ -72,7 +79,7 @@ export default async function ProfilePage() {
           <div className="grid gap-3">
             <Card>
               <CardContent>
-                <ProfileSettingsForm profile={profile} />
+                <ProfileSettingsForm profile={profile} settings={settings} />
               </CardContent>
             </Card>
             <p className="max-w-prose text-xs text-muted-foreground">

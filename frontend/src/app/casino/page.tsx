@@ -229,28 +229,33 @@ export default async function CasinoPage() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>내가 정하는 한도</CardTitle>
-              <CardDescription>
-                운영 한도와 별개로 나에게 거는 한도입니다. 둘 중 더 엄격한 쪽이 적용됩니다.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4">
-              {/* Honest about what this screen cannot show. The database has a
-                  writer for the self-limit and no reader, so the saved value
-                  is not knowable here — and inventing one, or leaving the
-                  fields looking like the current setting, would be worse than
-                  saying so. */}
-              <p className="text-sm text-muted-foreground">
-                지금 저장되어 있는 한도는 아직 이 화면에서 다시 불러올 수 없어요. 아래에서 새로
-                저장하면 그 값으로 바뀝니다.
-              </p>
-              <SelfLimitForm />
-            </CardContent>
-          </Card>
         </>
       )}
+
+      {/* Outside the `open` branch on purpose. A self-exclusion is a
+          protective control, and the game being closed is the moment a
+          member is most likely to want one set for when it opens. The route
+          behind it is not gated either. */}
+      <Card>
+        <CardHeader>
+          <CardTitle>내가 정하는 한도</CardTitle>
+          <CardDescription>
+            운영 한도와 별개로 나에게 거는 한도입니다. 둘 중 더 엄격한 쪽이 적용됩니다. 게임이
+            닫혀 있어도 미리 정해 둘 수 있어요.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          {/* Honest about what this screen cannot show. The database has a
+              writer for the self-limit and no reader, so the saved value is
+              not knowable here — and inventing one, or leaving the fields
+              looking like the current setting, would be worse than saying so. */}
+          <p className="text-sm text-muted-foreground">
+            지금 저장되어 있는 한도는 아직 이 화면에서 다시 불러올 수 없어요. 아래에서 새로
+            저장하면 그 값으로 바뀝니다.
+          </p>
+          <SelfLimitForm />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
