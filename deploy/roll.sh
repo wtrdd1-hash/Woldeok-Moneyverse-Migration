@@ -75,6 +75,14 @@ docker compose pull backend frontend
 # than being reported as a success.
 docker compose up -d --wait --wait-timeout 300
 
+# The edge's configuration is a bind mount, so compose does not recreate the
+# container when the file changes and a release that edits it would otherwise
+# take effect at the next unrelated restart. A reload is also what re-reads
+# the upstream addresses, which is the belt to the config's braces.
+docker compose exec -T edge nginx -t \
+  && docker compose exec -T edge nginx -s reload \
+  || docker compose restart edge
+
 port="$(grep -E '^EDGE_PORT=' .env | cut -d= -f2)"
 port="${port:-3021}"
 code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "http://127.0.0.1:${port}/" || true)"
