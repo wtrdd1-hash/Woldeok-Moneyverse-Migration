@@ -1,6 +1,6 @@
 # 월덕 머니버스 재구축 설계 — Next.js + NestJS
 
-작성 2026-08-27. 대상 저장소 `ridanit-ruma/Woldeok-Moneyverse-Migration`.
+작성 2026-08-27. 대상 저장소 `wtrdd1-hash/Woldeok-Moneyverse-Migration`.
 원본 `wtrdd1-hash/Woldeok-Moneyverse` (비공개, `/home/ruma/Woldeok-Moneyverse`).
 
 ---
