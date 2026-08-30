@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import type { ProfileSettings, ProfileView } from './profile';
-import { ProfileSettingsForm } from './profile-forms';
+import { ProfileImageForm, ProfileSettingsForm } from './profile-forms';
 import { ProfileCard } from './profile-parts';
 
 /** One member's own profile and settings. Never cached, never offered to a crawler. */
@@ -78,7 +78,8 @@ export default async function ProfilePage() {
         ) : (
           <div className="grid gap-3">
             <Card>
-              <CardContent>
+              <CardContent className="grid gap-6">
+                <ProfileImageForm imagePath={settings.image_url} />
                 <ProfileSettingsForm profile={profile} settings={settings} />
               </CardContent>
             </Card>

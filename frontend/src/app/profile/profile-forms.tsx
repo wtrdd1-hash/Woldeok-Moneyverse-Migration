@@ -31,7 +31,7 @@ import {
   fieldInputName,
   titleChoices,
 } from './profile';
-import { saveProfile } from './actions';
+import { removeProfileImage, saveProfile, uploadProfileImage } from './actions';
 
 /**
  * The profile's write surface.
@@ -125,8 +125,8 @@ export function ProfileSettingsForm({
             className="min-h-11"
           />
           <FieldDescription>
-            https로 시작하는 주소나 이 사이트의 경로를 넣을 수 있어요. 아직 이미지를 직접 올리는
-            기능은 없어요.
+            https로 시작하는 주소나 이 사이트의 경로를 넣을 수 있어요. 아래에서 파일을 직접 올리면
+            이 칸은 올린 사진의 주소로 바뀝니다.
           </FieldDescription>
         </Field>
       </div>
@@ -221,5 +221,52 @@ export function ProfileSettingsForm({
       <SubmitButton className="w-fit">프로필 저장</SubmitButton>
       <ActionAlert state={state} />
     </form>
+  );
+}
+
+/**
+ * Choosing a picture, as its own form.
+ *
+ * Separate from the settings form on purpose. That one replaces every column
+ * from what it holds, so a file input inside it would make picking a photo
+ * and renaming yourself one submission that could half-fail; this writes one
+ * column and leaves the rest alone. It also means a member can change their
+ * picture without re-confirming every visibility control.
+ */
+export function ProfileImageForm({ imagePath }: { readonly imagePath: string | null }) {
+  const [upload, uploadAction] = useActionState(uploadProfileImage, IDLE);
+  const [removal, removeAction] = useActionState(removeProfileImage, IDLE);
+  const uploaded = imagePath !== null && imagePath.startsWith('/media/profile/');
+
+  return (
+    <div className="grid gap-4">
+      <form action={uploadAction} className="grid gap-3">
+        <Field>
+          <FieldLabel htmlFor="profile-image-file">사진 올리기</FieldLabel>
+          <Input
+            id="profile-image-file"
+            name="image"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="min-h-11"
+          />
+          <FieldDescription>
+            PNG · JPEG · WebP, 4MB까지. 올리면 이전 사진은 서버에서 지워집니다. 공개 범위는 아래
+            &lsquo;프로필 이미지&rsquo; 설정을 따르므로, 비공개로 두면 주소를 알아도 열리지 않아요.
+          </FieldDescription>
+        </Field>
+        <SubmitButton className="w-fit">사진 올리기</SubmitButton>
+        <ActionAlert state={upload} />
+      </form>
+
+      {uploaded && (
+        <form action={removeAction} className="grid gap-3">
+          <SubmitButton variant="outline" className="w-fit">
+            올린 사진 내리기
+          </SubmitButton>
+          <ActionAlert state={removal} />
+        </form>
+      )}
+    </div>
   );
 }

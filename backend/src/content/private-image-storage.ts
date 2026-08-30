@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { mkdir, writeFile, readFile, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { validateImageUpload } from './image-upload-validation';
@@ -8,6 +8,9 @@ export interface StoredImage {
   readonly storageKey: string;
   readonly mimeType: string;
 }
+
+/** The shape `save` generates, and the only shape either accessor accepts. */
+const KEY = /^[0-9a-f-]{36}\.(png|jpg|webp)$/;
 
 function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
   return error instanceof Error && 'code' in error;
@@ -42,9 +45,28 @@ export class PrivateImageStorage {
     return { storageKey, mimeType: image.mimeType };
   }
 
+  /**
+   * Removes one stored image, and says nothing when it was already gone.
+   *
+   * Replacing a profile picture leaves the previous file behind otherwise,
+   * and a store that only ever grows is a store that eventually fills the
+   * disk it was moved onto. ENOENT is not an error here: the caller is
+   * deleting what a database row said was there, and a row outliving its file
+   * is exactly the case this is meant to tidy.
+   */
+  async remove(storageKey: unknown): Promise<boolean> {
+    if (typeof storageKey !== 'string' || !KEY.test(storageKey)) return false;
+    try {
+      await unlink(path.join(this.directory, storageKey));
+      return true;
+    } catch (error) {
+      if (isErrnoException(error) && error.code === 'ENOENT') return false;
+      throw error;
+    }
+  }
+
   async read(storageKey: unknown): Promise<Buffer | null> {
-    if (typeof storageKey !== 'string' || !/^[0-9a-f-]{36}\.(png|jpg|webp)$/.test(storageKey))
-      return null;
+    if (typeof storageKey !== 'string' || !KEY.test(storageKey)) return null;
     try {
       return await readFile(path.join(this.directory, storageKey));
     } catch (error) {

@@ -121,4 +121,27 @@ describe('profile routes', () => {
       .send({ dailyBetLimit: 0, dailyLossLimit: 0 });
     expect(response.status).toBe(404);
   });
+
+  // The bytes route carries no session guard on purpose: a public profile's
+  // picture has to be readable by somebody who is not signed in, and 094
+  // decides that from the profile's own visibility. What it must never do is
+  // answer differently for a key that does not exist -- that would confirm
+  // somebody has a picture they chose not to show.
+  it('answers not-found for a profile image nobody is using, without a session', async () => {
+    const response = await request(app.getHttpServer()).get(
+      '/media/profile/11111111-2222-4333-8444-555555555555.png',
+    );
+    expect([404, 503]).toContain(response.status);
+  });
+
+  it('mounts the member upload and removal as writes', async () => {
+    for (const [method, path] of [
+      ['post', '/api/v1/profile/image'],
+      ['delete', '/api/v1/profile/image'],
+    ] as const) {
+      const response = await request(app.getHttpServer())[method](path);
+      expect(response.status, `${method} ${path}`).not.toBe(404);
+      expect([400, 401, 403, 409, 415, 428, 503]).toContain(response.status);
+    }
+  });
 });

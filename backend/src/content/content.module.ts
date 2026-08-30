@@ -25,6 +25,6 @@ import { ContentService } from './content.service';
         pool ? new ContentService(new PostgresContentRepository(pool)) : null,
     },
   ],
-  exports: [ContentService],
+  exports: [ContentService, PrivateImageStorage],
 })
 export class ContentModule {}
