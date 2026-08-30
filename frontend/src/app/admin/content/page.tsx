@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Accent, PageHeader } from '@/components/page-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { requireAdministrator } from '@/lib/session';
+import { requireAdminConsole } from '@/lib/session';
 import { AnnouncementEditor, PhotoEditor, PublicationEditor } from './content-forms';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ContentAdminPage() {
-  await requireAdministrator();
+  await requireAdminConsole();
 
   return (
     <div className="grid gap-6">

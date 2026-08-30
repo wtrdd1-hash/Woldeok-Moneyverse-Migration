@@ -15,6 +15,7 @@ import {
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -132,7 +133,7 @@ export class ContentController {
   }
 
   @Post('admin/announcements')
-  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, CsrfGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Create or edit an announcement' })
   saveAnnouncement(@Req() request: RequestWithSession, @Body() body: SaveAnnouncementDto) {
     return this.guarded(
@@ -142,7 +143,7 @@ export class ContentController {
   }
 
   @Put('admin/announcements/:id/publication')
-  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, CsrfGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Publish or unpublish an announcement' })
   publishAnnouncement(
     @Req() request: RequestWithSession,
@@ -160,7 +161,7 @@ export class ContentController {
   }
 
   @Post('admin/photos/metadata')
-  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, CsrfGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Create or edit a photo record' })
   savePhoto(@Req() request: RequestWithSession, @Body() body: SavePhotoDto) {
     return this.guarded(
@@ -170,7 +171,7 @@ export class ContentController {
   }
 
   @Put('admin/photos/:id/publication')
-  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, CsrfGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Publish or unpublish a photo' })
   publishPhoto(
     @Req() request: RequestWithSession,

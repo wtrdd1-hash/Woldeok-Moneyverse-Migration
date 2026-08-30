@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
-import { requireAdministrator } from '@/lib/session';
+import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
 import type { ReconciliationHealth } from '../types';
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminEconomyPage() {
-  await requireAdministrator();
+  await requireAdminConsole();
   const health = await apiOrNull<ReconciliationHealth>(
     '/api/v1/admin/economy/reconciliations/latest',
   );

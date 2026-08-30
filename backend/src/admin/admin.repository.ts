@@ -46,12 +46,6 @@ function assertPayload(value: unknown, field = 'payload'): void {
   }
 }
 
-function assertDecision(value: unknown): asserts value is 'approved' | 'rejected' {
-  if (value !== 'approved' && value !== 'rejected') {
-    throw new AdminInputError('decision must be approved or rejected');
-  }
-}
-
 function isSafeInteger(value: unknown): value is number {
   return Number.isSafeInteger(value);
 }
@@ -62,36 +56,11 @@ function assertLimit(value: unknown): void {
   }
 }
 
-function assertReason(value: unknown, decision: 'approved' | 'rejected'): string | null {
-  if (value === null || value === undefined || value === '') {
-    if (decision === 'rejected') throw new AdminInputError('a rejection reason is required');
-    return null;
-  }
-  if (typeof value !== 'string' || value.trim().length > 1000) {
-    throw new AdminInputError('reason must be a string of at most 1000 characters');
-  }
-  return value.trim() || null;
-}
-
 /** Row interfaces below are annotated with the migration that defines their columns. */
 
 // packages/database/migrations/007-admin-hardening.sql (admin_current_roles)
 interface AdminRoleRow {
   role: string;
-}
-
-// packages/database/migrations/008-admin-read-models.sql (admin_list_approval_requests)
-interface AdminApprovalRequestRow {
-  approval_request_id: string;
-  requester_id: string;
-  approver_id: string | null;
-  action: string;
-  payload: unknown;
-  status: string;
-  requires_two_person_approval: boolean;
-  created_at: Date;
-  decided_at: Date | null;
-  decision_reason: string | null;
 }
 
 // packages/database/migrations/008-admin-read-models.sql (admin_recent_audit_events)
@@ -118,6 +87,9 @@ interface AdminUserRow {
 }
 
 // packages/database/migrations/039-admin-discord-outbox-read.sql (admin_recent_discord_outbox_events)
+// delivery_status gained `suppressed` and `dead_letter` in 066: an event no
+// route announces, and one the worker has given up on. Rendered as it arrives,
+// like the four that were already there.
 interface AdminDiscordOutboxEventRow {
   event_id: string;
   event_type: string;
@@ -130,17 +102,6 @@ interface AdminDiscordOutboxEventRow {
 // packages/database/migrations/026-admin-user-restrictions.sql (admin_set_user_restriction)
 interface ChangedRow {
   changed: boolean | null;
-}
-
-// packages/database/migrations/007-admin-hardening.sql (admin_create_approval_request)
-interface ApprovalRequestIdRow {
-  approval_request_id: string;
-}
-
-// packages/database/migrations/007-admin-hardening.sql (admin_decide_approval_request)
-interface ApprovalDecisionRow {
-  approval_request_id: string;
-  status: string;
 }
 
 // packages/database/migrations/007-admin-hardening.sql (admin_record_audit_event)
@@ -164,24 +125,6 @@ export class AdminRepository {
       [userId],
     );
     return rows.map(({ role }) => role);
-  }
-
-  async approvalRequests({
-    actorUserId,
-    limit = 30,
-  }: {
-    actorUserId: unknown;
-    limit?: unknown;
-  }): Promise<AdminApprovalRequestRow[]> {
-    assertUuid(actorUserId, 'actor user id');
-    assertLimit(limit);
-    return queryRows<AdminApprovalRequestRow>(
-      this.pool,
-      `SELECT approval_request_id, requester_id, approver_id, action, payload,
-              status, requires_two_person_approval, created_at, decided_at, decision_reason
-       FROM public.admin_list_approval_requests($1, $2)`,
-      [actorUserId, limit],
-    );
   }
 
   async recentAuditEvents({
@@ -258,69 +201,6 @@ export class AdminRepository {
       [actorUserId, userId, restricted, reason, requestId],
     );
     return { changed: Boolean(row?.changed) };
-  }
-
-  async createApprovalRequest({
-    requesterId,
-    action,
-    payload,
-    idempotencyKey,
-    requestId = null,
-  }: {
-    requesterId: unknown;
-    action: unknown;
-    payload: unknown;
-    idempotencyKey: unknown;
-    requestId?: unknown;
-  }): Promise<string> {
-    assertUuid(requesterId, 'requester id');
-    assertAction(action);
-    assertPayload(payload);
-    assertUuid(idempotencyKey, 'idempotency key');
-    assertUuid(requestId, 'request id', { optional: true });
-
-    const row = await queryOne<ApprovalRequestIdRow>(
-      this.pool,
-      `SELECT public.admin_create_approval_request(
-        $1, $2, $3::jsonb, $4, $5
-      ) AS approval_request_id`,
-      [requesterId, action, payload, idempotencyKey, requestId],
-    );
-    // Invariant: admin_create_approval_request is `RETURNS uuid`, so selecting
-    // its result always yields exactly one row.
-    if (!row) throw new Error('admin_create_approval_request did not return a row');
-    return row.approval_request_id;
-  }
-
-  async decideApprovalRequest({
-    approverId,
-    approvalRequestId,
-    decision,
-    reason = null,
-    requestId = null,
-  }: {
-    approverId: unknown;
-    approvalRequestId: unknown;
-    decision: unknown;
-    reason?: unknown;
-    requestId?: unknown;
-  }): Promise<{ approvalRequestId: string; status: string }> {
-    assertUuid(approverId, 'approver id');
-    assertUuid(approvalRequestId, 'approval request id');
-    assertDecision(decision);
-    const normalizedReason = assertReason(reason, decision);
-    assertUuid(requestId, 'request id', { optional: true });
-
-    const row = await queryOne<ApprovalDecisionRow>(
-      this.pool,
-      `SELECT approval_request_id, status
-       FROM public.admin_decide_approval_request($1, $2, $3, $4, $5)`,
-      [approverId, approvalRequestId, decision, normalizedReason, requestId],
-    );
-    // Invariant: admin_decide_approval_request raises on every not-found or
-    // invalid-state case and otherwise always RETURN QUERYs exactly one row.
-    if (!row) throw new Error('admin_decide_approval_request did not return a row');
-    return { approvalRequestId: row.approval_request_id, status: row.status };
   }
 
   async recordAuditEvent({

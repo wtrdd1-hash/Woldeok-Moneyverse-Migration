@@ -11,6 +11,7 @@ import { BusinessModule } from './business/business.module';
 import { ContentModule } from './content/content.module';
 import { StatusCollectorModule } from './content/status-collector.module';
 import { DiscordModule } from './discord/discord.module';
+import { DiscordOutboxWorkerModule } from './discord/outbox-worker.module';
 import { EconomyModule } from './economy/economy.module';
 import { PrivacyModule } from './privacy/privacy.module';
 import { SeasonModule } from './season/season.module';
@@ -42,6 +43,7 @@ const ONE_MINUTE_MS = 60_000;
     ContentModule,
     StatusCollectorModule,
     DiscordModule,
+    DiscordOutboxWorkerModule,
     // Process-local, exactly as in the original application. That is correct
     // for the single-instance deployment and becomes N times weaker on any
     // scale-out: a known limitation, tracked rather than overlooked. A shared

@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { apiOrNull } from '@/lib/api';
-import { requireAdministrator } from '@/lib/session';
+import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
 import type { AdminBusiness, AdminSeasonEvent } from '../types';
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminCatalogPage() {
-  await requireAdministrator();
+  await requireAdminConsole();
   const [businesses, events] = await Promise.all([
     apiOrNull<{ businessTypes: AdminBusiness[] }>('/api/v1/admin/business-types'),
     apiOrNull<{ events: AdminSeasonEvent[] }>('/api/v1/admin/season-events'),

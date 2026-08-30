@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
-import { requireAdministrator } from '@/lib/session';
+import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
 import type { AuditEvent, OutboxEvent } from '../types';
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminLogsPage() {
-  await requireAdministrator();
+  await requireAdminConsole();
   const [audit, outbox] = await Promise.all([
     apiOrNull<{ events: AuditEvent[] }>('/api/v1/admin/audit-events'),
     apiOrNull<{ events: OutboxEvent[] }>('/api/v1/admin/discord-outbox-events'),

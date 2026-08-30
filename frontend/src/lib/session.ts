@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { redirect } from 'next/navigation';
+import type { AdminConsole } from '@/app/admin/types';
 import { ApiError, api } from './api';
 
 /**
@@ -45,4 +46,37 @@ export async function requireAdministrator(): Promise<readonly string[]> {
     if (error instanceof ApiError && error.status === 403) redirect('/');
     throw error;
   }
+}
+
+/**
+ * What the console's front door needs to decide what to render: the caller's
+ * roles, whether they have a second factor, and whether the console session
+ * is open.
+ *
+ * An administrator session is a rotated session with a thirty-minute life and
+ * a ten-minute idle lock, and opening one costs a reauthentication and a TOTP
+ * code. Reading it here is also what moves the idle clock forward — loading
+ * an administrator page is the activity that clock is measuring.
+ */
+export async function adminConsole(): Promise<AdminConsole> {
+  await requireMember();
+  try {
+    return await api<AdminConsole>('/api/v1/admin/security');
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 403) redirect('/');
+    throw error;
+  }
+}
+
+/**
+ * The gate on every administrator page except the front door.
+ *
+ * The API refuses these pages' data without an open console session anyway;
+ * this sends the operator to the one screen that can open one instead of
+ * leaving them on a page of empty panels wondering what went wrong.
+ */
+export async function requireAdminConsole(): Promise<AdminConsole> {
+  const console_ = await adminConsole();
+  if (console_.consoleSession.state !== 'open') redirect('/admin');
+  return console_;
 }

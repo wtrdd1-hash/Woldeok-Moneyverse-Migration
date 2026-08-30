@@ -13,10 +13,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { apiOrNull } from '@/lib/api';
-import { requireAdministrator } from '@/lib/session';
+import { requireAdminConsole } from '@/lib/session';
 import { adminArea } from '../areas';
 import type { AdminUser } from '../types';
-import { RestrictionDialog } from '../admin-forms';
+import { ForceLogoutDialog, RestrictionDialog } from '../admin-forms';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminUsersPage() {
-  await requireAdministrator();
+  await requireAdminConsole();
   const users = await apiOrNull<{ users: AdminUser[] }>('/api/v1/admin/users');
 
   return (
@@ -80,11 +80,17 @@ export default async function AdminUsersPage() {
                             {user.restriction_reason ?? '—'}
                           </TableCell>
                           <TableCell className="text-right">
-                            <RestrictionDialog
-                              userId={user.user_id}
-                              displayName={user.display_name}
-                              restricted={restricted}
-                            />
+                            <span className="flex flex-wrap justify-end gap-2">
+                              <ForceLogoutDialog
+                                userId={user.user_id}
+                                displayName={user.display_name}
+                              />
+                              <RestrictionDialog
+                                userId={user.user_id}
+                                displayName={user.display_name}
+                                restricted={restricted}
+                              />
+                            </span>
                           </TableCell>
                         </TableRow>
                       );

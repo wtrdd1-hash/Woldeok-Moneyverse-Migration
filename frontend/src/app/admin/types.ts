@@ -19,17 +19,64 @@ export interface AdminUser {
   readonly restriction_reason: string | null;
 }
 
-export interface ApprovalRequest {
-  readonly approval_request_id: string;
-  readonly requester_id: string;
-  readonly approver_id: string | null;
-  readonly action: string;
-  readonly payload: unknown;
-  readonly status: string;
-  readonly requires_two_person_approval: boolean;
+/** packages/database/migrations/059-feature-switches-and-economy-policies.sql */
+export interface FeatureSwitch {
+  readonly feature_key: string;
+  readonly state: 'enabled' | 'paused' | 'safe_mode' | 'disabled';
+  readonly title: string;
+  readonly activation_preconditions: readonly string[];
+  readonly reason: string;
+  readonly updated_by: string | null;
+  readonly updated_at: string;
+}
+
+/** packages/database/migrations/059-feature-switches-and-economy-policies.sql */
+export interface EconomyPolicyVersion {
+  readonly policy_id: string;
+  readonly version: string;
+  readonly status: 'draft' | 'approved' | 'active' | 'superseded' | 'rolled_back';
+  readonly effective_at: string;
+  readonly activated_at: string | null;
+  readonly superseded_at: string | null;
+  readonly superseded_by: string | null;
+  readonly reason: string;
+  readonly created_by: string | null;
   readonly created_at: string;
-  readonly decided_at: string | null;
-  readonly decision_reason: string | null;
+  readonly payload: unknown;
+}
+
+/** packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql */
+export interface AdminRoleAssignment {
+  readonly user_id: string;
+  readonly display_name: string;
+  readonly role: string;
+  readonly granted_at: string;
+}
+
+/**
+ * camelCase, unlike its neighbours: these are shaped by the API rather than
+ * handed back by a read model, so they are domain objects travelling through
+ * a route rather than database rows.
+ */
+export interface AdminConsole {
+  readonly available: boolean;
+  readonly roles: readonly string[];
+  readonly secondFactor: {
+    readonly enrolled: boolean;
+    readonly confirmed: boolean;
+    readonly lockedUntil: string | null;
+  };
+  readonly consoleSession: {
+    readonly state: 'open' | 'idle_locked' | 'expired' | 'closed' | 'none';
+    readonly expiresAt: string | null;
+    readonly idleExpiresAt: string | null;
+  };
+  readonly loginPolicy: readonly {
+    readonly kind: string;
+    readonly value: string;
+    readonly label: string;
+    readonly recorded_at: string;
+  }[];
 }
 
 export interface AuditEvent {
