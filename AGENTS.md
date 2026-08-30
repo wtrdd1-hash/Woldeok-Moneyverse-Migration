@@ -246,6 +246,43 @@ GRANT EXECUTE ON FUNCTION public.<f>(...) TO moneyverse_app;
 PostgreSQL grants `EXECUTE` to `PUBLIC` by default, which is why the revoke is
 mandatory and not decoration. A trigger function gets no grant.
 
+### The audit trail — append-only, and closed
+
+Migrations 062–065. Four things about it will bite you if you do not know them.
+
+**`audit_logs` refuses `UPDATE` and `DELETE`, for its owner too.** A trigger
+raises 55000. A migration that genuinely has to touch history writes
+`ALTER TABLE public.audit_logs DISABLE TRIGGER audit_logs_immutable` and says
+why, in the migration file, where a reviewer sees it. The same holds for
+`audit_chain_verifications`, `audit_retention_policies` and
+`audit_destruction_records`. **Retention is a record, not a `DELETE`** — the
+end of a retention period appends a disposition row (065), it does not remove
+rows.
+
+**The `context` key set is closed.** `audit_assert_context` (063) rejects an
+unrecognised key with 22023 rather than dropping it, so adding a field means a
+migration *and* the matching change in `backend/src/admin/audit-context.ts`.
+Those two files are one unit. A typo in a caller is a loud failure, which is
+the point: a silently unrecorded field is discovered during an incident.
+
+**Secrets are refused, by key name.** `audit_first_sensitive_key` walks
+metadata and context to any depth and refuses any write carrying a key that
+matches `password|token|cookie|secret|session_id|api_key|…`. It is a coarse
+net and will also refuse a harmless `tokenCount`; that is the intended
+direction of error.
+
+**`sequence` is a bigint and a chain position.** It crosses the wire as a
+decimal string, like money. Cursor pagination keys on it because it is the
+only total order the table has — an offset repeats or skips rows as the chain
+grows under a reader.
+
+Writing a row: `admin_record_audit_event` for an administrative action (the
+actor must hold a role), `admin_record_console_access` for the fact that
+someone reached a console route (an active account is enough, and the action
+must be namespaced `admin.`). The second exists because the request most worth
+recording — the one an authorization guard refused — comes from a caller with
+no role.
+
 ---
 
 ## 5. Authorization: one superadmin, and the switches that turn things off
