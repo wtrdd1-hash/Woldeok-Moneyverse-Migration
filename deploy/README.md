@@ -78,6 +78,25 @@ The host has to be logged in to pull a private package. Once is enough:
 printf '%s' '<read:packages token>' | docker login ghcr.io -u <user> --password-stdin
 ```
 
+## Backups
+
+`backup.sh` and `restore.sh` are shipped to the host with everything else and
+run there, by the deploy user, from a cron entry the operator installs once.
+Nothing about a backup happens during a deploy.
+
+```bash
+bash backup.sh init-key     # once: the encryption key, kept outside this directory
+bash backup.sh run          # dump + photo objects, encrypted, verified, expired
+bash backup.sh verify       # what the release checklist asks for before production
+bash restore.sh <file>      # into a NEW database, then compares it to the manifest
+```
+
+The dump runs inside the profile-gated `backup` service as
+`moneyverse_backup`, a role holding `pg_read_all_data` and nothing else, and
+is compressed and encrypted on the host so the key never enters a container.
+The procedure, the retention policy and the restore rehearsal are in
+[docs/BACKUP.md](../docs/BACKUP.md).
+
 ## Secrets
 
 `bootstrap-env.sh` writes `~/moneyverse-migration/.env` once and never
@@ -85,7 +104,8 @@ overwrites a value that is already there.
 
 | Kind | Where it comes from |
 | --- | --- |
-| `POSTGRES_PASSWORD`, `APP_DB_PASSWORD`, `INTERNAL_API_TOKEN` | Generated on the host from `/dev/urandom`. Nothing outside the host needs them, so nothing outside the host sees them. |
+| `POSTGRES_PASSWORD`, `APP_DB_PASSWORD`, `INTERNAL_API_TOKEN`, `BACKUP_DB_PASSWORD` | Generated on the host from `/dev/urandom`. Nothing outside the host needs them, so nothing outside the host sees them. |
+| `BACKUP_ENCRYPTION_KEY` | **Not in `.env`.** `backup.sh init-key` writes `~/.moneyverse-backup-key`, and a copy belongs somewhere off this host. A key beside the ciphertext, or in the file compose loads into containers, is doing nothing — `backup.sh` refuses both. |
 | `DISCORD_*`, `GOOGLE_*` client credentials | Copied from a container already running on the host, named by `ADOPT_FROM`. They never pass through the runner, the repository, or a shell history. |
 | `*_REDIRECT_URI` | Derived from `APP_BASE_URL`. The API refuses to enable a provider whose redirect URI does not match that origin and the exact callback path, so a hand-written one is a silent disable. |
 

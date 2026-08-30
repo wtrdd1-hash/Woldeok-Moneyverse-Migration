@@ -29,6 +29,11 @@ put() { have "$1" || printf '%s=%s\n' "$1" "$2" >> .env; }
 # origin above all, since renaming the site is exactly the case `put` would
 # silently ignore.
 set_to() { sed -i "/^$1=/d" .env; printf '%s=%s\n' "$1" "$2" >> .env; }
+# For the values the workflow supplies from the GitHub environment it was run
+# against. An empty one means "this deployment did not configure it", not
+# "erase what somebody set on the host by hand", so an empty value writes a
+# placeholder and leaves an existing entry alone.
+supplied() { if [ -n "${2:-}" ]; then set_to "$1" "$2"; else put "$1" ''; fi; }
 
 # 32 bytes of urandom, hex encoded. The API requires at least 32 characters
 # for the internal token and rejects anything shorter at startup.
@@ -54,6 +59,20 @@ put ADMIN_TOTP_ENCRYPTION_KEY "$(secret)"
 # sealing key because it protects a different thing and neither should be
 # recoverable from the other.
 put ADMIN_DEVICE_HASH_PEPPER "$(secret)"
+# The backup role's own credential. It may read every table and write nothing,
+# which is what a logical backup needs and why it is not a second copy of the
+# application's access -- see deploy/seed.sh.
+#
+# BACKUP_ENCRYPTION_KEY is deliberately NOT here. A key kept in the file that
+# sits beside the ciphertext, and that Docker loads into containers, protects
+# nothing; backup.sh reads it from a file outside this directory and refuses to
+# run if it finds the key in .env. docs/BACKUP.md has the procedure.
+put BACKUP_DB_PASSWORD "$(secret)"
+# Where backup.sh writes. A host directory, not a Docker volume: a backup that
+# lives in the same volume as the database it is a backup of is not a backup.
+# It is outside this directory as well, which the deploy workflow overwrites on
+# every roll. Written once, so an operator who moves it keeps it moved.
+put BACKUP_DIR "${BACKUP_DIR:-$HOME/moneyverse-backups/${STACK:-wdmv}}"
 set_to APP_BASE_URL "${APP_BASE_URL:?APP_BASE_URL is required — it decides the OAuth redirect URIs}"
 put COOKIE_SECURE 'true'
 put TRUST_PROXY_X_FORWARDED_FOR 'true'
@@ -105,6 +124,25 @@ fi
 for name in DISCORD_CLIENT_ID DISCORD_CLIENT_SECRET GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET; do
   put "$name" ''
 done
+
+# The Discord bot.
+#
+# Deliberately NOT part of the ADOPT_FROM loop above. The OAuth client
+# credentials are shared by both deployments because both log a member in to
+# the same Discord application; a bot token is the opposite -- test and
+# production must run different bots, or the test stack announces into the
+# production guild. Adopting one from a container on this host is precisely
+# the accident to avoid, so the token arrives from the GitHub environment this
+# deploy was run against and the API refuses it if its application id is not
+# DISCORD_APPLICATION_ID.
+supplied DISCORD_APPLICATION_ID "${DISCORD_APPLICATION_ID:-}"
+supplied DISCORD_BOT_TOKEN "${DISCORD_BOT_TOKEN:-}"
+supplied DISCORD_INTERACTIONS_ENABLED "${DISCORD_INTERACTIONS_ENABLED:-}"
+supplied DISCORD_INTERACTIONS_PUBLIC_KEY "${DISCORD_INTERACTIONS_PUBLIC_KEY:-}"
+supplied DISCORD_INTERACTIONS_GUILD_ID "${DISCORD_INTERACTIONS_GUILD_ID:-}"
+supplied DISCORD_INTERACTIONS_ROLE_IDS "${DISCORD_INTERACTIONS_ROLE_IDS:-}"
+supplied DISCORD_OUTBOX_ENABLED "${DISCORD_OUTBOX_ENABLED:-}"
+supplied DISCORD_OUTBOX_CHANNEL_ID "${DISCORD_OUTBOX_CHANNEL_ID:-}"
 
 # Report presence, never contents.
 echo "--- .env ---"

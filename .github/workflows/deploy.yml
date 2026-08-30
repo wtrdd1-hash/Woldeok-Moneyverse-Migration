@@ -196,6 +196,7 @@ jobs:
           ssh target 'mkdir -p ~/${{ steps.target.outputs.dir }}'
           tar czf - \
             -C deploy compose.yml roll.sh bootstrap-env.sh seed.sh update.sh edge \
+            backup.sh restore.sh backup-figures.sql \
             -C "${GITHUB_WORKSPACE}/packages/database" init migrations migrate.sh \
             | ssh target 'tar xzf - -C ~/${{ steps.target.outputs.dir }}'
 
@@ -206,6 +207,13 @@ jobs:
       # ADOPT_FROM names a container already on the host whose OAuth client
       # credentials this deployment reuses. Those values are copied
       # host-locally and never pass through this runner.
+      #
+      # The Discord bot settings are the one group that comes from the GitHub
+      # environment rather than the step above, and deliberately: the two
+      # deployments must run two different bots, and `environment:` on this job
+      # is what makes one reference resolve to a different value for test than
+      # for production. A literal here would be two application ids to keep in
+      # step by hand, and there is nowhere in a public step to put a token.
       - name: Roll the deployment
         run: |
           ssh target \
@@ -221,6 +229,14 @@ jobs:
             "DB_NAME='${{ steps.target.outputs.db_name }}'" \
             "BOOTSTRAP_DISCORD_ADMIN_IDS='${{ steps.target.outputs.admin_ids }}'" \
             "ADOPT_FROM='${{ vars.ADOPT_FROM }}'" \
+            "DISCORD_APPLICATION_ID='${{ vars.DISCORD_APPLICATION_ID }}'" \
+            "DISCORD_BOT_TOKEN='${{ secrets.DISCORD_BOT_TOKEN }}'" \
+            "DISCORD_INTERACTIONS_ENABLED='${{ vars.DISCORD_INTERACTIONS_ENABLED }}'" \
+            "DISCORD_INTERACTIONS_PUBLIC_KEY='${{ vars.DISCORD_INTERACTIONS_PUBLIC_KEY }}'" \
+            "DISCORD_INTERACTIONS_GUILD_ID='${{ vars.DISCORD_INTERACTIONS_GUILD_ID }}'" \
+            "DISCORD_INTERACTIONS_ROLE_IDS='${{ vars.DISCORD_INTERACTIONS_ROLE_IDS }}'" \
+            "DISCORD_OUTBOX_ENABLED='${{ vars.DISCORD_OUTBOX_ENABLED }}'" \
+            "DISCORD_OUTBOX_CHANNEL_ID='${{ vars.DISCORD_OUTBOX_CHANNEL_ID }}'" \
             'bash ~/${{ steps.target.outputs.dir }}/roll.sh'
 
       - name: Report what is running
