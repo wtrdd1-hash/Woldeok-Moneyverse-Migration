@@ -1,0 +1,1314 @@
+[
+ {
+  "requirement": "대사 실패 시 자동 보상·국고 지급·시장 정산을 안전 모드로 제한하고 관리자에게 경보한다 — a reconciliation failure must automatically restrict automatic rewards, treasury payouts and market settlement to safe mode.",
+  "specLocation": "§7 경제 건강성과 대사",
+  "planCoverage": "partial",
+  "severity": "blocker",
+  "suggestedFix": "PR5 (`feat/scheduler-and-metrics`, 065–066). The plan builds both halves and never joins them: PR2/059 creates the `feature_switches` registry with a 안전모드 state, PR5 computes `integrity_ok` via `economy_record_reconciliation_snapshot`, and PR6 only halts *its own* auto-policy run on 대사 실패 (line 178). No PR flips the switches when reconciliation fails, and no PR says the mint-side wrappers (`economy_claim_daily`, `economy_claim_work`, treasury payout from PR4's 대량 지급, `stock_trade`/`business_settle_daily`) consult a switch before moving money. Add to PR5: on `integrity_ok = false`, set the reward/treasury/settlement switches to safe mode inside the snapshot transaction, and add the switch check to each money wrapper (they are all SECURITY DEFINER, so the check belongs in SQL, not the guard layer).",
+  "section": "§6–8 — economy core, health engine, data/infra (spec lines 81–135)"
+ },
+ {
+  "requirement": "…관리자에게 경보한다 — alert the administrator on reconciliation failure.",
+  "specLocation": "§7 경제 건강성과 대사",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR5 (065–066). PR5 line 166 delivers *detection* (시간별 이상 탐지: 이상 발행·대량 거래·카지노 지급·원장 불일치) but the plan never names a delivery path for the 경보. Per the deploy map, `outbox_events` has no consumer, the Discord outbox worker is dead code with no `DISCORD_BOT_TOKEN`, and `config.ts` force-disables Discord whenever `NODE_ENV==='production'` — so nothing in the repo can push an alert today. PR5 must either add the alert channel (outbox worker + bot token + channel id in `deploy/compose.yml`) or state explicitly that the 경보 is a pull-only banner on `/admin/economy`, so the omission is a decision rather than an oversight.",
+  "section": "§6–8 — economy core, health engine, data/infra (spec lines 81–135)"
+ },
+ {
+  "requirement": "M2 = 사용자 현금 + 예금 + 시장 예치금 (market escrow deposits are part of M2).",
+  "specLocation": "§7 경제 건강성과 대사",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR5 (065–066). `packages/database/migrations/018-economy-reconciliation-health.sql:216-228` computes `m2_amount` as a FILTER over `account_type IN ('USER_CASH','USER_BANK')` only — ESCROW is excluded. The plan's PR5 line 167-168 directs reuse as-is ('새로 만들지 말고 그걸 돌린다'), which is correct arithmetic only while ESCROW is dead. PR10 line 226 introduces 원장 예치 for user-to-user work orders, at which point M2 silently understates the money supply — and PR6's auto-adjustment engine reads M2 as its input signal. PR5 should widen the M2 filter to include ESCROW (and bump the snapshot `metric_version`, which is pinned by `CHECK (metric_version = 'v1')`) before PR10 puts money in escrow.",
+  "section": "§6–8 — economy core, health engine, data/infra (spec lines 81–135)"
+ },
+ {
+  "requirement": "백업: 암호화된 일일 백업; DB 스냅샷 + 사진 메타데이터 + 복구 절차를 별도 SSD에 보존.",
+  "specLocation": "§8 데이터·인프라",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "New PR (deploy/). No PR in the stack mentions backup, and nothing in the repo performs one — the only 'backup' hits are `ops/cloudflare-*.mjs` writing tunnel config to `/backup/tunnel-config.json`. `deploy/compose.yml` keeps everything in named volumes (`db-data`, `photo-data`) with no dump job, no encryption, and no documented restore. The plan adds ~32 migrations and an append-only hash-chained audit log (PR3) whose whole value is evidentiary, so shipping it without a tested restore path is the weakest link. Needs a compose-side dump service + encryption key handling + a `docs/` recovery procedure.",
+  "section": "§6–8 — economy core, health engine, data/infra (spec lines 81–135)"
+ },
+ {
+  "requirement": "건강 지표는 `engine`, `metric_version`, `calculated_at`을 함께 저장한다.",
+  "specLocation": "§7 경제 건강성과 대사",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR5 (065–066). `economy_reconciliation_snapshots` carries `metric_version` and `calculated_at` but has no `engine` discriminator (the dead `economy_metrics` prototype from init/001 had all three, and 018 revoked it). PR5 line 166 adds a new 일일 집계 without specifying its columns. Say in PR5 that the new daily-aggregation table carries `engine`/`metric_version`/`calculated_at` (+ the 018 shape: typed columns, jsonb payload, integrity hash, append-only trigger), and that `metric_version` is bumped whenever a metric definition changes.",
+  "section": "§6–8 — economy core, health engine, data/infra (spec lines 81–135)"
+ },
+ {
+  "requirement": "보상/소비/**세금**의 24시간 흐름을 매일 산출한다.",
+  "specLocation": "§7 경제 건강성과 대사",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR5 (065–066). PR5 line 166 enumerates the daily aggregation as 'M2·발행·소각·보상·거래·사업 정산·상점 판매' — 세금 is not in the list, and it cannot be derived from what exists: the stock tax leg is an untagged posting inside a `VIRTUAL_STOCK_SELL` transaction (`053-virtual-stock-float-and-intervals.sql:560`), so `treasury_inflow_24h_amount` conflates tax with every other treasury inflow. Either add a tax marker (posting tag or a distinct transaction type) or state that treasury inflow is the tax proxy.",
+  "section": "§6–8 — economy core, health engine, data/infra (spec lines 81–135)"
+ },
+ {
+  "requirement": "주요 거래 유형: USER_TO_TREASURY · TREASURY_TO_USER · USER_TO_SINK · MARKET_ESCROW / MARKET_SETTLEMENT.",
+  "specLocation": "§6 경제 코어 설계 — 주요 거래 유형",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "PR4 (`feat/ledger-corrections`, 063–064) — or flag to the user as a spec-vs-implementation naming decision. Of the nine named types only `MINT_TO_USER`, `USER_TO_USER`, `BANK_DEPOSIT`, `BANK_WITHDRAW` are ever emitted; the shipped ledger uses domain-specific strings instead (`SHOP_PURCHASE` for USER_TO_SINK, `VIRTUAL_STOCK_*` for USER_TO_TREASURY, `BUSINESS_SETTLEMENT`, `WORK_REWARD`). The plan only produces the ninth, `ADMIN_ADJUSTMENT` (PR4 line 143). `MARKET_ESCROW`/`MARKET_SETTLEMENT` and the seeded `ESCROW` account remain referenced by nothing (they exist only as Korean labels in `wallet.service.ts::TRANSACTION_LABELS`). PR4 should either record the mapping from spec category to shipped type, or drop the unproduced labels — the aggregation and admin UI in PR5/PR6 key off these strings.",
+  "section": "§6–8 — economy core, health engine, data/infra (spec lines 81–135)"
+ },
+ {
+  "requirement": "운영 데이터: 별도 SSD `/data/wtrdd/moneyverse/`; 사진: `/data/wtrdd/moneyverse/photos/`.",
+  "specLocation": "§8 데이터·인프라",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "Out of scope, flag to user (host/ops decision, though it lands in `deploy/compose.yml`). The compose file uses Docker named volumes `db-data:/var/lib/postgresql/data` and `photo-data:/data/moneyverse/photos` with `PHOTO_STORAGE_DIR: /data/moneyverse/photos` — neither is the spec's `/data/wtrdd/moneyverse/…` path, and a named volume gives no guarantee about which disk it lands on. (The DB-stores-metadata-only half is already satisfied: `photos.storage_key` is a text key, not a blob.) Confirm with the user whether the spec path is binding or historical before any PR touches the volume mapping.",
+  "section": "§6–8 — economy core, health engine, data/infra (spec lines 81–135)"
+ },
+ {
+  "requirement": "\"3단계 기능은 테스트 서버에서 수익률, 동시성, 악용 방지, 원장 대사가 통과하기 전까지 운영에서 비활성화한다.\" (3단계 = 카지노·확률형 게임, 주식 분할·병합, 자동 물가·금리 정책) — PR2는 범용 feature_switches 레지스트리만 만들 뿐, 어느 PR도 3단계 기능을 그 스위치에 등록하거나 운영 기본값을 off로 두지 않고, PR6은 반대로 자동 경제 조정 엔진을 주간 무조건 스케줄한다. 병합하면 3단계 기능이 검증 게이트 없이 운영에서 돌게 된다.",
+  "specLocation": "§3 서비스 범위 — 3단계, 검증 후에만 활성화 (line 59)",
+  "planCoverage": "partial",
+  "severity": "blocker",
+  "suggestedFix": "PR2 (059) — feature_switches에 casino / stock corporate action / economy auto policy 세 행을 운영 기본값 disabled로 등록하고 활성화 조건(테스트 서버 4항목 통과 기록)을 행이 참조하게 한다. PR6 — 주간 러너가 실행 전 그 스위치를 읽고 검증 기록이 없으면 거부하게 한다. PR1 — casino_play_coin도 같은 스위치를 확인하게 한다. (코드 사실: stock_admin_corporate_action(053)은 이미 배포돼 factor 100까지 즉시 적용 가능하고, casino_play_coin(042)은 moneyverse_app에 EXECUTE가 부여된 채 운영 DB에 있다)",
+  "section": "§1–5 — 제품 정의 · 설계 결정 · 서비스 범위 · 사용자 흐름 · 인증/개인정보"
+ },
+ {
+  "requirement": "\"카지노의 경우 확률을 정확히 공개하는 것을 원칙으로 한다. (근거: 게임물 관련 법에 명시됨)\" — PR1은 확률·배당·최대 손실을 반환값에 실어 \"화면이 공개할 수 있게\" 하지만, 그 화면을 만드는 PR은 없다 (카지노는 SQL 042만 있고 백엔드 라우트도 프론트 페이지도 없다).",
+  "specLocation": "§3 서비스 범위 — 3단계 (line 53)",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR1 — 확률 공개를 실제로 렌더하는 표면까지 PR 범위에 넣거나, 그게 이번 스택 밖이라면 '카지노는 이번 스택에서 사용자에게 노출되지 않는다'를 계획에 명시해 법적 요구가 미해결로 남지 않게 한다.",
+  "section": "§1–5 — 제품 정의 · 설계 결정 · 서비스 범위 · 사용자 흐름 · 인증/개인정보"
+ },
+ {
+  "requirement": "MVP 반드시 제공: \"마인크래프트 운영 봇: 상태, 시작, 중지, 재시작, 로그 조회\" — 계획 10개 PR 어디에도 없고, 코드에서는 049가 상태 소스를 끔고 route-map 세 행이 replacement:null(\"out of scope for this rebuild\")로 명시적으로 폐기됐다.",
+  "specLocation": "§3 서비스 범위 — MVP",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "out of scope, flag to user — 기획서가 MVP 필수로 유지할 것인지 049의 폐기 결정을 기획서에 반영할 것인지 사용자 판단이 필요하다. 유지한다면 새 PR(운영 콘솔 + 두 API 라우트 + 호스트 사이드카 + route-map 세 행의 replacement/reason 복구)이 필요하다.",
+  "section": "§1–5 — 제품 정의 · 설계 결정 · 서비스 범위 · 사용자 흐름 · 인증/개인정보"
+ },
+ {
+  "requirement": "MVP 반드시 제공: \"Discord 봇: 자산 조회, 일일 보상, 송금, 알림\" (및 §2의 \"테스트·운영 … 봇을 완전히 분리\") — balance/history/daily/send 핸들러는 있지만 config.ts:99가 NODE_ENV=production이면 Discord를 강제 비활성화하고 compose는 DISCORD_INTERACTIONS_* 변수를 전달하지도 않으며, '알림' 반쪽인 DiscordOutboxWorker는 생성된 적 없는 죽은 코드다. 스택 10개 PR 어디에도 Discord 작업이 없다.",
+  "specLocation": "§3 서비스 범위 — MVP / §2 설계 결정",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "new PR (PR5 옆 또는 앞) — 공유 원자적 rate limiter, DiscordOutboxWorkerRunner 기동(MarketTickerRunner 형태 복사), DISCORD_BOT_TOKEN·아웃박스 채널 id·활성 플래그·인터벌을 config.ts와 deploy/compose.yml backend.environment에 추가, docs/RELEASING.md 비밀값 표에 행 추가, 테스트/운영 봇 토큰 분리.",
+  "section": "§1–5 — 제품 정의 · 설계 결정 · 서비스 범위 · 사용자 흐름 · 인증/개인정보"
+ },
+ {
+  "requirement": "\"사용자는 홈페이지에서 서비스, 정책, 체험판을 본다\" — 로그인 전 체험판. frontend/src/app/page.tsx에는 서비스 소개·공지·상태·약관/개인정보 링크만 있고 체험 진입점이 없다.",
+  "specLocation": "§4 사용자 흐름 — 1",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "PR10 (§16.0 온보딩과 화면 언어가 같다) 또는 new PR. §16의 '5분 경제 튜토리얼'은 로그인 후 온보딩이라 비로그인 체험판을 대신하지 못한다.",
+  "section": "§1–5 — 제품 정의 · 설계 결정 · 서비스 범위 · 사용자 흐름 · 인증/개인정보"
+ },
+ {
+  "requirement": "\"14세 미만의 경우 관리자가 무통보 계정 삭제/IP 차단 등의 조치를 취할 수 있다.\" — PR4는 계정 동결/해제만 다룬다. 관리자 개시 계정 삭제는 어느 PR에도 없고(현재 삭제 경로는 본인 요청 softDeleteAccount 하나뿐), IP 차단은 저장소에도 계획에도 없다.",
+  "specLocation": "§4 사용자 흐름 — 2.1",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR4 — 계정 동결/해제 옆에 관리자 개시 계정 삭제(무통보, 감사 기록 필수, 재인증)와 IP 차단 목록을 추가한다.",
+  "section": "§1–5 — 제품 정의 · 설계 결정 · 서비스 범위 · 사용자 흐름 · 인증/개인정보"
+ },
+ {
+  "requirement": "\"모든 잔고 변동 후 거래 영수증 ID와 최신 잔액을 보여준다.\" — 계획 §2 공통 규약에 이 불변식이 없고, PR7·PR8이 새 잔고 변동 경로를 대량 추가하면서 반환 형태를 규정하지 않는다. 현재 claimWork/claimDaily는 {amount, replayed}만 받아 영수증 ID를 표시하지 않고, 상점 영수증은 {purchaseId,itemName,amount,purchasedAt}로 잔액이 없으며, economy_post_transaction을 포함해 어느 함수도 변동 후 잔액을 돌려주지 않는다.",
+  "specLocation": "§4 사용자 흐름 — 6",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR4 — 명령 함수 공통 반환 형태에 transaction_id(영수증 ID)와 변동 후 잔액을 포함하는 규약을 계획 §2 전 PR 공통 규약에 추가하고, PR7·PR8이 만드는 모든 경로가 그 형태를 따르게 한다.",
+  "section": "§1–5 — 제품 정의 · 설계 결정 · 서비스 범위 · 사용자 흐름 · 인증/개인정보"
+ },
+ {
+  "requirement": "\"로그인·권한상승·보안 공격 징후만 최소 기간으로 기록한다\" — 기록 대상 이벤트 자체가 없다. audit_logs에 쓰이는 액션은 15개이고 전부 관리자 쓰기 작업이며, backend/src/auth·account·privacy 어디에도 감사 호출이 없고 002/006/031 마이그레이션에도 없다. PR3은 관리자 쓰기/조회 감사만 확장한다.",
+  "specLocation": "§5 인증 및 개인정보 원칙",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR3 — 로그인 성공/실패, 세션 폐기, 역할 부여/회수(권한상승), CSRF·레이트리밋·Ed25519 서명 거부 같은 공격 징후를 기록하는 보안 이벤트 경로를 061에 함께 넣는다.",
+  "section": "§1–5 — 제품 정의 · 설계 결정 · 서비스 범위 · 사용자 흐름 · 인증/개인정보"
+ },
+ {
+  "requirement": "\"…최소 기간으로 기록한다\" — 보관 기간 상한과 파기. PR3 060이 audit_logs에 BEFORE UPDATE OR DELETE 불변 트리거를 붙이고 061이 원본 IP·User-Agent 파생값을 넣고 062가 관리자 라우트 전체에 조회 감사를 건다 — 개인식별 가능 데이터가 영구·삭제 불가로 쌓이며, 보관 창도 파기 잡도 계획 어디에도 없다.",
+  "specLocation": "§5 인증 및 개인정보 원칙",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR3 — 해시체인과 양립하는 보관 설계(구간 봉인 후 페이로드 폐기 / 파티션 드롭 / IP 익명화 시점) 중 하나를 명시하고, 실제 파기 잡은 PR5 스케줄러에 얹는다.",
+  "section": "§1–5 — 제품 정의 · 설계 결정 · 서비스 범위 · 사용자 흐름 · 인증/개인정보"
+ },
+ {
+  "requirement": "\"기존에 노출 가능성이 있는 OAuth Client Secret은 배포 전 재발급한다.\" — 계획 §6 검증 게이트는 lint·control-bytes·typecheck·build·test·code-review 여섯 개뿐이고 비밀값 재발급 항목이 없다.",
+  "specLocation": "§5 인증 및 개인정보 원칙 (마지막 항목)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "out of scope, flag to user — 코드가 아니라 릴리스 게이트다. Discord/Google Client Secret 재발급 + 호스트 .env 갱신을 계획 §6에 배포 전 체크리스트 한 줄로 추가할지 사용자에게 확인받는다.",
+  "section": "§1–5 — 제품 정의 · 설계 결정 · 서비스 범위 · 사용자 흐름 · 인증/개인정보"
+ },
+ {
+  "requirement": "\"비밀번호 외에 WebAuthn 보안키 또는 TOTP 2단계 인증을 필수로 한다\" — the single superadmin must carry a second authentication factor.",
+  "specLocation": "§10 보안 기준 / 단일 최고관리자 원칙",
+  "planCoverage": "absent",
+  "severity": "blocker",
+  "suggestedFix": "PR2 (feat/superadmin-authority). PR2 tears out two-person approval — today's only compensating control on economy/treasury actions — and concentrates every money, policy and account power in one account, but adds no second factor. Auth today is OAuth-only (no password, no TOTP, no WebAuthn anywhere in the repo per the admin-surface map), so a stolen Discord/Google session is full economic control. Either PR2 must add a WebAuthn/TOTP enrolment + challenge path bound to superadmin sessions, or the approval teardown must be gated behind a PR that does.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "\"백업 생성 및 빈 서버 복구 리허설\" (QA) and \"롤백 이미지와 검증된 백업 존재\" (release gate); §12 단계 2 also names 백업 as a foundation deliverable.",
+  "specLocation": "§11 QA 및 출시 기준 / 테스트 서버 + 운영 반영 게이트; §12 단계 2 기반 구축",
+  "planCoverage": "absent",
+  "severity": "blocker",
+  "suggestedFix": "New PR (deploy/). `deploy/` contains only bootstrap-env.sh, compose.yml, edge, roll.sh, seed.sh, update.sh — no dump job, no retention, no restore script; docs/RELEASING.md mentions pg_dump only as a manual one-off for moving data between stacks. The plan then ships ~32 immutable, non-revertible migrations (056–087) against the live ledger with rollback defined as image tags only. A backup job + a rehearsed restore procedure must exist before the stack lands.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "\"봇 명령은 역할 검증, 길드 검증, 요청 제한, 감사 로그를 거친다\" — every bot command passes through an audit log.",
+  "specLocation": "§9 Discord 봇 권한",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR3 (feat/audit-trail). interactions.ts does role check, guild check and rate limiting but writes no audit row (audit-logging map: the 15 written action strings are all admin web writes). PR3's read/write auditing is scoped to \"관리자 라우트에 Nest 인터셉터\", and the Discord interaction route is a raw-body non-admin route that the interceptor will not cover. Add a Discord-side audit append (command, guild, discord subject, resolved user, receipt) to PR3's scope.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "Bot command surface per role: 운영자 = 공지 발송·제한 요청; 최고관리자 = 전체 조회·설정·중지·복구·보정; 서버 운영자 = 마인크래프트 상태/시작/중지/재시작/로그.",
+  "specLocation": "§9 Discord 봇 권한 (역할별 가능 작업 표)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "New PR, or flag to user for scope reduction. The bot has exactly four member commands (balance/history/daily/send) duplicated across command-registration.ts and interactions.ts, and command-registration.ts carries an explicit standing decision against generic dispatch. No PR in the stack touches Discord at all, so the operator/superadmin/server-operator rows of the §9 table have no owner. Note the spec's own prohibition — \"임의 서버 콘솔 명령 전달 기능은 제공하지 않는다\" — means any such PR must stay an allowlisted command set.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "관리자 통제 범위 — Discord: \"명령 활성화, 공지, 역할 정책, 사용자 연결 상태, outbox 재처리\".",
+  "specLocation": "§10 보안 기준 / 관리자 통제 범위 (Discord 행)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "New PR. Only a read model exists (`admin_recent_discord_outbox_events`, payload deliberately withheld); there is no reprocess/park command, no per-command enable, no role-policy editor. Worse, the whole Discord surface is inert in production by construction — config.ts:99 returns `{enabled:false}` whenever NODE_ENV=production because the bundled rate limiter is single-process, and deploy/compose.yml does not pass the DISCORD_INTERACTIONS_* vars — so nothing in §9/§10's Discord scope can ship until a shared limiter and the compose wiring exist. No PR owns that.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "관리자 통제 범위 — Minecraft: \"상태·시작·중지·재시작·허용된 운영 작업·로그 조회\", and §9's 서버 운영자 role.",
+  "specLocation": "§9 Discord 봇 권한; §10 관리자 통제 범위 (Minecraft 행)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "New PR, or flag to user. The Minecraft control plane was retired during the port (`GET /admin/minecraft` etc. carry `replacement: null, reason: 'The Minecraft host control plane is out of scope for this rebuild'`), leaving only migration 014's approval-driven `minecraft_approved_operations`. The spec re-introduces it as a first-class admin/role scope and no PR in the stack mentions Minecraft. Confirm with the user whether §9 row 4 and the §10 Minecraft row are in scope for this stack.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "Dual approval must be removed while the superadmin keeps every listed control — the plan enumerates the removal sites as \"여섯 군데\".",
+  "specLocation": "§10 관리자 통제 범위 (전 항목 단독 실행) — cross-check against §9 서버 운영자",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR2. The list of six omits a seventh enforcement site: `minecraft_sync_approved_operation_from_approval` (014:238) raises 42501 'minecraft approval requires a different approver' from an AFTER UPDATE trigger on `admin_approval_requests`. With PR2 making the decide function raise 55000 and a single superadmin deciding their own requests, that trigger is both unreachable and self-contradictory, and it is the ONLY execution path for `minecraft_approved_operations`. PR2 must name it and state what replaces it.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "\"등록된 관리자 계정·기기·IP 정책에서 벗어난 로그인은 차단하거나 추가 검증한다.\"",
+  "specLocation": "§10 보안 기준 / 단일 최고관리자 원칙",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR2. Nothing in the repo binds a session to a device or an IP (admin map: \"no device/IP binding\"), and PR2's 058 bullet covers only 짧은 만료·유휴 잠금·강제 로그아웃. Add an admin device/IP allowlist table plus a login-time decision (block or step-up) to 058.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "\"관리자 페이지 진입 시 재인증한다\" and \"고위험 작업은 실행 직전 다시 인증한다.\"",
+  "specLocation": "§10 보안 기준 / 단일 최고관리자 원칙",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR2. The plan attaches ReauthGuard to high-risk actions only — admin-console entry re-auth is not named. More importantly the guard it leans on is currently vacuous: `completeOAuthLogin` stamps `auth_sessions.reauthenticated_at` at login, so a freshly logged-in admin satisfies the 900s window with no step-up, and one re-auth authorises unlimited high-risk operations for 15 minutes (session-level timestamp, no single-use consumption, no per-action record). PR2 must fix the stamp-at-login behaviour and add entry re-auth, or the guardrail it cites for bulk payouts and economy adjustment does not exist.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "\"CI에서 비밀값 탐지, 의존성 점검, 테스트 실행\"; release gate \"GitHub 비밀값 검사 통과\".",
+  "specLocation": "§10 공통 웹·서버 보안; §11 운영 반영 게이트",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "New PR (.github/workflows/ci.yml). ci.yml today runs install → lint → check-control-bytes → typecheck → build → ci-apply → test → reject-prisma-migrate: no secret scanning and no dependency audit. The plan's §6 gate list mirrors that same set and adds neither, so the §11 gate can never be evidenced.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "\"로그인·송금·보상·관리 API에 사용자별·세션별 속도 제한\".",
+  "specLocation": "§10 공통 웹·서버 보안",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR2 or a new PR. `security/rate-limit.ts::tierFor()` buckets every non-GET /api/ request into one `sensitive` tier at 60/min keyed per IP, with no per-user or per-session key and no admin tier, and ThrottlerModule is process-local (documented in app.module.ts as weakening on scale-out). The plan adds many new money-moving endpoints (work claims, purchases, bulk payouts) and never revisits throttling.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "관리자 통제 범위 — 사용자: \"조회, 검색, 상태 변경, 로그인 제한, 정지, 해제, 소프트 삭제, 복구, 세션 종료, 연결 계정 확인\".",
+  "specLocation": "§10 관리자 통제 범위 (사용자 행)",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR4 (feat/ledger-corrections). PR4 covers 계정 동결/해제 only. Existing code gives 조회/검색 (`admin_list_users`) and 제한/해제 (026); admin-initiated soft delete, restore, forced session termination for a member, and connected-identity inspection have no function, no route and no PR.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "관리자 통제 범위 — 보상: \"출석·작업 보상액, 일일·주간 상한, 쿨다운, 정책 버전, 기능 활성화\".",
+  "specLocation": "§10 관리자 통제 범위 (보상 행)",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR7 (feat/work-jobs-xp) or PR2's 059. Work-side caps and catalogue are covered by PR7, but 출석(daily) rewards are absent from the whole plan: `daily_reward_policy` and `work_reward_policy` are singleton tables revoked from the app with no admin write function — reward amounts can only be changed by a migration today. Add admin write paths for both policy singletons (versioned via 059) so 보상액·쿨다운·활성화 are operable.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "관리자 통제 범위 — 주식: \"종목, 거래시간, 거래 중지·재개, 상장·폐지, 분할·병합, 시장 안전장치\".",
+  "specLocation": "§10 관리자 통제 범위 (주식 행)",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "New PR, or fold 거래 중지·재개 into PR2's `feature_switches` and flag the rest. 종목 CRUD, 상장·폐지 (`stock_admin_delete`) and 분할·병합 (`stock_admin_corporate_action`, fixed in 053) already ship; 거래시간(trading window), per-stock halt/resume and 시장 안전장치(price-band/circuit-breaker) exist nowhere and no PR in the stack touches the stock domain. Note the market ticker moves prices every second regardless.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "관리자 통제 범위 — 은행·대출: \"이자율, 신용등급, 한도, 만기, 연체, 신규 사용자 제한, 대출 중지\".",
+  "specLocation": "§10 관리자 통제 범위 (은행·대출 행)",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR9 (feat/progression-stages). PR9 covers 신용등급·한도·이자 and new-user restriction; 만기(due date) and 연체(overdue/default) have no representation at all — `virtual_bank_loans` is principal/interest/outstanding/status('active','repaid') with no due date, no default state, no collateral. Either add them to PR9's 080–082 or state the deferral.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "\"카지노의 개별 결과, 주식의 과거 가격, 과거 작업 완료 기록을 사후 조작하지 않는다\" — history is append-only even for the superadmin.",
+  "specLocation": "§10 통제 제한과 안전한 수정 방식",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR3 (feat/audit-trail). PR3 adds a BEFORE UPDATE OR DELETE immutability trigger to `audit_logs` only. Casino round rows, `virtual_stock_prices` history and work-completion records get no such trigger, so protection stays privilege-only against an app role while the migrator (the compose superuser that runs every migration) can still rewrite them. Copy the `economy_reconciliation_snapshots_immutable` trigger onto those three histories — cheap, and it is what makes the spec sentence true.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "관리자 통제 범위 — 콘텐츠: \"공지·사진·게시판·신고·숨김·삭제·복구\".",
+  "specLocation": "§10 관리자 통제 범위 (콘텐츠 행)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "New PR. Content admin today is announcements + photos save/publish only (013/016); the member board (044) has no report intake, no hide, no admin delete and no restore, and no PR in the stack covers moderation. With PR10 adding user-generated engagement content this widens rather than closes.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "테스트 서버 QA 목록: 송금 동시 요청·중복·잔액 부족·재시작 중 처리, 원장/잔액/국고 대사, 관리자 권한 우회·CSRF·세션 탈취·속도 제한, 백업/복구 리허설, 모바일·데스크톱 접근성 및 핵심 UI 검사 (§12 7단계 \"보안·부하 QA\" as well).",
+  "specLocation": "§11 QA 및 출시 기준 / 테스트 서버; §12 단계 7",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "New PR for the automatable half, flag the rest to the user. The plan's §6 gate list is per-PR mechanical checks (lint/typecheck/build/test/review) with per-PR `.db.test.ts`. There is no concurrency/restart test for transfers, no authz-bypass or session-fixation suite, no rate-limit test, no browser/a11y test infrastructure at all (no Playwright, no axe), and no load test. Decide which of these become CI suites and which are a manual test-server checklist with an owner.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "운영 반영 게이트: P0/P1 결함 0건 · 원장 대사 7일 연속 성공 · 복구 리허설 성공 · OAuth 실제 도메인 콜백 성공 · 운영용 새 Client Secret·Discord 토큰 적용 · GitHub 비밀값 검사 통과 · 롤백 이미지와 검증된 백업 존재.",
+  "specLocation": "§11 QA 및 출시 기준 / 운영 반영 게이트",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "Out of scope, flag to user — but the plan's §6 \"검증 게이트\" section is where they belong as a named production-cutover checklist. Note two have code prerequisites owned by the stack: \"원장 대사 7일 연속 성공\" cannot start accruing until PR5 actually runs `economy_record_reconciliation_snapshot` (no snapshot has ever been taken), and \"검증된 백업\" needs the backup deliverable that is missing entirely.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "\"관리자 세션은 짧은 만료시간, 유휴시간 잠금, 세션 회전, 원격 강제 로그아웃을 적용한다.\"",
+  "specLocation": "§10 보안 기준 / 단일 최고관리자 원칙",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR2. 058 names 짧은 만료·유휴 잠금·강제 로그아웃 but not 세션 회전 (rotating the session identifier on privilege change / re-auth). Today there is one 8-hour `auth_sessions` TTL for members and admins alike; add rotation to the same migration.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "§13 확정이 필요한 항목: 화폐 이름·시작 지급액, 주식·은행·카지노 운영 포함 여부와 출시 순서, 사진 업로드 주체·용량·공개 범위, Discord 관리자 역할 ID, 새 운영 Client Secret 발급, 개인정보처리방침 운영자 연락처·보유 기간.",
+  "specLocation": "§13 확정이 필요한 항목",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "Out of scope, flag to user — but three have direct code consequences the stack silently assumes: 시작 지급액 (no signup grant exists and no PR adds one), 주식·은행·카지노 포함 여부 (PR1 and PR9 build on all three as if settled), and 개인정보처리방침 보유 기간 (audit_logs gains high-volume read auditing in PR3 with no retention/partitioning/purge story). Record the answers in the plan before PR1 opens.",
+  "section": "§9-13 (Discord bot permissions, security baseline, QA/release gates, schedule, open decisions) — spec lines 136-237"
+ },
+ {
+  "requirement": "\"테스트 서버에서 최소 100만 회 분포 시험과 원장 대사 후 기능 플래그 활성화\" — the coin game may only be switched on after a ≥1,000,000-play distribution trial and a ledger reconciliation on the test server.",
+  "specLocation": "§14.3 카지노 공정성 수정 (final checklist item)",
+  "planCoverage": "absent",
+  "severity": "blocker",
+  "suggestedFix": "PR2 (059 feature_switches) + PR5 (reconciliation worker) + release checklist. PR1 explicitly substitutes boundary tests (\"고정 시드가 없으므로 분포 대신 경계 조건을 검증한다\") and never registers the coin game in a feature switch, so nothing gates the corrected function behind proof that the bias is gone. PR1 cannot own the switch itself (feature_switches only exists from 059), so PR2 must register casino.coin default-off and the plan needs an explicit gate: 1M-play distribution run + economy_record_reconciliation_snapshot ledger tie-out on the test stack before flipping it on. Note the reconciler worker that would do the tie-out only starts existing in PR5.",
+  "section": "§14.1–14.4 — 기반·보안 작업, 사용자 프로필, 카지노 공정성 수정, 신규 사용자 대출 제한 (spec lines 238–301)"
+ },
+ {
+  "requirement": "\"브라우저는 선택과 베팅액만 보내고 결과·확률·지급액은 서버가 결정\" — the client submits only choice and stake; the server decides outcome, odds and payout.",
+  "specLocation": "§14.3 카지노 공정성 수정",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR1 (or a new PR stacked on it). The map records that `grep -rl casino` matches exactly one file (migration 042): there is no controller, service, DTO, module, route-map entry, server action or frontend page for the casino anywhere. PR1 rewrites SQL only, so after the whole 10-PR stack the coin game is still unreachable from a browser and this requirement has nothing to be true of. The vertical slice (Nest controller + DTO with choice/stake only, ConsentGuard/CsrfGuard stack, idempotencyKey from `mutate()`, `/casino` page, route-map row) is unowned — which also silently blocks §14.4's \"대출 잔액이 있으면 카지노 제한\" in PR9.",
+  "section": "§14.1–14.4 — 기반·보안 작업, 사용자 프로필, 카지노 공정성 수정, 신규 사용자 대출 제한 (spec lines 238–301)"
+ },
+ {
+  "requirement": "\"확률·배당·최대 손실 가능성을 사용자 화면에 공개\" — odds, payout and worst-case loss must be disclosed on the user-facing screen.",
+  "specLocation": "§14.3 카지노 공정성 수정",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR1. The plan stops at \"확률·배당·최대 손실 가능성을 반환값에 실어 화면이 공개할 수 있게 한다\" — the SQL returns the values but no PR builds a screen to render them, so the disclosure requirement is deferred to a UI nobody owns. Either PR1 carries the disclosure component or the plan must name the PR that does.",
+  "section": "§14.1–14.4 — 기반·보안 작업, 사용자 프로필, 카지노 공정성 수정, 신규 사용자 대출 제한 (spec lines 238–301)"
+ },
+ {
+  "requirement": "\"만기·최소 상환액·연체 상태·신용점수·감사 기록 추가\" — loans gain a due date, a minimum repayment amount, an overdue/delinquency state, a credit score, and audit records.",
+  "specLocation": "§14.4 신규 사용자 대출 제한",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR9. PR9 names \"§14.4 신용 등급(신규/C/B/A)과 대출 한도·이자\" and the three restrictions, but none of due date, minimum repayment, overdue state, credit score, or loan audit writes. The map confirms `virtual_bank_loans` has no due date, no overdue/default state, no interest accrual and no audit call at all. This is not optional detail: the B-tier condition is \"누적 정상 수입 10,000 WLD·연체 없음\" and the A-tier condition is \"상환 정상\", so the tier table PR9 does promise cannot be evaluated without a delinquency state and repayment history.",
+  "section": "§14.1–14.4 — 기반·보안 작업, 사용자 프로필, 카지노 공정성 수정, 신규 사용자 대출 제한 (spec lines 238–301)"
+ },
+ {
+  "requirement": "공개 프로필 표시 항목 — 표시명·프로필 이미지·가입일·최근 활동일, 현재 직업·직업 레벨·경험치 진행도, 보유 칭호·대표 배지·공개 업적, 누적 작업 완료 수와 성공률, 보유 사업 수와 대표 사업, 시즌 점수와 순위.",
+  "specLocation": "§14.2 사용자 프로필 → 프로필 표시 항목",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "New PR stacked after PR10. The plan has zero mentions of 프로필/profile across all 268 lines, and the map confirms nothing exists to build on (\"There is no user-state table at all beyond `users.status`… no per-user profile, no counters, no cached aggregates\"). Every field this section lists is produced by PR7 (직업/레벨/XP, work completion records), PR8 (사업), PR9 (성장 단계) and PR10 (칭호·배지·업적·시즌 점수) — the read model that assembles them into one screen is the piece nobody owns. Note also that \"성공률\" requires `work_completion_records` to carry a success/failure outcome, which PR7's bullet does not mention.",
+  "section": "§14.1–14.4 — 기반·보안 작업, 사용자 프로필, 카지노 공정성 수정, 신규 사용자 대출 제한 (spec lines 238–301)"
+ },
+ {
+  "requirement": "\"이메일, OAuth 식별자, 내부 보안 상태는 공개하지 않는다\" / \"지갑·은행·대출 요약은 본인에게만\" / \"카지노 이용내역·손익·손실 한도는 본인과 승인된 관리자에게만\" — a three-tier visibility split on the profile read path.",
+  "specLocation": "§14.2 사용자 프로필 (intro + 프로필 표시 항목)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "Same new PR as the profile read model. This is the load-bearing safety rule of §14.2 and the plan never states it, so whoever builds the profile function later has no instruction that email/provider_subject/role and restriction state must never leave the server for a public viewer. Enforce it where this codebase enforces everything else — a SECURITY DEFINER read function that takes viewer and subject and returns different column sets — not in the Next layer. The \"승인된 관리자\" branch also needs a read-audit write, which only exists once PR3's read-audit interceptor lands.",
+  "section": "§14.1–14.4 — 기반·보안 작업, 사용자 프로필, 카지노 공정성 수정, 신규 사용자 대출 제한 (spec lines 238–301)"
+ },
+ {
+  "requirement": "프로필 설정 — 표시명·소개·대표 칭호 변경, 전체 공개/로그인 사용자만/비공개 설정, 직업·사업·업적 항목별 공개 여부, Discord·Google 연결 상태 확인.",
+  "specLocation": "§14.2 사용자 프로필 → 프로필 설정",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "Same new PR. No PR in the stack creates an editable member profile, a visibility enum, or per-item visibility toggles. Identity link state is the one piece with existing prior art (`/account` already lists and unlinks identities under ReauthGuard) and can be surfaced rather than rebuilt.",
+  "section": "§14.1–14.4 — 기반·보안 작업, 사용자 프로필, 카지노 공정성 수정, 신규 사용자 대출 제한 (spec lines 238–301)"
+ },
+ {
+  "requirement": "\"카지노 일일 베팅·손실 한도 설정과 이용 잠금\" — the member sets their own daily bet and loss caps and can self-lock out of the casino.",
+  "specLocation": "§14.2 사용자 프로필 → 프로필 설정",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR1 (schema + enforcement inside `casino_play_coin`) plus the profile-settings PR for the UI. PR1 lifts min/max stake, daily total stake and daily loss cap into DB policy rows, but those are global operator policy; §14.2 additionally requires per-member self-imposed limits and a self-exclusion lock, and nothing in the plan covers either. The enforcement must sit inside the play function (it is the only thing `moneyverse_app` can call), and the lock has to be effective on the very next play, so it belongs in the same migration that rewrites the function rather than being bolted on later.",
+  "section": "§14.1–14.4 — 기반·보안 작업, 사용자 프로필, 카지노 공정성 수정, 신규 사용자 대출 제한 (spec lines 238–301)"
+ },
+ {
+  "requirement": "\"계정 탈퇴·데이터 열람·정정 요청 경로\" — the profile must expose paths for account withdrawal, personal-data access, and correction requests.",
+  "specLocation": "§14.2 사용자 프로필 → 프로필 설정",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "New PR + flag to user for legal review. Account deletion already ships (`DELETE /account` behind ReauthGuard, the only step-up route in the app), so 탈퇴 is satisfied; data access (열람) and correction (정정) request paths do not exist anywhere in the repo and no PR adds them. This is a privacy-compliance obligation rather than a game feature — worth confirming with the user whether it is a code deliverable (an export/request endpoint) or an operational contact path in the privacy policy page.",
+  "section": "§14.1–14.4 — 기반·보안 작업, 사용자 프로필, 카지노 공정성 수정, 신규 사용자 대출 제한 (spec lines 238–301)"
+ },
+ {
+  "requirement": "\"새 테스트 데이터 경로와 백업 정책 생성\" — establish a new test-data path and a backup policy.",
+  "specLocation": "§14.1 기반·보안 작업",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "New PR (ops), or out of scope, flag to user. No backup tooling exists — the only `backup` hits in the repo are the Cloudflare tunnel config dump in `ops/README.md` and a bare \"`pg_dump`를 직접 쓴다\" line in `docs/RELEASING.md`. The plan adds ~32 forward-only migrations (056–087) to a process that never rolls back (a schema revert is a new forward migration) and PR4 introduces admin bulk payouts and ledger corrections against live money. A documented backup/restore procedure and a reproducible test-data seed should exist before the wave lands, and neither is anyone's deliverable in the stack.",
+  "section": "§14.1–14.4 — 기반·보안 작업, 사용자 프로필, 카지노 공정성 수정, 신규 사용자 대출 제한 (spec lines 238–301)"
+ },
+ {
+  "requirement": "\"Google·Discord OAuth Client Secret 재발급\" — rotate the OAuth client secrets.",
+  "specLocation": "§14.1 기반·보안 작업",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "Out of scope, flag to user. Pure credential rotation in the provider consoles plus the host `.env` — no code deliverable, and the plan (correctly) contains no PR for it, but it is an unticked release-blocking box in the spec's own checklist that the user has to do by hand.",
+  "section": "§14.1–14.4 — 기반·보안 작업, 사용자 프로필, 카지노 공정성 수정, 신규 사용자 대출 제한 (spec lines 238–301)"
+ },
+ {
+  "requirement": "\"Discord 봇 최소 명령 구현\" — minimal Discord bot commands.",
+  "specLocation": "§14.1 기반·보안 작업",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "New PR, or out of scope if the user considers Discord post-launch. The handler is written (balance/history/daily/send, Ed25519 verify over raw bytes, deterministic receipt keys), so the implementation half is shipped — but `backend/src/core/config.ts:99` force-disables Discord interactions whenever `NODE_ENV=production` because the bundled rate limiter is single-process, `registerDiscordGuildCommands()` has no npm script/bin and is imported nowhere, and `DiscordOutboxWorker` is never constructed. In production today no Discord command can run, and no PR in the stack touches any of the three.",
+  "section": "§14.1–14.4 — 기반·보안 작업, 사용자 프로필, 카지노 공정성 수정, 신규 사용자 대출 제한 (spec lines 238–301)"
+ },
+ {
+  "requirement": "\"테스트 서버 종합 QA\" 및 \"운영 배포 승인 및 GitHub 반영\" — a comprehensive QA pass on the test stack, then production deploy approval.",
+  "specLocation": "§14.1 기반·보안 작업",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "Out of scope, flag to user (release process; extend docs/RELEASING.md). §6 of the plan is a solid per-PR merge gate (lint, control bytes, typecheck, build, CI Postgres tests, code review), but it stops at merge. There is no stage in the plan where the assembled stack is deployed to the wdmv test stack and exercised end to end, and no deploy-approval step — which matters more than usual here because the plan itself notes DB tests only ever execute in CI, never locally.",
+  "section": "§14.1–14.4 — 기반·보안 작업, 사용자 프로필, 카지노 공정성 수정, 신규 사용자 대출 제한 (spec lines 238–301)"
+ },
+ {
+  "requirement": "소규모 사업 3종 카탈로그: 중고 판매대 3,000 WLD (일 매출 170 / 운영비 50 / 순수익 120), 길거리 노점 5,000 (280/80/200), 소형 배달소 8,000 (430/130/300)",
+  "specLocation": "§14.8 소규모 사업 3종",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "new PR stacked after PR8 (or extend PR8's 075–079 migration range). The plan's ten PRs never mention §14.8 at all — every occurrence of '사업' in the plan is either shop items (PR8 '사업 10'), a progression input (PR9), a settlement metric (PR5), or churn detection (PR10). The repo ships only three high-end business types (CAFE 25000/1000/300, FARM 60000/2400/700, STUDIO 125000/4800/1500 in migration 036) and their economics are migration-only — business_admin_update can change just name/description/active — so the three low-entry types need a new migration seeding virtual_business_types plus the entry-tier pricing.",
+  "section": "§14.5–14.8 — 작업 보상 개편 · 초보자용 작업 화면 · 직업·경험치 시스템 · 소규모 사업 3종 (spec lines 302–372)"
+ },
+ {
+  "requirement": "하루 한 번 재고·영업·시설 관리 작업을 완료해야 정상 정산되고, 미관리일은 순수익 50% 지급 또는 정산 보류",
+  "specLocation": "§14.8 소규모 사업 3종",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "Same new PR as the §14.8 catalog (or PR7, which already owns the work-task machinery the management action would reuse). business_settle_daily today has no management/upkeep requirement of any kind — daily_operating_cost is merely netted out of a voluntary payout — so a 8,000 WLD purchase would mint 300 WLD/day forever with zero player action. Needs a per-(ownership_id, KST date) management-completion record that settlement reads, plus a reduced-payout or hold branch; note virtual_business_settlements' net_amount >= 0 CHECK permits a 50% payout but the settle function must be replaced in a new migration (036 is immutable).",
+  "section": "§14.5–14.8 — 작업 보상 개편 · 초보자용 작업 화면 · 직업·경험치 시스템 · 소규모 사업 3종 (spec lines 302–372)"
+ },
+ {
+  "requirement": "수동 승인·거절 시 담당자·사유·시각을 감사 로그에 저장",
+  "specLocation": "§14.5 작업 보상 개편 → 작업 기록 테이블",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR7 (command + admin surface), reusing the PR3 audit field set. PR7's bullets cover automatic verification only ('배정 없는 완료, 최소 수행시간 미달을 거부한다') and name no manual review path for a work completion; PR3 builds a generic audit trail but no work-adjudication action; PR2 meanwhile deletes the only approve/reject machinery in the repo (admin_decide_approval_request → 55000). Add an admin approve/reject command over work_completion_records that writes admin_record_audit_event with actor, reason and timestamp, and an ECONOMIC_RISK_ACTIONS / admin_action_policies entry for it.",
+  "section": "§14.5–14.8 — 작업 보상 개편 · 초보자용 작업 화면 · 직업·경험치 시스템 · 소규모 사업 3종 (spec lines 302–372)"
+ },
+ {
+  "requirement": "현재 단순 보상 버튼을 작업 배정·완료·검증·지급 흐름으로 교체한다 (with the new 400 WLD/day, 2,200 WLD/week ceilings)",
+  "specLocation": "§14.5 작업 보상 개편 (opening sentence + 일일 상한)",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR7. The plan never retires the legacy flat-rate path: PR4 instead hardens economy_claim_work as a going concern ('락이 키가 아닌 actor 기준, 23505 오용'), and PR7 only edits the route-map replacement row. As shipped today that function mints work_reward_policy.amount = 50 WLD on a 1-hour cooldown (~1,200 WLD/day) with no per-day or per-week accumulator, so if it survives PR7 the 400/2,200 cap is bypassable. PR7 should state that economy_claim_work is disabled/retired (or rewritten to route through the same accumulator) and that work_reward_policy.enabled is flipped off in the same migration.",
+  "section": "§14.5–14.8 — 작업 보상 개편 · 초보자용 작업 화면 · 직업·경험치 시스템 · 소규모 사업 3종 (spec lines 302–372)"
+ },
+ {
+  "requirement": "직업 레벨·경험치·해금 내역은 프로필에 표시",
+  "specLocation": "§14.7 직업·경험치 시스템",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "PR7. The only frontend deliverable named is '프론트 /work: 오늘 남은 보상·주간 진행도·추천 3개·진행 중 작업·완료 조건·영수증'. There is no profile surface in the repo at all (frontend/src/app has account, admin, api, auth, wallet only), so either a /profile page or an explicit job-level/XP/unlock-history block on an existing page has to be named.",
+  "section": "§14.5–14.8 — 작업 보상 개편 · 초보자용 작업 화면 · 직업·경험치 시스템 · 소규모 사업 3종 (spec lines 302–372)"
+ },
+ {
+  "requirement": "작업 카탈로그 시드 5종: 물류 정리(운송, 60 WLD/10 XP), 농장 관리(농업, 80/14), 광산 조사(광업, 100/18), 배달 작업(운송, 90/16), 장비 점검(기술, 90/16), each with its completion condition (순서형 / 재배·수확 목표 / 지정 자원 목표 / 시간·순서 / 점검 미니게임)",
+  "specLocation": "§14.5 work_task_catalog 작업 카탈로그",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR7. The plan commits to the schema ('work_task_catalog(§14.5 필드 그대로)') but never to the rows, unlike PR8 which explicitly says '§17.1~17.5의 상품을 전부 넣는다'. Without the seed the catalog ships empty and the '추천 작업 3개' screen has nothing to recommend. Add a bullet seeding the five tasks with their base_reward / base_experience / job_type and a per-task completion-condition kind.",
+  "section": "§14.5–14.8 — 작업 보상 개편 · 초보자용 작업 화면 · 직업·경험치 시스템 · 소규모 사업 3종 (spec lines 302–372)"
+ },
+ {
+  "requirement": "품질 점수는 서버가 작업 조건으로 산출",
+  "specLocation": "§14.7 직업·경험치 시스템",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR7. work_completion_records is named as a table (so the 품질 점수 column is terse-covered), but no bullet says the score is derived server-side from the task's completion conditions rather than submitted by the client — which matters because the plan's own convention is '비즈니스 로직은 SQL에 둔다'. Add it to PR7's verification bullet alongside '배정 없는 완료, 최소 수행시간 미달을 거부한다'.",
+  "section": "§14.5–14.8 — 작업 보상 개편 · 초보자용 작업 화면 · 직업·경험치 시스템 · 소규모 사업 3종 (spec lines 302–372)"
+ },
+ {
+  "requirement": "직업별 성장 효과: 농부→농업 작업·농장 효율 해금, 광부→고난도 자원 작업, 운송업자→연속 배송·운송 사업, 기술자→시설 유지비 절감, 상인→상점·거래 작업 해금",
+  "specLocation": "§14.7 직업·경험치 시스템",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR7 for the unlock rows, with cross-references to PR8 (상점·거래 작업) and the §14.8 business PR (시설 유지비 절감, 운송 사업). The plan commits to the mechanism ('레벨업은 보상 배율이 아니라 해금') but names none of the five effects; PR9's '§16.1/16.2/16.3의 해금 조건을 행으로 넣고' is progression stages, not job effects, so the job-level unlock table has no home. '시설 유지비 절감' in particular changes daily_operating_cost in a settlement path no PR currently owns.",
+  "section": "§14.5–14.8 — 작업 보상 개편 · 초보자용 작업 화면 · 직업·경험치 시스템 · 소규모 사업 3종 (spec lines 302–372)"
+ },
+ {
+  "requirement": "초보자용 작업 화면에 직업 추천을 표시한다",
+  "specLocation": "§14.6 초보자용 작업 화면",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "PR7. The /work bullet enumerates six elements and job recommendation is not among them (the companion half of the same spec bullet, '다음 해금 조건', is covered by PR9's 잠금 화면 and PR10's '다음 해금 1개'). Add a job-recommendation element to the PR7 frontend bullet.",
+  "section": "§14.5–14.8 — 작업 보상 개편 · 초보자용 작업 화면 · 직업·경험치 시스템 · 소규모 사업 3종 (spec lines 302–372)"
+ },
+ {
+  "requirement": "관리자 대시보드 — 현황 화면 자체. M2, 시간대별 발행·소각·순발행, 지급량 내역, 대사 상태, 실패 큐, 경보, 기능 상태를 한 화면에 모은 '현황' 메뉴.",
+  "specLocation": "§14.9 최고관리자 통합 운영 화면 → 관리자 대시보드",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR5 (feat/scheduler-and-metrics). 계획에는 대시보드 화면 산출물이 한 줄도 없다. PR5가 일일 집계를 만들지만 그것을 읽는 /admin 현황 페이지가 없고, 지금의 frontend/src/app/admin/page.tsx는 ADMIN_AREAS 카드 그리드 + 6개 카운트일 뿐이다. PR5에 '현황 대시보드 화면과 그것이 읽는 read-model 함수' 항목을 추가할 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "현재 M2 = 사용자 현금 + 예금 + **시장 예치금**",
+  "specLocation": "§14.9 → 관리자 대시보드 첫 항목",
+  "planCoverage": "contradicted",
+  "severity": "major",
+  "suggestedFix": "PR5. 계획 167–168줄이 '지표의 절반은 이미 economy_reconciliation_snapshots가 계산한다(M2 …) 새로 만들지 말고 그걸 돌린다'고 지시하는데, 018-economy-reconciliation-health.sql:216-228의 m2_amount는 owner_user_id IS NOT NULL AND account_type IN ('USER_CASH','USER_BANK')만 더한다 — ESCROW(시장 예치금)가 빠져 있다. 그대로 돌리면 기획서가 정의한 M2가 아니고, 그 값이 PR6 자동 조정 엔진의 입력이 된다. PR5에서 M2 정의를 확장하는 새 스냅숏 버전(metric_version 'v2')을 만들거나, 최소한 escrow 잔액을 별도 컬럼으로 병기할 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "1시간·24시간·7일 발행량/소각량/순발행량, 출석·작업·사업·은행 이자별 지급량, 사업 운영비·세금·수수료·카지노 순회수량",
+  "specLocation": "§14.9 → 관리자 대시보드 2~4번째 항목",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR5. PR5의 일일 집계는 'M2·발행·소각·보상·거래·사업 정산·상점 판매'로 뭉뚱그려져 있고, 스냅숏이 실제로 갖고 있는 창은 24시간 하나뿐이다(mint_issuance_24h_amount 등). 1시간·7일 창, 지급 원천별(출석/작업/사업/은행이자) 분해, 사업 운영비·세금·수수료·카지노 순회수량 항목을 PR5 집계 스키마에 명시적으로 넣을 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "신규·기존 사용자 자산 격차",
+  "specLocation": "§14.9 → 관리자 대시보드 (그리고 §14.10 초기 목표 마지막 항목에서 재차 요구)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR5. 상위 보유자 집중도는 스냅숏의 top_1/top_10_share_basis_points로 이미 있지만 가입 코호트별 자산 격차를 계산하는 것은 코드베이스에 없고 계획에도 없다. 기획서가 두 곳(§14.9 대시보드, §14.10 초기 목표)에서 요구하므로 PR5 일일 집계에 코호트 분위수 컬럼을 추가할 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "실패한 outbox, 정산, 작업 지급, 관리자 작업 (실패 큐 가시화)",
+  "specLocation": "§14.9 → 관리자 대시보드",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR5 (또는 PR3). 맵이 명시하듯 outbox에는 실패 상태가 아예 없다 — failed_at/last_error/max_attempts/parked가 없고 admin_recent_discord_outbox_events는 영원히 retry_pending만 보고한다. '실패한 outbox'는 지금 구조로는 표시가 불가능하다. outbox에 실패 종결 상태와 dead-letter를 먼저 넣고, 정산·작업 지급·관리자 작업의 실패 카운트를 집계에 포함할 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "관리자 로그인 실패, 권한 변경, 대량 지급, 큰 보정 거래, 로그 무결성 실패를 즉시 경보한다 / 대시보드의 로그인·권한 거부·속도 제한·이상 거래 경보",
+  "specLocation": "§14.9 → 로그 검색·보존·경보 3번째 항목, 그리고 관리자 대시보드",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "새 PR (또는 PR5에 흡수). 계획의 유일한 탐지는 PR5의 '시간별 이상 탐지(이상 발행·대량 거래·카지노 지급·원장 불일치)'로, 기획서가 요구하는 보안 이벤트(로그인 실패·권한 변경·권한 거부·속도 제한)를 포함하지 않고 '즉시'도 아니다. 게다가 경보를 내보낼 통로가 없다 — DiscordOutboxWorker는 죽은 코드(생성도 등록도 되지 않음)이고 프로덕션에서는 Discord 표면 전체가 비활성이다. 인증 실패/42501 거부/스로틀 히트를 기록하는 이벤트 소스 + 실제로 도는 경보 전달 경로를 산출물로 명시할 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "매일 감사 로그 해시 체인 검증과 경제 원장 대사를 실행하고 결과를 별도 검증 로그에 저장한다",
+  "specLocation": "§14.9 → 로그 검색·보존·경보 마지막 항목",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR5. PR3-062가 admin_verify_audit_chain과 '검증 결과 별도 테이블'을 만들지만, 그것을 **매일 돌리는 잡**이 어디에도 없다. PR5의 스케줄 목록은 '시간별 이상 탐지'와 '일일 04:00 집계'뿐이다. PR5의 scheduled_job_runs 잡 목록에 일일 감사 체인 검증을 추가하고 실패 시 §14.9의 즉시 경보와 연결할 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "로그 화면에서 민감값은 마스킹하며 원본 접근도 별도의 감사 로그를 남긴다",
+  "specLocation": "§14.9 → 민감정보 기록 제한 4번째 항목",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR3 (feat/audit-trail). PR3-061은 '기록하지 않을 값'(비밀번호·쿠키·토큰·Client Secret)만 다루고, 기록은 되지만 화면에서는 가려야 하는 값(IP, 개인정보, 대상 표시명 등)의 마스킹과 '마스킹 해제 열람 자체를 다시 감사에 남기는' 경로가 없다. 062의 검색 read-model에 마스킹된 기본 응답과 별도의 unmask 함수(자체 감사 기록 포함)를 넣을 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "운영 감사 로그는 온라인 검색용과 장기 보관용을 분리하고 암호화 백업한다 / 보존기간 종료도 자동 삭제가 아니라 정책에 따른 보관·파기 기록을 남긴다 / 개인정보는 보유기간을 적용한다",
+  "specLocation": "§14.9 → 로그 검색·보존·경보 4~5번째 항목, 민감정보 기록 제한 3번째 항목",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "새 PR (PR3 다음 층). 보존·아카이브가 계획에 전무하다. 맵의 경고가 정확하다 — audit_logs는 파티션도 아카이브 테이블도 퍼지도 없는 평범한 heap이고, PR3가 조회 감사를 켜는 순간 DB에서 압도적으로 큰 테이블이 된다. 월 단위 파티션 + 검증 후 detach·아카이브 + 파기 기록 테이블을 산출물로 넣을 것. 암호화 백업 자체는 운영 항목이므로 사용자에게 별도로 플래그.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "한 작업의 관리자 요청 → API → DB 함수 → 원장 거래 → outbox 전달을 trace_id로 연결한다",
+  "specLocation": "§14.9 → 로그 검색·보존·경보 2번째 항목",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR3 + PR4. PR3-061이 audit_logs에 trace_id 컬럼을 넣고 062가 그것으로 검색하게 하지만, 계획 어디에도 trace_id를 ledger_transactions와 outbox_events까지 **전파**하는 항목이 없다. outbox 행은 economy_post_transaction 안에서 쓰이므로 그 시그니처/페이로드에 상관 ID가 실려야 하고, 이는 PR4가 economy_post_transaction 계열을 손대는 층에서 같이 해야 한다. 현재 request_id조차 사실상 죽어 있다(주식 함수만 멱등성 키를 넣고 있고 어떤 컨트롤러도 requestId를 넘기지 않음).",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "감사 로그 필드 목록 중 계획이 열거하지 않은 것들: 관리자 표시명·역할, 서버 수신 시각·완료 시각·처리시간, UTC와 Asia/Seoul 병기, 국가·지역 추정값, HTTP 메서드·경로·화면 메뉴, 티켓·공지·장애 번호와 관리자 입력 메모, 기능 플래그 전후와 발효시각, 계정 ID·금액·통화·차변대변 요약, DB 트랜잭션 ID·적용된 함수·정책 코드·멱등성 키",
+  "specLocation": "§14.9 → 불변 상세 감사 로그 필드 목록",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR3-061. 061이 인용한 목록은 기획서 목록의 부분집합이다. 특히 '기능 플래그 전후·발효시각'은 PR2가 feature_switches를 만드는 이상 반드시 짝을 이뤄야 하고, '멱등성 키·DB 트랜잭션 ID·적용된 함수'는 원장 사고를 추적할 때 실제로 필요한 값이다. 061의 컬럼 목록에 명시적으로 추가할 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "모든 변경 화면에 현재 값과 변경 후 예상 값을 함께 표시한다 / 고위험 작업은 대상, 금액, 영향 범위, **되돌리는 방법**을 확인한 뒤 재인증한다",
+  "specLocation": "§14.9 → 실행 방식 1·3번째 항목",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR2 (콘솔 공통 규약) + PR4. 지금 이 요구를 만족하는 항목은 PR4의 대량 지급 미리보기(대상 건수·총액·정책 버전) 하나뿐이다. 기획서는 '모든 변경 화면'이라고 못박고 '되돌리는 방법'을 확인 단계에 넣으라고 한다. PR2가 /admin/controls를 만들면서 before/after + 되돌리기 안내를 콘솔 공통 컴포넌트 규약으로 세우고, 이후 PR들이 그것을 쓰게 할 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "변경 사유는 필수이며 빈 값이나 너무 짧은 사유는 거절한다",
+  "specLocation": "§14.9 → 실행 방식 2번째 항목",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR2. PR3-061은 '변경 사유'를 감사 필드로 **기록**할 뿐, 모든 관리자 실행 경로에서 사유를 강제하고 짧은 값을 거절하라는 규칙이 계획에 없다. 전례는 이미 있다 — 026의 user_restrictions.reason은 CHECK (char_length BETWEEN 3 AND 1000)이고 admin_decide_approval_request는 거절에만 사유를 요구한다. PR2에서 최고관리자 실행 함수 공통 전처리로 사유 검증(22023)을 세울 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "화면은 현황, 사용자, 경제, 작업·직업, 상점·사업, 주식, 은행·대출, 카지노, 시즌, 콘텐츠, Discord·Minecraft, 시스템, 감사 로그 메뉴로 구성한다",
+  "specLocation": "§14.9 첫 문단 (콘솔 메뉴 구성)",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR7·PR8·새 PR. 현재 ADMIN_AREAS는 7개(approvals·users·market·catalog·economy·logs·content)다. 계획이 추가하는 관리자 화면은 /admin/controls(PR2), 통제형 /admin/economy(PR6), 상점 카탈로그(PR8)뿐 — **작업·직업**, **은행·대출**, **카지노** 관리자 메뉴가 계획에 없다. PR1이 카지노 한도를 DB 정책 행으로 옮기고 PR9가 대출·신용 등급을 만들면서도 그것을 조작할 화면을 만들지 않는다. 각 PR에 해당 admin area 한 줄씩(ADMIN_AREAS + page.tsx + loading.tsx + counts)을 넣을 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "콘솔의 Discord·Minecraft 메뉴 — Minecraft 서버 운영 통제",
+  "specLocation": "§14.9 첫 문단 (콘솔 메뉴 구성)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR2. 계획 전체에 minecraft가 한 번도 나오지 않는데, PR2는 '승인 함수 폐기(호출 시 55000)'를 한다. 지금 Minecraft 운영(start/stop/restart/status/logs)에 도달하는 **유일한** 경로가 014의 minecraft.operation.* 승인 정책과 admin_approval_requests에 걸린 minecraft_sync_approved_operation_from_approval 트리거다. 승인 경로를 55000으로 막으면 Minecraft 통제가 통째로 도달 불능이 되고 기획서가 요구하는 메뉴도 생기지 않는다. PR2에 '승인 기반 Minecraft 명령을 최고관리자 직접 실행 + 재인증 경로로 이전'을 명시적 산출물로 넣을 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "활성 사용자당 발행량·소각량·평균 보유액 계산 / 첫 사업 도달시간과 작업 이탈률 확인",
+  "specLocation": "§14.10 실제 데이터 기반 보상 조정 2~3단계",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR5. 보상 조정의 입력이 되는 지표인데 계획의 일일 집계 목록(M2·발행·소각·보상·거래·사업 정산·상점 판매)에 '활성 사용자당' 정규화도, 첫 사업 도달시간(가입→첫 business_purchase 소요일)도, 작업 이탈률도 없다. PR10의 '이탈 감지'는 개별 사용자 대상 리텐션 장치이지 튜닝용 집계 지표가 아니다. PR5 집계 스키마에 코호트 지표로 추가할 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "초기 목표 — 7일 내 4,000~6,000 WLD 도달, 7~14일 내 첫 소규모 사업 구매, 작업 보상이 신규 발행의 50%를 지속적으로 넘지 않을 것, 일일 소각량이 일일 발행량의 60~90% 범위",
+  "specLocation": "§14.10 → 초기 목표",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR5(측정) + PR6(경계 감시). 이 네 개의 수치 목표를 추적하는 지표가 계획에 없다. 특히 '작업 보상 ≤ 신규 발행의 50%'와 '소각/발행 60~90%'는 PR6 자동 조정 엔진이 감시해야 할 경제 건전성 경계인데, PR6의 안전장치(§15.4)는 변경률 상하한만 다루고 이 비율들은 다루지 않는다. PR5에 비율 지표를, PR6에 그 비율이 범위를 벗어날 때의 처리(경보 또는 조정 중단)를 넣을 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "사유·승인자·적용 시각·롤백 기준을 감사 로그에 기록",
+  "specLocation": "§14.10 실제 데이터 기반 보상 조정 7단계",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR3-061 또는 PR6. 사유·적용 시각·정책 버전 전후는 061이 다루지만 '롤백 기준'(어떤 지표가 어떤 값을 넘으면 되돌리는가)을 정책 변경 시점에 함께 남기라는 요구는 계획에 없다. PR6의 economy_policy_runs 또는 정책 버전 행에 rollback_criteria를 컬럼으로 넣고 감사 이벤트에 실을 것.",
+  "section": "§14.9–14.10 — 최고관리자 통합 운영 화면 · 불변 상세 감사 로그 · 실제 데이터 기반 보상 조정 (spec lines 373–455)"
+ },
+ {
+  "requirement": "§15.3 자동 대응 대상에 \"사업 유지비\", \"거래 수수료\", \"예금 이율\", \"소비세\"가 들어 있다 (소각/발행 50% 미만 → 상점 소모품 가격·사업 유지비·거래 수수료 +5%; 은행 보관 비중 과다 → 예금 이율 -1bp; 유통량 급감 → 예금 이율 +1bp·소비세 -0.2%p).",
+  "specLocation": "§15.3 자동 조정 규칙 (표 1행·9행·10행)",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR6 (067–069) — 엔진이 쓸 노브를 먼저 정책 행으로 들어올리는 마이그레이션을 PR6 안에 넣는다. 지도 확인 결과: (a) 거래 수수료와 소비세는 스키마에 존재하지 않는다(virtual_stock_trades.fee_amount는 항상 0, economy_transfer에 수수료 개념 없음), (b) 예금 이율은 하드코딩 함수 bank_auto_interest_rate_bps()(4/3/2bps 티어)이고 virtual_bank_interest_accruals.rate_bps에 CHECK BETWEEN 1 AND 10이 걸려 있어 1bp 조정이 함수 교체 없이는 불가능, (c) 사업 유지비 daily_operating_cost는 business_admin_update가 name/description/active만 바꿀 수 있어 마이그레이션 없이는 변경 불가이며 CHECK (daily_operating_cost <= daily_revenue)가 인상 폭을 구조적으로 막는다. PR6은 \"§15.3의 표를 그대로 규칙 행으로 넣는다\"고만 하고 이 네 노브의 쓰기 대상을 만들지 않는다 — 표는 들어가되 세 규칙이 실행될 수 없다.",
+  "section": "§15 자동 경제 조정 엔진 (spec 456–508행) vs. 구현 계획 PR1–PR10"
+ },
+ {
+  "requirement": "§15.1 목표 지표 8종을 주기적으로 산출한다 — 특히 \"신규 7일 중앙 보유액 4,000~6,000 WLD\", \"첫 소규모 사업 도달 7~14일\", \"중간 사업 도달 30~45일\", \"활성 사용자 거래율 주간 25% 이상\", \"상점 구매 전환율 주간 20~45%\".",
+  "specLocation": "§15.1 목표 지표",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR5 (065–066) — 일일/주간 집계 산출물에 코호트·비율 지표를 명시적으로 추가한다. PR5의 집계 목록은 \"M2·발행·소각·보상·거래·사업 정산·상점 판매\"(총량형)뿐이고, PR5가 재사용하겠다는 economy_reconciliation_snapshots는 m2·순발행·국고·24h 거래량·top1/top10 집중도까지만 계산한다(지도: economy-core-ledger.md, stocks-bank-loans-casino.md:155). 가입 코호트 중앙값, 마일스톤 도달 소요일, 주간 활성 사용자 대비 거래/구매 비율은 어느 PR의 산출물도 아니다. 이 지표들이 §15.3의 네 규칙(신규 7일 자산 4,000 미만/6,000 초과, 첫 사업 도달 14일 초과)의 입력이므로 PR6 엔진이 그대로 굶는다.",
+  "section": "§15 자동 경제 조정 엔진 (spec 456–508행) vs. 구현 계획 PR1–PR10"
+ },
+ {
+  "requirement": "\"매월 1일: 성장 단계별 도달시간, 자산 집중도, 미사용 콘텐츠 분석\"",
+  "specLocation": "§15.2 자동 실행 주기",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR5 (065–066) — 월간 잡의 본문을 산출물로 넣는다. PR5는 \"KST 경계 계산(매시 / 매일 04:00 / 매주 월 04:30 / 매월 1일)\"에서 경계 계산만 언급하고, 매시·매일 잡의 내용은 적었지만 월간 잡이 무엇을 계산하는지는 어느 PR에도 없다. 자산 집중도만 기존 스냅숏으로 충당되고, 성장 단계별 도달시간(PR9의 progression_stages 의존)과 미사용 콘텐츠 분석(작업·상점 품목 노출 대비 사용률)은 새 구축이다.",
+  "section": "§15 자동 경제 조정 엔진 (spec 456–508행) vs. 구현 계획 PR1–PR10"
+ },
+ {
+  "requirement": "\"자동화는 과거 원장을 수정하지 않고 다음 정책 버전을 생성하는 방식으로만 동작한다\" + §15.4 \"이전 버전 복구 가능\"",
+  "specLocation": "§15 도입부 / §15.4 자동화 안전장치",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR6 (067–069), 규약은 PR2(059)에 — 돈·보상·가격 함수가 활성 정책 버전에서 값을 읽고 ledger_transactions.policy_version을 스탬프하도록 하는 작업이 어느 PR에도 없다. PR2-059는 \"새 버전 생성 · effective_at 예약 발효 · 이전 버전 복구\"라는 정책 행 수명주기까지만 다룬다. 지금 코드베이스는 economy_claim_work·business_settle_daily·shop_purchase·bank_*·casino_play_coin 전부가 economy_post_transaction에 p_policy => NULL을 넘기고 값은 싱글턴 정책 테이블/함수 본문에서 직접 읽는다(지도: businesses-seasons.md:106, work-rewards-jobs-xp.md:75, shop-items.md:99). 이 연결이 없으면 새 정책 버전이 발효돼도 런타임 동작이 바뀌지 않고, \"이전 버전 복구\"가 되돌릴 대상도 원장 귀속도 없다.",
+  "section": "§15 자동 경제 조정 엔진 (spec 456–508행) vs. 구현 계획 PR1–PR10"
+ },
+ {
+  "requirement": "\"자동 변경 전후와 계산 근거를 상세 감사 로그에 기록\"",
+  "specLocation": "§15.4 자동화 안전장치 (마지막 항목)",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR3 (060–062)에 시스템 주체 감사 경로를 추가하고 PR6에서 호출한다 — PR6은 근거를 economy_policy_runs 테이블에만 남기고 감사 로그 기록을 언급하지 않으며, PR3의 감사 작업은 관리자 행위만 다룬다. 현재 감사 체인의 유일한 입구인 admin_record_audit_event는 \"활성 사용자이면서 user_roles 행을 가진\" 주체를 요구하고 admin_append_audit_event는 actor NULL을 거부한다(지도: audit-logging.md:44). 사람 액터가 없는 스케줄러 잡은 구조적으로 감사 체인에 쓸 수 없으므로, 시스템 액터 표현(또는 전용 append 경로)을 정하지 않으면 자동 변경은 감사 로그에 남지 않는다.",
+  "section": "§15 자동 경제 조정 엔진 (spec 456–508행) vs. 구현 계획 PR1–PR10"
+ },
+ {
+  "requirement": "\"정책마다 version, reason, source_metrics, previous_values, new_values, effective_at, rollback_version 기록\"",
+  "specLocation": "§15.4 자동화 안전장치",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR6 (067–069) — economy_policy_runs 정의를 \"입력 지표·계산 결과·적용 정책·이전/신규 버전·성공 여부\"에서 확장한다. 명시되지 않은 필드: reason(변경 사유), previous_values/new_values(버전 식별자가 아니라 실제 값 전후), rollback_version(복구 대상 포인터). 기존 economy_policies에는 version·effective_at·status·payload만 있어(init/001) 이 셋을 담을 자리가 없다.",
+  "section": "§15 자동 경제 조정 엔진 (spec 456–508행) vs. 구현 계획 PR1–PR10"
+ },
+ {
+  "requirement": "\"한 정책은 최소 7일 유지하고 긴급상황 외 연속 변경 금지\" — 긴급상황에서는 연속 변경이 허용된다.",
+  "specLocation": "§15.4 자동화 안전장치",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR6 (067–069) — 계획은 \"안전장치(§15.4)는 DB 제약으로 건다 — 주 1회, 최소 유지 7일\"이라고만 하고 긴급 예외 경로를 명명하지 않는다. 예외 없는 CHECK/트리거로 구현하면 최고관리자의 긴급 수동 개입 자체가 막힌다. 최고관리자 긴급 오버라이드(사유 필수 + 감사 기록)를 제약과 함께 설계해야 한다.",
+  "section": "§15 자동 경제 조정 엔진 (spec 456–508행) vs. 구현 계획 PR1–PR10"
+ },
+ {
+  "requirement": "\"무한 반복 보상 대신 일일 상한 뒤에는 경험치·도감·커뮤니티 기여만 지급한다\" — hitting the daily WLD cap must NOT end the loop; the player keeps earning XP, collection progress and community contribution past the cap.",
+  "specLocation": "§16.0 흥미 유지 공통 원칙 (line 521)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR7 (`feat/work-jobs-xp`). PR7 defines the 400 WLD/day · 2,200 WLD/week accumulator but says nothing about what happens after the cap is reached — as written it is a hard stop. Add a post-cap branch: the work-completion path still writes XP, collection/도감 progress and community-contribution counters while suppressing only the WLD posting, and the `/work` screen must show \"cash cap reached, XP still earning\" rather than disabling the task.",
+  "section": "§16.0–16.1 — 흥미 유지 공통 원칙 · 초반(정착) 단계"
+ },
+ {
+  "requirement": "\"운에만 의존하지 않고 누적 진행도로 반드시 보상을 얻을 수 있는 천장 규칙을 둔다\" — every luck-based reward (랜덤 사건, 초보 행운 상자, 분실물 등) needs a pity/ceiling rule guaranteeing the reward once cumulative progress crosses a threshold.",
+  "specLocation": "§16.0 흥미 유지 공통 원칙 (line 522)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR10 (`feat/engagement-loop`). PR10 lists 랜덤 사건 with no counter substrate. Add a per-user, per-reward-pool cumulative-attempt counter table plus a guaranteed-grant branch when the counter crosses the threshold, and reset it on grant. Note the word 천장 appears nowhere in the plan; PR1's casino work explicitly covers only coin fairness, so no other PR absorbs this.",
+  "section": "§16.0–16.1 — 흥미 유지 공통 원칙 · 초반(정착) 단계"
+ },
+ {
+  "requirement": "첫날 흐름 steps 1–2 and 5: \"프로필과 대표 캐릭터·색상 설정\", \"5분 경제 튜토리얼로 지갑·원장·상점 체험\", \"첫 도구를 무료 체험한 뒤 기본 장비 구매\".",
+  "specLocation": "§16.1 초반: 정착 단계 → 첫날 흐름 (lines 530–534)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "New PR (or an explicit PR10 bullet). The plan never says 프로필, 튜토리얼, or 온보딩 in any PR; the map confirms there is no per-user profile table at all (`work-rewards-jobs-xp.md`: \"no user-state table beyond users.status\"). Needs: a user-profile row carrying 대표 캐릭터·색상, a tutorial-progress/completion record so the 5-minute wallet/ledger/shop walkthrough is resumable and grantable-once, and a zero-cost trial grant on the first tool (a `user_items` row with a trial flag/expiry, not a purchase) so PR8's catalog can express 무료 체험 alongside the priced 기본 장비.",
+  "section": "§16.0–16.1 — 흥미 유지 공통 원칙 · 초반(정착) 단계"
+ },
+ {
+  "requirement": "The NPC layer the early loop is built on: \"오늘의 NPC 주문 납품\", \"하루 한 번 랜덤 시민 요청 해결\", quest 이웃 돕기 \"NPC 요청 3회 완료\", collection \"시민 의뢰 인물 카드\", weekly goal \"NPC 단골 단계 1 달성\", and the spend sink \"NPC 선물\".",
+  "specLocation": "§16.1 초반 일일 활동 / 초반 퀘스트 묶음 / 초반 수집·도감 / 초반 주간 목표 / 초반 소비처 (lines 543, 546, 558, 578, 588, 604)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR10 (`feat/engagement-loop`). PR10 references the early content only by count (\"초반 퀘스트 7종, 일일 활동 10종\") and never names NPC in any PR. Six distinct §16.1 requirements need an NPC substrate the plan does not schedule: an NPC catalog, daily order/request generation with delivery verification, a per-user 단골(regular-customer) tier accumulator that the weekly goal reads, and NPC gifts as a purchasable sink. Name it in PR10's migration set (083–087) or it falls out of every count-based bullet.",
+  "section": "§16.0–16.1 — 흥미 유지 공통 원칙 · 초반(정착) 단계"
+ },
+ {
+  "requirement": "\"같은 작업만 반복하지 않도록 작업 후보와 보너스 조건을 매일 변경한다\" — both the task candidates and the bonus conditions rotate daily.",
+  "specLocation": "§16.0 흥미 유지 공통 원칙 (line 516)",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR7 (`feat/work-jobs-xp`). PR7 covers half of this — \"같은 작업 반복 시 감쇠, 작업 목록 일일 일부 교체\" — but has no notion of a daily-rotating bonus condition (e.g. today's bonus tag/multiplier attached to a subset of tasks). Add a per-KST-day bonus-condition roll alongside the task-list rotation so the rotation changes what pays extra, not only what is listed.",
+  "section": "§16.0–16.1 — 흥미 유지 공통 원칙 · 초반(정착) 단계"
+ },
+ {
+  "requirement": "\"돈 외에도 … 사업 도감 … 을 제공한다\" plus the 첫 가게 quest reward \"간판·사업 도감\" — a business codex is one of the named non-money reward channels.",
+  "specLocation": "§16.0 (line 517) and §16.1 초반 퀘스트 묶음 (line 561)",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR10 (`feat/engagement-loop`). PR10 enumerates the collection set as \"도감(직업 체험 5·초보 도구 10·지역 스탬프 7·업적 12)\" and drops 사업 도감 (and 시민 의뢰 인물 카드, covered separately). Since the enumeration is explicit rather than a count, the omission will be built as written. Add 사업 도감 as a collection kind and wire the 첫 가게 quest reward to it.",
+  "section": "§16.0–16.1 — 흥미 유지 공통 원칙 · 초반(정착) 단계"
+ },
+ {
+  "requirement": "\"수집 완성 보상은 소액 WLD보다 칭호·장식·할인권 중심\" — collection-completion payouts are weighted to titles, decorations and discount vouchers rather than small cash amounts.",
+  "specLocation": "§16.1 초반 수집·도감 (line 581)",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "PR10 (`feat/engagement-loop`), with the voucher item type in PR8. The plan states this reward-composition rule only for mid-game rankings (\"순위(보상은 현금이 아니라 칭호·장식·구매권)\") and never for collection completion. Also note 할인권 has no home: PR8's catalog covers §17.1–17.5 priced goods, and the 장사 준비 quest reward \"초보 사업 허가 할인권\" needs a discount-voucher item type that can be held in `user_items` and consumed at purchase time.",
+  "section": "§16.0–16.1 — 흥미 유지 공통 원칙 · 초반(정착) 단계"
+ },
+ {
+  "requirement": "\"Discord 오늘의 질문 또는 커뮤니티 투표 참여\" as one of the ten early daily activities, feeding the §16.0 \"커뮤니티 기여\" reward channel.",
+  "specLocation": "§16.1 초반 일일 활동 (line 547)",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR10 (`feat/engagement-loop`). Nominally inside PR10's \"일일 활동 10종\", but the plan touches no Discord code in any PR, and the map shows the bot's surface is fixed at COMMANDS = {balance, history, daily, send} (`backend/src/discord/interactions.ts:27`) with an `outbox_events` table that has no consumer. Call out the Discord-side work (daily question/poll post, participation capture back into the daily-activity ledger) explicitly, or the count-based bullet will ship nine activities.",
+  "section": "§16.0–16.1 — 흥미 유지 공통 원칙 · 초반(정착) 단계"
+ },
+ {
+  "requirement": "「편의 기능은 제공하되 경쟁 승률을 직접 구매하게 하지 않음」 and 「수집품은 직접 능력보다 전시·명예·스토리 가치 중심」 — the shop and collectibles may sell convenience and display value, never competitive win rate or direct power.",
+  "specLocation": "§16.3 후반 소비처 (last bullet) + §16.3 후반 수집·명예 (last bullet)",
+  "planCoverage": "absent",
+  "severity": "blocker",
+  "suggestedFix": "PR8 (feat/shop-catalog-items). PR8 builds `item_effect_receipts` and per-item effects with no constraint on what an effect may do; add an explicit effect-class taxonomy (convenience/cosmetic/display only) enforced as a DB CHECK on the catalog, plus a rule that season/명품/collectible rows carry no gameplay effect at all. PR10's ranking rewards already respect the sibling rule (칭호·장식·구매권), so the shop is the one place the no-pay-to-win rule can be violated.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "사업 운영 선택 전체: 저가대량/고가품질 가격 전략, 안전/공격적 재고 투자, 지역 광고·할인 행사·단골 쿠폰, 시설·창고·배달·직원 교육 업그레이드 우선순위, 사건 발생 시 보험/직접 복구/영업 중단 선택. Plus the matching sinks 「사업 임대료·운영비·광고비·재고·보험」.",
+  "specLocation": "§16.2 사업 운영 선택 + §16.2 중반 소비처 (1st bullet)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "new PR. No PR in the stack touches business gameplay — PR4 only fixes `business_settle_daily` idempotency. Per the map, `virtual_business_types` is a fixed 3-row catalog with no inventory, price, facility, staff, ad, or incident concept, and `CHECK (daily_operating_cost <= daily_revenue)` structurally forbids a business that can lose money, so the incident/insurance branch cannot even be expressed today.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "손익 보고서에서 매출·원가·운영비·순익 비교; 사업마다 고객 만족도·시설 상태·단골 수치 관리",
+  "specLocation": "§16.2 사업 운영 선택 (last two bullets)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "new PR (same business-operations PR as above). `virtual_business_settlements` records a single netted payout with no revenue/cost breakdown and no per-business state columns; a P&L read function plus satisfaction/condition/regulars state need their own tables and settlement inputs.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "사업 전문화(품질·물량·친환경·프리미엄), 본점과 지점 확장, 연구개발 프로젝트로 신규 상품 해금, 공급업체 선택과 장기 계약, 직원 교육·복지·생산성, 주간 이사회 보고서 — and the unlocks that gate them (사업 정상 정산 30회: 중형 사업 확장 / 90회: 본점·지점 시스템)",
+  "specLocation": "§16.3 후반 경영 콘텐츠 + §16.3 후반 해금",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR9 only inserts the unlock *conditions* as `progression_stages` rows; nothing in the stack builds the branch/specialization/R&D/supplier/staff systems those rows unlock, so the gates would open onto empty screens. Add to the new business PR, or explicitly defer the late-game management layer and flag to the user.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "사용자 시장에서 필요한 재료 구매·판매; 사업 재료 구매 주문 등록; and its sinks 「거래 수수료·시장 등록비·창고 비용」; 중반 장기 목표 「사용자 거래 20회와 단골 관계 구축」",
+  "specLocation": "§16.2 중반 일일 활동 + §16.2 중반 소비처 + §16.3 후반 사용자 생성 경제 활동",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR10 or new PR. PR10 covers only 사용자 간 *작업* 발주 (work orders); a player-to-player goods market with buy/sell orders, listing fees and trade fees is a separate system. The seeded `ESCROW` account and the `MARKET_ESCROW`/`MARKET_SETTLEMENT` ledger labels already exist and are produced by nothing — this is what they were reserved for.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "사용자 사업 간 공급 계약 (중반) / 사용자 사업 간 장기 계약 (후반); 운송·기술·농업 외주 계약 생성",
+  "specLocation": "§16.2 중반 협동 콘텐츠 + §16.3 후반 일일·주간 활동 + §16.3 후반 사용자 생성 경제 활동",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR10. Its user-generated-economy bullet names only one-shot work orders; recurring business-to-business supply contracts (term, delivery cadence, breach handling) need their own contract entity and should reuse PR10's 보상 상한·담보·원장 예치 guardrail.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "멘토 시스템: 후발 사용자 멘토 임무 (중반), 직업 후배 멘토링과 교육 계약, 멘토가 초보자 훈련 계약 개설 (후반), 직업 50레벨 멘토 기능 해금",
+  "specLocation": "§16.2 중반 협동 콘텐츠 + §16.3 후반 일일·주간 활동 + §16.3 후반 사용자 생성 경제 활동 + §16.3 후반 해금",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR10. The plan names no mentoring deliverable anywhere; PR9 would insert the level-50 mentor unlock row with nothing behind it. Needs a mentor/mentee pairing, training-contract creation, and a reward path that cannot be farmed by self-pairing.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "길드·그룹별 시즌 점수; 공동 창고와 기부 기록; 지역 건물 복구와 서버 공동 기금",
+  "specLocation": "§16.2 중반 협동 콘텐츠",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR10. PR10 covers ad-hoc 2~5인 team contracts but no persistent group/guild entity, so per-guild season scoring, a shared warehouse, and an auditable donation ledger have nowhere to hang. A shared warehouse holding other people's goods is also a custody problem that needs the ledger/escrow treatment, not a plain table.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "순자산 50,000 해금: 「일반 주식과 지정가 주문」 — limit orders",
+  "specLocation": "§16.2 중반 해금",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "new PR (stocks). Per the map, `stock_trade` is an immediate market fill at `current_price` with no order book and no order type; PR9 inserts the unlock row but no PR in the stack adds a resting/limit order. A resting order also needs funds reserved (escrow) and a matching/expiry path, which is a real PR, not a flag.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "손실이 아닌 수익·효율 중심 주식 모의대회 (paper-trading contest scored on profit/efficiency, not losses)",
+  "specLocation": "§16.2 중반 경쟁 콘텐츠",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR10. Its ranking bullet covers reward *shape* (칭호·장식·구매권) but not this event: a mock contest needs a separate simulated portfolio isolated from real balances, otherwise it becomes real trading with a leaderboard attached — exactly the loss-driven competition the spec is steering away from.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "NPC 대량 주문과 납품 기한 관리 (NPC bulk orders with delivery deadlines); NPC 대기업의 특별 계약",
+  "specLocation": "§16.2 중반 일일 활동 + §16.2 중반 랜덤 사건",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR7 (feat/work-jobs-xp) or PR10. PR7's `work_task_catalog`/`work_assignments` are single-actor tasks with a minimum duration; a multi-item bulk order with a deadline, partial delivery and failure penalty is a different shape and should be stated as a deliverable rather than assumed to fall out of the task catalog.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "직업 평판 의뢰와 지역별 계약 (job-reputation commissions and region-scoped contracts)",
+  "specLocation": "§16.2 중반 일일 활동",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR7. PR7 defines jobs, XP and levels but no reputation axis and no region dimension; reputation is a second progression track (quality/reliability) that gates commissions, and the weekly contract table in §16.2 (지역 축제 공급, 시설 복구) assumes regions exist.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "한정 수집품 제작 재료 수집; 수집품 제작·복원·전시 비용",
+  "specLocation": "§16.3 후반 일일·주간 활동 + §16.3 후반 소비처",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR8. PR8 sells 시즌·명품 7 items outright; crafting from gathered materials, restoration, and a paid exhibition surface are three distinct sinks with no deliverable in the plan. Crafting also needs the materials market (see the 사용자 시장 finding) to source inputs.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "후반 도전 콘텐츠 6종: 한정 자본 경영 시나리오, 불황 기간 생존 도전, 전 직업 대형 공급망 계약, 기간 내 최고 품질 달성, 자동화 없이 수동 운영 효율 도전, 시즌별 경제 퍼즐과 정책 선택 이벤트 — 그리고 「명예 초기화 없이 별도 프레스티지 도감 제공」",
+  "specLocation": "§16.3 후반 도전 콘텐츠",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR10. PR10's season bullet fixes what resets (assets kept, season score reset) but names no challenge mode and no prestige codex. The prestige rule is load-bearing: any prestige surface built later must be additive, never a reset of accumulated honor.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "부동산 사용권·사무실·창고 임대와 유지비 (real-estate/office/warehouse usage rights with recurring upkeep)",
+  "specLocation": "§16.3 후반 소비처",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "new PR, coordinated with PR5 (scheduler). This is a recurring sink, not a one-off purchase; it needs a lease entity plus a periodic charge job on PR5's KST scheduler, and a defined behaviour when a player cannot pay (§16.2's 밀린 유지비 상한 in PR10 hints at the policy but only for returning users).",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "고급 도구 수리·내구도·전문 자격 시험; 차량 구매·연료·정비·보험",
+  "specLocation": "§16.2 중반 소비처",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR8. PR8 sells the tools (장비·허가증 with level/job conditions) and 이동수단 6, but there is no durability counter, no repair action, no fuel/maintenance/insurance loop and no certification exam — so these named recurring sinks would ship as one-time purchases with no ongoing drain, weakening exactly the sink side the auto-policy engine (PR6) measures.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "사업 감사 이벤트: 정상 기록 유지 시 신용 상승 (business-audit random event that raises credit rating on a clean record)",
+  "specLocation": "§16.2 중반 랜덤 사건",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "PR9 (feat/progression-stages). PR9 defines 신용 등급 신규/C/B/A and loan limits but names no inputs that move a rating; this event is one of the two named ways to earn credit (the other being 정상 상환 기록). State the rating's input set in PR9 so the event has something to write to.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "시즌 스토리 5장 완료 (중반 장기 목표); 직업 20레벨 1차 전문화와 「직업 스토리」 (중반 해금)",
+  "specLocation": "§16.2 중반 장기 목표 + §16.2 중반 해금",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "PR10. PR10 opens the season lifecycle (6~8주, successor seasons) but no chapter/story progression exists; job stories likewise have no deliverable. Either add a minimal chapter-progress table or flag narrative content as out of scope to the user.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "중·후반 도감 항목: 사업 도감 15개, 수집 도감 완성률 순위, 직업별 전설 계약 도감, 지역 공헌 훈장, 사업 역사 기록과 창업 기념패",
+  "specLocation": "§16.2 중반 장기 목표·경쟁 콘텐츠 + §16.3 후반 수집·명예",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR10. PR10 enumerates the early-game 도감 only (직업 체험 5 · 초보 도구 10 · 지역 스탬프 7 · 업적 12); the mid/late collections and the completion-rate ranking that reads them are not listed, so the collection schema risks being sized for the early set alone.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "주식 시장 뉴스와 기업 상태 확인 (daily mid-game activity)",
+  "specLocation": "§16.2 중반 일일 활동",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "new PR (stocks) or out of scope, flag to user. Per the map, `virtual_stocks` carries only symbol/name/description/prices/shares_outstanding — there is no news feed and no company-status/fundamentals surface, and the price path is a random walk plus trade nudges with nothing narrative attached.",
+  "section": "§16.2–16.3 중반(확장 단계)·후반(영향력 단계)"
+ },
+ {
+  "requirement": "장식품은 경쟁 보상·승률·주식 수익률·카지노 확률을 높이지 않는다 (decorative/collectible items must confer no competitive, win-rate, stock-return or casino-odds advantage)",
+  "specLocation": "§17.5 시즌·명품·수집품 상점 (closing rule after the table)",
+  "planCoverage": "absent",
+  "severity": "blocker",
+  "suggestedFix": "PR8 (feat/shop-catalog-items). PR8 builds a generic effect engine (`item_effect_receipts`, '효과') plus the first-ever admin shop-catalog CRUD screen, and PR6 explicitly excludes casino odds only from the *auto-adjust* engine — nothing anywhere states that cosmetic/collectible items carry no effect. Add a DB-level constraint on `shop_catalog` (e.g. category in ('season','luxury','collectible') ⇒ effect IS NULL / effect_kind = 'cosmetic'), refuse cosmetic rows in the effect-application path, and cover it with a `.db.test.ts` case so an admin price/effect edit cannot turn a 25,000 WLD 명품 시계 아이콘 into a casino or stock modifier.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "이동수단·생활 소비 상품은 주간 유지비를 낸다 — 중고 자전거 주 100, 소형 스쿠터 주 300, 소형 화물차 주 900, 개인 창고 주 400, 작업실 임대권 주 700, 사무실 임대권 주 1,500",
+  "specLocation": "§17.4 이동수단·생활 소비 (유지비 column)",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR8 (feat/shop-catalog-items) for the schema + recurring-charge SQL, with the weekly KST job registered in PR5's `scheduled_job_runs` (매주 월 04:30 boundary already planned). PR8 lists the 6 이동수단 items but only as one-time purchases; PR10 refers to '밀린 유지비 상한' as if upkeep exists, yet no PR builds the weekly upkeep charge at all. Without it these are permanent unlocks with no sink — add an upkeep column on `shop_catalog`/`user_items`, an arrears accumulator with the §16.4 cap, and a weekly `USER_CASH → SINK` posting through `economy_post_transaction`.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "복귀 사용자에게 현금 대량 지급보다 할인권·소모품·재가동권을 제공한다",
+  "specLocation": "§16.4 복귀 사용자 콘텐츠",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR10 (feat/engagement-loop). PR10 says only '복귀 임무 7일, 밀린 유지비 상한' and never states what the returning package pays out. The plan already carries the equivalent rule for rankings ('보상은 현금이 아니라 칭호·장식·구매권') — apply the same discipline here: returning rewards are item grants (`user_items`) and discount/restart vouchers, never a bulk MINT→USER_CASH transaction.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "마지막 접속 이후 경제와 시스템 변경 요약을 복귀 사용자에게 보여준다",
+  "specLocation": "§16.4 복귀 사용자 콘텐츠",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR10 (feat/engagement-loop). Needs a last-seen watermark per user plus a change-feed read model over the policy-version history PR2/059 creates and the auto-adjust runs PR6 records (`economy_policy_runs`), rendered on the returning-user screen. Neither PR10 nor PR6 names any user-facing changelog surface.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "복귀 지원: 기본 도구 수리와 사업 재가동 지원 · 복귀 전용 작업 목록 · 도감 따라잡기",
+  "specLocation": "§16.4 복귀 사용자 콘텐츠",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR10 (feat/engagement-loop). PR10 covers the 7-day return quest and the upkeep cap but none of these three: a tool-repair grant against `user_items.내구도` (PR8), a business restart action against the dormant `virtual_business_ownerships`, a returning-only slice of the PR7 work catalog, and a catch-up path for the 도감 PR10 already builds for new players.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "시즌 종료 주: 결산, 전시, 명예 보상",
+  "specLocation": "§16.5 시즌 콘텐츠 구조",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR10 (feat/engagement-loop). PR10 opens the season lifecycle and resets 시즌 점수·한정 임무, but never builds the close-out itself. The map confirms there is no season-wide score aggregate, no final standings snapshot and no season reward path anywhere today (points live only in `virtual_consumption_event_entries` with no redemption). Add a season-close function that snapshots standings, awards 명예 보상 as titles/decorations (not cash, per §17.5), and exposes the 전시 surface — otherwise 'seasons' ship with a start and no end.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "반복 피로 설문 결과를 관리자 지표에 반영한다",
+  "specLocation": "§16.6 흥미 저하 감지와 대응",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR10 (feat/engagement-loop) for the survey capture, feeding the daily 04:00 aggregation PR5 builds and an /admin panel. The plan's disengagement bullet names the four behavioural triggers and the notification rule but omits the survey entirely.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "다음 해금까지 너무 멀면 중간 보상과 진행도 표시",
+  "specLocation": "§16.6 흥미 저하 감지와 대응",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR10 (feat/engagement-loop), reading the stage thresholds PR9 defines. Progress display is covered twice (PR10's '다음 해금 1개', PR9's '잠금 화면에 다음 해금 조건을 표시'), but the 중간 보상 half is missing — PR10 enumerates exactly four disengagement triggers (3일 / 7연속 / 7일 / 14일) and this fifth one is not among them.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "소모품 효과가 걸릴 지점: 작업 품질 실패 1회 보호(초보 작업 장갑), 실패한 쉬운 작업 재도전권(작업 에너지 음료), 배달 작업 대기시간 10% 감소(버스 이용권), 보통 작업 실패 시 재료비 50% 반환(작업 실패 보험), 동시 작업 준비 슬롯 +1(작은 작업 가방)",
+  "specLocation": "§17.1 초반 일반 상점 (효과 column)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR7 (feat/work-jobs-xp). PR7's work model is catalog → assignment → completion → reward with caps and decay; it has no failure/quality outcome, no retry token, no wait-time/queue concept, no material cost, and no concurrent-assignment slot limit. Five of the ten §17.1 items therefore have nothing to attach to even though PR8 builds `item_effect_receipts`. Add the outcome/quality result, material cost, wait time and a per-user assignment-slot cap to the PR7 tables so PR8's effects are applicable.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "사업 상점 효과: 판매대 매출 +5%, 다음 정산 매출 +10%, 시설 효율 복구, 재고 용량 +25%, 운영비 3% 절감, 이벤트 손실 50% 완화",
+  "specLocation": "§17.3 사업 상점 (효과 column)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR8 (feat/shop-catalog-items), or a new PR if business settlement is out of PR8's scope. Today `business_settle_daily` is a fixed four-leg formula from an immutable 3-row `virtual_business_types` catalog with no modifier input, no inventory, no facility condition and no business-event concept — and no PR in the stack touches it. Six of the ten 사업 상점 items are inert without settlement-time modifiers, a business inventory capacity, and a business-event/loss source for 사업 보험 to mitigate.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "허가증이 사업 구매 조건이다 — 초보 사업 허가증(500) → 중고 판매대, 중형 사업 허가증(5,000) → 카페·농장, 고급 사업 허가증(15,000) → 스튜디오·후반 사업; 노점 재고 상자는 '사업 보유자' 한정",
+  "specLocation": "§17.1 / §17.3 상점 (제한 · 효과 columns)",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR8 (feat/shop-catalog-items) for the permit-ownership check inside `business_purchase`, plus a migration adding the small business types. PR8's '장비·허가증은 레벨/직업/사업 조건' is the condition to *buy the permit*, not the permit *gating the business*. Also, 중고 판매대 and 노점 do not exist: `virtual_business_types` is a fixed 3-row CAFE/FARM/STUDIO catalog with no admin create path, so the 500 WLD 초보 사업 허가증 currently unlocks nothing.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "구매 제한은 하루 단위만이 아니다 — 계정당 1개(기본 공구함·작은 작업 가방), 1회 구매(초보 작업 장갑·기본 진열대), 주 2회(지역 광고), 영구/상태 기반/단계별/기간제",
+  "specLocation": "§17.1–17.3 상점 표 (제한 · 비용 성격 columns)",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR8 (feat/shop-catalog-items). PR8 names only '소모품 일일 한도' plus level/job/business conditions. The lifetime and per-account caps are load-bearing — without '계정당 1개' a member buys ten 작은 작업 가방 for +10 concurrent slots. Model the limit as (window: day/week/lifetime, count) on `shop_catalog` and enforce it inside the purchase function, not in the frontend.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "품절·가격·구매 제한·자동조정 변경은 모두 정책 버전과 로그 기록",
+  "specLocation": "§17.6 상품 공급·가격 규칙",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR8 (feat/shop-catalog-items), reusing PR2/059's `economy_policies` writer and PR3's audit chain. PR6 versions the auto-adjust side (`economy_policy_runs` 이전/신규 버전), but nothing binds *manual* shop price/stock/limit edits to a policy version, and PR8 never says the purchase path stops passing `p_policy => NULL` — today every SHOP_PURCHASE row has `policy_version` NULL, so no purchase is attributable to a price regime and none can be rolled back or replayed against one.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "사용자 간 거래 가능 여부와 귀속 여부를 상품마다 명시 (per-item tradability and soulbound state); shop_catalog.거래 여부 · user_items.귀속 상태",
+  "specLocation": "§17.6 상품 공급·가격 규칙 / §19 구현 데이터 구조",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR8 (feat/shop-catalog-items). The plan names the `shop_catalog` and `user_items` tables but its column-level bullets never mention tradability or binding, and no PR builds or forbids user-to-user item transfer. At minimum both flags must exist and the ~50 seeded rows must set them, so a later trade feature cannot silently make bound items liquid.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "시즌 주차별 구조 — 1주 탐색·직업 선택, 2~3주 개인 작업·사업 성장, 4~5주 협동 프로젝트·지역 경쟁, 6주 대형 사건·최종 납품",
+  "specLocation": "§16.5 시즌 콘텐츠 구조",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "PR10 (feat/engagement-loop). PR10 commits to '시즌 6~8주 구조' and lists the content types (협동 2~5인, 월드 프로젝트, 주간 목표) but has no phase/week schedule that decides which content is live in which week of a season. Add a season-phase table (or a week-indexed content gate) so the co-op and final-delivery beats open on schedule rather than all at once.",
+  "section": "§16.4–16.6 복귀·시즌·이탈감지 / §17 상점 카탈로그 / §18 단계 루프 / §19 데이터 구조 (spec lines 791–924)"
+ },
+ {
+  "requirement": "\"보상 배출(faucet)마다 대응 소비처(sink)를 먼저 설계하고, 신규 콘텐츠는 경제 시뮬레이션 후 기능 플래그로 켠다.\"",
+  "specLocation": "§15 경제 시스템 레퍼런스와 적용",
+  "planCoverage": "partial",
+  "severity": "blocker",
+  "suggestedFix": "PR7 · PR8 · PR10 (스위치 등록), §6 검증 게이트 (시뮬레이션·faucet/sink 대응표). PR2가 만드는 feature_switches에 새 배출 기능마다 기본 비활성 행을 넣고, 배출/소각 추정치를 PR5의 일일 집계 지표로 검토한 뒤에만 켜도록 각 PR의 완료 조건에 넣는다.",
+  "section": "§15 레퍼런스 기반 기술 검토 (Postgres · OAuth · Discord · OWASP) + §16 도입부 (spec-v2.md 925–1010)"
+ },
+ {
+  "requirement": "\"봇 알림은 DB 커밋 뒤 outbox_events로 전달한다. 따라서 Discord API 실패가 금전 거래를 되돌리거나 중복 처리하지 않는다.\"",
+  "specLocation": "§15 운영 DB 스키마",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR5. 이미 MarketTickerRunner를 본뜬 러너와 scheduled_job_runs를 만드는 PR이므로 DiscordOutboxWorkerRunner·프로바이더 토큰·config.ts의 DISCORD_BOT_TOKEN/채널 ID/활성 플래그·compose 환경 블록을 같은 PR에서 붙이고, failed_at/last_error/max_attempts 데드레터 컬럼을 065–066 중 하나에 넣는다.",
+  "section": "§15 레퍼런스 기반 기술 검토 (Postgres · OAuth · Discord · OWASP) + §16 도입부 (spec-v2.md 925–1010)"
+ },
+ {
+  "requirement": "\"Discord HTTP는 고정 수치로 재시도하지 않고 Retry-After 및 rate-limit 헤더를 존중한다.\"",
+  "specLocation": "§15 Discord 봇 최적화·안전성",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR5 (위 항목과 같은 PR). outbox-worker.ts의 `FetchLike` 타입이 `{ok, status}`만 노출해 헤더를 읽을 수조차 없으므로 타입부터 고쳐야 한다.",
+  "section": "§15 레퍼런스 기반 기술 검토 (Postgres · OAuth · Discord · OWASP) + §16 도입부 (spec-v2.md 925–1010)"
+ },
+ {
+  "requirement": "\"각 명령은 guild·역할·대상 서버·요청자·멱등 키를 검증하고, 결과는 감사 로그에 남긴다.\"",
+  "specLocation": "§15 Discord 봇 최적화·안전성",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR3. 061의 상세 감사 필드에 봇 채널(discord.command.*) 액션을 추가하고, interactions.ts의 네 명령이 admin_record_audit_event 계열 경로로 결과를 남기게 한다. 지금 audit_logs에 쓰이는 액션 문자열 15개에 discord.* 는 하나도 없다.",
+  "section": "§15 레퍼런스 기반 기술 검토 (Postgres · OAuth · Discord · OWASP) + §16 도입부 (spec-v2.md 925–1010)"
+ },
+ {
+  "requirement": "\"인증 실패, 권한 거부, 정책 변경, 경제 거래, 관리자 조작은 별도 감사 로그에 남긴다.\"",
+  "specLocation": "§15 보안 검증 기준",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR3. 계획의 조회 감사 인터셉터는 명시적으로 \"관리자 라우트\"에만 걸리므로, 인증 실패(OAuth 콜백 거부·SessionGuard 401)와 권한 거부(AdminGuard 403, SQL 42501/28000)를 남기는 경로를 062의 검색 함수 성공여부 필터와 짝지어 추가한다.",
+  "section": "§15 레퍼런스 기반 기술 검토 (Postgres · OAuth · Discord · OWASP) + §16 도입부 (spec-v2.md 925–1010)"
+ },
+ {
+  "requirement": "\"모든 쓰기는 idempotency_key의 고유성, SERIALIZABLE 또는 필요한 행의 SELECT … FOR UPDATE, 짧은 트랜잭션, 재시도 정책을 사용한다.\" — 이 중 재시도 정책",
+  "specLocation": "§15 운영 DB 스키마",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "§2 SQLSTATE 규약 + PR4. pg-error.ts에 40001(serialization_failure)·40P01(deadlock_detected)이 없어 지금은 500으로 샌다. 계획의 SQLSTATE 표에 두 코드를 넣고 제한 횟수·지수 백오프 재시도 래퍼를 PR4에서 만든다 — PR4의 대량 지급, PR5의 스케줄러, PR6의 자동 정책이 동시 기록자를 늘린다.",
+  "section": "§15 레퍼런스 기반 기술 검토 (Postgres · OAuth · Discord · OWASP) + §16 도입부 (spec-v2.md 925–1010)"
+ },
+ {
+  "requirement": "\"보안 테스트에는 IDOR, 권한 상승, CSRF, 세션 고정, OAuth 콜백 조작, 중복 결제/송금, 동시성·재시도, rate limit 우회가 포함된다.\"",
+  "specLocation": "§15 보안 검증 기준",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "§6 검증 게이트 + 새 PR. 계획의 게이트는 lint·control-bytes·typecheck·build·test·/code-review 뿐이고 계획 전문에 security/보안/CSRF/IDOR 이라는 단어가 SECURITY DEFINER 말고는 한 번도 없다. 특히 PR2의 런타임 역할 부여/회수, PR4의 대량 지급, PR8의 구매·환불은 권한 상승·중복 결제 테스트 없이 병합되면 안 된다.",
+  "section": "§15 레퍼런스 기반 기술 검토 (Postgres · OAuth · Discord · OWASP) + §16 도입부 (spec-v2.md 925–1010)"
+ },
+ {
+  "requirement": "\"OWASP ASVS 5.0 Level 2를 웹·API의 최소 검증 기준으로 삼는다.\"",
+  "specLocation": "§15 보안 검증 기준",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "out of scope, flag to user — 다만 §6 검증 게이트에 ASVS L2 항목 대조를 한 줄로 못박을지 사용자 결정이 필요하다. 코드 산출물이 아니라 릴리스 절차 문서(docs/RELEASING.md)에 붙는 성격이다.",
+  "section": "§15 레퍼런스 기반 기술 검토 (Postgres · OAuth · Discord · OWASP) + §16 도입부 (spec-v2.md 925–1010)"
+ },
+ {
+  "requirement": "\"HTTP 방식이면 Ed25519 요청 서명 검증·PING 처리·수 초 내 defer 응답을 구현한다.\" — 이 중 defer 응답",
+  "specLocation": "§15 Discord 봇 최적화·안전성",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "PR5 (Discord 배선을 하는 PR에 같이). Ed25519와 PING(INTERACTION_PING=1)은 이미 있으나 type 5(deferred) 응답이 없어 balance/history/daily/send 네 명령이 전부 DB 왕복을 Discord의 3초 ACK 예산 안에서 동기로 끝내야 한다.",
+  "section": "§15 레퍼런스 기반 기술 검토 (Postgres · OAuth · Discord · OWASP) + §16 도입부 (spec-v2.md 925–1010)"
+ },
+ {
+  "requirement": "\"저장소에는 값이 비어 있는 .env.example만 둔다\" / 새 비밀값의 출처를 정해 둔다",
+  "specLocation": "§16 .env란 무엇인가",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR5. 리포에 .env.example은 packages/database/ 아래 하나뿐이고 백엔드 ~20개 변수 표면에는 없다. PR5는 RECONCILER_DATABASE_URL(DB 자격증명)을 새로 넣으면서 compose와 seed.sh만 언급하고, 호스트 .env를 실제로 쓰는 deploy/bootstrap-env.sh와 docs/RELEASING.md의 '비밀값이 사는 곳' 표를 빠뜨렸다.",
+  "section": "§15 레퍼런스 기반 기술 검토 (Postgres · OAuth · Discord · OWASP) + §16 도입부 (spec-v2.md 925–1010)"
+ },
+ {
+  "requirement": "정책 변경·국고 조정·대량 지급은 요청자와 승인자를 분리한다. 승인자는 본인 요청을 승인할 수 없다. (§17.1 표도 가상 자산의 필수 통제로 \"이중 승인\"을 요구)",
+  "specLocation": "§17.5 API·권한 통제 (line 1142); §17.1 위협 모델과 보호 대상, 가상 자산 행 (line 1085)",
+  "planCoverage": "contradicted",
+  "severity": "major",
+  "suggestedFix": "PR2 (feat/superadmin-authority) — but flag to the user first: the spec contradicts itself. Line 153 (단일 최고관리자 원칙) says \"관리자 권한 위임이나 다중 승인 없이 최고관리자 본인이 단독 실행할 수 있다\", and PR2 deletes all six dual-approval sites plus the existing `CHECK (requester_id IS DISTINCT FROM approver_id)`. Either §17.5/§17.1 must be amended, or a requester≠approver path must survive for 국고 조정·대량 지급·정책 변경. If the superadmin decision wins, PR2's bullets should name the substitutes it relies on (step-up reauth, PR4's 대상 건수·총액 미리보기 + 확인 문구, PR3's 불변 감사 체인) so the removal is a recorded trade rather than a silent one.",
+  "section": "§16 환경변수(.env) 운영 가이드 + §17.1–17.9 보안 아키텍처·구현·QA 상세 기준 (spec lines 1011–1200)"
+ },
+ {
+  "requirement": "일일 논리 백업, 주기적 복구 테스트, WAL 아카이빙/PITR 도입 여부 결정 (§17.9); `BACKUP_ENCRYPTION_KEY` 백업 암호화 키 (§16 필수 변수); `.env`는 데이터 백업에 평문으로 포함하지 않고 접근권한이 분리된 암호화 비밀 백업만 사용 (§16 주의)",
+  "specLocation": "§17.9 PostgreSQL·컨테이너·서버 > PostgreSQL; §16 필수 변수 / 주의",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "new PR (deploy/backup.sh + a compose job or host timer + docs/RELEASING.md row). Nothing in the repo performs a backup today — no pg_dump, no restore drill, no BACKUP_ENCRYPTION_KEY anywhere — and the plan never mentions it. This matters more after this stack lands, not less: the plan's own §1.1 states migrations never roll back, and PR3/PR4 make both the ledger and the audit chain append-only, so a bad migration or a mistaken bulk payout has no restore path at all.",
+  "section": "§16 환경변수(.env) 운영 가이드 + §17.1–17.9 보안 아키텍처·구현·QA 상세 기준 (spec lines 1011–1200)"
+ },
+ {
+  "requirement": "Discord 메시지 전송, 웹훅, 통계 집계는 DB 커밋 이후 outbox worker가 처리한다. 외부 API 실패가 거래 중복·부분 완료를 만들지 않게 한다.",
+  "specLocation": "§17.6 경제 거래 보안",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR5 (feat/scheduler-and-metrics). PR5 wires exactly one worker — the reconciler — and never mentions the outbox. `outbox_events` rows are written inside `economy_post_transaction` and `outbox_claim_pending` works since migration 054, but `DiscordOutboxWorker` is dead code (never constructed, never provided, no token/channel env var), so nothing has ever been delivered. PR5 already has to add a runner + provider + compose env for the reconciler; the outbox worker is the same shape and belongs in the same PR, otherwise every new PR (work rewards, shop purchases, mass payouts) adds more undelivered rows.",
+  "section": "§16 환경변수(.env) 운영 가이드 + §17.1–17.9 보안 아키텍처·구현·QA 상세 기준 (spec lines 1011–1200)"
+ },
+ {
+  "requirement": "저장소 `.env.example`은 키 이름과 설명만 공유하고, 운영 절차 3은 새 키마다 예시 파일의 키 이름을 갱신한다. 필수 변수 표: `GOOGLE_OAUTH_ENABLED`, `OAUTH_ALLOWED_REDIRECT_URIS`, `DISCORD_TOKEN`/`DISCORD_APPLICATION_ID`/`DISCORD_GUILD_ID`, `LOG_LEVEL`(운영 기본 info, 비밀값 출력 금지), `BACKUP_ENCRYPTION_KEY`.",
+  "specLocation": "§16 파일 위치와 권한 / 필수 변수 / 예시 파일 — 실제 값 금지 / 운영 절차 3",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR5 for the new keys it introduces, plus a new PR for the file itself. The only `.env.example` in the tree is `packages/database/.env.example` (3 DB keys); the deployment env surface is documented nowhere except `deploy/bootstrap-env.sh` and docs/RELEASING.md. Of the spec's required keys, `DISCORD_TOKEN`/`APPLICATION_ID`/`GUILD_ID` are read only by the unwired command registrar and are absent from `deploy/compose.yml`; `GOOGLE_OAUTH_ENABLED`, `OAUTH_ALLOWED_REDIRECT_URIS`, `LOG_LEVEL` and `BACKUP_ENCRYPTION_KEY` do not exist at all (there is also no logger configuration or secret masking behind `LOG_LEVEL`). PR5 adds `RECONCILER_DATABASE_URL` with no example/doc line. Note for the writer: `SESSION_SECRET` and `CSRF_SECRET` are NOT gaps — sessions and CSRF tokens are random values stored as sha256 in `auth_sessions`, so no signing key is needed; the spec's env table should be reconciled to that rather than the code changed.",
+  "section": "§16 환경변수(.env) 운영 가이드 + §17.1–17.9 보안 아키텍처·구현·QA 상세 기준 (spec lines 1011–1200)"
+ },
+ {
+  "requirement": "OAuth 제공자 ID가 이미 다른 내부 사용자에게 연결돼 있으면 자동 병합하지 않고 차단·감사한다 (§17.3); 계정 연결 변경은 감사한다 (§17.1 사용자 계정 행의 \"연결 변경 감사\").",
+  "specLocation": "§17.3 로그인·계정 연결 > Discord·Google OAuth; §17.1 위협 모델과 보호 대상, 사용자 계정 행",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR3 (feat/audit-trail). The block half is shipped: `account_link_oauth_identity` takes an advisory lock on the provider subject and raises `23505 'OAuth identity is unavailable'` when the identity belongs to another user. The audit half is missing — that rejection, and every successful link/unlink, emits no `admin_append_audit_event`; the 15 action strings written today are all admin content/economy writes. PR3 rewrites the audit schema and field set, so the new account-lifecycle actions (`account.identity.linked|unlinked|link_rejected`) should land there rather than after the chain format is frozen.",
+  "section": "§16 환경변수(.env) 운영 가이드 + §17.1–17.9 보안 아키텍처·구현·QA 상세 기준 (spec lines 1011–1200)"
+ },
+ {
+  "requirement": "배포 전 CI 비밀값 검사와 `git status`로 노출 여부를 확인한다.",
+  "specLocation": "§16 운영 절차, 4번",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "new PR (a gitleaks/trufflehog job in `.github/workflows/ci.yml`), and add it to the plan's §6 검증 게이트 list. `ci.yml` today runs only control-byte check, migration apply, `pnpm test` and `reject-prisma-migrate.sh` — there is no secret scan — and the plan's own gate list (lint, control-bytes, typecheck, build, test, code-review) does not include one either, so the spec's pre-deploy secret check has no owner in this stack.",
+  "section": "§16 환경변수(.env) 운영 가이드 + §17.1–17.9 보안 아키텍처·구현·QA 상세 기준 (spec lines 1011–1200)"
+ },
+ {
+  "requirement": "제공자 연결/해제, 이메일 변경, 관리자 권한 부여, 백업키 발급은 최근 재인증을 요구한다.",
+  "specLocation": "§17.3 로그인·계정 연결 > Discord·Google OAuth",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR2 (feat/superadmin-authority). `ReauthGuard` is on exactly two routes today — `DELETE /account/identities/:id` and `DELETE /account` — so 해제 is covered but 연결 (the `purpose='link'` OAuth start) is not. PR2 says \"고위험 작업에 `ReauthGuard`를 붙인다\" in an admin-controls context; it should state that the link-start route and the new role grant/revoke commands are both in that set.",
+  "section": "§16 환경변수(.env) 운영 가이드 + §17.1–17.9 보안 아키텍처·구현·QA 상세 기준 (spec lines 1011–1200)"
+ },
+ {
+  "requirement": "사용자별·계정별·세션별·IP 기반 다층 rate limit을 둔다.",
+  "specLocation": "§17.5 API·권한 통제",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "new PR, or fold into PR7/PR8 which add the new money routes. `TieredThrottlerGuard`'s `getTracker` returns only `requestClientKey(...)` — the forwarded IP — so there is exactly one layer today. PR1/PR7/PR8 add casino plays, work claims and shop purchases with per-day caps in SQL, but nothing bounds a single account's request rate below those caps, and the plan never touches `backend/src/security/rate-limit.ts`.",
+  "section": "§16 환경변수(.env) 운영 가이드 + §17.1–17.9 보안 아키텍처·구현·QA 상세 기준 (spec lines 1011–1200)"
+ },
+ {
+  "requirement": "역할 분리: migration 전용, 앱 읽기/쓰기 전용, 읽기 전용 리포트, 백업 전용. 연결 풀의 최대 연결 수와 DB role connection limit을 설정해 폭주를 제한한다.",
+  "specLocation": "§17.9 PostgreSQL·컨테이너·서버 > PostgreSQL",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "PR5 (feat/scheduler-and-metrics), which already edits `deploy/seed.sh` and compose for `moneyverse_reconciler`. Existing roles are migrator / app / status_collector / reconciler / minecraft_executor — no read-only report role and no backup role — and no role carries a `CONNECTION LIMIT`, while `pool.provider.ts` constructs `new Pool({ connectionString })` with no `max`. PR5 adds a second long-lived connection pool, which is the moment to set both limits.",
+  "section": "§16 환경변수(.env) 운영 가이드 + §17.1–17.9 보안 아키텍처·구현·QA 상세 기준 (spec lines 1011–1200)"
+ },
+ {
+  "requirement": "매직바이트·이미지 디코딩으로 실제 형식을 확인한다. 파일 크기·가로세로·업로드 횟수·총 저장용량을 제한한다. 업로드·조회·삭제는 감사 이벤트로 기록한다.",
+  "specLocation": "§17.8 사진·파일 업로드",
+  "planCoverage": "partial",
+  "severity": "minor",
+  "suggestedFix": "new PR (or PR8 if it introduces item artwork). Shipped: magic-byte sniffing for PNG/JPEG/WebP, an 8 MiB cap, server-generated UUID keys, storage outside the web root, `nosniff`, and published-only serving. Missing: the decode step the spec pairs with magic bytes, any 가로세로 cap, any per-user upload count, any total storage quota (`photo-data` is an unbounded volume), and 조회 audit — PR3's read-audit interceptor is scoped to admin routes, and `GET /media/:key` is not one.",
+  "section": "§16 환경변수(.env) 운영 가이드 + §17.1–17.9 보안 아키텍처·구현·QA 상세 기준 (spec lines 1011–1200)"
+ },
+ {
+  "requirement": "오래 걸리는 작업은 즉시 defer 응답 후 큐에서 처리한다. Discord rate-limit의 `Retry-After`를 준수하며 고정 지연값으로 무한 재시도하지 않는다. 사용자 입력을 Discord 메시지로 보낼 때 mention 허용목록을 사용해 예기치 않은 @everyone/@role 알림을 막는다.",
+  "specLocation": "§17.7 Discord 봇 보안",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "PR5, alongside the outbox worker wiring. `allowed_mentions` appears nowhere in `backend/src`, and outgoing text carries user-supplied display names; `interactions.ts` has no deferred (type 5) response path, so every command answers inline; `DiscordOutboxWorker` breaks the batch on 429 but ignores `retry-after` and does not release the two-minute lease. Signature verification, guild/role checks and the four fixed commands are already shipped and are not gaps.",
+  "section": "§16 환경변수(.env) 운영 가이드 + §17.1–17.9 보안 아키텍처·구현·QA 상세 기준 (spec lines 1011–1200)"
+ },
+ {
+  "requirement": "호스트 커널·Docker Engine·이미지·Node 의존성의 보안 업데이트를 정기 점검한다.",
+  "specLocation": "§17.9 PostgreSQL·컨테이너·서버 > Docker·호스트",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "out of scope, flag to user — or a small new PR adding `.github/dependabot.yml` (npm + docker + github-actions ecosystems). There is no dependabot/renovate config and no scheduled audit job; base images are pinned by version tag (`postgres:17.5-alpine`, `nginx:1.27-alpine`) with nothing that notices when they go stale. Non-root containers, no docker socket, no host network and no privileged flag are already satisfied by the shipped Dockerfiles and compose.",
+  "section": "§16 환경변수(.env) 운영 가이드 + §17.1–17.9 보안 아키텍처·구현·QA 상세 기준 (spec lines 1011–1200)"
+ },
+ {
+  "requirement": "\"MVP에서 카지노·베팅·슬롯·룰렛·확률형 유료 보상은 비활성화한다. 확률 또는 유료 요소를 검토하는 경우에는 게임물 등급·사행성·청소년 보호 관련 전문 검토와 별도 승인 없이 출시하지 않는다.\"",
+  "specLocation": "§18.6 대한민국 법률 준수 설계 — 가상경제·게임·소비자 보호",
+  "planCoverage": "absent",
+  "severity": "blocker",
+  "suggestedFix": "PR1 (and PR2's `feature_switches` registry). PR1 repairs `casino_play_coin` (056), moves bet/loss limits into policy rows, and returns odds/payout \"so the screen can disclose them\"; PR9 then adds casino restrictions for members carrying loan balances — the plan treats the casino as a live MVP feature. Today the map confirms it is unreachable (migration 042 is the only file matching `casino`; no controller, route, DTO or page), so nothing is enabled yet, but the plan never states that. Add to PR1: register `casino.coin` in PR2's feature-switch registry as OFF by default, make `casino_play_coin` raise 55000 when the switch is off, and state that no casino surface ships until the 게임물 등급·사행성·청소년 보호 review named in §18.6 and §18.8's 국내 법률 gate is signed off.",
+  "section": "§17.10–§18.8 — SEO, Search Console, AdSense, and Korean-law compliance (spec lines 1201–1383)"
+ },
+ {
+  "requirement": "\"개인정보처리방침에는 처리 목적·항목·보유기간 … 을 실제 운영에 맞게 공개한다\" and \"로그인·보안 이벤트에서 IP 또는 식별정보를 필요 최소한으로 처리할 경우에는 목적·보유기간·접근권한을 별도로 명시한다.\"",
+  "specLocation": "§18.6 대한민국 법률 준수 설계 — 개인정보보호",
+  "planCoverage": "absent",
+  "severity": "blocker",
+  "suggestedFix": "PR3. Migration 061 adds `request_id/trace_id/session_id`, 인증 수단·재인증 시각, 원본 IP, and a User-Agent 파생값 to `audit_logs`. The shipped policy at `frontend/src/components/policy/privacy-document.tsx` lists the 보안·감사 처리 항목 as exactly \"내부 사용자 ID, 요청 ID, 작업 종류·결과·시각, 권한 변경·관리 작업 기록\" — no IP, no User-Agent, no session identifier — and separately promises \"일반 익명 방문자의 IP를 앱 데이터베이스에 저장하지 않으며\". Shipping 061 without amending that table and stating the IP's 목적·보유기간·접근권한 puts the published 처리방침 out of sync with actual processing. Add a privacy-document edit (and a policy version bump, since PR2 introduces 정책 버전) to PR3's deliverables.",
+  "section": "§17.10–§18.8 — SEO, Search Console, AdSense, and Korean-law compliance (spec lines 1201–1383)"
+ },
+ {
+  "requirement": "\"기록 금지: 비밀번호, 세션 ID, access/refresh token, DB URL, OAuth Client Secret, Bot Token, 암호화 키, 전체 개인정보, 원문 업로드 파일.\"",
+  "specLocation": "§17.10 로그·감사·백업·사고 대응 — 로그 원칙",
+  "planCoverage": "contradicted",
+  "severity": "blocker",
+  "suggestedFix": "PR3. Migration 061's field list explicitly names `session_id` as a column to add, while the same PR's own guard sentence only forbids \"비밀번호·쿠키·토큰·Client Secret\". A session ID in an append-only, admin-readable audit table is exactly the value §17.10 puts on the 기록 금지 list — it is a live credential for the duration of the session. Replace `session_id` with a non-reversible session correlation value (e.g. a keyed digest or a per-session opaque surrogate) in PR3's 061 field list, and add the session ID to the PR's forbidden-value list.",
+  "section": "§17.10–§18.8 — SEO, Search Console, AdSense, and Korean-law compliance (spec lines 1201–1383)"
+ },
+ {
+  "requirement": "\"광고는 서버 측 allowlist와 배포 검증을 모두 통과한 페이지에서만 로드한다. 클라이언트 쿼리값으로 광고 노출 경로를 바꿀 수 없게 한다\" plus the 절대 금지 zones (카지노·확률형·잔액·거래·송금·시장·주식·대출, 로그인/계정/지갑/관리자, 게임 플레이 화면) and `ADS_ALLOWED_PATHS`/`ADS_BLOCKED_PATHS`/`ADSENSE_PUBLISHER_ID`.",
+  "specLocation": "§18.5 AdSense 안전 설계 · §18.7 운영 환경변수와 광고 경로 제어",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "New PR (or fold into PR2's feature-switch work). `ADS_ENABLED` already exists and fails closed (`env.ADS_ENABLED === 'true'` in `backend/src/core/config.ts`, `${ADS_ENABLED:-false}` in `deploy/compose.yml` and `deploy/bootstrap-env.sh`), so the spec's default-off rule is satisfied and nothing broken ships today. But there is no path allowlist, no `ADSENSE_PUBLISHER_ID`, no `ads.txt` rule, and no ad-notice text — and the plan adds precisely the surfaces §18.5 puts on the permanent block list (casino in PR1, shop purchases in PR8, work in PR7, quests/rankings in PR10). Land the server-side allowlist/blocklist before any ad surface exists, and keep `ads.txt` gated on a real approved publisher ID.",
+  "section": "§17.10–§18.8 — SEO, Search Console, AdSense, and Korean-law compliance (spec lines 1201–1383)"
+ },
+ {
+  "requirement": "\"개인정보처리방침에는 처리 목적·항목·보유기간 … 파기 … 를 실제 운영에 맞게 공개한다\" — a stated retention period implies an executable deletion path.",
+  "specLocation": "§18.6 대한민국 법률 준수 설계 — 개인정보보호",
+  "planCoverage": "contradicted",
+  "severity": "major",
+  "suggestedFix": "PR3. Migration 060 copies the `economy_reconciliation_snapshots` guard verbatim — confirmed at `packages/database/migrations/018-economy-reconciliation-health.sql:103`, a `BEFORE UPDATE OR DELETE` trigger that rejects both. Applied to `audit_logs` it makes rows permanently undeletable, while the shipped privacy document promises \"인증·권한 거부 기록 90일, 관리자·경제 감사 기록 1년\". PR3 needs an expiry path the trigger permits (a migrator-owned purge function that the trigger exempts, or a documented policy change from deletion to 익명화), otherwise the published 보유기간 cannot be honoured.",
+  "section": "§17.10–§18.8 — SEO, Search Console, AdSense, and Korean-law compliance (spec lines 1201–1383)"
+ },
+ {
+  "requirement": "개인/거래 화면(/login, /auth/*, /account/*, /wallet, /transfer, /market/*)은 noindex·sitemap 제외·인증 필요; 운영 화면(/admin/*, /api/*, /status/*)은 외부 색인 금지.",
+  "specLocation": "§18.2 SEO의 기본 결정 — 색인 허용/차단 경로",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "PR7, PR8, PR9, PR10. Each adds member-facing routes (`/work`, shop purchase/inventory surfaces, progression/unlock screens, quests·도감·주간목표·순위, plus new `/admin/*` areas) but none of their bullets mention the route plumbing the codebase treats as load-bearing: `robots: { index: false, follow: false }` page metadata, an entry in `frontend/src/app/robots.ts`'s disallow array, and staying out of `sitemap.ts::PUBLIC_PATHS`. Nothing enforces it — `frontend/src/route-map.test.ts` only checks that a mapped path still has a file, so a new member route silently becomes crawlable the moment `SEO_INDEXING_ENABLED=true`. Add the three-line checklist to each of those PRs.",
+  "section": "§17.10–§18.8 — SEO, Search Console, AdSense, and Korean-law compliance (spec lines 1201–1383)"
+ },
+ {
+  "requirement": "\"배포마다 canonical, robots/noindex, sitemap URL, title/H1, 404/리다이렉트, 이미지 alt, Core Web Vitals를 자동 검사한다\" and \"noindex가 필요한 개인/관리/거래 화면이 실수로 색인되지 않았는지 … 배포 게이트로 검사한다.\"",
+  "specLocation": "§18.3 구현 체크리스트 · §18.4 Search Console 운영 절차 4항",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "New PR. The plan's §6 검증 게이트 is `pnpm lint` / check-control-bytes / typecheck / build / CI `pnpm test` / `/code-review` — no SEO or indexing assertion, and CI (`.github/workflows/ci.yml`) has no such step either. Add a test that walks every route under `frontend/src/app` and asserts that any page not in `sitemap.ts::PUBLIC_PATHS` exports `robots: { index: false }` and is covered by a `robots.ts` disallow prefix; that is the cheap half of this requirement and it is what keeps finding 6 from regressing.",
+  "section": "§17.10–§18.8 — SEO, Search Console, AdSense, and Korean-law compliance (spec lines 1201–1383)"
+ },
+ {
+  "requirement": "\"출시 전에 하나를 대표 공개 도메인으로 확정하고 … 비대표 도메인의 동일 공개 URL은 대표 URL로 영구 리다이렉트(301)한다.\"",
+  "specLocation": "§18.2 SEO의 기본 결정 — 대표 도메인",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "Out of scope, flag to user. The spec names easy-scraping.com and weoldeog.com as both serving the same public content, and §14's OAuth allowlist lists callbacks on both; the repo only ever configures easy-scraping.com (`.github/workflows/deploy.yml` sets `APP_BASE_URL` per stack, and `deploy/compose.yml` has no second host). There is no 301 anywhere — `frontend/next.config.ts` defines `headers()` but no `redirects()`. This is a launch decision plus edge/DNS work, not something a PR in this stack can settle, but §18.8's SEO gate requires it before release.",
+  "section": "§17.10–§18.8 — SEO, Search Console, AdSense, and Korean-law compliance (spec lines 1201–1383)"
+ },
+ {
+  "requirement": "\"운영자 조정·시세 개입·보상 정책은 공개 정책과 감사 로그로 남기며, 실제 투자·수익·금융상품처럼 오인될 표현을 사용하지 않는다.\"",
+  "specLocation": "§18.6 대한민국 법률 준수 설계 — 가상경제·게임·소비자 보호",
+  "planCoverage": "partial",
+  "severity": "major",
+  "suggestedFix": "PR6. The 감사 로그 half is covered (PR3's chain, PR6's `economy_policy_runs` recording 입력 지표·이전/신규 버전). The 공개 정책 half is not: every policy surface the plan builds is admin-only — PR6 turns `/admin/economy` from read-only into a control screen, and PR2's `economy_policies` versions have no public reader. Members get automatic weekly price/reward/tax adjustments with no published record of what changed or why. Add a public, indexable policy-history page (a natural sitemap entry) that renders the effective policy version and its change log.",
+  "section": "§17.10–§18.8 — SEO, Search Console, AdSense, and Korean-law compliance (spec lines 1201–1383)"
+ },
+ {
+  "requirement": "\"출시 전에는 P0/P1 보안 결함 0건, 모든 경제 불변식 통과, OAuth 실제 도메인 QA, 복구 리허설 성공, 비밀값 검사 통과가 필요하다\" and the 8-row 보안 QA 시험 matrix (OAuth·세션·권한·경제·봇·파일·DB/백업·배포).",
+  "specLocation": "§17.11 보안 QA 게이트",
+  "planCoverage": "absent",
+  "severity": "major",
+  "suggestedFix": "New PR (a release checklist, not code). The plan's §6 게이트 is strictly per-PR CI. Nothing in it covers 동시 송금·중복 요청·부분 실패·outbox 중복 전달 as an economy-invariant suite, OAuth QA on the real domain, a restore rehearsal, or a secret-scanning step — and `.github/workflows/ci.yml` has no secret-scan job. PR4 (idempotency holes) and PR5 (reconciliation worker) each produce evidence this gate would consume, so the checklist should be authored alongside them and blocked on before the first production roll.",
+  "section": "§17.10–§18.8 — SEO, Search Console, AdSense, and Korean-law compliance (spec lines 1201–1383)"
+ },
+ {
+  "requirement": "`PUBLIC_CANONICAL_ORIGIN=https://CHOSEN_PRIMARY_DOMAIN` and `SEARCH_CONSOLE_VERIFICATION=...` as operating environment variables.",
+  "specLocation": "§18.7 운영 환경변수와 광고 경로 제어",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "New PR (with finding 4's ads env work). Neither name appears anywhere in the repo; `APP_BASE_URL` currently does the canonical-origin job, so `PUBLIC_CANONICAL_ORIGIN` may just be a rename to decline deliberately — but `SEARCH_CONSOLE_VERIFICATION` has no equivalent, and §18.8's Search Console gate requires 도메인 속성 인증. Note the cost the map records: a new deployment knob must be added to `.github/workflows/deploy.yml`'s 'Choose the deployment' step AND its `ssh target` argument list AND `deploy/bootstrap-env.sh` AND `deploy/compose.yml`, so it is worth batching with the ads variables rather than doing twice.",
+  "section": "§17.10–§18.8 — SEO, Search Console, AdSense, and Korean-law compliance (spec lines 1201–1383)"
+ },
+ {
+  "requirement": "\"sitemap.xml은 대표 도메인의 정규 공개 URL과 lastmod만 포함해 자동 생성한다. 페이지 삭제·리다이렉트 시 sitemap도 함께 갱신한다.\"",
+  "specLocation": "§18.3 구현 체크리스트",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "New PR (with finding 7's SEO check). `frontend/src/app/sitemap.ts` emits `changeFrequency` and `priority` for its seven public paths and no `lastmod` at all — the one field the spec actually asks for, and the one Google reads. `/announcements` and `/gallery` have real publication timestamps available; derive `lastModified` from them rather than hard-coding a build date.",
+  "section": "§17.10–§18.8 — SEO, Search Console, AdSense, and Korean-law compliance (spec lines 1201–1383)"
+ },
+ {
+  "requirement": "\"실제 투자·수익·금융상품처럼 오인될 표현을 사용하지 않는다.\"",
+  "specLocation": "§18.6 대한민국 법률 준수 설계 — 가상경제·게임·소비자 보호",
+  "planCoverage": "absent",
+  "severity": "minor",
+  "suggestedFix": "PR9. It introduces 신용 등급 (신규/C/B/A), 대출 한도·이자, 자기자본 30% requirements, and restrictions on buying stocks with borrowed funds — vocabulary lifted wholesale from consumer credit and margin trading, layered on the existing 주식·은행 이자 surfaces. The spec bans copy that reads as a real financial product; the plan sets no naming constraint and no copy review. Add a bullet requiring the member-facing Korean strings in PR9 to carry an explicit 게임 내 재화 framing and to avoid 신용점수/대출/투자 수익 phrasing that mirrors regulated products.",
+  "section": "§17.10–§18.8 — SEO, Search Console, AdSense, and Korean-law compliance (spec lines 1201–1383)"
+ }
+]
