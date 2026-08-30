@@ -22,6 +22,7 @@ import { WalletModule } from './wallet/wallet.module';
 import { WorkModule } from './work/work.module';
 import { AUTH_LIMIT, READ_LIMIT, SENSITIVE_LIMIT } from './security/rate-limit';
 import { TieredThrottlerGuard } from './security/tiered-throttler.guard';
+import { SchedulerModule } from './scheduler/scheduler.module';
 
 const ONE_MINUTE_MS = 60_000;
 
@@ -46,6 +47,7 @@ const ONE_MINUTE_MS = 60_000;
     StatusCollectorModule,
     DiscordModule,
     DiscordOutboxWorkerModule,
+    SchedulerModule,
     // Process-local, exactly as in the original application. That is correct
     // for the single-instance deployment and becomes N times weaker on any
     // scale-out: a known limitation, tracked rather than overlooked. A shared
