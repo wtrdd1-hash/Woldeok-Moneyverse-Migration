@@ -76,6 +76,7 @@ services:
       PGPASSWORD: ${POSTGRES_PASSWORD:?required}
       PGDATABASE: ${DB_NAME:?required}
       STATUS_COLLECTOR_PASSWORD: ${STATUS_COLLECTOR_PASSWORD:-}
+      RECONCILER_PASSWORD: ${RECONCILER_PASSWORD:-}
       BACKUP_DB_PASSWORD: ${BACKUP_DB_PASSWORD:-}
       BOOTSTRAP_DISCORD_ADMIN_IDS: ${BOOTSTRAP_DISCORD_ADMIN_IDS:-}
     volumes:
@@ -157,6 +158,10 @@ services:
       # collector cannot borrow the pool every other query uses. Absent, the
       # collector does not run and /status keeps saying 확인 중.
       STATUS_COLLECTOR_DATABASE_URL: ${STATUS_COLLECTOR_PASSWORD:+postgresql://moneyverse_status_collector:${STATUS_COLLECTOR_PASSWORD}@db:5432/${DB_NAME}}
+      # The schedule runs reconciliation as its own role, because 018 checks
+      # the session login role: the application role cannot write a snapshot
+      # even by accident, and borrowing its pool here would give that back.
+      RECONCILER_DATABASE_URL: ${RECONCILER_PASSWORD:+postgresql://moneyverse_reconciler:${RECONCILER_PASSWORD}@db:5432/${DB_NAME}}
       STATUS_COLLECT_INTERVAL_MS: ${STATUS_COLLECT_INTERVAL_MS:-30000}
       # The market only moves where this says so. The tick takes an advisory
       # lock, so a second process would be harmless, but a deployment should

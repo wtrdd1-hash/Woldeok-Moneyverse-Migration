@@ -30,6 +30,21 @@ else
   echo "status collector: STATUS_COLLECTOR_PASSWORD unset, leaving the role without a login"
 fi
 
+# 018 creates moneyverse_reconciler NOLOGIN and gives it the one function that
+# writes a reconciliation snapshot. Until this release nothing could log in as
+# it, which is why no snapshot has ever been taken.
+if [ -n "${RECONCILER_PASSWORD:-}" ]; then
+  psql -X -v ON_ERROR_STOP=1 \
+    -v reconciler_password="$RECONCILER_PASSWORD" \
+    -v database_name="$PGDATABASE" <<'SQL'
+ALTER ROLE moneyverse_reconciler LOGIN PASSWORD :'reconciler_password';
+GRANT CONNECT ON DATABASE :"database_name" TO moneyverse_reconciler;
+SQL
+  echo "reconciler: login granted"
+else
+  echo "reconciler: RECONCILER_PASSWORD unset, leaving the role without a login"
+fi
+
 # The role a logical backup runs as. Unlike the two above, the role itself is
 # created here rather than in a numbered migration: the backup has to exist
 # before the irreversible migration series it protects, and this release adds

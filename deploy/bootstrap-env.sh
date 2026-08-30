@@ -51,6 +51,7 @@ put INTERNAL_API_TOKEN "$(secret)"
 # function and nothing else, so this is not a second copy of the application's
 # access — see 050-status-collector.sql.
 put STATUS_COLLECTOR_PASSWORD "$(secret)"
+put RECONCILER_PASSWORD "$(secret)"
 # The key that seals TOTP secrets before they reach the database, so a database
 # read alone yields no usable second factor. `put`, not `set_to`: rotating it
 # would strand every enrolled administrator's sealed secret, and a rotation is
