@@ -33,6 +33,16 @@ ALTER TABLE public.virtual_bank_loans DROP CONSTRAINT IF EXISTS virtual_bank_loa
 ALTER TABLE public.virtual_bank_loans ADD CONSTRAINT virtual_bank_loans_status_check
   CHECK (status IN ('active', 'repaid', 'overdue'));
 
+-- The one-loan-per-member index has to follow the new status, or defaulting
+-- becomes the better move: an overdue loan would stop counting as a loan, so
+-- a member could stop paying and immediately draw a second one against a MINT
+-- account that allows a negative balance. 077 makes `bank_repay` accept an
+-- overdue loan for the same reason -- the two go together, and 035's
+-- functions were written before this status existed.
+DROP INDEX IF EXISTS public.virtual_bank_one_active_loan_per_user;
+CREATE UNIQUE INDEX IF NOT EXISTS virtual_bank_one_open_loan_per_user
+  ON public.virtual_bank_loans (user_id) WHERE status IN ('active', 'overdue');
+
 INSERT INTO public.progression_stages(code, ordinal, name, unlock_requirements) VALUES
   ('starter', 1, 'Starter', '{"workCompletions":0}'),
   ('early', 2, 'Early growth', '{"workCompletions":10,"jobLevel":3}'),
