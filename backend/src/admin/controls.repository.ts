@@ -22,6 +22,7 @@ export class ControlsInputError extends Error {
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const FEATURE_KEY_PATTERN = /^[a-z][a-z0-9_]{2,63}$/;
 const VERSION_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_.:-]{2,63}$/;
+const KNOB_KEY_PATTERN = /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/;
 const SWITCH_STATES = new Set(['enabled', 'paused', 'safe_mode', 'disabled']);
 const GRANTABLE_ROLES = new Set(['operator', 'approver', 'server_operator', 'superadmin']);
 const REVOCABLE_ROLES = new Set(['operator', 'approver', 'server_operator']);
@@ -74,6 +75,28 @@ export interface EconomyPolicyRow {
   readonly created_by: string | null;
   readonly created_at: Date;
   readonly payload: unknown;
+}
+
+// packages/database/migrations/089-economy-policy-knobs.sql
+export interface PolicyKnobRow {
+  readonly knob_key: string;
+  readonly title: string;
+  readonly unit: string;
+  // numeric columns arrive as text so no bound is rounded on the way through.
+  readonly current_value: string;
+  readonly baseline_value: string;
+  readonly min_value: string;
+  readonly max_value: string;
+  readonly auto_adjustable: boolean;
+  readonly paused_reason: string;
+  readonly updated_at: Date;
+}
+
+export interface PolicyKnobSettingRow {
+  readonly knob_key: string;
+  readonly auto_adjustable: boolean;
+  readonly min_value: string;
+  readonly max_value: string;
 }
 
 // packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql
@@ -249,6 +272,94 @@ export class ControlsRepository {
       'SELECT public.economy_activate_due_policies() AS activated',
     );
     return { activated: row?.activated ?? 0 };
+  }
+
+  /**
+   * The knob registry and what the engine would do with today's numbers.
+   * Reading a proposal changes nothing, so 092 lets any administrator ask;
+   * running it is the superadmin's.
+   */
+  policyKnobs(actorUserId: unknown): Promise<PolicyKnobRow[]> {
+    assertUuid(actorUserId, 'actor user id');
+    return queryRows<PolicyKnobRow>(
+      this.pool,
+      `SELECT knob_key, title, unit, current_value::text AS current_value,
+              baseline_value::text AS baseline_value, min_value::text AS min_value,
+              max_value::text AS max_value, auto_adjustable, paused_reason, updated_at
+       FROM public.admin_list_policy_knobs($1)`,
+      [actorUserId],
+    );
+  }
+
+  async autoPolicyPreview(actorUserId: unknown): Promise<Record<string, unknown>> {
+    assertUuid(actorUserId, 'actor user id');
+    const row = await queryOne<{ readonly preview: Record<string, unknown> }>(
+      this.pool,
+      'SELECT public.admin_preview_auto_policy($1, 7) AS preview',
+      [actorUserId],
+    );
+    return row?.preview ?? {};
+  }
+
+  async runAutoPolicy(input: {
+    readonly idempotencyKey: unknown;
+    readonly actorUserId: unknown;
+    readonly reason: unknown;
+  }): Promise<Record<string, unknown>> {
+    assertUuid(input.idempotencyKey, 'idempotency key');
+    assertUuid(input.actorUserId, 'actor user id');
+    const reason = assertReason(input.reason);
+    const row = await queryOne<{ readonly result: Record<string, unknown> }>(
+      this.pool,
+      'SELECT public.admin_run_auto_policy_now($1, $2, $3) AS result',
+      [input.idempotencyKey, input.actorUserId, reason],
+    );
+    return row?.result ?? {};
+  }
+
+  async setPolicyKnob(input: {
+    readonly idempotencyKey: unknown;
+    readonly actorUserId: unknown;
+    readonly knobKey: unknown;
+    readonly autoAdjustable: unknown;
+    readonly minValue: unknown;
+    readonly maxValue: unknown;
+    readonly reason: unknown;
+  }): Promise<PolicyKnobSettingRow> {
+    assertUuid(input.idempotencyKey, 'idempotency key');
+    assertUuid(input.actorUserId, 'actor user id');
+    const reason = assertReason(input.reason);
+    if (typeof input.knobKey !== 'string' || !KNOB_KEY_PATTERN.test(input.knobKey)) {
+      throw new ControlsInputError('knob key must name a policy knob');
+    }
+    if (input.autoAdjustable !== undefined && typeof input.autoAdjustable !== 'boolean') {
+      throw new ControlsInputError('autoAdjustable must be true or false');
+    }
+    // The bounds are sent as text so a number that JavaScript cannot hold
+    // exactly never reaches a numeric column having already been rounded.
+    const bound = (value: unknown, field: string): string | null => {
+      if (value === undefined || value === null) return null;
+      if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+      if (typeof value === 'string' && /^-?\d+(\.\d+)?$/.test(value)) return value;
+      throw new ControlsInputError(`${field} must be a number`);
+    };
+    const row = await queryOne<PolicyKnobSettingRow>(
+      this.pool,
+      `SELECT knob_key, auto_adjustable, min_value::text AS min_value,
+              max_value::text AS max_value
+       FROM public.admin_set_policy_knob($1, $2, $3, $4, $5::numeric, $6::numeric, $7)`,
+      [
+        input.idempotencyKey,
+        input.actorUserId,
+        input.knobKey,
+        input.autoAdjustable ?? null,
+        bound(input.minValue, 'minValue'),
+        bound(input.maxValue, 'maxValue'),
+        reason,
+      ],
+    );
+    if (!row) throw new Error('admin_set_policy_knob did not return a row');
+    return row;
   }
 
   roles(actorUserId: unknown): Promise<AdminRoleAssignmentRow[]> {
