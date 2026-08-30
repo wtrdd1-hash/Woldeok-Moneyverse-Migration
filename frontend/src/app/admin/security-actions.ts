@@ -92,7 +92,7 @@ export async function openConsole(
   } catch (error) {
     return failure(
       error,
-      '콘솔을 열지 못했어요. 본인 확인이 최근 5분 안에 끝났는지, 허용된 주소인지 확인해 주세요.',
+      '콘솔을 열지 못했어요. 본인 확인이 최근 15분 안에 끝났는지, 허용된 주소인지 확인해 주세요.',
     );
   }
 }

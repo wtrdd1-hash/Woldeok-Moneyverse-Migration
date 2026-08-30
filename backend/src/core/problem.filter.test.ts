@@ -103,5 +103,28 @@ describe('ProblemFilter', () => {
     const [document] = json.mock.calls[0] as [Record<string, unknown>];
     expect('detail' in document).toBe(false);
     expect('errors' in document).toBe(false);
+    expect('code' in document).toBe(false);
+  });
+
+  it('carries a refusal code so two 401s can be told apart', () => {
+    const { host, json } = hostFor();
+    new ProblemFilter(true).catch(
+      new HttpException({ message: 'recent reauthentication required', code: 'reauthentication_required' }, 401),
+      host,
+    );
+    expect(json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 401,
+        detail: 'recent reauthentication required',
+        code: 'reauthentication_required',
+      }),
+    );
+  });
+
+  it('ignores a code that is not a string', () => {
+    const { host, json } = hostFor();
+    new ProblemFilter(false).catch(new HttpException({ message: 'no', code: 7 }, 400), host);
+    const [document] = json.mock.calls[0] as [Record<string, unknown>];
+    expect('code' in document).toBe(false);
   });
 });

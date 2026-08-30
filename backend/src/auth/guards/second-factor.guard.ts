@@ -37,7 +37,12 @@ export class SecondFactorGuard implements CanActivate {
       userId !== undefined &&
       userId !== null &&
       (await this.factors.satisfiedRecently(userId, SECOND_FACTOR_WINDOW_SECONDS));
-    if (!recent) throw new UnauthorizedException('recent second factor required');
+    if (!recent) {
+      throw new UnauthorizedException({
+        message: 'recent second factor required',
+        code: 'second_factor_required',
+      });
+    }
     return true;
   }
 }

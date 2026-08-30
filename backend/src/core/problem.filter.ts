@@ -7,6 +7,20 @@ export interface ProblemDocument {
   readonly title: string;
   readonly status: number;
   readonly detail?: string;
+  /**
+   * A stable name for the refusal, when the status alone does not say enough.
+   *
+   * `detail` is written for an operator, in English, and sometimes names an
+   * internal constraint -- so the reader that turns a refusal into a sentence
+   * for a member cannot use it, and has nothing else to go on but the status.
+   * Two different 401s then become the same message: "log in", told to
+   * somebody who is already logged in and merely has not confirmed who they
+   * are in the last quarter of an hour.
+   *
+   * An RFC 9457 extension member rather than a new status, because the status
+   * is right in both cases.
+   */
+  readonly code?: string;
   readonly errors?: string[];
 }
 
@@ -30,6 +44,11 @@ function detailOf(payload: unknown): string | undefined {
   if (typeof payload.message === 'string') return payload.message;
   if (typeof payload.error === 'string') return payload.error;
   return undefined;
+}
+
+function codeOf(payload: unknown): string | undefined {
+  if (!isRecord(payload)) return undefined;
+  return typeof payload.code === 'string' ? payload.code : undefined;
 }
 
 function errorsOf(payload: unknown): string[] | undefined {
@@ -62,6 +81,7 @@ export class ProblemFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const payload = exception.getResponse();
     const detail = detailOf(payload);
+    const code = codeOf(payload);
     const errors = errorsOf(payload);
     return {
       type: 'about:blank',
@@ -70,6 +90,7 @@ export class ProblemFilter implements ExceptionFilter {
       // Spread rather than assign undefined: exactOptionalPropertyTypes is on,
       // and an explicit `detail: undefined` would also serialise the key.
       ...(detail === undefined ? {} : { detail }),
+      ...(code === undefined ? {} : { code }),
       ...(errors === undefined ? {} : { errors }),
     };
   }

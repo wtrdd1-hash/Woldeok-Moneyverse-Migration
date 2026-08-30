@@ -162,6 +162,14 @@ describe('ReauthGuard', () => {
     await expect(guard.canActivate(context)).rejects.toMatchObject({ status: 401 });
   });
 
+  it('names the refusal, because the caller is signed in and 401 alone reads as "log in"', async () => {
+    const guard = new ReauthGuard({ hasRecentReauthentication: async () => false } as never);
+    const context = contextFor({ session: { id: 'session-id', user_id: 'user-id' } as never });
+    await expect(guard.canActivate(context)).rejects.toMatchObject({
+      response: { code: 'reauthentication_required' },
+    });
+  });
+
   it('asks for the 900 second window', async () => {
     const seen: unknown[] = [];
     const guard = new ReauthGuard({
