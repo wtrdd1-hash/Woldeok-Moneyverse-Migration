@@ -87,7 +87,9 @@ describe.skipIf(!DATABASE_URL)('the audit trail against a real database', () => 
     it('cannot compute a digest, which is what forging a chain would need', async () => {
       const error = await rejectionOf(() =>
         pool.query(
-          "SELECT public.audit_event_digest(1::bigint, NULL, $1, 'x.y.z', NULL, NULL, '{}'::jsonb, now(), '{}'::jsonb)",
+          `SELECT public.audit_event_digest(
+             $1, 1::bigint, NULL, $1, 'x.y.z', NULL, NULL, '{}'::jsonb, now(), '{}'::jsonb
+           )`,
           [UNKNOWN],
         ),
       );
