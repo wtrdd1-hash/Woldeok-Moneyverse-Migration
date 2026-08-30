@@ -26,6 +26,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      # First, because it needs nothing but the checkout and because a leaked
+      # credential is the one failure whose cost grows for as long as it goes
+      # unnoticed. Every secret this project uses is generated on the host or
+      # held by GitHub, so anything credential-shaped in a tracked file is a
+      # mistake -- see the script for the conventions it relies on.
+      - name: Reject a committed secret
+        run: scripts/check-secrets.sh
+
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
@@ -81,3 +90,14 @@ jobs:
       # inline here made the first version fail on every run.
       - name: Reject Prisma schema mutation
         run: scripts/reject-prisma-migrate.sh
+
+      # --prod, because an advisory in a build tool cannot reach a request and
+      # blocking every unrelated pull request on one is how a gate stops being
+      # read. --audit-level=high for the same reason: what is gated here is the
+      # class of advisory that would justify an out-of-band release.
+      #
+      # It runs last on purpose. It is the only step that talks to the registry
+      # rather than to this checkout, so an outage here should not hide a real
+      # failure in the steps above it.
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level=high

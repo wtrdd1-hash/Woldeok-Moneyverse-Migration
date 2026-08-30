@@ -1,6 +1,8 @@
 name: ${STACK:-wdmv}
 
-# One deployment of the rebuild. Six containers and one external network.
+# One deployment of the rebuild. Six containers and one external network, plus
+# `backup`, which is behind a profile and runs only for the length of one
+# `docker compose run`.
 #
 # The same file runs twice on this host: STACK=wdmv is the test deployment at
 # test.easy-scraping.com, STACK=wdmvp is production at easy-scraping.com. The
@@ -74,6 +76,7 @@ services:
       PGPASSWORD: ${POSTGRES_PASSWORD:?required}
       PGDATABASE: ${DB_NAME:?required}
       STATUS_COLLECTOR_PASSWORD: ${STATUS_COLLECTOR_PASSWORD:-}
+      BACKUP_DB_PASSWORD: ${BACKUP_DB_PASSWORD:-}
       BOOTSTRAP_DISCORD_ADMIN_IDS: ${BOOTSTRAP_DISCORD_ADMIN_IDS:-}
     volumes:
       - ./seed.sh:/usr/local/bin/seed.sh:ro
@@ -81,6 +84,44 @@ services:
     depends_on:
       migrate:
         condition: service_completed_successfully
+
+  # One command's worth of database reader, for deploy/backup.sh. A profile
+  # keeps it out of `docker compose up` entirely; `docker compose run` enables
+  # the profile of the service it is given, so nothing else has to.
+  #
+  # It exists so a dump runs as `moneyverse_backup` -- a member of
+  # pg_read_all_data and nothing else -- rather than as the migrator that owns
+  # the schema, and so the credential reaches pg_dump through this file's
+  # environment instead of a command line every process on the host can read in
+  # `ps`. See deploy/seed.sh for the role.
+  #
+  # It writes nothing itself. The dump goes to stdout, and backup.sh compresses
+  # and encrypts it on the host, which is what keeps BACKUP_ENCRYPTION_KEY out
+  # of every container and the plaintext dump off disk.
+  backup:
+    image: postgres:17.5-alpine
+    profiles: [backup]
+    restart: 'no'
+    # No container_name: `run` would reuse it for every invocation, so one
+    # abandoned container would block every later backup.
+    #
+    # The image's entrypoint execs anything that is not `postgres` as whoever
+    # the container runs as, which is root unless it is told otherwise. Nothing
+    # pg_dump does here needs root.
+    user: postgres
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: moneyverse_backup
+      # No `:?required`: this file is interpolated for every `docker compose`
+      # call, so demanding it here would break `ps` and `logs` on a deployment
+      # that takes no backups. An unset value fails inside psql instead, where
+      # the message names the credential.
+      PGPASSWORD: ${BACKUP_DB_PASSWORD:-}
+      PGDATABASE: ${DB_NAME:?required}
+    depends_on:
+      db:
+        condition: service_healthy
 
   backend:
     # No `:?required`: an unset value would make every later `docker compose`

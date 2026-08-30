@@ -56,4 +56,13 @@ if [ "$code" != "200" ]; then
 fi
 
 echo "deployment healthy on port ${port}"
+
+# Says out loud whether this host holds a recent, readable backup. It never
+# fails the deploy -- a rollout is not the moment to refuse over last night's
+# cron -- but a deploy that never mentions backups at all is how a host ends up
+# without any. backup.sh prints its own reason. See docs/BACKUP.md.
+if ! bash ./backup.sh verify; then
+  echo "warning: this host has no verified backup, and migrations do not roll back" >&2
+fi
+
 docker compose ps

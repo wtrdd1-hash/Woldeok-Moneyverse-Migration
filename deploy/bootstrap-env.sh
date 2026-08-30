@@ -54,6 +54,20 @@ put ADMIN_TOTP_ENCRYPTION_KEY "$(secret)"
 # sealing key because it protects a different thing and neither should be
 # recoverable from the other.
 put ADMIN_DEVICE_HASH_PEPPER "$(secret)"
+# The backup role's own credential. It may read every table and write nothing,
+# which is what a logical backup needs and why it is not a second copy of the
+# application's access -- see deploy/seed.sh.
+#
+# BACKUP_ENCRYPTION_KEY is deliberately NOT here. A key kept in the file that
+# sits beside the ciphertext, and that Docker loads into containers, protects
+# nothing; backup.sh reads it from a file outside this directory and refuses to
+# run if it finds the key in .env. docs/BACKUP.md has the procedure.
+put BACKUP_DB_PASSWORD "$(secret)"
+# Where backup.sh writes. A host directory, not a Docker volume: a backup that
+# lives in the same volume as the database it is a backup of is not a backup.
+# It is outside this directory as well, which the deploy workflow overwrites on
+# every roll. Written once, so an operator who moves it keeps it moved.
+put BACKUP_DIR "${BACKUP_DIR:-$HOME/moneyverse-backups/${STACK:-wdmv}}"
 set_to APP_BASE_URL "${APP_BASE_URL:?APP_BASE_URL is required — it decides the OAuth redirect URIs}"
 put COOKIE_SECURE 'true'
 put TRUST_PROXY_X_FORWARDED_FOR 'true'

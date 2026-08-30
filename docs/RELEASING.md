@@ -48,6 +48,18 @@ pnpm test
 pnpm build
 ```
 
+CI는 여기에 세 가지를 더 본다. 셋 다 저장소만 있으면 로컬에서도 돌아간다.
+
+```bash
+scripts/check-control-bytes.sh    # 정규식 안의 \u 이스케이프가 원시 바이트로 바뀌었는가
+scripts/check-secrets.sh          # 추적되는 파일에 자격증명이 들어갔는가
+pnpm audit --prod --audit-level=high
+```
+
+`check-secrets.sh`가 무엇을 통과시키는지는 그 파일 머리말에 적혀 있다 — 요약하면
+**환경변수 참조이거나 `ci_`로 시작하는 CI 상수**만 값으로 적을 수 있다. 걸린 값은
+줄을 지우는 것으로 끝나지 않는다. **먼저 교체하고**, 그다음 이력에서 지운다.
+
 > **AI 에이전트에게**: `pnpm lint`를 파이프로 넘기면 종료 코드가 가려진다.
 > `pnpm lint; echo $?`처럼 종료 코드를 직접 확인하고, "통과했다"는 말은 그 출력을
 > 본 뒤에만 한다. 데이터베이스가 필요한 테스트는 `DATABASE_URL`이 없으면 조용히
@@ -95,10 +107,22 @@ gh run watch
 
 ### 배포 전 점검
 
+- [ ] **운영 백업이 있고, 열린다** — 아래 명령
 - [ ] 같은 커밋이 테스트에 올라가 있고, 화면에서 확인했다
 - [ ] 마이그레이션을 추가했다면 테스트 DB에 실제로 적용됐다
 - [ ] 사용자에게 보이는 한국어 문구를 바꿨다면 의도한 변경이다
 - [ ] 되돌릴 방법을 알고 있다 (아래)
+
+첫 항목은 명령 하나다.
+
+```bash
+ssh <host> 'DEPLOY_DIR=$HOME/moneyverse-production bash $HOME/moneyverse-production/backup.sh verify'
+```
+
+매니페스트의 sha256이 맞는지, 이 호스트의 키로 복호화되는지, 덤프가 끝까지
+온전한지, 36시간보다 오래되지 않았는지를 본다. **마이그레이션을 포함한
+릴리스라면 건너뛰지 않는다** — 스키마 변경은 되돌아가지 않고, 그때 남는 길은
+백업뿐이다. 절차 전체는 [BACKUP.md](BACKUP.md).
 
 ### 확인
 
@@ -124,6 +148,10 @@ STACK=wdmvp docker compose up -d --wait
 **마이그레이션은 되돌아가지 않는다.** 스키마를 바꾼 릴리스를 되돌리려면 앞으로
 가는 마이그레이션을 새로 쓴다. `migrate.sh`는 이미 적용된 파일의 sha256이 달라지면
 실행을 거부한다 — 이미 적용된 마이그레이션 파일은 **절대 수정하지 않는다.**
+
+데이터를 되돌려야 하는 상황이라면 이미지 태그로는 안 된다. [BACKUP.md](BACKUP.md)의
+복구 절차가 그 경우다. `restore.sh`는 기존 데이터베이스를 덮어쓰지 않고 새
+데이터베이스로 복원한 뒤, 백업 시점에 기록해 둔 수치와 대조해서 보여 준다.
 
 ## 5. 이미지만 최신으로
 
@@ -161,6 +189,9 @@ API는 `APP_BASE_URL`의 origin과 정확한 콜백 경로가 일치하지 않�
 ## 배포가 하지 않는 것
 
 - **데이터 이전.** 두 스택의 DB는 별개다. 옮기려면 `pg_dump`를 직접 쓴다.
+- **백업.** 배포는 백업을 만들지도 확인하지도 않는다. 백업은 호스트의 cron이
+  하루 한 번 돌리고, 배포 전에 사람이 `backup.sh verify`로 확인한다 —
+  [BACKUP.md](BACKUP.md).
 - **관리자 부여.** 운영에서는 `BOOTSTRAP_DISCORD_ADMIN_IDS`를 비워 둔다. 관리자는
   운영 콘솔에서 부여한다. 테스트에서만 이 변수로 자동 부여한다.
 - **Cloudflare 경로 변경.** 터널 ingress와 DNS는 `ops/`의 스크립트로 따로 한다.
@@ -173,7 +204,8 @@ API는 `APP_BASE_URL`의 origin과 정확한 콜백 경로가 일치하지 않�
 
 | 값 | 어디서 오는가 |
 |---|---|
-| `POSTGRES_PASSWORD`, `APP_DB_PASSWORD`, `INTERNAL_API_TOKEN`, `STATUS_COLLECTOR_PASSWORD` | 호스트에서 `/dev/urandom`으로 생성. 한 번 쓰이면 다시 쓰지 않는다 |
+| `POSTGRES_PASSWORD`, `APP_DB_PASSWORD`, `INTERNAL_API_TOKEN`, `STATUS_COLLECTOR_PASSWORD`, `BACKUP_DB_PASSWORD` | 호스트에서 `/dev/urandom`으로 생성. 한 번 쓰이면 다시 쓰지 않는다 |
+| `BACKUP_ENCRYPTION_KEY` | **`.env`에 넣지 않는다.** `backup.sh init-key`가 `~/.moneyverse-backup-key`에 만들고, 사본 하나는 호스트 밖에 둔다. `.env`에 있으면 `backup.sh`가 거부한다 — [BACKUP.md](BACKUP.md) |
 | Discord·Google 클라이언트 자격증명 | `ADOPT_FROM`이 가리키는 기존 컨테이너에서 호스트 안에서 복사 |
 | `GHCR_PULL_TOKEN` | GitHub 시크릿. `read:packages`만. 호스트 디스크에 남지 않는다 |
 
