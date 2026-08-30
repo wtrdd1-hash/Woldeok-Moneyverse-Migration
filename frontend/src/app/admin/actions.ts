@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
 import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
+import { STEP_UP_CODE, spendSecondFactorCode } from './step-up';
 
 /**
  * The operator console's writes.
@@ -13,7 +14,15 @@ import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
  * decides who may act. Neither this file nor the page it serves is part of
  * that decision, and the bounds repeated here exist only so an operator sees
  * which field is wrong rather than a validation document about a DTO.
+ *
+ * The four high-risk ones spend a TOTP code first, in this same action, so
+ * the code the operator typed into the dialog that named the target and the
+ * way back is what authorises the change that dialog described. Since
+ * two-person approval was retired there is nobody else to object.
  */
+
+/** The refusal every high-risk action gives for a missing or malformed code. */
+const CODE_REQUIRED = { status: 'error', message: '실행 직전 인증 코드 6자리를 입력해 주세요.' } as const;
 
 function text(value: FormDataEntryValue | null): string {
   return typeof value === 'string' ? value.trim() : '';
@@ -33,8 +42,11 @@ export async function setUserRestriction(
   if (reason === '' || reason.length > 2000) {
     return { status: 'error', message: '사유를 1~2000자로 입력해 주세요.' };
   }
+  const code = text(formData.get('code'));
+  if (!STEP_UP_CODE.test(code)) return CODE_REQUIRED;
 
   try {
+    await spendSecondFactorCode(code);
     await mutate(`/api/v1/admin/users/${encodeURIComponent(userId)}/restriction`, {
       method: 'PUT',
       body: { restricted, reason },
@@ -43,65 +55,6 @@ export async function setUserRestriction(
     return { status: 'ok', message: restricted ? '이용을 제한했어요.' : '제한을 해제했어요.' };
   } catch (error) {
     return failure(error, '제한 상태를 바꾸지 못했어요.');
-  }
-}
-
-export async function createApproval(
-  _previous: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const action = text(formData.get('action'));
-  const rawPayload = text(formData.get('payload'));
-
-  if (action === '' || action.length > 64) {
-    return { status: 'error', message: '작업 키를 1~64자로 입력해 주세요.' };
-  }
-
-  let payload: Record<string, unknown>;
-  try {
-    const parsed: unknown = rawPayload === '' ? {} : JSON.parse(rawPayload);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-      return { status: 'error', message: 'payload는 JSON 객체여야 해요.' };
-    }
-    payload = parsed as Record<string, unknown>;
-  } catch {
-    return { status: 'error', message: 'payload의 JSON 형식을 확인해 주세요.' };
-  }
-
-  try {
-    await mutate('/api/v1/admin/approvals', {
-      body: { action, payload, idempotencyKey: idempotencyKey() },
-    });
-    revalidatePath('/admin');
-    return { status: 'ok', message: '승인 요청을 등록했어요.' };
-  } catch (error) {
-    return failure(error, '승인 요청을 등록하지 못했어요.');
-  }
-}
-
-export async function decideApproval(
-  _previous: ActionState,
-  formData: FormData,
-): Promise<ActionState> {
-  const approvalRequestId = text(formData.get('approvalRequestId'));
-  const decision = text(formData.get('decision'));
-  const reason = text(formData.get('reason'));
-
-  if (approvalRequestId === '') return { status: 'error', message: '요청을 확인할 수 없어요.' };
-  if (decision !== 'approve' && decision !== 'reject') {
-    return { status: 'error', message: '승인인지 반려인지 확인할 수 없어요.' };
-  }
-
-  try {
-    await mutate(`/api/v1/admin/approvals/${encodeURIComponent(approvalRequestId)}/decisions`, {
-      body: { decision, ...(reason === '' ? {} : { reason }) },
-    });
-    revalidatePath('/admin');
-    return { status: 'ok', message: decision === 'approve' ? '승인했어요.' : '반려했어요.' };
-  } catch (error) {
-    // A request the caller raised themselves is refused by the two-person
-    // rule, which is the most common reason to land here.
-    return failure(error, '처리하지 못했어요. 본인이 올린 요청은 본인이 승인할 수 없어요.');
   }
 }
 
@@ -154,8 +107,11 @@ export async function setStockPrice(
   if (price === null || Number(price) < 10) {
     return { status: 'error', message: '가격은 10 이상 정수여야 해요.' };
   }
+  const code = text(formData.get('code'));
+  if (!STEP_UP_CODE.test(code)) return CODE_REQUIRED;
 
   try {
+    await spendSecondFactorCode(code);
     await mutate(`/api/v1/admin/stocks/${encodeURIComponent(stockId)}/price`, {
       body: { price, idempotencyKey: idempotencyKey() },
     });
@@ -180,8 +136,11 @@ export async function deleteStock(
 ): Promise<ActionState> {
   const stockId = text(formData.get('stockId'));
   if (stockId === '') return { status: 'error', message: '종목을 찾을 수 없어요.' };
+  const code = text(formData.get('code'));
+  if (!STEP_UP_CODE.test(code)) return CODE_REQUIRED;
 
   try {
+    await spendSecondFactorCode(code);
     await mutate(`/api/v1/admin/stocks/${encodeURIComponent(stockId)}`, { method: 'DELETE' });
     revalidatePath('/admin/market');
     revalidatePath('/stocks');
@@ -227,8 +186,11 @@ export async function applyCorporateAction(
     return { status: 'error', message: '액면분할인지 병합인지 확인할 수 없어요.' };
   }
   if (factor === null) return { status: 'error', message: '비율은 1 이상 정수여야 해요.' };
+  const code = text(formData.get('code'));
+  if (!STEP_UP_CODE.test(code)) return CODE_REQUIRED;
 
   try {
+    await spendSecondFactorCode(code);
     await mutate(`/api/v1/admin/stocks/${encodeURIComponent(stockId)}/corporate-actions`, {
       body: { action, factor, idempotencyKey: idempotencyKey() },
     });

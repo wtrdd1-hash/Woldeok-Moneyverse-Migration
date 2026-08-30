@@ -1,9 +1,11 @@
 import type { Request } from 'express';
-import type { AuthSessionRow } from './session.repository';
+import type { AdminSessionStatus, AuthSessionRow } from './session.repository';
 
 export interface RequestWithSession extends Request {
   session?: AuthSessionRow;
   adminRoles?: string[];
+  /** Stamped by AdminSessionGuard so a handler can report the console's clock. */
+  adminSession?: AdminSessionStatus;
 }
 
 /**

@@ -19,12 +19,12 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { Textarea } from '@/components/ui/textarea';
 import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
+import { forceLogout } from './security-actions';
+import { StepUpField } from './step-up-field';
 import {
   applyCorporateAction,
-  createApproval,
   createSeasonEvent,
   createStock,
-  decideApproval,
   deleteStock,
   setBusinessActive,
   setSeasonEventActive,
@@ -40,6 +40,12 @@ import {
  * reason the API is going to record. The original asked for some of these
  * with `window.prompt`, which cannot be laid out, cannot be cancelled
  * predictably from the keyboard, and announces nothing to a screen reader.
+ *
+ * Five of them additionally carry `StepUpField`: restricting a member,
+ * ending their sessions, splitting a stock, moving a price by hand and
+ * deleting a listing are the acts §10 calls high-risk, and since two-person
+ * approval was retired the code typed into the dialog is what stands in for
+ * the second person.
  */
 
 export function RestrictionDialog({
@@ -78,6 +84,10 @@ export function RestrictionDialog({
             <FieldLabel htmlFor={`reason-${userId}`}>사유</FieldLabel>
             <Textarea id={`reason-${userId}`} name="reason" rows={3} maxLength={2000} required />
           </Field>
+          <StepUpField
+            id={`restriction-${userId}`}
+            undo={next ? '같은 화면에서 제한을 해제합니다.' : '같은 화면에서 다시 제한합니다.'}
+          />
           <ActionAlert state={state} />
           <DialogFooter>
             <SubmitButton variant={next ? 'destructive' : 'default'}>
@@ -90,54 +100,64 @@ export function RestrictionDialog({
   );
 }
 
-export function ApprovalDecision({ approvalRequestId }: { readonly approvalRequestId: string }) {
-  const [state, action] = useActionState(decideApproval, IDLE);
-  return (
-    <div className="grid gap-2">
-      <form action={action} className="grid gap-2 sm:grid-cols-[1fr_auto_auto] sm:items-end">
-        <input type="hidden" name="approvalRequestId" value={approvalRequestId} />
-        <Field>
-          <FieldLabel htmlFor={`decision-reason-${approvalRequestId}`} className="text-xs">
-            사유 (선택)
-          </FieldLabel>
-          <Input id={`decision-reason-${approvalRequestId}`} name="reason" maxLength={2000} />
-        </Field>
-        <SubmitButton name="decision" value="approve" size="sm" className="min-h-11">
-          승인
-        </SubmitButton>
-        <SubmitButton name="decision" value="reject" variant="outline" size="sm" className="min-h-11">
-          반려
-        </SubmitButton>
-      </form>
-      <ActionAlert state={state} />
-    </div>
-  );
-}
+/**
+ * Ends every live session a member holds, from somewhere else.
+ *
+ * It sits beside 이용 제한 because they are the two halves of the same
+ * remedy: the restriction stops the account being used again, and this stops
+ * it being used right now. Neither undoes what has already happened, which is
+ * why the dialog says how many sessions it is about to cut rather than
+ * promising anything about them.
+ */
+export function ForceLogoutDialog({
+  userId,
+  displayName,
+}: {
+  readonly userId: string;
+  readonly displayName: string;
+}) {
+  const [state, action] = useActionState(forceLogout, IDLE);
 
-export function NewApprovalForm() {
-  const [state, action] = useActionState(createApproval, IDLE);
   return (
-    <form action={action} className="grid gap-4">
-      <Field>
-        <FieldLabel htmlFor="approval-action">작업 키</FieldLabel>
-        <Input id="approval-action" name="action" maxLength={64} required />
-        <FieldDescription>승인 정책이 정의한 작업 키를 그대로 입력합니다.</FieldDescription>
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="approval-payload">payload (JSON)</FieldLabel>
-        <Textarea
-          id="approval-payload"
-          name="payload"
-          rows={4}
-          spellCheck={false}
-          className="font-mono text-xs"
-          defaultValue="{}"
-        />
-        <FieldDescription>객체 형태의 JSON만 받습니다. 비우면 빈 객체로 보냅니다.</FieldDescription>
-      </Field>
-      <SubmitButton className="w-fit">승인 요청 등록</SubmitButton>
-      <ActionAlert state={state} />
-    </form>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm" className="min-h-11">
+          세션 끊기
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <form action={action} className="grid gap-4">
+          <input type="hidden" name="userId" value={userId} />
+          <DialogHeader>
+            <DialogTitle>{displayName} 세션 끊기</DialogTitle>
+            <DialogDescription>
+              이 사용자의 살아 있는 로그인 세션을 모두 끊습니다. 계정은 그대로이고 다시 로그인할
+              수 있습니다. 진행 중인 거래는 훼손되지 않습니다.
+            </DialogDescription>
+          </DialogHeader>
+          <Field>
+            <FieldLabel htmlFor={`logout-reason-${userId}`}>사유</FieldLabel>
+            <Textarea
+              id={`logout-reason-${userId}`}
+              name="reason"
+              rows={3}
+              minLength={10}
+              maxLength={1000}
+              required
+            />
+            <FieldDescription>10자 이상. 감사 기록에 그대로 남습니다.</FieldDescription>
+          </Field>
+          <StepUpField
+            id={`logout-${userId}`}
+            undo="세션은 되살릴 수 없습니다. 사용자가 다시 로그인하면 됩니다."
+          />
+          <ActionAlert state={state} />
+          <DialogFooter>
+            <SubmitButton variant="destructive">세션 끊기</SubmitButton>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -273,6 +293,10 @@ export function CorporateActionDialog({
               <InputGroupAddon align="inline-end">배</InputGroupAddon>
             </InputGroup>
           </Field>
+          <StepUpField
+            id={`corporate-${stockId}`}
+            undo="반대 방향의 기업 활동을 같은 비율로 한 번 더 적용합니다."
+          />
           <ActionAlert state={state} />
           <DialogFooter>
             <SubmitButton>적용</SubmitButton>
@@ -369,6 +393,10 @@ export function SetPriceDialog({
               required
             />
           </Field>
+          <StepUpField
+            id={`price-step-${stockId}`}
+            undo={`같은 화면에서 이전 가격 ${groupDigits(currentPrice)} WLD로 다시 조정합니다.`}
+          />
           <ActionAlert state={state} />
           <DialogFooter>
             <SubmitButton>주가 적용</SubmitButton>
@@ -418,6 +446,10 @@ export function DeleteStockDialog({
                 : '거래 기록도 보유자도 없는 종목입니다. 삭제하면 되돌릴 수 없어요.'}
             </DialogDescription>
           </DialogHeader>
+          <StepUpField
+            id={`delete-${stockId}`}
+            undo="되돌릴 수 없습니다. 같은 코드로 종목을 다시 등록해야 합니다."
+          />
           <ActionAlert state={state} />
           <DialogFooter>
             <SubmitButton variant="destructive" disabled={blocked}>

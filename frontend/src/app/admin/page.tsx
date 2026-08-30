@@ -3,16 +3,20 @@ import Link from 'next/link';
 import { ArrowRight, CircleAlert, CircleCheck } from 'lucide-react';
 import { PageHeader, SectionHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
-import { requireAdministrator } from '@/lib/session';
+import { formatMoment } from '@/lib/money';
+import { adminConsole } from '@/lib/session';
 import { ADMIN_AREAS } from './areas';
+import { CloseConsole, EnrolSecondFactor, OpenConsole } from './console-gate';
 import type {
   AdminBusiness,
+  AdminConsole,
   AdminSeasonEvent,
   AdminStock,
   AdminUser,
-  ApprovalRequest,
+  FeatureSwitch,
   ReconciliationHealth,
 } from './types';
 
@@ -24,25 +28,27 @@ export const metadata: Metadata = {
 };
 
 /**
- * The console's front door.
+ * The console's front door, and now its door.
  *
- * It used to be the whole console: one page, eight endpoints, five tabs, and
- * four fifths of what an operator could do hidden behind a tab they had to
- * think to press. The original stacked every panel on one screen, so the port
- * had made the surface look smaller than it is.
+ * Reaching the administrator surface used to need only a role. Since
+ * two-person approval was retired it needs a console session: a rotated
+ * session with a thirty-minute life and a ten-minute idle lock, opened by
+ * proving the OAuth identity again and spending a code from an authenticator
+ * app. This page is the only screen that renders without one, because it is
+ * where one is obtained — every other area redirects here.
  *
- * Now each area is a page, and this is the map: what needs attention right
- * now, and every place there is to go, with a count so the console says how
- * much is behind each door rather than making the operator open it to find
- * out.
+ * The map below is unchanged in shape: what needs attention now, and every
+ * place there is to go, with a count so the console says how much is behind
+ * each door rather than making the operator open it to find out.
  */
 export default async function AdminPage() {
-  const roles = await requireAdministrator();
+  const admin = await adminConsole();
+  if (admin.consoleSession.state !== 'open') return <Gate admin={admin} />;
 
   // Counts only. Each area page fetches its own rows, so opening one is one
   // request rather than eight.
-  const [approvals, users, stocks, businesses, events, health] = await Promise.all([
-    apiOrNull<{ approvals: ApprovalRequest[] }>('/api/v1/admin/approvals'),
+  const [controls, users, stocks, businesses, events, health] = await Promise.all([
+    apiOrNull<{ featureSwitches: FeatureSwitch[] }>('/api/v1/admin/controls'),
     apiOrNull<{ users: AdminUser[] }>('/api/v1/admin/users'),
     apiOrNull<{ stocks: AdminStock[] }>('/api/v1/admin/stocks'),
     apiOrNull<{ businessTypes: AdminBusiness[] }>('/api/v1/admin/business-types'),
@@ -50,11 +56,14 @@ export default async function AdminPage() {
     apiOrNull<ReconciliationHealth>('/api/v1/admin/economy/reconciliations/latest'),
   ]);
 
-  const pending = approvals?.approvals.filter((row) => row.status === 'pending').length ?? 0;
+  const held =
+    controls?.featureSwitches.filter((feature) => feature.state !== 'enabled').length ?? 0;
   const integrityOk = health?.integrity?.ok;
 
   const counts: Readonly<Record<string, string | null>> = {
-    '/admin/approvals': approvals ? `대기 ${pending}건 · 전체 ${approvals.approvals.length}건` : null,
+    '/admin/controls': controls
+      ? `기능 ${controls.featureSwitches.length}개 · 중지·안전모드 ${held}개`
+      : null,
     '/admin/users': users ? `${users.users.length}명` : null,
     '/admin/market': stocks ? `종목 ${stocks.stocks.length}개` : null,
     '/admin/catalog': businesses && events
@@ -67,19 +76,19 @@ export default async function AdminPage() {
 
   return (
     <div className="grid gap-6">
-      <PageHeader eyebrow="WOLDEOK MONEYVERSE · OPERATIONS" title="운영 승인 콘솔">
+      <PageHeader eyebrow="WOLDEOK MONEYVERSE · OPERATIONS" title="운영 콘솔">
         모든 작업은 감사 기록에 남고, 데이터베이스가 역할을 다시 확인합니다. 이 화면은 무엇을
         보여 줄지만 정하고, 무엇을 허용할지는 정하지 않습니다.
       </PageHeader>
 
       {/* Two things an operator should not have to open a page to learn: is
-          anything waiting for a decision, and does the ledger still balance. */}
+          anything switched off, and does the ledger still balance. */}
       <div className="grid gap-3 sm:grid-cols-2">
         <Attention
-          tone={pending > 0 ? 'attention' : 'calm'}
-          term="결정을 기다리는 요청"
-          value={approvals === null ? '확인할 수 없음' : `${pending}건`}
-          href="/admin/approvals"
+          tone={held > 0 ? 'attention' : 'calm'}
+          term="중지·안전모드인 기능"
+          value={controls === null ? '확인할 수 없음' : `${held}개`}
+          href="/admin/controls"
         />
         <Attention
           tone={integrityOk === false ? 'attention' : 'calm'}
@@ -97,18 +106,39 @@ export default async function AdminPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">내 운영 역할</CardTitle>
+          <CardTitle className="text-base">내 운영 역할과 콘솔 세션</CardTitle>
           <CardDescription>
             표시된 역할은 이 세션에서 서버가 확인한 권한입니다. 허용 여부는 데이터베이스가 매
             요청마다 다시 판단합니다.
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
-          {roles.map((role) => (
-            <Badge key={role} variant="secondary">
-              {role}
-            </Badge>
-          ))}
+        <CardContent className="grid gap-3">
+          <div className="flex flex-wrap gap-2">
+            {admin.roles.map((role) => (
+              <Badge key={role} variant={role === 'superadmin' ? 'default' : 'secondary'}>
+                {role}
+              </Badge>
+            ))}
+          </div>
+          <dl className="grid gap-1 text-sm">
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-muted-foreground">콘솔 만료</dt>
+              <dd className="tabular">
+                {admin.consoleSession.expiresAt
+                  ? formatMoment(admin.consoleSession.expiresAt)
+                  : '—'}
+              </dd>
+            </div>
+            <div className="flex items-baseline justify-between gap-3">
+              <dt className="text-muted-foreground">유휴 잠금</dt>
+              <dd className="tabular">
+                {admin.consoleSession.idleExpiresAt
+                  ? formatMoment(admin.consoleSession.idleExpiresAt)
+                  : '—'}
+              </dd>
+            </div>
+          </dl>
+          <CloseConsole />
         </CardContent>
       </Card>
 
@@ -140,6 +170,83 @@ export default async function AdminPage() {
           ))}
         </div>
       </section>
+    </div>
+  );
+}
+
+/**
+ * What an administrator sees before the console is open.
+ *
+ * Deliberately a page rather than a redirect to a separate route: there is
+ * nothing else at /admin worth showing without a console session, and one
+ * screen that names the missing step is easier to follow than a bounce
+ * through a second URL.
+ */
+function Gate({ admin }: { readonly admin: AdminConsole }) {
+  const locked = admin.consoleSession.state === 'idle_locked';
+  const expired = admin.consoleSession.state === 'expired';
+
+  return (
+    <div className="grid gap-5">
+      <PageHeader eyebrow="WOLDEOK MONEYVERSE · OPERATIONS" title="운영 콘솔 잠금">
+        운영 기능은 별도의 콘솔 세션에서만 열립니다. 본인 확인을 다시 하고 인증 앱 코드를
+        입력해야 들어갈 수 있습니다.
+      </PageHeader>
+
+      {(locked || expired) && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              {locked ? '조작이 없어 잠겼어요.' : '콘솔 세션이 만료됐어요.'}
+            </CardTitle>
+            <CardDescription>
+              아래에서 다시 열 수 있습니다. 잠기기 전에 하던 변경은 저장되지 않습니다.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
+      {!admin.available ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">2단계 인증이 준비되지 않았어요.</CardTitle>
+            <CardDescription>
+              이 배포에는 인증 키가 설정되어 있지 않습니다. 운영자에게 문의해 주세요.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      ) : !admin.secondFactor.confirmed ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">인증 앱을 먼저 등록해 주세요.</CardTitle>
+            <CardDescription>
+              최고관리자 한 명이 모든 운영 기능을 단독으로 실행하므로, 로그인 외에 두 번째 인증
+              수단이 반드시 필요합니다. 등록에는 최근 5분 안의 본인 확인이 필요합니다.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <Button asChild variant="outline" className="min-h-11 w-fit">
+              <Link href="/account">본인 확인하러 가기 →</Link>
+            </Button>
+            <EnrolSecondFactor />
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">콘솔 열기</CardTitle>
+            <CardDescription>
+              최근 5분 안에 본인 확인을 마쳤고, 등록된 기기·주소에서 접속한 경우에만 열립니다.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-4">
+            <Button asChild variant="outline" className="min-h-11 w-fit">
+              <Link href="/account">본인 확인하러 가기 →</Link>
+            </Button>
+            <OpenConsole />
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

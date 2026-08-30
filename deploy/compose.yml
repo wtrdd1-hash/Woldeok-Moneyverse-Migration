@@ -122,6 +122,19 @@ services:
       # say out loud that it is the one running the market.
       MARKET_TICKER_ENABLED: ${MARKET_TICKER_ENABLED:-true}
       MARKET_TICK_INTERVAL_MS: ${MARKET_TICK_INTERVAL_MS:-1000}
+      # The administrator's second factor. 32 bytes, as 64 hex characters or
+      # base64, and it never reaches the database: the TOTP secret is sealed
+      # with it before it is stored, so a database read alone yields nothing
+      # that can produce a code. Absent, the console's second-factor routes
+      # answer 503 and no administrator can enter — which is the intended
+      # failure, because the alternative is a console with one factor.
+      ADMIN_TOTP_ENCRYPTION_KEY: ${ADMIN_TOTP_ENCRYPTION_KEY:-}
+      # Names which key sealed a stored secret, so the key can be rotated
+      # without guessing which rows the new one can still open.
+      ADMIN_TOTP_KEY_ID: ${ADMIN_TOTP_KEY_ID:-default}
+      # Salts the hash that recognises a returning administrator device.
+      # Falls back to INTERNAL_API_TOKEN, which every deployment already has.
+      ADMIN_DEVICE_HASH_PEPPER: ${ADMIN_DEVICE_HASH_PEPPER:-}
     volumes:
       - photo-data:/data/moneyverse/photos
     depends_on:

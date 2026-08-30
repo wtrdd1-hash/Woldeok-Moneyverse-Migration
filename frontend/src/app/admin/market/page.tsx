@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/table';
 import { apiOrNull } from '@/lib/api';
 import { groupDigits } from '@/lib/money';
-import { requireAdministrator } from '@/lib/session';
+import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
 import type { AdminStock } from '../types';
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminMarketPage() {
-  await requireAdministrator();
+  await requireAdminConsole();
   const stocks = await apiOrNull<{ stocks: AdminStock[] }>('/api/v1/admin/stocks');
 
   return (

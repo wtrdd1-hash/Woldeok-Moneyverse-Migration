@@ -1,16 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
-
-const ECONOMIC_RISK_ACTIONS = new Set([
-  'economy.policy.activate',
-  'economy.policy.rollback',
-  'economy.daily_reward_policy.update',
-  'economy.treasury.adjust',
-  'economy.mint.adjust',
-  'economy.reconciliation.adjust',
-  'economy.account.freeze',
-  'economy.account.unfreeze',
-]);
 
 /**
  * The repository shape this service depends on. It is declared locally
@@ -19,7 +7,6 @@ const ECONOMIC_RISK_ACTIONS = new Set([
  */
 interface AdminRepositoryLike {
   currentRoles(input: { userId: unknown }): Promise<string[]>;
-  approvalRequests(input: { actorUserId: unknown; limit?: unknown }): Promise<unknown[]>;
   recentAuditEvents(input: { actorUserId: unknown; limit?: unknown }): Promise<unknown[]>;
   recentDiscordOutboxEvents(input: { actorUserId: unknown; limit?: unknown }): Promise<unknown[]>;
   users(input: { actorUserId: unknown; limit?: unknown }): Promise<unknown[]>;
@@ -30,20 +17,6 @@ interface AdminRepositoryLike {
     reason: unknown;
     requestId?: unknown;
   }): Promise<{ changed: boolean }>;
-  createApprovalRequest(input: {
-    requesterId: unknown;
-    action: unknown;
-    payload: unknown;
-    idempotencyKey: unknown;
-    requestId?: unknown;
-  }): Promise<string>;
-  decideApprovalRequest(input: {
-    approverId: unknown;
-    approvalRequestId: unknown;
-    decision: unknown;
-    reason?: unknown;
-    requestId?: unknown;
-  }): Promise<{ approvalRequestId: string; status: string }>;
   recordAuditEvent(input: {
     actorUserId: unknown;
     action: unknown;
@@ -64,13 +37,6 @@ export class AdminService {
 
   currentRoles(userId: unknown): Promise<string[]> {
     return this.repository.currentRoles({ userId });
-  }
-
-  approvalRequests(
-    actorUserId: unknown,
-    { limit = 30 }: { limit?: unknown } = {},
-  ): Promise<unknown[]> {
-    return this.repository.approvalRequests({ actorUserId, limit });
   }
 
   recentAuditEvents(
@@ -113,64 +79,6 @@ export class AdminService {
     });
   }
 
-  async requestApproval({
-    actorUserId,
-    action,
-    payload,
-    idempotencyKey = randomUUID(),
-    requestId = null,
-  }: {
-    actorUserId: unknown;
-    action: unknown;
-    payload: unknown;
-    idempotencyKey?: unknown;
-    requestId?: unknown;
-  }): Promise<{
-    approvalRequestId: string;
-    requiresTwoPersonApproval: true;
-    economicRisk: boolean;
-  }> {
-    const approvalRequestId = await this.repository.createApprovalRequest({
-      requesterId: actorUserId,
-      action,
-      payload,
-      idempotencyKey,
-      requestId,
-    });
-    return {
-      approvalRequestId,
-      // The database command only accepts policies explicitly marked as
-      // two-person.  `economicRisk` is presentation metadata; PostgreSQL is
-      // still the authority that rejects an unsafe or unknown action.
-      requiresTwoPersonApproval: true,
-      // `Set<string>.has` requires a string argument; a non-string action can
-      // never be a member, matching the original untyped `.has(action)` call.
-      economicRisk: typeof action === 'string' && ECONOMIC_RISK_ACTIONS.has(action),
-    };
-  }
-
-  decideApproval({
-    actorUserId,
-    approvalRequestId,
-    decision,
-    reason = null,
-    requestId = null,
-  }: {
-    actorUserId: unknown;
-    approvalRequestId: unknown;
-    decision: unknown;
-    reason?: unknown;
-    requestId?: unknown;
-  }): Promise<{ approvalRequestId: string; status: string }> {
-    return this.repository.decideApprovalRequest({
-      approverId: actorUserId,
-      approvalRequestId,
-      decision,
-      reason,
-      requestId,
-    });
-  }
-
   recordAudit({
     actorUserId,
     action,
@@ -193,5 +101,3 @@ export class AdminService {
     });
   }
 }
-
-export { ECONOMIC_RISK_ACTIONS };

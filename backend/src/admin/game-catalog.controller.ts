@@ -27,9 +27,12 @@ import {
   MinLength,
 } from 'class-validator';
 import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
+import { SecondFactorGuard } from '../auth/guards/second-factor.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -176,7 +179,7 @@ export class UpdateSeasonEventDto {
  */
 @ApiTags('admin')
 @Controller('admin')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
 export class GameCatalogController {
   constructor(
     @Inject(StockService) private readonly stocks: StockService | null,
@@ -241,7 +244,7 @@ export class GameCatalogController {
    * walk clamps to a band around that open — see migration 053.
    */
   @Post('stocks/:id/price')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
   @ApiOperation({ summary: 'Set a stock price by hand' })
   setStockPrice(
     @Req() request: RequestWithSession,
@@ -260,7 +263,7 @@ export class GameCatalogController {
    * refusal carries is the one the operator needs to read.
    */
   @Delete('stocks/:id')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
   @ApiOperation({ summary: 'Delete a stock that has no history' })
   deleteStock(
     @Req() request: RequestWithSession,
@@ -273,7 +276,7 @@ export class GameCatalogController {
   }
 
   @Post('stocks/:id/corporate-actions')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
   @ApiOperation({ summary: 'Apply a split or reverse split' })
   corporateAction(
     @Req() request: RequestWithSession,

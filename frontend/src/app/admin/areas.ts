@@ -21,10 +21,10 @@ export interface AdminArea {
 
 export const ADMIN_AREAS: readonly AdminArea[] = [
   {
-    href: '/admin/approvals',
-    eyebrow: 'APPROVAL QUEUE',
-    title: '승인 요청',
-    summary: '두 사람이 필요한 변경을 요청하고 결정합니다.',
+    href: '/admin/controls',
+    eyebrow: 'FEATURE CONTROL',
+    title: '기능 스위치 · 정책 버전',
+    summary: '기능을 켜고 끄고, 경제 정책 버전을 만들고 되돌립니다.',
   },
   {
     href: '/admin/users',

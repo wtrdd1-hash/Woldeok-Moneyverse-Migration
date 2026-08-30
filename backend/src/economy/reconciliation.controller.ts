@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
@@ -29,7 +30,7 @@ import {
  */
 @ApiTags('admin')
 @Controller('admin/economy/reconciliations')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
 export class ReconciliationController {
   constructor(
     @Inject(EconomyReconciliationService)

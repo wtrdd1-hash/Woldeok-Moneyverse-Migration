@@ -42,6 +42,32 @@ export interface AuthSessionRow extends Session {
   readonly prelogin_age_confirmed: boolean;
   readonly prelogin_consented_at: Date | null;
   readonly reauthenticated_at: Date | null;
+  /** admin_* columns added in packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql. */
+  readonly admin_opened_at: Date | null;
+  readonly admin_last_seen_at: Date | null;
+  readonly admin_closed_at: Date | null;
+  readonly admin_rotated_from: string | null;
+}
+
+/**
+ * What the console session is doing, from
+ * packages/database/migrations/057-superadmin-authority-and-admin-sessions.sql
+ * (admin_session_touch). `none` is a live member session that has not entered
+ * the console; the other three each need a different thing said to the
+ * operator, which is why this is a state rather than a boolean.
+ */
+export type AdminSessionState = 'open' | 'idle_locked' | 'expired' | 'closed' | 'none';
+
+export interface AdminSessionStatus {
+  readonly state: AdminSessionState;
+  readonly expiresAt: Date | null;
+  readonly idleExpiresAt: Date | null;
+}
+
+export interface OpenedAdminSession extends AdminSessionStatus {
+  readonly sessionId: string;
+  readonly token: string;
+  readonly csrfToken: string;
 }
 
 /** Row returned by the auth_sessions INSERT...RETURNING in create() (packages/database/migrations/002-auth-and-api.sql). */
@@ -340,5 +366,78 @@ export class SessionRepository {
       `UPDATE auth_sessions SET revoked_at=coalesce(revoked_at, now()) WHERE id=$1`,
       [sessionId],
     );
+  }
+
+  /**
+   * Enters the operations console, which rotates the session.
+   *
+   * The token that reaches the console is not the token that was in the
+   * browser a moment ago: `admin_session_open` issues a new row and revokes
+   * the old one, so a session token captured earlier cannot be replayed into
+   * the console. The caller gets the clear-text token back exactly once, the
+   * way login does, and the API relays it as a `set-cookie`.
+   *
+   * The database refuses this without a reauthentication and a second factor
+   * proved in the last five minutes; nothing here re-decides that.
+   */
+  async openAdminSession(sessionId: string, userId: string): Promise<OpenedAdminSession> {
+    const token = randomToken();
+    const csrfToken = randomToken();
+    const row = await queryOne<{
+      readonly session_id: string;
+      readonly expires_at: Date;
+      readonly idle_expires_at: Date;
+    }>(
+      this.pool,
+      `SELECT session_id, expires_at, idle_expires_at
+       FROM public.admin_session_open($1, $2, $3, $4)`,
+      [sessionId, userId, sha256(token), sha256(csrfToken)],
+    );
+    if (!row) throw new Error('admin_session_open did not return a row');
+    return {
+      sessionId: row.session_id,
+      token,
+      csrfToken,
+      state: 'open',
+      expiresAt: row.expires_at,
+      idleExpiresAt: row.idle_expires_at,
+    };
+  }
+
+  async touchAdminSession(sessionId: string, userId: string): Promise<AdminSessionStatus> {
+    const row = await queryOne<{
+      readonly state: AdminSessionState;
+      readonly expires_at: Date | null;
+      readonly idle_expires_at: Date | null;
+    }>(
+      this.pool,
+      'SELECT state, expires_at, idle_expires_at FROM public.admin_session_touch($1, $2)',
+      [sessionId, userId],
+    );
+    if (!row) throw new Error('admin_session_touch did not return a row');
+    return { state: row.state, expiresAt: row.expires_at, idleExpiresAt: row.idle_expires_at };
+  }
+
+  async closeAdminSession(sessionId: string, userId: string): Promise<boolean> {
+    const row = await queryOne<{ readonly closed: boolean }>(
+      this.pool,
+      'SELECT public.admin_session_close($1, $2) AS closed',
+      [sessionId, userId],
+    );
+    return row?.closed === true;
+  }
+
+  async forceLogout(input: {
+    readonly idempotencyKey: string;
+    readonly actorUserId: string;
+    readonly targetUserId: string;
+    readonly reason: string;
+  }): Promise<{ readonly revokedSessions: number }> {
+    const row = await queryOne<{ readonly revoked_sessions: number }>(
+      this.pool,
+      'SELECT revoked_sessions FROM public.admin_force_logout($1, $2, $3, $4)',
+      [input.idempotencyKey, input.actorUserId, input.targetUserId, input.reason],
+    );
+    return { revokedSessions: row?.revoked_sessions ?? 0 };
   }
 }

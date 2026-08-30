@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -32,7 +33,7 @@ import { PrivateImageStorage } from './private-image-storage';
  */
 @ApiTags('admin')
 @Controller('admin/photos')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, CsrfGuard)
+@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
 export class PhotoUploadController {
   constructor(@Inject(PrivateImageStorage) private readonly storage: PrivateImageStorage | null) {}
 

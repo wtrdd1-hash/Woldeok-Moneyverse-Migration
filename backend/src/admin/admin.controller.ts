@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  GoneException,
   Inject,
   Param,
   ParseUUIDPipe,
@@ -13,19 +14,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsIn,
-  IsObject,
-  IsOptional,
-  IsString,
-  IsUUID,
-  MaxLength,
-} from 'class-validator';
+import { IsBoolean, IsString, MaxLength } from 'class-validator';
 import { AdminGuard } from '../auth/guards/admin.guard';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
+import { SecondFactorGuard } from '../auth/guards/second-factor.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -33,39 +29,11 @@ import { isExpectedCommandFailure } from '../core/pg-error';
 import { AdminInputError } from './admin.repository';
 import { AdminService } from './admin.service';
 
-export class CreateApprovalDto {
-  @ApiProperty({ maxLength: 64, description: 'Action key the approval policy names' })
-  @IsString()
-  @MaxLength(64)
-  readonly action!: string;
-
-  /**
-   * Passed through untouched. Its shape belongs to the action, and
-   * `admin_create_approval_request` is what validates it against the policy —
-   * enumerating shapes here would put a second, weaker authority in front of
-   * the one that decides.
-   */
-  @ApiProperty({ type: Object, description: 'Action-specific payload' })
-  @IsObject()
-  readonly payload!: Record<string, unknown>;
-
-  @ApiProperty({ required: false, format: 'uuid' })
-  @IsOptional()
-  @IsUUID()
-  readonly idempotencyKey?: string;
-}
-
-export class ApprovalDecisionDto {
-  @ApiProperty({ enum: ['approve', 'reject'] })
-  @IsIn(['approve', 'reject'])
-  readonly decision!: 'approve' | 'reject';
-
-  @ApiProperty({ required: false, maxLength: 2000 })
-  @IsOptional()
-  @IsString()
-  @MaxLength(2000)
-  readonly reason?: string;
-}
+/**
+ * What the three approval routes answer. Named so the sentence is written
+ * once and the three handlers cannot drift apart.
+ */
+const RETIRED = 'two-person approval was retired; the superadmin acts alone';
 
 export class UserRestrictionDto {
   @ApiProperty()
@@ -81,13 +49,26 @@ export class UserRestrictionDto {
 /**
  * Every route here carries the full guard chain, AdminGuard included, and
  * every write carries CsrfGuard on top. There is no read here that a
- * non-administrator may see: the approval queue, the audit log and the member
- * list all describe moderation activity.
+ * non-administrator may see: the audit log and the member list both describe
+ * moderation activity.
+ *
+ * `AdminSessionGuard` is on each route but `me`, which is the probe the
+ * console's front door uses to find out whether the caller is an
+ * administrator at all — gating it on an open console session would make the
+ * only way in depend on already being in.
  *
  * The database functions behind these check the caller's role again. That
- * duplication is deliberate — the two-person approval rule in particular is
- * enforced by `admin_decide_approval_request`, which refuses a requester
- * deciding their own request no matter what this layer believes.
+ * duplication is deliberate: nothing this layer believes can widen what
+ * `admin_set_user_restriction` or `admin_recent_audit_events` will do.
+ *
+ * THE APPROVAL QUEUE IS GONE. Two-person approval was retired in migrations
+ * 057-058 and the superadmin acts alone, backed by a second authentication
+ * factor rather than by a second person. The three routes stay mounted and
+ * answer 410 — they are in `packages/contract/src/route-map.ts`, where a
+ * route the original served cannot quietly disappear, and 410 is the answer
+ * that says the feature was withdrawn rather than that the path was mistyped.
+ * `admin_create_approval_request` and `admin_decide_approval_request` raise
+ * 55000 for the same reason, one layer down.
  */
 @ApiTags('admin')
 @Controller('admin')
@@ -117,67 +98,46 @@ export class AdminController {
   }
 
   @Get('approvals')
-  @ApiOperation({ summary: 'Pending and recent approval requests' })
-  async approvals(@Req() request: RequestWithSession) {
-    return { approvals: await this.service().approvalRequests(requireUserId(request)) };
+  @ApiOperation({ summary: 'Withdrawn: two-person approval was retired' })
+  approvals() {
+    throw new GoneException(RETIRED);
   }
 
   @Post('approvals')
-  @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Raise an approval request' })
-  approve(@Req() request: RequestWithSession, @Body() body: CreateApprovalDto) {
-    return this.guarded(
-      () =>
-        this.service().requestApproval({
-          actorUserId: requireUserId(request),
-          action: body.action,
-          payload: body.payload,
-          ...(body.idempotencyKey === undefined ? {} : { idempotencyKey: body.idempotencyKey }),
-        }),
-      'invalid approval request',
-    );
+  @ApiOperation({ summary: 'Withdrawn: two-person approval was retired' })
+  approve() {
+    throw new GoneException(RETIRED);
   }
 
   @Post('approvals/:id/decisions')
-  @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Approve or reject a request raised by someone else' })
-  decide(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) approvalRequestId: string,
-    @Body() body: ApprovalDecisionDto,
-  ) {
-    return this.guarded(
-      () =>
-        this.service().decideApproval({
-          actorUserId: requireUserId(request),
-          approvalRequestId,
-          decision: body.decision,
-          reason: body.reason ?? null,
-        }),
-      'invalid approval decision',
-    );
+  @ApiOperation({ summary: 'Withdrawn: two-person approval was retired' })
+  decide(@Param('id', ParseUUIDPipe) _approvalRequestId: string) {
+    throw new GoneException(RETIRED);
   }
 
   @Get('audit-events')
+  @UseGuards(AdminSessionGuard)
   @ApiOperation({ summary: 'Recent audit trail entries' })
   async auditEvents(@Req() request: RequestWithSession) {
     return { events: await this.service().recentAuditEvents(requireUserId(request)) };
   }
 
   @Get('discord-outbox-events')
+  @UseGuards(AdminSessionGuard)
   @ApiOperation({ summary: 'Recent Discord outbox deliveries' })
   async discordOutboxEvents(@Req() request: RequestWithSession) {
     return { events: await this.service().recentDiscordOutboxEvents(requireUserId(request)) };
   }
 
   @Get('users')
+  @UseGuards(AdminSessionGuard)
   @ApiOperation({ summary: 'Members and their status' })
   async users(@Req() request: RequestWithSession) {
     return { users: await this.service().users(requireUserId(request)) };
   }
 
   @Put('users/:id/restriction')
-  @UseGuards(CsrfGuard)
+  @UseGuards(AdminSessionGuard, CsrfGuard, ReauthGuard, SecondFactorGuard)
   @ApiOperation({ summary: 'Restrict or unrestrict a member' })
   restrict(
     @Req() request: RequestWithSession,
