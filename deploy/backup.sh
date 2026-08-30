@@ -4,7 +4,7 @@
 # as root.
 #
 # Everything the deployment holds that cannot be rebuilt is in two places: the
-# `db-data` volume and the `photo-data` volume. A logical dump of the first and
+# `db-data` volume and the photo store on the host. A logical dump of the first and
 # an archive of the second is the whole backup, and both are written to a host
 # directory outside either volume, because a copy that shares a disk failure
 # with its original is not a backup.
@@ -228,7 +228,8 @@ do_run() {
   figures="$(db_run psql -X -qAt -v ON_ERROR_STOP=1 -v cutoff="$cutoff" -f - < backup-figures.sql)"
   [ -n "$figures" ] || die "the verification figures came back empty"
 
-  # Photo bytes live in the photo-data volume and their metadata is in the
+  # Photo bytes live in the host directory the backend mounts and their
+  # metadata is in the
   # dump. Restoring one without the other gives a gallery of rows pointing at
   # files that are gone, so they are taken together or the run fails. The
   # archive is made inside the backend container because those files are mode
