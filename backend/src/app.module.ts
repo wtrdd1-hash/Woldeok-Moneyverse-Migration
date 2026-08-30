@@ -6,6 +6,11 @@ import { CoreModule } from './core/core.module';
 import { HealthModule } from './health/health.module';
 import { AccountModule } from './account/account.module';
 import { AdminModule } from './admin/admin.module';
+import { AdminEconomyModule } from './admin/economy.module';
+import { CasinoModule } from './casino/casino.module';
+import { EngagementModule } from './engagement/engagement.module';
+import { ProfileModule } from './profile/profile.module';
+import { ProgressionModule } from './progression/progression.module';
 import { BoardModule } from './board/board.module';
 import { BusinessModule } from './business/business.module';
 import { ContentModule } from './content/content.module';
@@ -42,6 +47,11 @@ const ONE_MINUTE_MS = 60_000;
     PrivacyModule,
     EconomyModule,
     AdminModule,
+    AdminEconomyModule,
+    CasinoModule,
+    ProgressionModule,
+    ProfileModule,
+    EngagementModule,
     AccountModule,
     ContentModule,
     StatusCollectorModule,

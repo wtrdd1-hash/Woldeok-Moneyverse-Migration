@@ -129,3 +129,174 @@ export class PostgresShopRepository {
     return row;
   }
 }
+
+/**
+ * Mirrors the bound `shop_purchase_catalog` enforces on its fourth argument
+ * (`p_quantity NOT BETWEEN 1 AND 100`, migration 072). Validated here as well
+ * as in the function so an out-of-range count is answered as a sentence about
+ * the field rather than as a conflict carrying a function's message.
+ *
+ * `requireShopLimit` polices the same interval for page sizes; this delegates
+ * to it rather than repeating the numbers, and stays a separate name because
+ * the two follow different authorities and can drift apart.
+ */
+export function requireShopQuantity(value: unknown): number {
+  return requireShopLimit(value, 'quantity');
+}
+
+/** public.shop_catalog_list RETURNS TABLE: packages/database/migrations/075-shop-read-models-and-maintenance.sql */
+export interface ShopCatalogListingRow {
+  readonly catalog_id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly description: string;
+  readonly category: string;
+  /** bigint */
+  readonly price: string;
+  /** integer, and null when the item is not stock-limited. */
+  readonly quantity: number | null;
+  readonly purchase_limit: string;
+  readonly effect_kind: string;
+  /** bigint. The weekly charge migration 075 attaches to vehicles and leases. */
+  readonly maintenance_cost: string;
+  readonly sale_ends_at: Date | null;
+}
+
+/** public.shop_my_items RETURNS TABLE: packages/database/migrations/075-shop-read-models-and-maintenance.sql */
+export interface ShopHoldingRow {
+  readonly catalog_id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly quantity: number;
+  readonly acquired_at: Date;
+  readonly expires_at: Date | null;
+  readonly effect_kind: string;
+}
+
+/** public.shop_purchase_catalog RETURNS TABLE: packages/database/migrations/072-shop-purchase-function.sql */
+export interface ShopCatalogReceiptRow {
+  readonly purchase_id: string;
+  /** bigint: unit price times quantity, read back from the stored row. */
+  readonly amount: string;
+  readonly transaction_id: string;
+  readonly replayed: boolean;
+}
+
+/** public.shop_use_item RETURNS TABLE: packages/database/migrations/074-shop-item-effects.sql */
+export interface ShopItemUseRow {
+  readonly catalog_id: string;
+  // Null on a replay whose key was spent on a different item: 074 leaves the
+  // OUT parameter unset there rather than guessing a count.
+  readonly remaining_quantity: number | null;
+  readonly expires_at: Date | null;
+  readonly replayed: boolean;
+}
+
+/**
+ * The catalogue of migrations 071-075, beside the 009 shop above.
+ *
+ * A second class rather than more methods on `ShopService`: that service
+ * exists to brand the 009 columns as `WldAmount` and rename them for the
+ * wire, and its constructor asserts the exact method list it needs. These
+ * read models carry their own OUT parameters, which the newest module in this
+ * codebase hands to the controller unchanged, so there is nothing left for a
+ * service to normalise -- and the amounts stay strings either way.
+ *
+ * Every statement targets a narrowly granted SECURITY DEFINER function. The
+ * six catalogue tables are readable by no application role at all, which
+ * `shop-catalog.db.test.ts` asserts on every run.
+ */
+export class ShopCatalogRepository {
+  constructor(private readonly pool: Queryable) {
+    if (!pool || typeof pool.query !== 'function')
+      throw new TypeError('a PostgreSQL pool is required');
+  }
+
+  async catalog(actor: unknown): Promise<ShopCatalogListingRow[]> {
+    const actorUserId = requireShopUuid(actor, 'authenticated user id');
+    return queryRows<ShopCatalogListingRow>(
+      this.pool,
+      `SELECT listing.catalog_id::text AS catalog_id,
+              listing.code,
+              listing.name,
+              listing.description,
+              listing.category,
+              listing.price::text AS price,
+              listing.quantity,
+              listing.purchase_limit,
+              listing.effect_kind::text AS effect_kind,
+              listing.maintenance_cost::text AS maintenance_cost,
+              listing.sale_ends_at
+       FROM public.shop_catalog_list($1) AS listing`,
+      [actorUserId],
+    );
+  }
+
+  async holdings(actor: unknown): Promise<ShopHoldingRow[]> {
+    const actorUserId = requireShopUuid(actor, 'authenticated user id');
+    return queryRows<ShopHoldingRow>(
+      this.pool,
+      `SELECT holding.catalog_id::text AS catalog_id,
+              holding.code,
+              holding.name,
+              holding.quantity,
+              holding.acquired_at,
+              holding.expires_at,
+              holding.effect_kind::text AS effect_kind
+       FROM public.shop_my_items($1) AS holding`,
+      [actorUserId],
+    );
+  }
+
+  /**
+   * The price is never an argument. `shop_purchase_catalog` re-reads
+   * `base_price` inside the transaction that posts the ledger entry, and a
+   * replay reports the amount stored on the first receipt rather than
+   * anything this caller repeats.
+   */
+  async purchase(
+    key: unknown,
+    actor: unknown,
+    catalogId: unknown,
+    quantity: unknown = 1,
+  ): Promise<ShopCatalogReceiptRow> {
+    const idempotencyKey = requireShopUuid(key, 'idempotency key');
+    const actorUserId = requireShopUuid(actor, 'authenticated user id');
+    const item = requireShopUuid(catalogId, 'catalog item id');
+    const count = requireShopQuantity(quantity);
+    const row = await queryOne<ShopCatalogReceiptRow>(
+      this.pool,
+      `SELECT purchase.purchase_id::text AS purchase_id,
+              purchase.amount::text AS amount,
+              purchase.transaction_id::text AS transaction_id,
+              purchase.replayed
+       FROM public.shop_purchase_catalog($1, $2, $3, $4) AS purchase`,
+      [idempotencyKey, actorUserId, item, count],
+    );
+    if (!row) throw new Error('shop_purchase_catalog did not return a receipt');
+    return row;
+  }
+
+  /**
+   * Only a `convenience` item can be consumed; the function answers 22023 for
+   * a decoration or a display piece, and 22023 again for an item nobody owns.
+   * The two share one answer on purpose -- the catalogue is the only place a
+   * member learns what an item is.
+   */
+  async use(key: unknown, actor: unknown, catalogId: unknown): Promise<ShopItemUseRow> {
+    const idempotencyKey = requireShopUuid(key, 'idempotency key');
+    const actorUserId = requireShopUuid(actor, 'authenticated user id');
+    const item = requireShopUuid(catalogId, 'catalog item id');
+    const row = await queryOne<ShopItemUseRow>(
+      this.pool,
+      `SELECT used.catalog_id::text AS catalog_id,
+              used.remaining_quantity,
+              used.expires_at,
+              used.replayed
+       FROM public.shop_use_item($1, $2, $3) AS used`,
+      [idempotencyKey, actorUserId, item],
+    );
+    if (!row) throw new Error('shop_use_item did not return a receipt');
+    return row;
+  }
+}

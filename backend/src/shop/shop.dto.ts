@@ -1,7 +1,41 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID } from 'class-validator';
+import { IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
 
 export class PurchaseDto {
+  @ApiProperty({ format: 'uuid', description: 'Client-generated idempotency key' })
+  @IsUUID()
+  readonly idempotencyKey!: string;
+}
+
+export class CatalogPurchaseDto {
+  @ApiProperty({ format: 'uuid', description: 'Client-generated idempotency key' })
+  @IsUUID()
+  readonly idempotencyKey!: string;
+
+  /**
+   * A count, not an amount, so it may safely be a JSON number: 100 is the
+   * ceiling `shop_purchase_catalog` itself enforces. The price is not a field
+   * here and never will be -- the function reads it from the catalogue inside
+   * the transaction that charges for it.
+   *
+   * `enableImplicitConversion` is off in the global pipe, so a JSON string
+   * fails validation rather than being quietly coerced.
+   */
+  @ApiProperty({
+    type: Number,
+    minimum: 1,
+    maximum: 100,
+    required: false,
+    description: 'How many to buy; one when omitted',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  readonly quantity?: number;
+}
+
+export class ItemConsumptionDto {
   @ApiProperty({ format: 'uuid', description: 'Client-generated idempotency key' })
   @IsUUID()
   readonly idempotencyKey!: string;

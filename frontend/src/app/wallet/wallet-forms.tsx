@@ -156,10 +156,27 @@ export interface LoanView {
   readonly principalAmount: string;
   readonly interestAmount: string;
   readonly outstandingAmount: string;
-  readonly status: 'active' | 'repaid';
+  /**
+   * 076 gave a loan a third status. It is listed here because an overdue loan
+   * that rendered as '상환 완료' would hide the repay form on the very loan
+   * that most needs it -- and `bank_repay` accepts an overdue loan on purpose,
+   * so that defaulting is never the better move.
+   */
+  readonly status: 'active' | 'repaid' | 'overdue';
   readonly issuedAt: string;
   readonly repaidAt: string | null;
 }
+
+interface LoanStandingWords {
+  readonly label: string;
+  readonly badge: 'secondary' | 'outline' | 'destructive';
+}
+
+const STANDING: Readonly<Record<LoanView['status'], LoanStandingWords>> = {
+  active: { label: '상환 중', badge: 'secondary' },
+  overdue: { label: '연체', badge: 'destructive' },
+  repaid: { label: '상환 완료', badge: 'outline' },
+};
 
 export function LoanList({ loans }: { readonly loans: readonly LoanView[] }) {
   const [state, action] = useActionState(repay, IDLE);
@@ -178,12 +195,10 @@ export function LoanList({ loans }: { readonly loans: readonly LoanView[] }) {
                 <Amount value={loan.interestAmount} /> · {formatDay(loan.issuedAt)} 실행
               </p>
             </div>
-            <Badge variant={loan.status === 'active' ? 'secondary' : 'outline'}>
-              {loan.status === 'active' ? '상환 중' : '상환 완료'}
-            </Badge>
+            <Badge variant={STANDING[loan.status].badge}>{STANDING[loan.status].label}</Badge>
           </div>
 
-          {loan.status === 'active' && (
+          {loan.status !== 'repaid' && (
             <form action={action} className="flex flex-wrap items-end gap-2">
               <input type="hidden" name="loanId" value={loan.loanId} />
               <AmountInput

@@ -39,6 +39,20 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   MARKET_SETTLEMENT: '시장 정산',
   ADMIN_ADJUSTMENT: '관리자 조정',
   WORK_REWARD: '작업 보상',
+  // Types the newer features write. Without a label each of these reads as
+  // '경제 활동' in the ledger, which is the one line a member checks when they
+  // want to know where their money went.
+  WORK_TASK_REWARD: '작업 보상',
+  BANK_DEPOSIT_INTEREST: '예금 이자',
+  BUSINESS_PURCHASE: '사업 인수',
+  BUSINESS_SETTLEMENT: '사업 정산',
+  CONSUMPTION_EVENT: '시즌 소비',
+  SHOP_PURCHASE: '상점 구매',
+  SHOP_CATALOG_PURCHASE: '상점 구매',
+  VIRTUAL_COIN_GAME: '동전 게임',
+  // 024 composes the type as 'VIRTUAL_STOCK_' || upper(side).
+  VIRTUAL_STOCK_BUY: '주식 매수',
+  VIRTUAL_STOCK_SELL: '주식 매도',
 });
 
 export class WalletRecipientError extends Error {
@@ -112,12 +126,19 @@ export interface WalletRewardReceipt {
   readonly replayed: boolean;
 }
 
+/**
+ * 076 gave a loan a third status. `overdue` is not a failure to report: it is
+ * the state the maturity sweep puts a loan into, the borrower can still repay
+ * it, and the screen has to be able to tell it apart from `active`.
+ */
+export type WalletLoanStatus = 'active' | 'repaid' | 'overdue';
+
 export interface WalletLoanView {
   readonly loanId: string;
   readonly principalAmount: WldAmount;
   readonly interestAmount: WldAmount;
   readonly outstandingAmount: WldAmount;
-  readonly status: 'active' | 'repaid';
+  readonly status: WalletLoanStatus;
   readonly issuedAt: string;
   readonly repaidAt: string | null;
 }
@@ -184,6 +205,18 @@ function timestamp(value: Date | string, field: string): string {
   const parsed = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(parsed.valueOf())) throw new Error(`database returned an invalid ${field}`);
   return parsed.toISOString();
+}
+
+/**
+ * Until this accepted `overdue`, the first loan the maturity sweep marked
+ * turned the whole of GET /bank/loans into a 500 for that member -- the list,
+ * not the one row. The throw is kept for a value the table's own CHECK
+ * constraint would refuse, which would mean the schema and this file had
+ * drifted apart.
+ */
+function loanStatus(value: string): WalletLoanStatus {
+  if (value === 'active' || value === 'repaid' || value === 'overdue') return value;
+  throw new Error('database returned invalid loan status');
 }
 
 function transactionLabel(type: string): string {
@@ -385,12 +418,7 @@ export class WalletService {
       principalAmount: positiveWldAmount(row.principal_amount, 'loan principal'),
       interestAmount: wldAmount(row.interest_amount, 'loan interest'),
       outstandingAmount: wldAmount(row.outstanding_amount, 'loan outstanding'),
-      status:
-        row.status === 'active' || row.status === 'repaid'
-          ? row.status
-          : (() => {
-              throw new Error('database returned invalid loan status');
-            })(),
+      status: loanStatus(row.status),
       issuedAt: timestamp(row.issued_at, 'loan issued timestamp'),
       repaidAt: row.repaid_at ? timestamp(row.repaid_at, 'loan repaid timestamp') : null,
     }));

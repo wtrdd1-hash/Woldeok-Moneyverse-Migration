@@ -46,9 +46,9 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
   },
   {
     href: '/admin/economy',
-    eyebrow: 'READ-ONLY RECONCILIATION',
-    title: '경제 대사',
-    summary: '원장 정합성과 통화량. 읽기 전용입니다.',
+    eyebrow: 'ECONOMY OPERATIONS',
+    title: '경제 운영',
+    summary: '통화량과 발행, 알림, 자동 조정 엔진, 일괄 지급.',
   },
   {
     href: '/admin/logs',
