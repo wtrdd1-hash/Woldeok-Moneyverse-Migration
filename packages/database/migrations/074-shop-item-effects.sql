@@ -25,6 +25,7 @@ SET search_path = pg_catalog, pg_temp
 AS $$
 DECLARE
   v_owner uuid;
+  v_catalog uuid;
   v_quantity integer;
   v_kind public.shop_effect_kind;
 BEGIN
@@ -37,7 +38,7 @@ BEGIN
   );
 
   SELECT receipt_row.user_id, receipt_row.catalog_id, receipt_row.expires_at
-  INTO v_owner, catalog_id, expires_at
+  INTO v_owner, v_catalog, expires_at
   FROM public.item_effect_receipts AS receipt_row
   WHERE receipt_row.idempotency_key = p_key;
 
@@ -47,10 +48,14 @@ BEGIN
     END IF;
 
     -- The catalogue entry the receipt names, not the one the caller repeated.
+    -- Through a local variable, because comparing against the OUT parameter
+    -- `catalog_id` is the very ambiguity this file exists to remove: it is
+    -- also a column of `user_items`, so plpgsql refuses to guess.
     SELECT item_row.quantity INTO remaining_quantity
     FROM public.user_items AS item_row
-    WHERE item_row.user_id = p_actor AND item_row.catalog_id = catalog_id;
+    WHERE item_row.user_id = p_actor AND item_row.catalog_id = v_catalog;
 
+    catalog_id := v_catalog;
     replayed := true;
     RETURN NEXT;
     RETURN;
