@@ -71,6 +71,7 @@ export default async function AdminPage() {
       : null,
     '/admin/economy': health?.available ? '최근 스냅샷 있음' : '스냅샷 없음',
     '/admin/logs': null,
+    '/admin/logs/integrity': null,
     '/admin/content': null,
   };
 

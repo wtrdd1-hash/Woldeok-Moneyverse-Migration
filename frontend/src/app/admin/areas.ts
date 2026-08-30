@@ -57,6 +57,12 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     summary: '누가 무엇을 했는지, 무엇이 전달됐는지.',
   },
   {
+    href: '/admin/logs/integrity',
+    eyebrow: 'CHAIN INTEGRITY',
+    title: '무결성 검증 · 보존 정책',
+    summary: '사슬을 다시 계산하고, 보존 기간과 파기 기록을 남깁니다.',
+  },
+  {
     href: '/admin/content',
     eyebrow: 'PUBLISHED CONTENT CONTROL',
     title: '공지 · 사진',
