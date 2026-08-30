@@ -60,6 +60,12 @@ describe.skipIf(!DATABASE_URL)('progression and credit against a real database',
       }
     };
 
+    /**
+     * A member with accounts and enough cash to settle a loan. The interest
+     * is added to the principal, so repaying in full costs more than was
+     * borrowed and a member funded only by the loan itself cannot do it --
+     * `USER_CASH` does not allow a negative balance.
+     */
     const borrower = async (client: PoolClient): Promise<string> => {
       const id = randomUUID();
       await client.query('INSERT INTO public.users (id) VALUES ($1)', [id]);
@@ -73,6 +79,21 @@ describe.skipIf(!DATABASE_URL)('progression and credit against a real database',
          SELECT account_row.id FROM public.accounts AS account_row
          WHERE account_row.owner_user_id = $1`,
         [id],
+      );
+      const { rows } = await client.query<{ cash: string; mint: string }>(
+        `SELECT (SELECT id::text FROM public.accounts
+                 WHERE owner_user_id = $1 AND account_type = 'USER_CASH') AS cash,
+                (SELECT id::text FROM public.accounts WHERE system_key = 'mint') AS mint`,
+        [id],
+      );
+      await client.query(
+        `SELECT public.economy_post_transaction(
+           $1, 'ADMIN_ADJUSTMENT', $2, NULL,
+           jsonb_build_array(
+             jsonb_build_object('accountId', $3::uuid, 'amount', 5000, 'direction', 'credit'),
+             jsonb_build_object('accountId', $4::uuid, 'amount', 5000, 'direction', 'debit')
+           ), 'test.funded', '{}'::jsonb)`,
+        [randomUUID(), id, rows[0]?.mint, rows[0]?.cash],
       );
       return id;
     };
