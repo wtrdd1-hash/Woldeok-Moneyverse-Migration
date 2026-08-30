@@ -233,7 +233,9 @@ services:
       DISCORD_OUTBOX_CHANNEL_IDS: ${DISCORD_OUTBOX_CHANNEL_IDS:-}
       DISCORD_OUTBOX_INTERVAL_MS: ${DISCORD_OUTBOX_INTERVAL_MS:-5000}
     volumes:
-      - photo-data:/data/moneyverse/photos
+      # A directory on the host rather than a docker volume, so the object
+      # store can be put on a disk chosen for it. See bootstrap-env.sh.
+      - ${PHOTO_STORAGE_HOST_DIR:?required}:/data/moneyverse/photos
     depends_on:
       db:
         condition: service_healthy
@@ -299,7 +301,6 @@ services:
 
 volumes:
   db-data:
-  photo-data:
 
 networks:
   # The Cloudflare tunnel's own network. Joining it is what lets the tunnel

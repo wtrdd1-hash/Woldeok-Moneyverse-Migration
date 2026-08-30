@@ -42,6 +42,22 @@ trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
 
 export STACK="${STACK:-wdmv}"
 
+# The photo store's directory on the second disk, made and given away before
+# anything mounts it.
+#
+# Docker creates a bind-mount path that does not exist, as root, and the
+# backend runs as uid 100 -- so without this the first upload fails with
+# EACCES on a directory nobody can see is wrong. It is done by a container
+# because the deploy user cannot write under /data and has no reason to be
+# able to. Idempotent: chown and chmod on a directory that is already right
+# change nothing.
+photo_dir="$(grep -E '^PHOTO_STORAGE_HOST_DIR=' .env | tail -1 | cut -d= -f2-)"
+if [ -n "$photo_dir" ]; then
+  docker run --rm -v "$photo_dir:/store" alpine:3.20 \
+    sh -c 'chown 100:101 /store && chmod 700 /store'
+  echo "photo store: $photo_dir on $(df -P "$photo_dir" 2>/dev/null | awk 'NR==2 {print $1, $4" free"}')"
+fi
+
 # A backup BEFORE the roll, not after it. `docker compose up` runs the
 # migrations, and a migration does not roll back -- so a dump taken at the end
 # of this script is a dump of the state the migration produced, which is not

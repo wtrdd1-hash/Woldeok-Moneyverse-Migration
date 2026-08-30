@@ -18,7 +18,7 @@
 #
 # What it does NOT do is repoint the deployment: after a successful restore it
 # prints the two steps that do, so that decision stays with a person. Photo
-# objects are opt-in for the same reason -- there is one photo-data volume, and
+# objects are opt-in for the same reason -- there is one photo store, and
 # a rehearsal must not write into the one the live site is reading.
 #
 # docs/BACKUP.md is the procedure this belongs to.
@@ -31,7 +31,7 @@ usage() {
 restore.sh <backup> [--into <database>] [--photos] [--yes]
 
   --into <database>   restore into this database instead of a generated name
-  --photos            also restore the photo objects into the photo-data volume
+  --photos            also restore the photo objects into the host photo store
   --yes               skip the confirmation prompt (for a scripted rehearsal)
 
 Reads DEPLOY_DIR, BACKUP_DIR, BACKUP_ENCRYPTION_KEY_FILE and
@@ -144,7 +144,7 @@ echo "  taken at:  $(manifest_string "$manifest" taken_at)  (cutoff $cutoff)"
 echo "  from:      $(manifest_string "$manifest" stack) / $(manifest_string "$manifest" database)"
 echo "  into:      $target on this host's db container"
 if [ "$restore_photos" = true ]; then
-  echo "  photos:    ${photos_file:-none in this backup} -> the live photo-data volume"
+  echo "  photos:    ${photos_file:-none in this backup} -> the live photo store"
 fi
 if [ "$assume_yes" != true ]; then
   printf 'Type the target database name to continue: '

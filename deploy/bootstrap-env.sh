@@ -78,6 +78,25 @@ put BACKUP_DB_PASSWORD "$(secret)"
 # It is outside this directory as well, which the deploy workflow overwrites on
 # every roll. Written once, so an operator who moves it keeps it moved.
 put BACKUP_DIR "${BACKUP_DIR:-$HOME/moneyverse-backups/${STACK:-wdmv}}"
+
+# Where the photo object store lives on the host.
+#
+# A directory rather than a docker volume, because a volume goes wherever
+# /var/lib/docker is, and that is the disk the operating system is on. Images
+# are the one thing here that grows without bound and the one thing no
+# migration can regenerate.
+#
+# The path is the specification's: 운영 데이터는 별도 SSD `/data/wtrdd/moneyverse/`,
+# 사진은 `/data/wtrdd/moneyverse/photos/`. It has never been honoured -- until
+# now the bytes were in a named volume on the root disk, which the spec-v2
+# audit flagged and nothing acted on.
+#
+# One deviation: the stack is appended, because two deployments share this
+# host and a shared directory would mean the test server serving production's
+# photos the first time a storage key collided. A host that wants the path
+# exactly as written can set PHOTO_STORAGE_HOST_DIR before deploying; roll.sh
+# reports which filesystem it resolved to either way.
+put PHOTO_STORAGE_HOST_DIR "${PHOTO_STORAGE_HOST_DIR:-/data/wtrdd/moneyverse/photos/${STACK:-wdmv}}"
 set_to APP_BASE_URL "${APP_BASE_URL:?APP_BASE_URL is required — it decides the OAuth redirect URIs}"
 put COOKIE_SECURE 'true'
 put TRUST_PROXY_X_FORWARDED_FOR 'true'
