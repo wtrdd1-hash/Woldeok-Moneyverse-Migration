@@ -20,6 +20,10 @@ umask 077
 touch .env
 
 have() { grep -qE "^$1=" .env; }
+# `have` is satisfied by a key written with an empty value, which is exactly
+# what the OAuth loop below does when adoption produced nothing. Anything that
+# must distinguish "present" from "present and usable" asks this instead.
+has_value() { grep -qE "^$1=.+" .env; }
 # Writes a value once and never again: a generated secret must survive every
 # later deploy, or the database would be unreachable with the password the
 # volume was initialised with.
@@ -99,9 +103,34 @@ set_to DISCORD_REDIRECT_URI "${base_url%/}/auth/discord/callback"
 set_to GOOGLE_REDIRECT_URI "${base_url%/}/auth/google/callback"
 
 adopt_from="${ADOPT_FROM:-}"
+oauth_names="DISCORD_CLIENT_ID DISCORD_CLIENT_SECRET GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET"
+
+adopted_already=true
+for name in $oauth_names; do
+  has_value "$name" || adopted_already=false
+done
+
+if [ -n "$adopt_from" ] && [ "$adopted_already" = true ]; then
+  # Adoption is a once-per-host act: the credentials are in .env and every
+  # later run skips them anyway. Refusing to roll because the container they
+  # came from has since been removed would make a deployment depend forever on
+  # a container nobody needs -- and that is not hypothetical, it is what
+  # stopped both stacks from rolling until this was written.
+  echo "OAuth client credentials already present; ADOPT_FROM not needed"
+  adopt_from=""
+fi
+
 if [ -n "$adopt_from" ]; then
   if ! docker inspect "$adopt_from" >/dev/null 2>&1; then
+    # Still fatal, and deliberately so. The loop below writes these keys empty
+    # when it cannot fill them, and the API answers by disabling both login
+    # providers without saying why. A deployment that cannot log anybody in
+    # must fail loudly here rather than come up looking healthy.
     echo "ADOPT_FROM names no container on this host: $adopt_from" >&2
+    echo "and .env is missing at least one OAuth client credential." >&2
+    echo "Put DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, GOOGLE_CLIENT_ID and" >&2
+    echo "GOOGLE_CLIENT_SECRET into $PWD/.env, or point ADOPT_FROM at a" >&2
+    echo "container that has them, then roll again." >&2
     exit 1
   fi
   for name in DISCORD_CLIENT_ID DISCORD_CLIENT_SECRET GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET; do
