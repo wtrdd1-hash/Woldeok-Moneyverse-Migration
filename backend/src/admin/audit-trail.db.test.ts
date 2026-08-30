@@ -106,7 +106,9 @@ describe.skipIf(!DATABASE_URL)('the audit trail against a real database', () => 
       expect(code(error)).toBe('42501');
     });
 
-    it('refuses a malformed outcome filter before it reaches the query', async () => {
+    it('answers a stranger with the role refusal, whatever they sent', async () => {
+      // The role is checked before the filters, so a caller who may not read
+      // the trail cannot use the error code to probe what the parameters are.
       const error = await rejectionOf(() =>
         pool.query(
           `SELECT * FROM public.admin_search_audit_events(
@@ -115,15 +117,25 @@ describe.skipIf(!DATABASE_URL)('the audit trail against a real database', () => 
           [UNKNOWN, 'maybe'],
         ),
       );
-      // 22023 rather than 42501: the argument is checked before the role, so a
-      // caller learns the filter is wrong without having to be an administrator.
-      expect(code(error)).toBe('22023');
+      expect(code(error)).toBe('42501');
     });
   });
 
-  describe('the published retention policy', () => {
+  describe.skipIf(!MIGRATOR_DATABASE_URL)('the published retention policy', () => {
+    let owner: Pool;
+
+    beforeAll(() => {
+      owner = new Pool({ connectionString: MIGRATOR_DATABASE_URL, max: 1 });
+    });
+
+    afterAll(async () => {
+      await owner.end();
+    });
+
     it('seeds exactly the two periods the privacy document promises', async () => {
-      const { rows } = await pool.query<{ category: string; retention_days: number }>(
+      // Read as the owner: `audit_active_retention_policy` is internal, and
+      // the console reaches retention through the overview function instead.
+      const { rows } = await owner.query<{ category: string; retention_days: number }>(
         `SELECT policy.category, policy.retention_days
          FROM public.audit_active_retention_policy($1) AS policy
          UNION ALL
@@ -428,7 +440,7 @@ describe.skipIf(!DATABASE_URL)('the audit trail against a real database', () => 
           ],
         );
         const { rows: stored } = await client.query<EventRow>(
-          `SELECT client_ip::text AS client_ip, feature, outcome, response_status, trace_id
+          `SELECT host(client_ip) AS client_ip, feature, outcome, response_status, trace_id
            FROM public.audit_logs WHERE id = $1`,
           [rows[0]?.audit_id],
         );
@@ -537,6 +549,10 @@ describe.skipIf(!DATABASE_URL)('the audit trail against a real database', () => 
         );
         const target = rows[0]?.audit_id;
 
+        // A savepoint, because a failed statement aborts the whole
+        // transaction and everything asserted below it would then answer
+        // 25P02 instead of what it was asked.
+        await client.query('SAVEPOINT before_thin_reason');
         const thin = await rejectionOf(() =>
           client.query('SELECT * FROM public.admin_reveal_audit_event($1,$2,$3)', [
             actor,
@@ -545,6 +561,7 @@ describe.skipIf(!DATABASE_URL)('the audit trail against a real database', () => 
           ]),
         );
         expect(code(thin)).toBe('22023');
+        await client.query('ROLLBACK TO SAVEPOINT before_thin_reason');
 
         const { rows: revealed } = await client.query<{ client_ip: string }>(
           'SELECT reveal.client_ip FROM public.admin_reveal_audit_event($1,$2,$3) AS reveal',

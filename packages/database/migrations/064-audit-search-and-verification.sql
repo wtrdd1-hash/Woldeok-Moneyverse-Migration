@@ -367,7 +367,12 @@ BEGIN
     audit_row.actor_user_id,
     audit_row.action,
     audit_row.session_hash,
-    audit_row.client_ip::text,
+    -- `host()`, not `::text`. The explicit cast runs `text(inet)`, which
+    -- always prints the netmask, so a single address comes back as
+    -- `203.0.113.7/32` -- a suffix an operator has to learn to ignore.
+    -- Audit rows only ever hold a host address; `audit_masked_ip` keeps the
+    -- cast because there the /24 is the whole point.
+    pg_catalog.host(audit_row.client_ip),
     audit_row.context,
     audit_row.metadata
   FROM public.audit_logs AS audit_row
