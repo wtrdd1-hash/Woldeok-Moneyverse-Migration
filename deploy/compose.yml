@@ -124,6 +124,32 @@ services:
       db:
         condition: service_healthy
 
+  # The backup role's login, on its own. `seed` establishes it too, but `seed`
+  # waits on `migrate` -- and the whole point of the dump roll.sh takes is that
+  # it happens before a migration runs. So the one piece of seeding a dump
+  # needs is reachable without the rest, from the same script and the same
+  # idempotent block.
+  #
+  # No container_name, for the reason the `backup` service gives.
+  backup-credential:
+    image: postgres:17.5-alpine
+    profiles: [backup]
+    restart: 'no'
+    environment:
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: moneyverse_migrator
+      PGPASSWORD: ${POSTGRES_PASSWORD:?required}
+      PGDATABASE: ${DB_NAME:?required}
+      BACKUP_DB_PASSWORD: ${BACKUP_DB_PASSWORD:-}
+      SEED_ONLY: backup-credential
+    volumes:
+      - ./seed.sh:/usr/local/bin/seed.sh:ro
+    entrypoint: ['/bin/sh', '/usr/local/bin/seed.sh']
+    depends_on:
+      db:
+        condition: service_healthy
+
   backend:
     # No `:?required`: an unset value would make every later `docker compose`
     # call fail, including `ps` and `logs`, which is exactly when an operator
