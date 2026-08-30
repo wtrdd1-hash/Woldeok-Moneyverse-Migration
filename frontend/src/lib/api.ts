@@ -20,18 +20,25 @@ const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 export class ApiError extends Error {
   readonly status: number;
   readonly detail: string | undefined;
+  /**
+   * The API's stable name for the refusal, when it sent one. `detail` is
+   * English prose for an operator; this is the part a reader may branch on.
+   */
+  readonly code: string | undefined;
 
-  constructor(status: number, detail?: string) {
+  constructor(status: number, detail?: string, code?: string) {
     super(detail ?? `API responded ${status}`);
     this.name = 'ApiError';
     this.status = status;
     this.detail = detail;
+    this.code = code;
   }
 }
 
 interface ProblemDocument {
   readonly title?: string;
   readonly detail?: string;
+  readonly code?: string;
   readonly errors?: string[];
 }
 
@@ -137,7 +144,7 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
 
   if (!response.ok) {
     const problem = payload as ProblemDocument | null;
-    throw new ApiError(response.status, problem?.detail ?? problem?.title);
+    throw new ApiError(response.status, problem?.detail ?? problem?.title, problem?.code);
   }
 
   return payload as T;
@@ -229,7 +236,7 @@ export async function apiWithCookie<T>(
 
   if (!response.ok) {
     const problem = payload as ProblemDocument | null;
-    throw new ApiError(response.status, problem?.detail ?? problem?.title);
+    throw new ApiError(response.status, problem?.detail ?? problem?.title, problem?.code);
   }
 
   return { payload: payload as T, setCookie: response.headers.getSetCookie() };
@@ -266,7 +273,7 @@ export async function apiBytes<T>(
   const payload: unknown = text ? JSON.parse(text) : null;
   if (!response.ok) {
     const problem = payload as ProblemDocument | null;
-    throw new ApiError(response.status, problem?.detail ?? problem?.title);
+    throw new ApiError(response.status, problem?.detail ?? problem?.title, problem?.code);
   }
   return payload as T;
 }

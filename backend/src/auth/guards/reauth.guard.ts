@@ -31,7 +31,14 @@ export class ReauthGuard implements CanActivate {
     const recent =
       sessionId !== undefined &&
       (await this.sessions.hasRecentReauthentication(sessionId, REAUTHENTICATION_WINDOW_SECONDS));
-    if (!recent) throw new UnauthorizedException('recent reauthentication required');
+    if (!recent) {
+      // Coded, because the caller IS signed in: a reader that sees only 401
+      // tells them to log in, which is both wrong and impossible to act on.
+      throw new UnauthorizedException({
+        message: 'recent reauthentication required',
+        code: 'reauthentication_required',
+      });
+    }
     return true;
   }
 }

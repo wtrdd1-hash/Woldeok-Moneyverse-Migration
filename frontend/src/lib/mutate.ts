@@ -35,6 +35,23 @@ export async function mutate<T>(
  */
 export function failure(error: unknown, fallback: string): ActionState {
   if (error instanceof ApiError) {
+    // Two of this API's 401s are told to somebody who IS signed in: a
+    // step-up that has expired is not a session that has. Telling them to log
+    // in sends them to a page they are already past, and the thing they
+    // actually have to do -- confirm who they are, or enter a code -- is not
+    // mentioned anywhere in the sentence.
+    if (error.code === 'reauthentication_required') {
+      return {
+        status: 'error',
+        message: '본인 확인이 필요해요. 먼저 "본인 확인하러 가기"를 눌러 주세요.',
+      };
+    }
+    if (error.code === 'second_factor_required') {
+      return {
+        status: 'error',
+        message: '인증 앱 코드가 필요해요. 앱에 표시된 6자리를 다시 입력해 주세요.',
+      };
+    }
     if (error.status === 401) return { status: 'error', message: '로그인이 필요해요.' };
     if (error.status === 403) {
       return { status: 'error', message: '이 작업을 수행할 권한이 없어요.' };
