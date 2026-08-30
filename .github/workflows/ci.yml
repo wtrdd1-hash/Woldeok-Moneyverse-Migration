@@ -62,9 +62,18 @@ jobs:
           APP_DB_PASSWORD: ci_app_password
         run: packages/database/ci-apply.sh
 
+      # Two connections, because two things are being proved. DATABASE_URL is
+      # the role the application actually runs as, and almost every database
+      # test asserts what that role can and cannot reach. MIGRATOR_DATABASE_URL
+      # is for the handful of guards that live on tables the application cannot
+      # write at all -- the casino's activation trigger is the first -- which
+      # can only be exercised by the role that owns the schema. Those tests run
+      # inside transactions they roll back; a run without this variable skips
+      # them rather than reporting a guard nobody checked.
       - name: Test
         env:
           DATABASE_URL: postgresql://moneyverse_app:ci_app_password@localhost:5432/woldeok_moneyverse_ci
+          MIGRATOR_DATABASE_URL: postgresql://moneyverse_migrator:ci_migrator_password@localhost:5432/woldeok_moneyverse_ci
         run: pnpm test
 
       # Prisma introspects the schema; it never owns it. The guard lives in a
