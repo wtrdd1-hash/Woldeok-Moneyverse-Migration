@@ -42,6 +42,18 @@ put INTERNAL_API_TOKEN "$(secret)"
 # function and nothing else, so this is not a second copy of the application's
 # access — see 050-status-collector.sql.
 put STATUS_COLLECTOR_PASSWORD "$(secret)"
+# The key that seals TOTP secrets before they reach the database, so a database
+# read alone yields no usable second factor. `put`, not `set_to`: rotating it
+# would strand every enrolled administrator's sealed secret, and a rotation is
+# a deliberate act with a re-enrolment behind it, not something a redeploy does
+# by accident. Without it the API still boots and reports the second factor
+# unavailable, which would quietly leave every high-risk command unreachable --
+# so it is generated here rather than left to be remembered.
+put ADMIN_TOTP_ENCRYPTION_KEY "$(secret)"
+# Peppers the device hash in the administrator login policy. Separate from the
+# sealing key because it protects a different thing and neither should be
+# recoverable from the other.
+put ADMIN_DEVICE_HASH_PEPPER "$(secret)"
 set_to APP_BASE_URL "${APP_BASE_URL:?APP_BASE_URL is required — it decides the OAuth redirect URIs}"
 put COOKIE_SECURE 'true'
 put TRUST_PROXY_X_FORWARDED_FOR 'true'
