@@ -15,36 +15,7 @@ set -eu
 : "${PGPASSWORD:?PGPASSWORD is required}"
 : "${PGDATABASE:?PGDATABASE is required}"
 
-# 050 creates moneyverse_status_collector NOLOGIN, the way 018 creates the
-# reconciler: the role and its one privilege are schema, the credential is
-# deployment. Nothing else in this database is reachable with it.
-if [ -n "${STATUS_COLLECTOR_PASSWORD:-}" ]; then
-  psql -X -v ON_ERROR_STOP=1 \
-    -v collector_password="$STATUS_COLLECTOR_PASSWORD" \
-    -v database_name="$PGDATABASE" <<'SQL'
-ALTER ROLE moneyverse_status_collector LOGIN PASSWORD :'collector_password';
-GRANT CONNECT ON DATABASE :"database_name" TO moneyverse_status_collector;
-SQL
-  echo "status collector: login granted"
-else
-  echo "status collector: STATUS_COLLECTOR_PASSWORD unset, leaving the role without a login"
-fi
-
-# 018 creates moneyverse_reconciler NOLOGIN and gives it the one function that
-# writes a reconciliation snapshot. Until this release nothing could log in as
-# it, which is why no snapshot has ever been taken.
-if [ -n "${RECONCILER_PASSWORD:-}" ]; then
-  psql -X -v ON_ERROR_STOP=1 \
-    -v reconciler_password="$RECONCILER_PASSWORD" \
-    -v database_name="$PGDATABASE" <<'SQL'
-ALTER ROLE moneyverse_reconciler LOGIN PASSWORD :'reconciler_password';
-GRANT CONNECT ON DATABASE :"database_name" TO moneyverse_reconciler;
-SQL
-  echo "reconciler: login granted"
-else
-  echo "reconciler: RECONCILER_PASSWORD unset, leaving the role without a login"
-fi
-
+grant_backup_credential() {
 # The role a logical backup runs as. Unlike the two above, the role itself is
 # created here rather than in a numbered migration: the backup has to exist
 # before the irreversible migration series it protects, and this release adds
@@ -89,6 +60,49 @@ SQL
 else
   echo "backup role: BACKUP_DB_PASSWORD unset, no backup credential in this database"
 fi
+}
+
+# roll.sh runs this on its own, before it dumps the database. The dump has to
+# happen before migrate.sh touches anything, and `seed` proper waits on
+# `migrate` -- so the one piece of seeding a dump needs, the backup role's
+# login, has to be reachable without the rest. Same block, called twice,
+# idempotent both times.
+if [ "${SEED_ONLY:-}" = "backup-credential" ]; then
+  grant_backup_credential
+  exit 0
+fi
+
+# 050 creates moneyverse_status_collector NOLOGIN, the way 018 creates the
+# reconciler: the role and its one privilege are schema, the credential is
+# deployment. Nothing else in this database is reachable with it.
+if [ -n "${STATUS_COLLECTOR_PASSWORD:-}" ]; then
+  psql -X -v ON_ERROR_STOP=1 \
+    -v collector_password="$STATUS_COLLECTOR_PASSWORD" \
+    -v database_name="$PGDATABASE" <<'SQL'
+ALTER ROLE moneyverse_status_collector LOGIN PASSWORD :'collector_password';
+GRANT CONNECT ON DATABASE :"database_name" TO moneyverse_status_collector;
+SQL
+  echo "status collector: login granted"
+else
+  echo "status collector: STATUS_COLLECTOR_PASSWORD unset, leaving the role without a login"
+fi
+
+# 018 creates moneyverse_reconciler NOLOGIN and gives it the one function that
+# writes a reconciliation snapshot. Until this release nothing could log in as
+# it, which is why no snapshot has ever been taken.
+if [ -n "${RECONCILER_PASSWORD:-}" ]; then
+  psql -X -v ON_ERROR_STOP=1 \
+    -v reconciler_password="$RECONCILER_PASSWORD" \
+    -v database_name="$PGDATABASE" <<'SQL'
+ALTER ROLE moneyverse_reconciler LOGIN PASSWORD :'reconciler_password';
+GRANT CONNECT ON DATABASE :"database_name" TO moneyverse_reconciler;
+SQL
+  echo "reconciler: login granted"
+else
+  echo "reconciler: RECONCILER_PASSWORD unset, leaving the role without a login"
+fi
+
+grant_backup_credential
 
 # A space or comma separated list of Discord user ids. Present on the test
 # deployment, absent on production -- which is the whole point of it being

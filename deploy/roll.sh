@@ -51,6 +51,12 @@ export STACK="${STACK:-wdmv}"
 # A host with no database has nothing to dump, and a first deploy must not
 # fail for the absence of a backup that could not have existed.
 if [ -n "$(docker compose ps -q db 2>/dev/null || true)" ]; then
+  # The dump runs as `moneyverse_backup`, whose login `seed` grants -- and
+  # `seed` runs after `migrate`, which is the thing this dump has to precede.
+  # So that one grant is done first, on its own. It is idempotent, and a
+  # failure here is left to speak through the dump rather than raised twice.
+  docker compose run --rm -T backup-credential || true
+
   if bash ./backup.sh run; then
     echo "backed up before the roll"
   elif [ "${REQUIRE_BACKUP:-0}" = "1" ]; then
