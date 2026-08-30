@@ -24,9 +24,14 @@ to avoid deadlock, rejects a negative balance on any account not marked
 
 - Add the next number. Never renumber, never edit an applied migration —
   `migrate.sh` compares a `sha256` and refuses a changed file.
-- The range is contiguous: 002 through 046, 45 migrations, no gaps.
-- Every `SECURITY DEFINER` function pins `search_path`. A test asserts this
-  across all 45 migrations.
+- The range is contiguous: 002 through the newest file, no gaps and no
+  repeated numbers. `test/migration-parity.test.ts` asserts it, which is also
+  why two branches cannot both claim the next number — stack them instead.
+  (This line read "002 through 046, 45 migrations" long after that stopped
+  being true, so it says the rule now rather than a count that goes stale on
+  the next merge.)
+- Every `SECURITY DEFINER` function pins `search_path`. The same test asserts
+  that across every migration.
 - Idempotency-key handling takes the lock *before* the replay check and
   verifies the replayed row belongs to the caller. Copy `shop_purchase`,
   `economy_claim_daily`, `economy_claim_work`, `021-work-reward.sql` or
