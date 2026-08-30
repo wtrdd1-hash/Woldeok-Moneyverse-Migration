@@ -78,6 +78,7 @@ export interface AuthenticateInput {
   readonly codeVerifier: string;
   readonly nonceHash: string;
   readonly providerConfig: EnabledOAuthProviderConfig;
+  readonly redirectUri: string;
 }
 
 export interface OAuthClientOptions {
@@ -108,8 +109,15 @@ export class OAuthClient {
     codeVerifier,
     nonceHash,
     providerConfig,
+    redirectUri,
   }: AuthenticateInput): Promise<OAuthIdentity> {
-    const token = await this.#exchangeCode({ provider, code, codeVerifier, providerConfig });
+    const token = await this.#exchangeCode({
+      provider,
+      code,
+      codeVerifier,
+      providerConfig,
+      redirectUri,
+    });
     if (provider === 'discord') return this.#discordIdentity(token);
     if (provider === 'google')
       return this.#googleIdentity(token, nonceHash, providerConfig.clientId);
@@ -121,11 +129,13 @@ export class OAuthClient {
     code,
     codeVerifier,
     providerConfig,
+    redirectUri,
   }: {
     readonly provider: string;
     readonly code: string;
     readonly codeVerifier: string;
     readonly providerConfig: EnabledOAuthProviderConfig;
+    readonly redirectUri: string;
   }): Promise<OAuthTokenResponse> {
     const tokenEndpoint =
       provider === 'discord'
@@ -146,7 +156,11 @@ export class OAuthClient {
           client_secret: providerConfig.clientSecret,
           grant_type: 'authorization_code',
           code,
-          redirect_uri: providerConfig.redirectUri,
+          // The URI the provider itself saw at the authorize step, read back
+          // from the stored challenge. RFC 6749 requires the exchange to
+          // repeat it exactly, so a deployment answering on two origins must
+          // send the one this round trip started on -- not the canonical one.
+          redirect_uri: redirectUri,
           code_verifier: codeVerifier,
         }),
       });

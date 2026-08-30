@@ -15,7 +15,31 @@ export type OAuthProviderConfig =
       readonly enabled: true;
       readonly clientId: string;
       readonly clientSecret: string;
+      /**
+       * The redirect URI used when nothing selects another one. It is the URI
+       * derived from APP_BASE_URL, so a deployment that never registers a
+       * second origin behaves exactly as it did before this became a list.
+       */
       readonly redirectUri: string;
+      /**
+       * Every redirect URI this deployment may complete a sign-in on, the
+       * canonical one first.
+       *
+       * A list rather than a single value because a deployment outlives its
+       * hostname: a domain gets renamed, a second name is pointed at the same
+       * stack, an origin is retired. With one value, the first of those
+       * silently removes the login button -- `oauthProvider` returns
+       * `{enabled: false}` for an origin mismatch, so nothing raises, nothing
+       * logs, and the deployment reports healthy.
+       *
+       * It is still a closed set. Each entry is registered ahead of time in
+       * OAUTH_ALLOWED_REDIRECT_URIS and checked here, so a request can only
+       * ever SELECT among origins an operator approved -- it can never
+       * introduce one. That distinction is the whole design: the objection to
+       * `X-Forwarded-Host` is that it lets a caller decide, and choosing from
+       * a pre-registered list is not deciding.
+       */
+      readonly redirectUris: readonly string[];
     };
 
 export interface DiscordInteractionsPolicy {
@@ -98,14 +122,68 @@ function oauthProvider(options: {
   readonly name: string;
   readonly baseUrl: string;
   readonly callbackPath: string;
+  readonly allowedOrigins: readonly string[];
 }): OAuthProviderConfig {
-  const { clientId, clientSecret, redirectUri, name, baseUrl, callbackPath } = options;
+  const { clientId, clientSecret, redirectUri, name, baseUrl, callbackPath, allowedOrigins } =
+    options;
   if (!clientId || !clientSecret || !redirectUri) return { enabled: false };
   const callbackUrl = parseUrl(redirectUri, `${name} redirect URI`);
   const applicationUrl = new URL(baseUrl);
   if (callbackUrl.origin !== applicationUrl.origin) return { enabled: false };
   if (callbackUrl.pathname !== callbackPath) return { enabled: false };
-  return { enabled: true, clientId, clientSecret, redirectUri: callbackUrl.toString() };
+
+  // The canonical URI leads, and every additional origin contributes the same
+  // callback path on itself. The path is not taken from the operator's entry:
+  // OAUTH_ALLOWED_REDIRECT_URIS names ORIGINS this deployment answers on, and
+  // letting it name paths too would turn one malformed entry into a redirect
+  // to somewhere the router does not serve.
+  const uris = [callbackUrl.toString()];
+  for (const origin of allowedOrigins) {
+    const candidate = new URL(callbackPath, origin).toString();
+    if (!uris.includes(candidate)) uris.push(candidate);
+  }
+
+  return {
+    enabled: true,
+    clientId,
+    clientSecret,
+    redirectUri: callbackUrl.toString(),
+    redirectUris: uris,
+  };
+}
+
+/**
+ * The origins a sign-in may be completed on, beyond APP_BASE_URL.
+ *
+ * Parsed through `parseUrl`, so an entry carrying credentials, a query or a
+ * fragment is rejected rather than half-honoured, and plain HTTP is refused
+ * outside localhost. A malformed entry throws at boot: this list decides where
+ * a session cookie may be issued, and a deployment that starts having quietly
+ * dropped one of them is worse than a deployment that refuses to start.
+ */
+function allowedRedirectOrigins(env: NodeJS.ProcessEnv): readonly string[] {
+  return String(env.OAUTH_ALLOWED_REDIRECT_URIS ?? '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .map((value) => parseUrl(value, 'OAUTH_ALLOWED_REDIRECT_URIS entry').origin);
+}
+
+/**
+ * Picks the redirect URI for one request.
+ *
+ * `requestOrigin` is what the browser used, relayed by the frontend. It is not
+ * trusted -- it is matched against the registered list, and anything that does
+ * not match falls back to the canonical URI. A caller who forges the header
+ * therefore gets the ordinary sign-in, not a redirect of their choosing.
+ */
+export function selectRedirectUri(
+  provider: { readonly redirectUri: string; readonly redirectUris: readonly string[] },
+  requestOrigin: string | undefined,
+): string {
+  if (!requestOrigin) return provider.redirectUri;
+  const match = provider.redirectUris.find((uri) => new URL(uri).origin === requestOrigin);
+  return match ?? provider.redirectUri;
 }
 
 function discordInteractions(env: NodeJS.ProcessEnv): DiscordInteractionsConfig {
@@ -254,6 +332,7 @@ function discordOutbox(env: NodeJS.ProcessEnv): DiscordOutboxConfig {
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const production = env.NODE_ENV === 'production';
   const baseUrl = parseUrl(env.APP_BASE_URL ?? 'http://127.0.0.1:3000', 'APP_BASE_URL').toString();
+  const allowedOrigins = allowedRedirectOrigins(env);
 
   const internalToken = env.INTERNAL_API_TOKEN ?? '';
   if (internalToken.length < 32) {
@@ -282,6 +361,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
         redirectUri: env.DISCORD_REDIRECT_URI,
         baseUrl,
         callbackPath: '/auth/discord/callback',
+        allowedOrigins,
       }),
       google: oauthProvider({
         // Google stays consistent with Discord: a provider is available only
@@ -294,6 +374,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
         redirectUri: env.GOOGLE_REDIRECT_URI,
         baseUrl,
         callbackPath: '/auth/google/callback',
+        allowedOrigins,
       }),
     },
     discordInteractions: discordInteractions(env),

@@ -100,6 +100,17 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
   const forwardedFor = incoming.get('x-forwarded-for');
   if (forwardedFor) requestHeaders['x-forwarded-for'] = forwardedFor;
 
+  // The origin the browser actually used, so the API can complete an OAuth
+  // round trip on the name the visitor is on rather than on the canonical one.
+  // The API does not trust it: it matches this against the origins registered
+  // in OAUTH_ALLOWED_REDIRECT_URIS and falls back to the canonical URI when it
+  // matches none, so relaying it can only ever select, never introduce.
+  const forwardedHost = incoming.get('x-forwarded-host') ?? incoming.get('host');
+  if (forwardedHost) {
+    const proto = incoming.get('x-forwarded-proto') ?? 'https';
+    requestHeaders['x-public-origin'] = `${proto}://${forwardedHost}`;
+  }
+
   const response = await fetch(`${API_ORIGIN}${path}`, {
     method,
     headers: requestHeaders,
@@ -178,6 +189,17 @@ export async function apiWithCookie<T>(
   const incoming = await headers();
   const forwardedFor = incoming.get('x-forwarded-for');
   if (forwardedFor) requestHeaders['x-forwarded-for'] = forwardedFor;
+
+  // The origin the browser actually used, so the API can complete an OAuth
+  // round trip on the name the visitor is on rather than on the canonical one.
+  // The API does not trust it: it matches this against the origins registered
+  // in OAUTH_ALLOWED_REDIRECT_URIS and falls back to the canonical URI when it
+  // matches none, so relaying it can only ever select, never introduce.
+  const forwardedHost = incoming.get('x-forwarded-host') ?? incoming.get('host');
+  if (forwardedHost) {
+    const proto = incoming.get('x-forwarded-proto') ?? 'https';
+    requestHeaders['x-public-origin'] = `${proto}://${forwardedHost}`;
+  }
 
   const response = await fetch(`${API_ORIGIN}${path}`, {
     method,

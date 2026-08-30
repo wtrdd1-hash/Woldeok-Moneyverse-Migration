@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { loadConfig } from './config';
+import { loadConfig, selectRedirectUri } from './config';
 
 const MINIMAL = {
   APP_BASE_URL: 'http://127.0.0.1:3000',
@@ -188,5 +188,89 @@ describe('loadConfig: the Discord outbox', () => {
       DISCORD_OUTBOX_INTERVAL_MS: '10',
     }).discordOutbox;
     expect(tooFast.enabled === true && tooFast.intervalMs).toBe(5_000);
+  });
+});
+
+describe('multiple registered origins', () => {
+  const base = {
+    DISCORD_CLIENT_ID: 'id',
+    DISCORD_CLIENT_SECRET: 'secret',
+    APP_BASE_URL: 'https://easy-scraping.com',
+    DISCORD_REDIRECT_URI: 'https://easy-scraping.com/auth/discord/callback',
+    INTERNAL_API_TOKEN: 'x'.repeat(32),
+  };
+
+  const discordOf = (env: NodeJS.ProcessEnv) => {
+    const provider = loadConfig(env).oauth.discord;
+    if (!provider.enabled) throw new Error('expected the provider to be enabled');
+    return provider;
+  };
+
+  it('registers only the canonical URI when no others are named', () => {
+    expect(discordOf({ ...base }).redirectUris).toEqual([
+      'https://easy-scraping.com/auth/discord/callback',
+    ]);
+  });
+
+  it('adds the callback path to each additional origin, canonical first', () => {
+    expect(
+      discordOf({
+        ...base,
+        OAUTH_ALLOWED_REDIRECT_URIS: 'https://weoldeog.com, https://www.easy-scraping.com',
+      }).redirectUris,
+    ).toEqual([
+      'https://easy-scraping.com/auth/discord/callback',
+      'https://weoldeog.com/auth/discord/callback',
+      'https://www.easy-scraping.com/auth/discord/callback',
+    ]);
+  });
+
+  it('takes only the origin from an entry, never a path it carries', () => {
+    // An operator naming a path would otherwise redirect sign-ins somewhere
+    // the router does not serve.
+    expect(
+      discordOf({ ...base, OAUTH_ALLOWED_REDIRECT_URIS: 'https://weoldeog.com/somewhere/else' })
+        .redirectUris,
+    ).toContain('https://weoldeog.com/auth/discord/callback');
+  });
+
+  it('refuses to start on an entry that is not an absolute HTTPS URL', () => {
+    // This list decides where a session cookie may be issued. Starting with
+    // one of them quietly dropped is worse than not starting.
+    expect(() => loadConfig({ ...base, OAUTH_ALLOWED_REDIRECT_URIS: 'weoldeog.com' })).toThrow(
+      /OAUTH_ALLOWED_REDIRECT_URIS/,
+    );
+  });
+
+  it('never registers an origin nobody named', () => {
+    const uris = discordOf({ ...base, OAUTH_ALLOWED_REDIRECT_URIS: 'https://weoldeog.com' })
+      .redirectUris;
+    expect(uris).not.toContain('https://test.easy-scraping.com/auth/discord/callback');
+  });
+});
+
+describe('selectRedirectUri', () => {
+  const provider = {
+    redirectUri: 'https://easy-scraping.com/auth/discord/callback',
+    redirectUris: [
+      'https://easy-scraping.com/auth/discord/callback',
+      'https://weoldeog.com/auth/discord/callback',
+    ],
+  };
+
+  it('keeps the visitor on the registered origin they arrived at', () => {
+    expect(selectRedirectUri(provider, 'https://weoldeog.com')).toBe(
+      'https://weoldeog.com/auth/discord/callback',
+    );
+  });
+
+  it('falls back to the canonical URI for an origin nobody registered', () => {
+    // A forged x-public-origin buys the ordinary sign-in, not a redirect of
+    // the caller's choosing.
+    expect(selectRedirectUri(provider, 'https://attacker.example')).toBe(provider.redirectUri);
+  });
+
+  it('falls back when no origin was relayed at all', () => {
+    expect(selectRedirectUri(provider, undefined)).toBe(provider.redirectUri);
   });
 });
