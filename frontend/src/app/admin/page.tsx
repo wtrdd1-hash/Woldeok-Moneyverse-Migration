@@ -222,7 +222,7 @@ function Gate({ admin }: { readonly admin: AdminConsole }) {
             <CardTitle className="text-base">인증 앱을 먼저 등록해 주세요.</CardTitle>
             <CardDescription>
               최고관리자 한 명이 모든 운영 기능을 단독으로 실행하므로, 로그인 외에 두 번째 인증
-              수단이 반드시 필요합니다. 등록에는 최근 15분 안의 본인 확인이 필요합니다.
+              수단이 반드시 필요합니다. 등록에는 최근 5분 안의 본인 확인이 필요합니다.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
@@ -237,7 +237,7 @@ function Gate({ admin }: { readonly admin: AdminConsole }) {
           <CardHeader>
             <CardTitle className="text-base">콘솔 열기</CardTitle>
             <CardDescription>
-              최근 15분 안에 본인 확인을 마쳤고, 등록된 기기·주소에서 접속한 경우에만 열립니다.
+              최근 5분 안에 본인 확인을 마쳤고, 등록된 기기·주소에서 접속한 경우에만 열립니다.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">

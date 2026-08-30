@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { isAuthorizationFailure, isExpectedCommandFailure, pgErrorCode } from './pg-error';
+import {
+  isAuthorizationFailure,
+  isExpectedCommandFailure,
+  pgErrorCode,
+  roleRefusalReason,
+} from './pg-error';
 
 describe('pgErrorCode', () => {
   it('reads a string code off an error-shaped object', () => {
@@ -44,5 +49,32 @@ describe('isAuthorizationFailure', () => {
 
   it('rejects anything else', () => {
     expect(isAuthorizationFailure({ code: '23505' })).toBe(false);
+  });
+});
+
+describe('roleRefusalReason', () => {
+  // 057 and 058 raise all three of these as 42501. A caller that cannot tell
+  // them apart can only say "refused", which the operator already knows.
+  it('separates the three refusals the admin functions raise', () => {
+    expect(roleRefusalReason({ code: '42501', message: 'recent reauthentication required' })).toBe(
+      'reauthentication',
+    );
+    expect(roleRefusalReason({ code: '42501', message: 'recent second factor required' })).toBe(
+      'second_factor',
+    );
+    expect(roleRefusalReason({ code: '42501', message: 'administrator role required' })).toBe('role');
+  });
+
+  it('is silent about a lost GRANT, which means the opposite thing', () => {
+    expect(
+      roleRefusalReason({ code: '42501', message: 'permission denied for table users' }),
+    ).toBeNull();
+  });
+
+  it('is silent about any other error', () => {
+    expect(
+      roleRefusalReason({ code: '23505', message: 'recent second factor required' }),
+    ).toBeNull();
+    expect(roleRefusalReason(new Error('recent second factor required'))).toBeNull();
   });
 });
