@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Pool, type PoolClient } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { databaseUrl, rejectionOf } from './testing/database';
+import { databaseUrl, reachLendingGrade, rejectionOf } from './testing/database';
 
 /**
  * Migrations 083-085, executed.
@@ -169,6 +169,9 @@ describe.skipIf(!DATABASE_URL)('ledger corrections against a real database', () 
       await rolledBack(async (client) => {
         const admin = await superadmin(client);
         const subject = await member(client, 5000);
+        // 096 refuses the seeded 'new' grade, so the loan this case needs has
+        // to be one the borrower's grade allows.
+        await reachLendingGrade(client, subject);
         const { rows } = await client.query<{ transaction_id: string }>(
           `SELECT borrowed.transaction_id::text FROM public.bank_borrow($1, $2, 1000) AS borrowed`,
           [randomUUID(), subject],

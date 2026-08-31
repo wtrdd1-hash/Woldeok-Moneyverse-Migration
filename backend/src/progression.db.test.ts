@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Pool, type PoolClient } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { databaseUrl, rejectionOf } from './testing/database';
+import { databaseUrl, reachLendingGrade, rejectionOf } from './testing/database';
 
 /**
  * Migrations 076-078, executed.
@@ -122,6 +122,9 @@ describe.skipIf(!DATABASE_URL)('progression and credit against a real database',
     it('records the grade, the term and the minimum repayment on a new loan', async () => {
       await rolledBack(async (client) => {
         const actor = await borrower(client);
+        // 096 refuses the seeded 'new' grade outright, so a test about loans
+        // has to reach a grade that lends before it can have one.
+        await reachLendingGrade(client, actor);
         await client.query('SELECT * FROM public.bank_borrow($1, $2, 1000)', [
           randomUUID(),
           actor,
@@ -148,6 +151,9 @@ describe.skipIf(!DATABASE_URL)('progression and credit against a real database',
     it('lets the borrower repay a loan that has gone overdue', async () => {
       await rolledBack(async (client) => {
         const actor = await borrower(client);
+        // 096 refuses the seeded 'new' grade outright, so a test about loans
+        // has to reach a grade that lends before it can have one.
+        await reachLendingGrade(client, actor);
         const { rows: loan } = await client.query<{ loan_id: string }>(
           'SELECT borrowed.loan_id::text FROM public.bank_borrow($1, $2, 1000) AS borrowed',
           [randomUUID(), actor],
@@ -188,6 +194,9 @@ describe.skipIf(!DATABASE_URL)('progression and credit against a real database',
     it('keeps an overdue loan from being replaced by a fresh one', async () => {
       await rolledBack(async (client) => {
         const actor = await borrower(client);
+        // 096 refuses the seeded 'new' grade outright, so a test about loans
+        // has to reach a grade that lends before it can have one.
+        await reachLendingGrade(client, actor);
         await client.query('SELECT * FROM public.bank_borrow($1, $2, 1000)', [
           randomUUID(),
           actor,
@@ -210,6 +219,9 @@ describe.skipIf(!DATABASE_URL)('progression and credit against a real database',
     it('leaves a partly repaid overdue loan overdue', async () => {
       await rolledBack(async (client) => {
         const actor = await borrower(client);
+        // 096 refuses the seeded 'new' grade outright, so a test about loans
+        // has to reach a grade that lends before it can have one.
+        await reachLendingGrade(client, actor);
         const { rows: loan } = await client.query<{ loan_id: string }>(
           'SELECT borrowed.loan_id::text FROM public.bank_borrow($1, $2, 1000) AS borrowed',
           [randomUUID(), actor],

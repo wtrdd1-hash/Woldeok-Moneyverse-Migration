@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Pool, type PoolClient } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { databaseUrl, rejectionOf } from './testing/database';
+import { databaseUrl, reachLendingGrade, rejectionOf } from './testing/database';
 
 /**
  * Migration 096, executed.
@@ -60,6 +60,21 @@ describe.skipIf(!DATABASE_URL)('the credit ceiling against a real database', () 
       }
     };
 
+    /**
+     * Runs something expected to fail, and leaves the transaction usable.
+     *
+     * A statement that raises inside a transaction aborts it, and every query
+     * after it answers 25P02 -- so a case that asserts a refusal and then
+     * asserts what is still allowed has to put a savepoint around the
+     * refusal. Returns the rejection so the caller can read its SQLSTATE.
+     */
+    const refused = async (client: PoolClient, attempt: () => Promise<unknown>): Promise<unknown> => {
+      await client.query('SAVEPOINT expected_refusal');
+      const error = await rejectionOf(attempt);
+      await client.query('ROLLBACK TO SAVEPOINT expected_refusal');
+      return error;
+    };
+
     const member = async (client: PoolClient): Promise<string> => {
       const id = randomUUID();
       await client.query('INSERT INTO public.users (id) VALUES ($1)', [id]);
@@ -73,34 +88,44 @@ describe.skipIf(!DATABASE_URL)('the credit ceiling against a real database', () 
          WHERE account_row.owner_user_id = $1`,
         [id],
       );
+      // Funded from MINT, which is also what puts a row in
+      // `ledger_transactions` -- the casino cases below need one, because
+      // `virtual_casino_coin_plays.transaction_id` is NOT NULL and references
+      // it.
+      await client.query(
+        `SELECT public.economy_post_transaction(
+           $1, 'ADMIN_ADJUSTMENT', $2, NULL,
+           jsonb_build_array(
+             jsonb_build_object('accountId',
+               (SELECT id FROM public.accounts WHERE system_key = 'mint'),
+               'amount', 5000, 'direction', 'credit'),
+             jsonb_build_object('accountId',
+               (SELECT id FROM public.accounts
+                WHERE owner_user_id = $2 AND account_type = 'USER_CASH'),
+               'amount', 5000, 'direction', 'debit')
+           ), 'test.funded', '{}'::jsonb)`,
+        [randomUUID(), id],
+      );
       return id;
     };
 
-    /** Ages the account and gives it paid tasks, which is all a grade tests. */
-    const earnGradeC = async (client: PoolClient, actor: string): Promise<void> => {
-      await client.query(
-        `UPDATE public.users SET created_at = clock_timestamp() - interval '10 days' WHERE id = $1`,
-        [actor],
+    /**
+     * A play written straight into the table.
+     *
+     * 096 puts the block on a trigger rather than inside `casino_play_coin`,
+     * so writing the row directly is the strongest form of this assertion:
+     * it proves the refusal does not depend on which path reached the table.
+     */
+    const play = (client: PoolClient, actor: string): Promise<unknown> =>
+      client.query(
+        `INSERT INTO public.virtual_casino_coin_plays
+           (user_id, play_date, stake_amount, net_amount, choice, outcome,
+            idempotency_key, transaction_id)
+         VALUES ($1, current_date, 100, -100, 'heads', 'tails', $2,
+                 (SELECT id FROM public.ledger_transactions
+                  ORDER BY created_at DESC, id DESC LIMIT 1))`,
+        [actor, randomUUID()],
       );
-      const task = await client.query<{ id: string }>(
-        'SELECT id FROM public.work_task_catalog WHERE active LIMIT 1',
-      );
-      const taskId = task.rows[0]?.id;
-      if (!taskId) throw new Error('the seeded task catalogue is empty');
-      for (let paid = 0; paid < 10; paid += 1) {
-        const assignment = await client.query<{ id: string }>(
-          `INSERT INTO public.work_assignments (user_id, task_id, expires_at)
-           VALUES ($1, $2, clock_timestamp() + interval '1 day') RETURNING id`,
-          [actor, taskId],
-        );
-        await client.query(
-          `INSERT INTO public.work_reward_receipts
-             (idempotency_key, user_id, assignment_id, reward_amount, experience_amount)
-           VALUES ($1, $2, $3, 10, 1)`,
-          [randomUUID(), actor, assignment.rows[0]?.id],
-        );
-      }
-    };
 
     /**
      * The clause the whole of 14.4 rests on. Before 096 this borrowed
@@ -127,9 +152,9 @@ describe.skipIf(!DATABASE_URL)('the credit ceiling against a real database', () 
     it('refuses an amount above the grade’s ceiling and allows the ceiling itself', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
-        await earnGradeC(client, actor);
+        await reachLendingGrade(client, actor);
 
-        const error = await rejectionOf(() =>
+        const error = await refused(client, () =>
           client.query('SELECT * FROM public.bank_borrow($1, $2, 2001)', [randomUUID(), actor]),
         );
         expect(code(error)).toBe('22023');
@@ -147,7 +172,7 @@ describe.skipIf(!DATABASE_URL)('the credit ceiling against a real database', () 
     it('records the grade’s own term rather than a fixed one', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
-        await earnGradeC(client, actor);
+        await reachLendingGrade(client, actor);
         await client.query('SELECT public.bank_borrow($1, $2, 500)', [randomUUID(), actor]);
         const loan = await client.query<{ credit_grade: string; days: string }>(
           `SELECT credit_grade,
@@ -168,17 +193,10 @@ describe.skipIf(!DATABASE_URL)('the credit ceiling against a real database', () 
     it('refuses a casino play while a loan is outstanding', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
-        await earnGradeC(client, actor);
+        await reachLendingGrade(client, actor);
         await client.query('SELECT public.bank_borrow($1, $2, 500)', [randomUUID(), actor]);
 
-        const error = await rejectionOf(() =>
-          client.query(
-            `INSERT INTO public.virtual_casino_coin_plays
-               (user_id, play_date, stake_amount, net_amount, choice, outcome, idempotency_key)
-             VALUES ($1, current_date, 100, -100, 'heads', 'tails', $2)`,
-            [actor, randomUUID()],
-          ),
-        );
+        const error = await refused(client, () => play(client, actor));
         expect(code(error)).toBe('55000');
       });
     });
@@ -186,21 +204,14 @@ describe.skipIf(!DATABASE_URL)('the credit ceiling against a real database', () 
     it('lets a member with no loan play', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
-        await expect(
-          client.query(
-            `INSERT INTO public.virtual_casino_coin_plays
-               (user_id, play_date, stake_amount, net_amount, choice, outcome, idempotency_key)
-             VALUES ($1, current_date, 100, -100, 'heads', 'tails', $2)`,
-            [actor, randomUUID()],
-          ),
-        ).resolves.toBeDefined();
+        await expect(play(client, actor)).resolves.toBeDefined();
       });
     });
 
     it('offers the whole ladder, marking the caller’s own rung', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
-        await earnGradeC(client, actor);
+        await reachLendingGrade(client, actor);
         const ladder = await client.query<{ grade: string; held: boolean; interest_bps: number }>(
           'SELECT grade, held, interest_bps FROM public.bank_credit_ladder($1)',
           [actor],
