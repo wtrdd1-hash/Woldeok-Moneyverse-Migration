@@ -15,6 +15,7 @@ export const PUBLIC_NAV: readonly NavEntry[] = [
 /** Needs a session and current consent. Every one of these is `noindex`. */
 export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/wallet', label: '내 지갑' },
+  { href: '/work', label: '작업' },
   { href: '/stocks', label: '가상 주식' },
   { href: '/businesses', label: '게임 사업' },
   { href: '/seasons', label: '시즌' },
@@ -77,6 +78,9 @@ export const HEADER_MEMBER: readonly NavItem[] = [
   {
     label: '게임',
     entries: [
+      // First, because it is where a member with nothing earns their first
+      // WLD: everything else in this group costs money to start.
+      { href: '/work', label: '작업' },
       { href: '/stocks', label: '가상 주식' },
       { href: '/businesses', label: '게임 사업' },
       { href: '/seasons', label: '시즌' },

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Pool, type PoolClient } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { databaseUrl, isMissingGrant, rejectionOf } from '../testing/database';
+import { databaseUrl, isMissingGrant, reachLendingGrade, rejectionOf } from '../testing/database';
 
 /**
  * The SQL this module's repository depends on.
@@ -190,6 +190,11 @@ describe.skipIf(!DATABASE_URL)('growth stages and credit against a real database
            ), 'test.funded', '{}'::jsonb)`,
         [randomUUID(), id, rows[0]?.mint, rows[0]?.cash],
       );
+      // 096 applies `bank_credit_policies.credit_limit`, which the seeded
+      // 'new' grade sets to zero -- section 14.4's 신규 대출 불가. A borrower
+      // is now somebody who has reached a grade that lends, so this fixture
+      // arranges that too rather than every loan test doing it.
+      await reachLendingGrade(client, id);
       return id;
     };
 
@@ -338,8 +343,9 @@ describe.skipIf(!DATABASE_URL)('growth stages and credit against a real database
         expect(rows).toHaveLength(1);
         expect(rows[0]?.status).toBe('overdue');
         // Cast in the SELECT, so it arrives as a string and stays one. 1000
-        // principal plus 5% interest, rounded up.
-        expect(rows[0]?.outstanding_amount).toBe('1050');
+        // principal plus the C grade's 8%, which 096 made the rate this loan
+        // is actually written at -- it was a flat 5% for every grade before.
+        expect(rows[0]?.outstanding_amount).toBe('1080');
         expect(rows[0]?.repaid_at).toBeNull();
       });
     });

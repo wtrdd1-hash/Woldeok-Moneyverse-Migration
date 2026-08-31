@@ -94,6 +94,26 @@ export interface CreditLoanRow {
   readonly repaid_at: Date | null;
 }
 
+/**
+ * public.bank_credit_ladder RETURNS TABLE:
+ * packages/database/migrations/096-credit-ceiling-and-small-businesses.sql
+ *
+ * The whole grade table, with `held` marking the caller's own rung. Until 096
+ * these numbers were seeded and read by nothing -- `bank_borrow` charged a
+ * flat rate and enforced no ceiling -- so a screen could not have shown them
+ * without stating a policy the database did not keep.
+ */
+export interface CreditLadderRow {
+  readonly grade: string;
+  readonly minimum_account_days: number;
+  readonly minimum_work_completions: number;
+  readonly credit_limit: string;
+  readonly interest_bps: number;
+  readonly term_days: number;
+  readonly minimum_repayment: string;
+  readonly held: boolean;
+}
+
 export class ProgressionRepository {
   constructor(private readonly pool: Queryable) {}
 
@@ -147,6 +167,18 @@ export class ProgressionRepository {
     );
     if (!row) throw new Error('bank_credit_grade did not return a row');
     return row;
+  }
+
+  creditLadder(actor: unknown): Promise<CreditLadderRow[]> {
+    assertUuid(actor, 'actor');
+    return queryRows<CreditLadderRow>(
+      this.pool,
+      `SELECT rung.grade, rung.minimum_account_days, rung.minimum_work_completions,
+              rung.credit_limit::text, rung.interest_bps, rung.term_days,
+              rung.minimum_repayment::text, rung.held
+       FROM public.bank_credit_ladder($1) AS rung`,
+      [actor],
+    );
   }
 
   async loans(actor: unknown): Promise<CreditLoanRow[]> {

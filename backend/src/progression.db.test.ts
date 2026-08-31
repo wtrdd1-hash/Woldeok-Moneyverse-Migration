@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Pool, type PoolClient } from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { databaseUrl, rejectionOf } from './testing/database';
+import { databaseUrl, reachLendingGrade, rejectionOf } from './testing/database';
 
 /**
  * Migrations 076-078, executed.
@@ -122,6 +122,9 @@ describe.skipIf(!DATABASE_URL)('progression and credit against a real database',
     it('records the grade, the term and the minimum repayment on a new loan', async () => {
       await rolledBack(async (client) => {
         const actor = await borrower(client);
+        // 096 refuses the seeded 'new' grade outright, so a test about loans
+        // has to reach a grade that lends before it can have one.
+        await reachLendingGrade(client, actor);
         await client.query('SELECT * FROM public.bank_borrow($1, $2, 1000)', [
           randomUUID(),
           actor,
@@ -137,10 +140,13 @@ describe.skipIf(!DATABASE_URL)('progression and credit against a real database',
            FROM public.virtual_bank_loans AS loan_row WHERE loan_row.user_id = $1`,
           [actor],
         );
-        // A brand new account is grade 'new', which is still allowed to
-        // borrow: applying the seeded zero credit limit would take a
-        // capability away from every member who has not worked yet.
-        expect(rows[0]?.credit_grade).toBe('new');
+        // 096 applies the seeded credit limit, so 'new' no longer borrows at
+        // all and the grade written on a loan is the first one that lends.
+        // The comment here used to say the opposite, and said why: applying
+        // the limit would take a capability away from members who had not
+        // worked yet. Section 14.4 is the decision that it should.
+        expect(rows[0]?.credit_grade).toBe('C');
+        expect(rows[0]?.minimum_repayment, "the C grade's own minimum").toBe('100');
         expect(rows[0]?.matures, 'the maturity sweep needs a maturity').toBe(true);
       });
     });
@@ -148,6 +154,9 @@ describe.skipIf(!DATABASE_URL)('progression and credit against a real database',
     it('lets the borrower repay a loan that has gone overdue', async () => {
       await rolledBack(async (client) => {
         const actor = await borrower(client);
+        // 096 refuses the seeded 'new' grade outright, so a test about loans
+        // has to reach a grade that lends before it can have one.
+        await reachLendingGrade(client, actor);
         const { rows: loan } = await client.query<{ loan_id: string }>(
           'SELECT borrowed.loan_id::text FROM public.bank_borrow($1, $2, 1000) AS borrowed',
           [randomUUID(), actor],
@@ -188,6 +197,9 @@ describe.skipIf(!DATABASE_URL)('progression and credit against a real database',
     it('keeps an overdue loan from being replaced by a fresh one', async () => {
       await rolledBack(async (client) => {
         const actor = await borrower(client);
+        // 096 refuses the seeded 'new' grade outright, so a test about loans
+        // has to reach a grade that lends before it can have one.
+        await reachLendingGrade(client, actor);
         await client.query('SELECT * FROM public.bank_borrow($1, $2, 1000)', [
           randomUUID(),
           actor,
@@ -210,6 +222,9 @@ describe.skipIf(!DATABASE_URL)('progression and credit against a real database',
     it('leaves a partly repaid overdue loan overdue', async () => {
       await rolledBack(async (client) => {
         const actor = await borrower(client);
+        // 096 refuses the seeded 'new' grade outright, so a test about loans
+        // has to reach a grade that lends before it can have one.
+        await reachLendingGrade(client, actor);
         const { rows: loan } = await client.query<{ loan_id: string }>(
           'SELECT borrowed.loan_id::text FROM public.bank_borrow($1, $2, 1000) AS borrowed',
           [randomUUID(), actor],

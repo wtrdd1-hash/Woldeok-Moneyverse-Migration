@@ -48,6 +48,10 @@ Migrations never run as that role. `migrate.sh` runs as `moneyverse_migrator`, w
 - `backend/src/game.db.test.ts:90` asserts the three tables are *still* unreadable in the same file that asserts the functions work. If someone grants `SELECT` later to make a query easier, that is what notices.
 - `docs/findings/stock-reads-lack-grants.md` is the full account, including the reproduction against the production database.
 
+**It happened a second time, and the second time was quieter.** The work loop shipped complete in 066–070: a catalogue, an assignment function, a submission that enforces a minimum duration, a verification that mints the reward inside one transaction, and a dashboard reporting the caps. `work_task_catalog` is revoked from the role like everything else, and no function read it back — so there was no way to learn a task's id, `POST /api/v1/work/assignments` could not be called, and the whole loop was unreachable from a browser. Nothing failed; there was simply no screen, and the missing read is why there could not be one. `095-work-task-board.sql` is the same fix in the same shape.
+
+The lesson is not "remember to add a read". It is that **a write path is not finished until something can name its arguments.** If a function takes an id, ask where a member gets that id from, and answer it in the same change.
+
 One caution before you read a `42501` as a missing grant: it usually is not. Fifteen migrations raise it deliberately — `game_catalog_operator` answers `operator role required` — and those refusals are the security model working. Only PostgreSQL's own privilege check phrases the message as `permission denied for ...`. `isMissingGrant` in `backend/src/testing/database.ts:43` is that distinction. An earlier version of the tests asserted `code !== '42501'` outright, which failed on every correct role refusal.
 
 ### Layout

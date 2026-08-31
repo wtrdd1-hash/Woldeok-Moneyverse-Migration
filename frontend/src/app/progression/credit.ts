@@ -101,3 +101,54 @@ const GRADE_LABELS: Readonly<Record<string, string>> = {
 export function gradeLabel(grade: string): string {
   return GRADE_LABELS[grade] ?? grade;
 }
+
+/**
+ * `public.bank_credit_ladder` RETURNS TABLE (096), as it arrives over the
+ * wire. `credit_limit` and `minimum_repayment` are bigints and stay strings.
+ *
+ * Every one of these numbers is now load-bearing. Before 096 `bank_borrow`
+ * lent up to its own hard ceiling at a flat 5% and read none of them, so the
+ * screen said so rather than quoting a table the database ignored.
+ */
+export interface CreditRung {
+  readonly grade: string;
+  readonly minimum_account_days: number;
+  readonly minimum_work_completions: number;
+  readonly credit_limit: string;
+  readonly interest_bps: number;
+  readonly term_days: number;
+  readonly minimum_repayment: string;
+  readonly held: boolean;
+}
+
+/**
+ * Basis points as a percentage a member reads.
+ *
+ * 800 -> '8%', 850 -> '8.5%'. `interest_bps` is an integer bounded at 10,000
+ * by 076's CHECK, so this arithmetic is exact.
+ */
+export function ratePercent(bps: number): string {
+  const percent = bps / 100;
+  return `${Number.isInteger(percent) ? percent : percent.toFixed(2).replace(/0$/, '')}%`;
+}
+
+/**
+ * What a rung asks for, as one Korean sentence.
+ *
+ * The two conditions `bank_credit_grade` actually tests are the account's age
+ * and the number of paid tasks -- not the 출석 and 누적 정상 수입 the
+ * specification's table describes, which nothing computes. Saying only what
+ * is tested is the honest version: a member who meets what is printed here
+ * will get the grade.
+ */
+export function rungConditions(rung: CreditRung): string {
+  const parts: string[] = [];
+  if (rung.minimum_account_days > 0) parts.push(`가입 ${rung.minimum_account_days}일`);
+  if (rung.minimum_work_completions > 0) parts.push(`작업 ${rung.minimum_work_completions}회`);
+  return parts.length === 0 ? '조건 없음' : parts.join(' · ');
+}
+
+/** True for a rung that lends nothing at all, which is what 'new' is. */
+export function lendsNothing(rung: CreditRung): boolean {
+  return rung.credit_limit === '0';
+}

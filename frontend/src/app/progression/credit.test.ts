@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import type { CreditLoan } from './credit';
-import { gradeLabel, hasOverdueLoan, isRepayable, loanStanding, urgentFirst } from './credit';
+import type { CreditLoan, CreditRung } from './credit';
+import {
+  gradeLabel,
+  hasOverdueLoan,
+  isRepayable,
+  lendsNothing,
+  loanStanding,
+  ratePercent,
+  rungConditions,
+  urgentFirst,
+} from './credit';
 
 function loan(status: string, issuedAt: string): CreditLoan {
   return {
@@ -88,5 +97,64 @@ describe('gradeLabel', () => {
 
   it('shows a grade it has not been taught rather than dropping it', () => {
     expect(gradeLabel('S')).toBe('S');
+  });
+});
+
+/**
+ * The ladder 096 exposes. Every one of these numbers is enforced by
+ * `bank_borrow` from that migration on, which is what makes printing them
+ * honest -- before it the same table was seeded and read by nothing.
+ */
+function rung(overrides: Partial<CreditRung> = {}): CreditRung {
+  return {
+    grade: 'C',
+    minimum_account_days: 7,
+    minimum_work_completions: 10,
+    credit_limit: '2000',
+    interest_bps: 800,
+    term_days: 30,
+    minimum_repayment: '100',
+    held: false,
+    ...overrides,
+  };
+}
+
+describe('ratePercent', () => {
+  it('reads the seeded rates as the specification writes them', () => {
+    expect(ratePercent(800)).toBe('8%');
+    expect(ratePercent(600)).toBe('6%');
+    expect(ratePercent(500)).toBe('5%');
+  });
+
+  it('does not round a fractional rate away', () => {
+    expect(ratePercent(850)).toBe('8.5%');
+  });
+
+  it('says a zero rate rather than nothing', () => {
+    expect(ratePercent(0)).toBe('0%');
+  });
+});
+
+describe('rungConditions', () => {
+  it('names the two conditions bank_credit_grade actually tests', () => {
+    expect(rungConditions(rung())).toBe('가입 7일 · 작업 10회');
+  });
+
+  // The 'new' grade asks for nothing, and is reached by having just arrived.
+  it('says so when a rung asks for nothing', () => {
+    expect(
+      rungConditions(rung({ minimum_account_days: 0, minimum_work_completions: 0 })),
+    ).toBe('조건 없음');
+  });
+
+  it('drops a condition set to zero rather than printing 0일', () => {
+    expect(rungConditions(rung({ minimum_account_days: 0 }))).toBe('작업 10회');
+  });
+});
+
+describe('lendsNothing', () => {
+  it('is true for the grade that may not borrow at all', () => {
+    expect(lendsNothing(rung({ grade: 'new', credit_limit: '0' }))).toBe(true);
+    expect(lendsNothing(rung())).toBe(false);
   });
 });

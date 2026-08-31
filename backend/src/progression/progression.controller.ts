@@ -110,20 +110,27 @@ export class ProgressionController {
    * issued together: the screen renders them side by side, and a second
    * endpoint would be a second thing to keep in step with this one.
    *
-   * `terms` is missing on purpose. What a grade buys -- the credit limit, the
-   * rate, the term and the minimum repayment -- lives in
-   * `bank_credit_policies`, which `moneyverse_app` cannot read and which no
-   * SECURITY DEFINER function exposes yet. Reciting the seeded numbers from
-   * TypeScript would state a policy the database does not agree to.
+   * `ladder` is what a grade buys: the limit, the rate, the term and the
+   * minimum repayment, for every grade rather than only the caller's. It could
+   * not be served before 096, because `bank_credit_policies` is revoked from
+   * `moneyverse_app` and no function exposed it -- and, more to the point,
+   * because until 096 `bank_borrow` ignored both the limit and the rate, so
+   * any screen quoting them would have been describing a policy the database
+   * did not keep.
    */
   @Get('credit')
-  @ApiOperation({ summary: 'The caller’s credit grade and their loans' })
+  @ApiOperation({ summary: 'The caller’s credit grade, what each grade buys, and their loans' })
   async credit(@Req() request: RequestWithSession) {
     const actor = requireUserId(request);
-    const [grade, loans] = await this.guarded(
-      () => Promise.all([this.repository().creditGrade(actor), this.repository().loans(actor)]),
+    const [grade, loans, ladder] = await this.guarded(
+      () =>
+        Promise.all([
+          this.repository().creditGrade(actor),
+          this.repository().loans(actor),
+          this.repository().creditLadder(actor),
+        ]),
       'credit standing is unavailable',
     );
-    return { grade: grade.grade, loans };
+    return { grade: grade.grade, loans, ladder };
   }
 }

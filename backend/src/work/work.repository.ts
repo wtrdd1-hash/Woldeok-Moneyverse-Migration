@@ -45,6 +45,41 @@ export interface WorkRewardRow {
   replayed: boolean;
 }
 
+/**
+ * One row of `work_task_board` (095).
+ *
+ * `reward_preview` is null when the question has no answer -- work rewards
+ * switched off -- and '0' when the caps are spent, which are different things
+ * and are said differently on the screen.
+ */
+export interface WorkTaskRow {
+  task_id: string;
+  code: string;
+  name: string;
+  description: string;
+  job_type: string;
+  difficulty: number;
+  base_reward: string;
+  base_experience: string;
+  minimum_duration_seconds: number;
+  daily_limit: number;
+  taken_today: number;
+  reward_preview: string | null;
+  recommended: boolean;
+}
+
+/** One row of `work_my_receipts` (095). A capped-out reward has no transaction. */
+export interface WorkReceiptRow {
+  receipt_id: string;
+  assignment_id: string;
+  code: string;
+  name: string;
+  reward_amount: string;
+  experience_amount: string;
+  transaction_id: string | null;
+  created_at: Date;
+}
+
 export interface WorkDashboardRow {
   daily_paid: string;
   daily_cap: string;
@@ -107,6 +142,39 @@ export class WorkRepository {
               summary.weekly_paid::text, summary.weekly_cap::text,
               summary.active_assignments::text
        FROM public.work_my_dashboard($1) AS summary`,
+      [actor],
+    );
+  }
+
+  /**
+   * The catalogue, which the member cannot read any other way.
+   *
+   * `work_task_catalog` is revoked from this role (066), so this is a
+   * function call and not a SELECT -- the same shape as the stock read fix in
+   * 047, and for the same reason.
+   */
+  tasks(actor: unknown): Promise<WorkTaskRow[]> {
+    assertUuid(actor, 'actor');
+    return queryRows<WorkTaskRow>(
+      this.pool,
+      `SELECT task.task_id::text, task.code, task.name, task.description,
+              task.job_type::text, task.difficulty, task.base_reward::text,
+              task.base_experience::text, task.minimum_duration_seconds,
+              task.daily_limit, task.taken_today, task.reward_preview::text,
+              task.recommended
+       FROM public.work_task_board($1) AS task`,
+      [actor],
+    );
+  }
+
+  receipts(actor: unknown): Promise<WorkReceiptRow[]> {
+    assertUuid(actor, 'actor');
+    return queryRows<WorkReceiptRow>(
+      this.pool,
+      `SELECT receipt.receipt_id::text, receipt.assignment_id::text, receipt.code,
+              receipt.name, receipt.reward_amount::text, receipt.experience_amount::text,
+              receipt.transaction_id::text, receipt.created_at
+       FROM public.work_my_receipts($1) AS receipt`,
       [actor],
     );
   }
