@@ -58,6 +58,13 @@ interface BusinessOwnershipRow extends BusinessCatalogRow {
   readonly last_settlement_date?: unknown;
 }
 
+interface BusinessEquityRow {
+  readonly holdings_amount?: unknown;
+  readonly debt_amount?: unknown;
+  readonly equity_amount?: unknown;
+  readonly minimum_ratio_bps?: unknown;
+}
+
 interface BusinessPurchaseRow {
   readonly ownership_id: unknown;
   readonly business_type_id: unknown;
@@ -99,6 +106,16 @@ export interface BusinessOwnership {
   readonly lastSettlementDate: string | null;
 }
 
+// public.business_equity_standing (105). `equityAmount` is the only amount in
+// this file that can be negative -- a member can owe the bank more than they
+// hold -- which is why it is validated as an amount and not as a balance.
+export interface BusinessEquityStanding {
+  readonly holdingsAmount: WldAmount;
+  readonly debtAmount: WldAmount;
+  readonly equityAmount: WldAmount;
+  readonly minimumRatioBps: number;
+}
+
 export interface BusinessPurchaseResult {
   readonly ownershipId: string;
   readonly businessTypeId: string;
@@ -132,6 +149,7 @@ export interface BusinessSettleInput {
 export interface BusinessRepository {
   catalog(): Promise<readonly BusinessCatalogRow[]>;
   mine(userId: string): Promise<readonly BusinessOwnershipRow[]>;
+  equity(userId: string): Promise<BusinessEquityRow | null>;
   purchase(input: BusinessPurchaseInput): Promise<BusinessPurchaseRow>;
   settle(input: BusinessSettleInput): Promise<BusinessSettleRow>;
 }
@@ -186,6 +204,30 @@ export class BusinessService {
       purchasedAt: iso(row?.purchased_at, 'purchased timestamp'),
       lastSettlementDate: row?.last_settlement_date ? String(row.last_settlement_date) : null,
     }));
+  }
+
+  /**
+   * The caller's own capital, and the share of a price 105 asks it to cover.
+   *
+   * `minimumRatioBps` comes from the database rather than from a constant here
+   * for the reason 105 gives: the trigger and the screen have to test the same
+   * ratio, and a copy in TypeScript is the half nothing refuses when it is
+   * wrong. It is a ratio, so it is validated as a bounded integer and never
+   * branded as money.
+   */
+  async equity(userId: unknown): Promise<BusinessEquityStanding> {
+    const row = await this.repository.equity(validId(userId, 'user id'));
+    if (!row) throw new Error('database did not return a business equity standing');
+    const bps = row.minimum_ratio_bps;
+    if (typeof bps !== 'number' || !Number.isInteger(bps) || bps < 0 || bps > 10000) {
+      throw new Error('database returned invalid minimum equity ratio');
+    }
+    return {
+      holdingsAmount: amount(row.holdings_amount, 'holdings amount'),
+      debtAmount: amount(row.debt_amount, 'debt amount'),
+      equityAmount: amount(row.equity_amount, 'equity amount'),
+      minimumRatioBps: bps,
+    };
   }
 
   async purchase(

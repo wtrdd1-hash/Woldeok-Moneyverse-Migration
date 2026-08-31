@@ -71,6 +71,23 @@ export class BusinessController {
     return { businesses: await this.service().mine(requireUserId(request)) };
   }
 
+  /**
+   * The caller's own capital, against 105's 자기자본 최소 30%.
+   *
+   * It exists because the refusal cannot explain itself: 105 raises 22023, this
+   * controller turns that into a 409, and a 409 reaches a member as one fixed
+   * Korean sentence -- so the requirement and their own figure have to be on
+   * the screen before the button is pressed, exactly as the level ladder is.
+   *
+   * Its own noun rather than a field on the catalogue: this is one row about
+   * the caller, and /business-types is one list every member shares.
+   */
+  @Get('business-equity')
+  @ApiOperation({ summary: 'The own capital the caller can put behind a purchase' })
+  async equity(@Req() request: RequestWithSession) {
+    return { equity: await this.service().equity(requireUserId(request)) };
+  }
+
   @Post('business-types/:id/purchases')
   @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Buy a business of this type' })
