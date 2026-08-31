@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
+import { TruncatedList } from '@/components/truncated-list';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -35,6 +36,14 @@ import {
 
 /** One member's own work. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
+
+/**
+ * How many receipts stay on the page. `work_my_receipts` returns twenty (095)
+ * and the section rendered every one of them, under three sections that are
+ * all more urgent than a record of work already paid for. The rest are behind
+ * 더보기 rather than gone.
+ */
+const RECEIPTS_ON_WORK = 5;
 
 export const metadata: Metadata = {
   title: '작업',
@@ -240,31 +249,18 @@ export default async function WorkPage() {
           />
         ) : (
           <Card>
-            <CardContent className="grid gap-3">
-              {paid.map((receipt) => (
-                <div
-                  key={receipt.receipt_id}
-                  className="grid gap-1 border-b pb-3 last:border-b-0 last:pb-0"
-                >
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <span className="text-sm font-medium">{receipt.name}</span>
-                    <span className="tabular text-sm">
-                      {groupDigits(receipt.reward_amount)} WLD · 경험치{' '}
-                      {groupDigits(receipt.experience_amount)}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {formatMoment(receipt.created_at)}
-                    {/* A reward the caps clamped to zero has no transaction,
-                        because nothing was minted. Saying so is the honest
-                        answer; a blank where a ledger link belongs reads as a
-                        missing record. */}
-                    {receipt.transaction_id === null
-                      ? ' · 한도가 차 WLD 지급 없이 경험치만 쌓였어요.'
-                      : ` · 원장 거래 ${receipt.transaction_id.slice(0, 8)}`}
-                  </p>
-                </div>
-              ))}
+            <CardContent>
+              {/* The row spacing moves onto the list rather than the card, so
+                  the rows behind 더보기 sit exactly as the ones in front of
+                  it do. */}
+              <TruncatedList
+                title="최근 지급 영수증"
+                visibleCount={RECEIPTS_ON_WORK}
+                listClassName="grid gap-3"
+                rows={paid.map((receipt) => (
+                  <ReceiptRow key={receipt.receipt_id} receipt={receipt} />
+                ))}
+              />
             </CardContent>
             <CardFooter>
               <Button asChild variant="ghost">
@@ -274,6 +270,37 @@ export default async function WorkPage() {
           </Card>
         )}
       </section>
+    </div>
+  );
+}
+
+/**
+ * One paid receipt.
+ *
+ * Lifted out of the page's map when the list gained a dialog: the rows on the
+ * page and the rows behind 더보기 have to be the same row, and
+ * `last:border-b-0` has to mean the last row of whichever of the two halves
+ * it is in.
+ */
+function ReceiptRow({ receipt }: { readonly receipt: WorkReceipt }) {
+  return (
+    <div className="grid gap-1 border-b pb-3 last:border-b-0 last:pb-0">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <span className="text-sm font-medium">{receipt.name}</span>
+        <span className="tabular text-sm">
+          {groupDigits(receipt.reward_amount)} WLD · 경험치{' '}
+          {groupDigits(receipt.experience_amount)}
+        </span>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        {formatMoment(receipt.created_at)}
+        {/* A reward the caps clamped to zero has no transaction, because
+            nothing was minted. Saying so is the honest answer; a blank where a
+            ledger link belongs reads as a missing record. */}
+        {receipt.transaction_id === null
+          ? ' · 한도가 차 WLD 지급 없이 경험치만 쌓였어요.'
+          : ` · 원장 거래 ${receipt.transaction_id.slice(0, 8)}`}
+      </p>
     </div>
   );
 }
