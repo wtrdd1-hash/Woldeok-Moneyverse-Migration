@@ -7,7 +7,7 @@ import type { MetadataRoute } from 'next';
  * renders `noindex`, and redirects a signed-out visitor to the login screen —
  * so listing it invited crawlers to a URL that answers them with a redirect.
  */
-const PUBLIC_PATHS = ['', '/announcements', '/gallery', '/status', '/shop', '/terms', '/privacy'];
+const PUBLIC_PATHS = ['', '/guide', '/announcements', '/gallery', '/status', '/shop', '/terms', '/privacy'];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   if (process.env.SEO_INDEXING_ENABLED !== 'true') return [];
