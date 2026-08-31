@@ -153,6 +153,10 @@ function HeaderLink({
   return (
     <Link
       href={entry.href}
+      // The console state changes outside this tab during OAuth. Do not let a
+      // speculative payload from before that redirect win over the server's
+      // current session decision when the operator returns.
+      prefetch={!entry.href.startsWith('/admin')}
       aria-current={current ? 'page' : undefined}
       // The underline grows from nothing on hover and stays for the current
       // page — the original's one piece of navigation motion, kept.
@@ -201,6 +205,7 @@ function HeaderGroup({
           <DropdownMenuItem key={entry.href} asChild>
             <Link
               href={entry.href}
+              prefetch={!entry.href.startsWith('/admin')}
               aria-current={isCurrent(pathname, entry.href) ? 'page' : undefined}
               className={cn(
                 'min-h-10 font-bold',
@@ -234,6 +239,7 @@ function Group({
           <Link
             key={entry.href}
             href={entry.href}
+            prefetch={!entry.href.startsWith('/admin')}
             aria-current={current ? 'page' : undefined}
             // 44px is the minimum comfortable tap target.
             className={cn(

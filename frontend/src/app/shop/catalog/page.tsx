@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import { BuyForm, SettleUpkeepButton, UseItemButton } from './catalog-forms';
@@ -24,8 +25,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function ShopCatalogPage() {
+export default async function ShopCatalogPage({
+  searchParams,
+}: {
+  readonly searchParams: Promise<{ readonly q?: string }>;
+}) {
   await requireMember();
+  const { q: rawQuery } = await searchParams;
+  const query = rawQuery?.trim().toLocaleLowerCase('ko-KR') ?? '';
 
   // Both reads in one round. The shelf is a second request only because it is
   // a second read model, not because the catalogue has to finish first.
@@ -40,7 +47,14 @@ export default async function ShopCatalogPage() {
   const held = new Map<string, number>(
     (mine?.holdings ?? []).map((item) => [item.catalog_id, item.quantity]),
   );
-  const groups = groupByCategory(catalog?.catalogItems ?? []);
+  const items = (catalog?.catalogItems ?? []).filter((item) => {
+    if (query === '') return true;
+    return [item.name, item.description, item.code]
+      .join(' ')
+      .toLocaleLowerCase('ko-KR')
+      .includes(query);
+  });
+  const groups = groupByCategory(items);
 
   return (
     <div className="grid gap-6">
@@ -72,6 +86,21 @@ export default async function ShopCatalogPage() {
             빠져나가고, 잔액이 모자라면 밀린 금액이 쌓이되 4주치를 넘지 않아요. 4주가 밀리면 그
             아이템은 관리비를 낼 때까지 잠시 정지되고, 아래 ‘내 아이템’에서 바로 낼 수 있어요.
           </p>
+          <form className="flex max-w-md gap-2" role="search">
+            <Input
+              name="q"
+              type="search"
+              defaultValue={rawQuery ?? ''}
+              placeholder="아이템 이름, 설명 또는 코드 검색"
+              aria-label="아이템 검색"
+            />
+            <button
+              type="submit"
+              className="min-h-11 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
+            >
+              검색
+            </button>
+          </form>
         </div>
 
         {catalog === null ? (
@@ -83,8 +112,12 @@ export default async function ShopCatalogPage() {
           // A different fact from the one above: the request worked and the
           // catalogue has nothing on sale right now.
           <EmptyState
-            title="지금 판매 중인 아이템이 없어요."
-            description="운영자가 아이템을 열면 이 자리에 가격과 함께 표시돼요."
+            title={query === '' ? '지금 판매 중인 아이템이 없어요.' : '검색한 아이템을 찾지 못했어요.'}
+            description={
+              query === ''
+                ? '운영자가 아이템을 열면 이 자리에 가격과 함께 표시돼요.'
+                : '다른 이름, 설명 또는 아이템 코드로 다시 검색해 주세요.'
+            }
           />
         ) : (
           groups.map((group) => (

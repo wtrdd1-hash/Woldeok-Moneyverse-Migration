@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 
 /**
- * A list that shows its first few rows and keeps the rest one click away.
+ * A list that previews its first few rows and lets a member open the whole list.
  *
  * `rows` is an array of *rendered* rows rather than data plus a renderer,
  * because every screen that uses this fetches on the server: a render
@@ -24,9 +24,9 @@ import {
  * lands. Nothing here fetches, and opening the dialog asks the server
  * nothing; the remainder was in the payload the page already sent.
  *
- * The dialog holds the remainder, not the whole list. The rows above it are
- * still on the page behind, and re-showing them would make the reader find
- * their place twice.
+ * The dialog deliberately holds the whole list, including the rows from the
+ * preview. The preview answers "what just happened?"; the dialog answers
+ * "show me everything" without making a member mentally join two lists.
  */
 export interface TruncatedListProps {
   /** Names the dialog, and gives the control its context in a screen reader. */
@@ -68,7 +68,7 @@ export function TruncatedList({
               {/* Two of these can sit on one screen. The title is in the
                   accessible name so they do not both announce as "더보기". */}
               <span className="sr-only">{title} </span>
-              나머지 {hidden}개 더보기
+              더보기
               <ChevronDown aria-hidden />
             </Button>
           </DialogTrigger>
@@ -76,7 +76,7 @@ export function TruncatedList({
             <DialogHeader>
               <DialogTitle>{title}</DialogTitle>
               <DialogDescription>
-                {description ?? `전체 ${rows.length}개 가운데 화면에 없던 ${hidden}개예요.`}
+                {description ?? `전체 ${rows.length}개를 볼 수 있어요.`}
               </DialogDescription>
             </DialogHeader>
             {/* The rows scroll, the header stays, and the page behind does not
@@ -85,7 +85,7 @@ export function TruncatedList({
                 open. `overscroll-contain` stops the last wheel event here
                 rather than handing it to whatever is underneath. */}
             <div className={cn('overflow-y-auto overscroll-contain', listClassName)}>
-              {rows.slice(shown)}
+              {rows}
             </div>
           </DialogContent>
         </Dialog>

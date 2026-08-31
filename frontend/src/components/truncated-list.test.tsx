@@ -38,9 +38,9 @@ describe('TruncatedList with nothing left over', () => {
 });
 
 describe('TruncatedList counting', () => {
-  it('names the number of rows the control is hiding', () => {
+  it('uses the requested compact 더보기 label', () => {
     render(<TruncatedList title="내 지갑 기록" rows={rows(12)} visibleCount={5} />);
-    expect(screen.getByRole('button', { name: '내 지갑 기록 나머지 7개 더보기' })).toBeDefined();
+    expect(screen.getByRole('button', { name: '내 지갑 기록 더보기' })).toBeDefined();
   });
 
   it('leaves the hidden rows out of the page until the dialog opens', () => {
@@ -52,7 +52,7 @@ describe('TruncatedList counting', () => {
 
   it('puts every row behind the control when none is shown on the page', () => {
     render(<TruncatedList title="내 지갑 기록" rows={rows(4)} visibleCount={0} />);
-    expect(screen.getByRole('button', { name: '내 지갑 기록 나머지 4개 더보기' })).toBeDefined();
+    expect(screen.getByRole('button', { name: '내 지갑 기록 더보기' })).toBeDefined();
     expect(screen.queryByText('행 1')).toBeNull();
   });
 
@@ -64,15 +64,16 @@ describe('TruncatedList counting', () => {
 });
 
 describe('TruncatedList dialog', () => {
-  it('shows the remainder and only the remainder', () => {
+  it('shows the entire list, including the preview rows', () => {
     render(<TruncatedList title="내 지갑 기록" rows={rows(12)} visibleCount={5} />);
     const dialog = openTheRest();
 
+    expect(dialog.textContent).toContain('행 1');
     expect(dialog.textContent).toContain('행 6');
     expect(dialog.textContent).toContain('행 12');
-    expect(dialog.textContent).not.toContain('행 5');
-    // The five on the page are still on the page, and are not repeated here.
-    expect(screen.getAllByText('행 1')).toHaveLength(1);
+    // The preview stays visible behind the modal and is intentionally
+    // repeated inside it: the modal is a complete view, not a remainder.
+    expect(screen.getAllByText('행 1')).toHaveLength(2);
   });
 
   it('names the dialog with the list title', () => {
@@ -81,10 +82,10 @@ describe('TruncatedList dialog', () => {
     expect(screen.getByRole('dialog', { name: '내 지갑 기록' })).toBeDefined();
   });
 
-  it('states the arithmetic under the title', () => {
+  it('states that the dialog contains the complete list', () => {
     render(<TruncatedList title="내 지갑 기록" rows={rows(12)} visibleCount={5} />);
     openTheRest();
-    expect(screen.getByText('전체 12개 가운데 화면에 없던 7개예요.')).toBeDefined();
+    expect(screen.getByText('전체 12개를 볼 수 있어요.')).toBeDefined();
   });
 
   it('takes a description of its own', () => {

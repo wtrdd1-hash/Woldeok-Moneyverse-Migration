@@ -94,12 +94,12 @@ export default async function SeasonsPage({
                     </p>
                   )}
                 </CardContent>
-                <CardFooter className="flex-wrap gap-2">
+                <CardFooter className="items-start flex-wrap gap-2">
                   <EnterButton eventId={event.event_id} />
                   <Link
                     href={`/seasons?event=${event.event_id}`}
                     scroll={false}
-                    className="text-sm text-primary"
+                    className="flex min-h-11 items-center self-start text-sm text-primary"
                   >
                     순위 보기 →
                   </Link>
