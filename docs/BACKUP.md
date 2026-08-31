@@ -77,12 +77,33 @@ bash backup.sh list
 
 ### 매일 돌리기
 
+> **2026-08-31 확인: 이 crontab은 minipc에 설치되어 있지 않다.**
+> `crontab -l`은 `no crontab for ruma0607`을 낸다. 도는 systemd 타이머
+> `easy-scraping-game-backup.timer`는 `/root/easy-scraping-server/`의 **다른
+> 프로젝트** 것이고 머니버스를 백업하지 않는다.
+>
+> 그래서 지금 머니버스 백업은 **배포할 때만** 생긴다(`roll.sh`가 부르는 반쪽
+> 리허설). 사양 §17.x가 요구하는 "매일 자동 백업"은 아직 없다. 아래를 설치하면
+> 생긴다 — sudo가 필요 없고, 배포 사용자 본인의 crontab이다:
+>
+> ```bash
+> ssh minipc 'crontab -l 2>/dev/null | { cat; cat <<CRON
+> PATH=/usr/local/bin:/usr/bin:/bin
+> 10 19 * * * DEPLOY_DIR=$HOME/moneyverse-production /bin/bash $HOME/moneyverse-production/backup.sh run >> $HOME/moneyverse-production-backup.log 2>&1
+> 40 19 * * * DEPLOY_DIR=$HOME/moneyverse-migration /bin/bash $HOME/moneyverse-migration/backup.sh run >> $HOME/moneyverse-migration-backup.log 2>&1
+> CRON
+> } | crontab -'
+> ```
+>
+> 로그는 `BACKUP_DIR` **밖**에 쓴다. 안에 쓰면 보존 정리가 세는 파일 수에
+> 섞이고, 암호화된 백업 옆에 평문 로그를 두게 된다.
+
 cron은 호스트 지역시간을 쓰고 `PATH`가 짧다. 04:10 KST는 **19:10 UTC(전날)**이다.
 
 ```cron
 PATH=/usr/local/bin:/usr/bin:/bin
-10 19 * * * DEPLOY_DIR=$HOME/moneyverse-production /bin/bash $HOME/moneyverse-production/backup.sh run >> $HOME/moneyverse-backups/wdmvp/backup.log 2>&1
-40 19 * * * DEPLOY_DIR=$HOME/moneyverse-migration /bin/bash $HOME/moneyverse-migration/backup.sh run >> $HOME/moneyverse-backups/wdmv/backup.log 2>&1
+10 19 * * * DEPLOY_DIR=$HOME/moneyverse-production /bin/bash $HOME/moneyverse-production/backup.sh run >> $HOME/moneyverse-production-backup.log 2>&1
+40 19 * * * DEPLOY_DIR=$HOME/moneyverse-migration /bin/bash $HOME/moneyverse-migration/backup.sh run >> $HOME/moneyverse-migration-backup.log 2>&1
 ```
 
 **루트가 아니라 배포 사용자의 crontab에 넣는다.** 그 사용자가 배포 디렉터리와
@@ -105,12 +126,24 @@ docker를 갖고 있고, 루트로 쓴 백업 파일은 그 사용자가 읽지 
 있으면 그대로 둔다. 옮기는 것은 이미 존재하는 데이터를 건드리는 일이라 손으로
 한다:
 
+**첫 줄은 root가 해야 한다.** `/data/wtrdd/moneyverse`가 `root:root 755`라서
+배포 사용자는 그 아래에 디렉터리를 만들 수 없다(`photos/`는 도커가 바인드 마운트를
+만들면서 root로 생겼다). 디렉터리를 만들고 소유권을 넘기는 것까지만 sudo가 필요하고,
+나머지는 배포 사용자로 한다.
+
 ```bash
-stack=wdmv   # 운영은 wdmvp
-install -d -m 700 "/data/wtrdd/moneyverse/backups/$stack"
+# 1) root로 한 번만 — 두 스택 모두
+sudo install -d -m 700 -o "$USER" -g "$USER" \
+  /data/wtrdd/moneyverse/backups/wdmv /data/wtrdd/moneyverse/backups/wdmvp
+
+# 2) 배포 사용자로 — 스택마다
+stack=wdmv                              # 운영은 wdmvp
+deploy=$HOME/moneyverse-migration       # 운영은 $HOME/moneyverse-production
 mv "$HOME/moneyverse-backups/$stack"/* "/data/wtrdd/moneyverse/backups/$stack"/
-sed -i "s#^BACKUP_DIR=.*#BACKUP_DIR=/data/wtrdd/moneyverse/backups/$stack#" \
-  "$HOME/moneyverse-migration/.env"   # 운영은 moneyverse-production
+sed -i "s#^BACKUP_DIR=.*#BACKUP_DIR=/data/wtrdd/moneyverse/backups/$stack#" "$deploy/.env"
+
+# 3) 옮긴 백업이 새 경로에서 실제로 읽히는지 확인한다
+DEPLOY_DIR=$deploy bash "$deploy/backup.sh" list
 ```
 
 crontab의 로그 경로(`>> .../backup.log`)도 같이 고친다. 옮긴 뒤에는 복원
