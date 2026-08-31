@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/empty-state';
 import { LiveRefresh } from '@/components/live-refresh';
 import { PageHeader, SectionHeader } from '@/components/page-header';
 import { PostingStrip } from '@/components/posting-strip';
+import { TruncatedList } from '@/components/truncated-list';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,9 +27,15 @@ import type { LoanView } from './wallet-forms';
 export const dynamic = 'force-dynamic';
 
 /**
- * How much of the ledger the wallet screen shows before handing over to
- * /wallet/activity. Enough to answer "did that go through?", short enough
- * that the balance and the transfer form stay on the first screen.
+ * How many ledger entries stay on the wallet screen. Enough to answer "did
+ * that go through?", short enough that the balance and the transfer form stay
+ * on the first screen.
+ *
+ * The rest of what the API sends is no longer a page away: it is behind the
+ * 더보기 control under the list. /wallet/activity is still a real URL and
+ * still linked, because a bookmark, a shared link and a reload are things a
+ * dialog cannot be — but answering "what else happened" should not cost a
+ * navigation and a navigation back.
  */
 const LATEST_ON_WALLET = 5;
 
@@ -41,7 +48,11 @@ export default async function WalletPage() {
   await requireMember();
 
   const [wallet, loanData] = await Promise.all([
-    apiOrNull<Overview>('/api/v1/wallet'),
+    // 50 is the API's ceiling for this list and what /wallet/activity asks
+    // for. The screen still shows five; the other forty-five are what the
+    // 더보기 dialog opens onto, so opening it asks the server nothing. The
+    // default of ten would have made "the rest" mean five more.
+    apiOrNull<Overview>('/api/v1/wallet?recent=50'),
     apiOrNull<{ loans: LoanView[] }>('/api/v1/bank/loans'),
   ]);
 
@@ -148,19 +159,23 @@ export default async function WalletPage() {
                 description="보상을 받거나 WLD를 보내면 실제 원장 기록이 여기에 표시됩니다."
               />
             ) : (
-              recentTransactions.slice(0, LATEST_ON_WALLET).map((entry) => {
-                const { debit, credit } = sides(entry);
-                return (
-                  <PostingStrip
-                    key={entry.transactionId}
-                    debit={debit}
-                    credit={credit}
-                    amount={entry.netAmount}
-                    label={entry.label}
-                    at={formatMoment(entry.occurredAt)}
-                  />
-                );
-              })
+              <TruncatedList
+                title="내 지갑 기록"
+                visibleCount={LATEST_ON_WALLET}
+                rows={recentTransactions.map((entry) => {
+                  const { debit, credit } = sides(entry);
+                  return (
+                    <PostingStrip
+                      key={entry.transactionId}
+                      debit={debit}
+                      credit={credit}
+                      amount={entry.netAmount}
+                      label={entry.label}
+                      at={formatMoment(entry.occurredAt)}
+                    />
+                  );
+                })}
+              />
             )}
           </CardContent>
         </Card>
