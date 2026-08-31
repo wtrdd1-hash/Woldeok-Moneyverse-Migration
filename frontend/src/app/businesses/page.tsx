@@ -5,6 +5,8 @@ import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
+import type { EarlyUnlock } from '@/app/progression/unlocks';
+import { businessGate, businessGateNote } from '@/app/progression/unlocks';
 import { formatDay } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { PurchaseButton, SettleButton } from './business-forms';
@@ -41,12 +43,20 @@ interface Ownership {
 export default async function BusinessesPage() {
   await requireMember();
 
-  const [catalog, mine] = await Promise.all([
+  // The ladder comes along because 101 gates three of these businesses on a
+  // job level, and a button that submits into a refusal is the defect this
+  // screen would otherwise ship: the member presses 구입, waits, and is told
+  // "지금은 사업을 구입할 수 없어요" without ever learning it was the level.
+  // `apiOrNull`, so a ladder that fails to load costs an explanation and not
+  // the page -- the database refuses the purchase either way.
+  const [catalog, mine, ladder] = await Promise.all([
     apiOrNull<{ businessTypes: BusinessType[] }>('/api/v1/business-types'),
     apiOrNull<{ businesses: Ownership[] }>('/api/v1/businesses'),
+    apiOrNull<{ unlocks: EarlyUnlock[] }>('/api/v1/progression/early-game'),
   ]);
 
   const owned = new Set((mine?.businesses ?? []).map((business) => business.businessTypeId));
+  const unlocks = ladder?.unlocks ?? [];
 
   return (
     <div className="grid gap-6">
@@ -83,7 +93,10 @@ export default async function BusinessesPage() {
                   {owned.has(type.id) ? (
                     <Badge variant="outline">보유 중</Badge>
                   ) : (
-                    <PurchaseButton businessTypeId={type.id} />
+                    <PurchaseButton
+                      businessTypeId={type.id}
+                      lockedReason={locked(unlocks, type.symbol)}
+                    />
                   )}
                 </CardFooter>
               </Card>
@@ -147,4 +160,10 @@ function Line({ term, value }: { readonly term: string; readonly value: string }
       <Amount value={value} currency />
     </div>
   );
+}
+
+/** The sentence to show instead of an enabled purchase, or null to enable it. */
+function locked(unlocks: readonly EarlyUnlock[], symbol: string): string | null {
+  const gate = businessGate(unlocks, symbol);
+  return gate ? businessGateNote(gate) : null;
 }

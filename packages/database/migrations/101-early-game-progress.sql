@@ -317,6 +317,12 @@ RETURNS TABLE(
   unlock_code text,
   unlock_label text,
   unlock_detail text,
+  -- The business a rung gates, when it gates one. Reported rather than left
+  -- for a caller to map, because the businesses screen has to disable the
+  -- purchase this ladder refuses, and a symbol table written in TypeScript
+  -- would be the rule kept in two places -- the second of which nothing
+  -- refuses to be wrong.
+  unlock_business_symbol text,
   needs_job_level integer,
   needs_account_days integer,
   needs_work_completions integer,
@@ -372,6 +378,7 @@ BEGIN
       rung_row.ordinal AS ordinal,
       rung_row.label AS label,
       rung_row.detail AS detail,
+      rung_row.business_symbol AS business_symbol,
       rung_row.required_job_level AS job_level,
       coalesce(policy_row.minimum_account_days, rung_row.required_account_days) AS account_days,
       coalesce(policy_row.minimum_work_completions, rung_row.required_work_completions)
@@ -397,6 +404,7 @@ BEGIN
     standing_row.code,
     standing_row.label,
     standing_row.detail,
+    standing_row.business_symbol,
     standing_row.job_level,
     standing_row.account_days,
     standing_row.completions,

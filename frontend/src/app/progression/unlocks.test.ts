@@ -1,12 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import type { EarlyUnlock } from './unlocks';
-import { nextUnlock, unlockConditions, unlockState, unlockStateNote } from './unlocks';
+import {
+  businessGate,
+  businessGateNote,
+  nextUnlock,
+  unlockConditions,
+  unlockState,
+  unlockStateNote,
+} from './unlocks';
 
 function unlock(overrides: Partial<EarlyUnlock> = {}): EarlyUnlock {
   return {
     unlock_code: 'stall_business',
     unlock_label: '중고 판매대',
     unlock_detail: '레벨 5부터 살 수 있어요.',
+    unlock_business_symbol: 'STALL',
     needs_job_level: 5,
     needs_account_days: 0,
     needs_work_completions: 0,
@@ -90,5 +98,46 @@ describe('nextUnlock', () => {
     const marked = unlock({ unlock_code: 'street_cart', next_up: true });
     expect(nextUnlock([unlock(), marked])?.unlock_code).toBe('street_cart');
     expect(nextUnlock([unlock()])).toBeNull();
+  });
+});
+
+describe('businessGate', () => {
+  const rung = (over: Partial<EarlyUnlock>): EarlyUnlock => ({
+    unlock_code: 'stall_business',
+    unlock_label: '중고 판매대',
+    unlock_detail: '',
+    unlock_business_symbol: 'STALL',
+    needs_job_level: 5,
+    needs_account_days: 0,
+    needs_work_completions: 0,
+    is_enforced: true,
+    unlocked: false,
+    next_up: false,
+    member_job_level: 1,
+    member_account_days: 0,
+    member_work_completions: 0,
+    ...over,
+  });
+
+  it('finds the rung that gates a business', () => {
+    expect(businessGate([rung({})], 'STALL')?.unlock_code).toBe('stall_business');
+  });
+
+  it('is silent about a business no rung names', () => {
+    expect(businessGate([rung({})], 'FARM')).toBeNull();
+  });
+
+  it('is silent once the rung is open', () => {
+    expect(businessGate([rung({ unlocked: true })], 'STALL')).toBeNull();
+  });
+
+  // The mistake worth a test: a rung the database does not enforce must not
+  // disable a purchase that would in fact succeed.
+  it('does not gate on a rung nothing enforces', () => {
+    expect(businessGate([rung({ is_enforced: false })], 'STALL')).toBeNull();
+  });
+
+  it('says both the requirement and where the member stands', () => {
+    expect(businessGateNote(rung({}))).toBe('레벨 5부터 살 수 있어요. 지금은 레벨 1이에요.');
   });
 });

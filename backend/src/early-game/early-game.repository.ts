@@ -39,6 +39,8 @@ export interface EarlyUnlockRow {
   readonly unlock_code: string;
   readonly unlock_label: string;
   readonly unlock_detail: string;
+  /** The business symbol this rung gates, or null when it gates none. */
+  readonly unlock_business_symbol: string | null;
   readonly needs_job_level: number;
   readonly needs_account_days: number;
   readonly needs_work_completions: number;
@@ -132,6 +134,7 @@ export class EarlyGameRepository {
     return queryRows<EarlyUnlockRow>(
       this.pool,
       `SELECT rung.unlock_code, rung.unlock_label, rung.unlock_detail,
+              rung.unlock_business_symbol,
               rung.needs_job_level, rung.needs_account_days, rung.needs_work_completions,
               rung.is_enforced, rung.unlocked, rung.next_up,
               rung.member_job_level, rung.member_account_days, rung.member_work_completions
