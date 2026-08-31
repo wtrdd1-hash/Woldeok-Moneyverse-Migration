@@ -145,7 +145,14 @@ export function HoldingCard({
           <Badge variant="outline" className="font-normal">
             {effectLabel(item.effect_kind)}
           </Badge>
-          {item.suspended && <Badge variant="destructive">관리비 미납 정지</Badge>}
+          {/* States the debt, not a consequence. The arrears are real -- the
+              weekly job charged them and stopped at the cap -- but nothing is
+              actually withheld yet, because 104 leaves item effects without a
+              mechanical consequence and says so. A badge reading 정지 would
+              claim a lock this build does not keep, which is what 101's
+              `enforced` flag exists to avoid on the ladder. When an effect
+              starts changing what work or 정산 pays, this becomes 정지. */}
+          {item.suspended && <Badge variant="destructive">관리비 {item.unpaid_weeks}주 밀림</Badge>}
           {item.effect_expires_at !== null && (
             <Badge variant="outline" className="font-normal">
               효과 적용 중
