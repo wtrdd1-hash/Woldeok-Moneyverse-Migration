@@ -194,7 +194,7 @@ INSERT INTO public.early_event_catalog (
 ) VALUES
   ('bulk_order', 1, '갑작스러운 단체 주문',
    '오늘 큰 주문이 한 번에 들어왔어요. 손을 보탠 몫으로 작업 경험치를 받습니다. 경험치는 지금 가장 많이 쌓은 직업으로 들어가요.',
-   '거들기', 0, 20, NULL, 0, '제한시간 안에 납품하는 주문'),
+   '거들기', 0, 20, NULL, 0, NULL),
   ('tool_breakdown', 2, '도구 고장',
    '쓰던 도구가 고장 났어요. 직접 고치면 수리 키트가 하나 남고, 고치는 동안 작업 경험치도 조금 쌓여요.',
    '직접 고치기', 0, 6, 'repair_kit', 1, '도구 내구도'),
@@ -206,10 +206,10 @@ INSERT INTO public.early_event_catalog (
    '장보기 몫 받기', 30, 0, NULL, 0, '초보 필수품 10% 할인'),
   ('lost_and_found', 5, '분실물 발견',
    '길에서 잃어버린 물건을 주웠어요. 주인에게 돌려주고 사례를 받습니다.',
-   '돌려주기', 40, 0, NULL, 0, '평판과 칭호 진행도'),
+   '돌려주기', 40, 0, NULL, 0, NULL),
   ('urgent_restock', 6, '긴급 재고 요청',
    '가게 재고가 급하게 필요해요. 채워 준 몫으로 WLD와 작업 경험치를 함께 받습니다.',
-   '재고 채우기', 25, 10, NULL, 0, '여러 사람이 함께 채우는 공동 납품'),
+   '재고 채우기', 25, 10, NULL, 0, NULL),
   ('lucky_box', 7, '초보 행운 상자',
    '초보자에게 주는 상자예요. 안에는 현금 대신 소모품이 들어 있습니다.',
    '상자 열기', 0, 0, 'energy_drink', 2, '장식과 재료')
@@ -359,11 +359,25 @@ BEGIN
     event_row.label,
     event_row.detail,
     event_row.claim_label,
-    event_row.reward_amount,
-    CASE WHEN v_has_job THEN event_row.reward_experience ELSE 0::bigint END,
-    event_row.reward_experience > 0 AND NOT v_has_job,
-    item_row.name,
-    event_row.reward_item_quantity::integer,
+    -- The receipt wins here too, not only for the code. The header promises
+    -- that once a claim exists the day's event IS the claimed one, read back
+    -- from the receipt -- and reading the figures from the live catalogue
+    -- breaks exactly that promise: an operator who edits a row after a member
+    -- has claimed makes this card disagree with the receipt and with the
+    -- ledger entry the member can see beside it.
+    coalesce(claim_row.reward_amount, event_row.reward_amount),
+    coalesce(
+      claim_row.experience_amount,
+      CASE WHEN v_has_job THEN event_row.reward_experience ELSE 0::bigint END
+    ),
+    -- Never true on a day already claimed. The experience either landed or it
+    -- did not, and the receipt is what says which; recomputing it from
+    -- `v_has_job` would put '직업이 없어 경험치를 받지 못했어요' on a card whose
+    -- receipt shows experience paid.
+    claim_row.user_id IS NULL
+      AND event_row.reward_experience > 0 AND NOT v_has_job,
+    coalesce(claimed_item.name, item_row.name),
+    coalesce(claim_row.item_quantity, event_row.reward_item_quantity)::integer,
     event_row.pending_effect,
     claim_row.user_id IS NOT NULL,
     claim_row.created_at,
@@ -379,9 +393,13 @@ BEGIN
       ELSE NULL
     END
   FROM public.early_event_catalog AS event_row
-  LEFT JOIN public.shop_catalog AS item_row ON item_row.code = event_row.reward_item_code
   LEFT JOIN public.early_event_claims AS claim_row
     ON claim_row.user_id = p_actor AND claim_row.event_date = v_day
+  LEFT JOIN public.shop_catalog AS item_row ON item_row.code = event_row.reward_item_code
+  -- The item the receipt names, which is not always the one the catalogue
+  -- names today. Joined separately rather than by moving `item_row`, because
+  -- both are still needed: the catalogue's item for a day not yet claimed.
+  LEFT JOIN public.shop_catalog AS claimed_item ON claimed_item.code = claim_row.item_code
   WHERE event_row.code = v_code;
 END;
 $$;
@@ -417,6 +435,7 @@ SET search_path = pg_catalog, pg_temp
 AS $$
 DECLARE
   v_today date := (pg_catalog.clock_timestamp() AT TIME ZONE 'Asia/Seoul')::date;
+  v_claim_date date;
   v_owner uuid;
   v_code text;
   v_label text;
@@ -440,10 +459,11 @@ BEGIN
     pg_catalog.hashtextextended('moneyverse:early-event-claim:' || p_key::text, 0)
   );
 
-  SELECT claim_row.user_id, claim_row.event_code, claim_row.reward_amount,
-         claim_row.experience_amount, claim_row.item_code, claim_row.item_quantity,
-         claim_row.transaction_id
-  INTO v_owner, v_code, v_cash, v_xp, v_item_code, v_item_quantity, v_transaction
+  SELECT claim_row.user_id, claim_row.event_date, claim_row.event_code,
+         claim_row.reward_amount, claim_row.experience_amount, claim_row.item_code,
+         claim_row.item_quantity, claim_row.transaction_id
+  INTO v_owner, v_claim_date, v_code, v_cash, v_xp, v_item_code, v_item_quantity,
+       v_transaction
   FROM public.early_event_claims AS claim_row
   WHERE claim_row.idempotency_key = p_key;
 
@@ -451,6 +471,15 @@ BEGIN
     IF v_owner IS DISTINCT FROM p_actor THEN
       RAISE EXCEPTION USING ERRCODE = '28000',
         MESSAGE = 'this event receipt belongs to another user';
+    END IF;
+    -- The date as well as the key. A key spent yesterday would otherwise take
+    -- this branch today and hand back yesterday's receipt marked `replayed`,
+    -- so the screen would say '이미 받았어요' about a day whose event is in
+    -- fact still unclaimed. The primary key already allows only one claim per
+    -- member per day; this is about answering the question that was asked.
+    IF v_claim_date IS DISTINCT FROM p_event_date THEN
+      RAISE EXCEPTION USING ERRCODE = '23505',
+        MESSAGE = 'this key already settled another day''s event';
     END IF;
 
     SELECT event_row.label INTO v_label

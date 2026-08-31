@@ -62,8 +62,8 @@ export default async function QuestsPage() {
           오늘의 사건
         </h2>
         {/* Said plainly, because a member who does not know this will try it:
-            the event is decided from your account and today's날짜, so there is
-            nothing to reroll. */}
+            the event is a function of the member and today's Seoul date, so
+            there is nothing to reroll. */}
         <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
           하루에 한 번, 사람마다 다른 사건이 하나씩 열려요. 새로고침하거나 다시 들어와도 오늘
           사건은 바뀌지 않고, 한 번만 받을 수 있어요. 다음 사건은 한국 시간 자정에 열립니다.
