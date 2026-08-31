@@ -178,6 +178,10 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
+      # Every origin a sign-in may be completed on. Absent here, the backend
+      # parsed an empty list and silently fell back to APP_BASE_URL for every
+      # request, which no second domain could ever have overridden.
+      OAUTH_ALLOWED_REDIRECT_URIS: ${OAUTH_ALLOWED_REDIRECT_URIS:-}
       PHOTO_STORAGE_DIR: /data/moneyverse/photos
       # A second connection, with one privilege: recording a status snapshot.
       # The application role is refused that write on purpose (013), so the
@@ -265,6 +269,12 @@ services:
       API_ORIGIN: http://backend:3000
       INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?required}
       APP_BASE_URL: ${APP_BASE_URL:?required}
+      # `allowedOrigins` in src/lib/public-url.ts reads the same list the API
+      # does, so that a visitor who arrived on a second registered host is sent
+      # back to it rather than to the canonical one -- which would lose the
+      # host-only session cookie mid-sign-in. Absent here, that function saw
+      # only APP_BASE_URL and the second host could never work.
+      OAUTH_ALLOWED_REDIRECT_URIS: ${OAUTH_ALLOWED_REDIRECT_URIS:-}
       SEO_INDEXING_ENABLED: ${SEO_INDEXING_ENABLED:-false}
     depends_on:
       backend:

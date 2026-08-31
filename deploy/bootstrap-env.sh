@@ -122,6 +122,18 @@ base_url="$(grep -E '^APP_BASE_URL=' .env | cut -d= -f2-)"
 set_to DISCORD_REDIRECT_URI "${base_url%/}/auth/discord/callback"
 set_to GOOGLE_REDIRECT_URI "${base_url%/}/auth/google/callback"
 
+# The origins a sign-in may be completed on. `allowedRedirectOrigins` in
+# backend/src/core/config.ts parses this, and `selectRedirectUri` matches the
+# browser's origin against it before falling back to the canonical URI.
+#
+# It was written by nothing until now, so the list was empty in every deployed
+# container and every sign-in used APP_BASE_URL. That is the correct answer
+# for one domain and it is why nobody noticed -- but the specification's 18.2
+# plans a second host, and adding one to the reverse proxy would have got a
+# silent fallback rather than a working sign-in. `put`, not `set_to`: an
+# operator who has listed a second origin by hand keeps it.
+put OAUTH_ALLOWED_REDIRECT_URIS "${OAUTH_ALLOWED_REDIRECT_URIS:-${base_url%/}/auth/discord/callback,${base_url%/}/auth/google/callback}"
+
 adopt_from="${ADOPT_FROM:-}"
 oauth_names="DISCORD_CLIENT_ID DISCORD_CLIENT_SECRET GOOGLE_CLIENT_ID GOOGLE_CLIENT_SECRET"
 
