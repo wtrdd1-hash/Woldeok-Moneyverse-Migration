@@ -107,9 +107,14 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
   it('refuses a payout that would stop the game being a sink', async () => {
     await rolledBack(async (client) => {
       for (const multiplier of [2_000_000, 2_500_000, 1_000_000]) {
+        // A savepoint per attempt: a raised statement aborts the transaction,
+        // and every query after it answers 25P02 rather than the constraint
+        // violation the next case is looking for.
+        await client.query('SAVEPOINT try_multiplier');
         const error = await rejectionOf(() =>
           client.query('UPDATE public.casino_policy SET payout_multiplier_ppm = $1', [multiplier]),
         );
+        await client.query('ROLLBACK TO SAVEPOINT try_multiplier');
         expect((error as { code?: string }).code, `${multiplier}`).toBe('23514');
       }
     });

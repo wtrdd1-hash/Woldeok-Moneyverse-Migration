@@ -84,9 +84,11 @@ $$;
 -- differ. Inside this transaction, so nothing observes it missing.
 DROP FUNCTION IF EXISTS public.casino_coin_terms(uuid);
 --
--- `worst_case_loss` is unchanged: the most a member can lose is what they
--- staked, whatever the payout is. `house_edge_ppm` now computes to something
--- other than zero, which is the number 14.3 asks to be shown.
+-- `worst_case_loss` keeps 060's meaning exactly -- the most this member can
+-- still lose today, which is the lesser of their two remaining allowances.
+-- `house_edge_ppm` now computes to something other than zero, which is the
+-- number 14.3 asks to be shown, and `net_win_at_max` is new: what a winning
+-- maximum stake actually pays after the rounding below.
 CREATE OR REPLACE FUNCTION public.casino_coin_terms(p_actor uuid)
 RETURNS TABLE(
   enabled boolean,
@@ -140,7 +142,11 @@ BEGIN
   win_probability_ppm := v_win_ppm;
   payout_multiplier_ppm := v_multiplier;
   house_edge_ppm := (1000000 - (v_win_ppm::bigint * v_multiplier::bigint / 1000000))::integer;
-  worst_case_loss := max_stake;
+  -- 060's meaning, unchanged: the most this member can still lose today. They
+  -- may stake no more than the stake headroom, and every WLD of it can lose.
+  -- It is not `max_stake`; that is the biggest single bet, which is a
+  -- different disclosure and a smaller number.
+  worst_case_loss := least(remaining_stake, remaining_loss);
   net_win_at_max := public.casino_net_win(max_stake, v_multiplier);
   RETURN NEXT;
 END;
