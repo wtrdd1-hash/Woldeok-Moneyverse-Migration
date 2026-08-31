@@ -3,6 +3,18 @@
  * and one line saying what the page is for. Every original view opened this
  * way, and keeping it uniform is what makes eighteen screens read as one
  * application.
+ *
+ * The title tops out at 2.5rem rather than 3rem. That is the size `error.tsx`
+ * was already using for the same job, so it is a register the product has
+ * rather than a new one, and it puts an interior page below the home hero
+ * instead of level with it. At line-height 1.2 the old ceiling cost 58px a
+ * line and these titles are Korean sentences that run to two.
+ *
+ * The gap between the three parts is 8px rather than 16px because the lede
+ * keeps `leading-[1.8]`: half of that leading sits above its first line and
+ * does the separating already. The leading itself is not where space gets
+ * saved here — Hangul has no descender rhythm to fall back on, and keep-all
+ * makes these lines wrap early enough without crowding them vertically too.
  */
 export function PageHeader({
   eyebrow,
@@ -14,9 +26,9 @@ export function PageHeader({
   readonly children?: React.ReactNode;
 }) {
   return (
-    <header className="grid gap-4 pb-2">
+    <header className="grid gap-2">
       {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-      <h1 className="text-[clamp(2rem,4vw,3rem)]">{title}</h1>
+      <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)]">{title}</h1>
       {children && (
         <div className="max-w-prose leading-[1.8] text-muted-foreground [word-break:keep-all]">
           {children}
