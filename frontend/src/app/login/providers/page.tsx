@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import { Accent, PageHeader } from '@/components/page-header';
+import { ScrollToTop } from '@/components/scroll-to-top';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -49,8 +50,12 @@ export default async function LoginProvidersPage() {
   const anyEnabled = ORDER.some((id) => enabled.has(id));
 
   return (
-    <div className="grid gap-6">
-      <PageHeader
+    // Arriving here is a Server Action redirect from the consent screen, whose
+    // panel the member had to scroll to the end of. Without this they land at
+    // that scroll position, with the first provider button above the fold.
+    <ScrollToTop>
+      <div className="grid gap-6">
+        <PageHeader
         title={
           <>
             어떤 계정으로
@@ -119,11 +124,12 @@ export default async function LoginProvidersPage() {
           개인정보 처리 안내
         </Link>
       </p>
-      <p className="text-sm">
-        <Link href="/login" className="text-muted-foreground">
-          ← 약관 동의 화면으로 돌아가기
-        </Link>
-      </p>
-    </div>
+        <p className="text-sm">
+          <Link href="/login" className="text-muted-foreground">
+            ← 약관 동의 화면으로 돌아가기
+          </Link>
+        </p>
+      </div>
+    </ScrollToTop>
   );
 }

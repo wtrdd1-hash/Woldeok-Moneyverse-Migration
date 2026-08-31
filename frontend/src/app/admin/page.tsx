@@ -226,10 +226,16 @@ function Gate({ admin }: { readonly admin: AdminConsole }) {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <Button asChild variant="outline" className="min-h-11 w-fit">
-              <Link href="/account">본인 확인하러 가기 →</Link>
-            </Button>
-            <EnrolSecondFactor />
+            {/* Shown only while it is the thing standing in the way. An
+                operator who has just confirmed their identity was still being
+                told to go and confirm it -- and the control below was live
+                whether or not they had, so pressing it answered 401. */}
+            {!admin.reauthentication.fresh && (
+              <Button asChild variant="outline" className="min-h-11 w-fit">
+                <Link href="/account">본인 확인하러 가기 →</Link>
+              </Button>
+            )}
+            <EnrolSecondFactor disabled={!admin.reauthentication.fresh} />
           </CardContent>
         </Card>
       ) : (
@@ -241,10 +247,12 @@ function Gate({ admin }: { readonly admin: AdminConsole }) {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <Button asChild variant="outline" className="min-h-11 w-fit">
-              <Link href="/account">본인 확인하러 가기 →</Link>
-            </Button>
-            <OpenConsole />
+            {!admin.reauthentication.fresh && (
+              <Button asChild variant="outline" className="min-h-11 w-fit">
+                <Link href="/account">본인 확인하러 가기 →</Link>
+              </Button>
+            )}
+            <OpenConsole disabled={!admin.reauthentication.fresh} />
           </CardContent>
         </Card>
       )}
