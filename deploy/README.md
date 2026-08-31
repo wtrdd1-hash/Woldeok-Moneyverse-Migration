@@ -108,6 +108,7 @@ overwrites a value that is already there.
 | `BACKUP_ENCRYPTION_KEY` | **Not in `.env`.** `backup.sh init-key` writes `~/.moneyverse-backup-key`, and a copy belongs somewhere off this host. A key beside the ciphertext, or in the file compose loads into containers, is doing nothing — `backup.sh` refuses both. |
 | `DISCORD_*`, `GOOGLE_*` client credentials | Copied from a container already running on the host, named by `ADOPT_FROM`. They never pass through the runner, the repository, or a shell history. |
 | `*_REDIRECT_URI` | Derived from `APP_BASE_URL`. The API refuses to enable a provider whose redirect URI does not match that origin and the exact callback path, so a hand-written one is a silent disable. |
+| `OAUTH_ALLOWED_REDIRECT_URIS` | Derived from `APP_BASE_URL` too, and the reason a second public host can work at all: both the API and the frontend match the browser's origin against this list before falling back to the canonical one. It was written by nothing until 2026-08-31, so the list was empty in every container and every sign-in used `APP_BASE_URL` — correct for one domain, and a silent fallback for any second one. Set it explicitly to add a host; `bootstrap-env.sh` will not overwrite a value that is there. |
 
 The script reports which keys are set, never what they contain.
 
