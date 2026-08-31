@@ -122,11 +122,22 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
    * Runs something expected to fail and leaves the transaction usable. A
    * statement that raises aborts the transaction, so a case that asserts a
    * refusal and then asserts what is still allowed needs a savepoint.
+   *
+   * The savepoint is released rather than rolled back when the attempt
+   * SUCCEEDS, and that distinction is the whole point. Rolling back either way
+   * undoes a play that went through, so a loop that stakes its way up to a
+   * daily cap through this helper arrives with nothing staked and the cap it
+   * was testing never binds -- which is exactly what happened: the cap was
+   * working and the test was erasing the plays it was counting on.
    */
   const refused = async (client: PoolClient, attempt: () => Promise<unknown>): Promise<unknown> => {
     await client.query('SAVEPOINT expected_refusal');
     const error = await rejectionOf(attempt);
-    await client.query('ROLLBACK TO SAVEPOINT expected_refusal');
+    await client.query(
+      error === null
+        ? 'RELEASE SAVEPOINT expected_refusal'
+        : 'ROLLBACK TO SAVEPOINT expected_refusal',
+    );
     return error;
   };
 

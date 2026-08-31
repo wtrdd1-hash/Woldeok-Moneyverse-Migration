@@ -236,6 +236,47 @@ REVOKE ALL PRIVILEGES ON TABLE public.casino_game_payouts FROM PUBLIC, moneyvers
 -- WLD, and a multiplier close enough to 1.0 makes a winning minimum stake pay
 -- zero -- which reaches `economy_post_transaction` as a posting of nothing and
 -- fails as an unbalanced transaction, after the member has been told they won.
+-- The same count, before it is rounded into a disclosure.
+--
+-- `casino_dice_win_probability_ppm` floors, deliberately: a member is never
+-- told a better chance than they have. But a floor is the wrong tool for
+-- deciding whether a price leaves the house an edge. 1/6 floors to 166,666
+-- ppm, and 166,666 x 6.0 is 999,996 -- under 1,000,000 by four parts in a
+-- million, so a payout that returns exactly everything reads as a sink and is
+-- accepted. The guard needs the fraction, not its rounding.
+CREATE OR REPLACE FUNCTION public.casino_dice_win_odds(p_game text)
+RETURNS TABLE(winning_bytes bigint, accepted_bytes bigint)
+LANGUAGE plpgsql
+IMMUTABLE
+SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp
+AS $$
+DECLARE
+  v_nominal text;
+BEGIN
+  v_nominal := CASE p_game WHEN 'dice_parity' THEN 'odd' WHEN 'dice_number' THEN '1' END;
+  IF v_nominal IS NULL THEN
+    RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'unknown dice game';
+  END IF;
+
+  RETURN QUERY
+  SELECT pg_catalog.count(*) FILTER (
+           WHERE public.casino_dice_is_win(p_game, v_nominal, draw.face)
+         ),
+         pg_catalog.count(*)
+  FROM (
+    SELECT public.casino_dice_face_for_byte(byte_value) AS face
+    FROM pg_catalog.generate_series(0, 255) AS byte_value
+  ) AS draw
+  WHERE draw.face IS NOT NULL;
+END;
+$$;
+
+ALTER FUNCTION public.casino_dice_win_odds(text) OWNER TO moneyverse_migrator;
+REVOKE ALL PRIVILEGES ON FUNCTION public.casino_dice_win_odds(text)
+  FROM PUBLIC, moneyverse_app;
+GRANT EXECUTE ON FUNCTION public.casino_dice_win_odds(text) TO moneyverse_app;
+
 CREATE OR REPLACE FUNCTION public.casino_reject_payout_that_is_not_a_sink()
 RETURNS trigger
 LANGUAGE plpgsql
@@ -243,13 +284,16 @@ SECURITY DEFINER
 SET search_path = pg_catalog, pg_temp
 AS $$
 DECLARE
-  v_win_ppm integer;
-  v_return_ppm bigint;
+  v_winning bigint;
+  v_accepted bigint;
   v_min_stake bigint;
 BEGIN
-  v_win_ppm := public.casino_dice_win_probability_ppm(NEW.game);
-  v_return_ppm := v_win_ppm::bigint * NEW.payout_multiplier_ppm::bigint / 1000000;
-  IF v_return_ppm >= 1000000 THEN
+  SELECT odds.winning_bytes, odds.accepted_bytes INTO v_winning, v_accepted
+  FROM public.casino_dice_win_odds(NEW.game) AS odds;
+  -- Cross-multiplied rather than divided, so nothing rounds on the way to the
+  -- comparison: winning/accepted x multiplier/1e6 >= 1 is exactly
+  -- winning x multiplier >= accepted x 1e6.
+  IF v_winning * NEW.payout_multiplier_ppm::bigint >= v_accepted * 1000000 THEN
     RAISE EXCEPTION USING
       ERRCODE = '23514',
       MESSAGE = 'this payout returns everything the game takes, or more',
