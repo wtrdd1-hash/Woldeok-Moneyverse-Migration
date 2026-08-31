@@ -140,10 +140,13 @@ describe.skipIf(!DATABASE_URL)('progression and credit against a real database',
            FROM public.virtual_bank_loans AS loan_row WHERE loan_row.user_id = $1`,
           [actor],
         );
-        // A brand new account is grade 'new', which is still allowed to
-        // borrow: applying the seeded zero credit limit would take a
-        // capability away from every member who has not worked yet.
-        expect(rows[0]?.credit_grade).toBe('new');
+        // 096 applies the seeded credit limit, so 'new' no longer borrows at
+        // all and the grade written on a loan is the first one that lends.
+        // The comment here used to say the opposite, and said why: applying
+        // the limit would take a capability away from members who had not
+        // worked yet. Section 14.4 is the decision that it should.
+        expect(rows[0]?.credit_grade).toBe('C');
+        expect(rows[0]?.minimum_repayment, "the C grade's own minimum").toBe('100');
         expect(rows[0]?.matures, 'the maturity sweep needs a maturity').toBe(true);
       });
     });
