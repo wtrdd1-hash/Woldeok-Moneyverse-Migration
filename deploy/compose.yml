@@ -164,6 +164,13 @@ services:
       # The application connects as the least-privileged role, never as the
       # migrator that owns the schema.
       DATABASE_URL: postgresql://moneyverse_app:${APP_DB_PASSWORD:?required}@db:5432/${DB_NAME:?required}
+      # Left unset by bootstrap-env.sh, and that is the intended state: the API
+      # bounds its own pool at ten with a five-second wait. These exist so a
+      # host that has grown past that can be told, without a rebuild -- the
+      # role's own CONNECTION LIMIT stays the backstop either way.
+      DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-}
+      DATABASE_POOL_IDLE_TIMEOUT_MS: ${DATABASE_POOL_IDLE_TIMEOUT_MS:-}
+      DATABASE_POOL_CONNECT_TIMEOUT_MS: ${DATABASE_POOL_CONNECT_TIMEOUT_MS:-}
       APP_BASE_URL: ${APP_BASE_URL:?required}
       INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?required}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
