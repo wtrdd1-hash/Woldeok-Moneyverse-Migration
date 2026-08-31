@@ -39,6 +39,32 @@ function assertFace(value: unknown): asserts value is string {
 }
 
 /**
+ * The two dice games and what each of them accepts as a choice.
+ *
+ * `casino_dice_is_win` is the authority and refuses the same pairs; this turns
+ * a mismatched pair into a 400 naming the field rather than a 409 carrying a
+ * sentence about a function. The pairing is checked, not just the membership:
+ * 'odd' is a real choice and a real refusal on the number game.
+ */
+const DICE_CHOICES: Readonly<Record<string, ReadonlySet<string>>> = Object.freeze({
+  dice_parity: new Set(['odd', 'even']),
+  dice_number: new Set(['1', '2', '3', '4', '5', '6']),
+});
+
+function assertDiceGame(value: unknown): asserts value is string {
+  if (typeof value !== 'string' || !(value in DICE_CHOICES)) {
+    throw new CasinoInputError('the game must be dice_parity or dice_number');
+  }
+}
+
+function assertDiceChoice(game: string, value: unknown): asserts value is string {
+  const allowed = DICE_CHOICES[game];
+  if (allowed === undefined || typeof value !== 'string' || !allowed.has(value)) {
+    throw new CasinoInputError('the choice does not belong to that dice game');
+  }
+}
+
+/**
  * Bounds, not limits. The policy in public.casino_policy owns the minimum and
  * maximum stake and an operator changes them without a deploy, so mirroring
  * today's 10..10000 here would be a second copy that goes stale and starts
@@ -127,7 +153,16 @@ export interface CasinoFairnessRow {
   readonly created_at: Date | null;
 }
 
-/** public.casino_play_coin RETURNS TABLE: packages/database/migrations/060-casino-coin-fairness.sql */
+/**
+ * public.casino_play_coin RETURNS TABLE: 060-casino-coin-fairness.sql, priced
+ * by 099 and re-bodied by 100.
+ *
+ * `net_win_at_max` was declared here and never selected, because the play
+ * function has never returned it -- it is a property of the policy, which
+ * `terms()` reports. `worst_case_loss` is what the receipt does carry, and
+ * from 100 it means what 060 named it: the most this member can still lose
+ * today, not the stake they just placed.
+ */
 export interface CasinoPlayRow {
   readonly play_id: string;
   readonly outcome: string;
@@ -137,15 +172,56 @@ export interface CasinoPlayRow {
   readonly win_probability_ppm: number;
   readonly payout_multiplier_ppm: number;
   readonly worst_case_loss: string;
-  /**
-   * What a winning maximum-stake play actually pays, net of the stake (099).
-   *
-   * Reported by the database rather than derived here, because the payout
-   * rounds down to whole WLD and a second copy of that arithmetic in
-   * TypeScript is a second chance to disagree with the ledger about what a
-   * member is owed.
-   */
-  readonly net_win_at_max: string;
+}
+
+/**
+ * public.casino_game_terms RETURNS TABLE: 100-casino-dice-games.sql. One row
+ * per game, carrying the three figures 14.3 requires on screen before a stake
+ * -- the probability, the payout, and the most this member can still lose.
+ *
+ * `daily_stake_used`, `daily_loss_used` and `worst_case_loss` are the same on
+ * every row on purpose: the daily allowances belong to the member and not to
+ * the game, and a screen that showed a fresh maximum loss beside each game
+ * would describe a casino that does not exist.
+ */
+export interface CasinoGameTermsRow extends CasinoTermsRow {
+  readonly game: string;
+}
+
+/**
+ * public.casino_dice_fairness RETURNS TABLE: 100-casino-dice-games.sql.
+ *
+ * Every trial column is nullable because no qualifying trial need exist. The
+ * chi-square is the statistic the coin's trial has no equivalent of: it asks
+ * whether the six faces are equally likely, which a win-share z-test cannot
+ * see, and it is the number that would have caught a die rolled with
+ * `byte % 6`.
+ */
+export interface CasinoDiceFairnessRow {
+  readonly game: string;
+  readonly win_probability_ppm: number;
+  readonly trial_id: string | null;
+  readonly trials: string | null;
+  readonly wins: string | null;
+  readonly expected_win_probability_ppm: number | null;
+  readonly observed_win_probability_ppm: number | null;
+  readonly z_score: string | null;
+  readonly chi_square: string | null;
+  readonly tolerance_chi_square: string | null;
+  readonly created_at: Date | null;
+}
+
+/** public.casino_play_dice RETURNS TABLE: 100-casino-dice-games.sql. */
+export interface CasinoDicePlayRow {
+  readonly play_id: string;
+  /** An integer column, not an amount: a die shows 1..6 and nothing larger. */
+  readonly outcome_face: number;
+  readonly net_amount: string;
+  readonly transaction_id: string;
+  readonly replayed: boolean;
+  readonly win_probability_ppm: number;
+  readonly payout_multiplier_ppm: number;
+  readonly worst_case_loss: string;
 }
 
 /**
@@ -294,5 +370,95 @@ export class CasinoRepository {
       `SELECT public.member_set_casino_self_limit($1::uuid, $2::bigint, $3::bigint, $4::timestamptz)`,
       [actor, String(dailyBetLimit), String(dailyLossLimit), lockedUntil],
     );
+  }
+
+  /**
+   * Every game's terms, on one row each, from one read of one day.
+   *
+   * Not three calls to three per-game functions: the usage figures are shared
+   * across the games from 100 onwards, and three reads of them could disagree
+   * with each other by the time a picker rendered them side by side.
+   */
+  async gameTerms(actor: unknown): Promise<CasinoGameTermsRow[]> {
+    assertUuid(actor, 'actor');
+    return queryRows<CasinoGameTermsRow>(
+      this.pool,
+      `SELECT terms.game,
+              terms.enabled,
+              terms.min_stake::text AS min_stake,
+              terms.max_stake::text AS max_stake,
+              terms.daily_stake_limit::text AS daily_stake_limit,
+              terms.daily_loss_limit::text AS daily_loss_limit,
+              terms.daily_stake_used::text AS daily_stake_used,
+              terms.daily_loss_used::text AS daily_loss_used,
+              terms.remaining_stake::text AS remaining_stake,
+              terms.remaining_loss::text AS remaining_loss,
+              terms.win_probability_ppm,
+              terms.payout_multiplier_ppm,
+              terms.house_edge_ppm,
+              terms.worst_case_loss::text AS worst_case_loss,
+              terms.net_win_at_max::text AS net_win_at_max
+       FROM public.casino_game_terms($1::uuid) AS terms`,
+      [actor],
+    );
+  }
+
+  /**
+   * The disclosed probability of each dice game and the trial behind it.
+   *
+   * The function keeps a row per game whether or not a trial qualifies -- the
+   * state every deployment is in until the casino first opens -- so this needs
+   * no LATERAL of its own, unlike the coin's.
+   */
+  async diceFairness(): Promise<CasinoDiceFairnessRow[]> {
+    return queryRows<CasinoDiceFairnessRow>(
+      this.pool,
+      `SELECT fairness.game,
+              fairness.win_probability_ppm,
+              fairness.trial_id::text AS trial_id,
+              fairness.trials::text AS trials,
+              fairness.wins::text AS wins,
+              fairness.expected_win_probability_ppm,
+              fairness.observed_win_probability_ppm,
+              fairness.z_score::text AS z_score,
+              fairness.chi_square::text AS chi_square,
+              fairness.tolerance_chi_square::text AS tolerance_chi_square,
+              fairness.created_at
+       FROM public.casino_dice_fairness() AS fairness`,
+    );
+  }
+
+  /**
+   * One roll. The key comes first and the actor second, as it does for every
+   * idempotent write in this schema, and neither the face, the odds nor the
+   * payout is a parameter the browser can reach.
+   */
+  async playDice(
+    key: unknown,
+    actor: unknown,
+    game: unknown,
+    choice: unknown,
+    stake: unknown,
+  ): Promise<CasinoDicePlayRow> {
+    assertUuid(key, 'idempotency key');
+    assertUuid(actor, 'actor');
+    assertDiceGame(game);
+    assertDiceChoice(game, choice);
+    assertStake(stake);
+    const row = await queryOne<CasinoDicePlayRow>(
+      this.pool,
+      `SELECT play.play_id::text AS play_id,
+              play.outcome_face,
+              play.net_amount::text AS net_amount,
+              play.transaction_id::text AS transaction_id,
+              play.replayed,
+              play.win_probability_ppm,
+              play.payout_multiplier_ppm,
+              play.worst_case_loss::text AS worst_case_loss
+       FROM public.casino_play_dice($1::uuid, $2::uuid, $3::text, $4::text, $5::bigint) AS play`,
+      [key, actor, game, choice, String(stake)],
+    );
+    if (!row) throw new Error('casino_play_dice did not return a row');
+    return row;
   }
 }

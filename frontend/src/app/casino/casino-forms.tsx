@@ -14,7 +14,8 @@ import {
 import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
 import { LOCK_CHOICES } from './coin';
-import { playCoin, setSelfLimit } from './actions';
+import { DIE_FACES, PARITY_CHOICES } from './dice';
+import { playCoin, playDiceNumber, playDiceParity, setSelfLimit } from './actions';
 
 /**
  * The coin game's write surface.
@@ -129,6 +130,129 @@ export function SelfLimitForm() {
         <p className="text-xs text-muted-foreground">0으로 두면 그 항목은 오늘 이용하지 않겠다는 뜻이에요.</p>
         <SubmitButton>한도 저장</SubmitButton>
       </div>
+
+      <ActionAlert state={state} />
+    </form>
+  );
+}
+
+/**
+ * 주사위 홀짝: a stake and one of two sides.
+ *
+ * The same shape as `CoinPlayForm`, and deliberately so -- one stake field and
+ * one button per intent, each carrying its own choice, so the form works
+ * before hydration and a double click cannot place a second stake. What the
+ * two forms do not share is a component: the API takes a game as well as a
+ * choice, and a single form parameterised by game would put the game on the
+ * wire as a field the browser fills in.
+ */
+export function DiceParityForm({
+  minStake,
+  maxStake,
+  remainingStake,
+  exhausted,
+}: {
+  readonly minStake: string;
+  readonly maxStake: string;
+  readonly remainingStake: string;
+  readonly exhausted: boolean;
+}) {
+  const [state, action] = useActionState(playDiceParity, IDLE);
+
+  return (
+    <form action={action} className="grid gap-4">
+      <Field>
+        <FieldLabel htmlFor="dice-parity-stake">걸 WLD</FieldLabel>
+        <AmountInput
+          id="dice-parity-stake"
+          name="stake"
+          defaultValue={minStake}
+          placeholder="0"
+          required
+        />
+        <FieldDescription>
+          한 판에 {groupDigits(minStake)} ~ {groupDigits(maxStake)} WLD를 걸 수 있어요. 오늘 남은
+          베팅 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 이 한도를 함께 씁니다.
+        </FieldDescription>
+      </Field>
+
+      <div className="flex flex-wrap gap-2">
+        {PARITY_CHOICES.map((choice, index) => (
+          <SubmitButton
+            key={choice.value}
+            name="choice"
+            value={choice.value}
+            disabled={exhausted}
+            {...(index === 0 ? {} : { variant: 'outline' as const })}
+          >
+            {choice.label}에 걸기
+          </SubmitButton>
+        ))}
+      </div>
+
+      {exhausted && (
+        <p className="text-sm text-muted-foreground">
+          오늘 걸 수 있는 한도를 모두 사용했어요. 내일 다시 열려요.
+        </p>
+      )}
+
+      <ActionAlert state={state} />
+    </form>
+  );
+}
+
+/**
+ * 주사위 숫자 맞히기: a stake and one of six faces.
+ *
+ * Six buttons rather than a select, for the reason the coin has two: a native
+ * submit carries its own value with no client state, so the form still works
+ * with no JavaScript and there is no hidden field to keep in step. Each label
+ * says what pressing it does, because `4` alone is a number on a screen full
+ * of numbers.
+ */
+export function DiceNumberForm({
+  minStake,
+  maxStake,
+  remainingStake,
+  exhausted,
+}: {
+  readonly minStake: string;
+  readonly maxStake: string;
+  readonly remainingStake: string;
+  readonly exhausted: boolean;
+}) {
+  const [state, action] = useActionState(playDiceNumber, IDLE);
+
+  return (
+    <form action={action} className="grid gap-4">
+      <Field>
+        <FieldLabel htmlFor="dice-number-stake">걸 WLD</FieldLabel>
+        <AmountInput
+          id="dice-number-stake"
+          name="stake"
+          defaultValue={minStake}
+          placeholder="0"
+          required
+        />
+        <FieldDescription>
+          한 판에 {groupDigits(minStake)} ~ {groupDigits(maxStake)} WLD를 걸 수 있어요. 오늘 남은
+          베팅 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 이 한도를 함께 씁니다.
+        </FieldDescription>
+      </Field>
+
+      <div className="flex flex-wrap gap-2">
+        {DIE_FACES.map((face) => (
+          <SubmitButton key={face} name="choice" value={face} variant="outline" disabled={exhausted}>
+            {face}에 걸기
+          </SubmitButton>
+        ))}
+      </div>
+
+      {exhausted && (
+        <p className="text-sm text-muted-foreground">
+          오늘 걸 수 있는 한도를 모두 사용했어요. 내일 다시 열려요.
+        </p>
+      )}
 
       <ActionAlert state={state} />
     </form>

@@ -318,9 +318,22 @@ describe.skipIf(!DATABASE_URL)('casino coin fairness against a real database', (
   describe.skipIf(!MIGRATOR_DATABASE_URL)('the activation gate', () => {
     let migrator: Pool;
 
-    beforeAll(() => {
+    /**
+     * Migration 100 made the gate ask once per game, so opening the casino now
+     * needs a qualifying trial for the two dice games as well as for the coin.
+     * Recorded here rather than in the outer `beforeAll` because this is the
+     * only block that opens the casino, and the two trials are a few seconds of
+     * server CPU that the rest of the file has no use for.
+     */
+    beforeAll(async () => {
       migrator = new Pool({ connectionString: MIGRATOR_DATABASE_URL, max: 1 });
-    });
+      for (const game of ['dice_parity', 'dice_number']) {
+        await pool.query(
+          'SELECT * FROM public.casino_run_dice_distribution_trial($1::uuid, $2::text, $3::bigint)',
+          [randomUUID(), game, TRIAL_SIZE],
+        );
+      }
+    }, 300_000);
 
     afterAll(async () => {
       await migrator.end();

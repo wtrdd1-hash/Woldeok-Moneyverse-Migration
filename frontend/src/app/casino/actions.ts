@@ -14,6 +14,7 @@ import {
   resultOf,
   selfLimitAmount,
 } from './coin';
+import { faceRolled, isDieFace, isParityChoice, parityLabel } from './dice';
 
 /**
  * The coin game's two writes.
@@ -157,3 +158,83 @@ export async function setSelfLimit(
     );
   }
 }
+
+interface DiceReceipt {
+  readonly play_id: string;
+  readonly outcome_face: number;
+  readonly net_amount: string;
+  readonly replayed: boolean;
+}
+
+/**
+ * One roll of the die, for whichever of the two games asked for it.
+ *
+ * The game is a parameter of this function and never a form field. Two exports
+ * that each name their own game mean the game cannot be swapped by whatever
+ * posts to the action, and the choice is still checked here against the rule
+ * that game plays by -- `casino_dice_is_win` refuses the same pairs, and this
+ * is only the sentence the member reads instead of a 409.
+ */
+async function rollDie(
+  game: 'dice_parity' | 'dice_number',
+  formData: FormData,
+  choiceIsValid: (choice: string) => boolean,
+  choiceHelp: string,
+): Promise<ActionState> {
+  const choice = String(formData.get('choice') ?? '');
+  const stake = wholeAmount(formData.get('stake'));
+
+  if (!choiceIsValid(choice)) {
+    return { status: 'error', message: choiceHelp };
+  }
+  if (stake === null) {
+    return { status: 'error', message: '1 WLD 이상 정수만 걸 수 있어요.' };
+  }
+
+  try {
+    const receipt = await mutate<DiceReceipt>('/api/v1/casino/dice/plays', {
+      body: { game, choice, stake, idempotencyKey: idempotencyKey() },
+    });
+    revalidatePath('/casino');
+
+    // Every figure comes from the database's receipt. The stake that was sent
+    // is never reported back as the result: a replay answers with the stored
+    // roll, which may have been for a different amount than the form holds.
+    const face = faceRolled(receipt.outcome_face);
+    const amount = groupDigits(absAmount(receipt.net_amount));
+    const result = resultOf(receipt.net_amount);
+    const outcome =
+      result === 'win'
+        ? `주사위는 ${face}이 나왔어요. ${amount} WLD를 얻었어요.`
+        : result === 'loss'
+          ? `주사위는 ${face}이 나왔어요. ${amount} WLD를 잃었어요.`
+          : `주사위는 ${face}이 나왔어요.`;
+
+    return {
+      status: 'ok',
+      message: receipt.replayed ? `이미 처리된 판이에요. ${outcome}` : outcome,
+    };
+  } catch (error) {
+    return closedOr(
+      error,
+      '이번 판은 받아들여지지 않았어요. 잔액과 오늘 남은 한도, 내가 건 잠금을 다시 확인해 주세요.',
+    );
+  }
+}
+
+export async function playDiceParity(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  return rollDie('dice_parity', formData, isParityChoice, '홀과 짝 중 하나를 골라 주세요.');
+}
+
+export async function playDiceNumber(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  return rollDie('dice_number', formData, isDieFace, '1부터 6 사이의 숫자를 골라 주세요.');
+}
+
+/** Re-exported so nothing else has to import two modules for one label. */
+export { parityLabel };

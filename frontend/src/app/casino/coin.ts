@@ -53,16 +53,16 @@ export const CLOSURE_COPY: Readonly<
   Record<CasinoClosure, { readonly title: string; readonly description: string }>
 > = Object.freeze({
   disabled: {
-    title: '동전 게임은 지금 열려 있지 않아요.',
+    title: '카지노는 지금 열려 있지 않아요.',
     description:
       '확률 게임은 게임물 등급·사행성·청소년 보호 검토를 마친 뒤에만 열립니다. 열리는 시점은 공지로 알려 드릴게요.',
   },
   paused: {
-    title: '동전 게임을 잠시 멈춰 두었어요.',
+    title: '카지노를 잠시 멈춰 두었어요.',
     description: '운영자가 점검하는 동안에는 새 참여를 받지 않아요. 잠시 후 다시 확인해 주세요.',
   },
   safe_mode: {
-    title: '동전 게임이 안전 모드예요.',
+    title: '카지노가 안전 모드예요.',
     description:
       '경제 원장을 확인하는 동안에는 새 참여를 받지 않아요. 잠시 후 다시 확인해 주세요.',
   },
