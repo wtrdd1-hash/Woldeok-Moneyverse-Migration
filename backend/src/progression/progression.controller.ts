@@ -18,6 +18,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
+import { EarlyGameInputError, EarlyGameRepository } from '../early-game/early-game.repository';
 import { ProgressionInputError, ProgressionRepository } from './progression.repository';
 
 /**
@@ -44,11 +45,17 @@ import { ProgressionInputError, ProgressionRepository } from './progression.repo
 export class ProgressionController {
   constructor(
     @Inject(ProgressionRepository) private readonly progression: ProgressionRepository | null,
+    @Inject(EarlyGameRepository) private readonly earlyGame: EarlyGameRepository | null,
   ) {}
 
   private repository(): ProgressionRepository {
     if (!this.progression) throw new ServiceUnavailableException('progression is unavailable');
     return this.progression;
+  }
+
+  private earlyGameRepository(): EarlyGameRepository {
+    if (!this.earlyGame) throw new ServiceUnavailableException('progression is unavailable');
+    return this.earlyGame;
   }
 
   /**
@@ -63,6 +70,7 @@ export class ProgressionController {
       return await work();
     } catch (error: unknown) {
       if (error instanceof ProgressionInputError) throw new BadRequestException(error.message);
+      if (error instanceof EarlyGameInputError) throw new BadRequestException(error.message);
       if (isAuthorizationFailure(error)) throw new ForbiddenException('this account is not active');
       if (isExpectedCommandFailure(error)) throw new ConflictException(conflictMessage);
       throw error;
@@ -132,5 +140,30 @@ export class ProgressionController {
       'credit standing is unavailable',
     );
     return { grade: grade.grade, loans, ladder };
+  }
+
+  /**
+   * 16.1's 초반 해금 ladder, and the caller's standing against every rung.
+   *
+   * It is served here rather than from /engagement because it answers the same
+   * question the two reads above do -- what has this member reached, and what
+   * does the next thing need -- and because one of its rungs *is* the credit
+   * ladder: the C grade's thresholds come out of `bank_credit_policies`, the
+   * table `credit` already reports. Two screens quoting one policy from two
+   * endpoints is how they come to disagree.
+   *
+   * Wrapped in an object for the reason `status` is: a member who has done
+   * nothing still gets rows, but a bare array leaves a page unable to tell an
+   * empty ladder from a failed request.
+   */
+  @Get('early-game')
+  @ApiOperation({ summary: 'The early-game unlock ladder and what the caller has reached' })
+  async earlyGameUnlocks(@Req() request: RequestWithSession) {
+    return {
+      unlocks: await this.guarded(
+        () => this.earlyGameRepository().unlocks(requireUserId(request)),
+        'the unlock ladder is unavailable',
+      ),
+    };
   }
 }

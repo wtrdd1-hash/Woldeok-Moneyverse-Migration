@@ -21,6 +21,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
+import { EarlyGameInputError, EarlyGameRepository } from '../early-game/early-game.repository';
 import { EngagementNpcOrderDto, EngagementPreferencesDto } from './engagement.dto';
 import { EngagementInputError, EngagementRepository } from './engagement.repository';
 
@@ -54,11 +55,19 @@ import { EngagementInputError, EngagementRepository } from './engagement.reposit
 export class EngagementController {
   constructor(
     @Inject(EngagementRepository) private readonly engagement: EngagementRepository | null,
+    // `early`, not `earlyGame`: the route method below is `earlyGame`, and a
+    // constructor parameter property is a class member like any other.
+    @Inject(EarlyGameRepository) private readonly early: EarlyGameRepository | null,
   ) {}
 
   private repository(): EngagementRepository {
     if (!this.engagement) throw new ServiceUnavailableException('engagement is unavailable');
     return this.engagement;
+  }
+
+  private earlyGameRepository(): EarlyGameRepository {
+    if (!this.early) throw new ServiceUnavailableException('engagement is unavailable');
+    return this.early;
   }
 
   /**
@@ -79,6 +88,7 @@ export class EngagementController {
       return await work();
     } catch (error: unknown) {
       if (error instanceof EngagementInputError) throw new BadRequestException(error.message);
+      if (error instanceof EarlyGameInputError) throw new BadRequestException(error.message);
       if (isAuthorizationFailure(error)) throw new ForbiddenException('this is not yours');
       if (isExpectedCommandFailure(error)) throw new ConflictException(conflictMessage);
       throw error;
@@ -141,5 +151,35 @@ export class EngagementController {
       'the preference was not changed',
     );
     return { notifications_enabled: notificationsEnabled };
+  }
+
+  /**
+   * 16.1's weekly goals and its two collection books.
+   *
+   * They belong here, next to the quests screen that renders them, and they
+   * are two reads in one request because that screen shows them together.
+   *
+   * They are also the answer to the two things this controller's comment says
+   * it could not serve. The collection a member has unlocked was written by
+   * `engagement_record_progress` and readable by nothing; the weekly goals it
+   * does report have no target and no verified progress, because that function
+   * takes a member's word for the count. These goals take no report at all --
+   * 101 computes each one from work receipts, shop purchases and ledger
+   * postings -- which is why there is no write route beside this read and must
+   * not be one.
+   */
+  @Get('early-game')
+  @ApiOperation({ summary: 'The early-game weekly goals and collection books' })
+  async earlyGame(@Req() request: RequestWithSession) {
+    const actor = requireUserId(request);
+    const [goals, collections] = await this.guarded(
+      () =>
+        Promise.all([
+          this.earlyGameRepository().weeklyGoals(actor),
+          this.earlyGameRepository().collections(actor),
+        ]),
+      'the early game summary is unavailable',
+    );
+    return { goals, collections };
   }
 }
