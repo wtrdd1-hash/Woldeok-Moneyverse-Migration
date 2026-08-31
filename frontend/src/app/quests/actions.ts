@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
+import { claimMessage } from './early-events';
+import type { EventReceipt } from './early-events';
 import { npcOrderMessage, preferenceMessage } from './quests';
 import type { NpcOrderReceipt } from './quests';
 
@@ -80,5 +82,53 @@ export async function setNotifications(
     return { status: 'ok', message: preferenceMessage(saved.notifications_enabled) };
   } catch (error) {
     return failure(error, '알림 설정을 바꾸지 못했어요. 잠시 후 다시 시도해 주세요.');
+  }
+}
+
+/**
+ * The shape of a Seoul day, as the read model hands it over.
+ *
+ * Checked here because a value that does not match cannot have come from the
+ * card -- it is a broken form rather than a mistyped field. It is not a second
+ * opinion about which day it is: that answer belongs to the database, which
+ * refuses any day but today in Seoul.
+ */
+const DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+/**
+ * Taking the day's random event.
+ *
+ * The form sends the day it was showing and nothing else. There is no event
+ * field, and there must not be one: `early_event_claim` (103) draws the event
+ * from a hash of the member and the Seoul date and pays what that draw
+ * returns, so refreshing until a better one appears is not a thing this
+ * screen -- or a hand-written request -- can do. The day is sent so that a
+ * page left open across midnight is refused instead of quietly claiming a day
+ * the member never saw.
+ */
+export async function claimTodayEvent(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const eventDate = String(formData.get('eventDate') ?? '');
+  if (!DAY.test(eventDate)) {
+    return { status: 'error', message: '오늘의 사건을 확인할 수 없어요. 새로고침해 주세요.' };
+  }
+
+  try {
+    const receipt = await mutate<EventReceipt>('/api/v1/early-game/claims', {
+      body: { idempotencyKey: idempotencyKey(), eventDate },
+    });
+    revalidatePath('/quests');
+    revalidatePath('/wallet');
+    return { status: 'ok', message: claimMessage(receipt) };
+  } catch (error) {
+    // 103 answers a second claim with 23505 and a not-yet-claimable event with
+    // 22023, and both arrive as a conflict. Already taken is much the likelier
+    // of the two, so it is the sentence a conflict gets.
+    return failure(
+      error,
+      '오늘 사건은 이미 받았거나, 아직 받을 수 없어요. 화면을 새로고침해 확인해 주세요.',
+    );
   }
 }

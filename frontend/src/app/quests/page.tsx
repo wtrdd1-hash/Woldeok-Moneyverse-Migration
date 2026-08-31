@@ -5,6 +5,9 @@ import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
+import type { FirstDayStep, TodayEvent } from './early-events';
+import { firstDaySummary } from './early-events';
+import { FirstDayFlow, TodayEventCard } from './early-events-parts';
 import type { EarlyGameBoard } from './early-game';
 import { CollectionCard, WeeklyGoalCard } from './early-game-parts';
 import { NotificationForm, NpcOrderButton } from './quest-forms';
@@ -37,9 +40,11 @@ export default async function QuestsPage() {
   // early-game read is separate because it is a different kind of answer --
   // 101 computes every figure in it from work receipts, shop purchases and
   // ledger postings rather than from anything a member reported.
-  const [board, earlyGame] = await Promise.all([
+  const [board, earlyGame, today, firstDay] = await Promise.all([
     apiOrNull<EngagementBoard>('/api/v1/engagement'),
     apiOrNull<EarlyGameBoard>('/api/v1/engagement/early-game'),
+    apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
+    apiOrNull<{ steps: readonly FirstDayStep[] }>('/api/v1/early-game/first-day'),
   ]);
 
   return (
@@ -48,6 +53,65 @@ export default async function QuestsPage() {
         퀘스트와 NPC 주문은 모두 게임 안의 활동 기록입니다. 달성하더라도 실제 현금이나 실물
         경품은 지급되지 않습니다.
       </PageHeader>
+
+      {/* The day's event comes first because it expires: the ladder, the
+          books and the weekly goals are all still there tomorrow, and this is
+          the one thing on the screen that is not. */}
+      <section aria-labelledby="event-title" className="grid gap-3">
+        <h2 id="event-title" className="text-lg">
+          오늘의 사건
+        </h2>
+        {/* Said plainly, because a member who does not know this will try it:
+            the event is a function of the member and today's Seoul date, so
+            there is nothing to reroll. */}
+        <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
+          하루에 한 번, 사람마다 다른 사건이 하나씩 열려요. 새로고침하거나 다시 들어와도 오늘
+          사건은 바뀌지 않고, 한 번만 받을 수 있어요. 다음 사건은 한국 시간 자정에 열립니다.
+        </p>
+
+        {today === null ? (
+          <EmptyState
+            title="오늘의 사건을 불러오지 못했어요."
+            description="사건을 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
+          />
+        ) : today.event === null ? (
+          // A different fact from the one above: the request worked and there
+          // is no event open at all.
+          <EmptyState
+            title="지금은 열린 사건이 없어요."
+            description="사건이 다시 열리면 이 자리에 표시돼요."
+          />
+        ) : (
+          <TodayEventCard event={today.event} />
+        )}
+      </section>
+
+      <section aria-labelledby="firstday-title" className="grid gap-3">
+        <h2 id="firstday-title" className="text-lg">
+          첫날 흐름
+        </h2>
+        <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
+          처음 들어온 날 해 보면 좋은 순서예요. 프로필·작업·상점 단계는 실제 기록에서 자동으로
+          확인되고, 읽어 보는 단계 두 개는 기록하지 않으니 직접 확인해 주세요.
+          {firstDay !== null && firstDay.steps.length > 0
+            ? ` ${firstDaySummary(firstDay.steps)}.`
+            : ''}
+        </p>
+
+        {firstDay === null ? (
+          <EmptyState
+            title="첫날 흐름을 불러오지 못했어요."
+            description="진행 상황을 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
+          />
+        ) : firstDay.steps.length === 0 ? (
+          <EmptyState
+            title="안내할 단계가 없어요."
+            description="단계가 열리면 이 자리에 표시돼요."
+          />
+        ) : (
+          <FirstDayFlow steps={firstDay.steps} />
+        )}
+      </section>
 
       <section aria-labelledby="today-title" className="grid gap-3">
         <h2 id="today-title" className="text-lg">

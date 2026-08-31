@@ -3,8 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
 import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
-import { PURCHASE_CEILING, purchaseMessage, useMessage } from './catalog';
-import type { PurchaseReceipt, UseReceipt } from './catalog';
+import { PURCHASE_CEILING, purchaseMessage, settlementMessage, useMessage } from './catalog';
+import type { PurchaseReceipt, SettlementReceipt, UseReceipt } from './catalog';
 
 /**
  * The catalogue's two writes.
@@ -105,5 +105,36 @@ export async function consumeHeldItem(
       error,
       '지금은 이 아이템을 사용할 수 없어요. 남은 수량이 없거나 사용할 수 없는 아이템일 수 있어요.',
     );
+  }
+}
+
+/**
+ * Pays the outstanding weekly upkeep on one holding.
+ *
+ * No amount is sent, for the same reason no price is: `shop_settle_upkeep`
+ * reads the capped `amount_due` inside the transaction that charges it, and
+ * this card may have been rendered before the Monday run that changed the
+ * figure. The card shows the amount; the database decides it.
+ */
+export async function settleItemUpkeep(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const catalogId = String(formData.get('catalogId') ?? '');
+  if (!UUID.test(catalogId)) {
+    return { status: 'error', message: '관리비를 낼 아이템을 확인할 수 없어요.' };
+  }
+
+  try {
+    const receipt = await mutate<SettlementReceipt>(
+      `/api/v1/shop/holdings/${encodeURIComponent(catalogId)}/upkeep-settlements`,
+      { body: { idempotencyKey: idempotencyKey() } },
+    );
+    revalidatePath('/shop/catalog');
+    return { status: 'ok', message: settlementMessage(receipt) };
+  } catch (error) {
+    // Nothing outstanding and too little cash both arrive as one 409. The
+    // second is the one a member can act on, so it is the one named.
+    return failure(error, '지금은 관리비를 낼 수 없어요. 잔액이 모자랄 수 있어요.');
   }
 }

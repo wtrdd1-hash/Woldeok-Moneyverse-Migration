@@ -4,7 +4,8 @@ import { useActionState } from 'react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { IDLE } from '@/lib/action-state';
-import { buyCatalogItem, consumeHeldItem } from './actions';
+import { groupDigits } from '@/lib/money';
+import { buyCatalogItem, consumeHeldItem, settleItemUpkeep } from './actions';
 
 /**
  * The catalogue's write surface.
@@ -73,6 +74,35 @@ export function UseItemButton({ catalogId }: { readonly catalogId: string }) {
       <form action={action}>
         <input type="hidden" name="catalogId" value={catalogId} />
         <SubmitButton variant="outline">1개 사용하기</SubmitButton>
+      </form>
+      <ActionAlert state={state} />
+    </div>
+  );
+}
+
+/**
+ * Pay off what a holding owes, so a suspended one works again.
+ *
+ * The amount is on the button and not in the request. `shop_settle_upkeep`
+ * reads the capped figure inside the transaction that posts it, so the label
+ * is a quotation of what the last read said and the charge is whatever the
+ * database finds when it is asked -- which is the only ordering that cannot
+ * charge a member for a week they have since paid.
+ */
+export function SettleUpkeepButton({
+  catalogId,
+  amount,
+}: {
+  readonly catalogId: string;
+  readonly amount: string;
+}) {
+  const [state, action] = useActionState(settleItemUpkeep, IDLE);
+
+  return (
+    <div className="grid w-full gap-2">
+      <form action={action}>
+        <input type="hidden" name="catalogId" value={catalogId} />
+        <SubmitButton>밀린 관리비 {groupDigits(amount)} WLD 내기</SubmitButton>
       </form>
       <ActionAlert state={state} />
     </div>

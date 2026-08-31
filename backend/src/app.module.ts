@@ -8,6 +8,7 @@ import { AccountModule } from './account/account.module';
 import { AdminModule } from './admin/admin.module';
 import { AdminEconomyModule } from './admin/economy.module';
 import { CasinoModule } from './casino/casino.module';
+import { EarlyGameModule } from './early-game/early-game.module';
 import { EngagementModule } from './engagement/engagement.module';
 import { ProfileModule } from './profile/profile.module';
 import { ProgressionModule } from './progression/progression.module';
@@ -52,6 +53,7 @@ const ONE_MINUTE_MS = 60_000;
     ProgressionModule,
     ProfileModule,
     EngagementModule,
+    EarlyGameModule,
     AccountModule,
     ContentModule,
     StatusCollectorModule,

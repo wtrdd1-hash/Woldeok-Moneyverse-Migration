@@ -22,7 +22,12 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
-import { CatalogPurchaseDto, ItemConsumptionDto, PurchaseDto } from './shop.dto';
+import {
+  CatalogPurchaseDto,
+  ItemConsumptionDto,
+  PurchaseDto,
+  UpkeepSettlementDto,
+} from './shop.dto';
 import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
 
@@ -182,6 +187,32 @@ export class ShopController {
     return this.guarded(
       () => this.repository().use(body.idempotencyKey, requireUserId(request), catalogId),
       'this item cannot be used now',
+    );
+  }
+
+  /**
+   * The way out of a suspension.
+   *
+   * 104 charges the weekly upkeep on a Monday and suspends a holding whose
+   * arrears reach the four-week ceiling of specification 16.4. Without this
+   * the only way back would be to wait for the next Monday, which turns a
+   * capped debt into a week of a bought item not working -- and 16.4 is the
+   * returning-member section, where restarting promptly is the whole point.
+   *
+   * Nothing outstanding and too little cash are both 409: they are one fact
+   * to a member, and the catalogue is where the reason belongs.
+   */
+  @Post('holdings/:id/upkeep-settlements')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+  @ApiOperation({ summary: 'Pay the outstanding weekly upkeep on one held item' })
+  async settleUpkeep(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) catalogId: string,
+    @Body() body: UpkeepSettlementDto,
+  ) {
+    return this.guarded(
+      () => this.repository().settleUpkeep(body.idempotencyKey, requireUserId(request), catalogId),
+      'this upkeep cannot be settled now',
     );
   }
 }

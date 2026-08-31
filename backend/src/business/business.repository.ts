@@ -35,6 +35,18 @@ export interface BusinessOwnershipRow extends BusinessCatalogRow {
   readonly last_settlement_date: Date | null;
 }
 
+// business_equity_standing() (105) always returns exactly one row -- zeros for
+// a member with no accounts -- so `equity()` below treats a missing row as an
+// assertion violation rather than a normal branch. The three amounts are bigint
+// columns cast to text; `minimum_ratio_bps` is an int4 ratio and stays a
+// number, the one number in this file that is not money.
+export interface BusinessEquityRow {
+  readonly holdings_amount: string;
+  readonly debt_amount: string;
+  readonly equity_amount: string;
+  readonly minimum_ratio_bps: number;
+}
+
 // business_purchase()/business_settle_daily() always return exactly one row
 // (idempotent replay included); the methods below throw if the driver ever
 // returns none, so callers can treat a missing row as an assertion
@@ -92,6 +104,19 @@ export class PostgresBusinessRepository implements BusinessRepository {
     return queryRows<BusinessOwnershipRow>(
       this.pool,
       'SELECT ownership_id::text,business_type_id::text,symbol,name,description,purchase_cost::text,daily_revenue::text,daily_operating_cost::text,purchased_at,last_settlement_date FROM public.business_my_ownerships($1)',
+      [actor],
+    );
+  }
+
+  // A function and not a SELECT over `account_balances` and
+  // `virtual_bank_loans`: the first is readable by this role and the second is
+  // not, and a read assembled here would be the 30% rule computed in two
+  // places -- the copy in TypeScript being the one nothing refuses to be wrong.
+  async equity(userId: string): Promise<BusinessEquityRow | null> {
+    const actor = uuid(userId, 'user id');
+    return queryOne<BusinessEquityRow>(
+      this.pool,
+      'SELECT holdings_amount::text,debt_amount::text,equity_amount::text,minimum_ratio_bps FROM public.business_equity_standing($1)',
       [actor],
     );
   }

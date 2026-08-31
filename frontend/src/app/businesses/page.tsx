@@ -10,6 +10,8 @@ import { businessGate, businessGateNote } from '@/app/progression/unlocks';
 import { formatDay } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { PurchaseButton, SettleButton } from './business-forms';
+import type { EquityStanding } from './equity';
+import { equityGateNote, equitySummary, meetsEquityRequirement } from './equity';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,20 +45,24 @@ interface Ownership {
 export default async function BusinessesPage() {
   await requireMember();
 
-  // The ladder comes along because 101 gates three of these businesses on a
-  // job level, and a button that submits into a refusal is the defect this
-  // screen would otherwise ship: the member presses 구입, waits, and is told
-  // "지금은 사업을 구입할 수 없어요" without ever learning it was the level.
-  // `apiOrNull`, so a ladder that fails to load costs an explanation and not
-  // the page -- the database refuses the purchase either way.
-  const [catalog, mine, ladder] = await Promise.all([
+  // The ladder and the equity standing come along because 101 gates three of
+  // these businesses on a job level and 105 gates every one of them on own
+  // capital, and a button that submits into a refusal is the defect this screen
+  // would otherwise ship: the member presses 구입, waits, and is told
+  // "지금은 사업을 구입할 수 없어요" without ever learning it was the level, or
+  // that the money in their wallet is the bank's. `apiOrNull` for both, so a
+  // read that fails costs an explanation and not the page -- the database
+  // refuses the purchase either way.
+  const [catalog, mine, ladder, capital] = await Promise.all([
     apiOrNull<{ businessTypes: BusinessType[] }>('/api/v1/business-types'),
     apiOrNull<{ businesses: Ownership[] }>('/api/v1/businesses'),
     apiOrNull<{ unlocks: EarlyUnlock[] }>('/api/v1/progression/early-game'),
+    apiOrNull<{ equity: EquityStanding }>('/api/v1/business-equity'),
   ]);
 
   const owned = new Set((mine?.businesses ?? []).map((business) => business.businessTypeId));
   const unlocks = ladder?.unlocks ?? [];
+  const standing = capital?.equity ?? null;
 
   return (
     <div className="grid gap-6">
@@ -66,9 +72,14 @@ export default async function BusinessesPage() {
       </PageHeader>
 
       <section aria-labelledby="catalog-title" className="grid gap-3">
-        <h2 id="catalog-title" className="text-lg">
-          구입 가능한 사업
-        </h2>
+        <div>
+          <h2 id="catalog-title" className="text-lg">
+            구입 가능한 사업
+          </h2>
+          {standing ? (
+            <p className="text-sm text-muted-foreground">{equitySummary(standing)}</p>
+          ) : null}
+        </div>
         {catalog === null ? (
           <EmptyState title="사업 정보를 불러오지 못했어요." />
         ) : catalog.businessTypes.length === 0 ? (
@@ -95,7 +106,7 @@ export default async function BusinessesPage() {
                   ) : (
                     <PurchaseButton
                       businessTypeId={type.id}
-                      lockedReason={locked(unlocks, type.symbol)}
+                      lockedReason={locked(unlocks, standing, type)}
                     />
                   )}
                 </CardFooter>
@@ -162,8 +173,27 @@ function Line({ term, value }: { readonly term: string; readonly value: string }
   );
 }
 
-/** The sentence to show instead of an enabled purchase, or null to enable it. */
-function locked(unlocks: readonly EarlyUnlock[], symbol: string): string | null {
-  const gate = businessGate(unlocks, symbol);
-  return gate ? businessGateNote(gate) : null;
+/**
+ * The sentence to show instead of an enabled purchase, or null to enable it.
+ *
+ * The level comes first when both hold. Both refusals are true, and the
+ * database happens to raise the equity one first -- BEFORE ROW triggers fire in
+ * name order (105) -- but a level is the half a member cannot fix with today's
+ * balance, so it is the half worth printing.
+ *
+ * A standing that failed to load disables nothing, exactly as a ladder that
+ * failed to load does: the database refuses either way, and a button disabled
+ * by a missing read is a lock nobody can explain.
+ */
+function locked(
+  unlocks: readonly EarlyUnlock[],
+  standing: EquityStanding | null,
+  type: BusinessType,
+): string | null {
+  const gate = businessGate(unlocks, type.symbol);
+  if (gate) return businessGateNote(gate);
+  if (standing && !meetsEquityRequirement(type.purchaseCost, standing)) {
+    return equityGateNote(type.purchaseCost, standing);
+  }
+  return null;
 }

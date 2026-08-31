@@ -45,6 +45,18 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     summary: '구입 가능한 사업과 시즌 소비 이벤트를 켜고 끕니다.',
   },
   {
+    href: '/admin/work',
+    eyebrow: 'WORK AND JOBS',
+    title: '작업 · 직업',
+    summary: '작업 카탈로그와 보상 한도, 직업별 숙련도.',
+  },
+  {
+    href: '/admin/bank',
+    eyebrow: 'BANK AND CREDIT',
+    title: '은행 · 대출',
+    summary: '예금과 남은 대출, 신용 등급별 한도와 연체.',
+  },
+  {
     href: '/admin/economy',
     eyebrow: 'ECONOMY OPERATIONS',
     title: '경제 운영',
@@ -61,6 +73,12 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     eyebrow: 'CHAIN INTEGRITY',
     title: '무결성 검증 · 보존 정책',
     summary: '사슬을 다시 계산하고, 보존 기간과 파기 기록을 남깁니다.',
+  },
+  {
+    href: '/admin/discord',
+    eyebrow: 'DISCORD DELIVERY',
+    title: 'Discord 전달 경로',
+    summary: '어떤 사건이 어느 채널로 나가는지, 무엇이 밀려 있는지.',
   },
   {
     href: '/admin/content',

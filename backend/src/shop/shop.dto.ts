@@ -40,3 +40,19 @@ export class ItemConsumptionDto {
   @IsUUID()
   readonly idempotencyKey!: string;
 }
+
+/**
+ * A key and nothing else, like the two above it.
+ *
+ * The amount is deliberately absent rather than optional: `shop_settle_upkeep`
+ * reads the capped `amount_due` inside the transaction that charges it, so a
+ * figure sent from a card rendered before the weekly run could only be wrong.
+ * Its own class rather than a reuse of `ItemConsumptionDto` because the two
+ * appear as different bodies in the generated API document, and a shared name
+ * would tell a reader the two routes take the same thing for the same reason.
+ */
+export class UpkeepSettlementDto {
+  @ApiProperty({ format: 'uuid', description: 'Client-generated idempotency key' })
+  @IsUUID()
+  readonly idempotencyKey!: string;
+}

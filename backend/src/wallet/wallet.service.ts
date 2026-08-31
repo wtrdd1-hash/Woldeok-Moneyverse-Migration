@@ -50,6 +50,11 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   SHOP_PURCHASE: '상점 구매',
   SHOP_CATALOG_PURCHASE: '상점 구매',
   VIRTUAL_COIN_GAME: '동전 게임',
+  // 100's two dice games share one type: the ledger records that WLD moved for
+  // a roll of the die, not which rule decided it.
+  VIRTUAL_DICE_GAME: '주사위 게임',
+  EARLY_EVENT_REWARD: '초반 사건 보상',
+  SHOP_MAINTENANCE: '주간 유지비',
   // 024 composes the type as 'VIRTUAL_STOCK_' || upper(side).
   VIRTUAL_STOCK_BUY: '주식 매수',
   VIRTUAL_STOCK_SELL: '주식 매도',
@@ -219,7 +224,14 @@ function loanStatus(value: string): WalletLoanStatus {
   throw new Error('database returned invalid loan status');
 }
 
-function transactionLabel(type: string): string {
+/**
+ * Exported for `ledger-labels.test.ts`, which reads the migrations for the
+ * transaction types they post and fails when one of them has no label here.
+ * Three arrived unlabelled before that test existed -- a member's ledger read
+ * '경제 활동' for a dice stake, an early-event reward and a weekly upkeep --
+ * and nothing anywhere said so.
+ */
+export function transactionLabel(type: string): string {
   return TRANSACTION_LABELS[type] ?? '경제 활동';
 }
 

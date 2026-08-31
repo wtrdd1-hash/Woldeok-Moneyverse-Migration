@@ -266,3 +266,155 @@ export interface ReconciliationHealth {
     readonly netFlowAmount: string;
   };
 }
+
+/**
+ * packages/database/migrations/106-admin-operations-read-models.sql.
+ *
+ * `base_reward` is the catalogue price; `paid_24h` is what the caps and the
+ * repeat decay actually let through (068). They are supposed to differ.
+ */
+export interface AdminWorkTask {
+  readonly task_id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly job_type: string;
+  readonly difficulty: number;
+  readonly base_reward: string;
+  readonly base_experience: string;
+  readonly minimum_duration_seconds: number;
+  readonly daily_limit: number;
+  readonly active: boolean;
+  readonly open_assignment_count: string;
+  readonly awaiting_verification_count: string;
+  readonly approved_24h: string;
+  readonly rejected_24h: string;
+  readonly paid_24h: string;
+  readonly last_assigned_at: string | null;
+}
+
+/** packages/database/migrations/106-admin-operations-read-models.sql */
+export interface AdminJobLevel {
+  readonly job_type: string;
+  readonly member_count: string;
+  readonly average_level: string;
+  readonly top_level: number;
+  readonly total_experience: string;
+  readonly active_7d_count: string;
+}
+
+/**
+ * packages/database/migrations/106-admin-operations-read-models.sql.
+ *
+ * The seven policy fields are null together when no version is in force. That
+ * is a state an operator has to be able to read, not an error -- the counts
+ * beside them are still real.
+ */
+export interface AdminWorkPolicy {
+  readonly policy_id: number | null;
+  readonly effective_at: string | null;
+  readonly daily_cap: string | null;
+  readonly weekly_cap: string | null;
+  readonly repeat_decay_percent: number | null;
+  readonly enabled: boolean | null;
+  readonly reason: string | null;
+  readonly active_task_count: string;
+  readonly open_assignment_count: string;
+  readonly awaiting_verification_count: string;
+  readonly paid_24h: string;
+  readonly members_paid_24h: string;
+  readonly experience_24h: string;
+}
+
+/** packages/database/migrations/106-admin-operations-read-models.sql */
+export interface AdminBankOverview {
+  readonly deposit_amount: string;
+  readonly depositor_count: string;
+  readonly open_loan_count: string;
+  readonly outstanding_amount: string;
+  readonly overdue_loan_count: string;
+  readonly overdue_amount: string;
+  readonly maturing_7d_count: string;
+  readonly issued_24h_count: string;
+  readonly issued_24h_amount: string;
+  readonly repaid_24h_amount: string;
+  readonly borrower_count: string;
+}
+
+/** packages/database/migrations/106-admin-operations-read-models.sql */
+export interface AdminCreditGrade {
+  readonly grade: string;
+  readonly minimum_account_days: number;
+  readonly minimum_work_completions: number;
+  readonly credit_limit: string;
+  readonly interest_bps: number;
+  readonly term_days: number;
+  readonly minimum_repayment: string;
+  readonly active: boolean;
+  readonly open_loan_count: string;
+  readonly outstanding_amount: string;
+  readonly overdue_loan_count: string;
+  readonly issued_loan_count: string;
+  readonly issued_principal: string;
+}
+
+/**
+ * packages/database/migrations/106-admin-operations-read-models.sql.
+ *
+ * `display_name` is the OAuth name, not the one the member chose: 097 keeps
+ * the console on the account behind the alias.
+ */
+export interface AdminLoan {
+  readonly loan_id: string;
+  readonly user_id: string;
+  readonly display_name: string;
+  readonly credit_grade: string;
+  readonly status: string;
+  readonly principal_amount: string;
+  readonly interest_amount: string;
+  readonly outstanding_amount: string;
+  readonly repaid_amount: string;
+  readonly minimum_repayment: string;
+  readonly issued_at: string;
+  readonly maturity_at: string | null;
+  readonly overdue_at: string | null;
+  readonly status_reason: string | null;
+}
+
+/** packages/database/migrations/106-admin-operations-read-models.sql */
+export interface AdminOutboxHealth {
+  readonly pending_count: string;
+  readonly retry_pending_count: string;
+  readonly delivering_count: string;
+  readonly delivered_count: string;
+  readonly dead_letter_count: string;
+  readonly suppressed_count: string;
+  readonly delivered_24h_count: string;
+  /** 087's predicate exactly, so the overview and this screen cannot disagree. */
+  readonly stuck_count: string;
+  readonly oldest_undelivered_at: string | null;
+  readonly last_delivered_at: string | null;
+  readonly last_failure_at: string | null;
+  readonly unrouted_type_count: string;
+}
+
+/**
+ * packages/database/migrations/106-admin-operations-read-models.sql.
+ *
+ * `routed` false means no row in `discord_outbox_routes`, so
+ * `outbox_claim_pending` (061) will never claim this type and its events
+ * accumulate silently. The four route fields are null there because there is
+ * no route to describe.
+ */
+export interface AdminDiscordRoute {
+  readonly event_type: string;
+  readonly channel_key: string | null;
+  readonly enabled: boolean | null;
+  readonly note: string | null;
+  readonly routed: boolean;
+  readonly total_count: string;
+  readonly pending_count: string;
+  readonly dead_letter_count: string;
+  readonly suppressed_count: string;
+  readonly delivered_24h_count: string;
+  readonly last_delivered_at: string | null;
+}
