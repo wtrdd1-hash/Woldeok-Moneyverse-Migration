@@ -88,9 +88,34 @@ PATH=/usr/local/bin:/usr/bin:/bin
 **루트가 아니라 배포 사용자의 crontab에 넣는다.** 그 사용자가 배포 디렉터리와
 docker를 갖고 있고, 루트로 쓴 백업 파일은 그 사용자가 읽지 못한다.
 
-두 배포는 `BACKUP_DIR`이 다르고(`~/moneyverse-backups/<stack>`), 파일 이름에
-스택과 데이터베이스 이름이 들어간다. 한 디렉터리를 같이 쓰더라도 보존 정리는
-자기 스택의 백업만 센다.
+두 배포는 `BACKUP_DIR`이 다르고(`/data/wtrdd/moneyverse/backups/<stack>`), 파일
+이름에 스택과 데이터베이스 이름이 들어간다. 한 디렉터리를 같이 쓰더라도 보존
+정리는 자기 스택의 백업만 센다.
+
+### 백업은 데이터베이스와 같은 디스크에 있으면 안 된다
+
+`bootstrap-env.sh`는 원래 `BACKUP_DIR`을 `$HOME/moneyverse-backups/<stack>`으로
+잡았다. 도커 볼륨은 피했지만 디스크는 피하지 못했다 — `$HOME`도
+`/var/lib/docker`도 `nvme0n1`에 있어서, 암호문이 자기가 복사한 postgres 데이터
+디렉터리와 같은 물리 디스크에 놓였다. 디스크 하나가 죽으면 둘 다 사라진다.
+
+기본값은 이제 두 번째 SSD(`/data`, `nvme1n1`)다. 사진 저장소가 이미 거기 있다.
+
+**이미 배포된 호스트는 재배포해도 옮겨가지 않는다.** `put`이라서 `.env`에 값이
+있으면 그대로 둔다. 옮기는 것은 이미 존재하는 데이터를 건드리는 일이라 손으로
+한다:
+
+```bash
+stack=wdmv   # 운영은 wdmvp
+install -d -m 700 "/data/wtrdd/moneyverse/backups/$stack"
+mv "$HOME/moneyverse-backups/$stack"/* "/data/wtrdd/moneyverse/backups/$stack"/
+sed -i "s#^BACKUP_DIR=.*#BACKUP_DIR=/data/wtrdd/moneyverse/backups/$stack#" \
+  "$HOME/moneyverse-migration/.env"   # 운영은 moneyverse-production
+```
+
+crontab의 로그 경로(`>> .../backup.log`)도 같이 고친다. 옮긴 뒤에는 복원
+리허설을 한 번 돌려서 새 경로에서 실제로 읽히는지 확인한다 — 옮긴 백업이
+읽히지 않는다면 옮기기 전에도 백업이 아니었던 것이다.
 
 ---
 
