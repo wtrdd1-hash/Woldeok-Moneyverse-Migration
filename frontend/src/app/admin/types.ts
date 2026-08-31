@@ -71,6 +71,16 @@ export interface AdminConsole {
     readonly expiresAt: string | null;
     readonly idleExpiresAt: string | null;
   };
+  /**
+   * When this session last proved who it belongs to, and until when that
+   * counts. Five minutes, which is what the three console SQL functions
+   * enforce -- not the fifteen `ReauthGuard` allows.
+   */
+  readonly reauthentication: {
+    readonly at: string | null;
+    readonly freshUntil: string | null;
+    readonly fresh: boolean;
+  };
   readonly loginPolicy: readonly {
     readonly kind: string;
     readonly value: string;

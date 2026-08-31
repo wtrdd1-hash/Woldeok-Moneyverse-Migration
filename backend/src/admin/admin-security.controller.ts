@@ -198,6 +198,17 @@ export class AdminSecurityController {
       secondFactor,
       consoleSession,
       loginPolicy: policy,
+      // When this session last proved who it belongs to, and until when that
+      // still counts. The screen had no way to know either, so it told
+      // somebody who had just confirmed their identity to go and confirm it
+      // -- and kept telling them until they reloaded the page.
+      //
+      // Five minutes, not the fifteen `ReauthGuard` allows. Three SQL
+      // functions gate on `auth_session_has_recent_reauthentication` at 300
+      // seconds -- opening the console and both halves of enrolment -- so the
+      // database is always the binding constraint here, and a screen quoting
+      // the guard's window would promise five minutes it does not have.
+      reauthentication: reauthenticationWindow(session.reauthenticated_at ?? null),
     };
   }
 
@@ -345,4 +356,24 @@ export class AdminSecurityController {
       'no session was ended',
     );
   }
+}
+
+/** The window the three console SQL functions enforce (058), in milliseconds. */
+const REAUTHENTICATION_WINDOW_MS = 300_000;
+
+/**
+ * What the screen needs in order to stop asking for something already done.
+ *
+ * `freshUntil` is reported rather than a bare boolean so the page can say how
+ * long is left, and so a page rendered a second before expiry does not claim
+ * a window that has closed by the time it is read.
+ */
+function reauthenticationWindow(at: Date | null): {
+  at: string | null;
+  freshUntil: string | null;
+  fresh: boolean;
+} {
+  if (!at) return { at: null, freshUntil: null, fresh: false };
+  const until = new Date(at.getTime() + REAUTHENTICATION_WINDOW_MS);
+  return { at: at.toISOString(), freshUntil: until.toISOString(), fresh: until > new Date() };
 }

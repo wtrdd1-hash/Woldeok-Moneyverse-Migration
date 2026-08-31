@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
+import { RefreshOnReturn } from '@/components/refresh-on-return';
 import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -72,6 +73,11 @@ export default async function AccountPage({
 
   return (
     <div className="grid gap-8">
+      {/* Coming back from a provider changed what every other screen would
+          say, and those screens are already in the client router cache. This
+          drops it, so `/admin` stops telling somebody who has just confirmed
+          their identity to go and confirm their identity. */}
+      <RefreshOnReturn when={reauth === 'done' || linked !== undefined} />
       <PageHeader
         eyebrow="ACCOUNT & ACCESS"
         title={
