@@ -14,16 +14,17 @@ import {
 import { api, apiOrNull } from '@/lib/api';
 import { compareAmounts, formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
-import { CoinPlayForm, SelfLimitForm } from './casino-forms';
+import { CoinPlayForm, DiceNumberForm, DiceParityForm, SelfLimitForm } from './casino-forms';
 import { ClosedNotice, PlayOutcome } from './casino-parts';
 import { closureOf, multiplierFromPpm, percentFromPpm, trimZeros } from './coin';
 import type { CasinoClosure } from './coin';
+import { CASINO_TRANSACTION_TYPES, gameLabel, ledgerLabel } from './dice';
 
 /** One member's stakes and headroom. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '동전 게임',
+  title: '게임',
   robots: { index: false, follow: false },
 };
 
@@ -44,6 +45,18 @@ interface CoinTerms {
   readonly worst_case_loss: string;
   /** What a winning maximum-stake play pays, net of the stake, after rounding (099). */
   readonly net_win_at_max: string;
+}
+
+/**
+ * `public.casino_game_terms`, one row per game (100).
+ *
+ * The same shape as `CoinTerms` with the game's own code beside it, because
+ * from 100 the daily allowances are one member's day rather than one game's:
+ * `remaining_stake` is the same number on all three rows and spending it on
+ * the coin leaves the dice with less.
+ */
+interface GameTerms extends CoinTerms {
+  readonly game: string;
 }
 
 /**
@@ -74,13 +87,6 @@ interface LedgerEntry {
 interface WalletOverview {
   readonly recentTransactions: readonly LedgerEntry[];
 }
-
-/**
- * The ledger transaction type `casino_play_coin` posts under. Nothing else
- * writes it, so filtering the member's own ledger on it yields their plays
- * and only their plays.
- */
-const COIN_GAME_TRANSACTION = 'VIRTUAL_COIN_GAME';
 
 /** The API's ceiling for that list, so this asks for everything it will give. */
 const RECENT_LEDGER = 50;
@@ -114,14 +120,23 @@ export default async function CasinoPage() {
   // One round, not one per panel. The odds, the member's headroom and the
   // ledger are three independent reads and nothing here depends on another's
   // answer, so they leave together.
-  const [terms, fairness, wallet] = await Promise.all([
+  const [terms, fairness, games, wallet] = await Promise.all([
     loadCasino<CoinTerms>('/api/v1/casino/coin/terms'),
     loadCasino<CoinFairness>('/api/v1/casino/coin/fairness'),
+    // The dice games' odds and today's headroom, in one read of one day. Three
+    // separate per-game calls could disagree with each other by the time they
+    // were rendered side by side, and the allowance they report is shared.
+    loadCasino<GameTerms[]>('/api/v1/casino/games/terms'),
     apiOrNull<WalletOverview>(`/api/v1/wallet?recent=${RECENT_LEDGER}`),
   ]);
 
-  const plays = (wallet?.recentTransactions ?? []).filter(
-    (entry) => entry.type === COIN_GAME_TRANSACTION,
+  const dice = games.state === 'ok' ? games.data.filter((row) => row.game !== 'coin') : [];
+
+  // Every game, not just the coin. The dice write `VIRTUAL_DICE_GAME` and
+  // filtering on the coin's type alone would have shown a member an empty
+  // history right after they had played -- which reads as a lost stake.
+  const plays = (wallet?.recentTransactions ?? []).filter((entry) =>
+    CASINO_TRANSACTION_TYPES.includes(entry.type),
   );
 
   // The switch is read twice on the way here — once by the route's gate, once
@@ -233,6 +248,53 @@ export default async function CasinoPage() {
             </CardContent>
           </Card>
 
+          {/* The other two games (100). They are rendered from the same read as
+              the coin, and each says its own odds before its own form, because
+              14.3 wants the disclosure before the stake and not on a page a
+              member has to go and find.
+
+              One allowance covers all three, so the card above is the whole
+              day's headroom and is deliberately not repeated per game -- three
+              copies of one number invite the reading that each game has its
+              own. Each form says so in its own words instead. */}
+          {dice.map((game) => (
+            <Card key={game.game}>
+              <CardHeader>
+                <CardTitle>{gameLabel(game.game)}</CardTitle>
+                <CardDescription>
+                  적중 확률 {percentFromPpm(game.win_probability_ppm)}%, 적중 시{' '}
+                  {multiplierFromPpm(game.payout_multiplier_ppm)}배입니다. 최대인{' '}
+                  {groupDigits(game.max_stake)} WLD를 걸어 이기면 순이익은{' '}
+                  {groupDigits(game.net_win_at_max)} WLD이고, 지급액은 원 단위로 내림합니다. 오늘
+                  더 잃을 수 있는 금액은 {groupDigits(game.worst_case_loss)} WLD입니다.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {game.game === 'dice_parity' ? (
+                  <DiceParityForm
+                    minStake={game.min_stake}
+                    maxStake={game.max_stake}
+                    remainingStake={game.remaining_stake}
+                    exhausted={
+                      compareAmounts(game.remaining_stake, '0') <= 0 ||
+                      compareAmounts(game.remaining_loss, '0') <= 0
+                    }
+                  />
+                ) : (
+                  <DiceNumberForm
+                    minStake={game.min_stake}
+                    maxStake={game.max_stake}
+                    remainingStake={game.remaining_stake}
+                    exhausted={
+                      compareAmounts(game.remaining_stake, '0') <= 0 ||
+                      compareAmounts(game.remaining_loss, '0') <= 0
+                    }
+                  />
+                )}
+              </CardContent>
+            </Card>
+          ))}
+
         </>
       )}
 
@@ -273,7 +335,7 @@ export default async function CasinoPage() {
             <EmptyState title="기록을 불러오지 못했어요." />
           ) : plays.length === 0 ? (
             <EmptyState
-              title="아직 동전 게임 기록이 없어요."
+              title="아직 게임 기록이 없어요."
               description="한 판 걸면 결과가 경제 원장에 남고 여기에 표시됩니다."
             />
           ) : (
@@ -282,6 +344,7 @@ export default async function CasinoPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>시각</TableHead>
+                    <TableHead>게임</TableHead>
                     <TableHead className="text-right">결과</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -291,6 +354,10 @@ export default async function CasinoPage() {
                       <TableCell className="whitespace-nowrap text-muted-foreground">
                         {formatMoment(play.occurredAt, '기록 확인 중')}
                       </TableCell>
+                      {/* Which game it was. The ledger keeps one type per
+                          game and three of them now land in this one table,
+                          so a row without it is a result nobody can place. */}
+                      <TableCell className="whitespace-nowrap">{ledgerLabel(play.type)}</TableCell>
                       <TableCell className="text-right">
                         <PlayOutcome netAmount={play.netAmount} />
                       </TableCell>
