@@ -11,6 +11,11 @@ import { Skeleton } from '@/components/ui/skeleton';
  * The shape matters more than the shimmer: a header block and cards in the
  * proportions the real page uses, so what arrives replaces this rather than
  * displacing it.
+ *
+ * Which is why the outer gap stays at 24px while the header block and the card
+ * heights came down with the frame: the pages still lay their own sections out
+ * with `grid gap-6`, and a placeholder that anticipated a tightening the pages
+ * have not had would displace rather than replace.
  */
 export function PageSkeleton({
   cards = 3,
@@ -22,14 +27,14 @@ export function PageSkeleton({
   return (
     <div className="grid gap-6" aria-busy aria-live="polite">
       <span className="sr-only">불러오는 중</span>
-      <div className="grid gap-3">
+      <div className="grid gap-2">
         <Skeleton className="h-3 w-28" />
         <Skeleton className="h-9 w-64" />
         <Skeleton className="h-4 w-full max-w-[520px]" />
       </div>
       <div className={columns === 2 ? 'grid gap-4 sm:grid-cols-2' : 'grid gap-4'}>
         {Array.from({ length: cards }, (_, index) => (
-          <Skeleton key={index} className="h-40 w-full rounded-[14px]" />
+          <Skeleton key={index} className="h-36 w-full rounded-[14px]" />
         ))}
       </div>
     </div>
