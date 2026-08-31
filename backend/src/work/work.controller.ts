@@ -68,6 +68,28 @@ export class WorkController {
     );
   }
 
+  @Get('tasks')
+  @ApiOperation({ summary: 'Every task on offer, with this member’s standing against each' })
+  async tasks(@Req() request: RequestWithSession) {
+    return {
+      tasks: await this.guarded(
+        () => this.repository().tasks(requireUserId(request)),
+        'the task board is unavailable',
+      ),
+    };
+  }
+
+  @Get('receipts')
+  @ApiOperation({ summary: 'What the work paid, and the ledger transaction it paid through' })
+  async receipts(@Req() request: RequestWithSession) {
+    return {
+      receipts: await this.guarded(
+        () => this.repository().receipts(requireUserId(request)),
+        'work receipts are unavailable',
+      ),
+    };
+  }
+
   @Get('assignments')
   @ApiOperation({ summary: 'The caller’s recent assignments' })
   async assignments(@Req() request: RequestWithSession) {

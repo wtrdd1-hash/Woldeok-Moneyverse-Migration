@@ -14,10 +14,17 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
-import { formatDay } from '@/lib/money';
+import { formatDay, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
-import type { CreditLoan } from './credit';
-import { gradeLabel, hasOverdueLoan, isRepayable } from './credit';
+import type { CreditLoan, CreditRung } from './credit';
+import {
+  gradeLabel,
+  hasOverdueLoan,
+  isRepayable,
+  lendsNothing,
+  ratePercent,
+  rungConditions,
+} from './credit';
 import { LoanBoard, RefreshButton } from './progression-forms';
 import type { ProgressionStatus } from './stages';
 import { STAGES, requirementLines, stageIndex, stageLabel } from './stages';
@@ -33,6 +40,7 @@ export const metadata: Metadata = {
 interface CreditStanding {
   readonly grade: string | null;
   readonly loans: readonly CreditLoan[];
+  readonly ladder: readonly CreditRung[];
 }
 
 export default async function ProgressionPage() {
@@ -47,6 +55,7 @@ export default async function ProgressionPage() {
 
   const status = progression?.progression ?? null;
   const loans = credit?.loans ?? [];
+  const ladder = credit?.ladder ?? [];
   // Borrowing lives on the wallet, and 077 refuses a second loan while one is
   // still open -- so the way there is offered only when it would work.
   const canBorrow = !loans.some((loan) => isRepayable(loan.status));
@@ -194,19 +203,54 @@ export default async function ProgressionPage() {
                   {credit.grade === null ? '확인 중' : gradeLabel(credit.grade)}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="grid gap-2 text-sm text-muted-foreground">
+              <CardContent className="grid gap-3 text-sm text-muted-foreground">
                 {credit.grade === null ? (
                   <p>계정이 활성 상태가 되면 등급이 매겨져요.</p>
                 ) : (
-                  <p>등급은 가입한 기간과 완료한 작업 수로 정해집니다.</p>
+                  <p>
+                    등급은 가입한 기간과{' '}
+                    <Link href="/work" className="text-clay-ink">
+                      작업
+                    </Link>{' '}
+                    화면에서 보상을 받은 횟수로 정해집니다.
+                  </p>
                 )}
-                {/* Said out loud rather than filled in with the seeded
-                    numbers: what a grade buys lives in a table no read model
-                    exposes, and reciting it here would state a policy the
-                    database has not agreed to. */}
-                <p>
-                  등급별 한도와 이자율은 아직 화면에 표시하지 않아요. 대출은 게임 안에서만 사용되며
-                  이자는 5%입니다.
+
+                {/* The numbers, now that they are the ones the database keeps.
+                    096 made `credit_limit` and `interest_bps` load-bearing:
+                    before it, `bank_borrow` charged everybody a flat 5% and
+                    enforced no ceiling, so this card said so rather than
+                    reciting a table nothing read. */}
+                {ladder.length === 0 ? (
+                  <p>등급별 한도와 이자율을 불러오지 못했어요.</p>
+                ) : (
+                  <ul className="grid gap-2">
+                    {ladder.map((rung) => (
+                      <li
+                        key={rung.grade}
+                        className={`grid gap-1 rounded-[14px] border p-3 ${
+                          rung.held ? 'border-forest-soft bg-mint' : 'bg-surface'
+                        }`}
+                      >
+                        <div className="flex flex-wrap items-baseline justify-between gap-2">
+                          <span className="text-sm font-medium text-foreground">
+                            {gradeLabel(rung.grade)}
+                            {rung.held && <span className="ml-2 text-xs text-forest-soft">지금 내 등급</span>}
+                          </span>
+                          <span className="tabular text-sm text-foreground">
+                            {lendsNothing(rung)
+                              ? '대출 불가'
+                              : `${groupDigits(rung.credit_limit)} WLD · 이자 ${ratePercent(rung.interest_bps)} · ${rung.term_days}일`}
+                          </span>
+                        </div>
+                        <span className="text-xs">{rungConditions(rung)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <p className="text-xs">
+                  한도를 넘는 금액은 신청할 수 없고, 이자는 대출을 받는 순간의 등급으로 정해져 이후
+                  등급이 바뀌어도 그대로예요. 갚지 않은 대출이 있으면 동전 게임을 할 수 없어요.
                 </p>
               </CardContent>
             </Card>
