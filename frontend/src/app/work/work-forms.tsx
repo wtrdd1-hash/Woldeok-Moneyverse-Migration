@@ -12,6 +12,11 @@ import { claimReward, submitTask, takeTask } from './actions';
  * different id, each gets its own outcome, and `SubmitButton` disables only
  * the control that was pressed. A member with two tasks open must be able to
  * submit one while the other is still waiting out its minimum duration.
+ *
+ * `label` and `disabled` are required rather than optional. The page knows
+ * why a control is unavailable -- the day's takes are spent, or the minimum
+ * duration has not passed -- and a default hidden in here would be a second
+ * place for that wording to live.
  */
 
 export function TakeButton({
@@ -20,15 +25,15 @@ export function TakeButton({
   label,
 }: {
   readonly taskId: string;
-  readonly disabled?: boolean;
-  readonly label?: string;
+  readonly disabled: boolean;
+  readonly label: string;
 }) {
   const [state, action] = useActionState(takeTask, IDLE);
   return (
     <div className="grid gap-2">
       <form action={action}>
         <input type="hidden" name="taskId" value={taskId} />
-        <SubmitButton disabled={disabled}>{label ?? '이 작업 맡기'}</SubmitButton>
+        <SubmitButton disabled={disabled}>{label}</SubmitButton>
       </form>
       <ActionAlert state={state} />
     </div>
@@ -41,8 +46,8 @@ export function SubmitTaskButton({
   label,
 }: {
   readonly assignmentId: string;
-  readonly disabled?: boolean;
-  readonly label?: string;
+  readonly disabled: boolean;
+  readonly label: string;
 }) {
   const [state, action] = useActionState(submitTask, IDLE);
   return (
@@ -50,7 +55,7 @@ export function SubmitTaskButton({
       <form action={action}>
         <input type="hidden" name="assignmentId" value={assignmentId} />
         <SubmitButton variant="outline" disabled={disabled}>
-          {label ?? '작업 제출하기'}
+          {label}
         </SubmitButton>
       </form>
       <ActionAlert state={state} />

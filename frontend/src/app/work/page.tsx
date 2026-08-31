@@ -154,7 +154,7 @@ export default async function WorkPage() {
                         <SubmitTaskButton
                           assignmentId={assignment.assignment_id}
                           disabled={wait > 0}
-                          label={wait > 0 ? `${durationLabel(wait)} 뒤 제출` : undefined}
+                          label={wait > 0 ? `${durationLabel(wait)} 뒤 제출` : '작업 제출하기'}
                         />
                       )}
                     </CardFooter>
@@ -217,7 +217,7 @@ export default async function WorkPage() {
                     <TakeButton
                       taskId={task.task_id}
                       disabled={spent}
-                      label={spent ? '오늘 횟수를 다 썼어요' : undefined}
+                      label={spent ? '오늘 횟수를 다 썼어요' : '이 작업 맡기'}
                     />
                   </CardFooter>
                 </Card>
