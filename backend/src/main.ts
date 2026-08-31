@@ -51,6 +51,9 @@ async function bootstrap(): Promise<void> {
   // photo upload is image data and PrivateImageStorage sniffs it itself.
   app.use('/api/v1/integrations/discord/interactions', raw({ type: '*/*', limit: '32kb' }));
   app.use('/api/v1/admin/photos', raw({ type: '*/*', limit: '8mb' }));
+  // A member's gallery submission. Smaller than the operator's, because this
+  // one is reachable by anybody signed in.
+  app.use('/api/v1/photos/uploads', raw({ type: '*/*', limit: '4mb' }));
   // A member's own picture, on the same terms as an operator's gallery
   // upload: the bytes arrive raw and `validateImageUpload` decides whether
   // they are an image. The cap is the smaller one because this is one avatar

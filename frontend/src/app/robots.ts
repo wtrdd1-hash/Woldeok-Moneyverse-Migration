@@ -23,6 +23,7 @@ export default function robots(): MetadataRoute.Robots {
         '/admin',
         '/account',
         '/wallet',
+        '/gallery/submit',
         '/work',
         '/stocks',
         '/businesses',

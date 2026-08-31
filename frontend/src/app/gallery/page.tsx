@@ -36,8 +36,8 @@ export default async function GalleryPage() {
           </>
         }
       >
-        사진은 운영자가 검토한 뒤에만 공개합니다. 이미지 제공 주소도 운영 환경에서 사전에
-        허용한 곳만 사용해요.
+        회원이 보낸 사진과 운영자가 올린 사진을 함께 모읍니다. 어느 쪽이든 운영자가 검토한
+        뒤에만 공개해요.
       </PageHeader>
 
       <section aria-labelledby="gallery-title" className="grid gap-3">
@@ -46,8 +46,12 @@ export default async function GalleryPage() {
           title="사진 모음"
           id="gallery-title"
           action={
-            <Link href="/announcements" className="shrink-0 text-sm font-extrabold text-clay-ink">
-              운영 소식 →
+            // Shown to everybody, including signed-out readers: the page is
+            // cached for five minutes, so branching on the session here would
+            // serve one visitor's answer to the next. The destination asks for
+            // a session itself.
+            <Link href="/gallery/submit" className="shrink-0 text-sm font-extrabold text-clay-ink">
+              사진 보내기 →
             </Link>
           }
         />
