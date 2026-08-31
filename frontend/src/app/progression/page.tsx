@@ -28,6 +28,8 @@ import {
 import { LoanBoard, RefreshButton } from './progression-forms';
 import type { ProgressionStatus } from './stages';
 import { STAGES, requirementLines, stageIndex, stageLabel } from './stages';
+import { UnlockCard } from './unlock-parts';
+import type { EarlyUnlock } from './unlocks';
 
 /** One member's own standing. Never cached, and never offered to a crawler. */
 export const dynamic = 'force-dynamic';
@@ -48,9 +50,10 @@ export default async function ProgressionPage() {
 
   // Both reads in one round. The credit half is a second request only because
   // it is a second concern, not because the first one has to finish first.
-  const [progression, credit] = await Promise.all([
+  const [progression, credit, earlyGame] = await Promise.all([
     apiOrNull<{ progression: ProgressionStatus | null }>('/api/v1/progression'),
     apiOrNull<CreditStanding>('/api/v1/progression/credit'),
+    apiOrNull<{ unlocks: readonly EarlyUnlock[] }>('/api/v1/progression/early-game'),
   ]);
 
   const status = progression?.progression ?? null;
@@ -182,6 +185,20 @@ export default async function ProgressionPage() {
             </CardFooter>
           </Card>
         )}
+      </section>
+
+      {/* Between the stage and the credit standing, because that is where it
+          sits in the member's own reading: the stage is where they are, the
+          ladder is what that reaches, and the C grade is one of its rungs. */}
+      <section aria-labelledby="unlock-title" className="grid gap-3">
+        <h2 id="unlock-title" className="text-lg">
+          초반 해금
+        </h2>
+        <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
+          직업 레벨은 작업을 마칠 때마다 오르고, 보상을 받은 작업 수와 가입 기간은 기록에서 그대로
+          가져옵니다. ‘예정’이라고 적힌 항목은 아직 잠금이 걸려 있지 않아 지금도 이용할 수 있어요.
+        </p>
+        <UnlockCard unlocks={earlyGame?.unlocks ?? []} />
       </section>
 
       <section aria-labelledby="credit-title" className="grid gap-3">

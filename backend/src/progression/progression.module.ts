@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
+import { EARLY_GAME_REPOSITORY_PROVIDER } from '../early-game/early-game.provider';
 import { ProgressionController } from './progression.controller';
 import { ProgressionRepository } from './progression.repository';
 
@@ -22,6 +23,12 @@ import { ProgressionRepository } from './progression.repository';
       inject: [PG_POOL],
       useFactory: (pool: Queryable | null) => (pool ? new ProgressionRepository(pool) : null),
     },
+    // The unlock ladder is served from this controller, so its repository is
+    // provided here too. One exported provider object rather than a second
+    // copy of the factory: the rule that a missing DATABASE_URL yields null
+    // instead of a bootstrap failure is written once and applies to both
+    // modules that serve part of 16.1.
+    EARLY_GAME_REPOSITORY_PROVIDER,
   ],
 })
 export class ProgressionModule {}

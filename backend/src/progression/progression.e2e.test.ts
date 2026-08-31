@@ -50,6 +50,22 @@ describe('progression routes', () => {
     expect([401, 428, 503]).toContain(response.status);
   });
 
+  it('mounts the early-game unlock ladder behind a session', async () => {
+    const response = await request(app.getHttpServer()).get('/api/v1/progression/early-game');
+    expect(response.status).not.toBe(404);
+    expect([401, 428, 503]).toContain(response.status);
+  });
+
+  // The ladder is a read model computed from receipts, levels and the account's
+  // age. If a write on it ever answered, something other than the work loop and
+  // the ledger would be deciding what a member has unlocked.
+  it('does not accept a write on the unlock ladder', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/api/v1/progression/early-game')
+      .send({});
+    expect(response.status).toBe(404);
+  });
+
   // A member's stage and their loans are one member's data. With the store
   // offline these must refuse; a 200 would mean a guard was missing and an
   // anonymous caller had been answered.

@@ -5,6 +5,8 @@ import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
+import type { EarlyGameBoard } from './early-game';
+import { CollectionCard, WeeklyGoalCard } from './early-game-parts';
 import { NotificationForm, NpcOrderButton } from './quest-forms';
 import { GoalCard, NextUnlock, NpcCard } from './quest-parts';
 import { NPCS } from './quests';
@@ -30,10 +32,15 @@ export const metadata: Metadata = {
 export default async function QuestsPage() {
   await requireMember();
 
-  // One request, not four. `member_engagement_dashboard` assembles today's
-  // goals, this week's, the next unlock and the preference in a single
-  // function, and the page renders them side by side.
-  const board = await apiOrNull<EngagementBoard>('/api/v1/engagement');
+  // Two requests, issued together. `member_engagement_dashboard` assembles
+  // today's goals, the next unlock and the preference in one function; the
+  // early-game read is separate because it is a different kind of answer --
+  // 101 computes every figure in it from work receipts, shop purchases and
+  // ledger postings rather than from anything a member reported.
+  const [board, earlyGame] = await Promise.all([
+    apiOrNull<EngagementBoard>('/api/v1/engagement'),
+    apiOrNull<EarlyGameBoard>('/api/v1/engagement/early-game'),
+  ]);
 
   return (
     <div className="grid gap-6">
@@ -76,28 +83,37 @@ export default async function QuestsPage() {
         )}
       </section>
 
+      {/* The weekly cards come from 101 and not from the dashboard.
+          `member_engagement_dashboard` reads `engagement_progress`, and the
+          only thing that writes it is `engagement_record_progress`, which no
+          route reaches -- deliberately, because it grants on a member's own
+          say-so. Those cards therefore read zero for ever, which is worse than
+          absent: a goal that cannot move looks like one the member is failing.
+          These four are counted from work receipts, shop purchases and ledger
+          postings, so each one carries a target and a real figure. */}
       <section aria-labelledby="weekly-title" className="grid gap-3">
         <h2 id="weekly-title" className="text-lg">
           이번 주 목표
         </h2>
         <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
-          주간 목표는 월요일마다 새로 시작해요. 지난주에 기록한 진행은 이번 주로 넘어오지 않아요.
+          주간 목표는 월요일마다 새로 시작하고, 따로 기록하지 않아도 작업·구매·저축 기록에서
+          자동으로 계산돼요. 지난주에 쌓은 진행은 이번 주로 넘어오지 않아요.
         </p>
 
-        {board === null ? (
+        {earlyGame === null ? (
           <EmptyState
             title="이번 주 목표를 불러오지 못했어요."
-            description="잠시 후 다시 확인해 주세요."
+            description="진행 상황을 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
           />
-        ) : board.weekly_goals.length === 0 ? (
+        ) : earlyGame.goals.length === 0 ? (
           <EmptyState
             title="이번 주에 열린 목표가 없어요."
             description="새 주간 목표가 열리면 이 자리에 표시돼요."
           />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
-            {board.weekly_goals.map((goal) => (
-              <GoalCard key={goal.code} goal={goal} />
+            {earlyGame.goals.map((goal) => (
+              <WeeklyGoalCard key={goal.goal_code} goal={goal} />
             ))}
           </div>
         )}
@@ -107,6 +123,38 @@ export default async function QuestsPage() {
           not depend on anything the failed request would have answered, and
           hiding the one thing that still works would make a slow read look
           like a broken feature. */}
+      {/* A 도감 fills itself: a page is unlocked by the work receipt or the
+          shop purchase that earned it, and the title a finished book pays is
+          granted by a trigger on that same row. There is nothing to press
+          here, which is why the section carries no control. */}
+      <section aria-labelledby="collection-title" className="grid gap-3">
+        <h2 id="collection-title" className="text-lg">
+          초반 도감
+        </h2>
+        <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
+          작업 보상을 받거나 상점에서 물건을 사면 도감이 저절로 채워져요. 모두 모으면 칭호를 받고,
+          칭호는 프로필에서 골라 보여줄 수 있어요. 도감 보상으로 WLD를 지급하지는 않습니다.
+        </p>
+
+        {earlyGame === null ? (
+          <EmptyState
+            title="도감을 불러오지 못했어요."
+            description="모은 장수를 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
+          />
+        ) : earlyGame.collections.length === 0 ? (
+          <EmptyState
+            title="아직 열린 도감이 없어요."
+            description="새 도감이 열리면 이 자리에 표시돼요."
+          />
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {earlyGame.collections.map((collection) => (
+              <CollectionCard key={collection.book_code} collection={collection} />
+            ))}
+          </div>
+        )}
+      </section>
+
       <section aria-labelledby="npc-title" className="grid gap-3">
         <h2 id="npc-title" className="text-lg">
           NPC 주문

@@ -45,6 +45,23 @@ describe('engagement routes', () => {
     expect([401, 428, 503]).toContain(response.status);
   });
 
+  it('mounts the early-game goals and collections behind a session', async () => {
+    const response = await request(app.getHttpServer()).get('/api/v1/engagement/early-game');
+    expect(response.status).not.toBe(404);
+    expect([401, 428, 503]).toContain(response.status);
+  });
+
+  // The whole point of 101's goals is that a member cannot report progress
+  // against them: they are computed from work receipts, shop purchases and
+  // ledger postings. A write route here would be the hole the progress route
+  // above was left out to avoid, reopened under a different name.
+  it('does not accept a write on the early-game goals', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/api/v1/engagement/early-game')
+      .send({});
+    expect(response.status).toBe(404);
+  });
+
   // One member's goals, their progress and their notification preference are
   // one member's data. With the store offline this must refuse; a 200 would
   // mean a guard was missing and an anonymous caller had been answered.
