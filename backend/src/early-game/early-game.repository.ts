@@ -1,5 +1,5 @@
 import type { Queryable } from '../core/db';
-import { queryRows } from '../core/db';
+import { queryOne, queryRows } from '../core/db';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -112,18 +112,119 @@ export interface EarlyCollectionRow {
 }
 
 /**
+ * The Seoul day a screen is claiming for.
+ *
+ * Sent by the caller rather than computed here, and that is deliberate: the
+ * database names the day in the read model, the claim refuses anything but
+ * today in Seoul, and computing it in TypeScript would be a second Asia/Seoul
+ * implementation whose disagreement with the first would look like a member
+ * being refused at random.
+ */
+const DAY = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+
+function assertSeoulDay(value: unknown, field: string): asserts value is string {
+  if (typeof value !== 'string' || !DAY.test(value)) {
+    throw new EarlyGameInputError(`${field} must be a YYYY-MM-DD date`);
+  }
+  // '2026-02-31' satisfies the pattern, and PostgreSQL answers it with 22008,
+  // which `pg-error.ts` does not map -- it would reach a member as a 500. The
+  // round-trip is what rejects a day that does not exist.
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(parsed.valueOf()) || parsed.toISOString().slice(0, 10) !== value) {
+    throw new EarlyGameInputError(`${field} must be a real calendar date`);
+  }
+}
+
+/**
+ * public.early_event_today RETURNS TABLE:
+ * packages/database/migrations/103-early-game-events.sql
+ *
+ * `reward_amount` and `reward_experience` are what claiming right now would
+ * actually pay this member -- 095's rule for `reward_preview` -- and not what
+ * the catalogue declares. They differ for a member who has never been paid
+ * for work, and `experience_blocked` is how the screen knows to say why.
+ *
+ * `claim_block` is 'claimed', 'needs_work' or null. It reaches the screen as
+ * a reason rather than as a disabled flag, because "already taken" and "work
+ * first" are two different days for a member.
+ */
+export interface EarlyEventRow {
+  readonly event_date: string;
+  readonly event_code: string;
+  readonly event_label: string;
+  readonly event_detail: string;
+  readonly claim_label: string;
+  readonly reward_amount: string;
+  readonly reward_experience: string;
+  readonly experience_blocked: boolean;
+  readonly reward_item_name: string | null;
+  readonly reward_item_quantity: number;
+  readonly pending_effect: string | null;
+  readonly claimed: boolean;
+  readonly claimed_at: Date | null;
+  readonly claim_transaction_id: string | null;
+  readonly claim_block: string | null;
+}
+
+/**
+ * public.early_event_claim RETURNS TABLE (103).
+ *
+ * `transaction_id` is null for an event that paid only an item or only
+ * experience: nothing moved through the ledger, so there is nothing to point
+ * at, and a screen has to say so rather than render a blank link.
+ */
+export interface EarlyEventReceiptRow {
+  readonly event_code: string;
+  readonly event_label: string;
+  readonly reward_amount: string;
+  readonly experience_amount: string;
+  readonly item_name: string | null;
+  readonly item_quantity: number;
+  readonly transaction_id: string | null;
+  readonly replayed: boolean;
+}
+
+/**
+ * public.early_first_day_flow RETURNS TABLE (103).
+ *
+ * `step_verified` is the field a screen must not ignore. False means nothing
+ * records this step -- reading the tutorial, opening the growth board -- and
+ * rendering it as a box that ticks itself would be `engagement_record_progress`
+ * with a nicer name.
+ */
+export interface EarlyFirstDayStepRow {
+  readonly step_code: string;
+  readonly step_label: string;
+  readonly step_detail: string;
+  readonly step_href: string;
+  readonly step_metric: string;
+  readonly step_verified: boolean;
+  readonly step_target: string;
+  readonly step_progress: string;
+  readonly step_unit: string;
+  readonly step_done: boolean;
+}
+
+/**
  * Database gateway for 16.1's early game.
  *
- * Three reads and no writes, and that is the whole point of the feature: the
- * ladder, the goals and the books are all computed from rows that a
- * money-moving or reward-paying function already wrote. There is nothing here
- * a member could call to move one of these numbers, and there must not be --
- * `engagement_record_progress` is the counterexample this feature was built
- * to avoid repeating.
+ * Five reads and one write. The five are computed from rows that a
+ * money-moving or reward-paying function already wrote -- the ladder, the
+ * goals, the books, the day's event and the first-day flow -- and there is
+ * nothing among them a member could call to move one of those numbers.
+ * `engagement_record_progress` is the counterexample this module was built to
+ * avoid repeating, and none of the reads takes an amount.
  *
- * Every statement targets a SECURITY DEFINER function that 101 granted to
- * moneyverse_app. The four tables 101 adds are revoked from that role, as are
- * all thirteen it reads through them.
+ * The write is `claimEvent`, and it is not that shape either. It takes a key
+ * and a day: no event, no amount, no count. `early_event_claim` (103) draws
+ * the day's event itself from a hash of the member and the Seoul date and
+ * prices it from its own catalogue, so the only thing a caller can influence
+ * is whether the claim happens at all -- and `early_event_claims` is keyed on
+ * (member, day), which means once.
+ *
+ * Every statement targets a SECURITY DEFINER function that 101 or 103 granted
+ * to moneyverse_app. The seven tables those two migrations add are revoked
+ * from that role, as is every table they read through them.
  */
 export class EarlyGameRepository {
   constructor(private readonly pool: Queryable) {}
@@ -173,6 +274,61 @@ export class EarlyGameRepository {
               book.reward_note, book.reward_held, book.entry_total, book.entry_unlocked,
               book.entries
        FROM public.early_game_collections($1::uuid) AS book`,
+      [actor],
+    );
+  }
+
+  /**
+   * The event this member is dealt today.
+   *
+   * Null when the catalogue has no active row, which is how the feature is
+   * switched off -- a different answer from a failed request, and the route
+   * keeps them apart.
+   */
+  todayEvent(actor: unknown): Promise<EarlyEventRow | null> {
+    assertUuid(actor, 'actor');
+    return queryOne<EarlyEventRow>(
+      this.pool,
+      `SELECT event.event_date::text, event.event_code, event.event_label, event.event_detail,
+              event.claim_label, event.reward_amount::text, event.reward_experience::text,
+              event.experience_blocked, event.reward_item_name, event.reward_item_quantity,
+              event.pending_effect, event.claimed, event.claimed_at,
+              event.claim_transaction_id::text, event.claim_block
+       FROM public.early_event_today($1::uuid) AS event`,
+      [actor],
+    );
+  }
+
+  /**
+   * Claiming today's event.
+   *
+   * The day is cast to `date` in the statement rather than left for pg to
+   * infer, so a value this repository accepted reaches the function as the
+   * type it declares.
+   */
+  claimEvent(key: unknown, actor: unknown, day: unknown): Promise<EarlyEventReceiptRow | null> {
+    assertUuid(key, 'idempotency key');
+    assertUuid(actor, 'actor');
+    assertSeoulDay(day, 'event date');
+    return queryOne<EarlyEventReceiptRow>(
+      this.pool,
+      `SELECT receipt.event_code, receipt.event_label, receipt.reward_amount::text,
+              receipt.experience_amount::text, receipt.item_name, receipt.item_quantity,
+              receipt.transaction_id::text, receipt.replayed
+       FROM public.early_event_claim($1::uuid, $2::uuid, $3::date) AS receipt`,
+      [key, actor, day],
+    );
+  }
+
+  /** 16.1's first day, step by step, counted from what happened. */
+  firstDayFlow(actor: unknown): Promise<EarlyFirstDayStepRow[]> {
+    assertUuid(actor, 'actor');
+    return queryRows<EarlyFirstDayStepRow>(
+      this.pool,
+      `SELECT step.step_code, step.step_label, step.step_detail, step.step_href,
+              step.step_metric, step.step_verified, step.step_target::text,
+              step.step_progress::text, step.step_unit, step.step_done
+       FROM public.early_first_day_flow($1::uuid) AS step`,
       [actor],
     );
   }
