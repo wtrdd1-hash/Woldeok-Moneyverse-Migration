@@ -198,7 +198,7 @@ describe.skipIf(!DATABASE_URL)('the early game events against a real database', 
         expect(receipt.rows[0]?.replayed).toBe(false);
 
         const balance = await client.query<{ balance: string }>(
-          `SELECT balance_row.balance::text AS balance
+          `SELECT balance_row.available_amount::text AS balance
            FROM public.account_balances AS balance_row
            JOIN public.accounts AS account_row ON account_row.id = balance_row.account_id
            WHERE account_row.owner_user_id = $1`,
@@ -235,7 +235,7 @@ describe.skipIf(!DATABASE_URL)('the early game events against a real database', 
         expect(replay.rows[0]?.reward_amount).toBe('30');
 
         const balance = await client.query<{ balance: string }>(
-          `SELECT balance_row.balance::text AS balance
+          `SELECT balance_row.available_amount::text AS balance
            FROM public.account_balances AS balance_row
            JOIN public.accounts AS account_row ON account_row.id = balance_row.account_id
            WHERE account_row.owner_user_id = $1`,
