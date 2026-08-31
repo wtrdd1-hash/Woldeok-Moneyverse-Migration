@@ -75,7 +75,11 @@ function lockUntilOrNull(value: unknown): string | null {
   return value;
 }
 
-/** public.casino_coin_terms RETURNS TABLE: packages/database/migrations/060-casino-coin-fairness.sql */
+/**
+ * public.casino_coin_terms RETURNS TABLE: 060-casino-coin-fairness.sql,
+ * redefined by 099-casino-payout-and-limits.sql when the payout stopped being
+ * even money.
+ */
 export interface CasinoTermsRow {
   readonly enabled: boolean;
   readonly min_stake: string;
@@ -90,6 +94,15 @@ export interface CasinoTermsRow {
   readonly payout_multiplier_ppm: number;
   readonly house_edge_ppm: number;
   readonly worst_case_loss: string;
+  /**
+   * What a winning maximum-stake play actually pays, net of the stake (099).
+   *
+   * Reported by the database rather than derived here, because the payout
+   * rounds down to whole WLD and a second copy of that arithmetic in
+   * TypeScript is a second chance to disagree with the ledger about what a
+   * member is owed.
+   */
+  readonly net_win_at_max: string;
 }
 
 /**
@@ -124,6 +137,15 @@ export interface CasinoPlayRow {
   readonly win_probability_ppm: number;
   readonly payout_multiplier_ppm: number;
   readonly worst_case_loss: string;
+  /**
+   * What a winning maximum-stake play actually pays, net of the stake (099).
+   *
+   * Reported by the database rather than derived here, because the payout
+   * rounds down to whole WLD and a second copy of that arithmetic in
+   * TypeScript is a second chance to disagree with the ledger about what a
+   * member is owed.
+   */
+  readonly net_win_at_max: string;
 }
 
 /**
@@ -176,7 +198,8 @@ export class CasinoRepository {
               terms.win_probability_ppm,
               terms.payout_multiplier_ppm,
               terms.house_edge_ppm,
-              terms.worst_case_loss::text AS worst_case_loss
+              terms.worst_case_loss::text AS worst_case_loss,
+              terms.net_win_at_max::text AS net_win_at_max
        FROM public.casino_coin_terms($1::uuid) AS terms`,
       [actor],
     );

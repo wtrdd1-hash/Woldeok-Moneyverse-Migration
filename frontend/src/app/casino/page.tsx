@@ -42,6 +42,8 @@ interface CoinTerms {
   readonly payout_multiplier_ppm: number;
   readonly house_edge_ppm: number;
   readonly worst_case_loss: string;
+  /** What a winning maximum-stake play pays, net of the stake, after rounding (099). */
+  readonly net_win_at_max: string;
 }
 
 /**
@@ -196,7 +198,9 @@ export default async function CasinoPage() {
               <CardDescription>
                 앞면과 뒷면 중 하나를 고르고 걸 금액을 정하면, 동전은 서버가 던집니다. 적중 확률{' '}
                 {percentFromPpm(open.win_probability_ppm)}%, 적중 시{' '}
-                {multiplierFromPpm(open.payout_multiplier_ppm)}배입니다.
+                {multiplierFromPpm(open.payout_multiplier_ppm)}배입니다. 최대인{' '}
+                {groupDigits(open.max_stake)} WLD를 걸어 이기면 순이익은{' '}
+                {groupDigits(open.net_win_at_max)} WLD이고, 지급액은 원 단위로 내림합니다.
               </CardDescription>
             </CardHeader>
             <CardContent>
