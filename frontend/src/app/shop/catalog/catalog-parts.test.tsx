@@ -202,7 +202,12 @@ describe('HoldingCard', () => {
     expect(screen.getByRole('button', { name: '밀린 관리비 내기' })).toBeDefined();
     expect(container.textContent).toContain('3,600');
     expect(container.textContent).toContain('4주');
-    expect(container.textContent).toContain('관리비 미납 정지');
+    // The badge states the debt and not a consequence. Nothing is actually
+    // withheld from a member in arrears yet -- 104 leaves item effects without
+    // a mechanical consequence -- so a badge reading 정지 would claim a lock
+    // this build does not keep.
+    expect(container.textContent).toContain('관리비 4주 밀림');
+    expect(container.textContent).not.toContain('정지');
   });
 
   // Chapter 20's 중복 방지: 104 answers 23505 for a second use while the
