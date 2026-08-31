@@ -6,6 +6,7 @@ export interface NavEntry {
 /** Readable by anyone, indexed, and the only group a signed-out visitor sees. */
 export const PUBLIC_NAV: readonly NavEntry[] = [
   { href: '/', label: '홈' },
+  { href: '/guide', label: '이용 방법' },
   { href: '/announcements', label: '공지' },
   { href: '/gallery', label: '사진' },
   { href: '/status', label: '서비스 상태' },
@@ -63,6 +64,10 @@ export function isGroup(item: NavItem): item is NavGroup {
 
 export const HEADER_PUBLIC: readonly NavItem[] = [
   { href: '/', label: '홈' },
+  // Second, and top level rather than inside a group: it is the one page that
+  // explains what this site is to somebody who has not signed in, and burying
+  // it under 소식 would put the answer to "how do I start" behind a hover.
+  { href: '/guide', label: '이용 방법' },
   {
     label: '소식',
     entries: [
@@ -74,32 +79,48 @@ export const HEADER_PUBLIC: readonly NavItem[] = [
   { href: '/shop', label: '상점' },
 ];
 
+/**
+ * Grouped by what a member is trying to do, not by which module built it.
+ *
+ * The first arrangement grouped seven screens under 게임 and two under 성장,
+ * which is how the code is organised rather than how the site is used: 작업
+ * and 가상 주식 have nothing to do with each other except that both were
+ * built as games, and a two-item dropdown is a menu that should not have been
+ * a menu. These three read as answers to "where do I earn", "where does the
+ * money go" and "where are other people".
+ *
+ * 작업 leads 활동 because it is where a member with nothing earns their first
+ * WLD; everything under 경제 costs money to start.
+ */
 export const HEADER_MEMBER: readonly NavItem[] = [
   {
-    label: '게임',
+    label: '활동',
     entries: [
-      // First, because it is where a member with nothing earns their first
-      // WLD: everything else in this group costs money to start.
       { href: '/work', label: '작업' },
-      { href: '/stocks', label: '가상 주식' },
-      { href: '/businesses', label: '게임 사업' },
-      { href: '/seasons', label: '시즌' },
       { href: '/quests', label: '퀘스트' },
+      { href: '/progression', label: '성장 단계' },
+    ],
+  },
+  {
+    label: '경제',
+    entries: [
       { href: '/shop/catalog', label: '아이템 상점' },
-      // Behind a feature switch that is off in production until the stage-3
-      // gates pass. The link stays, and the page says so in a sentence --
-      // hiding it would make "why can I not find it" a support question.
+      { href: '/businesses', label: '게임 사업' },
+      { href: '/stocks', label: '가상 주식' },
+      // Behind a feature switch that is off until the stage-3 gates pass. The
+      // link stays, and the page says so in a sentence -- hiding it would make
+      // "why can I not find it" a support question.
       { href: '/casino', label: '동전 게임' },
     ],
   },
   {
-    label: '성장',
+    label: '커뮤니티',
     entries: [
-      { href: '/progression', label: '성장 단계' },
+      { href: '/board', label: '게시판' },
+      { href: '/seasons', label: '시즌' },
       { href: '/profile', label: '내 프로필' },
     ],
   },
-  { href: '/board', label: '게시판' },
 ];
 
 export const HEADER_ADMIN: readonly NavItem[] = [
