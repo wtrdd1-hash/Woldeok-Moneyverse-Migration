@@ -5,9 +5,9 @@ import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
-import { BuyForm, UseItemButton } from './catalog-forms';
+import { BuyForm, SettleUpkeepButton, UseItemButton } from './catalog-forms';
 import { CatalogCard, HoldingCard } from './catalog-parts';
-import { groupByCategory, isHeldToTheLimit, maxPurchasable } from './catalog';
+import { groupByCategory, isHeldToTheLimit, maxPurchasable, owesUpkeep } from './catalog';
 import type { CatalogItem, HeldItem } from './catalog';
 
 /**
@@ -62,13 +62,15 @@ export default async function ShopCatalogPage() {
             </Link>
             에서도 볼 수 있어요.
           </p>
-          {/* Said once, beside the figure it explains. 075 adds the upkeep
-              column and the receipts table but no function that charges one,
-              so a member seeing 주간 관리비 must not read it as a bill that is
-              already arriving. */}
+          {/* Said once, beside the figure it explains. Until 104 the upkeep
+              was a column nothing charged and this paragraph said so; now it
+              has to say when the charge lands and what happens when it cannot
+              be paid, because a member who learns that from a suspended item
+              has learned it too late. The four weeks are 16.4's cap. */}
           <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
-            이동수단과 임대권에는 주간 관리비가 적혀 있어요. 지금은 금액만 안내하고 실제로
-            청구하지는 않습니다. 청구가 시작되면 이 화면에서 먼저 알려 드려요.
+            이동수단과 임대권에는 주간 관리비가 붙어요. 매주 월요일 새벽에 잔액에서 자동으로
+            빠져나가고, 잔액이 모자라면 밀린 금액이 쌓이되 4주치를 넘지 않아요. 4주가 밀리면 그
+            아이템은 관리비를 낼 때까지 잠시 정지되고, 아래 ‘내 아이템’에서 바로 낼 수 있어요.
           </p>
         </div>
 
@@ -129,8 +131,9 @@ export default async function ShopCatalogPage() {
             내 아이템
           </h2>
           <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
-            사용 가능한 아이템은 한 번에 1개씩 써요. 장식과 전시 아이템은 사용하지 않고 그대로
-            보유합니다.
+            사용 가능한 아이템은 한 번에 1개씩 써요. 효과가 적용되는 동안에는 같은 아이템을 다시
+            쓸 수 없고, 기간이 끝나면 다시 쓸 수 있어요. 기간제 아이템과 관리비가 붙는 아이템은
+            사용해서 소모하지 않고 기간 동안 그대로 유지됩니다.
           </p>
         </div>
 
@@ -148,7 +151,16 @@ export default async function ShopCatalogPage() {
           <div className="grid gap-3 sm:grid-cols-2">
             {mine.holdings.map((item) => (
               <HoldingCard key={item.catalog_id} item={item}>
-                <UseItemButton catalogId={item.catalog_id} />
+                {/* One slot, and the card decides whether to draw it at all.
+                    Which control it is, is decided here, because the page is
+                    the only place holding both: a holding with arrears has
+                    exactly one thing to do about it, and everything else that
+                    can be used has the other. */}
+                {owesUpkeep(item) ? (
+                  <SettleUpkeepButton catalogId={item.catalog_id} amount={item.arrears_due} />
+                ) : (
+                  <UseItemButton catalogId={item.catalog_id} />
+                )}
               </HoldingCard>
             ))}
           </div>

@@ -162,15 +162,28 @@ export interface ShopCatalogListingRow {
   readonly sale_ends_at: Date | null;
 }
 
-/** public.shop_my_items RETURNS TABLE: packages/database/migrations/075-shop-read-models-and-maintenance.sql */
+/** public.shop_my_items RETURNS TABLE: packages/database/migrations/104-item-lifecycle.sql */
 export interface ShopHoldingRow {
   readonly catalog_id: string;
   readonly code: string;
   readonly name: string;
   readonly quantity: number;
   readonly acquired_at: Date;
+  /** When the holding itself ends; 104 stamps it from the catalogue's term. */
   readonly expires_at: Date | null;
   readonly effect_kind: string;
+  /** Carries a term or an upkeep, so 104 refuses to consume it. */
+  readonly durable: boolean;
+  /** bigint */
+  readonly weekly_cost: string;
+  /** When the effect started on this holding stops. A different clock. */
+  readonly effect_expires_at: Date | null;
+  readonly unpaid_weeks: number;
+  /** bigint */
+  readonly arrears_due: string;
+  /** bigint: where the debt stops growing, spec 16.4. */
+  readonly arrears_cap: string;
+  readonly suspended: boolean;
 }
 
 /** public.shop_purchase_catalog RETURNS TABLE: packages/database/migrations/072-shop-purchase-function.sql */
@@ -192,8 +205,16 @@ export interface ShopItemUseRow {
   readonly replayed: boolean;
 }
 
+/** public.shop_settle_upkeep RETURNS TABLE: packages/database/migrations/104-item-lifecycle.sql */
+export interface ShopUpkeepSettlementRow {
+  /** bigint: the capped figure the function read, not one the caller sent. */
+  readonly paid_amount: string;
+  readonly ledger_transaction_id: string;
+  readonly replayed: boolean;
+}
+
 /**
- * The catalogue of migrations 071-075, beside the 009 shop above.
+ * The catalogue of migrations 071-075 and 104, beside the 009 shop above.
  *
  * A second class rather than more methods on `ShopService`: that service
  * exists to brand the 009 columns as `WldAmount` and rename them for the
@@ -242,7 +263,14 @@ export class ShopCatalogRepository {
               holding.quantity,
               holding.acquired_at,
               holding.expires_at,
-              holding.effect_kind::text AS effect_kind
+              holding.effect_kind::text AS effect_kind,
+              holding.durable,
+              holding.weekly_cost::text AS weekly_cost,
+              holding.effect_expires_at,
+              holding.unpaid_weeks,
+              holding.arrears_due::text AS arrears_due,
+              holding.arrears_cap::text AS arrears_cap,
+              holding.suspended
        FROM public.shop_my_items($1) AS holding`,
       [actorUserId],
     );
@@ -297,6 +325,34 @@ export class ShopCatalogRepository {
       [idempotencyKey, actorUserId, item],
     );
     if (!row) throw new Error('shop_use_item did not return a receipt');
+    return row;
+  }
+
+  /**
+   * Pays off the weekly upkeep a holding has fallen behind on.
+   *
+   * No amount is an argument, for the same reason no price is on a purchase:
+   * `shop_settle_upkeep` reads the capped `amount_due` inside the transaction
+   * that posts it. A member with nothing outstanding is answered 22023, which
+   * reaches the caller as a conflict rather than as a payment of zero.
+   */
+  async settleUpkeep(
+    key: unknown,
+    actor: unknown,
+    catalogId: unknown,
+  ): Promise<ShopUpkeepSettlementRow> {
+    const idempotencyKey = requireShopUuid(key, 'idempotency key');
+    const actorUserId = requireShopUuid(actor, 'authenticated user id');
+    const item = requireShopUuid(catalogId, 'catalog item id');
+    const row = await queryOne<ShopUpkeepSettlementRow>(
+      this.pool,
+      `SELECT settlement.paid_amount::text AS paid_amount,
+              settlement.ledger_transaction_id::text AS ledger_transaction_id,
+              settlement.replayed
+       FROM public.shop_settle_upkeep($1, $2, $3) AS settlement`,
+      [idempotencyKey, actorUserId, item],
+    );
+    if (!row) throw new Error('shop_settle_upkeep did not return a receipt');
     return row;
   }
 }

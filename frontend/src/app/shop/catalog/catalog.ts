@@ -1,4 +1,4 @@
-import { groupDigits } from '@/lib/money';
+import { formatDay, groupDigits } from '@/lib/money';
 
 /**
  * The item catalogue's vocabulary.
@@ -38,11 +38,19 @@ export interface CatalogItem {
 }
 
 /**
- * `public.shop_my_items` RETURNS TABLE: the same migration.
+ * `public.shop_my_items` RETURNS TABLE:
+ * packages/database/migrations/104-item-lifecycle.sql.
  *
- * `quantity` is a count of things held, not money, so a number is the right
- * type for it. The rule this product enforces is that a balance never becomes
- * a Number, and a count of gloves is not a balance.
+ * `quantity` and `unpaid_weeks` are counts of things, not money, so a number
+ * is the right type for them. The rule this product enforces is that a
+ * balance never becomes a Number, and a count of gloves is not a balance —
+ * `weekly_cost`, `arrears_due` and `arrears_cap` are `bigint` and stay
+ * strings the whole way to the DOM.
+ *
+ * `expires_at` and `effect_expires_at` are two different clocks and neither
+ * substitutes for the other. A 배달 계약 runs out seven days after it is
+ * bought whether or not anybody touched it; a 시장 분석권 is spent and then
+ * runs for seven days from the moment it was spent.
  */
 export interface HeldItem {
   readonly catalog_id: string;
@@ -52,6 +60,15 @@ export interface HeldItem {
   readonly acquired_at: string;
   readonly expires_at: string | null;
   readonly effect_kind: string;
+  /** Carries a term or an upkeep, so 104 refuses to consume it. */
+  readonly durable: boolean;
+  readonly weekly_cost: string;
+  readonly effect_expires_at: string | null;
+  readonly unpaid_weeks: number;
+  readonly arrears_due: string;
+  /** Where the debt stops: four weeks of this holding's upkeep, spec 16.4. */
+  readonly arrears_cap: string;
+  readonly suspended: boolean;
 }
 
 /** The receipt `POST /api/v1/shop/catalog/{id}/purchases` answers with. */
@@ -76,6 +93,20 @@ export interface UseReceipt {
   readonly catalog_id: string;
   readonly remaining_quantity: number | null;
   readonly expires_at: string | null;
+  readonly replayed: boolean;
+}
+
+/**
+ * The receipt `POST /api/v1/shop/holdings/{id}/upkeep-settlements` answers
+ * with.
+ *
+ * `paid_amount` is the capped figure `shop_settle_upkeep` read inside the
+ * transaction that posted it, never one this page sent — so it is what was
+ * actually charged even when the card had been open since before Monday.
+ */
+export interface SettlementReceipt {
+  readonly paid_amount: string;
+  readonly ledger_transaction_id: string;
   readonly replayed: boolean;
 }
 
@@ -120,6 +151,23 @@ export function effectLabel(kind: string): string {
 /** Only a `convenience` item may be consumed; 074 answers 22023 for the rest. */
 export function isConsumable(kind: string): boolean {
   return kind === 'convenience';
+}
+
+/**
+ * Whether the 사용하기 control belongs on a holding at all.
+ *
+ * A durable item — one the catalogue gives a term or a weekly upkeep — is
+ * refused by 104 with 22023. Every useful thing in the catalogue is
+ * `convenience`, vehicles and leases included, so without this the button
+ * that destroys a 45,000 WLD 소형 화물차 sits on its card.
+ */
+export function isUsable(item: HeldItem): boolean {
+  return isConsumable(item.effect_kind) && !item.durable;
+}
+
+/** Whether the weekly upkeep has fallen behind on this holding. */
+export function owesUpkeep(item: HeldItem): boolean {
+  return hasUpkeep(item.arrears_due);
 }
 
 /**
@@ -309,4 +357,47 @@ export function useMessage(receipt: UseReceipt): string {
   return receipt.replayed
     ? `이미 사용한 기록이에요. 남은 수량은 ${countLabel(remaining)}예요.`
     : `아이템을 사용했어요. 남은 수량은 ${countLabel(remaining)}예요.`;
+}
+
+/** A count of weeks, refused rather than rendered when it is not a count. */
+export function weeksLabel(weeks: number): string {
+  if (!Number.isInteger(weeks) || weeks < 0) return '—';
+  return `${weeks}주`;
+}
+
+/**
+ * The sentence a holding gets in place of a control, or null when a control
+ * belongs there instead.
+ *
+ * Every branch names a refusal 104 would actually make, so the screen never
+ * offers a button whose only possible answer is a conflict. Null comes back
+ * for two different situations — arrears to settle, and an item that can be
+ * used — and the page picks between them, because the page is the only place
+ * that holds both controls.
+ */
+export function holdingNote(item: HeldItem): string | null {
+  if (owesUpkeep(item)) return null;
+  if (item.durable) {
+    return hasUpkeep(item.weekly_cost)
+      ? '사용해서 소모하는 아이템이 아니에요. 주간 관리비를 내는 동안 계속 유지돼요.'
+      : '기간제 아이템이에요. 표시된 날짜까지 그대로 유지돼요.';
+  }
+  if (!isConsumable(item.effect_kind)) {
+    return '장식·전시 아이템은 사용하지 않고 그대로 보유해요.';
+  }
+  if (item.effect_expires_at !== null) {
+    // Chapter 20's 중복 방지. 104 answers 23505 for a second use while the
+    // first is still running, so the date is the thing worth saying.
+    const until = formatDay(item.effect_expires_at, '확인 중');
+    return `효과가 ${until}까지 적용 중이에요. 끝난 뒤에 다시 사용할 수 있어요.`;
+  }
+  return null;
+}
+
+/** What one settled upkeep is reported as, from the figure that was charged. */
+export function settlementMessage(receipt: SettlementReceipt): string {
+  const amount = groupDigits(receipt.paid_amount);
+  return receipt.replayed
+    ? `이미 처리된 납부예요. 결제된 금액은 ${amount} WLD였어요.`
+    : `밀린 관리비 ${amount} WLD를 냈어요. 이제 이 아이템을 다시 쓸 수 있어요.`;
 }

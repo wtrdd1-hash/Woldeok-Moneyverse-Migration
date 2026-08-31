@@ -33,6 +33,13 @@ function held(overrides: Partial<HeldItem> = {}): HeldItem {
     acquired_at: '2026-08-01T00:00:00.000Z',
     expires_at: null,
     effect_kind: 'convenience',
+    durable: false,
+    weekly_cost: '0',
+    effect_expires_at: null,
+    unpaid_weeks: 0,
+    arrears_due: '0',
+    arrears_cap: '0',
+    suspended: false,
     ...overrides,
   };
 }
@@ -159,6 +166,55 @@ describe('HoldingCard', () => {
   it('says when a held item runs out', () => {
     const { container } = render(<HoldingCard item={held({ expires_at: '2026-12-31T00:00:00.000Z' })} />);
     expect(container.textContent).toContain('까지');
+  });
+
+  // 104 refuses a durable holding with 22023. Every useful item in the
+  // catalogue is `convenience`, vehicles included, so without this the button
+  // that destroys 45,000 WLD sits on the card of a 소형 화물차.
+  it('withholds the use control from a durable holding and names its upkeep', () => {
+    const { container } = render(
+      <HoldingCard item={held({ durable: true, weekly_cost: '900', name: '소형 화물차' })}>
+        <button type="button">1개 사용하기</button>
+      </HoldingCard>,
+    );
+    expect(screen.queryByRole('button', { name: '1개 사용하기' })).toBeNull();
+    expect(container.textContent).toContain('주간 관리비');
+    expect(container.textContent).toContain('900');
+  });
+
+  // Paying is the one thing a member can do about a suspended holding, so the
+  // card has to draw the control it was given and state what is owed.
+  it('shows what a suspended holding owes and keeps its control', () => {
+    const { container } = render(
+      <HoldingCard
+        item={held({
+          durable: true,
+          weekly_cost: '900',
+          arrears_due: '3600',
+          arrears_cap: '3600',
+          unpaid_weeks: 4,
+          suspended: true,
+        })}
+      >
+        <button type="button">밀린 관리비 내기</button>
+      </HoldingCard>,
+    );
+    expect(screen.getByRole('button', { name: '밀린 관리비 내기' })).toBeDefined();
+    expect(container.textContent).toContain('3,600');
+    expect(container.textContent).toContain('4주');
+    expect(container.textContent).toContain('관리비 미납 정지');
+  });
+
+  // Chapter 20's 중복 방지: 104 answers 23505 for a second use while the
+  // first is still running, so the control comes off and the date goes on.
+  it('withholds the use control while an effect is still running', () => {
+    const { container } = render(
+      <HoldingCard item={held({ effect_expires_at: '2026-12-31T00:00:00.000Z' })}>
+        <button type="button">1개 사용하기</button>
+      </HoldingCard>,
+    );
+    expect(screen.queryByRole('button', { name: '1개 사용하기' })).toBeNull();
+    expect(container.textContent).toContain('적용 중');
   });
 
   // `shop_my_items` sends no price and the paid amount lives on the purchase

@@ -77,6 +77,20 @@ export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
     statement: 'SELECT public.bank_mark_overdue_loans()::text AS marked',
   },
   {
+    // 17.4 prices every vehicle and lease by the week, and 075 shipped the
+    // `maintenance_cost` column and the receipts table with no function that
+    // writes one -- so the 주간 관리비 on a card was a figure nothing ever
+    // charged. 104 is the charge; this is what calls it. Weekly at 04:30 KST,
+    // the same boundary `shop_charge_weekly_upkeep` computes its receipt week
+    // from, so the week the runner claims is the week the receipt is dated.
+    job: 'shop.weekly_upkeep',
+    cadence: 'weekly',
+    notBefore: 30,
+    connection: 'app',
+    statement:
+      'SELECT upkeep.charged_count, upkeep.unpaid_count, upkeep.suspended_count, upkeep.failed_count, upkeep.charged_amount::text AS charged_amount FROM public.shop_charge_weekly_upkeep() AS upkeep',
+  },
+  {
     // 15.2: Monday 04:30 KST. The window arithmetic counts from the daily
     // 04:00 boundary, so thirty minutes into it is half past four.
     job: 'economy.auto_policy',

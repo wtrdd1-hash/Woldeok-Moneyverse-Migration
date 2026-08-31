@@ -13,9 +13,11 @@ import {
   countLabel,
   effectLabel,
   hasUpkeep,
-  isConsumable,
+  holdingNote,
+  owesUpkeep,
   purchaseLimitLabel,
   stockLabel,
+  weeksLabel,
 } from './catalog';
 import type { CatalogItem, HeldItem } from './catalog';
 
@@ -97,10 +99,9 @@ export function CatalogCard({
       <CardContent className="grid gap-1 text-sm">
         <MoneyLine term="가격" value={item.price} />
         {/* Shown because a member choosing between a scooter and a van should
-            see what each costs every week before buying either. Nothing
-            charges it yet -- 075 adds the column and the receipts table and no
-            function that writes one -- and the section above says so, because
-            a figure with no explanation reads as a bill already arriving. */}
+            see what each costs every week before buying either. Since 104 it
+            is a charge and not a note: the weekly job takes it every Monday,
+            and the section above says what happens when it cannot be paid. */}
         {hasUpkeep(item.maintenance_cost) && (
           <MoneyLine term="주간 관리비" value={item.maintenance_cost} />
         )}
@@ -130,6 +131,10 @@ export function HoldingCard({
   readonly item: HeldItem;
   readonly children?: React.ReactNode;
 }) {
+  // Every refusal 104 would make, decided once. A non-null note means the
+  // control could only be answered with a conflict, so it is not drawn.
+  const note = holdingNote(item);
+
   return (
     <Card className="justify-between gap-4">
       <CardHeader>
@@ -140,6 +145,12 @@ export function HoldingCard({
           <Badge variant="outline" className="font-normal">
             {effectLabel(item.effect_kind)}
           </Badge>
+          {item.suspended && <Badge variant="destructive">관리비 미납 정지</Badge>}
+          {item.effect_expires_at !== null && (
+            <Badge variant="outline" className="font-normal">
+              효과 적용 중
+            </Badge>
+          )}
         </div>
         <CardTitle className="text-base">{item.name}</CardTitle>
         <CardDescription>
@@ -150,18 +161,23 @@ export function HoldingCard({
 
       <CardContent className="grid gap-1 text-sm">
         <FactLine term="보유 수량" value={countLabel(item.quantity)} />
+        {hasUpkeep(item.weekly_cost) && <MoneyLine term="주간 관리비" value={item.weekly_cost} />}
+        {/* The debt and how long it has run, together. A figure on its own
+            cannot be told apart from one week of an expensive lease and four
+            of a cheap one, and only the second is about to be suspended. */}
+        {owesUpkeep(item) && (
+          <>
+            <MoneyLine term="밀린 관리비" value={item.arrears_due} />
+            <FactLine term="미납 기간" value={weeksLabel(item.unpaid_weeks)} />
+          </>
+        )}
+        {item.effect_expires_at !== null && (
+          <FactLine term="효과 종료" value={formatDay(item.effect_expires_at, '확인 중')} />
+        )}
       </CardContent>
 
       <CardFooter>
-        {isConsumable(item.effect_kind) ? (
-          children
-        ) : (
-          // 074 refuses anything but a `convenience` item with 22023, so the
-          // control is not offered rather than offered and refused.
-          <p className="text-sm text-muted-foreground">
-            장식·전시 아이템은 사용하지 않고 그대로 보유해요.
-          </p>
-        )}
+        {note === null ? children : <p className="text-sm text-muted-foreground">{note}</p>}
       </CardFooter>
     </Card>
   );
