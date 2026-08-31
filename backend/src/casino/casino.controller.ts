@@ -21,7 +21,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure, isExpectedCommandFailure, isRoleRefusal } from '../core/pg-error';
-import { CasinoPlayDto, CasinoSelfLimitDto } from './casino.dto';
+import { CasinoDicePlayDto, CasinoPlayDto, CasinoSelfLimitDto } from './casino.dto';
 import { CASINO_OPEN, CasinoInputError, CasinoRepository } from './casino.repository';
 
 /**
@@ -199,6 +199,64 @@ export class CasinoController {
       throw this.mapped(error, {
         conflict: 'the play was not accepted',
         forbidden: 'the play was not yours to make',
+      });
+    }
+  }
+
+  /**
+   * The odds, the payout and the maximum loss for every game at once.
+   *
+   * One route rather than one per game, because from migration 100 the daily
+   * allowances are the member's rather than the game's: three reads would be
+   * three readings of one day, and a picker that showed them side by side
+   * could show three different answers to the same question.
+   */
+  @Get('games/terms')
+  @ApiOperation({ summary: 'Every game’s odds, payout and remaining exposure for today' })
+  async gameTerms(@Req() request: RequestWithSession) {
+    const repository = await this.requireOpenCasino();
+    return this.guarded(() => repository.gameTerms(requireUserId(request)), {
+      conflict: 'the casino terms are unavailable',
+      forbidden: 'the casino terms are not yours to read',
+    });
+  }
+
+  @Get('dice/fairness')
+  @ApiOperation({ summary: 'Each dice game’s disclosed odds and the trial evidencing them' })
+  async diceFairness() {
+    const repository = await this.requireOpenCasino();
+    return this.guarded(() => repository.diceFairness(), {
+      conflict: 'the fairness evidence is unavailable',
+      forbidden: 'the fairness evidence is not yours to read',
+    });
+  }
+
+  /**
+   * One roll, and it does not ask the switch first for exactly the reason the
+   * coin's play route does not: `casino_play_dice` looks for an existing
+   * receipt before it reads the switch, so closing the casino cannot turn a
+   * member's in-flight retry into an error.
+   */
+  @Post('dice/plays')
+  @ApiOperation({ summary: 'Stake WLD on one roll of the die' })
+  async playDice(@Req() request: RequestWithSession, @Body() body: CasinoDicePlayDto) {
+    const repository = this.repository();
+    try {
+      return await repository.playDice(
+        body.idempotencyKey,
+        requireUserId(request),
+        body.game,
+        body.choice,
+        body.stake,
+      );
+    } catch (error: unknown) {
+      if (isExpectedCommandFailure(error)) {
+        const state = await repository.switchState();
+        if (state !== CASINO_OPEN) throw casinoClosed(state);
+      }
+      throw this.mapped(error, {
+        conflict: 'the roll was not accepted',
+        forbidden: 'the roll was not yours to make',
       });
     }
   }

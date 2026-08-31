@@ -10,19 +10,23 @@ describe('ClosedNotice', () => {
   // A shut game and a paused one must not read the same. One is waiting for a
   // legal review and will not open today whatever the member does; the other
   // is an operator state meant to be lifted, where "come back later" is true.
-  it('tells a member the game is shut rather than busy', () => {
+  // The switch is one switch for the whole casino, so the sentence names the
+  // casino. It named the coin game while the coin was the only game, and a
+  // member sent away from the dice by a notice about a coin would reasonably
+  // go looking for the dice somewhere else.
+  it('tells a member the games are shut rather than busy', () => {
     render(<ClosedNotice closure="disabled" />);
-    expect(screen.getByText('동전 게임은 지금 열려 있지 않아요.')).toBeDefined();
+    expect(screen.getByText('카지노는 지금 열려 있지 않아요.')).toBeDefined();
   });
 
   it('tells a member a pause is temporary', () => {
     render(<ClosedNotice closure="paused" />);
-    expect(screen.getByText('동전 게임을 잠시 멈춰 두었어요.')).toBeDefined();
+    expect(screen.getByText('카지노를 잠시 멈춰 두었어요.')).toBeDefined();
   });
 
   it('names safe mode as its own state', () => {
     render(<ClosedNotice closure="safe_mode" />);
-    expect(screen.getByText('동전 게임이 안전 모드예요.')).toBeDefined();
+    expect(screen.getByText('카지노가 안전 모드예요.')).toBeDefined();
   });
 });
 

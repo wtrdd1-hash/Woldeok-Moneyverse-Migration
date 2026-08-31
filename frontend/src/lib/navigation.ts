@@ -21,7 +21,7 @@ export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/businesses', label: '게임 사업' },
   { href: '/seasons', label: '시즌' },
   { href: '/quests', label: '퀘스트' },
-  { href: '/casino', label: '동전 게임' },
+  { href: '/casino', label: '카지노' },
   { href: '/progression', label: '성장 단계' },
   { href: '/profile', label: '내 프로필' },
   { href: '/shop/catalog', label: '아이템 상점' },
@@ -110,7 +110,7 @@ export const HEADER_MEMBER: readonly NavItem[] = [
       // Behind a feature switch that is off until the stage-3 gates pass. The
       // link stays, and the page says so in a sentence -- hiding it would make
       // "why can I not find it" a support question.
-      { href: '/casino', label: '동전 게임' },
+      { href: '/casino', label: '카지노' },
     ],
   },
   {
