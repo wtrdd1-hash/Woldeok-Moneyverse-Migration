@@ -77,7 +77,18 @@ put BACKUP_DB_PASSWORD "$(secret)"
 # lives in the same volume as the database it is a backup of is not a backup.
 # It is outside this directory as well, which the deploy workflow overwrites on
 # every roll. Written once, so an operator who moves it keeps it moved.
-put BACKUP_DIR "${BACKUP_DIR:-$HOME/moneyverse-backups/${STACK:-wdmv}}"
+#
+# The default is on the second SSD, beside the photo store and NOT on the disk
+# carrying /var/lib/docker. Escaping the volume was never the whole ask: until
+# now this defaulted under $HOME, so the ciphertext sat on the same physical
+# device as the postgres data directory it was a copy of, and one disk failure
+# took both. 17.x asks for the operational data on a separate SSD and this is
+# half of what that is for.
+#
+# `put`, so a host that already has a value keeps it -- which means an existing
+# deployment does NOT move by redeploying. docs/BACKUP.md has the two commands
+# that move one, and it is a deliberate act on data that already exists.
+put BACKUP_DIR "${BACKUP_DIR:-${BACKUP_HOST_ROOT:-/data/wtrdd/moneyverse/backups}/${STACK:-wdmv}}"
 
 # Where the photo object store lives on the host.
 #
