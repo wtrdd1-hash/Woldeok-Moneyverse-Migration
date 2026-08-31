@@ -56,7 +56,7 @@ describe.skipIf(!DATABASE_URL)('the casino repository against a real database', 
   });
 
   describe('the terms a member is shown before staking', () => {
-    it('answers with exactly the columns 060 declares', async () => {
+    it('answers with exactly the columns 060 and 099 declare', async () => {
       const terms = await casino.terms(NOBODY);
       expect(Object.keys(terms).sort()).toEqual(
         [
@@ -68,6 +68,7 @@ describe.skipIf(!DATABASE_URL)('the casino repository against a real database', 
           'house_edge_ppm',
           'max_stake',
           'min_stake',
+          'net_win_at_max',
           'payout_multiplier_ppm',
           'remaining_loss',
           'remaining_stake',

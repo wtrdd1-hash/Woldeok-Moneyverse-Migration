@@ -250,10 +250,13 @@ describe.skipIf(!DATABASE_URL)('casino coin fairness against a real database', (
   describe('disclosure before the stake, not after', () => {
     it('states the odds, the payout and the edge', () => {
       expect(terms.win_probability_ppm, 'one half, in ppm').toBe(500_000);
-      expect(terms.payout_multiplier_ppm, 'even money').toBe(2_000_000);
-      // A fair coin at even money has no house edge. This is the arithmetic
-      // the distribution trial above is the evidence for.
-      expect(terms.house_edge_ppm, 'expected loss per unit staked').toBe(0);
+      // 099 priced the game as a sink: the coin stays exactly fair and the
+      // payout carries the edge. This assertion was `2_000_000` and `0` --
+      // even money, which returned every WLD the game took.
+      expect(terms.payout_multiplier_ppm, '1.9x').toBe(1_900_000);
+      // 0.5 x 1.9 = 0.95, so five percent of every stake is retired. This is
+      // the arithmetic the distribution trial above is the evidence for.
+      expect(terms.house_edge_ppm, 'expected loss per unit staked').toBe(50_000);
     });
 
     it('carries every limit as a canonical integer string', () => {
@@ -267,9 +270,9 @@ describe.skipIf(!DATABASE_URL)('casino coin fairness against a real database', (
         expect(typeof value, `${name} must stay a string`).toBe('string');
       }
       expect(terms.min_stake).toBe('10');
-      expect(terms.max_stake).toBe('10000');
-      expect(terms.daily_stake_limit).toBe('50000');
-      expect(terms.daily_loss_limit).toBe('25000');
+      expect(terms.max_stake).toBe('500');
+      expect(terms.daily_stake_limit).toBe('3000');
+      expect(terms.daily_loss_limit).toBe('1500');
     });
 
     // A member who has played nothing has spent neither allowance, and the
@@ -277,9 +280,9 @@ describe.skipIf(!DATABASE_URL)('casino coin fairness against a real database', (
     it('reports full headroom and the worst case for a member with no plays today', () => {
       expect(terms.daily_stake_used).toBe('0');
       expect(terms.daily_loss_used).toBe('0');
-      expect(terms.remaining_stake).toBe('50000');
-      expect(terms.remaining_loss).toBe('25000');
-      expect(terms.worst_case_loss, 'the lesser of the two allowances').toBe('25000');
+      expect(terms.remaining_stake).toBe('3000');
+      expect(terms.remaining_loss).toBe('1500');
+      expect(terms.worst_case_loss, 'the lesser of the two allowances').toBe('1500');
     });
 
     it('tells the screen the game is closed', () => {
