@@ -239,11 +239,23 @@ describe.skipIf(!DATABASE_URL)('the early game against a real database', () => {
         const ladder = await unlocks(client, actor);
         expect(rung(ladder, 'stall_business').unlocked).toBe(true);
         expect(rung(ladder, 'stall_business').member_job_level).toBe(5);
-        // The next thing that is actually refused, not the next row: a rung
-        // nothing enforces is already available and must never be offered as
-        // something to work towards.
-        expect(rung(ladder, 'street_cart').next_up).toBe(true);
+        // The next thing that is actually refused, not the next row. A level-5
+        // member who joined today still has the credit rung ahead of them --
+        // it wants seven days and ten paid tasks, neither of which a level
+        // buys -- so that is what they are working towards, and the business
+        // above them is not. `job_focus` is the rung this must never pick: it
+        // is below both and nothing enforces it, so offering it would send a
+        // member to work for something they can already do.
+        expect(rung(ladder, 'credit_c_loan').next_up).toBe(true);
+        expect(rung(ladder, 'street_cart').next_up).toBe(false);
         expect(rung(ladder, 'job_focus').next_up).toBe(false);
+
+        // And it moves. Once the credit rung is behind them the next lock is
+        // the next business, which is the ordering 16.1 describes.
+        await reachLendingGrade(client, actor);
+        const climbed = await unlocks(client, actor);
+        expect(rung(climbed, 'credit_c_loan').unlocked).toBe(true);
+        expect(rung(climbed, 'street_cart').next_up).toBe(true);
       });
     });
 
@@ -293,6 +305,11 @@ describe.skipIf(!DATABASE_URL)('the early game against a real database', () => {
         );
         const stall = rows[0]?.id;
 
+        // The savepoint is taken BEFORE the refusal, not after it. A statement
+        // that raises aborts the transaction, and an aborted transaction will
+        // not accept a SAVEPOINT either -- so asking for one afterwards fails
+        // with 25P02 rather than recovering.
+        await client.query('SAVEPOINT before_refusal');
         const refused = await rejectionOf(() =>
           client.query('SELECT * FROM public.business_purchase($1, $2, $3)', [
             randomUUID(),
@@ -300,9 +317,9 @@ describe.skipIf(!DATABASE_URL)('the early game against a real database', () => {
             stall,
           ]),
         );
+        await client.query('ROLLBACK TO SAVEPOINT before_refusal');
         expect(code(refused)).toBe('22023');
 
-        await client.query('SAVEPOINT after_refusal');
         await atLevel(client, actor, 'carrier', 5);
         const { rows: bought } = await client.query<{ purchase_cost: string }>(
           `SELECT purchased.purchase_cost::text
