@@ -236,4 +236,94 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('profile images against
       });
     });
   });
+
+  /**
+   * Migration 102. 094 gave a member a picture they upload and serve on their
+   * own terms, and recorded nothing when one was set or taken down -- so a
+   * picture that has to be removed after a report left no trace of who put it
+   * there or when, which is the one question asked afterwards.
+   */
+  describe('the audit trail a profile picture leaves', () => {
+    const events = async (client: PoolClient, actor: string) => {
+      const { rows } = await client.query<{ action: string; metadata: Record<string, unknown> }>(
+        `SELECT action, metadata FROM public.audit_logs
+         WHERE actor_user_id = $1 AND action LIKE 'member.profile_image.%'
+         ORDER BY sequence`,
+        [actor],
+      );
+      return rows;
+    };
+
+    it('records the member, not an administrator, as the actor', async () => {
+      await rolledBack(async (client) => {
+        const actor = await member(client);
+        await setImage(client, actor, KEY);
+        const written = await events(client, actor);
+        expect(written).toHaveLength(1);
+        expect(written[0]?.action).toBe('member.profile_image.set');
+        expect(written[0]?.metadata).toMatchObject({ storageKey: KEY });
+      });
+    });
+
+    it('names the key it replaced, so a removed picture can still be traced', async () => {
+      await rolledBack(async (client) => {
+        const actor = await member(client);
+        await setImage(client, actor, KEY);
+        await setImage(client, actor, OTHER_KEY);
+        const written = await events(client, actor);
+        expect(written).toHaveLength(2);
+        expect(written[1]?.metadata).toMatchObject({
+          storageKey: OTHER_KEY,
+          replacedStorageKey: KEY,
+        });
+      });
+    });
+
+    /**
+     * "They asked and there was none" is a different fact from "nobody asked",
+     * and a trail that records only successful removals cannot tell a reviewer
+     * which one happened.
+     */
+    it('records a clearing even when there was nothing to clear', async () => {
+      await rolledBack(async (client) => {
+        const actor = await member(client);
+        await client.query('SELECT public.member_clear_profile_image($1)', [actor]);
+        const written = await events(client, actor);
+        expect(written).toHaveLength(1);
+        expect(written[0]?.action).toBe('member.profile_image.cleared');
+        expect(written[0]?.metadata).toMatchObject({ hadPicture: false });
+      });
+    });
+
+    /**
+     * The failure this is guarding against is 058's: a rejected audit write
+     * rolls back the thing it was recording. `audit_first_sensitive_key`
+     * refuses a payload holding a credential, so `storageKey` has to stay
+     * outside its pattern -- and if a later migration widens that pattern,
+     * this is where it shows up rather than in production.
+     */
+    it('does not let the audit write roll back the picture it records', async () => {
+      await rolledBack(async (client) => {
+        const actor = await member(client);
+        const receipt = await setImage(client, actor, KEY);
+        expect(receipt?.image_path).toBe(`/media/profile/${KEY}`);
+        const { rows } = await client.query<{ image_url: string | null }>(
+          'SELECT image_url FROM public.member_profiles WHERE user_id = $1',
+          [actor],
+        );
+        expect(rows[0]?.image_url).toBe(`/media/profile/${KEY}`);
+      });
+    });
+  });
+
+  /** 17.9's other half: a ceiling the application cannot exceed by restarting. */
+  it('caps how many connections the application role may hold', async () => {
+    await rolledBack(async (client) => {
+      const { rows } = await client.query<{ rolconnlimit: number }>(
+        "SELECT rolconnlimit FROM pg_catalog.pg_roles WHERE rolname = 'moneyverse_app'",
+      );
+      expect(rows[0]?.rolconnlimit).toBe(30);
+    });
+  });
+
 });
