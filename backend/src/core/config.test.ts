@@ -123,6 +123,50 @@ const OUTBOX = {
   DISCORD_OUTBOX_CHANNEL_ID: '9876543210987654',
 } satisfies NodeJS.ProcessEnv;
 
+describe('loadConfig: the database pool', () => {
+  it('bounds the pool without being told to', () => {
+    expect(loadConfig({ ...MINIMAL }).databasePool).toEqual({
+      max: 10,
+      idleTimeoutMillis: 10_000,
+      connectionTimeoutMillis: 5_000,
+    });
+  });
+
+  it('takes a ceiling an operator sets', () => {
+    expect(loadConfig({ ...MINIMAL, DATABASE_POOL_MAX: '25' }).databasePool.max).toBe(25);
+  });
+
+  it('refuses a ceiling that would take the whole cluster', () => {
+    expect(loadConfig({ ...MINIMAL, DATABASE_POOL_MAX: '400' }).databasePool.max).toBe(10);
+  });
+
+  it('refuses a ceiling of zero, which would answer nothing at all', () => {
+    expect(loadConfig({ ...MINIMAL, DATABASE_POOL_MAX: '0' }).databasePool.max).toBe(10);
+  });
+
+  // compose.yml passes these through as `${DATABASE_POOL_MAX:-}`, so an
+  // unconfigured host sends the empty string rather than nothing at all.
+  // `'' ?? fallback` keeps the empty string; the bound is what rejects it.
+  it('treats an empty setting as unset', () => {
+    expect(loadConfig({ ...MINIMAL, DATABASE_POOL_MAX: '' }).databasePool).toEqual({
+      max: 10,
+      idleTimeoutMillis: 10_000,
+      connectionTimeoutMillis: 5_000,
+    });
+  });
+
+  it('refuses a ceiling that is not a number', () => {
+    expect(loadConfig({ ...MINIMAL, DATABASE_POOL_MAX: 'lots' }).databasePool.max).toBe(10);
+  });
+
+  // The wait is the setting that matters: without a ceiling `pg` queues
+  // forever, and a saturated pool stops answering instead of answering 503.
+  it('never waits forever for a connection', () => {
+    const forever = loadConfig({ ...MINIMAL, DATABASE_POOL_CONNECT_TIMEOUT_MS: '0' });
+    expect(forever.databasePool.connectionTimeoutMillis).toBe(5_000);
+  });
+});
+
 describe('loadConfig: the Discord outbox', () => {
   it('is off by default, and says which switch is off', () => {
     const outbox = loadConfig({ ...MINIMAL }).discordOutbox;

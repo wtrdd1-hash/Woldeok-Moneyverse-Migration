@@ -80,10 +80,26 @@ export type DiscordOutboxConfig =
       readonly intervalMs: number;
     };
 
+/**
+ * How many connections this process may hold, and how long it waits.
+ *
+ * 17.9 asks for a ceiling on both sides -- the pool here and a
+ * `CONNECTION LIMIT` on the role -- so that a burst of traffic is refused by
+ * the pool rather than by Postgres, where it would take the whole cluster's
+ * connection budget with it and lock out the reconciler and the backup role
+ * as well.
+ */
+export interface DatabasePoolConfig {
+  readonly max: number;
+  readonly idleTimeoutMillis: number;
+  readonly connectionTimeoutMillis: number;
+}
+
 export interface AppConfig {
   readonly port: number;
   readonly baseUrl: string;
   readonly databaseUrl: string | undefined;
+  readonly databasePool: DatabasePoolConfig;
   readonly production: boolean;
   readonly cookieSecure: boolean;
   readonly adsEnabled: boolean;
@@ -329,6 +345,30 @@ function discordOutbox(env: NodeJS.ProcessEnv): DiscordOutboxConfig {
   };
 }
 
+function bounded(raw: string | undefined, fallback: number, low: number, high: number): number {
+  const configured = Number(raw ?? fallback);
+  return Number.isFinite(configured) && configured >= low && configured <= high
+    ? Math.trunc(configured)
+    : fallback;
+}
+
+function databasePool(env: NodeJS.ProcessEnv): DatabasePoolConfig {
+  return {
+    // Ten, which is also what `pg` would have used -- the point is that it is
+    // now a decision with a ceiling rather than a library default. The cluster
+    // allows 100 and five other roles draw on the same budget, so the ceiling
+    // is well under it: an API told to hold fifty would starve the reconciler
+    // and the nightly backup, and 17.9 exists to prevent exactly that.
+    max: bounded(env.DATABASE_POOL_MAX, 10, 1, 40),
+    idleTimeoutMillis: bounded(env.DATABASE_POOL_IDLE_TIMEOUT_MS, 10_000, 1_000, 300_000),
+    // The one that is not a library default. `pg` waits forever for a free
+    // connection, so an exhausted pool turns into requests that never answer
+    // and a queue that only grows; five seconds turns it into a 503 the caller
+    // can retry, which is the failure the rest of this service is written for.
+    connectionTimeoutMillis: bounded(env.DATABASE_POOL_CONNECT_TIMEOUT_MS, 5_000, 1_000, 60_000),
+  };
+}
+
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const production = env.NODE_ENV === 'production';
   const baseUrl = parseUrl(env.APP_BASE_URL ?? 'http://127.0.0.1:3000', 'APP_BASE_URL').toString();
@@ -343,6 +383,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     port: Number(env.PORT ?? 3000),
     baseUrl,
     databaseUrl: env.DATABASE_URL,
+    databasePool: databasePool(env),
     production,
     cookieSecure: env.COOKIE_SECURE === undefined ? production : env.COOKIE_SECURE === 'true',
     adsEnabled: env.ADS_ENABLED === 'true',

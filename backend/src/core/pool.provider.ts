@@ -10,10 +10,18 @@ export const PG_POOL = Symbol('PG_POOL');
  * database checks for null and reports itself unavailable rather than
  * inventing data: the original application's public pages stay readable with
  * the store offline, and its APIs answer 503.
+ *
+ * The pool is bounded on purpose -- see `DatabasePoolConfig`. Until now it was
+ * constructed from the connection string alone, which meant `pg`'s defaults:
+ * ten connections, and an unbounded wait for the eleventh. The count was
+ * survivable; the wait was not, because a saturated pool answered nothing
+ * instead of answering 503, and the caller could not tell the two apart.
  */
 export const poolProvider: Provider = {
   provide: PG_POOL,
   inject: [CONFIG],
   useFactory: (config: AppConfig): Pool | null =>
-    config.databaseUrl ? new Pool({ connectionString: config.databaseUrl }) : null,
+    config.databaseUrl
+      ? new Pool({ connectionString: config.databaseUrl, ...config.databasePool })
+      : null,
 };
