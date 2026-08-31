@@ -19,6 +19,12 @@ import { AdminControlsController } from './controls.controller';
 import { ControlsRepository } from './controls.repository';
 import { GameCatalogController } from './game-catalog.controller';
 import { PostgresGameCatalogRepository } from './game-catalog.repository';
+import {
+  AdminBankOperationsController,
+  AdminDiscordOperationsController,
+  AdminWorkOperationsController,
+} from './operations.controller';
+import { OperationsRepository } from './operations.repository';
 
 /**
  * The device pepper.
@@ -44,6 +50,12 @@ function devicePepper(config: AppConfig): string {
     AdminControlsController,
     AdminSecurityController,
     GameCatalogController,
+    // The three surfaces spec 14.9 lists and this build did not have. They
+    // share one repository and one prefix each, because the audit trail reads
+    // an event's feature off the first path segment under /admin.
+    AdminWorkOperationsController,
+    AdminBankOperationsController,
+    AdminDiscordOperationsController,
   ],
   providers: [
     {
@@ -94,6 +106,15 @@ function devicePepper(config: AppConfig): string {
       inject: [PG_POOL],
       useFactory: (pool: Queryable | null) =>
         pool ? new PostgresGameCatalogRepository(pool) : null,
+    },
+    {
+      // A factory, like its neighbours: the constructor takes `Queryable`,
+      // which TypeScript erases to Object, so a class provider would leave
+      // Nest with no token to resolve and take the whole API down at
+      // bootstrap rather than just these three routes.
+      provide: OperationsRepository,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => (pool ? new OperationsRepository(pool) : null),
     },
   ],
   exports: [AdminService, AuditRepository],

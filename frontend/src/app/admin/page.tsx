@@ -70,6 +70,12 @@ export default async function AdminPage() {
       ? `사업 ${businesses.businessTypes.length}개 · 이벤트 ${events.events.length}개`
       : null,
     '/admin/economy': health?.available ? '최근 스냅샷 있음' : '스냅샷 없음',
+    // No count for these four. Each would be another round trip on the one
+    // screen that is supposed to open fast, and the card already says what is
+    // behind the door.
+    '/admin/work': null,
+    '/admin/bank': null,
+    '/admin/discord': null,
     '/admin/logs': null,
     '/admin/logs/integrity': null,
     '/admin/content': null,
