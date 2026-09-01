@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PublicAdvertisement } from '@/components/public-advertisement';
 import { FIRST_DAY_ORDER, GUIDE_STEPS } from './guide';
 
 /**
@@ -72,6 +73,8 @@ export default function GuidePage() {
           </li>
         ))}
       </ol>
+
+      <PublicAdvertisement />
 
       <section aria-labelledby="order-title" className="grid gap-3">
         <h2 id="order-title" className="text-lg">

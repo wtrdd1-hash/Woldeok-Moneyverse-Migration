@@ -4,6 +4,7 @@ import { EmptyState } from '@/components/empty-state';
 import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
+import { PublicAdvertisement } from '@/components/public-advertisement';
 
 export const revalidate = 300;
 
@@ -95,6 +96,9 @@ export default async function GalleryPage() {
           </div>
         )}
       </section>
+
+      {/* Only operator-reviewed, published photos make this a content page. */}
+      {photos.length > 0 && <PublicAdvertisement />}
     </div>
   );
 }

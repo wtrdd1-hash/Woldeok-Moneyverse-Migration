@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
 import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PublicAdvertisement } from '@/components/public-advertisement';
 import { publicApi } from '@/lib/api';
 import { jsonLd } from '@/lib/json-ld';
 import { formatDay } from '@/lib/money';
@@ -106,6 +107,9 @@ export default async function AnnouncementsPage() {
           ))
         )}
       </section>
+
+      {/* An empty notice board is not advertising inventory. */}
+      {data && data.announcements.length > 0 && <PublicAdvertisement />}
     </div>
   );
 }
