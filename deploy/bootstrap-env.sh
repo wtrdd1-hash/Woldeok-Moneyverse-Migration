@@ -115,7 +115,10 @@ put TRUST_PROXY_X_FORWARDED_FOR 'true'
 # A second host serving the same Korean copy under a different name is a
 # duplicate in search results, so this defaults off and production turns it on.
 set_to SEO_INDEXING_ENABLED "${SEO_INDEXING_ENABLED:-false}"
-put ADS_ENABLED "${ADS_ENABLED:-false}"
+# Advertising is a release-time feature flag.  Unlike durable host paths,
+# this must follow the deployment target: leaving an old `false` in .env
+# would make a reviewed production advertising release silently ineffective.
+set_to ADS_ENABLED "${ADS_ENABLED:-false}"
 supplied ADSENSE_PUBLISHER_ID "${ADSENSE_PUBLISHER_ID:-}"
 supplied ADSENSE_HOME_SLOT "${ADSENSE_HOME_SLOT:-}"
 set_to EDGE_PORT "${EDGE_PORT:-3021}"
