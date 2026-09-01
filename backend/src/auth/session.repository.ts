@@ -261,6 +261,18 @@ export class SessionRepository {
     return Boolean(row);
   }
 
+  async grantCurrentUserConsent(
+    sessionId: string,
+    acknowledgement: { readonly termsVersion: string; readonly privacyVersion: string },
+  ): Promise<boolean> {
+    const row = await queryOne<{ readonly accepted: boolean }>(
+      this.pool,
+      `SELECT public.auth_grant_current_user_consent($1::uuid, $2, $3) AS accepted`,
+      [sessionId, acknowledgement.termsVersion, acknowledgement.privacyVersion],
+    );
+    return row?.accepted === true;
+  }
+
   async hasCurrentUserConsent(sessionId: string): Promise<boolean> {
     const row = await queryOne<{ readonly has_current_consent: boolean }>(
       this.pool,

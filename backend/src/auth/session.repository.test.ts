@@ -103,6 +103,20 @@ describe('SessionRepository.verifyCsrf', () => {
   });
 });
 
+describe('SessionRepository.grantCurrentUserConsent', () => {
+  it('uses the database gate for a signed-in member and records the exact policy pair', async () => {
+    const { pool, queries } = recordingPool(() => [{ accepted: true }]);
+    const accepted = await new SessionRepository(pool).grantCurrentUserConsent('session-id', {
+      termsVersion: '2026-09-02',
+      privacyVersion: '2026-09-02',
+    });
+
+    expect(accepted).toBe(true);
+    expect(queries[0]?.text).toContain('auth_grant_current_user_consent');
+    expect(queries[0]?.values).toEqual(['session-id', '2026-09-02', '2026-09-02']);
+  });
+});
+
 describe('SessionRepository.rotateCsrf', () => {
   it('stores the hash and returns the clear token', async () => {
     const { pool, queries } = recordingPool(() => [{ id: 'session-id' }]);

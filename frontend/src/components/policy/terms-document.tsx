@@ -16,15 +16,15 @@ import Link from 'next/link';
 export function TermsDocument() {
   return (
       <article className="policy-document grid gap-6">
-      <p className="section-label">WOLDEOK MONEYVERSE · TEST POLICY</p>
+      <p className="section-label">WOLDEOK MONEYVERSE · TERMS OF SERVICE</p>
       <p className="max-w-prose text-sm text-muted-foreground">
       월덕 머니버스는 Discord와 웹에서 함께 사용하는 커뮤니티형 가상경제 서비스입니다.
-      이 문서는 테스트 서버에서 적용할 MVP 이용 기준을 분명히 설명합니다.
+      이 문서는 운영 서비스에 적용할 이용 기준을 분명히 설명합니다.
       </p>
       <dl className="grid gap-2 rounded-lg border bg-card p-4 text-sm sm:grid-cols-3" aria-label="문서 정보">
-      <div><dt>문서 버전</dt><dd>2026-08-26</dd></div>
-      <div><dt>시행일</dt><dd>2026년 8월 26일</dd></div>
-      <div><dt>문서 상태</dt><dd>테스트 서버 적용본</dd></div>
+      <div><dt>문서 버전</dt><dd>2026-09-02</dd></div>
+      <div><dt>시행일</dt><dd>2026년 9월 2일</dd></div>
+      <div><dt>문서 상태</dt><dd>운영 서버 적용본</dd></div>
       </dl>
       <aside className="rounded-lg border-l-4 border-l-primary bg-card p-4" aria-label="중요 안내">
       <strong>가상경제 안내</strong>
@@ -120,9 +120,9 @@ export function TermsDocument() {
       <li>이 약관은 대한민국 법령을 따르며, 분쟁은 법령상 관할 법원에서 해결합니다.</li>
       </ol>
       </section>
-      <aside className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground" aria-label="테스트 문서 고지">
-      <strong>테스트 서버 고지</strong>
-      <p>이 문서는 실제 기능·데이터 흐름에 맞춘 테스트용 정책 전문입니다. 운영 전에는 운영자 신원, 검증된 문의 연락처, 실제 수탁사·국외 이전 여부와 최종 보유 기간을 확정해 재게시하고, 중요한 변경은 다시 동의를 받아야 합니다.</p>
+      <aside className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground" aria-label="운영자와 문의처">
+      <strong>운영자와 문의처</strong>
+      <p>서비스 운영자는 홍종환이며, 약관·이용 제한·이의제기 관련 문의는 <a href="mailto:jungchwimisaenghwal63@gmail.com">jungchwimisaenghwal63@gmail.com</a>으로 보낼 수 있습니다.</p>
       </aside>
       </article>
   );

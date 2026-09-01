@@ -46,16 +46,19 @@ export async function submitConsent(
     }>('/api/v1/auth/prelogin-session', { method: 'POST' });
 
     await relaySetCookie(setCookie);
-    if (payload.signedIn) redirect('/');
-    if (!payload.csrfToken) {
+    const signedIn = payload.signedIn;
+    const csrfToken = signedIn
+      ? (await api<{ csrfToken: string }>('/api/v1/auth/session')).csrfToken
+      : payload.csrfToken;
+    if (!csrfToken) {
       return { status: 'error', message: '로그인 세션을 시작하지 못했어요. 잠시 후 다시 시도해 주세요.' };
     }
 
     await api('/api/v1/auth/consent', {
       method: 'PUT',
-      csrfToken: payload.csrfToken,
+      csrfToken,
       body: { termsCompleted: true, privacyCompleted: true, ageConfirmed: true, termsVersion, privacyVersion },
-      ...(sessionCookiePair(setCookie) === null
+      ...(signedIn || sessionCookiePair(setCookie) === null
         ? {}
         : { cookieHeader: sessionCookiePair(setCookie) as string }),
     });
@@ -65,5 +68,5 @@ export async function submitConsent(
     return failure(error, '동의를 기록하지 못했어요. 잠시 후 다시 시도해 주세요.');
   }
 
-  redirect('/login/providers');
+  redirect('/');
 }

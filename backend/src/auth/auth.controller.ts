@@ -121,7 +121,7 @@ export class AuthController {
    * become a second, staler source of the same facts.
    */
   @Get('auth/session')
-  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard)
   @ApiOperation({ summary: 'CSRF token for the current session' })
   async session(@Req() request: RequestWithSession) {
     const csrfToken = await this.store().rotateCsrf(requireSession(request).id);
@@ -133,10 +133,18 @@ export class AuthController {
   @ApiOperation({ summary: 'Record pre-login policy acknowledgement' })
   async consent(@Req() request: RequestWithSession, @Body() body: ConsentDto) {
     const session = requireSession(request);
-    // Deliberately not AuthenticatedGuard: this is the gate a visitor passes
-    // *before* logging in, so a session already bound to a user is wrong here.
-    if (session.user_id) throw new ForbiddenException('pre-login session required');
+    if (!body.termsCompleted || !body.privacyCompleted || !body.ageConfirmed) {
+      throw new BadRequestException('full policy acknowledgement and age confirmation required');
+    }
     try {
+      // A policy update is acknowledged in the existing authenticated session.
+      // Requiring another OAuth trip would make a legitimate policy change
+      // look like a sign-in failure and strand the member behind ConsentGuard.
+      if (session.user_id) {
+        const accepted = await this.store().grantCurrentUserConsent(session.id, body);
+        if (!accepted) throw new ConflictException('policy changed or session expired');
+        return { next: '/' };
+      }
       await this.store().grantPreloginConsent(session.id, { ...body });
     } catch {
       throw new ConflictException('policy changed or pre-login session expired');
