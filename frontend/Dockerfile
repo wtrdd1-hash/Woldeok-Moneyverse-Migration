@@ -40,6 +40,10 @@ ENV NODE_ENV=production
 # nor the workspace store.
 COPY --from=build /repo/frontend/.next/standalone ./
 COPY --from=build /repo/frontend/.next/static ./frontend/.next/static
+# `output: 'standalone'` traces the server and generated assets, but it does
+# not copy `public/`.  Keep root verification files such as ads.txt in the
+# runtime image; serving them at the public origin is part of their contract.
+COPY --from=build /repo/frontend/public ./frontend/public
 
 RUN addgroup -S moneyverse && adduser -S moneyverse -G moneyverse
 # The ISR cache is written at runtime, under .next/cache, by this user. The

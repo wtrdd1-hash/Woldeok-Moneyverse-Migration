@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { NOTICE_PREFERENCE_SCRIPT } from '@/lib/notice-preference';
 import { POINT_PREFERENCE_SCRIPT } from '@/lib/theme';
+import { jsonLd } from '@/lib/json-ld';
 import './globals.css';
 
 /**
@@ -38,18 +39,47 @@ const plexMono = IBM_Plex_Mono({
   display: 'swap',
 });
 
+const indexingEnabled = process.env.SEO_INDEXING_ENABLED === 'true';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.APP_BASE_URL ?? 'https://easy-scraping.com'),
   title: {
     default: '월덕 머니버스',
     template: '%s · 월덕 머니버스',
   },
   description: '월덕 커뮤니티의 가상 경제. 지갑, 상점, 주식, 사업, 시즌 이벤트.',
   applicationName: '월덕 머니버스',
+  robots: {
+    index: indexingEnabled,
+    follow: indexingEnabled,
+  },
   openGraph: {
     type: 'website',
     siteName: '월덕 머니버스',
     locale: 'ko_KR',
   },
+};
+
+const siteUrl = (process.env.APP_BASE_URL ?? 'https://easy-scraping.com').replace(/\/$/, '');
+const siteStructuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}/#website`,
+      url: siteUrl,
+      name: '월덕 머니버스',
+      inLanguage: 'ko-KR',
+      description: 'Discord로 이어지는 월덕 커뮤니티의 가상 경제 서비스',
+    },
+    {
+      '@type': 'Organization',
+      '@id': `${siteUrl}/#organization`,
+      name: '월덕 머니버스',
+      url: siteUrl,
+      email: 'jungchwimisaenghwal63@gmail.com',
+    },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -63,6 +93,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${myeongjo.variable} ${notoKr.variable} ${plexMono.variable}`}
     >
       <body>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLd(siteStructuredData) }}
+        />
         {/* Applies the reader's dismissal of the notice strip before the strip
             is painted. An effect would run after it is already on screen, and
             taking it away again is worse than never showing it. */}
