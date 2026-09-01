@@ -8,6 +8,8 @@ import type { NextConfig } from 'next';
  */
 const BEACON_SCRIPT = 'https://static.cloudflareinsights.com';
 const BEACON_REPORT = 'https://cloudflareinsights.com';
+const ADSENSE_SCRIPT = 'https://pagead2.googlesyndication.com';
+const ADSENSE_FRAME = 'https://googleads.g.doubleclick.net https://tpc.googlesyndication.com';
 
 const config: NextConfig = {
   reactStrictMode: true,
@@ -65,6 +67,10 @@ const config: NextConfig = {
    * has to be reconciled with anything.
    */
   async headers() {
+    // Tests and the standalone runtime load this config more than once with
+    // different deployment settings, so read the switch here rather than at
+    // module evaluation time.
+    const adsEnabled = process.env.ADS_ENABLED === 'true';
     const base = process.env.APP_BASE_URL ?? 'http://127.0.0.1:3000';
     // The lobby's socket shares this origin. `connect-src 'self'` has never
     // reliably covered ws:/wss: across browsers, so the socket origin is
@@ -76,13 +82,13 @@ const config: NextConfig = {
       "base-uri 'self'",
       "object-src 'none'",
       "frame-ancestors 'none'",
-      "frame-src 'none'",
+      adsEnabled ? `frame-src ${ADSENSE_FRAME}` : "frame-src 'none'",
       "form-action 'self'",
-      `script-src 'self' 'unsafe-inline' ${BEACON_SCRIPT}`,
+      `script-src 'self' 'unsafe-inline' ${BEACON_SCRIPT}${adsEnabled ? ` ${ADSENSE_SCRIPT}` : ''}`,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self'",
-      `connect-src 'self' ${socket} ${BEACON_REPORT}`,
+      `connect-src 'self' ${socket} ${BEACON_REPORT}${adsEnabled ? ` ${ADSENSE_SCRIPT} https://googleads.g.doubleclick.net` : ''}`,
       "manifest-src 'self'",
       'upgrade-insecure-requests',
     ].join('; ');

@@ -116,6 +116,8 @@ put TRUST_PROXY_X_FORWARDED_FOR 'true'
 # duplicate in search results, so this defaults off and production turns it on.
 set_to SEO_INDEXING_ENABLED "${SEO_INDEXING_ENABLED:-false}"
 put ADS_ENABLED "${ADS_ENABLED:-false}"
+supplied ADSENSE_PUBLISHER_ID "${ADSENSE_PUBLISHER_ID:-}"
+supplied ADSENSE_HOME_SLOT "${ADSENSE_HOME_SLOT:-}"
 set_to EDGE_PORT "${EDGE_PORT:-3021}"
 # Administrators this deployment grants on top of the two every database has.
 # Empty on production by design: an operator who should hold roles there is

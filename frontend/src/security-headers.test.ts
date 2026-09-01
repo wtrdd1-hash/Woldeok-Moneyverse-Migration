@@ -11,6 +11,7 @@ import config from '../next.config';
 
 const ORIGINAL_BASE = process.env.APP_BASE_URL;
 const ORIGINAL_INDEXING = process.env.SEO_INDEXING_ENABLED;
+const ORIGINAL_ADS = process.env.ADS_ENABLED;
 
 async function headersFor(base: string): Promise<Map<string, string>> {
   process.env.APP_BASE_URL = base;
@@ -34,6 +35,8 @@ afterEach(() => {
   else process.env.APP_BASE_URL = ORIGINAL_BASE;
   if (ORIGINAL_INDEXING === undefined) delete process.env.SEO_INDEXING_ENABLED;
   else process.env.SEO_INDEXING_ENABLED = ORIGINAL_INDEXING;
+  if (ORIGINAL_ADS === undefined) delete process.env.ADS_ENABLED;
+  else process.env.ADS_ENABLED = ORIGINAL_ADS;
 });
 
 describe('security headers', () => {
@@ -49,12 +52,21 @@ describe('security headers', () => {
   });
 
   it('admits no other third-party script origin', async () => {
+    process.env.ADS_ENABLED = 'false';
     const csp = directives((await headersFor('https://test.example.com')).get('content-security-policy')!);
     expect(csp.get('script-src')!.split(' ').sort()).toEqual([
       "'self'",
       "'unsafe-inline'",
       'https://static.cloudflareinsights.com',
     ]);
+  });
+
+  it('admits only the AdSense origins when advertising is enabled', async () => {
+    process.env.ADS_ENABLED = 'true';
+    const csp = directives((await headersFor('https://test.example.com')).get('content-security-policy')!);
+    expect(csp.get('script-src')).toContain('https://pagead2.googlesyndication.com');
+    expect(csp.get('frame-src')).toBe('https://googleads.g.doubleclick.net https://tpc.googlesyndication.com');
+    expect(csp.get('connect-src')).toContain('https://googleads.g.doubleclick.net');
   });
 
   it('keeps the directives that bound an injection', async () => {

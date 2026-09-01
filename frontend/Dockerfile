@@ -25,7 +25,10 @@ COPY frontend frontend
 # build time rather than run time for that reason alone; nothing secret is.
 ARG APP_BASE_URL=http://127.0.0.1:3000
 ARG SEO_INDEXING_ENABLED=false
-ENV APP_BASE_URL=${APP_BASE_URL} SEO_INDEXING_ENABLED=${SEO_INDEXING_ENABLED}
+ARG ADS_ENABLED=false
+ARG ADSENSE_PUBLISHER_ID=
+ARG ADSENSE_HOME_SLOT=
+ENV APP_BASE_URL=${APP_BASE_URL} SEO_INDEXING_ENABLED=${SEO_INDEXING_ENABLED} ADS_ENABLED=${ADS_ENABLED} ADSENSE_PUBLISHER_ID=${ADSENSE_PUBLISHER_ID} ADSENSE_HOME_SLOT=${ADSENSE_HOME_SLOT}
 RUN pnpm --filter @moneyverse/contract build && pnpm --filter @moneyverse/frontend build
 
 FROM node:20.19.2-alpine

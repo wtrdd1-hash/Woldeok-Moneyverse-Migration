@@ -7,6 +7,7 @@ import { Lobby } from '@/components/lobby';
 import { Accent } from '@/components/page-header';
 import { LobbyCount } from '@/components/lobby-count';
 import { WalletGlance } from '@/components/wallet-glance';
+import { HomeAdvertisement } from '@/components/home-advertisement';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
@@ -157,6 +158,8 @@ export default async function HomePage() {
           />
         )}
       </section>
+
+      <HomeAdvertisement />
 
       <section id="community" aria-labelledby="community-title" className="grid gap-8">
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">

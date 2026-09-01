@@ -121,6 +121,9 @@ jobs:
           build-args: |
             APP_BASE_URL=${{ inputs.environment == 'production' && 'https://easy-scraping.com' || 'https://test.easy-scraping.com' }}
             SEO_INDEXING_ENABLED=${{ inputs.environment == 'production' && 'true' || 'false' }}
+            ADS_ENABLED=${{ inputs.environment == 'production' && 'true' || 'false' }}
+            ADSENSE_PUBLISHER_ID=ca-pub-5220225531544323
+            ADSENSE_HOME_SLOT=2118692561
           tags: |
             ${{ steps.meta.outputs.frontend }}
             ${{ steps.meta.outputs.prefix }}/frontend:latest-${{ steps.meta.outputs.suffix }}
@@ -154,6 +157,9 @@ jobs:
               echo 'base_url=https://easy-scraping.com'
               echo 'edge_port=3022'
               echo 'seo=true'
+              echo 'ads=true'
+              echo 'adsense_publisher=ca-pub-5220225531544323'
+              echo 'adsense_home_slot=2118692561'
               echo 'db_name=moneyverse_production'
               # Production does not roll without something to return to.
               # Migrations do not roll back, and this is the only moment
@@ -168,6 +174,9 @@ jobs:
               echo 'base_url=https://test.easy-scraping.com'
               echo 'edge_port=3021'
               echo 'seo=false'
+              echo 'ads=false'
+              echo 'adsense_publisher='
+              echo 'adsense_home_slot='
               # The name the existing volume was initialised with. Changing it
               # would point the application at a database that does not exist.
               echo 'db_name=moneyverse_migration'
@@ -233,6 +242,9 @@ jobs:
             "APP_BASE_URL='${{ steps.target.outputs.base_url }}'" \
             "EDGE_PORT='${{ steps.target.outputs.edge_port }}'" \
             "SEO_INDEXING_ENABLED='${{ steps.target.outputs.seo }}'" \
+            "ADS_ENABLED='${{ steps.target.outputs.ads }}'" \
+            "ADSENSE_PUBLISHER_ID='${{ steps.target.outputs.adsense_publisher }}'" \
+            "ADSENSE_HOME_SLOT='${{ steps.target.outputs.adsense_home_slot }}'" \
             "DB_NAME='${{ steps.target.outputs.db_name }}'" \
             "REQUIRE_BACKUP='${{ steps.target.outputs.require_backup }}'" \
             "BOOTSTRAP_DISCORD_ADMIN_IDS='${{ steps.target.outputs.admin_ids }}'" \

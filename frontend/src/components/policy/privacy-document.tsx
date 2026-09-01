@@ -28,7 +28,7 @@ export function PrivacyDocument() {
       </dl>
       <aside className="rounded-lg border-l-4 border-l-primary bg-card p-4" aria-label="핵심 개인정보 원칙">
       <strong>핵심 원칙</strong>
-      <p>OAuth 접근·갱신 토큰과 Google 이메일은 장기 저장하지 않습니다. 일반 익명 방문자의 IP를 앱 데이터베이스에 저장하지 않으며, 광고·분석·마케팅 쿠키는 현재 사용하지 않습니다.</p>
+      <p>OAuth 접근·갱신 토큰과 Google 이메일은 장기 저장하지 않습니다. 일반 익명 방문자의 IP를 앱 데이터베이스에 저장하지 않습니다. 공개 홈 화면에서는 Google AdSense 광고가 표시될 수 있으며, 그 경우 Google의 광고 쿠키·식별자 사용과 선택 절차가 적용됩니다.</p>
       </aside>
       <nav className="rounded-lg border bg-card p-4 text-sm" aria-label="개인정보처리방침 목차">
       <p>목차</p>
@@ -57,7 +57,7 @@ export function PrivacyDocument() {
       </tbody>
       </table>
       </div>
-      <p>서비스는 OAuth 접근 토큰·갱신 토큰·Google 이메일을 장기 저장하지 않습니다. 현재 일반 이용자의 사진 업로드, 개인화 광고, 마케팅 수신 기능은 제공하지 않습니다.</p>
+      <p>서비스는 OAuth 접근 토큰·갱신 토큰·Google 이메일을 장기 저장하지 않습니다. 일반 이용자의 사진 업로드와 마케팅 수신 기능은 제공하지 않습니다. Google AdSense 광고는 공개 홈 화면에만 표시될 수 있으며, 경제 활동·잔액·거래·취향 정보를 광고 타기팅에 사용하지 않습니다.</p>
       <p>위 표의 접속 IP 주소와 브라우저·세션 관련 값은 운영 콘솔 경로(/admin)로 들어온 요청에만 기록합니다. 로그인한 이용자가 권한 없이 해당 경로에 접근해 거절된 요청도 같은 이유로 기록 대상입니다. 그 밖의 일반 서비스 이용에는 기록하지 않습니다. 관리자 화면에서도 IP 주소는 네트워크 단위로, 세션 식별자는 해시 일부만 보이며, 원본을 확인하면 누가 왜 확인했는지가 사유와 함께 다시 기록됩니다.</p>
       </section>
       <section>
@@ -87,7 +87,13 @@ export function PrivacyDocument() {
       </tbody>
       </table>
       </div>
-      <p>현재 분석·추적·광고 쿠키는 사용하지 않습니다. 광고 또는 분석 도구를 도입할 경우 적용 전에 실제 기능에 맞는 고지와 필요한 선택 절차를 제공하겠습니다.</p>
+      <p>로그인 이외에 공개 홈 화면에서는 Google AdSense가 광고 제공·빈도 관리·사기 방지·광고 개인화에 필요한 쿠키 또는 유사 식별자를 사용할 수 있습니다. Google 및 광고 기술 제공자는 각자의 정책에 따라 정보를 처리할 수 있습니다. 광고 개인화와 쿠키 설정은 Google 광고 설정에서 관리할 수 있습니다.</p>
+      <p>EEA, 영국 및 스위스 방문자에게는 Google AdSense의 Privacy &amp; messaging 동의 메시지 또는 Google 인증 CMP를 통해 필요한 선택지를 제공합니다. 동의하지 않아도 서비스의 공개 콘텐츠와 핵심 기능은 이용할 수 있습니다.</p>
+      </section>
+      <section>
+      <h2>4-1. 광고 표시와 제3자</h2>
+      <p>광고는 실질적인 공개 정보가 있는 홈 화면에만 표시하며, 로그인·계정·지갑·송금·상점·주식·대출·카지노·보상·관리자·상태·이용약관·개인정보처리방침 화면에는 표시하지 않습니다. 광고를 클릭하거나 새로고침하도록 유도하지 않으며, 광고 차단 여부와 관계없이 공개 콘텐츠를 제공합니다.</p>
+      <p>광고가 표시될 때 Google은 제3자 광고 제공자로서 쿠키 또는 유사 기술을 사용할 수 있습니다. 자세한 내용과 선택권은 <a href="https://policies.google.com/technologies/ads" rel="noopener noreferrer" target="_blank">Google 광고 기술 안내</a> 및 <a href="https://myadcenter.google.com/" rel="noopener noreferrer" target="_blank">Google 광고 설정</a>에서 확인할 수 있습니다.</p>
       </section>
       <section>
       <h2>5. 파기와 탈퇴</h2>
