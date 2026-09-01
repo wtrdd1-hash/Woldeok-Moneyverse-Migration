@@ -13,6 +13,7 @@ import type {
   WalletRepayInput,
   WalletRepayRow,
   WalletRewardRow,
+  WalletRewardAvailabilityRow,
   WalletTransactionRow,
   WalletTransferInput,
 } from './wallet.repository';
@@ -80,6 +81,7 @@ export interface WalletRepositoryLike {
   transfer(input: WalletTransferInput): Promise<{ transactionId: string }>;
   claimDaily(input: WalletClaimDailyInput): Promise<WalletRewardRow>;
   claimWork(input: WalletClaimWorkInput): Promise<WalletRewardRow>;
+  rewardAvailabilityForUser?(userId: string): Promise<WalletRewardAvailabilityRow>;
   moveBankBalance(input: WalletMoveBankBalanceInput): Promise<WalletBankMoveRow>;
   loansForUser?(userId: string): Promise<WalletLoanRow[]>;
   borrow(input: WalletBorrowInput): Promise<WalletBorrowRow>;
@@ -129,6 +131,13 @@ export interface WalletRewardReceipt {
   readonly transactionId: string;
   readonly amount: WldAmount;
   readonly replayed: boolean;
+}
+
+export interface WalletRewardAvailability {
+  readonly dailyAvailable: boolean;
+  readonly dailyNextEligibleAt: string | null;
+  readonly workAvailable: boolean;
+  readonly workNextEligibleAt: string | null;
 }
 
 /**
@@ -403,6 +412,27 @@ export class WalletService {
       transactionId: requireUuid(reward.transaction_id, 'database transaction id'),
       amount: positiveWldAmount(reward.amount, 'work reward amount'),
       replayed: reward.replayed,
+    };
+  }
+
+  async rewardAvailability(authenticatedUserId: string): Promise<WalletRewardAvailability> {
+    const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
+    if (typeof this.repository.rewardAvailabilityForUser !== 'function') {
+      throw new Error('reward availability is unavailable');
+    }
+    const availability = await this.repository.rewardAvailabilityForUser(actorUserId);
+    if (typeof availability.daily_available !== 'boolean' || typeof availability.work_available !== 'boolean') {
+      throw new Error('database returned invalid reward availability');
+    }
+    return {
+      dailyAvailable: availability.daily_available,
+      dailyNextEligibleAt: availability.daily_next_eligible_at
+        ? timestamp(availability.daily_next_eligible_at, 'daily next eligible time')
+        : null,
+      workAvailable: availability.work_available,
+      workNextEligibleAt: availability.work_next_eligible_at
+        ? timestamp(availability.work_next_eligible_at, 'work next eligible time')
+        : null,
     };
   }
 

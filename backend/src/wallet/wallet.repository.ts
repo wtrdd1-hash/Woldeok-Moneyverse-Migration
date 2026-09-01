@@ -72,6 +72,14 @@ export interface WalletRewardRow {
   readonly replayed: boolean;
 }
 
+/** public.wallet_reward_availability return columns: migration 108 */
+export interface WalletRewardAvailabilityRow {
+  readonly daily_available: boolean;
+  readonly daily_next_eligible_at: Date | null;
+  readonly work_available: boolean;
+  readonly work_next_eligible_at: Date | null;
+}
+
 /** public.bank_move_balance RETURNS TABLE: packages/database/migrations/035-virtual-bank-loans.sql */
 export interface WalletBankMoveRow {
   readonly transaction_id: string;
@@ -277,6 +285,19 @@ export class PostgresWalletRepository {
       [key, actor],
     );
     if (!row?.transaction_id) throw new Error('database did not return a work-reward receipt');
+    return row;
+  }
+
+  async rewardAvailabilityForUser(userId: string): Promise<WalletRewardAvailabilityRow> {
+    const actor = requireUuid(userId, 'authenticated user id');
+    const row = await queryOne<WalletRewardAvailabilityRow>(
+      this.pool,
+      `SELECT daily_available, daily_next_eligible_at,
+              work_available, work_next_eligible_at
+       FROM public.wallet_reward_availability($1)`,
+      [actor],
+    );
+    if (!row) throw new Error('database did not return reward availability');
     return row;
   }
 

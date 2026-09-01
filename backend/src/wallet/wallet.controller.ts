@@ -84,6 +84,12 @@ export class WalletController {
     return this.service().overview(requireUserId(request), { recentLimit: parsed });
   }
 
+  @Get('rewards/availability')
+  @ApiOperation({ summary: 'Next eligible times for the caller reward controls' })
+  rewardAvailability(@Req() request: RequestWithSession) {
+    return this.service().rewardAvailability(requireUserId(request));
+  }
+
   @Get('bank/loans')
   @ApiOperation({ summary: 'Outstanding loans for the caller' })
   async loans(@Req() request: RequestWithSession) {

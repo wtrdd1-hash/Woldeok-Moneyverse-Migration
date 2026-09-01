@@ -22,6 +22,7 @@ import {
   TransferForm,
 } from './wallet-forms';
 import type { LoanView } from './wallet-forms';
+import type { RewardAvailability } from './wallet-forms';
 
 /** Per-member data. Never cached, and never offered to a crawler. */
 export const dynamic = 'force-dynamic';
@@ -47,13 +48,14 @@ export const metadata: Metadata = {
 export default async function WalletPage() {
   await requireMember();
 
-  const [wallet, loanData] = await Promise.all([
+  const [wallet, loanData, rewardAvailability] = await Promise.all([
     // 50 is the API's ceiling for this list and what /wallet/activity asks
     // for. The screen still shows five; the other forty-five are what the
     // 더보기 dialog opens onto, so opening it asks the server nothing. The
     // default of ten would have made "the rest" mean five more.
     apiOrNull<Overview>('/api/v1/wallet?recent=50'),
     apiOrNull<{ loans: LoanView[] }>('/api/v1/bank/loans'),
+    apiOrNull<RewardAvailability>('/api/v1/rewards/availability'),
   ]);
 
   if (!wallet) {
@@ -111,7 +113,7 @@ export default async function WalletPage() {
               amount={balances.bank.availableAmount}
             />
           </dl>
-          <RewardButtons />
+          <RewardButtons availability={rewardAvailability} />
         </CardContent>
       </Card>
 

@@ -23,20 +23,38 @@ import { borrow, claimDaily, claimWork, moveBank, repay, transfer } from './acti
  * one on the server and spends it in the same call.
  */
 
-export function RewardButtons() {
+export interface RewardAvailability {
+  readonly dailyAvailable: boolean;
+  readonly dailyNextEligibleAt: string | null;
+  readonly workAvailable: boolean;
+  readonly workNextEligibleAt: string | null;
+}
+
+function unavailableHint(nextEligibleAt: string | null): string {
+  if (!nextEligibleAt) return '지금은 보상을 받을 수 없어요.';
+  const value = new Date(nextEligibleAt);
+  if (Number.isNaN(value.valueOf())) return '지금은 보상을 받을 수 없어요.';
+  return `다음 수령 가능: ${new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit',
+  }).format(value)}`;
+}
+
+export function RewardButtons({ availability }: { readonly availability: RewardAvailability | null }) {
   const [dailyState, daily] = useActionState(claimDaily, IDLE);
   const [workState, work] = useActionState(claimWork, IDLE);
   // A claim that reached the ledger (including an idempotent replay) must not
   // leave a live button behind. The server remains the authority for the next
   // eligible time; this stops an accidental second press in the same view.
-  const dailyClaimed = dailyState.status === 'ok';
-  const workClaimed = workState.status === 'ok';
+  const dailyClaimed = dailyState.status === 'ok' || availability?.dailyAvailable === false;
+  const workClaimed = workState.status === 'ok' || availability?.workAvailable === false;
 
   return (
     <div className="grid gap-2">
       <div className="flex flex-wrap gap-2">
         <form action={daily}>
-          <SubmitButton disabled={dailyClaimed}>✦ 오늘의 보상 받기</SubmitButton>
+          <SubmitButton disabled={dailyClaimed}>
+            ✦ 오늘의 보상 받기
+          </SubmitButton>
         </form>
         <form action={work}>
           <SubmitButton disabled={workClaimed} variant="outline">
@@ -44,6 +62,12 @@ export function RewardButtons() {
           </SubmitButton>
         </form>
       </div>
+      {availability?.dailyAvailable === false && (
+        <p className="text-xs text-muted-foreground">오늘의 보상 · {unavailableHint(availability.dailyNextEligibleAt)}</p>
+      )}
+      {availability?.workAvailable === false && (
+        <p className="text-xs text-muted-foreground">작업 보상 · {unavailableHint(availability.workNextEligibleAt)}</p>
+      )}
       <ActionAlert state={dailyState} />
       <ActionAlert state={workState} />
     </div>
