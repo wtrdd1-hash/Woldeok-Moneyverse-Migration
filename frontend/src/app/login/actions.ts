@@ -25,6 +25,7 @@ export async function submitConsent(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  let next: '/' | '/login/providers';
   const termsVersion = String(formData.get('termsVersion') ?? '');
   const privacyVersion = String(formData.get('privacyVersion') ?? '');
 
@@ -54,19 +55,24 @@ export async function submitConsent(
       return { status: 'error', message: '로그인 세션을 시작하지 못했어요. 잠시 후 다시 시도해 주세요.' };
     }
 
-    await api('/api/v1/auth/consent', {
+    ({ next } = await api<{ next: '/' | '/login/providers' }>('/api/v1/auth/consent', {
       method: 'PUT',
       csrfToken,
       body: { termsCompleted: true, privacyCompleted: true, ageConfirmed: true, termsVersion, privacyVersion },
       ...(signedIn || sessionCookiePair(setCookie) === null
         ? {}
         : { cookieHeader: sessionCookiePair(setCookie) as string }),
-    });
+    }));
   } catch (error) {
     // `redirect` works by throwing; rethrow so Next can act on it.
     if (error instanceof Error && error.message === 'NEXT_REDIRECT') throw error;
     return failure(error, '동의를 기록하지 못했어요. 잠시 후 다시 시도해 주세요.');
   }
 
-  redirect('/');
+  // A pre-login acknowledgement must lead to the provider picker.  The API
+  // deliberately owns this next step because an already authenticated member
+  // accepting a revised policy should instead return home.  Sending everyone
+  // to `/` strands a new visitor: the home CTA points back to this consent
+  // screen, so they can never select Discord or Google.
+  redirect(next);
 }
