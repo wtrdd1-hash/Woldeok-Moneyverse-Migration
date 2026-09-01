@@ -171,10 +171,8 @@ export function ProfileSettingsForm({
       <FieldSet className="gap-4">
         <FieldLegend>항목별 공개 범위</FieldLegend>
         <FieldDescription className="max-w-prose">
-          항목마다 따로 정하지 않으면 위에서 고른 프로필 공개 범위를 따라요. 지금은 저장해 둔
-          항목별 설정을 다시 불러올 수 없어서 이 화면은 언제나 &lsquo;프로필 설정 따름&rsquo;에서
-          시작해요. 저장하면 여기 있는 값으로 전체가 새로 저장되니, 예전에 정해 둔 항목이 있다면
-          다시 골라 주세요.
+          항목마다 따로 정하지 않으면 위에서 고른 프로필 공개 범위를 따라요. 저장해 둔 항목별
+          설정을 그대로 불러왔고, 여기에서 바꾼 값만 저장됩니다.
         </FieldDescription>
 
         <div className="grid gap-4">
