@@ -33,6 +33,11 @@ on:
         default: test
         type: choice
         options: [test, production]
+      enable_ads:
+        description: Enable the reviewed AdSense unit (production only, after AdSense approval and CMP setup)
+        required: true
+        default: false
+        type: boolean
 
 concurrency:
   # Never let two deploys touch the host at once; the later one waits rather
@@ -121,9 +126,9 @@ jobs:
           build-args: |
             APP_BASE_URL=${{ inputs.environment == 'production' && 'https://easy-scraping.com' || 'https://test.easy-scraping.com' }}
             SEO_INDEXING_ENABLED=${{ inputs.environment == 'production' && 'true' || 'false' }}
-            ADS_ENABLED=${{ inputs.environment == 'production' && 'true' || 'false' }}
-            ADSENSE_PUBLISHER_ID=ca-pub-5220225531544323
-            ADSENSE_HOME_SLOT=2118692561
+            ADS_ENABLED=${{ inputs.environment == 'production' && inputs.enable_ads && 'true' || 'false' }}
+            ADSENSE_PUBLISHER_ID=${{ inputs.environment == 'production' && inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}
+            ADSENSE_HOME_SLOT=${{ inputs.environment == 'production' && inputs.enable_ads && '2118692561' || '' }}
           tags: |
             ${{ steps.meta.outputs.frontend }}
             ${{ steps.meta.outputs.prefix }}/frontend:latest-${{ steps.meta.outputs.suffix }}
@@ -157,9 +162,9 @@ jobs:
               echo 'base_url=https://easy-scraping.com'
               echo 'edge_port=3022'
               echo 'seo=true'
-              echo 'ads=true'
-              echo 'adsense_publisher=ca-pub-5220225531544323'
-              echo 'adsense_home_slot=2118692561'
+              echo 'ads=${{ inputs.enable_ads && 'true' || 'false' }}'
+              echo 'adsense_publisher=${{ inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}'
+              echo 'adsense_home_slot=${{ inputs.enable_ads && '2118692561' || '' }}'
               echo 'db_name=moneyverse_production'
               # Production does not roll without something to return to.
               # Migrations do not roll back, and this is the only moment
