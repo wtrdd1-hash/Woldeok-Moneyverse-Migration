@@ -8,7 +8,6 @@ import { Accent } from '@/components/page-header';
 import { LobbyCount } from '@/components/lobby-count';
 import { WalletGlance } from '@/components/wallet-glance';
 import { HomeAdvertisement } from '@/components/home-advertisement';
-import { homeAdSense } from '@/lib/adsense';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
@@ -160,9 +159,39 @@ export default async function HomePage() {
         )}
       </section>
 
+      <section aria-labelledby="home-start-title" className="grid gap-6">
+        <div>
+          <p className="eyebrow mb-3">Start here</p>
+          <h2 id="home-start-title" className="text-[clamp(2rem,4vw,3rem)]">
+            처음이라면, 여기서 시작해요.
+          </h2>
+          <p className="mt-4 max-w-prose leading-[1.8] text-muted-foreground [word-break:keep-all]">
+            가입 전에 어떤 활동을 할 수 있는지 확인하고, 로그인 뒤에는 한 번에 하나씩 천천히
+            시작할 수 있어요.
+          </p>
+        </div>
+        <div className="grid gap-3 md:grid-cols-3">
+          <PolicyLink
+            href="/guide"
+            title="첫 활동 순서"
+            detail="로그인부터 첫 보상 확인까지"
+          />
+          <PolicyLink
+            href="/shop"
+            title="게임 상점 미리 보기"
+            detail="WLD로 살 수 있는 아이템 확인"
+          />
+          <PolicyLink
+            href="/announcements"
+            title="운영 소식 확인"
+            detail="변경 사항과 새로운 콘텐츠"
+          />
+        </div>
+      </section>
+
       <HomeAdvertisement />
 
-      {!homeAdSense.enabled && <section id="community" aria-labelledby="community-title" className="grid gap-8">
+      <section id="community" aria-labelledby="community-title" className="grid gap-8">
         <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
           <div>
             <p className="eyebrow mb-3">Community lobby</p>
@@ -196,7 +225,7 @@ export default async function HomePage() {
             </CardContent>
           </Card>
         </div>
-      </section>}
+      </section>
     </div>
   );
 }

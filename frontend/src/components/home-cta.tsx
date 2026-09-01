@@ -45,8 +45,8 @@ export function HomeCta() {
         variant="outline"
         className="h-12 w-full rounded-[12px] bg-surface/50 px-5 text-sm font-extrabold sm:w-auto"
       >
-        <Link href="/announcements">
-          알아보기
+        <Link href="/guide">
+          시작 방법 보기
           <ArrowRight />
         </Link>
       </Button>
