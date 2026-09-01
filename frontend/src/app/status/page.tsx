@@ -22,6 +22,9 @@ export const metadata: Metadata = {
   title: '서비스 상태',
   description: '월덕 머니버스가 기록한 서비스 상태',
   alternates: { canonical: '/status' },
+  // The service monitor may expose transient operational information. It is
+  // useful to visitors but is not durable public content for search results.
+  robots: { index: false, follow: false },
 };
 
 interface StatusRow {
