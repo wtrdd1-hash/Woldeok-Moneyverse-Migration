@@ -20,8 +20,9 @@ import { formatDay } from '@/lib/money';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: '월덕 머니버스 — 우리 서버의 작은 경제',
-  description: 'Discord로 이어지는 월덕 머니버스 커뮤니티 가상 경제',
+  title: '월덕 머니버스 — Discord 커뮤니티 가상경제와 게임 보상',
+  description:
+    'Discord 커뮤니티 활동을 기록하고 WLD 보상, 게임 상점, 시즌 이벤트를 함께 이용하는 월덕 머니버스입니다.',
   alternates: { canonical: '/' },
 };
 
@@ -60,8 +61,8 @@ export default async function HomePage() {
             <Accent>작고 단단한 경제.</Accent>
           </h1>
           <p className="mt-6 max-w-[590px] text-[clamp(1rem,1.5vw,1.125rem)] leading-[1.8] text-muted-foreground [word-break:keep-all]">
-            월덕 머니버스는 Discord로 이어지는 커뮤니티 장부입니다. 활동은 기록으로 남고,
-            로그인 후 실제 잔액과 이용 기록을 확인할 수 있어요.
+            월덕 머니버스는 Discord로 이어지는 커뮤니티 가상경제 서비스입니다. 활동은 기록으로
+            남고, 로그인 후 WLD 보상·게임 상점 이용·이용 기록을 확인할 수 있어요.
           </p>
 
           <HomeCta />

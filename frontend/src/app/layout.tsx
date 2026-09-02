@@ -47,8 +47,10 @@ export const metadata: Metadata = {
     default: '월덕 머니버스',
     template: '%s · 월덕 머니버스',
   },
-  description: '월덕 커뮤니티의 가상 경제. 지갑, 상점, 주식, 사업, 시즌 이벤트.',
+  description:
+    'Discord로 이어지는 월덕 커뮤니티의 가상경제 서비스. 활동 기록, WLD 보상, 게임 상점과 시즌 이벤트를 한곳에서 확인하세요.',
   applicationName: '월덕 머니버스',
+  category: '커뮤니티 게임',
   robots: {
     index: indexingEnabled,
     follow: indexingEnabled,
@@ -57,6 +59,16 @@ export const metadata: Metadata = {
     type: 'website',
     siteName: '월덕 머니버스',
     locale: 'ko_KR',
+    title: '월덕 머니버스 — Discord 커뮤니티 가상경제',
+    description:
+      'Discord 커뮤니티 활동을 기록하고 WLD 보상과 게임 상점을 함께 이용하는 월덕 머니버스입니다.',
+    url: '/',
+  },
+  twitter: {
+    card: 'summary',
+    title: '월덕 머니버스 — Discord 커뮤니티 가상경제',
+    description:
+      'Discord 커뮤니티 활동을 기록하고 WLD 보상과 게임 상점을 함께 이용하는 월덕 머니버스입니다.',
   },
 };
 
