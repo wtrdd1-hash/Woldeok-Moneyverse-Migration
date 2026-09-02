@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PublicAdvertisement } from '@/components/public-advertisement';
+import { ShareGuide } from '@/components/share-guide';
 import { FIRST_DAY_ORDER, GUIDE_FAQS, GUIDE_STEPS } from './guide';
 
 /**
@@ -31,6 +32,13 @@ export default function GuidePage() {
         처음 로그인했다면 아래 순서대로 한 번만 따라 해 보세요. 여기 나오는 WLD와 보상은 모두 게임
         안에서만 쓰는 가상 데이터이고, 현금으로 바꾸거나 실물 경품을 받을 수는 없습니다.
       </PageHeader>
+
+      <div className="-mt-3 flex flex-wrap items-center gap-3">
+        <ShareGuide />
+        <p className="text-xs text-muted-foreground">
+          친구에게 시작 안내를 보내고 함께 첫 활동을 확인해 보세요.
+        </p>
+      </div>
 
       <ol className="grid gap-4">
         {GUIDE_STEPS.map((step, index) => (
