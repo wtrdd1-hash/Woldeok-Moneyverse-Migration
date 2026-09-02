@@ -31,6 +31,35 @@ export interface GuideFaq {
   readonly link?: GuideLink;
 }
 
+export interface BeginnerTip {
+  readonly title: string;
+  readonly body: string;
+}
+
+/** A short route for visitors who want to begin before reading the full guide. */
+export const QUICK_START_STEPS: readonly string[] = [
+  'Discord 또는 Google로 로그인하기',
+  '지갑에서 시작 잔액 확인하기',
+  '오늘의 퀘스트 하나 고르기',
+  '활동을 마치고 기록 확인하기',
+];
+
+/** Product-specific guardrails that keep a first session small and understandable. */
+export const BEGINNER_TIPS: readonly BeginnerTip[] = [
+  {
+    title: '처음에는 하나만',
+    body: '퀘스트와 작업을 여러 개 펼치기보다 가장 쉬운 활동 하나를 끝까지 마쳐 보세요.',
+  },
+  {
+    title: '숫자는 지갑에서 확인',
+    body: '보상을 받았다면 지갑 기록에서 지급 사유와 WLD가 함께 남았는지 확인하세요.',
+  },
+  {
+    title: '모르면 운영 소식부터',
+    body: '진행 방식이 달라졌거나 기능이 잠시 멈춘 경우 운영 소식과 서비스 상태에 먼저 안내됩니다.',
+  },
+];
+
 /**
  * The six steps, in the order a member meets them.
  *
@@ -166,6 +195,18 @@ export const GUIDE_FAQS: readonly GuideFaq[] = [
     answer:
       '운영자가 검토해 공개한 소식과 사진만 각각 운영 소식과 사진 페이지에 표시됩니다. 새로운 내용을 확인하려면 이 두 페이지를 방문해 주세요.',
     link: { href: '/announcements', label: '운영 소식 보기' },
+  },
+  {
+    question: '이용 동의는 로그인할 때마다 해야 하나요?',
+    answer:
+      '아니요. 같은 계정에서 현재 문서 버전에 한 번 동의하면 다시 묻지 않습니다. 이용약관이나 개인정보처리방침이 변경된 경우에만 새 내용을 확인하고 다시 동의합니다.',
+    link: { href: '/privacy', label: '개인정보 안내 보기' },
+  },
+  {
+    question: '어디서부터 해야 할지 다시 잊어버렸어요.',
+    answer:
+      '괜찮아요. 내 지갑에서 현재 기록을 확인한 뒤 퀘스트 화면으로 돌아가 가장 쉬운 활동 하나를 고르면 됩니다. 진행 중인 작업이 있다면 새 작업보다 그 작업을 먼저 확인하세요.',
+    link: { href: '/quests', label: '퀘스트로 돌아가기' },
   },
 ];
 

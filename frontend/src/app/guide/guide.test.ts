@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { PUBLIC_NAV } from '@/lib/navigation';
-import { FIRST_DAY_ORDER, GUIDE_FAQS, GUIDE_STEPS, guideDestinations } from './guide';
+import {
+  BEGINNER_TIPS,
+  FIRST_DAY_ORDER,
+  GUIDE_FAQS,
+  GUIDE_STEPS,
+  QUICK_START_STEPS,
+  guideDestinations,
+} from './guide';
 
 /**
  * A guide is only worth having if every door it points at opens.
@@ -78,6 +85,15 @@ describe('the getting-started guide', () => {
 
   it('offers a short version as well as the long one', () => {
     expect(FIRST_DAY_ORDER.length).toBeGreaterThan(0);
+  });
+
+  it('offers a quick start and practical newcomer guardrails', () => {
+    expect(QUICK_START_STEPS).toHaveLength(4);
+    expect(BEGINNER_TIPS).toHaveLength(3);
+    for (const tip of BEGINNER_TIPS) {
+      expect(tip.title.trim()).not.toBe('');
+      expect(tip.body.trim()).not.toBe('');
+    }
   });
 
   it('answers product-specific questions before a visitor signs in', () => {
