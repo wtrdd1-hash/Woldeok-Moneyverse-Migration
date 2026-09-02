@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PublicAdvertisement } from '@/components/public-advertisement';
-import { FIRST_DAY_ORDER, GUIDE_STEPS } from './guide';
+import { FIRST_DAY_ORDER, GUIDE_FAQS, GUIDE_STEPS } from './guide';
 
 /**
  * How to start, on one page.
@@ -96,6 +96,37 @@ export default function GuidePage() {
             </p>
           </CardContent>
         </Card>
+      </section>
+
+      <section aria-labelledby="faq-title" className="grid gap-4">
+        <div>
+          <p className="eyebrow mb-2">COMMON QUESTIONS</p>
+          <h2 id="faq-title" className="text-2xl">
+            참여 전에 자주 묻는 질문
+          </h2>
+          <p className="mt-2 max-w-prose text-sm leading-[1.8] text-muted-foreground [word-break:keep-all]">
+            처음 방문한 분이 로그인 전에 확인할 수 있도록, 실제 서비스 기준으로 답변을 정리했어요.
+          </p>
+        </div>
+        <div className="grid gap-3">
+          {GUIDE_FAQS.map((faq) => (
+            <Card key={faq.question}>
+              <CardHeader className="gap-2">
+                <CardTitle className="text-base">{faq.question}</CardTitle>
+                <CardDescription className="leading-[1.8] [word-break:keep-all]">
+                  {faq.answer}
+                </CardDescription>
+              </CardHeader>
+              {faq.link && (
+                <CardContent>
+                  <Link className="text-sm font-extrabold text-clay-ink" href={faq.link.href}>
+                    {faq.link.label} →
+                  </Link>
+                </CardContent>
+              )}
+            </Card>
+          ))}
+        </div>
       </section>
     </div>
   );

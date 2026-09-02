@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PUBLIC_NAV } from '@/lib/navigation';
-import { FIRST_DAY_ORDER, GUIDE_STEPS, guideDestinations } from './guide';
+import { FIRST_DAY_ORDER, GUIDE_FAQS, GUIDE_STEPS, guideDestinations } from './guide';
 
 /**
  * A guide is only worth having if every door it points at opens.
@@ -78,6 +78,14 @@ describe('the getting-started guide', () => {
 
   it('offers a short version as well as the long one', () => {
     expect(FIRST_DAY_ORDER.length).toBeGreaterThan(0);
+  });
+
+  it('answers product-specific questions before a visitor signs in', () => {
+    expect(GUIDE_FAQS.length).toBeGreaterThanOrEqual(4);
+    for (const faq of GUIDE_FAQS) {
+      expect(faq.question.trim()).not.toBe('');
+      expect(faq.answer.trim()).not.toBe('');
+    }
   });
 
   // Public, and reachable without hovering: it is the answer to "what is this

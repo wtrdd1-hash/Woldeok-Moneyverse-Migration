@@ -24,6 +24,13 @@ export interface GuideStep {
   readonly link?: GuideLink;
 }
 
+/** Answers a signed-out visitor can use before deciding whether to join. */
+export interface GuideFaq {
+  readonly question: string;
+  readonly answer: string;
+  readonly link?: GuideLink;
+}
+
 /**
  * The six steps, in the order a member meets them.
  *
@@ -124,6 +131,42 @@ export const FIRST_DAY_ORDER: readonly string[] = [
   '실제로 그 활동 해 보기',
   '퀘스트와 지갑에서 기록 확인하기',
   '시간이 남으면 짧은 작업 하나 맡기',
+];
+
+/**
+ * Public, product-specific questions — not generic SEO copy. These answers
+ * intentionally describe only behaviour the app actually provides.
+ */
+export const GUIDE_FAQS: readonly GuideFaq[] = [
+  {
+    question: '월덕 머니버스는 어떤 서비스인가요?',
+    answer:
+      'Discord로 이어지는 커뮤니티 가상경제 서비스입니다. 활동 기록, WLD 보상, 게임 상점과 시즌 콘텐츠를 웹에서 확인하고 이용할 수 있습니다.',
+  },
+  {
+    question: 'WLD는 현금으로 바꾸거나 거래할 수 있나요?',
+    answer:
+      '아니요. WLD와 보상은 서비스 안에서만 쓰는 가상 데이터입니다. 현금 거래·환전·실물 경품 교환 기능은 제공하지 않습니다.',
+    link: { href: '/terms', label: '이용 기준 확인하기' },
+  },
+  {
+    question: '처음 참여하려면 무엇이 필요한가요?',
+    answer:
+      'Discord 또는 Google 계정으로 로그인한 뒤 최신 이용약관과 개인정보처리방침에 동의하면 됩니다. 별도의 월덕 비밀번호를 만들지 않습니다.',
+    link: { href: '/login', label: '로그인 시작하기' },
+  },
+  {
+    question: '보상은 어떻게 받나요?',
+    answer:
+      '퀘스트와 작업에서 실제로 완료한 활동을 기록하고, 작업 화면에서 보상 받기를 누르면 WLD와 경험치가 원장에 기록됩니다. 지급 한도와 수행 조건은 각 작업에 표시됩니다.',
+    link: { href: '/work', label: '작업 방식 보기' },
+  },
+  {
+    question: '운영 소식과 사진은 어디서 보나요?',
+    answer:
+      '운영자가 검토해 공개한 소식과 사진만 각각 운영 소식과 사진 페이지에 표시됩니다. 새로운 내용을 확인하려면 이 두 페이지를 방문해 주세요.',
+    link: { href: '/announcements', label: '운영 소식 보기' },
+  },
 ];
 
 /** Every internal destination the guide points at, deduplicated. */
