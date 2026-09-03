@@ -9,7 +9,7 @@ import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { adminConsole } from '@/lib/session';
 import { ADMIN_AREAS } from './areas';
-import { CloseConsole, EnrolSecondFactor, OpenConsole } from './console-gate';
+import { CloseConsole, EnrolSecondFactor, IssueRecoveryCodes, OpenConsole } from './console-gate';
 import type {
   AdminBusiness,
   AdminConsole,
@@ -66,9 +66,10 @@ export default async function AdminPage() {
       : null,
     '/admin/users': users ? `${users.users.length}명` : null,
     '/admin/market': stocks ? `종목 ${stocks.stocks.length}개` : null,
-    '/admin/catalog': businesses && events
-      ? `사업 ${businesses.businessTypes.length}개 · 이벤트 ${events.events.length}개`
-      : null,
+    '/admin/catalog':
+      businesses && events
+        ? `사업 ${businesses.businessTypes.length}개 · 이벤트 ${events.events.length}개`
+        : null,
     '/admin/economy': health?.available ? '최근 스냅샷 있음' : '스냅샷 없음',
     // No count for these four. Each would be another round trip on the one
     // screen that is supposed to open fast, and the card already says what is
@@ -84,8 +85,8 @@ export default async function AdminPage() {
   return (
     <div className="grid gap-6">
       <PageHeader eyebrow="WOLDEOK MONEYVERSE · OPERATIONS" title="운영 콘솔">
-        모든 작업은 감사 기록에 남고, 데이터베이스가 역할을 다시 확인합니다. 이 화면은 무엇을
-        보여 줄지만 정하고, 무엇을 허용할지는 정하지 않습니다.
+        모든 작업은 감사 기록에 남고, 데이터베이스가 역할을 다시 확인합니다. 이 화면은 무엇을 보여
+        줄지만 정하고, 무엇을 허용할지는 정하지 않습니다.
       </PageHeader>
 
       {/* Two things an operator should not have to open a page to learn: is
@@ -101,11 +102,7 @@ export default async function AdminPage() {
           tone={integrityOk === false ? 'attention' : 'calm'}
           term="원장 정합성"
           value={
-            health?.available !== true
-              ? '스냅샷 없음'
-              : integrityOk
-                ? '이상 없음'
-                : '불일치 발견'
+            health?.available !== true ? '스냅샷 없음' : integrityOk ? '이상 없음' : '불일치 발견'
           }
           href="/admin/economy"
         />
@@ -146,6 +143,7 @@ export default async function AdminPage() {
             </div>
           </dl>
           <CloseConsole />
+          {admin.roles.includes('superadmin') && <IssueRecoveryCodes />}
         </CardContent>
       </Card>
 
@@ -196,8 +194,8 @@ function Gate({ admin }: { readonly admin: AdminConsole }) {
   return (
     <div className="grid gap-5">
       <PageHeader eyebrow="WOLDEOK MONEYVERSE · OPERATIONS" title="운영 콘솔 잠금">
-        운영 기능은 별도의 콘솔 세션에서만 열립니다. 본인 확인을 다시 하고 인증 앱 코드를
-        입력해야 들어갈 수 있습니다.
+        운영 기능은 별도의 콘솔 세션에서만 열립니다. 본인 확인을 다시 하고 인증 앱 코드를 입력해야
+        들어갈 수 있습니다.
       </PageHeader>
 
       {(locked || expired) && (

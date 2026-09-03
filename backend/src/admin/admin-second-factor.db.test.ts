@@ -40,11 +40,37 @@ describe.skipIf(!DATABASE_URL)('the administrator second factor against a real d
       'admin_trusted_devices',
       'admin_ip_allowlist',
       'admin_login_attempts',
+      'admin_recovery_codes',
+      'admin_recovery_code_state',
     ]) {
       await expect(pool.query(`SELECT * FROM public.${table}`)).rejects.toThrow(
         /permission denied/i,
       );
     }
+  });
+
+  it('refuses to issue recovery codes without the superadmin designation', async () => {
+    const error = await rejectionOf(() =>
+      pool.query('SELECT * FROM public.admin_recovery_codes_issue($1,$2,$3::text[])', [
+        UNKNOWN,
+        UNKNOWN,
+        Array.from({ length: 8 }, (_, index) => String(index).padStart(64, 'a')),
+      ]),
+    );
+    expect(code(error)).toBe('42501');
+  });
+
+  it('refuses recovery before code comparison without recent OAuth reauthentication', async () => {
+    const error = await rejectionOf(() =>
+      pool.query('SELECT * FROM public.admin_recovery_code_open_session($1,$2,$3,$4,$5)', [
+        UNKNOWN,
+        UNKNOWN,
+        'a'.repeat(64),
+        'b'.repeat(64),
+        'c'.repeat(64),
+      ]),
+    );
+    expect(code(error)).toBe('42501');
   });
 
   it('answers nothing for an account with no credential rather than raising', async () => {

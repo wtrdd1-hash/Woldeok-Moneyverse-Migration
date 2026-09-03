@@ -19,7 +19,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { ArrayMaxSize, IsArray, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsString,
+  IsUUID,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import type { Response } from 'express';
 import { clearSessionCookie, sessionCookie } from '../auth/cookies';
 import { AdminGuard } from '../auth/guards/admin.guard';
@@ -43,6 +51,7 @@ import {
 import { requestClientKey } from '../security/rate-limit';
 import {
   AdminSecurityService,
+  RecoveryCodeRejectedError,
   SecondFactorRejectedError,
   SecondFactorUnavailableError,
 } from './admin-security.service';
@@ -54,6 +63,13 @@ export class SecondFactorCodeDto {
   @ApiProperty({ description: 'The six digit code from the authenticator app' })
   @IsString()
   @Matches(/^[0-9]{6,8}$/)
+  readonly code!: string;
+}
+
+export class RecoveryCodeDto {
+  @ApiProperty({ description: 'A one-time administrator recovery code' })
+  @IsString()
+  @Matches(/^[A-Za-z0-9_-]{27}$/)
   readonly code!: string;
 }
 
@@ -129,9 +145,7 @@ export class AdminSecurityController {
   private deviceHash(request: RequestWithSession): string {
     const agent = String(request.headers['user-agent'] ?? '');
     const language = String(request.headers['accept-language'] ?? '');
-    return createHash('sha256')
-      .update(`${this.devicePepper}|${agent}|${language}`)
-      .digest('hex');
+    return createHash('sha256').update(`${this.devicePepper}|${agent}|${language}`).digest('hex');
   }
 
   private clientAddress(request: RequestWithSession): string | null {
@@ -152,6 +166,9 @@ export class AdminSecurityController {
       }
       if (error instanceof SecondFactorRejectedError) {
         throw new UnauthorizedException('the authentication code is not valid');
+      }
+      if (error instanceof RecoveryCodeRejectedError) {
+        throw new UnauthorizedException('the recovery code is not valid or is locked');
       }
       if (error instanceof SecondFactorInputError) throw new BadRequestException(error.message);
       // 057 and 058 refuse with 42501 when the step-up has expired. Nothing
@@ -234,10 +251,7 @@ export class AdminSecurityController {
   @Put('second-factor')
   @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Confirm the enrolment with a code from the app' })
-  async confirmEnrolment(
-    @Req() request: RequestWithSession,
-    @Body() body: SecondFactorCodeDto,
-  ) {
+  async confirmEnrolment(@Req() request: RequestWithSession, @Body() body: SecondFactorCodeDto) {
     const session = requireSession(request);
     const confirmed = await this.guarded(
       () =>
@@ -300,6 +314,45 @@ export class AdminSecurityController {
       idleExpiresAt: opened.idleExpiresAt,
       csrfToken: opened.csrfToken,
       loginContext: context,
+    };
+  }
+
+  @Post('recovery-codes')
+  @UseGuards(AdminSessionGuard, CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @ApiOperation({ summary: 'Replace and reveal one-time administrator recovery codes' })
+  issueRecoveryCodes(@Req() request: RequestWithSession) {
+    const session = requireSession(request);
+    return this.guarded(
+      () => this.service().issueRecoveryCodes(requireUserId(request), session.id),
+      'recovery codes could not be issued',
+    );
+  }
+
+  @Post('recovery-sessions')
+  @UseGuards(CsrfGuard, ReauthGuard)
+  @ApiOperation({ summary: 'Consume one recovery code and enter the operations console' })
+  async openWithRecoveryCode(
+    @Req() request: RequestWithSession,
+    @Res({ passthrough: true }) response: Response,
+    @Body() body: RecoveryCodeDto,
+  ) {
+    const session = requireSession(request);
+    const actor = requireUserId(request);
+    const context = await this.service().evaluateLoginContext({
+      userId: actor,
+      ipAddress: this.clientAddress(request),
+      deviceHash: this.deviceHash(request),
+    });
+    if (context.decision === 'block') throw new ForbiddenException(context.reason);
+    const opened = await this.guarded(
+      () => this.service().openConsoleWithRecoveryCode(session.id, actor, body.code),
+      'the recovery code could not be used',
+    );
+    response.setHeader('set-cookie', sessionCookie(opened.token, this.config));
+    return {
+      state: opened.state,
+      expiresAt: opened.expiresAt,
+      idleExpiresAt: opened.idleExpiresAt,
     };
   }
 

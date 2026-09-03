@@ -88,11 +88,67 @@ export async function openConsole(
     });
     await relaySetCookie(setCookie);
     revalidatePath('/admin');
-    return { status: 'ok', message: '운영 콘솔을 열었어요. 30분 뒤, 또는 10분간 조작이 없으면 잠깁니다.' };
+    return {
+      status: 'ok',
+      message: '운영 콘솔을 열었어요. 30분 뒤, 또는 10분간 조작이 없으면 잠깁니다.',
+    };
   } catch (error) {
     return failure(
       error,
       '콘솔을 열지 못했어요. 본인 확인이 최근 5분 안에 끝났는지, 허용된 주소인지 확인해 주세요.',
+    );
+  }
+}
+
+export async function openConsoleWithRecoveryCode(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const code = text(formData.get('code'));
+  if (!/^[A-Za-z0-9_-]{27}$/.test(code)) {
+    return { status: 'error', message: '발급받은 복구 코드 형식을 확인해 주세요.' };
+  }
+  try {
+    const { setCookie } = await apiWithCookie<unknown>('/api/v1/admin/security/recovery-sessions', {
+      method: 'POST',
+      csrfToken: await csrfToken(),
+      body: { code },
+    });
+    await relaySetCookie(setCookie);
+    revalidatePath('/admin');
+    return {
+      status: 'ok',
+      message: '복구 코드를 사용해 운영 콘솔을 열었어요. 이 코드는 폐기됐습니다.',
+    };
+  } catch (error) {
+    return failure(
+      error,
+      '복구 코드가 올바르지 않거나 잠겨 있어요. 최근 본인 확인도 확인해 주세요.',
+    );
+  }
+}
+
+export async function issueRecoveryCodes(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const code = text(formData.get('code'));
+  if (!STEP_UP_CODE.test(code)) {
+    return { status: 'error', message: '발급 직전 인증 앱 코드 6자리를 입력해 주세요.' };
+  }
+  try {
+    await spendSecondFactorCode(code);
+    const issued = await mutate<{ codes: string[]; expiresAt: string }>(
+      '/api/v1/admin/security/recovery-codes',
+    );
+    return {
+      status: 'ok',
+      message: `지금 안전한 곳에 보관하세요. 다시 표시되지 않습니다.\n${issued.codes.join('\n')}`,
+    };
+  } catch (error) {
+    return failure(
+      error,
+      '복구 코드를 발급하지 못했어요. 최근 본인 확인과 인증 앱 코드를 확인해 주세요.',
     );
   }
 }

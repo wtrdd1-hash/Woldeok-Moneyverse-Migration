@@ -9,7 +9,9 @@ import {
   beginSecondFactorEnrolment,
   closeConsole,
   confirmSecondFactorEnrolment,
+  issueRecoveryCodes,
   openConsole,
+  openConsoleWithRecoveryCode,
 } from './security-actions';
 
 /**
@@ -77,6 +79,7 @@ export function EnrolSecondFactor({ disabled = false }: { readonly disabled?: bo
 
 export function OpenConsole({ disabled = false }: { readonly disabled?: boolean }) {
   const [state, action] = useActionState(openConsole, IDLE);
+  const [recoveryState, recover] = useActionState(openConsoleWithRecoveryCode, IDLE);
 
   return (
     <div className="grid gap-3">
@@ -104,6 +107,61 @@ export function OpenConsole({ disabled = false }: { readonly disabled?: boolean 
         </SubmitButton>
       </form>
       <ActionAlert state={state} />
+      <form
+        action={recover}
+        className="grid gap-3 border-t pt-4 sm:grid-cols-[1fr_auto] sm:items-end"
+      >
+        <Field>
+          <FieldLabel htmlFor="recovery-code">일회용 복구 코드</FieldLabel>
+          <Input
+            id="recovery-code"
+            name="code"
+            autoComplete="off"
+            pattern="[A-Za-z0-9_-]{27}"
+            maxLength={27}
+            required
+            disabled={disabled}
+          />
+          <FieldDescription>
+            인증 기기를 잃어버린 경우에만 사용하세요. 성공 즉시 폐기됩니다.
+          </FieldDescription>
+        </Field>
+        <SubmitButton disabled={disabled} variant="outline" className="min-h-11">
+          복구 코드로 열기 →
+        </SubmitButton>
+      </form>
+      <ActionAlert state={recoveryState} />
+    </div>
+  );
+}
+
+export function IssueRecoveryCodes() {
+  const [state, action] = useActionState(issueRecoveryCodes, IDLE);
+  return (
+    <div className="grid gap-2 border-t pt-4">
+      <p className="text-sm font-bold">일회용 복구 코드</p>
+      <p className="text-sm text-muted-foreground">
+        새 코드 8개를 발급하면 기존 미사용 코드는 모두 폐기됩니다.
+      </p>
+      <form action={action} className="flex flex-wrap items-end gap-2">
+        <Field className="max-w-56">
+          <FieldLabel htmlFor="issue-recovery-code">인증 앱 코드</FieldLabel>
+          <Input
+            id="issue-recovery-code"
+            name="code"
+            inputMode="numeric"
+            pattern="[0-9]{6}"
+            maxLength={6}
+            required
+          />
+        </Field>
+        <SubmitButton variant="outline" className="min-h-11">
+          새 복구 코드 발급
+        </SubmitButton>
+      </form>
+      <div className="whitespace-pre-wrap break-all">
+        <ActionAlert state={state} />
+      </div>
     </div>
   );
 }

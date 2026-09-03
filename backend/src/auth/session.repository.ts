@@ -416,6 +416,36 @@ export class SessionRepository {
     };
   }
 
+  async openAdminSessionWithRecoveryCode(
+    sessionId: string,
+    userId: string,
+    codeHash: string,
+  ): Promise<OpenedAdminSession | null> {
+    const token = randomToken();
+    const csrfToken = randomToken();
+    const row = await queryOne<{
+      readonly accepted: boolean;
+      readonly session_id: string | null;
+      readonly expires_at: Date | null;
+      readonly idle_expires_at: Date | null;
+    }>(
+      this.pool,
+      `SELECT accepted, session_id, expires_at, idle_expires_at
+       FROM public.admin_recovery_code_open_session($1,$2,$3,$4,$5)`,
+      [sessionId, userId, codeHash, sha256(token), sha256(csrfToken)],
+    );
+    if (!row) throw new Error('admin_recovery_code_open_session did not return a row');
+    if (!row.accepted || !row.session_id || !row.expires_at || !row.idle_expires_at) return null;
+    return {
+      sessionId: row.session_id,
+      token,
+      csrfToken,
+      state: 'open',
+      expiresAt: row.expires_at,
+      idleExpiresAt: row.idle_expires_at,
+    };
+  }
+
   async touchAdminSession(sessionId: string, userId: string): Promise<AdminSessionStatus> {
     const row = await queryOne<{
       readonly state: AdminSessionState;

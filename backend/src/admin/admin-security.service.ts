@@ -1,4 +1,6 @@
+import { randomBytes } from 'node:crypto';
 import { Injectable } from '@nestjs/common';
+import { sha256 } from '../auth/crypto';
 import type { SecondFactorRepository } from '../auth/second-factor.repository';
 import type { LoginPolicyRow } from '../auth/second-factor.repository';
 import type {
@@ -32,6 +34,13 @@ export class SecondFactorRejectedError extends Error {
     this.name = 'SecondFactorRejectedError';
     this.failedAttempts = failedAttempts;
     this.lockedUntil = lockedUntil;
+  }
+}
+
+export class RecoveryCodeRejectedError extends Error {
+  constructor() {
+    super('the recovery code is not valid');
+    this.name = 'RecoveryCodeRejectedError';
   }
 }
 
@@ -234,6 +243,22 @@ export class AdminSecurityService {
 
   closeConsoleSession(sessionId: string, userId: string): Promise<boolean> {
     return this.sessions.closeAdminSession(sessionId, userId);
+  }
+
+  async issueRecoveryCodes(userId: string, sessionId: string) {
+    const codes = Array.from({ length: 8 }, () => randomBytes(20).toString('base64url'));
+    const issued = await this.factors.issueRecoveryCodes(userId, sessionId, codes.map(sha256));
+    return { codes, expiresAt: issued.expiresAt.toISOString() };
+  }
+
+  async openConsoleWithRecoveryCode(sessionId: string, userId: string, code: string) {
+    const opened = await this.sessions.openAdminSessionWithRecoveryCode(
+      sessionId,
+      userId,
+      sha256(code),
+    );
+    if (!opened) throw new RecoveryCodeRejectedError();
+    return opened;
   }
 
   forceLogout(input: {

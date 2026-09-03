@@ -133,7 +133,10 @@ export class SecondFactorRepository {
     userId: unknown,
   ): Promise<{ readonly failedAttempts: number; readonly lockedUntil: Date | null }> {
     assertUuid(userId, 'user id');
-    const row = await queryOne<{ readonly failed_attempts: number; readonly locked_until: Date | null }>(
+    const row = await queryOne<{
+      readonly failed_attempts: number;
+      readonly locked_until: Date | null;
+    }>(
       this.pool,
       'SELECT failed_attempts, locked_until FROM public.admin_totp_record_failure($1)',
       [userId],
@@ -149,6 +152,18 @@ export class SecondFactorRepository {
       [userId, maxAgeSeconds],
     );
     return row?.satisfied === true;
+  }
+
+  async issueRecoveryCodes(userId: unknown, sessionId: unknown, codeHashes: readonly string[]) {
+    assertUuid(userId, 'user id');
+    assertUuid(sessionId, 'session id');
+    const row = await queryOne<{ readonly code_count: number; readonly expires_at: Date }>(
+      this.pool,
+      'SELECT code_count, expires_at FROM public.admin_recovery_codes_issue($1,$2,$3::text[])',
+      [userId, sessionId, [...codeHashes]],
+    );
+    if (!row) throw new Error('admin_recovery_codes_issue did not return a row');
+    return { count: row.code_count, expiresAt: row.expires_at };
   }
 
   async evaluateLoginContext(input: {
