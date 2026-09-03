@@ -16,17 +16,17 @@ describe('ClosedNotice', () => {
   // go looking for the dice somewhere else.
   it('tells a member the games are shut rather than busy', () => {
     render(<ClosedNotice closure="disabled" />);
-    expect(screen.getByText('카지노는 지금 열려 있지 않아요.')).toBeDefined();
+    expect(screen.getByText('미니게임을 준비하고 있어요.')).toBeDefined();
   });
 
   it('tells a member a pause is temporary', () => {
     render(<ClosedNotice closure="paused" />);
-    expect(screen.getByText('카지노를 잠시 멈춰 두었어요.')).toBeDefined();
+    expect(screen.getByText('잠시 점검 중이에요.')).toBeDefined();
   });
 
   it('names safe mode as its own state', () => {
     render(<ClosedNotice closure="safe_mode" />);
-    expect(screen.getByText('카지노가 안전 모드예요.')).toBeDefined();
+    expect(screen.getByText('안전 점검 모드입니다.')).toBeDefined();
   });
 });
 

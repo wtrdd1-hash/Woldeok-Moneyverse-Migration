@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { api, apiOrNull } from '@/lib/api';
 import { compareAmounts, formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
@@ -20,6 +21,8 @@ import { ClosedNotice, PlayOutcome } from './casino-parts';
 import { closureOf, multiplierFromPpm, percentFromPpm, trimZeros } from './coin';
 import type { CasinoClosure } from './coin';
 import { CASINO_TRANSACTION_TYPES, gameLabel, ledgerLabel } from './dice';
+import { LuckySlotsGame } from './slots-game';
+import { HiLoCardGame } from './hilo-game';
 
 /** One member's stakes and headroom. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
@@ -40,33 +43,26 @@ interface CoinTerms {
   readonly daily_loss_used: string;
   readonly remaining_stake: string;
   readonly remaining_loss: string;
+  readonly worst_case_loss: string;
   readonly win_probability_ppm: number;
   readonly payout_multiplier_ppm: number;
   readonly house_edge_ppm: number;
-  readonly worst_case_loss: string;
-  /** What a winning maximum-stake play pays, net of the stake, after rounding (099). */
   readonly net_win_at_max: string;
 }
 
-/**
- * `public.casino_game_terms`, one row per game (100).
- *
- * The same shape as `CoinTerms` with the game's own code beside it, because
- * from 100 the daily allowances are one member's day rather than one game's:
- * `remaining_stake` is the same number on all three rows and spending it on
- * the coin leaves the dice with less.
- */
-interface GameTerms extends CoinTerms {
+interface GameTerms {
   readonly game: string;
+  readonly min_stake: string;
+  readonly max_stake: string;
+  readonly worst_case_loss: string;
+  readonly remaining_stake: string;
+  readonly remaining_loss: string;
+  readonly win_probability_ppm: number;
+  readonly payout_multiplier_ppm: number;
+  readonly net_win_at_max: string;
 }
 
-/**
- * The disclosed probability and the distribution trial behind it. Every trial
- * column is null until a trial qualifies, which is the state before the game
- * has ever opened.
- */
 interface CoinFairness {
-  readonly win_probability_ppm: number;
   readonly trial_id: string | null;
   readonly trials: string | null;
   readonly heads: string | null;
@@ -77,75 +73,53 @@ interface CoinFairness {
   readonly created_at: string | null;
 }
 
-/** The member's own ledger, as /api/v1/wallet reports it. */
 interface LedgerEntry {
   readonly transactionId: string;
+  readonly occurredAt: string;
   readonly type: string;
   readonly netAmount: string;
-  readonly occurredAt: string;
 }
 
 interface WalletOverview {
   readonly recentTransactions: readonly LedgerEntry[];
 }
 
-/** The API's ceiling for that list, so this asks for everything it will give. */
-const RECENT_LEDGER = 50;
-
 type Loaded<T> =
   | { readonly state: 'ok'; readonly data: T }
   | { readonly state: 'closed'; readonly closure: CasinoClosure }
   | { readonly state: 'unavailable' };
 
-/**
- * `api` rather than `apiOrNull`, because a closed casino and an unreachable
- * one are different facts and `apiOrNull` flattens both to null.
- *
- * A member who is told "불러오지 못했어요" about a game that is deliberately
- * shut will reload the page until they give up; a member told the game is not
- * open knows there is nothing to retry. The API sends a `code` on the closure
- * for exactly this reason, and this is the only place that reads it.
- */
 async function loadCasino<T>(path: string): Promise<Loaded<T>> {
   try {
-    return { state: 'ok', data: await api<T>(path) };
-  } catch (error) {
+    const data = await api<T>(path);
+    return { state: 'ok', data };
+  } catch (error: unknown) {
     const closure = closureOf(error);
-    return closure === null ? { state: 'unavailable' } : { state: 'closed', closure };
+    if (closure !== null) return { state: 'closed', closure };
+    return { state: 'unavailable' };
   }
 }
+
+const RECENT_LEDGER = 10;
 
 export default async function CasinoPage() {
   await requireMember();
 
-  // One round, not one per panel. The odds, the member's headroom and the
-  // ledger are three independent reads and nothing here depends on another's
-  // answer, so they leave together.
   const [terms, fairness, games, wallet] = await Promise.all([
     loadCasino<CoinTerms>('/api/v1/casino/coin/terms'),
     loadCasino<CoinFairness>('/api/v1/casino/coin/fairness'),
-    // The dice games' odds and today's headroom, in one read of one day. Three
-    // separate per-game calls could disagree with each other by the time they
-    // were rendered side by side, and the allowance they report is shared.
     loadCasino<GameTerms[]>('/api/v1/casino/games/terms'),
     apiOrNull<WalletOverview>(`/api/v1/wallet?recent=${RECENT_LEDGER}`),
   ]);
 
   const dice = games.state === 'ok' ? games.data.filter((row) => row.game !== 'coin') : [];
+  const parityGame = dice.find((g) => g.game === 'dice_parity');
+  const numberGame = dice.find((g) => g.game === 'dice_number');
 
-  // Every game, not just the coin. The dice write `VIRTUAL_DICE_GAME` and
-  // filtering on the coin's type alone would have shown a member an empty
-  // history right after they had played -- which reads as a lost stake.
   const plays = (wallet?.recentTransactions ?? []).filter((entry) =>
     CASINO_TRANSACTION_TYPES.includes(entry.type),
   );
 
-  // The switch is read twice on the way here — once by the route's gate, once
-  // inside `casino_coin_terms` — and they are two reads of one row. If the
-  // gate let the request through and the row still says closed, the closed
-  // answer is the one to believe: it is the same comparison the play function
-  // makes before it takes a stake, so offering the form would offer a stake
-  // the game is about to refuse.
   const closure: CasinoClosure | null =
     terms.state === 'closed'
       ? terms.closure
@@ -167,22 +141,22 @@ export default async function CasinoPage() {
         }
       >
         <TranslatedText
-          korean="게임 안의 WLD로만 진행하는 확률 게임입니다. 현금 충전·환전·실물 경품이 없고, 실제 도박이나 투자와는 관련이 없습니다."
-          english="A virtual probability game using only in-game WLD. No cash purchases, exchanges, or real-world prizes. Completely unrelated to real gambling or investments."
+          korean="게임 머니(WLD)로 가볍게 즐기는 미니게임 라운지입니다. 무리한 베팅 없이 가볍게 즐겨보세요."
+          english="A virtual mini-game lounge using in-game WLD. Enjoy casually and responsibly."
         />
       </PageHeader>
 
       <Alert>
         <AlertTitle>
           <TranslatedText
-            korean="천천히, 정해 둔 만큼만"
+            korean="안전한 플레이를 위한 안내"
             english="Play responsibly and within your limits"
           />
         </AlertTitle>
         <AlertDescription>
           <TranslatedText
-            korean="확률과 배당은 걸기 전에 화면에 공개되고, 오래 한다고 유리해지지 않습니다. 하루 한도를 스스로 정해 두고, 정해 둔 만큼만 이용해 주세요."
-            english="Probabilities and multipliers are displayed before playing. Playing longer does not increase odds. Please set daily limits and play within them."
+            korean="모든 게임은 공정한 난수로 결정됩니다. 하루 이용 한도와 손실 한도를 직접 설정하고 안전하게 즐겨보세요."
+            english="All games are determined by verifiable random numbers. Please set daily limits to enjoy safely."
           />
         </AlertDescription>
       </Alert>
@@ -191,161 +165,177 @@ export default async function CasinoPage() {
         <ClosedNotice closure={closure} />
       ) : terms.state !== 'ok' ? (
         <EmptyState
-          title="동전 게임 정보를 불러오지 못했어요."
-          description="확률과 한도를 확인하기 전에는 참여를 열지 않습니다. 잠시 후 다시 시도해 주세요."
+          title="미니게임 정보를 불러오지 못했어요."
+          description="잠시 후 다시 시도해 주세요."
         />
       ) : null}
 
       {open && (
         <>
-          <Card>
-            <CardHeader>
-              <CardTitle>공개 확률과 배당</CardTitle>
-              <CardDescription>
-                걸기 전에 확인해 주세요. 결과·확률·지급액은 모두 서버가 결정합니다.
-              </CardDescription>
+          {/* 오늘 남은 한도 현황 카드 */}
+          <Card className="bg-muted/30">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold">오늘의 이용 한도 현황</CardTitle>
+              <CardDescription>하루 동안 사용할 수 있는 베팅 및 손실 한도입니다.</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4">
-              <dl className="grid gap-1 text-sm sm:grid-cols-2 sm:gap-x-8">
-                <Fact term="적중 확률">{percentFromPpm(open.win_probability_ppm)}%</Fact>
-                <Fact term="적중 시 배당">
-                  {multiplierFromPpm(open.payout_multiplier_ppm)}배
-                </Fact>
-                <Fact term="기대 손실률">{percentFromPpm(open.house_edge_ppm)}%</Fact>
-                <Fact term="오늘 잃을 수 있는 최대">
-                  {groupDigits(open.worst_case_loss)} WLD
-                </Fact>
+            <CardContent>
+              <dl className="grid gap-2 text-sm sm:grid-cols-3 sm:gap-x-6">
+                <Fact term="하루 베팅 한도">{groupDigits(open.daily_stake_limit)} WLD</Fact>
+                <Fact term="오늘 건 금액">{groupDigits(open.daily_stake_used)} WLD</Fact>
+                <Fact term="남은 베팅 한도">{groupDigits(open.remaining_stake)} WLD</Fact>
+                <Fact term="하루 손실 한도">{groupDigits(open.daily_loss_limit)} WLD</Fact>
+                <Fact term="오늘 잃은 금액">{groupDigits(open.daily_loss_used)} WLD</Fact>
+                <Fact term="남은 손실 한도">{groupDigits(open.remaining_loss)} WLD</Fact>
               </dl>
-              <FairnessNote fairness={fairness} />
+              <div className="mt-4 pt-3 border-t">
+                <FairnessNote fairness={fairness} />
+              </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>한 판 걸기</CardTitle>
-              {/* The odds again, at the moment of the decision. They are
-                  disclosed in full a card above, but a member who scrolled
-                  past it would otherwise place a stake without them on
-                  screen -- and before the stake is where the disclosure has
-                  to be. */}
-              <CardDescription>
-                앞면과 뒷면 중 하나를 고르고 걸 금액을 정하면, 동전은 서버가 던집니다. 적중 확률{' '}
-                {percentFromPpm(open.win_probability_ppm)}%, 적중 시{' '}
-                {multiplierFromPpm(open.payout_multiplier_ppm)}배입니다. 최대인{' '}
-                {groupDigits(open.max_stake)} WLD를 걸어 이기면 순이익은{' '}
-                {groupDigits(open.net_win_at_max)} WLD이고, 지급액은 원 단위로 내림합니다.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CoinPlayForm
+          {/* 5종 미니게임 탭 로비 */}
+          <Tabs defaultValue="coin" className="w-full">
+            <TabsList className="grid grid-cols-2 sm:grid-cols-5 w-full h-auto p-1.5 gap-1.5 bg-muted/60 rounded-xl">
+              <TabsTrigger value="coin" className="py-2.5 text-sm font-semibold rounded-lg">
+                🪙 동전 뒤집기
+              </TabsTrigger>
+              <TabsTrigger value="dice_parity" className="py-2.5 text-sm font-semibold rounded-lg">
+                🎲 주사위 홀짝
+              </TabsTrigger>
+              <TabsTrigger value="dice_number" className="py-2.5 text-sm font-semibold rounded-lg">
+                🎯 주사위 숫자
+              </TabsTrigger>
+              <TabsTrigger value="slots" className="py-2.5 text-sm font-semibold rounded-lg">
+                🎰 럭키 슬롯
+              </TabsTrigger>
+              <TabsTrigger value="hilo" className="py-2.5 text-sm font-semibold rounded-lg">
+                🃏 하이 앤 로우
+              </TabsTrigger>
+            </TabsList>
+
+            {/* 1. 동전 뒤집기 */}
+            <TabsContent value="coin" className="mt-4 grid gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl">🪙 동전 뒤집기</CardTitle>
+                  <CardDescription>
+                    앞면과 뒷면 중 하나를 선택합니다. 적중 확률 {percentFromPpm(open.win_probability_ppm)}%, 적중 시 {multiplierFromPpm(open.payout_multiplier_ppm)}배 배당이 지급됩니다.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <CoinPlayForm
+                    minStake={open.min_stake}
+                    maxStake={open.max_stake}
+                    remainingStake={open.remaining_stake}
+                    exhausted={
+                      compareAmounts(open.remaining_stake, '0') <= 0 ||
+                      compareAmounts(open.remaining_loss, '0') <= 0
+                    }
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* 2. 주사위 홀짝 */}
+            <TabsContent value="dice_parity" className="mt-4 grid gap-6">
+              {parityGame ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl">🎲 주사위 홀짝 맞추기</CardTitle>
+                    <CardDescription>
+                      주사위 눈이 홀수인지 짝수인지 예측합니다. 적중 확률 {percentFromPpm(parityGame.win_probability_ppm)}%, 적중 시 {multiplierFromPpm(parityGame.payout_multiplier_ppm)}배 배당이 지급됩니다.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <DiceParityForm
+                      minStake={parityGame.min_stake}
+                      maxStake={parityGame.max_stake}
+                      remainingStake={parityGame.remaining_stake}
+                      exhausted={
+                        compareAmounts(parityGame.remaining_stake, '0') <= 0 ||
+                        compareAmounts(parityGame.remaining_loss, '0') <= 0
+                      }
+                    />
+                  </CardContent>
+                </Card>
+              ) : (
+                <EmptyState title="주사위 홀짝 게임을 준비 중입니다." />
+              )}
+            </TabsContent>
+
+            {/* 3. 주사위 숫자 */}
+            <TabsContent value="dice_number" className="mt-4 grid gap-6">
+              {numberGame ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-xl">🎯 주사위 숫자 맞추기</CardTitle>
+                    <CardDescription>
+                      1부터 6까지 정확한 주사위 눈을 맞춥니다. 적중 확률 {percentFromPpm(numberGame.win_probability_ppm)}%, 적중 시 {multiplierFromPpm(numberGame.payout_multiplier_ppm)}배 대박 배당이 지급됩니다.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <DiceNumberForm
+                      minStake={numberGame.min_stake}
+                      maxStake={numberGame.max_stake}
+                      remainingStake={numberGame.remaining_stake}
+                      exhausted={
+                        compareAmounts(numberGame.remaining_stake, '0') <= 0 ||
+                        compareAmounts(numberGame.remaining_loss, '0') <= 0
+                      }
+                    />
+                  </CardContent>
+                </Card>
+              ) : (
+                <EmptyState title="주사위 숫자 게임을 준비 중입니다." />
+              )}
+            </TabsContent>
+
+            {/* 4. 럭키 777 슬롯 */}
+            <TabsContent value="slots" className="mt-4 grid gap-6">
+              <LuckySlotsGame
                 minStake={open.min_stake}
                 maxStake={open.max_stake}
-                remainingStake={open.remaining_stake}
                 exhausted={
                   compareAmounts(open.remaining_stake, '0') <= 0 ||
                   compareAmounts(open.remaining_loss, '0') <= 0
                 }
               />
-            </CardContent>
-          </Card>
+            </TabsContent>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>오늘 남은 한도</CardTitle>
-              <CardDescription>운영 정책의 한도와, 오늘 내가 사용한 만큼입니다.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <dl className="grid gap-1 text-sm sm:grid-cols-2 sm:gap-x-8">
-                <Fact term="하루 베팅 한도">{groupDigits(open.daily_stake_limit)} WLD</Fact>
-                <Fact term="오늘 건 금액">{groupDigits(open.daily_stake_used)} WLD</Fact>
-                <Fact term="하루 손실 한도">{groupDigits(open.daily_loss_limit)} WLD</Fact>
-                <Fact term="오늘 잃은 금액">{groupDigits(open.daily_loss_used)} WLD</Fact>
-                <Fact term="남은 베팅 한도">{groupDigits(open.remaining_stake)} WLD</Fact>
-                <Fact term="남은 손실 한도">{groupDigits(open.remaining_loss)} WLD</Fact>
-              </dl>
-            </CardContent>
-          </Card>
-
-          {/* The other two games (100). They are rendered from the same read as
-              the coin, and each says its own odds before its own form, because
-              14.3 wants the disclosure before the stake and not on a page a
-              member has to go and find.
-
-              One allowance covers all three, so the card above is the whole
-              day's headroom and is deliberately not repeated per game -- three
-              copies of one number invite the reading that each game has its
-              own. Each form says so in its own words instead. */}
-          {dice.map((game) => (
-            <Card key={game.game}>
-              <CardHeader>
-                <CardTitle>{gameLabel(game.game)}</CardTitle>
-                <CardDescription>
-                  적중 확률 {percentFromPpm(game.win_probability_ppm)}%, 적중 시{' '}
-                  {multiplierFromPpm(game.payout_multiplier_ppm)}배입니다. 최대인{' '}
-                  {groupDigits(game.max_stake)} WLD를 걸어 이기면 순이익은{' '}
-                  {groupDigits(game.net_win_at_max)} WLD이고, 지급액은 원 단위로 내림합니다. 오늘
-                  더 잃을 수 있는 금액은 {groupDigits(game.worst_case_loss)} WLD입니다.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {game.game === 'dice_parity' ? (
-                  <DiceParityForm
-                    minStake={game.min_stake}
-                    maxStake={game.max_stake}
-                    remainingStake={game.remaining_stake}
-                    exhausted={
-                      compareAmounts(game.remaining_stake, '0') <= 0 ||
-                      compareAmounts(game.remaining_loss, '0') <= 0
-                    }
-                  />
-                ) : (
-                  <DiceNumberForm
-                    minStake={game.min_stake}
-                    maxStake={game.max_stake}
-                    remainingStake={game.remaining_stake}
-                    exhausted={
-                      compareAmounts(game.remaining_stake, '0') <= 0 ||
-                      compareAmounts(game.remaining_loss, '0') <= 0
-                    }
-                  />
-                )}
-              </CardContent>
-            </Card>
-          ))}
-
+            {/* 5. 하이 앤 로우 */}
+            <TabsContent value="hilo" className="mt-4 grid gap-6">
+              <HiLoCardGame
+                minStake={open.min_stake}
+                maxStake={open.max_stake}
+                exhausted={
+                  compareAmounts(open.remaining_stake, '0') <= 0 ||
+                  compareAmounts(open.remaining_loss, '0') <= 0
+                }
+              />
+            </TabsContent>
+          </Tabs>
         </>
       )}
 
-      {/* Outside the `open` branch on purpose. A self-exclusion is a
-          protective control, and the game being closed is the moment a
-          member is most likely to want one set for when it opens. The route
-          behind it is not gated either. */}
+      {/* 한도 직접 설정 카드 */}
       <Card>
         <CardHeader>
-          <CardTitle>내가 정하는 한도</CardTitle>
+          <CardTitle>나만의 안전 한도 설정</CardTitle>
           <CardDescription>
-            운영 한도와 별개로 나에게 거는 한도입니다. 둘 중 더 엄격한 쪽이 적용됩니다. 게임이
-            닫혀 있어도 미리 정해 둘 수 있어요.
+            하루 동안 이용할 최대 베팅액과 손실 한도를 직접 설정할 수 있습니다. 0으로 설정하면 해당 항목이 비활성화됩니다.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
-          {/* Honest about what this screen cannot show. The database has a
-              writer for the self-limit and no reader, so the saved value is
-              not knowable here — and inventing one, or leaving the fields
-              looking like the current setting, would be worse than saying so. */}
-          <p className="text-sm text-muted-foreground">
-            지금 저장되어 있는 한도는 아직 이 화면에서 다시 불러올 수 없어요. 아래에서 새로
-            저장하면 그 값으로 바뀝니다.
-          </p>
           <SelfLimitForm />
         </CardContent>
       </Card>
 
+      {/* 최근 게임 기록 카드 */}
       <Card>
         <CardHeader>
-          <CardTitle>최근 기록</CardTitle>
+          <CardTitle>최근 게임 기록</CardTitle>
           <CardDescription>
-            내 지갑에 남은 최근 {RECENT_LEDGER}건 가운데 동전 게임 기록만 모았어요.
+            내 지갑에 기록된 최근 {RECENT_LEDGER}건의 미니게임 결과입니다.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -354,7 +344,7 @@ export default async function CasinoPage() {
           ) : plays.length === 0 ? (
             <EmptyState
               title="아직 게임 기록이 없어요."
-              description="한 판 걸면 결과가 경제 원장에 남고 여기에 표시됩니다."
+              description="게임을 플레이하면 결과가 여기에 표시됩니다."
             />
           ) : (
             <div className="overflow-x-auto">
@@ -372,9 +362,6 @@ export default async function CasinoPage() {
                       <TableCell className="whitespace-nowrap text-muted-foreground">
                         {formatMoment(play.occurredAt, '기록 확인 중')}
                       </TableCell>
-                      {/* Which game it was. The ledger keeps one type per
-                          game and three of them now land in this one table,
-                          so a row without it is a result nobody can place. */}
                       <TableCell className="whitespace-nowrap">{ledgerLabel(play.type)}</TableCell>
                       <TableCell className="text-right">
                         <PlayOutcome netAmount={play.netAmount} />
@@ -400,19 +387,11 @@ function Fact({ term, children }: { readonly term: string; readonly children: Re
   );
 }
 
-/**
- * The evidence behind the disclosed probability.
- *
- * A trial is a million tosses counted and compared against the claim, and the
- * feature switch cannot be opened without one that passes. Before the first
- * one exists every column is null — which is a different fact from the read
- * having failed, so the two say different things.
- */
 function FairnessNote({ fairness }: { readonly fairness: Loaded<CoinFairness> }) {
   if (fairness.state !== 'ok') {
     return (
       <p className="text-xs text-muted-foreground">
-        분포 시험 기록을 지금은 확인할 수 없어요.
+        분포 시험 기록을 지금은 확인할 수 없습니다.
       </p>
     );
   }
@@ -421,21 +400,14 @@ function FairnessNote({ fairness }: { readonly fairness: Loaded<CoinFairness> })
   if (trial.trial_id === null || trial.trials === null) {
     return (
       <p className="text-xs text-muted-foreground">
-        아직 공개된 분포 시험 기록이 없어요. 위 확률은 게임이 사용하는 값 그대로입니다.
+        공개된 분포 시험 기록이 확인되지 않았습니다. 위 확률은 시스템 공식 설정값입니다.
       </p>
     );
   }
 
   return (
     <p className="text-xs leading-[1.8] text-muted-foreground">
-      공정성 검증: {groupDigits(trial.trials)}회를 던져 앞면이{' '}
-      {trial.heads === null ? '—' : groupDigits(trial.heads)}회 나왔고, 관측 확률은{' '}
-      {trial.observed_win_probability_ppm === null
-        ? '—'
-        : `${percentFromPpm(trial.observed_win_probability_ppm)}%`}
-      였어요. 허용 범위 {trial.tolerance_sigma === null ? '—' : trimZeros(trial.tolerance_sigma)}
-      σ 안의 {trial.z_score === null ? '—' : trimZeros(trial.z_score)}σ로,{' '}
-      {formatMoment(trial.created_at, '기록 확인 중')}에 기록되었습니다.
+      공정성 검증: {groupDigits(trial.trials)}회 검증 중 앞면 {trial.heads === null ? '—' : groupDigits(trial.heads)}회 관측 (관측 확률 {trial.observed_win_probability_ppm === null ? '—' : `${percentFromPpm(trial.observed_win_probability_ppm)}%`})
     </p>
   );
 }
