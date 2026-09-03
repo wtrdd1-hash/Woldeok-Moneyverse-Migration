@@ -38,7 +38,8 @@ export async function saveAnnouncement(
   const announcementId = text(formData.get('announcementId'));
   const publishNow = formData.get('publishNow') === 'on';
   const file = formData.get('file');
-  const imageAltText = text(formData.get('imageAltText'));
+  const rawImageAltText = text(formData.get('imageAltText'));
+  const imageAltText = rawImageAltText || title.slice(0, 100);
 
   if (title === '' || title.length > 160) {
     return { status: 'error', message: '제목을 1~160자로 입력해 주세요.' };
@@ -46,8 +47,8 @@ export async function saveAnnouncement(
   if (body === '' || body.length > 12_000) {
     return { status: 'error', message: '내용을 1~12000자로 입력해 주세요.' };
   }
-  if (file instanceof File && file.size > 0 && (imageAltText === '' || imageAltText.length > 300)) {
-    return { status: 'error', message: '이미지 대체 텍스트를 1~300자로 입력해 주세요.' };
+  if (file instanceof File && file.size > 0 && imageAltText.length > 300) {
+    return { status: 'error', message: '이미지 대체 텍스트를 300자 이내로 입력해 주세요.' };
   }
 
   try {

@@ -37,6 +37,17 @@ function PublishNow({ id }: { readonly id: string }) {
 
 export function AnnouncementEditor() {
   const [state, action] = useActionState(saveAnnouncement, IDLE);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setPreviewUrl(null);
+    }
+  }
+
   return (
     <form action={action} className="grid gap-4">
       <Field>
@@ -47,7 +58,13 @@ export function AnnouncementEditor() {
           type="file"
           accept="image/png,image/jpeg,image/webp"
           className="min-h-11 py-2"
+          onChange={handleFileChange}
         />
+        {previewUrl && (
+          <div className="mt-2.5 overflow-hidden rounded-xl border border-amber-500/40 bg-surface/50 p-1 w-fit">
+            <img src={previewUrl} alt="선택한 이미지 미리보기" className="max-h-48 rounded-lg object-contain" />
+          </div>
+        )}
         <FieldDescription>
           PNG, JPEG, WebP · 최대 8 MiB. 별도 이미지 디스크에 저장됩니다.
         </FieldDescription>
