@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, Calendar, Share2, Sparkles } from 'lucide-react';
+import { ArrowLeft, Calendar } from 'lucide-react';
 import { PublicAdvertisement } from '@/components/public-advertisement';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { jsonLd } from '@/lib/json-ld';
 import { formatDay } from '@/lib/money';
