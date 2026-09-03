@@ -6,7 +6,6 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
-  HttpException,
   Inject,
   Post,
   Req,
@@ -23,7 +22,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
-import { HttpError } from '../http/errors';
+import { ImageUploadError } from './image-upload-validation';
 import { MemberPhotoInputError, MemberPhotoRepository } from './member-photo.repository';
 import { PrivateImageStorage } from './private-image-storage';
 
@@ -95,11 +94,7 @@ export class MemberPhotoController {
     try {
       return await this.storage.save(body);
     } catch (error: unknown) {
-      // Preserve the status the validator chose: an oversized upload and an
-      // unrecognised format are different answers to the member.
-      if (error instanceof HttpError) {
-        throw new HttpException(error.message, error.status);
-      }
+      if (error instanceof ImageUploadError) throw new BadRequestException(error.message);
       throw error;
     }
   }

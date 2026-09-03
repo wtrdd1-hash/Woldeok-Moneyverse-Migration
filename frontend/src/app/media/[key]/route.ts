@@ -17,7 +17,7 @@ const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 const STORAGE_KEY = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(png|jpg|webp)$/;
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { readonly params: Promise<{ readonly key: string }> },
 ): Promise<NextResponse> {
   const { key } = await context.params;
@@ -33,20 +33,24 @@ export async function GET(
   if (!token) throw new Error('INTERNAL_API_TOKEN is not configured');
 
   const response = await fetch(`${API_ORIGIN}/media/${key}`, {
-    headers: { 'x-internal-token': token },
-    // The key is a random UUID that never names different bytes, so the
-    // cached copy is correct for as long as the photo stays published.
-    next: { revalidate: 86_400 },
+    headers: {
+      'x-internal-token': token,
+      ...(request.headers.get('cookie') ? { cookie: request.headers.get('cookie')! } : {}),
+    },
+    // A draft depends on the caller and a 404 can become a 200 after review.
+    // Only the browser may cache a response the backend marks as public.
+    cache: 'no-store',
   });
 
   if (!response.ok) {
     return NextResponse.json({ error: 'not found' }, { status: response.status });
   }
 
+  const cacheControl = response.headers.get('cache-control') ?? 'private, no-store';
   return new NextResponse(await response.arrayBuffer(), {
     headers: {
       'content-type': response.headers.get('content-type') ?? 'application/octet-stream',
-      'cache-control': 'public, max-age=86400, immutable',
+      'cache-control': cacheControl,
       'x-content-type-options': 'nosniff',
     },
   });

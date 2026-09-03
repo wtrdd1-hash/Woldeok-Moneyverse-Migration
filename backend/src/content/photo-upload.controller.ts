@@ -1,8 +1,8 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   ForbiddenException,
-  HttpException,
   HttpCode,
   Inject,
   Post,
@@ -18,7 +18,7 @@ import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
-import { HttpError } from '../http/errors';
+import { ImageUploadError } from './image-upload-validation';
 import { PrivateImageStorage } from './private-image-storage';
 
 /**
@@ -50,16 +50,7 @@ export class PhotoUploadController {
     try {
       return await this.storage.save(body);
     } catch (error: unknown) {
-      // The original's pre-conversion check compared error.name to
-      // 'ImageUploadError', which a bare `class X extends Error {}` never
-      // sets, so every rejected upload fell through to a 500. instanceof is
-      // the check that was intended.
-      if (error instanceof HttpError) {
-        // Preserve the status the validator chose: an oversized upload and an
-        // unrecognised format are different answers, and flattening them to
-        // one tells the operator nothing about which to fix.
-        throw new HttpException(error.message, error.status);
-      }
+      if (error instanceof ImageUploadError) throw new BadRequestException(error.message);
       throw error;
     }
   }

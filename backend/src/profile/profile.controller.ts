@@ -7,7 +7,6 @@ import {
   ForbiddenException,
   Get,
   HttpCode,
-  HttpException,
   Inject,
   NotFoundException,
   Param,
@@ -26,7 +25,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
-import { HttpError } from '../http/errors';
+import { ImageUploadError } from '../content/image-upload-validation';
 import { PrivateImageStorage } from '../content/private-image-storage';
 import { ProfileUpdateDto } from './profile.dto';
 import { ProfileInputError, ProfileRepository } from './profile.repository';
@@ -176,9 +175,7 @@ export class ProfileController {
     try {
       stored = await storage.save(body);
     } catch (error: unknown) {
-      // Preserve the status the validator chose: too large and not an image
-      // are different answers and the member can act on each.
-      if (error instanceof HttpError) throw new HttpException(error.message, error.status);
+      if (error instanceof ImageUploadError) throw new BadRequestException(error.message);
       throw error;
     }
 
