@@ -15,6 +15,15 @@ import { ApiError, api } from './api';
  * visitor lands somewhere useful instead of on a page of empty panels; the
  * API refuses every request on its own regardless of what happens here.
  */
+export async function isLoggedInMember(): Promise<boolean> {
+  try {
+    await api<{ csrfToken: string }>('/api/v1/auth/session');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function requireMember(): Promise<void> {
   try {
     // Any authenticated route would do. This one is the cheapest, and its

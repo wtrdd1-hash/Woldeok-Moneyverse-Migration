@@ -15,7 +15,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { api, apiOrNull } from '@/lib/api';
 import { compareAmounts, formatMoment, groupDigits } from '@/lib/money';
-import { requireMember } from '@/lib/session';
+import { requireMember, isLoggedInMember } from '@/lib/session';
+import { CasinoGuestView } from './casino-guest-view';
 import { CoinPlayForm, DiceNumberForm, DiceParityForm, SelfLimitForm } from './casino-forms';
 import { ClosedNotice, PlayOutcome } from './casino-parts';
 import { closureOf, multiplierFromPpm, percentFromPpm } from './coin';
@@ -104,6 +105,10 @@ async function loadCasino<T>(path: string): Promise<Loaded<T>> {
 const RECENT_LEDGER = 10;
 
 export default async function CasinoPage() {
+  const isMember = await isLoggedInMember();
+  if (!isMember) {
+    return <CasinoGuestView />;
+  }
   await requireMember();
 
   const [terms, fairness, games, wallet] = await Promise.all([
