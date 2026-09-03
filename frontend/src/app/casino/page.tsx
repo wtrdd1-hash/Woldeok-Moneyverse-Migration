@@ -18,9 +18,9 @@ import { compareAmounts, formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { CoinPlayForm, DiceNumberForm, DiceParityForm, SelfLimitForm } from './casino-forms';
 import { ClosedNotice, PlayOutcome } from './casino-parts';
-import { closureOf, multiplierFromPpm, percentFromPpm, trimZeros } from './coin';
+import { closureOf, multiplierFromPpm, percentFromPpm } from './coin';
 import type { CasinoClosure } from './coin';
-import { CASINO_TRANSACTION_TYPES, gameLabel, ledgerLabel } from './dice';
+import { CASINO_TRANSACTION_TYPES, ledgerLabel } from './dice';
 import { LuckySlotsGame } from './slots-game';
 import { HiLoCardGame } from './hilo-game';
 
