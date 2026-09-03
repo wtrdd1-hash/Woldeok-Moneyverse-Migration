@@ -144,6 +144,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         {/* And the reader's point colour, for the same reason: a colour
             applied after paint is a colour the reader watches change. */}
         <script dangerouslySetInnerHTML={{ __html: POINT_PREFERENCE_SCRIPT }} />
+        {/* Auto-recover from chunk load failures caused by rolling deployments */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "window.addEventListener('error',function(e){if(e.target&&(e.target.tagName==='SCRIPT'||e.target.tagName==='LINK')&&(e.target.src||e.target.href)&&(e.target.src||e.target.href).indexOf('/_next/static/')!==-1){var k='wdmv_chunk_err_'+Math.floor(Date.now()/15000);if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');setTimeout(function(){window.location.reload();},250);}}},true);",
+          }}
+        />
         {/* A keyboard user should not have to walk the whole rail to reach the
             page. */}
         <a
