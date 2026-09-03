@@ -167,6 +167,21 @@ export default async function AdminLogsPage({
         {AREA.summary}
       </PageHeader>
 
+      <div className="flex flex-wrap gap-2 border-b pb-3">
+        <Button asChild variant="default" size="sm">
+          <Link href="/admin/logs">감사 로그 (Audit Trail)</Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link href="/admin/logs/delivery">배달 로그 (Outbox Delivery)</Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link href="/admin/logs/integrity">원장 무결성 체인 (Hash Integrity)</Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link href="/admin/economy">경제 원장 & 자동조정 (Economy Knobs)</Link>
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">기록 검색</CardTitle>

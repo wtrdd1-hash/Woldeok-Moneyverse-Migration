@@ -13,6 +13,13 @@ import { DETECTED_LOCALE_COOKIE, LOCALE_COOKIE, detectLocale, isLocale } from '@
  * Search Console entries can fall out of the index on their next crawl.
  */
 export function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  const hasSession = request.cookies.has('__Host-mv_session') || request.cookies.has('mv_session');
+
+  // Block signed-in members from landing on provider selection or login screen
+  if (hasSession && pathname === '/login/providers') {
+    return NextResponse.redirect(new URL('/', request.url), { status: 307 });
+  }
   if (request.nextUrl.pathname.startsWith('/entry/')) {
     return new NextResponse('This legacy blog post has been permanently removed.', {
       status: 410,
