@@ -16,6 +16,11 @@ const config: NextConfig = {
   // The API is internal. Nothing here should ever construct a browser-facing
   // URL to it, so its address is read only in server code.
   poweredByHeader: false,
+  compress: true,
+  productionBrowserSourceMaps: false,
+  httpAgentOptions: {
+    keepAlive: true,
+  },
   // Absolute, because Next resolves this against the process's working
   // directory and warns when handed a relative path. It points at the
   // workspace root so tracing follows the contract package's real files
