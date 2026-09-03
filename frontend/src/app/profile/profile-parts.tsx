@@ -1,3 +1,4 @@
+import { ProfileAvatar } from './profile-avatar';
 import { Badge } from '@/components/ui/badge';
 import {
   Card,
@@ -47,26 +48,7 @@ export function ProfileFigure({
   readonly name: string;
   readonly imageUrl: string | null;
 }) {
-  if (imageUrl === null) {
-    return (
-      <span
-        aria-hidden
-        className="grid size-16 shrink-0 place-items-center rounded-full border border-dashed bg-surface font-[family-name:var(--font-display)] text-2xl text-muted-foreground"
-      >
-        {[...name][0] ?? '?'}
-      </span>
-    );
-  }
-  return (
-    <img
-      src={imageUrl}
-      alt={`${name} 프로필 이미지`}
-      loading="lazy"
-      decoding="async"
-      referrerPolicy="no-referrer"
-      className="size-16 shrink-0 rounded-full border object-cover"
-    />
-  );
+  return <ProfileAvatar name={name} imageUrl={imageUrl} />;
 }
 
 function Fact({ term, children }: { readonly term: string; readonly children: React.ReactNode }) {

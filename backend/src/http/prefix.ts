@@ -14,6 +14,7 @@
 export const UNPREFIXED_ROUTES: readonly string[] = [
   'health',
   'media/:key',
+  'media/profile/:key',
   'auth/:provider/authorize',
   'auth/:provider/callback',
 ];

@@ -23,6 +23,12 @@ describe('public search surface', () => {
       'https://easy-scraping.com/announcements',
       'https://easy-scraping.com/gallery',
       'https://easy-scraping.com/shop',
+      'https://easy-scraping.com/casino',
+      'https://easy-scraping.com/stocks',
+      'https://easy-scraping.com/quests',
+      'https://easy-scraping.com/businesses',
+      'https://easy-scraping.com/board',
+      'https://easy-scraping.com/shop/catalog',
       'https://easy-scraping.com/terms',
       'https://easy-scraping.com/privacy',
     ]);
