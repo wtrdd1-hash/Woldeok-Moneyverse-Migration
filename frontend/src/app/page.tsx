@@ -79,11 +79,15 @@ export default async function HomePage() {
             the page stops being a document and looks like a ledger card. */}
         <aside
           aria-labelledby="status-panel-title"
-          className="rounded-[28px] border border-forest-deep bg-forest p-6 text-white shadow-raised lg:rotate-[1deg]"
+          className="rounded-[28px] border border-amber-500/30 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 p-6 text-white shadow-raised shadow-amber-500/10 ring-1 ring-amber-400/20 lg:rotate-[1deg]"
         >
-          <p className="eyebrow text-highlight">Today at a glance</p>
-          <h2 id="status-panel-title" className="mt-3 text-2xl text-white">
+          <div className="flex items-center gap-2">
+            <span className="text-base">🌙</span>
+            <p className="eyebrow text-amber-300 font-bold">Woldeok Moonlight</p>
+          </div>
+          <h2 id="status-panel-title" className="mt-2 text-2xl font-black text-white flex items-center gap-2">
             <T korean="오늘의 현황" english="Today at a glance" />
+            <span className="size-2 rounded-full bg-amber-400 animate-pulse" />
           </h2>
           <ul className="mt-6 grid gap-3">
             <StatusRowItem

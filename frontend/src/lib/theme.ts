@@ -41,12 +41,12 @@ export interface PointPreset {
  * leaving things alone.
  */
 export const POINT_PRESETS: readonly PointPreset[] = [
+  { id: 'moon', label: '달빛', hex: '#f59e0b' },
+  { id: 'gold', label: '황금', hex: '#eab308' },
+  { id: 'amber', label: '호박', hex: '#d97706' },
   { id: 'forest', label: '숲', hex: '#214b38' },
-  { id: 'clay', label: '흙', hex: '#d36c45' },
   { id: 'sea', label: '바다', hex: '#2f5fa8' },
   { id: 'plum', label: '자두', hex: '#8e4172' },
-  { id: 'moss', label: '이끼', hex: '#6b7f2e' },
-  { id: 'chestnut', label: '밤', hex: '#5b4636' },
 ];
 
 const SIX = /^#[0-9a-f]{6}$/i;

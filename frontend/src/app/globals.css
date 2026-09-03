@@ -26,42 +26,24 @@
 :root {
   --radius: 0.75rem;
 
-  /* Paper and ink. */
-  --paper: #f7f4ed;
-  --paper-dark: #eee9df;
-  --surface: #fffdf8;
-  --forest: #214b38;
-  --forest-deep: #173727;
-  --forest-soft: #3c7258;
-  --clay: #d36c45;
-  --clay-soft: #f2dfd5;
-  /*
-   * The terracotta at reading size.
-   *
-   * --clay is 3.19:1 on paper. That clears the 3:1 a large mark or a control's
-   * border has to meet, and the wordmark and the icons keep it. It does not
-   * clear the 4.5:1 that body-sized text has to meet, and the accent is used
-   * for section labels at 11px and for links at 14px, which are body-sized
-   * however bold they are set. This is the same hue and chroma at OKLCH
-   * L 0.52 — 5.34:1 on paper, 5.77:1 on a card — and it is what those roles
-   * use. Two tokens rather than one darker --clay, because darkening the
-   * brand colour everywhere to fix small text would be a different palette.
-   */
-  --clay-ink: #a9461d;
-  --mint: #dcebe1;
-  /*
-   * The accent for text on a dark brand panel — the hero card and the notice
-   * strip, both of which are dark in either mode. It is the one brand colour
-   * that must NOT flip with the theme: a token that darkens for night would
-   * darken onto a surface that was already dark.
-   */
-  --highlight: #f2dfd5;
-  --ink: #18231d;
-  --ink-soft: #5c6861;
-  --line: #dcd8ce;
+  /* Paper and ink - Warm Moonlit Ivory */
+  --paper: #faf8f2;
+  --paper-dark: #f2ede1;
+  --surface: #ffffff;
+  --forest: #b45309;
+  --forest-deep: #78350f;
+  --forest-soft: #d97706;
+  --clay: #f59e0b;
+  --clay-soft: #fef3c7;
+  --clay-ink: #b45309;
+  --mint: #fef9c3;
+  --highlight: #fef3c7;
+  --ink: #181c19;
+  --ink-soft: #5c635e;
+  --line: #e6dfce;
 
-  --shadow-plate: 0 8px 30px rgb(25 48 36 / 0.06);
-  --shadow-raised: 0 28px 70px rgb(20 44 31 / 0.16);
+  --shadow-plate: 0 8px 30px rgb(245 158 11 / 0.08);
+  --shadow-raised: 0 28px 70px rgb(180 83 9 / 0.16);
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -70,43 +52,43 @@
   --popover: var(--surface);
   --popover-foreground: var(--ink);
 
-  --primary: var(--forest);
+  --primary: #d97706;
   --primary-foreground: #ffffff;
 
-  --secondary: var(--mint);
-  --secondary-foreground: var(--forest-deep);
+  --secondary: #fef3c7;
+  --secondary-foreground: #78350f;
 
   --muted: var(--paper-dark);
   --muted-foreground: var(--ink-soft);
 
-  --accent: var(--clay-soft);
-  --accent-foreground: #7a3a20;
+  --accent: #fef3c7;
+  --accent-foreground: #92400e;
 
   --destructive: #b3452c;
   --destructive-foreground: #ffffff;
 
   --border: var(--line);
-  --input: #d2cec4;
-  --ring: rgb(211 108 69 / 0.7);
+  --input: #ded7c4;
+  --ring: rgb(245 158 11 / 0.6);
 
   /* Korean market convention. */
   --rise: #c0392b;
   --fall: #2f5fa8;
 
-  --chart-1: var(--forest);
-  --chart-2: var(--clay);
-  --chart-3: var(--forest-soft);
-  --chart-4: #d19432;
+  --chart-1: #d97706;
+  --chart-2: #f59e0b;
+  --chart-3: #fbbf24;
+  --chart-4: #ca8a04;
   --chart-5: var(--ink-soft);
 
   --sidebar: var(--surface);
   --sidebar-foreground: var(--ink);
-  --sidebar-primary: var(--forest);
+  --sidebar-primary: #d97706;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: var(--mint);
-  --sidebar-accent-foreground: var(--forest-deep);
+  --sidebar-accent: #fef3c7;
+  --sidebar-accent-foreground: #78350f;
   --sidebar-border: var(--line);
-  --sidebar-ring: var(--clay);
+  --sidebar-ring: #f59e0b;
 }
 
 /*
@@ -115,32 +97,20 @@
  * mud on a dark field.
  */
 .dark {
-  --paper: #121a15;
-  --paper-dark: #0e1611;
-  --surface: #1a251e;
-  --ink: #e6ede8;
-  --ink-soft: #a3b0a8;
-  --line: #2b382f;
+  --paper: #0b0f17; /* Midnight Sky */
+  --paper-dark: #070a10;
+  --surface: #111827; /* Deep Navy Obsidian */
+  --ink: #f8fafc;
+  --ink-soft: #94a3b8;
+  --line: #1e293b;
 
-  /*
-   * The brand family, restated for a dark ground.
-   *
-   * Leaving these at their daylight values is what a dark mode looks like
-   * when only the greys were considered: the masthead's underline and the
-   * wordmark's cup are both the deep forest, and on a near-black page they
-   * are the page. The two roles pull in opposite directions here — `forest`
-   * is a panel that white text sits on, so it stays dark, while `forest-soft`
-   * is a mark drawn *on* the page, so it goes light.
-   */
-  --forest: #1c4032;
-  --forest-deep: #14291f;
-  --forest-soft: #8fbfa6;
-  --clay: #e28c68;
-  --clay-soft: #3a2a23;
-  /* On a dark ground the accent is a light colour, and light on near-black is
-     6.9:1 on the page and 6.2:1 on a card. Nothing to separate here. */
-  --clay-ink: var(--clay);
-  --mint: #23342a;
+  --forest: #1e293b;
+  --forest-deep: #0f172a;
+  --forest-soft: #fbbf24; /* Radiant Moonbeam */
+  --clay: #f59e0b; /* Glowing Gold */
+  --clay-soft: #242217;
+  --clay-ink: #fbbf24;
+  --mint: #1c1d18;
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -149,28 +119,26 @@
   --popover: var(--surface);
   --popover-foreground: var(--ink);
 
-  --primary: #6da58a;
-  --primary-foreground: #0e1611;
-  --secondary: var(--mint);
-  --secondary-foreground: #dce9e1;
-  --muted: #1f2b24;
+  --primary: #fbbf24; /* Brilliant Moonlight Gold */
+  --primary-foreground: #0b0f17;
+  --secondary: #252216;
+  --secondary-foreground: #fef08a;
+  --muted: #161f30;
   --muted-foreground: var(--ink-soft);
-  --accent: var(--clay-soft);
-  --accent-foreground: #f0c7b3;
+  --accent: #292414;
+  --accent-foreground: #fde047;
   --destructive: #d97256;
-  --destructive-foreground: #121a15;
+  --destructive-foreground: #0b0f17;
   --border: var(--line);
-  --input: #35443a;
-  --ring: rgb(226 140 104 / 0.7);
+  --input: #293548;
+  --ring: rgb(251 191 36 / 0.6);
 
-  --rise: #e0705f;
-  --fall: #79a6e6;
+  --rise: #f87171;
+  --fall: #60a5fa;
 
-  /* A chart line has to be legible against the ground it is drawn on, and
-     the daylight forest is not. */
-  --chart-1: var(--forest-soft);
-  --chart-2: var(--clay);
-  --chart-3: #6da58a;
+  --chart-1: #fbbf24;
+  --chart-2: #f59e0b;
+  --chart-3: #fde047;
   --chart-5: var(--ink-soft);
 }
 

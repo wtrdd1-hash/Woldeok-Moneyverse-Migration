@@ -50,7 +50,7 @@ export function PageHeader({
  * display face has no italic and a synthesised one would be wrong.
  */
 export function Accent({ children }: { readonly children: React.ReactNode }) {
-  return <em className="not-italic text-forest-soft">{children}</em>;
+  return <em className="not-italic text-amber-500 dark:text-amber-400 font-extrabold">{children}</em>;
 }
 
 /**

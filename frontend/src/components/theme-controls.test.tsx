@@ -71,7 +71,7 @@ describe('ThemePanel', () => {
         <ThemePanel />
       </ThemeProvider>,
     );
-    for (const label of ['숲', '흙', '바다', '자두', '이끼', '밤']) {
+    for (const label of ['달빛', '황금', '호박', '숲', '바다', '자두']) {
       expect(screen.getByTitle(label)).toBeTruthy();
     }
     expect(screen.getByText('기본')).toBeTruthy();
