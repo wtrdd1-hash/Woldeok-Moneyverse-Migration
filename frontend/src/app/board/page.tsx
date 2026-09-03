@@ -12,8 +12,9 @@ import { NewPostForm } from './board-forms';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '회원 게시판',
-  robots: { index: false, follow: false },
+  title: '커뮤니티 광장 (회원 게시판) — 공략 및 자유 토론',
+  description: '월덕 머니버스 이용자들과 소통하고 가상경제 팁과 전략을 공유하는 커뮤니티 게시판입니다.',
+  robots: { index: true, follow: true },
 };
 
 /**

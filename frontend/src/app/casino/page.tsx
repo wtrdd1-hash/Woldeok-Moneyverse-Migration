@@ -28,8 +28,9 @@ import { HiLoCardGame } from './hilo-game';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '럭키존 (가상 미니게임)',
-  robots: { index: false, follow: false },
+  title: '럭키존 (가상 미니게임) — 동전·주사위·슬롯머신·하이로우',
+  description: '월덕 머니버스의 5종 캐주얼 가상 미니게임(동전 뒤집기, 주사위 홀짝, 주사위 숫자 맞추기, 럭키 슬롯머신, 하이 앤 로우)을 플레이하고 WLD 가상자산 보상을 획득하세요.',
+  robots: { index: true, follow: true },
 };
 
 /** public.casino_coin_terms, as backend/src/casino/casino.repository.ts returns it. */

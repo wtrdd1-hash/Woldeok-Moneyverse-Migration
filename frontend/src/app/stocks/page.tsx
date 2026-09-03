@@ -24,8 +24,9 @@ import { TradeDialog } from './trade-dialog';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '가상 주식',
-  robots: { index: false, follow: false },
+  title: '가상 주식 거래소 — 실시간 종목 시세 및 캔들 차트 분석',
+  description: '월덕 머니버스 커뮤니티 가상 주식 거래소에서 실시간 종목 시세를 분석하고 차트를 확인해 매매하세요.',
+  robots: { index: true, follow: true },
 };
 
 /** The API returns these rows as the database shapes them. */

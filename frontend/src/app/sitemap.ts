@@ -1,13 +1,23 @@
 import type { MetadataRoute } from 'next';
 
 /**
- * Only the pages a signed-out visitor can actually read.
- *
- * `/board` was listed here and should never have been: it is members-only,
- * renders `noindex`, and redirects a signed-out visitor to the login screen —
- * so listing it invited crawlers to a URL that answers them with a redirect.
+ * Public routes indexed by search crawlers.
  */
-const PUBLIC_PATHS = ['', '/guide', '/announcements', '/gallery', '/shop', '/terms', '/privacy'];
+const PUBLIC_PATHS = [
+  '',
+  '/guide',
+  '/announcements',
+  '/gallery',
+  '/shop',
+  '/casino',
+  '/stocks',
+  '/quests',
+  '/businesses',
+  '/board',
+  '/shop/catalog',
+  '/terms',
+  '/privacy',
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   if (process.env.SEO_INDEXING_ENABLED !== 'true') return [];
@@ -15,6 +25,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return PUBLIC_PATHS.map((path) => ({
     url: `${base}${path}`,
     changeFrequency: path === '' ? ('daily' as const) : ('weekly' as const),
-    priority: path === '' ? 1 : 0.6,
+    priority: path === '' ? 1 : path === '/casino' || path === '/stocks' ? 0.9 : 0.7,
   }));
 }

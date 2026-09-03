@@ -16,8 +16,9 @@ import { equityGateNote, equitySummary, meetsEquityRequirement } from './equity'
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '게임 사업',
-  robots: { index: false, follow: false },
+  title: '마이비즈 (소규모 게임 사업) — 가상 사업체 운영',
+  description: '월덕 머니버스 세계관 속 다양한 사업체를 인수하고 운영하여 일일 정산 수익을 창출하세요.',
+  robots: { index: true, follow: true },
 };
 
 interface BusinessType {
