@@ -8,7 +8,6 @@ import {
   MessageSquare,
   ChevronRight,
   ShieldCheck,
-  Radio,
 } from 'lucide-react';
 import { WalletGlance } from '@/components/wallet-glance';
 import { LobbyCount } from '@/components/lobby-count';
