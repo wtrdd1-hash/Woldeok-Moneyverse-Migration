@@ -53,15 +53,19 @@ export async function GET(
 
     await relaySetCookie(setCookie);
 
+    let destination: string;
     if (payload.outcome === 'linked') {
-      return NextResponse.redirect(publicUrl(`/account?linked=${provider}`));
+      destination = publicUrl(`/account?linked=${provider}`);
+    } else if (payload.outcome === 'reauthenticated') {
+      destination = publicUrl('/account?reauth=done');
+    } else {
+      destination = publicUrl(payload.consentCurrent === false ? '/login' : '/?account=signed-in');
     }
-    if (payload.outcome === 'reauthenticated') {
-      return NextResponse.redirect(publicUrl('/account?reauth=done'));
+    const response = NextResponse.redirect(destination);
+    for (const cookie of setCookie) {
+      response.headers.append('set-cookie', cookie);
     }
-    return NextResponse.redirect(
-      publicUrl(payload.consentCurrent === false ? '/login' : '/?account=signed-in'),
-    );
+    return response;
   } catch (error) {
     const detail = error instanceof ApiError ? (error.detail ?? '') : '';
     const code = KNOWN_ERRORS.has(detail) ? detail : 'oauth_login';

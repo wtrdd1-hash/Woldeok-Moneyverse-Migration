@@ -32,7 +32,11 @@ export async function GET(
       `/auth/${encodeURIComponent(provider)}/authorize`,
       cookieHeader && !session.signedIn ? { cookieHeader } : {},
     );
-    return NextResponse.redirect(authorizationUrl);
+    const response = NextResponse.redirect(authorizationUrl);
+    for (const cookie of setCookie) {
+      response.headers.append('set-cookie', cookie);
+    }
+    return response;
   } catch (error) {
     if (error instanceof ApiError) {
       if (error.status === 401 || error.status === 403) {
