@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
-import { TranslatedText } from '@/components/translated-text';
+import { TranslatedText, TranslatedText as T } from '@/components/translated-text';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -175,17 +175,17 @@ export default async function CasinoPage() {
           {/* 오늘 남은 한도 현황 카드 */}
           <Card className="bg-muted/30">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">오늘의 이용 한도 현황</CardTitle>
-              <CardDescription>하루 동안 사용할 수 있는 베팅 및 손실 한도입니다.</CardDescription>
+              <CardTitle className="text-base font-semibold"><T korean="오늘의 이용 한도 현황" english="Today's Gaming Limits" /></CardTitle>
+              <CardDescription><T korean="하루 동안 사용할 수 있는 베팅 및 손실 한도입니다." english="Daily stake and loss limits set for responsible play." /></CardDescription>
             </CardHeader>
             <CardContent>
               <dl className="grid gap-2 text-sm sm:grid-cols-3 sm:gap-x-6">
-                <Fact term="하루 베팅 한도">{groupDigits(open.daily_stake_limit)} WLD</Fact>
-                <Fact term="오늘 건 금액">{groupDigits(open.daily_stake_used)} WLD</Fact>
-                <Fact term="남은 베팅 한도">{groupDigits(open.remaining_stake)} WLD</Fact>
-                <Fact term="하루 손실 한도">{groupDigits(open.daily_loss_limit)} WLD</Fact>
-                <Fact term="오늘 잃은 금액">{groupDigits(open.daily_loss_used)} WLD</Fact>
-                <Fact term="남은 손실 한도">{groupDigits(open.remaining_loss)} WLD</Fact>
+                <Fact term={<T korean="하루 베팅 한도" english="Daily Stake Limit" />}>{groupDigits(open.daily_stake_limit)} WLD</Fact>
+                <Fact term={<T korean="오늘 건 금액" english="Today Stake Used" />}>{groupDigits(open.daily_stake_used)} WLD</Fact>
+                <Fact term={<T korean="남은 베팅 한도" english="Remaining Stake" />}>{groupDigits(open.remaining_stake)} WLD</Fact>
+                <Fact term={<T korean="하루 손실 한도" english="Daily Loss Limit" />}>{groupDigits(open.daily_loss_limit)} WLD</Fact>
+                <Fact term={<T korean="오늘 잃은 금액" english="Today Loss Used" />}>{groupDigits(open.daily_loss_used)} WLD</Fact>
+                <Fact term={<T korean="남은 손실 한도" english="Remaining Loss" />}>{groupDigits(open.remaining_loss)} WLD</Fact>
               </dl>
               <div className="mt-4 pt-3 border-t">
                 <FairnessNote fairness={fairness} />
@@ -197,19 +197,19 @@ export default async function CasinoPage() {
           <Tabs defaultValue="coin" className="w-full">
             <TabsList className="grid grid-cols-2 sm:grid-cols-5 w-full h-auto p-1.5 gap-1.5 bg-muted/60 rounded-xl">
               <TabsTrigger value="coin" className="py-2.5 text-sm font-semibold rounded-lg">
-                🪙 동전 뒤집기
+                🪙 <T korean="동전 뒤집기" english="Coin Flip" />
               </TabsTrigger>
               <TabsTrigger value="dice_parity" className="py-2.5 text-sm font-semibold rounded-lg">
-                🎲 주사위 홀짝
+                🎲 <T korean="주사위 홀짝" english="Dice Parity" />
               </TabsTrigger>
               <TabsTrigger value="dice_number" className="py-2.5 text-sm font-semibold rounded-lg">
-                🎯 주사위 숫자
+                🎯 <T korean="주사위 숫자" english="Dice Number" />
               </TabsTrigger>
               <TabsTrigger value="slots" className="py-2.5 text-sm font-semibold rounded-lg">
-                🎰 럭키 슬롯
+                🎰 <T korean="럭키 슬롯" english="Lucky Slots" />
               </TabsTrigger>
               <TabsTrigger value="hilo" className="py-2.5 text-sm font-semibold rounded-lg">
-                🃏 하이 앤 로우
+                🃏 <T korean="하이 앤 로우" english="Hi-Lo Cards" />
               </TabsTrigger>
             </TabsList>
 
@@ -378,7 +378,7 @@ export default async function CasinoPage() {
   );
 }
 
-function Fact({ term, children }: { readonly term: string; readonly children: React.ReactNode }) {
+function Fact({ term, children }: { readonly term: React.ReactNode; readonly children: React.ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
       <dt className="text-muted-foreground">{term}</dt>

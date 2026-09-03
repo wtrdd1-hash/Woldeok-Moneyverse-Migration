@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
+import { TranslatedText as T } from '@/components/translated-text';
 import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,9 +31,9 @@ interface Item {
 }
 
 const PRINCIPLES = [
-  '등록된 게임 아이템만 표시',
-  '결제 시 서버가 가격을 다시 확인',
-  '현금 교환·환전 기능 없음',
+  { ko: '등록된 게임 아이템만 표시', en: 'In-game items only' },
+  { ko: '결제 시 서버가 가격을 다시 확인', en: 'Server verifies prices at checkout' },
+  { ko: '현금 교환·환전 기능 없음', en: 'No cash exchange' },
 ];
 
 export default async function ShopPage() {
@@ -45,20 +46,22 @@ export default async function ShopPage() {
           eyebrow="WOLDEOK MARKET · LEDGER"
           title={
             <>
-              모은 WLD로,
+              <T korean="모은 WLD로," english="With earned WLD," />
               <br />
-              <Accent>우리 세계를 꾸며요.</Accent>
+              <Accent><T korean="우리 세계를 꾸며요." english="Customize our world." /></Accent>
             </>
           }
         >
-          상점 가격과 결제 기록은 서버 경제 원장 기준으로 처리됩니다. 실제 현금 결제나 환전
-          기능은 제공하지 않습니다.
+          <T
+            korean="상점 가격과 결제 기록은 서버 경제 원장 기준으로 처리됩니다. 실제 현금 결제나 환전 기능은 제공하지 않습니다."
+            english="Shop prices and transactions are verified by the server ledger. No real cash conversion is provided."
+          />
         </PageHeader>
         <ul aria-label="상점 이용 원칙" className="flex flex-wrap gap-2">
           {PRINCIPLES.map((principle) => (
-            <li key={principle}>
+            <li key={principle.ko}>
               <Badge variant="outline" className="font-normal">
-                {principle}
+                <T korean={principle.ko} english={principle.en} />
               </Badge>
             </li>
           ))}
@@ -68,11 +71,11 @@ export default async function ShopPage() {
       <section aria-labelledby="catalog-title" className="grid gap-3">
         <SectionHeader
           eyebrow="CATALOG"
-          title="등록된 상점 목록"
+          title={<T korean="등록된 상점 목록" english="Item Catalog" />}
           id="catalog-title"
           action={
             <p className="text-xs text-muted-foreground">
-              가격과 재고 판단은 브라우저가 아닌 서버에서 처리합니다.
+              <T korean="가격과 재고 판단은 브라우저가 아닌 서버에서 처리합니다." english="Prices and stock are verified by the server." />
             </p>
           }
         />

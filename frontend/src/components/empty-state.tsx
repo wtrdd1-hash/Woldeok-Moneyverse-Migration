@@ -18,8 +18,8 @@ export function EmptyState({
   description,
   children,
 }: {
-  readonly title: string;
-  readonly description?: string;
+  readonly title: React.ReactNode;
+  readonly description?: React.ReactNode;
   readonly children?: React.ReactNode;
 }) {
   return (
