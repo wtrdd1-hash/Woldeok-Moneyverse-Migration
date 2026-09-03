@@ -1,6 +1,7 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   DEFAULT_LOCALE,
   DETECTED_LOCALE_COOKIE,
@@ -26,6 +27,14 @@ function readCookie(name: string): string | null {
 }
 
 export function LocaleProvider({ children }: { readonly children: React.ReactNode }) {
+  let router: ReturnType<typeof useRouter> | null = null;
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    router = useRouter();
+  } catch {
+    router = null;
+  }
+  const [, startTransition] = useTransition();
   const [locale, updateLocale] = useState<Locale>(DEFAULT_LOCALE);
 
   useEffect(() => {
@@ -42,8 +51,11 @@ export function LocaleProvider({ children }: { readonly children: React.ReactNod
       document.cookie = `${LOCALE_COOKIE}=${nextLocale}; Path=/; Max-Age=31536000; SameSite=Lax; Secure`;
       document.documentElement.lang = nextLocale;
       updateLocale(nextLocale);
+      startTransition(() => {
+        router?.refresh();
+      });
     },
-  }), [locale]);
+  }), [locale, router]);
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }

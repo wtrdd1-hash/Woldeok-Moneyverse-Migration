@@ -7,6 +7,13 @@ import { Toaster } from '@/components/ui/sonner';
 import { NOTICE_PREFERENCE_SCRIPT } from '@/lib/notice-preference';
 import { POINT_PREFERENCE_SCRIPT } from '@/lib/theme';
 import { jsonLd } from '@/lib/json-ld';
+import { cookies } from 'next/headers';
+import {
+  DEFAULT_LOCALE,
+  DETECTED_LOCALE_COOKIE,
+  LOCALE_COOKIE,
+  isLocale,
+} from '@/lib/locale';
 import './globals.css';
 
 /**
@@ -110,10 +117,15 @@ const siteStructuredData = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const explicit = cookieStore.get(LOCALE_COOKIE)?.value;
+  const detected = cookieStore.get(DETECTED_LOCALE_COOKIE)?.value;
+  const locale = isLocale(explicit) ? explicit : isLocale(detected) ? detected : DEFAULT_LOCALE;
+
   return (
     <html
-      lang="ko"
+      lang={locale}
       // The theme scripts below write to this element before hydration, which
       // is the whole point of them; React is told not to report the
       // difference it will find.

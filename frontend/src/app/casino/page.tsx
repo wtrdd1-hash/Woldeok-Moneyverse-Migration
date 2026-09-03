@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
+import { TranslatedText } from '@/components/translated-text';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -156,16 +157,33 @@ export default async function CasinoPage() {
 
   return (
     <div className="grid gap-6">
-      <PageHeader eyebrow="LUCKY ZONE" title="럭키존 (가상 미니게임)">
-        게임 안의 WLD로만 진행하는 확률 게임입니다. 현금 충전·환전·실물 경품이 없고, 실제
-        도박이나 투자와는 관련이 없습니다.
+      <PageHeader
+        eyebrow="LUCKY ZONE"
+        title={
+          <TranslatedText
+            korean="럭키존 (가상 미니게임)"
+            english="Lucky Zone (Virtual Mini-games)"
+          />
+        }
+      >
+        <TranslatedText
+          korean="게임 안의 WLD로만 진행하는 확률 게임입니다. 현금 충전·환전·실물 경품이 없고, 실제 도박이나 투자와는 관련이 없습니다."
+          english="A virtual probability game using only in-game WLD. No cash purchases, exchanges, or real-world prizes. Completely unrelated to real gambling or investments."
+        />
       </PageHeader>
 
       <Alert>
-        <AlertTitle>천천히, 정해 둔 만큼만</AlertTitle>
+        <AlertTitle>
+          <TranslatedText
+            korean="천천히, 정해 둔 만큼만"
+            english="Play responsibly and within your limits"
+          />
+        </AlertTitle>
         <AlertDescription>
-          확률과 배당은 걸기 전에 화면에 공개되고, 오래 한다고 유리해지지 않습니다. 하루 한도를
-          스스로 정해 두고, 정해 둔 만큼만 이용해 주세요.
+          <TranslatedText
+            korean="확률과 배당은 걸기 전에 화면에 공개되고, 오래 한다고 유리해지지 않습니다. 하루 한도를 스스로 정해 두고, 정해 둔 만큼만 이용해 주세요."
+            english="Probabilities and multipliers are displayed before playing. Playing longer does not increase odds. Please set daily limits and play within them."
+          />
         </AlertDescription>
       </Alert>
 
