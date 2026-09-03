@@ -23,11 +23,11 @@ COPY frontend frontend
 # APP_BASE_URL is baked in here because robots.txt and sitemap.xml are
 # generated during the build and must name the public host. It is passed at
 # build time rather than run time for that reason alone; nothing secret is.
-ARG APP_BASE_URL=http://127.0.0.1:3000
-ARG SEO_INDEXING_ENABLED=false
-ARG ADS_ENABLED=false
-ARG ADSENSE_PUBLISHER_ID=
-ARG ADSENSE_HOME_SLOT=
+ARG APP_BASE_URL=https://easy-scraping.com
+ARG SEO_INDEXING_ENABLED=true
+ARG ADS_ENABLED=true
+ARG ADSENSE_PUBLISHER_ID=ca-pub-5220225531544323
+ARG ADSENSE_HOME_SLOT=2118692561
 ENV APP_BASE_URL=${APP_BASE_URL} SEO_INDEXING_ENABLED=${SEO_INDEXING_ENABLED} ADS_ENABLED=${ADS_ENABLED} ADSENSE_PUBLISHER_ID=${ADSENSE_PUBLISHER_ID} ADSENSE_HOME_SLOT=${ADSENSE_HOME_SLOT}
 RUN pnpm --filter @moneyverse/contract build && pnpm --filter @moneyverse/frontend build
 

@@ -8,11 +8,6 @@ declare global {
   }
 }
 
-/**
- * The unit is deliberately inert when the tag is blocked or unavailable:
- * public content remains readable and no retry loop attempts to evade an ad
- * blocker.  The component is used only by the server-side allowlist on home.
- */
 export function AdSenseAd({ publisherId, slot }: { readonly publisherId: string; readonly slot: string }) {
   const requested = useRef(false);
 
@@ -22,14 +17,19 @@ export function AdSenseAd({ publisherId, slot }: { readonly publisherId: string;
     try {
       (window.adsbygoogle = window.adsbygoogle ?? []).push({});
     } catch {
-      // An ad blocker or a late tag must never break the surrounding article.
+      // AdBlock or network error
     }
   }, []);
 
   return (
     <ins
-      className="adsbygoogle block min-h-[100px]"
-      style={{ display: 'block' }}
+      className="adsbygoogle"
+      style={{
+        display: 'block',
+        minWidth: '250px',
+        width: '100%',
+        minHeight: '90px',
+      }}
       data-ad-client={publisherId}
       data-ad-slot={slot}
       data-ad-format="auto"
