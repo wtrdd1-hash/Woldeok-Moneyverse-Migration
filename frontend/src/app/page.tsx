@@ -233,6 +233,8 @@ export default async function HomePage() {
           </Card>
         </div>
       </section>
+
+      <HomeAdvertisement />
       </div>
     </>
   );

@@ -116,7 +116,7 @@ export default async function AnnouncementsPage() {
       </section>
 
       {/* An empty notice board is not advertising inventory. */}
-      {data && data.announcements.length > 0 && <PublicAdvertisement />}
+      <PublicAdvertisement />
     </div>
   );
 }

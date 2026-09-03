@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { MyReceipts } from './my-receipts';
+import { PublicAdvertisement } from '@/components/public-advertisement';
 import { PurchaseControl } from './purchase-control';
 
 /**
@@ -119,6 +120,8 @@ export default async function ShopPage() {
       </section>
 
       <MyReceipts />
+
+      <PublicAdvertisement />
     </div>
   );
 }

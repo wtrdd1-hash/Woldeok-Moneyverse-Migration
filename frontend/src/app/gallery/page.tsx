@@ -98,7 +98,7 @@ export default async function GalleryPage() {
       </section>
 
       {/* Only operator-reviewed, published photos make this a content page. */}
-      {photos.length > 0 && <PublicAdvertisement />}
+      <PublicAdvertisement />
     </div>
   );
 }

@@ -186,6 +186,8 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
           />
         </p>
       </div>
+
+      <HomeAdvertisement />
     </div>
   );
 }
