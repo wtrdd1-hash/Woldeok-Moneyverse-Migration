@@ -1,5 +1,6 @@
-import { groupDigits } from '@/lib/money';
 'use server';
+
+import { groupDigits } from '@/lib/money';
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
