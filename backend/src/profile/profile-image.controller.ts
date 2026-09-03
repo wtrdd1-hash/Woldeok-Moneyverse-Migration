@@ -14,23 +14,18 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { PrivateImageStorage } from '../content/private-image-storage';
 import type { RequestWithSession } from '../auth/session.context';
+import { SessionRepository } from '../auth/session.repository';
+import { sessionToken } from '../auth/cookies';
+import type { AppConfig } from '../core/config';
+import { CONFIG } from '../core/config';
 import { ProfileRepository } from './profile.repository';
 
 /**
  * The bytes of a member's profile picture.
  *
- * A second serving route rather than a branch inside `MediaController`,
- * because the two answer different questions and share only a directory.
- * `/media/:key` asks whether an operator published a gallery photo; this asks
- * whether the member whose picture it is chose to show it to this reader.
- * Folding them together would mean one route holding both gates and getting
- * the wrong one right.
- *
- * No session guard. A profile may be 'public', which means readable by
- * somebody who is not signed in, and 094 decides that from the profile's own
- * visibility -- so the route forwards whoever the caller is, including
- * nobody, and lets the database answer. Adding a guard here would make a
- * public profile's picture members-only and contradict the setting beside it.
+ * No mandatory session guard because public profiles are visible anonymously,
+ * but session token is resolved from request headers when present so members-only
+ * profile pictures are visible to signed-in viewers.
  */
 @ApiTags('content')
 @Controller('media/profile')
@@ -38,6 +33,8 @@ export class ProfileImageController {
   constructor(
     @Inject(ProfileRepository) private readonly profiles: ProfileRepository | null,
     @Inject(PrivateImageStorage) private readonly storage: PrivateImageStorage | null,
+    @Inject(SessionRepository) private readonly sessions: SessionRepository | null,
+    @Inject(CONFIG) private readonly config: AppConfig,
   ) {}
 
   @Get(':key')
@@ -52,26 +49,27 @@ export class ProfileImageController {
       throw new ServiceUnavailableException('profile service is unavailable');
     }
 
-    // One answer covers "no such key", "not a profile image", "the owner is
-    // gone" and "not yours to see". Telling them apart would confirm that a
-    // member has a picture they chose not to show, which is the thing the
-    // setting exists to withhold.
+    let viewer: string | null = request.session?.user_id ?? null;
+    if (!viewer && this.sessions) {
+      const token = sessionToken(request.headers, this.config);
+      if (token) {
+        const session = await this.sessions.get(token);
+        if (session) {
+          viewer = session.user_id;
+          request.session = session;
+        }
+      }
+    }
+
     const missing = new NotFoundException('not found');
-    const viewer = request.session?.user_id ?? null;
     if (!(await this.profiles.imageVisible(viewer, key))) throw missing;
 
     const bytes = await this.storage.read(key);
     if (!bytes) throw missing;
 
-    // `nosniff` and an explicit type, like the gallery: these bytes were
-    // checked against their magic numbers on the way in, and the browser must
-    // not be invited to reconsider.
     response.setHeader('content-type', mimeFor(key));
     response.setHeader('x-content-type-options', 'nosniff');
     response.setHeader('content-disposition', 'inline');
-    // Private, because the same URL answers differently depending on who
-    // asks. A shared cache holding one reader's copy would serve it to a
-    // reader the member did not choose.
     response.setHeader('cache-control', 'private, max-age=300');
     response.end(bytes);
   }
