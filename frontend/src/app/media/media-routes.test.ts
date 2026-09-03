@@ -14,13 +14,14 @@ afterEach(() => {
 describe('same-origin media relays', () => {
   it('forwards the viewer cookie when an author reads a gallery draft', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetch = vi.fn(async () =>
-      new Response(new Uint8Array([1, 2, 3]), {
-        headers: {
-          'content-type': 'image/png',
-          'cache-control': 'private, no-store',
-        },
-      }),
+    const fetch = vi.fn(
+      async () =>
+        new Response(new Uint8Array([1, 2, 3]), {
+          headers: {
+            'content-type': 'image/png',
+            'cache-control': 'private, no-store',
+          },
+        }),
     );
     vi.stubGlobal('fetch', fetch);
 
@@ -44,13 +45,14 @@ describe('same-origin media relays', () => {
 
   it('relays the nested profile image path with the viewer cookie', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
-    const fetch = vi.fn(async () =>
-      new Response(new Uint8Array([1]), {
-        headers: {
-          'content-type': 'image/png',
-          'cache-control': 'private, max-age=300',
-        },
-      }),
+    const fetch = vi.fn(
+      async () =>
+        new Response(new Uint8Array([1]), {
+          headers: {
+            'content-type': 'image/png',
+            'cache-control': 'private, max-age=300',
+          },
+        }),
     );
     vi.stubGlobal('fetch', fetch);
 
@@ -72,6 +74,21 @@ describe('same-origin media relays', () => {
     );
   });
 
+  it('never caches a backend 404', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response(null, { status: 404 })),
+    );
+
+    const response = await galleryImage(new Request(`https://example.test/media/${KEY}`), {
+      params: Promise.resolve({ key: KEY }),
+    });
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
   it('rejects a malformed key without sending it to the backend', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetch = vi.fn();
@@ -83,6 +100,7 @@ describe('same-origin media relays', () => {
     );
 
     expect(response.status).toBe(404);
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
     expect(fetch).not.toHaveBeenCalled();
   });
 });

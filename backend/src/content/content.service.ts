@@ -6,6 +6,7 @@ import type {
   ContentPhotoRow,
   ContentSaveAnnouncementInput,
   ContentSavePhotoInput,
+  ContentSetAnnouncementImageInput,
   ContentSetAnnouncementPublicationInput,
   ContentSetPhotoPublicationInput,
   ContentStatusRow,
@@ -63,6 +64,8 @@ export interface ContentAnnouncement {
   readonly announcementId: string;
   readonly title: string;
   readonly body: string;
+  readonly imageUrl: string | null;
+  readonly imageAltText: string | null;
   readonly publishedAt: string | null;
 }
 
@@ -71,6 +74,18 @@ function normalizeAnnouncement(row: ContentAnnouncementRow): ContentAnnouncement
     announcementId: receiptId(row, 'announcement_id'),
     title: databasePlainText(row?.title, 'announcement title', 160),
     body: databasePlainText(row?.body, 'announcement body', 12_000, { multiline: true }),
+    imageUrl:
+      row?.image_url === null
+        ? null
+        : String(row.image_url).startsWith('/media/')
+          ? String(row.image_url)
+          : (() => {
+              throw new Error('database returned an unsafe announcement image URL');
+            })(),
+    imageAltText:
+      row?.image_alt_text === null
+        ? null
+        : databasePlainText(row.image_alt_text, 'announcement image alt text', 300),
     publishedAt: timestamp(row?.published_at, 'announcement published timestamp'),
   };
 }
@@ -176,6 +191,9 @@ export interface ContentRepositoryLike {
   isPublicStorageKey(storageKey: unknown): Promise<boolean>;
   publicStatus(): Promise<ContentStatusRow[]>;
   saveAnnouncement(input: ContentSaveAnnouncementInput): Promise<ContentAnnouncementReceiptRow>;
+  setAnnouncementImage(
+    input: ContentSetAnnouncementImageInput,
+  ): Promise<ContentAnnouncementReceiptRow>;
   setAnnouncementPublication(
     input: ContentSetAnnouncementPublicationInput,
   ): Promise<ContentAnnouncementReceiptRow>;
@@ -187,6 +205,14 @@ export interface ContentSaveAnnouncementDto {
   readonly announcementId?: unknown;
   readonly title: unknown;
   readonly body: unknown;
+  readonly idempotencyKey: unknown;
+  readonly requestId?: unknown;
+}
+
+export interface ContentSetAnnouncementImageDto {
+  readonly announcementId: unknown;
+  readonly storageKey: unknown;
+  readonly altText: unknown;
   readonly idempotencyKey: unknown;
   readonly requestId?: unknown;
 }
@@ -230,6 +256,7 @@ export class ContentService {
       'publishedPhotos',
       'publicStatus',
       'saveAnnouncement',
+      'setAnnouncementImage',
       'setAnnouncementPublication',
       'savePhoto',
       'setPhotoPublication',
@@ -307,6 +334,29 @@ export class ContentService {
         body: normalizedBody,
         idempotencyKey: key,
         requestId: correlationId,
+      }),
+    );
+  }
+
+  async setAnnouncementImage(
+    authenticatedOperatorId: unknown,
+    {
+      announcementId,
+      storageKey,
+      altText,
+      idempotencyKey,
+      requestId = null,
+    }: ContentSetAnnouncementImageDto,
+  ): Promise<ContentAnnouncementReceipt> {
+    const actorUserId = requireContentUuid(authenticatedOperatorId, 'authenticated operator id');
+    return normalizeAnnouncementReceipt(
+      await this.repository.setAnnouncementImage({
+        actorUserId,
+        announcementId: requireContentUuid(announcementId, 'announcement id'),
+        storageKey: requireContentStorageKey(storageKey),
+        altText: normalizeContentText(altText, 'alt text', 300),
+        idempotencyKey: requireContentUuid(idempotencyKey, 'idempotency key'),
+        requestId: optionalContentUuid(requestId, 'request id'),
       }),
     );
   }

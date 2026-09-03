@@ -20,6 +20,8 @@ interface Announcement {
   readonly announcementId: string;
   readonly title: string;
   readonly body: string;
+  readonly imageUrl: string | null;
+  readonly imageAltText: string | null;
   readonly publishedAt: string | null;
 }
 
@@ -90,17 +92,22 @@ export default async function AnnouncementsPage() {
           data.announcements.map((notice) => (
             <Card key={notice.announcementId} className="gap-4">
               <CardHeader>
-                  {notice.publishedAt && (
-                    <time
-                      dateTime={notice.publishedAt}
-                      className="text-xs text-muted-foreground"
-                    >
-                      {formatDay(notice.publishedAt, '게시 시간 확인 중')}
-                    </time>
-                  )}
+                {notice.publishedAt && (
+                  <time dateTime={notice.publishedAt} className="text-xs text-muted-foreground">
+                    {formatDay(notice.publishedAt, '게시 시간 확인 중')}
+                  </time>
+                )}
                 <CardTitle className="text-lg">{notice.title}</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="grid gap-4">
+                {notice.imageUrl && notice.imageAltText && (
+                  <img
+                    src={notice.imageUrl}
+                    alt={notice.imageAltText}
+                    className="max-h-[32rem] w-full rounded-2xl object-cover"
+                    loading="lazy"
+                  />
+                )}
                 <p className="whitespace-pre-wrap text-sm">{notice.body}</p>
               </CardContent>
             </Card>

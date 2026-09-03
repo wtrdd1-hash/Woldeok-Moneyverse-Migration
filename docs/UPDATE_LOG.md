@@ -1,5 +1,15 @@
 # Update Log
 
+## 2026-09-03 — Main integration, consent flow, announcement images, and live work countdown
+
+- Integrated the guide onboarding, locale switcher, administrator-console UX, and media relay fixes into `main`.
+- Changed sign-in to identify the member through OAuth first, then require current terms, privacy, and age acknowledgement before protected service use.
+- Added announcement image upload, private-disk storage metadata, publication-gated media access, accessible alt text, and public announcement rendering.
+- Prevented transient media 404 responses from being cached by the web tier.
+- Added a live seconds-resolution countdown to active work cards; the submit control enables immediately when the minimum duration expires.
+- Applied migrations 002–112 to a clean PostgreSQL 17 database and exercised announcement create/image/publish/public-read as the least-privileged application role.
+- Verified all 1,192 backend tests including database integration, 448 frontend tests, 23 contract tests, and 6 migration tests.
+
 This file records incremental project changes so concurrent work can avoid overlapping edits.
 
 ## 2026-09-03 — Guide onboarding refresh
@@ -25,7 +35,6 @@ This file records incremental project changes so concurrent work can avoid overl
 - Google Stitch was requested, but no Stitch connector or installable Stitch plugin was available in this Codex environment; the implementation follows current Google international-site and Material interaction guidance directly.
 - Verified the change with repository linting, workspace TypeScript checking, 23 contract tests, 6 migration tests, 696 backend tests, 438 frontend tests, and a successful production build with 17 static pages generated; 299 database-backed backend tests skipped because no test database URL was configured.
 - Passed the control-byte and committed-secret checks. The production dependency audit found no high-severity vulnerability and reported two moderate-severity vulnerabilities.
-
 
 ## 2026-09-03 — Administrator console usability
 

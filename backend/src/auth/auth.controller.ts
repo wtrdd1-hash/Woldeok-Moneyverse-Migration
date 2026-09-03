@@ -74,7 +74,7 @@ export class ReauthenticationStartDto {
 }
 
 /**
- * The session lifecycle: pre-login consent, the OAuth round trip, and logout.
+ * The session lifecycle: OAuth identification, required consent, and logout.
  *
  * One callback serves three purposes — login, linking another sign-in method,
  * and step-up reauthentication — because the provider redirects to a single
@@ -130,7 +130,7 @@ export class AuthController {
 
   @Put('auth/consent')
   @UseGuards(SessionGuard, CsrfGuard)
-  @ApiOperation({ summary: 'Record pre-login policy acknowledgement' })
+  @ApiOperation({ summary: 'Record the authenticated member policy acknowledgement' })
   async consent(@Req() request: RequestWithSession, @Body() body: ConsentDto) {
     const session = requireSession(request);
     if (!body.termsCompleted || !body.privacyCompleted || !body.ageConfirmed) {
@@ -230,9 +230,6 @@ export class AuthController {
     if (!provider) throw new ServiceUnavailableException('OAuth is not configured');
     const providerConfig = this.providerConfig(provider);
     const session = requireSession(request);
-    if (!(await this.store().hasCurrentPreloginConsent(session.id))) {
-      throw new ForbiddenException('consent required');
-    }
     const challenge = createOAuthChallenge(
       provider,
       selectRedirectUri(providerConfig, this.publicOrigin(request)),
@@ -307,9 +304,6 @@ export class AuthController {
       return { outcome: 'linked' as const, provider };
     }
 
-    if (!(await this.store().hasCurrentPreloginConsent(session.id))) {
-      throw new ForbiddenException('consent required');
-    }
     const login = await this.store().completeOAuthLogin({
       preAuthSessionId: session.id,
       provider: identity.provider,
@@ -317,6 +311,7 @@ export class AuthController {
       displayName: identity.displayName,
     });
     response.setHeader('set-cookie', sessionCookie(login.token, this.config));
-    return { outcome: 'signed-in' as const, csrfToken: login.csrfToken };
+    const consentCurrent = await this.store().hasCurrentUserConsent(login.session_id);
+    return { outcome: 'signed-in' as const, csrfToken: login.csrfToken, consentCurrent };
   }
 }

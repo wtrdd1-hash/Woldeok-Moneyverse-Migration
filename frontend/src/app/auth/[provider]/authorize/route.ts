@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { ApiError, api } from '@/lib/api';
+import { ApiError, api, apiWithCookie } from '@/lib/api';
+import { relaySetCookie, sessionCookiePair } from '@/lib/cookie-relay';
 import { publicUrl } from '@/lib/public-url';
 
 /**
@@ -21,17 +22,21 @@ export async function GET(
   const { provider } = await context.params;
 
   try {
+    const { payload: session, setCookie } = await apiWithCookie<{ signedIn: boolean }>(
+      '/api/v1/auth/prelogin-session',
+      { method: 'POST' },
+    );
+    await relaySetCookie(setCookie);
+    const cookieHeader = sessionCookiePair(setCookie);
     const { authorizationUrl } = await api<{ authorizationUrl: string }>(
       `/auth/${encodeURIComponent(provider)}/authorize`,
+      cookieHeader && !session.signedIn ? { cookieHeader } : {},
     );
     return NextResponse.redirect(authorizationUrl);
   } catch (error) {
     if (error instanceof ApiError) {
-      // No session, or a session that never acknowledged the policy: both
-      // are answered by sending the visitor to the consent step, which is
-      // where they can fix it.
       if (error.status === 401 || error.status === 403) {
-        return NextResponse.redirect(publicUrl('/login?error=consent_required'));
+        return NextResponse.redirect(publicUrl('/login/providers?error=oauth_session'));
       }
       if (error.status === 503) {
         return NextResponse.redirect(publicUrl('/login?error=provider_unavailable'));

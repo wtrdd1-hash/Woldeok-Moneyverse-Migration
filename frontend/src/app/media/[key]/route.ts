@@ -14,7 +14,8 @@ import { NextResponse } from 'next/server';
 const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 
 /** Exactly what the store generates: a v4 UUID and one of three extensions. */
-const STORAGE_KEY = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(png|jpg|webp)$/;
+const STORAGE_KEY =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(png|jpg|webp)$/;
 
 export async function GET(
   request: Request,
@@ -26,7 +27,10 @@ export async function GET(
   // malformed key — it re-validates the shape itself — but because there is
   // no reason to forward one.
   if (!STORAGE_KEY.test(key)) {
-    return NextResponse.json({ error: 'not found' }, { status: 404 });
+    return NextResponse.json(
+      { error: 'not found' },
+      { status: 404, headers: { 'cache-control': 'private, no-store' } },
+    );
   }
 
   const token = process.env.INTERNAL_API_TOKEN;
@@ -43,7 +47,10 @@ export async function GET(
   });
 
   if (!response.ok) {
-    return NextResponse.json({ error: 'not found' }, { status: response.status });
+    return NextResponse.json(
+      { error: 'not found' },
+      { status: response.status, headers: { 'cache-control': 'private, no-store' } },
+    );
   }
 
   const cacheControl = response.headers.get('cache-control') ?? 'private, no-store';

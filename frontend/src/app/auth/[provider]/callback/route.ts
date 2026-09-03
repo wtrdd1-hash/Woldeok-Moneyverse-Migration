@@ -48,6 +48,7 @@ export async function GET(
     const { payload, setCookie } = await apiWithCookie<{
       outcome: 'signed-in' | 'linked' | 'reauthenticated';
       provider?: string;
+      consentCurrent?: boolean;
     }>(`/auth/${encodeURIComponent(provider)}/callback?${forwarded.toString()}`);
 
     await relaySetCookie(setCookie);
@@ -58,7 +59,9 @@ export async function GET(
     if (payload.outcome === 'reauthenticated') {
       return NextResponse.redirect(publicUrl('/account?reauth=done'));
     }
-    return NextResponse.redirect(publicUrl('/?account=signed-in'));
+    return NextResponse.redirect(
+      publicUrl(payload.consentCurrent === false ? '/login' : '/?account=signed-in'),
+    );
   } catch (error) {
     const detail = error instanceof ApiError ? (error.detail ?? '') : '';
     const code = KNOWN_ERRORS.has(detail) ? detail : 'oauth_login';

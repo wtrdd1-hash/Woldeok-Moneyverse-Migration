@@ -110,6 +110,8 @@ export interface ContentAnnouncementRow {
   readonly announcement_id: string;
   readonly title: string;
   readonly body: string;
+  readonly image_url: string | null;
+  readonly image_alt_text: string | null;
   readonly published_at: unknown;
 }
 
@@ -150,6 +152,15 @@ export interface ContentSaveAnnouncementInput {
   readonly announcementId?: unknown;
   readonly title: unknown;
   readonly body: unknown;
+  readonly idempotencyKey: unknown;
+  readonly requestId?: unknown;
+}
+
+export interface ContentSetAnnouncementImageInput {
+  readonly actorUserId: unknown;
+  readonly announcementId: unknown;
+  readonly storageKey: unknown;
+  readonly altText: unknown;
   readonly idempotencyKey: unknown;
   readonly requestId?: unknown;
 }
@@ -201,7 +212,7 @@ export class PostgresContentRepository {
   > {
     const contentLimit = requireContentLimit(limit, 'announcement limit');
     const { rows } = await this.pool.query<ContentAnnouncementRow>(
-      `SELECT announcement_id::text AS announcement_id, title, body, published_at
+      `SELECT announcement_id::text AS announcement_id, title, body, image_url, image_alt_text, published_at
        FROM public.content_list_published_announcements($1)`,
       [contentLimit],
     );
@@ -260,6 +271,33 @@ export class PostgresContentRepository {
     );
     if (!row?.announcement_id || typeof row.replayed !== 'boolean') {
       throw new Error('database did not return an announcement receipt');
+    }
+    return row;
+  }
+
+  async setAnnouncementImage({
+    actorUserId,
+    announcementId,
+    storageKey,
+    altText,
+    idempotencyKey,
+    requestId = null,
+  }: ContentSetAnnouncementImageInput): Promise<ContentAnnouncementReceiptRow> {
+    const actor = requireContentUuid(actorUserId, 'authenticated operator id');
+    const id = requireContentUuid(announcementId, 'announcement id');
+    const key = requireContentStorageKey(storageKey);
+    const alt = normalizeContentText(altText, 'alt text', 300);
+    const commandKey = requireContentUuid(idempotencyKey, 'idempotency key');
+    const correlationId = optionalRequestId(requestId);
+    const {
+      rows: [row],
+    } = await this.pool.query<ContentAnnouncementReceiptRow>(
+      `SELECT announcement_id::text AS announcement_id, published_at, replayed
+       FROM public.content_set_announcement_image($1, $2, $3, $4, $5, $6)`,
+      [actor, id, key, alt, commandKey, correlationId],
+    );
+    if (!row?.announcement_id || typeof row.replayed !== 'boolean') {
+      throw new Error('database did not return an announcement image receipt');
     }
     return row;
   }

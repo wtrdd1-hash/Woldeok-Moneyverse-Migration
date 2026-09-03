@@ -129,10 +129,14 @@ export function isOpen(assignment: WorkAssignment): boolean {
 export function durationLabel(seconds: number): string {
   if (seconds < 60) return `${seconds}초`;
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}분`;
+  const restSeconds = seconds % 60;
+  if (minutes < 60) return restSeconds === 0 ? `${minutes}분` : `${minutes}분 ${restSeconds}초`;
   const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
-  return rest === 0 ? `${hours}시간` : `${hours}시간 ${rest}분`;
+  const restMinutes = minutes % 60;
+  if (restMinutes === 0 && restSeconds === 0) return `${hours}시간`;
+  const minutePart = restMinutes === 0 ? '' : ` ${restMinutes}분`;
+  const secondPart = restSeconds === 0 ? '' : ` ${restSeconds}초`;
+  return `${hours}시간${minutePart}${secondPart}`;
 }
 
 /**

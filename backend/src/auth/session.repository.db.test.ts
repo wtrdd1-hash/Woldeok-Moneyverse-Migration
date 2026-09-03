@@ -105,6 +105,20 @@ describe.skipIf(!DATABASE_URL)('against a real database', () => {
       expect(await repository.hasCurrentPreloginConsent(created.id)).toBe(false);
     });
 
+    it('completes OAuth before consent and keeps protected features blocked', async () => {
+      const repository = new SessionRepository(pool);
+      const prelogin = await repository.create();
+      const login = await repository.completeOAuthLogin({
+        preAuthSessionId: prelogin.id,
+        provider: 'discord',
+        subject: `qa-oauth-before-consent-${prelogin.id}`,
+        displayName: 'OAuth before consent QA',
+      });
+      expect(login.user_id).toHaveLength(36);
+      expect(await repository.hasCurrentUserConsent(login.session_id)).toBe(false);
+      expect(await repository.get(prelogin.token)).toBeNull();
+    });
+
     it('reports no recent reauthentication for a fresh session', async () => {
       const repository = new SessionRepository(pool);
       const created = await repository.create();

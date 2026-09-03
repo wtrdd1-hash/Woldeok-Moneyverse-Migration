@@ -40,6 +40,29 @@ export function AnnouncementEditor() {
   return (
     <form action={action} className="grid gap-4">
       <Field>
+        <FieldLabel htmlFor="announcement-file">공지 이미지 (선택)</FieldLabel>
+        <Input
+          id="announcement-file"
+          name="file"
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          className="min-h-11 py-2"
+        />
+        <FieldDescription>
+          PNG, JPEG, WebP · 최대 8 MiB. 별도 이미지 디스크에 저장됩니다.
+        </FieldDescription>
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="announcement-image-alt">이미지 대체 텍스트</FieldLabel>
+        <Input
+          id="announcement-image-alt"
+          name="imageAltText"
+          maxLength={300}
+          autoComplete="off"
+          placeholder="이미지 내용을 설명해 주세요"
+        />
+      </Field>
+      <Field>
         <FieldLabel htmlFor="announcement-title">공지 제목</FieldLabel>
         <Input
           id="announcement-title"

@@ -17,7 +17,8 @@ import { Progress } from '@/components/ui/progress';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
-import { ClaimButton, SubmitTaskButton, TakeButton } from './work-forms';
+import { ClaimButton, TakeButton } from './work-forms';
+import { WorkCountdown } from './work-countdown';
 import type { WorkAssignment, WorkReceipt, WorkSummary, WorkTask } from './work';
 import {
   boardOrder,
@@ -85,8 +86,8 @@ export default async function WorkPage() {
   return (
     <div className="grid gap-6">
       <PageHeader eyebrow="DAILY WORK" title="작업하고 보상 받기">
-        작업을 맡아 최소 수행 시간을 채우고 제출하면 WLD와 경험치를 받습니다. 보상액과 한도는
-        모두 서버가 정하며, 이 화면에 보이는 금액은 지금 마쳤을 때 실제로 지급될 금액입니다.
+        작업을 맡아 최소 수행 시간을 채우고 제출하면 WLD와 경험치를 받습니다. 보상액과 한도는 모두
+        서버가 정하며, 이 화면에 보이는 금액은 지금 마쳤을 때 실제로 지급될 금액입니다.
       </PageHeader>
 
       <section aria-labelledby="caps-title" className="grid gap-3">
@@ -142,31 +143,26 @@ export default async function WorkPage() {
                       {formatMoment(assignment.expires_at)}까지예요.
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="text-sm text-muted-foreground">
-                    {expired ? (
-                      <p>
-                        기한이 지나 제출할 수 없어요. 같은 작업을 아래에서 다시 맡을 수 있어요.
-                      </p>
-                    ) : assignment.status === 'submitted' ? (
-                      <p>제출을 마쳤어요. 보상을 받으면 원장에 기록되고 경험치가 쌓여요.</p>
-                    ) : wait > 0 ? (
-                      <p>최소 수행 시간이 {durationLabel(wait)} 남았어요.</p>
-                    ) : (
-                      <p>최소 수행 시간을 채웠어요. 이제 제출할 수 있어요.</p>
-                    )}
-                  </CardContent>
-                  {!expired && (
-                    <CardFooter>
-                      {assignment.status === 'submitted' ? (
+                  {expired ? (
+                    <CardContent className="text-sm text-muted-foreground">
+                      <p>기한이 지나 제출할 수 없어요. 같은 작업을 아래에서 다시 맡을 수 있어요.</p>
+                    </CardContent>
+                  ) : assignment.status === 'submitted' ? (
+                    <>
+                      <CardContent className="text-sm text-muted-foreground">
+                        <p>제출을 마쳤어요. 보상을 받으면 원장에 기록되고 경험치가 쌓여요.</p>
+                      </CardContent>
+                      <CardFooter>
                         <ClaimButton assignmentId={assignment.assignment_id} />
-                      ) : (
-                        <SubmitTaskButton
-                          assignmentId={assignment.assignment_id}
-                          disabled={wait > 0}
-                          label={wait > 0 ? `${durationLabel(wait)} 뒤 제출` : '작업 제출하기'}
-                        />
-                      )}
-                    </CardFooter>
+                      </CardFooter>
+                    </>
+                  ) : (
+                    <WorkCountdown
+                      assignmentId={assignment.assignment_id}
+                      assignedAt={assignment.assigned_at}
+                      minimumDurationSeconds={durations.get(assignment.task_id) ?? 0}
+                      initialSeconds={wait}
+                    />
                   )}
                 </Card>
               );
@@ -288,8 +284,7 @@ function ReceiptRow({ receipt }: { readonly receipt: WorkReceipt }) {
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <span className="text-sm font-medium">{receipt.name}</span>
         <span className="tabular text-sm">
-          {groupDigits(receipt.reward_amount)} WLD · 경험치{' '}
-          {groupDigits(receipt.experience_amount)}
+          {groupDigits(receipt.reward_amount)} WLD · 경험치 {groupDigits(receipt.experience_amount)}
         </span>
       </div>
       <p className="text-xs text-muted-foreground">

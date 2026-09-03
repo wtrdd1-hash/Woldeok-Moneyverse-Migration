@@ -11,7 +11,10 @@ export async function GET(
 ): Promise<NextResponse> {
   const { key } = await context.params;
   if (!STORAGE_KEY.test(key)) {
-    return NextResponse.json({ error: 'not found' }, { status: 404 });
+    return NextResponse.json(
+      { error: 'not found' },
+      { status: 404, headers: { 'cache-control': 'private, no-store' } },
+    );
   }
 
   const token = process.env.INTERNAL_API_TOKEN;
@@ -27,7 +30,10 @@ export async function GET(
   });
 
   if (!response.ok) {
-    return NextResponse.json({ error: 'not found' }, { status: response.status });
+    return NextResponse.json(
+      { error: 'not found' },
+      { status: response.status, headers: { 'cache-control': 'private, no-store' } },
+    );
   }
 
   return new NextResponse(await response.arrayBuffer(), {

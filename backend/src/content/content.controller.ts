@@ -76,6 +76,23 @@ export class SavePhotoDto {
   readonly idempotencyKey!: string;
 }
 
+export class SetAnnouncementImageDto {
+  @ApiProperty({ description: 'Key in the private image store' })
+  @IsString()
+  @MaxLength(255)
+  readonly storageKey!: string;
+
+  @ApiProperty({ maxLength: 300 })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(300)
+  readonly altText!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  readonly idempotencyKey!: string;
+}
+
 export class PublicationDto {
   @ApiProperty()
   @IsBoolean()
@@ -133,7 +150,14 @@ export class ContentController {
   }
 
   @Post('admin/announcements')
-  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
+  @UseGuards(
+    SessionGuard,
+    AuthenticatedGuard,
+    ConsentGuard,
+    AdminGuard,
+    AdminSessionGuard,
+    CsrfGuard,
+  )
   @ApiOperation({ summary: 'Create or edit an announcement' })
   saveAnnouncement(@Req() request: RequestWithSession, @Body() body: SaveAnnouncementDto) {
     return this.guarded(
@@ -142,8 +166,37 @@ export class ContentController {
     );
   }
 
+  @Put('admin/announcements/:id/image')
+  @UseGuards(
+    SessionGuard,
+    AuthenticatedGuard,
+    ConsentGuard,
+    AdminGuard,
+    AdminSessionGuard,
+    CsrfGuard,
+  )
+  @ApiOperation({ summary: 'Attach an uploaded image to a draft announcement' })
+  setAnnouncementImage(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) announcementId: string,
+    @Body() body: SetAnnouncementImageDto,
+  ) {
+    return this.guarded(
+      () =>
+        this.service().setAnnouncementImage(requireUserId(request), { announcementId, ...body }),
+      'invalid announcement image',
+    );
+  }
+
   @Put('admin/announcements/:id/publication')
-  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
+  @UseGuards(
+    SessionGuard,
+    AuthenticatedGuard,
+    ConsentGuard,
+    AdminGuard,
+    AdminSessionGuard,
+    CsrfGuard,
+  )
   @ApiOperation({ summary: 'Publish or unpublish an announcement' })
   publishAnnouncement(
     @Req() request: RequestWithSession,
@@ -161,7 +214,14 @@ export class ContentController {
   }
 
   @Post('admin/photos/metadata')
-  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
+  @UseGuards(
+    SessionGuard,
+    AuthenticatedGuard,
+    ConsentGuard,
+    AdminGuard,
+    AdminSessionGuard,
+    CsrfGuard,
+  )
   @ApiOperation({ summary: 'Create or edit a photo record' })
   savePhoto(@Req() request: RequestWithSession, @Body() body: SavePhotoDto) {
     return this.guarded(
@@ -171,7 +231,14 @@ export class ContentController {
   }
 
   @Put('admin/photos/:id/publication')
-  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
+  @UseGuards(
+    SessionGuard,
+    AuthenticatedGuard,
+    ConsentGuard,
+    AdminGuard,
+    AdminSessionGuard,
+    CsrfGuard,
+  )
   @ApiOperation({ summary: 'Publish or unpublish a photo' })
   publishPhoto(
     @Req() request: RequestWithSession,

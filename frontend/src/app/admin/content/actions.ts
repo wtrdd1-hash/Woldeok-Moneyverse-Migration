@@ -37,12 +37,17 @@ export async function saveAnnouncement(
   const body = text(formData.get('body'));
   const announcementId = text(formData.get('announcementId'));
   const publishNow = formData.get('publishNow') === 'on';
+  const file = formData.get('file');
+  const imageAltText = text(formData.get('imageAltText'));
 
   if (title === '' || title.length > 160) {
     return { status: 'error', message: '제목을 1~160자로 입력해 주세요.' };
   }
   if (body === '' || body.length > 12_000) {
     return { status: 'error', message: '내용을 1~12000자로 입력해 주세요.' };
+  }
+  if (file instanceof File && file.size > 0 && (imageAltText === '' || imageAltText.length > 300)) {
+    return { status: 'error', message: '이미지 대체 텍스트를 1~300자로 입력해 주세요.' };
   }
 
   try {
@@ -54,6 +59,25 @@ export async function saveAnnouncement(
         ...(announcementId === '' ? {} : { announcementId }),
       },
     });
+    if (file instanceof File && file.size > 0) {
+      const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session');
+      const uploaded = await apiBytes<{ storageKey: string }>(
+        '/api/v1/admin/photos',
+        await file.arrayBuffer(),
+        { contentType: file.type || 'application/octet-stream', csrfToken },
+      );
+      await mutate(
+        '/api/v1/admin/announcements/' + encodeURIComponent(receipt.announcementId) + '/image',
+        {
+          method: 'PUT',
+          body: {
+            storageKey: uploaded.storageKey,
+            altText: imageAltText,
+            idempotencyKey: idempotencyKey(),
+          },
+        },
+      );
+    }
     if (publishNow) await setPublication('announcements', receipt.announcementId, true);
     revalidatePath('/admin/content');
     revalidatePath('/announcements');

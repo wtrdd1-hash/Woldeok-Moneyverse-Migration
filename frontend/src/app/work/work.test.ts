@@ -91,8 +91,11 @@ describe('durationLabel', () => {
   it.each([
     [30, '30초'],
     [60, '1분'],
+    [61, '1분 1초'],
+    [779, '12분 59초'],
     [300, '5분'],
     [3600, '1시간'],
+    [3661, '1시간 1분 1초'],
     [5400, '1시간 30분'],
   ])('says %i seconds as %s', (seconds, expected) => {
     expect(durationLabel(seconds)).toBe(expected);
