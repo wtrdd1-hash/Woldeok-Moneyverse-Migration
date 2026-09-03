@@ -1,5 +1,6 @@
-import { Label } from '@/components/ui/label';
 'use client';
+
+import { Label } from '@/components/ui/label';
 
 import { useActionState, useState } from 'react';
 import { payoutToUser, reverseUserTransaction } from './actions';
