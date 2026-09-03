@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { useLocale } from '@/components/locale-provider';
 import { cn } from '@/lib/cn';
 
 /**
@@ -15,10 +18,11 @@ export function Brand({
   readonly className?: string;
   readonly tone?: 'default' | 'muted';
 }) {
+  const { locale } = useLocale();
   return (
     <Link
       href="/"
-      aria-label="월덕 머니버스 홈"
+      aria-label={locale === 'en' ? 'Woldeok Moneyverse home' : '월덕 머니버스 홈'}
       className={cn(
         'inline-flex items-center gap-2.5 text-[19px] font-extrabold tracking-[-0.045em]',
         tone === 'muted' ? 'text-foreground' : 'text-foreground',
@@ -35,9 +39,7 @@ export function Brand({
           strokeLinejoin="round"
         />
       </svg>
-      <span>
-        월덕 <strong className="text-clay">머니버스</strong>
-      </span>
+      <span>{locale === 'en' ? <>Woldeok <strong className="text-clay">Moneyverse</strong></> : <>월덕 <strong className="text-clay">머니버스</strong></>}</span>
     </Link>
   );
 }

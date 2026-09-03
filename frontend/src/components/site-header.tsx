@@ -6,6 +6,8 @@ import { ChevronDown, LogOut, Menu } from 'lucide-react';
 import { logout } from '@/app/actions';
 import { Brand } from '@/components/brand';
 import { ThemeMenu, ThemePanel } from '@/components/theme-controls';
+import { LanguageSwitcher } from '@/components/language-switcher';
+import { useLocale } from '@/components/locale-provider';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -34,6 +36,7 @@ import {
   isCurrent,
   isGroup,
   isGroupCurrent,
+  navLabel,
 } from '@/lib/navigation';
 import { useViewer } from '@/lib/use-viewer';
 import type { Viewer } from '@/lib/viewer-state';
@@ -59,6 +62,7 @@ import type { Viewer } from '@/lib/viewer-state';
 export function SiteHeader() {
   const pathname = usePathname();
   const viewer = useViewer();
+  const { locale } = useLocale();
 
   const isAdmin = Boolean(viewer && viewer.consentCurrent && viewer.adminRoles.length > 0);
 
@@ -77,21 +81,22 @@ export function SiteHeader() {
       <div className="mx-auto flex h-[76px] w-full max-w-[1180px] items-center gap-6 px-6">
         <Brand />
 
-        <nav aria-label="주요 메뉴" className="ml-auto hidden items-center gap-6 lg:flex">
+        <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="ml-auto hidden items-center gap-6 lg:flex">
           {items.map((item) =>
             isGroup(item) ? (
-              <HeaderGroup key={item.label} group={item} pathname={pathname} />
+              <HeaderGroup key={item.label} group={item} pathname={pathname} locale={locale} />
             ) : (
-              <HeaderLink key={item.href} entry={item} pathname={pathname} />
+              <HeaderLink key={item.href} entry={item} pathname={pathname} locale={locale} />
             ),
           )}
         </nav>
 
         <div className={cn('flex items-center gap-3', 'lg:ml-4', 'ml-auto lg:ml-4')}>
+          <LanguageSwitcher />
           <div className="hidden sm:block">
             <ThemeMenu />
           </div>
-          <SessionControl viewer={viewer} />
+          <SessionControl viewer={viewer} locale={locale} />
 
           <Sheet>
             <SheetTrigger asChild>
@@ -99,21 +104,21 @@ export function SiteHeader() {
                 variant="outline"
                 size="icon"
                 className="size-11 rounded-[10px] lg:hidden"
-                aria-label="메뉴 열기"
+                aria-label={locale === 'en' ? 'Open menu' : '메뉴 열기'}
               >
                 <Menu />
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-80 gap-0">
               <SheetHeader>
-                <SheetTitle className="text-left">메뉴</SheetTitle>
+                <SheetTitle className="text-left">{locale === 'en' ? 'Menu' : '메뉴'}</SheetTitle>
               </SheetHeader>
-              <nav aria-label="주요 메뉴" className="grid gap-1 overflow-y-auto px-3 pb-8">
-                <Group title="공개" entries={PUBLIC_NAV} pathname={pathname} />
+              <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="grid gap-1 overflow-y-auto px-3 pb-8">
+                <Group title={locale === 'en' ? 'Public' : '공개'} entries={PUBLIC_NAV} pathname={pathname} locale={locale} />
                 {viewer?.signedIn && (
-                  <Group title="회원" entries={MEMBER_NAV} pathname={pathname} />
+                  <Group title={locale === 'en' ? 'Member' : '회원'} entries={MEMBER_NAV} pathname={pathname} locale={locale} />
                 )}
-                {admin.length > 0 && <Group title="운영" entries={admin} pathname={pathname} />}
+                {admin.length > 0 && <Group title={locale === 'en' ? 'Admin' : '운영'} entries={admin} pathname={pathname} locale={locale} />}
                 {/* Signing out lives here on a phone. Four controls beside the
                     wordmark left nothing room to breathe, and this is the one
                     of them nobody reaches for in a hurry. */}
@@ -129,7 +134,7 @@ export function SiteHeader() {
                       className="min-h-11 w-full justify-start font-bold"
                     >
                       <LogOut />
-                      로그아웃
+                      {locale === 'en' ? 'Sign out' : '로그아웃'}
                     </Button>
                   </form>
                 )}
@@ -145,9 +150,11 @@ export function SiteHeader() {
 function HeaderLink({
   entry,
   pathname,
+  locale,
 }: {
   readonly entry: NavEntry;
   readonly pathname: string;
+  readonly locale: 'ko' | 'en';
 }) {
   const current = isCurrent(pathname, entry.href);
   return (
@@ -167,7 +174,7 @@ function HeaderLink({
         current ? 'text-foreground after:scale-x-100' : 'text-muted-foreground',
       )}
     >
-      {entry.label}
+      {navLabel(entry.label, locale)}
     </Link>
   );
 }
@@ -181,9 +188,11 @@ function HeaderLink({
 function HeaderGroup({
   group,
   pathname,
+  locale,
 }: {
   readonly group: NavGroup;
   readonly pathname: string;
+  readonly locale: 'ko' | 'en';
 }) {
   const current = isGroupCurrent(pathname, group);
   return (
@@ -197,7 +206,7 @@ function HeaderGroup({
           current ? 'text-foreground after:scale-x-100' : 'text-muted-foreground',
         )}
       >
-        {group.label}
+        {navLabel(group.label, locale)}
         <ChevronDown className="size-3.5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-44">
@@ -212,7 +221,7 @@ function HeaderGroup({
                 isCurrent(pathname, entry.href) && 'text-primary',
               )}
             >
-              {entry.label}
+              {navLabel(entry.label, locale)}
             </Link>
           </DropdownMenuItem>
         ))}
@@ -225,10 +234,12 @@ function Group({
   title,
   entries,
   pathname,
+  locale,
 }: {
   readonly title: string;
   readonly entries: readonly NavEntry[];
   readonly pathname: string;
+  readonly locale: 'ko' | 'en';
 }) {
   return (
     <div className="grid gap-0.5 py-2">
@@ -247,7 +258,7 @@ function Group({
               current ? 'bg-secondary text-secondary-foreground' : 'hover:bg-paper-dark',
             )}
           >
-            {entry.label}
+            {navLabel(entry.label, locale)}
           </Link>
         );
       })}
@@ -256,13 +267,13 @@ function Group({
   );
 }
 
-function SessionControl({ viewer }: { readonly viewer: Viewer | null }) {
+function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; readonly locale: 'ko' | 'en' }) {
   if (!viewer) return <Skeleton className="h-11 w-24 rounded-[12px]" />;
 
   if (!viewer.signedIn) {
     return (
       <Button asChild className="h-11 rounded-[12px] px-5 font-extrabold shadow-plate">
-        <Link href="/login">로그인</Link>
+        <Link href="/login">{locale === 'en' ? 'Sign in' : '로그인'}</Link>
       </Button>
     );
   }
@@ -274,10 +285,10 @@ function SessionControl({ viewer }: { readonly viewer: Viewer | null }) {
         variant="ghost"
         className="hidden h-11 text-sm font-bold text-muted-foreground sm:inline-flex"
       >
-        <Link href="/account">내 계정</Link>
+        <Link href="/account">{locale === 'en' ? 'My account' : '내 계정'}</Link>
       </Button>
       <Button asChild className="h-11 rounded-[12px] px-4 font-extrabold shadow-plate sm:px-5">
-        <Link href="/wallet">내 지갑</Link>
+        <Link href="/wallet">{locale === 'en' ? 'My wallet' : '내 지갑'}</Link>
       </Button>
       {/* Hidden on a phone, where it is the last item in the menu instead. */}
       <form action={logout} className="hidden sm:block">
@@ -286,7 +297,7 @@ function SessionControl({ viewer }: { readonly viewer: Viewer | null }) {
           variant="ghost"
           size="icon"
           className="size-11 text-muted-foreground"
-          aria-label="로그아웃"
+          aria-label={locale === 'en' ? 'Sign out' : '로그아웃'}
         >
           <LogOut />
         </Button>

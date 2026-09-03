@@ -8,6 +8,7 @@ import { Accent } from '@/components/page-header';
 import { LobbyCount } from '@/components/lobby-count';
 import { WalletGlance } from '@/components/wallet-glance';
 import { HomeAdvertisement } from '@/components/home-advertisement';
+import { TranslatedText as T } from '@/components/translated-text';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
@@ -56,20 +57,21 @@ export default async function HomePage() {
             id="hero-title"
             className="max-w-[680px] text-[clamp(2.25rem,4.6vw,3.5rem)] leading-[1.13] tracking-[-0.065em]"
           >
-            우리가 함께 만드는
+            <T korean="우리가 함께 만드는" english="A small, resilient economy" />
             <br />
-            <Accent>작고 단단한 경제.</Accent>
+            <Accent><T korean="작고 단단한 경제." english="we build together." /></Accent>
           </h1>
           <p className="mt-6 max-w-[590px] text-[clamp(1rem,1.5vw,1.125rem)] leading-[1.8] text-muted-foreground [word-break:keep-all]">
-            월덕 머니버스는 Discord로 이어지는 커뮤니티 가상경제 서비스입니다. 활동은 기록으로
-            남고, 로그인 후 WLD 보상·게임 상점 이용·이용 기록을 확인할 수 있어요.
+            <T
+              korean="월덕 머니버스는 Discord로 이어지는 커뮤니티 가상경제 서비스입니다. 활동은 기록으로 남고, 로그인 후 WLD 보상·게임 상점 이용·이용 기록을 확인할 수 있어요."
+              english="Woldeok Moneyverse is a community virtual economy connected through Discord. Sign in to track activity, earn WLD rewards, visit the game shop, and review your history."
+            />
           </p>
 
           <HomeCta />
 
           <p className="mt-7 max-w-[590px] text-xs text-muted-foreground">
-            모든 WLD와 보상은 게임 안에서만 사용하는 가상 데이터이며, 현금 거래나 환전 기능은
-            제공하지 않습니다.
+            <T korean="모든 WLD와 보상은 게임 안에서만 사용하는 가상 데이터이며, 현금 거래나 환전 기능은 제공하지 않습니다." english="WLD and all rewards are virtual game data. They cannot be traded or exchanged for cash." />
           </p>
         </div>
 
@@ -81,13 +83,13 @@ export default async function HomePage() {
         >
           <p className="eyebrow text-highlight">Today at a glance</p>
           <h2 id="status-panel-title" className="mt-3 text-2xl text-white">
-            오늘의 현황
+            <T korean="오늘의 현황" english="Today at a glance" />
           </h2>
           <ul className="mt-6 grid gap-3">
             <StatusRowItem
               glyph="▣"
-              term="내 지갑"
-              detail="원장 기준의 실제 잔액과 기록"
+              term={<T korean="내 지갑" english="My wallet" />}
+              detail={<T korean="원장 기준의 실제 잔액과 기록" english="Ledger-backed balance and history" />}
               href="/wallet"
             >
               {/* Signed in, this is the member's own balance; signed out, it
@@ -97,17 +99,17 @@ export default async function HomePage() {
 
             <StatusRowItem
               glyph="▤"
-              term="서비스 상태"
-              detail="운영이 기록한 상태만 표시해요"
+              term={<T korean="서비스 상태" english="Service status" />}
+              detail={<T korean="운영이 기록한 상태만 표시해요" english="Verified operational status" />}
               href="/status"
             >
-              상태 보기
+              <T korean="상태 보기" english="View status" />
             </StatusRowItem>
 
             <StatusRowItem
               glyph="⌁"
-              term="커뮤니티 로비"
-              detail="인증된 웹 로비 참여자"
+              term={<T korean="커뮤니티 로비" english="Community lobby" />}
+              detail={<T korean="인증된 웹 로비 참여자" english="Verified lobby participants" />}
               href="/lobby"
             >
               <LobbyCount />
@@ -121,11 +123,11 @@ export default async function HomePage() {
           <div>
             <p className="eyebrow mb-3">Monthly notes</p>
             <h2 id="home-updates-title" className="text-[clamp(2rem,4vw,3rem)]">
-              월간 소식
+              <T korean="월간 소식" english="Monthly updates" />
             </h2>
           </div>
           <Link href="/announcements" className="text-sm font-extrabold text-clay-ink">
-            전체 보기 →
+            <T korean="전체 보기 →" english="View all →" />
           </Link>
         </div>
 
@@ -164,28 +166,27 @@ export default async function HomePage() {
         <div>
           <p className="eyebrow mb-3">Start here</p>
           <h2 id="home-start-title" className="text-[clamp(2rem,4vw,3rem)]">
-            처음이라면, 여기서 시작해요.
+            <T korean="처음이라면, 여기서 시작해요." english="New here? Start with the essentials." />
           </h2>
           <p className="mt-4 max-w-prose leading-[1.8] text-muted-foreground [word-break:keep-all]">
-            가입 전에 어떤 활동을 할 수 있는지 확인하고, 로그인 뒤에는 한 번에 하나씩 천천히
-            시작할 수 있어요.
+            <T korean="가입 전에 어떤 활동을 할 수 있는지 확인하고, 로그인 뒤에는 한 번에 하나씩 천천히 시작할 수 있어요." english="Explore what you can do before joining, then take your first steps one at a time after signing in." />
           </p>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
           <PolicyLink
             href="/guide"
-            title="첫 활동 순서"
-            detail="로그인부터 첫 보상 확인까지"
+            title={<T korean="첫 활동 순서" english="Your first steps" />}
+            detail={<T korean="로그인부터 첫 보상 확인까지" english="From sign-in to your first reward" />}
           />
           <PolicyLink
             href="/shop"
-            title="게임 상점 미리 보기"
-            detail="WLD로 살 수 있는 아이템 확인"
+            title={<T korean="게임 상점 미리 보기" english="Preview the game shop" />}
+            detail={<T korean="WLD로 살 수 있는 아이템 확인" english="See what your WLD can unlock" />}
           />
           <PolicyLink
             href="/announcements"
-            title="운영 소식 확인"
-            detail="변경 사항과 새로운 콘텐츠"
+            title={<T korean="운영 소식 확인" english="Read the latest updates" />}
+            detail={<T korean="변경 사항과 새로운 콘텐츠" english="Changes and new content" />}
           />
         </div>
       </section>
@@ -197,25 +198,23 @@ export default async function HomePage() {
           <div>
             <p className="eyebrow mb-3">Community lobby</p>
             <h2 id="community-title" className="text-[clamp(2rem,4vw,3rem)]">
-              가볍게 인사하고,
+              <T korean="가볍게 인사하고," english="Say hello," />
               <br />
-              함께 이어 가요.
+              <T korean="함께 이어 가요." english="then build together." />
             </h2>
             <p className="mt-5 max-w-prose leading-[1.8] text-muted-foreground [word-break:keep-all]">
-              머니버스 로비는 지금 접속한 사람들과 짧게 인사하는 공간입니다. 메시지는 서버에
-              저장하지 않고 접속 중인 사람에게만 전달돼요. 개인정보나 계정 정보는 남기지 말아
-              주세요.
+              <T korean="머니버스 로비는 지금 접속한 사람들과 짧게 인사하는 공간입니다. 메시지는 서버에 저장하지 않고 접속 중인 사람에게만 전달돼요. 개인정보나 계정 정보는 남기지 말아 주세요." english="The Moneyverse lobby is a lightweight space to greet people who are online now. Messages are not stored and are only delivered to current participants. Never share personal or account information." />
             </p>
             <div className="mt-6 grid gap-2">
               <PolicyLink
                 href="/terms"
-                title="커뮤니티 이용 규칙"
-                detail="서로 존중하는 대화 기준"
+                title={<T korean="커뮤니티 이용 규칙" english="Community guidelines" />}
+                detail={<T korean="서로 존중하는 대화 기준" english="A shared standard for respectful chat" />}
               />
               <PolicyLink
                 href="/privacy"
-                title="개인정보 안내"
-                detail="수집 정보와 이용자 권리"
+                title={<T korean="개인정보 안내" english="Privacy information" />}
+                detail={<T korean="수집 정보와 이용자 권리" english="Data collection and your rights" />}
               />
             </div>
           </div>
@@ -239,8 +238,8 @@ function StatusRowItem({
   children,
 }: {
   readonly glyph: string;
-  readonly term: string;
-  readonly detail: string;
+  readonly term: React.ReactNode;
+  readonly detail: React.ReactNode;
   readonly href: string;
   readonly children: React.ReactNode;
 }) {
@@ -272,8 +271,8 @@ function PolicyLink({
   detail,
 }: {
   readonly href: string;
-  readonly title: string;
-  readonly detail: string;
+  readonly title: React.ReactNode;
+  readonly detail: React.ReactNode;
 }) {
   return (
     <Link

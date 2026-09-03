@@ -3,6 +3,38 @@ export interface NavEntry {
   readonly label: string;
 }
 
+const ENGLISH_LABELS: Readonly<Record<string, string>> = {
+  '홈': 'Home',
+  '이용 방법': 'Guide',
+  '공지': 'Updates',
+  '사진': 'Gallery',
+  '서비스 상태': 'Service status',
+  '상점': 'Shop',
+  '내 지갑': 'My wallet',
+  '작업': 'Work',
+  '가상 주식': 'Virtual stocks',
+  '게임 사업': 'Businesses',
+  '시즌': 'Seasons',
+  '퀘스트': 'Quests',
+  '카지노': 'Casino',
+  '성장 단계': 'Progression',
+  '내 프로필': 'My profile',
+  '아이템 상점': 'Item shop',
+  '게시판': 'Board',
+  '내 계정': 'My account',
+  '운영': 'Admin',
+  '경제': 'Economy',
+  '콘텐츠': 'Content',
+  '소식': 'Explore',
+  '활동': 'Earn',
+  '커뮤니티': 'Community',
+  '운영 콘솔': 'Admin console',
+};
+
+export function navLabel(label: string, locale: 'ko' | 'en'): string {
+  return locale === 'en' ? (ENGLISH_LABELS[label] ?? label) : label;
+}
+
 /** Readable by anyone, indexed, and the only group a signed-out visitor sees. */
 export const PUBLIC_NAV: readonly NavEntry[] = [
   { href: '/', label: '홈' },
