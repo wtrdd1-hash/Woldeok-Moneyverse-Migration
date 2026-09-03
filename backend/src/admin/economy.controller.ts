@@ -281,6 +281,26 @@ export class AdminEconomyController {
     );
   }
 
+  @Post('transactions/:id/reversal')
+  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @ApiOperation({ summary: 'Reverse one transaction, posting its opposite back to the ledger' })
+  reverseTransaction(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) transactionId: string,
+    @Body() body: { readonly idempotencyKey: string; readonly reason: string },
+  ) {
+    return this.guarded(
+      () =>
+        this.repository().reverseTransaction({
+          idempotencyKey: body.idempotencyKey,
+          actorUserId: requireUserId(request),
+          transactionId,
+          reason: body.reason,
+        }),
+      'the transaction could not be reversed',
+    );
+  }
+
   @Get('bulk-payouts/:id/report')
   @ApiOperation({ summary: 'Who was paid, who was skipped and who failed, one row each' })
   async payoutReport(

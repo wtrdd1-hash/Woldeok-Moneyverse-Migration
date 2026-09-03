@@ -52,6 +52,21 @@ export const metadata: Metadata = {
     'Discord로 이어지는 월덕 커뮤니티의 가상경제 서비스. 활동 기록, WLD 보상, 게임 상점과 시즌 이벤트를 한곳에서 확인하세요.',
   applicationName: '월덕 머니버스',
   category: '커뮤니티 게임',
+  keywords: [
+    '월덕 머니버스',
+    '가상경제',
+    '디스코드 봇',
+    '커뮤니티 게임',
+    'WLD',
+    '덕',
+    'Discord Economy',
+    'Woldeok Moneyverse',
+    '게임 경제',
+    '출석 보상',
+  ],
+  verification: {
+    google: process.env.SEARCH_CONSOLE_VERIFICATION || process.env.GOOGLE_SITE_VERIFICATION || undefined,
+  },
   robots: {
     index: indexingEnabled,
     follow: indexingEnabled,

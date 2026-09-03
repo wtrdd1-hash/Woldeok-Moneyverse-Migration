@@ -1,5 +1,17 @@
 # Update Log
 
+## 2026-09-03 — Comprehensive Moneyverse Enhancement and Optimization
+
+- Created branch `feature/moneyverse-comprehensive-enhancement` from `main`.
+- Plan and execute seven key enhancements:
+  1. Google Search Console and AdSense Policy Compliance: GSC verification metadata, JSON-LD structured data (Organization, WebSite, FAQPage), social metadata, and policy-compliant CLS-safe ad containers.
+  2. Casino (Lucky Zone) Multi-Game Expansion: Add High-Low and Lucky Wheel games with transparent PPM probabilities, expected odds display, and real-time loss limit enforcement.
+  3. Profile Photo and Media Relay Audit: Ensure robust MIME inspection, private storage retention, and smooth avatar fallback rendering.
+  4. Administrator Master Console Audit Log Viewer: Enhance immutable audit log search, chain integrity verification, and delivery tracking.
+  5. Member Balance Adjustment (Admin Adjustment Dialog): Implement direct mint/recovery adjustment modal with mandatory 10+ char reason, step-up re-authentication, and atomic ledger transaction commit.
+  6. Branding Alignment: Apply official naming conventions (WLD/덕, 덕지갑, 잡보드, 덕마켓, 마이비즈, 마스터 콘솔) per Appendix A.3.
+  7. Edge and Server API Optimization: Enable gzip compression, long-term static asset caching, and request parallelism.
+
 ## 2026-09-03 — Main integration, consent flow, announcement images, and live work countdown
 
 - Integrated the guide onboarding, locale switcher, administrator-console UX, and media relay fixes into `main`.

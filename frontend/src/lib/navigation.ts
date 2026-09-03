@@ -47,16 +47,16 @@ export const PUBLIC_NAV: readonly NavEntry[] = [
 
 /** Needs a session and current consent. Every one of these is `noindex`. */
 export const MEMBER_NAV: readonly NavEntry[] = [
-  { href: '/wallet', label: '내 지갑' },
-  { href: '/work', label: '작업' },
-  { href: '/stocks', label: '가상 주식' },
-  { href: '/businesses', label: '게임 사업' },
-  { href: '/seasons', label: '시즌' },
+  { href: '/wallet', label: '덕지갑' },
+  { href: '/work', label: '잡보드 (작업)' },
+  { href: '/stocks', label: '월덕거래소 (주식)' },
+  { href: '/businesses', label: '마이비즈 (사업)' },
+  { href: '/seasons', label: '월드사이클 (시즌)' },
   { href: '/quests', label: '퀘스트' },
-  { href: '/casino', label: '카지노' },
-  { href: '/progression', label: '성장 단계' },
+  { href: '/casino', label: '럭키존 (카지노)' },
+  { href: '/progression', label: '커리어패스 (성장)' },
   { href: '/profile', label: '내 프로필' },
-  { href: '/shop/catalog', label: '아이템 상점' },
+  { href: '/shop/catalog', label: '덕마켓 (상점)' },
   { href: '/board', label: '게시판' },
   { href: '/account', label: '내 계정' },
 ];
@@ -66,6 +66,7 @@ export const ADMIN_NAV: readonly NavEntry[] = [
   { href: '/admin', label: '운영' },
   { href: '/admin/economy', label: '경제' },
   { href: '/admin/content', label: '콘텐츠' },
+      { href: '/admin/logs', label: '감사 로그' },
 ];
 
 /**
@@ -159,9 +160,10 @@ export const HEADER_ADMIN: readonly NavItem[] = [
   {
     label: '운영',
     entries: [
-      { href: '/admin', label: '운영 콘솔' },
+      { href: '/admin', label: '마스터 콘솔' },
       { href: '/admin/economy', label: '경제' },
       { href: '/admin/content', label: '콘텐츠' },
+      { href: '/admin/logs', label: '감사 로그' },
     ],
   },
 ];

@@ -1,3 +1,4 @@
+import { jsonLd } from '@/lib/json-ld';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -42,8 +43,25 @@ export const metadata: Metadata = {
 const STEP_ICONS = [Compass, WalletCards, ListChecks, Sparkles, Gift, ShieldCheck] as const;
 
 export default function GuidePage() {
+  const faqStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: GUIDE_FAQS.map((faq) => ({
+      '@type': 'Question',
+      name: faq.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: faq.answer,
+      },
+    })),
+  };
+
   return (
     <div className="grid gap-12 pb-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(faqStructuredData) }}
+      />
       <section className="relative isolate overflow-hidden rounded-[28px] border bg-forest-deep text-white shadow-plate">
         <Image
           src="/images/guide/newcomer-adventure.png"

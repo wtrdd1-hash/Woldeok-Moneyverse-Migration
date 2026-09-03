@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Activity, ArrowUpRight, CalendarDays, CircleUserRound, ShieldAlert } from 'lucide-react';
 import { AdminBack } from '../../admin-back';
-import { ForceLogoutDialog, RestrictionDialog } from '../../admin-forms';
+import { AdminAdjustmentDialog, ForceLogoutDialog, RestrictionDialog } from '../../admin-forms';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
@@ -105,6 +105,7 @@ export default async function AdminUserDetailPage({
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
+            <AdminAdjustmentDialog userId={user.user_id} username={user.display_name} />
             <ForceLogoutDialog userId={user.user_id} displayName={user.display_name} />
             <RestrictionDialog
               userId={user.user_id}

@@ -1,3 +1,4 @@
+import { groupDigits } from '@/lib/money';
 'use server';
 
 import { revalidatePath } from 'next/cache';
@@ -268,5 +269,76 @@ export async function setSeasonEventActive(
     return { status: 'ok', message: active ? '이벤트를 재개했어요.' : '이벤트를 중지했어요.' };
   } catch (error) {
     return failure(error, '이벤트 상태를 바꾸지 못했어요.');
+  }
+}
+
+
+export async function payoutToUser(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const userId = formData.get('userId');
+  const amount = formData.get('amount');
+  const reason = formData.get('reason');
+
+  if (typeof userId !== 'string' || !userId) {
+    return { status: 'error', message: '대상 회원을 찾을 수 없습니다.' };
+  }
+  const parsedAmount = wholeAmount(amount);
+  if (parsedAmount === null || parsedAmount <= 0) {
+    return { status: 'error', message: '지급할 올바른 WLD 금액을 입력해 주세요.' };
+  }
+  if (typeof reason !== 'string' || reason.trim().length < 10) {
+    return { status: 'error', message: '지급 사유를 10자 이상 구체적으로 적어 주세요.' };
+  }
+
+  try {
+    await mutate('/api/v1/admin/economy/bulk-payouts', {
+      method: 'POST',
+      body: JSON.stringify({
+        idempotencyKey: idempotencyKey(),
+        userIds: [userId],
+        amount: parsedAmount,
+        reason: reason.trim(),
+      }),
+    });
+    revalidatePath('/admin/users');
+    revalidatePath(`/admin/users/${userId}`);
+    return { status: 'ok', message: `${groupDigits(String(parsedAmount))} WLD를 국고에서 지급했습니다.` };
+  } catch (error) {
+    return failure(error, '자산 지급을 실행하지 못했습니다. 관리자 2차 인증을 확인해 주세요.');
+  }
+}
+
+export async function reverseUserTransaction(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const userId = formData.get('userId');
+  const transactionId = formData.get('transactionId');
+  const reason = formData.get('reason');
+
+  if (typeof transactionId !== 'string' || !transactionId) {
+    return { status: 'error', message: '회수/역분개할 거래 ID를 입력해 주세요.' };
+  }
+  if (typeof reason !== 'string' || reason.trim().length < 10) {
+    return { status: 'error', message: '회수 사유를 10자 이상 구체적으로 적어 주세요.' };
+  }
+
+  try {
+    await mutate(`/api/v1/admin/economy/transactions/${encodeURIComponent(transactionId)}/reversal`, {
+      method: 'POST',
+      body: JSON.stringify({
+        idempotencyKey: idempotencyKey(),
+        reason: reason.trim(),
+      }),
+    });
+    if (typeof userId === 'string' && userId) {
+      revalidatePath(`/admin/users/${userId}`);
+    }
+    revalidatePath('/admin/users');
+    return { status: 'ok', message: '해당 거래의 역분개(회수) 보정 처리를 완료했습니다.' };
+  } catch (error) {
+    return failure(error, '거래를 회수하지 못했습니다. 이미 역분개됐거나 종속된 기록이 있는지 확인해 주세요.');
   }
 }

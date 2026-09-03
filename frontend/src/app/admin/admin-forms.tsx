@@ -1,6 +1,8 @@
+import { Label } from '@/components/ui/label';
 'use client';
 
 import { useActionState, useState } from 'react';
+import { payoutToUser, reverseUserTransaction } from './actions';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { AmountInput } from '@/components/amount-input';
 import { Button } from '@/components/ui/button';
@@ -457,6 +459,127 @@ export function DeleteStockDialog({
             </SubmitButton>
           </DialogFooter>
         </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
+/**
+ * Direct balance adjustment (payout or reversal) for a specific user.
+ * Conforms to the immutable ledger model and requires a 10+ character reason.
+ */
+export function AdminAdjustmentDialog({
+  userId,
+  username,
+}: {
+  readonly userId: string;
+  readonly username: string;
+}) {
+  const [tab, setTab] = useState<'payout' | 'reverse'>('payout');
+  const [payoutState, payoutAction] = useActionState(payoutToUser, IDLE);
+  const [reverseState, reverseAction] = useActionState(reverseUserTransaction, IDLE);
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="min-h-11">
+          자산 보정 (지급/회수)
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>{username} 자산 보정</DialogTitle>
+          <DialogDescription>
+            국고에서 자산을 직접 지급하거나, 특정 거래를 원장 불변 원칙에 따라 역분개(회수)합니다.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="flex gap-2 border-b pb-2">
+          <Button
+            type="button"
+            variant={tab === 'payout' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setTab('payout')}
+          >
+            국고 지급
+          </Button>
+          <Button
+            type="button"
+            variant={tab === 'reverse' ? 'default' : 'ghost'}
+            size="sm"
+            onClick={() => setTab('reverse')}
+          >
+            거래 회수 (역분개)
+          </Button>
+        </div>
+
+        {tab === 'payout' ? (
+          <form action={payoutAction} className="grid gap-4">
+            <input type="hidden" name="userId" value={userId} />
+            <div className="grid gap-1.5">
+              <Label htmlFor={`adjust-amount-${userId}`}>지급 금액 (WLD)</Label>
+              <Input
+                id={`adjust-amount-${userId}`}
+                name="amount"
+                type="number"
+                min="1"
+                max="1000000"
+                placeholder="예: 1000"
+                required
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor={`adjust-reason-${userId}`}>지급 사유 (최소 10자)</Label>
+              <Textarea
+                id={`adjust-reason-${userId}`}
+                name="reason"
+                minLength={10}
+                placeholder="지급 근거, 승인 내역 등을 상세히 입력하세요."
+                required
+              />
+            </div>
+            <StepUpField
+              id={`adjust-payout-${userId}`}
+              undo="지급된 자산은 회수(역분개) 처리로만 취소할 수 있습니다."
+            />
+            <ActionAlert state={payoutState} />
+            <DialogFooter>
+              <SubmitButton>지급 실행</SubmitButton>
+            </DialogFooter>
+          </form>
+        ) : (
+          <form action={reverseAction} className="grid gap-4">
+            <input type="hidden" name="userId" value={userId} />
+            <div className="grid gap-1.5">
+              <Label htmlFor={`reverse-tx-${userId}`}>취소/회수할 거래 ID (UUID)</Label>
+              <Input
+                id={`reverse-tx-${userId}`}
+                name="transactionId"
+                placeholder="예: 00000000-0000-0000-0000-000000000000"
+                required
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor={`reverse-reason-${userId}`}>회수 사유 (최소 10자)</Label>
+              <Textarea
+                id={`reverse-reason-${userId}`}
+                name="reason"
+                minLength={10}
+                placeholder="회수 사유 및 취소 결재 내역을 상세히 입력하세요."
+                required
+              />
+            </div>
+            <StepUpField
+              id={`adjust-reverse-${userId}`}
+              undo="역분개 트랜잭션이 생성되며 원본 거래는 보존됩니다."
+            />
+            <ActionAlert state={reverseState} />
+            <DialogFooter>
+              <SubmitButton variant="destructive">거래 회수 실행</SubmitButton>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );

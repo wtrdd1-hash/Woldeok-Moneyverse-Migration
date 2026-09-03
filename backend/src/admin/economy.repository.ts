@@ -351,6 +351,36 @@ export class EconomyConsoleRepository {
    * opposite of the reflex to generate a new one because the last attempt
    * looked like it failed.
    */
+  async reverseTransaction(input: {
+    readonly idempotencyKey: unknown;
+    readonly actorUserId: unknown;
+    readonly transactionId: unknown;
+    readonly reason: unknown;
+  }): Promise<{
+    readonly transaction_id: string;
+    readonly reverses_transaction_id: string;
+    readonly amount: string;
+    readonly replayed: boolean;
+  }> {
+    assertUuid(input.idempotencyKey, 'idempotency key');
+    assertUuid(input.actorUserId, 'actor');
+    assertUuid(input.transactionId, 'transaction');
+    const reason = assertReason(input.reason);
+    const row = await queryOne<{
+      transaction_id: string;
+      reverses_transaction_id: string;
+      amount: string;
+      replayed: boolean;
+    }>(
+      this.pool,
+      `SELECT transaction_id::text, reverses_transaction_id::text, amount::text, replayed
+       FROM public.economy_reverse_transaction($1::uuid, $2::uuid, $3::uuid, $4::text)`,
+      [input.idempotencyKey, input.actorUserId, input.transactionId, reason],
+    );
+    if (!row) throw new Error('economy_reverse_transaction did not return a row');
+    return row;
+  }
+
   async executeBulkPayout(input: {
     readonly idempotencyKey: unknown;
     readonly actorUserId: unknown;

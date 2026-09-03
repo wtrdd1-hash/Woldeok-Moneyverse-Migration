@@ -24,7 +24,7 @@ import { CASINO_TRANSACTION_TYPES, gameLabel, ledgerLabel } from './dice';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '게임',
+  title: '럭키존 (가상 미니게임)',
   robots: { index: false, follow: false },
 };
 
@@ -156,7 +156,7 @@ export default async function CasinoPage() {
 
   return (
     <div className="grid gap-6">
-      <PageHeader eyebrow="COIN GAME" title="동전 게임">
+      <PageHeader eyebrow="LUCKY ZONE" title="럭키존 (가상 미니게임)">
         게임 안의 WLD로만 진행하는 확률 게임입니다. 현금 충전·환전·실물 경품이 없고, 실제
         도박이나 투자와는 관련이 없습니다.
       </PageHeader>

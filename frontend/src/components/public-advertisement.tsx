@@ -14,15 +14,17 @@ export function PublicAdvertisement() {
   if (!homeAdSense.enabled) return null;
 
   return (
-    <section aria-label="광고" className="border-y py-6">
-      <p className="mb-3 text-center text-xs text-muted-foreground">광고</p>
+    <section aria-label="광고" className="my-8 min-h-[140px] border-y py-6">
+      <p className="mb-3 text-center text-xs text-muted-foreground tracking-wider uppercase">ADVERTISEMENT</p>
       <Script
         async
         crossOrigin="anonymous"
         src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${homeAdSense.publisherId}`}
         strategy="afterInteractive"
       />
-      <AdSenseAd publisherId={homeAdSense.publisherId} slot={homeAdSense.slot} />
+      <div className="flex min-h-[100px] items-center justify-center">
+        <AdSenseAd publisherId={homeAdSense.publisherId} slot={homeAdSense.slot} />
+      </div>
     </section>
   );
 }
