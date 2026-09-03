@@ -167,7 +167,35 @@ export default async function AdminLogsPage({
         {AREA.summary}
       </PageHeader>
 
-      <div className="flex flex-wrap gap-2 border-b pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
+        <div className="flex flex-wrap items-center gap-1.5 text-xs">
+          <span className="font-bold text-muted-foreground mr-1">빠른 필터:</span>
+          <Button asChild variant={filters.outcome === "" && filters.feature === "" ? "default" : "outline"} size="xs" className="h-7 text-xs">
+            <Link href="/admin/logs">전체</Link>
+          </Button>
+          <Button asChild variant={filters.outcome === "success" ? "default" : "outline"} size="xs" className="h-7 text-xs">
+            <Link href="/admin/logs?outcome=success">성공만</Link>
+          </Button>
+          <Button asChild variant={filters.outcome === "failure" ? "destructive" : "outline"} size="xs" className="h-7 text-xs">
+            <Link href="/admin/logs?outcome=failure">실패만</Link>
+          </Button>
+          <Button asChild variant={filters.feature === "security" ? "default" : "outline"} size="xs" className="h-7 text-xs">
+            <Link href="/admin/logs?feature=security">보안 감사</Link>
+          </Button>
+          <Button asChild variant={filters.feature === "controls" ? "default" : "outline"} size="xs" className="h-7 text-xs">
+            <Link href="/admin/logs?feature=controls">기능 제어</Link>
+          </Button>
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          <Button asChild variant="outline" size="xs" className="h-7 text-xs">
+            <Link href="/admin/logs/delivery">배달 로그</Link>
+          </Button>
+          <Button asChild variant="outline" size="xs" className="h-7 text-xs">
+            <Link href="/admin/logs/integrity">해시 무결성</Link>
+          </Button>
+        </div>
+      </div>
+      <div className="hidden">
         <Button asChild variant="default" size="sm">
           <Link href="/admin/logs">감사 로그 (Audit Trail)</Link>
         </Button>
@@ -496,7 +524,7 @@ function Identifier({
 /** The axes that do not earn a column, shown when a row is opened. */
 function EventDetail({ event }: { readonly event: AuditSearchRow }) {
   return (
-    <dl className="grid gap-1 rounded-md border border-dashed p-3 text-[0.7rem]">
+    <dl className="grid gap-1.5 rounded-xl border border-border/50 bg-background/80 p-3 text-[0.7rem]">
       <DetailRow term="감사 ID" value={event.audit_id} />
       <DetailRow term="요청 ID" value={event.request_id} />
       <DetailRow term="추적 ID" value={event.trace_id} />
@@ -504,9 +532,9 @@ function EventDetail({ event }: { readonly event: AuditSearchRow }) {
       <DetailRow term="거래 ID" value={event.transaction_id} />
       <DetailRow term="세션 해시" value={event.session_hash} />
       <DetailRow term="이전 해시" value={event.previous_integrity_hash} />
-      <dt className="mt-1 text-muted-foreground">기록 내용 (가려진 상태)</dt>
-      <dd>
-        <pre className="overflow-x-auto whitespace-pre-wrap break-all font-mono text-[0.7rem]">
+      <dt className="mt-2 font-bold text-muted-foreground">기록 내용 (가려진 상태)</dt>
+      <dd className="mt-1">
+        <pre className="max-h-60 overflow-auto rounded-lg border border-border/40 bg-muted/50 p-2.5 whitespace-pre-wrap break-all font-mono text-[0.7rem] leading-relaxed">
           {JSON.stringify({ context: event.context, metadata: event.metadata }, null, 2)}
         </pre>
       </dd>

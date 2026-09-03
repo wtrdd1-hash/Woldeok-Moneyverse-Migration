@@ -9,6 +9,7 @@ import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { adminConsole } from '@/lib/session';
 import { ADMIN_AREAS } from './areas';
+import { AdminQuickUserSearch } from './admin-quick-search';
 import { CloseConsole, EnrolSecondFactor, IssueRecoveryCodes, OpenConsole } from './console-gate';
 import type {
   AdminBusiness,
@@ -110,6 +111,72 @@ export default async function AdminPage() {
         모든 작업은 감사 기록에 남고, 데이터베이스가 역할을 다시 확인합니다. 이 화면은 무엇을 보여
         줄지만 정하고, 무엇을 허용할지는 정하지 않습니다.
       </PageHeader>
+
+      {/* 회원 원클릭 빠른 검색 폼 */}
+      <Card className="border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-card to-card">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <CardTitle className="text-base font-bold flex items-center gap-2">
+                <span className="text-amber-500">⚡</span>
+                <span>회원 빠른 검색 및 제재/자산 관리</span>
+              </CardTitle>
+              <CardDescription>
+                회원 UUID를 입력하면 해당 회원의 자산, 활동 이력, 이용 제한(정지), 관리자 자산 지급/회수 화면으로 즉시 이동합니다.
+              </CardDescription>
+            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/admin/users">전체 회원 목록 →</Link>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <AdminQuickUserSearch />
+        </CardContent>
+      </Card>
+
+      {/* 핵심 기능 스위치 실시간 상태 카드 */}
+      {controls && (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <CardTitle className="text-base font-bold">핵심 시스템 기능 스위치 현황</CardTitle>
+                <CardDescription>
+                  서비스 내 실시간 주요 기능 활성화 상태입니다.
+                </CardDescription>
+              </div>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/admin/controls">스위치 제어판 →</Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {controls.featureSwitches.slice(0, 8).map((fs) => (
+                <div
+                  key={fs.feature_key}
+                  className="flex items-center justify-between rounded-xl border border-border/40 bg-surface/40 p-2.5 text-xs"
+                >
+                  <span className="font-medium text-foreground truncate mr-2">{fs.title || fs.feature_key}</span>
+                  <Badge
+                    variant={
+                      fs.state === 'enabled'
+                        ? 'default'
+                        : fs.state === 'safe_mode'
+                        ? 'secondary'
+                        : 'destructive'
+                    }
+                    className="text-[10px] uppercase font-bold"
+                  >
+                    {fs.state}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Two things an operator should not have to open a page to learn: is
           anything switched off, and does the ledger still balance. */}
