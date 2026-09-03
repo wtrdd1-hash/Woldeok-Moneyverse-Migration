@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
-import { PageHeader, SectionHeader } from '@/components/page-header';
+import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,12 +14,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ApiError, api, apiOrNull } from '@/lib/api';
+import { ApiError, api } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
-import type { AuditSearchRow, OutboxEvent } from '../types';
+import type { AuditSearchRow } from '../types';
 import { RevealDisclosure } from './logs-forms';
 
 export const dynamic = 'force-dynamic';
@@ -146,12 +146,9 @@ export default async function AdminLogsPage({
   const cursor = one(params.cursor);
   const paged = SEQUENCE.test(cursor);
 
-  const [search, outbox] = await Promise.all([
-    searchEvents(
-      `/api/v1/admin/audit/events${searchQuery(filters, paged ? cursor : undefined)}`,
-    ),
-    apiOrNull<{ events: OutboxEvent[] }>('/api/v1/admin/discord-outbox-events'),
-  ]);
+  const search = await searchEvents(
+    `/api/v1/admin/audit/events${searchQuery(filters, paged ? cursor : undefined)}`,
+  );
 
   const events = 'problem' in search ? [] : search.events;
   const pageSize = Number(filters.limit);
@@ -253,6 +250,9 @@ export default async function AdminLogsPage({
               </Button>
               <Button asChild variant="outline" className="min-h-11 w-fit">
                 <Link href="/admin/logs/integrity">무결성 검증 · 보존 정책 →</Link>
+              </Button>
+              <Button asChild variant="outline" className="min-h-11 w-fit">
+                <Link href="/admin/logs/delivery">Discord 전달 로그 →</Link>
               </Button>
             </div>
           </form>
@@ -367,59 +367,6 @@ export default async function AdminLogsPage({
         </CardContent>
       </Card>
 
-      <section aria-labelledby="discord-outbox" className="grid gap-3">
-        <SectionHeader eyebrow="DELIVERY" title="Discord 전달" id="discord-outbox" />
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Discord 전달 로그</CardTitle>
-            <CardDescription>
-              원장에 기록된 사건이 알림으로 나갔는지입니다. 감사 사슬과는 별개의 기록입니다.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {outbox === null ? (
-              <EmptyState title="Discord 전달 현황을 불러오지 못했어요." />
-            ) : outbox.events.length === 0 ? (
-              <EmptyState title="전달 기록이 없습니다." />
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>시각</TableHead>
-                      <TableHead>유형</TableHead>
-                      <TableHead>상태</TableHead>
-                      <TableHead className="text-right">시도</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {outbox.events.map((event) => (
-                      <TableRow key={event.event_id}>
-                        <TableCell className="whitespace-nowrap text-muted-foreground">
-                          {formatMoment(event.created_at)}
-                        </TableCell>
-                        <TableCell className="font-mono text-xs">{event.event_type}</TableCell>
-                        <TableCell>
-                          <Badge
-                            variant={
-                              event.delivery_status === 'delivered' ? 'secondary' : 'outline'
-                            }
-                          >
-                            {event.delivery_status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="tabular text-right">
-                          {event.delivery_attempts}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </section>
     </div>
   );
 }

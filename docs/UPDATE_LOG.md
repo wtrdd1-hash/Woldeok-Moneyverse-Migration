@@ -25,3 +25,22 @@ This file records incremental project changes so concurrent work can avoid overl
 - Google Stitch was requested, but no Stitch connector or installable Stitch plugin was available in this Codex environment; the implementation follows current Google international-site and Material interaction guidance directly.
 - Verified the change with repository linting, workspace TypeScript checking, 23 contract tests, 6 migration tests, 696 backend tests, 438 frontend tests, and a successful production build with 17 static pages generated; 299 database-backed backend tests skipped because no test database URL was configured.
 - Passed the control-byte and committed-secret checks. The production dependency audit found no high-severity vulnerability and reported two moderate-severity vulnerabilities.
+
+
+## 2026-09-03 — Administrator console usability
+
+- Created the isolated `codex/admin-console-ux-20260903` branch from `origin/main`.
+- Replaced the flat member table with a searchable, status-filtered directory and summary cards.
+- Added a direct path from each member row to a dedicated detail and activity-log view.
+- Added a dedicated member detail page with status context, high-risk actions, and the latest 50 member-targeted audit events.
+- Made the administrator back-navigation component support contextual parent destinations.
+- Prepared the audit screen for a dedicated Discord delivery-history page.
+- Added a dedicated delivery-log page with summary counts, completion timestamps, and routing navigation.
+- Added the delivery-log destination to the administrator console navigation map.
+- Added interaction coverage for member-name search, status filtering, and detail-page links.
+- Grouped administrator destinations into member safety, economy operations, and records/delivery sections.
+- Rebuilt the administrator home navigation as three clearly labelled, responsive card groups with stronger focus and hover states.
+- Verified the frontend TypeScript build and all 435 frontend tests after the new routes and interactions were added.
+- Fixed stale member screens by invalidating both the directory and the active detail page after restrictions or forced logouts.
+- Made authentication cookie requests preserve Cloudflare's authoritative client-address header like all other API requests.
+- Final verification passed: workspace lint, 435 frontend tests, frontend type-check, and the optimized production build including both new dynamic routes.

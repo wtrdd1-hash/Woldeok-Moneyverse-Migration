@@ -52,6 +52,8 @@ export async function setUserRestriction(
       body: { restricted, reason },
     });
     revalidatePath('/admin');
+    revalidatePath('/admin/users');
+    revalidatePath(`/admin/users/${encodeURIComponent(userId)}`);
     return { status: 'ok', message: restricted ? '이용을 제한했어요.' : '제한을 해제했어요.' };
   } catch (error) {
     return failure(error, '제한 상태를 바꾸지 못했어요.');

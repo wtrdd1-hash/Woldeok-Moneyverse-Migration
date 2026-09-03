@@ -27,6 +27,27 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+const AREA_GROUPS = [
+  {
+    key: 'safety',
+    eyebrow: 'MEMBERS AND PUBLISHING',
+    title: '회원 · 공개 콘텐츠',
+    description: '사용자 안전 조치와 외부에 공개되는 콘텐츠를 관리합니다.',
+  },
+  {
+    key: 'economy',
+    eyebrow: 'ECONOMY OPERATIONS',
+    title: '경제 · 게임 운영',
+    description: '서비스 기능과 가상경제에 직접 영향을 주는 운영 영역입니다.',
+  },
+  {
+    key: 'records',
+    eyebrow: 'AUDIT AND DELIVERY',
+    title: '감사 · 전달 기록',
+    description: '관리 작업의 근거와 외부 전달 상태를 추적합니다.',
+  },
+] as const;
+
 /**
  * The console's front door, and now its door.
  *
@@ -78,6 +99,7 @@ export default async function AdminPage() {
     '/admin/bank': null,
     '/admin/discord': null,
     '/admin/logs': null,
+    '/admin/logs/delivery': null,
     '/admin/logs/integrity': null,
     '/admin/content': null,
   };
@@ -147,33 +169,47 @@ export default async function AdminPage() {
         </CardContent>
       </Card>
 
-      <section aria-labelledby="admin-areas-title" className="grid gap-3">
+      <section aria-labelledby="admin-areas-title" className="grid gap-6">
         <SectionHeader eyebrow="CONSOLE" title="관리 영역" id="admin-areas-title" />
-        <div className="grid gap-3 md:grid-cols-2">
-          {ADMIN_AREAS.map((area) => (
-            <Link
-              key={area.href}
-              href={area.href}
-              className="group flex min-h-24 flex-col justify-between gap-2 rounded-[14px] border bg-surface p-4 shadow-plate transition-transform hover:-translate-y-0.5"
-            >
-              <span>
-                <span className="eyebrow">{area.eyebrow}</span>
-                <span className="mt-1.5 flex items-center gap-2">
-                  <b className="text-lg">{area.title}</b>
-                  <ArrowRight className="size-4 shrink-0 text-clay transition-transform group-hover:translate-x-1" />
-                </span>
-              </span>
-              <span className="grid gap-1">
-                <span className="text-sm text-muted-foreground [word-break:keep-all]">
-                  {area.summary}
-                </span>
-                {counts[area.href] && (
-                  <span className="text-xs font-bold text-clay-ink">{counts[area.href]}</span>
-                )}
-              </span>
-            </Link>
-          ))}
-        </div>
+        {AREA_GROUPS.map((group) => {
+          const areas = ADMIN_AREAS.filter((area) => area.group === group.key);
+          return (
+            <div key={group.key} className="grid gap-3">
+              <div className="grid gap-1">
+                <span className="eyebrow">{group.eyebrow}</span>
+                <h3 className="text-lg font-bold">{group.title}</h3>
+                <p className="text-sm text-muted-foreground">{group.description}</p>
+              </div>
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                {areas.map((area) => (
+                  <Link
+                    key={area.href}
+                    href={area.href}
+                    className="group flex min-h-36 flex-col justify-between gap-4 rounded-2xl border bg-surface p-5 shadow-plate transition-[transform,border-color,box-shadow] hover:-translate-y-1 hover:border-clay/50 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <span className="flex items-start justify-between gap-3">
+                      <span className="eyebrow">{area.eyebrow}</span>
+                      <span className="grid size-8 shrink-0 place-items-center rounded-full bg-clay-soft/60 text-clay transition-transform group-hover:translate-x-0.5">
+                        <ArrowRight className="size-4" />
+                      </span>
+                    </span>
+                    <span className="grid gap-1.5">
+                      <b className="text-lg">{area.title}</b>
+                      <span className="text-sm text-muted-foreground [word-break:keep-all]">
+                        {area.summary}
+                      </span>
+                      {counts[area.href] && (
+                        <span className="mt-1 text-xs font-bold text-clay-ink">
+                          {counts[area.href]}
+                        </span>
+                      )}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </section>
     </div>
   );

@@ -202,6 +202,8 @@ export async function apiWithCookie<T>(
   if (csrfToken) requestHeaders['x-csrf-token'] = csrfToken;
 
   const incoming = await headers();
+  const connectingIp = incoming.get('cf-connecting-ip');
+  if (connectingIp) requestHeaders['cf-connecting-ip'] = connectingIp;
   const forwardedFor = incoming.get('x-forwarded-for');
   if (forwardedFor) requestHeaders['x-forwarded-for'] = forwardedFor;
 

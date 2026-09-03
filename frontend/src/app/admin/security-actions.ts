@@ -193,6 +193,7 @@ export async function forceLogout(
       { body: { userId, reason, idempotencyKey: idempotencyKey() } },
     );
     revalidatePath('/admin/users');
+    revalidatePath(`/admin/users/${encodeURIComponent(userId)}`);
     return { status: 'ok', message: `세션 ${result.revokedSessions}개를 끊었어요.` };
   } catch (error) {
     return failure(error, '세션을 끊지 못했어요.');

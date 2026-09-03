@@ -2,21 +2,12 @@ import type { Metadata } from 'next';
 import { AdminBack } from '../admin-back';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
 import { adminArea } from '../areas';
 import type { AdminUser } from '../types';
-import { ForceLogoutDialog, RestrictionDialog } from '../admin-forms';
+import { UserDirectory } from './user-directory';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,70 +28,24 @@ export default async function AdminUsersPage() {
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}
       </PageHeader>
+      <p className="text-sm text-muted-foreground">
+        사용자를 검색해 상세 화면에서 활동 로그, 이용 제한, 로그인 세션을 함께 관리할 수 있습니다.
+      </p>
+      {users === null ? (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base">사용자 제한 관리</CardTitle>
-            <CardDescription>
-              제한과 해제 모두 사유가 필요하고, 최근 본인 확인을 요구합니다.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {users === null ? (
-              <EmptyState title="사용자 목록을 불러오지 못했어요." />
-            ) : users.users.length === 0 ? (
-              <EmptyState title="표시할 사용자가 없습니다." />
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>표시 이름</TableHead>
-                      <TableHead>상태</TableHead>
-                      <TableHead>사유</TableHead>
-                      <TableHead />
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.users.map((user) => {
-                      const restricted = user.restricted_at !== null;
-                      return (
-                        <TableRow key={user.user_id}>
-                          <TableCell>
-                            <span className="block">{user.display_name}</span>
-                            <code className="font-mono text-[0.7rem] text-muted-foreground">
-                              {user.user_id}
-                            </code>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={restricted ? 'destructive' : 'secondary'}>
-                              {restricted ? '제한됨' : user.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="max-w-56 text-xs text-muted-foreground">
-                            {user.restriction_reason ?? '—'}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <span className="flex flex-wrap justify-end gap-2">
-                              <ForceLogoutDialog
-                                userId={user.user_id}
-                                displayName={user.display_name}
-                              />
-                              <RestrictionDialog
-                                userId={user.user_id}
-                                displayName={user.display_name}
-                                restricted={restricted}
-                              />
-                            </span>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+          <CardContent className="pt-6">
+            <EmptyState title="사용자 목록을 불러오지 못했어요." />
           </CardContent>
         </Card>
+      ) : users.users.length === 0 ? (
+        <Card>
+          <CardContent className="pt-6">
+            <EmptyState title="표시할 사용자가 없습니다." />
+          </CardContent>
+        </Card>
+      ) : (
+        <UserDirectory users={users.users} />
+      )}
     </div>
   );
 }
