@@ -27,13 +27,7 @@ function readCookie(name: string): string | null {
 }
 
 export function LocaleProvider({ children }: { readonly children: React.ReactNode }) {
-  let router: ReturnType<typeof useRouter> | null = null;
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    router = useRouter();
-  } catch {
-    router = null;
-  }
+  const router = useRouter();
   const [, startTransition] = useTransition();
   const [locale, updateLocale] = useState<Locale>(DEFAULT_LOCALE);
 
@@ -52,7 +46,7 @@ export function LocaleProvider({ children }: { readonly children: React.ReactNod
       document.documentElement.lang = nextLocale;
       updateLocale(nextLocale);
       startTransition(() => {
-        router?.refresh();
+        router.refresh();
       });
     },
   }), [locale, router]);
