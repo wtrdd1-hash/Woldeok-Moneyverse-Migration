@@ -8,6 +8,7 @@ import { Accent } from '@/components/page-header';
 import { LobbyCount } from '@/components/lobby-count';
 import { WalletGlance } from '@/components/wallet-glance';
 import { HomeAdvertisement } from '@/components/home-advertisement';
+import { MobileHomeView } from '@/components/mobile-home-view';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
@@ -46,7 +47,9 @@ export default async function HomePage() {
   const notices = announcements?.announcements.slice(0, 3) ?? [];
 
   return (
-    <div className="grid gap-20">
+    <>
+      <MobileHomeView notices={notices} />
+      <div className="hidden lg:grid gap-20">
       <section
         aria-labelledby="hero-title"
         className="grid items-center gap-10 py-6 lg:grid-cols-[1.1fr_0.78fr] lg:gap-[6vw] lg:py-12"
@@ -230,7 +233,8 @@ export default async function HomePage() {
           </Card>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   );
 }
 
