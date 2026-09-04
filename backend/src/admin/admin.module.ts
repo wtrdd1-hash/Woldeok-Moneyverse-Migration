@@ -1,4 +1,7 @@
 import { AdminShopController } from './admin-shop.controller';
+import { AiNewsController } from './ai-news.controller';
+import { AiNewsRepository } from './ai-news.repository';
+import { AiNewsService } from './ai-news.service';
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { SecondFactorRepository } from '../auth/second-factor.repository';
@@ -52,6 +55,7 @@ function devicePepper(config: AppConfig): string {
     AdminControlsController,
     AdminSecurityController,
     GameCatalogController,
+    AiNewsController,
     // The three surfaces spec 14.9 lists and this build did not have. They
     // share one repository and one prefix each, because the audit trail reads
     // an event's feature off the first path segment under /admin.
@@ -97,6 +101,15 @@ function devicePepper(config: AppConfig): string {
               issuer: new URL(config.baseUrl).host,
             })
           : null,
+    },
+    {
+      // The AI newsroom (127). Same sealing key as the second factor, for
+      // the same reason: it is the one secret the deployment already holds
+      // that a database read alone does not yield.
+      provide: AiNewsService,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) =>
+        pool ? new AiNewsService(new AiNewsRepository(pool), sealingKeyFrom(process.env)) : null,
     },
     {
       provide: 'ADMIN_DEVICE_PEPPER',
