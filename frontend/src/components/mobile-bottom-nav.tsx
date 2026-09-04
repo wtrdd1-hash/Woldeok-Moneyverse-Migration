@@ -44,17 +44,17 @@ export function MobileBottomNav() {
               className={cn(
                 'group relative flex min-w-[60px] flex-col items-center justify-center gap-1 py-1 text-[11px] font-bold transition-all',
                 isActive
-                  ? 'text-amber-500 scale-105'
+                  ? 'text-primary scale-105'
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >
               {isActive && (
-                <span className="absolute -top-1 size-1 rounded-full bg-amber-500 shadow-[0_0_8px_#f59e0b]" />
+                <span className="absolute -top-1 size-1 rounded-full bg-primary shadow-[0_0_8px_var(--primary)]" />
               )}
               <div
                 className={cn(
                   'flex size-8 items-center justify-center rounded-xl transition-colors',
-                  isActive ? 'bg-amber-500/15 text-amber-500' : 'group-hover:bg-muted/50',
+                  isActive ? 'bg-primary/15 text-primary' : 'group-hover:bg-muted/50',
                 )}
               >
                 <Icon className="size-4.5" />

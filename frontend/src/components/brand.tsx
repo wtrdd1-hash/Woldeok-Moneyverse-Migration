@@ -5,8 +5,8 @@ import { useLocale } from '@/components/locale-provider';
 import { cn } from '@/lib/cn';
 
 /**
- * 월덕(月德, 달의 덕) 머니버스 브랜드 워드마크.
- * 밤하늘에 빛나는 영롱한 황금빛 달(Moon)과 가상 경제 원장을 상징하는 심볼.
+ * ?붾뜒(?덂쓿, ?ъ쓽 ?? 癒몃땲踰꾩뒪 釉뚮옖???뚮뱶留덊겕.
+ * 諛ㅽ븯?섏뿉 鍮쏅굹???곷”???⑷툑鍮???Moon)怨?媛??寃쎌젣 ?먯옣???곸쭠?섎뒗 ?щ낵.
  */
 export function Brand({
   className,
@@ -19,32 +19,32 @@ export function Brand({
   return (
     <Link
       href="/"
-      aria-label={locale === 'en' ? 'Woldeok Moneyverse home' : '월덕 머니버스 홈'}
+      aria-label={locale === 'en' ? 'Woldeok Moneyverse home' : '\uC6d4\uB355 \uBA38\uB2C8\uBC84\uC2A4 \uD648'}
       className={cn(
-        'group inline-flex items-center gap-2.5 text-[19px] font-extrabold tracking-[-0.045em] transition-transform hover:scale-[1.02]',
+        'group shrink-0 inline-flex items-center gap-2 sm:gap-2.5 text-base sm:text-[19px] font-extrabold tracking-[-0.03em] sm:tracking-[-0.045em] transition-transform hover:scale-[1.02] whitespace-nowrap',
         tone === 'muted' ? 'text-foreground' : 'text-foreground',
         className,
       )}
     >
-      <div className="relative flex size-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 shadow-md shadow-amber-500/20 ring-1 ring-amber-400/30">
-        <svg viewBox="0 0 24 24" fill="none" className="size-5 text-slate-950" aria-hidden="true">
+      <div className="relative flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/20 ring-1 ring-primary/30">
+        <svg viewBox="0 0 24 24" fill="none" className="size-4.5 sm:size-5" aria-hidden="true">
           <path
             d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1Z"
             fill="currentColor"
           />
-          <circle cx="16.5" cy="7.5" r="1.5" fill="#fef08a" />
+          <circle cx="16.5" cy="7.5" r="1.5" fill="currentColor" opacity="0.8" />
         </svg>
       </div>
-      <span className="flex items-center gap-1">
+      <span className="inline-flex items-center gap-1 whitespace-nowrap">
         {locale === 'en' ? (
           <>
-            Woldeok <strong className="font-black text-amber-500 drop-shadow-sm">Moneyverse</strong>
+            <span>Woldeok</span> <strong className="font-black text-primary drop-shadow-sm">Moneyverse</strong>
           </>
         ) : (
           <>
-            <span className="font-bold">월덕</span>{' '}
-            <strong className="font-black bg-gradient-to-r from-amber-500 to-amber-600 bg-clip-text text-transparent drop-shadow-sm">
-              머니버스
+            <span className="font-bold">\uC6d4\uB355</span>{' '}
+            <strong className="font-black text-primary drop-shadow-sm">
+              \uBA38\uB2C8\uBC84\uC2A4
             </strong>
           </>
         )}

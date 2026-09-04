@@ -32,12 +32,12 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
       {/* 1. 상단 섹션: 스마트폰에서는 1열, 패드(태블릿 md:)에서는 2열 나란히 배치 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-stretch">
         {/* 달빛 지갑 대시보드 카드 */}
-        <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-amber-500/30 bg-gradient-to-br from-amber-500/15 via-card to-card p-5 md:p-6 shadow-lg shadow-amber-500/5">
+        <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-5 md:p-6 shadow-lg shadow-primary/5">
           <div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <span className="text-base md:text-lg">🌙</span>
-                <span className="text-xs md:text-sm font-black tracking-wider uppercase text-amber-500">
+                <span className="text-xs md:text-sm font-black tracking-wider uppercase text-primary">
                   Woldeok Moonlight
                 </span>
               </div>
@@ -62,14 +62,14 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
           <div className="mt-5 md:mt-8 grid grid-cols-2 gap-2.5">
             <Link
               href="/wallet"
-              className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-amber-600 font-bold text-sm text-white shadow-md active:scale-98 transition-transform hover:bg-amber-500"
+              className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-primary font-bold text-sm text-primary-foreground shadow-md active:scale-98 transition-transform hover:bg-primary/90"
             >
               <Wallet className="size-4 md:size-5" />
               <span><T korean="지갑 관리" english="Wallet" /></span>
             </Link>
             <Link
               href="/casino"
-              className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-surface font-bold text-sm text-amber-600 dark:text-amber-400 shadow-sm active:scale-98 transition-transform hover:bg-amber-500/10"
+              className="flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-primary/40 bg-card font-bold text-sm text-primary shadow-sm active:scale-98 transition-transform hover:bg-primary/10"
             >
               <Dices className="size-4 md:size-5" />
               <span><T korean="미니게임 5종" english="Mini Games" /></span>
@@ -144,7 +144,7 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
             </h2>
             <Link
               href="/announcements"
-              className="flex items-center text-xs md:text-sm font-bold text-amber-600 dark:text-amber-400"
+              className="flex items-center text-xs md:text-sm font-bold text-primary"
             >
               <span><T korean="전체 보기" english="View All" /></span>
               <ChevronRight className="size-3.5 md:size-4" />
@@ -155,11 +155,11 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
             {notices.map((notice) => (
               <div
                 key={notice.announcementId}
-                className="rounded-xl border border-border/50 bg-card p-4 shadow-sm hover:border-amber-500/40 transition-colors"
+                className="rounded-xl border border-border/50 bg-card p-4 shadow-sm hover:border-primary/40 transition-colors"
               >
                 <div className="flex items-center justify-between text-[11px] md:text-xs text-muted-foreground">
                   <span className="font-mono">{formatDay(notice.publishedAt)}</span>
-                  <span className="rounded bg-amber-500/10 px-1.5 py-0.5 font-bold text-amber-600 dark:text-amber-400 text-[10px]">
+                  <span className="rounded bg-primary/10 px-1.5 py-0.5 font-bold text-primary text-[10px]">
                     NOTICE
                   </span>
                 </div>
@@ -181,7 +181,7 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
       {/* 4. 신뢰 및 서비스 안내 카드 */}
       <div className="rounded-xl border border-border/40 bg-surface/50 p-4 md:p-5 text-xs md:text-sm text-muted-foreground">
         <div className="flex items-center gap-2 font-bold text-foreground mb-1.5">
-          <ShieldCheck className="size-4 md:size-5 text-amber-500" />
+          <ShieldCheck className="size-4 md:size-5 text-primary" />
           <span><T korean="공정한 가상경제 시스템" english="Fair Virtual Economy System" /></span>
         </div>
         <p className="leading-relaxed">
@@ -211,7 +211,7 @@ function QuickActionButton({
   readonly accent: 'amber' | 'purple' | 'blue' | 'emerald' | 'rose' | 'cyan';
 }) {
   const accentColors = {
-    amber: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 group-hover:bg-amber-500/20',
+    amber: 'bg-primary/10 text-primary group-hover:bg-primary/20',
     purple: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 group-hover:bg-purple-500/20',
     blue: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 group-hover:bg-blue-500/20',
     emerald: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-500/20',
@@ -222,7 +222,7 @@ function QuickActionButton({
   return (
     <Link
       href={href}
-      className="group flex flex-col items-center justify-center rounded-2xl border border-border/40 bg-card p-3 md:p-4 text-center shadow-sm transition-all active:scale-95 hover:border-amber-500/30 min-h-[90px] md:min-h-[105px]"
+      className="group flex flex-col items-center justify-center rounded-2xl border border-border/40 bg-card p-3 md:p-4 text-center shadow-sm transition-all active:scale-95 hover:border-primary/30 min-h-[90px] md:min-h-[105px]"
     >
       <div className={`mb-2 flex size-10 md:size-12 items-center justify-center rounded-xl transition-colors ${accentColors[accent]}`}>
         <Icon className="size-5 md:size-6" />
