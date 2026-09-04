@@ -1,6 +1,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Activity, ArrowUpRight, CalendarDays, CircleUserRound, ShieldAlert } from 'lucide-react';
+import {
+  Activity,
+  ArrowUpRight,
+  CalendarDays,
+  CircleUserRound,
+  Coins,
+  Crown,
+  Landmark,
+  PiggyBank,
+  ShieldAlert,
+  TrendingUp,
+  Wallet,
+} from 'lucide-react';
 import { AdminBack } from '../../admin-back';
 import { AdminAdjustmentDialog, ForceLogoutDialog, RestrictionDialog } from '../../admin-forms';
 import { EmptyState } from '@/components/empty-state';
@@ -56,23 +68,38 @@ export default async function AdminUserDetailPage({
   const events = activity?.events ?? [];
   const logLink = `/admin/logs?member=${encodeURIComponent(user.user_id)}&limit=50`;
 
+  const netWorth = Number(user.total_net_worth ?? 0);
+  const cash = Number(user.cash_balance ?? 0);
+  const bank = Number(user.bank_balance ?? 0);
+  const bond = Number(user.bond_balance ?? 0);
+  const stock = Number(user.stock_eval ?? 0);
+  const rank = user.wealth_rank ?? '—';
+
   return (
     <div className="grid gap-5">
       <AdminBack href="/admin/users" label="사용자 관리로" />
       <PageHeader eyebrow="USER DETAIL" title={user.display_name}>
-        사용자 상태와 관련 활동 기록을 한곳에서 확인하고 필요한 조치를 실행합니다.
+        사용자 상태와 자산 현황, 관련 활동 기록을 한곳에서 확인하고 필요한 조치를 실행합니다.
       </PageHeader>
 
+      {/* 기본 정보 및 빠른 관리 */}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.7fr)]">
         <Card>
           <CardHeader>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <span className="grid size-12 place-items-center rounded-2xl bg-muted">
-                  <CircleUserRound className="size-6 text-clay" />
+                  <CircleUserRound className="size-6 text-primary" />
                 </span>
                 <span>
-                  <CardTitle>{user.display_name}</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    {user.display_name}
+                    {user.wealth_rank === 1 && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-xs text-amber-500 border border-amber-500/30">
+                        <Crown className="size-3" /> 최고 부자 1위
+                      </span>
+                    )}
+                  </CardTitle>
                   <CardDescription className="mt-1 font-mono text-[0.72rem]">
                     {user.user_id}
                   </CardDescription>
@@ -116,6 +143,77 @@ export default async function AdminUserDetailPage({
         </Card>
       </div>
 
+      {/* 보유 자산 포트폴리오 대시보드 카드 */}
+      <Card className="border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card">
+        <CardHeader>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <CardTitle className="text-base font-bold flex items-center gap-2">
+                <Coins className="size-5 text-primary" /> 보유 자산 종합 포트폴리오
+              </CardTitle>
+              <CardDescription className="mt-0.5">
+                머니버스 전체 경제 활동(현금, 예금, 국채, 가상 주식)을 실시간으로 집계한 자산입니다.
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">부자 순위:</span>
+              <Badge variant="outline" className="font-mono text-sm px-2.5 py-0.5 border-primary/40 text-primary">
+                🏆 {rank}위
+              </Badge>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="rounded-xl border border-primary/20 bg-card p-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Coins className="size-4 text-primary" /> 총 순자산
+              </div>
+              <strong className="mt-2 block font-mono text-xl font-bold text-primary">
+                {netWorth.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+              </strong>
+            </div>
+
+            <div className="rounded-xl border bg-muted/30 p-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Wallet className="size-4 text-emerald-500" /> 지갑 현금
+              </div>
+              <strong className="mt-2 block font-mono text-lg font-bold">
+                {cash.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+              </strong>
+            </div>
+
+            <div className="rounded-xl border bg-muted/30 p-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <PiggyBank className="size-4 text-blue-500" /> 은행 예금
+              </div>
+              <strong className="mt-2 block font-mono text-lg font-bold">
+                {bank.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+              </strong>
+            </div>
+
+            <div className="rounded-xl border bg-muted/30 p-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Landmark className="size-4 text-purple-500" /> 가상 국채
+              </div>
+              <strong className="mt-2 block font-mono text-lg font-bold">
+                {bond.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+              </strong>
+            </div>
+
+            <div className="rounded-xl border bg-muted/30 p-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <TrendingUp className="size-4 text-amber-500" /> 주식 평가액
+              </div>
+              <strong className="mt-2 block font-mono text-lg font-bold">
+                {stock.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+              </strong>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 활동 감사 로그 */}
       <Card>
         <CardHeader>
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -142,7 +240,7 @@ export default async function AdminUserDetailPage({
               {events.map((event) => (
                 <article
                   key={event.audit_id}
-                  className="grid gap-2 rounded-xl border p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+                  className="grid gap-2 rounded-xl border p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center hover:bg-muted/20 transition-colors"
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">

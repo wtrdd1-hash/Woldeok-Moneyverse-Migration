@@ -17,6 +17,50 @@ export interface AdminUser {
   readonly created_at: string;
   readonly restricted_at: string | null;
   readonly restriction_reason: string | null;
+  readonly cash_balance?: number;
+  readonly bank_balance?: number;
+  readonly bond_balance?: number;
+  readonly stock_eval?: number;
+  readonly total_net_worth?: number;
+  readonly wealth_rank?: number;
+}
+
+export interface UserStockPosition {
+  readonly stockId: string;
+  readonly symbol: string;
+  readonly name: string;
+  readonly quantity: number;
+  readonly averageCost: number;
+  readonly currentPrice: number;
+  readonly evalAmount: number;
+  readonly profitLoss: number;
+}
+
+export interface UserBondHolding {
+  readonly id: string;
+  readonly bondCode: string;
+  readonly bondName: string;
+  readonly principalAmount: number;
+  readonly yieldBps: number;
+  readonly maturityAmount: number;
+  readonly purchasedAt: string;
+  readonly maturityAt: string;
+  readonly status: string;
+}
+
+export interface UserPortfolio {
+  readonly userId: string;
+  readonly displayName: string;
+  readonly status: string;
+  readonly createdAt: string;
+  readonly restrictedAt: string | null;
+  readonly restrictionReason: string | null;
+  readonly cashBalance: number;
+  readonly bankBalance: number;
+  readonly bondBalance: number;
+  readonly stockEval: number;
+  readonly stocks: readonly UserStockPosition[];
+  readonly bonds: readonly UserBondHolding[];
 }
 
 /** packages/database/migrations/059-feature-switches-and-economy-policies.sql */

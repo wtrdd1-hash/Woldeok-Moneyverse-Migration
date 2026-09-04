@@ -2,10 +2,23 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Search, ShieldAlert, UserRoundCheck, UsersRound } from 'lucide-react';
+import {
+  ArrowRight,
+  Coins,
+  Crown,
+  Landmark,
+  PiggyBank,
+  Search,
+  ShieldAlert,
+  SlidersHorizontal,
+  TrendingUp,
+  UserRoundCheck,
+  UsersRound,
+  Wallet,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
   Table,
@@ -18,45 +31,179 @@ import {
 import type { AdminUser } from '../types';
 
 type StatusFilter = 'all' | 'active' | 'restricted';
+type SortOption = 'wealth' | 'cash' | 'stock' | 'created';
 
 export function UserDirectory({ users }: { readonly users: readonly AdminUser[] }) {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
+  const [sort, setSort] = useState<SortOption>('wealth');
+
   const restrictedCount = users.filter((user) => user.restricted_at !== null).length;
+  const activeCount = users.length - restrictedCount;
+
+  // Total wealth across all members
+  const totalNetWorth = useMemo(() => {
+    return users.reduce((sum, u) => sum + (Number(u.total_net_worth) || 0), 0);
+  }, [users]);
 
   const filtered = useMemo(() => {
     const needle = query.trim().toLocaleLowerCase('ko-KR');
-    return users.filter((user) => {
-      const restricted = user.restricted_at !== null;
-      if (status === 'restricted' && !restricted) return false;
-      if (status === 'active' && restricted) return false;
-      return (
-        needle === '' ||
-        user.display_name.toLocaleLowerCase('ko-KR').includes(needle) ||
-        user.user_id.toLocaleLowerCase().includes(needle)
-      );
-    });
-  }, [query, status, users]);
+
+    return users
+      .filter((user) => {
+        if (status === 'active' && user.restricted_at !== null) return false;
+        if (status === 'restricted' && user.restricted_at === null) return false;
+        if (!needle) return true;
+
+        const name = (user.display_name ?? '').toLocaleLowerCase('ko-KR');
+        const id = (user.user_id ?? '').toLowerCase();
+        return name.includes(needle) || id.includes(needle);
+      })
+      .sort((a, b) => {
+        if (sort === 'wealth') {
+          const aWorth = Number(a.total_net_worth ?? 0);
+          const bWorth = Number(b.total_net_worth ?? 0);
+          if (bWorth !== aWorth) return bWorth - aWorth;
+          return a.display_name.localeCompare(b.display_name, 'ko-KR');
+        }
+        if (sort === 'cash') {
+          const aCash = Number(a.cash_balance ?? 0);
+          const bCash = Number(b.cash_balance ?? 0);
+          if (bCash !== aCash) return bCash - aCash;
+          return a.display_name.localeCompare(b.display_name, 'ko-KR');
+        }
+        if (sort === 'stock') {
+          const aStock = Number(a.stock_eval ?? 0);
+          const bStock = Number(b.stock_eval ?? 0);
+          if (bStock !== aStock) return bStock - aStock;
+          return a.display_name.localeCompare(b.display_name, 'ko-KR');
+        }
+        // created
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      });
+  }, [users, query, status, sort]);
 
   return (
-    <div className="grid gap-4">
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Summary icon={UsersRound} label="전체 사용자" value={`${users.length}명`} />
-        <Summary
-          icon={UserRoundCheck}
-          label="정상 이용"
-          value={`${users.length - restrictedCount}명`}
-        />
-        <Summary
-          icon={ShieldAlert}
-          label="이용 제한"
-          value={`${restrictedCount}명`}
-          attention={restrictedCount > 0}
-        />
+    <div className="grid gap-6">
+      {/* 상단 통계 요약 카드 4종 */}
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {/* 전체 회원 수 */}
+        <Card className="border-border shadow-xs">
+          <CardContent className="flex items-center gap-3.5 py-4">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+              <UsersRound className="size-5" />
+            </span>
+            <div className="grid gap-0.5">
+              <span className="text-xs text-muted-foreground font-medium">전체 회원</span>
+              <strong className="text-2xl font-bold tracking-tight">{users.length}명</strong>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 정상 이용 회원 */}
+        <Card className="border-border shadow-xs">
+          <CardContent className="flex items-center gap-3.5 py-4">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-emerald-500/10 text-emerald-500">
+              <UserRoundCheck className="size-5" />
+            </span>
+            <div className="grid gap-0.5">
+              <span className="text-xs text-muted-foreground font-medium">정상 이용</span>
+              <strong className="text-2xl font-bold tracking-tight">{activeCount}명</strong>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 이용 제한 회원 */}
+        <Card className={restrictedCount > 0 ? 'border-destructive/30 bg-destructive/5 shadow-xs' : 'border-border shadow-xs'}>
+          <CardContent className="flex items-center gap-3.5 py-4">
+            <span className={`grid size-11 shrink-0 place-items-center rounded-xl ${restrictedCount > 0 ? 'bg-destructive/20 text-destructive' : 'bg-muted text-muted-foreground'}`}>
+              <ShieldAlert className="size-5" />
+            </span>
+            <div className="grid gap-0.5">
+              <span className="text-xs text-muted-foreground font-medium">이용 제한</span>
+              <strong className={`text-2xl font-bold tracking-tight ${restrictedCount > 0 ? 'text-destructive' : ''}`}>
+                {restrictedCount}명
+              </strong>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 회원 총 순자산 합계 */}
+        <Card className="border-border shadow-xs">
+          <CardContent className="flex items-center gap-3.5 py-4">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-amber-500/10 text-amber-500">
+              <Coins className="size-5" />
+            </span>
+            <div className="grid gap-0.5">
+              <span className="text-xs text-muted-foreground font-medium">전체 회원 총 순자산</span>
+              <strong className="text-xl font-bold tracking-tight font-mono text-amber-600 dark:text-amber-400">
+                {totalNetWorth.toLocaleString()}
+                <span className="text-xs font-normal text-muted-foreground ml-1">WLD</span>
+              </strong>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <Card>
-        <CardContent className="grid gap-4 pt-6">
+      {/* 부자 랭킹 및 회원 관리 메인 카드 */}
+      <Card className="border-border shadow-xs">
+        <CardHeader className="pb-3 border-b">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <CardTitle className="text-base font-bold flex items-center gap-2">
+                <Crown className="size-4 text-amber-500" /> 회원 부자 순위(Leaderboard) 및 자산 관리
+              </CardTitle>
+              <p className="text-xs text-muted-foreground mt-1">
+                회원별 현금(지갑), 예금, 국채, 주식 평가액을 합산한 총 순자산 랭킹과 상세 자산을 확인하고 즉시 관리합니다.
+              </p>
+            </div>
+
+            {/* 정렬 옵션 탭 */}
+            <div className="flex flex-wrap items-center gap-1.5 bg-muted/40 p-1 rounded-lg border text-xs">
+              <span className="text-[0.7rem] font-bold text-muted-foreground px-2 flex items-center gap-1">
+                <SlidersHorizontal className="size-3" /> 정렬:
+              </span>
+              <Button
+                type="button"
+                size="xs"
+                variant={sort === 'wealth' ? 'default' : 'ghost'}
+                onClick={() => setSort('wealth')}
+                className="h-7 text-xs font-medium"
+              >
+                🏆 부자 순위 순
+              </Button>
+              <Button
+                type="button"
+                size="xs"
+                variant={sort === 'cash' ? 'default' : 'ghost'}
+                onClick={() => setSort('cash')}
+                className="h-7 text-xs font-medium"
+              >
+                💵 현금 많은 순
+              </Button>
+              <Button
+                type="button"
+                size="xs"
+                variant={sort === 'stock' ? 'default' : 'ghost'}
+                onClick={() => setSort('stock')}
+                className="h-7 text-xs font-medium"
+              >
+                📈 주식 자산 순
+              </Button>
+              <Button
+                type="button"
+                size="xs"
+                variant={sort === 'created' ? 'default' : 'ghost'}
+                onClick={() => setSort('created')}
+                className="h-7 text-xs font-medium"
+              >
+                📅 최근 가입 순
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent className="grid gap-4 pt-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <label className="relative block w-full lg:max-w-md">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -64,11 +211,12 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="이름 또는 사용자 ID 검색"
-                className="h-11 pl-9"
+                placeholder="닉네임 또는 사용자 UUID 검색..."
+                className="h-10 pl-9 text-sm"
               />
             </label>
-            <div className="flex flex-wrap gap-2" role="group" aria-label="사용자 상태 필터">
+
+            <div className="flex flex-wrap gap-1.5" role="group" aria-label="사용자 상태 필터">
               {([
                 ['all', '전체'],
                 ['active', '정상'],
@@ -81,7 +229,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                   variant={status === value ? 'default' : 'outline'}
                   onClick={() => setStatus(value)}
                   aria-pressed={status === value}
-                  className="min-h-10"
+                  className="h-9 text-xs"
                 >
                   {label}
                 </Button>
@@ -89,46 +237,120 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
             </div>
           </div>
 
-          <p className="text-sm text-muted-foreground">조건에 맞는 사용자 {filtered.length}명</p>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>
+              조회 조건에 맞는 회원 <strong className="text-foreground">{filtered.length}명</strong>
+            </span>
+            <span className="text-[0.72rem]">
+              순자산 = 지갑 현금 + 은행 예금 + 활성 국채 + 주식 실시간 평가액
+            </span>
+          </div>
 
           {filtered.length === 0 ? (
-            <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-              검색 조건에 맞는 사용자가 없습니다.
+            <div className="grid place-items-center gap-2 rounded-xl border border-dashed p-10 text-center text-muted-foreground">
+              <UsersRound className="size-8 opacity-40" />
+              <p className="text-sm font-medium">검색 조건과 일치하는 회원이 없습니다.</p>
+              <p className="text-xs">검색어를 수정하거나 상태 필터를 변경해 보세요.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-xl border">
+            <div className="overflow-x-auto rounded-xl border border-border/70">
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-muted/30">
                   <TableRow>
-                    <TableHead>사용자</TableHead>
-                    <TableHead>상태</TableHead>
-                    <TableHead>제한 사유</TableHead>
-                    <TableHead className="text-right">관리</TableHead>
+                    <TableHead className="w-16 text-center font-bold">순위</TableHead>
+                    <TableHead>회원 정보</TableHead>
+                    <TableHead className="text-right font-bold">총 순자산</TableHead>
+                    <TableHead>자산 세부 구성</TableHead>
+                    <TableHead className="text-center">상태</TableHead>
+                    <TableHead className="text-right">관리 조치</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((user) => {
+                  {filtered.map((user, index) => {
                     const restricted = user.restricted_at !== null;
+                    const rank = user.wealth_rank ?? index + 1;
+                    const netWorth = Number(user.total_net_worth ?? 0);
+                    const cash = Number(user.cash_balance ?? 0);
+                    const bank = Number(user.bank_balance ?? 0);
+                    const bond = Number(user.bond_balance ?? 0);
+                    const stock = Number(user.stock_eval ?? 0);
+
                     return (
-                      <TableRow key={user.user_id}>
-                        <TableCell>
-                          <span className="block font-semibold">{user.display_name}</span>
-                          <code className="font-mono text-[0.7rem] text-muted-foreground">
-                            {user.user_id}
-                          </code>
+                      <TableRow key={user.user_id} className="hover:bg-muted/20 transition-colors">
+                        {/* 부자 순위 뱃지 */}
+                        <TableCell className="text-center">
+                          <RankBadge rank={rank} />
                         </TableCell>
+
+                        {/* 회원 프로필 및 식별자 */}
                         <TableCell>
-                          <Badge variant={restricted ? 'destructive' : 'secondary'}>
+                          <div className="flex flex-col">
+                            <Link
+                              href={`/admin/users/${encodeURIComponent(user.user_id)}`}
+                              className="font-bold text-foreground hover:underline flex items-center gap-1.5"
+                            >
+                              {user.display_name}
+                              {rank === 1 && <Crown className="size-3.5 text-amber-500" />}
+                            </Link>
+                            <code className="font-mono text-[0.68rem] text-muted-foreground">
+                              {user.user_id}
+                            </code>
+                          </div>
+                        </TableCell>
+
+                        {/* 총 순자산 */}
+                        <TableCell className="text-right">
+                          <span className="font-mono font-bold text-base text-primary">
+                            {netWorth.toLocaleString()}{' '}
+                            <span className="text-xs font-normal text-muted-foreground">WLD</span>
+                          </span>
+                        </TableCell>
+
+                        {/* 자산 세부 구성 칩들 */}
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1.5 max-w-sm">
+                            <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title="지갑 현금">
+                              <Wallet className="size-3 text-emerald-500" />
+                              {cash.toLocaleString()} WLD
+                            </span>
+                            {bank > 0 && (
+                              <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title="은행 예금">
+                                <PiggyBank className="size-3 text-blue-500" />
+                                {bank.toLocaleString()} WLD
+                              </span>
+                            )}
+                            {bond > 0 && (
+                              <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title="가상 국채">
+                                <Landmark className="size-3 text-purple-500" />
+                                {bond.toLocaleString()} WLD
+                              </span>
+                            )}
+                            {stock > 0 && (
+                              <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title="보유 주식 평가액">
+                                <TrendingUp className="size-3 text-amber-500" />
+                                {stock.toLocaleString()} WLD
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+
+                        {/* 이용 상태 및 제재 사유 */}
+                        <TableCell className="text-center">
+                          <Badge variant={restricted ? 'destructive' : 'secondary'} className="text-[0.7rem]">
                             {restricted ? '제한됨' : '정상'}
                           </Badge>
+                          {restricted && user.restriction_reason && (
+                            <p className="mt-1 text-[0.68rem] text-muted-foreground max-w-36 truncate mx-auto" title={user.restriction_reason}>
+                              {user.restriction_reason}
+                            </p>
+                          )}
                         </TableCell>
-                        <TableCell className="max-w-64 text-xs text-muted-foreground">
-                          {user.restriction_reason ?? '—'}
-                        </TableCell>
+
+                        {/* 관리 액션 */}
                         <TableCell className="text-right">
-                          <Button asChild variant="outline" size="sm" className="min-h-10">
+                          <Button asChild variant="outline" size="xs" className="h-8 text-xs">
                             <Link href={`/admin/users/${encodeURIComponent(user.user_id)}`}>
-                              상세·로그 <ArrowRight className="size-4" />
+                              상세·로그 <ArrowRight className="size-3.5" />
                             </Link>
                           </Button>
                         </TableCell>
@@ -145,28 +367,31 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
   );
 }
 
-function Summary({
-  icon: Icon,
-  label,
-  value,
-  attention = false,
-}: {
-  readonly icon: typeof UsersRound;
-  readonly label: string;
-  readonly value: string;
-  readonly attention?: boolean;
-}) {
+function RankBadge({ rank }: { readonly rank: number }) {
+  if (rank === 1) {
+    return (
+      <span className="inline-flex items-center justify-center font-bold text-xs size-7 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/40 shadow-xs">
+        🥇 1
+      </span>
+    );
+  }
+  if (rank === 2) {
+    return (
+      <span className="inline-flex items-center justify-center font-bold text-xs size-7 rounded-full bg-slate-400/20 text-slate-300 border border-slate-400/40 shadow-xs">
+        🥈 2
+      </span>
+    );
+  }
+  if (rank === 3) {
+    return (
+      <span className="inline-flex items-center justify-center font-bold text-xs size-7 rounded-full bg-amber-800/20 text-amber-600 border border-amber-700/40 shadow-xs">
+        🥉 3
+      </span>
+    );
+  }
   return (
-    <Card className={attention ? 'border-clay bg-clay-soft/20' : undefined}>
-      <CardContent className="flex items-center gap-3 py-5">
-        <span className="grid size-10 place-items-center rounded-xl bg-muted">
-          <Icon className="size-5 text-clay" />
-        </span>
-        <span className="grid gap-0.5">
-          <span className="text-xs text-muted-foreground">{label}</span>
-          <strong className="text-xl tabular">{value}</strong>
-        </span>
-      </CardContent>
-    </Card>
+    <span className="inline-flex items-center justify-center font-mono text-xs font-semibold text-muted-foreground">
+      #{rank}
+    </span>
   );
 }

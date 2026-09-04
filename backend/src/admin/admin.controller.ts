@@ -137,6 +137,16 @@ export class AdminController {
     return { users: await this.service().users(requireUserId(request)) };
   }
 
+  @Get('users/:id/portfolio')
+  @UseGuards(AdminSessionGuard)
+  @ApiOperation({ summary: 'Detailed user asset portfolio' })
+  async userPortfolio(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) userId: string,
+  ) {
+    return { portfolio: await this.service().userPortfolio(requireUserId(request), userId) };
+  }
+
   @Put('users/:id/restriction')
   @UseGuards(AdminSessionGuard, CsrfGuard, ReauthGuard, SecondFactorGuard)
   @ApiOperation({ summary: 'Restrict or unrestrict a member' })

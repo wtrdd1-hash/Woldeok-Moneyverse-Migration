@@ -84,6 +84,12 @@ interface AdminUserRow {
   created_at: Date;
   restricted_at: Date | null;
   restriction_reason: string | null;
+  cash_balance?: number;
+  bank_balance?: number;
+  bond_balance?: number;
+  stock_eval?: number;
+  total_net_worth?: number;
+  wealth_rank?: number;
 }
 
 // packages/database/migrations/039-admin-discord-outbox-read.sql (admin_recent_discord_outbox_events)
@@ -147,18 +153,49 @@ export class AdminRepository {
 
   async users({
     actorUserId,
-    limit = 50,
+    limit = 100,
   }: {
     actorUserId: unknown;
     limit?: unknown;
   }): Promise<AdminUserRow[]> {
     assertUuid(actorUserId, 'actor user id');
     assertLimit(limit);
-    return queryRows<AdminUserRow>(
+    const rows = await queryRows<Record<string, unknown>>(
       this.pool,
-      'SELECT user_id::text,status,display_name,created_at,restricted_at,restriction_reason FROM public.admin_list_users($1,$2)',
+      'SELECT user_id::text,status,display_name,created_at,restricted_at,restriction_reason,cash_balance,bank_balance,bond_balance,stock_eval,total_net_worth,wealth_rank FROM public.admin_list_users($1,$2)',
       [actorUserId, limit],
     );
+    return rows.map((r) => ({
+      user_id: String(r.user_id),
+      status: String(r.status),
+      display_name: String(r.display_name),
+      created_at: r.created_at as Date,
+      restricted_at: (r.restricted_at as Date) ?? null,
+      restriction_reason: (r.restriction_reason as string) ?? null,
+      cash_balance: Number(r.cash_balance ?? 0),
+      bank_balance: Number(r.bank_balance ?? 0),
+      bond_balance: Number(r.bond_balance ?? 0),
+      stock_eval: Number(r.stock_eval ?? 0),
+      total_net_worth: Number(r.total_net_worth ?? 0),
+      wealth_rank: Number(r.wealth_rank ?? 0),
+    }));
+  }
+
+  async userPortfolio({
+    actorUserId,
+    targetUserId,
+  }: {
+    actorUserId: unknown;
+    targetUserId: unknown;
+  }): Promise<unknown> {
+    assertUuid(actorUserId, 'actor user id');
+    assertUuid(targetUserId, 'target user id');
+    const row = await queryOne<{ admin_get_user_portfolio: unknown }>(
+      this.pool,
+      'SELECT public.admin_get_user_portfolio($1, $2)',
+      [actorUserId, targetUserId],
+    );
+    return row?.admin_get_user_portfolio ?? null;
   }
 
   async recentDiscordOutboxEvents({

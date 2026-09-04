@@ -10,6 +10,7 @@ interface AdminRepositoryLike {
   recentAuditEvents(input: { actorUserId: unknown; limit?: unknown }): Promise<unknown[]>;
   recentDiscordOutboxEvents(input: { actorUserId: unknown; limit?: unknown }): Promise<unknown[]>;
   users(input: { actorUserId: unknown; limit?: unknown }): Promise<unknown[]>;
+  userPortfolio(input: { actorUserId: unknown; targetUserId: unknown }): Promise<unknown>;
   setUserRestriction(input: {
     actorUserId: unknown;
     userId: unknown;
@@ -55,6 +56,10 @@ export class AdminService {
 
   users(actorUserId: unknown, { limit = 50 }: { limit?: unknown } = {}): Promise<unknown[]> {
     return this.repository.users({ actorUserId, limit });
+  }
+
+  userPortfolio(actorUserId: unknown, targetUserId: unknown): Promise<unknown> {
+    return this.repository.userPortfolio({ actorUserId, targetUserId });
   }
 
   setUserRestriction({

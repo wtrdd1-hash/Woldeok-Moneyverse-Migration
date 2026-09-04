@@ -2,25 +2,15 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { ApiError, api } from '@/lib/api';
-import { formatMoment } from '@/lib/money';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
 import type { AuditSearchRow } from '../types';
-import { RevealDisclosure } from './logs-forms';
+import { AuditLogsView } from './audit-logs-view';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,25 +20,6 @@ export const metadata: Metadata = {
   title: AREA.title,
   robots: { index: false, follow: false },
 };
-
-/**
- * The audit trail, searched rather than scrolled.
- *
- * This page used to print whatever the last thirty rows happened to be, with
- * four columns and no way to ask a question of them. An incident starts from
- * a request id, an address or a member, and none of those were reachable.
- *
- * The form is a plain GET form and the page reads its own query string. That
- * is what makes a search a link: the URL an operator lands on after
- * filtering is the URL they can paste into an incident note, and it survives
- * a reload, which a client-held filter state does not.
- *
- * PAGINATION IS BY CURSOR, NOT OFFSET. The chain grows under a reader — one
- * administrator request is one row — and an offset would repeat or skip rows
- * as it does. `cursor` is the last row's chain position and the database
- * asks for `sequence < cursor`, so a page boundary means the same thing
- * however much has been written since.
- */
 
 const OUTCOMES: readonly { readonly value: string; readonly label: string }[] = [
   { value: '', label: '전체' },
@@ -60,7 +31,6 @@ const OUTCOMES: readonly { readonly value: string; readonly label: string }[] = 
 const LIMITS: readonly string[] = ['30', '50', '100'];
 const DEFAULT_LIMIT = '30';
 
-/** A chain position, as text: it is a bigint and never becomes a number. */
 const SEQUENCE = /^\d{1,18}$/;
 
 interface Filters {
@@ -86,7 +56,6 @@ function one(value: string | string[] | undefined): string {
   return first?.trim() ?? '';
 }
 
-/** Empty fields are left out entirely, so a shared link carries only what was asked. */
 function searchQuery(filters: Filters, cursor?: string): string {
   const query = new URLSearchParams();
   for (const [key, value] of Object.entries(filters)) {
@@ -97,12 +66,6 @@ function searchQuery(filters: Filters, cursor?: string): string {
   return text === '' ? '' : `?${text}`;
 }
 
-/**
- * A malformed filter and an unreachable service are different facts, and an
- * operator can only act on the first. `apiOrNull` would flatten both into
- * "could not load", which is how somebody spends ten minutes on a mistyped
- * UUID.
- */
 async function searchEvents(path: string): Promise<SearchResult> {
   try {
     return await api<{ events: AuditSearchRow[]; nextCursor: string | null }>(path);
@@ -137,8 +100,6 @@ export default async function AdminLogsPage({
     request: one(params.request),
     transaction: one(params.transaction),
     address: one(params.address),
-    // Both come from a <select>, so a value outside the list arrived by hand.
-    // Dropping it beats a 400 that reads as though the trail were broken.
     outcome: OUTCOMES.some((entry) => entry.value === outcome) ? outcome : '',
     limit: LIMITS.includes(limit) ? limit : DEFAULT_LIMIT,
   };
@@ -152,9 +113,6 @@ export default async function AdminLogsPage({
 
   const events = 'problem' in search ? [] : search.events;
   const pageSize = Number(filters.limit);
-  // The API answers a cursor whenever it returned any row at all, so a short
-  // page would still offer a 다음 that leads nowhere. Fewer rows than were
-  // asked for is the end of the trail.
   const nextCursor =
     'problem' in search || search.nextCursor === null || events.length < pageSize
       ? null
@@ -167,61 +125,15 @@ export default async function AdminLogsPage({
         {AREA.summary}
       </PageHeader>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b pb-3">
-        <div className="flex flex-wrap items-center gap-1.5 text-xs">
-          <span className="font-bold text-muted-foreground mr-1">빠른 필터:</span>
-          <Button asChild variant={filters.outcome === "" && filters.feature === "" ? "default" : "outline"} size="xs" className="h-7 text-xs">
-            <Link href="/admin/logs">전체</Link>
-          </Button>
-          <Button asChild variant={filters.outcome === "success" ? "default" : "outline"} size="xs" className="h-7 text-xs">
-            <Link href="/admin/logs?outcome=success">성공만</Link>
-          </Button>
-          <Button asChild variant={filters.outcome === "failure" ? "destructive" : "outline"} size="xs" className="h-7 text-xs">
-            <Link href="/admin/logs?outcome=failure">실패만</Link>
-          </Button>
-          <Button asChild variant={filters.feature === "security" ? "default" : "outline"} size="xs" className="h-7 text-xs">
-            <Link href="/admin/logs?feature=security">보안 감사</Link>
-          </Button>
-          <Button asChild variant={filters.feature === "controls" ? "default" : "outline"} size="xs" className="h-7 text-xs">
-            <Link href="/admin/logs?feature=controls">기능 제어</Link>
-          </Button>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          <Button asChild variant="outline" size="xs" className="h-7 text-xs">
-            <Link href="/admin/logs/delivery">배달 로그</Link>
-          </Button>
-          <Button asChild variant="outline" size="xs" className="h-7 text-xs">
-            <Link href="/admin/logs/integrity">해시 무결성</Link>
-          </Button>
-        </div>
-      </div>
-      <div className="hidden">
-        <Button asChild variant="default" size="sm">
-          <Link href="/admin/logs">감사 로그 (Audit Trail)</Link>
-        </Button>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/admin/logs/delivery">배달 로그 (Outbox Delivery)</Link>
-        </Button>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/admin/logs/integrity">원장 무결성 체인 (Hash Integrity)</Link>
-        </Button>
-        <Button asChild variant="outline" size="sm">
-          <Link href="/admin/economy">경제 원장 & 자동조정 (Economy Knobs)</Link>
-        </Button>
-      </div>
-
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">기록 검색</CardTitle>
+          <CardTitle className="text-base">조건 검색</CardTitle>
           <CardDescription>
-            비워 둔 항목은 조건에서 빠집니다. 액션은 앞부분만 적어도 그 아래 단계까지 함께
-            찾습니다 — <code className="font-mono text-[0.75rem]">admin.policy</code>는{' '}
-            <code className="font-mono text-[0.75rem]">admin.policy.rollback</code>도 포함합니다.
+            비어 있는 칸은 조건을 걸지 않습니다. 닉네임이 아니라 UUID입니다 — 사용자를
+            찾을 때는 회원 관리에서 UUID를 복사해 오세요.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* No client JavaScript: the browser submits the query string and
-              the server reads it back, so a filtered view is a plain link. */}
           <form method="get" className="grid gap-4">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <FilterField label="기간 시작" name="from" type="datetime-local" value={filters.from} />
@@ -320,71 +232,7 @@ export default async function AdminLogsPage({
               {...(paged ? { description: '마지막 쪽까지 왔거나, 조건이 좁습니다.' } : {})}
             />
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>순번</TableHead>
-                    <TableHead>시각</TableHead>
-                    <TableHead>관리자</TableHead>
-                    <TableHead>액션</TableHead>
-                    <TableHead>기능</TableHead>
-                    <TableHead>대상</TableHead>
-                    <TableHead>결과</TableHead>
-                    <TableHead>IP</TableHead>
-                    <TableHead>무결성 해시</TableHead>
-                    <TableHead />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {events.map((event) => (
-                    <TableRow key={event.audit_id}>
-                      <TableCell className="tabular font-mono text-xs">{event.sequence}</TableCell>
-                      <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
-                        {formatMoment(event.created_at)}
-                      </TableCell>
-                      <TableCell>
-                        <Identifier value={event.actor_user_id} fallback="시스템" />
-                      </TableCell>
-                      <TableCell className="font-mono text-xs">{event.action}</TableCell>
-                      <TableCell className="font-mono text-[0.7rem] text-muted-foreground">
-                        {event.feature ?? '—'}
-                      </TableCell>
-                      <TableCell className="text-[0.7rem] text-muted-foreground">
-                        <span className="grid gap-0.5">
-                          <span>{event.target_kind ?? '—'}</span>
-                          <Identifier value={event.target_id} fallback="" />
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <OutcomeBadge
-                          outcome={event.outcome}
-                          responseStatus={event.response_status}
-                        />
-                      </TableCell>
-                      <TableCell className="font-mono text-[0.7rem] text-muted-foreground">
-                        {event.client_ip ?? '—'}
-                      </TableCell>
-                      <TableCell className="font-mono text-[0.7rem] text-muted-foreground">
-                        <span className="grid gap-1">
-                          <span>{event.integrity_hash.slice(0, 16)}…</span>
-                          {event.hash_version === 1 && (
-                            <Badge variant="outline" className="w-fit">
-                              구버전 해시
-                            </Badge>
-                          )}
-                        </span>
-                      </TableCell>
-                      <TableCell>
-                        <RevealDisclosure auditId={event.audit_id} sequence={event.sequence}>
-                          <EventDetail event={event} />
-                        </RevealDisclosure>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <AuditLogsView events={events} />
           )}
 
           {!('problem' in search) && (
@@ -409,7 +257,6 @@ export default async function AdminLogsPage({
           )}
         </CardContent>
       </Card>
-
     </div>
   );
 }
@@ -444,14 +291,6 @@ function FilterField({
   );
 }
 
-/**
- * A native `<select>`, not the registry's.
- *
- * `components/ui/select` is Radix, which needs hydration and posts nothing on
- * its own — the console's dialogs pair it with a hidden input. This form has
- * to submit without JavaScript, so the browser's own control is the one that
- * works.
- */
 function FilterSelect({
   label,
   name,
@@ -474,79 +313,5 @@ function FilterSelect({
         {children}
       </select>
     </label>
-  );
-}
-
-function OutcomeBadge({
-  outcome,
-  responseStatus,
-}: {
-  readonly outcome: string | null;
-  readonly responseStatus: number | null;
-}) {
-  if (outcome === null && responseStatus === null) return <span>—</span>;
-  return (
-    <span className="flex flex-wrap items-center gap-1">
-      {outcome !== null && (
-        <Badge
-          variant={
-            outcome === 'success' ? 'secondary' : outcome === 'failure' ? 'destructive' : 'outline'
-          }
-        >
-          {outcome === 'success' ? '성공' : outcome === 'failure' ? '실패' : '부분'}
-        </Badge>
-      )}
-      {responseStatus !== null && (
-        <span className="tabular font-mono text-[0.7rem] text-muted-foreground">
-          {responseStatus}
-        </span>
-      )}
-    </span>
-  );
-}
-
-/** A uuid, shortened to what a reader can compare, with the whole of it on hover. */
-function Identifier({
-  value,
-  fallback,
-}: {
-  readonly value: string | null;
-  readonly fallback: string;
-}) {
-  if (value === null) return <span className="text-muted-foreground">{fallback}</span>;
-  return (
-    <code title={value} className="font-mono text-[0.7rem] text-muted-foreground">
-      {value.slice(0, 8)}…
-    </code>
-  );
-}
-
-/** The axes that do not earn a column, shown when a row is opened. */
-function EventDetail({ event }: { readonly event: AuditSearchRow }) {
-  return (
-    <dl className="grid gap-1.5 rounded-xl border border-border/50 bg-background/80 p-3 text-[0.7rem]">
-      <DetailRow term="감사 ID" value={event.audit_id} />
-      <DetailRow term="요청 ID" value={event.request_id} />
-      <DetailRow term="추적 ID" value={event.trace_id} />
-      <DetailRow term="대상 회원" value={event.subject_user_id} />
-      <DetailRow term="거래 ID" value={event.transaction_id} />
-      <DetailRow term="세션 해시" value={event.session_hash} />
-      <DetailRow term="이전 해시" value={event.previous_integrity_hash} />
-      <dt className="mt-2 font-bold text-muted-foreground">기록 내용 (가려진 상태)</dt>
-      <dd className="mt-1">
-        <pre className="max-h-60 overflow-auto rounded-lg border border-border/40 bg-muted/50 p-2.5 whitespace-pre-wrap break-all font-mono text-[0.7rem] leading-relaxed">
-          {JSON.stringify({ context: event.context, metadata: event.metadata }, null, 2)}
-        </pre>
-      </dd>
-    </dl>
-  );
-}
-
-function DetailRow({ term, value }: { readonly term: string; readonly value: string | null }) {
-  return (
-    <div className="flex items-baseline justify-between gap-2">
-      <dt className="text-muted-foreground">{term}</dt>
-      <dd className="font-mono break-all">{value ?? '없음'}</dd>
-    </div>
   );
 }

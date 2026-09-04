@@ -78,6 +78,11 @@ export default async function AdminPage() {
     apiOrNull<ReconciliationHealth>('/api/v1/admin/economy/reconciliations/latest'),
   ]);
 
+  const topUsers = (users?.users ?? [])
+    .slice()
+    .sort((a, b) => (Number(b.total_net_worth) || 0) - (Number(a.total_net_worth) || 0))
+    .slice(0, 5);
+
   const held =
     controls?.featureSwitches.filter((feature) => feature.state !== 'enabled').length ?? 0;
   const integrityOk = health?.integrity?.ok;
@@ -134,6 +139,74 @@ export default async function AdminPage() {
           <AdminQuickUserSearch />
         </CardContent>
       </Card>
+
+      {/* 실시간 최고 부자 TOP 5 리치 리스트 위젯 */}
+      {topUsers.length > 0 && (
+        <Card className="border-amber-500/30 bg-gradient-to-br from-amber-500/10 via-card to-card">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <CardTitle className="text-base font-bold flex items-center gap-2">
+                  <span className="text-amber-500">👑</span>
+                  <span>실시간 최고 부자 TOP 5 (Rich List)</span>
+                </CardTitle>
+                <CardDescription>
+                  머니버스 내 현금, 예금, 국채, 주식 자산 합계 기준 상위 고액 자산가 실시간 랭킹입니다.
+                </CardDescription>
+              </div>
+              <Button asChild variant="outline" size="sm" className="border-amber-500/30 text-amber-500 hover:bg-amber-500/10">
+                <Link href="/admin/users">부자 순위 및 전체 자산 관리 →</Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-5">
+              {topUsers.map((u, idx) => {
+                const rank = idx + 1;
+                const netWorth = Number(u.total_net_worth ?? 0);
+                const cash = Number(u.cash_balance ?? 0);
+                const stock = Number(u.stock_eval ?? 0);
+                return (
+                  <Link
+                    key={u.user_id}
+                    href={`/admin/users/${encodeURIComponent(u.user_id)}`}
+                    className="group flex flex-col justify-between rounded-xl border border-border/80 bg-card p-3.5 hover:border-amber-500/40 hover:bg-muted/30 transition-all shadow-xs"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-1">
+                        <span className={`inline-flex items-center justify-center font-bold text-xs size-6 rounded-full ${
+                          rank === 1 ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40' :
+                          rank === 2 ? 'bg-slate-400/20 text-slate-300 border border-slate-400/40' :
+                          rank === 3 ? 'bg-amber-800/20 text-amber-600 border border-amber-700/40' :
+                          'bg-muted text-muted-foreground'
+                        }`}>
+                          {rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}
+                        </span>
+                        <span className="font-mono text-[0.68rem] text-muted-foreground truncate max-w-20">
+                          {u.user_id.slice(0, 8)}…
+                        </span>
+                      </div>
+                      <div className="mt-2 font-bold text-sm text-foreground group-hover:text-primary transition-colors truncate">
+                        {u.display_name}
+                      </div>
+                    </div>
+                    <div className="mt-3 pt-2 border-t border-border/40">
+                      <div className="text-[0.7rem] text-muted-foreground">총 순자산</div>
+                      <div className="font-mono font-bold text-sm text-primary">
+                        {netWorth.toLocaleString()} <span className="text-[0.65rem] font-normal text-muted-foreground">WLD</span>
+                      </div>
+                      <div className="mt-1 flex items-center justify-between text-[0.65rem] text-muted-foreground">
+                        <span>현금 {cash.toLocaleString()}</span>
+                        {stock > 0 && <span>주식 {stock.toLocaleString()}</span>}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* 핵심 기능 스위치 실시간 상태 카드 */}
       {controls && (
