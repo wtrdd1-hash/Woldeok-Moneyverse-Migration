@@ -225,6 +225,37 @@ export interface AdminStock {
   readonly active: boolean;
 }
 
+/** One stock's mood beside its price: `stock_market_dynamics_admin` (124). */
+export interface AdminStockDynamics {
+  readonly stock_id: string;
+  readonly symbol: string;
+  readonly name: string;
+  readonly current_price: string;
+  readonly fair_value: string;
+  /** Basis points a day, as numerics cross the wire: strings, read and never summed. */
+  readonly trend_bps: string;
+  readonly vol_bps: string;
+  readonly market_trend_bps: string;
+  readonly live_events: number;
+}
+
+/** A market event, as the console lists them (124): running, ended and cancelled alike. */
+export interface AdminMarketEvent {
+  readonly id: string;
+  readonly stock_id: string | null;
+  readonly symbol: string | null;
+  readonly name: string | null;
+  readonly direction: 'up' | 'down';
+  readonly strength: number;
+  readonly headline: string;
+  readonly body: string;
+  readonly source: string;
+  readonly starts_at: string;
+  readonly ends_at: string;
+  readonly cancelled_at: string | null;
+  readonly live: boolean;
+}
+
 export interface AdminBusiness {
   readonly id: string;
   readonly symbol: string;

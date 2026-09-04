@@ -18,6 +18,8 @@ import { formatMoment, groupDigits } from '@/lib/money';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
 import { requireMember } from '@/lib/session';
 import { LiveBadge, LiveHoldingValue, LiveQuote, LiveSparkline } from './live';
+import { MarketNews } from './market-news';
+import type { MarketEvent } from './market-news';
 import { StockDetailDialog } from './stock-detail-dialog';
 import { TradeDialog } from './trade-dialog';
 
@@ -91,11 +93,14 @@ export default async function StocksPage() {
   // cost grew with the catalogue and paid that cost again on every
   // thirty-second refresh. They now arrive together and in the same round as
   // everything else.
-  const [market, portfolio, history, sparks] = await Promise.all([
+  const [market, portfolio, history, sparks, news] = await Promise.all([
     apiOrNull<{ stocks: StockRow[] }>('/api/v1/stocks'),
     apiOrNull<{ holdings: HoldingRow[] }>('/api/v1/stocks/portfolio'),
     apiOrNull<{ trades: TradeRow[] }>('/api/v1/stocks/history'),
     apiOrNull<{ series: SparkSeries[] }>(`/api/v1/stocks/sparklines?limit=${SPARK_POINTS}`),
+    // The news leaning the market (124). Absent rather than empty when the
+    // call fails: a market with no news is a normal state, not an error.
+    apiOrNull<{ events: MarketEvent[] }>('/api/v1/stocks/market-events'),
   ]);
 
   const stocks = market?.stocks ?? [];
@@ -116,6 +121,8 @@ export default async function StocksPage() {
         경제 상황에 따라 가격이 바뀌는 게임 전용 시장입니다. 실제 주식·현금·투자 상품이
         아닙니다.
       </PageHeader>
+
+      <MarketNews events={news?.events ?? []} />
 
       <section aria-labelledby="market-title" className="grid gap-3">
         <div className="flex items-center gap-3">
