@@ -1,3 +1,5 @@
+import { AdminControlCenterV2 } from './admin-control-center-v2';
+import type { MacroEconomyV2 } from './macro-v2-types';
 import { FaucetSinkGauge, type FaucetSinkStats } from './faucet-sink-gauge';
 import type { Metadata } from 'next';
 import { Amount } from '@/components/amount';
@@ -106,6 +108,7 @@ export default async function AdminEconomyPage({
   const requested = typeof params.payout === 'string' ? params.payout : '';
   const payoutId = UUID.test(requested) ? requested : null;
 
+  const macroV2Section = await section<MacroEconomyV2>('/api/v1/admin/economy/macro-v2');
   const [dashboard, alerts, autoPolicy, health, report] = await Promise.all([
     section<EconomyDashboard>('/api/v1/admin/economy'),
     section<{ alerts: EconomyAlert[] }>(`/api/v1/admin/economy/alerts?limit=${ALERT_LIMIT}`),
@@ -148,6 +151,12 @@ export default async function AdminEconomyPage({
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}
       </PageHeader>
+
+      {macroV2Section.ok && (
+        <section aria-labelledby="admin-control-center-v2">
+          <AdminControlCenterV2 initialData={macroV2Section.data} />
+        </section>
+      )}
 
       <section aria-labelledby="economy-figures" className="grid gap-3">
         <FaucetSinkGauge stats={faucetSinkStats} />

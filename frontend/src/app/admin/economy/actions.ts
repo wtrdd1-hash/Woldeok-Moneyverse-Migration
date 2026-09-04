@@ -1,5 +1,7 @@
 'use server';
 
+import { api } from '@/lib/api';
+
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
 import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
@@ -401,5 +403,91 @@ export async function setPolicyKnob(
       error,
       '항목을 바꾸지 못했어요. 지금 값이 새 범위 안에 있는지 확인해 주세요.',
     );
+  }
+}
+
+export async function toggleKillswitchAction(
+  scope: string,
+  active: boolean,
+): Promise<ActionState> {
+  try {
+    await mutate('/api/v1/admin/economy/killswitch', {
+      body: { scope, active },
+    });
+    revalidatePath('/admin/economy');
+    return {
+      status: 'ok',
+      message: `${scope} 제어 상태가 ${active ? '활성화' : '비활성화'}되었습니다.`,
+    };
+  } catch (error) {
+    return failure(error, '킬스위치/서킷브레이커 상태를 변경하지 못했습니다.');
+  }
+}
+
+export async function updateKnobsV2Action(
+  depositRateBps: number,
+  bond7dBps: number,
+  bond30dBps: number,
+  loanRateBps: number,
+): Promise<ActionState> {
+  try {
+    await mutate('/api/v1/admin/economy/knobs-v2', {
+      body: { depositRateBps, bond7dBps, bond30dBps, loanRateBps },
+    });
+    revalidatePath('/admin/economy');
+    return {
+      status: 'ok',
+      message: '경제 정책 파라미터(금리 및 수익률)가 성공적으로 갱신되었습니다.',
+    };
+  } catch (error) {
+    return failure(error, '경제 정책 파라미터를 변경하지 못했습니다.');
+  }
+}
+
+export async function inspectUserAction(userId: string): Promise<{
+  ok: boolean;
+  data?: Record<string, unknown>;
+  error?: string;
+}> {
+  try {
+    const trimmed = userId.trim();
+    if (!trimmed) return { ok: false, error: '유저 ID(UUID)를 입력해 주세요.' };
+    const data = await api<Record<string, unknown>>(`/api/v1/admin/economy/users/${encodeURIComponent(trimmed)}/inspect-v2`);
+    return { ok: true, data };
+  } catch {
+    return { ok: false, error: '유저 자산 정보를 조회하지 못했습니다.' };
+  }
+}
+
+export async function overrideUserAssetAction(
+  targetUserId: string,
+  assetType: 'wallet' | 'deposit' | 'loan',
+  amount: number,
+  direction: 'grant' | 'revoke',
+  reason: string,
+): Promise<ActionState> {
+  try {
+    if (!reason || reason.trim().length < 5) {
+      return { status: 'error', message: '사유를 최소 5자 이상 입력해 주세요.' };
+    }
+    if (amount <= 0) {
+      return { status: 'error', message: '금액은 1 WLD 이상이어야 합니다.' };
+    }
+    await mutate(`/api/v1/admin/economy/users/${encodeURIComponent(targetUserId)}/override-v2`, {
+      body: {
+        assetType,
+        amount,
+        direction,
+        reason: reason.trim(),
+        idempotencyKey: idempotencyKey(),
+      },
+    });
+    revalidatePath('/admin/economy');
+    return {
+      status: 'ok',
+      message: `성공적으로 ${direction === 'grant' ? '지급' : '회수'} 처리되었습니다.`,
+    };
+  } catch (error) {
+    return failure(error, '유저 자산 강제 조정을 처리하지 못했습니다.');
   }
 }

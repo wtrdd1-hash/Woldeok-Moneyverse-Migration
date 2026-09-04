@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import {
   BadRequestException,
   Body,
@@ -16,6 +17,8 @@ import {
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import {
   ArrayMaxSize,
+  IsBoolean,
+  IsIn,
   IsArray,
   IsInt,
   IsOptional,
@@ -143,6 +146,69 @@ export class BulkPayoutDto extends BulkPayoutPreviewDto {
  * `admin/economy/reconciliations` belongs to `ReconciliationController` in
  * the economy module; nothing here claims a path under it.
  */
+
+export class ToggleKillswitchDto {
+  @ApiProperty({ enum: ['master', 'financial', 'business', 'exchange', 'auto_balancing'] })
+  @IsIn(['master', 'financial', 'business', 'exchange', 'auto_balancing'])
+  readonly scope!: string;
+
+  @ApiProperty()
+  @IsBoolean()
+  readonly active!: boolean;
+}
+
+export class UpdateKnobsV2Dto {
+  @ApiProperty({ description: '일일 복리 이자율 bps (예: 5 = 0.05%)' })
+  @IsInt()
+  @Min(0)
+  @Max(5000)
+  readonly depositRateBps!: number;
+
+  @ApiProperty({ description: '7일 국채 만기 수익률 bps (예: 100 = 1.0%)' })
+  @IsInt()
+  @Min(0)
+  @Max(10000)
+  readonly bond7dBps!: number;
+
+  @ApiProperty({ description: '30일 국채 만기 수익률 bps (예: 500 = 5.0%)' })
+  @IsInt()
+  @Min(0)
+  @Max(20000)
+  readonly bond30dBps!: number;
+
+  @ApiProperty({ description: '대출 일일 이자율 bps (예: 10 = 0.1%)' })
+  @IsInt()
+  @Min(0)
+  @Max(10000)
+  readonly loanRateBps!: number;
+}
+
+export class OverrideUserAssetDto {
+  @ApiProperty({ enum: ['wallet', 'deposit', 'loan'] })
+  @IsIn(['wallet', 'deposit', 'loan'])
+  readonly assetType!: 'wallet' | 'deposit' | 'loan';
+
+  @ApiProperty({ minimum: 1 })
+  @IsInt()
+  @Min(1)
+  readonly amount!: number;
+
+  @ApiProperty({ enum: ['grant', 'revoke'] })
+  @IsIn(['grant', 'revoke'])
+  readonly direction!: 'grant' | 'revoke';
+
+  @ApiProperty({ minLength: 5, maxLength: 500 })
+  @IsString()
+  @MinLength(5)
+  @MaxLength(500)
+  readonly reason!: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  readonly idempotencyKey?: string;
+}
+
 @ApiTags('admin')
 @Controller('admin/economy')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
@@ -321,4 +387,76 @@ export class AdminEconomyController {
       ),
     };
   }
+
+  @Get('macro-v2')
+  @ApiOperation({ summary: 'Admin Control Center 2.0 Macro Economy statistics' })
+  async macroV2() {
+    return await this.repository().macroEconomyV2();
+  }
+
+  @Post('killswitch')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Toggle master killswitch or module circuit breaker' })
+  toggleKillswitch(@Req() request: RequestWithSession, @Body() body: ToggleKillswitchDto) {
+    return this.guarded(
+      () =>
+        this.repository().toggleKillswitch({
+          scope: body.scope,
+          active: body.active,
+          adminId: requireUserId(request),
+        }),
+      'failed to toggle killswitch',
+    );
+  }
+
+  @Post('knobs-v2')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Update economic knobs (interest, bond yields, loan rates)' })
+  updateKnobsV2(@Req() request: RequestWithSession, @Body() body: UpdateKnobsV2Dto) {
+    return this.guarded(
+      () =>
+        this.repository().updateEconomicKnobsV2({
+          depositRateBps: body.depositRateBps,
+          bond7dBps: body.bond7dBps,
+          bond30dBps: body.bond30dBps,
+          loanRateBps: body.loanRateBps,
+          adminId: requireUserId(request),
+        }),
+      'failed to update economic knobs',
+    );
+  }
+
+  @Get('users/:id/inspect-v2')
+  @ApiOperation({ summary: 'Inspect user wallet, deposits, loans, jobs, businesses' })
+  inspectUserV2(@Param('id', ParseUUIDPipe) userId: string) {
+    return this.guarded(
+      () => this.repository().inspectUserAssetsV2(userId),
+      'failed to inspect user assets',
+    );
+  }
+
+  @Post('users/:id/override-v2')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Override user asset (grant or revoke WLD in wallet, deposit, or loan)' })
+  overrideUserV2(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) userId: string,
+    @Body() body: OverrideUserAssetDto,
+  ) {
+    const idempotencyKey = body.idempotencyKey ?? randomUUID();
+    return this.guarded(
+      () =>
+        this.repository().overrideUserAssetV2({
+          targetUserId: userId,
+          assetType: body.assetType,
+          amount: body.amount,
+          direction: body.direction,
+          reason: body.reason,
+          adminId: requireUserId(request),
+          idempotencyKey,
+        }),
+      'failed to override user asset',
+    );
+  }
+
 }

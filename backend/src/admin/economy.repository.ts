@@ -438,4 +438,73 @@ export class EconomyConsoleRepository {
     };
   }
 
+
+  async macroEconomyV2(): Promise<Record<string, unknown>> {
+    const row = await queryOne<{ result: Record<string, unknown> }>(
+      this.pool,
+      `SELECT public.admin_get_macro_economy_v2() AS result`,
+    );
+    return row?.result ?? {};
+  }
+
+  async toggleKillswitch(input: {
+    readonly scope: string;
+    readonly active: boolean;
+    readonly adminId: unknown;
+  }): Promise<Record<string, unknown>> {
+    assertUuid(input.adminId, 'admin');
+    const row = await queryOne<{ result: Record<string, unknown> }>(
+      this.pool,
+      `SELECT public.admin_toggle_killswitch($1, $2, $3::uuid) AS result`,
+      [input.scope, input.active, input.adminId],
+    );
+    return row?.result ?? {};
+  }
+
+  async updateEconomicKnobsV2(input: {
+    readonly depositRateBps: number;
+    readonly bond7dBps: number;
+    readonly bond30dBps: number;
+    readonly loanRateBps: number;
+    readonly adminId: unknown;
+  }): Promise<Record<string, unknown>> {
+    assertUuid(input.adminId, 'admin');
+    const row = await queryOne<{ result: Record<string, unknown> }>(
+      this.pool,
+      `SELECT public.admin_update_economic_knobs_v2($1, $2, $3, $4, $5::uuid) AS result`,
+      [input.depositRateBps, input.bond7dBps, input.bond30dBps, input.loanRateBps, input.adminId],
+    );
+    return row?.result ?? {};
+  }
+
+  async inspectUserAssetsV2(targetUserId: unknown): Promise<Record<string, unknown>> {
+    assertUuid(targetUserId, 'target user');
+    const row = await queryOne<{ result: Record<string, unknown> }>(
+      this.pool,
+      `SELECT public.admin_inspect_user_assets_v2($1::uuid) AS result`,
+      [targetUserId],
+    );
+    return row?.result ?? {};
+  }
+
+  async overrideUserAssetV2(input: {
+    readonly targetUserId: unknown;
+    readonly assetType: string;
+    readonly amount: number;
+    readonly direction: string;
+    readonly reason: string;
+    readonly adminId: unknown;
+    readonly idempotencyKey: unknown;
+  }): Promise<Record<string, unknown>> {
+    assertUuid(input.targetUserId, 'target user');
+    assertUuid(input.adminId, 'admin');
+    assertUuid(input.idempotencyKey, 'idempotency key');
+    const row = await queryOne<{ result: Record<string, unknown> }>(
+      this.pool,
+      `SELECT public.admin_override_user_asset_v2($1::uuid, $2, $3::bigint, $4, $5, $6::uuid, $7::uuid) AS result`,
+      [input.targetUserId, input.assetType, input.amount, input.direction, input.reason, input.adminId, input.idempotencyKey],
+    );
+    return row?.result ?? {};
+  }
+
 }
