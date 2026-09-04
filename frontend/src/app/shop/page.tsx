@@ -1,66 +1,67 @@
 import type { Metadata } from 'next';
-import { Amount } from '@/components/amount';
-import { EmptyState } from '@/components/empty-state';
+import { PageHeader } from '@/components/page-header';
 import { TranslatedText as T } from '@/components/translated-text';
-import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
+import { Accent } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { publicApi } from '@/lib/api';
-import { MyReceipts } from './my-receipts';
+import { apiOrNull } from '@/lib/api';
+import { isLoggedInMember } from '@/lib/session';
+import { ShopStoreView, type CatalogItem } from './shop-store-view';
 import { PublicAdvertisement } from '@/components/public-advertisement';
-import { PurchaseControl } from './purchase-control';
 
-/**
- * The catalogue is public, as it was in the original: someone deciding
- * whether to join can see what the shop sells. That is also why the page is
- * prerendered — this is one of the pages a crawler indexes.
- */
-export const revalidate = 120;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '상점',
-  description: '월덕 머니버스 상점에 등록된 게임 아이템과 WLD 가격',
+  title: '상점 2.0 · 월덕 머니버스',
+  description: '11대 카테고리 78종 아이템과 치장품, 한정판 Limited 컬렉션 및 실시간 피팅룸',
   alternates: { canonical: '/shop' },
 };
 
-interface Item {
-  readonly itemId: string;
-  readonly name: string;
-  readonly description: string;
-  readonly price: string;
-}
-
 const PRINCIPLES = [
-  { ko: '등록된 게임 아이템만 표시', en: 'In-game items only' },
-  { ko: '결제 시 서버가 가격을 다시 확인', en: 'Server verifies prices at checkout' },
-  { ko: '현금 교환·환전 기능 없음', en: 'No cash exchange' },
+  { ko: '11개 카테고리 78종 상품 완비', en: '11 categories & 78 items' },
+  { ko: '60fps 무지연 실시간 피팅룸', en: '60fps zero-lag fitting room' },
+  { ko: '구매 시 100% 영구 소각(Sink)', en: '100% permanently burned (Sink)' },
+  { ko: '현금 교환·환전 불가', en: 'No cash exchange' },
 ];
 
 export default async function ShopPage() {
-  const data = await publicApi<{ items: Item[] }>('/api/v1/shop/items', 120);
+  const loggedIn = await isLoggedInMember();
+
+  const [catalogData, walletData, profileData] = await Promise.all([
+    apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog'),
+    loggedIn ? apiOrNull<{ cashBalance: string }>('/api/v1/wallet') : null,
+    loggedIn ? apiOrNull<{ chosenName?: string; discordUsername?: string; avatarUrl?: string }>('/api/v1/profile') : null,
+  ]);
+
+  const items = catalogData?.catalogItems || [];
+  const userBalance = walletData?.cashBalance || '0';
+  const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
+  const avatarUrl = profileData?.avatarUrl;
 
   return (
-    <div className="grid gap-8">
+    <div className="grid gap-8 pb-16">
       <div className="grid gap-4">
         <PageHeader
-          eyebrow="WOLDEOK MARKET · LEDGER"
+          eyebrow="WOLDEOK MARKET · STORE 2.0"
           title={
             <>
               <T korean="모은 WLD로," english="With earned WLD," />
               <br />
-              <Accent><T korean="우리 세계를 꾸며요." english="Customize our world." /></Accent>
+              <Accent>
+                <T korean="나만의 개성을 뽐내요." english="Express your unique identity." />
+              </Accent>
             </>
           }
         >
           <T
-            korean="상점 가격과 결제 기록은 서버 경제 원장 기준으로 처리됩니다. 실제 현금 결제나 환전 기능은 제공하지 않습니다."
-            english="Shop prices and transactions are verified by the server ledger. No real cash conversion is provided."
+            korean="상점의 모든 구매 대금은 서버 금융 원장에 의해 시스템 소각 계정(SYSTEM_SINK)으로 100% 영구 소각되어 통화 가치를 보존합니다."
+            english="All shop purchase proceeds are 100% permanently burned (SYSTEM_SINK) to preserve currency stability."
           />
         </PageHeader>
-        <ul aria-label="상점 이용 원칙" className="flex flex-wrap gap-2">
+
+        <ul aria-label="상점 2.0 원칙" className="flex flex-wrap gap-2">
           {PRINCIPLES.map((principle) => (
             <li key={principle.ko}>
-              <Badge variant="outline" className="font-normal">
+              <Badge variant="outline" className="font-normal border-amber-500/30 text-xs">
                 <T korean={principle.ko} english={principle.en} />
               </Badge>
             </li>
@@ -68,61 +69,13 @@ export default async function ShopPage() {
         </ul>
       </div>
 
-      <section aria-labelledby="catalog-title" className="grid gap-3">
-        <SectionHeader
-          eyebrow="CATALOG"
-          title={<T korean="등록된 상점 목록" english="Item Catalog" />}
-          id="catalog-title"
-          action={
-            <p className="text-xs text-muted-foreground">
-              <T korean="가격과 재고 판단은 브라우저가 아닌 서버에서 처리합니다." english="Prices and stock are verified by the server." />
-            </p>
-          }
-        />
-
-        {data === null ? (
-          <EmptyState
-            title="지금은 상점을 불러올 수 없어요."
-            description="잠시 후 다시 확인해 주세요."
-          />
-        ) : data.items.length === 0 ? (
-          <EmptyState
-            title="지금 준비 중인 상품이에요."
-            description="운영자가 실제 상품을 등록하면 이곳에 가격과 함께 표시됩니다. 임의의 상품이나 가격은 보여 주지 않아요."
-          />
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {data.items.map((item) => (
-              <Card key={item.itemId} className="justify-between">
-                <CardHeader>
-                  <Badge variant="secondary" className="w-fit font-normal">
-                    IN-GAME ITEM
-                  </Badge>
-                  <CardTitle>{item.name}</CardTitle>
-                  {item.description && <CardDescription>{item.description}</CardDescription>}
-                </CardHeader>
-                <CardContent>
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                    LISTED PRICE
-                  </p>
-                  <p className="text-xl font-medium">
-                    <Amount value={item.price} currency />
-                  </p>
-                </CardContent>
-                <CardFooter>
-                  <PurchaseControl
-                    itemId={item.itemId}
-                    itemName={item.name}
-                    price={item.price}
-                  />
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <MyReceipts />
+      {/* Main Store View */}
+      <ShopStoreView
+        items={items}
+        userBalance={userBalance}
+        currentUsername={username}
+        userAvatarUrl={avatarUrl}
+      />
 
       <PublicAdvertisement />
     </div>

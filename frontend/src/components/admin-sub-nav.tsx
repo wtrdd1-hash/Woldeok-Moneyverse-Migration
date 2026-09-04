@@ -11,6 +11,7 @@ import {
   Megaphone,
   Landmark,
   TrendingUp,
+  ShoppingBag,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
@@ -24,6 +25,7 @@ const ADMIN_TABS: readonly AdminTabItem[] = [
   { href: '/admin', label: '대시보드', icon: LayoutDashboard },
   { href: '/admin/users', label: '회원 관리', icon: Users },
   { href: '/admin/economy', label: '경제·원장', icon: Coins },
+  { href: '/admin/shop', label: '상점 관리', icon: ShoppingBag },
   { href: '/admin/logs', label: '감사 로그', icon: ShieldCheck },
   { href: '/admin/controls', label: '기능 스위치', icon: Sliders },
   { href: '/admin/content', label: '공지·갤러리', icon: Megaphone },

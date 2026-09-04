@@ -15,6 +15,7 @@ import {
   isLocale,
 } from '@/lib/locale';
 import './globals.css';
+import './cosmetics.css';
 
 /**
  * The product's own pairing, kept: a Korean serif for display and a Korean

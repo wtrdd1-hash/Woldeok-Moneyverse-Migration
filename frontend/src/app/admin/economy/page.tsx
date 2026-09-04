@@ -1,3 +1,4 @@
+import { FaucetSinkGauge, type FaucetSinkStats } from './faucet-sink-gauge';
 import type { Metadata } from 'next';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
@@ -122,6 +123,7 @@ export default async function AdminEconomyPage({
   const alertList = alerts.ok ? alerts.data.alerts : null;
   const alertProblem = problem(alerts, '알림을 불러오지 못했어요.');
   const engine = autoPolicy.ok ? autoPolicy.data : null;
+  const faucetSinkStats = await apiOrNull<FaucetSinkStats>('/api/v1/admin/economy/stats');
   const engineProblem = problem(autoPolicy, '자동 조정 엔진 상태를 불러오지 못했어요.');
 
   // Three answers, and the middle one only exists once a payout id is in the
@@ -148,7 +150,8 @@ export default async function AdminEconomyPage({
       </PageHeader>
 
       <section aria-labelledby="economy-figures" className="grid gap-3">
-        <SectionHeader eyebrow="MONEY SUPPLY" title="통화량과 발행" id="economy-figures" />
+        <FaucetSinkGauge stats={faucetSinkStats} />
+      <SectionHeader eyebrow="MONEY SUPPLY" title="통화량과 발행" id="economy-figures" />
 
         {board === null ? (
           <EmptyState title={boardProblem ?? '경제 지표를 불러오지 못했어요.'} />

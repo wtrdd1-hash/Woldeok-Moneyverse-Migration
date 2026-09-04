@@ -1,0 +1,347 @@
+/* Store 2.0 & Cosmetics - 60fps GPU-Accelerated Pure CSS Stylesheet */
+
+/* ==========================================================================
+   Rarity Borders & Glows
+   ========================================================================== */
+.rarity-common {
+  --rarity-color: #a4b0be;
+  border-color: rgba(164, 176, 190, 0.4);
+}
+.rarity-uncommon {
+  --rarity-color: #2ed573;
+  border-color: rgba(46, 213, 115, 0.5);
+  box-shadow: 0 0 10px rgba(46, 213, 115, 0.15);
+}
+.rarity-rare {
+  --rarity-color: #1e90ff;
+  border-color: rgba(30, 144, 255, 0.6);
+  box-shadow: 0 0 14px rgba(30, 144, 255, 0.25);
+}
+.rarity-epic {
+  --rarity-color: #9b59b6;
+  border-color: rgba(155, 89, 182, 0.7);
+  box-shadow: 0 0 18px rgba(155, 89, 182, 0.35);
+}
+.rarity-legendary {
+  --rarity-color: #f1c40f;
+  border-color: rgba(241, 196, 15, 0.85);
+  box-shadow: 0 0 24px rgba(241, 196, 15, 0.45);
+}
+.rarity-mythic {
+  --rarity-color: #ff4757;
+  border-color: rgba(255, 71, 87, 0.95);
+  box-shadow: 0 0 30px rgba(255, 71, 87, 0.6);
+  animation: mythicPulse 3s infinite alternate ease-in-out;
+}
+
+@keyframes mythicPulse {
+  0% {
+    box-shadow: 0 0 20px rgba(255, 71, 87, 0.4), 0 0 40px rgba(255, 0, 128, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 35px rgba(255, 71, 87, 0.8), 0 0 60px rgba(255, 215, 0, 0.4);
+  }
+}
+
+/* ==========================================================================
+   Avatar Frames (10 Frames)
+   ========================================================================== */
+.frame-neon-cyber {
+  border: 3px solid transparent;
+  background: linear-gradient(var(--card, #1a1a24), var(--card, #1a1a24)) padding-box,
+              linear-gradient(135deg, #00f0ff, #ff007f, #00f0ff) border-box;
+  box-shadow: 0 0 15px rgba(0, 240, 255, 0.5), inset 0 0 10px rgba(255, 0, 127, 0.3);
+  animation: cyberShift 4s linear infinite;
+}
+@keyframes cyberShift {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+.frame-gold-dragon {
+  border: 3px solid #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), inset 0 0 12px rgba(255, 170, 0, 0.4);
+  animation: goldBreathe 2.5s ease-in-out infinite alternate;
+}
+@keyframes goldBreathe {
+  0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
+  100% { transform: scale(1.02); box-shadow: 0 0 28px rgba(255, 215, 0, 0.85); }
+}
+
+.frame-moonlight-crystal {
+  border: 3px solid #a8e6cf;
+  box-shadow: 0 0 18px rgba(168, 230, 207, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.4);
+  animation: crystalShimmer 3s ease-in-out infinite alternate;
+}
+@keyframes crystalShimmer {
+  0% { box-shadow: 0 0 12px rgba(168, 230, 207, 0.3); }
+  100% { box-shadow: 0 0 25px rgba(255, 255, 255, 0.8), 0 0 35px rgba(168, 230, 207, 0.6); }
+}
+
+.frame-retro-pixel {
+  border: 3px dashed #48dbfb;
+  box-shadow: 0 0 10px rgba(72, 219, 251, 0.4);
+}
+
+.frame-inferno-flame {
+  border: 3px solid #ff4757;
+  box-shadow: 0 0 22px rgba(255, 71, 87, 0.7), inset 0 0 12px rgba(255, 165, 2, 0.5);
+  animation: flameFlicker 1.8s infinite ease-in-out;
+}
+@keyframes flameFlicker {
+  0%, 100% { box-shadow: 0 0 18px rgba(255, 71, 87, 0.6), inset 0 0 10px rgba(255, 165, 2, 0.4); }
+  50% { box-shadow: 0 0 28px rgba(255, 107, 129, 0.9), inset 0 0 16px rgba(255, 71, 87, 0.7); }
+}
+
+.frame-cherry-blossom {
+  border: 3px solid #ff9ff3;
+  box-shadow: 0 0 14px rgba(255, 159, 243, 0.4), inset 0 0 8px rgba(254, 202, 87, 0.3);
+}
+
+.frame-obsidian-armor {
+  border: 3px solid #57606f;
+  box-shadow: 0 0 16px rgba(112, 161, 255, 0.4), inset 0 0 14px rgba(47, 53, 66, 0.8);
+}
+
+.frame-diamond-tiara {
+  border: 3px solid #e0f7fa;
+  box-shadow: 0 0 25px rgba(128, 222, 234, 0.8), inset 0 0 15px rgba(255, 255, 255, 0.6);
+  animation: tiaraGleam 2s infinite ease-in-out;
+}
+@keyframes tiaraGleam {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.25) drop-shadow(0 0 8px #ffffff); }
+  100% { filter: brightness(1); }
+}
+
+.frame-ocean-wave {
+  border: 3px solid #00d2d3;
+  box-shadow: 0 0 16px rgba(84, 160, 255, 0.5);
+  animation: waveMotion 3s infinite ease-in-out;
+}
+@keyframes waveMotion {
+  0%, 100% { border-color: #00d2d3; box-shadow: 0 0 14px rgba(84, 160, 255, 0.4); }
+  50% { border-color: #54a0ff; box-shadow: 0 0 24px rgba(0, 210, 211, 0.8); }
+}
+
+.frame-galaxy-ring {
+  border: 3px solid transparent;
+  background: linear-gradient(var(--card, #1a1a24), var(--card, #1a1a24)) padding-box,
+              conic-gradient(from 0deg, #5f27cd, #341f97, #ff9ff3, #5f27cd) border-box;
+  box-shadow: 0 0 20px rgba(95, 39, 205, 0.6);
+  animation: ringSpin 6s linear infinite;
+}
+@keyframes ringSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Profile Backgrounds (10 Backgrounds)
+   ========================================================================== */
+.bg-cyberpunk-2099 {
+  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e) !important;
+}
+.bg-moonlight-lake {
+  background: linear-gradient(135deg, #141e30, #243b55) !important;
+}
+.bg-golden-vault {
+  background: linear-gradient(135deg, #2c2105, #5a450e, #2c2105) !important;
+  border-color: rgba(255, 215, 0, 0.4) !important;
+}
+.bg-neon-shinjuku {
+  background: linear-gradient(135deg, #2b5876, #4e4376) !important;
+}
+.bg-deep-space {
+  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%) !important;
+}
+.bg-mystic-forest {
+  background: linear-gradient(135deg, #0b221e, #134e5e, #1a3c34) !important;
+}
+.bg-retro-arcade {
+  background: linear-gradient(135deg, #1f4037, #15222e) !important;
+}
+.bg-steampunk-workshop {
+  background: linear-gradient(135deg, #2c1b18, #442a25, #221412) !important;
+}
+.bg-blazing-battlefield {
+  background: linear-gradient(135deg, #380e0e, #5a1818, #2a0b0b) !important;
+}
+.bg-pixel-dungeon {
+  background: linear-gradient(135deg, #1a1c1e, #2a2d32) !important;
+}
+
+/* ==========================================================================
+   Avatar Effects (8 Effects)
+   ========================================================================== */
+.fx-sparkle-stars::after {
+  content: '✨';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 1.2rem;
+  animation: sparkleTwinkle 2s infinite ease-in-out;
+}
+@keyframes sparkleTwinkle {
+  0%, 100% { transform: scale(0.8) rotate(0deg); opacity: 0.6; }
+  50% { transform: scale(1.3) rotate(25deg); opacity: 1; filter: drop-shadow(0 0 6px #ffd700); }
+}
+
+.fx-swirling-aura::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(0, 210, 211, 0.4) 0%, transparent 70%);
+  animation: auraPulse 2.5s infinite ease-in-out;
+  pointer-events: none;
+}
+@keyframes auraPulse {
+  0%, 100% { transform: scale(0.95); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.85; }
+}
+
+.fx-spark-lightning::after {
+  content: '⚡';
+  position: absolute;
+  bottom: -6px;
+  left: -6px;
+  font-size: 1.1rem;
+  animation: electricFlicker 1.2s infinite;
+}
+@keyframes electricFlicker {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  25% { opacity: 1; transform: scale(1.2); filter: drop-shadow(0 0 8px #fbc531); }
+  35% { opacity: 0.2; }
+  70% { opacity: 0.9; transform: scale(1.1); }
+}
+
+.fx-cherry-petals::after {
+  content: '🌸';
+  position: absolute;
+  top: -6px;
+  left: -4px;
+  font-size: 1.1rem;
+  animation: petalFloat 3s infinite ease-in-out;
+}
+@keyframes petalFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(6px) rotate(20deg); }
+}
+
+.fx-dark-flame::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(140, 122, 230, 0.5) 0%, transparent 75%);
+  animation: darkFlamePulse 2s infinite ease-in-out alternate;
+  pointer-events: none;
+}
+@keyframes darkFlamePulse {
+  0% { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(1.15); opacity: 0.9; }
+}
+
+.fx-holy-halo::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #f5cd79;
+  box-shadow: 0 0 10px #f5cd79, inset 0 0 6px #ffffff;
+  animation: haloHover 2s infinite ease-in-out;
+  pointer-events: none;
+}
+@keyframes haloHover {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-3px); }
+}
+
+.fx-neon-glitch {
+  animation: glitchFx 2.5s infinite;
+}
+@keyframes glitchFx {
+  0%, 85%, 100% { transform: translate(0); filter: none; }
+  87% { transform: translate(-2px, 1px); filter: drop-shadow(2px 0 #ff00ff); }
+  90% { transform: translate(2px, -1px); filter: drop-shadow(-2px 0 #00ffff); }
+  93% { transform: translate(0); filter: none; }
+}
+
+.fx-heart-bubble::after {
+  content: '💖';
+  position: absolute;
+  top: -8px;
+  right: -4px;
+  font-size: 1.1rem;
+  animation: heartPop 1.8s infinite ease-in-out;
+}
+@keyframes heartPop {
+  0%, 100% { transform: scale(0.9); }
+  50% { transform: scale(1.2); filter: drop-shadow(0 0 6px #ff7979); }
+}
+
+/* ==========================================================================
+   Nameplates (8 Nameplates)
+   ========================================================================== */
+.np-golden-banner {
+  border: 1px solid #ffd700;
+  background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
+  color: #ffd700 !important;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.25);
+}
+
+.np-neon-hologram {
+  border: 1px solid #00ffff;
+  background: linear-gradient(90deg, rgba(0, 255, 255, 0.15), rgba(0, 255, 255, 0.05));
+  color: #00ffff !important;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.35);
+}
+
+.np-retro-arcade {
+  border: 1px dashed #4cd137;
+  background: rgba(76, 209, 55, 0.1);
+  color: #4cd137 !important;
+}
+
+.np-dark-iron {
+  border: 1px solid #718093;
+  background: rgba(113, 128, 147, 0.15);
+  color: #dcdde1 !important;
+}
+
+.np-cyber-badge {
+  border: 1px solid #8c7ae6;
+  background: linear-gradient(90deg, rgba(140, 122, 230, 0.2), transparent);
+  color: #9c88ff !important;
+  box-shadow: 0 0 8px rgba(140, 122, 230, 0.3);
+}
+
+.np-royal-scroll {
+  border: 1px solid #e1b12c;
+  background: linear-gradient(90deg, rgba(225, 177, 44, 0.25), rgba(225, 177, 44, 0.08));
+  color: #fbc531 !important;
+}
+
+.np-fire-crest {
+  border: 1px solid #e84118;
+  background: linear-gradient(90deg, rgba(232, 65, 24, 0.2), transparent);
+  color: #ff6b81 !important;
+  box-shadow: 0 0 10px rgba(232, 65, 24, 0.35);
+}
+
+.np-diamond-plate {
+  border: 1px solid #dff9fb;
+  background: linear-gradient(90deg, rgba(223, 249, 251, 0.3), rgba(200, 240, 255, 0.1));
+  color: #ffffff !important;
+  box-shadow: 0 0 16px rgba(223, 249, 251, 0.6);
+  animation: plateShimmer 2.5s infinite alternate;
+}
+@keyframes plateShimmer {
+  0% { box-shadow: 0 0 10px rgba(223, 249, 251, 0.4); }
+  100% { box-shadow: 0 0 22px rgba(255, 255, 255, 0.85); }
+}

@@ -415,4 +415,27 @@ export class EconomyConsoleRepository {
       [actor, payoutId],
     );
   }
+
+  async faucetSinkStats(): Promise<{
+    summary: Record<string, unknown>;
+    daily: Array<Record<string, unknown>>;
+  }> {
+    const summary = await queryOne<Record<string, unknown>>(this.pool, `SELECT * FROM public.v_economy_summary`);
+    const daily = await queryRows<Record<string, unknown>>(
+      this.pool,
+      `SELECT stat_date::text AS stat_date,
+              faucet_amount::text AS faucet_amount,
+              sink_amount::text AS sink_amount,
+              tax_amount::text AS tax_amount,
+              net_change::text AS net_change,
+              sink_ratio_percent::text AS sink_ratio_percent
+       FROM public.v_daily_economy_stats
+       ORDER BY stat_date DESC LIMIT 30`
+    );
+    return {
+      summary: summary ?? {},
+      daily,
+    };
+  }
+
 }

@@ -147,6 +147,13 @@ export class BulkPayoutDto extends BulkPayoutPreviewDto {
 @Controller('admin/economy')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
 export class AdminEconomyController {
+
+  @Get('stats')
+  @ApiOperation({ summary: 'Realtime Faucet vs Sink stats and circulation summary' })
+  async stats() {
+    return await this.repository().faucetSinkStats();
+  }
+
   constructor(
     @Inject(EconomyConsoleRepository)
     private readonly economy: EconomyConsoleRepository | null,

@@ -32,12 +32,7 @@ import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
 
 /**
- * Two surfaces, on purpose.
- *
- * `items` and `purchases` are the 009 shop the current page reads. The
- * `catalog` and `holdings` routes below are the catalogue of migrations
- * 071-075, which until now nothing could reach. They share a controller
- * because they are one noun to a member, and nothing else.
+ * ShopController for Store 2.0 & Cosmetics
  */
 @ApiTags('shop')
 @Controller('shop')
@@ -57,13 +52,6 @@ export class ShopController {
     return this.catalogue;
   }
 
-  /**
-   * The three codes mean three different things to a member and would
-   * otherwise arrive as one conflict: 22023 is a request the rules refuse,
-   * 28000 is a receipt belonging to somebody else, and anything else is a
-   * fault that must reach the logs as a 500 rather than be reported as their
-   * mistake.
-   */
   private async guarded<T>(work: () => Promise<T>, conflictMessage: string): Promise<T> {
     try {
       return await work();
@@ -75,11 +63,6 @@ export class ShopController {
     }
   }
 
-  /**
-   * Deliberately unguarded: the catalogue is public in the original, and a
-   * visitor deciding whether to join can see what the shop sells. Only the
-   * purchase paths below carry a session.
-   */
   @Get('items')
   @ApiOperation({ summary: 'Items currently on sale' })
   async items() {
@@ -120,15 +103,9 @@ export class ShopController {
     }
   }
 
-  /**
-   * Guarded, unlike `items` above, because `shop_catalog_list` takes an actor
-   * and there is no anonymous caller to give it. Inventing one -- a null, a
-   * fixed uuid -- to keep the route open would put a value the schema asks
-   * for into a SECURITY DEFINER read that no member owns.
-   */
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'The catalogue with prices, stock, purchase limits and upkeep' })
+  @ApiOperation({ summary: 'The catalogue with prices, stock, purchase limits and cosmetics' })
   async catalog(@Req() request: RequestWithSession) {
     return {
       catalogItems: await this.guarded(
@@ -150,12 +127,6 @@ export class ShopController {
     };
   }
 
-  /**
-   * A missing item, an inactive one, one whose sale window has closed, one out
-   * of stock and one already held to its limit all answer 409. They are one
-   * fact to a member -- this cannot be bought now -- and the catalogue is the
-   * only place the reason belongs.
-   */
   @Post('catalog/:id/purchases')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
   @ApiOperation({ summary: 'Buy a catalogue item' })
@@ -176,6 +147,34 @@ export class ShopController {
     );
   }
 
+  @Post('holdings/:id/equip')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+  @ApiOperation({ summary: 'Equip or unequip a held cosmetic item' })
+  async equipItem(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) catalogId: string,
+    @Body() body: { slot?: string; equip?: boolean },
+  ) {
+    return this.guarded(
+      () =>
+        this.repository().equipItem(
+          requireUserId(request),
+          catalogId,
+          body.slot,
+          body.equip !== false,
+        ),
+      'failed to equip or unequip item',
+    );
+  }
+
+  @Get('cosmetics/:userId')
+  @ApiOperation({ summary: 'Get active cosmetics equipped by a user' })
+  async getCosmetics(@Param('userId', ParseUUIDPipe) userId: string) {
+    return {
+      cosmetics: await this.repository().getCosmetics(userId),
+    };
+  }
+
   @Post('holdings/:id/consumptions')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
   @ApiOperation({ summary: 'Consume one held item' })
@@ -190,18 +189,6 @@ export class ShopController {
     );
   }
 
-  /**
-   * The way out of a suspension.
-   *
-   * 104 charges the weekly upkeep on a Monday and suspends a holding whose
-   * arrears reach the four-week ceiling of specification 16.4. Without this
-   * the only way back would be to wait for the next Monday, which turns a
-   * capped debt into a week of a bought item not working -- and 16.4 is the
-   * returning-member section, where restarting promptly is the whole point.
-   *
-   * Nothing outstanding and too little cash are both 409: they are one fact
-   * to a member, and the catalogue is where the reason belongs.
-   */
   @Post('holdings/:id/upkeep-settlements')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
   @ApiOperation({ summary: 'Pay the outstanding weekly upkeep on one held item' })

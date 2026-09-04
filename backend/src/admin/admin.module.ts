@@ -1,3 +1,4 @@
+import { AdminShopController } from './admin-shop.controller';
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { SecondFactorRepository } from '../auth/second-factor.repository';
@@ -45,6 +46,7 @@ function devicePepper(config: AppConfig): string {
 @Module({
   imports: [AuthModule, StockModule],
   controllers: [
+    AdminShopController,
     AdminController,
     AdminAuditController,
     AdminControlsController,
