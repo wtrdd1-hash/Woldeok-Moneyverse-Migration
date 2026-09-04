@@ -218,7 +218,7 @@ export class ShopCatalogRepository {
   }
 
   async catalog(actor: unknown): Promise<ShopCatalogListingRow[]> {
-    const actorUserId = requireShopUuid(actor, 'authenticated user id');
+    const actorUserId = actor ? requireShopUuid(actor, 'authenticated user id') : null;
     return queryRows<ShopCatalogListingRow>(
       this.pool,
       `SELECT listing.catalog_id::text AS catalog_id,

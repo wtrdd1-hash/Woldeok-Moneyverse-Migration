@@ -3,7 +3,7 @@ import { PageHeader } from '@/components/page-header';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Accent } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
-import { apiOrNull } from '@/lib/api';
+import { apiOrNull, publicApi } from '@/lib/api';
 import { isLoggedInMember } from '@/lib/session';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
 import { PublicAdvertisement } from '@/components/public-advertisement';
@@ -27,7 +27,7 @@ export default async function ShopPage() {
   const loggedIn = await isLoggedInMember();
 
   const [catalogData, walletData, profileData] = await Promise.all([
-    apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog'),
+    loggedIn ? apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog') : publicApi<{ catalogItems: CatalogItem[] }>('/api/v1/shop/public-catalog', 60),
     loggedIn ? apiOrNull<{ cashBalance: string }>('/api/v1/wallet') : null,
     loggedIn ? apiOrNull<{ chosenName?: string; discordUsername?: string; avatarUrl?: string }>('/api/v1/profile') : null,
   ]);

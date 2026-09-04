@@ -103,6 +103,17 @@ export class ShopController {
     }
   }
 
+  @Get('public-catalog')
+  @ApiOperation({ summary: 'The catalogue with prices, stock and cosmetics for public browsing' })
+  async publicCatalog() {
+    return {
+      catalogItems: await this.guarded(
+        () => this.repository().catalog(null),
+        'the catalogue is unavailable',
+      ),
+    };
+  }
+
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
   @ApiOperation({ summary: 'The catalogue with prices, stock, purchase limits and cosmetics' })
