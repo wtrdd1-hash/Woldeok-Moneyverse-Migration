@@ -145,16 +145,23 @@ describe.skipIf(!DATABASE_URL)('the control centre against a real database', () 
         const superadmin = await roled(client, 'superadmin');
         const target = await member(client);
 
+        // A refusal aborts the transaction the fixture lives in, so each
+        // expected one is bracketed by a savepoint (as economy-console does).
+        await client.query('SAVEPOINT operator_money');
         const refused = await rejectionOf(() =>
           client.query('SELECT public.admin_override_user_asset_v2($1::uuid,$2,$3::bigint,$4,$5,$6::uuid,$7::uuid)', [
             target, 'cash', 500, 'credit_grant', 'operator trying the money lever', operator, randomUUID(),
           ]),
         );
         expect(code(refused)).toBe('42501');
+        await client.query('ROLLBACK TO SAVEPOINT operator_money');
+
+        await client.query('SAVEPOINT operator_switch');
         const refusedSwitch = await rejectionOf(() =>
           client.query('SELECT public.admin_toggle_killswitch($1, $2, $3::uuid)', ['market', true, operator]),
         );
         expect(code(refusedSwitch)).toBe('42501');
+        await client.query('ROLLBACK TO SAVEPOINT operator_switch');
 
         const key = randomUUID();
         const { rows } = await client.query<{ result: { success: boolean; new_balance: number } }>(
@@ -182,10 +189,12 @@ describe.skipIf(!DATABASE_URL)('the control centre against a real database', () 
           [operator, target],
         );
         expect(rows[0]?.result.user_id).toBe(target);
+        await client.query('SAVEPOINT operator_knobs');
         const refused = await rejectionOf(() =>
           client.query('SELECT public.admin_update_economic_knobs_v2($1,$2,$3,$4,$5::uuid)', [5, 300, 1500, 10, operator]),
         );
         expect(code(refused)).toBe('42501');
+        await client.query('ROLLBACK TO SAVEPOINT operator_knobs');
       });
     });
 
