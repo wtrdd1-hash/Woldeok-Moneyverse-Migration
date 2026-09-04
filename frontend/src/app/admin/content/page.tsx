@@ -4,7 +4,8 @@ import { Accent, PageHeader } from '@/components/page-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { requireAdminConsole } from '@/lib/session';
-import { AnnouncementEditor, PhotoEditor, PublicationEditor } from './content-forms';
+import { AnnouncementEditor, PhotoEditor, PublicationEditor, PhotoReviewQueue, type PendingPhotoItem } from './content-forms';
+import { apiOrNull } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,9 +16,37 @@ export const metadata: Metadata = {
 
 export default async function ContentAdminPage() {
   await requireAdminConsole();
+  const pendingPhotos = await apiOrNull<PendingPhotoItem[]>('/api/v1/admin/photos/submissions') ?? [];
 
   return (
     <div className="grid gap-6">
+      <section aria-labelledby="review-queue-title" className="grid gap-3">
+        <Card className="border-amber-500/30 bg-amber-500/5">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardDescription className="text-amber-500 font-semibold tracking-wider text-xs">
+                  REVIEW QUEUE
+                </CardDescription>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  회원 제출 사진 검토 대기열
+                  {pendingPhotos.length > 0 && (
+                    <span className="rounded-full bg-amber-500 text-black px-2 py-0.5 text-xs font-bold">
+                      {pendingPhotos.length}
+                    </span>
+                  )}
+                </CardTitle>
+              </div>
+            </div>
+            <CardDescription>
+              회원들이 사진 게시판에 제출한 사진들입니다. 사진 내용과 설명을 확인한 후 승인하면 즉시 전체 갤러리에 공개됩니다.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PhotoReviewQueue items={pendingPhotos} />
+          </CardContent>
+        </Card>
+      </section>
       <PageHeader
         eyebrow="PUBLISHED CONTENT CONTROL"
         title={

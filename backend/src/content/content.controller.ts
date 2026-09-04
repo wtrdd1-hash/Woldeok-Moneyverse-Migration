@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -248,6 +249,43 @@ export class ContentController {
     return this.guarded(
       () => this.service().setPhotoPublication(requireUserId(request), { photoId, ...body }),
       'invalid publication change',
+    );
+  }
+
+  @Get('admin/photos/submissions')
+  @UseGuards(
+    SessionGuard,
+    AuthenticatedGuard,
+    ConsentGuard,
+    AdminGuard,
+    AdminSessionGuard,
+  )
+  @ApiOperation({ summary: 'List pending photo submissions awaiting review' })
+  listPendingPhotos(@Req() request: RequestWithSession) {
+    return this.guarded(
+      () => this.service().listPendingPhotos(requireUserId(request)),
+      'could not list pending photos',
+    );
+  }
+
+  @Delete('admin/photos/:id')
+  @UseGuards(
+    SessionGuard,
+    AuthenticatedGuard,
+    ConsentGuard,
+    AdminGuard,
+    AdminSessionGuard,
+    CsrfGuard,
+  )
+  @ApiOperation({ summary: 'Reject and delete a draft photo submission' })
+  rejectPhoto(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) photoId: string,
+    @Body('reason') reason?: string,
+  ) {
+    return this.guarded(
+      () => this.service().rejectPhoto(requireUserId(request), photoId, reason),
+      'could not reject photo',
     );
   }
 }

@@ -141,6 +141,16 @@ export interface ContentAnnouncementReceiptRow {
   readonly replayed?: unknown;
 }
 
+export interface PendingPhotoRow {
+  readonly photo_id: string;
+  readonly storage_key: string;
+  readonly image_url: string;
+  readonly alt_text: string;
+  readonly uploaded_by: string;
+  readonly uploader_display_name: string;
+  readonly submitted_at: string;
+}
+
 export interface ContentPhotoReceiptRow {
   readonly photo_id?: unknown;
   readonly published_at?: unknown;
@@ -379,5 +389,35 @@ export class PostgresContentRepository {
       throw new Error('database did not return a photo publication receipt');
     }
     return row;
+  }
+
+  async adminListPendingPhotos(
+    actorUserId: unknown,
+    limit = 50,
+  ): Promise<readonly PendingPhotoRow[]> {
+    const actor = requireContentUuid(actorUserId, 'authenticated operator id');
+    const safeLimit = Math.min(Math.max(Number(limit) || 50, 1), 100);
+    const { rows } = await this.pool.query<PendingPhotoRow>(
+      `SELECT photo_id::text AS photo_id, storage_key, image_url, alt_text,
+              uploaded_by::text AS uploaded_by, uploader_display_name, submitted_at::text AS submitted_at
+       FROM public.admin_list_pending_photos($1, $2)`,
+      [actor, safeLimit],
+    );
+    return rows;
+  }
+
+  async adminRejectPhoto(
+    actorUserId: unknown,
+    photoId: unknown,
+    reason?: unknown,
+  ): Promise<boolean> {
+    const actor = requireContentUuid(actorUserId, 'authenticated operator id');
+    const id = requireContentUuid(photoId, 'photo id');
+    const safeReason = typeof reason === 'string' && reason.trim().length > 0 ? reason.trim().slice(0, 200) : 'operator rejected';
+    const { rows: [row] } = await this.pool.query<{ rejected: boolean }>(
+      `SELECT public.admin_reject_photo($1, $2, $3) AS rejected`,
+      [actor, id, safeReason],
+    );
+    return row?.rejected === true;
   }
 }

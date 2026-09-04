@@ -10,6 +10,7 @@ import type {
   ContentSetAnnouncementPublicationInput,
   ContentSetPhotoPublicationInput,
   ContentStatusRow,
+  PendingPhotoRow,
 } from './content.repository';
 import {
   ContentInputError,
@@ -199,6 +200,8 @@ export interface ContentRepositoryLike {
   ): Promise<ContentAnnouncementReceiptRow>;
   savePhoto(input: ContentSavePhotoInput): Promise<ContentPhotoReceiptRow>;
   setPhotoPublication(input: ContentSetPhotoPublicationInput): Promise<ContentPhotoReceiptRow>;
+  adminListPendingPhotos(actorUserId: unknown, limit?: number): Promise<readonly PendingPhotoRow[]>;
+  adminRejectPhoto(actorUserId: unknown, photoId: unknown, reason?: unknown): Promise<boolean>;
 }
 
 export interface ContentSaveAnnouncementDto {
@@ -260,6 +263,8 @@ export class ContentService {
       'setAnnouncementPublication',
       'savePhoto',
       'setPhotoPublication',
+      'adminListPendingPhotos',
+      'adminRejectPhoto',
     ];
     if (
       !(repository instanceof PostgresContentRepository) &&
@@ -435,6 +440,22 @@ export class ContentService {
         requestId: correlationId,
       }),
     );
+  }
+
+  async listPendingPhotos(
+    authenticatedOperatorId: unknown,
+    limit = 50,
+  ): Promise<readonly PendingPhotoRow[]> {
+    return this.repository.adminListPendingPhotos(authenticatedOperatorId, limit);
+  }
+
+  async rejectPhoto(
+    authenticatedOperatorId: unknown,
+    photoId: unknown,
+    reason?: unknown,
+  ): Promise<{ rejected: boolean }> {
+    const rejected = await this.repository.adminRejectPhoto(authenticatedOperatorId, photoId, reason);
+    return { rejected };
   }
 }
 

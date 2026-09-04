@@ -5,12 +5,13 @@ import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
 import { PublicAdvertisement } from '@/components/public-advertisement';
+import { TranslatedText as T } from '@/components/translated-text';
 
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: '사진',
-  description: '월덕 머니버스 커뮤니티 사진',
+  title: '사진 | Gallery',
+  description: '월덕 머니버스 커뮤니티 사진 | Woldeok Moneyverse Community Gallery',
   alternates: { canonical: '/gallery' },
 };
 
@@ -31,58 +32,58 @@ export default async function GalleryPage() {
         eyebrow="COMMUNITY ARCHIVE"
         title={
           <>
-            함께 만든
+            <T korean="함께 만든" english="Scenes of Our World," />
             <br />
-            <Accent>우리 세계의 장면.</Accent>
+            <Accent>
+              <T korean="우리 세계의 장면." english="Created Together." />
+            </Accent>
           </>
         }
       >
-        회원이 보낸 사진과 운영자가 올린 사진을 함께 모읍니다. 어느 쪽이든 운영자가 검토한
-        뒤에만 공개해요.
+        <T
+          korean="회원이 보낸 사진과 운영자가 올린 사진을 함께 모읍니다. 어느 쪽이든 운영자가 검토한 뒤에만 공개해요."
+          english="Photos submitted by members and posted by operators are gathered here. Every photo is published only after operator review."
+        />
       </PageHeader>
 
       <section aria-labelledby="gallery-title" className="grid gap-3">
         <SectionHeader
           eyebrow="PUBLISHED GALLERY"
-          title="사진 모음"
+          title={<T korean="사진 모음" english="Photo Gallery" />}
           id="gallery-title"
           action={
-            // Shown to everybody, including signed-out readers: the page is
-            // cached for five minutes, so branching on the session here would
-            // serve one visitor's answer to the next. The destination asks for
-            // a session itself.
             <Link href="/gallery/submit" className="shrink-0 text-sm font-extrabold text-clay-ink">
-              사진 보내기 →
+              <T korean="사진 보내기 →" english="Submit a photo →" />
             </Link>
           }
         />
 
         {data === null ? (
-          <EmptyState title="지금은 사진을 불러올 수 없어요." />
+          <EmptyState title={<T korean="지금은 사진을 불러올 수 없어요." english="Unable to load photos right now." />} />
         ) : photos.length === 0 ? (
           <EmptyState
-            title="아직 공개된 사진이 없어요."
-            description="운영자가 검토해 게시한 사진이 이곳에 나타납니다."
+            title={<T korean="아직 공개된 사진이 없어요." english="No published photos yet." />}
+            description={
+              <T
+                korean="운영자가 검토해 게시한 사진이 이곳에 나타납니다."
+                english="Photos reviewed and approved by operators will appear here."
+              />
+            }
           />
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {photos.map((photo) => (
               <figure key={photo.photoId} className="overflow-hidden rounded-lg border bg-card">
-                {/*
-                  A plain <img>, not next/image. These files are served by the
-                  API from a private store behind an authorisation check, and
-                  the optimiser would need to fetch and cache them itself —
-                  which would put an unreviewed photo into a public cache the
-                  moment its publication was revoked.
-                */}
-                <img
-                  src={photo.imageUrl}
-                  alt={photo.altText}
-                  loading="lazy"
-                  decoding="async"
-                  referrerPolicy="no-referrer"
-                  className="aspect-video w-full object-cover"
-                />
+                <div className="relative aspect-video w-full overflow-hidden bg-black/40 flex items-center justify-center">
+                  <img
+                    src={photo.imageUrl}
+                    alt={photo.altText}
+                    loading="lazy"
+                    decoding="async"
+                    referrerPolicy="no-referrer"
+                    className="max-h-full max-w-full object-contain transition-transform duration-300 hover:scale-105"
+                  />
+                </div>
                 <figcaption className="grid gap-0.5 p-3">
                   <span className="text-sm">{photo.altText}</span>
                   {photo.publishedAt && (

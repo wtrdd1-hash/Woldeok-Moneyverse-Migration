@@ -1,6 +1,9 @@
 'use client';
 
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useActionState, useState } from 'react';
+import { TranslatedText as T } from '@/components/translated-text';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
@@ -220,5 +223,137 @@ export function PublicationEditor() {
       <SubmitButton className="w-fit">상태 기록하기 →</SubmitButton>
       <ActionAlert state={state} />
     </form>
+  );
+}
+
+import { approvePhotoAction, rejectPhotoAction } from './actions';
+import { Badge } from '@/components/ui/badge';
+import { formatMoment } from '@/lib/money';
+import { Check, Trash2 } from 'lucide-react';
+
+export interface PendingPhotoItem {
+  readonly photo_id: string;
+  readonly storage_key: string;
+  readonly image_url: string;
+  readonly alt_text: string;
+  readonly uploaded_by: string;
+  readonly uploader_display_name: string;
+  readonly submitted_at: string;
+}
+
+export function PhotoReviewQueue({
+  items,
+}: {
+  readonly items: readonly PendingPhotoItem[];
+}) {
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ id: string; text: string; error?: boolean } | null>(null);
+
+  if (!items || items.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+        <T
+          korean="현재 검토 대기 중인 회원의 제출 사진이 없습니다. 모든 사진이 검토 완료되었습니다."
+          english="No pending photo submissions to review. All submissions have been processed."
+        />
+      </div>
+    );
+  }
+
+  const handleApprove = async (photoId: string) => {
+    setLoadingId(photoId);
+    setMessage(null);
+    try {
+      const res = await approvePhotoAction(photoId);
+      if (res.status === 'error') {
+        setMessage({ id: photoId, text: res.message || '승인하지 못했습니다.', error: true });
+      } else {
+        setMessage({ id: photoId, text: '성공적으로 승인 및 공개되었습니다!' });
+      }
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const handleReject = async (photoId: string) => {
+    if (!confirm('정말 이 사진을 반려하고 삭제하시겠습니까?')) return;
+    setLoadingId(photoId);
+    setMessage(null);
+    try {
+      const res = await rejectPhotoAction(photoId);
+      if (res.status === 'error') {
+        setMessage({ id: photoId, text: res.message || '반려하지 못했습니다.', error: true });
+      } else {
+        setMessage({ id: photoId, text: '사진이 정상적으로 반려되었습니다.' });
+      }
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      {items.map((item) => (
+        <Card key={item.photo_id} className="overflow-hidden border bg-card/60 backdrop-blur-sm">
+          <div className="relative aspect-video w-full overflow-hidden bg-black/50 flex items-center justify-center">
+            <img
+              src={item.image_url}
+              alt={item.alt_text}
+              className="max-h-full max-w-full object-contain"
+              loading="lazy"
+            />
+          </div>
+          <CardContent className="grid gap-2.5 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-500 border-amber-500/30">
+                <T korean="검토 대기중" english="Pending Review" />
+              </Badge>
+              <span className="text-[0.75rem] text-muted-foreground">
+                {formatMoment(item.submitted_at)}
+              </span>
+            </div>
+
+            <div className="grid gap-1">
+              <p className="font-semibold text-sm line-clamp-2" title={item.alt_text}>
+                {item.alt_text}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                <T korean="제출자:" english="Uploader:" />{' '}
+                <span className="text-foreground font-medium">{item.uploader_display_name}</span>{' '}
+                <code className="text-[0.65rem] font-mono">({item.uploaded_by.slice(0, 8)}...)</code>
+              </p>
+            </div>
+
+            {message?.id === item.photo_id && (
+              <p className={`text-xs ${message.error ? 'text-destructive' : 'text-emerald-500 font-medium'}`}>
+                {message.text}
+              </p>
+            )}
+
+            <div className="mt-2 flex items-center gap-2 pt-2 border-t">
+              <Button
+                size="sm"
+                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium"
+                disabled={loadingId === item.photo_id}
+                onClick={() => handleApprove(item.photo_id)}
+              >
+                <Check className="mr-1.5 h-4 w-4" />
+                <T korean="승인 (공개)" english="Approve (Publish)" />
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                className="flex-1"
+                disabled={loadingId === item.photo_id}
+                onClick={() => handleReject(item.photo_id)}
+              >
+                <Trash2 className="mr-1.5 h-4 w-4" />
+                <T korean="반려" english="Reject" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
   );
 }
