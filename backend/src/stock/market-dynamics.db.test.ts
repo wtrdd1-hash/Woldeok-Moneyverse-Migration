@@ -231,6 +231,79 @@ describe.skipIf(!DATABASE_URL)('the market dynamics against a real database', ()
       });
     });
 
+    /** An active member with cash: the shop test's fixture, for the same reason it exists there. */
+    const member = async (client: PoolClient, funds: number): Promise<string> => {
+      const id = randomUUID();
+      await client.query('INSERT INTO public.users (id) VALUES ($1)', [id]);
+      await client.query(
+        `INSERT INTO public.accounts (account_type, owner_user_id) VALUES ('USER_CASH', $1), ('USER_BANK', $1)`,
+        [id],
+      );
+      await client.query(
+        `INSERT INTO public.account_balances (account_id)
+         SELECT account_row.id FROM public.accounts AS account_row WHERE account_row.owner_user_id = $1`,
+        [id],
+      );
+      const { rows } = await client.query<{ cash: string; mint: string }>(
+        `SELECT
+           (SELECT id::text FROM public.accounts WHERE owner_user_id = $1 AND account_type = 'USER_CASH') AS cash,
+           (SELECT id::text FROM public.accounts WHERE system_key = 'mint') AS mint`,
+        [id],
+      );
+      await client.query(
+        `SELECT public.economy_post_transaction(
+           $1, 'ADMIN_ADJUSTMENT', $2, NULL,
+           jsonb_build_array(
+             jsonb_build_object('accountId', $3::uuid, 'amount', $5::bigint, 'direction', 'credit'),
+             jsonb_build_object('accountId', $4::uuid, 'amount', $5::bigint, 'direction', 'debit')
+           ),
+           'test.funded', '{}'::jsonb)`,
+        [randomUUID(), id, rows[0]?.mint, rows[0]?.cash, funds],
+      );
+      return id;
+    };
+
+    const cash = async (client: PoolClient, actor: string): Promise<bigint> => {
+      const { rows } = await client.query<{ available_amount: string }>(
+        `SELECT balance_row.available_amount::text
+         FROM public.account_balances AS balance_row
+         JOIN public.accounts AS account_row ON account_row.id = balance_row.account_id
+         WHERE account_row.owner_user_id = $1 AND account_row.account_type = 'USER_CASH'::public.account_type`,
+        [actor],
+      );
+      return BigInt(rows[0]?.available_amount ?? '0');
+    };
+
+    /**
+     * The order fills at the price it moved to, so a round trip costs money.
+     * Filling at the quoted price and moving afterwards would let a member
+     * buy three percent of the float at 100, sell it at the 105 that buy
+     * produced, and keep the difference from the sink -- without limit.
+     */
+    it('makes the taker pay the impact, so buying and selling back loses', async () => {
+      await rolledBack(async (client) => {
+        const stock = await listing(client, 100);
+        const actor = await member(client, 10_000_000);
+        const before = await cash(client, actor);
+
+        // 3.33 % of the default million-share float: past the 5 % cap.
+        const bought = await client.query<{ unit_price: string; current_price: string }>(
+          'SELECT unit_price::text, current_price::text FROM public.stock_trade($1,$2,$3,$4,$5)',
+          [randomUUID(), actor, stock, 'buy', 33_334],
+        );
+        expect(bought.rows[0]).toEqual({ unit_price: '105', current_price: '105' });
+
+        const sold = await client.query<{ unit_price: string; current_price: string }>(
+          'SELECT unit_price::text, current_price::text FROM public.stock_trade($1,$2,$3,$4,$5)',
+          [randomUUID(), actor, stock, 'sell', 33_334],
+        );
+        // 105 pushed down five percent, rounded: the seller gets 100, not 105.
+        expect(sold.rows[0]).toEqual({ unit_price: '100', current_price: '100' });
+
+        expect((await cash(client, actor)) < before).toBe(true);
+      });
+    });
+
     it('does not move while the circuit breaker is thrown, and refuses a trade', async () => {
       await rolledBack(async (client) => {
         const stock = await listing(client, 50_000);

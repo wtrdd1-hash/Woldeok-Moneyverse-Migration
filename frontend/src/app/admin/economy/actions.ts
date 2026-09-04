@@ -6,6 +6,9 @@ import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
 import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
 import { STEP_UP_CODE, spendSecondFactorCode } from '../step-up';
+
+/** The refusal every high-risk action gives for a missing or malformed code. */
+const CODE_REQUIRED = { status: 'error', message: '실행 직전 인증 코드 6자리를 입력해 주세요.' } as const;
 import {
   acknowledgeMessage,
   autoPolicyRunMessage,
@@ -406,11 +409,21 @@ export async function setPolicyKnob(
   }
 }
 
+/**
+ * The three levers of the control centre are high-risk writes: the kill
+ * switch stops the whole economy, the knobs reprice every deposit and loan,
+ * and the override moves a member's WLD. Each spends an authenticator code
+ * in the same call, like every other high-risk act in this file, so the code
+ * typed beside the lever is what authorises that lever and nothing else.
+ */
 export async function toggleKillswitchAction(
   scope: string,
   active: boolean,
+  code: string,
 ): Promise<ActionState> {
+  if (!STEP_UP_CODE.test(code)) return CODE_REQUIRED;
   try {
+    await spendSecondFactorCode(code);
     await mutate('/api/v1/admin/economy/killswitch', {
       body: { scope, active },
     });
@@ -429,8 +442,11 @@ export async function updateKnobsV2Action(
   bond7dBps: number,
   bond30dBps: number,
   loanRateBps: number,
+  code: string,
 ): Promise<ActionState> {
+  if (!STEP_UP_CODE.test(code)) return CODE_REQUIRED;
   try {
+    await spendSecondFactorCode(code);
     await mutate('/api/v1/admin/economy/knobs-v2', {
       body: { depositRateBps, bond7dBps, bond30dBps, loanRateBps },
     });
@@ -465,6 +481,7 @@ export async function overrideUserAssetAction(
   amount: number,
   direction: 'grant' | 'revoke',
   reason: string,
+  code: string,
 ): Promise<ActionState> {
   try {
     if (!reason || reason.trim().length < 5) {
@@ -473,6 +490,8 @@ export async function overrideUserAssetAction(
     if (amount <= 0) {
       return { status: 'error', message: '금액은 1 WLD 이상이어야 합니다.' };
     }
+    if (!STEP_UP_CODE.test(code)) return CODE_REQUIRED;
+    await spendSecondFactorCode(code);
     await mutate(`/api/v1/admin/economy/users/${encodeURIComponent(targetUserId)}/override-v2`, {
       body: {
         assetType,

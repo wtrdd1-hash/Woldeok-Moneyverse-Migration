@@ -477,12 +477,14 @@ export class EconomyConsoleRepository {
     return row?.result ?? {};
   }
 
-  async inspectUserAssetsV2(targetUserId: unknown): Promise<Record<string, unknown>> {
+  /** Takes the actor: the function (125) performs the operator check itself. */
+  async inspectUserAssetsV2(actorUserId: unknown, targetUserId: unknown): Promise<Record<string, unknown>> {
+    assertUuid(actorUserId, 'actor');
     assertUuid(targetUserId, 'target user');
     const row = await queryOne<{ result: Record<string, unknown> }>(
       this.pool,
-      `SELECT public.admin_inspect_user_assets_v2($1::uuid) AS result`,
-      [targetUserId],
+      `SELECT public.admin_inspect_user_assets_v2($1::uuid, $2::uuid) AS result`,
+      [actorUserId, targetUserId],
     );
     return row?.result ?? {};
   }

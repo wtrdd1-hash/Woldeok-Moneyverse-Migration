@@ -38,6 +38,12 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
   const [overrideReason, setOverrideReason] = useState<string>('운영팀 정기 밸런스 조정');
   const [overrideLoading, setOverrideLoading] = useState(false);
 
+  // The authenticator code for the three levers below. Asked for once, at the
+  // top, because the three are on one screen; the API gives a spent code two
+  // minutes, so one entry covers a burst of related changes and no more.
+  const [stepUpCode, setStepUpCode] = useState('');
+  const codeReady = /^[0-9]{6}$/.test(stepUpCode);
+
   const formatNumber = (num: number | string | undefined | null) => {
     if (num === undefined || num === null) return '0';
     return Number(num).toLocaleString('ko-KR');
@@ -51,7 +57,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
       }
     }
     startTransition(async () => {
-      const res = await toggleKillswitchAction(scope, next);
+      const res = await toggleKillswitchAction(scope, next, stepUpCode);
       if (res.status === 'ok') {
         setStatusMessage({ type: 'ok', text: res.message || '성공적으로 처리되었습니다.' });
         setData(prev => {
@@ -72,7 +78,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
   const handleUpdateKnobs = (e: React.FormEvent) => {
     e.preventDefault();
     startTransition(async () => {
-      const res = await updateKnobsV2Action(depositRateBps, bond7dBps, bond30dBps, loanRateBps);
+      const res = await updateKnobsV2Action(depositRateBps, bond7dBps, bond30dBps, loanRateBps, stepUpCode);
       if (res.status === 'ok') {
         setStatusMessage({ type: 'ok', text: res.message || '성공적으로 처리되었습니다.' });
         setData(prev => ({
@@ -133,6 +139,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
         overrideAmount,
         overrideDirection,
         overrideReason,
+        stepUpCode,
       );
       if (res.status === 'ok') {
         setStatusMessage({ type: 'ok', text: res.message || '성공적으로 처리되었습니다.' });
@@ -155,6 +162,28 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
 
   return (
     <div className="space-y-8">
+      {/* 0. The step-up. Every lever on this screen is a high-risk write. */}
+      <div className="flex flex-col gap-2 rounded-2xl border border-primary/40 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="grid gap-0.5">
+          <label htmlFor="control-center-code" className="text-sm font-bold">인증 앱 코드</label>
+          <p className="text-xs text-muted-foreground">
+            킬스위치·서킷브레이커, 금리 파라미터, 자산 강제 조정은 코드를 입력한 뒤에만 실행돼요. 한 번 쓴 코드는 2분 동안 유효합니다.
+          </p>
+        </div>
+        <input
+          id="control-center-code"
+          type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          pattern="[0-9]{6}"
+          maxLength={6}
+          value={stepUpCode}
+          onChange={e => setStepUpCode(e.target.value.replace(/\D/g, ''))}
+          placeholder="6자리"
+          className="h-11 w-full rounded-xl border bg-card px-3 font-mono text-sm sm:w-32"
+        />
+      </div>
+
       {/* 1. Global Emergency & Circuit Breaker Banner */}
       <div className={`p-6 rounded-2xl border transition-all duration-300 shadow-xl ${
         policy.master_killswitch_active
@@ -182,7 +211,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             {/* Master Killswitch Button */}
             <button
               type="button"
-              disabled={isPending}
+              disabled={isPending || !codeReady}
               onClick={() => handleToggleKillswitch('master', policy.master_killswitch_active)}
               className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-lg active:scale-95 disabled:opacity-50 ${
                 policy.master_killswitch_active
@@ -204,7 +233,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             </div>
             <button
               type="button"
-              disabled={isPending}
+              disabled={isPending || !codeReady}
               onClick={() => handleToggleKillswitch('financial', policy.banking_circuit_broken)}
               className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${
                 policy.banking_circuit_broken ? 'bg-rose-600 text-white' : 'bg-muted text-foreground hover:bg-muted/70'
@@ -221,7 +250,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             </div>
             <button
               type="button"
-              disabled={isPending}
+              disabled={isPending || !codeReady}
               onClick={() => handleToggleKillswitch('business', policy.businesses_circuit_broken)}
               className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${
                 policy.businesses_circuit_broken ? 'bg-rose-600 text-white' : 'bg-muted text-foreground hover:bg-muted/70'
@@ -238,7 +267,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             </div>
             <button
               type="button"
-              disabled={isPending}
+              disabled={isPending || !codeReady}
               onClick={() => handleToggleKillswitch('exchange', policy.market_circuit_broken)}
               className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${
                 policy.market_circuit_broken ? 'bg-rose-600 text-white' : 'bg-muted text-foreground hover:bg-muted/70'
@@ -255,7 +284,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             </div>
             <button
               type="button"
-              disabled={isPending}
+              disabled={isPending || !codeReady}
               onClick={() => handleToggleKillswitch('auto_balancing', policy.auto_balancing_active)}
               className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${
                 policy.auto_balancing_active ? 'bg-cyan-600 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/70'
@@ -486,7 +515,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
           <div className="flex justify-end">
             <button
               type="submit"
-              disabled={isPending}
+              disabled={isPending || !codeReady}
               className="px-6 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm transition-all shadow-lg shadow-cyan-950/50 active:scale-95 disabled:opacity-50"
             >
               {isPending ? '정책 파라미터 적용 중...' : '경제 정책 파라미터 즉시 적용'}
@@ -690,7 +719,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
                 <div className="flex justify-end">
                   <button
                     type="submit"
-                    disabled={overrideLoading}
+                    disabled={overrideLoading || !codeReady}
                     className={`px-6 py-2.5 rounded-xl text-white font-semibold text-sm transition-all shadow-lg active:scale-95 disabled:opacity-50 ${
                       overrideDirection === 'grant'
                         ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-950/50'
