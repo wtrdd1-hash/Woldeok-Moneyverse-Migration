@@ -26,7 +26,7 @@ import type { AppConfig } from '../core/config';
 import { CONFIG } from '../core/config';
 import { authorizationUrl, createOAuthChallenge } from './crypto';
 import type { OAuthProvider } from './crypto';
-import { clearSessionCookie, sessionCookie } from './cookies';
+import { clearSessionCookie, sessionCookie, sessionToken } from './cookies';
 import { AuthenticatedGuard } from './guards/authenticated.guard';
 import { ConsentGuard } from './guards/consent.guard';
 import { CsrfGuard } from './guards/csrf.guard';
@@ -123,8 +123,15 @@ export class AuthController {
   @Get('auth/session')
   @UseGuards(SessionGuard, AuthenticatedGuard)
   @ApiOperation({ summary: 'CSRF token for the current session' })
-  async session(@Req() request: RequestWithSession) {
+  async session(
+    @Req() request: RequestWithSession,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     const csrfToken = await this.store().rotateCsrf(requireSession(request).id);
+    const token = sessionToken(request.headers, this.config);
+    if (token) {
+      response.setHeader('set-cookie', sessionCookie(token, this.config));
+    }
     return { csrfToken };
   }
 

@@ -91,8 +91,8 @@ export function PrivacyDocument() {
       <table>
       <thead><tr><th scope="col">이름</th><th scope="col">목적</th><th scope="col">보유 기간</th><th scope="col">보호 방식</th></tr></thead>
       <tbody>
-      <tr><th scope="row">mv_session</th><td>서버 세션 식별, 로그인과 보안 유지</td><td>최대 8시간 또는 로그아웃·폐기 시까지</td><td>HttpOnly, Secure, SameSite 속성 적용</td></tr>
-      <tr><th scope="row">CSRF 확인값</th><td>상태 변경 요청 위조 방지</td><td>최대 8시간 또는 세션 폐기 시까지</td><td>쿠키로 장기 저장하지 않고, 로그인·지갑 화면에서 전달한 값을 서버에서 검증</td></tr>
+      <tr><th scope="row">mv_session</th><td>서버 세션 식별, 로그인과 보안 유지</td><td>최대 30일(활동 시 자동 연장) 또는 로그아웃·폐기 시까지</td><td>HttpOnly, Secure, SameSite 속성 적용</td></tr>
+      <tr><th scope="row">CSRF 확인값</th><td>상태 변경 요청 위조 방지</td><td>최대 30일 또는 세션 폐기 시까지</td><td>쿠키로 장기 저장하지 않고, 로그인·지갑 화면에서 전달한 값을 서버에서 검증</td></tr>
       </tbody>
       </table>
       </div>

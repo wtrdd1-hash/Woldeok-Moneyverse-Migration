@@ -4,7 +4,7 @@ import type { Queryable } from '../core/db';
 import { queryOne } from '../core/db';
 import { randomToken, sha256 } from './crypto';
 
-const SESSION_INTERVAL = "interval '8 hours'";
+const SESSION_INTERVAL = "interval '30 days'";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -175,7 +175,12 @@ export class SessionRepository {
     const csrfToken = randomToken();
     const session = await queryOne<IdRow>(
       this.pool,
-      `UPDATE auth_sessions SET csrf_hash=$2
+      `UPDATE auth_sessions
+       SET csrf_hash=$2,
+           expires_at = CASE
+             WHEN user_id IS NOT NULL THEN now() + ${SESSION_INTERVAL}
+             ELSE expires_at
+           END
        WHERE id=$1 AND revoked_at IS NULL AND expires_at>now()
        RETURNING id`,
       [sessionId, sha256(csrfToken)],

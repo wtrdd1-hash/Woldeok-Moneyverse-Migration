@@ -75,8 +75,8 @@ describe('sessionCookie', () => {
     expect(header).toContain(`Max-Age=${SESSION_MAX_AGE}`);
   });
 
-  it('expires the session after eight hours', () => {
-    expect(SESSION_MAX_AGE).toBe(8 * 60 * 60);
+  it('expires the session after thirty days', () => {
+    expect(SESSION_MAX_AGE).toBe(30 * 24 * 60 * 60);
   });
 
   // A browser silently drops a __Host--named cookie that lacks Secure, with

@@ -1,6 +1,6 @@
 export const AUTH_COOKIE = 'mv_session';
 export const HOST_PREFIXED_AUTH_COOKIE = `__Host-${AUTH_COOKIE}`;
-export const SESSION_MAX_AGE = 8 * 60 * 60;
+export const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days in seconds (2,592,000s)
 
 interface CookieSecurity {
   readonly cookieSecure: boolean;
