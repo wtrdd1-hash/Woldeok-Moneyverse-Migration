@@ -214,8 +214,8 @@ export class WorkRepository {
     assertUuid(actor, 'actor');
     return queryOne(
       this.pool,
-      `SELECT job_type::text, level, current_experience::text, is_active
-       FROM public.job_switch_active($1, $2::public.work_job_type)`,
+      `SELECT job_type::text, level, experience::text AS current_experience, is_active
+       FROM public.job_switch_active($1, $2::text)`,
       [actor, jobType],
     );
   }
