@@ -98,7 +98,7 @@ export default async function AdminEconomyPage({
 }: {
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requireAdminConsole();
+  await requireAdminConsole(AREA.href);
   const params = await searchParams;
 
   // A payout id arrives from the link the confirmation leaves behind. The

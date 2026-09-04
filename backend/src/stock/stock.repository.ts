@@ -223,6 +223,68 @@ export interface StockCorporateActionInput {
   readonly idempotencyKey?: unknown;
 }
 
+/** public.stock_market_events_active() (124): what is in the news right now. */
+export interface StockMarketEventRow {
+  readonly id: string;
+  /** Null is the whole market. */
+  readonly stock_id: string | null;
+  readonly symbol: string | null;
+  readonly name: string | null;
+  readonly direction: 'up' | 'down';
+  readonly strength: number;
+  readonly headline: string;
+  readonly body: string;
+  readonly source: string;
+  readonly starts_at: Date;
+  readonly ends_at: Date;
+}
+
+/** public.stock_market_events_admin_list() (124): the recent history, ended ones included. */
+export interface StockMarketEventAdminRow extends StockMarketEventRow {
+  readonly cancelled_at: Date | null;
+  readonly live: boolean;
+}
+
+/**
+ * public.stock_market_dynamics_admin() (124). The basis-point figures are
+ * numerics and cross as strings; they are read, never summed.
+ */
+export interface StockDynamicsRow {
+  readonly stock_id: string;
+  readonly symbol: string;
+  readonly name: string;
+  readonly current_price: WldAmount;
+  readonly fair_value: WldAmount;
+  readonly trend_bps: string;
+  readonly vol_bps: string;
+  readonly market_trend_bps: string;
+  readonly live_events: number;
+}
+
+export interface StockMarketEventPublishInput {
+  readonly userId: unknown;
+  /** Absent or null for the whole market. */
+  readonly stockId?: unknown;
+  readonly direction: unknown;
+  readonly strength: unknown;
+  readonly hours: unknown;
+  readonly headline: unknown;
+  readonly body?: unknown;
+  readonly source?: unknown;
+  readonly idempotencyKey?: unknown;
+}
+
+export interface StockMarketEventCancelInput {
+  readonly userId: unknown;
+  readonly eventId: unknown;
+  readonly idempotencyKey?: unknown;
+}
+
+export interface StockMarketEventReceipt {
+  readonly event_id: string;
+  readonly replayed: boolean;
+}
+
 @Injectable()
 export class PostgresStockRepository {
   readonly pool: Queryable;
@@ -542,5 +604,103 @@ export class PostgresStockRepository {
       [idempotencyKey, userId, stockId],
     );
     return row ?? { deleted: false };
+  }
+
+  /** The news that is running, for the market screen. */
+  async marketEvents(): Promise<readonly StockMarketEventRow[]> {
+    return queryRows<StockMarketEventRow>(
+      this.pool,
+      'SELECT id::text, stock_id::text, symbol, name, direction, strength, headline, body, source, starts_at, ends_at FROM public.stock_market_events_active()',
+    );
+  }
+
+  /** The recent history for the console; the function performs the operator check. */
+  async adminMarketEvents(
+    actorUserId: unknown,
+    limit: unknown = 50,
+  ): Promise<readonly StockMarketEventAdminRow[]> {
+    uuid(actorUserId, 'actor user id');
+    const n =
+      typeof limit === 'number' && Number.isSafeInteger(limit) ? Math.min(200, Math.max(1, limit)) : 50;
+    return queryRows<StockMarketEventAdminRow>(
+      this.pool,
+      'SELECT id::text, stock_id::text, symbol, name, direction, strength, headline, body, source, starts_at, ends_at, cancelled_at, live FROM public.stock_market_events_admin_list($1,$2)',
+      [actorUserId, n],
+    );
+  }
+
+  /** Each stock's trend, volatility and fair value beside its price. */
+  async adminDynamics(actorUserId: unknown): Promise<readonly StockDynamicsRow[]> {
+    uuid(actorUserId, 'actor user id');
+    return queryRows<StockDynamicsRow>(
+      this.pool,
+      'SELECT stock_id::text, symbol, name, current_price::text AS current_price, fair_value::text AS fair_value, trend_bps::text AS trend_bps, vol_bps::text AS vol_bps, market_trend_bps::text AS market_trend_bps, live_events FROM public.stock_market_dynamics_admin($1)',
+      [actorUserId],
+    );
+  }
+
+  /**
+   * Publishes news. The bounds repeat the function's so a bad request is a
+   * 400 from this process rather than a 22023 translated back out; the
+   * function checks them again, and the operator role, on its own.
+   */
+  async publishMarketEvent({
+    userId,
+    stockId = null,
+    direction,
+    strength,
+    hours,
+    headline,
+    body = '',
+    source = 'operator',
+    idempotencyKey = randomUUID(),
+  }: StockMarketEventPublishInput): Promise<StockMarketEventReceipt> {
+    uuid(userId, 'user id');
+    uuid(idempotencyKey, 'idempotency key');
+    if (stockId !== null && stockId !== undefined) uuid(stockId, 'stock id');
+    if (direction !== 'up' && direction !== 'down') {
+      throw new StockInputError('direction must be up or down');
+    }
+    if (typeof strength !== 'number' || !Number.isSafeInteger(strength) || strength < 1 || strength > 3) {
+      throw new StockInputError('strength must be 1, 2 or 3');
+    }
+    if (typeof hours !== 'number' || !Number.isSafeInteger(hours) || hours < 1 || hours > 168) {
+      throw new StockInputError('hours must be between 1 and 168');
+    }
+    const title = typeof headline === 'string' ? headline.trim() : '';
+    if (title.length < 2 || title.length > 120) {
+      throw new StockInputError('headline must be 2 to 120 characters');
+    }
+    const text = typeof body === 'string' ? body.trim() : '';
+    if (text.length > 2000) throw new StockInputError('body must be at most 2000 characters');
+    if (source !== 'operator' && source !== 'ai' && source !== 'system') {
+      throw new StockInputError('unknown event source');
+    }
+    const row = await queryOne<StockMarketEventReceipt>(
+      this.pool,
+      'SELECT event_id::text AS event_id, replayed FROM public.stock_market_event_publish($1,$2,$3,$4,$5,$6,$7,$8,$9)',
+      [idempotencyKey, userId, stockId ?? null, direction, strength, hours, title, text, source],
+    );
+    if (!row?.event_id || typeof row.replayed !== 'boolean') {
+      throw new Error('database did not return a market event receipt');
+    }
+    return row;
+  }
+
+  /** Ends an event now. False for one already over. */
+  async cancelMarketEvent({
+    userId,
+    eventId,
+    idempotencyKey = randomUUID(),
+  }: StockMarketEventCancelInput): Promise<{ readonly cancelled: boolean }> {
+    uuid(userId, 'user id');
+    uuid(eventId, 'event id');
+    uuid(idempotencyKey, 'idempotency key');
+    const row = await queryOne<{ cancelled: boolean }>(
+      this.pool,
+      'SELECT public.stock_market_event_cancel($1,$2,$3) AS cancelled',
+      [idempotencyKey, userId, eventId],
+    );
+    return row ?? { cancelled: false };
   }
 }

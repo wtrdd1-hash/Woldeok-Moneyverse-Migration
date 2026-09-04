@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ContentAdminPage() {
-  await requireAdminConsole();
+  await requireAdminConsole('/admin/content');
   const pendingPhotos = await apiOrNull<PendingPhotoItem[]>('/api/v1/admin/photos/submissions') ?? [];
 
   return (

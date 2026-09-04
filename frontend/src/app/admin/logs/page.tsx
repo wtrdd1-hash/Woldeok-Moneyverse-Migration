@@ -85,7 +85,7 @@ export default async function AdminLogsPage({
 }: {
   readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requireAdminConsole();
+  await requireAdminConsole(AREA.href);
   const params = await searchParams;
 
   const outcome = one(params.outcome);

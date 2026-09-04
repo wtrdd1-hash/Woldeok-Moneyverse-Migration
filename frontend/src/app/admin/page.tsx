@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { ArrowRight, CircleAlert, CircleCheck } from 'lucide-react';
 import { PageHeader, SectionHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { adminConsole } from '@/lib/session';
-import { ADMIN_AREAS } from './areas';
+import { ADMIN_AREAS, adminAreaFor, consoleReturnPath } from './areas';
 import { AdminQuickUserSearch } from './admin-quick-search';
 import { CloseConsole, EnrolSecondFactor, IssueRecoveryCodes, OpenConsole } from './console-gate';
 import type {
@@ -63,9 +64,20 @@ const AREA_GROUPS = [
  * place there is to go, with a count so the console says how much is behind
  * each door rather than making the operator open it to find out.
  */
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams,
+}: {
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const admin = await adminConsole();
-  if (admin.consoleSession.state !== 'open') return <Gate admin={admin} />;
+  // The page whose gate sent the operator here, when one did. Checked rather
+  // than trusted: it is a query parameter.
+  const params = await searchParams;
+  const next = consoleReturnPath(params.next);
+  if (admin.consoleSession.state !== 'open') return <Gate admin={admin} next={next} />;
+  // Already open -- in another tab, or here before a reload -- and still
+  // carrying the page that was refused. Finish the journey it started.
+  if (next) redirect(next);
 
   // Counts only. Each area page fetches its own rows, so opening one is one
   // request rather than eight.
@@ -363,9 +375,12 @@ export default async function AdminPage() {
  * screen that names the missing step is easier to follow than a bounce
  * through a second URL.
  */
-function Gate({ admin }: { readonly admin: AdminConsole }) {
+function Gate({ admin, next }: { readonly admin: AdminConsole; readonly next: string | null }) {
   const locked = admin.consoleSession.state === 'idle_locked';
   const expired = admin.consoleSession.state === 'expired';
+  // The screen that turned the operator away, named by its own title so the
+  // sentence below matches the menu item they clicked.
+  const waiting = next ? (adminAreaFor(next)?.title ?? next) : null;
 
   return (
     <div className="grid gap-5">
@@ -373,6 +388,20 @@ function Gate({ admin }: { readonly admin: AdminConsole }) {
         운영 기능은 별도의 콘솔 세션에서만 열립니다. 본인 확인을 다시 하고 인증 앱 코드를 입력해야
         들어갈 수 있습니다.
       </PageHeader>
+
+      {/* Why they are here rather than on the page they clicked. Without this
+          the bounce from 경제 to /admin read as the economy page being broken,
+          and nothing on either screen said otherwise. */}
+      {waiting && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="text-base">‘{waiting}’ 화면은 콘솔을 연 뒤에 열립니다.</CardTitle>
+            <CardDescription>
+              아래에서 콘솔을 열면 그 화면으로 바로 돌아갑니다.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
 
       {(locked || expired) && (
         <Card>
@@ -432,7 +461,7 @@ function Gate({ admin }: { readonly admin: AdminConsole }) {
                 <Link href="/account">본인 확인하러 가기 →</Link>
               </Button>
             )}
-            <OpenConsole disabled={!admin.reauthentication.fresh} />
+            <OpenConsole disabled={!admin.reauthentication.fresh} next={next} />
           </CardContent>
         </Card>
       )}

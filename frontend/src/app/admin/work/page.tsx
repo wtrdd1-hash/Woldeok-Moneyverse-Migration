@@ -68,7 +68,7 @@ function durationLabel(seconds: number): string {
 }
 
 export default async function AdminWorkPage() {
-  await requireAdminConsole();
+  await requireAdminConsole(AREA.href);
   const console_ = await apiOrNull<{
     readonly catalogue: readonly AdminWorkTask[];
     readonly jobLevels: readonly AdminJobLevel[];

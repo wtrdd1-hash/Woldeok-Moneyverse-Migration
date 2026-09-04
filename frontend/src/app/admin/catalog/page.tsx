@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminCatalogPage() {
-  await requireAdminConsole();
+  await requireAdminConsole(AREA.href);
   const [businesses, events] = await Promise.all([
     apiOrNull<{ businessTypes: AdminBusiness[] }>('/api/v1/admin/business-types'),
     apiOrNull<{ events: AdminSeasonEvent[] }>('/api/v1/admin/season-events'),

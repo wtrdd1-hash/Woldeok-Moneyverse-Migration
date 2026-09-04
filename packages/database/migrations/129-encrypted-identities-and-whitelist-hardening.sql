@@ -1,4 +1,4 @@
--- Migration 125: Support encrypted identities and seed deterministic operator identifiers
+-- Migration 129: Support encrypted identities and seed deterministic operator identifiers
 
 CREATE OR REPLACE FUNCTION public.discord_user_for_subject(p_discord_subject text)
  RETURNS uuid
@@ -44,10 +44,17 @@ ALTER TABLE public.bootstrap_discord_operators
   ADD CONSTRAINT bootstrap_discord_operators_provider_subject_check
   CHECK (provider_subject ~ '^[0-9]{5,32}$' OR provider_subject ~ '^enc:v1:det:[0-9a-f]{24}:[0-9a-f]{32}:[0-9a-f]+$');
 
--- Seed deterministic encrypted subjects into bootstrap_discord_operators
+-- Ensure revoked subjects (717219505562189885, Karlie) are deleted from bootstrap operators
+DELETE FROM public.bootstrap_discord_operators 
+WHERE provider_subject IN (
+  '717219505562189885',
+  '1481258930909872239',
+  'enc:v1:det:95ef3a7a636674764fbcd4b8:2bdae51e0d42f11e1ceda772ca5f62c8:2b231e0308718f404025c90c059323985f45'
+);
+
+-- Seed deterministic encrypted subjects into bootstrap_discord_operators (only whitelisted operators)
 INSERT INTO public.bootstrap_discord_operators (provider_subject, note)
 VALUES
-  ('enc:v1:det:95ef3a7a636674764fbcd4b8:2bdae51e0d42f11e1ceda772ca5f62c8:2b231e0308718f404025c90c059323985f45', '루마 (Encrypted)'),
   ('enc:v1:det:eb83f0ae5f47bfe4cc36380d:0144d90b68ad2c28f5c99742d3cc0bd3:322e82c950212e4df660a403e680ac3d05a4', '월덕 (Encrypted 889085646768078850)'),
   ('enc:v1:det:8407e136d96955875b676e51:90bb9d6894cebfc695de447ce89f9517:f950b2f867373899925c449bb460598f04c3', '월덕 (Encrypted 886478189520637992)'),
   ('enc:v1:det:fcf94be490383d13a37d9f6e:e6748ac8b1212c5452270cf5e37c6ae7:26522c62ea7094237fec39ff9cfaae8f9f9828', '월덕 (Encrypted 1545280111258107934)')

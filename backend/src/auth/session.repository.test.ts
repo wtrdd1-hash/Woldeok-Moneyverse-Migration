@@ -130,6 +130,17 @@ describe('SessionRepository.rotateCsrf', () => {
       'active session not found',
     );
   });
+
+  it('slides a member session but leaves a console session its thirty minutes', async () => {
+    // The bug this pins: sliding every signed-in session on each rotation
+    // turned the console's thirty-minute life (057) into thirty days, because
+    // every administrator page rotates a token on the way in.
+    const { pool, queries } = recordingPool(() => [{ id: 'session-id' }]);
+    await new SessionRepository(pool).rotateCsrf('session-id');
+    const text = queries[0]?.text.replace(/\s+/g, ' ') ?? '';
+    expect(text).toContain("WHEN user_id IS NOT NULL AND admin_opened_at IS NULL THEN now() + interval '30 days'");
+    expect(text).toContain('ELSE expires_at');
+  });
 });
 
 describe('SessionRepository.grantPreloginConsent', () => {

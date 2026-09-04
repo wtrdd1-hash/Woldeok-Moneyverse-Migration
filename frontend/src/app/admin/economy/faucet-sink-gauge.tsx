@@ -147,7 +147,7 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
             <Flame className="size-3.5" /> 소각(Sink) {burnedPercent.toFixed(1)}%
           </span>
         </div>
-        <div className="h-3 w-full rounded-full bg-black/40 overflow-hidden flex">
+        <div className="h-3 w-full rounded-full bg-muted overflow-hidden flex">
           <div
             style={{ width: `${mintedPercent}%` }}
             className="bg-blue-500 transition-all duration-500"

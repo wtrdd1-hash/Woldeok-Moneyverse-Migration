@@ -90,7 +90,7 @@ export function AdminShopView({ items }: AdminShopViewProps) {
             placeholder="상품명, 코드, 카테고리 검색..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-2xl border border-border/50 bg-card py-2 pl-10 pr-4 text-xs font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+className="w-full rounded-2xl border border-border/50 bg-card py-2 pl-10 pr-4 text-xs font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <div className="text-xs text-muted-foreground font-medium">

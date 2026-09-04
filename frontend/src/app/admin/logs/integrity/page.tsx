@@ -54,7 +54,7 @@ export const metadata: Metadata = {
  * evidence hash over the rows it names.
  */
 export default async function AdminAuditIntegrityPage() {
-  await requireAdminConsole();
+  await requireAdminConsole(AREA.href);
 
   const [verifications, retention, dispositions] = await Promise.all([
     apiOrNull<{ verifications: ChainVerificationHistory[] }>(

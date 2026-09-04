@@ -174,6 +174,15 @@ export class SessionRepository {
     );
   }
 
+  /**
+   * Rotates the CSRF token and, for a member session, slides its expiry.
+   *
+   * Not for a console session. `admin_session_open` (057) gives that row a
+   * thirty-minute life on purpose -- it is the one control over every money
+   * and treasury action -- and every administrator page fetches a CSRF token
+   * on the way in, so sliding it here quietly turned thirty minutes into
+   * thirty days. `admin_opened_at` is what marks the row as one.
+   */
   async rotateCsrf(sessionId: string): Promise<string> {
     const csrfToken = randomToken();
     const session = await queryOne<IdRow>(
@@ -181,7 +190,7 @@ export class SessionRepository {
       `UPDATE auth_sessions
        SET csrf_hash=$2,
            expires_at = CASE
-             WHEN user_id IS NOT NULL THEN now() + ${SESSION_INTERVAL}
+             WHEN user_id IS NOT NULL AND admin_opened_at IS NULL THEN now() + ${SESSION_INTERVAL}
              ELSE expires_at
            END
        WHERE id=$1 AND revoked_at IS NULL AND expires_at>now()
