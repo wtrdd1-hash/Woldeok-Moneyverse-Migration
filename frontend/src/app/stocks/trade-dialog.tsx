@@ -1,5 +1,6 @@
 'use client';
 
+import { useLocale } from '@/components/locale-provider';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -13,10 +14,6 @@ import { TradeForm } from './trade-form';
 
 /**
  * Buy or sell, with the quantity asked for in a dialog.
- *
- * The original used `window.prompt`, which cannot be styled, cannot be
- * cancelled by keyboard predictably, and gives a screen reader nothing to
- * announce. This asks the same question in a focus-trapped dialog.
  */
 export function TradeDialog({
   stockId,
@@ -33,7 +30,10 @@ export function TradeDialog({
   readonly available?: string;
   readonly side: 'buy' | 'sell';
 }) {
-  const label = side === 'buy' ? '매수' : '매도';
+  const { locale } = useLocale();
+  const isEn = locale === 'en';
+
+  const label = side === 'buy' ? (isEn ? 'Buy' : '매수') : (isEn ? 'Sell' : '매도');
 
   return (
     <Dialog>
@@ -48,7 +48,9 @@ export function TradeDialog({
             {symbol} · {name} {label}
           </DialogTitle>
           <DialogDescription>
-            체결가는 주문 시점에 서버가 다시 읽습니다.
+            {isEn
+              ? 'Execution price is re-evaluated by the server at the moment of order.'
+              : '체결가는 주문 시점에 서버가 다시 읽습니다.'}
           </DialogDescription>
         </DialogHeader>
         <TradeForm

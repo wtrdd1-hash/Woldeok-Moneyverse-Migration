@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useActionState } from 'react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
+import { useLocale } from '@/components/locale-provider';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -19,22 +20,26 @@ export function JobSwitchButton({
   readonly isActive: boolean;
   readonly level: number;
 }) {
+  const { locale } = useLocale();
+  const isEn = locale === 'en';
   const [state, action] = useActionState(switchJobAction, IDLE);
 
   if (isActive) {
     return (
       <Badge className="bg-emerald-600/20 text-emerald-400 border-emerald-500/40 px-3 py-1 font-semibold">
-        현재 활성 직업 (Lv.{level})
+        {isEn ? `Active Career (Lv.${level})` : `현재 활성 직업 (Lv.${level})`}
       </Badge>
     );
   }
+
+  const jobName = isEn ? (job.enName ?? job.name) : job.name;
 
   return (
     <div className="grid gap-1.5 w-full">
       <form action={action} className="w-full">
         <input type="hidden" name="jobType" value={job.code} />
         <SubmitButton variant="outline" className="w-full text-xs font-medium">
-          {job.name}으로 전직하기
+          {isEn ? `Switch to ${jobName}` : `${jobName}으로 전직하기`}
         </SubmitButton>
       </form>
       <ActionAlert state={state} />
@@ -49,6 +54,9 @@ export function TaskCompleteModalButton({
   readonly task: WorkTask;
   readonly isActiveJob: boolean;
 }) {
+  const { locale } = useLocale();
+  const isEn = locale === 'en';
+
   const [isOpen, setIsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -92,10 +100,10 @@ export function TaskCompleteModalButton({
         className="w-full font-semibold shadow-sm"
       >
         {!isActiveJob
-          ? '해당 직업 전직 필요'
+          ? (isEn ? 'Switch Career First' : '해당 직업 전직 필요')
           : isLimitReached
-          ? '오늘 수행 완료'
-          : '⚡ 즉시 업무 수행'}
+          ? (isEn ? 'Completed Today' : '오늘 수행 완료')
+          : (isEn ? '⚡ Perform Task' : '⚡ 즉시 업무 수행')}
       </Button>
 
       {isOpen && (
@@ -105,7 +113,9 @@ export function TaskCompleteModalButton({
               <div className="flex items-center justify-between">
                 <Badge variant="secondary">{task.code}</Badge>
                 <Badge className="bg-primary/20 text-primary border-primary/30">
-                  일일 {task.taken_today}/{task.daily_limit}회
+                  {isEn
+                    ? `Daily ${task.taken_today}/${task.daily_limit}`
+                    : `일일 ${task.taken_today}/${task.daily_limit}회`}
                 </Badge>
               </div>
               <CardTitle className="text-xl mt-2">{task.name}</CardTitle>
@@ -115,11 +125,15 @@ export function TaskCompleteModalButton({
             <CardContent className="grid gap-4">
               <div className="rounded-xl border border-border/50 bg-muted/40 p-3 grid grid-cols-2 gap-2 text-center text-sm">
                 <div>
-                  <span className="text-xs text-muted-foreground block">기본 WLD 보상</span>
+                  <span className="text-xs text-muted-foreground block">
+                    {isEn ? 'Base Reward' : '기본 WLD 보상'}
+                  </span>
                   <span className="text-base font-bold text-emerald-400">+{task.base_reward} WLD</span>
                 </div>
                 <div>
-                  <span className="text-xs text-muted-foreground block">획득 숙련도 EXP</span>
+                  <span className="text-xs text-muted-foreground block">
+                    {isEn ? 'Proficiency EXP' : '획득 숙련도 EXP'}
+                  </span>
                   <span className="text-base font-bold text-amber-400">+{task.base_experience} EXP</span>
                 </div>
               </div>
@@ -127,7 +141,7 @@ export function TaskCompleteModalButton({
               {isProcessing ? (
                 <div className="space-y-2 py-4">
                   <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>업무 진행 및 알고리즘 검증 중...</span>
+                    <span>{isEn ? 'Processing task & executing algorithms...' : '업무 진행 및 알고리즘 검증 중...'}</span>
                     <span>{progress}%</span>
                   </div>
                   <div className="w-full h-3 bg-secondary rounded-full overflow-hidden">
@@ -147,14 +161,16 @@ export function TaskCompleteModalButton({
                   disabled={isProcessing}
                   onClick={() => setIsOpen(false)}
                 >
-                  닫기
+                  {isEn ? 'Close' : '닫기'}
                 </Button>
                 <Button
                   disabled={isProcessing || isLimitReached}
                   onClick={handleStartWork}
                   className="font-bold"
                 >
-                  {isProcessing ? '수행 중...' : '업무 완료 및 보상 수령'}
+                  {isProcessing
+                    ? (isEn ? 'Processing...' : '수행 중...')
+                    : (isEn ? 'Complete Task & Claim Reward' : '업무 완료 및 보상 수령')}
                 </Button>
               </div>
             </CardContent>
@@ -210,12 +226,14 @@ export function SubmitTaskButton({
 }
 
 export function ClaimButton({ assignmentId }: { readonly assignmentId: string }) {
+  const { locale } = useLocale();
+  const isEn = locale === 'en';
   const [state, action] = useActionState(claimReward, IDLE);
   return (
     <div className="grid gap-2">
       <form action={action}>
         <input type="hidden" name="assignmentId" value={assignmentId} />
-        <SubmitButton>보상 받기</SubmitButton>
+        <SubmitButton>{isEn ? 'Claim Reward' : '보상 받기'}</SubmitButton>
       </form>
       <ActionAlert state={state} />
     </div>

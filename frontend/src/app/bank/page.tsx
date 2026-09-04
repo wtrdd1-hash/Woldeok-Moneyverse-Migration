@@ -15,6 +15,7 @@ import { TranslatedText as T } from '@/components/translated-text';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
+import { getServerLocale } from '@/lib/locale';
 import { groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import {
@@ -35,6 +36,8 @@ export const metadata: Metadata = {
 
 export default async function BankPage() {
   await requireMember();
+  const locale = await getServerLocale();
+  const isEn = locale === 'en';
 
   const standing = await apiOrNull<BankStanding>('/api/v1/banking/standing');
 
@@ -78,7 +81,9 @@ export default async function BankPage() {
         <Card className="border-border/60 bg-gradient-to-br from-primary/10 via-background to-muted/20 backdrop-blur-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground">순 금융 자산</span>
+              <span className="text-xs font-semibold text-muted-foreground">
+                <T korean="순 금융 자산" english="Net Financial Assets" />
+              </span>
               <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <TrendingUp className="size-4" />
               </div>
@@ -86,14 +91,18 @@ export default async function BankPage() {
             <div className="mt-2 text-xl font-extrabold tabular">
               <Amount value={String(netFinancialWorth)} currency />
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">현금+예금+국채-대출</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              <T korean="현금+예금+국채-대출" english="Cash + Savings + Bonds - Debt" />
+            </p>
           </CardContent>
         </Card>
 
         <Card className="border-border/60 bg-gradient-to-br from-blue-500/10 via-background to-muted/20 backdrop-blur-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground">복리 예금 잔액</span>
+              <span className="text-xs font-semibold text-muted-foreground">
+                <T korean="복리 예금 잔액" english="Compound Savings" />
+              </span>
               <div className="flex size-7 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
                 <PiggyBank className="size-4" />
               </div>
@@ -101,14 +110,18 @@ export default async function BankPage() {
             <div className="mt-2 text-xl font-extrabold text-blue-600 dark:text-blue-400 tabular">
               <Amount value={String(bank)} currency />
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">일일 0.05% 복리 적립</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              <T korean="일일 0.05% 복리 적립" english="0.05% daily compound interest" />
+            </p>
           </CardContent>
         </Card>
 
         <Card className="border-border/60 bg-gradient-to-br from-emerald-500/10 via-background to-muted/20 backdrop-blur-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground">정산 대기 복리 이자</span>
+              <span className="text-xs font-semibold text-muted-foreground">
+                <T korean="정산 대기 복리 이자" english="Accrued Interest" />
+              </span>
               <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500">
                 <Sparkles className="size-4" />
               </div>
@@ -116,14 +129,18 @@ export default async function BankPage() {
             <div className="mt-2 text-xl font-extrabold text-emerald-600 dark:text-emerald-400 tabular">
               +{groupDigits(String(unclaimed))} <span className="text-xs font-normal">WLD</span>
             </div>
-            <p className="mt-1 text-[11px] text-muted-foreground">온디맨드 즉시 정산 가능</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              <T korean="온디맨드 즉시 정산 가능" english="Instant on-demand claim" />
+            </p>
           </CardContent>
         </Card>
 
         <Card className="border-border/60 bg-gradient-to-br from-purple-500/10 via-background to-muted/20 backdrop-blur-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-foreground">평가 신용 한도</span>
+              <span className="text-xs font-semibold text-muted-foreground">
+                <T korean="평가 신용 한도" english="Credit Limit" />
+              </span>
               <div className="flex size-7 items-center justify-center rounded-lg bg-purple-500/10 text-purple-500">
                 <CreditCard className="size-4" />
               </div>
@@ -132,7 +149,13 @@ export default async function BankPage() {
               <Amount value={String(creditLimit)} currency />
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              {activeLoan ? `대출 실행 중 (${groupDigits(String(loanDebt))} WLD)` : '즉시 대출 가능'}
+              {activeLoan
+                ? isEn
+                  ? `Active Loan (${groupDigits(String(loanDebt))} WLD)`
+                  : `대출 실행 중 (${groupDigits(String(loanDebt))} WLD)`
+                : isEn
+                ? 'Instant Loan Available'
+                : '즉시 대출 가능'}
             </p>
           </CardContent>
         </Card>
@@ -163,18 +186,27 @@ export default async function BankPage() {
         <div className="flex items-center gap-3">
           <Landmark className="size-5 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">
-            연계 금융 서비스: 현금 지갑 관리와 주식 투자, 사업체 확장을 함께 활용해 보세요.
+            <T
+              korean="연계 금융 서비스: 현금 지갑 관리와 주식 투자, 사업체 확장을 함께 활용해 보세요."
+              english="Integrated Financial Services: Manage your cash wallet, stock investments, and business ventures together."
+            />
           </span>
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="outline" size="sm">
-            <Link href="/wallet">내 지갑 가기</Link>
+            <Link href="/wallet">
+              <T korean="내 지갑 가기" english="Go to Wallet" />
+            </Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link href="/stocks">가상 주식 거래소</Link>
+            <Link href="/stocks">
+              <T korean="가상 주식 거래소" english="Virtual Stock Exchange" />
+            </Link>
           </Button>
           <Button asChild variant="outline" size="sm">
-            <Link href="/businesses">사업 관리</Link>
+            <Link href="/businesses">
+              <T korean="사업 관리" english="Business Ventures" />
+            </Link>
           </Button>
         </div>
       </div>

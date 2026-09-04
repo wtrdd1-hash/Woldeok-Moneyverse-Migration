@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
+import { useLocale } from '@/components/locale-provider';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { IDLE } from '@/lib/action-state';
@@ -10,15 +11,7 @@ import { useQuote } from '@/lib/use-market-prices';
 import { placeOrder } from './actions';
 
 /**
- * One order.
- *
- * Shared by the buttons on a market card and by the detail dialog, so a reader
- * who opened the chart to decide can act on the decision without closing it —
- * which was the whole point of asking for the chart beside the buttons.
- *
- * The price shown is the live one. It is still labelled as a display price,
- * because the server re-reads it when the order lands: between the reader
- * seeing a number and the database applying one, the market has ticked.
+ * One order form.
  */
 export function TradeForm({
   stockId,
@@ -36,9 +29,12 @@ export function TradeForm({
   readonly available?: string;
   readonly idSuffix?: string;
 }) {
+  const { locale } = useLocale();
+  const isEn = locale === 'en';
+
   const [state, action] = useActionState(placeOrder, IDLE);
   const quote = useQuote(stockId, { price: currentPrice, open: dayOpenPrice ?? currentPrice });
-  const label = side === 'buy' ? '매수' : '매도';
+  const label = side === 'buy' ? (isEn ? 'Buy' : '매수') : (isEn ? 'Sell' : '매도');
   const fieldId = `quantity-${side}-${stockId}${idSuffix}`;
 
   return (
@@ -47,7 +43,9 @@ export function TradeForm({
       <input type="hidden" name="side" value={side} />
 
       <Field>
-        <FieldLabel htmlFor={fieldId}>{label}할 수량</FieldLabel>
+        <FieldLabel htmlFor={fieldId}>
+          {isEn ? `${label} Quantity` : `${label}할 수량`}
+        </FieldLabel>
         <InputGroup>
           <InputGroupInput
             id={fieldId}
@@ -59,19 +57,21 @@ export function TradeForm({
             defaultValue={1}
             required
           />
-          <InputGroupAddon align="inline-end">주</InputGroupAddon>
+          <InputGroupAddon align="inline-end">{isEn ? 'shares' : '주'}</InputGroupAddon>
         </InputGroup>
       </Field>
 
       <p className="tabular text-xs text-muted-foreground">
-        현재 표시가 {groupDigits(quote.price)} WLD
+        {isEn ? 'Indicative Price' : '현재 표시가'} {groupDigits(quote.price)} WLD
         {side === 'buy' && available !== undefined && (
-          <> · 거래 가능 {groupDigits(available)}주</>
+          <> · {isEn ? `Available ${groupDigits(available)} shares` : `거래 가능 ${groupDigits(available)}주`}</>
         )}
       </p>
 
       <ActionAlert state={state} />
-      <SubmitButton variant={side === 'buy' ? 'default' : 'outline'}>{label} 확정</SubmitButton>
+      <SubmitButton variant={side === 'buy' ? 'default' : 'outline'}>
+        {isEn ? `Confirm ${label}` : `${label} 확정`}
+      </SubmitButton>
     </form>
   );
 }

@@ -1,3 +1,5 @@
+import { cookies } from 'next/headers';
+
 export type Locale = 'ko' | 'en';
 
 export const DEFAULT_LOCALE: Locale = 'ko';
@@ -20,4 +22,16 @@ export function detectLocale(country: string | null, acceptLanguage: string | nu
 
 export function localeLabel(locale: Locale, korean: string, english: string): string {
   return locale === 'en' ? english : korean;
+}
+
+/**
+ * Server-side helper to read the current request's active locale from cookies.
+ */
+export async function getServerLocale(): Promise<Locale> {
+  const cookieStore = await cookies();
+  const explicit = cookieStore.get(LOCALE_COOKIE)?.value;
+  if (isLocale(explicit)) return explicit;
+  const detected = cookieStore.get(DETECTED_LOCALE_COOKIE)?.value;
+  if (isLocale(detected)) return detected;
+  return DEFAULT_LOCALE;
 }

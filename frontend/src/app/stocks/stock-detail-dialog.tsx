@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CandleChart } from '@/components/candle-chart';
 import type { Candle } from '@/components/candle-chart';
+import { useLocale } from '@/components/locale-provider';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -40,50 +41,19 @@ interface ApiCandle {
   readonly close_price: string;
 }
 
-/**
- * The widths the chart offers, in seconds — the same set `stock_candles`
- * accepts, because a width this list allowed and the function refused would be
- * an error the reader caused by using the control as intended.
- *
- * Below a day the candles are folded from the minute candles the ticker
- * keeps, which are retained for thirty days; a day and a week come from the
- * daily table, which is kept for a year.
- */
 const INTERVALS = [
-  { seconds: 60, label: '1분' },
-  { seconds: 300, label: '5분' },
-  { seconds: 1800, label: '30분' },
-  { seconds: 3600, label: '1시간' },
-  { seconds: 7200, label: '2시간' },
-  { seconds: 14400, label: '4시간' },
-  { seconds: 86400, label: '1일' },
-  { seconds: 604800, label: '1주' },
+  { seconds: 60, label: '1분', enLabel: '1m' },
+  { seconds: 300, label: '5분', enLabel: '5m' },
+  { seconds: 1800, label: '30분', enLabel: '30m' },
+  { seconds: 3600, label: '1시간', enLabel: '1h' },
+  { seconds: 7200, label: '2시간', enLabel: '2h' },
+  { seconds: 14400, label: '4시간', enLabel: '4h' },
+  { seconds: 86400, label: '1일', enLabel: '1d' },
+  { seconds: 604800, label: '1주', enLabel: '1w' },
 ] as const;
 
 const DEFAULT_INTERVAL = 86400;
 
-const TIME = new Intl.DateTimeFormat('ko-KR', {
-  month: 'numeric',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-const DAY = new Intl.DateTimeFormat('ko-KR', { year: '2-digit', month: 'numeric', day: 'numeric' });
-
-/**
- * One stock's detail, in a dialog.
- *
- * A dialog rather than a page because it is a glance, not a destination: the
- * question is "what has this been doing" and the answer belongs beside the buy
- * and sell buttons the reader is already looking at. Leaving the market to
- * find out and coming back to trade is the wrong shape for that — which is
- * also why the order forms are in here.
- *
- * The candles load when it opens, and again when the width changes. Rendering
- * a year of them into every card of a market page would be a lot of HTML for a
- * question nobody has asked yet.
- */
 export function StockDetailDialog({
   stockId,
   symbol,
@@ -99,10 +69,34 @@ export function StockDetailDialog({
   readonly dayOpenPrice: string;
   readonly available: string;
 }) {
+  const { locale } = useLocale();
+  const isEn = locale === 'en';
+
   const [open, setOpen] = useState(false);
   const [interval, setInterval] = useState<number>(DEFAULT_INTERVAL);
   const [data, setData] = useState<{ candles: ApiCandle[]; range: Range | null } | null>(null);
   const [failed, setFailed] = useState(false);
+
+  const timeFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', {
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    [isEn],
+  );
+
+  const dayFormatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', {
+        year: '2-digit',
+        month: 'numeric',
+        day: 'numeric',
+      }),
+    [isEn],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -125,20 +119,6 @@ export function StockDetailDialog({
   const intraday = interval < 86400;
   const quote = useQuote(stockId, { price: currentPrice, open: dayOpenPrice });
 
-  /**
-   * The fetched candles with the one still open brought up to the live price.
-   *
-   * A candle for a bucket that has not closed is a running total, and the
-   * chart was showing whatever it was when the dialog opened while the price
-   * beside it moved every second. The last bucket's close follows the
-   * broadcast and its high and low stretch to admit it, which is exactly what
-   * the database does to the same row on the next tick.
-   *
-   * When a bucket boundary passes with the dialog open a fresh candle is
-   * started, but only below a day: the day and week buckets are aligned to
-   * Seoul in SQL and guessing that alignment here would date the candle
-   * wrong. Waiting for the next fetch is the better error.
-   */
   const candles: Candle[] = useMemo(() => {
     const rows: Candle[] = (data?.candles ?? []).map((row) => ({
       at: row.bucket_at,
@@ -159,10 +139,6 @@ export function StockDetailDialog({
     const now = Date.now();
 
     if (now < started + width) {
-      // The candle's own figures are checked too, not just the live one: they
-      // cross the network as strings, and a BigInt() that throws in here
-      // throws during a render, which takes the whole page down rather than
-      // just the chart.
       const integer = (value: string) => /^\d+$/.test(value);
       const bigger = (a: string, b: string) =>
         integer(a) ? (BigInt(a) >= BigInt(b) ? a : b) : b;
@@ -194,23 +170,25 @@ export function StockDetailDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" className="min-h-11">
-          상세 보기
+          {isEn ? 'Details' : '상세 보기'}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[90dvh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            <span className="font-mono text-sm text-clay-ink">{symbol}</span> {name}
+            <span className="font-mono text-sm text-clay-ink">{symbol}</span> {name}{' '}
+            {isEn ? 'Details' : '상세'}
           </DialogTitle>
           <DialogDescription>
-            봉의 몸통은 시가와 종가, 위아래 선은 그 구간의 고가와 저가예요. 오른 봉은 빨강,
-            내린 봉은 파랑입니다.
+            {isEn
+              ? 'The candlestick body indicates open and close prices, and the wicks show high and low ranges. Red indicates a rise, blue indicates a fall.'
+              : '봉의 몸통은 시가와 종가, 위아래 선은 그 구간의 고가와 저가예요. 오른 봉은 빨강, 내린 봉은 파랑입니다.'}
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex items-center justify-between gap-3">
           <label htmlFor={`interval-${stockId}`} className="eyebrow">
-            봉 단위
+            {isEn ? 'Interval' : '봉 단위'}
           </label>
           <Select value={String(interval)} onValueChange={(value) => setInterval(Number(value))}>
             <SelectTrigger id={`interval-${stockId}`} className="w-32">
@@ -219,7 +197,7 @@ export function StockDetailDialog({
             <SelectContent>
               {INTERVALS.map((option) => (
                 <SelectItem key={option.seconds} value={String(option.seconds)}>
-                  {option.label}
+                  {isEn ? option.enLabel : option.label}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -228,7 +206,7 @@ export function StockDetailDialog({
 
         {failed ? (
           <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
-            지금은 차트를 불러올 수 없어요.
+            {isEn ? 'Unable to load chart at this time.' : '지금은 차트를 불러올 수 없어요.'}
           </p>
         ) : !data ? (
           <Skeleton className="h-[260px] w-full" />
@@ -239,25 +217,25 @@ export function StockDetailDialog({
               label={(at) => {
                 const when = new Date(at);
                 if (Number.isNaN(when.getTime())) return at;
-                return intraday ? TIME.format(when) : DAY.format(when);
+                return intraday ? timeFormatter.format(when) : dayFormatter.format(when);
               }}
             />
             <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Figure term="오늘 고가" value={data.range?.day_high} />
-              <Figure term="오늘 저가" value={data.range?.day_low} />
-              <Figure term="1년 최고" value={data.range?.year_high} />
-              <Figure term="1년 최저" value={data.range?.year_low} />
+              <Figure term={isEn ? 'Today High' : '오늘 고가'} value={data.range?.day_high} isEn={isEn} />
+              <Figure term={isEn ? 'Today Low' : '오늘 저가'} value={data.range?.day_low} isEn={isEn} />
+              <Figure term={isEn ? '52-Week High' : '1년 최고'} value={data.range?.year_high} isEn={isEn} />
+              <Figure term={isEn ? '52-Week Low' : '1년 최저'} value={data.range?.year_low} isEn={isEn} />
             </dl>
             {data.range?.first_trade_date && (
               <p className="text-xs text-muted-foreground">
-                {data.range.first_trade_date}부터 기록했습니다.
+                {isEn
+                  ? `Recorded since ${data.range.first_trade_date}`
+                  : `${data.range.first_trade_date}부터 기록했습니다.`}
               </p>
             )}
           </div>
         )}
 
-        {/* The reader opened this to decide. Closing it to act on the decision
-            would put the chart and the button on opposite sides of a click. */}
         <div className="grid gap-4 border-t pt-5 sm:grid-cols-2">
           <TradeForm
             stockId={stockId}
@@ -283,22 +261,17 @@ export function StockDetailDialog({
 function Figure({
   term,
   value,
+  isEn,
 }: {
   readonly term: string;
   readonly value: string | null | undefined;
+  readonly isEn?: boolean;
 }) {
   return (
-    // `min-w-0`, because a grid track sizes itself to its content by default
-    // and a grouped price has no break opportunity in it — a stock worth a
-    // billion pushed the card past its column and the dialog clipped the
-    // digits off the end. The card may now be narrower than its number, and
-    // the number wraps inside it.
     <div className="min-w-0 rounded-[10px] border bg-surface p-3">
       <dt className="text-xs text-muted-foreground">{term}</dt>
-      {/* A stock with no candle yet has no high, and saying so is better than
-          showing a zero that reads as a real price. */}
       <dd className="tabular text-base leading-tight font-bold [overflow-wrap:anywhere]">
-        {value ? groupDigits(value) : '기록 없음'}
+        {value ? groupDigits(value) : (isEn ? 'No record' : '기록 없음')}
       </dd>
     </div>
   );

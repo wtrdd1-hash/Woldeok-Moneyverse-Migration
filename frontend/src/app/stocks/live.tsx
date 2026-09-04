@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Amount } from '@/components/amount';
+import { useLocale } from '@/components/locale-provider';
 import { Sparkline } from '@/components/sparkline';
 import type { SparkPoint } from '@/components/sparkline';
 import { cn } from '@/lib/cn';
@@ -48,19 +49,22 @@ export function LiveQuote({
  * amount is hard to act on when the reader is about to buy a quantity.
  */
 function TodayMove({ current, open }: { readonly current: string; readonly open: string }) {
+  const { locale } = useLocale();
+  const isEn = locale === 'en';
   const direction = priceDirection(current, open);
   const amount = changeAmount(current, open);
   const percent = changePercent(current, open);
 
   if (direction === null) {
-    return <p className="tabular text-xs text-muted-foreground">오늘 변동 없음</p>;
+    return <p className="tabular text-xs text-muted-foreground">{isEn ? 'No change today' : '오늘 변동 없음'}</p>;
   }
 
   return (
     <p className={cn('tabular text-xs font-bold', direction === 'rise' ? 'text-rise' : 'text-fall')}>
       {/* groupDigits renders a leading minus as U+2212, so the sign is the
           amount's own and is not prefixed twice. */}
-      오늘 {direction === 'rise' ? '+' : ''}
+      {isEn ? 'Today ' : '오늘 '}
+      {direction === 'rise' ? '+' : ''}
       {groupDigits(amount)}
       {percent && <span className="ml-1 font-normal">({percent}%)</span>}
     </p>
@@ -95,13 +99,15 @@ export function LiveHoldingValue({
 
 /** Says the figures are live, once one has actually arrived. */
 export function LiveBadge() {
+  const { locale } = useLocale();
+  const isEn = locale === 'en';
   const connected = useMarketConnected();
   if (!connected) return null;
 
   return (
     <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-muted-foreground">
       <span aria-hidden className="size-1.5 animate-pulse rounded-full bg-rise" />
-      실시간
+      {isEn ? 'Live' : '실시간'}
     </span>
   );
 }

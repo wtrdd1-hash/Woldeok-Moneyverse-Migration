@@ -108,13 +108,13 @@ export function DepositWithdrawCard({
       <CardContent className="grid gap-4">
         <div className="grid grid-cols-2 gap-3 rounded-xl border border-border/50 bg-muted/20 p-3 text-sm">
           <div>
-            <span className="text-xs text-muted-foreground">보유 현금 (Cash)</span>
+            <span className="text-xs text-muted-foreground"><T korean="보유 현금" english="Cash Balance" /></span>
             <div className="font-bold">
               <Amount value={String(cash)} currency />
             </div>
           </div>
           <div>
-            <span className="text-xs text-muted-foreground">예금 잔액 (Savings)</span>
+            <span className="text-xs text-muted-foreground"><T korean="예금 잔액" english="Savings Balance" /></span>
             <div className="font-bold text-blue-600 dark:text-blue-400">
               <Amount value={String(bank)} currency />
             </div>
@@ -490,7 +490,7 @@ export function VirtualBondsCard({
             </div>
           </div>
           <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold">
-            보유 현금 {groupDigits(String(cash))} WLD
+            <T korean={`보유 현금 ${groupDigits(String(cash))} WLD`} english={`Cash ${groupDigits(String(cash))} WLD`} />
           </Badge>
         </div>
       </CardHeader>
@@ -505,12 +505,12 @@ export function VirtualBondsCard({
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="font-bold text-sm">7일 만기 단기 국채</span>
+              <span className="font-bold text-sm"><T korean="7일 만기 단기 국채" english="7-Day Virtual Bond" /></span>
               <Badge className="bg-amber-500 text-black font-extrabold">+3.0%</Badge>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">만기 7일 후 원금 + 3% 확정 수익 지급</p>
+            <p className="mt-1 text-xs text-muted-foreground"><T korean="만기 7일 후 원금 + 3% 확정 수익 지급" english="Principal + 3% fixed yield paid upon 7-day maturity" /></p>
             <div className="mt-2 text-xs font-semibold text-muted-foreground">
-              최소 매입: 1,000 WLD
+              <T korean="최소 매입: 1,000 WLD" english="Min: 1,000 WLD" />
             </div>
           </div>
 
@@ -523,12 +523,12 @@ export function VirtualBondsCard({
             }`}
           >
             <div className="flex items-center justify-between">
-              <span className="font-bold text-sm">30일 만기 프리미엄 국채</span>
+              <span className="font-bold text-sm"><T korean="30일 만기 프리미엄 국채" english="30-Day Premium Bond" /></span>
               <Badge className="bg-amber-500 text-black font-extrabold">+15.0%</Badge>
             </div>
-            <p className="mt-1 text-xs text-muted-foreground">만기 30일 후 원금 + 15% 확정 수익 지급</p>
+            <p className="mt-1 text-xs text-muted-foreground"><T korean="만기 30일 후 원금 + 15% 확정 수익 지급" english="Principal + 15% fixed yield paid upon 30-day maturity" /></p>
             <div className="mt-2 text-xs font-semibold text-muted-foreground">
-              최소 매입: 5,000 WLD
+              <T korean="최소 매입: 5,000 WLD" english="Min: 5,000 WLD" />
             </div>
           </div>
         </div>
@@ -585,12 +585,12 @@ export function VirtualBondsCard({
 
         <div className="grid gap-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-bold">나의 보유 국채 목록 ({bonds.length}건)</span>
+            <span className="text-sm font-bold"><T korean={`나의 보유 국채 목록 (${bonds.length}건)`} english={`My Virtual Bonds (${bonds.length})`} /></span>
           </div>
 
           {bonds.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-xs text-muted-foreground">
-              현재 보유 중인 가상 국채가 없습니다. 위의 국채 상품에 투자해 보세요.
+              <T korean="현재 보유 중인 가상 국채가 없습니다. 위의 국채 상품에 투자해 보세요." english="You do not hold any virtual treasury bonds. Invest in the bonds above to earn interest." />
             </div>
           ) : (
             <div className="grid gap-2">
@@ -607,15 +607,15 @@ export function VirtualBondsCard({
                     <div className="flex items-center gap-2">
                       <span className="font-bold">{bond.bond_name}</span>
                       <Badge variant={bond.is_matured ? 'default' : 'secondary'} className="text-[11px] font-bold">
-                        {bond.is_matured ? '만기 도래 (수령 가능)' : '락업 운용 중'}
+                        {bond.is_matured ? <T korean="만기 도래 (수령 가능)" english="Matured (Claimable)" /> : <T korean="락업 운용 중" english="Locked (Active)" />}
                       </Badge>
                     </div>
                     <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                      <span>원금: {groupDigits(String(bond.principal_amount))} WLD</span>
+                      <span><T korean="원금: " english="Principal: " />{groupDigits(String(bond.principal_amount))} WLD</span>
                       <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                        만기 수령액: {groupDigits(String(bond.maturity_amount))} WLD (+{bond.yield_bps / 100}%)
+                        <T korean="만기 수령액: " english="Maturity Payout: " />{groupDigits(String(bond.maturity_amount))} WLD (+{bond.yield_bps / 100}%)
                       </span>
-                      <span>만기일: {new Date(bond.maturity_at).toLocaleDateString('ko-KR')}</span>
+                      <span><T korean="만기일: " english="Maturity Date: " />{new Date(bond.maturity_at).toLocaleDateString()}</span>
                     </div>
                   </div>
 
@@ -624,7 +624,7 @@ export function VirtualBondsCard({
                       <input type="hidden" name="bondId" value={bond.id} />
                       <SubmitButton size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-9">
                         <Coins className="mr-1.5 size-4" />
-                        만기 원리금 수령
+                        <T korean="만기 원리금 수령" english="Claim Payout" />
                       </SubmitButton>
                     </form>
                   )}
