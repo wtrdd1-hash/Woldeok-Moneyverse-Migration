@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminShopPage() {
-  await requireAdminConsole();
+  await requireAdminConsole('/admin/shop');
 
   const data = await apiOrNull<{ items: AdminShopItem[] }>('/api/v1/admin/shop/items');
   const items = data?.items || [];

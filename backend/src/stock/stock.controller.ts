@@ -88,6 +88,17 @@ export class StockController {
     return { series: await this.service().sparkSeries(requested) };
   }
 
+  /**
+   * The news that is moving the market (124): every event that is running,
+   * for one stock or the whole market. A member reads the direction the
+   * market is leaning and why; the figures behind it stay in the console.
+   */
+  @Get('market-events')
+  @ApiOperation({ summary: 'Market events currently in effect' })
+  async marketEvents() {
+    return { events: await this.service().marketEvents() };
+  }
+
   /** `limit` bounds the series, 1 to 240; the repository clamps it. */
   @Get(':id/prices')
   @ApiOperation({ summary: 'Recorded price history for one stock' })

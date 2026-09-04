@@ -64,7 +64,7 @@ export function AnnouncementEditor() {
           onChange={handleFileChange}
         />
         {previewUrl && (
-          <div className="mt-2.5 overflow-hidden rounded-xl border border-amber-500/40 bg-surface/50 p-1 w-fit">
+          <div className="mt-2.5 overflow-hidden rounded-xl border border-primary/40 bg-surface/50 p-1 w-fit">
             <img src={previewUrl} alt="선택한 이미지 미리보기" className="max-h-48 rounded-lg object-contain" />
           </div>
         )}
@@ -305,7 +305,7 @@ export function PhotoReviewQueue({
           </div>
           <CardContent className="grid gap-2.5 p-4">
             <div className="flex items-center justify-between gap-2">
-              <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-500 border-amber-500/30">
+              <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/30">
                 <T korean="검토 대기중" english="Pending Review" />
               </Badge>
               <span className="text-[0.75rem] text-muted-foreground">

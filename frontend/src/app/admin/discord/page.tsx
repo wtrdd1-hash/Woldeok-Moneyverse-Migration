@@ -44,7 +44,7 @@ export const metadata: Metadata = {
  * a list built from the route table alone would have left out.
  */
 export default async function AdminDiscordPage() {
-  await requireAdminConsole();
+  await requireAdminConsole(AREA.href);
   const console_ = await apiOrNull<{
     readonly outbox: AdminOutboxHealth;
     readonly routes: readonly AdminDiscordRoute[];

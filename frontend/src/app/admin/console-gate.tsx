@@ -77,13 +77,21 @@ export function EnrolSecondFactor({ disabled = false }: { readonly disabled?: bo
   );
 }
 
-export function OpenConsole({ disabled = false }: { readonly disabled?: boolean }) {
+export function OpenConsole({
+  disabled = false,
+  next = null,
+}: {
+  readonly disabled?: boolean;
+  /** Where to go once the console is open: the page that sent the operator here. */
+  readonly next?: string | null;
+}) {
   const [state, action] = useActionState(openConsole, IDLE);
   const [recoveryState, recover] = useActionState(openConsoleWithRecoveryCode, IDLE);
 
   return (
     <div className="grid gap-3">
       <form action={action} className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+        {next && <input type="hidden" name="next" value={next} />}
         <Field>
           <FieldLabel htmlFor="console-code">인증 앱 코드</FieldLabel>
           <Input
@@ -111,6 +119,7 @@ export function OpenConsole({ disabled = false }: { readonly disabled?: boolean 
         action={recover}
         className="grid gap-3 border-t pt-4 sm:grid-cols-[1fr_auto] sm:items-end"
       >
+        {next && <input type="hidden" name="next" value={next} />}
         <Field>
           <FieldLabel htmlFor="recovery-code">일회용 복구 코드</FieldLabel>
           <Input
