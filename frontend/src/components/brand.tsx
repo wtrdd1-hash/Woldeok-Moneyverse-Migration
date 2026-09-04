@@ -19,7 +19,7 @@ export function Brand({
   return (
     <Link
       href="/"
-      aria-label={locale === 'en' ? 'Woldeok Moneyverse home' : '\uC6d4\uB355 \uBA38\uB2C8\uBC84\uC2A4 \uD648'}
+      aria-label={locale === 'en' ? 'Woldeok Moneyverse home' : '월덕 머니버스 홈'}
       className={cn(
         'group shrink-0 inline-flex items-center gap-2 sm:gap-2.5 text-base sm:text-[19px] font-extrabold tracking-[-0.03em] sm:tracking-[-0.045em] transition-transform hover:scale-[1.02] whitespace-nowrap',
         tone === 'muted' ? 'text-foreground' : 'text-foreground',
@@ -42,9 +42,9 @@ export function Brand({
           </>
         ) : (
           <>
-            <span className="font-bold">\uC6d4\uB355</span>{' '}
+            <span className="font-bold">월덕</span>{' '}
             <strong className="font-black text-primary drop-shadow-sm">
-              \uBA38\uB2C8\uBC84\uC2A4
+              머니버스
             </strong>
           </>
         )}
