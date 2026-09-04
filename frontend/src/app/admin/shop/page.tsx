@@ -5,7 +5,7 @@ import { Accent } from '@/components/page-header';
 import { AdminSubNav } from '@/components/admin-sub-nav';
 import { apiOrNull } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
-import { AdminShopView } from './admin-shop-view';
+import { AdminShopView, type AdminShopItem } from './admin-shop-view';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default async function AdminShopPage() {
   await requireAdminConsole();
 
-  const data = await apiOrNull<{ items: any[] }>('/api/v1/admin/shop/items');
+  const data = await apiOrNull<{ items: AdminShopItem[] }>('/api/v1/admin/shop/items');
   const items = data?.items || [];
 
   return (

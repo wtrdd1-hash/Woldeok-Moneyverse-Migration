@@ -2,10 +2,10 @@
 
 import React, { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShoppingBag, Save, Search, CheckCircle, XCircle } from 'lucide-react';
+import { Save, Search, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
-interface AdminShopItem {
+export interface AdminShopItem {
   readonly id: string;
   readonly code: string;
   readonly name: string;
@@ -32,7 +32,7 @@ export function AdminShopView({ items }: AdminShopViewProps) {
   const [editActive, setEditActive] = useState<boolean>(true);
   const [editStock, setEditStock] = useState<string>('');
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const filtered = items.filter(
     (item) =>

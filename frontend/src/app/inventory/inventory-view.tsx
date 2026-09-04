@@ -2,18 +2,7 @@
 
 import React, { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Sparkles,
-  Shield,
-  Layers,
-  Award,
-  Crown,
-  Tag,
-  Check,
-  RotateCcw,
-  Zap,
-  Building,
-} from 'lucide-react';
+import { Check, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { AvatarWithCosmetics, NameplateWithTitle, type UserCosmetics } from '@/components/profile-cosmetics';
 
@@ -63,7 +52,7 @@ export function InventoryView({
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [actionStatus, setActionStatus] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const filtered = holdings.filter((h) => {
     if (selectedCategory === 'all') return true;

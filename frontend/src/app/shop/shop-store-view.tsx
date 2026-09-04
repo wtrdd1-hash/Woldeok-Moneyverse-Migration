@@ -74,7 +74,7 @@ export function ShopStoreView({
   const [buyingItem, setBuyingItem] = useState<CatalogItem | null>(null);
   const [buyQuantity, setBuyQuantity] = useState<number>(1);
   const [buyStatus, setBuyStatus] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
 
   const balanceNum = Number(userBalance) || 0;
 
