@@ -27,8 +27,8 @@ export default async function AdminUserDetailPage({
 }: {
   readonly params: Promise<{ readonly id: string }>;
 }) {
-  await requireAdminConsole();
   const { id } = await params;
+  await requireAdminConsole(`/admin/users/${encodeURIComponent(id)}`);
   const userId = decodeURIComponent(id);
 
   if (!UUID.test(userId)) return <InvalidUser />;

@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminDeliveryLogsPage() {
-  await requireAdminConsole();
+  await requireAdminConsole('/admin/logs/delivery');
   const outbox = await apiOrNull<{ events: OutboxEvent[] }>(
     '/api/v1/admin/discord-outbox-events',
   );

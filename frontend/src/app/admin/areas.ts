@@ -112,3 +112,29 @@ export function adminArea(href: string): AdminArea {
   if (!area) throw new Error(`no admin area for ${href}`);
   return area;
 }
+
+/** The area a console path belongs to, by longest prefix; null for the front door itself. */
+export function adminAreaFor(path: string): AdminArea | null {
+  let best: AdminArea | null = null;
+  for (const area of ADMIN_AREAS) {
+    const inside = path === area.href || path.startsWith(`${area.href}/`);
+    if (inside && (best === null || area.href.length > best.href.length)) best = area;
+  }
+  return best;
+}
+
+/**
+ * A console path the gate may send an operator back to.
+ *
+ * It arrives in the query string and in a form field, so it is checked
+ * rather than trusted: only a path under /admin, made of plain path
+ * characters, with no scheme, host, query or dot-segment that could turn
+ * "back to the page you came from" into "off to somewhere else". The front
+ * door itself is where the gate already is, so it answers null like anything
+ * unusable.
+ */
+const CONSOLE_PATH = /^\/admin(\/(?!\.+(?:\/|$))[A-Za-z0-9._~%-]+)+\/?$/;
+
+export function consoleReturnPath(value: unknown): string | null {
+  return typeof value === 'string' && CONSOLE_PATH.test(value) ? value : null;
+}

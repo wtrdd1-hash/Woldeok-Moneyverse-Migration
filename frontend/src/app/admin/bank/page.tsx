@@ -61,7 +61,7 @@ function ratePercent(bps: number): string {
 }
 
 export default async function AdminBankPage() {
-  await requireAdminConsole();
+  await requireAdminConsole(AREA.href);
   const console_ = await apiOrNull<{
     readonly overview: AdminBankOverview;
     readonly grades: readonly AdminCreditGrade[];

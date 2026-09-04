@@ -1,10 +1,12 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import type { ActionState } from '@/lib/action-state';
 import { api, apiWithCookie } from '@/lib/api';
 import { relaySetCookie } from '@/lib/cookie-relay';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
+import { consoleReturnPath } from './areas';
 import { STEP_UP_CODE, spendSecondFactorCode } from './step-up';
 
 /**
@@ -80,6 +82,10 @@ export async function openConsole(
     return { status: 'error', message: '인증 앱에 표시된 6자리 숫자를 입력해 주세요.' };
   }
 
+  // The page the gate turned away, if any. Checked, not trusted: it came
+  // from a form field.
+  const next = consoleReturnPath(formData.get('next'));
+
   try {
     await spendSecondFactorCode(code);
     const { setCookie } = await apiWithCookie<unknown>('/api/v1/admin/security/sessions', {
@@ -88,16 +94,20 @@ export async function openConsole(
     });
     await relaySetCookie(setCookie);
     revalidatePath('/admin');
-    return {
-      status: 'ok',
-      message: '운영 콘솔을 열었어요. 30분 뒤, 또는 10분간 조작이 없으면 잠깁니다.',
-    };
   } catch (error) {
     return failure(
       error,
       '콘솔을 열지 못했어요. 본인 확인이 최근 5분 안에 끝났는지, 허용된 주소인지 확인해 주세요.',
     );
   }
+
+  // Outside the try: redirect() works by throwing, and a catch above would
+  // report a successful open as a failure to open.
+  if (next) redirect(next);
+  return {
+    status: 'ok',
+    message: '운영 콘솔을 열었어요. 30분 뒤, 또는 10분간 조작이 없으면 잠깁니다.',
+  };
 }
 
 export async function openConsoleWithRecoveryCode(
@@ -108,6 +118,7 @@ export async function openConsoleWithRecoveryCode(
   if (!/^[A-Za-z0-9_-]{27}$/.test(code)) {
     return { status: 'error', message: '발급받은 복구 코드 형식을 확인해 주세요.' };
   }
+  const next = consoleReturnPath(formData.get('next'));
   try {
     const { setCookie } = await apiWithCookie<unknown>('/api/v1/admin/security/recovery-sessions', {
       method: 'POST',
@@ -116,16 +127,17 @@ export async function openConsoleWithRecoveryCode(
     });
     await relaySetCookie(setCookie);
     revalidatePath('/admin');
-    return {
-      status: 'ok',
-      message: '복구 코드를 사용해 운영 콘솔을 열었어요. 이 코드는 폐기됐습니다.',
-    };
   } catch (error) {
     return failure(
       error,
       '복구 코드가 올바르지 않거나 잠겨 있어요. 최근 본인 확인도 확인해 주세요.',
     );
   }
+  if (next) redirect(next);
+  return {
+    status: 'ok',
+    message: '복구 코드를 사용해 운영 콘솔을 열었어요. 이 코드는 폐기됐습니다.',
+  };
 }
 
 export async function issueRecoveryCodes(

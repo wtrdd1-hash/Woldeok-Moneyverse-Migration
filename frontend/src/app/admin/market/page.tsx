@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminMarketPage() {
-  await requireAdminConsole();
+  await requireAdminConsole(AREA.href);
   const stocks = await apiOrNull<{ stocks: AdminStock[] }>('/api/v1/admin/stocks');
 
   return (
