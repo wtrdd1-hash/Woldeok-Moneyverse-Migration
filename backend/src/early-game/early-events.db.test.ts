@@ -407,8 +407,12 @@ describe.skipIf(!DATABASE_URL)('the early game events against a real database', 
 
         expect(flow.rows).toHaveLength(7);
         expect(flow.rows.filter((row) => !row.step_verified)).toHaveLength(2);
+        // The step's own target is 16.1's five (103 seeds it so), clamped to
+        // what the catalogue can offer. It equalled the catalogue's count only
+        // while the catalogue had fewer than five careers; 115 seeds ten, and
+        // five of ten is the step asking for what was always meant.
         expect(flow.rows.find((row) => row.step_code === 'job_sampler')?.step_target).toBe(
-          jobs.rows[0]?.count,
+          String(Math.min(5, Number(jobs.rows[0]?.count))),
         );
       });
     });
