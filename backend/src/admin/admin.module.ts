@@ -9,6 +9,7 @@ import { CONFIG } from '../core/config';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import { StockModule } from '../stock/stock.module';
+import { EncryptionService } from '../security/encryption.service';
 import { AdminController } from './admin.controller';
 import { AdminRepository } from './admin.repository';
 import { AdminAuditController } from './audit.controller';
@@ -62,9 +63,9 @@ function devicePepper(config: AppConfig): string {
   providers: [
     {
       provide: AdminService,
-      inject: [PG_POOL],
-      useFactory: (pool: Queryable | null) =>
-        pool ? new AdminService({ repository: new AdminRepository(pool) }) : null,
+      inject: [PG_POOL, EncryptionService],
+      useFactory: (pool: Queryable | null, encryption: EncryptionService) =>
+        pool ? new AdminService({ repository: new AdminRepository(pool, encryption) }) : null,
     },
     {
       provide: AuditRepository,

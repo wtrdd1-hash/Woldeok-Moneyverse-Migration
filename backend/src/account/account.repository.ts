@@ -1,5 +1,6 @@
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
+import { EncryptionService } from '../security/encryption.service';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DISCORD_SNOWFLAKE = /^\d{16,22}$/;
@@ -130,16 +131,18 @@ export interface AccountRepository {
  */
 export class PostgresAccountRepository implements AccountRepository {
   readonly pool: Queryable;
+  readonly encryptionService: EncryptionService;
 
-  constructor(pool: Queryable) {
+  constructor(pool: Queryable, encryptionService?: EncryptionService) {
     if (!pool || typeof pool.query !== 'function')
       throw new TypeError('a PostgreSQL pool is required');
     this.pool = pool;
+    this.encryptionService = encryptionService ?? new EncryptionService();
   }
 
   async linkedIdentities(actorUserId: unknown): Promise<readonly LinkedIdentityRow[]> {
     const actor = requireAccountUuid(actorUserId, 'authenticated user id');
-    return queryRows<LinkedIdentityRow>(
+    const rows = await queryRows<LinkedIdentityRow>(
       this.pool,
       `SELECT
          identity_id::text AS identity_id,
@@ -149,6 +152,10 @@ export class PostgresAccountRepository implements AccountRepository {
        FROM public.account_list_my_identities($1)`,
       [actor],
     );
+    return rows.map((r) => ({
+      ...r,
+      display_name: this.encryptionService.decrypt(r.display_name) ?? r.display_name,
+    }));
   }
 
   async linkVerifiedIdentity({
@@ -161,6 +168,8 @@ export class PostgresAccountRepository implements AccountRepository {
     const verifiedProvider = requireIdentityProvider(provider);
     const verifiedSubject = requireVerifiedSubject(verifiedProvider, providerSubject);
     const verifiedDisplayName = normalizeVerifiedDisplayName(displayName);
+    const encryptedSubject = this.encryptionService.encryptDeterministic(verifiedSubject) ?? verifiedSubject;
+    const encryptedDisplayName = this.encryptionService.encrypt(verifiedDisplayName) ?? verifiedDisplayName;
     const row = await queryOne<LinkOAuthIdentityRow>(
       this.pool,
       `SELECT
@@ -169,11 +178,14 @@ export class PostgresAccountRepository implements AccountRepository {
          display_name,
          linked
        FROM public.account_link_oauth_identity($1, $2::public.identity_provider, $3, $4)`,
-      [actor, verifiedProvider, verifiedSubject, verifiedDisplayName],
+      [actor, verifiedProvider, encryptedSubject, encryptedDisplayName],
     );
     if (!row || !row.identity_id)
       throw new Error('database did not return an identity-link receipt');
-    return row;
+    return {
+      ...row,
+      display_name: verifiedDisplayName,
+    };
   }
 
   async unlinkIdentity({

@@ -5,6 +5,7 @@ import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import { WalletModule } from '../wallet/wallet.module';
 import { WalletService } from '../wallet/wallet.service';
+import { EncryptionService } from '../security/encryption.service';
 import { DISCORD_INTERACTION_HANDLER, DiscordController } from './discord.controller';
 import { PostgresDiscordCommandAuditRepository } from './command-audit.repository';
 import { PostgresDiscordIdentityRepository } from './identity.repository';
@@ -16,21 +17,21 @@ import { createPostgresDiscordRateLimiter } from './rate-limiter';
   controllers: [DiscordController],
   providers: [
     {
-      // Interaction requests are public by Discord's design, so this boundary
-      // exists only after complete, fail-closed configuration. The pool is
-      // part of that configuration now and not only a wallet dependency: the
-      // rate limiter counts in the database, and an endpoint with nowhere to
-      // count is an endpoint with no limit.
       provide: DISCORD_INTERACTION_HANDLER,
-      inject: [CONFIG, PG_POOL, WalletService],
-      useFactory: (config: AppConfig, pool: Queryable | null, wallet: WalletService | null) => {
+      inject: [CONFIG, PG_POOL, WalletService, EncryptionService],
+      useFactory: (
+        config: AppConfig,
+        pool: Queryable | null,
+        wallet: WalletService | null,
+        encryption: EncryptionService,
+      ) => {
         const interactions = config.discordInteractions;
         if (!interactions.enabled || !pool || !wallet) return null;
         const logger = new Logger('DiscordInteractions');
         return createDiscordInteractionHandler({
           publicKey: interactions.publicKey,
           policy: interactions.policy,
-          identityRepository: new PostgresDiscordIdentityRepository(pool),
+          identityRepository: new PostgresDiscordIdentityRepository(pool, encryption),
           walletService: wallet,
           rateLimiter: createPostgresDiscordRateLimiter({
             pool,
@@ -45,9 +46,6 @@ import { createPostgresDiscordRateLimiter } from './rate-limiter';
               ),
           }),
           commandAuditor: new PostgresDiscordCommandAuditRepository(pool),
-          // A lost audit row is the one failure this boundary reports out loud
-          // rather than swallowing into the member's reply: nothing else would
-          // ever notice it.
           onAuditError: (error) =>
             logger.error(
               `command audit write failed: ${

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
+import { EncryptionService } from '../security/encryption.service';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -118,9 +119,11 @@ interface AuditIdRow {
 @Injectable()
 export class AdminRepository {
   readonly pool: Queryable;
+  readonly encryptionService: EncryptionService;
 
-  constructor(pool: Queryable) {
+  constructor(pool: Queryable, encryptionService?: EncryptionService) {
     this.pool = pool;
+    this.encryptionService = encryptionService ?? new EncryptionService();
   }
 
   async currentRoles({ userId }: { userId: unknown }): Promise<string[]> {
@@ -168,7 +171,7 @@ export class AdminRepository {
     return rows.map((r) => ({
       user_id: String(r.user_id),
       status: String(r.status),
-      display_name: String(r.display_name),
+      display_name: this.encryptionService.decrypt(String(r.display_name)) ?? String(r.display_name),
       created_at: r.created_at as Date,
       restricted_at: (r.restricted_at as Date) ?? null,
       restriction_reason: (r.restriction_reason as string) ?? null,
@@ -195,7 +198,17 @@ export class AdminRepository {
       'SELECT public.admin_get_user_portfolio($1, $2)',
       [actorUserId, targetUserId],
     );
-    return row?.admin_get_user_portfolio ?? null;
+    const data = row?.admin_get_user_portfolio ?? null;
+    if (
+      data &&
+      typeof data === 'object' &&
+      'displayName' in data &&
+      typeof (data as { displayName: unknown }).displayName === 'string'
+    ) {
+      const obj = data as { displayName: string };
+      obj.displayName = this.encryptionService.decrypt(obj.displayName) ?? obj.displayName;
+    }
+    return data;
   }
 
   async recentDiscordOutboxEvents({

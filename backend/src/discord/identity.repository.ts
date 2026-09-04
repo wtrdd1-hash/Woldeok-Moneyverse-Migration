@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne } from '../core/db';
+import { EncryptionService } from '../security/encryption.service';
 
 const DISCORD_SNOWFLAKE = /^\d{16,22}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -26,7 +27,6 @@ function internalUserId(value: string): string {
   return value.toLowerCase();
 }
 
-// public.discord_user_for_subject($1)::text AS user_id
 interface DiscordUserForSubjectRow {
   user_id: string | null;
 }
@@ -42,19 +42,22 @@ interface DiscordUserForSubjectRow {
 @Injectable()
 export class PostgresDiscordIdentityRepository {
   readonly pool: Queryable;
+  readonly encryptionService: EncryptionService;
 
-  constructor(pool: Queryable) {
+  constructor(pool: Queryable, encryptionService?: EncryptionService) {
     if (!pool || typeof pool.query !== 'function')
       throw new TypeError('a PostgreSQL pool is required');
     this.pool = pool;
+    this.encryptionService = encryptionService ?? new EncryptionService();
   }
 
   async userIdForDiscordUser(discordUserId: unknown): Promise<string | null> {
     const subject = discordSnowflake(discordUserId);
+    const encryptedSubject = this.encryptionService.encryptDeterministic(subject) ?? subject;
     const row = await queryOne<DiscordUserForSubjectRow>(
       this.pool,
       'SELECT public.discord_user_for_subject($1)::text AS user_id',
-      [subject],
+      [encryptedSubject],
     );
     return row?.user_id ? internalUserId(row.user_id) : null;
   }

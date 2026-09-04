@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne } from '../core/db';
 import { randomToken, sha256 } from './crypto';
+import { EncryptionService } from '../security/encryption.service';
 
 const SESSION_INTERVAL = "interval '30 days'";
 
@@ -142,9 +143,11 @@ export interface CompletedOAuthLogin extends CompletedOAuthLoginRow {
 @Injectable()
 export class SessionRepository {
   readonly pool: Queryable;
+  readonly encryptionService: EncryptionService;
 
-  constructor(pool: Queryable) {
+  constructor(pool: Queryable, encryptionService?: EncryptionService) {
     this.pool = pool;
+    this.encryptionService = encryptionService ?? new EncryptionService();
   }
 
   async create(): Promise<CreatedSession> {
@@ -342,10 +345,12 @@ export class SessionRepository {
   }): Promise<CompletedOAuthLogin> {
     const token = randomToken();
     const csrfToken = randomToken();
+    const encryptedSubject = this.encryptionService.encryptDeterministic(subject) ?? subject;
+    const encryptedDisplayName = this.encryptionService.encrypt(displayName) ?? displayName;
     const login = await queryOne<CompletedOAuthLoginRow>(
       this.pool,
       `SELECT * FROM auth_complete_oauth_login($1,$2,$3,$4,$5,$6)`,
-      [preAuthSessionId, provider, subject, displayName, sha256(token), sha256(csrfToken)],
+      [preAuthSessionId, provider, encryptedSubject, encryptedDisplayName, sha256(token), sha256(csrfToken)],
     );
     if (!login) throw new Error('OAuth login was not completed');
     await this.pool.query(
@@ -361,10 +366,11 @@ export class SessionRepository {
     provider: string,
     subject: string,
   ): Promise<boolean> {
+    const encryptedSubject = this.encryptionService.encryptDeterministic(subject) ?? subject;
     const row = await queryOne<{ readonly reauthenticated: boolean }>(
       this.pool,
       'SELECT public.auth_mark_session_reauthenticated($1,$2::public.identity_provider,$3) AS reauthenticated',
-      [sessionId, provider, subject],
+      [sessionId, provider, encryptedSubject],
     );
     return row?.reauthenticated === true;
   }

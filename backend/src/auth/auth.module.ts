@@ -1,6 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
+import { EncryptionService } from '../security/encryption.service';
 import { AdminRolesRepository } from './admin-roles.repository';
 import { AdminGuard } from './guards/admin.guard';
 import { AdminSessionGuard } from './guards/admin-session.guard';
@@ -43,8 +44,9 @@ const GUARDS = [
     },
     {
       provide: SessionRepository,
-      inject: [PG_POOL],
-      useFactory: (pool: Queryable | null) => (pool ? new SessionRepository(pool) : null),
+      inject: [PG_POOL, EncryptionService],
+      useFactory: (pool: Queryable | null, encryption: EncryptionService) =>
+        pool ? new SessionRepository(pool, encryption) : null,
     },
     {
       provide: SecondFactorRepository,
