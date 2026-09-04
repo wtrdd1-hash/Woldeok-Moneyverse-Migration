@@ -389,18 +389,8 @@ $$;
 -- Trades move the price in proportion to what they took
 -- ---------------------------------------------------------------------------
 
--- 053's stock_trade, unchanged except where marked: the halt check after
--- the replay lookup, and the impact.
---
--- THE ORDER FILLS AT THE MOVED PRICE. 053 filled at the quoted price and
--- moved the market afterwards, which was harmless while the move was a flat
--- one percent matched by the one-percent sell tax. With a move that grows
--- with the order it would be a spread anyone could pocket: buy three percent
--- of the float at 100, watch the price become 105, sell the same shares at
--- 105 and back to 100, keep four percent of the gross from the sink, repeat.
--- So the impact is computed first and the taker pays it -- a buy fills at
--- the price it pushed to, a sell at the price it pushed down to -- which is
--- what slippage means and what makes a round trip cost money.
+-- 053's stock_trade, unchanged except where marked: the halt check at the
+-- top, and the impact at the bottom.
 CREATE OR REPLACE FUNCTION public.stock_trade(
   p_key uuid, p_actor uuid, p_stock uuid, p_side text, p_quantity bigint
 )
@@ -457,20 +447,7 @@ BEGIN
   WHERE stock_row.id = p_stock AND stock_row.active
   FOR UPDATE;
   IF v_price IS NULL THEN RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'active stock required'; END IF;
-
-  -- 124: the impact is the share of the float this order takes, in basis
-  -- points per percent, capped; not 053's flat one percent. A buy of one
-  -- share in a float of a million moves nothing, which is right. It is
-  -- computed here, before the fill, because the fill is at this price.
-  SELECT * INTO prm FROM public.virtual_stock_market_params WHERE id = 1;
-  v_impact_bps := least(prm.impact_cap_bps,
-                        prm.impact_bps_per_float_percent * (p_quantity::numeric * 100 / greatest(v_shares, 1)));
-  v_exact := v_price * (1 + CASE WHEN p_side = 'buy' THEN v_impact_bps ELSE -v_impact_bps END / 10000.0);
-  v_low := greatest(10, v_open * (1 - prm.day_range_cap_bps / 10000.0));
-  v_high := v_open * (1 + prm.day_range_cap_bps / 10000.0);
-  v_exact := greatest(v_low, least(v_high, v_exact));
-  v_next := round(v_exact)::bigint;
-  v_gross := v_next * p_quantity;
+  v_gross := v_price * p_quantity;
 
   SELECT account_row.id INTO v_cash FROM public.accounts AS account_row
   WHERE account_row.owner_user_id = p_actor AND account_row.account_type = 'USER_CASH'::public.account_type
@@ -533,7 +510,7 @@ BEGIN
 
   IF p_side = 'buy' THEN
     INSERT INTO public.virtual_stock_positions(user_id, stock_id, quantity, average_cost)
-    VALUES(p_actor, p_stock, p_quantity, v_next)
+    VALUES(p_actor, p_stock, p_quantity, v_price)
     ON CONFLICT(user_id, stock_id) DO UPDATE
     SET average_cost = ((virtual_stock_positions.quantity * virtual_stock_positions.average_cost + excluded.quantity * excluded.average_cost) / (virtual_stock_positions.quantity + excluded.quantity)),
         quantity = virtual_stock_positions.quantity + excluded.quantity, updated_at = now();
@@ -544,8 +521,20 @@ BEGIN
   END IF;
 
   INSERT INTO public.virtual_stock_trades(idempotency_key, user_id, stock_id, side, quantity, unit_price, gross_amount, tax_amount)
-  VALUES(p_key, p_actor, p_stock, p_side, p_quantity, v_next, v_gross, v_tax)
+  VALUES(p_key, p_actor, p_stock, p_side, p_quantity, v_price, v_gross, v_tax)
   RETURNING id INTO v_trade;
+
+  -- 124: the impact is the share of the float this order took, in basis
+  -- points per percent, capped; not 053's flat one percent. A buy of one
+  -- share in a float of a million moves nothing, which is right.
+  SELECT * INTO prm FROM public.virtual_stock_market_params WHERE id = 1;
+  v_impact_bps := least(prm.impact_cap_bps,
+                        prm.impact_bps_per_float_percent * (p_quantity::numeric * 100 / greatest(v_shares, 1)));
+  v_exact := v_price * (1 + CASE WHEN p_side = 'buy' THEN v_impact_bps ELSE -v_impact_bps END / 10000.0);
+  v_low := greatest(10, v_open * (1 - prm.day_range_cap_bps / 10000.0));
+  v_high := v_open * (1 + prm.day_range_cap_bps / 10000.0);
+  v_exact := greatest(v_low, least(v_high, v_exact));
+  v_next := round(v_exact)::bigint;
 
   UPDATE public.virtual_stocks AS stock_row SET current_price = v_next, updated_at = now() WHERE stock_row.id = p_stock;
 
@@ -557,7 +546,7 @@ BEGIN
       updated_at = clock_timestamp()
   WHERE dynamics.stock_id = p_stock;
 
-  RETURN QUERY SELECT v_trade, v_next, v_gross, v_tax, v_next;
+  RETURN QUERY SELECT v_trade, v_price, v_gross, v_tax, v_next;
 END;
 $$;
 
