@@ -10,14 +10,9 @@ import {
   Compass,
   Dices,
   Landmark,
-  Layers,
-  Lightbulb,
-  ListChecks,
-  ShieldCheck,
   Sparkles,
   Store,
   TrendingUp,
-  WalletCards,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
