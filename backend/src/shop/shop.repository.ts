@@ -262,7 +262,14 @@ export class ShopCatalogRepository {
               holding.preview_data,
               holding.is_equipped,
               holding.equipped_slot,
-              holding.serial_number
+              holding.serial_number,
+              holding.durable,
+              holding.weekly_cost::text AS weekly_cost,
+              holding.effect_expires_at,
+              holding.unpaid_weeks,
+              holding.arrears_due::text AS arrears_due,
+              holding.arrears_cap::text AS arrears_cap,
+              holding.suspended
        FROM public.shop_my_items_v2($1) AS holding`,
       [actorUserId],
     );

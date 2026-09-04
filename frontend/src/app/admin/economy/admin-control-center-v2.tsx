@@ -159,7 +159,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
       <div className={`p-6 rounded-2xl border transition-all duration-300 shadow-xl ${
         policy.master_killswitch_active
           ? 'bg-rose-950/40 border-rose-600/80 shadow-rose-950/50 text-rose-100'
-          : 'bg-slate-900/80 border-slate-800 text-slate-100'
+          : 'bg-card border-border text-foreground'
       }`}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-1">
@@ -173,7 +173,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
                   : '🛡️ 가상경제 통합 관제 센터 2.0 (정상 가동)'}
               </h2>
             </div>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-muted-foreground">
               비상 시 통화 인플레이션 차단 및 모듈별(금융·사업·거래소) 서킷 브레이커를 즉각 발동할 수 있습니다.
             </p>
           </div>
@@ -196,69 +196,69 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
         </div>
 
         {/* Sub Circuit Breakers */}
-        <div className="mt-6 pt-6 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+        <div className="mt-6 pt-6 border-t border-border grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-muted/60 border border-border">
             <div className="text-xs">
-              <div className="font-semibold text-slate-200">🏦 금융 서킷브레이커</div>
-              <div className="text-slate-400 mt-0.5">예금·대출·국채 발행</div>
+              <div className="font-semibold text-foreground">🏦 금융 서킷브레이커</div>
+              <div className="text-muted-foreground mt-0.5">예금·대출·국채 발행</div>
             </div>
             <button
               type="button"
               disabled={isPending}
               onClick={() => handleToggleKillswitch('financial', policy.banking_circuit_broken)}
               className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${
-                policy.banking_circuit_broken ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                policy.banking_circuit_broken ? 'bg-rose-600 text-white' : 'bg-muted text-foreground hover:bg-muted/70'
               }`}
             >
               {policy.banking_circuit_broken ? '차단됨' : '정상'}
             </button>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-muted/60 border border-border">
             <div className="text-xs">
-              <div className="font-semibold text-slate-200">🏢 사업체 서킷브레이커</div>
-              <div className="text-slate-400 mt-0.5">지분 거래·배당 집행</div>
+              <div className="font-semibold text-foreground">🏢 사업체 서킷브레이커</div>
+              <div className="text-muted-foreground mt-0.5">지분 거래·배당 집행</div>
             </div>
             <button
               type="button"
               disabled={isPending}
               onClick={() => handleToggleKillswitch('business', policy.businesses_circuit_broken)}
               className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${
-                policy.businesses_circuit_broken ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                policy.businesses_circuit_broken ? 'bg-rose-600 text-white' : 'bg-muted text-foreground hover:bg-muted/70'
               }`}
             >
               {policy.businesses_circuit_broken ? '차단됨' : '정상'}
             </button>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-muted/60 border border-border">
             <div className="text-xs">
-              <div className="font-semibold text-slate-200">📈 거래소 서킷브레이커</div>
-              <div className="text-slate-400 mt-0.5">가상 주식 매매</div>
+              <div className="font-semibold text-foreground">📈 거래소 서킷브레이커</div>
+              <div className="text-muted-foreground mt-0.5">가상 주식 매매</div>
             </div>
             <button
               type="button"
               disabled={isPending}
               onClick={() => handleToggleKillswitch('exchange', policy.market_circuit_broken)}
               className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${
-                policy.market_circuit_broken ? 'bg-rose-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                policy.market_circuit_broken ? 'bg-rose-600 text-white' : 'bg-muted text-foreground hover:bg-muted/70'
               }`}
             >
               {policy.market_circuit_broken ? '차단됨' : '정상'}
             </button>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-muted/60 border border-border">
             <div className="text-xs">
-              <div className="font-semibold text-slate-200">🤖 스마트 자동 밸런싱</div>
-              <div className="text-slate-400 mt-0.5">AI 통화량 자율 제어</div>
+              <div className="font-semibold text-foreground">🤖 스마트 자동 밸런싱</div>
+              <div className="text-muted-foreground mt-0.5">AI 통화량 자율 제어</div>
             </div>
             <button
               type="button"
               disabled={isPending}
               onClick={() => handleToggleKillswitch('auto_balancing', policy.auto_balancing_active)}
               className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${
-                policy.auto_balancing_active ? 'bg-cyan-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                policy.auto_balancing_active ? 'bg-cyan-600 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/70'
               }`}
             >
               {policy.auto_balancing_active ? '자동 ON' : '수동 OFF'}
@@ -279,21 +279,21 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
 
       {/* 2. Macro Indicators & Glassmorphism Flow Chart */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-md border border-slate-800/80 shadow-xl space-y-3">
-          <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">M2 총 유효 통화량</span>
+        <div className="p-6 rounded-2xl bg-card backdrop-blur-md border border-border shadow-xl space-y-3">
+          <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">M2 총 유효 통화량</span>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-white">{formatNumber(data.m2_supply)}</span>
-            <span className="text-sm font-bold text-amber-400">WLD</span>
+            <span className="text-3xl font-black text-foreground">{formatNumber(data.m2_supply)}</span>
+            <span className="text-sm font-bold text-primary">WLD</span>
           </div>
-          <div className="pt-2 text-xs text-slate-400 flex justify-between border-t border-slate-800">
+          <div className="pt-2 text-xs text-muted-foreground flex justify-between border-t border-border">
             <span>시중 현금: {formatNumber(data.cash_total)} WLD</span>
             <span>은행 예금: {formatNumber(data.bank_total)} WLD</span>
           </div>
         </div>
 
-        <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-md border border-slate-800/80 shadow-xl space-y-3">
+        <div className="p-6 rounded-2xl bg-card backdrop-blur-md border border-border shadow-xl space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">24시간 넷 플로우</span>
+            <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">24시간 넷 플로우</span>
             {data.inflation_alert && (
               <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse">
                 인플레이션 위험
@@ -304,21 +304,21 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             <span className={`text-3xl font-black ${netFlow >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
               {netFlow > 0 ? `+${formatNumber(netFlow)}` : formatNumber(netFlow)}
             </span>
-            <span className="text-sm font-bold text-slate-400">WLD / 24h</span>
+            <span className="text-sm font-bold text-muted-foreground">WLD / 24h</span>
           </div>
-          <div className="pt-2 text-xs text-slate-400 flex justify-between border-t border-slate-800">
+          <div className="pt-2 text-xs text-muted-foreground flex justify-between border-t border-border">
             <span className="text-cyan-400">발행: +{formatNumber(faucetToday)} WLD</span>
-            <span className="text-amber-400">소모: -{formatNumber(sinkToday)} WLD</span>
+            <span className="text-primary">소모: -{formatNumber(sinkToday)} WLD</span>
           </div>
         </div>
 
-        <div className="p-6 rounded-2xl bg-slate-900/60 backdrop-blur-md border border-slate-800/80 shadow-xl space-y-3">
-          <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">금융 포털 수신고 현황</span>
+        <div className="p-6 rounded-2xl bg-card backdrop-blur-md border border-border shadow-xl space-y-3">
+          <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">금융 포털 수신고 현황</span>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-black text-sky-400">{formatNumber(data.bonds_stats.holding_principal)}</span>
-            <span className="text-sm font-bold text-slate-400">WLD 국채 잔존</span>
+            <span className="text-sm font-bold text-muted-foreground">WLD 국채 잔존</span>
           </div>
-          <div className="pt-2 text-xs text-slate-400 flex justify-between border-t border-slate-800">
+          <div className="pt-2 text-xs text-muted-foreground flex justify-between border-t border-border">
             <span>국채 {data.bonds_stats.holding_count}건 보유</span>
             <span className="text-rose-400">대출 잔존: {formatNumber(data.loans_stats.active_outstanding)} WLD</span>
           </div>
@@ -326,17 +326,17 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
       </div>
 
       {/* Glassmorphism SVG Faucet vs Sink Flow Chart */}
-      <div className="p-6 rounded-2xl bg-slate-900/70 backdrop-blur-md border border-slate-800/80 shadow-xl space-y-6">
+      <div className="p-6 rounded-2xl bg-card backdrop-blur-md border border-border shadow-xl space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <h3 className="text-base font-bold text-foreground flex items-center gap-2">
               🌊 실시간 유입(Faucet) vs 회수(Sink) 다이내믹 플로우 차트
             </h3>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               직업/보상/퀘스트 유입량 대비 상점/수수료/카지노/세금의 소모율을 비교합니다.
             </p>
           </div>
-          <div className="text-xs text-slate-300 font-mono bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
+          <div className="text-xs text-foreground/80 font-mono bg-background px-3 py-1.5 rounded-lg border border-border">
             비율: {sinkToday > 0 ? (faucetToday / sinkToday).toFixed(2) : '∞'} : 1
           </div>
         </div>
@@ -346,9 +346,9 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
           <div>
             <div className="flex justify-between text-xs font-medium mb-1.5">
               <span className="text-cyan-400 font-semibold">💧 유입 통화 (Faucet): +{formatNumber(faucetToday)} WLD</span>
-              <span className="text-slate-400">{faucetPercent}%</span>
+              <span className="text-muted-foreground">{faucetPercent}%</span>
             </div>
-            <div className="w-full h-3.5 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-800">
+            <div className="w-full h-3.5 bg-background rounded-full overflow-hidden p-0.5 border border-border">
               <div
                 className="h-full bg-gradient-to-r from-cyan-600 to-sky-400 rounded-full transition-all duration-500"
                 style={{ width: `${faucetPercent}%` }}
@@ -358,12 +358,12 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
 
           <div>
             <div className="flex justify-between text-xs font-medium mb-1.5">
-              <span className="text-amber-400 font-semibold">🔥 소모/회수 통화 (Sink): -{formatNumber(sinkToday)} WLD</span>
-              <span className="text-slate-400">{sinkPercent}%</span>
+              <span className="text-primary font-semibold">🔥 소모/회수 통화 (Sink): -{formatNumber(sinkToday)} WLD</span>
+              <span className="text-muted-foreground">{sinkPercent}%</span>
             </div>
-            <div className="w-full h-3.5 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-800">
+            <div className="w-full h-3.5 bg-background rounded-full overflow-hidden p-0.5 border border-border">
               <div
-                className="h-full bg-gradient-to-r from-amber-600 to-orange-400 rounded-full transition-all duration-500"
+                className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-all duration-500"
                 style={{ width: `${sinkPercent}%` }}
               />
             </div>
@@ -372,20 +372,20 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
       </div>
 
       {/* 3. Smart Auto-Balancing & Economic Knobs Tuning (A4) */}
-      <div className="p-6 rounded-2xl bg-slate-900/70 backdrop-blur-md border border-slate-800/80 shadow-xl space-y-6">
+      <div className="p-6 rounded-2xl bg-card backdrop-blur-md border border-border shadow-xl space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <h3 className="text-base font-bold text-foreground flex items-center gap-2">
               ⚙️ 스마트 자동 밸런싱 & 경제 정책 금리 튜닝 (A4)
             </h3>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               자동 모드가 켜져 있으면 인플레이션 발생 시 시스템이 자율적으로 금리를 인상합니다. 관리자가 즉시 수동 오버라이드할 수도 있습니다.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400">자동 제어 모드:</span>
+            <span className="text-xs text-muted-foreground">자동 제어 모드:</span>
             <span className={`px-2.5 py-1 text-xs font-bold rounded-lg ${
-              policy.auto_balancing_active ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'bg-slate-800 text-slate-400'
+              policy.auto_balancing_active ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'bg-muted text-muted-foreground'
             }`}>
               {policy.auto_balancing_active ? '자율 조절 ON' : '수동 조절만 허용'}
             </span>
@@ -395,9 +395,9 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
         <form onSubmit={handleUpdateKnobs} className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Daily Deposit Interest */}
-            <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
+            <div className="p-4 rounded-xl bg-muted/60 border border-border space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-slate-300">일일 복리 예금 금리</span>
+                <span className="font-semibold text-foreground/80">일일 복리 예금 금리</span>
                 <span className="font-mono text-cyan-400 font-bold">{(depositRateBps / 100).toFixed(2)}% / 일</span>
               </div>
               <input
@@ -409,7 +409,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
                 onChange={e => setDepositRateBps(Number(e.target.value))}
                 className="w-full accent-cyan-500"
               />
-              <div className="flex justify-between text-[11px] text-slate-500">
+              <div className="flex justify-between text-[11px] text-muted-foreground/70">
                 <span>0.0%</span>
                 <span>{depositRateBps} bps</span>
                 <span>5.0%</span>
@@ -417,9 +417,9 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             </div>
 
             {/* 7-day Bond Yield */}
-            <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
+            <div className="p-4 rounded-xl bg-muted/60 border border-border space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-slate-300">7일 국채 만기 수익률</span>
+                <span className="font-semibold text-foreground/80">7일 국채 만기 수익률</span>
                 <span className="font-mono text-sky-400 font-bold">{(bond7dBps / 100).toFixed(1)}%</span>
               </div>
               <input
@@ -431,7 +431,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
                 onChange={e => setBond7dBps(Number(e.target.value))}
                 className="w-full accent-sky-500"
               />
-              <div className="flex justify-between text-[11px] text-slate-500">
+              <div className="flex justify-between text-[11px] text-muted-foreground/70">
                 <span>0.0%</span>
                 <span>{bond7dBps} bps</span>
                 <span>10.0%</span>
@@ -439,9 +439,9 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             </div>
 
             {/* 30-day Bond Yield */}
-            <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
+            <div className="p-4 rounded-xl bg-muted/60 border border-border space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-slate-300">30일 국채 만기 수익률</span>
+                <span className="font-semibold text-foreground/80">30일 국채 만기 수익률</span>
                 <span className="font-mono text-indigo-400 font-bold">{(bond30dBps / 100).toFixed(1)}%</span>
               </div>
               <input
@@ -453,7 +453,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
                 onChange={e => setBond30dBps(Number(e.target.value))}
                 className="w-full accent-indigo-500"
               />
-              <div className="flex justify-between text-[11px] text-slate-500">
+              <div className="flex justify-between text-[11px] text-muted-foreground/70">
                 <span>0.0%</span>
                 <span>{bond30dBps} bps</span>
                 <span>20.0%</span>
@@ -461,10 +461,10 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             </div>
 
             {/* Loan Daily Rate */}
-            <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
+            <div className="p-4 rounded-xl bg-muted/60 border border-border space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-slate-300">대출 일일 이자율</span>
-                <span className="font-mono text-amber-400 font-bold">{(loanRateBps / 100).toFixed(2)}% / 일</span>
+                <span className="font-semibold text-foreground/80">대출 일일 이자율</span>
+                <span className="font-mono text-primary font-bold">{(loanRateBps / 100).toFixed(2)}% / 일</span>
               </div>
               <input
                 type="range"
@@ -473,9 +473,9 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
                 step="5"
                 value={loanRateBps}
                 onChange={e => setLoanRateBps(Number(e.target.value))}
-                className="w-full accent-amber-500"
+                className="w-full accent-primary"
               />
-              <div className="flex justify-between text-[11px] text-slate-500">
+              <div className="flex justify-between text-[11px] text-muted-foreground/70">
                 <span>0.0%</span>
                 <span>{loanRateBps} bps</span>
                 <span>10.0%</span>
@@ -496,12 +496,12 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
       </div>
 
       {/* 4. User Asset Inspector & Manual Override Console (A4: Max Intervention) */}
-      <div className="p-6 rounded-2xl bg-slate-900/70 backdrop-blur-md border border-slate-800/80 shadow-xl space-y-6">
+      <div className="p-6 rounded-2xl bg-card backdrop-blur-md border border-border shadow-xl space-y-6">
         <div>
-          <h3 className="text-base font-bold text-white flex items-center gap-2">
+          <h3 className="text-base font-bold text-foreground flex items-center gap-2">
             🔍 유저 자산 정밀 인스펙터 & 1 WLD 단위 강제 개입 콘솔 (A4)
           </h3>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             관리자가 특정 사용자의 지갑, 예금, 대출, 직업, 사업체를 원스톱 조회하고 1 WLD 단위로 강제 회수/지급을 원장에 복식부기로 집행합니다.
           </p>
         </div>
@@ -513,12 +513,12 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             placeholder="유저 UUID (예: 39fd17cf-8325-427d-a0c9-39688fa0a748)"
             value={searchUserId}
             onChange={e => setSearchUserId(e.target.value)}
-            className="flex-1 px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-500"
+            className="flex-1 px-4 py-2.5 rounded-xl bg-background border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-cyan-500"
           />
           <button
             type="submit"
             disabled={inspectLoading || !searchUserId.trim()}
-            className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm transition-colors disabled:opacity-50"
+            className="px-5 py-2.5 rounded-xl bg-muted hover:bg-muted/70 text-foreground font-semibold text-sm transition-colors disabled:opacity-50"
           >
             {inspectLoading ? '조회 중...' : '유저 자산 조회'}
           </button>
@@ -532,42 +532,42 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
 
         {/* Inspected User Profile & Intervention Card */}
         {inspectedUser && (
-          <div className="space-y-6 p-6 rounded-xl bg-slate-950/80 border border-slate-800">
+          <div className="space-y-6 p-6 rounded-xl bg-muted/60 border border-border">
             {/* User Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-800">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-border">
               <div>
-                <span className="text-xs text-slate-400 font-mono">{inspectedUser.user_id}</span>
-                <h4 className="text-lg font-bold text-white">
+                <span className="text-xs text-muted-foreground font-mono">{inspectedUser.user_id}</span>
+                <h4 className="text-lg font-bold text-foreground">
                   {inspectedUser.display_name || '(닉네임 미설정)'}
                 </h4>
               </div>
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-muted-foreground">
                 {inspectedUser.job ? (
                   <span className="px-2.5 py-1 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800">
                     {inspectedUser.job.job_type} (Lv.{inspectedUser.job.level} / Exp.{inspectedUser.job.experience})
                   </span>
                 ) : (
-                  <span className="text-slate-500">직업 없음</span>
+                  <span className="text-muted-foreground/70">직업 없음</span>
                 )}
               </div>
             </div>
 
             {/* Asset Breakdown Badges */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-xs text-slate-400">지갑 잔액 (Wallet)</span>
-                <div className="text-xl font-black text-amber-400 mt-1">
+              <div className="p-4 rounded-xl bg-card border border-border">
+                <span className="text-xs text-muted-foreground">지갑 잔액 (Wallet)</span>
+                <div className="text-xl font-black text-primary mt-1">
                   {formatNumber(inspectedUser.wallet_balance)} <span className="text-xs font-normal">WLD</span>
                 </div>
               </div>
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-xs text-slate-400">은행 정기예금 (Deposit)</span>
+              <div className="p-4 rounded-xl bg-card border border-border">
+                <span className="text-xs text-muted-foreground">은행 정기예금 (Deposit)</span>
                 <div className="text-xl font-black text-cyan-400 mt-1">
                   {formatNumber(inspectedUser.bank_deposit_balance)} <span className="text-xs font-normal">WLD</span>
                 </div>
               </div>
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                <span className="text-xs text-slate-400">대출 잔존 채무 (Loan)</span>
+              <div className="p-4 rounded-xl bg-card border border-border">
+                <span className="text-xs text-muted-foreground">대출 잔존 채무 (Loan)</span>
                 <div className="text-xl font-black text-rose-400 mt-1">
                   {formatNumber(inspectedUser.loan_debt_balance)} <span className="text-xs font-normal">WLD</span>
                 </div>
@@ -576,10 +576,10 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
 
             {/* Business Holdings if any */}
             {inspectedUser.businesses && inspectedUser.businesses.length > 0 && (
-              <div className="p-3 rounded-lg bg-slate-900/60 border border-slate-800 text-xs">
-                <span className="text-slate-400 font-semibold">보유 사업체 지분: </span>
+              <div className="p-3 rounded-lg bg-card border border-border text-xs">
+                <span className="text-muted-foreground font-semibold">보유 사업체 지분: </span>
                 {inspectedUser.businesses.map(b => (
-                  <span key={b.symbol} className="inline-block mr-3 text-slate-300">
+                  <span key={b.symbol} className="inline-block mr-3 text-foreground/80">
                     {b.name} ({b.symbol}): {b.share_count}주
                   </span>
                 ))}
@@ -587,19 +587,19 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             )}
 
             {/* Manual Intervention Form */}
-            <div className="pt-4 border-t border-slate-800 space-y-4">
-              <h5 className="text-sm font-bold text-white flex items-center gap-2">
+            <div className="pt-4 border-t border-border space-y-4">
+              <h5 className="text-sm font-bold text-foreground flex items-center gap-2">
                 ⚡ 1 WLD 단위 강제 원장 개입 (회수 / 지급)
               </h5>
 
               <form onSubmit={handleOverrideUser} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs text-slate-400 mb-1">대상 자산</label>
+                    <label className="block text-xs text-muted-foreground mb-1">대상 자산</label>
                     <select
                       value={overrideAsset}
                       onChange={e => setOverrideAsset(e.target.value as 'wallet' | 'deposit' | 'loan')}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:outline-none focus:border-cyan-500"
+                      className="w-full px-3 py-2 rounded-xl bg-card border border-border text-sm text-foreground focus:outline-none focus:border-cyan-500"
                     >
                       <option value="wallet">지갑 잔액 (Wallet)</option>
                       <option value="deposit">은행 예금 (Deposit)</option>
@@ -608,7 +608,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
                   </div>
 
                   <div>
-                    <label className="block text-xs text-slate-400 mb-1">개입 방향</label>
+                    <label className="block text-xs text-muted-foreground mb-1">개입 방향</label>
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
@@ -616,7 +616,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
                         className={`py-2 text-xs font-bold rounded-xl border transition-colors ${
                           overrideDirection === 'grant'
                             ? 'bg-emerald-600 border-emerald-500 text-white'
-                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                            : 'bg-card border-border text-muted-foreground hover:text-foreground'
                         }`}
                       >
                         + 강제 지급
@@ -627,7 +627,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
                         className={`py-2 text-xs font-bold rounded-xl border transition-colors ${
                           overrideDirection === 'revoke'
                             ? 'bg-rose-600 border-rose-500 text-white'
-                            : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'
+                            : 'bg-card border-border text-muted-foreground hover:text-foreground'
                         }`}
                       >
                         - 강제 회수
@@ -636,27 +636,27 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
                   </div>
 
                   <div>
-                    <label className="block text-xs text-slate-400 mb-1">조정 금액 (WLD)</label>
+                    <label className="block text-xs text-muted-foreground mb-1">조정 금액 (WLD)</label>
                     <input
                       type="number"
                       min="1"
                       step="1"
                       value={overrideAmount}
                       onChange={e => setOverrideAmount(Math.max(1, Number(e.target.value)))}
-                      className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white font-mono focus:outline-none focus:border-cyan-500"
+                      className="w-full px-3 py-2 rounded-xl bg-card border border-border text-sm text-foreground font-mono focus:outline-none focus:border-cyan-500"
                     />
                   </div>
                 </div>
 
                 {/* Amount presets */}
                 <div className="flex gap-2 text-xs">
-                  <span className="text-slate-500 self-center">빠른 금액:</span>
+                  <span className="text-muted-foreground/70 self-center">빠른 금액:</span>
                   {[10, 100, 1000, 10000].map(amt => (
                     <button
                       key={amt}
                       type="button"
                       onClick={() => setOverrideAmount(amt)}
-                      className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 transition-colors"
+                      className="px-2.5 py-1 rounded-lg bg-card hover:bg-muted text-foreground border border-border transition-colors"
                     >
                       +{formatNumber(amt)}
                     </button>
@@ -677,13 +677,13 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
                 </div>
 
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">개입 사유 (감사 로그 보존)</label>
+                  <label className="block text-xs text-muted-foreground mb-1">개입 사유 (감사 로그 보존)</label>
                   <input
                     type="text"
                     value={overrideReason}
                     onChange={e => setOverrideReason(e.target.value)}
                     placeholder="조정 사유를 구체적으로 입력하세요 (최소 5자)"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-500"
+                    className="w-full px-3 py-2 rounded-xl bg-card border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-cyan-500"
                   />
                 </div>
 

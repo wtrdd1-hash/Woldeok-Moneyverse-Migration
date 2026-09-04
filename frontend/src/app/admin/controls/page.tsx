@@ -49,7 +49,7 @@ interface ControlsOverview {
  * so they are in front of whoever is about to flip the switch.
  */
 export default async function AdminControlsPage() {
-  await requireAdminConsole();
+  await requireAdminConsole(AREA.href);
   const overview = await apiOrNull<ControlsOverview>('/api/v1/admin/controls');
 
   const active = overview?.policies.find((policy) => policy.status === 'active') ?? null;

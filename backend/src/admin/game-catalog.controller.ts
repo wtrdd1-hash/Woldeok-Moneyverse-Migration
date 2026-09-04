@@ -19,6 +19,7 @@ import {
   IsIn,
   IsInt,
   IsOptional,
+  Max,
   Min,
   IsPositive,
   IsString,
@@ -83,6 +84,56 @@ export class SetStockPriceDto {
   @IsInt()
   @Min(10)
   readonly price!: number;
+
+  @ApiProperty({ required: false, format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  readonly idempotencyKey?: string;
+}
+
+/**
+ * A market event (124): a headline and a lean. Strength and duration are
+ * bounded here and again in SQL, so what a console can do to the market is
+ * decided by the function's vocabulary and not by whoever calls it.
+ */
+export class PublishMarketEventDto {
+  @ApiProperty({ required: false, format: 'uuid', description: 'Absent for the whole market' })
+  @IsOptional()
+  @IsUUID()
+  readonly stockId?: string;
+
+  @ApiProperty({ enum: ['up', 'down'] })
+  @IsIn(['up', 'down'])
+  readonly direction!: 'up' | 'down';
+
+  @ApiProperty({ type: Number, minimum: 1, maximum: 3 })
+  @IsInt()
+  @Min(1)
+  @Max(3)
+  readonly strength!: number;
+
+  @ApiProperty({ type: Number, minimum: 1, maximum: 168 })
+  @IsInt()
+  @Min(1)
+  @Max(168)
+  readonly hours!: number;
+
+  @ApiProperty({ minLength: 2, maxLength: 120 })
+  @IsString()
+  @MinLength(2)
+  @MaxLength(120)
+  readonly headline!: string;
+
+  @ApiProperty({ required: false, maxLength: 2000 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  readonly body?: string;
+
+  @ApiProperty({ required: false, enum: ['operator', 'ai'] })
+  @IsOptional()
+  @IsIn(['operator', 'ai'])
+  readonly source?: 'operator' | 'ai';
 
   @ApiProperty({ required: false, format: 'uuid' })
   @IsOptional()
@@ -213,6 +264,42 @@ export class GameCatalogController {
   @ApiOperation({ summary: 'Every stock, including inactive ones' })
   async stockList(@Req() request: RequestWithSession) {
     return { stocks: await this.stockService().adminList(requireUserId(request)) };
+  }
+
+  /** Each stock's mood beside its price: trend, volatility, fair value, and the market's own lean. */
+  @Get('stocks/dynamics')
+  @ApiOperation({ summary: 'Trend, volatility and fair value per stock' })
+  async stockDynamics(@Req() request: RequestWithSession) {
+    return { stocks: await this.stockService().adminDynamics(requireUserId(request)) };
+  }
+
+  @Get('stocks/market-events')
+  @ApiOperation({ summary: 'Recent market events, ended and cancelled included' })
+  async marketEvents(@Req() request: RequestWithSession) {
+    return { events: await this.stockService().adminMarketEvents(requireUserId(request)) };
+  }
+
+  @Post('stocks/market-events')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Publish a market event: news that leans the market' })
+  publishMarketEvent(@Req() request: RequestWithSession, @Body() body: PublishMarketEventDto) {
+    return this.guarded(
+      () => this.stockService().publishMarketEvent({ userId: requireUserId(request), ...body }),
+      'invalid market event',
+    );
+  }
+
+  @Delete('stocks/market-events/:id')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'End a market event now' })
+  cancelMarketEvent(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) eventId: string,
+  ) {
+    return this.guarded(
+      () => this.stockService().cancelMarketEvent({ userId: requireUserId(request), eventId }),
+      'this event cannot be cancelled',
+    );
   }
 
   @Post('stocks')

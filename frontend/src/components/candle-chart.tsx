@@ -80,6 +80,61 @@ function log10(value: bigint): number {
   return digits.length - 15 + Math.log10(Number(digits.slice(0, 15)));
 }
 
+function pow10(exponent: number): bigint {
+  return 10n ** BigInt(exponent);
+}
+
+/**
+ * A step a reader can add up in their head: 1, 2, 2.5 or 5 times a power of
+ * ten, the smallest of them that yields about `target` steps across `span`.
+ * BigInt throughout, for the reason everything on this chart is.
+ */
+function niceStep(span: bigint, target: number): bigint {
+  const rough = span / BigInt(target);
+  if (rough < 1n) return 1n;
+  const exponent = rough.toString().length - 1;
+  const base = pow10(exponent);
+  const candidates = [
+    base,
+    2n * base,
+    ...(exponent >= 1 ? [25n * pow10(exponent - 1)] : []),
+    5n * base,
+    10n * base,
+  ];
+  return candidates.find((candidate) => candidate >= rough) ?? 10n * base;
+}
+
+/**
+ * Where the horizontal rules go, and what they say.
+ *
+ * A chart with no figures on its axis is a shape, not a reading: the caption
+ * gives the extremes, but what a candle in the middle is worth was left to
+ * the reader to interpolate. Linear axes get a step from `niceStep`; a log
+ * axis gets 1, 2 and 5 of each decade, thinned to the decades alone when
+ * that is too many to read.
+ */
+export function axisTicks(min: bigint, max: bigint, logarithmic: boolean): bigint[] {
+  if (max <= min) return [min];
+  if (!logarithmic) {
+    const step = niceStep(max - min, 4);
+    const ticks: bigint[] = [];
+    for (let value = ((min + step - 1n) / step) * step; value <= max; value += step) {
+      ticks.push(value);
+    }
+    return ticks;
+  }
+  const ticks: bigint[] = [];
+  const lowest = Math.max(0, min.toString().length - 1);
+  const highest = max.toString().length - 1;
+  for (let exponent = lowest; exponent <= highest; exponent += 1) {
+    for (const mantissa of [1n, 2n, 5n]) {
+      const value = mantissa * pow10(exponent);
+      if (value >= min && value <= max) ticks.push(value);
+    }
+  }
+  return ticks.length > 8 ? ticks.filter((value) => value.toString().startsWith('1')) : ticks;
+}
+
 export function CandleChart({
   candles,
   label,
@@ -156,11 +211,19 @@ export function CandleChart({
   const offset = (chartWidth - drawn) / 2;
   const body = Math.max(1.5, Math.min(14, slot * 0.6));
 
+  // The rules run the full drawn width inside the scrolling frame; their
+  // figures sit in a column beside it that does not scroll, so a reader deep
+  // in a long series still has an axis to read the candles against.
+  const ticks = axisTicks(min, max, logarithmic);
+  const labels = ticks.map((tick) => ({ y: y(tick), text: groupDigits(tick.toString()) }));
+  const axisWidth = 10 + 6.5 * Math.max(...labels.map((label) => label.text.length));
+
   return (
     <figure className="grid gap-2">
+      <div className="flex items-start">
       <div
         ref={frame}
-        className="overflow-x-auto"
+        className="min-w-0 flex-1 overflow-x-auto"
         onScroll={(event) => {
           const element = event.currentTarget;
           pinned.current = element.scrollWidth - element.clientWidth - element.scrollLeft < 4;
@@ -179,6 +242,18 @@ export function CandleChart({
             logarithmic ? ' 세로 눈금은 로그입니다.' : ''
           }`}
         >
+          {/* Paths rather than lines, so the wicks below stay the only <line>s
+              in the drawing -- which is what the tests, and a reader of the
+              markup, count. */}
+          {labels.map((label) => (
+            <path
+              key={label.text}
+              d={`M0 ${label.y} H ${chartWidth}`}
+              stroke="var(--border)"
+              strokeWidth={1}
+              strokeDasharray="3 4"
+            />
+          ))}
           {ordered.map((candle, index) => {
             const open = BigInt(candle.open_price);
             const close = BigInt(candle.close_price);
@@ -214,6 +289,22 @@ export function CandleChart({
             );
           })}
         </svg>
+      </div>
+      {/* The axis. aria-hidden because the figure's label already carries the
+          extremes, and a screen reader walking a column of prices learns
+          nothing the chart is not already saying. */}
+      <svg
+        aria-hidden
+        viewBox={`0 0 ${axisWidth} ${HEIGHT}`}
+        style={{ width: axisWidth }}
+        className="tabular h-[260px] shrink-0 border-l text-[10px]"
+      >
+        {labels.map((label) => (
+          <text key={label.text} x={6} y={label.y + 3.5} fill="var(--muted-foreground)">
+            {label.text}
+          </text>
+        ))}
+      </svg>
       </div>
       <figcaption className="flex justify-between text-[11px] text-muted-foreground">
         <span>{write(ordered[0]?.at ?? '')}</span>

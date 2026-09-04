@@ -205,6 +205,77 @@ export async function applyCorporateAction(
   }
 }
 
+/**
+ * Publishes a market event: news that leans the market (124).
+ *
+ * Not a step-up act. It moves no money and takes nothing from anybody; what
+ * it can do to prices is bounded by the function's own vocabulary of three
+ * strengths, and it is audited like every other console write.
+ */
+export async function publishMarketEvent(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const stockId = text(formData.get('stockId'));
+  const direction = text(formData.get('direction'));
+  const strength = Number(text(formData.get('strength')));
+  const hours = Number(text(formData.get('hours')));
+  const headline = text(formData.get('headline'));
+  const body = text(formData.get('body'));
+
+  if (direction !== 'up' && direction !== 'down') {
+    return { status: 'error', message: '호재인지 악재인지 골라 주세요.' };
+  }
+  if (![1, 2, 3].includes(strength)) return { status: 'error', message: '강도는 1·2·3 중 하나예요.' };
+  if (!Number.isSafeInteger(hours) || hours < 1 || hours > 168) {
+    return { status: 'error', message: '기간은 1~168시간이에요.' };
+  }
+  if (headline.length < 2 || headline.length > 120) {
+    return { status: 'error', message: '제목은 2~120자로 적어 주세요.' };
+  }
+  if (body.length > 2000) return { status: 'error', message: '본문은 2000자까지예요.' };
+
+  try {
+    await mutate('/api/v1/admin/stocks/market-events', {
+      body: {
+        ...(stockId === '' ? {} : { stockId }),
+        direction,
+        strength,
+        hours,
+        headline,
+        body,
+        idempotencyKey: idempotencyKey(),
+      },
+    });
+    revalidatePath('/admin/market');
+    revalidatePath('/stocks');
+    return { status: 'ok', message: '소식을 냈어요. 지금부터 시장이 그 방향으로 기울어요.' };
+  } catch (error) {
+    return failure(error, '소식을 내지 못했어요.');
+  }
+}
+
+export async function cancelMarketEvent(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const eventId = text(formData.get('eventId'));
+  if (eventId === '') return { status: 'error', message: '소식을 찾을 수 없어요.' };
+  try {
+    const result = await mutate<{ cancelled: boolean }>(
+      `/api/v1/admin/stocks/market-events/${encodeURIComponent(eventId)}`,
+      { method: 'DELETE' },
+    );
+    revalidatePath('/admin/market');
+    revalidatePath('/stocks');
+    return result.cancelled
+      ? { status: 'ok', message: '소식을 끝냈어요. 시장은 원래 흐름으로 돌아갑니다.' }
+      : { status: 'ok', message: '이미 끝난 소식이에요.' };
+  } catch (error) {
+    return failure(error, '소식을 끝내지 못했어요.');
+  }
+}
+
 export async function setBusinessActive(
   _previous: ActionState,
   formData: FormData,

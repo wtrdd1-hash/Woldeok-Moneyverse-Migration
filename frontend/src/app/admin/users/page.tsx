@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminUsersPage() {
-  await requireAdminConsole();
+  await requireAdminConsole(AREA.href);
   const users = await apiOrNull<{ users: AdminUser[] }>('/api/v1/admin/users');
 
   return (

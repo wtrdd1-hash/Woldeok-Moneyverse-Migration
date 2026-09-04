@@ -15,20 +15,20 @@ const CONFIG: AppConfig = {
 } as AppConfig;
 
 function mockResponse() {
-  const headers: Record<string, any> = {};
-  let body: any = null;
+  const headers: Record<string, unknown> = {};
+  let body: unknown = null;
   const res = {
-    setHeader: vi.fn((k: string, v: any) => {
+    setHeader: vi.fn((k: string, v: unknown) => {
       headers[k.toLowerCase()] = v;
       return res;
     }),
-    end: vi.fn((b: any) => {
+    end: vi.fn((b: unknown) => {
       body = b;
       return res;
     }),
     _headers: headers,
     _getBody: () => body,
-  } as unknown as Response & { _headers: Record<string, any>; _getBody: () => any };
+  } as unknown as Response & { _headers: Record<string, unknown>; _getBody: () => unknown };
   return res;
 }
 

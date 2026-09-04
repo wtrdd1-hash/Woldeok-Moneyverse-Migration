@@ -119,12 +119,15 @@ describe.skipIf(!DATABASE_URL)('superadmin authority against a real database', (
       expect(code(error)).toBe('55000');
     });
 
-    it('allows at most one superadmin row', async () => {
+    it('no longer caps the superadmin role at one row (121)', async () => {
+      // 057's partial unique index was the one-superadmin rule; 121 dropped
+      // it so that more than one account can hold the role. What must stay
+      // true is that the index is gone, not that it is there.
       const { rows } = await pool.query(
         `SELECT 1 FROM pg_catalog.pg_indexes
          WHERE schemaname = 'public' AND indexname = 'user_roles_single_superadmin'`,
       );
-      expect(rows).toHaveLength(1);
+      expect(rows).toHaveLength(0);
     });
   });
 

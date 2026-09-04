@@ -45,10 +45,10 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
   const burnedPercent = totalFlow > 0 ? (todayBurned / totalFlow) * 100 : 50;
 
   return (
-    <div className="rounded-3xl border border-amber-500/30 bg-card p-6 shadow-lg mb-8">
+    <div className="rounded-3xl border border-primary/30 bg-card p-6 shadow-lg mb-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div>
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-500 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
             REALTIME FAUCET · SINK ENGINE
           </span>
           <h3 className="text-lg font-bold text-foreground mt-1">WLD 통화 유통 및 소각(Sink) 실시간 관제</h3>
@@ -60,7 +60,7 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
               'px-2.5 py-1 rounded-xl text-xs font-extrabold border flex items-center gap-1',
               Number(todayRatio) >= 50
                 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                : 'bg-amber-500/20 text-amber-400 border-amber-500/40',
+                : 'bg-primary/20 text-primary border-primary/40',
             )}
           >
             <Percent className="size-3" />
@@ -75,11 +75,11 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
         <div className="rounded-2xl border border-border/50 bg-surface/50 p-4">
           <div className="flex items-center justify-between text-muted-foreground mb-1">
             <span className="text-xs font-semibold">현재 총 유통 통화량</span>
-            <Coins className="size-4 text-amber-500" />
+            <Coins className="size-4 text-primary" />
           </div>
           <p className="text-xl font-extrabold text-foreground">
             {totalCirculating.toLocaleString()}{' '}
-            <span className="text-xs text-amber-500 font-bold">WLD</span>
+            <span className="text-xs text-primary font-bold">WLD</span>
           </p>
           <p className="text-[11px] text-muted-foreground mt-1">
             누적 발행: {totalMinted.toLocaleString()} · 소각: {totalBurned.toLocaleString()}
@@ -117,7 +117,7 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
           <div className="flex items-center justify-between text-muted-foreground mb-1">
             <span className="text-xs font-semibold">금일 순증감 (Net Flow)</span>
             {todayNet >= 0 ? (
-              <ArrowUpRight className="size-4 text-amber-500" />
+              <ArrowUpRight className="size-4 text-primary" />
             ) : (
               <ArrowDownRight className="size-4 text-emerald-400" />
             )}
@@ -125,7 +125,7 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
           <p
             className={cn(
               'text-xl font-extrabold',
-              todayNet >= 0 ? 'text-amber-500' : 'text-emerald-400',
+              todayNet >= 0 ? 'text-primary' : 'text-emerald-400',
             )}
           >
             {todayNet >= 0 ? `+${todayNet.toLocaleString()}` : todayNet.toLocaleString()}{' '}
@@ -147,7 +147,7 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
             <Flame className="size-3.5" /> 소각(Sink) {burnedPercent.toFixed(1)}%
           </span>
         </div>
-        <div className="h-3 w-full rounded-full bg-black/40 overflow-hidden flex">
+        <div className="h-3 w-full rounded-full bg-muted overflow-hidden flex">
           <div
             style={{ width: `${mintedPercent}%` }}
             className="bg-blue-500 transition-all duration-500"
@@ -191,7 +191,7 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
                         ? `+${Number(d.net_change).toLocaleString()}`
                         : Number(d.net_change).toLocaleString()}
                     </td>
-                    <td className="px-4 py-2 text-right font-extrabold text-amber-500">
+                    <td className="px-4 py-2 text-right font-extrabold text-primary">
                       {d.sink_ratio_percent}%
                     </td>
                   </tr>

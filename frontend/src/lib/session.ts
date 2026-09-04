@@ -83,9 +83,16 @@ export async function adminConsole(): Promise<AdminConsole> {
  * The API refuses these pages' data without an open console session anyway;
  * this sends the operator to the one screen that can open one instead of
  * leaving them on a page of empty panels wondering what went wrong.
+ *
+ * `returnTo` is the page that sent them, so the gate can say which screen is
+ * waiting and put them back on it once the console is open. Without it the
+ * bounce read as "the economy page is broken": the operator clicked 경제 in
+ * the menu, landed on /admin, and nothing on either screen said why.
  */
-export async function requireAdminConsole(): Promise<AdminConsole> {
+export async function requireAdminConsole(returnTo?: string): Promise<AdminConsole> {
   const console_ = await adminConsole();
-  if (console_.consoleSession.state !== 'open') redirect('/admin');
+  if (console_.consoleSession.state !== 'open') {
+    redirect(returnTo ? `/admin?next=${encodeURIComponent(returnTo)}` : '/admin');
+  }
   return console_;
 }

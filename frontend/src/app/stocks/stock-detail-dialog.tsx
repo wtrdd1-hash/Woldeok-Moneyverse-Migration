@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CandleChart } from '@/components/candle-chart';
 import type { Candle } from '@/components/candle-chart';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { groupDigits } from '@/lib/money';
 import { useQuote } from '@/lib/use-market-prices';
+import { applyTick, reconcile, rollOver } from './live-candles';
 import { TradeForm } from './trade-form';
 
 interface Range {
@@ -62,6 +63,16 @@ const INTERVALS = [
 
 const DEFAULT_INTERVAL = 86400;
 
+/**
+ * How often the server's candles are fetched again while the dialog is open.
+ *
+ * The socket carries the price and the series below follows it, so this is
+ * for what the socket does not carry: the minute a hidden tab slept through,
+ * the day's high and low beside the chart, and the day and week candles the
+ * dialog never opens on its own.
+ */
+const REFETCH_MS = 60_000;
+
 const TIME = new Intl.DateTimeFormat('ko-KR', {
   month: 'numeric',
   day: 'numeric',
@@ -101,94 +112,84 @@ export function StockDetailDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [interval, setInterval] = useState<number>(DEFAULT_INTERVAL);
-  const [data, setData] = useState<{ candles: ApiCandle[]; range: Range | null } | null>(null);
+  /**
+   * The candles on screen: the server's rows, followed by the live price a
+   * second at a time (see live-candles.ts). State rather than a memo over the
+   * fetched rows, because the open candle has to remember the prices it has
+   * already seen -- its high and low are the whole reason it has a wick.
+   */
+  const [series, setSeries] = useState<readonly Candle[]>([]);
+  const [range, setRange] = useState<Range | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
+  // Whether a fetch has ever succeeded for this width. A refetch that fails
+  // after that must not blank a chart that is already drawn.
+  const everLoaded = useRef(false);
 
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
-    setData(null);
+    everLoaded.current = false;
+    setSeries([]);
+    setRange(null);
+    setLoaded(false);
     setFailed(false);
-    void fetch(`/api/stocks/${stockId}/candles?interval=${interval}`, { cache: 'no-store' })
-      .then((response) => (response.ok ? response.json() : Promise.reject(new Error('failed'))))
-      .then((value: { candles: ApiCandle[]; range: Range | null }) => {
-        if (!cancelled) setData(value);
-      })
-      .catch(() => {
-        if (!cancelled) setFailed(true);
-      });
+
+    const fetchCandles = (): void => {
+      void fetch(`/api/stocks/${stockId}/candles?interval=${interval}`, { cache: 'no-store' })
+        .then((response) => (response.ok ? response.json() : Promise.reject(new Error('failed'))))
+        .then((value: { candles: ApiCandle[]; range: Range | null }) => {
+          if (cancelled) return;
+          const rows: Candle[] = (value.candles ?? []).map((row) => ({
+            at: row.bucket_at,
+            open_price: row.open_price,
+            high_price: row.high_price,
+            low_price: row.low_price,
+            close_price: row.close_price,
+          }));
+          // The server's rows win for every bucket they cover; only what was
+          // opened here after the last of them survives the merge.
+          setSeries((local) => reconcile(rows, local));
+          setRange(value.range);
+          everLoaded.current = true;
+          setLoaded(true);
+        })
+        .catch(() => {
+          if (!cancelled && !everLoaded.current) setFailed(true);
+        });
+    };
+
+    fetchCandles();
+    const refetch = window.setInterval(() => {
+      // A hidden tab is not being read; asking on its behalf spends the
+      // reader's battery on a screen nobody is looking at.
+      if (document.visibilityState === 'visible') fetchCandles();
+    }, REFETCH_MS);
     return () => {
       cancelled = true;
+      window.clearInterval(refetch);
     };
   }, [open, interval, stockId]);
 
   const intraday = interval < 86400;
   const quote = useQuote(stockId, { price: currentPrice, open: dayOpenPrice });
 
-  /**
-   * The fetched candles with the one still open brought up to the live price.
-   *
-   * A candle for a bucket that has not closed is a running total, and the
-   * chart was showing whatever it was when the dialog opened while the price
-   * beside it moved every second. The last bucket's close follows the
-   * broadcast and its high and low stretch to admit it, which is exactly what
-   * the database does to the same row on the next tick.
-   *
-   * When a bucket boundary passes with the dialog open a fresh candle is
-   * started, but only below a day: the day and week buckets are aligned to
-   * Seoul in SQL and guessing that alignment here would date the candle
-   * wrong. Waiting for the next fetch is the better error.
-   */
-  const candles: Candle[] = useMemo(() => {
-    const rows: Candle[] = (data?.candles ?? []).map((row) => ({
-      at: row.bucket_at,
-      open_price: row.open_price,
-      high_price: row.high_price,
-      low_price: row.low_price,
-      close_price: row.close_price,
-    }));
+  // Every broadcast price goes into the open candle, or opens the next one.
+  useEffect(() => {
+    if (!open) return;
+    setSeries((local) => applyTick(local, quote.price, Date.now(), interval));
+  }, [open, quote.price, interval]);
 
-    const live = quote.price;
-    const last = rows[rows.length - 1];
-    if (!last || !/^\d+$/.test(live)) return rows;
-
-    const started = new Date(last.at).getTime();
-    if (Number.isNaN(started)) return rows;
-
-    const width = interval * 1000;
-    const now = Date.now();
-
-    if (now < started + width) {
-      // The candle's own figures are checked too, not just the live one: they
-      // cross the network as strings, and a BigInt() that throws in here
-      // throws during a render, which takes the whole page down rather than
-      // just the chart.
-      const integer = (value: string) => /^\d+$/.test(value);
-      const bigger = (a: string, b: string) =>
-        integer(a) ? (BigInt(a) >= BigInt(b) ? a : b) : b;
-      const smaller = (a: string, b: string) =>
-        integer(a) ? (BigInt(a) <= BigInt(b) ? a : b) : b;
-      rows[rows.length - 1] = {
-        ...last,
-        high_price: bigger(last.high_price, live),
-        low_price: smaller(last.low_price, live),
-        close_price: live,
-      };
-      return rows;
-    }
-
-    if (interval < 86400) {
-      const opened = Math.floor(now / width) * width;
-      rows.push({
-        at: new Date(opened).toISOString(),
-        open_price: live,
-        high_price: live,
-        low_price: live,
-        close_price: live,
-      });
-    }
-    return rows;
-  }, [data, quote.price, interval]);
+  // And the clock alone opens the next candle when no price has arrived to
+  // do it: a quiet minute is still a minute. `rollOver` hands back the same
+  // series until a boundary passes, so this costs no render in between.
+  useEffect(() => {
+    if (!open || !intraday) return;
+    const timer = window.setInterval(() => {
+      setSeries((local) => rollOver(local, Date.now(), interval));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [open, intraday, interval]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -230,12 +231,12 @@ export function StockDetailDialog({
           <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
             지금은 차트를 불러올 수 없어요.
           </p>
-        ) : !data ? (
+        ) : !loaded ? (
           <Skeleton className="h-[260px] w-full" />
         ) : (
           <div className="grid gap-4">
             <CandleChart
-              candles={candles}
+              candles={series}
               label={(at) => {
                 const when = new Date(at);
                 if (Number.isNaN(when.getTime())) return at;
@@ -243,14 +244,14 @@ export function StockDetailDialog({
               }}
             />
             <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <Figure term="오늘 고가" value={data.range?.day_high} />
-              <Figure term="오늘 저가" value={data.range?.day_low} />
-              <Figure term="1년 최고" value={data.range?.year_high} />
-              <Figure term="1년 최저" value={data.range?.year_low} />
+              <Figure term="오늘 고가" value={range?.day_high} />
+              <Figure term="오늘 저가" value={range?.day_low} />
+              <Figure term="1년 최고" value={range?.year_high} />
+              <Figure term="1년 최저" value={range?.year_low} />
             </dl>
-            {data.range?.first_trade_date && (
+            {range?.first_trade_date && (
               <p className="text-xs text-muted-foreground">
-                {data.range.first_trade_date}부터 기록했습니다.
+                {range.first_trade_date}부터 기록했습니다.
               </p>
             )}
           </div>
