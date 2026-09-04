@@ -113,12 +113,12 @@ export default async function AdminPage() {
       </PageHeader>
 
       {/* 회원 원클릭 빠른 검색 폼 */}
-      <Card className="border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-card to-card">
+      <Card className="border-primary/30 bg-gradient-to-r from-primary/10 via-card to-card">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <CardTitle className="text-base font-bold flex items-center gap-2">
-                <span className="text-amber-500">⚡</span>
+                <span className="text-primary">⚡</span>
                 <span>회원 빠른 검색 및 제재/자산 관리</span>
               </CardTitle>
               <CardDescription>

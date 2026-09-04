@@ -90,7 +90,7 @@ export function AdminShopView({ items }: AdminShopViewProps) {
             placeholder="상품명, 코드, 카테고리 검색..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-2xl border border-border/50 bg-card py-2 pl-10 pr-4 text-xs font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full rounded-2xl border border-border/50 bg-card py-2 pl-10 pr-4 text-xs font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <div className="text-xs text-muted-foreground font-medium">
@@ -99,7 +99,7 @@ export function AdminShopView({ items }: AdminShopViewProps) {
       </div>
 
       {statusMsg && (
-        <div className="p-3 text-center text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
+        <div className="p-3 text-center text-xs font-bold text-primary bg-primary/10 border border-primary/20 rounded-2xl">
           {statusMsg}
         </div>
       )}
@@ -134,7 +134,7 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <span className="text-[10px] font-extrabold uppercase text-amber-500">
+                      <span className="text-[10px] font-extrabold uppercase text-primary">
                         {item.rarity}
                       </span>
                     </td>
@@ -144,10 +144,10 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                           type="number"
                           value={editPrice}
                           onChange={(e) => setEditPrice(e.target.value)}
-                          className="w-24 rounded-lg border border-amber-500 bg-surface px-2 py-1 text-xs font-bold text-foreground"
+                          className="w-24 rounded-lg border border-primary bg-surface px-2 py-1 text-xs font-bold text-foreground"
                         />
                       ) : (
-                        <span className="font-extrabold text-amber-500">
+                        <span className="font-extrabold text-primary">
                           {Number(item.base_price).toLocaleString()} WLD
                         </span>
                       )}
@@ -159,7 +159,7 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                           value={editStock}
                           onChange={(e) => setEditStock(e.target.value)}
                           placeholder="재고"
-                          className="w-20 rounded-lg border border-amber-500 bg-surface px-2 py-1 text-xs font-bold"
+                          className="w-20 rounded-lg border border-primary bg-surface px-2 py-1 text-xs font-bold"
                         />
                       ) : (
                         <span className="text-[11px] text-muted-foreground">
@@ -204,7 +204,7 @@ export function AdminShopView({ items }: AdminShopViewProps) {
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => handleSave(item.id)}
-                            className="p-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold"
+                            className="p-1.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold"
                             title="저장"
                           >
                             <Save className="size-3.5" />

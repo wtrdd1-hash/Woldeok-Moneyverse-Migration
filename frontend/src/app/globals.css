@@ -52,16 +52,23 @@
   --popover: var(--surface);
   --popover-foreground: var(--ink);
 
-  --primary: #d97706;
+  /*
+   * Spelled in terms of the point-aware tokens above rather than as hex, and
+   * that is the whole point: the current-page underline in the masthead, the
+   * active tab in the bottom bar and every primary button are `--primary`,
+   * and a literal here is what kept them amber for a reader who had chosen a
+   * different point colour. The values are the same ones the literals were.
+   */
+  --primary: var(--forest-soft);
   --primary-foreground: #ffffff;
 
-  --secondary: #fef3c7;
-  --secondary-foreground: #78350f;
+  --secondary: var(--clay-soft);
+  --secondary-foreground: var(--forest-deep);
 
   --muted: var(--paper-dark);
   --muted-foreground: var(--ink-soft);
 
-  --accent: #fef3c7;
+  --accent: var(--clay-soft);
   --accent-foreground: #92400e;
 
   --destructive: #b3452c;
@@ -75,20 +82,20 @@
   --rise: #c0392b;
   --fall: #2f5fa8;
 
-  --chart-1: #d97706;
-  --chart-2: #f59e0b;
+  --chart-1: var(--forest-soft);
+  --chart-2: var(--clay);
   --chart-3: #fbbf24;
   --chart-4: #ca8a04;
   --chart-5: var(--ink-soft);
 
   --sidebar: var(--surface);
   --sidebar-foreground: var(--ink);
-  --sidebar-primary: #d97706;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #fef3c7;
-  --sidebar-accent-foreground: #78350f;
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--clay-soft);
+  --sidebar-accent-foreground: var(--forest-deep);
   --sidebar-border: var(--line);
-  --sidebar-ring: #f59e0b;
+  --sidebar-ring: var(--clay);
 }
 
 /*
@@ -119,13 +126,13 @@
   --popover: var(--surface);
   --popover-foreground: var(--ink);
 
-  --primary: #fbbf24; /* Brilliant Moonlight Gold */
+  --primary: var(--forest-soft); /* Brilliant Moonlight Gold */
   --primary-foreground: #0b0f17;
-  --secondary: #252216;
+  --secondary: var(--clay-soft);
   --secondary-foreground: #fef08a;
   --muted: #161f30;
   --muted-foreground: var(--ink-soft);
-  --accent: #292414;
+  --accent: var(--clay-soft);
   --accent-foreground: #fde047;
   --destructive: #d97256;
   --destructive-foreground: #0b0f17;
@@ -136,8 +143,8 @@
   --rise: #f87171;
   --fall: #60a5fa;
 
-  --chart-1: #fbbf24;
-  --chart-2: #f59e0b;
+  --chart-1: var(--forest-soft);
+  --chart-2: var(--clay);
   --chart-3: #fde047;
   --chart-5: var(--ink-soft);
 }
@@ -188,6 +195,12 @@
     --mint: oklch(from var(--point) 0.92 clamp(0.01, c * 0.2, 0.04) h);
     --highlight: oklch(from var(--point) 0.90 clamp(0.02, c * 0.45, 0.07) h);
 
+    /* The button face, the masthead underline and the active tab. Derived
+       at --clay's lightness rather than inheriting --forest-soft's 0.47: the
+       gold this product ships with sits near 0.65, and a reader picking a
+       hue should get that hue at the weight they are used to, not a darker
+       version of every control. */
+    --primary: oklch(from var(--point) 0.62 clamp(0.04, c, 0.15) h);
     --accent-foreground: oklch(from var(--point) 0.40 clamp(0.03, c * 0.8, 0.11) h);
     --ring: oklch(from var(--point) 0.62 clamp(0.04, c, 0.15) h / 0.7);
     --chart-4: oklch(from var(--point) 0.70 clamp(0.06, c, 0.14) calc(h + 45));
