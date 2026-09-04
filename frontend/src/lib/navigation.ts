@@ -129,14 +129,6 @@ export const HEADER_PUBLIC: readonly NavItem[] = [
 
 export const HEADER_MEMBER: readonly NavItem[] = [
   {
-    label: '활동',
-    entries: [
-      { href: '/work', label: '작업' },
-      { href: '/quests', label: '퀘스트' },
-      { href: '/progression', label: '성장 단계' },
-    ],
-  },
-  {
     label: '경제',
     entries: [
       { href: '/bank', label: '가상 금융' },
@@ -144,6 +136,14 @@ export const HEADER_MEMBER: readonly NavItem[] = [
       { href: '/businesses', label: '게임 사업' },
       { href: '/shop', label: '아이템 상점' },
       { href: '/casino', label: '카지노' },
+    ],
+  },
+  {
+    label: '활동',
+    entries: [
+      { href: '/work', label: '작업' },
+      { href: '/quests', label: '퀘스트' },
+      { href: '/progression', label: '성장 단계' },
     ],
   },
   {

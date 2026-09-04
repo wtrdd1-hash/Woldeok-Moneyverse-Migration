@@ -67,8 +67,12 @@ export function SiteHeader() {
   const isAdmin = Boolean(viewer && viewer.consentCurrent && viewer.adminRoles.length > 0);
 
   // The wide bar, grouped. Thirteen flat links wrapped onto a second row and
-  // pushed the wordmark out of line.
-  const items: NavItem[] = [...HEADER_PUBLIC];
+  // pushed the wordmark out of line. When signed in, the member version of
+  // '경제' replaces the public version to avoid duplicate menus.
+  const publicItems = viewer?.signedIn
+    ? HEADER_PUBLIC.filter((item) => !isGroup(item) || item.label !== '경제')
+    : HEADER_PUBLIC;
+  const items: NavItem[] = [...publicItems];
   if (viewer?.signedIn) items.push(...HEADER_MEMBER);
   if (isAdmin) items.push(...HEADER_ADMIN);
 

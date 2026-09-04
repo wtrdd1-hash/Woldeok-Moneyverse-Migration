@@ -13,6 +13,10 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import type { RequestWithSession } from '../auth/session.context';
+import { SessionRepository } from '../auth/session.repository';
+import { sessionToken } from '../auth/cookies';
+import type { AppConfig } from '../core/config';
+import { CONFIG } from '../core/config';
 import { ContentService } from './content.service';
 import { MemberPhotoRepository } from './member-photo.repository';
 import { PrivateImageStorage } from './private-image-storage';
@@ -51,6 +55,8 @@ export class MediaController {
     @Inject(ContentService) private readonly content: ContentService | null,
     @Inject(PrivateImageStorage) private readonly storage: PrivateImageStorage | null,
     @Inject(MemberPhotoRepository) private readonly submissions: MemberPhotoRepository | null,
+    @Inject(SessionRepository) private readonly sessions: SessionRepository | null,
+    @Inject(CONFIG) private readonly config: AppConfig,
   ) {}
 
   @Get(':key')
@@ -73,7 +79,17 @@ export class MediaController {
     const missing = new NotFoundException('not found');
     const published = await this.content.isPublicStorageKey(key);
     if (!published) {
-      const viewer = request.session?.user_id ?? null;
+      let viewer: string | null = request.session?.user_id ?? null;
+      if (!viewer && this.sessions) {
+        const token = sessionToken(request.headers, this.config);
+        if (token) {
+          const session = await this.sessions.get(token);
+          if (session) {
+            viewer = session.user_id;
+            request.session = session;
+          }
+        }
+      }
       const own = this.submissions
         ? await this.submissions.visibleTo(viewer, key)
         : false;
