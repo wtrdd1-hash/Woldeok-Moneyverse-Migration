@@ -30,8 +30,9 @@ BEGIN;
 
 CREATE TABLE IF NOT EXISTS public.ai_news_settings (
   id integer PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  -- PostgreSQL caps a regex repetition at 255, so the length is its own check.
   api_base_url text NOT NULL DEFAULT 'https://api.anthropic.com'
-    CHECK (api_base_url ~ '^https?://[^\s]{3,300}$'),
+    CHECK (api_base_url ~ '^https?://\S+$' AND pg_catalog.char_length(api_base_url) BETWEEN 11 AND 300),
   model text NOT NULL DEFAULT 'claude-opus-5' CHECK (pg_catalog.char_length(model) BETWEEN 1 AND 100),
   -- nonce || tag || ciphertext, base64, as totp.ts seals it. NULL until set.
   api_key_sealed text,
@@ -159,7 +160,8 @@ DECLARE
 BEGIN
   PERFORM public.game_catalog_operator(p_actor);
   IF p_key IS NULL
-     OR v_url !~ '^https?://[^\s]{3,300}$'
+     OR v_url !~ '^https?://\S+$'
+     OR pg_catalog.char_length(v_url) NOT BETWEEN 11 AND 300
      OR pg_catalog.char_length(v_model) NOT BETWEEN 1 AND 100
      OR (p_api_key_sealed IS NOT NULL AND coalesce(p_api_key_key_id, '') = '') THEN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'invalid AI news settings';
