@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { CandleChart } from '@/components/candle-chart';
 import type { Candle } from '@/components/candle-chart';
 import { useLocale } from '@/components/locale-provider';
