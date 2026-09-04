@@ -128,6 +128,29 @@ describe.skipIf(!DATABASE_URL)('the control centre against a real database', () 
       return id;
     };
 
+    /**
+     * A grant moves WLD from the treasury, and the treasury cannot go
+     * negative (init/001). The CI database's treasury holds nothing, so the
+     * test mints into it first -- as the shop test funds a member.
+     */
+    const fundTreasury = async (client: PoolClient, amount: number): Promise<void> => {
+      const { rows } = await client.query<{ treasury: string; mint: string }>(
+        `SELECT
+           (SELECT id::text FROM public.accounts WHERE system_key = 'treasury') AS treasury,
+           (SELECT id::text FROM public.accounts WHERE system_key = 'mint') AS mint`,
+      );
+      await client.query(
+        `SELECT public.economy_post_transaction(
+           $1, 'ADMIN_ADJUSTMENT', NULL, NULL,
+           jsonb_build_array(
+             jsonb_build_object('accountId', $2::uuid, 'amount', $4::bigint, 'direction', 'credit'),
+             jsonb_build_object('accountId', $3::uuid, 'amount', $4::bigint, 'direction', 'debit')
+           ),
+           'test.funded', '{}'::jsonb)`,
+        [randomUUID(), rows[0]?.mint, rows[0]?.treasury, amount],
+      );
+    };
+
     const cash = async (client: PoolClient, actor: string): Promise<string> => {
       const { rows } = await client.query<{ available_amount: string }>(
         `SELECT balance_row.available_amount::text
@@ -163,6 +186,7 @@ describe.skipIf(!DATABASE_URL)('the control centre against a real database', () 
         expect(code(refusedSwitch)).toBe('42501');
         await client.query('ROLLBACK TO SAVEPOINT operator_switch');
 
+        await fundTreasury(client, 10_000);
         const key = randomUUID();
         const { rows } = await client.query<{ result: { success: boolean; new_balance: number } }>(
           'SELECT public.admin_override_user_asset_v2($1::uuid,$2,$3::bigint,$4,$5,$6::uuid,$7::uuid) AS result',
