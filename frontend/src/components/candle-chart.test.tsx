@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { render } from '@testing-library/react';
-import { CandleChart } from './candle-chart';
+import { CandleChart, axisTicks } from './candle-chart';
 import type { Candle } from './candle-chart';
 
 const candle = (n: number): Candle => ({
@@ -170,5 +170,51 @@ describe('CandleChart bodies', () => {
     );
     const rect = container.querySelector('rect');
     expect(rect?.getAttribute('fill')).toBe('var(--rise)');
+  });
+});
+
+describe('axisTicks', () => {
+  it('steps by 1, 2, 2.5 or 5 times a power of ten, about four times across the range', () => {
+    // The screenshot's range: 98,091 to 101,824 wants thousands.
+    expect(axisTicks(98_091n, 101_824n, false)).toEqual([99_000n, 100_000n, 101_000n]);
+    expect(axisTicks(900n, 1100n, false)).toEqual([900n, 950n, 1000n, 1050n, 1100n]);
+    // 2.5 earns its place: 0..1000 in fours is 250, not 200 or 500.
+    expect(axisTicks(0n, 1000n, false)).toEqual([0n, 250n, 500n, 750n, 1000n]);
+  });
+
+  it('marks 1, 2 and 5 of each decade on a log axis', () => {
+    expect(axisTicks(10n, 1211n, true)).toEqual([10n, 20n, 50n, 100n, 200n, 500n, 1000n]);
+  });
+
+  it('thins a log axis to its decades when there are too many to read', () => {
+    expect(axisTicks(1n, 10_000_000n, true)).toEqual([1n, 10n, 100n, 1000n, 10_000n, 100_000n, 1_000_000n, 10_000_000n]);
+  });
+
+  it('reads a range past 2^53 without rounding it', () => {
+    const ticks = axisTicks(9_007_199_254_740_990n, 9_007_199_254_741_010n, false);
+    expect(ticks).toEqual([9_007_199_254_740_990n, 9_007_199_254_740_995n, 9_007_199_254_741_000n, 9_007_199_254_741_005n, 9_007_199_254_741_010n]);
+  });
+});
+
+describe('CandleChart axis', () => {
+  it('writes a figure beside every rule, at the same height', () => {
+    const { container } = render(<CandleChart candles={series(5)} />);
+    // series(): every candle spans 900 to 1100.
+    const labels = [...container.querySelectorAll('text')].map((node) => node.textContent);
+    expect(labels).toEqual(['900', '950', '1,000', '1,050', '1,100']);
+
+    const rules = [...container.querySelectorAll('path')].map((node) => node.getAttribute('d'));
+    const heights = [...container.querySelectorAll('text')].map((node) => Number(node.getAttribute('y')) - 3.5);
+    expect(rules).toHaveLength(labels.length);
+    rules.forEach((d, index) => {
+      expect(d).toBe(`M0 ${heights[index]} H 260`);
+    });
+  });
+
+  it('keeps the axis out of the scrolling frame', () => {
+    const { container } = render(<CandleChart candles={series(200)} />);
+    const frame = container.querySelector('.overflow-x-auto');
+    const axis = container.querySelectorAll('svg')[1];
+    expect(frame?.contains(axis ?? null)).toBe(false);
   });
 });
