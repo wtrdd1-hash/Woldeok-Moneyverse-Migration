@@ -66,15 +66,6 @@ const DEFAULT_INTERVAL = 86400;
  */
 const REFETCH_MS = 60_000;
 
-const TIME = new Intl.DateTimeFormat('ko-KR', {
-  month: 'numeric',
-  day: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-const DAY = new Intl.DateTimeFormat('ko-KR', { year: '2-digit', month: 'numeric', day: 'numeric' });
-
 /**
  * One stock's detail, in a dialog.
  *
