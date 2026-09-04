@@ -24,6 +24,7 @@ import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-err
 import {
   BankBondPurchaseDto,
   BankBorrowSmartDto,
+  BankRepayDto,
   BankTransferDto,
   IdempotentDto,
 } from './bank.dto';
@@ -126,7 +127,7 @@ export class BankController {
   @ApiOperation({ summary: 'Repay active bank loan' })
   repay(
     @Req() request: RequestWithSession,
-    @Body() body: { loanId: string; amount: string; idempotencyKey: string },
+    @Body() body: BankRepayDto,
   ) {
     return this.guarded(
       () =>

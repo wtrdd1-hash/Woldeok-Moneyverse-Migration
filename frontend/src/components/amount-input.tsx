@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { groupDigits } from '@/lib/money';
 
@@ -17,7 +17,7 @@ import { groupDigits } from '@/lib/money';
  *
  * The commas are only ever on screen. Every server action reads this through
  * `wholeAmount`, which strips them before the value goes anywhere near an
- * amount — the browser is not trusted to have formatted it correctly, it is
+ * amount ??the browser is not trusted to have formatted it correctly, it is
  * only asked to make it readable.
  */
 export function AmountInput({
@@ -25,6 +25,8 @@ export function AmountInput({
   name,
   className,
   defaultValue = '',
+  value: controlledValue,
+  onChange: controlledOnChange,
   required = false,
   placeholder,
   ariaLabel,
@@ -35,12 +37,22 @@ export function AmountInput({
   /** Sizes the group, for a field that sits inline beside its button. */
   readonly className?: string;
   readonly defaultValue?: string;
+  readonly value?: string;
+  readonly onChange?: (value: string) => void;
   readonly required?: boolean;
   readonly placeholder?: string;
   /** For the one field that has no visible label beside it. */
   readonly ariaLabel?: string;
 }) {
-  const [value, setValue] = useState(() => format(defaultValue));
+  const [internalValue, setInternalValue] = useState(() => format(defaultValue));
+
+  useEffect(() => {
+    if (defaultValue !== undefined) {
+      setInternalValue(format(defaultValue));
+    }
+  }, [defaultValue]);
+
+  const displayValue = controlledValue !== undefined ? format(controlledValue) : internalValue;
 
   return (
     <InputGroup className={className}>
@@ -53,8 +65,12 @@ export function AmountInput({
         required={required}
         {...(placeholder === undefined ? {} : { placeholder })}
         {...(ariaLabel === undefined ? {} : { 'aria-label': ariaLabel })}
-        value={value}
-        onChange={(event) => setValue(format(event.target.value))}
+        value={displayValue}
+        onChange={(event) => {
+          const next = format(event.target.value);
+          setInternalValue(next);
+          controlledOnChange?.(next);
+        }}
         className="tabular"
       />
       <InputGroupAddon align="inline-end">WLD</InputGroupAddon>
@@ -66,7 +82,7 @@ export function AmountInput({
  * Keeps the digits and regroups them.
  *
  * Anything that is not a digit is dropped, including the commas this function
- * added a keystroke ago — which is what makes the grouping stable as digits
+ * added a keystroke ago ??which is what makes the grouping stable as digits
  * are inserted in the middle. Leading zeros go too, so `007` reads as `7`,
  * but a lone `0` survives because it is a value someone may be part-way
  * through typing.

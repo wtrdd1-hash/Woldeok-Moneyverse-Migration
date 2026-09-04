@@ -14,7 +14,7 @@ export async function depositAction(_previous: ActionState, formData: FormData):
 
   try {
     await mutate('/api/v1/banking/deposit', {
-      body: { amount, idempotencyKey: idempotencyKey() },
+      body: { amount: String(amount), idempotencyKey: idempotencyKey() },
     });
     revalidatePath('/bank');
     revalidatePath('/wallet');
@@ -32,7 +32,7 @@ export async function withdrawAction(_previous: ActionState, formData: FormData)
 
   try {
     await mutate('/api/v1/banking/withdraw', {
-      body: { amount, idempotencyKey: idempotencyKey() },
+      body: { amount: String(amount), idempotencyKey: idempotencyKey() },
     });
     revalidatePath('/bank');
     revalidatePath('/wallet');
@@ -67,7 +67,7 @@ export async function borrowAction(_previous: ActionState, formData: FormData): 
 
   try {
     await mutate('/api/v1/banking/borrow', {
-      body: { amount, idempotencyKey: idempotencyKey() },
+      body: { amount: String(amount), idempotencyKey: idempotencyKey() },
     });
     revalidatePath('/bank');
     revalidatePath('/wallet');
@@ -90,7 +90,7 @@ export async function repayAction(_previous: ActionState, formData: FormData): P
 
   try {
     await mutate('/api/v1/banking/repay', {
-      body: { loanId, amount, idempotencyKey: idempotencyKey() },
+      body: { loanId, amount: String(amount), idempotencyKey: idempotencyKey() },
     });
     revalidatePath('/bank');
     revalidatePath('/wallet');
@@ -113,7 +113,7 @@ export async function purchaseBondAction(_previous: ActionState, formData: FormD
 
   try {
     await mutate('/api/v1/banking/bonds/purchase', {
-      body: { bondCode, amount, idempotencyKey: idempotencyKey() },
+      body: { bondCode, amount: String(amount), idempotencyKey: idempotencyKey() },
     });
     revalidatePath('/bank');
     revalidatePath('/wallet');
