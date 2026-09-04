@@ -4,6 +4,12 @@ import type {
   StockCorporateActionInput,
   StockCorporateActionResultRow,
   StockCreateInput,
+  StockDynamicsRow,
+  StockMarketEventAdminRow,
+  StockMarketEventCancelInput,
+  StockMarketEventPublishInput,
+  StockMarketEventReceipt,
+  StockMarketEventRow,
   StockCreateResultRow,
   StockDeleteInput,
   StockHistoryRow,
@@ -46,6 +52,11 @@ export interface StockRepository {
   corporateAction(input: StockCorporateActionInput): Promise<StockCorporateActionResultRow>;
   setPrice(input: StockSetPriceInput): Promise<{ readonly price: string }>;
   remove(input: StockDeleteInput): Promise<{ readonly deleted: boolean }>;
+  marketEvents(): Promise<readonly StockMarketEventRow[]>;
+  adminMarketEvents(actorUserId: unknown, limit?: unknown): Promise<readonly StockMarketEventAdminRow[]>;
+  adminDynamics(actorUserId: unknown): Promise<readonly StockDynamicsRow[]>;
+  publishMarketEvent(input: StockMarketEventPublishInput): Promise<StockMarketEventReceipt>;
+  cancelMarketEvent(input: StockMarketEventCancelInput): Promise<{ readonly cancelled: boolean }>;
 }
 
 @Injectable()
@@ -124,5 +135,26 @@ export class StockService {
 
   remove(input: StockDeleteInput): Promise<{ readonly deleted: boolean }> {
     return this.repository.remove(input);
+  }
+
+  /** The news that is running (124). */
+  marketEvents(): Promise<readonly StockMarketEventRow[]> {
+    return this.repository.marketEvents();
+  }
+
+  adminMarketEvents(actorUserId: unknown, limit?: unknown): Promise<readonly StockMarketEventAdminRow[]> {
+    return this.repository.adminMarketEvents(actorUserId, limit);
+  }
+
+  adminDynamics(actorUserId: unknown): Promise<readonly StockDynamicsRow[]> {
+    return this.repository.adminDynamics(actorUserId);
+  }
+
+  publishMarketEvent(input: StockMarketEventPublishInput): Promise<StockMarketEventReceipt> {
+    return this.repository.publishMarketEvent(input);
+  }
+
+  cancelMarketEvent(input: StockMarketEventCancelInput): Promise<{ readonly cancelled: boolean }> {
+    return this.repository.cancelMarketEvent(input);
   }
 }
