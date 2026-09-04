@@ -256,6 +256,41 @@ export interface AdminMarketEvent {
   readonly live: boolean;
 }
 
+/** `ai_news_settings_get` (127). The key itself never crosses; only its last four characters. */
+export interface AiNewsSettings {
+  readonly api_base_url: string;
+  readonly model: string;
+  readonly has_key: boolean;
+  readonly api_key_hint: string;
+  readonly updated_at: string;
+}
+
+/** One proposed scenario, as `ai_news_batch_latest` lists them. */
+export interface AiNewsScenario {
+  readonly id: string;
+  readonly ordinal: number;
+  readonly stock_id: string | null;
+  readonly symbol: string | null;
+  readonly name: string | null;
+  readonly direction: 'up' | 'down';
+  readonly strength: number;
+  readonly hours: number;
+  readonly headline: string;
+  readonly body: string;
+  readonly rationale: string;
+  readonly status: 'proposed' | 'published' | 'discarded' | 'superseded';
+  readonly published_event_id: string | null;
+  readonly decided_at: string | null;
+}
+
+export interface AiNewsBatch {
+  readonly batch_id: string;
+  readonly created_at: string;
+  readonly operator_prompt: string;
+  readonly model: string;
+  readonly scenarios: readonly AiNewsScenario[];
+}
+
 export interface AdminBusiness {
   readonly id: string;
   readonly symbol: string;
