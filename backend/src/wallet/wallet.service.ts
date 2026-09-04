@@ -59,6 +59,8 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   // 024 composes the type as 'VIRTUAL_STOCK_' || upper(side).
   VIRTUAL_STOCK_BUY: '주식 매수',
   VIRTUAL_STOCK_SELL: '주식 매도',
+  BOND_PURCHASE: '국채 매입',
+  BOND_REDEEM: '국채 만기 상환',
 });
 
 export class WalletRecipientError extends Error {

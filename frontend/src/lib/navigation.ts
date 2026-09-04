@@ -68,6 +68,7 @@ export const PUBLIC_NAV: readonly NavEntry[] = [
 /** Needs a session and current consent. Every one of these is `noindex`. */
 export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/wallet', label: '덕지갑' },
+  { href: '/bank', label: '가상 은행' },
   { href: '/work', label: '잡보드 (작업)' },
   { href: '/stocks', label: '월덕거래소 (주식)' },
   { href: '/businesses', label: '마이비즈 (사업)' },
