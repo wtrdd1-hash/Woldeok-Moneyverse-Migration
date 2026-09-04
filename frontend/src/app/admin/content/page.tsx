@@ -21,17 +21,17 @@ export default async function ContentAdminPage() {
   return (
     <div className="grid gap-6">
       <section aria-labelledby="review-queue-title" className="grid gap-3">
-        <Card className="border-amber-500/30 bg-amber-500/5">
+        <Card className="border-primary/30 bg-primary/5">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardDescription className="text-amber-500 font-semibold tracking-wider text-xs">
+                <CardDescription className="text-primary font-semibold tracking-wider text-xs">
                   REVIEW QUEUE
                 </CardDescription>
                 <CardTitle className="text-lg flex items-center gap-2">
                   회원 제출 사진 검토 대기열
                   {pendingPhotos.length > 0 && (
-                    <span className="rounded-full bg-amber-500 text-black px-2 py-0.5 text-xs font-bold">
+                    <span className="rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-xs font-bold">
                       {pendingPhotos.length}
                     </span>
                   )}

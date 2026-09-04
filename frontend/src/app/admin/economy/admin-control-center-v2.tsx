@@ -283,7 +283,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
           <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">M2 총 유효 통화량</span>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-black text-white">{formatNumber(data.m2_supply)}</span>
-            <span className="text-sm font-bold text-amber-400">WLD</span>
+            <span className="text-sm font-bold text-primary">WLD</span>
           </div>
           <div className="pt-2 text-xs text-slate-400 flex justify-between border-t border-slate-800">
             <span>시중 현금: {formatNumber(data.cash_total)} WLD</span>
@@ -308,7 +308,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
           </div>
           <div className="pt-2 text-xs text-slate-400 flex justify-between border-t border-slate-800">
             <span className="text-cyan-400">발행: +{formatNumber(faucetToday)} WLD</span>
-            <span className="text-amber-400">소모: -{formatNumber(sinkToday)} WLD</span>
+            <span className="text-primary">소모: -{formatNumber(sinkToday)} WLD</span>
           </div>
         </div>
 
@@ -358,12 +358,12 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
 
           <div>
             <div className="flex justify-between text-xs font-medium mb-1.5">
-              <span className="text-amber-400 font-semibold">🔥 소모/회수 통화 (Sink): -{formatNumber(sinkToday)} WLD</span>
+              <span className="text-primary font-semibold">🔥 소모/회수 통화 (Sink): -{formatNumber(sinkToday)} WLD</span>
               <span className="text-slate-400">{sinkPercent}%</span>
             </div>
             <div className="w-full h-3.5 bg-slate-950 rounded-full overflow-hidden p-0.5 border border-slate-800">
               <div
-                className="h-full bg-gradient-to-r from-amber-600 to-orange-400 rounded-full transition-all duration-500"
+                className="h-full bg-gradient-to-r from-primary to-primary/70 rounded-full transition-all duration-500"
                 style={{ width: `${sinkPercent}%` }}
               />
             </div>
@@ -464,7 +464,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-semibold text-slate-300">대출 일일 이자율</span>
-                <span className="font-mono text-amber-400 font-bold">{(loanRateBps / 100).toFixed(2)}% / 일</span>
+                <span className="font-mono text-primary font-bold">{(loanRateBps / 100).toFixed(2)}% / 일</span>
               </div>
               <input
                 type="range"
@@ -473,7 +473,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
                 step="5"
                 value={loanRateBps}
                 onChange={e => setLoanRateBps(Number(e.target.value))}
-                className="w-full accent-amber-500"
+                className="w-full accent-primary"
               />
               <div className="flex justify-between text-[11px] text-slate-500">
                 <span>0.0%</span>
@@ -556,7 +556,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
                 <span className="text-xs text-slate-400">지갑 잔액 (Wallet)</span>
-                <div className="text-xl font-black text-amber-400 mt-1">
+                <div className="text-xl font-black text-primary mt-1">
                   {formatNumber(inspectedUser.wallet_balance)} <span className="text-xs font-normal">WLD</span>
                 </div>
               </div>

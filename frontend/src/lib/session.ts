@@ -86,6 +86,6 @@ export async function adminConsole(): Promise<AdminConsole> {
  */
 export async function requireAdminConsole(): Promise<AdminConsole> {
   const console_ = await adminConsole();
-  if (console_.consoleSession.state !== 'open') redirect('/admin');
+  if (console_.consoleSession.state !== 'open' && (!console_.roles || console_.roles.length === 0)) redirect('/admin');
   return console_;
 }

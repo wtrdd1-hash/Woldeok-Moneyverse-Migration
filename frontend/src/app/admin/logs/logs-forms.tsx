@@ -40,7 +40,7 @@ export function RevealDisclosure({
 
   return (
     <details className="min-w-[280px] max-w-[480px] w-full rounded-xl border border-border/40 bg-surface/30 p-3">
-      <summary className="cursor-pointer select-none text-xs font-bold text-amber-500 hover:text-amber-400 marker:content-none flex items-center justify-between">
+      <summary className="cursor-pointer select-none text-xs font-bold text-primary hover:text-primary/90 marker:content-none flex items-center justify-between">
         상세 · 원본 보기
       </summary>
       <div className="grid gap-3 pt-3">

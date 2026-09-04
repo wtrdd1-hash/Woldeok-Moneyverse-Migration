@@ -55,11 +55,11 @@ export function AdminSubNav() {
                 className={cn(
                   'flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-all',
                   isActive
-                    ? 'bg-amber-500 text-black shadow-sm'
+                    ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
                     : 'text-muted-foreground hover:bg-surface hover:text-foreground',
                 )}
               >
-                <Icon className={cn('size-3.5', isActive ? 'text-black' : 'text-amber-500')} />
+                <Icon className={cn('size-3.5', isActive ? 'text-primary-foreground' : 'text-primary')} />
                 <span>{tab.label}</span>
               </Link>
             </li>

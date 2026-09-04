@@ -29,7 +29,7 @@ export function AdminQuickUserSearch() {
           className="pl-9 text-xs sm:text-sm font-mono h-10"
         />
       </div>
-      <Button type="submit" size="sm" className="h-10 shrink-0 bg-amber-500 text-black hover:bg-amber-400 font-bold">
+      <Button type="submit" size="sm" className="h-10 shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 font-bold">
         <UserCheck className="size-4 mr-1.5" />
         빠른 조회
       </Button>
