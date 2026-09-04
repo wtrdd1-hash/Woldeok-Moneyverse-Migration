@@ -394,8 +394,16 @@ export class AdminEconomyController {
     return await this.repository().macroEconomyV2();
   }
 
+  /**
+   * The three levers below are high-risk writes in the sense of §10 and
+   * §14.9: the kill switch stops the whole economy, the knobs reprice every
+   * deposit and loan, and the override moves WLD into or out of a member's
+   * accounts. They carry the same step-up as bulk payouts and reversals --
+   * a sign-in confirmation and a code spent in the last two minutes -- and
+   * the functions behind them (125) require the superadmin on their own.
+   */
   @Post('killswitch')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
   @ApiOperation({ summary: 'Toggle master killswitch or module circuit breaker' })
   toggleKillswitch(@Req() request: RequestWithSession, @Body() body: ToggleKillswitchDto) {
     return this.guarded(
@@ -410,7 +418,7 @@ export class AdminEconomyController {
   }
 
   @Post('knobs-v2')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
   @ApiOperation({ summary: 'Update economic knobs (interest, bond yields, loan rates)' })
   updateKnobsV2(@Req() request: RequestWithSession, @Body() body: UpdateKnobsV2Dto) {
     return this.guarded(
@@ -428,15 +436,15 @@ export class AdminEconomyController {
 
   @Get('users/:id/inspect-v2')
   @ApiOperation({ summary: 'Inspect user wallet, deposits, loans, jobs, businesses' })
-  inspectUserV2(@Param('id', ParseUUIDPipe) userId: string) {
+  inspectUserV2(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) userId: string) {
     return this.guarded(
-      () => this.repository().inspectUserAssetsV2(userId),
+      () => this.repository().inspectUserAssetsV2(requireUserId(request), userId),
       'failed to inspect user assets',
     );
   }
 
   @Post('users/:id/override-v2')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
   @ApiOperation({ summary: 'Override user asset (grant or revoke WLD in wallet, deposit, or loan)' })
   overrideUserV2(
     @Req() request: RequestWithSession,
