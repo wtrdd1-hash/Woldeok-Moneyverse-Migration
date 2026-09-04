@@ -1,10 +1,8 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { TruncatedList } from '@/components/truncated-list';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -17,82 +15,179 @@ import { Progress } from '@/components/ui/progress';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
-import { ClaimButton, TakeButton } from './work-forms';
-import { WorkCountdown } from './work-countdown';
-import type { WorkAssignment, WorkReceipt, WorkSummary, WorkTask } from './work';
+import { ClaimButton, JobSwitchButton, SubmitTaskButton, TaskCompleteModalButton } from './work-forms';
+import type {
+  JobProfileResponse,
+  WorkAssignment,
+  WorkReceipt,
+  WorkSummary,
+  WorkTask,
+} from './work';
 import {
   boardOrder,
+  CAREER_JOBS,
   difficultyLabel,
   durationLabel,
   hasExpired,
   isOpen,
-  isSpent,
   jobLabel,
+  jobMeta,
   progressPercent,
   remaining,
-  rewardSentence,
-  statusLabel,
   secondsUntilSubmittable,
+  statusLabel,
 } from './work';
 
-/** One member's own work. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
 
-/**
- * How many receipts stay on the page. `work_my_receipts` returns twenty (095)
- * and the section rendered every one of them, under three sections that are
- * all more urgent than a record of work already paid for. The rest are behind
- * 더보기 rather than gone.
- */
 const RECEIPTS_ON_WORK = 5;
 
 export const metadata: Metadata = {
-  title: '작업',
+  title: '직업 및 업무 — 월덕 머니버스 전문 직업 2.0',
+  description: '8대 전문 직업군으로 자유롭게 전직하고 업무를 수행하여 WLD와 경험치를 획득하세요.',
   robots: { index: false, follow: false },
 };
 
-/**
- * The work loop, on one screen.
- *
- * Everything below it already existed and none of it was reachable. 066
- * seeded five tasks, 067 assigns and takes a submission, 068 verifies and
- * mints the reward, 069 reports the caps -- but `work_task_catalog` is
- * revoked from the application role and nothing read it back, so there was no
- * way to learn a task's id and therefore no way to take one. 095 adds the
- * board and the receipts; this is the screen the specification asks for in
- * 14.6, and the order of the sections is the order of the loop: what is left
- * today, what is in hand, what can be taken, what was paid.
- */
 export default async function WorkPage() {
   await requireMember();
 
-  // Four reads, one round trip each, issued together. None of them depends on
-  // another's answer.
-  const [summary, board, assignments, receipts] = await Promise.all([
+  const [summary, board, assignments, receipts, profile] = await Promise.all([
     apiOrNull<WorkSummary>('/api/v1/work'),
     apiOrNull<{ tasks: readonly WorkTask[] }>('/api/v1/work/tasks'),
     apiOrNull<{ assignments: readonly WorkAssignment[] }>('/api/v1/work/assignments'),
     apiOrNull<{ receipts: readonly WorkReceipt[] }>('/api/v1/work/receipts'),
+    apiOrNull<JobProfileResponse>('/api/v1/work/profile'),
   ]);
 
   const tasks = board?.tasks ?? [];
   const open = (assignments?.assignments ?? []).filter(isOpen);
   const paid = receipts?.receipts ?? [];
-  // One clock for the whole render. Read twice, the two halves of a countdown
-  // could disagree by a second and show a task as both ready and not.
   const now = Date.now();
   const durations = new Map(tasks.map((task) => [task.task_id, task.minimum_duration_seconds]));
 
+  const activeJob = profile?.active_job;
+  const allJobsMap = new Map((profile?.all_jobs ?? []).map((j) => [j.job_type, j]));
+  const activeMeta = activeJob?.job_type ? jobMeta(activeJob.job_type) : undefined;
+
+  const currentExp = activeJob?.experience ?? 0;
+  const nextExp = activeJob?.next_level_exp ?? 100;
+  const expPercent = Math.min(100, Math.round((currentExp / (nextExp || 1)) * 100));
+
   return (
-    <div className="grid gap-6">
-      <PageHeader eyebrow="DAILY WORK" title="작업하고 보상 받기">
-        작업을 맡아 최소 수행 시간을 채우고 제출하면 WLD와 경험치를 받습니다. 보상액과 한도는 모두
-        서버가 정하며, 이 화면에 보이는 금액은 지금 마쳤을 때 실제로 지급될 금액입니다.
+    <div className="grid gap-8 pb-12">
+      <PageHeader eyebrow="CAREER & WORK 2.0" title="전문 직업 및 업무 수행">
+        8대 전문 직업군을 넘나들며 업무를 수행하고 WLD와 숙련도 경험치(EXP)를 획득하세요.
+        전직 수수료와 대기시간 없이 언제든 원하는 직업으로 전환할 수 있으며, 직업별 경험치는 영구 보존됩니다.
       </PageHeader>
 
+      {/* 1. 활성 직업 및 숙련도 게이지 섹션 */}
+      <section aria-labelledby="active-job-title" className="grid gap-4">
+        <h2 id="active-job-title" className="text-xl font-bold flex items-center gap-2">
+          <span>🎯</span> 현재 활성 직업 및 숙련도
+        </h2>
+
+        <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-card via-card/80 to-primary/5 p-6 shadow-xl relative overflow-hidden backdrop-blur-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-3xl shadow-inner">
+                {activeMeta?.icon ?? '💼'}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl font-black tracking-tight">
+                    {activeMeta?.name ?? '미선택 (전직을 선택하세요)'}
+                  </span>
+                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm font-semibold">
+                    Lv.{activeJob?.level ?? 1}
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {activeMeta?.roleDescription ?? '아래 8대 직업군 중 하나를 선택하여 업무를 시작할 수 있습니다.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="w-full md:w-80 grid gap-2">
+              <div className="flex justify-between text-xs font-semibold">
+                <span className="text-muted-foreground">숙련도 경험치</span>
+                <span className="text-primary font-mono">
+                  {currentExp.toLocaleString()} / {nextExp.toLocaleString()} EXP ({expPercent}%)
+                </span>
+              </div>
+              <div className="w-full h-3.5 bg-secondary/80 rounded-full overflow-hidden p-0.5 border border-border/50">
+                <div
+                  className="h-full bg-gradient-to-r from-primary to-emerald-400 rounded-full transition-all duration-300 ease-out shadow-sm"
+                  style={{ width: `${expPercent}%` }}
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground text-right">
+                다음 레벨(Lv.{(activeJob?.level ?? 1) + 1})까지 {(nextExp - currentExp).toLocaleString()} EXP 필요
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. 8대 전문 직업군 선택 카드 그리드 */}
+      <section aria-labelledby="careers-title" className="grid gap-4">
+        <div>
+          <h2 id="careers-title" className="text-xl font-bold flex items-center gap-2">
+            <span>🏛️</span> 8대 전문 직업군
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            원하는 직업의 [전직하기] 버튼을 누르면 즉시 해당 직업으로 활성화되며 고유 업무를 배정받을 수 있습니다.
+          </p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {CAREER_JOBS.map((job) => {
+            const mastery = allJobsMap.get(job.code);
+            const level = mastery?.level ?? 1;
+            const exp = mastery?.experience ?? 0;
+            const isActive = activeJob?.job_type === job.code;
+
+            return (
+              <Card
+                key={job.code}
+                className={`transition-all duration-200 hover:shadow-lg relative flex flex-col justify-between ${
+                  isActive
+                    ? 'border-primary ring-1 ring-primary/50 bg-primary/[0.03]'
+                    : 'border-border/60 hover:border-border'
+                }`}
+              >
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl">{job.icon}</span>
+                    <Badge variant={isActive ? 'default' : 'secondary'} className="font-mono text-xs">
+                      Lv.{level}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-base mt-2">{job.name}</CardTitle>
+                  <CardDescription className="text-xs line-clamp-2 min-h-[32px]">
+                    {job.roleDescription}
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent className="pb-3 text-xs">
+                  <div className="flex justify-between text-muted-foreground mb-1">
+                    <span>누적 경험치</span>
+                    <span className="font-mono font-medium text-foreground">{exp.toLocaleString()} EXP</span>
+                  </div>
+                </CardContent>
+
+                <CardFooter className="pt-0">
+                  <JobSwitchButton job={job} isActive={isActive} level={level} />
+                </CardFooter>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 3. 오늘 남은 보상 한도 */}
       <section aria-labelledby="caps-title" className="grid gap-3">
-        <h2 id="caps-title" className="text-lg">
-          오늘 남은 보상
+        <h2 id="caps-title" className="text-lg font-semibold">
+          오늘 남은 WLD 보상 한도
         </h2>
         {summary === null ? (
           <EmptyState
@@ -117,10 +212,79 @@ export default async function WorkPage() {
         )}
       </section>
 
+      {/* 4. 직업별 일일 업무 퀘스트 목록 (원클릭 모달 연동) */}
+      <section aria-labelledby="tasks-title" className="grid gap-4">
+        <div>
+          <h2 id="tasks-title" className="text-xl font-bold flex items-center gap-2">
+            <span>📋</span> 직업별 일일 업무 퀘스트
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            현재 활성 직업에 맞는 업무를 수행하면 즉시 보상 WLD와 경험치가 지급됩니다.
+          </p>
+        </div>
+
+        {tasks.length === 0 ? (
+          <EmptyState title="현재 등록된 업무가 없어요." />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {boardOrder(tasks).map((task) => {
+              const isActiveJob = activeJob?.job_type === task.job_type;
+              const meta = jobMeta(task.job_type);
+
+              return (
+                <Card
+                  key={task.task_id}
+                  className={`flex flex-col justify-between transition-all ${
+                    isActiveJob
+                      ? 'border-border/80 bg-card shadow-sm'
+                      : 'opacity-60 bg-muted/20 border-dashed'
+                  }`}
+                >
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="outline" className="text-xs">
+                        {meta?.icon ?? '💼'} {jobLabel(task.job_type)}
+                      </Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        {difficultyLabel(task.difficulty)}
+                      </Badge>
+                    </div>
+                    <CardTitle className="text-base mt-2">{task.name}</CardTitle>
+                    <CardDescription className="text-xs">{task.description}</CardDescription>
+                  </CardHeader>
+
+                  <CardContent className="grid gap-2 text-xs py-2">
+                    <div className="rounded-lg bg-muted/50 p-2.5 grid grid-cols-2 gap-2 text-center">
+                      <div>
+                        <span className="text-muted-foreground block text-[11px]">WLD 보상</span>
+                        <span className="font-bold text-emerald-400 font-mono">+{task.base_reward} WLD</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground block text-[11px]">숙련도 EXP</span>
+                        <span className="font-bold text-amber-400 font-mono">+{task.base_experience} EXP</span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground text-[11px] px-1">
+                      <span>소요 시간: {durationLabel(task.minimum_duration_seconds)}</span>
+                      <span>오늘 완료: {task.taken_today}/{task.daily_limit}회</span>
+                    </div>
+                  </CardContent>
+
+                  <CardFooter className="pt-2">
+                    <TaskCompleteModalButton task={task} isActiveJob={isActiveJob} />
+                  </CardFooter>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* 5. 진행 중인 작업 (기존 비동기 수행 건 보존) */}
       {open.length > 0 && (
         <section aria-labelledby="open-title" className="grid gap-3">
-          <h2 id="open-title" className="text-lg">
-            진행 중인 작업
+          <h2 id="open-title" className="text-lg font-semibold">
+            기존 진행 중인 작업
           </h2>
           <div className="grid gap-3">
             {open.map((assignment) => {
@@ -145,24 +309,20 @@ export default async function WorkPage() {
                   </CardHeader>
                   {expired ? (
                     <CardContent className="text-sm text-muted-foreground">
-                      <p>기한이 지나 제출할 수 없어요. 같은 작업을 아래에서 다시 맡을 수 있어요.</p>
+                      <p>기한이 지나 제출할 수 없어요. 같은 작업을 다시 맡을 수 있어요.</p>
                     </CardContent>
                   ) : assignment.status === 'submitted' ? (
-                    <>
-                      <CardContent className="text-sm text-muted-foreground">
-                        <p>제출을 마쳤어요. 보상을 받으면 원장에 기록되고 경험치가 쌓여요.</p>
-                      </CardContent>
-                      <CardFooter>
-                        <ClaimButton assignmentId={assignment.assignment_id} />
-                      </CardFooter>
-                    </>
+                    <CardFooter>
+                      <ClaimButton assignmentId={assignment.assignment_id} />
+                    </CardFooter>
                   ) : (
-                    <WorkCountdown
-                      assignmentId={assignment.assignment_id}
-                      assignedAt={assignment.assigned_at}
-                      minimumDurationSeconds={durations.get(assignment.task_id) ?? 0}
-                      initialSeconds={wait}
-                    />
+                    <CardFooter>
+                      <SubmitTaskButton
+                        assignmentId={assignment.assignment_id}
+                        disabled={wait > 0}
+                        label={wait > 0 ? `${durationLabel(wait)} 후 제출 가능` : '작업 완료 제출'}
+                      />
+                    </CardFooter>
                   )}
                 </Card>
               );
@@ -171,131 +331,34 @@ export default async function WorkPage() {
         </section>
       )}
 
-      <section aria-labelledby="board-title" className="grid gap-3">
-        <h2 id="board-title" className="text-lg">
-          맡을 수 있는 작업
-        </h2>
-        <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
-          오늘의 추천 3개를 먼저 보여 드려요. 추천은 하루에 한 번 바뀌고, 오늘 횟수를 다 쓴 작업은
-          추천하지 않아요.
-        </p>
-
-        {board === null ? (
-          <EmptyState
-            title="작업 목록을 불러오지 못했어요."
-            description="잠시 후 다시 확인해 주세요."
+      {/* 6. 최근 수령 영수증 */}
+      {paid.length > 0 && (
+        <section aria-labelledby="receipts-title" className="grid gap-3">
+          <h2 id="receipts-title" className="text-lg font-semibold">
+            최근 수령한 보상
+          </h2>
+          <TruncatedList
+            title="최근 수령한 보상"
+            visibleCount={RECEIPTS_ON_WORK}
+            listClassName="grid gap-2"
+            rows={paid.map((receipt) => (
+              <div
+                key={receipt.receipt_id}
+                className="flex items-center justify-between rounded-xl border border-border/50 bg-card/60 p-4 text-sm"
+              >
+                <div>
+                  <p className="font-semibold">{receipt.name}</p>
+                  <p className="text-xs text-muted-foreground">{formatMoment(receipt.created_at)}</p>
+                </div>
+                <div className="text-right font-mono">
+                  <span className="font-bold text-emerald-400">+{receipt.reward_amount} WLD</span>
+                  <span className="text-xs text-muted-foreground ml-2">+{receipt.experience_amount} EXP</span>
+                </div>
+              </div>
+            ))}
           />
-        ) : tasks.length === 0 ? (
-          <EmptyState
-            title="지금 열려 있는 작업이 없어요."
-            description="운영자가 작업을 다시 열면 여기에 표시돼요."
-          />
-        ) : (
-          <div className="grid gap-3">
-            {boardOrder(tasks).map((task) => {
-              const spent = isSpent(task);
-              return (
-                <Card key={task.task_id}>
-                  <CardHeader>
-                    <CardDescription className="flex flex-wrap items-center gap-2">
-                      {jobLabel(task.job_type)}
-                      <span aria-hidden>·</span>
-                      {difficultyLabel(task.difficulty)}
-                      {task.recommended && <Badge>오늘의 추천</Badge>}
-                    </CardDescription>
-                    <CardTitle>{task.name}</CardTitle>
-                    <CardDescription>{task.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="grid gap-2 text-sm">
-                    <dl className="grid gap-1 sm:grid-cols-3">
-                      <Fact label="최소 수행 시간">
-                        {durationLabel(task.minimum_duration_seconds)}
-                      </Fact>
-                      <Fact label="경험치">{groupDigits(task.base_experience)} XP</Fact>
-                      <Fact label="오늘 맡은 횟수">
-                        {task.taken_today} / {task.daily_limit}
-                      </Fact>
-                    </dl>
-                    <p className="text-muted-foreground">{rewardSentence(task)}</p>
-                  </CardContent>
-                  <CardFooter>
-                    <TakeButton
-                      taskId={task.task_id}
-                      disabled={spent}
-                      label={spent ? '오늘 횟수를 다 썼어요' : '이 작업 맡기'}
-                    />
-                  </CardFooter>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      <section aria-labelledby="receipts-title" className="grid gap-3">
-        <h2 id="receipts-title" className="text-lg">
-          최근 지급 영수증
-        </h2>
-        {receipts === null ? (
-          <EmptyState title="영수증을 불러오지 못했어요." />
-        ) : paid.length === 0 ? (
-          <EmptyState
-            title="아직 지급받은 작업이 없어요."
-            description="작업을 맡아 제출하고 보상을 받으면 여기에 영수증이 남아요."
-          />
-        ) : (
-          <Card>
-            <CardContent>
-              {/* The row spacing moves onto the list rather than the card, so
-                  the rows behind 더보기 sit exactly as the ones in front of
-                  it do. */}
-              <TruncatedList
-                title="최근 지급 영수증"
-                visibleCount={RECEIPTS_ON_WORK}
-                listClassName="grid gap-3"
-                rows={paid.map((receipt) => (
-                  <ReceiptRow key={receipt.receipt_id} receipt={receipt} />
-                ))}
-              />
-            </CardContent>
-            <CardFooter>
-              <Button asChild variant="ghost">
-                <Link href="/wallet/activity">내 지갑 기록에서 원장 확인하기 →</Link>
-              </Button>
-            </CardFooter>
-          </Card>
-        )}
-      </section>
-    </div>
-  );
-}
-
-/**
- * One paid receipt.
- *
- * Lifted out of the page's map when the list gained a dialog: the rows on the
- * page and the rows behind 더보기 have to be the same row, and
- * `last:border-b-0` has to mean the last row of whichever of the two halves
- * it is in.
- */
-function ReceiptRow({ receipt }: { readonly receipt: WorkReceipt }) {
-  return (
-    <div className="grid gap-1 border-b pb-3 last:border-b-0 last:pb-0">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <span className="text-sm font-medium">{receipt.name}</span>
-        <span className="tabular text-sm">
-          {groupDigits(receipt.reward_amount)} WLD · 경험치 {groupDigits(receipt.experience_amount)}
-        </span>
-      </div>
-      <p className="text-xs text-muted-foreground">
-        {formatMoment(receipt.created_at)}
-        {/* A reward the caps clamped to zero has no transaction, because
-            nothing was minted. Saying so is the honest answer; a blank where a
-            ledger link belongs reads as a missing record. */}
-        {receipt.transaction_id === null
-          ? ' · 한도가 차 WLD 지급 없이 경험치만 쌓였어요.'
-          : ` · 원장 거래 ${receipt.transaction_id.slice(0, 8)}`}
-      </p>
+        </section>
+      )}
     </div>
   );
 }
@@ -311,29 +374,24 @@ function CapCard({
   readonly cap: string;
   readonly note: string;
 }) {
-  const left = remaining(paid, cap);
+  const percent = progressPercent(paid, cap);
   return (
     <Card>
       <CardHeader>
-        <CardDescription>{label} 남은 보상</CardDescription>
-        <CardTitle className="tabular text-3xl">{groupDigits(left)} WLD</CardTitle>
+        <CardDescription>{label}</CardDescription>
+        <CardTitle className="flex flex-wrap items-baseline gap-2">
+          <span>{groupDigits(paid)} WLD</span>
+          <span className="text-sm font-normal text-muted-foreground">/ {groupDigits(cap)} WLD</span>
+        </CardTitle>
       </CardHeader>
       <CardContent className="grid gap-2">
-        <Progress value={progressPercent(paid, cap)} />
-        <p className="tabular text-sm text-muted-foreground">
-          {groupDigits(paid)} / {groupDigits(cap)} WLD 지급됨
+        <Progress value={percent} aria-label={`${label} 보상 한도`} />
+        <p className="text-xs text-muted-foreground">
+          {remaining(paid, cap) === '0'
+            ? '오늘 받을 수 있는 보상을 모두 채웠어요.'
+            : `${groupDigits(remaining(paid, cap))} WLD 더 받을 수 있어요. ${note}`}
         </p>
-        <p className="text-xs text-muted-foreground">{note}</p>
       </CardContent>
     </Card>
-  );
-}
-
-function Fact({ label, children }: { readonly label: string; readonly children: React.ReactNode }) {
-  return (
-    <div className="flex items-baseline gap-2 sm:grid sm:gap-0">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="tabular text-sm">{children}</dd>
-    </div>
   );
 }

@@ -11,13 +11,6 @@ const uuid = (value: unknown, field: string): string => {
   return value.toLowerCase();
 };
 
-// Raw rows from business_catalog()/business_my_ownerships() (see migration
-// 036-virtual-business-game.sql). purchase_cost/daily_revenue/
-// daily_operating_cost are bigint columns cast to text; business-service.ts
-// re-validates and brands them WldAmount rather than trusting the string
-// here. purchased_at is a timestamptz and last_settlement_date a date,
-// both returned by the driver as Date objects (or null when a business has
-// never been settled).
 export interface BusinessCatalogRow {
   readonly id: string;
   readonly symbol: string;
@@ -35,11 +28,12 @@ export interface BusinessOwnershipRow extends BusinessCatalogRow {
   readonly last_settlement_date: Date | null;
 }
 
-// business_equity_standing() (105) always returns exactly one row -- zeros for
-// a member with no accounts -- so `equity()` below treats a missing row as an
-// assertion violation rather than a normal branch. The three amounts are bigint
-// columns cast to text; `minimum_ratio_bps` is an int4 ratio and stays a
-// number, the one number in this file that is not money.
+export interface BusinessOwnershipV2Row extends BusinessOwnershipRow {
+  readonly is_settled_today: boolean;
+  readonly boost_active: Record<string, unknown> | null;
+  readonly status: string;
+}
+
 export interface BusinessEquityRow {
   readonly holdings_amount: string;
   readonly debt_amount: string;
@@ -47,10 +41,6 @@ export interface BusinessEquityRow {
   readonly minimum_ratio_bps: number;
 }
 
-// business_purchase()/business_settle_daily() always return exactly one row
-// (idempotent replay included); the methods below throw if the driver ever
-// returns none, so callers can treat a missing row as an assertion
-// violation, not a normal branch.
 export interface BusinessPurchaseRow {
   readonly ownership_id: string;
   readonly business_type_id: string;
@@ -69,6 +59,14 @@ export interface BusinessSettleRow {
   readonly replayed: boolean;
 }
 
+export interface BusinessActivateRow {
+  readonly ownership_id: string;
+  readonly business_symbol: string;
+  readonly business_name: string;
+  readonly daily_revenue: string;
+  readonly daily_operating_cost: string;
+}
+
 interface PurchaseInput {
   readonly userId: string;
   readonly businessTypeId: string;
@@ -79,6 +77,18 @@ interface SettleInput {
   readonly userId: string;
   readonly ownershipId: string;
   readonly idempotencyKey?: string;
+}
+
+interface ActivateLicenseInput {
+  readonly userId: string;
+  readonly catalogCode: string;
+  readonly idempotencyKey?: string;
+}
+
+interface ApplyBoostInput {
+  readonly userId: string;
+  readonly ownershipId: string;
+  readonly boostCode: string;
 }
 
 export class PostgresBusinessRepository implements BusinessRepository {
@@ -96,9 +106,6 @@ export class PostgresBusinessRepository implements BusinessRepository {
     );
   }
 
-  // Declared `async` so uuid()'s synchronous throw below becomes a rejected
-  // promise rather than a synchronous exception at the call site — see the
-  // matching note in postgres-stock-repository.ts.
   async mine(userId: string): Promise<readonly BusinessOwnershipRow[]> {
     const actor = uuid(userId, 'user id');
     return queryRows<BusinessOwnershipRow>(
@@ -108,10 +115,18 @@ export class PostgresBusinessRepository implements BusinessRepository {
     );
   }
 
-  // A function and not a SELECT over `account_balances` and
-  // `virtual_bank_loans`: the first is readable by this role and the second is
-  // not, and a read assembled here would be the 30% rule computed in two
-  // places -- the copy in TypeScript being the one nothing refuses to be wrong.
+  async mineV2(userId: string): Promise<readonly BusinessOwnershipV2Row[]> {
+    const actor = uuid(userId, 'user id');
+    return queryRows<BusinessOwnershipV2Row>(
+      this.pool,
+      `SELECT ownership_id::text, business_type_id::text, symbol, name, description,
+              purchase_cost::text, daily_revenue::text, daily_operating_cost::text,
+              purchased_at, last_settlement_date, is_settled_today, boost_active, status
+       FROM public.business_my_ownerships_v2($1)`,
+      [actor],
+    );
+  }
+
   async equity(userId: string): Promise<BusinessEquityRow | null> {
     const actor = uuid(userId, 'user id');
     return queryOne<BusinessEquityRow>(
@@ -156,5 +171,64 @@ export class PostgresBusinessRepository implements BusinessRepository {
     if (!row?.ownership_id)
       throw new Error('database did not return a business settlement receipt');
     return row;
+  }
+
+  async settleV2({
+    userId,
+    ownershipId,
+    idempotencyKey = randomUUID(),
+  }: SettleInput): Promise<BusinessSettleRow> {
+    const row = await queryOne<BusinessSettleRow>(
+      this.pool,
+      `SELECT ownership_id::text, settlement_date, gross_revenue::text,
+              operating_cost::text, net_amount::text, transaction_id::text, replayed
+       FROM public.business_settle_daily_v2($1, $2, $3)`,
+      [
+        uuid(userId, 'user id'),
+        uuid(ownershipId, 'ownership id'),
+        uuid(idempotencyKey, 'idempotency key'),
+      ],
+    );
+    if (!row?.ownership_id)
+      throw new Error('database did not return a business settlement receipt');
+    return row;
+  }
+
+  async activateFromLicense({
+    userId,
+    catalogCode,
+    idempotencyKey = randomUUID(),
+  }: ActivateLicenseInput): Promise<BusinessActivateRow> {
+    const row = await queryOne<BusinessActivateRow>(
+      this.pool,
+      `SELECT ownership_id::text, business_symbol, business_name,
+              daily_revenue::text, daily_operating_cost::text
+       FROM public.business_activate_from_license($1, $2, $3)`,
+      [
+        uuid(userId, 'user id'),
+        catalogCode,
+        uuid(idempotencyKey, 'idempotency key'),
+      ],
+    );
+    if (!row?.ownership_id)
+      throw new Error('database did not return an activated business receipt');
+    return row;
+  }
+
+  async applyBoost({
+    userId,
+    ownershipId,
+    boostCode,
+  }: ApplyBoostInput): Promise<Record<string, unknown>> {
+    const row = await queryOne<{ boost_active: Record<string, unknown> }>(
+      this.pool,
+      `SELECT public.business_apply_boost($1, $2, $3) AS boost_active`,
+      [
+        uuid(userId, 'user id'),
+        uuid(ownershipId, 'ownership id'),
+        boostCode,
+      ],
+    );
+    return row?.boost_active ?? {};
   }
 }

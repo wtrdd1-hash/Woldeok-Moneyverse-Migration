@@ -13,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { IsUUID } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -28,6 +28,24 @@ export class IdempotentDto {
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
   readonly idempotencyKey!: string;
+}
+
+export class ActivateLicenseDto {
+  @ApiProperty({ example: 'biz_cvs_license' })
+  @IsString()
+  @IsNotEmpty()
+  readonly catalogCode!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  readonly idempotencyKey!: string;
+}
+
+export class ApplyBoostDto {
+  @ApiProperty({ example: 'biz_cvs_boost_7d' })
+  @IsString()
+  @IsNotEmpty()
+  readonly boostCode!: string;
 }
 
 @ApiTags('businesses')
@@ -48,7 +66,10 @@ export class BusinessController {
       return await work();
     } catch (error: unknown) {
       if (error instanceof BusinessInputError) throw new BadRequestException(error.message);
-      if (isExpectedCommandFailure(error)) throw new ConflictException(message);
+      if (isExpectedCommandFailure(error)) {
+        const msg = error instanceof Error && error.message ? error.message : message;
+        throw new ConflictException(msg);
+      }
       throw error;
     }
   }
@@ -71,17 +92,12 @@ export class BusinessController {
     return { businesses: await this.service().mine(requireUserId(request)) };
   }
 
-  /**
-   * The caller's own capital, against 105's 자기자본 최소 30%.
-   *
-   * It exists because the refusal cannot explain itself: 105 raises 22023, this
-   * controller turns that into a 409, and a 409 reaches a member as one fixed
-   * Korean sentence -- so the requirement and their own figure have to be on
-   * the screen before the button is pressed, exactly as the level ladder is.
-   *
-   * Its own noun rather than a field on the catalogue: this is one row about
-   * the caller, and /business-types is one list every member shares.
-   */
+  @Get('businesses/my-v2')
+  @ApiOperation({ summary: 'Enhanced businesses the caller owns with boosts and settlement status' })
+  async mineV2(@Req() request: RequestWithSession) {
+    return { businesses: await this.service().mineV2(requireUserId(request)) };
+  }
+
   @Get('business-equity')
   @ApiOperation({ summary: 'The own capital the caller can put behind a purchase' })
   async equity(@Req() request: RequestWithSession) {
@@ -121,6 +137,59 @@ export class BusinessController {
           idempotencyKey: body.idempotencyKey,
         }),
       'this settlement cannot be completed now',
+    );
+  }
+
+  @Post('businesses/:id/settle-v2')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Settle a day of revenue with active boosts and double-entry ledger sink' })
+  settleV2(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) ownershipId: string,
+    @Body() body: IdempotentDto,
+  ) {
+    return this.guarded(
+      () =>
+        this.service().settleV2(requireUserId(request), {
+          ownershipId,
+          idempotencyKey: body.idempotencyKey,
+        }),
+      'this settlement cannot be completed now',
+    );
+  }
+
+  @Post('businesses/activate-license')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Activate a business using a purchased license item from inventory' })
+  activateLicense(
+    @Req() request: RequestWithSession,
+    @Body() body: ActivateLicenseDto,
+  ) {
+    return this.guarded(
+      () =>
+        this.service().activateFromLicense(requireUserId(request), {
+          catalogCode: body.catalogCode,
+          idempotencyKey: body.idempotencyKey,
+        }),
+      'failed to activate business license',
+    );
+  }
+
+  @Post('businesses/:id/boost')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Equip a boost item from inventory to business' })
+  applyBoost(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) ownershipId: string,
+    @Body() body: ApplyBoostDto,
+  ) {
+    return this.guarded(
+      () =>
+        this.service().applyBoost(requireUserId(request), {
+          ownershipId,
+          boostCode: body.boostCode,
+        }),
+      'failed to apply boost item',
     );
   }
 }

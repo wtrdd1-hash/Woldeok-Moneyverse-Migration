@@ -1,23 +1,169 @@
 'use client';
 
+import { useState, useTransition } from 'react';
 import { useActionState } from 'react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { IDLE } from '@/lib/action-state';
-import { claimReward, submitTask, takeTask } from './actions';
+import { claimReward, completeTaskV2Action, submitTask, switchJobAction, takeTask } from './actions';
+import type { JobMeta, WorkTask } from './work';
 
-/**
- * The three buttons of the loop, each its own form.
- *
- * One form per action rather than one form with three buttons: each carries a
- * different id, each gets its own outcome, and `SubmitButton` disables only
- * the control that was pressed. A member with two tasks open must be able to
- * submit one while the other is still waiting out its minimum duration.
- *
- * `label` and `disabled` are required rather than optional. The page knows
- * why a control is unavailable -- the day's takes are spent, or the minimum
- * duration has not passed -- and a default hidden in here would be a second
- * place for that wording to live.
- */
+export function JobSwitchButton({
+  job,
+  isActive,
+  level,
+}: {
+  readonly job: JobMeta;
+  readonly isActive: boolean;
+  readonly level: number;
+}) {
+  const [state, action] = useActionState(switchJobAction, IDLE);
+
+  if (isActive) {
+    return (
+      <Badge className="bg-emerald-600/20 text-emerald-400 border-emerald-500/40 px-3 py-1 font-semibold">
+        현재 활성 직업 (Lv.{level})
+      </Badge>
+    );
+  }
+
+  return (
+    <div className="grid gap-1.5 w-full">
+      <form action={action} className="w-full">
+        <input type="hidden" name="jobType" value={job.code} />
+        <SubmitButton variant="outline" className="w-full text-xs font-medium">
+          {job.name}으로 전직하기
+        </SubmitButton>
+      </form>
+      <ActionAlert state={state} />
+    </div>
+  );
+}
+
+export function TaskCompleteModalButton({
+  task,
+  isActiveJob,
+}: {
+  readonly task: WorkTask;
+  readonly isActiveJob: boolean;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [state, formAction] = useActionState(completeTaskV2Action, IDLE);
+  const [, startTransition] = useTransition();
+
+  const handleStartWork = () => {
+    setIsProcessing(true);
+    setProgress(0);
+
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + 20;
+      });
+    }, 120);
+
+    setTimeout(() => {
+      clearInterval(interval);
+      setProgress(100);
+      const fd = new FormData();
+      fd.append('taskId', task.task_id);
+      startTransition(() => {
+        formAction(fd);
+        setIsProcessing(false);
+      });
+    }, 800);
+  };
+
+  const isLimitReached = task.taken_today >= task.daily_limit;
+
+  return (
+    <div>
+      <Button
+        variant={isActiveJob ? 'default' : 'outline'}
+        disabled={!isActiveJob || isLimitReached}
+        onClick={() => setIsOpen(true)}
+        className="w-full font-semibold shadow-sm"
+      >
+        {!isActiveJob
+          ? '해당 직업 전직 필요'
+          : isLimitReached
+          ? '오늘 수행 완료'
+          : '⚡ 즉시 업무 수행'}
+      </Button>
+
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <Card className="w-full max-w-md border-border/80 bg-background/95 shadow-2xl backdrop-blur-md">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <Badge variant="secondary">{task.code}</Badge>
+                <Badge className="bg-primary/20 text-primary border-primary/30">
+                  일일 {task.taken_today}/{task.daily_limit}회
+                </Badge>
+              </div>
+              <CardTitle className="text-xl mt-2">{task.name}</CardTitle>
+              <CardDescription className="text-sm">{task.description}</CardDescription>
+            </CardHeader>
+
+            <CardContent className="grid gap-4">
+              <div className="rounded-xl border border-border/50 bg-muted/40 p-3 grid grid-cols-2 gap-2 text-center text-sm">
+                <div>
+                  <span className="text-xs text-muted-foreground block">기본 WLD 보상</span>
+                  <span className="text-base font-bold text-emerald-400">+{task.base_reward} WLD</span>
+                </div>
+                <div>
+                  <span className="text-xs text-muted-foreground block">획득 숙련도 EXP</span>
+                  <span className="text-base font-bold text-amber-400">+{task.base_experience} EXP</span>
+                </div>
+              </div>
+
+              {isProcessing ? (
+                <div className="space-y-2 py-4">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>업무 진행 및 알고리즘 검증 중...</span>
+                    <span>{progress}%</span>
+                  </div>
+                  <div className="w-full h-3 bg-secondary rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary transition-all duration-150 ease-out rounded-full"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+              ) : null}
+
+              <ActionAlert state={state} />
+
+              <div className="flex gap-2 justify-end mt-2">
+                <Button
+                  variant="ghost"
+                  disabled={isProcessing}
+                  onClick={() => setIsOpen(false)}
+                >
+                  닫기
+                </Button>
+                <Button
+                  disabled={isProcessing || isLimitReached}
+                  onClick={handleStartWork}
+                  className="font-bold"
+                >
+                  {isProcessing ? '수행 중...' : '업무 완료 및 보상 수령'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function TakeButton({
   taskId,

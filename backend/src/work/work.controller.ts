@@ -21,7 +21,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
-import { WorkAssignmentDto, WorkCompletionDto } from './work.dto';
+import { JobSwitchDto, WorkAssignmentDto, WorkCompletionDto, WorkCompleteTaskDto } from './work.dto';
 import { WorkInputError, WorkRepository } from './work.repository';
 
 /**
@@ -54,7 +54,10 @@ export class WorkController {
     } catch (error: unknown) {
       if (error instanceof WorkInputError) throw new BadRequestException(error.message);
       if (isAuthorizationFailure(error)) throw new ForbiddenException('this is not yours');
-      if (isExpectedCommandFailure(error)) throw new ConflictException(conflictMessage);
+      if (isExpectedCommandFailure(error)) {
+        const msg = error instanceof Error && error.message ? error.message : conflictMessage;
+        throw new ConflictException(msg);
+      }
       throw error;
     }
   }
@@ -68,6 +71,24 @@ export class WorkController {
     );
   }
 
+  @Get('profile')
+  @ApiOperation({ summary: 'Current active job and all job masteries' })
+  async profile(@Req() request: RequestWithSession) {
+    return this.guarded(
+      () => this.repository().jobProfile(requireUserId(request)),
+      'job profile is unavailable',
+    );
+  }
+
+  @Post('active-job')
+  @ApiOperation({ summary: 'Switch active job among 8 specialization careers' })
+  switchJob(@Req() request: RequestWithSession, @Body() body: JobSwitchDto) {
+    return this.guarded(
+      () => this.repository().switchActiveJob(requireUserId(request), body.jobType),
+      'failed to switch active job',
+    );
+  }
+
   @Get('tasks')
   @ApiOperation({ summary: 'Every task on offer, with this member’s standing against each' })
   async tasks(@Req() request: RequestWithSession) {
@@ -77,6 +98,19 @@ export class WorkController {
         'the task board is unavailable',
       ),
     };
+  }
+
+  @Post('tasks/:id/complete')
+  @ApiOperation({ summary: 'Directly complete a career task with EXP and instant WLD faucet payout' })
+  completeTask(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) taskId: string,
+    @Body() body: WorkCompleteTaskDto,
+  ) {
+    return this.guarded(
+      () => this.repository().completeTaskV2(body.idempotencyKey, requireUserId(request), taskId),
+      'failed to complete task',
+    );
   }
 
   @Get('receipts')

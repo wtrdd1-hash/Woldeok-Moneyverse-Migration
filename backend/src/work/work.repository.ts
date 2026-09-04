@@ -88,6 +88,15 @@ export interface WorkDashboardRow {
   active_assignments: string;
 }
 
+export interface WorkCompleteV2Row {
+  reward_amount: string;
+  experience_gained: string;
+  current_level: number;
+  current_experience: string;
+  level_up: boolean;
+  transaction_id: string;
+}
+
 export class WorkRepository {
   constructor(private readonly pool: Queryable) {}
 
@@ -188,6 +197,39 @@ export class WorkRepository {
               item.reward_amount::text, item.experience_amount::text
        FROM public.work_my_assignments($1) AS item`,
       [actor],
+    );
+  }
+
+  async jobProfile(actor: unknown): Promise<unknown> {
+    assertUuid(actor, 'actor');
+    const row = await queryOne<{ profile: unknown }>(
+      this.pool,
+      `SELECT public.job_get_my_profile($1) AS profile`,
+      [actor],
+    );
+    return row?.profile ?? null;
+  }
+
+  async switchActiveJob(actor: unknown, jobType: string): Promise<unknown> {
+    assertUuid(actor, 'actor');
+    return queryOne(
+      this.pool,
+      `SELECT job_type::text, level, current_experience::text, is_active
+       FROM public.job_switch_active($1, $2::public.work_job_type)`,
+      [actor, jobType],
+    );
+  }
+
+  async completeTaskV2(key: unknown, actor: unknown, taskId: unknown): Promise<WorkCompleteV2Row | null> {
+    assertUuid(key, 'idempotency key');
+    assertUuid(actor, 'actor');
+    assertUuid(taskId, 'task id');
+    return queryOne<WorkCompleteV2Row>(
+      this.pool,
+      `SELECT reward_amount::text, experience_gained::text, current_level,
+              current_experience::text, level_up, transaction_id::text
+       FROM public.work_complete_task_v2($1, $2, $3)`,
+      [actor, taskId, key],
     );
   }
 }

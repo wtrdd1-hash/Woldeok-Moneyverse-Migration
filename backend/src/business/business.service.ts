@@ -1,5 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { BusinessInputError } from './business.repository';
+import type {
+  BusinessCatalogRow,
+  BusinessOwnershipRow,
+  BusinessOwnershipV2Row,
+  BusinessEquityRow,
+  BusinessPurchaseRow,
+  BusinessSettleRow,
+  BusinessActivateRow,
+} from './business.repository';
 import { wldAmount } from '@moneyverse/contract';
 import type { WldAmount } from '@moneyverse/contract';
 
@@ -11,21 +20,12 @@ const validId = (value: unknown, field: string): string => {
   return value.toLowerCase();
 };
 
-// purchase_cost/daily_revenue/... arrive from PostgresBusinessRepository as
-// bigint columns cast to text (see migration 036-virtual-business-game.sql).
-// They are re-validated here, exactly like a UUID or free-text field coming
-// from outside the process, and only then branded WldAmount.
 function amount(value: unknown, field: string): WldAmount {
   if (typeof value !== 'string') throw new Error(`database returned invalid ${field}`);
   return wldAmount(value, field);
 }
 
 const iso = (value: unknown, field: string): string => {
-  // Date's constructor overloads accept string | number | Date, not
-  // `unknown`; the repository returns a driver Date for timestamptz columns
-  // in production and a plain ISO string in test doubles, so both are
-  // handled explicitly and anything else is treated as the invalid
-  // timestamp it would produce.
   const date =
     typeof value === 'string' || typeof value === 'number' || value instanceof Date
       ? new Date(value)
@@ -33,55 +33,6 @@ const iso = (value: unknown, field: string): string => {
   if (Number.isNaN(date.valueOf())) throw new Error(`database returned invalid ${field}`);
   return date.toISOString();
 };
-
-// Raw rows as returned by PostgresBusinessRepository (see
-// business_catalog()/business_my_ownerships()/business_purchase()/
-// business_settle_daily() in migration 036-virtual-business-game.sql).
-// Fields are kept `unknown` and pushed through the validators above, the
-// same defensive treatment board-service.ts gives its rows: this is the
-// last line of defense against a corrupted or unexpected database row, not
-// just a formatter.
-interface BusinessCatalogRow {
-  readonly id?: unknown;
-  readonly symbol?: unknown;
-  readonly name?: unknown;
-  readonly description?: unknown;
-  readonly purchase_cost?: unknown;
-  readonly daily_revenue?: unknown;
-  readonly daily_operating_cost?: unknown;
-}
-
-interface BusinessOwnershipRow extends BusinessCatalogRow {
-  readonly ownership_id?: unknown;
-  readonly business_type_id?: unknown;
-  readonly purchased_at?: unknown;
-  readonly last_settlement_date?: unknown;
-}
-
-interface BusinessEquityRow {
-  readonly holdings_amount?: unknown;
-  readonly debt_amount?: unknown;
-  readonly equity_amount?: unknown;
-  readonly minimum_ratio_bps?: unknown;
-}
-
-interface BusinessPurchaseRow {
-  readonly ownership_id: unknown;
-  readonly business_type_id: unknown;
-  readonly purchase_cost: unknown;
-  readonly transaction_id: unknown;
-  readonly replayed: unknown;
-}
-
-interface BusinessSettleRow {
-  readonly ownership_id: unknown;
-  readonly settlement_date: unknown;
-  readonly gross_revenue: unknown;
-  readonly operating_cost: unknown;
-  readonly net_amount: unknown;
-  readonly transaction_id: unknown;
-  readonly replayed: unknown;
-}
 
 export interface BusinessType {
   readonly id: string;
@@ -106,9 +57,12 @@ export interface BusinessOwnership {
   readonly lastSettlementDate: string | null;
 }
 
-// public.business_equity_standing (105). `equityAmount` is the only amount in
-// this file that can be negative -- a member can owe the bank more than they
-// hold -- which is why it is validated as an amount and not as a balance.
+export interface BusinessOwnershipV2 extends BusinessOwnership {
+  readonly isSettledToday: boolean;
+  readonly boostActive: Record<string, unknown> | null;
+  readonly status: string;
+}
+
 export interface BusinessEquityStanding {
   readonly holdingsAmount: WldAmount;
   readonly debtAmount: WldAmount;
@@ -134,6 +88,14 @@ export interface BusinessSettleResult {
   readonly replayed: boolean;
 }
 
+export interface BusinessActivateResult {
+  readonly ownershipId: string;
+  readonly businessSymbol: string;
+  readonly businessName: string;
+  readonly dailyRevenue: WldAmount;
+  readonly dailyOperatingCost: WldAmount;
+}
+
 export interface BusinessPurchaseInput {
   readonly userId: string;
   readonly businessTypeId: string;
@@ -146,12 +108,28 @@ export interface BusinessSettleInput {
   readonly idempotencyKey: string;
 }
 
+export interface BusinessActivateInput {
+  readonly userId: string;
+  readonly catalogCode: string;
+  readonly idempotencyKey?: string;
+}
+
+export interface BusinessApplyBoostInput {
+  readonly userId: string;
+  readonly ownershipId: string;
+  readonly boostCode: string;
+}
+
 export interface BusinessRepository {
   catalog(): Promise<readonly BusinessCatalogRow[]>;
   mine(userId: string): Promise<readonly BusinessOwnershipRow[]>;
+  mineV2(userId: string): Promise<readonly BusinessOwnershipV2Row[]>;
   equity(userId: string): Promise<BusinessEquityRow | null>;
   purchase(input: BusinessPurchaseInput): Promise<BusinessPurchaseRow>;
   settle(input: BusinessSettleInput): Promise<BusinessSettleRow>;
+  settleV2(input: BusinessSettleInput): Promise<BusinessSettleRow>;
+  activateFromLicense(input: BusinessActivateInput): Promise<BusinessActivateRow>;
+  applyBoost(input: BusinessApplyBoostInput): Promise<Record<string, unknown>>;
 }
 
 function businessType(row: BusinessCatalogRow): BusinessType {
@@ -174,6 +152,16 @@ export interface CreateBusinessPurchaseInput {
 export interface CreateBusinessSettleInput {
   readonly ownershipId?: unknown;
   readonly idempotencyKey?: unknown;
+}
+
+export interface CreateBusinessActivateInput {
+  readonly catalogCode?: unknown;
+  readonly idempotencyKey?: unknown;
+}
+
+export interface CreateBusinessApplyBoostInput {
+  readonly ownershipId?: unknown;
+  readonly boostCode?: unknown;
 }
 
 @Injectable()
@@ -206,15 +194,25 @@ export class BusinessService {
     }));
   }
 
-  /**
-   * The caller's own capital, and the share of a price 105 asks it to cover.
-   *
-   * `minimumRatioBps` comes from the database rather than from a constant here
-   * for the reason 105 gives: the trigger and the screen have to test the same
-   * ratio, and a copy in TypeScript is the half nothing refuses when it is
-   * wrong. It is a ratio, so it is validated as a bounded integer and never
-   * branded as money.
-   */
+  async mineV2(userId: unknown): Promise<BusinessOwnershipV2[]> {
+    const rows = await this.repository.mineV2(validId(userId, 'user id'));
+    return rows.map((row) => ({
+      ownershipId: validId(row?.ownership_id, 'ownership id'),
+      businessTypeId: validId(row?.business_type_id, 'business id'),
+      symbol: String(row?.symbol ?? ''),
+      name: String(row?.name ?? ''),
+      description: String(row?.description ?? ''),
+      purchaseCost: amount(row?.purchase_cost, 'purchase cost'),
+      dailyRevenue: amount(row?.daily_revenue, 'daily revenue'),
+      dailyOperatingCost: amount(row?.daily_operating_cost, 'operating cost'),
+      purchasedAt: iso(row?.purchased_at, 'purchased timestamp'),
+      lastSettlementDate: row?.last_settlement_date ? String(row.last_settlement_date) : null,
+      isSettledToday: row?.is_settled_today === true,
+      boostActive: row?.boost_active ?? null,
+      status: String(row?.status ?? 'active'),
+    }));
+  }
+
   async equity(userId: unknown): Promise<BusinessEquityStanding> {
     const row = await this.repository.equity(validId(userId, 'user id'));
     if (!row) throw new Error('database did not return a business equity standing');
@@ -266,5 +264,54 @@ export class BusinessService {
       transactionId: validId(row.transaction_id, 'transaction id'),
       replayed: row.replayed === true,
     };
+  }
+
+  async settleV2(
+    userId: unknown,
+    input: CreateBusinessSettleInput = {},
+  ): Promise<BusinessSettleResult> {
+    const row = await this.repository.settleV2({
+      userId: validId(userId, 'user id'),
+      ownershipId: validId(input.ownershipId, 'ownership id'),
+      idempotencyKey: validId(input.idempotencyKey, 'idempotency key'),
+    });
+    return {
+      ownershipId: validId(row.ownership_id, 'ownership id'),
+      settlementDate: String(row.settlement_date),
+      grossRevenue: amount(row.gross_revenue, 'gross revenue'),
+      operatingCost: amount(row.operating_cost, 'operating cost'),
+      netAmount: amount(row.net_amount, 'net amount'),
+      transactionId: validId(row.transaction_id, 'transaction id'),
+      replayed: row.replayed === true,
+    };
+  }
+
+  async activateFromLicense(
+    userId: unknown,
+    input: CreateBusinessActivateInput = {},
+  ): Promise<BusinessActivateResult> {
+    const row = await this.repository.activateFromLicense({
+      userId: validId(userId, 'user id'),
+      catalogCode: String(input.catalogCode ?? ''),
+      idempotencyKey: validId(input.idempotencyKey, 'idempotency key'),
+    });
+    return {
+      ownershipId: validId(row.ownership_id, 'ownership id'),
+      businessSymbol: String(row.business_symbol),
+      businessName: String(row.business_name),
+      dailyRevenue: amount(row.daily_revenue, 'daily revenue'),
+      dailyOperatingCost: amount(row.daily_operating_cost, 'operating cost'),
+    };
+  }
+
+  async applyBoost(
+    userId: unknown,
+    input: CreateBusinessApplyBoostInput = {},
+  ): Promise<Record<string, unknown>> {
+    return this.repository.applyBoost({
+      userId: validId(userId, 'user id'),
+      ownershipId: validId(input.ownershipId, 'ownership id'),
+      boostCode: String(input.boostCode ?? ''),
+    });
   }
 }
