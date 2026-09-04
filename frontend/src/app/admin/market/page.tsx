@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { LiveRefresh } from '@/components/live-refresh';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -146,7 +148,12 @@ export default async function AdminMarketPage() {
               호재와 악재. 낸 순간부터 기간이 끝날 때까지 대상의 적정가가 기울고 변동성이 커져요.
             </p>
           </div>
-          <PublishMarketEventDialog stocks={stocks?.stocks ?? []} />
+          <div className="flex flex-wrap items-center gap-2">
+            <Button asChild variant="outline" className="min-h-11">
+              <Link href="/admin/market/ai-news">AI 시나리오 →</Link>
+            </Button>
+            <PublishMarketEventDialog stocks={stocks?.stocks ?? []} />
+          </div>
         </CardHeader>
         <CardContent>
           {events === null ? (
