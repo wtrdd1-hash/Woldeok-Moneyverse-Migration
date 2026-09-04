@@ -19,22 +19,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { ShareGuide } from '@/components/share-guide';
+import { TranslatedText as T } from '@/components/translated-text';
 import {
   BEGINNER_TIPS,
   FIRST_DAY_ORDER,
+  FIRST_DAY_ORDER_EN,
   GUIDE_FAQS,
   GUIDE_STEPS,
   QUICK_START_STEPS,
+  QUICK_START_STEPS_EN,
 } from './guide';
 
-/**
- * Public and static because the guide contains no member data. The visual
- * entry point intentionally comes before the detailed instructions: a new
- * visitor should understand the size and shape of a first session before
- * committing to six explanatory cards.
- */
 export const metadata: Metadata = {
-  title: '이용 방법',
+  title: '이용 방법 (Guide)',
   description:
     '월덕 머니버스를 처음 시작하는 방법. 로그인부터 첫 퀘스트, WLD 보상 확인까지 재미있게 따라가는 초보자 안내.',
   alternates: { canonical: '/guide' },
@@ -76,146 +73,132 @@ export default function GuidePage() {
         <div className="relative grid min-h-[500px] content-end gap-6 p-6 sm:p-10 lg:max-w-[64%] lg:p-14">
           <div className="flex w-fit items-center gap-2 rounded-full border border-white/20 bg-black/15 px-3 py-1.5 text-xs font-extrabold backdrop-blur-sm">
             <Sparkles className="size-3.5 text-[#f2cd72]" aria-hidden />
-            처음 온 모험가를 위한 안내서
+            <T korean="처음 온 모험가를 위한 안내서" english="Guide for New Adventurers" />
           </div>
-          <div className="grid gap-3">
-            <p className="eyebrow !text-[#f2cd72]">YOUR FIRST ADVENTURE</p>
-            <h1 className="max-w-[650px] text-[clamp(2.15rem,6vw,4.5rem)] leading-[1.08] tracking-[-0.055em]">
-              오늘 10분,
-              <br />첫 보상까지 가볼까요?
-            </h1>
-            <p className="max-w-[590px] text-sm leading-[1.9] text-white/80 sm:text-base">
-              계정 하나만 있으면 충분해요. 퀘스트를 고르고, 활동을 마치고, 지갑에 남은 첫 기록을
-              확인하는 순간까지 길을 잃지 않도록 함께 안내할게요.
-            </p>
-          </div>
+          <h1 className="text-balance text-4xl leading-[1.12] sm:text-5xl">
+            <T korean="오늘 10분, 첫 보상까지 가볼까요?" english="Ready for your first reward in 10 minutes?" />
+          </h1>
+          <p className="max-w-prose text-base leading-[1.8] text-white/80 [word-break:keep-all] sm:text-lg">
+            <T
+              korean="계정 하나만 있으면 충분해요. 퀘스트를 고르고, 활동을 마치고, 지갑에 남은 첫 기록을 확인하는 순간까지 길을 잃지 않도록 함께 안내할게요."
+              english="All you need is an account. Pick a quest, finish an activity, and see your first reward in your wallet. We'll guide you step by step."
+            />
+          </p>
           <div className="flex flex-wrap gap-3">
-            <Button asChild size="lg" className="bg-[#f2cd72] text-forest-deep hover:bg-[#f6d98e]">
+            <Button asChild size="lg" className="bg-[#f2cd72] text-[#1b261b] hover:bg-[#e7bf5d]">
               <Link href="/login">
-                지금 시작하기 <ArrowRight aria-hidden />
+                <T korean="지금 시작하기" english="Get Started" /> <ArrowRight aria-hidden />
               </Link>
             </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-white/30 bg-white/10 text-white hover:bg-white/20 hover:text-white"
-            >
-              <Link href="#adventure-map">먼저 구경하기</Link>
+            <Button asChild size="lg" variant="outline" className="border-white/30 bg-black/20 text-white hover:bg-black/35 hover:text-white">
+              <Link href="#first-steps">
+                <T korean="먼저 구경하기" english="Explore First" />
+              </Link>
             </Button>
           </div>
-          <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-white/70">
-            <span className="flex items-center gap-1.5">
-              <Clock3 className="size-3.5" aria-hidden /> 약 10분
-            </span>
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="size-3.5" aria-hidden /> 별도 비밀번호 없음
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Gift className="size-3.5" aria-hidden /> 게임 속 가상 보상
-            </span>
-          </div>
+          <dl className="flex flex-wrap gap-6 pt-2 text-xs text-white/70">
+            <div className="flex items-center gap-1.5">
+              <Clock3 className="size-4 text-[#f2cd72]" aria-hidden />
+              <dt className="sr-only"><T korean="예상 소요 시간" english="Estimated time" /></dt>
+              <dd><T korean="약 10분" english="~10 mins" /></dd>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="size-4 text-[#f2cd72]" aria-hidden />
+              <dt className="sr-only"><T korean="인증 방식" english="Auth method" /></dt>
+              <dd><T korean="별도 비밀번호 없음" english="No password needed" /></dd>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Gift className="size-4 text-[#f2cd72]" aria-hidden />
+              <dt className="sr-only"><T korean="보상 종류" english="Reward type" /></dt>
+              <dd><T korean="게임 속 가상 보상" english="Virtual game rewards" /></dd>
+            </div>
+          </dl>
         </div>
       </section>
 
       <section
+        id="first-steps"
         aria-labelledby="quick-start-title"
-        className="grid gap-5 lg:grid-cols-[0.8fr_1.2fr]"
+        className="rounded-[24px] border bg-accent/30 p-6 sm:p-9"
       >
-        <div className="grid content-start gap-3">
-          <p className="eyebrow">QUICK START</p>
-          <h2 id="quick-start-title" className="text-3xl">
-            설명보다 먼저,
-            <br />이 네 가지만 기억하세요.
-          </h2>
-          <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground [word-break:keep-all]">
-            처음부터 모든 기능을 알 필요는 없어요. 한 바퀴 돌아본 뒤 마음에 드는 활동을 천천히
-            찾아도 충분합니다.
-          </p>
-          <div className="mt-2 flex flex-wrap items-center gap-3">
-            <ShareGuide />
-            <span className="text-xs text-muted-foreground">친구와 같이 시작해도 좋아요.</span>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="eyebrow mb-2">QUICK START</p>
+            <h2 id="quick-start-title" className="text-2xl">
+              <T korean="10분 만에 끝내는 첫 흐름" english="First 10-Minute Walkthrough" />
+            </h2>
           </div>
+          <ShareGuide />
         </div>
-        <Card className="overflow-hidden border-primary/20 bg-primary/[0.035]">
-          <CardContent className="grid gap-0 p-0 sm:grid-cols-2">
-            {QUICK_START_STEPS.map((step, index) => (
-              <div
-                key={step}
-                className="flex min-h-28 items-center gap-4 border-b p-5 last:border-b-0 sm:odd:border-r sm:[&:nth-last-child(-n+2)]:border-b-0"
-              >
-                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary font-extrabold text-primary-foreground shadow-sm">
-                  {index + 1}
-                </span>
-                <p className="font-bold leading-[1.65] [word-break:keep-all]">{step}</p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <ol className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {QUICK_START_STEPS.map((step, index) => (
+            <li
+              key={step}
+              className="flex gap-3 rounded-2xl border bg-background/90 p-4 text-sm shadow-card"
+            >
+              <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-extrabold text-primary">
+                {index + 1}
+              </span>
+              <span className="leading-[1.65] [word-break:keep-all]">
+                <T korean={step} english={QUICK_START_STEPS_EN[index] ?? step} />
+              </span>
+            </li>
+          ))}
+        </ol>
       </section>
 
-      <section
-        id="adventure-map"
-        aria-labelledby="adventure-map-title"
-        className="scroll-mt-28 grid gap-6"
-      >
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="eyebrow mb-2">ADVENTURE MAP</p>
-            <h2 id="adventure-map-title" className="text-3xl">
-              첫날 모험 지도
-            </h2>
-            <p className="mt-2 max-w-prose text-sm leading-[1.8] text-muted-foreground [word-break:keep-all]">
-              위에서 아래로 따라오세요. 각 단계의 버튼은 실제로 해야 할 화면으로 바로 이어집니다.
-            </p>
-          </div>
-          <span className="rounded-full bg-accent px-3 py-1.5 text-xs font-extrabold text-accent-foreground">
-            6개 체크포인트
-          </span>
+      <section aria-labelledby="steps-title" className="grid gap-6">
+        <div>
+          <p className="eyebrow mb-2">STEP BY STEP</p>
+          <h2 id="steps-title" className="text-3xl">
+            <T korean="차근차근 따라오는 여섯 걸음" english="Six Steps to Follow" />
+          </h2>
+          <p className="mt-2 text-sm leading-[1.8] text-muted-foreground [word-break:keep-all]">
+            <T
+              korean="처음 접속한 모험가가 첫 보상을 받고 사용하기까지의 전 과정을 순서대로 정리했습니다."
+              english="Here is the full flow from your first login to earning and using your rewards."
+            />
+          </p>
         </div>
-        <ol className="relative grid gap-4 before:absolute before:bottom-8 before:left-[27px] before:top-8 before:w-px before:bg-border sm:before:left-[35px]">
+        <ol className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {GUIDE_STEPS.map((step, index) => {
-            const StepIcon = STEP_ICONS[index] ?? Check;
+            const Icon = STEP_ICONS[index] ?? Compass;
             return (
-              <li
-                key={step.id}
-                className="relative grid grid-cols-[56px_1fr] gap-3 sm:grid-cols-[72px_1fr] sm:gap-5"
-              >
-                <div className="z-10 grid size-14 place-items-center rounded-2xl border bg-background text-primary shadow-sm sm:size-[72px]">
-                  <StepIcon className="size-6 sm:size-7" aria-hidden />
-                </div>
-                <Card className="transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-plate">
-                  <CardHeader className="gap-2">
-                    <CardDescription className="flex items-center gap-2 font-bold tabular">
-                      CHECKPOINT {index + 1}
-                      {index === GUIDE_STEPS.length - 1 && (
-                        <span className="rounded-full bg-[#f2cd72]/35 px-2 py-0.5 text-[10px] text-foreground">
-                          첫 기록 완성
-                        </span>
-                      )}
+              <li key={step.id} className="flex">
+                <Card className="flex w-full flex-col justify-between">
+                  <CardHeader>
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                        <Icon className="size-5" aria-hidden />
+                      </span>
+                      <span className="font-extrabold tabular text-muted-foreground">
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+                    <CardTitle className="text-xl">
+                      <T korean={step.title} english={step.titleEn} />
+                    </CardTitle>
+                    <CardDescription className="sr-only">
+                      <T korean={`안내 ${index + 1}단계`} english={`Step ${index + 1}`} />
                     </CardDescription>
-                    <CardTitle className="text-xl">{step.title}</CardTitle>
                   </CardHeader>
                   <CardContent className="grid gap-4">
-                    <div className="grid gap-2">
-                      {step.body.map((paragraph) => (
-                        <p
-                          key={paragraph.slice(0, 24)}
-                          className="max-w-prose text-sm leading-[1.8] text-muted-foreground [word-break:keep-all]"
-                        >
-                          {paragraph}
+                    <div className="grid gap-2 text-sm leading-[1.8] text-muted-foreground [word-break:keep-all]">
+                      {step.body.map((paragraph, i) => (
+                        <p key={i}>
+                          <T korean={paragraph} english={step.bodyEn[i] ?? paragraph} />
                         </p>
                       ))}
                     </div>
                     {step.points && (
-                      <ul className="grid gap-2 rounded-xl bg-accent/60 p-4 text-sm">
-                        {step.points.map((point) => (
+                      <ul className="grid gap-1.5 rounded-xl border bg-muted/40 p-3 text-xs text-muted-foreground">
+                        {step.points.map((point, i) => (
                           <li
-                            key={point}
+                            key={i}
                             className="flex gap-2 leading-[1.65] [word-break:keep-all]"
                           >
                             <Check className="mt-1 size-3.5 shrink-0 text-primary" aria-hidden />
-                            {point}
+                            <T korean={point} english={step.pointsEn?.[i] ?? point} />
                           </li>
                         ))}
                       </ul>
@@ -227,7 +210,7 @@ export default function GuidePage() {
                         className="w-fit"
                       >
                         <Link href={step.link.href}>
-                          {step.link.label} <ArrowRight aria-hidden />
+                          <T korean={step.link.label} english={step.link.labelEn ?? step.link.label} /> <ArrowRight aria-hidden />
                         </Link>
                       </Button>
                     )}
@@ -259,41 +242,56 @@ export default function GuidePage() {
             <div>
               <p className="eyebrow mb-2">THE REWARD LOOP</p>
               <h2 id="reward-loop-title" className="text-3xl">
-                고르고, 해보고,
-                <br />
-                기록을 확인하는 재미
+                <T
+                  korean="고르고, 해보고, 기록을 확인하는 재미"
+                  english="The Joy of Choosing, Doing, and Earning"
+                />
               </h2>
               <p className="mt-3 max-w-prose text-sm leading-[1.8] text-muted-foreground [word-break:keep-all]">
-                머니버스의 핵심은 숫자만 모으는 일이 아니에요. 커뮤니티 활동을 하나씩 완료하면 그
-                과정이 기록으로 남고, 받은 WLD로 상점 콘텐츠를 즐기며 다음 목표를 고를 수 있습니다.
+                <T
+                  korean="머니버스의 핵심은 숫자만 모으는 일이 아니에요. 커뮤니티 활동을 하나씩 완료하면 그 과정이 기록으로 남고, 받은 WLD로 상점 콘텐츠를 즐기며 다음 목표를 고를 수 있습니다."
+                  english="Moneyverse isn't just about accumulating numbers. Every community activity is permanently logged, allowing you to enjoy shop content and choose your next goal."
+                />
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               {[
                 {
                   icon: ListChecks,
-                  title: '1. 활동 선택',
-                  body: '오늘 할 수 있는 퀘스트 하나를 골라요.',
+                  titleKo: '1. 활동 선택',
+                  titleEn: '1. Pick Activity',
+                  bodyKo: '오늘 할 수 있는 퀘스트 하나를 골라요.',
+                  bodyEn: 'Choose one quest you can do today.',
                 },
                 {
                   icon: WalletCards,
-                  title: '2. 기록 확인',
-                  body: '완료 뒤 지갑에서 보상을 확인해요.',
+                  titleKo: '2. 기록 확인',
+                  titleEn: '2. Check Ledger',
+                  bodyKo: '완료 뒤 지갑에서 보상을 확인해요.',
+                  bodyEn: 'Verify your rewards in your wallet.',
                 },
-                { icon: Store, title: '3. 다음 재미', body: '상점과 시즌에서 다음 목표를 찾아요.' },
-              ].map(({ icon: Icon, title, body }) => (
-                <div key={title} className="rounded-xl border bg-background p-4">
+                {
+                  icon: Store,
+                  titleKo: '3. 다음 재미',
+                  titleEn: '3. Next Goal',
+                  bodyKo: '상점과 시즌에서 다음 목표를 찾아요.',
+                  bodyEn: 'Find new items in shop and seasons.',
+                },
+              ].map(({ icon: Icon, titleKo, titleEn, bodyKo, bodyEn }) => (
+                <div key={titleKo} className="rounded-xl border bg-background p-4">
                   <Icon className="mb-3 size-5 text-primary" aria-hidden />
-                  <h3 className="text-sm font-extrabold">{title}</h3>
+                  <h3 className="text-sm font-extrabold">
+                    <T korean={titleKo} english={titleEn} />
+                  </h3>
                   <p className="mt-1 text-xs leading-[1.7] text-muted-foreground [word-break:keep-all]">
-                    {body}
+                    <T korean={bodyKo} english={bodyEn} />
                   </p>
                 </div>
               ))}
             </div>
             <Button asChild className="w-fit">
               <Link href="/quests">
-                첫 퀘스트 고르기 <ArrowRight aria-hidden />
+                <T korean="첫 퀘스트 고르기" english="Pick First Quest" /> <ArrowRight aria-hidden />
               </Link>
             </Button>
           </div>
@@ -304,7 +302,7 @@ export default function GuidePage() {
         <div>
           <p className="eyebrow mb-2">NEWCOMER TIPS</p>
           <h2 id="tips-title" className="text-2xl">
-            헤매지 않는 작은 요령
+            <T korean="헤매지 않는 작은 요령" english="Tips for Getting Started" />
           </h2>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
@@ -314,9 +312,11 @@ export default function GuidePage() {
                 <span className="mb-2 grid size-9 place-items-center rounded-full bg-background text-sm font-extrabold text-clay-ink shadow-sm">
                   {index + 1}
                 </span>
-                <CardTitle className="text-lg">{tip.title}</CardTitle>
+                <CardTitle className="text-lg">
+                  <T korean={tip.title} english={tip.titleEn} />
+                </CardTitle>
                 <CardDescription className="leading-[1.8] [word-break:keep-all]">
-                  {tip.body}
+                  <T korean={tip.body} english={tip.bodyEn} />
                 </CardDescription>
               </CardHeader>
             </Card>
@@ -332,7 +332,7 @@ export default function GuidePage() {
           <div>
             <p className="eyebrow mb-2 !text-[#f2cd72]">TODAY&apos;S CHECKLIST</p>
             <h2 id="order-title" className="text-2xl">
-              첫날 추천 순서
+              <T korean="첫날 추천 순서" english="First Day Checklist" />
             </h2>
           </div>
           <Compass className="size-9 text-[#f2cd72]" aria-hidden />
@@ -346,13 +346,15 @@ export default function GuidePage() {
               <span className="font-extrabold tabular text-[#f2cd72]">
                 {String(index + 1).padStart(2, '0')}
               </span>
-              {entry}
+              <T korean={entry} english={FIRST_DAY_ORDER_EN[index] ?? entry} />
             </li>
           ))}
         </ol>
         <p className="max-w-prose text-sm leading-[1.8] text-white/70 [word-break:keep-all]">
-          첫날에는 여러 작업을 한꺼번에 맡기보다, 퀘스트나 작업 하나를 끝까지 마치고 보상이 어떻게
-          기록되는지 확인해 보시길 권합니다.
+          <T
+            korean="첫날에는 여러 작업을 한꺼번에 맡기보다, 퀘스트나 작업 하나를 끝까지 마치고 보상이 어떻게 기록되는지 확인해 보시길 권합니다."
+            english="On your first day, we recommend completing one simple task completely to see how rewards and ledger entries work."
+          />
         </p>
       </section>
 
@@ -362,7 +364,7 @@ export default function GuidePage() {
           <div>
             <p className="eyebrow mb-2">COMMON QUESTIONS</p>
             <h2 id="faq-title" className="text-2xl">
-              처음이라면 궁금한 것들
+              <T korean="처음이라면 궁금한 것들" english="Frequently Asked Questions" />
             </h2>
           </div>
         </div>
@@ -370,9 +372,11 @@ export default function GuidePage() {
           {GUIDE_FAQS.map((faq) => (
             <Card key={faq.question}>
               <CardHeader className="gap-2">
-                <CardTitle className="text-base">{faq.question}</CardTitle>
+                <CardTitle className="text-base">
+                  <T korean={faq.question} english={faq.questionEn} />
+                </CardTitle>
                 <CardDescription className="leading-[1.8] [word-break:keep-all]">
-                  {faq.answer}
+                  <T korean={faq.answer} english={faq.answerEn} />
                 </CardDescription>
               </CardHeader>
               {faq.link && (
@@ -381,7 +385,7 @@ export default function GuidePage() {
                     className="inline-flex items-center gap-1 text-sm font-extrabold text-clay-ink"
                     href={faq.link.href}
                   >
-                    {faq.link.label} <ArrowRight className="size-3.5" aria-hidden />
+                    <T korean={faq.link.label} english={faq.link.labelEn ?? faq.link.label} /> <ArrowRight className="size-3.5" aria-hidden />
                   </Link>
                 </CardContent>
               )}
@@ -395,14 +399,19 @@ export default function GuidePage() {
           <Sparkles aria-hidden />
         </span>
         <div>
-          <h2 className="text-2xl">준비됐다면, 첫 기록을 남겨봐요.</h2>
+          <h2 className="text-2xl">
+            <T korean="준비됐다면, 첫 기록을 남겨봐요." english="Ready? Leave your first record." />
+          </h2>
           <p className="mt-2 text-sm leading-[1.8] text-muted-foreground [word-break:keep-all]">
-            완벽하게 알 필요는 없어요. 가장 쉬운 퀘스트 하나면 시작하기에 충분합니다.
+            <T
+              korean="완벽하게 알 필요는 없어요. 가장 쉬운 퀘스트 하나면 시작하기에 충분합니다."
+              english="You don't need to know everything. One simple quest is all it takes to start."
+            />
           </p>
         </div>
         <Button asChild size="lg">
           <Link href="/login">
-            머니버스 시작하기 <ArrowRight aria-hidden />
+            <T korean="머니버스 시작하기" english="Start Moneyverse" /> <ArrowRight aria-hidden />
           </Link>
         </Button>
       </section>

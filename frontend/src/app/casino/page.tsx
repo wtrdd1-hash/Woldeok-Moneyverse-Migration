@@ -200,8 +200,8 @@ export default async function CasinoPage() {
           </Card>
 
           {/* 5종 미니게임 탭 로비 */}
-          <Tabs defaultValue="coin" className="w-full">
-            <TabsList className="grid grid-cols-2 sm:grid-cols-5 w-full h-auto p-1.5 gap-1.5 bg-muted/60 rounded-xl">
+          <Tabs defaultValue="coin" className="w-full space-y-6">
+            <TabsList className="sticky top-[78px] z-20 grid grid-cols-2 sm:grid-cols-5 w-full h-auto p-2 gap-2 bg-slate-900/90 backdrop-blur-md border border-slate-800/80 shadow-lg rounded-2xl">
               <TabsTrigger value="coin" className="py-2.5 text-sm font-semibold rounded-lg">
                 🪙 <T korean="동전 뒤집기" english="Coin Flip" />
               </TabsTrigger>
@@ -220,10 +220,10 @@ export default async function CasinoPage() {
             </TabsList>
 
             {/* 1. 동전 뒤집기 */}
-            <TabsContent value="coin" className="mt-4 grid gap-6">
+            <TabsContent value="coin" className="mt-6 pt-2 grid gap-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-xl">🪙 동전 뒤집기</CardTitle>
+                  <CardTitle className="text-xl flex items-center gap-2">🪙 <T korean="동전 뒤집기" english="Coin Flip" /></CardTitle>
                   <CardDescription>
                     앞면과 뒷면 중 하나를 선택합니다. 적중 확률 {percentFromPpm(open.win_probability_ppm)}%, 적중 시 {multiplierFromPpm(open.payout_multiplier_ppm)}배 배당이 지급됩니다.
                   </CardDescription>
@@ -243,11 +243,11 @@ export default async function CasinoPage() {
             </TabsContent>
 
             {/* 2. 주사위 홀짝 */}
-            <TabsContent value="dice_parity" className="mt-4 grid gap-6">
+            <TabsContent value="dice_parity" className="mt-6 pt-2 grid gap-6">
               {parityGame ? (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-xl">🎲 주사위 홀짝 맞추기</CardTitle>
+                    <CardTitle className="text-xl flex items-center gap-2">🎲 <T korean="주사위 홀짝 맞추기" english="Dice Parity Guess" /></CardTitle>
                     <CardDescription>
                       주사위 눈이 홀수인지 짝수인지 예측합니다. 적중 확률 {percentFromPpm(parityGame.win_probability_ppm)}%, 적중 시 {multiplierFromPpm(parityGame.payout_multiplier_ppm)}배 배당이 지급됩니다.
                     </CardDescription>
@@ -270,11 +270,11 @@ export default async function CasinoPage() {
             </TabsContent>
 
             {/* 3. 주사위 숫자 */}
-            <TabsContent value="dice_number" className="mt-4 grid gap-6">
+            <TabsContent value="dice_number" className="mt-6 pt-2 grid gap-6">
               {numberGame ? (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-xl">🎯 주사위 숫자 맞추기</CardTitle>
+                    <CardTitle className="text-xl flex items-center gap-2">🎯 <T korean="주사위 숫자 맞추기" english="Dice Number Guess" /></CardTitle>
                     <CardDescription>
                       1부터 6까지 정확한 주사위 눈을 맞춥니다. 적중 확률 {percentFromPpm(numberGame.win_probability_ppm)}%, 적중 시 {multiplierFromPpm(numberGame.payout_multiplier_ppm)}배 대박 배당이 지급됩니다.
                     </CardDescription>
@@ -297,7 +297,7 @@ export default async function CasinoPage() {
             </TabsContent>
 
             {/* 4. 럭키 777 슬롯 */}
-            <TabsContent value="slots" className="mt-4 grid gap-6">
+            <TabsContent value="slots" className="mt-6 pt-2 grid gap-6">
               <LuckySlotsGame
                 minStake={open.min_stake}
                 maxStake={open.max_stake}
@@ -309,7 +309,7 @@ export default async function CasinoPage() {
             </TabsContent>
 
             {/* 5. 하이 앤 로우 */}
-            <TabsContent value="hilo" className="mt-4 grid gap-6">
+            <TabsContent value="hilo" className="mt-6 pt-2 grid gap-6">
               <HiLoCardGame
                 minStake={open.min_stake}
                 maxStake={open.max_stake}
@@ -326,10 +326,8 @@ export default async function CasinoPage() {
       {/* 한도 직접 설정 카드 */}
       <Card>
         <CardHeader>
-          <CardTitle>나만의 안전 한도 설정</CardTitle>
-          <CardDescription>
-            하루 동안 이용할 최대 베팅액과 손실 한도를 직접 설정할 수 있습니다. 0으로 설정하면 해당 항목이 비활성화됩니다.
-          </CardDescription>
+          <CardTitle><T korean="나만의 안전 한도 설정" english="Responsible Gaming Self-Limits" /></CardTitle>
+          <CardDescription><T korean="하루 동안 이용할 최대 베팅액과 손실 한도를 직접 설정할 수 있습니다. 0으로 설정하면 해당 항목이 비활성화됩니다." english="Configure your daily maximum stake and loss limits. Setting 0 leaves the limit unbound." /></CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
           <SelfLimitForm />
@@ -339,7 +337,7 @@ export default async function CasinoPage() {
       {/* 최근 게임 기록 카드 */}
       <Card>
         <CardHeader>
-          <CardTitle>최근 게임 기록</CardTitle>
+          <CardTitle><T korean="최근 게임 기록" english="Recent Gaming History" /></CardTitle>
           <CardDescription>
             내 지갑에 기록된 최근 {RECENT_LEDGER}건의 미니게임 결과입니다.
           </CardDescription>

@@ -144,7 +144,7 @@ const JOB_LABELS: Readonly<Record<string, string>> = {
   entertainer: '엔터테이너',
   detective: '경제 탐정',
   miner: '자원 채굴사',
-  farmer: '스마트 농부',
+  farmer: '농부',
   artisan: '명품 장인',
   civil_servant: '행정 공무원',
   carrier: '운반원',
@@ -162,11 +162,11 @@ export function jobMeta(code: string): JobMeta | undefined {
 
 const DIFFICULTY_LABELS: readonly string[] = [
   '',
-  '초급 (Lv.1+)',
-  '중급 (Lv.2+)',
-  '상급 (Lv.4+)',
-  '전문가 (Lv.6+)',
-  '마스터 (Lv.8+)',
+  '아주 쉬움',
+  '쉬움',
+  '보통',
+  '어려움',
+  '아주 어려움',
 ];
 
 export function difficultyLabel(level: number): string {
