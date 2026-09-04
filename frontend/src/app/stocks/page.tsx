@@ -14,7 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { apiOrNull } from '@/lib/api';
-import { getServerLocale } from '@/lib/locale';
+import { getServerLocale } from '@/lib/locale-server';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
 import { requireMember } from '@/lib/session';

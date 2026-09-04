@@ -13,7 +13,8 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { apiOrNull } from '@/lib/api';
-import { getServerLocale, type Locale } from '@/lib/locale';
+import { type Locale } from '@/lib/locale';
+import { getServerLocale } from '@/lib/locale-server';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { ClaimButton, JobSwitchButton, SubmitTaskButton, TaskCompleteModalButton } from './work-forms';

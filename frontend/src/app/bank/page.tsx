@@ -15,7 +15,7 @@ import { TranslatedText as T } from '@/components/translated-text';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
-import { getServerLocale } from '@/lib/locale';
+import { getServerLocale } from '@/lib/locale-server';
 import { groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import {
