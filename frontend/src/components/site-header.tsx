@@ -79,7 +79,16 @@ export function SiteHeader() {
 
   // The sheet stays flat: a drawer has the room, and a menu inside a menu is
   // worse than a long list.
-  const admin = isAdmin ? ADMIN_NAV : [];
+  // The rail is discovery, never the permission boundary. A session can be
+  // valid while the lightweight viewer lookup temporarily has no role list;
+  // hiding the only route into the console then strands a real operator on a
+  // phone. The admin page asks the protected API again and redirects a member
+  // without a role, so a signed-in reader may safely get one entry point.
+  const mobileAdmin: readonly NavEntry[] = isAdmin
+    ? ADMIN_NAV
+    : viewer?.signedIn
+      ? [{ href: '/admin', label: '관리자 페이지' }]
+      : [];
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/94 backdrop-blur-lg">
@@ -123,7 +132,7 @@ export function SiteHeader() {
                 {viewer?.signedIn && (
                   <Group title={locale === 'en' ? 'Member' : '회원'} entries={MEMBER_NAV} pathname={pathname} locale={locale} />
                 )}
-                {admin.length > 0 && <Group title={locale === 'en' ? 'Admin' : '운영'} entries={admin} pathname={pathname} locale={locale} />}
+                {mobileAdmin.length > 0 && <Group title={locale === 'en' ? 'Admin' : '운영'} entries={mobileAdmin} pathname={pathname} locale={locale} />}
                 <div className="px-3 py-2 sm:hidden">
                   <ThemePanel />
                 </div>
