@@ -92,12 +92,13 @@ export const isCandleInterval = (value: unknown): value is CandleInterval =>
 
 /**
  * Every listed stock's recent prices, for the preview lines on the market
- * screen (055).
+ * screen (055, 136).
  *
- * Prices only, most recent first. The sparkline has no time axis — it answers
- * which way a stock has been going and hands every finer question to the
- * detail chart — so the timestamps `stock_price_history` returns were being
- * fetched and thrown away once per card per render.
+ * One close per minute, most recent first. The sparkline has no time axis —
+ * it answers which way a stock has been going and hands every finer question
+ * to the detail chart — so the timestamps `stock_price_history` returns were
+ * being fetched and thrown away once per card per render. The limit is
+ * therefore a number of minutes, and `limit` on the route reads as one.
  */
 export interface StockSparkSeriesRow {
   readonly stock_id: string;
@@ -355,13 +356,14 @@ export class PostgresStockRepository {
    *
    * The market screen used to ask for one stock's history per card, which is
    * a query per listed stock on every render — and the screen re-renders
-   * itself every thirty seconds while it is open.
+   * itself every thirty seconds while it is open. The default is an hour of
+   * minutes, which is what the screen asks for.
    */
-  async sparkSeries(limit: unknown = 40): Promise<readonly StockSparkSeriesRow[]> {
+  async sparkSeries(limit: unknown = 60): Promise<readonly StockSparkSeriesRow[]> {
     const n =
       typeof limit === 'number' && Number.isSafeInteger(limit)
         ? Math.min(240, Math.max(1, limit))
-        : 40;
+        : 60;
     return queryRows<StockSparkSeriesRow>(
       this.pool,
       'SELECT stock_id::text, prices::text[] AS prices FROM public.stock_spark_series($1)',

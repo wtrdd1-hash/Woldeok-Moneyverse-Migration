@@ -77,8 +77,12 @@ interface TradeRow {
 
 export const revalidate = 0;
 
-/** How much recent movement each card's sparkline draws. */
-const SPARK_POINTS = 40;
+/**
+ * How much recent movement each card's sparkline draws: one hour, a point a
+ * minute (136). A count of price changes was the window before that, which
+ * under 124's per-second walk is a different length of time on every card.
+ */
+const SPARK_POINTS = 60;
 
 export default async function StocksPage() {
   await requireMember();

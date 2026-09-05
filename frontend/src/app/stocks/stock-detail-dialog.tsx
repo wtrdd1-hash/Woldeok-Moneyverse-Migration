@@ -209,7 +209,11 @@ export function StockDetailDialog({
           {isEn ? 'Details' : '상세 보기'}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-h-[90dvh] max-w-3xl overflow-y-auto">
+      {/* sm:max-w-3xl, not max-w-3xl: the dialog's own sm:max-w-lg is a
+          media query and wins over an unprefixed width at every size it
+          applies to, so the wider dialog this chart was drawn for was never
+          the one on screen. */}
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
             <span className="font-mono text-sm text-clay-ink">{symbol}</span> {name}{' '}
