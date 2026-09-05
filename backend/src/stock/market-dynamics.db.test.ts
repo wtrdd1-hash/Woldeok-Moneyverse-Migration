@@ -187,6 +187,43 @@ describe.skipIf(!DATABASE_URL)('the market dynamics against a real database', ()
       });
     });
 
+    it('draws the preview line from minutes rather than from ticks', async () => {
+      // 136. The line used to be the last N rows of virtual_stock_price_ticks
+      // -- the last N *changes* -- which under 124's per-second walk is forty
+      // seconds for a stock priced in tens of thousands, normalised to its own
+      // extremes and drawn as a saw. One close per minute is a window that
+      // does not depend on the price level or on how often the tick fires.
+      await rolledBack(async (client) => {
+        const stock = await listing(client, 1000);
+        const minute = (index: number, close: number): Promise<unknown> =>
+          client.query(
+            `INSERT INTO public.virtual_stock_minute_candles
+               (stock_id, bucket_at, open_price, high_price, low_price, close_price)
+             VALUES ($1, date_trunc('minute', now()) - make_interval(mins => $2::int), $3, $3, $3, $3)`,
+            [stock, index, close],
+          );
+        await minute(2, 1000);
+        await minute(1, 1010);
+        await minute(0, 1020);
+        // Ticks in the same window, which must not reach the line: there are
+        // more of them than there are minutes, and that was the whole bug.
+        for (const price of [1017, 1018, 1019, 1020]) {
+          await client.query(
+            'INSERT INTO public.virtual_stock_price_ticks (stock_id, price) VALUES ($1, $2)',
+            [stock, price],
+          );
+        }
+
+        const { rows } = await client.query<{ stock_id: string; prices: string[] }>(
+          'SELECT stock_id::text, prices::text[] AS prices FROM public.stock_spark_series($1)',
+          [60],
+        );
+        const line = rows.find((row) => row.stock_id === stock);
+        // Most recent first, as the API's contract says and the figure reads.
+        expect(line?.prices).toEqual(['1020', '1010', '1000']);
+      });
+    });
+
     it('sizes a strength by the vocabulary, not by the caller', async () => {
       await rolledBack(async (client) => {
         const actor = await operator(client);

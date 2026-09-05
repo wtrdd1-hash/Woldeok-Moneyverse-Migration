@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useMemo } from 'react';
 import { Amount } from '@/components/amount';
 import { useLocale } from '@/components/locale-provider';
 import { Sparkline } from '@/components/sparkline';
@@ -113,20 +113,24 @@ export function LiveBadge() {
 }
 
 /**
- * The preview line, drawn from the broadcast rather than from the load.
+ * The preview line, with the minute in progress drawn from the broadcast.
  *
- * The server renders the last few minutes and the socket then moves only the
- * price beside it, so the line used to sit still until the thirty-second
- * refresh redrew it — the one figure on the card that looked frozen while
- * everything around it moved.
+ * The server renders an hour of one-minute closes and the socket then moves
+ * only the price beside it, so the line used to sit still until the
+ * thirty-second refresh redrew it — the one figure on the card that looked
+ * frozen while everything around it moved.
  *
- * The server's series is the seed and every broadcast is pushed onto the
- * front of it, oldest falling off the end. A refresh arriving underneath does
- * not reset it: what is held here is newer than what the server just sent.
+ * The broadcast price replaces the newest point rather than being added to
+ * the series, because that point *is* the minute in progress (136) and the
+ * price is where it stands. Pushing one point per second onto the front
+ * instead turned an hour-wide window into a forty-second one within a minute
+ * of the page being open, and forty seconds of a walk this calm is noise
+ * stretched to the full height of the figure — the saw this pair of changes
+ * is here to stop drawing.
  *
- * A tick that repeats the price adds no point. The window is therefore the
- * last N *changes* rather than the last N seconds, which is what a line of
- * this size is answering anyway — it has no time axis to be wrong about.
+ * Derived rather than held: the thirty-second refresh brings the minutes
+ * that have closed since the load, and state seeded once from the props
+ * would have ignored every one of them.
  */
 export function LiveSparkline({
   stockId,
@@ -145,14 +149,10 @@ export function LiveSparkline({
   readonly className?: string;
 }) {
   const quote = useQuote(stockId, { price, open });
-  const [series, setSeries] = useState<readonly SparkPoint[]>(() => points.slice(0, limit));
-
-  useEffect(() => {
-    setSeries((previous) => {
-      if (previous[0]?.price === quote.price) return previous;
-      return [{ price: quote.price }, ...previous].slice(0, limit);
-    });
-  }, [quote.price, limit]);
+  const series = useMemo<readonly SparkPoint[]>(
+    () => [{ price: quote.price }, ...points.slice(1, limit)],
+    [points, quote.price, limit],
+  );
 
   return (
     <Sparkline
