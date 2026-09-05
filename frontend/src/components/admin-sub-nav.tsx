@@ -60,12 +60,9 @@ export function AdminSubNav() {
   return (
     <nav
       aria-label="관리자 세부 내비게이션"
-      className="mb-4 rounded-2xl border border-border/50 bg-card p-1.5 shadow-sm"
+      className="-mx-4 mb-4 overflow-x-auto border-y border-border/50 bg-card p-1.5 shadow-sm sm:mx-0 sm:rounded-2xl sm:border"
     >
-      {/* Wraps rather than scrolls. Nine tabs do not fit a phone in one row,
-          and a strip that scrolls sideways hides the tabs past the edge from
-          a reader who does not think to drag it. */}
-      <ul className="flex flex-wrap items-center gap-1">
+      <ul className="flex w-max items-center gap-1 px-2 sm:w-auto sm:flex-wrap sm:px-0">
         {ADMIN_TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = tab.href === active;
@@ -81,7 +78,7 @@ export function AdminSubNav() {
                 prefetch={false}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-colors',
+                  'flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-colors',
                   isActive
 ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
                     : 'text-muted-foreground hover:bg-surface hover:text-foreground',

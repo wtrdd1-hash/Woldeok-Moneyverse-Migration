@@ -25,6 +25,10 @@ export function MobileBottomNav() {
   const pathname = usePathname();
   const { locale } = useLocale();
 
+  // The member shortcuts obscure admin actions on a phone and none of them
+  // point into the console. Admin has its own touch-sized navigation above.
+  if (pathname.startsWith('/admin')) return null;
+
   return (
     <nav
       aria-label={locale === 'en' ? 'Mobile bottom navigation' : '모바일 하단 내비게이션'}
