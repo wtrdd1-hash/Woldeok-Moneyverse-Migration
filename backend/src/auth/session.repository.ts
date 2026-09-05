@@ -355,11 +355,10 @@ export class SessionRepository {
     const token = randomToken();
     const csrfToken = randomToken();
     const encryptedSubject = this.encryptionService.encryptDeterministic(subject) ?? subject;
-    const encryptedDisplayName = this.encryptionService.encrypt(displayName) ?? displayName;
     const login = await queryOne<CompletedOAuthLoginRow>(
       this.pool,
       `SELECT * FROM auth_complete_oauth_login($1,$2,$3,$4,$5,$6)`,
-      [preAuthSessionId, provider, encryptedSubject, encryptedDisplayName, sha256(token), sha256(csrfToken)],
+      [preAuthSessionId, provider, encryptedSubject, displayName, sha256(token), sha256(csrfToken)],
     );
     if (!login) throw new Error('OAuth login was not completed');
     await this.pool.query(
