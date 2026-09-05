@@ -245,7 +245,7 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
       });
     });
 
-    it('clamps the reward to whatever is left of the daily cap', async () => {
+    it('does not clamp a reward to the legacy daily cap', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
         const chosen = await task(client, 'logistics_sorting');
@@ -265,7 +265,7 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
            FROM public.work_verify_and_reward($1, $2, $3) AS reward`,
           [randomUUID(), actor, assignment],
         );
-        expect(rows[0]?.reward_amount).toBe('10');
+        expect(rows[0]?.reward_amount).toBe(chosen.reward);
       });
     });
 
