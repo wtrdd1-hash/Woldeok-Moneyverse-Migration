@@ -4,6 +4,7 @@ import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes }
 @Injectable()
 export class EncryptionService {
   private readonly key: Buffer;
+  private readonly decryptionKeys: readonly Buffer[];
 
   constructor() {
     const rawKey =
@@ -13,6 +14,14 @@ export class EncryptionService {
       'moneyverse-default-vault-secure-encryption-key-32b';
     // 32바이트 고정 키 생성 (SHA-256 해시 파생)
     this.key = createHash('sha256').update(rawKey).digest();
+    const legacyKeys = (process.env.LEGACY_DATA_ENCRYPTION_KEYS ?? '')
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .map((value) => createHash('sha256').update(value).digest());
+    this.decryptionKeys = [this.key, ...legacyKeys].filter(
+      (key, index, keys) => keys.findIndex((candidate) => candidate.equals(key)) === index,
+    );
   }
 
   /**
@@ -97,15 +106,17 @@ export class EncryptionService {
         return ciphertext;
       }
 
-      const decipher = createDecipheriv('aes-256-gcm', this.key, iv);
-      decipher.setAuthTag(tag);
-
-      const decrypted = Buffer.concat([
-        decipher.update(encrypted),
-        decipher.final(),
-      ]);
-
-      return decrypted.toString('utf8');
+      for (const key of this.decryptionKeys) {
+        try {
+          const decipher = createDecipheriv('aes-256-gcm', key, iv);
+          decipher.setAuthTag(tag);
+          const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+          return decrypted.toString('utf8');
+        } catch {
+          // Historical deployments implicitly used another application secret.
+        }
+      }
+      return ciphertext;
     } catch {
       return ciphertext;
     }

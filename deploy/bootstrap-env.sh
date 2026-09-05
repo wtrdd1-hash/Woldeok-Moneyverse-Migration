@@ -49,13 +49,13 @@ secret() { head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n'; }
 # ciphertext from this database proves that a named, host-local container has
 # the matching token. Neither the candidate nor the plaintext is printed.
 adopt_data_key_from="${ADOPT_DATA_KEY_FROM:-}"
-if ! has_value DATA_ENCRYPTION_KEY \
+if ! has_value LEGACY_DATA_ENCRYPTION_KEYS \
   && [ -n "$adopt_data_key_from" ] \
   && docker inspect "$adopt_data_key_from" >/dev/null 2>&1 \
   && docker inspect "${STACK:-wdmv}-db" >/dev/null 2>&1; then
   encrypted_sample="$(docker exec --user postgres "${STACK:-wdmv}-db" \
     psql -X -qAt -U moneyverse_migrator -d "${DB_NAME:-moneyverse_migration}" \
-    -c "SELECT display_name FROM public.identities WHERE display_name LIKE 'enc:v1:rnd:%' LIMIT 1" \
+    -c "SELECT display_name FROM public.identities WHERE display_name LIKE 'enc:v1:rnd:%' LIMIT 250" \
     2>/dev/null || true)"
   if [ -n "$encrypted_sample" ] && printf '%s' "$encrypted_sample" | \
     docker exec -i "$adopt_data_key_from" node -e '
@@ -65,12 +65,23 @@ if ! has_value DATA_ENCRYPTION_KEY \
       process.stdin.on("data", chunk => { value += chunk; });
       process.stdin.on("end", () => {
         try {
-          const parts = value.split(":");
-          const key = createHash("sha256").update(process.env.DATA_ENCRYPTION_KEY || process.env.INTERNAL_API_TOKEN || process.env.APP_SECRET || "").digest();
-          const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(parts[3], "hex"));
-          decipher.setAuthTag(Buffer.from(parts[4], "hex"));
-          const plain = Buffer.concat([decipher.update(Buffer.from(parts[5], "hex")), decipher.final()]).toString("utf8");
-          process.exit(plain.length > 0 && !plain.includes("\u0000") ? 0 : 1);
+          const samples = value.split("\n").filter(Boolean);
+          const candidates = ["DATA_ENCRYPTION_KEY", "INTERNAL_API_TOKEN", "APP_SECRET"];
+          for (const name of candidates) {
+            const raw = process.env[name];
+            if (!raw) continue;
+            const key = createHash("sha256").update(raw).digest();
+            for (const sample of samples) {
+              try {
+                const parts = sample.split(":");
+                const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(parts[3], "hex"));
+                decipher.setAuthTag(Buffer.from(parts[4], "hex"));
+                const plain = Buffer.concat([decipher.update(Buffer.from(parts[5], "hex")), decipher.final()]).toString("utf8");
+                if (plain.length > 0 && !plain.includes("\u0000")) process.exit(0);
+              } catch {}
+            }
+          }
+          process.exit(1);
         } catch { process.exit(1); }
       });
     '; then
@@ -79,8 +90,8 @@ if ! has_value DATA_ENCRYPTION_KEY \
       | grep -E '^(DATA_ENCRYPTION_KEY|INTERNAL_API_TOKEN|APP_SECRET)=' \
       | head -1 | cut -d= -f2- || true)"
     if [ -n "$recovered_key" ]; then
-      put DATA_ENCRYPTION_KEY "$recovered_key"
-      echo "adopted verified data encryption key from $adopt_data_key_from"
+      put LEGACY_DATA_ENCRYPTION_KEYS "$recovered_key"
+      echo "adopted verified legacy data encryption key from $adopt_data_key_from"
     fi
   fi
 fi

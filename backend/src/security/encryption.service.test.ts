@@ -40,4 +40,26 @@ describe('EncryptionService', () => {
     const raw = 'legacy-unencrypted-string';
     expect(service.decrypt(raw)).toBe(raw);
   });
+
+  it('decrypts values written with a verified legacy key while encrypting with the current key', () => {
+    const previousDataKey = process.env.DATA_ENCRYPTION_KEY;
+    const previousLegacyKeys = process.env.LEGACY_DATA_ENCRYPTION_KEYS;
+    try {
+      process.env.DATA_ENCRYPTION_KEY = 'historical-key';
+      delete process.env.LEGACY_DATA_ENCRYPTION_KEYS;
+      const historical = new EncryptionService().encrypt('기존 닉네임');
+
+      process.env.DATA_ENCRYPTION_KEY = 'current-key';
+      process.env.LEGACY_DATA_ENCRYPTION_KEYS = 'historical-key';
+      const current = new EncryptionService();
+
+      expect(current.decrypt(historical)).toBe('기존 닉네임');
+      expect(current.decrypt(current.encrypt('새 닉네임'))).toBe('새 닉네임');
+    } finally {
+      if (previousDataKey === undefined) delete process.env.DATA_ENCRYPTION_KEY;
+      else process.env.DATA_ENCRYPTION_KEY = previousDataKey;
+      if (previousLegacyKeys === undefined) delete process.env.LEGACY_DATA_ENCRYPTION_KEYS;
+      else process.env.LEGACY_DATA_ENCRYPTION_KEYS = previousLegacyKeys;
+    }
+  });
 });

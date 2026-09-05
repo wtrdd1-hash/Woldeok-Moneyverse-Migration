@@ -174,6 +174,7 @@ services:
       APP_BASE_URL: ${APP_BASE_URL:?required}
       INTERNAL_API_TOKEN: ${INTERNAL_API_TOKEN:?required}
       DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:?required}
+      LEGACY_DATA_ENCRYPTION_KEYS: ${LEGACY_DATA_ENCRYPTION_KEYS:-}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
       # True because there is a reverse proxy in front that rewrites it. With
       # it false the rate limiter would count the proxy once for everybody.
