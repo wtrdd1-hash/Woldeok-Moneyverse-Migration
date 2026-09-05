@@ -43,6 +43,24 @@ describe('SessionRepository.create', () => {
   });
 });
 
+describe('SessionRepository.completeOAuthLogin', () => {
+  it('stores the public display name as plaintext', async () => {
+    const { pool, queries } = recordingPool((text) =>
+      text.includes('auth_complete_oauth_login')
+        ? [{ session_id: 'session-id', user_id: 'user-id', expires_at: new Date(0) }]
+        : [],
+    );
+    await new SessionRepository(pool).completeOAuthLogin({
+      preAuthSessionId: 'prelogin-id',
+      provider: 'discord',
+      subject: '889085646768078850',
+      displayName: '공개 닉네임',
+    });
+    expect(queries[0]?.values?.[3]).toBe('공개 닉네임');
+    expect(String(queries[0]?.values?.[3])).not.toMatch(/^enc:v1:/);
+  });
+});
+
 describe('SessionRepository.get', () => {
   it('rejects a token shorter than 32 characters without querying', async () => {
     const { pool, queries } = recordingPool(() => [{ id: 'x' }]);

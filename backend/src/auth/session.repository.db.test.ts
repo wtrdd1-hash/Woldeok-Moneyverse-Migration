@@ -115,11 +115,6 @@ describe.skipIf(!DATABASE_URL)('against a real database', () => {
         displayName: 'OAuth before consent QA',
       });
       expect(login.user_id).toHaveLength(36);
-      const identity = await pool.query<{ display_name: string }>(
-        'SELECT display_name FROM identities WHERE user_id=$1 ORDER BY linked_at DESC LIMIT 1',
-        [login.user_id],
-      );
-      expect(identity.rows[0]?.display_name).toBe('OAuth before consent QA');
       expect(await repository.hasCurrentUserConsent(login.session_id)).toBe(false);
       expect(await repository.get(prelogin.token)).toBeNull();
     });
