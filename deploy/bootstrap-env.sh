@@ -43,72 +43,21 @@ supplied() { if [ -n "${2:-}" ]; then set_to "$1" "$2"; else put "$1" ''; fi; }
 # for the internal token and rejects anything shorter at startup.
 secret() { head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n'; }
 
-# Encryption was originally added with INTERNAL_API_TOKEN as an implicit key.
-# A deployment directory replacement then changed that unrelated token and
-# made existing identity names unreadable. Recover the old key only when a
-# ciphertext from this database proves that a named, host-local container has
-# the matching token. Neither the candidate nor the plaintext is printed.
-adopt_data_key_from="${ADOPT_DATA_KEY_FROM:-}"
-if ! has_value LEGACY_DATA_ENCRYPTION_KEYS \
-  && [ -n "$adopt_data_key_from" ] \
-  && docker inspect "$adopt_data_key_from" >/dev/null 2>&1 \
-  && docker inspect "${STACK:-wdmv}-db" >/dev/null 2>&1; then
-  encrypted_sample="$(docker exec --user postgres "${STACK:-wdmv}-db" \
-    psql -X -qAt -U moneyverse_migrator -d "${DB_NAME:-moneyverse_migration}" \
-    -c "SELECT display_name FROM public.identities WHERE display_name LIKE 'enc:v1:rnd:%' LIMIT 250" \
-    2>/dev/null || true)"
-  if [ -n "$encrypted_sample" ] && printf '%s' "$encrypted_sample" | \
-    docker exec -i "$adopt_data_key_from" node -e '
-      const { createDecipheriv, createHash } = require("node:crypto");
-      let value = "";
-      process.stdin.setEncoding("utf8");
-      process.stdin.on("data", chunk => { value += chunk; });
-      process.stdin.on("end", () => {
-        try {
-          const samples = value.split("\n").filter(Boolean);
-          const candidates = ["DATA_ENCRYPTION_KEY", "INTERNAL_API_TOKEN", "APP_SECRET"];
-          for (const name of candidates) {
-            const raw = process.env[name];
-            if (!raw) continue;
-            const key = createHash("sha256").update(raw).digest();
-            for (const sample of samples) {
-              try {
-                const parts = sample.split(":");
-                const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(parts[3], "hex"));
-                decipher.setAuthTag(Buffer.from(parts[4], "hex"));
-                const plain = Buffer.concat([decipher.update(Buffer.from(parts[5], "hex")), decipher.final()]).toString("utf8");
-                if (plain.length > 0 && !plain.includes("\u0000")) process.exit(0);
-              } catch {}
-            }
-          }
-          process.exit(1);
-        } catch { process.exit(1); }
-      });
-    '; then
-    recovered_key="$(docker inspect "$adopt_data_key_from" \
-      --format '{{range .Config.Env}}{{println .}}{{end}}' \
-      | grep -E '^(DATA_ENCRYPTION_KEY|INTERNAL_API_TOKEN|APP_SECRET)=' \
-      | head -1 | cut -d= -f2- || true)"
-    if [ -n "$recovered_key" ]; then
-      put LEGACY_DATA_ENCRYPTION_KEYS "$recovered_key"
-      echo "adopted verified legacy data encryption key from $adopt_data_key_from"
-    fi
-  fi
-fi
-
-# Older manual deployments sometimes kept their durable environment beside a
-# source checkout instead of either current deployment directory. Search only
-# host-local .env files and accept a candidate only when it authenticates at
-# least one ciphertext from the target database. Values and plaintext never
-# leave the host or appear in output.
-if ! has_value LEGACY_DATA_ENCRYPTION_KEYS \
-  && docker inspect "${STACK:-wdmv}-backend" >/dev/null 2>&1 \
+# Encryption originally inherited whichever application secret a deployment
+# happened to use. More than one historical key can therefore exist in the
+# same database. Build a complete keyring from host-local deployment files,
+# accepting each candidate only when it decrypts at least one target row.
+encrypted_samples=''
+if docker inspect "${STACK:-wdmv}-backend" >/dev/null 2>&1 \
   && docker inspect "${STACK:-wdmv}-db" >/dev/null 2>&1; then
   encrypted_samples="$(docker exec --user postgres "${STACK:-wdmv}-db" \
     psql -X -qAt -U moneyverse_migrator -d "${DB_NAME:-moneyverse_migration}" \
     -c "SELECT display_name FROM public.identities WHERE display_name LIKE 'enc:v1:rnd:%' LIMIT 250" \
     2>/dev/null || true)"
   if [ -n "$encrypted_samples" ]; then
+    recovered_keys="$(mktemp)"
+    chmod 600 "$recovered_keys"
+    trap 'rm -f "$recovered_keys"' EXIT
     while IFS= read -r -d '' historical_env; do
       while IFS= read -r candidate; do
         [ -n "$candidate" ] || continue
@@ -129,13 +78,19 @@ if ! has_value LEGACY_DATA_ENCRYPTION_KEYS \
               process.exit(1);
             });
           '; then
-          put LEGACY_DATA_ENCRYPTION_KEYS "$candidate"
-          echo "adopted a verified legacy data encryption key from a host-local deployment"
-          break 2
+          printf '%s\n' "$candidate" >> "$recovered_keys"
         fi
-      done < <(grep -hE '^(DATA_ENCRYPTION_KEY|INTERNAL_API_TOKEN|APP_SECRET)=' "$historical_env" \
-        | cut -d= -f2- | awk 'NF && !seen[$0]++')
-    done < <(find "$HOME" -maxdepth 3 -type f -name .env -print0 2>/dev/null)
+      done < <(grep -hE '^(DATA_ENCRYPTION_KEY|LEGACY_DATA_ENCRYPTION_KEYS|INTERNAL_API_TOKEN|APP_SECRET)=' "$historical_env" \
+        | cut -d= -f2- | tr ',' '\n' | awk 'NF && !seen[$0]++')
+    done < <(find "$HOME" -maxdepth 5 -type f -name .env -print0 2>/dev/null)
+    if [ -s "$recovered_keys" ]; then
+      keyring="$(awk 'NF && !seen[$0]++' "$recovered_keys" | paste -sd, -)"
+      set_to LEGACY_DATA_ENCRYPTION_KEYS "$keyring"
+      recovered_count="$(awk 'NF && !seen[$0]++ { count++ } END { print count+0 }' "$recovered_keys")"
+      echo "adopted $recovered_count verified legacy data encryption key(s) from host-local deployments"
+    fi
+    rm -f "$recovered_keys"
+    trap - EXIT
   fi
 fi
 
@@ -148,6 +103,34 @@ put INTERNAL_API_TOKEN "$(secret)"
 # the historical implicit key (INTERNAL_API_TOKEN); after this line has written
 # DATA_ENCRYPTION_KEY it survives independently on every later deployment.
 put DATA_ENCRYPTION_KEY "$(grep -E '^INTERNAL_API_TOKEN=' .env | tail -1 | cut -d= -f2-)"
+if [ -n "$encrypted_samples" ]; then
+  primary_key="$(grep -E '^DATA_ENCRYPTION_KEY=' .env | tail -1 | cut -d= -f2-)"
+  legacy_keyring="$(grep -E '^LEGACY_DATA_ENCRYPTION_KEYS=' .env | tail -1 | cut -d= -f2-)"
+  coverage="$(printf '%s' "$encrypted_samples" | docker exec -i \
+    -e "VERIFY_PRIMARY_KEY=$primary_key" -e "VERIFY_LEGACY_KEYS=$legacy_keyring" \
+    "${STACK:-wdmv}-backend" node -e '
+      const { createDecipheriv, createHash } = require("node:crypto");
+      let input = "";
+      process.stdin.setEncoding("utf8");
+      process.stdin.on("data", chunk => { input += chunk; });
+      process.stdin.on("end", () => {
+        const samples = input.split("\n").filter(Boolean);
+        const rawKeys = [process.env.VERIFY_PRIMARY_KEY, ...(process.env.VERIFY_LEGACY_KEYS || "").split(",")].filter(Boolean);
+        const keys = rawKeys.map(raw => createHash("sha256").update(raw).digest());
+        let covered = 0;
+        for (const sample of samples) {
+          const p = sample.split(":");
+          if (keys.some(key => { try {
+            const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(p[3], "hex"));
+            decipher.setAuthTag(Buffer.from(p[4], "hex"));
+            return Buffer.concat([decipher.update(Buffer.from(p[5], "hex")), decipher.final()]).length > 0;
+          } catch { return false; } })) covered++;
+        }
+        process.stdout.write(`${covered}/${samples.length}`);
+      });
+    ')"
+  echo "nickname ciphertext coverage: $coverage"
+fi
 # The status collector's own credential. Its role may execute exactly one
 # function and nothing else, so this is not a second copy of the application's
 # access — see 050-status-collector.sql.
