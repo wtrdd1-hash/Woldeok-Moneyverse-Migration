@@ -133,7 +133,10 @@ decrypt() {
 # Runs as the postgres OS user inside the db container, which the image's
 # pg_hba trusts over the local socket. That is what keeps the migrator's
 # password off a command line and out of this host's process list.
-migrator_psql() { docker compose exec -u postgres -T db psql -X -v ON_ERROR_STOP=1 "$@"; }
+migrator_psql() {
+  docker compose exec -u postgres -T db psql -X -v ON_ERROR_STOP=1 \
+    -U moneyverse_migrator "$@"
+}
 
 actual_sha="$(sha256sum < "$dir/$sql_file" | cut -d' ' -f1)"
 [ "$actual_sha" = "$recorded_sha" ] || die \
