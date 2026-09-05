@@ -52,6 +52,16 @@ export function failure(error: unknown, fallback: string): ActionState {
         message: '인증 앱 코드가 필요해요. 앱에 표시된 6자리를 다시 입력해 주세요.',
       };
     }
+    if (
+      error.code === 'second_factor_rejected' ||
+      error.detail?.includes('authentication code') ||
+      error.message?.includes('authentication code')
+    ) {
+      return {
+        status: 'error',
+        message: '인증 앱 코드가 올바르지 않거나 등록되지 않았어요.',
+      };
+    }
     if (error.status === 401) return { status: 'error', message: '로그인이 필요해요.' };
     if (error.status === 403) {
       return { status: 'error', message: '이 작업을 수행할 권한이 없어요.' };

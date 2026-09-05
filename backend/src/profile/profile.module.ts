@@ -3,6 +3,7 @@ import { AuthModule } from '../auth/auth.module';
 import { ContentModule } from '../content/content.module';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
+import { EncryptionService } from '../security/encryption.service';
 import { ProfileController } from './profile.controller';
 import { ProfileImageController } from './profile-image.controller';
 import { ProfileRepository } from './profile.repository';
@@ -24,8 +25,9 @@ import { ProfileRepository } from './profile.repository';
       // Null with no DATABASE_URL, because the application has to boot and
       // answer 503 on these routes rather than refuse to start.
       provide: ProfileRepository,
-      inject: [PG_POOL],
-      useFactory: (pool: Queryable | null) => (pool ? new ProfileRepository(pool) : null),
+      inject: [PG_POOL, EncryptionService],
+      useFactory: (pool: Queryable | null, encryption: EncryptionService) =>
+        pool ? new ProfileRepository(pool, encryption) : null,
     },
   ],
 })

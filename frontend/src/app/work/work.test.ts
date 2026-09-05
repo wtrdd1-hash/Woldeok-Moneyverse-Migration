@@ -44,7 +44,6 @@ describe('jobLabel', () => {
     expect(jobLabel('smith')).toBe('smith');
   });
 });
-
 describe('difficultyLabel', () => {
   it('names every level the CHECK allows', () => {
     expect([1, 2, 3, 4, 5].map(difficultyLabel)).toEqual([
@@ -186,6 +185,21 @@ describe('boardOrder', () => {
       task({ code: 'd', recommended: true }),
     ];
     expect(boardOrder(tasks).map((entry) => entry.code)).toEqual(['b', 'd', 'a', 'c']);
+  });
+
+  it('floats the active job tasks to the top, putting unspent tasks first', () => {
+    const tasks = [
+      task({ code: 'other_rec', job_type: 'miner', recommended: true }),
+      task({ code: 'my_spent', job_type: 'detective', daily_limit: 3, taken_today: 3 }),
+      task({ code: 'my_unspent', job_type: 'detective', daily_limit: 3, taken_today: 1 }),
+      task({ code: 'other_norm', job_type: 'miner', recommended: false }),
+    ];
+    expect(boardOrder(tasks, 'detective').map((entry) => entry.code)).toEqual([
+      'my_unspent',
+      'my_spent',
+      'other_rec',
+      'other_norm',
+    ]);
   });
 
   it('does not mutate what it was given', () => {

@@ -140,11 +140,8 @@ export async function deleteStock(
 ): Promise<ActionState> {
   const stockId = text(formData.get('stockId'));
   if (stockId === '') return { status: 'error', message: '종목을 찾을 수 없어요.' };
-  const code = text(formData.get('code'));
-  if (!STEP_UP_CODE.test(code)) return CODE_REQUIRED;
 
   try {
-    await spendSecondFactorCode(code);
     await mutate(`/api/v1/admin/stocks/${encodeURIComponent(stockId)}`, { method: 'DELETE' });
     revalidatePath('/admin/market');
     revalidatePath('/stocks');

@@ -11,6 +11,7 @@ import type {
   ContentSetPhotoPublicationInput,
   ContentStatusRow,
   PendingPhotoRow,
+  AdminAnnouncementRow,
 } from './content.repository';
 import {
   ContentInputError,
@@ -202,6 +203,8 @@ export interface ContentRepositoryLike {
   setPhotoPublication(input: ContentSetPhotoPublicationInput): Promise<ContentPhotoReceiptRow>;
   adminListPendingPhotos(actorUserId: unknown, limit?: number): Promise<readonly PendingPhotoRow[]>;
   adminRejectPhoto(actorUserId: unknown, photoId: unknown, reason?: unknown): Promise<boolean>;
+  adminListAllAnnouncements(actorUserId: unknown): Promise<readonly AdminAnnouncementRow[]>;
+  adminDeleteAnnouncement(actorUserId: unknown, announcementId: unknown): Promise<boolean>;
 }
 
 export interface ContentSaveAnnouncementDto {
@@ -265,6 +268,8 @@ export class ContentService {
       'setPhotoPublication',
       'adminListPendingPhotos',
       'adminRejectPhoto',
+      'adminListAllAnnouncements',
+      'adminDeleteAnnouncement',
     ];
     if (
       !(repository instanceof PostgresContentRepository) &&
@@ -447,6 +452,28 @@ export class ContentService {
     limit = 50,
   ): Promise<readonly PendingPhotoRow[]> {
     return this.repository.adminListPendingPhotos(authenticatedOperatorId, limit);
+  }
+
+
+  async adminListAllAnnouncements(authenticatedOperatorId: unknown) {
+    const rows = await this.repository.adminListAllAnnouncements(authenticatedOperatorId);
+    return rows.map((r) => ({
+      announcementId: r.announcement_id,
+      title: r.title,
+      body: r.body,
+      contentState: r.content_state,
+      publishedAt: r.published_at ? new Date(r.published_at).toISOString() : null,
+      createdAt: new Date(r.created_at).toISOString(),
+      updatedAt: new Date(r.updated_at).toISOString(),
+    }));
+  }
+
+  async adminDeleteAnnouncement(
+    authenticatedOperatorId: unknown,
+    announcementId: unknown,
+  ): Promise<{ deleted: boolean }> {
+    const deleted = await this.repository.adminDeleteAnnouncement(authenticatedOperatorId, announcementId);
+    return { deleted };
   }
 
   async rejectPhoto(

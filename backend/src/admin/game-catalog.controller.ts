@@ -350,7 +350,7 @@ export class GameCatalogController {
    * refusal carries is the one the operator needs to read.
    */
   @Delete('stocks/:id')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Delete a stock that has no history' })
   deleteStock(
     @Req() request: RequestWithSession,

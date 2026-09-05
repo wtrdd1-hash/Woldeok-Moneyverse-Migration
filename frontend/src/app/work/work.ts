@@ -15,7 +15,6 @@ export interface WorkTask {
   readonly reward_preview: string | null;
   readonly recommended: boolean;
 }
-
 export interface WorkAssignment {
   readonly assignment_id: string;
   readonly task_id: string;
@@ -299,6 +298,38 @@ export function isSpent(task: WorkTask): boolean {
   return task.taken_today >= task.daily_limit;
 }
 
-export function boardOrder(tasks: readonly WorkTask[]): readonly WorkTask[] {
-  return [...tasks].sort((left, right) => Number(right.recommended) - Number(left.recommended));
+export function boardOrder(
+  tasks: readonly WorkTask[],
+  activeJobType?: string | null,
+): readonly WorkTask[] {
+  return [...tasks].sort((left, right) => {
+    // 1. If activeJobType is provided, prioritize active job tasks at the very top
+    if (activeJobType) {
+      const leftIsActive = left.job_type === activeJobType;
+      const rightIsActive = right.job_type === activeJobType;
+      if (leftIsActive !== rightIsActive) {
+        return leftIsActive ? -1 : 1;
+      }
+      // Among active job tasks: unspent daily limit tasks come before finished ones
+      if (leftIsActive && rightIsActive) {
+        const leftHasQuota = left.taken_today < left.daily_limit;
+        const rightHasQuota = right.taken_today < right.daily_limit;
+        if (leftHasQuota !== rightHasQuota) {
+          return leftHasQuota ? -1 : 1;
+        }
+      }
+    }
+
+    // 2. Recommended tasks
+    if (left.recommended !== right.recommended) {
+      return Number(right.recommended) - Number(left.recommended);
+    }
+
+    // 3. Difficulty ascending
+    if (left.difficulty !== right.difficulty) {
+      return left.difficulty - right.difficulty;
+    }
+
+    return left.code.localeCompare(right.code);
+  });
 }

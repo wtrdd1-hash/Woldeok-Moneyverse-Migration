@@ -252,6 +252,43 @@ export class ContentController {
     );
   }
 
+
+  @Get('admin/announcements')
+  @UseGuards(
+    SessionGuard,
+    AuthenticatedGuard,
+    ConsentGuard,
+    AdminGuard,
+    AdminSessionGuard,
+  )
+  @ApiOperation({ summary: 'List all announcements for administrators' })
+  adminAnnouncements(@Req() request: RequestWithSession) {
+    return this.guarded(
+      () => this.service().adminListAllAnnouncements(requireUserId(request)),
+      'could not list announcements',
+    );
+  }
+
+  @Delete('admin/announcements/:id')
+  @UseGuards(
+    SessionGuard,
+    AuthenticatedGuard,
+    ConsentGuard,
+    AdminGuard,
+    AdminSessionGuard,
+    CsrfGuard,
+  )
+  @ApiOperation({ summary: 'Delete an announcement' })
+  deleteAnnouncement(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) announcementId: string,
+  ) {
+    return this.guarded(
+      () => this.service().adminDeleteAnnouncement(requireUserId(request), announcementId),
+      'could not delete announcement',
+    );
+  }
+
   @Get('admin/photos/submissions')
   @UseGuards(
     SessionGuard,

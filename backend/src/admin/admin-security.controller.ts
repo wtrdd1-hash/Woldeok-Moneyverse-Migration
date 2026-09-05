@@ -165,7 +165,10 @@ export class AdminSecurityController {
         throw new ServiceUnavailableException(error.message);
       }
       if (error instanceof SecondFactorRejectedError) {
-        throw new UnauthorizedException('the authentication code is not valid');
+        throw new UnauthorizedException({
+          message: 'the authentication code is not valid or not enrolled',
+          code: 'second_factor_rejected',
+        });
       }
       if (error instanceof RecoveryCodeRejectedError) {
         throw new UnauthorizedException('the recovery code is not valid or is locked');

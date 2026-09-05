@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { IDLE } from '@/lib/action-state';
-import { changePublication, saveAnnouncement, savePhoto } from './actions';
+import { changePublication, saveAnnouncement, savePhoto, deleteAnnouncementAction, toggleAnnouncementPublicationAction } from './actions';
 
 function PublishNow({ id }: { readonly id: string }) {
   const [checked, setChecked] = useState(false);
@@ -354,6 +354,155 @@ export function PhotoReviewQueue({
           </CardContent>
         </Card>
       ))}
+    </div>
+  );
+}
+
+export interface AdminAnnouncementItem {
+  readonly announcementId: string;
+  readonly title: string;
+  readonly body: string;
+  readonly contentState: 'draft' | 'published';
+  readonly publishedAt: string | null;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export function AnnouncementManagementTable({
+  items,
+}: {
+  readonly items: readonly AdminAnnouncementItem[];
+}) {
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ id?: string; message: string; isError?: boolean } | null>(null);
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`공지 "${title}"을(를) 정말 영구 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) return;
+    setLoadingId(id);
+    setFeedback(null);
+    try {
+      const res = await deleteAnnouncementAction(id);
+      if (res.status === 'error') {
+        setFeedback({ id, message: res.message || '공지를 삭제하지 못했습니다.', isError: true });
+      } else {
+        setFeedback({ id, message: '공지사항이 성공적으로 삭제되었습니다.' });
+      }
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const handleToggle = async (id: string, currentPublished: boolean) => {
+    setLoadingId(id);
+    setFeedback(null);
+    try {
+      const res = await toggleAnnouncementPublicationAction(id, !currentPublished);
+      if (res.status === 'error') {
+        setFeedback({ id, message: res.message || '상태를 변경하지 못했습니다.', isError: true });
+      } else {
+        setFeedback({
+          id,
+          message: !currentPublished ? '공지로 공개되었습니다.' : '비공개(초안)로 전환되었습니다.',
+        });
+      }
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  if (!items || items.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+        등록된 공지사항이 없습니다. 새 운영 공지를 작성해 보세요.
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-3">
+      {feedback && (
+        <div
+          className={`rounded-md p-3 text-sm font-medium ${
+            feedback.isError
+              ? 'bg-destructive/15 text-destructive border border-destructive/30'
+              : 'bg-primary/10 text-primary border border-primary/30'
+          }`}
+        >
+          {feedback.message}
+        </div>
+      )}
+      <div className="overflow-x-auto rounded-md border">
+        <table className="w-full text-left text-sm">
+          <thead className="bg-muted/50 border-b text-xs text-muted-foreground">
+            <tr>
+              <th className="p-3">상태</th>
+              <th className="p-3">제목 및 본문 요약</th>
+              <th className="p-3">작성일시 / 공개일시</th>
+              <th className="p-3 text-right">관리 작업</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {items.map((item) => {
+              const isPublished = item.contentState === 'published';
+              const isLoading = loadingId === item.announcementId;
+              return (
+                <tr key={item.announcementId} className="hover:bg-muted/20 transition-colors">
+                  <td className="p-3 align-top whitespace-nowrap">
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
+                        isPublished
+                          ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30'
+                          : 'bg-amber-500/10 text-amber-600 border border-amber-500/30'
+                      }`}
+                    >
+                      {isPublished ? '● 공개중' : '○ 초안(비공개)'}
+                    </span>
+                  </td>
+                  <td className="p-3 align-top">
+                    <div className="font-semibold text-foreground">{item.title}</div>
+                    <div className="text-xs text-muted-foreground line-clamp-2 mt-0.5 max-w-xl">
+                      {item.body}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground font-mono mt-1">
+                      ID: {item.announcementId}
+                    </div>
+                  </td>
+                  <td className="p-3 align-top text-xs text-muted-foreground whitespace-nowrap">
+                    <div>작성: {new Date(item.createdAt).toLocaleString('ko-KR')}</div>
+                    {item.publishedAt && (
+                      <div className="text-primary/80">
+                        공개: {new Date(item.publishedAt).toLocaleString('ko-KR')}
+                      </div>
+                    )}
+                  </td>
+                  <td className="p-3 align-top text-right whitespace-nowrap">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        size="sm"
+                        variant={isPublished ? 'outline' : 'default'}
+                        disabled={isLoading}
+                        onClick={() => handleToggle(item.announcementId, isPublished)}
+                        className="h-8 text-xs"
+                      >
+                        {isPublished ? '비공개로 전환' : '바로 공개'}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        disabled={isLoading}
+                        onClick={() => handleDelete(item.announcementId, item.title)}
+                        className="h-8 text-xs"
+                      >
+                        삭제
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

@@ -207,6 +207,16 @@ export interface ContentSetPhotoPublicationInput {
  * SECURITY DEFINER functions, while status ingestion stays outside the web
  * application's database role.
  */
+export interface AdminAnnouncementRow {
+  readonly announcement_id: string;
+  readonly title: string;
+  readonly body: string;
+  readonly content_state: string;
+  readonly published_at: Date | null;
+  readonly created_at: Date;
+  readonly updated_at: Date;
+}
+
 @Injectable()
 export class PostgresContentRepository {
   readonly pool: Queryable;
@@ -404,6 +414,33 @@ export class PostgresContentRepository {
       [actor, safeLimit],
     );
     return rows;
+  }
+
+
+  async adminListAllAnnouncements(
+    actorUserId: unknown,
+  ): Promise<readonly AdminAnnouncementRow[]> {
+    const actor = requireContentUuid(actorUserId, 'authenticated operator id');
+    const { rows } = await this.pool.query<AdminAnnouncementRow>(
+      `SELECT announcement_id::text AS announcement_id, title, body, content_state,
+              published_at, created_at, updated_at
+       FROM public.content_list_all_announcements($1)`,
+      [actor],
+    );
+    return rows;
+  }
+
+  async adminDeleteAnnouncement(
+    actorUserId: unknown,
+    announcementId: unknown,
+  ): Promise<boolean> {
+    const actor = requireContentUuid(actorUserId, 'authenticated operator id');
+    const id = requireContentUuid(announcementId, 'announcement id');
+    const { rows: [row] } = await this.pool.query<{ deleted: boolean }>(
+      `SELECT public.content_delete_announcement($1, $2) AS deleted`,
+      [actor, id],
+    );
+    return row?.deleted === true;
   }
 
   async adminRejectPhoto(

@@ -96,6 +96,12 @@ describe.skipIf(!DATABASE_URL)('game modules against a real database', () => {
       }
     });
 
+    it('keeps OAuth identities unreadable by the application role', async () => {
+      await expect(pool.query('SELECT 1 FROM public.identities LIMIT 1')).rejects.toMatchObject({
+        code: '42501',
+      });
+    });
+
     // The operator check now lives in the function rather than in the route,
     // so a caller who reaches this method without the role is still refused.
     it('refuses the admin catalogue to a caller with no operator role', async () => {

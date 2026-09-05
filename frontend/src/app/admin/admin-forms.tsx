@@ -449,10 +449,27 @@ export function DeleteStockDialog({
                 : '거래 기록도 보유자도 없는 종목입니다. 삭제하면 되돌릴 수 없어요.'}
             </DialogDescription>
           </DialogHeader>
-          <StepUpField
-            id={`delete-${stockId}`}
-            undo="되돌릴 수 없습니다. 같은 코드로 종목을 다시 등록해야 합니다."
-          />
+          {!blocked ? (
+            <div className="rounded-md border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-600 dark:text-emerald-400">
+              <div className="flex items-center gap-2 font-medium">
+                <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+                삭제 가능 안전 상태
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                보유자 0명 · 거래 기록 0건 (원장 영향 없음). [삭제 확정] 클릭 시 즉시 제거됩니다.
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+              <div className="flex items-center gap-2 font-medium">
+                <span className="inline-block h-2 w-2 rounded-full bg-destructive" />
+                삭제 불가 (금융 원장 보호)
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                보유자 {holders}명 또는 거래 내역 {trades}건이 존재하여 삭제할 수 없습니다. 거래 정지를 사용해 주세요.
+              </p>
+            </div>
+          )}
           <ActionAlert state={state} />
           <DialogFooter>
             <SubmitButton variant="destructive" disabled={blocked}>

@@ -194,3 +194,37 @@ export async function rejectPhotoAction(photoId: string): Promise<ActionState> {
     return failure(error, '사진을 반려하지 못했어요.');
   }
 }
+
+export async function deleteAnnouncementAction(announcementId: string): Promise<ActionState> {
+  if (!announcementId) return { status: 'error', message: '공지사항 ID가 필요해요.' };
+  try {
+    await mutate(`/api/v1/admin/announcements/${encodeURIComponent(announcementId)}`, {
+      method: 'DELETE',
+    });
+    revalidatePath('/admin/content');
+    revalidatePath('/announcements');
+    revalidatePath('/');
+    return { status: 'ok', message: '공지사항을 성공적으로 삭제했어요.' };
+  } catch (error) {
+    return failure(error, '공지사항을 삭제하지 못했어요.');
+  }
+}
+
+export async function toggleAnnouncementPublicationAction(
+  announcementId: string,
+  publish: boolean,
+): Promise<ActionState> {
+  if (!announcementId) return { status: 'error', message: '공지사항 ID가 필요해요.' };
+  try {
+    await setPublication('announcements', announcementId, publish);
+    revalidatePath('/admin/content');
+    revalidatePath('/announcements');
+    revalidatePath('/');
+    return {
+      status: 'ok',
+      message: publish ? '공지사항을 공개로 전환했어요.' : '공지사항을 비공개(초안)로 전환했어요.',
+    };
+  } catch (error) {
+    return failure(error, '공개 상태를 변경하지 못했어요.');
+  }
+}

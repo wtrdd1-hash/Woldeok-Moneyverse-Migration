@@ -1,3 +1,4 @@
+import { EncryptionService } from '../security/encryption.service';
 import type { Queryable } from '../core/db';
 import { queryOne } from '../core/db';
 
@@ -232,7 +233,14 @@ export interface ProfileUpdate {
  * meant to be able to ask the question on its own.
  */
 export class ProfileRepository {
-  constructor(private readonly pool: Queryable) {}
+  readonly encryptionService: EncryptionService;
+
+  constructor(
+    private readonly pool: Queryable,
+    encryptionService?: EncryptionService,
+  ) {
+    this.encryptionService = encryptionService ?? new EncryptionService();
+  }
 
   /**
    * A profile as this caller is allowed to see it. `actor` and `subject` may
@@ -262,7 +270,12 @@ export class ProfileRepository {
     // Reporting it as 200 with an empty body would leave a screen unable to
     // tell a hidden profile from a broken one.
     if (!row) throw new Error('member_profile_view did not return a row');
-    return row;
+    return {
+      ...row,
+      display_name: row.display_name
+        ? (this.encryptionService.decrypt(row.display_name) ?? row.display_name)
+        : null,
+    };
   }
 
   /**
@@ -343,7 +356,12 @@ export class ProfileRepository {
       [actor],
     );
     if (!row) throw new Error('member_profile_settings did not return a row');
-    return row;
+    return {
+      ...row,
+      display_name: row.display_name
+        ? (this.encryptionService.decrypt(row.display_name) ?? row.display_name)
+        : null,
+    };
   }
 
   async update(actor: unknown, input: ProfileUpdate): Promise<ProfileSettingsRow> {
@@ -366,6 +384,11 @@ export class ProfileRepository {
       [actor, visibility, displayName, imageUrl, JSON.stringify(fieldVisibility), featuredTitle],
     );
     if (!row) throw new Error('member_update_profile did not return a row');
-    return row;
+    return {
+      ...row,
+      display_name: row.display_name
+        ? (this.encryptionService.decrypt(row.display_name) ?? row.display_name)
+        : null,
+    };
   }
 }

@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { TruncatedList } from '@/components/truncated-list';
 import { Badge } from '@/components/ui/badge';
@@ -11,31 +10,26 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { apiOrNull } from '@/lib/api';
-import { type Locale } from '@/lib/locale';
 import { getServerLocale } from '@/lib/locale-server';
-import { formatMoment, groupDigits } from '@/lib/money';
+import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
-import { ClaimButton, JobSwitchButton, SubmitTaskButton, TaskCompleteModalButton } from './work-forms';
+import { ClaimButton, JobSwitchButton, SubmitTaskButton } from './work-forms';
+import { CareerTasksBoard } from './career-tasks-board';
+
 import type {
   JobProfileResponse,
   WorkAssignment,
   WorkReceipt,
-  WorkSummary,
   WorkTask,
 } from './work';
 import {
-  boardOrder,
   CAREER_JOBS,
-  difficultyLabel,
   durationLabel,
   hasExpired,
   isOpen,
   jobLabel,
   jobMeta,
-  progressPercent,
-  remaining,
   secondsUntilSubmittable,
   statusLabel,
 } from './work';
@@ -55,8 +49,7 @@ export default async function WorkPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const [summary, board, assignments, receipts, profile] = await Promise.all([
-    apiOrNull<WorkSummary>('/api/v1/work'),
+  const [board, assignments, receipts, profile] = await Promise.all([
     apiOrNull<{ tasks: readonly WorkTask[] }>('/api/v1/work/tasks'),
     apiOrNull<{ assignments: readonly WorkAssignment[] }>('/api/v1/work/assignments'),
     apiOrNull<{ receipts: readonly WorkReceipt[] }>('/api/v1/work/receipts'),
@@ -141,11 +134,11 @@ export default async function WorkPage() {
         </div>
       </section>
 
-      {/* 2. 8대 전문 직업군 선택 카드 그리드 */}
-      <section aria-labelledby="careers-title" className="grid gap-4">
+      {/* 2. 8대 직업 탐색 및 즉시 전직 카드 그리드 */}
+      <section aria-labelledby="careers-grid-title" className="grid gap-4">
         <div>
-          <h2 id="careers-title" className="text-xl font-bold flex items-center gap-2">
-            <span>🏛️</span> {isEn ? '8 Professional Careers' : '8대 전문 직업군'}
+          <h2 id="careers-grid-title" className="text-xl font-bold flex items-center gap-2">
+            <span>🏛️</span> {isEn ? 'Available Careers (Zero-Fee Instant Switch)' : '8대 전문 직업군 탐색 및 전직'}
           </h2>
           <p className="text-sm text-muted-foreground">
             {isEn
@@ -201,34 +194,7 @@ export default async function WorkPage() {
         </div>
       </section>
 
-      {/* 3. 보상 한도 게이지 */}
-      <section aria-labelledby="caps-title" className="grid gap-3">
-        <h2 id="caps-title" className="text-lg font-semibold">
-          {isEn ? 'WLD Reward Cap Progress' : '보상 한도'}
-        </h2>
-        {summary === null ? (
-          <EmptyState title={isEn ? 'Failed to load reward caps.' : '한도 정보를 불러오지 못했어요.'} />
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
-            <CapCard
-              label={isEn ? 'Today' : '오늘'}
-              paid={summary.daily_paid}
-              cap={summary.daily_cap}
-              note={isEn ? 'Resets daily at midnight KST.' : '매일 한국 시간 자정에 다시 열려요.'}
-              locale={locale}
-            />
-            <CapCard
-              label={isEn ? 'This Week' : '이번 주'}
-              paid={summary.weekly_paid}
-              cap={summary.weekly_cap}
-              note={isEn ? 'Weekly cap resets every Monday.' : '주간 한도는 월요일에 다시 열려요.'}
-              locale={locale}
-            />
-          </div>
-        )}
-      </section>
-
-      {/* 4. 직업별 일일 업무 퀘스트 목록 */}
+      {/* 3. 직업별 일일 업무 퀘스트 목록 */}
       <section aria-labelledby="tasks-title" className="grid gap-4">
         <div>
           <h2 id="tasks-title" className="text-xl font-bold flex items-center gap-2">
@@ -241,64 +207,10 @@ export default async function WorkPage() {
           </p>
         </div>
 
-        {tasks.length === 0 ? (
-          <EmptyState title={isEn ? 'No tasks currently available.' : '현재 등록된 업무가 없어요.'} />
-        ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {boardOrder(tasks).map((task) => {
-              const isActiveJob = activeJob?.job_type === task.job_type;
-              const meta = jobMeta(task.job_type, locale);
-
-              return (
-                <Card
-                  key={task.task_id}
-                  className={`flex flex-col justify-between transition-all ${
-                    isActiveJob
-                      ? 'border-border/80 bg-card shadow-sm'
-                      : 'opacity-60 bg-muted/20 border-dashed'
-                  }`}
-                >
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline" className="text-xs">
-                        {meta?.icon ?? '💼'} {jobLabel(task.job_type, locale)}
-                      </Badge>
-                      <Badge variant="secondary" className="text-xs">
-                        {difficultyLabel(task.difficulty, locale)}
-                      </Badge>
-                    </div>
-                    <CardTitle className="text-base mt-2">{task.name}</CardTitle>
-                    <CardDescription className="text-xs">{task.description}</CardDescription>
-                  </CardHeader>
-
-                  <CardContent className="grid gap-2 text-xs py-2">
-                    <div className="rounded-lg bg-muted/50 p-2.5 grid grid-cols-2 gap-2 text-center">
-                      <div>
-                        <span className="text-muted-foreground block text-[11px]">{isEn ? 'WLD Reward' : 'WLD 보상'}</span>
-                        <span className="font-bold text-emerald-400 font-mono">+{task.base_reward} WLD</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground block text-[11px]">{isEn ? 'Proficiency EXP' : '숙련도 EXP'}</span>
-                        <span className="font-bold text-amber-400 font-mono">+{task.base_experience} EXP</span>
-                      </div>
-                    </div>
-                    <div className="flex justify-between text-muted-foreground text-[11px] px-1">
-                      <span>{isEn ? `Duration: ${durationLabel(task.minimum_duration_seconds, locale)}` : `소요 시간: ${durationLabel(task.minimum_duration_seconds, locale)}`}</span>
-                      <span>{isEn ? `Today: ${task.taken_today}/${task.daily_limit}` : `오늘 완료: ${task.taken_today}/${task.daily_limit}회`}</span>
-                    </div>
-                  </CardContent>
-
-                  <CardFooter className="pt-2">
-                    <TaskCompleteModalButton task={task} isActiveJob={isActiveJob} />
-                  </CardFooter>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+        <CareerTasksBoard tasks={tasks} activeJobType={activeJob?.job_type} />
       </section>
 
-      {/* 5. 진행 중인 작업 */}
+      {/* 4. 진행 중인 작업 */}
       {open.length > 0 && (
         <section aria-labelledby="open-title" className="grid gap-3">
           <h2 id="open-title" className="text-lg font-semibold">
@@ -358,7 +270,7 @@ export default async function WorkPage() {
         </section>
       )}
 
-      {/* 6. 최근 수령 영수증 */}
+      {/* 5. 최근 수령 영수증 */}
       {paid.length > 0 && (
         <section aria-labelledby="receipts-title" className="grid gap-3">
           <h2 id="receipts-title" className="text-lg font-semibold">
@@ -387,46 +299,5 @@ export default async function WorkPage() {
         </section>
       )}
     </div>
-  );
-}
-
-function CapCard({
-  label,
-  paid,
-  cap,
-  note,
-  locale,
-}: {
-  readonly label: string;
-  readonly paid: string;
-  readonly cap: string;
-  readonly note: string;
-  readonly locale?: Locale;
-}) {
-  const percent = progressPercent(paid, cap);
-  const isEn = locale === 'en';
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardDescription>{label}</CardDescription>
-        <CardTitle className="flex flex-wrap items-baseline gap-2">
-          <span>{groupDigits(paid)} WLD</span>
-          <span className="text-sm font-normal text-muted-foreground">/ {groupDigits(cap)} WLD</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-2">
-        <Progress value={percent} aria-label={isEn ? `${label} Reward Cap` : `${label} 보상 한도`} />
-        <p className="text-xs text-muted-foreground">
-          {remaining(paid, cap) === '0'
-            ? isEn
-              ? 'Daily reward limit reached.'
-              : '오늘 받을 수 있는 보상을 모두 채웠어요.'
-            : isEn
-            ? `${groupDigits(remaining(paid, cap))} WLD remaining. ${note}`
-            : `${groupDigits(remaining(paid, cap))} WLD 더 받을 수 있어요. ${note}`}
-        </p>
-      </CardContent>
-    </Card>
   );
 }

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
+import { ApiError } from '@/lib/api';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 
 function id(formData: FormData, field: string): string {
@@ -38,27 +39,46 @@ export async function completeTaskV2Action(
   const taskId = id(formData, 'taskId');
   if (!taskId) return { status: 'error', message: '작업 정보를 확인할 수 없습니다.' };
 
-  try {
-    const result = await mutate<{
-      reward_amount: string;
-      experience_gained: string;
-      current_level: number;
-      level_up: boolean;
-    }>(`/api/v1/work/tasks/${encodeURIComponent(taskId)}/complete`, {
-      body: { idempotencyKey: idempotencyKey() },
-    });
-    revalidatePath('/work');
-    revalidatePath('/wallet');
-    revalidatePath('/profile');
+  // 핑 손실 및 네트워크 지연에 대비해 동일 멱등키로 최대 2회 시도
+  const key = idempotencyKey();
+  let lastError: unknown;
 
-    const levelMsg = result.level_up ? ` 🎉 축하합니다! 레벨 ${result.current_level}로 올랐습니다!` : '';
-    return {
-      status: 'ok',
-      message: `업무를 완수했습니다! ${result.reward_amount} WLD 지급 + 숙련도 ${result.experience_gained} EXP 획득!${levelMsg}`,
-    };
-  } catch (error) {
-    return failure(error, '업무 완료에 실패했습니다. 활성 직업과 일치하는 업무인지, 일일 수행 횟수가 남았는지 확인해 주세요.');
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const result = await mutate<{
+        reward_amount: string;
+        experience_gained: string;
+        current_level: number;
+        level_up: boolean;
+      }>(`/api/v1/work/tasks/${encodeURIComponent(taskId)}/complete`, {
+        body: { idempotencyKey: key },
+      });
+      revalidatePath('/work');
+      revalidatePath('/wallet');
+      revalidatePath('/profile');
+
+      const levelMsg = result.level_up ? ` 🎉 축하합니다! 레벨 ${result.current_level}로 올랐습니다!` : '';
+      return {
+        status: 'ok',
+        message: `업무를 완수했습니다! ${result.reward_amount} WLD 지급 + 숙련도 ${result.experience_gained} EXP 획득!${levelMsg}`,
+      };
+    } catch (error) {
+      lastError = error;
+      // 4xx 클라이언트 에러는 재시도하지 않고 즉시 반환
+      if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
+        break;
+      }
+      if (attempt < 2) {
+        // 지수 백오프 + 지터 (200ms ~ 350ms)
+        await new Promise((resolve) => setTimeout(resolve, 200 + Math.random() * 150));
+      }
+    }
   }
+
+  return failure(
+    lastError,
+    '네트워크 핑 지연 또는 통신 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+  );
 }
 
 export async function takeTask(_previous: ActionState, formData: FormData): Promise<ActionState> {
@@ -127,7 +147,7 @@ export async function claimReward(
       status: 'ok',
       message:
         receipt.reward_amount === '0'
-          ? `보상 한도를 모두 채워 WLD는 지급되지 않았어요. 경험치 ${receipt.experience_amount}는 그대로 쌓였어요.`
+          ? `경험치 ${receipt.experience_amount}를 획득했어요.`
           : `${receipt.reward_amount} WLD와 경험치 ${receipt.experience_amount}를 받았어요.`,
     };
   } catch (error) {

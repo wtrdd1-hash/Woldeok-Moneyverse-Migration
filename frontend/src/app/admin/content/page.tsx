@@ -4,7 +4,15 @@ import { Accent, PageHeader } from '@/components/page-header';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { requireAdminConsole } from '@/lib/session';
-import { AnnouncementEditor, PhotoEditor, PublicationEditor, PhotoReviewQueue, type PendingPhotoItem } from './content-forms';
+import {
+  AnnouncementEditor,
+  PhotoEditor,
+  PublicationEditor,
+  PhotoReviewQueue,
+  AnnouncementManagementTable,
+  type PendingPhotoItem,
+  type AdminAnnouncementItem,
+} from './content-forms';
 import { apiOrNull } from '@/lib/api';
 
 export const dynamic = 'force-dynamic';
@@ -16,10 +24,56 @@ export const metadata: Metadata = {
 
 export default async function ContentAdminPage() {
   await requireAdminConsole('/admin/content');
-  const pendingPhotos = await apiOrNull<PendingPhotoItem[]>('/api/v1/admin/photos/submissions') ?? [];
+  const [pendingPhotosRes, announcementsData] = await Promise.all([
+    apiOrNull<PendingPhotoItem[]>('/api/v1/admin/photos/submissions'),
+    apiOrNull<AdminAnnouncementItem[] | { announcements: AdminAnnouncementItem[] }>('/api/v1/admin/announcements'),
+  ]);
+  const pendingPhotos = pendingPhotosRes ?? [];
+  const announcements = Array.isArray(announcementsData) ? announcementsData : (announcementsData?.announcements ?? []);
 
   return (
     <div className="grid gap-6">
+      <PageHeader
+        eyebrow="PUBLISHED CONTENT CONTROL"
+        title={
+          <>
+            보여 줄 소식만,
+            <br />
+            <Accent>차분히 꺼내 놓아요.</Accent>
+          </>
+        }
+      >
+        공지사항을 쉽게 조회하고 삭제하거나 공개/비공개 상태를 원터치로 변경할 수 있습니다.
+      </PageHeader>
+
+      <section aria-labelledby="announcement-manage-title" className="grid gap-3">
+        <Card className="border-border shadow-sm">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardDescription className="text-primary font-semibold tracking-wider text-xs">
+                  ANNOUNCEMENT MANAGEMENT
+                </CardDescription>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  공지사항 목록 및 간편 삭제 관리
+                  {announcements.length > 0 && (
+                    <span className="rounded-full bg-primary/20 text-primary px-2 py-0.5 text-xs font-bold">
+                      {announcements.length}개
+                    </span>
+                  )}
+                </CardTitle>
+              </div>
+            </div>
+            <CardDescription>
+              사이트에 등록된 모든 공지사항을 한눈에 확인하고, 불필요한 공지를 즉시 삭제하거나 공개/비공개로 전환하세요.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AnnouncementManagementTable items={announcements} />
+          </CardContent>
+        </Card>
+      </section>
+
       <section aria-labelledby="review-queue-title" className="grid gap-3">
         <Card className="border-primary/30 bg-primary/5">
           <CardHeader>
@@ -47,25 +101,12 @@ export default async function ContentAdminPage() {
           </CardContent>
         </Card>
       </section>
-      <PageHeader
-        eyebrow="PUBLISHED CONTENT CONTROL"
-        title={
-          <>
-            보여 줄 소식만,
-            <br />
-            <Accent>차분히 꺼내 놓아요.</Accent>
-          </>
-        }
-      >
-        초안 저장과 공개는 별도 기록으로 처리됩니다. 이 화면은 외부 이미지 호스트나 서버 상태를
-        설정하지 않으며, 운영 환경에서 이미 승인한 대상만 사용할 수 있어요.
-      </PageHeader>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardDescription>ANNOUNCEMENT</CardDescription>
-            <CardTitle className="text-base">운영 공지 작성</CardTitle>
+            <CardTitle className="text-base">새 운영 공지 작성</CardTitle>
             <CardDescription>
               저장만 하면 초안으로 남습니다. ‘바로 공개’를 선택하면 저장 후 같은 내용의 공개
               요청을 이어서 기록합니다.
@@ -93,11 +134,10 @@ export default async function ContentAdminPage() {
 
       <Card>
         <CardHeader>
-          <CardDescription>PUBLICATION CONTROL</CardDescription>
-          <CardTitle className="text-base">기존 항목 공개·비공개</CardTitle>
+          <CardDescription>MANUAL PUBLICATION CONTROL</CardDescription>
+          <CardTitle className="text-base">ID 직접 입력 공개·비공개</CardTitle>
           <CardDescription>
-            저장 결과의 ID를 넣어 공개 상태만 바꿀 수 있어요. 기존 제목·내용이나 이미지 정보는 이
-            양식에서 변경하지 않습니다.
+            저장 결과의 ID를 직접 넣어 공개 상태만 바꿀 수 있어요.
           </CardDescription>
         </CardHeader>
         <CardContent>
