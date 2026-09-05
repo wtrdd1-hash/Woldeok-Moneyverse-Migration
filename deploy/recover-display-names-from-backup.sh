@@ -60,3 +60,14 @@ remaining="$(docker compose exec -T --user postgres db psql -X -qAt \
   -U moneyverse_migrator -d "$db_name" \
   -c "SELECT count(*) FROM public.identities WHERE display_name LIKE 'enc:v1:rnd:%'")"
 echo "backup display-name recovery: $pending pending before, $remaining remaining"
+
+# If neither retained keys, Discord nor the oldest pre-roll backup contains
+# the plaintext, never expose ciphertext as a member name. Keep the stable
+# user UUID visible as a temporary, non-secret label. The next OAuth login
+# replaces it with the provider's current public display name.
+if [ "${remaining:-0}" -gt 0 ]; then
+  docker compose exec -T --user postgres db psql -X -q -v ON_ERROR_STOP=1 \
+    -U moneyverse_migrator -d "$db_name" \
+    -c "UPDATE public.identities SET display_name='회원-' || left(user_id::text, 8) WHERE display_name LIKE 'enc:v1:rnd:%'"
+  echo "display-name fallback replaced $remaining unrecoverable ciphertext value(s)"
+fi
