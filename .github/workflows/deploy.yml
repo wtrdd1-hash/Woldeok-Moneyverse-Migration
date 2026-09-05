@@ -216,7 +216,7 @@ jobs:
         run: |
           ssh target 'mkdir -p ~/${{ steps.target.outputs.dir }}'
           tar czf - \
-            -C deploy compose.yml roll.sh bootstrap-env.sh recover-display-names.sh seed.sh update.sh edge \
+            -C deploy compose.yml roll.sh bootstrap-env.sh recover-display-names.sh recover-display-names-from-backup.sh seed.sh update.sh edge \
             backup.sh restore.sh backup-figures.sql \
             -C "${GITHUB_WORKSPACE}/packages/database" init migrations migrate.sh \
             | ssh target 'tar xzf - -C ~/${{ steps.target.outputs.dir }}'

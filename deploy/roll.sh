@@ -139,6 +139,7 @@ docker compose up -d --wait --wait-timeout 300
 # OAuth display names are public labels. Repair ciphertext left by historical
 # releases from Discord without exposing the bot token or names in CI output.
 bash ./recover-display-names.sh
+bash ./recover-display-names-from-backup.sh
 
 # The edge's configuration is a bind mount, so compose does not recreate the
 # container when the file changes and a release that edits it would otherwise
