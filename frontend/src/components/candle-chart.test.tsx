@@ -24,6 +24,13 @@ function chart(count: number): SVGSVGElement {
 const centres = (svg: SVGSVGElement): number[] =>
   [...svg.querySelectorAll('line')].map((line) => Number(line.getAttribute('x1')));
 
+/**
+ * jsdom lays nothing out, so the frame measures zero and the chart falls back
+ * to the 720px it assumes until a real browser tells it otherwise. Every
+ * figure below is against that frame.
+ */
+const FRAME = 720;
+
 describe('CandleChart spacing', () => {
   it('keeps a readable pitch when there are only a few candles', () => {
     // The bug this pins: the slot was the full width divided by the count, so
@@ -34,33 +41,50 @@ describe('CandleChart spacing', () => {
   });
 
   it('draws a short series narrow rather than stretching it', () => {
-    expect(chart(2).getAttribute('viewBox')).toBe('0 0 260 260');
-    // 20 candles at the 20px pitch: 400 wide, not the full frame.
-    expect(chart(20).getAttribute('viewBox')).toBe('0 0 400 260');
-    // 36 is where 720/n meets the cap; past it the frame is full and the
-    // pitch gives way instead of the width growing.
-    expect(chart(40).getAttribute('viewBox')).toBe('0 0 720 260');
+    // The figure is the frame either way; what stays narrow is the drawing
+    // inside it. Two candles at the 20px pitch occupy 40 of the 720.
+    expect(chart(2).getAttribute('viewBox')).toBe(`0 0 ${FRAME} 260`);
+    const twenty = centres(chart(20));
+    expect((twenty[19] as number) - (twenty[0] as number)).toBe(19 * 20);
+    // 36 is where 720/n meets the cap; past it the pitch gives way.
+    const forty = centres(chart(40));
+    expect((forty[1] as number) - (forty[0] as number)).toBe(18);
   });
 
   it('centres a series too short to fill the figure', () => {
     const gaps = centres(chart(2));
-    // 260 wide, 40 drawn: 110 of margin either side, first centre at 120.
-    expect(gaps[0]).toBe(120);
+    // 720 wide, 40 drawn: 340 of margin either side, first centre at 350.
+    expect(gaps[0]).toBe(350);
   });
 
-  it('draws wider than the frame rather than thinning past readable', () => {
+  it('drops the oldest candles rather than thinning past readable', () => {
     // The bug this pins: the frame was the only bound, so 200 candles came out
     // at a 3.6px pitch with a 2px body and the chart read as a dashed rule.
     const gaps = centres(chart(200));
     expect((gaps[1] as number) - (gaps[0] as number)).toBe(9);
-    expect(chart(200).getAttribute('viewBox')).toBe('0 0 1800 260');
+    // 720 of frame at that pitch holds eighty, and the eighty it keeps are
+    // the newest — a reader opened the chart for the right-hand end of it.
+    expect(gaps).toHaveLength(80);
   });
 
-  it('lets the drawing be as wide as it needs to be', () => {
-    // Capping the rendered width at the container scaled the whole drawing
-    // back down, which is the squeeze the pitch floor exists to prevent.
-    expect(chart(200).style.maxWidth).toBe('');
-    expect(chart(200).style.width).toBe('1800px');
+  it('says which candles those are', () => {
+    const { container } = render(<CandleChart candles={series(200)} />);
+    // The caption names the ends of what is drawn, not of what was passed.
+    expect(container.textContent).toContain('2026-08-121');
+    expect(container.textContent).toContain('2026-08-200');
+    expect(container.textContent).not.toContain('2026-08-120');
+  });
+
+  it('never draws wider than its frame', () => {
+    // The bug this pins: the drawing grew past the frame and the frame
+    // scrolled sideways, which inside a dialog dragged the dialog's own text
+    // out of the box and put a horizontal scrollbar across it.
+    const svg = chart(200);
+    expect(svg.style.width).toBe('');
+    expect(svg.getAttribute('viewBox')).toBe(`0 0 ${FRAME} 260`);
+    expect(svg.getAttribute('class')).toContain('w-full');
+    const frame = svg.parentElement;
+    expect(frame?.className).not.toContain('overflow-x');
   });
 
   it('never lets a body vanish, however many candles there are', () => {
@@ -207,14 +231,18 @@ describe('CandleChart axis', () => {
     const heights = [...container.querySelectorAll('text')].map((node) => Number(node.getAttribute('y')) - 3.5);
     expect(rules).toHaveLength(labels.length);
     rules.forEach((d, index) => {
-      expect(d).toBe(`M0 ${heights[index]} H 260`);
+      expect(d).toBe(`M0 ${heights[index]} H ${FRAME}`);
     });
   });
 
-  it('keeps the axis out of the scrolling frame', () => {
+  it('keeps the figures in a column of their own', () => {
+    // The rules are drawn across the candles and their figures are not: a
+    // number written over a candle is a number a reader has to subtract the
+    // candle from.
     const { container } = render(<CandleChart candles={series(200)} />);
-    const frame = container.querySelector('.overflow-x-auto');
-    const axis = container.querySelectorAll('svg')[1];
-    expect(frame?.contains(axis ?? null)).toBe(false);
+    const [drawing, axis] = [...container.querySelectorAll('svg')];
+    expect(drawing?.querySelectorAll('text')).toHaveLength(0);
+    expect(axis?.querySelectorAll('text').length).toBeGreaterThan(0);
+    expect(drawing?.contains(axis ?? null)).toBe(false);
   });
 });

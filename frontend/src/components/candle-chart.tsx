@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { groupDigits } from '@/lib/money';
 
 /**
@@ -26,15 +26,14 @@ export interface Candle {
   readonly close_price: string;
 }
 
-const WIDTH = 720;
 const HEIGHT = 260;
 /**
  * The pitch a candle sits at when there is room for it.
  *
  * Without a cap the slot is the full width divided by the count, so two
  * candles landed 360px apart with 14px of body between them — a chart that
- * stretched whatever it was given to fill the frame. Real charts keep the
- * pitch and let the drawing be as wide as it needs to be.
+ * stretched whatever it was given to fill the frame. A chart keeps its pitch
+ * and draws narrower than the frame when it has little to say.
  */
 const SLOT_MAX = 20;
 /**
@@ -43,13 +42,20 @@ const SLOT_MAX = 20;
  * The cap above was the only bound, so the slot was still the frame divided
  * by the count once the count grew: two hundred minute candles came out at a
  * 3.6px pitch with a 2px body, which reads as a dashed rule along the chart
- * rather than as two hundred candles. Past this the drawing is wider than the
- * frame and the frame scrolls, which is what its overflow is for and what the
- * cap's own reasoning already said charts do.
+ * rather than as two hundred candles.
+ *
+ * What gives way past this point is the number of candles in view, not the
+ * width of the figure. Drawing wider than the frame and scrolling was the
+ * earlier answer, and it put the newest candles — the ones a reader opened
+ * the chart for — behind a scrollbar; inside a dialog it dragged the dialog's
+ * own text out of the box with it, which is a horizontal scrollbar across a
+ * screen that should not have one.
  */
 const SLOT_MIN = 9;
 /** Below this the figure is too narrow to read as a chart at all. */
 const MIN_WIDTH = 260;
+/** The frame's width until it has been measured: server render, and tests. */
+const ASSUMED_WIDTH = 720;
 const PADDING_Y = 16;
 const SCALE = 100_000n;
 const INTEGER = /^-?\d+$/;
@@ -143,28 +149,36 @@ export function CandleChart({
   /** How to write a bucket's start under the axis. Raw, if not given. */
   readonly label?: (at: string) => string;
 }) {
-  const frame = useRef<HTMLDivElement | null>(null);
-  // Whether the newest candle is the one in view. A live tick rewrites the
-  // series once a second, and scrolling back to the right on each of those
-  // would take the chart out of the hands of a reader looking at something
-  // older — so the chart follows only while they are already at that end.
-  const pinned = useRef(true);
+  const ordered = candles.filter(
+    (candle) =>
+      INTEGER.test(candle.open_price) &&
+      INTEGER.test(candle.high_price) &&
+      INTEGER.test(candle.low_price) &&
+      INTEGER.test(candle.close_price),
+  );
+  const drawable = ordered.length > 0;
 
+  const frame = useRef<HTMLDivElement | null>(null);
+  // The frame's width in CSS pixels. Measured rather than assumed: how many
+  // candles this chart can hold is a question about the box it was handed,
+  // and that box is a dialog on a phone as often as a column on a desktop.
+  const [frameWidth, setFrameWidth] = useState(0);
+
+  // `drawable` is in the dependencies because the frame is not in the tree
+  // until there is something to draw in it: a chart whose first candles
+  // arrive after it mounted has to be measured when they do.
   useEffect(() => {
     const element = frame.current;
-    if (element && pinned.current) element.scrollLeft = element.scrollWidth;
-  }, [candles]);
+    if (!element) return;
+    const measure = (): void => setFrameWidth(element.clientWidth);
+    measure();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [drawable]);
 
-  const ordered = candles
-    .filter(
-      (candle) =>
-        INTEGER.test(candle.open_price) &&
-        INTEGER.test(candle.high_price) &&
-        INTEGER.test(candle.low_price) &&
-        INTEGER.test(candle.close_price),
-    );
-
-  if (ordered.length === 0) {
+  if (!drawable) {
     return (
       <p className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
         아직 그릴 일봉이 없어요. 하루가 지나면 첫 봉이 그려집니다.
@@ -172,9 +186,17 @@ export function CandleChart({
     );
   }
 
-  let min = BigInt(ordered[0]!.low_price);
-  let max = BigInt(ordered[0]!.high_price);
-  for (const candle of ordered) {
+  // What fits: the newest candles, at a pitch that stays readable. The pitch
+  // is bounded at both ends as before, and past the tighter of the two it is
+  // the count that gives way rather than the figure growing past its frame.
+  const available = Math.max(MIN_WIDTH, frameWidth || ASSUMED_WIDTH);
+  const capacity = Math.max(1, Math.floor(available / SLOT_MIN));
+  const shown =
+    ordered.length > capacity ? ordered.slice(ordered.length - capacity) : ordered;
+
+  let min = BigInt(shown[0]!.low_price);
+  let max = BigInt(shown[0]!.high_price);
+  for (const candle of shown) {
     const low = BigInt(candle.low_price);
     const high = BigInt(candle.high_price);
     if (low < min) min = low;
@@ -198,22 +220,21 @@ export function CandleChart({
   const write = label ?? ((at: string) => at);
 
   // One slot per candle, with the body taking a little over half of it so
-  // neighbouring candles stay separate at any count. The pitch is bounded at
-  // both ends: a handful of candles cluster instead of being spread across
-  // the whole width, and a great many of them make the drawing wider than the
-  // frame instead of thinning to a hairline. The frame scrolls in the second
-  // case, and the effect below starts it at the newest candle.
-  const slot = Math.min(Math.max(WIDTH / ordered.length, SLOT_MIN), SLOT_MAX);
-  const drawn = slot * ordered.length;
-  const chartWidth = Math.max(MIN_WIDTH, drawn);
+  // neighbouring candles stay separate at any count. A handful of candles
+  // cluster at the cap instead of being spread across the whole width; a
+  // great many sit at the floor, and the ones that no longer fit are the
+  // oldest, which the axis under the figure names.
+  const slot = Math.min(Math.max(available / shown.length, SLOT_MIN), SLOT_MAX);
+  const drawn = slot * shown.length;
+  const chartWidth = available;
   // Centred, so a short series sits in the middle of its figure rather than
   // hugging the left edge with empty space after it.
   const offset = (chartWidth - drawn) / 2;
   const body = Math.max(1.5, Math.min(14, slot * 0.6));
 
-  // The rules run the full drawn width inside the scrolling frame; their
-  // figures sit in a column beside it that does not scroll, so a reader deep
-  // in a long series still has an axis to read the candles against.
+  // The rules run the full width of the drawing and their figures sit in a
+  // column beside it, because a number written over a candle is a number the
+  // reader has to separate from the candle first.
   const ticks = axisTicks(min, max, logarithmic);
   const labels = ticks.map((tick) => ({ y: y(tick), text: groupDigits(tick.toString()) }));
   const axisWidth = 10 + 6.5 * Math.max(...labels.map((label) => label.text.length));
@@ -221,24 +242,18 @@ export function CandleChart({
   return (
     <figure className="grid gap-2">
       <div className="flex items-start">
-      <div
-        ref={frame}
-        className="min-w-0 flex-1 overflow-x-auto"
-        onScroll={(event) => {
-          const element = event.currentTarget;
-          pinned.current = element.scrollWidth - element.clientWidth - element.scrollLeft < 4;
-        }}
-      >
+      <div ref={frame} className="min-w-0 flex-1">
         <svg
           viewBox={`0 0 ${chartWidth} ${HEIGHT}`}
-          // Sized in pixels and deliberately not capped at the container's
-          // width: capping it scaled the whole drawing back down, which is
-          // the squeeze the pitch floor exists to prevent. A drawing wider
-          // than the frame scrolls; a shorter one simply draws narrower.
-          style={{ width: chartWidth }}
-          className="h-[260px]"
+          // The drawing is built at the frame's own width, so this is one to
+          // one and nothing is squeezed. It stays a percentage rather than
+          // that measurement in pixels for the frame between a resize and
+          // the observer hearing about it, and for the first paint of a
+          // frame that has never been measured.
+          preserveAspectRatio="none"
+          className="h-[260px] w-full"
           role="img"
-          aria-label={`캔들 ${ordered.length}개. 최고 ${groupDigits(max.toString())}, 최저 ${groupDigits(min.toString())}.${
+          aria-label={`캔들 ${shown.length}개. 최고 ${groupDigits(max.toString())}, 최저 ${groupDigits(min.toString())}.${
             logarithmic ? ' 세로 눈금은 로그입니다.' : ''
           }`}
         >
@@ -254,7 +269,7 @@ export function CandleChart({
               strokeDasharray="3 4"
             />
           ))}
-          {ordered.map((candle, index) => {
+          {shown.map((candle, index) => {
             const open = BigInt(candle.open_price);
             const close = BigInt(candle.close_price);
             const down = close < open;
@@ -307,14 +322,14 @@ export function CandleChart({
       </svg>
       </div>
       <figcaption className="flex justify-between text-[11px] text-muted-foreground">
-        <span>{write(ordered[0]?.at ?? '')}</span>
+        <span>{write(shown[0]?.at ?? '')}</span>
         <span className="tabular">
           최저 {groupDigits(min.toString())} · 최고 {groupDigits(max.toString())}
           {/* Said outright rather than left to be inferred. A reader who
               takes a log axis for a linear one misreads every height on it. */}
           {logarithmic && <span className="ml-1">· 로그 눈금</span>}
         </span>
-        <span>{write(ordered[ordered.length - 1]?.at ?? '')}</span>
+        <span>{write(shown[shown.length - 1]?.at ?? '')}</span>
       </figcaption>
     </figure>
   );

@@ -237,11 +237,11 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <div className="flex items-start justify-between gap-3 text-xs text-muted-foreground">
             <span>
               조회 조건에 맞는 회원 <strong className="text-foreground">{filtered.length}명</strong>
             </span>
-            <span className="text-[0.72rem]">
+            <span className="hidden text-right text-[0.72rem] sm:block">
               순자산 = 지갑 현금 + 은행 예금 + 활성 국채 + 주식 실시간 평가액
             </span>
           </div>
@@ -253,9 +253,9 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
               <p className="text-xs">검색어를 수정하거나 상태 필터를 변경해 보세요.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-border/70">
-              <Table>
-                <TableHeader className="bg-muted/30">
+            <div className="rounded-xl border border-border/70 md:overflow-x-auto">
+              <Table className="block md:table">
+                <TableHeader className="hidden bg-muted/30 md:table-header-group">
                   <TableRow>
                     <TableHead className="w-16 text-center font-bold">순위</TableHead>
                     <TableHead>회원 정보</TableHead>
@@ -265,7 +265,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                     <TableHead className="text-right">관리 조치</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
+                <TableBody className="block divide-y md:table-row-group md:divide-y-0">
                   {filtered.map((user, index) => {
                     const restricted = user.restricted_at !== null;
                     const rank = user.wealth_rank ?? index + 1;
@@ -276,14 +276,14 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                     const stock = Number(user.stock_eval ?? 0);
 
                     return (
-                      <TableRow key={user.user_id} className="hover:bg-muted/20 transition-colors">
+                      <TableRow key={user.user_id} className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-2 p-4 hover:bg-muted/20 transition-colors md:table-row md:p-0">
                         {/* 부자 순위 뱃지 */}
-                        <TableCell className="text-center">
+                        <TableCell className="row-span-2 p-0 text-center md:table-cell md:p-2">
                           <RankBadge rank={rank} />
                         </TableCell>
 
                         {/* 회원 프로필 및 식별자 */}
-                        <TableCell>
+                        <TableCell className="min-w-0 p-0 md:table-cell md:p-2">
                           <div className="flex flex-col">
                             <Link
                               href={`/admin/users/${encodeURIComponent(user.user_id)}`}
@@ -292,14 +292,14 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                               {user.display_name}
                               {rank === 1 && <Crown className="size-3.5 text-amber-500" />}
                             </Link>
-                            <code className="font-mono text-[0.68rem] text-muted-foreground">
+                            <code className="truncate font-mono text-[0.68rem] text-muted-foreground">
                               {user.user_id}
                             </code>
                           </div>
                         </TableCell>
 
                         {/* 총 순자산 */}
-                        <TableCell className="text-right">
+                        <TableCell className="col-span-2 p-0 text-left md:table-cell md:p-2 md:text-right">
                           <span className="font-mono font-bold text-base text-primary">
                             {netWorth.toLocaleString()}{' '}
                             <span className="text-xs font-normal text-muted-foreground">WLD</span>
@@ -307,7 +307,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                         </TableCell>
 
                         {/* 자산 세부 구성 칩들 */}
-                        <TableCell>
+                        <TableCell className="col-span-2 p-0 md:table-cell md:p-2">
                           <div className="flex flex-wrap gap-1.5 max-w-sm">
                             <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title="지갑 현금">
                               <Wallet className="size-3 text-emerald-500" />
@@ -335,7 +335,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                         </TableCell>
 
                         {/* 이용 상태 및 제재 사유 */}
-                        <TableCell className="text-center">
+                        <TableCell className="col-span-1 p-0 text-left md:table-cell md:p-2 md:text-center">
                           <Badge variant={restricted ? 'destructive' : 'secondary'} className="text-[0.7rem]">
                             {restricted ? '제한됨' : '정상'}
                           </Badge>
@@ -347,8 +347,8 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                         </TableCell>
 
                         {/* 관리 액션 */}
-                        <TableCell className="text-right">
-                          <Button asChild variant="outline" size="xs" className="h-8 text-xs">
+                        <TableCell className="p-0 text-right md:table-cell md:p-2">
+                          <Button asChild variant="outline" size="xs" className="min-h-11 text-xs md:min-h-8">
                             <Link href={`/admin/users/${encodeURIComponent(user.user_id)}`}>
                               상세·로그 <ArrowRight className="size-3.5" />
                             </Link>
