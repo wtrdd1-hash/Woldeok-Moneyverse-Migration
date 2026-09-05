@@ -43,10 +43,57 @@ supplied() { if [ -n "${2:-}" ]; then set_to "$1" "$2"; else put "$1" ''; fi; }
 # for the internal token and rejects anything shorter at startup.
 secret() { head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n'; }
 
+# Encryption was originally added with INTERNAL_API_TOKEN as an implicit key.
+# A deployment directory replacement then changed that unrelated token and
+# made existing identity names unreadable. Recover the old key only when a
+# ciphertext from this database proves that a named, host-local container has
+# the matching token. Neither the candidate nor the plaintext is printed.
+adopt_data_key_from="${ADOPT_DATA_KEY_FROM:-}"
+if ! has_value DATA_ENCRYPTION_KEY \
+  && [ -n "$adopt_data_key_from" ] \
+  && docker inspect "$adopt_data_key_from" >/dev/null 2>&1 \
+  && docker inspect "${STACK:-wdmv}-db" >/dev/null 2>&1; then
+  encrypted_sample="$(docker exec --user postgres "${STACK:-wdmv}-db" \
+    psql -X -qAt -U moneyverse_migrator -d "${DB_NAME:-moneyverse_migration}" \
+    -c "SELECT display_name FROM public.identities WHERE display_name LIKE 'enc:v1:rnd:%' LIMIT 1" \
+    2>/dev/null || true)"
+  if [ -n "$encrypted_sample" ] && printf '%s' "$encrypted_sample" | \
+    docker exec -i "$adopt_data_key_from" node -e '
+      const { createDecipheriv, createHash } = require("node:crypto");
+      let value = "";
+      process.stdin.setEncoding("utf8");
+      process.stdin.on("data", chunk => { value += chunk; });
+      process.stdin.on("end", () => {
+        try {
+          const parts = value.split(":");
+          const key = createHash("sha256").update(process.env.DATA_ENCRYPTION_KEY || process.env.INTERNAL_API_TOKEN || process.env.APP_SECRET || "").digest();
+          const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(parts[3], "hex"));
+          decipher.setAuthTag(Buffer.from(parts[4], "hex"));
+          const plain = Buffer.concat([decipher.update(Buffer.from(parts[5], "hex")), decipher.final()]).toString("utf8");
+          process.exit(plain.length > 0 && !plain.includes("\u0000") ? 0 : 1);
+        } catch { process.exit(1); }
+      });
+    '; then
+    recovered_key="$(docker inspect "$adopt_data_key_from" \
+      --format '{{range .Config.Env}}{{println .}}{{end}}' \
+      | grep -E '^(DATA_ENCRYPTION_KEY|INTERNAL_API_TOKEN|APP_SECRET)=' \
+      | head -1 | cut -d= -f2- || true)"
+    if [ -n "$recovered_key" ]; then
+      put DATA_ENCRYPTION_KEY "$recovered_key"
+      echo "adopted verified data encryption key from $adopt_data_key_from"
+    fi
+  fi
+fi
+
 put DB_NAME "${DB_NAME:-moneyverse_migration}"
 put POSTGRES_PASSWORD "$(secret)"
 put APP_DB_PASSWORD "$(secret)"
 put INTERNAL_API_TOKEN "$(secret)"
+# Independent and durable: changing an API token must never make stored OAuth
+# identifiers or display names unreadable again. On the first upgrade, retain
+# the historical implicit key (INTERNAL_API_TOKEN); after this line has written
+# DATA_ENCRYPTION_KEY it survives independently on every later deployment.
+put DATA_ENCRYPTION_KEY "$(grep -E '^INTERNAL_API_TOKEN=' .env | tail -1 | cut -d= -f2-)"
 # The status collector's own credential. Its role may execute exactly one
 # function and nothing else, so this is not a second copy of the application's
 # access — see 050-status-collector.sql.

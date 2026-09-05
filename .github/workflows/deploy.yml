@@ -254,6 +254,7 @@ jobs:
             "REQUIRE_BACKUP='${{ steps.target.outputs.require_backup }}'" \
             "BOOTSTRAP_DISCORD_ADMIN_IDS='${{ steps.target.outputs.admin_ids }}'" \
             "ADOPT_FROM='${{ vars.ADOPT_FROM }}'" \
+            "ADOPT_DATA_KEY_FROM='${{ inputs.environment == 'production' && 'wdmv-backend' || '' }}'" \
             "DISCORD_APPLICATION_ID='${{ vars.DISCORD_APPLICATION_ID }}'" \
             "DISCORD_BOT_TOKEN='${{ secrets.DISCORD_BOT_TOKEN }}'" \
             "DISCORD_INTERACTIONS_ENABLED='${{ vars.DISCORD_INTERACTIONS_ENABLED }}'" \

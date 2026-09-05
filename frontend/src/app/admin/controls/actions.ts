@@ -50,6 +50,7 @@ export async function setFeatureSwitch(
   const state = text(formData.get('state'));
   const reason = text(formData.get('reason'));
   const code = text(formData.get('code'));
+  const requiresCode = featureKey !== 'economy_auto_policy';
 
   if (featureKey === '') return { status: 'error', message: '기능을 확인할 수 없어요.' };
   if (!['enabled', 'paused', 'safe_mode', 'disabled'].includes(state)) {
@@ -57,11 +58,13 @@ export async function setFeatureSwitch(
   }
   const badReason = checkReason(reason);
   if (badReason) return badReason;
-  const badCode = checkCode(code);
-  if (badCode) return badCode;
+  if (requiresCode) {
+    const badCode = checkCode(code);
+    if (badCode) return badCode;
+  }
 
   try {
-    await spendSecondFactorCode(code);
+    if (requiresCode) await spendSecondFactorCode(code);
     const result = await mutate<{ previousState: string; nextState: string }>(
       `/api/v1/admin/controls/feature-switches/${encodeURIComponent(featureKey)}`,
       { method: 'PUT', body: { state, reason, idempotencyKey: idempotencyKey() } },

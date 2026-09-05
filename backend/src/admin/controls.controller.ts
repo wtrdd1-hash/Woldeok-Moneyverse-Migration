@@ -187,6 +187,23 @@ export class AdminControlsController {
     return { featureSwitches, policies, roles };
   }
 
+  /**
+   * The automatic policy scheduler is an operational enable/pause control,
+   * not a direct balance mutation. The operator explicitly requested that
+   * this one switch keep reauthentication, reason and audit logging but not
+   * consume a TOTP code. This concrete route must stay above the parameter
+   * route so every other feature switch retains SecondFactorGuard.
+   */
+  @Put('feature-switches/economy_auto_policy')
+  @UseGuards(CsrfGuard, ReauthGuard)
+  @ApiOperation({ summary: 'Enable or pause the automatic economy policy without a TOTP code' })
+  setAutoPolicyFeatureSwitch(
+    @Req() request: RequestWithSession,
+    @Body() body: FeatureSwitchDto,
+  ) {
+    return this.changeFeatureSwitch(request, 'economy_auto_policy', body);
+  }
+
   @Put('feature-switches/:featureKey')
   @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
   @ApiOperation({ summary: 'Enable, pause, put into safe mode or disable a feature' })
@@ -194,6 +211,14 @@ export class AdminControlsController {
     @Req() request: RequestWithSession,
     @Param('featureKey') featureKey: string,
     @Body() body: FeatureSwitchDto,
+  ) {
+    return this.changeFeatureSwitch(request, featureKey, body);
+  }
+
+  private changeFeatureSwitch(
+    request: RequestWithSession,
+    featureKey: string,
+    body: FeatureSwitchDto,
   ) {
     return this.guarded(
       () =>
