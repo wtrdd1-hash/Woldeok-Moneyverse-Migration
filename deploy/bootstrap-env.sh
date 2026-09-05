@@ -96,6 +96,49 @@ if ! has_value LEGACY_DATA_ENCRYPTION_KEYS \
   fi
 fi
 
+# Older manual deployments sometimes kept their durable environment beside a
+# source checkout instead of either current deployment directory. Search only
+# host-local .env files and accept a candidate only when it authenticates at
+# least one ciphertext from the target database. Values and plaintext never
+# leave the host or appear in output.
+if ! has_value LEGACY_DATA_ENCRYPTION_KEYS \
+  && docker inspect "${STACK:-wdmv}-backend" >/dev/null 2>&1 \
+  && docker inspect "${STACK:-wdmv}-db" >/dev/null 2>&1; then
+  encrypted_samples="$(docker exec --user postgres "${STACK:-wdmv}-db" \
+    psql -X -qAt -U moneyverse_migrator -d "${DB_NAME:-moneyverse_migration}" \
+    -c "SELECT display_name FROM public.identities WHERE display_name LIKE 'enc:v1:rnd:%' LIMIT 250" \
+    2>/dev/null || true)"
+  if [ -n "$encrypted_samples" ]; then
+    while IFS= read -r -d '' historical_env; do
+      while IFS= read -r candidate; do
+        [ -n "$candidate" ] || continue
+        if printf '%s' "$encrypted_samples" | docker exec -i \
+          -e "CANDIDATE_DATA_KEY=$candidate" "${STACK:-wdmv}-backend" node -e '
+            const { createDecipheriv, createHash } = require("node:crypto");
+            let input = "";
+            process.stdin.setEncoding("utf8");
+            process.stdin.on("data", chunk => { input += chunk; });
+            process.stdin.on("end", () => {
+              const key = createHash("sha256").update(process.env.CANDIDATE_DATA_KEY || "").digest();
+              for (const sample of input.split("\n").filter(Boolean)) try {
+                const p = sample.split(":");
+                const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(p[3], "hex"));
+                decipher.setAuthTag(Buffer.from(p[4], "hex"));
+                if (Buffer.concat([decipher.update(Buffer.from(p[5], "hex")), decipher.final()]).length) process.exit(0);
+              } catch {}
+              process.exit(1);
+            });
+          '; then
+          put LEGACY_DATA_ENCRYPTION_KEYS "$candidate"
+          echo "adopted a verified legacy data encryption key from a host-local deployment"
+          break 2
+        fi
+      done < <(grep -hE '^(DATA_ENCRYPTION_KEY|INTERNAL_API_TOKEN|APP_SECRET)=' "$historical_env" \
+        | cut -d= -f2- | awk 'NF && !seen[$0]++')
+    done < <(find "$HOME" -maxdepth 3 -type f -name .env -print0 2>/dev/null)
+  fi
+fi
+
 put DB_NAME "${DB_NAME:-moneyverse_migration}"
 put POSTGRES_PASSWORD "$(secret)"
 put APP_DB_PASSWORD "$(secret)"

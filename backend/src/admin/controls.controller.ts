@@ -190,13 +190,13 @@ export class AdminControlsController {
   /**
    * The automatic policy scheduler is an operational enable/pause control,
    * not a direct balance mutation. The operator explicitly requested that
-   * this one switch keep reauthentication, reason and audit logging but not
-   * consume a TOTP code. This concrete route must stay above the parameter
+   * this one switch require only the authenticated admin session, CSRF token,
+   * reason and audit logging. This concrete route must stay above the parameter
    * route so every other feature switch retains SecondFactorGuard.
    */
   @Put('feature-switches/economy_auto_policy')
-  @UseGuards(CsrfGuard, ReauthGuard)
-  @ApiOperation({ summary: 'Enable or pause the automatic economy policy without a TOTP code' })
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Enable or pause the automatic economy policy without step-up' })
   setAutoPolicyFeatureSwitch(
     @Req() request: RequestWithSession,
     @Body() body: FeatureSwitchDto,

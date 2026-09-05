@@ -15,10 +15,10 @@ function guardsOn(method: keyof AdminControlsController): unknown[] {
 }
 
 describe('AdminControlsController feature switch guards', () => {
-  it('keeps the automatic economy switch behind CSRF and fresh reauthentication without TOTP', () => {
+  it('keeps the automatic economy switch behind CSRF without either step-up', () => {
     const guards = guardsOn('setAutoPolicyFeatureSwitch');
     expect(guards).toContain(CsrfGuard);
-    expect(guards).toContain(ReauthGuard);
+    expect(guards).not.toContain(ReauthGuard);
     expect(guards).not.toContain(SecondFactorGuard);
   });
 
