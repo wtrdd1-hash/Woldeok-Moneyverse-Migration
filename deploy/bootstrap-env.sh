@@ -226,7 +226,7 @@ echo "--- .env ---"
 while IFS='=' read -r key value; do
   case "$key" in
     ''|\#*) continue ;;
-    *SECRET*|*PASSWORD*|*TOKEN*|*CLIENT_ID*)
+    *SECRET*|*PASSWORD*|*TOKEN*|*CLIENT_ID*|*KEY*|*PEPPER*)
       if [ -n "$value" ]; then echo "$key=<set>"; else echo "$key=<empty>"; fi ;;
     *) echo "$key=$value" ;;
   esac

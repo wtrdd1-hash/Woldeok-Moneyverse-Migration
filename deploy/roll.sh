@@ -42,6 +42,43 @@ trap 'docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
 
 export STACK="${STACK:-wdmv}"
 
+# A persisted PostgreSQL volume does not change role passwords when the
+# container's environment changes. If .env was replaced or repaired, the db
+# container can therefore be healthy while every TCP login used by migrate,
+# seed and backup is refused. Detect that exact drift before the mandatory
+# backup and reconcile only the two bootstrap roles through PostgreSQL's local
+# Unix socket. That socket is reachable only inside the db container and the
+# official image initialises local connections as trusted for its postgres OS
+# user; no old database password or network bypass is involved.
+reconcile_bootstrap_credentials() {
+  local migrator_password app_password
+  migrator_password="$(grep -E '^POSTGRES_PASSWORD=' .env | tail -1 | cut -d= -f2-)"
+  app_password="$(grep -E '^APP_DB_PASSWORD=' .env | tail -1 | cut -d= -f2-)"
+  [ -n "$migrator_password" ] && [ -n "$app_password" ] || {
+    echo "cannot reconcile database credentials: .env is missing a bootstrap password" >&2
+    return 1
+  }
+
+  # Passwords travel on stdin, not in argv or output. The shell consumes the
+  # first two lines; psql receives only the fixed program below and imports the
+  # values from its private process environment.
+  {
+    printf '%s\n%s\n' "$migrator_password" "$app_password"
+    cat <<'SQL'
+\getenv migrator_password MONEYVERSE_MIGRATOR_PASSWORD
+\getenv app_password MONEYVERSE_APP_PASSWORD
+ALTER ROLE moneyverse_migrator LOGIN PASSWORD :'migrator_password';
+ALTER ROLE moneyverse_app LOGIN PASSWORD :'app_password';
+SQL
+  } | docker compose exec -T --user postgres db sh -eu -c '
+    IFS= read -r MONEYVERSE_MIGRATOR_PASSWORD
+    IFS= read -r MONEYVERSE_APP_PASSWORD
+    export MONEYVERSE_MIGRATOR_PASSWORD MONEYVERSE_APP_PASSWORD
+    exec psql -X -v ON_ERROR_STOP=1 -U moneyverse_migrator -d "$POSTGRES_DB"
+  ' >/dev/null
+  echo "database bootstrap credentials reconciled"
+}
+
 # The photo store's directory on the second disk, made and given away before
 # anything mounts it.
 #
@@ -67,6 +104,14 @@ fi
 # A host with no database has nothing to dump, and a first deploy must not
 # fail for the absence of a backup that could not have existed.
 if [ -n "$(docker compose ps -q db 2>/dev/null || true)" ]; then
+  # Probe over the same TCP path migrate uses. A local-socket repair is only
+  # attempted when that credential is actually stale.
+  if ! docker compose run --rm -T --entrypoint psql migrate \
+    -X -qAt -v ON_ERROR_STOP=1 -c 'SELECT 1' >/dev/null 2>&1; then
+    echo "database migrator credential drift detected"
+    reconcile_bootstrap_credentials
+  fi
+
   # The dump runs as `moneyverse_backup`, whose login `seed` grants -- and
   # `seed` runs after `migrate`, which is the thing this dump has to precede.
   # So that one grant is done first, on its own. It is idempotent, and a
