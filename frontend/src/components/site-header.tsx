@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronDown, LogOut, Menu } from 'lucide-react';
+import { ChevronDown, LogIn, LogOut, Menu } from 'lucide-react';
 import { logout } from '@/app/actions';
 import { Brand } from '@/components/brand';
 import { ThemeMenu, ThemePanel } from '@/components/theme-controls';
@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Sheet,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
@@ -78,7 +79,16 @@ export function SiteHeader() {
 
   // The sheet stays flat: a drawer has the room, and a menu inside a menu is
   // worse than a long list.
-  const admin = isAdmin ? ADMIN_NAV : [];
+  // The rail is discovery, never the permission boundary. A session can be
+  // valid while the lightweight viewer lookup temporarily has no role list;
+  // hiding the only route into the console then strands a real operator on a
+  // phone. The admin page asks the protected API again and redirects a member
+  // without a role, so a signed-in reader may safely get one entry point.
+  const mobileAdmin: readonly NavEntry[] = isAdmin
+    ? ADMIN_NAV
+    : viewer?.signedIn
+      ? [{ href: '/admin', label: '관리자 페이지' }]
+      : [];
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/94 backdrop-blur-lg">
@@ -117,32 +127,39 @@ export function SiteHeader() {
               <SheetHeader>
                 <SheetTitle className="text-left">{locale === 'en' ? 'Menu' : '메뉴'}</SheetTitle>
               </SheetHeader>
-              <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="grid gap-1 overflow-y-auto px-3 pb-8">
+              <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="grid min-h-0 flex-1 gap-1 overflow-y-auto px-3 pb-4">
                 <Group title={locale === 'en' ? 'Public' : '공개'} entries={PUBLIC_NAV} pathname={pathname} locale={locale} />
                 {viewer?.signedIn && (
                   <Group title={locale === 'en' ? 'Member' : '회원'} entries={MEMBER_NAV} pathname={pathname} locale={locale} />
                 )}
-                {admin.length > 0 && <Group title={locale === 'en' ? 'Admin' : '운영'} entries={admin} pathname={pathname} locale={locale} />}
-                {/* Signing out lives here on a phone. Four controls beside the
-                    wordmark left nothing room to breathe, and this is the one
-                    of them nobody reaches for in a hurry. */}
+                {mobileAdmin.length > 0 && <Group title={locale === 'en' ? 'Admin' : '운영'} entries={mobileAdmin} pathname={pathname} locale={locale} />}
                 <div className="px-3 py-2 sm:hidden">
                   <ThemePanel />
-                  <Separator className="mt-5" />
                 </div>
-                {viewer?.signedIn && (
-                  <form action={logout} className="px-3 pt-2 sm:hidden">
+              </nav>
+              <SheetFooter className="border-t bg-background/95 pb-[max(1rem,env(safe-area-inset-bottom))] sm:hidden">
+                {!viewer ? (
+                  <Skeleton className="h-11 w-full rounded-[10px]" />
+                ) : viewer.signedIn ? (
+                  <form action={logout}>
                     <Button
                       type="submit"
                       variant="outline"
-                      className="min-h-11 w-full justify-start font-bold"
+                      className="min-h-11 w-full font-bold"
                     >
                       <LogOut />
                       {locale === 'en' ? 'Sign out' : '로그아웃'}
                     </Button>
                   </form>
+                ) : (
+                  <Button asChild className="min-h-11 w-full font-bold">
+                    <Link href="/login">
+                      <LogIn />
+                      {locale === 'en' ? 'Sign in' : '로그인'}
+                    </Link>
+                  </Button>
                 )}
-              </nav>
+              </SheetFooter>
             </SheetContent>
           </Sheet>
         </div>
