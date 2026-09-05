@@ -58,26 +58,33 @@ if docker inspect "${STACK:-wdmv}-backend" >/dev/null 2>&1 \
     recovered_keys="$(mktemp)"
     chmod 600 "$recovered_keys"
     trap 'rm -f "$recovered_keys"' EXIT
+    candidate_decrypts() {
+      printf '%s' "$encrypted_samples" | docker exec -i \
+        -e "CANDIDATE_DATA_KEY=$1" "${STACK:-wdmv}-backend" node -e '
+          const { createDecipheriv, createHash } = require("node:crypto");
+          let input = "";
+          process.stdin.setEncoding("utf8");
+          process.stdin.on("data", chunk => { input += chunk; });
+          process.stdin.on("end", () => {
+            const key = createHash("sha256").update(process.env.CANDIDATE_DATA_KEY || "").digest();
+            for (const sample of input.split("\n").filter(Boolean)) try {
+              const p = sample.split(":");
+              const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(p[3], "hex"));
+              decipher.setAuthTag(Buffer.from(p[4], "hex"));
+              if (Buffer.concat([decipher.update(Buffer.from(p[5], "hex")), decipher.final()]).length) process.exit(0);
+            } catch {}
+            process.exit(1);
+          });
+        '
+    }
+    historical_default_key='moneyverse-default-vault-secure-encryption-key-32b'
+    if candidate_decrypts "$historical_default_key"; then
+      printf '%s\n' "$historical_default_key" >> "$recovered_keys"
+    fi
     while IFS= read -r -d '' historical_env; do
       while IFS= read -r candidate; do
         [ -n "$candidate" ] || continue
-        if printf '%s' "$encrypted_samples" | docker exec -i \
-          -e "CANDIDATE_DATA_KEY=$candidate" "${STACK:-wdmv}-backend" node -e '
-            const { createDecipheriv, createHash } = require("node:crypto");
-            let input = "";
-            process.stdin.setEncoding("utf8");
-            process.stdin.on("data", chunk => { input += chunk; });
-            process.stdin.on("end", () => {
-              const key = createHash("sha256").update(process.env.CANDIDATE_DATA_KEY || "").digest();
-              for (const sample of input.split("\n").filter(Boolean)) try {
-                const p = sample.split(":");
-                const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(p[3], "hex"));
-                decipher.setAuthTag(Buffer.from(p[4], "hex"));
-                if (Buffer.concat([decipher.update(Buffer.from(p[5], "hex")), decipher.final()]).length) process.exit(0);
-              } catch {}
-              process.exit(1);
-            });
-          '; then
+        if candidate_decrypts "$candidate"; then
           printf '%s\n' "$candidate" >> "$recovered_keys"
         fi
       done < <(grep -hE '^(DATA_ENCRYPTION_KEY|LEGACY_DATA_ENCRYPTION_KEYS|INTERNAL_API_TOKEN|APP_SECRET)=' "$historical_env" \
