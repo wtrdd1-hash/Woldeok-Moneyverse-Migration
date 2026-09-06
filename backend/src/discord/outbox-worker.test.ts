@@ -86,6 +86,9 @@ describe('the Discord outbox message', () => {
     expect(messageFor({ id: EVENT_ID, event_type: 'bank.loan.repaid' })).toBe(
       `대출이 상환되었습니다.\n영수증: ${EVENT_ID}`,
     );
+    expect(messageFor({ id: EVENT_ID, event_type: 'activity.admin_request' })).toBe(
+      `관리자 페이지 요청이 기록되었습니다.\n영수증: ${EVENT_ID}`,
+    );
   });
 
   // An event type this deployment has no headline for is still announced as

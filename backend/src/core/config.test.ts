@@ -177,7 +177,10 @@ describe('loadConfig: the Discord outbox', () => {
   it('runs with a token, an application and a channel', () => {
     const outbox = loadConfig({ ...MINIMAL, ...OUTBOX }).discordOutbox;
     expect(outbox.enabled).toBe(true);
-    expect(outbox.enabled === true && outbox.channels).toEqual({ default: '9876543210987654' });
+    expect(outbox.enabled === true && outbox.channels).toEqual({
+      default: '9876543210987654',
+      logs: '9876543210987654',
+    });
     expect(outbox.enabled === true && outbox.intervalMs).toBe(5_000);
   });
 
@@ -215,6 +218,7 @@ describe('loadConfig: the Discord outbox', () => {
       default: '9876543210987654',
       alerts: '1111111111111111',
       ops: '2222222222222222',
+      logs: '9876543210987654',
     });
 
     const withTypo = loadConfig({

@@ -46,20 +46,20 @@ export function PrivacyDocument() {
       <div className="overflow-x-auto rounded-lg border" tabIndex={0} aria-label="개인정보 처리 항목 표는 가로로 스크롤할 수 있습니다.">
       <table>
       <thead>
-      <tr><th scope="col">구분</th><th scope="col">처리 항목</th><th scope="col">처리 목적</th><th scope="col">테스트 기준 보유 기간</th></tr>
+      <tr><th scope="col">구분</th><th scope="col">처리 항목</th><th scope="col">처리 목적</th><th scope="col">보유 기간</th></tr>
       </thead>
       <tbody>
       <tr><th scope="row">OAuth 로그인</th><td>로그인 제공자, 제공자 고유 식별자, 표시명</td><td>로그인, 내부 계정 생성·연결, 중복 연결 방지, 계정 보호</td><td>탈퇴 처리 후 30일 이내 삭제</td></tr>
       <tr><th scope="row">내부 계정·가상경제</th><td>내부 사용자 ID, 계정 상태, 지갑·잔액, 송금·보상·구매·거래 기록</td><td>가상경제 제공, 거래 영수증, 부정 이용 방지, 원장 대사</td><td>탈퇴 후 30일 이내 식별 연결 제거. 대사용 잔여 기록은 재식별 불가능한 형태로 최대 1년 보관 후 익명화 또는 삭제</td></tr>
       <tr><th scope="row">정책 확인</th><td>문서 종류·버전·해시, 확인·동의 시각, 만 14세 이상 확인</td><td>동의 증명, 정책 버전 관리</td><td>탈퇴 후 3년</td></tr>
-      <tr><th scope="row">보안·감사</th><td>내부 사용자 ID, 요청 ID, 작업 종류·결과·시각, 권한 변경·관리 작업 기록. 운영 콘솔 경로(/admin) 요청에 한하여 접속 IP 주소, User-Agent에서 파생한 브라우저·운영체제 구분과 되돌릴 수 없는 해시, 세션 식별자의 단방향 해시, HTTP 메서드·경로, 추적 ID, 응답 상태와 처리시간</td><td>보안사고 대응, 권한 통제, 부정 이용 조사</td><td>인증·권한 거부 기록 90일, 관리자·경제 감사 기록 1년</td></tr>
+      <tr><th scope="row">접속·활동·보안 감사</th><td>내부 사용자 ID, 접속·요청 시각, 페이지·API 경로, HTTP 메서드, 응답 상태, 처리시간, 요청 ID, 버튼 클릭·페이지 체류 이벤트, 접속 IP 주소 또는 축약 네트워크, 브라우저·운영체제 정보. 쿠키·세션 토큰·요청 본문과 URL 검색값은 기록하지 않음</td><td>서비스 안정성 확인, 장애·보안사고 대응, 권한 통제, 부정 이용 조사</td><td>일반 접속·활동 및 인증·권한 거부 기록 90일, 관리자·경제 감사 기록 1년</td></tr>
       <tr><th scope="row">실시간 로비</th><td>이용자가 전송한 메시지</td><td>접속 중인 이용자에게 실시간 전달</td><td>서버 DB에 저장하지 않으며 연결 종료 시 처리 종료</td></tr>
       <tr><th scope="row">프로필·갤러리 사진</th><td>이용자가 선택한 이미지 파일, 저장 키, 설명문, 공개 범위, 제출·검토 상태 및 연결된 내부 사용자 ID</td><td>프로필 표시, 갤러리 제출·운영 검토, 권한에 따른 이미지 제공, 악성·권리침해 콘텐츠 대응</td><td>이용자가 삭제하거나 탈퇴할 때까지. 삭제·탈퇴 요청이 접수되면 공개 접근을 즉시 차단하고 파일·메타데이터를 30일 이내 삭제합니다. 법령상 보존 또는 분쟁·보안 조사가 필요한 경우에는 그 사유가 끝날 때까지 분리 보관합니다.</td></tr>
       </tbody>
       </table>
       </div>
       <p>서비스는 OAuth 접근 토큰·갱신 토큰·Google 이메일을 장기 저장하지 않습니다. 일반 이용자는 프로필 사진을 올리고, 갤러리 사진을 운영 검토용으로 제출할 수 있습니다. 공개 범위가 적용된 프로필 사진만 해당 범위의 이용자에게 제공하고, 갤러리 사진은 운영자가 검토·게시하기 전에는 공개하지 않습니다. 마케팅 수신 기능은 제공하지 않습니다. Google AdSense 광고는 공개 홈 화면에만 표시될 수 있으며, 경제 활동·잔액·거래·취향 정보를 광고 타기팅에 사용하지 않습니다.</p>
-      <p>위 표의 접속 IP 주소와 브라우저·세션 관련 값은 운영 콘솔 경로(/admin)로 들어온 요청에만 기록합니다. 로그인한 이용자가 권한 없이 해당 경로에 접근해 거절된 요청도 같은 이유로 기록 대상입니다. 그 밖의 일반 서비스 이용에는 기록하지 않습니다. 관리자 화면에서도 IP 주소는 네트워크 단위로, 세션 식별자는 해시 일부만 보이며, 원본을 확인하면 누가 왜 확인했는지가 사유와 함께 다시 기록됩니다.</p>
+      <p>로그인한 이용자의 일반 서비스 요청과 운영 콘솔 요청은 안정성·보안 확인을 위해 기록합니다. 경로는 검색값을 제거해 저장하고 쿠키, 세션 토큰, 인증정보, 요청 본문은 저장하지 않습니다. 일반 활동 화면에는 IP 주소를 네트워크 단위로 축약해 표시하며, 제한된 운영 감사 기능에서 원본 확인이 필요한 경우 누가 왜 확인했는지도 다시 기록합니다.</p>
       </section>
       <section>
       <h2>2. 처리 근거와 필수 확인</h2>
@@ -80,6 +80,7 @@ export function PrivacyDocument() {
       <tr><th scope="row">Cloudflare, Inc.</th><td>미국 등 글로벌 네트워크. 웹사이트 접속 시 TLS 암호화 통신으로 전송</td><td>접속 IP 주소, 요청 헤더, 보안·성능 로그. DDoS 방어, TLS 연결, 네트워크 보안</td><td>Cloudflare 정책 및 서비스 운영에 필요한 기간. 이용자는 서비스 이용을 중단할 수 있습니다.</td></tr>
       <tr><th scope="row">Google LLC</th><td>미국. Google 로그인 선택 또는 광고가 표시되는 공개 홈 화면 방문 시 TLS 암호화 통신으로 전송</td><td>로그인 제공자 식별자·표시명 또는 광고 쿠키·온라인 식별자·IP 주소. 인증 및 광고 제공·측정·부정 클릭 방지</td><td>Google 정책에 따른 기간. 로그인은 Discord를 선택할 수 있고, 광고 개인화는 Google 광고 설정 및 CMP에서 선택·거부할 수 있습니다.</td></tr>
       <tr><th scope="row">Discord Inc.</th><td>미국. Discord 로그인 선택 시 TLS 암호화 통신으로 전송</td><td>로그인 제공자 식별자·표시명. 인증 및 계정 연결</td><td>Discord 정책에 따른 기간. 이용자는 Google 로그인을 선택하거나 서비스 이용을 중단할 수 있습니다.</td></tr>
+      <tr><th scope="row">Discord Inc. 운영 알림</th><td>미국. 접속·활동 또는 서비스 이벤트 기록 생성 후 TLS 암호화 통신으로 전송</td><td>일반 API 요청·관리자 요청·화면 활동·가상경제 처리 등 서비스 이벤트의 종류와 무작위 영수증 ID. 운영 알림과 전송 실패 추적. 이용자 ID·닉네임·IP·브라우저·경로·금액·쿠키·토큰·본문·검색값은 전송하지 않음</td><td>Discord 채널의 운영자가 메시지를 삭제할 때까지. 상세 원문은 전송하지 않으며 운영 DB의 보유 기간은 제1항을 따릅니다.</td></tr>
       </tbody>
       </table>
       </div>
@@ -91,7 +92,7 @@ export function PrivacyDocument() {
       <table>
       <thead><tr><th scope="col">이름</th><th scope="col">목적</th><th scope="col">보유 기간</th><th scope="col">보호 방식</th></tr></thead>
       <tbody>
-      <tr><th scope="row">mv_session</th><td>서버 세션 식별, 로그인과 보안 유지</td><td>최대 30일(활동 시 자동 연장) 또는 로그아웃·폐기 시까지</td><td>HttpOnly, Secure, SameSite 속성 적용</td></tr>
+      <tr><th scope="row">__Host-mv_session (보안 연결이 아닌 개발 환경에서는 mv_session)</th><td>서버 세션 식별, 로그인과 보안 유지</td><td>최대 30일(활동 시 자동 연장) 또는 로그아웃·폐기 시까지</td><td>HttpOnly, Secure, SameSite=Lax, Path=/ 속성 적용</td></tr>
       <tr><th scope="row">CSRF 확인값</th><td>상태 변경 요청 위조 방지</td><td>최대 30일 또는 세션 폐기 시까지</td><td>쿠키로 장기 저장하지 않고, 로그인·지갑 화면에서 전달한 값을 서버에서 검증</td></tr>
       </tbody>
       </table>
@@ -131,6 +132,7 @@ export function PrivacyDocument() {
       </section>
       <aside className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground" aria-label="문서 변경 이력">
       <strong>변경 이력</strong>
+      <p>2026년 9월 6일: 실제 운영 중인 접속·활동·API 요청 기록의 항목, 목적, 보호 범위와 보유 기간을 명확히 설명하고 시험용 표현을 바로잡았습니다. 처리 목적이나 필수 동의 범위를 새로 확대하지 않는 설명 정정이므로 2026-09-02 동의 버전을 유지합니다.</p>
       <p>2026년 9월 2일: 운영자·문의처, 사진 보유·삭제 기준, Cloudflare·OAuth·Google 광고 관련 처리 및 국외 이전 정보를 반영했습니다.</p>
       </aside>
       </article>
