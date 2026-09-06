@@ -31,7 +31,7 @@ BEGIN
     pg_catalog.left(COALESCE(event->>'path', '/'), 500),
     NULLIF(pg_catalog.left(COALESCE(event->>'targetLabel', ''), 200), ''),
     CASE WHEN event->>'dwellTimeMs' ~ '^[0-9]+$'
-      THEN pg_catalog.least((event->>'dwellTimeMs')::integer, 86400000)
+      THEN least((event->>'dwellTimeMs')::integer, 86400000)
       ELSE NULL END,
     p_ip,
     pg_catalog.left(p_user_agent, 500),
@@ -80,7 +80,7 @@ AS $$
     pg_catalog.jsonb_build_object(
       'method', pg_catalog.left(COALESCE(p_method, ''), 12),
       'status', p_status,
-      'durationMs', pg_catalog.greatest(COALESCE(p_duration_ms, 0), 0),
+      'durationMs', greatest(COALESCE(p_duration_ms, 0), 0),
       'requestId', p_request_id
     )
   );
@@ -134,8 +134,8 @@ AS $$
   WHERE (p_event_type IS NULL OR log.event_type = p_event_type)
     AND (p_user_id IS NULL OR log.user_id = p_user_id)
   ORDER BY log.created_at DESC, log.id DESC
-  LIMIT pg_catalog.greatest(1, pg_catalog.least(p_limit, 200))
-  OFFSET pg_catalog.greatest(p_offset, 0);
+  LIMIT greatest(1, least(p_limit, 200))
+  OFFSET greatest(p_offset, 0);
 $$;
 
 ALTER FUNCTION public.activity_list_logs(integer, integer, text, uuid)
