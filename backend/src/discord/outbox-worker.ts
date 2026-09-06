@@ -156,6 +156,14 @@ function deviceSummary(value: string | null): string | null {
   return `${platform} · ${browser}`;
 }
 
+function maskedNetwork(value: string | null): string | null {
+  if (!value) return null;
+  const ipv4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.\d{1,3}\/24$/.exec(value);
+  if (ipv4) return `${ipv4[1]}.${ipv4[2]}.${ipv4[3]}.0/24`;
+  if (value.includes(':') && value.endsWith('/48')) return 'IPv6 /48';
+  return null;
+}
+
 function activityMessage(event: {
   id: string;
   event_type: string;
@@ -174,7 +182,7 @@ function activityMessage(event: {
   const path = safeText(context.path, 500);
   const requestId = safeText(context.requestId, 36);
   const occurredAt = safeText(context.occurredAt, 40);
-  const network = safeText(context.network, 64);
+  const network = maskedNetwork(safeText(context.network, 64));
   const device = deviceSummary(safeText(context.userAgent, 500));
   const status =
     typeof context.status === 'number' && Number.isInteger(context.status) ? context.status : null;
