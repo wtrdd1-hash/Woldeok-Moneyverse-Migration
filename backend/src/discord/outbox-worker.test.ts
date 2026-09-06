@@ -121,7 +121,7 @@ describe('the Discord outbox message', () => {
           requestId: EVENT_ID,
           occurredAt: '2026-09-07T01:23:45.000Z',
           country: 'KR',
-          network: '203.0.113.0/24',
+          network: '203.0.113.47/24',
           userAgent:
             'Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 Chrome/140.0 Mobile Safari/537.36',
         },
@@ -139,6 +139,16 @@ describe('the Discord outbox message', () => {
         `요청 ID: ${EVENT_ID}`,
       ].join('\n'),
     );
+  });
+
+  it('never prints an exact IP address supplied in activity context', () => {
+    const message = messageFor({
+      id: EVENT_ID,
+      event_type: 'activity.api_request',
+      safe_context: { network: '203.0.113.47/24', country: 'KR' },
+    });
+    expect(message).toContain('접속망: 203.0.113.0/24');
+    expect(message).not.toContain('203.0.113.47');
   });
 
   it('does not allow activity fields to create Discord mentions or multiline injection', () => {
