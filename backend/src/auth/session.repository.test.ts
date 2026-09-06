@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import type { Queryable } from '../core/db';
 import { sha256 } from './crypto';
@@ -44,7 +45,7 @@ describe('SessionRepository.create', () => {
 });
 
 describe('SessionRepository.completeOAuthLogin', () => {
-  it('stores the public display name as plaintext', async () => {
+  const login = async () => {
     const { pool, queries } = recordingPool((text) =>
       text.includes('auth_complete_oauth_login')
         ? [{ session_id: 'session-id', user_id: 'user-id', expires_at: new Date(0) }]
@@ -56,8 +57,23 @@ describe('SessionRepository.completeOAuthLogin', () => {
       subject: '889085646768078850',
       displayName: '공개 닉네임',
     });
-    expect(queries[0]?.values?.[3]).toBe('공개 닉네임');
-    expect(String(queries[0]?.values?.[3])).not.toMatch(/^enc:v1:/);
+    return queries[0]?.values ?? [];
+  };
+
+  it('stores the public display name as plaintext', async () => {
+    const values = await login();
+    expect(values[4]).toBe('공개 닉네임');
+    expect(String(values[4])).not.toMatch(/^enc:v1:/);
+  });
+
+  it('sends the subject encrypted and, beside it, the hash the account is found by', async () => {
+    const values = await login();
+    expect(String(values[2])).toMatch(/^enc:v1:det:/);
+    expect(String(values[3])).toMatch(/^[0-9a-f]{64}$/);
+    // Neither the plaintext subject nor anything derived from the encryption
+    // key: 162's whole point is that this survives a key that moves.
+    expect(values).not.toContain('889085646768078850');
+    expect(values[3]).toBe(createHash('sha256').update('discord:889085646768078850').digest('hex'));
   });
 });
 

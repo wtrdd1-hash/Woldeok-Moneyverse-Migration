@@ -355,10 +355,13 @@ export class SessionRepository {
     const token = randomToken();
     const csrfToken = randomToken();
     const encryptedSubject = this.encryptionService.encryptDeterministic(subject) ?? subject;
+    // The hash is what finds the account; the ciphertext is what it is stored
+    // as. 162: a key that moves must not be able to fork a member's account.
+    const subjectHash = this.encryptionService.subjectHash(provider, subject);
     const login = await queryOne<CompletedOAuthLoginRow>(
       this.pool,
-      `SELECT * FROM auth_complete_oauth_login($1,$2,$3,$4,$5,$6)`,
-      [preAuthSessionId, provider, encryptedSubject, displayName, sha256(token), sha256(csrfToken)],
+      `SELECT * FROM auth_complete_oauth_login($1,$2,$3,$4,$5,$6,$7)`,
+      [preAuthSessionId, provider, encryptedSubject, subjectHash, displayName, sha256(token), sha256(csrfToken)],
     );
     if (!login) throw new Error('OAuth login was not completed');
     await this.pool.query(
