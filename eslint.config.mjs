@@ -1,9 +1,13 @@
+import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
+
+const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
 
 export default tseslint.config(
   { ignores: ['**/dist/**', '**/.next/**', '**/node_modules/**', '**/generated/**', '.claude/**'] },
   js.configs.recommended,
+  ...compat.extends('next/core-web-vitals'),
   ...tseslint.configs.recommended,
   {
     rules: {

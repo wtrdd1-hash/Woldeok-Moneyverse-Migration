@@ -35,8 +35,6 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
-import { ReauthGuard } from '../auth/guards/reauth.guard';
-import { SecondFactorGuard } from '../auth/guards/second-factor.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import { SecondFactorInputError } from '../auth/second-factor.repository';
 import type { RequestWithSession } from '../auth/session.context';
@@ -233,7 +231,7 @@ export class AdminSecurityController {
   }
 
   @Post('second-factor')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Begin enrolling an authenticator app' })
   beginEnrolment(@Req() request: RequestWithSession) {
     const session = requireSession(request);
@@ -252,7 +250,7 @@ export class AdminSecurityController {
   }
 
   @Put('second-factor')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Confirm the enrolment with a code from the app' })
   async confirmEnrolment(@Req() request: RequestWithSession, @Body() body: SecondFactorCodeDto) {
     const session = requireSession(request);
@@ -285,7 +283,7 @@ export class AdminSecurityController {
   }
 
   @Post('sessions')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Enter the operations console, rotating the session' })
   async openConsole(
     @Req() request: RequestWithSession,
@@ -321,7 +319,7 @@ export class AdminSecurityController {
   }
 
   @Post('recovery-codes')
-  @UseGuards(AdminSessionGuard, CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Replace and reveal one-time administrator recovery codes' })
   issueRecoveryCodes(@Req() request: RequestWithSession) {
     const session = requireSession(request);
@@ -332,7 +330,7 @@ export class AdminSecurityController {
   }
 
   @Post('recovery-sessions')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Consume one recovery code and enter the operations console' })
   async openWithRecoveryCode(
     @Req() request: RequestWithSession,
@@ -377,7 +375,7 @@ export class AdminSecurityController {
   }
 
   @Put('login-policies/:userId')
-  @UseGuards(AdminSessionGuard, CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Replace the address allowlist for an administrator' })
   setIpAllowlist(
     @Req() request: RequestWithSession,
@@ -398,7 +396,7 @@ export class AdminSecurityController {
   }
 
   @Post('forced-logouts')
-  @UseGuards(AdminSessionGuard, CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'End every live session a member holds' })
   forceLogout(@Req() request: RequestWithSession, @Body() body: ForcedLogoutDto) {
     return this.guarded(

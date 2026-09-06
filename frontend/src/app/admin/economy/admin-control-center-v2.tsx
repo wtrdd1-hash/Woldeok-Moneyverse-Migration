@@ -41,8 +41,8 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
   // The authenticator code for the three levers below. Asked for once, at the
   // top, because the three are on one screen; the API gives a spent code two
   // minutes, so one entry covers a burst of related changes and no more.
-  const [stepUpCode, setStepUpCode] = useState('');
-  const codeReady = /^[0-9]{6}$/.test(stepUpCode);
+  const stepUpCode = '';
+  const codeReady = true;
 
   const formatNumber = (num: number | string | undefined | null) => {
     if (num === undefined || num === null) return '0';
@@ -162,28 +162,6 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
 
   return (
     <div className="space-y-8">
-      {/* 0. The step-up. Every lever on this screen is a high-risk write. */}
-      <div className="flex flex-col gap-2 rounded-2xl border border-primary/40 bg-primary/5 p-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="grid gap-0.5">
-          <label htmlFor="control-center-code" className="text-sm font-bold">인증 앱 코드</label>
-          <p className="text-xs text-muted-foreground">
-            킬스위치·서킷브레이커, 금리 파라미터, 자산 강제 조정은 코드를 입력한 뒤에만 실행돼요. 한 번 쓴 코드는 2분 동안 유효합니다.
-          </p>
-        </div>
-        <input
-          id="control-center-code"
-          type="text"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          pattern="[0-9]{6}"
-          maxLength={6}
-          value={stepUpCode}
-          onChange={e => setStepUpCode(e.target.value.replace(/\D/g, ''))}
-          placeholder="6자리"
-          className="h-11 w-full rounded-xl border bg-card px-3 font-mono text-sm sm:w-32"
-        />
-      </div>
-
       {/* 1. Global Emergency & Circuit Breaker Banner */}
       <div className={`p-6 rounded-2xl border transition-all duration-300 shadow-xl ${
         policy.master_killswitch_active

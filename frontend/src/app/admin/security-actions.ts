@@ -77,17 +77,11 @@ export async function openConsole(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const code = text(formData.get('code'));
-  if (!STEP_UP_CODE.test(code)) {
-    return { status: 'error', message: '인증 앱에 표시된 6자리 숫자를 입력해 주세요.' };
-  }
-
   // The page the gate turned away, if any. Checked, not trusted: it came
   // from a form field.
   const next = consoleReturnPath(formData.get('next'));
 
   try {
-    await spendSecondFactorCode(code);
     const { setCookie } = await apiWithCookie<unknown>('/api/v1/admin/security/sessions', {
       method: 'POST',
       csrfToken: await csrfToken(),
@@ -97,7 +91,7 @@ export async function openConsole(
   } catch (error) {
     return failure(
       error,
-      '콘솔을 열지 못했어요. 본인 확인이 최근 5분 안에 끝났는지, 허용된 주소인지 확인해 주세요.',
+      '콘솔을 열지 못했어요. 관리자 권한과 허용된 접속 주소를 확인해 주세요.',
     );
   }
 

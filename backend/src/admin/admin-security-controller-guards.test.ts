@@ -3,29 +3,28 @@ import { describe, expect, it } from 'vitest';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SecondFactorGuard } from '../auth/guards/second-factor.guard';
-import { AdminControlsController } from './controls.controller';
+import { AdminSecurityController } from './admin-security.controller';
 
-function guardsOn(method: keyof AdminControlsController): unknown[] {
+function guardsOn(method: keyof AdminSecurityController): unknown[] {
   return (
     (Reflect.getMetadata(
       GUARDS_METADATA,
-      AdminControlsController.prototype[method],
+      AdminSecurityController.prototype[method],
     ) as unknown[]) ?? []
   );
 }
 
-describe('AdminControlsController feature switch guards', () => {
-  it('keeps the automatic economy switch behind CSRF without either step-up', () => {
-    const guards = guardsOn('setAutoPolicyFeatureSwitch');
+describe('AdminSecurityController console-entry guards', () => {
+  it('opens the console from a current admin session without OAuth or TOTP step-up', () => {
+    const guards = guardsOn('openConsole');
     expect(guards).toContain(CsrfGuard);
     expect(guards).not.toContain(ReauthGuard);
     expect(guards).not.toContain(SecondFactorGuard);
   });
 
-  it('keeps every other feature switch behind CSRF without additional authentication', () => {
-    const guards = guardsOn('setFeatureSwitch');
+  it('does not require OAuth step-up for legacy second-factor enrolment', () => {
+    const guards = guardsOn('beginEnrolment');
     expect(guards).toContain(CsrfGuard);
     expect(guards).not.toContain(ReauthGuard);
-    expect(guards).not.toContain(SecondFactorGuard);
   });
 });

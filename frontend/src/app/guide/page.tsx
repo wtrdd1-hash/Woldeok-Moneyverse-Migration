@@ -205,8 +205,8 @@ export default function GuidePage() {
                 stepEn: '2. Accumulation',
                 titleKo: '은행 복리 예금 & 국채',
                 titleEn: 'Bank Savings & Bonds',
-                descKo: '모은 WLD를 은행에 예치해 매일 자정 복리 이자와 국채 확정 수익을 거둡니다.',
-                descEn: 'Deposit savings for daily midnight compound interest and guaranteed bond yields.',
+                descKo: '모은 WLD를 은행에 예치하고 누적 이자를 직접 정산하거나 가상 국채를 이용합니다.',
+                descEn: 'Deposit WLD, claim accrued savings interest, or use virtual bonds.',
                 icon: Landmark,
               },
               {
@@ -223,8 +223,8 @@ export default function GuidePage() {
                 stepEn: '4. Consumption',
                 titleKo: '상점 도구 & 카지노 게임',
                 titleEn: 'Shop Tools & Casino',
-                descKo: '작업 효율을 높여줄 생산 장비를 상점에서 구입하고 5종 미니게임을 즐깁니다.',
-                descEn: 'Acquire payout boosters in the shop and enjoy 5 casual mini-games.',
+                descKo: '생산 장비를 상점에서 구입하고 한도가 적용되는 가상 미니게임을 즐깁니다.',
+                descEn: 'Acquire tools in the shop and play virtual mini-games with daily limits.',
                 icon: Store,
               },
             ].map(({ step, stepEn, titleKo, titleEn, descKo, descEn, icon: Icon }) => (

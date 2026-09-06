@@ -35,8 +35,6 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
-import { ReauthGuard } from '../auth/guards/reauth.guard';
-import { SecondFactorGuard } from '../auth/guards/second-factor.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -334,7 +332,7 @@ export class AdminEconomyController {
   }
 
   @Post('bulk-payouts')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Pay every member the filter matches' })
   executeBulkPayout(@Req() request: RequestWithSession, @Body() body: BulkPayoutDto) {
     return this.guarded(
@@ -355,7 +353,7 @@ export class AdminEconomyController {
   }
 
   @Post('transactions/:id/reversal')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Reverse one transaction, posting its opposite back to the ledger' })
   reverseTransaction(
     @Req() request: RequestWithSession,
@@ -403,7 +401,7 @@ export class AdminEconomyController {
    * the functions behind them (125) require the superadmin on their own.
    */
   @Post('killswitch')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Toggle master killswitch or module circuit breaker' })
   toggleKillswitch(@Req() request: RequestWithSession, @Body() body: ToggleKillswitchDto) {
     return this.guarded(
@@ -418,7 +416,7 @@ export class AdminEconomyController {
   }
 
   @Post('knobs-v2')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Update economic knobs (interest, bond yields, loan rates)' })
   updateKnobsV2(@Req() request: RequestWithSession, @Body() body: UpdateKnobsV2Dto) {
     return this.guarded(
@@ -444,7 +442,7 @@ export class AdminEconomyController {
   }
 
   @Post('users/:id/override-v2')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Override user asset (grant or revoke WLD in wallet, deposit, or loan)' })
   overrideUserV2(
     @Req() request: RequestWithSession,

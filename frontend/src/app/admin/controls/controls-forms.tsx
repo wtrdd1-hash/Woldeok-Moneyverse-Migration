@@ -242,21 +242,7 @@ export function ActivateDuePoliciesForm() {
 
   return (
     <div className="grid gap-2">
-      <form action={action} className="grid gap-3 sm:grid-cols-[auto_auto] sm:items-end">
-        <Field>
-          <FieldLabel htmlFor="activation-code" className="text-xs">
-            인증 앱 코드
-          </FieldLabel>
-          <Input
-            id="activation-code"
-            name="code"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            pattern="[0-9]{6}"
-            maxLength={6}
-            required
-          />
-        </Field>
+      <form action={action} className="grid gap-3 sm:grid-cols-[auto] sm:items-end">
         <SubmitButton variant="outline" size="sm" className="min-h-11">
           예약된 버전 지금 발효
         </SubmitButton>
@@ -269,7 +255,6 @@ export function ActivateDuePoliciesForm() {
 const ROLES: readonly { readonly value: string; readonly label: string }[] = [
   { value: 'operator', label: 'operator — 카탈로그와 콘텐츠' },
   { value: 'approver', label: 'approver — 사용자와 감사 기록 열람' },
-  { value: 'server_operator', label: 'server_operator — 서버 운영' },
   { value: 'superadmin', label: 'superadmin — 전부. 넘기면 지금 보유자는 잃습니다' },
 ];
 

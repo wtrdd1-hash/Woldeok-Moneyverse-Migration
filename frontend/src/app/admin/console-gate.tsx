@@ -11,7 +11,6 @@ import {
   confirmSecondFactorEnrolment,
   issueRecoveryCodes,
   openConsole,
-  openConsoleWithRecoveryCode,
 } from './security-actions';
 
 /**
@@ -86,60 +85,19 @@ export function OpenConsole({
   readonly next?: string | null;
 }) {
   const [state, action] = useActionState(openConsole, IDLE);
-  const [recoveryState, recover] = useActionState(openConsoleWithRecoveryCode, IDLE);
 
   return (
     <div className="grid gap-3">
-      <form action={action} className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+      <form action={action}>
         {next && <input type="hidden" name="next" value={next} />}
-        <Field>
-          <FieldLabel htmlFor="console-code">인증 앱 코드</FieldLabel>
-          <Input
-            id="console-code"
-            name="code"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            pattern="[0-9]{6}"
-            maxLength={6}
-            required
-            disabled={disabled}
-          />
-          <FieldDescription>
-            {disabled
-              ? '본인 확인을 먼저 마쳐야 콘솔을 열 수 있어요. 위 버튼으로 확인한 뒤 돌아와 주세요.'
-              : '콘솔 세션은 30분 뒤, 또는 10분간 조작이 없으면 잠깁니다.'}
-          </FieldDescription>
-        </Field>
         <SubmitButton disabled={disabled} className="min-h-11">
-          콘솔 열기 →
+          관리자 페이지 열기 →
         </SubmitButton>
       </form>
       <ActionAlert state={state} />
-      <form
-        action={recover}
-        className="grid gap-3 border-t pt-4 sm:grid-cols-[1fr_auto] sm:items-end"
-      >
-        {next && <input type="hidden" name="next" value={next} />}
-        <Field>
-          <FieldLabel htmlFor="recovery-code">일회용 복구 코드</FieldLabel>
-          <Input
-            id="recovery-code"
-            name="code"
-            autoComplete="off"
-            pattern="[A-Za-z0-9_-]{27}"
-            maxLength={27}
-            required
-            disabled={disabled}
-          />
-          <FieldDescription>
-            인증 기기를 잃어버린 경우에만 사용하세요. 성공 즉시 폐기됩니다.
-          </FieldDescription>
-        </Field>
-        <SubmitButton disabled={disabled} variant="outline" className="min-h-11">
-          복구 코드로 열기 →
-        </SubmitButton>
-      </form>
-      <ActionAlert state={recoveryState} />
+      <FieldDescription>
+        콘솔 세션은 30분 뒤 또는 10분간 조작이 없으면 잠깁니다.
+      </FieldDescription>
     </div>
   );
 }

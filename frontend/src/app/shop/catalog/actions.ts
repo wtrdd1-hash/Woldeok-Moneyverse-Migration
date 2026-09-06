@@ -3,7 +3,12 @@
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
 import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
-import { PURCHASE_CEILING, purchaseMessage, settlementMessage, useMessage } from './catalog';
+import {
+  PURCHASE_CEILING,
+  purchaseMessage,
+  settlementMessage,
+  useMessage as formatUseMessage,
+} from './catalog';
 import type { PurchaseReceipt, SettlementReceipt, UseReceipt } from './catalog';
 
 /**
@@ -99,7 +104,7 @@ export async function consumeHeldItem(
       { body: { idempotencyKey: idempotencyKey() } },
     );
     revalidatePath('/shop/catalog');
-    return { status: 'ok', message: useMessage(receipt) };
+    return { status: 'ok', message: formatUseMessage(receipt) };
   } catch (error) {
     return failure(
       error,

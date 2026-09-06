@@ -149,7 +149,7 @@ export default async function ContentAdminPage() {
         <AlertTitle>상태는 여기서 ‘정상’이라고 만들 수 없어요.</AlertTitle>
         <AlertDescription>
           <span>
-            웹과 마인크래프트의 상태는 별도 신뢰 수집기가 남긴 최근 기록만 공개됩니다. 이
+            웹 서비스 상태는 별도 신뢰 수집기가 남긴 최근 기록만 공개됩니다. 이
             페이지의 일반 운영자 권한은 상태 수집원·이미지 호스트·서버 제어 권한을 바꾸지
             못합니다.{' '}
             <Link href="/status" target="_blank" rel="noopener" className="text-primary">

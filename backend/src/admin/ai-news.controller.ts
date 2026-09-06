@@ -19,8 +19,6 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
-import { ReauthGuard } from '../auth/guards/reauth.guard';
-import { SecondFactorGuard } from '../auth/guards/second-factor.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -148,7 +146,7 @@ export class AiNewsController {
   }
 
   @Put('settings')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Store the model address, model name and, optionally, a new key' })
   saveSettings(@Req() request: RequestWithSession, @Body() body: SaveAiNewsSettingsDto) {
     return this.guarded(

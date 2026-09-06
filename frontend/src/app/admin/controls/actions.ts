@@ -219,7 +219,7 @@ async function designateRole(
   const code = text(formData.get('code'));
 
   if (userId === '') return { status: 'error', message: '대상 사용자를 확인할 수 없어요.' };
-  if (!['operator', 'approver', 'server_operator', 'superadmin'].includes(role)) {
+  if (!['operator', 'approver', 'superadmin'].includes(role)) {
     return { status: 'error', message: '역할을 선택해 주세요.' };
   }
   if (operation === 'revoke' && role === 'superadmin') {

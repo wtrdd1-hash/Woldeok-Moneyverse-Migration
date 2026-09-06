@@ -49,7 +49,7 @@ export function LuckySlotsGame({
           <span>🎰</span> 럭키 777 슬롯머신
         </CardTitle>
         <CardDescription>
-          레버를 당겨 3개의 릴을 맞추는 슬롯입니다. 행운의 7️⃣7️⃣7️⃣ 적중 시 5.7배의 배당이 지급됩니다.
+          주사위 숫자 맞추기 서버 규칙을 슬롯 화면으로 표현합니다. 6번 적중 시 5.7배로 정산됩니다.
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
