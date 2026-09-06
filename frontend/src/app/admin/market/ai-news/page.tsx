@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { apiOrNull } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
-import type { AiNewsBatch, AiNewsSettings } from '../../types';
+import type { AiNewsBatch, AiNewsModelList, AiNewsSettings } from '../../types';
 import { AiNewsGenerateForm, AiNewsSettingsForm, ScenarioCard } from './ai-news-console';
 
 export const dynamic = 'force-dynamic';
@@ -25,9 +25,10 @@ export const metadata: Metadata = {
  */
 export default async function AiNewsPage() {
   await requireAdminConsole(PATH);
-  const [settings, latest] = await Promise.all([
+  const [settings, latest, models] = await Promise.all([
     apiOrNull<{ settings: AiNewsSettings | null }>('/api/v1/admin/ai-news/settings'),
     apiOrNull<{ batch: AiNewsBatch | null }>('/api/v1/admin/ai-news/batches/latest'),
+    apiOrNull<AiNewsModelList>('/api/v1/admin/ai-news/models'),
   ]);
   const batch = latest?.batch ?? null;
   const ready = settings?.settings?.has_key === true;
@@ -42,7 +43,7 @@ export default async function AiNewsPage() {
         다듬어 발행하면 그 순간부터 시장이 기웁니다. 만든 시나리오는 저장되어 새로고침해도 남아요.
       </PageHeader>
 
-      <AiNewsSettingsForm settings={settings?.settings ?? null} />
+      <AiNewsSettingsForm settings={settings?.settings ?? null} models={models ?? { models: [], problem: null }} />
       <AiNewsGenerateForm batch={batch} ready={ready} />
 
       {latest === null ? (

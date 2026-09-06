@@ -312,6 +312,15 @@ export interface AiNewsSettings {
   readonly updated_at: string;
 }
 
+/**
+ * What the stored key can reach, as the OpenAI-standard `GET {base}/models`
+ * lists it. Empty with a `problem` when the address would not say.
+ */
+export interface AiNewsModelList {
+  readonly models: readonly string[];
+  readonly problem: string | null;
+}
+
 /** One proposed scenario, as `ai_news_batch_latest` lists them. */
 export interface AiNewsScenario {
   readonly id: string;
