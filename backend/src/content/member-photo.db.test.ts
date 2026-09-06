@@ -113,9 +113,10 @@ describe.skipIf(!DATABASE_URL)('member photo submissions', () => {
       });
     });
 
-    it('shows it to everybody once an operator publishes it', async () => {
+    it('lets an operator publish a member submission through the real command', async () => {
       await rolledBack(async (client) => {
         const author = await member(client);
+        const operator = await member(client);
         const id = randomUUID();
         const key = storageKey();
         await client.query('SELECT public.member_submit_photo($1, $2, $3, $4)', [
@@ -125,11 +126,16 @@ describe.skipIf(!DATABASE_URL)('member photo submissions', () => {
           '내가 찍은 사진',
         ]);
         await client.query(
-          `UPDATE public.photos SET content_state = 'published', visibility = 'public',
-             published_at = clock_timestamp() WHERE id = $1`,
-          [id],
+          `INSERT INTO public.user_roles (user_id, role, granted_by)
+           VALUES ($1, 'operator'::public.admin_role, $1)`,
+          [operator],
+        );
+        const { rows } = await client.query<{ replayed: boolean }>(
+          `SELECT replayed FROM public.content_set_photo_publication($1, $2, true, $3, $4)`,
+          [operator, id, randomUUID(), randomUUID()],
         );
 
+        expect(rows[0]?.replayed).toBe(false);
         expect(await visible(client, null, key)).toBe(true);
         expect(await inGallery(client, id)).toBe(true);
       });
