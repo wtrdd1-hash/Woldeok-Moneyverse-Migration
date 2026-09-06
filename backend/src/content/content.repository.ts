@@ -152,6 +152,11 @@ export interface PendingPhotoRow {
   readonly submitted_at: string;
 }
 
+export interface AdminPhotoRow extends PendingPhotoRow {
+  readonly content_state: string;
+  readonly published_at: Date | null;
+}
+
 export interface ContentPhotoReceiptRow {
   readonly photo_id?: unknown;
   readonly published_at?: unknown;
@@ -427,10 +432,31 @@ export class PostgresContentRepository {
     return rows;
   }
 
+  async adminListAllPhotos(actorUserId: unknown): Promise<readonly AdminPhotoRow[]> {
+    const actor = requireContentUuid(actorUserId, 'authenticated operator id');
+    const { rows } = await this.pool.query<AdminPhotoRow>(
+      `SELECT photo_id::text AS photo_id, storage_key, image_url, alt_text,
+              uploaded_by::text AS uploaded_by, uploader_display_name,
+              content_state, submitted_at::text AS submitted_at, published_at
+       FROM public.admin_list_all_photos($1, 100)`,
+      [actor],
+    );
+    return rows;
+  }
 
-  async adminListAllAnnouncements(
-    actorUserId: unknown,
-  ): Promise<readonly AdminAnnouncementRow[]> {
+  async adminDeletePhoto(actorUserId: unknown, photoId: unknown): Promise<string | null> {
+    const actor = requireContentUuid(actorUserId, 'authenticated operator id');
+    const id = requireContentUuid(photoId, 'photo id');
+    const {
+      rows: [row],
+    } = await this.pool.query<{ storage_key: string | null }>(
+      `SELECT public.admin_delete_photo($1, $2) AS storage_key`,
+      [actor, id],
+    );
+    return row?.storage_key ?? null;
+  }
+
+  async adminListAllAnnouncements(actorUserId: unknown): Promise<readonly AdminAnnouncementRow[]> {
     const actor = requireContentUuid(actorUserId, 'authenticated operator id');
     const { rows } = await this.pool.query<AdminAnnouncementRow>(
       `SELECT announcement_id::text AS announcement_id, title, body, content_state, is_pinned,
@@ -471,13 +497,12 @@ export class PostgresContentRepository {
     return row;
   }
 
-  async adminDeleteAnnouncement(
-    actorUserId: unknown,
-    announcementId: unknown,
-  ): Promise<boolean> {
+  async adminDeleteAnnouncement(actorUserId: unknown, announcementId: unknown): Promise<boolean> {
     const actor = requireContentUuid(actorUserId, 'authenticated operator id');
     const id = requireContentUuid(announcementId, 'announcement id');
-    const { rows: [row] } = await this.pool.query<{ deleted: boolean }>(
+    const {
+      rows: [row],
+    } = await this.pool.query<{ deleted: boolean }>(
       `SELECT public.content_delete_announcement($1, $2) AS deleted`,
       [actor, id],
     );
@@ -491,8 +516,13 @@ export class PostgresContentRepository {
   ): Promise<boolean> {
     const actor = requireContentUuid(actorUserId, 'authenticated operator id');
     const id = requireContentUuid(photoId, 'photo id');
-    const safeReason = typeof reason === 'string' && reason.trim().length > 0 ? reason.trim().slice(0, 200) : 'operator rejected';
-    const { rows: [row] } = await this.pool.query<{ rejected: boolean }>(
+    const safeReason =
+      typeof reason === 'string' && reason.trim().length > 0
+        ? reason.trim().slice(0, 200)
+        : 'operator rejected';
+    const {
+      rows: [row],
+    } = await this.pool.query<{ rejected: boolean }>(
       `SELECT public.admin_reject_photo($1, $2, $3) AS rejected`,
       [actor, id, safeReason],
     );

@@ -7,7 +7,10 @@ import { formatDay } from '@/lib/money';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { TranslatedText as T } from '@/components/translated-text';
 
-export const revalidate = 300;
+// Publication changes must be visible immediately. The public API query still
+// remains cheap and bounded; caching this page hid freshly approved photos for
+// up to five minutes and made a successful review look like a failure.
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '사진 | Gallery',
@@ -23,7 +26,7 @@ interface Photo {
 }
 
 export default async function GalleryPage() {
-  const data = await publicApi<{ photos: Photo[] }>('/api/v1/photos', 300);
+  const data = await publicApi<{ photos: Photo[] }>('/api/v1/photos', 0);
   const photos = data?.photos ?? [];
 
   return (
@@ -59,7 +62,14 @@ export default async function GalleryPage() {
         />
 
         {data === null ? (
-          <EmptyState title={<T korean="지금은 사진을 불러올 수 없어요." english="Unable to load photos right now." />} />
+          <EmptyState
+            title={
+              <T
+                korean="지금은 사진을 불러올 수 없어요."
+                english="Unable to load photos right now."
+              />
+            }
+          />
         ) : photos.length === 0 ? (
           <EmptyState
             title={<T korean="아직 공개된 사진이 없어요." english="No published photos yet." />}

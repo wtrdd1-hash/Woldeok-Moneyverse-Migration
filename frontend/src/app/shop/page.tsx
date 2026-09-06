@@ -7,6 +7,7 @@ import { apiOrNull, publicApi } from '@/lib/api';
 import { isLoggedInMember } from '@/lib/session';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
 import { PublicAdvertisement } from '@/components/public-advertisement';
+import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,13 +28,22 @@ export default async function ShopPage() {
   const loggedIn = await isLoggedInMember();
 
   const [catalogData, walletData, profileData] = await Promise.all([
-    loggedIn ? apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog') : publicApi<{ catalogItems: CatalogItem[] }>('/api/v1/shop/public-catalog', 60),
-    loggedIn ? apiOrNull<{ cashBalance: string }>('/api/v1/wallet') : null,
-    loggedIn ? apiOrNull<{ chosenName?: string; discordUsername?: string; avatarUrl?: string }>('/api/v1/profile') : null,
+    loggedIn
+      ? apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog')
+      : publicApi<{ catalogItems: CatalogItem[] }>('/api/v1/shop/public-catalog', 60),
+    loggedIn ? apiOrNull<CanonicalWalletOverview>('/api/v1/wallet') : null,
+    loggedIn
+      ? apiOrNull<{ chosenName?: string; discordUsername?: string; avatarUrl?: string }>(
+          '/api/v1/profile',
+        )
+      : null,
   ]);
 
   const items = catalogData?.catalogItems || [];
-  const userBalance = walletData?.cashBalance || '0';
+  // The shop and wallet must read the same canonical USER_CASH balance from
+  // WalletOverview. A removed legacy `cashBalance` field made the shop show 0
+  // even while the wallet correctly showed the ledger-backed amount.
+  const userBalance = cashBalanceFromWallet(walletData);
   const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
   const avatarUrl = profileData?.avatarUrl;
 

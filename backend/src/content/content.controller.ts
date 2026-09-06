@@ -30,6 +30,7 @@ import { isExpectedCommandFailure } from '../core/pg-error';
 import { contextOf } from '../core/request-context';
 import { ContentInputError } from './content.repository';
 import { ContentService } from './content.service';
+import { PrivateImageStorage } from './private-image-storage';
 
 export class SaveAnnouncementDto {
   @ApiProperty({ required: false, format: 'uuid', description: 'Omit to create' })
@@ -146,6 +147,7 @@ export class ContentController {
   constructor(
     @Inject(ContentService) private readonly content: ContentService | null,
     @Optional() @Inject(DiscordAlertService) private readonly discordAlert?: DiscordAlertService,
+    @Optional() @Inject(PrivateImageStorage) private readonly imageStorage?: PrivateImageStorage,
   ) {}
 
   private service(): ContentService {
@@ -400,6 +402,16 @@ export class ContentController {
     );
   }
 
+  @Get('admin/photos')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
+  @ApiOperation({ summary: 'List all gallery photos for administrators' })
+  listAllPhotos(@Req() request: RequestWithSession) {
+    return this.guarded(
+      () => this.service().listAllPhotos(requireUserId(request)),
+      'could not list photos',
+    );
+  }
+
   @Delete('admin/photos/:id')
   @UseGuards(
     SessionGuard,
@@ -409,15 +421,18 @@ export class ContentController {
     AdminSessionGuard,
     CsrfGuard,
   )
-  @ApiOperation({ summary: 'Reject and delete a draft photo submission' })
-  rejectPhoto(
+  @ApiOperation({ summary: 'Delete a draft or published photo' })
+  async rejectPhoto(
     @Req() request: RequestWithSession,
     @Param('id', ParseUUIDPipe) photoId: string,
     @Body('reason') reason?: string,
   ) {
-    return this.guarded(
-      () => this.service().rejectPhoto(requireUserId(request), photoId, reason),
-      'could not reject photo',
+    void reason;
+    const deleted = await this.guarded(
+      () => this.service().deletePhoto(requireUserId(request), photoId),
+      'could not delete photo',
     );
+    if (deleted.storageKey) await this.imageStorage?.remove(deleted.storageKey);
+    return { rejected: false, deleted: deleted.storageKey !== null };
   }
 }
