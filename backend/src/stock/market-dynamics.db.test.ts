@@ -149,6 +149,69 @@ describe.skipIf(!DATABASE_URL)('the market dynamics against a real database', ()
       return rows[0]!.id;
     };
 
+    const dynamics = async (client: PoolClient, stockId: string, price: number): Promise<void> => {
+      await client.query(
+        `INSERT INTO public.virtual_stock_dynamics (stock_id, price_exact, fair_value, trend_bps, vol_bps)
+         VALUES ($1, $2, $2, 0, 300)`,
+        [stockId, price],
+      );
+    };
+
+    it('lands a headline on the price at once and leaves the lean behind it (151)', async () => {
+      await rolledBack(async (client) => {
+        const actor = await operator(client);
+        const stock = await listing(client, 1_000);
+        await dynamics(client, stock, 1_000);
+
+        await client.query('SELECT * FROM public.stock_market_event_publish($1,$2,$3,$4,$5,$6,$7,$8,$9)', [
+          randomUUID(), actor, stock, 'up', 2, 6, '신제품 발표', '', 'operator',
+        ]);
+
+        // 보통 is 250 basis points: a 1,000 WLD stock reprices to 1,025 the
+        // moment the headline lands, rather than drifting there over hours.
+        const priced = await client.query<{ current_price: string }>(
+          'SELECT current_price FROM public.virtual_stocks WHERE id = $1',
+          [stock],
+        );
+        expect(Number(priced.rows[0]?.current_price)).toBe(1_025);
+
+        // The fair value steps with it, or the pull back would undo the step.
+        const state = await client.query<{ price_exact: string; fair_value: string }>(
+          'SELECT price_exact, fair_value FROM public.virtual_stock_dynamics WHERE stock_id = $1',
+          [stock],
+        );
+        expect(Number(state.rows[0]?.price_exact)).toBeCloseTo(1_025, 6);
+        expect(Number(state.rows[0]?.fair_value)).toBeCloseTo(1_025, 6);
+
+        // And the lean is still there: 124's drift for a 보통 호재.
+        const running = await client.query<{ drift_bps_per_day: string }>(
+          'SELECT drift_bps_per_day FROM public.virtual_stock_market_events WHERE stock_id = $1',
+          [stock],
+        );
+        expect(Number(running.rows[0]?.drift_bps_per_day)).toBe(800);
+      });
+    });
+
+    it('lands bad news the other way, and never outside the day band (151)', async () => {
+      await rolledBack(async (client) => {
+        const actor = await operator(client);
+        const stock = await listing(client, 1_000);
+        await dynamics(client, stock, 1_000);
+
+        await client.query('SELECT * FROM public.stock_market_event_publish($1,$2,$3,$4,$5,$6,$7,$8,$9)', [
+          randomUUID(), actor, stock, 'down', 3, 6, '리콜', '', 'operator',
+        ]);
+        const priced = await client.query<{ current_price: string }>(
+          'SELECT current_price FROM public.virtual_stocks WHERE id = $1',
+          [stock],
+        );
+        expect(Number(priced.rows[0]?.current_price)).toBe(940);
+        // Well inside 052's ±30 % band around the day's open, which the jump
+        // clamps itself to exactly as the tick does.
+        expect(Number(priced.rows[0]?.current_price)).toBeGreaterThan(700);
+      });
+    });
+
     it('publishes once per key, shows the event to members, and cancels it once', async () => {
       await rolledBack(async (client) => {
         const actor = await operator(client);
