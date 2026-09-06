@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
 import { apiOrNull } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
-import type { AiNewsBatch, AiNewsModelList, AiNewsSettings } from '../../types';
+import type { AiNewsBatch, AiNewsModelList, AiNewsRun, AiNewsSettings } from '../../types';
 import { AiNewsGenerateForm, AiNewsSettingsForm, ScenarioCard } from './ai-news-console';
 
 export const dynamic = 'force-dynamic';
@@ -27,11 +27,18 @@ export default async function AiNewsPage() {
   await requireAdminConsole(PATH);
   const [settings, latest, models] = await Promise.all([
     apiOrNull<{ settings: AiNewsSettings | null }>('/api/v1/admin/ai-news/settings'),
-    apiOrNull<{ batch: AiNewsBatch | null }>('/api/v1/admin/ai-news/batches/latest'),
+    apiOrNull<{ batch: AiNewsBatch | null; run: AiNewsRun | null }>('/api/v1/admin/ai-news/batches/latest'),
     apiOrNull<AiNewsModelList>('/api/v1/admin/ai-news/models'),
   ]);
   const batch = latest?.batch ?? null;
+  const run = latest?.run ?? null;
   const ready = settings?.settings?.has_key === true;
+  // Measured here rather than in the browser: the console is server-rendered
+  // and refreshes itself every few seconds while a run is open, so this stays
+  // current without a clock ticking in the reader's face.
+  const runningFor = run?.running
+    ? Math.max(0, Math.round((Date.now() - Date.parse(run.started_at)) / 1000))
+    : 0;
 
   return (
     <div className="grid gap-5">
@@ -44,7 +51,7 @@ export default async function AiNewsPage() {
       </PageHeader>
 
       <AiNewsSettingsForm settings={settings?.settings ?? null} models={models ?? { models: [], problem: null }} />
-      <AiNewsGenerateForm batch={batch} ready={ready} />
+      <AiNewsGenerateForm batch={batch} run={run} runningFor={runningFor} ready={ready} />
 
       {latest === null ? (
         <EmptyState title="시나리오를 불러오지 못했어요." />

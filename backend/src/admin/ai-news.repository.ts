@@ -60,6 +60,22 @@ export interface AiNewsScenarioRow {
   readonly decided_at: string | null;
 }
 
+/**
+ * `ai_news_run_latest` (149): one attempt at asking the model. The console
+ * reads this while it waits, and reads `failure_code` when there is nothing
+ * to read instead.
+ */
+export interface AiNewsRunRow {
+  readonly run_id: string;
+  readonly started_at: Date;
+  readonly finished_at: Date | null;
+  readonly operator_prompt: string;
+  readonly batch_id: string | null;
+  readonly failure_code: string | null;
+  readonly failure_detail: string;
+  readonly running: boolean;
+}
+
 export interface AiNewsBatchRow {
   readonly batch_id: string;
   readonly created_at: Date;
@@ -165,6 +181,54 @@ export class AiNewsRepository {
     const rows = await queryRows<AiNewsBatchRow>(
       this.pool,
       'SELECT batch_id::text AS batch_id, created_at, operator_prompt, model, scenarios FROM public.ai_news_batch_latest($1)',
+      [actorUserId],
+    );
+    return rows[0] ?? null;
+  }
+
+  /** Starts a run, or hands back the one already going (149). */
+  async beginRun(input: {
+    readonly idempotencyKey: unknown;
+    readonly actorUserId: unknown;
+    readonly prompt: string;
+  }): Promise<{ readonly run_id: string; readonly started: boolean }> {
+    uuid(input.idempotencyKey, 'idempotency key');
+    uuid(input.actorUserId, 'actor user id');
+    if (input.prompt.length > 2000) throw new AiNewsInputError('the wish must be at most 2000 characters');
+    const row = await queryOne<{ run_id: string; started: boolean }>(
+      this.pool,
+      'SELECT run_id::text AS run_id, started FROM public.ai_news_run_begin($1,$2,$3)',
+      [input.idempotencyKey, input.actorUserId, input.prompt],
+    );
+    if (!row?.run_id) throw new Error('database did not return a run receipt');
+    return row;
+  }
+
+  /** Closes a run with the batch it produced, or with why it produced none. */
+  async finishRun(input: {
+    readonly actorUserId: unknown;
+    readonly runId: unknown;
+    readonly batchId?: string | null;
+    readonly failureCode?: string | null;
+    readonly failureDetail?: string | null;
+  }): Promise<boolean> {
+    uuid(input.actorUserId, 'actor user id');
+    uuid(input.runId, 'run id');
+    const row = await queryOne<{ finished: boolean }>(
+      this.pool,
+      'SELECT public.ai_news_run_finish($1,$2,$3,$4,$5) AS finished',
+      [input.actorUserId, input.runId, input.batchId ?? null, input.failureCode ?? null, input.failureDetail ?? ''],
+    );
+    return row?.finished === true;
+  }
+
+  async latestRun(actorUserId: unknown): Promise<AiNewsRunRow | null> {
+    uuid(actorUserId, 'actor user id');
+    const rows = await queryRows<AiNewsRunRow>(
+      this.pool,
+      `SELECT run_id::text AS run_id, started_at, finished_at, operator_prompt,
+              batch_id::text AS batch_id, failure_code, failure_detail, running
+       FROM public.ai_news_run_latest($1)`,
       [actorUserId],
     );
     return rows[0] ?? null;

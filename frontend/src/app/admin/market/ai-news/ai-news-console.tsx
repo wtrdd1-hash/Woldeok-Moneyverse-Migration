@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
+import { LiveRefresh } from '@/components/live-refresh';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
@@ -11,9 +12,10 @@ import { IDLE } from '@/lib/action-state';
 import { cn } from '@/lib/cn';
 import { formatMoment } from '@/lib/money';
 import { StepUpField } from '../../step-up-field';
-import type { AiNewsBatch, AiNewsModelList, AiNewsScenario, AiNewsSettings } from '../../types';
+import type { AiNewsBatch, AiNewsModelList, AiNewsRun, AiNewsScenario, AiNewsSettings } from '../../types';
 import { STRENGTHS } from '../market-events';
 import { decideAiNewsScenario, generateAiNews, saveAiNewsSettings } from './actions';
+import { aiNewsSentence } from './sentences';
 
 /** Why the model field has no list beside it, in a sentence an operator can act on. */
 const NO_LIST: Readonly<Record<string, string>> = {
@@ -120,8 +122,36 @@ export function AiNewsSettingsForm({
   );
 }
 
-export function AiNewsGenerateForm({ batch, ready }: { readonly batch: AiNewsBatch | null; readonly ready: boolean }) {
+/** Seconds as a reader says them, so the figure beside a wait means something. */
+function elapsed(seconds: number): string {
+  if (seconds < 60) return `${seconds}초`;
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  return rest === 0 ? `${minutes}분` : `${minutes}분 ${rest}초`;
+}
+
+/**
+ * Asking is a run, not a request (149). The model takes longer than the
+ * gateways in front of this page will hold a connection open for, so the
+ * button starts a run and this card reports it: what it is doing and for how
+ * long while it runs, and why there are no scenarios when it ends without
+ * any. The page refreshes itself only while a run is open.
+ */
+export function AiNewsGenerateForm({
+  batch,
+  run,
+  runningFor,
+  ready,
+}: {
+  readonly batch: AiNewsBatch | null;
+  readonly run: AiNewsRun | null;
+  /** Seconds since the open run started, measured on the server. */
+  readonly runningFor: number;
+  readonly ready: boolean;
+}) {
   const [state, action] = useActionState(generateAiNews, IDLE);
+  const running = run?.running === true;
+  const failed = run !== null && !run.running && run.failure_code !== null;
   return (
     <Card>
       <CardHeader>
@@ -146,11 +176,36 @@ export function AiNewsGenerateForm({ batch, ready }: { readonly batch: AiNewsBat
             <FieldDescription>비워 두면 지금 흐름을 그대로 이어 갑니다. 적으면 그 방향으로, 단 흐름과 어긋나지 않게 만들어요.</FieldDescription>
           </Field>
           <div className="flex flex-wrap items-center gap-3">
-            <SubmitButton disabled={!ready}>{batch ? '다시 5개 만들기' : '시나리오 5개 만들기'}</SubmitButton>
+            <SubmitButton disabled={!ready || running}>
+              {running ? '만드는 중…' : batch ? '다시 5개 만들기' : '시나리오 5개 만들기'}
+            </SubmitButton>
             <span className="text-xs text-muted-foreground">
-              {ready ? '모델에 묻는 동안 1분 안팎 걸릴 수 있어요.' : '먼저 위에서 키를 저장해 주세요.'}
+              {!ready
+                ? '먼저 위에서 키를 저장해 주세요.'
+                : running
+                  ? '창을 닫아도 계속 만들어져요. 돌아와서 새로고침하면 결과가 있습니다.'
+                  : '모델이 답하는 데 보통 30초에서 2분 걸려요.'}
             </span>
           </div>
+
+          {running && (
+            <div className="rounded-[10px] border border-primary/40 bg-primary/5 px-3 py-2 text-sm">
+              <p className="font-bold">모델이 다섯 개를 쓰고 있어요 · {elapsed(runningFor)} 경과</p>
+              <p className="text-xs text-muted-foreground">
+                보통 30초~2분, 최대 10분까지 기다립니다. 이 화면은 4초마다 스스로 확인해요.
+              </p>
+            </div>
+          )}
+
+          {failed && (
+            <div className="rounded-[10px] border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm">
+              <p className="font-bold">{aiNewsSentence(run.failure_code, '시나리오를 만들지 못했어요.')}</p>
+              {run.failure_detail !== '' && (
+                <p className="mt-1 font-mono text-xs break-all text-muted-foreground">{run.failure_detail}</p>
+              )}
+            </div>
+          )}
+
           {batch && (
             <p className="text-xs text-muted-foreground">
               현재 묶음: {formatMoment(batch.created_at)} · {batch.model}
@@ -159,6 +214,7 @@ export function AiNewsGenerateForm({ batch, ready }: { readonly batch: AiNewsBat
           <ActionAlert state={state} />
         </form>
       </CardContent>
+      {running && <LiveRefresh everyMs={4_000} />}
     </Card>
   );
 }

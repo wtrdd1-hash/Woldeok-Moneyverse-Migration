@@ -45,8 +45,11 @@ function fakeRepository(overrides: Partial<AiNewsRepository> = {}): AiNewsReposi
     })),
     saveSettings: vi.fn(async () => true),
     context: vi.fn(async () => CONTEXT),
-    createBatch: vi.fn(async () => ({ batch_id: 'b', replayed: false })),
+    createBatch: vi.fn(async () => ({ batch_id: '33333333-3333-4333-8333-333333333333', replayed: false })),
     latest: vi.fn(async () => null),
+    beginRun: vi.fn(async () => ({ run_id: '44444444-4444-4444-8444-444444444444', started: true })),
+    finishRun: vi.fn(async () => true),
+    latestRun: vi.fn(async () => null),
     publish: vi.fn(async () => ({ event_id: 'e', replayed: false })),
     discard: vi.fn(async () => true),
     ...overrides,
@@ -101,23 +104,28 @@ describe('normalise', () => {
   });
 });
 
-describe('AiNewsService.generate', () => {
-  it('refuses before calling the model when no key is stored', async () => {
+describe('AiNewsService.begin', () => {
+  const settled = async (repository: AiNewsRepository): Promise<void> => {
+    await vi.waitFor(() => expect(repository.finishRun as ReturnType<typeof vi.fn>).toHaveBeenCalled());
+  };
+
+  it('refuses before opening a run when no key is stored', async () => {
     const repository = fakeRepository({
       credential: vi.fn(async () => ({ api_base_url: 'x', model: 'm', api_key_sealed: null, api_key_key_id: null })),
     } as Partial<AiNewsRepository>);
     const caller = vi.fn();
     const service = new AiNewsService(repository, SEALING, caller);
-    await expect(service.generate({ actorUserId: ACTOR })).rejects.toMatchObject({ code: 'ai_news_key_missing' });
+    await expect(service.begin({ actorUserId: ACTOR })).rejects.toMatchObject({ code: 'ai_news_key_missing' });
+    expect(repository.beginRun).not.toHaveBeenCalled();
     expect(caller).not.toHaveBeenCalled();
   });
 
   it('refuses when the stored key was sealed under a key this deployment does not hold', async () => {
     const service = new AiNewsService(fakeRepository(), { keyId: 'other', key: Buffer.alloc(32, 1) }, vi.fn());
-    await expect(service.generate({ actorUserId: ACTOR })).rejects.toMatchObject({ code: 'ai_news_sealing_unavailable' });
+    await expect(service.begin({ actorUserId: ACTOR })).rejects.toMatchObject({ code: 'ai_news_sealing_unavailable' });
   });
 
-  it('opens the key, calls the model at the stored address with the context, and stores what came back', async () => {
+  it('answers with the run and calls the model after, so no gateway is waiting on it', async () => {
     const calls: ModelCall[] = [];
     const caller = async (call: ModelCall): Promise<ScenarioBatch> => {
       calls.push(call);
@@ -125,7 +133,14 @@ describe('AiNewsService.generate', () => {
     };
     const repository = fakeRepository();
     const service = new AiNewsService(repository, SEALING, caller);
-    await service.generate({ actorUserId: ACTOR, prompt: '  조용한 하루  ', idempotencyKey: '22222222-2222-4222-8222-222222222222' });
+
+    await service.begin({ actorUserId: ACTOR, prompt: '  조용한 하루  ', idempotencyKey: '22222222-2222-4222-8222-222222222222' });
+    expect(repository.beginRun).toHaveBeenCalledWith({
+      idempotencyKey: '22222222-2222-4222-8222-222222222222',
+      actorUserId: ACTOR,
+      prompt: '조용한 하루',
+    });
+    await settled(repository);
 
     expect(calls[0]).toMatchObject({ apiBaseUrl: 'https://api.example', apiKey: 'sk-test-key-1234', model: 'gpt-4o-mini', system: SYSTEM_PROMPT });
     expect(calls[0]?.user).toContain('Operator wish: 조용한 하루');
@@ -137,17 +152,38 @@ describe('AiNewsService.generate', () => {
     expect(stored.context).toEqual(CONTEXT);
     expect(stored.scenarios).toHaveLength(2);
     expect(stored.scenarios[1]?.stock_symbol).toBeNull();
-    expect(repository.latest).toHaveBeenCalledWith(ACTOR);
+    expect(repository.finishRun).toHaveBeenCalledWith({
+      actorUserId: ACTOR,
+      runId: '44444444-4444-4444-8444-444444444444',
+      batchId: '33333333-3333-4333-8333-333333333333',
+    });
   });
 
-  it('lets the model\'s own refusal through untouched', async () => {
+  it('writes why a run produced nothing against the run, since nobody is left to throw at', async () => {
     const caller = async (): Promise<ScenarioBatch> => {
       throw new AiNewsUnavailableError('ai_news_model_refused', 'declined');
     };
     const repository = fakeRepository();
     const service = new AiNewsService(repository, SEALING, caller);
-    await expect(service.generate({ actorUserId: ACTOR })).rejects.toMatchObject({ code: 'ai_news_model_refused' });
+    await service.begin({ actorUserId: ACTOR });
+    await settled(repository);
+
     expect(repository.createBatch).not.toHaveBeenCalled();
+    expect((repository.finishRun as ReturnType<typeof vi.fn>).mock.calls[0]?.[0]).toMatchObject({
+      failureCode: 'ai_news_model_refused',
+      failureDetail: 'declined',
+    });
+  });
+
+  it('asks the model once while a run is already open', async () => {
+    const repository = fakeRepository({
+      beginRun: vi.fn(async () => ({ run_id: '44444444-4444-4444-8444-444444444444', started: false })),
+    } as Partial<AiNewsRepository>);
+    const caller = vi.fn();
+    const service = new AiNewsService(repository, SEALING, caller);
+    await service.begin({ actorUserId: ACTOR });
+    expect(caller).not.toHaveBeenCalled();
+    expect(repository.latestRun).toHaveBeenCalledWith(ACTOR);
   });
 });
 

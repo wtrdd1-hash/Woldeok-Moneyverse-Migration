@@ -321,6 +321,22 @@ export interface AiNewsModelList {
   readonly problem: string | null;
 }
 
+/**
+ * One attempt at asking the model, as `ai_news_run_latest` reports it (149).
+ * The console reads this while it waits: the model is slower than any
+ * gateway in front of the site will hold a connection open for.
+ */
+export interface AiNewsRun {
+  readonly run_id: string;
+  readonly started_at: string;
+  readonly finished_at: string | null;
+  readonly operator_prompt: string;
+  readonly batch_id: string | null;
+  readonly failure_code: string | null;
+  readonly failure_detail: string;
+  readonly running: boolean;
+}
+
 /** One proposed scenario, as `ai_news_batch_latest` lists them. */
 export interface AiNewsScenario {
   readonly id: string;
