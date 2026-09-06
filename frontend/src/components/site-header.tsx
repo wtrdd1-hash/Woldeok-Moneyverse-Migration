@@ -41,6 +41,7 @@ import {
 } from '@/lib/navigation';
 import { useViewer } from '@/lib/use-viewer';
 import type { Viewer } from '@/lib/viewer-state';
+import { isAdministrator } from '@/lib/viewer-state';
 
 /**
  * The sticky masthead, in the shape the product has always had: wordmark on
@@ -79,16 +80,7 @@ export function SiteHeader() {
 
   // The sheet stays flat: a drawer has the room, and a menu inside a menu is
   // worse than a long list.
-  // The rail is discovery, never the permission boundary. A session can be
-  // valid while the lightweight viewer lookup temporarily has no role list;
-  // hiding the only route into the console then strands a real operator on a
-  // phone. The admin page asks the protected API again and redirects a member
-  // without a role, so a signed-in reader may safely get one entry point.
-  const mobileAdmin: readonly NavEntry[] = isAdmin
-    ? ADMIN_NAV
-    : viewer?.signedIn
-      ? [{ href: '/admin', label: '관리자 페이지' }]
-      : [];
+  const mobileAdmin = mobileAdminEntries(viewer);
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/94 backdrop-blur-lg">
@@ -138,33 +130,45 @@ export function SiteHeader() {
                 </div>
               </nav>
               <SheetFooter className="border-t bg-background/95 pb-[max(1rem,env(safe-area-inset-bottom))] sm:hidden">
-                {!viewer ? (
-                  <Skeleton className="h-11 w-full rounded-[10px]" />
-                ) : viewer.signedIn ? (
-                  <form action={logout}>
-                    <Button
-                      type="submit"
-                      variant="outline"
-                      className="min-h-11 w-full font-bold"
-                    >
-                      <LogOut />
-                      {locale === 'en' ? 'Sign out' : '로그아웃'}
-                    </Button>
-                  </form>
-                ) : (
-                  <Button asChild className="min-h-11 w-full font-bold">
-                    <Link href="/login">
-                      <LogIn />
-                      {locale === 'en' ? 'Sign in' : '로그인'}
-                    </Link>
-                  </Button>
-                )}
+                <MobileSessionAction viewer={viewer} locale={locale} />
               </SheetFooter>
             </SheetContent>
           </Sheet>
         </div>
       </div>
     </header>
+  );
+}
+
+export function mobileAdminEntries(viewer: Viewer | null): readonly NavEntry[] {
+  return viewer && isAdministrator(viewer) ? ADMIN_NAV : [];
+}
+
+export function MobileSessionAction({
+  viewer,
+  locale,
+}: {
+  readonly viewer: Viewer | null;
+  readonly locale: 'ko' | 'en';
+}) {
+  if (!viewer) return <Skeleton className="h-11 w-full rounded-[10px]" />;
+  if (!viewer.signedIn) {
+    return (
+      <Button asChild className="min-h-11 w-full font-bold">
+        <Link href="/login">
+          <LogIn />
+          {locale === 'en' ? 'Sign in' : '로그인'}
+        </Link>
+      </Button>
+    );
+  }
+  return (
+    <form action={logout}>
+      <Button type="submit" variant="outline" className="min-h-11 w-full font-bold">
+        <LogOut />
+        {locale === 'en' ? 'Sign out' : '로그아웃'}
+      </Button>
+    </form>
   );
 }
 

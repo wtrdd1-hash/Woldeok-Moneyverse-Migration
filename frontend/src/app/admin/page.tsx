@@ -11,7 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { adminConsole } from '@/lib/session';
 import { ADMIN_AREAS, adminAreaFor, consoleReturnPath } from './areas';
 import { AdminQuickUserSearch } from './admin-quick-search';
-import { CloseConsole, EnrolSecondFactor, IssueRecoveryCodes, OpenConsole } from './console-gate';
+import { CloseConsole, IssueRecoveryCodes, OpenConsole } from './console-gate';
 import type {
   AdminBusiness,
   AdminConsole,
@@ -385,7 +385,7 @@ function Gate({ admin, next }: { readonly admin: AdminConsole; readonly next: st
   return (
     <div className="grid gap-5">
       <PageHeader eyebrow="WOLDEOK MONEYVERSE · OPERATIONS" title="운영 콘솔 잠금">
-        운영 기능은 별도의 콘솔 세션에서만 열립니다. 본인 확인을 다시 하고 인증 앱 코드를 입력해야
+        운영 기능은 별도의 콘솔 세션에서만 열립니다. 현재 로그인 세션의 관리자 역할을 확인한 뒤
         들어갈 수 있습니다.
       </PageHeader>
 
@@ -425,43 +425,16 @@ function Gate({ admin, next }: { readonly admin: AdminConsole; readonly next: st
             </CardDescription>
           </CardHeader>
         </Card>
-      ) : !admin.secondFactor.confirmed ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">인증 앱을 먼저 등록해 주세요.</CardTitle>
-            <CardDescription>
-              최고관리자 한 명이 모든 운영 기능을 단독으로 실행하므로, 로그인 외에 두 번째 인증
-              수단이 반드시 필요합니다. 등록에는 최근 5분 안의 본인 확인이 필요합니다.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            {/* Shown only while it is the thing standing in the way. An
-                operator who has just confirmed their identity was still being
-                told to go and confirm it -- and the control below was live
-                whether or not they had, so pressing it answered 401. */}
-            {!admin.reauthentication.fresh && (
-              <Button asChild variant="outline" className="min-h-11 w-fit">
-                <Link href="/account">본인 확인하러 가기 →</Link>
-              </Button>
-            )}
-            <EnrolSecondFactor disabled={!admin.reauthentication.fresh} />
-          </CardContent>
-        </Card>
       ) : (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">콘솔 열기</CardTitle>
             <CardDescription>
-              최근 5분 안에 본인 확인을 마쳤고, 등록된 기기·주소에서 접속한 경우에만 열립니다.
+              현재 로그인한 계정에 관리자 역할이 있고 허용된 주소에서 접속한 경우에만 열립니다.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
-            {!admin.reauthentication.fresh && (
-              <Button asChild variant="outline" className="min-h-11 w-fit">
-                <Link href="/account">본인 확인하러 가기 →</Link>
-              </Button>
-            )}
-            <OpenConsole disabled={!admin.reauthentication.fresh} next={next} />
+            <OpenConsole next={next} />
           </CardContent>
         </Card>
       )}

@@ -285,7 +285,7 @@ export class AdminSecurityController {
   }
 
   @Post('sessions')
-  @UseGuards(CsrfGuard, ReauthGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Enter the operations console, rotating the session' })
   async openConsole(
     @Req() request: RequestWithSession,
