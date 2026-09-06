@@ -32,25 +32,36 @@ export function requestActivityTrail({
     }
 
     const startedAt = Date.now();
+    const countryHeader = String(
+      request.headers['cf-ipcountry'] ?? request.headers['x-vercel-ip-country'] ?? '',
+    ).toUpperCase();
+    const country = /^[A-Z]{2}$/.test(countryHeader) ? countryHeader : null;
     const token = sessionToken(request.headers, config);
-    const actor = token && sessions
-      ? sessions.get(token).then((session) => session?.user_id ?? null).catch(() => null)
-      : Promise.resolve(null);
+    const actor =
+      token && sessions
+        ? sessions
+            .get(token)
+            .then((session) => session?.user_id ?? null)
+            .catch(() => null)
+        : Promise.resolve(null);
 
     response.on('finish', () => {
       void actor
-        .then((actorUserId) => activity.recordRequest({
-          actor: actorUserId,
-          path,
-          method: request.method.slice(0, 12),
-          status: response.statusCode,
-          durationMs: Math.max(0, Date.now() - startedAt),
-          requestId: contextOf(request)?.requestId ?? null,
-          ip: requestClientKey(request, {
-            trustForwardedFor: config.trustProxyForwardedFor,
+        .then((actorUserId) =>
+          activity.recordRequest({
+            actor: actorUserId,
+            path,
+            method: request.method.slice(0, 12),
+            status: response.statusCode,
+            durationMs: Math.max(0, Date.now() - startedAt),
+            requestId: contextOf(request)?.requestId ?? null,
+            ip: requestClientKey(request, {
+              trustForwardedFor: config.trustProxyForwardedFor,
+            }),
+            userAgent: String(request.headers['user-agent'] ?? '').slice(0, 500) || null,
+            country,
           }),
-          userAgent: String(request.headers['user-agent'] ?? '').slice(0, 500) || null,
-        }))
+        )
         .catch(onFailure);
     });
 

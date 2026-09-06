@@ -28,6 +28,7 @@ describe('requestActivityTrail', () => {
         cookie: '__Host-mv_session=session-secret',
         'cf-connecting-ip': '203.0.113.9',
         'user-agent': 'mobile-test',
+        'cf-ipcountry': 'kr',
       },
       socket: {},
     } as unknown as Request;
@@ -44,14 +45,17 @@ describe('requestActivityTrail', () => {
 
     expect(next).toHaveBeenCalledOnce();
     expect(sessions.get).toHaveBeenCalledWith('session-secret');
-    expect(recordRequest).toHaveBeenCalledWith(expect.objectContaining({
-      actor: '00000000-0000-4000-8000-000000000001',
-      path: '/api/v1/admin/users',
-      method: 'GET',
-      status: 200,
-      ip: '203.0.113.9',
-      userAgent: 'mobile-test',
-    }));
+    expect(recordRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        actor: '00000000-0000-4000-8000-000000000001',
+        path: '/api/v1/admin/users',
+        method: 'GET',
+        status: 200,
+        ip: '203.0.113.9',
+        userAgent: 'mobile-test',
+        country: 'KR',
+      }),
+    );
     expect(JSON.stringify(recordRequest.mock.calls)).not.toContain('query=secret');
     expect(JSON.stringify(recordRequest.mock.calls)).not.toContain('session-secret');
   });

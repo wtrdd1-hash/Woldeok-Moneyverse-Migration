@@ -10,6 +10,7 @@ interface ClaimableEvent {
   id: string;
   event_type: string;
   channel_key: string;
+  safe_context?: unknown;
 }
 
 /**
@@ -104,6 +105,62 @@ describe('the Discord outbox message', () => {
       `머니버스 이벤트: unknown\n영수증: ${EVENT_ID}`,
     );
   });
+
+  it('renders an actionable, sanitised API request with the requesting member', () => {
+    expect(
+      messageFor({
+        id: EVENT_ID,
+        event_type: 'activity.api_request',
+        safe_context: {
+          nickname: '월덕',
+          userId: '23b1ece3-1c38-4f96-a4fe-061a8b44a457',
+          method: 'GET',
+          path: '/api/v1/wallet',
+          status: 200,
+          durationMs: 42,
+          requestId: EVENT_ID,
+          occurredAt: '2026-09-07T01:23:45.000Z',
+          country: 'KR',
+        },
+      }),
+    ).toBe(
+      [
+        '[WEB 요청]',
+        '사용자: 월덕 (23b1ece3-1c38-4f96-a4fe-061a8b44a457)',
+        '요청: GET /api/v1/wallet',
+        '응답: 200 · 42ms',
+        '접속 국가: KR',
+        '시각: 2026-09-07T01:23:45.000Z',
+        `요청 ID: ${EVENT_ID}`,
+      ].join('\n'),
+    );
+  });
+
+  it('does not allow activity fields to create Discord mentions or multiline injection', () => {
+    const message = messageFor({
+      id: EVENT_ID,
+      event_type: 'activity.admin_request',
+      safe_context: {
+        nickname: '@everyone\n침입',
+        method: 'POST',
+        path: '/api/v1/admin/users\nsecret',
+      },
+    });
+    expect(message).toContain('사용자:  침입');
+    expect(message).not.toContain('@everyone');
+    expect(message).toContain('요청: POST /api/v1/admin/users secret');
+    expect(message).toContain('접속 국가: 확인 불가');
+  });
+
+  it('shows client events in Korean with their page and country', () => {
+    const message = messageFor({
+      id: EVENT_ID,
+      event_type: 'activity.client_event',
+      safe_context: { nickname: '방문자', activity: 'page_view', path: '/shop', country: 'US' },
+    });
+    expect(message).toContain('화면: /shop · 페이지 접속');
+    expect(message).toContain('접속 국가: US');
+  });
 });
 
 describe('reading a Discord rate-limit response', () => {
@@ -129,8 +186,7 @@ describe('DiscordOutboxWorker delivery', () => {
   it('refuses to be built without somewhere to post', () => {
     const { pool } = fakePool([]);
     expect(
-      () =>
-        new DiscordOutboxWorker({ pool, token: 'bot-token', channels: {}, intervalMs: 5_000 }),
+      () => new DiscordOutboxWorker({ pool, token: 'bot-token', channels: {}, intervalMs: 5_000 }),
     ).toThrow('at least one outbox channel');
     expect(
       () =>
@@ -214,7 +270,10 @@ describe('DiscordOutboxWorker delivery', () => {
    * did.
    */
   it('dead-letters a refusal that repeating cannot fix', async () => {
-    const { fetchImpl } = respondWith([{ ok: false, status: 403 }, { ok: true, status: 200 }]);
+    const { fetchImpl } = respondWith([
+      { ok: false, status: 403 },
+      { ok: true, status: 200 },
+    ]);
     const events: ClaimableEvent[] = [
       ...oneEvent,
       {

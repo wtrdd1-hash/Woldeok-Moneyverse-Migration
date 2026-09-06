@@ -58,18 +58,17 @@ export class ActivityController {
     const ip = this.extractIp(request);
     const userAgent = String(request.headers['user-agent'] ?? '').slice(0, 500);
 
-    return this.activityService.recordEvents(body.events, actor, ip, userAgent);
+    const countryHeader = String(
+      request.headers['cf-ipcountry'] ?? request.headers['x-vercel-ip-country'] ?? '',
+    ).toUpperCase();
+    const country = /^[A-Z]{2}$/.test(countryHeader) ? countryHeader : null;
+    return this.activityService.recordEvents(body.events, actor, ip, userAgent, country);
   }
 
   @Get('admin/activity/logs')
   @UseGuards(AdminSessionGuard, AdminGuard)
   @ApiOperation({ summary: 'List user activity logs for administrators' })
   async listLogs(@Query() query: QueryActivityLogsDto) {
-    return this.activityService.getLogs(
-      query.limit,
-      query.offset,
-      query.eventType,
-      query.userId,
-    );
+    return this.activityService.getLogs(query.limit, query.offset, query.eventType, query.userId);
   }
 }

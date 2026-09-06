@@ -24,10 +24,9 @@ import { NO_MENTIONS, withoutMentions } from './mentions';
  *   - The message depends on the event type. One line reading
  *     "머니버스 이벤트: shop.purchase.completed" told a reader nothing.
  *
- * It is never handed a payload: `outbox_claim_pending` returns the type and
- * the receipt id only, so no amount, member or transaction detail can reach a
- * Discord channel through this path even by mistake — the same rule 039 keeps
- * for the operator console.
+ * The claim function exposes a small, database-built `safe_context` only for
+ * activity events. It never exposes the original request, headers, cookies,
+ * query values or body.
  */
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -45,6 +44,7 @@ interface OutboxEventRow {
   id: string;
   event_type: string;
   channel_key: string;
+  safe_context: unknown;
 }
 
 // public.outbox_record_delivery_failure($1,$2,$3)
@@ -100,8 +100,68 @@ const HEADLINES: Readonly<Record<string, string>> = Object.freeze({
  * can reach `@everyone` today — the filter is there so the next person to add
  * a payload-derived field does not have to remember.
  */
-export function messageFor(event: { id: string; event_type: string }): string {
+function safeText(value: unknown, maximum: number): string | null {
+  if (typeof value !== 'string') return null;
+  const normalised = value.replace(/[\r\n\t]+/g, ' ').trim();
+  return normalised ? normalised.slice(0, maximum) : null;
+}
+
+function activityMessage(event: {
+  id: string;
+  event_type: string;
+  safe_context?: unknown;
+}): string | null {
+  if (
+    !event.event_type.startsWith('activity.') ||
+    !event.safe_context ||
+    typeof event.safe_context !== 'object'
+  )
+    return null;
+  const context = event.safe_context as Record<string, unknown>;
+  const userId = safeText(context.userId, 36);
+  const nickname = safeText(context.nickname, 80) ?? (userId ? '회원' : '비로그인');
+  const method = safeText(context.method, 12);
+  const path = safeText(context.path, 500);
+  const requestId = safeText(context.requestId, 36);
+  const occurredAt = safeText(context.occurredAt, 40);
+  const status =
+    typeof context.status === 'number' && Number.isInteger(context.status) ? context.status : null;
+  const durationMs =
+    typeof context.durationMs === 'number' && Number.isInteger(context.durationMs)
+      ? Math.max(0, context.durationMs)
+      : null;
+  const activity = safeText(context.activity, 40);
+  const targetLabel = safeText(context.targetLabel, 120);
+  const activityLabels: Readonly<Record<string, string>> = {
+    page_view: '페이지 접속',
+    page_dwell: '페이지 체류',
+    button_click: '버튼 클릭',
+    form_submit: '양식 제출',
+    navigation: '페이지 이동',
+  };
+  const country = safeText(context.country, 2) ?? '확인 불가';
+  const lines = [event.event_type === 'activity.admin_request' ? '[ADMIN 요청]' : '[WEB 요청]'];
+  lines.push(`사용자: ${nickname}${userId ? ` (${userId})` : ''}`);
+  if (method && path) lines.push(`요청: ${method} ${path}`);
+  else if (path)
+    lines.push(`화면: ${path}${activity ? ` · ${activityLabels[activity] ?? activity}` : ''}`);
+  if (targetLabel) lines.push(`대상: ${targetLabel}`);
+  if (status !== null)
+    lines.push(`응답: ${status}${durationMs !== null ? ` · ${durationMs}ms` : ''}`);
+  lines.push(`접속 국가: ${country}`);
+  if (occurredAt) lines.push(`시각: ${occurredAt}`);
+  lines.push(`요청 ID: ${requestId ?? event.id}`);
+  return lines.join('\n');
+}
+
+export function messageFor(event: {
+  id: string;
+  event_type: string;
+  safe_context?: unknown;
+}): string {
   const type = EVENT_TYPE.test(event.event_type) ? event.event_type : 'unknown';
+  const activity = activityMessage({ ...event, event_type: type });
+  if (activity) return withoutMentions(activity);
   const headline = HEADLINES[type] ?? `머니버스 이벤트: ${type}`;
   return withoutMentions(`${headline}\n영수증: ${event.id}`);
 }
@@ -299,7 +359,7 @@ export class DiscordOutboxWorker {
   private async deliverBatch(): Promise<OutboxRunSummary> {
     const rows = await queryRows<OutboxEventRow>(
       this.options.pool,
-      'SELECT id::text,event_type,channel_key FROM public.outbox_claim_pending($1)',
+      'SELECT id::text,event_type,channel_key,safe_context FROM public.outbox_claim_pending($1)',
       [this.batchSize],
     );
     let delivered = 0;

@@ -27,13 +27,14 @@ export class ActivityRepository {
     actor: string | null,
     ip: string | null,
     userAgent: string | null,
+    country: string | null,
   ): Promise<number> {
     if (events.length === 0) return 0;
     const client = await this.pool.connect();
     try {
       const result = await client.query<{ activity_log_events: number }>(
-        'SELECT public.activity_log_events($1::jsonb, $2::uuid, $3::inet, $4::text) AS activity_log_events',
-        [JSON.stringify(events), actor, ip, userAgent],
+        'SELECT public.activity_log_events($1::jsonb, $2::uuid, $3::inet, $4::text, $5::text) AS activity_log_events',
+        [JSON.stringify(events), actor, ip, userAgent, country],
       );
       return result.rows[0]?.activity_log_events ?? 0;
     } finally {
@@ -68,9 +69,10 @@ export class ActivityRepository {
     readonly requestId: string | null;
     readonly ip: string | null;
     readonly userAgent: string | null;
+    readonly country: string | null;
   }): Promise<void> {
     await this.pool.query(
-      'SELECT public.activity_log_request($1::uuid,$2,$3,$4,$5,$6::uuid,$7::inet,$8)',
+      'SELECT public.activity_log_request($1::uuid,$2,$3,$4,$5,$6::uuid,$7::inet,$8,$9)',
       [
         input.actor,
         input.path,
@@ -80,6 +82,7 @@ export class ActivityRepository {
         input.requestId,
         input.ip,
         input.userAgent,
+        input.country,
       ],
     );
   }
