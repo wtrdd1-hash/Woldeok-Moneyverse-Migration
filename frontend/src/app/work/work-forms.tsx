@@ -91,9 +91,7 @@ export function TaskCompleteModalButton({
   }, []);
 
   const meta = jobMeta(task.job_type, locale);
-  const isLimitReached = task.taken_today >= task.daily_limit;
   const isBusy = phase === 'running' || phase === 'slow_network' || isPending;
-  const overtimeReward = Math.max(30, Math.round(Number(task.base_reward) * 0.25));
 
   // Sync server action response to UI state
   useEffect(() => {
@@ -202,7 +200,7 @@ export function TaskCompleteModalButton({
   return (
     <div>
       <Button
-        variant={isActiveJob ? (isLimitReached ? 'default' : 'default') : 'outline'}
+        variant={isActiveJob ? 'default' : 'outline'}
         disabled={!isActiveJob}
         onClick={() => {
           setPhase('idle');
@@ -210,17 +208,11 @@ export function TaskCompleteModalButton({
           setStatusText('');
           setIsOpen(true);
         }}
-        className={`w-full font-semibold shadow-sm transition-all ${
-          isActiveJob && isLimitReached
-            ? 'bg-amber-600 hover:bg-amber-500 text-white border-amber-500/50'
-            : ''
-        }`}
+        className="w-full font-semibold shadow-sm transition-all"
       >
         {!isActiveJob
           ? (isEn ? 'Switch Career First' : '해당 직업 전직 필요')
-          : isLimitReached
-          ? (isEn ? '🔥 Overtime Work (Unlimited)' : '🔥 추가 특근 수행 (무제한)')
-          : (isEn ? '⚡ Perform Task' : '⚡ 즉시 업무 수행')}
+          : (isEn ? '⚡ Perform Task (Unlimited)' : '⚡ 즉시 업무 수행 (무제한)')}
       </Button>
 
       {isOpen && (
@@ -234,18 +226,9 @@ export function TaskCompleteModalButton({
                   <span className="text-muted-foreground/60">·</span>
                   <span>{difficultyLabel(task.difficulty, locale)}</span>
                 </Badge>
-                {isLimitReached ? (
-                  <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 flex items-center gap-1 font-semibold">
-                    <span>⚡</span>
-                    <span>{isEn ? 'Overtime Mode (Unlimited)' : '추가 특근 (무제한)'}</span>
-                  </Badge>
-                ) : (
-                  <Badge className="bg-primary/20 text-primary border-primary/30">
-                    {isEn
-                      ? `Daily ${task.taken_today}/${task.daily_limit}`
-                      : `일일 ${task.taken_today}/${task.daily_limit}회`}
-                  </Badge>
-                )}
+                <Badge className="bg-primary/20 text-primary border-primary/30">
+                  {isEn ? `Today ${task.taken_today} · Repeatable` : `오늘 ${task.taken_today}회 · 계속 가능`}
+                </Badge>
               </div>
               <CardTitle className="text-xl mt-2">{task.name}</CardTitle>
               <CardDescription className="text-sm">{task.description}</CardDescription>
@@ -255,13 +238,10 @@ export function TaskCompleteModalButton({
               <div className="rounded-xl border border-border/50 bg-muted/40 p-3 grid grid-cols-2 gap-2 text-center text-sm">
                 <div>
                   <span className="text-xs text-muted-foreground block">
-                    {isLimitReached
-                      ? (isEn ? 'Overtime Reward' : '특근 WLD 보상')
-                      : (isEn ? 'Base Reward' : '기본 WLD 보상')}
+                    {isEn ? 'Full WLD Reward' : 'WLD 전액 보상'}
                   </span>
                   <span className="text-base font-bold text-emerald-400">
-                    +{isLimitReached ? overtimeReward : task.base_reward} WLD
-                    {isLimitReached && <span className="text-[11px] font-normal text-muted-foreground ml-1">(25%)</span>}
+                    +{task.reward_preview ?? task.base_reward} WLD
                   </span>
                 </div>
                 <div>
@@ -275,12 +255,9 @@ export function TaskCompleteModalButton({
                 </div>
               </div>
 
-              {isLimitReached && (
-                <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-2.5 text-xs text-amber-300 text-center flex items-center justify-center gap-1.5">
-                  <span>⚡</span>
-                  <span>{isEn ? 'Daily quota completed! You can now perform unlimited overtime to earn EXP and level up.' : '기본 일일 횟수 달성! 멈추지 않고 추가 특근을 통해 숙련도 EXP 100%와 WLD를 무제한 획득할 수 있습니다.'}</span>
-                </div>
-              )}
+              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-2.5 text-xs text-emerald-300 text-center">
+                {isEn ? 'No daily task cap: every verified repeat pays the full WLD and EXP reward.' : '일일 횟수 제한 없이 검증된 모든 반복 작업에 WLD와 EXP가 전액 지급됩니다.'}
+              </div>
 
               {phase !== 'idle' ? (
                 <div className="space-y-2 py-3">
@@ -334,11 +311,7 @@ export function TaskCompleteModalButton({
                 <Button
                   disabled={isBusy && phase !== 'slow_network'}
                   onClick={handleStartWork}
-                  className={`font-bold transition-all ${
-                    isLimitReached && phase !== 'error' && phase !== 'done'
-                      ? 'bg-amber-600 hover:bg-amber-500 text-white'
-                      : ''
-                  }`}
+                  className="font-bold transition-all"
                   variant={phase === 'error' ? 'destructive' : 'default'}
                 >
                   {phase === 'running'
@@ -349,9 +322,7 @@ export function TaskCompleteModalButton({
                     ? (isEn ? 'Completed ✓' : '완료됨 ✓')
                     : phase === 'error'
                     ? (isEn ? 'Retry' : '다시 시도')
-                    : isLimitReached
-                    ? (isEn ? '🔥 Perform Overtime & Claim' : '🔥 추가 특근 수행 및 보상 수령')
-                    : (isEn ? 'Complete Task & Claim Reward' : '업무 완료 및 보상 수령')}
+                    : (isEn ? 'Complete Task & Claim Full Reward' : '업무 완료 및 전액 보상 수령')}
                 </Button>
               </div>
             </CardContent>

@@ -459,6 +459,42 @@ export default function GuidePage() {
         </section>
       </div>
 
+      <section aria-labelledby="operations-title" className="space-y-6">
+        <div>
+          <p className="eyebrow mb-1 text-primary">RELIABILITY & ECONOMY REFERENCES</p>
+          <h2 id="operations-title" className="text-2xl font-extrabold sm:text-3xl">
+            <T korean="통신 안정성과 경제 운영 원칙" english="Reliability and Economy Principles" />
+          </h2>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">패킷·요청 유실 방지</CardTitle>
+              <CardDescription className="leading-relaxed">
+                활동 이벤트에 고유 ID를 붙이고, 실패한 전송은 브라우저에 보관해 재시도하며 서버는 중복을 제거합니다. 원장 변경 요청도 멱등 키를 사용합니다.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-3 text-xs font-semibold text-primary">
+              <a href="https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon" target="_blank" rel="noreferrer">MDN sendBeacon ↗</a>
+              <a href="https://docs.stripe.com/api/idempotent_requests" target="_blank" rel="noreferrer">Stripe 멱등 요청 ↗</a>
+              <a href="https://docs.discord.com/developers/topics/rate-limits" target="_blank" rel="noreferrer">Discord 재시도 정책 ↗</a>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">보상 제한 대신 소비처 확장</CardTitle>
+              <CardDescription className="leading-relaxed">
+                직업 작업은 일일 횟수 제한 없이 매번 전액 보상합니다. 발행된 WLD는 상점의 반복 구매 상품, 금융·사업·거래·여가 기능으로 순환시키고 운영 지표로 균형을 점검합니다.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-3 text-xs font-semibold text-primary">
+              <a href="https://docs.unity.com/en-us/economy/add-virtual-purchase" target="_blank" rel="noreferrer">Unity 가상 구매 ↗</a>
+              <a href="https://learn.microsoft.com/en-us/xbox/playfab/economy-monetization/economy-v2/quickstart" target="_blank" rel="noreferrer">PlayFab 경제 ↗</a>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* 7. FAQ Section */}
       <section aria-labelledby="faq-title" className="space-y-6">
         <div className="flex items-center gap-3">

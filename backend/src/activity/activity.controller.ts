@@ -13,6 +13,9 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
+import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
+import { ConsentGuard } from '../auth/guards/consent.guard';
+import { SessionGuard } from '../auth/guards/session.guard';
 import { sessionToken } from '../auth/cookies';
 import { SessionRepository } from '../auth/session.repository';
 import { requestClientKey } from '../security/rate-limit';
@@ -66,7 +69,7 @@ export class ActivityController {
   }
 
   @Get('admin/activity/logs')
-  @UseGuards(AdminSessionGuard, AdminGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
   @ApiOperation({ summary: 'List user activity logs for administrators' })
   async listLogs(@Query() query: QueryActivityLogsDto) {
     return this.activityService.getLogs(query.limit, query.offset, query.eventType, query.userId);

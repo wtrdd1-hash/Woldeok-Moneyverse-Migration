@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { api } from '@/lib/api';
+import { ApiError } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../../admin-back';
 import { adminArea } from '../../areas';
@@ -76,12 +77,15 @@ export default async function AdminActivityLogsPage({
   const offset = (page - 1) * parseInt(limit, 10);
 
   let logs: ActivityLogRow[] = [];
+  let loadProblem = '';
   try {
     const query = new URLSearchParams({ limit, offset: String(offset) });
     if (eventType) query.set('eventType', eventType);
     logs = await api<ActivityLogRow[]>(`/api/v1/admin/activity/logs?${query.toString()}`);
-  } catch {
-    logs = [];
+  } catch (error) {
+    loadProblem = error instanceof ApiError && error.status === 403
+      ? '관리자 세션 권한을 확인할 수 없습니다. 다시 로그인한 뒤 시도해 주세요.'
+      : '활동 로그를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
   }
 
   return (
@@ -163,7 +167,9 @@ export default async function AdminActivityLogsPage({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {logs.length === 0 ? (
+          {loadProblem ? (
+            <EmptyState title="활동 로그 조회 실패" description={loadProblem} />
+          ) : logs.length === 0 ? (
             <EmptyState
               title="기록된 활동 로그가 없습니다"
               description="새로운 접속이나 클릭이 발생하면 여기에 실시간으로 기록됩니다."
