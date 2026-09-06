@@ -106,6 +106,56 @@ function safeText(value: unknown, maximum: number): string | null {
   return normalised ? normalised.slice(0, maximum) : null;
 }
 
+function koreaTime(value: string | null): string | null {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (!Number.isFinite(parsed.getTime())) return null;
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(parsed);
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((candidate) => candidate.type === type)?.value;
+  const date = `${part('year')}-${part('month')}-${part('day')}`;
+  const time = `${part('hour')}:${part('minute')}:${part('second')}`;
+  return `${date} ${time} (한국시간)`;
+}
+
+function deviceSummary(value: string | null): string | null {
+  if (!value) return null;
+  const browser = /Edg\//.test(value)
+    ? 'Edge'
+    : /OPR\//.test(value)
+      ? 'Opera'
+      : /Firefox\//.test(value)
+        ? 'Firefox'
+        : /Chrome\//.test(value)
+          ? 'Chrome'
+          : /Safari\//.test(value)
+            ? 'Safari'
+            : /bot|crawler|spider/i.test(value)
+              ? 'Bot'
+              : '기타 브라우저';
+  const platform = /Android/.test(value)
+    ? 'Android'
+    : /iPhone|iPad|iOS/.test(value)
+      ? 'iOS'
+      : /Windows/.test(value)
+        ? 'Windows'
+        : /Mac OS X/.test(value)
+          ? 'macOS'
+          : /Linux/.test(value)
+            ? 'Linux'
+            : '기타 기기';
+  return `${platform} · ${browser}`;
+}
+
 function activityMessage(event: {
   id: string;
   event_type: string;
@@ -124,6 +174,8 @@ function activityMessage(event: {
   const path = safeText(context.path, 500);
   const requestId = safeText(context.requestId, 36);
   const occurredAt = safeText(context.occurredAt, 40);
+  const network = safeText(context.network, 64);
+  const device = deviceSummary(safeText(context.userAgent, 500));
   const status =
     typeof context.status === 'number' && Number.isInteger(context.status) ? context.status : null;
   const durationMs =
@@ -149,7 +201,10 @@ function activityMessage(event: {
   if (status !== null)
     lines.push(`응답: ${status}${durationMs !== null ? ` · ${durationMs}ms` : ''}`);
   lines.push(`접속 국가: ${country}`);
-  if (occurredAt) lines.push(`시각: ${occurredAt}`);
+  if (network) lines.push(`접속망: ${network}`);
+  if (device) lines.push(`기기: ${device}`);
+  const localTime = koreaTime(occurredAt);
+  if (localTime) lines.push(`시각: ${localTime}`);
   lines.push(`요청 ID: ${requestId ?? event.id}`);
   return lines.join('\n');
 }
