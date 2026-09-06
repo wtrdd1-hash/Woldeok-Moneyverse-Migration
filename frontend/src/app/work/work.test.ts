@@ -170,9 +170,9 @@ describe('rewardSentence', () => {
 });
 
 describe('isSpent', () => {
-  it('is true once the day’s takes equal the limit 066 sets', () => {
+  it('never marks repeatable work as spent', () => {
     expect(isSpent(task({ taken_today: 1, daily_limit: 2 }))).toBe(false);
-    expect(isSpent(task({ taken_today: 2, daily_limit: 2 }))).toBe(true);
+    expect(isSpent(task({ taken_today: 2, daily_limit: 2 }))).toBe(false);
   });
 });
 
@@ -187,7 +187,7 @@ describe('boardOrder', () => {
     expect(boardOrder(tasks).map((entry) => entry.code)).toEqual(['b', 'd', 'a', 'c']);
   });
 
-  it('floats the active job tasks to the top, putting unspent tasks first', () => {
+  it('floats active job tasks to the top without quota-based reordering', () => {
     const tasks = [
       task({ code: 'other_rec', job_type: 'miner', recommended: true }),
       task({ code: 'my_spent', job_type: 'detective', daily_limit: 3, taken_today: 3 }),
@@ -195,8 +195,8 @@ describe('boardOrder', () => {
       task({ code: 'other_norm', job_type: 'miner', recommended: false }),
     ];
     expect(boardOrder(tasks, 'detective').map((entry) => entry.code)).toEqual([
-      'my_unspent',
       'my_spent',
+      'my_unspent',
       'other_rec',
       'other_norm',
     ]);

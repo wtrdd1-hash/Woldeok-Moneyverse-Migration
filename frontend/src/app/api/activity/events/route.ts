@@ -10,6 +10,9 @@ export async function POST(request: Request) {
     });
     return NextResponse.json(result);
   } catch {
-    return NextResponse.json({ recorded: 0 }, { status: 200 });
+    return NextResponse.json(
+      { recorded: 0, error: 'activity_delivery_failed' },
+      { status: 503, headers: { 'Retry-After': '2' } },
+    );
   }
 }

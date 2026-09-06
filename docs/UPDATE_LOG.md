@@ -65,3 +65,18 @@ This file records incremental project changes so concurrent work can avoid overl
 - Fixed stale member screens by invalidating both the directory and the active detail page after restrictions or forced logouts.
 - Made authentication cookie requests preserve Cloudflare's authoritative client-address header like all other API requests.
 - Final verification passed: workspace lint, 435 frontend tests, frontend type-check, and the optimized production build including both new dynamic routes.
+# 2026-09-07 — Activity reliability, unrestricted work, and economy references
+
+- Audited GitHub integration through merged PR #75. `main` contains the recent AI news,
+  administrator boundary, photo moderation, and private Discord logging changes; no remote
+  feature branch contains commits missing from `main`.
+- Corrected the activity-log administrator guard order. The database already contained activity
+  rows, but the endpoint returned 403 before the session was hydrated and the page rendered that
+  failure as an empty result.
+- Added client event IDs, retry persistence, non-success HTTP responses, and database deduplication
+  for loss-resistant browser telemetry. Exact source IPs remain in the private database; Discord
+  continues to receive only a masked network.
+- Removed the remaining per-task overtime reduction. Verified repeat work now pays full WLD and
+  EXP without a daily task-count cap.
+- Added seven repeatable shop purchases as voluntary currency sinks and published the reliability
+  and virtual-economy reference links on the getting-started guide.

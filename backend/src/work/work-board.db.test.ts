@@ -115,10 +115,7 @@ describe.skipIf(!DATABASE_URL)('the work board against a real database', () => {
       });
     });
 
-    // A suggestion is only useful if it can be acted on. 067 refuses a take
-    // past the task's daily_limit, so suggesting a spent task would be
-    // pointing a member at a button that answers 23505.
-    it('never suggests a task whose daily limit is already spent', async () => {
+    it('keeps suggesting repeatable tasks after the legacy daily count', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
         const tasks = await client.query<{ id: string; daily_limit: number }>(
@@ -137,7 +134,7 @@ describe.skipIf(!DATABASE_URL)('the work board against a real database', () => {
           'SELECT recommended FROM public.work_task_board($1)',
           [actor],
         );
-        expect(board.rows.filter((row) => row.recommended)).toHaveLength(0);
+        expect(board.rows.filter((row) => row.recommended)).toHaveLength(3);
       });
     });
 

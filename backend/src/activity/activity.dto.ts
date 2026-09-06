@@ -14,6 +14,10 @@ import {
 } from 'class-validator';
 
 export class ActivityEventItemDto {
+  @ApiProperty({ description: 'Client-generated idempotency identifier' })
+  @IsUUID()
+  readonly eventId!: string;
+
   @ApiProperty({ description: 'Event type: page_view, page_dwell, button_click' })
   @IsString()
   @IsIn(['page_view', 'page_dwell', 'button_click', 'form_submit', 'navigation'])

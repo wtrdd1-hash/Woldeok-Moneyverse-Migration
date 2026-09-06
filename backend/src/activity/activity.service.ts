@@ -21,7 +21,7 @@ export class ActivityService {
       return { recorded: count };
     } catch (error) {
       this.logger.error('Failed to log activity events', error);
-      return { recorded: 0 };
+      throw error;
     }
   }
 

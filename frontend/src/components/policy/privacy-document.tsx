@@ -28,7 +28,7 @@ export function PrivacyDocument() {
       </dl>
       <aside className="rounded-lg border-l-4 border-l-primary bg-card p-4" aria-label="핵심 개인정보 원칙">
       <strong>핵심 원칙</strong>
-      <p>OAuth 접근·갱신 토큰과 Google 이메일은 장기 저장하지 않습니다. 일반 익명 방문자의 IP를 앱 데이터베이스에 저장하지 않습니다. 공개 홈 화면에서는 Google AdSense 광고가 표시될 수 있으며, 그 경우 Google의 광고 쿠키·식별자 사용과 선택 절차가 적용됩니다.</p>
+      <p>OAuth 접근·갱신 토큰과 Google 이메일은 장기 저장하지 않습니다. 접속 IP는 보안·장애 대응을 위해 제한된 운영 데이터베이스에 저장하고 일반 화면과 Discord 운영 알림에는 축약 네트워크만 표시합니다. 공개 홈 화면에서는 Google AdSense 광고가 표시될 수 있으며, 그 경우 Google의 광고 쿠키·식별자 사용과 선택 절차가 적용됩니다.</p>
       </aside>
       <nav className="rounded-lg border bg-card p-4 text-sm" aria-label="개인정보처리방침 목차">
       <p>목차</p>
@@ -80,7 +80,7 @@ export function PrivacyDocument() {
       <tr><th scope="row">Cloudflare, Inc.</th><td>미국 등 글로벌 네트워크. 웹사이트 접속 시 TLS 암호화 통신으로 전송</td><td>접속 IP 주소, 요청 헤더, 보안·성능 로그. DDoS 방어, TLS 연결, 네트워크 보안</td><td>Cloudflare 정책 및 서비스 운영에 필요한 기간. 이용자는 서비스 이용을 중단할 수 있습니다.</td></tr>
       <tr><th scope="row">Google LLC</th><td>미국. Google 로그인 선택 또는 광고가 표시되는 공개 홈 화면 방문 시 TLS 암호화 통신으로 전송</td><td>로그인 제공자 식별자·표시명 또는 광고 쿠키·온라인 식별자·IP 주소. 인증 및 광고 제공·측정·부정 클릭 방지</td><td>Google 정책에 따른 기간. 로그인은 Discord를 선택할 수 있고, 광고 개인화는 Google 광고 설정 및 CMP에서 선택·거부할 수 있습니다.</td></tr>
       <tr><th scope="row">Discord Inc.</th><td>미국. Discord 로그인 선택 시 TLS 암호화 통신으로 전송</td><td>로그인 제공자 식별자·표시명. 인증 및 계정 연결</td><td>Discord 정책에 따른 기간. 이용자는 Google 로그인을 선택하거나 서비스 이용을 중단할 수 있습니다.</td></tr>
-      <tr><th scope="row">Discord Inc. 운영 알림</th><td>미국. 접속·활동 또는 서비스 이벤트 기록 생성 후 TLS 암호화 통신으로 전송</td><td>일반 API 요청·관리자 요청·화면 활동·가상경제 처리 등 서비스 이벤트의 종류와 무작위 영수증 ID. 운영 알림과 전송 실패 추적. 이용자 ID·닉네임·IP·브라우저·경로·금액·쿠키·토큰·본문·검색값은 전송하지 않음</td><td>Discord 채널의 운영자가 메시지를 삭제할 때까지. 상세 원문은 전송하지 않으며 운영 DB의 보유 기간은 제1항을 따릅니다.</td></tr>
+      <tr><th scope="row">Discord Inc. 운영 알림</th><td>미국. 접속·활동 또는 서비스 이벤트 기록 생성 후 TLS 암호화 통신으로 전송</td><td>이벤트 종류, 발생 시각, 내부 사용자 ID·닉네임, 페이지·API 경로, 메서드·상태·처리시간, 접속 국가, 축약 네트워크, 브라우저·운영체제 정보, 버튼 이름 및 가상경제 처리 결과. 원 IP·쿠키·세션 토큰·인증정보·요청 본문·URL 검색값은 전송하지 않음</td><td>접근이 제한된 운영 Discord 채널에서 운영자가 메시지를 삭제할 때까지. 원 IP와 상세 원문은 전송하지 않으며 운영 DB의 보유 기간은 제1항을 따릅니다.</td></tr>
       </tbody>
       </table>
       </div>
@@ -132,6 +132,7 @@ export function PrivacyDocument() {
       </section>
       <aside className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground" aria-label="문서 변경 이력">
       <strong>변경 이력</strong>
+      <p>2026년 9월 7일: 접속 IP의 제한 저장과 Discord 운영 알림에 포함되는 축약 정보의 실제 범위를 명확히 바로잡았습니다. 원 IP·비밀값·요청 본문·URL 검색값은 Discord로 전송하지 않습니다.</p>
       <p>2026년 9월 6일: 실제 운영 중인 접속·활동·API 요청 기록의 항목, 목적, 보호 범위와 보유 기간을 명확히 설명하고 시험용 표현을 바로잡았습니다. 처리 목적이나 필수 동의 범위를 새로 확대하지 않는 설명 정정이므로 2026-09-02 동의 버전을 유지합니다.</p>
       <p>2026년 9월 2일: 운영자·문의처, 사진 보유·삭제 기준, Cloudflare·OAuth·Google 광고 관련 처리 및 국외 이전 정보를 반영했습니다.</p>
       </aside>

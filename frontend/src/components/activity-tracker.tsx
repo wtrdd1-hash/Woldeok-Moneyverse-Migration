@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface ActivityEvent {
+  readonly eventId: string;
   readonly eventType: 'page_view' | 'page_dwell' | 'button_click' | 'form_submit';
   readonly path: string;
   readonly targetLabel?: string;
@@ -14,16 +15,32 @@ interface ActivityEvent {
 }
 
 const BATCH_FLUSH_INTERVAL_MS = 2000;
+const RETRY_STORAGE_KEY = 'mv_activity_retry_v1';
+const MAX_QUEUED_EVENTS = 200;
+
+function eventId(): string {
+  return crypto.randomUUID();
+}
 
 export function ActivityTracker() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const currentPath = `${pathname}${searchParams?.toString() ? `?${searchParams.toString()}` : ''}`;
+  // Query strings may contain member IDs, IP addresses, or other private filters.
+  // Request middleware records the server route; client telemetry records pathname only.
+  const currentPath = pathname;
 
   const pageEnteredAtRef = useRef<number>(Date.now());
   const activePathRef = useRef<string>(currentPath);
   const queueRef = useRef<ActivityEvent[]>([]);
   const sessionIdRef = useRef<string>('');
+  const flushingRef = useRef(false);
+
+  const persistQueue = useCallback(() => {
+    try {
+      localStorage.setItem(RETRY_STORAGE_KEY, JSON.stringify(queueRef.current.slice(-MAX_QUEUED_EVENTS)));
+    } catch {
+      // Storage can be disabled; the in-memory queue still retries while this page is alive.
+    }
+  }, []);
 
   // Generate or retrieve anonymous session id
   useEffect(() => {
@@ -37,30 +54,47 @@ export function ActivityTracker() {
       }
     }
     sessionIdRef.current = sid;
+    try {
+      const pending = JSON.parse(localStorage.getItem(RETRY_STORAGE_KEY) ?? '[]');
+      if (Array.isArray(pending)) queueRef.current.push(...pending.slice(-MAX_QUEUED_EVENTS));
+    } catch {
+      // Ignore malformed or unavailable storage.
+    }
   }, []);
 
   // Flush queued events
-  const flushQueue = (useBeacon = false) => {
-    if (queueRef.current.length === 0) return;
+  const flushQueue = useCallback(async (useBeacon = false) => {
+    if (queueRef.current.length === 0 || flushingRef.current) return;
     const batch = [...queueRef.current];
-    queueRef.current = [];
-
     const payload = JSON.stringify({ events: batch });
 
     if (useBeacon && typeof navigator !== 'undefined' && navigator.sendBeacon) {
       const blob = new Blob([payload], { type: 'application/json' });
-      navigator.sendBeacon('/api/activity/events', blob);
-    } else {
-      fetch('/api/activity/events', {
+      // Keep the batch persisted even when accepted into the browser queue. A later retry is
+      // safe because the server deduplicates each client event ID.
+      if (!navigator.sendBeacon('/api/activity/events', blob)) persistQueue();
+      else persistQueue();
+      return;
+    }
+
+    flushingRef.current = true;
+    try {
+      const response = await fetch('/api/activity/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: payload,
         keepalive: true,
-      }).catch(() => {
-        // silent fail for telemetry
       });
+      if (!response.ok) throw new Error(`activity delivery failed: ${response.status}`);
+      const sentIds = new Set(batch.map((event) => event.eventId));
+      queueRef.current = queueRef.current.filter((event) => !sentIds.has(event.eventId));
+      persistQueue();
+    } catch {
+      persistQueue();
+    } finally {
+      flushingRef.current = false;
     }
-  };
+  }, [persistQueue]);
 
   // 1. Track page view and dwell time on route change
   useEffect(() => {
@@ -71,6 +105,7 @@ export function ActivityTracker() {
     // Record dwell time for previous page if valid
     if (prevPath && dwellMs > 100) {
       queueRef.current.push({
+        eventId: eventId(),
         eventType: 'page_dwell',
         path: prevPath,
         dwellTimeMs: dwellMs,
@@ -85,6 +120,7 @@ export function ActivityTracker() {
 
     // Record page view
     queueRef.current.push({
+      eventId: eventId(),
       eventType: 'page_view',
       path: currentPath,
       sessionId: sessionIdRef.current,
@@ -96,7 +132,7 @@ export function ActivityTracker() {
 
     // Flush quickly
     flushQueue();
-  }, [currentPath]);
+  }, [currentPath, flushQueue]);
 
   // 2. Global click listener for buttons and links
   useEffect(() => {
@@ -124,6 +160,7 @@ export function ActivityTracker() {
       if (!label) return;
 
       queueRef.current.push({
+        eventId: eventId(),
         eventType: 'button_click',
         path: activePathRef.current,
         targetLabel: label,
@@ -146,7 +183,7 @@ export function ActivityTracker() {
     return () => {
       document.removeEventListener('click', handleClick, { capture: true });
     };
-  }, []);
+  }, [flushQueue]);
 
   // 3. Page unload / visibility change listener for final dwell time flush
   useEffect(() => {
@@ -155,6 +192,7 @@ export function ActivityTracker() {
       const dwellMs = Math.max(0, now - pageEnteredAtRef.current);
       if (activePathRef.current && dwellMs > 100) {
         queueRef.current.push({
+          eventId: eventId(),
           eventType: 'page_dwell',
           path: activePathRef.current,
           dwellTimeMs: dwellMs,
@@ -171,19 +209,17 @@ export function ActivityTracker() {
       }
     };
 
-    window.addEventListener('beforeunload', handleUnload);
     window.addEventListener('pagehide', handleUnload);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     const interval = setInterval(() => flushQueue(), BATCH_FLUSH_INTERVAL_MS);
 
     return () => {
-      window.removeEventListener('beforeunload', handleUnload);
       window.removeEventListener('pagehide', handleUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       clearInterval(interval);
     };
-  }, []);
+  }, [flushQueue]);
 
   return null;
 }

@@ -294,8 +294,8 @@ export function rewardSentence(task: WorkTask, locale?: Locale | unknown): strin
   return `지금 마치면 ${task.reward_preview} WLD를 받아요.`;
 }
 
-export function isSpent(task: WorkTask): boolean {
-  return task.taken_today >= task.daily_limit;
+export function isSpent(_task: WorkTask): boolean {
+  return false;
 }
 
 export function boardOrder(
@@ -309,14 +309,6 @@ export function boardOrder(
       const rightIsActive = right.job_type === activeJobType;
       if (leftIsActive !== rightIsActive) {
         return leftIsActive ? -1 : 1;
-      }
-      // Among active job tasks: unspent daily limit tasks come before finished ones
-      if (leftIsActive && rightIsActive) {
-        const leftHasQuota = left.taken_today < left.daily_limit;
-        const rightHasQuota = right.taken_today < right.daily_limit;
-        if (leftHasQuota !== rightHasQuota) {
-          return leftHasQuota ? -1 : 1;
-        }
       }
     }
 
