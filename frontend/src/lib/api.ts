@@ -106,6 +106,9 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
   if (connectingIp) requestHeaders['cf-connecting-ip'] = connectingIp;
   const forwardedFor = incoming.get('x-forwarded-for');
   if (forwardedFor) requestHeaders['x-forwarded-for'] = forwardedFor;
+  const country = incoming.get('cf-ipcountry') ?? incoming.get('x-vercel-ip-country');
+  if (country && /^[A-Za-z]{2}$/.test(country))
+    requestHeaders['cf-ipcountry'] = country.toUpperCase();
 
   // The origin the browser actually used, so the API can complete an OAuth
   // round trip on the name the visitor is on rather than on the canonical one.
@@ -132,9 +135,7 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     // A per-caller response must never be cached: it carries one member's
     // balances. Only pages that pass an explicit revalidate are public.
-    ...(revalidate === undefined
-      ? { cache: 'no-store' as const }
-      : { next: { revalidate } }),
+    ...(revalidate === undefined ? { cache: 'no-store' as const } : { next: { revalidate } }),
   });
 
   if (response.status === 204) return undefined as T;
@@ -206,6 +207,9 @@ export async function apiWithCookie<T>(
   if (connectingIp) requestHeaders['cf-connecting-ip'] = connectingIp;
   const forwardedFor = incoming.get('x-forwarded-for');
   if (forwardedFor) requestHeaders['x-forwarded-for'] = forwardedFor;
+  const country = incoming.get('cf-ipcountry') ?? incoming.get('x-vercel-ip-country');
+  if (country && /^[A-Za-z]{2}$/.test(country))
+    requestHeaders['cf-ipcountry'] = country.toUpperCase();
 
   // The origin the browser actually used, so the API can complete an OAuth
   // round trip on the name the visitor is on rather than on the canonical one.
