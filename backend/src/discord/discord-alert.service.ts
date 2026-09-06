@@ -261,9 +261,7 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
     }>(
       this.pool,
       `SELECT verified, failure_reason, checked_at
-       FROM public.audit_chain_verifications
-       ORDER BY checked_at DESC
-       LIMIT 1`,
+       FROM public.discord_latest_audit_chain_health()`,
     );
 
     const latest = rows[0];
