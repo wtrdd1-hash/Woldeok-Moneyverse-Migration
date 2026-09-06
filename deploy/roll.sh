@@ -22,6 +22,12 @@ cd "${DEPLOY_DIR:-$HOME/moneyverse-migration}"
 
 bash ./bootstrap-env.sh
 
+# An explicitly empty workflow input remains exported in this parent shell
+# and takes precedence over the non-empty value bootstrap-env just persisted
+# in .env. Drop only empty bot inputs so Compose can read the adopted values.
+[ -n "${DISCORD_APPLICATION_ID:-}" ] || unset DISCORD_APPLICATION_ID
+[ -n "${DISCORD_BOT_TOKEN:-}" ] || unset DISCORD_BOT_TOKEN
+
 # Recorded rather than exported for one command, so a later `docker compose
 # ps`, `logs` or `up` resolves the same images an operator is looking at.
 record() {
