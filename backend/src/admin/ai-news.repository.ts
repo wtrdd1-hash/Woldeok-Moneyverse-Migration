@@ -32,15 +32,42 @@ export interface AiNewsCredentialRow {
   readonly api_key_key_id: string | null;
 }
 
+/**
+ * What one story does to one stock (152). `none` is a stock the story names
+ * without moving; a null symbol is the whole market.
+ */
+export interface ScenarioEffectProposal {
+  readonly stock_symbol: string | null;
+  readonly direction: 'up' | 'down' | 'none';
+  readonly strength: 1 | 2 | 3;
+}
+
 /** One proposal as the model wrote it and as `ai_news_batch_create` stores it. */
 export interface ScenarioProposal {
-  readonly stock_symbol: string | null;
-  readonly direction: 'up' | 'down';
-  readonly strength: 1 | 2 | 3;
+  readonly effects: readonly ScenarioEffectProposal[];
   readonly hours: number;
   readonly headline: string;
   readonly body: string;
   readonly rationale: string;
+}
+
+/** One leg of a stored scenario, as `ai_news_batch_latest` lists it. */
+export interface AiNewsScenarioEffectRow {
+  readonly id: string;
+  readonly ordinal: number;
+  readonly stock_id: string | null;
+  readonly symbol: string | null;
+  readonly name: string | null;
+  readonly direction: 'up' | 'down' | 'none';
+  readonly strength: number;
+  readonly published_event_id: string | null;
+}
+
+/** What the operator settled on for one leg, on the way to publication. */
+export interface ScenarioEffectChoice {
+  readonly stockId: string | null;
+  readonly direction: 'up' | 'down' | 'none';
+  readonly strength: number;
 }
 
 export interface AiNewsScenarioRow {
@@ -58,6 +85,7 @@ export interface AiNewsScenarioRow {
   readonly status: 'proposed' | 'published' | 'discarded' | 'superseded';
   readonly published_event_id: string | null;
   readonly decided_at: string | null;
+  readonly effects: readonly AiNewsScenarioEffectRow[];
 }
 
 /**
@@ -234,21 +262,23 @@ export class AiNewsRepository {
     return rows[0] ?? null;
   }
 
+  /**
+   * Publishes a scenario: one event per leg that moves something (152). The
+   * legs are validated here in full before the statement is sent, in the
+   * style of the rest of this file.
+   */
   async publish(input: {
     readonly idempotencyKey: unknown;
     readonly actorUserId: unknown;
     readonly scenarioId: unknown;
-    readonly direction: unknown;
-    readonly strength: unknown;
     readonly hours: unknown;
     readonly headline: unknown;
     readonly body: unknown;
-  }): Promise<{ readonly event_id: string; readonly replayed: boolean }> {
+    readonly effects: unknown;
+  }): Promise<{ readonly event_id: string; readonly published: number; readonly replayed: boolean }> {
     uuid(input.idempotencyKey, 'idempotency key');
     uuid(input.actorUserId, 'actor user id');
     uuid(input.scenarioId, 'scenario id');
-    if (input.direction !== 'up' && input.direction !== 'down') throw new AiNewsInputError('direction must be up or down');
-    if (![1, 2, 3].includes(input.strength as number)) throw new AiNewsInputError('strength must be 1, 2 or 3');
     if (typeof input.hours !== 'number' || !Number.isSafeInteger(input.hours) || input.hours < 1 || input.hours > 168) {
       throw new AiNewsInputError('hours must be between 1 and 168');
     }
@@ -256,10 +286,24 @@ export class AiNewsRepository {
     if (headline.length < 2 || headline.length > 120) throw new AiNewsInputError('headline must be 2 to 120 characters');
     const body = typeof input.body === 'string' ? input.body.trim() : '';
     if (body.length > 2000) throw new AiNewsInputError('body must be at most 2000 characters');
-    const row = await queryOne<{ event_id: string; replayed: boolean }>(
+    if (!Array.isArray(input.effects) || input.effects.length < 1 || input.effects.length > 4) {
+      throw new AiNewsInputError('a scenario moves one to four stocks');
+    }
+    const effects = (input.effects as readonly ScenarioEffectChoice[]).map((effect, index) => {
+      if (effect.stockId !== null && effect.stockId !== undefined) uuid(effect.stockId, `effect ${index + 1} stock id`);
+      if (effect.direction !== 'up' && effect.direction !== 'down' && effect.direction !== 'none') {
+        throw new AiNewsInputError(`effect ${index + 1} direction must be up, down or none`);
+      }
+      if (![1, 2, 3].includes(effect.strength)) throw new AiNewsInputError(`effect ${index + 1} strength must be 1, 2 or 3`);
+      return { stock_id: effect.stockId ?? null, direction: effect.direction, strength: effect.strength };
+    });
+    if (!effects.some((effect) => effect.direction !== 'none')) {
+      throw new AiNewsInputError('at least one stock must move');
+    }
+    const row = await queryOne<{ event_id: string; published: number; replayed: boolean }>(
       this.pool,
-      'SELECT event_id::text AS event_id, replayed FROM public.ai_news_scenario_publish($1,$2,$3,$4,$5,$6,$7,$8)',
-      [input.idempotencyKey, input.actorUserId, input.scenarioId, input.direction, input.strength, input.hours, headline, body],
+      'SELECT event_id::text AS event_id, published, replayed FROM public.ai_news_scenario_publish($1,$2,$3,$4,$5,$6,$7::jsonb)',
+      [input.idempotencyKey, input.actorUserId, input.scenarioId, input.hours, headline, body, JSON.stringify(effects)],
     );
     if (!row?.event_id) throw new Error('database did not return a market event receipt');
     return row;

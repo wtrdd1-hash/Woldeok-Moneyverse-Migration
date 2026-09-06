@@ -1,9 +1,10 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { LiveRefresh } from '@/components/live-refresh';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,14 @@ import { IDLE } from '@/lib/action-state';
 import { cn } from '@/lib/cn';
 import { formatMoment } from '@/lib/money';
 import { StepUpField } from '../../step-up-field';
-import type { AiNewsBatch, AiNewsModelList, AiNewsRun, AiNewsScenario, AiNewsSettings } from '../../types';
+import type {
+  AiNewsBatch,
+  AiNewsModelList,
+  AiNewsRun,
+  AiNewsScenario,
+  AiNewsScenarioEffect,
+  AiNewsSettings,
+} from '../../types';
 import { STRENGTHS } from '../market-events';
 import { decideAiNewsScenario, generateAiNews, saveAiNewsSettings } from './actions';
 import { aiNewsSentence } from './sentences';
@@ -226,28 +234,70 @@ const STATUS: Readonly<Record<AiNewsScenario['status'], string>> = {
   superseded: '지난 묶음',
 };
 
+const SELECT_CLASS =
+  'h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm dark:bg-input/30';
+
+const DIRECTIONS = [
+  { value: 'up', label: '호재' },
+  { value: 'down', label: '악재' },
+  { value: 'none', label: '소식만' },
+] as const;
+
+function scopeOf(effect: Pick<AiNewsScenarioEffect, 'symbol' | 'name'>): string {
+  return effect.symbol ? `${effect.symbol} ${effect.name ?? ''}`.trim() : '시장 전체';
+}
+
+function strengthLabel(strength: number): string {
+  return STRENGTHS.find((one) => one.value === strength)?.label ?? String(strength);
+}
+
 /**
- * One scenario, editable until it is decided. The operator settles the
- * lean, the strength, the hours and the text; the model's rationale stays
- * beside it as the reason it was proposed and never leaves this screen.
+ * What the story does to one stock, in one chip: the stock, which way, and
+ * how hard. This is the whole card until an operator opens it -- five
+ * stories read as five stories, not as five identical forms.
+ */
+function EffectChip({ effect }: { readonly effect: AiNewsScenarioEffect }) {
+  const moves = effect.direction !== 'none';
+  const up = effect.direction === 'up';
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs',
+        !moves && 'text-muted-foreground',
+        moves && (up ? 'border-rise/50 text-rise' : 'border-fall/50 text-fall'),
+      )}
+    >
+      <span className="font-mono">{scopeOf(effect)}</span>
+      <span className="font-bold">
+        {moves ? `${up ? '▲ 호재' : '▼ 악재'} · ${strengthLabel(effect.strength)}` : '— 소식'}
+      </span>
+    </span>
+  );
+}
+
+/**
+ * One story. Closed, it is a headline, why the model wrote it, and what it
+ * does to each stock it names. Opened -- which is what choosing it means --
+ * it is the editor for those same values: the operator settles each stock's
+ * lean and strength, the hours and the text, and publishes one piece of news
+ * that moves them all.
  */
 export function ScenarioCard({ scenario }: { readonly scenario: AiNewsScenario }) {
   const [state, action] = useActionState(decideAiNewsScenario, IDLE);
+  const [chosen, setChosen] = useState(false);
   const open = scenario.status === 'proposed';
-  const up = scenario.direction === 'up';
-  const scope = scenario.symbol ? `${scenario.symbol} ${scenario.name ?? ''}`.trim() : '시장 전체';
   const id = scenario.id.slice(0, 8);
+  const moved = scenario.effects.filter((effect) => effect.direction !== 'none').length;
 
   return (
     <Card className={cn(!open && 'opacity-70')}>
       <CardHeader>
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <Badge variant="secondary">#{scenario.ordinal}</Badge>
-          <span className="font-mono text-muted-foreground">{scope}</span>
-          <Badge variant="outline" className={cn('font-bold', up ? 'border-rise text-rise' : 'border-fall text-fall')}>
-            {up ? '▲ 호재' : '▼ 악재'} · {STRENGTHS.find((s) => s.value === scenario.strength)?.label ?? scenario.strength}
-          </Badge>
           <Badge variant={scenario.status === 'published' ? 'default' : 'outline'}>{STATUS[scenario.status]}</Badge>
+          <span className="text-muted-foreground">
+            {scenario.hours}시간 · 종목 {scenario.effects.length}개 중 {moved}개 이동
+          </span>
           {scenario.decided_at && <span className="text-muted-foreground">{formatMoment(scenario.decided_at)}</span>}
         </div>
         <CardTitle className="text-base">{scenario.headline}</CardTitle>
@@ -255,58 +305,88 @@ export function ScenarioCard({ scenario }: { readonly scenario: AiNewsScenario }
           <CardDescription className="[word-break:keep-all]">왜 지금: {scenario.rationale}</CardDescription>
         )}
       </CardHeader>
-      <CardContent>
-        {open ? (
-          <form action={action} className="grid gap-4">
+      <CardContent className="grid gap-4">
+        <div className="flex flex-wrap gap-2">
+          {scenario.effects.map((effect) => (
+            <EffectChip key={effect.id} effect={effect} />
+          ))}
+        </div>
+
+        {scenario.body && <p className="text-sm text-muted-foreground [word-break:keep-all]">{scenario.body}</p>}
+
+        {open && !chosen && (
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" onClick={() => setChosen(true)}>
+              이 소재 고르기
+            </Button>
+            <span className="text-xs text-muted-foreground">고르면 종목별 방향과 강도를 다듬어 발행할 수 있어요.</span>
+          </div>
+        )}
+
+        {open && chosen && (
+          <form action={action} className="grid gap-4 border-t pt-4">
             <input type="hidden" name="scenarioId" value={scenario.id} />
-            <Field>
-              <FieldLabel htmlFor={`headline-${id}`}>제목</FieldLabel>
-              <Input id={`headline-${id}`} name="headline" defaultValue={scenario.headline} minLength={2} maxLength={120} required />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor={`body-${id}`}>본문</FieldLabel>
-              <Textarea id={`body-${id}`} name="body" defaultValue={scenario.body} rows={4} maxLength={2000} />
-            </Field>
-            <div className="grid gap-4 sm:grid-cols-3">
-              <fieldset className="grid gap-2">
-                <legend className="text-sm font-bold">방향</legend>
-                <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-[10px] border px-3 text-sm has-[:checked]:border-rise has-[:checked]:bg-rise/10">
-                  <input type="radio" name="direction" value="up" defaultChecked={up} required /> 호재
-                </label>
-                <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-[10px] border px-3 text-sm has-[:checked]:border-fall has-[:checked]:bg-fall/10">
-                  <input type="radio" name="direction" value="down" defaultChecked={!up} /> 악재
-                </label>
-              </fieldset>
-              <fieldset className="grid gap-2">
-                <legend className="text-sm font-bold">강도</legend>
-                {STRENGTHS.map((strength) => (
-                  <label
-                    key={strength.value}
-                    className="flex min-h-11 cursor-pointer items-center gap-2 rounded-[10px] border px-3 text-sm has-[:checked]:border-primary has-[:checked]:bg-primary/10"
-                    title={strength.detail}
-                  >
-                    <input type="radio" name="strength" value={strength.value} defaultChecked={strength.value === scenario.strength} />
-                    {strength.label}
+            <input type="hidden" name="effectCount" value={scenario.effects.length} />
+
+            <fieldset className="grid gap-2">
+              <legend className="text-sm font-bold">종목별 영향</legend>
+              {scenario.effects.map((effect, index) => (
+                <div key={effect.id} className="grid items-center gap-2 sm:grid-cols-[1fr_auto_auto]">
+                  <input type="hidden" name={`effect-${index}-stockId`} value={effect.stock_id ?? ''} />
+                  <span className="font-mono text-sm">{scopeOf(effect)}</span>
+                  <label className="grid gap-1">
+                    <span className="sr-only">{scopeOf(effect)} 방향</span>
+                    <select name={`effect-${index}-direction`} defaultValue={effect.direction} className={SELECT_CLASS}>
+                      {DIRECTIONS.map((direction) => (
+                        <option key={direction.value} value={direction.value}>
+                          {direction.label}
+                        </option>
+                      ))}
+                    </select>
                   </label>
-                ))}
-              </fieldset>
+                  <label className="grid gap-1">
+                    <span className="sr-only">{scopeOf(effect)} 강도</span>
+                    <select name={`effect-${index}-strength`} defaultValue={effect.strength} className={SELECT_CLASS}>
+                      {STRENGTHS.map((strength) => (
+                        <option key={strength.value} value={strength.value}>
+                          {strength.label} · {strength.detail}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              ))}
+              <FieldDescription>
+                발행하는 순간 호재는 값이 뛰고 악재는 떨어져요 (소폭 0.8 %, 보통 2.5 %, 강력 6 %). 그 뒤로는 위 강도만큼
+                기울어 갑니다. &lsquo;소식만&rsquo;은 이야기에 등장하되 값은 건드리지 않아요.
+              </FieldDescription>
+            </fieldset>
+
+            <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
+              <Field>
+                <FieldLabel htmlFor={`headline-${id}`}>제목</FieldLabel>
+                <Input id={`headline-${id}`} name="headline" defaultValue={scenario.headline} minLength={2} maxLength={120} required />
+              </Field>
               <Field>
                 <FieldLabel htmlFor={`hours-${id}`}>기간 (시간)</FieldLabel>
                 <Input id={`hours-${id}`} name="hours" type="number" inputMode="numeric" min={1} max={168} defaultValue={scenario.hours} required />
                 <FieldDescription>1~168시간</FieldDescription>
               </Field>
             </div>
+            <Field>
+              <FieldLabel htmlFor={`body-${id}`}>본문</FieldLabel>
+              <Textarea id={`body-${id}`} name="body" defaultValue={scenario.body} rows={4} maxLength={2000} />
+            </Field>
+
             <div className="flex flex-wrap items-center gap-2">
               <SubmitButton name="intent" value="publish">이 소식 발행</SubmitButton>
               <SubmitButton name="intent" value="discard" variant="outline">접어 두기</SubmitButton>
+              <Button type="button" variant="ghost" onClick={() => setChosen(false)}>
+                닫기
+              </Button>
             </div>
             <ActionAlert state={state} />
           </form>
-        ) : (
-          <div className="grid gap-2 text-sm">
-            {scenario.body && <p className="text-muted-foreground [word-break:keep-all]">{scenario.body}</p>}
-            <p className="text-xs text-muted-foreground">{scenario.hours}시간 · 강도 {scenario.strength}</p>
-          </div>
         )}
       </CardContent>
     </Card>

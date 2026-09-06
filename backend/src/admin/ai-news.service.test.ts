@@ -23,10 +23,18 @@ const CONTEXT = {
   live_events: [],
 };
 
-const proposal = (overrides: Partial<ScenarioBatch['scenarios'][number]> = {}): ScenarioBatch['scenarios'][number] => ({
+type Proposal = ScenarioBatch['scenarios'][number];
+type Effect = NonNullable<Proposal['effects']>[number];
+
+const effect = (overrides: Partial<Effect> = {}): Effect => ({
   stock_symbol: 'MYUY',
   direction: 'up',
   strength: 2,
+  ...overrides,
+});
+
+const proposal = (overrides: Partial<Proposal> = {}): Proposal => ({
+  effects: [effect()],
   hours: 6,
   headline: '뮤야얌 전자, 신제품 발표',
   body: '시장의 기대가 높다.',
@@ -60,7 +68,8 @@ describe('the prompt', () => {
   it('states the rules the database enforces, so the model and the function agree', () => {
     expect(SYSTEM_PROMPT).toContain('exactly 5 scenarios');
     expect(SYSTEM_PROMPT).toContain('six hours');
-    expect(SYSTEM_PROMPT).toContain('At most one scenario in a batch');
+    expect(SYSTEM_PROMPT).toContain('One story, several stocks');
+    expect(SYSTEM_PROMPT).toContain('At most one\n   entry in a scenario');
   });
 
   it('hands the model the whole context and the wish, and says when there is none', () => {
@@ -71,15 +80,67 @@ describe('the prompt', () => {
 });
 
 describe('normalise', () => {
-  it('turns an unlisted symbol into the whole market and says so, rather than refusing the batch', () => {
-    const [only] = normalise({ scenarios: [proposal({ stock_symbol: 'ghost' })] }, CONTEXT);
-    expect(only?.stock_symbol).toBeNull();
+  it('keeps one story over several stocks, each with its own lean', () => {
+    const [only] = normalise({
+      scenarios: [proposal({
+        effects: [effect(), effect({ stock_symbol: 'duck', direction: 'down', strength: 1 }), effect({ stock_symbol: null, direction: 'none' })],
+      })],
+    }, CONTEXT);
+    expect(only?.effects).toEqual([
+      { stock_symbol: 'MYUY', direction: 'up', strength: 2 },
+      { stock_symbol: 'DUCK', direction: 'down', strength: 1 },
+      { stock_symbol: null, direction: 'none', strength: 2 },
+    ]);
+  });
+
+  it('drops a leg that names an unlisted stock and says so, rather than refusing the batch', () => {
+    const [only] = normalise({
+      scenarios: [proposal({ effects: [effect(), effect({ stock_symbol: 'ghost', direction: 'down' })] })],
+    }, CONTEXT);
+    expect(only?.effects).toHaveLength(1);
     expect(only?.rationale).toContain('GHOST');
   });
 
-  it('keeps at most one strength-3 scenario per batch', () => {
-    const out = normalise({ scenarios: [proposal({ strength: 3 }), proposal({ strength: 3 }), proposal({ strength: 1 })] }, CONTEXT);
-    expect(out.map((s) => s.strength)).toEqual([3, 2, 1]);
+  it('drops a scenario whose every leg was unlisted, since nothing is left to move', () => {
+    expect(normalise({ scenarios: [proposal({ effects: [effect({ stock_symbol: 'ghost' })] })] }, CONTEXT)).toHaveLength(0);
+  });
+
+  it('drops a scenario that moves nothing at all', () => {
+    expect(normalise({ scenarios: [proposal({ effects: [effect({ direction: 'none' })] })] }, CONTEXT)).toHaveLength(0);
+  });
+
+  it('leans a stock one way only, however many times the model named it', () => {
+    const [only] = normalise({
+      scenarios: [proposal({ effects: [effect(), effect({ direction: 'down', strength: 3 })] })],
+    }, CONTEXT);
+    expect(only?.effects).toEqual([{ stock_symbol: 'MYUY', direction: 'up', strength: 2 }]);
+  });
+
+  it('keeps at most one strength-3 leg in a scenario, and at most four legs', () => {
+    const [only] = normalise({
+      scenarios: [proposal({
+        effects: [
+          effect({ strength: 3 }),
+          effect({ stock_symbol: 'DUCK', strength: 3 }),
+          effect({ stock_symbol: null, strength: 3 }),
+        ],
+      })],
+    }, CONTEXT);
+    expect(only?.effects.map((one) => one.strength)).toEqual([3, 2, 2]);
+  });
+
+  it('pulls a strength outside the vocabulary back into it', () => {
+    const [only] = normalise({
+      scenarios: [proposal({ effects: [effect({ strength: 7 }), effect({ stock_symbol: 'DUCK', strength: 0 })] })],
+    }, CONTEXT);
+    expect(only?.effects.map((one) => one.strength)).toEqual([3, 1]);
+  });
+
+  it('reads a scenario written in 135\'s one-stock shape', () => {
+    const [only] = normalise({
+      scenarios: [{ ...proposal(), effects: undefined, stock_symbol: 'MYUY', direction: 'down', strength: 1 }],
+    }, CONTEXT);
+    expect(only?.effects).toEqual([{ stock_symbol: 'MYUY', direction: 'down', strength: 1 }]);
   });
 
   it('clamps hours and trims text to the widths the database enforces', () => {
@@ -91,11 +152,6 @@ describe('normalise', () => {
   it('drops a scenario with no headline left rather than failing the four beside it', () => {
     const out = normalise({ scenarios: [proposal({ headline: '  ' }), proposal()] }, CONTEXT);
     expect(out).toHaveLength(1);
-  });
-
-  it('pulls a strength outside the vocabulary back into it', () => {
-    const out = normalise({ scenarios: [proposal({ strength: 7 }), proposal({ strength: 0 })] }, CONTEXT);
-    expect(out.map((scenario) => scenario.strength)).toEqual([3, 1]);
   });
 
   it('never stores more than five', () => {
@@ -129,7 +185,7 @@ describe('AiNewsService.begin', () => {
     const calls: ModelCall[] = [];
     const caller = async (call: ModelCall): Promise<ScenarioBatch> => {
       calls.push(call);
-      return { scenarios: [proposal(), proposal({ stock_symbol: null, direction: 'down' })] };
+      return { scenarios: [proposal(), proposal({ effects: [effect({ stock_symbol: null, direction: 'down' })] })] };
     };
     const repository = fakeRepository();
     const service = new AiNewsService(repository, SEALING, caller);
@@ -151,7 +207,7 @@ describe('AiNewsService.begin', () => {
     expect(stored.model).toBe('gpt-4o-mini');
     expect(stored.context).toEqual(CONTEXT);
     expect(stored.scenarios).toHaveLength(2);
-    expect(stored.scenarios[1]?.stock_symbol).toBeNull();
+    expect(stored.scenarios[1]?.effects[0]?.stock_symbol).toBeNull();
     expect(repository.finishRun).toHaveBeenCalledWith({
       actorUserId: ACTOR,
       runId: '44444444-4444-4444-8444-444444444444',

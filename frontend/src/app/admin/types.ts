@@ -337,6 +337,21 @@ export interface AiNewsRun {
   readonly running: boolean;
 }
 
+/**
+ * What one story does to one stock (152). `none` is a stock the story names
+ * without moving; a null `stock_id` is the whole market.
+ */
+export interface AiNewsScenarioEffect {
+  readonly id: string;
+  readonly ordinal: number;
+  readonly stock_id: string | null;
+  readonly symbol: string | null;
+  readonly name: string | null;
+  readonly direction: 'up' | 'down' | 'none';
+  readonly strength: number;
+  readonly published_event_id: string | null;
+}
+
 /** One proposed scenario, as `ai_news_batch_latest` lists them. */
 export interface AiNewsScenario {
   readonly id: string;
@@ -353,6 +368,7 @@ export interface AiNewsScenario {
   readonly status: 'proposed' | 'published' | 'discarded' | 'superseded';
   readonly published_event_id: string | null;
   readonly decided_at: string | null;
+  readonly effects: readonly AiNewsScenarioEffect[];
 }
 
 export interface AiNewsBatch {

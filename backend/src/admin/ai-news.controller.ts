@@ -13,7 +13,22 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+  ValidateNested,
+} from 'class-validator';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
@@ -64,16 +79,32 @@ export class GenerateAiNewsDto {
   readonly idempotencyKey?: string;
 }
 
-export class PublishAiNewsScenarioDto {
-  @ApiProperty({ enum: ['up', 'down'] })
-  @IsIn(['up', 'down'])
-  readonly direction!: 'up' | 'down';
+/** One leg: what the story does to one stock (152). */
+export class AiNewsScenarioEffectDto {
+  @ApiProperty({ required: false, format: 'uuid', nullable: true, description: 'Absent or null is the whole market' })
+  @IsOptional()
+  @IsUUID()
+  readonly stockId?: string | null;
+
+  @ApiProperty({ enum: ['up', 'down', 'none'] })
+  @IsIn(['up', 'down', 'none'])
+  readonly direction!: 'up' | 'down' | 'none';
 
   @ApiProperty({ minimum: 1, maximum: 3 })
   @IsInt()
   @Min(1)
   @Max(3)
   readonly strength!: number;
+}
+
+export class PublishAiNewsScenarioDto {
+  @ApiProperty({ type: [AiNewsScenarioEffectDto], minItems: 1, maxItems: 4 })
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(4)
+  @ValidateNested({ each: true })
+  @Type(() => AiNewsScenarioEffectDto)
+  readonly effects!: readonly AiNewsScenarioEffectDto[];
 
   @ApiProperty({ minimum: 1, maximum: 168 })
   @IsInt()
