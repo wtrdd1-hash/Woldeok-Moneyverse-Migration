@@ -171,7 +171,7 @@ export async function changePublication(
 export async function approvePhotoAction(photoId: string): Promise<ActionState> {
   if (!photoId) return { status: 'error', message: '사진 ID가 필요해요.' };
   try {
-    await setPublication('photos', photoId, true);
+    await mutate(`/api/v1/admin/photos/${encodeURIComponent(photoId)}/approval`);
     revalidatePath('/admin/content');
     revalidatePath('/gallery');
     return { status: 'ok', message: '사진을 승인하고 공개했어요.' };
