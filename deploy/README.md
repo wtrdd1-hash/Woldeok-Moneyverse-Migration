@@ -80,9 +80,9 @@ printf '%s' '<read:packages token>' | docker login ghcr.io -u <user> --password-
 
 ## Backups
 
-`backup.sh` and `restore.sh` are shipped to the host with everything else and
-run there, by the deploy user, from a cron entry the operator installs once.
-Nothing about a backup happens during a deploy.
+`backup.sh`, `restore.sh` and `install-backup-cron.sh` are shipped to the host.
+Every roll idempotently installs that stack's staggered ten-minute schedule;
+the deploy user owns the cron entry and its timestamped result log.
 
 ```bash
 bash backup.sh init-key     # once: the encryption key, kept outside this directory

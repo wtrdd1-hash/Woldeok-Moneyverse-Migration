@@ -209,14 +209,25 @@ jobs:
             Port ${{ secrets.DEPLOY_PORT }}
             IdentityFile ~/.ssh/deploy
             IdentitiesOnly yes
+            ConnectTimeout 30
+            ConnectionAttempts 3
+            ServerAliveInterval 15
+            ServerAliveCountMax 3
+            ControlMaster auto
+            ControlPath ~/.ssh/control-%C
+            ControlPersist 10m
           CONFIG
           chmod 600 ~/.ssh/config
 
       - name: Ship the deployment files
         run: |
+          # The deployment host intermittently rate-limits new TCP sessions.
+          # Open one authenticated master and reuse it for shipping, rolling
+          # and reporting instead of reconnecting for every command.
+          ssh target true
           ssh target 'mkdir -p ~/${{ steps.target.outputs.dir }}'
           tar czf - \
-            -C deploy compose.yml roll.sh bootstrap-env.sh recover-display-names.sh recover-display-names-from-backup.sh seed.sh update.sh edge \
+            -C deploy compose.yml roll.sh bootstrap-env.sh install-backup-cron.sh recover-display-names.sh recover-display-names-from-backup.sh seed.sh update.sh edge \
             backup.sh restore.sh backup-figures.sql \
             -C "${GITHUB_WORKSPACE}/packages/database" init migrations migrate.sh \
             | ssh target 'tar xzf - -C ~/${{ steps.target.outputs.dir }}'

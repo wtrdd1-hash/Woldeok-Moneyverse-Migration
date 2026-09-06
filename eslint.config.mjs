@@ -10,6 +10,7 @@ export default tseslint.config(
   ...compat.extends('next/core-web-vitals'),
   ...tseslint.configs.recommended,
   {
+    settings: { react: { version: '19.1' } },
     rules: {
       // The original repository finished its TypeScript migration with zero
       // bare `any`. This project starts from that baseline, so it is an error.
@@ -28,6 +29,9 @@ export default tseslint.config(
       // the handle first and assigning it once is the only order that works,
       // and rewriting it to satisfy the rule would obscure why.
       'prefer-const': ['error', { ignoreReadBeforeAssign: true }],
+      // This repository uses App Router only; the rule searches for a legacy
+      // pages directory and warns even though there is intentionally none.
+      '@next/next/no-html-link-for-pages': 'off',
     },
   },
   {

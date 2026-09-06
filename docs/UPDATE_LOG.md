@@ -100,3 +100,16 @@ This file records incremental project changes so concurrent work can avoid overl
 - 관리자 콘텐츠 화면에서 대기·공개 사진 전체를 조회하고 공개/비공개 전환 및 영구 삭제할 수 있게 했으며, 삭제 시 내부 이미지 파일도 함께 정리합니다.
 - 상점이 제거된 `cashBalance` 필드를 읽어 잔액을 0으로 표시하던 오류를 수정했습니다. 지갑과 상점 모두 동일한 `WalletOverview.balances.cash.availableAmount`를 사용합니다.
 - 운영 원장 정합성 스냅샷에서 미균형 거래·누락 계좌·잔액 불일치가 모두 0임을 확인했습니다.
+# 2026-09-07 — Account continuity, safe merge and resilient backups
+
+- OAuth login now finds a provider identity by a key-independent hash, so a
+  data-encryption-key rotation cannot create an empty duplicate account.
+- Added a migrator-only, append-only account-fork merge operation. It transfers
+  balances through the ledger, preserves chosen names and immutable history,
+  merges supported photos/activity/progression/work state, and refuses unknown
+  ownership state instead of deleting it.
+- Test and production install staggered ten-minute encrypted full backups with
+  overlap locks, one-hour freshness checks, bounded retention and result logs.
+- Deployment reuses one SSH control connection to avoid repeated host timeout.
+- Account merge ledger entries now have a clear Korean wallet label.
+- Added the current project gap audit under `docs/findings/`.

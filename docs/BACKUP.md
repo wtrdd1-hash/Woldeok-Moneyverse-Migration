@@ -75,35 +75,22 @@ bash backup.sh list
 같은 파일을 복사한다. 비워 두면 `run`이 매번 "이 데이터의 모든 사본이 이 호스트
 하나에 있다"고 경고한다.
 
-### 매일 돌리기
+### 10분마다 돌리기
 
-> **2026-08-31 확인: 이 crontab은 minipc에 설치되어 있지 않다.**
-> `crontab -l`은 `no crontab for ruma0607`을 낸다. 도는 systemd 타이머
-> `easy-scraping-game-backup.timer`는 `/root/easy-scraping-server/`의 **다른
-> 프로젝트** 것이고 머니버스를 백업하지 않는다.
->
-> 그래서 지금 머니버스 백업은 **배포할 때만** 생긴다(`roll.sh`가 부르는 반쪽
-> 리허설). 사양 §17.x가 요구하는 "매일 자동 백업"은 아직 없다. 아래를 설치하면
-> 생긴다 — sudo가 필요 없고, 배포 사용자 본인의 crontab이다:
->
-> ```bash
-> ssh minipc 'crontab -l 2>/dev/null | { cat; cat <<CRON
-> PATH=/usr/local/bin:/usr/bin:/bin
-> 10 19 * * * DEPLOY_DIR=$HOME/moneyverse-production /bin/bash $HOME/moneyverse-production/backup.sh run >> $HOME/moneyverse-production-backup.log 2>&1
-> 40 19 * * * DEPLOY_DIR=$HOME/moneyverse-migration /bin/bash $HOME/moneyverse-migration/backup.sh run >> $HOME/moneyverse-migration-backup.log 2>&1
-> CRON
-> } | crontab -'
-> ```
->
-> 로그는 `BACKUP_DIR` **밖**에 쓴다. 안에 쓰면 보존 정리가 세는 파일 수에
-> 섞이고, 암호화된 백업 옆에 평문 로그를 두게 된다.
+`roll.sh`가 `install-backup-cron.sh`를 호출하므로 배포할 때 해당 스택의 일정을
+멱등하게 설치한다. 운영은 매시 0·10·20·30·40·50분, 테스트는 5분 뒤에 시작해
+두 전체 덤프가 디스크와 PostgreSQL을 동시에 누르지 않는다. `flock`은 이전 실행이
+끝나지 않았을 때 겹치는 실행을 건너뛴다.
 
-cron은 호스트 지역시간을 쓰고 `PATH`가 짧다. 04:10 KST는 **19:10 UTC(전날)**이다.
+최근 24시간의 10분 복구 지점은 모두 남기고 이후에는 주별 보존으로 축약한다.
+각 실행의 한국시간 시작·종료와 종료 코드는 `$HOME/<stack>-backup.log`에 남는다.
+로그는 `BACKUP_DIR` 밖에 있어 암호화 백업 파일과 섞이지 않는다.
 
-```cron
-PATH=/usr/local/bin:/usr/bin:/bin
-10 19 * * * DEPLOY_DIR=$HOME/moneyverse-production /bin/bash $HOME/moneyverse-production/backup.sh run >> $HOME/moneyverse-production-backup.log 2>&1
-40 19 * * * DEPLOY_DIR=$HOME/moneyverse-migration /bin/bash $HOME/moneyverse-migration/backup.sh run >> $HOME/moneyverse-migration-backup.log 2>&1
+수동 재설치는 배포 사용자로 한다.
+
+```bash
+STACK=wdmvp DEPLOY_DIR=$HOME/moneyverse-production bash $HOME/moneyverse-production/install-backup-cron.sh
+STACK=wdmv DEPLOY_DIR=$HOME/moneyverse-migration bash $HOME/moneyverse-migration/install-backup-cron.sh
 ```
 
 **루트가 아니라 배포 사용자의 crontab에 넣는다.** 그 사용자가 배포 디렉터리와
@@ -152,7 +139,7 @@ crontab의 로그 경로(`>> .../backup.log`)도 같이 고친다. 옮긴 뒤에
 
 ---
 
-## 매일 무엇이 일어나는가
+## 10분마다 무엇이 일어나는가
 
 ```
 pg_dump (moneyverse_backup 역할)  →  gzip  →  openssl enc  →  BACKUP_DIR/
@@ -176,7 +163,7 @@ pg_dump (moneyverse_backup 역할)  →  gzip  →  openssl enc  →  BACKUP_DIR
 
 | 구간 | 남기는 것 | 변수 |
 |---|---|---|
-| 최근 14일 | 전부 | `BACKUP_RETAIN_DAYS` |
+| 최근 1일 | 10분 복구 지점 전부 | `BACKUP_RETAIN_DAYS` |
 | 그 뒤 8주 | ISO 주마다 가장 최근 것 하나 | `BACKUP_RETAIN_WEEKS` |
 | 그 이전 | 삭제 | |
 
@@ -193,8 +180,8 @@ ssh <host> 'DEPLOY_DIR=$HOME/moneyverse-production bash $HOME/moneyverse-product
 ```
 
 `verify`는 네 가지를 본다: 매니페스트의 sha256과 실제 파일이 같은가, 이 호스트의
-키로 복호화되는가, 덤프가 끝까지 온전한가, 그리고 **36시간보다 오래되지
-않았는가**(`BACKUP_MAX_AGE_HOURS`). 마지막 항목이 "매일 돌기로 한 것이 실제로
+키로 복호화되는가, 덤프가 끝까지 온전한가, 그리고 **1시간보다 오래되지
+않았는가**(`BACKUP_MAX_AGE_HOURS`). 마지막 항목이 "10분마다 돌기로 한 것이 실제로
 돌고 있는가"를 대신 묻는다.
 
 ---

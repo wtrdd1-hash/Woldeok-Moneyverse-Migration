@@ -39,6 +39,7 @@ const TRANSACTION_LABELS: Readonly<Record<string, string>> = Object.freeze({
   MARKET_ESCROW: '시장 예치',
   MARKET_SETTLEMENT: '시장 정산',
   ADMIN_ADJUSTMENT: '관리자 조정',
+  ACCOUNT_MERGE_TRANSFER: '계정 통합',
   WORK_REWARD: '작업 보상',
   // Types the newer features write. Without a label each of these reads as
   // '경제 활동' in the ledger, which is the one line a member checks when they
