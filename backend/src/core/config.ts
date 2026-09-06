@@ -300,6 +300,12 @@ function outboxChannels(env: NodeJS.ProcessEnv): Readonly<Record<string, string>
     }
     channels[key] = channelId;
   }
+  // Activity has its own production channel, while an isolated test stack may
+  // intentionally configure only its default channel. Falling back keeps the
+  // route deliverable without ever making the two deployments share a channel.
+  if (channels.logs === undefined && channels.default !== undefined) {
+    channels.logs = channels.default;
+  }
   return Object.keys(channels).length > 0 ? channels : null;
 }
 

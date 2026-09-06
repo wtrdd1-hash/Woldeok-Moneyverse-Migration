@@ -85,6 +85,9 @@ const HEADLINES: Readonly<Record<string, string>> = Object.freeze({
   'season.event.consumed': '시즌 이벤트 참여가 기록되었습니다.',
   'stock.trade.completed': '주식 거래가 체결되었습니다.',
   'casino.coin.played': '동전 게임 결과가 기록되었습니다.',
+  'activity.api_request': '웹 API 요청이 기록되었습니다.',
+  'activity.admin_request': '관리자 페이지 요청이 기록되었습니다.',
+  'activity.client_event': '웹 화면 활동이 기록되었습니다.',
 });
 
 /**

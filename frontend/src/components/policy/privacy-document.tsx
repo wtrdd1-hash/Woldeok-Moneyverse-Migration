@@ -80,6 +80,7 @@ export function PrivacyDocument() {
       <tr><th scope="row">Cloudflare, Inc.</th><td>미국 등 글로벌 네트워크. 웹사이트 접속 시 TLS 암호화 통신으로 전송</td><td>접속 IP 주소, 요청 헤더, 보안·성능 로그. DDoS 방어, TLS 연결, 네트워크 보안</td><td>Cloudflare 정책 및 서비스 운영에 필요한 기간. 이용자는 서비스 이용을 중단할 수 있습니다.</td></tr>
       <tr><th scope="row">Google LLC</th><td>미국. Google 로그인 선택 또는 광고가 표시되는 공개 홈 화면 방문 시 TLS 암호화 통신으로 전송</td><td>로그인 제공자 식별자·표시명 또는 광고 쿠키·온라인 식별자·IP 주소. 인증 및 광고 제공·측정·부정 클릭 방지</td><td>Google 정책에 따른 기간. 로그인은 Discord를 선택할 수 있고, 광고 개인화는 Google 광고 설정 및 CMP에서 선택·거부할 수 있습니다.</td></tr>
       <tr><th scope="row">Discord Inc.</th><td>미국. Discord 로그인 선택 시 TLS 암호화 통신으로 전송</td><td>로그인 제공자 식별자·표시명. 인증 및 계정 연결</td><td>Discord 정책에 따른 기간. 이용자는 Google 로그인을 선택하거나 서비스 이용을 중단할 수 있습니다.</td></tr>
+      <tr><th scope="row">Discord Inc. 운영 알림</th><td>미국. 접속·활동 기록 생성 직후 TLS 암호화 통신으로 전송</td><td>일반 API 요청·관리자 요청·화면 활동의 종류와 무작위 영수증 ID. 운영 알림과 전송 실패 추적. 이용자 ID·닉네임·IP·브라우저·경로·쿠키·토큰·본문·검색값은 전송하지 않음</td><td>Discord 채널의 운영자가 메시지를 삭제할 때까지. 상세 원문은 전송하지 않으며 운영 DB의 보유 기간은 제1항을 따릅니다.</td></tr>
       </tbody>
       </table>
       </div>
