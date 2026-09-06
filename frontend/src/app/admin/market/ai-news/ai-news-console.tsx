@@ -173,15 +173,23 @@ export function AiNewsGenerateForm({
         <form action={action} className="grid gap-4">
           <Field>
             <FieldLabel htmlFor="ai-prompt">원하는 방향 (선택)</FieldLabel>
+            {/* Deliberately empty on every load. Prefilling it with the last
+                wish meant a refresh put words back in the operator's mouth,
+                and the next batch quietly served a request they had already
+                had answered. What was asked last time is below, as text. */}
             <Textarea
               id="ai-prompt"
               name="prompt"
               rows={3}
               maxLength={2000}
-              defaultValue={batch?.operator_prompt ?? ''}
               placeholder="예: 이번 주는 뮤야얌 전자에 악재가 이어지다가 주말에 반전이 오면 좋겠어요. 시장 전체는 조용하게."
             />
             <FieldDescription>비워 두면 지금 흐름을 그대로 이어 갑니다. 적으면 그 방향으로, 단 흐름과 어긋나지 않게 만들어요.</FieldDescription>
+            {batch?.operator_prompt && (
+              <FieldDescription className="[word-break:keep-all]">
+                지난 요청: “{batch.operator_prompt}”
+              </FieldDescription>
+            )}
           </Field>
           <div className="flex flex-wrap items-center gap-3">
             <SubmitButton disabled={!ready || running}>
