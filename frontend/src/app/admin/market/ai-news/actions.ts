@@ -5,6 +5,7 @@ import type { ActionState } from '@/lib/action-state';
 import { ApiError } from '@/lib/api';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 import { STEP_UP_CODE, spendSecondFactorCode } from '../../step-up';
+import { AI_NEWS_SENTENCES } from './sentences';
 
 /**
  * The AI newsroom's writes. The model's refusals arrive as 503s with a
@@ -15,23 +16,13 @@ import { STEP_UP_CODE, spendSecondFactorCode } from '../../step-up';
 const PAGE = '/admin/market/ai-news';
 const CODE_REQUIRED = { status: 'error', message: '실행 직전 인증 코드 6자리를 입력해 주세요.' } as const;
 
-const SENTENCES: Readonly<Record<string, string>> = {
-  ai_news_key_missing: 'API 키를 먼저 저장해 주세요.',
-  ai_news_sealing_unavailable:
-    '이 배포에는 봉인 키(ADMIN_TOTP_ENCRYPTION_KEY)가 없어 API 키를 저장하거나 쓸 수 없어요.',
-  ai_news_model_rejected_key: '모델 API가 키를 거부했어요. 키를 다시 확인해 주세요.',
-  ai_news_model_unreachable: '모델 API에 닿지 못했어요. 주소를 확인하고 잠시 뒤 다시 시도해 주세요.',
-  ai_news_model_refused: '모델이 이 요청을 거절했어요. 요청 문구를 바꿔 다시 시도해 주세요.',
-  ai_news_model_unusable: '모델의 답을 읽을 수 없었어요. 모델 이름과 주소를 확인해 주세요.',
-};
-
 function text(value: FormDataEntryValue | null): string {
   return typeof value === 'string' ? value.trim() : '';
 }
 
 function explain(error: unknown, fallback: string): ActionState {
   if (error instanceof ApiError) {
-    if (error.code && SENTENCES[error.code]) return { status: 'error', message: SENTENCES[error.code]! };
+    if (error.code && AI_NEWS_SENTENCES[error.code]) return { status: 'error', message: AI_NEWS_SENTENCES[error.code]! };
     if (error.code === 'ai_news_refused' && error.detail?.includes('reversal')) {
       return { status: 'error', message: '여섯 시간 안에는 반대 방향의 강력한 소식을 낼 수 없어요. 강도를 낮추거나 시간을 두세요.' };
     }
@@ -81,9 +72,12 @@ export async function generateAiNews(_previous: ActionState, formData: FormData)
       body: { ...(prompt === '' ? {} : { prompt }), idempotencyKey: idempotencyKey() },
     });
     revalidatePath(PAGE);
-    return { status: 'ok', message: '시나리오 5개를 받았어요. 아래에서 고르고 다듬어 발행하세요.' };
+    // The batch is not here yet: the model is slower than any gateway in
+    // front of this page will wait, so the request starts a run and the page
+    // shows what that run is doing.
+    return { status: 'ok', message: '모델에 물어보는 중이에요. 다 되면 아래에 다섯 개가 나타납니다.' };
   } catch (error) {
-    return explain(error, '시나리오를 만들지 못했어요.');
+    return explain(error, '시나리오 만들기를 시작하지 못했어요.');
   }
 }
 

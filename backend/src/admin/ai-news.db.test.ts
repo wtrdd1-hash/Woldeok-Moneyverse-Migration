@@ -30,7 +30,7 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
   });
 
   it('keeps the settings, batches and scenarios unreadable by the application role', async () => {
-    for (const table of ['ai_news_settings', 'ai_news_batches', 'ai_news_scenarios']) {
+    for (const table of ['ai_news_settings', 'ai_news_batches', 'ai_news_scenarios', 'ai_news_runs']) {
       const error = await rejectionOf(() => pool.query(`SELECT * FROM public.${table}`));
       expect(String((error as { message?: string }).message), table).toMatch(/permission denied/i);
     }
@@ -45,6 +45,8 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
     expect(code(context)).toBe('42501');
     const latest = await rejectionOf(() => pool.query('SELECT * FROM public.ai_news_batch_latest($1)', [UNKNOWN]));
     expect(code(latest)).toBe('42501');
+    const run = await rejectionOf(() => pool.query('SELECT * FROM public.ai_news_run_latest($1)', [UNKNOWN]));
+    expect(code(run)).toBe('42501');
   });
 
   describe.skipIf(!MIGRATOR_DATABASE_URL)('what an operator can do', () => {
@@ -106,6 +108,54 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
         // 135 shipped one vendor's root; 143 moved the row a key was never
         // stored against to the standard's own address.
         expect(settings.rows[0]).toMatchObject({ api_base_url: 'https://api.openai.com/v1', has_key: false });
+      });
+    });
+
+    it('keeps one run at a time and closes it with a batch or a reason (149)', async () => {
+      await rolledBack(async (client) => {
+        const actor = await operator(client);
+        const key = randomUUID();
+        const begin = async (idempotencyKey: string) =>
+          (await client.query<{ run_id: string; started: boolean }>(
+            'SELECT run_id::text AS run_id, started FROM public.ai_news_run_begin($1,$2,$3)',
+            [idempotencyKey, actor, '조용하게'],
+          )).rows[0];
+
+        const first = await begin(key);
+        expect(first?.started).toBe(true);
+        // The same key is the same run, and a different key while one is open
+        // joins it rather than starting a second.
+        expect(await begin(key)).toMatchObject({ run_id: first!.run_id, started: false });
+        expect(await begin(randomUUID())).toMatchObject({ run_id: first!.run_id, started: false });
+
+        const open = await client.query<{ running: boolean; batch_id: string | null }>(
+          'SELECT running, batch_id::text AS batch_id FROM public.ai_news_run_latest($1)',
+          [actor],
+        );
+        expect(open.rows[0]).toMatchObject({ running: true, batch_id: null });
+
+        const closed = await client.query<{ finished: boolean }>(
+          'SELECT public.ai_news_run_finish($1,$2,$3,$4,$5) AS finished',
+          [actor, first!.run_id, null, 'ai_news_model_unreachable', 'nothing answered at that address'],
+        );
+        expect(closed.rows[0]?.finished).toBe(true);
+
+        const after = await client.query<{ running: boolean; failure_code: string; failure_detail: string }>(
+          'SELECT running, failure_code, failure_detail FROM public.ai_news_run_latest($1)',
+          [actor],
+        );
+        expect(after.rows[0]).toMatchObject({
+          running: false,
+          failure_code: 'ai_news_model_unreachable',
+          failure_detail: 'nothing answered at that address',
+        });
+
+        // Closing a closed run is a replay, not a second close.
+        const twice = await client.query<{ finished: boolean }>(
+          'SELECT public.ai_news_run_finish($1,$2,$3,$4,$5) AS finished',
+          [actor, first!.run_id, null, 'ai_news_model_unusable', ''],
+        );
+        expect(twice.rows[0]?.finished).toBe(false);
       });
     });
 

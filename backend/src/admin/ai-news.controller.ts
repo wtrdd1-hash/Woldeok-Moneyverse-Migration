@@ -162,18 +162,23 @@ export class AiNewsController {
   }
 
   @Get('batches/latest')
-  @ApiOperation({ summary: 'The current batch of proposed scenarios' })
+  @ApiOperation({ summary: 'The current batch of proposed scenarios, and the last run that asked for one' })
   async latest(@Req() request: RequestWithSession) {
-    return { batch: await this.service().latest(requireUserId(request)) };
+    const actor = requireUserId(request);
+    const [batch, run] = await Promise.all([this.service().latest(actor), this.service().latestRun(actor)]);
+    return { batch, run };
   }
 
   @Post('batches')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Ask the model for five scenarios; replaces the current batch' })
+  @ApiOperation({
+    summary: 'Start a run that asks the model for five scenarios',
+    description: 'Answers with the run, not with the batch: the model takes longer than any gateway in front of this will wait.',
+  })
   generate(@Req() request: RequestWithSession, @Body() body: GenerateAiNewsDto) {
     return this.guarded(
-      async () => ({ batch: await this.service().generate({ actorUserId: requireUserId(request), ...body }) }),
-      'the batch could not be stored',
+      async () => ({ run: await this.service().begin({ actorUserId: requireUserId(request), ...body }) }),
+      'the run could not be started',
     );
   }
 

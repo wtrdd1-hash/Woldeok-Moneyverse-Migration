@@ -2,7 +2,13 @@ import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import type { TotpSealingKey } from '../auth/totp';
 import { openSecret, sealSecret } from '../auth/totp';
-import type { AiNewsBatchRow, AiNewsRepository, AiNewsSettingsRow, ScenarioProposal } from './ai-news.repository';
+import type {
+  AiNewsBatchRow,
+  AiNewsRepository,
+  AiNewsRunRow,
+  AiNewsSettingsRow,
+  ScenarioProposal,
+} from './ai-news.repository';
 import { AiNewsInputError } from './ai-news.repository';
 
 /**
@@ -447,42 +453,89 @@ export class AiNewsService {
     }
   }
 
+  latestRun(actorUserId: string): Promise<AiNewsRunRow | null> {
+    return this.repository.latestRun(actorUserId);
+  }
+
   /**
-   * Asks the model for five and stores what it said. The context is read
-   * once and stored with the batch, so each scenario can be read against
-   * the state it was written for.
+   * Starts a run and answers at once.
+   *
+   * The model takes as long as it takes -- a minute is ordinary, three is
+   * possible -- and in front of this deployment sit an nginx that stops
+   * reading at sixty seconds and a tunnel that gives up around a hundred.
+   * Waiting for the answer inside the request meant the operator never saw
+   * one: the gateway cut the connection first and the browser drew its own
+   * error over a run that was still going. So the request starts a run (149)
+   * and returns it; the call to the model goes on in this process and writes
+   * its outcome against that row; the console reads the row while it waits.
    */
-  async generate(input: {
+  async begin(input: {
     readonly actorUserId: string;
     readonly prompt?: string | undefined;
     readonly idempotencyKey?: string | undefined;
-  }): Promise<AiNewsBatchRow | null> {
+  }): Promise<AiNewsRunRow | null> {
     const prompt = (input.prompt ?? '').trim();
     if (prompt.length > 2000) throw new AiNewsInputError('the wish must be at most 2000 characters');
-
+    // A run needs a key that can call the model, and saying so now is worth
+    // more than a run that exists only to fail.
     const credential = await this.open(input.actorUserId);
-    const context = await this.repository.context(input.actorUserId);
-    const batch = await this.caller({
-      apiBaseUrl: credential.apiBaseUrl,
-      apiKey: credential.apiKey,
-      model: credential.model,
-      system: SYSTEM_PROMPT,
-      user: userPrompt(context, prompt),
-    });
 
-    const scenarios = normalise(batch, context);
-    if (scenarios.length === 0) {
-      throw new AiNewsUnavailableError('ai_news_model_unusable', 'the model wrote nothing that could be published');
-    }
-    await this.repository.createBatch({
+    const run = await this.repository.beginRun({
       idempotencyKey: input.idempotencyKey ?? randomUUID(),
       actorUserId: input.actorUserId,
       prompt,
-      model: credential.model,
-      context,
-      scenarios,
     });
-    return this.repository.latest(input.actorUserId);
+    if (run.started) {
+      // Deliberately not awaited: this is the work the response is not
+      // waiting for. `perform` settles the run itself, whatever happens.
+      void this.perform(run.run_id, input.actorUserId, prompt, credential);
+    }
+    return this.repository.latestRun(input.actorUserId);
+  }
+
+  /**
+   * The run itself: the context as the model was shown it, the call, and the
+   * batch -- or the reason there is none -- written against the run's row.
+   * Nothing here throws: a run nobody is waiting on can only report.
+   */
+  private async perform(
+    runId: string,
+    actorUserId: string,
+    prompt: string,
+    credential: { readonly apiBaseUrl: string; readonly model: string; readonly apiKey: string },
+  ): Promise<void> {
+    try {
+      const context = await this.repository.context(actorUserId);
+      const batch = await this.caller({
+        apiBaseUrl: credential.apiBaseUrl,
+        apiKey: credential.apiKey,
+        model: credential.model,
+        system: SYSTEM_PROMPT,
+        user: userPrompt(context, prompt),
+      });
+      const scenarios = normalise(batch, context);
+      if (scenarios.length === 0) {
+        throw new AiNewsUnavailableError('ai_news_model_unusable', 'the model wrote nothing that could be published');
+      }
+      const created = await this.repository.createBatch({
+        idempotencyKey: randomUUID(),
+        actorUserId,
+        prompt,
+        model: credential.model,
+        context,
+        scenarios,
+      });
+      await this.repository.finishRun({ actorUserId, runId, batchId: created.batch_id });
+    } catch (error: unknown) {
+      const code = error instanceof AiNewsUnavailableError ? error.code : 'ai_news_model_unusable';
+      const detail = error instanceof Error ? error.message : 'the run ended without a reason';
+      try {
+        await this.repository.finishRun({ actorUserId, runId, failureCode: code, failureDetail: detail });
+      } catch {
+        // The row is left open; `ai_news_run_begin` abandons it after ten
+        // minutes rather than leaving the console waiting forever.
+      }
+    }
   }
 
   publish(input: {
