@@ -81,14 +81,14 @@ export const BEGINNER_TIPS: readonly BeginnerTip[] = [
   {
     title: '남는 WLD는 은행 복리 예금에',
     titleEn: 'Deposit Idle WLD in Savings',
-    body: '지갑에 모인 WLD를 은행 복리 정기예금에 넣어두면 매일 자정 복리 이자가 원장에 자동 지급됩니다.',
-    bodyEn: 'Deposit your earned WLD into Bank Daily Compound Savings to earn automatic compound interest at midnight.',
+    body: '지갑에 모인 WLD를 은행 복리 예금에 넣으면 일 단위로 이자가 누적됩니다. 은행 화면에서 정산을 요청하면 원장에 반영됩니다.',
+    bodyEn: 'Deposit earned WLD into compound savings. Interest accrues daily and is posted to the ledger when you claim it from the bank.',
   },
   {
     title: '숫자는 지갑과 원장에서 확인',
     titleEn: 'Verify Numbers in Wallet & Ledger',
-    body: '보상, 이자, 배당금 등 모든 재화 변동은 투명한 복식부기 원장과 내 지갑 기록에서 실시간으로 확인할 수 있습니다.',
-    bodyEn: 'All payouts, interest, and dividends are transparently recorded in the real-time double-entry ledger.',
+    body: '보상, 이자, 배당금 등 처리 완료된 재화 변동은 복식부기 원장과 내 지갑 기록에서 확인할 수 있습니다.',
+    bodyEn: 'Completed payouts, interest claims, and dividends are recorded in the double-entry ledger and wallet history.',
   },
 ];
 
@@ -122,7 +122,7 @@ export const GUIDE_STEPS: readonly GuideStep[] = [
     points: [
       '지금 가지고 있는 WLD 잔액',
       'WLD가 늘거나 쓰인 기록과 그 거래 사유',
-      '작업 보상 및 복리 이자 실시간 지급 내역',
+      '작업 보상 및 정산된 복리 이자 내역',
       '상점에서 구매한 아이템 및 소모품',
     ],
     pointsEn: [
@@ -191,7 +191,7 @@ export const GUIDE_STEPS: readonly GuideStep[] = [
     titleEn: 'Verify Rewards, Deposit in Savings & Use Shop',
     body: [
       '보상을 받았다면 내 지갑 기록에서 거래를 즉시 확인할 수 있습니다. 모든 숫자는 동일한 원장 블록에 안전하게 기록됩니다.',
-      '모은 WLD는 은행 복리 정기예금에 넣어 매일 이자를 불리거나, 생산성 도구를 구매하거나, 가상 주식 및 사업체에 투자하여 지속적인 부를 축적할 수 있습니다.',
+      '모은 WLD는 은행 복리 예금, 생산성 도구, 가상 주식 및 사업체 등 서비스 안의 여러 기능에 사용할 수 있습니다. 수익이나 원금은 보장되지 않는 가상경제 데이터입니다.',
     ],
     bodyEn: [
       'After claiming, verify the transaction receipt in your wallet history. All figures are secured by the ledger.',
@@ -221,17 +221,17 @@ export const ECONOMY_PILLARS: readonly EconomyPillar[] = [
     titleKo: '🏦 복리 정기예금 & 만기 국채 & 스마트 대출',
     titleEn: '🏦 Compound Savings, Treasury Bonds & Loans',
     descKo:
-      '열심히 모은 WLD를 은행에 예치하면 매일 자정 복리 이자가 원장에 지급됩니다. 7일/30일 만기 국채로 확정 고수익을 올리거나, 긴급 자금이 필요할 때 신용 대출을 활용할 수 있습니다.',
+      '모은 WLD를 은행에 예치하면 일 단위로 복리 이자가 누적되고, 은행 화면에서 직접 정산할 수 있습니다. 7일/30일 만기 가상 국채와 신용도 기반 가상 대출도 이용할 수 있습니다.',
     descEn:
-      'Deposit earned WLD in the bank to earn daily compounding interest paid at midnight. Purchase 7-day or 30-day Treasury Bonds for guaranteed high yields, or apply for smart credit loans.',
+      'Deposit WLD to accrue daily compound interest and claim it from the bank. Virtual 7-day and 30-day bonds and credit-based loans are also available.',
     featuresKo: [
-      '일일 복리 정기예금 (매일 자정 복리 이자 지급)',
-      '7일 및 30일 만기 확정 고수익 국채',
+      '일일 복리 예금 (누적 이자를 직접 정산)',
+      '7일 및 30일 만기 가상 국채',
       '신용 등급 기반 스마트 비상 대출',
     ],
     featuresEn: [
-      'Daily Compounding Savings (Interest paid every midnight)',
-      '7-day & 30-day Guaranteed Yield Treasury Bonds',
+      'Daily Compounding Savings (claim accrued interest)',
+      '7-day & 30-day Virtual Treasury Bonds',
       'Credit-score based smart emergency loans',
     ],
     link: { href: '/bank', label: '가상 금융 포털 가기', labelEn: 'Go to Virtual Banking' },
@@ -306,20 +306,20 @@ export const ECONOMY_PILLARS: readonly EconomyPillar[] = [
     id: 'casino',
     badgeKo: '카지노 & 미니게임',
     badgeEn: 'Casino & Mini-games',
-    titleKo: '🎲 5종 미니게임 캐주얼 엔터테인먼트',
-    titleEn: '🎲 5 Thrilling Mini-Games',
+    titleKo: '🎲 가상 미니게임 엔터테인먼트',
+    titleEn: '🎲 Virtual Mini-Game Entertainment',
     descKo:
-      '동전 던지기, 주사위 홀짝, 주사위 숫자 맞추기, 럭키 슬롯머신(777), 하이-로우 카드 게임까지! 철저한 100만 회 검증 난수와 일일 손실 한도로 보호받는 건전한 가상 오락을 즐겨보세요.',
+      '서버가 정산하는 동전·주사위 3개 규칙과 이를 활용한 슬롯·하이로우 테마 화면을 제공합니다. 모든 이용에는 일일 베팅 및 손실 한도가 적용됩니다.',
     descEn:
-      'Enjoy Coin Flip, Dice Even/Odd, Lucky Slots (777), and High-Low card games! Verified random number generation and responsible daily betting limits keep gameplay fair and safe.',
+      'Play three server-settled coin and dice rules plus Slots and Hi-Lo themed interfaces. Daily betting and loss limits apply to every play.',
     featuresKo: [
-      '5종의 캐주얼 가상 미니게임 라인업 완비',
-      '100만 회 사전 검증된 투명하고 정직한 확률',
+      '3개 서버 게임 규칙과 2개 테마형 화면',
+      '서버 트랜잭션으로 결과 생성과 WLD 정산',
       '과몰입 방지 일일 최대 베팅 및 손실 한도 규정',
     ],
     featuresEn: [
-      '5 casual virtual casino mini-games ready to play',
-      'Transparent odds verified by 1,000,000 simulations',
+      'Three server game rules and two themed interfaces',
+      'Server-transaction result generation and WLD settlement',
       'Responsible daily bet caps and loss limits',
     ],
     link: { href: '/casino', label: '카지노 게임장 가기', labelEn: 'Visit Casino' },
@@ -364,8 +364,8 @@ export const GROWTH_STAGES: readonly GrowthStage[] = [
     targetEn: 'Target Assets: 1,000 ~ 10,000 WLD',
     actionsKo: [
       '8대 직업 중 진로 선택 후 전문 일거리 수행',
-      '은행 복리 예금에 여유 자금 예치 (매일 자정 이자 지급)',
-      '7일 만기 국채 매입으로 확정 고수익 달성',
+      '은행 복리 예금에 여유 자금 예치 후 누적 이자 정산',
+      '조건을 확인하고 7일 만기 가상 국채 매입',
     ],
     actionsEn: [
       'Select a profession and complete specialized jobs',
@@ -431,9 +431,9 @@ export const GUIDE_FAQS: readonly GuideFaq[] = [
     question: '가상 금융(예금, 국채, 대출)은 어떻게 이용하나요?',
     questionEn: 'How do I use Virtual Banking (Savings, Bonds, Loans)?',
     answer:
-      '경제 → 가상 금융(/bank) 메뉴에서 이용할 수 있습니다. 유휴 WLD를 일일 복리 예금에 넣어두면 매일 자정 복리 이자가 원장에 입금됩니다. 7일 또는 30일 만기 국채를 매입하면 만기 시 확정된 높은 이율을 보장받으며, 신용도에 따라 긴급 대출도 신청할 수 있습니다.',
+      '경제 → 가상 금융(/bank) 메뉴에서 이용할 수 있습니다. 복리 예금의 이자는 일 단위로 누적되며 은행 화면에서 직접 정산해야 원장에 반영됩니다. 7일 또는 30일 만기 가상 국채와 신용도 기반 가상 대출은 화면에 표시된 조건을 확인한 뒤 이용하세요.',
     answerEn:
-      'Visit Economy → Virtual Banking (/bank). Deposit idle WLD into Daily Compound Savings to receive compound interest at midnight. Purchase 7-day or 30-day Treasury Bonds for guaranteed high yields, or borrow funds via smart credit loans.',
+      'Visit Economy → Virtual Banking (/bank). Savings interest accrues daily and is posted when you claim it. Review the displayed terms before using virtual 7-day or 30-day bonds or credit-based loans.',
     link: { href: '/bank', label: '가상 금융 둘러보기', labelEn: 'Explore Virtual Banking' },
   },
   {
@@ -467,9 +467,9 @@ export const GUIDE_FAQS: readonly GuideFaq[] = [
     question: '카지노 미니게임의 공정성과 한도는 어떻게 되나요?',
     questionEn: 'How are casino game fairness and limits ensured?',
     answer:
-      '카지노(/casino)의 모든 5종 게임은 100만 회 PRNG 사전 검증을 거친 정직하고 투명한 확률로 작동합니다. 또한 건전한 게임 환경을 위해 일일 베팅 금액 및 손실 한도 보호 장치가 24시간 철저히 적용됩니다.',
+      '카지노(/casino)는 동전·주사위 기반 3개 서버 게임 규칙과 슬롯·하이로우 테마 화면을 제공합니다. 결과 생성과 WLD 정산은 서버 트랜잭션에서 처리되며, 일일 베팅 금액 및 손실 한도가 적용됩니다.',
     answerEn:
-      'All 5 casino mini-games run on fair odds verified through 1,000,000-trial PRNG simulations. In addition, responsible daily betting caps and loss limits are strictly enforced around the clock.',
+      'The casino provides three server-settled coin and dice rules plus Slots and Hi-Lo themed interfaces. Results and WLD settlement run in server transactions, with daily betting and loss limits.',
     link: { href: '/casino', label: '카지노 둘러보기', labelEn: 'Visit Casino' },
   },
   {

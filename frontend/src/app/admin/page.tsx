@@ -11,7 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { adminConsole } from '@/lib/session';
 import { ADMIN_AREAS, adminAreaFor, consoleReturnPath } from './areas';
 import { AdminQuickUserSearch } from './admin-quick-search';
-import { CloseConsole, IssueRecoveryCodes, OpenConsole } from './console-gate';
+import { CloseConsole, OpenConsole } from './console-gate';
 import type {
   AdminBusiness,
   AdminConsole,
@@ -317,7 +317,6 @@ export default async function AdminPage({
             </div>
           </dl>
           <CloseConsole />
-          {admin.roles.includes('superadmin') && <IssueRecoveryCodes />}
         </CardContent>
       </Card>
 
@@ -416,28 +415,17 @@ function Gate({ admin, next }: { readonly admin: AdminConsole; readonly next: st
         </Card>
       )}
 
-      {!admin.available ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">2단계 인증이 준비되지 않았어요.</CardTitle>
-            <CardDescription>
-              이 배포에는 인증 키가 설정되어 있지 않습니다. 운영자에게 문의해 주세요.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">콘솔 열기</CardTitle>
-            <CardDescription>
-              현재 로그인한 계정에 관리자 역할이 있고 허용된 주소에서 접속한 경우에만 열립니다.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <OpenConsole next={next} />
-          </CardContent>
-        </Card>
-      )}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">콘솔 열기</CardTitle>
+          <CardDescription>
+            현재 로그인한 계정에 관리자 역할이 있고 허용된 주소에서 접속한 경우에만 열립니다.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <OpenConsole next={next} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

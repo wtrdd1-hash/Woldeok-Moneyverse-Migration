@@ -205,6 +205,10 @@ API는 `APP_BASE_URL`의 origin과 정확한 콜백 경로가 일치하지 않�
 | `DISCORD_OUTBOX_ENABLED` | 아웃박스 알림 발송 여부 (`true`) |
 | `DISCORD_OUTBOX_CHANNEL_ID` | `default` 라우트가 글을 쓰는 채널 |
 
+운영 웹 활동 아웃박스의 지정 대상은 길드 `1184322508556611625`, 채널
+`1542465347364589609`이다. 이 값은 GitHub의 `production` 환경 변수에만 저장한다.
+테스트 환경은 별도 봇·길드·채널을 사용하며 운영 채널로 테스트 알림을 보내지 않는다.
+
 사람이 콘솔에서 해야 하는 것 (API로 대신할 수 없다):
 
 1. Developer Portal → 앱 → General Information → **Interactions Endpoint URL**에

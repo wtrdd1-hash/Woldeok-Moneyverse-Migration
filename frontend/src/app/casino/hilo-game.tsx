@@ -30,13 +30,13 @@ export function HiLoCardGame({
           <span>🃏</span> 하이 앤 로우 카드 게임
         </CardTitle>
         <CardDescription>
-          다음 카드가 기준 카드보다 높을지(High) 낮을지(Low)를 맞추는 직관적인 게임입니다. 적중 시 1.9배의 배당이 지급됩니다.
+          주사위 홀짝 서버 규칙을 카드 화면으로 표현합니다. High는 홀수, Low는 짝수이며 적중 시 1.9배로 정산됩니다.
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
         <div className="flex justify-center items-center gap-6 py-6 px-4 rounded-xl bg-black/30 border border-indigo-500/20">
           <div className="flex flex-col items-center gap-2">
-            <span className="text-xs text-muted-foreground font-semibold">기준 카드</span>
+            <span className="text-xs text-muted-foreground font-semibold">테마 기준 카드</span>
             <div className="grid size-20 sm:size-24 place-items-center rounded-xl bg-card border-2 border-indigo-400/50 shadow-lg text-3xl sm:text-4xl font-bold text-foreground">
               ♠️ 7
             </div>
@@ -45,7 +45,7 @@ export function HiLoCardGame({
           <div className="text-2xl font-bold text-muted-foreground">VS</div>
 
           <div className="flex flex-col items-center gap-2">
-            <span className="text-xs text-muted-foreground font-semibold">다음 카드</span>
+            <span className="text-xs text-muted-foreground font-semibold">서버 판정</span>
             <div className={`grid size-20 sm:size-24 place-items-center rounded-xl bg-indigo-950/40 border-2 border-dashed border-indigo-400/50 shadow-inner text-3xl sm:text-4xl font-bold text-indigo-300 ${pending ? 'animate-pulse' : ''}`}>
               {pending ? '❓' : state.status === 'ok' ? '🎯' : '🂠'}
             </div>

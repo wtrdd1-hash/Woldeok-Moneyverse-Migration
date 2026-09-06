@@ -22,10 +22,10 @@ describe('AdminControlsController feature switch guards', () => {
     expect(guards).not.toContain(SecondFactorGuard);
   });
 
-  it('keeps every other feature switch behind the full second-factor step-up', () => {
+  it('keeps every other feature switch behind CSRF without additional authentication', () => {
     const guards = guardsOn('setFeatureSwitch');
     expect(guards).toContain(CsrfGuard);
-    expect(guards).toContain(ReauthGuard);
-    expect(guards).toContain(SecondFactorGuard);
+    expect(guards).not.toContain(ReauthGuard);
+    expect(guards).not.toContain(SecondFactorGuard);
   });
 });

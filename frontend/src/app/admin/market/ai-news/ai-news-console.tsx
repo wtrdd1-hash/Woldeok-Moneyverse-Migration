@@ -27,7 +27,7 @@ export function AiNewsSettingsForm({ settings }: { readonly settings: AiNewsSett
       <CardHeader>
         <CardTitle className="text-base">모델 연결</CardTitle>
         <CardDescription>
-          키는 이 배포의 봉인 키로 암호화해 저장되고, 호출하는 순간에만 풀립니다. 저장에는 인증 앱 코드가 필요해요.
+          키는 이 배포의 봉인 키로 암호화해 저장되고, 호출하는 순간에만 풀립니다.
         </CardDescription>
       </CardHeader>
       <CardContent>

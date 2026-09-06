@@ -14,14 +14,14 @@ function guardsOn(method: keyof GameCatalogController): unknown[] {
   );
 }
 
-describe('GameCatalogController step-up guards', () => {
+describe('GameCatalogController mutation guards', () => {
   it.each(['setStockPrice', 'corporateAction'] as const)(
-    'requires CSRF, recent reauthentication and a spent code on %s',
+    'requires CSRF without additional authentication on %s',
     (method) => {
       const guards = guardsOn(method);
       expect(guards).toContain(CsrfGuard);
-      expect(guards).toContain(ReauthGuard);
-      expect(guards).toContain(SecondFactorGuard);
+      expect(guards).not.toContain(ReauthGuard);
+      expect(guards).not.toContain(SecondFactorGuard);
     },
   );
 

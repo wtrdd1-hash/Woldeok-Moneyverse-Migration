@@ -22,9 +22,9 @@ describe('AdminSecurityController console-entry guards', () => {
     expect(guards).not.toContain(SecondFactorGuard);
   });
 
-  it('retains OAuth step-up for second-factor enrolment', () => {
+  it('does not require OAuth step-up for legacy second-factor enrolment', () => {
     const guards = guardsOn('beginEnrolment');
     expect(guards).toContain(CsrfGuard);
-    expect(guards).toContain(ReauthGuard);
+    expect(guards).not.toContain(ReauthGuard);
   });
 });

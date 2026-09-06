@@ -29,8 +29,8 @@ import { HiLoCardGame } from './hilo-game';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '럭키존 (가상 미니게임) — 동전·주사위·슬롯머신·하이로우',
-  description: '월덕 머니버스의 5종 캐주얼 가상 미니게임(동전 뒤집기, 주사위 홀짝, 주사위 숫자 맞추기, 럭키 슬롯머신, 하이 앤 로우)을 플레이하고 WLD 가상자산 보상을 획득하세요.',
+  title: '럭키존 (가상 미니게임) — 동전·주사위·테마 게임',
+  description: '동전·주사위 기반 서버 게임과 슬롯·하이로우 테마 화면을 일일 이용 한도 안에서 즐기는 WLD 가상 미니게임입니다.',
   robots: { index: true, follow: true },
 };
 
@@ -199,7 +199,7 @@ export default async function CasinoPage() {
             </CardContent>
           </Card>
 
-          {/* 5종 미니게임 탭 로비 */}
+          {/* 3개 서버 규칙과 2개 테마 인터페이스 */}
           <Tabs defaultValue="coin" className="w-full space-y-6">
             <TabsList className="sticky top-[78px] z-20 grid grid-cols-2 sm:grid-cols-5 w-full h-auto p-2 gap-2 bg-slate-900/90 backdrop-blur-md border border-slate-800/80 shadow-lg rounded-2xl">
               <TabsTrigger value="coin" className="py-2.5 text-sm font-semibold rounded-lg">

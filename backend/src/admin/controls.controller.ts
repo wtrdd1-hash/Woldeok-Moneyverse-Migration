@@ -28,8 +28,6 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
-import { ReauthGuard } from '../auth/guards/reauth.guard';
-import { SecondFactorGuard } from '../auth/guards/second-factor.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -205,7 +203,7 @@ export class AdminControlsController {
   }
 
   @Put('feature-switches/:featureKey')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Enable, pause, put into safe mode or disable a feature' })
   setFeatureSwitch(
     @Req() request: RequestWithSession,
@@ -234,7 +232,7 @@ export class AdminControlsController {
   }
 
   @Post('policies')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Create an economy policy version, immediate or scheduled' })
   createPolicyVersion(@Req() request: RequestWithSession, @Body() body: PolicyVersionDto) {
     return this.guarded(
@@ -252,7 +250,7 @@ export class AdminControlsController {
   }
 
   @Post('policies/rollbacks')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Return the economy to the previous policy version' })
   rollbackPolicy(@Req() request: RequestWithSession, @Body() body: ReasonedCommandDto) {
     return this.guarded(
@@ -272,7 +270,7 @@ export class AdminControlsController {
    * one that calls this on a clock.
    */
   @Post('policies/activations')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Activate every policy version whose effective time has passed' })
   activateDuePolicies() {
     return this.guarded(
@@ -299,7 +297,7 @@ export class AdminControlsController {
   }
 
   @Post('auto-policy/runs')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Run the automatic adjustment now instead of waiting for Monday' })
   runAutoPolicy(@Req() request: RequestWithSession, @Body() body: ReasonedCommandDto) {
     return this.guarded(
@@ -314,7 +312,7 @@ export class AdminControlsController {
   }
 
   @Put('auto-policy/knobs/:knobKey')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Take one knob off automatic, or move its approved range' })
   setPolicyKnob(
     @Req() request: RequestWithSession,
@@ -337,7 +335,7 @@ export class AdminControlsController {
   }
 
   @Post('roles')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Grant an administrative role, or move the superadmin designation' })
   grantRole(@Req() request: RequestWithSession, @Body() body: RoleDesignationDto) {
     return this.guarded(
@@ -354,7 +352,7 @@ export class AdminControlsController {
   }
 
   @Post('role-revocations')
-  @UseGuards(CsrfGuard, ReauthGuard, SecondFactorGuard)
+  @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Take back an administrative role' })
   revokeRole(@Req() request: RequestWithSession, @Body() body: RoleDesignationDto) {
     return this.guarded(

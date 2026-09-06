@@ -86,15 +86,6 @@ function ReasonedStepUp({
         <FieldDescription>10자 이상. 감사 기록에 그대로 남습니다.</FieldDescription>
       </Field>
       <StepUpField id={id} undo={undo} />
-      {/* These three routes carry `ReauthGuard` as well as `SecondFactorGuard`,
-          and a stale identity check answers 401 with a sentence about
-          confirming who you are -- from a page that had nowhere to do it. */}
-      <p className="text-xs text-muted-foreground [word-break:keep-all]">
-        최근 15분 안의 본인 확인도 필요합니다.{' '}
-        <Link href="/account" className="underline underline-offset-4">
-          본인 확인하러 가기 →
-        </Link>
-      </p>
     </>
   );
 }

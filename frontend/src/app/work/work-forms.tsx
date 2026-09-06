@@ -125,7 +125,7 @@ export function TaskCompleteModalButton({
         state.message ?? (isEn ? 'Task execution failed.' : '업무 처리에 실패했습니다.'),
       );
     }
-  }, [state, isEn, combo]);
+  }, [state, isEn, combo, phase]);
 
   const handleStartWork = () => {
     clearAllTimers();
