@@ -18,18 +18,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { IDLE } from '@/lib/action-state';
 import { cancelMarketEvent, publishMarketEvent } from '../actions';
 import type { AdminStock } from '../types';
+import { STRENGTHS } from './strengths';
 
-/** What each strength does, in the words an operator decides by. */
-/**
- * The three strengths, in what they do. The step is what 152 added: news
- * moves the price when it lands and leans it afterwards, so both figures
- * belong beside the label an operator picks.
- */
-export const STRENGTHS = [
-  { value: 1, label: '소폭', detail: '즉시 ±0.8 % · 하루 ±3 % 기울기 · 변동성 1.2배' },
-  { value: 2, label: '보통', detail: '즉시 ±2.5 % · 하루 ±8 % 기울기 · 변동성 1.5배' },
-  { value: 3, label: '강력', detail: '즉시 ±6 % · 하루 ±20 % 기울기 · 변동성 2배' },
-] as const;
 
 /**
  * Publishes news.
