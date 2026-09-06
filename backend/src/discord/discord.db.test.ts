@@ -77,7 +77,7 @@ describe.skipIf(!DATABASE_URL)('the Discord surface against a real database', ()
 
   it('calls outbox_claim_pending with the declared signature', async () => {
     const claimed = await pool.query(
-      'SELECT id::text,event_type,channel_key FROM public.outbox_claim_pending($1)',
+      'SELECT id::text,event_type,channel_key,safe_context FROM public.outbox_claim_pending($1)',
       [1],
     );
     expect(Array.isArray(claimed.rows)).toBe(true);

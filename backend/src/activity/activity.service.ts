@@ -14,9 +14,10 @@ export class ActivityService {
     actor: string | null,
     ip: string | null,
     userAgent: string | null,
+    country: string | null,
   ): Promise<{ recorded: number }> {
     try {
-      const count = await this.repository.logEvents(events, actor, ip, userAgent);
+      const count = await this.repository.logEvents(events, actor, ip, userAgent, country);
       return { recorded: count };
     } catch (error) {
       this.logger.error('Failed to log activity events', error);
