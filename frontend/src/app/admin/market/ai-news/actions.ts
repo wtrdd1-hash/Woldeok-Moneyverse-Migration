@@ -99,25 +99,45 @@ export async function decideAiNewsScenario(_previous: ActionState, formData: For
     }
   }
 
-  const direction = text(formData.get('direction'));
-  const strength = Number(text(formData.get('strength')));
   const hours = Number(text(formData.get('hours')));
   const headline = text(formData.get('headline'));
   const body = text(formData.get('body'));
-  if (direction !== 'up' && direction !== 'down') return { status: 'error', message: '호재인지 악재인지 골라 주세요.' };
-  if (![1, 2, 3].includes(strength)) return { status: 'error', message: '강도는 1·2·3 중 하나예요.' };
+  // One row of controls per stock the story touches (152), named by index so
+  // each radio group is its own.
+  const count = Number(text(formData.get('effectCount')));
+  if (!Number.isSafeInteger(count) || count < 1 || count > 4) {
+    return { status: 'error', message: '종목별 영향이 비어 있어요. 새로고침해 주세요.' };
+  }
+  const effects = [];
+  for (let index = 0; index < count; index += 1) {
+    const stockId = text(formData.get(`effect-${index}-stockId`));
+    const direction = text(formData.get(`effect-${index}-direction`));
+    const strength = Number(text(formData.get(`effect-${index}-strength`)));
+    if (direction !== 'up' && direction !== 'down' && direction !== 'none') {
+      return { status: 'error', message: '종목마다 호재·악재·소식 중 하나를 골라 주세요.' };
+    }
+    if (![1, 2, 3].includes(strength)) return { status: 'error', message: '강도는 1·2·3 중 하나예요.' };
+    effects.push({ stockId: stockId === '' ? null : stockId, direction, strength });
+  }
+  if (!effects.some((effect) => effect.direction !== 'none')) {
+    return { status: 'error', message: '적어도 한 종목은 움직여야 소식이 됩니다.' };
+  }
   if (!Number.isSafeInteger(hours) || hours < 1 || hours > 168) return { status: 'error', message: '기간은 1~168시간이에요.' };
   if (headline.length < 2 || headline.length > 120) return { status: 'error', message: '제목은 2~120자로 적어 주세요.' };
   if (body.length > 2000) return { status: 'error', message: '본문은 2000자까지예요.' };
 
   try {
     await mutate(`/api/v1/admin/ai-news/scenarios/${encodeURIComponent(scenarioId)}/publish`, {
-      body: { direction, strength, hours, headline, body, idempotencyKey: idempotencyKey() },
+      body: { hours, headline, body, effects, idempotencyKey: idempotencyKey() },
     });
     revalidatePath(PAGE);
     revalidatePath('/admin/market');
     revalidatePath('/stocks');
-    return { status: 'ok', message: '소식을 냈어요. 지금부터 시장이 그 방향으로 기울어요.' };
+    const moved = effects.filter((effect) => effect.direction !== 'none').length;
+    return {
+      status: 'ok',
+      message: `소식을 냈어요. ${moved}개 종목이 지금 값이 뛰고, 그 방향으로 계속 기울어요.`,
+    };
   } catch (error) {
     return explain(error, '소식을 내지 못했어요.');
   }

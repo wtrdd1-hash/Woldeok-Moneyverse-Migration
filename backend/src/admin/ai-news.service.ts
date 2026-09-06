@@ -7,6 +7,7 @@ import type {
   AiNewsRepository,
   AiNewsRunRow,
   AiNewsSettingsRow,
+  ScenarioEffectProposal,
   ScenarioProposal,
 } from './ai-news.repository';
 import { AiNewsInputError } from './ai-news.repository';
@@ -28,6 +29,8 @@ export class AiNewsUnavailableError extends Error {
 }
 
 const HOW_MANY = 5;
+/** How many stocks one story may move. Four is what a card can show at a glance. */
+const MOST_EFFECTS = 4;
 
 /**
  * The shape the model is held to, read leniently: a model that answers
@@ -36,10 +39,19 @@ const HOW_MANY = 5;
  * and vocabularies 124 and 135 enforce. Only the fields a scenario cannot
  * be built without are required.
  */
-const ProposalSchema = z.object({
+const EffectSchema = z.object({
   stock_symbol: z.string().nullish(),
-  direction: z.enum(['up', 'down']),
+  direction: z.enum(['up', 'down', 'none']),
   strength: z.coerce.number(),
+});
+
+const ProposalSchema = z.object({
+  /** What the story does to each stock it touches (152). */
+  effects: z.array(EffectSchema).min(1).max(6).optional(),
+  /** 135's one-stock shape, still read when a server answers in it. */
+  stock_symbol: z.string().nullish(),
+  direction: z.enum(['up', 'down']).optional(),
+  strength: z.coerce.number().optional(),
   hours: z.coerce.number(),
   headline: z.string(),
   body: z.string().nullish(),
@@ -96,23 +108,31 @@ stock (or the whole market) up or down for a number of hours. Follow these rules
    still running or ended within the last six hours. Prefer follow-ups, second-order
    effects and news about stocks that have been quiet. Choose "hours" to fit the news:
    a rumour lasts hours, a product launch a day or two, a structural shift longer.
-3. STRENGTH is a vocabulary of three: 1 = 소폭 (about ±3 % a day of lean, volatility
-   ×1.2), 2 = 보통 (±8 %, ×1.5), 3 = 강력 (±20 %, ×2.0). At most one scenario in a batch
-   may be strength 3, and only when the story has earned it.
-4. VARIETY. Spread the five across different stocks and directions; at most one may be
-   about the whole market. Mix good and bad news unless the operator asks otherwise.
-5. THE OPERATOR'S WISH, when given, is what the batch should serve -- but it still has to
+3. WHO IT MOVES. One story, several stocks. "effects" is one to four entries, each a
+   listed symbol (or null for the whole market) with a direction and a strength. A
+   direction of "up" is 호재 for that stock, "down" is 악재, and "none" is a stock the
+   story names without moving -- use it when a company is mentioned but unaffected. At
+   least one entry must move. News that helps one company at another's expense is the
+   most interesting kind: a supplier's win is its rival's loss, a rate cut lifts the
+   borrowers and squeezes the lender.
+4. STRENGTH is a vocabulary of three, per entry: 1 = 소폭 (about ±3 % a day of lean plus
+   a 0.8 % step when it lands), 2 = 보통 (±8 %, 2.5 %), 3 = 강력 (±20 %, 6 %). At most one
+   entry in a scenario may be strength 3, and only when the story has earned it.
+5. VARIETY. Spread the five scenarios across different stocks; at most one scenario may
+   move the whole market. Mix good and bad news unless the operator asks otherwise.
+6. THE OPERATOR'S WISH, when given, is what the batch should serve -- but it still has to
    be consistent with the context. If the wish contradicts what is running, propose the
    closest consistent story and say so in the rationale.
-6. LANGUAGE AND FORM. Headlines and bodies are in Korean, in the register of a game's
+7. LANGUAGE AND FORM. Headlines and bodies are in Korean, in the register of a game's
    news feed: concrete, a little playful, never real-world. Headline 2-120 characters;
-   body up to 2000, two to five sentences. "stock_symbol" must be exactly one of the
-   listed symbols, or null for the whole market. "hours" is a whole number from 1 to 168.
+   body up to 2000, two to five sentences. Every "stock_symbol" must be exactly one of
+   the listed symbols, or null for the whole market. "hours" is a whole number from 1 to
+   168 and belongs to the story, not to one stock.
 
 Answer with one JSON object and nothing else -- no prose, no code fence -- of this shape:
 
-{"scenarios": [{"stock_symbol": "MYUY or null", "direction": "up" | "down",
-  "strength": 1 | 2 | 3, "hours": 6, "headline": "...", "body": "...", "rationale": "..."}]}`;
+{"scenarios": [{"effects": [{"stock_symbol": "MYUY or null", "direction": "up" | "down" | "none",
+  "strength": 1 | 2 | 3}], "hours": 6, "headline": "...", "body": "...", "rationale": "..."}]}`;
 
 export function userPrompt(context: Record<string, unknown>, operatorPrompt: string): string {
   const wish = operatorPrompt.trim();
@@ -162,14 +182,29 @@ const BATCH_JSON_SCHEMA = {
       items: {
         type: 'object',
         additionalProperties: false,
-        required: ['stock_symbol', 'direction', 'strength', 'hours', 'headline', 'body', 'rationale'],
+        required: ['effects', 'hours', 'headline', 'body', 'rationale'],
         properties: {
-          stock_symbol: {
-            type: ['string', 'null'],
-            description: 'The listed symbol this is about, or null for the whole market',
+          effects: {
+            type: 'array',
+            description: 'One to four stocks this story touches, and what it does to each',
+            items: {
+              type: 'object',
+              additionalProperties: false,
+              required: ['stock_symbol', 'direction', 'strength'],
+              properties: {
+                stock_symbol: {
+                  type: ['string', 'null'],
+                  description: 'A listed symbol, or null for the whole market',
+                },
+                direction: {
+                  type: 'string',
+                  enum: ['up', 'down', 'none'],
+                  description: 'up is 호재 for this stock, down is 악재, none is mentioned but unmoved',
+                },
+                strength: { type: 'integer', enum: [1, 2, 3] },
+              },
+            },
           },
-          direction: { type: 'string', enum: ['up', 'down'] },
-          strength: { type: 'integer', enum: [1, 2, 3] },
           hours: { type: 'integer', description: 'How long the lean lasts, 1 to 168' },
           headline: { type: 'string', description: 'Korean, 2 to 120 characters' },
           body: { type: 'string', description: 'Korean, up to 2000 characters' },
@@ -541,11 +576,10 @@ export class AiNewsService {
   publish(input: {
     readonly actorUserId: string;
     readonly scenarioId: string;
-    readonly direction: unknown;
-    readonly strength: unknown;
     readonly hours: unknown;
     readonly headline: unknown;
     readonly body?: unknown;
+    readonly effects: unknown;
     readonly idempotencyKey?: string | undefined;
   }) {
     return this.repository.publish({
@@ -581,12 +615,14 @@ export class AiNewsService {
 }
 
 /**
- * What the model said, held to the rules the prompt stated: symbols must be
- * listed ones (an unknown one becomes market-wide rather than refusing the
- * whole batch, and says so in the rationale), strength inside the
- * vocabulary of three and at most one of them a 3, at most five. Trimmed to
- * the column widths the database enforces; a scenario with no headline left
- * after trimming is dropped rather than failing the four beside it.
+ * What the model said, held to the rules the prompt stated.
+ *
+ * Every leg must name a listed symbol or the whole market; a leg naming
+ * something unlisted is dropped and said so in the rationale, because a
+ * story about a company that does not exist is worse than a story with one
+ * fewer stock in it. Four legs at most, one strength-3 leg at most, and a
+ * scenario that moves nothing -- or has no headline left after trimming --
+ * is dropped rather than taking the four beside it down.
  */
 export function normalise(batch: ScenarioBatch, context: Record<string, unknown>): ScenarioProposal[] {
   const listed = new Set(
@@ -595,28 +631,48 @@ export function normalise(batch: ScenarioBatch, context: Record<string, unknown>
       .filter((symbol): symbol is string => typeof symbol === 'string')
       .map((symbol) => symbol.toUpperCase()),
   );
-  let strongSeen = false;
   const proposals: ScenarioProposal[] = [];
   for (const scenario of batch.scenarios.slice(0, HOW_MANY)) {
     const headline = scenario.headline.trim().slice(0, 120);
     if (headline.length < 2) continue;
-    const symbol = scenario.stock_symbol?.trim().toUpperCase() || null;
-    const known = symbol !== null && listed.has(symbol);
-    const rationale = (scenario.rationale ?? '').trim();
-    let strength = strengthOf(scenario.strength);
-    if (strength === 3) {
-      if (strongSeen) strength = 2;
-      strongSeen = true;
+
+    // A model answering in 135's one-stock shape has still answered.
+    const legs = scenario.effects ?? (scenario.direction
+      ? [{ stock_symbol: scenario.stock_symbol, direction: scenario.direction, strength: scenario.strength ?? 2 }]
+      : []);
+
+    const unknown: string[] = [];
+    const seen = new Set<string>();
+    const effects: ScenarioEffectProposal[] = [];
+    let strongSeen = false;
+    for (const leg of legs) {
+      const symbol = leg.stock_symbol?.trim().toUpperCase() || null;
+      if (symbol !== null && !listed.has(symbol)) {
+        unknown.push(symbol);
+        continue;
+      }
+      // One leg per stock: a story cannot lean a stock two ways.
+      const key = symbol ?? '__market__';
+      if (seen.has(key)) continue;
+      seen.add(key);
+      let strength = strengthOf(leg.strength);
+      if (strength === 3 && leg.direction !== 'none') {
+        if (strongSeen) strength = 2;
+        strongSeen = true;
+      }
+      effects.push({ stock_symbol: symbol, direction: leg.direction, strength });
+      if (effects.length === MOST_EFFECTS) break;
     }
+    if (!effects.some((effect) => effect.direction !== 'none')) continue;
+
+    const rationale = (scenario.rationale ?? '').trim();
     proposals.push({
-      stock_symbol: known ? symbol : null,
-      direction: scenario.direction,
-      strength,
+      effects,
       hours: Math.min(168, Math.max(1, Math.round(scenario.hours) || 1)),
       headline,
       body: (scenario.body ?? '').trim().slice(0, 2000),
-      rationale: (symbol !== null && !known
-        ? `(${symbol}은 상장 종목이 아니라 시장 전체로 바꿨습니다) ${rationale}`
+      rationale: (unknown.length > 0
+        ? `(${unknown.join(', ')}은 상장 종목이 아니라 뺐습니다) ${rationale}`
         : rationale
       ).slice(0, 1000),
     });
@@ -624,8 +680,8 @@ export function normalise(batch: ScenarioBatch, context: Record<string, unknown>
   return proposals;
 }
 
-function strengthOf(value: number): 1 | 2 | 3 {
-  const whole = Math.round(value);
+function strengthOf(value: number | undefined): 1 | 2 | 3 {
+  const whole = Math.round(value ?? 2);
   if (whole >= 3) return 3;
   if (whole <= 1) return 1;
   return 2;

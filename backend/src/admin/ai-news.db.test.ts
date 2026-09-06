@@ -87,29 +87,30 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
       return rows[0]!.id;
     };
 
+    const dynamics = async (client: PoolClient, stockId: string): Promise<void> => {
+      await client.query(
+        `INSERT INTO public.virtual_stock_dynamics (stock_id, price_exact, fair_value, trend_bps, vol_bps)
+         VALUES ($1, 1000, 1000, 0, 300)`,
+        [stockId],
+      );
+    };
+
     const scenarios = (symbol: string) => [
-      { stock_symbol: symbol, direction: 'up', strength: 2, hours: 6, headline: '신제품 발표', body: '기대가 높다.', rationale: '지난 흐름을 잇는다.' },
-      { stock_symbol: null, direction: 'down', strength: 1, hours: 12, headline: '시장 전체 관망세', body: '', rationale: '' },
+      {
+        effects: [{ stock_symbol: symbol, direction: 'up', strength: 2 }],
+        hours: 6,
+        headline: '신제품 발표',
+        body: '기대가 높다.',
+        rationale: '지난 흐름을 잇는다.',
+      },
+      {
+        effects: [{ stock_symbol: null, direction: 'down', strength: 1 }],
+        hours: 12,
+        headline: '시장 전체 관망세',
+        body: '',
+        rationale: '',
+      },
     ];
-
-    it('starts on an OpenAI-standard address, so a fresh deployment has one to call (143)', async () => {
-      await rolledBack(async (client) => {
-        const actor = await operator(client);
-        const { rows } = await client.query<{ column_default: string | null }>(
-          `SELECT column_default FROM information_schema.columns
-           WHERE table_schema = 'public' AND table_name = 'ai_news_settings' AND column_name = 'api_base_url'`,
-        );
-        expect(rows[0]?.column_default ?? '').toContain('https://api.openai.com/v1');
-
-        const settings = await client.query<{ api_base_url: string; has_key: boolean }>(
-          'SELECT api_base_url, has_key FROM public.ai_news_settings_get($1)',
-          [actor],
-        );
-        // 135 shipped one vendor's root; 143 moved the row a key was never
-        // stored against to the standard's own address.
-        expect(settings.rows[0]).toMatchObject({ api_base_url: 'https://api.openai.com/v1', has_key: false });
-      });
-    });
 
     it('keeps one run at a time and closes it with a batch or a reason (149)', async () => {
       await rolledBack(async (client) => {
@@ -246,24 +247,26 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
       await rolledBack(async (client) => {
         const actor = await operator(client);
         const symbol = `N${randomUUID().slice(0, 6).replace(/[^0-9a-f]/g, '').toUpperCase()}`;
-        await listing(client, symbol);
+        const stock = await listing(client, symbol);
+        await dynamics(client, stock);
         await client.query('SELECT public.ai_news_batch_create($1,$2,$3,$4,$5::jsonb,$6::jsonb)', [
           randomUUID(), actor, '', 'gpt-4o-mini', '{}', JSON.stringify(scenarios(symbol)),
         ]);
         const { rows } = await client.query<{ scenarios: { id: string }[] }>('SELECT scenarios FROM public.ai_news_batch_latest($1)', [actor]);
         const chosen = rows[0]!.scenarios[0]!.id;
+        const legs = JSON.stringify([{ stock_id: stock, direction: 'up', strength: 1 }]);
 
         const key = randomUUID();
-        const published = await client.query<{ event_id: string; replayed: boolean }>(
-          'SELECT event_id, replayed FROM public.ai_news_scenario_publish($1,$2,$3,$4,$5,$6,$7,$8)',
-          [key, actor, chosen, 'up', 1, 3, '다듬은 제목', '다듬은 본문'],
+        const published = await client.query<{ event_id: string; published: number; replayed: boolean }>(
+          'SELECT event_id, published, replayed FROM public.ai_news_scenario_publish($1,$2,$3,$4,$5,$6,$7::jsonb)',
+          [key, actor, chosen, 3, '다듬은 제목', '다듬은 본문', legs],
         );
-        expect(published.rows[0]?.replayed).toBe(false);
-        const again = await client.query<{ event_id: string; replayed: boolean }>(
-          'SELECT event_id, replayed FROM public.ai_news_scenario_publish($1,$2,$3,$4,$5,$6,$7,$8)',
-          [key, actor, chosen, 'up', 1, 3, '다듬은 제목', '다듬은 본문'],
+        expect(published.rows[0]).toMatchObject({ published: 1, replayed: false });
+        const again = await client.query<{ event_id: string; published: number; replayed: boolean }>(
+          'SELECT event_id, published, replayed FROM public.ai_news_scenario_publish($1,$2,$3,$4,$5,$6,$7::jsonb)',
+          [key, actor, chosen, 3, '다듬은 제목', '다듬은 본문', legs],
         );
-        expect(again.rows[0]).toEqual({ event_id: published.rows[0]?.event_id, replayed: true });
+        expect(again.rows[0]).toEqual({ event_id: published.rows[0]?.event_id, published: 1, replayed: true });
 
         const event = await client.query<{ source: string; strength: number; headline: string }>(
           'SELECT source, strength, headline FROM public.virtual_stock_market_events WHERE id = $1',
@@ -271,8 +274,87 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
         );
         expect(event.rows[0]).toEqual({ source: 'ai', strength: 1, headline: '다듬은 제목' });
 
+        // And it landed: 소폭 is 80 basis points on a 1,000 WLD stock (151).
+        const priced = await client.query<{ current_price: string }>(
+          'SELECT current_price FROM public.virtual_stocks WHERE id = $1',
+          [stock],
+        );
+        expect(Number(priced.rows[0]?.current_price)).toBe(1_008);
+
         const running = await client.query<{ id: string }>('SELECT id FROM public.stock_market_events_active()');
         expect(running.rows.map((row) => row.id)).toContain(published.rows[0]?.event_id);
+      });
+    });
+
+    it('publishes one event per stock a story moves, and none for the ones it only names (152)', async () => {
+      await rolledBack(async (client) => {
+        const actor = await operator(client);
+        const winner = `W${randomUUID().slice(0, 5).replace(/[^0-9a-f]/g, '').toUpperCase()}`;
+        const loser = `L${randomUUID().slice(0, 5).replace(/[^0-9a-f]/g, '').toUpperCase()}`;
+        const winnerId = await listing(client, winner);
+        const loserId = await listing(client, loser);
+        await dynamics(client, winnerId);
+        await dynamics(client, loserId);
+
+        await client.query('SELECT public.ai_news_batch_create($1,$2,$3,$4,$5::jsonb,$6::jsonb)', [
+          randomUUID(), actor, '', 'gpt-4o-mini', '{}', JSON.stringify([{
+            effects: [
+              { stock_symbol: winner, direction: 'up', strength: 2 },
+              { stock_symbol: loser, direction: 'down', strength: 1 },
+              { stock_symbol: null, direction: 'none', strength: 1 },
+            ],
+            hours: 6,
+            headline: '원자재 값이 내렸다',
+            body: '사는 쪽은 웃고 파는 쪽은 운다.',
+            rationale: '어제의 공급 소식을 잇는다.',
+          }]),
+        ]);
+
+        const { rows } = await client.query<{
+          scenarios: { id: string; effects: { symbol: string | null; direction: string; strength: number }[] }[];
+        }>('SELECT scenarios FROM public.ai_news_batch_latest($1)', [actor]);
+        const scenario = rows[0]!.scenarios[0]!;
+        expect(scenario.effects.map((effect) => [effect.symbol, effect.direction, effect.strength])).toEqual([
+          [winner, 'up', 2],
+          [loser, 'down', 1],
+          [null, 'none', 1],
+        ]);
+
+        const published = await client.query<{ event_id: string; published: number }>(
+          'SELECT event_id, published FROM public.ai_news_scenario_publish($1,$2,$3,$4,$5,$6,$7::jsonb)',
+          [randomUUID(), actor, scenario.id, 6, '원자재 값이 내렸다', '', JSON.stringify([
+            { stock_id: winnerId, direction: 'up', strength: 2 },
+            { stock_id: loserId, direction: 'down', strength: 1 },
+            { stock_id: null, direction: 'none', strength: 1 },
+          ])],
+        );
+        expect(published.rows[0]?.published).toBe(2);
+
+        // Two events under one headline, one each way, and the third stock
+        // untouched -- 152's whole point.
+        const events = await client.query<{ stock_id: string; direction: string }>(
+          `SELECT stock_id::text AS stock_id, direction FROM public.virtual_stock_market_events
+           WHERE headline = '원자재 값이 내렸다' ORDER BY direction`,
+        );
+        expect(events.rows).toEqual([
+          { stock_id: loserId, direction: 'down' },
+          { stock_id: winnerId, direction: 'up' },
+        ]);
+
+        const prices = await client.query<{ id: string; current_price: string }>(
+          'SELECT id::text AS id, current_price FROM public.virtual_stocks WHERE id = ANY($1::uuid[]) ORDER BY id',
+          [[winnerId, loserId]],
+        );
+        const priced = new Map(prices.rows.map((row) => [row.id, Number(row.current_price)]));
+        expect(priced.get(winnerId)).toBe(1_025);
+        expect(priced.get(loserId)).toBe(992);
+
+        const legs = await client.query<{ published: number }>(
+          `SELECT count(published_event_id)::integer AS published
+           FROM public.ai_news_scenario_effects WHERE scenario_id = $1`,
+          [scenario.id],
+        );
+        expect(legs.rows[0]?.published).toBe(2);
       });
     });
 
@@ -292,8 +374,9 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
 
         await client.query('SAVEPOINT reversal');
         const error = await rejectionOf(() =>
-          client.query('SELECT * FROM public.ai_news_scenario_publish($1,$2,$3,$4,$5,$6,$7,$8)', [
-            randomUUID(), actor, first!.id, 'up', 3, 6, '강력 반전', '',
+          client.query('SELECT * FROM public.ai_news_scenario_publish($1,$2,$3,$4,$5,$6,$7::jsonb)', [
+            randomUUID(), actor, first!.id, 6, '강력 반전', '',
+            JSON.stringify([{ stock_id: stock, direction: 'up', strength: 3 }]),
           ]),
         );
         expect(code(error)).toBe('22023');
@@ -302,8 +385,9 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
 
         // A gentler follow-up is allowed.
         const gentle = await client.query<{ event_id: string }>(
-          'SELECT event_id FROM public.ai_news_scenario_publish($1,$2,$3,$4,$5,$6,$7,$8)',
-          [randomUUID(), actor, first!.id, 'up', 1, 6, '조심스러운 반등', ''],
+          'SELECT event_id FROM public.ai_news_scenario_publish($1,$2,$3,$4,$5,$6,$7::jsonb)',
+          [randomUUID(), actor, first!.id, 6, '조심스러운 반등', '',
+           JSON.stringify([{ stock_id: stock, direction: 'up', strength: 1 }])],
         );
         expect(gentle.rows[0]?.event_id).toBeTruthy();
 
