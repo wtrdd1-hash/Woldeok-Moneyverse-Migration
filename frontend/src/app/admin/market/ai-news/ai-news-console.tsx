@@ -11,17 +11,39 @@ import { IDLE } from '@/lib/action-state';
 import { cn } from '@/lib/cn';
 import { formatMoment } from '@/lib/money';
 import { StepUpField } from '../../step-up-field';
-import type { AiNewsBatch, AiNewsScenario, AiNewsSettings } from '../../types';
+import type { AiNewsBatch, AiNewsModelList, AiNewsScenario, AiNewsSettings } from '../../types';
 import { STRENGTHS } from '../market-events';
 import { decideAiNewsScenario, generateAiNews, saveAiNewsSettings } from './actions';
+
+/** Why the model field has no list beside it, in a sentence an operator can act on. */
+const NO_LIST: Readonly<Record<string, string>> = {
+  ai_news_key_missing: '키를 저장하면 이 키로 쓸 수 있는 모델을 여기에 모아 둘게요.',
+  ai_news_sealing_unavailable: '이 배포에는 봉인 키가 없어 저장된 키를 열 수 없어요.',
+  ai_news_model_rejected_key: '저장된 키를 API가 거부해서 목록을 받지 못했어요.',
+  ai_news_model_unreachable: '주소에 닿지 못해 목록을 받지 못했어요.',
+  ai_news_model_unusable: '이 주소는 모델 목록을 주지 않네요. 모델 이름을 직접 적어 주세요.',
+  ai_news_model_refused: '목록을 받지 못했어요.',
+};
 
 /**
  * The AI newsroom's console: where the model is, what it last proposed,
  * and the five cards an operator chooses from. Everything here is what the
  * database holds, so a reload draws the same five.
+ *
+ * The address is an OpenAI-standard base -- the API this calls is
+ * `{주소}/chat/completions`, and `{주소}/models` is where the list beside
+ * the model field comes from. The field stays a field: a server that will
+ * not list its models is still a server an operator can name a model on.
  */
-export function AiNewsSettingsForm({ settings }: { readonly settings: AiNewsSettings | null }) {
+export function AiNewsSettingsForm({
+  settings,
+  models,
+}: {
+  readonly settings: AiNewsSettings | null;
+  readonly models: AiNewsModelList;
+}) {
   const [state, action] = useActionState(saveAiNewsSettings, IDLE);
+  const listed = models.models.length;
   return (
     <Card>
       <CardHeader>
@@ -37,15 +59,35 @@ export function AiNewsSettingsForm({ settings }: { readonly settings: AiNewsSett
             <Input
               id="ai-base-url"
               name="apiBaseUrl"
-              defaultValue={settings?.api_base_url ?? 'https://api.anthropic.com'}
+              defaultValue={settings?.api_base_url ?? 'https://api.openai.com/v1'}
               required
               className="font-mono text-sm"
             />
-            <FieldDescription>Anthropic API 또는 같은 규격의 프록시 주소.</FieldDescription>
+            <FieldDescription>
+              OpenAI 표준을 따르는 주소예요. 뒤에 /chat/completions와 /models를 붙여 부릅니다. OpenAI는
+              https://api.openai.com/v1, Anthropic은 https://api.anthropic.com/v1, 직접 띄운 서버도 같은 규격이면 됩니다.
+            </FieldDescription>
           </Field>
           <Field>
             <FieldLabel htmlFor="ai-model">모델</FieldLabel>
-            <Input id="ai-model" name="model" defaultValue={settings?.model ?? 'claude-opus-5'} required className="font-mono text-sm" />
+            <Input
+              id="ai-model"
+              name="model"
+              list="ai-model-options"
+              defaultValue={settings?.model ?? 'gpt-4o-mini'}
+              required
+              className="font-mono text-sm"
+            />
+            <datalist id="ai-model-options">
+              {models.models.map((model) => (
+                <option key={model} value={model} />
+              ))}
+            </datalist>
+            <FieldDescription>
+              {listed > 0
+                ? `이 키로 쓸 수 있는 모델 ${listed}개를 목록에 담아 뒀어요. 눌러서 고르거나 직접 적어도 됩니다.`
+                : (models.problem ? NO_LIST[models.problem] : undefined) ?? '모델 이름을 직접 적어 주세요.'}
+            </FieldDescription>
           </Field>
           <Field className="sm:col-span-2">
             <FieldLabel htmlFor="ai-key">API 키</FieldLabel>

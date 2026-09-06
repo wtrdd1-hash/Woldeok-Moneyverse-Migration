@@ -27,13 +27,13 @@ import { AiNewsInputError } from './ai-news.repository';
 import { AiNewsService, AiNewsUnavailableError } from './ai-news.service';
 
 export class SaveAiNewsSettingsDto {
-  @ApiProperty({ example: 'https://api.anthropic.com' })
+  @ApiProperty({ example: 'https://api.openai.com/v1', description: 'The OpenAI-standard base: /chat/completions and /models hang off it' })
   @IsString()
   @MinLength(8)
   @MaxLength(300)
   readonly apiBaseUrl!: string;
 
-  @ApiProperty({ example: 'claude-opus-5' })
+  @ApiProperty({ example: 'gpt-4o-mini' })
   @IsString()
   @MinLength(1)
   @MaxLength(100)
@@ -140,7 +140,7 @@ export class AiNewsController {
   }
 
   @Get('settings')
-  @ApiOperation({ summary: 'Model address, model name and whether a key is stored' })
+  @ApiOperation({ summary: 'API address, model name and whether a key is stored' })
   async settings(@Req() request: RequestWithSession) {
     return { settings: await this.service().settings(requireUserId(request)) };
   }
@@ -153,6 +153,12 @@ export class AiNewsController {
       async () => ({ saved: await this.service().saveSettings({ actorUserId: requireUserId(request), ...body }) }),
       'invalid AI news settings',
     );
+  }
+
+  @Get('models')
+  @ApiOperation({ summary: 'What the stored key can reach, as GET {base}/models lists it' })
+  async models(@Req() request: RequestWithSession) {
+    return this.service().models(requireUserId(request));
   }
 
   @Get('batches/latest')

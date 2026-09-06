@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { databaseUrl, rejectionOf } from '../testing/database';
 
 /**
- * Migration 127, executed: the newsroom's tables stay behind functions, an
+ * Migration 135, executed: the newsroom's tables stay behind functions, an
  * operator is required, a batch survives a reload, and the continuity
  * guard holds.
  */
@@ -90,11 +90,30 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
       { stock_symbol: null, direction: 'down', strength: 1, hours: 12, headline: '시장 전체 관망세', body: '', rationale: '' },
     ];
 
+    it('starts on an OpenAI-standard address, so a fresh deployment has one to call (143)', async () => {
+      await rolledBack(async (client) => {
+        const actor = await operator(client);
+        const { rows } = await client.query<{ column_default: string | null }>(
+          `SELECT column_default FROM information_schema.columns
+           WHERE table_schema = 'public' AND table_name = 'ai_news_settings' AND column_name = 'api_base_url'`,
+        );
+        expect(rows[0]?.column_default ?? '').toContain('https://api.openai.com/v1');
+
+        const settings = await client.query<{ api_base_url: string; has_key: boolean }>(
+          'SELECT api_base_url, has_key FROM public.ai_news_settings_get($1)',
+          [actor],
+        );
+        // 135 shipped one vendor's root; 143 moved the row a key was never
+        // stored against to the standard's own address.
+        expect(settings.rows[0]).toMatchObject({ api_base_url: 'https://api.openai.com/v1', has_key: false });
+      });
+    });
+
     it('stores the settings without the key in the clear and reads them back masked', async () => {
       await rolledBack(async (client) => {
         const actor = await operator(client);
         await client.query('SELECT public.ai_news_settings_set($1,$2,$3,$4,$5,$6,$7)', [
-          randomUUID(), actor, 'https://api.example', 'claude-opus-5', 'c2VhbGVk', 'test', '9876',
+          randomUUID(), actor, 'https://api.example', 'gpt-4o-mini', 'c2VhbGVk', 'test', '9876',
         ]);
         const { rows } = await client.query<{ api_base_url: string; has_key: boolean; api_key_hint: string }>(
           'SELECT api_base_url, has_key, api_key_hint FROM public.ai_news_settings_get($1)',
@@ -104,7 +123,7 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
 
         // The address changes and the key stays.
         await client.query('SELECT public.ai_news_settings_set($1,$2,$3,$4,$5,$6,$7)', [
-          randomUUID(), actor, 'https://proxy.example', 'claude-opus-5', null, null, null,
+          randomUUID(), actor, 'https://proxy.example', 'gpt-4o-mini', null, null, null,
         ]);
         const again = await client.query<{ api_key_sealed: string; api_base_url: string }>(
           'SELECT api_key_sealed, api_base_url FROM public.ai_news_settings_credential($1)',
@@ -136,7 +155,7 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
 
         const first = await client.query<{ batch_id: string; replayed: boolean }>(
           'SELECT batch_id, replayed FROM public.ai_news_batch_create($1,$2,$3,$4,$5::jsonb,$6::jsonb)',
-          [randomUUID(), actor, '조용하게', 'claude-opus-5', '{}', JSON.stringify(scenarios(symbol))],
+          [randomUUID(), actor, '조용하게', 'gpt-4o-mini', '{}', JSON.stringify(scenarios(symbol))],
         );
         expect(first.rows[0]?.replayed).toBe(false);
 
@@ -152,7 +171,7 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
 
         const second = await client.query<{ batch_id: string }>(
           'SELECT batch_id FROM public.ai_news_batch_create($1,$2,$3,$4,$5::jsonb,$6::jsonb)',
-          [randomUUID(), actor, '', 'claude-opus-5', '{}', JSON.stringify(scenarios(symbol).slice(0, 1))],
+          [randomUUID(), actor, '', 'gpt-4o-mini', '{}', JSON.stringify(scenarios(symbol).slice(0, 1))],
         );
         const old = await client.query<{ status: string }>(
           'SELECT status FROM public.ai_news_scenarios WHERE batch_id = $1',
@@ -165,7 +184,7 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
         await client.query('SAVEPOINT unknown_symbol');
         const error = await rejectionOf(() =>
           client.query('SELECT * FROM public.ai_news_batch_create($1,$2,$3,$4,$5::jsonb,$6::jsonb)', [
-            randomUUID(), actor, '', 'claude-opus-5', '{}', JSON.stringify(scenarios('NOPE')),
+            randomUUID(), actor, '', 'gpt-4o-mini', '{}', JSON.stringify(scenarios('NOPE')),
           ]),
         );
         expect(code(error)).toBe('22023');
@@ -179,7 +198,7 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
         const symbol = `N${randomUUID().slice(0, 6).replace(/[^0-9a-f]/g, '').toUpperCase()}`;
         await listing(client, symbol);
         await client.query('SELECT public.ai_news_batch_create($1,$2,$3,$4,$5::jsonb,$6::jsonb)', [
-          randomUUID(), actor, '', 'claude-opus-5', '{}', JSON.stringify(scenarios(symbol)),
+          randomUUID(), actor, '', 'gpt-4o-mini', '{}', JSON.stringify(scenarios(symbol)),
         ]);
         const { rows } = await client.query<{ scenarios: { id: string }[] }>('SELECT scenarios FROM public.ai_news_batch_latest($1)', [actor]);
         const chosen = rows[0]!.scenarios[0]!.id;
@@ -216,7 +235,7 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
           randomUUID(), actor, stock, 'down', 2, 3, '악재가 났다', '', 'operator',
         ]);
         await client.query('SELECT public.ai_news_batch_create($1,$2,$3,$4,$5::jsonb,$6::jsonb)', [
-          randomUUID(), actor, '', 'claude-opus-5', '{}', JSON.stringify(scenarios(symbol)),
+          randomUUID(), actor, '', 'gpt-4o-mini', '{}', JSON.stringify(scenarios(symbol)),
         ]);
         const { rows } = await client.query<{ scenarios: { id: string }[] }>('SELECT scenarios FROM public.ai_news_batch_latest($1)', [actor]);
         const [first, second] = rows[0]!.scenarios;
