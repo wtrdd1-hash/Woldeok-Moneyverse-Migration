@@ -130,10 +130,11 @@ describe.skipIf(!DATABASE_URL)('the work board against a real database', () => {
             );
           }
         }
-        const board = await client.query<{ recommended: boolean }>(
-          'SELECT recommended FROM public.work_task_board($1)',
+        const board = await client.query<{ daily_limit: number; recommended: boolean }>(
+          'SELECT daily_limit, recommended FROM public.work_task_board($1)',
           [actor],
         );
+        expect(board.rows.every((row) => row.daily_limit === 0)).toBe(true);
         expect(board.rows.filter((row) => row.recommended)).toHaveLength(3);
       });
     });
