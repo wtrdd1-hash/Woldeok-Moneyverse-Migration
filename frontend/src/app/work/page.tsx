@@ -194,11 +194,11 @@ export default async function WorkPage() {
         </div>
       </section>
 
-      {/* 3. 직업별 일일 업무 퀘스트 목록 */}
+      {/* 3. Repeatable career task list */}
       <section aria-labelledby="tasks-title" className="grid gap-4">
         <div>
           <h2 id="tasks-title" className="text-xl font-bold flex items-center gap-2">
-            <span>📋</span> {isEn ? 'Daily Career Tasks' : '직업별 일일 업무 퀘스트'}
+            <span>📋</span> {isEn ? 'Repeatable Career Tasks' : '직업별 반복 업무 퀘스트'}
           </h2>
           <p className="text-sm text-muted-foreground">
             {isEn

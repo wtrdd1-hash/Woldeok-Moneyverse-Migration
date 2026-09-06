@@ -80,3 +80,16 @@ This file records incremental project changes so concurrent work can avoid overl
   EXP without a daily task-count cap.
 - Added seven repeatable shop purchases as voluntary currency sinks and published the reliability
   and virtual-economy reference links on the getting-started guide.
+
+## 2026-09-07 — Remove the legacy career-task limit and expand sinks
+
+- Re-fetched GitHub and confirmed that `main` contains every recent remote change, including AI
+  news, Discord delivery, photo moderation, mobile administrator access, and activity reliability.
+- Found that the legacy assign-submit-verify work path still enforced each catalogue row's
+  `daily_limit`, even though the direct-completion path was already unlimited.
+- Removed that final assignment limit, made the compatible task-board field report zero as the
+  unlimited sentinel, and aligned the member and administrator descriptions with full repeat pay.
+- Added eight repeatable, non-investment convenience purchases across 350–60,000 WLD price bands,
+  bringing the newly added voluntary sink catalogue to fifteen products.
+- Added `docs/SITE_GAP_AUDIT_2026-09-07.md` with confirmed gaps, priorities, evidence, and release
+  acceptance criteria.

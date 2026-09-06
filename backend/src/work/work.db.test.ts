@@ -156,7 +156,7 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
       });
     });
 
-    it('holds the daily limit for a task', async () => {
+    it('allows assignments beyond the legacy daily limit', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
         const chosen = await task(client, 'farm_care'); // daily_limit 2
@@ -171,14 +171,11 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
           actor,
           chosen.id,
         ]);
-        const error = await rejectionOf(() =>
-          client.query('SELECT * FROM public.work_assign_task($1, $2, $3)', [
-            randomUUID(),
-            actor,
-            chosen.id,
-          ]),
+        const third = await client.query<{ assignment_id: string }>(
+          'SELECT assignment_id::text FROM public.work_assign_task($1, $2, $3)',
+          [randomUUID(), actor, chosen.id],
         );
-        expect(code(error)).toBe('23505');
+        expect(third.rows[0]?.assignment_id).toBeTruthy();
       });
     });
 

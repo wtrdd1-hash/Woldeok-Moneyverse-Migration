@@ -34,15 +34,12 @@ export const metadata: Metadata = {
  *
  * `/work` answers "what may I take", and every read model behind it filters by
  * the member asking. Nothing answered "what is the catalogue paying" -- the
- * caps, the decay and the daily limits were all set by 066 and 095 and only
- * ever visible one member at a time. This is the screen 14.9 asks for under
- * 작업·직업, and it is a read: the caps are changed as an economy policy
- * version on /admin/controls, where the reason and the step-up already are.
+ * the historical policy fields were all set by 066 and 095 and only ever
+ * visible one member at a time. They remain in storage for audit compatibility,
+ * but unlimited work no longer applies them to assignments or rewards.
  *
- * The catalogue table prints the base reward and the paid total side by side
- * on purpose. They are supposed to differ -- 068 decays a repeat and clamps to
- * the caps -- and how far they differ is the number that says whether the
- * caps are doing something or strangling the loop.
+ * The catalogue table prints the base reward and aggregate paid total side by
+ * side so operators can compare faucet volume with the sink dashboard.
  */
 
 /**
@@ -93,15 +90,16 @@ export default async function AdminWorkPage() {
             <CardHeader>
               <CardTitle className="text-base">지금 적용 중인 보상 정책</CardTitle>
               <CardDescription>
-                한도와 감소율은 작업 화면에 표시되는 예상 보상액을 그대로 결정합니다. 바꾸려면
-                기능 스위치 · 정책 버전 화면에서 새 버전을 만드세요.
+                직업 작업은 횟수 제한과 반복 감액 없이 매번 전액 지급됩니다. 기능 스위치는 긴급
+                중지 용도로만 유지됩니다.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <dl className="grid gap-2">
                 <Figure
-                  term="일 지급 한도"
-                  value={console_.policy.daily_cap ?? '0'}
+                  term="보상 지급 상태"
+                  value={console_.policy.enabled ? '전액 · 무제한' : '중지'}
+                  plain
                   hint={
                     console_.policy.policy_id === null
                       ? '적용 중인 정책 버전이 없습니다. 지금은 작업 보상이 지급되지 않습니다.'
@@ -111,13 +109,8 @@ export default async function AdminWorkPage() {
                         )}부터`
                   }
                 />
-                <Figure term="주 지급 한도" value={console_.policy.weekly_cap ?? '0'} />
-                <Figure
-                  term="반복 감소율"
-                  value={`${console_.policy.repeat_decay_percent ?? 0}%`}
-                  plain
-                  hint="같은 작업을 하루에 다시 할 때마다 이만큼 깎입니다."
-                />
+                <Figure term="일·주 지급 한도" value="적용 안 함" plain />
+                <Figure term="반복 감액" value="없음" plain />
               </dl>
               <dl className="grid gap-2">
                 <Figure term="24시간 지급액" value={console_.policy.paid_24h} />
@@ -147,8 +140,8 @@ export default async function AdminWorkPage() {
               <CardHeader>
                 <CardTitle className="text-base">작업별 현황</CardTitle>
                 <CardDescription>
-                  기본 보상은 카탈로그에 적힌 값이고, 24시간 지급액은 한도와 반복 감소를 거쳐 실제로
-                  나간 금액입니다. 두 값이 크게 벌어지면 한도가 걸리고 있다는 뜻입니다.
+                  기본 보상은 1회 지급액이고, 24시간 지급액은 실제 지급된 전체 합계입니다. 소비처
+                  지표와 함께 비교해 발행·소각 균형을 확인하세요.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -165,7 +158,7 @@ export default async function AdminWorkPage() {
                           <TableHead className="text-right">기본 보상</TableHead>
                           <TableHead className="text-right">경험치</TableHead>
                           <TableHead className="text-right">최소 수행</TableHead>
-                          <TableHead className="text-right">일일 한도</TableHead>
+                          <TableHead className="text-right">반복 정책</TableHead>
                           <TableHead className="text-right">진행 중</TableHead>
                           <TableHead className="text-right">검수 대기</TableHead>
                           <TableHead className="text-right">24시간 승인</TableHead>
@@ -195,7 +188,7 @@ export default async function AdminWorkPage() {
                             <TableCell className="tabular text-right">
                               {durationLabel(task.minimum_duration_seconds)}
                             </TableCell>
-                            <TableCell className="tabular text-right">{task.daily_limit}</TableCell>
+                            <TableCell className="text-right">무제한</TableCell>
                             <TableCell className="tabular text-right">
                               {groupDigits(task.open_assignment_count)}
                             </TableCell>

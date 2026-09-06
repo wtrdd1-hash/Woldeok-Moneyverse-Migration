@@ -48,9 +48,8 @@ export interface WorkRewardRow {
 /**
  * One row of `work_task_board` (095).
  *
- * `reward_preview` is null when the question has no answer -- work rewards
- * switched off -- and '0' when the caps are spent, which are different things
- * and are said differently on the screen.
+ * `reward_preview` is null when work rewards are switched off. `daily_limit`
+ * remains in the wire shape for compatibility and is zero for unlimited work.
  */
 export interface WorkTaskRow {
   task_id: string;
@@ -68,7 +67,7 @@ export interface WorkTaskRow {
   recommended: boolean;
 }
 
-/** One row of `work_my_receipts` (095). A capped-out reward has no transaction. */
+/** One row of `work_my_receipts` (095). */
 export interface WorkReceiptRow {
   receipt_id: string;
   assignment_id: string;
