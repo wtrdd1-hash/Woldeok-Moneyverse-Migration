@@ -255,7 +255,6 @@ export function ActivateDuePoliciesForm() {
 const ROLES: readonly { readonly value: string; readonly label: string }[] = [
   { value: 'operator', label: 'operator — 카탈로그와 콘텐츠' },
   { value: 'approver', label: 'approver — 사용자와 감사 기록 열람' },
-  { value: 'server_operator', label: 'server_operator — 서버 운영' },
   { value: 'superadmin', label: 'superadmin — 전부. 넘기면 지금 보유자는 잃습니다' },
 ];
 
