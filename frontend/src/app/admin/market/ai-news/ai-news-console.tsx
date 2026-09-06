@@ -21,7 +21,7 @@ import type {
   AiNewsScenarioEffect,
   AiNewsSettings,
 } from '../../types';
-import { STRENGTHS } from '../market-events';
+import { STRENGTHS, strengthLabel } from '../strengths';
 import { decideAiNewsScenario, generateAiNews, saveAiNewsSettings } from './actions';
 import { aiNewsSentence } from './sentences';
 
@@ -245,10 +245,6 @@ const DIRECTIONS = [
 
 function scopeOf(effect: Pick<AiNewsScenarioEffect, 'symbol' | 'name'>): string {
   return effect.symbol ? `${effect.symbol} ${effect.name ?? ''}`.trim() : '시장 전체';
-}
-
-function strengthLabel(strength: number): string {
-  return STRENGTHS.find((one) => one.value === strength)?.label ?? String(strength);
 }
 
 /**

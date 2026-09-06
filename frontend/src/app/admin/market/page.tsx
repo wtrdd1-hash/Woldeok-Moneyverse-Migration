@@ -24,7 +24,8 @@ import type { AdminMarketEvent, AdminStock, AdminStockDynamics } from '../types'
 import { formatMoment } from '@/lib/money';
 import { cn } from '@/lib/cn';
 import { eventScope } from '@/app/stocks/market-news';
-import { CancelMarketEventButton, PublishMarketEventDialog, STRENGTHS } from './market-events';
+import { CancelMarketEventButton, PublishMarketEventDialog } from './market-events';
+import { strengthLabel } from './strengths';
 import {
   CorporateActionDialog,
   DeleteStockDialog,
@@ -66,7 +67,6 @@ export default async function AdminMarketPage() {
     apiOrNull<{ events: AdminMarketEvent[] }>('/api/v1/admin/stocks/market-events'),
   ]);
   const marketTrend = dynamics?.stocks[0]?.market_trend_bps ?? null;
-  const strengthLabel = (value: number) => STRENGTHS.find((s) => s.value === value)?.label ?? String(value);
 
   return (
     <div className="grid gap-5">
