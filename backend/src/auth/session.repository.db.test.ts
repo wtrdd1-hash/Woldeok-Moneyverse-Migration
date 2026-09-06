@@ -119,6 +119,43 @@ describe.skipIf(!DATABASE_URL)('against a real database', () => {
       expect(await repository.get(prelogin.token)).toBeNull();
     });
 
+    it('shares current consent across device sessions without changing the saved name', async () => {
+      const repository = new SessionRepository(pool);
+      const subject = `qa-cross-device-consent-${crypto.randomUUID()}`;
+      const firstPrelogin = await repository.create();
+      const firstLogin = await repository.completeOAuthLogin({
+        preAuthSessionId: firstPrelogin.id,
+        provider: 'discord',
+        subject,
+        displayName: 'Database nickname',
+      });
+      const policy = await repository.currentConsentVersion();
+      expect(policy).not.toBeNull();
+      expect(
+        await repository.grantCurrentUserConsent(firstLogin.session_id, {
+          termsVersion: policy!.terms_version,
+          privacyVersion: policy!.privacy_version,
+        }),
+      ).toBe(true);
+
+      const secondPrelogin = await repository.create();
+      const secondLogin = await repository.completeOAuthLogin({
+        preAuthSessionId: secondPrelogin.id,
+        provider: 'discord',
+        subject,
+        displayName: 'Changed provider nickname',
+      });
+
+      expect(secondLogin.user_id).toBe(firstLogin.user_id);
+      expect(secondLogin.is_new).toBe(false);
+      expect(await repository.hasCurrentUserConsent(secondLogin.session_id)).toBe(true);
+      const profile = await pool.query<{ display_name: string }>(
+        'SELECT display_name FROM public.member_profile_view($1, $1)',
+        [secondLogin.user_id],
+      );
+      expect(profile.rows[0]?.display_name).toBe('Database nickname');
+    });
+
     it('reports no recent reauthentication for a fresh session', async () => {
       const repository = new SessionRepository(pool);
       const created = await repository.create();
