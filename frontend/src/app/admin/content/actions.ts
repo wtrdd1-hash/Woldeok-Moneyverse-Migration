@@ -194,6 +194,24 @@ export async function rejectPhotoAction(photoId: string): Promise<ActionState> {
   }
 }
 
+export async function togglePhotoPublicationAction(
+  photoId: string,
+  publish: boolean,
+): Promise<ActionState> {
+  if (!photoId) return { status: 'error', message: '사진 ID가 필요해요.' };
+  try {
+    await setPublication('photos', photoId, publish);
+    revalidatePath('/admin/content');
+    revalidatePath('/gallery');
+    return {
+      status: 'ok',
+      message: publish ? '사진을 공개했어요.' : '사진을 비공개로 전환했어요.',
+    };
+  } catch (error) {
+    return failure(error, '사진 공개 상태를 변경하지 못했어요.');
+  }
+}
+
 export async function deleteAnnouncementAction(announcementId: string): Promise<ActionState> {
   if (!announcementId) return { status: 'error', message: '공지사항 ID가 필요해요.' };
   try {

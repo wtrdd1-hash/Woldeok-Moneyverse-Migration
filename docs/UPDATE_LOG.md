@@ -93,3 +93,10 @@ This file records incremental project changes so concurrent work can avoid overl
   bringing the newly added voluntary sink catalogue to fifteen products.
 - Added `docs/SITE_GAP_AUDIT_2026-09-07.md` with confirmed gaps, priorities, evidence, and release
   acceptance criteria.
+# 2026-09-07 — 사진 공개·관리 및 단일 지갑 잔액 표시 복구
+
+- 회원 사진 승인 후 DB는 공개 상태였지만 API가 내부 `/media/<key>` 경로를 외부 HTTPS 주소로 잘못 거부해 500을 내던 오류를 수정했습니다.
+- 갤러리를 동적 조회로 전환해 승인 직후 공개 사진이 보이도록 했습니다.
+- 관리자 콘텐츠 화면에서 대기·공개 사진 전체를 조회하고 공개/비공개 전환 및 영구 삭제할 수 있게 했으며, 삭제 시 내부 이미지 파일도 함께 정리합니다.
+- 상점이 제거된 `cashBalance` 필드를 읽어 잔액을 0으로 표시하던 오류를 수정했습니다. 지갑과 상점 모두 동일한 `WalletOverview.balances.cash.availableAmount`를 사용합니다.
+- 운영 원장 정합성 스냅샷에서 미균형 거래·누락 계좌·잔액 불일치가 모두 0임을 확인했습니다.

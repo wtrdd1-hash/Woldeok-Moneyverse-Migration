@@ -103,10 +103,17 @@ export interface ContentPhoto {
 
 function normalizePhoto(row: ContentPhotoRow): ContentPhoto {
   let imageUrl: string;
-  try {
-    imageUrl = requireExternalImageUrl(row?.image_url);
-  } catch {
-    throw new Error('database returned an unsafe external image URL');
+  if (
+    typeof row?.image_url === 'string' &&
+    /^\/media\/[0-9a-f-]{36}\.(png|jpg|webp)$/.test(row.image_url)
+  ) {
+    imageUrl = row.image_url;
+  } else {
+    try {
+      imageUrl = requireExternalImageUrl(row?.image_url);
+    } catch {
+      throw new Error('database returned an unsafe photo image URL');
+    }
   }
   return {
     photoId: receiptId(row, 'photo_id'),
@@ -204,6 +211,10 @@ export interface ContentRepositoryLike {
   savePhoto(input: ContentSavePhotoInput): Promise<ContentPhotoReceiptRow>;
   setPhotoPublication(input: ContentSetPhotoPublicationInput): Promise<ContentPhotoReceiptRow>;
   adminListPendingPhotos(actorUserId: unknown, limit?: number): Promise<readonly PendingPhotoRow[]>;
+  adminListAllPhotos(
+    actorUserId: unknown,
+  ): Promise<readonly import('./content.repository').AdminPhotoRow[]>;
+  adminDeletePhoto(actorUserId: unknown, photoId: unknown): Promise<string | null>;
   adminRejectPhoto(actorUserId: unknown, photoId: unknown, reason?: unknown): Promise<boolean>;
   adminListAllAnnouncements(actorUserId: unknown): Promise<readonly AdminAnnouncementRow[]>;
   adminDeleteAnnouncement(actorUserId: unknown, announcementId: unknown): Promise<boolean>;
@@ -277,6 +288,8 @@ export class ContentService {
       'savePhoto',
       'setPhotoPublication',
       'adminListPendingPhotos',
+      'adminListAllPhotos',
+      'adminDeletePhoto',
       'adminRejectPhoto',
       'adminListAllAnnouncements',
       'adminDeleteAnnouncement',
@@ -464,6 +477,13 @@ export class ContentService {
     return this.repository.adminListPendingPhotos(authenticatedOperatorId, limit);
   }
 
+  async listAllPhotos(authenticatedOperatorId: unknown) {
+    return this.repository.adminListAllPhotos(authenticatedOperatorId);
+  }
+
+  async deletePhoto(authenticatedOperatorId: unknown, photoId: unknown) {
+    return { storageKey: await this.repository.adminDeletePhoto(authenticatedOperatorId, photoId) };
+  }
 
   async adminListAllAnnouncements(authenticatedOperatorId: unknown) {
     const rows = await this.repository.adminListAllAnnouncements(authenticatedOperatorId);
@@ -482,7 +502,12 @@ export class ContentService {
   async adminUpdateAnnouncement(
     authenticatedOperatorId: unknown,
     announcementId: unknown,
-    { title, body, isPinned, contentState }: { title: unknown; body: unknown; isPinned?: unknown; contentState?: unknown },
+    {
+      title,
+      body,
+      isPinned,
+      contentState,
+    }: { title: unknown; body: unknown; isPinned?: unknown; contentState?: unknown },
   ) {
     const actorUserId = requireContentUuid(authenticatedOperatorId, 'authenticated operator id');
     const id = requireContentUuid(announcementId, 'announcement id');
@@ -510,7 +535,10 @@ export class ContentService {
     authenticatedOperatorId: unknown,
     announcementId: unknown,
   ): Promise<{ deleted: boolean }> {
-    const deleted = await this.repository.adminDeleteAnnouncement(authenticatedOperatorId, announcementId);
+    const deleted = await this.repository.adminDeleteAnnouncement(
+      authenticatedOperatorId,
+      announcementId,
+    );
     return { deleted };
   }
 
@@ -519,7 +547,11 @@ export class ContentService {
     photoId: unknown,
     reason?: unknown,
   ): Promise<{ rejected: boolean }> {
-    const rejected = await this.repository.adminRejectPhoto(authenticatedOperatorId, photoId, reason);
+    const rejected = await this.repository.adminRejectPhoto(
+      authenticatedOperatorId,
+      photoId,
+      reason,
+    );
     return { rejected };
   }
 }

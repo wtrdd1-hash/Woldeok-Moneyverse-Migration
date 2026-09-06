@@ -24,6 +24,7 @@ import {
   savePhoto,
   approvePhotoAction,
   rejectPhotoAction,
+  togglePhotoPublicationAction,
   deleteAnnouncementAction,
   toggleAnnouncementPublicationAction,
   updateAnnouncementAction,
@@ -86,7 +87,11 @@ export function AnnouncementEditor() {
         />
         {previewUrl && (
           <div className="mt-2.5 overflow-hidden rounded-xl border border-primary/40 bg-surface/50 p-1 w-fit">
-            <img src={previewUrl} alt="선택한 이미지 미리보기" className="max-h-48 rounded-lg object-contain" />
+            <img
+              src={previewUrl}
+              alt="선택한 이미지 미리보기"
+              className="max-h-48 rounded-lg object-contain"
+            />
           </div>
         )}
         <FieldDescription>
@@ -257,13 +262,99 @@ export interface PendingPhotoItem {
   readonly submitted_at: string;
 }
 
-export function PhotoReviewQueue({
-  items,
-}: {
-  readonly items: readonly PendingPhotoItem[];
-}) {
+export interface AdminPhotoItem extends PendingPhotoItem {
+  readonly content_state: 'draft' | 'published';
+  readonly published_at: string | null;
+}
+
+export function PhotoManagementGrid({ items }: { readonly items: readonly AdminPhotoItem[] }) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [message, setMessage] = useState<{ id: string; text: string; error?: boolean } | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  if (items.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
+        등록된 사진이 없습니다.
+      </div>
+    );
+  }
+
+  async function toggle(item: AdminPhotoItem) {
+    setLoadingId(item.photo_id);
+    const result = await togglePhotoPublicationAction(
+      item.photo_id,
+      item.content_state !== 'published',
+    );
+    setFeedback(result.message ?? null);
+    setLoadingId(null);
+  }
+
+  async function remove(item: AdminPhotoItem) {
+    if (!confirm(`사진 "${item.alt_text}"을(를) 영구 삭제하시겠습니까?`)) return;
+    setLoadingId(item.photo_id);
+    const result = await rejectPhotoAction(item.photo_id);
+    setFeedback(result.message ?? null);
+    setLoadingId(null);
+  }
+
+  return (
+    <div className="grid gap-4">
+      {feedback && <p className="rounded-md border bg-muted/40 p-3 text-sm">{feedback}</p>}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {items.map((item) => (
+          <Card key={item.photo_id} className="overflow-hidden">
+            <div className="aspect-video bg-black/40 flex items-center justify-center overflow-hidden">
+              <img
+                src={item.image_url}
+                alt={item.alt_text}
+                className="max-h-full max-w-full object-contain"
+                loading="lazy"
+              />
+            </div>
+            <CardContent className="grid gap-3 p-4">
+              <div className="flex items-center justify-between gap-2">
+                <Badge variant="outline">
+                  {item.content_state === 'published' ? '공개' : '비공개'}
+                </Badge>
+                <span className="text-xs text-muted-foreground">
+                  {formatMoment(item.published_at ?? item.submitted_at)}
+                </span>
+              </div>
+              <p className="text-sm font-semibold">{item.alt_text}</p>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1"
+                  disabled={loadingId === item.photo_id}
+                  onClick={() => toggle(item)}
+                >
+                  {item.content_state === 'published' ? '비공개' : '공개'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="flex-1"
+                  disabled={loadingId === item.photo_id}
+                  onClick={() => remove(item)}
+                >
+                  <Trash2 className="mr-1.5 h-4 w-4" />
+                  삭제
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function PhotoReviewQueue({ items }: { readonly items: readonly PendingPhotoItem[] }) {
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ id: string; text: string; error?: boolean } | null>(
+    null,
+  );
 
   if (!items || items.length === 0) {
     return (
@@ -321,7 +412,10 @@ export function PhotoReviewQueue({
           </div>
           <CardContent className="grid gap-2.5 p-4">
             <div className="flex items-center justify-between gap-2">
-              <Badge variant="outline" className="text-xs bg-primary/10 text-primary border-primary/30">
+              <Badge
+                variant="outline"
+                className="text-xs bg-primary/10 text-primary border-primary/30"
+              >
                 <T korean="검토 대기중" english="Pending Review" />
               </Badge>
               <span className="text-[0.75rem] text-muted-foreground">
@@ -336,12 +430,16 @@ export function PhotoReviewQueue({
               <p className="text-xs text-muted-foreground">
                 <T korean="제출자:" english="Uploader:" />{' '}
                 <span className="text-foreground font-medium">{item.uploader_display_name}</span>{' '}
-                <code className="text-[0.65rem] font-mono">({item.uploaded_by.slice(0, 8)}...)</code>
+                <code className="text-[0.65rem] font-mono">
+                  ({item.uploaded_by.slice(0, 8)}...)
+                </code>
               </p>
             </div>
 
             {message?.id === item.photo_id && (
-              <p className={`text-xs ${message.error ? 'text-destructive' : 'text-emerald-500 font-medium'}`}>
+              <p
+                className={`text-xs ${message.error ? 'text-destructive' : 'text-emerald-500 font-medium'}`}
+              >
                 {message.text}
               </p>
             )}
@@ -391,7 +489,11 @@ export function AnnouncementManagementTable({
   readonly items: readonly AdminAnnouncementItem[];
 }) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<{ id?: string; message: string; isError?: boolean } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    id?: string;
+    message: string;
+    isError?: boolean;
+  } | null>(null);
 
   const [editingItem, setEditingItem] = useState<AdminAnnouncementItem | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -445,11 +547,17 @@ export function AnnouncementManagementTable({
         item.body,
       );
       if (res.status === 'error') {
-        setFeedback({ id: item.announcementId, message: res.message || '고정 상태를 변경하지 못했습니다.', isError: true });
+        setFeedback({
+          id: item.announcementId,
+          message: res.message || '고정 상태를 변경하지 못했습니다.',
+          isError: true,
+        });
       } else {
         setFeedback({
           id: item.announcementId,
-          message: !item.isPinned ? '📌 공지사항을 상단에 고정했습니다.' : '상단 고정을 해제했습니다.',
+          message: !item.isPinned
+            ? '📌 공지사항을 상단에 고정했습니다.'
+            : '상단 고정을 해제했습니다.',
         });
       }
     } finally {
@@ -458,7 +566,8 @@ export function AnnouncementManagementTable({
   };
 
   const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`공지 "${title}"을(를) 정말 영구 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`)) return;
+    if (!confirm(`공지 "${title}"을(를) 정말 영구 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`))
+      return;
     setLoadingId(id);
     setFeedback(null);
     try {
@@ -527,7 +636,10 @@ export function AnnouncementManagementTable({
               const isPublished = item.contentState === 'published';
               const isLoading = loadingId === item.announcementId;
               return (
-                <tr key={item.announcementId} className={`hover:bg-muted/20 transition-colors ${item.isPinned ? 'bg-amber-500/5' : ''}`}>
+                <tr
+                  key={item.announcementId}
+                  className={`hover:bg-muted/20 transition-colors ${item.isPinned ? 'bg-amber-500/5' : ''}`}
+                >
                   <td className="p-3 align-top whitespace-nowrap">
                     <div className="flex flex-col gap-1 items-start">
                       <span
@@ -579,7 +691,9 @@ export function AnnouncementManagementTable({
                         }`}
                         title={item.isPinned ? '상단 고정 해제' : '상단 고정 핀'}
                       >
-                        <Pin className={`size-3.5 ${item.isPinned ? 'fill-amber-500 text-amber-600' : 'text-muted-foreground'}`} />
+                        <Pin
+                          className={`size-3.5 ${item.isPinned ? 'fill-amber-500 text-amber-600' : 'text-muted-foreground'}`}
+                        />
                         {item.isPinned ? '고정 해제' : '상단 고정'}
                       </Button>
                       <Button
@@ -669,7 +783,9 @@ export function AnnouncementManagementTable({
                     <Pin className="size-4 text-amber-500" />
                     상단 고정 (Pin)
                   </div>
-                  <div className="text-xs text-muted-foreground">목록 최상단에 📌 뱃지와 함께 고정 노출</div>
+                  <div className="text-xs text-muted-foreground">
+                    목록 최상단에 📌 뱃지와 함께 고정 노출
+                  </div>
                 </div>
                 <input
                   type="checkbox"
@@ -685,7 +801,10 @@ export function AnnouncementManagementTable({
                     {editState === 'published' ? '사용자 화면에 공개' : '초안(비공개)'}
                   </div>
                 </div>
-                <Select value={editState} onValueChange={(val) => setEditState(val as 'draft' | 'published')}>
+                <Select
+                  value={editState}
+                  onValueChange={(val) => setEditState(val as 'draft' | 'published')}
+                >
                   <SelectTrigger className="h-8 w-24 text-xs">
                     <SelectValue />
                   </SelectTrigger>
@@ -697,7 +816,12 @@ export function AnnouncementManagementTable({
               </div>
             </div>
             <DialogFooter className="mt-2">
-              <Button type="button" variant="outline" onClick={() => setEditingItem(null)} disabled={isSaving}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setEditingItem(null)}
+                disabled={isSaving}
+              >
                 취소
               </Button>
               <Button type="submit" disabled={isSaving}>
