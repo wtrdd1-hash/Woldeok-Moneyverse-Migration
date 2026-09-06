@@ -39,24 +39,106 @@ const MOST_EFFECTS = 4;
  * and vocabularies 124 and 135 enforce. Only the fields a scenario cannot
  * be built without are required.
  */
-const EffectSchema = z.object({
-  stock_symbol: z.string().nullish(),
-  direction: z.enum(['up', 'down', 'none']),
-  strength: z.coerce.number(),
-});
+/**
+ * The words a model may use for a direction and a strength.
+ *
+ * The prompt asks for `up`, `down`, `none` and 1, 2, 3, and most models
+ * oblige. A model that answers 호재 or "strong" has still answered, and
+ * rejecting the batch over its vocabulary wastes a minute of the operator's
+ * time and a call. Anything not in here is read as `none`, which moves
+ * nothing -- the safe way to be wrong.
+ */
+const DIRECTION_WORDS: Readonly<Record<string, 'up' | 'down' | 'none'>> = {
+  up: 'up', rise: 'up', rising: 'up', positive: 'up', good: 'up', bull: 'up', bullish: 'up',
+  buy: 'up', gain: 'up', 호재: 'up', 상승: 'up', 긍정: 'up',
+  down: 'down', fall: 'down', falling: 'down', negative: 'down', bad: 'down', bear: 'down',
+  bearish: 'down', sell: 'down', loss: 'down', 악재: 'down', 하락: 'down', 부정: 'down',
+  none: 'none', neutral: 'none', flat: 'none', hold: 'none', 중립: 'none', 소식: 'none', 없음: 'none',
+};
 
-const ProposalSchema = z.object({
-  /** What the story does to each stock it touches (153). */
+const STRENGTH_WORDS: Readonly<Record<string, number>> = {
+  weak: 1, light: 1, small: 1, minor: 1, low: 1, 소폭: 1, 약함: 1, 약: 1,
+  medium: 2, moderate: 2, normal: 2, 보통: 2, 중간: 2, 중: 2,
+  strong: 3, major: 3, severe: 3, high: 3, 강력: 3, 강함: 3, 강: 3,
+};
+
+function firstString(...values: readonly unknown[]): string | null {
+  for (const value of values) {
+    if (typeof value === 'string' && value.trim() !== '') return value;
+  }
+  return null;
+}
+
+function firstArray(...values: readonly unknown[]): unknown[] | undefined {
+  for (const value of values) {
+    if (Array.isArray(value) && value.length > 0) return value;
+  }
+  return undefined;
+}
+
+function asNumber(value: unknown): number | undefined {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string') {
+    const parsed = Number.parseFloat(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return undefined;
+}
+
+function asDirection(value: unknown): 'up' | 'down' | 'none' {
+  if (typeof value !== 'string') return 'none';
+  return DIRECTION_WORDS[value.trim().toLowerCase()] ?? 'none';
+}
+
+function asStrength(value: unknown): number {
+  const numeric = asNumber(value);
+  if (numeric !== undefined) return numeric;
+  if (typeof value === 'string') {
+    const word = STRENGTH_WORDS[value.trim().toLowerCase()];
+    if (word !== undefined) return word;
+  }
+  return 2;
+}
+
+const EffectSchema = z.preprocess((value) => {
+  if (typeof value !== 'object' || value === null) return value;
+  const raw = value as Record<string, unknown>;
+  return {
+    stock_symbol: firstString(raw.stock_symbol, raw.symbol, raw.stock, raw.ticker),
+    direction: asDirection(raw.direction ?? raw.effect ?? raw.impact ?? raw.sentiment),
+    strength: asStrength(raw.strength ?? raw.magnitude ?? raw.intensity),
+  };
+}, z.object({
+  stock_symbol: z.string().nullable(),
+  direction: z.enum(['up', 'down', 'none']),
+  strength: z.number(),
+}));
+
+const ProposalSchema = z.preprocess((value) => {
+  if (typeof value !== 'object' || value === null) return value;
+  const raw = value as Record<string, unknown>;
+  return {
+    // 152's legs, under any of the names a model reaches for.
+    effects: firstArray(raw.effects, raw.stocks, raw.targets, raw.impacts),
+    // 135's one-stock shape, still read when a model answers in it.
+    stock_symbol: firstString(raw.stock_symbol, raw.symbol, raw.stock, raw.ticker),
+    direction: raw.direction === undefined ? undefined : asDirection(raw.direction),
+    strength: raw.strength === undefined ? undefined : asStrength(raw.strength),
+    hours: asNumber(raw.hours ?? raw.duration_hours ?? raw.duration) ?? 6,
+    headline: firstString(raw.headline, raw.title, raw.head) ?? '',
+    body: firstString(raw.body, raw.content, raw.text) ?? '',
+    rationale: firstString(raw.rationale, raw.reason, raw.why) ?? '',
+  };
+}, z.object({
   effects: z.array(EffectSchema).min(1).max(6).optional(),
-  /** 135's one-stock shape, still read when a server answers in it. */
-  stock_symbol: z.string().nullish(),
-  direction: z.enum(['up', 'down']).optional(),
-  strength: z.coerce.number().optional(),
-  hours: z.coerce.number(),
+  stock_symbol: z.string().nullable(),
+  direction: z.enum(['up', 'down', 'none']).optional(),
+  strength: z.number().optional(),
+  hours: z.number(),
   headline: z.string(),
-  body: z.string().nullish(),
-  rationale: z.string().nullish(),
-});
+  body: z.string(),
+  rationale: z.string(),
+}));
 
 const BatchSchema = z.object({
   scenarios: z.array(ProposalSchema).min(1),
@@ -315,8 +397,12 @@ const CompletionSchema = z.object({
         z.array(z.object({ text: z.string().nullish() })),
         z.null(),
       ]).optional(),
+      /** Where a reasoning model puts its thinking. Never the answer. */
+      reasoning_content: z.string().nullish(),
       refusal: z.string().nullish(),
     }).optional(),
+    /** 'length' means the answer was cut off, which reads as broken JSON. */
+    finish_reason: z.string().nullish(),
   })).min(1),
 });
 
@@ -330,44 +416,143 @@ function contentOf(message: z.infer<typeof CompletionSchema>['choices'][number][
 }
 
 /**
- * The JSON inside the answer. A server without structured output hands
- * back a string that may carry a fence or a sentence around the object, and
- * that is still an answer.
+ * The JSON inside the answer.
+ *
+ * A server without structured output hands back a string, and what is around
+ * the JSON varies by model: a code fence, a sentence of introduction, or --
+ * for a reasoning model -- a whole `<think>` block, which is prose full of
+ * braces and quotes. So the object is found by trying every `{` in turn and
+ * keeping the first one that parses whole, rather than by taking everything
+ * between the first brace and the last.
  */
 export function readBatchJson(text: string): unknown {
-  const trimmed = text.trim();
-  const fenced = /^```(?:json)?\s*([\s\S]*?)\s*```$/.exec(trimmed);
-  const candidate = (fenced?.[1] ?? trimmed).trim();
-  try {
-    return JSON.parse(candidate) as unknown;
-  } catch {
-    const first = candidate.indexOf('{');
-    const last = candidate.lastIndexOf('}');
-    if (first >= 0 && last > first) {
-      try {
-        return JSON.parse(candidate.slice(first, last + 1)) as unknown;
-      } catch {
-        // Falls through to the one message an operator can act on.
-      }
+  const withoutThinking = text
+    .replace(/<think>[\s\S]*?<\/think>/gi, ' ')
+    .replace(/<reasoning>[\s\S]*?<\/reasoning>/gi, ' ')
+    .trim();
+  const fenced = /```(?:json)?\s*([\s\S]*?)```/i.exec(withoutThinking);
+  const candidate = (fenced?.[1] ?? withoutThinking).trim();
+
+  const direct = attemptJson(candidate);
+  if (direct !== undefined) return direct;
+
+  for (let start = candidate.indexOf('{'); start >= 0; start = candidate.indexOf('{', start + 1)) {
+    const parsed = attemptJson(candidate.slice(start));
+    if (parsed !== undefined) return parsed;
+    const closed = balancedEnd(candidate, start);
+    if (closed > start) {
+      const inner = attemptJson(candidate.slice(start, closed + 1));
+      if (inner !== undefined) return inner;
     }
   }
-  throw new AiNewsUnavailableError('ai_news_model_unusable', 'the model answered in a shape that could not be read');
+  const array = candidate.indexOf('[');
+  if (array >= 0) {
+    const parsed = attemptJson(candidate.slice(array));
+    if (parsed !== undefined) return parsed;
+  }
+  throw new AiNewsUnavailableError(
+    'ai_news_model_unusable',
+    `the model did not answer with JSON: ${snippet(text)}`,
+  );
+}
+
+function attemptJson(text: string): unknown {
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return undefined;
+  }
+}
+
+/** The index of the brace that closes the one at `start`, ignoring strings. */
+function balancedEnd(text: string, start: number): number {
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let index = start; index < text.length; index += 1) {
+    const character = text[index] as string;
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (character === '\\') escaped = true;
+      else if (character === '"') inString = false;
+      continue;
+    }
+    if (character === '"') inString = true;
+    else if (character === '{') depth += 1;
+    else if (character === '}') {
+      depth -= 1;
+      if (depth === 0) return index;
+    }
+  }
+  return -1;
+}
+
+/** Enough of an answer to recognise it, on one line, for the operator. */
+function snippet(text: string): string {
+  const flat = text.replace(/\s+/g, ' ').trim();
+  return flat.length > 160 ? `${flat.slice(0, 160)}…` : flat;
+}
+
+/**
+ * The batch inside the document, however the model wrapped it: the array
+ * itself, `{scenarios: […]}`, or one of those inside a single-key envelope,
+ * which is what a model does when it decides to be helpful.
+ */
+function unwrapScenarios(document: unknown): unknown {
+  if (Array.isArray(document)) return { scenarios: document };
+  if (typeof document !== 'object' || document === null) return document;
+  const record = document as Record<string, unknown>;
+  if ('scenarios' in record) return record;
+  for (const key of Object.keys(record)) {
+    const inside = record[key];
+    if (Array.isArray(inside)) return { scenarios: inside };
+    if (typeof inside === 'object' && inside !== null && 'scenarios' in (inside as Record<string, unknown>)) {
+      return inside;
+    }
+  }
+  return document;
 }
 
 function readBatch(body: string): ScenarioBatch {
   const completion = CompletionSchema.safeParse(parseJson(body));
   if (!completion.success) {
-    throw new AiNewsUnavailableError('ai_news_model_unusable', 'the model API answered outside the chat-completions shape');
+    throw new AiNewsUnavailableError(
+      'ai_news_model_unusable',
+      `the model API answered outside the chat-completions shape: ${snippet(body)}`,
+    );
   }
-  const message = completion.data.choices[0]?.message;
-  if (message?.refusal) {
+  const choice = completion.data.choices[0];
+  if (choice?.message?.refusal) {
     throw new AiNewsUnavailableError('ai_news_model_refused', 'the model declined to write this batch');
   }
-  const document = readBatchJson(contentOf(message));
-  // A model that answers with the bare array has still answered.
-  const batch = BatchSchema.safeParse(Array.isArray(document) ? { scenarios: document } : document);
+  const content = contentOf(choice?.message);
+  if (choice?.finish_reason === 'length') {
+    // The answer is not malformed, it is unfinished -- which is a different
+    // thing to do about it: a shorter wish, or a model with more room.
+    throw new AiNewsUnavailableError(
+      'ai_news_model_unusable',
+      `the model ran out of room and the answer was cut off after ${content.length} characters`,
+    );
+  }
+  if (content.trim() === '') {
+    const thought = choice?.message?.reasoning_content ?? '';
+    throw new AiNewsUnavailableError(
+      'ai_news_model_unusable',
+      thought === ''
+        ? 'the model answered with no text at all'
+        : `the model thought but never answered: ${snippet(thought)}`,
+    );
+  }
+
+  const document = unwrapScenarios(readBatchJson(content));
+  const batch = BatchSchema.safeParse(document);
   if (!batch.success) {
-    throw new AiNewsUnavailableError('ai_news_model_unusable', 'the model answered in a shape that could not be read');
+    const issue = batch.error.issues[0];
+    const where = issue ? `${issue.path.join('.') || 'the answer'}: ${issue.message}` : 'no scenarios';
+    throw new AiNewsUnavailableError(
+      'ai_news_model_unusable',
+      `the model's JSON is not a batch (${where}) — ${snippet(content)}`,
+    );
   }
   return batch.data;
 }

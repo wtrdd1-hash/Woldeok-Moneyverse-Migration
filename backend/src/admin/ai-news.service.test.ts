@@ -395,6 +395,74 @@ describe('openAiCaller', () => {
   });
 });
 
+describe('reading what a model actually answered', () => {
+  const wrapped = (content: string, extra: Record<string, unknown> = {}): Response =>
+    new Response(JSON.stringify({ choices: [{ message: { content }, ...extra }] }), { status: 200 });
+
+  it('finds the answer after a reasoning block full of braces', async () => {
+    const thinking = '<think>Let me draft {"scenarios": [ maybe not this one }] and reconsider.</think>';
+    vi.stubGlobal('fetch', server(wrapped(`${thinking}\n${JSON.stringify(BATCH)}`)));
+    await expect(openAiCaller(CALL)).resolves.toMatchObject({ scenarios: [{ headline: '뮤야얌 전자, 신제품 발표' }] });
+  });
+
+  it('finds the answer inside a sentence the model wrapped it in', async () => {
+    vi.stubGlobal('fetch', server(wrapped(`여기 다섯 개입니다: ${JSON.stringify(BATCH)} 이상입니다.`)));
+    await expect(openAiCaller(CALL)).resolves.toMatchObject({ scenarios: [{ hours: 6 }] });
+  });
+
+  it('unwraps a batch the model put in an envelope', async () => {
+    vi.stubGlobal('fetch', server(wrapped(JSON.stringify({ result: BATCH }))));
+    await expect(openAiCaller(CALL)).resolves.toMatchObject({ scenarios: [{ hours: 6 }] });
+  });
+
+  it('reads the words a model uses instead of the vocabulary it was given', async () => {
+    vi.stubGlobal('fetch', server(wrapped(JSON.stringify({
+      scenarios: [{
+        effects: [{ symbol: 'MYUY', impact: '호재', magnitude: '보통' }, { ticker: 'DUCK', impact: 'negative', magnitude: 'strong' }],
+        title: '원자재 값이 내렸다',
+        text: '사는 쪽은 웃는다.',
+        reason: '어제를 잇는다.',
+      }],
+    }))));
+    const batch = await openAiCaller(CALL);
+    expect(batch.scenarios[0]?.effects).toEqual([
+      { stock_symbol: 'MYUY', direction: 'up', strength: 2 },
+      { stock_symbol: 'DUCK', direction: 'down', strength: 3 },
+    ]);
+    // No hours in the answer, so the story lasts the length the prompt calls
+    // ordinary rather than the batch being refused over a missing field.
+    expect(batch.scenarios[0]?.hours).toBe(6);
+    expect(batch.scenarios[0]?.headline).toBe('원자재 값이 내렸다');
+  });
+
+  it('says the answer was cut off rather than calling it unreadable', async () => {
+    vi.stubGlobal('fetch', server(wrapped('{"scenarios": [{"headline": "반쯤 쓰다 만', { finish_reason: 'length' })));
+    const error = await openAiCaller(CALL).catch((reason: unknown) => reason as Error);
+    expect(error.message).toContain('ran out of room');
+  });
+
+  it('says the model thought but never answered', async () => {
+    vi.stubGlobal('fetch', server(new Response(JSON.stringify({
+      choices: [{ message: { content: '', reasoning_content: '음... 뭘 쓰지' } }],
+    }), { status: 200 })));
+    const error = await openAiCaller(CALL).catch((reason: unknown) => reason as Error);
+    expect(error.message).toContain('never answered');
+  });
+
+  it('quotes what came back when the JSON is not a batch, so the next attempt is informed', async () => {
+    vi.stubGlobal('fetch', server(wrapped(JSON.stringify({ scenarios: 'five of them' }))));
+    const error = await openAiCaller(CALL).catch((reason: unknown) => reason as Error);
+    expect(error.message).toContain('five of them');
+    expect(error.message).toContain('not a batch');
+  });
+
+  it('quotes an answer that is not JSON at all', async () => {
+    vi.stubGlobal('fetch', server(wrapped('오늘은 쓸 소식이 없습니다.')));
+    const error = await openAiCaller(CALL).catch((reason: unknown) => reason as Error);
+    expect(error.message).toContain('오늘은 쓸 소식이 없습니다');
+  });
+});
+
 describe('openAiLister', () => {
   it('reads {base}/models with the key, without repeats and in order', async () => {
     const fetcher = server(new Response(JSON.stringify({ data: [{ id: 'gpt-4o' }, { id: 'gpt-4o-mini' }, { id: 'gpt-4o' }] }), { status: 200 }));
