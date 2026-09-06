@@ -32,4 +32,8 @@ export class ActivityService {
   ): Promise<ActivityLogRow[]> {
     return this.repository.listLogs(limit, offset, eventType, userId);
   }
+
+  async recordRequest(input: Parameters<ActivityRepository['logRequest']>[0]): Promise<void> {
+    await this.repository.logRequest(input);
+  }
 }

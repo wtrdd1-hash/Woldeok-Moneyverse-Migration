@@ -91,6 +91,16 @@ interface AdminUserRow {
   stock_eval?: number;
   total_net_worth?: number;
   wealth_rank?: number;
+  last_login_at?: Date | null;
+  last_seen_at?: Date | null;
+  last_admin_at?: Date | null;
+}
+
+interface UserAccessSummaryRow {
+  user_id: string;
+  last_login_at: Date | null;
+  last_seen_at: Date | null;
+  last_admin_at: Date | null;
 }
 
 // packages/database/migrations/039-admin-discord-outbox-read.sql (admin_recent_discord_outbox_events)
@@ -163,11 +173,19 @@ export class AdminRepository {
   }): Promise<AdminUserRow[]> {
     assertUuid(actorUserId, 'actor user id');
     assertLimit(limit);
-    const rows = await queryRows<Record<string, unknown>>(
-      this.pool,
-      'SELECT user_id::text,status,display_name,created_at,restricted_at,restriction_reason,cash_balance,bank_balance,bond_balance,stock_eval,total_net_worth,wealth_rank FROM public.admin_list_users($1,$2)',
-      [actorUserId, limit],
-    );
+    const [rows, summaries] = await Promise.all([
+      queryRows<Record<string, unknown>>(
+        this.pool,
+        'SELECT user_id::text,status,display_name,created_at,restricted_at,restriction_reason,cash_balance,bank_balance,bond_balance,stock_eval,total_net_worth,wealth_rank FROM public.admin_list_users($1,$2)',
+        [actorUserId, limit],
+      ),
+      queryRows<UserAccessSummaryRow>(
+        this.pool,
+        'SELECT user_id::text,last_login_at,last_seen_at,last_admin_at FROM public.activity_user_access_summaries($1)',
+        [actorUserId],
+      ),
+    ]);
+    const summariesByUser = new Map(summaries.map((summary) => [summary.user_id, summary]));
     return rows.map((r) => ({
       user_id: String(r.user_id),
       status: String(r.status),
@@ -181,6 +199,9 @@ export class AdminRepository {
       stock_eval: Number(r.stock_eval ?? 0),
       total_net_worth: Number(r.total_net_worth ?? 0),
       wealth_rank: Number(r.wealth_rank ?? 0),
+      last_login_at: summariesByUser.get(String(r.user_id))?.last_login_at ?? null,
+      last_seen_at: summariesByUser.get(String(r.user_id))?.last_seen_at ?? null,
+      last_admin_at: summariesByUser.get(String(r.user_id))?.last_admin_at ?? null,
     }));
   }
 
