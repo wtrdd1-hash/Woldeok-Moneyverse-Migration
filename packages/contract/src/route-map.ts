@@ -341,6 +341,11 @@ export const ROUTE_MAP: readonly RouteMapping[] = [
     module: 'content',
   },
   {
+    original: 'POST /api/v1/admin/photos/00000000-0000-4000-8000-000000000000/approval',
+    replacement: 'POST /api/v1/admin/photos/{id}/approval',
+    module: 'content',
+  },
+  {
     original: 'POST /api/v1/admin/minecraft/operations',
     replacement: null,
     module: 'minecraft',
