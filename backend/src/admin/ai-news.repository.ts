@@ -15,7 +15,7 @@ function uuid(value: unknown, name: string): string {
   return value.toLowerCase();
 }
 
-/** `ai_news_settings_get` (127): what the console shows. Never the key. */
+/** `ai_news_settings_get` (135): what the console shows. Never the key. */
 export interface AiNewsSettingsRow {
   readonly api_base_url: string;
   readonly model: string;
@@ -24,7 +24,7 @@ export interface AiNewsSettingsRow {
   readonly updated_at: Date;
 }
 
-/** `ai_news_settings_credential` (127): what the application calls the model with. */
+/** `ai_news_settings_credential` (135): what the application calls the model with. */
 export interface AiNewsCredentialRow {
   readonly api_base_url: string;
   readonly model: string;
@@ -69,7 +69,7 @@ export interface AiNewsBatchRow {
 }
 
 /**
- * The AI newsroom's tables, reached through 127's functions and nothing
+ * The AI newsroom's tables, reached through 135's functions and nothing
  * else. Every call takes the actor because every function checks the
  * operator role itself.
  */

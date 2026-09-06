@@ -11,7 +11,6 @@
     "dev": "nest start --watch"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.123.0",
     "@moneyverse/contract": "workspace:*",
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.0.0",

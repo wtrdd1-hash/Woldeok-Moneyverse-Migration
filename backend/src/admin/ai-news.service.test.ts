@@ -1,8 +1,17 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { TotpSealingKey } from '../auth/totp';
 import { sealSecret } from '../auth/totp';
 import type { AiNewsRepository, ScenarioProposal } from './ai-news.repository';
-import { AiNewsService, AiNewsUnavailableError, SYSTEM_PROMPT, normalise, userPrompt } from './ai-news.service';
+import {
+  AiNewsService,
+  AiNewsUnavailableError,
+  SYSTEM_PROMPT,
+  endpoint,
+  normalise,
+  openAiCaller,
+  openAiLister,
+  userPrompt,
+} from './ai-news.service';
 import type { ModelCall, ScenarioBatch } from './ai-news.service';
 
 const ACTOR = '11111111-1111-4111-8111-111111111111';
@@ -30,7 +39,7 @@ function fakeRepository(overrides: Partial<AiNewsRepository> = {}): AiNewsReposi
     settings: vi.fn(),
     credential: vi.fn(async () => ({
       api_base_url: 'https://api.example',
-      model: 'claude-opus-5',
+      model: 'gpt-4o-mini',
       api_key_sealed: sealSecret(Buffer.from('sk-test-key-1234'), SEALING),
       api_key_key_id: 'test',
     })),
@@ -76,6 +85,16 @@ describe('normalise', () => {
     expect(only?.headline).toHaveLength(120);
   });
 
+  it('drops a scenario with no headline left rather than failing the four beside it', () => {
+    const out = normalise({ scenarios: [proposal({ headline: '  ' }), proposal()] }, CONTEXT);
+    expect(out).toHaveLength(1);
+  });
+
+  it('pulls a strength outside the vocabulary back into it', () => {
+    const out = normalise({ scenarios: [proposal({ strength: 7 }), proposal({ strength: 0 })] }, CONTEXT);
+    expect(out.map((scenario) => scenario.strength)).toEqual([3, 1]);
+  });
+
   it('never stores more than five', () => {
     const out = normalise({ scenarios: Array.from({ length: 5 }, () => proposal()) }, CONTEXT);
     expect(out).toHaveLength(5);
@@ -108,13 +127,13 @@ describe('AiNewsService.generate', () => {
     const service = new AiNewsService(repository, SEALING, caller);
     await service.generate({ actorUserId: ACTOR, prompt: '  조용한 하루  ', idempotencyKey: '22222222-2222-4222-8222-222222222222' });
 
-    expect(calls[0]).toMatchObject({ apiBaseUrl: 'https://api.example', apiKey: 'sk-test-key-1234', model: 'claude-opus-5', system: SYSTEM_PROMPT });
+    expect(calls[0]).toMatchObject({ apiBaseUrl: 'https://api.example', apiKey: 'sk-test-key-1234', model: 'gpt-4o-mini', system: SYSTEM_PROMPT });
     expect(calls[0]?.user).toContain('Operator wish: 조용한 하루');
     const stored = (repository.createBatch as ReturnType<typeof vi.fn>).mock.calls[0]?.[0] as {
       prompt: string; model: string; scenarios: ScenarioProposal[]; context: unknown;
     };
     expect(stored.prompt).toBe('조용한 하루');
-    expect(stored.model).toBe('claude-opus-5');
+    expect(stored.model).toBe('gpt-4o-mini');
     expect(stored.context).toEqual(CONTEXT);
     expect(stored.scenarios).toHaveLength(2);
     expect(stored.scenarios[1]?.stock_symbol).toBeNull();
@@ -158,5 +177,166 @@ describe('AiNewsService.saveSettings', () => {
     await expect(
       service.saveSettings({ actorUserId: ACTOR, apiBaseUrl: 'https://api.example', model: 'm', apiKey: 'sk-ant-secret-9876' }),
     ).rejects.toMatchObject({ code: 'ai_news_sealing_unavailable' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// The OpenAI standard, against a stubbed server
+// ---------------------------------------------------------------------------
+
+const CALL = {
+  apiBaseUrl: 'https://api.example/v1',
+  apiKey: 'sk-test-key-1234',
+  model: 'gpt-4o-mini',
+  system: 'the brief',
+  user: 'the market',
+};
+
+const BATCH = {
+  scenarios: [
+    { stock_symbol: 'MYUY', direction: 'up', strength: 2, hours: 6, headline: '뮤야얌 전자, 신제품 발표', body: '기대가 높다.', rationale: '지난 소식을 잇는다.' },
+  ],
+};
+
+function completion(content: string): Response {
+  return new Response(JSON.stringify({ choices: [{ message: { content } }] }), { status: 200 });
+}
+
+/** Answers each attempt in turn, so a test can say what the server does not know. */
+function server(...answers: readonly Response[]): ReturnType<typeof vi.fn> {
+  let turn = 0;
+  return vi.fn(async () => answers[Math.min(turn++, answers.length - 1)] as Response);
+}
+
+function bodyOf(fetcher: ReturnType<typeof vi.fn>, turn: number): Record<string, unknown> {
+  const init = fetcher.mock.calls[turn]?.[1] as { body?: string } | undefined;
+  return JSON.parse(init?.body ?? '{}') as Record<string, unknown>;
+}
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
+
+describe('endpoint', () => {
+  it('hangs both paths off the address, however the operator wrote it', () => {
+    expect(endpoint('https://api.example/v1', 'chat/completions')).toBe('https://api.example/v1/chat/completions');
+    expect(endpoint('https://api.example/v1/', 'models')).toBe('https://api.example/v1/models');
+    expect(endpoint('https://api.example/v1/chat/completions', 'models')).toBe('https://api.example/v1/models');
+  });
+});
+
+describe('openAiCaller', () => {
+  it('posts to {base}/chat/completions with the model, the two turns and a strict schema', async () => {
+    const fetcher = server(completion(JSON.stringify(BATCH)));
+    vi.stubGlobal('fetch', fetcher);
+
+    const batch = await openAiCaller(CALL);
+
+    expect(batch.scenarios).toHaveLength(1);
+    expect(fetcher.mock.calls[0]?.[0]).toBe('https://api.example/v1/chat/completions');
+    const init = fetcher.mock.calls[0]?.[1] as { method: string; headers: Record<string, string> };
+    expect(init.method).toBe('POST');
+    expect(init.headers.authorization).toBe('Bearer sk-test-key-1234');
+    const body = bodyOf(fetcher, 0);
+    expect(body.model).toBe('gpt-4o-mini');
+    expect(body.messages).toEqual([
+      { role: 'system', content: 'the brief' },
+      { role: 'user', content: 'the market' },
+    ]);
+    expect(body.response_format).toMatchObject({ type: 'json_schema' });
+  });
+
+  it('asks for less when the server does not know an option, rather than giving up', async () => {
+    const fetcher = server(
+      new Response('{"error":{"message":"response_format json_schema is not supported"}}', { status: 400 }),
+      new Response('{"error":{"message":"Unsupported parameter: max_tokens"}}', { status: 400 }),
+      completion(JSON.stringify(BATCH)),
+    );
+    vi.stubGlobal('fetch', fetcher);
+
+    await expect(openAiCaller(CALL)).resolves.toMatchObject({ scenarios: [{ headline: '뮤야얌 전자, 신제품 발표' }] });
+    expect(fetcher).toHaveBeenCalledTimes(3);
+    expect(bodyOf(fetcher, 1).response_format).toEqual({ type: 'json_object' });
+    expect(bodyOf(fetcher, 2)).not.toHaveProperty('response_format');
+    expect(bodyOf(fetcher, 2)).not.toHaveProperty('max_tokens');
+  });
+
+  it('reads an answer a server wrapped in a code fence', async () => {
+    vi.stubGlobal('fetch', server(completion(`Here you go:\n\`\`\`json\n${JSON.stringify(BATCH)}\n\`\`\``)));
+    await expect(openAiCaller(CALL)).resolves.toMatchObject({ scenarios: [{ direction: 'up' }] });
+  });
+
+  it('reads a bare array as the batch it plainly is', async () => {
+    vi.stubGlobal('fetch', server(completion(JSON.stringify(BATCH.scenarios))));
+    await expect(openAiCaller(CALL)).resolves.toMatchObject({ scenarios: [{ strength: 2 }] });
+  });
+
+  it('says the key was refused when the API answers 401', async () => {
+    vi.stubGlobal('fetch', server(new Response('no', { status: 401 })));
+    await expect(openAiCaller(CALL)).rejects.toMatchObject({ code: 'ai_news_model_rejected_key' });
+  });
+
+  it('says the API could not be reached when it answers 500 or not at all', async () => {
+    vi.stubGlobal('fetch', server(new Response('boom', { status: 500 })));
+    await expect(openAiCaller(CALL)).rejects.toMatchObject({ code: 'ai_news_model_unreachable' });
+
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('fetch failed'); }));
+    await expect(openAiCaller(CALL)).rejects.toMatchObject({ code: 'ai_news_model_unreachable' });
+  });
+
+  it('never carries the key back into the sentence the console shows', async () => {
+    vi.stubGlobal('fetch', server(new Response(`bad key sk-test-key-1234 rejected`, { status: 400 })));
+    const error = await openAiCaller(CALL).catch((reason: unknown) => reason);
+    expect(String((error as Error).message)).not.toContain('sk-test-key-1234');
+  });
+
+  it('lets a refusal through as a refusal', async () => {
+    vi.stubGlobal('fetch', server(
+      new Response(JSON.stringify({ choices: [{ message: { refusal: 'I cannot' } }] }), { status: 200 }),
+    ));
+    await expect(openAiCaller(CALL)).rejects.toMatchObject({ code: 'ai_news_model_refused' });
+  });
+
+  it('says the answer could not be read rather than storing nonsense', async () => {
+    vi.stubGlobal('fetch', server(completion('오늘은 소식이 없습니다.')));
+    await expect(openAiCaller(CALL)).rejects.toMatchObject({ code: 'ai_news_model_unusable' });
+  });
+});
+
+describe('openAiLister', () => {
+  it('reads {base}/models with the key, without repeats and in order', async () => {
+    const fetcher = server(new Response(JSON.stringify({ data: [{ id: 'gpt-4o' }, { id: 'gpt-4o-mini' }, { id: 'gpt-4o' }] }), { status: 200 }));
+    vi.stubGlobal('fetch', fetcher);
+
+    await expect(openAiLister({ apiBaseUrl: 'https://api.example/v1', apiKey: 'sk-test-key-1234' }))
+      .resolves.toEqual(['gpt-4o', 'gpt-4o-mini']);
+    expect(fetcher.mock.calls[0]?.[0]).toBe('https://api.example/v1/models');
+    expect((fetcher.mock.calls[0]?.[1] as { method: string }).method).toBe('GET');
+  });
+
+  it('says so when the address will not list its models', async () => {
+    vi.stubGlobal('fetch', server(new Response('not found', { status: 404 })));
+    await expect(openAiLister({ apiBaseUrl: 'https://api.example/v1', apiKey: 'k' }))
+      .rejects.toMatchObject({ code: 'ai_news_model_unusable' });
+  });
+});
+
+describe('AiNewsService.models', () => {
+  it('offers what the key can reach', async () => {
+    const service = new AiNewsService(fakeRepository(), SEALING, vi.fn(), async () => ['gpt-4o', 'gpt-4o-mini']);
+    await expect(service.models(ACTOR)).resolves.toEqual({ models: ['gpt-4o', 'gpt-4o-mini'], problem: null });
+  });
+
+  it('returns an empty list and why, so the field stays a field', async () => {
+    const repository = fakeRepository({
+      credential: vi.fn(async () => ({ api_base_url: 'x', model: 'm', api_key_sealed: null, api_key_key_id: null })),
+    } as Partial<AiNewsRepository>);
+    const service = new AiNewsService(repository, SEALING, vi.fn(), vi.fn());
+    await expect(service.models(ACTOR)).resolves.toEqual({ models: [], problem: 'ai_news_key_missing' });
+
+    const unreachable = new AiNewsService(fakeRepository(), SEALING, vi.fn(), async () => {
+      throw new AiNewsUnavailableError('ai_news_model_unreachable', 'nope');
+    });
+    await expect(unreachable.models(ACTOR)).resolves.toEqual({ models: [], problem: 'ai_news_model_unreachable' });
   });
 });
