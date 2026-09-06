@@ -125,7 +125,7 @@ GRANT EXECUTE ON FUNCTION public.activity_log_events(jsonb, uuid, inet, text)
 GRANT EXECUTE ON FUNCTION public.activity_log_request(uuid, text, text, integer, integer, uuid, inet, text)
   TO moneyverse_app;
 
-REVOKE ALL PRIVILEGES ON TABLE public.user_activity_logs, public.outbox_events,
-  public.discord_outbox_routes FROM PUBLIC, moneyverse_app;
+REVOKE ALL PRIVILEGES ON TABLE public.user_activity_logs, public.discord_outbox_routes
+  FROM PUBLIC, moneyverse_app;
 
 COMMIT;

@@ -126,8 +126,8 @@ describe.skipIf(!DATABASE_URL)('member photo submissions', () => {
           '내가 찍은 사진',
         ]);
         await client.query(
-          `INSERT INTO public.user_roles (user_id, role, granted_by)
-           VALUES ($1, 'operator'::public.admin_role, $1)`,
+          `INSERT INTO public.user_roles (user_id, role)
+           VALUES ($1, 'operator'::public.admin_role)`,
           [operator],
         );
         const { rows } = await client.query<{ replayed: boolean }>(
