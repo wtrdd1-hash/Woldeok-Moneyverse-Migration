@@ -1,8 +1,10 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { IBM_Plex_Mono, Nanum_Myeongjo, Noto_Sans_KR } from 'next/font/google';
 import { SiteShell } from '@/components/site-shell';
 import { LocaleProvider } from '@/components/locale-provider';
 import { ThemeProvider } from '@/components/theme-provider';
+import { ActivityTracker } from '@/components/activity-tracker';
 import { Toaster } from '@/components/ui/sonner';
 import { NOTICE_PREFERENCE_SCRIPT } from '@/lib/notice-preference';
 import { POINT_PREFERENCE_SCRIPT } from '@/lib/theme';
@@ -160,6 +162,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           본문으로 건너뛰기
         </a>
         <LocaleProvider>
+          <Suspense fallback={null}>
+            <ActivityTracker />
+          </Suspense>
           <ThemeProvider>
             <SiteShell>{children}</SiteShell>
             <Toaster />

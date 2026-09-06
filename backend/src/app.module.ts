@@ -18,6 +18,8 @@ import { ContentModule } from './content/content.module';
 import { StatusCollectorModule } from './content/status-collector.module';
 import { DiscordModule } from './discord/discord.module';
 import { DiscordOutboxWorkerModule } from './discord/outbox-worker.module';
+import { DiscordAlertModule } from './discord/discord-alert.module';
+import { ActivityModule } from './activity/activity.module';
 import { EconomyModule } from './economy/economy.module';
 import { PrivacyModule } from './privacy/privacy.module';
 import { SeasonModule } from './season/season.module';
@@ -61,6 +63,8 @@ const ONE_MINUTE_MS = 60_000;
     StatusCollectorModule,
     DiscordModule,
     DiscordOutboxWorkerModule,
+    DiscordAlertModule,
+    ActivityModule,
     SchedulerModule,
     // Process-local, exactly as in the original application. That is correct
     // for the single-instance deployment and becomes N times weaker on any

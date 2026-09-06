@@ -68,6 +68,7 @@ export interface ContentAnnouncement {
   readonly body: string;
   readonly imageUrl: string | null;
   readonly imageAltText: string | null;
+  readonly isPinned: boolean;
   readonly publishedAt: string | null;
 }
 
@@ -88,6 +89,7 @@ function normalizeAnnouncement(row: ContentAnnouncementRow): ContentAnnouncement
       row?.image_alt_text === null
         ? null
         : databasePlainText(row.image_alt_text, 'announcement image alt text', 300),
+    isPinned: Boolean(row?.is_pinned),
     publishedAt: timestamp(row?.published_at, 'announcement published timestamp'),
   };
 }
@@ -205,6 +207,14 @@ export interface ContentRepositoryLike {
   adminRejectPhoto(actorUserId: unknown, photoId: unknown, reason?: unknown): Promise<boolean>;
   adminListAllAnnouncements(actorUserId: unknown): Promise<readonly AdminAnnouncementRow[]>;
   adminDeleteAnnouncement(actorUserId: unknown, announcementId: unknown): Promise<boolean>;
+  adminUpdateAnnouncement(input: {
+    actorUserId: unknown;
+    announcementId: unknown;
+    title: unknown;
+    body: unknown;
+    isPinned?: unknown;
+    contentState?: unknown;
+  }): Promise<AdminAnnouncementRow>;
 }
 
 export interface ContentSaveAnnouncementDto {
@@ -462,10 +472,38 @@ export class ContentService {
       title: r.title,
       body: r.body,
       contentState: r.content_state,
+      isPinned: Boolean(r.is_pinned),
       publishedAt: r.published_at ? new Date(r.published_at).toISOString() : null,
       createdAt: new Date(r.created_at).toISOString(),
       updatedAt: new Date(r.updated_at).toISOString(),
     }));
+  }
+
+  async adminUpdateAnnouncement(
+    authenticatedOperatorId: unknown,
+    announcementId: unknown,
+    { title, body, isPinned, contentState }: { title: unknown; body: unknown; isPinned?: unknown; contentState?: unknown },
+  ) {
+    const actorUserId = requireContentUuid(authenticatedOperatorId, 'authenticated operator id');
+    const id = requireContentUuid(announcementId, 'announcement id');
+    const row = await this.repository.adminUpdateAnnouncement({
+      actorUserId,
+      announcementId: id,
+      title,
+      body,
+      isPinned,
+      contentState,
+    });
+    return {
+      announcementId: row.announcement_id,
+      title: row.title,
+      body: row.body,
+      contentState: row.content_state,
+      isPinned: Boolean(row.is_pinned),
+      publishedAt: row.published_at ? new Date(row.published_at).toISOString() : null,
+      createdAt: new Date(row.created_at).toISOString(),
+      updatedAt: new Date(row.updated_at).toISOString(),
+    };
   }
 
   async adminDeleteAnnouncement(

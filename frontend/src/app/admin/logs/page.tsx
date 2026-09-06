@@ -125,6 +125,22 @@ export default async function AdminLogsPage({
         {AREA.summary}
       </PageHeader>
 
+      {/* Navigation Sub-Tabs */}
+      <div className="flex flex-wrap gap-2 border-b border-border pb-3">
+        <Button variant="secondary" size="sm" asChild>
+          <Link href="/admin/logs">감사 로그</Link>
+        </Button>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/admin/logs/activity">사용자 접속 · 체류 · 클릭 로그</Link>
+        </Button>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/admin/logs/delivery">Discord 전달 로그</Link>
+        </Button>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/admin/logs/integrity">무결성 검증</Link>
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">조건 검색</CardTitle>
