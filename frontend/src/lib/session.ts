@@ -72,7 +72,18 @@ export async function adminConsole(): Promise<AdminConsole> {
   try {
     return await api<AdminConsole>('/api/v1/admin/security');
   } catch (error) {
-    if (error instanceof ApiError && error.status === 403) redirect('/');
+    if (error instanceof ApiError) {
+      // A session can end between the check above and this call, and opening
+      // the console in another tab rotates the cookie this one is holding. The
+      // answer to all three of these is a screen the operator can act on: only
+      // 403 means "you are signed in and this is not yours". Anything else
+      // rethrown here reaches the error boundary, which is how a console page
+      // came to answer an expired session with a reference code and nothing
+      // else -- the same three the member gate already handles, handled here.
+      if (error.status === 401) redirect('/login?error=login_required');
+      if (error.status === 428) redirect('/login?error=consent_required');
+      if (error.status === 403) redirect('/');
+    }
     throw error;
   }
 }
