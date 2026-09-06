@@ -121,6 +121,9 @@ describe('the Discord outbox message', () => {
           requestId: EVENT_ID,
           occurredAt: '2026-09-07T01:23:45.000Z',
           country: 'KR',
+          network: '203.0.113.0/24',
+          userAgent:
+            'Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 Chrome/140.0 Mobile Safari/537.36',
         },
       }),
     ).toBe(
@@ -130,7 +133,9 @@ describe('the Discord outbox message', () => {
         '요청: GET /api/v1/wallet',
         '응답: 200 · 42ms',
         '접속 국가: KR',
-        '시각: 2026-09-07T01:23:45.000Z',
+        '접속망: 203.0.113.0/24',
+        '기기: Android · Chrome',
+        '시각: 2026-09-07 10:23:45 (한국시간)',
         `요청 ID: ${EVENT_ID}`,
       ].join('\n'),
     );

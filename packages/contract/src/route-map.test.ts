@@ -21,7 +21,7 @@ const MODULES = new Set([
 
 describe('ROUTE_MAP', () => {
   it('covers every application route of the original', () => {
-    expect(originalRoutes()).toHaveLength(92);
+    expect(originalRoutes()).toHaveLength(93);
   });
 
   it('has no duplicate original routes', () => {

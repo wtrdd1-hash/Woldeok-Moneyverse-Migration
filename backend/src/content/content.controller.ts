@@ -14,6 +14,7 @@ import {
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { DiscordAlertService } from '../discord/discord-alert.service';
@@ -26,6 +27,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure } from '../core/pg-error';
+import { contextOf } from '../core/request-context';
 import { ContentInputError } from './content.repository';
 import { ContentService } from './content.service';
 
@@ -194,12 +196,14 @@ export class ContentController {
       () => this.service().saveAnnouncement(requireUserId(request), { ...body }),
       'invalid announcement',
     );
-    this.discordAlert?.notifyAnnouncementEvent({
-      action: 'created',
-      announcementId: res.announcementId,
-      title: body.title,
-      actorUserId: requireUserId(request),
-    }).catch(() => {});
+    this.discordAlert
+      ?.notifyAnnouncementEvent({
+        action: 'created',
+        announcementId: res.announcementId,
+        title: body.title,
+        actorUserId: requireUserId(request),
+      })
+      .catch(() => {});
     return res;
   }
 
@@ -288,15 +292,34 @@ export class ContentController {
     );
   }
 
-
-  @Get('admin/announcements')
+  @Post('admin/photos/:id/approval')
   @UseGuards(
     SessionGuard,
     AuthenticatedGuard,
     ConsentGuard,
     AdminGuard,
     AdminSessionGuard,
+    CsrfGuard,
   )
+  @ApiOperation({ summary: 'Approve and publish a pending member photo' })
+  approveMemberPhoto(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) photoId: string,
+  ) {
+    return this.guarded(
+      () =>
+        this.service().setPhotoPublication(requireUserId(request), {
+          photoId,
+          publish: true,
+          idempotencyKey: randomUUID(),
+          requestId: contextOf(request)?.requestId ?? null,
+        }),
+      'invalid photo approval',
+    );
+  }
+
+  @Get('admin/announcements')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
   @ApiOperation({ summary: 'List all announcements for administrators' })
   adminAnnouncements(@Req() request: RequestWithSession) {
     return this.guarded(
@@ -327,12 +350,14 @@ export class ContentController {
         }),
       'could not update announcement',
     );
-    this.discordAlert?.notifyAnnouncementEvent({
-      action: body.isPinned ? 'pinned' : 'updated',
-      announcementId: res.announcementId,
-      title: res.title,
-      actorUserId: requireUserId(request),
-    }).catch(() => {});
+    this.discordAlert
+      ?.notifyAnnouncementEvent({
+        action: body.isPinned ? 'pinned' : 'updated',
+        announcementId: res.announcementId,
+        title: res.title,
+        actorUserId: requireUserId(request),
+      })
+      .catch(() => {});
     return res;
   }
 
@@ -354,23 +379,19 @@ export class ContentController {
       () => this.service().adminDeleteAnnouncement(requireUserId(request), announcementId),
       'could not delete announcement',
     );
-    this.discordAlert?.notifyAnnouncementEvent({
-      action: 'deleted',
-      announcementId,
-      title: '공지사항 ID ' + announcementId,
-      actorUserId: requireUserId(request),
-    }).catch(() => {});
+    this.discordAlert
+      ?.notifyAnnouncementEvent({
+        action: 'deleted',
+        announcementId,
+        title: '공지사항 ID ' + announcementId,
+        actorUserId: requireUserId(request),
+      })
+      .catch(() => {});
     return res;
   }
 
   @Get('admin/photos/submissions')
-  @UseGuards(
-    SessionGuard,
-    AuthenticatedGuard,
-    ConsentGuard,
-    AdminGuard,
-    AdminSessionGuard,
-  )
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
   @ApiOperation({ summary: 'List pending photo submissions awaiting review' })
   listPendingPhotos(@Req() request: RequestWithSession) {
     return this.guarded(
