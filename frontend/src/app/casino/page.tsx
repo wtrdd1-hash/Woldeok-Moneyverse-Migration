@@ -199,6 +199,41 @@ export default async function CasinoPage() {
             </CardContent>
           </Card>
 
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base font-semibold">
+                <T korean="게임별 확률·배당 공개" english="Published Odds and Payouts" />
+              </CardTitle>
+              <CardDescription>
+                <T
+                  korean="실제 서버 정산에 사용하는 공식 설정값입니다. 슬롯은 주사위 숫자, 하이로우는 주사위 홀짝 규칙을 사용합니다."
+                  english="These are the official server settlement settings. Slots use dice-number rules and Hi-Lo uses dice-parity rules."
+                />
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead><T korean="게임" english="Game" /></TableHead>
+                      <TableHead className="text-right"><T korean="적중 확률" english="Win chance" /></TableHead>
+                      <TableHead className="text-right"><T korean="적중 배당" english="Payout" /></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <OddsRow name="동전 뒤집기" terms={open} />
+                    {parityGame ? <OddsRow name="주사위 홀짝 · 하이로우" terms={parityGame} /> : null}
+                    {numberGame ? <OddsRow name="주사위 숫자 · 럭키 슬롯" terms={numberGame} /> : null}
+                  </TableBody>
+                </Table>
+              </div>
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                WLD는 사이트 안에서만 사용하는 가상 게임 머니이며 현금 교환·환전·출금이 불가능합니다.
+              </p>
+            </CardContent>
+          </Card>
+
           {/* 3개 서버 규칙과 2개 테마 인터페이스 */}
           <Tabs defaultValue="coin" className="w-full space-y-6">
             <TabsList className="sticky top-[78px] z-20 grid grid-cols-2 sm:grid-cols-5 w-full h-auto p-2 gap-2 bg-slate-900/90 backdrop-blur-md border border-slate-800/80 shadow-lg rounded-2xl">
@@ -388,6 +423,26 @@ function Fact({ term, children }: { readonly term: React.ReactNode; readonly chi
       <dt className="text-muted-foreground">{term}</dt>
       <dd className="tabular">{children}</dd>
     </div>
+  );
+}
+
+function OddsRow({
+  name,
+  terms,
+}: {
+  readonly name: string;
+  readonly terms: Pick<GameTerms, 'win_probability_ppm' | 'payout_multiplier_ppm'>;
+}) {
+  return (
+    <TableRow>
+      <TableCell>{name}</TableCell>
+      <TableCell className="text-right tabular-nums">
+        {percentFromPpm(terms.win_probability_ppm)}%
+      </TableCell>
+      <TableCell className="text-right tabular-nums">
+        {multiplierFromPpm(terms.payout_multiplier_ppm)}배
+      </TableCell>
+    </TableRow>
   );
 }
 
