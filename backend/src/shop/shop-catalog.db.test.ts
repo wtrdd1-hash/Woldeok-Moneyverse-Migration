@@ -61,7 +61,7 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
 
     it('lists the seeded catalogue with every amount still a string', async () => {
       const rows = await catalogue().catalog(UNKNOWN_MEMBER);
-      expect(rows.length, 'migration 073 seeds the catalogue').toBeGreaterThan(0);
+      expect(rows.length, 'all Store 2.0 products need an inventory policy').toBeGreaterThanOrEqual(78);
 
       const gloves = rows.find((row) => row.code === 'work_gloves');
       expect(gloves, 'work_gloves is seeded by 073').toBeDefined();
