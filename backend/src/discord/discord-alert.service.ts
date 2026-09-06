@@ -294,11 +294,7 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
     }>(
       this.pool,
       `SELECT id::text, kind, severity, summary, raised_at
-       FROM public.admin_alerts
-       WHERE acknowledged_at IS NULL
-         AND raised_at > pg_catalog.clock_timestamp() - interval '1 hour'
-       ORDER BY raised_at DESC
-       LIMIT 3`,
+       FROM public.discord_recent_unacknowledged_alerts()`,
     );
 
     for (const alert of rows) {
