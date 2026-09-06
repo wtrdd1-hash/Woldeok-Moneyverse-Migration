@@ -17,7 +17,6 @@ import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 function text(value: FormDataEntryValue | null): string {
   return typeof value === 'string' ? value.trim() : '';
 }
-
 async function setPublication(
   kind: 'announcements' | 'photos',
   id: string,
@@ -226,5 +225,69 @@ export async function toggleAnnouncementPublicationAction(
     };
   } catch (error) {
     return failure(error, '공개 상태를 변경하지 못했어요.');
+  }
+}
+
+export async function updateAnnouncementAction(input: {
+  announcementId: string;
+  title: string;
+  body: string;
+  isPinned?: boolean;
+  contentState?: 'draft' | 'published';
+}): Promise<ActionState> {
+  const { announcementId, title, body, isPinned, contentState } = input;
+  if (!announcementId) return { status: 'error', message: '공지사항 ID가 필요해요.' };
+  if (!title || title.trim().length === 0 || title.length > 160) {
+    return { status: 'error', message: '제목을 1~160자로 입력해 주세요.' };
+  }
+  if (!body || body.trim().length === 0 || body.length > 12_000) {
+    return { status: 'error', message: '본문을 1~12000자로 입력해 주세요.' };
+  }
+
+  try {
+    await mutate(`/api/v1/admin/announcements/${encodeURIComponent(announcementId)}`, {
+      method: 'PUT',
+      body: {
+        title: title.trim(),
+        body: body.trim(),
+        isPinned: Boolean(isPinned),
+        ...(contentState ? { contentState } : {}),
+      },
+    });
+    revalidatePath('/admin/content');
+    revalidatePath('/announcements');
+    revalidatePath(`/announcements/${encodeURIComponent(announcementId)}`);
+    revalidatePath('/');
+    return { status: 'ok', message: '공지사항을 성공적으로 수정했어요.' };
+  } catch (error) {
+    return failure(error, '공지사항을 수정하지 못했어요.');
+  }
+}
+
+export async function toggleAnnouncementPinAction(
+  announcementId: string,
+  currentPinned: boolean,
+  currentTitle: string,
+  currentBody: string,
+): Promise<ActionState> {
+  if (!announcementId) return { status: 'error', message: '공지사항 ID가 필요해요.' };
+  try {
+    await mutate(`/api/v1/admin/announcements/${encodeURIComponent(announcementId)}`, {
+      method: 'PUT',
+      body: {
+        title: currentTitle,
+        body: currentBody,
+        isPinned: !currentPinned,
+      },
+    });
+    revalidatePath('/admin/content');
+    revalidatePath('/announcements');
+    revalidatePath('/');
+    return {
+      status: 'ok',
+      message: !currentPinned ? '공지사항을 상단에 고정했어요.' : '상단 고정을 해제했어요.',
+    };
+  } catch (error) {
+    return failure(error, '상단 고정 상태를 변경하지 못했어요.');
   }
 }

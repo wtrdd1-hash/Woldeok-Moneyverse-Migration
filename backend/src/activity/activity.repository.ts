@@ -1,0 +1,61 @@
+import { Inject, Injectable } from '@nestjs/common';
+import type { Pool } from 'pg';
+import { PG_POOL } from '../core/pool.provider';
+import type { ActivityEventItemDto } from './activity.dto';
+
+export interface ActivityLogRow {
+  readonly id: string;
+  readonly user_id: string | null;
+  readonly username: string;
+  readonly session_id: string;
+  readonly event_type: string;
+  readonly path: string;
+  readonly target_label: string | null;
+  readonly dwell_time_ms: number | null;
+  readonly ip: string | null;
+  readonly user_agent: string | null;
+  readonly metadata: Record<string, unknown>;
+  readonly created_at: Date;
+}
+
+@Injectable()
+export class ActivityRepository {
+  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+
+  async logEvents(
+    events: ActivityEventItemDto[],
+    actor: string | null,
+    ip: string | null,
+    userAgent: string | null,
+  ): Promise<number> {
+    if (events.length === 0) return 0;
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query<{ activity_log_events: number }>(
+        'SELECT public.activity_log_events($1::jsonb, $2::uuid, $3::inet, $4::text) AS activity_log_events',
+        [JSON.stringify(events), actor, ip, userAgent],
+      );
+      return result.rows[0]?.activity_log_events ?? 0;
+    } finally {
+      client.release();
+    }
+  }
+
+  async listLogs(
+    limit: number,
+    offset: number,
+    eventType?: string,
+    userId?: string,
+  ): Promise<ActivityLogRow[]> {
+    const client = await this.pool.connect();
+    try {
+      const result = await client.query<ActivityLogRow>(
+        'SELECT * FROM public.activity_list_logs($1::integer, $2::integer, $3::text, $4::uuid)',
+        [limit, offset, eventType ?? null, userId ?? null],
+      );
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+}

@@ -112,6 +112,7 @@ export interface ContentAnnouncementRow {
   readonly body: string;
   readonly image_url: string | null;
   readonly image_alt_text: string | null;
+  readonly is_pinned: boolean;
   readonly published_at: unknown;
 }
 
@@ -212,9 +213,19 @@ export interface AdminAnnouncementRow {
   readonly title: string;
   readonly body: string;
   readonly content_state: string;
+  readonly is_pinned: boolean;
   readonly published_at: Date | null;
   readonly created_at: Date;
   readonly updated_at: Date;
+}
+
+export interface ContentUpdateAnnouncementInput {
+  readonly actorUserId: unknown;
+  readonly announcementId: unknown;
+  readonly title: unknown;
+  readonly body: unknown;
+  readonly isPinned?: unknown;
+  readonly contentState?: unknown;
 }
 
 @Injectable()
@@ -232,7 +243,7 @@ export class PostgresContentRepository {
   > {
     const contentLimit = requireContentLimit(limit, 'announcement limit');
     const { rows } = await this.pool.query<ContentAnnouncementRow>(
-      `SELECT announcement_id::text AS announcement_id, title, body, image_url, image_alt_text, published_at
+      `SELECT announcement_id::text AS announcement_id, title, body, image_url, image_alt_text, is_pinned, published_at
        FROM public.content_list_published_announcements($1)`,
       [contentLimit],
     );
@@ -422,12 +433,42 @@ export class PostgresContentRepository {
   ): Promise<readonly AdminAnnouncementRow[]> {
     const actor = requireContentUuid(actorUserId, 'authenticated operator id');
     const { rows } = await this.pool.query<AdminAnnouncementRow>(
-      `SELECT announcement_id::text AS announcement_id, title, body, content_state,
+      `SELECT announcement_id::text AS announcement_id, title, body, content_state, is_pinned,
               published_at, created_at, updated_at
        FROM public.content_list_all_announcements($1)`,
       [actor],
     );
     return rows;
+  }
+
+  async adminUpdateAnnouncement({
+    actorUserId,
+    announcementId,
+    title,
+    body,
+    isPinned = false,
+    contentState = null,
+  }: ContentUpdateAnnouncementInput): Promise<AdminAnnouncementRow> {
+    const actor = requireContentUuid(actorUserId, 'authenticated operator id');
+    const id = requireContentUuid(announcementId, 'announcement id');
+    const safeTitle = normalizeContentText(title, 'title', 160);
+    const safeBody = normalizeContentText(body, 'body', 12000, { multiline: true });
+    const safePinned = typeof isPinned === 'boolean' ? isPinned : false;
+    const safeState =
+      contentState === 'draft' || contentState === 'published' ? contentState : null;
+
+    const {
+      rows: [row],
+    } = await this.pool.query<AdminAnnouncementRow>(
+      `SELECT announcement_id::text AS announcement_id, title, body, content_state, is_pinned,
+              published_at, created_at, updated_at
+       FROM public.content_update_announcement($1, $2, $3, $4, $5, $6)`,
+      [actor, id, safeTitle, safeBody, safePinned, safeState],
+    );
+    if (!row?.announcement_id) {
+      throw new Error('database did not return an announcement update receipt');
+    }
+    return row;
   }
 
   async adminDeleteAnnouncement(

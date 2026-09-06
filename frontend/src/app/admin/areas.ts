@@ -78,6 +78,13 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'records',
   },
   {
+    href: '/admin/logs/activity',
+    eyebrow: 'USER ACTIVITY TELEMETRY',
+    title: '사용자 접속 · 체류 · 클릭 로그',
+    summary: '페이지 접속 기록, 페이지별 체류 시간, 버튼 클릭 이벤트를 실시간 확인합니다.',
+    group: 'records',
+  },
+  {
     href: '/admin/logs/delivery',
     eyebrow: 'DELIVERY LOG',
     title: 'Discord 전달 로그',

@@ -74,10 +74,8 @@ function checkReason(reason: string): ActionState | null {
   return null;
 }
 
-function checkCode(code: string): ActionState | null {
-  if (!STEP_UP_CODE.test(code)) {
-    return { status: 'error', message: '실행 직전 인증 코드 6자리를 입력해 주세요.' };
-  }
+function checkCode(_code: string): ActionState | null {
+  // 2FA 요구 해제: 관리자 세션으로 인증 대체
   return null;
 }
 

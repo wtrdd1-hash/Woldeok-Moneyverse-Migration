@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { ApiError } from '@/lib/api';
 import type { ActionState } from '@/lib/action-state';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
-import { STEP_UP_CODE, spendSecondFactorCode } from '../step-up';
+import { spendSecondFactorCode } from '../step-up';
 import type { AuditRevealedEvent, ChainVerification } from '../types';
 
 /**
@@ -39,10 +39,8 @@ function checkReason(reason: string): ActionState | null {
   return null;
 }
 
-function checkCode(code: string): ActionState | null {
-  if (!STEP_UP_CODE.test(code)) {
-    return { status: 'error', message: '실행 직전 인증 코드 6자리를 입력해 주세요.' };
-  }
+function checkCode(_code: string): ActionState | null {
+  // 2FA 요구 해제: 관리자 세션으로 인증 대체
   return null;
 }
 

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, Image as ImageIcon } from 'lucide-react';
+import { ArrowRight, Image as ImageIcon, Pin } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { PublicAdvertisement } from '@/components/public-advertisement';
@@ -22,6 +22,7 @@ interface Announcement {
   readonly body: string;
   readonly imageUrl: string | null;
   readonly imageAltText: string | null;
+  readonly isPinned?: boolean;
   readonly publishedAt: string | null;
 }
 
@@ -91,11 +92,21 @@ export default async function AnnouncementsPage() {
             <Link
               key={notice.announcementId}
               href={`/announcements/${notice.announcementId}`}
-              className="group block rounded-2xl border border-border/50 bg-card p-5 sm:p-6 transition-all hover:border-amber-500/50 hover:shadow-md active:scale-[0.99]"
+              className={`group block rounded-2xl border p-5 sm:p-6 transition-all hover:border-amber-500/50 hover:shadow-md active:scale-[0.99] ${
+                notice.isPinned
+                  ? 'border-amber-500/50 bg-amber-500/5 shadow-sm ring-1 ring-amber-500/20'
+                  : 'border-border/50 bg-card'
+              }`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center flex-wrap gap-2 mb-2">
+                    {notice.isPinned && (
+                      <span className="inline-flex items-center gap-1 rounded bg-amber-500/20 px-2 py-0.5 text-[11px] font-extrabold text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                        <Pin className="size-3 fill-amber-500 text-amber-600 dark:text-amber-400" />
+                        상단 고정
+                      </span>
+                    )}
                     {notice.publishedAt && (
                       <time dateTime={notice.publishedAt} className="text-xs text-muted-foreground font-mono">
                         {formatDay(notice.publishedAt, '게시 시간 확인 중')}
@@ -108,8 +119,9 @@ export default async function AnnouncementsPage() {
                       </span>
                     )}
                   </div>
-                  <h3 className="text-lg font-bold text-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                    {notice.title}
+                  <h3 className="text-lg font-bold text-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors flex items-center gap-1.5">
+                    {notice.isPinned && <span className="text-amber-500 text-base font-bold">📌</span>}
+                    <span>{notice.title}</span>
                   </h3>
                   <p className="mt-2 text-sm text-muted-foreground line-clamp-2 leading-relaxed">
                     {notice.body}

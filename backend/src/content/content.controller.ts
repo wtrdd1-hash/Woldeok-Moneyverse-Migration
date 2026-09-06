@@ -5,6 +5,7 @@ import {
   Delete,
   Get,
   Inject,
+  Optional,
   Param,
   ParseUUIDPipe,
   Post,
@@ -15,6 +16,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { DiscordAlertService } from '../discord/discord-alert.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
@@ -48,6 +50,30 @@ export class SaveAnnouncementDto {
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
   readonly idempotencyKey!: string;
+}
+
+export class UpdateAnnouncementDto {
+  @ApiProperty({ maxLength: 160 })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(160)
+  readonly title!: string;
+
+  @ApiProperty({ maxLength: 12000 })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(12_000)
+  readonly body!: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsBoolean()
+  readonly isPinned?: boolean;
+
+  @ApiProperty({ required: false, enum: ['draft', 'published'] })
+  @IsOptional()
+  @IsString()
+  readonly contentState?: 'draft' | 'published';
 }
 
 export class SavePhotoDto {
@@ -115,7 +141,10 @@ export class PublicationDto {
 @ApiTags('content')
 @Controller()
 export class ContentController {
-  constructor(@Inject(ContentService) private readonly content: ContentService | null) {}
+  constructor(
+    @Inject(ContentService) private readonly content: ContentService | null,
+    @Optional() @Inject(DiscordAlertService) private readonly discordAlert?: DiscordAlertService,
+  ) {}
 
   private service(): ContentService {
     if (!this.content) throw new ServiceUnavailableException('content service is unavailable');
@@ -160,11 +189,18 @@ export class ContentController {
     CsrfGuard,
   )
   @ApiOperation({ summary: 'Create or edit an announcement' })
-  saveAnnouncement(@Req() request: RequestWithSession, @Body() body: SaveAnnouncementDto) {
-    return this.guarded(
+  async saveAnnouncement(@Req() request: RequestWithSession, @Body() body: SaveAnnouncementDto) {
+    const res = await this.guarded(
       () => this.service().saveAnnouncement(requireUserId(request), { ...body }),
       'invalid announcement',
     );
+    this.discordAlert?.notifyAnnouncementEvent({
+      action: 'created',
+      announcementId: res.announcementId,
+      title: body.title,
+      actorUserId: requireUserId(request),
+    }).catch(() => {});
+    return res;
   }
 
   @Put('admin/announcements/:id/image')
@@ -269,6 +305,37 @@ export class ContentController {
     );
   }
 
+  @Put('admin/announcements/:id')
+  @UseGuards(
+    SessionGuard,
+    AuthenticatedGuard,
+    ConsentGuard,
+    AdminGuard,
+    AdminSessionGuard,
+    CsrfGuard,
+  )
+  @ApiOperation({ summary: 'Update an announcement' })
+  async updateAnnouncement(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) announcementId: string,
+    @Body() body: UpdateAnnouncementDto,
+  ) {
+    const res = await this.guarded(
+      () =>
+        this.service().adminUpdateAnnouncement(requireUserId(request), announcementId, {
+          ...body,
+        }),
+      'could not update announcement',
+    );
+    this.discordAlert?.notifyAnnouncementEvent({
+      action: body.isPinned ? 'pinned' : 'updated',
+      announcementId: res.announcementId,
+      title: res.title,
+      actorUserId: requireUserId(request),
+    }).catch(() => {});
+    return res;
+  }
+
   @Delete('admin/announcements/:id')
   @UseGuards(
     SessionGuard,
@@ -279,14 +346,21 @@ export class ContentController {
     CsrfGuard,
   )
   @ApiOperation({ summary: 'Delete an announcement' })
-  deleteAnnouncement(
+  async deleteAnnouncement(
     @Req() request: RequestWithSession,
     @Param('id', ParseUUIDPipe) announcementId: string,
   ) {
-    return this.guarded(
+    const res = await this.guarded(
       () => this.service().adminDeleteAnnouncement(requireUserId(request), announcementId),
       'could not delete announcement',
     );
+    this.discordAlert?.notifyAnnouncementEvent({
+      action: 'deleted',
+      announcementId,
+      title: '공지사항 ID ' + announcementId,
+      actorUserId: requireUserId(request),
+    }).catch(() => {});
+    return res;
   }
 
   @Get('admin/photos/submissions')

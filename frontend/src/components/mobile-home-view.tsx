@@ -19,6 +19,7 @@ interface Announcement {
   readonly announcementId: string;
   readonly title: string;
   readonly body: string;
+  readonly isPinned?: boolean;
   readonly publishedAt: string | null;
 }
 

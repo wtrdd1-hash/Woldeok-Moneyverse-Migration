@@ -76,12 +76,10 @@ export function SwitchStateBadge({ state }: { readonly state: FeatureSwitch['sta
 function ReasonedStepUp({
   id,
   undo,
-  requireCode = true,
 }: {
   readonly id: string;
   /** How to reverse this change, in the operator's own words. */
   readonly undo: string;
-  readonly requireCode?: boolean;
 }) {
   return (
     <>
@@ -97,11 +95,7 @@ function ReasonedStepUp({
         />
         <FieldDescription>10자 이상. 감사 기록에 그대로 남습니다.</FieldDescription>
       </Field>
-      {requireCode ? (
-        <StepUpField id={id} undo={undo} />
-      ) : (
-        <FieldDescription>되돌리는 방법: {undo}</FieldDescription>
-      )}
+      <StepUpField id={id} undo={undo} />
     </>
   );
 }
@@ -150,7 +144,6 @@ export function FeatureSwitchDialog({ feature }: { readonly feature: FeatureSwit
           <ReasonedStepUp
             id={feature.feature_key}
             undo={`같은 화면에서 ${feature.feature_key}을(를) 다시 이전 상태로 되돌립니다.`}
-            requireCode={feature.feature_key !== 'economy_auto_policy'}
           />
           <ActionAlert state={state} />
           <DialogFooter>
@@ -242,7 +235,7 @@ export function ActivateDuePoliciesForm() {
 
   return (
     <div className="grid gap-2">
-      <form action={action} className="grid gap-3 sm:grid-cols-[auto] sm:items-end">
+      <form action={action} className="flex items-center gap-3">
         <SubmitButton variant="outline" size="sm" className="min-h-11">
           예약된 버전 지금 발효
         </SubmitButton>
