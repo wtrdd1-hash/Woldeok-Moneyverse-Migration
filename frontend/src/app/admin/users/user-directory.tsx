@@ -33,6 +33,18 @@ import type { AdminUser } from '../types';
 type StatusFilter = 'all' | 'active' | 'restricted';
 type SortOption = 'wealth' | 'cash' | 'stock' | 'created';
 
+function accessTime(value: string | null | undefined): string {
+  if (!value) return '기록 없음';
+  return new Date(value).toLocaleString('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+}
+
 export function UserDirectory({ users }: { readonly users: readonly AdminUser[] }) {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
@@ -295,6 +307,12 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                             <code className="truncate font-mono text-[0.68rem] text-muted-foreground">
                               {user.user_id}
                             </code>
+                            <span className="mt-1 text-[0.68rem] text-muted-foreground">
+                              로그인 {accessTime(user.last_login_at)} · 최근 접속 {accessTime(user.last_seen_at)}
+                            </span>
+                            <span className="text-[0.68rem] text-muted-foreground">
+                              관리자 페이지 {accessTime(user.last_admin_at)}
+                            </span>
                           </div>
                         </TableCell>
 

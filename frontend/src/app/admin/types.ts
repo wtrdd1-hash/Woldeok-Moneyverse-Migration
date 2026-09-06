@@ -23,6 +23,9 @@ export interface AdminUser {
   readonly stock_eval?: number;
   readonly total_net_worth?: number;
   readonly wealth_rank?: number;
+  readonly last_login_at?: string | null;
+  readonly last_seen_at?: string | null;
+  readonly last_admin_at?: string | null;
 }
 
 export interface UserStockPosition {

@@ -16,6 +16,8 @@ import { SessionRepository } from './auth/session.repository';
 import { attachLobby } from './lobby/lobby';
 import { MARKET_ROOM, MarketBroadcast } from './stock/market-broadcast';
 import { UNPREFIXED_ROUTES } from './http/prefix';
+import { ActivityService } from './activity/activity.service';
+import { requestActivityTrail } from './activity/request-activity.middleware';
 
 async function bootstrap(): Promise<void> {
   const config = loadConfig(process.env);
@@ -30,6 +32,16 @@ async function bootstrap(): Promise<void> {
   // by the trail below or by a SECURITY DEFINER function three layers down --
   // carries the same request id. Spec 14.9 asks for that thread to exist.
   app.use(requestContext({ trustForwardedHeaders: config.trustProxyForwardedFor }));
+
+  const activityLog = new Logger('RequestActivity');
+  app.use(
+    requestActivityTrail({
+      activity: app.get(ActivityService, { strict: false }),
+      sessions: app.get(SessionRepository, { strict: false }),
+      config,
+      onFailure: (error) => activityLog.error('request activity was not recorded', error),
+    }),
+  );
 
   // Spec 14.9: every console view and execution is recorded, including the
   // request an authorization guard refused. Middleware rather than an

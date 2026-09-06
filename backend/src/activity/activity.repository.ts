@@ -58,4 +58,29 @@ export class ActivityRepository {
       client.release();
     }
   }
+
+  async logRequest(input: {
+    readonly actor: string | null;
+    readonly path: string;
+    readonly method: string;
+    readonly status: number;
+    readonly durationMs: number;
+    readonly requestId: string | null;
+    readonly ip: string | null;
+    readonly userAgent: string | null;
+  }): Promise<void> {
+    await this.pool.query(
+      'SELECT public.activity_log_request($1::uuid,$2,$3,$4,$5,$6::uuid,$7::inet,$8)',
+      [
+        input.actor,
+        input.path,
+        input.method,
+        input.status,
+        input.durationMs,
+        input.requestId,
+        input.ip,
+        input.userAgent,
+      ],
+    );
+  }
 }

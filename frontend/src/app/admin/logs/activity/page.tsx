@@ -128,6 +128,8 @@ export default async function AdminActivityLogsPage({
                 <option value="page_view">👁️ 페이지 접속 (page_view)</option>
                 <option value="page_dwell">⏱️ 페이지 체류 시간 (page_dwell)</option>
                 <option value="button_click">👆 버튼 / 링크 클릭 (button_click)</option>
+                <option value="api_request">🌐 API 요청 (api_request)</option>
+                <option value="admin_request">🛡️ 관리자 요청 (admin_request)</option>
               </select>
             </div>
 
@@ -193,6 +195,12 @@ export default async function AdminActivityLogsPage({
                     } else if (log.event_type === 'button_click') {
                       badgeColor = 'outline';
                       badgeLabel = '👆 버튼 클릭';
+                    } else if (log.event_type === 'api_request') {
+                      badgeColor = 'outline';
+                      badgeLabel = '🌐 API 요청';
+                    } else if (log.event_type === 'admin_request') {
+                      badgeColor = 'destructive';
+                      badgeLabel = '🛡️ 관리자 요청';
                     }
 
                     return (
@@ -226,6 +234,11 @@ export default async function AdminActivityLogsPage({
                           )}
                           {log.event_type === 'page_view' && (
                             <span className="text-muted-foreground">페이지 진입</span>
+                          )}
+                          {(log.event_type === 'api_request' || log.event_type === 'admin_request') && (
+                            <span className="text-muted-foreground">
+                              {String(log.metadata.method ?? '')} · {String(log.metadata.status ?? '')} · {String(log.metadata.durationMs ?? '')}ms
+                            </span>
                           )}
                         </td>
                         <td className="py-2.5 px-3 font-mono text-[11px] text-muted-foreground">
