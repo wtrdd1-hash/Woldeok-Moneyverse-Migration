@@ -338,7 +338,7 @@ export interface AiNewsRun {
 }
 
 /**
- * What one story does to one stock (152). `none` is a stock the story names
+ * What one story does to one stock (153). `none` is a stock the story names
  * without moving; a null `stock_id` is the whole market.
  */
 export interface AiNewsScenarioEffect {

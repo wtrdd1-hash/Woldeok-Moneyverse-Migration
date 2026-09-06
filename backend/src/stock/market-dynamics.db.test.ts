@@ -157,7 +157,7 @@ describe.skipIf(!DATABASE_URL)('the market dynamics against a real database', ()
       );
     };
 
-    it('lands a headline on the price at once and leaves the lean behind it (151)', async () => {
+    it('lands a headline on the price at once and leaves the lean behind it (152)', async () => {
       await rolledBack(async (client) => {
         const actor = await operator(client);
         const stock = await listing(client, 1_000);
@@ -192,7 +192,7 @@ describe.skipIf(!DATABASE_URL)('the market dynamics against a real database', ()
       });
     });
 
-    it('lands bad news the other way, and never outside the day band (151)', async () => {
+    it('lands bad news the other way, and never outside the day band (152)', async () => {
       await rolledBack(async (client) => {
         const actor = await operator(client);
         const stock = await listing(client, 1_000);

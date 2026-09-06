@@ -21,7 +21,7 @@ import type { AdminStock } from '../types';
 
 /** What each strength does, in the words an operator decides by. */
 /**
- * The three strengths, in what they do. The step is what 151 added: news
+ * The three strengths, in what they do. The step is what 152 added: news
  * moves the price when it lands and leans it afterwards, so both figures
  * belong beside the label an operator picks.
  */

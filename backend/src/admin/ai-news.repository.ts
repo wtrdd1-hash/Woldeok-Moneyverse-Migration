@@ -33,7 +33,7 @@ export interface AiNewsCredentialRow {
 }
 
 /**
- * What one story does to one stock (152). `none` is a stock the story names
+ * What one story does to one stock (153). `none` is a stock the story names
  * without moving; a null symbol is the whole market.
  */
 export interface ScenarioEffectProposal {
@@ -263,7 +263,7 @@ export class AiNewsRepository {
   }
 
   /**
-   * Publishes a scenario: one event per leg that moves something (152). The
+   * Publishes a scenario: one event per leg that moves something (153). The
    * legs are validated here in full before the statement is sent, in the
    * style of the rest of this file.
    */
