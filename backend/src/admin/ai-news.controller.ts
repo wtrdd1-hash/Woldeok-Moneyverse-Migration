@@ -79,7 +79,7 @@ export class GenerateAiNewsDto {
   readonly idempotencyKey?: string;
 }
 
-/** One leg: what the story does to one stock (152). */
+/** One leg: what the story does to one stock (153). */
 export class AiNewsScenarioEffectDto {
   @ApiProperty({ required: false, format: 'uuid', nullable: true, description: 'Absent or null is the whole market' })
   @IsOptional()

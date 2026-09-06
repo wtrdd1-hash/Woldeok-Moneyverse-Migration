@@ -197,7 +197,7 @@ BEGIN
      pg_catalog.clock_timestamp() + pg_catalog.make_interval(hours => p_hours), p_actor)
   RETURNING id INTO v_id;
 
-  -- The headline lands: 151.
+  -- The headline lands: 152.
   v_moved := public.stock_market_apply_event_jump(p_stock, p_direction, p_strength);
 
   PERFORM public.admin_record_audit_event(

@@ -228,7 +228,7 @@ BEGIN
                FROM public.ai_news_scenario_effects AS effect
                LEFT JOIN public.virtual_stocks AS touched ON touched.id = effect.stock_id
                WHERE effect.scenario_id = scenario.id),
-              -- Stored before 152: the scenario's own columns are its one leg.
+              -- Stored before 153: the scenario's own columns are its one leg.
               jsonb_build_array(jsonb_build_object(
                 'id', scenario.id, 'ordinal', 1, 'stock_id', scenario.stock_id,
                 'symbol', stock.symbol, 'name', stock.name,

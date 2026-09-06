@@ -274,7 +274,7 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
         );
         expect(event.rows[0]).toEqual({ source: 'ai', strength: 1, headline: '다듬은 제목' });
 
-        // And it landed: 소폭 is 80 basis points on a 1,000 WLD stock (151).
+        // And it landed: 소폭 is 80 basis points on a 1,000 WLD stock (152).
         const priced = await client.query<{ current_price: string }>(
           'SELECT current_price FROM public.virtual_stocks WHERE id = $1',
           [stock],
@@ -286,7 +286,7 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
       });
     });
 
-    it('publishes one event per stock a story moves, and none for the ones it only names (152)', async () => {
+    it('publishes one event per stock a story moves, and none for the ones it only names (153)', async () => {
       await rolledBack(async (client) => {
         const actor = await operator(client);
         const winner = `W${randomUUID().slice(0, 5).replace(/[^0-9a-f]/g, '').toUpperCase()}`;
@@ -331,7 +331,7 @@ describe.skipIf(!DATABASE_URL)('the AI newsroom against a real database', () => 
         expect(published.rows[0]?.published).toBe(2);
 
         // Two events under one headline, one each way, and the third stock
-        // untouched -- 152's whole point.
+        // untouched -- 153's whole point.
         const events = await client.query<{ stock_id: string; direction: string }>(
           `SELECT stock_id::text AS stock_id, direction FROM public.virtual_stock_market_events
            WHERE headline = '원자재 값이 내렸다' ORDER BY direction`,

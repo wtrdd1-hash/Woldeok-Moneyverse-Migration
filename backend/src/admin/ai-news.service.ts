@@ -46,7 +46,7 @@ const EffectSchema = z.object({
 });
 
 const ProposalSchema = z.object({
-  /** What the story does to each stock it touches (152). */
+  /** What the story does to each stock it touches (153). */
   effects: z.array(EffectSchema).min(1).max(6).optional(),
   /** 135's one-stock shape, still read when a server answers in it. */
   stock_symbol: z.string().nullish(),
