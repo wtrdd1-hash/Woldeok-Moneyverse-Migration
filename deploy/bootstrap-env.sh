@@ -293,16 +293,28 @@ for name in DISCORD_CLIENT_ID DISCORD_CLIENT_SECRET GOOGLE_CLIENT_ID GOOGLE_CLIE
   put "$name" ''
 done
 
-# The Discord bot.
-#
-# Deliberately NOT part of the ADOPT_FROM loop above. The OAuth client
-# credentials are shared by both deployments because both log a member in to
-# the same Discord application; a bot token is the opposite -- test and
-# production must run different bots, or the test stack announces into the
-# production guild. Adopting one from a container on this host is precisely
-# the accident to avoid, so the token arrives from the GitHub environment this
-# deploy was run against and the API refuses it if its application id is not
-# DISCORD_APPLICATION_ID.
+# The Discord bot. Production may explicitly adopt its existing host-local bot.
+# The workflow never passes this source to test, so test cannot share it.
+discord_from="${ADOPT_DISCORD_FROM:-}"
+if [ -n "$discord_from" ] && { ! has_value DISCORD_APPLICATION_ID || ! has_value DISCORD_BOT_TOKEN; }; then
+  if ! docker inspect "$discord_from" >/dev/null 2>&1; then
+    echo "ADOPT_DISCORD_FROM names no container on this host: $discord_from" >&2
+    exit 1
+  fi
+  discord_application_id="$(docker inspect "$discord_from" \
+    --format '{{range .Config.Env}}{{println .}}{{end}}' \
+    | grep -E '^(DISCORD_APPLICATION_ID|DISCORD_CLIENT_ID)=' | head -1 | cut -d= -f2- || true)"
+  discord_bot_token="$(docker inspect "$discord_from" \
+    --format '{{range .Config.Env}}{{println .}}{{end}}' \
+    | grep -E '^(DISCORD_BOT_TOKEN|DISCORD_TOKEN)=' | head -1 | cut -d= -f2- || true)"
+  if [ -z "$discord_application_id" ] || [ -z "$discord_bot_token" ]; then
+    echo "$discord_from does not contain a Discord application id and bot token" >&2
+    exit 1
+  fi
+  set_to DISCORD_APPLICATION_ID "$discord_application_id"
+  set_to DISCORD_BOT_TOKEN "$discord_bot_token"
+  echo "adopted production Discord bot settings"
+fi
 supplied DISCORD_APPLICATION_ID "${DISCORD_APPLICATION_ID:-}"
 supplied DISCORD_BOT_TOKEN "${DISCORD_BOT_TOKEN:-}"
 supplied DISCORD_INTERACTIONS_ENABLED "${DISCORD_INTERACTIONS_ENABLED:-}"

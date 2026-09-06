@@ -181,9 +181,7 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
               ledger_unbalanced_transaction_count::text,
               balance_total_delta_amount::text,
               calculated_at
-       FROM public.economy_reconciliation_snapshots
-       ORDER BY calculated_at DESC
-       LIMIT 1`,
+       FROM public.discord_latest_reconciliation_health()`,
     );
 
     const latest = rows[0];
