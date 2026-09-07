@@ -25,7 +25,7 @@ jobs:
           - 5432:5432
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # First, because it needs nothing but the checkout and because a leaked
       # credential is the one failure whose cost grows for as long as it goes
