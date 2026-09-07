@@ -16,7 +16,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -42,6 +42,19 @@ export class CreatePostDto {
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
   readonly idempotencyKey!: string;
+
+  @ApiProperty({ required: false, pattern: '^[0-9a-f-]{36}\\.(png|jpg|webp)$' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[0-9a-f-]{36}\.(png|jpg|webp)$/)
+  readonly imageStorageKey?: string;
+
+  @ApiProperty({ required: false, maxLength: 300 })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(300)
+  readonly imageAltText?: string;
 }
 
 /** Same fields as writing one: an edit replaces the post, it does not patch it. */

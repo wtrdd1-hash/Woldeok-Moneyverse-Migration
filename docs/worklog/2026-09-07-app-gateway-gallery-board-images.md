@@ -7,9 +7,9 @@ Branch: `fix/app-gateway-20260907`
 
 - [x] Start a dedicated branch/worktree from current `origin/main` without touching unrelated local changes.
 - [x] Add an app-facing Gateway/BFF boundary without exposing `INTERNAL_API_TOKEN` to native clients.
-- [ ] Make published gallery cards open a dedicated detail page.
-- [ ] Allow a signed-in member to attach an image to a board post.
-- [ ] Render the board image on the post detail page.
+- [x] Make published gallery cards open a dedicated detail page.
+- [x] Allow a signed-in member to attach an image to a board post.
+- [x] Render the board image on the post detail page.
 - [ ] Add regression tests for the new access boundaries and UI behavior.
 - [ ] Run typecheck/tests/build and database migration validation in CI.
 - [ ] Deploy to test, verify, then deploy the validated revision to production.
@@ -18,9 +18,13 @@ Branch: `fix/app-gateway-20260907`
 
 ### In progress
 
-The app Gateway route exists under `/app-api/v1/...` and forwards only explicitly allowed member-facing API groups. Admin and Discord integration paths are not in the allowlist. The next implementation block adds gallery detail navigation and a private, members-only board-image path backed by the existing validated image storage.
+The app Gateway route exists under `/app-api/v1/...` and forwards only explicitly allowed member-facing API groups. Admin and Discord integration paths are not in the allowlist. Gallery cards now link to `/gallery/[photoId]`. Board posts accept one PNG/JPEG/WebP image up to 4MB plus required alt text; the bytes use the existing validated private image store. Migration 173 adds the board image metadata and a SECURITY DEFINER visibility check, and `/media/board/[key]` only relays bytes after the signed-in viewer passes that database check.
 
 ### Validation so far
 
 - App Gateway allowlist unit tests: 4/4 passed.
-- A full frontend test invocation reached 503 passing tests before failing because the shared contract package had not been built in that isolated container run. Re-running after building the contract is required before completion.
+- Board service unit tests: 8/8 passed after updating the repository double for the new image visibility operation.
+- Frontend Gateway/media targeted tests: 8/8 passed.
+- Workspace typecheck: passed under Node 24.
+- ESLint: 0 errors; 11 existing/new `<img>` optimization warnings remain.
+- Database migration 173 still requires CI/PostgreSQL execution before it can be called validated.

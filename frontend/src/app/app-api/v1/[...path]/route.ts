@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 import { appGatewayOrigin, appGatewayPath } from '@/lib/app-gateway';
 
 const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
@@ -18,7 +19,15 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
   });
-  for (const name of ['cookie', 'content-type', 'x-csrf-token', 'user-agent', 'cf-connecting-ip', 'x-forwarded-for', 'cf-ipcountry']) {
+  for (const name of [
+    'cookie',
+    'content-type',
+    'x-csrf-token',
+    'user-agent',
+    'cf-connecting-ip',
+    'x-forwarded-for',
+    'cf-ipcountry',
+  ]) {
     const value = request.headers.get(name);
     if (value) outgoing.set(name, value);
   }

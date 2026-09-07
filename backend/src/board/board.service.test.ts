@@ -31,6 +31,7 @@ function repository(overrides: Partial<BoardRepository> = {}): BoardRepository {
       throw new Error('not stubbed');
     },
     removeComment: async () => false,
+    imageVisible: async () => false,
     ...overrides,
   };
 }

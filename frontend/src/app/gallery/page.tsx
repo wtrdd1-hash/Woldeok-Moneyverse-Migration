@@ -83,26 +83,32 @@ export default async function GalleryPage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {photos.map((photo) => (
-              <figure key={photo.photoId} className="overflow-hidden rounded-lg border bg-card">
-                <div className="relative aspect-video w-full overflow-hidden bg-black/40 flex items-center justify-center">
-                  <img
-                    src={photo.imageUrl}
-                    alt={photo.altText}
-                    loading="lazy"
-                    decoding="async"
-                    referrerPolicy="no-referrer"
-                    className="max-h-full max-w-full object-contain transition-transform duration-300 hover:scale-105"
-                  />
-                </div>
-                <figcaption className="grid gap-0.5 p-3">
-                  <span className="text-sm">{photo.altText}</span>
-                  {photo.publishedAt && (
-                    <time dateTime={photo.publishedAt} className="text-xs text-muted-foreground">
-                      {formatDay(photo.publishedAt, '게시 시간 확인 중')}
-                    </time>
-                  )}
-                </figcaption>
-              </figure>
+              <Link
+                key={photo.photoId}
+                href={`/gallery/${photo.photoId}`}
+                className="group overflow-hidden rounded-lg border bg-card transition-colors hover:border-clay-ink/60"
+              >
+                <figure>
+                  <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden bg-black/40">
+                    <img
+                      src={photo.imageUrl}
+                      alt={photo.altText}
+                      loading="lazy"
+                      decoding="async"
+                      referrerPolicy="no-referrer"
+                      className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
+                  <figcaption className="grid gap-0.5 p-3">
+                    <span className="text-sm font-semibold">{photo.altText}</span>
+                    {photo.publishedAt && (
+                      <time dateTime={photo.publishedAt} className="text-xs text-muted-foreground">
+                        {formatDay(photo.publishedAt, '게시 시간 확인 중')}
+                      </time>
+                    )}
+                  </figcaption>
+                </figure>
+              </Link>
             ))}
           </div>
         )}
