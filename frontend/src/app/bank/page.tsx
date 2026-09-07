@@ -53,16 +53,16 @@ export default async function BankPage() {
     );
   }
 
-  const cash = Number(standing.cash_balance) || 0;
-  const bank = Number(standing.bank_balance) || 0;
-  const unclaimed = Number(standing.unclaimed_interest) || 0;
-  const creditLimit = Number(standing.credit_limit) || 5000;
+  const cash = standing.cash_balance;
+  const bank = standing.bank_balance;
+  const unclaimed = standing.unclaimed_interest;
+  const creditLimit = standing.credit_limit;
   const activeLoan = standing.active_loan;
   const bonds = standing.bonds ?? [];
 
-  const bondTotalPrincipal = bonds.reduce((acc, b) => acc + (Number(b.principal_amount) || 0), 0);
-  const loanDebt = activeLoan ? Number(activeLoan.outstanding_amount) || 0 : 0;
-  const netFinancialWorth = cash + bank + bondTotalPrincipal - loanDebt;
+  const bondTotalPrincipal = bonds.reduce((acc, bond) => acc + BigInt(bond.principal_amount), 0n);
+  const loanDebt = activeLoan ? BigInt(activeLoan.outstanding_amount) : 0n;
+  const netFinancialWorth = (BigInt(cash) + BigInt(bank) + bondTotalPrincipal - loanDebt).toString();
 
   return (
     <div className="grid gap-6">
@@ -89,7 +89,7 @@ export default async function BankPage() {
               </div>
             </div>
             <div className="mt-2 text-xl font-extrabold tabular">
-              <Amount value={String(netFinancialWorth)} currency />
+              <Amount value={netFinancialWorth} currency />
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">
               <T korean="현금+예금+국채-대출" english="Cash + Savings + Bonds - Debt" />
@@ -108,7 +108,7 @@ export default async function BankPage() {
               </div>
             </div>
             <div className="mt-2 text-xl font-extrabold text-blue-600 dark:text-blue-400 tabular">
-              <Amount value={String(bank)} currency />
+              <Amount value={bank} currency />
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">
               <T korean="일일 0.05% 복리 적립" english="0.05% daily compound interest" />
@@ -127,7 +127,7 @@ export default async function BankPage() {
               </div>
             </div>
             <div className="mt-2 text-xl font-extrabold text-emerald-600 dark:text-emerald-400 tabular">
-              +{groupDigits(String(unclaimed))} <span className="text-xs font-normal">WLD</span>
+              +{groupDigits(unclaimed)} <span className="text-xs font-normal">WLD</span>
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">
               <T korean="온디맨드 즉시 정산 가능" english="Instant on-demand claim" />
@@ -146,13 +146,13 @@ export default async function BankPage() {
               </div>
             </div>
             <div className="mt-2 text-xl font-extrabold text-purple-600 dark:text-purple-400 tabular">
-              <Amount value={String(creditLimit)} currency />
+              <Amount value={creditLimit} currency />
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">
               {activeLoan
                 ? isEn
-                  ? `Active Loan (${groupDigits(String(loanDebt))} WLD)`
-                  : `대출 실행 중 (${groupDigits(String(loanDebt))} WLD)`
+                  ? `Active Loan (${groupDigits(loanDebt.toString())} WLD)`
+                  : `대출 실행 중 (${groupDigits(loanDebt.toString())} WLD)`
                 : isEn
                 ? 'Instant Loan Available'
                 : '즉시 대출 가능'}

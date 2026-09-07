@@ -5,6 +5,7 @@ import {
   ConflictException,
   Controller,
   Get,
+  GoneException,
   Inject,
   NotFoundException,
   Param,
@@ -146,11 +147,8 @@ export class WalletController {
   }
 
   @Post('rewards/work/claims')
-  @ApiOperation({ summary: 'Claim the work reward' })
-  claimWork(@Req() request: RequestWithSession, @Body() body: ClaimDto) {
-    return this.guarded(
-      () => this.service().claimWork(requireUserId(request), { ...body }),
-      'this wallet action cannot be completed now',
-    );
+  @ApiOperation({ summary: 'Retired legacy work faucet; use professional work tasks', deprecated: true })
+  claimWork() {
+    throw new GoneException('legacy work reward retired; complete a professional task on /work');
   }
 }

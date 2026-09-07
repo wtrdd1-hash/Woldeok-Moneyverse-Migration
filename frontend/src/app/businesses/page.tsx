@@ -170,9 +170,9 @@ export default async function BusinessesPage() {
             {businesses.map((business) => {
               const boost = business.boostActive;
               const hasBoost = boost && boost.name;
-              const gross = Number(business.dailyRevenue);
-              const cost = Number(business.dailyOperatingCost);
-              const net = gross - cost;
+              const gross = business.dailyRevenue;
+              const cost = business.dailyOperatingCost;
+              const net = (BigInt(gross) - BigInt(cost)).toString();
 
               return (
                 <Card
@@ -214,19 +214,19 @@ export default async function BusinessesPage() {
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">일일 매출</span>
                         <span className="font-mono font-bold text-emerald-400">
-                          +{groupDigits(String(gross))} WLD
+                          +{groupDigits(gross)} WLD
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">일일 운영비 (소각)</span>
                         <span className="font-mono font-medium text-rose-400">
-                          -{groupDigits(String(cost))} WLD
+                          -{groupDigits(cost)} WLD
                         </span>
                       </div>
                       <div className="border-t border-border/60 pt-1.5 flex justify-between font-bold text-sm">
                         <span>일일 순수익</span>
                         <span className="font-mono text-primary">
-                          +{groupDigits(String(net))} WLD
+                          +{groupDigits(net)} WLD
                         </span>
                       </div>
                     </div>

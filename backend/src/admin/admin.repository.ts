@@ -85,11 +85,11 @@ interface AdminUserRow {
   created_at: Date;
   restricted_at: Date | null;
   restriction_reason: string | null;
-  cash_balance?: number;
-  bank_balance?: number;
-  bond_balance?: number;
-  stock_eval?: number;
-  total_net_worth?: number;
+  cash_balance?: string;
+  bank_balance?: string;
+  bond_balance?: string;
+  stock_eval?: string;
+  total_net_worth?: string;
   wealth_rank?: number;
   last_login_at?: Date | null;
   last_seen_at?: Date | null;
@@ -193,11 +193,11 @@ export class AdminRepository {
       created_at: r.created_at as Date,
       restricted_at: (r.restricted_at as Date) ?? null,
       restriction_reason: (r.restriction_reason as string) ?? null,
-      cash_balance: Number(r.cash_balance ?? 0),
-      bank_balance: Number(r.bank_balance ?? 0),
-      bond_balance: Number(r.bond_balance ?? 0),
-      stock_eval: Number(r.stock_eval ?? 0),
-      total_net_worth: Number(r.total_net_worth ?? 0),
+      cash_balance: String(r.cash_balance ?? '0'),
+      bank_balance: String(r.bank_balance ?? '0'),
+      bond_balance: String(r.bond_balance ?? '0'),
+      stock_eval: String(r.stock_eval ?? '0'),
+      total_net_worth: String(r.total_net_worth ?? '0'),
       wealth_rank: Number(r.wealth_rank ?? 0),
       last_login_at: summariesByUser.get(String(r.user_id))?.last_login_at ?? null,
       last_seen_at: summariesByUser.get(String(r.user_id))?.last_seen_at ?? null,

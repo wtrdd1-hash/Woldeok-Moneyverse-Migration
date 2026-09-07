@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useTransition, useEffect, useRef } from 'react';
-import { useActionState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { useLocale } from '@/components/locale-provider';
 import { Button } from '@/components/ui/button';
@@ -54,7 +54,106 @@ export function JobSwitchButton({
   );
 }
 
-type WorkPhase = 'idle' | 'running' | 'slow_network' | 'done' | 'error';
+function TaskCompletionPanel({
+  task,
+  onClose,
+}: {
+  readonly task: WorkTask;
+  readonly onClose: () => void;
+}) {
+  const { locale } = useLocale();
+  const isEn = locale === 'en';
+  const router = useRouter();
+  const [state, action] = useActionState(completeTaskV2Action, IDLE);
+  const meta = jobMeta(task.job_type, locale);
+  const rewardPaused = task.reward_preview === null || task.experience_preview === null;
+
+  useEffect(() => {
+    if (state.status === 'ok') router.refresh();
+  }, [router, state.status]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+      <Card className="w-full max-w-md border-border/80 bg-background/95 shadow-2xl backdrop-blur-md">
+        <CardHeader>
+          <div className="flex items-center justify-between gap-2">
+            <Badge variant="secondary" className="flex items-center gap-1.5 font-medium px-2.5 py-1">
+              <span>{meta?.icon ?? '💼'}</span>
+              <span>{jobLabel(task.job_type, locale)}</span>
+              <span className="text-muted-foreground/60">·</span>
+              <span>{difficultyLabel(task.difficulty, locale)}</span>
+            </Badge>
+            <Badge className="bg-primary/20 text-primary border-primary/30">
+              {isEn ? `Completed today ${task.taken_today}` : `오늘 ${task.taken_today}회 완료`}
+            </Badge>
+          </div>
+          <CardTitle className="text-xl mt-2">{task.name}</CardTitle>
+          <CardDescription className="text-sm">{task.description}</CardDescription>
+        </CardHeader>
+
+        <CardContent className="grid gap-4">
+          <div className="rounded-xl border border-border/50 bg-muted/40 p-3 grid grid-cols-2 gap-2 text-center text-sm">
+            <div>
+              <span className="text-xs text-muted-foreground block">
+                {isEn ? 'WLD paid this run' : '이번 지급 WLD'}
+              </span>
+              <span className="text-lg font-black text-emerald-400">
+                {task.reward_preview === null ? '—' : `+${task.reward_preview} WLD`}
+              </span>
+            </div>
+            <div>
+              <span className="text-xs text-muted-foreground block">
+                {isEn ? 'Proficiency EXP' : '숙련도 EXP'}
+              </span>
+              <span className="text-lg font-black text-amber-400">
+                {task.experience_preview === null ? '—' : `+${task.experience_preview} EXP`}
+              </span>
+            </div>
+          </div>
+
+          {rewardPaused ? (
+            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
+              {isEn
+                ? 'Career work payouts are temporarily paused by the current operations policy.'
+                : '현재 운영 정책에 따라 직업 업무 보상 지급이 일시 중지되어 있습니다.'}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-3 text-xs leading-5 text-emerald-300">
+              {isEn
+                ? 'The server validates your active career, writes one idempotent ledger transaction, then records EXP. Repeating the task is allowed.'
+                : '서버가 현재 활성 직업을 확인한 뒤 멱등 원장 거래 1건과 숙련도 EXP를 기록합니다. 같은 업무는 반복 수행할 수 있습니다.'}
+            </div>
+          )}
+
+          {state.status !== 'ok' && (
+            <form action={action} className="grid gap-2">
+              <input type="hidden" name="taskId" value={task.task_id} />
+              <SubmitButton disabled={rewardPaused} className="w-full font-bold">
+                {isEn ? 'Perform task and receive reward' : '업무 수행하고 보상 받기'}
+              </SubmitButton>
+            </form>
+          )}
+
+          <ActionAlert state={state} />
+
+          {state.status === 'ok' && (
+            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm font-semibold text-emerald-300">
+              {isEn
+                ? 'Completed. The ledger and career proficiency have been refreshed.'
+                : '완료되었습니다. 지갑 원장과 직업 숙련도가 최신 상태로 갱신되었습니다.'}
+            </div>
+          )}
+        </CardContent>
+
+        <div className="flex justify-end gap-2 px-6 pb-5">
+          <Button type="button" variant="ghost" onClick={onClose}>
+            {state.status === 'ok' ? (isEn ? 'Done' : '완료') : isEn ? 'Close' : '닫기'}
+          </Button>
+        </div>
+      </Card>
+    </div>
+  );
+}
 
 export function TaskCompleteModalButton({
   task,
@@ -65,275 +164,40 @@ export function TaskCompleteModalButton({
 }) {
   const { locale } = useLocale();
   const isEn = locale === 'en';
-
   const [isOpen, setIsOpen] = useState(false);
-  const [phase, setPhase] = useState<WorkPhase>('idle');
-  const [progress, setProgress] = useState(0);
-  const [statusText, setStatusText] = useState('');
-  const [state, formAction] = useActionState(completeTaskV2Action, IDLE);
-  const [isPending, startTransition] = useTransition();
-  const handledStateRef = useRef(state);
+  const [cycle, setCycle] = useState(0);
+  const rewardPaused = task.reward_preview === null || task.experience_preview === null;
 
-  const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const slowTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const timeoutTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const closeTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const clearAllTimers = () => {
-    if (progressTimerRef.current) clearInterval(progressTimerRef.current);
-    if (slowTimerRef.current) clearTimeout(slowTimerRef.current);
-    if (timeoutTimerRef.current) clearTimeout(timeoutTimerRef.current);
-    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-  };
-
-  useEffect(() => {
-    return () => clearAllTimers();
-  }, []);
-
-  const meta = jobMeta(task.job_type, locale);
-  const isBusy = phase === 'running' || phase === 'slow_network' || isPending;
-
-  // Sync server action response to UI state
-  useEffect(() => {
-    // useActionState keeps the previous result between modal openings. Handle
-    // each new server response once; local phase or copy changes must never
-    // replay an already-settled reward response.
-    if (state === handledStateRef.current) return;
-    handledStateRef.current = state;
-
-    if (state.status === 'ok') {
-      clearAllTimers();
-      setProgress(100);
-      setPhase('done');
-      setStatusText(
-        isEn
-          ? 'Transaction confirmed & reward claimed!'
-          : '서버 원장 검증 완료! 보상이 정상 지급되었습니다.',
-      );
-
-      // Auto close after 2.2 seconds if user doesn't click
-      closeTimerRef.current = setTimeout(() => {
-        setIsOpen(false);
-        setPhase('idle');
-        setProgress(0);
-      }, 2200);
-    } else if (state.status === 'error') {
-      clearAllTimers();
-      setPhase('error');
-      setStatusText(
-        state.message ?? (isEn ? 'Task execution failed.' : '업무 처리에 실패했습니다.'),
-      );
-    }
-  }, [state, isEn]);
-
-  const handleStartWork = () => {
-    clearAllTimers();
-    setPhase('running');
-    setProgress(15);
-    setStatusText(
-      isEn
-        ? 'Executing algorithms & verifying integrity...'
-        : '업무 알고리즘 실행 및 데이터 무결성 검증 중...',
-    );
-
-    // Phase 1: Rapid local preparation (15% -> 70%)
-    let cur = 15;
-    progressTimerRef.current = setInterval(() => {
-      cur += 10;
-      if (cur >= 70) {
-        if (progressTimerRef.current) clearInterval(progressTimerRef.current);
-        cur = 70;
-        setProgress(70);
-        setStatusText(
-          isEn
-            ? 'Transmitting payload & writing to ledger...'
-            : '서버 전송 및 원장 멱등 트랜잭션 기록 중...',
-        );
-
-        // Slow crawl while waiting for network response (70% -> 88%)
-        progressTimerRef.current = setInterval(() => {
-          setProgress((p) => (p < 88 ? p + 2 : 88));
-        }, 300);
-
-        // Dispatch actual server action
-        const fd = new FormData();
-        fd.append('taskId', task.task_id);
-        startTransition(() => {
-          formAction(fd);
-        });
-      } else {
-        setProgress(cur);
-      }
-    }, 80);
-
-    // Phase 2: Detect slow network / ping delay after 2.5s
-    slowTimerRef.current = setTimeout(() => {
-      setPhase((prev) => {
-        if (prev === 'running') {
-          setStatusText(
-            isEn
-              ? 'Network ping delay detected. Safely keeping idempotent connection...'
-              : '네트워크 핑 지연 감지됨. 멱등 트랜잭션 안전 유지 중...',
-          );
-          return 'slow_network';
-        }
-        return prev;
-      });
-    }, 2500);
-
-    // Phase 3: Client timeout after 8.5s (prevent indefinite freeze)
-    timeoutTimerRef.current = setTimeout(() => {
-      setPhase((prev) => {
-        if (prev === 'running' || prev === 'slow_network') {
-          clearAllTimers();
-          setStatusText(
-            isEn
-              ? 'Network timeout occurred. Please click [Retry].'
-              : '네트워크 핑 손실 또는 응답 지연이 발생했습니다. [다시 시도]를 눌러주세요.',
-          );
-          return 'error';
-        }
-        return prev;
-      });
-    }, 8500);
+  const close = () => {
+    setIsOpen(false);
+    setCycle((value) => value + 1);
   };
 
   return (
-    <div>
+    <div className="w-full">
       <Button
         variant={isActiveJob ? 'default' : 'outline'}
-        disabled={!isActiveJob}
-        onClick={() => {
-          setPhase('idle');
-          setProgress(0);
-          setStatusText('');
-          setIsOpen(true);
-        }}
+        disabled={!isActiveJob || rewardPaused}
+        onClick={() => setIsOpen(true)}
         className="w-full font-semibold shadow-sm transition-all"
       >
         {!isActiveJob
-          ? (isEn ? 'Switch Career First' : '해당 직업 전직 필요')
-          : (isEn ? '⚡ Perform Task (Unlimited)' : '⚡ 즉시 업무 수행 (무제한)')}
+          ? isEn
+            ? 'Switch career first'
+            : '해당 직업으로 먼저 전직'
+          : rewardPaused
+            ? isEn
+              ? 'Rewards paused'
+              : '보상 지급 일시 중지'
+            : isEn
+              ? 'Perform career task'
+              : '직업 업무 수행'}
       </Button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <Card className="w-full max-w-md border-border/80 bg-background/95 shadow-2xl backdrop-blur-md">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <Badge variant="secondary" className="flex items-center gap-1.5 font-medium px-2.5 py-1">
-                  <span>{meta?.icon ?? '💼'}</span>
-                  <span>{jobLabel(task.job_type, locale)}</span>
-                  <span className="text-muted-foreground/60">·</span>
-                  <span>{difficultyLabel(task.difficulty, locale)}</span>
-                </Badge>
-                <Badge className="bg-primary/20 text-primary border-primary/30">
-                  {isEn ? `Today ${task.taken_today} · Repeatable` : `오늘 ${task.taken_today}회 · 계속 가능`}
-                </Badge>
-              </div>
-              <CardTitle className="text-xl mt-2">{task.name}</CardTitle>
-              <CardDescription className="text-sm">{task.description}</CardDescription>
-            </CardHeader>
-
-            <CardContent className="grid gap-4">
-              <div className="rounded-xl border border-border/50 bg-muted/40 p-3 grid grid-cols-2 gap-2 text-center text-sm">
-                <div>
-                  <span className="text-xs text-muted-foreground block">
-                    {isEn ? 'Full WLD Reward' : 'WLD 전액 보상'}
-                  </span>
-                  <span className="text-base font-bold text-emerald-400">
-                    +{task.reward_preview ?? task.base_reward} WLD
-                  </span>
-                </div>
-                <div>
-                  <span className="text-xs text-muted-foreground block">
-                    {isEn ? 'Proficiency EXP' : '획득 숙련도 EXP'}
-                  </span>
-                  <span className="text-base font-bold text-amber-400">
-                    +{task.base_experience} EXP
-                    <span className="text-[11px] font-normal text-emerald-400 ml-1">(100%)</span>
-                  </span>
-                </div>
-              </div>
-
-              <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-2.5 text-xs text-emerald-300 text-center">
-                {isEn ? 'No daily task cap: every verified repeat pays the full WLD and EXP reward.' : '일일 횟수 제한 없이 검증된 모든 반복 작업에 WLD와 EXP가 전액 지급됩니다.'}
-              </div>
-
-              {phase !== 'idle' ? (
-                <div className="space-y-2 py-3">
-                  <div className="flex justify-between text-xs font-medium">
-                    <span
-                      className={
-                        phase === 'slow_network'
-                          ? 'text-amber-400 font-semibold animate-pulse'
-                          : phase === 'done'
-                          ? 'text-emerald-400 font-semibold'
-                          : phase === 'error'
-                          ? 'text-rose-400 font-semibold'
-                          : 'text-muted-foreground'
-                      }
-                    >
-                      {statusText}
-                    </span>
-                    <span className="font-mono text-muted-foreground">{progress}%</span>
-                  </div>
-                  <div className="w-full h-3 bg-secondary rounded-full overflow-hidden">
-                    <div
-                      className={`h-full transition-all duration-200 ease-out rounded-full ${
-                        phase === 'slow_network'
-                          ? 'bg-amber-500 animate-pulse'
-                          : phase === 'done'
-                          ? 'bg-emerald-500'
-                          : phase === 'error'
-                          ? 'bg-rose-500'
-                          : 'bg-primary'
-                      }`}
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                </div>
-              ) : null}
-
-              <ActionAlert state={state} />
-
-              <div className="flex gap-2 justify-end mt-2">
-                <Button
-                  variant="ghost"
-                  disabled={isBusy && phase === 'running'}
-                  onClick={() => {
-                    clearAllTimers();
-                    setIsOpen(false);
-                    setPhase('idle');
-                  }}
-                >
-                  {isEn ? 'Close' : '닫기'}
-                </Button>
-                <Button
-                  disabled={isBusy && phase !== 'slow_network'}
-                  onClick={handleStartWork}
-                  className="font-bold transition-all"
-                  variant={phase === 'error' ? 'destructive' : 'default'}
-                >
-                  {phase === 'running'
-                    ? (isEn ? 'Processing...' : '수행 중...')
-                    : phase === 'slow_network'
-                    ? (isEn ? 'Connecting...' : '응답 대기 중...')
-                    : phase === 'done'
-                    ? (isEn ? 'Completed ✓' : '완료됨 ✓')
-                    : phase === 'error'
-                    ? (isEn ? 'Retry' : '다시 시도')
-                    : (isEn ? 'Complete Task & Claim Full Reward' : '업무 완료 및 전액 보상 수령')}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {isOpen && <TaskCompletionPanel key={cycle} task={task} onClose={close} />}
     </div>
   );
 }
-
 
 export function TakeButton({
   taskId,

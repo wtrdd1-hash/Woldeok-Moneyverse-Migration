@@ -18,6 +18,7 @@ import {
   Coins,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { compareAmounts, groupDigits } from '@/lib/money';
 import { AvatarWithCosmetics, NameplateWithTitle, type UserCosmetics } from '@/components/profile-cosmetics';
 
 export interface CatalogItem {
@@ -76,7 +77,6 @@ export function ShopStoreView({
   const [buyStatus, setBuyStatus] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
-  const balanceNum = Number(userBalance) || 0;
 
   const filteredItems = items.filter((item) => {
     if (selectedCategory === 'all') return true;
@@ -166,8 +166,7 @@ export function ShopStoreView({
         {filteredItems.map((item) => {
           const isOwned = item.user_owned_quantity > 0;
           const isLimited = item.is_limited;
-          const priceNum = Number(item.price);
-          const canAfford = balanceNum >= priceNum;
+          const canAfford = compareAmounts(userBalance, item.price) >= 0;
 
           return (
             <div
@@ -264,7 +263,7 @@ export function ShopStoreView({
                   <span className="text-xs text-muted-foreground">가격</span>
                   <div className="flex items-center gap-1 font-extrabold text-sm text-amber-500">
                     <Coins className="size-4 text-amber-500" />
-                    <span>{Number(item.price).toLocaleString()} WLD</span>
+                    <span>{groupDigits(item.price)} WLD</span>
                   </div>
                 </div>
 
@@ -351,7 +350,7 @@ export function ShopStoreView({
               <p className="text-xs text-muted-foreground mt-1">{previewItem.description}</p>
               <div className="flex items-center justify-center gap-1 font-extrabold text-amber-500 text-lg mt-2">
                 <Coins className="size-5 text-amber-500" />
-                <span>{Number(previewItem.price).toLocaleString()} WLD</span>
+                <span>{groupDigits(previewItem.price)} WLD</span>
               </div>
             </div>
 
@@ -392,9 +391,9 @@ export function ShopStoreView({
               </div>
               <div className="text-right">
                 <p className="font-extrabold text-sm text-amber-500">
-                  {Number(buyingItem.price).toLocaleString()} WLD
+                  {groupDigits(buyingItem.price)} WLD
                 </p>
-                <p className="text-[11px] text-muted-foreground">내 잔액: {balanceNum.toLocaleString()} WLD</p>
+                <p className="text-[11px] text-muted-foreground">내 잔액: {groupDigits(userBalance)} WLD</p>
               </div>
             </div>
 
@@ -413,11 +412,11 @@ export function ShopStoreView({
                 취소
               </button>
               <button
-                disabled={Boolean(buyStatus) || balanceNum < Number(buyingItem.price)}
+                disabled={Boolean(buyStatus) || compareAmounts(userBalance, buyingItem.price) < 0}
                 onClick={() => handleBuy(buyingItem)}
                 className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold shadow-md shadow-amber-500/20 disabled:opacity-50"
               >
-                {balanceNum < Number(buyingItem.price) ? '잔액 부족' : '확인 및 결제'}
+                {compareAmounts(userBalance, buyingItem.price) < 0 ? '잔액 부족' : '확인 및 결제'}
               </button>
             </div>
           </div>

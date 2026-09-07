@@ -2,13 +2,14 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
+import { groupDigits } from '@/lib/money';
 import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function depositAction(_previous: ActionState, formData: FormData): Promise<ActionState> {
   const amount = wholeAmount(formData.get('amount'));
-  if (amount === null || Number(amount) < 1) {
+  if (amount === null) {
     return { status: 'error', message: '1 WLD 이상의 정수 금액을 입력해 주세요.' };
   }
 
@@ -18,7 +19,7 @@ export async function depositAction(_previous: ActionState, formData: FormData):
     });
     revalidatePath('/bank');
     revalidatePath('/wallet');
-    return { status: 'ok', message: `${Number(amount).toLocaleString()} WLD를 복리 예금 계좌에 입금했습니다.` };
+    return { status: 'ok', message: `${groupDigits(amount)} WLD를 복리 예금 계좌에 입금했습니다.` };
   } catch (error) {
     return failure(error, '은행 예금 입금 처리에 실패했습니다. 보유 현금을 확인해 주세요.');
   }
@@ -26,7 +27,7 @@ export async function depositAction(_previous: ActionState, formData: FormData):
 
 export async function withdrawAction(_previous: ActionState, formData: FormData): Promise<ActionState> {
   const amount = wholeAmount(formData.get('amount'));
-  if (amount === null || Number(amount) < 1) {
+  if (amount === null) {
     return { status: 'error', message: '1 WLD 이상의 정수 금액을 입력해 주세요.' };
   }
 
@@ -36,7 +37,7 @@ export async function withdrawAction(_previous: ActionState, formData: FormData)
     });
     revalidatePath('/bank');
     revalidatePath('/wallet');
-    return { status: 'ok', message: `${Number(amount).toLocaleString()} WLD를 현금으로 출금했습니다.` };
+    return { status: 'ok', message: `${groupDigits(amount)} WLD를 현금으로 출금했습니다.` };
   } catch (error) {
     return failure(error, '은행 출금 처리에 실패했습니다. 예금 잔액을 확인해 주세요.');
   }
@@ -49,7 +50,7 @@ export async function claimInterestAction(_previous: ActionState): Promise<Actio
     });
     revalidatePath('/bank');
     revalidatePath('/wallet');
-    const claimed = res?.claimedAmount ? Number(res.claimedAmount).toLocaleString() : '';
+    const claimed = res?.claimedAmount ? groupDigits(res.claimedAmount) : '';
     return {
       status: 'ok',
       message: claimed ? `${claimed} WLD의 복리 예금 이자가 원장에 정산되었습니다!` : '복리 이자가 정산되었습니다.',
@@ -61,7 +62,7 @@ export async function claimInterestAction(_previous: ActionState): Promise<Actio
 
 export async function borrowAction(_previous: ActionState, formData: FormData): Promise<ActionState> {
   const amount = wholeAmount(formData.get('amount'));
-  if (amount === null || Number(amount) < 100) {
+  if (amount === null || BigInt(amount) < 100n) {
     return { status: 'error', message: '대출 신청은 최소 100 WLD 이상부터 가능합니다.' };
   }
 
@@ -71,7 +72,7 @@ export async function borrowAction(_previous: ActionState, formData: FormData): 
     });
     revalidatePath('/bank');
     revalidatePath('/wallet');
-    return { status: 'ok', message: `${Number(amount).toLocaleString()} WLD 스마트 신용 대출이 승인 및 지급되었습니다.` };
+    return { status: 'ok', message: `${groupDigits(amount)} WLD 스마트 신용 대출이 승인 및 지급되었습니다.` };
   } catch (error) {
     return failure(error, '대출 실행이 거절되었습니다. 신용 한도 또는 기존 미상환 대출 여부를 확인해 주세요.');
   }
@@ -84,7 +85,7 @@ export async function repayAction(_previous: ActionState, formData: FormData): P
   if (!UUID.test(loanId)) {
     return { status: 'error', message: '대출 식별 번호가 올바르지 않습니다.' };
   }
-  if (amount === null || Number(amount) < 1) {
+  if (amount === null) {
     return { status: 'error', message: '1 WLD 이상의 상환 금액을 입력해 주세요.' };
   }
 
@@ -94,7 +95,7 @@ export async function repayAction(_previous: ActionState, formData: FormData): P
     });
     revalidatePath('/bank');
     revalidatePath('/wallet');
-    return { status: 'ok', message: `${Number(amount).toLocaleString()} WLD 대출 상환 처리가 완료되었습니다.` };
+    return { status: 'ok', message: `${groupDigits(amount)} WLD 대출 상환 처리가 완료되었습니다.` };
   } catch (error) {
     return failure(error, '대출 상환에 실패했습니다. 보유 현금 잔액을 확인해 주세요.');
   }
@@ -107,7 +108,7 @@ export async function purchaseBondAction(_previous: ActionState, formData: FormD
   if (!bondCode) {
     return { status: 'error', message: '국채 상품을 선택해 주세요.' };
   }
-  if (amount === null || Number(amount) < 1000) {
+  if (amount === null || BigInt(amount) < 1000n) {
     return { status: 'error', message: '국채 매입은 최소 1,000 WLD 이상이어야 합니다.' };
   }
 

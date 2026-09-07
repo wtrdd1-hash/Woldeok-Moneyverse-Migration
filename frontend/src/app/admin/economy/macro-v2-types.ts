@@ -13,43 +13,42 @@ export interface AdminPolicyV2 {
   last_auto_balanced_at: string | null;
   auto_balance_log: unknown;
   updated_at: string;
-  updated_by: string;
+  updated_by: string | null;
 }
 
 export interface JobStat {
   job_type: string;
-  active_members: number;
-  total_earned: number;
+  user_count: number;
+  avg_level: number;
 }
 
 export interface BusinessStat {
   symbol: string;
   name: string;
-  total_shares: number;
-  owner_count: number;
-  total_dividends_paid: number;
+  total_owners: number;
+  boosted_count: number;
 }
 
 export interface BondsStat {
   holding_count: number;
-  holding_principal: number;
+  holding_principal: string;
   redeemed_count: number;
-  redeemed_amount: number;
+  redeemed_amount: string;
 }
 
 export interface LoansStat {
   active_count: number;
-  active_outstanding: number;
+  active_outstanding: string;
   repaid_count: number;
 }
 
 export interface MacroEconomyV2 {
-  m2_supply: number;
-  cash_total: number;
-  bank_total: number;
-  faucet_today: number;
-  sink_today: number;
-  net_flow_today: number;
+  m2_supply: string;
+  cash_total: string;
+  bank_total: string;
+  faucet_today: string;
+  sink_today: string;
+  net_flow_today: string;
   inflation_ratio: number;
   inflation_alert: boolean;
   policy: AdminPolicyV2;
@@ -62,25 +61,37 @@ export interface MacroEconomyV2 {
 export interface UserAssetInspectV2 {
   user_id: string;
   display_name: string | null;
-  wallet_balance: number;
-  bank_deposit_balance: number;
-  loan_debt_balance: number;
-  job: {
+  created_at: string;
+  status: string;
+  cash_balance: string;
+  bank_balance: string;
+  total_interest_claimed: string;
+  jobs: Array<{
     job_type: string;
     level: number;
-    experience: number;
-  } | null;
+    experience: string;
+    is_active: boolean;
+  }>;
   businesses: Array<{
+    id: string;
     symbol: string;
     name: string;
-    share_count: number;
-    total_dividends_received: number;
+    boost_active: boolean;
+    status: string;
   }>;
+  active_loan: {
+    loan_id: string;
+    principal: string;
+    outstanding: string;
+    issued_at: string;
+  } | null;
   bonds: Array<{
-    bond_type: string;
-    principal_amount: number;
-    yield_amount: number;
-    matures_at: string;
+    id: string;
+    bond_code: string;
+    bond_name: string;
+    principal_amount: string;
+    maturity_amount: string;
+    maturity_at: string;
     status: string;
   }>;
 }

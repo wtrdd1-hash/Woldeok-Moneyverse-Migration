@@ -18,7 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { TranslatedText as T } from '@/components/translated-text';
 import { IDLE } from '@/lib/action-state';
-import { groupDigits } from '@/lib/money';
+import { compareAmounts, groupDigits } from '@/lib/money';
 import type { BankBond, BankLoan } from './types';
 import {
   borrowAction,
@@ -30,20 +30,43 @@ import {
   withdrawAction,
 } from './actions';
 
+function minAmount(left: string, right: string): string {
+  return compareAmounts(left, right) <= 0 ? left : right;
+}
+
+function halfAmount(amount: string): string {
+  return (BigInt(amount) / 2n).toString();
+}
+
+function percentOf(amount: string, total: string): number {
+  const denominator = BigInt(total);
+  if (denominator <= 0n) return 0;
+  const numerator = BigInt(amount);
+  const rounded = (numerator * 100n + denominator / 2n) / denominator;
+  return Math.min(100, Math.max(0, Number(rounded)));
+}
+
+function bondMaturityAmount(amount: string, yieldBps: number): string {
+  if (!/^\d+$/.test(amount) || amount === '0') return '0';
+  const principal = BigInt(amount);
+  const interest = (principal * BigInt(yieldBps) + 5_000n) / 10_000n;
+  return (principal + interest).toString();
+}
+
 export function DepositWithdrawCard({
   cashBalance,
   bankBalance,
 }: {
-  readonly cashBalance: number | string;
-  readonly bankBalance: number | string;
+  readonly cashBalance: string;
+  readonly bankBalance: string;
 }) {
   const [tab, setTab] = useState<'deposit' | 'withdraw'>('deposit');
   const [depositState, doDeposit] = useActionState(depositAction, IDLE);
   const [withdrawState, doWithdraw] = useActionState(withdrawAction, IDLE);
   const [amountStr, setAmountStr] = useState<string>('');
 
-  const cash = Number(cashBalance) || 0;
-  const bank = Number(bankBalance) || 0;
+  const cash = cashBalance;
+  const bank = bankBalance;
 
   const handleQuickPreset = (val: number) => {
     setAmountStr(String(val));
@@ -51,9 +74,9 @@ export function DepositWithdrawCard({
 
   const handleMax = () => {
     if (tab === 'deposit') {
-      setAmountStr(String(cash));
+      setAmountStr(cash);
     } else {
-      setAmountStr(String(bank));
+      setAmountStr(bank);
     }
   };
 
@@ -110,13 +133,13 @@ export function DepositWithdrawCard({
           <div>
             <span className="text-xs text-muted-foreground"><T korean="보유 현금" english="Cash Balance" /></span>
             <div className="font-bold">
-              <Amount value={String(cash)} currency />
+              <Amount value={cash} currency />
             </div>
           </div>
           <div>
             <span className="text-xs text-muted-foreground"><T korean="예금 잔액" english="Savings Balance" /></span>
             <div className="font-bold text-blue-600 dark:text-blue-400">
-              <Amount value={String(bank)} currency />
+              <Amount value={bank} currency />
             </div>
           </div>
         </div>
@@ -219,14 +242,14 @@ export function CompoundInterestCard({
   dailyRatePct,
   annualYieldPct,
 }: {
-  readonly bankBalance: number | string;
-  readonly unclaimedInterest: number | string;
+  readonly bankBalance: string;
+  readonly unclaimedInterest: string;
   readonly dailyRatePct: number;
   readonly annualYieldPct: number;
 }) {
   const [state, doClaim] = useActionState(claimInterestAction, IDLE);
-  const unclaimed = Number(unclaimedInterest) || 0;
-  const bank = Number(bankBalance) || 0;
+  const unclaimed = unclaimedInterest;
+  const bank = bankBalance;
 
   return (
     <Card className="border-border/60 bg-gradient-to-br from-emerald-500/5 via-background to-blue-500/5 backdrop-blur-md">
@@ -259,7 +282,7 @@ export function CompoundInterestCard({
             <T korean="현재 정산 대기 이자" english="Accrued Unclaimed Interest" />
           </div>
           <div className="mt-1 text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 tabular">
-            +{groupDigits(String(unclaimed))} <span className="text-base text-muted-foreground font-normal">WLD</span>
+            +{groupDigits(unclaimed)} <span className="text-base text-muted-foreground font-normal">WLD</span>
           </div>
           <p className="mt-1.5 text-xs text-muted-foreground">
             일일 {dailyRatePct}% (시간당 실시간 분할 적립) · 최소 30분 예치 후 수령 가능
@@ -268,7 +291,7 @@ export function CompoundInterestCard({
 
         <form action={doClaim}>
           <SubmitButton
-            disabled={bank <= 0 || unclaimed < 1}
+            disabled={compareAmounts(bank, '0') <= 0 || compareAmounts(unclaimed, '1') < 0}
             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-11 shadow-sm"
           >
             <Sparkles className="mr-2 size-4" />
@@ -292,21 +315,21 @@ export function SmartLoanCard({
   activeLoan,
   cashBalance,
 }: {
-  readonly creditLimit: number | string;
+  readonly creditLimit: string;
   readonly activeLoan: BankLoan | null;
-  readonly cashBalance: number | string;
+  readonly cashBalance: string;
 }) {
   const [borrowState, doBorrow] = useActionState(borrowAction, IDLE);
   const [repayState, doRepay] = useActionState(repayAction, IDLE);
   const [repayAmountStr, setRepayAmountStr] = useState<string>('');
 
-  const limit = Number(creditLimit) || 5000;
-  const cash = Number(cashBalance) || 0;
+  const limit = creditLimit;
+  const cash = cashBalance;
   const hasActiveLoan = Boolean(activeLoan && activeLoan.status === 'active');
 
-  const outstanding = hasActiveLoan ? Number(activeLoan?.outstanding_amount) || 0 : 0;
-  const principal = hasActiveLoan ? Number(activeLoan?.principal_amount) || 0 : 0;
-  const interest = hasActiveLoan ? Number(activeLoan?.interest_amount) || 0 : 0;
+  const outstanding = hasActiveLoan && activeLoan ? activeLoan.outstanding_amount : '0';
+  const principal = hasActiveLoan && activeLoan ? activeLoan.principal_amount : '0';
+  const interest = hasActiveLoan && activeLoan ? activeLoan.interest_amount : '0';
 
   return (
     <Card className="border-border/60 bg-background/80 backdrop-blur-md">
@@ -338,20 +361,20 @@ export function SmartLoanCard({
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">나의 평가 신용 한도</span>
             <span className="font-extrabold text-purple-600 dark:text-purple-400">
-              <Amount value={String(limit)} currency />
+              <Amount value={limit} currency />
             </span>
           </div>
           <div className="mt-2 h-2 w-full rounded-full bg-muted overflow-hidden">
             <div
               className="h-full bg-purple-500 transition-all duration-500"
               style={{
-                width: hasActiveLoan ? `${Math.min(100, Math.round((principal / limit) * 100))}%` : '0%',
+                width: hasActiveLoan ? `${percentOf(principal, limit)}%` : '0%',
               }}
             />
           </div>
           <div className="mt-1.5 flex justify-between text-xs text-muted-foreground">
             <span>직업·사업 연동 스마트 신용평가</span>
-            <span>한도 소진율: {hasActiveLoan ? Math.min(100, Math.round((principal / limit) * 100)) : 0}%</span>
+            <span>한도 소진율: {hasActiveLoan ? percentOf(principal, limit) : 0}%</span>
           </div>
         </div>
 
@@ -368,15 +391,15 @@ export function SmartLoanCard({
             <div className="grid grid-cols-3 gap-2 text-center text-xs py-2 border-y border-destructive/10">
               <div>
                 <span className="text-muted-foreground">대출 원금</span>
-                <p className="font-bold mt-0.5">{groupDigits(String(principal))} WLD</p>
+                <p className="font-bold mt-0.5">{groupDigits(principal)} WLD</p>
               </div>
               <div>
                 <span className="text-muted-foreground">약정 이자 (1.4%)</span>
-                <p className="font-bold text-amber-600 mt-0.5">+{groupDigits(String(interest))} WLD</p>
+                <p className="font-bold text-amber-600 mt-0.5">+{groupDigits(interest)} WLD</p>
               </div>
               <div>
                 <span className="text-muted-foreground">총 상환 잔액</span>
-                <p className="font-extrabold text-destructive mt-0.5">{groupDigits(String(outstanding))} WLD</p>
+                <p className="font-extrabold text-destructive mt-0.5">{groupDigits(outstanding)} WLD</p>
               </div>
             </div>
 
@@ -391,7 +414,7 @@ export function SmartLoanCard({
                     id="repay-amount"
                     name="amount"
                     defaultValue={repayAmountStr}
-                    placeholder={`최대 ${groupDigits(String(outstanding))}`}
+                    placeholder={`최대 ${groupDigits(outstanding)}`}
                     required
                   />
                 </Field>
@@ -402,7 +425,7 @@ export function SmartLoanCard({
                   variant="outline"
                   size="sm"
                   className="h-7 text-xs"
-                  onClick={() => setRepayAmountStr(String(Math.min(cash, Math.floor(outstanding / 2))))}
+                  onClick={() => setRepayAmountStr(minAmount(cash, halfAmount(outstanding)))}
                 >
                   반액 상환
                 </Button>
@@ -411,7 +434,7 @@ export function SmartLoanCard({
                   variant="secondary"
                   size="sm"
                   className="h-7 text-xs font-bold"
-                  onClick={() => setRepayAmountStr(String(Math.min(cash, outstanding)))}
+                  onClick={() => setRepayAmountStr(minAmount(cash, outstanding))}
                 >
                   전액 상환 (Full)
                 </Button>
@@ -432,7 +455,7 @@ export function SmartLoanCard({
                 <AmountInput
                   id="loan-amount"
                   name="amount"
-                  placeholder={`최대 ${groupDigits(String(limit))} WLD`}
+                  placeholder={`최대 ${groupDigits(limit)} WLD`}
                   required
                 />
                 <FieldDescription>
@@ -460,14 +483,14 @@ export function VirtualBondsCard({
   cashBalance,
 }: {
   readonly bonds: readonly BankBond[];
-  readonly cashBalance: number | string;
+  readonly cashBalance: string;
 }) {
   const [selectedBond, setSelectedBond] = useState<'BOND_7D' | 'BOND_30D'>('BOND_7D');
   const [purchaseState, doPurchase] = useActionState(purchaseBondAction, IDLE);
   const [redeemState, doRedeem] = useActionState(redeemBondAction, IDLE);
   const [amountStr, setAmountStr] = useState<string>('10000');
 
-  const cash = Number(cashBalance) || 0;
+  const cash = cashBalance;
 
   return (
     <Card className="border-border/60 bg-background/80 backdrop-blur-md">
@@ -490,7 +513,7 @@ export function VirtualBondsCard({
             </div>
           </div>
           <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold">
-            <T korean={`보유 현금 ${groupDigits(String(cash))} WLD`} english={`Cash ${groupDigits(String(cash))} WLD`} />
+            <T korean={`보유 현금 ${groupDigits(cash)} WLD`} english={`Cash ${groupDigits(cash)} WLD`} />
           </Badge>
         </div>
       </CardHeader>
@@ -553,11 +576,7 @@ export function VirtualBondsCard({
               <FieldDescription>
                 <T
                   korean={`만기 시 예상 수령액: ${groupDigits(
-                    String(
-                      Number(amountStr) > 0
-                        ? Math.round(Number(amountStr) * (selectedBond === 'BOND_7D' ? 1.03 : 1.15))
-                        : 0,
-                    ),
+                    bondMaturityAmount(amountStr, selectedBond === 'BOND_7D' ? 300 : 1500),
                   )} WLD`}
                   english="Estimated payout at maturity"
                 />
@@ -611,9 +630,9 @@ export function VirtualBondsCard({
                       </Badge>
                     </div>
                     <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                      <span><T korean="원금: " english="Principal: " />{groupDigits(String(bond.principal_amount))} WLD</span>
+                      <span><T korean="원금: " english="Principal: " />{groupDigits(bond.principal_amount)} WLD</span>
                       <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                        <T korean="만기 수령액: " english="Maturity Payout: " />{groupDigits(String(bond.maturity_amount))} WLD (+{bond.yield_bps / 100}%)
+                        <T korean="만기 수령액: " english="Maturity Payout: " />{groupDigits(bond.maturity_amount)} WLD (+{bond.yield_bps / 100}%)
                       </span>
                       <span><T korean="만기일: " english="Maturity Date: " />{new Date(bond.maturity_at).toLocaleDateString()}</span>
                     </div>

@@ -140,6 +140,11 @@ export function experienceNote(event: TodayEvent): string | null {
  * a mix of 받침 endings and picking one would be wrong half the time.
  */
 export function pendingEffectNote(event: TodayEvent): string | null {
+  if (event.event_code === 'market_sale') {
+    return event.claimed
+      ? '적용 중 · 오늘 자정까지 초보 필수품 10% 할인'
+      : '받으면 적용 · 오늘 자정까지 초보 필수품 10% 할인';
+  }
   return event.pending_effect === null ? null : `아직 준비 중 · ${event.pending_effect}`;
 }
 

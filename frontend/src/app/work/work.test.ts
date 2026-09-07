@@ -29,6 +29,7 @@ function task(overrides: Partial<WorkTask> = {}): WorkTask {
     daily_limit: 2,
     taken_today: 0,
     reward_preview: '80',
+    experience_preview: '14',
     recommended: false,
     ...overrides,
   };
@@ -151,21 +152,22 @@ describe('remaining and progressPercent', () => {
 });
 
 describe('rewardSentence', () => {
-  it('says the preview when it matches the catalogue price', () => {
-    expect(rewardSentence(task())).toContain('80 WLD');
+  it('states both WLD and proficiency EXP for the exact server preview', () => {
+    const sentence = rewardSentence(task());
+    expect(sentence).toContain('80 WLD');
+    expect(sentence).toContain('14 EXP');
   });
 
-  it('explains a preview cut by the repeat decay', () => {
-    const sentence = rewardSentence(task({ reward_preview: '64' }));
-    expect(sentence).toContain('64 WLD');
-    expect(sentence).toContain('기본 80 WLD');
+  it('explains when a career-level bonus changes the actual payout', () => {
+    const sentence = rewardSentence(task({ reward_preview: '84', experience_preview: '15' }));
+    expect(sentence).toContain('84 WLD');
+    expect(sentence).toContain('15 EXP');
+    expect(sentence).toContain('직업 레벨 보너스');
   });
 
-  // The two facts that are not "you will be paid this much", and are not the
-  // same as each other.
-  it('separates a spent cap from rewards being switched off', () => {
-    expect(rewardSentence(task({ reward_preview: '0' }))).toContain('모두 채웠어요');
-    expect(rewardSentence(task({ reward_preview: null }))).toContain('멈춰 있어요');
+  it('says payouts are paused when either authoritative preview is unavailable', () => {
+    expect(rewardSentence(task({ reward_preview: null }))).toContain('일시 중지');
+    expect(rewardSentence(task({ experience_preview: null }))).toContain('일시 중지');
   });
 });
 

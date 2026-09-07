@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
-import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
+import { failure, idempotencyKey, mutate, wholeAmount, wholeNumber } from '@/lib/mutate';
 
 /**
  * Every write the wallet can make.
@@ -60,7 +60,7 @@ export async function moveBank(_previous: ActionState, formData: FormData): Prom
 }
 
 export async function borrow(_previous: ActionState, formData: FormData): Promise<ActionState> {
-  const principalAmount = wholeAmount(formData.get('principalAmount'));
+  const principalAmount = wholeNumber(formData.get('principalAmount'));
   if (principalAmount === null || principalAmount < 100 || principalAmount > 500_000) {
     return { status: 'error', message: '100 ~ 500,000 WLD 사이의 정수만 신청할 수 있어요.' };
   }
@@ -115,13 +115,6 @@ async function claimReward(
   } catch (error) {
     return failure(error, already);
   }
-}
-
-export async function claimWork(_previous: ActionState): Promise<ActionState> {
-  return claimReward('/api/v1/rewards/work/claims', {
-    already: '지금은 작업 보상을 받을 수 없어요. 잠시 후 다시 시도해 주세요.',
-    granted: '작업 보상을 지갑에 넣었어요.',
-  });
 }
 
 export async function claimDaily(_previous: ActionState): Promise<ActionState> {

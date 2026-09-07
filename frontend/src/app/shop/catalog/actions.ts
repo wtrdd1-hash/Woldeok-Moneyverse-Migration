@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
-import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
+import { failure, idempotencyKey, mutate, wholeNumber } from '@/lib/mutate';
 import {
   PURCHASE_CEILING,
   purchaseMessage,
@@ -56,7 +56,7 @@ export async function buyCatalogItem(
   // means. A field that was filled in with something that is not a whole
   // count is a mistake worth naming rather than quietly rounding to one.
   const raw = formData.get('quantity');
-  const quantity = raw === null || raw === '' ? 1 : wholeAmount(raw);
+  const quantity = raw === null || raw === '' ? 1 : wholeNumber(raw);
   if (quantity === null || quantity > PURCHASE_CEILING) {
     return {
       status: 'error',

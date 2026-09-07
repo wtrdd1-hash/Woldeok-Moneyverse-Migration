@@ -90,14 +90,21 @@ describe.skipIf(!DATABASE_URL)('the work board against a real database', () => {
       return id;
     };
 
-    const anyTask = async (client: PoolClient): Promise<{ id: string; minimum: number }> => {
-      const task = await client.query<{ id: string; minimum_duration_seconds: number }>(
-        `SELECT id, minimum_duration_seconds FROM public.work_task_catalog
+    const anyTask = async (
+      client: PoolClient,
+    ): Promise<{ id: string; minimum: number; jobType: string }> => {
+      const task = await client.query<{
+        id: string;
+        minimum_duration_seconds: number;
+        job_type: string;
+      }>(
+        `SELECT id, minimum_duration_seconds, job_type::text
+         FROM public.work_task_catalog
          WHERE active ORDER BY base_reward LIMIT 1`,
       );
       const row = task.rows[0];
       if (!row) throw new Error('the seeded task catalogue is empty');
-      return { id: row.id, minimum: row.minimum_duration_seconds };
+      return { id: row.id, minimum: row.minimum_duration_seconds, jobType: row.job_type };
     };
 
     it('offers the whole active catalogue, and suggests three of it', async () => {
@@ -112,6 +119,21 @@ describe.skipIf(!DATABASE_URL)('the work board against a real database', () => {
         );
         expect(String(board.rowCount)).toBe(active.rows[0]?.count);
         expect(board.rows.filter((row) => row.recommended)).toHaveLength(3);
+      });
+    });
+
+    it('recommends one task from the active career while still exposing the full catalogue', async () => {
+      await rolledBack(async (client) => {
+        const actor = await member(client);
+        await client.query('SELECT * FROM public.job_switch_active($1, $2)', [actor, 'developer']);
+        const board = await client.query<{ job_type: string; recommended: boolean }>(
+          'SELECT job_type::text, recommended FROM public.work_task_board($1)',
+          [actor],
+        );
+        const recommended = board.rows.filter((row) => row.recommended);
+        expect(recommended).toHaveLength(1);
+        expect(recommended[0]?.job_type).toBe('developer');
+        expect(board.rows).toHaveLength(24);
       });
     });
 
@@ -177,6 +199,7 @@ describe.skipIf(!DATABASE_URL)('the work board against a real database', () => {
           [actor, task.id],
         );
 
+        await client.query('SELECT * FROM public.job_switch_active($1, $2)', [actor, task.jobType]);
         const assignment = randomUUID();
         await client.query('SELECT public.work_assign_task($1, $2, $3)', [
           assignment,
@@ -222,6 +245,7 @@ describe.skipIf(!DATABASE_URL)('the work board against a real database', () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
         const task = await anyTask(client);
+        await client.query('SELECT * FROM public.job_switch_active($1, $2)', [actor, task.jobType]);
         const assignment = randomUUID();
         await client.query('SELECT public.work_assign_task($1, $2, $3)', [
           assignment,

@@ -84,6 +84,16 @@ function assertAmount(value: unknown): number {
   return value;
 }
 
+function assertOverrideAmount(value: unknown): string {
+  if (typeof value !== 'string' || !/^[1-9]\d*$/.test(value)) {
+    throw new EconomyConsoleInputError('override amount must be a positive integer string');
+  }
+  if (BigInt(value) > 1_000_000_000_000n) {
+    throw new EconomyConsoleInputError('override amount exceeds the 1,000,000,000,000 WLD limit');
+  }
+  return value;
+}
+
 function assertAlertLimit(value: unknown): number {
   if (value === undefined || value === null) return ALERT_LIMIT_DEFAULT;
   if (typeof value !== 'number' || !Number.isSafeInteger(value)) {
@@ -420,7 +430,15 @@ export class EconomyConsoleRepository {
     summary: Record<string, unknown>;
     daily: Array<Record<string, unknown>>;
   }> {
-    const summary = await queryOne<Record<string, unknown>>(this.pool, `SELECT * FROM public.v_economy_summary`);
+    const summary = await queryOne<Record<string, unknown>>(
+      this.pool,
+      `SELECT total_minted::text AS total_minted,
+              total_burned::text AS total_burned,
+              total_circulating::text AS total_circulating,
+              today_minted::text AS today_minted,
+              today_burned::text AS today_burned
+       FROM public.v_economy_summary`,
+    );
     const daily = await queryRows<Record<string, unknown>>(
       this.pool,
       `SELECT stat_date::text AS stat_date,
@@ -439,10 +457,12 @@ export class EconomyConsoleRepository {
   }
 
 
-  async macroEconomyV2(): Promise<Record<string, unknown>> {
+  async macroEconomyV2(actorUserId: unknown): Promise<Record<string, unknown>> {
+    assertUuid(actorUserId, 'actor');
     const row = await queryOne<{ result: Record<string, unknown> }>(
       this.pool,
-      `SELECT public.admin_get_macro_economy_v2() AS result`,
+      `SELECT public.admin_get_macro_economy_v2($1::uuid) AS result`,
+      [actorUserId],
     );
     return row?.result ?? {};
   }
@@ -492,7 +512,7 @@ export class EconomyConsoleRepository {
   async overrideUserAssetV2(input: {
     readonly targetUserId: unknown;
     readonly assetType: string;
-    readonly amount: number;
+    readonly amount: unknown;
     readonly direction: string;
     readonly reason: string;
     readonly adminId: unknown;
@@ -501,10 +521,11 @@ export class EconomyConsoleRepository {
     assertUuid(input.targetUserId, 'target user');
     assertUuid(input.adminId, 'admin');
     assertUuid(input.idempotencyKey, 'idempotency key');
+    const amount = assertOverrideAmount(input.amount);
     const row = await queryOne<{ result: Record<string, unknown> }>(
       this.pool,
       `SELECT public.admin_override_user_asset_v2($1::uuid, $2, $3::bigint, $4, $5, $6::uuid, $7::uuid) AS result`,
-      [input.targetUserId, input.assetType, input.amount, input.direction, input.reason, input.adminId, input.idempotencyKey],
+      [input.targetUserId, input.assetType, amount, input.direction, input.reason, input.adminId, input.idempotencyKey],
     );
     return row?.result ?? {};
   }

@@ -1,5 +1,6 @@
 import { Controller, Get, VERSION_NEUTRAL, Version } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
+import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator';
 
 /**
  * VERSION_NEUTRAL alongside the global prefix exclusion: excluding the
@@ -9,6 +10,7 @@ import { ApiOperation } from '@nestjs/swagger';
  * silently 404s reads as a dead service.
  */
 @Controller({ path: 'health', version: VERSION_NEUTRAL })
+@SkipInternalToken()
 export class HealthController {
   @Get()
   @Version(VERSION_NEUTRAL)

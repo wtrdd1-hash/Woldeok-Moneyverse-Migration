@@ -16,7 +16,11 @@ import { SessionGuard } from './session.guard';
 
 function contextFor(request: Partial<RequestWithSession>): ExecutionContext {
   const full = { headers: {}, method: 'GET', ...request } as RequestWithSession;
-  return { switchToHttp: () => ({ getRequest: () => full }) } as unknown as ExecutionContext;
+  return {
+    switchToHttp: () => ({ getRequest: () => full }),
+    getHandler: () => contextFor,
+    getClass: () => class TestController {},
+  } as unknown as ExecutionContext;
 }
 
 function requestOf(context: ExecutionContext): RequestWithSession {
@@ -24,6 +28,10 @@ function requestOf(context: ExecutionContext): RequestWithSession {
 }
 
 const CONFIG_INSECURE = { cookieSecure: false, internalToken: 'i'.repeat(32) };
+const CONFIG_PRODUCTION = { ...CONFIG_INSECURE, production: true };
+const CONFIG_DEVELOPMENT = { ...CONFIG_INSECURE, production: false };
+const REQUIRE_INTERNAL_TOKEN = { getAllAndOverride: () => false } as never;
+const SKIP_INTERNAL_TOKEN = { getAllAndOverride: () => true } as never;
 
 describe('SessionGuard', () => {
   it('reports the store unavailable rather than unauthorised when there is no repository', async () => {
@@ -204,25 +212,35 @@ describe('an offline session store', () => {
 
 describe('InternalTokenGuard', () => {
   it('rejects a request without the shared token', () => {
-    const guard = new InternalTokenGuard(CONFIG_INSECURE as never);
+    const guard = new InternalTokenGuard(CONFIG_PRODUCTION as never, REQUIRE_INTERNAL_TOKEN);
     expect(() => guard.canActivate(contextFor({}))).toThrow(UnauthorizedException);
   });
 
   it('rejects a token of the right length but the wrong value', () => {
-    const guard = new InternalTokenGuard(CONFIG_INSECURE as never);
+    const guard = new InternalTokenGuard(CONFIG_PRODUCTION as never, REQUIRE_INTERNAL_TOKEN);
     const context = contextFor({ headers: { 'x-internal-token': 'j'.repeat(32) } });
     expect(() => guard.canActivate(context)).toThrow(UnauthorizedException);
   });
 
   it('rejects a token of the wrong length without throwing from timingSafeEqual', () => {
-    const guard = new InternalTokenGuard(CONFIG_INSECURE as never);
+    const guard = new InternalTokenGuard(CONFIG_PRODUCTION as never, REQUIRE_INTERNAL_TOKEN);
     const context = contextFor({ headers: { 'x-internal-token': 'i'.repeat(31) } });
     expect(() => guard.canActivate(context)).toThrow(UnauthorizedException);
   });
 
   it('accepts the configured token', () => {
-    const guard = new InternalTokenGuard(CONFIG_INSECURE as never);
+    const guard = new InternalTokenGuard(CONFIG_PRODUCTION as never, REQUIRE_INTERNAL_TOKEN);
     const context = contextFor({ headers: { 'x-internal-token': 'i'.repeat(32) } });
     expect(guard.canActivate(context)).toBe(true);
+  });
+
+  it('allows a narrowly annotated public-internal endpoint without the token', () => {
+    const guard = new InternalTokenGuard(CONFIG_PRODUCTION as never, SKIP_INTERNAL_TOKEN);
+    expect(guard.canActivate(contextFor({}))).toBe(true);
+  });
+
+  it('does not turn the shared token into a local-development login', () => {
+    const guard = new InternalTokenGuard(CONFIG_DEVELOPMENT as never, REQUIRE_INTERNAL_TOKEN);
+    expect(guard.canActivate(contextFor({}))).toBe(true);
   });
 });

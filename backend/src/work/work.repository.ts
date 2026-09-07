@@ -64,6 +64,7 @@ export interface WorkTaskRow {
   daily_limit: number;
   taken_today: number;
   reward_preview: string | null;
+  experience_preview: string | null;
   recommended: boolean;
 }
 
@@ -169,6 +170,7 @@ export class WorkRepository {
               task.job_type::text, task.difficulty, task.base_reward::text,
               task.base_experience::text, task.minimum_duration_seconds,
               task.daily_limit, task.taken_today, task.reward_preview::text,
+              public.work_experience_preview($1, task.task_id)::text AS experience_preview,
               task.recommended
        FROM public.work_task_board($1) AS task`,
       [actor],

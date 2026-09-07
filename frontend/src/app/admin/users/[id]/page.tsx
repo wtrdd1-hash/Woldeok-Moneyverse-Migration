@@ -21,7 +21,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
-import { formatMoment } from '@/lib/money';
+import { formatMoment, groupDigits } from '@/lib/money';
 import { requireAdminConsole } from '@/lib/session';
 import type { AdminUser, AuditSearchRow } from '../../types';
 
@@ -68,11 +68,11 @@ export default async function AdminUserDetailPage({
   const events = activity?.events ?? [];
   const logLink = `/admin/logs?member=${encodeURIComponent(user.user_id)}&limit=50`;
 
-  const netWorth = Number(user.total_net_worth ?? 0);
-  const cash = Number(user.cash_balance ?? 0);
-  const bank = Number(user.bank_balance ?? 0);
-  const bond = Number(user.bond_balance ?? 0);
-  const stock = Number(user.stock_eval ?? 0);
+  const netWorth = user.total_net_worth ?? '0';
+  const cash = user.cash_balance ?? '0';
+  const bank = user.bank_balance ?? '0';
+  const bond = user.bond_balance ?? '0';
+  const stock = user.stock_eval ?? '0';
   const rank = user.wealth_rank ?? '—';
 
   return (
@@ -170,7 +170,7 @@ export default async function AdminUserDetailPage({
                 <Coins className="size-4 text-primary" /> 총 순자산
               </div>
               <strong className="mt-2 block font-mono text-xl font-bold text-primary">
-                {netWorth.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+                {groupDigits(netWorth)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
               </strong>
             </div>
 
@@ -179,7 +179,7 @@ export default async function AdminUserDetailPage({
                 <Wallet className="size-4 text-emerald-500" /> 지갑 현금
               </div>
               <strong className="mt-2 block font-mono text-lg font-bold">
-                {cash.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+                {groupDigits(cash)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
               </strong>
             </div>
 
@@ -188,7 +188,7 @@ export default async function AdminUserDetailPage({
                 <PiggyBank className="size-4 text-blue-500" /> 은행 예금
               </div>
               <strong className="mt-2 block font-mono text-lg font-bold">
-                {bank.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+                {groupDigits(bank)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
               </strong>
             </div>
 
@@ -197,7 +197,7 @@ export default async function AdminUserDetailPage({
                 <Landmark className="size-4 text-purple-500" /> 가상 국채
               </div>
               <strong className="mt-2 block font-mono text-lg font-bold">
-                {bond.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+                {groupDigits(bond)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
               </strong>
             </div>
 
@@ -206,7 +206,7 @@ export default async function AdminUserDetailPage({
                 <TrendingUp className="size-4 text-amber-500" /> 주식 평가액
               </div>
               <strong className="mt-2 block font-mono text-lg font-bold">
-                {stock.toLocaleString()} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+                {groupDigits(stock)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
               </strong>
             </div>
           </div>

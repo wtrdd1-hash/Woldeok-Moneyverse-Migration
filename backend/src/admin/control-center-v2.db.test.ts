@@ -4,7 +4,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { databaseUrl, rejectionOf } from '../testing/database';
 
 /**
- * Migration 125, executed: the control centre's functions decide who may act.
+ * Migrations 125 and 169, executed: the control centre's functions decide who may act
+ * and monetary JSON values stay exact decimal strings.
  *
  * 117 granted them to the application role without asking who was calling
  * and without revoking them from PUBLIC. What is asserted here is the part a
@@ -39,14 +40,19 @@ describe.skipIf(!DATABASE_URL)('the control centre against a real database', () 
     }
   });
 
-  it('grants the levers to the application role and to nobody else', async () => {
-    const signatures = [
+  it('grants actor-scoped control functions to the application role and keeps legacy bypasses closed', async () => {
+    const allowed = [
       'public.admin_toggle_killswitch(text, boolean, uuid)',
       'public.admin_update_economic_knobs_v2(integer, integer, integer, integer, uuid)',
+      'public.admin_get_macro_economy_v2(uuid)',
       'public.admin_inspect_user_assets_v2(uuid, uuid)',
       'public.admin_override_user_asset_v2(uuid, text, bigint, text, text, uuid, uuid)',
+    ];
+    const blocked = [
+      'public.admin_get_macro_economy_v2()',
       'public.auth_bind_bootstrap_google_admin(text, text, uuid)',
     ];
+    const signatures = [...allowed, ...blocked];
     const { rows } = await pool.query<{ signature: string; app: boolean; other: boolean }>(
       `SELECT signature,
               has_function_privilege('moneyverse_app', signature, 'EXECUTE') AS app,
@@ -55,13 +61,14 @@ describe.skipIf(!DATABASE_URL)('the control centre against a real database', () 
       [signatures],
     );
     const held = new Map(rows.map((row) => [row.signature, row]));
-    for (const signature of signatures.slice(0, 4)) {
+    for (const signature of allowed) {
       expect(held.get(signature)?.app, `${signature} for the application`).toBe(true);
       // The status collector stands in for PUBLIC: any other login principal.
       expect(held.get(signature)?.other, `${signature} for another principal`).toBe(false);
     }
-    // Unused, and it hands out the superadmin designation by e-mail.
-    expect(held.get(signatures[4]!)?.app).toBe(false);
+    for (const signature of blocked) {
+      expect(held.get(signature)?.app, `${signature} must not be an application API`).toBe(false);
+    }
   });
 
   it('refuses every lever to a caller with no role, from inside the function', async () => {
@@ -77,6 +84,12 @@ describe.skipIf(!DATABASE_URL)('the control centre against a real database', () 
       pool.query('SELECT public.admin_inspect_user_assets_v2($1::uuid, $2::uuid)', [UNKNOWN, UNKNOWN]),
     );
     expect(code(inspect)).toBe('42501');
+    const macro = await rejectionOf(() =>
+      pool.query('SELECT public.admin_get_macro_economy_v2($1::uuid)', [UNKNOWN]),
+    );
+    expect(code(macro)).toBe('42501');
+    const legacyMacro = await rejectionOf(() => pool.query('SELECT public.admin_get_macro_economy_v2()'));
+    expect(code(legacyMacro)).toBe('42501');
     const override = await rejectionOf(() =>
       pool.query('SELECT public.admin_override_user_asset_v2($1::uuid,$2,$3::bigint,$4,$5,$6::uuid,$7::uuid)', [
         UNKNOWN, 'cash', 100, 'credit_grant', 'a stranger moving money', UNKNOWN, randomUUID(),
@@ -201,6 +214,41 @@ describe.skipIf(!DATABASE_URL)('the control centre against a real database', () 
           [superadmin],
         );
         expect(audit.rows).toEqual([{ action: 'economy.asset.overridden', target_id: target, request_id: key }]);
+      });
+    });
+
+    it('keeps macro and member monetary values exact past JavaScript safe integers', async () => {
+      await rolledBack(async (client) => {
+        const operator = await roled(client, 'operator');
+        const target = await member(client);
+        const huge = '9007199254740993';
+        await client.query(
+          `UPDATE public.account_balances AS balance_row
+           SET available_amount = CASE account_row.account_type
+             WHEN 'USER_CASH'::public.account_type THEN $2::bigint
+             WHEN 'USER_BANK'::public.account_type THEN 7::bigint
+             ELSE balance_row.available_amount
+           END
+           FROM public.accounts AS account_row
+           WHERE account_row.id = balance_row.account_id
+             AND account_row.owner_user_id = $1`,
+          [target, huge],
+        );
+
+        const macro = await client.query<{ result: { m2_supply: string; cash_total: string; bank_total: string } }>(
+          'SELECT public.admin_get_macro_economy_v2($1::uuid) AS result',
+          [operator],
+        );
+        expect(macro.rows[0]?.result.cash_total).toBe(huge);
+        expect(macro.rows[0]?.result.bank_total).toBe('7');
+        expect(macro.rows[0]?.result.m2_supply).toBe('9007199254741000');
+
+        const inspect = await client.query<{ result: { cash_balance: string; bank_balance: string } }>(
+          'SELECT public.admin_inspect_user_assets_v2($1::uuid, $2::uuid) AS result',
+          [operator, target],
+        );
+        expect(inspect.rows[0]?.result.cash_balance).toBe(huge);
+        expect(inspect.rows[0]?.result.bank_balance).toBe('7');
       });
     });
 

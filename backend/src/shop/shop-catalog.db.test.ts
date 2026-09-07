@@ -209,6 +209,40 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
       });
     });
 
+    it('applies the claimed market-sale discount to starter essentials in both listing and charge', async () => {
+      await rolledBack(async (client) => {
+        const actor = await buyer(client, 1000);
+        const gloves = await item(client, 'work_gloves'); // 150 -> 135 on market_sale
+
+        await client.query(
+          `INSERT INTO public.early_event_claims(
+             user_id, event_date, event_code, idempotency_key,
+             reward_amount, experience_amount, item_quantity
+           ) VALUES (
+             $1, pg_catalog.timezone('Asia/Seoul', pg_catalog.clock_timestamp())::date,
+             'market_sale', $2, 0, 0, 0
+           )`,
+          [actor, randomUUID()],
+        );
+
+        const { rows: listing } = await client.query<{ price: string }>(
+          `SELECT listed.price::text
+           FROM public.shop_catalog_list_v2($1) AS listed
+           WHERE listed.code = 'work_gloves'`,
+          [actor],
+        );
+        expect(listing[0]?.price).toBe('135');
+
+        const { rows } = await client.query<{ amount: string }>(
+          `SELECT purchase.amount::text
+           FROM public.shop_purchase_catalog($1, $2, $3, 1) AS purchase`,
+          [randomUUID(), actor, gloves],
+        );
+        expect(rows[0]?.amount).toBe('135');
+        expect(await cash(client, actor)).toBe('865');
+      });
+    });
+
     it('reports the stored amount on a replay, not the quantity the caller repeated', async () => {
       await rolledBack(async (client) => {
         const actor = await buyer(client, 1000);

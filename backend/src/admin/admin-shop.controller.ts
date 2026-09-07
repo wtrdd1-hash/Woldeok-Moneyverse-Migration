@@ -2,12 +2,13 @@ import {
   BadRequestException,
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Inject,
-  NotFoundException,
   Param,
   ParseUUIDPipe,
   Patch,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -17,8 +18,11 @@ import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
+import type { RequestWithSession } from '../auth/session.context';
+import { requireUserId } from '../auth/session.context';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
+import { isExpectedCommandFailure, isRoleRefusal } from '../core/pg-error';
 import { PG_POOL } from '../core/pool.provider';
 
 interface AdminShopItemRow {
@@ -39,6 +43,17 @@ interface AdminShopItemRow {
   readonly created_at: Date;
 }
 
+interface AdminShopUpdateBody {
+  readonly base_price?: string | number;
+  readonly active?: boolean;
+  readonly current_stock?: number | null;
+}
+
+function positiveIntegerText(value: unknown): string | null {
+  const text = typeof value === 'number' ? String(value) : typeof value === 'string' ? value.trim() : '';
+  return /^[1-9]\d*$/.test(text) ? text : null;
+}
+
 @ApiTags('admin')
 @Controller('admin/shop')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
@@ -52,94 +67,74 @@ export class AdminShopController {
 
   @Get('items')
   @ApiOperation({ summary: 'List all items in the catalog for admin inspection' })
-  async listItems(): Promise<{ items: AdminShopItemRow[] }> {
-    const items = await queryRows<AdminShopItemRow>(
-      this.getPool(),
-      `SELECT
-         id::text AS id,
-         code,
-         name,
-         description,
-         category,
-         base_price::text AS base_price,
-         rarity,
-         animation_css,
-         preview_data,
-         max_stock,
-         current_stock,
-         is_limited,
-         active,
-         purchase_limit,
-         created_at
-       FROM public.shop_catalog
-       ORDER BY 
-         CASE category
-           WHEN 'frame' THEN 1
-           WHEN 'background' THEN 2
-           WHEN 'effect' THEN 3
-           WHEN 'nameplate' THEN 4
-           WHEN 'title' THEN 5
-           WHEN 'badge' THEN 6
-           WHEN 'season' THEN 7
-           WHEN 'limited' THEN 8
-           WHEN 'business' THEN 9
-           WHEN 'convenience' THEN 10
-           ELSE 11
-         END,
-         base_price ASC, code ASC`,
-    );
-    return { items };
+  async listItems(@Req() request: RequestWithSession): Promise<{ items: AdminShopItemRow[] }> {
+    try {
+      const items = await queryRows<AdminShopItemRow>(
+        this.getPool(),
+        `SELECT
+           id::text AS id, code, name, description, category,
+           base_price::text AS base_price, rarity, animation_css, preview_data,
+           max_stock, current_stock, is_limited, active, purchase_limit, created_at
+         FROM public.admin_shop_items($1)`,
+        [requireUserId(request)],
+      );
+      return { items };
+    } catch (error) {
+      if (isRoleRefusal(error)) throw new ForbiddenException('administrator role required');
+      throw error;
+    }
   }
 
   @Patch('items/:id')
   @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Update price, active status, or stock of a catalog item' })
   async updateItem(
+    @Req() request: RequestWithSession,
     @Param('id', ParseUUIDPipe) id: string,
-    @Body() body: { base_price?: string | number; active?: boolean; current_stock?: number | null },
+    @Body() body: AdminShopUpdateBody,
   ) {
-    const updates: string[] = [];
-    const values: unknown[] = [id];
-    let index = 2;
-
-    if (body.base_price !== undefined) {
-      const price = Number(body.base_price);
-      if (isNaN(price) || price <= 0) {
-        throw new BadRequestException('base_price must be a positive integer');
-      }
-      updates.push(`base_price = $${index++}`);
-      values.push(price);
-    }
-
-    if (body.active !== undefined) {
-      updates.push(`active = $${index++}`);
-      values.push(Boolean(body.active));
-    }
-
-    if (body.current_stock !== undefined) {
-      updates.push(`current_stock = $${index++}`);
-      values.push(body.current_stock === null ? null : Number(body.current_stock));
-    }
-
-    if (updates.length === 0) {
+    const updatePrice = body.base_price !== undefined;
+    const updateActive = body.active !== undefined;
+    const updateStock = body.current_stock !== undefined;
+    if (!updatePrice && !updateActive && !updateStock) {
       throw new BadRequestException('No update parameters provided');
     }
 
-    updates.push(`updated_at = clock_timestamp()`);
-
-    const result = await queryOne<{ id: string; name: string; base_price: string; active: boolean }>(
-      this.getPool(),
-      `UPDATE public.shop_catalog
-       SET ${updates.join(', ')}
-       WHERE id = $1
-       RETURNING id::text, name, base_price::text, active`,
-      values,
-    );
-
-    if (!result) {
-      throw new NotFoundException('Shop item not found');
+    const price = updatePrice ? positiveIntegerText(body.base_price) : null;
+    if (updatePrice && price === null) {
+      throw new BadRequestException('base_price must be a positive integer');
     }
 
-    return { item: result };
+    if (
+      updateStock &&
+      body.current_stock !== null &&
+      (!Number.isSafeInteger(body.current_stock) || (body.current_stock ?? 0) < 0)
+    ) {
+      throw new BadRequestException('current_stock must be null or a non-negative integer');
+    }
+
+    try {
+      const result = await queryOne<{ id: string; name: string; base_price: string; active: boolean }>(
+        this.getPool(),
+        `SELECT id::text, name, base_price::text, active
+         FROM public.admin_shop_update_item($1,$2,$3::bigint,$4,$5,$6,$7,$8)`,
+        [
+          requireUserId(request),
+          id,
+          price,
+          updateActive ? body.active : null,
+          updateStock ? body.current_stock : null,
+          updatePrice,
+          updateActive,
+          updateStock,
+        ],
+      );
+      if (!result) throw new BadRequestException('Shop item not found');
+      return { item: result };
+    } catch (error) {
+      if (isRoleRefusal(error)) throw new ForbiddenException('operator or superadmin role required');
+      if (isExpectedCommandFailure(error)) throw new BadRequestException('shop item update rejected');
+      throw error;
+    }
   }
 }

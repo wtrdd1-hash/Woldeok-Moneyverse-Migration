@@ -67,8 +67,17 @@ export async function GET(
     }
     return response;
   } catch (error) {
-    const detail = error instanceof ApiError ? (error.detail ?? '') : '';
-    const code = KNOWN_ERRORS.has(detail) ? detail : 'oauth_login';
+    // Do not log the callback URL, authorization code, state, cookies, or any
+    // provider payload.  A stage-safe summary is enough to distinguish a
+    // provider refusal from an internal callback failure in production.
+    const candidate = error instanceof ApiError ? (error.code ?? error.detail ?? '') : '';
+    const code = KNOWN_ERRORS.has(candidate) ? candidate : 'oauth_login';
+    console.error('[oauth-callback]', {
+      provider,
+      category: code,
+      apiStatus: error instanceof ApiError ? error.status : undefined,
+      errorType: error instanceof Error ? error.name : typeof error,
+    });
     return NextResponse.redirect(publicUrl(`/login?error=${code}`));
   }
 }

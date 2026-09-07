@@ -23,7 +23,7 @@ name: ${STACK:-wdmv}
 
 services:
   db:
-    image: postgres:17.5-alpine
+    image: postgres:17.11-alpine
     container_name: ${STACK:-wdmv}-db
     restart: unless-stopped
     environment:
@@ -44,7 +44,7 @@ services:
   # and refuses one that changed, so re-running it is safe and applying a new
   # migration needs no separate step.
   migrate:
-    image: postgres:17.5-alpine
+    image: postgres:17.11-alpine
     container_name: ${STACK:-wdmv}-migrate
     restart: 'no'
     environment:
@@ -66,7 +66,7 @@ services:
   # this deployment and the other one. Runs to completion on every deploy and
   # is idempotent.
   seed:
-    image: postgres:17.5-alpine
+    image: postgres:17.11-alpine
     container_name: ${STACK:-wdmv}-seed
     restart: 'no'
     environment:
@@ -100,7 +100,7 @@ services:
   # and encrypts it on the host, which is what keeps BACKUP_ENCRYPTION_KEY out
   # of every container and the plaintext dump off disk.
   backup:
-    image: postgres:17.5-alpine
+    image: postgres:17.11-alpine
     profiles: [backup]
     restart: 'no'
     # No container_name: `run` would reuse it for every invocation, so one
@@ -132,7 +132,7 @@ services:
   #
   # No container_name, for the reason the `backup` service gives.
   backup-credential:
-    image: postgres:17.5-alpine
+    image: postgres:17.11-alpine
     profiles: [backup]
     restart: 'no'
     environment:
@@ -157,6 +157,16 @@ services:
     image: ${BACKEND_IMAGE:-ghcr.io/wtrdd1-hash/wdmv/backend:latest-test}
     container_name: ${STACK:-wdmv}-backend
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 512
+    mem_limit: 1g
+    memswap_limit: 2g
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=64m
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -270,6 +280,17 @@ services:
     image: ${FRONTEND_IMAGE:-ghcr.io/wtrdd1-hash/wdmv/frontend:latest-test}
     container_name: ${STACK:-wdmv}-frontend
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 512
+    mem_limit: 1g
+    memswap_limit: 2g
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=64m
+      - /app/frontend/.next/cache:rw,nosuid,nodev,size=256m,mode=1777
     environment:
       NODE_ENV: production
       PORT: 3000
@@ -301,9 +322,18 @@ services:
       start_period: 15s
 
   edge:
-    image: nginx:1.27-alpine
+    image: nginx:1.30.4-alpine
     container_name: ${STACK:-wdmv}-edge
     restart: unless-stopped
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:rw,nosuid,nodev,size=64m
+      - /var/run:rw,nosuid,nodev,size=16m
+      - /tmp:rw,nosuid,nodev,size=16m
     volumes:
       # The directory, not the file. A bind mount of a single file binds its
       # inode, and shipping a new config replaces the file rather than editing
@@ -314,6 +344,12 @@ services:
     depends_on:
       frontend:
         condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -q -O - http://127.0.0.1/nginx-health | grep -qx ok']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     # Published on loopback as well, so an operator on the host can check the
     # site without going out through Cloudflare and back.
     ports:

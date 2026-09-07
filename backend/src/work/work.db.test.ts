@@ -86,6 +86,7 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
          WHERE account_row.owner_user_id = $1`,
         [id],
       );
+      await client.query('SELECT * FROM public.job_switch_active($1, $2)', [id, 'developer']);
       return id;
     };
 
@@ -114,8 +115,8 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
     it('returns the task that was assigned on a replay, not the one the caller repeated', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
-        const first = await task(client, 'logistics_sorting');
-        const other = await task(client, 'farm_care');
+        const first = await task(client, 'dev_refactor');
+        const other = await task(client, 'dev_bugfix');
         const key = randomUUID();
 
         await client.query('SELECT * FROM public.work_assign_task($1, $2, $3)', [
@@ -137,7 +138,7 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
       await rolledBack(async (client) => {
         const owner = await member(client);
         const stranger = await member(client);
-        const chosen = await task(client, 'logistics_sorting');
+        const chosen = await task(client, 'dev_refactor');
         const key = randomUUID();
 
         await client.query('SELECT * FROM public.work_assign_task($1, $2, $3)', [
@@ -159,7 +160,7 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
     it('allows assignments beyond the legacy daily limit', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
-        const chosen = await task(client, 'farm_care'); // daily_limit 2
+        const chosen = await task(client, 'dev_bugfix'); // legacy catalogue limit remains metadata only
 
         await client.query('SELECT * FROM public.work_assign_task($1, $2, $3)', [
           randomUUID(),
@@ -171,18 +172,23 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
           actor,
           chosen.id,
         ]);
-        const third = await client.query<{ assignment_id: string }>(
+        await client.query('SELECT * FROM public.work_assign_task($1, $2, $3)', [
+          randomUUID(),
+          actor,
+          chosen.id,
+        ]);
+        const beyondLegacyLimit = await client.query<{ assignment_id: string }>(
           'SELECT assignment_id::text FROM public.work_assign_task($1, $2, $3)',
           [randomUUID(), actor, chosen.id],
         );
-        expect(third.rows[0]?.assignment_id).toBeTruthy();
+        expect(beyondLegacyLimit.rows[0]?.assignment_id).toBeTruthy();
       });
     });
 
     it('refuses a submission before the task has taken its minimum time', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
-        const chosen = await task(client, 'mine_survey');
+        const chosen = await task(client, 'dev_architecture');
         const key = randomUUID();
         await client.query('SELECT * FROM public.work_assign_task($1, $2, $3)', [
           key,
@@ -204,7 +210,7 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
     it('pays the base reward and records a receipt', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
-        const chosen = await task(client, 'logistics_sorting');
+        const chosen = await task(client, 'dev_refactor');
         const assignment = await assigned(client, actor, chosen.id);
         await client.query('SELECT * FROM public.work_submit_completion($1, $2, $3, NULL)', [
           randomUUID(),
@@ -245,7 +251,7 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
     it('does not clamp a reward to the legacy daily cap', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
-        const chosen = await task(client, 'logistics_sorting');
+        const chosen = await task(client, 'dev_refactor');
         await client.query(
           `INSERT INTO public.work_reward_policy_versions (daily_cap, weekly_cap, reason)
            VALUES (10, 2200, 'a cap this test can exhaust')`,
@@ -272,7 +278,7 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
       // so a member restricted for economy abuse kept being paid.
       await rolledBack(async (client) => {
         const actor = await member(client);
-        const chosen = await task(client, 'logistics_sorting');
+        const chosen = await task(client, 'dev_refactor');
         const assignment = await assigned(client, actor, chosen.id);
         await client.query('SELECT * FROM public.work_submit_completion($1, $2, $3, NULL)', [
           randomUUID(),

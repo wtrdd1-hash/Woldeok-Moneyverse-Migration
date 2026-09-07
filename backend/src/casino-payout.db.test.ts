@@ -42,6 +42,16 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
 
   /** A funded member, with the casino open. */
   const player = async (client: PoolClient): Promise<string> => {
+    // The production switch correctly refuses to open without distribution
+    // evidence. This test is about payout arithmetic, not the trial runner, so
+    // provide deterministic passing evidence inside the rolled-back fixture.
+    await client.query(
+      `INSERT INTO public.casino_coin_distribution_trials (
+         idempotency_key, trials, heads, expected_win_probability_ppm,
+         observed_win_probability_ppm, z_score, tolerance_sigma, passed
+       ) VALUES ($1, 1000000, 500000, 500000, 500000, 0, 5, true)`,
+      [randomUUID()],
+    );
     await client.query(
       "UPDATE public.feature_switches SET state = 'enabled' WHERE feature_key = 'casino'",
     );

@@ -28,6 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { compareAmounts, groupDigits } from '@/lib/money';
 import type { AdminUser } from '../types';
 
 type StatusFilter = 'all' | 'active' | 'restricted';
@@ -55,7 +56,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
 
   // Total wealth across all members
   const totalNetWorth = useMemo(() => {
-    return users.reduce((sum, u) => sum + (Number(u.total_net_worth) || 0), 0);
+    return users.reduce((sum, u) => sum + BigInt(u.total_net_worth ?? '0'), 0n).toString();
   }, [users]);
 
   const filtered = useMemo(() => {
@@ -73,21 +74,18 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
       })
       .sort((a, b) => {
         if (sort === 'wealth') {
-          const aWorth = Number(a.total_net_worth ?? 0);
-          const bWorth = Number(b.total_net_worth ?? 0);
-          if (bWorth !== aWorth) return bWorth - aWorth;
+          const order = compareAmounts(b.total_net_worth ?? '0', a.total_net_worth ?? '0');
+          if (order !== 0) return order;
           return a.display_name.localeCompare(b.display_name, 'ko-KR');
         }
         if (sort === 'cash') {
-          const aCash = Number(a.cash_balance ?? 0);
-          const bCash = Number(b.cash_balance ?? 0);
-          if (bCash !== aCash) return bCash - aCash;
+          const order = compareAmounts(b.cash_balance ?? '0', a.cash_balance ?? '0');
+          if (order !== 0) return order;
           return a.display_name.localeCompare(b.display_name, 'ko-KR');
         }
         if (sort === 'stock') {
-          const aStock = Number(a.stock_eval ?? 0);
-          const bStock = Number(b.stock_eval ?? 0);
-          if (bStock !== aStock) return bStock - aStock;
+          const order = compareAmounts(b.stock_eval ?? '0', a.stock_eval ?? '0');
+          if (order !== 0) return order;
           return a.display_name.localeCompare(b.display_name, 'ko-KR');
         }
         // created
@@ -149,7 +147,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
             <div className="grid gap-0.5">
               <span className="text-xs text-muted-foreground font-medium">전체 회원 총 순자산</span>
               <strong className="text-xl font-bold tracking-tight font-mono text-amber-600 dark:text-amber-400">
-                {totalNetWorth.toLocaleString()}
+                {groupDigits(totalNetWorth)}
                 <span className="text-xs font-normal text-muted-foreground ml-1">WLD</span>
               </strong>
             </div>
@@ -281,11 +279,11 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                   {filtered.map((user, index) => {
                     const restricted = user.restricted_at !== null;
                     const rank = user.wealth_rank ?? index + 1;
-                    const netWorth = Number(user.total_net_worth ?? 0);
-                    const cash = Number(user.cash_balance ?? 0);
-                    const bank = Number(user.bank_balance ?? 0);
-                    const bond = Number(user.bond_balance ?? 0);
-                    const stock = Number(user.stock_eval ?? 0);
+                    const netWorth = user.total_net_worth ?? '0';
+                    const cash = user.cash_balance ?? '0';
+                    const bank = user.bank_balance ?? '0';
+                    const bond = user.bond_balance ?? '0';
+                    const stock = user.stock_eval ?? '0';
 
                     return (
                       <TableRow key={user.user_id} className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-2 p-4 hover:bg-muted/20 transition-colors md:table-row md:p-0">
@@ -319,7 +317,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                         {/* 총 순자산 */}
                         <TableCell className="col-span-2 p-0 text-left md:table-cell md:p-2 md:text-right">
                           <span className="font-mono font-bold text-base text-primary">
-                            {netWorth.toLocaleString()}{' '}
+                            {groupDigits(netWorth)}{' '}
                             <span className="text-xs font-normal text-muted-foreground">WLD</span>
                           </span>
                         </TableCell>
@@ -329,24 +327,24 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                           <div className="flex flex-wrap gap-1.5 max-w-sm">
                             <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title="지갑 현금">
                               <Wallet className="size-3 text-emerald-500" />
-                              {cash.toLocaleString()} WLD
+                              {groupDigits(cash)} WLD
                             </span>
-                            {bank > 0 && (
+                            {compareAmounts(bank, '0') > 0 && (
                               <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title="은행 예금">
                                 <PiggyBank className="size-3 text-blue-500" />
-                                {bank.toLocaleString()} WLD
+                                {groupDigits(bank)} WLD
                               </span>
                             )}
-                            {bond > 0 && (
+                            {compareAmounts(bond, '0') > 0 && (
                               <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title="가상 국채">
                                 <Landmark className="size-3 text-purple-500" />
-                                {bond.toLocaleString()} WLD
+                                {groupDigits(bond)} WLD
                               </span>
                             )}
-                            {stock > 0 && (
+                            {compareAmounts(stock, '0') > 0 && (
                               <span className="inline-flex items-center gap-1 rounded-md bg-muted/60 px-2 py-0.5 font-mono text-[0.7rem] text-foreground" title="보유 주식 평가액">
                                 <TrendingUp className="size-3 text-amber-500" />
-                                {stock.toLocaleString()} WLD
+                                {groupDigits(stock)} WLD
                               </span>
                             )}
                           </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useTransition } from 'react';
+import { groupDigits } from '@/lib/money';
 import type { MacroEconomyV2, UserAssetInspectV2 } from './macro-v2-types';
 import {
   toggleKillswitchAction,
@@ -31,10 +32,12 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
   const [inspectLoading, setInspectLoading] = useState(false);
   const [inspectError, setInspectError] = useState<string | null>(null);
 
-  // User override state
-  const [overrideAsset, setOverrideAsset] = useState<'wallet' | 'deposit' | 'loan'>('wallet');
-  const [overrideDirection, setOverrideDirection] = useState<'grant' | 'revoke'>('grant');
-  const [overrideAmount, setOverrideAmount] = useState<number>(100);
+  // User override state. WLD is kept as a canonical decimal string all
+  // the way to PostgreSQL; converting it to a JS number would silently round
+  // large balances before an operator confirms the ledger movement.
+  const [overrideAsset, setOverrideAsset] = useState<'cash' | 'bank'>('cash');
+  const [overrideDirection, setOverrideDirection] = useState<'credit_grant' | 'debit_confiscate'>('credit_grant');
+  const [overrideAmount, setOverrideAmount] = useState<string>('100');
   const [overrideReason, setOverrideReason] = useState<string>('운영팀 정기 밸런스 조정');
   const [overrideLoading, setOverrideLoading] = useState(false);
 
@@ -44,9 +47,23 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
   const stepUpCode = '';
   const codeReady = true;
 
-  const formatNumber = (num: number | string | undefined | null) => {
-    if (num === undefined || num === null) return '0';
-    return Number(num).toLocaleString('ko-KR');
+  const integerText = (value: number | string | undefined | null): string => {
+    if (value === undefined || value === null) return '0';
+    const raw = String(value).trim();
+    return /^-?\d+$/.test(raw) ? raw : '0';
+  };
+  const asBigInt = (value: number | string | undefined | null): bigint => BigInt(integerText(value));
+  const formatNumber = (value: number | string | undefined | null): string => groupDigits(integerText(value));
+  const ratioPercent = (part: bigint, total: bigint): number => {
+    if (total <= 0n || part <= 0n) return 0;
+    return Math.min(100, Number((part * 100n + total / 2n) / total));
+  };
+  const ratioFixed = (numerator: bigint, denominator: bigint): string => {
+    if (denominator <= 0n) return '∞';
+    const scaled = (numerator * 100n + denominator / 2n) / denominator;
+    const whole = scaled / 100n;
+    const fraction = (scaled % 100n).toString().padStart(2, '0');
+    return `${whole}.${fraction}`;
   };
 
   const handleToggleKillswitch = (scope: string, current: boolean) => {
@@ -120,15 +137,15 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
   const handleOverrideUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inspectedUser) return;
-    if (overrideAmount <= 0) {
-      alert('금액은 1 WLD 이상이어야 합니다.');
+    if (!/^[1-9]\d{0,12}$/.test(overrideAmount) || BigInt(overrideAmount) > 1_000_000_000_000n) {
+      alert('금액은 1 ~ 1,000,000,000,000 WLD 정수여야 합니다.');
       return;
     }
     if (overrideReason.trim().length < 5) {
       alert('사유를 5자 이상 입력해 주세요.');
       return;
     }
-    const confirmMsg = `[유저: ${inspectedUser.display_name || inspectedUser.user_id}]\n대상: ${overrideAsset}\n방향: ${overrideDirection === 'grant' ? '지급(+)' : '회수(-)'}\n금액: ${formatNumber(overrideAmount)} WLD\n\n정말 원장에 즉시 집행하시겠습니까?`;
+    const confirmMsg = `[유저: ${inspectedUser.display_name || inspectedUser.user_id}]\n대상: ${overrideAsset}\n방향: ${overrideDirection === 'credit_grant' ? '지급(+)' : '회수(-)'}\n금액: ${formatNumber(overrideAmount)} WLD\n\n정말 원장에 즉시 집행하시겠습니까?`;
     if (!confirm(confirmMsg)) return;
 
     setOverrideLoading(true);
@@ -153,12 +170,16 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
     }
   };
 
-  const faucetToday = data.faucet_today || 0;
-  const sinkToday = data.sink_today || 0;
-  const netFlow = data.net_flow_today || 0;
-  const maxFlow = Math.max(faucetToday, sinkToday, 1);
-  const faucetPercent = Math.min(100, Math.round((faucetToday / maxFlow) * 100));
-  const sinkPercent = Math.min(100, Math.round((sinkToday / maxFlow) * 100));
+  const faucetToday = data.faucet_today || '0';
+  const sinkToday = data.sink_today || '0';
+  const netFlow = data.net_flow_today || '0';
+  const faucetValue = asBigInt(faucetToday);
+  const sinkValue = asBigInt(sinkToday);
+  const netFlowValue = asBigInt(netFlow);
+  const maxFlow = faucetValue > sinkValue ? faucetValue : sinkValue;
+  const faucetPercent = ratioPercent(faucetValue, maxFlow);
+  const sinkPercent = ratioPercent(sinkValue, maxFlow);
+  const activeInspectedJob = inspectedUser?.jobs.find((job) => job.is_active) ?? null;
 
   return (
     <div className="space-y-8">
@@ -308,8 +329,8 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             )}
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={`text-3xl font-black ${netFlow >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-              {netFlow > 0 ? `+${formatNumber(netFlow)}` : formatNumber(netFlow)}
+            <span className={`text-3xl font-black ${netFlowValue >= 0n ? 'text-emerald-400' : 'text-rose-400'}`}>
+              {netFlowValue > 0n ? `+${formatNumber(netFlow)}` : formatNumber(netFlow)}
             </span>
             <span className="text-sm font-bold text-muted-foreground">WLD / 24h</span>
           </div>
@@ -344,7 +365,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             </p>
           </div>
           <div className="text-xs text-foreground/80 font-mono bg-background px-3 py-1.5 rounded-lg border border-border">
-            비율: {sinkToday > 0 ? (faucetToday / sinkToday).toFixed(2) : '∞'} : 1
+            비율: {sinkValue > 0n ? ratioFixed(faucetValue, sinkValue) : '∞'} : 1
           </div>
         </div>
 
@@ -549,9 +570,9 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
                 </h4>
               </div>
               <div className="text-xs text-muted-foreground">
-                {inspectedUser.job ? (
+                {activeInspectedJob ? (
                   <span className="px-2.5 py-1 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800">
-                    {inspectedUser.job.job_type} (Lv.{inspectedUser.job.level} / Exp.{inspectedUser.job.experience})
+                    {activeInspectedJob.job_type} (Lv.{activeInspectedJob.level} / Exp.{activeInspectedJob.experience})
                   </span>
                 ) : (
                   <span className="text-muted-foreground/70">직업 없음</span>
@@ -564,19 +585,19 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
 <div className="p-4 rounded-xl bg-card border border-border">
                 <span className="text-xs text-muted-foreground">지갑 잔액 (Wallet)</span>
                 <div className="text-xl font-black text-primary mt-1">
-                  {formatNumber(inspectedUser.wallet_balance)} <span className="text-xs font-normal">WLD</span>
+                  {formatNumber(inspectedUser.cash_balance)} <span className="text-xs font-normal">WLD</span>
                 </div>
               </div>
               <div className="p-4 rounded-xl bg-card border border-border">
                 <span className="text-xs text-muted-foreground">은행 정기예금 (Deposit)</span>
                 <div className="text-xl font-black text-cyan-400 mt-1">
-                  {formatNumber(inspectedUser.bank_deposit_balance)} <span className="text-xs font-normal">WLD</span>
+                  {formatNumber(inspectedUser.bank_balance)} <span className="text-xs font-normal">WLD</span>
                 </div>
               </div>
               <div className="p-4 rounded-xl bg-card border border-border">
                 <span className="text-xs text-muted-foreground">대출 잔존 채무 (Loan)</span>
                 <div className="text-xl font-black text-rose-400 mt-1">
-                  {formatNumber(inspectedUser.loan_debt_balance)} <span className="text-xs font-normal">WLD</span>
+                  {formatNumber(inspectedUser.active_loan?.outstanding ?? '0')} <span className="text-xs font-normal">WLD</span>
                 </div>
               </div>
             </div>
@@ -584,10 +605,10 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
             {/* Business Holdings if any */}
             {inspectedUser.businesses && inspectedUser.businesses.length > 0 && (
               <div className="p-3 rounded-lg bg-card border border-border text-xs">
-                <span className="text-muted-foreground font-semibold">보유 사업체 지분: </span>
+                <span className="text-muted-foreground font-semibold">보유 사업체: </span>
                 {inspectedUser.businesses.map(b => (
                   <span key={b.symbol} className="inline-block mr-3 text-foreground/80">
-                    {b.name} ({b.symbol}): {b.share_count}주
+                    {b.name} ({b.symbol}) · {b.status}{b.boost_active ? ' · 부스트 적용' : ''}
                   </span>
                 ))}
               </div>
@@ -605,12 +626,11 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
                     <label className="block text-xs text-muted-foreground mb-1">대상 자산</label>
                     <select
                       value={overrideAsset}
-                      onChange={e => setOverrideAsset(e.target.value as 'wallet' | 'deposit' | 'loan')}
+                      onChange={e => setOverrideAsset(e.target.value as 'cash' | 'bank')}
                       className="w-full px-3 py-2 rounded-xl bg-card border border-border text-sm text-foreground focus:outline-none focus:border-cyan-500"
                     >
-                      <option value="wallet">지갑 잔액 (Wallet)</option>
-                      <option value="deposit">은행 예금 (Deposit)</option>
-                      <option value="loan">대출 채무 (Loan)</option>
+                      <option value="cash">지갑 현금 (Cash)</option>
+                      <option value="bank">은행 예금 (Bank)</option>
                     </select>
                   </div>
 
@@ -619,9 +639,9 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
                     <div className="grid grid-cols-2 gap-2">
                       <button
                         type="button"
-                        onClick={() => setOverrideDirection('grant')}
+                        onClick={() => setOverrideDirection('credit_grant')}
                         className={`py-2 text-xs font-bold rounded-xl border transition-colors ${
-                          overrideDirection === 'grant'
+                          overrideDirection === 'credit_grant'
                             ? 'bg-emerald-600 border-emerald-500 text-white'
                             : 'bg-card border-border text-muted-foreground hover:text-foreground'
                         }`}
@@ -630,9 +650,9 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
                       </button>
                       <button
                         type="button"
-                        onClick={() => setOverrideDirection('revoke')}
+                        onClick={() => setOverrideDirection('debit_confiscate')}
                         className={`py-2 text-xs font-bold rounded-xl border transition-colors ${
-                          overrideDirection === 'revoke'
+                          overrideDirection === 'debit_confiscate'
                             ? 'bg-rose-600 border-rose-500 text-white'
                             : 'bg-card border-border text-muted-foreground hover:text-foreground'
                         }`}
@@ -645,11 +665,9 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
                   <div>
                     <label className="block text-xs text-muted-foreground mb-1">조정 금액 (WLD)</label>
                     <input
-                      type="number"
-                      min="1"
-                      step="1"
+                      type="text" inputMode="numeric"
                       value={overrideAmount}
-                      onChange={e => setOverrideAmount(Math.max(1, Number(e.target.value)))}
+                      onChange={e => setOverrideAmount(e.target.value.replace(/\D/g, '').slice(0, 13))}
                       className="w-full px-3 py-2 rounded-xl bg-card border border-border text-sm text-foreground font-mono focus:outline-none focus:border-cyan-500"
                     />
                   </div>
@@ -662,19 +680,18 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
                     <button
                       key={amt}
                       type="button"
-                      onClick={() => setOverrideAmount(amt)}
+                      onClick={() => setOverrideAmount(String(amt))}
                       className="px-2.5 py-1 rounded-lg bg-card hover:bg-muted text-foreground border border-border transition-colors"
                     >
                       +{formatNumber(amt)}
                     </button>
                   ))}
-                  {overrideDirection === 'revoke' && (
+                  {overrideDirection === 'debit_confiscate' && (
                     <button
                       type="button"
                       onClick={() => {
-                        if (overrideAsset === 'wallet') setOverrideAmount(inspectedUser.wallet_balance);
-                        if (overrideAsset === 'deposit') setOverrideAmount(inspectedUser.bank_deposit_balance);
-                        if (overrideAsset === 'loan') setOverrideAmount(inspectedUser.loan_debt_balance);
+                        if (overrideAsset === 'cash') setOverrideAmount(inspectedUser.cash_balance);
+                        if (overrideAsset === 'bank') setOverrideAmount(inspectedUser.bank_balance);
                       }}
                       className="px-2.5 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800 transition-colors"
                     >
@@ -699,14 +716,14 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
                     type="submit"
                     disabled={overrideLoading || !codeReady}
                     className={`px-6 py-2.5 rounded-xl text-white font-semibold text-sm transition-all shadow-lg active:scale-95 disabled:opacity-50 ${
-                      overrideDirection === 'grant'
+                      overrideDirection === 'credit_grant'
                         ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-950/50'
                         : 'bg-rose-600 hover:bg-rose-500 shadow-rose-950/50'
                     }`}
                   >
                     {overrideLoading
                       ? '원장 집행 중...'
-                      : `${overrideDirection === 'grant' ? '강제 지급 (+)' : '강제 회수 (-)'} 집행`}
+                      : `${overrideDirection === 'credit_grant' ? '강제 지급 (+)' : '강제 회수 (-)'} 집행`}
                   </button>
                 </div>
               </form>

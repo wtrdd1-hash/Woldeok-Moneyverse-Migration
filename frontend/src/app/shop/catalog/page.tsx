@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
+import type { TodayEvent } from '@/app/quests/early-events';
 import { BuyForm, SettleUpkeepButton, UseItemButton } from './catalog-forms';
 import { CatalogCard, HoldingCard } from './catalog-parts';
 import { groupByCategory, isHeldToTheLimit, maxPurchasable, owesUpkeep } from './catalog';
@@ -36,10 +37,12 @@ export default async function ShopCatalogPage({
 
   // Both reads in one round. The shelf is a second request only because it is
   // a second read model, not because the catalogue has to finish first.
-  const [catalog, mine] = await Promise.all([
+  const [catalog, mine, today] = await Promise.all([
     apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog'),
     apiOrNull<{ holdings: HeldItem[] }>('/api/v1/shop/holdings'),
+    apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
   ]);
+  const marketSaleActive = today?.event?.event_code === 'market_sale' && today.event.claimed;
 
   // How many of each the member holds right now. A failed shelf read leaves
   // this empty, which shows one 보유 중 badge fewer -- it never turns into a
@@ -62,6 +65,18 @@ export default async function ShopCatalogPage({
         아이템과 가격은 모두 WLD 게임 데이터입니다. 실제 현금 결제나 환전, 실물 배송과는 관련이
         없습니다.
       </PageHeader>
+
+      {marketSaleActive && (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge>시장 할인일</Badge>
+            <strong>초보 필수품 10% 할인 적용 중</strong>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            오늘 자정까지 이 페이지에 표시되는 대상 아이템 가격과 실제 결제 금액에 같은 할인이 적용돼요.
+          </p>
+        </div>
+      )}
 
       <section aria-labelledby="catalog-title" className="grid gap-4">
         <div className="grid gap-2">

@@ -2,7 +2,7 @@
 
 # The build needs the whole workspace: the backend imports @moneyverse/contract
 # by workspace protocol, and pnpm resolves it from the lockfile at the root.
-FROM node:20.19.2-alpine AS build
+FROM node:24.20.0-alpine AS build
 WORKDIR /repo
 RUN corepack enable
 
@@ -24,7 +24,17 @@ RUN pnpm install --frozen-lockfile --prod \
       --filter @moneyverse/contract \
       --filter @moneyverse/backend
 
-FROM node:20.19.2-alpine
+FROM node:24.20.0-alpine
+
+# Keep the runtime smaller than the build image and remove package-manager code
+# that the service never executes. Refresh Alpine packages first so rebuilds
+# pick up security fixes even when the upstream Node tag has not yet been
+# republished with the latest repository packages.
+RUN apk upgrade --no-cache \
+ && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+ && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+          /usr/local/bin/pnpm /usr/local/bin/pnpx /usr/local/bin/yarn /usr/local/bin/yarnpkg
+
 WORKDIR /app
 ENV NODE_ENV=production
 

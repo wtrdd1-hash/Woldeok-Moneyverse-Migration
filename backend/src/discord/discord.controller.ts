@@ -9,6 +9,7 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { createDiscordInteractionHandler } from './interactions';
+import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator';
 
 export const DISCORD_INTERACTION_HANDLER = Symbol('DISCORD_INTERACTION_HANDLER');
 
@@ -30,6 +31,7 @@ type InteractionHandler = ReturnType<typeof createDiscordInteractionHandler>;
  */
 @ApiTags('discord')
 @Controller('integrations/discord')
+@SkipInternalToken()
 export class DiscordController {
   constructor(
     @Inject(DISCORD_INTERACTION_HANDLER) private readonly handler: InteractionHandler | null,

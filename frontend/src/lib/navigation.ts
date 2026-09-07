@@ -7,11 +7,16 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '홈': 'Home',
   '이용 방법': 'Guide',
   '공지': 'Updates',
+  '운영 소식': 'Updates',
+  '안내': 'Information',
+  '이용약관': 'Terms',
+  '개인정보처리방침': 'Privacy',
   '사진': 'Gallery',
   '서비스 상태': 'Service status',
   '상점': 'Shop',
   '내 지갑': 'My wallet',
   '작업': 'Work',
+  '직업 업무': 'Career work',
   '가상 금융': 'Banking',
   '가상 은행': 'Virtual Bank',
   '가상 금융 (은행)': 'Virtual Banking',
@@ -19,8 +24,10 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '게임 사업': 'Businesses',
   '시즌': 'Seasons',
   '퀘스트': 'Quests',
+  '일일·주간 퀘스트': 'Daily & weekly quests',
   '카지노': 'Casino',
   '성장 단계': 'Progression',
+  '장기 성장 단계': 'Long-term progression',
   '내 프로필': 'My profile',
   '아이템 상점': 'Item shop',
   '게시판': 'Board',
@@ -62,9 +69,11 @@ export function navLabel(label: string, locale: 'ko' | 'en'): string {
 export const PUBLIC_NAV: readonly NavEntry[] = [
   { href: '/', label: '홈' },
   { href: '/guide', label: '이용 방법' },
-  { href: '/announcements', label: '공지' },
+  { href: '/announcements', label: '운영 소식' },
   { href: '/gallery', label: '사진' },
   { href: '/status', label: '서비스 상태' },
+  { href: '/terms', label: '이용약관' },
+  { href: '/privacy', label: '개인정보처리방침' },
   { href: '/bank', label: '가상 금융' },
   { href: '/shop', label: '아이템 상점' },
 ];
@@ -108,12 +117,14 @@ export function isGroup(item: NavItem): item is NavGroup {
 export const HEADER_PUBLIC: readonly NavItem[] = [
   { href: '/', label: '홈' },
   { href: '/guide', label: '이용 방법' },
+  { href: '/gallery', label: '사진' },
   {
-    label: '소식',
+    label: '안내',
     entries: [
-      { href: '/announcements', label: '공지' },
-      { href: '/gallery', label: '사진' },
+      { href: '/announcements', label: '운영 소식' },
       { href: '/status', label: '서비스 상태' },
+      { href: '/terms', label: '이용약관' },
+      { href: '/privacy', label: '개인정보처리방침' },
     ],
   },
   {
@@ -141,9 +152,9 @@ export const HEADER_MEMBER: readonly NavItem[] = [
   {
     label: '활동',
     entries: [
-      { href: '/work', label: '작업' },
-      { href: '/quests', label: '퀘스트' },
-      { href: '/progression', label: '성장 단계' },
+      { href: '/work', label: '직업 업무' },
+      { href: '/quests', label: '일일·주간 퀘스트' },
+      { href: '/progression', label: '장기 성장 단계' },
     ],
   },
   {

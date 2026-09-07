@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useActionState, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
@@ -14,7 +15,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { TranslatedText as T } from '@/components/translated-text';
 import { IDLE } from '@/lib/action-state';
 import { formatDay } from '@/lib/money';
-import { borrow, claimDaily, claimWork, moveBank, repay, transfer } from './actions';
+import { borrow, claimDaily, moveBank, repay, transfer } from './actions';
 
 export interface RewardAvailability {
   readonly dailyAvailable: boolean;
@@ -34,9 +35,7 @@ function unavailableHint(nextEligibleAt: string | null): string {
 
 export function RewardButtons({ availability }: { readonly availability: RewardAvailability | null }) {
   const [dailyState, daily] = useActionState(claimDaily, IDLE);
-  const [workState, work] = useActionState(claimWork, IDLE);
   const dailyClaimed = dailyState.status === 'ok' || availability?.dailyAvailable === false;
-  const workClaimed = workState.status === 'ok' || availability?.workAvailable === false;
 
   return (
     <div className="grid gap-2">
@@ -46,24 +45,24 @@ export function RewardButtons({ availability }: { readonly availability: RewardA
             ✦ <T korean="오늘의 보상 받기" english="Claim Daily Reward" />
           </SubmitButton>
         </form>
-        <form action={work}>
-          <SubmitButton disabled={workClaimed} variant="outline">
-            ◈ <T korean="작업 보상 받기" english="Claim Work Reward" />
-          </SubmitButton>
-        </form>
+        <Button asChild variant="outline">
+          <Link href="/work">
+            ◈ <T korean="직업 업무 수행하기" english="Do Career Work" />
+          </Link>
+        </Button>
       </div>
       {availability?.dailyAvailable === false && (
         <p className="text-xs text-muted-foreground">
           <T korean="오늘의 보상" english="Daily Reward" /> · {unavailableHint(availability.dailyNextEligibleAt)}
         </p>
       )}
-      {availability?.workAvailable === false && (
-        <p className="text-xs text-muted-foreground">
-          <T korean="작업 보상" english="Work Reward" /> · {unavailableHint(availability.workNextEligibleAt)}
-        </p>
-      )}
+      <p className="text-xs text-muted-foreground">
+        <T
+          korean="작업 보상은 이제 직업별 업무를 완료하는 즉시 WLD와 숙련도 EXP로 지급됩니다."
+          english="Work rewards are now paid immediately as WLD and proficiency EXP when you complete career tasks."
+        />
+      </p>
       <ActionAlert state={dailyState} />
-      <ActionAlert state={workState} />
     </div>
   );
 }

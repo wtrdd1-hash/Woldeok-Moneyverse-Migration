@@ -4,7 +4,7 @@ import { api } from '@/lib/api';
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
-import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
+import { failure, idempotencyKey, mutate, wholeNumber } from '@/lib/mutate';
 import { STEP_UP_CODE, spendSecondFactorCode } from '../step-up';
 
 /** The refusal every high-risk action gives for a missing or malformed code. */
@@ -154,7 +154,7 @@ type ParsedRequest =
  * offer is that the same value is refused for the same reason in both places.
  */
 function readRequest(formData: FormData): ParsedRequest {
-  const amount = wholeAmount(formData.get('amount'));
+  const amount = wholeNumber(formData.get('amount'));
   if (amount === null || amount > AMOUNT_MAX) {
     return {
       ok: false,
@@ -475,9 +475,9 @@ export async function inspectUserAction(userId: string): Promise<{
 
 export async function overrideUserAssetAction(
   targetUserId: string,
-  assetType: 'wallet' | 'deposit' | 'loan',
-  amount: number,
-  direction: 'grant' | 'revoke',
+  assetType: 'cash' | 'bank',
+  amount: string,
+  direction: 'credit_grant' | 'debit_confiscate',
   reason: string,
   code: string,
 ): Promise<ActionState> {
@@ -485,8 +485,8 @@ export async function overrideUserAssetAction(
     if (!reason || reason.trim().length < 5) {
       return { status: 'error', message: '사유를 최소 5자 이상 입력해 주세요.' };
     }
-    if (amount <= 0) {
-      return { status: 'error', message: '금액은 1 WLD 이상이어야 합니다.' };
+    if (!/^[1-9]\d{0,12}$/.test(amount) || BigInt(amount) > 1_000_000_000_000n) {
+      return { status: 'error', message: '금액은 1 ~ 1,000,000,000,000 WLD 정수여야 합니다.' };
     }
     if (!STEP_UP_CODE.test(code)) return CODE_REQUIRED;
     await spendSecondFactorCode(code);
@@ -502,7 +502,7 @@ export async function overrideUserAssetAction(
     revalidatePath('/admin/economy');
     return {
       status: 'ok',
-      message: `성공적으로 ${direction === 'grant' ? '지급' : '회수'} 처리되었습니다.`,
+      message: `성공적으로 ${direction === 'credit_grant' ? '지급' : '회수'} 처리되었습니다.`,
     };
   } catch (error) {
     return failure(error, '유저 자산 강제 조정을 처리하지 못했습니다.');

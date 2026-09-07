@@ -2,7 +2,7 @@ name: woldeok-moneyverse-dev
 
 services:
   db:
-    image: postgres:17.5-alpine
+    image: postgres:17.11-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: moneyverse_migrator
@@ -21,7 +21,7 @@ services:
       retries: 20
 
   migrate:
-    image: postgres:17.5-alpine
+    image: postgres:17.11-alpine
     restart: 'no'
     environment:
       PGHOST: db

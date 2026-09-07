@@ -17,11 +17,11 @@ export interface AdminUser {
   readonly created_at: string;
   readonly restricted_at: string | null;
   readonly restriction_reason: string | null;
-  readonly cash_balance?: number;
-  readonly bank_balance?: number;
-  readonly bond_balance?: number;
-  readonly stock_eval?: number;
-  readonly total_net_worth?: number;
+  readonly cash_balance?: string;
+  readonly bank_balance?: string;
+  readonly bond_balance?: string;
+  readonly stock_eval?: string;
+  readonly total_net_worth?: string;
   readonly wealth_rank?: number;
   readonly last_login_at?: string | null;
   readonly last_seen_at?: string | null;

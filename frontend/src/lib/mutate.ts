@@ -99,13 +99,20 @@ export function idempotencyKey(): string {
  * here means the member is told which field is wrong instead of receiving a
  * validation document about a DTO.
  */
-export function wholeAmount(value: FormDataEntryValue | null): number | null {
+export function wholeAmount(value: FormDataEntryValue | null): string | null {
   if (typeof value !== 'string') return null;
-  const trimmed = value.replaceAll(',', '').trim();
-  if (!/^[0-9]+$/.test(trimmed)) return null;
-  const parsed = Number(trimmed);
-  if (!Number.isSafeInteger(parsed) || parsed <= 0) return null;
-  return parsed;
+  const digits = value.replaceAll(',', '').trim();
+  if (!/^[0-9]+$/.test(digits)) return null;
+  const canonical = digits.replace(/^0+(?=\d)/, '');
+  return canonical === '0' ? null : canonical;
+}
+
+/** Positive safe integer for counts/quantities that are not monetary values. */
+export function wholeNumber(value: FormDataEntryValue | null): number | null {
+  const integer = wholeAmount(value);
+  if (integer === null) return null;
+  const parsed = Number(integer);
+  return Number.isSafeInteger(parsed) ? parsed : null;
 }
 
 export type { ActionState };

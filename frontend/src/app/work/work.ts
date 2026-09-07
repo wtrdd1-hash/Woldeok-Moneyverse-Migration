@@ -13,6 +13,7 @@ export interface WorkTask {
   readonly daily_limit: number;
   readonly taken_today: number;
   readonly reward_preview: string | null;
+  readonly experience_preview: string | null;
   readonly recommended: boolean;
 }
 export interface WorkAssignment {
@@ -261,37 +262,35 @@ export function hasExpired(expiresAt: string, now: number): boolean {
 }
 
 export function remaining(paid: string, cap: string): string {
-  const left = Number(cap) - Number(paid);
-  return String(Number.isFinite(left) && left > 0 ? Math.floor(left) : 0);
+  if (!/^\d+$/.test(paid) || !/^\d+$/.test(cap)) return '0';
+  const left = BigInt(cap) - BigInt(paid);
+  return left > 0n ? left.toString() : '0';
 }
 
 export function progressPercent(paid: string, cap: string): number {
-  const total = Number(cap);
-  const done = Number(paid);
-  if (!Number.isFinite(total) || total <= 0) return 0;
-  return Math.min(100, Math.max(0, Math.round((done / total) * 100)));
+  if (!/^\d+$/.test(paid) || !/^\d+$/.test(cap)) return 0;
+  const total = BigInt(cap);
+  if (total <= 0n) return 0;
+  const done = BigInt(paid);
+  const rounded = (done * 100n + total / 2n) / total;
+  return Math.min(100, Math.max(0, Number(rounded)));
 }
 
 export function rewardSentence(task: WorkTask, locale?: Locale | unknown): string {
+  if (task.reward_preview === null || task.experience_preview === null) {
+    return locale === 'en'
+      ? 'Career work rewards are temporarily paused.'
+      : '현재 직업 업무 보상 지급이 일시 중지되어 있어요.';
+  }
+  const levelBonus = task.reward_preview !== task.base_reward || task.experience_preview !== task.base_experience;
   if (locale === 'en') {
-    if (task.reward_preview === null) return 'Work reward distribution is currently paused.';
-    if (task.reward_preview === '0') {
-      return 'You have reached today’s reward cap. EXP is still awarded.';
-    }
-    if (task.reward_preview !== task.base_reward) {
-      return `Complete now to earn ${task.reward_preview} WLD (reduced from ${task.base_reward} WLD due to daily repetitions).`;
-    }
-    return `Complete now to earn ${task.reward_preview} WLD.`;
+    return levelBonus
+      ? `Complete now to earn ${task.reward_preview} WLD and ${task.experience_preview} EXP, including your career-level bonus.`
+      : `Complete now to earn ${task.reward_preview} WLD and ${task.experience_preview} EXP.`;
   }
-
-  if (task.reward_preview === null) return '지금은 작업 보상 지급이 멈춰 있어요.';
-  if (task.reward_preview === '0') {
-    return '오늘 받을 수 있는 보상을 모두 채웠어요. 경험치는 그대로 쌓여요.';
-  }
-  if (task.reward_preview !== task.base_reward) {
-    return `지금 마치면 ${task.reward_preview} WLD를 받아요. 기본 ${task.base_reward} WLD에서 오늘 반복한 만큼 줄어든 금액이에요.`;
-  }
-  return `지금 마치면 ${task.reward_preview} WLD를 받아요.`;
+  return levelBonus
+    ? `지금 마치면 직업 레벨 보너스를 포함해 ${task.reward_preview} WLD와 ${task.experience_preview} EXP를 받아요.`
+    : `지금 마치면 ${task.reward_preview} WLD와 ${task.experience_preview} EXP를 받아요.`;
 }
 
 export function isSpent(_task: WorkTask): boolean {

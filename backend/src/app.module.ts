@@ -31,6 +31,7 @@ import { WorkModule } from './work/work.module';
 import { BankModule } from './bank/bank.module';
 import { AUTH_LIMIT, READ_LIMIT, SENSITIVE_LIMIT } from './security/rate-limit';
 import { TieredThrottlerGuard } from './security/tiered-throttler.guard';
+import { InternalTokenGuard } from './auth/guards/internal-token.guard';
 import { SchedulerModule } from './scheduler/scheduler.module';
 
 const ONE_MINUTE_MS = 60_000;
@@ -78,6 +79,9 @@ const ONE_MINUTE_MS = 60_000;
       ],
     }),
   ],
-  providers: [{ provide: APP_GUARD, useClass: TieredThrottlerGuard }],
+  providers: [
+    { provide: APP_GUARD, useClass: TieredThrottlerGuard },
+    { provide: APP_GUARD, useClass: InternalTokenGuard },
+  ],
 })
 export class AppModule {}

@@ -37,7 +37,7 @@ function QuickCareerSwitchButton({
         variant="ghost"
         className="w-full text-xs text-muted-foreground hover:text-foreground h-7 py-1 px-2 border border-border/40 hover:border-border"
       >
-        {isEn ? `⚡ Switch to ${jobName} & Perform` : `⚡ ${jobName}(으)로 전직 후 바로 수행`}
+        {isEn ? `Switch to ${jobName}` : `${jobName}(으)로 전직하기`}
       </SubmitButton>
     </form>
   );
@@ -103,7 +103,7 @@ export function CareerTasksBoard({
             className="font-semibold text-xs"
           >
             <span>🌐</span>
-            <span className="ml-1.5">{isEn ? 'All Career Tasks' : '전체 직업 업무'}</span>
+            <span className="ml-1.5">{isEn ? 'Explore Other Careers' : '다른 직업 둘러보기'}</span>
             <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0">
               {tasks.length}
             </Badge>
@@ -114,10 +114,10 @@ export function CareerTasksBoard({
           <div className="flex items-center gap-2 text-xs">
             <Badge variant="secondary" className="flex items-center gap-1.5 py-1 px-2.5">
                 <span className="text-emerald-400 font-mono font-bold">
-                  {myCompletedToday}회 · 무제한
+                  {myCompletedToday}회 완료 · 반복 가능
                 </span>
                 <span className="text-muted-foreground">
-                  {isEn ? 'Repeatable Career Work' : '반복 가능한 직업 업무'}
+                  {isEn ? 'Career work today' : '오늘의 직업 업무'}
                 </span>
             </Badge>
           </div>
@@ -166,6 +166,11 @@ export function CareerTasksBoard({
                           ✨ {isEn ? 'Mine' : '내 직업'}
                         </Badge>
                       )}
+                      {task.recommended && (
+                        <Badge className="bg-emerald-500/15 text-emerald-300 border-emerald-500/30 text-[10px] px-1.5 py-0 font-bold">
+                          ★ {isEn ? 'Today’s pick' : '오늘 추천'}
+                        </Badge>
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Badge variant="secondary" className="text-xs">
@@ -183,10 +188,10 @@ export function CareerTasksBoard({
                   <div className="rounded-lg bg-muted/50 p-2.5 grid grid-cols-2 gap-2 text-center">
                     <div>
                       <span className="text-muted-foreground block text-[11px]">
-                        {isEn ? 'Full WLD Reward' : 'WLD 전액 보상'}
+                        {isEn ? 'WLD this run' : '이번 지급 WLD'}
                       </span>
                       <span className="font-bold text-emerald-400 font-mono">
-                        +{task.reward_preview ?? task.base_reward} WLD
+                        {task.reward_preview === null ? '—' : `+${task.reward_preview} WLD`}
                       </span>
                     </div>
                     <div>
@@ -194,8 +199,7 @@ export function CareerTasksBoard({
                         {isEn ? 'Proficiency EXP' : '숙련도 EXP'}
                       </span>
                       <span className="font-bold text-amber-400 font-mono">
-                        +{task.base_experience} EXP
-                        <span className="text-[10px] font-normal text-emerald-400 ml-1">(100%)</span>
+                        {task.experience_preview === null ? '—' : `+${task.experience_preview} EXP`}
                       </span>
                     </div>
                   </div>
@@ -206,14 +210,15 @@ export function CareerTasksBoard({
                         : `소요 시간: ${durationLabel(task.minimum_duration_seconds, locale)}`}
                     </span>
                     <span className="text-emerald-400 font-semibold">
-                      {isEn ? `Today: ${task.taken_today} · Unlimited` : `오늘 완료: ${task.taken_today}회 · 무제한`}
+                      {isEn ? `Completed today: ${task.taken_today}` : `오늘 ${task.taken_today}회 완료`}
                     </span>
                   </div>
                 </CardContent>
 
-                <CardFooter className="pt-2 flex flex-col gap-1.5">
-                  <TaskCompleteModalButton task={task} isActiveJob={isActiveJob} />
-                  {!isActiveJob && (
+                <CardFooter className="pt-2">
+                  {isActiveJob ? (
+                    <TaskCompleteModalButton task={task} isActiveJob />
+                  ) : (
                     <QuickCareerSwitchButton
                       jobCode={task.job_type}
                       jobName={jobLabel(task.job_type, locale)}

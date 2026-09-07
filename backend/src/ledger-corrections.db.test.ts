@@ -330,6 +330,10 @@ describe.skipIf(!DATABASE_URL)('ledger corrections against a real database', () 
         const owner = await member(client);
         const stranger = await member(client);
         const key = randomUUID();
+        // The generic hourly faucet is retired in 166. Re-enable it only inside
+        // this rolled-back fixture so the historical replay ownership boundary
+        // remains covered without making the route live again.
+        await client.query('UPDATE public.work_reward_policy SET enabled = true WHERE singleton');
         await client.query('SELECT * FROM public.economy_claim_work($1, $2)', [key, owner]);
 
         const error = await rejectionOf(() =>

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { PageHeader } from '@/components/page-header';
 import { TruncatedList } from '@/components/truncated-list';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import {
   Card,
   CardContent,
@@ -142,8 +143,8 @@ export default async function WorkPage() {
           </h2>
           <p className="text-sm text-muted-foreground">
             {isEn
-              ? 'Click [Switch Career] to instantly activate that profession and receive tailored daily tasks.'
-              : '원하는 직업의 [전직하기] 버튼을 누르면 즉시 해당 직업으로 활성화되며 고유 업무를 배정받을 수 있습니다.'}
+              ? 'Career switches are instant and free. Each career keeps its own proficiency EXP even after you switch away.'
+              : '전직은 수수료와 대기시간 없이 즉시 적용되며, 다른 직업으로 옮겨도 각 직업에서 쌓은 숙련도 EXP는 그대로 보존됩니다.'}
           </p>
         </div>
 
@@ -152,6 +153,13 @@ export default async function WorkPage() {
             const mastery = allJobsMap.get(job.code);
             const level = mastery?.level ?? 1;
             const exp = mastery?.experience ?? 0;
+            const nextLevelExp = mastery?.next_level_exp ?? Math.max(100, level * level * 100);
+            const previousLevelExp = level <= 1 ? 0 : (level - 1) * (level - 1) * 100;
+            const levelSpan = Math.max(1, nextLevelExp - previousLevelExp);
+            const levelProgress = Math.min(
+              100,
+              Math.max(0, Math.round(((exp - previousLevelExp) / levelSpan) * 100)),
+            );
             const isActive = activeJob?.job_type === job.code;
             const jobDisplayName = isEn ? (job.enName ?? job.name) : job.name;
             const jobDisplayDesc = isEn ? (job.enRoleDescription ?? job.roleDescription) : job.roleDescription;
@@ -178,11 +186,23 @@ export default async function WorkPage() {
                   </CardDescription>
                 </CardHeader>
 
-                <CardContent className="pb-3 text-xs">
-                  <div className="flex justify-between text-muted-foreground mb-1">
-                    <span>{isEn ? 'Cumulative EXP' : '누적 경험치'}</span>
-                    <span className="font-mono font-medium text-foreground">{exp.toLocaleString()} EXP</span>
+                <CardContent className="pb-3 text-xs grid gap-2">
+                  <div className="flex justify-between gap-3 text-muted-foreground">
+                    <span>{isEn ? 'Proficiency' : '직업 숙련도'}</span>
+                    <span className="font-mono font-medium text-foreground">
+                      {exp.toLocaleString()} / {nextLevelExp.toLocaleString()} EXP
+                    </span>
                   </div>
+                  <Progress value={levelProgress} aria-label={isEn ? 'Career proficiency progress' : '직업 숙련도 진행률'} />
+                  <p className="text-[11px] text-muted-foreground">
+                    {level >= 50
+                      ? isEn
+                        ? 'Maximum career level reached'
+                        : '최대 직업 레벨 달성'
+                      : isEn
+                        ? `${Math.max(0, nextLevelExp - exp).toLocaleString()} EXP until Lv.${level + 1}`
+                        : `Lv.${level + 1}까지 ${Math.max(0, nextLevelExp - exp).toLocaleString()} EXP`}
+                  </p>
                 </CardContent>
 
                 <CardFooter className="pt-0">
@@ -198,12 +218,12 @@ export default async function WorkPage() {
       <section aria-labelledby="tasks-title" className="grid gap-4">
         <div>
           <h2 id="tasks-title" className="text-xl font-bold flex items-center gap-2">
-            <span>📋</span> {isEn ? 'Repeatable Career Tasks' : '직업별 반복 업무 퀘스트'}
+            <span>📋</span> {isEn ? 'Career Work' : '직업 업무'}
           </h2>
           <p className="text-sm text-muted-foreground">
             {isEn
-              ? 'Perform tasks matching your active profession to receive immediate WLD and EXP rewards.'
-              : '현재 활성 직업에 맞는 업무를 수행하면 즉시 보상 WLD와 경험치가 지급됩니다.'}
+              ? 'Only work for your active career can be performed. Tasks may be repeated, and each completion pays the server-validated WLD and proficiency EXP shown below.'
+              : '현재 활성 직업의 업무만 수행할 수 있습니다. 같은 업무는 반복 가능하며, 아래에 표시된 WLD와 숙련도 EXP가 서버 검증 후 매회 즉시 지급됩니다.'}
           </p>
         </div>
 

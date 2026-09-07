@@ -4,6 +4,7 @@ import React, { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Save, Search, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { groupDigits } from '@/lib/money';
 
 export interface AdminShopItem {
   readonly id: string;
@@ -55,7 +56,7 @@ export function AdminShopView({ items }: AdminShopViewProps) {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          base_price: Number(editPrice),
+          base_price: editPrice,
           active: editActive,
           current_stock: editStock ? Number(editStock) : null,
         }),
@@ -148,7 +149,7 @@ className="w-full rounded-2xl border border-border/50 bg-card py-2 pl-10 pr-4 te
                         />
                       ) : (
                         <span className="font-extrabold text-primary">
-                          {Number(item.base_price).toLocaleString()} WLD
+                          {groupDigits(item.base_price)} WLD
                         </span>
                       )}
                     </td>

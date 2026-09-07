@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
-import { formatMoment } from '@/lib/money';
+import { compareAmounts, formatMoment, groupDigits } from '@/lib/money';
 import { adminConsole } from '@/lib/session';
 import { ADMIN_AREAS, adminAreaFor, consoleReturnPath } from './areas';
 import { AdminQuickUserSearch } from './admin-quick-search';
@@ -92,7 +92,7 @@ export default async function AdminPage({
 
   const topUsers = (users?.users ?? [])
     .slice()
-    .sort((a, b) => (Number(b.total_net_worth) || 0) - (Number(a.total_net_worth) || 0))
+    .sort((a, b) => compareAmounts(b.total_net_worth ?? '0', a.total_net_worth ?? '0'))
     .slice(0, 5);
 
   const held =
@@ -175,9 +175,9 @@ export default async function AdminPage({
             <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-5">
               {topUsers.map((u, idx) => {
                 const rank = idx + 1;
-                const netWorth = Number(u.total_net_worth ?? 0);
-                const cash = Number(u.cash_balance ?? 0);
-                const stock = Number(u.stock_eval ?? 0);
+                const netWorth = u.total_net_worth ?? '0';
+                const cash = u.cash_balance ?? '0';
+                const stock = u.stock_eval ?? '0';
                 return (
                   <Link
                     key={u.user_id}
@@ -205,11 +205,11 @@ export default async function AdminPage({
                     <div className="mt-3 pt-2 border-t border-border/40">
                       <div className="text-[0.7rem] text-muted-foreground">총 순자산</div>
                       <div className="font-mono font-bold text-sm text-primary">
-                        {netWorth.toLocaleString()} <span className="text-[0.65rem] font-normal text-muted-foreground">WLD</span>
+                        {groupDigits(netWorth)} <span className="text-[0.65rem] font-normal text-muted-foreground">WLD</span>
                       </div>
                       <div className="mt-1 flex items-center justify-between text-[0.65rem] text-muted-foreground">
-                        <span>현금 {cash.toLocaleString()}</span>
-                        {stock > 0 && <span>주식 {stock.toLocaleString()}</span>}
+                        <span>현금 {groupDigits(cash)}</span>
+                        {compareAmounts(stock, '0') > 0 && <span>주식 {groupDigits(stock)}</span>}
                       </div>
                     </div>
                   </Link>

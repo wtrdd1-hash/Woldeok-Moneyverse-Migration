@@ -182,18 +182,18 @@ export class UpdateKnobsV2Dto {
 }
 
 export class OverrideUserAssetDto {
-  @ApiProperty({ enum: ['wallet', 'deposit', 'loan'] })
-  @IsIn(['wallet', 'deposit', 'loan'])
-  readonly assetType!: 'wallet' | 'deposit' | 'loan';
+  @ApiProperty({ enum: ['cash', 'bank'] })
+  @IsIn(['cash', 'bank'])
+  readonly assetType!: 'cash' | 'bank';
 
-  @ApiProperty({ minimum: 1 })
-  @IsInt()
-  @Min(1)
-  readonly amount!: number;
+  @ApiProperty({ type: String, example: '1000' })
+  @IsString()
+  @Matches(/^[1-9]\d{0,12}$/)
+  readonly amount!: string;
 
-  @ApiProperty({ enum: ['grant', 'revoke'] })
-  @IsIn(['grant', 'revoke'])
-  readonly direction!: 'grant' | 'revoke';
+  @ApiProperty({ enum: ['credit_grant', 'debit_confiscate'] })
+  @IsIn(['credit_grant', 'debit_confiscate'])
+  readonly direction!: 'credit_grant' | 'debit_confiscate';
 
   @ApiProperty({ minLength: 5, maxLength: 500 })
   @IsString()
@@ -388,8 +388,8 @@ export class AdminEconomyController {
 
   @Get('macro-v2')
   @ApiOperation({ summary: 'Admin Control Center 2.0 Macro Economy statistics' })
-  async macroV2() {
-    return await this.repository().macroEconomyV2();
+  async macroV2(@Req() request: RequestWithSession) {
+    return await this.repository().macroEconomyV2(requireUserId(request));
   }
 
   /**
@@ -443,7 +443,7 @@ export class AdminEconomyController {
 
   @Post('users/:id/override-v2')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Override user asset (grant or revoke WLD in wallet, deposit, or loan)' })
+  @ApiOperation({ summary: 'Override user cash or bank balance (grant or confiscate WLD)' })
   overrideUserV2(
     @Req() request: RequestWithSession,
     @Param('id', ParseUUIDPipe) userId: string,

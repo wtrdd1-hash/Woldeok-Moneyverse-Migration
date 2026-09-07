@@ -354,7 +354,7 @@ export async function payoutToUser(
     return { status: 'error', message: '대상 회원을 찾을 수 없습니다.' };
   }
   const parsedAmount = wholeAmount(amount);
-  if (parsedAmount === null || parsedAmount <= 0) {
+  if (parsedAmount === null) {
     return { status: 'error', message: '지급할 올바른 WLD 금액을 입력해 주세요.' };
   }
   if (typeof reason !== 'string' || reason.trim().length < 10) {

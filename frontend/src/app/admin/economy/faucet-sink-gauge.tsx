@@ -3,22 +3,23 @@
 import React from 'react';
 import { ArrowDownRight, ArrowUpRight, Flame, Droplets, Coins, Percent } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { groupDigits } from '@/lib/money';
 
 export interface FaucetSinkStats {
   readonly summary: {
-    readonly total_minted?: string | number;
-    readonly total_burned?: string | number;
-    readonly total_circulating?: string | number;
-    readonly today_minted?: string | number;
-    readonly today_burned?: string | number;
+    readonly total_minted?: string;
+    readonly total_burned?: string;
+    readonly total_circulating?: string;
+    readonly today_minted?: string;
+    readonly today_burned?: string;
   };
   readonly daily: Array<{
     readonly stat_date: string;
-    readonly faucet_amount: string | number;
-    readonly sink_amount: string | number;
-    readonly tax_amount: string | number;
-    readonly net_change: string | number;
-    readonly sink_ratio_percent: string | number;
+    readonly faucet_amount: string;
+    readonly sink_amount: string;
+    readonly tax_amount: string;
+    readonly net_change: string;
+    readonly sink_ratio_percent: string;
   }>;
 }
 
@@ -30,19 +31,25 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
   if (!stats) return null;
 
   const summary = stats.summary || {};
-  const totalCirculating = Number(summary.total_circulating || 0);
-  const todayMinted = Number(summary.today_minted || 0);
-  const todayBurned = Number(summary.today_burned || 0);
-  const totalMinted = Number(summary.total_minted || 0);
-  const totalBurned = Number(summary.total_burned || 0);
+  const totalCirculating = summary.total_circulating ?? '0';
+  const todayMinted = summary.today_minted ?? '0';
+  const todayBurned = summary.today_burned ?? '0';
+  const totalMinted = summary.total_minted ?? '0';
+  const totalBurned = summary.total_burned ?? '0';
 
-  const todayNet = todayMinted - todayBurned;
-  const todayRatio = todayMinted > 0 ? ((todayBurned / todayMinted) * 100).toFixed(1) : '0.0';
+  const minted = BigInt(todayMinted);
+  const burned = BigInt(todayBurned);
+  const todayNet = (minted - burned).toString();
+  const ratioTenths = minted > 0n ? (burned * 1_000n + minted / 2n) / minted : 0n;
+  const todayRatio = `${ratioTenths / 10n}.${ratioTenths % 10n}`;
+  const ratioAtLeastHalf = ratioTenths >= 500n;
 
-  // Calculate percentage of bar (clamped 0-100)
-  const totalFlow = todayMinted + todayBurned;
-  const mintedPercent = totalFlow > 0 ? (todayMinted / totalFlow) * 100 : 50;
-  const burnedPercent = totalFlow > 0 ? (todayBurned / totalFlow) * 100 : 50;
+  // Only the 0..100 presentation ratio becomes a Number; WLD never does.
+  const totalFlow = minted + burned;
+  const percent = (value: bigint): number =>
+    totalFlow > 0n ? Number((value * 100n + totalFlow / 2n) / totalFlow) : 50;
+  const mintedPercent = percent(minted);
+  const burnedPercent = percent(burned);
 
   return (
     <div className="rounded-3xl border border-primary/30 bg-card p-6 shadow-lg mb-8">
@@ -58,7 +65,7 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
           <span
             className={cn(
               'px-2.5 py-1 rounded-xl text-xs font-extrabold border flex items-center gap-1',
-              Number(todayRatio) >= 50
+              ratioAtLeastHalf
                 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
                 : 'bg-primary/20 text-primary border-primary/40',
             )}
@@ -78,11 +85,11 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
             <Coins className="size-4 text-primary" />
           </div>
           <p className="text-xl font-extrabold text-foreground">
-            {totalCirculating.toLocaleString()}{' '}
+            {groupDigits(totalCirculating)}{' '}
             <span className="text-xs text-primary font-bold">WLD</span>
           </p>
           <p className="text-[11px] text-muted-foreground mt-1">
-            누적 발행: {totalMinted.toLocaleString()} · 소각: {totalBurned.toLocaleString()}
+            누적 발행: {groupDigits(totalMinted)} · 소각: {groupDigits(totalBurned)}
           </p>
         </div>
 
@@ -93,7 +100,7 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
             <Droplets className="size-4 text-blue-400" />
           </div>
           <p className="text-xl font-extrabold text-blue-400">
-            +{todayMinted.toLocaleString()}{' '}
+            +{groupDigits(todayMinted)}{' '}
             <span className="text-xs font-bold">WLD</span>
           </p>
           <p className="text-[11px] text-muted-foreground mt-1">퀘스트/활동 보상/이자 지급</p>
@@ -106,7 +113,7 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
             <Flame className="size-4 text-red-400" />
           </div>
           <p className="text-xl font-extrabold text-red-400">
-            -{todayBurned.toLocaleString()}{' '}
+            -{groupDigits(todayBurned)}{' '}
             <span className="text-xs font-bold">WLD</span>
           </p>
           <p className="text-[11px] text-muted-foreground mt-1">상점 2.0 구매/수수료 100% 소각</p>
@@ -116,7 +123,7 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
         <div className="rounded-2xl border border-border/50 bg-surface/50 p-4">
           <div className="flex items-center justify-between text-muted-foreground mb-1">
             <span className="text-xs font-semibold">금일 순증감 (Net Flow)</span>
-            {todayNet >= 0 ? (
+            {!todayNet.startsWith('-') ? (
               <ArrowUpRight className="size-4 text-primary" />
             ) : (
               <ArrowDownRight className="size-4 text-emerald-400" />
@@ -125,14 +132,14 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
           <p
             className={cn(
               'text-xl font-extrabold',
-              todayNet >= 0 ? 'text-primary' : 'text-emerald-400',
+              !todayNet.startsWith('-') ? 'text-primary' : 'text-emerald-400',
             )}
           >
-            {todayNet >= 0 ? `+${todayNet.toLocaleString()}` : todayNet.toLocaleString()}{' '}
+            {todayNet.startsWith('-') ? groupDigits(todayNet) : `+${groupDigits(todayNet)}`}{' '}
             <span className="text-xs font-bold">WLD</span>
           </p>
           <p className="text-[11px] text-muted-foreground mt-1">
-            {todayNet >= 0 ? '통화 팽창 중' : '통화 수축 디플레이션 중'}
+            {!todayNet.startsWith('-') ? '통화 팽창 중' : '통화 수축 디플레이션 중'}
           </p>
         </div>
       </div>
@@ -181,15 +188,13 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
                   <tr key={d.stat_date} className="hover:bg-surface/40">
                     <td className="px-4 py-2 text-muted-foreground font-mono">{d.stat_date}</td>
                     <td className="px-4 py-2 text-blue-400 font-bold">
-                      +{Number(d.faucet_amount).toLocaleString()}
+                      +{groupDigits(d.faucet_amount)}
                     </td>
                     <td className="px-4 py-2 text-red-400 font-bold">
-                      -{Number(d.sink_amount).toLocaleString()}
+                      -{groupDigits(d.sink_amount)}
                     </td>
                     <td className="px-4 py-2 font-bold text-foreground">
-                      {Number(d.net_change) >= 0
-                        ? `+${Number(d.net_change).toLocaleString()}`
-                        : Number(d.net_change).toLocaleString()}
+                      {d.net_change.startsWith('-') ? groupDigits(d.net_change) : `+${groupDigits(d.net_change)}`}
                     </td>
                     <td className="px-4 py-2 text-right font-extrabold text-primary">
                       {d.sink_ratio_percent}%

@@ -1,6 +1,7 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { IDLE } from '@/lib/action-state';
 import { claimTodayEvent } from './actions';
@@ -28,6 +29,12 @@ export function ClaimEventButton({
   readonly disabled: boolean;
 }) {
   const [state, action] = useActionState(claimTodayEvent, IDLE);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (state.status === 'ok') router.refresh();
+  }, [router, state]);
+
   return (
     <div className="grid gap-2">
       <form action={action}>
