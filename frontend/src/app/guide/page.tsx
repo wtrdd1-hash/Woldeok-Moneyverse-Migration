@@ -15,13 +15,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { TranslatedText as T } from '@/components/translated-text';
 import {
   BEGINNER_TIPS,
@@ -145,17 +139,27 @@ export default function GuidePage() {
                   <div className="space-y-1.5 rounded-lg border bg-muted/30 p-3 text-xs">
                     {pillar.featuresKo.map((feat, fIdx) => (
                       <div key={feat} className="flex items-start gap-2">
-                        <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-500" aria-hidden />
+                        <CheckCircle2
+                          className="mt-0.5 size-3.5 shrink-0 text-emerald-500"
+                          aria-hidden
+                        />
                         <span className="text-muted-foreground">
                           <T korean={feat} english={pillar.featuresEn[fIdx] ?? feat} />
                         </span>
                       </div>
                     ))}
                   </div>
-                  <Button asChild variant="outline" className="w-full justify-between text-xs font-semibold">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="w-full justify-between text-xs font-semibold"
+                  >
                     <Link href={pillar.link.href}>
                       <span>
-                        <T korean={pillar.link.label} english={pillar.link.labelEn ?? pillar.link.label} />
+                        <T
+                          korean={pillar.link.label}
+                          english={pillar.link.labelEn ?? pillar.link.label}
+                        />
                       </span>
                       <ChevronRight className="size-3.5" aria-hidden />
                     </Link>
@@ -205,7 +209,8 @@ export default function GuidePage() {
                 stepEn: '2. Accumulation',
                 titleKo: '은행 복리 예금 & 국채',
                 titleEn: 'Bank Savings & Bonds',
-                descKo: '모은 WLD를 은행에 예치하고 누적 이자를 직접 정산하거나 가상 국채를 이용합니다.',
+                descKo:
+                  '모은 WLD를 은행에 예치하고 누적 이자를 직접 정산하거나 가상 국채를 이용합니다.',
                 descEn: 'Deposit WLD, claim accrued savings interest, or use virtual bonds.',
                 icon: Landmark,
               },
@@ -214,8 +219,10 @@ export default function GuidePage() {
                 stepEn: '3. Expansion',
                 titleKo: '주식 매매 & 사업 창업',
                 titleEn: 'Stocks & Enterprises',
-                descKo: '주식 거래소에서 지분을 매매하고 나만의 사업체를 설립해 매일 배당을 받습니다.',
-                descEn: 'Trade shares on the exchange and found enterprises to earn daily dividends.',
+                descKo:
+                  '주식 거래소에서 지분을 매매하고 나만의 사업체를 설립해 매일 배당을 받습니다.',
+                descEn:
+                  'Trade shares on the exchange and found enterprises to earn daily dividends.',
                 icon: TrendingUp,
               },
               {
@@ -224,7 +231,8 @@ export default function GuidePage() {
                 titleKo: '상점 도구 & 카지노 게임',
                 titleEn: 'Shop Tools & Casino',
                 descKo: '생산 장비를 상점에서 구입하고 한도가 적용되는 가상 미니게임을 즐깁니다.',
-                descEn: 'Acquire tools in the shop and play virtual mini-games with daily limits.',
+                descEn:
+                  'Acquire tools in the shop and play virtual mini-games with optional self-limits.',
                 icon: Store,
               },
             ].map(({ step, stepEn, titleKo, titleEn, descKo, descEn, icon: Icon }) => (
@@ -353,7 +361,12 @@ export default function GuidePage() {
                   </div>
                 </div>
                 {step.link && (
-                  <Button asChild size="sm" variant="outline" className="shrink-0 self-start text-xs font-semibold">
+                  <Button
+                    asChild
+                    size="sm"
+                    variant="outline"
+                    className="shrink-0 self-start text-xs font-semibold"
+                  >
                     <Link href={step.link.href}>
                       <T korean={step.link.label} english={step.link.labelEn ?? step.link.label} />
                       <ArrowRight className="ml-1 size-3.5" aria-hidden />
@@ -366,14 +379,20 @@ export default function GuidePage() {
                 <CardContent className="pt-0 sm:pl-[68px]">
                   <div className="rounded-xl border bg-muted/30 p-3.5">
                     <p className="mb-2 text-xs font-extrabold text-foreground">
-                      <T korean="화면에서 눈여겨볼 핵심 포인트:" english="Key Points to Look for on Screen:" />
+                      <T
+                        korean="화면에서 눈여겨볼 핵심 포인트:"
+                        english="Key Points to Look for on Screen:"
+                      />
                     </p>
                     <ul className="grid gap-1.5 text-xs text-muted-foreground sm:grid-cols-2">
                       {step.points.map((point, ptIdx) => (
                         <li key={point} className="flex items-center gap-2">
                           <CheckCircle2 className="size-3.5 text-emerald-500" aria-hidden />
                           <span>
-                            <T korean={point} english={step.pointsEn ? step.pointsEn[ptIdx] ?? point : point} />
+                            <T
+                              korean={point}
+                              english={step.pointsEn ? (step.pointsEn[ptIdx] ?? point) : point}
+                            />
                           </span>
                         </li>
                       ))}
@@ -471,25 +490,57 @@ export default function GuidePage() {
             <CardHeader>
               <CardTitle className="text-base">패킷·요청 유실 방지</CardTitle>
               <CardDescription className="leading-relaxed">
-                활동 이벤트에 고유 ID를 붙이고, 실패한 전송은 브라우저에 보관해 재시도하며 서버는 중복을 제거합니다. 원장 변경 요청도 멱등 키를 사용합니다.
+                활동 이벤트에 고유 ID를 붙이고, 실패한 전송은 브라우저에 보관해 재시도하며 서버는
+                중복을 제거합니다. 원장 변경 요청도 멱등 키를 사용합니다.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-3 text-xs font-semibold text-primary">
-              <a href="https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon" target="_blank" rel="noreferrer">MDN sendBeacon ↗</a>
-              <a href="https://docs.stripe.com/api/idempotent_requests" target="_blank" rel="noreferrer">Stripe 멱등 요청 ↗</a>
-              <a href="https://docs.discord.com/developers/topics/rate-limits" target="_blank" rel="noreferrer">Discord 재시도 정책 ↗</a>
+              <a
+                href="https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon"
+                target="_blank"
+                rel="noreferrer"
+              >
+                MDN sendBeacon ↗
+              </a>
+              <a
+                href="https://docs.stripe.com/api/idempotent_requests"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Stripe 멱등 요청 ↗
+              </a>
+              <a
+                href="https://docs.discord.com/developers/topics/rate-limits"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Discord 재시도 정책 ↗
+              </a>
             </CardContent>
           </Card>
           <Card>
             <CardHeader>
               <CardTitle className="text-base">보상 제한 대신 소비처 확장</CardTitle>
               <CardDescription className="leading-relaxed">
-                직업 작업은 일일 횟수 제한 없이 매번 전액 보상합니다. 발행된 WLD는 상점의 반복 구매 상품, 금융·사업·거래·여가 기능으로 순환시키고 운영 지표로 균형을 점검합니다.
+                직업 작업은 일일 횟수 제한 없이 매번 전액 보상합니다. 발행된 WLD는 상점의 반복 구매
+                상품, 금융·사업·거래·여가 기능으로 순환시키고 운영 지표로 균형을 점검합니다.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-3 text-xs font-semibold text-primary">
-              <a href="https://docs.unity.com/en-us/economy/add-virtual-purchase" target="_blank" rel="noreferrer">Unity 가상 구매 ↗</a>
-              <a href="https://learn.microsoft.com/en-us/xbox/playfab/economy-monetization/economy-v2/quickstart" target="_blank" rel="noreferrer">PlayFab 경제 ↗</a>
+              <a
+                href="https://docs.unity.com/en-us/economy/add-virtual-purchase"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Unity 가상 구매 ↗
+              </a>
+              <a
+                href="https://learn.microsoft.com/en-us/xbox/playfab/economy-monetization/economy-v2/quickstart"
+                target="_blank"
+                rel="noreferrer"
+              >
+                PlayFab 경제 ↗
+              </a>
             </CardContent>
           </Card>
         </div>
@@ -541,7 +592,10 @@ export default function GuidePage() {
             <Sparkles className="size-6" aria-hidden />
           </span>
           <h2 className="text-2xl font-extrabold sm:text-3xl">
-            <T korean="준비됐다면, 지금 바로 시작해 보세요!" english="Ready? Begin Your Journey Now!" />
+            <T
+              korean="준비됐다면, 지금 바로 시작해 보세요!"
+              english="Ready? Begin Your Journey Now!"
+            />
           </h2>
           <p className="text-xs leading-relaxed text-muted-foreground sm:text-sm [word-break:keep-all]">
             <T

@@ -224,6 +224,12 @@ export interface CasinoDicePlayRow {
   readonly worst_case_loss: string;
 }
 
+export interface CasinoSelfLimitRow {
+  readonly daily_bet_limit: string;
+  readonly daily_loss_limit: string;
+  readonly locked_until: string | null;
+}
+
 /**
  * Database gateway for the coin game.
  *
@@ -459,6 +465,20 @@ export class CasinoRepository {
       [key, actor, game, choice, String(stake)],
     );
     if (!row) throw new Error('casino_play_dice did not return a row');
+    return row;
+  }
+
+  async selfLimit(actor: unknown): Promise<CasinoSelfLimitRow> {
+    assertUuid(actor, 'actor');
+    const row = await queryOne<CasinoSelfLimitRow>(
+      this.pool,
+      `SELECT limits.daily_bet_limit::text AS daily_bet_limit,
+              limits.daily_loss_limit::text AS daily_loss_limit,
+              limits.locked_until::text AS locked_until
+       FROM public.member_casino_self_limit($1::uuid) AS limits`,
+      [actor],
+    );
+    if (!row) throw new Error('member_casino_self_limit did not return a row');
     return row;
   }
 }

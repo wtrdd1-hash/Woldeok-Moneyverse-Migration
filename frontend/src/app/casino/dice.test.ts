@@ -81,10 +81,12 @@ describe('every game the screen declares is reachable on it', () => {
 
   it('asks for the per-game terms the forms are priced from', () => {
     expect(page).toContain('/api/v1/casino/games/terms');
+    expect(page).toContain('/api/v1/casino/self-limit');
   });
 
   it('does not filter the play history down to one game', () => {
     expect(page).toContain('CASINO_TRANSACTION_TYPES');
+    expect(page).toContain('ThemeGameCard');
     expect(page).not.toContain("=== 'VIRTUAL_COIN_GAME'");
   });
 });

@@ -304,4 +304,13 @@ export class CasinoController {
       locked_until: body.lockedUntil ?? null,
     };
   }
+
+  @Get('self-limit')
+  @ApiOperation({ summary: 'Read the daily limits chosen by the current member' })
+  async selfLimit(@Req() request: RequestWithSession) {
+    return this.guarded(() => this.repository().selfLimit(requireUserId(request)), {
+      conflict: 'the self-limit is unavailable',
+      forbidden: 'an active membership is required to read a casino limit',
+    });
+  }
 }

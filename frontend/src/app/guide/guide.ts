@@ -76,19 +76,22 @@ export const BEGINNER_TIPS: readonly BeginnerTip[] = [
     title: '처음에는 하나만',
     titleEn: 'Start with Just One',
     body: '퀘스트와 작업을 여러 개 펼치기보다 가장 쉬운 활동 하나를 끝까지 마쳐 보세요.',
-    bodyEn: 'Rather than starting multiple quests at once, finish one simple task from start to end.',
+    bodyEn:
+      'Rather than starting multiple quests at once, finish one simple task from start to end.',
   },
   {
     title: '남는 WLD는 은행 복리 예금에',
     titleEn: 'Deposit Idle WLD in Savings',
     body: '지갑에 모인 WLD를 은행 복리 예금에 넣으면 일 단위로 이자가 누적됩니다. 은행 화면에서 정산을 요청하면 원장에 반영됩니다.',
-    bodyEn: 'Deposit earned WLD into compound savings. Interest accrues daily and is posted to the ledger when you claim it from the bank.',
+    bodyEn:
+      'Deposit earned WLD into compound savings. Interest accrues daily and is posted to the ledger when you claim it from the bank.',
   },
   {
     title: '숫자는 지갑과 원장에서 확인',
     titleEn: 'Verify Numbers in Wallet & Ledger',
     body: '보상, 이자, 배당금 등 처리 완료된 재화 변동은 복식부기 원장과 내 지갑 기록에서 확인할 수 있습니다.',
-    bodyEn: 'Completed payouts, interest claims, and dividends are recorded in the double-entry ledger and wallet history.',
+    bodyEn:
+      'Completed payouts, interest claims, and dividends are recorded in the double-entry ledger and wallet history.',
   },
 ];
 
@@ -145,11 +148,7 @@ export const GUIDE_STEPS: readonly GuideStep[] = [
       'Visit Earn → Quests to view daily quests, weekly goals, and NPC orders. Picking the simplest one first is recommended.',
       'Quests are recorded upon actual completion. Please only submit genuine activities.',
     ],
-    points: [
-      '수행할 활동 위치와 조건',
-      '완료 확인 방식 및 보상 WLD',
-      '주문이 유지되는 시간',
-    ],
+    points: ['수행할 활동 위치와 조건', '완료 확인 방식 및 보상 WLD', '주문이 유지되는 시간'],
     pointsEn: [
       'Activity location and requirements',
       'Completion verification method and WLD reward',
@@ -309,18 +308,18 @@ export const ECONOMY_PILLARS: readonly EconomyPillar[] = [
     titleKo: '🎲 가상 미니게임 엔터테인먼트',
     titleEn: '🎲 Virtual Mini-Game Entertainment',
     descKo:
-      '서버가 정산하는 동전·주사위 3개 규칙과 이를 활용한 슬롯·하이로우 테마 화면을 제공합니다. 모든 이용에는 일일 베팅 및 손실 한도가 적용됩니다.',
+      '서버가 정산하는 동전·주사위 규칙과 이를 활용한 슬롯·하이로우·컬러 휠·보물 상자·럭키 젬 테마 화면을 제공합니다. 시스템 일일 상한은 없으며 사용자가 원할 때 자가 한도를 설정합니다.',
     descEn:
-      'Play three server-settled coin and dice rules plus Slots and Hi-Lo themed interfaces. Daily betting and loss limits apply to every play.',
+      'Play server-settled coin and dice rules through Slots, Hi-Lo, Color Wheel, Treasure and Lucky Gem themes. There is no platform daily cap; members can opt into self-limits.',
     featuresKo: [
       '3개 서버 게임 규칙과 2개 테마형 화면',
       '서버 트랜잭션으로 결과 생성과 WLD 정산',
-      '과몰입 방지 일일 최대 베팅 및 손실 한도 규정',
+      '사용자가 직접 선택하는 일일 베팅 및 손실 자가 한도',
     ],
     featuresEn: [
       'Three server game rules and two themed interfaces',
       'Server-transaction result generation and WLD settlement',
-      'Responsible daily bet caps and loss limits',
+      'Optional member-controlled daily stake and loss limits',
     ],
     link: { href: '/casino', label: '카지노 게임장 가기', labelEn: 'Visit Casino' },
   },
@@ -467,9 +466,9 @@ export const GUIDE_FAQS: readonly GuideFaq[] = [
     question: '카지노 미니게임의 공정성과 한도는 어떻게 되나요?',
     questionEn: 'How are casino game fairness and limits ensured?',
     answer:
-      '카지노(/casino)는 동전·주사위 기반 3개 서버 게임 규칙과 슬롯·하이로우 테마 화면을 제공합니다. 결과 생성과 WLD 정산은 서버 트랜잭션에서 처리되며, 일일 베팅 금액 및 손실 한도가 적용됩니다.',
+      '카지노(/casino)는 동전·주사위 기반 서버 규칙과 여러 테마 화면을 제공합니다. 결과 생성과 WLD 정산은 서버 트랜잭션에서 처리되며, 시스템 일일 상한 대신 사용자가 선택한 자가 한도만 적용됩니다.',
     answerEn:
-      'The casino provides three server-settled coin and dice rules plus Slots and Hi-Lo themed interfaces. Results and WLD settlement run in server transactions, with daily betting and loss limits.',
+      'The casino provides server-settled coin and dice rules through several themed interfaces. Results and WLD settlement run in server transactions, with only member-selected self-limits and no platform daily cap.',
     link: { href: '/casino', label: '카지노 둘러보기', labelEn: 'Visit Casino' },
   },
   {
