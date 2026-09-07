@@ -44,29 +44,27 @@ describe('same-origin media relays', () => {
     );
   });
 
-  it('relays a board image only through the authenticated board endpoint', async () => {
+  it('relays a visible board image through the public board endpoint without a member cookie', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     const fetch = vi.fn(
       async () =>
         new Response(new Uint8Array([1]), {
-          headers: { 'content-type': 'image/png', 'cache-control': 'private, max-age=300' },
+          headers: { 'content-type': 'image/png', 'cache-control': 'public, max-age=300' },
         }),
     );
     vi.stubGlobal('fetch', fetch);
 
-    const response = await boardImage(
-      new Request(`https://example.test/media/board/${KEY}`, {
-        headers: { cookie: 'moneyverse_session=member' },
-      }),
-      { params: Promise.resolve({ key: KEY }) },
-    );
+    const response = await boardImage(new Request(`https://example.test/media/board/${KEY}`), {
+      params: Promise.resolve({ key: KEY }),
+    });
 
     expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe('public, max-age=300');
     expect(fetch).toHaveBeenCalledWith(
-      `http://127.0.0.1:3020/api/v1/board/images/${KEY}`,
+      `http://127.0.0.1:3020/api/v1/board/public/images/${KEY}`,
       expect.objectContaining({
         cache: 'no-store',
-        headers: expect.objectContaining({ cookie: 'moneyverse_session=member' }),
+        headers: { 'x-internal-token': 'x'.repeat(32) },
       }),
     );
   });
