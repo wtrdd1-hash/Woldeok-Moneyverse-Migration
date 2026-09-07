@@ -429,18 +429,18 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
     });
   });
 
-  describe('the uncapped platform usage shared by every game', () => {
+  describe('the balanced platform usage shared by every game', () => {
     it('shows a coin stake in every game’s usage', async () => {
       await rolledBack(async (client) => {
         const actor = await player(client);
-        await playCoin(client, actor, 500);
+        await playCoin(client, actor, 200);
 
         const terms = await termsFor(client, actor);
         for (const game of ['coin', ...GAMES]) {
           const row = termsRow(terms, game);
-          expect(row.daily_stake_used, `${game} did not count the coin play`).toBe('500');
-          expect(row.remaining_stake, `${game} headroom after a 500 coin stake`).toBe(
-            '8999999999999999500',
+          expect(row.daily_stake_used, `${game} did not count the coin play`).toBe('200');
+          expect(row.remaining_stake, `${game} headroom after a 200 coin stake`).toBe(
+            '1800',
           );
         }
       });
@@ -449,7 +449,7 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
     it('shows a dice stake against the coin’s headroom', async () => {
       await rolledBack(async (client) => {
         const actor = await player(client);
-        await playDice(client, actor, 'dice_parity', 'odd', 500);
+        await playDice(client, actor, 'dice_parity', 'odd', 200);
 
         const { rows } = await client.query<{ daily_stake_used: string; remaining_stake: string }>(
           `SELECT daily_stake_used::text, remaining_stake::text
@@ -457,24 +457,21 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
           [actor],
         );
         const coin = firstRow(rows, 'casino_coin_terms');
-        expect(coin.daily_stake_used, 'the coin did not count the dice play').toBe('500');
-        expect(coin.remaining_stake).toBe('8999999999999999500');
+        expect(coin.daily_stake_used, 'the coin did not count the dice play').toBe('200');
+        expect(coin.remaining_stake).toBe('1800');
       });
     });
 
-    it('does not impose the former 3,000 WLD platform ceiling', async () => {
+    it('publishes the balanced shared exposure limits to every game', async () => {
       await rolledBack(async (client) => {
         const actor = await player(client);
-        for (let play = 0; play < 6; play += 1) {
-          const attempt =
-            play % 2 === 0
-              ? () => playCoin(client, actor, 500)
-              : () => playDice(client, actor, 'dice_parity', 'even', 500);
-          expect(await refused(client, attempt)).toBeNull();
+        const terms = await termsFor(client, actor);
+        for (const game of ['coin', ...GAMES]) {
+          const row = termsRow(terms, game);
+          expect(row.remaining_stake, `${game} stake headroom`).toBe('2000');
+          expect(row.remaining_loss, `${game} loss headroom`).toBe('1000');
+          expect(row.worst_case_loss, `${game} worst case`).toBe('1000');
         }
-        expect(
-          await refused(client, () => playDice(client, actor, 'dice_number', '3', 500)),
-        ).toBeNull();
       });
     });
 
@@ -486,16 +483,16 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
         const actor = await player(client);
         const terms = await termsFor(client, actor);
         const parity = termsRow(terms, 'dice_parity');
-        expect(parity.remaining_stake).toBe('9000000000000000000');
-        expect(parity.remaining_loss).toBe('8999999999999999999');
+        expect(parity.remaining_stake).toBe('2000');
+        expect(parity.remaining_loss).toBe('1000');
         expect(parity.worst_case_loss, 'the lesser of the two allowances').toBe(
-          '8999999999999999999',
+          '1000',
         );
 
-        const { rows } = await playDice(client, actor, 'dice_parity', 'odd', 500);
+        const { rows } = await playDice(client, actor, 'dice_parity', 'odd', 200);
         const played = firstRow(rows, 'casino_play_dice');
-        expect(played.worst_case_loss, 'not the 500 that was staked').not.toBe('500');
-        expect(BigInt(played.worst_case_loss) > 1500n).toBe(true);
+        expect(played.worst_case_loss, 'not the 200 that was staked').not.toBe('200');
+        expect(BigInt(played.worst_case_loss) >= 800n).toBe(true);
       });
     });
   });
@@ -520,10 +517,10 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
     it('counts a coin stake against the member’s own daily limit before a roll', async () => {
       await rolledBack(async (client) => {
         const actor = await player(client);
-        await client.query('SELECT public.member_set_casino_self_limit($1, 500, 500, NULL)', [
+        await client.query('SELECT public.member_set_casino_self_limit($1, 200, 500, NULL)', [
           actor,
         ]);
-        await playCoin(client, actor, 500);
+        await playCoin(client, actor, 200);
         const error = await refused(client, () =>
           playDice(client, actor, 'dice_parity', 'odd', 100),
         );

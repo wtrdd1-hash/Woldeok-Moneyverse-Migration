@@ -9,6 +9,8 @@
 export interface ActionState {
   readonly status: 'idle' | 'ok' | 'error';
   readonly message?: string;
+  /** Optional semantic tone for a successfully processed outcome. */
+  readonly tone?: 'success' | 'neutral' | 'negative';
 }
 
 export const IDLE: ActionState = { status: 'idle' };
