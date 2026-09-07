@@ -143,8 +143,8 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
     );
     expect(rows[0]).toEqual({
       min_stake: '10',
-      max_stake: '500',
-      daily_stake_limit: '9000000000000000000',
+      max_stake: '200',
+      daily_stake_limit: '2000',
     });
   });
 
@@ -176,22 +176,20 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
     });
   });
 
-  it('does not stop a member at the former daily platform limit', async () => {
+  it('publishes the balanced daily exposure policy', async () => {
     await rolledBack(async (client) => {
       const actor = await player(client);
-      for (let play = 0; play < 7; play += 1) {
-        const error = await rejectionOf(() =>
-          client.query(`SELECT public.casino_play_coin($1, $2, 'heads', 500)`, [
-            randomUUID(),
-            actor,
-          ]),
-        );
-        expect(error).toBeNull();
-      }
+      const { rows } = await client.query<{ daily_stake_limit: string; daily_loss_limit: string }>(
+        `SELECT daily_stake_limit::text, daily_loss_limit::text
+         FROM public.casino_coin_terms($1)`,
+        [actor],
+      );
+      expect(rows[0]?.daily_stake_limit).toBe('2000');
+      expect(rows[0]?.daily_loss_limit).toBe('1000');
     });
   });
 
-  it.each([9, 501])('refuses a stake of %i, outside the policy range', async (stake) => {
+  it.each([9, 201])('refuses a stake of %i, outside the policy range', async (stake) => {
     await rolledBack(async (client) => {
       const actor = await player(client);
       const error = await rejectionOf(() =>

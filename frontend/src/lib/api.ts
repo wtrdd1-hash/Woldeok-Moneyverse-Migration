@@ -66,6 +66,8 @@ export interface ApiRequest {
   readonly csrfToken?: string;
   /** Seconds. Omit for no caching, which is right for anything per-caller. */
   readonly revalidate?: number;
+  /** Abort a slow internal API call instead of leaving a server action pending forever. */
+  readonly timeoutMs?: number;
   /**
    * Sends this cookie header instead of the caller's.
    *
@@ -82,7 +84,7 @@ export interface ApiRequest {
  * it decides from what is forwarded here, not from anything Next asserts.
  */
 export async function api<T>(path: string, request: ApiRequest = {}): Promise<T> {
-  const { method = 'GET', body, csrfToken, revalidate } = request;
+  const { method = 'GET', body, csrfToken, revalidate, timeoutMs } = request;
 
   const cookieHeader = request.cookieHeader ?? (await callerCookies());
 
@@ -136,6 +138,7 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
     // A per-caller response must never be cached: it carries one member's
     // balances. Only pages that pass an explicit revalidate are public.
     ...(revalidate === undefined ? { cache: 'no-store' as const } : { next: { revalidate } }),
+    ...(timeoutMs === undefined ? {} : { signal: AbortSignal.timeout(timeoutMs) }),
   });
 
   if (response.status === 204) return undefined as T;
