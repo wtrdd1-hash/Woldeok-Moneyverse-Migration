@@ -4,7 +4,11 @@
 # by workspace protocol, and pnpm resolves it from the lockfile at the root.
 FROM node:26.8.1-alpine AS build
 WORKDIR /repo
-RUN corepack enable
+# Node 26 ships without corepack, so the package manager is installed rather
+# than enabled. The version is the one `packageManager` in the root
+# package.json pins, and it is written here as well because this line runs
+# before that file is copied.
+RUN npm install --global --no-fund --no-audit pnpm@10.0.0
 
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json tsconfig.base.json .npmrc ./
 COPY packages/contract/package.json packages/contract/
