@@ -3,7 +3,7 @@
 # The build needs the whole workspace: the frontend imports
 # @moneyverse/contract by workspace protocol, and pnpm resolves it from the
 # lockfile at the root.
-FROM node:24.20.0-alpine AS build
+FROM node:26.8.1-alpine AS build
 WORKDIR /repo
 RUN corepack enable
 
@@ -34,7 +34,7 @@ ARG ADSENSE_HOME_SLOT=2118692561
 ENV APP_BASE_URL=${APP_BASE_URL} SEO_INDEXING_ENABLED=${SEO_INDEXING_ENABLED} ADS_ENABLED=${ADS_ENABLED} ADSENSE_PUBLISHER_ID=${ADSENSE_PUBLISHER_ID} ADSENSE_HOME_SLOT=${ADSENSE_HOME_SLOT}
 RUN pnpm --filter @moneyverse/contract build && pnpm --filter @moneyverse/frontend build
 
-FROM node:24.20.0-alpine
+FROM node:26.8.1-alpine
 
 # Keep the runtime smaller than the build image and remove package-manager code
 # that the service never executes. Refresh Alpine packages first so rebuilds
