@@ -12,7 +12,7 @@ const MIN_AD_WIDTH = 250;
 
 export function AdSenseAd({ publisherId, slot }: { readonly publisherId: string; readonly slot: string }) {
   const requested = useRef(false);
-  const adRef = useRef<HTMLElement | null>(null);
+  const adRef = useRef<HTMLModElement | null>(null);
 
   useEffect(() => {
     const element = adRef.current;
