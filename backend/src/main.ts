@@ -66,6 +66,7 @@ async function bootstrap(): Promise<void> {
   // A member's gallery submission. Smaller than the operator's, because this
   // one is reachable by anybody signed in.
   app.use('/api/v1/photos/uploads', raw({ type: '*/*', limit: '4mb' }));
+  app.use('/api/v1/board/images/uploads', raw({ type: '*/*', limit: '4mb' }));
   // A member's own picture, on the same terms as an operator's gallery
   // upload: the bytes arrive raw and `validateImageUpload` decides whether
   // they are an image. The cap is the smaller one because this is one avatar
@@ -111,15 +112,13 @@ async function bootstrap(): Promise<void> {
   // emitter here rather than creating one, because the lobby owns the
   // server's limits — connection caps, handshake rate, the origin check — and
   // a second server would be a second door with none of them.
-  app
-    .get(MarketBroadcast, { strict: false })
-    ?.attach(
-      (event, payload) => io.to(MARKET_ROOM).emit(event, payload),
-      // The room, not the whole server: `clientsCount` counts every visitor
-      // on every page, so the market was read once a second whenever anybody
-      // was anywhere on the site.
-      () => (io.sockets.adapter.rooms.get(MARKET_ROOM)?.size ?? 0) > 0,
-    );
+  app.get(MarketBroadcast, { strict: false })?.attach(
+    (event, payload) => io.to(MARKET_ROOM).emit(event, payload),
+    // The room, not the whole server: `clientsCount` counts every visitor
+    // on every page, so the market was read once a second whenever anybody
+    // was anywhere on the site.
+    () => (io.sockets.adapter.rooms.get(MARKET_ROOM)?.size ?? 0) > 0,
+  );
 
   // Loopback by default, not 0.0.0.0. This is an internal service; binding it
   // to every interface by default is how an "internal" service becomes

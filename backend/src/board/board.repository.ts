@@ -20,6 +20,8 @@ export interface BoardPostSummaryRow {
   /** bigint, which node-postgres hands back as a string. */
   readonly comment_count: string;
   readonly mine: boolean;
+  readonly image_storage_key: string | null;
+  readonly image_alt_text: string | null;
 }
 
 export interface BoardPostRow {
@@ -30,6 +32,8 @@ export interface BoardPostRow {
   readonly created_at: Date;
   readonly updated_at: Date | null;
   readonly mine: boolean;
+  readonly image_storage_key: string | null;
+  readonly image_alt_text: string | null;
 }
 
 export interface BoardCommentRow {
@@ -45,8 +49,9 @@ interface DeletedRow {
 }
 
 const SUMMARY_COLUMNS =
-  'post_id::text,title,author_name,created_at,updated_at,comment_count,mine';
-const POST_COLUMNS = 'post_id::text,title,body,author_name,created_at,updated_at,mine';
+  'post_id::text,title,author_name,created_at,updated_at,comment_count,mine,image_storage_key,image_alt_text';
+const POST_COLUMNS =
+  'post_id::text,title,body,author_name,created_at,updated_at,mine,image_storage_key,image_alt_text';
 const COMMENT_COLUMNS = 'comment_id::text,body,author_name,created_at,mine';
 
 export class PostgresBoardRepository implements BoardRepository {
@@ -78,17 +83,16 @@ export class PostgresBoardRepository implements BoardRepository {
     title: string,
     body: string,
     idempotencyKey: string,
+    imageStorageKey: string | null,
+    imageAltText: string | null,
   ): Promise<BoardPostRow> {
-    // 044's create still returns 044's shape, which has no updated_at. A post
-    // that was just written has not been edited, so the column is supplied
-    // here rather than by widening a function production has already applied.
-    const row = await queryOne<Omit<BoardPostRow, 'updated_at'>>(
+    const row = await queryOne<BoardPostRow>(
       this.pool,
-      'SELECT post_id::text,title,body,author_name,created_at,mine FROM public.member_board_create($1,$2,$3,$4)',
-      [actorUserId, title, body, idempotencyKey],
+      `SELECT ${POST_COLUMNS} FROM public.member_board_create_with_image($1,$2,$3,$4,$5,$6)`,
+      [actorUserId, title, body, idempotencyKey, imageStorageKey, imageAltText],
     );
     if (!row) throw new Error('board did not return a post');
-    return { ...row, updated_at: null };
+    return row;
   }
 
   async update(
@@ -139,6 +143,15 @@ export class PostgresBoardRepository implements BoardRepository {
     );
     if (!row) throw new Error('board did not return a comment');
     return row;
+  }
+
+  async imageVisible(actorUserId: string, storageKey: string): Promise<boolean> {
+    const row = await queryOne<{ readonly visible: boolean }>(
+      this.pool,
+      'SELECT public.member_board_image_visible($1,$2) AS visible',
+      [actorUserId, storageKey],
+    );
+    return row?.visible === true;
   }
 
   async removeComment(

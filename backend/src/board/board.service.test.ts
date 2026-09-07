@@ -31,6 +31,7 @@ function repository(overrides: Partial<BoardRepository> = {}): BoardRepository {
       throw new Error('not stubbed');
     },
     removeComment: async () => false,
+    imageVisible: async () => false,
     ...overrides,
   };
 }
@@ -66,6 +67,33 @@ describe('BoardService', () => {
     const [post] = await board.list(ACTOR);
     expect(post?.commentCount).toBe(3);
     expect(post?.createdAt).toBe(WRITTEN.toISOString());
+  });
+
+  it('keeps a board image private path attached to the post', async () => {
+    const storageKey = '55555555-5555-4555-8555-555555555555.png';
+    const board = new BoardService(
+      repository({
+        get: async () => ({
+          post_id: POST,
+          title: 'A title',
+          body: 'A body',
+          author_name: 'A member',
+          created_at: WRITTEN,
+          updated_at: null,
+          mine: false,
+          image_storage_key: storageKey,
+          image_alt_text: 'A chart screenshot',
+        }),
+        imageVisible: async (_actor, key) => key === storageKey,
+      }),
+    );
+
+    await expect(board.get(ACTOR, POST)).resolves.toMatchObject({
+      imageUrl: `/media/board/${storageKey}`,
+      imageAltText: 'A chart screenshot',
+    });
+    await expect(board.imageVisible(ACTOR, storageKey)).resolves.toBe(true);
+    await expect(board.imageVisible(ACTOR, '../secret.png')).resolves.toBe(false);
   });
 
   it('reports an unedited post as unedited rather than as an invalid time', async () => {
