@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
-import { groupDigits } from '@/lib/money';
+import { canonicalIntegerString, groupDigits } from '@/lib/money';
 import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
 import {
   CLOSURE_COPY,
@@ -14,7 +14,25 @@ import {
   resultOf,
   selfLimitAmount,
 } from './coin';
+import type { PlayResult } from './coin';
 import { faceRolled, isDieFace, isParityChoice, parityLabel } from './dice';
+
+
+export interface CasinoPlayState extends ActionState {
+  readonly result?: PlayResult;
+  readonly netAmount?: string;
+  readonly replayed?: boolean;
+  readonly outcomeFace?: number;
+  readonly coinOutcome?: string;
+}
+
+export const CASINO_IDLE: CasinoPlayState = { status: 'idle' };
+
+function resultTone(result: PlayResult): NonNullable<ActionState['tone']> {
+  if (result === 'win') return 'success';
+  if (result === 'loss') return 'negative';
+  return 'neutral';
+}
 
 /**
  * The coin game's two writes.
@@ -37,7 +55,7 @@ import { faceRolled, isDieFace, isParityChoice, parityLabel } from './dice';
  * happened, and neither tells the member whether waiting will help. The API
  * sends a `code` for exactly this reason.
  */
-function closedOr(error: unknown, fallback: string): ActionState {
+function closedOr(error: unknown, fallback: string): CasinoPlayState {
   const closure = closureOf(error);
   if (closure) return { status: 'error', message: CLOSURE_COPY[closure].title };
   return failure(error, fallback);
@@ -46,11 +64,11 @@ function closedOr(error: unknown, fallback: string): ActionState {
 interface PlayReceipt {
   readonly play_id: string;
   readonly outcome: string;
-  readonly net_amount: string;
+  readonly net_amount: unknown;
   readonly replayed: boolean;
 }
 
-export async function playCoin(_previous: ActionState, formData: FormData): Promise<ActionState> {
+export async function playCoin(_previous: CasinoPlayState, formData: FormData): Promise<CasinoPlayState> {
   const choice = String(formData.get('choice') ?? '');
   const stake = wholeAmount(formData.get('stake'));
 
@@ -75,8 +93,10 @@ export async function playCoin(_previous: ActionState, formData: FormData): Prom
     // answers with the stored play, which may have been for a different
     // amount than the form currently holds.
     const face = faceLabel(receipt.outcome);
-    const amount = groupDigits(absAmount(receipt.net_amount));
-    const result = resultOf(receipt.net_amount);
+    const netAmount = canonicalIntegerString(receipt.net_amount);
+    if (netAmount === null) throw new TypeError('casino coin receipt returned an invalid net amount');
+    const amount = groupDigits(absAmount(netAmount));
+    const result = resultOf(netAmount);
     const outcome =
       result === 'win'
         ? `${face}이 나왔어요. ${amount} WLD를 얻었어요.`
@@ -87,6 +107,11 @@ export async function playCoin(_previous: ActionState, formData: FormData): Prom
     return {
       status: 'ok',
       message: receipt.replayed ? `이미 처리된 판이에요. ${outcome}` : outcome,
+      tone: resultTone(result),
+      result,
+      netAmount,
+      replayed: receipt.replayed,
+      coinOutcome: receipt.outcome,
     };
   } catch (error) {
     return closedOr(
@@ -97,8 +122,8 @@ export async function playCoin(_previous: ActionState, formData: FormData): Prom
 }
 
 interface SelfLimitReceipt {
-  readonly daily_bet_limit: string;
-  readonly daily_loss_limit: string;
+  readonly daily_bet_limit: unknown;
+  readonly daily_loss_limit: unknown;
   readonly locked_until: string | null;
 }
 
@@ -146,7 +171,7 @@ export async function setSelfLimit(
     return {
       status: 'ok',
       message: receipt.locked_until
-        ? `${stored} 잠금이 풀릴 때까지는 한도를 바꿀 수 없어요.`
+        ? `${stored} 잠금이 풀릴 때까지 카지노 플레이와 한도 변경이 모두 차단돼요.`
         : stored,
     };
   } catch (error) {
@@ -162,7 +187,7 @@ export async function setSelfLimit(
 interface DiceReceipt {
   readonly play_id: string;
   readonly outcome_face: number;
-  readonly net_amount: string;
+  readonly net_amount: unknown;
   readonly replayed: boolean;
 }
 
@@ -180,7 +205,7 @@ async function rollDie(
   formData: FormData,
   choiceIsValid: (choice: string) => boolean,
   choiceHelp: string,
-): Promise<ActionState> {
+): Promise<CasinoPlayState> {
   const choice = String(formData.get('choice') ?? '');
   const stake = wholeAmount(formData.get('stake'));
 
@@ -201,8 +226,10 @@ async function rollDie(
     // is never reported back as the result: a replay answers with the stored
     // roll, which may have been for a different amount than the form holds.
     const face = faceRolled(receipt.outcome_face);
-    const amount = groupDigits(absAmount(receipt.net_amount));
-    const result = resultOf(receipt.net_amount);
+    const netAmount = canonicalIntegerString(receipt.net_amount);
+    if (netAmount === null) throw new TypeError('casino dice receipt returned an invalid net amount');
+    const amount = groupDigits(absAmount(netAmount));
+    const result = resultOf(netAmount);
     const outcome =
       result === 'win'
         ? `주사위는 ${face}이 나왔어요. ${amount} WLD를 얻었어요.`
@@ -210,9 +237,18 @@ async function rollDie(
           ? `주사위는 ${face}이 나왔어요. ${amount} WLD를 잃었어요.`
           : `주사위는 ${face}이 나왔어요.`;
 
+    const outcomeFace =
+      Number.isInteger(receipt.outcome_face) && receipt.outcome_face >= 1 && receipt.outcome_face <= 6
+        ? receipt.outcome_face
+        : null;
     return {
       status: 'ok',
       message: receipt.replayed ? `이미 처리된 판이에요. ${outcome}` : outcome,
+      tone: resultTone(result),
+      result,
+      netAmount,
+      replayed: receipt.replayed,
+      ...(outcomeFace === null ? {} : { outcomeFace }),
     };
   } catch (error) {
     return closedOr(
@@ -223,16 +259,16 @@ async function rollDie(
 }
 
 export async function playDiceParity(
-  _previous: ActionState,
+  _previous: CasinoPlayState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<CasinoPlayState> {
   return rollDie('dice_parity', formData, isParityChoice, '홀과 짝 중 하나를 골라 주세요.');
 }
 
 export async function playDiceNumber(
-  _previous: ActionState,
+  _previous: CasinoPlayState,
   formData: FormData,
-): Promise<ActionState> {
+): Promise<CasinoPlayState> {
   return rollDie('dice_number', formData, isDieFace, '1부터 6 사이의 숫자를 골라 주세요.');
 }
 

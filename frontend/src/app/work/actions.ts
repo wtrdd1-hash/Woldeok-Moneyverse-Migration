@@ -5,6 +5,8 @@ import type { ActionState } from '@/lib/action-state';
 import { ApiError } from '@/lib/api';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 function id(formData: FormData, field: string): string {
   const value = formData.get(field);
   return typeof value === 'string' ? value.trim() : '';
@@ -39,8 +41,10 @@ export async function completeTaskV2Action(
   const taskId = id(formData, 'taskId');
   if (!taskId) return { status: 'error', message: '작업 정보를 확인할 수 없습니다.' };
 
-  // 핑 손실 및 네트워크 지연에 대비해 동일 멱등키로 최대 2회 시도
-  const key = idempotencyKey();
+  // The browser keeps one key for the lifetime of this modal. If a response is
+  // lost, retrying the same form replays the same receipt instead of paying twice.
+  const key = id(formData, 'idempotencyKey');
+  if (!UUID.test(key)) return { status: 'error', message: '요청 식별자를 새로고침해 주세요.' };
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= 2; attempt++) {
@@ -52,6 +56,7 @@ export async function completeTaskV2Action(
         level_up: boolean;
       }>(`/api/v1/work/tasks/${encodeURIComponent(taskId)}/complete`, {
         body: { idempotencyKey: key },
+        timeoutMs: 8_000,
       });
       revalidatePath('/work');
       revalidatePath('/wallet');
@@ -64,20 +69,18 @@ export async function completeTaskV2Action(
       };
     } catch (error) {
       lastError = error;
-      // 4xx 클라이언트 에러는 재시도하지 않고 즉시 반환
+      // 4xx client refusals are final. Network/timeout failures are retried once
+      // with the exact same idempotency key, so a late success cannot double-pay.
       if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
         break;
       }
-      if (attempt < 2) {
-        // 지수 백오프 + 지터 (200ms ~ 350ms)
-        await new Promise((resolve) => setTimeout(resolve, 200 + Math.random() * 150));
-      }
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 250));
     }
   }
 
   return failure(
     lastError,
-    '네트워크 핑 지연 또는 통신 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+    '응답이 지연되어 요청 상태를 확정하지 못했습니다. 같은 버튼을 다시 누르면 동일 요청 키로 안전하게 상태를 확인합니다.',
   );
 }
 

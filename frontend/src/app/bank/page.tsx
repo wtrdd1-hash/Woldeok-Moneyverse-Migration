@@ -71,8 +71,8 @@ export default async function BankPage() {
       {/* Page Header */}
       <PageHeader title={<T korean="가상 은행 (월덕 파이낸스)" english="Virtual Bank & Finance" />}>
         <T
-          korean="일일 0.05% (연 약 20%) 복리 예금, 직업·사업 연동 무담보 신용 대출, 최대 15% 확정 수익 가상 국채"
-          english="0.05% daily compound deposit, dynamic credit loans, and up to 15% fixed yield sovereign bonds."
+          korean={`일일 ${standing.daily_interest_rate_pct}% 복리 예금, 등급 기반 신용 대출, 최대 15% 확정 수익 가상 국채`}
+          english={`${standing.daily_interest_rate_pct}% daily compound deposits, grade-based credit loans, and up to 15% fixed-yield sovereign bonds.`}
         />
       </PageHeader>
 
@@ -111,7 +111,7 @@ export default async function BankPage() {
               <Amount value={bank} currency />
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              <T korean="일일 0.05% 복리 적립" english="0.05% daily compound interest" />
+              <T korean={`일일 ${standing.daily_interest_rate_pct}% 복리 적립`} english={`${standing.daily_interest_rate_pct}% daily compound interest`} />
             </p>
           </CardContent>
         </Card>
@@ -165,7 +165,7 @@ export default async function BankPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column: Savings & Compound Interest */}
         <div className="grid gap-6">
-          <DepositWithdrawCard cashBalance={cash} bankBalance={bank} />
+          <DepositWithdrawCard cashBalance={cash} bankBalance={bank} dailyRatePct={standing.daily_interest_rate_pct} />
           <CompoundInterestCard
             bankBalance={bank}
             unclaimedInterest={unclaimed}
@@ -176,7 +176,15 @@ export default async function BankPage() {
 
         {/* Right Column: Smart Dynamic Loans & Virtual Bonds */}
         <div className="grid gap-6">
-          <SmartLoanCard creditLimit={creditLimit} activeLoan={activeLoan} cashBalance={cash} />
+          <SmartLoanCard
+            creditLimit={creditLimit}
+            creditGrade={standing.credit_grade}
+            loanInterestBps={standing.loan_interest_bps}
+            loanTermDays={standing.loan_term_days}
+            loanMinimumRepayment={standing.loan_minimum_repayment}
+            activeLoan={activeLoan}
+            cashBalance={cash}
+          />
           <VirtualBondsCard bonds={bonds} cashBalance={cash} />
         </div>
       </div>
