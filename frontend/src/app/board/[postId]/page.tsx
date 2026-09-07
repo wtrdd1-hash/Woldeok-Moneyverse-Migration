@@ -8,7 +8,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
-import { isLoggedInMember } from '@/lib/session';
 import { CommentForm, DeleteCommentButton, PostControls } from './post-forms';
 
 export const dynamic = 'force-dynamic';
@@ -71,12 +70,17 @@ export default async function PostPage({
   readonly params: Promise<{ readonly postId: string }>;
 }) {
   const { postId } = await params;
-  const member = await isLoggedInMember();
-  const root = member ? '/api/v1/board/posts' : '/api/v1/board/public/posts';
-  const [postData, commentData] = await Promise.all([
-    apiOrNull<{ post: Post }>(`${root}/${encodeURIComponent(postId)}`),
-    apiOrNull<{ comments: Comment[] }>(`${root}/${encodeURIComponent(postId)}/comments`),
-  ]);
+  const encodedPostId = encodeURIComponent(postId);
+  const memberPostData = await apiOrNull<{ post: Post }>(`/api/v1/board/posts/${encodedPostId}`);
+  const member = memberPostData !== null;
+  const postData =
+    memberPostData ??
+    (await apiOrNull<{ post: Post }>(`/api/v1/board/public/posts/${encodedPostId}`));
+  const commentData = await apiOrNull<{ comments: Comment[] }>(
+    member
+      ? `/api/v1/board/posts/${encodedPostId}/comments`
+      : `/api/v1/board/public/posts/${encodedPostId}/comments`,
+  );
 
   if (!postData) notFound();
 
