@@ -3,6 +3,7 @@ import {
   StatusCollector,
   apiProbe,
   databaseProbe,
+  retryNetworkError,
   webProbe,
 } from './status-collector';
 import type { Fetcher, Probe } from './status-collector';
@@ -66,6 +67,46 @@ describe('probes', () => {
     };
     await webProbe(watching, 'http://frontend:3000/', clock(0, 10)).run();
     expect(seen).toEqual(['http://frontend:3000/']);
+  });
+
+
+  it('rechecks one transient web transport failure before declaring an outage', async () => {
+    const fetcher = vi
+      .fn<Fetcher>()
+      .mockRejectedValueOnce(new TypeError('fetch failed'))
+      .mockResolvedValueOnce({ ok: true, status: 200 });
+    const sleep = vi.fn(async () => undefined);
+
+    await expect(
+      webProbe(retryNetworkError(fetcher, 1000, sleep), 'http://frontend:3000/', clock(0, 20)).run(),
+    ).resolves.toEqual({ state: 'operational', detail: '응답 20ms' });
+
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(sleep).toHaveBeenCalledWith(1000);
+  });
+
+  it('does not retry an HTTP outage that returned a real response', async () => {
+    const fetcher = vi.fn<Fetcher>().mockResolvedValue({ ok: false, status: 503 });
+    const sleep = vi.fn(async () => undefined);
+
+    await expect(
+      webProbe(retryNetworkError(fetcher, 1000, sleep), 'http://frontend:3000/').run(),
+    ).resolves.toEqual({ state: 'outage', detail: '상태 코드 503' });
+
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(sleep).not.toHaveBeenCalled();
+  });
+
+  it('propagates a second transport failure so the collector records an outage', async () => {
+    const failure = new TypeError('fetch failed');
+    const fetcher = vi.fn<Fetcher>().mockRejectedValue(failure);
+    const sleep = vi.fn(async () => undefined);
+
+    await expect(retryNetworkError(fetcher, 1000, sleep)('http://frontend:3000/')).rejects.toBe(
+      failure,
+    );
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(sleep).toHaveBeenCalledOnce();
   });
 });
 

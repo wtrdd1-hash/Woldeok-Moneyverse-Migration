@@ -84,10 +84,11 @@ describe('every game the screen declares is reachable on it', () => {
     expect(page).toContain('/api/v1/casino/self-limit');
   });
 
-  it('does not filter the play history down to one game', () => {
-    expect(page).toContain('CASINO_TRANSACTION_TYPES');
+  it('reads dedicated casino history instead of filtering the wallet feed', () => {
+    expect(page).toContain('/api/v1/casino/history');
     expect(page).toContain('ThemeGameCard');
-    expect(page).not.toContain("=== 'VIRTUAL_COIN_GAME'");
+    expect(page).not.toContain('CASINO_TRANSACTION_TYPES');
+    expect(page).not.toContain('/api/v1/wallet?recent=');
   });
 
   it('publishes odds for every themed game', () => {
