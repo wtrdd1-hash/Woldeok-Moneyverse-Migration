@@ -89,4 +89,14 @@ describe('every game the screen declares is reachable on it', () => {
     expect(page).toContain('ThemeGameCard');
     expect(page).not.toContain("=== 'VIRTUAL_COIN_GAME'");
   });
+
+  it('publishes odds for every themed game', () => {
+    for (const game of ['럭키 슬롯', '하이 앤 로우', '컬러 휠', '보물 상자', '럭키 젬']) {
+      expect(page).toContain(`<OddsRow name="${game}"`);
+    }
+
+    const themeGames = readFileSync(join(__dirname, 'theme-games.tsx'), 'utf8');
+    expect(themeGames).toContain('적중 확률 {winProbability}%');
+    expect(themeGames).toContain('적중 시 {payoutMultiplier}배 배당');
+  });
 });

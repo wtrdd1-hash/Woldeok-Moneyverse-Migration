@@ -312,12 +312,12 @@ export const ECONOMY_PILLARS: readonly EconomyPillar[] = [
     descEn:
       'Play server-settled coin and dice rules through Slots, Hi-Lo, Color Wheel, Treasure and Lucky Gem themes. There is no platform daily cap; members can opt into self-limits.',
     featuresKo: [
-      '3개 서버 게임 규칙과 2개 테마형 화면',
+      '3개 서버 게임 규칙과 5개 테마형 화면의 확률·배당 공개',
       '서버 트랜잭션으로 결과 생성과 WLD 정산',
       '사용자가 직접 선택하는 일일 베팅 및 손실 자가 한도',
     ],
     featuresEn: [
-      'Three server game rules and two themed interfaces',
+      'Published odds and payouts for three server rules and five themed interfaces',
       'Server-transaction result generation and WLD settlement',
       'Optional member-controlled daily stake and loss limits',
     ],
