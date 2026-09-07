@@ -270,9 +270,9 @@ describe.skipIf(!DATABASE_URL)('casino coin fairness against a real database', (
         expect(typeof value, `${name} must stay a string`).toBe('string');
       }
       expect(terms.min_stake).toBe('10');
-      expect(terms.max_stake).toBe('500');
-      expect(terms.daily_stake_limit).toBe('9000000000000000000');
-      expect(terms.daily_loss_limit).toBe('8999999999999999999');
+      expect(terms.max_stake).toBe('200');
+      expect(terms.daily_stake_limit).toBe('2000');
+      expect(terms.daily_loss_limit).toBe('1000');
     });
 
     // A member who has played nothing has spent neither allowance, and the
@@ -280,9 +280,9 @@ describe.skipIf(!DATABASE_URL)('casino coin fairness against a real database', (
     it('reports full headroom and the worst case for a member with no plays today', () => {
       expect(terms.daily_stake_used).toBe('0');
       expect(terms.daily_loss_used).toBe('0');
-      expect(terms.remaining_stake).toBe('9000000000000000000');
-      expect(terms.remaining_loss).toBe('8999999999999999999');
-      expect(terms.worst_case_loss, 'the lesser of the two allowances').toBe('8999999999999999999');
+      expect(terms.remaining_stake).toBe('2000');
+      expect(terms.remaining_loss).toBe('1000');
+      expect(terms.worst_case_loss, 'the lesser of the two allowances').toBe('1000');
     });
 
     it('tells the screen the game is closed', () => {

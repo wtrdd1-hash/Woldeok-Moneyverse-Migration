@@ -52,6 +52,23 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
        ) VALUES ($1, 1000000, 500000, 500000, 500000, 0, 5, true)`,
       [randomUUID()],
     );
+    for (const [game, wins, probabilityPpm] of [
+      ['dice_parity', 500000, 500000],
+      ['dice_number', 166667, 166667],
+    ] as const) {
+      await client.query(
+        `INSERT INTO public.casino_dice_distribution_trials (
+           idempotency_key, game, requested_draws, trials, wins, face_counts,
+           rejected_bytes, expected_win_probability_ppm, observed_win_probability_ppm,
+           z_score, chi_square, tolerance_sigma, tolerance_chi_square, passed
+         ) VALUES (
+           $1, $2, 1000000, 1000000, $3,
+           ARRAY[166667,166667,166667,166667,166666,166666]::bigint[],
+           0, $4, $4, 0, 0.000008, 5, 40, true
+         )`,
+        [randomUUID(), game, wins, probabilityPpm],
+      );
+    }
     await client.query(
       "UPDATE public.feature_switches SET state = 'enabled' WHERE feature_key = 'casino'",
     );
@@ -143,8 +160,8 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
     );
     expect(rows[0]).toEqual({
       min_stake: '10',
-      max_stake: '500',
-      daily_stake_limit: '9000000000000000000',
+      max_stake: '200',
+      daily_stake_limit: '2000',
     });
   });
 
@@ -176,22 +193,20 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
     });
   });
 
-  it('does not stop a member at the former daily platform limit', async () => {
+  it('publishes the balanced daily exposure policy', async () => {
     await rolledBack(async (client) => {
       const actor = await player(client);
-      for (let play = 0; play < 7; play += 1) {
-        const error = await rejectionOf(() =>
-          client.query(`SELECT public.casino_play_coin($1, $2, 'heads', 500)`, [
-            randomUUID(),
-            actor,
-          ]),
-        );
-        expect(error).toBeNull();
-      }
+      const { rows } = await client.query<{ daily_stake_limit: string; daily_loss_limit: string }>(
+        `SELECT daily_stake_limit::text, daily_loss_limit::text
+         FROM public.casino_coin_terms($1)`,
+        [actor],
+      );
+      expect(rows[0]?.daily_stake_limit).toBe('2000');
+      expect(rows[0]?.daily_loss_limit).toBe('1000');
     });
   });
 
-  it.each([9, 501])('refuses a stake of %i, outside the policy range', async (stake) => {
+  it.each([9, 201])('refuses a stake of %i, outside the policy range', async (stake) => {
     await rolledBack(async (client) => {
       const actor = await player(client);
       const error = await rejectionOf(() =>

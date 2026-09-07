@@ -8,6 +8,7 @@ import {
   StatusCollector,
   apiProbe,
   databaseProbe,
+  retryNetworkError,
   webProbe,
 } from './status-collector';
 import type { Fetcher } from './status-collector';
@@ -76,7 +77,10 @@ export class StatusCollectorRunner implements OnApplicationBootstrap, OnApplicat
             // The frontend by its service name on the compose network. This is
             // the tier a visitor actually lands on, and it can be down while
             // the API is fine.
-            webProbe(fetcher, process.env.WEB_HEALTH_URL ?? 'http://frontend:3000/'),
+            webProbe(
+              retryNetworkError(fetcher),
+              process.env.WEB_HEALTH_URL ?? 'http://frontend:3000/',
+            ),
           ],
           onError: (sourceKey, error) =>
             logger.warn(`${sourceKey}: ${error instanceof Error ? error.message : String(error)}`),

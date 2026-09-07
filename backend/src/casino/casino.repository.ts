@@ -230,6 +230,17 @@ export interface CasinoSelfLimitRow {
   readonly locked_until: string | null;
 }
 
+export interface CasinoHistoryRow {
+  readonly play_id: string;
+  readonly game: 'coin' | 'dice_parity' | 'dice_number';
+  readonly choice: string;
+  readonly outcome: string;
+  readonly stake_amount: string;
+  readonly net_amount: string;
+  readonly transaction_id: string;
+  readonly played_at: Date;
+}
+
 /**
  * Database gateway for the coin game.
  *
@@ -466,6 +477,25 @@ export class CasinoRepository {
     );
     if (!row) throw new Error('casino_play_dice did not return a row');
     return row;
+  }
+
+
+  /** The member's actual recent plays, independent of unrelated wallet rows. */
+  async history(actor: unknown): Promise<CasinoHistoryRow[]> {
+    assertUuid(actor, 'actor');
+    return queryRows<CasinoHistoryRow>(
+      this.pool,
+      `SELECT history.play_id::text AS play_id,
+              history.game,
+              history.choice,
+              history.outcome,
+              history.stake_amount::text AS stake_amount,
+              history.net_amount::text AS net_amount,
+              history.transaction_id::text AS transaction_id,
+              history.played_at
+       FROM public.member_casino_history($1::uuid, 20) AS history`,
+      [actor],
+    );
   }
 
   async selfLimit(actor: unknown): Promise<CasinoSelfLimitRow> {
