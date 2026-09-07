@@ -27,15 +27,21 @@ COPY frontend frontend
 # once. The files are then served from this origin and no page load makes a
 # third-party request.
 #
-# APP_BASE_URL is baked in here because robots.txt and sitemap.xml are
-# generated during the build and must name the public host. It is passed at
-# build time rather than run time for that reason alone; nothing secret is.
+# APP_BASE_URL, indexing and the public Search Console verification token are
+# baked into generated metadata at build time. The verification value is not a
+# credential; it is intentionally published in a meta tag.
 ARG APP_BASE_URL=https://easy-scraping.com
 ARG SEO_INDEXING_ENABLED=true
+ARG SEARCH_CONSOLE_VERIFICATION=
 ARG ADS_ENABLED=true
 ARG ADSENSE_PUBLISHER_ID=ca-pub-5220225531544323
 ARG ADSENSE_HOME_SLOT=2118692561
-ENV APP_BASE_URL=${APP_BASE_URL} SEO_INDEXING_ENABLED=${SEO_INDEXING_ENABLED} ADS_ENABLED=${ADS_ENABLED} ADSENSE_PUBLISHER_ID=${ADSENSE_PUBLISHER_ID} ADSENSE_HOME_SLOT=${ADSENSE_HOME_SLOT}
+ENV APP_BASE_URL=${APP_BASE_URL} \
+    SEO_INDEXING_ENABLED=${SEO_INDEXING_ENABLED} \
+    SEARCH_CONSOLE_VERIFICATION=${SEARCH_CONSOLE_VERIFICATION} \
+    ADS_ENABLED=${ADS_ENABLED} \
+    ADSENSE_PUBLISHER_ID=${ADSENSE_PUBLISHER_ID} \
+    ADSENSE_HOME_SLOT=${ADSENSE_HOME_SLOT}
 RUN pnpm --filter @moneyverse/contract build && pnpm --filter @moneyverse/frontend build
 
 FROM node:26.8.1-alpine
