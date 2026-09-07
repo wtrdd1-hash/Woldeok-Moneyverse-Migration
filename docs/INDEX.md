@@ -20,6 +20,10 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 - [Shop](features/shop.md)
 - [Admin Control Center](features/admin-control-center.md)
 
+## Localization
+
+- [Localization maintenance and parity policy](localization/README.md)
+
 ## Integration
 
 - [Mobile / external app API](mobile-api.md)
