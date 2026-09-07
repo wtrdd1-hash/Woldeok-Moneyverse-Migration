@@ -209,8 +209,8 @@ jobs:
             Port ${{ secrets.DEPLOY_PORT }}
             IdentityFile ~/.ssh/deploy
             IdentitiesOnly yes
-            ConnectTimeout 30
-            ConnectionAttempts 3
+            ConnectTimeout 15
+            ConnectionAttempts 1
             ServerAliveInterval 15
             ServerAliveCountMax 3
             ControlMaster auto
@@ -224,7 +224,20 @@ jobs:
           # The deployment host intermittently rate-limits new TCP sessions.
           # Open one authenticated master and reuse it for shipping, rolling
           # and reporting instead of reconnecting for every command.
-          ssh target true
+          connected=false
+          for attempt in 1 2 3 4 5 6; do
+            if ssh -MNf target; then
+              connected=true
+              break
+            fi
+            echo "SSH master connection attempt ${attempt}/6 failed; retrying in 10 seconds"
+            sleep 10
+          done
+          if [ "$connected" != true ]; then
+            echo 'Could not establish the deployment SSH master connection' >&2
+            exit 1
+          fi
+          ssh -O check target
           ssh target 'mkdir -p ~/${{ steps.target.outputs.dir }}'
           tar czf - \
             -C deploy compose.yml roll.sh bootstrap-env.sh install-backup-cron.sh recover-display-names.sh recover-display-names-from-backup.sh seed.sh update.sh edge \
