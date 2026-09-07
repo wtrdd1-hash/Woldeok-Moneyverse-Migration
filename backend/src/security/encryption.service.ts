@@ -46,6 +46,19 @@ export class EncryptionService {
   }
 
   /**
+   * The key-independent name for an OAuth identity (162).
+   *
+   * `encryptDeterministic` is only deterministic while the key holds, and a
+   * key that moves turns every returning member into a stranger with an empty
+   * wallet. This is what a login is found by instead: a plain SHA-256 of the
+   * provider and the subject, which no deployment change can alter. The
+   * encrypted subject stays beside it — this identifies, it does not disclose.
+   */
+  subjectHash(provider: string, subject: string): string {
+    return createHash('sha256').update(`${provider}:${subject}`).digest('hex');
+  }
+
+  /**
    * Randomized AES-256-GCM encryption for general PII (display names, emails, profiles).
    * Result format: enc:v1:rnd:<iv_hex>:<tag_hex>:<ciphertext_hex>
    */

@@ -142,6 +142,11 @@ docker compose pull backend frontend
 # than being reported as a success.
 docker compose up -d --wait --wait-timeout 300
 
+# A deploy is the one reliable moment at which this host is known to have the
+# current backup script. Keep the periodic schedule in step with it; the two
+# stacks use different minute offsets so their full dumps never compete.
+bash ./install-backup-cron.sh
+
 # OAuth display names are public labels. Repair ciphertext left by historical
 # releases from Discord without exposing the bot token or names in CI output.
 bash ./recover-display-names.sh
