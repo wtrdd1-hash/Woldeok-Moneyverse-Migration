@@ -76,8 +76,8 @@ export class BankRepository {
       this.pool,
       `SELECT loan_id::text, principal_amount::text, interest_amount::text,
               outstanding_amount::text, transaction_id::text
-       FROM public.bank_borrow_smart($1, $2, $3)`,
-      [actor, amount.toString(), key],
+       FROM public.bank_borrow($1, $2, $3)`,
+      [key, actor, amount.toString()],
     );
   }
 

@@ -15,7 +15,7 @@ import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
 import { LOCK_CHOICES } from './coin';
 import { DIE_FACES, PARITY_CHOICES } from './dice';
-import { playCoin, playDiceNumber, playDiceParity, setSelfLimit } from './actions';
+import { CASINO_IDLE, playCoin, playDiceNumber, playDiceParity, setSelfLimit } from './actions';
 
 /**
  * The coin game's write surface.
@@ -40,7 +40,7 @@ export function CoinPlayForm({
   /** True when today's headroom is spent, so the two buttons refuse locally. */
   readonly exhausted: boolean;
 }) {
-  const [state, action] = useActionState(playCoin, IDLE);
+  const [state, action] = useActionState(playCoin, CASINO_IDLE);
 
   return (
     <form action={action} className="grid gap-4">
@@ -117,7 +117,7 @@ export function SelfLimitForm() {
       </FieldGroup>
 
       <Field>
-        <FieldLabel htmlFor="casino-lock">한도 잠금</FieldLabel>
+        <FieldLabel htmlFor="casino-lock">플레이 잠금 (자가 제외)</FieldLabel>
         <Select value={lock} onValueChange={setLock}>
           <SelectTrigger id="casino-lock" className="min-h-11 w-full sm:w-64">
             <SelectValue />
@@ -131,8 +131,8 @@ export function SelfLimitForm() {
           </SelectContent>
         </Select>
         <FieldDescription>
-          잠가 두면 그 기간이 끝날 때까지 한도를 다시 바꿀 수 없어요. 스스로 쉬어 가기 위한
-          장치입니다.
+          잠가 두면 그 기간이 끝날 때까지 카지노 플레이가 차단되고 한도도 다시 바꿀 수 없어요.
+          스스로 쉬어 가기 위한 자가 제외 장치입니다.
         </FieldDescription>
       </Field>
 
@@ -169,7 +169,7 @@ export function DiceParityForm({
   readonly remainingStake: string;
   readonly exhausted: boolean;
 }) {
-  const [state, action] = useActionState(playDiceParity, IDLE);
+  const [state, action] = useActionState(playDiceParity, CASINO_IDLE);
 
   return (
     <form action={action} className="grid gap-4">
@@ -233,7 +233,7 @@ export function DiceNumberForm({
   readonly remainingStake: string;
   readonly exhausted: boolean;
 }) {
-  const [state, action] = useActionState(playDiceNumber, IDLE);
+  const [state, action] = useActionState(playDiceNumber, CASINO_IDLE);
 
   return (
     <form action={action} className="grid gap-4">
