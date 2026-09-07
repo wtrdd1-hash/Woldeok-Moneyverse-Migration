@@ -162,9 +162,14 @@ docker compose exec -T edge nginx -t \
 
 port="$(grep -E '^EDGE_PORT=' .env | cut -d= -f2)"
 port="${port:-3021}"
-code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "http://127.0.0.1:${port}/" || true)"
+app_base_url="${APP_BASE_URL:-$(grep -E '^APP_BASE_URL=' .env | tail -1 | cut -d= -f2-)}"
+[ -n "$app_base_url" ] || { echo 'APP_BASE_URL is required for the edge smoke test' >&2; exit 1; }
+smoke_host="${app_base_url#http://}"
+smoke_host="${smoke_host#https://}"
+smoke_host="${smoke_host%%/*}"
+code="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 -H "Host: ${smoke_host}" "http://127.0.0.1:${port}/" || true)"
 if [ "$code" != "200" ]; then
-  echo "the site answered ${code:-nothing} through the edge" >&2
+  echo "the site answered ${code:-nothing} through the edge for Host ${smoke_host}" >&2
   docker compose logs --tail 50 edge frontend backend >&2
   exit 1
 fi

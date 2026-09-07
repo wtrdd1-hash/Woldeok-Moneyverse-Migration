@@ -56,9 +56,11 @@ function bondMaturityAmount(amount: string, yieldBps: number): string {
 export function DepositWithdrawCard({
   cashBalance,
   bankBalance,
+  dailyRatePct,
 }: {
   readonly cashBalance: string;
   readonly bankBalance: string;
+  readonly dailyRatePct: number;
 }) {
   const [tab, setTab] = useState<'deposit' | 'withdraw'>('deposit');
   const [depositState, doDeposit] = useActionState(depositAction, IDLE);
@@ -160,8 +162,8 @@ export function DepositWithdrawCard({
                 />
                 <FieldDescription>
                   <T
-                    korean="입금 즉시 일일 0.05% (연 약 20%) 복리 이자가 발생합니다."
-                    english="Daily 0.05% compound interest starts accruing immediately."
+                    korean={`입금 후 잔액이 유지되는 동안 일일 ${dailyRatePct}% 기준으로 복리 이자가 누적됩니다.`}
+                    english={`Compound interest accrues at the current ${dailyRatePct}% daily rate while the balance remains unchanged.`}
                   />
                 </FieldDescription>
               </Field>
@@ -303,7 +305,7 @@ export function CompoundInterestCard({
         <div className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
           <p className="font-semibold text-foreground">💡 가상 은행 복리 시스템 안내</p>
           <p>• 수령한 이자는 예금 계좌로 즉시 재예치되어 원금에 합산되는 자동 복리 구조입니다.</p>
-          <p>• 출금 시에도 직전까지 누적된 이자는 손실 없이 보존되며 언제든 정산할 수 있습니다.</p>
+          <p>• 입금·출금으로 예금 잔액이 바뀌면 새 잔액 기준으로 이자 누적 시간이 다시 시작됩니다.</p>
         </div>
       </CardContent>
     </Card>
@@ -312,10 +314,18 @@ export function CompoundInterestCard({
 
 export function SmartLoanCard({
   creditLimit,
+  creditGrade,
+  loanInterestBps,
+  loanTermDays,
+  loanMinimumRepayment,
   activeLoan,
   cashBalance,
 }: {
   readonly creditLimit: string;
+  readonly creditGrade: string;
+  readonly loanInterestBps: number;
+  readonly loanTermDays: number;
+  readonly loanMinimumRepayment: string;
   readonly activeLoan: BankLoan | null;
   readonly cashBalance: string;
 }) {
@@ -325,7 +335,8 @@ export function SmartLoanCard({
 
   const limit = creditLimit;
   const cash = cashBalance;
-  const hasActiveLoan = Boolean(activeLoan && activeLoan.status === 'active');
+  const hasActiveLoan = Boolean(activeLoan && (activeLoan.status === 'active' || activeLoan.status === 'overdue'));
+  const loanRatePct = (loanInterestBps / 100).toFixed(loanInterestBps % 100 === 0 ? 0 : 2);
 
   const outstanding = hasActiveLoan && activeLoan ? activeLoan.outstanding_amount : '0';
   const principal = hasActiveLoan && activeLoan ? activeLoan.principal_amount : '0';
@@ -341,7 +352,7 @@ export function SmartLoanCard({
             </div>
             <div>
               <CardTitle className="text-lg">
-                <T korean="스마트 동적 신용 대출" english="Smart Dynamic Credit Loan" />
+                <T korean="등급 기반 신용 대출" english="Grade-based Credit Loan" />
               </CardTitle>
               <CardDescription>
                 <T
@@ -394,7 +405,7 @@ export function SmartLoanCard({
                 <p className="font-bold mt-0.5">{groupDigits(principal)} WLD</p>
               </div>
               <div>
-                <span className="text-muted-foreground">약정 이자 (1.4%)</span>
+                <span className="text-muted-foreground">약정 이자</span>
                 <p className="font-bold text-amber-600 mt-0.5">+{groupDigits(interest)} WLD</p>
               </div>
               <div>
@@ -460,8 +471,8 @@ export function SmartLoanCard({
                 />
                 <FieldDescription>
                   <T
-                    korean="만기 14일, 일일 0.1% (총 1.4%), 중도상환 수수료 0% 즉시 지급"
-                    english="14-day tenure, 0.1% daily interest (1.4% total), 0% early repayment fee."
+                    korean={`${creditGrade}등급 · ${loanTermDays}일 만기 · 총 이자 ${loanRatePct}% · 최소 상환 ${groupDigits(loanMinimumRepayment)} WLD`}
+                    english={`${creditGrade} grade · ${loanTermDays}-day term · ${loanRatePct}% total interest · minimum repayment ${groupDigits(loanMinimumRepayment)} WLD`}
                   />
                 </FieldDescription>
               </Field>

@@ -6,11 +6,12 @@ export function buildOpenApiDocument(app: INestApplication): OpenAPIObject {
   const config = new DocumentBuilder()
     .setTitle('Woldeok Moneyverse API')
     .setDescription(
-      'Internal API. Not reachable from the public internet: the Next.js ' +
-        'application is the only public origin and calls this service over ' +
-        'the internal network.',
+      'Moneyverse versioned API. Production keeps the NestJS service private; ' +
+        'browser and native clients must reach it through an approved BFF/gateway. ' +
+        'Never embed the server-to-server internal token in a client application.',
     )
     .setVersion('1.0')
+    .addServer('/api/v1', 'Version 1')
     .addApiKey({ type: 'apiKey', name: 'x-internal-token', in: 'header' }, 'internal-token')
     .addApiKey({ type: 'apiKey', name: 'x-csrf-token', in: 'header' }, 'csrf-token')
     .build();
