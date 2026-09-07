@@ -27,6 +27,8 @@ interface Post {
   readonly updatedAt: string | null;
   /** The API decides this, not the page: only the author may edit or delete. */
   readonly mine: boolean;
+  readonly imageUrl: string | null;
+  readonly imageAltText: string | null;
 }
 
 interface Comment {
@@ -82,9 +84,7 @@ export default async function PostPage({
             {post.updatedAt && (
               <>
                 {' · '}
-                <time dateTime={post.updatedAt}>
-                  {formatMoment(post.updatedAt)} 수정됨
-                </time>
+                <time dateTime={post.updatedAt}>{formatMoment(post.updatedAt)} 수정됨</time>
               </>
             )}
           </p>
@@ -92,11 +92,24 @@ export default async function PostPage({
 
         <Separator />
 
+        {post.imageUrl && post.imageAltText && (
+          <figure className="overflow-hidden rounded-xl border bg-black/30">
+            <img
+              src={post.imageUrl}
+              alt={post.imageAltText}
+              className="max-h-[70vh] w-full object-contain"
+              loading="eager"
+              decoding="async"
+            />
+            <figcaption className="border-t px-3 py-2 text-xs text-muted-foreground">
+              {post.imageAltText}
+            </figcaption>
+          </figure>
+        )}
+
         <p className="whitespace-pre-wrap leading-[1.9] [word-break:keep-all]">{post.body}</p>
 
-        {post.mine && (
-          <PostControls postId={post.postId} title={post.title} body={post.body} />
-        )}
+        {post.mine && <PostControls postId={post.postId} title={post.title} body={post.body} />}
       </article>
 
       <section aria-labelledby="comments-title" className="grid gap-4">
@@ -127,10 +140,7 @@ export default async function PostPage({
                     <p className="text-sm leading-[1.8] [word-break:keep-all]">{comment.body}</p>
                   </div>
                   {comment.mine && (
-                    <DeleteCommentButton
-                      postId={post.postId}
-                      commentId={comment.commentId}
-                    />
+                    <DeleteCommentButton postId={post.postId} commentId={comment.commentId} />
                   )}
                 </div>
               ))}
