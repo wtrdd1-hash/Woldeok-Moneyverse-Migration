@@ -4,7 +4,7 @@ const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 const STORAGE_KEY = /^[0-9a-f-]{36}\.(png|jpg|webp)$/;
 
 export async function GET(
-  request: Request,
+  _request: Request,
   context: { readonly params: Promise<{ readonly key: string }> },
 ): Promise<NextResponse> {
   const { key } = await context.params;
@@ -12,11 +12,8 @@ export async function GET(
   const token = process.env.INTERNAL_API_TOKEN;
   if (!token) throw new Error('INTERNAL_API_TOKEN is not configured');
 
-  const response = await fetch(`${API_ORIGIN}/api/v1/board/images/${key}`, {
-    headers: {
-      'x-internal-token': token,
-      ...(request.headers.get('cookie') ? { cookie: request.headers.get('cookie')! } : {}),
-    },
+  const response = await fetch(`${API_ORIGIN}/api/v1/board/public/images/${key}`, {
+    headers: { 'x-internal-token': token },
     cache: 'no-store',
   });
   if (!response.ok) {
@@ -26,7 +23,7 @@ export async function GET(
     status: 200,
     headers: {
       'content-type': response.headers.get('content-type') ?? 'application/octet-stream',
-      'cache-control': 'private, max-age=300',
+      'cache-control': 'public, max-age=300',
       'content-disposition': 'inline',
       'x-content-type-options': 'nosniff',
     },
