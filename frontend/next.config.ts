@@ -10,6 +10,8 @@ const BEACON_SCRIPT = 'https://static.cloudflareinsights.com';
 const BEACON_REPORT = 'https://cloudflareinsights.com';
 const ADSENSE_SCRIPT = 'https://pagead2.googlesyndication.com';
 const ADSENSE_FRAME = 'https://googleads.g.doubleclick.net https://tpc.googlesyndication.com';
+const ADSENSE_CONNECT =
+  'https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://adtrafficquality.google https://*.adtrafficquality.google';
 
 /**
  * One value that changes on every build, readable on both sides.
@@ -110,7 +112,7 @@ const config: NextConfig = {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self'",
-      `connect-src 'self' ${socket} ${BEACON_REPORT}${adsEnabled ? ` ${ADSENSE_SCRIPT} https://googleads.g.doubleclick.net` : ''}`,
+      `connect-src 'self' ${socket} ${BEACON_REPORT}${adsEnabled ? ` ${ADSENSE_CONNECT}` : ''}`,
       "manifest-src 'self'",
       'upgrade-insecure-requests',
     ].join('; ');
