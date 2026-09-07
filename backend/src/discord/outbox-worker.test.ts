@@ -133,7 +133,7 @@ describe('the Discord outbox message', () => {
         '요청: GET /api/v1/wallet',
         '응답: 200 · 42ms',
         '접속 국가: KR',
-        '접속망: 203.0.113.0/24',
+        '접속망: 203.0.113.xxx',
         '기기: Android · Chrome',
         '시각: 2026-09-07 10:23:45 (한국시간)',
         `요청 ID: ${EVENT_ID}`,
@@ -147,7 +147,7 @@ describe('the Discord outbox message', () => {
       event_type: 'activity.api_request',
       safe_context: { network: '203.0.113.47/24', country: 'KR' },
     });
-    expect(message).toContain('접속망: 203.0.113.0/24');
+    expect(message).toContain('접속망: 203.0.113.xxx');
     expect(message).not.toContain('203.0.113.47');
   });
 
