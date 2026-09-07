@@ -31,6 +31,11 @@ describe('buildOpenApiDocument', () => {
     expect(document.paths['/health']?.get).toBeDefined();
   });
 
+  it('publishes the versioned API base for generated app clients', async () => {
+    const document = await documentOf();
+    expect(document.servers).toEqual([{ url: '/api/v1', description: 'Version 1' }]);
+  });
+
   it('declares both header credentials the API accepts', async () => {
     const schemes = (await documentOf()).components?.securitySchemes ?? {};
     expect(Object.keys(schemes).sort()).toEqual(['csrf-token', 'internal-token']);

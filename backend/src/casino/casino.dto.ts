@@ -52,7 +52,7 @@ export class CasinoDicePlayDto {
 }
 
 export class CasinoSelfLimitDto {
-  /** Zero is a real answer: it is the member saying they will stake nothing. */
+  /** Zero is the explicit sentinel for leaving this self-limit unbound. */
   @ApiProperty({ type: Number, minimum: 0 })
   @IsInt()
   @Min(0)

@@ -19,9 +19,8 @@ import { requireMember, isLoggedInMember } from '@/lib/session';
 import { CasinoGuestView } from './casino-guest-view';
 import { CoinPlayForm, DiceNumberForm, DiceParityForm, SelfLimitForm } from './casino-forms';
 import { ClosedNotice, PlayOutcome } from './casino-parts';
-import { closureOf, multiplierFromPpm, percentFromPpm } from './coin';
+import { closureOf, faceLabel, multiplierFromPpm, percentFromPpm } from './coin';
 import type { CasinoClosure } from './coin';
-import { CASINO_TRANSACTION_TYPES, ledgerLabel } from './dice';
 import { LuckySlotsGame } from './slots-game';
 import { HiLoCardGame } from './hilo-game';
 import { ThemeGameCard } from './theme-games';
@@ -77,15 +76,15 @@ interface CoinFairness {
   readonly created_at: string | null;
 }
 
-interface LedgerEntry {
-  readonly transactionId: string;
-  readonly occurredAt: string;
-  readonly type: string;
-  readonly netAmount: string;
-}
-
-interface WalletOverview {
-  readonly recentTransactions: readonly LedgerEntry[];
+interface CasinoHistoryEntry {
+  readonly play_id: string;
+  readonly game: 'coin' | 'dice_parity' | 'dice_number';
+  readonly choice: string;
+  readonly outcome: string;
+  readonly stake_amount: string;
+  readonly net_amount: string;
+  readonly transaction_id: string;
+  readonly played_at: string;
 }
 
 interface SelfLimit {
@@ -110,7 +109,7 @@ async function loadCasino<T>(path: string): Promise<Loaded<T>> {
   }
 }
 
-const RECENT_LEDGER = 10;
+const RECENT_GAMES = 20;
 
 export default async function CasinoPage() {
   const isMember = await isLoggedInMember();
@@ -119,11 +118,11 @@ export default async function CasinoPage() {
   }
   await requireMember();
 
-  const [terms, fairness, games, wallet, selfLimit] = await Promise.all([
+  const [terms, fairness, games, history, selfLimit] = await Promise.all([
     loadCasino<CoinTerms>('/api/v1/casino/coin/terms'),
     loadCasino<CoinFairness>('/api/v1/casino/coin/fairness'),
     loadCasino<GameTerms[]>('/api/v1/casino/games/terms'),
-    apiOrNull<WalletOverview>(`/api/v1/wallet?recent=${RECENT_LEDGER}`),
+    apiOrNull<CasinoHistoryEntry[]>('/api/v1/casino/history'),
     apiOrNull<SelfLimit>('/api/v1/casino/self-limit'),
   ]);
 
@@ -131,9 +130,7 @@ export default async function CasinoPage() {
   const parityGame = dice.find((g) => g.game === 'dice_parity');
   const numberGame = dice.find((g) => g.game === 'dice_number');
 
-  const plays = (wallet?.recentTransactions ?? []).filter((entry) =>
-    CASINO_TRANSACTION_TYPES.includes(entry.type),
-  );
+  const plays = history ?? [];
 
   const closure: CasinoClosure | null =
     terms.state === 'closed'
@@ -151,7 +148,34 @@ export default async function CasinoPage() {
     open && selfLimit && selfLimit.daily_loss_limit !== '0'
       ? remaining(selfLimit.daily_loss_limit, open.daily_loss_used)
       : null;
-  const exhausted = userStakeRemaining === '0' || userLossRemaining === '0';
+  const selfExcluded =
+    selfLimit?.locked_until !== null &&
+    selfLimit?.locked_until !== undefined &&
+    Date.parse(selfLimit.locked_until) > Date.now();
+  const coinHeadroom = open
+    ? playableHeadroom(open.remaining_stake, open.remaining_loss, userStakeRemaining, userLossRemaining)
+    : '0';
+  const parityHeadroom = parityGame
+    ? playableHeadroom(
+        parityGame.remaining_stake,
+        parityGame.remaining_loss,
+        userStakeRemaining,
+        userLossRemaining,
+      )
+    : '0';
+  const numberHeadroom = numberGame
+    ? playableHeadroom(
+        numberGame.remaining_stake,
+        numberGame.remaining_loss,
+        userStakeRemaining,
+        userLossRemaining,
+      )
+    : '0';
+  const coinExhausted = !open || selfExcluded || belowMinimum(coinHeadroom, open.min_stake);
+  const parityExhausted =
+    !parityGame || selfExcluded || belowMinimum(parityHeadroom, parityGame.min_stake);
+  const numberExhausted =
+    !numberGame || selfExcluded || belowMinimum(numberHeadroom, numberGame.min_stake);
 
   return (
     <div className="grid gap-6">
@@ -179,11 +203,21 @@ export default async function CasinoPage() {
         </AlertTitle>
         <AlertDescription>
           <TranslatedText
-            korean="시스템의 일일 이용 상한은 없습니다. 원한다면 나만의 베팅·손실 한도를 직접 설정할 수 있으며 모든 결과는 서버에서 정산됩니다."
-            english="There is no platform daily cap. You can opt into your own stake and loss limits; every result is settled by the server."
+            korean="플랫폼은 한 판과 하루 이용량에 기본 상한을 두고 있습니다. 원한다면 더 낮은 나만의 베팅·손실 한도를 설정할 수 있으며 모든 결과는 서버에서 정산됩니다."
+            english="The platform applies per-play and daily caps. You can opt into stricter personal stake and loss limits; every result is settled by the server."
           />
         </AlertDescription>
       </Alert>
+
+      {selfExcluded && selfLimit?.locked_until ? (
+        <Alert>
+          <AlertTitle>자가 제외가 적용 중입니다.</AlertTitle>
+          <AlertDescription>
+            {formatMoment(selfLimit.locked_until, '설정한 잠금 시각')}까지 카지노 플레이와 한도 변경이
+            모두 차단됩니다.
+          </AlertDescription>
+        </Alert>
+      ) : null}
 
       {closure !== null ? (
         <ClosedNotice closure={closure} />
@@ -204,8 +238,8 @@ export default async function CasinoPage() {
               </CardTitle>
               <CardDescription>
                 <T
-                  korean="시스템 상한 없이 이용하며, 사용자가 설정한 자가 한도만 적용됩니다."
-                  english="No platform cap applies; only limits you choose are enforced."
+                  korean="플랫폼 기본 상한과 사용자가 설정한 자가 한도 중 더 엄격한 값이 적용됩니다."
+                  english="The stricter of the platform cap and your personal limits is enforced."
                 />
               </CardDescription>
             </CardHeader>
@@ -345,8 +379,8 @@ export default async function CasinoPage() {
                   <CoinPlayForm
                     minStake={open.min_stake}
                     maxStake={open.max_stake}
-                    remainingStake={open.remaining_stake}
-                    exhausted={exhausted}
+                    remainingStake={coinHeadroom}
+                    exhausted={coinExhausted}
                   />
                 </CardContent>
               </Card>
@@ -370,8 +404,8 @@ export default async function CasinoPage() {
                     <DiceParityForm
                       minStake={parityGame.min_stake}
                       maxStake={parityGame.max_stake}
-                      remainingStake={parityGame.remaining_stake}
-                      exhausted={exhausted}
+                      remainingStake={parityHeadroom}
+                      exhausted={parityExhausted}
                     />
                   </CardContent>
                 </Card>
@@ -399,8 +433,8 @@ export default async function CasinoPage() {
                     <DiceNumberForm
                       minStake={numberGame.min_stake}
                       maxStake={numberGame.max_stake}
-                      remainingStake={numberGame.remaining_stake}
-                      exhausted={exhausted}
+                      remainingStake={numberHeadroom}
+                      exhausted={numberExhausted}
                     />
                   </CardContent>
                 </Card>
@@ -411,51 +445,80 @@ export default async function CasinoPage() {
 
             {/* 4. 럭키 777 슬롯 */}
             <TabsContent value="slots" className="mt-6 pt-2 grid gap-6">
-              <LuckySlotsGame
-                minStake={open.min_stake}
-                maxStake={open.max_stake}
-                exhausted={exhausted}
-              />
+              {numberGame ? (
+                <LuckySlotsGame
+                  minStake={numberGame.min_stake}
+                  maxStake={numberGame.max_stake}
+                  remainingStake={numberHeadroom}
+                  exhausted={numberExhausted}
+                  winProbability={percentFromPpm(numberGame.win_probability_ppm)}
+                  payoutMultiplier={multiplierFromPpm(numberGame.payout_multiplier_ppm)}
+                />
+              ) : (
+                <EmptyState title="슬롯의 서버 규칙을 불러오지 못했어요." />
+              )}
             </TabsContent>
 
             {/* 5. 하이 앤 로우 */}
             <TabsContent value="hilo" className="mt-6 pt-2 grid gap-6">
-              <HiLoCardGame
-                minStake={open.min_stake}
-                maxStake={open.max_stake}
-                exhausted={exhausted}
-              />
+              {parityGame ? (
+                <HiLoCardGame
+                  minStake={parityGame.min_stake}
+                  maxStake={parityGame.max_stake}
+                  remainingStake={parityHeadroom}
+                  exhausted={parityExhausted}
+                  winProbability={percentFromPpm(parityGame.win_probability_ppm)}
+                  payoutMultiplier={multiplierFromPpm(parityGame.payout_multiplier_ppm)}
+                />
+              ) : (
+                <EmptyState title="하이/로우의 서버 규칙을 불러오지 못했어요." />
+              )}
             </TabsContent>
 
             <TabsContent value="wheel" className="mt-6 pt-2">
-              <ThemeGameCard
-                game="wheel"
-                minStake={open.min_stake}
-                maxStake={open.max_stake}
-                exhausted={exhausted}
-                winProbability={percentFromPpm(parityGame?.win_probability_ppm ?? 0)}
-                payoutMultiplier={multiplierFromPpm(parityGame?.payout_multiplier_ppm ?? 0)}
-              />
+              {parityGame ? (
+                <ThemeGameCard
+                  game="wheel"
+                  minStake={parityGame.min_stake}
+                  maxStake={parityGame.max_stake}
+                  remainingStake={parityHeadroom}
+                  exhausted={parityExhausted}
+                  winProbability={percentFromPpm(parityGame.win_probability_ppm)}
+                  payoutMultiplier={multiplierFromPpm(parityGame.payout_multiplier_ppm)}
+                />
+              ) : (
+                <EmptyState title="컬러 휠의 서버 규칙을 불러오지 못했어요." />
+              )}
             </TabsContent>
             <TabsContent value="treasure" className="mt-6 pt-2">
-              <ThemeGameCard
-                game="treasure"
-                minStake={open.min_stake}
-                maxStake={open.max_stake}
-                exhausted={exhausted}
-                winProbability={percentFromPpm(numberGame?.win_probability_ppm ?? 0)}
-                payoutMultiplier={multiplierFromPpm(numberGame?.payout_multiplier_ppm ?? 0)}
-              />
+              {numberGame ? (
+                <ThemeGameCard
+                  game="treasure"
+                  minStake={numberGame.min_stake}
+                  maxStake={numberGame.max_stake}
+                  remainingStake={numberHeadroom}
+                  exhausted={numberExhausted}
+                  winProbability={percentFromPpm(numberGame.win_probability_ppm)}
+                  payoutMultiplier={multiplierFromPpm(numberGame.payout_multiplier_ppm)}
+                />
+              ) : (
+                <EmptyState title="보물 상자의 서버 규칙을 불러오지 못했어요." />
+              )}
             </TabsContent>
             <TabsContent value="gems" className="mt-6 pt-2">
-              <ThemeGameCard
-                game="gems"
-                minStake={open.min_stake}
-                maxStake={open.max_stake}
-                exhausted={exhausted}
-                winProbability={percentFromPpm(numberGame?.win_probability_ppm ?? 0)}
-                payoutMultiplier={multiplierFromPpm(numberGame?.payout_multiplier_ppm ?? 0)}
-              />
+              {numberGame ? (
+                <ThemeGameCard
+                  game="gems"
+                  minStake={numberGame.min_stake}
+                  maxStake={numberGame.max_stake}
+                  remainingStake={numberHeadroom}
+                  exhausted={numberExhausted}
+                  winProbability={percentFromPpm(numberGame.win_probability_ppm)}
+                  payoutMultiplier={multiplierFromPpm(numberGame.payout_multiplier_ppm)}
+                />
+              ) : (
+                <EmptyState title="럭키 젬의 서버 규칙을 불러오지 못했어요." />
+              )}
             </TabsContent>
           </Tabs>
         </>
@@ -486,11 +549,11 @@ export default async function CasinoPage() {
             <T korean="최근 게임 기록" english="Recent Gaming History" />
           </CardTitle>
           <CardDescription>
-            내 지갑에 기록된 최근 {RECENT_LEDGER}건의 미니게임 결과입니다.
+            다른 지갑 거래와 관계없이 서버에 기록된 최근 {RECENT_GAMES}판을 보여줍니다.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {wallet === null ? (
+          {history === null ? (
             <EmptyState title="기록을 불러오지 못했어요." />
           ) : plays.length === 0 ? (
             <EmptyState
@@ -504,18 +567,26 @@ export default async function CasinoPage() {
                   <TableRow>
                     <TableHead>시각</TableHead>
                     <TableHead>게임</TableHead>
-                    <TableHead className="text-right">결과</TableHead>
+                    <TableHead>선택 → 서버 결과</TableHead>
+                    <TableHead className="text-right">베팅</TableHead>
+                    <TableHead className="text-right">정산</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {plays.map((play) => (
-                    <TableRow key={play.transactionId}>
+                    <TableRow key={play.play_id}>
                       <TableCell className="whitespace-nowrap text-muted-foreground">
-                        {formatMoment(play.occurredAt, '기록 확인 중')}
+                        {formatMoment(play.played_at, '기록 확인 중')}
                       </TableCell>
-                      <TableCell className="whitespace-nowrap">{ledgerLabel(play.type)}</TableCell>
+                      <TableCell className="whitespace-nowrap">{casinoGameLabel(play.game)}</TableCell>
+                      <TableCell className="whitespace-nowrap text-muted-foreground">
+                        {casinoChoiceLabel(play.game, play.choice)} → {casinoOutcomeLabel(play.game, play.outcome)}
+                      </TableCell>
+                      <TableCell className="text-right tabular-nums">
+                        {groupDigits(play.stake_amount)} WLD
+                      </TableCell>
                       <TableCell className="text-right">
-                        <PlayOutcome netAmount={play.netAmount} />
+                        <PlayOutcome netAmount={play.net_amount} />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -575,6 +646,40 @@ function OddsRow({
       </TableCell>
     </TableRow>
   );
+}
+
+function playableHeadroom(
+  platformStake: string,
+  platformLoss: string,
+  userStake: string | null,
+  userLoss: string | null,
+): string {
+  const values = [platformStake, platformLoss, ...(userStake ? [userStake] : []), ...(userLoss ? [userLoss] : [])];
+  return values.reduce((lowest, value) => (BigInt(value) < BigInt(lowest) ? value : lowest));
+}
+
+function belowMinimum(remainingAmount: string, minimumStake: string): boolean {
+  return BigInt(remainingAmount) < BigInt(minimumStake);
+}
+
+function casinoGameLabel(game: CasinoHistoryEntry['game']): string {
+  if (game === 'coin') return '동전 뒤집기';
+  if (game === 'dice_parity') return '주사위 홀짝';
+  return '주사위 숫자';
+}
+
+function casinoChoiceLabel(game: CasinoHistoryEntry['game'], choice: string): string {
+  if (game === 'coin') return faceLabel(choice);
+  if (game === 'dice_parity') return choice === 'odd' ? '홀' : choice === 'even' ? '짝' : choice;
+  return `${choice}번`;
+}
+
+function casinoOutcomeLabel(game: CasinoHistoryEntry['game'], outcome: string): string {
+  if (game === 'coin') return faceLabel(outcome);
+  const face = Number.parseInt(outcome, 10);
+  if (!Number.isInteger(face) || face < 1 || face > 6) return outcome;
+  if (game === 'dice_parity') return `${face} (${face % 2 === 1 ? '홀' : '짝'})`;
+  return `${face}번`;
 }
 
 function FairnessNote({ fairness }: { readonly fairness: Loaded<CoinFairness> }) {
