@@ -10,7 +10,10 @@ RUN corepack enable
 COPY pnpm-workspace.yaml pnpm-lock.yaml package.json tsconfig.base.json .npmrc ./
 COPY packages/contract/package.json packages/contract/
 COPY frontend/package.json frontend/
-RUN pnpm install --frozen-lockfile --filter @moneyverse/contract --filter @moneyverse/frontend
+# The root project owns the shared ESLint configuration and its plugins.
+# Include it explicitly: a frontend-only filtered install can leave Next's
+# build-time lint step unable to resolve eslint-plugin-react-hooks.
+RUN pnpm install --frozen-lockfile --filter woldeok-moneyverse --filter @moneyverse/contract --filter @moneyverse/frontend
 
 COPY eslint.config.mjs ./
 COPY packages/contract packages/contract
