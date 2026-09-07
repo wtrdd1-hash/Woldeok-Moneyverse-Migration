@@ -11,7 +11,24 @@ const BEACON_REPORT = 'https://cloudflareinsights.com';
 const ADSENSE_SCRIPT = 'https://pagead2.googlesyndication.com';
 const ADSENSE_FRAME = 'https://googleads.g.doubleclick.net https://tpc.googlesyndication.com';
 
+/**
+ * One value that changes on every build, readable on both sides.
+ *
+ * A tab left open across a deploy holds server-action ids from a build that
+ * no longer exists. Next answers those with a 404 and the click does nothing
+ * -- no error, no message, the button simply stops working. The page needs to
+ * be able to notice, and to notice it needs to know which build it came from
+ * and which build the server is serving.
+ *
+ * `env` is inlined at build time into both bundles, so the browser has the id
+ * of the build it was served by and `/api/build` has the id of the build
+ * answering now. When they differ, the tab is stale.
+ */
+const BUILD_ID = process.env.BUILD_ID ?? String(Date.now());
+
 const config: NextConfig = {
+  generateBuildId: () => BUILD_ID,
+  env: { NEXT_PUBLIC_BUILD_ID: BUILD_ID },
   reactStrictMode: true,
   // The API is internal. Nothing here should ever construct a browser-facing
   // URL to it, so its address is read only in server code.
