@@ -1,6 +1,6 @@
 # 🌙 Woldeok Moneyverse
 
-[한국어](README/README.ko.md) | [English](README/README.en.md) | [简体中文](README/README.zh-CN.md) | [繁體中文](README/README.zh-TW.md) | [日本語](README/README.ja.md) | [Español](README/README.es.md) | [Français](README/README.fr.md) | [Русский](README/README.ru.md) | [العربية](README/README.ar.md) | [हिन्दी](README/README.hi.md) · 📜 [Changelog](docs/changelog/CHANGELOG.md) · 🚀 [Releases](docs/releases/v2026.09.07.1.md)
+[한국어](README/README.ko.md) | [English](README/README.en.md) | [简体中文](README/README.zh-CN.md) | [繁體中文](README/README.zh-TW.md) | [日本語](README/README.ja.md) | [Español](README/README.es.md) | [Français](README/README.fr.md) | [Русский](README/README.ru.md) | [العربية](README/README.ar.md) | [हिन्दी](README/README.hi.md) · 📜 [Changelog](docs/changelog/CHANGELOG.md) · 🚀 [Releases](docs/releases/v2026.09.07.2.md)
 
 ---
 
@@ -27,6 +27,8 @@
 | **Русский** | [README.ru.md](README/README.ru.md) | [CHANGELOG.ru.md](docs/changelog/CHANGELOG.ru.md) |
 | **العربية** | [README.ar.md](README/README.ar.md) | [CHANGELOG.ar.md](docs/changelog/CHANGELOG.ar.md) |
 | **हिन्दी** | [README.hi.md](README/README.hi.md) | [CHANGELOG.hi.md](docs/changelog/CHANGELOG.hi.md) |
+
+> **Localized guides are full guides, not short summaries.** Each language covers product features, architecture, gameplay/economy, security, mobile API, deployment, backup/recovery and development.
 
 ---
 
@@ -220,7 +222,8 @@ See [Banking](docs/features/banking.md).
 
 ### Change History
 - [Documentation Index](docs/INDEX.md)
-- [Current Documentation Release](docs/releases/v2026.09.07.1.md)
+- [Current Documentation Release](docs/releases/v2026.09.07.2.md)
+- [Previous Documentation Showcase](docs/releases/v2026.09.07.1.md)
 - [Gameplay Runtime Release](docs/releases/v2026.09.07.md)
 - [Detailed Worklog](docs/worklog/2026-09-07-gameplay-ux-release.md)
 - [English Changelog](docs/changelog/CHANGELOG.md)
@@ -280,6 +283,10 @@ See [Production Deployment](docs/operations/production-deployment.md) and [Backu
 ## 📜 Release
 
 Latest documentation release:
+
+**[v2026.09.07.2 — Localized Guide Parity](docs/releases/v2026.09.07.2.md)**
+
+Previous documentation showcase:
 
 **[v2026.09.07.1 — Documentation & Showcase](docs/releases/v2026.09.07.1.md)**
 

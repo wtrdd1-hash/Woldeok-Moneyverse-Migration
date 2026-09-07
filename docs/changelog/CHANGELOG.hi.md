@@ -1,5 +1,11 @@
 # परिवर्तन लॉग
 
+## v2026.09.07.2 — Localized Full-Guide Parity
+- सभी 10 localized README को छोटे summary से complete guide में बदला गया।
+- हर भाषा में real Production GUI, responsive UI, architecture, work/quests, casino/banking, WLD precision, security, mobile API, deployment, backup और development sections जोड़े गए।
+- Job 2.0, casino balance, banking integrity और internal API boundary facts सभी translations में sync किए गए।
+- Documentation-only change; Production Runtime/DB पर प्रभाव नहीं।
+
 ## v2026.09.07.1 — Documentation & Showcase
 - वास्तविक public Production screenshots के साथ visual README showcase.
 - 10 भाषाओं में README और changelog.

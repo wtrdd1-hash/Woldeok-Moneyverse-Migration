@@ -1,5 +1,11 @@
 # 変更履歴
 
+## v2026.09.07.2 — 多言語完全ガイド同期
+- 10言語のREADMEを短い概要から完全ガイドへ拡張。
+- 全言語に実Production GUI、レスポンシブUI、アーキテクチャ、職業/クエスト、カジノ/銀行、WLD精度、セキュリティ、Mobile API、デプロイ/バックアップ/開発説明を追加。
+- Job 2.0、カジノバランス、銀行整合性、内部API境界の事実を翻訳間で同期。
+- ドキュメントのみの変更でProduction Runtime/DBへの影響なし。
+
 ## v2026.09.07.1 — Documentation & Showcase
 - 実際の Production 公開画面を使った README GUI ショーケースを追加。
 - README / Changelog を10言語に拡張。

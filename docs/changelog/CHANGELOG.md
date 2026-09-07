@@ -1,5 +1,11 @@
 # Changelog
 
+## v2026.09.07.2 — Localized Guide Parity
+- Expanded all 10 localized READMEs into full guides instead of short summaries.
+- Added the Production GUI showcase, responsive behavior, architecture, gameplay/economy, WLD precision, security, mobile API, deployment, backup and development sections to every language.
+- Synchronized the same Job 2.0, casino, banking and security facts across translations.
+- Documentation-only release; no runtime/database changes.
+
 ## v2026.09.07.1 — Documentation & Showcase
 - Visual README showcase using real public Production screenshots.
 - 10-language README and changelog portal.

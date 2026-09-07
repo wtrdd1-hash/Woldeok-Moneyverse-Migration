@@ -34,6 +34,8 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 
 ## Release history and work logs
 
+- [v2026.09.07.2 localized guide parity](releases/v2026.09.07.2.md)
+
 - [v2026.09.07.1 documentation release](releases/v2026.09.07.1.md)
 - [v2026.09.07 gameplay release](releases/v2026.09.07.md)
 - [2026-09-07 gameplay/UX worklog](worklog/2026-09-07-gameplay-ux-release.md)
