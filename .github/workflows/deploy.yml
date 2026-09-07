@@ -278,7 +278,6 @@ jobs:
             "REQUIRE_BACKUP='${{ steps.target.outputs.require_backup }}'" \
             "BOOTSTRAP_DISCORD_ADMIN_IDS='${{ steps.target.outputs.admin_ids }}'" \
             "ADOPT_FROM='${{ vars.ADOPT_FROM }}'" \
-            "ADOPT_DATA_KEY_FROM='${{ inputs.environment == 'production' && 'wdmv-backend' || '' }}'" \
             "ADOPT_DISCORD_FROM='${{ inputs.environment == 'production' && 'wtrdd-discord-app' || '' }}'" \
             "DISCORD_APPLICATION_ID='${{ vars.DISCORD_APPLICATION_ID }}'" \
             "DISCORD_BOT_TOKEN='${{ secrets.DISCORD_BOT_TOKEN }}'" \
