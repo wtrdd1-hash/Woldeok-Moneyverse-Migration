@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+
 /**
  * The last resort: a throw in the root layout itself, where the masthead and
  * the stylesheet may not exist yet.
@@ -15,6 +17,20 @@ export default function GlobalError({
   readonly error: Error & { readonly digest?: string };
   readonly reset: () => void;
 }) {
+  const [recovering, setRecovering] = useState(true);
+
+  useEffect(() => {
+    console.error('Captured global error:', error);
+    const lastRecovery = Number(sessionStorage.getItem('wdmv_global_recovery_ts') || '0');
+    const now = Date.now();
+    if (now - lastRecovery > 30000) {
+      sessionStorage.setItem('wdmv_global_recovery_ts', String(now));
+      const timer = setTimeout(() => window.location.reload(), 800);
+      return () => clearTimeout(timer);
+    }
+    setRecovering(false);
+  }, [error]);
+
   return (
     <html lang="ko">
       <body
@@ -30,14 +46,16 @@ export default function GlobalError({
         }}
       >
         <div style={{ display: 'grid', gap: '1rem', maxWidth: '34rem' }} role="alert">
-          <h1 style={{ fontSize: '1.6rem', margin: 0 }}>화면을 불러오지 못했어요.</h1>
+          <h1 style={{ fontSize: '1.6rem', margin: 0 }}>{recovering ? '서비스 연결을 복구하고 있어요.' : '화면을 불러오지 못했어요.'}</h1>
           <p style={{ lineHeight: 1.8, margin: 0, wordBreak: 'keep-all' }}>
-            잠시 후 다시 시도해 주세요. 방금 서비스가 업데이트됐다면 새로고침 한 번으로
-            해결되는 경우가 많습니다.
+            {recovering
+              ? '업데이트 전환을 감지해 자동으로 다시 연결하고 있습니다. 잠시만 기다려 주세요.'
+              : '잠시 후 다시 시도해 주세요. 문제가 계속되면 새로고침으로 다시 연결할 수 있습니다.'}
           </p>
           <button
             type="button"
             onClick={reset}
+            disabled={recovering}
             style={{
               background: '#214b38',
               border: 0,
@@ -50,7 +68,7 @@ export default function GlobalError({
               width: 'fit-content',
             }}
           >
-            다시 시도
+            {recovering ? '연결 중...' : '다시 시도'}
           </button>
           {error.digest && (
             <p style={{ fontSize: '0.75rem', margin: 0, opacity: 0.7 }}>
