@@ -57,9 +57,11 @@ case "$command" in
   *) usage >&2; die "unknown command: $command" ;;
 esac
 
-# Named, not inferred from this script's location: a copy run from somewhere
-# else would otherwise back up whatever stack happened to be beside it.
-cd "${DEPLOY_DIR:-$HOME/moneyverse-migration}"
+# A deployed copy lives inside its own stack directory. Default to the script
+# directory so manually running production/backup.sh can never silently back up
+# the test stack. DEPLOY_DIR remains an explicit override for automation.
+script_dir="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+cd "${DEPLOY_DIR:-$script_dir}"
 [ -f .env ] || die "no .env in $PWD -- this is not a deployment directory"
 
 # The deployment's own settings, read the way roll.sh and update.sh read them.
