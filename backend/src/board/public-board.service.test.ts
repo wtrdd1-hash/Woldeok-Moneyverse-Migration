@@ -9,7 +9,7 @@ const COMMENT = '22222222-3333-4444-8555-666666666666';
 function queryable(respond: (text: string) => readonly QueryResultRow[]): Queryable {
   return {
     async query<R extends QueryResultRow>(text: string): Promise<{ rows: R[] }> {
-      return { rows: [...respond(text)] as R[] };
+      return { rows: [...respond(text)] as unknown as R[] };
     },
   };
 }
