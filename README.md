@@ -1,67 +1,53 @@
 # Woldeok Moneyverse
 
-A rebuild of the Woldeok Moneyverse community virtual economy on Next.js and
-NestJS, deployed at
-[migration.easy-scraping.com](https://migration.easy-scraping.com).
+Community virtual-economy platform built with Next.js, NestJS and PostgreSQL.
+Production: **https://easy-scraping.com** · Test: **https://test.easy-scraping.com**
 
-| Workspace | What it is |
+> All WLD, stocks, casino plays, jobs and rewards are virtual in-service data. They are not real money, securities or gambling products.
+
+## Languages
+
+[한국어](README/README.ko.md) · [English](README/README.en.md) · [简体中文](README/README.zh-CN.md) · [繁體中文](README/README.zh-TW.md) · [日本語](README/README.ja.md) · [Español](README/README.es.md)
+
+## Architecture at a glance
+
+```text
+Browser
+  │
+  ▼
+Cloudflare Tunnel / proxy
+  │
+  ▼
+nginx edge
+  │
+  ├──▶ Next.js frontend
+  │       │
+  │       ▼
+  │    NestJS API
+  │       │
+  │       ▼
+  └──▶ PostgreSQL SECURITY DEFINER functions
+              │
+              ▼
+        ledger / game / member tables
+```
+
+The application role is intentionally unable to mutate economy tables directly. Money-moving and identity-sensitive writes go through PostgreSQL `SECURITY DEFINER` functions, with idempotency keys and ledger receipts where appropriate.
+
+## Main workspaces
+
+| Path | Purpose |
 | --- | --- |
-| `frontend/` | Next.js App Router application with shadcn/ui — the only publicly reachable origin |
-| `backend/` | NestJS API, reachable only from the internal network |
-| `packages/database/` | Numbered SQL migrations and the production checksum manifest |
-| `packages/contract/` | Types shared by both applications, and the route map |
-| `deploy/` | nginx configuration, Compose file, host scripts |
-| `ops/` | Cloudflare DNS and tunnel scripts |
+| `frontend/` | Next.js App Router site and member UI |
+| `backend/` | NestJS internal API |
+| `packages/database/` | Ordered SQL migrations and DB policy |
+| `packages/contract/` | Shared route/types contract |
+| `deploy/` | Compose, nginx and host deployment scripts |
+| `ops/` | Infrastructure helper scripts |
+| `README/` | Localized project documentation |
 
-## The one thing to know first
+## Current gameplay areas
 
-The business logic of this application does not live in TypeScript. It lives
-in PostgreSQL `SECURITY DEFINER` functions. The application connects as a role
-that cannot update balances, delete audit rows, or forge an identity — it can
-only execute those functions. Every write goes through one.
+Jobs and proficiency, quests and progression, wallet/ledger, catalog shop, inventory/collections, virtual stocks, businesses, banking/credit/bonds, and virtual casino minigames with server-side outcomes and member self-limits.
 
-That boundary is deliberate and load-bearing. Read
-[the design document](docs/superpowers/specs/2026-08-27-nextjs-nestjs-rebuild-design.md)
-before changing anything in the data layer, and
-[AGENTS.md](AGENTS.md) before changing anything at all.
-
-```
-browser ──▶ Next.js ──▶ NestJS ──▶ SECURITY DEFINER function ──▶ tables
-```
-
-The browser never talks to the API directly. That is what keeps the session a
-same-origin `HttpOnly` cookie and CSRF a same-origin problem. The lobby's
-`/socket.io/` handshake is the single deliberate exception.
-
-## Development
-
-Requires Node 20+ and pnpm 10+.
-
-```bash
-pnpm install
-pnpm dev          # frontend and backend together
-pnpm typecheck
-pnpm lint
-pnpm test
-pnpm build
-```
-
-Tests that need a database run only when `DATABASE_URL` is set. They are
-skipped otherwise, and a skipped test is never reported as a passing one.
-
-## Deploying
-
-Two deployments from one compose file, and neither runs on a push:
-
-| | Test | Production |
-| --- | --- | --- |
-| | `test.easy-scraping.com` | `easy-scraping.com` |
-
-```bash
-gh workflow run deploy.yml -f environment=test          # then, once confirmed:
-gh workflow run deploy.yml -f environment=production
-```
-
-They share no database and no secret. **[docs/RELEASING.md](docs/RELEASING.md)
-is the procedure**, including rollback and what to do when a release carries a
-migration. [deploy/README.md](deploy/README.md) describes the stack itself.
+See a localized README above for setup, security and deployment details.
