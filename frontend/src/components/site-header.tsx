@@ -84,7 +84,7 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-30 border-b bg-background/94 backdrop-blur-lg">
-      <div className="mx-auto flex h-[76px] w-full max-w-[1180px] items-center gap-6 px-6">
+      <div className="mx-auto flex h-16 sm:h-[70px] lg:h-[76px] w-full max-w-[1180px] items-center gap-2 min-[480px]:gap-3 lg:gap-6 px-3 min-[480px]:px-4 sm:px-6">
         <Brand />
 
         <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="ml-auto hidden items-center gap-6 lg:flex">
@@ -97,8 +97,10 @@ export function SiteHeader() {
           )}
         </nav>
 
-        <div className={cn('flex items-center gap-1.5 sm:gap-3 shrink-0', 'lg:ml-4', 'ml-auto lg:ml-4')}>
-          <LanguageSwitcher />
+        <div className={cn('flex min-w-0 items-center gap-1 sm:gap-2 lg:gap-3 shrink-0', 'ml-auto lg:ml-4')}>
+          <div className="hidden min-[420px]:block">
+            <LanguageSwitcher />
+          </div>
           <div className="hidden sm:block">
             <ThemeMenu />
           </div>
