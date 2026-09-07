@@ -22,9 +22,11 @@ content publication and the public economy surfaces.
    non-overlap lock, timestamps, result codes and bounded high-frequency
    retention. Production and test write to separate directories on the second
    physical disk.
-4. **Deploy SSH reconnected for every step and timed out (high).** The workflow
-   now opens one authenticated, pinned-host-key SSH control connection and reuses
-   it for file transfer, rollout and reporting.
+4. **Deploy SSH reconnected for every step and amplified connection loss
+   (high).** The workflow now retries one authenticated, pinned-host-key SSH
+   control connection and reuses it for file transfer, rollout and reporting.
+   This removes needless reconnects, but it cannot repair host or firewall
+   policy that rejects every GitHub-hosted runner connection.
 5. **A new ledger type had no member-facing label (medium).** Account merge
    transfers now appear as `계정 통합` instead of the generic activity label.
 6. **Lint emitted two configuration-only warnings (low).** React version is
@@ -46,28 +48,34 @@ content publication and the public economy surfaces.
 
 ## Remaining work, ordered by risk
 
-1. **No off-host backup copy (high).** Database volumes and encrypted backups
+1. **GitHub-hosted deploy ingress is currently unavailable (high).** During the
+   release, six fresh SSH attempts from the runner timed out before file
+   transfer. CI and image publication work; deployment was completed locally on
+   the host after the same gates. Restore runner access with a narrowly scoped
+   firewall rule, VPN/overlay route or a locked-down self-hosted runner, then
+   prove a test deployment before relying on automatic production delivery.
+2. **No off-host backup copy (high).** Database volumes and encrypted backups
    are on different physical disks, but one machine loss still removes both.
    Set `BACKUP_COPY_TO` to storage mounted from another machine or object-storage
    gateway and perform a restore drill there. A second live database on the same
    PostgreSQL host is not disaster recovery and was deliberately not presented
    as one.
-2. **Restore rehearsal is manual (high).** Every backup is decrypted, CRC-checked
+3. **Restore rehearsal is manual (high).** Every backup is decrypted, CRC-checked
    and compared to manifest figures, but a scheduled restore into an isolated
    PostgreSQL instance would also exercise role and schema recreation.
-3. **Mobile browser coverage stops at component and responsive tests (medium).**
+4. **Mobile browser coverage stops at component and responsive tests (medium).**
    Admin visibility, login/logout and token forwarding are covered in code, but
    CI has no Android Chrome/iOS WebKit end-to-end run against the deployed test
    origin. Add Playwright device projects and an operator test identity whose
    credentials never reach screenshots or artifacts.
-4. **Nine intentional raw-image paths still produce performance warnings
+5. **Nine intentional raw-image paths still produce performance warnings
    (medium).** Blob previews and unconstrained approved external URLs cannot use
    the default Next image loader safely. Same-origin media should move to a
    sized image component; external sources need an explicit reviewed allowlist.
-5. **Backup failures are logged but not alerted (medium).** Add a separate
+6. **Backup failures are logged but not alerted (medium).** Add a separate
    watchdog that notifies the private operations channel only when the newest
    verified manifest exceeds one hour or a cron result is non-zero.
-6. **GitHub-hosted action runtime deprecation warning (low).** CI currently
+7. **GitHub-hosted action runtime deprecation warning (low).** CI currently
    succeeds because the runner forces the affected actions onto Node 24. Upgrade
    those action majors after reviewing their release notes and pinned behavior.
 
