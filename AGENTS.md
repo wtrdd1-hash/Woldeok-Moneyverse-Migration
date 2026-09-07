@@ -385,6 +385,12 @@ saying why.
 
 ## 8. Conventions
 
+### Work-detail log is mandatory
+
+Every update or modification must have a task-detail page under `docs/worklog/`. Create it before substantive implementation, keep an explicit checklist of planned/in-progress/completed work, and update it at meaningful checkpoints. Commit and push those checkpoints to the task branch so the current state is inspectable both on the working host and on GitHub while work is still in progress. The final entry must record validation results and deployment state.
+
+Do not wait until the end to write the log. If the task spans multiple related changes requested together, keep them on one task page and one task branch unless migration stacking requires otherwise.
+
 **Everything written into this repository is English.** Code comments, commit
 messages, PR titles and bodies, test names, assertion messages. The one
 exception is `docs/`, which may be Korean.

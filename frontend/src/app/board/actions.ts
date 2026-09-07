@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import type { ActionState } from '@/lib/action-state';
+import { api, apiBytes } from '@/lib/api';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
 
 /**
@@ -22,13 +23,40 @@ function checkPost(title: string, body: string): ActionState | null {
 export async function createPost(_previous: ActionState, formData: FormData): Promise<ActionState> {
   const title = String(formData.get('title') ?? '').trim();
   const body = String(formData.get('body') ?? '').trim();
+  const photo = formData.get('photo');
+  const imageAltText = String(formData.get('imageAltText') ?? '').trim();
 
   const invalid = checkPost(title, body);
   if (invalid) return invalid;
+  if (photo instanceof File && photo.size > 4 * 1024 * 1024) {
+    return { status: 'error', message: '사진은 4MB 이하여야 해요.' };
+  }
+  if (
+    photo instanceof File &&
+    photo.size > 0 &&
+    (imageAltText === '' || imageAltText.length > 300)
+  ) {
+    return { status: 'error', message: '사진 설명은 1~300자로 입력해 주세요.' };
+  }
 
   try {
+    let imageStorageKey: string | undefined;
+    if (photo instanceof File && photo.size > 0) {
+      const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session');
+      const upload = await apiBytes<{ storageKey: string }>(
+        '/api/v1/board/images/uploads',
+        await photo.arrayBuffer(),
+        { contentType: photo.type || 'application/octet-stream', csrfToken },
+      );
+      imageStorageKey = upload.storageKey;
+    }
     await mutate('/api/v1/board/posts', {
-      body: { title, body, idempotencyKey: idempotencyKey() },
+      body: {
+        title,
+        body,
+        idempotencyKey: idempotencyKey(),
+        ...(imageStorageKey ? { imageStorageKey, imageAltText } : {}),
+      },
     });
     revalidatePath('/board');
     return { status: 'ok', message: '글을 등록했어요.' };

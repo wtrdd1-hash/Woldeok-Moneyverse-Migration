@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { ContentModule } from '../content/content.module';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import { BoardController } from './board.controller';
+import { BoardImageController } from './board-image.controller';
 import { PostgresBoardRepository } from './board.repository';
 import { BoardService } from './board.service';
 
 @Module({
-  imports: [AuthModule],
-  controllers: [BoardController],
+  imports: [AuthModule, ContentModule],
+  controllers: [BoardController, BoardImageController],
   providers: [
     {
       provide: BoardService,

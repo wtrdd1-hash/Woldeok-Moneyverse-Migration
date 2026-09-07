@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
-import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
+import { failure, idempotencyKey, mutate, wholeNumber } from '@/lib/mutate';
 import { groupDigits } from '@/lib/money';
 
 interface TradeReceipt {
@@ -25,7 +25,7 @@ interface TradeReceipt {
 export async function placeOrder(_previous: ActionState, formData: FormData): Promise<ActionState> {
   const stockId = String(formData.get('stockId') ?? '');
   const side = String(formData.get('side') ?? '');
-  const quantity = wholeAmount(formData.get('quantity'));
+  const quantity = wholeNumber(formData.get('quantity'));
 
   if (stockId === '') return { status: 'error', message: '종목을 확인할 수 없어요.' };
   if (side !== 'buy' && side !== 'sell') {
