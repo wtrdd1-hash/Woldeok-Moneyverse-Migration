@@ -11,33 +11,25 @@ export default function PageError({
   readonly error: Error & { readonly digest?: string };
   readonly reset: () => void;
 }) {
-  const [reloading, setReloading] = useState(false);
+  const [reloading, setReloading] = useState(true);
 
   useEffect(() => {
     console.error('Captured page error:', error);
 
-    const msg = (error.message || '').toLowerCase();
-    const name = (error.name || '').toLowerCase();
-    const isChunkOrDeployError =
-      msg.includes('chunk') ||
-      msg.includes('loading') ||
-      msg.includes('failed to fetch') ||
-      msg.includes('dynamically imported module') ||
-      name.includes('chunk') ||
-      (error.digest && error.digest.includes('NEXT_NOT_FOUND'));
-
-    // 배포 갱신 또는 청크 불일치 감지 시 자동 새로고침 복구 (무한루프 방지 10초 세션)
-    const lastReload = Number(sessionStorage.getItem('wdmv_chunk_reload_ts') || '0');
+    // Production Server Components often hide the original network error and
+    // expose only a generic digest. Treat the first boundary hit as transient:
+    // one automatic reload absorbs the short backend/frontend hand-over during
+    // a deploy. A real application bug is not looped forever; the next hit in
+    // the recovery window is shown to the visitor normally.
+    const lastRecovery = Number(sessionStorage.getItem('wdmv_error_recovery_ts') || '0');
     const now = Date.now();
-
-    if (isChunkOrDeployError && now - lastReload > 10000) {
-      sessionStorage.setItem('wdmv_chunk_reload_ts', String(now));
-      setReloading(true);
-      const timer = setTimeout(() => {
-        window.location.reload();
-      }, 500);
+    if (now - lastRecovery > 30000) {
+      sessionStorage.setItem('wdmv_error_recovery_ts', String(now));
+      const timer = setTimeout(() => window.location.reload(), 800);
       return () => clearTimeout(timer);
     }
+
+    setReloading(false);
   }, [error]);
 
   return (

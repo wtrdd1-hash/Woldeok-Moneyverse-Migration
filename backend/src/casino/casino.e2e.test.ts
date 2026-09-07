@@ -25,6 +25,7 @@ const ROUTES = [
   ['post', '/api/v1/casino/coin/plays'],
   ['get', '/api/v1/casino/games/terms'],
   ['get', '/api/v1/casino/dice/fairness'],
+  ['get', '/api/v1/casino/history'],
   ['get', '/api/v1/casino/self-limit'],
   ['post', '/api/v1/casino/dice/plays'],
   ['put', '/api/v1/casino/self-limit'],

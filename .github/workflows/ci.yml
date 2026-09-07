@@ -13,7 +13,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:17.5-alpine
+        image: postgres:17.11-alpine
         env:
           POSTGRES_USER: moneyverse_migrator
           POSTGRES_PASSWORD: ci_migrator_password
@@ -35,10 +35,10 @@ jobs:
       - name: Reject a committed secret
         run: scripts/check-secrets.sh
 
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 24
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
