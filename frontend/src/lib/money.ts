@@ -7,10 +7,28 @@
  * anything — so grouping is done by walking the string.
  */
 
+/**
+ * Canonicalises an integer received at a UI boundary without sacrificing precision.
+ * Strings and bigint are exact. A number is accepted only while it is a safe integer;
+ * an already-rounded unsafe double must never be presented as if it were exact WLD.
+ */
+export function canonicalIntegerString(value: unknown): string | null {
+  if (typeof value === 'bigint') return value.toString();
+  if (typeof value === 'number') return Number.isSafeInteger(value) ? String(value) : null;
+  if (typeof value !== 'string' || !/^-?\d+$/.test(value)) return null;
+
+  const negative = value.startsWith('-');
+  const digits = (negative ? value.slice(1) : value).replace(/^0+(?=\d)/, '');
+  if (digits === '0') return '0';
+  return negative ? `-${digits}` : digits;
+}
+
 /** Groups thousands and renders a leading minus as a true minus sign (U+2212). */
-export function groupDigits(amount: string): string {
-  const negative = amount.startsWith('-');
-  const digits = negative ? amount.slice(1) : amount;
+export function groupDigits(amount: unknown): string {
+  const canonical = canonicalIntegerString(amount);
+  if (canonical === null) return '—';
+  const negative = canonical.startsWith('-');
+  const digits = negative ? canonical.slice(1) : canonical;
   const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   return negative ? `−${grouped}` : grouped;
 }

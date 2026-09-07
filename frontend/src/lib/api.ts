@@ -17,6 +17,35 @@ import { cookies, headers } from 'next/headers';
 
 const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 
+const TRANSIENT_API_STATUSES = new Set([502, 503, 504]);
+const API_RETRY_DELAYS_MS = [150, 350] as const;
+
+async function fetchInternal(
+  url: string,
+  initFactory: () => RequestInit,
+  retryTransient: boolean,
+): Promise<Response> {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= API_RETRY_DELAYS_MS.length; attempt += 1) {
+    try {
+      const response = await fetch(url, initFactory());
+      const shouldRetry =
+        retryTransient &&
+        TRANSIENT_API_STATUSES.has(response.status) &&
+        attempt < API_RETRY_DELAYS_MS.length;
+      if (!shouldRetry) return response;
+    } catch (error) {
+      lastError = error;
+      if (!retryTransient || attempt >= API_RETRY_DELAYS_MS.length) throw error;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, API_RETRY_DELAYS_MS[attempt]));
+  }
+
+  throw lastError instanceof Error ? lastError : new Error('Internal API request failed');
+}
+
 export class ApiError extends Error {
   readonly status: number;
   readonly detail: string | undefined;
@@ -66,6 +95,8 @@ export interface ApiRequest {
   readonly csrfToken?: string;
   /** Seconds. Omit for no caching, which is right for anything per-caller. */
   readonly revalidate?: number;
+  /** Abort a slow internal API call instead of leaving a server action pending forever. */
+  readonly timeoutMs?: number;
   /**
    * Sends this cookie header instead of the caller's.
    *
@@ -82,7 +113,7 @@ export interface ApiRequest {
  * it decides from what is forwarded here, not from anything Next asserts.
  */
 export async function api<T>(path: string, request: ApiRequest = {}): Promise<T> {
-  const { method = 'GET', body, csrfToken, revalidate } = request;
+  const { method = 'GET', body, csrfToken, revalidate, timeoutMs } = request;
 
   const cookieHeader = request.cookieHeader ?? (await callerCookies());
 
@@ -129,14 +160,19 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
     requestHeaders['x-public-origin'] = `${proto}://${forwardedHost}`;
   }
 
-  const response = await fetch(`${API_ORIGIN}${path}`, {
-    method,
-    headers: requestHeaders,
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-    // A per-caller response must never be cached: it carries one member's
-    // balances. Only pages that pass an explicit revalidate are public.
-    ...(revalidate === undefined ? { cache: 'no-store' as const } : { next: { revalidate } }),
-  });
+  const response = await fetchInternal(
+    `${API_ORIGIN}${path}`,
+    () => ({
+      method,
+      headers: requestHeaders,
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+      // A per-caller response must never be cached: it carries one member's
+      // balances. Only pages that pass an explicit revalidate are public.
+      ...(revalidate === undefined ? { cache: 'no-store' as const } : { next: { revalidate } }),
+      ...(timeoutMs === undefined ? {} : { signal: AbortSignal.timeout(timeoutMs) }),
+    }),
+    method === 'GET',
+  );
 
   if (response.status === 204) return undefined as T;
 
@@ -166,10 +202,14 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
  */
 export async function publicApi<T>(path: string, revalidate: number): Promise<T | null> {
   try {
-    const response = await fetch(`${API_ORIGIN}${path}`, {
-      headers: { 'x-internal-token': internalToken(), accept: 'application/json' },
-      next: { revalidate },
-    });
+    const response = await fetchInternal(
+      `${API_ORIGIN}${path}`,
+      () => ({
+        headers: { 'x-internal-token': internalToken(), accept: 'application/json' },
+        next: { revalidate },
+      }),
+      true,
+    );
     if (!response.ok) return null;
     const text = await response.text();
     return (text ? JSON.parse(text) : null) as T;
