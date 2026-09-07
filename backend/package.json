@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@moneyverse/contract": "workspace:*",
-    "@nestjs/common": "^11.0.0",
+    "@nestjs/common": "^12.0.1",
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "@nestjs/swagger": "^11.0.0",
