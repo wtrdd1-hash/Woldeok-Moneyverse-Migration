@@ -98,6 +98,7 @@ jobs:
           build-args: |
             APP_BASE_URL=${{ inputs.environment == 'test' && 'https://test.easy-scraping.com' || 'https://easy-scraping.com' }}
             SEO_INDEXING_ENABLED=${{ inputs.environment == 'production' && 'true' || 'false' }}
+            SEARCH_CONSOLE_VERIFICATION=${{ inputs.environment == 'production' && vars.SEARCH_CONSOLE_VERIFICATION || '' }}
             ADS_ENABLED=${{ inputs.environment == 'production' && inputs.enable_ads && 'true' || 'false' }}
             ADSENSE_PUBLISHER_ID=${{ inputs.environment == 'production' && inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}
             ADSENSE_HOME_SLOT=${{ inputs.environment == 'production' && inputs.enable_ads && '2118692561' || '' }}
