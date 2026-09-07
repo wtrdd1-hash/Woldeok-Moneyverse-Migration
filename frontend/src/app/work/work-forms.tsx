@@ -56,21 +56,31 @@ export function JobSwitchButton({
 
 function TaskCompletionPanel({
   task,
+  requestKey,
   onClose,
 }: {
   readonly task: WorkTask;
+  readonly requestKey: string;
   readonly onClose: () => void;
 }) {
   const { locale } = useLocale();
   const isEn = locale === 'en';
   const router = useRouter();
-  const [state, action] = useActionState(completeTaskV2Action, IDLE);
+  const [state, action, pending] = useActionState(completeTaskV2Action, IDLE);
   const meta = jobMeta(task.job_type, locale);
   const rewardPaused = task.reward_preview === null || task.experience_preview === null;
+  const [slow, setSlow] = useState(false);
 
   useEffect(() => {
     if (state.status === 'ok') router.refresh();
   }, [router, state.status]);
+
+  useEffect(() => {
+    setSlow(false);
+    if (!pending) return;
+    const timer = window.setTimeout(() => setSlow(true), 4_000);
+    return () => window.clearTimeout(timer);
+  }, [pending]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-150">
@@ -128,10 +138,23 @@ function TaskCompletionPanel({
           {state.status !== 'ok' && (
             <form action={action} className="grid gap-2">
               <input type="hidden" name="taskId" value={task.task_id} />
+              <input type="hidden" name="idempotencyKey" value={requestKey} />
               <SubmitButton disabled={rewardPaused} className="w-full font-bold">
                 {isEn ? 'Perform task and receive reward' : '업무 수행하고 보상 받기'}
               </SubmitButton>
             </form>
+          )}
+
+          {pending && (
+            <div className="rounded-xl border border-sky-500/30 bg-sky-500/10 p-3 text-sm text-sky-200" role="status" aria-live="polite">
+              {slow
+                ? isEn
+                  ? 'The response is taking longer than usual. The request is protected against duplicates and will time out safely instead of spinning forever.'
+                  : '응답이 평소보다 늦습니다. 동일 요청은 중복 지급되지 않으며, 무한 로딩 대신 안전하게 시간 초과 후 다시 시도할 수 있습니다.'
+                : isEn
+                  ? 'The server is recording the ledger transaction and proficiency EXP…'
+                  : '서버가 원장 거래와 직업 숙련도를 기록하고 있습니다…'}
+            </div>
           )}
 
           <ActionAlert state={state} />
@@ -146,7 +169,7 @@ function TaskCompletionPanel({
         </CardContent>
 
         <div className="flex justify-end gap-2 px-6 pb-5">
-          <Button type="button" variant="ghost" onClick={onClose}>
+          <Button type="button" variant="ghost" onClick={onClose} disabled={pending}>
             {state.status === 'ok' ? (isEn ? 'Done' : '완료') : isEn ? 'Close' : '닫기'}
           </Button>
         </div>
@@ -166,10 +189,18 @@ export function TaskCompleteModalButton({
   const isEn = locale === 'en';
   const [isOpen, setIsOpen] = useState(false);
   const [cycle, setCycle] = useState(0);
+  const [requestKey, setRequestKey] = useState('');
   const rewardPaused = task.reward_preview === null || task.experience_preview === null;
+
+  const open = () => {
+    setRequestKey(crypto.randomUUID());
+    setCycle((value) => value + 1);
+    setIsOpen(true);
+  };
 
   const close = () => {
     setIsOpen(false);
+    setRequestKey('');
     setCycle((value) => value + 1);
   };
 
@@ -178,7 +209,7 @@ export function TaskCompleteModalButton({
       <Button
         variant={isActiveJob ? 'default' : 'outline'}
         disabled={!isActiveJob || rewardPaused}
-        onClick={() => setIsOpen(true)}
+        onClick={open}
         className="w-full font-semibold shadow-sm transition-all"
       >
         {!isActiveJob
@@ -194,7 +225,9 @@ export function TaskCompleteModalButton({
               : '직업 업무 수행'}
       </Button>
 
-      {isOpen && <TaskCompletionPanel key={cycle} task={task} onClose={close} />}
+      {isOpen && requestKey && (
+        <TaskCompletionPanel key={cycle} task={task} requestKey={requestKey} onClose={close} />
+      )}
     </div>
   );
 }

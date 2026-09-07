@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { CircleAlert, CircleCheck, X } from 'lucide-react';
+import { CircleAlert, CircleCheck, CircleMinus, Info, X } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -92,6 +92,8 @@ export function ActionAlert({ state }: { readonly state: ActionState }) {
 
   if (state.status === 'idle' || !state.message || dismissed) return null;
   const failed = state.status === 'error';
+  const negative = state.status === 'ok' && state.tone === 'negative';
+  const neutral = state.status === 'ok' && state.tone === 'neutral';
 
   return (
     <Alert
@@ -100,7 +102,11 @@ export function ActionAlert({ state }: { readonly state: ActionState }) {
       // and the outcome must reach them without their having to hunt for it.
       role="status"
       aria-live="polite"
-      className="pr-12"
+      className={cn(
+        'pr-12',
+        negative && 'border-rose-500/40 bg-rose-500/10 text-rose-700 dark:text-rose-300',
+        neutral && 'border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300',
+      )}
       onMouseEnter={() => {
         paused.current = true;
       }}
@@ -114,7 +120,15 @@ export function ActionAlert({ state }: { readonly state: ActionState }) {
         paused.current = false;
       }}
     >
-      {failed ? <CircleAlert /> : <CircleCheck />}
+      {failed ? (
+        <CircleAlert />
+      ) : negative ? (
+        <CircleMinus />
+      ) : neutral ? (
+        <Info />
+      ) : (
+        <CircleCheck />
+      )}
       <AlertDescription>{state.message}</AlertDescription>
       <button
         type="button"
