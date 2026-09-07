@@ -30,7 +30,7 @@ export function StaleTabNotice({ everyMs = EVERY_MS }: { readonly everyMs?: numb
   const check = useCallback(async (): Promise<void> => {
     if (mine === '' || document.visibilityState !== 'visible') return;
     try {
-      const response = await fetch('/api/build', { cache: 'no-store' });
+      const response = await fetch('/api/version', { cache: 'no-store' });
       if (!response.ok) return;
       const body = (await response.json()) as { id?: unknown };
       // Only a difference counts. An answer we cannot read is not evidence

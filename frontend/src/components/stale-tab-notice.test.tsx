@@ -55,6 +55,13 @@ describe('StaleTabNotice', () => {
     expect(screen.queryByText(notice)).toBeNull();
   });
 
+  it('asks the route that exists, which is not the one .gitignore ate', async () => {
+    answers('build-two');
+    render(<StaleTabNotice everyMs={10} />);
+    document.dispatchEvent(new Event('visibilitychange'));
+    await waitFor(() => expect(fetch).toHaveBeenCalledWith('/api/version', { cache: 'no-store' }));
+  });
+
   it('asks nothing at all while the tab is hidden', async () => {
     answers('build-two');
     Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
