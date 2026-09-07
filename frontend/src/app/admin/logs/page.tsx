@@ -146,7 +146,8 @@ export default async function AdminLogsPage({
           <CardTitle className="text-base">조건 검색</CardTitle>
           <CardDescription>
             비어 있는 칸은 조건을 걸지 않습니다. 닉네임이 아니라 UUID입니다 — 사용자를
-            찾을 때는 회원 관리에서 UUID를 복사해 오세요.
+            찾을 때는 회원 관리에서 UUID를 복사해 오세요. 대상 회원 ID는 대상/주체로 기록된
+            회원 로그를 함께 찾습니다.
           </CardDescription>
         </CardHeader>
         <CardContent>
