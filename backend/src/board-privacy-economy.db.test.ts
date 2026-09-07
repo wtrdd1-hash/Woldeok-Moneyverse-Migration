@@ -4,6 +4,7 @@ import { databaseUrl, isMissingGrant, rejectionOf } from './testing/database';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { PostgresBoardRepository } from './board/board.repository';
 import { BoardService } from './board/board.service';
+import { PublicBoardService } from './board/public-board.service';
 import { PostgresEconomyReconciliationRepository } from './economy/reconciliation.repository';
 import { EconomyReconciliationService } from './economy/reconciliation.service';
 import { PostgresPrivacyRequestRepository } from './privacy/privacy.repository';
@@ -15,12 +16,14 @@ const UNKNOWN = '00000000-0000-4000-8000-000000000000';
 describe.skipIf(!DATABASE_URL)('board, privacy and reconciliation against a real database', () => {
   let pool: Pool;
   let board: BoardService;
+  let publicBoard: PublicBoardService;
   let privacy: PrivacyRequestService;
   let reconciliation: EconomyReconciliationService;
 
   beforeAll(() => {
     pool = new Pool({ connectionString: DATABASE_URL, max: 3 });
     board = new BoardService(new PostgresBoardRepository(pool));
+    publicBoard = new PublicBoardService(pool);
     privacy = new PrivacyRequestService(new PostgresPrivacyRequestRepository(pool));
     reconciliation = new EconomyReconciliationService({
       repository: new PostgresEconomyReconciliationRepository(pool),
@@ -31,10 +34,17 @@ describe.skipIf(!DATABASE_URL)('board, privacy and reconciliation against a real
     await pool.end();
   });
 
-  // member_board_list raises 28000 for an actor with no active account: the
-  // board is members-only and the function decides that, not the route.
-  it('refuses the board listing to an account that does not exist', async () => {
+  it('keeps the member board endpoint restricted to an active account', async () => {
     await expect(board.list(UNKNOWN)).rejects.toMatchObject({ code: '28000' });
+  });
+
+  it('allows the dedicated public board read model without an actor', async () => {
+    await expect(publicBoard.list()).resolves.toEqual(expect.any(Array));
+  });
+
+  it('does not turn public board reading into direct table access', async () => {
+    const error = await rejectionOf(() => pool.query('SELECT id FROM public.member_board_posts LIMIT 1'));
+    expect(isMissingGrant(error)).toBe(true);
   });
 
   it('refuses to create a post for a user that does not exist', async () => {
@@ -67,17 +77,13 @@ describe.skipIf(!DATABASE_URL)('board, privacy and reconciliation against a real
     ).rejects.toThrow(/supported privacy request type/);
   });
 
-  // The read model is administrator-gated inside the function, so an unknown
-  // actor is refused there rather than by the application. It raises 42501 to
-  // say so -- the same SQLSTATE PostgreSQL uses for a missing grant, which is
-  // why isMissingGrant() below reads the message rather than the code.
   it('refuses the reconciliation read model to a caller with no role', async () => {
     await expect(reconciliation.latestHealth(UNKNOWN)).rejects.toThrow(
       'active approver role required for reconciliation health',
     );
   });
 
-  it('is refused by the functions themselves, never by a missing grant', async () => {
+  it('is refused by protected functions themselves, never by a missing grant', async () => {
     const attempts: readonly (() => Promise<unknown>)[] = [
       () => board.list(UNKNOWN),
       () => privacy.myRequests(UNKNOWN),
