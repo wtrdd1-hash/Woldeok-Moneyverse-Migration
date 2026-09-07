@@ -20,7 +20,7 @@
 
 ### PostgreSQL 보안 경계
 
-Migration 174는 다음 전용 read model만 추가한다.
+Migration 175는 다음 전용 read model만 추가한다.
 
 - `member_board_public_list(integer)`
 - `member_board_public_get(uuid)`
@@ -52,7 +52,7 @@ Migration 174는 다음 전용 read model만 추가한다.
 
 ## 검증 게이트
 
-- [ ] PR CI: secret guard, lint, typecheck, build, migration 174 실제 PostgreSQL 적용, DB/application/frontend tests
+- [ ] PR CI: secret guard, lint, typecheck, build, migration 175 실제 PostgreSQL 적용, DB/application/frontend tests
 - [ ] test 서버에 현재 stacked branch 배포
 - [ ] 비로그인: `/board` 목록, 글 본문, 댓글, 첨부 이미지 열람 가능
 - [ ] 비로그인: 글/댓글 작성 API는 여전히 거부됨
