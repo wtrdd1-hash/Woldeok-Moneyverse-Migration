@@ -76,7 +76,7 @@ jobs:
       backend: ${{ steps.meta.outputs.backend }}
       frontend: ${{ steps.meta.outputs.frontend }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
@@ -148,7 +148,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # The two deployments differ in six values and nothing else. They are
       # here rather than in environment variables because none of them is a

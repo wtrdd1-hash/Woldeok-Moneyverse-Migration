@@ -1,13 +1,11 @@
-import { FlatCompat } from '@eslint/eslintrc';
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
-
-const compat = new FlatCompat({ baseDirectory: import.meta.dirname });
+import nextVitals from 'eslint-config-next/core-web-vitals';
 
 export default tseslint.config(
   { ignores: ['**/dist/**', '**/.next/**', '**/node_modules/**', '**/generated/**', '.claude/**'] },
   js.configs.recommended,
-  ...compat.extends('next/core-web-vitals'),
+  ...nextVitals,
   ...tseslint.configs.recommended,
   {
     settings: { react: { version: '19.1' } },
@@ -32,6 +30,10 @@ export default tseslint.config(
       // This repository uses App Router only; the rule searches for a legacy
       // pages directory and warns even though there is intentionally none.
       '@next/next/no-html-link-for-pages': 'off',
+      // Next 16 enables two React compiler-oriented rules that would require a
+      // broad behavioural refactor. Keep the pre-upgrade lint contract for now.
+      'react-hooks/purity': 'off',
+      'react-hooks/set-state-in-effect': 'off',
     },
   },
   {

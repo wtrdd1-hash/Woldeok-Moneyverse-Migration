@@ -5,10 +5,17 @@
     "moduleResolution": "Node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "ignoreDeprecations": "6.0"
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["src/**/*.test.ts"]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/*.test.ts"
+  ]
 }
