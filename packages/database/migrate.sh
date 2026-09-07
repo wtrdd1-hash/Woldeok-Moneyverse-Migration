@@ -34,7 +34,11 @@ historical_checksum_is_recognized() {
 
 historical_content_revision_seen=0
 
-for migration in /migrations/*.sql; do
+# Production uses the /migrations bind mount. Local/CI callers can point at
+# their own checkout so concurrent worktrees never share a global symlink.
+migrations_dir="${MIGRATIONS_DIR:-/migrations}"
+
+for migration in "$migrations_dir"/*.sql; do
   [ -f "$migration" ] || continue
 
   filename="$(basename "$migration")"

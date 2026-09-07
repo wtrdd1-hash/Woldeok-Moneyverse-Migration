@@ -52,6 +52,23 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
        ) VALUES ($1, 1000000, 500000, 500000, 500000, 0, 5, true)`,
       [randomUUID()],
     );
+    for (const [game, wins, probabilityPpm] of [
+      ['dice_parity', 500000, 500000],
+      ['dice_number', 166667, 166667],
+    ] as const) {
+      await client.query(
+        `INSERT INTO public.casino_dice_distribution_trials (
+           idempotency_key, game, requested_draws, trials, wins, face_counts,
+           rejected_bytes, expected_win_probability_ppm, observed_win_probability_ppm,
+           z_score, chi_square, tolerance_sigma, tolerance_chi_square, passed
+         ) VALUES (
+           $1, $2, 1000000, 1000000, $3,
+           ARRAY[166667,166667,166667,166667,166666,166666]::bigint[],
+           0, $4, $4, 0, 0.000008, 5, 40, true
+         )`,
+        [randomUUID(), game, wins, probabilityPpm],
+      );
+    }
     await client.query(
       "UPDATE public.feature_switches SET state = 'enabled' WHERE feature_key = 'casino'",
     );
