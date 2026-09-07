@@ -44,7 +44,22 @@ env:
   IMAGE_PREFIX: ${{ github.repository_owner }}/wdmv
 
 jobs:
+  # There is one deployment now, so the ref this was dispatched from is no
+  # longer a harmless detail: without this, a branch someone was testing a
+  # dependency bump on would roll the live site. main is what the site runs.
+  ref:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refuse to roll anything but main
+        run: |
+          if [ "${GITHUB_REF}" != 'refs/heads/main' ]; then
+            echo "::error::the site rolls main; this run was dispatched from ${GITHUB_REF}"
+            exit 1
+          fi
+          echo "rolling ${GITHUB_SHA} from main"
+
   verify:
+    needs: ref
     uses: ./.github/workflows/ci.yml
 
   build:
@@ -52,9 +67,8 @@ jobs:
     runs-on: ubuntu-latest
     # The frontend image has the public origin compiled into it -- robots.txt
     # and sitemap.xml are generated at build time and have to name the host --
-    # so the two deployments cannot share a tag. The environment is part of
-    # the tag rather than a hidden difference between two images called the
-    # same thing.
+    # so the image is tagged with the environment rather than the two being a
+    # hidden difference between images called the same thing.
     permissions:
       contents: read
       packages: write
