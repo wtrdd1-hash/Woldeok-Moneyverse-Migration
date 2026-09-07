@@ -118,8 +118,8 @@ describe('the self-imposed lock', () => {
 
 describe('selfLimitAmount', () => {
   // The difference from `wholeAmount`, and the reason this exists: a limit of
-  // zero is a member saying they will stake nothing, which is the strongest
-  // setting on the form and the worst one to refuse.
+  // zero is the explicit sentinel for leaving that self-limit unbound, as
+  // migration 164 defines it.
   it('accepts zero', () => {
     expect(selfLimitAmount('0')).toBe(0);
   });

@@ -4,11 +4,23 @@ import { describe, expect, it } from 'vitest';
 
 describe('repeatable work completion feedback', () => {
   const source = readFileSync(join(__dirname, 'work-forms.tsx'), 'utf8');
+  const actionSource = readFileSync(join(__dirname, 'actions.ts'), 'utf8');
 
-  it('creates a fresh server-action state for every modal cycle', () => {
+  it('creates a fresh modal cycle and one stable idempotency key per opening', () => {
     expect(source).toContain('const [cycle, setCycle] = useState(0);');
-    expect(source).toContain('setCycle((value) => value + 1);');
-    expect(source).toContain('<TaskCompletionPanel key={cycle} task={task} onClose={close} />');
+    expect(source).toContain("const [requestKey, setRequestKey] = useState('');");
+    expect(source).toContain('setRequestKey(crypto.randomUUID());');
+    expect(source).toContain('name="idempotencyKey" value={requestKey}');
+    expect(source).toContain('requestKey={requestKey}');
+  });
+
+  it('bounds a slow request and lets the same key be retried instead of spinning forever', () => {
+    expect(actionSource).toContain("const key = id(formData, 'idempotencyKey');");
+    expect(actionSource).toContain('timeoutMs: 8_000');
+    expect(actionSource).not.toContain('const key = idempotencyKey();');
+    expect(source).toContain('const [state, action, pending] = useActionState');
+    expect(source).toContain('setSlow(true)');
+    expect(source).toContain('disabled={pending}');
   });
 
   it('does not manufacture client-only completion signals', () => {

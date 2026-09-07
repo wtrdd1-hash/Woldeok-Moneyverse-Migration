@@ -305,6 +305,16 @@ export class CasinoController {
     };
   }
 
+
+  @Get('history')
+  @ApiOperation({ summary: "Read the current member's recent casino plays" })
+  async history(@Req() request: RequestWithSession) {
+    return this.guarded(() => this.repository().history(requireUserId(request)), {
+      conflict: 'the casino history is unavailable',
+      forbidden: 'an active membership is required to read casino history',
+    });
+  }
+
   @Get('self-limit')
   @ApiOperation({ summary: 'Read the daily limits chosen by the current member' })
   async selfLimit(@Req() request: RequestWithSession) {
