@@ -3,8 +3,14 @@
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "types": ["node"],
-    "noEmit": true
+    "types": [
+      "node"
+    ],
+    "noEmit": true,
+    "ignoreDeprecations": "6.0"
   },
-  "include": ["test/**/*.ts", "*.ts"]
+  "include": [
+    "test/**/*.ts",
+    "*.ts"
+  ]
 }
