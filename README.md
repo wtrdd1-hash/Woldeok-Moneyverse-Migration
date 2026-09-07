@@ -51,3 +51,11 @@ The application role is intentionally unable to mutate economy tables directly. 
 Jobs and proficiency, quests and progression, wallet/ledger, catalog shop, inventory/collections, virtual stocks, businesses, banking/credit/bonds, and virtual casino minigames with server-side outcomes and member self-limits.
 
 See a localized README above for setup, security and deployment details.
+
+## Mobile / external app integration
+
+The NestJS service already exposes the Moneyverse application API under
+`/api/v1`. Do not put `INTERNAL_API_TOKEN` inside a mobile or desktop client;
+production treats it as a server-to-server credential. Use an HTTPS BFF/gateway
+that holds the internal token and forwards the existing session + CSRF context.
+See [docs/mobile-api.md](docs/mobile-api.md).
