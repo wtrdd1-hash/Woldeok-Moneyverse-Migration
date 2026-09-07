@@ -20,10 +20,18 @@ export async function mutate<T>(
   request: {
     readonly method?: 'POST' | 'PUT' | 'PATCH' | 'DELETE';
     readonly body?: unknown;
+    readonly timeoutMs?: number;
   } = {},
 ): Promise<T> {
-  const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session');
-  return api<T>(path, { method: request.method ?? 'POST', body: request.body, csrfToken });
+  const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session', {
+    ...(request.timeoutMs === undefined ? {} : { timeoutMs: request.timeoutMs }),
+  });
+  return api<T>(path, {
+    method: request.method ?? 'POST',
+    body: request.body,
+    csrfToken,
+    ...(request.timeoutMs === undefined ? {} : { timeoutMs: request.timeoutMs }),
+  });
 }
 
 /**

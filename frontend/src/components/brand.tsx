@@ -21,7 +21,7 @@ export function Brand({
       href="/"
       aria-label={locale === 'en' ? 'Woldeok Moneyverse home' : '월덕 머니버스 홈'}
       className={cn(
-        'group shrink-0 inline-flex items-center gap-2 sm:gap-2.5 text-base sm:text-[19px] font-extrabold tracking-[-0.03em] sm:tracking-[-0.045em] transition-transform hover:scale-[1.02] whitespace-nowrap',
+        'group shrink-0 hidden min-[360px]:inline-flex items-center gap-2 sm:gap-2.5 text-base sm:text-[19px] font-extrabold tracking-[-0.03em] sm:tracking-[-0.045em] transition-transform hover:scale-[1.02] whitespace-nowrap',
         tone === 'muted' ? 'text-foreground' : 'text-foreground',
         className,
       )}
@@ -35,7 +35,7 @@ export function Brand({
           <circle cx="16.5" cy="7.5" r="1.5" fill="currentColor" opacity="0.8" />
         </svg>
       </div>
-      <span className="inline-flex items-center gap-1 whitespace-nowrap">
+      <span className="hidden min-[520px]:inline-flex items-center gap-1 whitespace-nowrap">
         {locale === 'en' ? (
           <>
             <span>Woldeok</span> <strong className="font-black text-primary drop-shadow-sm">Moneyverse</strong>

@@ -55,3 +55,16 @@ describe('changePercent', () => {
     expect(changePercent('101999', '100000')).toBe('+1.99');
   });
 });
+
+
+describe('money formatting runtime boundary', () => {
+  it('formats a safe integer number without crashing when an API driver returns a number', async () => {
+    const { groupDigits } = await import('./money');
+    expect(groupDigits(123456)).toBe('123,456');
+  });
+
+  it('refuses to pretend an unsafe JavaScript number is an exact WLD amount', async () => {
+    const { groupDigits } = await import('./money');
+    expect(groupDigits(Number.MAX_SAFE_INTEGER + 2)).toBe('—');
+  });
+});
