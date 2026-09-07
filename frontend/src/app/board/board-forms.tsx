@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useRef, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ImagePlus } from 'lucide-react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { Button } from '@/components/ui/button';
 import { Field, FieldLabel } from '@/components/ui/field';
@@ -47,9 +47,7 @@ export function NewPostForm() {
           {open ? '접기' : '글쓰기'}
           <ChevronDown className={cn('transition-transform', open && 'rotate-180')} />
         </Button>
-        <p className="text-xs text-muted-foreground">
-          개인정보나 계정 정보는 남기지 말아 주세요.
-        </p>
+        <p className="text-xs text-muted-foreground">개인정보나 계정 정보는 남기지 말아 주세요.</p>
       </div>
 
       <form
@@ -67,6 +65,30 @@ export function NewPostForm() {
           <FieldLabel htmlFor="board-body">내용</FieldLabel>
           <Textarea id="board-body" name="body" maxLength={5000} rows={6} required />
         </Field>
+        <div className="grid gap-3 rounded-xl border border-dashed p-3">
+          <Field>
+            <FieldLabel htmlFor="board-photo" className="flex items-center gap-2">
+              <ImagePlus className="size-4" aria-hidden />
+              사진 첨부 (선택)
+            </FieldLabel>
+            <Input
+              id="board-photo"
+              name="photo"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="board-image-alt">사진 설명</FieldLabel>
+            <Input
+              id="board-image-alt"
+              name="imageAltText"
+              maxLength={300}
+              placeholder="사진을 첨부한 경우 내용을 짧게 설명해 주세요"
+            />
+          </Field>
+          <p className="text-xs text-muted-foreground">PNG · JPEG · WebP, 최대 4MB</p>
+        </div>
         <div className="justify-self-end">
           <SubmitButton>등록</SubmitButton>
         </div>

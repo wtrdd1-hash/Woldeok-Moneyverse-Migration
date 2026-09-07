@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const STORAGE_KEY = /^[0-9a-f-]{36}\.(png|jpg|webp)$/;
 
 export class BoardInputError extends Error {}
 
@@ -34,6 +35,8 @@ interface BoardPostSummaryRow {
   readonly updated_at?: unknown;
   readonly comment_count?: unknown;
   readonly mine?: unknown;
+  readonly image_storage_key?: unknown;
+  readonly image_alt_text?: unknown;
 }
 
 interface BoardPostRow {
@@ -44,6 +47,8 @@ interface BoardPostRow {
   readonly created_at?: unknown;
   readonly updated_at?: unknown;
   readonly mine?: unknown;
+  readonly image_storage_key?: unknown;
+  readonly image_alt_text?: unknown;
 }
 
 interface BoardCommentRow {
@@ -63,6 +68,7 @@ export interface BoardPostSummary {
   readonly updatedAt: string | null;
   readonly commentCount: number;
   readonly mine: boolean;
+  readonly hasImage: boolean;
 }
 
 export interface BoardPost {
@@ -73,6 +79,8 @@ export interface BoardPost {
   readonly createdAt: string;
   readonly updatedAt: string | null;
   readonly mine: boolean;
+  readonly imageUrl: string | null;
+  readonly imageAltText: string | null;
 }
 
 export interface BoardComment {
@@ -117,6 +125,39 @@ function count(value: unknown): number {
   return parsed;
 }
 
+function boardImage(row: {
+  readonly image_storage_key?: unknown;
+  readonly image_alt_text?: unknown;
+}): {
+  readonly imageUrl: string | null;
+  readonly imageAltText: string | null;
+} {
+  const key = row.image_storage_key;
+  const alt = row.image_alt_text;
+  if (key === null || key === undefined) {
+    if (alt !== null && alt !== undefined)
+      throw new Error('database returned an inconsistent board image');
+    return { imageUrl: null, imageAltText: null };
+  }
+  if (typeof key !== 'string' || !STORAGE_KEY.test(key)) {
+    throw new Error('database returned an invalid board image key');
+  }
+  return { imageUrl: `/media/board/${key}`, imageAltText: boardText(alt, 'image alt text', 300) };
+}
+
+function optionalImageInput(
+  storageKey: unknown,
+  altText: unknown,
+): { storageKey: string | null; altText: string | null } {
+  const noKey = storageKey === null || storageKey === undefined || storageKey === '';
+  const noAlt = altText === null || altText === undefined || altText === '';
+  if (noKey && noAlt) return { storageKey: null, altText: null };
+  if (noKey || noAlt || typeof storageKey !== 'string' || !STORAGE_KEY.test(storageKey)) {
+    throw new BoardInputError('board image is invalid');
+  }
+  return { storageKey, altText: boardText(altText, 'image alt text', 300) };
+}
+
 function summary(row: BoardPostSummaryRow): BoardPostSummary {
   return {
     postId: uuid(row?.post_id, 'post id'),
@@ -126,10 +167,12 @@ function summary(row: BoardPostSummaryRow): BoardPostSummary {
     updatedAt: optionalMoment(row?.updated_at),
     commentCount: count(row?.comment_count),
     mine: row?.mine === true,
+    hasImage: row?.image_storage_key !== null && row?.image_storage_key !== undefined,
   };
 }
 
 function post(row: BoardPostRow): BoardPost {
+  const image = boardImage(row);
   return {
     postId: uuid(row?.post_id, 'post id'),
     title: boardText(row?.title, 'title', 120),
@@ -138,6 +181,7 @@ function post(row: BoardPostRow): BoardPost {
     createdAt: moment(row?.created_at),
     updatedAt: optionalMoment(row?.updated_at),
     mine: row?.mine === true,
+    ...image,
   };
 }
 
@@ -159,6 +203,8 @@ export interface BoardRepository {
     title: string,
     body: string,
     idempotencyKey: string,
+    imageStorageKey: string | null,
+    imageAltText: string | null,
   ): Promise<BoardPostRow>;
   update(
     actorUserId: string,
@@ -180,12 +226,15 @@ export interface BoardRepository {
     idempotencyKey: string,
   ): Promise<BoardCommentRow>;
   removeComment(actorUserId: string, commentId: string, idempotencyKey: string): Promise<boolean>;
+  imageVisible(actorUserId: string, storageKey: string): Promise<boolean>;
 }
 
 export interface CreateBoardPostInput {
   readonly title?: unknown;
   readonly body?: unknown;
   readonly idempotencyKey?: unknown;
+  readonly imageStorageKey?: unknown;
+  readonly imageAltText?: unknown;
 }
 
 export interface CreateBoardCommentInput {
@@ -202,6 +251,7 @@ const REQUIRED = [
   'listComments',
   'createComment',
   'removeComment',
+  'imageVisible',
 ] as const;
 
 @Injectable()
@@ -226,12 +276,15 @@ export class BoardService {
   }
 
   async create(userId: unknown, input?: CreateBoardPostInput): Promise<BoardPost> {
+    const image = optionalImageInput(input?.imageStorageKey, input?.imageAltText);
     return post(
       await this.repository.create(
         uuid(userId, 'user id'),
         boardText(input?.title, 'title', 120),
         boardText(input?.body, 'body', 5000, true),
         uuid(input?.idempotencyKey ?? randomUUID(), 'idempotency key'),
+        image.storageKey,
+        image.altText,
       ),
     );
   }
@@ -282,6 +335,11 @@ export class BoardService {
         uuid(input?.idempotencyKey ?? randomUUID(), 'idempotency key'),
       ),
     );
+  }
+
+  async imageVisible(userId: unknown, storageKey: unknown): Promise<boolean> {
+    if (typeof storageKey !== 'string' || !STORAGE_KEY.test(storageKey)) return false;
+    return this.repository.imageVisible(uuid(userId, 'user id'), storageKey);
   }
 
   async removeComment(

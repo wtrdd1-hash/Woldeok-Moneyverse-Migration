@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { GET as galleryImage } from './[key]/route';
 import { GET as profileImage } from './profile/[key]/route';
+import { GET as boardImage } from './board/[key]/route';
 
 const KEY = '11111111-2222-4333-8444-555555555555.png';
 const ORIGINAL_TOKEN = process.env.INTERNAL_API_TOKEN;
@@ -39,6 +40,33 @@ describe('same-origin media relays', () => {
       expect.objectContaining({
         cache: 'no-store',
         headers: expect.objectContaining({ cookie: 'moneyverse_session=owner' }),
+      }),
+    );
+  });
+
+  it('relays a board image only through the authenticated board endpoint', async () => {
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetch = vi.fn(
+      async () =>
+        new Response(new Uint8Array([1]), {
+          headers: { 'content-type': 'image/png', 'cache-control': 'private, max-age=300' },
+        }),
+    );
+    vi.stubGlobal('fetch', fetch);
+
+    const response = await boardImage(
+      new Request(`https://example.test/media/board/${KEY}`, {
+        headers: { cookie: 'moneyverse_session=member' },
+      }),
+      { params: Promise.resolve({ key: KEY }) },
+    );
+
+    expect(response.status).toBe(200);
+    expect(fetch).toHaveBeenCalledWith(
+      `http://127.0.0.1:3020/api/v1/board/images/${KEY}`,
+      expect.objectContaining({
+        cache: 'no-store',
+        headers: expect.objectContaining({ cookie: 'moneyverse_session=member' }),
       }),
     );
   });

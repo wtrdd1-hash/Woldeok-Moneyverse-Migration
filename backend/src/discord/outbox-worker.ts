@@ -158,9 +158,12 @@ function deviceSummary(value: string | null): string | null {
 
 function maskedNetwork(value: string | null): string | null {
   if (!value) return null;
-  const ipv4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.\d{1,3}\/24$/.exec(value);
-  if (ipv4) return `${ipv4[1]}.${ipv4[2]}.${ipv4[3]}.0/24`;
-  if (value.includes(':') && value.endsWith('/48')) return 'IPv6 /48';
+  // Discord never receives a host address. The database already reduces IPv4
+  // to /24 and IPv6 to /48; render one step safer here so the operations feed
+  // cannot be mistaken for an exact address and a future payload cannot leak it.
+  const ipv4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(?:\d{1,3})(?:\/\d{1,2})?$/.exec(value);
+  if (ipv4) return `${ipv4[1]}.${ipv4[2]}.${ipv4[3]}.xxx`;
+  if (value.includes(':')) return 'IPv6 (주소 가림)';
   return null;
 }
 
