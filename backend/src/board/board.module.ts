@@ -7,10 +7,13 @@ import { BoardController } from './board.controller';
 import { BoardImageController } from './board-image.controller';
 import { PostgresBoardRepository } from './board.repository';
 import { BoardService } from './board.service';
+import { PublicBoardController } from './public-board.controller';
+import { PublicBoardImageController } from './public-board-image.controller';
+import { PublicBoardService } from './public-board.service';
 
 @Module({
   imports: [AuthModule, ContentModule],
-  controllers: [BoardController, BoardImageController],
+  controllers: [BoardController, BoardImageController, PublicBoardController, PublicBoardImageController],
   providers: [
     {
       provide: BoardService,
@@ -18,7 +21,12 @@ import { BoardService } from './board.service';
       useFactory: (pool: Queryable | null) =>
         pool ? new BoardService(new PostgresBoardRepository(pool)) : null,
     },
+    {
+      provide: PublicBoardService,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => (pool ? new PublicBoardService(pool) : null),
+    },
   ],
-  exports: [BoardService],
+  exports: [BoardService, PublicBoardService],
 })
 export class BoardModule {}
