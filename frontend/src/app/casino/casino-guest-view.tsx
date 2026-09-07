@@ -42,9 +42,33 @@ const GAME_SHOWCASE = [
     icon: Sparkles,
     title: '하이 앤 로우 (Hi-Lo Card)',
     badge: '1.9배 배당',
-    probability: '주사위 홀짝 규칙',
+    probability: '당첨 확률 50%',
     description:
       '주사위 홀짝 규칙을 High/Low 선택 화면으로 표현한 테마 게임입니다. High는 홀수, Low는 짝수 선택으로 정산됩니다.',
+  },
+  {
+    icon: Sparkles,
+    title: '컬러 휠 (Color Wheel)',
+    badge: '1.9배 배당',
+    probability: '당첨 확률 50%',
+    description:
+      '황금색 또는 푸른색을 선택하며 주사위 홀짝 서버 규칙으로 결과와 보상이 정산됩니다.',
+  },
+  {
+    icon: Sparkles,
+    title: '보물 상자 (Treasure)',
+    badge: '5.7배 배당',
+    probability: '당첨 확률 16.67%',
+    description:
+      '여섯 상자 중 하나를 선택하며 주사위 숫자 서버 규칙으로 결과와 보상이 정산됩니다.',
+  },
+  {
+    icon: Sparkles,
+    title: '럭키 젬 (Lucky Gem)',
+    badge: '5.7배 배당',
+    probability: '당첨 확률 16.67%',
+    description:
+      '여섯 보석 중 하나를 선택하며 주사위 숫자 서버 규칙으로 결과와 보상이 정산됩니다.',
   },
 ];
 
@@ -55,7 +79,7 @@ export function CasinoGuestView() {
         eyebrow="WOLDEOK MONEYVERSE · LUCKY ZONE"
         title="럭키존 (가상 미니게임)"
       >
-        동전·주사위 기반 서버 게임과 슬롯·하이로우 테마 화면을 일일 한도 안에서 즐겨보세요.
+        모든 게임의 적용 확률과 배당을 확인하고 동전·주사위 기반 서버 게임을 즐겨보세요.
       </PageHeader>
 
       {/* 로그인 유도 배너 */}
@@ -116,7 +140,7 @@ export function CasinoGuestView() {
         <CardContent className="text-xs text-muted-foreground space-y-1.5 leading-relaxed">
           <p>• 동전·주사위 결과 생성과 WLD 정산은 서버 데이터베이스 트랜잭션에서 함께 처리됩니다.</p>
           <p>• 과도한 게임 몰입을 방지하기 위해 1일 베팅 한도 및 손실 자가 제한 시스템을 제공합니다.</p>
-          <p>• 슬롯과 하이로우 화면은 각각 주사위 숫자·홀짝 서버 규칙을 사용하는 테마형 인터페이스입니다.</p>
+          <p>• 각 테마 게임 카드에 실제 적용되는 적중 확률과 적중 배당을 공개합니다.</p>
         </CardContent>
       </Card>
     </div>

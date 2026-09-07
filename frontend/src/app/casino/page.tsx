@@ -267,10 +267,19 @@ export default async function CasinoPage() {
                   <TableBody>
                     <OddsRow name="동전 뒤집기" terms={open} />
                     {parityGame ? (
-                      <OddsRow name="주사위 홀짝 · 하이로우" terms={parityGame} />
+                      <>
+                        <OddsRow name="주사위 홀짝" terms={parityGame} />
+                        <OddsRow name="하이 앤 로우" terms={parityGame} />
+                        <OddsRow name="컬러 휠" terms={parityGame} />
+                      </>
                     ) : null}
                     {numberGame ? (
-                      <OddsRow name="주사위 숫자 · 럭키 슬롯" terms={numberGame} />
+                      <>
+                        <OddsRow name="주사위 숫자" terms={numberGame} />
+                        <OddsRow name="럭키 슬롯" terms={numberGame} />
+                        <OddsRow name="보물 상자" terms={numberGame} />
+                        <OddsRow name="럭키 젬" terms={numberGame} />
+                      </>
                     ) : null}
                   </TableBody>
                 </Table>
@@ -282,7 +291,7 @@ export default async function CasinoPage() {
             </CardContent>
           </Card>
 
-          {/* 3개 서버 규칙과 2개 테마 인터페이스 */}
+          {/* 3개 서버 규칙과 5개 테마 인터페이스 */}
           <Tabs defaultValue="coin" className="min-w-0 w-full space-y-6">
             <div className="sticky top-[70px] z-20 -mx-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
               <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-2xl border border-slate-800/80 bg-slate-900/90 p-2 shadow-lg backdrop-blur-md">
@@ -424,6 +433,8 @@ export default async function CasinoPage() {
                 minStake={open.min_stake}
                 maxStake={open.max_stake}
                 exhausted={exhausted}
+                winProbability={percentFromPpm(parityGame?.win_probability_ppm ?? 0)}
+                payoutMultiplier={multiplierFromPpm(parityGame?.payout_multiplier_ppm ?? 0)}
               />
             </TabsContent>
             <TabsContent value="treasure" className="mt-6 pt-2">
@@ -432,6 +443,8 @@ export default async function CasinoPage() {
                 minStake={open.min_stake}
                 maxStake={open.max_stake}
                 exhausted={exhausted}
+                winProbability={percentFromPpm(numberGame?.win_probability_ppm ?? 0)}
+                payoutMultiplier={multiplierFromPpm(numberGame?.payout_multiplier_ppm ?? 0)}
               />
             </TabsContent>
             <TabsContent value="gems" className="mt-6 pt-2">
@@ -440,6 +453,8 @@ export default async function CasinoPage() {
                 minStake={open.min_stake}
                 maxStake={open.max_stake}
                 exhausted={exhausted}
+                winProbability={percentFromPpm(numberGame?.win_probability_ppm ?? 0)}
+                payoutMultiplier={multiplierFromPpm(numberGame?.payout_multiplier_ppm ?? 0)}
               />
             </TabsContent>
           </Tabs>

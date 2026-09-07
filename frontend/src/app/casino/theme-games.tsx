@@ -37,11 +37,15 @@ export function ThemeGameCard({
   minStake,
   maxStake,
   exhausted,
+  winProbability,
+  payoutMultiplier,
 }: {
   readonly game: ThemeGame;
   readonly minStake: string;
   readonly maxStake: string;
   readonly exhausted: boolean;
+  readonly winProbability: string;
+  readonly payoutMultiplier: string;
 }) {
   const theme = THEMES[game];
   const action = theme.mode === 'parity' ? playDiceParity : playDiceNumber;
@@ -70,6 +74,14 @@ export function ThemeGameCard({
         <CardDescription>
           {theme.description} 모든 결과와 WLD 정산은 서버에서 처리됩니다.
         </CardDescription>
+        <div className="flex flex-wrap gap-2 pt-1 text-xs font-semibold">
+          <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1">
+            적중 확률 {winProbability}%
+          </span>
+          <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1">
+            적중 시 {payoutMultiplier}배 배당
+          </span>
+        </div>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="grid gap-5">
