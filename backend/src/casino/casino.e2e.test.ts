@@ -25,6 +25,7 @@ const ROUTES = [
   ['post', '/api/v1/casino/coin/plays'],
   ['get', '/api/v1/casino/games/terms'],
   ['get', '/api/v1/casino/dice/fairness'],
+  ['get', '/api/v1/casino/self-limit'],
   ['post', '/api/v1/casino/dice/plays'],
   ['put', '/api/v1/casino/self-limit'],
 ] as const;
@@ -100,7 +101,7 @@ describe('casino routes', () => {
    * class stack for that route rather than adding to it, so a route that grew
    * one would silently lose the session guards above.
    */
-  it.each(['terms', 'fairness', 'play', 'setSelfLimit'] as const)(
+  it.each(['terms', 'fairness', 'play', 'selfLimit', 'setSelfLimit'] as const)(
     'leaves the class stack in place on %s',
     (handler) => {
       const own: unknown = Reflect.getMetadata(
@@ -116,8 +117,8 @@ describe('casino routes', () => {
    * write that had been mounted as a GET would sail past it, and the same
    * request would then be forgeable from another origin.
    */
-  it('does not answer the two writes on a safe method', async () => {
-    for (const path of ['/api/v1/casino/coin/plays', '/api/v1/casino/self-limit']) {
+  it('does not answer the two play commands on a safe method', async () => {
+    for (const path of ['/api/v1/casino/coin/plays', '/api/v1/casino/dice/plays']) {
       const response = await request(app.getHttpServer()).get(path);
       expect(response.status, `${path} answers GET`).toBe(404);
     }

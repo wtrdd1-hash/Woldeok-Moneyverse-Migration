@@ -95,14 +95,24 @@ export function SelfLimitForm() {
       <FieldGroup className="gap-4 sm:grid-cols-2">
         <Field>
           <FieldLabel htmlFor="casino-bet-limit">하루 베팅 한도</FieldLabel>
-          <AmountInput id="casino-bet-limit" name="dailyBetLimit" placeholder="0" required />
-          <FieldDescription>하루에 걸 수 있는 WLD의 합계입니다.</FieldDescription>
+          <AmountInput
+            id="casino-bet-limit"
+            name="dailyBetLimit"
+            placeholder="0 (무제한)"
+            required
+          />
+          <FieldDescription>원할 때만 설정하세요. 0은 무제한입니다.</FieldDescription>
         </Field>
 
         <Field>
           <FieldLabel htmlFor="casino-loss-limit">하루 손실 한도</FieldLabel>
-          <AmountInput id="casino-loss-limit" name="dailyLossLimit" placeholder="0" required />
-          <FieldDescription>하루에 잃을 수 있는 WLD의 합계입니다.</FieldDescription>
+          <AmountInput
+            id="casino-loss-limit"
+            name="dailyLossLimit"
+            placeholder="0 (무제한)"
+            required
+          />
+          <FieldDescription>원할 때만 설정하세요. 0은 무제한입니다.</FieldDescription>
         </Field>
       </FieldGroup>
 
@@ -127,7 +137,9 @@ export function SelfLimitForm() {
       </Field>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs text-muted-foreground">0으로 두면 그 항목은 오늘 이용하지 않겠다는 뜻이에요.</p>
+        <p className="text-xs text-muted-foreground">
+          시스템 제한은 없으며 0으로 저장하면 해당 자가 한도를 사용하지 않습니다.
+        </p>
         <SubmitButton>한도 저장</SubmitButton>
       </div>
 
@@ -242,7 +254,13 @@ export function DiceNumberForm({
 
       <div className="flex flex-wrap gap-2">
         {DIE_FACES.map((face) => (
-          <SubmitButton key={face} name="choice" value={face} variant="outline" disabled={exhausted}>
+          <SubmitButton
+            key={face}
+            name="choice"
+            value={face}
+            variant="outline"
+            disabled={exhausted}
+          >
             {face}에 걸기
           </SubmitButton>
         ))}

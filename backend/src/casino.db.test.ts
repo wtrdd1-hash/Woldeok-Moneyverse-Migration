@@ -214,25 +214,25 @@ describe.skipIf(!DATABASE_URL)('casino coin fairness against a real database', (
 
     it('refuses a key that was used for a differently sized trial', async () => {
       await expect(
-        pool.query('SELECT * FROM public.casino_run_coin_distribution_trial($1::uuid, $2::bigint)', [
-          trialKey,
-          TRIAL_SIZE / 2,
-        ]),
+        pool.query(
+          'SELECT * FROM public.casino_run_coin_distribution_trial($1::uuid, $2::bigint)',
+          [trialKey, TRIAL_SIZE / 2],
+        ),
       ).rejects.toMatchObject({ code: '23505' });
     });
 
     it('refuses a trial too small to mean anything and one too large to bound', async () => {
       await expect(
-        pool.query('SELECT * FROM public.casino_run_coin_distribution_trial($1::uuid, $2::bigint)', [
-          randomUUID(),
-          999,
-        ]),
+        pool.query(
+          'SELECT * FROM public.casino_run_coin_distribution_trial($1::uuid, $2::bigint)',
+          [randomUUID(), 999],
+        ),
       ).rejects.toMatchObject({ code: '22023' });
       await expect(
-        pool.query('SELECT * FROM public.casino_run_coin_distribution_trial($1::uuid, $2::bigint)', [
-          randomUUID(),
-          2_000_001,
-        ]),
+        pool.query(
+          'SELECT * FROM public.casino_run_coin_distribution_trial($1::uuid, $2::bigint)',
+          [randomUUID(), 2_000_001],
+        ),
       ).rejects.toMatchObject({ code: '22023' });
     });
 
@@ -271,8 +271,8 @@ describe.skipIf(!DATABASE_URL)('casino coin fairness against a real database', (
       }
       expect(terms.min_stake).toBe('10');
       expect(terms.max_stake).toBe('500');
-      expect(terms.daily_stake_limit).toBe('3000');
-      expect(terms.daily_loss_limit).toBe('1500');
+      expect(terms.daily_stake_limit).toBe('9000000000000000000');
+      expect(terms.daily_loss_limit).toBe('8999999999999999999');
     });
 
     // A member who has played nothing has spent neither allowance, and the
@@ -280,9 +280,9 @@ describe.skipIf(!DATABASE_URL)('casino coin fairness against a real database', (
     it('reports full headroom and the worst case for a member with no plays today', () => {
       expect(terms.daily_stake_used).toBe('0');
       expect(terms.daily_loss_used).toBe('0');
-      expect(terms.remaining_stake).toBe('3000');
-      expect(terms.remaining_loss).toBe('1500');
-      expect(terms.worst_case_loss, 'the lesser of the two allowances').toBe('1500');
+      expect(terms.remaining_stake).toBe('9000000000000000000');
+      expect(terms.remaining_loss).toBe('8999999999999999999');
+      expect(terms.worst_case_loss, 'the lesser of the two allowances').toBe('8999999999999999999');
     });
 
     it('tells the screen the game is closed', () => {
@@ -415,12 +415,10 @@ describe.skipIf(!DATABASE_URL)('casino coin fairness against a real database', (
 
   describe('the game itself', () => {
     const play = (choice: string, stake: number, key: string = randomUUID()) =>
-      pool.query('SELECT * FROM public.casino_play_coin($1::uuid, $2::uuid, $3::text, $4::bigint)', [
-        key,
-        UNKNOWN,
-        choice,
-        stake,
-      ]);
+      pool.query(
+        'SELECT * FROM public.casino_play_coin($1::uuid, $2::uuid, $3::text, $4::bigint)',
+        [key, UNKNOWN, choice, stake],
+      );
 
     it('refuses a face that is not on the coin', async () => {
       await expect(play('edge', 100)).rejects.toMatchObject({ code: '22023' });

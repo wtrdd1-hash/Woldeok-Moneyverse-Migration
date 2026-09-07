@@ -42,7 +42,9 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
 
   /** A funded member, with the casino open. */
   const player = async (client: PoolClient): Promise<string> => {
-    await client.query("UPDATE public.feature_switches SET state = 'enabled' WHERE feature_key = 'casino'");
+    await client.query(
+      "UPDATE public.feature_switches SET state = 'enabled' WHERE feature_key = 'casino'",
+    );
     const id = randomUUID();
     await client.query('INSERT INTO public.users (id) VALUES ($1)', [id]);
     const { rows } = await client.query<{ id: string }>(
@@ -73,10 +75,10 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
   it('discloses a house edge of exactly five percent', async () => {
     await rolledBack(async (client) => {
       const actor = await player(client);
-      const { rows } = await client.query<{ house_edge_ppm: number; payout_multiplier_ppm: number }>(
-        'SELECT house_edge_ppm, payout_multiplier_ppm FROM public.casino_coin_terms($1)',
-        [actor],
-      );
+      const { rows } = await client.query<{
+        house_edge_ppm: number;
+        payout_multiplier_ppm: number;
+      }>('SELECT house_edge_ppm, payout_multiplier_ppm FROM public.casino_coin_terms($1)', [actor]);
       expect(rows[0]?.payout_multiplier_ppm).toBe(1_900_000);
       expect(rows[0]?.house_edge_ppm).toBe(50_000);
     });
@@ -120,7 +122,7 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
     });
   });
 
-  it('carries the proposed limits', async () => {
+  it('carries per-play bounds without a reachable platform daily ceiling', async () => {
     const { rows } = await migrator.query<{
       min_stake: string;
       max_stake: string;
@@ -129,7 +131,11 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
       `SELECT min_stake::text, max_stake::text, daily_stake_limit::text
        FROM public.casino_policy WHERE singleton`,
     );
-    expect(rows[0]).toEqual({ min_stake: '10', max_stake: '500', daily_stake_limit: '3000' });
+    expect(rows[0]).toEqual({
+      min_stake: '10',
+      max_stake: '500',
+      daily_stake_limit: '9000000000000000000',
+    });
   });
 
   /**
@@ -160,29 +166,18 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
     });
   });
 
-  it('stops a member at the daily stake limit', async () => {
+  it('does not stop a member at the former daily platform limit', async () => {
     await rolledBack(async (client) => {
       const actor = await player(client);
-      // Six maximum stakes is exactly 3,000, and the seventh is over.
-      for (let play = 0; play < 6; play += 1) {
+      for (let play = 0; play < 7; play += 1) {
         const error = await rejectionOf(() =>
           client.query(`SELECT public.casino_play_coin($1, $2, 'heads', 500)`, [
             randomUUID(),
             actor,
           ]),
         );
-        // A loss cap of 1,500 can bind first on an unlucky run, which is the
-        // control working rather than a failure -- so either refusal is fine
-        // here, and only the seventh is required to be refused.
-        if (error !== null) {
-          expect(String((error as { message?: string }).message)).toMatch(/daily (stake|loss) limit/);
-          return;
-        }
+        expect(error).toBeNull();
       }
-      const error = await rejectionOf(() =>
-        client.query(`SELECT public.casino_play_coin($1, $2, 'heads', 500)`, [randomUUID(), actor]),
-      );
-      expect(String((error as { message?: string }).message)).toMatch(/daily (stake|loss) limit/);
     });
   });
 
