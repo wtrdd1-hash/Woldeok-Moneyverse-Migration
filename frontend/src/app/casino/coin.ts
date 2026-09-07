@@ -1,3 +1,5 @@
+import { canonicalIntegerString } from '@/lib/money';
+
 /**
  * The coin game's pure vocabulary.
  *
@@ -125,14 +127,18 @@ export function faceLabel(face: string): string {
  */
 export type PlayResult = 'win' | 'loss' | 'even';
 
-export function resultOf(netAmount: string): PlayResult {
-  if (netAmount.startsWith('-')) return 'loss';
-  return /^0+$/.test(netAmount) ? 'even' : 'win';
+export function resultOf(netAmount: unknown): PlayResult {
+  const canonical = canonicalIntegerString(netAmount);
+  if (canonical === null) throw new TypeError('casino net amount is not a canonical integer');
+  if (canonical.startsWith('-')) return 'loss';
+  return canonical === '0' ? 'even' : 'win';
 }
 
-/** The magnitude of a signed amount, still a string. */
-export function absAmount(value: string): string {
-  return value.startsWith('-') ? value.slice(1) : value;
+/** The magnitude of a signed amount, still a canonical string. */
+export function absAmount(value: unknown): string {
+  const canonical = canonicalIntegerString(value);
+  if (canonical === null) throw new TypeError('casino amount is not a canonical integer');
+  return canonical.startsWith('-') ? canonical.slice(1) : canonical;
 }
 
 /**
@@ -145,10 +151,10 @@ export function absAmount(value: string): string {
  */
 export const LOCK_CHOICES: readonly { readonly value: string; readonly label: string }[] =
   Object.freeze([
-    { value: 'none', label: '잠그지 않기' },
-    { value: '1', label: '1일 동안 잠그기' },
-    { value: '7', label: '7일 동안 잠그기' },
-    { value: '30', label: '30일 동안 잠그기' },
+    { value: 'none', label: '플레이 잠금 사용 안 함' },
+    { value: '1', label: '1일 동안 플레이 잠그기' },
+    { value: '7', label: '7일 동안 플레이 잠그기' },
+    { value: '30', label: '30일 동안 플레이 잠그기' },
   ]);
 
 export function isLockChoice(value: string): boolean {
@@ -177,9 +183,8 @@ export function lockUntilIso(choice: string, from: Date): string | null {
  *
  * Zero is accepted, which is the whole reason this is not `wholeAmount` from
  * `@/lib/mutate`: that one refuses zero because no transfer, purchase or
- * stake of nothing makes sense, while a self-limit of zero is a member
- * saying they will stake nothing at all — the strongest setting on the form
- * and the one it would be worst to reject.
+ * stake of nothing makes sense, while zero is the explicit sentinel introduced by migration 164 for
+ * "no self-limit on this field". The database applies only positive limits.
  *
  * `Number` here is the same exception `wholeAmount` takes: this is an inbound
  * request field that leaves as a JSON integer, bounded by what a member can
