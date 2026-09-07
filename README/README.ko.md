@@ -1,71 +1,62 @@
-# Woldeok Moneyverse — 한국어
+# 월덕 머니버스 — 한국어 가이드
 
-Woldeok Moneyverse는 커뮤니티용 **가상 경제·성장 게임 플랫폼**입니다.
+[← 메인 README](../README.md) · [변경 기록](../docs/changelog/CHANGELOG.ko.md) · [문서 목록](../docs/INDEX.md) · [운영](https://easy-scraping.com) · [테스트](https://test.easy-scraping.com)
 
-- Production: **https://easy-scraping.com**
-- Test: **https://test.easy-scraping.com**
-- 기술 스택: Next.js · NestJS · PostgreSQL · Docker Compose · nginx
+## 월덕 머니버스란?
 
-> WLD, 가상 주식, 카지노, 직업 보상 등은 모두 서비스 내부의 가상 데이터입니다. 실제 화폐·증권·도박 상품이 아닙니다.
+월덕 머니버스는 커뮤니티용 **가상 경제 서비스**입니다. Next.js, NestJS, PostgreSQL을 기반으로 직업/작업, 퀘스트, 성장, 지갑, 상점, 가상 주식/사업체, 은행, 가상 카지노 미니게임을 하나의 반응형 웹 UI에서 제공합니다.
+
+WLD와 주식/게임/보상은 모두 서비스 내부 가상 데이터이며 실제 돈·증권·예금·도박 상품이 아닙니다.
 
 ## 주요 기능
 
-- **직업/업무**: 8개 전문 직업, 직업별 반복 업무, WLD + 숙련도 EXP, 레벨 성장
-- **퀘스트/성장 단계**: 일일 사건, NPC/수집 목표, 장기 성장 단계
-- **지갑/원장**: 모든 경제 거래를 추적 가능한 원장 기반으로 처리
-- **상점/인벤토리/도감**: 서버가 가격·재고·할인을 최종 결정
-- **가상 주식**: 시장 가격, 차트, 매수/매도, 경제 이벤트
-- **사업체**: 사업체 보유와 가상 수익 구조
-- **은행/신용**: 예금, 실제 정책 기반 금리, 신용등급별 대출, 국채
-- **카지노 미니게임**: 동전/주사위 기반 서버 RNG와 테마 UI, 개인 베팅·손실 한도 및 자가 제외
+- **직업/작업:** 8개 직업, 직업별 숙련도 EXP, 반복 업무 보상.
+- **퀘스트/성장:** 일일 사건, 초반 가이드, 장기 성장 목표.
+- **지갑/원장:** WLD 잔액, 거래 기록, 송금.
+- **상점/인벤토리:** DB에서 결정되는 실제 가격/재고 규칙.
+- **가상 주식:** 가격/캔들/포트폴리오 흐름.
+- **가상 사업체:** 소유/운영형 장기 경제 콘텐츠.
+- **은행:** 예금, 이자, 신용등급 기반 대출, 가상 채권.
+- **가상 카지노:** 서버 판정 결과, 공개된 확률/배당, 자기 한도/자가 제외.
+- **관리자 도구:** 관리자 전용 경제 read model 및 운영 제어 함수.
 
-## 게임 밸런스 원칙
+## 시스템 구조
 
-카지노의 최종 판정과 배당은 브라우저가 아니라 서버/DB에서 결정합니다. 현재 기본 정책은 다음을 기준으로 합니다.
-
-- 최소 베팅: 10 WLD
-- 최대 베팅: 200 WLD
-- 일일 총 베팅: 2,000 WLD
-- 일일 실손실: 1,000 WLD
-- 기본 RTP: 95%
-
-개인은 플랫폼 한도보다 더 낮은 자기 한도를 설정할 수 있습니다. 자가 제외 잠금 중에는 플레이와 한도 변경이 함께 차단됩니다.
-
-은행은 잔액 변경 시 이자 기준시각을 갱신하고, 1 WLD 미만의 이자를 억지로 지급하지 않습니다. 신규 대출은 DB의 신용등급 정책을 사용합니다.
-
-## 보안 구조
-
-```text
-브라우저
-  ↓
-Cloudflare
-  ↓
-nginx edge
-  ↓
-Next.js
-  ↓ 내부 토큰
-NestJS
-  ↓
-PostgreSQL SECURITY DEFINER
-  ↓
-원장 / 회원 / 게임 데이터
+```mermaid
+flowchart LR
+  U[브라우저] --> E[Cloudflare + nginx]
+  E --> F[Next.js]
+  F --> A[NestJS 내부 API]
+  A --> D[PostgreSQL SECURITY DEFINER 함수]
+  D --> T[(원장 / 게임 / 회원 테이블)]
 ```
 
-핵심 원칙:
+핵심 경제 쓰기는 TypeScript에서 임의로 테이블을 UPDATE하는 방식이 아니라 PostgreSQL 함수에서 사용자/권한/정책/멱등성/원장 정합성을 확인한 뒤 원자적으로 수행합니다.
 
-1. Production DB/volume/user data는 승인 없이 삭제하지 않습니다.
-2. 앱 DB role은 원장·잔액·게임 핵심 테이블을 직접 수정하지 못합니다.
-3. 경제 write는 검증된 DB 함수와 idempotency key를 사용합니다.
-4. 비밀번호/API token/secret은 저장소 문서에 기록하지 않습니다.
-5. 배포 전 migration checksum, 타입체크, 테스트, 빌드, 백업을 확인합니다.
+## WLD 정밀도 원칙
 
-## 반응형 UI
+WLD는 API에서 **정수 문자열**로 전달합니다. 큰 잔액·가격·순자산을 JavaScript `Number`로 바꾸면 정밀도가 깨질 수 있으므로 문자열과 `BigInt`를 사용합니다.
 
-헤더/브랜드는 화면폭에 따라 CSS breakpoint의 `display:none`/`display:flex` 방식으로 표시 상태가 전환됩니다. DOM을 제거하지 않으므로 창 크기를 줄였다가 다시 늘리면 로고와 메뉴가 자동으로 다시 나타납니다.
+## 현재 카지노 기준
 
-## 개발
+- 공개 핵심 게임 기준 RTP 95%.
+- 1회 10~200 WLD.
+- 플랫폼 하루 총 베팅 2,000 WLD.
+- 플랫폼 하루 실손실 1,000 WLD.
+- 사용자 자기 한도/자가 제외는 더 엄격하게 설정 가능.
 
-Node.js 24 이상과 pnpm 10을 사용합니다.
+자세한 내용: [카지노 기능 문서](../docs/features/casino.md)
+
+## 현재 배포 기준
+
+- Node.js 24.
+- PostgreSQL 17.11.
+- nginx 1.30.4.
+- Test/Production은 Git commit 고정 GHCR 이미지를 사용.
+- `main` push는 CI를 실행하지만 Production 자동 배포는 하지 않음.
+- 공식 Deploy workflow에서 Test → Production 순서로 배포.
+
+## 개발 기본 명령
 
 ```bash
 corepack enable
@@ -73,36 +64,24 @@ pnpm install --frozen-lockfile
 pnpm lint
 pnpm typecheck
 pnpm build
-pnpm test
 ```
 
-DB schema의 source of truth는 `packages/database/migrations/`의 순서가 있는 SQL migration입니다. Prisma migration은 사용하지 않습니다.
+DB 테스트는 반드시 별도의 격리 PostgreSQL에서 실행해야 합니다. Production DB를 테스트 대상으로 사용하면 안 됩니다.
 
-## 배포
+## 운영상 중요한 원칙
 
-Test를 먼저 검증한 뒤 Production으로 승격합니다.
+1. 실제 서버 상태가 문서보다 우선입니다.
+2. 적용된 migration은 수정하지 않고 새 migration을 추가합니다.
+3. Production DB/볼륨/회원 데이터/원장 기록은 일반 배포에서 삭제하지 않습니다.
+4. 배포 전 백업은 생성 여부뿐 아니라 복호화/덤프/사진 archive 읽기까지 검증합니다.
+5. 브라우저에는 내부 API token이나 DB credential을 노출하지 않습니다.
+6. 재시도로 가치가 중복될 수 있는 쓰기는 멱등키를 유지합니다.
 
-```text
-CI/security checks
-  → Docker build
-  → Test migration/deploy
-  → Test smoke test
-  → Production encrypted backup
-  → Production migration/deploy
-  → public smoke + DB invariant checks
-```
+## 추가 문서
 
-배포 스크립트는 commit-tagged 이미지를 사용하고, 문제 발생 시 이전 이미지/설정 기준점으로 롤백할 수 있도록 설계되어 있습니다.
-
-## 저장소 구조
-
-| 경로 | 설명 |
-| --- | --- |
-| `frontend/` | Next.js 사용자/관리자 UI |
-| `backend/` | NestJS 내부 API |
-| `packages/database/` | SQL migrations 및 DB 정책 |
-| `packages/contract/` | 공용 route/type 계약 |
-| `deploy/` | Compose/nginx/backup/roll 스크립트 |
-| `ops/` | 운영 보조 도구 |
-
-변경 전에는 `AGENTS.md`와 데이터 계층 설계 문서를 먼저 확인하십시오.
+- [시스템 개요](../docs/architecture/system-overview.md)
+- [요청 흐름](../docs/architecture/request-flow.md)
+- [DB 보안 경계](../docs/architecture/database-security.md)
+- [Production 배포](../docs/operations/production-deployment.md)
+- [백업/복구](../docs/operations/backup-and-recovery.md)
+- [9/7 Gameplay/UX 작업 기록](../docs/worklog/2026-09-07-gameplay-ux-release.md)

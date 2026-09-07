@@ -1,59 +1,61 @@
-# Woldeok Moneyverse — English
+# Woldeok Moneyverse — English Guide
 
-Woldeok Moneyverse is a **community virtual-economy and progression game platform**.
+[← Main README](../README.md) · [Changelog](../docs/changelog/CHANGELOG.md) · [Documentation Index](../docs/INDEX.md) · [Production](https://easy-scraping.com) · [Test](https://test.easy-scraping.com)
 
-- Production: **https://easy-scraping.com**
-- Test: **https://test.easy-scraping.com**
-- Stack: Next.js · NestJS · PostgreSQL · Docker Compose · nginx
+## What is Woldeok Moneyverse?
 
-> WLD, virtual stocks, casino plays, jobs and rewards are in-service virtual data only. They are not real money, securities or gambling products.
+Woldeok Moneyverse is a Korean community virtual-economy service rebuilt on Next.js, NestJS and PostgreSQL. Members can participate in jobs, quests, progression, a ledger-backed wallet, catalog shop, virtual stocks/businesses, banking and virtual casino minigames.
 
-## Features
+All WLD and game/economy assets are in-service virtual data. There is no real-money cash-out.
 
-- **Jobs & work**: eight careers, repeatable career tasks, WLD + proficiency EXP and levels
-- **Quests & progression**: daily events, NPC/collection goals and long-term stages
-- **Wallet & ledger**: auditable economy transactions
-- **Shop, inventory & collections**: server-authoritative pricing, stock and discounts
-- **Virtual stocks**: prices, charts, buying/selling and market events
-- **Businesses**: virtual ownership and earnings loops
-- **Banking & credit**: deposits, policy-backed interest, credit-grade loans and bonds
-- **Casino minigames**: server-side coin/dice outcomes with themed UIs, self-limits and self-exclusion
+## Main features
 
-## Gameplay balance
+- **Jobs & careers:** 8 careers, career EXP and repeatable task rewards.
+- **Quests & progression:** daily events, early-game guidance and long-term objectives.
+- **Wallet:** exact WLD balances, transaction history and transfers.
+- **Shop & inventory:** database-authoritative price and stock rules.
+- **Virtual stocks:** market prices, candles and portfolio flows.
+- **Virtual businesses:** ownership and long-horizon economy loops.
+- **Banking:** deposits, interest, credit-grade loans and virtual bonds.
+- **Virtual casino:** server-authoritative outcomes, disclosed odds and self-limits.
+- **Admin tools:** actor-scoped economy/control read models and operations functions.
 
-Casino outcomes and payouts are decided by the server/database, never by browser RNG. Current baseline policy:
+## Architecture
 
-- minimum stake: 10 WLD
-- maximum stake: 200 WLD
-- daily total stake: 2,000 WLD
-- daily realized loss: 1,000 WLD
-- baseline RTP: 95%
-
-Members may set stricter personal stake/loss limits. A self-exclusion lock blocks both play and limit changes while active.
-
-Deposit interest uses one server-side rate contract, does not mint a forced minimum 1 WLD, and resets its accrual clock when the deposit balance changes. New loans use the database credit-grade policy.
-
-## Security model
-
-```text
-Browser → Cloudflare → nginx → Next.js → NestJS → PostgreSQL SECURITY DEFINER → tables
+```mermaid
+flowchart LR
+  U[Browser] --> E[Cloudflare + nginx]
+  E --> F[Next.js]
+  F --> A[NestJS internal API]
+  A --> D[PostgreSQL SECURITY DEFINER functions]
+  D --> T[(Ledger / gameplay / member tables)]
 ```
 
-Key rules:
+The application role is intentionally unable to perform arbitrary direct economy mutations. Important writes are centralized in PostgreSQL functions that validate actor/policy/idempotency and update the ledger atomically.
 
-1. Production DB/volumes/user data are never deleted without explicit approval.
-2. The application DB role cannot directly mutate core ledger/balance/game tables.
-3. Economy writes use reviewed DB functions and idempotency keys.
-4. Passwords, API tokens and secrets do not belong in repository documentation.
-5. Deployments validate migration checksums, types, tests, builds and backups first.
+## Exact WLD rule
 
-## Responsive UI
+WLD values cross the API as canonical integer **strings**. Do not convert large balances/prices to JavaScript `Number`; use strings and `BigInt` when exact arithmetic is required.
 
-Header/brand visibility is controlled with CSS breakpoints (`display:none` / display utilities). Elements remain in the DOM, so resizing a window naturally hides and restores the logo/navigation without remount logic.
+## Current casino baseline
+
+- 95% baseline RTP for disclosed core games.
+- 10–200 WLD per play.
+- 2,000 WLD daily platform stake exposure.
+- 1,000 WLD daily realized-loss exposure.
+- Member self-limits/self-exclusion can be stricter.
+
+See [Casino](../docs/features/casino.md).
+
+## Current deployment baseline
+
+- Node.js 24 runtime.
+- PostgreSQL 17.11.
+- nginx 1.30.4 edge.
+- Test and Production use commit-tagged GHCR images.
+- A push to `main` runs CI; Production deployment is an explicit workflow action.
 
 ## Development
-
-Node.js 24+ and pnpm 10 are expected.
 
 ```bash
 corepack enable
@@ -61,20 +63,15 @@ pnpm install --frozen-lockfile
 pnpm lint
 pnpm typecheck
 pnpm build
-pnpm test
 ```
 
-The schema source of truth is the ordered SQL migration set under `packages/database/migrations/`. Prisma migrations are intentionally rejected.
+Database tests require an isolated PostgreSQL database. Never run test migration workflows against Production.
 
-## Deployment flow
+## Where to read next
 
-```text
-CI/security checks
-  → container build
-  → Test migrate/deploy/smoke
-  → encrypted Production backup
-  → Production migrate/deploy
-  → public smoke + DB invariant verification
-```
-
-Commit-pinned images and pre-deploy rollback snapshots are used so a release can be reversed without rebuilding.
+- [System overview](../docs/architecture/system-overview.md)
+- [Request flow](../docs/architecture/request-flow.md)
+- [Database security](../docs/architecture/database-security.md)
+- [Production deployment](../docs/operations/production-deployment.md)
+- [Backup and recovery](../docs/operations/backup-and-recovery.md)
+- [Gameplay/UX release worklog](../docs/worklog/2026-09-07-gameplay-ux-release.md)

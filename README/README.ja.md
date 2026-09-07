@@ -1,36 +1,23 @@
-# Woldeok Moneyverse — 日本語
+# Woldeok Moneyverse — 日本語ガイド
 
-Woldeok Moneyverse はコミュニティ向けの**仮想経済・成長ゲームプラットフォーム**です。
+[← Main README](../README.md) · [変更履歴](../docs/changelog/CHANGELOG.ja.md) · [ドキュメント一覧](../docs/INDEX.md)
 
-- Production: **https://easy-scraping.com**
-- Test: **https://test.easy-scraping.com**
-- Stack: Next.js · NestJS · PostgreSQL · Docker Compose · nginx
-
-> WLD、仮想株式、カジノミニゲーム、職業報酬はすべてサービス内の仮想データであり、現実の通貨・証券・賭博商品ではありません。
+Woldeok Moneyverse は **Next.js / NestJS / PostgreSQL** で構築されたコミュニティ向け仮想経済サービスです。WLD、仮想株式、カジノ、仕事報酬はすべてサービス内部の仮想データで、現実の通貨・証券・ギャンブル商品ではありません。
 
 ## 主な機能
+- 8職業、繰り返し業務、職業EXP
+- デイリークエストと長期成長
+- WLDウォレットと台帳
+- ショップ/インベントリ
+- 仮想株式/事業
+- 預金、利息、信用ランク別ローン、仮想債券
+- サーバー権威型の仮想カジノミニゲーム
+- 管理者向け経済/運用画面
 
-- 8職種、反復可能な仕事、WLD + 熟練度 EXP
-- デイリーイベント、クエスト、収集、長期成長段階
-- 台帳ベースのウォレットと経済取引
-- ショップ、インベントリ、コレクション
-- 仮想株式、事業、銀行、信用ローン、債券
-- サーバー判定のコイン/ダイス系カジノとセルフリミット・自己除外
+重要な経済更新は TypeScript から直接テーブルを更新せず、PostgreSQL `SECURITY DEFINER` 関数で認可・ポリシー・冪等性・台帳整合性を確認します。
 
-## ゲームバランス
+WLD は API 上で整数文字列として扱い、JavaScript `Number` の精度問題を回避します。
 
-カジノの結果と配当はブラウザではなくサーバー/DBが決定します。基準は最低 10 WLD、1回最大 200 WLD、1日総ベット 2,000 WLD、1日実損 1,000 WLD、RTP 95%です。
+現在のカジノ基準: RTP 95%、1回 10–200 WLD、1日総ベット 2,000 WLD、1日実損失 1,000 WLD。個人制限はさらに厳しく設定できます。
 
-## セキュリティ
-
-```text
-Browser → Cloudflare → nginx → Next.js → NestJS → PostgreSQL SECURITY DEFINER → tables
-```
-
-アプリDBロールは主要な残高・台帳・ゲームテーブルを直接更新できません。重要な書き込みはDB関数とidempotency keyを経由します。
-
-## レスポンシブUI
-
-ロゴやナビゲーションはCSS breakpointの`display:none`/display utilitiesで切り替えます。DOMは保持されるため、ウィンドウ幅を戻すと自動で再表示されます。
-
-開発は Node.js 24+ / pnpm 10 を使用し、DB schema の正本は `packages/database/migrations/` のSQL migrationです。
+詳細は [ドキュメント一覧](../docs/INDEX.md) を参照してください。
