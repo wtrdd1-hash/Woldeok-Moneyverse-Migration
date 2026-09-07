@@ -6,6 +6,7 @@ import { LocaleProvider } from '@/components/locale-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { Toaster } from '@/components/ui/sonner';
+import { StaleTabNotice } from '@/components/stale-tab-notice';
 import { NOTICE_PREFERENCE_SCRIPT } from '@/lib/notice-preference';
 import { POINT_PREFERENCE_SCRIPT } from '@/lib/theme';
 import { jsonLd } from '@/lib/json-ld';
@@ -168,6 +169,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <ThemeProvider>
             <SiteShell>{children}</SiteShell>
             <Toaster />
+            <StaleTabNotice />
           </ThemeProvider>
         </LocaleProvider>
       </body>
