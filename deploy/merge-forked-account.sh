@@ -15,6 +15,11 @@ KEY="${4:?idempotency key required}"
 APPLY=0
 [ "${5:-}" = '--yes' ] && APPLY=1
 
+uuid_pattern='^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$'
+for value in "$ACTOR" "$KEEP" "$MERGE" "$KEY"; do
+  [[ "$value" =~ $uuid_pattern ]] || { echo "invalid UUID: $value" >&2; exit 2; }
+done
+
 DEPLOY_DIR="${DEPLOY_DIR:-$HOME/moneyverse-production}"
 cd "$DEPLOY_DIR"
 env_value() { grep -E "^$1=" .env | tail -1 | cut -d= -f2-; }
@@ -25,8 +30,8 @@ DB_CONTAINER="${DB_CONTAINER:-${STACK:-wdmvp}-db}"
 
 psql_run() {
   docker exec "$DB_CONTAINER" sh -lc \
-    'PGPASSWORD="$POSTGRES_PASSWORD" exec psql -X -v ON_ERROR_STOP=1 -U moneyverse_migrator -d "$1" -v actor="$2" -v keep="$3" -v merge="$4" -v key="$5" "${@:6}"' \
-    _ "$DATABASE" "$ACTOR" "$KEEP" "$MERGE" "$KEY" "$@"
+    'PGPASSWORD="$POSTGRES_PASSWORD" exec psql "$@"' \
+    _ -X -v ON_ERROR_STOP=1 -U moneyverse_migrator -d "$DATABASE" "$@"
 }
 
 echo "database: $DATABASE"
@@ -36,7 +41,7 @@ echo "merge:    $MERGE"
 echo "mode:     $([ "$APPLY" = 1 ] && echo APPLY || echo 'validated dry run')"
 echo
 
-statement="SELECT * FROM public.admin_merge_forked_member_account(:'key'::uuid, :'actor'::uuid, :'keep'::uuid, :'merge'::uuid);"
+statement="SELECT * FROM public.admin_merge_forked_member_account('$KEY'::uuid, '$ACTOR'::uuid, '$KEEP'::uuid, '$MERGE'::uuid);"
 if [ "$APPLY" = 1 ]; then
   psql_run -c "$statement"
 else
