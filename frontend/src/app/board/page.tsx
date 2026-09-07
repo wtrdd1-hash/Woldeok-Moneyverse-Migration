@@ -6,14 +6,14 @@ import { PageHeader } from '@/components/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { formatDay, formatMoment } from '@/lib/money';
-import { isLoggedInMember } from '@/lib/session';
 import { NewPostForm } from './board-forms';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '커뮤니티 광장 — 공략 및 자유 토론',
-  description: '월덕 머니버스 이용자들의 가상경제 팁, 공략과 자유 토론을 누구나 읽을 수 있는 커뮤니티 게시판입니다.',
+  description:
+    '월덕 머니버스 이용자들의 가상경제 팁, 공략과 자유 토론을 누구나 읽을 수 있는 커뮤니티 게시판입니다.',
   alternates: { canonical: '/board' },
   robots: { index: true, follow: true },
 };
@@ -29,14 +29,16 @@ interface PostSummary {
 }
 
 export default async function BoardPage() {
-  const member = await isLoggedInMember();
-  const endpoint = member ? '/api/v1/board/posts' : '/api/v1/board/public/posts';
-  const data = await apiOrNull<{ posts: PostSummary[] }>(endpoint);
+  const memberData = await apiOrNull<{ posts: PostSummary[] }>('/api/v1/board/posts');
+  const member = memberData !== null;
+  const data =
+    memberData ?? (await apiOrNull<{ posts: PostSummary[] }>('/api/v1/board/public/posts'));
 
   return (
     <div className="grid gap-6">
       <PageHeader eyebrow="COMMUNITY" title="커뮤니티 광장">
-        게시글과 댓글은 누구나 읽을 수 있습니다. 글과 댓글 작성은 로그인하고 최신 정책에 동의한 회원만 가능합니다.
+        게시글과 댓글은 누구나 읽을 수 있습니다. 글과 댓글 작성은 로그인하고 최신 정책에
+        동의한 회원만 가능합니다.
       </PageHeader>
 
       {member ? (
@@ -45,7 +47,10 @@ export default async function BoardPage() {
         <Card>
           <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4 text-sm text-muted-foreground">
             <span>읽기는 자유롭게, 참여는 회원으로.</span>
-            <Link href="/login" className="font-bold text-foreground underline underline-offset-4">
+            <Link
+              href="/login"
+              className="font-bold text-foreground underline underline-offset-4"
+            >
               로그인하고 글쓰기
             </Link>
           </CardContent>
@@ -61,7 +66,9 @@ export default async function BoardPage() {
         ) : data.posts.length === 0 ? (
           <EmptyState
             title="아직 작성된 글이 없어요."
-            description={member ? '첫 글을 남겨 보세요.' : '회원의 첫 이야기를 기다리고 있어요.'}
+            description={
+              member ? '첫 글을 남겨 보세요.' : '회원의 첫 이야기를 기다리고 있어요.'
+            }
           />
         ) : (
           <Card className="overflow-hidden py-0">
