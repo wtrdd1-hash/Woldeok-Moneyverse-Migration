@@ -67,6 +67,7 @@ describe('security headers', () => {
     expect(csp.get('script-src')).toContain('https://pagead2.googlesyndication.com');
     expect(csp.get('frame-src')).toBe('https://googleads.g.doubleclick.net https://tpc.googlesyndication.com');
     expect(csp.get('connect-src')).toContain('https://googleads.g.doubleclick.net');
+    expect(csp.get('connect-src')).toContain('https://*.adtrafficquality.google');
   });
 
   it('keeps the directives that bound an injection', async () => {
