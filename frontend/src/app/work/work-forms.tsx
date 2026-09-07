@@ -70,9 +70,9 @@ export function TaskCompleteModalButton({
   const [phase, setPhase] = useState<WorkPhase>('idle');
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState('');
-  const [combo, setCombo] = useState(0);
   const [state, formAction] = useActionState(completeTaskV2Action, IDLE);
   const [isPending, startTransition] = useTransition();
+  const handledStateRef = useRef(state);
 
   const progressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const slowTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -95,19 +95,20 @@ export function TaskCompleteModalButton({
 
   // Sync server action response to UI state
   useEffect(() => {
-    if (phase === 'idle') return;
+    // useActionState keeps the previous result between modal openings. Handle
+    // each new server response once; local phase or copy changes must never
+    // replay an already-settled reward response.
+    if (state === handledStateRef.current) return;
+    handledStateRef.current = state;
 
     if (state.status === 'ok') {
       clearAllTimers();
       setProgress(100);
       setPhase('done');
-      setCombo((prev) => prev + 1);
-
-      const streakText = combo > 0 ? (isEn ? ` 🔥 ${combo + 1} COMBO STREAK!` : ` 🔥 ${combo + 1}연속 완수 피버!`) : '';
       setStatusText(
-        (isEn
+        isEn
           ? 'Transaction confirmed & reward claimed!'
-          : '블록체인·원장 검증 완료! 보상이 정상 지급되었습니다.') + streakText,
+          : '서버 원장 검증 완료! 보상이 정상 지급되었습니다.',
       );
 
       // Auto close after 2.2 seconds if user doesn't click
@@ -123,7 +124,7 @@ export function TaskCompleteModalButton({
         state.message ?? (isEn ? 'Task execution failed.' : '업무 처리에 실패했습니다.'),
       );
     }
-  }, [state, isEn, combo, phase]);
+  }, [state, isEn]);
 
   const handleStartWork = () => {
     clearAllTimers();
