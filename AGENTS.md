@@ -341,22 +341,25 @@ distribution trial of at least 1,000,000 draws is on record.
 
 ---
 
-## 7. Deploying: two stacks, one compose file
+## 7. Deploying: one stack
 
-| | test | production |
-| --- | --- | --- |
-| address | `https://test.easy-scraping.com` | `https://easy-scraping.com` |
-| `STACK` | `wdmv` | `wdmvp` |
-| host directory | `~/moneyverse-migration` | `~/moneyverse-production` |
-| database | `moneyverse_migration` | `moneyverse_production` |
-| loopback port | 3021 | 3022 |
-| image tag | `<sha>-test` | `<sha>-production` |
-| search indexing | off | on |
+| | production |
+| --- | --- |
+| address | `https://easy-scraping.com` |
+| `STACK` | `wdmvp` |
+| host directory | `~/moneyverse-production` |
+| database | `moneyverse_production` |
+| loopback port | 3022 |
+| image tag | `<sha>-production` |
+| search indexing | on |
 
-**They share no database and no secret.** The public origin is baked into the
-frontend image at **build** time, which is why one commit produces two images
-and the environment is in the tag rather than being a hidden difference between
-two images with the same name.
+There used to be a second one, `wdmv`, at `test.easy-scraping.com`. It was
+retired on 2026-09-07. It had its own database, its own encryption key and its
+own half of every setting in the workflow, and what it actually produced was a
+dropdown that could roll the wrong deployment and a second copy of every
+account. The public origin is still baked into the frontend image at **build**
+time, which is why the environment is in the image tag rather than being a
+hidden difference between two images with the same name.
 
 **Nothing deploys on a push.** A human dispatches it, test first, production
 only after test is confirmed:

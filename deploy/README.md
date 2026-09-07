@@ -4,14 +4,14 @@ Five containers on one host, built by Actions and pulled there, published to
 the internet through the Cloudflare tunnel that already runs on that machine.
 
 ```
-Cloudflare  →  cloudflared (wtrdd-edge network)  →  wdmv-edge (nginx)
-                                                       ├─ /socket.io/ → wdmv-backend
-                                                       └─ everything   → wdmv-frontend
+Cloudflare  →  cloudflared (wtrdd-edge network)  →  wdmvp-edge (nginx)
+                                                       ├─ /socket.io/ → wdmvp-backend
+                                                       └─ everything   → wdmvp-frontend
                                                                              │
-                                                            internal only ───┴→ wdmv-backend → wdmv-db
+                                                            internal only ───┴→ wdmvp-backend → wdmvp-db
 ```
 
-`wdmv-edge` is the only container on the tunnel's network. The API is never
+`wdmvp-edge` is the only container on the tunnel's network. The API is never
 published: the browser talks to Next, Next talks to the API over the compose
 network, and that is what keeps the session a same-origin HttpOnly cookie and
 CSRF a same-origin problem. The one exception is `/socket.io/`, which is the
@@ -41,7 +41,7 @@ It runs CI, then:
 Because the tag is the commit, a rollback is one edited line:
 
 ```bash
-cd ~/moneyverse-migration
+cd ~/moneyverse-production
 sed -i 's#/backend:.*#/backend:<older-sha>#;s#/frontend:.*#/frontend:<older-sha>#' .env
 docker compose up -d --wait
 ```
@@ -53,13 +53,13 @@ them:
 
 ```bash
 ssh <host>
-bash ~/moneyverse-migration/update.sh
+bash ~/moneyverse-production/update.sh
 ```
 
 Or, without the script:
 
 ```bash
-cd ~/moneyverse-migration
+cd ~/moneyverse-production
 sed -i '/^BACKEND_IMAGE=/d;/^FRONTEND_IMAGE=/d' .env   # drop the pinned commit
 docker compose pull backend frontend
 docker compose up -d --wait
@@ -99,7 +99,7 @@ The procedure, the retention policy and the restore rehearsal are in
 
 ## Secrets
 
-`bootstrap-env.sh` writes `~/moneyverse-migration/.env` once and never
+`bootstrap-env.sh` writes `~/moneyverse-production/.env` once and never
 overwrites a value that is already there.
 
 | Kind | Where it comes from |
@@ -155,7 +155,7 @@ under a hostname that is not the canonical one.
 
 ```bash
 ssh <host>
-cd ~/moneyverse-migration
+cd ~/moneyverse-production
 APP_BASE_URL=https://migration.easy-scraping.com \
   ADOPT_FROM=woldeok-moneyverse-local-app-test-1 \
   BACKEND_IMAGE=ghcr.io/wtrdd1-hash/wdmv/backend:latest \

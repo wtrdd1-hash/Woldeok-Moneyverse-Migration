@@ -27,12 +27,6 @@ name: Deploy
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: Which deployment to roll
-        required: true
-        default: test
-        type: choice
-        options: [test, production]
       enable_ads:
         description: Enable the reviewed AdSense unit (production only, after AdSense approval and CMP setup)
         required: true
@@ -85,7 +79,7 @@ jobs:
           # may not.
           prefix=$(echo "${REGISTRY}/${IMAGE_PREFIX}" | tr '[:upper:]' '[:lower:]')
           echo "prefix=${prefix}" >> "$GITHUB_OUTPUT"
-          suffix="${{ inputs.environment || 'test' }}"
+          suffix=production
           echo "suffix=${suffix}" >> "$GITHUB_OUTPUT"
           echo "backend=${prefix}/backend:${GITHUB_SHA}-${suffix}" >> "$GITHUB_OUTPUT"
           echo "frontend=${prefix}/frontend:${GITHUB_SHA}-${suffix}" >> "$GITHUB_OUTPUT"
@@ -124,11 +118,11 @@ jobs:
           # to name the public host, so the origin is a build argument. It is
           # a repository variable, not a secret: it is the site's own address.
           build-args: |
-            APP_BASE_URL=${{ inputs.environment == 'production' && 'https://easy-scraping.com' || 'https://test.easy-scraping.com' }}
-            SEO_INDEXING_ENABLED=${{ inputs.environment == 'production' && 'true' || 'false' }}
-            ADS_ENABLED=${{ inputs.environment == 'production' && inputs.enable_ads && 'true' || 'false' }}
-            ADSENSE_PUBLISHER_ID=${{ inputs.environment == 'production' && inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}
-            ADSENSE_HOME_SLOT=${{ inputs.environment == 'production' && inputs.enable_ads && '2118692561' || '' }}
+            APP_BASE_URL=https://easy-scraping.com
+            SEO_INDEXING_ENABLED=true
+            ADS_ENABLED=${{ inputs.enable_ads && 'true' || 'false' }}
+            ADSENSE_PUBLISHER_ID=${{ inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}
+            ADSENSE_HOME_SLOT=${{ inputs.enable_ads && '2118692561' || '' }}
           tags: |
             ${{ steps.meta.outputs.frontend }}
             ${{ steps.meta.outputs.prefix }}/frontend:latest-${{ steps.meta.outputs.suffix }}
@@ -138,7 +132,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'test' }}
+    environment: production
     steps:
       - uses: actions/checkout@v4
 
@@ -152,45 +146,28 @@ jobs:
       # deployment already uses: its compose project, and therefore its
       # database volume, is named after the stack, so renaming it would strand
       # the data. Only the public origin moves.
-      - name: Choose the deployment
+      - name: Name the deployment
         id: target
         run: |
-          if [ "${{ inputs.environment || 'test' }}" = production ]; then
-            {
-              echo 'stack=wdmvp'
-              echo 'dir=moneyverse-production'
-              echo 'base_url=https://easy-scraping.com'
-              echo 'edge_port=3022'
-              echo 'seo=true'
-              echo 'ads=${{ inputs.enable_ads && 'true' || 'false' }}'
-              echo 'adsense_publisher=${{ inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}'
-              echo 'adsense_home_slot=${{ inputs.enable_ads && '2118692561' || '' }}'
-              echo 'db_name=moneyverse_production'
-              # Production does not roll without something to return to.
-              # Migrations do not roll back, and this is the only moment
-              # anybody is looking.
-              echo 'require_backup=1'
-              echo 'admin_ids='
-            } >> "$GITHUB_OUTPUT"
-          else
-            {
-              echo 'stack=wdmv'
-              echo 'dir=moneyverse-migration'
-              echo 'base_url=https://test.easy-scraping.com'
-              echo 'edge_port=3021'
-              echo 'seo=false'
-              echo 'ads=false'
-              echo 'adsense_publisher='
-              echo 'adsense_home_slot='
-              # The name the existing volume was initialised with. Changing it
-              # would point the application at a database that does not exist.
-              echo 'db_name=moneyverse_migration'
-              # The test server is rebuilt from seed when it breaks, so a
-              # missing backup is a warning there rather than a refusal.
-              echo 'require_backup=0'
-              echo "admin_ids=${{ vars.TEST_BOOTSTRAP_DISCORD_ADMIN_IDS }}"
-            } >> "$GITHUB_OUTPUT"
-          fi
+          # One deployment. The test stack it used to choose between was
+          # retired on 2026-09-07: it had its own database, its own encryption
+          # key and its own half of every setting here, and a mis-picked
+          # dropdown rolled the wrong one.
+          {
+            echo 'stack=wdmvp'
+            echo 'dir=moneyverse-production'
+            echo 'base_url=https://easy-scraping.com'
+            echo 'edge_port=3022'
+            echo 'seo=true'
+            echo 'ads=${{ inputs.enable_ads && 'true' || 'false' }}'
+            echo 'adsense_publisher=${{ inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}'
+            echo 'adsense_home_slot=${{ inputs.enable_ads && '2118692561' || '' }}'
+            echo 'db_name=moneyverse_production'
+            # It does not roll without something to return to. Migrations do
+            # not roll back, and this is the only moment anybody is looking.
+            echo 'require_backup=1'
+            echo 'admin_ids='
+          } >> "$GITHUB_OUTPUT"
 
       - name: Open an SSH session to the host
         run: |
@@ -278,7 +255,7 @@ jobs:
             "REQUIRE_BACKUP='${{ steps.target.outputs.require_backup }}'" \
             "BOOTSTRAP_DISCORD_ADMIN_IDS='${{ steps.target.outputs.admin_ids }}'" \
             "ADOPT_FROM='${{ vars.ADOPT_FROM }}'" \
-            "ADOPT_DISCORD_FROM='${{ inputs.environment == 'production' && 'wtrdd-discord-app' || '' }}'" \
+            "ADOPT_DISCORD_FROM='wtrdd-discord-app'" \
             "DISCORD_APPLICATION_ID='${{ vars.DISCORD_APPLICATION_ID }}'" \
             "DISCORD_BOT_TOKEN='${{ secrets.DISCORD_BOT_TOKEN }}'" \
             "DISCORD_INTERACTIONS_ENABLED='${{ vars.DISCORD_INTERACTIONS_ENABLED }}'" \
