@@ -317,7 +317,9 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
       const counts = (trial?.face_counts ?? []).map((count) => BigInt(count));
       expect(counts, 'a die has six faces').toHaveLength(6);
       const total = counts.reduce((sum, count) => sum + count, 0n);
-      expect(total, 'the face counts must account for every roll').toBe(BigInt(trial?.trials ?? '0'));
+      expect(total, 'the face counts must account for every roll').toBe(
+        BigInt(trial?.trials ?? '0'),
+      );
       // About one byte in sixty-four is thrown away; a run that rejected none
       // would mean the rejection branch never fired.
       expect(BigInt(trial?.rejected_bytes ?? '0') > 0n, 'no byte was ever rejected').toBe(true);
@@ -427,13 +429,8 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
     });
   });
 
-  /**
-   * The hole a second table opens, and the reason `casino_daily_usage` exists.
-   * If each game counted only its own rows a member would get 3,000 WLD of
-   * exposure per game and 1,500 of loss per game.
-   */
-  describe('the daily caps, which belong to the member and not to the game', () => {
-    it('shows a coin stake against every game’s headroom', async () => {
+  describe('the uncapped platform usage shared by every game', () => {
+    it('shows a coin stake in every game’s usage', async () => {
       await rolledBack(async (client) => {
         const actor = await player(client);
         await playCoin(client, actor, 500);
@@ -442,7 +439,9 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
         for (const game of ['coin', ...GAMES]) {
           const row = termsRow(terms, game);
           expect(row.daily_stake_used, `${game} did not count the coin play`).toBe('500');
-          expect(row.remaining_stake, `${game} headroom after a 500 coin stake`).toBe('2500');
+          expect(row.remaining_stake, `${game} headroom after a 500 coin stake`).toBe(
+            '8999999999999999500',
+          );
         }
       });
     });
@@ -459,17 +458,11 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
         );
         const coin = firstRow(rows, 'casino_coin_terms');
         expect(coin.daily_stake_used, 'the coin did not count the dice play').toBe('500');
-        expect(coin.remaining_stake).toBe('2500');
+        expect(coin.remaining_stake).toBe('8999999999999999500');
       });
     });
 
-    /**
-     * Six maximum stakes is exactly the day's 3,000, whichever games they were
-     * spread across. The loss cap of 1,500 can bind first on an unlucky run,
-     * which is the control working rather than a failure, so either refusal is
-     * accepted -- what is not accepted is a seventh play going through.
-     */
-    it('stops a member after 3,000 WLD spread across the games', async () => {
+    it('does not impose the former 3,000 WLD platform ceiling', async () => {
       await rolledBack(async (client) => {
         const actor = await player(client);
         for (let play = 0; play < 6; play += 1) {
@@ -477,18 +470,11 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
             play % 2 === 0
               ? () => playCoin(client, actor, 500)
               : () => playDice(client, actor, 'dice_parity', 'even', 500);
-          const error = await refused(client, attempt);
-          if (error !== null) {
-            expect(message(error)).toMatch(/daily (stake|loss) limit/);
-            return;
-          }
+          expect(await refused(client, attempt)).toBeNull();
         }
-        const error = await refused(client, () =>
-          playDice(client, actor, 'dice_number', '3', 500),
-        );
-        expect(message(error), 'a seventh maximum stake was allowed').toMatch(
-          /daily (stake|loss) limit/,
-        );
+        expect(
+          await refused(client, () => playDice(client, actor, 'dice_number', '3', 500)),
+        ).toBeNull();
       });
     });
 
@@ -500,14 +486,16 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
         const actor = await player(client);
         const terms = await termsFor(client, actor);
         const parity = termsRow(terms, 'dice_parity');
-        expect(parity.remaining_stake).toBe('3000');
-        expect(parity.remaining_loss).toBe('1500');
-        expect(parity.worst_case_loss, 'the lesser of the two allowances').toBe('1500');
+        expect(parity.remaining_stake).toBe('9000000000000000000');
+        expect(parity.remaining_loss).toBe('8999999999999999999');
+        expect(parity.worst_case_loss, 'the lesser of the two allowances').toBe(
+          '8999999999999999999',
+        );
 
         const { rows } = await playDice(client, actor, 'dice_parity', 'odd', 500);
         const played = firstRow(rows, 'casino_play_dice');
         expect(played.worst_case_loss, 'not the 500 that was staked').not.toBe('500');
-        expect(BigInt(played.worst_case_loss) <= 1500n).toBe(true);
+        expect(BigInt(played.worst_case_loss) > 1500n).toBe(true);
       });
     });
   });
@@ -521,9 +509,7 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
              clock_timestamp() + interval '7 days')`,
           [actor],
         );
-        const error = await refused(client, () =>
-          playDice(client, actor, 'dice_number', '6', 100),
-        );
+        const error = await refused(client, () => playDice(client, actor, 'dice_number', '6', 100));
         expect(code(error)).toBe('55000');
         expect(message(error)).toContain('locked yourself out');
       });
@@ -543,6 +529,16 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
         );
         expect(code(error)).toBe('55000');
         expect(message(error)).toContain('your own daily stake limit');
+      });
+    });
+
+    it('treats zero self-limits as the member choosing no limit', async () => {
+      await rolledBack(async (client) => {
+        const actor = await player(client);
+        await client.query('SELECT public.member_set_casino_self_limit($1, 0, 0, NULL)', [actor]);
+        expect(
+          await refused(client, () => playDice(client, actor, 'dice_number', '6', 100)),
+        ).toBeNull();
       });
     });
 
