@@ -27,6 +27,37 @@ export interface Probe {
 /** Anything that can answer whether a URL responds, so tests need no network. */
 export type Fetcher = (url: string) => Promise<{ readonly ok: boolean; readonly status: number }>;
 
+export type Sleeper = (delayMs: number) => Promise<void>;
+
+const SLEEP: Sleeper = (delayMs) => new Promise((resolve) => setTimeout(resolve, delayMs));
+
+/**
+ * Retries transport failures once without hiding a real HTTP outage.
+ *
+ * During a Compose rollout the backend can become healthy a moment before the
+ * frontend accepts connections. A connection-refused/reset error in that tiny
+ * window should be rechecked, while an HTTP 5xx response is already an honest
+ * result and must be returned immediately.
+ */
+export function retryNetworkError(
+  fetcher: Fetcher,
+  delayMs = 1000,
+  sleep: Sleeper = SLEEP,
+): Fetcher {
+  if (!Number.isFinite(delayMs) || delayMs < 0) {
+    throw new Error('retry delay must be a non-negative finite number');
+  }
+
+  return async (url) => {
+    try {
+      return await fetcher(url);
+    } catch {
+      if (delayMs > 0) await sleep(delayMs);
+      return fetcher(url);
+    }
+  };
+}
+
 const NOW = () => Date.now();
 
 /**

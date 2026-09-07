@@ -6,80 +6,80 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { groupDigits } from '@/lib/money';
-import { playDiceParity } from './actions';
-import type { ActionState } from '@/lib/action-state';
+import { absAmount } from './coin';
+import { CASINO_IDLE, playDiceParity } from './actions';
+
+function minAmount(...values: readonly string[]): string {
+  return values.reduce((lowest, value) => (BigInt(value) < BigInt(lowest) ? value : lowest));
+}
 
 export function HiLoCardGame({
   minStake,
   maxStake,
+  remainingStake,
   exhausted,
+  winProbability,
+  payoutMultiplier,
 }: {
   readonly minStake: string;
   readonly maxStake: string;
+  readonly remainingStake: string;
   readonly exhausted: boolean;
+  readonly winProbability: string;
+  readonly payoutMultiplier: string;
 }) {
-  const [state, formAction, pending] = useActionState<ActionState, FormData>(playDiceParity, {
-    status: 'idle',
-  });
+  const [state, formAction, pending] = useActionState(playDiceParity, CASINO_IDLE);
   const [choice, setChoice] = useState<'odd' | 'even'>('odd');
+  const maxPlayable = minAmount(maxStake, remainingStake);
+
+  const serverSide =
+    state.outcomeFace === undefined ? null : state.outcomeFace % 2 === 1 ? 'High' : 'Low';
+  const resultText =
+    state.status === 'ok' && state.outcomeFace !== undefined && state.netAmount
+      ? `${state.replayed ? '이미 처리된 판 · ' : ''}서버 숫자 ${state.outcomeFace} → ${serverSide}. ${
+          state.result === 'win'
+            ? `${groupDigits(absAmount(state.netAmount))} WLD 획득`
+            : state.result === 'loss'
+              ? `${groupDigits(absAmount(state.netAmount))} WLD 손실`
+              : '정산 0 WLD'
+        }`
+      : null;
 
   return (
     <Card className="border-indigo-500/20 bg-gradient-to-b from-card to-indigo-500/5">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl text-indigo-400">
-          <span>🃏</span> 하이 앤 로우 카드 게임
+        <CardTitle className="flex items-center gap-2 text-xl text-indigo-500">
+          <span>🃏</span> 하이 / 로우 테마
         </CardTitle>
         <CardDescription>
-          주사위 홀짝 서버 규칙을 카드 화면으로 표현합니다. High는 홀수, Low는 짝수이며 적중 시 1.9배로 정산됩니다.
+          서버의 주사위 홀짝 규칙을 카드 테마로 표현합니다. High=홀수, Low=짝수이며 적중 확률{' '}
+          {winProbability}%, 적중 시 {payoutMultiplier}배로 정산됩니다.
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-6">
-        <div className="flex justify-center items-center gap-6 py-6 px-4 rounded-xl bg-black/30 border border-indigo-500/20">
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-xs text-muted-foreground font-semibold">테마 기준 카드</span>
-            <div className="grid size-20 sm:size-24 place-items-center rounded-xl bg-card border-2 border-indigo-400/50 shadow-lg text-3xl sm:text-4xl font-bold text-foreground">
-              ♠️ 7
-            </div>
-          </div>
-
-          <div className="text-2xl font-bold text-muted-foreground">VS</div>
-
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-xs text-muted-foreground font-semibold">서버 판정</span>
-            <div className={`grid size-20 sm:size-24 place-items-center rounded-xl bg-indigo-950/40 border-2 border-dashed border-indigo-400/50 shadow-inner text-3xl sm:text-4xl font-bold text-indigo-300 ${pending ? 'animate-pulse' : ''}`}>
-              {pending ? '❓' : state.status === 'ok' ? '🎯' : '🂠'}
-            </div>
-          </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            type="button"
+            variant={choice === 'odd' ? 'default' : 'outline'}
+            onClick={() => setChoice('odd')}
+            disabled={pending || exhausted}
+            className="h-16 text-base font-bold"
+          >
+            🔺 High (홀수)
+          </Button>
+          <Button
+            type="button"
+            variant={choice === 'even' ? 'default' : 'outline'}
+            onClick={() => setChoice('even')}
+            disabled={pending || exhausted}
+            className="h-16 text-base font-bold"
+          >
+            🔻 Low (짝수)
+          </Button>
         </div>
 
         <form action={formAction} className="grid gap-4">
           <input type="hidden" name="parity" value={choice} />
-
-          <div className="grid grid-cols-2 gap-3">
-            <Button
-              type="button"
-              variant={choice === 'odd' ? 'default' : 'outline'}
-              onClick={() => setChoice('odd')}
-              disabled={pending || exhausted}
-              className={`h-14 text-base font-bold transition-all ${
-                choice === 'odd' ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md ring-2 ring-indigo-400' : ''
-              }`}
-            >
-              🔺 High (더 높음)
-            </Button>
-            <Button
-              type="button"
-              variant={choice === 'even' ? 'default' : 'outline'}
-              onClick={() => setChoice('even')}
-              disabled={pending || exhausted}
-              className={`h-14 text-base font-bold transition-all ${
-                choice === 'even' ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md ring-2 ring-indigo-400' : ''
-              }`}
-            >
-              🔻 Low (더 낮음)
-            </Button>
-          </div>
-
           <div className="grid gap-2">
             <Label htmlFor="hilo-stake" className="text-sm font-medium">
               베팅할 WLD 금액
@@ -90,35 +90,45 @@ export function HiLoCardGame({
                 name="stake"
                 type="number"
                 min={minStake}
-                max={maxStake}
+                max={maxPlayable}
                 defaultValue={minStake}
+                required
                 disabled={pending || exhausted}
                 className="pr-12 text-lg font-mono font-bold"
               />
-              <span className="absolute right-3 top-2.5 text-xs text-muted-foreground font-semibold">
+              <span className="absolute right-3 top-2.5 text-xs font-semibold text-muted-foreground">
                 WLD
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              최소 {groupDigits(minStake)} ~ 최대 {groupDigits(maxStake)} WLD까지 베팅할 수 있습니다.
+              한 판 최소 {groupDigits(minStake)} WLD · 현재 한도 기준 최대 {groupDigits(maxPlayable)} WLD
             </p>
           </div>
 
-          <Button
-            type="submit"
-            disabled={pending || exhausted}
-            className="w-full h-12 text-base font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg transition-all"
-          >
-            {pending ? '카드 확인 중...' : exhausted ? '오늘 한도 소진' : choice === 'odd' ? '🔺 High에 베팅하기' : '🔻 Low에 베팅하기'}
+          <Button type="submit" disabled={pending || exhausted} className="h-12 w-full text-base font-bold">
+            {pending
+              ? '서버에서 결과 확인 중…'
+              : exhausted
+                ? '현재 한도로 플레이 불가'
+                : choice === 'odd'
+                  ? '🔺 High에 베팅하기'
+                  : '🔻 Low에 베팅하기'}
           </Button>
 
-          {state.status === 'ok' && (
-            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-center font-medium text-sm">
-              🎉 {state.message}
+          {resultText && (
+            <div
+              role="status"
+              className={
+                state.result === 'win'
+                  ? 'rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-center text-sm font-semibold text-emerald-700 dark:text-emerald-300'
+                  : 'rounded-lg border border-rose-500/30 bg-rose-500/10 p-3 text-center text-sm font-semibold text-rose-700 dark:text-rose-300'
+              }
+            >
+              {resultText}
             </div>
           )}
-          {state.status === 'error' && (
-            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-center font-medium text-sm">
+          {state.status === 'error' && state.message && (
+            <div role="status" className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-center text-sm text-destructive">
               {state.message}
             </div>
           )}
