@@ -10,7 +10,7 @@ Branch: `fix/app-gateway-20260907`
 - [x] Make published gallery cards open a dedicated detail page.
 - [x] Allow a signed-in member to attach an image to a board post.
 - [x] Render the board image on the post detail page.
-- [ ] Add regression tests for the new access boundaries and UI behavior.
+- [x] Add regression tests for the new access boundaries and UI behavior.
 - [ ] Run typecheck/tests/build and database migration validation in CI.
 - [ ] Deploy to test, verify, then deploy the validated revision to production.
 
@@ -23,8 +23,11 @@ The app Gateway route exists under `/app-api/v1/...` and forwards only explicitl
 ### Validation so far
 
 - App Gateway allowlist unit tests: 4/4 passed.
-- Board service unit tests: 8/8 passed after updating the repository double for the new image visibility operation.
-- Frontend Gateway/media targeted tests: 8/8 passed.
+- Board service unit tests: 9/9 passed, including private board-image path and malformed-key refusal.
+- Frontend Gateway/media targeted tests: 9/9 passed, including the authenticated board-image relay.
 - Workspace typecheck: passed under Node 24.
 - ESLint: 0 errors; 11 existing/new `<img>` optimization warnings remain.
+
+- Full local workspace test run: contract 23/23, database migration parity 6/6, backend 818 passed with 343 database-backed tests skipped because no `DATABASE_URL` was supplied to the isolated container, frontend 523/523.
+- Production build: contract/database/backend/frontend all built successfully; Next compiled successfully and emitted `/gallery/[photoId]`, `/media/board/[key]`, and `/app-api/v1/[...path]`.
 - Database migration 173 still requires CI/PostgreSQL execution before it can be called validated.
