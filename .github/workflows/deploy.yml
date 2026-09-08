@@ -162,9 +162,13 @@ jobs:
           ssh target 'mkdir -p ~/${{ steps.target.outputs.dir }}'
           tar czf - \
             -C deploy compose.yml roll.sh bootstrap-env.sh install-backup-cron.sh backup-watchdog.sh recover-display-names.sh recover-display-names-from-backup.sh seed.sh update.sh edge \
-            backup.sh restore.sh backup-figures.sql \
+            backup.sh restore.sh backup-figures.sql data-audit.sh data-audit.sql \
             -C "${GITHUB_WORKSPACE}/packages/database" init migrations migrate.sh \
             | ssh target 'tar xzf - -C ~/${{ steps.target.outputs.dir }}'
+      - name: Pre-deploy backup and data audit
+        run: |
+          ssh target "cd ~/${{ steps.target.outputs.dir }} && DEPLOY_DIR=\"\$PWD\" STACK='${{ steps.target.outputs.stack }}' bash backup.sh verify"
+          ssh target "cd ~/${{ steps.target.outputs.dir }} && DEPLOY_DIR=\"\$PWD\" STACK='${{ steps.target.outputs.stack }}' bash data-audit.sh"
       - name: Roll deployment
         run: |
           ssh target \
@@ -195,6 +199,9 @@ jobs:
             "DISCORD_OUTBOX_CHANNEL_ID='${{ vars.DISCORD_OUTBOX_CHANNEL_ID }}'" \
             "DISCORD_OUTBOX_CHANNEL_IDS='${{ vars.DISCORD_ACTIVITY_CHANNEL_ID != '' && format('logs={0}', vars.DISCORD_ACTIVITY_CHANNEL_ID) || '' }}'" \
             'bash ~/${{ steps.target.outputs.dir }}/roll.sh'
+      - name: Post-deploy data audit
+        run: |
+          ssh target "cd ~/${{ steps.target.outputs.dir }} && DEPLOY_DIR=\"\$PWD\" STACK='${{ steps.target.outputs.stack }}' bash data-audit.sh"
       - name: Public smoke check
         run: |
           base='${{ steps.target.outputs.base_url }}'
