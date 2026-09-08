@@ -2,19 +2,22 @@
 
 ## Status checklist
 
-- [x] Confirm the vulnerable dependency is reachable in production upload paths.
+- [x] Confirm the affected dependency is present in the production dependency graph.
+- [x] Check whether the application currently invokes Multer multipart interceptors.
 - [x] Require patched `multer >=2.3.0` through the root pnpm override.
 - [x] Regenerate the frozen lockfile and confirm Multer resolves to 2.3.0.
-- [x] Run frozen install, lint, typecheck, backend tests, and production dependency audit.
-- [x] Run GitHub CI with the PostgreSQL-backed test job.
-- [ ] Merge to `main` after branch synchronization and review findings are resolved.
-- [ ] Deploy through the authoritative production deployment path after the deployment-path drift tracked in #126 is resolved.
+- [x] Run frozen install, lint, typecheck, backend tests, production dependency audit, and PostgreSQL-backed GitHub CI.
+- [ ] Synchronize the branch with current `main` and rerun CI.
+- [ ] Merge after current-main validation succeeds.
+- [ ] Deploy only through the authoritative production path after #126 is resolved.
 
 ## Finding
 
-The production dependency audit began failing after new upstream advisories were published for `multer`. `@nestjs/platform-express@11.2.3` resolved `multer@2.2.0`, while the advisories classify crafted multipart requests as High-severity denial-of-service issues and identify `2.3.0` as the patched release.
+New upstream advisories classify multiple crafted multipart requests as High-severity denial-of-service issues in Multer versions before 2.3.0. The repository's NestJS platform dependency resolved Multer 2.2.0, causing the production dependency audit to fail.
 
-The affected code is reachable in this service because profile and administrator photo upload endpoints use NestJS multipart handling before the application's image magic-byte/dimension validation runs.
+A reachability review corrected the initial assessment: the current photo and board upload routes do **not** use NestJS Multer interceptors. `backend/src/main.ts` mounts `express.raw()` with explicit 4 MiB/8 MiB limits for those image endpoints, and code search found no `FileInterceptor`, `FilesInterceptor`, `AnyFilesInterceptor`, `FileFieldsInterceptor`, `UploadedFile`, or `UploadedFiles` use. The vulnerable package is therefore present in the runtime dependency graph but no currently identified application route invokes its multipart parser.
+
+The upgrade remains appropriate because a known-vulnerable runtime dependency should not remain pinned, the production audit must stay clean, and a future multipart endpoint must not silently reactivate a vulnerable parser.
 
 ## Remediation
 
@@ -28,23 +31,24 @@ The affected code is reachable in this service because profile and administrator
 - `pnpm lint`: passed with 0 errors and 11 pre-existing image-optimization warnings.
 - `pnpm typecheck`: passed.
 - backend Vitest: 58 files passed, 44 DB-backed files skipped locally; 822 tests passed, 345 skipped.
-- `pnpm audit --prod --audit-level=high`: passed with no known vulnerabilities after the override.
-- GitHub Actions CI run 34290115514: completed successfully, including the repository's PostgreSQL-backed gate.
+- `pnpm audit --prod --audit-level=high`: passed after the override.
+- GitHub Actions CI run 34290115514: passed, including the PostgreSQL-backed gate on the earlier branch head.
+- Reachability review: current binary upload endpoints use `express.raw()` size limits; no Multer interceptor/decorator usage was found.
 
 ## Deployment state
 
-Not deployed. The production runtime and the repository deployment workflow are currently inconsistent: production is recorded as Kubernetes/Flux while the workflow still assumes a Docker Compose/SSH rollout. Issue #126 tracks restoration of an authoritative deployment path. This dependency fix must not be described as production-complete until that path is repaired and a post-deploy smoke check succeeds.
+Not deployed. Production is recorded as Kubernetes/Flux while the repository deployment workflow still assumes Docker Compose/SSH. Issue #126 tracks restoration of one authoritative deployment contract. Do not mark this change production-complete before that path is repaired and a post-deploy smoke check succeeds.
 
 ## Rollback
 
-Revert this dependency change to restore the previous lockfile only for compatibility diagnosis. Because the previous Multer release has known remotely triggerable availability vulnerabilities, do not keep that rollback in production; replace it with another patched integration before service exposure.
+Reverting restores the vulnerable dependency graph and should be used only for compatibility diagnosis. If 2.3.0 causes an integration regression, replace it with another patched solution rather than leaving a known-vulnerable Multer version exposed in the production dependency set.
 
 ## 한국어 요약
 
-프로필·관리자 사진 업로드 경로에서 NestJS multipart 처리기가 애플리케이션 자체 이미지 검증보다 먼저 실행되므로 Multer 취약점은 실제 서비스 요청 경로에 도달합니다. 루트 pnpm override와 lockfile을 통해 Multer 2.3.0을 강제했고, frozen install·lint·typecheck·backend test·production audit·GitHub PostgreSQL CI를 통과했습니다. 다만 현재 운영 Kubernetes/Flux와 저장소의 Docker Compose/SSH 배포 워크플로가 불일치하므로 #126 해결 전에는 운영 배포 완료로 표시하지 않습니다.
+Multer 2.2.0은 새로운 High 등급 DoS 권고의 영향 버전이어서 2.3.0으로 올리는 조치는 유지합니다. 다만 현재 월덕 머니버스의 이미지 업로드는 Multer 인터셉터가 아니라 `express.raw()`와 4/8 MiB 제한을 사용하며, 저장소에서 Multer 인터셉터/업로드 데코레이터 사용도 확인되지 않았습니다. 따라서 현재 직접 노출된 취약 경로로 표현하지 않고, 취약 런타임 의존성 제거·의존성 감사 복구·향후 오용 방지 조치로 기록합니다. 운영 배포는 #126의 Kubernetes/배포 경로 불일치가 해결된 뒤 수행합니다.
 
 ## References
 
-- GHSA-wc9g-mqfw-jrwm / CVE-2026-77078
-- GHSA-535w-7cp7-47q4 / CVE-2026-82333
-- GHSA-qfvm-cv95-jqjf
+- GHSA-wc9g-mqfw-jrwm / CVE-2026-77078 — affected `<2.3.0`, patched `2.3.0`.
+- GHSA-535w-7cp7-47q4 / CVE-2026-82333 — affected `<2.3.0`, patched `2.3.0`; recommends a minimal `fieldArrayIndexLimit` when Multer is actually used.
+- GHSA-qvfw-j98x-7q72 / CVE-2026-77063 — async `fileFilter` file-size-limit race, also patched in `2.3.0`.
