@@ -13,7 +13,7 @@ const homeSlot =
   '2118692561';
 
 const adsEnabled =
-  (process.env.NEXT_PUBLIC_ADS_ENABLED || process.env.ADS_ENABLED || 'true') === 'true';
+  (process.env.NEXT_PUBLIC_ADS_ENABLED || process.env.ADS_ENABLED || 'false') === 'true';
 
 export const homeAdSense = Object.freeze({
   enabled:
