@@ -12,6 +12,7 @@ import config from '../next.config';
 const ORIGINAL_BASE = process.env.APP_BASE_URL;
 const ORIGINAL_INDEXING = process.env.SEO_INDEXING_ENABLED;
 const ORIGINAL_ADS = process.env.ADS_ENABLED;
+const ORIGINAL_PUBLIC_ADS = process.env.NEXT_PUBLIC_ADS_ENABLED;
 
 async function headersFor(base: string): Promise<Map<string, string>> {
   process.env.APP_BASE_URL = base;
@@ -37,6 +38,8 @@ afterEach(() => {
   else process.env.SEO_INDEXING_ENABLED = ORIGINAL_INDEXING;
   if (ORIGINAL_ADS === undefined) delete process.env.ADS_ENABLED;
   else process.env.ADS_ENABLED = ORIGINAL_ADS;
+  if (ORIGINAL_PUBLIC_ADS === undefined) delete process.env.NEXT_PUBLIC_ADS_ENABLED;
+  else process.env.NEXT_PUBLIC_ADS_ENABLED = ORIGINAL_PUBLIC_ADS;
 });
 
 describe('security headers', () => {
@@ -49,6 +52,15 @@ describe('security headers', () => {
     const csp = directives((await headersFor('https://test.example.com')).get('content-security-policy')!);
     expect(csp.get('script-src')).toContain('https://static.cloudflareinsights.com');
     expect(csp.get('connect-src')).toContain('https://cloudflareinsights.com');
+  });
+
+  it('fails closed when advertising was not explicitly enabled', async () => {
+    delete process.env.ADS_ENABLED;
+    delete process.env.NEXT_PUBLIC_ADS_ENABLED;
+    const csp = directives((await headersFor('https://test.example.com')).get('content-security-policy')!);
+    expect(csp.get('script-src')).not.toContain('https://pagead2.googlesyndication.com');
+    expect(csp.get('frame-src')).toBe("'none'");
+    expect(csp.get('connect-src')).not.toContain('https://googleads.g.doubleclick.net');
   });
 
   it('admits no other third-party script origin', async () => {
