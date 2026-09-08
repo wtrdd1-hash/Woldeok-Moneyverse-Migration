@@ -24,6 +24,7 @@ import type {
   StockTradeResultRow,
   StockUpdateInput,
   StockUpdateResultRow,
+  StockWatchlistRow,
 } from './stock.repository';
 import type { LivePriceRow } from './market-broadcast';
 
@@ -42,6 +43,8 @@ export interface StockRepository {
   livePrices(): Promise<readonly LivePriceRow[]>;
   liveTick(): Promise<number>;
   adminList(actorUserId: unknown): Promise<readonly StockAdminRow[]>;
+  watchlist(userId: unknown): Promise<readonly StockWatchlistRow[]>;
+  setWatchlist(userId: unknown, stockId: unknown, watching: unknown): Promise<{ readonly watching: boolean }>;
   portfolio(userId: unknown): Promise<readonly StockPortfolioRow[]>;
   history(userId: unknown, limit?: unknown): Promise<readonly StockHistoryRow[]>;
   priceHistory(stockId: unknown, limit?: unknown): Promise<readonly StockPriceHistoryRow[]>;
@@ -94,6 +97,14 @@ export class StockService {
 
   adminList(actorUserId: unknown): Promise<readonly StockAdminRow[]> {
     return this.repository.adminList(actorUserId);
+  }
+
+  watchlist(userId: unknown): Promise<readonly StockWatchlistRow[]> {
+    return this.repository.watchlist(userId);
+  }
+
+  setWatchlist(userId: unknown, stockId: unknown, watching: unknown): Promise<{ readonly watching: boolean }> {
+    return this.repository.setWatchlist(userId, stockId, watching);
   }
 
   portfolio(userId: unknown): Promise<readonly StockPortfolioRow[]> {
