@@ -12,6 +12,7 @@ The original 2026-08-26 project-planning draft was reviewed against the current 
 - The draft mentioned WebAuthn or TOTP as if both were current; the repository currently implements the TOTP/`SecondFactorGuard` path.
 - The repository deployment workflow retired the previous always-on test stack on 2026-09-08. Pre-production verification remains a project requirement and must not be reported as a test-server pass when no dedicated test server exists.
 - The project lacked a single indexed Living Project Plan location in `docs/`.
+- Hourly audit finding: the advertising implementation and deployment manifests failed closed when `ADS_ENABLED` was absent, but `frontend/next.config.ts` independently defaulted the CSP advertising switch to `true`. That broadened `script-src`, `frame-src`, and `connect-src` to Google advertising origins even when the release had not explicitly opted in. This contradicted the Living Spec and the existing SEO/ads operations documentation.
 
 ## Changes
 
@@ -23,14 +24,23 @@ The original 2026-08-26 project-planning draft was reviewed against the current 
 - Documented the current test-stack state while keeping explicit pre-production gates.
 - Added the Living Project Plan to `docs/INDEX.md`.
 - Updated the hourly project audit automation so specification drift is checked and the Living Spec is updated together with implementation changes.
+- Corrected the CSP advertising switch to default to `false`, matching the existing frontend ad loader, backend config, Dockerfile, Compose defaults, and documented release policy.
+- Added a regression test proving that an absent advertising flag does not admit AdSense script, frame, or connection origins.
 
 ## Validation scope
 
-This change is documentation/automation only; it does not modify application code, database migrations, secrets, production data, or deployment manifests. Repository CI is still required before merge to ensure documentation changes do not violate repository checks.
+The Living Spec synchronization was documentation/automation only and passed repository CI before merge. The advertising CSP correction changes frontend configuration and tests only; it does not modify database migrations, secrets, production data, or advertising publisher identifiers. Repository CI and production smoke verification remain required before deployment.
+
+## References consulted for the advertising finding
+
+- OWASP Content Security Policy Cheat Sheet — restrict remote script origins and use an enforced CSP as defense in depth.
+- OWASP Next.js Security Cheat Sheet — validate security-sensitive environment configuration and fail closed when a required/optional capability has not been explicitly enabled.
+- Google AdSense Program Policies and Publisher Policies — ad code and placements must be deliberately controlled and must not interfere with user interactions or appear on unsuitable surfaces.
+- Project `docs/operations/SEO_ADS_LEGAL_AUDIT.md` and Korean counterpart — advertising is an explicit production release-time opt-in.
 
 ## Deployment impact
 
-No runtime deployment is required for this documentation-only change. After merge, the GitHub documentation becomes the maintained planning reference for subsequent implementation work.
+The Living Spec merge itself requires no runtime deployment. The CSP fix should be deployed only after CI succeeds. It is low-risk and fail-closed: an environment that already sets `ADS_ENABLED=true` keeps the same ad CSP, while an environment missing the flag becomes more restrictive. Rollback is the previous frontend image/commit; no data rollback is involved.
 
 ## Follow-up
 
@@ -38,3 +48,4 @@ No runtime deployment is required for this documentation-only change. After merg
 - Restore or replace a dependable isolated pre-production validation environment.
 - Expand English/Korean parity when detailed feature-planning sections materially change.
 - Keep admin-control-center and security documentation aligned with the actual guard/database-function contract.
+- Continue reviewing CSP toward a stricter nonce/hash model where compatible with the rendering strategy; the current `'unsafe-inline'` exception remains a documented residual risk.
