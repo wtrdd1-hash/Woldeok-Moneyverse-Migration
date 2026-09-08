@@ -71,6 +71,7 @@ export const PUBLIC_NAV: readonly NavEntry[] = [
   { href: '/guide', label: '이용 방법' },
   { href: '/announcements', label: '운영 소식' },
   { href: '/gallery', label: '사진' },
+  { href: '/board', label: '게시판' },
   { href: '/status', label: '서비스 상태' },
   { href: '/terms', label: '이용약관' },
   { href: '/privacy', label: '개인정보처리방침' },
@@ -91,7 +92,6 @@ export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/casino', label: '럭키존 (카지노)' },
   { href: '/progression', label: '커리어패스 (성장)' },
   { href: '/profile', label: '내 프로필' },
-  { href: '/board', label: '게시판' },
   { href: '/account', label: '내 계정' },
 ];
 
@@ -118,6 +118,7 @@ export const HEADER_PUBLIC: readonly NavItem[] = [
   { href: '/', label: '홈' },
   { href: '/guide', label: '이용 방법' },
   { href: '/gallery', label: '사진' },
+  { href: '/board', label: '게시판' },
   {
     label: '안내',
     entries: [
@@ -160,7 +161,6 @@ export const HEADER_MEMBER: readonly NavItem[] = [
   {
     label: '커뮤니티',
     entries: [
-      { href: '/board', label: '게시판' },
       { href: '/seasons', label: '시즌' },
       { href: '/profile', label: '내 프로필' },
     ],

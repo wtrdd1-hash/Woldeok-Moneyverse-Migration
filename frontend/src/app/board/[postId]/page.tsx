@@ -8,15 +8,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
-import { requireMember } from '@/lib/session';
 import { CommentForm, DeleteCommentButton, PostControls } from './post-forms';
 
 export const dynamic = 'force-dynamic';
-
-export const metadata: Metadata = {
-  title: '게시글',
-  robots: { index: false, follow: false },
-};
 
 interface Post {
   readonly postId: string;
@@ -25,7 +19,6 @@ interface Post {
   readonly authorName: string;
   readonly createdAt: string;
   readonly updatedAt: string | null;
-  /** The API decides this, not the page: only the author may edit or delete. */
   readonly mine: boolean;
   readonly imageUrl: string | null;
   readonly imageAltText: string | null;
@@ -39,23 +32,56 @@ interface Comment {
   readonly mine: boolean;
 }
 
+async function publicPost(postId: string): Promise<Post | null> {
+  const data = await apiOrNull<{ post: Post }>(
+    `/api/v1/board/public/posts/${encodeURIComponent(postId)}`,
+  );
+  return data?.post ?? null;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  readonly params: Promise<{ readonly postId: string }>;
+}): Promise<Metadata> {
+  const { postId } = await params;
+  const post = await publicPost(postId);
+  if (!post) return { title: '게시글', robots: { index: false, follow: false } };
+  const description = post.body.replace(/\s+/g, ' ').trim().slice(0, 155);
+  return {
+    title: post.title,
+    description,
+    alternates: { canonical: `/board/${post.postId}` },
+    robots: { index: true, follow: true },
+    openGraph: {
+      type: 'article',
+      title: post.title,
+      description,
+      url: `/board/${post.postId}`,
+      publishedTime: post.createdAt,
+      modifiedTime: post.updatedAt ?? undefined,
+    },
+  };
+}
+
 export default async function PostPage({
   params,
 }: {
   readonly params: Promise<{ readonly postId: string }>;
 }) {
-  await requireMember();
   const { postId } = await params;
+  const encodedPostId = encodeURIComponent(postId);
+  const memberPostData = await apiOrNull<{ post: Post }>(`/api/v1/board/posts/${encodedPostId}`);
+  const member = memberPostData !== null;
+  const postData =
+    memberPostData ??
+    (await apiOrNull<{ post: Post }>(`/api/v1/board/public/posts/${encodedPostId}`));
+  const commentData = await apiOrNull<{ comments: Comment[] }>(
+    member
+      ? `/api/v1/board/posts/${encodedPostId}/comments`
+      : `/api/v1/board/public/posts/${encodedPostId}/comments`,
+  );
 
-  const [postData, commentData] = await Promise.all([
-    apiOrNull<{ post: Post }>(`/api/v1/board/posts/${encodeURIComponent(postId)}`),
-    apiOrNull<{ comments: Comment[] }>(
-      `/api/v1/board/posts/${encodeURIComponent(postId)}/comments`,
-    ),
-  ]);
-
-  // A deleted post and one that never existed answer the same way, so this
-  // page does too.
   if (!postData) notFound();
 
   const post = postData.post;
@@ -79,8 +105,6 @@ export default async function PostPage({
             <time dateTime={post.createdAt}>
               {formatMoment(post.createdAt, '작성 시간 확인 중')}
             </time>
-            {/* An edited post says so. Silently changing a post other people
-                have already replied to is worse than not allowing edits. */}
             {post.updatedAt && (
               <>
                 {' · '}
@@ -109,7 +133,9 @@ export default async function PostPage({
 
         <p className="whitespace-pre-wrap leading-[1.9] [word-break:keep-all]">{post.body}</p>
 
-        {post.mine && <PostControls postId={post.postId} title={post.title} body={post.body} />}
+        {member && post.mine && (
+          <PostControls postId={post.postId} title={post.title} body={post.body} />
+        )}
       </article>
 
       <section aria-labelledby="comments-title" className="grid gap-4">
@@ -120,7 +146,10 @@ export default async function PostPage({
         {commentData === null ? (
           <EmptyState title="댓글을 불러오지 못했어요." />
         ) : comments.length === 0 ? (
-          <EmptyState title="아직 댓글이 없어요." description="첫 댓글을 남겨 보세요." />
+          <EmptyState
+            title="아직 댓글이 없어요."
+            description={member ? '첫 댓글을 남겨 보세요.' : '댓글 작성은 로그인 후 가능합니다.'}
+          />
         ) : (
           <Card className="overflow-hidden py-0">
             <CardContent className="grid gap-0 px-0">
@@ -139,7 +168,7 @@ export default async function PostPage({
                     </p>
                     <p className="text-sm leading-[1.8] [word-break:keep-all]">{comment.body}</p>
                   </div>
-                  {comment.mine && (
+                  {member && comment.mine && (
                     <DeleteCommentButton postId={post.postId} commentId={comment.commentId} />
                   )}
                 </div>
@@ -148,7 +177,17 @@ export default async function PostPage({
           </Card>
         )}
 
-        <CommentForm postId={post.postId} />
+        {member ? (
+          <CommentForm postId={post.postId} />
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            댓글을 남기려면{' '}
+            <Link href="/login" className="font-bold underline underline-offset-4">
+              로그인
+            </Link>
+            해 주세요.
+          </p>
+        )}
       </section>
     </div>
   );

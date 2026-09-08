@@ -1,42 +1,24 @@
 name: Deploy
 
-# Builds both images in Actions, publishes them to GHCR, and rolls the host
-# over SSH.
-#
-# The repository is private, so the packages are private too, and two
-# different credentials are involved. They are not interchangeable:
-#
-#   - Publishing uses the workflow's own GITHUB_TOKEN with packages: write.
-#     Nothing has to be configured for it.
-#   - Pulling happens on the host, which is outside GitHub and cannot use that
-#     token. It logs in with GHCR_PULL_TOKEN, which needs only read:packages.
-#
-# Every image is tagged with the commit that produced it, which is what makes
-# a rollback one edited line in the host's .env rather than a rebuild.
-#
-# Deployment is gated on the CI workflow passing, and it runs only when
-# someone asks for it. There is no push trigger: a commit on main builds and
-# tests through ci.yml, and stays there until a person decides the host should
-# take it. Run it from the Actions tab, or:
-#
-#   gh workflow run deploy.yml
-#
-# The host can also be updated without this workflow at all, from whatever is
-# already tagged `latest` in the registry -- see deploy/README.md.
-
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: Deployment target. Production remains restricted to main.
+        required: true
+        default: test
+        type: choice
+        options:
+          - test
+          - production
       enable_ads:
-        description: Enable the reviewed AdSense unit (production only, after AdSense approval and CMP setup)
+        description: Enable the reviewed AdSense unit (production only)
         required: true
         default: false
         type: boolean
 
 concurrency:
-  # Never let two deploys touch the host at once; the later one waits rather
-  # than interleaving with a half-finished rollout.
-  group: deploy-${{ github.ref }}
+  group: deploy-${{ inputs.environment }}
   cancel-in-progress: false
 
 env:
@@ -44,19 +26,20 @@ env:
   IMAGE_PREFIX: ${{ github.repository_owner }}/wdmv
 
 jobs:
-  # There is one deployment now, so the ref this was dispatched from is no
-  # longer a harmless detail: without this, a branch someone was testing a
-  # dependency bump on would roll the live site. main is what the site runs.
   ref:
     runs-on: ubuntu-latest
     steps:
-      - name: Refuse to roll anything but main
+      - name: Enforce production branch policy
         run: |
-          if [ "${GITHUB_REF}" != 'refs/heads/main' ]; then
-            echo "::error::the site rolls main; this run was dispatched from ${GITHUB_REF}"
+          if [ '${{ inputs.environment }}' = production ] && [ "${GITHUB_REF}" != 'refs/heads/main' ]; then
+            echo '::error::production deployment is allowed only from main'
             exit 1
           fi
-          echo "rolling ${GITHUB_SHA} from main"
+          if [ '${{ inputs.environment }}' = test ]; then
+            echo "deploying test environment from ${GITHUB_SHA} (${GITHUB_REF})"
+          else
+            echo "rolling production ${GITHUB_SHA} from main"
+          fi
 
   verify:
     needs: ref
@@ -65,10 +48,6 @@ jobs:
   build:
     needs: verify
     runs-on: ubuntu-latest
-    # The frontend image has the public origin compiled into it -- robots.txt
-    # and sitemap.xml are generated at build time and have to name the host --
-    # so the image is tagged with the environment rather than the two being a
-    # hidden difference between images called the same thing.
     permissions:
       contents: read
       packages: write
@@ -78,48 +57,36 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v3
-
       - name: Log in to GHCR
         uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Compute the image references
+      - name: Compute image references
         id: meta
         run: |
-          # Lowercase: a repository owner may contain capitals, an image name
-          # may not.
           prefix=$(echo "${REGISTRY}/${IMAGE_PREFIX}" | tr '[:upper:]' '[:lower:]')
+          suffix='${{ inputs.environment }}'
           echo "prefix=${prefix}" >> "$GITHUB_OUTPUT"
-          suffix=production
           echo "suffix=${suffix}" >> "$GITHUB_OUTPUT"
           echo "backend=${prefix}/backend:${GITHUB_SHA}-${suffix}" >> "$GITHUB_OUTPUT"
           echo "frontend=${prefix}/frontend:${GITHUB_SHA}-${suffix}" >> "$GITHUB_OUTPUT"
-
-      - name: Build and push the backend
+      - name: Build and push backend
         uses: docker/build-push-action@v7
         with:
           context: .
           file: backend/Dockerfile
           push: true
-          # One platform, because there is one host and it is x86-64. Naming
-          # it also stops buildx wrapping a single image in a manifest list.
           platforms: linux/amd64
-          # buildx attaches provenance and SBOM attestations by default. They
-          # arrive as extra manifests whose platform is unknown/unknown, which
-          # is what shows up as a nonsensical OS/Arch row on the package page.
-          # Nothing here consumes them, so they are only noise.
           provenance: false
           sbom: false
           tags: |
             ${{ steps.meta.outputs.backend }}
             ${{ steps.meta.outputs.prefix }}/backend:latest-${{ steps.meta.outputs.suffix }}
-          cache-from: type=gha,scope=backend
-          cache-to: type=gha,mode=max,scope=backend
-
-      - name: Build and push the frontend
+          cache-from: type=gha,scope=backend-${{ steps.meta.outputs.suffix }}
+          cache-to: type=gha,mode=max,scope=backend-${{ steps.meta.outputs.suffix }}
+      - name: Build and push frontend
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -128,15 +95,13 @@ jobs:
           platforms: linux/amd64
           provenance: false
           sbom: false
-          # robots.txt and sitemap.xml are generated during the build and have
-          # to name the public host, so the origin is a build argument. It is
-          # a repository variable, not a secret: it is the site's own address.
           build-args: |
-            APP_BASE_URL=https://easy-scraping.com
-            SEO_INDEXING_ENABLED=true
-            ADS_ENABLED=${{ inputs.enable_ads && 'true' || 'false' }}
-            ADSENSE_PUBLISHER_ID=${{ inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}
-            ADSENSE_HOME_SLOT=${{ inputs.enable_ads && '2118692561' || '' }}
+            APP_BASE_URL=${{ inputs.environment == 'test' && 'https://test.easy-scraping.com' || 'https://easy-scraping.com' }}
+            SEO_INDEXING_ENABLED=${{ inputs.environment == 'production' && 'true' || 'false' }}
+            SEARCH_CONSOLE_VERIFICATION=${{ inputs.environment == 'production' && vars.SEARCH_CONSOLE_VERIFICATION || '' }}
+            ADS_ENABLED=${{ inputs.environment == 'production' && inputs.enable_ads && 'true' || 'false' }}
+            ADSENSE_PUBLISHER_ID=${{ inputs.environment == 'production' && inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}
+            ADSENSE_HOME_SLOT=${{ inputs.environment == 'production' && inputs.enable_ads && '2118692561' || '' }}
           tags: |
             ${{ steps.meta.outputs.frontend }}
             ${{ steps.meta.outputs.prefix }}/frontend:latest-${{ steps.meta.outputs.suffix }}
@@ -146,51 +111,48 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    environment: production
+    environment: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v7
-
-      # The two deployments differ in six values and nothing else. They are
-      # here rather than in environment variables because none of them is a
-      # secret -- they are hostnames, a directory and a port -- and a reader
-      # asking "what is different about production?" should find the answer in
-      # the file that does it.
-      #
-      # `test` keeps the stack name `wdmv` and the directory the migration
-      # deployment already uses: its compose project, and therefore its
-      # database volume, is named after the stack, so renaming it would strand
-      # the data. Only the public origin moves.
-      - name: Name the deployment
+      - name: Name deployment
         id: target
         run: |
-          # One deployment. The test stack it used to choose between was
-          # retired on 2026-09-07: it had its own database, its own encryption
-          # key and its own half of every setting here, and a mis-picked
-          # dropdown rolled the wrong one.
-          {
-            echo 'stack=wdmvp'
-            echo 'dir=moneyverse-production'
-            echo 'base_url=https://easy-scraping.com'
-            echo 'edge_port=3022'
-            echo 'seo=true'
-            echo 'ads=${{ inputs.enable_ads && 'true' || 'false' }}'
-            echo 'adsense_publisher=${{ inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}'
-            echo 'adsense_home_slot=${{ inputs.enable_ads && '2118692561' || '' }}'
-            echo 'db_name=moneyverse_production'
-            # It does not roll without something to return to. Migrations do
-            # not roll back, and this is the only moment anybody is looking.
-            echo 'require_backup=1'
-            echo 'admin_ids='
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Open an SSH session to the host
+          if [ '${{ inputs.environment }}' = test ]; then
+            {
+              echo 'stack=wdmv'
+              echo 'dir=moneyverse-migration'
+              echo 'base_url=https://test.easy-scraping.com'
+              echo 'edge_port=3021'
+              echo 'seo=false'
+              echo 'ads=false'
+              echo 'adsense_publisher='
+              echo 'adsense_home_slot='
+              echo 'db_name=moneyverse_migration'
+              echo 'require_backup=0'
+              echo 'admin_ids=${{ vars.TEST_BOOTSTRAP_DISCORD_ADMIN_IDS }}'
+              echo 'adopt_discord_from='
+            } >> "$GITHUB_OUTPUT"
+          else
+            {
+              echo 'stack=wdmvp'
+              echo 'dir=moneyverse-production'
+              echo 'base_url=https://easy-scraping.com'
+              echo 'edge_port=3022'
+              echo 'seo=true'
+              echo "ads=${{ inputs.enable_ads && 'true' || 'false' }}"
+              echo "adsense_publisher=${{ inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}"
+              echo "adsense_home_slot=${{ inputs.enable_ads && '2118692561' || '' }}"
+              echo 'db_name=moneyverse_production'
+              echo 'require_backup=1'
+              echo 'admin_ids='
+              echo 'adopt_discord_from=wtrdd-discord-app'
+            } >> "$GITHUB_OUTPUT"
+          fi
+      - name: Open SSH session to host
         run: |
           install -m 700 -d ~/.ssh
           printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy
           chmod 600 ~/.ssh/deploy
-          # Pinned host key rather than StrictHostKeyChecking=no: accepting
-          # whatever key answers would let anyone who can spoof the address
-          # receive the deploy credentials.
           printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
           cat >> ~/.ssh/config <<'CONFIG'
@@ -200,6 +162,12 @@ jobs:
             Port ${{ secrets.DEPLOY_PORT }}
             IdentityFile ~/.ssh/deploy
             IdentitiesOnly yes
+            IdentityAgent none
+            PubkeyAuthentication yes
+            PreferredAuthentications publickey
+            PasswordAuthentication no
+            KbdInteractiveAuthentication no
+            BatchMode yes
             ConnectTimeout 15
             ConnectionAttempts 1
             ServerAliveInterval 15
@@ -209,48 +177,23 @@ jobs:
             ControlPersist 10m
           CONFIG
           chmod 600 ~/.ssh/config
-
-      - name: Ship the deployment files
+      - name: Ship deployment files
         run: |
-          # The deployment host intermittently rate-limits new TCP sessions.
-          # Open one authenticated master and reuse it for shipping, rolling
-          # and reporting instead of reconnecting for every command.
           connected=false
           for attempt in 1 2 3 4 5 6; do
-            if ssh -MNf target; then
-              connected=true
-              break
-            fi
-            echo "SSH master connection attempt ${attempt}/6 failed; retrying in 10 seconds"
+            if ssh -MNf target; then connected=true; break; fi
+            echo "SSH public-key authentication attempt ${attempt}/6 failed; retrying in 10 seconds"
             sleep 10
           done
-          if [ "$connected" != true ]; then
-            echo 'Could not establish the deployment SSH master connection' >&2
-            exit 1
-          fi
+          [ "$connected" = true ] || { echo 'Could not establish deployment SSH connection with the configured deploy key' >&2; exit 1; }
           ssh -O check target
           ssh target 'mkdir -p ~/${{ steps.target.outputs.dir }}'
           tar czf - \
-            -C deploy compose.yml roll.sh bootstrap-env.sh install-backup-cron.sh recover-display-names.sh recover-display-names-from-backup.sh seed.sh update.sh edge \
+            -C deploy compose.yml roll.sh bootstrap-env.sh install-backup-cron.sh backup-watchdog.sh recover-display-names.sh recover-display-names-from-backup.sh seed.sh update.sh edge \
             backup.sh restore.sh backup-figures.sql \
             -C "${GITHUB_WORKSPACE}/packages/database" init migrations migrate.sh \
             | ssh target 'tar xzf - -C ~/${{ steps.target.outputs.dir }}'
-
-      # The script runs on the host and reads its inputs from the environment.
-      # Passing it as a here-doc let the runner's shell expand the body first,
-      # which rewrote the script before it ever arrived.
-      #
-      # ADOPT_FROM names a container already on the host whose OAuth client
-      # credentials this deployment reuses. Those values are copied
-      # host-locally and never pass through this runner.
-      #
-      # The Discord bot settings are the one group that comes from the GitHub
-      # environment rather than the step above, and deliberately: the two
-      # deployments must run two different bots, and `environment:` on this job
-      # is what makes one reference resolve to a different value for test than
-      # for production. A literal here would be two application ids to keep in
-      # step by hand, and there is nowhere in a public step to put a token.
-      - name: Roll the deployment
+      - name: Roll deployment
         run: |
           ssh target \
             "BACKEND_IMAGE='${{ needs.build.outputs.backend }}'" \
@@ -269,7 +212,7 @@ jobs:
             "REQUIRE_BACKUP='${{ steps.target.outputs.require_backup }}'" \
             "BOOTSTRAP_DISCORD_ADMIN_IDS='${{ steps.target.outputs.admin_ids }}'" \
             "ADOPT_FROM='${{ vars.ADOPT_FROM }}'" \
-            "ADOPT_DISCORD_FROM='wtrdd-discord-app'" \
+            "ADOPT_DISCORD_FROM='${{ steps.target.outputs.adopt_discord_from }}'" \
             "DISCORD_APPLICATION_ID='${{ vars.DISCORD_APPLICATION_ID }}'" \
             "DISCORD_BOT_TOKEN='${{ secrets.DISCORD_BOT_TOKEN }}'" \
             "DISCORD_INTERACTIONS_ENABLED='${{ vars.DISCORD_INTERACTIONS_ENABLED }}'" \
@@ -280,9 +223,11 @@ jobs:
             "DISCORD_OUTBOX_CHANNEL_ID='${{ vars.DISCORD_OUTBOX_CHANNEL_ID }}'" \
             "DISCORD_OUTBOX_CHANNEL_IDS='${{ vars.DISCORD_ACTIVITY_CHANNEL_ID != '' && format('logs={0}', vars.DISCORD_ACTIVITY_CHANNEL_ID) || '' }}'" \
             'bash ~/${{ steps.target.outputs.dir }}/roll.sh'
-
+      - name: Public smoke check
+        run: |
+          curl --fail --silent --show-error --retry 5 --retry-delay 3 '${{ steps.target.outputs.base_url }}/' >/dev/null
+          curl --fail --silent --show-error --retry 5 --retry-delay 3 '${{ steps.target.outputs.base_url }}/status' >/dev/null
       - name: Report what is running
         if: always()
         run: |
-          ssh target "cd ~/${{ steps.target.outputs.dir }} \
-            && STACK='${{ steps.target.outputs.stack }}' docker compose ps"
+          ssh target "cd ~/${{ steps.target.outputs.dir }} && STACK='${{ steps.target.outputs.stack }}' docker compose ps"
