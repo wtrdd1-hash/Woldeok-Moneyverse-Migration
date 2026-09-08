@@ -226,8 +226,24 @@ jobs:
             'bash ~/${{ steps.target.outputs.dir }}/roll.sh'
       - name: Public smoke check
         run: |
-          curl --fail --silent --show-error --retry 5 --retry-delay 3 '${{ steps.target.outputs.base_url }}/' >/dev/null
-          curl --fail --silent --show-error --retry 5 --retry-delay 3 '${{ steps.target.outputs.base_url }}/status' >/dev/null
+          base='${{ steps.target.outputs.base_url }}'
+          curl --fail --silent --show-error --retry 5 --retry-delay 3 "${base}/" >/dev/null
+          curl --fail --silent --show-error --retry 5 --retry-delay 3 "${base}/status" >/dev/null
+
+          robots="$(curl --fail --silent --show-error --retry 5 --retry-delay 3 "${base}/robots.txt")"
+          sitemap="$(curl --fail --silent --show-error --retry 5 --retry-delay 3 "${base}/sitemap.xml")"
+          ads="$(curl --fail --silent --show-error --retry 5 --retry-delay 3 "${base}/ads.txt")"
+
+          if [ '${{ steps.target.outputs.seo }}' = true ]; then
+            printf '%s' "$robots" | grep -Fq "Sitemap: ${base}/sitemap.xml"
+            printf '%s' "$sitemap" | grep -Fq "<loc>${base}"
+          else
+            printf '%s' "$robots" | grep -Fq 'Disallow: /'
+          fi
+
+          if [ '${{ steps.target.outputs.ads }}' = true ]; then
+            printf '%s' "$ads" | grep -Fq 'google.com, pub-5220225531544323, DIRECT, f08c47fec0942fa0'
+          fi
       - name: Report what is running
         if: always()
         run: |

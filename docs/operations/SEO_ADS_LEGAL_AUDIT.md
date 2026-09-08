@@ -19,6 +19,7 @@ Baseline date: 2026-09-08
 - Removed advertising from the shop page to reduce adjacency risk around transaction/purchase UI.
 - Aligned the privacy notice with the actual permitted public-content ad placements.
 - Added a regression test for the opt-in behavior.
+- Added deployment smoke checks for `/robots.txt`, `/sitemap.xml`, `/ads.txt`, and environment-specific indexing/ad expectations.
 
 ## Production verification checklist
 
