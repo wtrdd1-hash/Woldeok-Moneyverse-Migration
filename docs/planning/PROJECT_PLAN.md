@@ -187,3 +187,32 @@ The project should continue to reconcile and improve, in priority order:
 - Removed the obsolete mandatory two-person approval statement from the current plan while retaining stronger compensating controls.
 - Recorded that the previous always-on test stack was retired, while preserving mandatory pre-production verification gates.
 - Added the rule that implementation and plan documentation must be synchronized in the same workstream.
+### 2026-09-09 — product expansion roadmap parity
+
+The following roadmap mirrors the Korean Living Spec and is staged behind implementation, validation, and release gates. It does not redefine WLD or any virtual-economy feature as a real financial product.
+
+#### P0 — discovery, return visits, and operations
+
+- **Virtual-stock detail hub:** combine price/candles, server-defined indicators, member holdings, and related community content on one canonical page.
+- **Stock watchlist:** store per-member watched virtual stocks and expose them from stock/home surfaces. The first watchlist slice is implemented in PostgreSQL/NestJS/Next.js and remains subject to the normal release/deployment gates.
+- **Public-content SEO:** continuously verify canonical URLs, metadata, sitemap/robots behavior, breadcrumbs, and internal links for anonymous public content.
+- **Admin operations console:** expand read-model-driven user/economy/content/error/service-health views while keeping risky writes separated and step-up protected.
+- **Administrator audit trail:** preserve actor/action/target/result, safe before/after summaries, and masked network context without secrets or unrestricted request bodies.
+
+#### P1 — data and community integration
+
+- **Stock-tagged community:** connect posts to virtual stocks so members can navigate between a stock detail surface and relevant discussion.
+- **Stock comparison:** compare multiple virtual stocks with server-defined metrics on a consistent basis.
+- **Conditional alerts:** support server-verifiable price/change/service-event conditions with cooldown and rate limiting.
+- **Economy/event calendar:** unify service events, virtual-stock events, quests, and shop events around dates.
+- **Account security center:** expose active-session review, other-session termination, login-security state, and future second-factor expansion.
+
+#### P2 — personalization and summaries
+
+- **Personal dashboard:** combine watchlist, recent activity, holdings, quests, and economy events for the signed-in member.
+- **Portfolio analysis:** calculate valuation, allocation, and gain/loss from authoritative virtual-stock holdings while preserving WLD integer/string precision contracts.
+- **AI-assisted summaries:** optionally summarize announcements, guides, or public community activity. Generated output must be visibly distinguished from source content, include provenance/time context, and never decide economy outcomes.
+
+#### P3 — long-term expansion
+
+Advanced economic analysis, recommendations, and simulation remain gated on data quality, operating cost, safety, product wording, and legal review. They must not bypass existing ledger, authorization, privacy, or probability-feature controls.
