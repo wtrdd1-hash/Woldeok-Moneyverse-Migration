@@ -19,3 +19,10 @@ Expanded the living product plan with prioritized product requirements based on 
 
 ## Status
 Documentation/planning change only. No production code or deployment changed in this work item.
+
+## Implementation progress — Watchlist P0
+- Added member-owned stock watchlist storage with no direct application-role table privileges.
+- Added SECURITY DEFINER read/write functions scoped to the authenticated actor.
+- Added NestJS watchlist GET/set endpoints behind session/consent and CSRF on writes.
+- Added Next.js server action and responsive stock-card watch toggle.
+- This remains on the feature branch until automated checks and test-environment validation pass.
