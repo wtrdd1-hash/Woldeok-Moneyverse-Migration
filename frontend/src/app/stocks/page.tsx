@@ -23,6 +23,7 @@ import { MarketNews } from './market-news';
 import type { MarketEvent } from './market-news';
 import { StockDetailDialog } from './stock-detail-dialog';
 import { TradeDialog } from './trade-dialog';
+import { WatchlistToggle } from './watchlist-toggle';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +53,15 @@ interface StockRow {
 interface SparkSeries {
   readonly stock_id: string;
   readonly prices: readonly string[];
+}
+
+interface WatchlistRow {
+  readonly stock_id: string;
+  readonly symbol: string;
+  readonly name: string;
+  readonly current_price: string;
+  readonly day_open_price: string;
+  readonly created_at: string;
 }
 
 interface HoldingRow {
@@ -94,7 +104,7 @@ export default async function StocksPage() {
   // cost grew with the catalogue and paid that cost again on every
   // thirty-second refresh. They now arrive together and in the same round as
   // everything else.
-  const [market, portfolio, history, sparks, news] = await Promise.all([
+  const [market, portfolio, history, sparks, news, watchlist] = await Promise.all([
     apiOrNull<{ stocks: StockRow[] }>('/api/v1/stocks'),
     apiOrNull<{ holdings: HoldingRow[] }>('/api/v1/stocks/portfolio'),
     apiOrNull<{ trades: TradeRow[] }>('/api/v1/stocks/history'),
@@ -102,9 +112,11 @@ export default async function StocksPage() {
     // The news leaning the market (124). Absent rather than empty when the
     // call fails: a market with no news is a normal state, not an error.
     apiOrNull<{ events: MarketEvent[] }>('/api/v1/stocks/market-events'),
+    apiOrNull<{ stocks: WatchlistRow[] }>('/api/v1/stocks/watchlist'),
   ]);
 
   const stocks = market?.stocks ?? [];
+  const watchedStockIds = new Set((watchlist?.stocks ?? []).map((row) => row.stock_id));
 
   const seriesFor = new Map<string, readonly SparkPoint[]>(
     (sparks?.series ?? []).map((row) => [
@@ -148,10 +160,11 @@ export default async function StocksPage() {
             {stocks.map((row) => (
               <Card key={row.id} className="gap-4">
                 <CardHeader>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center justify-between gap-2">
                     <Badge variant="secondary" className="font-mono">
                       {row.symbol}
                     </Badge>
+                    <WatchlistToggle stockId={row.id} watching={watchedStockIds.has(row.id)} />
                   </div>
                   <CardTitle className="text-base">{row.name}</CardTitle>
                   <CardDescription>

@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsInt, IsPositive, IsUUID } from 'class-validator';
+import { IsBoolean, IsIn, IsInt, IsPositive, IsUUID } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -25,6 +25,12 @@ import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure } from '../core/pg-error';
 import { StockInputError, isCandleInterval } from './stock.repository';
 import { StockService } from './stock.service';
+
+export class WatchlistDto {
+  @ApiProperty({ type: Boolean })
+  @IsBoolean()
+  readonly watching!: boolean;
+}
 
 export class OrderDto {
   @ApiProperty({ enum: ['buy', 'sell'] })
@@ -56,6 +62,28 @@ export class StockController {
   @ApiOperation({ summary: 'Listed stocks and their current prices' })
   async list() {
     return { stocks: await this.service().list() };
+  }
+
+  @Get('watchlist')
+  @ApiOperation({ summary: 'Stocks watched by the caller' })
+  async watchlist(@Req() request: RequestWithSession) {
+    return { stocks: await this.service().watchlist(requireUserId(request)) };
+  }
+
+  @Post(':id/watchlist')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Add or remove a stock from the caller watchlist' })
+  async setWatchlist(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) stockId: string,
+    @Body() body: WatchlistDto,
+  ) {
+    try {
+      return await this.service().setWatchlist(requireUserId(request), stockId, body.watching);
+    } catch (error: unknown) {
+      if (error instanceof StockInputError) throw new BadRequestException(error.message);
+      throw error;
+    }
   }
 
   @Get('portfolio')

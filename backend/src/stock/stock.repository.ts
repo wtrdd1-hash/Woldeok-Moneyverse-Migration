@@ -119,6 +119,15 @@ export interface StockRangeRow {
 // 023-virtual-stock-game.sql). quantity is a share count, not money, so it
 // stays a plain string like season's points/entries tallies; average_cost,
 // market_value and current_price are WLD amounts.
+export interface StockWatchlistRow {
+  readonly stock_id: string;
+  readonly symbol: string;
+  readonly name: string;
+  readonly current_price: WldAmount;
+  readonly day_open_price: WldAmount;
+  readonly created_at: Date;
+}
+
 export interface StockPortfolioRow {
   readonly stock_id: string;
   readonly symbol: string;
@@ -420,6 +429,28 @@ export class PostgresStockRepository {
   // promise. A plain function that throws before returning one instead
   // throws synchronously at the call site, which `assert.rejects()` (and
   // any caller expecting a rejected promise) does not catch.
+  async watchlist(userId: unknown): Promise<readonly StockWatchlistRow[]> {
+    uuid(userId, 'user id');
+    return queryRows<StockWatchlistRow>(
+      this.pool,
+      'SELECT stock_id::text, symbol, name, current_price::text, day_open_price::text, created_at FROM public.stock_my_watchlist($1)',
+      [userId],
+    );
+  }
+
+  async setWatchlist(userId: unknown, stockId: unknown, watching: unknown): Promise<{ readonly watching: boolean }> {
+    uuid(userId, 'user id');
+    uuid(stockId, 'stock id');
+    if (typeof watching !== 'boolean') throw new StockInputError('watching must be boolean');
+    const row = await queryOne<{ watching: boolean }>(
+      this.pool,
+      'SELECT public.stock_watchlist_set($1,$2,$3) AS watching',
+      [userId, stockId, watching],
+    );
+    if (!row) throw new Error('database did not return watchlist state');
+    return row;
+  }
+
   async portfolio(userId: unknown): Promise<readonly StockPortfolioRow[]> {
     uuid(userId, 'user id');
     return queryRows<StockPortfolioRow>(
