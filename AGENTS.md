@@ -354,20 +354,25 @@ distribution trial of at least 1,000,000 draws is on record.
 | search indexing | on |
 
 There used to be a second one, `wdmv`, at `test.easy-scraping.com`. It was
-retired on 2026-09-07. It had its own database, its own encryption key and its
-own half of every setting in the workflow, and what it actually produced was a
-dropdown that could roll the wrong deployment and a second copy of every
-account. The public origin is still baked into the frontend image at **build**
-time, which is why the environment is in the image tag rather than being a
-hidden difference between two images with the same name.
+retired on 2026-09-07, and the `environment` input that still offered it was
+removed from `deploy.yml` on 2026-09-08. It had its own database, its own
+encryption key and its own half of every setting in the workflow, and what it
+actually produced was a dropdown that could roll the wrong deployment and a
+second copy of every account. The public origin is still baked into the
+frontend image at **build** time, which is why the environment is in the image
+tag rather than being a hidden difference between two images with the same name.
 
-**Nothing deploys on a push.** A human dispatches it, test first, production
-only after test is confirmed:
+**Nothing deploys on a push.** A human dispatches it, and it runs only from
+`main` -- the `ref` job refuses any other ref:
 
 ```bash
-gh workflow run deploy.yml -f environment=test
-gh workflow run deploy.yml --ref <branch> -f environment=test   # a branch, without touching main
+gh workflow run deploy.yml
 ```
+
+There is no longer a stack to rehearse a commit on before production. What
+replaces that rehearsal is the pre-deploy checklist in `docs/RELEASING.md`, and
+in particular the mandatory verified backup: `roll.sh` runs the migrations, and
+a migration does not roll back.
 
 `docs/RELEASING.md` is the procedure. Read it before changing anything under
 `deploy/`.

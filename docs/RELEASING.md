@@ -1,35 +1,32 @@
 # 배포 지침서
 
-개발한 것을 **테스트 서버에 올리는 절차**와 **사용자에게 내보내는 절차**.
-사람과 AI 에이전트 모두 이 문서 하나만 읽고 따라할 수 있게 쓴다.
+개발한 것을 **사용자에게 내보내는 절차**. 사람과 AI 에이전트 모두 이 문서 하나만
+읽고 따라할 수 있게 쓴다.
 
 ---
 
-## 두 개의 배포가 있다
+## 배포는 하나다
 
-같은 `deploy/compose.yml` 파일이 이 호스트에서 두 번 돈다. `STACK` 값이 컨테이너
-이름·compose 프로젝트·Cloudflare 터널이 찾는 별칭을 모두 정한다. 그래서 **볼륨도
-데이터베이스도 시크릿도 서로 완전히 분리돼 있다.**
+| | 운영 (production) |
+|---|---|
+| 주소 | `https://easy-scraping.com` |
+| `STACK` | `wdmvp` |
+| 컨테이너 | `wdmvp-backend` … |
+| 호스트 디렉터리 | `~/moneyverse-production` |
+| 데이터베이스 | `moneyverse_production` |
+| 루프백 포트 | `3022` |
+| 검색 노출 | 켜짐 |
+| 이미지 태그 | `<sha>-production`, `latest-production` |
+| 부트스트랩 관리자 | 없음 (콘솔에서 부여) |
 
-| | 테스트 (dev) | 운영 (production) |
-|---|---|---|
-| 주소 | `https://test.easy-scraping.com` | `https://easy-scraping.com` |
-| `STACK` | `wdmv` | `wdmvp` |
-| 컨테이너 | `wdmv-backend` … | `wdmvp-backend` … |
-| 호스트 디렉터리 | `~/moneyverse-migration` | `~/moneyverse-production` |
-| 데이터베이스 | `moneyverse_migration` | `moneyverse_production` |
-| 루프백 포트 | `3021` | `3022` |
-| 검색 노출 | 꺼짐 | 켜짐 |
-| 이미지 태그 | `<sha>-test`, `latest-test` | `<sha>-production`, `latest-production` |
-| 부트스트랩 관리자 | `TEST_BOOTSTRAP_DISCORD_ADMIN_IDS` 변수 | 없음 (콘솔에서 부여) |
-| Discord 봇 | 테스트 애플리케이션·토큰 | 운영 애플리케이션·토큰 (별개) |
-
-**두 배포는 데이터를 공유하지 않는다.** 테스트에서 만든 계정·잔액·게시글은 운영에
-나타나지 않고, 그 반대도 마찬가지다.
+두 번째 스택 `wdmv`가 `test.easy-scraping.com`에 있었고 2026-09-07에 폐기됐다.
+자기 데이터베이스와 자기 암호화 키, 워크플로 설정의 절반을 따로 갖고 있었는데,
+그것이 실제로 만들어 낸 것은 **잘못된 배포를 굴릴 수 있는 드롭다운과 모든 계정의
+두 번째 사본**이었다. 2026-09-08에 워크플로에서도 선택지를 걷어냈다.
 
 프런트엔드 이미지에는 공개 주소가 **빌드 시점에 박힌다**(`robots.txt`와
-`sitemap.xml`이 호스트 이름을 담아야 한다). 그래서 같은 커밋이라도 이미지가 두
-벌이고, 태그에 환경이 들어간다.
+`sitemap.xml`이 호스트 이름을 담아야 한다). 환경이 이미지 태그에 남아 있는 것은
+그 때문이다 — 같은 이름의 이미지 두 벌이 숨은 차이를 갖는 것보다 낫다.
 
 ---
 
@@ -71,46 +68,31 @@ pnpm audit --prod --audit-level=high
 
 ---
 
-## 2. 테스트 서버에 올리기
+## 2. 사용자에게 배포하기 (운영)
 
 `main`에 푸시해도 **배포되지 않는다.** CI만 돈다. 올리는 것은 사람이 정한다.
 
 ```bash
 git push origin main
-gh workflow run deploy.yml -f environment=test
+gh workflow run deploy.yml
 gh run watch
 ```
 
 워크플로가 하는 일:
 
 1. `ci.yml` 실행 (lint · typecheck · test · build)
-2. 이미지 두 개를 빌드해 GHCR에 push — `<sha>-test`, `latest-test`
+2. 이미지 두 개를 빌드해 GHCR에 push — `<sha>-production`, `latest-production`
 3. `compose.yml`·스크립트·`migrations/`를 호스트로 전송
 4. `roll.sh` 실행 → `bootstrap-env.sh` → `migrate` → `seed` → 컨테이너 교체 → 헬스체크
 
-### 확인
-
-```bash
-curl -s -o /dev/null -w '%{http_code}\n' https://test.easy-scraping.com/
-ssh <host> 'cd ~/moneyverse-migration && STACK=wdmv docker compose ps'
-```
-
----
-
-## 3. 사용자에게 배포하기 (운영)
-
-**테스트에서 확인한 뒤에만 한다.** 같은 커밋으로 올린다.
-
-```bash
-gh workflow run deploy.yml -f environment=production
-gh run watch
-```
-
 ### 배포 전 점검
 
+폐기된 테스트 스택이 하던 일 — 같은 커밋을 먼저 굴려 보는 것 — 을 대신할 것이
+없다. **이 목록이 그 자리를 대신한다.**
+
 - [ ] **운영 백업이 있고, 열린다** — 아래 명령
-- [ ] 같은 커밋이 테스트에 올라가 있고, 화면에서 확인했다
-- [ ] 마이그레이션을 추가했다면 테스트 DB에 실제로 적용됐다
+- [ ] `ci.yml`이 이 커밋에서 통과했다
+- [ ] 마이그레이션을 추가했다면 CI의 DB 테스트가 그 커밋에서 돌았다
 - [ ] 사용자에게 보이는 한국어 문구를 바꿨다면 의도한 변경이다
 - [ ] 되돌릴 방법을 알고 있다 (아래)
 
@@ -134,13 +116,13 @@ ssh <host> 'cd ~/moneyverse-production && STACK=wdmvp docker compose ps'
 
 ---
 
-## 4. 되돌리기
+## 3. 되돌리기
 
 이미지 태그가 커밋이라, 되돌리는 것은 `.env` 두 줄이다.
 
 ```bash
 ssh <host>
-cd ~/moneyverse-production          # 또는 ~/moneyverse-migration
+cd ~/moneyverse-production
 sed -i 's#/backend:.*#/backend:<이전-sha>-production#' .env
 sed -i 's#/frontend:.*#/frontend:<이전-sha>-production#' .env
 STACK=wdmvp docker compose up -d --wait
@@ -154,7 +136,7 @@ STACK=wdmvp docker compose up -d --wait
 복구 절차가 그 경우다. `restore.sh`는 기존 데이터베이스를 덮어쓰지 않고 새
 데이터베이스로 복원한 뒤, 백업 시점에 기록해 둔 수치와 대조해서 보여 준다.
 
-## 5. 이미지만 최신으로
+## 4. 이미지만 최신으로
 
 이미 배포가 올라와 있고 이 호스트만 그 이미지로 옮기고 싶을 때:
 
@@ -225,12 +207,11 @@ API는 `APP_BASE_URL`의 origin과 정확한 콜백 경로가 일치하지 않�
 
 ## 배포가 하지 않는 것
 
-- **데이터 이전.** 두 스택의 DB는 별개다. 옮기려면 `pg_dump`를 직접 쓴다.
 - **백업.** 배포는 백업을 만들지도 확인하지도 않는다. 백업은 호스트의 cron이
   하루 한 번 돌리고, 배포 전에 사람이 `backup.sh verify`로 확인한다 —
   [BACKUP.md](BACKUP.md).
-- **관리자 부여.** 운영에서는 `BOOTSTRAP_DISCORD_ADMIN_IDS`를 비워 둔다. 관리자는
-  운영 콘솔에서 부여한다. 테스트에서만 이 변수로 자동 부여한다.
+- **관리자 부여.** `BOOTSTRAP_DISCORD_ADMIN_IDS`는 비어 있다. 관리자는 운영
+  콘솔에서 부여한다.
 - **Cloudflare 경로 변경.** 터널 ingress와 DNS는 `ops/`의 스크립트로 따로 한다.
   터널 설정은 이 호스트의 다른 사이트들과 공유하므로, 규칙을 추가할 때는 반드시
   기존 규칙을 보존하고 catch-all 앞에 넣는다. 붙이는 것은
@@ -245,7 +226,7 @@ API는 `APP_BASE_URL`의 origin과 정확한 콜백 경로가 일치하지 않�
 | `BACKUP_ENCRYPTION_KEY` | **`.env`에 넣지 않는다.** `backup.sh init-key`가 `~/.moneyverse-backup-key`에 만들고, 사본 하나는 호스트 밖에 둔다. `.env`에 있으면 `backup.sh`가 거부한다 — [BACKUP.md](BACKUP.md) |
 | Discord·Google 클라이언트 자격증명 | `ADOPT_FROM`이 가리키는 기존 컨테이너에서 호스트 안에서 복사 |
 | `GHCR_PULL_TOKEN` | GitHub 시크릿. `read:packages`만. 호스트 디스크에 남지 않는다 |
-| `DISCORD_BOT_TOKEN` | GitHub **환경 시크릿**(`test`·`production` 각각). 워크플로의 참조는 하나이고 GitHub가 배포한 환경의 값을 고른다. **절대 `ADOPT_FROM`으로 복사하지 않는다** — 위의 「Discord 봇」 절 |
+| `DISCORD_BOT_TOKEN` | GitHub **환경 시크릿**(`production`). **절대 `ADOPT_FROM`으로 복사하지 않는다** — 위의 「Discord 봇」 절 |
 | `DISCORD_APPLICATION_ID`, `DISCORD_INTERACTIONS_*`, `DISCORD_OUTBOX_*` | GitHub **환경 변수**(`vars`). 시크릿이 아니다 — 애플리케이션·길드·역할·채널 id뿐이다 |
 
 **어떤 값도 저장소·CI 로그·이 문서에 들어가지 않는다.** 스크립트는 어떤 키가
