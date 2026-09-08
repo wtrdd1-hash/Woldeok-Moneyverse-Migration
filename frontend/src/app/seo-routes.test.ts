@@ -34,7 +34,7 @@ describe('search crawler routes', () => {
     );
 
     const urls = sitemap().map((entry) => entry.url);
-    expect(urls).toContain('https://easy-scraping.com/');
+    expect(urls).toContain('https://easy-scraping.com');
     expect(urls).toContain('https://easy-scraping.com/board');
     expect(urls).not.toContain('https://easy-scraping.com/admin');
     expect(urls).not.toContain('https://easy-scraping.com/wallet');
