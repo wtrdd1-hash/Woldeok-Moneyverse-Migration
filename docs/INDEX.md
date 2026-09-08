@@ -2,6 +2,13 @@
 
 This directory is the long-form documentation for Woldeok Moneyverse. The root README is the visual product overview; files here describe the contracts operators and contributors need to preserve.
 
+## Planning
+
+- [Living Project Plan](planning/PROJECT_PLAN.md)
+- [Living Project Plan — Korean](planning/PROJECT_PLAN.ko.md)
+
+The project plan is a living specification. Intentional, validated implementation changes must update the plan in the same development flow; accidental violations of security/data-integrity invariants must be fixed in code rather than documented away.
+
 ## Architecture
 
 - [System overview](architecture/system-overview.md)
