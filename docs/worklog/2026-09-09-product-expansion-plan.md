@@ -36,3 +36,13 @@ Documentation/planning change only. No production code or deployment changed in 
 - CI surfaced three high-severity Multer 2.2.0 denial-of-service advisories at the final production dependency audit.
 - Added a workspace override requiring Multer >= 2.3.0 and regenerated the lockfile.
 - Local `pnpm audit --prod --audit-level=high` reports no known vulnerabilities after the override.
+
+### Production rollout completion
+- PR #130 was merged after CI passed database migration execution, full tests, builds, and the production dependency audit.
+- Production PostgreSQL was backed up before schema change; migrations 175, 176, and 177 were then applied in sequence with checksum records intact.
+- Multer was constrained to the patched >=2.3.0 line; the production dependency audit reported no known vulnerabilities before merge.
+- Production backend and frontend images for application commit `ffcdc5b0d2878639639ca48747f09ed8532da4d7` were built and imported into the Kubernetes containerd runtime.
+- The Flux infrastructure repository was updated to revision `983f2c56aaaf86823cde8f8b2dc96fd7fd731355` with both production image tags and reconciled successfully.
+- `wdmvp-backend` and `wdmvp-frontend` rolled out successfully with zero restarts observed immediately after rollout.
+- Public smoke checks returned HTTP 200 for `/`, `/status`, `/stocks`, and `/robots.txt`; recent backend logs showed no matching fatal/error/permission-denied signals.
+- The old Compose-oriented deploy path remains unsuitable for this Kubernetes production host; the Kubernetes image staging workflow was corrected to avoid remote sudo and to use repository-scoped package read credentials.

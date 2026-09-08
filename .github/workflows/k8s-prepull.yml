@@ -1,5 +1,9 @@
 name: Kubernetes Image Prepull
 
+permissions:
+  contents: read
+  packages: read
+
 on:
   workflow_dispatch:
     inputs:
@@ -36,24 +40,21 @@ jobs:
             StrictHostKeyChecking yes
           CONFIG
           chmod 600 ~/.ssh/config
-          ssh target 'command -v sudo >/dev/null && sudo -n true && command -v ctr >/dev/null && command -v kubectl >/dev/null'
-      - name: Prepull production images into k8s containerd
+          ssh target 'mkdir -p /tmp/wdmv-image-stage && chmod 700 /tmp/wdmv-image-stage'
+      - name: Pull private production images
         env:
-          BACKEND_IMAGE: ${{ inputs.backend_image }}
-          FRONTEND_IMAGE: ${{ inputs.frontend_image }}
           GHCR_USER: ${{ github.repository_owner }}
-          GHCR_TOKEN: ${{ secrets.GHCR_PULL_TOKEN }}
-        run: |
-          printf -v q_backend '%q' "$BACKEND_IMAGE"
-          printf -v q_frontend '%q' "$FRONTEND_IMAGE"
-          printf -v q_user '%q' "$GHCR_USER"
-          printf -v q_token '%q' "$GHCR_TOKEN"
-          ssh target "sudo ctr -n k8s.io images pull --user ${q_user}:${q_token} ${q_backend} >/dev/null && sudo ctr -n k8s.io images pull --user ${q_user}:${q_token} ${q_frontend} >/dev/null"
-      - name: Verify cached images
-        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BACKEND_IMAGE: ${{ inputs.backend_image }}
           FRONTEND_IMAGE: ${{ inputs.frontend_image }}
         run: |
-          printf -v q_backend '%q' "$BACKEND_IMAGE"
-          printf -v q_frontend '%q' "$FRONTEND_IMAGE"
-          ssh target "sudo ctr -n k8s.io images check ${q_backend} ${q_frontend} >/dev/null"
+          printf '%s' "$GHCR_TOKEN" | docker login ghcr.io --username "$GHCR_USER" --password-stdin
+          docker pull "$BACKEND_IMAGE"
+          docker pull "$FRONTEND_IMAGE"
+          docker save "$BACKEND_IMAGE" | gzip -1 > /tmp/wdmv-backend.tar.gz
+          docker save "$FRONTEND_IMAGE" | gzip -1 > /tmp/wdmv-frontend.tar.gz
+      - name: Stage image archives on Kubernetes host
+        run: |
+          scp /tmp/wdmv-backend.tar.gz target:/tmp/wdmv-image-stage/backend.tar.gz
+          scp /tmp/wdmv-frontend.tar.gz target:/tmp/wdmv-image-stage/frontend.tar.gz
+          ssh target 'sha256sum /tmp/wdmv-image-stage/backend.tar.gz /tmp/wdmv-image-stage/frontend.tar.gz'
