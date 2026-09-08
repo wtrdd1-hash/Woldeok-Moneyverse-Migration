@@ -1,0 +1,62 @@
+name: Test Images
+
+on:
+  push:
+    branches: [docs/product-expansion-plan-20260909]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/wdmv
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Compute image prefix
+        id: meta
+        shell: bash
+        run: echo "prefix=$(echo "${REGISTRY}/${IMAGE_PREFIX}" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+      - name: Build and push backend test image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          platforms: linux/amd64
+          provenance: false
+          sbom: false
+          tags: |
+            ${{ steps.meta.outputs.prefix }}/backend:${{ github.sha }}-test
+            ${{ steps.meta.outputs.prefix }}/backend:latest-test
+          cache-from: type=gha,scope=backend-test
+          cache-to: type=gha,mode=max,scope=backend-test
+      - name: Build and push frontend test image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: frontend/Dockerfile
+          push: true
+          platforms: linux/amd64
+          provenance: false
+          sbom: false
+          build-args: |
+            APP_BASE_URL=https://test.easy-scraping.com
+            SEO_INDEXING_ENABLED=false
+            ADS_ENABLED=false
+          tags: |
+            ${{ steps.meta.outputs.prefix }}/frontend:${{ github.sha }}-test
+            ${{ steps.meta.outputs.prefix }}/frontend:latest-test
+          cache-from: type=gha,scope=frontend-test
+          cache-to: type=gha,mode=max,scope=frontend-test

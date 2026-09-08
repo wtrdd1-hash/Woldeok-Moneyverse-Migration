@@ -26,3 +26,8 @@ Documentation/planning change only. No production code or deployment changed in 
 - Added NestJS watchlist GET/set endpoints behind session/consent and CSRF on writes.
 - Added Next.js server action and responsive stock-card watch toggle.
 - This remains on the feature branch until automated checks and test-environment validation pass.
+
+### Test environment recovery
+- Added a branch-scoped GitHub Actions image builder for the isolated test stack only.
+- Test images bake `https://test.easy-scraping.com`, indexing disabled and ads disabled.
+- This workflow never deploys production and does not run on `main`.
