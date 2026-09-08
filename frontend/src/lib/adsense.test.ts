@@ -12,6 +12,12 @@ async function settings() {
 }
 
 describe('home AdSense settings', () => {
+  it('stays disabled when the deployment does not explicitly opt in', async () => {
+    delete process.env.ADS_ENABLED;
+    delete process.env.NEXT_PUBLIC_ADS_ENABLED;
+    expect((await settings()).enabled).toBe(false);
+  });
+
   it('fails closed unless the deployment enables a complete public unit', async () => {
     process.env.ADS_ENABLED = 'true';
     process.env.ADSENSE_PUBLISHER_ID = 'not-a-publisher';
