@@ -7,8 +7,8 @@
 - [x] Confirm `.github/workflows/test-images.yml` only watches the already-merged product branch while holding `packages: write`.
 - [x] Add the product-expansion roadmap to the English Living Spec with implementation-status wording.
 - [x] Remove the stale branch-specific image-publishing workflow rather than leave an unused write-capable CI path.
-- [ ] Run repository CI after both corrections.
-- [ ] Merge only if current-main CI succeeds.
+- [x] Run repository CI after both corrections — GitHub Actions CI run 34291522907 succeeded on the branch synchronized with then-current `main`.
+- [x] Merge only if current-main CI succeeds — PR #134 merged as `c89b5fcb` after CI success.
 
 ## Findings
 
@@ -28,3 +28,7 @@ Documentation/CI-only task. No production or database change is planned. Product
 - Added the P0–P3 roadmap to the English primary Living Spec and recorded the stock watchlist as implemented but still release-gated.
 - Removed `.github/workflows/test-images.yml`; it only targeted the already-merged one-off branch and retained `packages: write` without being an authoritative test/deployment path.
 - No application code, migration, database role, secret, runtime configuration, or production data changed.
+
+## Final state
+
+PR #134 merged after successful CI. This task changed documentation and removed a stale non-authoritative image-publishing workflow only; no production rollout was required. The separate Kubernetes/Flux deployment-path and reconciliation problem remains tracked in #126.
