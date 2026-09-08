@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { apiOrNull, publicApi } from '@/lib/api';
 import { isLoggedInMember } from '@/lib/session';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
-import { PublicAdvertisement } from '@/components/public-advertisement';
 import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
 
 export const dynamic = 'force-dynamic';
@@ -87,7 +86,6 @@ export default async function ShopPage() {
         userAvatarUrl={avatarUrl}
       />
 
-      <PublicAdvertisement />
     </div>
   );
 }
