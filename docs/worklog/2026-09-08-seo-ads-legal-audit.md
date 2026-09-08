@@ -26,13 +26,15 @@ Improve crawler discoverability and AdSense safety without indexing test surface
 
 ## Deployment discrepancy found
 
-The test deploy failed only at the host SSH step because the configured GitHub Actions deploy key is not accepted by the current host. The repository also contains conflicting deployment documentation: `AGENTS.md` says the old Docker `wdmv` test stack was retired on 2026-09-07, while `docs/RELEASING.md` and `deploy.yml` still attempt to deploy that retired stack.
+At the time of the original test attempt, the test deploy failed at the host SSH step because the configured GitHub Actions deploy key was not accepted by the current host. During that investigation, repository deployment guidance was also found to be in transition after retirement of the old Docker `wdmv` test stack.
 
-The live Kubernetes ingress currently routes `test.easy-scraping.com` to the production `wdmvp` frontend. Consequently the test hostname returns the production sitemap and production crawler policy. This is not an acceptable test gate for SEO work. Production has not been changed by this task.
+That retired-test-target discrepancy is now historical: the current `deploy.yml` no longer offers the old test target and its deployment target is production `wdmvp`. The remaining active discrepancy is different and more important: the repository workflow still performs an SSH + Docker Compose rollout, while the observed production runtime is Kubernetes/containerd managed through Flux/GitOps. See issue #126 for the current remediation contract.
+
+The live Kubernetes ingress observed during the SEO task routed `test.easy-scraping.com` to the production `wdmvp` frontend. Consequently that hostname was not an acceptable isolated test gate for SEO work.
 
 ## Current remediation
 
-Use the already-built `<sha>-test` image in an isolated Kubernetes canary for the public SEO/ad/legal surfaces, with indexing and ads disabled and login/mutation paths unavailable. Keep `main` and the production deployment unchanged until that canary is verified. The stale deployment-path discrepancy must remain recorded until the repository workflow is aligned with the Kubernetes host.
+The SEO/ad/legal change was verified through an isolated Kubernetes canary before production completion. For subsequent releases, do not treat the retired `wdmv` test target or a production-routed test hostname as a test-server pass. The supported pre-production and production deployment contract must be reconciled with the Kubernetes/Flux runtime described in issue #126.
 
 ## Production completion — 2026-09-09
 
@@ -40,11 +42,11 @@ Use the already-built `<sha>-test` image in an isolated Kubernetes canary for th
 - Production workflow run `34280512568` passed ref enforcement, CI verification, and image build. Its legacy SSH ship step still failed because the configured deploy key is rejected by the host.
 - To avoid altering database state, only the frontend image was rolled. No database migration or backend image change was required for this task.
 - The frontend was rebuilt from the exact `main` commit with production SEO and AdSense build arguments, imported into the host containerd runtime, and rolled through Kubernetes `wdmvp-frontend`.
-- The production deployment now references `ghcr.io/wtrdd1-hash/wdmv/frontend:a077e88454aa06b34557c7bdc11a4e5edaa4f33f-production` with one ready replica.
-- Flux GitOps was temporarily suspended only during the controlled rollout, then the infrastructure source was updated to commit `4b183b74261abf28f34c3468bcd6b05e16323994` and Flux was resumed. `apps` reports that revision as applied.
-- Public checks returned HTTP 200 for `/`, `/status`, `/robots.txt`, `/sitemap.xml`, `/ads.txt`, `/privacy`, and `/shop`.
-- `robots.txt` advertises `https://easy-scraping.com/sitemap.xml`; `ads.txt` contains the expected Google publisher record; sitemap URLs use the production origin; `/shop` contains no `SPONSORED ADVERTISEMENT` marker.
+- The production deployment referenced `ghcr.io/wtrdd1-hash/wdmv/frontend:a077e88454aa06b34557c7bdc11a4e5edaa4f33f-production` with one ready replica at the completion checkpoint.
+- Flux GitOps was temporarily suspended only during the controlled rollout, then the infrastructure source was updated to commit `4b183b74261abf28f34c3468bcd6b05e16323994` and Flux was resumed. `apps` reported that revision as applied at the checkpoint.
+- Public checks returned HTTP 200 for `/`, `/status`, `/robots.txt`, `/sitemap.xml`, `/ads.txt`, `/privacy`, and `/shop` at the completion checkpoint.
+- `robots.txt` advertised `https://easy-scraping.com/sitemap.xml`; `ads.txt` contained the expected Google publisher record; sitemap URLs used the production origin; `/shop` contained no `SPONSORED ADVERTISEMENT` marker.
 
 ## Residual operational issue
 
-The repository deployment workflow still contains an SSH transport path that is not authenticated against the current host. This does not affect the currently running production revision, but it should be repaired before relying on GitHub Actions for the next automated host rollout.
+The repository deployment workflow is not yet the authoritative Kubernetes/Flux rollout path used by the production host. This is tracked as issue #126 and must be resolved before relying on GitHub Actions as the complete production deployment gate.
