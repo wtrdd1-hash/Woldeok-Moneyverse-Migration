@@ -227,6 +227,7 @@ export interface BoardRepository {
   ): Promise<BoardCommentRow>;
   removeComment(actorUserId: string, commentId: string, idempotencyKey: string): Promise<boolean>;
   imageVisible(actorUserId: string, storageKey: string): Promise<boolean>;
+  registerImageUpload(actorUserId: string, storageKey: string): Promise<boolean>;
 }
 
 export interface CreateBoardPostInput {
@@ -252,6 +253,7 @@ const REQUIRED = [
   'createComment',
   'removeComment',
   'imageVisible',
+  'registerImageUpload',
 ] as const;
 
 @Injectable()
@@ -340,6 +342,13 @@ export class BoardService {
   async imageVisible(userId: unknown, storageKey: unknown): Promise<boolean> {
     if (typeof storageKey !== 'string' || !STORAGE_KEY.test(storageKey)) return false;
     return this.repository.imageVisible(uuid(userId, 'user id'), storageKey);
+  }
+
+  async registerImageUpload(userId: unknown, storageKey: unknown): Promise<boolean> {
+    if (typeof storageKey !== 'string' || !STORAGE_KEY.test(storageKey)) {
+      throw new BoardInputError('board image is invalid');
+    }
+    return this.repository.registerImageUpload(uuid(userId, 'user id'), storageKey);
   }
 
   async removeComment(

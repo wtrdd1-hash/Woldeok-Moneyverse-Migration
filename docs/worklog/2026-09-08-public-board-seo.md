@@ -67,3 +67,15 @@ Migration 175는 다음 전용 read model만 추가한다.
 ## 현재 상태
 
 PR #117의 CI는 성공했다. 그러나 2026-09-08 현재 배포 호스트 `weoldog`가 원격 도구에서 offline으로 확인되어 실제 test 서버 배포/검증을 수행하지 못했다. 프로젝트 규칙에 따라 이 상태에서는 #117도 이 변경도 `main`에 병합하지 않는다. 호스트 접근이 복구되면 test 검증 후 정확히 검증한 커밋 계열만 main/Production으로 승격한다.
+
+## 2026-09-08 재검증 / 리뷰 보완
+
+PR #118 최신 브랜치를 다시 점검하면서 초기 자동 리뷰의 미해결 항목을 확인했다.
+
+- [x] P1: 게시판 이미지 업로드를 `member_board_image_uploads` 소유권 레지스트리에 등록하고, 글 발행 시 같은 회원이 게시판 용도로 업로드한 키만 허용하도록 migration 176 추가
+- [x] P2: Deploy `build` job을 선택한 GitHub environment에 연결하여 Production `SEARCH_CONSOLE_VERIFICATION` 변수가 실제 frontend image build에 주입되도록 수정
+- [x] P2: `/board` 목록은 서버 렌더 중 세션을 읽지 않고 `publicApi` + 60초 ISR로 공개 HTML을 생성하며, 글쓰기 UI는 `/api/viewer`를 사용하는 client hydration으로 분리. 글 상세 metadata/공개 본문도 공개 read model을 우선 사용
+- [x] 수정 후 lint/typecheck/test 재실행: lint 0 errors (기존 img warnings 11), typecheck pass, backend 822 passed/345 DB-local skipped, frontend 531 passed
+- [ ] GitHub branch push 후 CI 확인
+- [ ] test 환경 실제 배포 및 signed-out/read-only 회귀 검증
+- [ ] 모든 게이트 통과 후에만 main/Production 승격
