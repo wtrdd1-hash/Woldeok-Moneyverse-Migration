@@ -1,0 +1,113 @@
+name: Recover Test Deploy Transport
+
+on:
+  push:
+    branches:
+      - test
+
+concurrency:
+  group: recover-test-deploy-transport
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-test:
+    runs-on: ubuntu-latest
+    # The test GitHub environment currently carries an SSH credential that the
+    # host rejects. Production's transport credential reached the same host on
+    # the last successful deploy. This job borrows only that transport context;
+    # every deployment target below is pinned to the isolated test stack.
+    environment: production
+    env:
+      TEST_IMAGE_SHA: b4b02aaa89834422cd16f2dec487fca15a8d96e2
+      STACK: wdmv
+      DEPLOY_DIR_NAME: moneyverse-migration
+      APP_BASE_URL: https://test.easy-scraping.com
+      EDGE_PORT: "3021"
+      DB_NAME: moneyverse_migration
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Configure known-good SSH transport
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy
+          chmod 600 ~/.ssh/deploy
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<'CONFIG'
+          Host target
+            HostName ${{ secrets.DEPLOY_HOST }}
+            User ${{ secrets.DEPLOY_USER }}
+            Port ${{ secrets.DEPLOY_PORT }}
+            IdentityFile ~/.ssh/deploy
+            IdentitiesOnly yes
+            PreferredAuthentications publickey
+            PasswordAuthentication no
+            KbdInteractiveAuthentication no
+            ConnectTimeout 15
+            ConnectionAttempts 1
+            ServerAliveInterval 15
+            ServerAliveCountMax 3
+            ControlMaster auto
+            ControlPath ~/.ssh/control-%C
+            ControlPersist 10m
+          CONFIG
+          chmod 600 ~/.ssh/config
+          ssh -MNf target
+          ssh -O check target
+
+      - name: Ship test deployment files
+        run: |
+          ssh target "mkdir -p ~/${DEPLOY_DIR_NAME}"
+          tar czf - \
+            -C deploy compose.yml roll.sh bootstrap-env.sh install-backup-cron.sh backup-watchdog.sh recover-display-names.sh recover-display-names-from-backup.sh seed.sh update.sh edge \
+            backup.sh restore.sh backup-figures.sql \
+            -C "${GITHUB_WORKSPACE}/packages/database" init migrations migrate.sh \
+            | ssh target "tar xzf - -C ~/${DEPLOY_DIR_NAME}"
+
+      - name: Roll isolated test stack
+        run: |
+          prefix="ghcr.io/${{ github.repository_owner }}/wdmv"
+          prefix="$(printf '%s' "$prefix" | tr '[:upper:]' '[:lower:]')"
+          ssh target \
+            "BACKEND_IMAGE=${prefix}/backend:${TEST_IMAGE_SHA}-test" \
+            "FRONTEND_IMAGE=${prefix}/frontend:${TEST_IMAGE_SHA}-test" \
+            "GHCR_USER=${{ github.actor }}" \
+            "GHCR_TOKEN=${{ secrets.GHCR_PULL_TOKEN }}" \
+            "STACK=${STACK}" \
+            "DEPLOY_DIR=\$HOME/${DEPLOY_DIR_NAME}" \
+            "APP_BASE_URL=${APP_BASE_URL}" \
+            "EDGE_PORT=${EDGE_PORT}" \
+            "SEO_INDEXING_ENABLED=false" \
+            "ADS_ENABLED=false" \
+            "ADSENSE_PUBLISHER_ID=" \
+            "ADSENSE_HOME_SLOT=" \
+            "DB_NAME=${DB_NAME}" \
+            "REQUIRE_BACKUP=0" \
+            "BOOTSTRAP_DISCORD_ADMIN_IDS=" \
+            "ADOPT_FROM=" \
+            "ADOPT_DISCORD_FROM=" \
+            "DISCORD_APPLICATION_ID=" \
+            "DISCORD_BOT_TOKEN=" \
+            "DISCORD_INTERACTIONS_ENABLED=false" \
+            "DISCORD_INTERACTIONS_PUBLIC_KEY=" \
+            "DISCORD_INTERACTIONS_GUILD_ID=" \
+            "DISCORD_INTERACTIONS_ROLE_IDS=" \
+            "DISCORD_OUTBOX_ENABLED=false" \
+            "DISCORD_OUTBOX_CHANNEL_ID=" \
+            "DISCORD_OUTBOX_CHANNEL_IDS=" \
+            "bash ~/${DEPLOY_DIR_NAME}/roll.sh"
+
+      - name: Verify public test smoke
+        run: |
+          curl --fail --silent --show-error --retry 5 --retry-delay 3 "${APP_BASE_URL}/" >/dev/null
+          curl --fail --silent --show-error --retry 5 --retry-delay 3 "${APP_BASE_URL}/status" >/dev/null
+          curl --fail --silent --show-error "${APP_BASE_URL}/robots.txt" | grep -Eq 'Disallow:[[:space:]]*/'
+
+      - name: Report isolated test stack
+        if: always()
+        run: |
+          ssh target "cd ~/${DEPLOY_DIR_NAME} && STACK='${STACK}' docker compose ps"
