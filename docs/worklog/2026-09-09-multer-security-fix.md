@@ -7,9 +7,10 @@
 - [x] Require patched `multer >=2.3.0` through the root pnpm override.
 - [x] Regenerate the frozen lockfile and confirm Multer resolves to 2.3.0.
 - [x] Run frozen install, lint, typecheck, backend tests, production dependency audit, and PostgreSQL-backed GitHub CI.
-- [ ] Synchronize the branch with current `main` and rerun CI.
-- [ ] Merge after current-main validation succeeds.
-- [ ] Deploy only through the authoritative production path after #126 is resolved.
+- [x] Synchronize the documentation branch with current `main`.
+- [x] Confirm the Multer 2.3.0 override and lockfile already reached `main` through merged PR #130 after successful CI.
+- [ ] Merge this documentation correction after its current-main CI succeeds.
+- [ ] Deploy the updated runtime only through the authoritative production path after #126 is resolved.
 
 ## Finding
 
@@ -37,7 +38,7 @@ The upgrade remains appropriate because a known-vulnerable runtime dependency sh
 
 ## Deployment state
 
-Not deployed. Production is recorded as Kubernetes/Flux while the repository deployment workflow still assumes Docker Compose/SSH. Issue #126 tracks restoration of one authoritative deployment contract. Do not mark this change production-complete before that path is repaired and a post-deploy smoke check succeeds.
+The dependency correction is present in Git `main` because PR #130 merged a branch that already contained the Multer override commit. It is **not confirmed deployed** to the live runtime. Production remains on mixed older application images while Flux reconciliation is unhealthy; #126 tracks restoration of the authoritative Kubernetes/GitOps deployment contract. Do not mark the dependency correction production-complete until the exact patched image is rolled out and smoke-checked.
 
 ## Rollback
 
@@ -52,3 +53,7 @@ Multer 2.2.0은 새로운 High 등급 DoS 권고의 영향 버전이어서 2.3.0
 - GHSA-wc9g-mqfw-jrwm / CVE-2026-77078 — affected `<2.3.0`, patched `2.3.0`.
 - GHSA-535w-7cp7-47q4 / CVE-2026-82333 — affected `<2.3.0`, patched `2.3.0`; recommends a minimal `fieldArrayIndexLimit` when Multer is actually used.
 - GHSA-qvfw-j98x-7q72 / CVE-2026-77063 — async `fileFilter` file-size-limit race, also patched in `2.3.0`.
+
+## Merge provenance correction
+
+The package/lockfile change reached `main` indirectly through PR #130 (`feat: product expansion P0 watchlist`), whose head already included commit `1944e425` (`security: require patched multer release`). This documentation PR therefore no longer carries a runtime dependency diff; its purpose is to preserve an accurate reachability, validation, and deployment record.
