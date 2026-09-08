@@ -38,10 +38,15 @@ export class BoardImageController {
   @HttpCode(201)
   @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Upload one image for a board post' })
-  async upload(@Body() body: Buffer) {
-    if (!this.storage) throw new ServiceUnavailableException('board image storage is unavailable');
+  async upload(@Req() request: RequestWithSession, @Body() body: Buffer) {
+    if (!this.board || !this.storage) {
+      throw new ServiceUnavailableException('board image service is unavailable');
+    }
     try {
-      return await this.storage.save(body);
+      const stored = await this.storage.save(body);
+      const registered = await this.board.registerImageUpload(requireUserId(request), stored.storageKey);
+      if (!registered) throw new ServiceUnavailableException('board image ownership registration failed');
+      return stored;
     } catch (error: unknown) {
       if (error instanceof ImageUploadError) throw new BadRequestException(error.message);
       throw error;

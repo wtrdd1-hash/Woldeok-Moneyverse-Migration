@@ -29,6 +29,8 @@ Migration 175는 다음 전용 read model만 추가한다.
 
 모두 `SECURITY DEFINER`이며 `moneyverse_migrator` 소유다. `moneyverse_app`에는 함수 `EXECUTE`만 부여하고 `member_board_posts`와 `member_board_comments`의 직접 테이블 권한은 다시 `REVOKE`한다. 기존 회원 전용 쓰기 함수는 수정하지 않는다.
 
+Migration 176은 게시판 이미지 업로드를 `member_board_image_uploads`에 회원별로 등록하고, 글을 발행할 때 같은 회원이 게시판 용도로 업로드한 키만 사용할 수 있게 강제한다. 다른 비공개 이미지 기능에서 얻은 storage key를 게시글에 재사용해 공개하는 경로를 차단한다.
+
 ### 검색 / Search Console
 
 - `/board`는 canonical과 공개 설명을 제공한다.
@@ -36,6 +38,8 @@ Migration 175는 다음 전용 read model만 추가한다.
 - Production은 기존 `robots.txt` + `sitemap.xml` 허용 정책을 유지하고 test는 전체 크롤링 차단을 유지한다.
 - `frontend/Dockerfile`에 공개 빌드 인자 `SEARCH_CONSOLE_VERIFICATION`을 연결했다.
 - Deploy workflow는 Production GitHub environment의 `vars.SEARCH_CONSOLE_VERIFICATION`만 Production 프런트 이미지에 전달하며 test에는 빈 값만 전달한다.
+- Deploy `build` job 자체도 선택된 GitHub environment에 연결해 environment variable이 image build 단계에서 실제로 보이게 한다.
+- `/board` 목록은 `publicApi`와 60초 ISR을 사용하고, 글쓰기 UI만 `/api/viewer`를 통해 hydration 뒤 표시한다.
 - `seo-routes.test.ts`가 test 전체 차단, production sitemap origin, `/board` 포함, private 영역 제외를 고정한다.
 
 ## 외부 검색 관찰
@@ -52,7 +56,7 @@ Migration 175는 다음 전용 read model만 추가한다.
 
 ## 검증 게이트
 
-- [ ] PR CI: secret guard, lint, typecheck, build, migration 175 실제 PostgreSQL 적용, DB/application/frontend tests
+- [x] PR CI #381: secret guard, lint, typecheck, build, migration 175/176 실제 PostgreSQL 적용, DB/application/frontend tests, Prisma mutation guard, production dependency audit
 - [ ] test 서버에 현재 stacked branch 배포
 - [ ] 비로그인: `/board` 목록, 글 본문, 댓글, 첨부 이미지 열람 가능
 - [ ] 비로그인: 글/댓글 작성 API는 여전히 거부됨
@@ -66,4 +70,16 @@ Migration 175는 다음 전용 read model만 추가한다.
 
 ## 현재 상태
 
-PR #117의 CI는 성공했다. 그러나 2026-09-08 현재 배포 호스트 `weoldog`가 원격 도구에서 offline으로 확인되어 실제 test 서버 배포/검증을 수행하지 못했다. 프로젝트 규칙에 따라 이 상태에서는 #117도 이 변경도 `main`에 병합하지 않는다. 호스트 접근이 복구되면 test 검증 후 정확히 검증한 커밋 계열만 main/Production으로 승격한다.
+PR #117의 CI는 성공했다. PR #118의 review-gap 수정 커밋 `e6b7961ea206eabc550ef37bf4ba456e24179fe6`도 GitHub CI #381에서 전체 성공했다. 연결된 미니PC 셸에는 Docker와 테스트 배포 스택이 없고, 현재 사용 가능한 GitHub 도구에는 `workflow_dispatch` 실행 기능이 없어 test 환경 Deploy를 여기서 시작할 수 없다. 따라서 프로젝트 규칙대로 `main`과 Production은 변경하지 않는다. 테스트 배포가 실행 가능한 경로가 확보되면 현재 PR branch를 test에 올려 signed-out/read-only 회귀 검증을 완료한 뒤에만 main/Production으로 승격한다.
+
+## 2026-09-08 재검증 / 리뷰 보완
+
+PR #118 최신 브랜치를 다시 점검하면서 초기 자동 리뷰의 미해결 항목을 확인했다.
+
+- [x] P1: 게시판 이미지 업로드를 `member_board_image_uploads` 소유권 레지스트리에 등록하고, 글 발행 시 같은 회원이 게시판 용도로 업로드한 키만 허용하도록 migration 176 추가
+- [x] P2: Deploy `build` job을 선택한 GitHub environment에 연결하여 Production `SEARCH_CONSOLE_VERIFICATION` 변수가 실제 frontend image build에 주입되도록 수정
+- [x] P2: `/board` 목록은 서버 렌더 중 세션을 읽지 않고 `publicApi` + 60초 ISR로 공개 HTML을 생성하며, 글쓰기 UI는 `/api/viewer`를 사용하는 client hydration으로 분리
+- [x] 로컬 재검증: lint 0 errors (기존 img warnings 11), typecheck pass, backend 822 passed/345 DB-local skipped, frontend 531 passed
+- [x] GitHub branch push 및 CI #381 전체 성공
+- [ ] test 환경 실제 배포 및 signed-out/read-only 회귀 검증
+- [ ] 모든 게이트 통과 후에만 main/Production 승격

@@ -4,11 +4,11 @@ import { MessageSquare } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent } from '@/components/ui/card';
-import { apiOrNull } from '@/lib/api';
+import { publicApi } from '@/lib/api';
 import { formatDay, formatMoment } from '@/lib/money';
-import { NewPostForm } from './board-forms';
+import { BoardParticipation } from './board-participation';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: '커뮤니티 광장 — 공략 및 자유 토론',
@@ -29,10 +29,7 @@ interface PostSummary {
 }
 
 export default async function BoardPage() {
-  const memberData = await apiOrNull<{ posts: PostSummary[] }>('/api/v1/board/posts');
-  const member = memberData !== null;
-  const data =
-    memberData ?? (await apiOrNull<{ posts: PostSummary[] }>('/api/v1/board/public/posts'));
+  const data = await publicApi<{ posts: PostSummary[] }>('/api/v1/board/public/posts', 60);
 
   return (
     <div className="grid gap-6">
@@ -41,21 +38,7 @@ export default async function BoardPage() {
         동의한 회원만 가능합니다.
       </PageHeader>
 
-      {member ? (
-        <NewPostForm />
-      ) : (
-        <Card>
-          <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4 text-sm text-muted-foreground">
-            <span>읽기는 자유롭게, 참여는 회원으로.</span>
-            <Link
-              href="/login"
-              className="font-bold text-foreground underline underline-offset-4"
-            >
-              로그인하고 글쓰기
-            </Link>
-          </CardContent>
-        </Card>
-      )}
+      <BoardParticipation />
 
       <section aria-labelledby="posts-title" className="grid gap-3">
         <h2 id="posts-title" className="sr-only">
@@ -66,9 +49,7 @@ export default async function BoardPage() {
         ) : data.posts.length === 0 ? (
           <EmptyState
             title="아직 작성된 글이 없어요."
-            description={
-              member ? '첫 글을 남겨 보세요.' : '회원의 첫 이야기를 기다리고 있어요.'
-            }
+            description="회원의 첫 이야기를 기다리고 있어요."
           />
         ) : (
           <Card className="overflow-hidden py-0">

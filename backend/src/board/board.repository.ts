@@ -145,6 +145,15 @@ export class PostgresBoardRepository implements BoardRepository {
     return row;
   }
 
+  async registerImageUpload(actorUserId: string, storageKey: string): Promise<boolean> {
+    const row = await queryOne<{ readonly registered: boolean }>(
+      this.pool,
+      'SELECT public.member_board_register_image_upload($1,$2) AS registered',
+      [actorUserId, storageKey],
+    );
+    return row?.registered === true;
+  }
+
   async imageVisible(actorUserId: string, storageKey: string): Promise<boolean> {
     const row = await queryOne<{ readonly visible: boolean }>(
       this.pool,

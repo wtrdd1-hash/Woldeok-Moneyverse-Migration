@@ -32,6 +32,7 @@ function repository(overrides: Partial<BoardRepository> = {}): BoardRepository {
     },
     removeComment: async () => false,
     imageVisible: async () => false,
+    registerImageUpload: async () => false,
     ...overrides,
   };
 }
@@ -67,6 +68,22 @@ describe('BoardService', () => {
     const [post] = await board.list(ACTOR);
     expect(post?.commentCount).toBe(3);
     expect(post?.createdAt).toBe(WRITTEN.toISOString());
+  });
+
+  it('registers a newly stored board image for the same member before publication', async () => {
+    const storageKey = '55555555-5555-4555-8555-555555555555.png';
+    const calls: string[] = [];
+    const board = new BoardService(
+      repository({
+        registerImageUpload: async (actor, key) => {
+          calls.push(`${actor}:${key}`);
+          return true;
+        },
+      }),
+    );
+
+    await expect(board.registerImageUpload(ACTOR, storageKey)).resolves.toBe(true);
+    expect(calls).toEqual([`${ACTOR}:${storageKey}`]);
   });
 
   it('keeps a board image private path attached to the post', async () => {
