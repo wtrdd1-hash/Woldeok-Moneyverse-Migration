@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: Deployment target. Branches may deploy only to test; production requires main.
+        description: Deployment target. Production remains restricted to main.
         required: true
         default: test
         type: choice
@@ -29,14 +29,14 @@ jobs:
   ref:
     runs-on: ubuntu-latest
     steps:
-      - name: Enforce test-first branch policy
+      - name: Enforce production branch policy
         run: |
           if [ '${{ inputs.environment }}' = production ] && [ "${GITHUB_REF}" != 'refs/heads/main' ]; then
             echo '::error::production deployment is allowed only from main'
             exit 1
           fi
           if [ '${{ inputs.environment }}' = test ]; then
-            echo "testing ${GITHUB_SHA} from ${GITHUB_REF}"
+            echo "deploying test environment from ${GITHUB_SHA} (${GITHUB_REF})"
           else
             echo "rolling production ${GITHUB_SHA} from main"
           fi
