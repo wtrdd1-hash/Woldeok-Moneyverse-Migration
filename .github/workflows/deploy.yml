@@ -153,9 +153,6 @@ jobs:
           install -m 700 -d ~/.ssh
           printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy
           chmod 600 ~/.ssh/deploy
-          echo 'DEPLOY_PUBLIC_KEY_BEGIN'
-          ssh-keygen -y -f ~/.ssh/deploy
-          echo 'DEPLOY_PUBLIC_KEY_END'
           printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
           cat >> ~/.ssh/config <<'CONFIG'
