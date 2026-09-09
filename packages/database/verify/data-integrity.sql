@@ -17,9 +17,9 @@ BEGIN
     SELECT
       transaction_row.id,
       pg_catalog.count(posting_row.id)::bigint AS posting_count,
-      pg_catalog.coalesce(pg_catalog.sum(posting_row.amount::numeric)
+      COALESCE(pg_catalog.sum(posting_row.amount::numeric)
         FILTER (WHERE posting_row.direction = 'debit'::public.posting_direction), 0::numeric) AS debit_total,
-      pg_catalog.coalesce(pg_catalog.sum(posting_row.amount::numeric)
+      COALESCE(pg_catalog.sum(posting_row.amount::numeric)
         FILTER (WHERE posting_row.direction = 'credit'::public.posting_direction), 0::numeric) AS credit_total
     FROM public.ledger_transactions AS transaction_row
     LEFT JOIN public.ledger_postings AS posting_row ON posting_row.transaction_id = transaction_row.id
@@ -37,7 +37,7 @@ BEGIN
       account_row.id,
       account_row.allow_negative,
       balance_row.available_amount::numeric AS stored_amount,
-      pg_catalog.coalesce(pg_catalog.sum(
+      COALESCE(pg_catalog.sum(
         CASE posting_row.direction
           WHEN 'debit'::public.posting_direction THEN posting_row.amount::numeric
           WHEN 'credit'::public.posting_direction THEN -posting_row.amount::numeric
