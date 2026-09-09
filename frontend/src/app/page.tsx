@@ -50,7 +50,7 @@ export default async function HomePage() {
   return (
     <>
       <MobileHomeView notices={notices} />
-      <div className="hidden lg:grid gap-20">
+      <div className="hidden lg:grid gap-14 xl:gap-16">
       <section
         aria-labelledby="hero-title"
         className="grid items-center gap-10 py-6 lg:grid-cols-[1.1fr_0.78fr] lg:gap-[6vw] lg:py-12"
