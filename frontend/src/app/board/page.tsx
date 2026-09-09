@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { MessageSquare } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
+import { PublicAdvertisement } from '@/components/public-advertisement';
 import { Card, CardContent } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatDay, formatMoment } from '@/lib/money';
@@ -95,6 +96,9 @@ export default async function BoardPage() {
           </Card>
         )}
       </section>
+
+      {/* Keep the ad outside the posting form and away from individual UGC detail pages. */}
+      <PublicAdvertisement />
     </div>
   );
 }

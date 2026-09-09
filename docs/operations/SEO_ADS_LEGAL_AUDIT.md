@@ -7,7 +7,7 @@ Baseline date: 2026-09-08
 - Search indexing is allowed only for the canonical production deployment with `SEO_INDEXING_ENABLED=true`. Test and temporary hosts fail closed with the default `false`.
 - Advertising is enabled only for production deployments that explicitly set `ADS_ENABLED=true`. The Dockerfile default is also `false`, preventing accidentally built test images from serving ads.
 - Root `/ads.txt` declares publisher `pub-5220225531544323` as `DIRECT`.
-- Ad placements are limited to public informational surfaces: home, announcements/list/detail, and operator-reviewed public gallery content.
+- Ad placements are limited to reviewed public surfaces: home, announcements/list/detail, operator-reviewed public gallery content, and one bottom placement on the public community-board index. Individual board post/comment detail pages remain ad-free.
 - Do not place ads on shop purchase flows, account, wallet, transfers, stocks, loans, casino, rewards, admin, status, terms, or privacy surfaces.
 - WLD remains service-internal virtual data with no cash redemption, withdrawal, or physical-prize exchange.
 - For EEA, UK, and Swiss visitors, the deployed Google Privacy & messaging flow or Google-certified CMP must match the privacy notice in actual operation.
