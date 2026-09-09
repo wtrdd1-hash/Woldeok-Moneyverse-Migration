@@ -1,0 +1,94 @@
+name: Build Test Candidate
+
+on:
+  push:
+    branches:
+      - 'auto/hourly-*'
+      - 'test-candidate/*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/wdmv
+
+jobs:
+  verify:
+    uses: ./.github/workflows/ci.yml
+
+  build:
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      backend: ${{ steps.meta.outputs.backend }}
+      frontend: ${{ steps.meta.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Log in to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Compute immutable candidate image references
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          prefix=$(echo "${REGISTRY}/${IMAGE_PREFIX}" | tr '[:upper:]' '[:lower:]')
+          echo "backend=${prefix}/backend:${GITHUB_SHA}-test" >> "$GITHUB_OUTPUT"
+          echo "frontend=${prefix}/frontend:${GITHUB_SHA}-test" >> "$GITHUB_OUTPUT"
+      - name: Build and push backend candidate
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: .
+          file: backend/Dockerfile
+          push: true
+          platforms: linux/amd64
+          provenance: mode=max
+          sbom: true
+          tags: ${{ steps.meta.outputs.backend }}
+          cache-from: type=gha,scope=backend-test
+          cache-to: type=gha,mode=max,scope=backend-test
+      - name: Build and push frontend candidate
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: .
+          file: frontend/Dockerfile
+          push: true
+          platforms: linux/amd64
+          provenance: mode=max
+          sbom: true
+          build-args: |
+            APP_BASE_URL=https://test.easy-scraping.com
+            SEO_INDEXING_ENABLED=false
+            SEARCH_CONSOLE_VERIFICATION=
+            ADS_ENABLED=false
+            ADSENSE_PUBLISHER_ID=
+            ADSENSE_HOME_SLOT=
+          tags: ${{ steps.meta.outputs.frontend }}
+          cache-from: type=gha,scope=frontend-test
+          cache-to: type=gha,mode=max,scope=frontend-test
+      - name: Write candidate summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo '## Test candidate images built'
+            echo
+            echo "- commit: \`${GITHUB_SHA}\`"
+            echo "- backend: \`${{ steps.meta.outputs.backend }}\`"
+            echo "- frontend: \`${{ steps.meta.outputs.frontend }}\`"
+            echo
+            echo 'These images are staging-only artifacts. Deploy them only to the isolated wdmv-test namespace and verify the exact SHA before merge or Production promotion.'
+          } >> "$GITHUB_STEP_SUMMARY"
