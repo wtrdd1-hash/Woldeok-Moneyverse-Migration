@@ -21,14 +21,20 @@ A production desktop screenshot showed two visible UX defects on the landing pag
 - Moved ad-slot chrome into the client-side AdSense component so it can react to the real Google `data-ad-status` value.
 - Added a `MutationObserver` for `data-ad-status` and a bounded six-second no-fill timeout.
 - Collapse the complete advertising section when Google reports `unfilled`, when initialization throws, or when no fill arrives within the timeout.
-- Removed the dashed empty-placeholder panel. Filled AdSense units retain a conventional sponsored label and a responsive 970 px maximum width.
+- Preserve Google's documented `unfill-optimized` state instead of treating it as an ordinary blank no-fill; this avoids hiding content AdSense may optimize when the Fill empty in-page ads setting is active.
+- Removed the dashed empty-placeholder panel. Filled/optimized AdSense units retain a conventional sponsored label and a responsive 970 px maximum width.
 - Added a stable `id` to the shared AdSense loader so repeated public ad placements reuse the same script resource.
 
 ## Advertising verification
 
 Production already exposes the configured publisher and slot in rendered HTML, publishes the expected Google record in `/ads.txt`, and its CSP allows the AdSense script/frame/connect origins used by the current implementation. This change therefore does not replace the publisher identity or invent an advertisement. Google ultimately decides whether a request is filled based on the AdSense account, site approval, inventory and visitor context; the UI now degrades cleanly when the result is no-fill.
 
+Google AdSense documentation defines `data-ad-status="unfilled"` for an empty unit and `data-ad-status="unfill-optimized"` for an unfilled unit that AdSense has optimized. The UI therefore collapses explicit ordinary no-fill while leaving the optimized state available to AdSense.
+
+Reference: https://support.google.com/adsense/answer/10762946
+
 ## Validation
 
-- Frontend TypeScript typecheck: passed.
-- Remaining repository CI / Test deployment / public smoke checks are required before Production.
+- Frontend TypeScript typecheck: passed before the follow-up status correction.
+- Full repository CI must pass again for the final PR head before merge.
+- Production rollout and public smoke checks are required only after the final verified application commit reaches `main`.
