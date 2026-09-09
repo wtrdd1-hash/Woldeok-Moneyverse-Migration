@@ -14,11 +14,11 @@ Infrastructure GitOps validation이 통과했고 PR #19는 `2ad8cc807ddb86ae4460
 
 ## 애플리케이션 저장소 개선
 
-현재 `main`에서 만든 새 브랜치에 `.github/workflows/test-candidate.yml`을 추가했습니다.
+당시 최신 `main`에서 만든 새 브랜치에 `.github/workflows/test-candidate.yml`을 추가했습니다.
 
 - 이미지 push 전 재사용 전체 CI 게이트 실행
 - CI 성공 후에만 `<sha>-test` backend/frontend 불변 이미지 생성
-- checkout/buildx/login/build-push Action을 현재 immutable commit SHA로 고정
+- checkout/buildx/login/build-push Action을 immutable commit SHA로 고정
 - SBOM/provenance 생성
 - staging frontend의 검색 색인과 광고 비활성화
 - staging/Production cluster를 workflow가 직접 수정하지 않음
@@ -28,9 +28,16 @@ Infrastructure GitOps validation이 통과했고 PR #19는 `2ad8cc807ddb86ae4460
 ## 검증 상태
 
 - Infrastructure `Validate GitOps`: bootstrap repair branch에서 PASS 후 병합
-- Application candidate branch: 최종 branch SHA의 GitHub CI 및 candidate-image build 통과가 필요
-- 실제 cluster 검증은 여전히 필수입니다. 현재 승인된 원격 미니PC가 연결되지 않아 running image parity, Pod health, migration, user/direct-play QA, Production 승격 성공을 주장하지 않습니다.
+- Application candidate SHA `660280b390c812825b77b2ef8d4ca06402bff4c2`: Secret/control-byte guard, lint, typecheck, production build, PostgreSQL migration, 테스트, Prisma mutation guard, Production dependency audit를 포함한 재사용 CI 전체 PASS
+- 같은 candidate workflow에서 backend/frontend `<sha>-test` 불변 이미지와 SBOM/provenance 생성 및 push 성공
+- upstream `main`이 이동하지 않은 것을 확인한 뒤 Application PR #145를 `c7496ab65d4b012d7b51aa34d5857f596bcd1f3a`로 `main`에 병합
+- 정확한 main SHA `c7496ab65d4b012d7b51aa34d5857f596bcd1f3a`의 병합 후 CI: PASS
+- 복구된 staging bootstrap의 실제 cluster 검증은 여전히 필요합니다. 이번 실행 중 승인된 원격 미니PC가 연결되지 않아 running-image parity, Pod health, 실제 staging migration/user flow/direct-play QA, Flux runtime 상태, Production runtime 승격 성공을 주장하지 않습니다.
 
 ## Production 상태
 
-현재까지 변경 없음. Production image reference와 database resource는 수정하지 않았습니다.
+이번 애플리케이션 변경은 CI/배포 도구만 변경하므로 Production runtime 배포가 필요하지 않았습니다. Production application image reference, database resource, PVC, 데이터는 변경하지 않았습니다.
+
+## 최종 상태
+
+Release engineering 기능은 애플리케이션 `main`에 통합됐고 staging bootstrap 복구는 infrastructure `main`에 통합됐습니다. 남은 검증은 독립 reconciliation되는 `wdmv-test`가 복구된 bootstrap으로 실제 정상화되는지 cluster에서 직접 확인하는 것입니다. 이후 runtime 후보는 여전히 이 실제 staging 게이트를 통과한 경우에만 Production으로 승격해야 합니다.
