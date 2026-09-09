@@ -29,9 +29,18 @@ References:
 - Repository `pnpm test`: passed (contract 23, database 6, backend 822, frontend 535; database-gated backend tests remain skipped when their isolated PostgreSQL harness is not provided).
 - Repository `pnpm build`: passed, including Next.js production build.
 
+## Test-server verification
+
+- Synced the feature branch with current `origin/main` (`3e7c8a2`) without conflicts; integrated head: `9921411`.
+- Re-ran repository lint, tests, and production build on the integrated head: passed with the same 11 existing image warnings and no lint errors.
+- Built and ran exact commit `9921411` in an isolated `wdmv-test` Kubernetes verification stack with a mock board API; Production DB/API were not reused.
+- `/board`: HTTP 200, sample public post rendered, approved AdSense loader and slot `2118692561` present, CSP admitted the AdSense origin.
+- `/board/11111111-1111-4111-8111-111111111111`: HTTP 200, post/comment rendered, AdSense loader absent and ad slot absent.
+- Test responses retained `X-Robots-Tag: noindex, nofollow`; the Traefik Host-header route for `test.easy-scraping.com` returned HTTP 200.
+
 ## Deployment state
 
 - Working branch: `fix/board-ad-20260909`.
-- Dedicated test-server rollout: pending.
-- `main` merge: pending until test-server verification.
-- Production rollout: pending until test-server verification and `main` integration.
+- Ephemeral dedicated test-server verification: passed on integrated commit `9921411`.
+- `main` merge: pending final GitHub CI.
+- Production rollout: pending `main` integration because the GitOps production-image workflow only builds immutable release images from `main`.
