@@ -11,7 +11,7 @@ declare global {
 const MIN_AD_WIDTH = 250;
 const NO_FILL_TIMEOUT_MS = 6000;
 
-type AdStatus = 'pending' | 'filled' | 'unfilled';
+type AdStatus = 'pending' | 'filled' | 'optimized' | 'unfilled';
 
 export function AdSenseAd({ publisherId, slot }: { readonly publisherId: string; readonly slot: string }) {
   const requested = useRef(false);
@@ -27,7 +27,9 @@ export function AdSenseAd({ publisherId, slot }: { readonly publisherId: string;
 
     const syncStatus = () => {
       const next = element.dataset.adStatus;
-      if (next === 'filled' || next === 'unfilled') setStatus(next);
+      if (next === 'filled') setStatus('filled');
+      if (next === 'unfilled') setStatus('unfilled');
+      if (next === 'unfill-optimized') setStatus('optimized');
     };
 
     const requestAdWhenSized = () => {
@@ -45,7 +47,8 @@ export function AdSenseAd({ publisherId, slot }: { readonly publisherId: string;
       }
 
       timeout = window.setTimeout(() => {
-        if (element.dataset.adStatus !== 'filled') setStatus('unfilled');
+        const next = element.dataset.adStatus;
+        if (next !== 'filled' && next !== 'unfill-optimized') setStatus('unfilled');
       }, NO_FILL_TIMEOUT_MS);
     };
 
