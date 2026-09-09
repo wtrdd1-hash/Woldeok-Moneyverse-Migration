@@ -1,37 +1,72 @@
 # Deployment Flow
 
-A push to `main` runs CI but does not automatically roll Production.
+Production is Kubernetes/Flux GitOps. The application repository builds and validates immutable images; the GitOps repository declares what runs.
 
 ```mermaid
 flowchart TD
-    M[main commit] --> CI[CI: lint / typecheck / build / tests / guards]
-    CI --> D{Manual Deploy workflow}
-    D -->|test| BT[Build GHCR test images]
-    BT --> TT[Test backup + migrations + roll]
-    TT --> VT[Test smoke / health validation]
-    VT -->|approved| BP[Build GHCR production images]
-    BP --> BK[Production verified backup]
-    BK --> MG[Ordered migrations]
-    MG --> RP[Roll frontend/backend]
-    RP --> SM[Local edge smoke test]
-    SM --> HV[External routes + health + DB invariants]
+    M[Application main commit] --> CI[CI: secrets / lint / typecheck / build / DB migrations / tests / dependency audit]
+    CI --> TI[Build exact-SHA test images]
+    TI --> TG[GitOps test manifests]
+    TG --> TR[Test namespace rollout]
+    TR --> TV[Test readiness + smoke checks]
+    TV --> PI[Build exact-SHA production images]
+    PI --> GP[Reviewed GitOps production PR]
+    GP --> FX[Flux reconciliation]
+    FX --> KR[Kubernetes rollout status]
+    KR --> SM[Public smoke checks]
+    SM --> DA[Data-integrity + backup/recovery checks]
 ```
 
+## Source of truth
+
+- Application source: `wtrdd1-hash/Woldeok-Moneyverse-Migration`.
+- Runtime declarations: `wtrdd1-hash/kuber-infrastructure`.
+- Production namespace: `wdmvp`.
+- Isolated test namespace: `wdmv-test`.
+- Flux reconciliation, not Docker Compose, is the authoritative production mutation path.
+
+The application repository's `deploy.yml` builds immutable production artifacts only. It must not SSH to the host and run `docker compose`; the current NixOS production host uses Kubernetes/containerd and does not provide Docker as the release control plane.
+
 ## Immutable image identity
-Frontend/backend images are tagged with the Git commit and environment, e.g. `backend:<commit>-production` and `frontend:<commit>-production`.
+
+Backend and frontend images use the application Git SHA plus environment suffix, for example:
+
+```text
+ghcr.io/wtrdd1-hash/wdmv/backend:<sha>-production
+ghcr.io/wtrdd1-hash/wdmv/frontend:<sha>-production
+```
+
+The GitOps manifests must reference the exact SHA-qualified images being promoted. Mutable `latest-*` tags are not release identity.
+
+## Test gate
+
+The isolated `wdmv-test` stack has its own frontend, backend, PostgreSQL database, application secrets, registry credentials, routing, and readiness probes. A production candidate must not be described as tested merely because CI passed; the exact candidate image must also become Ready in the isolated test stack and pass the intended public smoke checks before production promotion.
+
+## Production promotion
+
+1. Confirm the candidate is the current application `main` SHA and CI is green.
+2. Confirm the exact candidate has passed the isolated test rollout/readiness/smoke gate.
+3. Build immutable production images from that exact SHA.
+4. Open a reviewed PR in `kuber-infrastructure` updating `apps/minipc/wdmvp/backend.yaml` and `frontend.yaml`.
+5. Merge only when data-changing prerequisites are satisfied. Schema-changing or destructive changes remain blocked when verified separate-media recovery is unavailable.
+6. Wait for Flux reconciliation.
+7. Require Kubernetes rollout completion for the changed Deployments. Kubernetes documents `kubectl rollout status` as the rollout completion check; a zero exit status means the rollout completed.
+8. Verify `/`, `/status`, `/robots.txt`, `/sitemap.xml`, and `/ads.txt` as applicable.
+9. Re-run the production aggregate data-integrity audit and confirm backup/recovery state when the release can affect data.
 
 ## Migration safety
-The runner records filename + checksum. Historical drift stops deployment before app rollout.
 
-## Edge smoke test
-The hardened nginx edge rejects unknown Host headers. The deploy smoke test therefore connects to the local edge port with the real public Host header.
-
-## Backup gate
-Production-changing releases should have a verified backup immediately before rollout. Verification checks decryptability and dump/archive readability.
+Migrations remain numbered, immutable, and checksummed. Historical checksum drift must stop promotion. A release containing a migration is not eligible for production while the required recovery gate is unhealthy.
 
 ## Rollback model
-- app/image failure → previous commit-tagged images;
-- configuration failure → restore saved config and restart/reload;
-- migration/data failure → prefer forward-fix; restore verified backup only when needed and approved.
 
-Production volumes are not routine rollback targets and must not be deleted casually.
+- Application/image failure: revert the GitOps manifest to the previously verified SHA-qualified image and let Flux reconcile it.
+- Configuration failure: revert the GitOps commit/PR that introduced the configuration.
+- Migration/data failure: prefer a forward fix; restore only from a verified backup when explicitly required.
+
+Do not use `kubectl set image` as the normal release path because it creates drift from Git. Do not delete production PVCs or databases as part of rollback.
+
+## References
+
+- Kubernetes Deployment rollout/status semantics: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+- Flux GitOps documentation: https://fluxcd.io/flux/
