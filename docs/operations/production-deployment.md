@@ -1,39 +1,76 @@
 # Production Deployment
 
+This is the procedure. For what the machine *is* — the cluster, what remains
+of the retired Docker host, and the failure modes this arrangement has already
+produced — read [`../INFRASTRUCTURE.md`](../INFRASTRUCTURE.md) first.
+
 ## Deployment philosophy
 
-`main` is continuously validated, but Production deployment is explicit. Runtime changes go through the `Deploy` GitHub Actions workflow using `workflow_dispatch`.
+`main` is continuously validated, but Production promotion is explicit. The application repository builds immutable release images; Production state is declared in `wtrdd1-hash/kuber-infrastructure` and reconciled by Flux.
+
+Docker Compose is not the Production deployment control plane.
 
 ## Expected order
 
-1. Merge/push validated code to `main`.
-2. Run the Test deployment.
-3. Verify Test routes, logs, database invariants and container health.
-4. Run the Production deployment.
-5. Confirm the Production backup completed and verifies.
-6. Confirm ordered migrations completed without checksum drift.
-7. Confirm frontend/backend containers are using the commit-tagged GHCR images.
-8. Verify public routes and protected boundary probes.
-9. Inspect recent frontend/backend logs for new runtime errors.
+1. Merge validated application code to `main`.
+2. Confirm the exact SHA passed repository CI.
+3. Build exact-SHA production images with the `Build Production Release` workflow.
+4. Record the currently running production image references for rollback.
+5. Confirm recovery prerequisites for any schema-changing/destructive release.
+6. Update the `wdmvp` backend/frontend image references in `wtrdd1-hash/kuber-infrastructure`.
+7. Commit directly to its `main` — that repository takes direct pushes, not branches or pull requests — and wait for Flux reconciliation.
+8. Require `kubectl rollout status` success for changed Deployments.
+9. Confirm the running image references match the intended SHA.
+10. Verify public routes and protected boundaries.
+11. Re-run aggregate data-integrity/recovery checks when the release can affect data.
 
 ## Images
 
-Backend and frontend are built in GitHub Actions and pushed to GHCR with environment-specific commit tags.
+Backend and frontend production images are built in GitHub Actions and pushed to GHCR as immutable commit tags:
 
-The host `.env` records the exact image reference so a later `docker compose up -d` does not silently return to an older tag.
+```text
+ghcr.io/wtrdd1-hash/wdmv/backend:<sha>-production
+ghcr.io/wtrdd1-hash/wdmv/frontend:<sha>-production
+```
 
-## Local smoke test
+The GitOps manifests must reference the exact SHA-qualified tags. Mutable `latest-*` tags are not release identity.
 
-The production edge is bound locally and hardened against unknown hosts. Deployment smoke tests use the local port while sending the real public Host header.
+## GitOps source of truth
+
+Production application declarations live under:
+
+```text
+wtrdd1-hash/kuber-infrastructure
+  apps/wdmvp/backend.yaml
+  apps/wdmvp/frontend.yaml
+```
+
+Normal releases must not use `kubectl set image` or host-local manifest edits because those create drift from Flux/Git.
+
+## Rollout verification
+
+After the GitOps PR merges:
+
+```bash
+flux get sources git -A
+flux get kustomizations -A
+kubectl -n wdmvp rollout status deployment/wdmvp-backend --timeout=5m
+kubectl -n wdmvp rollout status deployment/wdmvp-frontend --timeout=5m
+kubectl -n wdmvp get pods
+```
+
+Do not report success until the changed workload is Ready and running the intended image SHA.
 
 ## Database/data safety
 
-Normal deployment:
+Normal application deployment:
 
-- does not recreate/drop the Production database volume;
-- does not prune Docker volumes;
-- does not erase ledger history;
-- does not retroactively rewrite existing loan/bond contracts unless an explicit migration says so.
+- does not recreate/drop the Production database or PVC;
+- does not erase ledger/audit history;
+- does not retroactively rewrite existing economic contracts without an explicit migration;
+- does not run schema-changing/destructive promotion while the required verified recovery gate is unhealthy.
+
+The current separate-media recovery risk is tracked in issue #139.
 
 ## Post-deploy probes
 
@@ -52,6 +89,11 @@ At minimum verify:
 /privacy
 /status
 /announcements
+/robots.txt
+/sitemap.xml
+/ads.txt
 ```
 
-Also verify internal-only/forbidden probe paths remain unavailable externally.
+Also verify internal-only/forbidden probe paths remain unavailable externally, and re-run the aggregate data-integrity audit for data-affecting releases.
+
+See `docs/RELEASING.md` and `docs/RELEASING.ko.md` for the operator checklist.
