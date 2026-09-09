@@ -37,6 +37,7 @@ The project plan is a living specification. Intentional, validated implementatio
 
 ## Operations
 
+- [What this deployment actually is](INFRASTRUCTURE.md) — read first: Kubernetes, Flux, and what is left of the Docker host
 - [Release guide](RELEASING.md)
 - [Release guide — Korean](RELEASING.ko.md)
 - [Local development](operations/local-development.md)

@@ -62,7 +62,7 @@ One caution before you read a `42501` as a missing grant: it usually is not. Fif
 | `backend/` | NestJS API. Reachable from the compose network, plus the two edge exceptions below. |
 | `packages/contract/` | Types shared by both applications, and `src/route-map.ts`. Built before anything type-checks against it — its `dist` is what the dependents see. |
 | `packages/database/` | `init/`, the numbered `migrations/`, `migrate.sh`, `production-checksums.json`, `verify/`, `test/migration-parity.test.ts`. The schema is owned here; Prisma introspects it and never migrates it. |
-| `deploy/` | `compose.yml`, `edge/default.conf`, and the host scripts (`roll.sh`, `update.sh`, `seed.sh`, `backup.sh`, `restore.sh`). |
+| `deploy/` | Data and recovery scripts left over from the retired Docker host; **not the release path**. See `deploy/README.md` and `docs/INFRASTRUCTURE.md`. |
 | `ops/` | Cloudflare tunnel and DNS scripts. They run on the deployment host, never here. |
 | `docs/` | Design docs, `RELEASING.md`, `BACKUP.md`, `route-map.md`, `findings/`. Korean is allowed here and nowhere else in the repository. |
 | `scripts/` | CI guards: `check-secrets.sh`, `check-control-bytes.sh`, `reject-prisma-migrate.sh`, `extract-original-routes.py`. |
@@ -303,9 +303,11 @@ no role.
   `SecondFactorGuard` giving a spent code two minutes.
 - TOTP secrets are sealed with `ADMIN_TOTP_ENCRYPTION_KEY`, which lives only in
   the environment, so a database read alone yields no usable factor.
-  `bootstrap-env.sh` generates it with `put`, not `set_to` — **rotating it
-  strands every enrolled administrator**, so a rotation has a re-enrolment
-  behind it and is never something a redeploy does by accident.
+  It now lives in the `wdmvp-app` Secret in the cluster; the `bootstrap-env.sh`
+  that used to generate it once and never overwrite it is gone with the Docker
+  host. The property that mattered still holds: **rotating it strands every
+  enrolled administrator**, so a rotation has a re-enrolment behind it and is
+  never something a redeploy does by accident.
 - `feature_switches` holds `enabled | paused | safe_mode | disabled`.
 
 **`feature_switch_state` fails closed.** An unregistered feature reads
@@ -341,55 +343,52 @@ distribution trial of at least 1,000,000 draws is on record.
 
 ---
 
-## 7. Deploying: one stack
+## 7. Deploying: Kubernetes, and this repository does not do it
 
-| | production |
-| --- | --- |
-| address | `https://easy-scraping.com` |
-| `STACK` | `wdmvp` |
-| host directory | `~/moneyverse-production` |
-| database | `moneyverse_production` |
-| loopback port | 3022 |
-| image tag | `<sha>-production` |
-| search indexing | on |
+**`docs/INFRASTRUCTURE.md` is the description of record.** Read it before
+changing anything under `deploy/`, `.github/workflows/`, or any release
+document. What follows is the short form.
 
-There used to be a second one, `wdmv`, at `test.easy-scraping.com`. It was
-retired on 2026-09-07, and the `environment` input that still offered it was
-removed from `deploy.yml` on 2026-09-08. It had its own database, its own
-encryption key and its own half of every setting in the workflow, and what it
-actually produced was a dropdown that could roll the wrong deployment and a
-second copy of every account. The public origin is still baked into the
-frontend image at **build** time, which is why the environment is in the image
-tag rather than being a hidden difference between two images with the same name.
+Production is a single-node Kubernetes cluster on NixOS, reconciled by Flux from
+`wtrdd1-hash/kuber-infrastructure`. **There is no Docker on the host.** This
+repository builds images and pushes them to GHCR; it has no deploy job and no
+SSH. A release is a commit in the other repository that changes an image tag.
 
-**Nothing deploys on a push.** A human dispatches it, and it runs only from
-`main` -- the `ref` job refuses any other ref:
+| | production | test |
+| --- | --- | --- |
+| address | `https://easy-scraping.com` | `https://test.easy-scraping.com` |
+| namespace | `wdmvp` | `wdmv-test` |
+| image tag | `<sha>-production` | `<sha>-test` |
+| manifests | `kuber-infrastructure` → `apps/minipc/wdmvp/` | → `apps/minipc/wdmv-test/` |
+
+The public origin is baked into the frontend image at **build** time, which is
+why the environment is in the image tag rather than being a hidden difference
+between two images with the same name.
+
+**Nothing deploys on a push.** A human dispatches the build, and it runs only
+from `main` -- the `ref` job refuses any other ref:
 
 ```bash
 gh workflow run deploy.yml
 ```
 
-There is no longer a stack to rehearse a commit on before production. What
-replaces that rehearsal is the pre-deploy checklist in `docs/RELEASING.md`, and
-in particular the mandatory verified backup: `roll.sh` runs the migrations, and
-a migration does not roll back.
+`docs/RELEASING.md` is the procedure, `docs/RELEASING.ko.md` its translation.
 
-`docs/RELEASING.md` is the procedure. Read it before changing anything under
-`deploy/`.
+Three things this arrangement does not do for you, each of which has already
+cost a release:
 
-The `migrate` service runs on every `docker compose up`, so a new migration
-reaches the stack with the deploy — **and its checksum is frozen the moment it
-lands.** Deploying before review means review can no longer change that file;
-only a new numbered migration can correct it.
+- **The rollout does not run migrations.** Compose did, through the `migrate`
+  service; nothing in the Kubernetes manifests replaces it. Check
+  `public.schema_migrations` against the image you are promoting.
+- **A stuck rollout still reports `Available=True`,** because the previous pod
+  keeps serving. `Progressing=False ProgressDeadlineExceeded` is the only place
+  it says otherwise.
+- **Old image tags disappear from GHCR.** Do not assume a rollback target
+  exists; verify the manifest resolves before you rely on it.
 
-Secrets generated on the host by `bootstrap-env.sh` never leave it. OAuth client
-credentials are copied host-locally from the container named by `ADOPT_FROM`,
-which is a once-per-host act — the adoption is skipped once all four are present,
-and still fatal when they are not, because the loop writes those keys empty when
-it cannot fill them and the API then disables both login providers without
-saying why.
-
----
+Deploying before review still freezes a migration's checksum: `migrate.sh`
+refuses a file whose sha256 has changed since it was applied, so only a new
+numbered migration can correct one that has landed.
 
 ## 8. Conventions
 

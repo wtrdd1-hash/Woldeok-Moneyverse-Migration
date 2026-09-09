@@ -1,5 +1,9 @@
 # Production Deployment
 
+This is the procedure. For what the machine *is* — the cluster, what remains
+of the retired Docker host, and the failure modes this arrangement has already
+produced — read [`../INFRASTRUCTURE.md`](../INFRASTRUCTURE.md) first.
+
 ## Deployment philosophy
 
 `main` is continuously validated, but Production promotion is explicit. The application repository builds immutable release images; Production state is declared in `wtrdd1-hash/kuber-infrastructure` and reconciled by Flux.
@@ -14,8 +18,8 @@ Docker Compose is not the Production deployment control plane.
 4. Build exact-SHA production images with the `Build Production Release` workflow.
 5. Record the currently running production image references for rollback.
 6. Confirm recovery prerequisites for any schema-changing/destructive release.
-7. Open a reviewed GitOps PR updating the `wdmvp` backend/frontend image references.
-8. Merge the GitOps PR and wait for Flux reconciliation.
+7. Update the `wdmvp` backend/frontend image references in `wtrdd1-hash/kuber-infrastructure`.
+8. Commit directly to its `main` — that repository takes direct pushes, not branches or pull requests — and wait for Flux reconciliation.
 9. Require `kubectl rollout status` success for changed Deployments.
 10. Confirm the running image references match the intended SHA.
 11. Verify public routes and protected boundaries.

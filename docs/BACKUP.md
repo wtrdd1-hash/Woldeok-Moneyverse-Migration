@@ -3,6 +3,13 @@
 이 배포에서 **다시 만들 수 없는 것**을 어떻게 보관하고, 어떻게 되돌리고,
 되돌릴 수 있다는 것을 어떻게 **확인**하는지.
 
+> **이 문서는 2026-09-07에 폐기된 Docker 호스트를 설명한다.** 여기 나오는
+> `backup.sh`·`restore.sh`·`bootstrap-env.sh`·`roll.sh`는 `docker compose`를
+> 거치므로 현재 호스트에서 돌지 않는다. 지금 백업은 클러스터의
+> `wdmvp-db-backup` CronJob이 매시 :17에 돌리고, **동작하는 복구 절차는 아직
+> 없다.** 설계 의도를 읽는 용도로 보고, 명령을 그대로 실행하지 말 것 —
+> [INFRASTRUCTURE.md](INFRASTRUCTURE.md).
+
 배포 절차는 [RELEASING.md](RELEASING.md)에 있다. 여기는 그 앞에 있어야 하는
 것이다 — 마이그레이션은 되돌아가지 않으므로, 되돌릴 방법은 마이그레이션보다
 먼저 있어야 한다.

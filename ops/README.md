@@ -66,5 +66,5 @@ host holds a credential for:
 | Google | Cloud Console → Credentials → the OAuth 2.0 client → Authorised redirect URIs. |
 
 Each needs `https://<host>/auth/<provider>/callback` — the exact value
-`bootstrap-env.sh` derives, which the API also checks against `APP_BASE_URL`
+`APP_BASE_URL` names, which the API also checks against `APP_BASE_URL`
 before it will enable the provider at all.
