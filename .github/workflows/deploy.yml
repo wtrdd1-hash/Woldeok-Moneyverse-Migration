@@ -1,16 +1,19 @@
-name: Deploy
+name: Build Production Release
 
 on:
   workflow_dispatch:
     inputs:
       enable_ads:
-        description: Enable the reviewed AdSense unit
+        description: Enable the reviewed AdSense unit in the production frontend image
         required: true
         default: false
         type: boolean
 
+permissions:
+  contents: read
+
 concurrency:
-  group: deploy-production
+  group: build-production-release
   cancel-in-progress: false
 
 env:
@@ -22,12 +25,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Enforce production branch policy
+        shell: bash
         run: |
+          set -euo pipefail
           if [ "${GITHUB_REF}" != 'refs/heads/main' ]; then
-            echo '::error::production deployment is allowed only from main'
+            echo '::error::production release images may only be built from main'
             exit 1
           fi
-          echo "rolling production ${GITHUB_SHA} from main"
+          echo "preparing immutable production images for ${GITHUB_SHA}"
 
   verify:
     needs: ref
@@ -52,15 +57,14 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Compute image references
+      - name: Compute immutable image references
         id: meta
+        shell: bash
         run: |
+          set -euo pipefail
           prefix=$(echo "${REGISTRY}/${IMAGE_PREFIX}" | tr '[:upper:]' '[:lower:]')
-          suffix='production'
-          echo "prefix=${prefix}" >> "$GITHUB_OUTPUT"
-          echo "suffix=${suffix}" >> "$GITHUB_OUTPUT"
-          echo "backend=${prefix}/backend:${GITHUB_SHA}-${suffix}" >> "$GITHUB_OUTPUT"
-          echo "frontend=${prefix}/frontend:${GITHUB_SHA}-${suffix}" >> "$GITHUB_OUTPUT"
+          echo "backend=${prefix}/backend:${GITHUB_SHA}-production" >> "$GITHUB_OUTPUT"
+          echo "frontend=${prefix}/frontend:${GITHUB_SHA}-production" >> "$GITHUB_OUTPUT"
       - name: Build and push backend
         uses: docker/build-push-action@v7
         with:
@@ -68,13 +72,11 @@ jobs:
           file: backend/Dockerfile
           push: true
           platforms: linux/amd64
-          provenance: false
-          sbom: false
-          tags: |
-            ${{ steps.meta.outputs.backend }}
-            ${{ steps.meta.outputs.prefix }}/backend:latest-${{ steps.meta.outputs.suffix }}
-          cache-from: type=gha,scope=backend-${{ steps.meta.outputs.suffix }}
-          cache-to: type=gha,mode=max,scope=backend-${{ steps.meta.outputs.suffix }}
+          provenance: mode=max
+          sbom: true
+          tags: ${{ steps.meta.outputs.backend }}
+          cache-from: type=gha,scope=backend-production
+          cache-to: type=gha,mode=max,scope=backend-production
       - name: Build and push frontend
         uses: docker/build-push-action@v7
         with:
@@ -82,8 +84,8 @@ jobs:
           file: frontend/Dockerfile
           push: true
           platforms: linux/amd64
-          provenance: false
-          sbom: false
+          provenance: mode=max
+          sbom: true
           build-args: |
             APP_BASE_URL=https://easy-scraping.com
             SEO_INDEXING_ENABLED=true
@@ -91,131 +93,22 @@ jobs:
             ADS_ENABLED=${{ inputs.enable_ads && 'true' || 'false' }}
             ADSENSE_PUBLISHER_ID=${{ inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}
             ADSENSE_HOME_SLOT=${{ inputs.enable_ads && '2118692561' || '' }}
-          tags: |
-            ${{ steps.meta.outputs.frontend }}
-            ${{ steps.meta.outputs.prefix }}/frontend:latest-${{ steps.meta.outputs.suffix }}
-          cache-from: type=gha,scope=frontend-${{ steps.meta.outputs.suffix }}
-          cache-to: type=gha,mode=max,scope=frontend-${{ steps.meta.outputs.suffix }}
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - uses: actions/checkout@v7
-      - name: Name deployment
-        id: target
+          tags: ${{ steps.meta.outputs.frontend }}
+          cache-from: type=gha,scope=frontend-production
+          cache-to: type=gha,mode=max,scope=frontend-production
+      - name: Write GitOps promotion summary
+        shell: bash
         run: |
+          set -euo pipefail
           {
-            echo 'stack=wdmvp'
-            echo 'dir=moneyverse-production'
-            echo 'base_url=https://easy-scraping.com'
-            echo 'edge_port=3022'
-            echo 'seo=true'
-            echo "ads=${{ inputs.enable_ads && 'true' || 'false' }}"
-            echo "adsense_publisher=${{ inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}"
-            echo "adsense_home_slot=${{ inputs.enable_ads && '2118692561' || '' }}"
-            echo 'db_name=moneyverse_production'
-            echo 'require_backup=1'
-            echo 'admin_ids='
-            echo 'adopt_discord_from=wtrdd-discord-app'
-          } >> "$GITHUB_OUTPUT"
-      - name: Open SSH session to host
-        run: |
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy
-          chmod 600 ~/.ssh/deploy
-          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-          cat >> ~/.ssh/config <<'CONFIG'
-          Host target
-            HostName ${{ secrets.DEPLOY_HOST }}
-            User ${{ secrets.DEPLOY_USER }}
-            Port ${{ secrets.DEPLOY_PORT }}
-            IdentityFile ~/.ssh/deploy
-            IdentitiesOnly yes
-            IdentityAgent none
-            PubkeyAuthentication yes
-            PreferredAuthentications publickey
-            PasswordAuthentication no
-            KbdInteractiveAuthentication no
-            BatchMode yes
-            ConnectTimeout 15
-            ConnectionAttempts 1
-            ServerAliveInterval 15
-            ServerAliveCountMax 3
-            ControlMaster auto
-            ControlPath ~/.ssh/control-%C
-            ControlPersist 10m
-          CONFIG
-          chmod 600 ~/.ssh/config
-      - name: Ship deployment files
-        run: |
-          connected=false
-          for attempt in 1 2 3 4 5 6; do
-            if ssh -MNf target; then connected=true; break; fi
-            echo "SSH public-key authentication attempt ${attempt}/6 failed; retrying in 10 seconds"
-            sleep 10
-          done
-          [ "$connected" = true ] || { echo 'Could not establish deployment SSH connection with the configured deploy key' >&2; exit 1; }
-          ssh -O check target
-          ssh target 'mkdir -p ~/${{ steps.target.outputs.dir }}'
-          tar czf - \
-            -C deploy compose.yml roll.sh bootstrap-env.sh install-backup-cron.sh backup-watchdog.sh recover-display-names.sh recover-display-names-from-backup.sh seed.sh update.sh edge \
-            backup.sh restore.sh backup-figures.sql \
-            -C "${GITHUB_WORKSPACE}/packages/database" init migrations migrate.sh \
-            | ssh target 'tar xzf - -C ~/${{ steps.target.outputs.dir }}'
-      - name: Roll deployment
-        run: |
-          ssh target \
-            "BACKEND_IMAGE='${{ needs.build.outputs.backend }}'" \
-            "FRONTEND_IMAGE='${{ needs.build.outputs.frontend }}'" \
-            "GHCR_USER='${{ github.actor }}'" \
-            "GHCR_TOKEN='${{ secrets.GHCR_PULL_TOKEN }}'" \
-            "STACK='${{ steps.target.outputs.stack }}'" \
-            "DEPLOY_DIR=\"\$HOME/${{ steps.target.outputs.dir }}\"" \
-            "APP_BASE_URL='${{ steps.target.outputs.base_url }}'" \
-            "EDGE_PORT='${{ steps.target.outputs.edge_port }}'" \
-            "SEO_INDEXING_ENABLED='${{ steps.target.outputs.seo }}'" \
-            "ADS_ENABLED='${{ steps.target.outputs.ads }}'" \
-            "ADSENSE_PUBLISHER_ID='${{ steps.target.outputs.adsense_publisher }}'" \
-            "ADSENSE_HOME_SLOT='${{ steps.target.outputs.adsense_home_slot }}'" \
-            "DB_NAME='${{ steps.target.outputs.db_name }}'" \
-            "REQUIRE_BACKUP='${{ steps.target.outputs.require_backup }}'" \
-            "BOOTSTRAP_DISCORD_ADMIN_IDS='${{ steps.target.outputs.admin_ids }}'" \
-            "ADOPT_FROM='${{ vars.ADOPT_FROM }}'" \
-            "ADOPT_DISCORD_FROM='${{ steps.target.outputs.adopt_discord_from }}'" \
-            "DISCORD_APPLICATION_ID='${{ vars.DISCORD_APPLICATION_ID }}'" \
-            "DISCORD_BOT_TOKEN='${{ secrets.DISCORD_BOT_TOKEN }}'" \
-            "DISCORD_INTERACTIONS_ENABLED='${{ vars.DISCORD_INTERACTIONS_ENABLED }}'" \
-            "DISCORD_INTERACTIONS_PUBLIC_KEY='${{ vars.DISCORD_INTERACTIONS_PUBLIC_KEY }}'" \
-            "DISCORD_INTERACTIONS_GUILD_ID='${{ vars.DISCORD_INTERACTIONS_GUILD_ID }}'" \
-            "DISCORD_INTERACTIONS_ROLE_IDS='${{ vars.DISCORD_INTERACTIONS_ROLE_IDS }}'" \
-            "DISCORD_OUTBOX_ENABLED='${{ vars.DISCORD_OUTBOX_ENABLED }}'" \
-            "DISCORD_OUTBOX_CHANNEL_ID='${{ vars.DISCORD_OUTBOX_CHANNEL_ID }}'" \
-            "DISCORD_OUTBOX_CHANNEL_IDS='${{ vars.DISCORD_ACTIVITY_CHANNEL_ID != '' && format('logs={0}', vars.DISCORD_ACTIVITY_CHANNEL_ID) || '' }}'" \
-            'bash ~/${{ steps.target.outputs.dir }}/roll.sh'
-      - name: Public smoke check
-        run: |
-          base='${{ steps.target.outputs.base_url }}'
-          curl --fail --silent --show-error --retry 5 --retry-delay 3 "${base}/" >/dev/null
-          curl --fail --silent --show-error --retry 5 --retry-delay 3 "${base}/status" >/dev/null
-
-          robots="$(curl --fail --silent --show-error --retry 5 --retry-delay 3 "${base}/robots.txt")"
-          sitemap="$(curl --fail --silent --show-error --retry 5 --retry-delay 3 "${base}/sitemap.xml")"
-          ads="$(curl --fail --silent --show-error --retry 5 --retry-delay 3 "${base}/ads.txt")"
-
-          if [ '${{ steps.target.outputs.seo }}' = true ]; then
-            printf '%s' "$robots" | grep -Fq "Sitemap: ${base}/sitemap.xml"
-            printf '%s' "$sitemap" | grep -Fq "<loc>${base}"
-          else
-            printf '%s' "$robots" | grep -Fq 'Disallow: /'
-          fi
-
-          if [ '${{ steps.target.outputs.ads }}' = true ]; then
-            printf '%s' "$ads" | grep -Fq 'google.com, pub-5220225531544323, DIRECT, f08c47fec0942fa0'
-          fi
-      - name: Report what is running
-        if: always()
-        run: |
-          ssh target "cd ~/${{ steps.target.outputs.dir }} && STACK='${{ steps.target.outputs.stack }}' docker compose ps"
+            echo '## Production images built'
+            echo
+            echo 'This workflow intentionally does not mutate the production cluster.'
+            echo 'Production is reconciled by Flux from wtrdd1-hash/kuber-infrastructure.'
+            echo
+            echo "- backend: \`${{ steps.meta.outputs.backend }}\`"
+            echo "- frontend: \`${{ steps.meta.outputs.frontend }}\`"
+            echo
+            echo 'Promote by updating apps/minipc/wdmvp/backend.yaml and frontend.yaml in the GitOps repository through a reviewed PR.'
+            echo 'After merge, require Flux Ready, Kubernetes rollout completion, public smoke checks, and the production data-integrity audit before reporting success.'
+          } >> "$GITHUB_STEP_SUMMARY"
