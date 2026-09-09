@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { groupDigits } from '@/lib/money';
+import { signedDelta } from './stock-comparison-math';
 
 export interface ComparableStock {
   readonly id: string;
@@ -25,14 +26,6 @@ interface StockComparisonProps {
 }
 
 const MAX_SELECTED = 3;
-
-function signedDelta(current: string, open: string) {
-  const delta = BigInt(current) - BigInt(open);
-  if (delta === 0n) return '0';
-  const prefix = delta > 0n ? '+' : '-';
-  const absolute = delta > 0n ? delta : -delta;
-  return `${prefix}${groupDigits(absolute.toString())}`;
-}
 
 export function StockComparison({ stocks, isEn }: StockComparisonProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>(() => stocks.slice(0, 2).map((stock) => stock.id));
