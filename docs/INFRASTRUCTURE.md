@@ -38,13 +38,18 @@ a machine that is gone.
 
 ## Where production lives
 
-| | production | test |
-| --- | --- | --- |
-| URL | `https://easy-scraping.com`, `www.` | `https://test.easy-scraping.com` |
-| namespace | `wdmvp` | `wdmv-test` |
-| workloads | `wdmvp-backend`, `wdmvp-frontend`, `wdmvp-db` (StatefulSet), `wdmvp-discord-voice` | `wdmv-test-backend`, `wdmv-test-frontend`, `wdmv-test-db` |
-| manifests | `wtrdd1-hash/kuber-infrastructure` → `apps/minipc/wdmvp/` | → `apps/minipc/wdmv-test/` |
-| backups | `wdmvp-db-backup` CronJob, hourly at `:17` | — |
+| | production |
+| --- | --- |
+| URL | `https://easy-scraping.com`, `www.` |
+| namespace | `wdmvp` |
+| workloads | `wdmvp-backend`, `wdmvp-frontend`, `wdmvp-db` (StatefulSet), `wdmvp-discord-voice` |
+| manifests | `wtrdd1-hash/kuber-infrastructure` → `apps/wdmvp/` |
+| backups | `wdmvp-db-backup` CronJob, hourly at `:17` |
+
+**There is one stack.** A `wdmv-test` namespace existed for one day and was
+removed on 2026-09-09; `test.easy-scraping.com` now answers 404. Nothing
+rehearses a release before production, which is why the checks in
+`operations/production-deployment.md` are the whole gate.
 
 Other namespaces on the same node run unrelated services (`mail`, `economy`,
 `launcher`, `discord`, `cloudflared`, `gpt-plugin`). Do not assume the cluster
@@ -57,7 +62,7 @@ this repo:  gh workflow run deploy.yml        (Build Production Release)
               ref -> verify -> build
               pushes ghcr.io/wtrdd1-hash/wdmv/{backend,frontend}:<sha>-production
 
-other repo: edit the image tag in apps/minipc/wdmvp/{backend,frontend}.yaml
+other repo: edit the image tag in apps/wdmvp/{backend,frontend}.yaml
             commit to main
 
 cluster:    Flux reconciles within ~1m and rolls the Deployment

@@ -354,12 +354,14 @@ Production is a single-node Kubernetes cluster on NixOS, reconciled by Flux from
 repository builds images and pushes them to GHCR; it has no deploy job and no
 SSH. A release is a commit in the other repository that changes an image tag.
 
-| | production | test |
-| --- | --- | --- |
-| address | `https://easy-scraping.com` | `https://test.easy-scraping.com` |
-| namespace | `wdmvp` | `wdmv-test` |
-| image tag | `<sha>-production` | `<sha>-test` |
-| manifests | `kuber-infrastructure` → `apps/minipc/wdmvp/` | → `apps/minipc/wdmv-test/` |
+| | production |
+| --- | --- |
+| address | `https://easy-scraping.com` |
+| namespace | `wdmvp` |
+| image tag | `<sha>-production` |
+| manifests | `kuber-infrastructure` → `apps/wdmvp/` |
+
+There is one stack. The `wdmv-test` namespace was removed on 2026-09-09.
 
 The public origin is baked into the frontend image at **build** time, which is
 why the environment is in the image tag rather than being a hidden difference

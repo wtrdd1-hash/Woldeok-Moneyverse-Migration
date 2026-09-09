@@ -14,16 +14,15 @@ Docker Compose is not the Production deployment control plane.
 
 1. Merge validated application code to `main`.
 2. Confirm the exact SHA passed repository CI.
-3. Confirm the same SHA passed the isolated `wdmv-test` rollout/readiness/smoke gate.
-4. Build exact-SHA production images with the `Build Production Release` workflow.
-5. Record the currently running production image references for rollback.
-6. Confirm recovery prerequisites for any schema-changing/destructive release.
-7. Update the `wdmvp` backend/frontend image references in `wtrdd1-hash/kuber-infrastructure`.
-8. Commit directly to its `main` — that repository takes direct pushes, not branches or pull requests — and wait for Flux reconciliation.
-9. Require `kubectl rollout status` success for changed Deployments.
-10. Confirm the running image references match the intended SHA.
-11. Verify public routes and protected boundaries.
-12. Re-run aggregate data-integrity/recovery checks when the release can affect data.
+3. Build exact-SHA production images with the `Build Production Release` workflow.
+4. Record the currently running production image references for rollback.
+5. Confirm recovery prerequisites for any schema-changing/destructive release.
+6. Update the `wdmvp` backend/frontend image references in `wtrdd1-hash/kuber-infrastructure`.
+7. Commit directly to its `main` — that repository takes direct pushes, not branches or pull requests — and wait for Flux reconciliation.
+8. Require `kubectl rollout status` success for changed Deployments.
+9. Confirm the running image references match the intended SHA.
+10. Verify public routes and protected boundaries.
+11. Re-run aggregate data-integrity/recovery checks when the release can affect data.
 
 ## Images
 
@@ -42,8 +41,8 @@ Production application declarations live under:
 
 ```text
 wtrdd1-hash/kuber-infrastructure
-  apps/minipc/wdmvp/backend.yaml
-  apps/minipc/wdmvp/frontend.yaml
+  apps/wdmvp/backend.yaml
+  apps/wdmvp/frontend.yaml
 ```
 
 Normal releases must not use `kubectl set image` or host-local manifest edits because those create drift from Flux/Git.

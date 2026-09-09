@@ -6,8 +6,10 @@ This document is the authoritative release procedure for Woldeok Moneyverse. The
 
 | Environment | Public URL | Namespace | Runtime source of truth |
 | --- | --- | --- | --- |
-| Test | `https://test.easy-scraping.com` | `wdmv-test` | `wtrdd1-hash/kuber-infrastructure` |
 | Production | `https://easy-scraping.com` | `wdmvp` | `wtrdd1-hash/kuber-infrastructure` |
+
+There is one stack. The `wdmv-test` namespace was removed on 2026-09-09, so no
+commit is rehearsed anywhere before it reaches production.
 
 The host runs Kubernetes/containerd and is reconciled by Flux. Docker Compose is not the production release control plane.
 
@@ -27,20 +29,7 @@ pnpm audit --prod --audit-level=high
 
 CI additionally provisions PostgreSQL, applies the numbered migrations, runs DB-backed tests, rejects Prisma schema mutation, and verifies the production dependency audit. A skipped DB test is not a pass.
 
-## 2. Isolated test gate
-
-The `wdmv-test` GitOps stack is a real isolated environment. It has separate frontend, backend, PostgreSQL, secrets, registry credentials, routing, and readiness checks.
-
-A production candidate must satisfy all of the following:
-
-- the image tag is the exact application Git SHA with `-test`;
-- the test database migrations complete;
-- frontend/backend/DB workloads become Ready;
-- `https://test.easy-scraping.com/` and `https://test.easy-scraping.com/status` pass smoke checks;
-- test-only crawler/advertising policy remains isolated from production;
-- no production secret, database, Discord token, or write path is reused accidentally.
-
-## 3. Build production artifacts
+## 2. Build production artifacts
 
 From the application repository's `main` branch:
 
@@ -60,13 +49,13 @@ Despite the historical filename, this workflow is now named **Build Production R
 
 Release identity is the immutable SHA tag, not `latest-production`.
 
-## 4. Production GitOps promotion
+## 3. Production GitOps promotion
 
 Open a branch and reviewed PR in `wtrdd1-hash/kuber-infrastructure`. Update the production image references in:
 
 ```text
-apps/minipc/wdmvp/backend.yaml
-apps/minipc/wdmvp/frontend.yaml
+apps/wdmvp/backend.yaml
+apps/wdmvp/frontend.yaml
 ```
 
 Do not mutate the production Deployment with `kubectl set image` as the normal release procedure. Git must remain the source of truth.
@@ -79,7 +68,7 @@ Before merging a production GitOps PR:
 - a schema-changing or destructive release has a verified recovery path;
 - migration ordering/checksums were not altered retroactively.
 
-## 5. Flux and rollout verification
+## 4. Flux and rollout verification
 
 After the GitOps PR merges:
 
@@ -95,7 +84,7 @@ Kubernetes documents `kubectl rollout status` as the completion check for a Depl
 
 Confirm the running image references are the intended SHA-qualified production images.
 
-## 6. Public smoke checks
+## 5. Public smoke checks
 
 At minimum:
 
@@ -109,7 +98,7 @@ curl --fail https://easy-scraping.com/ads.txt >/dev/null
 
 When advertising is enabled, verify `ads.txt` and the reviewed AdSense configuration. When SEO indexing is enabled, `robots.txt` must reference the production sitemap and the sitemap must contain the production origin.
 
-## 7. Data and recovery gate
+## 6. Data and recovery gate
 
 Production data is PostgreSQL-backed. The ledger is the source of truth for balances and production migrations are immutable/checksummed.
 
@@ -117,7 +106,7 @@ A data-changing release must not proceed while the required verified separate-me
 
 The 2026-09-09 recovery audit recorded a temporary same-host PostgreSQL dump because the designated separate backup SSD required repair. That same-host dump is not a substitute for separate-media recovery. Track the current recovery status in issue #139 before approving schema-changing/destructive production work.
 
-## 8. Rollback
+## 7. Rollback
 
 For application/configuration failures, revert the GitOps image/config commit to the previously verified SHA and let Flux reconcile.
 

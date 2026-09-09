@@ -22,7 +22,6 @@ flowchart TD
 - Application source: `wtrdd1-hash/Woldeok-Moneyverse-Migration`.
 - Runtime declarations: `wtrdd1-hash/kuber-infrastructure`.
 - Production namespace: `wdmvp`.
-- Isolated test namespace: `wdmv-test`.
 - Flux reconciliation, not Docker Compose, is the authoritative production mutation path.
 
 The application repository's `deploy.yml` builds immutable production artifacts only. It must not SSH to the host and run `docker compose`; the current NixOS production host uses Kubernetes/containerd and does not provide Docker as the release control plane.
@@ -40,19 +39,18 @@ The GitOps manifests must reference the exact SHA-qualified images being promote
 
 ## Test gate
 
-The isolated `wdmv-test` stack has its own frontend, backend, PostgreSQL database, application secrets, registry credentials, routing, and readiness probes. A production candidate must not be described as tested merely because CI passed; the exact candidate image must also become Ready in the isolated test stack and pass the intended public smoke checks before production promotion.
+There is none. A `wdmv-test` namespace existed for one day and was removed on 2026-09-09; `test.easy-scraping.com` now answers 404. No commit is exercised anywhere between CI and production, so CI plus the pre-promotion checks below are the entire gate — and a green CI run is not the same as a candidate that has run.
 
 ## Production promotion
 
 1. Confirm the candidate is the current application `main` SHA and CI is green.
-2. Confirm the exact candidate has passed the isolated test rollout/readiness/smoke gate.
-3. Build immutable production images from that exact SHA.
-4. Open a reviewed PR in `kuber-infrastructure` updating `apps/minipc/wdmvp/backend.yaml` and `frontend.yaml`.
-5. Merge only when data-changing prerequisites are satisfied. Schema-changing or destructive changes remain blocked when verified separate-media recovery is unavailable.
-6. Wait for Flux reconciliation.
-7. Require Kubernetes rollout completion for the changed Deployments. Kubernetes documents `kubectl rollout status` as the rollout completion check; a zero exit status means the rollout completed.
-8. Verify `/`, `/status`, `/robots.txt`, `/sitemap.xml`, and `/ads.txt` as applicable.
-9. Re-run the production aggregate data-integrity audit and confirm backup/recovery state when the release can affect data.
+2. Build immutable production images from that exact SHA.
+3. Update `apps/wdmvp/backend.yaml` and `frontend.yaml` in `kuber-infrastructure` and commit directly to its `main`; that repository takes direct pushes, not branches or pull requests.
+4. Promote only when data-changing prerequisites are satisfied. Schema-changing or destructive changes remain blocked when verified separate-media recovery is unavailable.
+5. Wait for Flux reconciliation.
+6. Require Kubernetes rollout completion for the changed Deployments. Kubernetes documents `kubectl rollout status` as the rollout completion check; a zero exit status means the rollout completed.
+7. Verify `/`, `/status`, `/robots.txt`, `/sitemap.xml`, and `/ads.txt` as applicable.
+8. Re-run the production aggregate data-integrity audit and confirm backup/recovery state when the release can affect data.
 
 ## Migration safety
 
