@@ -37,6 +37,16 @@ to avoid deadlock, rejects a negative balance on any account not marked
   `economy_claim_daily`, `economy_claim_work`, `021-work-reward.sql` or
   `044-member-board.sql`. If your version resembles none of them, you have
   misread one.
+- Core economy invariants are enforced twice: command functions reject bad
+  writes immediately, and deferred constraint triggers reject an account with
+  no balance row or a ledger transaction whose postings are missing or
+  unbalanced at commit. Do not bypass or disable those triggers in normal
+  migrations.
+- `verify/data-integrity.sh` is the read-only release gate for persistent data.
+  Run it after migrations in CI and against the test database before promoting
+  a release. It checks ledger balance, stored-vs-ledger account balances,
+  negative-balance policy, validated constraints/indexes, and protected-table
+  application privileges.
 
 ## The baseline is production, not a checkout
 

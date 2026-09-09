@@ -71,6 +71,18 @@ jobs:
           APP_DB_PASSWORD: ci_app_password
         run: packages/database/ci-apply.sh
 
+      # A migration can be syntactically valid and still leave durable state in an
+      # impossible shape. Run the same read-only integrity gate operations can
+      # run against test/production before application tests begin.
+      - name: Verify database integrity
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: moneyverse_migrator
+          PGPASSWORD: ci_migrator_password
+          PGDATABASE: woldeok_moneyverse_ci
+        run: packages/database/verify/data-integrity.sh
+
       # Two connections, because two things are being proved. DATABASE_URL is
       # the role the application actually runs as, and almost every database
       # test asserts what that role can and cannot reach. MIGRATOR_DATABASE_URL

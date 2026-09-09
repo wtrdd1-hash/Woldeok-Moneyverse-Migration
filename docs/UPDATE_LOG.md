@@ -1,3 +1,10 @@
+# 2026-09-09 — Core data-integrity defense in depth
+
+- Added deferred database constraint triggers so an account cannot commit without its balance row and a ledger transaction cannot commit without at least two balanced postings.
+- Added a read-only database integrity release gate covering ledger balance, stored-vs-ledger balances, negative-balance policy, constraint/index validity, and protected-table application privileges.
+- Wired the integrity gate into CI immediately after applying migrations, before database-backed application tests.
+- Kept all enforcement in PostgreSQL so future privileged maintenance code cannot silently bypass the same invariants enforced by application commands.
+
 # Update Log
 
 ## 2026-09-03 — Comprehensive Moneyverse Enhancement and Optimization

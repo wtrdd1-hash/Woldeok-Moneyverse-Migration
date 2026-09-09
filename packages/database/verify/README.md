@@ -24,3 +24,23 @@ each, zero differences. That is what establishes this repository can rebuild
 production's schema from scratch — a checksum manifest only proves the files
 are the ones that were applied, not that applying them lands in the same
 place.
+
+## Persistent data integrity gate
+
+`data-integrity.sh` runs `data-integrity.sql` with `ON_ERROR_STOP=1` and fails
+closed if durable economy state violates an invariant. It is intentionally
+read-only and safe to run against test or production with a role that can read
+the catalog and economy tables.
+
+It verifies:
+
+- every account has its matching `account_balances` row;
+- every ledger transaction has at least two postings and balanced debit/credit totals;
+- every stored account balance equals the amount reconstructed from the ledger;
+- accounts that disallow negative balances are non-negative;
+- public constraints are validated and indexes are valid; and
+- `moneyverse_app` has not regained direct write privileges on protected economy tables.
+
+CI runs this immediately after rebuilding the database from init + migrations.
+Operations should run the same gate on the test database before production
+promotion.
