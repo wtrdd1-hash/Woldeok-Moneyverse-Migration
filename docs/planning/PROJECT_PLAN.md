@@ -129,7 +129,7 @@ One canonical public origin should be selected for public content. Duplicate pub
 
 Private/account/admin/transaction paths are excluded from search indexing through authentication plus appropriate noindex/X-Robots handling; `robots.txt` alone is not considered a privacy control.
 
-Advertising remains disabled by default until policy/review gates are complete. Ads are restricted to allowlisted public information/content pages and remain blocked from login, wallet, transfer, market, casino/gameplay, admin, error, and other sensitive/interactive paths.
+Advertising remains disabled by default until policy/review gates are complete. Ads are restricted to allowlisted public information/content pages. The public community-board index may carry one bottom placement separated from the posting controls, while individual user-generated post/comment detail pages remain ad-free and subject to publisher UGC review/removal responsibilities. Ads remain blocked from login, wallet, transfer, market, casino/gameplay, admin, error, and other sensitive/interactive paths.
 
 Privacy/terms/cookie disclosures must describe the actual implementation. Under-age handling, paid features, advertising, probability-based features, or any cash-value change require an updated legal/product review before release.
 
