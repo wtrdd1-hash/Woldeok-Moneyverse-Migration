@@ -6,7 +6,7 @@ on:
       enable_ads:
         description: Enable the reviewed AdSense unit in the production frontend image
         required: true
-        default: true
+        default: false
         type: boolean
 
 permissions:
