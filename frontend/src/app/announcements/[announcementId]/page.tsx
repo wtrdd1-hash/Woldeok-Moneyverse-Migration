@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Calendar } from 'lucide-react';
@@ -115,11 +116,17 @@ export default async function AnnouncementDetailPage({ params }: PageProps) {
 
         {/* 첨부 이미지 */}
         {notice.imageUrl && (
-          <div className="my-6 overflow-hidden rounded-2xl border border-border/40 bg-surface/30">
-            <img
+          <div className="relative my-6 h-[min(70vh,560px)] min-h-64 overflow-hidden rounded-2xl border border-border/40 bg-surface/30">
+            <Image
               src={notice.imageUrl}
               alt={notice.imageAltText || notice.title}
-              className="w-full max-h-[560px] object-contain rounded-2xl shadow-sm"
+              fill
+              sizes="(max-width: 768px) 100vw, 768px"
+              unoptimized={notice.imageUrl.startsWith('https://')}
+              className="object-contain rounded-2xl shadow-sm"
+              priority
+              decoding="async"
+              referrerPolicy="no-referrer"
             />
           </div>
         )}
@@ -133,7 +140,10 @@ export default async function AnnouncementDetailPage({ params }: PageProps) {
       {/* 다른 공지사항 추천 */}
       {others.length > 0 && (
         <section aria-labelledby="other-notices-title" className="grid gap-3 pt-4">
-          <h2 id="other-notices-title" className="text-sm font-bold tracking-tight text-muted-foreground">
+          <h2
+            id="other-notices-title"
+            className="text-sm font-bold tracking-tight text-muted-foreground"
+          >
             다른 최근 소식
           </h2>
           <div className="grid gap-2 sm:grid-cols-2">

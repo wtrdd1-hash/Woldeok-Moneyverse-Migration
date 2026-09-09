@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import React from 'react';
 import { cn } from '@/lib/cn';
 
@@ -17,7 +18,14 @@ export interface UserCosmetics {
   readonly effect?: CosmeticItemData | null | undefined;
   readonly nameplate?: CosmeticItemData | null | undefined;
   readonly title?: CosmeticItemData | null | undefined;
-  readonly badges?: Array<{ readonly slot: string; readonly code: string; readonly name: string; readonly rarity?: string | undefined }> | undefined;
+  readonly badges?:
+    | Array<{
+        readonly slot: string;
+        readonly code: string;
+        readonly name: string;
+        readonly rarity?: string | undefined;
+      }>
+    | undefined;
 }
 
 interface AvatarWithCosmeticsProps {
@@ -59,7 +67,17 @@ export function AvatarWithCosmetics({
           )}
         >
           {src ? (
-            <img src={src} alt={name} className="size-full object-cover rounded-full" />
+            <Image
+              src={src}
+              alt={name}
+              fill
+              sizes="112px"
+              unoptimized
+              loading="lazy"
+              decoding="async"
+              referrerPolicy="no-referrer"
+              className="object-cover rounded-full"
+            />
           ) : (
             <div className="size-full flex items-center justify-center bg-gradient-to-br from-amber-500/20 to-amber-700/30 text-foreground font-bold">
               {initial}
@@ -77,11 +95,7 @@ interface NameplateWithTitleProps {
   readonly className?: string | undefined;
 }
 
-export function NameplateWithTitle({
-  cosmetics,
-  username,
-  className,
-}: NameplateWithTitleProps) {
+export function NameplateWithTitle({ cosmetics, username, className }: NameplateWithTitleProps) {
   const nameplateClass = cosmetics?.nameplate?.animation_css || '';
   const title = cosmetics?.title?.name || '';
   const badges = cosmetics?.badges || [];
@@ -96,9 +110,7 @@ export function NameplateWithTitle({
       <div
         className={cn(
           'inline-flex items-center gap-2 px-2.5 py-1 rounded-lg text-sm font-semibold transition-all',
-          nameplateClass
-            ? nameplateClass
-            : 'bg-surface/60 border border-border/40 text-foreground',
+          nameplateClass ? nameplateClass : 'bg-surface/60 border border-border/40 text-foreground',
         )}
       >
         <span>{username}</span>

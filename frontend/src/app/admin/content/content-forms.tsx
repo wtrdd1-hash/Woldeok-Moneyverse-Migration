@@ -1,8 +1,9 @@
 'use client';
 
+import Image from 'next/image';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { TranslatedText as T } from '@/components/translated-text';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -64,13 +65,15 @@ export function AnnouncementEditor() {
   const [state, action] = useActionState(saveAnnouncement, IDLE);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (file) {
-      setPreviewUrl(URL.createObjectURL(file));
-    } else {
-      setPreviewUrl(null);
-    }
+    setPreviewUrl(file ? URL.createObjectURL(file) : null);
   }
 
   return (
@@ -87,6 +90,8 @@ export function AnnouncementEditor() {
         />
         {previewUrl && (
           <div className="mt-2.5 overflow-hidden rounded-xl border border-primary/40 bg-surface/50 p-1 w-fit">
+            {/* Browser-local blob URL: keeping this as <img> avoids sending a private preview through an optimizer. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={previewUrl}
               alt="선택한 이미지 미리보기"
@@ -303,12 +308,17 @@ export function PhotoManagementGrid({ items }: { readonly items: readonly AdminP
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((item) => (
           <Card key={item.photo_id} className="overflow-hidden">
-            <div className="aspect-video bg-black/40 flex items-center justify-center overflow-hidden">
-              <img
+            <div className="relative aspect-video overflow-hidden bg-black/40">
+              <Image
                 src={item.image_url}
                 alt={item.alt_text}
-                className="max-h-full max-w-full object-contain"
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                unoptimized
+                className="object-contain"
                 loading="lazy"
+                decoding="async"
+                referrerPolicy="no-referrer"
               />
             </div>
             <CardContent className="grid gap-3 p-4">
@@ -402,12 +412,17 @@ export function PhotoReviewQueue({ items }: { readonly items: readonly PendingPh
     <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {items.map((item) => (
         <Card key={item.photo_id} className="overflow-hidden border bg-card/60 backdrop-blur-sm">
-          <div className="relative aspect-video w-full overflow-hidden bg-black/50 flex items-center justify-center">
-            <img
+          <div className="relative aspect-video w-full overflow-hidden bg-black/50">
+            <Image
               src={item.image_url}
               alt={item.alt_text}
-              className="max-h-full max-w-full object-contain"
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              unoptimized
+              className="object-contain"
               loading="lazy"
+              decoding="async"
+              referrerPolicy="no-referrer"
             />
           </div>
           <CardContent className="grid gap-2.5 p-4">

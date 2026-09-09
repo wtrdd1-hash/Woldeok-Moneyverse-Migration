@@ -33,13 +33,10 @@ export function displayName(profile: ProfileView): string {
 /**
  * The round image, or the first letter of the name.
  *
- * A plain `<img>`, not `next/image` and not the registry `Avatar`. The
- * optimiser would have to fetch a member-supplied address from this server,
- * and Radix's avatar only reveals the image after it has loaded in the
- * browser -- which would leave the picture missing from the server-rendered
- * HTML the rest of this product ships. `referrerPolicy` is the gallery's, for
- * the same reason: the host on the other end has no business learning which
- * member page linked to it.
+ * The avatar uses `next/image` only as a layout-safe image element and sets
+ * `unoptimized`: profile addresses may be member-supplied or viewer-bound, so
+ * the Next image optimiser must never fetch them server-side. `no-referrer`
+ * also keeps the member page URL away from an external image host.
  */
 export function ProfileFigure({
   name,

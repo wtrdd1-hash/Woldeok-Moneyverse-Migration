@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { EmptyState } from '@/components/empty-state';
 import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
@@ -90,13 +91,16 @@ export default async function GalleryPage() {
               >
                 <figure>
                   <div className="relative flex aspect-video w-full items-center justify-center overflow-hidden bg-black/40">
-                    <img
+                    <Image
                       src={photo.imageUrl}
                       alt={photo.altText}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      unoptimized={photo.imageUrl.startsWith('https://')}
                       loading="lazy"
                       decoding="async"
                       referrerPolicy="no-referrer"
-                      className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                      className="object-contain transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>
                   <figcaption className="grid gap-0.5 p-3">

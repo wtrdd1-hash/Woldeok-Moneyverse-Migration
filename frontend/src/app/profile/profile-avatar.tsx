@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 
 export function ProfileAvatar({
@@ -26,10 +27,14 @@ export function ProfileAvatar({
   }
 
   return (
-    <img
+    <Image
       src={imageUrl}
       alt={`${name} 프로필 이미지`}
-      loading="eager"
+      width={112}
+      height={112}
+      sizes="112px"
+      unoptimized
+      loading="lazy"
       decoding="async"
       referrerPolicy="no-referrer"
       onError={() => setHasError(true)}

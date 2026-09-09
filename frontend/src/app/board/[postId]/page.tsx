@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
@@ -118,13 +119,19 @@ export default async function PostPage({
 
         {post.imageUrl && post.imageAltText && (
           <figure className="overflow-hidden rounded-xl border bg-black/30">
-            <img
-              src={post.imageUrl}
-              alt={post.imageAltText}
-              className="max-h-[70vh] w-full object-contain"
-              loading="eager"
-              decoding="async"
-            />
+            <div className="relative h-[min(70vh,720px)] min-h-64 w-full">
+              <Image
+                src={post.imageUrl}
+                alt={post.imageAltText}
+                fill
+                sizes="(max-width: 768px) 100vw, 1024px"
+                unoptimized={post.imageUrl.startsWith('https://')}
+                className="object-contain"
+                priority
+                decoding="async"
+                referrerPolicy="no-referrer"
+              />
+            </div>
             <figcaption className="border-t px-3 py-2 text-xs text-muted-foreground">
               {post.imageAltText}
             </figcaption>

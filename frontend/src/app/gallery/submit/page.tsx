@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
@@ -60,7 +61,10 @@ export default async function GallerySubmitPage() {
             <T korean="새 사진" english="New Photo" />
           </CardTitle>
           <CardDescription>
-            <T korean="사진과 설명을 함께 보내 주세요." english="Please submit your photo along with a description." />
+            <T
+              korean="사진과 설명을 함께 보내 주세요."
+              english="Please submit your photo along with a description."
+            />
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -74,7 +78,14 @@ export default async function GallerySubmitPage() {
         </h2>
 
         {data === null ? (
-          <EmptyState title={<T korean="보낸 사진을 불러오지 못했어요." english="Failed to load your submissions." />} />
+          <EmptyState
+            title={
+              <T
+                korean="보낸 사진을 불러오지 못했어요."
+                english="Failed to load your submissions."
+              />
+            }
+          />
         ) : submissions.length === 0 ? (
           <EmptyState
             title={<T korean="아직 보낸 사진이 없어요." english="No submissions yet." />}
@@ -93,11 +104,16 @@ export default async function GallerySubmitPage() {
                   <CardContent className="grid gap-3">
                     {submission.image_url && (
                       <div className="relative aspect-video w-full overflow-hidden rounded-[12px] border bg-black/40 flex items-center justify-center">
-                        <img
+                        <Image
                           src={submission.image_url}
                           alt={submission.alt_text}
-                          className="max-h-full max-w-full object-contain"
+                          fill
+                          sizes="(max-width: 640px) 100vw, 50vw"
+                          unoptimized
+                          className="object-contain"
                           loading="lazy"
+                          decoding="async"
+                          referrerPolicy="no-referrer"
                         />
                       </div>
                     )}

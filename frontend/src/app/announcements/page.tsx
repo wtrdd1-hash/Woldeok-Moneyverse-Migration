@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Image as ImageIcon, Pin } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
@@ -108,7 +109,10 @@ export default async function AnnouncementsPage() {
                       </span>
                     )}
                     {notice.publishedAt && (
-                      <time dateTime={notice.publishedAt} className="text-xs text-muted-foreground font-mono">
+                      <time
+                        dateTime={notice.publishedAt}
+                        className="text-xs text-muted-foreground font-mono"
+                      >
                         {formatDay(notice.publishedAt, '게시 시간 확인 중')}
                       </time>
                     )}
@@ -120,7 +124,9 @@ export default async function AnnouncementsPage() {
                     )}
                   </div>
                   <h3 className="text-lg font-bold text-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors flex items-center gap-1.5">
-                    {notice.isPinned && <span className="text-amber-500 text-base font-bold">📌</span>}
+                    {notice.isPinned && (
+                      <span className="text-amber-500 text-base font-bold">📌</span>
+                    )}
                     <span>{notice.title}</span>
                   </h3>
                   <p className="mt-2 text-sm text-muted-foreground line-clamp-2 leading-relaxed">
@@ -128,12 +134,17 @@ export default async function AnnouncementsPage() {
                   </p>
                 </div>
                 {notice.imageUrl && (
-                  <div className="hidden sm:block size-20 shrink-0 overflow-hidden rounded-xl border border-border/40 bg-surface/50">
-                    <img
+                  <div className="relative hidden size-20 shrink-0 overflow-hidden rounded-xl border border-border/40 bg-surface/50 sm:block">
+                    <Image
                       src={notice.imageUrl}
                       alt={notice.imageAltText || notice.title}
-                      className="size-full object-cover group-hover:scale-105 transition-transform"
+                      fill
+                      sizes="80px"
+                      unoptimized={notice.imageUrl.startsWith('https://')}
+                      className="object-cover transition-transform group-hover:scale-105"
                       loading="lazy"
+                      decoding="async"
+                      referrerPolicy="no-referrer"
                     />
                   </div>
                 )}

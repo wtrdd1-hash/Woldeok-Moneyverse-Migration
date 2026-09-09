@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
@@ -40,11 +41,15 @@ export default async function GalleryPhotoPage({
       </Button>
 
       <article className="overflow-hidden rounded-2xl border bg-card">
-        <div className="flex min-h-[45vh] items-center justify-center bg-black/50 p-3 sm:p-6">
-          <img
+        <div className="relative h-[min(78vh,900px)] min-h-[45vh] bg-black/50 p-3 sm:p-6">
+          <Image
             src={photo.imageUrl}
             alt={photo.altText}
-            className="max-h-[78vh] max-w-full object-contain"
+            fill
+            sizes="100vw"
+            unoptimized={photo.imageUrl.startsWith('https://')}
+            className="object-contain p-3 sm:p-6"
+            priority
             decoding="async"
             referrerPolicy="no-referrer"
           />
