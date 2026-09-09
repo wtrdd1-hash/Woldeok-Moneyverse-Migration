@@ -87,7 +87,7 @@ export function SiteHeader() {
       <div className="mx-auto flex h-16 sm:h-[70px] lg:h-[76px] w-full max-w-[1180px] items-center gap-2 min-[480px]:gap-3 lg:gap-6 px-3 min-[480px]:px-4 sm:px-6">
         <Brand />
 
-        <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="ml-auto hidden items-center gap-6 lg:flex">
+        <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="ml-auto hidden items-center gap-4 xl:gap-5 lg:flex">
           {items.map((item) =>
             isGroup(item) ? (
               <HeaderGroup key={item.label} group={item} pathname={pathname} locale={locale} />
@@ -195,7 +195,7 @@ function HeaderLink({
       // The underline grows from nothing on hover and stays for the current
       // page — the original's one piece of navigation motion, kept.
       className={cn(
-        'relative py-[26px] text-sm font-semibold transition-colors',
+        'relative whitespace-nowrap py-[26px] text-sm font-semibold transition-colors',
         'after:absolute after:inset-x-0 after:bottom-[17px] after:h-0.5 after:bg-primary after:transition-transform',
         'after:origin-left after:scale-x-0 hover:after:scale-x-100',
         current ? 'text-foreground after:scale-x-100' : 'text-muted-foreground',
@@ -226,7 +226,7 @@ function HeaderGroup({
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          'relative flex items-center gap-1 py-[26px] text-sm font-semibold transition-colors outline-none',
+          'relative flex items-center gap-1 whitespace-nowrap py-[26px] text-sm font-semibold transition-colors outline-none',
           'after:absolute after:inset-x-0 after:bottom-[17px] after:h-0.5 after:bg-primary after:transition-transform',
           'after:origin-left after:scale-x-0 hover:after:scale-x-100',
           'focus-visible:after:scale-x-100',
