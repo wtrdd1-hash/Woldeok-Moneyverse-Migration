@@ -74,7 +74,7 @@ describe.skipIf(!MIGRATOR_DATABASE_URL)('business_settle_daily_v2 idempotency', 
     );
   };
 
-  it('locks the idempotency key before reading its receipt', async () => {
+  it('locks the idempotency key before reading its receipt and qualifies settlement columns', async () => {
     const { rows } = await pool.query<{ definition: string }>(
       `SELECT pg_catalog.pg_get_functiondef(
          'public.business_settle_daily_v2(uuid,uuid,uuid)'::pg_catalog.regprocedure
@@ -86,9 +86,11 @@ describe.skipIf(!MIGRATOR_DATABASE_URL)('business_settle_daily_v2 idempotency', 
     expect(lock).toBeGreaterThanOrEqual(0);
     expect(replay).toBeGreaterThan(lock);
     expect(definition).toContain('moneyverse:business_settle_daily_v2:');
+    expect(definition).toContain('settlement_row.ownership_id = p_ownership_id');
+    expect(definition).toContain('settlement_row.settlement_date = v_date');
   });
 
-  it('refuses replay of a settlement receipt owned by another user', async () => {
+  it('settles once, replays for the owner, and refuses another user', async () => {
     await rolledBack(async (client) => {
       const owner = await member(client);
       const attacker = await member(client);
@@ -120,10 +122,28 @@ describe.skipIf(!MIGRATOR_DATABASE_URL)('business_settle_daily_v2 idempotency', 
       if (!ownershipId) throw new Error('business purchase returned no ownership');
 
       const settlementKey = randomUUID();
-      await client.query(
+      const { rows: settled } = await client.query<{
+        ownership_id: string;
+        settlement_date: Date;
+        replayed: boolean;
+      }>(
         'SELECT * FROM public.business_settle_daily_v2($1, $2, $3)',
         [owner, ownershipId, settlementKey],
       );
+      expect(settled[0]?.ownership_id).toBe(ownershipId);
+      expect(settled[0]?.replayed).toBe(false);
+
+      const { rows: replayed } = await client.query<{
+        ownership_id: string;
+        settlement_date: Date;
+        replayed: boolean;
+      }>(
+        'SELECT * FROM public.business_settle_daily_v2($1, $2, $3)',
+        [owner, ownershipId, settlementKey],
+      );
+      expect(replayed[0]?.ownership_id).toBe(ownershipId);
+      expect(replayed[0]?.settlement_date).toEqual(settled[0]?.settlement_date);
+      expect(replayed[0]?.replayed).toBe(true);
 
       await client.query('SAVEPOINT before_refusal');
       const error = await rejectionOf(() =>
