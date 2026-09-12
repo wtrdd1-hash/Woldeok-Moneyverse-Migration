@@ -5,6 +5,7 @@ export interface NavEntry {
 
 const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '홈': 'Home',
+  '내 대시보드': 'My dashboard',
   '이용 방법': 'Guide',
   '공지': 'Updates',
   '운영 소식': 'Updates',
@@ -32,6 +33,7 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '아이템 상점': 'Item shop',
   '게시판': 'Board',
   '내 계정': 'My account',
+  '계정 보안': 'Account security',
   '운영': 'Admin',
   '경제': 'Economy',
   '콘텐츠': 'Content',
@@ -81,6 +83,7 @@ export const PUBLIC_NAV: readonly NavEntry[] = [
 
 /** Needs a session and current consent. Every one of these is `noindex`. */
 export const MEMBER_NAV: readonly NavEntry[] = [
+  { href: '/dashboard', label: '내 대시보드' },
   { href: '/wallet', label: '덕지갑' },
   { href: '/bank', label: '가상 금융 (은행)' },
   { href: '/work', label: '잡보드 (작업)' },
@@ -93,6 +96,7 @@ export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/progression', label: '커리어패스 (성장)' },
   { href: '/profile', label: '내 프로필' },
   { href: '/account', label: '내 계정' },
+  { href: '/account/security', label: '계정 보안' },
 ];
 
 /** Shown only to a member holding at least one administrator role. */
@@ -140,6 +144,7 @@ export const HEADER_PUBLIC: readonly NavItem[] = [
 ];
 
 export const HEADER_MEMBER: readonly NavItem[] = [
+  { href: '/dashboard', label: '내 대시보드' },
   {
     label: '경제',
     entries: [
@@ -163,6 +168,7 @@ export const HEADER_MEMBER: readonly NavItem[] = [
     entries: [
       { href: '/seasons', label: '시즌' },
       { href: '/profile', label: '내 프로필' },
+      { href: '/account/security', label: '계정 보안' },
     ],
   },
 ];

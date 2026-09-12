@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 import { Save, Search, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { groupDigits } from '@/lib/money';
@@ -26,16 +25,15 @@ interface AdminShopViewProps {
 }
 
 export function AdminShopView({ items }: AdminShopViewProps) {
-  const router = useRouter();
+  const [localItems, setLocalItems] = useState(items);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState<string>('');
   const [editActive, setEditActive] = useState<boolean>(true);
   const [editStock, setEditStock] = useState<string>('');
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
-  const [, startTransition] = useTransition();
 
-  const filtered = items.filter(
+  const filtered = localItems.filter(
     (item) =>
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -67,14 +65,21 @@ export function AdminShopView({ items }: AdminShopViewProps) {
         throw new Error(data.message || '수정에 실패했습니다.');
       }
 
+      setLocalItems((current) =>
+        current.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                base_price: editPrice,
+                active: editActive,
+                current_stock: editStock ? Number(editStock) : null,
+              }
+            : item,
+        ),
+      );
       setStatusMsg('성공적으로 저장되었습니다.');
       setEditingId(null);
-      setTimeout(() => {
-        setStatusMsg(null);
-        startTransition(() => {
-          router.refresh();
-        });
-      }, 1000);
+      setTimeout(() => setStatusMsg(null), 1000);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : '오류가 발생했습니다.';
       setStatusMsg(`오류: ${msg}`);
@@ -95,7 +100,7 @@ className="w-full rounded-2xl border border-border/50 bg-card py-2 pl-10 pr-4 te
           />
         </div>
         <div className="text-xs text-muted-foreground font-medium">
-          총 <strong className="text-foreground">{items.length}</strong>개 상품 등록됨
+          총 <strong className="text-foreground">{localItems.length}</strong>개 상품 등록됨
         </div>
       </div>
 

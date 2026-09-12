@@ -1,3 +1,5 @@
+import { isIP } from 'node:net';
+
 export interface ClientKeyOptions {
   readonly trustForwardedFor: boolean;
 }
@@ -92,31 +94,26 @@ const single = (value: string | string[] | undefined): string | undefined =>
 /**
  * Who to count a request against.
  *
- * Enabling `trustForwardedFor` without a reverse proxy that strips and
- * rewrites `X-Forwarded-For` lets a client forge the header and evade rate
- * limiting entirely, so the default is false and the header is ignored
- * outright rather than merely deprioritised.
+ * The trusted-proxy switch accepts only `CF-Connecting-IP`. Cloudflare
+ * overwrites that header at the edge, while `X-Forwarded-For` can contain a
+ * visitor-supplied first hop. Treating the latter as identity lets a caller
+ * forge audit IPs and rotate rate-limit keys.
  *
- * `CF-Connecting-IP` is preferred over it where both are present. Cloudflare
- * writes that header itself and overwrites whatever a client sent, whereas it
- * *appends* to a client-supplied `X-Forwarded-For` — so the first entry of
- * that list is a value the visitor chose. Reading it means one visitor can
- * spend another's budget by naming them, which on this deployment is the
- * difference between a reader staying signed in and being told they are not.
- *
- * The `X-Forwarded-For` fallback still takes the first entry rather than the
- * last. The last entry is only the client behind a chain of exactly one
- * appending proxy, and this application is reached through more than one on
- * some paths; a wrong guess there collapses every visitor onto a single key,
- * which is worse than the forgery it would prevent.
+ * When the trusted edge header is absent or malformed we fail closed to the
+ * socket peer. In this deployment that may be the internal frontend proxy;
+ * recording a less specific internal peer is safer than recording an
+ * attacker-chosen public address.
  */
+function validIp(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const candidate = value.trim();
+  return isIP(candidate) ? candidate : undefined;
+}
+
 export function requestClientKey(request: KeyableRequest, options: ClientKeyOptions): string {
   if (options.trustForwardedFor) {
-    const connecting = single(request.headers['cf-connecting-ip']);
+    const connecting = validIp(single(request.headers['cf-connecting-ip']));
     if (connecting) return connecting;
-    const forwarded = single(request.headers['x-forwarded-for']);
-    const first = forwarded?.split(',')[0]?.trim();
-    if (first) return first;
   }
-  return request.socket.remoteAddress ?? 'unknown';
+  return validIp(request.socket.remoteAddress) ?? 'unknown';
 }

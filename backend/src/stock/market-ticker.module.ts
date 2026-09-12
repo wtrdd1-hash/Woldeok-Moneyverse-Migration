@@ -1,19 +1,11 @@
 import { Inject, Injectable, Logger, Module } from '@nestjs/common';
 import type { OnApplicationBootstrap, OnApplicationShutdown } from '@nestjs/common';
 import { StockModule } from './stock.module';
+import { StockAlertRepository } from './stock-alert.repository';
 import { StockService } from './stock.service';
 import { MarketTicker } from './market-ticker';
 import { MarketBroadcast } from './market-broadcast';
 
-/**
- * Runs the market, if this deployment is told to.
- *
- * `MARKET_TICK_INTERVAL_MS` decides the beat and `MARKET_TICKER_ENABLED`
- * decides whether there is one at all. Off by default: a second process
- * ticking the same database would be harmless — the function takes an
- * advisory lock — but a developer's laptop quietly moving the test market is
- * not what anyone wants, and a deployment saying so out loud is cheap.
- */
 export const MARKET_TICKER = Symbol('MARKET_TICKER');
 
 @Injectable()
@@ -39,17 +31,14 @@ export class MarketTickerRunner implements OnApplicationBootstrap, OnApplication
 @Module({
   imports: [StockModule],
   providers: [
-    // One instance, shared: the bootstrap attaches the socket server to it
-    // and the ticker publishes through it. It exists whether or not the
-    // ticker does, because a deployment that does not run the market can
-    // still be the one a reader is connected to.
     MarketBroadcast,
     {
       provide: MARKET_TICKER,
-      inject: [StockService, MarketBroadcast],
+      inject: [StockService, MarketBroadcast, StockAlertRepository],
       useFactory: (
         stocks: StockService | null,
         broadcast: MarketBroadcast,
+        alerts: StockAlertRepository | null,
       ): MarketTicker | null => {
         if (process.env.MARKET_TICKER_ENABLED !== 'true' || !stocks) return null;
 
@@ -58,8 +47,14 @@ export class MarketTickerRunner implements OnApplicationBootstrap, OnApplication
         return new MarketTicker({
           tick: async () => {
             const moved = await stocks.liveTick();
-            // Read the prices only when somebody is connected to receive
-            // them. An idle deployment pays for the walk and nothing else.
+            if (moved > 0 && alerts) {
+              try {
+                const triggered = await alerts.evaluateDue();
+                if (triggered > 0) logger.log(`triggered ${triggered} stock alert event(s)`);
+              } catch (error: unknown) {
+                logger.warn(`stock alert evaluation failed: ${error instanceof Error ? error.message : String(error)}`);
+              }
+            }
             if (broadcast.shouldPublish) broadcast.publish(await stocks.livePrices());
             return moved;
           },
