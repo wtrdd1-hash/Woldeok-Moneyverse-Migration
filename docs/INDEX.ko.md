@@ -8,6 +8,7 @@
 - [상시 갱신 프로젝트 계획](planning/PROJECT_PLAN.ko.md)
 - [제품 성장 및 리텐션 계획](planning/PRODUCT_GROWTH_PLAN.ko.md)
 - [상세 제품 설계 명세](planning/PRODUCT_DESIGN_SPEC.ko.md)
+- [인증 보안 및 구현 우선순위 명세](planning/AUTHENTICATION_SECURITY_PRIORITY_SPEC.ko.md)
 - [기본 제한 정책](planning/DEFAULT_LIMIT_POLICY.ko.md)
 - [무제한 기본값 일관성 구현 명세](planning/LIMIT_CONSISTENCY_IMPLEMENTATION_SPEC.ko.md)
 - [경제 소각처 명세](planning/ECONOMY_SINKS_SPEC.ko.md)
@@ -17,6 +18,7 @@
 - [플레이어 마켓 및 제작 명세](planning/PLAYER_MARKETPLACE_CRAFTING_SPEC.ko.md)
 - [클럽 및 협동 경제 명세](planning/CLUBS_COOPERATIVE_ECONOMY_SPEC.ko.md)
 - [커뮤니티 및 시장 무결성 명세](planning/COMMUNITY_MARKET_INTEGRITY_SPEC.ko.md)
+- [수익화·한국/미국 준수·검색 성장 명세](planning/MONETIZATION_COMPLIANCE_SEO_SPEC.ko.md)
 
 프로젝트 계획은 계속 갱신되는 초안/상시 명세입니다. 개발 시작 전과 개발 중간에 최신 내용을 다시 확인합니다.
 
@@ -57,6 +59,10 @@
 ## 릴리스 기록 및 작업 로그
 영어 기록을 1번 문서, 한국어 `.ko.md` 기록을 2번 문서로 함께 유지합니다.
 
+- [인증 보안 및 구현 우선순위 v2026.09.12.31 — 한국어](changelog/2026-09-12-auth-security-priority-v2026.09.12.31.ko.md)
+- [제품 기획 v2026.09.12.31 작업 로그 — 한국어](worklog/2026-09-12-product-planning-v2026.09.12.31.ko.md)
+- [수익화·준수·SEO v2026.09.12.27 — 한국어](changelog/2026-09-12-monetization-compliance-seo-v2026.09.12.27.ko.md)
+- [제품 기획 v2026.09.12.27 작업 로그 — 한국어](worklog/2026-09-12-product-planning-v2026.09.12.27.ko.md)
 - [Business Operations & Supply Chain v2026.09.12.25 — 한국어](changelog/2026-09-12-business-operations-supply-chain-v2026.09.12.25.ko.md)
 - [제품 기획 v2026.09.12.25 작업 로그 — 한국어](worklog/2026-09-12-product-planning-v2026.09.12.25.ko.md)
 - [Unlimited-Default Consistency v2026.09.12.23 — 한국어](changelog/2026-09-12-unlimited-consistency-v2026.09.12.23.ko.md)
@@ -70,9 +76,9 @@
 1. 기준 언어는 영어이며 한국어 문서를 두 번째 문서로 반드시 유지합니다.
 2. 영어 `NAME.md` → 한국어 `NAME.ko.md` 형식을 기본으로 사용합니다.
 3. 영어 문서를 수정하면 같은 작업에서 한국어 문서를 동기화합니다.
-4. 문서만 수정하는 작업은 별도 브랜치 없이 `main`에 바로 반영합니다.
+4. 문서-only 작업도 통합 기획 자동화에서는 별도 브랜치/PR로 관리한다.
 5. 코드·설정·DB·인프라·배포 변경은 별도 브랜치 → Test 검증 → Production 절차를 유지합니다.
 6. 모든 의미 있는 작업은 버전을 부여하고 내부 작업 기록과 GitHub 변경 기록에 동일 버전을 남깁니다.
 7. 한국어 문서 상단에는 영어 원문과 한국어 색인으로 이동할 수 있는 링크를 둡니다.
 
-현재 한국어 문서 정비 작업 버전: **v2026.09.12.27**
+현재 통합 기획 작업 버전: **v2026.09.12.31**
