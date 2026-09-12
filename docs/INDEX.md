@@ -20,6 +20,10 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 - [Personal Spaces & City Projects Specification — Korean](planning/PERSONAL_SPACES_CITY_PROJECTS_SPEC.ko.md)
 - [Player Marketplace & Crafting Specification](planning/PLAYER_MARKETPLACE_CRAFTING_SPEC.md)
 - [Player Marketplace & Crafting Specification — Korean](planning/PLAYER_MARKETPLACE_CRAFTING_SPEC.ko.md)
+- [Clubs & Cooperative Economy Specification](planning/CLUBS_COOPERATIVE_ECONOMY_SPEC.md)
+- [Clubs & Cooperative Economy Specification — Korean](planning/CLUBS_COOPERATIVE_ECONOMY_SPEC.ko.md)
+- [Community & Market Integrity Specification](planning/COMMUNITY_MARKET_INTEGRITY_SPEC.md)
+- [Community & Market Integrity Specification — Korean](planning/COMMUNITY_MARKET_INTEGRITY_SPEC.ko.md)
 
 The project plan is a living specification. Intentional, validated implementation changes must update the plan in the same development flow; accidental violations of security/data-integrity invariants must be fixed in code rather than documented away.
 
@@ -64,6 +68,14 @@ The project plan is a living specification. Intentional, validated implementatio
 
 ## Release history and work logs
 
+- [Community & Market Integrity v2026.09.12.21 changelog](changelog/2026-09-12-community-market-integrity-v2026.09.12.21.md)
+- [Community & Market Integrity v2026.09.12.21 changelog — Korean](changelog/2026-09-12-community-market-integrity-v2026.09.12.21.ko.md)
+- [Product planning v2026.09.12.21 worklog](worklog/2026-09-12-product-planning-v2026.09.12.21.md)
+- [Product planning v2026.09.12.21 worklog — Korean](worklog/2026-09-12-product-planning-v2026.09.12.21.ko.md)
+- [Clubs & Cooperative Economy v2026.09.12.20 changelog](changelog/2026-09-12-clubs-cooperative-economy-v2026.09.12.20.md)
+- [Clubs & Cooperative Economy v2026.09.12.20 changelog — Korean](changelog/2026-09-12-clubs-cooperative-economy-v2026.09.12.20.ko.md)
+- [Product planning v2026.09.12.20 worklog](worklog/2026-09-12-product-planning-v2026.09.12.20.md)
+- [Product planning v2026.09.12.20 worklog — Korean](worklog/2026-09-12-product-planning-v2026.09.12.20.ko.md)
 - [Player Marketplace & Crafting v2026.09.12.16 changelog](changelog/2026-09-12-player-marketplace-crafting-v2026.09.12.16.md)
 - [Player Marketplace & Crafting v2026.09.12.16 changelog — Korean](changelog/2026-09-12-player-marketplace-crafting-v2026.09.12.16.ko.md)
 - [Product planning v2026.09.12.16 worklog](worklog/2026-09-12-product-planning-v2026.09.12.16.md)
