@@ -22,6 +22,7 @@
 - [검색 노출 운영 명세](planning/SEARCH_DISCOVERY_OPERATIONS_SPEC.ko.md)
 - [미성년자 안전·연령확인·콘텐츠 삭제 명세](planning/MINOR_SAFETY_AGE_ASSURANCE_CONTENT_REMOVAL_SPEC.ko.md)
 - [분석 및 실험 거버넌스 명세](planning/ANALYTICS_EXPERIMENTATION_GOVERNANCE_SPEC.ko.md)
+- [알림 및 복귀 메시지 거버넌스 명세](planning/NOTIFICATION_REACTIVATION_GOVERNANCE_SPEC.ko.md)
 
 프로젝트 계획은 계속 갱신되는 초안/상시 명세입니다. 개발 시작 전과 개발 중간에 최신 내용을 다시 확인합니다.
 
@@ -76,6 +77,8 @@
 
 ## 변경 기록 / 작업 로그
 - [전체 한국어 CHANGELOG](changelog/CHANGELOG.ko.md)
+- [알림 및 복귀 메시지 거버넌스 v2026.09.13.12 변경 기록](changelog/2026-09-13-notification-reactivation-governance-v2026.09.13.12.ko.md)
+- [제품 기획 v2026.09.13.12 작업 로그](worklog/2026-09-13-product-planning-v2026.09.13.12.ko.md)
 - [분석 및 실험 거버넌스 v2026.09.13.7 변경 기록](changelog/2026-09-13-analytics-experimentation-governance-v2026.09.13.7.ko.md)
 - [제품 기획 v2026.09.13.7 작업 로그](worklog/2026-09-13-product-planning-v2026.09.13.7.ko.md)
 - [결제·구독·소비자보호 v2026.09.13.6 변경 기록](changelog/2026-09-13-billing-subscription-consumer-protection-v2026.09.13.6.ko.md)
@@ -111,4 +114,4 @@
 6. 모든 의미 있는 작업은 버전을 부여하고 내부 작업 기록과 GitHub 변경 기록에 동일 버전을 남깁니다.
 7. 새 한국어 문서 상단에는 영어 원문과 한국어 색인으로 이동할 수 있는 링크를 둡니다.
 
-현재 한국어 문서 정비 작업 버전: **v2026.09.13.7**
+현재 한국어 문서 정비 작업 버전: **v2026.09.13.12**
