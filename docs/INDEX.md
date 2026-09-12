@@ -10,6 +10,12 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 - [Product Growth & Retention Plan — Korean](planning/PRODUCT_GROWTH_PLAN.ko.md)
 - [Detailed Product Design Specification](planning/PRODUCT_DESIGN_SPEC.md)
 - [Detailed Product Design Specification — Korean](planning/PRODUCT_DESIGN_SPEC.ko.md)
+- [Default Limit Policy](planning/DEFAULT_LIMIT_POLICY.md)
+- [Default Limit Policy — Korean](planning/DEFAULT_LIMIT_POLICY.ko.md)
+- [Economy Sinks Specification](planning/ECONOMY_SINKS_SPEC.md)
+- [Economy Sinks Specification — Korean](planning/ECONOMY_SINKS_SPEC.ko.md)
+- [Economy Sink Catalog](planning/ECONOMY_SINK_CATALOG.md)
+- [Economy Sink Catalog — Korean](planning/ECONOMY_SINK_CATALOG.ko.md)
 
 The project plan is a living specification. Intentional, validated implementation changes must update the plan in the same development flow; accidental violations of security/data-integrity invariants must be fixed in code rather than documented away.
 
@@ -54,6 +60,9 @@ The project plan is a living specification. Intentional, validated implementatio
 
 ## Release history and work logs
 
+- [Economy Sink Catalog v2026.09.12.7 changelog](changelog/2026-09-12-economy-sink-catalog-v2026.09.12.7.md)
+- [Economy Sink Catalog v2026.09.12.7 changelog — Korean](changelog/2026-09-12-economy-sink-catalog-v2026.09.12.7.ko.md)
+- [Product planning v2026.09.12.7 worklog](worklog/2026-09-12-product-planning-v2026.09.12.7.md)
 - [v2026.09.07.2 localized guide parity](releases/v2026.09.07.2.md)
 - [v2026.09.07.1 documentation release](releases/v2026.09.07.1.md)
 - [2026-09-07 gameplay release](releases/v2026.09.07.md)
