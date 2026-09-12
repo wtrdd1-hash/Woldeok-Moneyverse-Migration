@@ -18,6 +18,8 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 - [Economy Sink Catalog — Korean](planning/ECONOMY_SINK_CATALOG.ko.md)
 - [Personal Spaces & City Projects Specification](planning/PERSONAL_SPACES_CITY_PROJECTS_SPEC.md)
 - [Personal Spaces & City Projects Specification — Korean](planning/PERSONAL_SPACES_CITY_PROJECTS_SPEC.ko.md)
+- [Player Marketplace & Crafting Specification](planning/PLAYER_MARKETPLACE_CRAFTING_SPEC.md)
+- [Player Marketplace & Crafting Specification — Korean](planning/PLAYER_MARKETPLACE_CRAFTING_SPEC.ko.md)
 
 The project plan is a living specification. Intentional, validated implementation changes must update the plan in the same development flow; accidental violations of security/data-integrity invariants must be fixed in code rather than documented away.
 
@@ -62,6 +64,10 @@ The project plan is a living specification. Intentional, validated implementatio
 
 ## Release history and work logs
 
+- [Player Marketplace & Crafting v2026.09.12.16 changelog](changelog/2026-09-12-player-marketplace-crafting-v2026.09.12.16.md)
+- [Player Marketplace & Crafting v2026.09.12.16 changelog — Korean](changelog/2026-09-12-player-marketplace-crafting-v2026.09.12.16.ko.md)
+- [Product planning v2026.09.12.16 worklog](worklog/2026-09-12-product-planning-v2026.09.12.16.md)
+- [Product planning v2026.09.12.16 worklog — Korean](worklog/2026-09-12-product-planning-v2026.09.12.16.ko.md)
 - [Personal Spaces & City Projects v2026.09.12.11 changelog](changelog/2026-09-12-personal-spaces-city-projects-v2026.09.12.11.md)
 - [Personal Spaces & City Projects v2026.09.12.11 changelog — Korean](changelog/2026-09-12-personal-spaces-city-projects-v2026.09.12.11.ko.md)
 - [Product planning v2026.09.12.11 worklog](worklog/2026-09-12-product-planning-v2026.09.12.11.md)
