@@ -6,23 +6,20 @@ produced — read [`../INFRASTRUCTURE.md`](../INFRASTRUCTURE.md) first.
 
 ## Deployment philosophy
 
-`main` is continuously validated, but Production promotion is explicit. The application repository builds immutable release images; Production state is declared in `wtrdd1-hash/kuber-infrastructure` and reconciled by Flux.
+`main` is continuously validated and the normal Test→Production promotion path is automated but fail-closed. The application repository builds immutable release images only after the exact SHA is live and healthy in isolated Test; Production state is declared in `wtrdd1-hash/kuber-infrastructure` and reconciled by Flux.
 
 Docker Compose is not the Production deployment control plane.
 
 ## Expected order
 
 1. Merge validated application code to `main`.
-2. Confirm the exact SHA passed repository CI.
-3. Build exact-SHA production images with the `Build Production Release` workflow.
-4. Record the currently running production image references for rollback.
-5. Confirm recovery prerequisites for any schema-changing/destructive release.
-6. Update the `wdmvp` backend/frontend image references in `wtrdd1-hash/kuber-infrastructure`.
-7. Commit directly to its `main` — that repository takes direct pushes, not branches or pull requests — and wait for Flux reconciliation.
-8. Require `kubectl rollout status` success for changed Deployments.
-9. Confirm the running image references match the intended SHA.
-10. Verify public routes and protected boundaries.
-11. Re-run aggregate data-integrity/recovery checks when the release can affect data.
+2. CI automatically builds exact-SHA `-test` images.
+3. The GitOps auto-reconciler pins isolated Test to the latest successful `main` SHA.
+4. `Build Production Release` waits until `test.easy-scraping.com/api/version` reports that exact SHA and the public catalog backend/database path plus noindex boundary pass.
+5. The workflow builds same-SHA `-production` images and publishes a successful `production-ready` deployment signal.
+6. The GitOps auto-reconciler accepts only a signal matching the current successful Test/main SHA, re-runs the Test smoke gate, and updates the Production manifests.
+7. Flux reconciles Production. The reconciler waits for the public Production version to report the exact SHA and verifies `/status` plus the backend/database catalog path.
+8. Keep the previous Production image references available for rollback. Schema-changing/destructive releases still require their recovery prerequisites; automation does not waive database safety rules.
 
 ## Images
 
@@ -49,7 +46,7 @@ Normal releases must not use `kubectl set image` or host-local manifest edits be
 
 ## Rollout verification
 
-After the GitOps PR merges:
+For direct cluster diagnosis after GitOps reconciliation:
 
 ```bash
 flux get sources git -A

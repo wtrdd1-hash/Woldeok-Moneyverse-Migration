@@ -10,8 +10,9 @@ flowchart TD
     TG --> TR[Test namespace rollout]
     TR --> TV[Test readiness + smoke checks]
     TV --> PI[Build exact-SHA production images]
-    PI --> GP[Reviewed GitOps production PR]
-    GP --> FX[Flux reconciliation]
+    PI --> AS[Production-ready exact-SHA signal]
+    AS --> GR[GitOps auto-reconciler]
+    GR --> FX[Flux reconciliation]
     FX --> KR[Kubernetes rollout status]
     KR --> SM[Public smoke checks]
     SM --> DA[Data-integrity + backup/recovery checks]
@@ -24,7 +25,7 @@ flowchart TD
 - Production namespace: `wdmvp`.
 - Flux reconciliation, not Docker Compose, is the authoritative production mutation path.
 
-The application repository's `deploy.yml` builds immutable production artifacts only. It must not SSH to the host and run `docker compose`; the current NixOS production host uses Kubernetes/containerd and does not provide Docker as the release control plane.
+The application repository's `deploy.yml` waits for the exact SHA on the isolated test origin, verifies the backend/database smoke path, builds immutable Production artifacts for that same SHA, and publishes a `production-ready` deployment signal. It must not SSH to the host or mutate Kubernetes directly. GitOps remains the release control plane.
 
 ## Immutable image identity
 
@@ -48,8 +49,8 @@ Every application `main` push builds immutable `-test` images after CI. Promotio
 1. Confirm the candidate is the current application `main` SHA and CI plus `Build Test Candidate` are green.
 2. Promote that exact SHA to the isolated `wdmv-test` GitOps manifests through `kuber-infrastructure/.github/workflows/wdmv-promote.yml`.
 3. Require Flux readiness, Kubernetes rollout completion, and public smoke checks on `https://test.easy-scraping.com`, including backend/API health.
-4. Build immutable `-production` images from the same application SHA with `deploy.yml`.
-5. Promote the same SHA to `apps/wdmvp/backend.yaml` and `frontend.yaml` through the reviewed GitOps promotion workflow.
+4. `deploy.yml` automatically builds immutable `-production` images for the same SHA after the exact-SHA test gate and publishes a successful `production-ready` deployment signal.
+5. `kuber-infrastructure/.github/workflows/wdmv-auto-reconcile.yml` observes only the latest successful `main` candidate and the matching `production-ready` signal, re-verifies test, then updates `apps/wdmvp/backend.yaml` and `frontend.yaml` on GitOps `main`.
 6. Promote only when data-changing prerequisites are satisfied. Schema-changing or destructive changes remain blocked when verified separate-media recovery is unavailable.
 7. Require Flux reconciliation and Kubernetes rollout completion for the production Deployments.
 8. Verify `/`, `/status`, `/robots.txt`, `/sitemap.xml`, and `/ads.txt` as applicable on the production origin.

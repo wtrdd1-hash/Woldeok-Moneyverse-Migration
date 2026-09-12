@@ -1,5 +1,12 @@
 # Changelog
 
+## v2026.09.12.13 — Automatic Test-to-Production GitOps Reconciliation
+- Added an exact application SHA as the public build identity used by `/api/version`.
+- A successful `main` Test Candidate now drives isolated Test GitOps reconciliation automatically.
+- Production image creation starts only after the same SHA is live on Test and the backend/database catalog path plus noindex boundary pass.
+- Successful same-SHA Production images publish a `production-ready` deployment signal; GitOps accepts only a signal matching the latest successful `main` candidate and re-checks Test immediately before Production mutation.
+- Production GitOps reconciliation is followed by exact-SHA public smoke checks. Test/Production namespaces and PostgreSQL databases remain isolated.
+
 ## v2026.09.12.10 — Test-to-Production Deployment Gate
 - Restored documentation parity with the active isolated `wdmv-test` Kubernetes/Flux environment.
 - `main` pushes now build immutable exact-SHA test candidate images after the reusable CI gate.
