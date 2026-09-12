@@ -57,7 +57,7 @@ interface AlertEvent {
 }
 
 export default async function DashboardPage() {
-  await requireMember('/dashboard');
+  await requireMember();
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
