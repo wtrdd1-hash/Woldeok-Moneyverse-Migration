@@ -12,6 +12,8 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 - [Detailed Product Design Specification — Korean](planning/PRODUCT_DESIGN_SPEC.ko.md)
 - [Default Limit Policy](planning/DEFAULT_LIMIT_POLICY.md)
 - [Default Limit Policy — Korean](planning/DEFAULT_LIMIT_POLICY.ko.md)
+- [Unlimited-Default Consistency Implementation Specification](planning/LIMIT_CONSISTENCY_IMPLEMENTATION_SPEC.md)
+- [Unlimited-Default Consistency Implementation Specification — Korean](planning/LIMIT_CONSISTENCY_IMPLEMENTATION_SPEC.ko.md)
 - [Economy Sinks Specification](planning/ECONOMY_SINKS_SPEC.md)
 - [Economy Sinks Specification — Korean](planning/ECONOMY_SINKS_SPEC.ko.md)
 - [Economy Sink Catalog](planning/ECONOMY_SINK_CATALOG.md)
@@ -68,6 +70,10 @@ The project plan is a living specification. Intentional, validated implementatio
 
 ## Release history and work logs
 
+- [Unlimited-Default Consistency v2026.09.12.23 changelog](changelog/2026-09-12-unlimited-consistency-v2026.09.12.23.md)
+- [Unlimited-Default Consistency v2026.09.12.23 changelog — Korean](changelog/2026-09-12-unlimited-consistency-v2026.09.12.23.ko.md)
+- [Product planning v2026.09.12.23 worklog](worklog/2026-09-12-product-planning-v2026.09.12.23.md)
+- [Product planning v2026.09.12.23 worklog — Korean](worklog/2026-09-12-product-planning-v2026.09.12.23.ko.md)
 - [Community & Market Integrity v2026.09.12.21 changelog](changelog/2026-09-12-community-market-integrity-v2026.09.12.21.md)
 - [Community & Market Integrity v2026.09.12.21 changelog — Korean](changelog/2026-09-12-community-market-integrity-v2026.09.12.21.ko.md)
 - [Product planning v2026.09.12.21 worklog](worklog/2026-09-12-product-planning-v2026.09.12.21.md)
