@@ -135,9 +135,9 @@ Privacy/terms/cookie disclosures must describe the actual implementation. Under-
 
 ## 12. Pre-production verification and deployment
 
-The earlier always-on test stack was retired from the repository deployment workflow on 2026-09-08. This infrastructure fact must not be confused with removing the pre-production validation requirement.
+The isolated `wdmv-test` Kubernetes/Flux stack is active again. Every releasable `main` SHA must be deployed and validated there before Production. Test and Production use separate namespaces and PostgreSQL databases.
 
-When a dedicated test stack exists, changes are deployed and validated there first. When it does not exist, the strongest available pre-production gate is mandatory: CI, lint/type/build/tests, real-PostgreSQL database verification where required, migration parity, secret/dependency scanning, backup/restore checks for risky changes, and an explicit production smoke/rollback plan.
+The deployment gate is fail-closed: CI and immutable test-image build must succeed, the exact application SHA must be observed on `test.easy-scraping.com`, the backend/database smoke path must pass, and only then may same-SHA Production images and GitOps manifests advance. If the dedicated test stack is unavailable or does not serve the exact SHA, Production automation stops.
 
 A run must never claim “test server passed” if no dedicated test server was available.
 

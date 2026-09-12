@@ -1,5 +1,12 @@
 # 변경 기록
 
+## v2026.09.12.13 — 테스트→운영 GitOps 자동 승격
+- `/api/version`이 정확한 애플리케이션 SHA를 공개 빌드 식별자로 사용하도록 했습니다.
+- `main`의 Test Candidate 성공 시 독립 테스트 GitOps 반영이 자동으로 진행됩니다.
+- 동일 SHA가 테스트 서버에 실제 반영되고 백엔드/DB 카탈로그 경로와 noindex 경계가 통과한 경우에만 운영 이미지 빌드를 시작합니다.
+- 동일 SHA 운영 이미지 성공 시 `production-ready` 신호를 만들고, GitOps는 최신 `main` 테스트 후보와 SHA가 일치할 때만 테스트를 재검증한 뒤 운영 manifest를 갱신합니다.
+- 운영 GitOps 반영 뒤에도 정확한 SHA의 공개 스모크 검증을 수행합니다. 테스트/운영 namespace와 PostgreSQL DB 분리는 유지됩니다.
+
 ## v2026.09.12.10 — 테스트→운영 배포 게이트
 - 현재 활성화된 독립 `wdmv-test` Kubernetes/Flux 환경에 맞춰 배포 문서를 동기화했습니다.
 - `main` 푸시 시 공통 CI 통과 후 정확한 SHA의 테스트 후보 이미지를 자동 빌드하도록 했습니다.

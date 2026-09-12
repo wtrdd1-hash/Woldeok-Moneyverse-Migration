@@ -1,6 +1,9 @@
 name: Build Production Release
 
 on:
+  workflow_run:
+    workflows: [Build Test Candidate]
+    types: [completed]
   workflow_dispatch:
     inputs:
       enable_ads:
@@ -13,7 +16,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: build-production-release
+  group: build-production-release-${{ github.event.workflow_run.head_sha || github.sha }}
   cancel-in-progress: false
 
 env:
@@ -21,52 +24,85 @@ env:
   IMAGE_PREFIX: ${{ github.repository_owner }}/wdmv
 
 jobs:
-  ref:
+  test-gate:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
+    outputs:
+      release_sha: ${{ steps.release.outputs.sha }}
     steps:
-      - name: Enforce production branch policy
+      - name: Resolve immutable release SHA
+        id: release
         shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_SHA: ${{ github.event.workflow_run.head_sha }}
+          DISPATCH_SHA: ${{ github.sha }}
+          DISPATCH_REF: ${{ github.ref }}
         run: |
           set -euo pipefail
-          if [ "${GITHUB_REF}" != 'refs/heads/main' ]; then
-            echo '::error::production release images may only be built from main'
-            exit 1
+          if [[ "$EVENT_NAME" == workflow_run ]]; then
+            sha="$WORKFLOW_SHA"
+          else
+            [[ "$DISPATCH_REF" == refs/heads/main ]] || { echo '::error::manual production release requires main'; exit 1; }
+            sha="$DISPATCH_SHA"
           fi
-          echo "preparing immutable production images for ${GITHUB_SHA}"
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo '::error::invalid release SHA'; exit 1; }
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
-  verify:
-    needs: ref
-    uses: ./.github/workflows/ci.yml
+      - name: Wait for exact SHA on isolated test and verify backend/database path
+        shell: bash
+        env:
+          RELEASE_SHA: ${{ steps.release.outputs.sha }}
+        run: |
+          set -euo pipefail
+          for _ in $(seq 1 60); do
+            version="$(curl -fsS --max-time 10 https://test.easy-scraping.com/api/version 2>/dev/null | jq -r '.id // empty' || true)"
+            if [[ "$version" == "$RELEASE_SHA" ]]; then
+              curl -fsS --max-time 15 https://test.easy-scraping.com/app-api/shop/public-catalog \
+                | jq -e '.catalogItems | type == "array" and length > 0' >/dev/null
+              headers="$(curl -fsSI --max-time 10 https://test.easy-scraping.com/ || true)"
+              grep -Eiq '^x-robots-tag:.*noindex' <<<"$headers"
+              echo "isolated test verified for $RELEASE_SHA"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::isolated test never served exact SHA $RELEASE_SHA"
+          exit 1
 
   build:
-    needs: verify
+    needs: test-gate
     runs-on: ubuntu-latest
     environment: production
     permissions:
       contents: read
       packages: write
-    outputs:
-      backend: ${{ steps.meta.outputs.backend }}
-      frontend: ${{ steps.meta.outputs.frontend }}
+      deployments: write
+    env:
+      RELEASE_SHA: ${{ needs.test-gate.outputs.release_sha }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: docker/setup-buildx-action@v3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ env.RELEASE_SHA }}
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
       - name: Log in to GHCR
-        uses: docker/login-action@v4
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Compute immutable image references
+      - name: Compute immutable production image references
         id: meta
         shell: bash
         run: |
           set -euo pipefail
           prefix=$(echo "${REGISTRY}/${IMAGE_PREFIX}" | tr '[:upper:]' '[:lower:]')
-          echo "backend=${prefix}/backend:${GITHUB_SHA}-production" >> "$GITHUB_OUTPUT"
-          echo "frontend=${prefix}/frontend:${GITHUB_SHA}-production" >> "$GITHUB_OUTPUT"
+          echo "backend=${prefix}/backend:${RELEASE_SHA}-production" >> "$GITHUB_OUTPUT"
+          echo "frontend=${prefix}/frontend:${RELEASE_SHA}-production" >> "$GITHUB_OUTPUT"
       - name: Build and push backend
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
           context: .
           file: backend/Dockerfile
@@ -78,7 +114,7 @@ jobs:
           cache-from: type=gha,scope=backend-production
           cache-to: type=gha,mode=max,scope=backend-production
       - name: Build and push frontend
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
           context: .
           file: frontend/Dockerfile
@@ -88,27 +124,33 @@ jobs:
           sbom: true
           build-args: |
             APP_BASE_URL=https://easy-scraping.com
+            BUILD_ID=${{ env.RELEASE_SHA }}
             SEO_INDEXING_ENABLED=true
             SEARCH_CONSOLE_VERIFICATION=${{ vars.SEARCH_CONSOLE_VERIFICATION }}
-            ADS_ENABLED=${{ inputs.enable_ads && 'true' || 'false' }}
-            ADSENSE_PUBLISHER_ID=${{ inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}
-            ADSENSE_HOME_SLOT=${{ inputs.enable_ads && '2118692561' || '' }}
+            ADS_ENABLED=${{ github.event_name == 'workflow_dispatch' && inputs.enable_ads && 'true' || 'false' }}
+            ADSENSE_PUBLISHER_ID=${{ github.event_name == 'workflow_dispatch' && inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}
+            ADSENSE_HOME_SLOT=${{ github.event_name == 'workflow_dispatch' && inputs.enable_ads && '2118692561' || '' }}
           tags: ${{ steps.meta.outputs.frontend }}
           cache-from: type=gha,scope=frontend-production
           cache-to: type=gha,mode=max,scope=frontend-production
-      - name: Write GitOps promotion summary
+      - name: Publish exact-SHA production-ready signal
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          payload="$(jq -n --arg ref "$RELEASE_SHA" '{ref:$ref,environment:"production-ready",auto_merge:false,required_contexts:[],description:"Exact-SHA images passed isolated test gate"}')"
+          deployment_id="$(gh api --method POST "repos/${GITHUB_REPOSITORY}/deployments" --input - --jq '.id' <<<"$payload")"
+          status_payload="$(jq -n '{state:"success",environment:"production-ready",description:"Production images are ready for GitOps reconciliation",auto_inactive:false}')"
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/deployments/${deployment_id}/statuses" --input - <<<"$status_payload" >/dev/null
+      - name: Write release summary
+        shell: bash
+        run: |
           {
-            echo '## Production images built'
+            echo '## Production images ready after isolated test gate'
             echo
-            echo 'This workflow intentionally does not mutate the production cluster.'
-            echo 'Production is reconciled by Flux from wtrdd1-hash/kuber-infrastructure.'
-            echo
+            echo "- exact SHA: \`${RELEASE_SHA}\`"
             echo "- backend: \`${{ steps.meta.outputs.backend }}\`"
             echo "- frontend: \`${{ steps.meta.outputs.frontend }}\`"
-            echo
-            echo 'Promote by updating apps/minipc/wdmvp/backend.yaml and frontend.yaml in the GitOps repository through a reviewed PR.'
-            echo 'After merge, require Flux Ready, Kubernetes rollout completion, public smoke checks, and the production data-integrity audit before reporting success.'
+            echo '- GitOps automation may promote only this exact SHA after observing the production-ready signal.'
           } >> "$GITHUB_STEP_SUMMARY"

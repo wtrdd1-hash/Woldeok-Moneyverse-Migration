@@ -1,5 +1,12 @@
 # Update Log
 
+## v2026.09.12.13 — Automatic Test→Production release pipeline
+- Internal release pipeline version: `v2026.09.12.13`.
+- Branch: `ops/auto-test-prod-v2026.09.12.13`.
+- Added exact-SHA Test identity, fail-closed Test smoke gating, automatic Production image creation, and a cross-repository Production-ready signal.
+- GitOps automation remains the only cluster mutation path; application Actions do not receive kubeconfig or Production database credentials.
+- Rollback anchor remains the previously pinned Production image SHA. Production success is reported only after the public exact-SHA and backend/database smoke checks pass.
+
 ## 2026-09-03 — Comprehensive Moneyverse Enhancement and Optimization
 
 - Created branch `feature/moneyverse-comprehensive-enhancement` from `main`.
