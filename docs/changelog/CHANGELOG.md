@@ -1,5 +1,13 @@
 # Changelog
 
+## v2026.09.12.1 — Product Growth & Retention Planning
+- Added a dedicated bilingual product growth/retention plan.
+- Defined onboarding, daily/weekly/seasonal loops and reactivation strategy.
+- Proposed a fictional WDX stock universe, market-event model and staged trading progression.
+- Defined shop product families, collections, rotations, social competition and referral loops.
+- Added activation/retention/economy/growth KPIs, abuse controls and experiment backlog.
+- Documentation-only update; no runtime, database or production configuration changes.
+
 ## v2026.09.07.2 — Localized Guide Parity
 - Expanded all 10 localized READMEs into full guides instead of short summaries.
 - Added the Production GUI showcase, responsive behavior, architecture, gameplay/economy, WLD precision, security, mobile API, deployment, backup and development sections to every language.
