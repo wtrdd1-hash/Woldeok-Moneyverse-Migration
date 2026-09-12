@@ -56,6 +56,8 @@
 
 - 버전: `v2026.09.13.18`
 - 브랜치: `docs/clubhouse-ux-operations-v2026.09.13.18`
+- PR: #221 — squash merge 완료
+- 병합 커밋: `01e5d8a72f0f3b83bbd83a7fbbd9a9f09fac2b09`
 - 변경 유형: 문서-only
 - 테스트 서버: 이번 문서 변경에는 배포 불필요
 - 실제 구현: 별도 개발 브랜치 -> 격리 Test -> backend/DB/API/authorization/accessibility 검증 -> Production
