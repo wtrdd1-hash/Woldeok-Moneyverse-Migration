@@ -61,7 +61,8 @@ No Production/Test implementation claim is made. When runtime becomes reachable,
 
 - Version: `v2026.09.13.18`
 - Branch: `docs/clubhouse-ux-operations-v2026.09.13.18`
-- PR: create after all bilingual docs and index updates are complete
+- PR: #221 — squash merged to `main`
+- Merge commit: `01e5d8a72f0f3b83bbd83a7fbbd9a9f09fac2b09`
 - Documentation-only: yes
 - Test server required for this docs change: no
 - Runtime implementation later: separate development branch -> isolated Test -> backend/DB/API/authz/accessibility validation -> Production
