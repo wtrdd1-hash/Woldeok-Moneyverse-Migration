@@ -3,6 +3,7 @@ name: Build Test Candidate
 on:
   push:
     branches:
+      - main
       - 'auto/hourly-*'
       - 'test-candidate/*'
       - 'ops/cicd-db-isolation-backup-*'

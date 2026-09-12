@@ -39,18 +39,21 @@ The GitOps manifests must reference the exact SHA-qualified images being promote
 
 ## Test gate
 
-There is none. A `wdmv-test` namespace existed for one day and was removed on 2026-09-09; `test.easy-scraping.com` now answers 404. No commit is exercised anywhere between CI and production, so CI plus the pre-promotion checks below are the entire gate — and a green CI run is not the same as a candidate that has run.
+The isolated `wdmv-test` environment is active again and is reconciled independently by Flux from `kuber-infrastructure/staging/wdmv-test`. It uses its own namespace and PostgreSQL StatefulSet, and `test.easy-scraping.com` is the pre-production origin.
+
+Every application `main` push builds immutable `-test` images after CI. Promotion to `wdmv-test` must pin backend, frontend, migration source, and candidate metadata to the same full application SHA. Production promotion is blocked operationally until that exact candidate is Ready and the public test origin passes backend/API and frontend smoke checks.
 
 ## Production promotion
 
-1. Confirm the candidate is the current application `main` SHA and CI is green.
-2. Build immutable production images from that exact SHA.
-3. Update `apps/wdmvp/backend.yaml` and `frontend.yaml` in `kuber-infrastructure` and commit directly to its `main`; that repository takes direct pushes, not branches or pull requests.
-4. Promote only when data-changing prerequisites are satisfied. Schema-changing or destructive changes remain blocked when verified separate-media recovery is unavailable.
-5. Wait for Flux reconciliation.
-6. Require Kubernetes rollout completion for the changed Deployments. Kubernetes documents `kubectl rollout status` as the rollout completion check; a zero exit status means the rollout completed.
-7. Verify `/`, `/status`, `/robots.txt`, `/sitemap.xml`, and `/ads.txt` as applicable.
-8. Re-run the production aggregate data-integrity audit and confirm backup/recovery state when the release can affect data.
+1. Confirm the candidate is the current application `main` SHA and CI plus `Build Test Candidate` are green.
+2. Promote that exact SHA to the isolated `wdmv-test` GitOps manifests through `kuber-infrastructure/.github/workflows/wdmv-promote.yml`.
+3. Require Flux readiness, Kubernetes rollout completion, and public smoke checks on `https://test.easy-scraping.com`, including backend/API health.
+4. Build immutable `-production` images from the same application SHA with `deploy.yml`.
+5. Promote the same SHA to `apps/wdmvp/backend.yaml` and `frontend.yaml` through the reviewed GitOps promotion workflow.
+6. Promote only when data-changing prerequisites are satisfied. Schema-changing or destructive changes remain blocked when verified separate-media recovery is unavailable.
+7. Require Flux reconciliation and Kubernetes rollout completion for the production Deployments.
+8. Verify `/`, `/status`, `/robots.txt`, `/sitemap.xml`, and `/ads.txt` as applicable on the production origin.
+9. Re-run the production aggregate data-integrity audit and confirm backup/recovery state when the release can affect data.
 
 ## Migration safety
 
