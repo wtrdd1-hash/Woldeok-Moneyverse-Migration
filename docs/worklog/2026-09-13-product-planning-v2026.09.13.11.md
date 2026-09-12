@@ -57,7 +57,6 @@ External retrieval of `https://easy-scraping.com` failed during this pass. Runti
 - `docs/planning/ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.ko.md`
 - English/Korean changelog for v2026.09.13.11
 - English/Korean worklog for v2026.09.13.11
-- English/Korean documentation index links
 
 ## Branch / PR / deployment
 
