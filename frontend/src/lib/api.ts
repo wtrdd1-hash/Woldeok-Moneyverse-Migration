@@ -128,15 +128,12 @@ export async function api<T>(path: string, request: ApiRequest = {}): Promise<T>
   // The real client address, so the API's rate limiter counts the visitor
   // rather than counting this process once for everybody.
   //
-  // Both headers, and the API prefers the first: Cloudflare writes
-  // `CF-Connecting-IP` itself and overwrites whatever the visitor sent, while
-  // it appends to a visitor-supplied `X-Forwarded-For`. Forwarding only the
-  // appendable one would let a visitor be counted as somebody else.
+  // Only the edge-overwritten address is relayed. `X-Forwarded-For` is not:
+  // its first hop can be visitor supplied, so forwarding it would let a caller
+  // forge audit IPs and rotate rate-limit identities.
   const incoming = await headers();
   const connectingIp = incoming.get('cf-connecting-ip');
   if (connectingIp) requestHeaders['cf-connecting-ip'] = connectingIp;
-  const forwardedFor = incoming.get('x-forwarded-for');
-  if (forwardedFor) requestHeaders['x-forwarded-for'] = forwardedFor;
   const country = incoming.get('cf-ipcountry') ?? incoming.get('x-vercel-ip-country');
   if (country && /^[A-Za-z]{2}$/.test(country))
     requestHeaders['cf-ipcountry'] = country.toUpperCase();
@@ -245,8 +242,6 @@ export async function apiWithCookie<T>(
   const incoming = await headers();
   const connectingIp = incoming.get('cf-connecting-ip');
   if (connectingIp) requestHeaders['cf-connecting-ip'] = connectingIp;
-  const forwardedFor = incoming.get('x-forwarded-for');
-  if (forwardedFor) requestHeaders['x-forwarded-for'] = forwardedFor;
   const country = incoming.get('cf-ipcountry') ?? incoming.get('x-vercel-ip-country');
   if (country && /^[A-Za-z]{2}$/.test(country))
     requestHeaders['cf-ipcountry'] = country.toUpperCase();
