@@ -73,6 +73,7 @@ jobs:
           sbom: true
           build-args: |
             APP_BASE_URL=https://test.easy-scraping.com
+            BUILD_ID=${{ github.sha }}
             SEO_INDEXING_ENABLED=false
             SEARCH_CONSOLE_VERIFICATION=
             ADS_ENABLED=false
