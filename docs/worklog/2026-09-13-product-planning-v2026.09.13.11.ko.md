@@ -57,7 +57,6 @@ Test 배포 필요: 없음
 - `docs/planning/ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.ko.md`
 - v2026.09.13.11 영문/한국어 changelog
 - v2026.09.13.11 영문/한국어 worklog
-- 영문/한국어 문서 INDEX 링크
 
 ## 브랜치/PR/배포
 
