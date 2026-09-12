@@ -56,6 +56,8 @@ No claim is made that current Production/Test club or clubhouse runtime already 
 
 - Version: `v2026.09.13.18`
 - Branch: `docs/clubhouse-ux-operations-v2026.09.13.18`
+- PR: #221 — squash merged to `main`
+- Merge commit: `01e5d8a72f0f3b83bbd83a7fbbd9a9f09fac2b09`
 - Change type: documentation-only
 - Test deployment: not required for this documentation change
 - Runtime implementation: separate development branch -> isolated Test -> backend/DB/API/authorization/accessibility validation -> Production
