@@ -56,6 +56,7 @@ The spec makes banking accounting explicit:
 
 - Version: `v2026.09.13.13`
 - Branch: `docs/banking-credit-safety-v2026.09.13.13`
+- PR: #216
 - Change type: documentation-only
 - Test deployment: not required for this documentation change
 - Runtime implementation: separate development branch -> isolated Test -> backend/DB/API/UI validation -> Production
