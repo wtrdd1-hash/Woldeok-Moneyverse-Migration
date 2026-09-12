@@ -55,6 +55,21 @@ export default async function QuestsPage() {
         경품은 지급되지 않습니다.
       </PageHeader>
 
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3">
+        <div>
+          <p className="text-sm font-medium">다가오는 일정도 한곳에서 확인하세요.</p>
+          <p className="text-xs text-muted-foreground">
+            시즌 이벤트 종료 시각, 오늘의 사건, 주간 목표 갱신 시각을 일정 허브에서 모아 봅니다.
+          </p>
+        </div>
+        <Link
+          href="/calendar"
+          className="inline-flex min-h-10 items-center rounded-md border px-3 text-sm font-medium hover:bg-muted"
+        >
+          일정 보기 →
+        </Link>
+      </div>
+
       {/* The day's event comes first because it expires: the ladder, the
           books and the weekly goals are all still there tomorrow, and this is
           the one thing on the screen that is not. */}
@@ -76,8 +91,8 @@ export default async function QuestsPage() {
             description="사건을 추측해서 보여 주지는 않습니다. 잠시 후 다시 확인해 주세요."
           />
         ) : today.event === null ? (
-          // A different fact from the one above: the request worked and there
-          // is no event open at all.
+          // A different fact from the one above: the request worked and the
+          // catalogue has nothing open for today.
           <EmptyState
             title="지금은 열린 사건이 없어요."
             description="사건이 다시 열리면 이 자리에 표시돼요."
@@ -224,65 +239,47 @@ export default async function QuestsPage() {
         <h2 id="npc-title" className="text-lg">
           NPC 주문
         </h2>
-        <p className="max-w-prose text-sm leading-[1.8] text-muted-foreground">
-          주문을 하나 받으면 그 NPC와의 친밀도가 오르고, ‘이웃 돕기’ 퀘스트도 함께 1회 진행돼요.
-          지금까지 쌓인 친밀도는 아직 이 화면에서 다시 불러올 수 없어요. 주문을 받으면 그 결과에
-          지금 친밀도가 표시됩니다.
-        </p>
-
         <div className="grid gap-3 sm:grid-cols-2">
           {NPCS.map((npc) => (
             <NpcCard key={npc.code} npc={npc}>
-              <NpcOrderButton code={npc.code} />
+              <NpcOrderButton npc={npc} />
             </NpcCard>
           ))}
         </div>
       </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>다음 해금 단계</CardTitle>
-          <CardDescription>
-            퀘스트와 주문을 이어 가면 다음 성장 단계가 열려요.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-3">
-          {board === null ? (
-            <p className="text-sm text-muted-foreground">
-              다음 해금 단계를 불러오지 못했어요. 잠시 후 다시 확인해 주세요.
-            </p>
-          ) : (
+      <section aria-labelledby="stage-title" className="grid gap-3">
+        <h2 id="stage-title" className="text-lg">
+          성장 단계
+        </h2>
+        {board === null ? (
+          <EmptyState
+            title="성장 단계를 불러오지 못했어요."
+            description="단계나 해금 조건을 추측해서 보여 주지는 않습니다."
+          />
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>현재 단계</CardTitle>
+                <CardDescription>실제 활동 기록을 기준으로 계산됩니다.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-2xl font-semibold">{board.stage}</p>
+              </CardContent>
+            </Card>
             <NextUnlock unlock={board.next_unlock} />
-          )}
-          <p className="text-xs text-muted-foreground">
-            단계와 조건은{' '}
-            <Link href="/progression" className="text-clay-ink">
-              성장 단계
-            </Link>{' '}
-            화면에서 자세히 볼 수 있어요.
-          </p>
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </section>
 
       <Card>
         <CardHeader>
           <CardTitle>알림 설정</CardTitle>
-          <CardDescription>
-            퀘스트와 NPC 주문 소식을 받을지 정할 수 있어요. 알림을 꺼도 진행 기록은 그대로 남아요.
-          </CardDescription>
+          <CardDescription>퀘스트 진행 알림을 받을지 선택합니다.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4">
-          {/* Honest about what this screen cannot show. The preference is only
-              readable through the board, so a failed read leaves the box
-              showing the default rather than the member's own setting -- and
-              a box that looks like a saved choice but is not would be worse
-              than saying so. */}
-          {board === null && (
-            <p className="text-sm text-muted-foreground">
-              지금 저장되어 있는 설정을 불러오지 못했어요. 아래에서 저장하면 그 값으로 바뀝니다.
-            </p>
-          )}
-          <NotificationForm enabled={board === null ? null : board.notifications_enabled} />
+        <CardContent>
+          <NotificationForm enabled={board?.notifications_enabled ?? false} />
         </CardContent>
       </Card>
     </div>
