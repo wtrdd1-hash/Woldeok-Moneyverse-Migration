@@ -4,6 +4,7 @@ import { MessageSquare } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { PublicAdvertisement } from '@/components/public-advertisement';
+import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatDay, formatMoment } from '@/lib/money';
@@ -19,6 +20,15 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+interface StockContext {
+  readonly stockId: string;
+  readonly symbol: string;
+  readonly name: string;
+  readonly category: string;
+  readonly stance: string;
+  readonly positionDisclosure: string;
+}
+
 interface PostSummary {
   readonly postId: string;
   readonly title: string;
@@ -27,10 +37,27 @@ interface PostSummary {
   readonly updatedAt: string | null;
   readonly commentCount: number;
   readonly mine: boolean;
+  readonly stock: StockContext | null;
 }
 
-export default async function BoardPage() {
-  const data = await publicApi<{ posts: PostSummary[] }>('/api/v1/board/public/posts', 60);
+function selectedStock(value: string | string[] | undefined): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return /^[A-Za-z0-9._-]{1,16}$/.test(trimmed) ? trimmed.toUpperCase() : null;
+}
+
+export default async function BoardPage({
+  searchParams,
+}: {
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const params = await searchParams;
+  const stock = selectedStock(params.stock);
+  const suffix = stock ? `?stock=${encodeURIComponent(stock)}` : '';
+  const data = await publicApi<{ posts: PostSummary[] }>(
+    `/api/v1/board/public/stock-posts${suffix}`,
+    60,
+  );
 
   return (
     <div className="grid gap-6">
@@ -38,6 +65,20 @@ export default async function BoardPage() {
         게시글과 댓글은 누구나 읽을 수 있습니다. 글과 댓글 작성은 로그인하고 최신 정책에
         동의한 회원만 가능합니다.
       </PageHeader>
+
+      {stock ? (
+        <Card>
+          <CardContent className="flex flex-wrap items-center justify-between gap-3 pt-6">
+            <div className="flex items-center gap-2 text-sm">
+              <Badge variant="secondary">{stock}</Badge>
+              <span>종목과 연결된 토론만 보고 있습니다.</span>
+            </div>
+            <Link className="text-sm font-semibold underline underline-offset-4" href="/board">
+              전체 글 보기
+            </Link>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <BoardParticipation />
 
@@ -49,7 +90,7 @@ export default async function BoardPage() {
           <EmptyState title="게시글을 불러오지 못했어요." />
         ) : data.posts.length === 0 ? (
           <EmptyState
-            title="아직 작성된 글이 없어요."
+            title={stock ? `${stock} 토론 글이 아직 없어요.` : '아직 작성된 글이 없어요.'}
             description="회원의 첫 이야기를 기다리고 있어요."
           />
         ) : (
@@ -64,6 +105,11 @@ export default async function BoardPage() {
                     >
                       <span className="min-w-0 flex-1">
                         <span className="flex items-center gap-2">
+                          {post.stock ? (
+                            <Badge variant="outline" className="shrink-0">
+                              {post.stock.symbol}
+                            </Badge>
+                          ) : null}
                           <b className="truncate font-bold">{post.title}</b>
                           {post.commentCount > 0 && (
                             <span
