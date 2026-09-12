@@ -1,0 +1,63 @@
+name: Cleanup Merged Branches
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cleanup-merged-branches
+  cancel-in-progress: false
+
+jobs:
+  delete-merged-pr-branch:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.head.ref != 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete merged source branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          encoded="$(jq -rn --arg v "$HEAD_REF" '$v|@uri')"
+          gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${encoded}" || {
+            echo "branch already absent or protected: $HEAD_REF"
+          }
+
+  prune-contained-branches:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete only branches fully contained in main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          main_sha="$(gh api "repos/${GITHUB_REPOSITORY}/branches/main" --jq '.commit.sha')"
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/branches?per_page=100" --jq '.[].name' |
+          while IFS= read -r branch; do
+            case "$branch" in
+              main|production|staging|develop|release/*) continue ;;
+            esac
+            encoded="$(jq -rn --arg v "$branch" '$v|@uri')"
+            cmp="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${encoded}...${main_sha}" 2>/dev/null || true)"
+            [[ -n "$cmp" ]] || continue
+            behind="$(jq -r '.behind_by // -1' <<<"$cmp")"
+            if [[ "$behind" == "0" ]]; then
+              echo "deleting branch fully contained in main: $branch"
+              gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${encoded}" || true
+            fi
+          done
