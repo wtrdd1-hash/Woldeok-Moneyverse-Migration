@@ -18,6 +18,7 @@
 - [클럽 및 협동 경제 명세](planning/CLUBS_COOPERATIVE_ECONOMY_SPEC.ko.md)
 - [커뮤니티 및 시장 무결성 명세](planning/COMMUNITY_MARKET_INTEGRITY_SPEC.ko.md)
 - [수익화·한국/미국 규정 준수·검색 성장 명세](planning/MONETIZATION_COMPLIANCE_SEO_SPEC.ko.md)
+- [검색 노출 운영 명세](planning/SEARCH_DISCOVERY_OPERATIONS_SPEC.ko.md)
 - [미성년자 안전·연령확인·콘텐츠 삭제 명세](planning/MINOR_SAFETY_AGE_ASSURANCE_CONTENT_REMOVAL_SPEC.ko.md)
 
 프로젝트 계획은 계속 갱신되는 초안/상시 명세입니다. 개발 시작 전과 개발 중간에 최신 내용을 다시 확인합니다.
@@ -73,6 +74,8 @@
 
 ## 변경 기록 / 작업 로그
 - [전체 한국어 CHANGELOG](changelog/CHANGELOG.ko.md)
+- [검색 노출 운영 v2026.09.13.1 변경 기록](changelog/2026-09-13-search-discovery-operations-v2026.09.13.1.ko.md)
+- [제품 기획 v2026.09.13.1 작업 로그](worklog/2026-09-13-product-planning-v2026.09.13.1.ko.md)
 - [미성년자 안전·연령확인 v2026.09.12.35 변경 기록](changelog/2026-09-12-minor-safety-age-assurance-v2026.09.12.35.ko.md)
 - [제품 기획 v2026.09.12.35 작업 로그](worklog/2026-09-12-product-planning-v2026.09.12.35.ko.md)
 - [공개 게시판 / SEO 후보 변경 기록](changelog/2026-09-08-public-board-seo.ko.md)
@@ -102,4 +105,4 @@
 6. 모든 의미 있는 작업은 버전을 부여하고 내부 작업 기록과 GitHub 변경 기록에 동일 버전을 남깁니다.
 7. 새 한국어 문서 상단에는 영어 원문과 한국어 색인으로 이동할 수 있는 링크를 둡니다.
 
-현재 한국어 문서 정비 작업 버전: **v2026.09.12.35**
+현재 한국어 문서 정비 작업 버전: **v2026.09.13.1**
