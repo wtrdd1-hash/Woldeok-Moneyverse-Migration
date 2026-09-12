@@ -1,4 +1,4 @@
--- 126-business-settlement-v2-idempotency.sql
+-- 178-business-settlement-v2-idempotency.sql
 -- Update version: 2026.09.12-02
 --
 -- business_settle_daily_v2 was introduced after the repository's idempotency

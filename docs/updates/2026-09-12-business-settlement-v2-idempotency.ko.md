@@ -16,7 +16,7 @@
 
 ## 수정 내용
 
-신규 migration `126-business-settlement-v2-idempotency.sql`에서 V2 정산 함수만 교체했습니다.
+신규 migration `178-business-settlement-v2-idempotency.sql`에서 V2 정산 함수만 교체했습니다.
 
 처리 순서를 다음과 같이 고정했습니다.
 
@@ -47,7 +47,7 @@
 따라서 이번 버전은 운영 반영하지 않습니다. 다음 조건을 모두 확인한 뒤에만 운영 승격합니다.
 
 - GitHub CI 통과
-- 테스트 DB에 migration 126 적용
+- 테스트 DB에 migration 178 적용
 - 테스트 서버 백엔드 정상 기동 확인
 - 최초 V2 정산이 `42702` 없이 성공
 - 동일 사용자 동일 키 재요청은 `replayed = true`

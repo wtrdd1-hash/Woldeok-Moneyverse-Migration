@@ -169,12 +169,22 @@ export function NewStockForm() {
   return (
     <form action={action} className="grid gap-4 sm:grid-cols-2">
       <Field>
-        <FieldLabel htmlFor="stock-symbol">종목 코드</FieldLabel>
-        <Input id="stock-symbol" name="symbol" maxLength={12} required className="font-mono" />
+        <FieldLabel htmlFor="stock-symbol">종목 코드 (영문 대문자 2~8자)</FieldLabel>
+        <Input
+          id="stock-symbol"
+          name="symbol"
+          maxLength={8}
+          placeholder="예: AAPL, BTC, SAM1"
+          required
+          className="font-mono uppercase"
+          onChange={(e) => {
+            e.currentTarget.value = e.currentTarget.value.toUpperCase();
+          }}
+        />
       </Field>
       <Field>
-        <FieldLabel htmlFor="stock-name">종목명</FieldLabel>
-        <Input id="stock-name" name="name" maxLength={100} required />
+        <FieldLabel htmlFor="stock-name">종목명 (최대 80자)</FieldLabel>
+        <Input id="stock-name" name="name" maxLength={80} placeholder="예: 애플, 비트코인" required />
       </Field>
       <Field className="sm:col-span-2">
         <FieldLabel htmlFor="stock-description">설명</FieldLabel>
