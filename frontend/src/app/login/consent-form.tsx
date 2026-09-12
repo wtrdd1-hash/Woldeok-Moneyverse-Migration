@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -41,6 +41,21 @@ export function ConsentForm({
   const [termsRead, setTermsRead] = useState(false);
   const [privacyRead, setPrivacyRead] = useState(false);
   const [accepted, setAccepted] = useState({ terms: false, privacy: false, age: false });
+
+  useEffect(() => {
+    // Intercept back-button navigation to prevent bypassing required consent
+    window.history.pushState({ page: 'consent-guard' }, '', window.location.href);
+
+    const handlePopState = () => {
+      window.history.pushState({ page: 'consent-guard' }, '', window.location.href);
+      alert('서비스 이용을 위해 이용약관 및 개인정보처리방침 동의를 먼저 완료해 주세요.');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
 
   const ready = accepted.terms && accepted.privacy && accepted.age;
 

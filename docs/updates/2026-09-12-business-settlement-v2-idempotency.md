@@ -16,7 +16,7 @@ The first two defects are regressions from the repository idempotency template a
 
 ## Change
 
-Migration `126-business-settlement-v2-idempotency.sql` replaces only the V2 settlement function and restores the required mutation order:
+Migration `178-business-settlement-v2-idempotency.sql` replaces only the V2 settlement function and restores the required mutation order:
 
 1. validate `p_actor`, `p_ownership_id`, and `p_idempotency_key`;
 2. acquire `pg_advisory_xact_lock(hashtextextended('moneyverse:business_settle_daily_v2:' || key, 0))`;
@@ -44,7 +44,7 @@ Database-backed verification requires CI or a connected scratch/staging PostgreS
 Do not merge/promote this update to production until all of the following are true:
 
 - CI migration parity and database-backed tests pass;
-- migration 126 is applied to the staging/test database;
+- migration 178 is applied to the staging/test database;
 - the staging backend starts successfully against that schema;
 - the initial V2 settlement path completes without SQLSTATE `42702`;
 - same-key replay returns the original receipt with `replayed = true`;

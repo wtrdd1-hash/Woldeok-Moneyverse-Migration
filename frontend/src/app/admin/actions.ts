@@ -63,20 +63,27 @@ export async function setUserRestriction(
 }
 
 export async function createStock(_previous: ActionState, formData: FormData): Promise<ActionState> {
-  const symbol = text(formData.get('symbol'));
+  const symbol = text(formData.get('symbol')).toUpperCase();
   const name = text(formData.get('name'));
   const description = text(formData.get('description'));
-  const price = wholeAmount(formData.get('price'));
-  const shares = wholeAmount(formData.get('shares'));
+  const rawPrice = wholeAmount(formData.get('price'));
+  const rawShares = wholeAmount(formData.get('shares'));
 
-  if (symbol === '' || symbol.length > 12) {
-    return { status: 'error', message: '종목 코드를 1~12자로 입력해 주세요.' };
+  const SYMBOL_REGEX = /^[A-Z][A-Z0-9]{1,7}$/;
+  if (!SYMBOL_REGEX.test(symbol)) {
+    return {
+      status: 'error',
+      message: '종목 코드는 영문 대문자로 시작하는 2~8자 영문 대문자 및 숫자여야 해요 (예: AAPL, BTC, SAM1).',
+    };
   }
-  if (name === '' || name.length > 100) {
-    return { status: 'error', message: '종목명을 1~100자로 입력해 주세요.' };
+  if (name === '' || name.length > 80) {
+    return { status: 'error', message: '종목명을 1~80자로 입력해 주세요.' };
   }
-  if (price === null) return { status: 'error', message: '시작 가격은 1 이상 정수여야 해요.' };
-  if (shares === null) {
+  const price = rawPrice !== null ? Number(rawPrice) : null;
+  const shares = rawShares !== null ? Number(rawShares) : null;
+
+  if (price === null || price < 10) return { status: 'error', message: '시작 가격은 10 WLD 이상 정수여야 해요.' };
+  if (shares === null || shares < 1) {
     return { status: 'error', message: '발행 주식 수는 1 이상 정수여야 해요.' };
   }
 
@@ -105,10 +112,11 @@ export async function setStockPrice(
   formData: FormData,
 ): Promise<ActionState> {
   const stockId = text(formData.get('stockId'));
-  const price = wholeAmount(formData.get('price'));
+  const rawPrice = wholeAmount(formData.get('price'));
+  const price = rawPrice !== null ? Number(rawPrice) : null;
 
   if (stockId === '') return { status: 'error', message: '종목을 찾을 수 없어요.' };
-  if (price === null || Number(price) < 10) {
+  if (price === null || price < 10) {
     return { status: 'error', message: '가격은 10 이상 정수여야 해요.' };
   }
   const code = text(formData.get('code'));

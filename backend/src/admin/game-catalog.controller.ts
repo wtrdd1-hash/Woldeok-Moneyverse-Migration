@@ -14,11 +14,13 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsIn,
   IsInt,
   IsOptional,
+  Matches,
   Max,
   Min,
   IsPositive,
@@ -41,27 +43,32 @@ import { StockService } from '../stock/stock.service';
 import { GameCatalogInputError, PostgresGameCatalogRepository } from './game-catalog.repository';
 
 export class CreateStockDto {
-  @ApiProperty({ maxLength: 12 })
+  @ApiProperty({ maxLength: 8, example: 'AAPL' })
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toUpperCase() : value))
   @IsString()
-  @MinLength(1)
-  @MaxLength(12)
+  @Matches(/^[A-Z][A-Z0-9]{1,7}$/, {
+    message: 'symbol must be 2-8 uppercase alphanumeric characters starting with a letter',
+  })
   readonly symbol!: string;
 
-  @ApiProperty({ maxLength: 100 })
+  @ApiProperty({ maxLength: 80 })
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
   @MinLength(1)
-  @MaxLength(100)
+  @MaxLength(80)
   readonly name!: string;
 
   @ApiProperty({ required: false, maxLength: 500 })
   @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
   @MaxLength(500)
   readonly description?: string;
 
-  @ApiProperty({ type: Number, minimum: 1 })
+  @ApiProperty({ type: Number, minimum: 10 })
+  @Type(() => Number)
   @IsInt()
-  @IsPositive()
+  @Min(10)
   readonly price!: number;
 
   /**
@@ -72,6 +79,7 @@ export class CreateStockDto {
    */
   @ApiProperty({ type: Number, required: false, minimum: 1 })
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   @IsPositive()
   readonly shares?: number;
@@ -79,6 +87,7 @@ export class CreateStockDto {
 
 export class SetStockPriceDto {
   @ApiProperty({ type: Number, minimum: 10 })
+  @Type(() => Number)
   @IsInt()
   @Min(10)
   readonly price!: number;

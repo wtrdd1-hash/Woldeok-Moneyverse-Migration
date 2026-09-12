@@ -7,6 +7,8 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { Toaster } from '@/components/ui/sonner';
 import { StaleTabNotice } from '@/components/stale-tab-notice';
+import { ConsentGuard } from '@/components/consent-guard';
+import { currentViewer } from '@/lib/viewer';
 import { NOTICE_PREFERENCE_SCRIPT } from '@/lib/notice-preference';
 import { POINT_PREFERENCE_SCRIPT } from '@/lib/theme';
 import { jsonLd } from '@/lib/json-ld';
@@ -126,6 +128,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const explicit = cookieStore.get(LOCALE_COOKIE)?.value;
   const detected = cookieStore.get(DETECTED_LOCALE_COOKIE)?.value;
   const locale = isLocale(explicit) ? explicit : isLocale(detected) ? detected : DEFAULT_LOCALE;
+  const viewer = await currentViewer();
 
   return (
     <html
@@ -137,6 +140,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${myeongjo.variable} ${notoKr.variable} ${plexMono.variable}`}
     >
       <body>
+        <ConsentGuard signedIn={viewer.signedIn} consentCurrent={viewer.consentCurrent} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: jsonLd(siteStructuredData) }}
