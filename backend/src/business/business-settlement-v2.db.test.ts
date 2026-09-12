@@ -94,6 +94,14 @@ describe.skipIf(!MIGRATOR_DATABASE_URL)('business_settle_daily_v2 idempotency', 
       const attacker = await member(client);
       await fund(client, owner, 100000);
 
+      // Migration 101 adds a job-level purchase gate. Give this fixture enough
+      // progression so the test reaches the settlement behavior it is about.
+      await client.query(
+        `INSERT INTO public.user_job_progress (user_id, job_type, experience, level)
+         VALUES ($1, 'carrier'::public.work_job_type, 10000, 10)`,
+        [owner],
+      );
+
       const { rows: businesses } = await client.query<{ id: string }>(
         `SELECT id::text AS id
          FROM public.virtual_business_types
