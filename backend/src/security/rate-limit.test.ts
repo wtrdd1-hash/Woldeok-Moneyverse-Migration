@@ -45,20 +45,20 @@ describe('requestClientKey', () => {
     expect(requestClientKey(request, { trustForwardedFor: false })).toBe('10.0.0.4');
   });
 
-  it('uses the first forwarded address only when the header is trusted', () => {
+  it('ignores x-forwarded-for even when trusted proxy mode is enabled', () => {
     const request = {
       headers: { 'x-forwarded-for': '203.0.113.9, 10.0.0.1' },
       socket: { remoteAddress: '10.0.0.4' },
     };
-    expect(requestClientKey(request, { trustForwardedFor: true })).toBe('203.0.113.9');
+    expect(requestClientKey(request, { trustForwardedFor: true })).toBe('10.0.0.4');
   });
 
-  it('handles a repeated header arriving as an array', () => {
+  it('ignores repeated x-forwarded-for values too', () => {
     const request = {
       headers: { 'x-forwarded-for': ['203.0.113.9', '198.51.100.7'] },
       socket: { remoteAddress: '10.0.0.4' },
     };
-    expect(requestClientKey(request, { trustForwardedFor: true })).toBe('203.0.113.9');
+    expect(requestClientKey(request, { trustForwardedFor: true })).toBe('10.0.0.4');
   });
 
   it('falls back to the socket address when a trusted header is absent', () => {
@@ -93,6 +93,14 @@ describe('requestClientKey', () => {
     expect(requestClientKey(request, { trustForwardedFor: true })).toBe('203.0.113.9');
   });
 
+  it('rejects a malformed trusted edge address', () => {
+    const request = {
+      headers: { 'cf-connecting-ip': '203.0.113.9, 198.51.100.7' },
+      socket: { remoteAddress: '10.0.0.4' },
+    };
+    expect(requestClientKey(request, { trustForwardedFor: true })).toBe('10.0.0.4');
+  });
+
   it('ignores the proxy-written address when no proxy is trusted', () => {
     const request = {
       headers: { 'cf-connecting-ip': '203.0.113.9' },
@@ -101,12 +109,12 @@ describe('requestClientKey', () => {
     expect(requestClientKey(request, { trustForwardedFor: false })).toBe('10.0.0.4');
   });
 
-  it('still reads the forwarded list when the proxy wrote nothing', () => {
+  it('fails closed to the socket when the trusted edge header is empty', () => {
     const request = {
       headers: { 'cf-connecting-ip': '   ', 'x-forwarded-for': '203.0.113.9' },
       socket: { remoteAddress: '10.0.0.4' },
     };
-    expect(requestClientKey(request, { trustForwardedFor: true })).toBe('203.0.113.9');
+    expect(requestClientKey(request, { trustForwardedFor: true })).toBe('10.0.0.4');
   });
 });
 

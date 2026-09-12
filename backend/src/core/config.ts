@@ -396,8 +396,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     // Public indexing stays opt-in. A test URL or a newly connected domain
     // must not become searchable until its canonical host is reviewed.
     seoIndexingEnabled: env.SEO_INDEXING_ENABLED === 'true',
-    // Enable only when the last reverse proxy removes client-supplied
-    // X-Forwarded-For values and writes its own trusted value.
+    // Legacy environment name: this enables trusted edge metadata. Client IP
+    // resolution accepts only the edge-overwritten CF-Connecting-IP value;
+    // X-Forwarded-For is intentionally never treated as caller identity.
     trustProxyForwardedFor: env.TRUST_PROXY_X_FORWARDED_FOR === 'true',
     internalToken,
     oauth: {
