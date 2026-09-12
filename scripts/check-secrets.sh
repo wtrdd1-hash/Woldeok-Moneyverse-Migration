@@ -55,6 +55,17 @@ if [ -n "$env_files" ]; then
   fail=1
 fi
 
+# Runtime databases, dumps, backups and backend-generated exports belong on the
+# host or backup storage, never in Git. This also catches `git add -f`, which
+# .gitignore alone cannot prevent. SQL source migrations are intentionally not
+# matched; only dump/compressed-data shapes and runtime data paths are blocked.
+data_files="$(git ls-files | grep -E '(^|/)(backend/(data|storage|uploads|backups)/|backups/)|\.(dump|backup|db|sqlite|sqlite3)(\.gz)?$|\.sql\.(gz|zst|xz)$|^backend/.*\.(csv|jsonl|ndjson|log|bak)$' || true)"
+if [ -n "$data_files" ]; then
+  printf '%s\n' "$data_files" >&2
+  echo '^ backend runtime data or a database backup is tracked: keep only code/schema in Git' >&2
+  fail=1
+fi
+
 scan '\-\-\-\-\-BEGIN [A-Z ]*PRIVATE KEY\-\-\-\-\-' \
   'a private key block'
 

@@ -32,3 +32,29 @@ test-results/
 
 # Claude Code local state: agent worktrees and machine-local settings
 .claude/
+
+# Backend runtime data — code/schema stay in Git, real data never does
+backend/data/
+backend/storage/
+backend/uploads/
+backend/backups/
+backups/
+
+# Database dumps and local database files
+*.dump
+*.dump.gz
+*.backup
+*.backup.gz
+*.db
+*.sqlite
+*.sqlite3
+*.sql.gz
+*.sql.zst
+*.sql.xz
+
+# Backend exports and runtime logs
+backend/**/*.csv
+backend/**/*.jsonl
+backend/**/*.ndjson
+backend/**/*.log
+backend/**/*.bak
