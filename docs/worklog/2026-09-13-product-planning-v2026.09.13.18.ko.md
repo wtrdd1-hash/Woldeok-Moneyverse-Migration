@@ -61,7 +61,8 @@ Production/Test 구현상태를 추정하지 않는다. 외부 접근 복구 첫
 
 - 버전: `v2026.09.13.18`
 - 브랜치: `docs/clubhouse-ux-operations-v2026.09.13.18`
-- PR: 영/한 문서와 index 완료 후 생성
+- PR: #221 — squash merge 완료
+- 병합 커밋: `01e5d8a72f0f3b83bbd83a7fbbd9a9f09fac2b09`
 - 문서-only: 예
 - 이번 변경 테스트 서버: 불필요
 - 실제 구현: 별도 개발 브랜치 -> 격리 Test -> backend/DB/API/authz/accessibility 검증 -> Production
