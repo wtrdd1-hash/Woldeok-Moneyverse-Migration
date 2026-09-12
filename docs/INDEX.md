@@ -6,6 +6,8 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 
 - [Living Project Plan](planning/PROJECT_PLAN.md)
 - [Living Project Plan — Korean](planning/PROJECT_PLAN.ko.md)
+- [Product Growth & Retention Plan](planning/PRODUCT_GROWTH_PLAN.md)
+- [Product Growth & Retention Plan — Korean](planning/PRODUCT_GROWTH_PLAN.ko.md)
 
 The project plan is a living specification. Intentional, validated implementation changes must update the plan in the same development flow; accidental violations of security/data-integrity invariants must be fixed in code rather than documented away.
 
