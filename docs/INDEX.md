@@ -20,6 +20,8 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 - [Personal Spaces & City Projects Specification — Korean](planning/PERSONAL_SPACES_CITY_PROJECTS_SPEC.ko.md)
 - [Player Marketplace & Crafting Specification](planning/PLAYER_MARKETPLACE_CRAFTING_SPEC.md)
 - [Player Marketplace & Crafting Specification — Korean](planning/PLAYER_MARKETPLACE_CRAFTING_SPEC.ko.md)
+- [Banking & Financial Services Specification](planning/BANKING_FINANCIAL_SERVICES_SPEC.md)
+- [Banking & Financial Services Specification — Korean](planning/BANKING_FINANCIAL_SERVICES_SPEC.ko.md)
 
 The project plan is a living specification. Intentional, validated implementation changes must update the plan in the same development flow; accidental violations of security/data-integrity invariants must be fixed in code rather than documented away.
 
@@ -64,6 +66,10 @@ The project plan is a living specification. Intentional, validated implementatio
 
 ## Release history and work logs
 
+- [Banking & Financial Services v2026.09.12.17 changelog](changelog/2026-09-12-banking-financial-services-v2026.09.12.17.md)
+- [Banking & Financial Services v2026.09.12.17 changelog — Korean](changelog/2026-09-12-banking-financial-services-v2026.09.12.17.ko.md)
+- [Product planning v2026.09.12.17 worklog](worklog/2026-09-12-product-planning-v2026.09.12.17.md)
+- [Product planning v2026.09.12.17 worklog — Korean](worklog/2026-09-12-product-planning-v2026.09.12.17.ko.md)
 - [Player Marketplace & Crafting v2026.09.12.16 changelog](changelog/2026-09-12-player-marketplace-crafting-v2026.09.12.16.md)
 - [Player Marketplace & Crafting v2026.09.12.16 changelog — Korean](changelog/2026-09-12-player-marketplace-crafting-v2026.09.12.16.ko.md)
 - [Product planning v2026.09.12.16 worklog](worklog/2026-09-12-product-planning-v2026.09.12.16.md)
