@@ -28,6 +28,8 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 - [Clubs & Cooperative Economy Specification — Korean](planning/CLUBS_COOPERATIVE_ECONOMY_SPEC.ko.md)
 - [Community & Market Integrity Specification](planning/COMMUNITY_MARKET_INTEGRITY_SPEC.md)
 - [Community & Market Integrity Specification — Korean](planning/COMMUNITY_MARKET_INTEGRITY_SPEC.ko.md)
+- [Monetization, Korea/US Compliance & Search Growth Specification](planning/MONETIZATION_COMPLIANCE_SEO_SPEC.md)
+- [Monetization, Korea/US Compliance & Search Growth Specification — Korean](planning/MONETIZATION_COMPLIANCE_SEO_SPEC.ko.md)
 
 The project plan is a living specification. Intentional, validated implementation changes must update the plan in the same development flow; accidental violations of security/data-integrity invariants must be fixed in code rather than documented away.
 
@@ -72,6 +74,10 @@ The project plan is a living specification. Intentional, validated implementatio
 
 ## Release history and work logs
 
+- [Monetization, Compliance & SEO v2026.09.12.27 changelog](changelog/2026-09-12-monetization-compliance-seo-v2026.09.12.27.md)
+- [Monetization, Compliance & SEO v2026.09.12.27 changelog — Korean](changelog/2026-09-12-monetization-compliance-seo-v2026.09.12.27.ko.md)
+- [Product planning v2026.09.12.27 worklog](worklog/2026-09-12-product-planning-v2026.09.12.27.md)
+- [Product planning v2026.09.12.27 worklog — Korean](worklog/2026-09-12-product-planning-v2026.09.12.27.ko.md)
 - [Business Operations & Supply Chain v2026.09.12.25 changelog](changelog/2026-09-12-business-operations-supply-chain-v2026.09.12.25.md)
 - [Business Operations & Supply Chain v2026.09.12.25 changelog — Korean](changelog/2026-09-12-business-operations-supply-chain-v2026.09.12.25.ko.md)
 - [Product planning v2026.09.12.25 worklog](worklog/2026-09-12-product-planning-v2026.09.12.25.md)
