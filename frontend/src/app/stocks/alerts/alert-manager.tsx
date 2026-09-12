@@ -20,12 +20,14 @@ export interface AlertEvent {
   readonly trigger_price: string; readonly trigger_day_change_bps: number; readonly triggered_at: string;
 }
 
+type AlertThreshold = Pick<AlertRule, 'condition_kind' | 'threshold_amount' | 'threshold_bps'>;
+
 const conditionLabel: Record<string, string> = {
   price_at_or_above: '가격 이상', price_at_or_below: '가격 이하',
   day_change_at_or_above: '일일 변동률 이상', day_change_at_or_below: '일일 변동률 이하',
 };
 
-function thresholdText(rule: Pick<AlertRule, 'condition_kind' | 'threshold_amount' | 'threshold_bps'>): string {
+function thresholdText(rule: AlertThreshold): string {
   if (rule.condition_kind.startsWith('price_')) return `${rule.threshold_amount ?? '-'} WLD`;
   const bps = rule.threshold_bps ?? 0;
   return `${bps >= 0 ? '+' : ''}${(bps / 100).toFixed(2)}%`;
@@ -53,7 +55,7 @@ export function AlertManager({ stocks, alerts, events, isEn }: { readonly stocks
 
       <section className="grid gap-3" aria-labelledby="active-alerts"><h2 id="active-alerts" className="text-lg font-semibold">{isEn ? 'Active alerts' : '활성 알림'}</h2>{alerts.length === 0 ? <p className="text-sm text-muted-foreground">{isEn ? 'No conditional alerts yet.' : '아직 조건부 알림이 없습니다.'}</p> : <div className="grid gap-3 md:grid-cols-2">{alerts.map((rule) => <AlertRuleCard key={rule.alert_id} rule={rule} isEn={isEn} />)}</div>}</section>
 
-      <Card><CardHeader><CardTitle>{isEn ? 'Recent triggers' : '최근 발생 알림'}</CardTitle><CardDescription>{isEn ? 'Stored server-side trigger history. Repeated triggers are suppressed until the condition resets; cooldown also protects rapid re-entry.' : '서버에서 발생한 조건 기록입니다. 조건이 해제되기 전에는 반복 발생하지 않으며 재진입에도 cooldown이 적용됩니다.'}</CardDescription></CardHeader><CardContent className="grid gap-3">{events.length === 0 ? <p className="text-sm text-muted-foreground">{isEn ? 'No alerts have triggered yet.' : '아직 발생한 알림이 없습니다.'}</p> : events.map((event) => <div key={event.event_id} className="rounded-md border p-3 text-sm"><div className="font-medium">{event.symbol} · {event.name}</div><div className="text-muted-foreground">{conditionLabel[event.condition_kind] ?? event.condition_kind} {thresholdText(event as AlertRule)} · {isEn ? 'trigger price' : '발생 가격'} {event.trigger_price} WLD · {event.trigger_day_change_bps >= 0 ? '+' : ''}{(event.trigger_day_change_bps / 100).toFixed(2)}%</div><time className="text-xs text-muted-foreground" dateTime={event.triggered_at}>{new Date(event.triggered_at).toLocaleString()}</time></div>)}</CardContent></Card>
+      <Card><CardHeader><CardTitle>{isEn ? 'Recent triggers' : '최근 발생 알림'}</CardTitle><CardDescription>{isEn ? 'Stored server-side trigger history. Repeated triggers are suppressed until the condition resets; cooldown also protects rapid re-entry.' : '서버에서 발생한 조건 기록입니다. 조건이 해제되기 전에는 반복 발생하지 않으며 재진입에도 cooldown이 적용됩니다.'}</CardDescription></CardHeader><CardContent className="grid gap-3">{events.length === 0 ? <p className="text-sm text-muted-foreground">{isEn ? 'No alerts have triggered yet.' : '아직 발생한 알림이 없습니다.'}</p> : events.map((event) => <div key={event.event_id} className="rounded-md border p-3 text-sm"><div className="font-medium">{event.symbol} · {event.name}</div><div className="text-muted-foreground">{conditionLabel[event.condition_kind] ?? event.condition_kind} {thresholdText(event)} · {isEn ? 'trigger price' : '발생 가격'} {event.trigger_price} WLD · {event.trigger_day_change_bps >= 0 ? '+' : ''}{(event.trigger_day_change_bps / 100).toFixed(2)}%</div><time className="text-xs text-muted-foreground" dateTime={event.triggered_at}>{new Date(event.triggered_at).toLocaleString()}</time></div>)}</CardContent></Card>
     </div>
   );
 }
