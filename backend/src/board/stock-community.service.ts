@@ -5,6 +5,7 @@ import { boardText } from './board.service';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const STORAGE_KEY = /^[0-9a-f-]{36}\.(png|jpg|webp)$/;
+const STOCK_SYMBOL = /^[A-Za-z0-9._-]{1,16}$/;
 
 export interface StockTaggedPostInput {
   readonly actorUserId: string;
@@ -85,7 +86,7 @@ export class StockCommunityService {
 
   async create(input: StockTaggedPostInput) {
     if (!UUID.test(input.actorUserId) || !UUID.test(input.idempotencyKey)) throw new Error('invalid board identity');
-    if (!/^[A-Za-z0-9._-]{1,16}$/.test(input.stockSymbol)) throw new Error('invalid stock symbol');
+    if (!STOCK_SYMBOL.test(input.stockSymbol)) throw new Error('invalid stock symbol');
     if (input.imageStorageKey && !STORAGE_KEY.test(input.imageStorageKey)) throw new Error('invalid board image');
     const row = await queryOne<StockTaggedRow>(this.pool,
       `SELECT post_id::text,title,body,author_name,created_at,updated_at,mine,image_storage_key,image_alt_text,
@@ -98,11 +99,14 @@ export class StockCommunityService {
     return mapped(row);
   }
 
-  async publicList() {
+  async publicList(stockSymbol?: string) {
+    const normalized = stockSymbol?.trim() || null;
+    if (normalized !== null && !STOCK_SYMBOL.test(normalized)) throw new Error('invalid stock symbol');
     const rows = await queryRows<StockTaggedRow>(this.pool,
       `SELECT post_id::text,title,author_name,created_at,updated_at,comment_count,mine,image_storage_key,image_alt_text,
               primary_stock_id::text,stock_symbol,stock_name,category,stance,position_disclosure
-         FROM public.member_board_public_list_with_stock($1)`, [50]);
+         FROM public.member_board_public_list_with_stock($1)
+        WHERE $2::text IS NULL OR upper(stock_symbol) = upper($2)`, [50, normalized]);
     return rows.map(mapped);
   }
 }
