@@ -14,7 +14,7 @@ Prioritize unfinished Moneyverse work and define production-grade first-party re
 - existing authentication backend structure (`backend/src/auth`), secure-cookie/session/TOTP foundations;
 - current privacy/monetization/search planning.
 
-During the work, `main` advanced to `381a26a097dc3c5970a94ad43603f9653613684b` with unrelated Korean app-gateway documentation. No direct conflict with this authentication specification was found. The branch must be brought current with `main` before merge if additional conflicting changes appear.
+During the work, `main` advanced first to `381a26a097dc3c5970a94ad43603f9653613684b` and at final recheck to `0ed6693665b8313136e3c39d0081e841db4387a5`. The concurrent changes were documentation/integration work outside this authentication specification. The comparison at final recheck showed this branch 8 commits ahead and 13 commits behind `main`; no automatic merge is performed. The branch must be synchronized with the latest main and any INDEX overlap reconciled before merge.
 
 ## Runtime verification
 
@@ -60,8 +60,9 @@ Documentation-only. No runtime Test/Production deployment is performed in this p
 
 ## Next priority
 
-1. Implement DB schema/functions and local credential repository behind least-privilege roles.
-2. Implement registration/email verification/login/recovery with Argon2id and generic public errors.
-3. Add session security center/revoke-all and ordinary-user TOTP.
-4. Add attack telemetry/rate policies and redaction tests.
-5. Run full staging security QA and runtime UI audit before enabling public local authentication.
+1. Synchronize this planning branch with current main and reconcile documentation INDEX edits before merge.
+2. Implement DB schema/functions and local credential repository behind least-privilege roles.
+3. Implement registration/email verification/login/recovery with Argon2id and generic public errors.
+4. Add session security center/revoke-all and ordinary-user TOTP.
+5. Add attack telemetry/rate policies and redaction tests.
+6. Run full staging security QA and runtime UI audit before enabling public local authentication.
