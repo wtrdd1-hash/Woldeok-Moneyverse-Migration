@@ -21,6 +21,7 @@
 - [결제·구독·소비자보호 명세](planning/BILLING_SUBSCRIPTION_CONSUMER_PROTECTION_SPEC.ko.md)
 - [검색 노출 운영 명세](planning/SEARCH_DISCOVERY_OPERATIONS_SPEC.ko.md)
 - [미성년자 안전·연령확인·콘텐츠 삭제 명세](planning/MINOR_SAFETY_AGE_ASSURANCE_CONTENT_REMOVAL_SPEC.ko.md)
+- [분석 및 실험 거버넌스 명세](planning/ANALYTICS_EXPERIMENTATION_GOVERNANCE_SPEC.ko.md)
 
 프로젝트 계획은 계속 갱신되는 초안/상시 명세입니다. 개발 시작 전과 개발 중간에 최신 내용을 다시 확인합니다.
 
@@ -75,6 +76,8 @@
 
 ## 변경 기록 / 작업 로그
 - [전체 한국어 CHANGELOG](changelog/CHANGELOG.ko.md)
+- [분석 및 실험 거버넌스 v2026.09.13.7 변경 기록](changelog/2026-09-13-analytics-experimentation-governance-v2026.09.13.7.ko.md)
+- [제품 기획 v2026.09.13.7 작업 로그](worklog/2026-09-13-product-planning-v2026.09.13.7.ko.md)
 - [결제·구독·소비자보호 v2026.09.13.6 변경 기록](changelog/2026-09-13-billing-subscription-consumer-protection-v2026.09.13.6.ko.md)
 - [제품 기획 v2026.09.13.6 작업 로그](worklog/2026-09-13-product-planning-v2026.09.13.6.ko.md)
 - [검색 노출 운영 v2026.09.13.1 변경 기록](changelog/2026-09-13-search-discovery-operations-v2026.09.13.1.ko.md)
@@ -103,9 +106,9 @@
 1. 기준 언어는 영어이며 한국어 문서를 두 번째 문서로 반드시 유지합니다.
 2. 영어 `NAME.md` → 한국어 `NAME.ko.md` 형식을 기본으로 사용합니다.
 3. 영어 문서를 수정하면 같은 작업에서 한국어 문서를 동기화합니다.
-4. 문서만 수정하는 작업은 별도 브랜치 없이 `main`에 바로 반영합니다.
+4. 문서 변경도 동시 작업이 있을 때는 최신 `main`에서 브랜치를 만들고 충돌 여부를 확인한 뒤 통합합니다.
 5. 코드·설정·DB·인프라·배포 변경은 별도 브랜치 → Test 검증 → Production 절차를 유지합니다.
 6. 모든 의미 있는 작업은 버전을 부여하고 내부 작업 기록과 GitHub 변경 기록에 동일 버전을 남깁니다.
 7. 새 한국어 문서 상단에는 영어 원문과 한국어 색인으로 이동할 수 있는 링크를 둡니다.
 
-현재 한국어 문서 정비 작업 버전: **v2026.09.13.6**
+현재 한국어 문서 정비 작업 버전: **v2026.09.13.7**
