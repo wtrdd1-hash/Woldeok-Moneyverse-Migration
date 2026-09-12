@@ -16,6 +16,8 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 - [Economy Sinks Specification — Korean](planning/ECONOMY_SINKS_SPEC.ko.md)
 - [Economy Sink Catalog](planning/ECONOMY_SINK_CATALOG.md)
 - [Economy Sink Catalog — Korean](planning/ECONOMY_SINK_CATALOG.ko.md)
+- [Personal Spaces & City Projects Specification](planning/PERSONAL_SPACES_CITY_PROJECTS_SPEC.md)
+- [Personal Spaces & City Projects Specification — Korean](planning/PERSONAL_SPACES_CITY_PROJECTS_SPEC.ko.md)
 
 The project plan is a living specification. Intentional, validated implementation changes must update the plan in the same development flow; accidental violations of security/data-integrity invariants must be fixed in code rather than documented away.
 
@@ -60,6 +62,10 @@ The project plan is a living specification. Intentional, validated implementatio
 
 ## Release history and work logs
 
+- [Personal Spaces & City Projects v2026.09.12.11 changelog](changelog/2026-09-12-personal-spaces-city-projects-v2026.09.12.11.md)
+- [Personal Spaces & City Projects v2026.09.12.11 changelog — Korean](changelog/2026-09-12-personal-spaces-city-projects-v2026.09.12.11.ko.md)
+- [Product planning v2026.09.12.11 worklog](worklog/2026-09-12-product-planning-v2026.09.12.11.md)
+- [Product planning v2026.09.12.11 worklog — Korean](worklog/2026-09-12-product-planning-v2026.09.12.11.ko.md)
 - [Economy Sink Catalog v2026.09.12.7 changelog](changelog/2026-09-12-economy-sink-catalog-v2026.09.12.7.md)
 - [Economy Sink Catalog v2026.09.12.7 changelog — Korean](changelog/2026-09-12-economy-sink-catalog-v2026.09.12.7.ko.md)
 - [Product planning v2026.09.12.7 worklog](worklog/2026-09-12-product-planning-v2026.09.12.7.md)
