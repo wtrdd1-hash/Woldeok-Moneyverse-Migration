@@ -1,5 +1,5 @@
 -- 126-business-settlement-v2-idempotency.sql
--- Update version: 2026.09.12-01
+-- Update version: 2026.09.12-02
 --
 -- business_settle_daily_v2 was introduced after the repository's idempotency
 -- template had already been established, but it did not copy the template:
@@ -7,7 +7,11 @@
 -- returned the receipt without verifying that its ownership belongs to the
 -- caller. V1 was corrected for exactly those two properties in migration 085.
 --
--- This migration changes only those invariants. The V2 boost calculation,
+-- 115 also used the unqualified names `ownership_id` and `settlement_date` in
+-- its daily duplicate check even though RETURNS TABLE declares OUT parameters
+-- with those same names. PL/pgSQL can therefore raise 42702 for that path.
+--
+-- This migration repairs those invariants only. The V2 boost calculation,
 -- daily-settlement rule, ledger postings and event payload remain unchanged.
 
 BEGIN;
