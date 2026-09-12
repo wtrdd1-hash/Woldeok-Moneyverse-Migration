@@ -18,6 +18,8 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 - [Economy Sinks Specification — Korean](planning/ECONOMY_SINKS_SPEC.ko.md)
 - [Economy Sink Catalog](planning/ECONOMY_SINK_CATALOG.md)
 - [Economy Sink Catalog — Korean](planning/ECONOMY_SINK_CATALOG.ko.md)
+- [Business Operations & Supply-Chain Specification](planning/BUSINESS_OPERATIONS_SUPPLY_CHAIN_SPEC.md)
+- [Business Operations & Supply-Chain Specification — Korean](planning/BUSINESS_OPERATIONS_SUPPLY_CHAIN_SPEC.ko.md)
 - [Personal Spaces & City Projects Specification](planning/PERSONAL_SPACES_CITY_PROJECTS_SPEC.md)
 - [Personal Spaces & City Projects Specification — Korean](planning/PERSONAL_SPACES_CITY_PROJECTS_SPEC.ko.md)
 - [Player Marketplace & Crafting Specification](planning/PLAYER_MARKETPLACE_CRAFTING_SPEC.md)
@@ -70,6 +72,10 @@ The project plan is a living specification. Intentional, validated implementatio
 
 ## Release history and work logs
 
+- [Business Operations & Supply Chain v2026.09.12.25 changelog](changelog/2026-09-12-business-operations-supply-chain-v2026.09.12.25.md)
+- [Business Operations & Supply Chain v2026.09.12.25 changelog — Korean](changelog/2026-09-12-business-operations-supply-chain-v2026.09.12.25.ko.md)
+- [Product planning v2026.09.12.25 worklog](worklog/2026-09-12-product-planning-v2026.09.12.25.md)
+- [Product planning v2026.09.12.25 worklog — Korean](worklog/2026-09-12-product-planning-v2026.09.12.25.ko.md)
 - [Unlimited-Default Consistency v2026.09.12.23 changelog](changelog/2026-09-12-unlimited-consistency-v2026.09.12.23.md)
 - [Unlimited-Default Consistency v2026.09.12.23 changelog — Korean](changelog/2026-09-12-unlimited-consistency-v2026.09.12.23.ko.md)
 - [Product planning v2026.09.12.23 worklog](worklog/2026-09-12-product-planning-v2026.09.12.23.md)
