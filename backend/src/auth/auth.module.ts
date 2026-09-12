@@ -15,6 +15,8 @@ import { SessionGuard } from './guards/session.guard';
 import { AccountModule } from '../account/account.module';
 import { AuthBootstrapController } from './bootstrap.controller';
 import { AuthController } from './auth.controller';
+import { LocalAuthController } from './local-auth.controller';
+import { LocalAuthRepository } from './local-auth.repository';
 import { OAuthClient } from './oauth-client';
 import { SecondFactorRepository } from './second-factor.repository';
 import { SessionRepository } from './session.repository';
@@ -33,12 +35,9 @@ const GUARDS = [
 
 @Module({
   imports: [forwardRef(() => AccountModule)],
-  controllers: [AuthController, AuthBootstrapController],
+  controllers: [AuthController, AuthBootstrapController, LocalAuthController],
   providers: [
     {
-      // Constructed, not injected: its constructor takes an options object
-      // with defaults (fetch implementation, JWKS endpoint, timeout) rather
-      // than provider tokens, so Nest has nothing to resolve for it.
       provide: OAuthClient,
       useFactory: () => new OAuthClient(),
     },
@@ -47,6 +46,11 @@ const GUARDS = [
       inject: [PG_POOL, EncryptionService],
       useFactory: (pool: Queryable | null, encryption: EncryptionService) =>
         pool ? new SessionRepository(pool, encryption) : null,
+    },
+    {
+      provide: LocalAuthRepository,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => (pool ? new LocalAuthRepository(pool) : null),
     },
     {
       provide: SecondFactorRepository,
@@ -58,6 +62,7 @@ const GUARDS = [
   ],
   exports: [
     SessionRepository,
+    LocalAuthRepository,
     SecondFactorRepository,
     AdminRolesRepository,
     OAuthClient,
