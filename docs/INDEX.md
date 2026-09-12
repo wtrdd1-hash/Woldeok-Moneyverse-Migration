@@ -21,6 +21,7 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 - [Clubs & Cooperative Economy Specification](planning/CLUBS_COOPERATIVE_ECONOMY_SPEC.md) / [한국어](planning/CLUBS_COOPERATIVE_ECONOMY_SPEC.ko.md)
 - [Community & Market Integrity Specification](planning/COMMUNITY_MARKET_INTEGRITY_SPEC.md) / [한국어](planning/COMMUNITY_MARKET_INTEGRITY_SPEC.ko.md)
 - [Monetization, Korea/US Compliance & Search Growth Specification](planning/MONETIZATION_COMPLIANCE_SEO_SPEC.md) / [한국어](planning/MONETIZATION_COMPLIANCE_SEO_SPEC.ko.md)
+- [Billing, Subscription & Consumer Protection Specification](planning/BILLING_SUBSCRIPTION_CONSUMER_PROTECTION_SPEC.md) / [한국어](planning/BILLING_SUBSCRIPTION_CONSUMER_PROTECTION_SPEC.ko.md)
 - [Search Discovery Operations Specification](planning/SEARCH_DISCOVERY_OPERATIONS_SPEC.md) / [한국어](planning/SEARCH_DISCOVERY_OPERATIONS_SPEC.ko.md)
 - [Minor Safety, Age Assurance & Content Removal Specification](planning/MINOR_SAFETY_AGE_ASSURANCE_CONTENT_REMOVAL_SPEC.md) / [한국어](planning/MINOR_SAFETY_AGE_ASSURANCE_CONTENT_REMOVAL_SPEC.ko.md)
 
@@ -73,6 +74,8 @@ The project plan is a living specification. Intentional, validated implementatio
 
 ## Release history and work logs
 
+- [Billing, Subscription & Consumer Protection v2026.09.13.6 changelog](changelog/2026-09-13-billing-subscription-consumer-protection-v2026.09.13.6.md) / [한국어](changelog/2026-09-13-billing-subscription-consumer-protection-v2026.09.13.6.ko.md)
+- [Product planning v2026.09.13.6 worklog](worklog/2026-09-13-product-planning-v2026.09.13.6.md) / [한국어](worklog/2026-09-13-product-planning-v2026.09.13.6.ko.md)
 - [Search Discovery Operations v2026.09.13.1 changelog](changelog/2026-09-13-search-discovery-operations-v2026.09.13.1.md) / [한국어](changelog/2026-09-13-search-discovery-operations-v2026.09.13.1.ko.md)
 - [Product planning v2026.09.13.1 worklog](worklog/2026-09-13-product-planning-v2026.09.13.1.md) / [한국어](worklog/2026-09-13-product-planning-v2026.09.13.1.ko.md)
 - [Minor Safety / Age Assurance v2026.09.12.35 changelog](changelog/2026-09-12-minor-safety-age-assurance-v2026.09.12.35.md) / [한국어](changelog/2026-09-12-minor-safety-age-assurance-v2026.09.12.35.ko.md)
