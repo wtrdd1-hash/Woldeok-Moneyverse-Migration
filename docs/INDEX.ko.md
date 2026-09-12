@@ -16,6 +16,7 @@
 - [개인 공간 및 도시 프로젝트 명세](planning/PERSONAL_SPACES_CITY_PROJECTS_SPEC.ko.md)
 - [플레이어 마켓 및 제작 명세](planning/PLAYER_MARKETPLACE_CRAFTING_SPEC.ko.md)
 - [클럽 및 협동 경제 명세](planning/CLUBS_COOPERATIVE_ECONOMY_SPEC.ko.md)
+- [클럽하우스 UX 및 운영 명세](planning/CLUBHOUSE_UX_OPERATIONS_SPEC.ko.md)
 - [커뮤니티 및 시장 무결성 명세](planning/COMMUNITY_MARKET_INTEGRITY_SPEC.ko.md)
 - [수익화·한국/미국 규정 준수·검색 성장 명세](planning/MONETIZATION_COMPLIANCE_SEO_SPEC.ko.md)
 - [결제·구독·소비자보호 명세](planning/BILLING_SUBSCRIPTION_CONSUMER_PROTECTION_SPEC.ko.md)
@@ -78,6 +79,8 @@
 
 ## 변경 기록 / 작업 로그
 - [전체 한국어 CHANGELOG](changelog/CHANGELOG.ko.md)
+- [클럽하우스 UX 및 운영 v2026.09.13.18 변경 기록](changelog/2026-09-13-clubhouse-ux-operations-v2026.09.13.18.ko.md)
+- [제품 기획 v2026.09.13.18 작업 로그](worklog/2026-09-13-product-planning-v2026.09.13.18.ko.md)
 - [은행·신용·금융학습 안전 v2026.09.13.13 변경 기록](changelog/2026-09-13-banking-credit-safety-v2026.09.13.13.ko.md)
 - [제품 기획 v2026.09.13.13 작업 로그](worklog/2026-09-13-product-planning-v2026.09.13.13.ko.md)
 - [알림 및 복귀 메시지 거버넌스 v2026.09.13.12 변경 기록](changelog/2026-09-13-notification-reactivation-governance-v2026.09.13.12.ko.md)
@@ -117,4 +120,4 @@
 6. 모든 의미 있는 작업은 버전을 부여하고 내부 작업 기록과 GitHub 변경 기록에 동일 버전을 남깁니다.
 7. 새 한국어 문서 상단에는 영어 원문과 한국어 색인으로 이동할 수 있는 링크를 둡니다.
 
-현재 한국어 문서 정비 작업 버전: **v2026.09.13.13**
+현재 한국어 문서 정비 작업 버전: **v2026.09.13.18**
