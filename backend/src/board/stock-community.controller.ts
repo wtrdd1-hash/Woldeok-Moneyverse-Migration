@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Post, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Query, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
 import { ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsIn, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
@@ -38,8 +38,8 @@ export class StockCommunityController {
 export class PublicStockCommunityController {
   constructor(@Inject(StockCommunityService) private readonly community: StockCommunityService | null) {}
   @Get()
-  async list() {
+  async list(@Query('stock') stock?: string) {
     if (!this.community) throw new ServiceUnavailableException('stock community is unavailable');
-    return { posts: await this.community.publicList() };
+    return { posts: await this.community.publicList(stock) };
   }
 }
