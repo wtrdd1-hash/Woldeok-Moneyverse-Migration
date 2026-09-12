@@ -1,5 +1,11 @@
 # Changelog
 
+## v2026.09.12.10 — Test-to-Production Deployment Gate
+- Restored documentation parity with the active isolated `wdmv-test` Kubernetes/Flux environment.
+- `main` pushes now build immutable exact-SHA test candidate images after the reusable CI gate.
+- Documented the enforced promotion order: test GitOps promotion, test readiness/API smoke checks, same-SHA production image build, reviewed production GitOps promotion, and production smoke/data-integrity checks.
+- Test and Production remain separate namespaces and PostgreSQL databases; Production is not the first runtime environment for a release candidate.
+
 ## v2026.09.12.2 — Detailed Product Design Specification
 - Added a bilingual implementation-oriented detailed product specification.
 - Defined player personas, information architecture, screen states and first-session/D1/D2–D7 onboarding.
