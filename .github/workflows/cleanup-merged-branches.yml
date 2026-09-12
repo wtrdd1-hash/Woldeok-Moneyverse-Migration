@@ -55,9 +55,8 @@ jobs:
             encoded="$(jq -rn --arg v "$branch" '$v|@uri')"
             cmp="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${encoded}...${main_sha}" 2>/dev/null || true)"
             [[ -n "$cmp" ]] || continue
-            ahead="$(jq -r '.ahead_by // -1' <<<"$cmp")"
             behind="$(jq -r '.behind_by // -1' <<<"$cmp")"
-            if [[ "$ahead" == "0" && "$behind" -ge 0 ]]; then
+            if [[ "$behind" == "0" ]]; then
               echo "deleting branch fully contained in main: $branch"
               gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${encoded}" || true
             fi
