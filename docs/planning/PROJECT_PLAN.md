@@ -187,6 +187,7 @@ The project should continue to reconcile and improve, in priority order:
 - Removed the obsolete mandatory two-person approval statement from the current plan while retaining stronger compensating controls.
 - Recorded that the previous always-on test stack was retired, while preserving mandatory pre-production verification gates.
 - Added the rule that implementation and plan documentation must be synchronized in the same workstream.
+
 ### 2026-09-09 — product expansion roadmap parity
 
 The following roadmap mirrors the Korean Living Spec and is staged behind implementation, validation, and release gates. It does not redefine WLD or any virtual-economy feature as a real financial product.
@@ -216,3 +217,5 @@ The following roadmap mirrors the Korean Living Spec and is staged behind implem
 #### P3 — long-term expansion
 
 Advanced economic analysis, recommendations, and simulation remain gated on data quality, operating cost, safety, product wording, and legal review. They must not bypass existing ledger, authorization, privacy, or probability-feature controls.
+
+The first P3 implementation slice is the `v2026.09.12.14` Economy Scenario Lab candidate: an administrator-only, read-only deterministic projection using current M2 and recent 24-hour issuance/burn figures. It does not write policy, ledger, balance, or database state and must pass the normal exact-SHA Test gate before Production. Recommendation or automatic-policy capability remains unimplemented and behind the gates above.
