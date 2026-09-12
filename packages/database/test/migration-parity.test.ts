@@ -86,6 +86,26 @@ describe('migration parity with the production database', () => {
     ]);
   });
 
+  it('rejects schema-qualified SQL constructs outside immutable legacy migrations', () => {
+    const legacy = new Set([
+      '018-economy-reconciliation-health.sql',
+      '030-discord-outbox-delivery-lease.sql',
+      '040-virtual-stock-corporate-actions.sql',
+      '041-virtual-bank-auto-interest.sql',
+      '178-business-settlement-v2-idempotency.sql',
+    ]);
+    const offenders: string[] = [];
+    const pattern = /pg_catalog\.(?:coalesce|greatest|least|nullif|extract)\s*\(/i;
+    const directory = join(PORTED_ROOT, 'migrations');
+
+    for (const name of readdirSync(directory).sort()) {
+      if (!name.endsWith('.sql') || legacy.has(name)) continue;
+      if (pattern.test(readFileSync(join(directory, name), 'utf8'))) offenders.push(name);
+    }
+
+    expect(offenders, 'SQL constructs must not be schema-qualified').toEqual([]);
+  });
+
   // An unpinned SECURITY DEFINER function is a privilege-escalation
   // primitive: it runs as its owner with whatever search_path the caller
   // chose, so a caller can shadow a referenced object with one of their own.
