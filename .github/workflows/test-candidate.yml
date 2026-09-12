@@ -5,6 +5,7 @@ on:
     branches:
       - 'auto/hourly-*'
       - 'test-candidate/*'
+      - 'ops/cicd-db-isolation-backup-*'
   workflow_dispatch:
 
 permissions:
