@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
-import { LiveRefresh } from '@/components/live-refresh';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -71,7 +70,6 @@ export default async function AdminMarketPage() {
   return (
     <div className="grid gap-5">
       <AdminBack />
-      <LiveRefresh />
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}
       </PageHeader>

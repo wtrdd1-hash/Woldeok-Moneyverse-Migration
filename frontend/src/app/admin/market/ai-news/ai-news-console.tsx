@@ -2,7 +2,6 @@
 
 import { useActionState, useState } from 'react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
-import { LiveRefresh } from '@/components/live-refresh';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -208,7 +207,7 @@ export function AiNewsGenerateForm({
             <div className="rounded-[10px] border border-primary/40 bg-primary/5 px-3 py-2 text-sm">
               <p className="font-bold">모델이 다섯 개를 쓰고 있어요 · {elapsed(runningFor)} 경과</p>
               <p className="text-xs text-muted-foreground">
-                보통 30초~2분, 최대 10분까지 기다립니다. 이 화면은 4초마다 스스로 확인해요.
+                보통 30초~2분, 최대 10분까지 기다립니다. 입력값 보호를 위해 자동 새로고침하지 않습니다.
               </p>
             </div>
           )}
@@ -230,7 +229,6 @@ export function AiNewsGenerateForm({
           <ActionAlert state={state} />
         </form>
       </CardContent>
-      {running && <LiveRefresh everyMs={4_000} />}
     </Card>
   );
 }
