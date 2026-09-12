@@ -66,12 +66,11 @@ Use fictional issuers so the game can tune events without implying real-security
 | WDX-RET | Maple Market | Retail | shop/event demand exposure |
 | WDX-LOG | BlueRoute Logistics | Logistics | business/market activity exposure |
 | WDX-ENE | Hanbit Energy | Energy | cyclical/event-driven profile |
-| WDX-MED | Mirae BioLab | Health | research-event profile |
-| WDX-MED | Mirae BioLab | Health | research-event profile |
+| WDX-BIO | Mirae BioLab | Health | research-event profile |
 | WDX-ENT | Moonlight Media | Entertainment | community/event-sensitive |
 | WDX-IND | Woldeok Composite | Index | diversified benchmark |
 
-Before implementation, resolve the duplicate draft ticker row and assign one unique ticker per issuer. The catalog itself is a planning proposal until database/admin contracts exist.
+The catalog is a planning proposal until database/admin contracts exist.
 
 ### 4.2 Market state
 Each stock needs server-defined fields for ticker, display name, sector, issue quantity, reference price, bounded volatility, intraday movement cap, market status, event sensitivity, and listing state. All price/settlement values preserve the existing integer WLD contract.
