@@ -55,6 +55,7 @@
 
 - 버전: `v2026.09.13.13`
 - 브랜치: `docs/banking-credit-safety-v2026.09.13.13`
+- PR: #216
 - 변경 유형: 문서-only
 - Test 배포: 이번 문서 변경에는 불필요
 - 런타임 구현: 별도 개발 브랜치 → 격리 Test → backend/DB/API/UI 검증 → Production
