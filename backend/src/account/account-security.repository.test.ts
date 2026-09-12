@@ -1,13 +1,14 @@
+import type { QueryResultRow } from 'pg';
 import { describe, expect, it } from 'vitest';
-import type { Queryable, QueryResultLike } from '../core/db';
+import type { Queryable } from '../core/db';
 import { AccountSecurityRepository } from './account-security.repository';
 
 function db(
   handler: (text: string, values: readonly unknown[]) => readonly Record<string, unknown>[],
 ): Queryable {
   return {
-    async query(text: string, values: readonly unknown[] = []): Promise<QueryResultLike<any>> {
-      return { rows: [...handler(text, values)] };
+    async query<R extends QueryResultRow>(text: string, values: readonly unknown[] = []) {
+      return { rows: handler(text, values) as R[] };
     },
   };
 }
