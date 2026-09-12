@@ -13,6 +13,14 @@ Required order:
 
 Other translations are optional. Whenever both English and Korean versions exist, they must describe the same behavior, operational state, and release scope.
 
+## Documentation branch rule
+
+Documentation-only edits are committed **directly to `main`**. Do not create a separate feature branch or pull request solely for documentation changes unless repository protection rules make that technically impossible.
+
+This exception applies only to documentation. Code, configuration, database, infrastructure, deployment, and runtime behavior changes continue to use the normal development flow: a separate branch, validation on the Test environment, backend/runtime verification where applicable, Production deployment, and then integration according to the repository workflow.
+
+When a documentation edit describes a code or deployment change that has not yet been validated, the document must state the real status and must not claim Test or Production completion early.
+
 ## Version format
 
 Each meaningful change set receives a version in this format:
@@ -70,7 +78,7 @@ Do not publish a Production-complete release description before the Production d
 
 ## Deployment discipline
 
-The documentation must reflect the real deployment state:
+For runtime-affecting changes, the documentation must reflect the real deployment state:
 
 ```text
 feature/fix branch
@@ -83,6 +91,8 @@ feature/fix branch
   -> finalize release documentation and GitHub Release
 ```
 
+Documentation-only changes are the explicit exception and may be committed directly to `main`.
+
 Never mark Test, Production, or `main` integration as complete before verification.
 
 ## Operational traceability
@@ -90,7 +100,7 @@ Never mark Test, Production, or `main` integration as complete before verificati
 Every meaningful change should remain traceable through the same version across:
 
 - commits
-- pull request
+- pull request, when the change requires one
 - release document
 - changelog
 - GitHub Release/tag when published
