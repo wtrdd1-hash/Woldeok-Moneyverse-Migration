@@ -55,9 +55,7 @@ export class BusinessController {
   constructor(@Inject(BusinessService) private readonly businesses: BusinessService | null) {}
 
   private service(): BusinessService {
-    if (!this.businesses) {
-      throw new ServiceUnavailableException('business service is unavailable');
-    }
+    if (!this.businesses) throw new ServiceUnavailableException('business service is unavailable');
     return this.businesses;
   }
 
@@ -74,16 +72,16 @@ export class BusinessController {
     }
   }
 
-  /**
-   * The catalogue of purchasable types, which the original served at
-   * /api/v1/businesses. The caller's own holdings took /businesses/mine; those
-   * are different resources, so the catalogue moved to its own noun and the
-   * holdings took the plain path.
-   */
   @Get('business-types')
   @ApiOperation({ summary: 'Business types available to buy' })
   async catalog() {
     return { businessTypes: await this.service().catalog() };
+  }
+
+  @Get('businesses/catalog')
+  @ApiOperation({ summary: 'App API alias: business types available to buy' })
+  catalogForApp() {
+    return this.catalog();
   }
 
   @Get('businesses')
@@ -104,6 +102,12 @@ export class BusinessController {
     return { equity: await this.service().equity(requireUserId(request)) };
   }
 
+  @Get('businesses/equity')
+  @ApiOperation({ summary: 'App API alias: own capital available for a business purchase' })
+  equityForApp(@Req() request: RequestWithSession) {
+    return this.equity(request);
+  }
+
   @Post('business-types/:id/purchases')
   @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Buy a business of this type' })
@@ -113,13 +117,20 @@ export class BusinessController {
     @Body() body: IdempotentDto,
   ) {
     return this.guarded(
-      () =>
-        this.service().purchase(requireUserId(request), {
-          businessTypeId,
-          idempotencyKey: body.idempotencyKey,
-        }),
+      () => this.service().purchase(requireUserId(request), { businessTypeId, idempotencyKey: body.idempotencyKey }),
       'this business purchase cannot be completed now',
     );
+  }
+
+  @Post('businesses/catalog/:id/purchases')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'App API alias: buy a business from the catalogue' })
+  purchaseForApp(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) businessTypeId: string,
+    @Body() body: IdempotentDto,
+  ) {
+    return this.purchase(request, businessTypeId, body);
   }
 
   @Post('businesses/:id/settlements')
@@ -131,11 +142,7 @@ export class BusinessController {
     @Body() body: IdempotentDto,
   ) {
     return this.guarded(
-      () =>
-        this.service().settle(requireUserId(request), {
-          ownershipId,
-          idempotencyKey: body.idempotencyKey,
-        }),
+      () => this.service().settle(requireUserId(request), { ownershipId, idempotencyKey: body.idempotencyKey }),
       'this settlement cannot be completed now',
     );
   }
@@ -149,11 +156,7 @@ export class BusinessController {
     @Body() body: IdempotentDto,
   ) {
     return this.guarded(
-      () =>
-        this.service().settleV2(requireUserId(request), {
-          ownershipId,
-          idempotencyKey: body.idempotencyKey,
-        }),
+      () => this.service().settleV2(requireUserId(request), { ownershipId, idempotencyKey: body.idempotencyKey }),
       'this settlement cannot be completed now',
     );
   }
@@ -161,16 +164,9 @@ export class BusinessController {
   @Post('businesses/activate-license')
   @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Activate a business using a purchased license item from inventory' })
-  activateLicense(
-    @Req() request: RequestWithSession,
-    @Body() body: ActivateLicenseDto,
-  ) {
+  activateLicense(@Req() request: RequestWithSession, @Body() body: ActivateLicenseDto) {
     return this.guarded(
-      () =>
-        this.service().activateFromLicense(requireUserId(request), {
-          catalogCode: body.catalogCode,
-          idempotencyKey: body.idempotencyKey,
-        }),
+      () => this.service().activateFromLicense(requireUserId(request), { catalogCode: body.catalogCode, idempotencyKey: body.idempotencyKey }),
       'failed to activate business license',
     );
   }
@@ -184,11 +180,7 @@ export class BusinessController {
     @Body() body: ApplyBoostDto,
   ) {
     return this.guarded(
-      () =>
-        this.service().applyBoost(requireUserId(request), {
-          ownershipId,
-          boostCode: body.boostCode,
-        }),
+      () => this.service().applyBoost(requireUserId(request), { ownershipId, boostCode: body.boostCode }),
       'failed to apply boost item',
     );
   }
