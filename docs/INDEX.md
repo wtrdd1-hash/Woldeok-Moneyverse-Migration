@@ -10,6 +10,8 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 - [Product Growth & Retention Plan — Korean](planning/PRODUCT_GROWTH_PLAN.ko.md)
 - [Detailed Product Design Specification](planning/PRODUCT_DESIGN_SPEC.md)
 - [Detailed Product Design Specification — Korean](planning/PRODUCT_DESIGN_SPEC.ko.md)
+- [Authentication Security & Implementation Priority Specification](planning/AUTHENTICATION_SECURITY_PRIORITY_SPEC.md)
+- [Authentication Security & Implementation Priority Specification — Korean](planning/AUTHENTICATION_SECURITY_PRIORITY_SPEC.ko.md)
 - [Default Limit Policy](planning/DEFAULT_LIMIT_POLICY.md)
 - [Default Limit Policy — Korean](planning/DEFAULT_LIMIT_POLICY.ko.md)
 - [Unlimited-Default Consistency Implementation Specification](planning/LIMIT_CONSISTENCY_IMPLEMENTATION_SPEC.md)
@@ -74,6 +76,10 @@ The project plan is a living specification. Intentional, validated implementatio
 
 ## Release history and work logs
 
+- [Authentication Security & Implementation Priority v2026.09.12.31 changelog](changelog/2026-09-12-auth-security-priority-v2026.09.12.31.md)
+- [Authentication Security & Implementation Priority v2026.09.12.31 changelog — Korean](changelog/2026-09-12-auth-security-priority-v2026.09.12.31.ko.md)
+- [Product planning v2026.09.12.31 worklog](worklog/2026-09-12-product-planning-v2026.09.12.31.md)
+- [Product planning v2026.09.12.31 worklog — Korean](worklog/2026-09-12-product-planning-v2026.09.12.31.ko.md)
 - [Monetization, Compliance & SEO v2026.09.12.27 changelog](changelog/2026-09-12-monetization-compliance-seo-v2026.09.12.27.md)
 - [Monetization, Compliance & SEO v2026.09.12.27 changelog — Korean](changelog/2026-09-12-monetization-compliance-seo-v2026.09.12.27.ko.md)
 - [Product planning v2026.09.12.27 worklog](worklog/2026-09-12-product-planning-v2026.09.12.27.md)
