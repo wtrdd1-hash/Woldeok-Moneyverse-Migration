@@ -1,6 +1,6 @@
 # 월덕 머니버스 모바일 앱 전체 API 통합 구현 명세서
 
-> 버전: v2026.09.13.51
+> 버전: v2026.09.13.52
 > 기준일: 2026-09-13
 > 운영 기본 주소: `https://easy-scraping.com`
 > 앱 API 기준 prefix: `/app-api/v1`
@@ -406,154 +406,163 @@ UUID v4 등 충돌 가능성이 충분히 낮은 UUID를 **사용자 의도 1회
 
 NestJS는 개발 환경에서 DTO 기반 OpenAPI를 만들지만 production에서는 의도적으로 Swagger를 mount하지 않는다. 앱은 production Swagger URL을 발견/추측하려 하지 않는다. 이 통합 문서와 저장소의 DTO/controller가 계약의 근거이며, 앱은 private internal API schema를 런타임 discovery하지 않는다.
 
+## API 경로표를 읽는 방법
+
+아래 표는 이제 단순 경로 목록이 아니라 **앱 기능 사전**이다. `기능` 열을 먼저 보고 해당 API가 어떤 화면/버튼의 동작인지 확인한 다음 호출한다. `인증/CSRF` 열은 호출 전에 갖춰야 하는 상태다.
+
+- `GET`: 화면 진입/새로고침 때 서버의 최신 상태를 읽는다.
+- `POST/PUT/DELETE`: 서버 상태를 변경한다. 연속 탭을 막고 CSRF 및 `idempotencyKey` 규칙을 지킨다.
+- 잔액·주식·사업·보상·상점·카지노 등 경제 write는 성공 후 관련 GET을 다시 호출해 UI를 서버 상태와 동기화한다.
+- `401`은 로그인/세션 문제, `403`은 동의·CSRF·권한 문제, `422`는 요청 body 타입/필드 문제, `404`는 앱 경로 구현 오류로 취급한다.
+
 ## 전체 감사된 사용자 API 라우트 목록
 
 기준: 2026-09-13 운영 NestJS 재시작 후 실제 route map. 전체 backend route: **239**. 아래 사용자 앱 매핑: **144**. 관리자, Discord webhook, health probe, worker/control-plane 경로는 의도적으로 제외한다.
 
-| Method | App API | Backend route |
-|---|---|---|
-| `DELETE` | `/app-api/v1/account` | `/api/account` |
-| `GET` | `/app-api/v1/account/identities` | `/api/account/identities` |
-| `DELETE` | `/app-api/v1/account/identities/:id` | `/api/account/identities/:id` |
-| `POST` | `/app-api/v1/account/identities/:provider/link` | `/api/account/identities/:provider/link` |
-| `GET` | `/app-api/v1/account/security/sessions` | `/api/account/security/sessions` |
-| `DELETE` | `/app-api/v1/account/security/sessions/:id` | `/api/account/security/sessions/:id` |
-| `POST` | `/app-api/v1/account/security/sessions/revoke-others` | `/api/account/security/sessions/revoke-others` |
-| `POST` | `/app-api/v1/activity/events` | `/api/activity/events` |
-| `GET` | `/app-api/v1/content/announcements` | `/api/announcements` |
-| `POST` | `/app-api/v1/auth/:provider/reauthentication` | `/api/auth/:provider/reauthentication` |
-| `PUT` | `/app-api/v1/auth/consent` | `/api/auth/consent` |
-| `POST` | `/app-api/v1/auth/local/login` | `/api/auth/local/login` |
-| `POST` | `/app-api/v1/auth/local/register` | `/api/auth/local/register` |
-| `POST` | `/app-api/v1/auth/local/verify-email` | `/api/auth/local/verify-email` |
-| `POST` | `/app-api/v1/auth/logout` | `/api/auth/logout` |
-| `POST` | `/app-api/v1/auth/mobile/handoff` | `/api/auth/mobile/handoff` |
-| `GET` | `/app-api/v1/auth/policy` | `/api/auth/policy` |
-| `POST` | `/app-api/v1/auth/prelogin-session` | `/api/auth/prelogin-session` |
-| `GET` | `/app-api/v1/auth/providers` | `/api/auth/providers` |
-| `GET` | `/app-api/v1/auth/session` | `/api/auth/session` |
-| `GET` | `/app-api/v1/auth/viewer` | `/api/auth/viewer` |
-| `GET` | `/app-api/v1/bank/loans` | `/api/bank/loans` |
-| `POST` | `/app-api/v1/bank/loans` | `/api/bank/loans` |
-| `POST` | `/app-api/v1/bank/loans/:id/repayments` | `/api/bank/loans/:id/repayments` |
-| `POST` | `/app-api/v1/bank/movements` | `/api/bank/movements` |
-| `POST` | `/app-api/v1/banking/bonds/:id/redeem` | `/api/banking/bonds/:id/redeem` |
-| `POST` | `/app-api/v1/banking/bonds/purchase` | `/api/banking/bonds/purchase` |
-| `POST` | `/app-api/v1/banking/borrow` | `/api/banking/borrow` |
-| `POST` | `/app-api/v1/banking/claim-interest` | `/api/banking/claim-interest` |
-| `POST` | `/app-api/v1/banking/deposit` | `/api/banking/deposit` |
-| `POST` | `/app-api/v1/banking/repay` | `/api/banking/repay` |
-| `GET` | `/app-api/v1/banking/standing` | `/api/banking/standing` |
-| `POST` | `/app-api/v1/banking/withdraw` | `/api/banking/withdraw` |
-| `GET` | `/app-api/v1/board/images/:key` | `/api/board/images/:key` |
-| `POST` | `/app-api/v1/board/images/uploads` | `/api/board/images/uploads` |
-| `GET` | `/app-api/v1/board/posts` | `/api/board/posts` |
-| `POST` | `/app-api/v1/board/posts` | `/api/board/posts` |
-| `DELETE` | `/app-api/v1/board/posts/:id` | `/api/board/posts/:id` |
-| `GET` | `/app-api/v1/board/posts/:id` | `/api/board/posts/:id` |
-| `PUT` | `/app-api/v1/board/posts/:id` | `/api/board/posts/:id` |
-| `GET` | `/app-api/v1/board/posts/:id/comments` | `/api/board/posts/:id/comments` |
-| `POST` | `/app-api/v1/board/posts/:id/comments` | `/api/board/posts/:id/comments` |
-| `DELETE` | `/app-api/v1/board/posts/:id/comments/:commentId` | `/api/board/posts/:id/comments/:commentId` |
-| `GET` | `/app-api/v1/board/public/images/:key` | `/api/board/public/images/:key` |
-| `GET` | `/app-api/v1/board/public/posts` | `/api/board/public/posts` |
-| `GET` | `/app-api/v1/board/public/posts/:id` | `/api/board/public/posts/:id` |
-| `GET` | `/app-api/v1/board/public/posts/:id/comments` | `/api/board/public/posts/:id/comments` |
-| `GET` | `/app-api/v1/board/public/stock-posts` | `/api/board/public/stock-posts` |
-| `POST` | `/app-api/v1/board/stock-posts` | `/api/board/stock-posts` |
-| `GET` | `/app-api/v1/businesses/equity` | `/api/business-equity` |
-| `GET` | `/app-api/v1/businesses/catalog` | `/api/business-types` |
-| `POST` | `/app-api/v1/businesses/catalog/:id/purchases` | `/api/business-types/:id/purchases` |
-| `GET` | `/app-api/v1/businesses` | `/api/businesses` |
-| `POST` | `/app-api/v1/businesses/:id/boost` | `/api/businesses/:id/boost` |
-| `POST` | `/app-api/v1/businesses/:id/settle-v2` | `/api/businesses/:id/settle-v2` |
-| `POST` | `/app-api/v1/businesses/:id/settlements` | `/api/businesses/:id/settlements` |
-| `POST` | `/app-api/v1/businesses/activate-license` | `/api/businesses/activate-license` |
-| `GET` | `/app-api/v1/businesses/catalog` | `/api/businesses/catalog` |
-| `POST` | `/app-api/v1/businesses/catalog/:id/purchases` | `/api/businesses/catalog/:id/purchases` |
-| `GET` | `/app-api/v1/businesses/equity` | `/api/businesses/equity` |
-| `GET` | `/app-api/v1/businesses/my-v2` | `/api/businesses/my-v2` |
-| `GET` | `/app-api/v1/casino/coin/fairness` | `/api/casino/coin/fairness` |
-| `POST` | `/app-api/v1/casino/coin/plays` | `/api/casino/coin/plays` |
-| `GET` | `/app-api/v1/casino/coin/terms` | `/api/casino/coin/terms` |
-| `GET` | `/app-api/v1/casino/dice/fairness` | `/api/casino/dice/fairness` |
-| `POST` | `/app-api/v1/casino/dice/plays` | `/api/casino/dice/plays` |
-| `GET` | `/app-api/v1/casino/games/terms` | `/api/casino/games/terms` |
-| `GET` | `/app-api/v1/casino/history` | `/api/casino/history` |
-| `GET` | `/app-api/v1/casino/self-limit` | `/api/casino/self-limit` |
-| `PUT` | `/app-api/v1/casino/self-limit` | `/api/casino/self-limit` |
-| `GET` | `/app-api/v1/content/announcements` | `/api/content/announcements` |
-| `GET` | `/app-api/v1/content/photos` | `/api/content/photos` |
-| `GET` | `/app-api/v1/content/status` | `/api/content/status` |
-| `POST` | `/app-api/v1/early-game/claims` | `/api/early-game/claims` |
-| `GET` | `/app-api/v1/early-game/first-day` | `/api/early-game/first-day` |
-| `GET` | `/app-api/v1/early-game/today` | `/api/early-game/today` |
-| `GET` | `/app-api/v1/engagement` | `/api/engagement` |
-| `GET` | `/app-api/v1/engagement/early-game` | `/api/engagement/early-game` |
-| `POST` | `/app-api/v1/engagement/npcs/:code/orders` | `/api/engagement/npcs/:code/orders` |
-| `PUT` | `/app-api/v1/engagement/preferences` | `/api/engagement/preferences` |
-| `GET` | `/app-api/v1/photos` | `/api/photos` |
-| `POST` | `/app-api/v1/photos` | `/api/photos` |
-| `GET` | `/app-api/v1/photos/mine` | `/api/photos/mine` |
-| `POST` | `/app-api/v1/photos/uploads` | `/api/photos/uploads` |
-| `GET` | `/app-api/v1/privacy/requests` | `/api/privacy/requests` |
-| `POST` | `/app-api/v1/privacy/requests` | `/api/privacy/requests` |
-| `GET` | `/app-api/v1/profile` | `/api/profile` |
-| `PUT` | `/app-api/v1/profile` | `/api/profile` |
-| `GET` | `/app-api/v1/profile/:userId` | `/api/profile/:userId` |
-| `DELETE` | `/app-api/v1/profile/image` | `/api/profile/image` |
-| `POST` | `/app-api/v1/profile/image` | `/api/profile/image` |
-| `GET` | `/app-api/v1/profile/settings` | `/api/profile/settings` |
-| `GET` | `/app-api/v1/progression` | `/api/progression` |
-| `GET` | `/app-api/v1/progression/credit` | `/api/progression/credit` |
-| `GET` | `/app-api/v1/progression/early-game` | `/api/progression/early-game` |
-| `POST` | `/app-api/v1/progression/refreshes` | `/api/progression/refreshes` |
-| `GET` | `/app-api/v1/rewards/availability` | `/api/rewards/availability` |
-| `POST` | `/app-api/v1/rewards/daily/claims` | `/api/rewards/daily/claims` |
-| `POST` | `/app-api/v1/rewards/work/claims` | `/api/rewards/work/claims` |
-| `GET` | `/app-api/v1/seasons/events` | `/api/seasons/events` |
-| `POST` | `/app-api/v1/seasons/events/:id/consumptions` | `/api/seasons/events/:id/consumptions` |
-| `GET` | `/app-api/v1/seasons/events/:id/leaderboard` | `/api/seasons/events/:id/leaderboard` |
-| `GET` | `/app-api/v1/shop/catalog` | `/api/shop/catalog` |
-| `POST` | `/app-api/v1/shop/catalog/:id/purchases` | `/api/shop/catalog/:id/purchases` |
-| `GET` | `/app-api/v1/shop/cosmetics/:userId` | `/api/shop/cosmetics/:userId` |
-| `GET` | `/app-api/v1/shop/holdings` | `/api/shop/holdings` |
-| `POST` | `/app-api/v1/shop/holdings/:id/consumptions` | `/api/shop/holdings/:id/consumptions` |
-| `POST` | `/app-api/v1/shop/holdings/:id/equip` | `/api/shop/holdings/:id/equip` |
-| `POST` | `/app-api/v1/shop/holdings/:id/upkeep-settlements` | `/api/shop/holdings/:id/upkeep-settlements` |
-| `GET` | `/app-api/v1/shop/items` | `/api/shop/items` |
-| `POST` | `/app-api/v1/shop/items/:id/purchases` | `/api/shop/items/:id/purchases` |
-| `GET` | `/app-api/v1/shop/public-catalog` | `/api/shop/public-catalog` |
-| `GET` | `/app-api/v1/shop/purchases` | `/api/shop/purchases` |
-| `GET` | `/app-api/v1/content/status` | `/api/status` |
-| `GET` | `/app-api/v1/stocks` | `/api/stocks` |
-| `GET` | `/app-api/v1/stocks/:id/candles` | `/api/stocks/:id/candles` |
-| `POST` | `/app-api/v1/stocks/:id/orders` | `/api/stocks/:id/orders` |
-| `GET` | `/app-api/v1/stocks/:id/prices` | `/api/stocks/:id/prices` |
-| `POST` | `/app-api/v1/stocks/:id/watchlist` | `/api/stocks/:id/watchlist` |
-| `GET` | `/app-api/v1/stocks/alerts` | `/api/stocks/alerts` |
-| `POST` | `/app-api/v1/stocks/alerts` | `/api/stocks/alerts` |
-| `DELETE` | `/app-api/v1/stocks/alerts/:id` | `/api/stocks/alerts/:id` |
-| `GET` | `/app-api/v1/stocks/alerts/events` | `/api/stocks/alerts/events` |
-| `GET` | `/app-api/v1/stocks/history` | `/api/stocks/history` |
-| `GET` | `/app-api/v1/stocks/market-events` | `/api/stocks/market-events` |
-| `GET` | `/app-api/v1/stocks/portfolio` | `/api/stocks/portfolio` |
-| `GET` | `/app-api/v1/stocks/sparklines` | `/api/stocks/sparklines` |
-| `GET` | `/app-api/v1/stocks/watchlist` | `/api/stocks/watchlist` |
-| `GET` | `/app-api/v1/wallet` | `/api/wallet` |
-| `POST` | `/app-api/v1/wallet/transfers` | `/api/wallet/transfers` |
-| `GET` | `/app-api/v1/work` | `/api/work` |
-| `POST` | `/app-api/v1/work/active-job` | `/api/work/active-job` |
-| `GET` | `/app-api/v1/work/assignments` | `/api/work/assignments` |
-| `POST` | `/app-api/v1/work/assignments` | `/api/work/assignments` |
-| `POST` | `/app-api/v1/work/assignments/:id/completions` | `/api/work/assignments/:id/completions` |
-| `POST` | `/app-api/v1/work/assignments/:id/verify` | `/api/work/assignments/:id/verify` |
-| `GET` | `/app-api/v1/work/profile` | `/api/work/profile` |
-| `GET` | `/app-api/v1/work/receipts` | `/api/work/receipts` |
-| `GET` | `/app-api/v1/work/tasks` | `/api/work/tasks` |
-| `POST` | `/app-api/v1/work/tasks/:id/complete` | `/api/work/tasks/:id/complete` |
-| `GET` | `/app-api/v1/auth/:provider/authorize` | `/auth/:provider/authorize` |
-| `GET` | `/app-api/v1/auth/:provider/callback` | `/auth/:provider/callback` |
-| `GET` | `/app-api/v1/media/:key` | `/media/:key` |
-| `GET` | `/app-api/v1/media/profile/:key` | `/media/profile/:key` |
+| 방법 | 앱 API | 기능 | 인증/CSRF | 백엔드 경로 |
+|---|---|---|---|---|
+| `DELETE` | `/app-api/v1/account` | 회원 탈퇴 및 계정 삭제 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/account` |
+| `GET` | `/app-api/v1/account/identities` | 연결된 Google/Discord 등 로그인 수단 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/account/identities` |
+| `DELETE` | `/app-api/v1/account/identities/:id` | 특정 로그인 수단 연결 해제 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/account/identities/:id` |
+| `POST` | `/app-api/v1/account/identities/:provider/link` | Google/Discord 로그인 수단 추가 연결 시작 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/account/identities/:provider/link` |
+| `GET` | `/app-api/v1/account/security/sessions` | 현재 계정의 로그인 기기/세션 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/account/security/sessions` |
+| `DELETE` | `/app-api/v1/account/security/sessions/:id` | 선택한 로그인 세션 강제 종료 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/account/security/sessions/:id` |
+| `POST` | `/app-api/v1/account/security/sessions/revoke-others` | 현재 기기 제외 모든 로그인 세션 종료 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/account/security/sessions/revoke-others` |
+| `POST` | `/app-api/v1/activity/events` | 앱 활동/참여 이벤트 서버 기록 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/activity/events` |
+| `GET` | `/app-api/v1/content/announcements` | 공지사항 목록 조회 | 공개: 로그인 불필요 | `/api/announcements` |
+| `POST` | `/app-api/v1/auth/:provider/reauthentication` | 민감 작업 전 Google/Discord 재인증 시작 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/auth/:provider/reauthentication` |
+| `PUT` | `/app-api/v1/auth/consent` | 현재 약관·개인정보·연령 동의 저장 | Prelogin 또는 로그인 세션 + CSRF | `/api/auth/consent` |
+| `POST` | `/app-api/v1/auth/local/login` | 이메일/비밀번호 로그인 | 인증 흐름 전용: 상태머신 준수 | `/api/auth/local/login` |
+| `POST` | `/app-api/v1/auth/local/register` | 이메일/비밀번호 회원가입 시작 | 인증 흐름 전용: 상태머신 준수 | `/api/auth/local/register` |
+| `POST` | `/app-api/v1/auth/local/verify-email` | 이메일 인증 완료, 계정 활성화 및 로그인 세션 발급 | 인증 흐름 전용: 상태머신 준수 | `/api/auth/local/verify-email` |
+| `POST` | `/app-api/v1/auth/logout` | 현재 로그인 세션 로그아웃 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/auth/logout` |
+| `POST` | `/app-api/v1/auth/mobile/handoff` | 모바일 Google/Discord OAuth 1회용 code를 앱 로그인 세션으로 교환 | 인증 흐름 전용: 상태머신 준수 | `/api/auth/mobile/handoff` |
+| `GET` | `/app-api/v1/auth/policy` | 현재 약관·개인정보처리방침 버전 조회 | 공개/Prelogin에서 호출 가능 | `/api/auth/policy` |
+| `POST` | `/app-api/v1/auth/prelogin-session` | 로그인 전 임시 세션과 CSRF 토큰 생성 | 인증 흐름 전용: 상태머신 준수 | `/api/auth/prelogin-session` |
+| `GET` | `/app-api/v1/auth/providers` | 현재 사용 가능한 로그인 방식(local/Google/Discord) 조회 | 공개/Prelogin에서 호출 가능 | `/api/auth/providers` |
+| `GET` | `/app-api/v1/auth/session` | 현재 로그인 세션과 최신 CSRF 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/auth/session` |
+| `GET` | `/app-api/v1/auth/viewer` | 현재 로그인 사용자 및 signedIn 상태 확인 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/auth/viewer` |
+| `GET` | `/app-api/v1/bank/loans` | 내 대출 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/bank/loans` |
+| `POST` | `/app-api/v1/bank/loans` | 신규 대출 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/bank/loans` |
+| `POST` | `/app-api/v1/bank/loans/:id/repayments` | 선택한 대출 상환 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/bank/loans/:id/repayments` |
+| `POST` | `/app-api/v1/bank/movements` | 현금 계정과 은행 계정 사이 입금/출금 이동 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/bank/movements` |
+| `POST` | `/app-api/v1/banking/bonds/:id/redeem` | 보유 채권 상환/환매 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/banking/bonds/:id/redeem` |
+| `POST` | `/app-api/v1/banking/bonds/purchase` | 채권 상품 구매 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/banking/bonds/purchase` |
+| `POST` | `/app-api/v1/banking/borrow` | 은행 대출 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/banking/borrow` |
+| `POST` | `/app-api/v1/banking/claim-interest` | 예금 이자 수령 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/banking/claim-interest` |
+| `POST` | `/app-api/v1/banking/deposit` | 은행 예금 입금 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/banking/deposit` |
+| `POST` | `/app-api/v1/banking/repay` | 은행 대출 상환 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/banking/repay` |
+| `GET` | `/app-api/v1/banking/standing` | 은행 잔액·대출·신용 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/banking/standing` |
+| `POST` | `/app-api/v1/banking/withdraw` | 은행 예금 출금 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/banking/withdraw` |
+| `GET` | `/app-api/v1/board/images/:key` | 게시판 이미지 파일 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/board/images/:key` |
+| `POST` | `/app-api/v1/board/images/uploads` | 게시글 첨부 이미지 업로드 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/board/images/uploads` |
+| `GET` | `/app-api/v1/board/posts` | 게시글 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/board/posts` |
+| `POST` | `/app-api/v1/board/posts` | 새 게시글 작성 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/board/posts` |
+| `DELETE` | `/app-api/v1/board/posts/:id` | 게시글 삭제 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/board/posts/:id` |
+| `GET` | `/app-api/v1/board/posts/:id` | 게시글 상세 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/board/posts/:id` |
+| `PUT` | `/app-api/v1/board/posts/:id` | 게시글 수정 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/board/posts/:id` |
+| `GET` | `/app-api/v1/board/posts/:id/comments` | 게시글 댓글 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/board/posts/:id/comments` |
+| `POST` | `/app-api/v1/board/posts/:id/comments` | 게시글 댓글 작성 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/board/posts/:id/comments` |
+| `DELETE` | `/app-api/v1/board/posts/:id/comments/:commentId` | 게시글 댓글 삭제 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/board/posts/:id/comments/:commentId` |
+| `GET` | `/app-api/v1/board/public/images/:key` | 로그인 없이 공개 게시판 이미지 조회 | 공개: 로그인 불필요 | `/api/board/public/images/:key` |
+| `GET` | `/app-api/v1/board/public/posts` | 로그인 없이 공개 게시글 목록 조회 | 공개: 로그인 불필요 | `/api/board/public/posts` |
+| `GET` | `/app-api/v1/board/public/posts/:id` | 로그인 없이 공개 게시글 상세 조회 | 공개: 로그인 불필요 | `/api/board/public/posts/:id` |
+| `GET` | `/app-api/v1/board/public/posts/:id/comments` | 로그인 없이 공개 게시글 댓글 조회 | 공개: 로그인 불필요 | `/api/board/public/posts/:id/comments` |
+| `GET` | `/app-api/v1/board/public/stock-posts` | 로그인 없이 공개 주식 게시글 조회 | 공개: 로그인 불필요 | `/api/board/public/stock-posts` |
+| `POST` | `/app-api/v1/board/stock-posts` | 주식 관련 게시글 작성 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/board/stock-posts` |
+| `GET` | `/app-api/v1/businesses/equity` | 사업 구매에 사용할 수 있는 자기자본 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/business-equity` |
+| `GET` | `/app-api/v1/businesses/catalog` | 사업 종류·가격·조건 카탈로그 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/business-types` |
+| `POST` | `/app-api/v1/businesses/catalog/:id/purchases` | 선택한 사업 종류 구매 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/business-types/:id/purchases` |
+| `GET` | `/app-api/v1/businesses` | 내 보유 사업 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/businesses` |
+| `POST` | `/app-api/v1/businesses/:id/boost` | 보유 사업 부스트/강화 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/businesses/:id/boost` |
+| `POST` | `/app-api/v1/businesses/:id/settle-v2` | 보유 사업 V2 정산 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/businesses/:id/settle-v2` |
+| `POST` | `/app-api/v1/businesses/:id/settlements` | 보유 사업 정산 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/businesses/:id/settlements` |
+| `POST` | `/app-api/v1/businesses/activate-license` | 사업 라이선스 활성화 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/businesses/activate-license` |
+| `GET` | `/app-api/v1/businesses/catalog` | 사업 종류·가격·조건 카탈로그 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/businesses/catalog` |
+| `POST` | `/app-api/v1/businesses/catalog/:id/purchases` | 선택한 사업 종류 구매 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/businesses/catalog/:id/purchases` |
+| `GET` | `/app-api/v1/businesses/equity` | 사업 구매에 사용할 수 있는 자기자본 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/businesses/equity` |
+| `GET` | `/app-api/v1/businesses/my-v2` | 내 사업 V2 상세 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/businesses/my-v2` |
+| `GET` | `/app-api/v1/casino/coin/fairness` | 동전게임 공정성 검증 정보 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/casino/coin/fairness` |
+| `POST` | `/app-api/v1/casino/coin/plays` | 동전 앞/뒤 게임 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/casino/coin/plays` |
+| `GET` | `/app-api/v1/casino/coin/terms` | 동전게임 배당·한도 규칙 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/casino/coin/terms` |
+| `GET` | `/app-api/v1/casino/dice/fairness` | 주사위게임 공정성 검증 정보 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/casino/dice/fairness` |
+| `POST` | `/app-api/v1/casino/dice/plays` | 주사위 홀짝/숫자 게임 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/casino/dice/plays` |
+| `GET` | `/app-api/v1/casino/games/terms` | 카지노 공통 게임 규칙 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/casino/games/terms` |
+| `GET` | `/app-api/v1/casino/history` | 내 카지노 플레이 기록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/casino/history` |
+| `GET` | `/app-api/v1/casino/self-limit` | 내 카지노 자기제한 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/casino/self-limit` |
+| `PUT` | `/app-api/v1/casino/self-limit` | 일일 베팅/손실 자기제한 설정 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/casino/self-limit` |
+| `GET` | `/app-api/v1/content/announcements` | 공지사항 목록 조회 | 공개: 로그인 불필요 | `/api/content/announcements` |
+| `GET` | `/app-api/v1/content/photos` | 공개 갤러리 사진 조회 | 공개: 로그인 불필요 | `/api/content/photos` |
+| `GET` | `/app-api/v1/content/status` | 서비스 상태 정보 조회 | 공개: 로그인 불필요 | `/api/content/status` |
+| `POST` | `/app-api/v1/early-game/claims` | 오늘 초반 이벤트 보상 수령 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/early-game/claims` |
+| `GET` | `/app-api/v1/early-game/first-day` | 첫날 온보딩 진행 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/early-game/first-day` |
+| `GET` | `/app-api/v1/early-game/today` | 오늘의 초반 진행 이벤트 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/early-game/today` |
+| `GET` | `/app-api/v1/engagement` | 참여/활동 진행 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/engagement` |
+| `GET` | `/app-api/v1/engagement/early-game` | 초반 참여 목표 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/engagement/early-game` |
+| `POST` | `/app-api/v1/engagement/npcs/:code/orders` | NPC 주문/상호작용 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/engagement/npcs/:code/orders` |
+| `PUT` | `/app-api/v1/engagement/preferences` | 참여·알림 선호 설정 변경 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/engagement/preferences` |
+| `GET` | `/app-api/v1/photos` | 갤러리 사진 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/photos` |
+| `POST` | `/app-api/v1/photos` | 업로드된 사진을 갤러리에 등록 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/photos` |
+| `GET` | `/app-api/v1/photos/mine` | 내가 등록한 갤러리 사진 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/photos/mine` |
+| `POST` | `/app-api/v1/photos/uploads` | 갤러리 이미지 업로드 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/photos/uploads` |
+| `GET` | `/app-api/v1/privacy/requests` | 내 개인정보 요청 목록/상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/privacy/requests` |
+| `POST` | `/app-api/v1/privacy/requests` | 개인정보 열람·삭제 등 요청 생성 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/privacy/requests` |
+| `GET` | `/app-api/v1/profile` | 내 프로필 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/profile` |
+| `PUT` | `/app-api/v1/profile` | 내 프로필 정보/공개범위 수정 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/profile` |
+| `GET` | `/app-api/v1/profile/:userId` | 다른 사용자 공개 프로필 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/profile/:userId` |
+| `DELETE` | `/app-api/v1/profile/image` | 프로필 이미지 삭제 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/profile/image` |
+| `POST` | `/app-api/v1/profile/image` | 프로필 이미지 등록 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/profile/image` |
+| `GET` | `/app-api/v1/profile/settings` | 내 프로필 설정 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/profile/settings` |
+| `GET` | `/app-api/v1/progression` | 내 전체 성장/레벨 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/progression` |
+| `GET` | `/app-api/v1/progression/credit` | 내 신용/성장 점수 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/progression/credit` |
+| `GET` | `/app-api/v1/progression/early-game` | 초반 성장 진행 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/progression/early-game` |
+| `POST` | `/app-api/v1/progression/refreshes` | 성장 상태 재계산/새로고침 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/progression/refreshes` |
+| `GET` | `/app-api/v1/rewards/availability` | 현재 수령 가능한 보상 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/rewards/availability` |
+| `POST` | `/app-api/v1/rewards/daily/claims` | 일일 보상 수령 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/rewards/daily/claims` |
+| `POST` | `/app-api/v1/rewards/work/claims` | 근무 보상 수령 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/rewards/work/claims` |
+| `GET` | `/app-api/v1/seasons/events` | 진행 중 시즌 이벤트 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/seasons/events` |
+| `POST` | `/app-api/v1/seasons/events/:id/consumptions` | 시즌 이벤트 자원/아이템 소비 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/seasons/events/:id/consumptions` |
+| `GET` | `/app-api/v1/seasons/events/:id/leaderboard` | 시즌 이벤트 리더보드 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/seasons/events/:id/leaderboard` |
+| `GET` | `/app-api/v1/shop/catalog` | 상점 카탈로그 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/shop/catalog` |
+| `POST` | `/app-api/v1/shop/catalog/:id/purchases` | 선택한 카탈로그 상품 구매 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/shop/catalog/:id/purchases` |
+| `GET` | `/app-api/v1/shop/cosmetics/:userId` | 사용자 장착 코스메틱 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/shop/cosmetics/:userId` |
+| `GET` | `/app-api/v1/shop/holdings` | 내 보유 아이템 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/shop/holdings` |
+| `POST` | `/app-api/v1/shop/holdings/:id/consumptions` | 보유 소모품 사용 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/shop/holdings/:id/consumptions` |
+| `POST` | `/app-api/v1/shop/holdings/:id/equip` | 보유 코스메틱 장착 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/shop/holdings/:id/equip` |
+| `POST` | `/app-api/v1/shop/holdings/:id/upkeep-settlements` | 보유 아이템 유지비 정산 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/shop/holdings/:id/upkeep-settlements` |
+| `GET` | `/app-api/v1/shop/items` | 상점 아이템 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/shop/items` |
+| `POST` | `/app-api/v1/shop/items/:id/purchases` | 선택한 상점 아이템 구매 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/shop/items/:id/purchases` |
+| `GET` | `/app-api/v1/shop/public-catalog` | 로그인 없이 공개 상점 카탈로그 조회 | 공개: 로그인 불필요 | `/api/shop/public-catalog` |
+| `GET` | `/app-api/v1/shop/purchases` | 내 상점 구매 기록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/shop/purchases` |
+| `GET` | `/app-api/v1/content/status` | 서비스 상태 정보 조회 | 공개: 로그인 불필요 | `/api/status` |
+| `GET` | `/app-api/v1/stocks` | 거래 가능한 주식 종목 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks` |
+| `GET` | `/app-api/v1/stocks/:id/candles` | 선택 종목 OHLC 캔들 차트 데이터 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/:id/candles` |
+| `POST` | `/app-api/v1/stocks/:id/orders` | 선택 종목 매수/매도 주문 생성 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/stocks/:id/orders` |
+| `GET` | `/app-api/v1/stocks/:id/prices` | 선택 종목 가격 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/:id/prices` |
+| `POST` | `/app-api/v1/stocks/:id/watchlist` | 선택 종목 관심목록 추가/변경 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/stocks/:id/watchlist` |
+| `GET` | `/app-api/v1/stocks/alerts` | 내 주가 알림 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/alerts` |
+| `POST` | `/app-api/v1/stocks/alerts` | 새 주가 알림 생성 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/stocks/alerts` |
+| `DELETE` | `/app-api/v1/stocks/alerts/:id` | 선택한 주가 알림 삭제 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/stocks/alerts/:id` |
+| `GET` | `/app-api/v1/stocks/alerts/events` | 발생한 주가 알림 이벤트 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/alerts/events` |
+| `GET` | `/app-api/v1/stocks/history` | 내 주식 거래 기록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/history` |
+| `GET` | `/app-api/v1/stocks/market-events` | 주식 시장 이벤트 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/market-events` |
+| `GET` | `/app-api/v1/stocks/portfolio` | 내 주식 보유량·평가 포트폴리오 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/portfolio` |
+| `GET` | `/app-api/v1/stocks/sparklines` | 종목별 미니 차트용 시세 데이터 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/sparklines` |
+| `GET` | `/app-api/v1/stocks/watchlist` | 내 관심종목 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/watchlist` |
+| `GET` | `/app-api/v1/wallet` | 내 현금/은행 잔액과 지갑 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/wallet` |
+| `POST` | `/app-api/v1/wallet/transfers` | 다른 사용자에게 WLD 송금 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/wallet/transfers` |
+| `GET` | `/app-api/v1/work` | 근무/직업 대시보드 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/work` |
+| `POST` | `/app-api/v1/work/active-job` | 현재 직업 변경 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/work/active-job` |
+| `GET` | `/app-api/v1/work/assignments` | 근무 과제 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/work/assignments` |
+| `POST` | `/app-api/v1/work/assignments` | 새 근무 과제 배정/시작 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/work/assignments` |
+| `POST` | `/app-api/v1/work/assignments/:id/completions` | 근무 과제 완료 제출 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/work/assignments/:id/completions` |
+| `POST` | `/app-api/v1/work/assignments/:id/verify` | 근무 과제 완료 검증 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/work/assignments/:id/verify` |
+| `GET` | `/app-api/v1/work/profile` | 내 근무 프로필/통계 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/work/profile` |
+| `GET` | `/app-api/v1/work/receipts` | 근무 보상 영수증 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/work/receipts` |
+| `GET` | `/app-api/v1/work/tasks` | 현재 수행 가능한 근무 작업 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/work/tasks` |
+| `POST` | `/app-api/v1/work/tasks/:id/complete` | 선택한 근무 작업 완료 처리 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/work/tasks/:id/complete` |
+| `GET` | `/app-api/v1/auth/:provider/authorize` | Google/Discord OAuth 시작; 모바일은 client=mobile 필수 | 인증 흐름 전용: 상태머신 준수 | `/auth/:provider/authorize` |
+| `GET` | `/app-api/v1/auth/:provider/callback` | OAuth provider callback 처리; 앱이 직접 호출하지 않음 | 인증 흐름 전용: 상태머신 준수 | `/auth/:provider/callback` |
+| `GET` | `/app-api/v1/media/:key` | 일반 미디어 파일 조회 | 공개: 로그인 불필요 | `/media/:key` |
+| `GET` | `/app-api/v1/media/profile/:key` | 프로필 미디어 파일 조회 | 공개: 로그인 불필요 | `/media/profile/:key` |
 
