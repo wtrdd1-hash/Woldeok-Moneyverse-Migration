@@ -6,6 +6,9 @@ describe('appGatewayPath', () => {
     expect(appGatewayPath(['wallet', 'transfers'])).toBe('/api/v1/wallet/transfers');
     expect(appGatewayPath(['auth', 'session'])).toBe('/api/v1/auth/session');
     expect(appGatewayPath(['stocks'])).toBe('/api/v1/stocks');
+    expect(appGatewayPath(['media', 'profile', 'avatar.webp'])).toBe('/media/profile/avatar.webp');
+    expect(appGatewayPath(['auth', 'google', 'authorize'])).toBe('/auth/google/authorize');
+    expect(appGatewayPath(['auth', 'discord', 'callback'])).toBe('/auth/discord/callback');
   });
 
   it('refuses internal and traversal paths', () => {

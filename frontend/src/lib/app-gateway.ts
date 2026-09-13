@@ -9,6 +9,22 @@ export function appGatewayPath(parts: readonly string[]): string | null {
   const clean = parts.map((part) => part.trim());
   if (clean.some((part) => !part || part === '.' || part === '..' || part.includes('/'))) return null;
   if (!APP_API_GROUPS.has(clean[0]!)) return null;
+
+  // A small set of member-facing backend routes are intentionally version-neutral.
+  // Keep them behind the same reviewed app BFF rather than making native clients
+  // know the private backend origin or internal token.
+  if (clean[0] === 'media') {
+    return `/${clean.map(encodeURIComponent).join('/')}`;
+  }
+  if (
+    clean[0] === 'auth' &&
+    clean.length === 3 &&
+    (clean[1] === 'discord' || clean[1] === 'google') &&
+    (clean[2] === 'authorize' || clean[2] === 'callback')
+  ) {
+    return `/${clean.map(encodeURIComponent).join('/')}`;
+  }
+
   return `/api/v1/${clean.map(encodeURIComponent).join('/')}`;
 }
 
