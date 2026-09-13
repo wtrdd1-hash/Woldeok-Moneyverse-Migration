@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { PageHeader } from '@/components/page-header';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Accent } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { apiOrNull, publicApi } from '@/lib/api';
 import { isLoggedInMember } from '@/lib/session';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
@@ -67,25 +69,32 @@ export default async function ShopPage() {
           />
         </PageHeader>
 
-        <ul aria-label="상점 2.0 원칙" className="flex flex-wrap gap-2">
-          {PRINCIPLES.map((principle) => (
-            <li key={principle.ko}>
-              <Badge variant="outline" className="font-normal border-amber-500/30 text-xs">
-                <T korean={principle.ko} english={principle.en} />
-              </Badge>
-            </li>
-          ))}
-        </ul>
+        <div className="flex flex-wrap items-center gap-2">
+          <ul aria-label="상점 2.0 원칙" className="flex flex-wrap gap-2">
+            {PRINCIPLES.map((principle) => (
+              <li key={principle.ko}>
+                <Badge variant="outline" className="font-normal border-amber-500/30 text-xs">
+                  <T korean={principle.ko} english={principle.en} />
+                </Badge>
+              </li>
+            ))}
+          </ul>
+          {loggedIn ? (
+            <Button asChild size="sm" variant="outline">
+              <Link href="/marketplace">
+                <T korean="플레이어 마켓 작업대" english="Marketplace workbench" />
+              </Link>
+            </Button>
+          ) : null}
+        </div>
       </div>
 
-      {/* Main Store View */}
       <ShopStoreView
         items={items}
         userBalance={userBalance}
         currentUsername={username}
         userAvatarUrl={avatarUrl}
       />
-
     </div>
   );
 }
