@@ -17,6 +17,8 @@ const PUBLIC_PATHS = [
   '/shop/catalog',
   '/terms',
   '/privacy',
+  '/account-deletion',
+  '/data-deletion',
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

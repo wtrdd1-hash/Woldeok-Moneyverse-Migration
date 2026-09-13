@@ -31,6 +31,8 @@ describe('public search surface', () => {
       'https://easy-scraping.com/shop/catalog',
       'https://easy-scraping.com/terms',
       'https://easy-scraping.com/privacy',
+      'https://easy-scraping.com/account-deletion',
+      'https://easy-scraping.com/data-deletion',
     ]);
   });
 

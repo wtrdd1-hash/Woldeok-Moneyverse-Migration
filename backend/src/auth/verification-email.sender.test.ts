@@ -30,8 +30,10 @@ function scriptedSmtpServer() {
         }
         if (line.startsWith('EHLO ')) socket.write('250-test\r\n250 AUTH LOGIN\r\n');
         else if (line === 'AUTH LOGIN') socket.write('334 VXNlcm5hbWU6\r\n');
-        else if (line === Buffer.from('mailer').toString('base64')) socket.write('334 UGFzc3dvcmQ6\r\n');
-        else if (line === Buffer.from('secret').toString('base64')) socket.write('235 authenticated\r\n');
+        else if (line === Buffer.from('mailer').toString('base64'))
+          socket.write('334 UGFzc3dvcmQ6\r\n');
+        else if (line === Buffer.from('secret').toString('base64'))
+          socket.write('235 authenticated\r\n');
         else if (line.startsWith('MAIL FROM:')) socket.write('250 sender ok\r\n');
         else if (line.startsWith('RCPT TO:')) socket.write('250 recipient ok\r\n');
         else if (line === 'DATA') {
@@ -75,6 +77,52 @@ describe('VerificationEmailSender', () => {
     expect(received.join('\n')).toContain(
       'https://easy-scraping.com/verify-email?token=verification-token-value',
     );
+  });
+
+  it('supports a loopback relay without SMTP AUTH when host and sender are configured', async () => {
+    const { server, received } = scriptedSmtpServer();
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const address = server.address();
+    if (!address || typeof address === 'string') throw new Error('missing SMTP test address');
+
+    process.env.SMTP_HOST = '127.0.0.1';
+    process.env.SMTP_PORT = String(address.port);
+    process.env.SMTP_SECURE = 'false';
+    delete process.env.SMTP_USERNAME;
+    delete process.env.SMTP_PASSWORD;
+    process.env.SMTP_FROM = 'no-reply@easy-scraping.com';
+
+    try {
+      await new VerificationEmailSender().send({
+        to: 'member@example.com',
+        token: 'verification-token-value',
+        baseUrl: 'https://easy-scraping.com/',
+      });
+    } finally {
+      await new Promise<void>((resolve, reject) =>
+        server.close((error) => (error ? reject(error) : resolve())),
+      );
+    }
+
+    expect(received).not.toContain('AUTH LOGIN');
+    expect(received).toContain('MAIL FROM:<no-reply@easy-scraping.com>');
+  });
+
+  it('fails closed for a remote SMTP host without credentials', async () => {
+    process.env.SMTP_HOST = 'smtp.example.com';
+    process.env.SMTP_PORT = '587';
+    process.env.SMTP_SECURE = 'false';
+    delete process.env.SMTP_USERNAME;
+    delete process.env.SMTP_PASSWORD;
+    process.env.SMTP_FROM = 'no-reply@easy-scraping.com';
+
+    await expect(
+      new VerificationEmailSender().send({
+        to: 'member@example.com',
+        token: 'token',
+        baseUrl: 'https://easy-scraping.com/',
+      }),
+    ).rejects.toThrow('verification email delivery unavailable');
   });
 
   it('fails closed when SMTP credentials are not configured', async () => {

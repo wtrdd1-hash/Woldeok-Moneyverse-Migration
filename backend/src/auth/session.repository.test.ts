@@ -172,7 +172,9 @@ describe('SessionRepository.rotateCsrf', () => {
     const { pool, queries } = recordingPool(() => [{ id: 'session-id' }]);
     await new SessionRepository(pool).rotateCsrf('session-id');
     const text = queries[0]?.text.replace(/\s+/g, ' ') ?? '';
-    expect(text).toContain("WHEN user_id IS NOT NULL AND admin_opened_at IS NULL THEN now() + interval '30 days'");
+    expect(text).toContain(
+      "WHEN user_id IS NOT NULL AND admin_opened_at IS NULL THEN now() + interval '30 days'",
+    );
     expect(text).toContain('ELSE expires_at');
   });
 });
@@ -283,6 +285,13 @@ describe('SessionRepository.createChallenge', () => {
         repository.createChallenge('session-id', challenge, purpose),
       ).resolves.toBeUndefined();
     }
+  });
+
+  it('persists the mobile-client flag for native OAuth callbacks', async () => {
+    const { pool, queries } = recordingPool(() => []);
+    await new SessionRepository(pool).createChallenge('session-id', challenge, 'login', true);
+    expect(queries[0]?.values?.at(-1)).toBe(true);
+    expect(queries[0]?.text).toContain('mobile_client');
   });
 
   // The verifier must be recoverable at callback time to complete PKCE, so it

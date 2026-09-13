@@ -2,8 +2,8 @@
 
 **English canonical** | [한국어](mobile-api-complete-spec.ko.md)
 
-> Version: v2026.09.13.53
-> Date: 2026-09-13
+> Version: v2026.09.14.2
+> Date: 2026-09-14
 > Production origin: `https://easy-scraping.com`
 > App API prefix: `/app-api/v1`
 > Audience: Android/iOS clients, code-generation tools such as Gemini, QA and store-review preparation
@@ -191,6 +191,53 @@ After economy writes (wallet/bank/stocks/business/shop/reward/casino), re-fetch 
 ## 29. Response contract for crash-free native clients
 
 `GET /app-api/v1/wallet` returns WLD monetary values as decimal strings, not JSON numbers. Native models MUST decode `balances.cash.availableAmount`, `balances.bank.availableAmount`, `balances.totalAvailableAmount`, and `recentTransactions[].netAmount` as strings. A newly registered user may have an empty `recentTransactions` array and this is a valid success response. Registration completion provisions USER_CASH and USER_BANK accounts before the authenticated wallet read. After email verification, verify `/auth/viewer` first, then call `/wallet` with the same CookieJar. A single card/API failure must never terminate the application process; isolate request failures and render per-feature error state.
+
+## 34. v2026.09.14.2 runtime stability contract
+
+Native API failures must never terminate the app process. Parallel startup reads need independent failure boundaries (`SupervisorJob`/`supervisorScope` or per-request `Result` in Kotlin). One failed wallet/profile/card request becomes that surface's recoverable error state, not a global coroutine failure.
+
+Preserve JSON types exactly. Economy decimal values may be JSON strings such as `"1000"`; deserialize them as `String` and explicitly convert to `BigDecimal` in the domain layer. Empty arrays are valid. Optional fields must not be forced with `!!`. Handle 401/403/404/409/422/429/5xx, timeout and decode errors distinctly and without process termination.
+
+Production read traffic uses a high read-only request budget so normal native startup bursts should not hit 429. Sensitive writes, login, registration and OAuth remain abuse-protected. A 429 is recoverable: honor `Retry-After` when present and use bounded backoff.
+
+## 35. Registration email delivery
+
+Production registration is fail-closed: `POST /auth/local/register` may return 503 when verification-email delivery is unavailable. The app must display a recoverable delivery error rather than retrying indefinitely or crashing. Production may use an unauthenticated SMTP relay only when the relay host is loopback (`127.0.0.1`, `::1`, `localhost`); remote SMTP still requires username and password.
+
+Registration is complete only after verification, saving the new session cookie/CSRF, and `/auth/viewer` returning `signedIn:true`. A newly activated account receives `USER_CASH` and `USER_BANK`; an empty transaction array is valid.
+
+## 36. Native OAuth browser completion
+
+The exact mobile flow is: `authorize?client=mobile` → external provider → stored `mobile_client=true` challenge → server-generated one-time handoff → browser completion page attempts `woldeok-moneyverse://oauth/callback` and provides an **Open Woldeok Moneyverse app** tap fallback → app POSTs the opaque code to `/auth/mobile/handoff` → stores Set-Cookie/CSRF → verifies `/auth/viewer`.
+
+Provider authorization `code/state` is not the mobile handoff code. Fake, expired or replayed handoff codes correctly return 401.
+
+## 37. Google Play account/data deletion
+
+Public URLs that must return 200 without login:
+
+- `https://easy-scraping.com/account-deletion`
+- `https://easy-scraping.com/data-deletion`
+
+Account deletion uses `DELETE /app-api/v1/account` and requires an authenticated/current-consent session, CSRF and recent step-up reauthentication. Success is 202 and begins account deletion/session revocation. When that reauthentication path is unavailable, the public page provides the documented verified-email fallback request path.
+
+Data deletion while keeping the account is requested through `POST /app-api/v1/privacy/requests`:
+
+```json
+{"requestType":"deletion","detail":"minimal scope description","idempotencyKey":"UUID"}
+```
+
+Supported request types are `access`, `correction`, `restriction`, `withdrawal`, and `deletion`. This records a data-subject request; the client must not pretend all data was synchronously erased. Re-read `GET /privacy/requests` for server status.
+
+The published retention schedule states: OAuth/profile identifiers within 30 days after withdrawal; profile/gallery files within 30 days after request; de-identified economy reconciliation records up to one year; consent evidence three years; ordinary access/authentication logs 90 days; admin/economy audit records up to one year; legally required/dispute/security records only for the documented necessary period.
+
+## 38. Policy-version re-consent
+
+Never hard-code policy versions. Read server policy/session/viewer state. When a published server change makes `consentCurrent:false`, keep the session, show the re-consent UI, PUT the server-provided `termsVersion` and `privacyVersion` to `/auth/consent`, then re-read viewer. Do not force logout solely because policy versions changed.
+
+## 39. Release QA matrix
+
+Test signed-out, prelogin, fresh registration, existing local login, Google/Discord handoff, stale-consent re-consent, wallet/profile and every main feature group, malformed/empty responses, 401/403/404/409/422/429/5xx/timeouts, and both Play deletion URLs. Native code must not call obsolete `/early-game/tasks` or `/activity/logs`; use `/early-game/today` and `POST /activity/events` where applicable.
 
 ## Audited user-facing app API route inventory
 

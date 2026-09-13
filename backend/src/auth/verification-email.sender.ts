@@ -14,8 +14,8 @@ interface SmtpSettings {
   readonly host: string;
   readonly port: number;
   readonly secure: boolean;
-  readonly username: string;
-  readonly password: string;
+  readonly username?: string;
+  readonly password?: string;
   readonly from: string;
 }
 
@@ -24,14 +24,24 @@ function smtpSettings(env: NodeJS.ProcessEnv): SmtpSettings | null {
   const username = env.SMTP_USERNAME?.trim();
   const password = env.SMTP_PASSWORD;
   const from = env.SMTP_FROM?.trim();
-  if (!host || !username || !password || !from) return null;
+  if (!host || !from) return null;
+  if ((username && !password) || (!username && password))
+    throw new Error('SMTP_USERNAME and SMTP_PASSWORD must be configured together');
+  const loopbackRelay = host === '127.0.0.1' || host === '::1' || host === 'localhost';
+  if (!username && !password && !loopbackRelay) return null;
 
   const secure = env.SMTP_SECURE !== 'false';
   const parsedPort = Number(env.SMTP_PORT ?? (secure ? '465' : '587'));
   if (!Number.isInteger(parsedPort) || parsedPort < 1 || parsedPort > 65535) {
     throw new Error('SMTP_PORT must be an integer from 1 to 65535');
   }
-  return { host, port: parsedPort, secure, username, password, from };
+  return {
+    host,
+    port: parsedPort,
+    secure,
+    ...(username && password ? { username, password } : {}),
+    from,
+  };
 }
 
 function headerValue(value: string): string {
@@ -115,9 +125,11 @@ async function deliver(settings: SmtpSettings, mail: VerificationEmail): Promise
     const greeting = await readReply(socket);
     if (greeting.code !== 220) throw new Error(`SMTP greeting rejected (${greeting.code})`);
     await command(socket, 'EHLO moneyverse-backend', [250]);
-    await command(socket, 'AUTH LOGIN', [334]);
-    await command(socket, Buffer.from(settings.username).toString('base64'), [334]);
-    await command(socket, Buffer.from(settings.password).toString('base64'), [235]);
+    if (settings.username && settings.password) {
+      await command(socket, 'AUTH LOGIN', [334]);
+      await command(socket, Buffer.from(settings.username).toString('base64'), [334]);
+      await command(socket, Buffer.from(settings.password).toString('base64'), [235]);
+    }
     await command(socket, `MAIL FROM:<${settings.from.replace(/[<>\r\n]/g, '')}>`, [250]);
     await command(socket, `RCPT TO:<${mail.to.replace(/[<>\r\n]/g, '')}>`, [250, 251]);
     await command(socket, 'DATA', [354]);
