@@ -24,7 +24,7 @@ export interface RateLimitTier {
  */
 export const AUTH_LIMIT = 20;
 export const SENSITIVE_LIMIT = 60;
-export const READ_LIMIT = 240;
+export const READ_LIMIT = 12000;
 
 /**
  * The backend mounts everything under a global `/api` prefix with URI
@@ -54,7 +54,7 @@ const AUTH_PATH = /^(?:\/api\/v\d+)?\/auth\//;
  * offered them a login button — while their session cookie was untouched and
  * their socket carried on chatting.
  */
-const CHEAP_AUTH_READ = /^(?:\/api\/v\d+)?\/auth\/(?:viewer|session)\/?$/;
+const CHEAP_AUTH_READ = /^(?:\/api\/v\d+)?\/auth\/(?:viewer|session|policy|providers)\/?$/;
 
 /**
  * The path a tier is decided from, without the query string.
