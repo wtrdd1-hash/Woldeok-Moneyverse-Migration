@@ -54,4 +54,30 @@ describe.skipIf(!DATABASE_URL)('LocalAuthRepository against a real database', ()
     expect(await sessions.hasCurrentUserConsent(completed.session_id)).toBe(true);
     expect((await local.credential(emailHash))?.user_id).toBe(completed.user_id);
   });
+
+  it('exchanges a mobile OAuth handoff once and creates a separate app session', async () => {
+    const sessions = new SessionRepository(pool);
+    const local = new LocalAuthRepository(pool);
+    const prelogin = await sessions.create();
+    const policy = await sessions.currentConsentVersion();
+    expect(policy).not.toBeNull();
+    await sessions.grantPreloginConsent(prelogin.id, {
+      termsCompleted: true, privacyCompleted: true, ageConfirmed: true,
+      termsVersion: policy!.terms_version, privacyVersion: policy!.privacy_version,
+    });
+
+    const email = `qa-mobile-${crypto.randomUUID()}@example.test`;
+    const verificationToken = randomToken();
+    await local.startRegistration({
+      preAuthSessionId: prelogin.id, email, emailHash: sha256(email),
+      passwordVerifier: await hashPassword('review-test-password-2026!'),
+      displayName: 'Mobile OAuth QA', verificationTokenHash: sha256(verificationToken),
+    });
+    const member = await local.completeRegistration(prelogin.id, verificationToken);
+    const handoff = await sessions.createMobileOAuthHandoff(member.user_id);
+    const mobile = await sessions.consumeMobileOAuthHandoff(handoff);
+    expect(mobile?.user_id).toBe(member.user_id);
+    expect(mobile?.session_id).not.toBe(member.session_id);
+    expect(await sessions.consumeMobileOAuthHandoff(handoff)).toBeNull();
+  });
 });

@@ -1,6 +1,6 @@
 # Woldeok Moneyverse Mobile/App API — Complete Usage Reference
 
-> Version: v2026.09.13.48
+> Version: v2026.09.13.49
 > Date: 2026-09-13  
 > Baseline main before this change: `a57fc851c2800d77c8bb284cb1c168cfb3638bc2`
 > Korean: [mobile-api-reference.ko.md](mobile-api-reference.ko.md)
@@ -81,13 +81,13 @@ Before each submission verify: production build SHA, public catalog, auth provid
 
 The current product plan still treats password recovery/change and login-email change, unified notifications/push preferences, global member search, and future member MFA/passkeys as planned/partial. They must not be advertised as available app features until their backend contract and runtime validation are complete.
 
-## 11. v2026.09.13.48 authentication changes
+## 11. v2026.09.13.49 authentication changes
 
 - Removed the numeric minimum password length from first-party registration. Empty passwords remain invalid and the 128-code-point technical maximum remains.
 - Added a dedicated end-to-end authentication API integration guide with cookie/CSRF handling, examples, responses and error handling.
 - Kept common-password blocking, Argon2id storage and authentication abuse controls.
 
-## 12. v2026.09.13.48 fixes
+## 12. v2026.09.13.49 fixes
 
 - Added migration `183-local-email-auth-registration-conflict-fix.sql` to remove PostgreSQL SQLSTATE 42702 from verified local registration.
 - Added a real-PostgreSQL regression test for the full first-party registration completion path.

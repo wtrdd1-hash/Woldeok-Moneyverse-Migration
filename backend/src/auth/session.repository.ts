@@ -126,6 +126,7 @@ export interface OAuthChallengeRow {
   readonly nonce_hash: string;
   readonly redirect_uri: string;
   readonly purpose: string;
+  readonly mobile_client: boolean;
 }
 
 /** Row returned by auth_complete_oauth_login (packages/database/migrations/006-auth-hardening.sql). */
@@ -303,11 +304,12 @@ export class SessionRepository {
     sessionId: string,
     challenge: OAuthChallengeLike,
     purpose: unknown = 'login',
+    mobileClient = false,
   ): Promise<void> {
     if (!isChallengePurpose(purpose)) throw new TypeError('invalid OAuth challenge purpose');
     await this.pool.query(
-      `INSERT INTO oauth_challenges(state_hash,session_id,provider,code_verifier,nonce_hash,redirect_uri,purpose,expires_at)
-       VALUES($1,$2,$3,$4,$5,$6,$7,now()+interval '10 minutes')`,
+      `INSERT INTO oauth_challenges(state_hash,session_id,provider,code_verifier,nonce_hash,redirect_uri,purpose,mobile_client,expires_at)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,now()+interval '10 minutes')`,
       [
         challenge.stateHash,
         sessionId,
@@ -316,6 +318,7 @@ export class SessionRepository {
         challenge.nonceHash,
         challenge.redirectUri,
         purpose,
+        mobileClient,
       ],
     );
   }
@@ -336,9 +339,32 @@ export class SessionRepository {
        SET consumed_at=now()
        WHERE state_hash=$1 AND session_id=$2 AND provider=$3
          AND consumed_at IS NULL AND expires_at>now()
-       RETURNING code_verifier, nonce_hash, redirect_uri, purpose`,
+       RETURNING code_verifier, nonce_hash, redirect_uri, purpose, mobile_client`,
       [sha256(state), sessionId, provider],
     );
+  }
+
+  async createMobileOAuthHandoff(userId: string): Promise<string> {
+    const code = randomToken();
+    const row = await queryOne<{ readonly created: boolean }>(
+      this.pool,
+      'SELECT public.auth_create_mobile_oauth_handoff($1,$2) AS created',
+      [userId, sha256(code)],
+    );
+    if (row?.created !== true) throw new Error('mobile OAuth handoff was not created');
+    return code;
+  }
+
+  async consumeMobileOAuthHandoff(code: string): Promise<CompletedOAuthLogin | null> {
+    if (typeof code !== 'string' || code.length < 32 || code.length > 512) return null;
+    const token = randomToken();
+    const csrfToken = randomToken();
+    const row = await queryOne<CompletedOAuthLoginRow>(
+      this.pool,
+      'SELECT user_id, session_id, false AS is_new FROM public.auth_consume_mobile_oauth_handoff($1,$2,$3)',
+      [sha256(code), sha256(token), sha256(csrfToken)],
+    );
+    return row ? { ...row, token, csrfToken } : null;
   }
 
   async completeOAuthLogin({

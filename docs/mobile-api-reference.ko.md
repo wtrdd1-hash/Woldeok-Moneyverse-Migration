@@ -1,6 +1,6 @@
 # 월덕 머니버스 모바일/앱 API — 전체 상세 사용 가이드
 
-> 버전: v2026.09.13.48
+> 버전: v2026.09.13.49
 > 날짜: 2026-09-13  
 > 변경 전 기준 main: `a57fc851c2800d77c8bb284cb1c168cfb3638bc2`
 > 영어 원문: [mobile-api-reference.md](mobile-api-reference.md)
@@ -78,13 +78,13 @@ OAuth 완료 후 웹 callback은 브라우저 세션을 앱 세션으로 재사�
 
 비밀번호 찾기/변경과 로그인 이메일 변경, 통합 알림/푸시 설정, 전역 사용자 검색, 일반 사용자 MFA/패스키는 현재 기획상 planned/partial이다. 실제 앱 기능으로 광고하거나 활성화하려면 먼저 backend contract와 runtime 검증을 완료해야 한다.
 
-## 11. v2026.09.13.48 인증 변경 사항
+## 11. v2026.09.13.49 인증 변경 사항
 
 - 자체 회원가입 비밀번호의 숫자형 최소 글자 수 제한 제거. 빈 비밀번호 거부와 128 code point 기술적 최대치는 유지.
 - 쿠키/CSRF 흐름, 요청/응답 예시, 오류 처리까지 포함한 인증 전용 상세 API 문서 추가.
 - common password 차단, Argon2id 저장, 인증 공격 방어는 유지.
 
-## 12. v2026.09.13.48 수정 사항
+## 12. v2026.09.13.49 수정 사항
 
 - `183-local-email-auth-registration-conflict-fix.sql`: 자체 회원가입 완료 시 PostgreSQL SQLSTATE 42702 수정
 - 실제 PostgreSQL 기반 자체 회원가입 완료 회귀 테스트 추가
