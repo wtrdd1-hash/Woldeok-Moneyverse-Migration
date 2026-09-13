@@ -4,9 +4,12 @@ on:
   push:
     branches:
       - main
-      - 'auto/hourly-*'
-      - 'test-candidate/*'
-      - 'ops/cicd-db-isolation-backup-*'
+      - 'feat/**'
+      - 'fix/**'
+      - 'integrate/**'
+      - 'ops/**'
+      - 'auto/**'
+      - 'test-candidate/**'
   workflow_dispatch:
 
 permissions:
@@ -90,8 +93,13 @@ jobs:
             echo '## Test candidate images built'
             echo
             echo "- commit: \`${GITHUB_SHA}\`"
+            echo "- source branch: \`${GITHUB_REF_NAME}\`"
             echo "- backend: \`${{ steps.meta.outputs.backend }}\`"
             echo "- frontend: \`${{ steps.meta.outputs.frontend }}\`"
             echo
-            echo 'These images are staging-only artifacts. Deploy them only to the isolated wdmv-test namespace and verify the exact SHA before merge or Production promotion.'
+            if [[ "$GITHUB_REF_NAME" == "main" ]]; then
+              echo 'This main candidate is eligible for the automated isolated-Test -> exact-SHA gate -> Production GitOps promotion chain.'
+            else
+              echo 'This development-branch candidate is automatically CI/build validated. Production promotion remains fail-closed until the validated change reaches main and the same main SHA passes isolated Test.'
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
