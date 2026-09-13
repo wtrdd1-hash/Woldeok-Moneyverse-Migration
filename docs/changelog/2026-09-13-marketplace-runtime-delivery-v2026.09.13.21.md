@@ -3,7 +3,7 @@
 Date: 2026-09-13
 Change type: documentation-only
 Branch: `docs/marketplace-runtime-delivery-v2026.09.13.21`
-PR: pending until bilingual documentation is complete
+PR: #226
 Test deployment: not required for this documentation-only change
 
 ## Why this changed
