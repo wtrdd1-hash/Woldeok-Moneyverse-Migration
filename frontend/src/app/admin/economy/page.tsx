@@ -2,10 +2,12 @@ import { AdminControlCenterV2 } from './admin-control-center-v2';
 import type { MacroEconomyV2 } from './macro-v2-types';
 import { FaucetSinkGauge, type FaucetSinkStats } from './faucet-sink-gauge';
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader, SectionHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ApiError, api, apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
@@ -151,6 +153,20 @@ export default async function AdminEconomyPage({
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}
       </PageHeader>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">경제 시나리오 실험실</CardTitle>
+          <CardDescription>
+            현재 통화량과 최근 24시간 발행·소각을 바탕으로 읽기 전용 장기 시나리오를 계산합니다.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="outline" asChild>
+            <Link href="/admin/economy/scenario-lab">시나리오 실험실 열기</Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       {macroV2Section.ok && (
         <section aria-labelledby="admin-control-center-v2">

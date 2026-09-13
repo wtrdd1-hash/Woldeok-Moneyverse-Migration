@@ -82,7 +82,7 @@ describe('TieredThrottlerGuard', () => {
     // is one shared allowance for the whole site.
     const { guard } = guardWith(true);
     const tracker = await guard.getTracker({
-      headers: { 'x-forwarded-for': '203.0.113.9, 10.0.0.2' },
+      headers: { 'cf-connecting-ip': '203.0.113.9', 'x-forwarded-for': '198.51.100.7, 203.0.113.9' },
       socket: { remoteAddress: '192.168.32.3' },
     });
     expect(tracker).toBe('203.0.113.9');

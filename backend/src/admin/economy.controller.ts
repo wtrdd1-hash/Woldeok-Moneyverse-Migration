@@ -45,6 +45,7 @@ import {
   isRoleRefusal,
 } from '../core/pg-error';
 import { EconomyConsoleInputError, EconomyConsoleRepository } from './economy.repository';
+import { projectEconomyScenario } from './economy-scenario';
 
 /**
  * The floor `admin_normalized_reason` (058) enforces. Mirrored here so a
@@ -262,6 +263,44 @@ export class AdminEconomyController {
       () => this.repository().dashboard(requireUserId(request)),
       'the economy dashboard could not be read',
     );
+  }
+
+  @Get('scenario-lab/preview')
+  @ApiOperation({ summary: 'Read-only deterministic economy scenario projection' })
+  async scenarioLabPreview(
+    @Req() request: RequestWithSession,
+    @Query('days') daysText = '30',
+    @Query('issuanceChangeBps') issuanceText = '0',
+    @Query('sinkChangeBps') sinkText = '0',
+  ) {
+    const parseWhole = (value: string, name: string): number => {
+      if (!/^-?\d+$/.test(value)) throw new BadRequestException(`${name} must be a whole number`);
+      const parsed = Number(value);
+      if (!Number.isSafeInteger(parsed)) {
+        throw new BadRequestException(`${name} is outside the safe input range`);
+      }
+      return parsed;
+    };
+    const days = parseWhole(daysText, 'days');
+    const issuanceChangeBps = parseWhole(issuanceText, 'issuanceChangeBps');
+    const sinkChangeBps = parseWhole(sinkText, 'sinkChangeBps');
+    const board = await this.guarded(
+      () => this.repository().dashboard(requireUserId(request)),
+      'the economy baseline could not be read',
+    );
+    try {
+      return projectEconomyScenario({
+        m2Amount: board.m2_amount,
+        issued24h: board.issued_24h,
+        burned24h: board.burned_24h,
+        days,
+        issuanceChangeBps,
+        sinkChangeBps,
+      });
+    } catch (error) {
+      if (error instanceof Error) throw new BadRequestException(error.message);
+      throw error;
+    }
   }
 
   @Get('alerts')
