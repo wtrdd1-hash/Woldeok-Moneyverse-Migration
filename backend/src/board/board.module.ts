@@ -10,10 +10,15 @@ import { BoardService } from './board.service';
 import { PublicBoardController } from './public-board.controller';
 import { PublicBoardImageController } from './public-board-image.controller';
 import { PublicBoardService } from './public-board.service';
+import { PublicStockCommunityController, StockCommunityController } from './stock-community.controller';
+import { StockCommunityService } from './stock-community.service';
 
 @Module({
   imports: [AuthModule, ContentModule],
-  controllers: [BoardController, BoardImageController, PublicBoardController, PublicBoardImageController],
+  controllers: [
+    BoardController, BoardImageController, PublicBoardController, PublicBoardImageController,
+    StockCommunityController, PublicStockCommunityController,
+  ],
   providers: [
     {
       provide: BoardService,
@@ -26,7 +31,12 @@ import { PublicBoardService } from './public-board.service';
       inject: [PG_POOL],
       useFactory: (pool: Queryable | null) => (pool ? new PublicBoardService(pool) : null),
     },
+    {
+      provide: StockCommunityService,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => (pool ? new StockCommunityService(pool) : null),
+    },
   ],
-  exports: [BoardService, PublicBoardService],
+  exports: [BoardService, PublicBoardService, StockCommunityService],
 })
 export class BoardModule {}

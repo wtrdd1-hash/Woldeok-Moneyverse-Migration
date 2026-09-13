@@ -40,10 +40,10 @@ function suppliedUuid(value: unknown): string | null {
 }
 
 /**
- * `trustForwardedHeaders` is the same switch that decides whether
- * `X-Forwarded-For` may be believed. A correlation id a visitor can choose is
- * a correlation id a visitor can collide with someone else's on purpose, so
- * the header is only read where an edge proxy is known to write it.
+ * `trustForwardedHeaders` is the same deployment trust switch used for
+ * edge-written client metadata. A correlation id a visitor can choose is a
+ * correlation id a visitor can collide with someone else's on purpose, so
+ * these headers are only read where an edge proxy is known to overwrite them.
  */
 export function requestContext({
   trustForwardedHeaders,

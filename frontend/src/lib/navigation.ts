@@ -32,6 +32,7 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '아이템 상점': 'Item shop',
   '게시판': 'Board',
   '내 계정': 'My account',
+  '계정 보안': 'Account security',
   '운영': 'Admin',
   '경제': 'Economy',
   '콘텐츠': 'Content',
@@ -93,6 +94,7 @@ export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/progression', label: '커리어패스 (성장)' },
   { href: '/profile', label: '내 프로필' },
   { href: '/account', label: '내 계정' },
+  { href: '/account/security', label: '계정 보안' },
 ];
 
 /** Shown only to a member holding at least one administrator role. */
@@ -163,6 +165,7 @@ export const HEADER_MEMBER: readonly NavItem[] = [
     entries: [
       { href: '/seasons', label: '시즌' },
       { href: '/profile', label: '내 프로필' },
+      { href: '/account/security', label: '계정 보안' },
     ],
   },
 ];

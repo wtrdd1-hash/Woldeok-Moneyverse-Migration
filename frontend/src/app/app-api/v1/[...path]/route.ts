@@ -25,7 +25,6 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
     'x-csrf-token',
     'user-agent',
     'cf-connecting-ip',
-    'x-forwarded-for',
     'cf-ipcountry',
   ]) {
     const value = request.headers.get(name);
