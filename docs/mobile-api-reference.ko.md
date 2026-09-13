@@ -7,6 +7,8 @@
 
 ## 1. 목적과 구조
 
+> **앱 구현 기준 문서:** [모바일 앱 전체 API 통합 구현 명세서](mobile-api-complete-spec.ko.md) — 신규 앱/Gemini 구현은 이 통합 명세를 우선한다.
+
 이 문서는 네이티브/모바일 앱이 실제로 사용해야 하는 기준 API 문서다. 일반 회원 기능은 모두 다음 경계를 사용한다.
 
 `모바일 앱 -> HTTPS https://easy-scraping.com/app-api/v1/* -> Next.js BFF -> 비공개 NestJS API -> PostgreSQL`

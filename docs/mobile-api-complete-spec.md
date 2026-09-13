@@ -1,104 +1,160 @@
-# Woldeok Moneyverse Mobile/App API — Complete Usage Reference
+# Woldeok Moneyverse Mobile App — Complete API Implementation Specification
 
-> Version: v2026.09.13.49
-> Date: 2026-09-13  
-> Baseline main before this change: `a57fc851c2800d77c8bb284cb1c168cfb3638bc2`
-> Korean: [mobile-api-reference.ko.md](mobile-api-reference.ko.md)
+**English canonical** | [한국어](mobile-api-complete-spec.ko.md)
 
-## 1. Purpose and architecture
+> Version: v2026.09.13.51
+> Date: 2026-09-13
+> Production origin: `https://easy-scraping.com`
+> App API prefix: `/app-api/v1`
+> Audience: Android/iOS clients, code-generation tools such as Gemini, QA and store-review preparation
 
-> **Native implementation authority:** [Complete Mobile App API Implementation Specification](mobile-api-complete-spec.md) — new app/code-generation work must prefer this consolidated contract.
+## 0. Contract authority
 
-This is the normative integration guide for native/mobile clients. All ordinary member features use the public BFF boundary:
+This file is the single integration contract for the native app. User-facing native code MUST use `https://easy-scraping.com/app-api/v1/*`; it must not guess web-page URLs or call the private NestJS origin.
 
-`Mobile App -> HTTPS https://easy-scraping.com/app-api/v1/* -> Next.js BFF -> private NestJS API -> PostgreSQL`
+Non-negotiable rules:
 
-Never place `INTERNAL_API_TOKEN`, database credentials, OAuth client secrets, SMTP secrets or administrator credentials in the app. The BFF injects the internal token server-side and relays only approved headers/cookies.
+1. Never embed `INTERNAL_API_TOKEN`, database credentials, OAuth client secrets or SMTP secrets in an APK/AAB/IPA.
+2. Use one persistent secure CookieJar for all Moneyverse requests.
+3. Treat login as complete only after `/auth/viewer` returns `signedIn:true`.
+4. Send the current `x-csrf-token` on state-changing calls where required.
+5. Native Google/Discord OAuth MUST include `?client=mobile`.
+6. The external browser/Custom Tab is expected for provider authentication; the final redirect must return to `woldeok-moneyverse://oauth/callback`.
+7. Do not expose admin, worker, Discord webhook or database access to the ordinary app.
+8. Handle 401, 403, 409, 422, 429 and 5xx as distinct states.
 
-## 2. Transport contract
+## 1. Architecture
 
-- Base URL: `https://easy-scraping.com`
-- App API prefix: `/app-api/v1`
-- JSON: send `Content-Type: application/json`.
-- Binary image upload: send the raw image body and its real image content type.
-- Session: HTTP-only secure cookie issued by the server. Native clients must retain and resend cookies for subsequent requests.
-- Mutations: obtain a fresh CSRF token and send it as `x-csrf-token`.
-- Do not follow redirects blindly for OAuth; use the returned provider authorization URL in the platform browser/custom tab.
-- Treat `401` as unauthenticated/invalid credentials, `403` as authenticated but not allowed/consent missing, `409` as state/version conflict, `422/400` as invalid input, and `5xx` as server failure.
+`Native UI -> HTTPS BFF (/app-api/v1) -> Next.js server -> private NestJS API -> PostgreSQL`
 
-## 3. First-party email/password sign-up
+The BFF attaches the server-only internal credential and forwards only reviewed member-facing routes. The native client must not construct `/api/v1/*` backend URLs or send `x-internal-token`. Read state is authoritative from the server. For balance, orders, settlements, rewards and inventory, never finalize optimistic state before the server confirms it.
 
-Detailed authentication integration guide: [app-auth-api-guide.md](app-auth-api-guide.md).
+## 2. Shared HTTP client
 
-1. `POST /app-api/v1/auth/prelogin-session` with an empty JSON body. Save the `Set-Cookie` value and returned `csrfToken`.
-2. `GET /app-api/v1/auth/policy` and read `termsVersion` / `privacyVersion`.
-3. `PUT /app-api/v1/auth/consent` with the cookie, `x-csrf-token`, and JSON:
-   `{"termsCompleted":true,"privacyCompleted":true,"ageConfirmed":true,"termsVersion":"...","privacyVersion":"..."}`
-4. `POST /app-api/v1/auth/local/register` with the same cookie/CSRF and JSON:
-   `{"email":"member@example.com","password":"my-password","displayName":"Name"}`
-   There is no numeric minimum password length. Empty passwords are rejected, the technical maximum is 128 code points, and obvious common passwords are rejected.
-5. The server sends a verification email. Submit its token to `POST /app-api/v1/auth/local/verify-email` with the same prelogin cookie and CSRF token.
-6. Save the new session cookie from `Set-Cookie`. The response includes a new CSRF token and `consentCurrent`.
+Use `https://easy-scraping.com` as the base origin, JSON for ordinary requests, bounded timeouts, one CookieJar and a CSRF store. Store every `Set-Cookie`, send matching cookies automatically, and replace the CSRF token whenever the server returns a fresh value. Never log passwords, session cookies, CSRF values, email verification tokens, provider codes/state or mobile handoff codes.
+
+Recommended state machine:
+
+```text
+SignedOut -> Prelogin -> (LocalRegister | LocalLogin | OAuthBrowser)
+OAuthBrowser -> HandoffPending -> SignedIn
+SignedIn -> ConsentRequired when the server reports stale consent
+```
+
+On app launch, load the CookieJar and call `/app-api/v1/auth/viewer`; never infer an authenticated state merely because a cookie exists locally.
+
+## 3. First-party registration
+
+Exact order: `prelogin -> policy -> consent -> local/register -> email verification -> local/verify-email -> viewer`.
+
+- `POST /auth/prelogin-session`: create pre-auth session, save cookie and `csrfToken`.
+- `GET /auth/policy`: fetch current terms/privacy versions; do not hard-code them.
+- `PUT /auth/consent`: send current cookie, CSRF and the server-provided policy versions.
+- `POST /auth/local/register`: send email/password/displayName. Password is non-empty, maximum 128 code points, with obvious common-password rejection possible.
+- `POST /auth/local/verify-email`: same prelogin cookie/CSRF plus the verification token received through email. Save the new login cookie and CSRF.
+- `GET /auth/viewer`: require `signedIn:true`.
+
+Production does not return the raw verification token in the registration JSON response.
 
 ## 4. First-party login
 
-1. Create/reuse a prelogin session with `POST /app-api/v1/auth/prelogin-session`.
-2. `POST /app-api/v1/auth/local/login` with cookie + `x-csrf-token` and `{"email":"...","password":"..."}`.
-3. Save the new session cookie and returned CSRF token.
-4. Use `GET /app-api/v1/auth/viewer` to confirm `signedIn:true`.
+Exact order: `prelogin -> local/login -> viewer`. Use the prelogin cookie and CSRF on `/auth/local/login`, persist the replacement session cookie and new CSRF, then call viewer. Unknown email and wrong password intentionally collapse to the same authentication-failure class.
 
-The login API deliberately returns the same authentication failure for an unknown email and a wrong password.
+## 5. Native Google/Discord OAuth
 
-## 5. Google/Discord OAuth — native app return
+### 5.1 Correct start URLs
 
-The native app calls `GET /app-api/v1/auth/google/authorize?client=mobile` (or Discord). The BFF returns a browser start URL such as `https://easy-scraping.com/auth/google/authorize?client=mobile`; open that URL in the system browser or Custom Tab.
+- `GET /app-api/v1/auth/google/authorize?client=mobile`
+- `GET /app-api/v1/auth/discord/authorize?client=mobile`
 
-After the provider callback, the web browser session is **not** copied into the app. The server creates a five-minute, single-use handoff code and redirects to the configured fixed app URI, defaulting to `woldeok-moneyverse://oauth/callback?code=...&provider=google|discord`. The app must register that scheme/host/path. Deployments may set `MOBILE_OAUTH_RETURN_URI` to another fixed app/universal-link URI; callers cannot supply arbitrary return URIs.
+Omitting `client=mobile` selects the web-login flow and therefore ends on the website. Do not start native auth by directly calling `/auth/{provider}/authorize`.
 
-When the app receives the deep link it immediately sends `POST /app-api/v1/auth/mobile/handoff` with `{"code":"..."}`. Persist the returned `Set-Cookie`, `csrfToken`, and `consentCurrent`. The handoff code is one-time; replay returns 401. Never write the code to logs, analytics, or crash reports.
+The BFF returns:
 
-Web OAuth remains unchanged and returns to the website. Google Play reviewers should receive a dedicated first-party email/password review account instead of a developer's personal Google/Discord account.
+```json
+{"authorizationUrl":"https://easy-scraping.com/auth/google/authorize?client=mobile"}
+```
 
-## 6. CSRF/session pattern for writes
+Open only the returned `authorizationUrl` in a system browser or secure Custom Tab. Do not collect Google/Discord passwords in the app.
 
-For an authenticated session call `GET /app-api/v1/auth/session` to rotate and receive a fresh CSRF token. Send that token in `x-csrf-token` on `POST`, `PUT`, `PATCH`, and `DELETE` operations that require CSRF. Preserve the session cookie across calls.
+### 5.2 Server logic
 
-## 7. File and image APIs
+The browser route establishes a prelogin browser session, then redirects to the provider. The backend validates state, PKCE, nonce/provider response and identity. For a mobile challenge, the resulting browser session is revoked and the server creates a five-minute single-use opaque handoff. Only its SHA-256 hash is persisted.
 
-- Gallery: raw upload `POST /app-api/v1/photos/uploads`, then create submission `POST /app-api/v1/photos` with returned storage key.
-- Board image: `POST /app-api/v1/board/images/uploads`.
-- Profile image: `POST /app-api/v1/profile/image`.
-- Media reads: `/app-api/v1/media/*` now maps to the backend's version-neutral `/media/*` routes instead of the nonexistent `/api/v1/media/*` path.
-- Respect backend size/type limits; do not base64-wrap binary uploads unless an endpoint explicitly says so.
+### 5.3 App return and handoff
 
-## 8. Security boundaries
+The browser redirects to:
 
-The app gateway intentionally rejects `/admin/*`, `/integrations/*`, `/health`, scheduler/worker internals, path traversal and arbitrary top-level routes. This is not missing functionality. Administrative controls stay outside the member app.
+`woldeok-moneyverse://oauth/callback?code=<opaque>&provider=<google|discord>`
 
-## 9. Google Play review readiness checks
+The Android activity must register VIEW + DEFAULT + BROWSABLE for scheme `woldeok-moneyverse`, host `oauth`, path `/callback`. If the deep link is absent or mismatched, no server change can force Android to open the app.
 
-Before each submission verify: production build SHA, public catalog, auth providers, first-party reviewer login, viewer endpoint, at least one authenticated read, logout/relogin, privacy/terms pages, account deletion/privacy request entry points, and that no app screen links to a 404 API. Features that are not implemented must be hidden/disabled in the app rather than presenting a dead control.
+Exchange immediately:
 
-## 10. Known future/partial product areas
+```http
+POST /app-api/v1/auth/mobile/handoff
+Content-Type: application/json
 
-The current product plan still treats password recovery/change and login-email change, unified notifications/push preferences, global member search, and future member MFA/passkeys as planned/partial. They must not be advertised as available app features until their backend contract and runtime validation are complete.
+{"code":"<opaque>"}
+```
 
-## 11. v2026.09.13.49 authentication changes
+Persist the returned app session cookie and CSRF, then verify with `/auth/viewer`. The handoff is single-use; reuse, expiration or mutation returns 401.
 
-- Removed the numeric minimum password length from first-party registration. Empty passwords remain invalid and the 128-code-point technical maximum remains.
-- Added a dedicated end-to-end authentication API integration guide with cookie/CSRF handling, examples, responses and error handling.
-- Kept common-password blocking, Argon2id storage and authentication abuse controls.
+## 6. Authenticated session and CSRF
 
-## 12. v2026.09.13.49 fixes
+Use `GET /app-api/v1/auth/session` when a fresh CSRF is required. Use `POST /app-api/v1/auth/logout` to revoke the server session and clear local auth state only after processing the response cookie invalidation. Identity linking and step-up reauthentication may require current consent and CSRF.
 
-- Added migration `183-local-email-auth-registration-conflict-fix.sql` to remove PostgreSQL SQLSTATE 42702 from verified local registration.
-- Added a real-PostgreSQL regression test for the full first-party registration completion path.
-- Fixed app BFF mapping for version-neutral `/media/*` and OAuth `/auth/:provider/(authorize|callback)` routes.
-- Re-audited the live backend route map and documented the concrete app mapping below.
+## 7. Status handling
 
-## Full audited member route inventory
+| Status | Client behavior |
+|---|---|
+| 200/201/202 | parse body, cookies and CSRF |
+| 204 | success without body |
+| 400 | invalid request/flow |
+| 401 | authentication/expiry/handoff failure; restart auth when appropriate |
+| 403 | consent, CSRF, authorization or state requirement failed |
+| 404 | route mismatch or unimplemented surface; never silently ignore in release builds |
+| 409 | concurrency/state/version conflict; re-fetch authoritative state |
+| 422 | DTO/input validation error |
+| 429 | rate limited; do not hammer retry |
+| 5xx | service failure; keep internals hidden and show retry UI |
 
-Runtime source: production NestJS route map after restart on 2026-09-13. Total backend routes observed: **239**. Member/app mappings listed below: **143**. Admin, Discord webhook, health probe and worker/control-plane routes are intentionally excluded.
+## 8. Feature behavior
+
+Wallet/transfers, banking, stocks, businesses, work, progression, rewards, shop, seasons and casino operations are server-authoritative. Disable duplicate action buttons while writes are in flight. After a successful write, use the response and/or re-fetch the relevant resource; do not calculate final balance, settlement, fill price, reward, inventory or payout locally. GET failures may be retried in a bounded way, but money/economy writes must not be blindly retried after an ambiguous network failure.
+
+Board/profile/photo uploads send actual image bytes with the correct content type. The flow is upload -> receive storage key -> create/update the resource with that key. Do not wrap image bytes in arbitrary base64 JSON.
+
+Privacy requests live under `/privacy/*`; account lifecycle uses `DELETE /account` and must honor any session/CSRF/reauthentication requirement returned by the server.
+
+## 9. App launch and screen loading
+
+```text
+launch
+ -> restore CookieJar
+ -> GET /auth/viewer
+ -> signedIn ? authenticated shell : signed-out shell
+ -> fetch fresh /auth/session when CSRF is required
+ -> each screen fetches only its own feature GETs
+```
+
+Model each screen with loading/error/empty/success states. Never use stale local data as proof that a server-side action succeeded.
+
+## 10. Forbidden native surfaces
+
+The ordinary app must not use `/api/v1/admin/*`, `/api/v1/integrations/discord/*`, `/health`, scheduler/worker routes, direct database connectivity, private backend origins or internal credentials. Their absence from the native BFF is intentional security isolation.
+
+## 11. Store-review QA
+
+Before submission verify: production build SHA, public catalog 200, full local registration, review-account login + viewer, Google and Discord mobile OAuth on a real device, deep-link return, single-use handoff, authenticated core reads/writes, image upload, privacy/terms/account deletion entry points, no 404/5xx from exposed buttons, no unfinished feature exposed as a dead button, and no secrets in the binary.
+
+## 12. Gemini implementation directive
+
+Use this verbatim when generating the app: `Use only https://easy-scraping.com/app-api/v1/* with one persistent secure CookieJar and CSRF store. Native Google/Discord OAuth is GET /auth/{provider}/authorize?client=mobile through the BFF; open the returned authorizationUrl externally; receive woldeok-moneyverse://oauth/callback?code=...; POST the code to /auth/mobile/handoff; persist Set-Cookie; call /auth/viewer; accept login only when signedIn===true. Never call the private backend, never embed internal tokens/secrets, and re-sync authoritative server state after economy writes.`
+
+## Audited user-facing app API route inventory
+
+Basis: actual NestJS route map captured after the 2026-09-13 production restart. Total backend routes: **239**. User-facing app mappings below include the added mobile handoff route. Admin, Discord webhook, health probe, worker and control-plane routes are intentionally excluded.
 
 | Method | App API | Backend route |
 |---|---|---|
@@ -117,6 +173,7 @@ Runtime source: production NestJS route map after restart on 2026-09-13. Total b
 | `POST` | `/app-api/v1/auth/local/register` | `/api/auth/local/register` |
 | `POST` | `/app-api/v1/auth/local/verify-email` | `/api/auth/local/verify-email` |
 | `POST` | `/app-api/v1/auth/logout` | `/api/auth/logout` |
+| `POST` | `/app-api/v1/auth/mobile/handoff` | `/api/auth/mobile/handoff` |
 | `GET` | `/app-api/v1/auth/policy` | `/api/auth/policy` |
 | `POST` | `/app-api/v1/auth/prelogin-session` | `/api/auth/prelogin-session` |
 | `GET` | `/app-api/v1/auth/providers` | `/api/auth/providers` |
@@ -245,3 +302,5 @@ Runtime source: production NestJS route map after restart on 2026-09-13. Total b
 | `GET` | `/app-api/v1/auth/:provider/callback` | `/auth/:provider/callback` |
 | `GET` | `/app-api/v1/media/:key` | `/media/:key` |
 | `GET` | `/app-api/v1/media/profile/:key` | `/media/profile/:key` |
+
+

@@ -214,8 +214,8 @@ x-csrf-token: <현재 csrf token>
 
 시작점:
 
-- `GET /app-api/v1/auth/google/authorize`
-- `GET /app-api/v1/auth/discord/authorize`
+- `GET /app-api/v1/auth/google/authorize?client=mobile`
+- `GET /app-api/v1/auth/discord/authorize?client=mobile`
 
 provider 인증은 시스템 브라우저 또는 안전한 Custom Tab으로 연다. 앱에서 Google/Discord 비밀번호를 직접 받지 않는다. 서버 전용 secret을 넣지 않고, callback 값만 보고 앱이 임의 로그인 처리하지 않는다. 서버의 state/PKCE/OIDC 검증 완료를 기준으로 한다.
 

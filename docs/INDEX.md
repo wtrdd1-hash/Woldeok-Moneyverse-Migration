@@ -116,3 +116,4 @@ The project plan is a living specification. Intentional, validated implementatio
 ## Visual assets
 
 - [Screenshot provenance and update rules](images/README.md) / [한국어](images/README.ko.md)
+- [Complete Mobile App API Implementation Specification](mobile-api-complete-spec.md) / [한국어](mobile-api-complete-spec.ko.md) — single-source native API contract, OAuth handoff, feature logic, DTO guidance, and audited route inventory.

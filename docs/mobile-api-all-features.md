@@ -6,6 +6,8 @@
 
 ## Purpose
 
+
+> **Native implementation authority:** [Complete Mobile App API Implementation Specification](mobile-api-complete-spec.md) — new app/code-generation work must prefer this consolidated contract.
 This document defines the complete app-facing API surface for Woldeok Moneyverse. Native/mobile clients call the Next.js BFF under `/app-api/v1/*`; they never receive or embed `INTERNAL_API_TOKEN`. The BFF forwards session cookies, CSRF tokens and approved request metadata to the private NestJS API.
 
 ## Authentication
@@ -24,8 +26,8 @@ Canonical app paths include:
 - `GET /app-api/v1/auth/policy`
 - `PUT /app-api/v1/auth/consent`
 - `GET /app-api/v1/auth/providers`
-- `GET /app-api/v1/auth/discord/authorize`
-- `GET /app-api/v1/auth/google/authorize`
+- `GET /app-api/v1/auth/discord/authorize?client=mobile`
+- `GET /app-api/v1/auth/google/authorize?client=mobile`
 - provider callbacks through the existing OAuth flow
 - `POST /app-api/v1/auth/local/register`
 - `POST /app-api/v1/auth/local/verify-email`

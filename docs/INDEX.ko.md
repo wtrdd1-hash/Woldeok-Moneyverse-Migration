@@ -49,6 +49,7 @@
 - [시각 자료 출처 및 스크린샷 정책](images/README.ko.md)
 
 ## 통합
+- [모바일 앱 전체 API 통합 구현 명세서](mobile-api-complete-spec.ko.md) / [English](mobile-api-complete-spec.md) — 인증 상태머신, OAuth 앱 복귀, 기능별 로직, 전체 감사 라우트를 한 파일에 통합한 기준 문서.
 - [앱 인증 API 상세 가이드](app-auth-api-guide.ko.md) / [English](app-auth-api-guide.md) — 회원가입, 이메일 인증, 로그인, session/CSRF, 로그아웃, OAuth 시작점.
 - [모바일 / 외부 앱 API](mobile-api.ko.md)
 

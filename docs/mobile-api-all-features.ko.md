@@ -6,6 +6,8 @@
 
 ## 목적
 
+
+> **앱 구현 기준 문서:** [모바일 앱 전체 API 통합 구현 명세서](mobile-api-complete-spec.ko.md) — 신규 앱/Gemini 구현은 이 통합 명세를 우선한다.
 이 문서는 Woldeok Moneyverse의 일반 사용자/회원 기능을 앱에서 사용할 수 있도록 제공하는 전체 앱 API 범위를 정의한다. 네이티브/모바일 앱은 `/app-api/v1/*` Next.js BFF를 호출하며 `INTERNAL_API_TOKEN`을 앱에 저장하거나 노출하지 않는다. BFF가 세션 쿠키, CSRF 토큰, 허용된 요청 메타데이터를 비공개 NestJS API로 전달한다.
 
 ## 로그인/회원가입 API
@@ -24,8 +26,8 @@
 - `GET /app-api/v1/auth/policy`
 - `PUT /app-api/v1/auth/consent`
 - `GET /app-api/v1/auth/providers`
-- `GET /app-api/v1/auth/discord/authorize`
-- `GET /app-api/v1/auth/google/authorize`
+- `GET /app-api/v1/auth/discord/authorize?client=mobile`
+- `GET /app-api/v1/auth/google/authorize?client=mobile`
 - 기존 OAuth callback 흐름
 - `POST /app-api/v1/auth/local/register`
 - `POST /app-api/v1/auth/local/verify-email`
