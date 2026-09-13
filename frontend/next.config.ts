@@ -93,9 +93,9 @@ const config: NextConfig = {
   async headers() {
     // Tests and the standalone runtime load this config more than once with
     // different deployment settings, so read the switch here rather than at
-    // module evaluation time. Advertising is opt-in: a missing release flag
-    // must not broaden CSP to third-party ad origins.
-    const adsEnabled = (process.env.NEXT_PUBLIC_ADS_ENABLED || process.env.ADS_ENABLED || 'false') === 'true';
+    // module evaluation time. Reviewed public-page advertising defaults on;
+    // an explicit false removes all AdSense CSP origins for test/emergency use.
+    const adsEnabled = (process.env.NEXT_PUBLIC_ADS_ENABLED || process.env.ADS_ENABLED || 'true') === 'true';
     const base = process.env.APP_BASE_URL ?? 'http://127.0.0.1:3000';
     // The lobby's socket shares this origin. `connect-src 'self'` has never
     // reliably covered ws:/wss: across browsers, so the socket origin is

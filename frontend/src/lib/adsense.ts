@@ -1,6 +1,8 @@
 /**
  * Google AdSense configuration.
- * Reads environment variables or falls back to production configured publisher/slot.
+ * Reads environment variables or falls back to the reviewed production publisher/slot.
+ * Reviewed public-page advertising defaults to enabled; deployments may explicitly set
+ * ADS_ENABLED=false to disable it.
  */
 const publisherId =
   process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID ||
@@ -13,7 +15,7 @@ const homeSlot =
   '2118692561';
 
 const adsEnabled =
-  (process.env.NEXT_PUBLIC_ADS_ENABLED || process.env.ADS_ENABLED || 'false') === 'true';
+  (process.env.NEXT_PUBLIC_ADS_ENABLED || process.env.ADS_ENABLED || 'true') === 'true';
 
 export const homeAdSense = Object.freeze({
   enabled:

@@ -2,7 +2,7 @@
 
 > Status: Living specification
 > Original planning baseline: 2026-08-26
-> Implementation sync: 2026-09-09
+> Implementation sync: 2026-09-13
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 ## 0. How this document is maintained
@@ -129,7 +129,7 @@ One canonical public origin should be selected for public content. Duplicate pub
 
 Private/account/admin/transaction paths are excluded from search indexing through authentication plus appropriate noindex/X-Robots handling; `robots.txt` alone is not considered a privacy control.
 
-Advertising remains disabled by default until policy/review gates are complete. Ads are restricted to allowlisted public information/content pages. The public community-board index may carry one bottom placement separated from the posting controls, while individual user-generated post/comment detail pages remain ad-free and subject to publisher UGC review/removal responsibilities. Ads remain blocked from login, wallet, transfer, market, casino/gameplay, admin, error, and other sensitive/interactive paths.
+Reviewed advertising is enabled by default on the existing allowlisted public-information/content surfaces. Production builds therefore use `ADS_ENABLED=true` unless an operator explicitly disables advertising for an emergency policy/compliance hold. The isolated test deployment explicitly uses `ADS_ENABLED=false` and empty AdSense identifiers so QA never generates real ad traffic. The public community-board index may carry one bottom placement separated from posting controls, while individual user-generated post/comment detail pages remain ad-free and subject to publisher UGC review/removal responsibilities. Ads remain blocked from login, wallet, transfer, market, casino/gameplay, admin, error, and other sensitive/interactive paths.
 
 Privacy/terms/cookie disclosures must describe the actual implementation. Under-age handling, paid features, advertising, probability-based features, or any cash-value change require an updated legal/product review before release.
 
@@ -178,6 +178,13 @@ The project should continue to reconcile and improve, in priority order:
 - Treat security, reliability, and specification drift as recurring operational work rather than one-time launch tasks.
 
 ## 16. Change record
+
+### 2026-09-13 — default-on reviewed advertising v2026.09.13.37
+
+- Changed the reviewed public-content advertising policy from default-off to default-on.
+- Production builds now enable the approved AdSense publisher/slot automatically, while an explicit operator switch can still disable advertising.
+- The isolated test deployment remains explicitly ad-free so staging traffic cannot generate real ad requests.
+- Sensitive/account/economy/gameplay routes remain outside the advertising allowlist.
 
 ### 2026-09-09 — implementation synchronization
 

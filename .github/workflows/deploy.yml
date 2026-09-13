@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       enable_ads:
-        description: Enable the reviewed AdSense unit in the production frontend image
+        description: Enable the reviewed AdSense unit in the production frontend image (default on)
         required: true
-        default: false
+        default: true
         type: boolean
 
 permissions:
@@ -127,9 +127,9 @@ jobs:
             BUILD_ID=${{ env.RELEASE_SHA }}
             SEO_INDEXING_ENABLED=true
             SEARCH_CONSOLE_VERIFICATION=${{ vars.SEARCH_CONSOLE_VERIFICATION }}
-            ADS_ENABLED=${{ github.event_name == 'workflow_dispatch' && inputs.enable_ads && 'true' || 'false' }}
-            ADSENSE_PUBLISHER_ID=${{ github.event_name == 'workflow_dispatch' && inputs.enable_ads && 'ca-pub-5220225531544323' || '' }}
-            ADSENSE_HOME_SLOT=${{ github.event_name == 'workflow_dispatch' && inputs.enable_ads && '2118692561' || '' }}
+            ADS_ENABLED=${{ github.event_name == 'workflow_dispatch' && inputs.enable_ads == false && 'false' || 'true' }}
+            ADSENSE_PUBLISHER_ID=ca-pub-5220225531544323
+            ADSENSE_HOME_SLOT=2118692561
           tags: ${{ steps.meta.outputs.frontend }}
           cache-from: type=gha,scope=frontend-production
           cache-to: type=gha,mode=max,scope=frontend-production
@@ -152,5 +152,6 @@ jobs:
             echo "- exact SHA: \`${RELEASE_SHA}\`"
             echo "- backend: \`${{ steps.meta.outputs.backend }}\`"
             echo "- frontend: \`${{ steps.meta.outputs.frontend }}\`"
+            echo '- reviewed public-page advertising defaults to enabled; manual dispatch may explicitly disable it.'
             echo '- GitOps automation may promote only this exact SHA after observing the production-ready signal.'
           } >> "$GITHUB_STEP_SUMMARY"

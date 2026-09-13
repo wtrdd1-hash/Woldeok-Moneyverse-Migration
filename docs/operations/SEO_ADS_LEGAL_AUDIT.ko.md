@@ -1,33 +1,43 @@
 # SEO · 광고 · 법적 고지 운영 점검
 
 기준일: 2026-09-08
+최근 정책 동기화: 2026-09-13 (v2026.09.13.37)
 
 ## 적용 원칙
 
 - 검색 색인은 `SEO_INDEXING_ENABLED=true`인 정본 운영 배포에서만 허용한다. 테스트·임시 호스트는 기본 `false`로 실패 폐쇄한다.
-- 광고는 `ADS_ENABLED=true`가 명시된 운영 배포에서만 활성화한다. Dockerfile 자체 기본값도 `false`로 두어 실수로 만든 테스트 이미지가 광고를 송출하지 않게 한다.
+- 검토 완료된 공개 경로 광고는 기본 활성화한다. 운영 빌드는 `ADS_ENABLED=true`와 승인된 게시자/슬롯을 기본 사용하며, 정책·법률·장애 대응을 위한 긴급 중지 시 운영자가 명시적으로 광고를 끌 수 있다. 격리 테스트 빌드는 `ADS_ENABLED=false`와 빈 AdSense 식별자를 명시한다.
 - `ads.txt`는 루트 `/ads.txt`에서 게시자 `pub-5220225531544323`을 DIRECT로 선언한다.
 - 광고 배치는 홈, 운영 소식 목록·상세, 운영 검토 후 공개된 갤러리와 공개 커뮤니티 게시판 목록 하단의 단일 슬롯으로 제한한다. 개별 게시글·댓글 상세 화면은 광고 없이 유지한다.
 - 상점 구매 화면, 계정, 지갑, 송금, 주식, 대출, 카지노, 보상, 관리자, 상태, 약관, 개인정보처리방침에는 광고를 배치하지 않는다.
 - WLD는 현금 환전·출금·실물 경품 교환이 불가능한 서비스 내부 가상 데이터라는 경계를 유지한다.
 - EEA·영국·스위스 방문자 광고 동의는 Google Privacy & messaging 또는 Google 인증 CMP의 실제 운영 설정과 개인정보처리방침 문구가 일치해야 한다.
 
+## 2026-09-13 변경 — v2026.09.13.37
+
+- 검토된 공개 콘텐츠 광고 정책을 opt-in에서 기본 활성화로 전환했다.
+- 운영 릴리스 빌드는 자동 배포에서도 승인된 AdSense 게시자와 슬롯을 유지한다.
+- 수동 운영 배포의 광고 기본값도 활성화로 바꾸되 긴급 비활성화 스위치는 유지한다.
+- 격리 테스트 후보 이미지는 계속 광고를 명시적으로 끄고 실제 광고 트래픽을 발생시키지 않는다.
+- 광고 플래그가 없으면 활성화되고, `ADS_ENABLED=false`를 명시하면 AdSense 로더와 CSP 허용 origin이 제거되는 회귀 테스트로 정책을 고정한다.
+
 ## 2026-09-08 변경
 
-- Docker SEO/AdSense 기본값을 opt-in(`false`)으로 변경.
-- AdSense 런타임 설정도 명시적 enable이 없으면 비활성화하도록 변경.
-- 상점 페이지의 광고를 제거해 거래·구매 UI 인접 광고 리스크를 줄임.
-- 실제 광고 배치와 개인정보처리방침의 광고 범위를 일치시킴.
-- 위 opt-in 동작을 회귀 테스트로 고정.
-- 배포 smoke check에서 `/robots.txt`, `/sitemap.xml`, `/ads.txt`와 환경별 index/ad 기대값을 자동 검증.
+- 당시 Docker SEO/AdSense 기본값을 opt-in(`false`)으로 변경했다.
+- 당시 AdSense 런타임 설정도 명시적 enable이 없으면 비활성화하도록 변경했다.
+- 상점 페이지의 광고를 제거해 거래·구매 UI 인접 광고 리스크를 줄였다.
+- 실제 광고 배치와 개인정보처리방침의 광고 범위를 일치시켰다.
+- 당시 opt-in 동작 회귀 테스트는 2026-09-13 기본 활성화 정책으로 대체됐다.
+- 배포 smoke check에서 `/robots.txt`, `/sitemap.xml`, `/ads.txt`와 환경별 index/ad 기대값을 자동 검증했다.
 
 ## 운영 확인 체크
 
-1. 운영: `APP_BASE_URL=https://easy-scraping.com`, `SEO_INDEXING_ENABLED=true`.
-2. 테스트: `SEO_INDEXING_ENABLED=false`, `ADS_ENABLED=false`.
+1. 운영: `APP_BASE_URL=https://easy-scraping.com`, `SEO_INDEXING_ENABLED=true`, 긴급 중지가 아닌 한 `ADS_ENABLED=true`.
+2. 테스트: `SEO_INDEXING_ENABLED=false`, `ADS_ENABLED=false`, 빈 AdSense 게시자/슬롯 빌드 인자.
 3. 운영에서 `/robots.txt`, `/sitemap.xml`, `/ads.txt`가 200으로 응답하는지 확인.
-4. Search Console에서 사이트맵 제출·색인 상태·페이지별 canonical 상태 확인.
-5. AdSense에서 ads.txt 승인 상태와 정책 센터 경고 확인.
-6. Google Privacy & messaging/CMP가 대상 지역에서 실제 노출되는지 브라우저 세션으로 확인.
+4. 광고 허용 공개 페이지에서 검토된 AdSense 스크립트/설정이 로드되고, 민감·차단 경로에는 광고 컴포넌트가 배치되지 않는지 확인.
+5. Search Console에서 사이트맵 제출·색인 상태·페이지별 canonical 상태 확인.
+6. AdSense에서 ads.txt 승인 상태와 정책 센터 경고 확인.
+7. Google Privacy & messaging/CMP가 대상 지역에서 실제 노출되는지 브라우저 세션으로 확인.
 
 > 이 문서는 기술·운영 점검 기록이며 법률 자문을 대체하지 않는다. 기능·수익화 방식이 바뀌면 개인정보 처리, 청소년 보호, 게임/사행성 관련 규제 적용 여부를 다시 검토한다.

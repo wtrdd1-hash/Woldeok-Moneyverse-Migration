@@ -12,20 +12,33 @@ async function settings() {
 }
 
 describe('home AdSense settings', () => {
-  it('stays disabled when the deployment does not explicitly opt in', async () => {
+  it('defaults to the reviewed public unit when no ad switch is provided', async () => {
     delete process.env.ADS_ENABLED;
     delete process.env.NEXT_PUBLIC_ADS_ENABLED;
+    delete process.env.ADSENSE_PUBLISHER_ID;
+    delete process.env.NEXT_PUBLIC_ADSENSE_PUBLISHER_ID;
+    delete process.env.ADSENSE_HOME_SLOT;
+    delete process.env.NEXT_PUBLIC_ADSENSE_HOME_SLOT;
+    expect(await settings()).toMatchObject({
+      enabled: true,
+      publisherId: 'ca-pub-5220225531544323',
+      slot: '2118692561',
+    });
+  });
+
+  it('can be explicitly disabled for test or emergency policy holds', async () => {
+    process.env.ADS_ENABLED = 'false';
     expect((await settings()).enabled).toBe(false);
   });
 
-  it('fails closed unless the deployment enables a complete public unit', async () => {
+  it('fails closed when the configured public unit is invalid', async () => {
     process.env.ADS_ENABLED = 'true';
     process.env.ADSENSE_PUBLISHER_ID = 'not-a-publisher';
     process.env.ADSENSE_HOME_SLOT = '2118692561';
     expect((await settings()).enabled).toBe(false);
   });
 
-  it('accepts the configured public homepage unit only when advertising is enabled', async () => {
+  it('accepts the configured public homepage unit when advertising is enabled', async () => {
     process.env.ADS_ENABLED = 'true';
     process.env.ADSENSE_PUBLISHER_ID = 'ca-pub-5220225531544323';
     process.env.ADSENSE_HOME_SLOT = '2118692561';

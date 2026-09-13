@@ -54,16 +54,24 @@ describe('security headers', () => {
     expect(csp.get('connect-src')).toContain('https://cloudflareinsights.com');
   });
 
-  it('fails closed when advertising was not explicitly enabled', async () => {
+  it('admits the reviewed AdSense origins by default', async () => {
     delete process.env.ADS_ENABLED;
     delete process.env.NEXT_PUBLIC_ADS_ENABLED;
+    const csp = directives((await headersFor('https://test.example.com')).get('content-security-policy')!);
+    expect(csp.get('script-src')).toContain('https://pagead2.googlesyndication.com');
+    expect(csp.get('frame-src')).toBe('https://googleads.g.doubleclick.net https://tpc.googlesyndication.com');
+    expect(csp.get('connect-src')).toContain('https://googleads.g.doubleclick.net');
+  });
+
+  it('removes all AdSense origins when advertising is explicitly disabled', async () => {
+    process.env.ADS_ENABLED = 'false';
     const csp = directives((await headersFor('https://test.example.com')).get('content-security-policy')!);
     expect(csp.get('script-src')).not.toContain('https://pagead2.googlesyndication.com');
     expect(csp.get('frame-src')).toBe("'none'");
     expect(csp.get('connect-src')).not.toContain('https://googleads.g.doubleclick.net');
   });
 
-  it('admits no other third-party script origin', async () => {
+  it('admits no other third-party script origin while ads are disabled', async () => {
     process.env.ADS_ENABLED = 'false';
     const csp = directives((await headersFor('https://test.example.com')).get('content-security-policy')!);
     expect(csp.get('script-src')!.split(' ').sort()).toEqual([
