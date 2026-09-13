@@ -5,6 +5,7 @@ export interface NavEntry {
 
 const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '홈': 'Home',
+  '내 대시보드': 'My dashboard',
   '이용 방법': 'Guide',
   '공지': 'Updates',
   '운영 소식': 'Updates',
@@ -82,6 +83,7 @@ export const PUBLIC_NAV: readonly NavEntry[] = [
 
 /** Needs a session and current consent. Every one of these is `noindex`. */
 export const MEMBER_NAV: readonly NavEntry[] = [
+  { href: '/dashboard', label: '내 대시보드' },
   { href: '/wallet', label: '덕지갑' },
   { href: '/bank', label: '가상 금융 (은행)' },
   { href: '/work', label: '잡보드 (작업)' },
@@ -142,6 +144,7 @@ export const HEADER_PUBLIC: readonly NavItem[] = [
 ];
 
 export const HEADER_MEMBER: readonly NavItem[] = [
+  { href: '/dashboard', label: '내 대시보드' },
   {
     label: '경제',
     entries: [
