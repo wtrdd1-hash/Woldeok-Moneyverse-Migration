@@ -14,6 +14,7 @@ import {
   Req,
   Res,
   ServiceUnavailableException,
+  UnauthorizedException,
   UseGuards,
   Version,
   VERSION_NEUTRAL,
@@ -65,6 +66,14 @@ export class ConsentDto {
   @IsString()
   @MaxLength(64)
   readonly privacyVersion!: string;
+}
+
+
+export class MobileHandoffDto {
+  @ApiProperty({ minLength: 32, maxLength: 512 })
+  @IsString()
+  @MaxLength(512)
+  readonly code!: string;
 }
 
 export class ReauthenticationStartDto {
@@ -232,7 +241,11 @@ export class AuthController {
   @Version(VERSION_NEUTRAL)
   @UseGuards(SessionGuard)
   @ApiOperation({ summary: 'Begin login with a provider' })
-  async authorize(@Req() request: RequestWithSession, @Param('provider') providerName: string) {
+  async authorize(
+    @Req() request: RequestWithSession,
+    @Param('provider') providerName: string,
+    @Query('client') client?: string,
+  ) {
     const provider = asProvider(providerName);
     if (!provider) throw new ServiceUnavailableException('OAuth is not configured');
     const providerConfig = this.providerConfig(provider);
@@ -241,7 +254,10 @@ export class AuthController {
       provider,
       selectRedirectUri(providerConfig, this.publicOrigin(request)),
     );
-    await this.store().createChallenge(session.id, challenge, 'login');
+    if (client !== undefined && client !== 'web' && client !== 'mobile') {
+      throw new BadRequestException('oauth_client');
+    }
+    await this.store().createChallenge(session.id, challenge, 'login', client === 'mobile');
     return { authorizationUrl: authorizationUrl(provider, challenge, providerConfig.clientId) };
   }
 
@@ -317,6 +333,26 @@ export class AuthController {
       subject: identity.subject,
       displayName: identity.displayName,
     });
+    const consentCurrent = await this.store().hasCurrentUserConsent(login.session_id);
+    if (challenge.mobile_client) {
+      const mobileHandoff = await this.store().createMobileOAuthHandoff(login.user_id);
+      await this.store().revoke(login.session_id);
+      return { outcome: 'signed-in' as const, mobileHandoff, consentCurrent };
+    }
+
+    response.setHeader('set-cookie', sessionCookie(login.token, this.config));
+    return { outcome: 'signed-in' as const, csrfToken: login.csrfToken, consentCurrent };
+  }
+
+  @Post('auth/mobile/handoff')
+  @ApiOperation({ summary: 'Exchange a one-time native OAuth handoff for an app session' })
+  async mobileHandoff(
+    @Res({ passthrough: true }) response: Response,
+    @Body() body: MobileHandoffDto,
+  ) {
+    if (body.code.length < 32) throw new UnauthorizedException('invalid mobile handoff');
+    const login = await this.store().consumeMobileOAuthHandoff(body.code);
+    if (!login) throw new UnauthorizedException('invalid mobile handoff');
     response.setHeader('set-cookie', sessionCookie(login.token, this.config));
     const consentCurrent = await this.store().hasCurrentUserConsent(login.session_id);
     return { outcome: 'signed-in' as const, csrfToken: login.csrfToken, consentCurrent };

@@ -1,7 +1,7 @@
 # Complete App API Guide
 
-> Version: v2026.09.12.33
-> Date: 2026-09-12
+> Version: v2026.09.13.48
+> Date: 2026-09-13
 > Korean: [mobile-api-all-features.ko.md](mobile-api-all-features.ko.md)
 
 ## Purpose
@@ -9,6 +9,8 @@
 This document defines the complete app-facing API surface for Woldeok Moneyverse. Native/mobile clients call the Next.js BFF under `/app-api/v1/*`; they never receive or embed `INTERNAL_API_TOKEN`. The BFF forwards session cookies, CSRF tokens and approved request metadata to the private NestJS API.
 
 ## Authentication
+Detailed authentication integration: [app-auth-api-guide.md](app-auth-api-guide.md).
+
 
 Supported app authentication methods:
 - first-party email/password registration and login (`local_email`);

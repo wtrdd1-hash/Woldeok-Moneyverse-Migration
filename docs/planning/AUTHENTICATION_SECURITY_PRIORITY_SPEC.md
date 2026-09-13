@@ -84,7 +84,7 @@ Maintain a data inventory containing: field, purpose, source, table, encryption/
 
 ## 4. Password policy — production baseline
 
-Current NIST SP 800-63B-4 (published August 1, 2025) is the password baseline to cross-check before implementation. Because a password can initially operate as a single factor for ordinary local accounts, require at least **15 characters**. Permit at least **64 characters**; a higher explicit technical ceiling such as 128 or 256 code points may be used for denial-of-service protection but must be documented and must never silently truncate.
+NIST SP 800-63B-4 (published August 1, 2025) remains an external security reference. From v2026.09.13.48, the product policy intentionally **does not enforce a numeric minimum password length** to reduce sign-up friction. An empty string is not a password. The server currently enforces a 128-code-point technical maximum and never silently truncates. Common/compromised-password blocking, Argon2id, rate limiting and account-enumeration resistance remain required.
 
 Password rules:
 - permit passphrases, spaces, Unicode and password-manager generated values;
@@ -357,7 +357,7 @@ No Production rollout before all release-blocking tests pass on the isolated tes
 ## 22. Security Definition of Done
 
 Local authentication is complete only when all are true:
-- current NIST-aligned password policy with compromised-password blocklist;
+- documented product password policy, including its explicit difference from the external NIST length recommendation, with compromised-password blocklist;
 - Argon2id adaptive hashing, versioning and rehash path;
 - parameterized SQL/fixed reviewed DB functions everywhere;
 - least-privilege private-data roles and negative permission tests;
@@ -397,3 +397,8 @@ Reference-only:
 - Added Korea September 11, 2026 privacy-regime review note without assuming thresholds that depend on actual service status/scale.
 
 Documentation-only. Runtime implementation must occur in a separate development branch and pass the isolated test-server exact-SHA security gate before Production.
+
+### v2026.09.13.48 — simplified member password entry
+- Removed the numeric minimum-length requirement for first-party registration by product decision.
+- Kept empty-password rejection, the 128-code-point technical maximum, common/compromised-password blocking, Argon2id and rate limiting.
+- Documented the deliberate difference from the NIST 15-character recommendation instead of describing the product policy as NIST-aligned.

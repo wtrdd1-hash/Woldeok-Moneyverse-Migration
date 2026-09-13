@@ -28,10 +28,20 @@ import { SessionRepository } from './session.repository';
 import { VerificationEmailSender } from './verification-email.sender';
 
 const COMMON_PASSWORDS = new Set([
+  'password',
   'passwordpassword',
+  '1234',
+  '123456',
+  '12345678',
+  '123456789',
   '123456789012345',
+  'qwerty',
   'qwertyqwertyqwerty',
+  'letmein',
   'letmeinletmeinletmein',
+  'admin',
+  '111111',
+  'abc123',
 ]);
 
 function normalizeEmail(value: string): string {
@@ -42,9 +52,9 @@ function emailHash(value: string): string {
   return sha256(normalizeEmail(value));
 }
 
-function acceptablePassword(password: string): boolean {
+export function acceptablePassword(password: string): boolean {
   const normalized = password.normalize('NFC');
-  return normalized.length >= 15 && normalized.length <= 128 && !COMMON_PASSWORDS.has(normalized.toLowerCase());
+  return normalized.length > 0 && normalized.length <= 128 && !COMMON_PASSWORDS.has(normalized.toLowerCase());
 }
 
 export class LocalRegisterDto {
@@ -53,9 +63,8 @@ export class LocalRegisterDto {
   @MaxLength(254)
   readonly email!: string;
 
-  @ApiProperty({ minLength: 15, maxLength: 128 })
+  @ApiProperty({ maxLength: 128, description: 'Non-empty password. No numeric minimum length is enforced.' })
   @IsString()
-  @MinLength(15)
   @MaxLength(128)
   readonly password!: string;
 
@@ -72,9 +81,8 @@ export class LocalLoginDto {
   @MaxLength(254)
   readonly email!: string;
 
-  @ApiProperty({ minLength: 1, maxLength: 128 })
+  @ApiProperty({ maxLength: 128 })
   @IsString()
-  @MinLength(1)
   @MaxLength(128)
   readonly password!: string;
 }

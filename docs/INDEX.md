@@ -7,7 +7,6 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 > Documentation language order: **1. English canonical source / 2. Korean maintained translation.** When a paired Korean document exists, it is linked beside the English source.
 
 ## Planning
-
 - [Living Project Plan](planning/PROJECT_PLAN.md) / [한국어](planning/PROJECT_PLAN.ko.md)
 - [Product Growth & Retention Plan](planning/PRODUCT_GROWTH_PLAN.md) / [한국어](planning/PRODUCT_GROWTH_PLAN.ko.md)
 - [Detailed Product Design Specification](planning/PRODUCT_DESIGN_SPEC.md) / [한국어](planning/PRODUCT_DESIGN_SPEC.ko.md)
@@ -55,6 +54,7 @@ The project plan is a living specification. Intentional, validated implementatio
 
 ## Integration
 
+- [App authentication API guide](app-auth-api-guide.md) / [한국어](app-auth-api-guide.ko.md) — registration, email verification, login, session/CSRF, logout, OAuth entry points.
 - [Mobile / external app API](mobile-api.md) / [한국어](mobile-api.ko.md)
 
 ## Operations

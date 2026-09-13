@@ -16,7 +16,7 @@ import { publicUrl } from '@/lib/public-url';
 export const dynamic = 'force-dynamic';
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { readonly params: Promise<{ readonly provider: string }> },
 ): Promise<NextResponse> {
   const { provider } = await context.params;
@@ -28,8 +28,10 @@ export async function GET(
     );
     await relaySetCookie(setCookie);
     const cookieHeader = sessionCookiePair(setCookie);
+    const client = new URL(request.url).searchParams.get('client');
+    const suffix = client === 'mobile' ? '?client=mobile' : '';
     const { authorizationUrl } = await api<{ authorizationUrl: string }>(
-      `/auth/${encodeURIComponent(provider)}/authorize`,
+      `/auth/${encodeURIComponent(provider)}/authorize${suffix}`,
       cookieHeader && !session.signedIn ? { cookieHeader } : {},
     );
     const response = NextResponse.redirect(authorizationUrl);

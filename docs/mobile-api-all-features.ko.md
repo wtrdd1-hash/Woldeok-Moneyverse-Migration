@@ -1,7 +1,7 @@
 # 전체 기능 앱 API 가이드
 
-> 버전: v2026.09.12.33
-> 기준일: 2026-09-12
+> 버전: v2026.09.13.48
+> 기준일: 2026-09-13
 > 영문: [mobile-api-all-features.md](mobile-api-all-features.md)
 
 ## 목적
@@ -9,6 +9,8 @@
 이 문서는 Woldeok Moneyverse의 일반 사용자/회원 기능을 앱에서 사용할 수 있도록 제공하는 전체 앱 API 범위를 정의한다. 네이티브/모바일 앱은 `/app-api/v1/*` Next.js BFF를 호출하며 `INTERNAL_API_TOKEN`을 앱에 저장하거나 노출하지 않는다. BFF가 세션 쿠키, CSRF 토큰, 허용된 요청 메타데이터를 비공개 NestJS API로 전달한다.
 
 ## 로그인/회원가입 API
+
+인증 상세 연동 문서: [app-auth-api-guide.ko.md](app-auth-api-guide.ko.md).
 
 앱 인증 방식은 다음을 모두 지원한다.
 - 사이트 자체 이메일/비밀번호 회원가입 및 로그인(`local_email`)

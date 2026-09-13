@@ -15,6 +15,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return NextResponse.json({ title: 'Not Found' }, { status: 404 });
 
+  if (
+    parts.length === 3 &&
+    parts[0] === 'auth' &&
+    (parts[1] === 'google' || parts[1] === 'discord') &&
+    parts[2] === 'authorize' &&
+    request.nextUrl.searchParams.get('client') === 'mobile'
+  ) {
+    const origin = appGatewayOrigin(request.headers);
+    if (!origin) return NextResponse.json({ title: 'Bad Request' }, { status: 400 });
+    return NextResponse.json({
+      authorizationUrl: `${origin}/auth/${encodeURIComponent(parts[1])}/authorize?client=mobile`,
+    });
+  }
+
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),

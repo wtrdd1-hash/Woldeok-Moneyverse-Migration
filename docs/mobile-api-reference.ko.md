@@ -1,8 +1,8 @@
 # 월덕 머니버스 모바일/앱 API — 전체 상세 사용 가이드
 
-> 버전: v2026.09.13.46  
+> 버전: v2026.09.13.49
 > 날짜: 2026-09-13  
-> 수정 전 기준 main: `d80c22da548c2f28fb41cf7d06f711dc81c6b00a`  
+> 변경 전 기준 main: `a57fc851c2800d77c8bb284cb1c168cfb3638bc2`
 > 영어 원문: [mobile-api-reference.md](mobile-api-reference.md)
 
 ## 1. 목적과 구조
@@ -25,11 +25,13 @@
 
 ## 3. 자체 이메일 회원가입 순서
 
+인증 전용 상세 연동 문서: [app-auth-api-guide.ko.md](app-auth-api-guide.ko.md).
+
 1. `POST /app-api/v1/auth/prelogin-session` 호출. 응답 `Set-Cookie`와 `csrfToken` 저장.
 2. `GET /app-api/v1/auth/policy`에서 현재 `termsVersion`, `privacyVersion` 조회.
 3. `PUT /app-api/v1/auth/consent`에 세션 쿠키 + `x-csrf-token`과 다음 JSON 전송:
    `{"termsCompleted":true,"privacyCompleted":true,"ageConfirmed":true,"termsVersion":"...","privacyVersion":"..."}`
-4. `POST /app-api/v1/auth/local/register`에 `{"email":"member@example.com","password":"15자 이상 비밀번호","displayName":"이름"}` 전송. 비밀번호는 15~128자이며 흔한 취약 비밀번호는 거부한다.
+4. `POST /app-api/v1/auth/local/register`에 `{"email":"member@example.com","password":"내비밀번호","displayName":"이름"}` 전송. 숫자형 최소 글자 수 제한은 없다. 빈 비밀번호는 거부하고 기술적 최대치는 128 code point이며, 명백한 흔한 취약 비밀번호는 거부한다.
 5. 인증메일의 token을 `POST /app-api/v1/auth/local/verify-email`에 같은 prelogin 쿠키/CSRF와 함께 전송.
 6. 성공 시 새 `Set-Cookie`를 저장한다. 응답의 새 `csrfToken`과 `consentCurrent`를 사용한다.
 
@@ -42,11 +44,15 @@
 
 존재하지 않는 이메일과 틀린 비밀번호는 같은 인증 실패 응답을 사용해 계정 존재 여부를 노출하지 않는다.
 
-## 5. Google/Discord OAuth
+## 5. Google/Discord OAuth — 네이티브 앱 복귀
 
-`GET /app-api/v1/auth/google/authorize`, `GET /app-api/v1/auth/discord/authorize`는 BFF가 백엔드의 version-neutral OAuth 경로로 변환한다. 응답의 provider authorization URL을 시스템 브라우저/Custom Tab으로 연다. callback은 서비스가 처리하며 앱에 내부 토큰을 노출하지 않는다.
+앱은 `GET /app-api/v1/auth/google/authorize?client=mobile` 또는 Discord 동일 경로를 호출한다. BFF는 provider URL을 직접 주지 않고 `https://easy-scraping.com/auth/{provider}/authorize?client=mobile` 브라우저 시작 URL을 `authorizationUrl`로 반환한다. 앱은 이 URL을 시스템 브라우저/Custom Tab으로 연다.
 
-Google Play 심사에는 개발자 개인 Google/Discord 계정이 아니라 별도의 자체 로그인 심사용 계정을 제공한다.
+OAuth 완료 후 웹 callback은 브라우저 세션을 앱 세션으로 재사용하지 않는다. 대신 5분짜리 1회용 handoff code를 만들고 기본 deep link `woldeok-moneyverse://oauth/callback?code=...&provider=google|discord`로 앱을 연다. 앱은 이 URI scheme/host/path를 등록해야 한다. 운영에서 다른 앱 링크를 사용할 경우 서버 `MOBILE_OAUTH_RETURN_URI`를 그 고정 URI로 설정한다. 사용자 입력 URI는 허용하지 않는다.
+
+앱이 deep link의 `code`를 받으면 즉시 `POST /app-api/v1/auth/mobile/handoff`에 JSON `{"code":"..."}`를 보낸다. 성공 응답의 `Set-Cookie`, `csrfToken`, `consentCurrent`를 앱 CookieJar/세션 저장소에 반영한다. handoff code는 한 번 사용되면 즉시 폐기되며 재사용 시 401이다. code를 로그, analytics, crash report에 기록하지 않는다.
+
+웹 로그인은 기존 `/auth/{provider}/authorize` 흐름을 그대로 사용하며 웹 callback 후 웹사이트로 복귀한다. Google Play 심사에는 개발자 개인 Google/Discord 계정이 아니라 별도의 자체 로그인 심사용 계정을 제공한다.
 
 ## 6. 로그인 이후 CSRF 사용법
 
@@ -72,7 +78,13 @@ Google Play 심사에는 개발자 개인 Google/Discord 계정이 아니라 별
 
 비밀번호 찾기/변경과 로그인 이메일 변경, 통합 알림/푸시 설정, 전역 사용자 검색, 일반 사용자 MFA/패스키는 현재 기획상 planned/partial이다. 실제 앱 기능으로 광고하거나 활성화하려면 먼저 backend contract와 runtime 검증을 완료해야 한다.
 
-## 11. v2026.09.13.46 수정 사항
+## 11. v2026.09.13.49 인증 변경 사항
+
+- 자체 회원가입 비밀번호의 숫자형 최소 글자 수 제한 제거. 빈 비밀번호 거부와 128 code point 기술적 최대치는 유지.
+- 쿠키/CSRF 흐름, 요청/응답 예시, 오류 처리까지 포함한 인증 전용 상세 API 문서 추가.
+- common password 차단, Argon2id 저장, 인증 공격 방어는 유지.
+
+## 12. v2026.09.13.49 수정 사항
 
 - `183-local-email-auth-registration-conflict-fix.sql`: 자체 회원가입 완료 시 PostgreSQL SQLSTATE 42702 수정
 - 실제 PostgreSQL 기반 자체 회원가입 완료 회귀 테스트 추가

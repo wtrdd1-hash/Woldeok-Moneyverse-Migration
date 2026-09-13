@@ -18,6 +18,14 @@ import { publicUrl } from '@/lib/public-url';
  */
 export const dynamic = 'force-dynamic';
 
+function mobileOAuthReturnUrl(code: string, provider: string): URL {
+  const configured = process.env.MOBILE_OAUTH_RETURN_URI ?? 'woldeok-moneyverse://oauth/callback';
+  const url = new URL(configured);
+  url.searchParams.set('code', code);
+  url.searchParams.set('provider', provider);
+  return url;
+}
+
 /** The API's own error vocabulary, carried through to the login screen. */
 const KNOWN_ERRORS = new Set([
   'oauth_session',
@@ -49,19 +57,22 @@ export async function GET(
       outcome: 'signed-in' | 'linked' | 'reauthenticated';
       provider?: string;
       consentCurrent?: boolean;
+      mobileHandoff?: string;
     }>(`/auth/${encodeURIComponent(provider)}/callback?${forwarded.toString()}`);
 
     await relaySetCookie(setCookie);
 
-    let destination: string;
-    if (payload.outcome === 'linked') {
+    let destination: string | URL;
+    if (payload.mobileHandoff) {
+      destination = mobileOAuthReturnUrl(payload.mobileHandoff, provider);
+    } else if (payload.outcome === 'linked') {
       destination = publicUrl(`/account?linked=${provider}`);
     } else if (payload.outcome === 'reauthenticated') {
       destination = publicUrl('/account?reauth=done');
     } else {
       destination = publicUrl(payload.consentCurrent === false ? '/login' : '/?account=signed-in');
     }
-    const response = NextResponse.redirect(destination);
+    const response = NextResponse.redirect(destination, 302);
     for (const cookie of setCookie) {
       response.headers.append('set-cookie', cookie);
     }
