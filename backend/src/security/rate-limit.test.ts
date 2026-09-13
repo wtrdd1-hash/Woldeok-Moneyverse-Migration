@@ -25,11 +25,11 @@ describe('tierFor', () => {
   });
 
   it('gives an API read the read tier', () => {
-    expect(tierFor('/api/v1/wallet', 'GET')).toEqual({ name: 'read', limit: 240 });
+    expect(tierFor('/api/v1/wallet', 'GET')).toEqual({ name: 'read', limit: 12000 });
   });
 
   it('gives a non-API page the read tier', () => {
-    expect(tierFor('/health', 'GET')).toEqual({ name: 'read', limit: 240 });
+    expect(tierFor('/health', 'GET')).toEqual({ name: 'read', limit: 12000 });
   });
 });
 
@@ -123,14 +123,16 @@ describe('tierFor, on the reads a page makes every time', () => {
     // The masthead asks once per page load. At the auth tier's twenty a
     // minute a reader who refreshed ten times was locked out of the whole
     // API, and the front end read that as a lost session.
-    expect(tierFor('/api/v1/auth/viewer', 'GET')).toEqual({ name: 'read', limit: 240 });
-    expect(tierFor('/auth/viewer', 'GET')).toEqual({ name: 'read', limit: 240 });
+    expect(tierFor('/api/v1/auth/viewer', 'GET')).toEqual({ name: 'read', limit: 12000 });
+    expect(tierFor('/auth/viewer', 'GET')).toEqual({ name: 'read', limit: 12000 });
   });
 
   it('does not spend it on the session read either', () => {
     // Every member page opens with this, and every write fetches a CSRF
     // token from it.
-    expect(tierFor('/api/v1/auth/session', 'GET')).toEqual({ name: 'read', limit: 240 });
+    expect(tierFor('/api/v1/auth/session', 'GET')).toEqual({ name: 'read', limit: 12000 });
+    expect(tierFor('/api/v1/auth/policy', 'GET')).toEqual({ name: 'read', limit: 12000 });
+    expect(tierFor('/api/v1/auth/providers', 'GET')).toEqual({ name: 'read', limit: 12000 });
   });
 
   it('still guards the routes that create sessions and reach a provider', () => {
