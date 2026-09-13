@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { ApiError, apiWithCookie } from '@/lib/api';
 import { relaySetCookie } from '@/lib/cookie-relay';
 import { publicUrl } from '@/lib/public-url';
+import { mobileOAuthCompletionResponse } from '@/lib/mobile-oauth-return';
 
 /**
  * Where Discord and Google send the browser back.
@@ -17,14 +18,6 @@ import { publicUrl } from '@/lib/public-url';
  * to the API directly.
  */
 export const dynamic = 'force-dynamic';
-
-function mobileOAuthReturnUrl(code: string, provider: string): URL {
-  const configured = process.env.MOBILE_OAUTH_RETURN_URI ?? 'woldeok-moneyverse://oauth/callback';
-  const url = new URL(configured);
-  url.searchParams.set('code', code);
-  url.searchParams.set('provider', provider);
-  return url;
-}
 
 /** The API's own error vocabulary, carried through to the login screen. */
 const KNOWN_ERRORS = new Set([
@@ -62,10 +55,16 @@ export async function GET(
 
     await relaySetCookie(setCookie);
 
-    let destination: string | URL;
     if (payload.mobileHandoff) {
-      destination = mobileOAuthReturnUrl(payload.mobileHandoff, provider);
-    } else if (payload.outcome === 'linked') {
+      const response = mobileOAuthCompletionResponse(payload.mobileHandoff, provider);
+      for (const cookie of setCookie) {
+        response.headers.append('set-cookie', cookie);
+      }
+      return response;
+    }
+
+    let destination: string;
+    if (payload.outcome === 'linked') {
       destination = publicUrl(`/account?linked=${provider}`);
     } else if (payload.outcome === 'reauthenticated') {
       destination = publicUrl('/account?reauth=done');
