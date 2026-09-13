@@ -188,6 +188,10 @@ Profile PUT is replacement-oriented; omitted optional fields may become null, so
 After economy writes (wallet/bank/stocks/business/shop/reward/casino), re-fetch the related read model. Do not calculate authoritative balance, fill price, settlement, reward, inventory or payout locally.
 
 
+## 29. Response contract for crash-free native clients
+
+`GET /app-api/v1/wallet` returns WLD monetary values as decimal strings, not JSON numbers. Native models MUST decode `balances.cash.availableAmount`, `balances.bank.availableAmount`, `balances.totalAvailableAmount`, and `recentTransactions[].netAmount` as strings. A newly registered user may have an empty `recentTransactions` array and this is a valid success response. Registration completion provisions USER_CASH and USER_BANK accounts before the authenticated wallet read. After email verification, verify `/auth/viewer` first, then call `/wallet` with the same CookieJar. A single card/API failure must never terminate the application process; isolate request failures and render per-feature error state.
+
 ## Audited user-facing app API route inventory
 
 Basis: actual NestJS route map captured after the 2026-09-13 production restart. Total backend routes: **239**. User-facing app mappings below include the added mobile handoff route. Admin, Discord webhook, health probe, worker and control-plane routes are intentionally excluded.
