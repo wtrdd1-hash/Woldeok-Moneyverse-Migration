@@ -1,6 +1,6 @@
 # 월덕 머니버스 모바일 앱 전체 API 통합 구현 명세서
 
-> 버전: v2026.09.13.52
+> 버전: v2026.09.13.53
 > 기준일: 2026-09-13
 > 운영 기본 주소: `https://easy-scraping.com`
 > 앱 API 기준 prefix: `/app-api/v1`
@@ -415,154 +415,657 @@ NestJS는 개발 환경에서 DTO 기반 OpenAPI를 만들지만 production에�
 - 잔액·주식·사업·보상·상점·카지노 등 경제 write는 성공 후 관련 GET을 다시 호출해 UI를 서버 상태와 동기화한다.
 - `401`은 로그인/세션 문제, `403`은 동의·CSRF·권한 문제, `422`는 요청 body 타입/필드 문제, `404`는 앱 경로 구현 오류로 취급한다.
 
+
+## 31. 구현자가 그대로 따라야 하는 공통 HTTP 클라이언트 규칙
+
+### 31.1 단 하나의 API origin
+
+앱의 Moneyverse API base URL은 운영에서 반드시 `https://easy-scraping.com` 하나다. 모든 일반 사용자 API는 `/app-api/v1` 아래로 호출한다. 앱에서 `/api/*`, 내부 NestJS 주소, 컨테이너 주소, IP 주소를 조합하지 않는다.
+
+권장 구조:
+
+```text
+MoneyverseApiClient
+  baseUrl = https://easy-scraping.com
+  cookieJar = persistent + secure
+  csrfStore = memory + encrypted persistence if needed
+  timeout = bounded
+  retryPolicy = read-only GET만 제한적 자동 재시도
+```
+
+### 31.2 CookieJar는 기능별로 나누지 않는다
+
+회원가입, 로그인, OAuth handoff, 지갑, 주식, 게시판 등 모든 Moneyverse 요청은 **같은 CookieJar**를 사용한다. prelogin에서 받은 쿠키와 로그인 후 교체된 쿠키를 같은 jar가 처리해야 한다. 앱 코드가 `Cookie` 헤더를 문자열로 직접 조립하지 않는다.
+
+서버가 `Set-Cookie`를 반환하면 HTTP 라이브러리의 CookieJar가 즉시 반영해야 한다. `__Host-mv_session` 같은 HttpOnly 쿠키는 앱 비즈니스 로직에서 읽거나 localStorage류에 복사하지 않는다.
+
+### 31.3 CSRF 토큰 생명주기
+
+1. `POST /app-api/v1/auth/prelogin-session`의 JSON 응답에서 `csrfToken` 저장.
+2. prelogin 상태의 `PUT /auth/consent`, `POST /auth/local/register`, `POST /auth/local/login`, `POST /auth/local/verify-email` 등에 현재 토큰 사용.
+3. 로그인/인증 완료 응답에서 새 `csrfToken`이 오면 즉시 교체.
+4. 로그인 후 값이 불확실하면 `GET /app-api/v1/auth/session`으로 최신 상태 확인.
+5. 403이 CSRF 문제로 보이면 동일 write를 무한 재시도하지 말고 세션 상태를 다시 조회한 뒤 사용자가 의도한 동작을 다시 수행하도록 한다.
+
+변경 요청 기본 헤더:
+
+```http
+Content-Type: application/json
+x-csrf-token: <현재 csrfToken>
+Cookie: <CookieJar가 자동 전송>
+```
+
+### 31.4 idempotencyKey 규칙
+
+경제/보상/구매/게시물 등 idempotencyKey를 받는 API는 **사용자 동작 1회마다 UUID v4 하나**를 생성한다. 네트워크 결과가 불명확한 경우 같은 사용자 동작을 재전송할 때는 같은 키를 사용한다. 사용자가 새로 버튼을 눌러 새로운 거래를 시작한 경우에만 새 UUID를 만든다.
+
+잘못된 구현:
+
+```text
+재시도마다 UUID 새 생성 -> 서버에서 중복 결제/중복 작업으로 해석될 수 있음
+```
+
+올바른 구현:
+
+```text
+사용자 1회 동작 -> UUID A 생성 -> timeout -> 같은 UUID A로 상태 확인/안전 재시도
+새 사용자 동작 -> UUID B
+```
+
+### 31.5 자동 재시도 정책
+
+- GET: 네트워크 단절/일시적 5xx에 한해 짧은 backoff로 제한적 재시도 가능.
+- POST/PUT/PATCH/DELETE: 임의 자동 재시도 금지. idempotencyKey가 있고 결과가 불명확한 경우에만 동일 키로 안전성을 고려해 재시도.
+- 401: 로그인 상태 재확인. 무한 재시도 금지.
+- 403: CSRF/동의/권한 원인을 해결한 뒤 다시 수행.
+- 409: 서버 최신 상태 재조회 후 UI 갱신.
+- 422: 앱 payload 버그 또는 사용자 입력 오류. 같은 body 자동 재전송 금지.
+- 429: `Retry-After`가 있으면 존중하고 즉시 반복 호출하지 않는다.
+
+## 32. 앱 시작부터 화면 표시까지 정확한 상태머신
+
+앱 프로세스 시작 시 다음 순서를 사용한다.
+
+```text
+APP_START
+  -> CookieJar 복원
+  -> GET /app-api/v1/auth/viewer
+      -> signedIn=true  -> SIGNED_IN
+      -> signedIn=false -> SIGNED_OUT
+      -> 401            -> SIGNED_OUT
+      -> 5xx/network    -> UNKNOWN_OFFLINE (로그아웃으로 단정하지 않음)
+```
+
+`SIGNED_IN`이면 필요한 화면의 GET만 호출한다. 예를 들어 홈 화면에서 지갑/진행도/공지사항이 필요하다면 각각 서버에서 읽는다. 이전 로컬 캐시는 로딩 placeholder 용도로만 사용할 수 있고 서버 성공을 대신하지 않는다.
+
+앱이 백그라운드에서 오래 있다가 복귀했거나 write 전에 세션 유효성이 중요하면 `/auth/viewer` 또는 `/auth/session`을 다시 확인한다.
+
+## 33. 자체 회원가입 구현 — 실제 요청 순서
+
+### 33.1 prelogin 생성
+
+```http
+POST /app-api/v1/auth/prelogin-session
+Content-Type: application/json
+
+{}
+```
+
+성공 조건: 201 계열 + CookieJar에 세션 쿠키 저장 + JSON `csrfToken` 존재.
+
+### 33.2 약관 버전 조회
+
+```http
+GET /app-api/v1/auth/policy
+```
+
+앱은 `termsVersion`, `privacyVersion`을 서버 응답에서 읽어야 한다. 앱에 버전 문자열을 하드코딩하지 않는다.
+
+### 33.3 약관 동의 저장
+
+```json
+{
+  "termsCompleted": true,
+  "privacyCompleted": true,
+  "ageConfirmed": true,
+  "termsVersion": "<policy 응답>",
+  "privacyVersion": "<policy 응답>"
+}
+```
+
+호출: `PUT /app-api/v1/auth/consent`, 같은 prelogin CookieJar + `x-csrf-token`.
+
+### 33.4 가입 시작
+
+```http
+POST /app-api/v1/auth/local/register
+```
+
+```json
+{
+  "email": "member@example.com",
+  "password": "사용자가 입력한 비밀번호",
+  "displayName": "표시 이름"
+}
+```
+
+운영 성공 응답은 인증 메일이 필요하다는 상태만 돌려주며 원문 verification token을 앱에 주지 않는다. 앱은 인증메일 확인 화면으로 이동한다.
+
+### 33.5 이메일 인증
+
+인증 링크/화면에서 확보한 token을 **가입을 시작했던 같은 prelogin 세션**과 함께 보낸다.
+
+```http
+POST /app-api/v1/auth/local/verify-email
+x-csrf-token: <prelogin csrf>
+```
+
+```json
+{"token":"<verification token>"}
+```
+
+성공 시 새 로그인 쿠키와 새 CSRF를 저장하고 즉시 `GET /auth/viewer`를 호출한다. `signedIn:true`가 확인되기 전까지 앱 내부 로그인 완료 화면으로 이동하지 않는다.
+
+## 34. 이메일/비밀번호 로그인 구현
+
+```text
+로그인 버튼
+ -> POST /auth/prelogin-session
+ -> CookieJar + csrf 확보
+ -> POST /auth/local/login
+ -> 새 Set-Cookie + csrf 저장
+ -> GET /auth/viewer
+ -> signedIn=true일 때 홈 화면
+```
+
+로그인 body:
+
+```json
+{
+  "email": "member@example.com",
+  "password": "사용자가 입력한 비밀번호"
+}
+```
+
+401에서는 “이메일이 존재하지 않음”과 “비밀번호 틀림”을 앱에서 구분해 표시하지 않는다. 서버의 일반 인증 실패 메시지를 사용한다.
+
+## 35. Google/Discord 네이티브 OAuth — 구현을 틀리면 웹사이트로 가는 부분
+
+### 35.1 앱이 첫 번째로 호출해야 하는 URL
+
+Google:
+
+```http
+GET /app-api/v1/auth/google/authorize?client=mobile
+```
+
+Discord:
+
+```http
+GET /app-api/v1/auth/discord/authorize?client=mobile
+```
+
+**`client=mobile`이 없으면 웹 로그인 흐름이다.** 이 경우 인증 뒤 웹사이트로 돌아가는 것이 정상이다. 앱에서 provider의 `/auth/google/authorize` 또는 `/auth/discord/authorize`를 직접 하드코딩해 시작하지 않는다.
+
+BFF 응답 예:
+
+```json
+{
+  "authorizationUrl": "https://easy-scraping.com/auth/google/authorize?client=mobile"
+}
+```
+
+앱은 이 `authorizationUrl`을 시스템 브라우저 또는 Custom Tab으로 연다. Google/Discord 로그인 화면이 외부 브라우저에 뜨는 것 자체는 정상이다. **중요한 것은 인증 완료 뒤 앱 deep link로 돌아오는 것**이다.
+
+### 35.2 Android deep link 필수 등록 예
+
+```xml
+<intent-filter>
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data
+        android:scheme="woldeok-moneyverse"
+        android:host="oauth"
+        android:path="/callback" />
+</intent-filter>
+```
+
+앱이 받아야 하는 URI:
+
+```text
+woldeok-moneyverse://oauth/callback?code=<opaque>&provider=google
+woldeok-moneyverse://oauth/callback?code=<opaque>&provider=discord
+```
+
+scheme/host/path 중 하나라도 다르면 Android가 앱을 열지 못한다. 브라우저가 이 URI를 받았는데 앱이 열리지 않는다면 서버 API보다 먼저 Manifest/intent-filter를 확인한다.
+
+### 35.3 handoff 교환
+
+Deep link에서 `code`만 파싱하고 로그에 남기지 않는다.
+
+```http
+POST /app-api/v1/auth/mobile/handoff
+Content-Type: application/json
+```
+
+```json
+{"code":"<deep link에서 받은 code>"}
+```
+
+성공하면 `Set-Cookie`를 CookieJar에 저장하고 JSON의 `csrfToken`을 저장한 뒤 `/auth/viewer`를 호출한다. handoff code는 5분짜리 1회용이므로 한 번 성공한 code를 다시 보내면 401이 정상이다.
+
+### 35.4 OAuth 실패 판별표
+
+| 증상 | 우선 확인 |
+|---|---|
+| 인증 후 웹사이트 홈으로 감 | 앱이 `?client=mobile` 없이 시작했는지 확인 |
+| 인증 후 `woldeok-moneyverse://...`가 보이지만 앱이 안 열림 | Android intent-filter scheme/host/path 확인 |
+| 앱은 열리지만 로그인 안 됨 | handoff POST 여부, CookieJar 저장 여부 확인 |
+| handoff 401 | code 만료/재사용/잘못된 code 여부 확인 |
+| handoff 성공인데 앱은 미로그인 | `/auth/viewer`와 CookieJar가 같은 HTTP client인지 확인 |
+
+## 36. 화면별 API 사용 레시피
+
+### 36.1 홈/대시보드
+
+로그인 확인 후 화면에 필요한 데이터만 병렬 조회한다. 예: `/wallet`, `/progression`, `/content/announcements`, `/engagement`. 한 API 실패 때문에 전체 홈을 빈 화면으로 만들지 말고 카드 단위 오류 상태를 보여준다.
+
+### 36.2 지갑/송금
+
+1. `GET /wallet`로 현재 잔액 표시.
+2. 송금 대상과 금액 검증.
+3. UUID v4 `idempotencyKey` 생성.
+4. `POST /wallet/transfers`.
+5. 성공 후 `GET /wallet` 다시 호출.
+
+```json
+{
+  "recipientUserId": "00000000-0000-4000-8000-000000000000",
+  "amount": 1000,
+  "idempotencyKey": "00000000-0000-4000-8000-000000000001"
+}
+```
+
+`amount`는 이 API에서는 JSON number 정수다. 잔액은 서버 반환값을 기준으로 렌더링한다.
+
+### 36.3 일반 은행 movement
+
+`POST /bank/movements`:
+
+```json
+{
+  "direction": "deposit",
+  "amount": 1000,
+  "idempotencyKey": "<uuid>"
+}
+```
+
+`direction`은 `deposit|withdraw`. 성공 뒤 지갑/은행 상태를 다시 읽는다.
+
+### 36.4 banking 고정밀 금액 API
+
+`/banking/deposit`, `/banking/withdraw`, `/banking/borrow` 등 일부 DTO는 금액을 **문자열 양의 정수**로 받는다.
+
+```json
+{
+  "amount": "1000",
+  "idempotencyKey": "<uuid>"
+}
+```
+
+Gemini가 모든 금액을 number로 통일하면 422가 발생할 수 있다. 각 endpoint의 DTO 계약을 그대로 지킨다.
+
+### 36.5 주식
+
+주식 목록: `GET /stocks`, 보유자산: `GET /stocks/portfolio`, 관심종목: `GET /stocks/watchlist`.
+
+주문:
+
+```json
+{
+  "side": "buy",
+  "quantity": 3,
+  "idempotencyKey": "<uuid>"
+}
+```
+
+`POST /stocks/:id/orders` 성공 후 최소 `/stocks/portfolio`, 필요하면 `/stocks/history`와 해당 종목 가격을 재조회한다. 체결 가격이나 잔액을 앱에서 계산해 확정하지 않는다.
+
+관심종목:
+
+```json
+{"watching":true}
+```
+
+### 36.6 사업
+
+구매 가능 사업은 `/businesses/catalog`, 자금 상태는 `/businesses/equity`, 내 사업은 `/businesses` 또는 최신 화면 계약에 따라 `/businesses/my-v2`를 읽는다.
+
+라이선스 활성화:
+
+```json
+{
+  "catalogCode":"biz_cvs_license",
+  "idempotencyKey":"<uuid>"
+}
+```
+
+부스트:
+
+```json
+{"boostCode":"biz_cvs_boost_7d"}
+```
+
+정산/구매/라이선스 변경 성공 후 내 사업 목록과 equity를 다시 읽는다.
+
+### 36.7 상점
+
+카탈로그 조회 후 구매 버튼을 누르면 서버가 제시한 item/catalog id만 사용한다. 가격을 앱 body에 임의로 넣지 않는다.
+
+일반 구매 body:
+
+```json
+{"idempotencyKey":"<uuid>"}
+```
+
+수량형 catalog 구매:
+
+```json
+{
+  "idempotencyKey":"<uuid>",
+  "quantity":2
+}
+```
+
+`quantity`는 생략 시 1, 허용 범위는 1~100. 구매 성공 후 holdings/purchases와 관련 잔액을 재조회한다.
+
+### 36.8 근무
+
+과제 시작/완료는 서버가 내려준 task/assignment id를 그대로 사용한다.
+
+```json
+{
+  "taskId":"<uuid>",
+  "idempotencyKey":"<uuid>"
+}
+```
+
+완료:
+
+```json
+{
+  "idempotencyKey":"<uuid>",
+  "evidence":"선택 입력, 최대 1000자"
+}
+```
+
+직업 변경 body의 `jobType`은 서버 enum 중 하나만 사용한다: `developer`, `trader`, `entertainer`, `detective`, `miner`, `farmer`, `artisan`, `civil_servant`.
+
+### 36.9 게시판
+
+글 작성:
+
+```json
+{
+  "title":"제목",
+  "body":"본문",
+  "idempotencyKey":"<uuid>",
+  "imageStorageKey":"<업로드 성공 시 받은 key>",
+  "imageAltText":"이미지 설명"
+}
+```
+
+이미지가 있으면 먼저 `/board/images/uploads`로 실제 이미지 바이트를 업로드하고 성공한 storage key를 글 생성 body에 넣는다. 글 수정은 PATCH가 아니라 **전체 교체형 PUT**이므로 기존 title/body를 빠뜨리지 않는다.
+
+댓글:
+
+```json
+{
+  "body":"댓글",
+  "idempotencyKey":"<uuid>"
+}
+```
+
+### 36.10 프로필
+
+`PUT /profile`은 partial patch가 아니라 replacement 의미가 있으므로 화면이 가진 현재 값과 사용자가 변경한 값을 합쳐 완전한 의도를 전송한다.
+
+```json
+{
+  "visibility":"members",
+  "displayName":"새 이름",
+  "imageUrl":"https://...",
+  "fieldVisibility":{"imageUrl":"private"},
+  "featuredTitle":"title_code"
+}
+```
+
+선택 필드를 빼면 DB에서 NULL 의미가 될 수 있으므로 “안 바꿈”과 “지움”을 앱에서 구분해 구현한다.
+
+### 36.11 카지노
+
+코인:
+
+```json
+{
+  "idempotencyKey":"<uuid>",
+  "choice":"heads",
+  "stake":100
+}
+```
+
+주사위:
+
+```json
+{
+  "idempotencyKey":"<uuid>",
+  "game":"dice_parity",
+  "choice":"odd",
+  "stake":100
+}
+```
+
+결과/당첨/잔액을 앱 난수나 계산으로 결정하지 않는다. 서버 응답이 유일한 결과다.
+
+### 36.12 초반 진행 이벤트
+
+```json
+{
+  "idempotencyKey":"<uuid>",
+  "eventDate":"2026-09-13"
+}
+```
+
+`eventDate`는 앱이 임의 계산하기보다 서버 read model이 보여준 Asia/Seoul 날짜를 그대로 보낸다. 자정이 지나 stale 화면이면 서버가 거부할 수 있으므로 최신 상태를 다시 조회한다.
+
+### 36.13 개인정보 요청 및 계정 삭제
+
+개인정보 요청은 `/privacy/requests`, 계정 삭제는 `DELETE /account`를 사용한다. 계정 삭제 버튼은 실수 방지를 위해 확인 UI를 두고, 서버가 재인증을 요구하면 재인증 흐름을 완료한 뒤 다시 실행한다. 삭제 성공 후 CookieJar/CSRF/사용자 캐시를 지우고 signed-out 화면으로 이동한다.
+
+## 37. 앱 화면 상태와 HTTP 상태 코드 매핑
+
+| HTTP | 앱 의미 | 사용자 UI | 개발자 처리 |
+|---|---|---|---|
+| 200/201/202 | 성공 | 정상 화면/완료 표시 | body + Set-Cookie + csrf 반영 |
+| 204 | body 없는 성공 | 완료 표시 | JSON 파싱 시도 금지 |
+| 400 | 흐름/입력 오류 | 입력 확인 안내 | request contract 확인 |
+| 401 | 인증 실패/만료 | 로그인 필요 또는 인증 실패 | 세션 상태 확인, OAuth code 재사용 금지 |
+| 403 | 동의/CSRF/권한 부족 | 필요한 절차 안내 | policy/session/reauth 확인 |
+| 404 | 잘못된 앱 route 또는 없는 리소스 | 상황별 처리 | 릴리스에서 API route 404는 결함으로 취급 |
+| 409 | 서버 상태 충돌 | 최신 상태 갱신 안내 | GET 재조회 후 UI 재구성 |
+| 422 | DTO validation 실패 | 입력 오류 | 타입/필드명/enum 확인 |
+| 429 | rate limit | 잠시 후 재시도 | backoff, 반복 호출 중단 |
+| 5xx | 서버 장애 | 재시도 UI | 내부 오류 노출 금지, telemetry 기록 |
+
+## 38. Gemini/코드 생성 도구에 그대로 줄 구현 지시문
+
+```text
+이 앱은 Woldeok Moneyverse의 공식 네이티브 클라이언트다.
+오직 https://easy-scraping.com/app-api/v1/* 만 호출한다.
+모든 요청은 하나의 persistent secure CookieJar를 공유한다.
+CSRF는 prelogin/session 응답에서 받아 변경 요청의 x-csrf-token으로 보낸다.
+로그인 완료는 반드시 GET /auth/viewer 의 signedIn===true로 검증한다.
+Google/Discord 로그인은 GET /auth/{provider}/authorize?client=mobile 을 BFF로 호출하고,
+응답 authorizationUrl을 외부 브라우저/Custom Tab으로 연다.
+Android는 woldeok-moneyverse://oauth/callback 을 deep link로 등록한다.
+callback의 code는 POST /auth/mobile/handoff로 단 한 번 교환하고 Set-Cookie를 같은 CookieJar에 저장한다.
+/api/* private backend를 직접 호출하지 말고 x-internal-token/DB/OAuth secret을 앱에 넣지 않는다.
+경제 write에는 서버 계약의 idempotencyKey를 사용하며, 성공 후 관련 GET으로 서버 상태를 재동기화한다.
+응답 필드, enum, number/string 타입을 임의 추측하거나 변환하지 않는다.
+404/422를 무시하거나 빈 성공으로 바꾸지 않는다.
+이 문서의 endpoint별 기능, 요청 body, 호출 시점, 성공 후 처리 규칙을 그대로 구현한다.
+```
+
+
 ## 전체 감사된 사용자 API 라우트 목록
 
 기준: 2026-09-13 운영 NestJS 재시작 후 실제 route map. 전체 backend route: **239**. 아래 사용자 앱 매핑: **144**. 관리자, Discord webhook, health probe, worker/control-plane 경로는 의도적으로 제외한다.
 
-| 방법 | 앱 API | 기능 | 인증/CSRF | 백엔드 경로 |
-|---|---|---|---|---|
-| `DELETE` | `/app-api/v1/account` | 회원 탈퇴 및 계정 삭제 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/account` |
-| `GET` | `/app-api/v1/account/identities` | 연결된 Google/Discord 등 로그인 수단 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/account/identities` |
-| `DELETE` | `/app-api/v1/account/identities/:id` | 특정 로그인 수단 연결 해제 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/account/identities/:id` |
-| `POST` | `/app-api/v1/account/identities/:provider/link` | Google/Discord 로그인 수단 추가 연결 시작 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/account/identities/:provider/link` |
-| `GET` | `/app-api/v1/account/security/sessions` | 현재 계정의 로그인 기기/세션 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/account/security/sessions` |
-| `DELETE` | `/app-api/v1/account/security/sessions/:id` | 선택한 로그인 세션 강제 종료 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/account/security/sessions/:id` |
-| `POST` | `/app-api/v1/account/security/sessions/revoke-others` | 현재 기기 제외 모든 로그인 세션 종료 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/account/security/sessions/revoke-others` |
-| `POST` | `/app-api/v1/activity/events` | 앱 활동/참여 이벤트 서버 기록 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/activity/events` |
-| `GET` | `/app-api/v1/content/announcements` | 공지사항 목록 조회 | 공개: 로그인 불필요 | `/api/announcements` |
-| `POST` | `/app-api/v1/auth/:provider/reauthentication` | 민감 작업 전 Google/Discord 재인증 시작 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/auth/:provider/reauthentication` |
-| `PUT` | `/app-api/v1/auth/consent` | 현재 약관·개인정보·연령 동의 저장 | Prelogin 또는 로그인 세션 + CSRF | `/api/auth/consent` |
-| `POST` | `/app-api/v1/auth/local/login` | 이메일/비밀번호 로그인 | 인증 흐름 전용: 상태머신 준수 | `/api/auth/local/login` |
-| `POST` | `/app-api/v1/auth/local/register` | 이메일/비밀번호 회원가입 시작 | 인증 흐름 전용: 상태머신 준수 | `/api/auth/local/register` |
-| `POST` | `/app-api/v1/auth/local/verify-email` | 이메일 인증 완료, 계정 활성화 및 로그인 세션 발급 | 인증 흐름 전용: 상태머신 준수 | `/api/auth/local/verify-email` |
-| `POST` | `/app-api/v1/auth/logout` | 현재 로그인 세션 로그아웃 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/auth/logout` |
-| `POST` | `/app-api/v1/auth/mobile/handoff` | 모바일 Google/Discord OAuth 1회용 code를 앱 로그인 세션으로 교환 | 인증 흐름 전용: 상태머신 준수 | `/api/auth/mobile/handoff` |
-| `GET` | `/app-api/v1/auth/policy` | 현재 약관·개인정보처리방침 버전 조회 | 공개/Prelogin에서 호출 가능 | `/api/auth/policy` |
-| `POST` | `/app-api/v1/auth/prelogin-session` | 로그인 전 임시 세션과 CSRF 토큰 생성 | 인증 흐름 전용: 상태머신 준수 | `/api/auth/prelogin-session` |
-| `GET` | `/app-api/v1/auth/providers` | 현재 사용 가능한 로그인 방식(local/Google/Discord) 조회 | 공개/Prelogin에서 호출 가능 | `/api/auth/providers` |
-| `GET` | `/app-api/v1/auth/session` | 현재 로그인 세션과 최신 CSRF 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/auth/session` |
-| `GET` | `/app-api/v1/auth/viewer` | 현재 로그인 사용자 및 signedIn 상태 확인 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/auth/viewer` |
-| `GET` | `/app-api/v1/bank/loans` | 내 대출 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/bank/loans` |
-| `POST` | `/app-api/v1/bank/loans` | 신규 대출 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/bank/loans` |
-| `POST` | `/app-api/v1/bank/loans/:id/repayments` | 선택한 대출 상환 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/bank/loans/:id/repayments` |
-| `POST` | `/app-api/v1/bank/movements` | 현금 계정과 은행 계정 사이 입금/출금 이동 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/bank/movements` |
-| `POST` | `/app-api/v1/banking/bonds/:id/redeem` | 보유 채권 상환/환매 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/banking/bonds/:id/redeem` |
-| `POST` | `/app-api/v1/banking/bonds/purchase` | 채권 상품 구매 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/banking/bonds/purchase` |
-| `POST` | `/app-api/v1/banking/borrow` | 은행 대출 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/banking/borrow` |
-| `POST` | `/app-api/v1/banking/claim-interest` | 예금 이자 수령 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/banking/claim-interest` |
-| `POST` | `/app-api/v1/banking/deposit` | 은행 예금 입금 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/banking/deposit` |
-| `POST` | `/app-api/v1/banking/repay` | 은행 대출 상환 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/banking/repay` |
-| `GET` | `/app-api/v1/banking/standing` | 은행 잔액·대출·신용 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/banking/standing` |
-| `POST` | `/app-api/v1/banking/withdraw` | 은행 예금 출금 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/banking/withdraw` |
-| `GET` | `/app-api/v1/board/images/:key` | 게시판 이미지 파일 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/board/images/:key` |
-| `POST` | `/app-api/v1/board/images/uploads` | 게시글 첨부 이미지 업로드 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/board/images/uploads` |
-| `GET` | `/app-api/v1/board/posts` | 게시글 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/board/posts` |
-| `POST` | `/app-api/v1/board/posts` | 새 게시글 작성 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/board/posts` |
-| `DELETE` | `/app-api/v1/board/posts/:id` | 게시글 삭제 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/board/posts/:id` |
-| `GET` | `/app-api/v1/board/posts/:id` | 게시글 상세 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/board/posts/:id` |
-| `PUT` | `/app-api/v1/board/posts/:id` | 게시글 수정 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/board/posts/:id` |
-| `GET` | `/app-api/v1/board/posts/:id/comments` | 게시글 댓글 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/board/posts/:id/comments` |
-| `POST` | `/app-api/v1/board/posts/:id/comments` | 게시글 댓글 작성 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/board/posts/:id/comments` |
-| `DELETE` | `/app-api/v1/board/posts/:id/comments/:commentId` | 게시글 댓글 삭제 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/board/posts/:id/comments/:commentId` |
-| `GET` | `/app-api/v1/board/public/images/:key` | 로그인 없이 공개 게시판 이미지 조회 | 공개: 로그인 불필요 | `/api/board/public/images/:key` |
-| `GET` | `/app-api/v1/board/public/posts` | 로그인 없이 공개 게시글 목록 조회 | 공개: 로그인 불필요 | `/api/board/public/posts` |
-| `GET` | `/app-api/v1/board/public/posts/:id` | 로그인 없이 공개 게시글 상세 조회 | 공개: 로그인 불필요 | `/api/board/public/posts/:id` |
-| `GET` | `/app-api/v1/board/public/posts/:id/comments` | 로그인 없이 공개 게시글 댓글 조회 | 공개: 로그인 불필요 | `/api/board/public/posts/:id/comments` |
-| `GET` | `/app-api/v1/board/public/stock-posts` | 로그인 없이 공개 주식 게시글 조회 | 공개: 로그인 불필요 | `/api/board/public/stock-posts` |
-| `POST` | `/app-api/v1/board/stock-posts` | 주식 관련 게시글 작성 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/board/stock-posts` |
-| `GET` | `/app-api/v1/businesses/equity` | 사업 구매에 사용할 수 있는 자기자본 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/business-equity` |
-| `GET` | `/app-api/v1/businesses/catalog` | 사업 종류·가격·조건 카탈로그 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/business-types` |
-| `POST` | `/app-api/v1/businesses/catalog/:id/purchases` | 선택한 사업 종류 구매 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/business-types/:id/purchases` |
-| `GET` | `/app-api/v1/businesses` | 내 보유 사업 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/businesses` |
-| `POST` | `/app-api/v1/businesses/:id/boost` | 보유 사업 부스트/강화 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/businesses/:id/boost` |
-| `POST` | `/app-api/v1/businesses/:id/settle-v2` | 보유 사업 V2 정산 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/businesses/:id/settle-v2` |
-| `POST` | `/app-api/v1/businesses/:id/settlements` | 보유 사업 정산 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/businesses/:id/settlements` |
-| `POST` | `/app-api/v1/businesses/activate-license` | 사업 라이선스 활성화 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/businesses/activate-license` |
-| `GET` | `/app-api/v1/businesses/catalog` | 사업 종류·가격·조건 카탈로그 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/businesses/catalog` |
-| `POST` | `/app-api/v1/businesses/catalog/:id/purchases` | 선택한 사업 종류 구매 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/businesses/catalog/:id/purchases` |
-| `GET` | `/app-api/v1/businesses/equity` | 사업 구매에 사용할 수 있는 자기자본 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/businesses/equity` |
-| `GET` | `/app-api/v1/businesses/my-v2` | 내 사업 V2 상세 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/businesses/my-v2` |
-| `GET` | `/app-api/v1/casino/coin/fairness` | 동전게임 공정성 검증 정보 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/casino/coin/fairness` |
-| `POST` | `/app-api/v1/casino/coin/plays` | 동전 앞/뒤 게임 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/casino/coin/plays` |
-| `GET` | `/app-api/v1/casino/coin/terms` | 동전게임 배당·한도 규칙 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/casino/coin/terms` |
-| `GET` | `/app-api/v1/casino/dice/fairness` | 주사위게임 공정성 검증 정보 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/casino/dice/fairness` |
-| `POST` | `/app-api/v1/casino/dice/plays` | 주사위 홀짝/숫자 게임 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/casino/dice/plays` |
-| `GET` | `/app-api/v1/casino/games/terms` | 카지노 공통 게임 규칙 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/casino/games/terms` |
-| `GET` | `/app-api/v1/casino/history` | 내 카지노 플레이 기록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/casino/history` |
-| `GET` | `/app-api/v1/casino/self-limit` | 내 카지노 자기제한 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/casino/self-limit` |
-| `PUT` | `/app-api/v1/casino/self-limit` | 일일 베팅/손실 자기제한 설정 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/casino/self-limit` |
-| `GET` | `/app-api/v1/content/announcements` | 공지사항 목록 조회 | 공개: 로그인 불필요 | `/api/content/announcements` |
-| `GET` | `/app-api/v1/content/photos` | 공개 갤러리 사진 조회 | 공개: 로그인 불필요 | `/api/content/photos` |
-| `GET` | `/app-api/v1/content/status` | 서비스 상태 정보 조회 | 공개: 로그인 불필요 | `/api/content/status` |
-| `POST` | `/app-api/v1/early-game/claims` | 오늘 초반 이벤트 보상 수령 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/early-game/claims` |
-| `GET` | `/app-api/v1/early-game/first-day` | 첫날 온보딩 진행 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/early-game/first-day` |
-| `GET` | `/app-api/v1/early-game/today` | 오늘의 초반 진행 이벤트 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/early-game/today` |
-| `GET` | `/app-api/v1/engagement` | 참여/활동 진행 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/engagement` |
-| `GET` | `/app-api/v1/engagement/early-game` | 초반 참여 목표 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/engagement/early-game` |
-| `POST` | `/app-api/v1/engagement/npcs/:code/orders` | NPC 주문/상호작용 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/engagement/npcs/:code/orders` |
-| `PUT` | `/app-api/v1/engagement/preferences` | 참여·알림 선호 설정 변경 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/engagement/preferences` |
-| `GET` | `/app-api/v1/photos` | 갤러리 사진 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/photos` |
-| `POST` | `/app-api/v1/photos` | 업로드된 사진을 갤러리에 등록 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/photos` |
-| `GET` | `/app-api/v1/photos/mine` | 내가 등록한 갤러리 사진 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/photos/mine` |
-| `POST` | `/app-api/v1/photos/uploads` | 갤러리 이미지 업로드 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/photos/uploads` |
-| `GET` | `/app-api/v1/privacy/requests` | 내 개인정보 요청 목록/상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/privacy/requests` |
-| `POST` | `/app-api/v1/privacy/requests` | 개인정보 열람·삭제 등 요청 생성 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/privacy/requests` |
-| `GET` | `/app-api/v1/profile` | 내 프로필 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/profile` |
-| `PUT` | `/app-api/v1/profile` | 내 프로필 정보/공개범위 수정 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/profile` |
-| `GET` | `/app-api/v1/profile/:userId` | 다른 사용자 공개 프로필 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/profile/:userId` |
-| `DELETE` | `/app-api/v1/profile/image` | 프로필 이미지 삭제 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/profile/image` |
-| `POST` | `/app-api/v1/profile/image` | 프로필 이미지 등록 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/profile/image` |
-| `GET` | `/app-api/v1/profile/settings` | 내 프로필 설정 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/profile/settings` |
-| `GET` | `/app-api/v1/progression` | 내 전체 성장/레벨 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/progression` |
-| `GET` | `/app-api/v1/progression/credit` | 내 신용/성장 점수 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/progression/credit` |
-| `GET` | `/app-api/v1/progression/early-game` | 초반 성장 진행 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/progression/early-game` |
-| `POST` | `/app-api/v1/progression/refreshes` | 성장 상태 재계산/새로고침 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/progression/refreshes` |
-| `GET` | `/app-api/v1/rewards/availability` | 현재 수령 가능한 보상 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/rewards/availability` |
-| `POST` | `/app-api/v1/rewards/daily/claims` | 일일 보상 수령 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/rewards/daily/claims` |
-| `POST` | `/app-api/v1/rewards/work/claims` | 근무 보상 수령 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/rewards/work/claims` |
-| `GET` | `/app-api/v1/seasons/events` | 진행 중 시즌 이벤트 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/seasons/events` |
-| `POST` | `/app-api/v1/seasons/events/:id/consumptions` | 시즌 이벤트 자원/아이템 소비 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/seasons/events/:id/consumptions` |
-| `GET` | `/app-api/v1/seasons/events/:id/leaderboard` | 시즌 이벤트 리더보드 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/seasons/events/:id/leaderboard` |
-| `GET` | `/app-api/v1/shop/catalog` | 상점 카탈로그 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/shop/catalog` |
-| `POST` | `/app-api/v1/shop/catalog/:id/purchases` | 선택한 카탈로그 상품 구매 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/shop/catalog/:id/purchases` |
-| `GET` | `/app-api/v1/shop/cosmetics/:userId` | 사용자 장착 코스메틱 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/shop/cosmetics/:userId` |
-| `GET` | `/app-api/v1/shop/holdings` | 내 보유 아이템 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/shop/holdings` |
-| `POST` | `/app-api/v1/shop/holdings/:id/consumptions` | 보유 소모품 사용 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/shop/holdings/:id/consumptions` |
-| `POST` | `/app-api/v1/shop/holdings/:id/equip` | 보유 코스메틱 장착 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/shop/holdings/:id/equip` |
-| `POST` | `/app-api/v1/shop/holdings/:id/upkeep-settlements` | 보유 아이템 유지비 정산 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/shop/holdings/:id/upkeep-settlements` |
-| `GET` | `/app-api/v1/shop/items` | 상점 아이템 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/shop/items` |
-| `POST` | `/app-api/v1/shop/items/:id/purchases` | 선택한 상점 아이템 구매 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/shop/items/:id/purchases` |
-| `GET` | `/app-api/v1/shop/public-catalog` | 로그인 없이 공개 상점 카탈로그 조회 | 공개: 로그인 불필요 | `/api/shop/public-catalog` |
-| `GET` | `/app-api/v1/shop/purchases` | 내 상점 구매 기록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/shop/purchases` |
-| `GET` | `/app-api/v1/content/status` | 서비스 상태 정보 조회 | 공개: 로그인 불필요 | `/api/status` |
-| `GET` | `/app-api/v1/stocks` | 거래 가능한 주식 종목 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks` |
-| `GET` | `/app-api/v1/stocks/:id/candles` | 선택 종목 OHLC 캔들 차트 데이터 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/:id/candles` |
-| `POST` | `/app-api/v1/stocks/:id/orders` | 선택 종목 매수/매도 주문 생성 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/stocks/:id/orders` |
-| `GET` | `/app-api/v1/stocks/:id/prices` | 선택 종목 가격 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/:id/prices` |
-| `POST` | `/app-api/v1/stocks/:id/watchlist` | 선택 종목 관심목록 추가/변경 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/stocks/:id/watchlist` |
-| `GET` | `/app-api/v1/stocks/alerts` | 내 주가 알림 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/alerts` |
-| `POST` | `/app-api/v1/stocks/alerts` | 새 주가 알림 생성 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/stocks/alerts` |
-| `DELETE` | `/app-api/v1/stocks/alerts/:id` | 선택한 주가 알림 삭제 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/stocks/alerts/:id` |
-| `GET` | `/app-api/v1/stocks/alerts/events` | 발생한 주가 알림 이벤트 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/alerts/events` |
-| `GET` | `/app-api/v1/stocks/history` | 내 주식 거래 기록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/history` |
-| `GET` | `/app-api/v1/stocks/market-events` | 주식 시장 이벤트 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/market-events` |
-| `GET` | `/app-api/v1/stocks/portfolio` | 내 주식 보유량·평가 포트폴리오 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/portfolio` |
-| `GET` | `/app-api/v1/stocks/sparklines` | 종목별 미니 차트용 시세 데이터 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/sparklines` |
-| `GET` | `/app-api/v1/stocks/watchlist` | 내 관심종목 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/stocks/watchlist` |
-| `GET` | `/app-api/v1/wallet` | 내 현금/은행 잔액과 지갑 상태 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/wallet` |
-| `POST` | `/app-api/v1/wallet/transfers` | 다른 사용자에게 WLD 송금 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/wallet/transfers` |
-| `GET` | `/app-api/v1/work` | 근무/직업 대시보드 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/work` |
-| `POST` | `/app-api/v1/work/active-job` | 현재 직업 변경 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/work/active-job` |
-| `GET` | `/app-api/v1/work/assignments` | 근무 과제 목록 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/work/assignments` |
-| `POST` | `/app-api/v1/work/assignments` | 새 근무 과제 배정/시작 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/work/assignments` |
-| `POST` | `/app-api/v1/work/assignments/:id/completions` | 근무 과제 완료 제출 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/work/assignments/:id/completions` |
-| `POST` | `/app-api/v1/work/assignments/:id/verify` | 근무 과제 완료 검증 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/work/assignments/:id/verify` |
-| `GET` | `/app-api/v1/work/profile` | 내 근무 프로필/통계 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/work/profile` |
-| `GET` | `/app-api/v1/work/receipts` | 근무 보상 영수증 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/work/receipts` |
-| `GET` | `/app-api/v1/work/tasks` | 현재 수행 가능한 근무 작업 조회 | 로그인 필요(기능에 따라 최신 동의 필요) | `/api/work/tasks` |
-| `POST` | `/app-api/v1/work/tasks/:id/complete` | 선택한 근무 작업 완료 처리 | 로그인 + 최신 동의 + CSRF(변경 요청) | `/api/work/tasks/:id/complete` |
-| `GET` | `/app-api/v1/auth/:provider/authorize` | Google/Discord OAuth 시작; 모바일은 client=mobile 필수 | 인증 흐름 전용: 상태머신 준수 | `/auth/:provider/authorize` |
-| `GET` | `/app-api/v1/auth/:provider/callback` | OAuth provider callback 처리; 앱이 직접 호출하지 않음 | 인증 흐름 전용: 상태머신 준수 | `/auth/:provider/callback` |
-| `GET` | `/app-api/v1/media/:key` | 일반 미디어 파일 조회 | 공개: 로그인 불필요 | `/media/:key` |
-| `GET` | `/app-api/v1/media/profile/:key` | 프로필 미디어 파일 조회 | 공개: 로그인 불필요 | `/media/profile/:key` |
+| 방법 | 앱 API | 기능 | 호출 시점 | 인증/CSRF | 성공 후 앱 처리 | 백엔드 경로 |
+|---|---|---|---|---|---|---|
+| `DELETE` | `/app-api/v1/account` | 회원 탈퇴 및 계정 삭제 | 사용자가 삭제/해제를 명시적으로 확인했을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/account` |
+| `GET` | `/app-api/v1/account/identities` | 연결된 Google/Discord 등 로그인 수단 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/account/identities` |
+| `DELETE` | `/app-api/v1/account/identities/:id` | 특정 로그인 수단 연결 해제 | 사용자가 삭제/해제를 명시적으로 확인했을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/account/identities/:id` |
+| `POST` | `/app-api/v1/account/identities/:provider/link` | Google/Discord 로그인 수단 추가 연결 시작 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/account/identities/:provider/link` |
+| `GET` | `/app-api/v1/account/security/sessions` | 현재 계정의 로그인 기기/세션 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/account/security/sessions` |
+| `DELETE` | `/app-api/v1/account/security/sessions/:id` | 선택한 로그인 세션 강제 종료 | 사용자가 삭제/해제를 명시적으로 확인했을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/account/security/sessions/:id` |
+| `POST` | `/app-api/v1/account/security/sessions/revoke-others` | 현재 기기 제외 모든 로그인 세션 종료 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/account/security/sessions/revoke-others` |
+| `POST` | `/app-api/v1/activity/events` | 앱 활동/참여 이벤트 서버 기록 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/activity/events` |
+| `GET` | `/app-api/v1/content/announcements` | 공지사항 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 응답을 화면의 서버 기준 상태로 교체 | `/api/announcements` |
+| `POST` | `/app-api/v1/auth/:provider/reauthentication` | 민감 작업 전 Google/Discord 재인증 시작 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/auth/:provider/reauthentication` |
+| `PUT` | `/app-api/v1/auth/consent` | 현재 약관·개인정보·연령 동의 저장 | 사용자가 약관 동의를 확정할 때 | Prelogin 또는 로그인 세션 + CSRF | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/auth/consent` |
+| `POST` | `/app-api/v1/auth/local/login` | 이메일/비밀번호 로그인 | 이메일 로그인 버튼을 눌렀을 때 | 인증 흐름 전용: 상태머신 준수 | 새 쿠키/CSRF 저장 후 /auth/viewer 확인 | `/api/auth/local/login` |
+| `POST` | `/app-api/v1/auth/local/register` | 이메일/비밀번호 회원가입 시작 | 회원가입 정보를 제출할 때 | 인증 흐름 전용: 상태머신 준수 | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/auth/local/register` |
+| `POST` | `/app-api/v1/auth/local/verify-email` | 이메일 인증 완료, 계정 활성화 및 로그인 세션 발급 | 이메일 인증 token을 확보한 뒤 | 인증 흐름 전용: 상태머신 준수 | 새 쿠키/CSRF 저장 후 /auth/viewer 확인 | `/api/auth/local/verify-email` |
+| `POST` | `/app-api/v1/auth/logout` | 현재 로그인 세션 로그아웃 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 쿠키 무효화 반영 후 로컬 사용자 상태 초기화 | `/api/auth/logout` |
+| `POST` | `/app-api/v1/auth/mobile/handoff` | 모바일 Google/Discord OAuth 1회용 code를 앱 로그인 세션으로 교환 | OAuth deep link code 수신 직후 | 인증 흐름 전용: 상태머신 준수 | 새 쿠키/CSRF 저장 후 /auth/viewer 확인 | `/api/auth/mobile/handoff` |
+| `GET` | `/app-api/v1/auth/policy` | 현재 약관·개인정보처리방침 버전 조회 | 가입/동의 화면 진입 시 | 공개/Prelogin에서 호출 가능 | 응답을 화면의 서버 기준 상태로 교체 | `/api/auth/policy` |
+| `POST` | `/app-api/v1/auth/prelogin-session` | 로그인 전 임시 세션과 CSRF 토큰 생성 | 로그인/가입/OAuth 시작 직전 | 인증 흐름 전용: 상태머신 준수 | CookieJar와 csrfToken 저장 | `/api/auth/prelogin-session` |
+| `GET` | `/app-api/v1/auth/providers` | 현재 사용 가능한 로그인 방식(local/Google/Discord) 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개/Prelogin에서 호출 가능 | 응답을 화면의 서버 기준 상태로 교체 | `/api/auth/providers` |
+| `GET` | `/app-api/v1/auth/session` | 현재 로그인 세션과 최신 CSRF 상태 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/auth/session` |
+| `GET` | `/app-api/v1/auth/viewer` | 현재 로그인 사용자 및 signedIn 상태 확인 | 앱 시작/로그인 완료 후 로그인 확인 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/auth/viewer` |
+| `GET` | `/app-api/v1/bank/loans` | 내 대출 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 지갑/은행 관련 GET 재조회 | `/api/bank/loans` |
+| `POST` | `/app-api/v1/bank/loans` | 신규 대출 실행 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 지갑/은행 관련 GET 재조회 | `/api/bank/loans` |
+| `POST` | `/app-api/v1/bank/loans/:id/repayments` | 선택한 대출 상환 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 지갑/은행 관련 GET 재조회 | `/api/bank/loans/:id/repayments` |
+| `POST` | `/app-api/v1/bank/movements` | 현금 계정과 은행 계정 사이 입금/출금 이동 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 지갑/은행 관련 GET 재조회 | `/api/bank/movements` |
+| `POST` | `/app-api/v1/banking/bonds/:id/redeem` | 보유 채권 상환/환매 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 지갑/은행 관련 GET 재조회 | `/api/banking/bonds/:id/redeem` |
+| `POST` | `/app-api/v1/banking/bonds/purchase` | 채권 상품 구매 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 지갑/은행 관련 GET 재조회 | `/api/banking/bonds/purchase` |
+| `POST` | `/app-api/v1/banking/borrow` | 은행 대출 실행 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 지갑/은행 관련 GET 재조회 | `/api/banking/borrow` |
+| `POST` | `/app-api/v1/banking/claim-interest` | 예금 이자 수령 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 지갑/은행 관련 GET 재조회 | `/api/banking/claim-interest` |
+| `POST` | `/app-api/v1/banking/deposit` | 은행 예금 입금 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 지갑/은행 관련 GET 재조회 | `/api/banking/deposit` |
+| `POST` | `/app-api/v1/banking/repay` | 은행 대출 상환 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 지갑/은행 관련 GET 재조회 | `/api/banking/repay` |
+| `GET` | `/app-api/v1/banking/standing` | 은행 잔액·대출·신용 상태 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 지갑/은행 관련 GET 재조회 | `/api/banking/standing` |
+| `POST` | `/app-api/v1/banking/withdraw` | 은행 예금 출금 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 지갑/은행 관련 GET 재조회 | `/api/banking/withdraw` |
+| `GET` | `/app-api/v1/board/images/:key` | 게시판 이미지 파일 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/images/:key` |
+| `POST` | `/app-api/v1/board/images/uploads` | 게시글 첨부 이미지 업로드 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/images/uploads` |
+| `GET` | `/app-api/v1/board/posts` | 게시글 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/posts` |
+| `POST` | `/app-api/v1/board/posts` | 새 게시글 작성 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/posts` |
+| `DELETE` | `/app-api/v1/board/posts/:id` | 게시글 삭제 | 사용자가 삭제/해제를 명시적으로 확인했을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/posts/:id` |
+| `GET` | `/app-api/v1/board/posts/:id` | 게시글 상세 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/posts/:id` |
+| `PUT` | `/app-api/v1/board/posts/:id` | 게시글 수정 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/posts/:id` |
+| `GET` | `/app-api/v1/board/posts/:id/comments` | 게시글 댓글 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/posts/:id/comments` |
+| `POST` | `/app-api/v1/board/posts/:id/comments` | 게시글 댓글 작성 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/posts/:id/comments` |
+| `DELETE` | `/app-api/v1/board/posts/:id/comments/:commentId` | 게시글 댓글 삭제 | 사용자가 삭제/해제를 명시적으로 확인했을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/posts/:id/comments/:commentId` |
+| `GET` | `/app-api/v1/board/public/images/:key` | 로그인 없이 공개 게시판 이미지 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/public/images/:key` |
+| `GET` | `/app-api/v1/board/public/posts` | 로그인 없이 공개 게시글 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/public/posts` |
+| `GET` | `/app-api/v1/board/public/posts/:id` | 로그인 없이 공개 게시글 상세 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/public/posts/:id` |
+| `GET` | `/app-api/v1/board/public/posts/:id/comments` | 로그인 없이 공개 게시글 댓글 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/public/posts/:id/comments` |
+| `GET` | `/app-api/v1/board/public/stock-posts` | 로그인 없이 공개 주식 게시글 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/public/stock-posts` |
+| `POST` | `/app-api/v1/board/stock-posts` | 주식 관련 게시글 작성 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/stock-posts` |
+| `GET` | `/app-api/v1/businesses/equity` | 사업 구매에 사용할 수 있는 자기자본 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/business-equity` |
+| `GET` | `/app-api/v1/businesses/catalog` | 사업 종류·가격·조건 카탈로그 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/business-types` |
+| `POST` | `/app-api/v1/businesses/catalog/:id/purchases` | 선택한 사업 종류 구매 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/business-types/:id/purchases` |
+| `GET` | `/app-api/v1/businesses` | 내 보유 사업 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/businesses` |
+| `POST` | `/app-api/v1/businesses/:id/boost` | 보유 사업 부스트/강화 실행 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/businesses/:id/boost` |
+| `POST` | `/app-api/v1/businesses/:id/settle-v2` | 보유 사업 V2 정산 실행 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/businesses/:id/settle-v2` |
+| `POST` | `/app-api/v1/businesses/:id/settlements` | 보유 사업 정산 실행 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/businesses/:id/settlements` |
+| `POST` | `/app-api/v1/businesses/activate-license` | 사업 라이선스 활성화 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/businesses/activate-license` |
+| `GET` | `/app-api/v1/businesses/catalog` | 사업 종류·가격·조건 카탈로그 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/businesses/catalog` |
+| `POST` | `/app-api/v1/businesses/catalog/:id/purchases` | 선택한 사업 종류 구매 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/businesses/catalog/:id/purchases` |
+| `GET` | `/app-api/v1/businesses/equity` | 사업 구매에 사용할 수 있는 자기자본 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/businesses/equity` |
+| `GET` | `/app-api/v1/businesses/my-v2` | 내 사업 V2 상세 상태 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/businesses/my-v2` |
+| `GET` | `/app-api/v1/casino/coin/fairness` | 동전게임 공정성 검증 정보 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/casino/coin/fairness` |
+| `POST` | `/app-api/v1/casino/coin/plays` | 동전 앞/뒤 게임 실행 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/casino/coin/plays` |
+| `GET` | `/app-api/v1/casino/coin/terms` | 동전게임 배당·한도 규칙 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/casino/coin/terms` |
+| `GET` | `/app-api/v1/casino/dice/fairness` | 주사위게임 공정성 검증 정보 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/casino/dice/fairness` |
+| `POST` | `/app-api/v1/casino/dice/plays` | 주사위 홀짝/숫자 게임 실행 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/casino/dice/plays` |
+| `GET` | `/app-api/v1/casino/games/terms` | 카지노 공통 게임 규칙 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/casino/games/terms` |
+| `GET` | `/app-api/v1/casino/history` | 내 카지노 플레이 기록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/casino/history` |
+| `GET` | `/app-api/v1/casino/self-limit` | 내 카지노 자기제한 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/casino/self-limit` |
+| `PUT` | `/app-api/v1/casino/self-limit` | 일일 베팅/손실 자기제한 설정 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/casino/self-limit` |
+| `GET` | `/app-api/v1/content/announcements` | 공지사항 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 응답을 화면의 서버 기준 상태로 교체 | `/api/content/announcements` |
+| `GET` | `/app-api/v1/content/photos` | 공개 갤러리 사진 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 응답을 화면의 서버 기준 상태로 교체 | `/api/content/photos` |
+| `GET` | `/app-api/v1/content/status` | 서비스 상태 정보 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 응답을 화면의 서버 기준 상태로 교체 | `/api/content/status` |
+| `POST` | `/app-api/v1/early-game/claims` | 오늘 초반 이벤트 보상 수령 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/early-game/claims` |
+| `GET` | `/app-api/v1/early-game/first-day` | 첫날 온보딩 진행 상태 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/early-game/first-day` |
+| `GET` | `/app-api/v1/early-game/today` | 오늘의 초반 진행 이벤트 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/early-game/today` |
+| `GET` | `/app-api/v1/engagement` | 참여/활동 진행 상태 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/engagement` |
+| `GET` | `/app-api/v1/engagement/early-game` | 초반 참여 목표 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/engagement/early-game` |
+| `POST` | `/app-api/v1/engagement/npcs/:code/orders` | NPC 주문/상호작용 실행 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/engagement/npcs/:code/orders` |
+| `PUT` | `/app-api/v1/engagement/preferences` | 참여·알림 선호 설정 변경 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/engagement/preferences` |
+| `GET` | `/app-api/v1/photos` | 갤러리 사진 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/photos` |
+| `POST` | `/app-api/v1/photos` | 업로드된 사진을 갤러리에 등록 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/photos` |
+| `GET` | `/app-api/v1/photos/mine` | 내가 등록한 갤러리 사진 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/photos/mine` |
+| `POST` | `/app-api/v1/photos/uploads` | 갤러리 이미지 업로드 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/photos/uploads` |
+| `GET` | `/app-api/v1/privacy/requests` | 내 개인정보 요청 목록/상태 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 개인정보 요청 목록 재조회 | `/api/privacy/requests` |
+| `POST` | `/app-api/v1/privacy/requests` | 개인정보 열람·삭제 등 요청 생성 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 개인정보 요청 목록 재조회 | `/api/privacy/requests` |
+| `GET` | `/app-api/v1/profile` | 내 프로필 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 프로필 GET 재조회 후 화면 교체 | `/api/profile` |
+| `PUT` | `/app-api/v1/profile` | 내 프로필 정보/공개범위 수정 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 프로필 GET 재조회 후 화면 교체 | `/api/profile` |
+| `GET` | `/app-api/v1/profile/:userId` | 다른 사용자 공개 프로필 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 프로필 GET 재조회 후 화면 교체 | `/api/profile/:userId` |
+| `DELETE` | `/app-api/v1/profile/image` | 프로필 이미지 삭제 | 사용자가 삭제/해제를 명시적으로 확인했을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 프로필 GET 재조회 후 화면 교체 | `/api/profile/image` |
+| `POST` | `/app-api/v1/profile/image` | 프로필 이미지 등록 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 프로필 GET 재조회 후 화면 교체 | `/api/profile/image` |
+| `GET` | `/app-api/v1/profile/settings` | 내 프로필 설정 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 프로필 GET 재조회 후 화면 교체 | `/api/profile/settings` |
+| `GET` | `/app-api/v1/progression` | 내 전체 성장/레벨 상태 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/progression` |
+| `GET` | `/app-api/v1/progression/credit` | 내 신용/성장 점수 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/progression/credit` |
+| `GET` | `/app-api/v1/progression/early-game` | 초반 성장 진행 상태 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/progression/early-game` |
+| `POST` | `/app-api/v1/progression/refreshes` | 성장 상태 재계산/새로고침 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/progression/refreshes` |
+| `GET` | `/app-api/v1/rewards/availability` | 현재 수령 가능한 보상 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/rewards/availability` |
+| `POST` | `/app-api/v1/rewards/daily/claims` | 일일 보상 수령 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/rewards/daily/claims` |
+| `POST` | `/app-api/v1/rewards/work/claims` | 근무 보상 수령 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | work/profile/tasks/receipts 중 관련 상태 재조회 | `/api/rewards/work/claims` |
+| `GET` | `/app-api/v1/seasons/events` | 진행 중 시즌 이벤트 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/seasons/events` |
+| `POST` | `/app-api/v1/seasons/events/:id/consumptions` | 시즌 이벤트 자원/아이템 소비 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/seasons/events/:id/consumptions` |
+| `GET` | `/app-api/v1/seasons/events/:id/leaderboard` | 시즌 이벤트 리더보드 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 응답을 화면의 서버 기준 상태로 교체 | `/api/seasons/events/:id/leaderboard` |
+| `GET` | `/app-api/v1/shop/catalog` | 상점 카탈로그 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | holdings/purchases/관련 잔액 재조회 | `/api/shop/catalog` |
+| `POST` | `/app-api/v1/shop/catalog/:id/purchases` | 선택한 카탈로그 상품 구매 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | holdings/purchases/관련 잔액 재조회 | `/api/shop/catalog/:id/purchases` |
+| `GET` | `/app-api/v1/shop/cosmetics/:userId` | 사용자 장착 코스메틱 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | holdings/purchases/관련 잔액 재조회 | `/api/shop/cosmetics/:userId` |
+| `GET` | `/app-api/v1/shop/holdings` | 내 보유 아이템 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | holdings/purchases/관련 잔액 재조회 | `/api/shop/holdings` |
+| `POST` | `/app-api/v1/shop/holdings/:id/consumptions` | 보유 소모품 사용 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | holdings/purchases/관련 잔액 재조회 | `/api/shop/holdings/:id/consumptions` |
+| `POST` | `/app-api/v1/shop/holdings/:id/equip` | 보유 코스메틱 장착 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | holdings/purchases/관련 잔액 재조회 | `/api/shop/holdings/:id/equip` |
+| `POST` | `/app-api/v1/shop/holdings/:id/upkeep-settlements` | 보유 아이템 유지비 정산 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | holdings/purchases/관련 잔액 재조회 | `/api/shop/holdings/:id/upkeep-settlements` |
+| `GET` | `/app-api/v1/shop/items` | 상점 아이템 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | holdings/purchases/관련 잔액 재조회 | `/api/shop/items` |
+| `POST` | `/app-api/v1/shop/items/:id/purchases` | 선택한 상점 아이템 구매 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | holdings/purchases/관련 잔액 재조회 | `/api/shop/items/:id/purchases` |
+| `GET` | `/app-api/v1/shop/public-catalog` | 로그인 없이 공개 상점 카탈로그 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | holdings/purchases/관련 잔액 재조회 | `/api/shop/public-catalog` |
+| `GET` | `/app-api/v1/shop/purchases` | 내 상점 구매 기록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | holdings/purchases/관련 잔액 재조회 | `/api/shop/purchases` |
+| `GET` | `/app-api/v1/content/status` | 서비스 상태 정보 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 응답을 화면의 서버 기준 상태로 교체 | `/api/status` |
+| `GET` | `/app-api/v1/stocks` | 거래 가능한 주식 종목 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks` |
+| `GET` | `/app-api/v1/stocks/:id/candles` | 선택 종목 OHLC 캔들 차트 데이터 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/:id/candles` |
+| `POST` | `/app-api/v1/stocks/:id/orders` | 선택 종목 매수/매도 주문 생성 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/:id/orders` |
+| `GET` | `/app-api/v1/stocks/:id/prices` | 선택 종목 가격 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/:id/prices` |
+| `POST` | `/app-api/v1/stocks/:id/watchlist` | 선택 종목 관심목록 추가/변경 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/:id/watchlist` |
+| `GET` | `/app-api/v1/stocks/alerts` | 내 주가 알림 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/alerts` |
+| `POST` | `/app-api/v1/stocks/alerts` | 새 주가 알림 생성 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/alerts` |
+| `DELETE` | `/app-api/v1/stocks/alerts/:id` | 선택한 주가 알림 삭제 | 사용자가 삭제/해제를 명시적으로 확인했을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/alerts/:id` |
+| `GET` | `/app-api/v1/stocks/alerts/events` | 발생한 주가 알림 이벤트 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/alerts/events` |
+| `GET` | `/app-api/v1/stocks/history` | 내 주식 거래 기록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/history` |
+| `GET` | `/app-api/v1/stocks/market-events` | 주식 시장 이벤트 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/market-events` |
+| `GET` | `/app-api/v1/stocks/portfolio` | 내 주식 보유량·평가 포트폴리오 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/portfolio` |
+| `GET` | `/app-api/v1/stocks/sparklines` | 종목별 미니 차트용 시세 데이터 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/sparklines` |
+| `GET` | `/app-api/v1/stocks/watchlist` | 내 관심종목 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/watchlist` |
+| `GET` | `/app-api/v1/wallet` | 내 현금/은행 잔액과 지갑 상태 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 지갑/은행 관련 GET 재조회 | `/api/wallet` |
+| `POST` | `/app-api/v1/wallet/transfers` | 다른 사용자에게 WLD 송금 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 지갑/은행 관련 GET 재조회 | `/api/wallet/transfers` |
+| `GET` | `/app-api/v1/work` | 근무/직업 대시보드 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | work/profile/tasks/receipts 중 관련 상태 재조회 | `/api/work` |
+| `POST` | `/app-api/v1/work/active-job` | 현재 직업 변경 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | work/profile/tasks/receipts 중 관련 상태 재조회 | `/api/work/active-job` |
+| `GET` | `/app-api/v1/work/assignments` | 근무 과제 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | work/profile/tasks/receipts 중 관련 상태 재조회 | `/api/work/assignments` |
+| `POST` | `/app-api/v1/work/assignments` | 새 근무 과제 배정/시작 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | work/profile/tasks/receipts 중 관련 상태 재조회 | `/api/work/assignments` |
+| `POST` | `/app-api/v1/work/assignments/:id/completions` | 근무 과제 완료 제출 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | work/profile/tasks/receipts 중 관련 상태 재조회 | `/api/work/assignments/:id/completions` |
+| `POST` | `/app-api/v1/work/assignments/:id/verify` | 근무 과제 완료 검증 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | work/profile/tasks/receipts 중 관련 상태 재조회 | `/api/work/assignments/:id/verify` |
+| `GET` | `/app-api/v1/work/profile` | 내 근무 프로필/통계 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | work/profile/tasks/receipts 중 관련 상태 재조회 | `/api/work/profile` |
+| `GET` | `/app-api/v1/work/receipts` | 근무 보상 영수증 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | work/profile/tasks/receipts 중 관련 상태 재조회 | `/api/work/receipts` |
+| `GET` | `/app-api/v1/work/tasks` | 현재 수행 가능한 근무 작업 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | work/profile/tasks/receipts 중 관련 상태 재조회 | `/api/work/tasks` |
+| `POST` | `/app-api/v1/work/tasks/:id/complete` | 선택한 근무 작업 완료 처리 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | work/profile/tasks/receipts 중 관련 상태 재조회 | `/api/work/tasks/:id/complete` |
+| `GET` | `/app-api/v1/auth/:provider/authorize` | Google/Discord OAuth 시작; 모바일은 client=mobile 필수 | 해당 화면 진입/새로고침/관련 write 후 | 인증 흐름 전용: 상태머신 준수 | 응답을 화면의 서버 기준 상태로 교체 | `/auth/:provider/authorize` |
+| `GET` | `/app-api/v1/auth/:provider/callback` | OAuth provider callback 처리; 앱이 직접 호출하지 않음 | 해당 화면 진입/새로고침/관련 write 후 | 인증 흐름 전용: 상태머신 준수 | 응답을 화면의 서버 기준 상태로 교체 | `/auth/:provider/callback` |
+| `GET` | `/app-api/v1/media/:key` | 일반 미디어 파일 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 응답을 화면의 서버 기준 상태로 교체 | `/media/:key` |
+| `GET` | `/app-api/v1/media/profile/:key` | 프로필 미디어 파일 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 프로필 GET 재조회 후 화면 교체 | `/media/profile/:key` |
 
