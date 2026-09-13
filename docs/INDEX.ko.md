@@ -49,6 +49,7 @@
 - [시각 자료 출처 및 스크린샷 정책](images/README.ko.md)
 
 ## 통합
+- [앱 인증 API 상세 가이드](app-auth-api-guide.ko.md) / [English](app-auth-api-guide.md) — 회원가입, 이메일 인증, 로그인, session/CSRF, 로그아웃, OAuth 시작점.
 - [모바일 / 외부 앱 API](mobile-api.ko.md)
 
 ## 운영

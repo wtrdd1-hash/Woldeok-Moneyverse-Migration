@@ -69,7 +69,7 @@ OAuth 이메일과 로컬 이메일이 같다는 이유만으로 자동 계정�
 
 ## 4. 비밀번호 정책
 
-최종 NIST SP 800-63B-4(2025-08-01)를 기준으로 구현 직전 다시 확인한다. 일반 로컬 계정에서 비밀번호가 단일 factor로 동작할 수 있으므로 기본 최소길이는 **15자**로 계획한다. 최소 64자 이상을 지원하고, DoS 방지를 위한 128/256 code point 같은 기술적 최대치는 문서화하되 절대 자동 잘라내지 않는다.
+최종 NIST SP 800-63B-4(2025-08-01)의 권고는 외부 보안 기준으로 계속 기록한다. 다만 v2026.09.13.48부터 제품 정책은 가입 마찰을 줄이기 위해 **숫자로 된 최소 글자 수를 강제하지 않는다**. 빈 문자열은 비밀번호로 인정하지 않으며, 서버는 현재 128 code point 기술적 최대치를 적용하고 자동 잘라내지 않는다. 흔한/유출 비밀번호 차단, Argon2id, rate limit과 계정 열거 방어는 유지한다.
 
 - 공백·Unicode·긴 passphrase 허용
 - Unicode normalization은 일관되게 적용하며 현재 NIST의 NFC 지침 우선 검토
@@ -222,7 +222,7 @@ Production은 이 release-blocking test가 격리 Test 환경에서 모두 통�
 
 ## 19. 완료 조건
 
-NIST 기준 password policy, Argon2id+rehash, 모든 SQL parameterization, DB 최소권한 negative test, server-side secure session, localStorage token 금지, CSRF/XSS/session 공격 방어, email verification/recovery, enumeration 저항, 자동공격 방어, MFA/재인증, 세션 보안센터, 관리자 masking/audit, retention/delete/export/backup, incident response, EN/KO parity, Test exact-SHA QA와 rollback까지 완료되어야 자체 로그인이 “완성”이다.
+문서화된 제품 password policy와 외부 기준 차이, Argon2id+rehash, 모든 SQL parameterization, DB 최소권한 negative test, server-side secure session, localStorage token 금지, CSRF/XSS/session 공격 방어, email verification/recovery, enumeration 저항, 자동공격 방어, MFA/재인증, 세션 보안센터, 관리자 masking/audit, retention/delete/export/backup, incident response, EN/KO parity, Test exact-SHA QA와 rollback까지 완료되어야 자체 로그인이 “완성”이다.
 
 ## 20. 최신 근거
 
@@ -246,3 +246,8 @@ CAPTCHA/device risk는 보조 참고만 하며 authorization/DB/input 보안 경
 - 2026-09-11 시행 한국 개인정보 강화 제도의 적용성 검토 gate 추가
 
 문서-only 변경이다. 실제 코드는 별도 개발 브랜치 → 격리 Test exact-SHA 보안검증 → Production 순서로 구현한다.
+
+### v2026.09.13.48
+- 제품 결정으로 회원가입 비밀번호의 숫자형 최소 글자 수 제한을 제거했다.
+- 빈 비밀번호 거부, 128 code point 기술적 최대치, common/compromised password 차단, Argon2id, rate limit은 유지한다.
+- NIST 15자 권고와의 차이는 숨기지 않고 제품 정책 예외로 문서화한다.

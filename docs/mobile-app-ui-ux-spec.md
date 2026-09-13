@@ -130,7 +130,7 @@ Fields:
 - Display name only if required by current product contract
 
 UX:
-- Password length guidance
+- No numeric minimum length; explain empty-value rejection, technical maximum, and weak/common-password rejection
 - Allow paste/password managers
 - Do not require arbitrary symbol/uppercase composition rules
 - Generic account-existence handling

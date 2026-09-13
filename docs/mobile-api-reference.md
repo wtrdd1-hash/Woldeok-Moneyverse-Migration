@@ -1,8 +1,8 @@
 # Woldeok Moneyverse Mobile/App API — Complete Usage Reference
 
-> Version: v2026.09.13.46  
+> Version: v2026.09.13.48
 > Date: 2026-09-13  
-> Baseline main before this fix: `d80c22da548c2f28fb41cf7d06f711dc81c6b00a`  
+> Baseline main before this change: `a57fc851c2800d77c8bb284cb1c168cfb3638bc2`
 > Korean: [mobile-api-reference.ko.md](mobile-api-reference.ko.md)
 
 ## 1. Purpose and architecture
@@ -26,13 +26,15 @@ Never place `INTERNAL_API_TOKEN`, database credentials, OAuth client secrets, SM
 
 ## 3. First-party email/password sign-up
 
+Detailed authentication integration guide: [app-auth-api-guide.md](app-auth-api-guide.md).
+
 1. `POST /app-api/v1/auth/prelogin-session` with an empty JSON body. Save the `Set-Cookie` value and returned `csrfToken`.
 2. `GET /app-api/v1/auth/policy` and read `termsVersion` / `privacyVersion`.
 3. `PUT /app-api/v1/auth/consent` with the cookie, `x-csrf-token`, and JSON:
    `{"termsCompleted":true,"privacyCompleted":true,"ageConfirmed":true,"termsVersion":"...","privacyVersion":"..."}`
 4. `POST /app-api/v1/auth/local/register` with the same cookie/CSRF and JSON:
-   `{"email":"member@example.com","password":"15+ character password","displayName":"Name"}`
-   Password length is 15–128 characters; common weak passwords are rejected.
+   `{"email":"member@example.com","password":"my-password","displayName":"Name"}`
+   There is no numeric minimum password length. Empty passwords are rejected, the technical maximum is 128 code points, and obvious common passwords are rejected.
 5. The server sends a verification email. Submit its token to `POST /app-api/v1/auth/local/verify-email` with the same prelogin cookie and CSRF token.
 6. Save the new session cookie from `Set-Cookie`. The response includes a new CSRF token and `consentCurrent`.
 
@@ -45,11 +47,15 @@ Never place `INTERNAL_API_TOKEN`, database credentials, OAuth client secrets, SM
 
 The login API deliberately returns the same authentication failure for an unknown email and a wrong password.
 
-## 5. Google and Discord OAuth
+## 5. Google/Discord OAuth — native app return
 
-`GET /app-api/v1/auth/google/authorize` and `GET /app-api/v1/auth/discord/authorize` are mapped by the BFF to the backend's version-neutral OAuth routes. The response contains the provider authorization URL. Open it in the system browser/custom tab. The registered callback is handled by the service and must not expose the internal token to the app.
+The native app calls `GET /app-api/v1/auth/google/authorize?client=mobile` (or Discord). The BFF returns a browser start URL such as `https://easy-scraping.com/auth/google/authorize?client=mobile`; open that URL in the system browser or Custom Tab.
 
-For Google Play review, use the dedicated first-party reviewer account supplied out-of-band; reviewers must not need the developer's personal Google/Discord account.
+After the provider callback, the web browser session is **not** copied into the app. The server creates a five-minute, single-use handoff code and redirects to the configured fixed app URI, defaulting to `woldeok-moneyverse://oauth/callback?code=...&provider=google|discord`. The app must register that scheme/host/path. Deployments may set `MOBILE_OAUTH_RETURN_URI` to another fixed app/universal-link URI; callers cannot supply arbitrary return URIs.
+
+When the app receives the deep link it immediately sends `POST /app-api/v1/auth/mobile/handoff` with `{"code":"..."}`. Persist the returned `Set-Cookie`, `csrfToken`, and `consentCurrent`. The handoff code is one-time; replay returns 401. Never write the code to logs, analytics, or crash reports.
+
+Web OAuth remains unchanged and returns to the website. Google Play reviewers should receive a dedicated first-party email/password review account instead of a developer's personal Google/Discord account.
 
 ## 6. CSRF/session pattern for writes
 
@@ -75,7 +81,13 @@ Before each submission verify: production build SHA, public catalog, auth provid
 
 The current product plan still treats password recovery/change and login-email change, unified notifications/push preferences, global member search, and future member MFA/passkeys as planned/partial. They must not be advertised as available app features until their backend contract and runtime validation are complete.
 
-## 11. v2026.09.13.46 fixes
+## 11. v2026.09.13.48 authentication changes
+
+- Removed the numeric minimum password length from first-party registration. Empty passwords remain invalid and the 128-code-point technical maximum remains.
+- Added a dedicated end-to-end authentication API integration guide with cookie/CSRF handling, examples, responses and error handling.
+- Kept common-password blocking, Argon2id storage and authentication abuse controls.
+
+## 12. v2026.09.13.48 fixes
 
 - Added migration `183-local-email-auth-registration-conflict-fix.sql` to remove PostgreSQL SQLSTATE 42702 from verified local registration.
 - Added a real-PostgreSQL regression test for the full first-party registration completion path.
