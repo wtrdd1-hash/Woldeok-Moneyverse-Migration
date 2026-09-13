@@ -25,6 +25,7 @@ import { hashPassword, spendDummyPasswordWork, verifyPassword } from './password
 import type { RequestWithSession } from './session.context';
 import { requireSession } from './session.context';
 import { SessionRepository } from './session.repository';
+import { VerificationEmailSender } from './verification-email.sender';
 
 const COMMON_PASSWORDS = new Set([
   'passwordpassword',
@@ -93,6 +94,7 @@ export class LocalAuthController {
     @Inject(CONFIG) private readonly config: AppConfig,
     @Inject(SessionRepository) private readonly sessions: SessionRepository | null,
     @Inject(LocalAuthRepository) private readonly localAuth: LocalAuthRepository | null,
+    private readonly verificationEmails: VerificationEmailSender,
   ) {}
 
   private sessionStore(): SessionRepository {
@@ -129,6 +131,17 @@ export class LocalAuthController {
       displayName: body.displayName,
       verificationTokenHash: sha256(token),
     });
+
+    if (accepted) {
+      try {
+        await this.verificationEmails.send({ to: email, token, baseUrl: this.config.baseUrl });
+      } catch (error) {
+        // Production must never claim that verification was dispatched when
+        // there is no functioning delivery path. Development keeps the
+        // existing token-in-response escape hatch for isolated local work.
+        if (this.config.production) throw error;
+      }
+    }
 
     return {
       accepted: true,

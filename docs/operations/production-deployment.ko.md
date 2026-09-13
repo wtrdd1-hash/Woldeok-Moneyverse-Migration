@@ -2,7 +2,7 @@
 
 [English](production-deployment.md) | **한국어** | [문서 색인](../INDEX.ko.md)
 
-이 문서는 운영 배포 절차를 설명합니다. 클러스터 구조, 이전 Docker 호스트의 잔여 요소, 이미 발생했던 장애 유형을 포함한 실제 장비 상태는 먼저 [`../INFRASTRUCTURE.md`](../INFRASTRUCTURE.md)를 확인합니다.
+이 문서는 운영 배포 절차를 설명합니다. 클러스터 구조, 이전 Docker 호스트의 잔여 요소, 이미 발생했던 장애 유형을 포함한 실제 장비 상태는 먼저 [실제 배포 인프라 구조](../INFRASTRUCTURE.ko.md)를 확인합니다.
 
 ## 배포 철학
 `main`은 지속적으로 검증되며 일반적인 Test→Production 승격 경로는 자동화되어 있지만 실패 시 닫히는 구조입니다. 애플리케이션 저장소는 정확한 SHA가 격리된 Test에서 정상 동작한 뒤에만 변경 불가능한 릴리스 이미지를 만들며, Production 상태는 `wtrdd1-hash/kuber-infrastructure`에 선언되고 Flux가 조정합니다.
@@ -77,4 +77,4 @@ kubectl -n wdmvp get pods
 
 외부에서 접근하면 안 되는 내부 전용 경로가 계속 차단되는지 확인하고 데이터에 영향을 주는 릴리스는 종합 데이터 무결성 감사를 다시 실행합니다.
 
-운영자 체크리스트는 `docs/RELEASING.md`와 `docs/RELEASING.ko.md`를 참고합니다.
+운영자 체크리스트는 [한국어 릴리스 가이드](../RELEASING.ko.md)를 참고합니다. 영문 정본이 필요한 경우에만 `docs/RELEASING.md`를 선택합니다.
