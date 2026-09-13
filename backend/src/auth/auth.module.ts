@@ -20,6 +20,7 @@ import { LocalAuthRepository } from './local-auth.repository';
 import { OAuthClient } from './oauth-client';
 import { SecondFactorRepository } from './second-factor.repository';
 import { SessionRepository } from './session.repository';
+import { VerificationEmailSender } from './verification-email.sender';
 
 const GUARDS = [
   SessionGuard,
@@ -57,6 +58,7 @@ const GUARDS = [
       inject: [PG_POOL],
       useFactory: (pool: Queryable | null) => (pool ? new SecondFactorRepository(pool) : null),
     },
+    VerificationEmailSender,
     AdminRolesRepository,
     ...GUARDS,
   ],
@@ -66,6 +68,7 @@ const GUARDS = [
     SecondFactorRepository,
     AdminRolesRepository,
     OAuthClient,
+    VerificationEmailSender,
     ...GUARDS,
   ],
 })
