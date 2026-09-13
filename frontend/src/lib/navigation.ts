@@ -32,6 +32,7 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '아이템 상점': 'Item shop',
   '게시판': 'Board',
   '내 계정': 'My account',
+  '계정 보안': 'Account security',
   '운영': 'Admin',
   '경제': 'Economy',
   '콘텐츠': 'Content',
@@ -65,7 +66,6 @@ export function navLabel(label: string, locale: 'ko' | 'en'): string {
   return locale === 'en' ? (ENGLISH_LABELS[label] ?? label) : label;
 }
 
-/** Readable by anyone, indexed, and the only group a signed-out visitor sees. */
 export const PUBLIC_NAV: readonly NavEntry[] = [
   { href: '/', label: '홈' },
   { href: '/guide', label: '이용 방법' },
@@ -79,7 +79,6 @@ export const PUBLIC_NAV: readonly NavEntry[] = [
   { href: '/shop', label: '아이템 상점' },
 ];
 
-/** Needs a session and current consent. Every one of these is `noindex`. */
 export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/wallet', label: '덕지갑' },
   { href: '/bank', label: '가상 금융 (은행)' },
@@ -93,9 +92,9 @@ export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/progression', label: '커리어패스 (성장)' },
   { href: '/profile', label: '내 프로필' },
   { href: '/account', label: '내 계정' },
+  { href: '/account/security', label: '계정 보안' },
 ];
 
-/** Shown only to a member holding at least one administrator role. */
 export const ADMIN_NAV: readonly NavEntry[] = [
   { href: '/admin', label: '운영' },
   { href: '/admin/economy', label: '경제' },
@@ -163,6 +162,7 @@ export const HEADER_MEMBER: readonly NavItem[] = [
     entries: [
       { href: '/seasons', label: '시즌' },
       { href: '/profile', label: '내 프로필' },
+      { href: '/account/security', label: '계정 보안' },
     ],
   },
 ];
@@ -179,14 +179,10 @@ export const HEADER_ADMIN: readonly NavItem[] = [
   },
 ];
 
-/** True when the reader is inside any of a group's destinations. */
 export function isGroupCurrent(pathname: string, group: NavGroup): boolean {
   return group.entries.some((entry) => isCurrent(pathname, entry.href));
 }
 
-/**
- * `/` matches only itself; everything else matches its subtree.
- */
 export function isCurrent(pathname: string, href: string): boolean {
   if (href === '/') return pathname === '/';
   if (href === '/shop') return pathname === '/shop';
