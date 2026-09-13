@@ -19,6 +19,7 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 - [Personal Spaces & City Projects Specification](planning/PERSONAL_SPACES_CITY_PROJECTS_SPEC.md) / [한국어](planning/PERSONAL_SPACES_CITY_PROJECTS_SPEC.ko.md)
 - [Player Marketplace & Crafting Specification](planning/PLAYER_MARKETPLACE_CRAFTING_SPEC.md) / [한국어](planning/PLAYER_MARKETPLACE_CRAFTING_SPEC.ko.md)
 - [Clubs & Cooperative Economy Specification](planning/CLUBS_COOPERATIVE_ECONOMY_SPEC.md) / [한국어](planning/CLUBS_COOPERATIVE_ECONOMY_SPEC.ko.md)
+- [Clubhouse UX & Operations Specification](planning/CLUBHOUSE_UX_OPERATIONS_SPEC.md) / [한국어](planning/CLUBHOUSE_UX_OPERATIONS_SPEC.ko.md)
 - [Community & Market Integrity Specification](planning/COMMUNITY_MARKET_INTEGRITY_SPEC.md) / [한국어](planning/COMMUNITY_MARKET_INTEGRITY_SPEC.ko.md)
 - [Monetization, Korea/US Compliance & Search Growth Specification](planning/MONETIZATION_COMPLIANCE_SEO_SPEC.md) / [한국어](planning/MONETIZATION_COMPLIANCE_SEO_SPEC.ko.md)
 - [Billing, Subscription & Consumer Protection Specification](planning/BILLING_SUBSCRIPTION_CONSUMER_PROTECTION_SPEC.md) / [한국어](planning/BILLING_SUBSCRIPTION_CONSUMER_PROTECTION_SPEC.ko.md)
@@ -26,6 +27,7 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 - [Minor Safety, Age Assurance & Content Removal Specification](planning/MINOR_SAFETY_AGE_ASSURANCE_CONTENT_REMOVAL_SPEC.md) / [한국어](planning/MINOR_SAFETY_AGE_ASSURANCE_CONTENT_REMOVAL_SPEC.ko.md)
 - [Analytics & Experimentation Governance Specification](planning/ANALYTICS_EXPERIMENTATION_GOVERNANCE_SPEC.md) / [한국어](planning/ANALYTICS_EXPERIMENTATION_GOVERNANCE_SPEC.ko.md)
 - [Notification & Reactivation Governance Specification](planning/NOTIFICATION_REACTIVATION_GOVERNANCE_SPEC.md) / [한국어](planning/NOTIFICATION_REACTIVATION_GOVERNANCE_SPEC.ko.md)
+- [Banking, Credit & Financial-Learning Safety Specification](planning/BANKING_CREDIT_SAFETY_SPEC.md) / [한국어](planning/BANKING_CREDIT_SAFETY_SPEC.ko.md)
 
 The project plan is a living specification. Intentional, validated implementation changes must update the plan in the same development flow; accidental violations of security/data-integrity invariants must be fixed in code rather than documented away.
 
@@ -76,6 +78,10 @@ The project plan is a living specification. Intentional, validated implementatio
 
 ## Release history and work logs
 
+- [Clubhouse UX & Operations v2026.09.13.18 changelog](changelog/2026-09-13-clubhouse-ux-operations-v2026.09.13.18.md) / [한국어](changelog/2026-09-13-clubhouse-ux-operations-v2026.09.13.18.ko.md)
+- [Product planning v2026.09.13.18 worklog](worklog/2026-09-13-product-planning-v2026.09.13.18.md) / [한국어](worklog/2026-09-13-product-planning-v2026.09.13.18.ko.md)
+- [Banking, Credit & Financial-Learning Safety v2026.09.13.13 changelog](changelog/2026-09-13-banking-credit-safety-v2026.09.13.13.md) / [한국어](changelog/2026-09-13-banking-credit-safety-v2026.09.13.13.ko.md)
+- [Product planning v2026.09.13.13 worklog](worklog/2026-09-13-product-planning-v2026.09.13.13.md) / [한국어](worklog/2026-09-13-product-planning-v2026.09.13.13.ko.md)
 - [Notification & Reactivation Governance v2026.09.13.12 changelog](changelog/2026-09-13-notification-reactivation-governance-v2026.09.13.12.md) / [한국어](changelog/2026-09-13-notification-reactivation-governance-v2026.09.13.12.ko.md)
 - [Product planning v2026.09.13.12 worklog](worklog/2026-09-13-product-planning-v2026.09.13.12.md) / [한국어](worklog/2026-09-13-product-planning-v2026.09.13.12.ko.md)
 - [Analytics & Experimentation Governance v2026.09.13.7 changelog](changelog/2026-09-13-analytics-experimentation-governance-v2026.09.13.7.md) / [한국어](changelog/2026-09-13-analytics-experimentation-governance-v2026.09.13.7.ko.md)
