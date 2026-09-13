@@ -6,6 +6,8 @@ import { sha256, randomToken } from './crypto';
 import { hashPassword } from './password-hasher';
 import { LocalAuthRepository } from './local-auth.repository';
 import { SessionRepository } from './session.repository';
+import { PostgresWalletRepository } from '../wallet/wallet.repository';
+import { WalletService } from '../wallet/wallet.service';
 
 const DATABASE_URL = databaseUrl();
 
@@ -53,6 +55,15 @@ describe.skipIf(!DATABASE_URL)('LocalAuthRepository against a real database', ()
     expect(completed.is_new).toBe(true);
     expect(await sessions.hasCurrentUserConsent(completed.session_id)).toBe(true);
     expect((await local.credential(emailHash))?.user_id).toBe(completed.user_id);
+
+    const wallet = new WalletService(new PostgresWalletRepository(pool));
+    const overview = await wallet.overview(completed.user_id);
+    expect(overview.userId).toBe(completed.user_id);
+    expect(overview.balances.currency).toBe('WLD');
+    expect(typeof overview.balances.cash.availableAmount).toBe('string');
+    expect(typeof overview.balances.bank.availableAmount).toBe('string');
+    expect(typeof overview.balances.totalAvailableAmount).toBe('string');
+    expect(Array.isArray(overview.recentTransactions)).toBe(true);
   });
 
   it('exchanges a mobile OAuth handoff once and creates a separate app session', async () => {

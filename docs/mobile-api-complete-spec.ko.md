@@ -918,6 +918,39 @@ callback의 code는 POST /auth/mobile/handoff로 단 한 번 교환하고 Set-Co
 ```
 
 
+## 29. 앱 종료 방지용 응답 타입 계약
+
+### 29.1 지갑 응답은 숫자가 아니라 문자열 금액이다
+
+`GET /app-api/v1/wallet`의 정상 응답은 아래 형태다. WLD 금액은 정밀도 보존을 위해 JSON number가 아니라 decimal string이다. Android/Kotlin 모델에서 `Long`, `Int`, `Double`로 바로 역직렬화하지 말고 `String`으로 받은 뒤 표시/계산 계층에서 안전하게 변환한다.
+
+```json
+{
+  "userId": "00000000-0000-0000-0000-000000000000",
+  "balances": {
+    "currency": "WLD",
+    "cash": { "availableAmount": "1000", "updatedAt": "2026-09-13T14:00:00.000Z" },
+    "bank": { "availableAmount": "0", "updatedAt": "2026-09-13T14:00:00.000Z" },
+    "totalAvailableAmount": "1000"
+  },
+  "recentTransactions": []
+}
+```
+
+`balances.cash.availableAmount`, `balances.bank.availableAmount`, `balances.totalAvailableAmount`, `recentTransactions[].netAmount`는 모두 문자열이다. 신규 가입 직후 거래내역이 없으면 `recentTransactions`는 `[]`이며 `null`이 아니다. 앱은 빈 배열을 오류로 취급하면 안 된다.
+
+### 29.2 회원가입 완료 후 지갑 생성 계약
+
+이메일 인증 완료(`POST /auth/local/verify-email`)가 성공하면 같은 DB transaction에서 사용자 활성화, `USER_CASH`, `USER_BANK`, 두 account balance row, 로그인 session이 준비되어야 한다. 그 직후 동일 CookieJar로 `GET /auth/viewer`를 호출해 `signedIn:true`를 확인하고 `GET /wallet`을 호출한다. wallet이 200이 아니면 홈 전체를 종료하지 말고 지갑 카드만 오류 상태로 표시한다.
+
+### 29.3 앱 시작 API 병렬 호출 규칙
+
+운영 서버의 read tier는 v2026.09.13.56부터 앱 bootstrap burst를 수용하도록 크게 완화되어 있다. 그래도 앱은 한 API 실패를 process crash로 전파하면 안 된다. 각 요청을 독립적으로 `try/catch`하고 `401/403/404/429/5xx`를 화면 상태로 변환한다. `Promise.all`/coroutine fan-out을 쓸 때 한 요청 실패로 전체 scope가 cancel되지 않도록 supervisor 계층 또는 개별 Result 래핑을 사용한다.
+
+### 29.4 Kotlin/Gson/Moshi/serialization 구현 주의
+
+지갑 모델의 WLD 금액 필드는 반드시 `String`이어야 한다. `recentTransactions` 기본값은 빈 리스트로 두고 nullable 응답을 강제하지 않는다. `viewer.userId`, `wallet.userId`는 UUID string이다. 서버에 없는 임의 필드를 required로 선언하지 않는다. 알 수 없는 추가 필드는 무시하고, 필수 필드 누락은 해당 카드 오류로 처리하되 앱 프로세스를 종료하지 않는다.
+
 ## 전체 감사된 사용자 API 라우트 목록
 
 기준: 2026-09-13 운영 NestJS 재시작 후 실제 route map. 전체 backend route: **239**. 아래 사용자 앱 매핑: **144**. 관리자, Discord webhook, health probe, worker/control-plane 경로는 의도적으로 제외한다.
