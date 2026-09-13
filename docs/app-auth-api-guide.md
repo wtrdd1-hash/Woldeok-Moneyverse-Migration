@@ -222,8 +222,8 @@ After a successful logout, clear local authentication UI state and let the Cooki
 
 Entry points:
 
-- `GET /app-api/v1/auth/google/authorize`
-- `GET /app-api/v1/auth/discord/authorize`
+- `GET /app-api/v1/auth/google/authorize?client=mobile`
+- `GET /app-api/v1/auth/discord/authorize?client=mobile`
 
 The server returns/initiates the provider authorization contract through the BFF. Open provider authorization in a system browser or secure custom tab. Do not embed server secrets, do not ask the user for their Google/Discord password, and do not treat provider callback parameters as trusted without the server completing its own state/PKCE/OIDC checks.
 
