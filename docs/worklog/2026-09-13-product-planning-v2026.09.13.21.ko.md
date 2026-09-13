@@ -3,7 +3,7 @@
 기준일: 2026-09-13
 변경 유형: 문서-only
 브랜치: `docs/marketplace-runtime-delivery-v2026.09.13.21`
-PR: 영/한 문서 완료 후 생성 예정
+PR: #226
 테스트 배포: 문서-only 변경에는 불필요
 
 ## 시작 상태
