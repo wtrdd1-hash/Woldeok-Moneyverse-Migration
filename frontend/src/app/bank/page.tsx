@@ -4,6 +4,7 @@ import {
   CreditCard,
   Landmark,
   PiggyBank,
+  ShieldCheck,
   Sparkles,
   TrendingUp,
 } from 'lucide-react';
@@ -12,11 +13,12 @@ import { EmptyState } from '@/components/empty-state';
 import { LiveRefresh } from '@/components/live-refresh';
 import { PageHeader } from '@/components/page-header';
 import { TranslatedText as T } from '@/components/translated-text';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
-import { groupDigits } from '@/lib/money';
+import { compareAmounts, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import {
   CompoundInterestCard,
@@ -29,8 +31,8 @@ import type { BankStanding } from './types';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '가상 은행 & 핀테크 포털',
-  description: '월덕 머니버스 복리 예금, 스마트 신용 대출, 가상 국채 투자 서비스',
+  title: '가상 은행 & 금융 학습',
+  description: '게임 전용 WLD 예금, 가상 신용, 상환, 가상 채권을 관리하는 월덕 머니버스 금융 학습 화면',
   robots: { index: false, follow: false },
 };
 
@@ -63,21 +65,51 @@ export default async function BankPage() {
   const bondTotalPrincipal = bonds.reduce((acc, bond) => acc + BigInt(bond.principal_amount), 0n);
   const loanDebt = activeLoan ? BigInt(activeLoan.outstanding_amount) : 0n;
   const netFinancialWorth = (BigInt(cash) + BigInt(bank) + bondTotalPrincipal - loanDebt).toString();
+  const minimumRepayment = activeLoan?.minimum_repayment ?? standing.loan_minimum_repayment;
+  const canCoverMinimumRepayment = activeLoan ? compareAmounts(cash, minimumRepayment) >= 0 : true;
+  const maturityLabel = activeLoan?.maturity_at
+    ? new Intl.DateTimeFormat(isEn ? 'en-US' : 'ko-KR', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }).format(new Date(activeLoan.maturity_at))
+    : null;
 
   return (
     <div className="grid gap-6">
       <LiveRefresh />
 
-      {/* Page Header */}
       <PageHeader title={<T korean="가상 은행 (월덕 파이낸스)" english="Virtual Bank & Finance" />}>
         <T
-          korean={`일일 ${standing.daily_interest_rate_pct}% 복리 예금, 등급 기반 신용 대출, 최대 15% 확정 수익 가상 국채`}
-          english={`${standing.daily_interest_rate_pct}% daily compound deposits, grade-based credit loans, and up to 15% fixed-yield sovereign bonds.`}
+          korean="WLD 예금, 가상 신용·상환, 가상 채권을 한곳에서 관리하는 게임 경제 학습 화면입니다."
+          english="Manage game-only WLD savings, virtual credit and repayment, and virtual bonds in one financial-learning surface."
         />
       </PageHeader>
 
-      {/* Hero Financial Metrics Overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <Card className="border-sky-500/30 bg-sky-500/5">
+        <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex gap-3">
+            <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
+              <ShieldCheck className="size-5" />
+            </div>
+            <div className="grid gap-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm font-bold">
+                  <T korean="게임 전용 금융 서비스" english="Game-only financial service" />
+                </p>
+                <Badge variant="outline">WLD · virtual / simulated</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                <T
+                  korean="이 화면의 예금, 신용등급, 대출, 이자와 채권은 실제 은행·예금·신용평가·대출·증권 또는 투자상품이 아니며 현금 환전을 약속하지 않습니다."
+                  english="Savings, credit grades, loans, interest and bonds here are virtual game mechanics, not real banking, deposits, credit reporting, lending, securities or investment products, and they do not promise cash redemption."
+                />
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card className="border-border/60 bg-gradient-to-br from-primary/10 via-background to-muted/20 backdrop-blur-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -92,7 +124,7 @@ export default async function BankPage() {
               <Amount value={netFinancialWorth} currency />
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              <T korean="현금+예금+국채-대출" english="Cash + Savings + Bonds - Debt" />
+              <T korean="현금+예금+가상 채권-가상 대출" english="Cash + Savings + Virtual Bonds - Virtual Debt" />
             </p>
           </CardContent>
         </Card>
@@ -101,7 +133,7 @@ export default async function BankPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">
-                <T korean="복리 예금 잔액" english="Compound Savings" />
+                <T korean="게임 예금 잔액" english="Game Savings" />
               </span>
               <div className="flex size-7 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
                 <PiggyBank className="size-4" />
@@ -111,7 +143,7 @@ export default async function BankPage() {
               <Amount value={bank} currency />
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              <T korean={`일일 ${standing.daily_interest_rate_pct}% 복리 적립`} english={`${standing.daily_interest_rate_pct}% daily compound interest`} />
+              <T korean={`현재 게임 이자율 일일 ${standing.daily_interest_rate_pct}%`} english={`Current game rate ${standing.daily_interest_rate_pct}% daily`} />
             </p>
           </CardContent>
         </Card>
@@ -120,7 +152,7 @@ export default async function BankPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">
-                <T korean="정산 대기 복리 이자" english="Accrued Interest" />
+                <T korean="정산 대기 게임 이자" english="Accrued Game Interest" />
               </span>
               <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-500">
                 <Sparkles className="size-4" />
@@ -130,7 +162,7 @@ export default async function BankPage() {
               +{groupDigits(unclaimed)} <span className="text-xs font-normal">WLD</span>
             </div>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              <T korean="온디맨드 즉시 정산 가능" english="Instant on-demand claim" />
+              <T korean="서버 기준 정산 가능 금액" english="Server-calculated claimable amount" />
             </p>
           </CardContent>
         </Card>
@@ -139,7 +171,7 @@ export default async function BankPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">
-                <T korean="평가 신용 한도" english="Credit Limit" />
+                <T korean="게임 신용 한도" english="Game Credit Limit" />
               </span>
               <div className="flex size-7 items-center justify-center rounded-lg bg-purple-500/10 text-purple-500">
                 <CreditCard className="size-4" />
@@ -151,19 +183,50 @@ export default async function BankPage() {
             <p className="mt-1 text-[11px] text-muted-foreground">
               {activeLoan
                 ? isEn
-                  ? `Active Loan (${groupDigits(loanDebt.toString())} WLD)`
-                  : `대출 실행 중 (${groupDigits(loanDebt.toString())} WLD)`
+                  ? `Virtual debt outstanding (${groupDigits(loanDebt.toString())} WLD)`
+                  : `가상 대출 잔액 (${groupDigits(loanDebt.toString())} WLD)`
                 : isEn
-                ? 'Instant Loan Available'
-                : '즉시 대출 가능'}
+                  ? 'No active virtual loan'
+                  : '실행 중인 가상 대출 없음'}
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Banking Operations Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column: Savings & Compound Interest */}
+      <Card className={activeLoan ? 'border-amber-500/30 bg-amber-500/5' : 'border-emerald-500/30 bg-emerald-500/5'}>
+        <CardContent className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center">
+          <div className="grid gap-1">
+            <p className="text-sm font-bold">
+              <T korean="지금의 안전한 다음 행동" english="Recommended safe next action" />
+            </p>
+            {activeLoan ? (
+              <p className="text-sm text-muted-foreground">
+                {isEn
+                  ? canCoverMinimumRepayment
+                    ? `You have enough spendable cash for the current minimum repayment of ${groupDigits(minimumRepayment)} WLD. Review the repayment amount before taking on more virtual credit.${maturityLabel ? ` Maturity: ${maturityLabel}.` : ''}`
+                    : `Your spendable cash is below the current minimum repayment of ${groupDigits(minimumRepayment)} WLD. Prioritize repayment planning before taking on more virtual credit.${maturityLabel ? ` Maturity: ${maturityLabel}.` : ''}`
+                  : canCoverMinimumRepayment
+                    ? `현재 사용 가능한 현금으로 최소 상환액 ${groupDigits(minimumRepayment)} WLD를 충당할 수 있습니다. 추가 가상 신용보다 상환 금액을 먼저 확인하세요.${maturityLabel ? ` 만기: ${maturityLabel}.` : ''}`
+                    : `현재 사용 가능한 현금이 최소 상환액 ${groupDigits(minimumRepayment)} WLD보다 적습니다. 추가 가상 신용보다 상환 계획을 우선하세요.${maturityLabel ? ` 만기: ${maturityLabel}.` : ''}`}
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                <T
+                  korean="실행 중인 가상 대출이 없습니다. 새 신용을 사용하기 전에 상환 총액과 현재 현금·예금 여유를 함께 확인하세요."
+                  english="You have no active virtual loan. Before using new credit, compare the total repayment with your available cash and savings buffer."
+                />
+              </p>
+            )}
+          </div>
+          <Button asChild variant={activeLoan ? 'default' : 'outline'} size="sm">
+            <Link href={activeLoan ? '#bank-credit' : '/wallet'}>
+              <T korean={activeLoan ? '상환 영역 보기' : '지갑 확인'} english={activeLoan ? 'Review repayment' : 'Review wallet'} />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="grid gap-6">
           <DepositWithdrawCard cashBalance={cash} bankBalance={bank} dailyRatePct={standing.daily_interest_rate_pct} />
           <CompoundInterestCard
@@ -174,8 +237,7 @@ export default async function BankPage() {
           />
         </div>
 
-        {/* Right Column: Smart Dynamic Loans & Virtual Bonds */}
-        <div className="grid gap-6">
+        <div id="bank-credit" className="grid scroll-mt-24 gap-6">
           <SmartLoanCard
             creditLimit={creditLimit}
             creditGrade={standing.credit_grade}
@@ -189,14 +251,13 @@ export default async function BankPage() {
         </div>
       </div>
 
-      {/* Quick Navigation Footer */}
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border/60 bg-muted/20 p-4">
         <div className="flex items-center gap-3">
           <Landmark className="size-5 text-muted-foreground" />
           <span className="text-sm text-muted-foreground">
             <T
-              korean="연계 금융 서비스: 현금 지갑 관리와 주식 투자, 사업체 확장을 함께 활용해 보세요."
-              english="Integrated Financial Services: Manage your cash wallet, stock investments, and business ventures together."
+              korean="가상 금융 상태를 지갑, 주식, 사업 현황과 함께 확인해 과도한 게임 내 부채를 피하세요."
+              english="Review virtual-finance state alongside your wallet, stocks, and businesses to avoid excessive in-game debt."
             />
           </span>
         </div>
