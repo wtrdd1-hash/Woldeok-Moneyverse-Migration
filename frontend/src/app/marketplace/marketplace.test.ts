@@ -58,6 +58,13 @@ describe('marketplaceQuery', () => {
     });
   });
 
+  it('accepts supported cleanup state and acquisition-order values', () => {
+    expect(marketplaceQuery({ state: 'unequipped', sort: 'oldest' })).toMatchObject({
+      state: 'unequipped',
+      sort: 'oldest',
+    });
+  });
+
   it('takes only the first repeated query parameter', () => {
     expect(
       marketplaceQuery({
@@ -104,7 +111,7 @@ describe('filterMarketplaceHoldings', () => {
           rarity: 'common',
           effect: 'convenience',
           minQuantity: '2',
-          state: 'all',
+          state: 'unequipped',
         }),
       ).map((item) => item.code),
     ).toEqual(['repair_kit']);
@@ -161,6 +168,25 @@ describe('filterMarketplaceHoldings', () => {
         (item) => item.code,
       ),
     ).toEqual(['city_badge', 'repair_kit']);
+    expect(
+      filterMarketplaceHoldings(source, marketplaceQuery({ sort: 'oldest' })).map(
+        (item) => item.code,
+      ),
+    ).toEqual(['repair_kit', 'city_badge']);
     expect(source).toEqual(items);
+  });
+
+  it('keeps malformed acquisition dates at the end for chronological sorting', () => {
+    const malformed = holding({ code: 'bad_date', name: '오류 날짜', acquired_at: 'not-a-date' });
+    expect(
+      filterMarketplaceHoldings([malformed, ...items], marketplaceQuery({ sort: 'newest' })).map(
+        (item) => item.code,
+      ),
+    ).toEqual(['city_badge', 'repair_kit', 'bad_date']);
+    expect(
+      filterMarketplaceHoldings([malformed, ...items], marketplaceQuery({ sort: 'oldest' })).map(
+        (item) => item.code,
+      ),
+    ).toEqual(['repair_kit', 'city_badge', 'bad_date']);
   });
 });
