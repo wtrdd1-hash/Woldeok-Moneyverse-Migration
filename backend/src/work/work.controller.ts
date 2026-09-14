@@ -60,16 +60,11 @@ export class WorkController {
 
   @Get('profile')
   @ApiOperation({ summary: 'Current active job and all job masteries' })
-  async profile(@Req() request: RequestWithSession) {
-    const repository = this.repository();
-    const [profile, featureState] = await Promise.all([
-      this.guarded(
-        () => repository.jobProfile(requireUserId(request)),
-        'job profile is unavailable',
-      ),
-      repository.featureState(),
-    ]);
-    return { profile, featureState };
+  profile(@Req() request: RequestWithSession) {
+    return this.guarded(
+      () => this.repository().jobProfile(requireUserId(request)),
+      'job profile is unavailable',
+    );
   }
 
   @Post('active-job')
