@@ -34,6 +34,14 @@ interface StockContext {
   readonly stance: string;
   readonly positionDisclosure: string;
 }
+interface StockAlertRule {
+  readonly alert_id: string;
+  readonly stock_id: string;
+  readonly condition_kind: string;
+  readonly threshold_amount: string | null;
+  readonly threshold_bps: number | null;
+  readonly condition_met: boolean;
+}
 interface PostSummary {
   readonly postId: string;
   readonly title: string;
@@ -78,14 +86,16 @@ export default async function StockHubPage({
   if (!stock) notFound();
 
   const encodedSymbol = encodeURIComponent(stock.symbol);
-  const [portfolio, watchlist, discussion] = await Promise.all([
+  const [portfolio, watchlist, discussion, alertResult] = await Promise.all([
     apiOrNull<{ holdings: HubHolding[] }>('/api/v1/stocks/portfolio'),
     apiOrNull<{ stocks: WatchlistRow[] }>('/api/v1/stocks/watchlist'),
     apiOrNull<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts?stock=${encodedSymbol}`),
+    apiOrNull<{ alerts: StockAlertRule[] }>('/api/v1/stocks/alerts'),
   ]);
   const holding = findHoldingForStock(portfolio?.holdings ?? [], stock.id);
   const watching = (watchlist?.stocks ?? []).some((row) => row.stock_id === stock.id);
   const posts = discussion?.posts ?? [];
+  const stockAlerts = (alertResult?.alerts ?? []).filter((rule) => rule.stock_id === stock.id);
 
   return (
     <div className="grid gap-6">
@@ -196,6 +206,52 @@ export default async function StockHubPage({
       <Card>
         <CardHeader className="flex-row items-start justify-between gap-3">
           <div>
+            <CardTitle>{isEn ? 'My alerts for this stock' : '이 종목의 내 알림'}</CardTitle>
+            <CardDescription>
+              {isEn
+                ? 'See the server-side conditions currently watching this stock.'
+                : '서버가 이 종목에 대해 감시 중인 조건을 바로 확인합니다.'}
+            </CardDescription>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/stocks/alerts?stock=${encodedSymbol}`}>
+              {isEn ? 'Manage alerts' : '알림 관리'}
+            </Link>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {alertResult === null ? (
+            <EmptyState title={isEn ? 'Unable to load alerts.' : '알림을 불러오지 못했어요.'} />
+          ) : stockAlerts.length === 0 ? (
+            <EmptyState
+              title={isEn ? 'No alert for this stock yet.' : '이 종목에 설정된 알림이 없어요.'}
+              description={
+                isEn
+                  ? 'Create one without selecting the stock again.'
+                  : '종목을 다시 고를 필요 없이 바로 알림을 만들 수 있습니다.'
+              }
+            />
+          ) : (
+            <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {stockAlerts.slice(0, 6).map((rule) => (
+                <li key={rule.alert_id} className="rounded-md border p-3 text-sm">
+                  <div className="flex items-center justify-between gap-2">
+                    <b>{stockAlertConditionLabel(rule.condition_kind, isEn)}</b>
+                    <Badge variant={rule.condition_met ? 'default' : 'secondary'}>
+                      {rule.condition_met ? (isEn ? 'Met' : '충족') : isEn ? 'Watching' : '감시 중'}
+                    </Badge>
+                  </div>
+                  <p className="mt-1 text-muted-foreground">{stockAlertThreshold(rule)}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex-row items-start justify-between gap-3">
+          <div>
             <CardTitle>{isEn ? 'Related community' : '관련 커뮤니티'}</CardTitle>
             <CardDescription>
               {isEn
@@ -271,4 +327,21 @@ function Position({ label, value }: { readonly label: string; readonly value: Re
       <dd className="tabular font-bold">{value}</dd>
     </div>
   );
+}
+
+function stockAlertConditionLabel(kind: string, isEn: boolean): string {
+  const labels: Record<string, readonly [string, string]> = {
+    price_at_or_above: ['Price at or above', '가격 이상'],
+    price_at_or_below: ['Price at or below', '가격 이하'],
+    day_change_at_or_above: ['Daily change at or above', '일일 변동률 이상'],
+    day_change_at_or_below: ['Daily change at or below', '일일 변동률 이하'],
+  };
+  const label = labels[kind];
+  return label ? label[isEn ? 0 : 1] : kind;
+}
+
+function stockAlertThreshold(rule: StockAlertRule): string {
+  if (rule.condition_kind.startsWith('price_')) return `${rule.threshold_amount ?? '—'} WLD`;
+  if (rule.threshold_bps === null) return '—';
+  return `${rule.threshold_bps >= 0 ? '+' : ''}${(rule.threshold_bps / 100).toFixed(2)}%`;
 }
