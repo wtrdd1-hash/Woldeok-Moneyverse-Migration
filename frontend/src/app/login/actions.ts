@@ -2,8 +2,61 @@
 
 import { redirect } from 'next/navigation';
 import type { ActionState } from '@/lib/action-state';
-import { api } from '@/lib/api';
+import { ApiError, api, apiWithCookie } from '@/lib/api';
+import { relaySetCookie, sessionCookiePair } from '@/lib/cookie-relay';
 import { failure } from '@/lib/mutate';
+
+/**
+ * Signs a first-party account in through the same API/session boundary used by OAuth.
+ *
+ * A signed-out browser may not have a pre-login session yet, so the action first
+ * creates/reuses one, relays its cookie, then submits the email/password with the
+ * API-issued CSRF token. The browser never receives the internal API token and the
+ * password is never persisted by the frontend.
+ */
+export async function submitLocalLogin(formData: FormData): Promise<never> {
+  const email = String(formData.get('email') ?? '').trim();
+  const password = String(formData.get('password') ?? '');
+
+  if (email === '' || password === '') {
+    redirect('/login?error=local_fields');
+  }
+
+  try {
+    const { payload: prelogin, setCookie: preloginCookies } = await apiWithCookie<{
+      signedIn: boolean;
+      csrfToken: string;
+    }>('/api/v1/auth/prelogin-session', { method: 'POST' });
+
+    await relaySetCookie(preloginCookies);
+    const freshCookieHeader = sessionCookiePair(preloginCookies);
+
+    const { payload: login, setCookie: loginCookies } = await apiWithCookie<{
+      outcome: 'signed-in';
+      csrfToken: string;
+      consentCurrent: boolean;
+    }>('/api/v1/auth/local/login', {
+      method: 'POST',
+      csrfToken: prelogin.csrfToken,
+      body: { email, password },
+      ...(freshCookieHeader ? { cookieHeader: freshCookieHeader } : {}),
+    });
+
+    await relaySetCookie(loginCookies);
+    redirect(login.consentCurrent ? '/' : '/login');
+  } catch (error) {
+    // `redirect` works by throwing; never translate a successful redirect into
+    // a login failure message.
+    if (error instanceof Error && error.message === 'NEXT_REDIRECT') throw error;
+    if (error instanceof ApiError && error.status === 401) {
+      redirect('/login?error=local_credentials');
+    }
+    if (error instanceof ApiError && error.status === 503) {
+      redirect('/login?error=local_unavailable');
+    }
+    redirect('/login?error=local_login');
+  }
+}
 
 /**
  * Records the authenticated member acknowledgement after OAuth identification.
