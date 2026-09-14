@@ -77,17 +77,14 @@ export class WorkController {
   }
 
   @Get('tasks')
-  @ApiOperation({ summary: 'Every task on offer plus the administrator-controlled work feature state' })
+  @ApiOperation({ summary: 'Every task on offer, with this member’s standing against each' })
   async tasks(@Req() request: RequestWithSession) {
-    const repository = this.repository();
-    const [tasks, featureState] = await Promise.all([
-      this.guarded(
-        () => repository.tasks(requireUserId(request)),
+    return {
+      tasks: await this.guarded(
+        () => this.repository().tasks(requireUserId(request)),
         'the task board is unavailable',
       ),
-      repository.featureState(),
-    ]);
-    return { tasks, featureState };
+    };
   }
 
   @Post('tasks/:id/complete')
