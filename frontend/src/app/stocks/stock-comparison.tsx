@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { groupDigits } from '@/lib/money';
-import { comparisonSymbolsQuery, initialComparisonIds, signedDelta } from './stock-comparison-math';
+import { comparisonSymbolsQuery, initialComparisonIds, signedDelta, signedPercentChange } from './stock-comparison-math';
 
 export interface ComparableStock {
   readonly id: string;
@@ -163,6 +163,10 @@ export function StockComparison({ stocks, isEn, initialSymbols = [] }: StockComp
                 <TableRow>
                   <TableHead scope="row">{isEn ? 'Change from open' : '시가 대비'}</TableHead>
                   {selected.map((stock) => <TableCell key={stock.id} className="tabular text-right">{signedDelta(stock.current_price, stock.day_open_price)} WLD</TableCell>)}
+                </TableRow>
+                <TableRow>
+                  <TableHead scope="row">{isEn ? 'Change rate' : '등락률'}</TableHead>
+                  {selected.map((stock) => <TableCell key={stock.id} className="tabular text-right">{signedPercentChange(stock.current_price, stock.day_open_price)}</TableCell>)}
                 </TableRow>
                 <TableRow>
                   <TableHead scope="row">{isEn ? 'Day range' : '오늘 범위'}</TableHead>

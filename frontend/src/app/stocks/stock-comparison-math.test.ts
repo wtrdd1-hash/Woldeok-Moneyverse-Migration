@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { comparisonSymbolsQuery, initialComparisonIds, signedDelta } from './stock-comparison-math';
+import { comparisonSymbolsQuery, initialComparisonIds, signedDelta, signedPercentChange } from './stock-comparison-math';
 
 describe('signedDelta', () => {
   it('formats positive, negative and flat changes', () => {
@@ -10,6 +10,24 @@ describe('signedDelta', () => {
 
   it('keeps values exact beyond JavaScript safe integers', () => {
     expect(signedDelta('9007199254741999', '9007199254740991')).toBe('+1,008');
+  });
+});
+
+
+describe('signedPercentChange', () => {
+  it('formats positive, negative and flat percentage changes', () => {
+    expect(signedPercentChange('1500', '1000')).toBe('+50.00%');
+    expect(signedPercentChange('900', '1000')).toBe('-10.00%');
+    expect(signedPercentChange('1000', '1000')).toBe('0.00%');
+  });
+
+  it('keeps integer-string precision and truncates beyond two decimals', () => {
+    expect(signedPercentChange('1001', '1000')).toBe('+0.10%');
+    expect(signedPercentChange('9007199254741999', '9007199254740991')).toBe('+0.00%');
+  });
+
+  it('does not invent a percentage when the opening price is zero', () => {
+    expect(signedPercentChange('1000', '0')).toBe('—');
   });
 });
 
