@@ -7,118 +7,110 @@ This document is the authoritative release procedure for Woldeok Moneyverse. The
 | Environment | Public URL | Namespace | Runtime source of truth |
 | --- | --- | --- | --- |
 | Production | `https://easy-scraping.com` | `wdmvp` | `wtrdd1-hash/kuber-infrastructure` |
-| Isolated staging | `https://test.easy-scraping.com` | `wdmv-test` | independent Flux Kustomization in `wtrdd1-hash/kuber-infrastructure` |
+| Isolated Test | `https://test.easy-scraping.com` | `wdmv-test` | independent Flux Kustomization in `wtrdd1-hash/kuber-infrastructure` |
 
-The host runs Kubernetes/containerd and is reconciled by Flux. Docker Compose is not the production release control plane. The test namespace is reconciled independently from the shared Production `apps` Kustomization so a staging failure cannot block Production reconciliation.
+The host runs Kubernetes/containerd and is reconciled by Flux. Docker Compose is not the Production release control plane. Test is isolated from Production and must not mutate Production state.
 
-## 1. Development and CI gate
+## 1. Development and exact-SHA CI gate
 
-Before a change can be promoted, the repository gate must pass for the exact commit:
+Development branches eligible for automated integration are limited to these prefixes:
 
-```bash
-pnpm lint
-pnpm typecheck
-pnpm build
-pnpm test
-scripts/check-control-bytes.sh
-scripts/check-secrets.sh
-pnpm audit --prod --audit-level=high
+```text
+feat/*
+feature/*
+fix/*
+bugfix/*
+integrate/*
+ops/*
+auto/*
+test-candidate/*
 ```
 
-CI additionally provisions PostgreSQL, applies the numbered migrations, runs DB-backed tests, rejects Prisma schema mutation, and verifies the production dependency audit. A skipped DB test is not a pass.
-
-## 2. Build exact-SHA staging artifacts
-
-Push a runtime candidate on an `auto/hourly-*` or `test-candidate/*` branch. `.github/workflows/test-candidate.yml` first runs the reusable full CI gate and only then builds immutable staging images:
+`.github/workflows/test-candidate.yml` runs the reusable full CI gate and then builds immutable Test images for the exact branch HEAD:
 
 ```text
 ghcr.io/wtrdd1-hash/wdmv/backend:<sha>-test
 ghcr.io/wtrdd1-hash/wdmv/frontend:<sha>-test
 ```
 
-The workflow pins third-party Actions to immutable commit SHAs, enables SBOM/provenance, builds with staging origin settings, disables Search indexing and ads, and does not mutate either Kubernetes environment.
+The gate includes lint, typecheck, build, tests, PostgreSQL migrations and DB-backed tests, control-byte and committed-secret checks, Prisma mutation protection, and Production dependency audit. A skipped DB test is not treated as a pass.
 
-Deploy those exact images only to the isolated `wdmv-test` namespace. Backend image, frontend image, migration source, and candidate label must identify the same commit. Verify migration/data integrity, service health, user flows, authorization/security, responsive/accessibility behavior, SEO/noindex, and relevant direct-play QA. A stale staging SHA is not a pass.
+## 2. Automatic branch → main integration
 
-## 3. Build production artifacts
+`.github/workflows/auto-integrate-promote.yml` runs hourly and can also be dispatched manually. It integrates at most one branch per run.
 
-Only after the exact candidate passes staging, merge the validated application change to the latest `main`, re-run required checks, then build Production artifacts from that exact verified main commit:
+A branch is eligible only when all of the following are true:
 
-```bash
-gh workflow run deploy.yml -f enable_ads=true
-gh run watch
-```
+- its current HEAD is ahead of `main`;
+- a successful `Build Test Candidate` run exists for that exact HEAD SHA;
+- the branch matches an allowed development prefix;
+- GitHub reports the PR as mergeable without conflicts;
+- the PR HEAD still equals the SHA that passed the Test Candidate gate.
 
-Despite the historical filename, this workflow is named **Build Production Release**. It intentionally does not mutate the production cluster. It re-runs CI, builds exact-SHA backend/frontend production images, pushes them to GHCR, emits SBOM/provenance attestations, and prints the exact GitOps promotion targets.
+The workflow opens an integration PR when needed, squash-merges the validated exact HEAD to `main`, requests deletion of the merged source branch, and explicitly dispatches `Build Test Candidate` on `main`.
 
-Release identity is the immutable SHA tag, not `latest-production`.
+The explicit dispatch is required because follow-on workflow events created with `GITHUB_TOKEN` are not relied on as a release trigger.
 
-## 4. Production GitOps promotion
+## 3. Automatic isolated Test verification
 
-Open a branch and reviewed PR in `wtrdd1-hash/kuber-infrastructure`. Update the production image references in:
+A successful `main` Test Candidate is consumed by the GitOps reconciler and deployed only to the isolated Test namespace.
+
+The Production release workflow waits for `https://test.easy-scraping.com/api/version` to report the exact `main` SHA and then verifies a real backend/database path through `/app-api/v1/shop/public-catalog`. It also verifies the Test `noindex` boundary.
+
+If Test never serves the exact SHA or the backend/database smoke check fails, Production promotion stops closed.
+
+## 4. Automatic Production artifact and GitOps promotion
+
+After the exact main SHA passes the isolated Test gate, `.github/workflows/deploy.yml` builds immutable Production backend/frontend images for that same SHA and emits a `production-ready` deployment signal.
+
+The GitOps reconciler is the only Production cluster mutation path. It consumes the exact-SHA `production-ready` signal, updates the infrastructure repository, and lets Flux reconcile the Production namespace.
+
+Application GitHub Actions do not receive Production kubeconfig or Production database credentials.
+
+Release identity is the immutable SHA tag, never `latest-production`.
+
+## 5. Branch cleanup
+
+Merged source branches are deleted by the automatic integration workflow. `.github/workflows/cleanup-merged-branches.yml` remains as a second safety net: it deletes a merged PR source branch and periodically removes branches that are already fully contained in `main`.
+
+Protected branches and `main`, `production`, `staging`, `develop`, and `release/*` are excluded from pruning.
+
+## 6. Production verification
+
+Production is not considered successfully released until the intended Flux revision is Ready, changed workloads complete rollout, their running images match the intended SHA-qualified Production images, and the public smoke checks pass.
+
+Minimum public smoke endpoints are:
 
 ```text
-apps/wdmvp/backend.yaml
-apps/wdmvp/frontend.yaml
+/
+/status
+/robots.txt
+/sitemap.xml
+/ads.txt
 ```
 
-Do not mutate the production Deployment with `kubectl set image` as the normal release procedure. Git must remain the source of truth.
-
-Before merging a production GitOps PR:
-
-- the exact candidate passed CI and isolated staging;
-- the Production images for that exact main SHA exist;
-- the previous Production image references are recorded for rollback;
-- a schema-changing or destructive release has a verified recovery path;
-- migration ordering/checksums were not altered retroactively.
-
-## 5. Flux and rollout verification
-
-After the GitOps PR merges:
-
-```bash
-flux get sources git -A
-flux get kustomizations -A
-kubectl -n wdmvp rollout status deployment/wdmvp-backend --timeout=5m
-kubectl -n wdmvp rollout status deployment/wdmvp-frontend --timeout=5m
-kubectl -n wdmvp get pods
-```
-
-Do not report deployment success unless the intended Flux revision is Ready, the changed workloads finish rollout, and their running images match the intended SHA-qualified Production images.
-
-## 6. Public smoke checks
-
-At minimum:
-
-```bash
-curl --fail https://easy-scraping.com/ >/dev/null
-curl --fail https://easy-scraping.com/status >/dev/null
-curl --fail https://easy-scraping.com/robots.txt >/dev/null
-curl --fail https://easy-scraping.com/sitemap.xml >/dev/null
-curl --fail https://easy-scraping.com/ads.txt >/dev/null
-```
-
-When advertising is enabled, verify `ads.txt` and the reviewed AdSense configuration. When SEO indexing is enabled, `robots.txt` must reference the Production sitemap and the sitemap must contain the Production origin.
+Advertising and SEO checks must match the reviewed Production configuration.
 
 ## 7. Data and recovery gate
 
 Production data is PostgreSQL-backed. The ledger is the source of truth for balances and Production migrations are immutable/checksummed.
 
-A data-changing release must not proceed while the required verified separate-media recovery path is unhealthy. Re-check the aggregate integrity audit after rollout and never print member-level values or credentials in release logs.
+A schema-changing or destructive release must not proceed while the required verified separate-media recovery path is unhealthy. Re-check aggregate integrity after rollout and never print member-level values or credentials in release logs.
 
-The 2026-09-09 recovery audit recorded a temporary same-host PostgreSQL dump because the designated separate backup SSD required repair. That same-host dump is not a substitute for separate-media recovery. Track the current recovery status in issue #139 before approving schema-changing/destructive Production work.
+The 2026-09-09 recovery audit recorded a temporary same-host PostgreSQL dump because the designated separate backup SSD required repair. That dump is not a substitute for separate-media recovery. Track current recovery status in issue #139.
 
 ## 8. Rollback
 
 For application/configuration failures, revert the GitOps image/config commit to the previously verified SHA and let Flux reconcile.
 
-Do not delete Production PVCs, databases, ledgers, or audit data as part of an application rollback. Migrations are forward-only in normal operation; if a data restore is truly required, follow the verified recovery procedure rather than improvising from image tags.
+Do not delete Production PVCs, databases, ledgers, or audit data as part of an application rollback. Migrations are forward-only in normal operation; use the verified recovery procedure if a data restore is required.
 
 ## References
 
-- Deployment topology: `docs/architecture/deployment-flow.md`
-- Backup/recovery: `docs/BACKUP.md`
-- Working rules: `AGENTS.md`
-- Kubernetes Deployments: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
-- Kubernetes Service Accounts: https://kubernetes.io/docs/concepts/security/service-accounts/
-- Flux: https://fluxcd.io/flux/
+- `.github/workflows/auto-integrate-promote.yml`
+- `.github/workflows/test-candidate.yml`
+- `.github/workflows/deploy.yml`
+- `.github/workflows/cleanup-merged-branches.yml`
+- `docs/architecture/deployment-flow.md`
+- `docs/BACKUP.md`
+- `AGENTS.md`

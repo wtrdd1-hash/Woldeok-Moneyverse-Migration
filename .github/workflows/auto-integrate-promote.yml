@@ -1,0 +1,116 @@
+name: Auto Integrate and Promote
+
+on:
+  schedule:
+    - cron: '5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: auto-integrate-promote
+  cancel-in-progress: false
+
+jobs:
+  integrate-one-validated-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Integrate one validated development branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          main_sha="$(gh api "repos/${REPO}/branches/main" --jq '.commit.sha')"
+          echo "current main: ${main_sha}"
+
+          gh api --paginate "repos/${REPO}/branches?per_page=100" --jq '.[].name' |
+          while IFS= read -r branch; do
+            case "$branch" in
+              main|production|staging|develop|release/*) continue ;;
+              feat/*|feature/*|fix/*|bugfix/*|integrate/*|ops/*|auto/*|test-candidate/*) ;;
+              *) continue ;;
+            esac
+
+            encoded="$(jq -rn --arg v "$branch" '$v|@uri')"
+            branch_sha="$(gh api "repos/${REPO}/branches/${encoded}" --jq '.commit.sha')"
+
+            compare="$(gh api "repos/${REPO}/compare/main...${encoded}" 2>/dev/null || true)"
+            [[ -n "$compare" ]] || continue
+            ahead="$(jq -r '.ahead_by // 0' <<<"$compare")"
+            [[ "$ahead" -gt 0 ]] || continue
+
+            validated="$(
+              gh api --method GET "repos/${REPO}/actions/workflows/test-candidate.yml/runs" \
+                -f branch="$branch" -f status=success -f per_page=30 \
+                --jq ".workflow_runs[] | select(.head_sha == \"${branch_sha}\") | .id" \
+                | head -n 1
+            )"
+            if [[ -z "$validated" ]]; then
+              echo "skip ${branch}: exact head ${branch_sha} has no successful Build Test Candidate run"
+              continue
+            fi
+
+            pr="$(
+              gh api --method GET "repos/${REPO}/pulls" \
+                -f state=open -f base=main -f head="${GITHUB_REPOSITORY_OWNER}:${branch}" -f per_page=10 \
+                --jq '.[0].number // empty'
+            )"
+
+            if [[ -z "$pr" ]]; then
+              title="auto: integrate ${branch}"
+              body=$(cat <<EOF
+Automated integration candidate.
+
+Gate:
+- exact branch SHA: \`${branch_sha}\`
+- successful \`Build Test Candidate\` run: \`${validated}\`
+- target: \`main\`
+
+After merge, this workflow explicitly dispatches the main Test Candidate chain. Production remains gated by isolated Test exact-SHA/backend checks and the existing GitOps production-ready flow.
+EOF
+)
+              pr="$(gh api --method POST "repos/${REPO}/pulls" \
+                -f title="$title" -f head="$branch" -f base=main -f body="$body" \
+                --jq '.number')"
+              echo "opened PR #${pr} for ${branch}"
+            fi
+
+            mergeable="unknown"
+            merge_state="unknown"
+            for _ in $(seq 1 12); do
+              pr_json="$(gh api "repos/${REPO}/pulls/${pr}")"
+              mergeable="$(jq -r '.mergeable // "unknown"' <<<"$pr_json")"
+              merge_state="$(jq -r '.mergeable_state // "unknown"' <<<"$pr_json")"
+              [[ "$mergeable" != "unknown" ]] && break
+              sleep 5
+            done
+
+            if [[ "$mergeable" != "true" || ! "$merge_state" =~ ^(clean|unstable|has_hooks)$ ]]; then
+              echo "skip PR #${pr}: mergeable=${mergeable}, state=${merge_state}"
+              continue
+            fi
+
+            current_head="$(gh api "repos/${REPO}/pulls/${pr}" --jq '.head.sha')"
+            if [[ "$current_head" != "$branch_sha" ]]; then
+              echo "skip PR #${pr}: head moved from ${branch_sha} to ${current_head}"
+              continue
+            fi
+
+            gh pr merge "$pr" --repo "$REPO" --squash --delete-branch --match-head-commit "$branch_sha"
+            echo "merged PR #${pr}; source branch cleanup requested"
+
+            # GITHUB_TOKEN-created events do not reliably start follow-on workflows.
+            # Dispatch the main candidate explicitly so Test -> Production promotion remains automatic.
+            gh workflow run test-candidate.yml --repo "$REPO" --ref main
+            echo "dispatched main Build Test Candidate"
+
+            exit 0
+          done
+
+          echo "no validated branch was eligible for integration"
