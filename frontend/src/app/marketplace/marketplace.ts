@@ -18,6 +18,8 @@ export type MarketplaceSort = 'name' | 'quantity' | 'newest';
 export interface MarketplaceQuery {
   readonly q: string;
   readonly category: string;
+  readonly rarity: string;
+  readonly effect: string;
   readonly state: MarketplaceFilterState;
   readonly sort: MarketplaceSort;
 }
@@ -37,6 +39,8 @@ export function marketplaceQuery(
   return {
     q: first(params.q).trim().slice(0, 80),
     category: first(params.category).trim().slice(0, 60),
+    rarity: first(params.rarity).trim().slice(0, 60),
+    effect: first(params.effect).trim().slice(0, 60),
     state: STATES.has(state as MarketplaceFilterState) ? (state as MarketplaceFilterState) : 'all',
     sort: SORTS.has(sort as MarketplaceSort) ? (sort as MarketplaceSort) : 'name',
   };
@@ -49,6 +53,8 @@ export function filterMarketplaceHoldings(
   const needle = query.q.toLocaleLowerCase('ko-KR');
   const filtered = holdings.filter((item) => {
     if (query.category && item.category !== query.category) return false;
+    if (query.rarity && item.rarity !== query.rarity) return false;
+    if (query.effect && item.effect_kind !== query.effect) return false;
     if (query.state === 'equipped' && !item.is_equipped) return false;
     if (query.state === 'serialized' && item.serial_number === null) return false;
     if (!needle) return true;
