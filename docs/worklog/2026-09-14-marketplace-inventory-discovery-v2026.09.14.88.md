@@ -11,3 +11,4 @@
 - Test deployment: pending exact candidate SHA build and isolated runtime verification.
 - Production: not promoted unless the isolated Test runtime serves the exact candidate SHA and all release gates pass.
 - Remaining risk: the workbench is still read-only; authoritative marketplace listing/escrow/settlement and crafting contracts remain future work.
+- Pre-PR resync: `origin/main` advanced to `aea77def54ac4b839bb0299781253e9824ac8982` with documentation-only trust/credibility planning; merged cleanly with no marketplace overlap. Required validation is rerun after this resync.

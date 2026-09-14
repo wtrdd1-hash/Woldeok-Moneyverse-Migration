@@ -11,3 +11,4 @@
 - Test 배포: 최종 후보 exact SHA 이미지 및 격리 런타임 검증 대기.
 - Production: Test가 동일 후보 SHA를 실제 제공하고 모든 게이트를 통과하기 전에는 승격하지 않는다.
 - 남은 위험: 작업대는 아직 읽기 전용이며 authoritative listing/escrow/settlement 및 crafting 계약은 향후 구현 대상이다.
+- PR 직전 재동기화: `origin/main`이 문서 전용 trust/credibility 기획 커밋 `aea77def54ac4b839bb0299781253e9824ac8982`로 전진해 충돌 없이 병합했다. marketplace 겹침은 없으며 이후 필수 검증을 다시 실행한다.
