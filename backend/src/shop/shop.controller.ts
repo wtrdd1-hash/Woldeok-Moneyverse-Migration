@@ -10,6 +10,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
@@ -30,6 +31,23 @@ import {
 } from './shop.dto';
 import { ShopCatalogRepository, ShopInputError } from './shop.repository';
 import { ShopItemUnavailableError, ShopService } from './shop.service';
+
+interface SearchableShopItem {
+  readonly code?: unknown;
+  readonly name?: unknown;
+  readonly description?: unknown;
+  readonly category?: unknown;
+}
+
+function filterShopItems<T extends SearchableShopItem>(items: readonly T[], query?: string): T[] {
+  const needle = query?.trim().toLocaleLowerCase('ko-KR') ?? '';
+  if (!needle) return [...items];
+  return items.filter((item) =>
+    [item.code, item.name, item.description, item.category]
+      .filter((value): value is string => typeof value === 'string')
+      .some((value) => value.toLocaleLowerCase('ko-KR').includes(needle)),
+  );
+}
 
 /**
  * ShopController for Store 2.0 & Cosmetics
@@ -64,9 +82,9 @@ export class ShopController {
   }
 
   @Get('items')
-  @ApiOperation({ summary: 'Items currently on sale' })
-  async items() {
-    return { items: await this.service().catalog() };
+  @ApiOperation({ summary: 'Items currently on sale; optional q searches name/description' })
+  async items(@Query('q') query?: string) {
+    return { items: filterShopItems(await this.service().catalog(), query) };
   }
 
   @Get('purchases')
@@ -104,26 +122,24 @@ export class ShopController {
   }
 
   @Get('public-catalog')
-  @ApiOperation({ summary: 'The catalogue with prices, stock and cosmetics for public browsing' })
-  async publicCatalog() {
-    return {
-      catalogItems: await this.guarded(
-        () => this.repository().catalog(null),
-        'the catalogue is unavailable',
-      ),
-    };
+  @ApiOperation({ summary: 'The public catalogue; optional q searches code/name/description/category' })
+  async publicCatalog(@Query('q') query?: string) {
+    const catalogItems = await this.guarded(
+      () => this.repository().catalog(null),
+      'the catalogue is unavailable',
+    );
+    return { catalogItems: filterShopItems(catalogItems, query) };
   }
 
   @Get('catalog')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
-  @ApiOperation({ summary: 'The catalogue with prices, stock, purchase limits and cosmetics' })
-  async catalog(@Req() request: RequestWithSession) {
-    return {
-      catalogItems: await this.guarded(
-        () => this.repository().catalog(requireUserId(request)),
-        'the catalogue is unavailable',
-      ),
-    };
+  @ApiOperation({ summary: 'The member catalogue; optional q searches code/name/description/category' })
+  async catalog(@Req() request: RequestWithSession, @Query('q') query?: string) {
+    const catalogItems = await this.guarded(
+      () => this.repository().catalog(requireUserId(request)),
+      'the catalogue is unavailable',
+    );
+    return { catalogItems: filterShopItems(catalogItems, query) };
   }
 
   @Get('holdings')

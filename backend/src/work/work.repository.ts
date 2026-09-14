@@ -10,19 +10,14 @@ export class WorkInputError extends Error {
   }
 }
 
-/**
- * Validated here as well as in the database function. The double gate is
- * deliberate and documented across this codebase: the function is the
- * authority, and this turns a malformed argument into a 400 with a sentence
- * about the field rather than a 500 carrying a message about a function.
- */
 function assertUuid(value: unknown, field: string): asserts value is string {
   if (typeof value !== 'string' || !UUID.test(value)) {
     throw new WorkInputError(`${field} must be a UUID`);
   }
 }
 
-/** Reward and experience are bigints, so they stay strings end to end. */
+export type WorkFeatureState = 'enabled' | 'paused' | 'safe_mode' | 'disabled';
+
 export interface WorkAssignmentRow {
   assignment_id: string;
   task_id: string;
@@ -45,12 +40,6 @@ export interface WorkRewardRow {
   replayed: boolean;
 }
 
-/**
- * One row of `work_task_board` (095).
- *
- * `reward_preview` is null when work rewards are switched off. `daily_limit`
- * remains in the wire shape for compatibility and is zero for unlimited work.
- */
 export interface WorkTaskRow {
   task_id: string;
   code: string;
@@ -68,7 +57,6 @@ export interface WorkTaskRow {
   recommended: boolean;
 }
 
-/** One row of `work_my_receipts` (095). */
 export interface WorkReceiptRow {
   receipt_id: string;
   assignment_id: string;
@@ -100,10 +88,29 @@ export interface WorkCompleteV2Row {
 export class WorkRepository {
   constructor(private readonly pool: Queryable) {}
 
-  assign(key: unknown, actor: unknown, task: unknown): Promise<WorkAssignmentRow | null> {
+  async featureState(): Promise<WorkFeatureState> {
+    const row = await queryOne<{ state: WorkFeatureState }>(
+      this.pool,
+      `SELECT public.feature_switch_state('work')::text AS state`,
+    );
+    return row?.state ?? 'disabled';
+  }
+
+  private async requireEnabled(): Promise<void> {
+    const state = await this.featureState();
+    if (state !== 'enabled') throw new WorkInputError(`work feature is ${state}`);
+  }
+
+  private async requireExistingFlowAllowed(): Promise<void> {
+    const state = await this.featureState();
+    if (state === 'disabled') throw new WorkInputError('work feature is disabled');
+  }
+
+  async assign(key: unknown, actor: unknown, task: unknown): Promise<WorkAssignmentRow | null> {
     assertUuid(key, 'idempotency key');
     assertUuid(actor, 'actor');
     assertUuid(task, 'task id');
+    await this.requireEnabled();
     return queryOne<WorkAssignmentRow>(
       this.pool,
       `SELECT assignment.assignment_id::text, assignment.task_id::text,
@@ -113,7 +120,7 @@ export class WorkRepository {
     );
   }
 
-  submit(
+  async submit(
     key: unknown,
     actor: unknown,
     assignment: unknown,
@@ -122,6 +129,7 @@ export class WorkRepository {
     assertUuid(key, 'idempotency key');
     assertUuid(actor, 'actor');
     assertUuid(assignment, 'assignment id');
+    await this.requireExistingFlowAllowed();
     return queryOne<WorkCompletionRow>(
       this.pool,
       `SELECT completion.assignment_id::text, completion.submitted_at, completion.replayed
@@ -130,10 +138,11 @@ export class WorkRepository {
     );
   }
 
-  verify(key: unknown, actor: unknown, assignment: unknown): Promise<WorkRewardRow | null> {
+  async verify(key: unknown, actor: unknown, assignment: unknown): Promise<WorkRewardRow | null> {
     assertUuid(key, 'idempotency key');
     assertUuid(actor, 'actor');
     assertUuid(assignment, 'assignment id');
+    await this.requireExistingFlowAllowed();
     return queryOne<WorkRewardRow>(
       this.pool,
       `SELECT reward.assignment_id::text, reward.reward_amount::text,
@@ -155,13 +164,6 @@ export class WorkRepository {
     );
   }
 
-  /**
-   * The catalogue, which the member cannot read any other way.
-   *
-   * `work_task_catalog` is revoked from this role (066), so this is a
-   * function call and not a SELECT -- the same shape as the stock read fix in
-   * 047, and for the same reason.
-   */
   tasks(actor: unknown): Promise<WorkTaskRow[]> {
     assertUuid(actor, 'actor');
     return queryRows<WorkTaskRow>(
@@ -213,6 +215,7 @@ export class WorkRepository {
 
   async switchActiveJob(actor: unknown, jobType: string): Promise<unknown> {
     assertUuid(actor, 'actor');
+    await this.requireEnabled();
     return queryOne(
       this.pool,
       `SELECT job_type::text, level, experience::text AS current_experience, is_active
@@ -225,6 +228,7 @@ export class WorkRepository {
     assertUuid(key, 'idempotency key');
     assertUuid(actor, 'actor');
     assertUuid(taskId, 'task id');
+    await this.requireEnabled();
     return queryOne<WorkCompleteV2Row>(
       this.pool,
       `SELECT reward_amount::text, experience_gained::text, current_level,
