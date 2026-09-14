@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living Spec
 > **최초 기획 기준:** 2026-08-26
-> **실제 구현 동기화:** 2026-09-13
+> **실제 구현 동기화:** 2026-09-15
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 ## 0. 문서 운영 원칙
@@ -290,7 +290,7 @@ production checksum과 migration parity를 유지한다. 데이터/스키마 변
 ### P1 — 데이터와 커뮤니티 결합
 
 - **가상 종목 태그형 커뮤니티**: 게시글을 종목과 연결하여 종목 상세 ↔ 관련 글 사이의 탐색 경로를 만든다. 회원용 흐름은 구현되어 종목 상세에서 해당 종목으로 필터링된 게시판 글쓰기 화면으로 이동하며 작성 폼이 자동으로 열리고 종목코드가 미리 입력된다. 기존 서버 기준 태그 게시글 생성/조회 계약은 변경하지 않는다.
-- **종목 비교**: 여러 가상 종목의 가격 추이와 서버가 제공하는 비교 지표를 동일 기준으로 비교한다. 종목 상세 허브에서 검증된 종목 심볼을 비교 화면으로 전달하고, 현재 선택한 2~~3개 종목 조합을 브라우저 URL에 동기화하며, 동일한 비교 상태를 다시 열거나 공유할 수 있도록 비교 링크 복사를 제공한다. 비교 화면은 검증된 종목 심볼 딥링크, 현재 2~~3개 선택 URL 동기화/복사 공유, 시가 대비 절대 변화와 정수 문자열 기반 등락률을 함께 제공한다.
+- **종목 비교**: 여러 가상 종목의 가격 추이와 서버가 제공하는 비교 지표를 동일 기준으로 비교한다. 종목 상세 허브에서 검증된 종목 심볼을 비교 화면으로 전달하고, 현재 선택한 2~3개 종목 조합을 브라우저 URL에 동기화하며, 동일한 비교 상태를 다시 열거나 공유할 수 있도록 비교 링크 복사를 제공한다. 비교 화면은 검증된 종목 심볼 딥링크, 현재 2~3개 선택 URL 동기화/복사 공유, 시가 대비 절대 변화와 정수 문자열 기반 등락률을 함께 제공한다.
 - **조건 알림**: 가격/변동률/서비스 이벤트 등 서버가 검증 가능한 조건을 기반으로 알림을 제공한다. 가격·일일 변동 조건은 구현되어 있으며, 종목 상세의 알림 링크가 `/stocks/alerts`에서 해당 가상 종목을 자동 선택하도록 연결해 화면 간 이동에서도 사용자 의도를 유지한다. 알림 폭주 방지용 cooldown/rate limit을 둔다.
 - **경제/이벤트 캘린더**: 서비스 내부 이벤트, 가상 종목 이벤트, 퀘스트/상점 이벤트를 날짜 기반으로 통합한다. 회원 캘린더는 이제 일일 사건, 주간 갱신, 시즌 이벤트 종료와 함께 서버 상점 카탈로그의 판매 종료 일정을 표시한다.
 - **계정 보안 센터**: 활성 세션 확인, 다른 세션 종료, 로그인 보안 상태, 2단계 인증 확장 가능성을 포함한다.
@@ -322,3 +322,53 @@ production checksum과 migration parity를 유지한다. 데이터/스키마 변
 `기획 → 브랜치 구현 → 정적/단위/통합 테스트 → DB 정합성 확인 → 테스트 서버 배포 → 공개 동작/반응형/보안 확인 → 문서 갱신 → main 병합 → 운영 배포 → 운영 health 확인`
 
 main은 테스트 서버 검증이 끝나기 전 직접 수정하거나 병합하지 않는다.
+
+## 25. 통합 구현·QA·SEO·보안·수익성 계약 — v2026.09.15.103
+
+이 절은 모든 기능군에 적용되는 규범적 통합 기준이다. `보안 강화`, `SEO 개선`, `수익화 검토`, `기능 추가`처럼 구현 범위를 확정할 수 없는 표현만으로 backlog를 만들지 않는다.
+
+### 25.1 현재 운영승격 차단 이슈
+
+**P0 — 직업 작업 일일 quota 계약 드리프트.** 운영 `/guide`는 직업 작업을 일일 횟수 제한 없이 반복하고 매번 WLD/EXP를 전액 보상한다고 설명하지만, 최신 `main` v2026.09.15.102는 작업별 `daily_limit`, 실제 완료 기준 `taken_today`, 한도 초과 거부, 사용자/작업 단위 동시성 보호를 DB authoritative 계약으로 복구했다. 공개/모바일/웹 안내를 동기화하고 검증하기 전까지 무제한 보상 문구를 사용하지 않는다. 수용조건은 실DB에서 0/부분/최대 quota, 최대+1 거부, 직업 전환 격리, 동시 중복 완료, 서울 날짜 경계, API/웹/모바일 parity가 모두 통과하는 것이다. 이미 적용된 migration은 수정하지 않으며 경제 동작 롤백은 새 migration으로만 수행한다.
+
+**P0 — 운영 승격 증거 fail-closed.** CI 성공, 불변 test image, exact-SHA 테스트 배포, backend/DB smoke, migration parity/checksum, 핵심 사용자 흐름 QA, rollback 준비는 서로 다른 필수 증거다. GitHub status가 보이지 않으면 성공/실패로 추정하지 않고 `verification unavailable`로 기록한다. 필수 증거를 증명하지 못하면 운영 승격을 차단한다.
+
+### 25.2 기능별 필수 상세명세
+
+인증/세션, 프로필/보안센터, 인벤토리/컬렉션, 상점/장바구니/결제/구독, 시즌/퀘스트/직업/성장, 사업/은행/대출, 가상주식/포트폴리오/알림, 카지노/확률형, 커뮤니티/댓글/신고/차단, 친구/클럽/추천, 알림, 검색, 업로드, 공개 콘텐츠, 앱 API, 관리자/감사/백업, 분석/실험, 광고, SEO, 장애대응 등 모든 기능 backlog는 다음을 기록한다: 목적/사용자문제, 구현상태(`UNIMPLEMENTED`, `PARTIAL`, `IMPLEMENTED`, `REDESIGN_REQUIRED`), actor/권한/진입경로, 최초/재방문/복귀 흐름, loading/empty/error/offline/timeout, 반응형/접근성/i18n, 서버 권위와 데이터 소유권, 읽기/쓰기 권한, endpoint/method/request/response/error/idempotency/rate limit, 서비스 규칙, 테이블/인덱스/제약/트랜잭션/동시성, 감사/관측/관리자 운영, feature flag/fallback/backup 영향, 보안/개인정보/악용, SEO/index 정책, 분석 이벤트/KPI, 성능/cache 목표, 수익성/비용, unit/integration/E2E/실DB/security/regression 수용기준, 테스트환경 게이트, 운영승격/롤백.
+
+### 25.3 보안 검증 매트릭스
+
+object ID를 받는 모든 API는 서버에서 object-level authorization을 확인하고 다른 사용자 ID를 넣은 negative test를 포함한다. 이는 OWASP API1:2023 BOLA 기준을 따른다. 인증/세션은 credential stuffing/rate limit, session fixation/rotation, logout/invalidation, OAuth state/nonce/PKCE/exact redirect URI, recent reauthentication, CSRF, cookie 속성, 관리자 MFA/TOTP 경계, secret/log masking을 검증한다. 경제 endpoint는 idempotency/replay, 동시 요청, reward duplication, multi-account/collusion/market manipulation, 정밀도, append-only 원장 대사, DB least privilege를 추가 검증한다. upload/UGC는 실제 디코딩 타입/매직바이트, 크기·해상도, 격리 저장, delivery authorization, metadata 개인정보, moderation/report/block, 악성 링크/피싱을 점검한다. CRITICAL/HIGH 보안 테스트 실패는 배포차단이다.
+
+### 25.4 SEO 백엔드 계약
+
+SEO는 문구뿐 아니라 backend/read-model 영역이다. canonical URL 생성은 서버 authoritative이고 결정적이어야 한다. 동적 sitemap은 public/indexable canonical URL과 authoritative `lastModified`만 포함하고 protocol 한계 전에 분할한다. 계정/관리자/지갑/거래/복구/보안/private holdings는 sitemap에서 제외하고 인증과 필요 시 `noindex`/`X-Robots-Tag`를 적용한다. robots.txt만 개인정보 보호수단으로 사용하지 않는다. slug 변경은 명시적 301/308 redirect map으로 관리한다. 공개 콘텐츠 핵심 의미는 SSR/ISR HTML에서 검색로봇이 읽을 수 있어야 하며 filter/sort/search/query variant는 canonical 또는 noindex로 thin duplicate 생성을 막는다. Breadcrumb JSON-LD는 실제 보이는 breadcrumb와 canonical URL을 일치시킨다. 이미지 alt·크기·최적화와 private filename/EXIF 유출 방지를 포함한다. 다국어 공개 페이지는 canonical/hreflang을 일관되게 관리한다. Google Search Console/Naver Search Advisor의 crawl/index/canonical/sitemap 오류를 수집하고 organic visit → signup → activation → D7/D30 → revenue까지 연결한다. 대표 공개 템플릿의 Core Web Vitals 목표는 LCP 2.5초 이하, INP 200ms 미만, CLS 0.1 이하를 기준으로 한다.
+
+### 25.5 수익화·사업성 계약
+
+유료기능은 gross revenue 직감만으로 승인하지 않는다. 각 구독, 일회성/비소모성/소모성 상품, sponsorship, 광고 surface, B2B2C 기능은 가격/테스트 범위와 근거, attach/conversion/repeat/renewal 가설, refund/cancellation/churn, 플랫폼/결제 수수료·세금·환불비·infra/storage/CDN/notification/LLM 비용, 콘텐츠/CS/moderation/fraud 비용, gross margin/contribution margin, CAC/LTV/LTV:CAC/payback, 낙관/기준/보수 민감도, D1/D7/D30 영향, 신뢰/법규 위험, `SCALE/ITERATE/HOLD/KILL` 기준을 가진다. 실측이 없는 값은 가설/테스트 기준으로 표기한다. 자동갱신의 주요 조건은 결제 전 명확히 표시하고 명시적 동의를 받아야 하며 해지를 방해하는 retention tactic은 금지한다. 광고는 `광고매출 - 광고 유발 이탈/세션감소/CS부담` 순기여로 평가한다. 보안/QA/백업/SEO/관리도구는 사고·부정사용·환불·CS 비용 절감 및 retained customer/organic value로 사업가치를 평가한다.
+
+### 25.6 상점·카탈로그 계약
+
+모든 SKU는 canonical item ID/이름/카테고리/설명/대상/가치제안, WLD/실결제 구분, consumable/non-consumable/subscription 분류, 서버 authoritative 가격과 테스트 범위, 할인/번들/쿠폰, 재고/판매기간/구매제한/중복구매, 계정귀속/선물, 환불/복구/해지/갱신, grant/inventory 반영과 idempotency, economy sink/source와 P2W 판정, retention/revenue 가설, KPI/fraud 통제, API/DB/admin lifecycle, QA를 기록한다. fake scarcity, resetting countdown, 숨은 개인별 가격, wealth/profit/casino prestige 기본화, 경쟁우위 유료판매는 제외한다.
+
+### 25.7 우선순위와 배포순서
+
+우선순위는 `P0 데이터손실/보안/인증/권한/자산중복/경제악용/DB무결성/승격증거` → `P1 주요 사용자 오류·핵심흐름 완성도` → `P1 결제/상점/수익화 계약` → `P1 SEO backend/공개유입` → `P2 리텐션/성장` → `P2 접근성/반응형` → `P3 장기확장` 순이다. 모든 항목은 상태, 근거, 완료조건, QA gate, 의존성, rollback, 사업효과 가설을 가진다.
+
+### 25.8 현재 런타임·QA 현실
+
+운영 공개 상태 페이지는 최신 기록 기준 웹, 경제 API, 원장 DB를 정상으로 표시한다. 공개 홈/상태/가이드는 접근 가능했으나 인증 사용자 흐름은 이번 문서-only 회차에서 독립 실행하지 않았다. 시작 `main` SHA의 GitHub status/workflow 조회에서는 visible check를 확인하지 못했으므로 CI/테스트서버 통과를 주장하지 않는다. Runtime verification은 부분 가능으로 기록한다.
+
+### 25.9 외부 근거 적용판정
+
+직접채택: Google canonical/Core Web Vitals/Breadcrumb, Naver 검색로봇/sitemap/canonical/robots, OWASP API BOLA/Broken Authentication 및 OWASP Top 10:2025/ASVS 검증기준, FTC 2026 구독 집행을 소비자보호 신호로, Apple 구독/결제복구 문서를 플랫폼 수익·갱신 참고로 사용한다. 특정 플랫폼의 수익배분율이나 복구기간은 실제 해당 플랫폼/결제모델을 채택하기 전 Moneyverse의 확정값으로 사용하지 않는다.
+
+### 25.10 변경 기록 — v2026.09.15.103
+
+- Living Project Plan에 개발/QA/SEO backend/보안/수익성 요구를 통합했다.
+- 공개 가이드의 무제한 작업 보상 문구와 실제 일일 quota 구현의 불일치를 P0 계약 드리프트로 승격했다.
+- fail-closed 승격 증거와 `verification unavailable` 의미를 명문화했다.
+- 모든 기능 backlog에 UX/API/DB/보안/운영/분석/수익성/QA/rollback 상세 계약을 요구한다.
+- 이번 기획 변경은 런타임/코드/DB/인프라를 수정하지 않는다.
