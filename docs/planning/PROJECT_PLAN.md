@@ -209,7 +209,7 @@ The following roadmap mirrors the Korean Living Spec and is staged behind implem
 
 #### P1 — data and community integration
 
-- **Stock-tagged community:** connect posts to virtual stocks so members can navigate between a stock detail surface and relevant discussion.
+- **Stock-tagged community:** connect posts to virtual stocks so members can navigate between a stock detail surface and relevant discussion. The member-facing path is implemented: stock detail links into a stock-filtered board composer that opens automatically with the symbol prefilled, while existing server-authoritative tagged-post creation/listing contracts remain unchanged.
 - **Stock comparison:** compare multiple virtual stocks with server-defined metrics on a consistent basis.
 - **Conditional alerts:** support server-verifiable price/change/service-event conditions with cooldown and rate limiting.
 - **Economy/event calendar:** unify service events, virtual-stock events, quests, and shop events around dates.
