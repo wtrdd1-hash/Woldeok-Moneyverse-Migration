@@ -117,3 +117,5 @@ The project plan is a living specification. Intentional, validated implementatio
 
 - [Screenshot provenance and update rules](images/README.md) / [한국어](images/README.ko.md)
 - [Complete Mobile App API Implementation Specification](mobile-api-complete-spec.md) / [한국어](mobile-api-complete-spec.ko.md) — single-source native API contract, OAuth handoff, feature logic, DTO guidance, and audited route inventory.
+
+- [Mobile API request/response schema reference](mobile-api-schema-reference.md) / [한국어](mobile-api-schema-reference.ko.md) — actual request DTO fields, constraints, and success response fields for all 139 app APIs.
