@@ -14,6 +14,7 @@ export type MarketplaceHolding = {
 
 export type MarketplaceFilterState = 'all' | 'equipped' | 'serialized';
 export type MarketplaceSort = 'name' | 'quantity' | 'newest';
+export type MarketplaceAcquiredWindow = 'all' | '7d' | '30d';
 
 export interface MarketplaceQuery {
   readonly q: string;
@@ -21,13 +22,16 @@ export interface MarketplaceQuery {
   readonly rarity: string;
   readonly effect: string;
   readonly minQuantity: number;
+  readonly acquired: MarketplaceAcquiredWindow;
   readonly state: MarketplaceFilterState;
   readonly sort: MarketplaceSort;
 }
 
 const STATES = new Set<MarketplaceFilterState>(['all', 'equipped', 'serialized']);
 const SORTS = new Set<MarketplaceSort>(['name', 'quantity', 'newest']);
+const ACQUIRED_WINDOWS = new Set<MarketplaceAcquiredWindow>(['all', '7d', '30d']);
 const MAX_MIN_QUANTITY = 999_999;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 function first(value: string | string[] | undefined): string {
   return Array.isArray(value) ? (value[0] ?? '') : (value ?? '');
@@ -44,6 +48,7 @@ function minimumQuantity(value: string | string[] | undefined): number {
 export function marketplaceQuery(
   params: Readonly<Record<string, string | string[] | undefined>>,
 ): MarketplaceQuery {
+  const acquired = first(params.acquired);
   const state = first(params.state);
   const sort = first(params.sort);
   return {
@@ -52,6 +57,9 @@ export function marketplaceQuery(
     rarity: first(params.rarity).trim().slice(0, 60),
     effect: first(params.effect).trim().slice(0, 60),
     minQuantity: minimumQuantity(params.minQuantity),
+    acquired: ACQUIRED_WINDOWS.has(acquired as MarketplaceAcquiredWindow)
+      ? (acquired as MarketplaceAcquiredWindow)
+      : 'all',
     state: STATES.has(state as MarketplaceFilterState) ? (state as MarketplaceFilterState) : 'all',
     sort: SORTS.has(sort as MarketplaceSort) ? (sort as MarketplaceSort) : 'name',
   };
@@ -60,13 +68,28 @@ export function marketplaceQuery(
 export function filterMarketplaceHoldings(
   holdings: readonly MarketplaceHolding[],
   query: MarketplaceQuery,
+  now: Date = new Date(),
 ): MarketplaceHolding[] {
   const needle = query.q.toLocaleLowerCase('ko-KR');
+  const nowMs = now.getTime();
+  const acquiredCutoffMs =
+    query.acquired === '7d'
+      ? nowMs - 7 * DAY_MS
+      : query.acquired === '30d'
+        ? nowMs - 30 * DAY_MS
+        : null;
+
   const filtered = holdings.filter((item) => {
     if (query.category && item.category !== query.category) return false;
     if (query.rarity && item.rarity !== query.rarity) return false;
     if (query.effect && item.effect_kind !== query.effect) return false;
     if (query.minQuantity > 0 && item.quantity < query.minQuantity) return false;
+    if (acquiredCutoffMs !== null) {
+      const acquiredAtMs = Date.parse(item.acquired_at);
+      if (!Number.isFinite(acquiredAtMs) || acquiredAtMs < acquiredCutoffMs || acquiredAtMs > nowMs) {
+        return false;
+      }
+    }
     if (query.state === 'equipped' && !item.is_equipped) return false;
     if (query.state === 'serialized' && item.serial_number === null) return false;
     if (!needle) return true;
