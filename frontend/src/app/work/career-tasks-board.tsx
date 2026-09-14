@@ -10,6 +10,7 @@ import { SubmitButton } from '@/components/action-form';
 import { IDLE } from '@/lib/action-state';
 import { switchJobAction } from './actions';
 import { TaskCompleteModalButton } from './work-forms';
+import { filterWorkTasks } from './work-search';
 import {
   boardOrder,
   difficultyLabel,
@@ -56,6 +57,7 @@ export function CareerTasksBoard({
   const [filter, setFilter] = useState<'my_job' | 'all'>(
     activeJobType ? 'my_job' : 'all',
   );
+  const [searchQuery, setSearchQuery] = useState('');
 
   const activeMeta = activeJobType ? jobMeta(activeJobType, locale) : undefined;
   const activeJobName = activeJobType ? jobLabel(activeJobType, locale) : '';
@@ -65,72 +67,88 @@ export function CareerTasksBoard({
     : [];
   const myCompletedToday = myTasks.reduce((sum, t) => sum + t.taken_today, 0);
 
-  const displayTasks =
+  const scopedTasks =
     filter === 'my_job' && activeJobType && myTasks.length > 0
-      ? boardOrder(myTasks, activeJobType)
-      : boardOrder(tasks, activeJobType);
+      ? myTasks
+      : tasks;
+  const displayTasks = boardOrder(filterWorkTasks(scopedTasks, searchQuery), activeJobType);
 
   return (
     <div className="grid gap-4">
-      {/* 1. 탭 필터 및 상단 대시보드 뱃지 */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card/60 border border-border/60 rounded-xl p-3 backdrop-blur-sm shadow-sm">
-        <div className="flex items-center gap-2">
-          {activeJobType && (
+      <div className="flex flex-col gap-3 bg-card/60 border border-border/60 rounded-xl p-3 backdrop-blur-sm shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            {activeJobType && (
+              <Button
+                size="sm"
+                variant={filter === 'my_job' ? 'default' : 'outline'}
+                onClick={() => setFilter('my_job')}
+                className={`font-semibold text-xs transition-all ${
+                  filter === 'my_job'
+                    ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-sm'
+                    : ''
+                }`}
+              >
+                <span>{activeMeta?.icon ?? '💼'}</span>
+                <span className="ml-1.5">
+                  {isEn ? `My Career: ${activeJobName}` : `내 직업 전용 (${activeJobName})`}
+                </span>
+                <Badge className="ml-2 bg-black/20 text-white border-0 text-[10px] px-1.5 py-0">
+                  {myTasks.length}
+                </Badge>
+              </Button>
+            )}
+
             <Button
               size="sm"
-              variant={filter === 'my_job' ? 'default' : 'outline'}
-              onClick={() => setFilter('my_job')}
-              className={`font-semibold text-xs transition-all ${
-                filter === 'my_job'
-                  ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-sm'
-                  : ''
-              }`}
+              variant={filter === 'all' ? 'default' : 'outline'}
+              onClick={() => setFilter('all')}
+              className="font-semibold text-xs"
             >
-              <span>{activeMeta?.icon ?? '💼'}</span>
-              <span className="ml-1.5">
-                {isEn ? `My Career: ${activeJobName}` : `내 직업 전용 (${activeJobName})`}
-              </span>
-              <Badge className="ml-2 bg-black/20 text-white border-0 text-[10px] px-1.5 py-0">
-                {myTasks.length}
+              <span>🌐</span>
+              <span className="ml-1.5">{isEn ? 'Explore Other Careers' : '다른 직업 둘러보기'}</span>
+              <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0">
+                {tasks.length}
               </Badge>
             </Button>
-          )}
+          </div>
 
-          <Button
-            size="sm"
-            variant={filter === 'all' ? 'default' : 'outline'}
-            onClick={() => setFilter('all')}
-            className="font-semibold text-xs"
-          >
-            <span>🌐</span>
-            <span className="ml-1.5">{isEn ? 'Explore Other Careers' : '다른 직업 둘러보기'}</span>
-            <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0">
-              {tasks.length}
-            </Badge>
-          </Button>
-        </div>
-
-        {activeJobType && (
-          <div className="flex items-center gap-2 text-xs">
-            <Badge variant="secondary" className="flex items-center gap-1.5 py-1 px-2.5">
+          {activeJobType && (
+            <div className="flex items-center gap-2 text-xs">
+              <Badge variant="secondary" className="flex items-center gap-1.5 py-1 px-2.5">
                 <span className="text-emerald-400 font-mono font-bold">
                   {myCompletedToday}회 완료 · 반복 가능
                 </span>
                 <span className="text-muted-foreground">
                   {isEn ? 'Career work today' : '오늘의 직업 업무'}
                 </span>
-            </Badge>
-          </div>
-        )}
+              </Badge>
+            </div>
+          )}
+        </div>
+
+        <label className="grid gap-1 text-xs text-muted-foreground">
+          <span>{isEn ? 'Find a task' : '업무 검색'}</span>
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder={isEn ? 'Search by task, description, or career…' : '업무명, 설명, 직업으로 검색…'}
+            className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        </label>
       </div>
 
-      {/* 3. 업무 카드 그리드 */}
       {displayTasks.length === 0 ? (
         <EmptyState
           title={
-            isEn
-              ? 'No tasks available in this category.'
-              : '선택한 직업에 등록된 업무가 없어요.'
+            searchQuery.trim()
+              ? isEn
+                ? 'No work tasks match your search.'
+                : '검색 조건에 맞는 업무가 없어요.'
+              : isEn
+                ? 'No tasks available in this category.'
+                : '선택한 직업에 등록된 업무가 없어요.'
           }
         />
       ) : (
