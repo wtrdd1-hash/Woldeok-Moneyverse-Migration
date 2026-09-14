@@ -1,13 +1,13 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { groupDigits } from '@/lib/money';
-import { signedDelta } from './stock-comparison-math';
+import { comparisonSymbolsQuery, initialComparisonIds, signedDelta } from './stock-comparison-math';
 
 export interface ComparableStock {
   readonly id: string;
@@ -23,16 +23,40 @@ export interface ComparableStock {
 interface StockComparisonProps {
   readonly stocks: readonly ComparableStock[];
   readonly isEn: boolean;
+  readonly initialSymbols?: readonly string[];
 }
 
 const MAX_SELECTED = 3;
 
-export function StockComparison({ stocks, isEn }: StockComparisonProps) {
-  const [selectedIds, setSelectedIds] = useState<string[]>(() => stocks.slice(0, 2).map((stock) => stock.id));
+export function StockComparison({ stocks, isEn, initialSymbols = [] }: StockComparisonProps) {
+  const [selectedIds, setSelectedIds] = useState<string[]>(() =>
+    initialComparisonIds(stocks, initialSymbols, MAX_SELECTED),
+  );
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const selected = useMemo(
     () => selectedIds.map((id) => stocks.find((stock) => stock.id === id)).filter((stock): stock is ComparableStock => Boolean(stock)),
     [selectedIds, stocks],
   );
+
+  const shareQuery = useMemo(() => comparisonSymbolsQuery(stocks, selectedIds, MAX_SELECTED), [selectedIds, stocks]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const nextUrl = shareQuery ? `${window.location.pathname}?${shareQuery}` : window.location.pathname;
+    window.history.replaceState(window.history.state, '', nextUrl);
+    setCopyState('idle');
+  }, [shareQuery]);
+
+  const copyComparisonLink = async () => {
+    if (typeof window === 'undefined' || selected.length < 2) return;
+    const url = `${window.location.origin}${window.location.pathname}${shareQuery ? `?${shareQuery}` : ''}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopyState('copied');
+    } catch {
+      setCopyState('failed');
+    }
+  };
 
   const toggle = (stockId: string, checked: boolean) => {
     setSelectedIds((current) => {
@@ -81,18 +105,37 @@ export function StockComparison({ stocks, isEn }: StockComparisonProps) {
           </div>
         </fieldset>
 
-        <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
           <span>
             {isEn
               ? `${selected.length} selected · values are virtual WLD market data`
               : `${selected.length}개 선택 · 모든 값은 게임 내 WLD 가상 시장 데이터입니다.`}
           </span>
-          {selectedIds.length > 0 ? (
-            <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedIds([])}>
-              {isEn ? 'Clear' : '선택 해제'}
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={selected.length < 2}
+              onClick={copyComparisonLink}
+            >
+              {copyState === 'copied'
+                ? (isEn ? 'Link copied' : '링크 복사됨')
+                : (isEn ? 'Copy comparison link' : '비교 링크 복사')}
             </Button>
-          ) : null}
+            {selectedIds.length > 0 ? (
+              <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedIds([])}>
+                {isEn ? 'Clear' : '선택 해제'}
+              </Button>
+            ) : null}
+          </div>
         </div>
+
+        {copyState === 'failed' ? (
+          <p className="text-xs text-destructive" role="status">
+            {isEn ? 'Could not copy the link. Copy the current browser URL instead.' : '링크를 복사하지 못했습니다. 현재 브라우저 주소를 직접 복사해 주세요.'}
+          </p>
+        ) : null}
 
         {selected.length < 2 ? (
           <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground" role="status">

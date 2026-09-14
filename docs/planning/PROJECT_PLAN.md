@@ -194,13 +194,14 @@ The project should continue to reconcile and improve, in priority order:
 - Removed the obsolete mandatory two-person approval statement from the current plan while retaining stronger compensating controls.
 - Recorded that the previous always-on test stack was retired, while preserving mandatory pre-production verification gates.
 - Added the rule that implementation and plan documentation must be synchronized in the same workstream.
+
 ### 2026-09-09 — product expansion roadmap parity
 
 The following roadmap mirrors the Korean Living Spec and is staged behind implementation, validation, and release gates. It does not redefine WLD or any virtual-economy feature as a real financial product.
 
 #### P0 — discovery, return visits, and operations
 
-- **Virtual-stock detail hub:** combine price/candles, server-defined indicators, member holdings, and related community content on one canonical page.
+- **Virtual-stock detail hub:** combine price/candles, server-defined indicators, member holdings, and related community content on one canonical page. The first member-facing hub slice is implemented at `/stocks/[symbol]`, linking market data, holdings, watchlist, chart/trading controls, comparison/alerts, and stock-tagged discussion.
 - **Stock watchlist:** store per-member watched virtual stocks and expose them from stock/home surfaces. The first watchlist slice is implemented in PostgreSQL/NestJS/Next.js and remains subject to the normal release/deployment gates.
 - **Public-content SEO:** continuously verify canonical URLs, metadata, sitemap/robots behavior, breadcrumbs, and internal links for anonymous public content.
 - **Admin operations console:** expand read-model-driven user/economy/content/error/service-health views while keeping risky writes separated and step-up protected.
@@ -208,8 +209,8 @@ The following roadmap mirrors the Korean Living Spec and is staged behind implem
 
 #### P1 — data and community integration
 
-- **Stock-tagged community:** connect posts to virtual stocks so members can navigate between a stock detail surface and relevant discussion.
-- **Stock comparison:** compare multiple virtual stocks with server-defined metrics on a consistent basis.
+- **Stock-tagged community:** connect posts to virtual stocks so members can navigate between a stock detail surface and relevant discussion. The member-facing path is implemented: stock detail links into a stock-filtered board composer that opens automatically with the symbol prefilled, while existing server-authoritative tagged-post creation/listing contracts remain unchanged.
+- **Stock comparison:** compare multiple virtual stocks with server-defined metrics on a consistent basis. The comparison route accepts validated stock-symbol deep links from the stock detail hub, keeps the browser URL synchronized with the current 2–3 stock selection, and lets members copy that exact comparison link for later return or sharing.
 - **Conditional alerts:** support server-verifiable price/change/service-event conditions with cooldown and rate limiting.
 - **Economy/event calendar:** unify service events, virtual-stock events, quests, and shop events around dates.
 - **Account security center:** expose active-session review, other-session termination, login-security state, and future second-factor expansion.
