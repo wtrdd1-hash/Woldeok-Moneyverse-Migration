@@ -43,3 +43,23 @@ export function initialComparisonIds(
   }
   return selected;
 }
+
+/**
+ * Builds the canonical query used to share a stock comparison. Symbols are
+ * resolved from the authoritative market list and emitted in selection order.
+ */
+export function comparisonSymbolsQuery(
+  stocks: readonly StockIdentity[],
+  selectedIds: readonly string[],
+  maxSelected = 3,
+): string {
+  const byId = new Map(stocks.map((stock) => [stock.id, stock.symbol.trim().toUpperCase()]));
+  const symbols: string[] = [];
+  for (const id of selectedIds) {
+    const symbol = byId.get(id);
+    if (!symbol || symbols.includes(symbol)) continue;
+    symbols.push(symbol);
+    if (symbols.length >= maxSelected) break;
+  }
+  return symbols.length > 0 ? `symbols=${encodeURIComponent(symbols.join(','))}` : '';
+}

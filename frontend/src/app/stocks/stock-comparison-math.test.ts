@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { initialComparisonIds, signedDelta } from './stock-comparison-math';
+import { comparisonSymbolsQuery, initialComparisonIds, signedDelta } from './stock-comparison-math';
 
 describe('signedDelta', () => {
   it('formats positive, negative and flat changes', () => {
@@ -35,5 +35,28 @@ describe('initialComparisonIds', () => {
       'alpha',
       'gamma',
     ]);
+  });
+});
+
+
+describe('comparisonSymbolsQuery', () => {
+  const stocks = [
+    { id: 'alpha', symbol: 'AAA' },
+    { id: 'beta', symbol: 'bbb' },
+    { id: 'gamma', symbol: 'CCC' },
+  ];
+
+  it('serializes selected symbols in comparison order', () => {
+    expect(comparisonSymbolsQuery(stocks, ['beta', 'alpha'])).toBe('symbols=BBB%2CAAA');
+  });
+
+  it('ignores unknown and duplicate ids and caps the result', () => {
+    expect(comparisonSymbolsQuery(stocks, ['missing', 'alpha', 'alpha', 'beta', 'gamma'], 2)).toBe(
+      'symbols=AAA%2CBBB',
+    );
+  });
+
+  it('returns an empty query for an empty selection', () => {
+    expect(comparisonSymbolsQuery(stocks, [])).toBe('');
   });
 });
