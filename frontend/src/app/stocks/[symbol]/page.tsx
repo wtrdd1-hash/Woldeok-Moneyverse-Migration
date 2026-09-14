@@ -203,11 +203,18 @@ export default async function StockHubPage({
                 : '이 종목이 태그된 최근 토론입니다.'}
             </CardDescription>
           </div>
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/board?stock=${encodedSymbol}`}>
-              {isEn ? 'All discussions' : '전체 토론'}
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button asChild size="sm">
+              <Link href={`/board?stock=${encodedSymbol}#board-composer`}>
+                {isEn ? 'Start discussion' : '이 종목으로 글쓰기'}
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/board?stock=${encodedSymbol}`}>
+                {isEn ? 'All discussions' : '전체 토론'}
+              </Link>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {discussion === null ? (

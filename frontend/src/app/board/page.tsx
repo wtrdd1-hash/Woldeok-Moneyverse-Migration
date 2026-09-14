@@ -80,7 +80,7 @@ export default async function BoardPage({
         </Card>
       ) : null}
 
-      <BoardParticipation />
+      <BoardParticipation defaultStockSymbol={stock ?? undefined} />
 
       <section aria-labelledby="posts-title" className="grid gap-3">
         <h2 id="posts-title" className="sr-only">
