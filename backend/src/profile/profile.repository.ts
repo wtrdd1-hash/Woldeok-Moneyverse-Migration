@@ -209,6 +209,10 @@ export interface ProfileImageChange {
   readonly replaced_key: string | null;
 }
 
+export interface OwnProfileAccountRow {
+  readonly email: string | null;
+}
+
 /** A replacement, not a patch: see `update`. */
 export interface ProfileUpdate {
   readonly visibility: unknown;
@@ -249,6 +253,17 @@ export class ProfileRepository {
    * Async so the assertions above reject the promise rather than throw at the
    * call site, where the controller's mapping would never see them.
    */
+  async ownAccountEmail(actor: unknown): Promise<string | null> {
+    assertUuid(actor, 'actor');
+    const row = await queryOne<OwnProfileAccountRow>(
+      this.pool,
+      'SELECT account.email FROM public.member_own_account_email($1::uuid) AS account',
+      [actor],
+    );
+    if (!row) throw new Error('member_own_account_email did not return a row');
+    return row.email;
+  }
+
   async view(actor: unknown, subject: unknown): Promise<ProfileViewRow> {
     assertUuid(actor, 'actor');
     assertUuid(subject, 'member id');

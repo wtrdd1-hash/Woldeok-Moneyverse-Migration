@@ -123,3 +123,5 @@
 7. 새 한국어 문서 상단에는 영어 원문과 한국어 색인으로 이동할 수 있는 링크를 둡니다.
 
 현재 한국어 문서 정비 작업 버전: **v2026.09.13.18**
+
+- [모바일 API 요청·응답 스키마 레퍼런스](mobile-api-schema-reference.ko.md) / [English](mobile-api-schema-reference.md) — 139개 앱 API의 실제 요청 DTO 필드·제약·성공 응답 필드.

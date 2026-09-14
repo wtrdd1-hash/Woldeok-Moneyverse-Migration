@@ -199,6 +199,7 @@ See [Banking](docs/features/banking.md).
 - [Database Security](docs/architecture/database-security.md)
 - [Deployment Pipeline](docs/architecture/deployment-flow.md)
 - [Mobile / External App API](docs/mobile-api.md) — use a gateway/BFF; never embed `INTERNAL_API_TOKEN` in a native client
+- [Mobile API Request/Response Schemas](docs/mobile-api-schema-reference.md) / [한국어](docs/mobile-api-schema-reference.ko.md) — exact request DTO fields, constraints, and success response fields for all app endpoints
 
 ### Features
 - [Jobs & Progression](docs/features/jobs-and-progression.md)

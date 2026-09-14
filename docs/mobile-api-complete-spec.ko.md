@@ -1079,7 +1079,6 @@ Google Play Console 공개 URL은 다음과 같다.
 | `DELETE` | `/app-api/v1/account/security/sessions/:id` | 선택한 로그인 세션 강제 종료 | 사용자가 삭제/해제를 명시적으로 확인했을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/account/security/sessions/:id` |
 | `POST` | `/app-api/v1/account/security/sessions/revoke-others` | 현재 기기 제외 모든 로그인 세션 종료 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/account/security/sessions/revoke-others` |
 | `POST` | `/app-api/v1/activity/events` | 앱 활동/참여 이벤트 서버 기록 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/activity/events` |
-| `GET` | `/app-api/v1/content/announcements` | 공지사항 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 응답을 화면의 서버 기준 상태로 교체 | `/api/announcements` |
 | `POST` | `/app-api/v1/auth/:provider/reauthentication` | 민감 작업 전 Google/Discord 재인증 시작 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/auth/:provider/reauthentication` |
 | `PUT` | `/app-api/v1/auth/consent` | 현재 약관·개인정보·연령 동의 저장 | 사용자가 약관 동의를 확정할 때 | Prelogin 또는 로그인 세션 + CSRF | 관련 GET을 다시 호출해 서버 상태와 동기화 | `/api/auth/consent` |
 | `POST` | `/app-api/v1/auth/local/login` | 이메일/비밀번호 로그인 | 이메일 로그인 버튼을 눌렀을 때 | 인증 흐름 전용: 상태머신 준수 | 새 쿠키/CSRF 저장 후 /auth/viewer 확인 | `/api/auth/local/login` |
@@ -1120,9 +1119,6 @@ Google Play Console 공개 URL은 다음과 같다.
 | `GET` | `/app-api/v1/board/public/posts/:id/comments` | 로그인 없이 공개 게시글 댓글 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/public/posts/:id/comments` |
 | `GET` | `/app-api/v1/board/public/stock-posts` | 로그인 없이 공개 주식 게시글 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/public/stock-posts` |
 | `POST` | `/app-api/v1/board/stock-posts` | 주식 관련 게시글 작성 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 게시글/댓글 목록 또는 상세 재조회 | `/api/board/stock-posts` |
-| `GET` | `/app-api/v1/businesses/equity` | 사업 구매에 사용할 수 있는 자기자본 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/business-equity` |
-| `GET` | `/app-api/v1/businesses/catalog` | 사업 종류·가격·조건 카탈로그 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/business-types` |
-| `POST` | `/app-api/v1/businesses/catalog/:id/purchases` | 선택한 사업 종류 구매 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/business-types/:id/purchases` |
 | `GET` | `/app-api/v1/businesses` | 내 보유 사업 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/businesses` |
 | `POST` | `/app-api/v1/businesses/:id/boost` | 보유 사업 부스트/강화 실행 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/businesses/:id/boost` |
 | `POST` | `/app-api/v1/businesses/:id/settle-v2` | 보유 사업 V2 정산 실행 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 내 사업/equity/catalog 관련 상태 재조회 | `/api/businesses/:id/settle-v2` |
@@ -1184,7 +1180,6 @@ Google Play Console 공개 URL은 다음과 같다.
 | `POST` | `/app-api/v1/shop/items/:id/purchases` | 선택한 상점 아이템 구매 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | holdings/purchases/관련 잔액 재조회 | `/api/shop/items/:id/purchases` |
 | `GET` | `/app-api/v1/shop/public-catalog` | 로그인 없이 공개 상점 카탈로그 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | holdings/purchases/관련 잔액 재조회 | `/api/shop/public-catalog` |
 | `GET` | `/app-api/v1/shop/purchases` | 내 상점 구매 기록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | holdings/purchases/관련 잔액 재조회 | `/api/shop/purchases` |
-| `GET` | `/app-api/v1/content/status` | 서비스 상태 정보 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 응답을 화면의 서버 기준 상태로 교체 | `/api/status` |
 | `GET` | `/app-api/v1/stocks` | 거래 가능한 주식 종목 목록 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks` |
 | `GET` | `/app-api/v1/stocks/:id/candles` | 선택 종목 OHLC 캔들 차트 데이터 조회 | 해당 화면 진입/새로고침/관련 write 후 | 로그인 필요(기능에 따라 최신 동의 필요) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/:id/candles` |
 | `POST` | `/app-api/v1/stocks/:id/orders` | 선택 종목 매수/매도 주문 생성 | 해당 기능의 저장/실행 버튼을 눌렀을 때 | 로그인 + 최신 동의 + CSRF(변경 요청) | 종목/포트폴리오/기록 중 관련 상태 재조회 | `/api/stocks/:id/orders` |
