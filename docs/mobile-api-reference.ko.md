@@ -1,5 +1,10 @@
 # 월덕 머니버스 모바일/앱 API — 전체 상세 사용 가이드
 
+> 런타임 JSON 구조와 null 처리까지 구현할 때는 [모바일 앱 API 런타임 계약](mobile-api-runtime-contract.ko.md)을 함께 준수한다.
+
+[전체 요청·응답 스키마](mobile-api-schema-reference.ko.md)
+
+
 > 버전: v2026.09.13.49
 > 날짜: 2026-09-13  
 > 변경 전 기준 main: `a57fc851c2800d77c8bb284cb1c168cfb3638bc2`

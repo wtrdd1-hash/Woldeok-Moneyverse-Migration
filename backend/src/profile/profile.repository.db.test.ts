@@ -72,6 +72,13 @@ describe.skipIf(!DATABASE_URL)('the profile repository against a real database',
       expect(code(error)).toBe('28000');
     });
 
+
+    it('refuses an own-email read for a user who is not active', async () => {
+      const error = await rejectionOf(() => profiles.ownAccountEmail(NOBODY));
+      expect(code(error)).toBe('28000');
+      expect(isMissingGrant(error)).toBe(false);
+    });
+
     /**
      * Every refusal above has to be a function deciding, never the role
      * having lost a grant. Both arrive as an error and only one of them means
@@ -177,6 +184,24 @@ describe.skipIf(!DATABASE_URL)('the profile repository against a real database',
         const viewer = await member(client);
         const profile = await inTransaction(client).view(viewer, subject);
         expect(profile.visibility).toBe('members');
+      });
+    });
+
+
+    it('returns the owner local email and null for an OAuth-only member', async () => {
+      await rolledBack(async (client) => {
+        const localMember = await member(client);
+        const oauthMember = await member(client);
+        await client.query(
+          `INSERT INTO public.auth_local_credentials
+             (user_id, email, email_hash, password_verifier)
+           VALUES ($1, $2, repeat('a', 64), repeat('b', 64))`,
+          [localMember, 'member@example.test'],
+        );
+        await expect(inTransaction(client).ownAccountEmail(localMember)).resolves.toBe(
+          'member@example.test',
+        );
+        await expect(inTransaction(client).ownAccountEmail(oauthMember)).resolves.toBeNull();
       });
     });
 
