@@ -26,6 +26,10 @@ const ERRORS: Readonly<Record<string, string>> = {
   oauth_verification: '로그인 정보를 확인하지 못했습니다. 다시 시도해 주세요.',
   oauth_login: '로그인을 완료하지 못했습니다. 다시 시도해 주세요.',
   provider_unavailable: '로그인 제공자가 아직 연결되지 않았어요.',
+  local_fields: '이메일과 비밀번호를 모두 입력해 주세요.',
+  local_credentials: '이메일 또는 비밀번호를 확인해 주세요.',
+  local_unavailable: '자체 로그인 서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.',
+  local_login: '자체 로그인을 완료하지 못했습니다. 잠시 후 다시 시도해 주세요.',
 };
 
 export default async function LoginPage({
