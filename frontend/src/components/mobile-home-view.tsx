@@ -29,7 +29,7 @@ interface MobileHomeViewProps {
 
 export function MobileHomeView({ notices }: MobileHomeViewProps) {
   return (
-    <div className="flex flex-col gap-6 lg:hidden">
+    <div className="flex flex-col gap-6">
       {/* 1. 상단 섹션: 스마트폰에서는 1열, 패드(태블릿 md:)에서는 2열 나란히 배치 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-stretch">
         {/* 달빛 지갑 대시보드 카드 */}
