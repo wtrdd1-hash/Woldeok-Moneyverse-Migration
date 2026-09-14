@@ -70,7 +70,7 @@ key_file="${BACKUP_ENCRYPTION_KEY_FILE:-$HOME/.moneyverse-backup-key}"
 export STACK="$stack"
 umask 077
 
-for tool in docker openssl gzip sha256sum; do
+for tool in docker openssl gzip sha256sum date; do
   command -v "$tool" >/dev/null 2>&1 || die "$tool is required and is not on PATH"
 done
 
