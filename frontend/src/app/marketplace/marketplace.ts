@@ -20,15 +20,25 @@ export interface MarketplaceQuery {
   readonly category: string;
   readonly rarity: string;
   readonly effect: string;
+  readonly minQuantity: number;
   readonly state: MarketplaceFilterState;
   readonly sort: MarketplaceSort;
 }
 
 const STATES = new Set<MarketplaceFilterState>(['all', 'equipped', 'serialized']);
 const SORTS = new Set<MarketplaceSort>(['name', 'quantity', 'newest']);
+const MAX_MIN_QUANTITY = 999_999;
 
 function first(value: string | string[] | undefined): string {
   return Array.isArray(value) ? (value[0] ?? '') : (value ?? '');
+}
+
+function minimumQuantity(value: string | string[] | undefined): number {
+  const raw = first(value).trim();
+  if (!/^\d+$/.test(raw)) return 0;
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isSafeInteger(parsed) || parsed < 1) return 0;
+  return Math.min(parsed, MAX_MIN_QUANTITY);
 }
 
 export function marketplaceQuery(
@@ -41,6 +51,7 @@ export function marketplaceQuery(
     category: first(params.category).trim().slice(0, 60),
     rarity: first(params.rarity).trim().slice(0, 60),
     effect: first(params.effect).trim().slice(0, 60),
+    minQuantity: minimumQuantity(params.minQuantity),
     state: STATES.has(state as MarketplaceFilterState) ? (state as MarketplaceFilterState) : 'all',
     sort: SORTS.has(sort as MarketplaceSort) ? (sort as MarketplaceSort) : 'name',
   };
@@ -55,6 +66,7 @@ export function filterMarketplaceHoldings(
     if (query.category && item.category !== query.category) return false;
     if (query.rarity && item.rarity !== query.rarity) return false;
     if (query.effect && item.effect_kind !== query.effect) return false;
+    if (query.minQuantity > 0 && item.quantity < query.minQuantity) return false;
     if (query.state === 'equipped' && !item.is_equipped) return false;
     if (query.state === 'serialized' && item.serial_number === null) return false;
     if (!needle) return true;
