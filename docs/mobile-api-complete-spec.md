@@ -391,3 +391,10 @@ Basis: actual NestJS route map captured after the 2026-09-13 production restart.
 | `GET` | `/app-api/v1/media/profile/:key` | Read/update own profile | Screen load/refresh/after related write | Public; no login required | Re-fetch profile and replace UI state | `/media/profile/:key` |
 
 
+
+
+## v2026.09.14.71 — Native OAuth browser-session isolation
+
+Native Google/Discord login must not reuse an already-authenticated website session that happens to exist in the external browser. For every `client=mobile` authorization, the API creates a dedicated anonymous pre-login session and binds the OAuth challenge to it. At callback time, ordinary web challenges remain bound to the browser session, while mobile challenges may be recovered by their high-entropy single-use `state + provider`. The server then verifies the provider code, completes OAuth login against the dedicated pre-login session, creates a one-time `mobileHandoff`, returns through `woldeok-moneyverse://oauth/callback`, and the app exchanges the handoff at `POST /app-api/v1/auth/mobile/handoff` before confirming `/auth/viewer` returns `signedIn:true`.
+
+This isolation is required because Android system browsers and Custom Tabs can share existing website cookies. Passing a browser session that already has a `user_id` into the OAuth login completer is invalid and is rejected as `active pre-login session required`; the native client must not attempt to work around that server invariant.

@@ -122,6 +122,7 @@ export interface OAuthChallengeLike {
  * packages/database/migrations/031-step-up-reauthentication.sql.
  */
 export interface OAuthChallengeRow {
+  readonly session_id: string;
   readonly code_verifier: string;
   readonly nonce_hash: string;
   readonly redirect_uri: string;
@@ -339,8 +340,27 @@ export class SessionRepository {
        SET consumed_at=now()
        WHERE state_hash=$1 AND session_id=$2 AND provider=$3
          AND consumed_at IS NULL AND expires_at>now()
-       RETURNING code_verifier, nonce_hash, redirect_uri, purpose, mobile_client`,
+       RETURNING session_id, code_verifier, nonce_hash, redirect_uri, purpose, mobile_client`,
       [sha256(state), sessionId, provider],
+    );
+  }
+
+  async consumeMobileChallenge({
+    provider,
+    state,
+  }: {
+    readonly provider: string;
+    readonly state: unknown;
+  }): Promise<OAuthChallengeRow | null> {
+    if (typeof state !== 'string' || state.length < 32 || state.length > 512) return null;
+    return queryOne<OAuthChallengeRow>(
+      this.pool,
+      `UPDATE oauth_challenges
+       SET consumed_at=now()
+       WHERE state_hash=$1 AND provider=$2 AND mobile_client=true
+         AND consumed_at IS NULL AND expires_at>now()
+       RETURNING session_id, code_verifier, nonce_hash, redirect_uri, purpose, mobile_client`,
+      [sha256(state), provider],
     );
   }
 

@@ -257,7 +257,13 @@ export class AuthController {
     if (client !== undefined && client !== 'web' && client !== 'mobile') {
       throw new BadRequestException('oauth_client');
     }
-    await this.store().createChallenge(session.id, challenge, 'login', client === 'mobile');
+    const mobileClient = client === 'mobile';
+    // A native OAuth round trip must not inherit an already-authenticated web
+    // session from the external browser. Otherwise the callback reaches the
+    // login completer with a non-anonymous session and fails before a handoff
+    // can be created. Give mobile its own anonymous prelogin session instead.
+    const challengeSessionId = mobileClient ? (await this.store().create()).id : session.id;
+    await this.store().createChallenge(challengeSessionId, challenge, 'login', mobileClient);
     return { authorizationUrl: authorizationUrl(provider, challenge, providerConfig.clientId) };
   }
 
@@ -280,11 +286,17 @@ export class AuthController {
 
     // Consuming the challenge is what makes it single use, so it happens
     // before anything that could return early on the provider's own error.
-    const challenge = await this.store().consumeChallenge({
+    let challenge = await this.store().consumeChallenge({
       sessionId: session.id,
       provider,
       state,
     });
+    // Mobile OAuth intentionally uses a dedicated anonymous session so it is
+    // isolated from any signed-in website session present in the system
+    // browser. The high-entropy, single-use state identifies that challenge.
+    if (!challenge) {
+      challenge = await this.store().consumeMobileChallenge({ provider, state });
+    }
     // Membership rather than equality: the round trip may legitimately have
     // started on any registered origin, and the stored challenge is what says
     // which. Still a closed set -- a challenge naming an origin that has since
@@ -328,7 +340,7 @@ export class AuthController {
     }
 
     const login = await this.store().completeOAuthLogin({
-      preAuthSessionId: session.id,
+      preAuthSessionId: challenge.session_id,
       provider: identity.provider,
       subject: identity.subject,
       displayName: identity.displayName,
