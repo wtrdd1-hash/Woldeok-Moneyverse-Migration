@@ -188,6 +188,7 @@ export default async function MarketplacePage({
             >
               <option value="all">전체 상태</option>
               <option value="equipped">장착 중</option>
+              <option value="unequipped">미장착</option>
               <option value="serialized">고유 번호 있음</option>
             </select>
             <select
@@ -199,6 +200,7 @@ export default async function MarketplacePage({
               <option value="name">이름순</option>
               <option value="quantity">수량 많은 순</option>
               <option value="newest">최근 획득순</option>
+              <option value="oldest">오래된 획득순</option>
             </select>
             <div className="flex gap-2">
               <Button type="submit" className="flex-1">
@@ -212,9 +214,9 @@ export default async function MarketplacePage({
             </div>
           </form>
           <p className="mt-3 text-xs text-muted-foreground">
-            전체 {holdings.length}종 중 {visibleHoldings.length}종을 표시합니다. 최소 수량과 최근 획득
-            기간은 제작 준비나 새로 얻은 보유품을 빠르게 찾는 용도이며, 필터 결과가 거래 가능 여부를
-            뜻하지는 않습니다.
+            전체 {holdings.length}종 중 {visibleHoldings.length}종을 표시합니다. 최소 수량·획득 기간·장착
+            상태·획득순 정렬을 조합해 오래 보유한 미장착 아이템을 찾을 수 있으며, 필터 결과가 거래 가능
+            여부를 뜻하지는 않습니다.
           </p>
         </CardContent>
       </Card>
