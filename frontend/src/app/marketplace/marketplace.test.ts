@@ -39,13 +39,20 @@ const items = [
 describe('marketplaceQuery', () => {
   it('normalizes unknown filter values instead of trusting the URL', () => {
     expect(
-      marketplaceQuery({ state: 'broken', sort: 'random', minQuantity: '-10', q: '  수리  ' }),
+      marketplaceQuery({
+        state: 'broken',
+        sort: 'random',
+        acquired: 'forever',
+        minQuantity: '-10',
+        q: '  수리  ',
+      }),
     ).toEqual({
       q: '수리',
       category: '',
       rarity: '',
       effect: '',
       minQuantity: 0,
+      acquired: 'all',
       state: 'all',
       sort: 'name',
     });
@@ -58,6 +65,7 @@ describe('marketplaceQuery', () => {
         rarity: ['common', 'rare'],
         effect: ['convenience', 'display'],
         minQuantity: ['2', '1'],
+        acquired: ['7d', '30d'],
         state: ['serialized', 'all'],
       }),
     ).toMatchObject({
@@ -65,6 +73,7 @@ describe('marketplaceQuery', () => {
       rarity: 'common',
       effect: 'convenience',
       minQuantity: 2,
+      acquired: '7d',
       state: 'serialized',
     });
   });
@@ -111,6 +120,33 @@ describe('filterMarketplaceHoldings', () => {
         }),
       ),
     ).toHaveLength(0);
+  });
+
+  it('filters by a bounded recent-acquisition window using the server render time', () => {
+    const now = new Date('2026-09-14T00:00:00.000Z');
+    expect(
+      filterMarketplaceHoldings(items, marketplaceQuery({ acquired: '7d' }), now).map(
+        (item) => item.code,
+      ),
+    ).toEqual(['city_badge']);
+    expect(
+      filterMarketplaceHoldings(items, marketplaceQuery({ acquired: '30d' }), now).map(
+        (item) => item.code,
+      ),
+    ).toEqual(['city_badge', 'repair_kit']);
+  });
+
+  it('rejects invalid or future acquisition timestamps from recent windows', () => {
+    const now = new Date('2026-09-14T00:00:00.000Z');
+    const malformed = holding({ code: 'bad_date', acquired_at: 'not-a-date' });
+    const future = holding({ code: 'future_item', acquired_at: '2026-09-15T00:00:00.000Z' });
+    expect(
+      filterMarketplaceHoldings(
+        [malformed, future, ...items],
+        marketplaceQuery({ acquired: '30d' }),
+        now,
+      ).map((item) => item.code),
+    ).toEqual(['city_badge', 'repair_kit']);
   });
 
   it('sorts by quantity or acquisition time without mutating the API result', () => {
