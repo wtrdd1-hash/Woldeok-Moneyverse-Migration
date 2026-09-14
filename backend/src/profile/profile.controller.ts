@@ -28,12 +28,33 @@ import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-err
 import { ImageUploadError } from '../content/image-upload-validation';
 import { PrivateImageStorage } from '../content/private-image-storage';
 import { ProfileUpdateDto } from './profile.dto';
-import { ProfileInputError, ProfileRepository } from './profile.repository';
+import {
+  ProfileInputError,
+  ProfileRepository,
+  type ProfileViewRow,
+} from './profile.repository';
 
 /** How a 28000 reads on this route. It means different things on each. */
 interface Refusal {
   readonly denied: () => Error;
   readonly conflict: string;
+}
+
+export function ownProfileContract(profile: ProfileViewRow, email: string | null) {
+  const joinedAt =
+    profile.joined_at instanceof Date ? profile.joined_at.toISOString() : profile.joined_at;
+  const appFields = {
+    displayName: profile.display_name,
+    imageUrl: profile.image_url,
+    joinedAt,
+    jobType: profile.job_type,
+    jobLevel: profile.job_level ?? 0,
+    workCompletions: profile.work_completions ?? '0',
+    visibility: profile.visibility,
+    featuredTitle: profile.featured_title,
+    email,
+  };
+  return { profile: { ...profile, ...appFields }, ...appFields };
 }
 
 /**
@@ -127,12 +148,12 @@ export class ProfileController {
   @ApiOperation({ summary: 'The caller’s own profile, with every field' })
   async mine(@Req() request: RequestWithSession) {
     const actor = requireUserId(request);
-    return {
-      profile: await this.guarded(
-        () => this.repository().view(actor, actor),
-        ProfileController.HIDDEN,
-      ),
-    };
+    const repository = this.repository();
+    const [profile, email] = await this.guarded(
+      () => Promise.all([repository.view(actor, actor), repository.ownAccountEmail(actor)]),
+      ProfileController.HIDDEN,
+    );
+    return ownProfileContract(profile, email);
   }
 
   /**

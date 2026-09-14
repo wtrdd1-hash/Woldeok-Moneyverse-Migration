@@ -240,3 +240,30 @@ describe('ProfileRepository.view', () => {
     );
   });
 });
+
+
+describe('ProfileRepository.ownAccountEmail', () => {
+  it('reads only the signed-in member email through the security-definer function', async () => {
+    const queries: RecordedQuery[] = [];
+    const pool: Queryable = {
+      async query(text: string, values?: readonly unknown[]) {
+        queries.push({ text, values });
+        return { rows: [{ email: 'member@example.test' }] as never[] };
+      },
+    };
+    await expect(new ProfileRepository(pool).ownAccountEmail(NOBODY)).resolves.toBe(
+      'member@example.test',
+    );
+    expect(queries[0]?.values).toEqual([NOBODY]);
+    expect(queries[0]?.text).toContain('public.member_own_account_email');
+  });
+
+  it('uses null for an OAuth-only account that has no local email credential', async () => {
+    const pool: Queryable = {
+      async query() {
+        return { rows: [{ email: null }] as never[] };
+      },
+    };
+    await expect(new ProfileRepository(pool).ownAccountEmail(NOBODY)).resolves.toBeNull();
+  });
+});

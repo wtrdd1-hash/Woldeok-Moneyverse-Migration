@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { appGatewayOrigin, appGatewayPath } from './app-gateway';
+import {
+  APP_API_CONTRACT_VERSION,
+  APP_API_GROUPS,
+  APP_API_REQUEST_HEADERS,
+  APP_API_RESPONSE_HEADERS,
+  addAppJsonCompatibility,
+  appApiContract,
+  appendAppContractHeaders,
+  appGatewayOrigin,
+  appGatewayPath,
+  isJsonMediaType,
+} from './app-gateway';
 
 describe('appGatewayPath', () => {
   it('allows member-facing API groups', () => {
@@ -28,4 +39,66 @@ describe('appGatewayOrigin', () => {
   it('rejects a malformed host', () => {
     expect(appGatewayOrigin(new Headers())).toBeNull();
   });
+});
+
+
+describe('app API compatibility contract', () => {
+  it('keeps every documented app group in the gateway allow-list', () => {
+    expect(APP_API_GROUPS).toEqual([
+      'account', 'activity', 'auth', 'bank', 'banking', 'board', 'businesses',
+      'casino', 'content', 'early-game', 'engagement', 'media', 'photos', 'privacy',
+      'profile', 'progression', 'rewards', 'seasons', 'shop', 'stocks', 'wallet', 'work',
+    ]);
+  });
+
+  it('declares request and response headers native clients rely on', () => {
+    expect(APP_API_REQUEST_HEADERS).toContain('accept-language');
+    expect(APP_API_REQUEST_HEADERS).toContain('range');
+    expect(APP_API_REQUEST_HEADERS).toContain('if-none-match');
+    expect(APP_API_RESPONSE_HEADERS).toContain('retry-after');
+    expect(APP_API_RESPONSE_HEADERS).toContain('etag');
+    expect(APP_API_RESPONSE_HEADERS).toContain('content-range');
+    expect(APP_API_RESPONSE_HEADERS).toContain('x-ratelimit-remaining');
+  });
+
+  it('stamps every app response with stable API and contract versions', () => {
+    const headers = appendAppContractHeaders(new Headers());
+    expect(headers.get('x-moneyverse-api-version')).toBe('1');
+    expect(headers.get('x-moneyverse-contract-version')).toBe(APP_API_CONTRACT_VERSION);
+    expect(headers.get('x-content-type-options')).toBe('nosniff');
+  });
+
+  it('publishes machine-readable client rules without exposing private backend details', () => {
+    const contract = appApiContract('https://easy-scraping.com');
+    expect(contract.baseUrl).toBe('https://easy-scraping.com/app-api/v1');
+    expect(contract.auth.persistentCookieJarRequired).toBe(true);
+    expect(contract.auth.csrfHeader).toBe('x-csrf-token');
+    expect(contract.errors.mediaType).toBe('application/problem+json');
+    expect(contract.nullHandling.neverRenderLiteralNull).toBe(true);
+    expect(JSON.stringify(contract)).not.toContain('INTERNAL_API_TOKEN');
+    expect(JSON.stringify(contract)).not.toContain('3020');
+  });
+
+  it('adds camelCase aliases recursively without removing legacy keys', () => {
+    const value = addAppJsonCompatibility({
+      daily_bet_limit: '1000',
+      nested_rows: [{ joined_at: '2026-09-14T00:00:00.000Z', existingValue: 7 }],
+      existing_value: 1,
+      existingValue: 2,
+    }) as Record<string, unknown>;
+    expect(value.daily_bet_limit).toBe('1000');
+    expect(value.dailyBetLimit).toBe('1000');
+    expect(value.nestedRows).toEqual([
+      { joined_at: '2026-09-14T00:00:00.000Z', joinedAt: '2026-09-14T00:00:00.000Z', existingValue: 7 },
+    ]);
+    expect(value.existingValue).toBe(2);
+  });
+
+  it('recognises normal JSON and RFC problem JSON media types only', () => {
+    expect(isJsonMediaType('application/json; charset=utf-8')).toBe(true);
+    expect(isJsonMediaType('application/problem+json')).toBe(true);
+    expect(isJsonMediaType('image/png')).toBe(false);
+    expect(isJsonMediaType(null)).toBe(false);
+  });
+
 });
