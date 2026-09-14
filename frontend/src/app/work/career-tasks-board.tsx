@@ -10,6 +10,7 @@ import { SubmitButton } from '@/components/action-form';
 import { IDLE } from '@/lib/action-state';
 import { switchJobAction } from './actions';
 import { TaskCompleteModalButton } from './work-forms';
+import { dailyQuotaLabel } from './work-quota';
 import { filterWorkTasks } from './work-search';
 import {
   boardOrder,
@@ -228,7 +229,7 @@ export function CareerTasksBoard({
                         : `소요 시간: ${durationLabel(task.minimum_duration_seconds, locale)}`}
                     </span>
                     <span className="text-emerald-400 font-semibold">
-                      {isEn ? `Completed today: ${task.taken_today}` : `오늘 ${task.taken_today}회 완료`}
+                      {dailyQuotaLabel(task.taken_today, task.daily_limit, isEn)}
                     </span>
                   </div>
                 </CardContent>
