@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import type { SparkPoint } from '@/components/sparkline';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -222,6 +224,11 @@ export default async function StocksPage() {
                       dayOpenPrice={row.day_open_price}
                       available={row.shares_available}
                     />
+                    <Button asChild variant="outline" className="min-h-11">
+                      <Link href={`/stocks/${encodeURIComponent(row.symbol)}`}>
+                        {isEn ? 'Open hub' : '종목 허브'}
+                      </Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
