@@ -51,7 +51,7 @@ Exact order: `prelogin -> policy -> consent -> local/register -> email verificat
 - `GET /auth/policy`: fetch current terms/privacy versions; do not hard-code them.
 - `PUT /auth/consent`: send current cookie, CSRF and the server-provided policy versions.
 - `POST /auth/local/register`: send email/password/displayName. Password is non-empty, maximum 128 code points, with obvious common-password rejection possible.
-- `POST /auth/local/verify-email`: same prelogin cookie/CSRF plus the verification token received through email. Save the new login cookie and CSRF.
+- `POST /auth/local/verify-email`: submit the 30-minute, single-use verification token received through email. The endpoint does not require the original prelogin cookie or CSRF, so the email link may be opened in a browser different from the app. Save the new login cookie and CSRF.
 - `GET /auth/viewer`: require `signedIn:true`.
 
 Production does not return the raw verification token in the registration JSON response.

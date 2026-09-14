@@ -189,17 +189,13 @@ export class LocalAuthController {
   }
 
   @Post('verify-email')
-  @UseGuards(SessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Verify first-party email and activate the account' })
   async verifyEmail(
-    @Req() request: RequestWithSession,
     @Res({ passthrough: true }) response: Response,
     @Body() body: LocalVerifyDto,
   ) {
-    const session = requireSession(request);
-    if (session.user_id) throw new ForbiddenException('already signed in');
     try {
-      const login = await this.credentialStore().completeRegistration(session.id, body.token);
+      const login = await this.credentialStore().completeRegistration(body.token);
       response.setHeader('set-cookie', sessionCookie(login.token, this.config));
       return { outcome: 'signed-in' as const, csrfToken: login.csrfToken, consentCurrent: true };
     } catch {

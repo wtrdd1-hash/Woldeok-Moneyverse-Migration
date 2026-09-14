@@ -92,7 +92,7 @@ SessionStore = { cookieJar, csrfToken?, viewer?, consentCurrent? }
 
 ### 3.5 이메일 인증 완료
 
-`POST /app-api/v1/auth/local/verify-email`에 같은 prelogin cookie/CSRF를 유지하고 `{"token":"..."}` 전송. 성공하면 새 로그인 쿠키와 새 CSRF가 발급된다. 이후 반드시 viewer 확인.
+`POST /app-api/v1/auth/local/verify-email`에 이메일로 받은 1회용 `{"token":"..."}`을 전송한다. 인증 링크는 가입을 시작한 앱과 다른 브라우저에서 열어도 된다. 이 endpoint는 원래 prelogin cookie/CSRF를 요구하지 않으며, 유효한 30분 1회용 token 자체가 인증 자격증명이다. 성공하면 새 로그인 쿠키와 새 CSRF가 발급된다. 이후 반드시 viewer 확인.
 
 ## 4. 자체 이메일 로그인
 
@@ -442,7 +442,7 @@ MoneyverseApiClient
 ### 31.3 CSRF 토큰 생명주기
 
 1. `POST /app-api/v1/auth/prelogin-session`의 JSON 응답에서 `csrfToken` 저장.
-2. prelogin 상태의 `PUT /auth/consent`, `POST /auth/local/register`, `POST /auth/local/login`, `POST /auth/local/verify-email` 등에 현재 토큰 사용.
+2. prelogin 상태의 `PUT /auth/consent`, `POST /auth/local/register`, `POST /auth/local/login`에는 현재 CSRF를 사용한다. `POST /auth/local/verify-email`은 이메일의 30분 1회용 token으로 검증하므로 기존 prelogin cookie/CSRF를 요구하지 않는다.
 3. 로그인/인증 완료 응답에서 새 `csrfToken`이 오면 즉시 교체.
 4. 로그인 후 값이 불확실하면 `GET /app-api/v1/auth/session`으로 최신 상태 확인.
 5. 403이 CSRF 문제로 보이면 동일 write를 무한 재시도하지 말고 세션 상태를 다시 조회한 뒤 사용자가 의도한 동작을 다시 수행하도록 한다.
@@ -980,7 +980,7 @@ callback의 code는 POST /auth/mobile/handoff로 단 한 번 교환하고 Set-Co
 
 Production은 인증메일을 실제 발송하지 못하면서 가입 성공을 가장하지 않는다. 서버는 loopback SMTP relay를 사용할 수 있으며 AUTH 없는 SMTP는 `127.0.0.1`, `::1`, `localhost`에만 허용한다. 원격 SMTP는 username/password가 둘 다 필요하다. SMTP 비밀값은 앱에 절대 넣지 않는다.
 
-성공 기준은 `register=202`만이 아니다. 동일 prelogin CookieJar/CSRF로 이메일 token을 `verify-email`에 제출하고, 발급된 로그인 쿠키를 저장한 뒤 `viewer.signedIn === true`까지 확인해야 한다. 신규 가입 완료 시 서버는 기본 `USER_CASH`와 `USER_BANK` 지갑을 만들며, `/wallet`은 빈 거래내역이더라도 정상적으로 읽혀야 한다.
+성공 기준은 `register=202`만이 아니다. 이메일의 30분 1회용 token을 `verify-email`에 제출하고, 발급된 로그인 쿠키를 저장한 뒤 `viewer.signedIn === true`까지 확인해야 한다. 이메일 링크를 앱과 다른 브라우저에서 여는 것은 허용된다. 신규 가입 완료 시 서버는 기본 `USER_CASH`와 `USER_BANK` 지갑을 만들며, `/wallet`은 빈 거래내역이더라도 정상적으로 읽혀야 한다.
 
 ## 41. Google/Discord OAuth 브라우저 복귀 v2026.09.14.1+
 
