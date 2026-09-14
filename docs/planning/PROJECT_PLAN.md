@@ -2,7 +2,7 @@
 
 > Status: Living specification
 > Original planning baseline: 2026-08-26
-> Implementation sync: 2026-09-13
+> Implementation sync: 2026-09-15
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 ## 0. How this document is maintained
@@ -224,3 +224,53 @@ The following roadmap mirrors the Korean Living Spec and is staged behind implem
 #### P3 — long-term expansion
 
 Advanced economic analysis, recommendations, and simulation remain gated on data quality, operating cost, safety, product wording, and legal review. They must not bypass existing ledger, authorization, privacy, or probability-feature controls.
+
+## 17. Integrated implementation, QA, SEO, security, and profitability contract — v2026.09.15.103
+
+This section is normative for all feature families and supersedes generic phrases such as “improve security”, “add SEO”, or “consider monetization”. Any implementation backlog item must be concrete enough for another developer or agent to identify authority, data flow, error states, tests, deployment gates, and business consequences.
+
+### 17.1 Current release-blocking findings
+
+**P0 — profession-work quota contract drift.** Runtime `/guide` currently says profession work is repeatable without a daily limit and always pays full WLD/EXP. `main` v2026.09.15.102 instead restored server/database-authoritative task-specific `daily_limit`, `taken_today`, exact-limit completion, over-limit rejection, and per-member/per-task concurrency protection. Until public/mobile/web guidance is synchronized and revalidated, release notes and user education must not claim unlimited rewards. Acceptance requires real-DB tests for zero/partial/full quota, one-over-limit rejection, profession switch isolation, concurrent duplicate completion, Seoul-day rollover, and API/web/mobile parity. Applied migrations are immutable; behavior rollback requires a new migration.
+
+**P0 — promotion evidence must be fail-closed.** CI success, immutable test image, exact-SHA test deployment, backend/database smoke, migration parity/checksum, critical user-flow QA, and rollback readiness are separate pieces of evidence. Missing GitHub status visibility is `verification unavailable`, not pass and not fail. Production promotion is blocked whenever required evidence cannot be proven.
+
+### 17.2 Required per-feature specification
+
+For identity/session, profile/security center, inventory/collection, shop/cart/payment/subscription, season/quest/job/progression, business/bank/loan, virtual stocks/portfolio/alerts, casino/probability, community/comments/report/block, friends/clubs/referral, notifications, search, uploads, public content, app API, admin/audit/backup, analytics/experiments, advertising, SEO, and incident operations, every backlog entry records: purpose and user problem; implementation status (`UNIMPLEMENTED`, `PARTIAL`, `IMPLEMENTED`, `REDESIGN_REQUIRED`); actor/role and entry points; first-use/return/comeback flows; loading/empty/error/offline/timeout states; responsive/accessibility/i18n behavior; server authority and data ownership; read/write permissions; endpoint/method/request/response/error/idempotency/rate limit; service rules; tables/indexes/constraints/transactions/concurrency; audit/metrics/admin operations; feature flag/fallback/backup impact; security/privacy/abuse; SEO/public-indexing rules; analytics/KPIs; performance/cache targets; profitability/cost model; unit/integration/E2E/real-DB/security/regression acceptance; test-environment gate; production promotion and rollback.
+
+### 17.3 Security verification matrix
+
+Object-ID APIs must perform server-side object authorization on every read/write and must include negative tests using another member’s identifier, consistent with OWASP API1:2023 BOLA guidance. Authentication/session work must test credential stuffing and rate limits, session fixation/rotation, logout/invalidation, OAuth state/nonce/PKCE/exact redirect URI, recent reauthentication, CSRF boundaries, cookie attributes, MFA/TOTP admin boundaries, and secret/log masking. Economy endpoints additionally require idempotency/replay, concurrent requests, duplicate reward prevention, multi-account/collusion/market-manipulation scenarios, precision checks, append-only ledger reconciliation, and least-privilege DB verification. Upload/UGC work requires decoded-type/magic-byte validation, size/dimension limits, isolated storage, delivery authorization, metadata/privacy review, moderation/report/block paths, and malicious-link/phishing defenses. A failed CRITICAL/HIGH security test blocks promotion.
+
+### 17.4 SEO backend contract
+
+SEO is a backend/read-model responsibility, not only page copy. Canonical URL generation is deterministic and server-owned. Dynamic sitemap generation includes only public, indexable canonical URLs and authoritative `lastModified`; split sitemap indexes before protocol limits become operational risk. Account/admin/wallet/transaction/recovery/security/private holdings pages are excluded from sitemap and are protected by authentication plus `noindex`/`X-Robots-Tag` where relevant; robots.txt is never a confidentiality control. Stable slug changes use explicit 301/308 redirect maps. Public content must expose core meaning in crawlable SSR/ISR HTML; filter/sort/search/query variants canonicalize or noindex rather than multiplying thin duplicates. Breadcrumb JSON-LD mirrors visible navigation and canonical URLs. Image metadata includes safe alt text, dimensions, optimized formats, and no private filenames/EXIF leakage. Multi-language public pages use consistent canonical/hreflang policy. Google Search Console and Naver Search Advisor monitoring must track crawl/index/canonical/sitemap errors and connect organic visit → signup → activation → D7/D30 → revenue. Core Web Vitals target good thresholds (LCP ≤2.5s, INP <200ms, CLS <0.1) for representative public templates.
+
+### 17.5 Monetization and profitability contract
+
+No paid feature is approved from gross-revenue intuition alone. Each subscription, one-time/non-consumable/consumable item, sponsorship, ad surface, or B2B2C feature carries price/test range and rationale; attach/conversion/repeat/renewal hypotheses; refund/cancellation/churn assumptions; platform/payment fees, tax, refund cost, infra/storage/CDN/notification/LLM cost; content/CS/moderation/fraud operations cost; gross margin and contribution margin; CAC, LTV, LTV/CAC and payback; optimistic/base/conservative sensitivity; D1/D7/D30 impact; trust/legal risk; and explicit `SCALE`, `ITERATE`, `HOLD`, `KILL` thresholds. Unknown values are labeled hypothesis/test targets. Subscription material terms and recurring billing are clear before charge, express consent is required, and cancellation must not be obstructed. Advertising optimizes `ad revenue - ad-induced churn/session loss/support burden`, never impression count alone. Security, QA, backup, SEO, and admin tooling are evaluated through avoided incident/fraud/refund/support cost and retained customer/organic value.
+
+### 17.6 Store and catalog contract
+
+Each shop SKU records canonical item ID/name/category/description/audience/value proposition; WLD vs real payment; consumable/non-consumable/subscription classification; server-authoritative price and test band; discount/bundle/coupon rules; inventory/sale window/purchase limit/duplicate behavior; account binding/gifting; refund/recovery/cancellation/renewal; grant/inventory reflection and idempotency; economy sink/source impact and P2W classification; retention/revenue hypothesis; KPI and fraud controls; API/DB/admin lifecycle; and QA. Fake scarcity, resetting countdowns, hidden personalized pricing, wealth/profit/casino prestige as default aspiration, and paid competitive advantage are excluded.
+
+### 17.7 Priority and release order
+
+Priority order is: `P0 data loss/security/auth/authorization/asset duplication/economy abuse/DB integrity/promotion evidence` → `P1 major user-visible correctness and core-flow completeness` → `P1 monetization contract and store/payment correctness` → `P1 SEO backend/public acquisition` → `P2 retention/growth` → `P2 accessibility/responsive` → `P3 long-term expansion`. Every item carries status, evidence, acceptance conditions, QA gate, dependencies, rollback and business-effect hypothesis.
+
+### 17.8 Current runtime and QA reality
+
+Production public status currently reports the web service, economy API, and ledger database healthy at its latest recorded snapshot. Public home/status/guide are reachable, but authenticated flows were not independently executed in this documentation-only run. The connected GitHub status/workflow lookup did not expose checks for the starting `main` SHA, so CI/test-server success is not claimed. Runtime verification is therefore partial.
+
+### 17.9 External reference decisions
+
+Directly adopted: Google canonicalization/Core Web Vitals/Breadcrumb guidance; Naver crawler/sitemap/canonical/robots guidance; OWASP API BOLA/Broken Authentication, OWASP Top 10:2025 and ASVS as verification references; FTC 2026 subscription enforcement as a consumer-protection signal; Apple subscription/billing-recovery documentation as platform economics/renewal reference. Platform-specific revenue percentages or recovery durations are not assumed to apply to Moneyverse unless the corresponding platform/payment model is actually adopted.
+
+### 17.10 Change record — v2026.09.15.103
+
+- Integrated development/QA/SEO-backend/security/profitability requirements into the Living Project Plan.
+- Elevated the public unlimited-work copy vs authoritative daily-quota implementation mismatch to P0 release-blocking contract drift.
+- Formalized fail-closed promotion evidence and `verification unavailable` semantics.
+- Added a required per-feature contract covering UX, API, DB, security, operations, analytics, economics, QA and rollback.
+- No runtime/code/database/infrastructure change is performed by this planning update.
