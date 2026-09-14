@@ -33,7 +33,7 @@ function thresholdText(rule: AlertThreshold): string {
   return `${bps >= 0 ? '+' : ''}${(bps / 100).toFixed(2)}%`;
 }
 
-export function AlertManager({ stocks, alerts, events, isEn }: { readonly stocks: readonly AlertStock[]; readonly alerts: readonly AlertRule[]; readonly events: readonly AlertEvent[]; readonly isEn: boolean }) {
+export function AlertManager({ stocks, alerts, events, isEn, initialStockId }: { readonly stocks: readonly AlertStock[]; readonly alerts: readonly AlertRule[]; readonly events: readonly AlertEvent[]; readonly isEn: boolean; readonly initialStockId?: string | undefined }) {
   const [createState, createAction] = useActionState(createStockAlert, IDLE);
   return (
     <div className="grid gap-5">
@@ -44,7 +44,7 @@ export function AlertManager({ stocks, alerts, events, isEn }: { readonly stocks
         </CardHeader>
         <CardContent>
           <form action={createAction} className="grid gap-4 md:grid-cols-2">
-            <label className="grid gap-1 text-sm"><span>{isEn ? 'Stock' : '종목'}</span><select name="stockId" required className="min-h-11 rounded-md border bg-background px-3"><option value="">{isEn ? 'Select a stock' : '종목 선택'}</option>{stocks.map((stock) => <option key={stock.id} value={stock.id}>{stock.symbol} · {stock.name}</option>)}</select></label>
+            <label className="grid gap-1 text-sm"><span>{isEn ? 'Stock' : '종목'}</span><select name="stockId" required defaultValue={initialStockId ?? ''} className="min-h-11 rounded-md border bg-background px-3"><option value="">{isEn ? 'Select a stock' : '종목 선택'}</option>{stocks.map((stock) => <option key={stock.id} value={stock.id}>{stock.symbol} · {stock.name}</option>)}</select></label>
             <label className="grid gap-1 text-sm"><span>{isEn ? 'Condition' : '조건'}</span><select name="conditionKind" required className="min-h-11 rounded-md border bg-background px-3"><option value="price_at_or_above">{isEn ? 'Price at or above' : '가격 이상'}</option><option value="price_at_or_below">{isEn ? 'Price at or below' : '가격 이하'}</option><option value="day_change_at_or_above">{isEn ? 'Daily change at or above' : '일일 변동률 이상'}</option><option value="day_change_at_or_below">{isEn ? 'Daily change at or below' : '일일 변동률 이하'}</option></select></label>
             <label className="grid gap-1 text-sm"><span>{isEn ? 'Threshold (WLD or bp)' : '기준값 (WLD 또는 bp)'}</span><input name="threshold" required inputMode="numeric" className="min-h-11 rounded-md border bg-background px-3" placeholder={isEn ? 'e.g. 10000 or -500' : '예: 10000 또는 -500'} /></label>
             <label className="grid gap-1 text-sm"><span>{isEn ? 'Cooldown (minutes)' : '재알림 대기 (분)'}</span><input name="cooldownMinutes" type="number" min="5" max="10080" defaultValue="60" required className="min-h-11 rounded-md border bg-background px-3" /></label>

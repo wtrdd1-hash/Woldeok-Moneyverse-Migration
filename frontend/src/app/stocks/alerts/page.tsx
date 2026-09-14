@@ -5,6 +5,7 @@ import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
 import { requireMember } from '@/lib/session';
 import { AlertManager } from './alert-manager';
+import { resolveInitialAlertStockId } from './alert-deeplink';
 import type { AlertEvent, AlertRule, AlertStock } from './alert-manager';
 
 export const dynamic = 'force-dynamic';
@@ -15,9 +16,10 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function StockAlertsPage() {
+export default async function StockAlertsPage({ searchParams }: { readonly searchParams: Promise<{ readonly stock?: string | string[] }> }) {
   await requireMember();
   const locale = await getServerLocale();
+  const { stock: stockParam } = await searchParams;
   const isEn = locale === 'en';
   const [market, alertResult, eventResult] = await Promise.all([
     apiOrNull<{ stocks: AlertStock[] }>('/api/v1/stocks'),
@@ -25,5 +27,7 @@ export default async function StockAlertsPage() {
     apiOrNull<{ events: AlertEvent[] }>('/api/v1/stocks/alerts/events?limit=30'),
   ]);
 
-  return <div className="grid gap-6"><PageHeader eyebrow="VIRTUAL MARKET" title={isEn ? 'Conditional Alerts' : '조건부 알림'}>{isEn ? 'Create server-evaluated alerts for virtual stock prices and daily changes. This is game data, not investment advice.' : '가상 주식 가격과 일일 변동을 서버가 확인해 알림 기록을 남깁니다. 실제 투자 조언이 아닌 게임 데이터입니다.'}</PageHeader>{market === null || alertResult === null || eventResult === null ? <EmptyState title={isEn ? 'Failed to load stock alerts.' : '주식 알림 정보를 불러오지 못했어요.'} description={isEn ? 'Please try again in a few moments.' : '잠시 후 다시 시도해 주세요.'} /> : <AlertManager stocks={market.stocks} alerts={alertResult.alerts} events={eventResult.events} isEn={isEn} />}</div>;
+  const initialStockId = market ? resolveInitialAlertStockId(market.stocks, stockParam) : undefined;
+
+  return <div className="grid gap-6"><PageHeader eyebrow="VIRTUAL MARKET" title={isEn ? 'Conditional Alerts' : '조건부 알림'}>{isEn ? 'Create server-evaluated alerts for virtual stock prices and daily changes. This is game data, not investment advice.' : '가상 주식 가격과 일일 변동을 서버가 확인해 알림 기록을 남깁니다. 실제 투자 조언이 아닌 게임 데이터입니다.'}</PageHeader>{market === null || alertResult === null || eventResult === null ? <EmptyState title={isEn ? 'Failed to load stock alerts.' : '주식 알림 정보를 불러오지 못했어요.'} description={isEn ? 'Please try again in a few moments.' : '잠시 후 다시 시도해 주세요.'} /> : <AlertManager stocks={market.stocks} alerts={alertResult.alerts} events={eventResult.events} isEn={isEn} initialStockId={initialStockId} />}</div>;
 }
