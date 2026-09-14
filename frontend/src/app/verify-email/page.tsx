@@ -30,7 +30,7 @@ export default async function VerifyEmailPage({
   return (
     <div className="grid gap-6">
       <PageHeader title="이메일 인증">
-        회원가입을 완료하려면 가입할 때 사용한 브라우저에서 이메일 주소를 확인해 주세요.
+        회원가입을 완료하려면 이메일로 받은 인증 링크를 열어 주세요.
       </PageHeader>
 
       {message && (
@@ -43,7 +43,7 @@ export default async function VerifyEmailPage({
         <CardHeader>
           <CardTitle>가입 이메일 확인</CardTitle>
           <CardDescription>
-            인증 링크는 30분 동안 유효하며 회원가입을 시작한 로그인 전 세션에 연결되어 있습니다.
+            인증 링크는 30분 동안 유효하며 한 번만 사용할 수 있습니다. 가입을 시작한 앱과 다른 브라우저에서도 인증할 수 있습니다.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -58,7 +58,7 @@ export default async function VerifyEmailPage({
             </Alert>
           )}
           <p className="text-sm text-muted-foreground">
-            다른 기기나 브라우저에서 링크를 열었다면 보안을 위해 인증이 거부될 수 있습니다.{' '}
+            인증이 끝나면 앱으로 돌아가 로그인 상태를 다시 확인해 주세요.{' '}
             <Link href="/login" className="text-primary underline-offset-4 hover:underline">
               로그인 화면으로 돌아가기
             </Link>

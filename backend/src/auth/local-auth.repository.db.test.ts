@@ -50,8 +50,9 @@ describe.skipIf(!DATABASE_URL)('LocalAuthRepository against a real database', ()
     });
     expect(accepted).toBe(true);
 
-    const completed = await local.completeRegistration(prelogin.id, verificationToken);
+    const completed = await local.completeRegistration(verificationToken);
     expect(completed.user_id).toMatch(/^[0-9a-f-]{36}$/);
+    await expect(local.completeRegistration(verificationToken)).rejects.toThrow();
     expect(completed.is_new).toBe(true);
     expect(await sessions.hasCurrentUserConsent(completed.session_id)).toBe(true);
     expect((await local.credential(emailHash))?.user_id).toBe(completed.user_id);
@@ -84,7 +85,7 @@ describe.skipIf(!DATABASE_URL)('LocalAuthRepository against a real database', ()
       passwordVerifier: await hashPassword('review-test-password-2026!'),
       displayName: 'Mobile OAuth QA', verificationTokenHash: sha256(verificationToken),
     });
-    const member = await local.completeRegistration(prelogin.id, verificationToken);
+    const member = await local.completeRegistration(verificationToken);
     const handoff = await sessions.createMobileOAuthHandoff(member.user_id);
     const mobile = await sessions.consumeMobileOAuthHandoff(handoff);
     expect(mobile?.user_id).toBe(member.user_id);

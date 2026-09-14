@@ -5,10 +5,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useViewer } from '@/lib/use-viewer';
 import { NewPostForm } from './board-forms';
 
-export function BoardParticipation() {
+export function BoardParticipation({ defaultStockSymbol }: { readonly defaultStockSymbol?: string | undefined }) {
   const viewer = useViewer();
 
-  if (viewer?.signedIn && viewer.consentCurrent) return <NewPostForm />;
+  if (viewer?.signedIn && viewer.consentCurrent) {
+    return <NewPostForm defaultStockSymbol={defaultStockSymbol} />;
+  }
 
   return (
     <Card>

@@ -11,8 +11,8 @@ import { cn } from '@/lib/cn';
 import { IDLE } from '@/lib/action-state';
 import { createStockAwarePost } from './stock-actions';
 
-export function NewPostForm() {
-  const [open, setOpen] = useState(false);
+export function NewPostForm({ defaultStockSymbol }: { readonly defaultStockSymbol?: string | undefined }) {
+  const [open, setOpen] = useState(Boolean(defaultStockSymbol));
   const [state, action] = useActionState(createStockAwarePost, IDLE);
   const form = useRef<HTMLFormElement>(null);
   useEffect(() => { if (state.status === 'ok') { form.current?.reset(); setOpen(false); } }, [state]);
@@ -28,7 +28,7 @@ export function NewPostForm() {
         <Field><FieldLabel htmlFor="board-title">제목</FieldLabel><Input id="board-title" name="title" maxLength={120} required /></Field>
         <Field><FieldLabel htmlFor="board-body">내용</FieldLabel><Textarea id="board-body" name="body" maxLength={5000} rows={6} required /></Field>
         <div className="grid gap-3 rounded-xl border p-3 md:grid-cols-2">
-          <Field><FieldLabel htmlFor="board-stock-symbol">가상주식 종목코드 (선택)</FieldLabel><Input id="board-stock-symbol" name="stockSymbol" maxLength={16} placeholder="예: WDX" /></Field>
+          <Field><FieldLabel htmlFor="board-stock-symbol">가상주식 종목코드 (선택)</FieldLabel><Input id="board-stock-symbol" name="stockSymbol" maxLength={16} placeholder="예: WDX" defaultValue={defaultStockSymbol} /></Field>
           <Field><FieldLabel htmlFor="board-category">글 분류</FieldLabel><select id="board-category" name="category" className="h-10 rounded-md border bg-background px-3"><option value="analysis">분석</option><option value="question">질문</option><option value="journal">기록</option><option value="business">사업</option><option value="system">시스템</option></select></Field>
           <Field><FieldLabel htmlFor="board-stance">관점</FieldLabel><select id="board-stance" name="stance" className="h-10 rounded-md border bg-background px-3"><option value="none">없음</option><option value="bullish">긍정</option><option value="neutral">중립</option><option value="bearish">부정</option></select></Field>
           <Field><FieldLabel htmlFor="board-position">보유 관계</FieldLabel><select id="board-position" name="positionDisclosure" className="h-10 rounded-md border bg-background px-3"><option value="undisclosed">미공개</option><option value="holder">보유 중</option><option value="no_position">미보유</option><option value="operator_related">운영 관련</option></select></Field>
