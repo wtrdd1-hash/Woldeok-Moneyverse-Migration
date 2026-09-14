@@ -57,6 +57,7 @@ export default async function MarketplacePage({
       query.category ||
       query.rarity ||
       query.effect ||
+      query.minQuantity > 0 ||
       query.state !== 'all' ||
       query.sort !== 'name',
   );
@@ -112,7 +113,7 @@ export default async function MarketplacePage({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form method="get" className="grid gap-3 md:grid-cols-2 xl:grid-cols-7">
+          <form method="get" className="grid gap-3 md:grid-cols-2 xl:grid-cols-8">
             <Input
               name="q"
               defaultValue={query.q}
@@ -159,6 +160,15 @@ export default async function MarketplacePage({
                 </option>
               ))}
             </select>
+            <Input
+              name="minQuantity"
+              type="number"
+              min={1}
+              max={999999}
+              defaultValue={query.minQuantity || ''}
+              placeholder="최소 수량"
+              aria-label="최소 보유 수량"
+            />
             <select
               name="state"
               defaultValue={query.state}
@@ -191,8 +201,9 @@ export default async function MarketplacePage({
             </div>
           </form>
           <p className="mt-3 text-xs text-muted-foreground">
-            전체 {holdings.length}종 중 {visibleHoldings.length}종을 표시합니다. 필터는 거래 가능
-            여부를 뜻하지 않습니다.
+            전체 {holdings.length}종 중 {visibleHoldings.length}종을 표시합니다. 최소 수량은 제작 재료처럼
+            여러 개가 필요한 보유품을 빠르게 찾는 용도이며, 필터 결과가 거래 가능 여부를 뜻하지는
+            않습니다.
           </p>
         </CardContent>
       </Card>
