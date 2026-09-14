@@ -137,7 +137,7 @@ describe.skipIf(!DATABASE_URL)('the work board against a real database', () => {
       });
     });
 
-    it('keeps suggesting repeatable tasks after the legacy daily count', async () => {
+    it('keeps catalogue quotas visible and counts only completed rewards as taken', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
         const tasks = await client.query<{ id: string; daily_limit: number }>(
@@ -152,11 +152,17 @@ describe.skipIf(!DATABASE_URL)('the work board against a real database', () => {
             );
           }
         }
-        const board = await client.query<{ daily_limit: number; recommended: boolean }>(
-          'SELECT daily_limit, recommended FROM public.work_task_board($1)',
-          [actor],
-        );
-        expect(board.rows.every((row) => row.daily_limit === 0)).toBe(true);
+        const board = await client.query<{
+          task_id: string;
+          daily_limit: number;
+          taken_today: number;
+          recommended: boolean;
+        }>('SELECT task_id, daily_limit, taken_today, recommended FROM public.work_task_board($1)', [
+          actor,
+        ]);
+        const expected = new Map(tasks.rows.map((task) => [task.id, task.daily_limit]));
+        expect(board.rows.every((row) => row.daily_limit === expected.get(row.task_id))).toBe(true);
+        expect(board.rows.every((row) => row.taken_today === 0)).toBe(true);
         expect(board.rows.filter((row) => row.recommended)).toHaveLength(3);
       });
     });
