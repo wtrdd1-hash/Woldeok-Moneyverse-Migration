@@ -98,9 +98,12 @@ export class WorkRepository {
 
   private async requireEnabled(): Promise<void> {
     const state = await this.featureState();
-    if (state !== 'enabled') {
-      throw new WorkInputError(`work feature is ${state}`);
-    }
+    if (state !== 'enabled') throw new WorkInputError(`work feature is ${state}`);
+  }
+
+  private async requireExistingFlowAllowed(): Promise<void> {
+    const state = await this.featureState();
+    if (state === 'disabled') throw new WorkInputError('work feature is disabled');
   }
 
   async assign(key: unknown, actor: unknown, task: unknown): Promise<WorkAssignmentRow | null> {
@@ -126,7 +129,7 @@ export class WorkRepository {
     assertUuid(key, 'idempotency key');
     assertUuid(actor, 'actor');
     assertUuid(assignment, 'assignment id');
-    await this.requireEnabled();
+    await this.requireExistingFlowAllowed();
     return queryOne<WorkCompletionRow>(
       this.pool,
       `SELECT completion.assignment_id::text, completion.submitted_at, completion.replayed
@@ -139,7 +142,7 @@ export class WorkRepository {
     assertUuid(key, 'idempotency key');
     assertUuid(actor, 'actor');
     assertUuid(assignment, 'assignment id');
-    await this.requireEnabled();
+    await this.requireExistingFlowAllowed();
     return queryOne<WorkRewardRow>(
       this.pool,
       `SELECT reward.assignment_id::text, reward.reward_amount::text,
