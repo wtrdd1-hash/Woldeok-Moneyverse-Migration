@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { acceptablePassword } from './local-auth.controller';
+import { acceptablePassword, suggestedEmailForKnownDomainTypo } from './local-auth.controller';
 
 describe('local auth password policy', () => {
   it('does not enforce a numeric minimum length for registration', () => {
@@ -20,5 +20,17 @@ describe('local auth password policy', () => {
   it('keeps the documented technical maximum', () => {
     expect(acceptablePassword('a'.repeat(128))).toBe(true);
     expect(acceptablePassword('a'.repeat(129))).toBe(false);
+  });
+});
+
+describe('local auth email typo guard', () => {
+  it('suggests the intended provider for known high-confidence domain typos', () => {
+    expect(suggestedEmailForKnownDomainTypo('wtrdd@nvaer.com')).toBe('wtrdd@naver.com');
+    expect(suggestedEmailForKnownDomainTypo('MEMBER@GAMIL.COM')).toBe('member@gmail.com');
+  });
+
+  it('does not rewrite unknown or legitimate domains', () => {
+    expect(suggestedEmailForKnownDomainTypo('member@naver.com')).toBeNull();
+    expect(suggestedEmailForKnownDomainTypo('member@example.com')).toBeNull();
   });
 });
