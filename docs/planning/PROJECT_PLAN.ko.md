@@ -418,249 +418,163 @@ SEO는 문구뿐 아니라 backend/read-model 영역이다. canonical URL 생성
 
 상태는 근거 범위로 제한한다. `IMPLEMENTED`는 해당 slice의 현행 code/runtime 근거가 있다는 뜻이며 전체 기능군 완성을 의미하지 않는다. `PARTIAL`은 일부 구현이 있으나 필수 흐름이 미감사/미완성임을 뜻한다. `UNVERIFIED`는 기획이 있더라도 이번 회차에 code/runtime 근거가 충분하지 않다는 뜻이다. `REDESIGN_REQUIRED`는 검증된 구현이 규범적 불변조건과 충돌하는 경우다.
 
-| 기능군 | 현재 상태/근거 | 권위·UX/API/DB 계약 | 보안·악용·개인정보 | SEO·성장·사업성 | QA 게이트 |
-| --- | --- | --- | --- | --- | --- |
-| 회원가입/로그인/OAuth/로그아웃/세션 | `IMPLEMENTED/PARTIAL`: Nest auth controller/module과 local-email+Discord/Google bootstrap, 앱 API coverage 문서 존재 | identity linking, consent, session 발급/회전/폐기는 서버 권위. UI는 loading/provider error/consent required/session expired/offline을 구분하고 client state만으로 로그인 판정 금지. 연결수단 삭제/계정삭제는 구현된 recent reauth 적용 | credential stuffing rate limit, state/nonce/PKCE/exact redirect URI, fixation 방지 session rotation, CSRF, secure cookie, logout invalidation, auth secret 로그/URL 금지 | 로그인 페이지 noindex. KPI는 form submit이 아니라 verified session→meaningful activation. 비용은 provider/CS/fraud per activated D30 | DTO/guard, state replay/mismatch, fixation, cross-account linking, logout invalidation, mobile handoff one-time, provider sandbox 가능범위 |
-| 계정/프로필/보안센터 | `PARTIAL`: account controller와 admin security control 근거, 회원용 전체 parity는 미가정 | profile/linked method/session은 서버 권위. active-session 조회/다른 세션 종료 제공. 민감 변경 recent reauth, admin은 더 강한 role/TOTP | session/account ID BOLA negative test, 고위험 변경 알림에서 secret 제외, security audit, privacy-minimal default | private/auth+noindex. 사업가치는 ATO·지원비 감소와 신뢰; takeover signal/support ticket 측정 | other-user session denial, reauth expiry, terminate others, recovery, 접근성/mobile parity |
-| 인벤토리/컬렉션/marketplace workbench | `PARTIAL`: 최근 inventory/marketplace slice 존재, 실 player-to-player settlement 완성으로 보지 않음 | ownership/provenance DB 권위. empty/loading/error/offline에서 holdings 조작 금지. 향후 거래는 escrow/cancel/expire/settle/fee/reversal 정의 | BOLA, serial/ownership leakage, 다계정 wash trade/collusion, duplicate grant/replay 방지 | acquire→use→curate→reuse. WLD 소비는 경제 sink이며 실매출 아님 | ownership concurrency, duplicate entitlement, transfer denial, recovery, private URL leakage, wash trade 시나리오 |
-| 상점/catalog | `IMPLEMENTED/PARTIAL`: release smoke가 public catalog를 실제 사용하며 WLD store 존재. 실결제는 별도 scope | effective price/eligibility/limit/sale window/entitlement 서버 권위. 가격/화폐/소유/중복/마감/receipt를 명확히 하고 timeout retry 멱등 | client 가격 신뢰 금지, replay/duplicate grant, fake scarcity/hidden personalized pricing/P2W 금지 | 실질적 공개 editorial catalog만 index. purchase history private. WLD spend를 revenue로 회계 금지 | price tamper, 시간경계, duplicate click, 부족잔액, concurrent purchase, entitlement repair/cache invalidation |
-| 실결제 장바구니/결제/구독/광고제거 | `UNVERIFIED`: WLD shop으로 존재 추정 금지 | 구현 전 provider, receipt/webhook signature, tax/refund, entitlement source, renewal/cancel/recovery/idempotency 확정. 결제 전 반복조건 명확히 | receipt forgery/webhook replay/order BOLA/payment data minimization/refund abuse/chargeback | checkout/order noindex. net revenue는 fee/tax/refund/support/fraud/infra 차감. SCALE/ITERATE/HOLD/KILL 사전 정의 | sandbox, duplicate/out-of-order webhook, cancel/refund/regrant, billing recovery, cancellation E2E, 법률 gate |
-| 작업/퀘스트/직업/레벨/보상 | `PARTIAL + P0 DRIFT`: authoritative quota slice 존재, public guide stale | catalog/min duration/cooldown/daily limit/reward/EXP/receipt DB·서버 권위. playable과 reward-eligible 구분 | bot/macro, multi-account, replay, concurrent duplicate, clock abuse. append-only receipt/reconciliation | guide는 계약수정 후 확장. KPI TTFV/first verified job/D1/D7/fraud-adjusted reward inflation | QA-104-01 matrix를 릴리스 차단으로 적용 |
-| 사업 | `UNVERIFIED/PARTIAL`: plan 존재, 이번 회차 complete settlement 미입증 | inventory/demand/cost/fee/tax/management를 명시하고 무위험 고정복리 금지. 모든 가치이동 ledger/idempotency | multi-account demand farming, circular purchase, replay/admin manipulation/precision | 교육 public page 가능, private P&L noindex. nominal WLD profit 아닌 retention+sink/source 건전성 | 실DB settlement/reconciliation/concurrency+abuse simulation |
-| 은행/대출 | `UNVERIFIED/PARTIAL`: public guide 개념 존재, 전체 code/QA 미입증 | eligibility/source-of-funds/interest schedule/repayment/arrears/recovery 서버 권위, game-only 명확화 | loan mint, double repayment, clock, BOLA, loss-chasing 금지; 실제 예금안전/수익보장 암시 금지 | finance-like public content는 game/simulation label, private debt/balance noindex | accrual 경계, idempotent repayment, concurrent payment, restart/recovery, ledger reconciliation |
-| 가상주식/watchlist/portfolio/alert/compare | `PARTIAL`: detail hub/watchlist/comparison/alert slice 구현 문서 근거 | public market read-model과 member holding 분리. settlement 서버 권위. URL에는 public symbol만, private holding/session 금지 | holding BOLA, manipulation/collusion, duplicate settlement, alert phishing/spam, precision | `/stocks/[symbol]`은 public-safe substantial content일 때 index. portfolio/watchlist/alert private/noindex | other-user holdings, symbol validation, large integer, cooldown, idempotent settlement, manipulation |
-| 카지노/확률형 | `PARTIAL/high-risk`: runtime/public guide 근거 있으나 전체 release evidence 고위험 | 서버 RNG/outcome, 공개 probability/payout/limit, atomic settlement, 동일 idempotency result 재사용 | bot/replay/RNG tamper/limit bypass/multi-account/loss chasing/youth risk, cash redemption 금지 | gameplay/history noindex, win 중심 acquisition 금지. 별도 실결제 법률모델 없으면 revenue 0 | distribution sanity, replay receipt, limit/max loss/concurrency/ledger/legal gate |
-| 커뮤니티/post/comment/report/block | `PARTIAL`: public/community surface 존재, moderation 전체 parity는 추가감사 | authorship/edit/delete/moderation 서버 권위; deleted/locked/report/block state 명확화 | spam/bot/harassment/impersonation/doxxing/link/XSS/BOLA/mod abuse | board index는 품질시 index, 개별 UGC는 moderation 정책 전 noindex 가능. 미검토 detail 광고 금지 | stored XSS/link, other-user edit/delete, report spam, block semantics, audit, deletion/index removal |
-| 친구/클럽/referral | `UNVERIFIED/PARTIAL` | invite lifecycle, role/member/leave/kick/ban, privacy, referral attribution/reward maturity 명시 | invite spam, fake account, referral fraud, collusion, private club leakage, impersonation | public club은 explicit visibility만, private membership URL/search 금지 | referral ring, invite replay, role escalation, privacy/block |
-| 알림/email/push/Discord | `PARTIAL` | event source/preference/cooldown/dedupe/delivery/deep-link 서버 권위. 알림에 민감 balance/debt/security state 제외 | phishing imitation/webhook abuse/spam/secret leakage, canonical-domain deep link, opt-out | noindex. incremental healthy return - optout/spam/support/privacy cost | dedupe/cooldown, stale link, revoked session, opt-out, provider failure, retry/outbox |
-| 검색 | `UNVERIFIED` | public-safe read model, private search auth, query parsing/pagination/empty/timeout | injection, expensive-query DoS, private enumeration, search-log PII | 검색결과 기본 noindex, curated stable landing만 예외 | auth, special chars, pagination, rate/complexity, relevance regression |
-| 업로드/gallery/file | `PARTIAL/spec-level` | decoded type/magic byte, size/dimension, random name, isolated storage, authorized delivery, EXIF strip | polyglot/malware/path traversal/bomb/SSRF/BOLA/metadata leakage | private media noindex, public media는 permission/moderation 후 safe alt/dimension | malformed/polyglot, oversize, unauthorized read, metadata strip, storage recovery |
-| 공개콘텐츠/home/guide/status | `IMPLEMENTED`: 운영 익명 접근 확인 | public read model은 정직하게 fail, status measurement age 표시, guide는 server contract와 일치 | 내부 secret/topology 과노출 금지, XSS/phishing 방지 | canonical/indexable. `/guide` SEO 확장은 QA-104-01 종료 전 HOLD | HTTP/status/canonical/meta/structured data/accessibility/CWV/content-contract |
-| App API/mobile gateway | `PARTIAL/COVERAGE DOCUMENTED` | versioned `/app-api/v1`, wrapper key/shape 안정, one-time handoff. breaking은 호환/버전업 | replay/BOLA/rate/CORS/PII log | API noindex, mobile activation/retention/support 측정 | contract snapshot, old client, one-time handoff, auth expiry/error parity |
-| 관리자/audit | `PARTIAL/IMPLEMENTED controls`: AdminSessionGuard/Reauth/TOTP/DB actor | read와 risky write 분리; target/current/proposed/impact/reason/idempotency/audit/step-up | escalation/session theft/CSRF/BOLA/mass action/audit tampering. 단일 superadmin 잔여위험 | noindex/auth. 사고/operator error/CS 비용 절감 | lower-role denial, expired reauth/TOTP, impact preview, audit integrity, compensation |
-| 백업/복구 | `UNVERIFIED EVIDENCE` | RPO/RTO, encrypted backup, restore target/checksum/drill/app+ledger reconciliation | key theft, plaintext snapshot, over-retention, wrong-env restore, destructive op | 비공개. catastrophic loss/downtime 회피가 가치 | isolated restore drill+checksum+migration parity+ledger reconciliation. destructive migration 차단 |
-| 분석/실험 | `PARTIAL/SPECIFIED` | pseudonymous subject, analytics session≠auth secret, schema/version/retention/assignment | PII/secret leakage, re-identification, experiment manipulation, sensitive profiling | safe campaign/content ID만 cohort 연결 | schema, consent/retention deletion, deterministic assignment, secret scan |
-| 광고 | `IMPLEMENTED/PARTIAL`: reviewed public placement 운영 노출 확인 | approved substantial public surface만, test 강제 off, CTA 위장/가림 금지 | invalid traffic/click encouragement/youth/privacy tracking/sponsor confusion | thin page를 광고 때문에 index하지 않음. net ad = revenue-churn/session/support/privacy cost | route allowlist, test off, CLS/CWV, ad exit, policy, invalid traffic |
-| SEO backend | `PARTIAL`: 정책 및 test root noindex smoke 존재, 전체 read-model/dashboard는 미입증 | deterministic canonical, public SEO read-model, sitemap shard, redirect map, JSON-LD serializer, authoritative updatedAt, crawler observation | private route leakage/cache poisoning/Host canonical injection/PII sitemap·JSON-LD | organic→signup→activation→D7/D30→revenue, organic CAC 절감 | host injection, sitemap privacy, redirect loop, SSR, GSC/Naver, CWV |
-| 장애/status 운영 | `PARTIAL`: status page 존재, release evidence 미완성 | public-safe status와 internal telemetry 분리; incident start/update/resolve/owner/severity/impact/rollback | topology 과노출/fake status/admin abuse/alert fatigue | status는 trust infra. MTTR/support 절감 | stale-status, dependency outage, rollback drill, postmortem |
+기능군별 상세표, SEO 경로 매트릭스, 보안 위협등록부, 수익성 모델, 개발수용순서는 v104에서 확정된 내용을 그대로 유지한다. 인증/세션, 계정/보안센터, 인벤토리/컬렉션, WLD 상점, 실결제/구독, 작업/직업/보상, 사업, 은행/대출, 가상주식/포트폴리오/알림/비교, 카지노/확률형, 커뮤니티, 친구/클럽/referral, 알림, 검색, 업로드, 공개콘텐츠, App API, 관리자/audit, 백업/복구, 분석/실험, 광고, SEO backend, 장애/status는 각각 서버 권위·권한·오류상태·DB 트랜잭션·보안/악용·SEO/index·KPI·사업성·QA/rollback을 가져야 한다. 본 v106은 그 계약을 약화시키지 않는다.
 
 ### 26.3 SEO 구현 매트릭스 및 SEO 백엔드 backlog
 
-SEO는 로그인하지 않은 사용자에게도 독립적인 가치를 주는 콘텐츠만 확장한다. Google 공식 최신 가이드는 redirect·sitemap·`rel=canonical`을 canonical 신호로 다루며 절대 명령으로 보지 않는다. Naver 최신 가이드는 정확하고 고유한 title/description, 사용자에게 도움되는 콘텐츠, crawl 가능한 HTML/resource/link, sitemap/RSS 제출과 색인품질 모니터링을 강조한다.
+공개 `/`, `/guide`, `/status`, public news/season/collection/world guide, public-safe `/stocks/[symbol]`, moderation된 community index만 조건부 index 대상이다. 검색/filter/sort/query variant와 login/signup/account/security/recovery/wallet/transfer/private business/bank/loan/portfolio/watchlist/alert/checkout/order/subscription/admin/moderation은 noindex 또는 인증, sitemap 제외가 기본이다. 테스트 origin은 전역 noindex/ads-off를 유지한다.
 
-- **`/`** — `PUBLIC_INDEXABLE`; canonical `/`; 브랜드/제품목적 intent; 고유 title/H1/meta, 사실일 때만 Organization/WebSite JSON-LD, OG/Twitter, hero image dimension, 실질적 guide로 내부링크.
-- **`/guide`** — QA-104-01 종료 전 `PUBLIC_INDEXABLE_BUT_HOLD_EXPANSION`. 수정 후 초보/game-system intent를 대상으로 하고 실제 투자수익 키워드 유입을 노리지 않는다. `lastModified`는 의미 있는 편집 시에만 갱신한다.
-- **`/status`** — 실제 서비스상태 정보로 유지되는 한 public canonical 가능. DB credential/private hostname/stack trace/user state 금지. 검색유입보다 운영신뢰가 목적.
-- **public news/season/collection/world guide** — 독창적이고 실질적이며 관리되는 경우 index. 안정 slug, breadcrumb, 작성/검토/업데이트 metadata, image alt/dimension.
-- **`/stocks/[symbol]`** — public-safe stock/company/world read-model만 index. member holding/watch/order/alert/portfolio는 익명 HTML/JSON-LD/shared cache에 포함하지 않는다. sitemap `lastModified`를 매 price tick마다 바꾸지 않는다.
-- **community index** — moderation된 실질 discovery value가 있을 때 index. 개별 UGC detail은 문서화된 품질/검토 기준 전 기본 noindex 가능; 삭제콘텐츠는 404/410+sitemap 제거.
-- **search/filter/sort/pagination/query** — 의도적으로 큐레이션된 stable landing이 아니면 noindex/canonical. query parameter로 doorway page를 만들지 않는다.
-- **login/signup/account/security/recovery/wallet/transfer/private business/bank/loan/portfolio/watchlist/alert/checkout/order/subscription/admin/moderation** — `AUTH_REQUIRED` 또는 `PUBLIC_NOINDEX`, sitemap 제외. robots.txt를 보안으로 사용하지 않는다.
-- **test origin** — 전역 `X-Robots-Tag:noindex`, sitemap/indexing off. 현재 root smoke를 대표 public path까지 확장해 route-level 누락을 막는다.
+SEO backend는 safe public field만 갖는 `SeoMetadataReadModel`, config public origin 기반 canonical builder, sitemap index/shard generator, robots generator, allowlist structured-data serializer, redirect map, public image metadata service, crawler classification, GSC/Naver 상태수집, crawl/index/canonical/sitemap 오류리포트, 운영 read dashboard/API를 개발영역으로 유지한다. Public cache에는 auth/session identity를 넣지 않는다.
 
-필수 SEO backend 개발영역: safe public field만 갖는 `SeoMetadataReadModel`; Host header가 아니라 config public origin에 고정된 canonical builder; URL/byte limit을 지키는 sitemap index/shard generator; robots generator; schema allowlist 기반 structured-data serializer; loop/conflict 검증 redirect map; public image metadata service; crawler log classification; GSC/Naver ownership/config 상태; crawl/index/canonical/sitemap 오류수집; SEO operator dashboard/read API. Public SEO HTML cache key는 locale/content version을 포함하되 auth/session identity를 포함하지 않고 HTML/meta/sitemap/redirect invalidation을 일관되게 유지한다.
+### 26.4 보안·수익성·배포 계약 유지
 
-### 26.4 보안 위협 등록부 — v104 추가
-
-| ID | 심각도 | 공격/전제/영향 | 예방통제 | 탐지/로그/알림 | 테스트/배포차단 | 잔여위험 |
-| --- | --- | --- | --- | --- | --- | --- |
-| SEC-104-01 | HIGH | BOLA/IDOR로 다른 사용자 object ID 치환해 holdings/session/order/report 조회·변경 | 모든 object read/write actor-scoped service/DB authz, client owner ID 불신 | route/object type 단위 authz denial, payload 비기록 | other-user negative test 필수, 실패시 차단 | 신규 object path의 누락 |
-| SEC-104-02 | HIGH | credential stuffing/fixation/stolen session ATO | rate/abuse, auth/privilege session rotate, recent reauth, CSRF/cookie, provider link uniqueness | auth failure velocity/session rotation/high-risk audit | fixation/logout/reauth/OAuth state/nonce/PKCE, 실패차단 | 분산 저속공격/제공자 침해 |
-| SEC-104-03 | HIGH | replay/concurrent economy request로 중복 WLD | idempotency+unique, DB transaction/lock, append-only ledger/reconciliation | duplicate/retry/concurrency/reconciliation alert | parallel/replay/ledger test, unexplained mismatch 차단 | 개별적으로 정상인 collusion |
-| SEC-104-04 | HIGH | migration/auth/rollback 증거 없이 release | REL-104-02 release-evidence+immutable SHA+분리 test DB | SHA별 deployment evidence, missing/timeout alert | 각 gate 의도파손 시험, production-ready 미발행 | CI/GitHub 장애시 안전한 block |
-| SEC-104-05 | MEDIUM | workflow action tag 이동/공급망 | 중요 action commit SHA pin, Dependabot/review, dependency audit/SBOM/provenance | update review/audit | workflow lint pin policy | 신뢰 upstream 자체침해 |
-| SEC-104-06 | HIGH | upload/UGC polyglot/XSS/link/EXIF | decoded type, isolated storage, metadata strip, CSP/encoding, moderation | rejection/moderation metric | polyglot/XSS/link/unauth delivery | 새로운 social-engineering payload |
-| SEC-104-07 | HIGH | admin/session으로 경제변조 | AdminSessionGuard+reauth+TOTP+DB actor+least privilege+preview+append-only audit | 고위험 action alert | role/reauth/TOTP/CSRF/mass/DB privilege | 단일 superadmin compromise |
-| SEC-104-08 | MEDIUM/HIGH | analytics/ad/SEO에 private economy/security state 유출 | field allowlist/minimization/retention, token/balance/debt/security URL·JSON-LD 금지 | schema validator/outbound sampling/privacy complaint | payload+sitemap/JSON-LD scan, HIGH leak 차단 | 외부 processor 행위 |
-
-기술통제 검증 기준은 OWASP ASVS 5.0.0을 사용하고, object authorization은 OWASP API Security API1:2023 BOLA를 직접 적용한다. 체크리스트 존재만으로 보안 준수 완료를 주장하지 않는다.
-
-### 26.5 수익성·비용효율 모델
-
-WLD-only sink는 실화폐 매출로 계산하지 않는다. **게임경제 활동**과 **인식 가능한 실제 매출**을 분리한다.
-
-- **보안/QA/릴리스 거버넌스:** 사고 빈도/심각도, 운영 전 잡힌 실패, downtime, refund, fraud loss, support hours, restore/rollback time을 측정한다. 기본식은 `회피 기대비용 = 사고확률 변화×예상영향 + 다운타임/환불/지원/부정손실 절감`; 관측 전 임의 금액을 넣지 않는다.
-- **SEO/content:** `organic CAC = 콘텐츠+SEO+도구 비용 / incremental organic D30 retained users`; organic visit→signup→activation→D7/D30→실 net revenue/retained value로 본다. URL 증가만 있고 D30이 늘지 않거나 crawl/index 품질이 악화되면 템플릿 확장 KILL/HOLD.
-- **광고:** `net ad contribution = 광고매출 - ad-induced churn/session LTV 손실 - 광고 infra/privacy/support/fraud 비용`. D7/D30/CWV guardrail 안에서만 SCALE.
-- **WLD 상점:** sink health, 실제 사용/전시, healthy repeat engagement, CS/fraud, concentration을 본다. WLD volume을 ARPU/real revenue로 부르지 않는다.
-- **향후 실결제/구독:** displayed price, tax, processor/platform fee, refund/chargeback, content, entitlement/CS/moderation/fraud/infra, net revenue, contribution margin, attach/renewal/churn, CAC/LTV/payback의 낙관/기준/보수 표를 구현 전 작성한다. FTC 2026 집행 사례를 소비자보호 guardrail로 참고해 반복결제 주요조건 사전고지, 명시동의, 쉬운 해지를 릴리스 조건으로 둔다.
-- **알림/커뮤니티/운영:** incremental retained user/session에서 provider/moderation/support/fraud 비용을 뺀 간접가치로 평가하며 open/post 숫자만 매출로 계산하지 않는다.
-
-모든 실험은 최소 관찰기간/표본 충족조건을 정의한다. 작은 cohort에서는 되돌릴 수 있는 실험과 불확실성 표기를 유지하고 업계 benchmark를 Moneyverse 실측처럼 쓰지 않는다.
-
-### 26.6 개발 backlog 및 수용 순서
-
-1. **P0 / QA-104-01 / Frontend+Docs → API/DB QA → Web/Mobile E2E:** 무제한 전액보상 문구 제거, quota 정확표시, exact-SHA isolated DB matrix, 운영 smoke.
-2. **P0 / REL-104-02 / DevOps+Backend+DB+QA:** migration parity/checksum, authenticated synthetic smoke, economy/reconciliation, rollback artifact를 검증하는 release-evidence를 `production-ready` 전 추가.
-3. **P1 / REL-104-03 / Repository governance:** runtime-code required check/PR 강제, docs-only 자동화는 좁은 예외.
-4. **P1 / Security:** 모든 object-ID endpoint inventory+BOLA negative test, auth/session fixation/rotation/logout/reauth, workflow action pinning 정책.
-5. **P1 / SEO:** public SEO read-model/canonical/sitemap shard/redirect/serializer/GSC-Naver ingestion/privacy scan. QA-104-01 전 `/guide` acquisition 확장 HOLD.
-6. **P1 / Backup:** destructive DB 변경 전 restore proof, RPO/RTO, migration parity, ledger reconciliation.
-7. **P1/P2 / Monetization:** WLD economy와 revenue 분리, ad net contribution 계측, payment/subscription은 provider/legal/unit economics/receipt-webhook 계약 승인 전 구현 시작 금지.
-8. **P2 / UX/접근성/성장:** P0/P1 이후 representative mobile/tablet/desktop, keyboard/focus/label/contrast/reduced motion, comeback/D1/D7/D30 검증.
-
-실제 런타임 구현은 별도 흐름 `새 브랜치 → CI/static/unit/integration/실DB → immutable candidate → isolated exact-SHA → backend/API/DB/auth/user-flow/security QA → main 통합 → exact-main-SHA test gate → production-ready → GitOps 운영 → 운영 smoke/관측 → 필요시 rollback`을 따른다. 이 기획 자동화는 런타임 코드를 배포하지 않는다.
-
-### 26.7 현재 런타임·QA 증거 스냅샷
-
-- 시작/중간 `main`: `3bfa41ce6c251b707254c09f7c3504d1e5245d28`; 문서 반영 전 동시 변경 없음.
-- 운영 public home, `/guide`, `/status` 접근 가능. status는 최신 snapshot에서 web/economy API/ledger DB 정상으로 표시했지만 authenticated QA 증거는 아니다.
-- `/guide`에서 QA-104-01을 재현해 P0 OPEN 유지.
-- 저장소 CI는 clean lint/typecheck/build, PostgreSQL migration/test, secret/control-byte guard, production dependency audit를 수행하고 candidate는 immutable SHA tag+SBOM/provenance+test ads/index off를 사용한다.
-- Production release workflow는 exact test SHA, non-empty public catalog, root noindex를 검증한다. 더 넓은 Living Plan 증거와의 차이는 REL-104-02로 등록했다.
-- GitHub branch metadata상 main은 protected지만 required status check enforcement가 off/empty. 시작 SHA legacy combined status는 `pending`이지만 status entry 0개였고 조회 가능한 PR-triggered workflow run도 0개였다. CI 성공을 주장하지 않으며 해당 증거는 partial/unavailable로 기록한다.
-
-### 26.8 외부 레퍼런스 적용 — 2026-09-15 조회
-
-- **Google Search Central canonical/crawling 최신 공식 가이드 — 직접채택:** canonical builder, redirect, sitemap, `rel=canonical`을 일관된 signal로 사용하며 절대명령으로 오인하지 않는다. 의미 있는 content update에 `lastModified`를 연결하고 핵심 의미를 crawl 가능한 HTML에 둔다.
-- **Naver Search Advisor 최신 SEO/index/sitemap 가이드 — 직접채택:** 정확하고 고유한 title/description, 사용자에게 도움되는 콘텐츠, crawl 가능한 resource/link, sitemap/feed 제출, index quality 관측을 적용한다. thin query page 양산이 아니라 사용자/콘텐츠 품질 개선을 목표로 한다.
-- **OWASP ASVS 5.0.0(2025-05-30 공개) — 검증 기준으로 직접채택.**
-- **OWASP API Security API1:2023 BOLA 및 인증 guidance — 직접채택:** 모든 object에 서버 권한검증과 negative test, session/auth failure 통제를 요구한다.
-- **FTC 2026 Shutterstock·Genesis Tech·Negative Option 관련 집행/검토 — 참고+직접 guardrail:** 향후 실제 반복결제가 생기면 주요조건 사전표시, 명시동의, 쉬운 해지를 요구한다. 특정 미국 규칙이 모든 Moneyverse 거래에 자동 적용된다고 단정하지 않는다.
-- **플랫폼별 수수료/복구율 — 보류:** 실제 payment/app-store provider가 선택되고 당시 공식 계약을 검증하기 전 Moneyverse 확정 unit-economics 값으로 쓰지 않는다.
-
-### 26.9 변경 기록 — v2026.09.15.104
-
-- 직업 quota 공개문구 drift를 운영에서 다시 재현해 P0 OPEN을 유지했다.
-- P0 release automation evidence 공백과 P1 branch required-check 공백을 재현/수정/QA/rollback 조건과 함께 추가했다.
-- 인증, 경제, 상거래, 소셜, 앱 API, 관리자, 백업, 분석, 광고, SEO, 장애운영까지 근거기반 구현상태 표를 추가하고 증거가 부족한 영역은 완료로 추정하지 않고 UNVERIFIED로 명시했다.
-- public route SEO/index matrix와 SEO backend 구체 컴포넌트를 추가했다.
-- BOLA, 인증, 경제 replay, 릴리스, 공급망, 업로드, 관리자, 개인정보/분석을 포함한 보안 위협등록부를 추가했다.
-- WLD sink와 실매출을 분리하고 retained value/contribution cost 기반 SCALE/HOLD/KILL 사업성 모델을 추가했다.
-- 이번 문서 변경은 런타임 코드, DB, API, 인프라, branch 설정, 보안 구현을 변경하지 않는다.
+OWASP ASVS 5.0.0과 API1 BOLA negative test, 인증 fixation/rotation/logout/reauth, 경제 idempotency/concurrency/reconciliation, upload/UGC 격리, admin reauth/TOTP/DB actor, analytics/ad/SEO 개인정보 allowlist, 공급망 검증을 유지한다. WLD-only sink는 실매출로 계산하지 않고 광고는 순기여, SEO는 organic D30 retained user 기준, 결제/구독은 provider/legal/unit economics/receipt-webhook 계약 승인 전 구현하지 않는다. 실제 런타임 구현은 `새 브랜치 → CI → immutable candidate → isolated exact-SHA → backend/API/DB/auth/user-flow/security QA → main → exact-main-SHA gate → Production → smoke/rollback`을 따른다.
 
 ## 27. 인증 개인정보 처리 정합성·로컬인증 릴리스 감사 — v2026.09.15.105
 
-이 절은 v104의 전 기능 계약을 그대로 유지하면서 이번 회차에서 확인된 인증·개인정보 경계의 신규 공백을 추가한다. `main`에는 자체 이메일/비밀번호 인증 코드·DB migration·모바일 API 계약이 존재하지만 운영 웹 로그인·가이드·개인정보처리방침은 여전히 OAuth 중심이다. 기존 P0/P1을 약화하지 않는다.
+### 27.1 AUTH-105-01 — P0 OPEN / PUBLIC ROLLOUT HOLD
 
-### 27.1 신규 및 기존 릴리스 이슈
+현재 `main`에는 local-email register/verify/login과 Argon2id/email-hash/token-hash 저장경로가 있지만 공개 web login/guide/privacy는 OAuth 중심이다. 개인정보처리방침/동의/version/retention/deletion/SMTP 처리사실과 exact-SHA QA가 실제 구현을 설명하기 전 신규 local registration을 새로 마케팅하거나 일반 공개하지 않는다. OAuth/local identity는 email 유사성만으로 자동 병합하지 않는다.
 
-#### AUTH-105-01 — P0 — OPEN / PUBLIC ROLLOUT HOLD — 로컬인증 개인정보 처리계약이 공개 개인정보/로그인 고지보다 앞서 있음
+### 27.2 AUTH-105-02 — P1 TODO
 
-- **최초 발견/재현:** 2026-09-15. **심각도:** 인증 credential, 동의, 개인정보 고지에 관련되므로 P0/HIGH. 다만 이번 회차는 운영 계정생성 mutation을 수행하지 않았으므로 공개되지 않은 운영 endpoint가 실제로 활성화됐다고 단정하지 않는다.
-- **저장소 근거:** 최신 `main`에 `LocalAuthController`, `POST /app-api/v1/auth/local/register`, `POST /app-api/v1/auth/local/verify-email`, `POST /app-api/v1/auth/local/login`, Argon2id password verifier, normalized email 및 SHA-256 email hash, one-time verification-token hash, local-email migration, first-party 가입/로그인/이메일 인증을 covered로 표시한 모바일 API 문서가 존재한다.
-- **운영/공개계약 근거:** 운영 `/login`은 현재 Discord/Google만 노출하고, 운영 `/guide`는 사용자가 별도 비밀번호를 만들지 않는다고 설명한다. 공개 개인정보처리방침은 OAuth 식별 및 Discord/Google 외부로그인을 설명하지만 자체 이메일/비밀번호 credential, verification-token 처리, local-auth 보유/삭제, verification mail delivery를 별도 개인정보 처리 목적으로 설명하지 않는다.
-- **영향:** native/mobile 자체가입, 향후 web local-auth, 개인정보/약관 동의, 계정탈퇴/credential 삭제, SMTP 인증메일, 복구, CS, 보안사고 대응, 분석, local signup을 홍보하는 acquisition.
-- **확정원인:** OAuth 중심 공개 고지 이후 first-party 인증 경로가 구현됐으나 공개 로그인/가이드/처리방침과 동의버전이 같은 작업흐름에서 동기화되지 않았다.
-- **즉시 제품규칙:** 최신 개인정보처리방침 버전과 동의 흐름이 실제 처리를 설명하고 exact-SHA QA가 끝나기 전 자체가입을 새로 마케팅하거나 일반 공개하지 않는다. 운영 App API가 이미 존재한다면 기존 정상사용자를 파괴적으로 비활성화하지 말고 실제 노출상태를 먼저 확인한다. 신규가입 제어는 서버권위 feature/rollout control로 되돌릴 수 있어야 하며 구체 flag 이름은 구현 시 정한다.
-- **GA 전 공개해야 할 처리계약:** identity/verification/recovery용 normalized email, lookup/uniqueness/security용 email-derived hash, 평문이 아닌 Argon2id verifier, display name, hashed verification token과 expiry/single-use, policy consent version, authenticated session ID, 문제진단에 필요한 verification delivery metadata, 처리목적, 해당 시 SMTP processor/국외이전, 보유/삭제/credential 제거, 이용자 권리/연락처. 내부 hash/token 값은 공개하지 않는다.
-- **보유기간:** migration 근거상 pending verification token은 30분 만료다. expired pending registration cleanup, 탈퇴 후 credential 제거, 법적/fraud hold, SMTP diagnostic 보유기간은 GA 전에 실제 코드/운영정책과 함께 확정한다. 구현되지 않은 보유기간을 기획에서 임의 확정하지 않는다.
-- **동의/버전:** `/app-api/v1/auth/policy`의 `termsVersion`/`privacyVersion`이 authoritative이며 local registration은 current prelogin consent를 요구한다. 처리방침이 실질 변경되면 published version을 갱신하고 앱은 서버버전을 사용한다. `consentCurrent:false` 사용자는 문서화된 재동의 흐름을 따른다.
-- **migration/rollback:** 공개문구 동기화만으로 applied migration을 수정하지 않는다. 보유/삭제 enforcement가 새 schema/job을 요구하면 새 migration으로 추가한다. rollback은 신규 local signup 노출을 끄고 마지막 정확한 문구로 되돌리는 것이며 경제 ledger history를 credential 삭제 명목으로 수정하지 않는다.
-- **상태:** OPEN. **운영승격 게이트:** privacy/content/auth-doc parity, security tests, isolated exact-SHA 수용 전 public local-auth GA BLOCK.
+`verify-email`은 one-time bearer token을 사용하는 cross-browser/no-cookie 성공 계약인데 canonical app-auth guide는 과거 prelogin cookie/CSRF 의존 설명이 남아 있다. 영·한 가이드/endpoint/schema/example을 controller와 동기화하고 same/cross-browser, invalid/expired/reused token, session rotation, old-client compatibility를 검증한다.
 
-#### AUTH-105-02 — P1 — TODO — canonical app-auth guide가 cross-browser verification 구현과 불일치
+### 27.3 local-auth 보안·개인정보·SEO·사업성·QA 계약
 
-- **근거:** 현재 `LocalAuthController.verifyEmail`에는 `SessionGuard`/`CsrfGuard`가 없고 credential repository가 bearer verification token을 검증한 뒤 성공하면 signed-in session cookie/CSRF state를 발급한다. migration/current mobile complete 문서는 이메일 링크를 원래 app cookie jar 밖 브라우저에서 열 수 있도록 single-use token 방식을 의도한다. 반면 `docs/app-auth-api-guide.md`는 아직 `POST /app-api/v1/auth/local/verify-email` 호출에 같은 prelogin cookie와 현재 CSRF token을 보내라고 설명하며 pseudocode도 그 전제를 유지한다.
-- **영향:** 신규 앱 구현이 인증을 원래 CookieJar에 잘못 결합하거나 외부 브라우저 이메일 링크에서 불필요한 실패/CS를 만들 수 있고, 보안 경계 설명이 상충한다.
-- **수정범위:** 영문/한국어 app-auth guide, endpoint catalog/schema, 생성예시를 controller와 동기화한다. register/login은 prelogin+CSRF guard를 사용하지만 verify-email은 one-time bearer-token exchange이므로 CSRF 대신 token secrecy가 핵심임을 명시한다.
-- **QA:** OpenAPI/controller guard와 문서 contract snapshot, 같은 브라우저/다른 브라우저 인증, invalid/expired/reused token, valid token no-cookie success, 임의 CSRF header가 authorization 수단이 아님, 성공 후 cookie/session rotation, 구클라이언트 호환.
-- **상태:** TODO. 실제 client break/security bypass가 확인되면 P0/HIGH로 승격한다.
+- register/login은 prelogin+CSRF, verify-email은 short-lived single-use bearer token 권위다.
+- token URL은 noindex/sitemap 제외, no-referrer, token 교환 전 광고·제3자 analytics 금지, query 로그 마스킹, 성공 후 clean token-free URL로 이동한다.
+- register/login/verify는 각각 rate/abuse budget과 429를 가지며 숫자 threshold는 실제 config review에서 확정한다.
+- product analytics는 pseudonymous coarse funnel만 허용하고 email/hash/password/verifier/token/cookie/CSRF/OAuth code는 제외한다.
+- 사업가치는 incremental D30 retained value에서 SMTP/compute/DB/CS/fraud/privacy/security 비용을 차감하며 직접매출로 계산하지 않는다.
+- GA 전 policy/consent, register retry/SMTP, cross-browser verification, replay/expiry/scanner, credential stuffing, session/logout, OAuth collision, raw-secret scan, deletion/cleanup, mobile docs, noindex/token, reversible new-signup rollback을 exact-SHA isolated test에서 통과한다.
+- `QA-104-01`, `REL-104-02`는 P0 OPEN, `REL-104-03`은 P1 TODO로 계속 유지한다.
 
-#### 기존 차단항목 유지
+## 28. 독립 백업·복구 증거 및 데이터손실 방지 감사 — v2026.09.15.106
 
-- `QA-104-01` **P0 OPEN**: 운영 `/guide`의 무제한 전액 직업보상 문구가 authoritative daily quota와 계속 충돌한다.
-- `REL-104-02` **P0 OPEN**: Production-ready 자동게이트가 Living Plan의 migration/auth/economy/rollback 증거 전체를 아직 직접 강제하지 않는다.
-- `REL-104-03` **P1 TODO**: `main`은 protected지만 required status checks enforcement가 계속 off/empty다.
+이 절은 v104/v105의 기능·보안·SEO·수익성·배포 계약을 약화시키지 않고 데이터손실/DB 무결성 우선순위를 강화한다. 이번 회차에서 가장 큰 신규 공백은 독립 재해복구 백업과 최근 성공한 전체 restore가 현재 증명되지 않는다는 점이다.
 
-### 27.2 자체 이메일 인증 end-to-end 계약
+### 28.1 BAK-106-01 — P0 — OPEN / 파괴적 변경 차단
 
-다음은 현재 local-auth slice의 최소 구현/운영 계약이며 OAuth/OIDC 기준을 대체하지 않고 추가한다.
+- **최초 근거:** 2026-09-09 생성되어 2026-09-15 재확인 시에도 OPEN인 GitHub issue #139. 당시 점검에서 지정 별도 백업 SSD `/mnt/backup`(`/dev/sda1`)이 read-only였고, 별도매체 최신 파일은 2026-09-07이었으며 Kubernetes 전환 후 해당 매체의 최신 자동백업은 관찰되지 않았다. 응급 PostgreSQL custom-format dump는 SHA-256과 `pg_restore -l`을 통과했지만 동일 시스템 디스크에 있어 독립 재해복구로 인정하지 않는다.
+- **저장소 교차근거:** recovery DB worklog도 `moneyverse_recovery`가 빠른 논리복구/검사용이며 암호화 별도매체 백업을 대체하지 않는다고 명시한다. `docs/operations/backup-and-recovery.md`의 운영변경 전 암호화 DB/사진 백업 문구는 목표 운영계약이지 현재 독립복구 가능성을 증명하는 evidence 자체는 아니다.
+- **영향:** PostgreSQL identity/session/economy 데이터, append-only 원장/파생잔액, inventory/entitlement, policy/audit, 필수 object/photo, 서비스 연속성, 분쟁/CS 증거가 host/storage 손실에서 복구되지 않을 수 있다.
+- **원인 분류:** Kubernetes 이전 이후 legacy/host backup 경로가 바뀌었고, 마지막 직접 점검에서 지정 독립매체가 비정상이었으며, 현재 저장소 증거만으로 독립 backup + full restore drill 성공을 기계적으로 증명할 수 없는 운영복구 evidence gap이다.
+- **즉시 규칙:** 최신 독립 복구경로가 검증되기 전 파괴적 또는 schema/data-changing Production 작업은 fail-closed로 차단한다. 문서-only 변경은 영향받지 않는다. 비파괴 runtime release를 별도 위험등급으로 허용하려면 명시 승인된 정책이 있어야 하며 DB 변경을 묵시적으로 예외처리하지 않는다.
+- **migration:** 백업 evidence 자체에는 제품 migration이 필요하지 않다. evidence read-model이 새 schema를 요구하면 새 번호 migration과 least-privilege read 계약으로 추가한다.
+- **rollback:** 앱은 last-known-good immutable application/GitOps 버전으로 되돌린다. 경제 데이터 수정은 가능한 경우 forward repair/보정거래를 사용하고, 운영 data restore는 승인된 restore scope로만 수행한다. 과거 ledger를 지우거나 수정해 rollback을 흉내내지 않는다.
 
-| 단계 | Endpoint/권위 | UX/state | 보안/error 계약 | 데이터/side effect |
-| --- | --- | --- | --- | --- |
-| prelogin | `POST /app-api/v1/auth/prelogin-session` | 재개 가능한 인증전 상태, 서비스오류는 retry UI | secure server cookie + memory CSRF, secret log 금지 | prelogin session |
-| policy | `GET /app-api/v1/auth/policy` | 가입 전 current terms/privacy 표시 | server version authoritative, client hard-code 금지 | policy version read |
-| consent | `PUT /app-api/v1/auth/consent` | terms/privacy/age 명시동의, stale version은 재검토 | SessionGuard+CSRF, silent consent 금지 | consent version/time |
-| register | `POST /app-api/v1/auth/local/register` | email/password/display name, typo suggestion, verification pending, SMTP 장애복구 UI | prelogin+CSRF, current consent, common-password reject, generic accepted, abuse 429 | normalized email, email hash, Argon2id verifier, display name, hashed token, verification delivery |
-| verify | `POST /app-api/v1/auth/local/verify-email` | 이메일링크 cross-browser 가능, 성공 signed-in, 실패 generic | bearer token이 authorization secret, SessionGuard/CSRF 의존 없음, single-use/expiry, 로그 token 금지 | account activate, pending token consume, session cookie+CSRF 발급 |
-| login | `POST /app-api/v1/auth/local/login` | unknown email/wrong password 동일 공개오류, offline/429/5xx 구분 | prelogin+CSRF, unknown user dummy password work, rate/abuse | Argon2id 검증, session 발급/회전 |
-| viewer/session | `GET /app-api/v1/auth/viewer`, `GET /app-api/v1/auth/session` | client는 server signed-in 결과만 신뢰, consent stale이면 재동의 | signed-in cookie 권위 | session read/refresh |
-| logout | `POST /app-api/v1/auth/logout` | server invalidation 결과 후 UI 정리, offline이면 원격폐기 성공 가장 금지 | session+CSRF, server revoke | session invalidation/audit |
+### 28.2 RPO/RTO와 복구데이터 분류
 
-**Rate limit:** register/login/verify 및 향후 resend/recovery는 각각 server-configured budget을 두고 privacy-safe 범위에서 IP/network, email-hash, session/device abuse signal을 조합한다. 숫자 threshold를 기획에서 임의로 만들지 않고 구현/config review에서 확정한 뒤 `429`/bounded retry와 함께 load/abuse test한다. SMTP/Argon2 계산비용은 OWASP API resource-consumption 관점의 cost amplification 공격대상으로 본다.
+- **RPO**(허용 가능한 복구시점 데이터손실)와 **RTO**(서비스 복구시간)를 명시적 승인 목표로 정의한다. 숫자는 서비스의 ledger/account/content 손실허용도, 복구비용, 운영역량을 근거로 결정하며 기획 자동화가 임의 숫자를 만들지 않는다.
+- RPO는 단순 backup file 생성시각이 아니라 실제 restore 가능한 최신 시점으로 측정한다. RTO는 전체 recovery drill의 실제 경과시간으로 측정한다.
+- 최소 복구대상: (1) 권위 PostgreSQL identity/economy/ledger/audit, (2) schema/migration/version manifest/checksum, (3) inventory/entitlement/content metadata, (4) 필요한 object/photo, (5) 해당 backup을 해석할 application/GitOps version. secret/key recovery는 별도 암호화 control plane으로 관리하고 backup 옆 plaintext secret에 의존하지 않는다.
+- 같은 host/storage/failure domain 또는 같은 online credential에 의존하는 recovery DB/read replica/local dump는 **복구 편의수단**이지 독립 DR backup으로 계산하지 않는다.
 
-**멱등/상태:** client retry로 duplicate active account를 만들지 않고, consumed token 재호출로 새 identity/session을 반복생성하지 않는다. OAuth/local identity는 email 유사성만으로 silent merge하지 않는다. linking은 로그인된 기존계정, 양쪽 소유증명, collision 처리, 감사가 필요하다.
+### 28.3 백업 구조·권한·보존
 
-### 27.3 이메일 인증링크·개인정보·분석 경계
+1. primary host/storage와 함께 실패하지 않는 off-host NAS/remote object storage/기타 독립 failure domain을 수리·선정한다.
+2. 전송/저장 암호화를 적용하고 key는 접근권한을 분리한다. key recovery도 정기적으로 시험한다. key와 raw credential을 일반 로그·public status·같은 비보호 archive에 두지 않는다.
+3. backup identity는 export에 필요한 최소 읽기권한만 가진다. restore credential과 Production app credential을 분리한다. recovery 환경은 Production webhook/SMTP/Discord/ad endpoint를 상속하지 않는다.
+4. authoritative PostgreSQL, 필요한 object/photo, source env/DB identity, app/GitOps version, migration list/checksum, backup format/tool version, 생성시각, backup ID, encryption/checksum/manifest, retention class를 함께 기록한다.
+5. 승인 RPO/RTO에 따라 logical dump, physical base backup, continuous archiving/PITR 또는 조합을 선택한다. `pg_dump`/`pg_restore` 구조검증은 full restore를 대체하지 않는다. PITR을 사용하면 compatible manifest/checksum 검증과 필요한 WAL segment/recovery target 가용성을 증명한다.
+6. retention에는 최소/최대 보유, 삭제권한, 용량 임계치, 삭제/변조 보호를 둔다. immutable/object-lock 방식이 적합하면 실제로 삭제차단과 복구를 테스트한다.
 
-Verification token은 URL로 전달되더라도 단기 bearer secret이다. 현재 sender가 query에 token을 넣으므로 GA 전 verification surface는 다음을 모두 만족한다.
+### 28.4 필수 isolated restore drill
 
-- `noindex`/`X-Robots-Tag`, sitemap 제외, token URL에 public structured data 금지.
-- token 소비 response/page에 `Referrer-Policy: no-referrer` 또는 동등 이상 검증정책.
-- token exchange 전 AdSense, 제3자 analytics, social widget, marketing pixel, 외부 image/script 로딩 금지.
-- access/error/analytics log에서 이 route query string 제거/마스킹, raw token 저장 금지.
-- 1회 exchange 후 token 없는 clean success/failure URL로 redirect/replace해 address bar/history에서 제거.
-- 단순 GET link preview/scanner가 token을 소비하지 않게 mutation은 의도적인 POST/server action에서 수행하고 QA에 scanner/prefetch 시나리오 포함.
+백업은 다음 전 과정을 통과해야만 `VERIFIED_RESTORABLE`로 본다.
 
-제품 analytics는 `prelogin_created`, `consent_completed`, `registration_accepted`, `verification_succeeded|failed_class`, `login_succeeded|failed_class`, `logout` 같은 coarse state와 pseudonymous ID까지만 허용한다. email/email hash/password/verifier/raw token/session cookie/CSRF/OAuth code/recovery state/정밀 security signal은 일반 product analytics/ad system으로 보내지 않는다.
+1. Production traffic과 완전히 분리된 clean recovery target 준비;
+2. backup ID 선택 후 source env/DB identity, timestamp, format/tool version, retention 상태 검증;
+3. checksum/manifest 및 decrypt/key availability 확인;
+4. 빈 isolated DB로 PostgreSQL 전체 restore. PITR이면 목표시점과 WAL gap 부재 증명;
+5. application version과 migration version/checksum/schema parity 확인;
+6. least-privilege recovery/test DB role로 앱을 연결해 Production endpoint 없이 health/read smoke;
+7. DB integrity/referential check와 안전한 대표 count 검증, 원시 개인정보는 로그로 출력하지 않음;
+8. ledger 차변/대변, derived balance, 필수 economy invariant 대사. 원인불명 mismatch면 drill 실패;
+9. inventory/shop entitlement/provenance와 변경된 고위험 기능 정합성 대표검증;
+10. object/photo 대표 sample을 안전한 metadata/hash 방식으로 복원확인;
+11. notification/webhook/Discord/email/ads/index가 off 또는 비운영 sink인지 확인;
+12. 실제 restore duration, recoverable point, evidence ID, operator/audit ID, 실패/재시도/잔여위험을 기록하고 RPO/RTO와 비교;
+13. 임시 recovery copy는 retention/privacy 정책에 따라 폐기/보관하고 disposal을 감사기록.
 
-### 27.4 보안 위협 추가
+checksum-only, `pg_restore -l`-only, recovery replica 존재, 파일 존재만으로는 successful DR drill로 인정하지 않는다.
 
-| ID | 심각도 | 시나리오 | 예방/탐지 | 필수 테스트/배포조건 |
-| --- | --- | --- | --- | --- |
-| SEC-105-01 | HIGH | local login credential stuffing/password spraying | generic error, Argon2id, rate/abuse budget, unknown user dummy work, credential 미기록 velocity alert | 분산/연속 invalid login, bypass 발견시 local-auth rollout 차단 |
-| SEC-105-02 | HIGH | verification token이 URL referrer/log/analytics로 유출 또는 replay | hashed storage, short expiry, single-use, no-referrer, query redaction, exchange 전 third-party 금지 | token log/referrer/analytics scan, expired/replay/cross-browser, raw leak시 차단 |
-| SEC-105-03 | HIGH | local email과 OAuth identity를 자동병합해 ATO | email similarity merge 금지, authenticated explicit linking, uniqueness | cross-account local/OAuth collision, silent merge시 차단 |
-| SEC-105-04 | MEDIUM/HIGH | register/resend/verify로 SMTP/Argon2/DB 비용고갈 | API4 resource budget, provider/queue limit, anomaly, graceful 429/503 | load/cost amplification, provider 장애시 mail loop/허위발송 금지 |
-| SEC-105-05 | HIGH privacy/trust | 실제 제공 local credential 처리를 개인정보처리방침/동의에서 누락 | 최신 public notice+consent+deletion/retention+processor fact 전 rollout hold | exact-SHA policy-content snapshot, mismatch면 신규 public registration 차단 |
+### 28.5 릴리스 evidence 연계
 
-### 27.5 SEO·공개콘텐츠 변경
+`REL-104-02`의 `release-evidence`는 파괴적/schema-changing Production 후보에 대해 다음 backup evidence를 소비해야 한다: candidate SHA, backup ID, source stack/DB identity, 생성시각, 독립 failure-domain 분류, encryption/key availability, checksum/manifest, restore drill ID/time/result, 달성 RPO/RTO 상태, migration parity, ledger/derived-balance reconciliation, 관련 object sample, rollback application/GitOps target, operator/audit ID, evidence freshness/expiry.
 
-- `/login`, local-signup form, `/verify-email`, recovery/reset, authenticated security-center는 `PUBLIC_NOINDEX` 또는 `AUTH_REQUIRED`, sitemap 제외.
-- verification token query URL은 자기 자신을 canonical로 쓰지 않는다. canonical 후보는 token-free 정보 URL뿐이며 성공/실패에서 계정존재/private state를 crawler에 노출하지 않는다.
-- `/privacy`, `/terms`는 public canonical trust/legal 문서로 유지한다. `lastModified`/visible effective date는 실제 정책 변경에만 갱신하고 consent 서버의 policy version이 공개문서와 대응해야 한다.
-- `/guide` SEO/acquisition 확대는 두 이유로 계속 HOLD: 직업 quota misinformation(`QA-104-01`)과 local auth를 일반공개한다면 충돌하는 OAuth-only 비밀번호 설명.
-- Google Search 기술가이드에 따라 공개 200 페이지는 index 가능하므로 인증/token surface는 robots.txt가 아니라 명시적 noindex/auth 경계를 사용한다.
+누락·stale·corrupt·wrong-environment·wrong-key·reconciliation 실패·WAL gap·미검증 상태는 모두 `BLOCKED`이며 skip-pass가 없다. 승인 recovery policy가 요구하는 고위험 migration은 정기백업이 RPO 안에 있더라도 직전 fresh backup을 요구할 수 있다.
 
-### 27.6 Local auth 사업성·비용효율
+### 28.6 보안·개인정보 위협등록부 추가
 
-현재 local auth의 직접매출은 0이다. 사업가치는 **추가 activation/D30 retained users와 단일 OAuth provider 의존성 완화**에서 인증 운영비를 뺀 간접가치로 본다.
+| ID | 심각도 | 시나리오/영향 | 예방·탐지 통제 | QA/배포 규칙 | 잔여위험 |
+| --- | --- | --- | --- | --- | --- |
+| SEC-106-01 | HIGH | backup/key 탈취 또는 plaintext 원격복사로 계정/경제/audit 노출 | encryption, key separation, least-privilege backup identity, access audit, secret-free logs | 승인 key restore, 미승인 identity 거부, plaintext artifact scan; HIGH leak면 차단 | storage와 key control plane 동시침해 |
+| SEC-106-02 | CRITICAL/HIGH | 잘못된 환경으로 restore하거나 recovery app이 Production credential/endpoint를 사용해 덮어쓰기/외부 side effect | source/target identity, isolated namespace/DB, separate credential, non-Production outbound, impact confirmation | wrong-target/Production credential negative test; Production write 가능성이 있으면 차단 | privileged operator compromise |
+| SEC-106-03 | HIGH | ransomware/운영오류가 primary와 backup을 같은 failure domain에서 삭제/변조 | independent/off-host copy, retention/delete separation, 가능한 tamper-resistant control, deletion audit | primary host-loss simulation 후 독립 restore | 독립성이 약하면 provider/region 상관장애 |
+| SEC-106-04 | HIGH | corrupt/poisoned backup 또는 PITR WAL gap으로 false confidence | checksum/manifest/tool-version, 주기 full restore, WAL coverage, ledger/data reconciliation | corrupt/wrong checksum/missing WAL은 fail-closed+alert | 앱 수준 latent corruption이 정상 backup에 복제될 수 있음 |
+| SEC-106-05 | MEDIUM/HIGH | backup·restore copy가 승인기간을 넘어 개인정보/경제 shadow dataset화 | retention/deletion policy, access log, isolated lifecycle, disposal audit, log 최소화 | retention/disposal test와 recovery-copy inventory | 법적 hold/offline copy로 lifecycle 복잡성 증가 |
 
-측정: app start/visitor → prelogin → consent → register accepted → mail delivered → verified session → first meaningful action → D1/D7/D30, mail delivery success/latency, time-to-verify, resend rate(구현 시), login success/failure, ATO/credential-stuffing signal, fake signup, activated user당 CS, SMTP/provider cost, Argon2 CPU/DB, privacy/security incident 업무, deletion/recovery 업무.
+backup path/provider ID/checksum/key/restore endpoint/상세 topology는 private 운영정보다. public status, SEO read-model, sitemap, structured data, 일반 analytics에 노출하지 않는다.
 
-`incremental local-auth contribution = incremental D30 retained-user contribution value - SMTP - auth compute/DB - support - fraud/abuse - privacy/security operations cost`. D30 value와 전환상승은 실측 전 가설이다. D30/activation이 늘고 ATO/privacy complaint/fake signup/email abuse/CS guardrail을 지킬 때만 `SCALE`; verification drop/support burden이 높으면 `ITERATE/HOLD`; disclosure 불일치·통제불가 credential abuse·HIGH security test 실패 시 신규가입 `KILL/ROLLBACK`한다.
+### 28.7 SEO·상태페이지 경계
 
-### 27.7 QA·운영·rollout·rollback 수용조건
+- backup/restore/recovery/admin endpoint는 `AUTH_REQUIRED`, browser 노출 시 `noindex`, sitemap 제외. robots.txt를 보안경계로 쓰지 않는다.
+- public `/status`에 backup health를 표시한다면 진실한 public-safe category와 age/timestamp 정도만 허용한다. storage path, hostname, DB name, key, checksum, object ID, WAL location, 내부 장애구조는 금지한다.
+- recovery/test origin은 전역 noindex, ads-off를 유지한다. 임시 restore stack의 데이터가 crawler에 노출되지 않아야 한다.
+- operational endpoint의 access/error log에는 secret query, signed URL, recovery credential을 남기지 않는다.
 
-일반 사용자에게 local auth를 광고/활성화하기 전 동일 immutable SHA의 isolated test에서 다음을 통과한다.
+### 28.8 사업성·비용효율
 
-1. current policy version 조회와 required consent, stale/missing consent 거부;
-2. register validation, known-domain typo, duplicate/retry, SMTP success/failure semantics;
-3. same/cross-browser verify, valid-token no-cookie success, invalid/expired/reused token 거부, link-scanner/prefetch 안전;
-4. unknown-email/wrong-password 공개오류 동등성, credential stuffing, 429;
-5. viewer/session, session rotation/fixation, logout invalidation, guarded mutation CSRF;
-6. Discord/Google OAuth 회귀, local/OAuth collision/linking;
-7. app/access/error/analytics log에서 password/verifier/token/cookie/CSRF raw secret scan;
-8. privacy/terms/consent version, account deletion/credential removal, expired pending registration cleanup;
-9. mobile API schema/guide parity/old client, web login은 별도 승인 전 OAuth-only 유지 가능;
-10. login/verify/recovery noindex, sitemap/canonical token 미노출, token surface ads/third-party analytics off;
-11. rollback은 existing legit account/session을 파괴하지 않고 신규 local registration만 끌 수 있으며 OAuth와 append-only economy history를 보존.
+백업/복구의 **직접매출은 0**이다. 사업가치는 데이터손실·다운타임·환불·fraud·CS·사고대응의 기대비용 회피와 검증된 빠른 복구다.
 
-운영관측: registration/verification funnel, SMTP 4xx/5xx, queue latency, endpoint별 429, failed-login velocity, token failure class, account-link collision, signup fraud, deletion/recovery, CS, privacy complaint, D1/D7/D30. 알림에는 pseudonymous ID/safe error class만 쓰고 raw email/token/credential을 넣지 않는다.
+직접비용은 backup storage/retention/egress, encryption/key management, restore drill compute/storage, monitoring, operator hours, independent-media 유지비를 측정한다. 회피/완화비용은 permanent data loss, downtime, refund/compensation, fraud/dispute 증거손실, CS, incident-response labor, 신뢰/retained-user 가치손실을 포함한다. 기본식은 `회피 기대비용 = 사고확률 변화 × 예상사고영향 + 다운타임/환불/지원/부정/복구비용 절감`이며 관측 전 금액은 가설로 표기한다.
 
-### 27.8 v105 런타임·CI 증거
+KPI: backup 성공률/실패, backup freshness, independent-copy coverage, verified restore 성공률, 실제 RPO/RTO, drill failure class, recovery refresh, checksum/manifest failure, key unavailable, PITR 사용 시 WAL gap, storage headroom, drill/operator cost. 승인 RPO/RTO/restore SLO를 합리적 비용으로 충족하면 `SCALE`, backup은 있으나 restore evidence/비용/자동화가 약하면 `ITERATE`, 증거 부족이면 파괴적 release `HOLD`, 독립복구가 불가능하거나 secret/privacy 위험이 큰 경로는 `KILL`한다.
 
-- 시작/중간 `main`은 `1679fe33a8b276035c4a8fc0ab8e79d42cb2f07c`로 동일했고 문서 준비 전 동시 변경이 없었다.
-- 운영 public home/login/guide/privacy/status를 비파괴 확인했다. web login은 OAuth-only, guide는 기존 무제한 작업문구와 OAuth-only password 설명을 유지, privacy는 OAuth 중심이다. status는 최신 snapshot에서 web/economy API/ledger DB 정상이다. local-auth 운영 mutation은 의도적으로 실행하지 않아 실제 runtime exposure를 `UNVERIFIED`로 유지한다.
-- GitHub branch metadata는 main protected이지만 required-status-check enforcement off/empty이며 시작 SHA legacy combined status entry도 없다.
-- 시작 docs SHA의 `Build Production Release`는 `skipped` 완료했고 `test-gate`, `build` 모두 skipped였다. workflow 조건은 manual dispatch 또는 successful `Build Test Candidate` on main일 때만 test gate를 실행한다. 현재 증거로 upstream 정확원인을 확정하지 않으며 **운영승격 성공을 주장하지 않는다**.
-- `REL-104-02`는 계속 OPEN이다. runtime release eligibility가 생기면 현 gate는 exact SHA/public catalog/root noindex를 확인하지만 규범적 migration/auth/economy/rollback 증거 전체를 아직 직접 강제하지 않는다.
+### 28.9 QA·모니터링·rollback 수용조건
 
-### 27.9 외부 레퍼런스 적용 — 2026-09-15
+`BAK-106-01` 종료 전 다음을 모두 증명한다.
 
-- **OWASP ASVS 5.0.0(2025-05-30) — 직접채택:** 인증/세션 기술통제의 최신 stable 검증 baseline.
-- **OWASP API Security Top 10 2023 — 직접채택:** Broken Authentication, BOLA, Unrestricted Resource Consumption, Sensitive Business Flow abuse를 local login/email verify/signup에 적용.
-- **개인정보보호위원회 2026 개인정보 처리방침 자료 — 공개 고지설계에 직접채택:** 현재 표준안/안내가 처리목적, 개인정보 항목, 보유기간, 정보주체 권리절차의 명확한 기재를 강조하므로 실제 local-auth 처리와 공개문서를 GA 전에 맞춘다.
-- **Google Search Central 기술/indexing 가이드 — 직접채택:** 공개 200 page는 index될 수 있으므로 auth/token surface에 명시적 noindex/auth를 적용하고 robots.txt를 개인정보 보호수단으로 사용하지 않는다.
-- **FTC 2026 negative-option/subscription 자료 — 참고만:** 향후 실화폐 반복결제 guardrail 유지용이며 local auth나 WLD를 유료상품으로 바꾸는 근거가 아니다.
+- 최신 backup과 독립 failure domain;
+- encryption/key availability와 checksum/manifest;
+- clean isolated target full restore;
+- migration version/checksum parity와 least-privilege DB role;
+- Production endpoint 없이 restored data 대상 app/backend smoke;
+- ledger debit/credit 및 derived-balance reconciliation;
+- inventory/entitlement, object/photo representative sample;
+- stale/missing/corrupt backup, wrong key, storage-full, wrong-env, PITR 사용 시 WAL-gap fault injection과 fail-closed alert;
+- last-known-good immutable app/GitOps rollback rehearsal;
+- restore drill 실제시간과 승인 RPO/RTO 비교;
+- secret-free alert와 temporary recovery data disposal.
 
-### 27.10 변경 기록 — v2026.09.15.105
+알림은 stale/failed backup, checksum/manifest mismatch, decrypt/key failure, storage 부족, restore drill 실패, recovery refresh 실패, reconciliation 실패, PITR/WAL gap을 포함한다. alert storm은 dedupe하고 사용자/경제 payload가 아닌 safe evidence ID를 사용한다.
 
-- first-party email/password 처리 공개고지·동의 정합성을 위한 P0 `AUTH-105-01` public-rollout hold 추가.
-- stale verify-email cookie/CSRF 문서와 cross-browser bearer-token 구현의 불일치에 P1 `AUTH-105-02` 추가.
-- local-auth UX/API/data/security/SEO/analytics/사업성/QA/rollback 계약을 endpoint 수준으로 추가.
-- verification-token URL 개인정보/SEO 통제와 auth 전용 위협 시나리오를 추가.
-- QA-104-01, REL-104-02 P0 OPEN과 REL-104-03 P1 TODO를 재확인.
-- 시작 docs SHA의 Production Release는 skipped이며 운영승격 pass를 주장하지 않는 것으로 CI 증거를 정정·구체화.
-- v104 전 기능군 계약은 위에서 명시적으로 대체한 부분 외 모두 계속 규범적이다. v105는 런타임 코드, DB, API, 인프라, branch policy, 보안 구현을 변경하지 않는다.
+### 28.10 현재 증거 snapshot
+
+- v106 문서작업 시작/중간 `main`은 `e1dce34cf3e7544d3bb3fe53a80caf992945a213`였고 v106 문서 commit 시작 전 외부 동시변경은 관찰되지 않았다.
+- GitHub issue #139는 OPEN이며 마지막 직접근거인 read-only 지정 백업 SSD와 same-host emergency dump를 기록한다.
+- 2026-09-12 recovery worklog는 `moneyverse_recovery`가 encrypted separate-media backup을 대체하지 않는다고 명시한다.
+- 시작 SHA의 connected GitHub combined status는 individual status가 없고 사용 가능한 PR-triggered workflow lookup도 비어 있어 CI/test-server 성공을 주장하지 않는다.
+- 이번 회차는 fresh Production `/status` 직접검증에 성공하지 못했고 과거 health snapshot을 현재 상태처럼 재사용하지 않았다. authorized remote device도 unavailable이므로 새 mount/Kubernetes/backup-job 점검을 주장하지 않는다.
+
+### 28.11 외부 레퍼런스 적용 — 2026-09-15
+
+- **PostgreSQL 최신 `pg_verifybackup` — 직접채택:** compatible physical backup에서 manifest/checksum 검증에 사용한다. PostgreSQL은 이것만으로 실제 복구 서버의 모든 동작을 보장할 수 없다고 명시하므로 full test restore는 계속 필수다.
+- **PostgreSQL 최신 continuous archiving/PITR — PITR 선택 시 직접채택:** WAL availability/recovery target을 복구 evidence에 포함한다.
+- **CISA StopRansomware — resilience 원칙 직접채택:** 가능한 경우 offline/independent + encrypted backup과 정기 availability/integrity DR test를 유지한다.
+- **NIST SP 1339(2026-06-17) — 참고/운영원칙 채택:** backup을 change management, 정기 생성·시험·recovery exercise와 연결한다. Moneyverse를 OT system으로 정의한다는 의미는 아니다.
+- v105의 OWASP/PIPC/Google/FTC 결정은 해당 범위에서 계속 유효하다.
+
+### 28.12 우선순위·변경기록 — v2026.09.15.106
+
+우선순위는 `BAK-106-01 P0 데이터손실 복구증거`를 최상단으로 올리고, 기존 P0 `AUTH-105-01`, `QA-104-01`, `REL-104-02`, 이어서 P1 `AUTH-105-02`, `REL-104-03`, BOLA/auth security matrix, SEO backend 및 남은 restore automation 순으로 관리한다. 데이터손실/DB무결성이 신규 기능·수익화보다 앞선다는 프로젝트 원칙을 적용한다.
+
+- P0 `BAK-106-01` 독립 backup + full restore 증거 공백 추가.
+- recovery convenience/read replica와 disaster-recovery backup을 명확히 분리.
+- RPO/RTO governance, backup 권위/범위, independent failure-domain/encryption/key 통제, logical/physical/PITR 선택규칙, machine-readable release evidence 추가.
+- migration/app/ledger/balance/inventory/entitlement/object 검증을 포함한 isolated restore drill 추가.
+- backup 전용 보안·개인정보·SEO/status·사업성·QA·monitoring·rollback·fault-injection 계약 추가.
+- `AUTH-105-01`, `QA-104-01`, `REL-104-02` P0 OPEN과 `AUTH-105-02`, `REL-104-03` P1 TODO 유지.
+- v106 기획은 런타임 코드, DB 내용/schema, backup 장치, 인프라, secret, branch setting, 보안 구현을 직접 변경하지 않는다.
