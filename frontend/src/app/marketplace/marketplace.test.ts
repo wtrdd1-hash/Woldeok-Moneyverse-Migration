@@ -38,11 +38,14 @@ const items = [
 
 describe('marketplaceQuery', () => {
   it('normalizes unknown filter values instead of trusting the URL', () => {
-    expect(marketplaceQuery({ state: 'broken', sort: 'random', q: '  수리  ' })).toEqual({
+    expect(
+      marketplaceQuery({ state: 'broken', sort: 'random', minQuantity: '-10', q: '  수리  ' }),
+    ).toEqual({
       q: '수리',
       category: '',
       rarity: '',
       effect: '',
+      minQuantity: 0,
       state: 'all',
       sort: 'name',
     });
@@ -54,14 +57,22 @@ describe('marketplaceQuery', () => {
         category: ['material', 'cosmetic'],
         rarity: ['common', 'rare'],
         effect: ['convenience', 'display'],
+        minQuantity: ['2', '1'],
         state: ['serialized', 'all'],
       }),
     ).toMatchObject({
       category: 'material',
       rarity: 'common',
       effect: 'convenience',
+      minQuantity: 2,
       state: 'serialized',
     });
+  });
+
+  it('bounds the minimum quantity filter to a safe integer range', () => {
+    expect(marketplaceQuery({ minQuantity: '2' }).minQuantity).toBe(2);
+    expect(marketplaceQuery({ minQuantity: '1.5' }).minQuantity).toBe(0);
+    expect(marketplaceQuery({ minQuantity: '999999999' }).minQuantity).toBe(999_999);
   });
 });
 
@@ -75,7 +86,19 @@ describe('filterMarketplaceHoldings', () => {
     ).toEqual(['city_badge']);
   });
 
-  it('filters category, rarity, effect kind and item state together', () => {
+  it('filters category, rarity, effect kind, quantity and item state together', () => {
+    expect(
+      filterMarketplaceHoldings(
+        items,
+        marketplaceQuery({
+          category: 'material',
+          rarity: 'common',
+          effect: 'convenience',
+          minQuantity: '2',
+          state: 'all',
+        }),
+      ).map((item) => item.code),
+    ).toEqual(['repair_kit']);
     expect(
       filterMarketplaceHoldings(
         items,
@@ -83,18 +106,8 @@ describe('filterMarketplaceHoldings', () => {
           category: 'cosmetic',
           rarity: 'common',
           effect: 'display',
+          minQuantity: '2',
           state: 'equipped',
-        }),
-      ),
-    ).toHaveLength(1);
-    expect(
-      filterMarketplaceHoldings(
-        items,
-        marketplaceQuery({
-          category: 'material',
-          rarity: 'common',
-          effect: 'display',
-          state: 'serialized',
         }),
       ),
     ).toHaveLength(0);
