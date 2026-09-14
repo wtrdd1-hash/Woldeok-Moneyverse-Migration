@@ -30,6 +30,7 @@ const items = [
     category: 'cosmetic',
     quantity: 1,
     acquired_at: '2026-09-10T00:00:00.000Z',
+    effect_kind: 'display',
     is_equipped: true,
     serial_number: 42,
   }),
@@ -41,6 +42,7 @@ describe('marketplaceQuery', () => {
       q: '수리',
       category: '',
       rarity: '',
+      effect: '',
       state: 'all',
       sort: 'name',
     });
@@ -51,11 +53,13 @@ describe('marketplaceQuery', () => {
       marketplaceQuery({
         category: ['material', 'cosmetic'],
         rarity: ['common', 'rare'],
+        effect: ['convenience', 'display'],
         state: ['serialized', 'all'],
       }),
     ).toMatchObject({
       category: 'material',
       rarity: 'common',
+      effect: 'convenience',
       state: 'serialized',
     });
   });
@@ -71,17 +75,27 @@ describe('filterMarketplaceHoldings', () => {
     ).toEqual(['city_badge']);
   });
 
-  it('filters category, rarity and item state together', () => {
+  it('filters category, rarity, effect kind and item state together', () => {
     expect(
       filterMarketplaceHoldings(
         items,
-        marketplaceQuery({ category: 'cosmetic', rarity: 'common', state: 'equipped' }),
+        marketplaceQuery({
+          category: 'cosmetic',
+          rarity: 'common',
+          effect: 'display',
+          state: 'equipped',
+        }),
       ),
     ).toHaveLength(1);
     expect(
       filterMarketplaceHoldings(
         items,
-        marketplaceQuery({ category: 'material', rarity: 'common', state: 'serialized' }),
+        marketplaceQuery({
+          category: 'material',
+          rarity: 'common',
+          effect: 'display',
+          state: 'serialized',
+        }),
       ),
     ).toHaveLength(0);
   });

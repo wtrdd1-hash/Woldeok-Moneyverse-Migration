@@ -26,6 +26,13 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+function effectLabel(effect: string): string {
+  if (effect === 'convenience') return '편의';
+  if (effect === 'decoration') return '꾸미기';
+  if (effect === 'display') return '전시';
+  return effect;
+}
+
 export default async function MarketplacePage({
   searchParams,
 }: {
@@ -42,8 +49,16 @@ export default async function MarketplacePage({
   const rarities = [...new Set(holdings.map((item) => item.rarity))].sort((a, b) =>
     a.localeCompare(b, 'ko-KR'),
   );
+  const effects = [...new Set(holdings.map((item) => item.effect_kind))].sort((a, b) =>
+    effectLabel(a).localeCompare(effectLabel(b), 'ko-KR'),
+  );
   const filtering = Boolean(
-    query.q || query.category || query.rarity || query.state !== 'all' || query.sort !== 'name',
+    query.q ||
+      query.category ||
+      query.rarity ||
+      query.effect ||
+      query.state !== 'all' ||
+      query.sort !== 'name',
   );
   const totalUnits = holdings.reduce((sum, item) => sum + item.quantity, 0);
   const categories = new Set(holdings.map((item) => item.category)).size;
@@ -97,7 +112,7 @@ export default async function MarketplacePage({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form method="get" className="grid gap-3 md:grid-cols-2 xl:grid-cols-6">
+          <form method="get" className="grid gap-3 md:grid-cols-2 xl:grid-cols-7">
             <Input
               name="q"
               defaultValue={query.q}
@@ -128,6 +143,19 @@ export default async function MarketplacePage({
               {rarities.map((rarity) => (
                 <option value={rarity} key={rarity}>
                   {rarity}
+                </option>
+              ))}
+            </select>
+            <select
+              name="effect"
+              defaultValue={query.effect}
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              aria-label="효과 유형 필터"
+            >
+              <option value="">전체 효과 유형</option>
+              {effects.map((effect) => (
+                <option value={effect} key={effect}>
+                  {effectLabel(effect)}
                 </option>
               ))}
             </select>
@@ -227,6 +255,7 @@ export default async function MarketplacePage({
                     <Boxes className="mr-1 h-3 w-3" />×{item.quantity}
                   </Badge>
                   <Badge variant="secondary">{item.category}</Badge>
+                  <Badge variant="outline">{effectLabel(item.effect_kind)}</Badge>
                   {item.serial_number !== null ? (
                     <Badge variant="secondary">#{item.serial_number}</Badge>
                   ) : null}
