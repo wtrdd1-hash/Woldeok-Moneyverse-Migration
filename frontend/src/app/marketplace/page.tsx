@@ -58,6 +58,7 @@ export default async function MarketplacePage({
       query.rarity ||
       query.effect ||
       query.minQuantity > 0 ||
+      query.acquired !== 'all' ||
       query.state !== 'all' ||
       query.sort !== 'name',
   );
@@ -113,7 +114,7 @@ export default async function MarketplacePage({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form method="get" className="grid gap-3 md:grid-cols-2 xl:grid-cols-8">
+          <form method="get" className="grid gap-3 md:grid-cols-2 xl:grid-cols-9">
             <Input
               name="q"
               defaultValue={query.q}
@@ -170,6 +171,16 @@ export default async function MarketplacePage({
               aria-label="최소 보유 수량"
             />
             <select
+              name="acquired"
+              defaultValue={query.acquired}
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              aria-label="획득 기간 필터"
+            >
+              <option value="all">전체 획득 기간</option>
+              <option value="7d">최근 7일</option>
+              <option value="30d">최근 30일</option>
+            </select>
+            <select
               name="state"
               defaultValue={query.state}
               className="h-10 rounded-md border border-input bg-background px-3 text-sm"
@@ -201,9 +212,9 @@ export default async function MarketplacePage({
             </div>
           </form>
           <p className="mt-3 text-xs text-muted-foreground">
-            전체 {holdings.length}종 중 {visibleHoldings.length}종을 표시합니다. 최소 수량은 제작 재료처럼
-            여러 개가 필요한 보유품을 빠르게 찾는 용도이며, 필터 결과가 거래 가능 여부를 뜻하지는
-            않습니다.
+            전체 {holdings.length}종 중 {visibleHoldings.length}종을 표시합니다. 최소 수량과 최근 획득
+            기간은 제작 준비나 새로 얻은 보유품을 빠르게 찾는 용도이며, 필터 결과가 거래 가능 여부를
+            뜻하지는 않습니다.
           </p>
         </CardContent>
       </Card>
