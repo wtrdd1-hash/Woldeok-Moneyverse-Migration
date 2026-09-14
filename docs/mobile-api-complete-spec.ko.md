@@ -1216,3 +1216,12 @@ Google Play Console 공개 URL은 다음과 같다.
 | `GET` | `/app-api/v1/media/:key` | 일반 미디어 파일 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 응답을 화면의 서버 기준 상태로 교체 | `/media/:key` |
 | `GET` | `/app-api/v1/media/profile/:key` | 프로필 미디어 파일 조회 | 해당 화면 진입/새로고침/관련 write 후 | 공개: 로그인 불필요 | 프로필 GET 재조회 후 화면 교체 | `/media/profile/:key` |
 
+
+
+## v2026.09.14.71 — 모바일 OAuth 브라우저 세션 격리 규칙
+
+Google/Discord 네이티브 로그인은 외부 브라우저에 이미 웹사이트 로그인 세션이 있어도 그 세션을 로그인 completion 세션으로 재사용하지 않는다. 서버는 `client=mobile` 요청마다 별도의 익명 prelogin 세션을 생성하고 OAuth challenge를 그 세션에 연결한다. provider callback에서는 일반 웹 challenge는 브라우저 세션과 일치시켜 소비하고, 모바일 challenge는 고엔트로피 single-use `state + provider`로 찾아 전용 prelogin 세션을 복원한다. 이후 provider code 검증 → OAuth 사용자 로그인 → one-time `mobileHandoff` 생성 → `woldeok-moneyverse://oauth/callback?code=...&provider=...` → `POST /app-api/v1/auth/mobile/handoff` 순서로 진행한다.
+
+이 규칙이 필요한 이유는 Android 시스템 브라우저/Custom Tab이 웹사이트의 기존 쿠키를 공유할 수 있기 때문이다. 기존 웹 로그인 세션(`user_id`가 이미 있는 세션)을 `auth_complete_oauth_login`의 prelogin 세션으로 넘기면 서버는 `active pre-login session required`로 거부한다. 앱은 이 오류를 자체 문제로 우회하면 안 되며, 서버가 모바일 challenge를 전용 익명 세션에 격리해야 한다.
+
+운영 점검 시 provider 인증은 성공했는데 앱으로 복귀하지 않으면 다음 순서로 확인한다. (1) authorize URL에 `client=mobile` 포함, (2) DB challenge `mobile_client=true`, (3) challenge 전용 세션 `user_id IS NULL`, (4) callback 뒤 `oauth_mobile_handoffs` row 생성, (5) 브라우저 완료 페이지의 custom URI, (6) 앱 intent-filter의 scheme=`woldeok-moneyverse`, host=`oauth`, path=`/callback`, (7) handoff 교환 후 `/auth/viewer`의 `signedIn:true`.

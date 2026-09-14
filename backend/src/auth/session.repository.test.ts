@@ -335,6 +335,20 @@ describe('SessionRepository.consumeChallenge', () => {
   });
 });
 
+describe('SessionRepository.consumeMobileChallenge', () => {
+  it('uses the single-use mobile state instead of the browser session id', async () => {
+    const { pool, queries } = recordingPool(() => [{ session_id: 'mobile-prelogin', code_verifier: 'v' }]);
+    await new SessionRepository(pool).consumeMobileChallenge({
+      provider: 'discord',
+      state: 'm'.repeat(64),
+    });
+    expect(queries[0]?.text).toMatch(/mobile_client=true/);
+    expect(queries[0]?.text).not.toMatch(/session_id=\$\d/);
+    expect(queries[0]?.text).toMatch(/RETURNING session_id/);
+    expect(queries[0]?.values).toEqual([sha256('m'.repeat(64)), 'discord']);
+  });
+});
+
 describe('SessionRepository.revoke', () => {
   it('never moves an existing revocation timestamp forward', async () => {
     const { pool, queries } = recordingPool(() => []);
