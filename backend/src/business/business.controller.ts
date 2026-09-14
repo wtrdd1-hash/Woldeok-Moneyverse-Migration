@@ -72,16 +72,25 @@ export class BusinessController {
     }
   }
 
+  private async availableCatalog(userId: string) {
+    const [catalog, owned] = await Promise.all([
+      this.service().catalog(),
+      this.service().mineV2(userId),
+    ]);
+    const ownedTypeIds = new Set(owned.map((item) => item.businessTypeId));
+    return catalog.filter((item) => !ownedTypeIds.has(item.id));
+  }
+
   @Get('business-types')
-  @ApiOperation({ summary: 'Business types available to buy' })
-  async catalog() {
-    return { businessTypes: await this.service().catalog() };
+  @ApiOperation({ summary: 'Business types available to buy, excluding types already owned' })
+  async catalog(@Req() request: RequestWithSession) {
+    return { businessTypes: await this.availableCatalog(requireUserId(request)) };
   }
 
   @Get('businesses/catalog')
-  @ApiOperation({ summary: 'App API alias: business types available to buy' })
-  catalogForApp() {
-    return this.catalog();
+  @ApiOperation({ summary: 'App API alias: business types available to buy, excluding owned types' })
+  catalogForApp(@Req() request: RequestWithSession) {
+    return this.catalog(request);
   }
 
   @Get('businesses')
