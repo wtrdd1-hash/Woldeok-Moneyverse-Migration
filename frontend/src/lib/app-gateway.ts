@@ -1,5 +1,5 @@
 export const APP_API_VERSION = '1';
-export const APP_API_CONTRACT_VERSION = 'v2026.09.14.76';
+export const APP_API_CONTRACT_VERSION = 'v2026.09.14.82';
 
 export const APP_API_GROUPS = Object.freeze([
   'account', 'activity', 'auth', 'bank', 'banking', 'board', 'businesses',
@@ -100,6 +100,31 @@ export function addAppJsonCompatibility(value: unknown, depth = 0): unknown {
     if (alias && !(alias in result)) {
       result[alias] = addAppJsonCompatibility(item, depth + 1);
     }
+  }
+
+  // Business catalog DTOs predate the native app and use purchaseCost /
+  // dailyRevenue / dailyOperatingCost. Some released native clients read the
+  // older semantic names instead. Keep the canonical fields and add aliases so
+  // a compatible server can repair those clients without requiring an app
+  // release. Never overwrite a field explicitly returned by the backend.
+  const purchaseCost = result.purchaseCost;
+  const dailyRevenue = result.dailyRevenue;
+  const dailyOperatingCost = result.dailyOperatingCost;
+  if (typeof purchaseCost === 'string') {
+    if (!('price' in result)) result.price = purchaseCost;
+    if (!('purchasePrice' in result)) result.purchasePrice = purchaseCost;
+  }
+  if (
+    typeof dailyRevenue === 'string' &&
+    typeof dailyOperatingCost === 'string' &&
+    /^-?\d+$/.test(dailyRevenue) &&
+    /^-?\d+$/.test(dailyOperatingCost)
+  ) {
+    const netProfit = (BigInt(dailyRevenue) - BigInt(dailyOperatingCost)).toString();
+    if (!('expectedProfit' in result)) result.expectedProfit = netProfit;
+    if (!('dailyProfit' in result)) result.dailyProfit = netProfit;
+    if (!('netProfit' in result)) result.netProfit = netProfit;
+    if (!('profit' in result)) result.profit = netProfit;
   }
   return result;
 }
