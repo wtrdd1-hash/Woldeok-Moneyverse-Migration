@@ -25,13 +25,20 @@ const PRINCIPLES = [
   { ko: '현금 교환·환전 불가', en: 'No cash exchange' },
 ];
 
-export default async function ShopPage() {
+interface ShopPageProps {
+  readonly searchParams: Promise<{ q?: string }>;
+}
+
+export default async function ShopPage({ searchParams }: ShopPageProps) {
   const loggedIn = await isLoggedInMember();
+  const params = await searchParams;
+  const query = params.q?.trim() ?? '';
+  const querySuffix = query ? `?q=${encodeURIComponent(query)}` : '';
 
   const [catalogData, walletData, profileData] = await Promise.all([
     loggedIn
-      ? apiOrNull<{ catalogItems: CatalogItem[] }>('/api/v1/shop/catalog')
-      : publicApi<{ catalogItems: CatalogItem[] }>('/api/v1/shop/public-catalog', 60),
+      ? apiOrNull<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/catalog${querySuffix}`)
+      : publicApi<{ catalogItems: CatalogItem[] }>(`/api/v1/shop/public-catalog${querySuffix}`, 60),
     loggedIn ? apiOrNull<CanonicalWalletOverview>('/api/v1/wallet') : null,
     loggedIn
       ? apiOrNull<{ chosenName?: string; discordUsername?: string; avatarUrl?: string }>(
@@ -41,9 +48,6 @@ export default async function ShopPage() {
   ]);
 
   const items = catalogData?.catalogItems || [];
-  // The shop and wallet must read the same canonical USER_CASH balance from
-  // WalletOverview. A removed legacy `cashBalance` field made the shop show 0
-  // even while the wallet correctly showed the ledger-backed amount.
   const userBalance = cashBalanceFromWallet(walletData);
   const username = profileData?.chosenName || profileData?.discordUsername || '모험가';
   const avatarUrl = profileData?.avatarUrl;
@@ -68,6 +72,32 @@ export default async function ShopPage() {
             english="All shop purchase proceeds are 100% permanently burned (SYSTEM_SINK) to preserve currency stability."
           />
         </PageHeader>
+
+        <form action="/shop" method="get" className="flex w-full max-w-2xl gap-2" role="search">
+          <input
+            type="search"
+            name="q"
+            defaultValue={query}
+            placeholder="상품명, 설명, 카테고리 검색"
+            aria-label="상점 검색"
+            className="min-w-0 flex-1 rounded-xl border border-border bg-card px-4 py-2 text-sm outline-none focus:border-amber-500"
+          />
+          <Button type="submit">
+            <T korean="검색" english="Search" />
+          </Button>
+          {query ? (
+            <Button asChild type="button" variant="outline">
+              <Link href="/shop">
+                <T korean="초기화" english="Reset" />
+              </Link>
+            </Button>
+          ) : null}
+        </form>
+        {query ? (
+          <p className="text-sm text-muted-foreground">
+            “{query}” 검색 결과 {items.length}개
+          </p>
+        ) : null}
 
         <div className="flex flex-wrap items-center gap-2">
           <ul aria-label="상점 2.0 원칙" className="flex flex-wrap gap-2">
