@@ -54,16 +54,13 @@ export class LocalAuthRepository {
     );
   }
 
-  async completeRegistration(
-    preAuthSessionId: string,
-    verificationToken: string,
-  ): Promise<CompletedLocalLogin> {
+  async completeRegistration(verificationToken: string): Promise<CompletedLocalLogin> {
     const token = randomToken();
     const csrfToken = randomToken();
     const row = await queryOne<CompletedLocalLoginRow>(
       this.pool,
-      'SELECT * FROM public.auth_complete_local_registration($1,$2,$3,$4)',
-      [preAuthSessionId, sha256(verificationToken), sha256(token), sha256(csrfToken)],
+      'SELECT * FROM public.auth_complete_local_registration_by_token($1,$2,$3)',
+      [sha256(verificationToken), sha256(token), sha256(csrfToken)],
     );
     if (!row) throw new Error('local registration was not completed');
     return { ...row, token, csrfToken };
