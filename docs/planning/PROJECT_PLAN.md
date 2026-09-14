@@ -194,13 +194,14 @@ The project should continue to reconcile and improve, in priority order:
 - Removed the obsolete mandatory two-person approval statement from the current plan while retaining stronger compensating controls.
 - Recorded that the previous always-on test stack was retired, while preserving mandatory pre-production verification gates.
 - Added the rule that implementation and plan documentation must be synchronized in the same workstream.
+
 ### 2026-09-09 — product expansion roadmap parity
 
 The following roadmap mirrors the Korean Living Spec and is staged behind implementation, validation, and release gates. It does not redefine WLD or any virtual-economy feature as a real financial product.
 
 #### P0 — discovery, return visits, and operations
 
-- **Virtual-stock detail hub:** combine price/candles, server-defined indicators, member holdings, and related community content on one canonical page.
+- **Virtual-stock detail hub:** combine price/candles, server-defined indicators, member holdings, and related community content on one canonical page. The first member-facing hub slice is implemented at `/stocks/[symbol]`, linking market data, holdings, watchlist, chart/trading controls, comparison/alerts, and stock-tagged discussion.
 - **Stock watchlist:** store per-member watched virtual stocks and expose them from stock/home surfaces. The first watchlist slice is implemented in PostgreSQL/NestJS/Next.js and remains subject to the normal release/deployment gates.
 - **Public-content SEO:** continuously verify canonical URLs, metadata, sitemap/robots behavior, breadcrumbs, and internal links for anonymous public content.
 - **Admin operations console:** expand read-model-driven user/economy/content/error/service-health views while keeping risky writes separated and step-up protected.
