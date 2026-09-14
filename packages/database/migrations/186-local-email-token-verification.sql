@@ -1,4 +1,4 @@
--- 185-local-email-token-verification.sql
+-- 186-local-email-token-verification.sql
 -- Update version: v2026.09.14.75
 -- Allow a one-time email verification token to complete registration even when
 -- the link is opened outside the app's original browser/cookie jar.
