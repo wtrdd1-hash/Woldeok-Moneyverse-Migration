@@ -24,13 +24,6 @@ import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-err
 import { JobSwitchDto, WorkAssignmentDto, WorkCompletionDto, WorkCompleteTaskDto } from './work.dto';
 import { WorkInputError, WorkRepository } from './work.repository';
 
-/**
- * Guard order is semantic. SessionGuard resolves the session onto the
- * request and everything after it reads what that attached; CsrfGuard cannot
- * verify a token without a session id. CsrfGuard sits at class level and
- * exits early on GET, HEAD and OPTIONS, so the two reads below are not asked
- * for a token.
- */
 @ApiTags('work')
 @Controller('work')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
@@ -42,12 +35,6 @@ export class WorkController {
     return this.work;
   }
 
-  /**
-   * The three codes mean three different things to a member and were all
-   * arriving as one conflict: 22023 is a request the rules refuse, 28000 is a
-   * receipt belonging to somebody else, and anything else is a fault that
-   * must reach the logs as a 500 rather than be reported as their mistake.
-   */
   private async guarded<T>(work: () => Promise<T>, conflictMessage: string): Promise<T> {
     try {
       return await work();
@@ -74,10 +61,15 @@ export class WorkController {
   @Get('profile')
   @ApiOperation({ summary: 'Current active job and all job masteries' })
   async profile(@Req() request: RequestWithSession) {
-    return this.guarded(
-      () => this.repository().jobProfile(requireUserId(request)),
-      'job profile is unavailable',
-    );
+    const repository = this.repository();
+    const [profile, featureState] = await Promise.all([
+      this.guarded(
+        () => repository.jobProfile(requireUserId(request)),
+        'job profile is unavailable',
+      ),
+      repository.featureState(),
+    ]);
+    return { profile, featureState };
   }
 
   @Post('active-job')
@@ -90,14 +82,17 @@ export class WorkController {
   }
 
   @Get('tasks')
-  @ApiOperation({ summary: 'Every task on offer, with this member’s standing against each' })
+  @ApiOperation({ summary: 'Every task on offer plus the administrator-controlled work feature state' })
   async tasks(@Req() request: RequestWithSession) {
-    return {
-      tasks: await this.guarded(
-        () => this.repository().tasks(requireUserId(request)),
+    const repository = this.repository();
+    const [tasks, featureState] = await Promise.all([
+      this.guarded(
+        () => repository.tasks(requireUserId(request)),
         'the task board is unavailable',
       ),
-    };
+      repository.featureState(),
+    ]);
+    return { tasks, featureState };
   }
 
   @Post('tasks/:id/complete')
