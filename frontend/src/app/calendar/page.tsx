@@ -5,10 +5,11 @@ import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
-import { formatDay, formatMoment } from '@/lib/money';
+import { formatDay, formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import type { TodayEvent } from '../quests/early-events';
 import type { EarlyGameBoard } from '../quests/early-game';
+import { upcomingShopDeadlines, type ShopDeadlineItem } from './shop-deadlines';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,10 +40,11 @@ function nextWeekStart(weekStart: string): string | null {
 export default async function CalendarPage() {
   await requireMember();
 
-  const [seasonData, todayData, earlyGame] = await Promise.all([
+  const [seasonData, todayData, earlyGame, shopData] = await Promise.all([
     apiOrNull<{ events: SeasonEvent[] }>('/api/v1/seasons/events'),
     apiOrNull<{ event: TodayEvent | null }>('/api/v1/early-game/today'),
     apiOrNull<EarlyGameBoard>('/api/v1/engagement/early-game'),
+    apiOrNull<{ catalogItems: ShopDeadlineItem[] }>('/api/v1/shop/catalog'),
   ]);
 
   const seasonEvents = seasonData?.events ?? [];
@@ -50,6 +52,7 @@ export default async function CalendarPage() {
   const weeklyGoals = earlyGame?.goals ?? [];
   const weekStart = weeklyGoals.find((goal) => goal.goal_window === 'week')?.week_start ?? null;
   const nextReset = weekStart ? nextWeekStart(weekStart) : null;
+  const shopDeadlines = upcomingShopDeadlines(shopData?.catalogItems ?? []);
 
   return (
     <div className="grid gap-8">
@@ -63,8 +66,8 @@ export default async function CalendarPage() {
           </>
         }
       >
-        시즌 이벤트, 오늘의 사건, 주간 목표처럼 날짜에 따라 바뀌는 게임 일정을 모아 보여줘요.
-        실제 보상·가격·상태는 각 기능의 서버 기록이 기준입니다.
+        시즌 이벤트, 오늘의 사건, 주간 목표처럼 날짜에 따라 바뀌는 게임 일정을 모아 보여줘요. 실제
+        보상·가격·상태는 각 기능의 서버 기록이 기준입니다.
       </PageHeader>
 
       <section className="grid gap-3" aria-labelledby="today-calendar-title">
@@ -90,8 +93,8 @@ export default async function CalendarPage() {
                   </div>
                   <p className="text-sm text-muted-foreground">{today.event_detail}</p>
                   <p className="text-xs text-muted-foreground">
-                    기준일 <time dateTime={today.event_date}>{formatDay(today.event_date)}</time> · 다음 사건은
-                    한국 시간 자정 이후 갱신
+                    기준일 <time dateTime={today.event_date}>{formatDay(today.event_date)}</time> ·
+                    다음 사건은 한국 시간 자정 이후 갱신
                   </p>
                   <Link href="/quests" className="text-sm text-primary">
                     퀘스트에서 확인하기 →
@@ -113,11 +116,17 @@ export default async function CalendarPage() {
                 <p className="text-sm text-muted-foreground">현재 주간 목표가 없어요.</p>
               ) : (
                 <>
-                  <p className="text-sm">이번 주 목표 {weeklyGoals.filter((goal) => goal.goal_window === 'week').length}개</p>
+                  <p className="text-sm">
+                    이번 주 목표 {weeklyGoals.filter((goal) => goal.goal_window === 'week').length}
+                    개
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     이번 주 시작 <time dateTime={weekStart}>{formatDay(weekStart)}</time>
                     {nextReset && (
-                      <> · 다음 갱신 <time dateTime={nextReset}>{formatMoment(nextReset)}</time></>
+                      <>
+                        {' '}
+                        · 다음 갱신 <time dateTime={nextReset}>{formatMoment(nextReset)}</time>
+                      </>
                     )}
                   </p>
                   <Link href="/quests" className="text-sm text-primary">
@@ -130,15 +139,64 @@ export default async function CalendarPage() {
         </div>
       </section>
 
+      <section className="grid gap-3" aria-labelledby="shop-calendar-title">
+        <SectionHeader
+          eyebrow="SHOP DEADLINES"
+          title="판매 종료 예정 상품"
+          id="shop-calendar-title"
+        />
+        {shopData === null ? (
+          <EmptyState
+            title="상점 판매 일정을 불러오지 못했어요."
+            description="판매 종료 시각을 추측하지 않고 서버 카탈로그가 제공하는 일정만 표시합니다."
+          />
+        ) : shopDeadlines.length === 0 ? (
+          <EmptyState
+            title="현재 판매 종료가 예정된 상품이 없어요."
+            description="기간 한정 판매가 등록되면 가장 가까운 종료 일정부터 이곳에 표시돼요."
+          />
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2">
+            {shopDeadlines.map((item) => (
+              <Card key={item.catalog_id}>
+                <CardHeader>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline">{item.category}</Badge>
+                    <CardTitle className="text-base">{item.name}</CardTitle>
+                  </div>
+                  <CardDescription>{groupDigits(item.price)} WLD</CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-2 text-sm">
+                  <p>
+                    판매 종료{' '}
+                    <time dateTime={item.sale_ends_at!}>{formatMoment(item.sale_ends_at!)}</time>
+                  </p>
+                  <Link href="/shop" className="text-sm text-primary">
+                    상점에서 확인하기 →
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </section>
+
       <section className="grid gap-3" aria-labelledby="season-calendar-title">
-        <SectionHeader eyebrow="SEASON EVENTS" title="종료 예정 시즌 이벤트" id="season-calendar-title" />
+        <SectionHeader
+          eyebrow="SEASON EVENTS"
+          title="종료 예정 시즌 이벤트"
+          id="season-calendar-title"
+        />
         {seasonData === null ? (
           <EmptyState
             title="시즌 이벤트 일정을 불러오지 못했어요."
             description="일정을 추측해서 표시하지 않습니다. 잠시 후 다시 확인해 주세요."
           />
         ) : seasonEvents.length === 0 ? (
-          <EmptyState title="현재 진행 중인 시즌 이벤트가 없어요." description="새 이벤트가 열리면 이곳에 표시돼요." />
+          <EmptyState
+            title="현재 진행 중인 시즌 이벤트가 없어요."
+            description="새 이벤트가 열리면 이곳에 표시돼요."
+          />
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
             {seasonEvents.map((event) => (
