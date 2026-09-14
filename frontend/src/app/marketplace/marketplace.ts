@@ -12,8 +12,8 @@ export type MarketplaceHolding = {
   readonly serial_number: number | null;
 };
 
-export type MarketplaceFilterState = 'all' | 'equipped' | 'serialized';
-export type MarketplaceSort = 'name' | 'quantity' | 'newest';
+export type MarketplaceFilterState = 'all' | 'equipped' | 'unequipped' | 'serialized';
+export type MarketplaceSort = 'name' | 'quantity' | 'newest' | 'oldest';
 export type MarketplaceAcquiredWindow = 'all' | '7d' | '30d';
 
 export interface MarketplaceQuery {
@@ -27,8 +27,8 @@ export interface MarketplaceQuery {
   readonly sort: MarketplaceSort;
 }
 
-const STATES = new Set<MarketplaceFilterState>(['all', 'equipped', 'serialized']);
-const SORTS = new Set<MarketplaceSort>(['name', 'quantity', 'newest']);
+const STATES = new Set<MarketplaceFilterState>(['all', 'equipped', 'unequipped', 'serialized']);
+const SORTS = new Set<MarketplaceSort>(['name', 'quantity', 'newest', 'oldest']);
 const ACQUIRED_WINDOWS = new Set<MarketplaceAcquiredWindow>(['all', '7d', '30d']);
 const MAX_MIN_QUANTITY = 999_999;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -65,6 +65,11 @@ export function marketplaceQuery(
   };
 }
 
+function parsedAcquiredAt(value: string): number | null {
+  const parsed = Date.parse(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export function filterMarketplaceHoldings(
   holdings: readonly MarketplaceHolding[],
   query: MarketplaceQuery,
@@ -85,12 +90,13 @@ export function filterMarketplaceHoldings(
     if (query.effect && item.effect_kind !== query.effect) return false;
     if (query.minQuantity > 0 && item.quantity < query.minQuantity) return false;
     if (acquiredCutoffMs !== null) {
-      const acquiredAtMs = Date.parse(item.acquired_at);
-      if (!Number.isFinite(acquiredAtMs) || acquiredAtMs < acquiredCutoffMs || acquiredAtMs > nowMs) {
+      const acquiredAtMs = parsedAcquiredAt(item.acquired_at);
+      if (acquiredAtMs === null || acquiredAtMs < acquiredCutoffMs || acquiredAtMs > nowMs) {
         return false;
       }
     }
     if (query.state === 'equipped' && !item.is_equipped) return false;
+    if (query.state === 'unequipped' && item.is_equipped) return false;
     if (query.state === 'serialized' && item.serial_number === null) return false;
     if (!needle) return true;
     return [item.name, item.code, item.description].some((value) =>
@@ -102,9 +108,15 @@ export function filterMarketplaceHoldings(
     if (query.sort === 'quantity') {
       return right.quantity - left.quantity || left.name.localeCompare(right.name, 'ko-KR');
     }
-    if (query.sort === 'newest') {
-      const byDate = Date.parse(right.acquired_at) - Date.parse(left.acquired_at);
-      return byDate || left.name.localeCompare(right.name, 'ko-KR');
+    if (query.sort === 'newest' || query.sort === 'oldest') {
+      const leftDate = parsedAcquiredAt(left.acquired_at);
+      const rightDate = parsedAcquiredAt(right.acquired_at);
+      if (leftDate === null && rightDate !== null) return 1;
+      if (leftDate !== null && rightDate === null) return -1;
+      if (leftDate !== null && rightDate !== null && leftDate !== rightDate) {
+        return query.sort === 'newest' ? rightDate - leftDate : leftDate - rightDate;
+      }
+      return left.name.localeCompare(right.name, 'ko-KR');
     }
     return left.name.localeCompare(right.name, 'ko-KR');
   });
