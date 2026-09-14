@@ -16,12 +16,22 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function StockComparePage() {
+export default async function StockComparePage({
+  searchParams,
+}: {
+  readonly searchParams: Promise<{ readonly symbols?: string | string[] }>;
+}) {
   await requireMember();
-  const locale = await getServerLocale();
+  const [locale, query] = await Promise.all([getServerLocale(), searchParams]);
   const isEn = locale === 'en';
   const market = await apiOrNull<{ stocks: ComparableStock[] }>('/api/v1/stocks');
   const stocks = market?.stocks ?? [];
+  const symbolQuery = Array.isArray(query.symbols) ? query.symbols[0] : query.symbols;
+  const initialSymbols = (symbolQuery ?? '')
+    .split(',')
+    .map((symbol) => symbol.trim())
+    .filter(Boolean)
+    .slice(0, 3);
 
   return (
     <div className="grid gap-6">
@@ -44,7 +54,7 @@ export default async function StockComparePage() {
           title={isEn ? 'At least two listed stocks are required for comparison.' : '비교하려면 거래 가능한 종목이 2개 이상 필요합니다.'}
         />
       ) : (
-        <StockComparison stocks={stocks} isEn={isEn} />
+        <StockComparison stocks={stocks} isEn={isEn} initialSymbols={initialSymbols} />
       )}
     </div>
   );

@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { groupDigits } from '@/lib/money';
-import { signedDelta } from './stock-comparison-math';
+import { initialComparisonIds, signedDelta } from './stock-comparison-math';
 
 export interface ComparableStock {
   readonly id: string;
@@ -23,12 +23,15 @@ export interface ComparableStock {
 interface StockComparisonProps {
   readonly stocks: readonly ComparableStock[];
   readonly isEn: boolean;
+  readonly initialSymbols?: readonly string[];
 }
 
 const MAX_SELECTED = 3;
 
-export function StockComparison({ stocks, isEn }: StockComparisonProps) {
-  const [selectedIds, setSelectedIds] = useState<string[]>(() => stocks.slice(0, 2).map((stock) => stock.id));
+export function StockComparison({ stocks, isEn, initialSymbols = [] }: StockComparisonProps) {
+  const [selectedIds, setSelectedIds] = useState<string[]>(() =>
+    initialComparisonIds(stocks, initialSymbols, MAX_SELECTED),
+  );
   const selected = useMemo(
     () => selectedIds.map((id) => stocks.find((stock) => stock.id === id)).filter((stock): stock is ComparableStock => Boolean(stock)),
     [selectedIds, stocks],
