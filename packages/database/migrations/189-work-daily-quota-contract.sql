@@ -100,7 +100,7 @@ BEGIN
     v_updated := pg_catalog.replace(
       v_definition,
       '  v_is_overtime := false;',
-      '  PERFORM pg_catalog.pg_advisory_xact_lock(\n    pg_catalog.hashtextextended(''moneyverse:work-quota:'' || p_actor::text || '':'' || p_task_id::text, 0)\n  );\n\n  IF v_task.daily_limit > 0 AND v_today_completions >= v_task.daily_limit THEN\n    RAISE EXCEPTION USING ERRCODE = ''22023'', MESSAGE = ''daily completion limit reached for this task'';\n  END IF;\n\n  v_is_overtime := false;'
+      E'  PERFORM pg_catalog.pg_advisory_xact_lock(\n    pg_catalog.hashtextextended(''moneyverse:work-quota:'' || p_actor::text || '':'' || p_task_id::text, 0)\n  );\n\n  IF v_task.daily_limit > 0 AND v_today_completions >= v_task.daily_limit THEN\n    RAISE EXCEPTION USING ERRCODE = ''22023'', MESSAGE = ''daily completion limit reached for this task'';\n  END IF;\n\n  v_is_overtime := false;'
     );
     IF v_updated = v_definition THEN
       RAISE EXCEPTION 'work_complete_task_v2 definition did not match expected quota insertion point';
@@ -117,7 +117,7 @@ BEGIN
     v_updated := pg_catalog.replace(
       v_definition,
       '  -- Legacy assignment completion now shares the same full-repeat, level-aware',
-      '  PERFORM pg_catalog.pg_advisory_xact_lock(\n    pg_catalog.hashtextextended(''moneyverse:work-quota:'' || p_actor::text || '':'' || v_task::text, 0)\n  );\n\n  IF COALESCE((SELECT task_row.daily_limit FROM public.work_task_catalog AS task_row WHERE task_row.id = v_task), 0) > 0\n     AND v_repeat >= (SELECT task_row.daily_limit FROM public.work_task_catalog AS task_row WHERE task_row.id = v_task) THEN\n    RAISE EXCEPTION USING ERRCODE = ''22023'', MESSAGE = ''daily completion limit reached for this task'';\n  END IF;\n\n  -- Legacy assignment completion now shares the same full-repeat, level-aware'
+      E'  PERFORM pg_catalog.pg_advisory_xact_lock(\n    pg_catalog.hashtextextended(''moneyverse:work-quota:'' || p_actor::text || '':'' || v_task::text, 0)\n  );\n\n  IF COALESCE((SELECT task_row.daily_limit FROM public.work_task_catalog AS task_row WHERE task_row.id = v_task), 0) > 0\n     AND v_repeat >= (SELECT task_row.daily_limit FROM public.work_task_catalog AS task_row WHERE task_row.id = v_task) THEN\n    RAISE EXCEPTION USING ERRCODE = ''22023'', MESSAGE = ''daily completion limit reached for this task'';\n  END IF;\n\n  -- Legacy assignment completion now shares the same full-repeat, level-aware'
     );
     IF v_updated = v_definition THEN
       RAISE EXCEPTION 'work_verify_and_reward definition did not match expected quota insertion point';
