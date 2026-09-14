@@ -15,4 +15,4 @@ Integrated active development branches against the refreshed `main` baseline wit
 
 ## Validation and deployment
 
-Pending in this commit: local CI-equivalent checks, branch Test Candidate build, isolated test exact-SHA/backend smoke, then Production promotion and post-deploy smoke.
+Local CI-equivalent validation passed: lint (0 errors, 11 existing image-optimization warnings), typecheck, tests (backend 856 passed / 354 DB-dependent skipped, frontend 575 passed, database 7 passed), and production build. The first test run exposed a duplicate migration number: the new email verification migration collided with existing migration 185, so the new migration was renumbered to 186 and the full gate was rerun successfully. Next: GitHub Test Candidate, isolated test exact-SHA/backend smoke, Production promotion, and post-deploy smoke.

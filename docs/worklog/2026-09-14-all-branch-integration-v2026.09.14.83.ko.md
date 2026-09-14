@@ -15,4 +15,4 @@
 
 ## 검증 및 배포
 
-이 커밋 이후 로컬 CI 동등 검증, 브랜치 Test Candidate 빌드, 격리 테스트 서버 동일 SHA/백엔드 스모크, Production 승격 및 배포 후 스모크를 순서대로 수행한다.
+로컬 CI 동등 검증 완료: lint(오류 0, 기존 이미지 최적화 경고 11개), typecheck 통과, 테스트 통과(backend 856개 통과/DB 종속 354개 스킵, frontend 575개 통과, database 7개 통과), production build 통과. 최초 테스트에서 신규 이메일 인증 마이그레이션이 기존 185번과 충돌한 것을 발견해 신규 파일을 186번으로 재번호화했고 재검증했다. 다음 단계는 GitHub Test Candidate, 격리 테스트 서버 동일 SHA/백엔드 스모크, Production 승격 및 배포 후 스모크다.
