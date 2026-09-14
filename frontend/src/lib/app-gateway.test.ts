@@ -94,6 +94,38 @@ describe('app API compatibility contract', () => {
     expect(value.existingValue).toBe(2);
   });
 
+  it('adds released mobile business price and profit aliases without removing canonical fields', () => {
+    const value = addAppJsonCompatibility({
+      businessTypes: [{
+        id: 'business-1',
+        name: '중고 판매대',
+        purchaseCost: '3000',
+        dailyRevenue: '170',
+        dailyOperatingCost: '50',
+      }],
+    }) as { businessTypes: Array<Record<string, unknown>> };
+    const business = value.businessTypes[0]!;
+    expect(business.purchaseCost).toBe('3000');
+    expect(business.price).toBe('3000');
+    expect(business.purchasePrice).toBe('3000');
+    expect(business.expectedProfit).toBe('120');
+    expect(business.dailyProfit).toBe('120');
+    expect(business.netProfit).toBe('120');
+    expect(business.profit).toBe('120');
+  });
+
+  it('does not overwrite explicit semantic business fields from the backend', () => {
+    const value = addAppJsonCompatibility({
+      purchaseCost: '3000',
+      dailyRevenue: '170',
+      dailyOperatingCost: '50',
+      price: 'custom',
+      expectedProfit: 'custom-profit',
+    }) as Record<string, unknown>;
+    expect(value.price).toBe('custom');
+    expect(value.expectedProfit).toBe('custom-profit');
+  });
+
   it('recognises normal JSON and RFC problem JSON media types only', () => {
     expect(isJsonMediaType('application/json; charset=utf-8')).toBe(true);
     expect(isJsonMediaType('application/problem+json')).toBe(true);
