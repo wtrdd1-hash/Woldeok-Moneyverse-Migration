@@ -40,6 +40,7 @@ describe('marketplaceQuery', () => {
     expect(marketplaceQuery({ state: 'broken', sort: 'random', q: '  수리  ' })).toEqual({
       q: '수리',
       category: '',
+      rarity: '',
       state: 'all',
       sort: 'name',
     });
@@ -47,9 +48,14 @@ describe('marketplaceQuery', () => {
 
   it('takes only the first repeated query parameter', () => {
     expect(
-      marketplaceQuery({ category: ['material', 'cosmetic'], state: ['serialized', 'all'] }),
+      marketplaceQuery({
+        category: ['material', 'cosmetic'],
+        rarity: ['common', 'rare'],
+        state: ['serialized', 'all'],
+      }),
     ).toMatchObject({
       category: 'material',
+      rarity: 'common',
       state: 'serialized',
     });
   });
@@ -65,17 +71,17 @@ describe('filterMarketplaceHoldings', () => {
     ).toEqual(['city_badge']);
   });
 
-  it('filters category and item state together', () => {
+  it('filters category, rarity and item state together', () => {
     expect(
       filterMarketplaceHoldings(
         items,
-        marketplaceQuery({ category: 'cosmetic', state: 'equipped' }),
+        marketplaceQuery({ category: 'cosmetic', rarity: 'common', state: 'equipped' }),
       ),
     ).toHaveLength(1);
     expect(
       filterMarketplaceHoldings(
         items,
-        marketplaceQuery({ category: 'material', state: 'serialized' }),
+        marketplaceQuery({ category: 'material', rarity: 'common', state: 'serialized' }),
       ),
     ).toHaveLength(0);
   });
