@@ -13,7 +13,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "api:contract:generate": "node scripts/enrich-mobile-api-contract.mjs && node scripts/generate-mobile-api-schema-reference.mjs",
-    "api:contract:check": "pnpm api:contract:generate && git diff --exit-code -- docs/mobile-api-contract.json docs/mobile-api-schema-reference.md docs/mobile-api-schema-reference.ko.md"
+    "api:contract:check": "pnpm api:contract:generate && node scripts/check-mobile-api-contract.mjs"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
@@ -24,7 +24,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-hooks": "5.2.0",
     "prettier": "^3.0.0",
     "typescript": "6.0.3",
     "typescript-eslint": "^8.0.0"
