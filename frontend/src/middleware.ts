@@ -3,24 +3,33 @@ import type { NextRequest } from 'next/server';
 import { DETECTED_LOCALE_COOKIE, LOCALE_COOKIE, detectLocale, isLocale } from '@/lib/locale';
 
 /**
- * `easy-scraping.com` previously served an unrelated technical blog under
- * `/entry/*`.  Those articles are not part of Moneyverse and must never be
- * redirected to the new service: that would make both visitors and search
- * engines believe the old article still exists.
- *
- * A 410 is intentionally stronger than the application's normal 404.  It
- * tells crawlers that the resource was deliberately removed, so historic
- * Search Console entries can fall out of the index on their next crawl.
+ * Browser-facing production traffic must stay on HTTPS. TLS terminates at the
+ * public proxy; the Nest service remains private loopback HTTP and is reached
+ * only through the same-origin BFF.
  */
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  if (process.env.NODE_ENV === 'production') {
+    const base = process.env.APP_BASE_URL;
+    const forwardedProto = request.headers.get('x-forwarded-proto')?.split(',')[0]?.trim();
+    const requestIsHttp =
+      forwardedProto === 'http' || (!forwardedProto && request.nextUrl.protocol === 'http:');
+    if (base?.startsWith('https://') && requestIsHttp) {
+      const target = new URL(`${pathname}${request.nextUrl.search}`, base);
+      return NextResponse.redirect(target, 308);
+    }
+  }
+
   const hasSession = request.cookies.has('__Host-mv_session') || request.cookies.has('mv_session');
 
-  // Block signed-in members from landing on provider selection or login screen
+  // Block signed-in members from landing on provider selection or login screen.
   if (hasSession && pathname === '/login/providers') {
     return NextResponse.redirect(new URL('/', request.url), { status: 307 });
   }
-  if (request.nextUrl.pathname.startsWith('/entry/')) {
+
+  // Historic blog routes are deliberately gone and must not be redirected.
+  if (pathname.startsWith('/entry/')) {
     return new NextResponse('This legacy blog post has been permanently removed.', {
       status: 410,
       headers: {
