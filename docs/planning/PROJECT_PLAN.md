@@ -430,3 +430,139 @@ Runtime implementation continues through a separate workflow: new branch → CI/
 - Added security threat register including BOLA, authentication, economy replay, release governance, supply chain, uploads, admin and privacy/analytics.
 - Added feature/business cost models that distinguish WLD sinks from real revenue and define scale/hold/kill logic using retained value and contribution cost.
 - No runtime code, database, API, infrastructure, branch setting or security implementation is changed by this documentation update.
+
+## 19. Identity data-processing parity and authentication release audit — v2026.09.15.105
+
+This section is normative and extends the v104 all-feature contract without weakening any prior P0/P1 gate. The run re-audited the full feature register and found the largest new gap at the identity/privacy boundary: first-party email/password authentication is present in code, migrations and mobile API documentation, while the current public web login, guide and privacy notice remain OAuth-centric.
+
+### 19.1 New and carried release issues
+
+#### AUTH-105-01 — P0 — OPEN / PUBLIC ROLLOUT HOLD — local-auth processing contract is ahead of public privacy/login disclosure
+
+- **First found/reproduced:** 2026-09-15. **Severity:** P0/HIGH because the gap concerns authentication credentials, consent and privacy disclosure. It does not by itself prove that an undisclosed Production mutation is currently enabled; this run did not create an account or mutate Production.
+- **Repository evidence:** current `main` contains `LocalAuthController`; `POST /app-api/v1/auth/local/register`, `POST /app-api/v1/auth/local/verify-email`, `POST /app-api/v1/auth/local/login`; Argon2id password-verifier storage; normalized email and SHA-256 email hash; one-time verification-token hash; migrations for local email registration/verification; and mobile API coverage that treats first-party registration/login/email verification as covered.
+- **Runtime/public-contract evidence:** Production `/login` currently offers Discord/Google only; Production `/guide` says users do not create a separate password; the current public privacy notice describes OAuth identity processing and Discord/Google external login but does not describe first-party email/password credentials, verification-token processing, local-auth retention/deletion or email-verification delivery as a separate data-processing purpose.
+- **Affected users/functions:** native/mobile first-party registration, future web local-auth rollout, privacy/terms consent, account deletion and credential removal, SMTP verification delivery, recovery, support, security incident handling, analytics and any campaign that advertises local signup.
+- **Root cause:** implementation/channel expansion landed after the public OAuth-centric disclosure contract and the public login/guide were not synchronized with that new credential-processing path.
+- **Immediate product rule:** do not newly market or generally expose first-party local registration until the published privacy version and consent flow accurately describe the processing and exact-SHA QA passes. If Production already serves the app endpoint, preserve existing valid users and investigate exposure rather than destructively disabling accounts; new-registration gating must be reversible through a server-owned feature/rollout control. Proposed flag name is implementation-defined, not normative.
+- **Required public disclosure/data contract before GA:** normalized email used for identity and verification/recovery; an email-derived hash used for lookup/uniqueness/security; Argon2id password verifier rather than plaintext password; display name; hashed verification token and its expiry/single-use behavior; consent/policy versions; authenticated session identifiers; verification-delivery metadata needed for troubleshooting; purposes; processor/SMTP transfer facts if applicable; retention and deletion/credential-removal rules; user-rights/contact procedure. Never publish internal hash/token values.
+- **Retention:** migration evidence gives the pending verification token a 30-minute expiry. The exact cleanup schedule for expired pending registrations, credential retention after account deletion, legal/fraud holds and SMTP diagnostics must be documented and implemented before GA. Planning must not invent a retention duration that code/operations do not enforce.
+- **Consent/versioning:** `/app-api/v1/auth/policy` remains the source of current `termsVersion`/`privacyVersion`; local registration requires current prelogin consent. A materially updated local-auth privacy notice requires a published version change and client use of the server version, not a hard-coded mobile version. Existing signed-in users follow the documented re-consent policy when `consentCurrent` becomes false.
+- **Migration/rollback:** no applied migration is edited. Disclosure/UI synchronization needs no schema change unless deletion/retention enforcement requires a new data job/table/index. Rollback is feature exposure rollback plus restoration of the last accurate public copy; never remove or rewrite ledger history to delete an auth credential.
+- **Status:** OPEN. **Promotion gate:** public local-auth GA BLOCKED until privacy/content/auth-doc parity, security tests and isolated exact-SHA acceptance pass.
+
+#### AUTH-105-02 — P1 — TODO — canonical app-auth guide is stale against the cross-browser verification implementation
+
+- **Evidence:** current `LocalAuthController.verifyEmail` does not use `SessionGuard` or `CsrfGuard`; it validates the bearer verification token through the credential repository and on success issues the signed-in session cookie/CSRF state. Migration/current mobile-complete documentation intentionally support opening the one-time verification link outside the original browser/cookie jar. `docs/app-auth-api-guide.md`, however, still tells clients to send the same prelogin cookie and current CSRF token to `POST /app-api/v1/auth/local/verify-email` and its minimal pseudocode preserves that obsolete dependency.
+- **Impact:** new app implementations may incorrectly bind verification to the originating CookieJar, produce support failures when email opens in another browser, or maintain contradictory security assumptions.
+- **Fix scope:** synchronize English/Korean app-auth guide, endpoint catalog/schema descriptions and generated examples with the controller contract. Explicitly state that register/login remain prelogin-session + CSRF guarded while verify-email is a one-time bearer-token exchange and therefore must receive stronger token secrecy controls instead of CSRF dependence.
+- **QA:** documentation contract snapshot against OpenAPI/controller guards; same-browser and cross-browser verification; missing/invalid/expired/reused token; no-cookie success for a valid token; arbitrary CSRF header does not become an authorization primitive; cookie/session rotation after success; old-client compatibility.
+- **Status:** TODO. This is P1 unless runtime testing reveals a client break/security bypass, in which case it escalates.
+
+#### Carried blockers
+
+- `QA-104-01` remains **P0 OPEN**: Production `/guide` still states unlimited full profession reward and therefore remains out of contract with authoritative daily quotas.
+- `REL-104-02` remains **P0 OPEN**: the automated Production-ready gate still proves less than the Living Plan's migration/auth/economy/rollback evidence contract.
+- `REL-104-03` remains **P1 TODO**: `main` is protected but repository metadata still reports required status checks unenforced/empty.
+
+### 19.2 First-party authentication end-to-end contract
+
+The following is the minimum implementation/operations contract for the existing local-auth slice. It supplements rather than replaces OAuth/OIDC requirements.
+
+| Step | Endpoint/current authority | Required UX/state | Security/error contract | Data/side effects |
+| --- | --- | --- | --- | --- |
+| prelogin | `POST /app-api/v1/auth/prelogin-session` | create resumable pre-auth state; show retryable service failure, not a fake signed-in state | secure server cookie + in-memory CSRF; no secret logging | prelogin session only |
+| policy | `GET /app-api/v1/auth/policy` | render current terms/privacy versions before local registration | server version is authoritative; clients never hard-code | read-only policy version |
+| consent | `PUT /app-api/v1/auth/consent` | explicit terms/privacy/age acknowledgement; stale version returns refresh/review path | SessionGuard+CSRF, no silent consent | consent version/time bound to prelogin/user state |
+| register | `POST /app-api/v1/auth/local/register` | email/password/display-name form; typo suggestion; pending-verification state; recoverable SMTP unavailable state | prelogin+CSRF, current consent required, generic accepted semantics, common-password rejection, 429 abuse control | normalized email, email hash, Argon2id verifier, display name, hashed one-time token; verification delivery |
+| verify | `POST /app-api/v1/auth/local/verify-email` | email link may open cross-browser; success becomes signed-in; failure is generic and recoverable | bearer token is the authorization secret; no SessionGuard/CSRF dependency; single-use/expiry; no token disclosure in logs | completes account activation, invalidates/consumes pending token, issues session cookie + CSRF |
+| login | `POST /app-api/v1/auth/local/login` | same public error for unknown email/wrong password; offline/429/5xx distinguished | prelogin+CSRF; dummy password work for nonexistent user; rate/abuse controls | verifies Argon2id credential, issues/rotates session |
+| viewer/session | `GET /app-api/v1/auth/viewer`, `GET /app-api/v1/auth/session` | client trusts server signed-in state only; consent-current state can route to re-consent | signed-in cookie authority; no client-only auth inference | read/refresh session state |
+| logout | `POST /app-api/v1/auth/logout` | clear local UI only after server invalidation response; offline failure does not pretend remote session is revoked | signed-in session+CSRF; revoke server session/cookie | session invalidation + audit as appropriate |
+
+**Rate limits:** register, login, verify and any future resend/recovery endpoint require separate server-configured budgets with IP/network, credential/email-hash and session/device abuse signals where privacy-safe. Numeric thresholds are not invented in this plan; the chosen values must be recorded in the implementation/config review, return `429` with bounded retry behavior, and be load/abuse tested. OWASP API resource-consumption guidance applies because SMTP/Argon2 work can also be a cost-amplification target.
+
+**Idempotency/state:** registration must not create duplicate active accounts on client retries; verification of an already-consumed token must not issue additional identities; OAuth/local linking must not silently merge identities on email similarity alone. Any linking workflow requires an authenticated existing account, provider/credential ownership proof, collision handling and audit.
+
+### 19.3 Verification-link, privacy and analytics boundary
+
+The verification token is a short-lived bearer secret even though it is delivered in a URL. The current email sender puts the token in the verification URL query, so the verification surface must apply all of these controls before GA:
+
+- `noindex`/`X-Robots-Tag` and exclusion from sitemap; no public structured data for token-bearing URLs.
+- `Referrer-Policy: no-referrer` (or an equally strict validated policy) on the token-consumption response/page.
+- no AdSense, third-party analytics, social widgets, remote marketing pixels or external images/scripts before the token has been exchanged and removed from the address bar.
+- web/access logs, error telemetry and analytics must drop or redact query strings on this route; never store the raw verification token.
+- consume/exchange once, then redirect/replace navigation to a clean canonical success/failure URL with no token. Browser history/back/reload must not re-expose a usable token.
+- email-link preview/scanner behavior must not accidentally consume the token solely through a GET. State mutation remains POST/server action after an intentional verification step; QA must include link scanners/prefetch where practical.
+
+Privacy analytics for local auth may record coarse state transitions (`prelogin_created`, `consent_completed`, `registration_accepted`, `verification_succeeded|failed_class`, `login_succeeded|failed_class`, `logout`) using pseudonymous subject/session identifiers. Never send email, email hash, password/verifier, raw token, session cookie, CSRF, OAuth code, recovery state or precise security signals to general-purpose product analytics/ad systems.
+
+### 19.4 Security threat additions
+
+| ID | Severity | Scenario | Prevent/detect | Mandatory test/deploy rule |
+| --- | --- | --- | --- | --- |
+| SEC-105-01 | HIGH | credential stuffing or password spraying against local login | generic errors, Argon2id, rate/abuse budgets, dummy work for unknown account, high-velocity alert without raw credential logging | distributed/sequential invalid-login tests; unexplained bypass blocks local-auth rollout |
+| SEC-105-02 | HIGH | verification token leaks through URL referrer/log/analytics or is replayed | hashed server storage, short expiry, one-time consume, no-referrer, query redaction, no third parties before exchange | token log/referrer/analytics scan; expired/replay/cross-browser tests; raw-token leak blocks release |
+| SEC-105-03 | HIGH | local email collides with or is auto-merged into an OAuth identity, enabling account takeover | never merge by email similarity; authenticated explicit linking and uniqueness checks | cross-account/local-vs-OAuth collision matrix; any silent merge blocks release |
+| SEC-105-04 | MEDIUM/HIGH | registration/resend/verification is abused to consume SMTP/Argon2/DB capacity | API4-style resource budgets, queue/provider limits, anomaly metrics, graceful 429/503 | load/cost-amplification test; provider outage must not loop mail or claim delivery |
+| SEC-105-05 | HIGH privacy/trust | public privacy notice/consent omits credential-processing actually offered to users | rollout hold until published notice, consent version, deletion/retention and processor facts match implementation | policy-content snapshot in exact-SHA QA; mismatch blocks new public local registration |
+
+### 19.5 SEO and public-content changes
+
+- `/login`, any local-signup form, `/verify-email`, recovery/reset pages and authenticated security-center pages are `PUBLIC_NOINDEX` or `AUTH_REQUIRED` and excluded from all sitemaps. Their purpose is account security, not acquisition inventory.
+- Verification-token query URLs never canonicalize to themselves. The only canonical candidate is a token-free informational route, and success/failure views must not expose account existence or private state to crawlers.
+- `/privacy` and `/terms` remain public canonical legal/trust documents. Their `lastModified`/visible effective date changes only when policy text changes, and the server-published policy version used by consent must correspond to the actually published document.
+- `/guide` remains acquisition/SEO expansion HOLD for two independent correctness reasons until fixed: profession quota misinformation (`QA-104-01`) and OAuth-only password wording that is incompatible with any decision to make local auth generally available.
+- Google Search technical guidance is applied directly: public 200 pages can be indexed unless indexing is blocked; sensitive auth/token pages therefore require explicit noindex/auth controls rather than relying on robots.txt.
+
+### 19.6 Profitability and business-value model for local auth
+
+Local auth has no direct revenue in the current model. Its business case is **incremental activated/retained users and reduced single-provider dependency**, minus authentication operations cost.
+
+Track: visitor/app-start → prelogin → consent → register accepted → email delivered → verified session → first meaningful action → D1/D7/D30; verification-delivery success/latency; time-to-verify; resend rate if implemented; login success/failure; ATO/credential-stuffing signals; fake-signup rate; support contacts per activated user; SMTP/provider cost; Argon2/CPU and DB cost; privacy/security incident workload; deletion/recovery workload.
+
+Use `incremental local-auth contribution = incremental D30 retained-user contribution value - SMTP - auth compute/DB - support - fraud/abuse - privacy/security operations cost`. The D30 contribution value and attach uplift are hypotheses until measured; do not substitute industry averages. `SCALE` only if incremental D30 retention/activation improves without breaching ATO, privacy complaint, fake-signup, email abuse or support-cost guardrails. `ITERATE/HOLD` if verification drop-off or support burden is high. `KILL/ROLLBACK NEW SIGNUP` if disclosure cannot remain accurate, credential abuse becomes uncontrolled, or security tests fail.
+
+### 19.7 QA, operations, rollout and rollback acceptance
+
+Before local auth can be advertised or generally enabled, the same immutable SHA on isolated test must pass:
+
+1. current policy version fetch and required consent; stale/missing consent rejection;
+2. registration validation, known-domain typo handling, duplicate/retry behavior and SMTP success/failure semantics;
+3. same-browser and cross-browser verification; no-cookie valid-token success; invalid/expired/reused token denial; link-scanner/prefetch safety;
+4. local login unknown-email/wrong-password public-error equivalence, credential stuffing and 429 handling;
+5. viewer/session confirmation, session rotation/fixation resistance, logout invalidation and CSRF on guarded mutations;
+6. OAuth Discord/Google regression and cross-account provider/local collision/linking tests;
+7. raw secret scan across application/access/error/analytics logs for password, verifier, verification token, cookie and CSRF;
+8. privacy notice, terms, consent version, account deletion/credential removal and expired-pending-registration cleanup evidence;
+9. mobile API schema/guide parity and old-client behavior; web login remains OAuth-only unless a separate web-local-auth rollout is intentionally approved;
+10. SEO/privacy smoke: login/verify/recovery noindex, no token URL in sitemap/canonical, no ads/third-party analytics on token-consumption surface;
+11. rollback: disable new local registration without invalidating existing legitimate sessions/accounts, preserve OAuth login and preserve append-only economy history.
+
+Operator monitoring after rollout: registration/verification funnel, SMTP 4xx/5xx, queue latency, 429 by endpoint, failed-login velocity, token failure classes, account-link collision, signup fraud, deletion/recovery requests, support contacts, privacy complaints, D1/D7/D30. Alerts must contain pseudonymous IDs and safe error classes, not credentials or raw email/token.
+
+### 19.8 Runtime/CI evidence snapshot for v105
+
+- Starting and mid-run `main` remained `1679fe33a8b276035c4a8fc0ab8e79d42cb2f07c`; no concurrent change was observed before preparing this update.
+- Production public home/login/guide/privacy/status were checked non-destructively. Login is OAuth-only in current web UX; guide still contains the known unlimited-work statement and OAuth-only password explanation; privacy is OAuth-centric; public status reports web/economy API/ledger DB healthy at its latest snapshot. Authenticated/mutating Production local-auth behavior was intentionally not exercised, so that runtime exposure remains `UNVERIFIED`.
+- GitHub branch metadata still reports `main` protected with required-status-check enforcement off/empty. Legacy combined status for the starting SHA contains no status entries.
+- A `Build Production Release` workflow run for the starting docs SHA completed as `skipped`, with `test-gate` and `build` skipped. The workflow itself only enters the test gate for manual dispatch or a successful `Build Test Candidate` workflow on `main`. Available evidence does not establish the exact upstream reason, so this run records **no Production promotion success** rather than guessing.
+- `REL-104-02` therefore remains open: when a runtime release is eligible, the test gate still checks exact SHA, public catalog and root noindex but not the full normative migration/auth/economy/rollback evidence set.
+
+### 19.9 External reference decisions — accessed 2026-09-15
+
+- **OWASP ASVS 5.0.0 (2025-05-30) — DIRECT ADOPT:** current stable application-security verification baseline for authentication/session controls.
+- **OWASP API Security Top 10 2023 — DIRECT ADOPT:** Broken Authentication, BOLA, Unrestricted Resource Consumption and Sensitive Business Flow abuse are directly relevant to local login, email verification and signup abuse.
+- **Korea PIPC 2026 privacy-policy materials — DIRECT ADOPT as disclosure-design guidance:** current standard-policy materials emphasize documenting processing purpose, personal-data items, retention and user-rights procedures. Moneyverse must make those public facts match the actual local-auth processing before broad rollout.
+- **Google Search Central technical/indexing guidance — DIRECT ADOPT:** publicly accessible 200 pages can be indexed; explicit noindex/auth controls are required for auth/token surfaces, and robots.txt is not the privacy boundary.
+- **FTC 2026 negative-option/subscription actions — REFERENCE ONLY:** retain the existing guardrail for any future real-money recurring billing; it does not turn local auth or WLD into a paid product.
+
+### 19.10 Change record — v2026.09.15.105
+
+- Added P0 `AUTH-105-01` public-rollout hold for first-party email/password processing disclosure and consent parity.
+- Added P1 `AUTH-105-02` for stale verify-email cookie/CSRF instructions versus the current cross-browser bearer-token implementation.
+- Added endpoint-level local-auth UX/API/data/security/SEO/analytics/profitability/QA/rollback contracts.
+- Added verification-token URL privacy/SEO controls and auth-specific threat cases.
+- Reconfirmed QA-104-01 and REL-104-02 as P0 OPEN and REL-104-03 as P1 TODO.
+- Recorded current workflow evidence accurately: Production Release for the starting docs SHA is skipped; no Production promotion pass is claimed.
+- All v104 feature-family contracts remain normative unless explicitly superseded above. No runtime code, database, API, infrastructure, branch policy or security implementation is changed by v105.

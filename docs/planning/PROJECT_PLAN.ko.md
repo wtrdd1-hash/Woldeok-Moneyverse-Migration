@@ -528,3 +528,139 @@ WLD-only sink는 실화폐 매출로 계산하지 않는다. **게임경제 활�
 - BOLA, 인증, 경제 replay, 릴리스, 공급망, 업로드, 관리자, 개인정보/분석을 포함한 보안 위협등록부를 추가했다.
 - WLD sink와 실매출을 분리하고 retained value/contribution cost 기반 SCALE/HOLD/KILL 사업성 모델을 추가했다.
 - 이번 문서 변경은 런타임 코드, DB, API, 인프라, branch 설정, 보안 구현을 변경하지 않는다.
+
+## 27. 인증 개인정보 처리 정합성·로컬인증 릴리스 감사 — v2026.09.15.105
+
+이 절은 v104의 전 기능 계약을 그대로 유지하면서 이번 회차에서 확인된 인증·개인정보 경계의 신규 공백을 추가한다. `main`에는 자체 이메일/비밀번호 인증 코드·DB migration·모바일 API 계약이 존재하지만 운영 웹 로그인·가이드·개인정보처리방침은 여전히 OAuth 중심이다. 기존 P0/P1을 약화하지 않는다.
+
+### 27.1 신규 및 기존 릴리스 이슈
+
+#### AUTH-105-01 — P0 — OPEN / PUBLIC ROLLOUT HOLD — 로컬인증 개인정보 처리계약이 공개 개인정보/로그인 고지보다 앞서 있음
+
+- **최초 발견/재현:** 2026-09-15. **심각도:** 인증 credential, 동의, 개인정보 고지에 관련되므로 P0/HIGH. 다만 이번 회차는 운영 계정생성 mutation을 수행하지 않았으므로 공개되지 않은 운영 endpoint가 실제로 활성화됐다고 단정하지 않는다.
+- **저장소 근거:** 최신 `main`에 `LocalAuthController`, `POST /app-api/v1/auth/local/register`, `POST /app-api/v1/auth/local/verify-email`, `POST /app-api/v1/auth/local/login`, Argon2id password verifier, normalized email 및 SHA-256 email hash, one-time verification-token hash, local-email migration, first-party 가입/로그인/이메일 인증을 covered로 표시한 모바일 API 문서가 존재한다.
+- **운영/공개계약 근거:** 운영 `/login`은 현재 Discord/Google만 노출하고, 운영 `/guide`는 사용자가 별도 비밀번호를 만들지 않는다고 설명한다. 공개 개인정보처리방침은 OAuth 식별 및 Discord/Google 외부로그인을 설명하지만 자체 이메일/비밀번호 credential, verification-token 처리, local-auth 보유/삭제, verification mail delivery를 별도 개인정보 처리 목적으로 설명하지 않는다.
+- **영향:** native/mobile 자체가입, 향후 web local-auth, 개인정보/약관 동의, 계정탈퇴/credential 삭제, SMTP 인증메일, 복구, CS, 보안사고 대응, 분석, local signup을 홍보하는 acquisition.
+- **확정원인:** OAuth 중심 공개 고지 이후 first-party 인증 경로가 구현됐으나 공개 로그인/가이드/처리방침과 동의버전이 같은 작업흐름에서 동기화되지 않았다.
+- **즉시 제품규칙:** 최신 개인정보처리방침 버전과 동의 흐름이 실제 처리를 설명하고 exact-SHA QA가 끝나기 전 자체가입을 새로 마케팅하거나 일반 공개하지 않는다. 운영 App API가 이미 존재한다면 기존 정상사용자를 파괴적으로 비활성화하지 말고 실제 노출상태를 먼저 확인한다. 신규가입 제어는 서버권위 feature/rollout control로 되돌릴 수 있어야 하며 구체 flag 이름은 구현 시 정한다.
+- **GA 전 공개해야 할 처리계약:** identity/verification/recovery용 normalized email, lookup/uniqueness/security용 email-derived hash, 평문이 아닌 Argon2id verifier, display name, hashed verification token과 expiry/single-use, policy consent version, authenticated session ID, 문제진단에 필요한 verification delivery metadata, 처리목적, 해당 시 SMTP processor/국외이전, 보유/삭제/credential 제거, 이용자 권리/연락처. 내부 hash/token 값은 공개하지 않는다.
+- **보유기간:** migration 근거상 pending verification token은 30분 만료다. expired pending registration cleanup, 탈퇴 후 credential 제거, 법적/fraud hold, SMTP diagnostic 보유기간은 GA 전에 실제 코드/운영정책과 함께 확정한다. 구현되지 않은 보유기간을 기획에서 임의 확정하지 않는다.
+- **동의/버전:** `/app-api/v1/auth/policy`의 `termsVersion`/`privacyVersion`이 authoritative이며 local registration은 current prelogin consent를 요구한다. 처리방침이 실질 변경되면 published version을 갱신하고 앱은 서버버전을 사용한다. `consentCurrent:false` 사용자는 문서화된 재동의 흐름을 따른다.
+- **migration/rollback:** 공개문구 동기화만으로 applied migration을 수정하지 않는다. 보유/삭제 enforcement가 새 schema/job을 요구하면 새 migration으로 추가한다. rollback은 신규 local signup 노출을 끄고 마지막 정확한 문구로 되돌리는 것이며 경제 ledger history를 credential 삭제 명목으로 수정하지 않는다.
+- **상태:** OPEN. **운영승격 게이트:** privacy/content/auth-doc parity, security tests, isolated exact-SHA 수용 전 public local-auth GA BLOCK.
+
+#### AUTH-105-02 — P1 — TODO — canonical app-auth guide가 cross-browser verification 구현과 불일치
+
+- **근거:** 현재 `LocalAuthController.verifyEmail`에는 `SessionGuard`/`CsrfGuard`가 없고 credential repository가 bearer verification token을 검증한 뒤 성공하면 signed-in session cookie/CSRF state를 발급한다. migration/current mobile complete 문서는 이메일 링크를 원래 app cookie jar 밖 브라우저에서 열 수 있도록 single-use token 방식을 의도한다. 반면 `docs/app-auth-api-guide.md`는 아직 `POST /app-api/v1/auth/local/verify-email` 호출에 같은 prelogin cookie와 현재 CSRF token을 보내라고 설명하며 pseudocode도 그 전제를 유지한다.
+- **영향:** 신규 앱 구현이 인증을 원래 CookieJar에 잘못 결합하거나 외부 브라우저 이메일 링크에서 불필요한 실패/CS를 만들 수 있고, 보안 경계 설명이 상충한다.
+- **수정범위:** 영문/한국어 app-auth guide, endpoint catalog/schema, 생성예시를 controller와 동기화한다. register/login은 prelogin+CSRF guard를 사용하지만 verify-email은 one-time bearer-token exchange이므로 CSRF 대신 token secrecy가 핵심임을 명시한다.
+- **QA:** OpenAPI/controller guard와 문서 contract snapshot, 같은 브라우저/다른 브라우저 인증, invalid/expired/reused token, valid token no-cookie success, 임의 CSRF header가 authorization 수단이 아님, 성공 후 cookie/session rotation, 구클라이언트 호환.
+- **상태:** TODO. 실제 client break/security bypass가 확인되면 P0/HIGH로 승격한다.
+
+#### 기존 차단항목 유지
+
+- `QA-104-01` **P0 OPEN**: 운영 `/guide`의 무제한 전액 직업보상 문구가 authoritative daily quota와 계속 충돌한다.
+- `REL-104-02` **P0 OPEN**: Production-ready 자동게이트가 Living Plan의 migration/auth/economy/rollback 증거 전체를 아직 직접 강제하지 않는다.
+- `REL-104-03` **P1 TODO**: `main`은 protected지만 required status checks enforcement가 계속 off/empty다.
+
+### 27.2 자체 이메일 인증 end-to-end 계약
+
+다음은 현재 local-auth slice의 최소 구현/운영 계약이며 OAuth/OIDC 기준을 대체하지 않고 추가한다.
+
+| 단계 | Endpoint/권위 | UX/state | 보안/error 계약 | 데이터/side effect |
+| --- | --- | --- | --- | --- |
+| prelogin | `POST /app-api/v1/auth/prelogin-session` | 재개 가능한 인증전 상태, 서비스오류는 retry UI | secure server cookie + memory CSRF, secret log 금지 | prelogin session |
+| policy | `GET /app-api/v1/auth/policy` | 가입 전 current terms/privacy 표시 | server version authoritative, client hard-code 금지 | policy version read |
+| consent | `PUT /app-api/v1/auth/consent` | terms/privacy/age 명시동의, stale version은 재검토 | SessionGuard+CSRF, silent consent 금지 | consent version/time |
+| register | `POST /app-api/v1/auth/local/register` | email/password/display name, typo suggestion, verification pending, SMTP 장애복구 UI | prelogin+CSRF, current consent, common-password reject, generic accepted, abuse 429 | normalized email, email hash, Argon2id verifier, display name, hashed token, verification delivery |
+| verify | `POST /app-api/v1/auth/local/verify-email` | 이메일링크 cross-browser 가능, 성공 signed-in, 실패 generic | bearer token이 authorization secret, SessionGuard/CSRF 의존 없음, single-use/expiry, 로그 token 금지 | account activate, pending token consume, session cookie+CSRF 발급 |
+| login | `POST /app-api/v1/auth/local/login` | unknown email/wrong password 동일 공개오류, offline/429/5xx 구분 | prelogin+CSRF, unknown user dummy password work, rate/abuse | Argon2id 검증, session 발급/회전 |
+| viewer/session | `GET /app-api/v1/auth/viewer`, `GET /app-api/v1/auth/session` | client는 server signed-in 결과만 신뢰, consent stale이면 재동의 | signed-in cookie 권위 | session read/refresh |
+| logout | `POST /app-api/v1/auth/logout` | server invalidation 결과 후 UI 정리, offline이면 원격폐기 성공 가장 금지 | session+CSRF, server revoke | session invalidation/audit |
+
+**Rate limit:** register/login/verify 및 향후 resend/recovery는 각각 server-configured budget을 두고 privacy-safe 범위에서 IP/network, email-hash, session/device abuse signal을 조합한다. 숫자 threshold를 기획에서 임의로 만들지 않고 구현/config review에서 확정한 뒤 `429`/bounded retry와 함께 load/abuse test한다. SMTP/Argon2 계산비용은 OWASP API resource-consumption 관점의 cost amplification 공격대상으로 본다.
+
+**멱등/상태:** client retry로 duplicate active account를 만들지 않고, consumed token 재호출로 새 identity/session을 반복생성하지 않는다. OAuth/local identity는 email 유사성만으로 silent merge하지 않는다. linking은 로그인된 기존계정, 양쪽 소유증명, collision 처리, 감사가 필요하다.
+
+### 27.3 이메일 인증링크·개인정보·분석 경계
+
+Verification token은 URL로 전달되더라도 단기 bearer secret이다. 현재 sender가 query에 token을 넣으므로 GA 전 verification surface는 다음을 모두 만족한다.
+
+- `noindex`/`X-Robots-Tag`, sitemap 제외, token URL에 public structured data 금지.
+- token 소비 response/page에 `Referrer-Policy: no-referrer` 또는 동등 이상 검증정책.
+- token exchange 전 AdSense, 제3자 analytics, social widget, marketing pixel, 외부 image/script 로딩 금지.
+- access/error/analytics log에서 이 route query string 제거/마스킹, raw token 저장 금지.
+- 1회 exchange 후 token 없는 clean success/failure URL로 redirect/replace해 address bar/history에서 제거.
+- 단순 GET link preview/scanner가 token을 소비하지 않게 mutation은 의도적인 POST/server action에서 수행하고 QA에 scanner/prefetch 시나리오 포함.
+
+제품 analytics는 `prelogin_created`, `consent_completed`, `registration_accepted`, `verification_succeeded|failed_class`, `login_succeeded|failed_class`, `logout` 같은 coarse state와 pseudonymous ID까지만 허용한다. email/email hash/password/verifier/raw token/session cookie/CSRF/OAuth code/recovery state/정밀 security signal은 일반 product analytics/ad system으로 보내지 않는다.
+
+### 27.4 보안 위협 추가
+
+| ID | 심각도 | 시나리오 | 예방/탐지 | 필수 테스트/배포조건 |
+| --- | --- | --- | --- | --- |
+| SEC-105-01 | HIGH | local login credential stuffing/password spraying | generic error, Argon2id, rate/abuse budget, unknown user dummy work, credential 미기록 velocity alert | 분산/연속 invalid login, bypass 발견시 local-auth rollout 차단 |
+| SEC-105-02 | HIGH | verification token이 URL referrer/log/analytics로 유출 또는 replay | hashed storage, short expiry, single-use, no-referrer, query redaction, exchange 전 third-party 금지 | token log/referrer/analytics scan, expired/replay/cross-browser, raw leak시 차단 |
+| SEC-105-03 | HIGH | local email과 OAuth identity를 자동병합해 ATO | email similarity merge 금지, authenticated explicit linking, uniqueness | cross-account local/OAuth collision, silent merge시 차단 |
+| SEC-105-04 | MEDIUM/HIGH | register/resend/verify로 SMTP/Argon2/DB 비용고갈 | API4 resource budget, provider/queue limit, anomaly, graceful 429/503 | load/cost amplification, provider 장애시 mail loop/허위발송 금지 |
+| SEC-105-05 | HIGH privacy/trust | 실제 제공 local credential 처리를 개인정보처리방침/동의에서 누락 | 최신 public notice+consent+deletion/retention+processor fact 전 rollout hold | exact-SHA policy-content snapshot, mismatch면 신규 public registration 차단 |
+
+### 27.5 SEO·공개콘텐츠 변경
+
+- `/login`, local-signup form, `/verify-email`, recovery/reset, authenticated security-center는 `PUBLIC_NOINDEX` 또는 `AUTH_REQUIRED`, sitemap 제외.
+- verification token query URL은 자기 자신을 canonical로 쓰지 않는다. canonical 후보는 token-free 정보 URL뿐이며 성공/실패에서 계정존재/private state를 crawler에 노출하지 않는다.
+- `/privacy`, `/terms`는 public canonical trust/legal 문서로 유지한다. `lastModified`/visible effective date는 실제 정책 변경에만 갱신하고 consent 서버의 policy version이 공개문서와 대응해야 한다.
+- `/guide` SEO/acquisition 확대는 두 이유로 계속 HOLD: 직업 quota misinformation(`QA-104-01`)과 local auth를 일반공개한다면 충돌하는 OAuth-only 비밀번호 설명.
+- Google Search 기술가이드에 따라 공개 200 페이지는 index 가능하므로 인증/token surface는 robots.txt가 아니라 명시적 noindex/auth 경계를 사용한다.
+
+### 27.6 Local auth 사업성·비용효율
+
+현재 local auth의 직접매출은 0이다. 사업가치는 **추가 activation/D30 retained users와 단일 OAuth provider 의존성 완화**에서 인증 운영비를 뺀 간접가치로 본다.
+
+측정: app start/visitor → prelogin → consent → register accepted → mail delivered → verified session → first meaningful action → D1/D7/D30, mail delivery success/latency, time-to-verify, resend rate(구현 시), login success/failure, ATO/credential-stuffing signal, fake signup, activated user당 CS, SMTP/provider cost, Argon2 CPU/DB, privacy/security incident 업무, deletion/recovery 업무.
+
+`incremental local-auth contribution = incremental D30 retained-user contribution value - SMTP - auth compute/DB - support - fraud/abuse - privacy/security operations cost`. D30 value와 전환상승은 실측 전 가설이다. D30/activation이 늘고 ATO/privacy complaint/fake signup/email abuse/CS guardrail을 지킬 때만 `SCALE`; verification drop/support burden이 높으면 `ITERATE/HOLD`; disclosure 불일치·통제불가 credential abuse·HIGH security test 실패 시 신규가입 `KILL/ROLLBACK`한다.
+
+### 27.7 QA·운영·rollout·rollback 수용조건
+
+일반 사용자에게 local auth를 광고/활성화하기 전 동일 immutable SHA의 isolated test에서 다음을 통과한다.
+
+1. current policy version 조회와 required consent, stale/missing consent 거부;
+2. register validation, known-domain typo, duplicate/retry, SMTP success/failure semantics;
+3. same/cross-browser verify, valid-token no-cookie success, invalid/expired/reused token 거부, link-scanner/prefetch 안전;
+4. unknown-email/wrong-password 공개오류 동등성, credential stuffing, 429;
+5. viewer/session, session rotation/fixation, logout invalidation, guarded mutation CSRF;
+6. Discord/Google OAuth 회귀, local/OAuth collision/linking;
+7. app/access/error/analytics log에서 password/verifier/token/cookie/CSRF raw secret scan;
+8. privacy/terms/consent version, account deletion/credential removal, expired pending registration cleanup;
+9. mobile API schema/guide parity/old client, web login은 별도 승인 전 OAuth-only 유지 가능;
+10. login/verify/recovery noindex, sitemap/canonical token 미노출, token surface ads/third-party analytics off;
+11. rollback은 existing legit account/session을 파괴하지 않고 신규 local registration만 끌 수 있으며 OAuth와 append-only economy history를 보존.
+
+운영관측: registration/verification funnel, SMTP 4xx/5xx, queue latency, endpoint별 429, failed-login velocity, token failure class, account-link collision, signup fraud, deletion/recovery, CS, privacy complaint, D1/D7/D30. 알림에는 pseudonymous ID/safe error class만 쓰고 raw email/token/credential을 넣지 않는다.
+
+### 27.8 v105 런타임·CI 증거
+
+- 시작/중간 `main`은 `1679fe33a8b276035c4a8fc0ab8e79d42cb2f07c`로 동일했고 문서 준비 전 동시 변경이 없었다.
+- 운영 public home/login/guide/privacy/status를 비파괴 확인했다. web login은 OAuth-only, guide는 기존 무제한 작업문구와 OAuth-only password 설명을 유지, privacy는 OAuth 중심이다. status는 최신 snapshot에서 web/economy API/ledger DB 정상이다. local-auth 운영 mutation은 의도적으로 실행하지 않아 실제 runtime exposure를 `UNVERIFIED`로 유지한다.
+- GitHub branch metadata는 main protected이지만 required-status-check enforcement off/empty이며 시작 SHA legacy combined status entry도 없다.
+- 시작 docs SHA의 `Build Production Release`는 `skipped` 완료했고 `test-gate`, `build` 모두 skipped였다. workflow 조건은 manual dispatch 또는 successful `Build Test Candidate` on main일 때만 test gate를 실행한다. 현재 증거로 upstream 정확원인을 확정하지 않으며 **운영승격 성공을 주장하지 않는다**.
+- `REL-104-02`는 계속 OPEN이다. runtime release eligibility가 생기면 현 gate는 exact SHA/public catalog/root noindex를 확인하지만 규범적 migration/auth/economy/rollback 증거 전체를 아직 직접 강제하지 않는다.
+
+### 27.9 외부 레퍼런스 적용 — 2026-09-15
+
+- **OWASP ASVS 5.0.0(2025-05-30) — 직접채택:** 인증/세션 기술통제의 최신 stable 검증 baseline.
+- **OWASP API Security Top 10 2023 — 직접채택:** Broken Authentication, BOLA, Unrestricted Resource Consumption, Sensitive Business Flow abuse를 local login/email verify/signup에 적용.
+- **개인정보보호위원회 2026 개인정보 처리방침 자료 — 공개 고지설계에 직접채택:** 현재 표준안/안내가 처리목적, 개인정보 항목, 보유기간, 정보주체 권리절차의 명확한 기재를 강조하므로 실제 local-auth 처리와 공개문서를 GA 전에 맞춘다.
+- **Google Search Central 기술/indexing 가이드 — 직접채택:** 공개 200 page는 index될 수 있으므로 auth/token surface에 명시적 noindex/auth를 적용하고 robots.txt를 개인정보 보호수단으로 사용하지 않는다.
+- **FTC 2026 negative-option/subscription 자료 — 참고만:** 향후 실화폐 반복결제 guardrail 유지용이며 local auth나 WLD를 유료상품으로 바꾸는 근거가 아니다.
+
+### 27.10 변경 기록 — v2026.09.15.105
+
+- first-party email/password 처리 공개고지·동의 정합성을 위한 P0 `AUTH-105-01` public-rollout hold 추가.
+- stale verify-email cookie/CSRF 문서와 cross-browser bearer-token 구현의 불일치에 P1 `AUTH-105-02` 추가.
+- local-auth UX/API/data/security/SEO/analytics/사업성/QA/rollback 계약을 endpoint 수준으로 추가.
+- verification-token URL 개인정보/SEO 통제와 auth 전용 위협 시나리오를 추가.
+- QA-104-01, REL-104-02 P0 OPEN과 REL-104-03 P1 TODO를 재확인.
+- 시작 docs SHA의 Production Release는 skipped이며 운영승격 pass를 주장하지 않는 것으로 CI 증거를 정정·구체화.
+- v104 전 기능군 계약은 위에서 명시적으로 대체한 부분 외 모두 계속 규범적이다. v105는 런타임 코드, DB, API, 인프라, branch policy, 보안 구현을 변경하지 않는다.
