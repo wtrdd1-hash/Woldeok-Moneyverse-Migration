@@ -60,7 +60,7 @@ jobs:
           for _ in $(seq 1 60); do
             version="$(curl -fsS --max-time 10 https://test.easy-scraping.com/api/version 2>/dev/null | jq -r '.id // empty' || true)"
             if [[ "$version" == "$RELEASE_SHA" ]]; then
-              curl -fsS --max-time 15 https://test.easy-scraping.com/app-api/shop/public-catalog \
+              curl -fsS --max-time 15 https://test.easy-scraping.com/app-api/v1/shop/public-catalog \
                 | jq -e '.catalogItems | type == "array" and length > 0' >/dev/null
               headers="$(curl -fsSI --max-time 10 https://test.easy-scraping.com/ || true)"
               grep -Eiq '^x-robots-tag:.*noindex' <<<"$headers"
