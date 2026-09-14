@@ -211,7 +211,7 @@ The following roadmap mirrors the Korean Living Spec and is staged behind implem
 
 - **Stock-tagged community:** connect posts to virtual stocks so members can navigate between a stock detail surface and relevant discussion. The member-facing path is implemented: stock detail links into a stock-filtered board composer that opens automatically with the symbol prefilled, while existing server-authoritative tagged-post creation/listing contracts remain unchanged.
 - **Stock comparison:** compare multiple virtual stocks with server-defined metrics on a consistent basis. The comparison route accepts validated stock-symbol deep links from the stock detail hub, keeps the browser URL synchronized with the current 2–3 stock selection, lets members copy that exact comparison link for later return or sharing, and shows exact integer-string-derived absolute and percentage change from the day open.
-- **Conditional alerts:** support server-verifiable price/change/service-event conditions with cooldown and rate limiting.
+- **Conditional alerts:** support server-verifiable price/change/service-event conditions with cooldown and rate limiting. Price and daily-change rules are implemented, and stock-detail alert links now preselect the referenced virtual stock on `/stocks/alerts` so the cross-surface flow preserves member intent.
 - **Economy/event calendar:** unify service events, virtual-stock events, quests, and shop events around dates.
 - **Account security center:** expose active-session review, other-session termination, login-security state, and future second-factor expansion.
 
