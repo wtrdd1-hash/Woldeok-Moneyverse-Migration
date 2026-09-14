@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/empty-state';
-import { SubmitButton } from '@/lib/action-state';
+import { SubmitButton } from '@/components/action-form';
 import { IDLE } from '@/lib/action-state';
 import { switchJobAction } from './actions';
 import { TaskCompleteModalButton } from './work-forms';
