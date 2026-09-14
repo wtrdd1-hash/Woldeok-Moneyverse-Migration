@@ -1,4 +1,4 @@
-# Stock detail hub v2026.09.14.74
+# Stock detail hub v2026.09.14.75
 
 - Added a member-facing canonical virtual-stock hub at `/stocks/[symbol]`.
 - Combined current market snapshot, watchlist state, authoritative holdings, chart/trade access, comparison/alert entry points, and recent stock-tagged community discussion.
