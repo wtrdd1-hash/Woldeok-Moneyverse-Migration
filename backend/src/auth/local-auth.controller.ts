@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   ForbiddenException,
@@ -52,9 +53,31 @@ function emailHash(value: string): string {
   return sha256(normalizeEmail(value));
 }
 
+const COMMON_EMAIL_DOMAIN_TYPOS: Readonly<Record<string, string>> = {
+  'nvaer.com': 'naver.com',
+  'navre.com': 'naver.com',
+  'gamil.com': 'gmail.com',
+  'gmial.com': 'gmail.com',
+  'hotamil.com': 'hotmail.com',
+};
+
+export function suggestedEmailForKnownDomainTypo(email: string): string | null {
+  const normalized = normalizeEmail(email);
+  const separator = normalized.lastIndexOf('@');
+  if (separator < 1) return null;
+  const localPart = normalized.slice(0, separator);
+  const domain = normalized.slice(separator + 1);
+  const correctedDomain = COMMON_EMAIL_DOMAIN_TYPOS[domain];
+  return correctedDomain ? `${localPart}@${correctedDomain}` : null;
+}
+
 export function acceptablePassword(password: string): boolean {
   const normalized = password.normalize('NFC');
-  return normalized.length > 0 && normalized.length <= 128 && !COMMON_PASSWORDS.has(normalized.toLowerCase());
+  return (
+    normalized.length > 0 &&
+    normalized.length <= 128 &&
+    !COMMON_PASSWORDS.has(normalized.toLowerCase())
+  );
 }
 
 export class LocalRegisterDto {
@@ -63,7 +86,10 @@ export class LocalRegisterDto {
   @MaxLength(254)
   readonly email!: string;
 
-  @ApiProperty({ maxLength: 128, description: 'Non-empty password. No numeric minimum length is enforced.' })
+  @ApiProperty({
+    maxLength: 128,
+    description: 'Non-empty password. No numeric minimum length is enforced.',
+  })
   @IsString()
   @MaxLength(128)
   readonly password!: string;
@@ -130,6 +156,10 @@ export class LocalAuthController {
     }
 
     const email = normalizeEmail(body.email);
+    const suggestedEmail = suggestedEmailForKnownDomainTypo(email);
+    if (suggestedEmail) {
+      throw new BadRequestException(`email domain looks mistyped; did you mean ${suggestedEmail}?`);
+    }
     const token = randomToken();
     const accepted = await this.credentialStore().startRegistration({
       preAuthSessionId: session.id,
@@ -204,7 +234,11 @@ export class LocalAuthController {
     if (!valid) throw new UnauthorizedException('invalid credentials');
 
     try {
-      const login = await this.credentialStore().completeLogin(session.id, credential.user_id, hash);
+      const login = await this.credentialStore().completeLogin(
+        session.id,
+        credential.user_id,
+        hash,
+      );
       response.setHeader('set-cookie', sessionCookie(login.token, this.config));
       const consentCurrent = await this.sessionStore().hasCurrentUserConsent(login.session_id);
       return { outcome: 'signed-in' as const, csrfToken: login.csrfToken, consentCurrent };

@@ -59,6 +59,7 @@ describe('VerificationEmailSender', () => {
     process.env.SMTP_USERNAME = 'mailer';
     process.env.SMTP_PASSWORD = 'secret';
     process.env.SMTP_FROM = 'no-reply@easy-scraping.com';
+    process.env.SMTP_RETURN_PATH = 'bounces@easy-scraping.com';
 
     try {
       await new VerificationEmailSender().send({
@@ -72,7 +73,7 @@ describe('VerificationEmailSender', () => {
       );
     }
 
-    expect(received).toContain('MAIL FROM:<no-reply@easy-scraping.com>');
+    expect(received).toContain('MAIL FROM:<bounces@easy-scraping.com>');
     expect(received).toContain('RCPT TO:<member@example.com>');
     expect(received.join('\n')).toContain(
       'https://easy-scraping.com/verify-email?token=verification-token-value',

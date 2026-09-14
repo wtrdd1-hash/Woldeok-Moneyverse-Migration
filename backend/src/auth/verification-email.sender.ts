@@ -1,4 +1,4 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { connect as connectNet, type Socket } from 'node:net';
 import { connect as connectTls, type TLSSocket } from 'node:tls';
 
@@ -17,6 +17,7 @@ interface SmtpSettings {
   readonly username?: string;
   readonly password?: string;
   readonly from: string;
+  readonly returnPath: string;
 }
 
 function smtpSettings(env: NodeJS.ProcessEnv): SmtpSettings | null {
@@ -24,7 +25,8 @@ function smtpSettings(env: NodeJS.ProcessEnv): SmtpSettings | null {
   const username = env.SMTP_USERNAME?.trim();
   const password = env.SMTP_PASSWORD;
   const from = env.SMTP_FROM?.trim();
-  if (!host || !from) return null;
+  const returnPath = env.SMTP_RETURN_PATH?.trim() || from;
+  if (!host || !from || !returnPath) return null;
   if ((username && !password) || (!username && password))
     throw new Error('SMTP_USERNAME and SMTP_PASSWORD must be configured together');
   const loopbackRelay = host === '127.0.0.1' || host === '::1' || host === 'localhost';
@@ -41,6 +43,7 @@ function smtpSettings(env: NodeJS.ProcessEnv): SmtpSettings | null {
     secure,
     ...(username && password ? { username, password } : {}),
     from,
+    returnPath,
   };
 }
 
@@ -130,7 +133,7 @@ async function deliver(settings: SmtpSettings, mail: VerificationEmail): Promise
       await command(socket, Buffer.from(settings.username).toString('base64'), [334]);
       await command(socket, Buffer.from(settings.password).toString('base64'), [235]);
     }
-    await command(socket, `MAIL FROM:<${settings.from.replace(/[<>\r\n]/g, '')}>`, [250]);
+    await command(socket, `MAIL FROM:<${settings.returnPath.replace(/[<>\r\n]/g, '')}>`, [250]);
     await command(socket, `RCPT TO:<${mail.to.replace(/[<>\r\n]/g, '')}>`, [250, 251]);
     await command(socket, 'DATA', [354]);
     socket.write(`${messageBody(mail, settings.from)}\r\n.\r\n`);
@@ -144,14 +147,24 @@ async function deliver(settings: SmtpSettings, mail: VerificationEmail): Promise
 
 @Injectable()
 export class VerificationEmailSender {
+  private readonly logger = new Logger(VerificationEmailSender.name);
+
   async send(input: VerificationEmail): Promise<void> {
     const settings = smtpSettings(process.env);
     if (!settings) {
+      this.logger.error(
+        'Verification email delivery is unavailable because SMTP is not fully configured',
+      );
       throw new ServiceUnavailableException('verification email delivery unavailable');
     }
     try {
       await deliver(settings, input);
-    } catch {
+    } catch (error) {
+      const domain = input.to.split('@').at(-1)?.toLowerCase() || 'invalid-domain';
+      const reason = error instanceof Error ? error.message : 'unknown SMTP failure';
+      this.logger.error(
+        `Verification email delivery failed for recipient domain=${domain}: ${reason}`,
+      );
       throw new ServiceUnavailableException('verification email delivery unavailable');
     }
   }

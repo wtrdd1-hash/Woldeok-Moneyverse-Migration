@@ -120,3 +120,9 @@ This file records incremental project changes so concurrent work can avoid overl
 - Deployment reuses one SSH control connection to avoid repeated host timeout.
 - Account merge ledger entries now have a clear Korean wallet label.
 - Added the current project gap audit under `docs/findings/`.
+
+## 2026-09-14 — v2026.09.14.70 Email verification delivery hardening
+
+- Added high-confidence email-domain typo rejection, safe SMTP failure diagnostics, and optional `SMTP_RETURN_PATH` bounce routing.
+- Confirmed the triggering production failure was an invalid recipient-domain submission, while preserving fail-closed delivery semantics.
+- DKIM DNS/relay activation and public MX port-25 acceptance remain infrastructure prerequisites and are not falsely marked complete by this application change.
