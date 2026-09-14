@@ -1278,115 +1278,13 @@
                   "type": "string"
                 },
                 "principalAmount": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "interestAmount": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "outstandingAmount": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "status": {
                   "oneOf": [
@@ -1493,115 +1391,13 @@
             "type": "string"
           },
           "principalAmount": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "interestAmount": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "outstandingAmount": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "replayed": {
             "type": "boolean"
@@ -1683,78 +1479,10 @@
             "type": "string"
           },
           "paidAmount": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "outstandingAmount": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "replayed": {
             "type": "boolean"
@@ -3846,115 +3574,13 @@
                   "type": "string"
                 },
                 "purchaseCost": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "dailyRevenue": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "dailyOperatingCost": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "purchasedAt": {
                   "type": "string"
@@ -4115,115 +3741,13 @@
             "type": "string"
           },
           "grossRevenue": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "operatingCost": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "netAmount": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "transactionId": {
             "type": "string"
@@ -4308,115 +3832,13 @@
             "type": "string"
           },
           "grossRevenue": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "operatingCost": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "netAmount": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "transactionId": {
             "type": "string"
@@ -4500,78 +3922,10 @@
             "type": "string"
           },
           "dailyRevenue": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "dailyOperatingCost": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           }
         },
         "required": [
@@ -4631,115 +3985,13 @@
                   "type": "string"
                 },
                 "purchaseCost": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "dailyRevenue": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "dailyOperatingCost": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 }
               },
               "required": [
@@ -4824,41 +4076,7 @@
             "type": "string"
           },
           "purchaseCost": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "transactionId": {
             "type": "string"
@@ -4910,115 +4128,13 @@
             "type": "object",
             "properties": {
               "holdingsAmount": {
-                "allOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "__wld": {
-                        "type": "object",
-                        "properties": {
-                          "description": {
-                            "oneOf": [
-                              {
-                                "type": "undefined"
-                              },
-                              {
-                                "type": "string"
-                              }
-                            ]
-                          },
-                          "__@toStringTag@716": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "description",
-                          "__@toStringTag@716"
-                        ]
-                      }
-                    },
-                    "required": [
-                      "__wld"
-                    ]
-                  }
-                ]
+                "type": "any"
               },
               "debtAmount": {
-                "allOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "__wld": {
-                        "type": "object",
-                        "properties": {
-                          "description": {
-                            "oneOf": [
-                              {
-                                "type": "undefined"
-                              },
-                              {
-                                "type": "string"
-                              }
-                            ]
-                          },
-                          "__@toStringTag@716": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "description",
-                          "__@toStringTag@716"
-                        ]
-                      }
-                    },
-                    "required": [
-                      "__wld"
-                    ]
-                  }
-                ]
+                "type": "any"
               },
               "equityAmount": {
-                "allOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "__wld": {
-                        "type": "object",
-                        "properties": {
-                          "description": {
-                            "oneOf": [
-                              {
-                                "type": "undefined"
-                              },
-                              {
-                                "type": "string"
-                              }
-                            ]
-                          },
-                          "__@toStringTag@716": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "description",
-                          "__@toStringTag@716"
-                        ]
-                      }
-                    },
-                    "required": [
-                      "__wld"
-                    ]
-                  }
-                ]
+                "type": "any"
               },
               "minimumRatioBps": {
                 "type": "number"
@@ -5106,115 +4222,13 @@
                   "type": "string"
                 },
                 "purchaseCost": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "dailyRevenue": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "dailyOperatingCost": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "purchasedAt": {
                   "type": "string"
@@ -8842,41 +7856,7 @@
             "type": "string"
           },
           "amount": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "replayed": {
             "type": "boolean"
@@ -8972,41 +7952,7 @@
                   "type": "string"
                 },
                 "cost_wld": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "points_per_entry": {
                   "type": "number"
@@ -9918,41 +8864,7 @@
                   "type": "string"
                 },
                 "price": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "createdAt": {
                   "type": "string"
@@ -10039,41 +8951,7 @@
             "type": "string"
           },
           "amount": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "replayed": {
             "type": "boolean"
@@ -10285,41 +9163,7 @@
                   "type": "string"
                 },
                 "amount": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "purchasedAt": {
                   "type": "string"
@@ -10459,78 +9303,10 @@
               "type": "object",
               "properties": {
                 "day_high_price": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "day_low_price": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "symbol": {
                   "type": "string"
@@ -10545,78 +9321,10 @@
                   "type": "string"
                 },
                 "current_price": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "day_open_price": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "updated_at": {
                   "type": "string",
@@ -10754,152 +9462,16 @@
                   "format": "date-time"
                 },
                 "open_price": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "high_price": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "low_price": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "close_price": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 }
               },
               "required": [
@@ -10920,188 +9492,16 @@
                 "type": "object",
                 "properties": {
                   "day_high": {
-                    "oneOf": [
-                      {
-                        "type": "null"
-                      },
-                      {
-                        "allOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "object",
-                            "properties": {
-                              "__wld": {
-                                "type": "object",
-                                "properties": {
-                                  "description": {
-                                    "oneOf": [
-                                      {
-                                        "type": "object",
-                                        "note": "depth-limited"
-                                      },
-                                      {
-                                        "type": "object",
-                                        "note": "depth-limited"
-                                      }
-                                    ]
-                                  },
-                                  "__@toStringTag@716": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "description",
-                                  "__@toStringTag@716"
-                                ]
-                              }
-                            },
-                            "required": [
-                              "__wld"
-                            ]
-                          }
-                        ]
-                      }
-                    ]
+                    "type": "any"
                   },
                   "day_low": {
-                    "oneOf": [
-                      {
-                        "type": "null"
-                      },
-                      {
-                        "allOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "object",
-                            "properties": {
-                              "__wld": {
-                                "type": "object",
-                                "properties": {
-                                  "description": {
-                                    "oneOf": [
-                                      {
-                                        "type": "object",
-                                        "note": "depth-limited"
-                                      },
-                                      {
-                                        "type": "object",
-                                        "note": "depth-limited"
-                                      }
-                                    ]
-                                  },
-                                  "__@toStringTag@716": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "description",
-                                  "__@toStringTag@716"
-                                ]
-                              }
-                            },
-                            "required": [
-                              "__wld"
-                            ]
-                          }
-                        ]
-                      }
-                    ]
+                    "type": "any"
                   },
                   "year_high": {
-                    "oneOf": [
-                      {
-                        "type": "null"
-                      },
-                      {
-                        "allOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "object",
-                            "properties": {
-                              "__wld": {
-                                "type": "object",
-                                "properties": {
-                                  "description": {
-                                    "oneOf": [
-                                      {
-                                        "type": "object",
-                                        "note": "depth-limited"
-                                      },
-                                      {
-                                        "type": "object",
-                                        "note": "depth-limited"
-                                      }
-                                    ]
-                                  },
-                                  "__@toStringTag@716": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "description",
-                                  "__@toStringTag@716"
-                                ]
-                              }
-                            },
-                            "required": [
-                              "__wld"
-                            ]
-                          }
-                        ]
-                      }
-                    ]
+                    "type": "any"
                   },
                   "year_low": {
-                    "oneOf": [
-                      {
-                        "type": "null"
-                      },
-                      {
-                        "allOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "object",
-                            "properties": {
-                              "__wld": {
-                                "type": "object",
-                                "properties": {
-                                  "description": {
-                                    "oneOf": [
-                                      {
-                                        "type": "object",
-                                        "note": "depth-limited"
-                                      },
-                                      {
-                                        "type": "object",
-                                        "note": "depth-limited"
-                                      }
-                                    ]
-                                  },
-                                  "__@toStringTag@716": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "description",
-                                  "__@toStringTag@716"
-                                ]
-                              }
-                            },
-                            "required": [
-                              "__wld"
-                            ]
-                          }
-                        ]
-                      }
-                    ]
+                    "type": "any"
                   },
                   "first_trade_date": {
                     "oneOf": [
@@ -11207,152 +9607,16 @@
             "type": "string"
           },
           "unit_price": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "gross_amount": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "tax_amount": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           },
           "current_price": {
-            "allOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "__wld": {
-                    "type": "object",
-                    "properties": {
-                      "description": {
-                        "oneOf": [
-                          {
-                            "type": "undefined"
-                          },
-                          {
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "__@toStringTag@716": {
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "description",
-                      "__@toStringTag@716"
-                    ]
-                  }
-                },
-                "required": [
-                  "__wld"
-                ]
-              }
-            ]
+            "type": "any"
           }
         },
         "required": [
@@ -11422,41 +9686,7 @@
                   "format": "date-time"
                 },
                 "price": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 }
               },
               "required": [
@@ -11970,115 +10200,13 @@
                   "type": "string"
                 },
                 "unit_price": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "gross_amount": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "tax_amount": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "created_at": {
                   "type": "string",
@@ -12275,115 +10403,13 @@
                   "type": "string"
                 },
                 "average_cost": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "market_value": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "current_price": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 }
               },
               "required": [
@@ -12454,43 +10480,7 @@
                 "prices": {
                   "type": "array",
                   "items": {
-                    "allOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "__wld": {
-                            "type": "object",
-                            "properties": {
-                              "description": {
-                                "oneOf": [
-                                  {
-                                    "type": "object",
-                                    "note": "depth-limited"
-                                  },
-                                  {
-                                    "type": "object",
-                                    "note": "depth-limited"
-                                  }
-                                ]
-                              },
-                              "__@toStringTag@716": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "description",
-                              "__@toStringTag@716"
-                            ]
-                          }
-                        },
-                        "required": [
-                          "__wld"
-                        ]
-                      }
-                    ]
+                    "type": "any"
                   }
                 }
               },
@@ -12552,78 +10542,10 @@
                   "type": "string"
                 },
                 "current_price": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "day_open_price": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "created_at": {
                   "type": "string",
@@ -12699,41 +10621,7 @@
                 "type": "object",
                 "properties": {
                   "availableAmount": {
-                    "allOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "__wld": {
-                            "type": "object",
-                            "properties": {
-                              "description": {
-                                "oneOf": [
-                                  {
-                                    "type": "undefined"
-                                  },
-                                  {
-                                    "type": "string"
-                                  }
-                                ]
-                              },
-                              "__@toStringTag@716": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "description",
-                              "__@toStringTag@716"
-                            ]
-                          }
-                        },
-                        "required": [
-                          "__wld"
-                        ]
-                      }
-                    ]
+                    "type": "any"
                   },
                   "updatedAt": {
                     "type": "string"
@@ -12748,41 +10636,7 @@
                 "type": "object",
                 "properties": {
                   "availableAmount": {
-                    "allOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "object",
-                        "properties": {
-                          "__wld": {
-                            "type": "object",
-                            "properties": {
-                              "description": {
-                                "oneOf": [
-                                  {
-                                    "type": "undefined"
-                                  },
-                                  {
-                                    "type": "string"
-                                  }
-                                ]
-                              },
-                              "__@toStringTag@716": {
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "description",
-                              "__@toStringTag@716"
-                            ]
-                          }
-                        },
-                        "required": [
-                          "__wld"
-                        ]
-                      }
-                    ]
+                    "type": "any"
                   },
                   "updatedAt": {
                     "type": "string"
@@ -12794,41 +10648,7 @@
                 ]
               },
               "totalAvailableAmount": {
-                "allOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "object",
-                    "properties": {
-                      "__wld": {
-                        "type": "object",
-                        "properties": {
-                          "description": {
-                            "oneOf": [
-                              {
-                                "type": "undefined"
-                              },
-                              {
-                                "type": "string"
-                              }
-                            ]
-                          },
-                          "__@toStringTag@716": {
-                            "type": "string"
-                          }
-                        },
-                        "required": [
-                          "description",
-                          "__@toStringTag@716"
-                        ]
-                      }
-                    },
-                    "required": [
-                      "__wld"
-                    ]
-                  }
-                ]
+                "type": "any"
               }
             },
             "required": [
@@ -12853,41 +10673,7 @@
                   "type": "string"
                 },
                 "netAmount": {
-                  "allOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "__wld": {
-                          "type": "object",
-                          "properties": {
-                            "description": {
-                              "oneOf": [
-                                {
-                                  "type": "undefined"
-                                },
-                                {
-                                  "type": "string"
-                                }
-                              ]
-                            },
-                            "__@toStringTag@716": {
-                              "type": "string"
-                            }
-                          },
-                          "required": [
-                            "description",
-                            "__@toStringTag@716"
-                          ]
-                        }
-                      },
-                      "required": [
-                        "__wld"
-                      ]
-                    }
-                  ]
+                  "type": "any"
                 },
                 "direction": {
                   "oneOf": [
