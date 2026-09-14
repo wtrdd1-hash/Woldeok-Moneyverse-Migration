@@ -3,7 +3,7 @@
 # The build needs the whole workspace: the frontend imports
 # @moneyverse/contract by workspace protocol, and pnpm resolves it from the
 # lockfile at the root.
-FROM node:26.8.1-alpine AS build
+FROM node:26.8.2-alpine AS build
 WORKDIR /repo
 # Node 26 ships without corepack, so the package manager is installed rather
 # than enabled. The version is the one `packageManager` in the root
@@ -46,7 +46,7 @@ ENV APP_BASE_URL=${APP_BASE_URL} \
     ADSENSE_HOME_SLOT=${ADSENSE_HOME_SLOT}
 RUN pnpm --filter @moneyverse/contract build && pnpm --filter @moneyverse/frontend build
 
-FROM node:26.8.1-alpine
+FROM node:26.8.2-alpine
 
 # Keep the runtime smaller than the build image and remove package-manager code
 # that the service never executes. Refresh Alpine packages first so rebuilds
