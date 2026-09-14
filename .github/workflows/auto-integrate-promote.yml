@@ -39,7 +39,6 @@ jobs:
 
             encoded="$(jq -rn --arg v "$branch" '$v|@uri')"
             branch_sha="$(gh api "repos/${REPO}/branches/${encoded}" --jq '.commit.sha')"
-
             compare="$(gh api "repos/${REPO}/compare/main...${encoded}" 2>/dev/null || true)"
             [[ -n "$compare" ]] || continue
             ahead="$(jq -r '.ahead_by // 0' <<<"$compare")"
@@ -64,17 +63,15 @@ jobs:
 
             if [[ -z "$pr" ]]; then
               title="auto: integrate ${branch}"
-              body=$(cat <<EOF
-Automated integration candidate.
-
-Gate:
-- exact branch SHA: \`${branch_sha}\`
-- successful \`Build Test Candidate\` run: \`${validated}\`
-- target: \`main\`
-
-After merge, this workflow explicitly dispatches the main Test Candidate chain. Production remains gated by isolated Test exact-SHA/backend checks and the existing GitOps production-ready flow.
-EOF
-)
+              printf -v body '%s\n' \
+                'Automated integration candidate.' \
+                '' \
+                'Gate:' \
+                "- exact branch SHA: ${branch_sha}" \
+                "- successful Build Test Candidate run: ${validated}" \
+                '- target: main' \
+                '' \
+                'After merge, this workflow explicitly dispatches the main Test Candidate chain. Production remains gated by isolated Test exact-SHA/backend checks and the existing GitOps production-ready flow.'
               pr="$(gh api --method POST "repos/${REPO}/pulls" \
                 -f title="$title" -f head="$branch" -f base=main -f body="$body" \
                 --jq '.number')"
@@ -105,11 +102,8 @@ EOF
             gh pr merge "$pr" --repo "$REPO" --squash --delete-branch --match-head-commit "$branch_sha"
             echo "merged PR #${pr}; source branch cleanup requested"
 
-            # GITHUB_TOKEN-created events do not reliably start follow-on workflows.
-            # Dispatch the main candidate explicitly so Test -> Production promotion remains automatic.
             gh workflow run test-candidate.yml --repo "$REPO" --ref main
             echo "dispatched main Build Test Candidate"
-
             exit 0
           done
 
