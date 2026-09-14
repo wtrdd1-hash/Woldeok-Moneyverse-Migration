@@ -1,441 +1,249 @@
 # Woldeok Moneyverse — Living Project Plan
 
-> Status: Living specification
-> Original planning baseline: 2026-08-26
-> Implementation sync: 2026-09-15
+> Status: Living specification / current authoritative integrated plan
+> Original baseline: 2026-08-26
+> Current integrated version: v2026.09.15.106
+> Implementation/evidence sync: 2026-09-15
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
-## 0. How this document is maintained
+Historical detail remains recoverable from Git and the versioned changelog/worklog. This file is the current implementation-facing contract: another developer or agent should be able to derive scope, authority, data flow, failure states, security, SEO, business economics, QA and release gates from this plan without treating earlier drafts as current truth.
 
-This is not a frozen proposal. It is the project specification that must evolve with the validated implementation.
+## 0. Maintenance and evidence rules
 
-When implementation intentionally changes during development because the new design is safer, more maintainable, or better matches operational reality, the plan must be updated in the same workstream. When code accidentally violates a still-valid security, data-integrity, privacy, or product invariant, the code must be fixed instead of rewriting the plan to excuse the regression.
+1. External/reference research precedes material product planning. Prefer current official product/platform documentation, OWASP/security bodies, government/regulator material and current primary operational evidence.
+2. Read the latest `main`, this English canonical plan, the Korean counterpart, current QA/worklogs, CI/release automation, runtime evidence and relevant code/migrations before changing a contract.
+3. Re-check `main` while working and immediately before integration. Preserve concurrent work; never force-push `main` for documentation automation.
+4. Implementation evidence is classified as `IMPLEMENTED`, `PARTIAL`, `UNVERIFIED`, or `REDESIGN_REQUIRED`. A plan or old screenshot does not prove current runtime behavior.
+5. CI/test/runtime evidence is explicit. Missing evidence is `verification unavailable`, not pass. High-risk promotion is fail-closed.
+6. Applied database migrations are immutable. Corrections use a new migration. Economy history is append-only and is corrected through compensating entries, not historical rewrites.
+7. Unknown commercial values are labeled hypothesis/test target. WLD activity is not real-currency revenue.
+8. Runtime implementation is performed separately: branch → static/unit/integration/real-DB/security tests → immutable candidate → isolated exact-SHA test deployment → backend/API/DB/user-flow QA → main integration → exact-main-SHA release gate → Production promotion → Production smoke/monitoring → rollback if required.
 
-Every material implementation/specification divergence must record the reason, validation performed, effective date, and remaining risk. Applied database migrations remain immutable even when documentation is corrected.
+## 1. Product and non-negotiable system boundaries
 
-English documentation is primary in GitHub; Korean documentation is maintained for product and operator parity.
+Woldeok Moneyverse is a community virtual-economy/game platform spanning web and Discord. Users authenticate, earn/spend WLD, progress through jobs/quests, collect/use items, operate virtual businesses, use a virtual bank/loans, use virtual stocks, community/social features and probability/game features.
 
-## 1. Product definition
+WLD, WDX/virtual stocks, bank balances, loans, casino play, rewards and related values are game/simulation data only. The service does not promise cash redemption, real securities, deposits, guaranteed yield, external prizes, investment return or real gambling. Any future change toward real-money financial/gambling value is a separate product/legal redesign and cannot inherit this plan’s approval.
 
-Woldeok Moneyverse is a community virtual-economy and game platform shared by the web service and Discord. Users authenticate through supported identity providers, earn and spend WLD, use jobs and progression systems, operate virtual businesses, use a virtual bank and stock market, and access community/game features.
+Current technical baseline is Next.js frontend, NestJS API, PostgreSQL authoritative state/economy/authorization, protected `SECURITY DEFINER` database functions for sensitive paths, least-privilege application DB roles, append-only double-entry ledger, idempotency for retryable value-changing operations, and outbox-style post-commit external delivery.
 
-WLD, stock positions, casino play, bank balances, rewards, and other economy values are service-internal virtual data. The service does not promise cash redemption, investment returns, real securities, real deposits, or real gambling products.
+### 1.1 Economy invariants
 
-## 2. Current implementation baseline
+Every value-changing operation validates actor/policy/eligibility/limits/idempotency and atomically writes ledger postings, derived balances, audit/outbox as required. Debits and credits reconcile; disallowed negative balances remain impossible at the transaction boundary. Money is transported/stored using integer-safe/string-safe contracts rather than unsafe JavaScript `Number` conversion. Corrections reference the original transaction and create compensating transactions.
 
-The current application is built around:
+### 1.2 Security baseline
 
-- Next.js for the browser-facing frontend.
-- NestJS for the internal application API.
-- PostgreSQL as the authoritative economy and authorization boundary.
-- PostgreSQL `SECURITY DEFINER` functions for sensitive reads and writes.
-- A least-privilege application database role that does not receive direct write access to protected ledger/economy tables.
-- A double-entry append-only ledger as the source of truth for value movement.
-- Idempotency for retryable value-changing requests.
-- Outbox-style post-commit delivery for external notifications/integrations.
+Use OWASP ASVS 5.0.0 and OWASP API Security Top 10 as verification baselines, not certification claims. Required cross-cutting controls include OAuth/OIDC state/nonce/PKCE/exact redirect, secure session rotation/invalidation, recent reauthentication, CSRF, BOLA/IDOR negative authorization tests, XSS/output encoding, SQLi/SSRF/path traversal/command-injection defense, decoded file-type validation, rate/resource-abuse controls, least-privilege DB roles, CORS/CSP/security headers, secret management, dependency/supply-chain controls, container/Kubernetes hardening, encrypted recoverable backups, append-only audit, privacy minimization/retention/deletion and secret-safe logs.
 
-Operational economy data uses PostgreSQL. SQLite is limited to local, isolated, single-process tooling or experiments and is not the production economy database.
+### 1.3 Administrator boundary
 
-## 3. Economy invariants
+Current model is a single `superadmin` with compensating controls, not mandatory two-person approval. `AdminSessionGuard`, recent `ReauthGuard`, TOTP/`SecondFactorGuard`, database-side actor checks, least privilege, impact preview, reason capture, idempotency where relevant and append-only audit are required for sensitive operations. The superadmin does not receive a bypass to directly rewrite protected economy/audit history. Read-only operational views may avoid unnecessary step-up but still require proper admin session/role authorization.
 
-All value-changing operations must pass the economy core/database contract. No application path may directly update a user balance to perform an economy event.
+## 2. Current priority and release blocker register
 
-A value-changing transaction must atomically validate policy and authorization, write ledger postings, update derived balances, and create required audit/outbox state. Debits and credits must reconcile. Non-negative account rules must be enforced unless an account type explicitly allows a negative balance.
+Priority order: `P0 data loss/security/auth/authorization/asset duplication/economy abuse/outage/DB integrity/promotion evidence` → `P1 major user correctness/core completeness` → `P1 shop/payment/monetization` → `P1 SEO/acquisition` → `P2 retention/growth` → `P2 UX/accessibility` → `P3 long-term expansion`.
 
-The ledger and audit trail are append-only. Incorrect transactions are corrected with compensating transactions that reference the original transaction rather than editing or deleting historical rows.
+### BAK-106-01 — P0 — OPEN — independent backup + successful restore evidence unavailable
 
-Money values are stored and transported as integer units/string-safe values. Browser or server code must not convert authoritative WLD amounts into unsafe JavaScript `Number` values when precision can be lost.
+- First evidence: GitHub issue #139 opened 2026-09-09, still open on 2026-09-15. Last recorded direct inspection found designated `/mnt/backup` (`/dev/sda1`) mounted read-only, newest observed separate-media files from 2026-09-07, and no current Kubernetes-era automated backup on that medium. An emergency PostgreSQL custom-format dump passed SHA-256 and `pg_restore -l` but lived on the same system disk.
+- Repository recovery worklog explicitly says `moneyverse_recovery` is a recovery/inspection convenience and does not replace encrypted separate-media backup.
+- Impact: complete host/storage loss can threaten identity/session/economy/ledger/audit/inventory/entitlement/object data and recovery/dispute capability.
+- Rule: destructive or schema/data-changing Production work is blocked unless a current independently recoverable backup and successful restore evidence are proven. Docs-only work is unaffected.
+- Close condition: section 9 recovery architecture + full restore drill + monitoring + release evidence are implemented and current.
 
-## 4. Accounts and identity
+### AUTH-105-01 — P0 — OPEN / PUBLIC LOCAL-AUTH ROLLOUT HOLD
 
-Supported OAuth/OIDC flows must use modern authorization-code security controls, including state, nonce where applicable, exact redirect URIs, and PKCE where supported/required.
+Current code/migrations/mobile contracts contain local email registration, verification and login with Argon2id/email-hash/token-hash processing while current public web login/guide/privacy evidence remains OAuth-centric. Do not newly market or generally expose local registration until privacy notice/policy version/consent, retention/deletion/credential removal, SMTP/processor facts, security controls, token-link privacy, exact-SHA test evidence and rollback are aligned. Preserve existing legitimate identities if the endpoint already exists; do not perform destructive account disablement merely to make public copy match.
 
-Provider identities may only be linked after authenticating the existing account. A provider subject already linked to another internal user must not be silently merged.
+### QA-104-01 — P0 — OPEN — profession-work quota guidance contradicts authoritative quota behavior
 
-Session cookies are `HttpOnly`, `Secure`, same-origin scoped, and rotated on authentication/privilege changes as required. Sensitive account changes require recent reauthentication.
+Public guide evidence states unlimited repeated full WLD/EXP work while current server/DB contract uses task-specific `daily_limit`, `taken_today`, exact-limit acceptance, over-limit denial and member/task concurrency protection. Fix public/web/mobile/FAQ/schema examples; show reward eligibility separately from playability; test 0/partial/exact/+1 quota, profession/task isolation, double submit, idempotency, Seoul-day boundary and web/mobile/API parity. Copy correction does not justify reverting quota protection.
 
-Secrets, OAuth client secrets, bot tokens, session keys, database credentials, and backup encryption keys must never be committed to Git, rendered to users, or written into ordinary logs.
+### REL-104-02 — P0 — OPEN — Production-ready automation proves less than normative release evidence
 
-## 5. Administrator model — implementation-synced
+Current release workflow has exact-SHA/test/catalog/noindex evidence, while this plan requires migration parity/checksum, authenticated synthetic smoke, least-privilege DB connectivity, changed economy invariants/reconciliation, backup/restore evidence for destructive changes and rollback target. Add a fail-closed machine-readable `release-evidence` stage before `production-ready`; missing synthetic identity/evidence is `BLOCKED`, never skipped-pass.
 
-The original draft evolved during implementation. The current control model is a single `superadmin` with compensating security controls rather than a mandatory two-person approval workflow.
+### AUTH-105-02 — P1 — TODO — app-auth verification documentation stale
 
-The implemented/admin security contract is:
+Current verify-email design is a one-time bearer-token cross-browser/no-cookie exchange rather than an originating prelogin-cookie/CSRF-dependent operation. Synchronize English/Korean app-auth guide, schema/catalog/examples and test same/cross-browser, invalid/expired/reused token, session rotation, arbitrary CSRF, old client behavior.
 
-- `AdminSessionGuard` protects admin routes according to their role/session requirements.
-- Console entry and high-risk boundaries require fresh reauthentication as implemented by `ReauthGuard`.
-- High-risk operations require a second factor through the implemented TOTP/`SecondFactorGuard` path.
-- Sensitive PostgreSQL functions re-check the acting administrator/operator; HTTP/UI authorization is not the final trust boundary.
-- Protected economy/audit tables do not gain direct application write grants merely because the caller is an administrator.
-- High-risk changes require target/impact preview, reason capture, idempotency where appropriate, and append-only audit evidence.
-- Existing ledger and audit history must not be rewritten or deleted by the administrator.
-- Read-only operational/admin views should not add unnecessary step-up friction, but still require appropriate admin session/role checks.
+### REL-104-03 — P1 — TODO — runtime-code required checks not repository-enforced for every main update
 
-TOTP is the current implemented second-factor baseline. WebAuthn remains a future option until implementation and QA exist.
+Maintain protected/no-force main and add the narrowest possible ruleset requiring approved runtime-code integration and successful checks for `backend/`, `frontend/`, `packages/database/`, deploy manifests/security scripts. Preserve the explicit docs-only direct-main automation without allowing it to become a runtime-code bypass. Sandbox-test failing PR/direct push denial and validated automation success.
 
-The plan must not re-introduce obsolete two-person approval requirements merely because they appear in an older draft. If the project later adopts multi-party approval, it must be introduced as a new, tested policy with migration and operational design.
+## 3. Mandatory specification template for every feature
 
-## 6. Administrator capability scope
+Every feature/backlog item must contain all of the following, with implementation evidence linked: purpose/user problem; target actor/role; implementation status; user story; entry routes; screen components/CTA; state transitions; loading/empty/error/offline/timeout; first-use/return/comeback; mobile/tablet/desktop; keyboard/focus/label/contrast/reduced-motion; i18n; email/push/Discord needs; data model/ownership; read/write permissions; endpoint/method/request/response/error codes; idempotency/rate/resource limits; service/business rules; tables/indexes/constraints/transactions/concurrency; audit/metrics/admin operations; feature flag/fallback; backup/recovery impact; threats/privacy/abuse; SEO/indexing; analytics/KPI; latency/cache/performance; profitability/cost; completion criteria; unit/integration/E2E/real-DB/security/regression tests; isolated-test acceptance; Production promotion/monitoring/rollback.
 
-The admin control center may expose tightly scoped, server-validated operations for users, economy reconciliation/corrections, rewards, jobs/progression, shop/business policy, virtual stocks, banking/loans, casino feature controls, seasons/content, Discord integration, Minecraft operations, feature flags, maintenance mode, backup/reconciliation state, and observability.
+## 4. Current all-feature implementation and product contract matrix
 
-Each capability must be implemented only when the backing database/API contract exists. UI controls must not advertise mutations that the database cannot safely perform.
+| Feature family | Evidence/status | UX / authority / data / API-DB contract | Security/privacy/abuse | SEO/growth/business | Mandatory QA/release gate |
+|---|---|---|---|---|---|
+| Registration/login/OAuth/logout/session | `IMPLEMENTED/PARTIAL`; Nest auth/provider/local slices documented | Server owns provider linking, consent, session issue/rotation/revoke. Client shows loading/provider error/consent/session-expired/offline and never infers auth solely from local state. Local register/login use prelogin+CSRF; verify-email uses one-time bearer token. | Credential stuffing/resource limits; OAuth state/nonce/PKCE/exact redirect; secure cookie; fixation rotation; logout invalidation; no secret logs/URLs; no silent local/OAuth email merge. | Auth pages noindex. Funnel = verified session→meaningful activation→D1/D7/D30. Local auth value = incremental retained contribution minus SMTP/compute/CS/fraud/privacy cost. | Guard/DTO, state replay, fixation/logout, provider collision, local token expiry/replay/cross-browser, rate 429, secret scan, policy/privacy parity. AUTH-105-01 blocks general local-auth rollout. |
+| Profile/account/security center | `PARTIAL` | Member profile/linked methods/session list are server authoritative; sensitive changes recent-reauth; other-session termination and recovery states explicit. | BOLA on account/session IDs, ATO alerts without secrets, privacy-minimal defaults, audit security changes. | Private/auth/noindex. Value = lower ATO/support loss/trust. | Other-user session denial, reauth expiry, terminate-other/all, provider-loss recovery, responsive/accessibility. |
+| Inventory/collection/marketplace workbench | `PARTIAL`; holdings/curation slices exist; live P2P settlement not assumed | DB owns item, owner, provenance/entitlement/serial. Empty/error/offline never fabricate holdings. Future listing defines escrow, cancel, expiry, settlement, fee, reversal. | BOLA/serial leakage, duplicate grants, multi-account wash trade/collusion, replay. | Holdings private/noindex; public-safe opted-in collection only. WLD spend is sink, not revenue. Retention = acquire→use→curate→reuse. | Ownership concurrency, duplicate entitlement, unauthorized transfer, recovery, private URL leak, future wash-trade tests. |
+| WLD shop/catalog | `IMPLEMENTED/PARTIAL` public catalog/store | Server authoritative item/effective price/eligibility/limit/sale window/entitlement. UX displays exact currency, ownership/duplicate behavior, deadline, receipt; retries idempotent. Each SKU records ID/name/category/description/audience/value, WLD-vs-real payment, consumable class, test price, promotion/stock/window/limit, binding/gift/refund/recovery, sink/source, P2W, KPI, admin lifecycle. | No client price authority, duplicate grant/replay, fake/resetting scarcity, hidden personalized pricing, P2W/wealth/casino pressure. | Substantial editorial collection pages may index; purchase history private. Unit economics for WLD are economy health/retention, not real revenue. | Price tamper, boundary time, insufficient balance, double click/concurrent purchase, entitlement repair/cache invalidation, catalog admin deactivate/reactivate. |
+| Real-money cart/payment/subscription/ad removal | `UNVERIFIED`; never infer from WLD shop | Before implementation select provider and define order/cart authority, tax, receipt/webhook signature, entitlement source, cancel/refund/renewal/billing recovery/idempotency. Material recurring terms before charge and simple cancellation. | Receipt/webhook forgery/replay, order BOLA, PCI/provider boundary, refund/chargeback fraud, secret signature storage. | Checkout/order/account noindex. Unit economics = displayed price minus tax/platform/payment/refund/chargeback/content/CS/moderation/fraud/infra. | Provider sandbox; duplicate/out-of-order webhook; refund/regrant; renewal/cancel/grace/recovery; legal/policy gate; predeclared SCALE/ITERATE/HOLD/KILL. |
+| Jobs/quests/profession/level/rewards | `PARTIAL + P0 content drift` | Server/DB owns catalog, min duration, cooldown, daily quota, reward/EXP, receipt, progression unlocks. UI shows remaining rewarded completions/next unlock and distinguishes playable vs reward-eligible. | Bot/macro, multi-account, replay, clock/reset abuse, concurrent duplicate completion, ledger reconciliation. | Corrected guide may index for game-system learning. KPI TTFV, first verified job, D1/D7 progression, reward inflation/fraud. | QA-104-01 exact-SHA real-DB matrix is release blocking. |
+| Business | `UNVERIFIED/PARTIAL` | Define inventory, demand, sale price, costs, fees/tax, management state and settlement; no risk-free fixed compounding; all value through ledger/idempotency. | Circular/multi-account demand farming, refund/replay, admin manipulation, precision. | Public educational pages can index; private P&L noindex. KPI retention + sustainable sink/source, not nominal profit. | Real-DB settlement/reconciliation/concurrency and abuse simulations before expansion. |
+| Bank/loans | `UNVERIFIED/PARTIAL` | Server owns eligibility/source-of-funds, principal, interest/accrual schedule, repayment/minimum/arrears, purpose restrictions, recovery. Loan source must not become uncontrolled mint. | Double repayment, clock abuse, BOLA, multi-account, loss-chasing; game-only wording, no real deposit/yield promise. | Public education must clearly say simulation/game; private balance/debt noindex. | Accrual boundaries, idempotent/concurrent repayment, insufficient balance, restart/recovery, ledger reconciliation. |
+| Virtual stocks/WDX/watchlist/portfolio/alerts/comparison | `PARTIAL`; detail/watch/comparison/alert slices documented | Public market read model separated from private holdings. Issuance/pricing/trading/settlement/server market rules authoritative. URL may carry public symbol/compare state only. | Holdings BOLA, duplicate settlement, manipulation/collusion, alert spam/phishing, integer precision. | Public-safe substantial `/stocks/[symbol]` may index; portfolio/watchlist/orders/alerts private/noindex. KPI discovery→activation→D7, not trade volume alone. | Other-user holdings denial, symbol validation, large integer, settlement replay/concurrency, alert cooldown, manipulation cases. |
+| Casino/probability | `PARTIAL/high-risk` | Server generates outcomes, publishes probability/payout/limits, settles atomically, same idempotency key returns same receipt/outcome. | RNG/result tamper, replay, limit bypass, bots/multi-account, loss chasing/youth risk. No cash redemption/external prize. | Gameplay/account history noindex; acquisition must not promise winnings. Real revenue = 0 absent separately approved paid model. | Distribution sanity, deterministic replay receipt, limit/max-loss boundary, concurrency, ledger reconciliation, legal/product review. |
+| Seasons/live events | `PARTIAL/plan+calendar slices` | Server owns start/end/grace/reward eligibility; D-14/D-7/D-3/D-1 previews are content, not client authority. Catch-up and archives preserve history after end. | Bot/multi-account reward farming, collusion, deadline manipulation/fake FOMO. | Public season/archive pages can index when substantial, with truthful dates/lastModified. | Timezone boundaries, late entry/catch-up, reward duplicate, archive transition, notification cooldown. |
+| Community/posts/comments/report/block | `PARTIAL` | Server owns authorship/edit/delete/moderation status; UI has loading/empty/deleted/locked/report/block feedback without leaking enforcement internals. | Spam/bot, harassment, impersonation/doxxing, malicious links, stored XSS, BOLA, moderator abuse. | Curated board index may index; individual UGC defaults noindex until documented quality/moderation rule. Ads remain off unreviewed detail. | Other-user edit/delete denial, XSS/link, report spam, block semantics, moderator audit, deletion→404/410/index removal. |
+| Friends/clubs/referral | `UNVERIFIED/PARTIAL` | Define invite lifecycle, member/role/leave/kick/ban, visibility, attribution and reward maturity. | Invite spam, fake account/referral fraud, collusion, role escalation, private membership leakage. Rewards favor cosmetic/prestige/convenience after fraud-resistant milestones. | Public club only explicit visibility; private graph no search/share leak. | Multi-account/referral ring, invite replay, role escalation, privacy/block interaction. |
+| Notifications/email/push/Discord | `PARTIAL` | Server owns source event, preference/consent, cooldown/dedupe, delivery state, canonical deep link. Text excludes sensitive balances/debt/security state. | Phishing/ATO imitation, webhook abuse, spam, token leakage. | Noindex. Business = incremental healthy return minus provider/opt-out/spam/privacy/support cost. | Dedupe/cooldown, revoked/stale link, opt-out, provider outage/retry/outbox, secret-safe logs. |
+| Search | `UNVERIFIED` | Public search reads public-safe model; member/admin search explicitly authorized. Define parsing, pagination, empty/no-result, timeout. | Injection, expensive-query DoS, object enumeration, query-log PII. | Query result pages normally noindex; only curated stable intent landing may index. | Authorization, special chars, pagination stability, complexity/rate limits, relevance regression. |
+| Upload/gallery/files | `PARTIAL/spec-level unless feature code linked` | Decode/type/magic-byte validation; size/dimensions; generated names; isolated storage; authorized delivery; strip private EXIF/metadata as applicable. | Malware/polyglot/path traversal/decompression bomb/remote-fetch SSRF/BOLA/metadata leakage. | Private media noindex; public media stable safe URL/alt/dimensions only after permission/moderation. | Malformed/polyglot, oversized dimensions, unauthorized read, EXIF strip, storage failure/restore. |
+| Public home/guide/status/content | `IMPLEMENTED public slices` | Public read model must fail honestly; status shows measurement age; guide/help must match server behavior. | No secret/topology/stack traces/user state; XSS/phishing lookalike controls. | Canonical/indexable when original/substantial. `/guide` expansion HOLD while QA-104-01 and local-auth wording conflict remain. | HTTP/status/meta/canonical/structured data/accessibility/CWV/content-contract regression. |
+| App API/mobile gateway | `PARTIAL/COVERAGE DOCUMENTED` | Versioned `/app-api/v1`, stable wrapper/shape; one-time server-verified handoff; breaking change requires compatibility or version bump. | Handoff/token replay, BOLA, rate/resource abuse, PII/log masking. | API noindex. Value = mobile activation/D30 minus support/infra/fraud. | Contract snapshots, old-client compatibility, auth expiry, handoff one-time, error-code parity, auth-doc parity AUTH-105-02. |
+| Admin/audit | `PARTIAL/implemented controls` | Read and risky write separated. High-risk operation shows current/proposed/targets/impact/reason and uses reauth+TOTP+DB actor+idempotency/audit as relevant. | Privilege escalation/session theft/CSRF/BOLA/mass-action/audit tamper; single-superadmin residual risk. | Always private/noindex. Value = lower incident/operator/support cost. | Lower-role denial, stale reauth, invalid TOTP, impact preview, mass-action bounds, DB privilege/audit integrity, compensation. |
+| Backup/recovery | `UNVERIFIED CURRENT EVIDENCE`; BAK-106-01 P0 | Section 9 is authoritative: explicit RPO/RTO, independent encrypted backup, source/version/checksum, isolated restore, app/ledger/object validation. | Key theft/plaintext, shared failure domain, wrong-env restore, corrupted/WAL-gap backup, retention shadow copies. | Private/noindex. Direct revenue 0; value = expected loss/downtime avoided. | Destructive DB change blocked until current independently restorable evidence. Full fault-injected restore drill. |
+| Analytics/experiments | `PARTIAL/SPECIFIED` | Pseudonymous subject; analytics session ≠ auth secret; versioned event schema, retention, experiment assignment, guardrails. | PII/secret leak, reidentification, experiment abuse, sensitive finance/security profiling. | Safe campaign/content IDs can link to downstream cohorts; no private SEO payload. | Schema validation, consent/deletion, deterministic assignment, outbound secret/privacy scan. |
+| Advertising/sponsorship | `IMPLEMENTED/PARTIAL reviewed public placements` | Only approved substantial public surfaces; Production default-reviewed enable; test forced off; sponsor/ads visibly distinguished from product action. | Invalid traffic/click encouragement/youth/privacy targeting/tracker leakage/sponsor confusion. | Ads do not justify thin indexing. `net ad contribution = revenue - churn/session/support/privacy/fraud cost`. | Route allowlist, test ads disabled, CLS/CWV, ad-induced exit, invalid traffic/policy/privacy review. |
+| SEO backend | `PARTIAL` | Deterministic configured-origin canonical builder; public `SeoMetadataReadModel`; dynamic sitemap shards; robots; redirect map; structured-data serializer; authoritative updatedAt/lastModified; image metadata; crawler/GSC/Naver observation. | Private-route leakage, Host canonical injection, cache poisoning, PII in sitemap/JSON-LD, admin exposure. | KPI organic→signup→activation→D7/D30→net revenue/retained value and organic CAC savings. | Sitemap privacy scan, canonical injection, redirect loops, SSR content, GSC/Naver errors, representative CWV. |
+| Incident/status/operations | `PARTIAL` | Public-safe status separated from internal telemetry; incident severity/start/update/resolution/customer impact/owner/rollback and postmortem. | Topology/secret over-disclosure, fake status, admin abuse, alert fatigue. | Trust/support/MTTR function, not acquisition bait. | Dependency outage, stale-status detection, alert routing, rollback/restore drill, public-safe copy. |
 
-High-risk actions must show the current value, proposed value, affected targets, monetary/operational impact, rollback or compensating strategy, and required confirmation/reauthentication state.
+## 5. Local first-party authentication detailed contract
 
-## 7. Audit and observability
+| Step | Endpoint/current authority | Required state/UX | Security/error/data contract |
+|---|---|---|---|
+| prelogin | `POST /app-api/v1/auth/prelogin-session` | resumable pre-auth state; retryable service failure | secure prelogin cookie + in-memory CSRF; no secret logging |
+| policy | `GET /app-api/v1/auth/policy` | render current terms/privacy versions before local registration | server version authoritative; client never hard-codes |
+| consent | `PUT /app-api/v1/auth/consent` | explicit current terms/privacy/age acknowledgement | SessionGuard+CSRF; stale version requires refresh/review; no silent consent |
+| register | `POST /app-api/v1/auth/local/register` | email/password/display name, typo help, pending verification, recoverable SMTP failure | prelogin+CSRF/current consent; generic public semantics; common-password policy; normalized email/email hash/Argon2id verifier/display name/hashed one-time token; abuse budget |
+| verify | `POST /app-api/v1/auth/local/verify-email` | link may open cross-browser; success becomes signed-in | one-time short-lived bearer token is authority; no SessionGuard/CSRF dependency; raw token never logged; consume then clean token-free navigation |
+| login | `POST /app-api/v1/auth/local/login` | unknown email and wrong password same public class; distinguish offline/429/5xx | prelogin+CSRF, dummy password work for nonexistent account, rate/resource abuse control, session issue/rotation |
+| viewer/session | `GET /app-api/v1/auth/viewer`, `GET /app-api/v1/auth/session` | client trusts only server signed-in state; stale consent routes to review | signed-in cookie authority; no client-only auth inference |
+| logout | `POST /app-api/v1/auth/logout` | UI does not pretend server logout succeeded while offline | signed-in session+CSRF; revoke server session/cookie and audit as appropriate |
 
-Admin actions, security-relevant failures, economy adjustments, policy changes, and sensitive operations must be traceable through structured logs and append-only audit records.
+Verification-token URL/page: noindex/X-Robots, sitemap excluded, `Referrer-Policy: no-referrer` or validated equivalent, no ads/third-party analytics/social widgets/marketing pixels before exchange, query strings redacted from logs, GET preview/scanner does not consume token, token removed from address bar/history after exchange. Product analytics records only pseudonymous coarse states and never email/email-hash/password/verifier/token/cookie/CSRF/OAuth code/recovery secrets.
 
-Audit data should include identifiers such as request/trace/session/action/target IDs, actor identity, authentication/reauthentication context, timestamps, before/after policy/value summaries when safe, result classification, related transaction IDs, and integrity-chain state where implemented.
+## 6. SEO implementation contract
 
-Passwords, session cookies, access/refresh tokens, OAuth client secrets, bot tokens, database passwords, encryption keys, and unrestricted request bodies must never be logged.
+### 6.1 Route policy
 
-## 8. Jobs, progression, shop, business, banking, stocks, and casino
+- `/`: `PUBLIC_INDEXABLE`, configured-origin canonical `/`, unique title/H1/meta, truthful Organization/WebSite markup when factual, OG/social metadata, stable image dimensions, internal links to substantial content.
+- `/guide`: `PUBLIC_INDEXABLE_BUT_ACQUISITION_HOLD` until QA-104-01 and local-auth password wording are accurate. Target game-system beginner intent, not real-investment return queries.
+- `/status`: public canonical only as truthful service-status information; public safety outranks acquisition.
+- Public news/season/collection/world guides: index when original, substantial, maintained, with stable slug, author/review/update context, breadcrumb and meaningful `lastModified`.
+- `/stocks/[symbol]`: only public-safe stock/world read model indexable. Holdings/watch/orders/alerts/portfolio never enter anonymous HTML/JSON-LD/shared cache.
+- Community: board index only when moderated/substantial; individual UGC default noindex until documented quality/moderation rule. Removed content returns appropriate 404/410 and leaves sitemap.
+- Search/filter/sort/pagination/query variants: canonical/noindex unless intentionally curated stable landing; no doorway page generation.
+- Login/signup/verify/recovery/account/security/wallet/transfer/private business/bank/loan/portfolio/watchlist/alerts/checkout/orders/subscription/admin/moderation/backup/recovery: `AUTH_REQUIRED` or `PUBLIC_NOINDEX`, excluded from sitemap.
+- Test/recovery origins: global noindex, no real ads, no sitemap submission/indexable data.
 
-Jobs use assignment → completion → verification → reward flows rather than an unverified reward button. Reward policy, cooldowns, limits, and experience are server/database controlled.
+### 6.2 SEO backend backlog
 
-Progression unlocks content, roles, titles, business eligibility, and other non-cash advantages. Infinite multiplicative money bonuses are avoided.
+Implement and test: safe public `SeoMetadataReadModel`; configured-origin canonical builder immune to Host-header injection; sitemap index/shards with URL/byte limits and meaningful lastModified; robots generator; JSON-LD schema allowlist serializer; permanent 301/308 redirect map with loop/conflict detection; image metadata/alt/dimension service; locale/hreflang policy; crawler-log classification; Search Console/Naver verification/status ingestion; crawl/index/canonical/sitemap issue reporting; SEO operator read dashboard/API. Keep HTML/meta/sitemap/redirect cache invalidation coherent. Private identity/economy/security state never enters cache keys or public structured data.
 
-Shop purchases use the authoritative server price/effective-price contract, inventory rules, purchase limits, and idempotent value movement.
+### 6.3 SEO KPI and performance
 
-Businesses must not be risk-free fixed compounding instruments. Revenue should depend on inventory, demand/activity, costs, fees/taxes, management state, and other modeled inputs as the system matures.
+Track impressions/click/CTR only as upstream diagnostics. Business funnel is organic visit → qualified interest → signup → activation → D1/D7/D30 → retained contribution/real net revenue. Measure organic CAC as attributable content+SEO/tooling cost divided by incremental organic D30 retained users. Representative public templates target good Core Web Vitals (LCP ≤2.5s, INP <200ms, CLS <0.1) and are regression-tested on mobile/desktop.
 
-Loans require eligibility, purpose restrictions where applicable, repayment/arrears behavior, source-of-funds design, and recovery/restart paths. Loan money must not become an uncontrolled mint.
+## 7. Security threat and verification register
 
-Virtual stock functionality requires server-defined issuance, pricing/trading rules, market controls, anti-manipulation rules, and safe settlement before expansion.
+| Risk | Severity | Required prevention/detection | Mandatory test / release behavior |
+|---|---|---|---|
+| BOLA/IDOR | HIGH | actor-scoped authorization at service/DB for every object read/write; never trust owner ID from client; denial metrics without sensitive payload | other-user ID negative test on every object API; failure blocks |
+| Credential stuffing/session fixation | HIGH | generic auth errors, rate/abuse signals, session rotation, secure cookies, recent reauth, logout invalidation, OAuth uniqueness | sequential/distributed invalid auth, fixation/logout/reauth/state/nonce/PKCE; unexplained bypass blocks |
+| Economy replay/duplicate/concurrency | HIGH | idempotency unique constraints, DB transaction/locking, append-only ledger/reconciliation | parallel/retry/replay, precision and ledger balance; unexplained mismatch blocks |
+| Admin abuse | HIGH | session+reauth+TOTP+DB actor+least privilege+impact preview+append-only audit | lower-role, stale reauth, invalid TOTP, CSRF, mass-action, DB privilege; failure blocks |
+| Upload/UGC | HIGH | decoded file type, isolated storage, output encoding/CSP, metadata minimization, moderation/report/block | polyglot/malformed/XSS/link/unauthorized delivery |
+| Analytics/ad/SEO leakage | MEDIUM/HIGH by data | outbound allowlist, minimization, no token/balance/debt/security state in URLs/structured data | payload/schema/sitemap/JSON-LD scan; HIGH leakage blocks |
+| Supply chain | MEDIUM/HIGH | pin critical actions/dependencies to reviewed immutable versions where feasible, dependency audit/SBOM/provenance | workflow/dependency policy regression; critical/high unresolved issue follows release policy |
+| Release-evidence bypass | HIGH | immutable SHA, machine-readable fail-closed evidence, no skip-pass | intentionally break each release prerequisite; `production-ready` must not emit |
+| Backup/key compromise | HIGH | encryption, key separation, independent medium, least-privilege backup identity, access audit | unauthorized identity/key/plaintext tests; HIGH leak blocks |
+| Wrong-environment restore | CRITICAL/HIGH | explicit source/target, isolated namespace/DB, separate credentials/outbound sinks | simulate wrong target/Production credential; any unintended Production write possibility blocks |
+| Backup corruption/WAL gap | HIGH | checksums/manifests, tool/version checks, regular full restores, WAL monitoring, ledger/data reconciliation | corrupt/missing WAL/wrong checksum must fail closed and alert |
+| Multi-account/referral/market manipulation | HIGH where economy affected | maturity/caps, graph/anomaly review, transaction provenance, separation of raw acquisition signal from economic reward | referral ring, wash trade/collusion, duplicate reward, replay scenarios |
 
-Casino/probability features remain service-internal and must use server-generated outcomes, published probabilities/payouts, user limits, idempotent settlement, and the same ledger invariants as every other value-changing feature. Cash redemption or external prizes are prohibited unless a separate legal/product review explicitly changes the product model.
+Secrets/passwords/verifiers/session cookies/OAuth codes/client secrets/bot tokens/DB passwords/backup keys/raw verification/recovery tokens and unrestricted request bodies are never written to general logs. Security events use pseudonymous IDs and safe classifications.
 
-## 9. Economy health and policy automation
+## 8. Profitability and business contract
 
-Economy health measures include supply, mint/burn flows, treasury movement, asset concentration, reward/sink flows, market activity, and ledger/balance reconciliation.
+No feature is approved from gross revenue alone. For real-money or ad monetization record: model (subscription/one-time/consumable/non-consumable/ad/sponsor/B2B2C/indirect retention/acquisition), user conversion path, displayed/test price, attach/paid conversion/repeat/renewal hypothesis, refund/churn/cancellation, ARPU/ARPDAU/ARPPU only when real revenue exists, eCPM/fill/CTR for ads, platform/payment/tax/refund/chargeback, infra/storage/CDN/notification/LLM, content/CS/moderation/fraud/security cost, gross/contribution margin, CAC, LTV, LTV/CAC, payback, optimistic/base/conservative sensitivity, D1/D7/D30 impact, trust/regulatory cost and predeclared `SCALE/ITERATE/HOLD/KILL`.
 
-Policy automation begins in proposal mode. Automatic policy application may only be introduced after sufficient observation, minimum sample thresholds, bounded change limits, rollback criteria, and explicit validation demonstrate that automated changes are safe.
+- WLD-only shop/casino/bank/stock activity is game-economy activity, not real revenue.
+- Advertising uses `net ad contribution = ad revenue - estimated LTV loss from ad-induced churn/session reduction - ad infra/privacy/support/fraud cost`.
+- SEO uses incremental organic D30 retained users and organic CAC savings rather than impression growth alone.
+- Security/QA/release/backup uses avoided expected incident/data-loss/downtime/refund/fraud/support cost; do not fabricate currency values without data.
+- Local auth uses incremental D30 retained-user contribution minus SMTP/Argon2/DB/support/fraud/privacy/security operations cost.
+- Future recurring billing must disclose material terms before charge, obtain affirmative consent, and provide straightforward cancellation. Provider/platform-specific fees are not assumed until a provider is selected and current official terms are verified.
 
-Historical ledger data is never rewritten to make a policy metric look healthier.
+## 9. Backup and disaster-recovery contract — v106 normative addition
 
-## 10. Security baseline
+### 9.1 Recovery objectives and data scope
 
-The project follows a defense-in-depth model covering OAuth/session security, CSRF, authorization/BOLA, XSS/output encoding, input validation, rate limiting, secret management, file-upload validation, least-privilege database roles, container hardening, dependency/supply-chain review, backup/recovery, and operational incident response.
+Approve explicit RPO and RTO based on acceptable identity/ledger/content loss and recovery cost; this plan does not invent numeric targets. Measure RPO from the newest actually restorable point and RTO from a timed full drill. Back up at least authoritative PostgreSQL identity/economy/ledger/audit, migration/schema/version manifests/checksums, inventory/entitlement/content metadata, required object/photo store and the application/GitOps version needed to interpret the data. Keys/secrets use a separate encrypted recovery control plane.
 
-The browser must not receive internal API credentials. The internal API is not treated as a public general-purpose origin. Public integration endpoints must be explicit and independently authenticated/verified.
+A recovery DB/read replica/snapshot/local dump sharing the primary host/storage/failure domain or credentials is recovery convenience, not sufficient independent disaster recovery.
 
-Uploaded files are allowlisted by actual decoded type/magic bytes, stored outside the web root, size/dimension limited, randomly named, and authorization checked before private delivery.
+### 9.2 Backup architecture
 
-## 11. SEO, Search Console, ads, privacy, and legal gates
+Use an independent/off-host failure domain; encryption in transit/at rest; key separation and tested key recovery; least-privilege backup identity; separate restore credentials; source env/DB/app/migration/tool/timestamp/backup ID/checksum/retention metadata; monitored capacity; controlled deletion/retention/tamper protection. Choose logical dump, physical base backup, continuous archiving/PITR or combination according to approved RPO/RTO. Logical structure checks do not replace full restore. If PITR is selected, prove required WAL coverage and recovery target behavior.
 
-One canonical public origin should be selected for public content. Duplicate public origins should redirect or canonicalize consistently. Public pages use correct status codes, titles, headings, metadata, internal links, sitemap entries, and crawl/index controls.
+### 9.3 `VERIFIED_RESTORABLE` drill
 
-Private/account/admin/transaction paths are excluded from search indexing through authentication plus appropriate noindex/X-Robots handling; `robots.txt` alone is not considered a privacy control.
+A backup is verified only after: clean isolated target → source/backup identity verification → decrypt/key/checksum/manifest → full DB restore (and target/WAL proof if PITR) → migration/checksum parity → least-privilege application smoke with Production outbound disabled → DB referential checks → ledger debit/credit and derived-balance reconciliation → inventory/entitlement/provenance checks → representative object/photo restore → proof that notification/webhook/Discord/email/ads/index are non-Production/off → measured recoverable point and restore duration → evidence/operator/audit record → controlled disposal/retention of recovery copy.
 
-Reviewed advertising is enabled by default on the existing allowlisted public-information/content surfaces. Production builds therefore use `ADS_ENABLED=true` unless an operator explicitly disables advertising for an emergency policy/compliance hold. The isolated test deployment explicitly uses `ADS_ENABLED=false` and empty AdSense identifiers so QA never generates real ad traffic. The public community-board index may carry one bottom placement separated from posting controls, while individual user-generated post/comment detail pages remain ad-free and subject to publisher UGC review/removal responsibilities. Ads remain blocked from login, wallet, transfer, market, casino/gameplay, admin, error, and other sensitive/interactive paths.
+File existence, checksum alone, `pg_restore -l` alone or a recovery replica alone is not a successful DR drill.
 
-Privacy/terms/cookie disclosures must describe the actual implementation. Under-age handling, paid features, advertising, probability-based features, or any cash-value change require an updated legal/product review before release.
+### 9.4 Machine-readable release evidence for destructive/schema-changing work
 
-## 12. Pre-production verification and deployment
+Required fields: candidate SHA, backup ID, source stack/DB ID, createdAt, independent failure-domain classification, encryption/key result, checksum/manifest result, restore drill ID/time/result, achieved RPO/RTO status, migration checksum parity, ledger/derived-balance reconciliation, relevant object-store sample, rollback application/GitOps target, operator/audit ID, evidence freshness/expiry. Missing/stale/corrupt/wrong-key/wrong-env/WAL-gap/reconciliation-failed/untested evidence = `BLOCKED`, never skip-pass.
 
-The isolated `wdmv-test` Kubernetes/Flux stack is active again. Every releasable `main` SHA must be deployed and validated there before Production. Test and Production use separate namespaces and PostgreSQL databases.
+### 9.5 Backup security/privacy/SEO
 
-The deployment gate is fail-closed: CI and immutable test-image build must succeed, the exact application SHA must be observed on `test.easy-scraping.com`, the backend/database smoke path must pass, and only then may same-SHA Production images and GitOps manifests advance. If the dedicated test stack is unavailable or does not serve the exact SHA, Production automation stops.
+Backup/restore/admin artifacts are private/authenticated/noindex and sitemap-excluded. Public status may expose only a truthful safe high-level recovery-health category/timestamp if desired; never paths, provider IDs, DB names, keys, checksums, WAL locations or internal topology. Restore environments remain noindex/ad-free and never use Production side-effect credentials. Retention/disposal of restore copies is audited.
 
-A run must never claim “test server passed” if no dedicated test server was available.
+### 9.6 Backup QA and monitoring
 
-Before merging/deploying, sync with current `main`, preserve other contributors' work, resolve conflicts without force-pushing `main`, and rerun the required checks after integration.
+Alert on stale/failed backup, checksum/manifest mismatch, decrypt/key failure, insufficient storage, restore-drill failure, recovery-refresh failure, reconciliation failure and PITR/WAL gap when applicable; deduplicate alerts and exclude user/economy payloads. Fault-inject stale/missing/corrupt archive, wrong key, storage-full, wrong target, Production credential and WAL-gap scenarios. Rehearse last-known-good immutable application/GitOps rollback and record actual recovery duration.
 
-Production deployment is followed immediately by smoke checks for HTTP/API health, major user flows, authentication where testable, logs/errors, container/service health, resource use, and rollback readiness.
+Business KPI: backup success/freshness, independent-copy coverage, verified-restore success, achieved RPO/measured RTO, drill failures, storage/key/compute/operator cost, expected-loss avoided. Direct revenue is zero. `SCALE` when approved recovery objectives are reliably met at acceptable cost; `ITERATE` when copies exist but proof/automation/cost is weak; `HOLD` destructive changes while proof is missing; `KILL` a path that is not independently restorable or creates unacceptable secret/privacy risk.
 
-## 13. Database migration rules
+## 10. QA, test environment, release, monitoring and rollback
 
-Applied migrations are immutable. Any correction is made in a new numbered migration.
+Every material issue records severity, first found, last reproduced, exact reproduction, affected user/function, evidence, root-cause hypothesis/confirmation, frontend/backend/API/DB/infra target, concrete design, migration need, rollback, unit/integration/E2E/real-DB/security/regression tests, test acceptance, Production promotion, monitoring, status and owner sequence. Repeated `BLOCKED` becomes a root-cause-removal item. CRITICAL/HIGH beats feature work.
 
-Migration parity and production checksum rules must remain intact. Schema/data changes need integrity checks, backward-compatibility analysis where applicable, and a realistic recovery strategy.
+### 10.1 Candidate/release sequence
 
-Destructive production data operations require an explicit safe recovery path and must never be hidden inside an unrelated feature change.
+`new branch → lint/type/unit/integration/real-DB/security → immutable candidate/SBOM/provenance as applicable → isolated exact-SHA deployment → migration checksum/parity → backend/DB least-privilege smoke → authenticated synthetic flow → changed feature E2E/abuse tests → release evidence including restore/rollback for DB-changing work → main integration → exact-main-SHA test gate → Production-ready → GitOps Production → HTTP/API/auth/user-flow/log/resource smoke → monitor/rollback`.
 
-## 14. Documentation and work-log rules
+The test environment uses isolated namespace/database, indexing off and real ads off. Missing test evidence is not converted into a pass. Test/recovery stacks must not send Production email/Discord/webhook or mutate Production data.
 
-Every material feature/security/operations change must update the relevant documentation in the same development flow:
+### 10.2 Monitoring guardrails
 
-1. Living Project Plan if product/architecture/security intent changed.
-2. Feature/architecture/operations docs for the concrete implementation contract.
-3. English changelog/release notes first, Korean counterpart second.
-4. Work log containing findings, rationale, files changed, tests, failures/fixes, merge/deploy state, rollback notes, and unresolved risks.
+Observe API 4xx/5xx classes, auth failures/ATO signals, DB pool/transaction errors, migration parity, ledger reconciliation, suspicious duplicate reward, quota denials, shop entitlement failures, alert/outbox/provider failures, ad-induced exit/CWV, crawler/index errors, backup freshness/restore status, deployment evidence and rollback availability. Logs contain IDs/classes, not raw secrets/private payloads.
 
-Documentation is not updated to make a regression look intentional. A spec change must have a defensible implementation reason and evidence that the new design is acceptable.
+## 11. UX, activation, retention and operations
 
-## 15. Current priority gaps
+First visit explains one clear product promise and game-only boundary before presenting the whole economy. Activation is visit → understand → sample/value → contextual signup → first meaningful verified action → first result/reward → next goal. New users are not required to learn market/business/bank/casino simultaneously.
 
-The project should continue to reconcile and improve, in priority order:
+D1 restores the exact thread the user selected; D3 shows real change or honest no-change; D7 resolves a coherent progression/collection/project/learning loop; D14 encourages optional breadth; D30 should leave durable history/identity/collection rather than attendance punishment. Support 1–3 minute quick checks, 5–15 minute meaningful sessions and optional deep sessions. Avoid punitive streaks, loss-threat FOMO and excessive notifications; provide catch-up/comeback.
 
-- Keep the Living Spec synchronized with current admin/security implementation.
-- Restore or replace a dependable isolated pre-production environment so production is not the first environment executing risky changes.
-- Continuously verify database privilege boundaries and actor-scoped read/write functions.
-- Maintain economy reconciliation, backup/restore proof, and production rollback readiness.
-- Close user-visible feature gaps and stale UI contracts that make implemented backend capabilities unreachable.
-- Continue responsive/accessibility/Core Web Vitals/SEO/Search Console checks.
-- Keep ad placement, privacy disclosures, and probability/game features behind explicit policy/legal gates.
-- Treat security, reliability, and specification drift as recurring operational work rather than one-time launch tasks.
+Social sharing prefers public-safe achievements/collections/projects/season records/learning results. Shared URLs contain no session token, private holdings, balances, debt, casino history, recovery/security state or PII. Referral rewards favor cosmetics/prestige/convenience and require fraud-resistant maturity rather than raw signup.
 
-## 16. Change record
+Admin/CS operations define dispute/refund/report/abuse queues, feature flags, rollback/fallback, safe incident messaging and audit. High-risk account/economy actions use clear confirmation and anti-phishing UX rather than ambiguous notices.
 
-### 2026-09-13 — default-on reviewed advertising v2026.09.13.37
+## 12. External reference decisions — 2026-09-15
 
-- Changed the reviewed public-content advertising policy from default-off to default-on.
-- Production builds now enable the approved AdSense publisher/slot automatically, while an explicit operator switch can still disable advertising.
-- The isolated test deployment remains explicitly ad-free so staging traffic cannot generate real ad requests.
-- Sensitive/account/economy/gameplay routes remain outside the advertising allowlist.
+- PostgreSQL current `pg_verifybackup`: **DIRECT ADOPT** for compatible backup manifest/checksum verification; PostgreSQL itself notes this cannot prove every property of a running restored server, so full restore testing remains mandatory.
+- PostgreSQL current continuous archiving/PITR: **DIRECT ADOPT IF PITR SELECTED**; WAL availability and recovery targets are part of recovery evidence.
+- CISA StopRansomware: **DIRECT ADOPT as resilience guidance** for independent/offline encrypted backup and regular recovery availability/integrity testing.
+- NIST SP 1339 (2026-06-17): **REFERENCE/DIRECT OPERATING PRINCIPLE** for integrating backup management with change management, regular backup/testing/recovery exercises; this does not characterize Moneyverse as an OT deployment.
+- OWASP ASVS 5.0.0 / API Security Top 10: **DIRECT ADOPT as verification baseline** for authentication/session/BOLA/resource/business-flow controls.
+- Google Search Central and Naver Search Advisor current guidance: **DIRECT ADOPT** for canonical/indexing/sitemap/crawl/public-content quality and explicit noindex/auth boundaries.
+- Korea PIPC current privacy-policy material: **DIRECT ADOPT as disclosure design guidance** so purpose/items/retention/rights match actual authentication/analytics processing.
+- FTC 2026 subscription/negative-option enforcement/rulemaking: **REFERENCE/DIRECT PRODUCT GUARDRAIL** for any future real recurring billing: clear material terms, affirmative consent and straightforward cancellation; do not claim automatic universal jurisdiction.
 
-### 2026-09-09 — implementation synchronization
+## 13. Current evidence snapshot and integration record — v2026.09.15.106
 
-- Converted the plan from a frozen draft into a Living Spec.
-- Standardized the production economy database on PostgreSQL.
-- Updated the administrator design to the implemented single-superadmin model with admin-session validation, reauthentication, TOTP second factor, database actor checks, and append-only audit controls.
-- Removed the obsolete mandatory two-person approval statement from the current plan while retaining stronger compensating controls.
-- Recorded that the previous always-on test stack was retired, while preserving mandatory pre-production verification gates.
-- Added the rule that implementation and plan documentation must be synchronized in the same workstream.
-
-### 2026-09-09 — product expansion roadmap parity
-
-The following roadmap mirrors the Korean Living Spec and is staged behind implementation, validation, and release gates. It does not redefine WLD or any virtual-economy feature as a real financial product.
-
-#### P0 — discovery, return visits, and operations
-
-- **Virtual-stock detail hub:** combine price/candles, server-defined indicators, member holdings, and related community content on one canonical page. The first member-facing hub slice is implemented at `/stocks/[symbol]`, linking market data, holdings, watchlist, chart/trading controls, comparison/alerts, and stock-tagged discussion.
-- **Stock watchlist:** store per-member watched virtual stocks and expose them from stock/home surfaces. The first watchlist slice is implemented in PostgreSQL/NestJS/Next.js and remains subject to the normal release/deployment gates.
-- **Public-content SEO:** continuously verify canonical URLs, metadata, sitemap/robots behavior, breadcrumbs, and internal links for anonymous public content.
-- **Admin operations console:** expand read-model-driven user/economy/content/error/service-health views while keeping risky writes separated and step-up protected.
-- **Administrator audit trail:** preserve actor/action/target/result, safe before/after summaries, and masked network context without secrets or unrestricted request bodies.
-
-#### P1 — data and community integration
-
-- **Stock-tagged community:** connect posts to virtual stocks so members can navigate between a stock detail surface and relevant discussion. The member-facing path is implemented: stock detail links into a stock-filtered board composer that opens automatically with the symbol prefilled, while existing server-authoritative tagged-post creation/listing contracts remain unchanged.
-- **Stock comparison:** compare multiple virtual stocks with server-defined metrics on a consistent basis. The comparison route accepts validated stock-symbol deep links from the stock detail hub, keeps the browser URL synchronized with the current 2–3 stock selection, lets members copy that exact comparison link for later return or sharing, and shows exact integer-string-derived absolute and percentage change from the day open.
-- **Conditional alerts:** support server-verifiable price/change/service-event conditions with cooldown and rate limiting. Price and daily-change rules are implemented, and stock-detail alert links now preselect the referenced virtual stock on `/stocks/alerts` so the cross-surface flow preserves member intent.
-- **Economy/event calendar:** unify service events, virtual-stock events, quests, and shop events around dates. The member calendar now includes authoritative shop sale-ending deadlines alongside daily events, weekly resets, and season-event endings.
-- **Account security center:** expose active-session review, other-session termination, login-security state, and future second-factor expansion.
-
-#### P2 — personalization and summaries
-
-- **Personal dashboard:** combine watchlist, recent activity, holdings, quests, and economy events for the signed-in member.
-- **Portfolio analysis:** calculate valuation, allocation, and gain/loss from authoritative virtual-stock holdings while preserving WLD integer/string precision contracts.
-- **AI-assisted summaries:** optionally summarize announcements, guides, or public community activity. Generated output must be visibly distinguished from source content, include provenance/time context, and never decide economy outcomes.
-
-#### P3 — long-term expansion
-
-Advanced economic analysis, recommendations, and simulation remain gated on data quality, operating cost, safety, product wording, and legal review. They must not bypass existing ledger, authorization, privacy, or probability-feature controls.
-
-## 17. Integrated implementation, QA, SEO, security, and profitability contract — v2026.09.15.103
-
-This section is normative for all feature families and supersedes generic phrases such as “improve security”, “add SEO”, or “consider monetization”. Any implementation backlog item must be concrete enough for another developer or agent to identify authority, data flow, error states, tests, deployment gates, and business consequences.
-
-### 17.1 Current release-blocking findings
-
-**P0 — profession-work quota contract drift.** Runtime `/guide` currently says profession work is repeatable without a daily limit and always pays full WLD/EXP. `main` v2026.09.15.102 instead restored server/database-authoritative task-specific `daily_limit`, `taken_today`, exact-limit completion, over-limit rejection, and per-member/per-task concurrency protection. Until public/mobile/web guidance is synchronized and revalidated, release notes and user education must not claim unlimited rewards. Acceptance requires real-DB tests for zero/partial/full quota, one-over-limit rejection, profession switch isolation, concurrent duplicate completion, Seoul-day rollover, and API/web/mobile parity. Applied migrations are immutable; behavior rollback requires a new migration.
-
-**P0 — promotion evidence must be fail-closed.** CI success, immutable test image, exact-SHA test deployment, backend/database smoke, migration parity/checksum, critical user-flow QA, and rollback readiness are separate pieces of evidence. Missing GitHub status visibility is `verification unavailable`, not pass and not fail. Production promotion is blocked whenever required evidence cannot be proven.
-
-### 17.2 Required per-feature specification
-
-For identity/session, profile/security center, inventory/collection, shop/cart/payment/subscription, season/quest/job/progression, business/bank/loan, virtual stocks/portfolio/alerts, casino/probability, community/comments/report/block, friends/clubs/referral, notifications, search, uploads, public content, app API, admin/audit/backup, analytics/experiments, advertising, SEO, and incident operations, every backlog entry records: purpose and user problem; implementation status (`UNIMPLEMENTED`, `PARTIAL`, `IMPLEMENTED`, `REDESIGN_REQUIRED`); actor/role and entry points; first-use/return/comeback flows; loading/empty/error/offline/timeout states; responsive/accessibility/i18n behavior; server authority and data ownership; read/write permissions; endpoint/method/request/response/error/idempotency/rate limit; service rules; tables/indexes/constraints/transactions/concurrency; audit/metrics/admin operations; feature flag/fallback/backup impact; security/privacy/abuse; SEO/public-indexing rules; analytics/KPIs; performance/cache targets; profitability/cost model; unit/integration/E2E/real-DB/security/regression acceptance; test-environment gate; production promotion and rollback.
-
-### 17.3 Security verification matrix
-
-Object-ID APIs must perform server-side object authorization on every read/write and must include negative tests using another member’s identifier, consistent with OWASP API1:2023 BOLA guidance. Authentication/session work must test credential stuffing and rate limits, session fixation/rotation, logout/invalidation, OAuth state/nonce/PKCE/exact redirect URI, recent reauthentication, CSRF boundaries, cookie attributes, MFA/TOTP admin boundaries, and secret/log masking. Economy endpoints additionally require idempotency/replay, concurrent requests, duplicate reward prevention, multi-account/collusion/market-manipulation scenarios, precision checks, append-only ledger reconciliation, and least-privilege DB verification. Upload/UGC work requires decoded-type/magic-byte validation, size/dimension limits, isolated storage, delivery authorization, metadata/privacy review, moderation/report/block paths, and malicious-link/phishing defenses. A failed CRITICAL/HIGH security test blocks promotion.
-
-### 17.4 SEO backend contract
-
-SEO is a backend/read-model responsibility, not only page copy. Canonical URL generation is deterministic and server-owned. Dynamic sitemap generation includes only public, indexable canonical URLs and authoritative `lastModified`; split sitemap indexes before protocol limits become operational risk. Account/admin/wallet/transaction/recovery/security/private holdings pages are excluded from sitemap and are protected by authentication plus `noindex`/`X-Robots-Tag` where relevant; robots.txt is never a confidentiality control. Stable slug changes use explicit 301/308 redirect maps. Public content must expose core meaning in crawlable SSR/ISR HTML; filter/sort/search/query variants canonicalize or noindex rather than multiplying thin duplicates. Breadcrumb JSON-LD mirrors visible navigation and canonical URLs. Image metadata includes safe alt text, dimensions, optimized formats, and no private filenames/EXIF leakage. Multi-language public pages use consistent canonical/hreflang policy. Google Search Console and Naver Search Advisor monitoring must track crawl/index/canonical/sitemap errors and connect organic visit → signup → activation → D7/D30 → revenue. Core Web Vitals target good thresholds (LCP ≤2.5s, INP <200ms, CLS <0.1) for representative public templates.
-
-### 17.5 Monetization and profitability contract
-
-No paid feature is approved from gross-revenue intuition alone. Each subscription, one-time/non-consumable/consumable item, sponsorship, ad surface, or B2B2C feature carries price/test range and rationale; attach/conversion/repeat/renewal hypotheses; refund/cancellation/churn assumptions; platform/payment fees, tax, refund cost, infra/storage/CDN/notification/LLM cost; content/CS/moderation/fraud operations cost; gross margin and contribution margin; CAC, LTV, LTV/CAC and payback; optimistic/base/conservative sensitivity; D1/D7/D30 impact; trust/legal risk; and explicit `SCALE`, `ITERATE`, `HOLD`, `KILL` thresholds. Unknown values are labeled hypothesis/test targets. Subscription material terms and recurring billing are clear before charge, express consent is required, and cancellation must not be obstructed. Advertising optimizes `ad revenue - ad-induced churn/session loss/support burden`, never impression count alone. Security, QA, backup, SEO, and admin tooling are evaluated through avoided incident/fraud/refund/support cost and retained customer/organic value.
-
-### 17.6 Store and catalog contract
-
-Each shop SKU records canonical item ID/name/category/description/audience/value proposition; WLD vs real payment; consumable/non-consumable/subscription classification; server-authoritative price and test band; discount/bundle/coupon rules; inventory/sale window/purchase limit/duplicate behavior; account binding/gifting; refund/recovery/cancellation/renewal; grant/inventory reflection and idempotency; economy sink/source impact and P2W classification; retention/revenue hypothesis; KPI and fraud controls; API/DB/admin lifecycle; and QA. Fake scarcity, resetting countdowns, hidden personalized pricing, wealth/profit/casino prestige as default aspiration, and paid competitive advantage are excluded.
-
-### 17.7 Priority and release order
-
-Priority order is: `P0 data loss/security/auth/authorization/asset duplication/economy abuse/DB integrity/promotion evidence` → `P1 major user-visible correctness and core-flow completeness` → `P1 monetization contract and store/payment correctness` → `P1 SEO backend/public acquisition` → `P2 retention/growth` → `P2 accessibility/responsive` → `P3 long-term expansion`. Every item carries status, evidence, acceptance conditions, QA gate, dependencies, rollback and business-effect hypothesis.
-
-### 17.8 Current runtime and QA reality
-
-Production public status currently reports the web service, economy API, and ledger database healthy at its latest recorded snapshot. Public home/status/guide are reachable, but authenticated flows were not independently executed in this documentation-only run. The connected GitHub status/workflow lookup did not expose checks for the starting `main` SHA, so CI/test-server success is not claimed. Runtime verification is therefore partial.
-
-### 17.9 External reference decisions
-
-Directly adopted: Google canonicalization/Core Web Vitals/Breadcrumb guidance; Naver crawler/sitemap/canonical/robots guidance; OWASP API BOLA/Broken Authentication, OWASP Top 10:2025 and ASVS as verification references; FTC 2026 subscription enforcement as a consumer-protection signal; Apple subscription/billing-recovery documentation as platform economics/renewal reference. Platform-specific revenue percentages or recovery durations are not assumed to apply to Moneyverse unless the corresponding platform/payment model is actually adopted.
-
-### 17.10 Change record — v2026.09.15.103
-
-- Integrated development/QA/SEO-backend/security/profitability requirements into the Living Project Plan.
-- Elevated the public unlimited-work copy vs authoritative daily-quota implementation mismatch to P0 release-blocking contract drift.
-- Formalized fail-closed promotion evidence and `verification unavailable` semantics.
-- Added a required per-feature contract covering UX, API, DB, security, operations, analytics, economics, QA and rollback.
-- No runtime/code/database/infrastructure change is performed by this planning update.
-
-## 18. Integrated release-governance and feature-evidence audit — v2026.09.15.104
-
-Sections 18.1–18.9 remain normative as recorded in Git history and the v104 changelog/worklog. Their release blocker register, evidence-backed feature register, SEO implementation matrix, threat register, profitability model, development order, runtime/QA evidence, reference decisions, and change record are retained without weakening. In particular, `QA-104-01`, `REL-104-02`, and `REL-104-03` remain active under the statuses carried below. This consolidation sentence does not replace the detailed v104 records in version control; it preserves their normative force while later sections add stricter controls.
-
-## 19. Identity data-processing parity and authentication release audit — v2026.09.15.105
-
-This section is normative and extends the v104 all-feature contract without weakening any prior P0/P1 gate. The run re-audited the full feature register and found the largest new gap at the identity/privacy boundary: first-party email/password authentication is present in code, migrations and mobile API documentation, while the current public web login, guide and privacy notice remain OAuth-centric.
-
-### 19.1 New and carried release issues
-
-#### AUTH-105-01 — P0 — OPEN / PUBLIC ROLLOUT HOLD — local-auth processing contract is ahead of public privacy/login disclosure
-
-- Current `main` contains the local registration/verification/login API and Argon2id/email-hash/token-hash storage path, while current public login/guide/privacy material remains OAuth-centric.
-- Do not newly market or generally expose local registration until privacy version/consent, retention/deletion, SMTP processing facts, account deletion/credential removal, security tests, SEO noindex/token controls, and isolated exact-SHA acceptance are synchronized.
-- Registration/login remain prelogin-session + CSRF guarded; verify-email is a one-time bearer-token exchange and must use short expiry, single use, no raw-token logs, no third-party analytics/ads before exchange, strict referrer control, and clean token-free redirect after consumption.
-- Local/OAuth identities are never silently merged by email similarity; linking requires authenticated ownership proof and collision-safe audit.
-- Local auth business value is incremental activation/D30 retention and provider resilience minus SMTP/compute/DB/support/fraud/privacy/security cost; it has no direct revenue claim.
-
-#### AUTH-105-02 — P1 — TODO — canonical app-auth guide is stale against cross-browser verification
-
-Synchronize English/Korean auth guide, endpoint catalog and examples with the current controller: verify-email must document token-based cross-browser/no-cookie success rather than obsolete originating prelogin-cookie/CSRF dependence. Contract tests cover same/cross-browser, expired/reused/invalid token, session rotation, CSRF boundaries and old-client behavior.
-
-#### Carried blockers
-
-- `QA-104-01` remains **P0 OPEN**: public profession-work guidance contradicts authoritative daily quotas.
-- `REL-104-02` remains **P0 OPEN**: Production-ready automation still proves less than the Living Plan's migration/auth/economy/rollback evidence contract.
-- `REL-104-03` remains **P1 TODO**: required status checks are not repository-enforced on every runtime-code main update.
-
-### 19.2 Local-auth security, privacy, SEO and QA contract
-
-- Public auth/recovery/token pages are `PUBLIC_NOINDEX` or `AUTH_REQUIRED`, excluded from sitemaps, and never leak credentials, tokens, account existence, private state or security signals through URL/JSON-LD/analytics/ads.
-- Register/login/verify use separate server-configured abuse budgets; planning does not invent threshold numbers. SMTP/Argon2/DB resource exhaustion is tested as a cost-amplification scenario.
-- Analytics records coarse pseudonymous funnel state only and excludes email/email hash/password/verifier/raw verification token/session cookie/CSRF/OAuth code/recovery state.
-- GA requires current policy/consent, register validation, duplicate/retry semantics, SMTP success/failure, same/cross-browser verification, token replay/expiry/scanner safety, credential-stuffing/429, viewer/session rotation/logout, OAuth regression, local/OAuth collision, raw-secret log scans, deletion/credential-removal and pending-registration cleanup, mobile-doc parity, noindex/sitemap/token checks, and reversible new-signup rollback.
-- `SCALE` only when incremental activation/D30 improves without ATO/privacy/fake-signup/email-abuse/support guardrail breach; `HOLD/KILL` applies to disclosure mismatch or failed HIGH security control.
-
-## 20. Independent backup, recovery evidence, and data-loss prevention audit — v2026.09.15.106
-
-This section is normative and strengthens the data-loss/DB-integrity priority without weakening v104/v105 security, auth, SEO, economics, or release gates. The largest new evidence gap is that an independent disaster-recovery backup and a recent successful restore are not currently proven.
-
-### 20.1 BAK-106-01 — P0 — OPEN / DESTRUCTIVE-CHANGE BLOCK
-
-- **First evidence:** GitHub issue #139, opened 2026-09-09 and still open when rechecked 2026-09-15. The recorded host inspection found the designated `/mnt/backup` SSD (`/dev/sda1`) mounted read-only; the newest observed separate-media files were from 2026-09-07; no current Kubernetes-era automated backup on that medium was observed. An emergency PostgreSQL custom-format dump passed SHA-256 and `pg_restore -l`, but it was stored on the same system disk and explicitly does not satisfy independent disaster recovery.
-- **Corroborating repository evidence:** the recovery-DB worklog states that `moneyverse_recovery` is a fast logical restore/inspection target and does **not** replace encrypted separate-media backups. `docs/operations/backup-and-recovery.md` describes the desired contract that Production-changing migrations/runtime rolls take encrypted DB/photo backups, but that wording is not itself current proof that an independently recoverable backup exists.
-- **Affected assets/users:** PostgreSQL identity/session/economy data, append-only ledger and derived balances, inventory/entitlements, policy/audit state, required object/photo data, service continuity, support/dispute resolution, and any user whose state cannot be reconstructed after host/storage loss.
-- **Root cause classification:** operational recovery evidence gap: legacy/host backup mechanisms changed during Kubernetes migration, the designated independent medium was unhealthy/read-only at the last direct inspection, and the current repository does not expose a machine-verifiable successful independent backup + full restore drill.
-- **Immediate rule:** destructive or schema/data-changing Production operations are fail-closed unless a current independently verified recovery path exists. Docs-only changes remain unaffected. Non-destructive runtime releases may use a risk-tier policy only if that policy is explicitly approved; it must not silently exempt DB-changing work.
-- **Migration:** no product migration is required to implement backup evidence itself. Existing migrations remain immutable. A backup metadata/read-model table may be introduced only through a new migration and least-privilege interface if needed.
-- **Rollback:** application rollback uses the last known-good immutable application/GitOps version. Data correction prefers forward repair/compensating economy transactions; restoring Production data requires an explicitly approved restore scope. Never delete/rewrite ledger history merely to simulate rollback.
-
-### 20.2 Recovery objectives and data classification
-
-- Define explicit, approved **RPO** (maximum acceptable recoverable-point data loss) and **RTO** (maximum acceptable restoration-to-service time). Planning does not invent numeric targets; product/operations must approve them based on ledger/account/content loss tolerance, recovery cost, and operational capacity.
-- Measure RPO from the newest point that is actually restorable, not merely the timestamp of a backup file. Measure RTO from a timed end-to-end recovery drill, not an estimate.
-- Classify recovery-critical state: (1) authoritative PostgreSQL identity/economy/ledger/audit data; (2) schema/migration/version manifests and checksums; (3) inventory/entitlement/content metadata; (4) required object/photo storage; (5) application/GitOps version needed to interpret the backup. Secret/key recovery is a separate encrypted control plane and must never rely on plaintext secrets stored beside the backup.
-- A recovery database, read replica, snapshot, or local dump sharing the same host/storage/failure domain or online credentials is **recovery convenience**, not sufficient independent disaster-recovery backup.
-
-### 20.3 Backup architecture and authority
-
-1. Select or repair an independent failure domain: off-host NAS/remote object storage/other separately recoverable medium. The medium must not fail with the primary host/storage.
-2. Encrypt in transit and at rest. Backup encryption keys use least-access/key separation; key-recovery is itself periodically tested. Keys and raw credentials are never included in ordinary backup logs, checksums, public status, or the same unprotected archive.
-3. Use a least-privilege backup identity with only the read/export permissions required. Restore credentials are separate from Production application credentials. Recovery environments must not inherit Production webhook/SMTP/Discord/ad endpoints.
-4. Back up authoritative PostgreSQL plus required object/photo data and record source environment/database identity, application/GitOps version, migration list/checksum, backup format/tool version, creation time, backup ID, encryption/checksum/manifest information, and retention class.
-5. Choose logical dump, physical base backup, continuous archiving/PITR, or a combined strategy from the approved RPO/RTO. Logical `pg_dump`/`pg_restore` structure validation is useful but does not replace a full restore. If physical base backup/PITR is used, use version-compatible manifest/checksum verification and prove all required WAL segments/recovery targets are available.
-6. Retention has minimum/maximum policy, deletion authority, capacity threshold and tamper/deletion protection. If immutable/object-lock style retention is technically and economically appropriate, test it rather than assuming configuration equals protection.
-
-### 20.4 Mandatory isolated restore drill
-
-A backup is `VERIFIED_RESTORABLE` only after a controlled drill completes all required stages:
-
-1. allocate a clean isolated recovery target with no Production application traffic;
-2. select the backup ID and verify source environment/database identity, timestamps, format/tool version and approved retention state;
-3. verify checksum/manifest and decryptability/key availability;
-4. restore PostgreSQL from scratch to the isolated target; if PITR is used, recover to the intended target and prove no required WAL gap;
-5. compare migration versions/checksums and schema expectations with the application version being tested;
-6. connect the application using a least-privilege recovery/test role and run health/read smoke without Production credentials/endpoints;
-7. run DB integrity/referential checks and selected safe account/user counts without exporting sensitive rows into logs;
-8. reconcile ledger debits/credits, derived balances and any required economy invariants; unexplained imbalance fails the drill;
-9. verify representative inventory/shop entitlement/provenance consistency and other changed high-risk feature invariants;
-10. restore and validate representative object/photo samples using safe metadata/hash checks where available;
-11. prove notifications/webhooks/Discord/email/ads/indexing are disabled or redirected to non-Production sinks;
-12. record actual restore duration, achieved recoverable point, evidence IDs, operator/audit ID, failures/retries and residual risk; compare measured values to approved RPO/RTO;
-13. destroy or retain the recovery copy according to the approved privacy/retention policy and audit the disposal.
-
-A checksum-only, `pg_restore -l`-only, recovery-replica-only, or file-exists-only result is **not** a successful disaster-recovery drill.
-
-### 20.5 Release-evidence integration
-
-`REL-104-02` must consume backup/recovery evidence for every destructive/schema-changing Production candidate. Machine-readable evidence minimally includes: candidate SHA; backup ID; source stack/database ID; backup creation time; independent-medium/failure-domain classification; encryption/key-availability result; checksum/manifest result; restore-drill ID/time/result; achieved RPO/RTO status; migration version/checksum parity; ledger/derived-balance reconciliation result; object-store sample result when relevant; rollback application/GitOps target; operator/audit ID; and expiry/freshness status of the evidence.
-
-Missing, stale, corrupt, wrong-environment, wrong-key, reconciliation-failed, WAL-gap, or untested evidence yields `BLOCKED`; there is no skip-pass. High-risk migrations may require a fresh pre-release backup even when the periodic backup remains within RPO, according to the approved recovery policy.
-
-### 20.6 Security and privacy threat additions
-
-| ID | Severity | Scenario / impact | Preventive and detective controls | Mandatory QA / deployment rule | Residual risk |
-| --- | --- | --- | --- | --- | --- |
-| SEC-106-01 | HIGH | backup/key theft or plaintext remote copy exposes accounts/economy/audit data | encryption, key separation, least-privilege backup identity, access audit, secret-free logs | restore with approved key; unauthorized identity denied; plaintext artifact scan; HIGH leak blocks release | compromise of both storage and key control plane |
-| SEC-106-02 | CRITICAL/HIGH | operator restores into the wrong environment or recovery app uses Production credentials/endpoints, causing overwrite or external side effects | explicit source/target identity, isolated namespace/DB, separate credentials, non-Production outbound sinks, impact confirmation | wrong-target and Production-credential negative tests; any possibility of unintended Production write blocks drill/release | privileged operator compromise |
-| SEC-106-03 | HIGH | ransomware/operator deletes or corrupts primary and backup in same failure domain | independent/off-host copy, retention/deletion separation, tamper-resistant controls where feasible, backup deletion audit | simulated primary-host loss and independent restore proof | correlated provider/region compromise if independence is insufficient |
-| SEC-106-04 | HIGH | backup is corrupt/poisoned or PITR WAL chain has a gap, creating false confidence | checksum/manifest, tool-version validation, periodic full restore, WAL coverage monitoring, ledger/data reconciliation | corrupt archive/wrong checksum/missing WAL must fail closed and alert | latent application-level corruption copied into otherwise valid backups |
-| SEC-106-05 | MEDIUM/HIGH | backups retain personal/economy data longer than approved or restoration copies become shadow datasets | retention/deletion policy, access logging, isolated recovery lifecycle, disposal audit, minimization of exported logs | retention/disposal test and recovery-copy inventory; privacy failure escalates by data scope | legally required holds or offline copies increase lifecycle complexity |
-
-Backup file paths, storage provider identifiers, checksums, keys, restore endpoints and detailed topology are private operational data. Public status pages, SEO read models, sitemaps, structured data and general analytics do not expose them.
-
-### 20.7 SEO/status contract
-
-- Backup/restore/recovery/admin endpoints are `AUTH_REQUIRED`, `noindex` where browser-visible, and excluded from all sitemaps. `robots.txt` is not the confidentiality boundary.
-- Public `/status` may expose only a truthful, public-safe backup-health category and age/timestamp if operators deliberately choose to publish it. Do not expose storage paths, hostnames, DB names, keys, checksums, object identifiers, WAL locations or internal failure topology.
-- Recovery/test origins remain globally non-indexable and ad-free. Restored data must never become crawler-accessible merely because an isolated recovery stack is temporarily online.
-- Crawler/access/error logs for operational endpoints must not capture secret query parameters, signed URLs or recovery credentials.
-
-### 20.8 Profitability and cost-efficiency
-
-Backup/recovery has **zero direct revenue**. Its business value is expected-loss avoidance and faster verified recovery.
-
-Track direct cost: backup storage, retained versions, egress/transfer, encryption/key management, restore-drill compute/storage, monitoring, operator hours, and any independent-media maintenance. Track avoided/mitigated cost: expected permanent data loss, downtime, refund/compensation, fraud/dispute inability, support load, incident-response labor, reputational/trust damage, and lost retained-user value. Use `expected avoided cost = Δincident probability × expected incident impact + avoided downtime/refund/support/fraud/recovery cost`; all unknown monetary inputs remain hypotheses until observed or approved.
-
-Operational KPIs: backup success/failure, backup age/freshness, independent-copy coverage, verified-restore success, achieved RPO, measured RTO, restore-drill failure classes, recovery-refresh health, checksum/manifest failure, key-unavailable state, WAL-gap state if applicable, storage-capacity headroom, drill/operator cost. `SCALE` means approved RPO/RTO and restore-success SLO are met at acceptable total cost; `ITERATE` means backup exists but restore evidence/cost/automation is weak; `HOLD` means destructive changes remain blocked; `KILL` removes a backup path that cannot be independently restored or creates unacceptable secret/privacy risk.
-
-### 20.9 QA, monitoring and rollback acceptance
-
-Before closing `BAK-106-01`:
-
-- prove current backup freshness and independent failure domain;
-- verify encryption/key availability and checksum/manifest;
-- perform full restore into a clean isolated target;
-- prove migration version/checksum parity and least-privilege DB boundaries;
-- run application/backend smoke against restored data without Production endpoints;
-- run ledger debit/credit and derived-balance reconciliation;
-- verify representative inventory/entitlement and object/photo samples;
-- inject stale/missing/corrupt backup, wrong key, storage-full, wrong-environment and, if PITR is used, WAL-gap failures and prove fail-closed alerting;
-- rehearse application/GitOps rollback to the last known-good immutable version;
-- time the drill and compare actual recovery with approved RTO/RPO;
-- verify alert contents are secret-free and that temporary recovery data is disposed according to policy.
-
-Alerts cover stale/failed backup, checksum/manifest mismatch, decrypt/key failure, insufficient storage, restore-drill failure, recovery-refresh failure, reconciliation failure and PITR/WAL gaps where applicable. Alert storms are deduplicated and carry safe evidence IDs rather than user/economy payloads.
-
-### 20.10 Current evidence snapshot
-
-- Starting and mid-run `main` before this v106 documentation sequence was `e1dce34cf3e7544d3bb3fe53a80caf992945a213`; no concurrent external change was observed before the v106 docs commits began.
-- GitHub issue #139 remains open and records the last direct evidence of the read-only designated backup SSD and same-host emergency dump.
-- The 2026-09-12 recovery worklog explicitly states that `moneyverse_recovery` does not replace encrypted separate-media backup.
-- Connected GitHub combined-status lookup for the starting SHA returned no individual statuses, and the available PR-triggered workflow lookup returned no runs. CI/test-server success is therefore not claimed.
-- Fresh direct Production runtime `/status` verification was unavailable in this run; an older health snapshot is not reused as current truth. An authorized remote device was also unavailable, so this run does not claim a new mount/Kubernetes/backup-job inspection.
-
-### 20.11 External reference decisions — accessed 2026-09-15
-
-- **PostgreSQL current `pg_verifybackup` — DIRECT ADOPT:** use manifest/checksum verification when compatible physical backups are used. PostgreSQL explicitly notes that verification cannot prove every property of a running restored server, so full test restore remains mandatory.
-- **PostgreSQL current continuous archiving/PITR guidance — DIRECT ADOPT IF PITR IS SELECTED:** WAL availability and recovery-target semantics become part of recoverability evidence, not an implementation detail that can be skipped.
-- **CISA StopRansomware current guidance — DIRECT ADOPT as resilience guidance:** maintain offline/independent and encrypted backups where feasible and regularly test availability/integrity in disaster-recovery scenarios.
-- **NIST SP 1339, published 2026-06-17 — REFERENCE/DIRECT OPERATING PRINCIPLE:** integrate backup management with change management, regular backup creation, testing and recovery exercises. Moneyverse is not characterized as an OT deployment; only the resilient-backup operating principle is adopted.
-- All v105 OWASP/PIPC/Google/FTC decisions remain normative for their respective scopes.
-
-### 20.12 Priority and change record — v2026.09.15.106
-
-Priority now begins with `BAK-106-01 P0 data-loss recovery evidence`, followed by carried P0 `AUTH-105-01`, `QA-104-01`, and `REL-104-02`; P1 includes `AUTH-105-02`, `REL-104-03`, BOLA/auth security matrix, SEO backend and remaining restore automation. This ordering reflects the project rule that data-loss/DB-integrity risk outranks new features and monetization.
-
-- Added P0 `BAK-106-01` for missing current independent backup + full restore proof.
-- Distinguished recovery convenience/read replica from disaster-recovery backup.
-- Added RPO/RTO governance, backup authority/data scope, independent failure-domain/encryption/key controls, logical/physical/PITR decision rules and machine-readable release evidence.
-- Added end-to-end isolated restore drill with migration, application, ledger/balance, inventory/entitlement and object-store checks.
-- Added backup-specific security/privacy/SEO/status/profitability/QA/monitoring/rollback contracts and failure-injection tests.
-- Preserved `AUTH-105-01`, `QA-104-01`, `REL-104-02` as P0 OPEN and `AUTH-105-02`, `REL-104-03` as P1 TODO.
-- This v106 planning change does not deploy or modify runtime code, database contents/schema, backup devices, infrastructure, secrets, branch settings or security implementation.
+- Starting and mid-run pre-documentation `main`: `e1dce34cf3e7544d3bb3fe53a80caf992945a213`; no concurrent external commit was observed before v106 documentation commits began.
+- GitHub issue #139 remained OPEN; its last direct inspection evidence is the read-only designated backup SSD and same-host emergency dump.
+- Recovery worklog says `moneyverse_recovery` does not replace encrypted separate-media backup.
+- Connected GitHub combined status for the starting SHA had no individual status entries; the available PR-triggered workflow lookup returned no runs. This run does not claim CI/test-server pass.
+- Fresh direct Production `/status` verification was unavailable in this run and no older runtime snapshot is reused as current truth. Authorized remote device access was also unavailable, so no new host/Kubernetes/mount inspection is claimed.
+- New P0: `BAK-106-01`. Carried P0: `AUTH-105-01`, `QA-104-01`, `REL-104-02`. Carried P1: `AUTH-105-02`, `REL-104-03`.
+- v106 changes planning/docs only; it does not change runtime code, DB schema/data, backup devices, infrastructure, secrets, branch settings or security implementation.
