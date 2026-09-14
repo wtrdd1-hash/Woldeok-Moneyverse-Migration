@@ -1,7 +1,7 @@
 # 월덕 머니버스 모바일 앱 전체 API 통합 구현 명세서
 
-> 버전: v2026.09.13.53
-> 기준일: 2026-09-13
+> 버전: v2026.09.14.2
+> 기준일: 2026-09-14
 > 운영 기본 주소: `https://easy-scraping.com`
 > 앱 API 기준 prefix: `/app-api/v1`
 > 대상: Android/iOS 네이티브 앱, Gemini 등 코드 생성 도구, 앱 심사/QA 담당자
@@ -950,6 +950,120 @@ callback의 code는 POST /auth/mobile/handoff로 단 한 번 교환하고 Set-Co
 ### 29.4 Kotlin/Gson/Moshi/serialization 구현 주의
 
 지갑 모델의 WLD 금액 필드는 반드시 `String`이어야 한다. `recentTransactions` 기본값은 빈 리스트로 두고 nullable 응답을 강제하지 않는다. `viewer.userId`, `wallet.userId`는 UUID string이다. 서버에 없는 임의 필드를 required로 선언하지 않는다. 알 수 없는 추가 필드는 무시하고, 필수 필드 누락은 해당 카드 오류로 처리하되 앱 프로세스를 종료하지 않는다.
+
+## 39. v2026.09.14.2 운영 안정성 계약 — 앱 크래시 방지
+
+이 절은 앱 구현자가 반드시 지켜야 하는 런타임 계약이다. HTTP 실패나 한 화면의 JSON 파싱 실패를 앱 프로세스 종료로 전파하면 안 된다.
+
+### 39.1 병렬 초기 로딩
+
+로그인 완료 뒤 홈에서 여러 API를 읽을 수 있지만, 각 요청은 서로 독립적인 실패 경계를 가져야 한다. Kotlin coroutine에서는 `SupervisorJob`/`supervisorScope` 또는 요청별 `Result`를 사용한다. 지갑 조회 하나가 실패해도 주식·프로필·공지 조회와 앱 프로세스는 계속 살아 있어야 한다.
+
+권장 상태는 `Loading | Content<T> | Empty | RecoverableError`다. `401`, `403`, `404`, `409`, `422`, `429`, `5xx`, timeout, JSON decode 오류를 `throw`한 채 Main/UI scope 밖으로 보내지 않는다.
+
+### 39.2 JSON 타입을 임의 변환하지 않는다
+
+- WLD/경제 금액은 정밀도 보존을 위해 문자열 decimal인 API가 있다. 예: `"availableAmount":"1000"`.
+- 빈 컬렉션 `[]`은 정상 상태다. `null`이나 예외로 바꾸지 않는다.
+- optional 필드는 서버 계약에 따라 nullable/default를 둔다. 없는 필드를 강제 `!!` 하지 않는다.
+- 서버가 문자열 금액을 보내는데 Kotlin `Long`, `Double`, `Int`로 직접 역직렬화하지 않는다. DTO는 `String`으로 받고 도메인 계층에서 `BigDecimal` 등으로 명시 변환한다.
+
+### 39.3 조회 요청과 429
+
+정상 앱 초기 GET burst가 rate limit에 걸리지 않도록 서버의 read budget은 높은 조회 전용 tier로 운영한다. 그래도 429가 오면 앱은 종료하지 않고 `Retry-After`가 있으면 존중하며 지수 backoff한다. 로그인·회원가입·OAuth·송금·주문·구매 같은 민감 write의 abuse 방어는 유지된다.
+
+## 40. 회원가입 이메일 발송 계약
+
+회원가입 순서는 `prelogin -> policy -> consent -> local/register -> 이메일 확인 -> local/verify-email -> viewer`다.
+
+`POST /app-api/v1/auth/local/register`가 Production에서 `503`을 반환하면 입력 형식 문제가 아니라 인증메일 delivery path가 사용할 수 없다는 뜻일 수 있다. 앱은 이를 무한 재시도하거나 크래시하지 말고 "인증메일 발송 서버를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요" 같은 복구 가능한 오류로 표시한다.
+
+Production은 인증메일을 실제 발송하지 못하면서 가입 성공을 가장하지 않는다. 서버는 loopback SMTP relay를 사용할 수 있으며 AUTH 없는 SMTP는 `127.0.0.1`, `::1`, `localhost`에만 허용한다. 원격 SMTP는 username/password가 둘 다 필요하다. SMTP 비밀값은 앱에 절대 넣지 않는다.
+
+성공 기준은 `register=202`만이 아니다. 동일 prelogin CookieJar/CSRF로 이메일 token을 `verify-email`에 제출하고, 발급된 로그인 쿠키를 저장한 뒤 `viewer.signedIn === true`까지 확인해야 한다. 신규 가입 완료 시 서버는 기본 `USER_CASH`와 `USER_BANK` 지갑을 만들며, `/wallet`은 빈 거래내역이더라도 정상적으로 읽혀야 한다.
+
+## 41. Google/Discord OAuth 브라우저 복귀 v2026.09.14.1+
+
+Provider 인증을 외부 브라우저/Custom Tab에서 진행하는 것은 정상이다. 문제는 인증 완료 후 웹사이트에 머무는 경우다.
+
+정상 모바일 흐름:
+
+1. 앱이 `GET /app-api/v1/auth/{google|discord}/authorize?client=mobile` 호출.
+2. 응답 `authorizationUrl`만 외부 브라우저로 연다.
+3. backend는 OAuth challenge에 `mobile_client=true`를 저장한다.
+4. provider callback 성공 시 서버가 5분짜리 1회용 handoff code를 만든다.
+5. callback 페이지는 `woldeok-moneyverse://oauth/callback?code=...&provider=...` 이동을 자동 시도한다.
+6. 브라우저가 자동 external-app navigation을 막는 경우 완료 페이지의 **월덕 머니버스 앱 열기** 버튼을 사용자가 누를 수 있다.
+7. 앱 deep link handler가 code를 받으면 즉시 `POST /app-api/v1/auth/mobile/handoff`로 교환한다.
+8. `Set-Cookie`와 `csrfToken`을 공통 SessionStore에 저장한다.
+9. `GET /app-api/v1/auth/viewer`에서 `signedIn:true`를 확인한 뒤에만 메인 화면을 연다.
+
+앱이 provider callback URL을 직접 만들거나 provider `code/state`를 `/mobile/handoff`에 넣으면 안 된다. handoff에는 Moneyverse 서버가 생성한 opaque handoff code만 넣는다. 가짜/만료/재사용 code의 401은 정상 보안 동작이다.
+
+## 42. Google Play 계정 삭제 / 데이터 삭제 계약
+
+Google Play Console 공개 URL은 다음과 같다.
+
+- 계정 및 관련 데이터 삭제 안내: `https://easy-scraping.com/account-deletion`
+- 계정은 유지하면서 개인정보 삭제 요청: `https://easy-scraping.com/data-deletion`
+
+두 페이지는 로그인 없이 200으로 열려야 하며 앱 이름/운영자, 단계별 요청 방법, 삭제되는 데이터, 제한 보관 데이터와 기간, 로그인 불가 시 요청 수단을 표시한다.
+
+### 42.1 계정 삭제 API
+
+`DELETE /app-api/v1/account`
+
+조건: 로그인 세션 + 현재 동의 + CSRF + 최근 step-up reauthentication. 성공은 `202`다. 계정 삭제는 모든 활성 세션을 무효화하고 계정/식별자 삭제 절차를 시작한다. 앱은 202 뒤 로컬 민감 캐시를 제거하고 삭제 완료 화면을 표시한다. API 실패 시 앱 자체를 종료하지 않는다.
+
+현재 reauthentication은 연결된 Google/Discord identity를 통한 step-up을 지원한다. 이 경로를 사용할 수 없는 사용자는 공개 삭제 안내 페이지의 이메일 대체 요청 경로를 이용할 수 있다. 앱이 임의로 계정 DB row를 삭제하거나 원장을 제거하면 안 된다.
+
+### 42.2 계정 유지형 데이터 삭제 요청 API
+
+`POST /app-api/v1/privacy/requests`
+
+요청 예:
+
+```json
+{
+  "requestType": "deletion",
+  "detail": "삭제를 원하는 개인정보 범위를 필요한 최소한으로 설명",
+  "idempotencyKey": "UUID"
+}
+```
+
+지원 requestType은 `access`, `correction`, `restriction`, `withdrawal`, `deletion`이다. 이 endpoint는 **요청 접수 기록**을 만드는 API이며 즉시 모든 데이터를 동기 삭제했다고 표시하면 안 된다. `GET /app-api/v1/privacy/requests`로 본인의 접수 기록을 다시 읽는다.
+
+### 42.3 공개 안내에 표시하는 보관 기준
+
+현재 개인정보처리방침과 삭제 안내 페이지의 기준은 다음과 같다.
+
+- OAuth 연결 정보/프로필 식별정보: 탈퇴 처리 후 30일 이내 삭제.
+- 프로필/갤러리 파일 및 메타데이터: 삭제 요청 후 30일 이내 삭제.
+- 가상경제 대사에 필요한 잔여 기록: 식별 연결 제거 후 최대 1년.
+- 정책 동의 증명: 탈퇴 후 3년.
+- 일반 접속/인증 기록: 90일.
+- 관리자/경제 감사 기록: 최대 1년.
+- 법령상 보존·분쟁·보안조사 데이터는 필요한 범위에서 분리 보관 후 사유 종료 시 삭제.
+
+## 43. 약관·개인정보처리방침 변경 후 재동의
+
+앱은 약관 버전을 하드코딩하지 않는다. 앱 시작/로그인 복원 시 서버 `auth/policy`와 `viewer/session` 상태를 기준으로 한다. 서버가 새 정책 버전을 발행해 `consentCurrent:false`가 되면 일반 기능을 계속 호출하며 403을 반복하지 말고 동의 화면으로 전환한다.
+
+동의 화면은 서버가 준 `termsVersion`, `privacyVersion`을 그대로 `PUT /auth/consent`에 제출하고 성공 후 `viewer`를 다시 읽는다. 새 정책 버전 반영 때문에 로그아웃할 필요는 없다. 세션을 유지한 채 재동의를 받는다.
+
+## 44. 앱 기능 API QA 최소 매트릭스
+
+릴리스 전 아래 상태를 분리해 테스트한다.
+
+- 완전 로그아웃 상태: 공개 API만 200, 보호 API는 의도된 401/403.
+- prelogin 상태: policy/consent/register 흐름, CookieJar 유지.
+- 신규 가입 직후: viewer, profile, wallet, USER_CASH/USER_BANK, 빈 배열 응답.
+- 기존 로그인: viewer/session/profile/wallet/early-game/engagement/work/shop/stocks/businesses/casino/board/privacy.
+- 정책 버전 변경: `consentCurrent:false -> consent UI -> PUT consent -> viewer true`.
+- OAuth Google/Discord: browser → completion page/deep link → handoff 1회 교환 → viewer.
+- 404 endpoint가 앱에 남아 있지 않은지: `/early-game/tasks`, `/activity/logs`는 호출 금지. 현재 계약은 `/early-game/today`, 필요 시 `POST /activity/events`다.
+- 429/5xx/timeout/JSON decode 실패가 앱 종료로 전파되지 않는지.
+- Google Play 공개 삭제 URL 2개가 로그인 없이 200인지.
 
 ## 전체 감사된 사용자 API 라우트 목록
 
