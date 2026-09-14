@@ -6,7 +6,7 @@ Economy/event calendar: surface authoritative shop sale-ending deadlines so memb
 ## Baseline and concurrency
 - Started from `origin/main` `def9782` after auditing recent branches and PRs.
 - Active stock-alert PR #304 was the newest application work but did not overlap calendar/shop files.
-- Mid-work, main advanced to `5042ea9` through merged PR #304; the branch was fast-forwarded to that exact main before final validation.
+- Mid-work, main advanced through merged PR #304 and then to `d66e247` (frontend Node image update plus planning changes); the candidate was resynchronized to the latest main before the final full validation pass.
 - Dependabot branches were preserved as active dependency work and were not mixed into this feature.
 
 ## Scope
