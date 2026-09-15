@@ -168,7 +168,7 @@ async function ensureVoiceConnection(reason = 'Normal') {
  */
 function checkBackendHealth() {
   return new Promise((resolve) => {
-    const req = http.get('http://127.0.0.1:3000/api/version', (res) => {
+    const req = http.get('http://127.0.0.1:3000/health', (res) => {
       resolve(res.statusCode === 200 ? 'OK' : `HTTP ${res.statusCode}`);
     });
     req.on('error', (err) => resolve(`FAIL (${err.message})`));
@@ -241,7 +241,7 @@ client.once(Events.ClientReady, async (c) => {
       .setTitle('📊 [정기 보고] 시스템 & 봇 상태 점검')
       .addFields(
         { name: '백엔드 API', value: backendStatus === 'OK' ? '🟢 정상 (200 OK)' : `🔴 오류: ${backendStatus}`, inline: true },
-        { name: '음성 상주 상태', value: inVoice ? '🟢 연결 정상 (<#1536572442422550538>)' : '⚠️ 재접속 중', inline: true },
+        { name: '음성 상주 상태', value: inVoice ? `🟢 연결 정상 (<#${VOICE_CHANNEL_ID}>)` : '⚠️ 재접속 중', inline: true },
         { name: '시스템 가동 시간', value: `${Math.floor(process.uptime() / 60)}분`, inline: true }
       )
       .setColor(backendStatus === 'OK' && inVoice ? 0x10b981 : 0xf59e0b)
