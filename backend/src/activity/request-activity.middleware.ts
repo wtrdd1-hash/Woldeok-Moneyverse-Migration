@@ -46,6 +46,10 @@ export function requestActivityTrail({
 
     response.on('finish', () => {
       const requestContext = contextOf(request);
+      const responseHeader = (name: string): string | null => {
+        if (typeof response.getHeader !== 'function') return null;
+        return String(response.getHeader(name) ?? '').slice(0, name === 'content-type' ? 160 : 32) || null;
+      };
       void actor
         .then((actorUserId) =>
           activity.recordRequest({
@@ -68,9 +72,9 @@ export function requestActivityTrail({
               contentType: String(request.headers['content-type'] ?? '').slice(0, 160) || null,
               accept: String(request.headers['accept'] ?? '').slice(0, 160) || null,
               acceptLanguage: String(request.headers['accept-language'] ?? '').slice(0, 120) || null,
-              responseContentType: String(response.getHeader('content-type') ?? '').slice(0, 160) || null,
-              responseContentLength: String(response.getHeader('content-length') ?? '').slice(0, 32) || null,
-              rateLimitRemaining: String(response.getHeader('x-ratelimit-remaining') ?? '').slice(0, 32) || null,
+              responseContentType: responseHeader('content-type'),
+              responseContentLength: responseHeader('content-length'),
+              rateLimitRemaining: responseHeader('x-ratelimit-remaining'),
             },
           }),
         )
