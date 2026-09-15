@@ -289,3 +289,6 @@ punitive streak, loss-threat FOMO, fake scarcity, 과도한 알림을 피하고 
 - PR #332는 OPEN/mergeable. head `b3f28185107a2f6f4a8bd389016de778df08b747`는 CI와 Test Candidate image build를 성공했다. 그러나 infrastructure desired-state 통합 후에도 public Test `/api/version`은 `1789391457242`를 반환해 exact-SHA staging이 실패했고 REL-110-01은 P0/BLOCKED다.
 - 해당 candidate는 Production을 변경하지 않았으므로 Production rollback은 필요하지 않다.
 - v110은 planning/docs only다. 이 회차에서는 runtime code, API, DB schema/data, migration, infrastructure, collector, backup medium, secret, branch rule을 변경하지 않는다.
+
+### v2026.09.16.1 변경 — 조합 가능한 주식 탐색
+`/stocks` 탐색은 URL 기반 `q` 검색과 `sort=change|price|available|name` 정렬을 함께 사용합니다. 한 조건을 바꿀 때 다른 조건을 유지해 결과 화면을 북마크·공유할 수 있어야 합니다. 경제 값은 정수 문자열 정밀도를 유지하고 잘못된 정렬 값은 API 기본순으로 돌아갑니다.
