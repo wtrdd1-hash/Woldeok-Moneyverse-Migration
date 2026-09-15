@@ -4251,6 +4251,7 @@ _No request body._
 
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
+| featureState | true | string="enabled" \| string="paused" \| string="safe_mode" \| string="disabled" |  |
 | tasks[] | true | object[] |  |
 | tasks[] | true | object |  |
 | tasks[].task_id | true | string |  |

@@ -4251,6 +4251,7 @@ _요청 본문 없음._
 
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
+| featureState | true | string="enabled" \| string="paused" \| string="safe_mode" \| string="disabled" |  |
 | tasks[] | true | object[] |  |
 | tasks[] | true | object |  |
 | tasks[].task_id | true | string |  |
