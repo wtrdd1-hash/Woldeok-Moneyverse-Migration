@@ -19,11 +19,10 @@ export function requireUuid(value: unknown, field: string): string {
   return value.toLowerCase();
 }
 
-export function requirePositiveSafeInteger(value: unknown, field: string): number {
-  if (typeof value !== 'number' || !Number.isSafeInteger(value) || value <= 0) {
-    throw new WalletInputError(`${field} must be a positive safe integer`);
-  }
-  return value;
+export function requirePositiveWld(value: unknown, field: string): string {
+  if (typeof value === 'number' && Number.isSafeInteger(value) && value > 0) return String(value);
+  if (typeof value === 'string' && /^[1-9][0-9]*$/.test(value)) return value;
+  throw new WalletInputError(`${field} must be a positive safe integer or canonical WLD integer string`);
 }
 
 export function requireRecentLimit(value: unknown): number {
@@ -118,7 +117,7 @@ export interface WalletRepayRow {
 export interface WalletTransferInput {
   readonly actorUserId: string;
   readonly recipientUserId: string;
-  readonly amount: number;
+  readonly amount: string;
   readonly idempotencyKey: string;
 }
 
@@ -136,20 +135,20 @@ export interface WalletClaimWorkInput {
 export interface WalletMoveBankBalanceInput {
   readonly actorUserId: string;
   readonly direction: unknown;
-  readonly amount: number;
+  readonly amount: string;
   readonly idempotencyKey: string;
 }
 
 export interface WalletBorrowInput {
   readonly actorUserId: string;
-  readonly principalAmount: number;
+  readonly principalAmount: string;
   readonly idempotencyKey: string;
 }
 
 export interface WalletRepayInput {
   readonly actorUserId: string;
   readonly loanId: string;
-  readonly amount: number;
+  readonly amount: string;
   readonly idempotencyKey: string;
 }
 
@@ -244,13 +243,13 @@ export class PostgresWalletRepository {
   }: WalletTransferInput): Promise<{ transactionId: string }> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const recipient = requireUuid(recipientUserId, 'recipient user id');
-    const transferAmount = requirePositiveSafeInteger(amount, 'amount');
+    const transferAmount = requirePositiveWld(amount, 'amount');
     const key = requireUuid(idempotencyKey, 'idempotency key');
     if (actor === recipient) throw new WalletInputError('cannot transfer to yourself');
 
     const row = await queryOne<WalletTransferRow>(
       this.pool,
-      'SELECT public.economy_transfer($1, $2, $3, $4)::text AS transaction_id',
+      'SELECT public.economy_transfer($1, $2, $3, $4::numeric)::text AS transaction_id',
       [key, actor, recipient, transferAmount],
     );
     if (!row?.transaction_id) throw new Error('database did not return a transfer receipt');
@@ -309,12 +308,12 @@ export class PostgresWalletRepository {
   }: WalletMoveBankBalanceInput): Promise<WalletBankMoveRow> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
-    const transferAmount = requirePositiveSafeInteger(amount, 'amount');
+    const transferAmount = requirePositiveWld(amount, 'amount');
     if (direction !== 'deposit' && direction !== 'withdraw')
       throw new WalletInputError('invalid bank direction');
     const row = await queryOne<WalletBankMoveRow>(
       this.pool,
-      'SELECT public.bank_move_balance($1,$2,$3,$4)::text AS transaction_id',
+      'SELECT public.bank_move_balance($1,$2,$3,$4::numeric)::text AS transaction_id',
       [key, actor, direction, transferAmount],
     );
     if (!row?.transaction_id) throw new Error('database did not return a bank transfer receipt');
@@ -337,10 +336,10 @@ export class PostgresWalletRepository {
   }: WalletBorrowInput): Promise<WalletBorrowRow> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
-    const principal = requirePositiveSafeInteger(principalAmount, 'principal amount');
+    const principal = requirePositiveWld(principalAmount, 'principal amount');
     const row = await queryOne<WalletBorrowRow>(
       this.pool,
-      `SELECT loan_id::text, principal_amount::text, interest_amount::text, outstanding_amount::text, transaction_id::text, replayed FROM public.bank_borrow($1,$2,$3)`,
+      `SELECT loan_id::text, principal_amount::text, interest_amount::text, outstanding_amount::text, transaction_id::text, replayed FROM public.bank_borrow($1,$2,$3::numeric)`,
       [key, actor, principal],
     );
     if (!row?.loan_id) throw new Error('database did not return a loan receipt');
@@ -356,10 +355,10 @@ export class PostgresWalletRepository {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
     const loan = requireUuid(loanId, 'loan id');
-    const payment = requirePositiveSafeInteger(amount, 'amount');
+    const payment = requirePositiveWld(amount, 'amount');
     const row = await queryOne<WalletRepayRow>(
       this.pool,
-      `SELECT loan_id::text, paid_amount::text, outstanding_amount::text, transaction_id::text, replayed FROM public.bank_repay($1,$2,$3,$4)`,
+      `SELECT loan_id::text, paid_amount::text, outstanding_amount::text, transaction_id::text, replayed FROM public.bank_repay($1,$2,$3,$4::numeric)`,
       [key, actor, loan, payment],
     );
     if (!row?.loan_id) throw new Error('database did not return a repayment receipt');

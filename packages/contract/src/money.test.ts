@@ -31,8 +31,9 @@ describe('wldAmount', () => {
     expect(() => wldAmount('1e3', 'balance')).toThrow(TypeError);
   });
 
-  it('rejects a value wider than the widest money column', () => {
-    expect(() => wldAmount(`9${'0'.repeat(38)}`, 'balance')).toThrow(TypeError);
+  it('accepts magnitudes beyond bigint and the former 38-digit storage contract', () => {
+    const huge = `9${'0'.repeat(199)}`;
+    expect(wldAmount(huge, 'balance')).toBe(huge);
   });
 
   it('names the field in the error message', () => {
