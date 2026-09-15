@@ -15,6 +15,7 @@ import {
   entersState,
 } from '@discordjs/voice';
 import http from 'node:http';
+import { MusicManager } from './music.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '../backend/.env') });
@@ -23,6 +24,7 @@ const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const LOG_CHANNEL_ID = process.env.DISCORD_LOG_CHANNEL_ID || '1542465347364589609';
 const VOICE_GUILD_ID = process.env.DISCORD_VOICE_GUILD_ID || '1104015535592701984';
 const VOICE_CHANNEL_ID = process.env.DISCORD_VOICE_CHANNEL_ID || '1536572442422550538';
+const MUSIC_MAX_TRACK_SECONDS = Number(process.env.DISCORD_MUSIC_MAX_TRACK_SECONDS || 10800);
 
 if (!BOT_TOKEN) {
   console.error('[CRITICAL] DISCORD_BOT_TOKEN is not defined in environment variables.');
@@ -40,6 +42,14 @@ const client = new Client({
 let isReconnecting = false;
 let watchdogInterval = null;
 let healthCheckInterval = null;
+
+const music = new MusicManager({
+  guildId: VOICE_GUILD_ID,
+  voiceChannelId: VOICE_CHANNEL_ID,
+  maxTrackSeconds: Number.isFinite(MUSIC_MAX_TRACK_SECONDS) && MUSIC_MAX_TRACK_SECONDS > 0
+    ? MUSIC_MAX_TRACK_SECONDS
+    : undefined,
+});
 
 /**
  * 로그 채널에 메시지 또는 임베드 직접 전송
@@ -89,6 +99,7 @@ async function ensureVoiceConnection(reason = 'Normal') {
     if (existingConnection) {
       if (existingConnection.state.status === VoiceConnectionStatus.Ready &&
           guild.members.me?.voice.channelId === VOICE_CHANNEL_ID) {
+        music.attachConnection(existingConnection);
         isReconnecting = false;
         return;
       }
@@ -106,6 +117,7 @@ async function ensureVoiceConnection(reason = 'Normal') {
     });
 
     connection.on(VoiceConnectionStatus.Ready, async () => {
+      music.attachConnection(connection);
       console.log(`[Voice] Voice connection ready in channel: ${channel.name} (${VOICE_CHANNEL_ID})`);
       const embed = new EmbedBuilder()
         .setTitle('🎙️ [음성 상주] 음성 채널 접속 완료')
@@ -156,7 +168,7 @@ async function ensureVoiceConnection(reason = 'Normal') {
  */
 function checkBackendHealth() {
   return new Promise((resolve) => {
-    const req = http.get('http://127.0.0.1:3000/api/version', (res) => {
+    const req = http.get('http://127.0.0.1:3000/health', (res) => {
       resolve(res.statusCode === 200 ? 'OK' : `HTTP ${res.statusCode}`);
     });
     req.on('error', (err) => resolve(`FAIL (${err.message})`));
@@ -171,7 +183,7 @@ client.once(Events.ClientReady, async (c) => {
   console.log(`[Bot] Logged in successfully as ${c.user.tag} (${c.user.id})`);
 
   c.user.setPresence({
-    activities: [{ name: '월덕 머니버스 & 음성 상주', type: ActivityType.Custom }],
+    activities: [{ name: '월덕 머니버스 · 음악 재생', type: ActivityType.Custom }],
     status: 'online',
   });
 
@@ -188,6 +200,18 @@ client.once(Events.ClientReady, async (c) => {
     .setTimestamp();
 
   await sendLog({ embeds: [embed] });
+
+  const guild = await c.guilds.fetch(VOICE_GUILD_ID).catch(() => null);
+  if (guild) {
+    try {
+      await music.registerCommands(guild);
+    } catch (error) {
+      console.error('[Music] Failed to register slash commands:', error.message);
+      await sendLog(`⚠️ 음악 명령어 등록 실패: ${error.message}`);
+    }
+  } else {
+    console.warn(`[Music] Guild ${VOICE_GUILD_ID} unavailable; slash commands were not registered.`);
+  }
 
   // 음성 채널 즉시 진입
   await ensureVoiceConnection('Initial Boot');
@@ -217,7 +241,7 @@ client.once(Events.ClientReady, async (c) => {
       .setTitle('📊 [정기 보고] 시스템 & 봇 상태 점검')
       .addFields(
         { name: '백엔드 API', value: backendStatus === 'OK' ? '🟢 정상 (200 OK)' : `🔴 오류: ${backendStatus}`, inline: true },
-        { name: '음성 상주 상태', value: inVoice ? '🟢 연결 정상 (<#1536572442422550538>)' : '⚠️ 재접속 중', inline: true },
+        { name: '음성 상주 상태', value: inVoice ? `🟢 연결 정상 (<#${VOICE_CHANNEL_ID}>)` : '⚠️ 재접속 중', inline: true },
         { name: '시스템 가동 시간', value: `${Math.floor(process.uptime() / 60)}분`, inline: true }
       )
       .setColor(backendStatus === 'OK' && inVoice ? 0x10b981 : 0xf59e0b)
@@ -225,6 +249,20 @@ client.once(Events.ClientReady, async (c) => {
 
     await sendLog({ embeds: [reportEmbed] });
   }, 30 * 60 * 1000);
+});
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  try {
+    await music.handleInteraction(interaction);
+  } catch (error) {
+    console.error('[Music] Interaction handling failed:', error.message);
+    const payload = { content: '음악 명령 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.', ephemeral: true };
+    if (interaction.deferred || interaction.replied) {
+      await interaction.editReply(payload).catch(() => {});
+    } else {
+      await interaction.reply(payload).catch(() => {});
+    }
+  }
 });
 
 // VoiceStateUpdate 이벤트: 강퇴되거나 음성방에서 나가지면 즉시 감지하여 자동 재진입
@@ -254,6 +292,7 @@ function cleanup() {
   console.log('[Bot] Cleaning up before exit...');
   if (watchdogInterval) clearInterval(watchdogInterval);
   if (healthCheckInterval) clearInterval(healthCheckInterval);
+  music.dispose();
   const conn = getVoiceConnection(VOICE_GUILD_ID);
   if (conn) {
     try { conn.destroy(); } catch { /* best-effort cleanup */ }
