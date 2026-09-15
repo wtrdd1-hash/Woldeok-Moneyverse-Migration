@@ -2,7 +2,7 @@ name: Auto Integrate and Promote
 
 on:
   schedule:
-    - cron: '5 * * * *'
+    - cron: '5,25,45 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -15,10 +15,10 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  integrate-one-validated-branch:
+  integrate-validated-branches:
     runs-on: ubuntu-latest
     steps:
-      - name: Integrate one validated development branch
+      - name: Integrate validated development branches
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -33,7 +33,7 @@ jobs:
           while IFS= read -r branch; do
             case "$branch" in
               main|production|staging|develop|release/*) continue ;;
-              feat/*|feature/*|fix/*|bugfix/*|integrate/*|ops/*|auto/*|test-candidate/*) ;;
+              feat/*|feature/*|fix/*|bugfix/*|security/*|integrate/*|ops/*|auto/*|test-candidate/*) ;;
               *) continue ;;
             esac
 
@@ -51,7 +51,8 @@ jobs:
                 | head -n 1
             )"
             if [[ -z "$validated" ]]; then
-              echo "skip ${branch}: exact head ${branch_sha} has no successful Build Test Candidate run"
+              echo "dispatch validation for ${branch}: exact head ${branch_sha} has no successful Build Test Candidate run"
+              gh workflow run test-candidate.yml --repo "$REPO" --ref "$branch" || true
               continue
             fi
 
@@ -104,7 +105,8 @@ jobs:
 
             gh workflow run test-candidate.yml --repo "$REPO" --ref main
             echo "dispatched main Build Test Candidate"
-            exit 0
+            sleep 2
+            continue
           done
 
-          echo "no validated branch was eligible for integration"
+          echo "integration scan completed"
