@@ -40,10 +40,34 @@ export function CoinPlayForm({
   /** True when today's headroom is spent, so the two buttons refuse locally. */
   readonly exhausted: boolean;
 }) {
-  const [state, action] = useActionState(playCoin, CASINO_IDLE);
+  const [state, action, pending] = useActionState(playCoin, CASINO_IDLE);
 
   return (
     <form action={action} className="grid gap-4">
+      <div className="casino-coin-stage" aria-live="polite">
+        <div
+          className={`casino-coin ${pending ? 'casino-coin--spinning' : ''} ${
+            state.coinOutcome === 'tails' ? 'casino-coin--tails' : 'casino-coin--heads'
+          }`}
+          aria-hidden="true"
+        >
+          <span className="casino-coin__face casino-coin__face--front">W</span>
+          <span className="casino-coin__face casino-coin__face--back">D</span>
+        </div>
+        <div className="text-center">
+          <p className="text-sm font-extrabold">
+            {pending
+              ? '동전이 서버 결과를 기다리며 회전 중…'
+              : state.coinOutcome === 'heads'
+                ? '앞면 결과'
+                : state.coinOutcome === 'tails'
+                  ? '뒷면 결과'
+                  : '앞면 또는 뒷면을 선택해 동전을 던져보세요'}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">결과는 애니메이션이 아니라 서버 영수증으로 결정됩니다.</p>
+        </div>
+      </div>
+
       <Field>
         <FieldLabel htmlFor="casino-stake">걸 WLD</FieldLabel>
         <AmountInput
@@ -73,7 +97,7 @@ export function CoinPlayForm({
 
       {exhausted && (
         <p className="text-sm text-muted-foreground">
-          오늘 걸 수 있는 한도를 모두 사용했어요. 내일 다시 열려요.
+          오늘 걸 수 있는 보호 한도를 모두 사용했어요. 다음 현실 날짜에 다시 열려요.
         </p>
       )}
 
@@ -184,7 +208,7 @@ export function DiceParityForm({
         />
         <FieldDescription>
           한 판에 {groupDigits(minStake)} ~ {groupDigits(maxStake)} WLD를 걸 수 있어요. 오늘 남은
-          베팅 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 이 한도를 함께 씁니다.
+          베팅 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 현실 하루 보호 한도를 함께 씁니다.
         </FieldDescription>
       </Field>
 
@@ -204,7 +228,7 @@ export function DiceParityForm({
 
       {exhausted && (
         <p className="text-sm text-muted-foreground">
-          오늘 걸 수 있는 한도를 모두 사용했어요. 내일 다시 열려요.
+          오늘 걸 수 있는 보호 한도를 모두 사용했어요. 다음 현실 날짜에 다시 열려요.
         </p>
       )}
 
@@ -248,7 +272,7 @@ export function DiceNumberForm({
         />
         <FieldDescription>
           한 판에 {groupDigits(minStake)} ~ {groupDigits(maxStake)} WLD를 걸 수 있어요. 오늘 남은
-          베팅 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 이 한도를 함께 씁니다.
+          베팅 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 현실 하루 보호 한도를 함께 씁니다.
         </FieldDescription>
       </Field>
 
@@ -268,7 +292,7 @@ export function DiceNumberForm({
 
       {exhausted && (
         <p className="text-sm text-muted-foreground">
-          오늘 걸 수 있는 한도를 모두 사용했어요. 내일 다시 열려요.
+          오늘 걸 수 있는 보호 한도를 모두 사용했어요. 다음 현실 날짜에 다시 열려요.
         </p>
       )}
 

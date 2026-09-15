@@ -4,7 +4,7 @@ export const APP_API_CONTRACT_VERSION = 'v2026.09.14.82';
 export const APP_API_GROUPS = Object.freeze([
   'account', 'activity', 'auth', 'bank', 'banking', 'board', 'businesses',
   'casino', 'content', 'early-game', 'engagement', 'media', 'photos', 'privacy',
-  'profile', 'progression', 'rewards', 'seasons', 'shop', 'stocks', 'wallet', 'work',
+  'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'stocks', 'wallet', 'work',
 ] as const);
 
 const APP_API_GROUP_SET = new Set<string>(APP_API_GROUPS);
@@ -20,6 +20,10 @@ export const APP_API_REQUEST_HEADERS = Object.freeze([
   'if-modified-since',
   'if-range',
   'x-request-id',
+  'x-moneyverse-client',
+  'x-moneyverse-app-version',
+  'x-moneyverse-android-sdk',
+  'x-play-integrity-token',
   'cf-connecting-ip',
   'cf-ipcountry',
 ] as const);
@@ -36,6 +40,10 @@ export const APP_API_RESPONSE_HEADERS = Object.freeze([
   'content-range',
   'content-disposition',
   'x-request-id',
+  'x-moneyverse-client',
+  'x-moneyverse-app-version',
+  'x-moneyverse-android-sdk',
+  'x-play-integrity-token',
   'x-ratelimit-limit',
   'x-ratelimit-remaining',
   'x-ratelimit-reset',

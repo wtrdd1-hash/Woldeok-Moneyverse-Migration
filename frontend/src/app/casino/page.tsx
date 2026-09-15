@@ -17,6 +17,8 @@ import { api, apiOrNull } from '@/lib/api';
 import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember, isLoggedInMember } from '@/lib/session';
 import { CasinoGuestView } from './casino-guest-view';
+import { CasinoClock } from './casino-clock';
+import { CasinoVisualHero } from './casino-visual-hero';
 import { CoinPlayForm, DiceNumberForm, DiceParityForm, SelfLimitForm } from './casino-forms';
 import { ClosedNotice, PlayOutcome } from './casino-parts';
 import { closureOf, faceLabel, multiplierFromPpm, percentFromPpm } from './coin';
@@ -93,6 +95,19 @@ interface SelfLimit {
   readonly locked_until: string | null;
 }
 
+interface ServerGameClock {
+  readonly policy_version: string;
+  readonly day_index: string;
+  readonly week_index: string;
+  readonly day_of_week: number;
+  readonly real_seconds_per_day: number;
+  readonly game_days_per_week: number;
+  readonly day_started_at: string;
+  readonly day_ends_at: string;
+  readonly week_started_at: string;
+  readonly week_ends_at: string;
+}
+
 type Loaded<T> =
   | { readonly state: 'ok'; readonly data: T }
   | { readonly state: 'closed'; readonly closure: CasinoClosure }
@@ -118,12 +133,13 @@ export default async function CasinoPage() {
   }
   await requireMember();
 
-  const [terms, fairness, games, history, selfLimit] = await Promise.all([
+  const [terms, fairness, games, history, selfLimit, gameClock] = await Promise.all([
     loadCasino<CoinTerms>('/api/v1/casino/coin/terms'),
     loadCasino<CoinFairness>('/api/v1/casino/coin/fairness'),
     loadCasino<GameTerms[]>('/api/v1/casino/games/terms'),
     apiOrNull<CasinoHistoryEntry[]>('/api/v1/casino/history'),
     apiOrNull<SelfLimit>('/api/v1/casino/self-limit'),
+    apiOrNull<ServerGameClock>('/api/v1/casino/clock'),
   ]);
 
   const dice = games.state === 'ok' ? games.data.filter((row) => row.game !== 'coin') : [];
@@ -194,6 +210,20 @@ export default async function CasinoPage() {
         />
       </PageHeader>
 
+      <CasinoVisualHero />
+
+      {gameClock ? (
+        <CasinoClock
+          dayIndex={gameClock.day_index}
+          weekIndex={gameClock.week_index}
+          dayOfWeek={gameClock.day_of_week}
+          realSecondsPerDay={gameClock.real_seconds_per_day}
+          gameDaysPerWeek={gameClock.game_days_per_week}
+          dayEndsAt={gameClock.day_ends_at}
+          weekEndsAt={gameClock.week_ends_at}
+        />
+      ) : null}
+
       <Alert>
         <AlertTitle>
           <TranslatedText
@@ -234,7 +264,7 @@ export default async function CasinoPage() {
           <Card className="bg-muted/30">
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold">
-                <T korean="오늘의 이용 현황" english="Today's Gaming" />
+                <T korean="오늘의 보호 한도 현황" english="Daily Safety Limits" />
               </CardTitle>
               <CardDescription>
                 <T

@@ -33,12 +33,14 @@ import { AUTH_LIMIT, READ_LIMIT, SENSITIVE_LIMIT } from './security/rate-limit';
 import { TieredThrottlerGuard } from './security/tiered-throttler.guard';
 import { InternalTokenGuard } from './auth/guards/internal-token.guard';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { GameClockModule } from './game-clock/game-clock.module';
 
 const ONE_MINUTE_MS = 60_000;
 
 @Module({
   imports: [
     CoreModule,
+    GameClockModule,
     AuthModule,
     HealthModule,
     WalletModule,

@@ -7,6 +7,7 @@ import { logout } from '@/app/actions';
 import { Brand } from '@/components/brand';
 import { ThemeMenu, ThemePanel } from '@/components/theme-controls';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { ServerClockPill } from '@/components/server-clock-pill';
 import { useLocale } from '@/components/locale-provider';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -99,6 +100,7 @@ export function SiteHeader() {
 
         <div className={cn('flex min-w-0 items-center gap-1 sm:gap-2 lg:gap-3 shrink-0', 'ml-auto lg:ml-4')}>
           <div className="hidden min-[420px]:block">
+            <ServerClockPill className="hidden md:inline-flex lg:hidden 2xl:inline-flex" />
             <LanguageSwitcher />
           </div>
           <div className="hidden sm:block">
@@ -122,6 +124,7 @@ export function SiteHeader() {
                 <SheetTitle className="text-left">{locale === 'en' ? 'Menu' : '메뉴'}</SheetTitle>
               </SheetHeader>
               <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="grid min-h-0 flex-1 gap-1 overflow-y-auto px-3 pb-4">
+                <div className="px-3 pt-2"><ServerClockPill className="w-full justify-center" /></div>
                 <Group title={locale === 'en' ? 'Public' : '공개'} entries={PUBLIC_NAV} pathname={pathname} locale={locale} />
                 {viewer?.signedIn && (
                   <Group title={locale === 'en' ? 'Member' : '회원'} entries={MEMBER_NAV} pathname={pathname} locale={locale} />

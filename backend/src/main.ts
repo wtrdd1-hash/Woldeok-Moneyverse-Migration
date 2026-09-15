@@ -17,6 +17,9 @@ import { attachLobby } from './lobby/lobby';
 import { MARKET_ROOM, MarketBroadcast } from './stock/market-broadcast';
 import { UNPREFIXED_ROUTES } from './http/prefix';
 import { ActivityService } from './activity/activity.service';
+import { PG_POOL } from './core/pool.provider';
+import type { Queryable } from './core/db';
+import { ipBlockGate } from './security/ip-block.middleware';
 import { requestActivityTrail } from './activity/request-activity.middleware';
 
 async function bootstrap(): Promise<void> {
@@ -32,6 +35,15 @@ async function bootstrap(): Promise<void> {
   // by the trail below or by a SECURITY DEFINER function three layers down --
   // carries the same request id. Spec 14.9 asks for that thread to exist.
   app.use(requestContext({ trustForwardedHeaders: config.trustProxyForwardedFor }));
+
+  const ipBlockLog = new Logger('IpBlockGate');
+  app.use(
+    ipBlockGate({
+      pool: app.get<Queryable | null>(PG_POOL, { strict: false }),
+      trustForwardedFor: config.trustProxyForwardedFor,
+      onFailure: (error) => ipBlockLog.error('IP block check failed', error),
+    }),
+  );
 
   const activityLog = new Logger('RequestActivity');
   app.use(
