@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
-import { failure, idempotencyKey, mutate, wholeAmount, wholeNumber } from '@/lib/mutate';
+import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
 
 /**
  * Every write the wallet can make.
@@ -60,9 +60,9 @@ export async function moveBank(_previous: ActionState, formData: FormData): Prom
 }
 
 export async function borrow(_previous: ActionState, formData: FormData): Promise<ActionState> {
-  const principalAmount = wholeNumber(formData.get('principalAmount'));
-  if (principalAmount === null || principalAmount < 100 || principalAmount > 500_000) {
-    return { status: 'error', message: '100 ~ 500,000 WLD 사이의 정수만 신청할 수 있어요.' };
+  const principalAmount = wholeAmount(formData.get('principalAmount'));
+  if (principalAmount === null) {
+    return { status: 'error', message: '1 WLD 이상 정수만 신청할 수 있어요.' };
   }
 
   try {

@@ -1,25 +1,42 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsInt, IsPositive, IsUUID } from 'class-validator';
+import { IsIn, IsUUID, registerDecorator, type ValidationArguments, type ValidationOptions } from 'class-validator';
 
-/**
- * Amounts arrive as integers, not strings, exactly as the original API
- * accepted them: the repository's `requirePositiveSafeInteger` is what bounds
- * them, and every value the *database* returns is a string carrying up to 38
- * digits. The asymmetry is deliberate — a request body cannot express a
- * balance too large for a safe integer, but a balance can be.
- *
- * `enableImplicitConversion` is off in the global pipe, so a JSON string here
- * fails validation rather than being quietly coerced to a number.
- */
+/** Monetary request values prefer canonical decimal strings. Safe integer JSON
+ * numbers remain accepted for backward compatibility with older app builds. */
+const POSITIVE_WLD = /^[1-9][0-9]*$/;
+
+function IsWldRequestAmount(options?: ValidationOptions) {
+  return (object: object, propertyName: string): void => {
+    registerDecorator({
+      name: 'isWldRequestAmount',
+      target: object.constructor,
+      propertyName,
+      ...(options ? { options } : {}),
+      validator: {
+        validate(value: unknown): boolean {
+          return (
+            (typeof value === 'string' && POSITIVE_WLD.test(value)) ||
+            (typeof value === 'number' && Number.isSafeInteger(value) && value > 0)
+          );
+        },
+        defaultMessage(args: ValidationArguments): string {
+          return `${args.property} must be a positive WLD integer string`;
+        },
+      },
+    });
+  };
+}
+
+type WldRequestAmount = string | number;
+
 export class TransferDto {
   @ApiProperty({ format: 'uuid', description: 'Recipient user id' })
   @IsUUID()
   readonly recipientUserId!: string;
 
-  @ApiProperty({ type: Number, minimum: 1, description: 'Amount in WLD' })
-  @IsInt()
-  @IsPositive()
-  readonly amount!: number;
+  @ApiProperty({ oneOf: [{ type: 'string', pattern: '^[1-9][0-9]*$' }, { type: 'integer', minimum: 1 }], example: '100000000000000000000' })
+  @IsWldRequestAmount()
+  readonly amount!: WldRequestAmount;
 
   @ApiProperty({ format: 'uuid', description: 'Client-generated idempotency key' })
   @IsUUID()
@@ -31,10 +48,9 @@ export class BankMovementDto {
   @IsIn(['deposit', 'withdraw'])
   readonly direction!: 'deposit' | 'withdraw';
 
-  @ApiProperty({ type: Number, minimum: 1 })
-  @IsInt()
-  @IsPositive()
-  readonly amount!: number;
+  @ApiProperty({ oneOf: [{ type: 'string', pattern: '^[1-9][0-9]*$' }, { type: 'integer', minimum: 1 }] })
+  @IsWldRequestAmount()
+  readonly amount!: WldRequestAmount;
 
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
@@ -42,10 +58,9 @@ export class BankMovementDto {
 }
 
 export class BorrowDto {
-  @ApiProperty({ type: Number, minimum: 1 })
-  @IsInt()
-  @IsPositive()
-  readonly principalAmount!: number;
+  @ApiProperty({ oneOf: [{ type: 'string', pattern: '^[1-9][0-9]*$' }, { type: 'integer', minimum: 1 }] })
+  @IsWldRequestAmount()
+  readonly principalAmount!: WldRequestAmount;
 
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
@@ -53,10 +68,9 @@ export class BorrowDto {
 }
 
 export class RepayDto {
-  @ApiProperty({ type: Number, minimum: 1 })
-  @IsInt()
-  @IsPositive()
-  readonly amount!: number;
+  @ApiProperty({ oneOf: [{ type: 'string', pattern: '^[1-9][0-9]*$' }, { type: 'integer', minimum: 1 }] })
+  @IsWldRequestAmount()
+  readonly amount!: WldRequestAmount;
 
   @ApiProperty({ format: 'uuid' })
   @IsUUID()

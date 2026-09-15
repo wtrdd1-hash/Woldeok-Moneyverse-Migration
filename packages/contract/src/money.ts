@@ -1,16 +1,16 @@
 /**
  * Money in this application is an integer string, never a JavaScript number.
- * The database columns are bigint and numeric(38, 0); node-postgres returns
- * both as strings, and the services convert with BigInt(). Branding the type
+ * Database money columns are NUMERIC integer values and node-postgres returns
+ * them as strings. Services may use BigInt only for exact in-process arithmetic. Branding the type
  * makes it a compile error to put a number where an amount belongs.
  */
 export type WldAmount = string & { readonly __wld: unique symbol };
 
 // Canonical: no leading zeros, no plus sign, no exponent, no separators, no
-// negative zero, and up to 38 digits — matching the widest money columns in
-// use, numeric(38, 0) (see
-// packages/database/migrations/018-economy-reconciliation-health.sql).
-const CANONICAL_INTEGER = /^(0|-?[1-9][0-9]{0,37})$/;
+// negative zero. Monetary magnitude is intentionally not capped here; HTTP body
+// limits remain the abuse-control boundary, while PostgreSQL NUMERIC stores the
+// authoritative integer exactly.
+const CANONICAL_INTEGER = /^(0|-?[1-9][0-9]*)$/;
 
 export function isWldAmount(value: unknown): value is WldAmount {
   return typeof value === 'string' && CANONICAL_INTEGER.test(value);
