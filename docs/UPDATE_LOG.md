@@ -126,3 +126,10 @@ This file records incremental project changes so concurrent work can avoid overl
 - Added high-confidence email-domain typo rejection, safe SMTP failure diagnostics, and optional `SMTP_RETURN_PATH` bounce routing.
 - Confirmed the triggering production failure was an invalid recipient-domain submission, while preserving fail-closed delivery semantics.
 - DKIM DNS/relay activation and public MX port-25 acceptance remain infrastructure prerequisites and are not falsely marked complete by this application change.
+
+## 2026-09-15 — v2026.09.15.113 Test runtime routing recovery
+
+- Diagnosed the promotion blocker: public `test.easy-scraping.com` was falling through the Production Nginx default upstream instead of the isolated Test frontend.
+- Added an opt-in middleware bridge that forwards only the Test hostname to `TEST_FRONTEND_ORIGIN`; Production behavior is unchanged when the variable is absent.
+- Verified the bridge on an alternate port: Production host stayed on the router build while Test host returned exact main SHA `c82153917095bf380b5336ef95ad6932c9d7a295`, public-catalog smoke returned 200, and Test remained `noindex`.
+- Rebuilt the isolated Test frontend/backend from exact current main SHA instead of trusting a mismatched manual BUILD_ID.
