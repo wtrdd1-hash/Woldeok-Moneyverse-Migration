@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { isWldAmount } from '@moneyverse/contract';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 
@@ -19,6 +20,30 @@ export function requireUuid(value: unknown, field: string): string {
   return value.toLowerCase();
 }
 
+/**
+ * Canonicalize a positive WLD input without ever passing a large amount
+ * through JavaScript Number. Legacy safe integers remain accepted for old
+ * clients; values beyond 2^53 must be decimal strings.
+ */
+export function requirePositiveWldInput(value: unknown, field: string): string {
+  if (typeof value === 'number') {
+    if (!Number.isSafeInteger(value) || value <= 0) {
+      throw new WalletInputError(`${field} must be a positive whole WLD value`);
+    }
+    return String(value);
+  }
+  if (
+    typeof value === 'string' &&
+    isWldAmount(value) &&
+    value !== '0' &&
+    !value.startsWith('-')
+  ) {
+    return value;
+  }
+  throw new WalletInputError(`${field} must be a positive canonical WLD integer string`);
+}
+
+/** Compatibility alias for non-money callers/tests that still import it. */
 export function requirePositiveSafeInteger(value: unknown, field: string): number {
   if (typeof value !== 'number' || !Number.isSafeInteger(value) || value <= 0) {
     throw new WalletInputError(`${field} must be a positive safe integer`);
@@ -40,14 +65,12 @@ function requireRewardDate(value: unknown): string {
   return value;
 }
 
-/** accounts / account_balances columns: packages/database/init/001-economy-core.sql */
 export interface WalletBalanceRow {
   readonly account_type: string;
   readonly available_amount: string;
   readonly updated_at: Date;
 }
 
-/** ledger_transactions / ledger_postings columns: packages/database/init/001-economy-core.sql */
 export interface WalletTransactionRow {
   readonly transaction_id: string;
   readonly type: string;
@@ -55,24 +78,20 @@ export interface WalletTransactionRow {
   readonly net_amount: string;
 }
 
-/** public.wallet_active_recipient_by_id return column: packages/database/migrations/010-account-lifecycle.sql */
 export interface WalletActiveRecipientRow {
   readonly user_id: string | null;
 }
 
-/** public.economy_transfer return column: packages/database/migrations/005-economy-hardening.sql */
 export interface WalletTransferRow {
   readonly transaction_id: string;
 }
 
-/** public.economy_claim_daily / public.economy_claim_work RETURNS TABLE: packages/database/migrations/005-economy-hardening.sql, packages/database/migrations/021-work-reward.sql */
 export interface WalletRewardRow {
   readonly transaction_id: string;
   readonly amount: string;
   readonly replayed: boolean;
 }
 
-/** public.wallet_reward_availability return columns: migration 108 */
 export interface WalletRewardAvailabilityRow {
   readonly daily_available: boolean;
   readonly daily_next_eligible_at: Date | null;
@@ -80,12 +99,10 @@ export interface WalletRewardAvailabilityRow {
   readonly work_next_eligible_at: Date | null;
 }
 
-/** public.bank_move_balance RETURNS TABLE: packages/database/migrations/035-virtual-bank-loans.sql */
 export interface WalletBankMoveRow {
   readonly transaction_id: string;
 }
 
-/** public.bank_my_loans RETURNS TABLE: packages/database/migrations/035-virtual-bank-loans.sql */
 export interface WalletLoanRow {
   readonly loan_id: string;
   readonly principal_amount: string;
@@ -96,7 +113,6 @@ export interface WalletLoanRow {
   readonly repaid_at: Date | null;
 }
 
-/** public.bank_borrow RETURNS TABLE: packages/database/migrations/035-virtual-bank-loans.sql */
 export interface WalletBorrowRow {
   readonly loan_id: string;
   readonly principal_amount: string;
@@ -106,7 +122,6 @@ export interface WalletBorrowRow {
   readonly replayed: boolean;
 }
 
-/** public.bank_repay RETURNS TABLE: packages/database/migrations/035-virtual-bank-loans.sql */
 export interface WalletRepayRow {
   readonly loan_id: string;
   readonly paid_amount: string;
@@ -118,7 +133,7 @@ export interface WalletRepayRow {
 export interface WalletTransferInput {
   readonly actorUserId: string;
   readonly recipientUserId: string;
-  readonly amount: number;
+  readonly amount: string | number;
   readonly idempotencyKey: string;
 }
 
@@ -136,30 +151,23 @@ export interface WalletClaimWorkInput {
 export interface WalletMoveBankBalanceInput {
   readonly actorUserId: string;
   readonly direction: unknown;
-  readonly amount: number;
+  readonly amount: string | number;
   readonly idempotencyKey: string;
 }
 
 export interface WalletBorrowInput {
   readonly actorUserId: string;
-  readonly principalAmount: number;
+  readonly principalAmount: string | number;
   readonly idempotencyKey: string;
 }
 
 export interface WalletRepayInput {
   readonly actorUserId: string;
   readonly loanId: string;
-  readonly amount: number;
+  readonly amount: string | number;
   readonly idempotencyKey: string;
 }
 
-/**
- * Read-model and command gateway for a single wallet owner.
- *
- * This class intentionally has no ledger INSERT/UPDATE/DELETE path. Economic
- * changes are delegated to the two SECURITY DEFINER functions granted to the
- * application database role.
- */
 @Injectable()
 export class PostgresWalletRepository {
   readonly pool: Queryable;
@@ -174,18 +182,14 @@ export class PostgresWalletRepository {
     const ownerUserId = requireUuid(userId, 'authenticated user id');
     return queryRows<WalletBalanceRow>(
       this.pool,
-      `SELECT
-         account.account_type::text AS account_type,
-         balance.available_amount::text AS available_amount,
-         balance.updated_at
+      `SELECT account.account_type::text AS account_type,
+              balance.available_amount::text AS available_amount,
+              balance.updated_at
        FROM public.accounts AS account
        JOIN public.account_balances AS balance ON balance.account_id = account.id
        WHERE account.owner_user_id = $1
          AND account.status = 'active'::public.account_status
-         AND account.account_type IN (
-           'USER_CASH'::public.account_type,
-           'USER_BANK'::public.account_type
-         )
+         AND account.account_type IN ('USER_CASH'::public.account_type,'USER_BANK'::public.account_type)
        ORDER BY account.account_type ASC`,
       [ownerUserId],
     );
@@ -196,24 +200,17 @@ export class PostgresWalletRepository {
     const recentLimit = requireRecentLimit(limit);
     return queryRows<WalletTransactionRow>(
       this.pool,
-      `SELECT
-         ledger_transaction.id::text AS transaction_id,
-         ledger_transaction.type,
-         ledger_transaction.created_at,
-         COALESCE(SUM(
-           CASE posting.direction
-             WHEN 'debit'::public.posting_direction THEN posting.amount
-             ELSE -posting.amount
-           END
-         ), 0)::text AS net_amount
+      `SELECT ledger_transaction.id::text AS transaction_id,
+              ledger_transaction.type,
+              ledger_transaction.created_at,
+              COALESCE(SUM(CASE posting.direction
+                WHEN 'debit'::public.posting_direction THEN posting.amount
+                ELSE -posting.amount END), 0)::text AS net_amount
        FROM public.ledger_transactions AS ledger_transaction
        JOIN public.ledger_postings AS posting ON posting.transaction_id = ledger_transaction.id
        JOIN public.accounts AS account ON account.id = posting.account_id
        WHERE account.owner_user_id = $1
-         AND account.account_type IN (
-           'USER_CASH'::public.account_type,
-           'USER_BANK'::public.account_type
-         )
+         AND account.account_type IN ('USER_CASH'::public.account_type,'USER_BANK'::public.account_type)
        GROUP BY ledger_transaction.id, ledger_transaction.type, ledger_transaction.created_at
        ORDER BY ledger_transaction.created_at DESC, ledger_transaction.id DESC
        LIMIT $2`,
@@ -221,11 +218,6 @@ export class PostgresWalletRepository {
     );
   }
 
-  /**
-   * Recipient resolution deliberately accepts only the internal user UUID.
-   * It exposes neither OAuth subjects nor profile data, preventing this query
-   * from becoming an identity lookup endpoint.
-   */
   async activeRecipientById(recipientUserId: string): Promise<{ userId: string } | null> {
     const id = requireUuid(recipientUserId, 'recipient user id');
     const row = await queryOne<WalletActiveRecipientRow>(
@@ -236,32 +228,22 @@ export class PostgresWalletRepository {
     return row?.user_id ? { userId: requireUuid(row.user_id, 'database recipient user id') } : null;
   }
 
-  async transfer({
-    actorUserId,
-    recipientUserId,
-    amount,
-    idempotencyKey,
-  }: WalletTransferInput): Promise<{ transactionId: string }> {
+  async transfer({ actorUserId, recipientUserId, amount, idempotencyKey }: WalletTransferInput): Promise<{ transactionId: string }> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const recipient = requireUuid(recipientUserId, 'recipient user id');
-    const transferAmount = requirePositiveSafeInteger(amount, 'amount');
+    const transferAmount = requirePositiveWldInput(amount, 'amount');
     const key = requireUuid(idempotencyKey, 'idempotency key');
     if (actor === recipient) throw new WalletInputError('cannot transfer to yourself');
-
     const row = await queryOne<WalletTransferRow>(
       this.pool,
-      'SELECT public.economy_transfer($1, $2, $3, $4)::text AS transaction_id',
+      'SELECT public.economy_transfer($1, $2, $3, $4::numeric)::text AS transaction_id',
       [key, actor, recipient, transferAmount],
     );
     if (!row?.transaction_id) throw new Error('database did not return a transfer receipt');
     return { transactionId: requireUuid(row.transaction_id, 'database transaction id') };
   }
 
-  async claimDaily({
-    actorUserId,
-    rewardDate,
-    idempotencyKey,
-  }: WalletClaimDailyInput): Promise<WalletRewardRow> {
+  async claimDaily({ actorUserId, rewardDate, idempotencyKey }: WalletClaimDailyInput): Promise<WalletRewardRow> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const date = requireRewardDate(rewardDate);
     const key = requireUuid(idempotencyKey, 'idempotency key');
@@ -292,8 +274,7 @@ export class PostgresWalletRepository {
     const actor = requireUuid(userId, 'authenticated user id');
     const row = await queryOne<WalletRewardAvailabilityRow>(
       this.pool,
-      `SELECT daily_available, daily_next_eligible_at,
-              work_available, work_next_eligible_at
+      `SELECT daily_available, daily_next_eligible_at, work_available, work_next_eligible_at
        FROM public.wallet_reward_availability($1)`,
       [actor],
     );
@@ -301,20 +282,15 @@ export class PostgresWalletRepository {
     return row;
   }
 
-  async moveBankBalance({
-    actorUserId,
-    direction,
-    amount,
-    idempotencyKey,
-  }: WalletMoveBankBalanceInput): Promise<WalletBankMoveRow> {
+  async moveBankBalance({ actorUserId, direction, amount, idempotencyKey }: WalletMoveBankBalanceInput): Promise<WalletBankMoveRow> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
-    const transferAmount = requirePositiveSafeInteger(amount, 'amount');
+    const transferAmount = requirePositiveWldInput(amount, 'amount');
     if (direction !== 'deposit' && direction !== 'withdraw')
       throw new WalletInputError('invalid bank direction');
     const row = await queryOne<WalletBankMoveRow>(
       this.pool,
-      'SELECT public.bank_move_balance($1,$2,$3,$4)::text AS transaction_id',
+      'SELECT public.bank_move_balance($1,$2,$3,$4::numeric)::text AS transaction_id',
       [key, actor, direction, transferAmount],
     );
     if (!row?.transaction_id) throw new Error('database did not return a bank transfer receipt');
@@ -325,41 +301,38 @@ export class PostgresWalletRepository {
     const actor = requireUuid(userId, 'authenticated user id');
     return queryRows<WalletLoanRow>(
       this.pool,
-      `SELECT loan_id::text, principal_amount::text, interest_amount::text, outstanding_amount::text, status, issued_at, repaid_at FROM public.bank_my_loans($1)`,
+      `SELECT loan_id::text, principal_amount::text, interest_amount::text,
+              outstanding_amount::text, status, issued_at, repaid_at
+       FROM public.bank_my_loans($1)`,
       [actor],
     );
   }
 
-  async borrow({
-    actorUserId,
-    principalAmount,
-    idempotencyKey,
-  }: WalletBorrowInput): Promise<WalletBorrowRow> {
+  async borrow({ actorUserId, principalAmount, idempotencyKey }: WalletBorrowInput): Promise<WalletBorrowRow> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
-    const principal = requirePositiveSafeInteger(principalAmount, 'principal amount');
+    const principal = requirePositiveWldInput(principalAmount, 'principal amount');
     const row = await queryOne<WalletBorrowRow>(
       this.pool,
-      `SELECT loan_id::text, principal_amount::text, interest_amount::text, outstanding_amount::text, transaction_id::text, replayed FROM public.bank_borrow($1,$2,$3)`,
+      `SELECT loan_id::text, principal_amount::text, interest_amount::text,
+              outstanding_amount::text, transaction_id::text, replayed
+       FROM public.bank_borrow($1,$2,$3::numeric)`,
       [key, actor, principal],
     );
     if (!row?.loan_id) throw new Error('database did not return a loan receipt');
     return row;
   }
 
-  async repay({
-    actorUserId,
-    loanId,
-    amount,
-    idempotencyKey,
-  }: WalletRepayInput): Promise<WalletRepayRow> {
+  async repay({ actorUserId, loanId, amount, idempotencyKey }: WalletRepayInput): Promise<WalletRepayRow> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
     const loan = requireUuid(loanId, 'loan id');
-    const payment = requirePositiveSafeInteger(amount, 'amount');
+    const payment = requirePositiveWldInput(amount, 'amount');
     const row = await queryOne<WalletRepayRow>(
       this.pool,
-      `SELECT loan_id::text, paid_amount::text, outstanding_amount::text, transaction_id::text, replayed FROM public.bank_repay($1,$2,$3,$4)`,
+      `SELECT loan_id::text, paid_amount::text, outstanding_amount::text,
+              transaction_id::text, replayed
+       FROM public.bank_repay($1,$2,$3,$4::numeric)`,
       [key, actor, loan, payment],
     );
     if (!row?.loan_id) throw new Error('database did not return a repayment receipt');
