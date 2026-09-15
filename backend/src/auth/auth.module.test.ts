@@ -10,9 +10,7 @@ import { ConsentGuard } from './guards/consent.guard';
 import { CsrfGuard } from './guards/csrf.guard';
 import { InternalTokenGuard } from './guards/internal-token.guard';
 import { ReauthGuard } from './guards/reauth.guard';
-import { SecondFactorGuard } from './guards/second-factor.guard';
 import { SessionGuard } from './guards/session.guard';
-import { SecondFactorRepository } from './second-factor.repository';
 import { SessionRepository } from './session.repository';
 
 const ORIGINAL_ENV = { ...process.env };
@@ -45,7 +43,6 @@ describe('AuthModule wiring', () => {
       AdminGuard,
       AdminSessionGuard,
       ReauthGuard,
-      SecondFactorGuard,
       InternalTokenGuard,
     ]) {
       expect(moduleRef.get(guard), guard.name).toBeInstanceOf(guard);
@@ -56,12 +53,6 @@ describe('AuthModule wiring', () => {
   it('yields a null session repository when no DATABASE_URL is configured', async () => {
     const moduleRef = await compile();
     expect(moduleRef.get(SessionRepository, { strict: false })).toBeNull();
-    await moduleRef.close();
-  });
-
-  it('yields a null second factor repository when no DATABASE_URL is configured', async () => {
-    const moduleRef = await compile();
-    expect(moduleRef.get(SecondFactorRepository, { strict: false })).toBeNull();
     await moduleRef.close();
   });
 

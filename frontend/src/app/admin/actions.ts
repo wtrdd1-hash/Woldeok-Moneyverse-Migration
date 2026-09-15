@@ -383,7 +383,7 @@ export async function payoutToUser(
     revalidatePath(`/admin/users/${userId}`);
     return { status: 'ok', message: `${groupDigits(String(parsedAmount))} WLD를 국고에서 지급했습니다.` };
   } catch (error) {
-    return failure(error, '자산 지급을 실행하지 못했습니다. 관리자 2차 인증을 확인해 주세요.');
+    return failure(error, '자산 지급을 실행하지 못했습니다. 관리자 세션과 권한을 확인해 주세요.');
   }
 }
 

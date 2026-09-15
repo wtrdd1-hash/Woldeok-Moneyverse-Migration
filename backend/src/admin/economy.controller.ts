@@ -134,8 +134,7 @@ export class BulkPayoutDto extends BulkPayoutPreviewDto {
  * `admin_require_superadmin` inside each function decide who may act, and one
  * is not a substitute for the other.
  *
- * Executing a payout is the only route here carrying `ReauthGuard` and
- * `SecondFactorGuard`. It is the heaviest write in the product -- up to five
+ * Executing a payout is the only route here carrying `ReauthGuard`. It is the heaviest write in the product -- up to five
  * thousand ledger transactions from one press -- and it is irreversible by
  * anything short of a correction per member. Acknowledging an alert and
  * previewing a batch change nothing that a second look cannot undo, and
