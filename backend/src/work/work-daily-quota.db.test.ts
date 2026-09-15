@@ -20,6 +20,11 @@ describe.skipIf(!MIGRATOR_DATABASE_URL)('work daily quota contract', () => {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
+      await client.query(
+        `INSERT INTO public.work_reward_policy_versions
+           (daily_cap, weekly_cap, repeat_decay_percent, enabled, reason)
+         VALUES (999999999, 999999999, 0, true, 'per-task quota test isolation')`,
+      );
       await body(client);
     } finally {
       await client.query('ROLLBACK');
@@ -119,6 +124,30 @@ describe.skipIf(!MIGRATOR_DATABASE_URL)('work daily quota contract', () => {
       const error = await rejectionOf(() => complete(client, actor, task.id));
       expect((error as { code?: string }).code).toBe('22023');
       expect(String((error as { message?: string }).message)).toContain('daily completion limit reached');
+    });
+  });
+
+
+  it('enforces the administrator member-wide daily cap on direct completion', async () => {
+    await rolledBack(async (client) => {
+      const actor = await member(client);
+      const task = await limitedTask(client);
+      await client.query('SELECT * FROM public.job_switch_active($1, $2)', [actor, task.jobType]);
+      await client.query(
+        `INSERT INTO public.work_reward_policy_versions
+           (daily_cap, weekly_cap, repeat_decay_percent, enabled, reason)
+         VALUES (10, 2200, 0, true, 'global cap regression test')`,
+      );
+
+      const first = await client.query<{ reward_amount: string }>(
+        `SELECT reward_amount::text FROM public.work_complete_task_v2($1,$2,$3)`,
+        [actor, task.id, randomUUID()],
+      );
+      expect(first.rows[0]?.reward_amount).toBe('10');
+
+      const error = await rejectionOf(() => complete(client, actor, task.id));
+      expect((error as { code?: string }).code).toBe('22023');
+      expect(String((error as { message?: string }).message)).toContain('work reward quota reached');
     });
   });
 
