@@ -1,3 +1,8 @@
+
+## v2026.09.15.123 — Shareable stock-market sorting
+- Added URL-backed sorting on `/stocks` for top movers, price, available shares, and name while preserving the API's default market order.
+- Price, availability, and percentage-change comparisons use `BigInt` integer-string math so large WLD/share values never pass through lossy JavaScript `Number` conversion.
+- Sort controls are keyboard-native links with a visible active state and `aria-current`; the selected view is bookmarkable/shareable.
 # Changelog
 
 ## v2026.09.12.13 — Automatic Test-to-Production GitOps Reconciliation

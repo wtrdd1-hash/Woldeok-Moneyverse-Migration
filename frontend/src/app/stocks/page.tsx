@@ -24,6 +24,7 @@ import { LiveBadge, LiveHoldingValue, LiveQuote, LiveSparkline } from './live';
 import { MarketNews } from './market-news';
 import type { MarketEvent } from './market-news';
 import { StockDetailDialog } from './stock-detail-dialog';
+import { normalizeStockSort, sortMarketStocks } from './stock-market-sort';
 import { TradeDialog } from './trade-dialog';
 import { WatchlistToggle } from './watchlist-toggle';
 
@@ -96,10 +97,16 @@ export const revalidate = 0;
  */
 const SPARK_POINTS = 60;
 
-export default async function StocksPage() {
+export default async function StocksPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ sort?: string }>;
+}) {
   await requireMember();
   const locale = await getServerLocale();
   const isEn = locale === 'en';
+  const params = await searchParams;
+  const sort = normalizeStockSort(params?.sort);
 
 // Four calls, not three plus one per listed stock. The preview lines used
   // to be fetched a card at a time, after the list came back, so the page
@@ -118,6 +125,7 @@ export default async function StocksPage() {
   ]);
 
   const stocks = market?.stocks ?? [];
+  const sortedStocks = sortMarketStocks(stocks, sort);
   const watchedStockIds = new Set((watchlist?.stocks ?? []).map((row) => row.stock_id));
 
   const seriesFor = new Map<string, readonly SparkPoint[]>(
@@ -142,11 +150,28 @@ export default async function StocksPage() {
       <MarketNews events={news?.events ?? []} />
 
       <section aria-labelledby="market-title" className="grid gap-3">
-        <div className="flex items-center gap-3">
-          <h2 id="market-title" className="text-lg">
-            {isEn ? 'Available Stocks' : '거래 가능 종목'}
-          </h2>
-          <LiveBadge />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <h2 id="market-title" className="text-lg">
+              {isEn ? 'Available Stocks' : '거래 가능 종목'}
+            </h2>
+            <LiveBadge />
+          </div>
+          <nav aria-label={isEn ? 'Sort stocks' : '종목 정렬'} className="flex flex-wrap gap-2">
+            {[
+              ['default', isEn ? 'Default' : '기본순'],
+              ['change', isEn ? 'Top movers' : '등락률순'],
+              ['price', isEn ? 'Price' : '가격순'],
+              ['available', isEn ? 'Availability' : '거래 가능순'],
+              ['name', isEn ? 'Name' : '이름순'],
+            ].map(([value, label]) => (
+              <Button key={value} asChild size="sm" variant={sort === value ? 'default' : 'outline'}>
+                <Link href={value === 'default' ? '/stocks' : `/stocks?sort=${value}`} aria-current={sort === value ? 'page' : undefined}>
+                  {label}
+                </Link>
+              </Button>
+            ))}
+          </nav>
         </div>
         {market === null ? (
           <EmptyState
@@ -159,7 +184,7 @@ export default async function StocksPage() {
           />
         ) : (
           <div className="grid gap-3 sm:grid-cols-2">
-            {stocks.map((row) => (
+            {sortedStocks.map((row) => (
               <Card key={row.id} className="gap-4">
                 <CardHeader>
                   <div className="flex items-center justify-between gap-2">
