@@ -6,6 +6,9 @@ on:
       - main
       - 'feat/**'
       - 'fix/**'
+      - 'feature/**'
+      - 'bugfix/**'
+      - 'security/**'
       - 'integrate/**'
       - 'ops/**'
       - 'auto/**'
