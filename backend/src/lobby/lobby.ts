@@ -40,6 +40,7 @@ export interface LobbyOptions {
 
 interface LobbySocketData {
   sessionId: string | null;
+  userId: string | null;
   canChat: boolean;
   usesLobbySlot: boolean;
   countedLobbyUser: boolean;
@@ -184,6 +185,7 @@ export function attachLobby(httpServer: HttpServer, options: LobbyOptions): Serv
       try {
         const session = sessions ? await sessions.get(sessionToken(socket.handshake.headers)) : null;
         data.sessionId = session?.id ?? null;
+        data.userId = session?.user_id ?? null;
         data.canChat = Boolean(
           session?.user_id && sessions && (await sessions.hasCurrentUserConsent(session.id)),
         );
@@ -191,6 +193,7 @@ export function attachLobby(httpServer: HttpServer, options: LobbyOptions): Serv
         // The public landing page stays readable when the session store is
         // unavailable, but it never grants the ability to write a message.
         data.sessionId = null;
+        data.userId = null;
         data.canChat = false;
       }
 
@@ -276,6 +279,11 @@ export function attachLobby(httpServer: HttpServer, options: LobbyOptions): Serv
         if (!safeText) return;
         data.messageTimes.push(at);
         io.emit('message', safeText);
+        io.emit('lobby:message', {
+          sender: lobbyDisplayName(data.userId),
+          text: safeText,
+          sentAt: new Date(at).toISOString(),
+        });
       })();
     });
 
@@ -298,6 +306,13 @@ export function attachLobby(httpServer: HttpServer, options: LobbyOptions): Serv
   });
 
   return io;
+}
+
+
+/** Privacy-safe display label for ephemeral lobby chat. */
+export function lobbyDisplayName(userId: string | null): string {
+  if (!userId) return '회원';
+  return `회원-${userId.replace(/-/g, '').slice(0, 6)}`;
 }
 
 /**

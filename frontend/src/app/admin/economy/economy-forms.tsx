@@ -45,7 +45,7 @@ import { PreviewPanel } from './economy-parts';
  * Three of the four cost a code typed immediately before the change, because
  * the API asks for one: a bulk payout, a hand-run of the adjustment engine
  * and a knob taken off automatic all sit behind `ReauthGuard` and
- * `SecondFactorGuard`. `ReasonedStepUp` is the reason field and the code
+ * the administrator authorization boundary. `ReasonedStepUp` is the reason field
  * written once, with the sentence saying how to undo what is about to happen,
  * so no dialog here can quietly ship without them.
  *
