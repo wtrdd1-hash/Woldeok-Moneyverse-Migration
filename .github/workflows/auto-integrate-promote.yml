@@ -42,6 +42,7 @@ jobs:
 
           merged_count=0
           validated_count=0
+          validation_dispatched_count=0
           conflict_count=0
 
           for branch in "${branches[@]}"; do
@@ -65,7 +66,12 @@ jobs:
                 | head -n 1
             )"
             if [[ -z "$validated" ]]; then
-              echo "skip ${branch}: exact head ${branch_sha} has no successful Build Test Candidate run"
+              echo "dispatch validation for ${branch}: exact head ${branch_sha} has no successful Build Test Candidate run"
+              if gh workflow run test-candidate.yml --repo "$REPO" --ref "$branch"; then
+                validation_dispatched_count=$((validation_dispatched_count + 1))
+              else
+                echo "::warning::failed to dispatch Build Test Candidate for ${branch}"
+              fi
               continue
             fi
             validated_count=$((validated_count + 1))
@@ -134,6 +140,7 @@ jobs:
             echo '## Auto integration drain summary'
             echo
             echo "- validated branches observed: ${validated_count}"
+            echo "- validation runs dispatched: ${validation_dispatched_count}"
             echo "- merged branches: ${merged_count}"
             echo "- merge-conflicted branches left open: ${conflict_count}"
             if [[ "$merged_count" -eq 0 ]]; then
