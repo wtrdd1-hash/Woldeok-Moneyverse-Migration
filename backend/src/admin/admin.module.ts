@@ -18,6 +18,8 @@ import { AdminRepository } from './admin.repository';
 import { AdminAuditController } from './audit.controller';
 import { AdminSecurityController } from './admin-security.controller';
 import { AdminSecurityService } from './admin-security.service';
+import { AbuseSecurityController } from './abuse-security.controller';
+import { AbuseSecurityRepository } from './abuse-security.repository';
 import { AdminService } from './admin.service';
 import { AuditRepository } from './audit.repository';
 import { AdminControlsController } from './controls.controller';
@@ -41,9 +43,6 @@ import { OperationsRepository } from './operations.repository';
  * missing pepper must not silently degrade to none.
  */
 function devicePepper(config: AppConfig): string {
-  // `||`, not `??`: compose writes `${ADMIN_DEVICE_HASH_PEPPER:-}` when the
-  // variable is unset, so the value arrives as an empty string rather than
-  // absent, and an empty pepper is no pepper.
   return process.env.ADMIN_DEVICE_HASH_PEPPER || config.internalToken;
 }
 
@@ -55,11 +54,9 @@ function devicePepper(config: AppConfig): string {
     AdminAuditController,
     AdminControlsController,
     AdminSecurityController,
+    AbuseSecurityController,
     GameCatalogController,
     AiNewsController,
-    // The three surfaces spec 14.9 lists and this build did not have. They
-    // share one repository and one prefix each, because the audit trail reads
-    // an event's feature off the first path segment under /admin.
     AdminWorkOperationsController,
     AdminBankOperationsController,
     AdminDiscordOperationsController,
@@ -82,6 +79,11 @@ function devicePepper(config: AppConfig): string {
       useFactory: (pool: Queryable | null) => (pool ? new ControlsRepository(pool) : null),
     },
     {
+      provide: AbuseSecurityRepository,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => (pool ? new AbuseSecurityRepository(pool) : null),
+    },
+    {
       provide: AdminSecurityService,
       inject: [CONFIG, SecondFactorRepository, SessionRepository],
       useFactory: (
@@ -93,20 +95,12 @@ function devicePepper(config: AppConfig): string {
           ? new AdminSecurityService({
               factors,
               sessions,
-              // Read here rather than from AppConfig: the module factories in
-              // this codebase already own their optional environment (photo
-              // storage, market ticker, status collector), and a deployment
-              // without the key has to boot and answer "unavailable" on these
-              // routes rather than refuse to start.
               sealing: sealingKeyFrom(process.env),
               issuer: new URL(config.baseUrl).host,
             })
           : null,
     },
     {
-      // The AI newsroom (127). Same sealing key as the second factor, for
-      // the same reason: it is the one secret the deployment already holds
-      // that a database read alone does not yield.
       provide: AiNewsService,
       inject: [PG_POOL],
       useFactory: (pool: Queryable | null) =>
@@ -124,10 +118,6 @@ function devicePepper(config: AppConfig): string {
         pool ? new PostgresGameCatalogRepository(pool) : null,
     },
     {
-      // A factory, like its neighbours: the constructor takes `Queryable`,
-      // which TypeScript erases to Object, so a class provider would leave
-      // Nest with no token to resolve and take the whole API down at
-      // bootstrap rather than just these three routes.
       provide: OperationsRepository,
       inject: [PG_POOL],
       useFactory: (pool: Queryable | null) => (pool ? new OperationsRepository(pool) : null),
