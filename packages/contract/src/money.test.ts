@@ -1,14 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { isWldAmount, wldAmount } from './money';
+import { isWldAmount, WLD_MAX_DIGITS, wldAmount } from './money';
 
 describe('wldAmount', () => {
   it('accepts a canonical zero', () => {
     expect(wldAmount('0', 'balance')).toBe('0');
   });
 
-  it('accepts the widest supported magnitude', () => {
-    const thirtyEightDigits = `9${'0'.repeat(37)}`;
-    expect(wldAmount(thirtyEightDigits, 'balance')).toBe(thirtyEightDigits);
+  it('accepts values far beyond bigint and 경 units', () => {
+    const huge = `9${'0'.repeat(99)}`;
+    expect(wldAmount(huge, 'balance')).toBe(huge);
+  });
+
+  it('accepts PostgreSQL NUMERIC maximum integer width', () => {
+    const maximum = `9${'0'.repeat(WLD_MAX_DIGITS - 1)}`;
+    expect(wldAmount(maximum, 'balance')).toBe(maximum);
   });
 
   it('accepts a negative amount', () => {
@@ -31,8 +36,9 @@ describe('wldAmount', () => {
     expect(() => wldAmount('1e3', 'balance')).toThrow(TypeError);
   });
 
-  it('rejects a value wider than the widest money column', () => {
-    expect(() => wldAmount(`9${'0'.repeat(38)}`, 'balance')).toThrow(TypeError);
+  it('rejects a value wider than PostgreSQL NUMERIC can hold', () => {
+    const tooWide = `9${'0'.repeat(WLD_MAX_DIGITS)}`;
+    expect(() => wldAmount(tooWide, 'balance')).toThrow(TypeError);
   });
 
   it('names the field in the error message', () => {
