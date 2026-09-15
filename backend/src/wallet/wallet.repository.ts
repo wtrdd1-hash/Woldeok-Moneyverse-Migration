@@ -3,7 +3,6 @@ import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 export class WalletInputError extends Error {
   constructor(message: string) {
@@ -28,13 +27,6 @@ export function requirePositiveWld(value: unknown, field: string): string {
 export function requireRecentLimit(value: unknown): number {
   if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 1 || value > 50) {
     throw new WalletInputError('recent transaction limit must be an integer between 1 and 50');
-  }
-  return value;
-}
-
-function requireRewardDate(value: unknown): string {
-  if (typeof value !== 'string' || !DATE_PATTERN.test(value)) {
-    throw new WalletInputError('reward date must be YYYY-MM-DD');
   }
   return value;
 }
@@ -123,7 +115,6 @@ export interface WalletTransferInput {
 
 export interface WalletClaimDailyInput {
   readonly actorUserId: string;
-  readonly rewardDate: string;
   readonly idempotencyKey: string;
 }
 
@@ -256,19 +247,14 @@ export class PostgresWalletRepository {
     return { transactionId: requireUuid(row.transaction_id, 'database transaction id') };
   }
 
-  async claimDaily({
-    actorUserId,
-    rewardDate,
-    idempotencyKey,
-  }: WalletClaimDailyInput): Promise<WalletRewardRow> {
+  async claimDaily({ actorUserId, idempotencyKey }: WalletClaimDailyInput): Promise<WalletRewardRow> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
-    const date = requireRewardDate(rewardDate);
     const key = requireUuid(idempotencyKey, 'idempotency key');
     const row = await queryOne<WalletRewardRow>(
       this.pool,
       `SELECT transaction_id::text AS transaction_id, amount::text AS amount, replayed
-       FROM public.economy_claim_daily($1, $2, $3)`,
-      [key, actor, date],
+       FROM public.economy_claim_daily($1, $2, public.server_game_day_key())`,
+      [key, actor],
     );
     if (!row?.transaction_id) throw new Error('database did not return a daily-reward receipt');
     return row;
