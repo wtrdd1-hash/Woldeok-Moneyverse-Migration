@@ -132,8 +132,8 @@ jobs:
 
           if [[ "$merged_count" -gt 0 ]]; then
             final_main_sha="$(gh api "repos/${REPO}/branches/main" --jq '.commit.sha')"
-            gh workflow run test-candidate.yml --repo "$REPO" --ref main
-            echo "dispatched main Build Test Candidate for final main ${final_main_sha}"
+            gh workflow run test-candidate.yml --repo "$REPO" --ref main -f promote=true
+            echo "dispatched promotable main Build Test Candidate for final main ${final_main_sha}"
           fi
 
           {
@@ -146,6 +146,6 @@ jobs:
             if [[ "$merged_count" -eq 0 ]]; then
               echo '- no final main candidate dispatch was needed'
             else
-              echo '- one final main Build Test Candidate was dispatched after the drain'
+              echo '- one promotable final main Build Test Candidate was dispatched after the drain'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
