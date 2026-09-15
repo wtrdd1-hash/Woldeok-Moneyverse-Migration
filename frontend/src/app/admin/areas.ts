@@ -29,6 +29,13 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'economy',
   },
   {
+    href: '/admin/security',
+    eyebrow: 'ABUSE SECURITY',
+    title: '계정 정지 · IP 차단',
+    summary: '이상 요청 계정의 영구 정지와 IP/CIDR 차단·해제를 관리합니다.',
+    group: 'safety',
+  },
+  {
     href: '/admin/users',
     eyebrow: 'USER SAFETY',
     title: '사용자 제한 관리',

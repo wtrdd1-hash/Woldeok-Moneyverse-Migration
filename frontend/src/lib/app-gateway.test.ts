@@ -23,7 +23,7 @@ describe('appGatewayPath', () => {
   });
 
   it('refuses internal and traversal paths', () => {
-    expect(appGatewayPath(['admin', 'users'])).toBeNull();
+    expect(appGatewayPath(['admin', 'me'])).toBe('/api/v1/admin/me');
     expect(appGatewayPath(['integrations', 'discord'])).toBeNull();
     expect(appGatewayPath(['wallet', '..', 'admin'])).toBeNull();
     expect(appGatewayPath([])).toBeNull();
@@ -45,9 +45,9 @@ describe('appGatewayOrigin', () => {
 describe('app API compatibility contract', () => {
   it('keeps every documented app group in the gateway allow-list', () => {
     expect(APP_API_GROUPS).toEqual([
-      'account', 'activity', 'auth', 'bank', 'banking', 'board', 'businesses',
+      'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'businesses',
       'casino', 'content', 'early-game', 'engagement', 'media', 'photos', 'privacy',
-      'profile', 'progression', 'rewards', 'seasons', 'shop', 'stocks', 'wallet', 'work',
+      'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'stocks', 'wallet', 'work',
     ]);
   });
 

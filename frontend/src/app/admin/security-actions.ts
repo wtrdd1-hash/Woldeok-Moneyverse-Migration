@@ -205,3 +205,71 @@ export async function forceLogout(
     return failure(error, '세션을 끊지 못했어요.');
   }
 }
+
+export async function permanentlySuspendUser(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const userId = text(formData.get('userId'));
+  const reason = text(formData.get('reason'));
+  const code = text(formData.get('code'));
+  if (userId === '') return { status: 'error', message: '대상 사용자를 확인할 수 없어요.' };
+  if (reason.length < 3 || reason.length > 1000) return { status: 'error', message: '사유를 3~1000자로 입력해 주세요.' };
+  if (!STEP_UP_CODE.test(code)) return { status: 'error', message: '실행 직전 인증 코드 6자리를 입력해 주세요.' };
+  try {
+    await spendSecondFactorCode(code);
+    await mutate(`/api/v1/admin/security/users/${encodeURIComponent(userId)}/permanent-suspension`, {
+      body: { reason },
+    });
+    revalidatePath('/admin/users');
+    revalidatePath(`/admin/users/${encodeURIComponent(userId)}`);
+    return { status: 'ok', message: '계정을 영구 정지하고 모든 로그인 세션을 종료했습니다.' };
+  } catch (error) {
+    return failure(error, '계정을 영구 정지하지 못했어요.');
+  }
+}
+
+export async function blockIpAddress(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const network = text(formData.get('network'));
+  const reason = text(formData.get('reason'));
+  const code = text(formData.get('code'));
+  if (!/^[0-9A-Fa-f:.]+(?:\/\d{1,3})?$/.test(network)) return { status: 'error', message: 'IP 또는 CIDR 형식을 확인해 주세요.' };
+  if (reason.length < 3 || reason.length > 1000) return { status: 'error', message: '사유를 3~1000자로 입력해 주세요.' };
+  if (!STEP_UP_CODE.test(code)) return { status: 'error', message: '실행 직전 인증 코드 6자리를 입력해 주세요.' };
+  try {
+    await spendSecondFactorCode(code);
+    await mutate('/api/v1/admin/security/ip-blocks', {
+      body: { network, reason, idempotencyKey: idempotencyKey() },
+    });
+    revalidatePath('/admin/security');
+    return { status: 'ok', message: `${network} 차단을 적용했습니다.` };
+  } catch (error) {
+    return failure(error, 'IP 차단을 적용하지 못했어요.');
+  }
+}
+
+export async function liftIpAddressBlock(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const blockId = text(formData.get('blockId'));
+  const reason = text(formData.get('reason'));
+  const code = text(formData.get('code'));
+  if (blockId === '') return { status: 'error', message: '차단 기록을 확인할 수 없어요.' };
+  if (reason.length < 3 || reason.length > 1000) return { status: 'error', message: '해제 사유를 3~1000자로 입력해 주세요.' };
+  if (!STEP_UP_CODE.test(code)) return { status: 'error', message: '실행 직전 인증 코드 6자리를 입력해 주세요.' };
+  try {
+    await spendSecondFactorCode(code);
+    await mutate(`/api/v1/admin/security/ip-blocks/${encodeURIComponent(blockId)}`, {
+      method: 'DELETE',
+      body: { reason, idempotencyKey: idempotencyKey() },
+    });
+    revalidatePath('/admin/security');
+    return { status: 'ok', message: 'IP 차단을 해제했습니다.' };
+  } catch (error) {
+    return failure(error, 'IP 차단을 해제하지 못했어요.');
+  }
+}

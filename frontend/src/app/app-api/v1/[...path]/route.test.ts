@@ -23,7 +23,7 @@ describe('app API route compatibility', () => {
     const response = await GET(request('/app-api/v1/meta/contract'), context('meta', 'contract'));
     expect(response.status).toBe(200);
     expect(response.headers.get('x-moneyverse-api-version')).toBe('1');
-    expect(response.headers.get('x-moneyverse-contract-version')).toBe('v2026.09.14.82');
+    expect(response.headers.get('x-moneyverse-contract-version')).toBe('v2026.09.15.115');
     const body = await response.json();
     expect(body.baseUrl).toBe('https://easy-scraping.com/app-api/v1');
     expect(body.auth.persistentCookieJarRequired).toBe(true);
@@ -31,7 +31,7 @@ describe('app API route compatibility', () => {
   });
 
   it('returns a stable problem document for paths outside the app allow-list', async () => {
-    const response = await GET(request('/app-api/v1/admin/users'), context('admin', 'users'));
+    const response = await GET(request('/app-api/v1/integrations/discord'), context('integrations', 'discord'));
     expect(response.status).toBe(404);
     expect(response.headers.get('content-type')).toContain('application/problem+json');
     expect(await response.json()).toMatchObject({ status: 404, code: 'app_gateway_path' });
@@ -72,7 +72,7 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('accept-ranges')).toBe('bytes');
     expect(response.headers.get('etag')).toBe('"def"');
     expect(response.headers.get('retry-after')).toBe('3');
-    expect(response.headers.get('x-moneyverse-contract-version')).toBe('v2026.09.14.82');
+    expect(response.headers.get('x-moneyverse-contract-version')).toBe('v2026.09.15.115');
   });
 
   it('turns upstream transport failures into stable JSON gateway errors', async () => {
