@@ -293,3 +293,6 @@ All flows cover loading/empty/error/offline/timeout, keyboard and focus, labels,
 - PR #332 remains open and mergeable. Its head `b3f28185107a2f6f4a8bd389016de778df08b747` passed CI and Test Candidate image build. Infrastructure desired-state update reportedly merged, but public Test `/api/version` returned `1789391457242`, so exact-SHA staging failed and REL-110-01 is P0/BLOCKED.
 - Production was not mutated by that candidate, so no Production rollback is required.
 - v110 is planning/docs only: no runtime code, API, DB schema/data, migration, infrastructure, collector, backup medium, secret or branch-rule mutation is performed by this planning run.
+
+### v2026.09.16.1 delta — composable stock discovery
+`/stocks` discovery composes URL-backed `q` search with `sort=change|price|available|name`. Either control must preserve the other when changed, keeping the resulting view bookmarkable/shareable. Integer-string precision remains mandatory for economy values and invalid sort values fall back to API order.

@@ -57,3 +57,8 @@
 - Added casino history and balanced exposure limits.
 - Reconciled banking interest and credit policy paths.
 - Added migrations 170–172 and validated official Test/Production deployment.
+
+## v2026.09.16.1 — Combined stock search and sorting
+- `/stocks` can now combine its existing symbol/name/description search with shareable sorting by movers, price, availability, or name.
+- Search submissions preserve the active sort and sort links preserve the active search query, so refining a market view no longer resets the other discovery control.
+- Numeric ordering uses `BigInt` integer-string comparisons; percentage movers use exact cross multiplication rather than floating-point division.
