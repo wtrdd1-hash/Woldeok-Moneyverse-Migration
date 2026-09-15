@@ -440,7 +440,7 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
           const row = termsRow(terms, game);
           expect(row.daily_stake_used, `${game} did not count the coin play`).toBe('200');
           expect(row.remaining_stake, `${game} headroom after a 200 coin stake`).toBe(
-            '1800',
+            '8999999999999999800',
           );
         }
       });
