@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '5 * * * *'
   workflow_dispatch:
+  workflow_run:
+    workflows: [Build Test Candidate]
+    types: [completed]
 
 permissions:
   contents: write
@@ -15,10 +18,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  integrate-one-validated-branch:
+  integrate-validated-branches:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch != 'main')
     runs-on: ubuntu-latest
     steps:
-      - name: Integrate one validated development branch
+      - name: Drain validated development branches
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -29,11 +36,18 @@ jobs:
           main_sha="$(gh api "repos/${REPO}/branches/main" --jq '.commit.sha')"
           echo "current main: ${main_sha}"
 
-          gh api --paginate "repos/${REPO}/branches?per_page=100" --jq '.[].name' |
-          while IFS= read -r branch; do
+          mapfile -t branches < <(
+            gh api --paginate "repos/${REPO}/branches?per_page=100" --jq '.[].name' | sort
+          )
+
+          merged_count=0
+          validated_count=0
+          conflict_count=0
+
+          for branch in "${branches[@]}"; do
             case "$branch" in
               main|production|staging|develop|release/*) continue ;;
-              feat/*|feature/*|fix/*|bugfix/*|integrate/*|ops/*|auto/*|test-candidate/*) ;;
+              feat/*|feature/*|fix/*|bugfix/*|integrate/*|ops/*|auto/*|test-candidate/*|security/*) ;;
               *) continue ;;
             esac
 
@@ -46,7 +60,7 @@ jobs:
 
             validated="$(
               gh api --method GET "repos/${REPO}/actions/workflows/test-candidate.yml/runs" \
-                -f branch="$branch" -f status=success -f per_page=30 \
+                -f branch="$branch" -f status=success -f per_page=50 \
                 --jq ".workflow_runs[] | select(.head_sha == \"${branch_sha}\") | .id" \
                 | head -n 1
             )"
@@ -54,6 +68,7 @@ jobs:
               echo "skip ${branch}: exact head ${branch_sha} has no successful Build Test Candidate run"
               continue
             fi
+            validated_count=$((validated_count + 1))
 
             pr="$(
               gh api --method GET "repos/${REPO}/pulls" \
@@ -71,7 +86,7 @@ jobs:
                 "- successful Build Test Candidate run: ${validated}" \
                 '- target: main' \
                 '' \
-                'After merge, this workflow explicitly dispatches the main Test Candidate chain. Production remains gated by isolated Test exact-SHA/backend checks and the existing GitOps production-ready flow.'
+                'This workflow drains every currently validated, mergeable branch in one serialized run. After the drain it dispatches one main Test Candidate for the final main SHA; Production remains gated by isolated Test exact-SHA/backend checks and the existing GitOps production-ready flow.'
               pr="$(gh api --method POST "repos/${REPO}/pulls" \
                 -f title="$title" -f head="$branch" -f base=main -f body="$body" \
                 --jq '.number')"
@@ -82,14 +97,19 @@ jobs:
             merge_state="unknown"
             for _ in $(seq 1 12); do
               pr_json="$(gh api "repos/${REPO}/pulls/${pr}")"
-              mergeable="$(jq -r '.mergeable // "unknown"' <<<"$pr_json")"
+              mergeable="$(jq -r 'if .mergeable == null then "unknown" else (.mergeable|tostring) end' <<<"$pr_json")"
               merge_state="$(jq -r '.mergeable_state // "unknown"' <<<"$pr_json")"
               [[ "$mergeable" != "unknown" ]] && break
               sleep 5
             done
 
             if [[ "$mergeable" != "true" || ! "$merge_state" =~ ^(clean|unstable|has_hooks)$ ]]; then
-              echo "skip PR #${pr}: mergeable=${mergeable}, state=${merge_state}"
+              if [[ "$merge_state" == "dirty" ]]; then
+                conflict_count=$((conflict_count + 1))
+                echo "::warning::PR #${pr} (${branch}) has merge conflicts and was left open for repair"
+              else
+                echo "skip PR #${pr}: mergeable=${mergeable}, state=${merge_state}"
+              fi
               continue
             fi
 
@@ -100,11 +120,25 @@ jobs:
             fi
 
             gh pr merge "$pr" --repo "$REPO" --squash --delete-branch --match-head-commit "$branch_sha"
+            merged_count=$((merged_count + 1))
             echo "merged PR #${pr}; source branch cleanup requested"
-
-            gh workflow run test-candidate.yml --repo "$REPO" --ref main
-            echo "dispatched main Build Test Candidate"
-            exit 0
           done
 
-          echo "no validated branch was eligible for integration"
+          if [[ "$merged_count" -gt 0 ]]; then
+            final_main_sha="$(gh api "repos/${REPO}/branches/main" --jq '.commit.sha')"
+            gh workflow run test-candidate.yml --repo "$REPO" --ref main
+            echo "dispatched main Build Test Candidate for final main ${final_main_sha}"
+          fi
+
+          {
+            echo '## Auto integration drain summary'
+            echo
+            echo "- validated branches observed: ${validated_count}"
+            echo "- merged branches: ${merged_count}"
+            echo "- merge-conflicted branches left open: ${conflict_count}"
+            if [[ "$merged_count" -eq 0 ]]; then
+              echo '- no final main candidate dispatch was needed'
+            else
+              echo '- one final main Build Test Candidate was dispatched after the drain'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
