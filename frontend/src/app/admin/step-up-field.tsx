@@ -1,27 +1,23 @@
-'use client';
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 
-/**
- * The code an operator types immediately before a high-risk change, and the
- * sentence saying how to undo what they are about to do.
- *
- * One component, used by every high-risk dialog in the console, because §14.9
- * asks for both on all of them and a dialog that forgot one would look
- * exactly like a dialog that did not need one. Two-person approval used to be
- * what caught a change nobody had thought through; this is what replaced it,
- * so it cannot be optional.
- *
- * The API gives a spent code two minutes (`SecondFactorGuard`), which is why
- * it is asked for here rather than on a separate screen: a step-up that
- * outlives the dialog it was asked on authorises whatever comes next instead
- * of this.
- */
-export function StepUpField({
-  id: _id,
-  undo: _undo,
-}: {
-  readonly id: string;
-  /** How to reverse this change, in words the operator can act on. */
-  readonly undo: string;
-}) {
-  return null;
+/** High-risk admin action confirmation: fresh TOTP code plus an explicit undo note. */
+export function StepUpField({ id, undo }: { readonly id: string; readonly undo: string }) {
+  return (
+    <Field>
+      <FieldLabel htmlFor={`${id}-code`}>2단계 인증 코드</FieldLabel>
+      <Input
+        id={`${id}-code`}
+        name="code"
+        inputMode="numeric"
+        autoComplete="one-time-code"
+        pattern="[0-9]{6}"
+        minLength={6}
+        maxLength={6}
+        required
+        placeholder="123456"
+      />
+      <FieldDescription>실행 직전 인증 앱의 6자리 코드를 입력하세요. 되돌리기: {undo}</FieldDescription>
+    </Field>
+  );
 }
