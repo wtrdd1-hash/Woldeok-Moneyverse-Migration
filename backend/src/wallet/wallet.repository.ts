@@ -43,12 +43,22 @@ export function requirePositiveWldInput(value: unknown, field: string): string {
   throw new WalletInputError(`${field} must be a positive canonical WLD integer string`);
 }
 
-/** Compatibility alias for non-money callers/tests that still import it. */
-export function requirePositiveSafeInteger(value: unknown, field: string): number {
-  if (typeof value !== 'number' || !Number.isSafeInteger(value) || value <= 0) {
-    throw new WalletInputError(`${field} must be a positive safe integer`);
+/**
+ * Historical name kept so service and older tests do not need a flag-day
+ * change. It now accepts exact decimal strings as well as legacy safe numbers.
+ */
+export function requirePositiveSafeInteger(value: unknown, field: string): string | number {
+  if (typeof value === 'number') {
+    if (!Number.isSafeInteger(value) || value <= 0) {
+      throw new WalletInputError(`${field} must be a positive safe integer`);
+    }
+    return value;
   }
-  return value;
+  try {
+    return requirePositiveWldInput(value, field);
+  } catch {
+    throw new WalletInputError(`${field} must be a positive safe integer or canonical WLD string`);
+  }
 }
 
 export function requireRecentLimit(value: unknown): number {
