@@ -93,3 +93,10 @@
 - 배포는 호스트 타임아웃을 줄이기 위해 하나의 SSH 제어 연결을 재사용합니다.
 - 계정 병합 원장 항목에 명확한 한국어 지갑 라벨을 추가했습니다.
 - 현재 프로젝트 부족 사항 감사를 `docs/findings/`에 추가했습니다.
+
+## 2026-09-15 — v2026.09.15.113 Test 런타임 라우팅 복구
+
+- 운영 승격 차단 원인을 확인했습니다. 공개 `test.easy-scraping.com`이 분리 Test 프론트가 아니라 Production Nginx 기본 upstream으로 들어가고 있었습니다.
+- `TEST_FRONTEND_ORIGIN`이 설정된 경우에만 Test 호스트를 분리 런타임으로 전달하는 middleware 브리지를 추가했습니다. 변수가 없으면 Production 동작은 그대로입니다.
+- 별도 포트 검증에서 Production 호스트는 라우터 빌드를 유지했고 Test 호스트는 정확한 main SHA `c82153917095bf380b5336ef95ad6932c9d7a295`, public-catalog 200, `noindex`를 확인했습니다.
+- 잘못된 수동 BUILD_ID를 신뢰하지 않고 현재 main의 정확한 SHA로 Test 프론트/백엔드를 다시 빌드했습니다.

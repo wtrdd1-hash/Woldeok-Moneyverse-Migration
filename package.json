@@ -12,7 +12,7 @@
     "test": "pnpm api:contract:check && pnpm --filter @moneyverse/contract build && pnpm -r --sequential test",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "api:contract:generate": "node scripts/enrich-mobile-api-contract.mjs && node scripts/generate-mobile-api-schema-reference.mjs",
+    "api:contract:generate": "pnpm --filter @moneyverse/contract build && node scripts/enrich-mobile-api-contract.mjs && node scripts/generate-mobile-api-schema-reference.mjs",
     "api:contract:check": "pnpm api:contract:generate && node scripts/check-mobile-api-contract.mjs"
   },
   "devDependencies": {

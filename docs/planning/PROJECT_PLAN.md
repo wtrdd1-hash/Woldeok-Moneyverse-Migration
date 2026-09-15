@@ -2,248 +2,294 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.15.106
+> Current integrated version: v2026.09.15.110
 > Implementation/evidence sync: 2026-09-15
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
-Historical detail remains recoverable from Git and the versioned changelog/worklog. This file is the current implementation-facing contract: another developer or agent should be able to derive scope, authority, data flow, failure states, security, SEO, business economics, QA and release gates from this plan without treating earlier drafts as current truth.
+This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
-## 0. Maintenance and evidence rules
+## 0. Maintenance, evidence and priority rules
 
-1. External/reference research precedes material product planning. Prefer current official product/platform documentation, OWASP/security bodies, government/regulator material and current primary operational evidence.
-2. Read the latest `main`, this English canonical plan, the Korean counterpart, current QA/worklogs, CI/release automation, runtime evidence and relevant code/migrations before changing a contract.
-3. Re-check `main` while working and immediately before integration. Preserve concurrent work; never force-push `main` for documentation automation.
-4. Implementation evidence is classified as `IMPLEMENTED`, `PARTIAL`, `UNVERIFIED`, or `REDESIGN_REQUIRED`. A plan or old screenshot does not prove current runtime behavior.
-5. CI/test/runtime evidence is explicit. Missing evidence is `verification unavailable`, not pass. High-risk promotion is fail-closed.
-6. Applied database migrations are immutable. Corrections use a new migration. Economy history is append-only and is corrected through compensating entries, not historical rewrites.
-7. Unknown commercial values are labeled hypothesis/test target. WLD activity is not real-currency revenue.
-8. Runtime implementation is performed separately: branch → static/unit/integration/real-DB/security tests → immutable candidate → isolated exact-SHA test deployment → backend/API/DB/user-flow QA → main integration → exact-main-SHA release gate → Production promotion → Production smoke/monitoring → rollback if required.
+1. Material planning starts with fresh external research. Prefer current official product/platform documentation, regulators, OWASP/security bodies and primary runtime evidence. Important decisions compare independent sources when practical.
+2. Before changing a contract, read latest `main`, both integrated plans, recent QA/worklogs, CI/release automation, open incidents/PRs, runtime evidence and relevant code/migrations. Re-check `main` mid-run and immediately before each docs integration. Documentation automation never force-pushes.
+3. Evidence state is explicit: `IMPLEMENTED`, `PARTIAL`, `UNVERIFIED`, `REDESIGN_REQUIRED`. A plan, issue, screenshot, successful build or stale test does not prove current Production behavior.
+4. Missing CI/test/runtime evidence means `verification unavailable`, never pass. P0/CRITICAL/HIGH gates fail closed.
+5. Applied DB migrations are immutable. Corrections use a new migration. Economy history is append-only; corrections use compensating transactions.
+6. Unknown business figures are `HYPOTHESIS` or `TEST TARGET`. WLD/WDX activity is game-economy activity, not real-currency revenue.
+7. Priority order: `P0 data loss/security/auth/authorization/asset duplication/economy abuse/outage/DB integrity/release truth` → `P1 major correctness/core completeness` → `P1 shop/payment/monetization` → `P1 SEO/acquisition` → `P2 retention/growth` → `P2 UX/accessibility` → `P3 long-term expansion`.
+8. Runtime development remains separate: `new branch → static/unit/integration/real-DB/security tests → immutable candidate → isolated exact-SHA test → backend/API/DB/user-flow QA → main integration → exact-main-SHA re-test → Production evidence → GitOps promotion → Production smoke/monitoring → rollback if required`.
 
-## 1. Product and non-negotiable system boundaries
+## 1. Product and non-negotiable boundaries
 
-Woldeok Moneyverse is a community virtual-economy/game platform spanning web and Discord. Users authenticate, earn/spend WLD, progress through jobs/quests, collect/use items, operate virtual businesses, use a virtual bank/loans, use virtual stocks, community/social features and probability/game features.
+Woldeok Moneyverse is a web+Discord community virtual-economy/game platform. Users authenticate, progress through jobs/quests, earn/spend WLD, collect and use items, operate virtual businesses, use a virtual bank/loans, virtual stocks, social/community and probability/game systems.
 
-WLD, WDX/virtual stocks, bank balances, loans, casino play, rewards and related values are game/simulation data only. The service does not promise cash redemption, real securities, deposits, guaranteed yield, external prizes, investment return or real gambling. Any future change toward real-money financial/gambling value is a separate product/legal redesign and cannot inherit this plan’s approval.
+WLD, WDX/virtual stocks, bank balances, loans, casino play and rewards are simulated/game-only data. There is no cash redemption, real security/deposit, guaranteed yield, investment return, external prize or real gambling promise. Any future real-money/financial/gambling linkage is a separate legal/product redesign.
 
-Current technical baseline is Next.js frontend, NestJS API, PostgreSQL authoritative state/economy/authorization, protected `SECURITY DEFINER` database functions for sensitive paths, least-privilege application DB roles, append-only double-entry ledger, idempotency for retryable value-changing operations, and outbox-style post-commit external delivery.
+The baseline architecture is Next.js frontend, NestJS API and PostgreSQL authoritative data/economy/authorization, protected `SECURITY DEFINER` paths for sensitive DB operations, least-privilege application roles, append-only double-entry ledger, idempotency for retryable value changes and outbox-style post-commit external delivery.
 
 ### 1.1 Economy invariants
 
-Every value-changing operation validates actor/policy/eligibility/limits/idempotency and atomically writes ledger postings, derived balances, audit/outbox as required. Debits and credits reconcile; disallowed negative balances remain impossible at the transaction boundary. Money is transported/stored using integer-safe/string-safe contracts rather than unsafe JavaScript `Number` conversion. Corrections reference the original transaction and create compensating transactions.
+Every value-changing operation validates actor, permission, policy, eligibility, quota/limit and idempotency, then atomically writes required ledger postings, derived balances, audit/outbox. Debits and credits reconcile; prohibited negative balances fail at transaction boundaries. Money uses integer/string-safe contracts, not unsafe JavaScript `Number`. Duplicate/retry/concurrent requests cannot create duplicate value. Corrections reference the original transaction and use compensating entries.
 
 ### 1.2 Security baseline
 
-Use OWASP ASVS 5.0.0 and OWASP API Security Top 10 as verification baselines, not certification claims. Required cross-cutting controls include OAuth/OIDC state/nonce/PKCE/exact redirect, secure session rotation/invalidation, recent reauthentication, CSRF, BOLA/IDOR negative authorization tests, XSS/output encoding, SQLi/SSRF/path traversal/command-injection defense, decoded file-type validation, rate/resource-abuse controls, least-privilege DB roles, CORS/CSP/security headers, secret management, dependency/supply-chain controls, container/Kubernetes hardening, encrypted recoverable backups, append-only audit, privacy minimization/retention/deletion and secret-safe logs.
+Use OWASP ASVS 5.0.0 and OWASP API Security Top 10 as verification baselines, not certification claims. Cross-cutting controls include OAuth/OIDC `state`/`nonce`/PKCE/exact redirect, secure session rotation/revocation, recent reauthentication, CSRF, BOLA/IDOR negative tests, output encoding/XSS defense, SQLi/SSRF/path traversal/command-injection controls, decoded upload validation, rate/resource/business-flow abuse controls, least-privilege DB roles, CORS/CSP/security headers, secret management, dependency/supply-chain controls, container/Kubernetes hardening, independent encrypted restorable backups, append-only audit, privacy minimization/retention/deletion and secret-safe logs.
 
 ### 1.3 Administrator boundary
 
-Current model is a single `superadmin` with compensating controls, not mandatory two-person approval. `AdminSessionGuard`, recent `ReauthGuard`, TOTP/`SecondFactorGuard`, database-side actor checks, least privilege, impact preview, reason capture, idempotency where relevant and append-only audit are required for sensitive operations. The superadmin does not receive a bypass to directly rewrite protected economy/audit history. Read-only operational views may avoid unnecessary step-up but still require proper admin session/role authorization.
+Current model is a single `superadmin` plus compensating controls, not mandatory two-person approval. Sensitive operations require `AdminSessionGuard`, recent `ReauthGuard`, TOTP/`SecondFactorGuard`, DB actor checks, least privilege, impact preview, reason capture, idempotency where relevant and append-only audit. Superadmin has no direct bypass for protected economy or audit history.
 
-## 2. Current priority and release blocker register
+## 2. Current blocker and QA register
 
-Priority order: `P0 data loss/security/auth/authorization/asset duplication/economy abuse/outage/DB integrity/promotion evidence` → `P1 major user correctness/core completeness` → `P1 shop/payment/monetization` → `P1 SEO/acquisition` → `P2 retention/growth` → `P2 UX/accessibility` → `P3 long-term expansion`.
+Every issue records severity, first found, latest reproduction, steps, affected users/functions, evidence, root-cause status, FE/BE/API/DB/infra target, concrete fix, migration impact, rollback, unit/integration/E2E/real-DB/security/regression tests, test acceptance, Production promotion condition, monitoring, state and owner sequence. Repeated `BLOCKED` becomes a root-cause-removal item.
 
-### BAK-106-01 — P0 — OPEN — independent backup + successful restore evidence unavailable
+### BAK-106-01 — P0 — OPEN/BLOCKED — independent backup + successful restore evidence unavailable
 
-- First evidence: GitHub issue #139 opened 2026-09-09, still open on 2026-09-15. Last recorded direct inspection found designated `/mnt/backup` (`/dev/sda1`) mounted read-only, newest observed separate-media files from 2026-09-07, and no current Kubernetes-era automated backup on that medium. An emergency PostgreSQL custom-format dump passed SHA-256 and `pg_restore -l` but lived on the same system disk.
-- Repository recovery worklog explicitly says `moneyverse_recovery` is a recovery/inspection convenience and does not replace encrypted separate-media backup.
-- Impact: complete host/storage loss can threaten identity/session/economy/ledger/audit/inventory/entitlement/object data and recovery/dispute capability.
-- Rule: destructive or schema/data-changing Production work is blocked unless a current independently recoverable backup and successful restore evidence are proven. Docs-only work is unaffected.
-- Close condition: section 9 recovery architecture + full restore drill + monitoring + release evidence are implemented and current.
+- First evidence: GitHub issue #139, 2026-09-09. It remains open on 2026-09-15. Last direct host evidence found `/mnt/backup` (`/dev/sda1`) read-only, newest observed separate-media files dated 2026-09-07 and no current Kubernetes-era automated backup there. A custom-format emergency PostgreSQL dump passed SHA-256 and `pg_restore -l`, but remained on the same host/system disk.
+- Impact: total host/storage loss can affect identity, sessions, economy, ledger, audit, inventory, entitlement, content and dispute recovery.
+- Root cause/evidence gap: filesystem/media health and current scheduled-backup path are unresolved because authorized remote cluster devices are currently offline; no fresh host claim is made.
+- Fix targets: backup medium/storage, Kubernetes/GitOps backup job, least-privilege backup identity, encryption/key separation, retention, monitoring, isolated restore environment and release-evidence integration.
+- Migration: none merely to repair backup infrastructure; schema/data-changing Production work is blocked until current independent recovery evidence exists.
+- Tests: corrupt/missing archive, wrong key, full disk, WAL gap where PITR applies, wrong source/target, Production credential denial, full isolated DB/object restore, migration parity, ledger/balance and entitlement/provenance reconciliation.
+- Close: one current independent backup reaches `VERIFIED_RESTORABLE`, measured RPO/RTO evidence exists, monitoring alerts work and release automation consumes the evidence.
+- Rollback: backup-system rollout may revert to prior operational configuration only if a separately verified recovery path remains available.
+- Business: direct revenue 0; value = expected data-loss/downtime/refund/support/fraud/dispute cost avoided.
+
+### OPS-107-01 — P0 — OPEN — stale status remains false-green for hours
+
+- First reproduction: 2026-09-15 07:05 KST. Latest reproduction this cycle: around 08:08 KST. Public `/status` still said all services normal while Web/economy API/ledger DB observations were all 04:06 KST. The page says collection interval is 30 seconds and older records should show checking, so the same stale snapshot remained green for more than four hours.
+- Repository contract: frontend revalidates but trusts API state; migration 013 has source `stale_after_seconds` and `content_public_status()` designed to map stale rows to `unknown`. Initial migration values use 180 seconds, which also proves the UI’s literal 30-second statement is not the authoritative stale threshold.
+- Impact: an outage/degradation or monitoring failure can be hidden, increasing MTTR, support burden, false release confidence and trust loss.
+- Root cause: not confirmed. Candidates remain Production migration/function/config drift, stale deployed backend/image, collector failure plus non-authoritative read path, or caching.
+- Read-only diagnosis order: capture raw `/api/v1/status` body/headers/server clock → deployed frontend/backend SHA+digest → migration checksum → `pg_get_functiondef(content_public_status)` and `stale_after_seconds` → latest snapshots vs `clock_timestamp()` → collector attempt/success/schedule/logs → reproduce on isolated exact-SHA test.
+- Design: server-side source freshness is authoritative; collection interval and stale threshold are separate. Stale/missing required source becomes `unknown`; overall cannot remain `operational`. Collector failure is `monitoring delayed/checking`, not a fabricated target outage and never green. Healthy cache cannot outlive freshness. No `stale-if-error` green assertion after threshold.
+- Migration: migration 013 remains immutable; Production drift is corrected through a new migration/reviewed configuration path.
+- Required QA: threshold -1/0/+1 second, different source thresholds, no snapshot, future timestamp, stopped collector, API/DB/cache failure, restart, mixed states, timezone, forged writer denial, app-role write denial, no topology leakage.
+- Test gate: stopping a synthetic collector must turn API+UI to checking within the configured threshold, lower overall health and alert; only a new trusted fresh snapshot restores green.
+- Metrics: `status_source_age_seconds`, `collector_last_success_age_seconds`, `public_status_unknown_count`, `status_api_errors`, `stale_operational_violation_count=0`.
+- Rollback: last-known-good immutable app/config while remaining fail-closed; never rewrite history simply to make the board green.
+
+### REL-110-01 — P0 — BLOCKED — Test GitOps declaration advanced but public runtime serves the wrong candidate revision
+
+- First/latest evidence: PR #332 candidate `b3f28185107a2f6f4a8bd389016de778df08b747`. CI passed and immutable backend/frontend `-test` images built successfully. Test infrastructure PR #67 reportedly rendered and merged, updating candidate labels, images, Test source SHA and redeploy tokens. The immediate public Test probe then returned `/api/version = 1789391457242`, not the expected candidate SHA. Application-main merge and Production promotion were correctly stopped.
+- Impact: a successful build and GitOps declaration can diverge from the workload actually serving Test. If treated as equivalent, QA may validate the wrong code and promote untested runtime.
+- Root cause: unconfirmed because cluster/Flux inspection requires an authorized device and all connected devices are offline. Candidate hypotheses: Flux source/reconcile lag or stall, Kustomization revision mismatch, Deployment/ReplicaSet rollout failure, old Pod/image digest, image pull/cache issue, Service/Ingress selecting old endpoints, version endpoint built from wrong source, or another routing/cache layer.
+- Read-only diagnosis sequence when cluster access returns: Test GitRepository/OCI source revision → Flux Kustomization `Ready/Reconciling/Stalled`, `lastAppliedRevision`, `lastAttemptedRevision`, history and events → rendered Deployment desired image digest/env/labels → ReplicaSet/Pod owner+digest+restart/image-pull events → Service endpoints → Ingress/router/cache → pod-local `/api/version` → public `/api/version`.
+- Evidence contract: `Git commit` ≠ `CI green` ≠ `image built` ≠ `GitOps desired state merged` ≠ `Flux applied` ≠ `workload rolled out` ≠ `Service routes candidate` ≠ `public exact-SHA`. Each is a separate state with timestamp, source and evidence ID.
+- Fix targets: infrastructure/GitOps reconciliation, candidate metadata/version endpoint, workload rollout and public route. No application DB/schema change is required by the diagnosis itself.
+- Rollback: because Production was untouched, no Production rollback. For Test, restore last-known-good immutable Test image/digest only if needed to recover the verification environment; preserve failure evidence.
+- Required QA after repair: exact SHA from pod-local and public endpoint, backend+frontend image digest, DB migration checksum, least-privilege DB smoke, login/logout, Work quota UI/API, public catalog, noindex, logs/resources and rollback-readiness.
+- Acceptance: the same candidate SHA/digest must be demonstrably connected from source commit → image provenance → GitOps applied revision → Deployment/Pod → public `/api/version`; repeated probe remains stable through rollout completion.
+- Monitoring: reconcile age, last applied/attempted revision, rollout desired/available replicas, image digest mismatch, endpoint age, exact-SHA probe failures.
+- State/sequence: `BLOCKED` on cluster-access/root-cause inspection. Owner order: infra/Flux evidence → routing/workload correction → exact-SHA Test QA → only then application merge consideration.
 
 ### AUTH-105-01 — P0 — OPEN / PUBLIC LOCAL-AUTH ROLLOUT HOLD
 
-Current code/migrations/mobile contracts contain local email registration, verification and login with Argon2id/email-hash/token-hash processing while current public web login/guide/privacy evidence remains OAuth-centric. Do not newly market or generally expose local registration until privacy notice/policy version/consent, retention/deletion/credential removal, SMTP/processor facts, security controls, token-link privacy, exact-SHA test evidence and rollback are aligned. Preserve existing legitimate identities if the endpoint already exists; do not perform destructive account disablement merely to make public copy match.
+- Evidence: local email registration/verification/login, Argon2id, normalized email hash and token hash exist in code/contracts while current Production login/guide/privacy remains OAuth-centric and says users do not create a separate Moneyverse password.
+- Impact: processing facts, user expectation and privacy disclosure can diverge; credentials may be exposed to a flow users were not told exists.
+- Fix: before broad rollout, align privacy notice/version+consent, purpose/items/retention/deletion/credential removal, SMTP/provider facts, verification-link privacy, account recovery and support scripts.
+- Security: credential stuffing/resource abuse, email enumeration, verifier/token logs, OAuth/local account collision and silent identity merge are release blockers. Unknown email/wrong password use the same public error class.
+- SEO: signup/login/verification/recovery are noindex and sitemap-excluded; raw verification token never enters analytics/referrer/logs.
+- QA: register/verify/login/logout, invalid/expired/reused token, same/cross-browser, session rotation, rate/resource limits, provider collision, deletion, policy-version mismatch and rollback.
 
-### QA-104-01 — P0 — OPEN — profession-work quota guidance contradicts authoritative quota behavior
+### QA-104-01 — P0 — IN PROGRESS, NOT CLOSED — profession-work quota visibility/content contract
 
-Public guide evidence states unlimited repeated full WLD/EXP work while current server/DB contract uses task-specific `daily_limit`, `taken_today`, exact-limit acceptance, over-limit denial and member/task concurrency protection. Fix public/web/mobile/FAQ/schema examples; show reward eligibility separately from playability; test 0/partial/exact/+1 quota, profession/task isolation, double submit, idempotency, Seoul-day boundary and web/mobile/API parity. Copy correction does not justify reverting quota protection.
+- Production runtime still says profession work can be repeated without a daily limit for full WLD/EXP every time; this contradicts authoritative `daily_limit`/`taken_today` quota behavior.
+- Candidate progress: PR #332 adds authoritative `taken_today / daily_limit` Work visibility. Candidate `b3f28185107a2f6f4a8bd389016de778df08b747` passed CI and immutable Test-image build.
+- Not closed because REL-110-01 prevents exact-SHA Test runtime proof, PR #332 remains open, and Production `/guide` still contains the incorrect unlimited-reward text.
+- Fix scope: Work UI, `/guide`, mobile/App API guides, FAQ/schema examples and any SEO snippets. Distinguish `playable` from `reward eligible`; do not weaken server quota to match old copy.
+- QA: 0/partial/exact/+1, profession/task isolation, double-submit, idempotency, concurrency, Seoul day boundary, API/web/mobile parity, guide copy, accessibility and SEO metadata.
+- Promotion: close only after exact-SHA isolated Test passes, current-main integration is retested and Production copy/runtime smoke verifies authoritative quota messaging.
 
-### REL-104-02 — P0 — OPEN — Production-ready automation proves less than normative release evidence
+### REL-104-02 — P0 — OPEN — Production-ready workflow is narrower than normative release evidence
 
-Current release workflow has exact-SHA/test/catalog/noindex evidence, while this plan requires migration parity/checksum, authenticated synthetic smoke, least-privilege DB connectivity, changed economy invariants/reconciliation, backup/restore evidence for destructive changes and rollback target. Add a fail-closed machine-readable `release-evidence` stage before `production-ready`; missing synthetic identity/evidence is `BLOCKED`, never skipped-pass.
+The current release path has useful exact-SHA/catalog/noindex checks, immutable images, SBOM/provenance, but Production readiness must also prove migration parity/checksum, least-privilege DB connectivity, authenticated synthetic flow, changed-feature abuse/reconciliation, current backup/restore evidence when destructive work is involved, rollback target and the REL-110-01 end-to-end candidate lineage. Missing, stale or wrong-revision evidence is `BLOCKED`, never skip-pass.
 
-### AUTH-105-02 — P1 — TODO — app-auth verification documentation stale
+### AUTH-105-02 — P1 — TODO — verify-email app documentation stale
 
-Current verify-email design is a one-time bearer-token cross-browser/no-cookie exchange rather than an originating prelogin-cookie/CSRF-dependent operation. Synchronize English/Korean app-auth guide, schema/catalog/examples and test same/cross-browser, invalid/expired/reused token, session rotation, arbitrary CSRF, old client behavior.
+Current verify-email is one-time bearer-token, cross-browser/no-cookie exchange rather than an originating prelogin-cookie/CSRF dependency. Synchronize EN/KO app-auth guide, endpoint catalog, schema/examples and old-client behavior. Test invalid/expired/reused token, arbitrary CSRF, same/cross-browser and session rotation.
 
-### REL-104-03 — P1 — TODO — runtime-code required checks not repository-enforced for every main update
+### REL-104-03 — P1 — OPEN/CONFIRMED — required status checks are not repository-enforced
 
-Maintain protected/no-force main and add the narrowest possible ruleset requiring approved runtime-code integration and successful checks for `backend/`, `frontend/`, `packages/database/`, deploy manifests/security scripts. Preserve the explicit docs-only direct-main automation without allowing it to become a runtime-code bypass. Sandbox-test failing PR/direct push denial and validated automation success.
+Fresh `main` branch metadata shows protection enabled but required-status-check enforcement `off` with empty required contexts/checks. This is no longer merely unverified. GitHub documents that without required checks, protected-branch merges are not blocked by check results. Keep direct-main docs automation narrowly allowed if desired, but runtime paths (`backend/`, `frontend/`, database/migrations, deploy/security workflows) must require reviewed integration and selected checks from the expected GitHub App/source. Rules must not turn docs automation into a runtime bypass.
 
-## 3. Mandatory specification template for every feature
+## 3. Candidate evidence state machine — normative release contract
 
-Every feature/backlog item must contain all of the following, with implementation evidence linked: purpose/user problem; target actor/role; implementation status; user story; entry routes; screen components/CTA; state transitions; loading/empty/error/offline/timeout; first-use/return/comeback; mobile/tablet/desktop; keyboard/focus/label/contrast/reduced-motion; i18n; email/push/Discord needs; data model/ownership; read/write permissions; endpoint/method/request/response/error codes; idempotency/rate/resource limits; service/business rules; tables/indexes/constraints/transactions/concurrency; audit/metrics/admin operations; feature flag/fallback; backup/recovery impact; threats/privacy/abuse; SEO/indexing; analytics/KPI; latency/cache/performance; profitability/cost; completion criteria; unit/integration/E2E/real-DB/security/regression tests; isolated-test acceptance; Production promotion/monitoring/rollback.
+A release candidate moves only through these states; later states do not imply missing earlier evidence:
 
-## 4. Current all-feature implementation and product contract matrix
+1. `SOURCE_READY`: candidate SHA and base-main SHA captured; changed files/risk class known.
+2. `CI_GREEN`: exact candidate passes required static/unit/integration/real-DB/security jobs.
+3. `IMAGE_BUILT`: immutable backend/frontend image digests exist with provenance/SBOM where applicable.
+4. `GITOPS_DECLARED`: Test GitOps desired-state commit references exact candidate/digests.
+5. `TEST_APPLIED`: Flux source/Kustomization reports the expected applied revision and healthy reconciliation.
+6. `TEST_WORKLOAD_EXACT`: Deployment/ReplicaSet/Pods run expected digest and candidate metadata.
+7. `TEST_PUBLIC_EXACT`: public Test version endpoint returns expected candidate SHA without stale routing/cache.
+8. `TEST_QA_GREEN`: DB/API/auth/changed-feature/security/noindex/log/resource/rollback tests pass against that exact runtime.
+9. `MAIN_INTEGRATED`: reviewed candidate is integrated into current main; if main moved, compare/reconcile first.
+10. `MAIN_EXACT_TEST_GREEN`: exact integrated main SHA receives immutable Test deployment and the same gates again.
+11. `PRODUCTION_READY`: machine-readable release evidence includes all applicable gates, backup/restore and rollback target.
+12. `PROD_DEPLOYED`: GitOps Production desired/applied/workload/public lineage matches exact approved main SHA/digests.
+13. `PROD_SMOKE_GREEN`: HTTP/API/auth/changed user flow/log/resource/status-freshness smoke passes; monitor or rollback.
 
-| Feature family | Evidence/status | UX / authority / data / API-DB contract | Security/privacy/abuse | SEO/growth/business | Mandatory QA/release gate |
+Minimum evidence object: `candidateSha`, `baseMainSha`, `riskClass`, `ciRunIds`, `imageDigests`, `provenanceIds`, `testGitOpsRevision`, `fluxAppliedRevision`, `testWorkloadDigests`, `testPublicVersion`, `migrationChecksum`, `dbSmoke`, `authSmoke`, `featureQa`, `securityQa`, `backupEvidenceId` when required, `rollbackTarget`, timestamps, operator/automation identity and expiry/freshness. A stage mismatch blocks advancement and creates an incident/QA item rather than being normalized away.
+
+## 4. Mandatory feature specification template
+
+Every current or planned feature records all of: purpose/user problem; target actor/role; implementation status and code/doc evidence; user stories; entry route; screen components and CTA; state transitions; loading/empty/error/offline/timeout; first-use/return/comeback; mobile/tablet/desktop differences; keyboard/focus/label/contrast/reduced-motion accessibility; i18n; email/push/Discord integration; data model/ownership; read/write permission; endpoint/method/request/response/error codes; idempotency/rate/resource/business-flow limits; service/business rules; tables/indexes/constraints/transactions/concurrency; audit/metrics/admin operations; feature flag/fallback; backup/recovery impact; security/privacy/abuse; SEO/indexing; analytics/KPI; performance/cache; profitability/cost; completion criteria; unit/integration/E2E/real-DB/security/regression tests; isolated-test acceptance; Production promotion/monitoring/rollback.
+
+## 5. All-feature implementation and product contract matrix
+
+| Feature family | Evidence/status | Authority, UX, API/DB contract | Security/privacy/abuse | SEO/growth/business | Mandatory QA/release gate |
 |---|---|---|---|---|---|
-| Registration/login/OAuth/logout/session | `IMPLEMENTED/PARTIAL`; Nest auth/provider/local slices documented | Server owns provider linking, consent, session issue/rotation/revoke. Client shows loading/provider error/consent/session-expired/offline and never infers auth solely from local state. Local register/login use prelogin+CSRF; verify-email uses one-time bearer token. | Credential stuffing/resource limits; OAuth state/nonce/PKCE/exact redirect; secure cookie; fixation rotation; logout invalidation; no secret logs/URLs; no silent local/OAuth email merge. | Auth pages noindex. Funnel = verified session→meaningful activation→D1/D7/D30. Local auth value = incremental retained contribution minus SMTP/compute/CS/fraud/privacy cost. | Guard/DTO, state replay, fixation/logout, provider collision, local token expiry/replay/cross-browser, rate 429, secret scan, policy/privacy parity. AUTH-105-01 blocks general local-auth rollout. |
-| Profile/account/security center | `PARTIAL` | Member profile/linked methods/session list are server authoritative; sensitive changes recent-reauth; other-session termination and recovery states explicit. | BOLA on account/session IDs, ATO alerts without secrets, privacy-minimal defaults, audit security changes. | Private/auth/noindex. Value = lower ATO/support loss/trust. | Other-user session denial, reauth expiry, terminate-other/all, provider-loss recovery, responsive/accessibility. |
-| Inventory/collection/marketplace workbench | `PARTIAL`; holdings/curation slices exist; live P2P settlement not assumed | DB owns item, owner, provenance/entitlement/serial. Empty/error/offline never fabricate holdings. Future listing defines escrow, cancel, expiry, settlement, fee, reversal. | BOLA/serial leakage, duplicate grants, multi-account wash trade/collusion, replay. | Holdings private/noindex; public-safe opted-in collection only. WLD spend is sink, not revenue. Retention = acquire→use→curate→reuse. | Ownership concurrency, duplicate entitlement, unauthorized transfer, recovery, private URL leak, future wash-trade tests. |
-| WLD shop/catalog | `IMPLEMENTED/PARTIAL` public catalog/store | Server authoritative item/effective price/eligibility/limit/sale window/entitlement. UX displays exact currency, ownership/duplicate behavior, deadline, receipt; retries idempotent. Each SKU records ID/name/category/description/audience/value, WLD-vs-real payment, consumable class, test price, promotion/stock/window/limit, binding/gift/refund/recovery, sink/source, P2W, KPI, admin lifecycle. | No client price authority, duplicate grant/replay, fake/resetting scarcity, hidden personalized pricing, P2W/wealth/casino pressure. | Substantial editorial collection pages may index; purchase history private. Unit economics for WLD are economy health/retention, not real revenue. | Price tamper, boundary time, insufficient balance, double click/concurrent purchase, entitlement repair/cache invalidation, catalog admin deactivate/reactivate. |
-| Real-money cart/payment/subscription/ad removal | `UNVERIFIED`; never infer from WLD shop | Before implementation select provider and define order/cart authority, tax, receipt/webhook signature, entitlement source, cancel/refund/renewal/billing recovery/idempotency. Material recurring terms before charge and simple cancellation. | Receipt/webhook forgery/replay, order BOLA, PCI/provider boundary, refund/chargeback fraud, secret signature storage. | Checkout/order/account noindex. Unit economics = displayed price minus tax/platform/payment/refund/chargeback/content/CS/moderation/fraud/infra. | Provider sandbox; duplicate/out-of-order webhook; refund/regrant; renewal/cancel/grace/recovery; legal/policy gate; predeclared SCALE/ITERATE/HOLD/KILL. |
-| Jobs/quests/profession/level/rewards | `PARTIAL + P0 content drift` | Server/DB owns catalog, min duration, cooldown, daily quota, reward/EXP, receipt, progression unlocks. UI shows remaining rewarded completions/next unlock and distinguishes playable vs reward-eligible. | Bot/macro, multi-account, replay, clock/reset abuse, concurrent duplicate completion, ledger reconciliation. | Corrected guide may index for game-system learning. KPI TTFV, first verified job, D1/D7 progression, reward inflation/fraud. | QA-104-01 exact-SHA real-DB matrix is release blocking. |
-| Business | `UNVERIFIED/PARTIAL` | Define inventory, demand, sale price, costs, fees/tax, management state and settlement; no risk-free fixed compounding; all value through ledger/idempotency. | Circular/multi-account demand farming, refund/replay, admin manipulation, precision. | Public educational pages can index; private P&L noindex. KPI retention + sustainable sink/source, not nominal profit. | Real-DB settlement/reconciliation/concurrency and abuse simulations before expansion. |
-| Bank/loans | `UNVERIFIED/PARTIAL` | Server owns eligibility/source-of-funds, principal, interest/accrual schedule, repayment/minimum/arrears, purpose restrictions, recovery. Loan source must not become uncontrolled mint. | Double repayment, clock abuse, BOLA, multi-account, loss-chasing; game-only wording, no real deposit/yield promise. | Public education must clearly say simulation/game; private balance/debt noindex. | Accrual boundaries, idempotent/concurrent repayment, insufficient balance, restart/recovery, ledger reconciliation. |
-| Virtual stocks/WDX/watchlist/portfolio/alerts/comparison | `PARTIAL`; detail/watch/comparison/alert slices documented | Public market read model separated from private holdings. Issuance/pricing/trading/settlement/server market rules authoritative. URL may carry public symbol/compare state only. | Holdings BOLA, duplicate settlement, manipulation/collusion, alert spam/phishing, integer precision. | Public-safe substantial `/stocks/[symbol]` may index; portfolio/watchlist/orders/alerts private/noindex. KPI discovery→activation→D7, not trade volume alone. | Other-user holdings denial, symbol validation, large integer, settlement replay/concurrency, alert cooldown, manipulation cases. |
-| Casino/probability | `PARTIAL/high-risk` | Server generates outcomes, publishes probability/payout/limits, settles atomically, same idempotency key returns same receipt/outcome. | RNG/result tamper, replay, limit bypass, bots/multi-account, loss chasing/youth risk. No cash redemption/external prize. | Gameplay/account history noindex; acquisition must not promise winnings. Real revenue = 0 absent separately approved paid model. | Distribution sanity, deterministic replay receipt, limit/max-loss boundary, concurrency, ledger reconciliation, legal/product review. |
-| Seasons/live events | `PARTIAL/plan+calendar slices` | Server owns start/end/grace/reward eligibility; D-14/D-7/D-3/D-1 previews are content, not client authority. Catch-up and archives preserve history after end. | Bot/multi-account reward farming, collusion, deadline manipulation/fake FOMO. | Public season/archive pages can index when substantial, with truthful dates/lastModified. | Timezone boundaries, late entry/catch-up, reward duplicate, archive transition, notification cooldown. |
-| Community/posts/comments/report/block | `PARTIAL` | Server owns authorship/edit/delete/moderation status; UI has loading/empty/deleted/locked/report/block feedback without leaking enforcement internals. | Spam/bot, harassment, impersonation/doxxing, malicious links, stored XSS, BOLA, moderator abuse. | Curated board index may index; individual UGC defaults noindex until documented quality/moderation rule. Ads remain off unreviewed detail. | Other-user edit/delete denial, XSS/link, report spam, block semantics, moderator audit, deletion→404/410/index removal. |
-| Friends/clubs/referral | `UNVERIFIED/PARTIAL` | Define invite lifecycle, member/role/leave/kick/ban, visibility, attribution and reward maturity. | Invite spam, fake account/referral fraud, collusion, role escalation, private membership leakage. Rewards favor cosmetic/prestige/convenience after fraud-resistant milestones. | Public club only explicit visibility; private graph no search/share leak. | Multi-account/referral ring, invite replay, role escalation, privacy/block interaction. |
-| Notifications/email/push/Discord | `PARTIAL` | Server owns source event, preference/consent, cooldown/dedupe, delivery state, canonical deep link. Text excludes sensitive balances/debt/security state. | Phishing/ATO imitation, webhook abuse, spam, token leakage. | Noindex. Business = incremental healthy return minus provider/opt-out/spam/privacy/support cost. | Dedupe/cooldown, revoked/stale link, opt-out, provider outage/retry/outbox, secret-safe logs. |
-| Search | `UNVERIFIED` | Public search reads public-safe model; member/admin search explicitly authorized. Define parsing, pagination, empty/no-result, timeout. | Injection, expensive-query DoS, object enumeration, query-log PII. | Query result pages normally noindex; only curated stable intent landing may index. | Authorization, special chars, pagination stability, complexity/rate limits, relevance regression. |
-| Upload/gallery/files | `PARTIAL/spec-level unless feature code linked` | Decode/type/magic-byte validation; size/dimensions; generated names; isolated storage; authorized delivery; strip private EXIF/metadata as applicable. | Malware/polyglot/path traversal/decompression bomb/remote-fetch SSRF/BOLA/metadata leakage. | Private media noindex; public media stable safe URL/alt/dimensions only after permission/moderation. | Malformed/polyglot, oversized dimensions, unauthorized read, EXIF strip, storage failure/restore. |
-| Public home/guide/status/content | `IMPLEMENTED public slices` | Public read model must fail honestly; status shows measurement age; guide/help must match server behavior. | No secret/topology/stack traces/user state; XSS/phishing lookalike controls. | Canonical/indexable when original/substantial. `/guide` expansion HOLD while QA-104-01 and local-auth wording conflict remain. | HTTP/status/meta/canonical/structured data/accessibility/CWV/content-contract regression. |
-| App API/mobile gateway | `PARTIAL/COVERAGE DOCUMENTED` | Versioned `/app-api/v1`, stable wrapper/shape; one-time server-verified handoff; breaking change requires compatibility or version bump. | Handoff/token replay, BOLA, rate/resource abuse, PII/log masking. | API noindex. Value = mobile activation/D30 minus support/infra/fraud. | Contract snapshots, old-client compatibility, auth expiry, handoff one-time, error-code parity, auth-doc parity AUTH-105-02. |
-| Admin/audit | `PARTIAL/implemented controls` | Read and risky write separated. High-risk operation shows current/proposed/targets/impact/reason and uses reauth+TOTP+DB actor+idempotency/audit as relevant. | Privilege escalation/session theft/CSRF/BOLA/mass-action/audit tamper; single-superadmin residual risk. | Always private/noindex. Value = lower incident/operator/support cost. | Lower-role denial, stale reauth, invalid TOTP, impact preview, mass-action bounds, DB privilege/audit integrity, compensation. |
-| Backup/recovery | `UNVERIFIED CURRENT EVIDENCE`; BAK-106-01 P0 | Section 9 is authoritative: explicit RPO/RTO, independent encrypted backup, source/version/checksum, isolated restore, app/ledger/object validation. | Key theft/plaintext, shared failure domain, wrong-env restore, corrupted/WAL-gap backup, retention shadow copies. | Private/noindex. Direct revenue 0; value = expected loss/downtime avoided. | Destructive DB change blocked until current independently restorable evidence. Full fault-injected restore drill. |
-| Analytics/experiments | `PARTIAL/SPECIFIED` | Pseudonymous subject; analytics session ≠ auth secret; versioned event schema, retention, experiment assignment, guardrails. | PII/secret leak, reidentification, experiment abuse, sensitive finance/security profiling. | Safe campaign/content IDs can link to downstream cohorts; no private SEO payload. | Schema validation, consent/deletion, deterministic assignment, outbound secret/privacy scan. |
-| Advertising/sponsorship | `IMPLEMENTED/PARTIAL reviewed public placements` | Only approved substantial public surfaces; Production default-reviewed enable; test forced off; sponsor/ads visibly distinguished from product action. | Invalid traffic/click encouragement/youth/privacy targeting/tracker leakage/sponsor confusion. | Ads do not justify thin indexing. `net ad contribution = revenue - churn/session/support/privacy/fraud cost`. | Route allowlist, test ads disabled, CLS/CWV, ad-induced exit, invalid traffic/policy/privacy review. |
-| SEO backend | `PARTIAL` | Deterministic configured-origin canonical builder; public `SeoMetadataReadModel`; dynamic sitemap shards; robots; redirect map; structured-data serializer; authoritative updatedAt/lastModified; image metadata; crawler/GSC/Naver observation. | Private-route leakage, Host canonical injection, cache poisoning, PII in sitemap/JSON-LD, admin exposure. | KPI organic→signup→activation→D7/D30→net revenue/retained value and organic CAC savings. | Sitemap privacy scan, canonical injection, redirect loops, SSR content, GSC/Naver errors, representative CWV. |
-| Incident/status/operations | `PARTIAL` | Public-safe status separated from internal telemetry; incident severity/start/update/resolution/customer impact/owner/rollback and postmortem. | Topology/secret over-disclosure, fake status, admin abuse, alert fatigue. | Trust/support/MTTR function, not acquisition bait. | Dependency outage, stale-status detection, alert routing, rollback/restore drill, public-safe copy. |
+| Registration/login/OAuth/logout/session | `IMPLEMENTED/PARTIAL` | Server owns identity linking, consent and session issue/rotate/revoke. Local register/login use prelogin+CSRF; verify-email uses one-time bearer token. Loading/provider-error/consent/session-expired/offline are distinct. | Credential stuffing/resource budgets, OAuth state/nonce/PKCE/exact redirect, secure cookie, fixation rotation, logout invalidation, no silent local/OAuth email merge. | Auth pages noindex. Value = verified session→activation→D1/D7/D30 minus SMTP/compute/CS/fraud/privacy cost. | Provider collision, replay/fixation/logout, token expiry/reuse/cross-browser, 429, policy/privacy parity. AUTH-105-01 blocks broad local rollout. |
+| Profile/account/security center | `PARTIAL` | Server owns profile, linked methods and sessions; sensitive changes require recent reauth. | Account/session BOLA, ATO alerts without secrets, privacy-minimal defaults, audited changes. | Private/auth/noindex; value = lower ATO/support loss. | Other-user session denial, reauth expiry, terminate-other/all, provider-loss recovery, responsive/accessibility. |
+| Inventory/collection/marketplace workbench | `PARTIAL`; live P2P settlement unproven | DB owns item/owner/provenance/entitlement/serial. Future listing defines escrow/cancel/expiry/settlement/fee/reversal. | BOLA/serial leakage, duplicate grant, wash trade/collusion, replay. | Holdings private/noindex; only explicit public-safe collections. WLD spend is sink, not revenue. | Ownership concurrency, duplicate entitlement, unauthorized transfer, recovery, private URL leak, future wash-trade simulation. |
+| WLD shop/catalog | `IMPLEMENTED/PARTIAL` | Server owns SKU/effective price/eligibility/limit/window/entitlement. Each SKU records identity/category/value, currency, consumability, test price, promo/window/limit, binding/gift/refund/recovery, sink/source, P2W, KPI/admin lifecycle. | Client price untrusted, replay/duplicate, fake/reset scarcity, hidden individualized pricing and P2W/wealth/casino pressure prohibited. | Substantial editorial collection pages may index; purchase history private. WLD is retention/economy, not real revenue. | Price tamper, boundary time, insufficient balance, concurrent purchase, entitlement repair/cache, admin lifecycle. |
+| Real-money cart/payment/subscription/ad removal | `UNVERIFIED` | Before build select provider; server owns order, displayed amount, tax, receipt/webhook verification, entitlement, refund/cancel/renewal/grace and idempotency. | Receipt/webhook replay/forgery, BOLA, chargeback fraud, secret/PCI/provider boundary. | Checkout/order/account noindex. Net economics subtract tax/platform/payment/refund/chargeback/content/CS/moderation/fraud/infra. | Provider sandbox, duplicate/out-of-order webhook, refund/regrant, renewal/cancel, legal/privacy gate; predeclared SCALE/ITERATE/HOLD/KILL. |
+| Jobs/quests/profession/level/rewards | `PARTIAL + P0 IN PROGRESS` | Server/DB owns catalog, duration/cooldown/daily quota/reward/EXP/receipt/unlock. UI must show authoritative `taken_today/daily_limit`; playable != reward eligible. | Bot/macro/multi-account/replay/clock-reset/concurrent duplicate; ledger reconciliation. | Correct guide may index as game learning. KPI TTFV, first verified job, D1/D7 and inflation. | QA-104-01 + REL-110-01 exact-SHA matrix. |
+| Business | `UNVERIFIED/PARTIAL` | Define inventory/demand/price/cost/fee/tax/management/settlement; no risk-free fixed compounding; all value via ledger/idempotency. | Circular farming, replay/refund, admin manipulation, precision. | Public education possible; private P&L noindex. | Real-DB settlement/reconciliation/concurrency/abuse simulation. |
+| Bank/loans | `UNVERIFIED/PARTIAL` | Server owns eligibility, source of funds, principal/interest/accrual/repayment/arrears/purpose/recovery. | Double repayment, clock abuse, BOLA, multi-account/loss-chasing; no real deposit/yield claim. | Public simulation education only; private balance/debt noindex. | Accrual boundaries, concurrent/idempotent repayment, restart/recovery, ledger reconciliation. |
+| Virtual stocks/WDX/watchlist/portfolio/alerts/compare | `PARTIAL` | Public market read model separate from private holdings. Server owns issuance/pricing/trading/settlement/rules. | Holdings BOLA, settlement replay, manipulation/collusion, phishing/spam alerts, integer precision. | Substantial public-safe symbol pages may index; portfolio/watch/orders/alerts private. | Other-user denial, symbol validation, large integer, concurrency/replay, alert cooldown/manipulation. |
+| Casino/probability | `PARTIAL/HIGH-RISK` | Server owns outcome/probability/payout/limit/atomic settlement; same idempotency key gives same receipt/outcome. | RNG/result tamper, replay, limit bypass, bot/multi-account, loss chasing/youth risk. | Gameplay/account history noindex; never acquisition-promote winnings. Real revenue 0 absent separate paid approval. | Distribution sanity, replay, limits, concurrency, ledger reconciliation, legal/product review. |
+| Seasons/live events | `PARTIAL` | Server owns start/end/grace/reward eligibility; preview is not time authority; catch-up/archive required. | Reward farming/collusion, deadline manipulation/fake FOMO. | Substantial season/archive pages may index with truthful dates/lastModified. | Timezone boundary, late entry/catch-up, duplicate reward, archive transition, notification cooldown. |
+| Community/posts/comments/report/block | `PARTIAL` | Server owns authorship/edit/delete/mod state; explicit deleted/locked/report/block states. | Spam/bot, harassment, impersonation/doxxing, malicious links/stored XSS, BOLA, moderator abuse. | Curated board may index; individual UGC default noindex until quality/moderation policy. | Other-user mutation denial, XSS/link, report spam, block semantics, moderator audit, 404/410/index removal. |
+| Friends/clubs/referral | `UNVERIFIED/PARTIAL` | Define invite lifecycle, roles, leave/kick/ban, visibility, attribution and reward maturity. | Invite spam, fake account/referral fraud, collusion, role escalation/private graph leakage. | Public club only explicit visibility; rewards prefer cosmetic/prestige/convenience. | Referral ring, invite replay, role escalation, privacy/block. |
+| Notifications/email/push/Discord | `PARTIAL` | Server owns source event, preference/consent, cooldown/dedupe, delivery state and canonical deep link. | Phishing imitation, webhook abuse, spam/token leakage; no sensitive balance/debt/security in notification. | noindex; value = healthy return minus provider/opt-out/spam/privacy/support cost. | Dedupe/cooldown, stale/revoked link, opt-out, provider outage/outbox, secret-safe logs. |
+| Search | `UNVERIFIED` | Public search reads only public-safe model; member/admin search separately authorized; define pagination/no-result/timeout. | Injection, expensive-query DoS, enumeration, query-log PII. | Result pages normally noindex; only intentional curated landing indexes. | Authz, special chars, pagination stability, complexity/rate, relevance regression. |
+| Upload/gallery/files | `PARTIAL/spec-level unless linked code` | Decode/type/magic, size/dimensions, generated names, isolated storage, authorized delivery, metadata strip. | Malware/polyglot/path traversal/decompression bomb/remote-fetch SSRF/BOLA/EXIF. | Private media noindex; public only after permission/moderation. | malformed/polyglot/oversize/unauthorized read/EXIF/storage failure/restore. |
+| Public home/guide/status/content | `PARTIAL + P0` | Public read model fails honestly; guide matches server contract; status freshness server-authoritative. | No secret/topology/private user state; XSS/phishing; status writer trusted non-browser path. | `/status` noindex; `/guide` acquisition HOLD until quota/local-auth copy is correct. | HTTP/meta/a11y/CWV, guide contract, stale-status fail-closed. |
+| App API/mobile gateway | `PARTIAL/COVERAGE DOCUMENTED` | Versioned `/app-api/v1`; stable wrappers; breaking contract requires compatibility/version decision. | Handoff/token replay, BOLA, rate/resource abuse, PII/log masking. | API noindex; value = mobile activation/D30 minus support/infra/fraud. | Contract snapshots, old client, auth expiry, handoff one-time, error parity, AUTH-105-02. |
+| Admin/audit | `PARTIAL` | Risky writes show current/proposed/target/impact/reason; use reauth+TOTP+DB actor+idempotency/audit as relevant. | Privilege escalation/session theft/CSRF/BOLA/mass action/audit tamper. | private/noindex; value = lower incident/operator/support cost. | Lower-role denial, stale reauth, invalid TOTP, mass bounds, DB privilege/audit, compensation. |
+| Backup/recovery | `UNVERIFIED CURRENT EVIDENCE` | Independent encrypted backup, source/version/checksum, isolated restore, app/ledger/object validation, measured RPO/RTO. | Key theft/plaintext/shared failure domain/wrong-env/corruption/WAL gap/shadow retention. | private/noindex; direct revenue 0. | BAK-106-01 blocks destructive work; full fault-injected drill. |
+| Analytics/experiments | `PARTIAL/SPECIFIED` | Pseudonymous subject; analytics session != auth secret; versioned event schema/retention/assignment/guardrails. | PII/secret leak, reidentification, experiment abuse, sensitive profiling. | Safe campaign/content IDs only; no private SEO payload. | Schema/consent/deletion/deterministic assignment/outbound privacy scan. |
+| Advertising/sponsorship | `IMPLEMENTED/PARTIAL reviewed placements` | Approved substantial public surfaces only; Test ads off; ad/sponsor visually separate from product action. | Invalid traffic/click encouragement/youth/privacy targeting/tracker leak/sponsor confusion. | Ads never justify thin pages. Net ad contribution subtracts churn/session/support/privacy/fraud cost. | Route allowlist, Test ads off, CLS/CWV, ad exit, invalid traffic/policy/privacy. |
+| SEO backend | `PARTIAL` | Configured-origin canonical, public metadata read model, sitemap shards, robots, redirect map, structured-data serializer, updatedAt, images, crawler/GSC/Naver observation. | Private leakage, Host injection, cache poison, PII in sitemap/JSON-LD. | KPI organic→signup→activation→D7/D30→retained net value/CAC saving. | sitemap privacy, canonical injection, redirect loops, SSR, GSC/Naver, CWV. |
+| Incident/status/operations | `PARTIAL + OPS-107-01 P0` | Public-safe status separated from internal telemetry; server freshness, collector heartbeat, snapshot age, incident lifecycle and rollback/postmortem explicit. | false green, forged writer, stale monitoring, topology leak, admin abuse, alert fatigue. | Trust/support/MTTR feature, not acquisition bait; `/status` noindex. | stopped collector/source, cache/API/DB outage, mixed states, stale threshold, alerting, exact-SHA smoke. |
+| CI/Test/GitOps/Production promotion | `PARTIAL + REL-110-01 P0` | §3 state machine is authoritative; desired-state merge never equals applied/runtime proof. | stale candidate, supply-chain substitution, wrong image/routing, evidence replay. | indirect value through lower failure/rollback/support cost. | source→CI→image→Flux→Pod→public version lineage must be exact and fresh. |
 
-## 5. Local first-party authentication detailed contract
+## 6. Local first-party authentication detailed contract
 
-| Step | Endpoint/current authority | Required state/UX | Security/error/data contract |
+| Step | Endpoint | Required UX/state | Security/error/data contract |
 |---|---|---|---|
-| prelogin | `POST /app-api/v1/auth/prelogin-session` | resumable pre-auth state; retryable service failure | secure prelogin cookie + in-memory CSRF; no secret logging |
-| policy | `GET /app-api/v1/auth/policy` | render current terms/privacy versions before local registration | server version authoritative; client never hard-codes |
-| consent | `PUT /app-api/v1/auth/consent` | explicit current terms/privacy/age acknowledgement | SessionGuard+CSRF; stale version requires refresh/review; no silent consent |
-| register | `POST /app-api/v1/auth/local/register` | email/password/display name, typo help, pending verification, recoverable SMTP failure | prelogin+CSRF/current consent; generic public semantics; common-password policy; normalized email/email hash/Argon2id verifier/display name/hashed one-time token; abuse budget |
-| verify | `POST /app-api/v1/auth/local/verify-email` | link may open cross-browser; success becomes signed-in | one-time short-lived bearer token is authority; no SessionGuard/CSRF dependency; raw token never logged; consume then clean token-free navigation |
-| login | `POST /app-api/v1/auth/local/login` | unknown email and wrong password same public class; distinguish offline/429/5xx | prelogin+CSRF, dummy password work for nonexistent account, rate/resource abuse control, session issue/rotation |
-| viewer/session | `GET /app-api/v1/auth/viewer`, `GET /app-api/v1/auth/session` | client trusts only server signed-in state; stale consent routes to review | signed-in cookie authority; no client-only auth inference |
-| logout | `POST /app-api/v1/auth/logout` | UI does not pretend server logout succeeded while offline | signed-in session+CSRF; revoke server session/cookie and audit as appropriate |
+| prelogin | `POST /app-api/v1/auth/prelogin-session` | resumable pre-auth; retryable failure | secure prelogin cookie + in-memory CSRF; no secret logs |
+| policy | `GET /app-api/v1/auth/policy` | current terms/privacy before registration | server version authoritative |
+| consent | `PUT /app-api/v1/auth/consent` | explicit current policy/age acknowledgement | SessionGuard+CSRF; stale version requires review |
+| register | `POST /app-api/v1/auth/local/register` | email/password/display name → pending verification; SMTP failure recoverable | prelogin+CSRF+current consent; password policy; normalized email/hash/Argon2id/hashed one-time token; abuse budget |
+| verify | `POST /app-api/v1/auth/local/verify-email` | cross-browser allowed; success signs in | short-lived one-time bearer token; no originating cookie dependency; raw token never logged; clean URL after exchange |
+| login | `POST /app-api/v1/auth/local/login` | unknown email/wrong password same public class; offline/429/5xx distinct | prelogin+CSRF, dummy work for nonexistent account, resource/rate control, session rotation |
+| viewer/session | `GET /app-api/v1/auth/viewer`, `GET /app-api/v1/auth/session` | client trusts server signed-in result | signed-in cookie authoritative |
+| logout | `POST /app-api/v1/auth/logout` | UI cannot claim server logout succeeded while offline | session+CSRF, revoke server session/cookie |
 
-Verification-token URL/page: noindex/X-Robots, sitemap excluded, `Referrer-Policy: no-referrer` or validated equivalent, no ads/third-party analytics/social widgets/marketing pixels before exchange, query strings redacted from logs, GET preview/scanner does not consume token, token removed from address bar/history after exchange. Product analytics records only pseudonymous coarse states and never email/email-hash/password/verifier/token/cookie/CSRF/OAuth code/recovery secrets.
+Verification-token surfaces are noindex/sitemap-excluded; use `Referrer-Policy: no-referrer` or equivalent; no ads/third-party analytics/social pixels before token exchange; redact query strings; GET/link preview must not consume the token; after exchange redirect to a token-free clean URL. Product analytics never contains email/hash/password/verifier/token/cookie/CSRF/OAuth/recovery secrets.
 
-## 6. SEO implementation contract
+## 7. SEO and SEO-backend contract
 
-### 6.1 Route policy
+### 7.1 Route policy
 
-- `/`: `PUBLIC_INDEXABLE`, configured-origin canonical `/`, unique title/H1/meta, truthful Organization/WebSite markup when factual, OG/social metadata, stable image dimensions, internal links to substantial content.
-- `/guide`: `PUBLIC_INDEXABLE_BUT_ACQUISITION_HOLD` until QA-104-01 and local-auth password wording are accurate. Target game-system beginner intent, not real-investment return queries.
-- `/status`: public canonical only as truthful service-status information; public safety outranks acquisition.
-- Public news/season/collection/world guides: index when original, substantial, maintained, with stable slug, author/review/update context, breadcrumb and meaningful `lastModified`.
-- `/stocks/[symbol]`: only public-safe stock/world read model indexable. Holdings/watch/orders/alerts/portfolio never enter anonymous HTML/JSON-LD/shared cache.
-- Community: board index only when moderated/substantial; individual UGC default noindex until documented quality/moderation rule. Removed content returns appropriate 404/410 and leaves sitemap.
-- Search/filter/sort/pagination/query variants: canonical/noindex unless intentionally curated stable landing; no doorway page generation.
-- Login/signup/verify/recovery/account/security/wallet/transfer/private business/bank/loan/portfolio/watchlist/alerts/checkout/orders/subscription/admin/moderation/backup/recovery: `AUTH_REQUIRED` or `PUBLIC_NOINDEX`, excluded from sitemap.
-- Test/recovery origins: global noindex, no real ads, no sitemap submission/indexable data.
+- `/`: `PUBLIC_INDEXABLE`, configured-origin self-canonical, unique title/meta/H1, truthful structured data, OG/Twitter, stable image dimensions, substantial internal links.
+- `/guide`: `PUBLIC_INDEXABLE_BUT_ACQUISITION_HOLD` until QA-104-01 and AUTH-105-01 wording is corrected. Target game-system beginner intent, not real investment-return intent.
+- `/status`: `PUBLIC_NOINDEX`, sitemap excluded. It is transient operational content and truth/freshness outranks search acquisition.
+- Public news/season/collection/world guides: index only if original, substantial, maintained and public-safe, with stable slug and meaningful `lastModified`.
+- `/stocks/[symbol]`: only public-safe fictional-market/world read model may index. Holdings/watch/orders/alerts/portfolio never enter anonymous HTML, JSON-LD or shared cache.
+- Community UGC defaults noindex until quality/moderation criteria; deleted public content uses 404/410 and leaves sitemap.
+- Search/filter/sort/query variants canonicalize or noindex unless deliberately curated; never create doorway pages.
+- login/signup/verify/recovery/account/security/wallet/transfer/private bank/business/loan/portfolio/watchlist/alerts/checkout/orders/subscription/admin/moderation/backup/recovery are auth-required or public-noindex and sitemap-excluded.
+- Test/recovery origins are globally noindex, real ads off, no sitemap submission and no indexable user data.
 
-### 6.2 SEO backend backlog
+### 7.2 SEO backend
 
-Implement and test: safe public `SeoMetadataReadModel`; configured-origin canonical builder immune to Host-header injection; sitemap index/shards with URL/byte limits and meaningful lastModified; robots generator; JSON-LD schema allowlist serializer; permanent 301/308 redirect map with loop/conflict detection; image metadata/alt/dimension service; locale/hreflang policy; crawler-log classification; Search Console/Naver verification/status ingestion; crawl/index/canonical/sitemap issue reporting; SEO operator read dashboard/API. Keep HTML/meta/sitemap/redirect cache invalidation coherent. Private identity/economy/security state never enters cache keys or public structured data.
+Implement and QA a configured-origin `SeoMetadataReadModel`, Host-injection-resistant canonical builder, dynamic sitemap index/shards respecting URL/byte limits, authoritative `lastModified`, robots generator, structured-data allowlist serializer, permanent 301/308 redirect map with loop/conflict checks, image metadata/alt/dimensions, locale/hreflang, crawler-log classification, Search Console/Naver verification/status ingestion, crawl/index/canonical/sitemap reporting and operator read dashboard/API. HTML/meta/sitemap/redirect caches stay coherent; private identity/economy/security state never enters public cache keys or structured data.
 
-### 6.3 SEO KPI and performance
+`noindex` must be delivered in page meta or HTTP header on a crawlable response; robots blocking is not a substitute for noindex. Canonical signals must be consistent across redirect, sitemap, `rel=canonical`, internal link and hreflang.
 
-Track impressions/click/CTR only as upstream diagnostics. Business funnel is organic visit → qualified interest → signup → activation → D1/D7/D30 → retained contribution/real net revenue. Measure organic CAC as attributable content+SEO/tooling cost divided by incremental organic D30 retained users. Representative public templates target good Core Web Vitals (LCP ≤2.5s, INP <200ms, CLS <0.1) and are regression-tested on mobile/desktop.
+### 7.3 SEO performance and economics
 
-## 7. Security threat and verification register
+Impressions/clicks/CTR are diagnostic. Business funnel is `organic visit → qualified interest → signup → activation → D1/D7/D30 → retained contribution/real net revenue`. Organic CAC includes content, tooling and SEO operations per incremental organic D30 retained user. Representative public templates target good CWV: LCP ≤2.5s, INP <200ms, CLS <0.1, tested on mobile and desktop.
 
-| Risk | Severity | Required prevention/detection | Mandatory test / release behavior |
+## 8. Security threat and verification register
+
+| Risk | Severity | Prevention/detection | Mandatory release behavior |
 |---|---|---|---|
-| BOLA/IDOR | HIGH | actor-scoped authorization at service/DB for every object read/write; never trust owner ID from client; denial metrics without sensitive payload | other-user ID negative test on every object API; failure blocks |
-| Credential stuffing/session fixation | HIGH | generic auth errors, rate/abuse signals, session rotation, secure cookies, recent reauth, logout invalidation, OAuth uniqueness | sequential/distributed invalid auth, fixation/logout/reauth/state/nonce/PKCE; unexplained bypass blocks |
-| Economy replay/duplicate/concurrency | HIGH | idempotency unique constraints, DB transaction/locking, append-only ledger/reconciliation | parallel/retry/replay, precision and ledger balance; unexplained mismatch blocks |
-| Admin abuse | HIGH | session+reauth+TOTP+DB actor+least privilege+impact preview+append-only audit | lower-role, stale reauth, invalid TOTP, CSRF, mass-action, DB privilege; failure blocks |
-| Upload/UGC | HIGH | decoded file type, isolated storage, output encoding/CSP, metadata minimization, moderation/report/block | polyglot/malformed/XSS/link/unauthorized delivery |
-| Analytics/ad/SEO leakage | MEDIUM/HIGH by data | outbound allowlist, minimization, no token/balance/debt/security state in URLs/structured data | payload/schema/sitemap/JSON-LD scan; HIGH leakage blocks |
-| Supply chain | MEDIUM/HIGH | pin critical actions/dependencies to reviewed immutable versions where feasible, dependency audit/SBOM/provenance | workflow/dependency policy regression; critical/high unresolved issue follows release policy |
-| Release-evidence bypass | HIGH | immutable SHA, machine-readable fail-closed evidence, no skip-pass | intentionally break each release prerequisite; `production-ready` must not emit |
-| Backup/key compromise | HIGH | encryption, key separation, independent medium, least-privilege backup identity, access audit | unauthorized identity/key/plaintext tests; HIGH leak blocks |
-| Wrong-environment restore | CRITICAL/HIGH | explicit source/target, isolated namespace/DB, separate credentials/outbound sinks | simulate wrong target/Production credential; any unintended Production write possibility blocks |
-| Backup corruption/WAL gap | HIGH | checksums/manifests, tool/version checks, regular full restores, WAL monitoring, ledger/data reconciliation | corrupt/missing WAL/wrong checksum must fail closed and alert |
-| Multi-account/referral/market manipulation | HIGH where economy affected | maturity/caps, graph/anomaly review, transaction provenance, separation of raw acquisition signal from economic reward | referral ring, wash trade/collusion, duplicate reward, replay scenarios |
+| BOLA/IDOR | HIGH | actor-scoped service/DB authz; client owner ID untrusted; denial metrics | other-user ID negative test on every object API; failure blocks |
+| Credential stuffing/session fixation | HIGH | generic errors, rate/resource budgets, rotation, secure cookies, reauth/logout, OAuth uniqueness | distributed invalid auth, fixation/logout/state/nonce/PKCE; unexplained bypass blocks |
+| Resource/business-flow exhaustion | HIGH where costly | per-operation limits, timeouts, pagination, third-party spend alerts, bot signals | burst/concurrency/large-input/provider-cost tests; no unbounded email/upload/search/reward flow |
+| Economy replay/duplicate/concurrency | HIGH | idempotency unique constraints, transaction/locking, append-only ledger/reconciliation | parallel/retry/replay/precision/ledger mismatch blocks |
+| Admin abuse | HIGH | session+reauth+TOTP+DB actor+least privilege+impact preview+audit | lower-role/stale reauth/TOTP/CSRF/mass/DB privilege failure blocks |
+| Upload/UGC | HIGH | decoded type, isolated storage, output encoding/CSP, metadata minimization/moderation | polyglot/malformed/XSS/link/unauthorized delivery |
+| Analytics/ad/SEO leakage | MEDIUM/HIGH | outbound allowlist/minimization; no token/balance/debt/security in URL/structured data | payload/schema/sitemap/JSON-LD scan; HIGH leak blocks |
+| Supply chain | MEDIUM/HIGH | immutable action/image refs, dependency audit, SBOM/provenance | workflow/dependency/provenance regression follows severity gate |
+| Candidate lineage mismatch | HIGH | §3 evidence chain, image digest, Flux revision, Pod/public version probes | any desired/applied/workload/public mismatch blocks merge/promotion |
+| Release-evidence bypass | HIGH | immutable SHA, signed/machine-readable fail-closed evidence, no skip-pass | break each prerequisite intentionally; Production-ready must not emit |
+| Backup/key compromise | HIGH | encryption, key separation, independent medium, least privilege, access audit | unauthorized key/plaintext test; HIGH leak blocks |
+| Wrong-environment restore | CRITICAL/HIGH | source/target identity, isolated DB/namespace, separate credentials/outbound sinks | wrong target/Production credential simulation; possible prod write blocks |
+| Backup corruption/WAL gap | HIGH | checksum/manifest, full restore, WAL monitoring, reconciliation | corrupt/missing/wrong checksum fails closed+alerts |
+| Multi-account/referral/market manipulation | HIGH where economy affected | maturity/caps/provenance/anomaly/graph review | referral ring/wash trade/collusion/duplicate/replay |
+| Stale/forged operational health | HIGH | trusted status writer, server freshness, collector heartbeat, parity | false-green stale boundary/stopped collector/cache/API/DB/forged writer blocks status-dependent release |
 
-Secrets/passwords/verifiers/session cookies/OAuth codes/client secrets/bot tokens/DB passwords/backup keys/raw verification/recovery tokens and unrestricted request bodies are never written to general logs. Security events use pseudonymous IDs and safe classifications.
+Secrets/passwords/verifiers/session cookies/OAuth codes/client secrets/bot tokens/DB passwords/backup keys/raw verification or recovery tokens and unrestricted request bodies never enter general logs. Security events use pseudonymous IDs and safe classifications.
 
-## 8. Profitability and business contract
+## 9. Profitability and business contract
 
-No feature is approved from gross revenue alone. For real-money or ad monetization record: model (subscription/one-time/consumable/non-consumable/ad/sponsor/B2B2C/indirect retention/acquisition), user conversion path, displayed/test price, attach/paid conversion/repeat/renewal hypothesis, refund/churn/cancellation, ARPU/ARPDAU/ARPPU only when real revenue exists, eCPM/fill/CTR for ads, platform/payment/tax/refund/chargeback, infra/storage/CDN/notification/LLM, content/CS/moderation/fraud/security cost, gross/contribution margin, CAC, LTV, LTV/CAC, payback, optimistic/base/conservative sensitivity, D1/D7/D30 impact, trust/regulatory cost and predeclared `SCALE/ITERATE/HOLD/KILL`.
+No feature is approved from gross revenue alone. For every real-money/ad feature record: model, conversion path, displayed/test price, attach/paid conversion/repeat/renewal hypotheses, refund/churn/cancel, real ARPU/ARPDAU/ARPPU only where real revenue exists, eCPM/fill/CTR, platform/payment/tax/refund/chargeback cost, infra/storage/CDN/notification/LLM, content/CS/moderation/fraud/security cost, gross/contribution margin, CAC, LTV, LTV/CAC, payback, optimistic/base/conservative sensitivity, D1/D7/D30, trust/regulatory cost and predefined `SCALE/ITERATE/HOLD/KILL`.
 
-- WLD-only shop/casino/bank/stock activity is game-economy activity, not real revenue.
-- Advertising uses `net ad contribution = ad revenue - estimated LTV loss from ad-induced churn/session reduction - ad infra/privacy/support/fraud cost`.
-- SEO uses incremental organic D30 retained users and organic CAC savings rather than impression growth alone.
-- Security/QA/release/backup uses avoided expected incident/data-loss/downtime/refund/fraud/support cost; do not fabricate currency values without data.
-- Local auth uses incremental D30 retained-user contribution minus SMTP/Argon2/DB/support/fraud/privacy/security operations cost.
-- Future recurring billing must disclose material terms before charge, obtain affirmative consent, and provide straightforward cancellation. Provider/platform-specific fees are not assumed until a provider is selected and current official terms are verified.
+- WLD-only shop/casino/bank/stock activity is not real revenue.
+- Ads: `net contribution = ad revenue - estimated LTV loss from ad-induced churn/session reduction - ad infra/privacy/support/fraud cost`.
+- SEO: measure incremental organic D30 retained users and CAC saving, not impressions alone.
+- Security/QA/release/backup/status/GitOps: model avoided expected incident/data-loss/downtime/refund/fraud/support cost; do not invent currency amounts without measurements.
+- Local auth: incremental D30 retained contribution minus SMTP/Argon2/DB/support/fraud/privacy/security cost.
+- Status: false-green is a HOLD/KILL signal; `stale_operational_violation_count` target is zero.
+- Release lineage: repeated Test convergence failures increase engineering/queue cost and reduce release throughput; measure candidate lead time, failed promotion attempts, rerun compute, operator time and escaped-defect avoidance.
+- Future recurring billing must disclose material terms before charge, obtain affirmative consent and offer straightforward cancellation. Provider fees remain hypotheses until provider selection and current official-term review.
 
-## 9. Backup and disaster-recovery contract — v106 normative addition
+## 10. Backup and disaster recovery
 
-### 9.1 Recovery objectives and data scope
+Approve explicit RPO/RTO from acceptable identity/ledger/content loss and recovery cost; planning does not invent numbers. Measure RPO from the newest actually restorable point and RTO from a timed full drill. Back up authoritative PostgreSQL identity/economy/ledger/audit, migrations/schema/version/checksums, inventory/entitlement/content metadata, required object/photo storage and application/GitOps versions. Secret/key recovery uses a separate encrypted control plane.
 
-Approve explicit RPO and RTO based on acceptable identity/ledger/content loss and recovery cost; this plan does not invent numeric targets. Measure RPO from the newest actually restorable point and RTO from a timed full drill. Back up at least authoritative PostgreSQL identity/economy/ledger/audit, migration/schema/version manifests/checksums, inventory/entitlement/content metadata, required object/photo store and the application/GitOps version needed to interpret the data. Keys/secrets use a separate encrypted recovery control plane.
+A read replica, recovery DB, snapshot or dump sharing primary host/storage/failure domain or online credential is convenience, not independent DR. `VERIFIED_RESTORABLE` requires: clean isolated target → source identity → decrypt/key/checksum/manifest → full DB restore/PITR proof → migration parity → least-privilege app smoke with Production outbound disabled → referential integrity → ledger/balance reconciliation → inventory/entitlement/provenance → representative object restore → email/Discord/webhook/ads/indexing off → measured recoverable point and RTO → evidence/audit → controlled disposal/retention.
 
-A recovery DB/read replica/snapshot/local dump sharing the primary host/storage/failure domain or credentials is recovery convenience, not sufficient independent disaster recovery.
+Destructive/schema-changing work requires current evidence: candidate SHA, backup ID/source/failure-domain, encryption/key result, checksum/manifest, restore drill/time, RPO/RTO status, migration parity, reconciliation, object sample, rollback target, operator identity and freshness. Missing/stale/corrupt/wrong-key/wrong-env/WAL-gap/reconciliation-failed/untested means `BLOCKED`.
 
-### 9.2 Backup architecture
+## 11. QA, test, release, monitoring and rollback
 
-Use an independent/off-host failure domain; encryption in transit/at rest; key separation and tested key recovery; least-privilege backup identity; separate restore credentials; source env/DB/app/migration/tool/timestamp/backup ID/checksum/retention metadata; monitored capacity; controlled deletion/retention/tamper protection. Choose logical dump, physical base backup, continuous archiving/PITR or combination according to approved RPO/RTO. Logical structure checks do not replace full restore. If PITR is selected, prove required WAL coverage and recovery target behavior.
+### 11.1 Candidate sequence
 
-### 9.3 `VERIFIED_RESTORABLE` drill
+Use §3 exactly. Test uses isolated namespace/DB, indexing off and real ads off. Test/recovery cannot send Production email/Discord/webhooks or mutate Production data. A successful CI or image build never substitutes for applied/runtime proof.
 
-A backup is verified only after: clean isolated target → source/backup identity verification → decrypt/key/checksum/manifest → full DB restore (and target/WAL proof if PITR) → migration/checksum parity → least-privilege application smoke with Production outbound disabled → DB referential checks → ledger debit/credit and derived-balance reconciliation → inventory/entitlement/provenance checks → representative object/photo restore → proof that notification/webhook/Discord/email/ads/index are non-Production/off → measured recoverable point and restore duration → evidence/operator/audit record → controlled disposal/retention of recovery copy.
+### 11.2 Monitoring
 
-File existence, checksum alone, `pg_restore -l` alone or a recovery replica alone is not a successful DR drill.
+Observe API 4xx/5xx, auth/ATO, DB pool/transactions, migration parity, ledger reconciliation, duplicate reward/quota denials, entitlement failures, outbox/provider failures, ad-induced exits/CWV, crawl/index errors, backup freshness/restore, release evidence/rollback, Flux source/Kustomization applied revision, rollout replicas/digests, public exact-SHA probes, collector heartbeat, status-source snapshot age and stale-green violations. Missing monitoring data is not healthy by default.
 
-### 9.4 Machine-readable release evidence for destructive/schema-changing work
+### 11.3 Rollback rule
 
-Required fields: candidate SHA, backup ID, source stack/DB ID, createdAt, independent failure-domain classification, encryption/key result, checksum/manifest result, restore drill ID/time/result, achieved RPO/RTO status, migration checksum parity, ledger/derived-balance reconciliation, relevant object-store sample, rollback application/GitOps target, operator/audit ID, evidence freshness/expiry. Missing/stale/corrupt/wrong-key/wrong-env/WAL-gap/reconciliation-failed/untested evidence = `BLOCKED`, never skip-pass.
+Rollback uses a known immutable application/image/GitOps target and a compatible DB contract. Applied migrations are not edited backward in place. If DB rollback is unsafe, application rollback must use backward-compatible schema or a forward corrective migration. Preserve incident evidence before cleanup.
 
-### 9.5 Backup security/privacy/SEO
+## 12. UX, accessibility, growth and operations
 
-Backup/restore/admin artifacts are private/authenticated/noindex and sitemap-excluded. Public status may expose only a truthful safe high-level recovery-health category/timestamp if desired; never paths, provider IDs, DB names, keys, checksums, WAL locations or internal topology. Restore environments remain noindex/ad-free and never use Production side-effect credentials. Retention/disposal of restore copies is audited.
+First visit explains one clear product promise and game-only boundary before the whole economy. Activation is `visit → understand → sample/value → contextual signup → first meaningful verified action → result/reward → next goal`. D1 restores the chosen thread; D3 shows real change or honest no-change; D7 completes a coherent progression/collection/project/learning loop; D14 supports optional breadth; D30 leaves durable history/identity/collection.
 
-### 9.6 Backup QA and monitoring
+Avoid punitive streaks, loss-threat FOMO, fake scarcity and excessive notifications; provide catch-up/comeback. Sharing favors public-safe achievements, collections, projects, seasons and learning results. Shared URLs contain no session token, private holdings, balances, debt, casino, recovery/security state or PII. Referral rewards prefer cosmetics/prestige/convenience after fraud-resistant maturity.
 
-Alert on stale/failed backup, checksum/manifest mismatch, decrypt/key failure, insufficient storage, restore-drill failure, recovery-refresh failure, reconciliation failure and PITR/WAL gap when applicable; deduplicate alerts and exclude user/economy payloads. Fault-inject stale/missing/corrupt archive, wrong key, storage-full, wrong target, Production credential and WAL-gap scenarios. Rehearse last-known-good immutable application/GitOps rollback and record actual recovery duration.
+All flows cover loading/empty/error/offline/timeout, keyboard and focus, labels, contrast, reduced motion, mobile/tablet/desktop and EN/KO copy parity. High-risk account/economy/admin actions use explicit confirmation and anti-phishing UX. Admin/CS owns dispute/refund/report/abuse queues, feature flags, incident messaging and audit.
 
-Business KPI: backup success/freshness, independent-copy coverage, verified-restore success, achieved RPO/measured RTO, drill failures, storage/key/compute/operator cost, expected-loss avoided. Direct revenue is zero. `SCALE` when approved recovery objectives are reliably met at acceptable cost; `ITERATE` when copies exist but proof/automation/cost is weak; `HOLD` destructive changes while proof is missing; `KILL` a path that is not independently restorable or creates unacceptable secret/privacy risk.
+## 13. External-reference decisions — v2026.09.15.110
 
-## 10. QA, test environment, release, monitoring and rollback
+- Flux Kustomization current docs: **DIRECT ADOPT** for Test/Production evidence. `Ready`, reconciliation conditions/history, `lastAppliedRevision`, `lastAttemptedRevision` and applied origin revision are deployment evidence distinct from a Git commit or desired-state merge.
+- GitHub protected-branch/status-check docs: **DIRECT ADOPT**. Required checks can enforce merge blocking and strict mode can require up-to-date branches. Current repository metadata shows required checks disabled, so REL-104-03 remains open.
+- GitHub artifact attestation docs: **DIRECT SUPPLY-CHAIN EVIDENCE**. Provenance/SBOM strengthens evidence of how artifacts were built but does not prove that the cluster is actually serving that artifact.
+- OWASP API Security Top 10 API4/API5/API6: **DIRECT SECURITY BASELINE** for resource/cost exhaustion, function authorization and automated abuse of sensitive business flows.
+- Google Search Central canonical/noindex: **DIRECT SEO ADOPT**. Use crawlable `noindex` meta/header to exclude pages; do not treat robots blocking as a noindex or canonical mechanism. Keep canonical signals consistent.
+- CISA ransomware/backup guidance and PostgreSQL backup/PITR documentation: **DIRECT RESILIENCE GUIDANCE** with full restore evidence still mandatory.
+- Korea PIPC current privacy-policy guidance: **DIRECT DISCLOSURE DESIGN** so local-auth/analytics processing facts match public notices.
+- FTC 2026 negative-option/subscription enforcement: **REFERENCE + PRODUCT GUARDRAIL** for clear recurring-payment terms, affirmative consent and straightforward cancellation; do not overstate jurisdiction.
 
-Every material issue records severity, first found, last reproduced, exact reproduction, affected user/function, evidence, root-cause hypothesis/confirmation, frontend/backend/API/DB/infra target, concrete design, migration need, rollback, unit/integration/E2E/real-DB/security/regression tests, test acceptance, Production promotion, monitoring, status and owner sequence. Repeated `BLOCKED` becomes a root-cause-removal item. CRITICAL/HIGH beats feature work.
+## 14. Current evidence snapshot — v2026.09.15.110
 
-### 10.1 Candidate/release sequence
-
-`new branch → lint/type/unit/integration/real-DB/security → immutable candidate/SBOM/provenance as applicable → isolated exact-SHA deployment → migration checksum/parity → backend/DB least-privilege smoke → authenticated synthetic flow → changed feature E2E/abuse tests → release evidence including restore/rollback for DB-changing work → main integration → exact-main-SHA test gate → Production-ready → GitOps Production → HTTP/API/auth/user-flow/log/resource smoke → monitor/rollback`.
-
-The test environment uses isolated namespace/database, indexing off and real ads off. Missing test evidence is not converted into a pass. Test/recovery stacks must not send Production email/Discord/webhook or mutate Production data.
-
-### 10.2 Monitoring guardrails
-
-Observe API 4xx/5xx classes, auth failures/ATO signals, DB pool/transaction errors, migration parity, ledger reconciliation, suspicious duplicate reward, quota denials, shop entitlement failures, alert/outbox/provider failures, ad-induced exit/CWV, crawler/index errors, backup freshness/restore status, deployment evidence and rollback availability. Logs contain IDs/classes, not raw secrets/private payloads.
-
-## 11. UX, activation, retention and operations
-
-First visit explains one clear product promise and game-only boundary before presenting the whole economy. Activation is visit → understand → sample/value → contextual signup → first meaningful verified action → first result/reward → next goal. New users are not required to learn market/business/bank/casino simultaneously.
-
-D1 restores the exact thread the user selected; D3 shows real change or honest no-change; D7 resolves a coherent progression/collection/project/learning loop; D14 encourages optional breadth; D30 should leave durable history/identity/collection rather than attendance punishment. Support 1–3 minute quick checks, 5–15 minute meaningful sessions and optional deep sessions. Avoid punitive streaks, loss-threat FOMO and excessive notifications; provide catch-up/comeback.
-
-Social sharing prefers public-safe achievements/collections/projects/season records/learning results. Shared URLs contain no session token, private holdings, balances, debt, casino history, recovery/security state or PII. Referral rewards favor cosmetics/prestige/convenience and require fraud-resistant maturity rather than raw signup.
-
-Admin/CS operations define dispute/refund/report/abuse queues, feature flags, rollback/fallback, safe incident messaging and audit. High-risk account/economy actions use clear confirmation and anti-phishing UX rather than ambiguous notices.
-
-## 12. External reference decisions — 2026-09-15
-
-- PostgreSQL current `pg_verifybackup`: **DIRECT ADOPT** for compatible backup manifest/checksum verification; PostgreSQL itself notes this cannot prove every property of a running restored server, so full restore testing remains mandatory.
-- PostgreSQL current continuous archiving/PITR: **DIRECT ADOPT IF PITR SELECTED**; WAL availability and recovery targets are part of recovery evidence.
-- CISA StopRansomware: **DIRECT ADOPT as resilience guidance** for independent/offline encrypted backup and regular recovery availability/integrity testing.
-- NIST SP 1339 (2026-06-17): **REFERENCE/DIRECT OPERATING PRINCIPLE** for integrating backup management with change management, regular backup/testing/recovery exercises; this does not characterize Moneyverse as an OT deployment.
-- OWASP ASVS 5.0.0 / API Security Top 10: **DIRECT ADOPT as verification baseline** for authentication/session/BOLA/resource/business-flow controls.
-- Google Search Central and Naver Search Advisor current guidance: **DIRECT ADOPT** for canonical/indexing/sitemap/crawl/public-content quality and explicit noindex/auth boundaries.
-- Korea PIPC current privacy-policy material: **DIRECT ADOPT as disclosure design guidance** so purpose/items/retention/rights match actual authentication/analytics processing.
-- FTC 2026 subscription/negative-option enforcement/rulemaking: **REFERENCE/DIRECT PRODUCT GUARDRAIL** for any future real recurring billing: clear material terms, affirmative consent and straightforward cancellation; do not claim automatic universal jurisdiction.
-
-## 13. Current evidence snapshot and integration record — v2026.09.15.106
-
-- Starting and mid-run pre-documentation `main`: `e1dce34cf3e7544d3bb3fe53a80caf992945a213`; no concurrent external commit was observed before v106 documentation commits began.
-- GitHub issue #139 remained OPEN; its last direct inspection evidence is the read-only designated backup SSD and same-host emergency dump.
-- Recovery worklog says `moneyverse_recovery` does not replace encrypted separate-media backup.
-- Connected GitHub combined status for the starting SHA had no individual status entries; the available PR-triggered workflow lookup returned no runs. This run does not claim CI/test-server pass.
-- Fresh direct Production `/status` verification was unavailable in this run and no older runtime snapshot is reused as current truth. Authorized remote device access was also unavailable, so no new host/Kubernetes/mount inspection is claimed.
-- New P0: `BAK-106-01`. Carried P0: `AUTH-105-01`, `QA-104-01`, `REL-104-02`. Carried P1: `AUTH-105-02`, `REL-104-03`.
-- v106 changes planning/docs only; it does not change runtime code, DB schema/data, backup devices, infrastructure, secrets, branch settings or security implementation.
+- Start and mid-run application `main`: `a0b4d656f7bad17ff9ee0acb976358df9466a750`; no concurrent main movement was observed before the first v110 docs write.
+- Branch metadata directly shows `main` protection enabled but required status-check enforcement `off`, with empty contexts/checks. REL-104-03 is confirmed open.
+- Production `/status` around 08:08 KST still reported all services normal using 04:06 KST snapshots, extending OPS-107-01 false-green to more than four hours.
+- Production `/guide` still contains unlimited profession-work/full-reward language and Discord/Google-only/no-separate-password wording. QA-104-01 and AUTH-105-01 remain open.
+- Production privacy notice remains OAuth-centric and does not describe local credential processing, so broad local-auth rollout remains on hold.
+- Issue #139 remains open; authorized Remote Desktop devices are offline, so no newer backup-medium or cluster evidence is claimed.
+- PR #332 remains open and mergeable. Its head `b3f28185107a2f6f4a8bd389016de778df08b747` passed CI and Test Candidate image build. Infrastructure desired-state update reportedly merged, but public Test `/api/version` returned `1789391457242`, so exact-SHA staging failed and REL-110-01 is P0/BLOCKED.
+- Production was not mutated by that candidate, so no Production rollback is required.
+- v110 is planning/docs only: no runtime code, API, DB schema/data, migration, infrastructure, collector, backup medium, secret or branch-rule mutation is performed by this planning run.
