@@ -5,6 +5,7 @@ import { StockAlertRepository } from './stock-alert.repository';
 import { StockService } from './stock.service';
 import { MarketTicker } from './market-ticker';
 import { MarketBroadcast } from './market-broadcast';
+import { isMarketTickerEnabled } from './market-ticker.config';
 
 export const MARKET_TICKER = Symbol('MARKET_TICKER');
 
@@ -40,7 +41,7 @@ export class MarketTickerRunner implements OnApplicationBootstrap, OnApplication
         broadcast: MarketBroadcast,
         alerts: StockAlertRepository | null,
       ): MarketTicker | null => {
-        if (process.env.MARKET_TICKER_ENABLED !== 'true' || !stocks) return null;
+        if (!isMarketTickerEnabled() || !stocks) return null;
 
         const configured = Number(process.env.MARKET_TICK_INTERVAL_MS ?? 1000);
         const logger = new Logger('MarketTicker');
