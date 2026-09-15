@@ -26,6 +26,7 @@ import {
 export interface LobbySessions {
   get(token: unknown): Promise<{ readonly id: string; readonly user_id: string | null } | null>;
   hasCurrentUserConsent(sessionId: string): Promise<boolean>;
+  memberDisplayName(userId: string): Promise<string | null>;
 }
 
 export interface LobbyOptions {
@@ -41,6 +42,7 @@ export interface LobbyOptions {
 interface LobbySocketData {
   sessionId: string | null;
   userId: string | null;
+  displayName: string | null;
   canChat: boolean;
   usesLobbySlot: boolean;
   countedLobbyUser: boolean;
@@ -189,11 +191,15 @@ export function attachLobby(httpServer: HttpServer, options: LobbyOptions): Serv
         data.canChat = Boolean(
           session?.user_id && sessions && (await sessions.hasCurrentUserConsent(session.id)),
         );
+        data.displayName = data.userId && sessions
+          ? await sessions.memberDisplayName(data.userId)
+          : null;
       } catch {
         // The public landing page stays readable when the session store is
         // unavailable, but it never grants the ability to write a message.
         data.sessionId = null;
         data.userId = null;
+        data.displayName = null;
         data.canChat = false;
       }
 
@@ -280,7 +286,7 @@ export function attachLobby(httpServer: HttpServer, options: LobbyOptions): Serv
         data.messageTimes.push(at);
         io.emit('message', safeText);
         io.emit('lobby:message', {
-          sender: lobbyDisplayName(data.userId),
+          sender: lobbyDisplayName(data.userId, data.displayName),
           text: safeText,
           sentAt: new Date(at).toISOString(),
         });
@@ -310,7 +316,9 @@ export function attachLobby(httpServer: HttpServer, options: LobbyOptions): Serv
 
 
 /** Privacy-safe display label for ephemeral lobby chat. */
-export function lobbyDisplayName(userId: string | null): string {
+export function lobbyDisplayName(userId: string | null, displayName?: string | null): string {
+  const safeName = String(displayName ?? '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 80);
+  if (safeName) return safeName;
   if (!userId) return '회원';
   return `회원-${userId.replace(/-/g, '').slice(0, 6)}`;
 }

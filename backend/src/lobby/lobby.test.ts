@@ -56,7 +56,9 @@ describe('fixed window limiter', () => {
 });
 
 describe('lobby identity', () => {
-  it('uses a privacy-safe stable member label', () => {
+  it('uses the authoritative member nickname and keeps a safe fallback', () => {
+    expect(lobbyDisplayName('12345678-1234-4234-8234-123456789012', '월덕')).toBe('월덕');
+    expect(lobbyDisplayName('12345678-1234-4234-8234-123456789012', '<관리자>')).toBe('관리자');
     expect(lobbyDisplayName('12345678-1234-4234-8234-123456789012')).toBe('회원-123456');
     expect(lobbyDisplayName(null)).toBe('회원');
   });
