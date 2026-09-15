@@ -13,6 +13,13 @@ import {
 
 const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 const METHODS_WITH_BODY = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+const ANDROID_ONLY = process.env.APP_API_ANDROID_ONLY === 'true';
+
+function looksLikeOfficialAndroid(request: NextRequest): boolean {
+  const client = request.headers.get('x-moneyverse-client')?.toLowerCase();
+  const userAgent = request.headers.get('user-agent') ?? '';
+  return client === 'android' && /^WoldeokMoneyverse-Android\/[0-9]+\.[0-9]+\.[0-9]+(?:\s|$)/.test(userAgent);
+}
 
 function internalToken(): string {
   const token = process.env.INTERNAL_API_TOKEN;
@@ -46,6 +53,18 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
 
+  // Optional coarse filter for the native public surface only. Normal web
+  // /api routes are unaffected. This is intentionally not cryptographic proof;
+  // strong Android attestation must use a verified Play Integrity verdict.
+  if (ANDROID_ONLY && !looksLikeOfficialAndroid(request)) {
+    return gatewayProblem(
+      403,
+      'Forbidden',
+      'android_client_required',
+      'this app API is restricted to the Android client',
+    );
+  }
+
   if (
     parts.length === 3 &&
     parts[0] === 'auth' &&
@@ -63,6 +82,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
+    'x-moneyverse-gateway': 'app-api-v1',
   });
   for (const name of APP_API_REQUEST_HEADERS) {
     const value = request.headers.get(name);
@@ -111,9 +131,6 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
       const compatible = addAppJsonCompatibility(parsed);
       return new NextResponse(JSON.stringify(compatible), { status: response.status, headers });
     } catch {
-      // A backend claiming JSON but returning malformed bytes is still an
-      // upstream response. Preserve the body/status so diagnostics are not
-      // hidden by a second gateway error.
       return new NextResponse(bytes, { status: response.status, headers });
     }
   }

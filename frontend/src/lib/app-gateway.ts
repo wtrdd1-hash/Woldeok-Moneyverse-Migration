@@ -1,10 +1,10 @@
 export const APP_API_VERSION = '1';
-export const APP_API_CONTRACT_VERSION = 'v2026.09.14.82';
+export const APP_API_CONTRACT_VERSION = 'v2026.09.15.115';
 
 export const APP_API_GROUPS = Object.freeze([
-  'account', 'activity', 'auth', 'bank', 'banking', 'board', 'businesses',
+  'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'businesses',
   'casino', 'content', 'early-game', 'engagement', 'media', 'photos', 'privacy',
-  'profile', 'progression', 'rewards', 'seasons', 'shop', 'stocks', 'wallet', 'work',
+  'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'stocks', 'wallet', 'work',
 ] as const);
 
 const APP_API_GROUP_SET = new Set<string>(APP_API_GROUPS);
@@ -20,6 +20,10 @@ export const APP_API_REQUEST_HEADERS = Object.freeze([
   'if-modified-since',
   'if-range',
   'x-request-id',
+  'x-moneyverse-client',
+  'x-moneyverse-app-version',
+  'x-moneyverse-android-sdk',
+  'x-play-integrity-token',
   'cf-connecting-ip',
   'cf-ipcountry',
 ] as const);
@@ -69,23 +73,11 @@ export function appGatewayOrigin(headers: Headers): string | null {
   return `${proto}://${host}`;
 }
 
-
-
 function camelAlias(key: string): string | null {
   if (!/^[a-z][a-z0-9]*(?:_[a-z0-9]+)+$/.test(key)) return null;
   return key.replace(/_([a-z0-9])/g, (_, letter: string) => letter.toUpperCase());
 }
 
-/**
- * Additive compatibility transform for native clients.
- *
- * The private API contains a mixture of newer camelCase DTOs and older
- * database-shaped snake_case read models. Removing or renaming legacy keys
- * would break the web client, while forcing native apps to know both styles
- * caused the null-rendering failures this contract version fixes. Therefore
- * app responses keep every original key and add a camelCase alias only when
- * one does not already exist. Existing camelCase is always authoritative.
- */
 export function addAppJsonCompatibility(value: unknown, depth = 0): unknown {
   if (depth > 32 || value === null || typeof value !== 'object') return value;
   if (Array.isArray(value)) return value.map((item) => addAppJsonCompatibility(item, depth + 1));
@@ -102,11 +94,6 @@ export function addAppJsonCompatibility(value: unknown, depth = 0): unknown {
     }
   }
 
-  // Business catalog DTOs predate the native app and use purchaseCost /
-  // dailyRevenue / dailyOperatingCost. Some released native clients read the
-  // older semantic names instead. Keep the canonical fields and add aliases so
-  // a compatible server can repair those clients without requiring an app
-  // release. Never overwrite a field explicitly returned by the backend.
   const purchaseCost = result.purchaseCost;
   const dailyRevenue = result.dailyRevenue;
   const dailyOperatingCost = result.dailyOperatingCost;
@@ -156,6 +143,8 @@ export function appApiContract(origin: string) {
       csrfHeader: 'x-csrf-token',
       loginTruthEndpoint: '/auth/viewer',
       loginTruthField: 'signedIn',
+      adminRoleEndpoint: '/admin/me',
+      adminRoleDoubleCheckRequired: true,
     },
     errors: {
       mediaType: 'application/problem+json',

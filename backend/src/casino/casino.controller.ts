@@ -306,6 +306,15 @@ export class CasinoController {
   }
 
 
+  @Get('clock')
+  @ApiOperation({ summary: 'Read the authoritative accelerated server day and week' })
+  async clock() {
+    return this.guarded(() => this.repository().clock(), {
+      conflict: 'the server game clock is unavailable',
+      forbidden: 'the server game clock is unavailable',
+    });
+  }
+
   @Get('history')
   @ApiOperation({ summary: "Read the current member's recent casino plays" })
   async history(@Req() request: RequestWithSession) {

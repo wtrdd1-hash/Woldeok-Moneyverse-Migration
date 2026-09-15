@@ -13587,6 +13587,26 @@
       "responseSchema": {
         "type": "object",
         "properties": {
+          "featureState": {
+            "oneOf": [
+              {
+                "type": "string",
+                "const": "enabled"
+              },
+              {
+                "type": "string",
+                "const": "paused"
+              },
+              {
+                "type": "string",
+                "const": "safe_mode"
+              },
+              {
+                "type": "string",
+                "const": "disabled"
+              }
+            ]
+          },
           "tasks": {
             "type": "array",
             "items": {
@@ -13669,6 +13689,7 @@
           }
         },
         "required": [
+          "featureState",
           "tasks"
         ]
       },

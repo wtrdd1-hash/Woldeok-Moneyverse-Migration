@@ -79,12 +79,13 @@ export class WorkController {
   @Get('tasks')
   @ApiOperation({ summary: 'Every task on offer, with this member’s standing against each' })
   async tasks(@Req() request: RequestWithSession) {
-    return {
-      tasks: await this.guarded(
-        () => this.repository().tasks(requireUserId(request)),
-        'the task board is unavailable',
-      ),
-    };
+    const repository = this.repository();
+    const actor = requireUserId(request);
+    const [featureState, tasks] = await Promise.all([
+      repository.featureState(),
+      this.guarded(() => repository.tasks(actor), 'the task board is unavailable'),
+    ]);
+    return { featureState, tasks };
   }
 
   @Post('tasks/:id/complete')

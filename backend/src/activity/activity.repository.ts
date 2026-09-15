@@ -70,9 +70,10 @@ export class ActivityRepository {
     readonly ip: string | null;
     readonly userAgent: string | null;
     readonly country: string | null;
+    readonly context: Record<string, unknown>;
   }): Promise<void> {
     await this.pool.query(
-      'SELECT public.activity_log_request($1::uuid,$2,$3,$4,$5,$6::uuid,$7::inet,$8,$9)',
+      'SELECT public.activity_log_request_v2($1::uuid,$2,$3,$4,$5,$6::uuid,$7::inet,$8,$9,$10::jsonb)',
       [
         input.actor,
         input.path,
@@ -83,6 +84,7 @@ export class ActivityRepository {
         input.ip,
         input.userAgent,
         input.country,
+        JSON.stringify(input.context),
       ],
     );
   }

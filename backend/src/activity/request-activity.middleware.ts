@@ -15,8 +15,7 @@ interface RequestActivityOptions {
 
 /**
  * Records every application API request without retaining query values,
- * cookies, authorization data or request bodies. Health probes and CORS
- * preflights are operational noise and are deliberately excluded.
+ * cookies, authorization data, CSRF values or request/response bodies.
  */
 export function requestActivityTrail({
   activity,
@@ -46,6 +45,11 @@ export function requestActivityTrail({
         : Promise.resolve(null);
 
     response.on('finish', () => {
+      const requestContext = contextOf(request);
+      const responseHeader = (name: string): string | null => {
+        if (typeof response.getHeader !== 'function') return null;
+        return String(response.getHeader(name) ?? '').slice(0, name === 'content-type' ? 160 : 32) || null;
+      };
       void actor
         .then((actorUserId) =>
           activity.recordRequest({
@@ -54,12 +58,24 @@ export function requestActivityTrail({
             method: request.method.slice(0, 12),
             status: response.statusCode,
             durationMs: Math.max(0, Date.now() - startedAt),
-            requestId: contextOf(request)?.requestId ?? null,
+            requestId: requestContext?.requestId ?? null,
             ip: requestClientKey(request, {
               trustForwardedFor: config.trustProxyForwardedFor,
             }),
             userAgent: String(request.headers['user-agent'] ?? '').slice(0, 500) || null,
             country,
+            context: {
+              traceId: requestContext?.traceId ?? null,
+              client: String(request.headers['x-moneyverse-client'] ?? '').slice(0, 40) || null,
+              appVersion: String(request.headers['x-moneyverse-app-version'] ?? '').slice(0, 40) || null,
+              androidSdk: String(request.headers['x-moneyverse-android-sdk'] ?? '').slice(0, 16) || null,
+              contentType: String(request.headers['content-type'] ?? '').slice(0, 160) || null,
+              accept: String(request.headers['accept'] ?? '').slice(0, 160) || null,
+              acceptLanguage: String(request.headers['accept-language'] ?? '').slice(0, 120) || null,
+              responseContentType: responseHeader('content-type'),
+              responseContentLength: responseHeader('content-length'),
+              rateLimitRemaining: responseHeader('x-ratelimit-remaining'),
+            },
           }),
         )
         .catch(onFailure);
