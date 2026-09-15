@@ -1,3 +1,7 @@
+## v2026.09.15.121 — Virtual Stock Discovery Search
+- Added shareable symbol/name/description search to the authenticated virtual-stock market with localized result and empty states.
+- No database, ledger, authorization, or trading mutation path changed.
+
 # Changelog
 
 ## v2026.09.12.13 — Automatic Test-to-Production GitOps Reconciliation
