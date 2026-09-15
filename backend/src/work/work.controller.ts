@@ -43,7 +43,12 @@ export class WorkController {
       if (isAuthorizationFailure(error)) throw new ForbiddenException('this is not yours');
       if (isExpectedCommandFailure(error)) {
         const msg = error instanceof Error && error.message ? error.message : conflictMessage;
-        throw new ConflictException(msg);
+        const code = msg.includes('work reward quota reached')
+          ? 'work_reward_quota_reached'
+          : msg.includes('daily completion limit reached')
+            ? 'work_task_daily_limit_reached'
+            : undefined;
+        throw new ConflictException(code ? { message: msg, code } : msg);
       }
       throw error;
     }
