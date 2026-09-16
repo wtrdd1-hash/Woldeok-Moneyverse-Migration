@@ -310,3 +310,5 @@ All flows cover loading/empty/error/offline/timeout, keyboard and focus, labels,
 - The classical lane remains the operational fallback and authority for accounting, reconciliation, market matching/price bounds, policy constraints and safety. AI adds behavioral agents, counterfactuals, RL/MARL simulation, demand/product hypotheses and adversarial analysis.
 - Strong cross-lane disagreement cannot be averaged into a live action. It falls back to `SHADOW`, `NO_OP` or human review; agreement only makes a candidate eligible for deterministic validation.
 - The research pass created a deduplicated **11,749-record** OpenAlex+Crossref candidate corpus and committed a machine-readable manifest plus English/Korean review under `docs/findings/`. The corpus supports discovery breadth; production decisions still require primary evidence, current runtime data and causal post-rollout evaluation.
+### v2026.09.16.6 — trade-history summary
+Read-only filtered-history summary added to /stocks/history; no economy mutation or schema change. Exact-SHA runtime verification remains required before promotion.

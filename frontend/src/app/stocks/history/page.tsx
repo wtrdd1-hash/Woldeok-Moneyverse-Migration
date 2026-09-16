@@ -4,7 +4,7 @@ import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
@@ -61,6 +61,13 @@ export default async function StockHistoryPage({ searchParams }: { readonly sear
     return matchesSide && matchesQuery;
   }).sort((left, right) => compareTrades(left, right, sort)) ?? [];
 
+  const summary = visible.reduce((total, trade) => ({
+    buys: total.buys + (trade.side === 'buy' ? 1 : 0),
+    sells: total.sells + (trade.side === 'sell' ? 1 : 0),
+    gross: total.gross + BigInt(trade.gross_amount),
+    tax: total.tax + BigInt(trade.tax_amount),
+  }), { buys: 0, sells: 0, gross: 0n, tax: 0n });
+
   return (
     <div className="grid gap-6">
       <PageHeader eyebrow="TRADE HISTORY" title={isEn ? 'My Stock Trade History' : '내 주식 거래 내역'}>
@@ -76,6 +83,7 @@ export default async function StockHistoryPage({ searchParams }: { readonly sear
             <Button type="submit">{isEn ? 'Apply' : '적용'}</Button>
           </form>
           <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="trade-history-results" className="text-lg">{isEn ? `${visible.length} of ${history.trades.length} trades` : `전체 ${history.trades.length}건 중 ${visible.length}건`}</h2>{(query || side !== 'all' || sort !== 'newest') ? <Button asChild variant="outline"><Link href="/stocks/history">{isEn ? 'Clear filters' : '필터 초기화'}</Link></Button> : null}</div>
+          {visible.length > 0 ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label={isEn ? 'Filtered trade summary' : '필터된 거래 요약'}><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Buy / sell count' : '매수 / 매도 건수'}</CardTitle></CardHeader><CardContent>{summary.buys} / {summary.sells}</CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Gross volume' : '총 거래금액'}</CardTitle></CardHeader><CardContent><Amount value={summary.gross.toString()} /></CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Total tax' : '총 세금'}</CardTitle></CardHeader><CardContent><Amount value={summary.tax.toString()} /></CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Matching trades' : '조건 일치 거래'}</CardTitle></CardHeader><CardContent>{visible.length}</CardContent></Card></div> : null}
           {visible.length === 0 ? <EmptyState title={isEn ? 'No trades match these filters.' : '조건에 맞는 거래 내역이 없습니다.'} description={isEn ? 'Try another symbol or clear the filters.' : '다른 종목 코드를 입력하거나 필터를 초기화해 보세요.'} /> : <div className="grid gap-3">{visible.map((trade) => <Card key={trade.trade_id}><CardContent className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"><div className="grid gap-1"><div className="flex flex-wrap items-center gap-2"><Link href={`/stocks/${encodeURIComponent(trade.symbol)}`} className="font-mono font-semibold underline-offset-4 hover:underline">{trade.symbol}</Link><Badge variant={trade.side === 'buy' ? 'default' : 'outline'}>{trade.side === 'buy' ? (isEn ? 'Buy' : '매수') : (isEn ? 'Sell' : '매도')}</Badge></div><p className="text-sm text-muted-foreground">{formatMoment(trade.created_at, isEn ? 'Checking...' : '기록 확인 중')}</p></div><div className="grid gap-1 text-sm sm:text-right"><p>{trade.quantity}{isEn ? ' shares' : '주'} × <Amount value={trade.unit_price} /></p><p className="text-muted-foreground">{isEn ? 'Gross' : '거래금액'} <Amount value={trade.gross_amount} /> · {isEn ? 'Tax' : '세금'} <Amount value={trade.tax_amount} /></p></div></CardContent></Card>)}</div>}
         </section>
       )}
