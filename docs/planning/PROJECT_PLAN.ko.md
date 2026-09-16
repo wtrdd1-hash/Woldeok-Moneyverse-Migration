@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.16.156
+> **현재 통합 버전:** v2026.09.16.157
 > **구현·증거 동기화:** 2026-09-16
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -487,3 +487,62 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 ### v156 worklog
 - 확인: Google Search Central 9월 글과 8월 site-reputation 변경, favicon 가이드, OWASP API/GenAI 최신 기준, Google Play 현재 수수료 문서, 최신 GitHub main, 병합 #383, open #382/#381, exact-main Actions.
 - 이번 자동화는 문서만 변경한다. runtime code/DB/Flux/Production 승격은 수행하지 않았다. 우선순위는 release truth/restore/status P0 이후 cache/recovery/migration/authorization HIGH, 그 다음 기능 확장이다.
+
+## v2026.09.16.157 — 카지노 계약 정확성·릴리스 진실성 갱신
+
+### CASINO-CONTRACT-157-01 — HIGH — FIX MERGED / EXACT-SHA REVERIFY REQUIRED
+- 최초/최근 증거: 2026-09-16 병합 PR #384, 현재 `main` `f6fd312025dcb9c517edfa2ad4986de0db1df54d`. 포맷된 베팅액이 `wholeAmount()`에서 문자열이 되었으나 카지노 DTO는 의도적으로 JSON 정수만 허용해 10 WLD 같은 정상 베팅도 HTTP 400이 됐다. 병합 수정은 bounded stake를 JSON number로 전송하고 주사위 홀짝/숫자 서버결과 시각 단계를 추가했다. PR 증거는 frontend 609 tests, backend casino E2E 29 tests, typecheck/production build 통과, lint 오류 0(기존 image warning 11)이다.
+- 사용자/UX 계약: 카지노 진입 → 게임 선택 → 베팅액 입력 → 명시적 플레이 CTA → 중복 CTA가 비활성화된 pending → 서버 권위 결과 → 지갑/최근 플레이 대사. 빈 값, 비정수, 서버 최소/최대 초과, 잔액부족, timeout, 4xx 검증, 401/403 인증, 409 멱등 충돌, 5xx를 서로 다른 복구 상태로 표시한다. 결과가 모호한 timeout/5xx에서는 최근 권위 플레이와 지갑을 대사하기 전 재베팅을 유도하지 않는다.
+- API 계약: numeric JSON 변환은 어댑터 책임일 뿐 서버는 정수/범위/잔액/자격/세션/rate-limit/idempotency의 권위다. API를 의도적으로 versioning하지 않는 한 numeric string은 계속 거부한다. JavaScript safe-integer 범위를 넘는 금액을 `Number`로 변환하지 않으며, 카지노 허용 베팅 상한이 안전범위임을 증명하거나 string-safe money DTO를 versioned 계약으로 종단간 사용한다.
+- DB/동시성: 정산은 actor/idempotency uniqueness, balance/ledger invariant, append-only audit를 포함한 하나의 transaction이다. 같은 idempotency key의 동시 중복 요청은 같은 권위 결과를 반환/복구하고, 서로 다른 동시 요청도 서버 잔액·한도 검사를 통해 음수잔액/중복지급을 막는다.
+- 보안/악용: 카지노 플레이를 OWASP sensitive business flow로 취급한다. BOLA/BFLA, replay, 자동화/resource abuse, 결과/지급 위조, client odds/stake authority, 로그 누출을 차단한다. 비정상 요청속도, duplicate-key conflict, validation failure 급증, payout/ledger reconciliation mismatch를 탐지한다. 실제 현금·환전·도박수익 표현은 도입하지 않는다.
+- 마이그레이션/롤백: 이 어댑터 수정에는 schema migration이 없다. 마지막 verified immutable frontend/backend pair로 rollback하며 계약 불일치가 재발하면 서버 DTO 검증을 약화하지 않고 casino play를 feature flag로 중지한다.
+- QA: min-1/min/min+1/max-1/max/max+1, 포맷 입력, 소수/음수/0/초대형 정수, numeric string 직접 API negative, 잔액부족, 세션만료, double click, timeout retry, concurrent bets, 모든 dice 결과, keyboard/screen-reader pending/result 알림, mobile/tablet/desktop, wallet/recent-play 대사, real PostgreSQL ledger invariant를 검증한다.
+- 운영승격: current-main CI만으로 부족하다. 캡처 시 exact-main `Build Production Release #888`은 `in_progress`였다. exact `f6fd312...` isolated Test lineage, backend/API/DB/casino QA, public exact SHA, Production smoke 후 예상 밖 casino HTTP-400 contract failure와 settlement reconciliation alert 0건이어야 DONE이다.
+- KPI/사업성: 직접매출은 가정하지 않는다. play-start→accepted-play conversion, validation-error rate, ambiguous-result CS, D1/D7 casino return, fraud/reconciliation loss, support cost를 본다. 수익화는 별도 법률/제품 검토이며 정확성을 플레이 빈도 증가와 교환하지 않는다.
+
+### REL-EVIDENCE-157-01 — P0 — IN PROGRESS
+- exact current main의 `Build Production Release #888`은 캡처 시 실행 중이다. source commit → CI → immutable image digest → GitOps desired → applied revision → workload digest → pod-local version → public Test version → backend readiness → authoritative DB/schema → changed-feature QA → main exact retest → Production promotion/smoke를 서로 다른 증거 상태로 유지한다.
+- 성공/실패 bundle은 expected/observed SHA/digest/revision, workload generation, 최초 불일치 계층, timestamp/latency, rollback target을 기록한다. secret/cookie/Authorization/DSN/private key는 금지한다. P0 증거가 누락·오류·stale이면 pass가 아니라 `BLOCKED`다.
+- 저장소 보호도 미충족이다. 현재 `main` metadata는 protection enabled지만 required-status-check enforcement `off`, required contexts/checks 비어 있음이다. runtime 경로는 신뢰된 required checks와 reviewed integration을 저장소에서 강제하되 docs 자동화가 runtime bypass가 되지 않게 한다.
+
+### SEO·보안·수익성 레퍼런스 결정
+- Google Search Central 2026-09-08/09-14 글은 행사 공지라 crawl/index 계약을 바꾸지 않는다. 09-08 regional Search experience 문서는 참고용이며 Moneyverse 가상주식/WDX를 EEA finance carousel을 노린 실제 금융정보 provider처럼 표현하지 않는다. 2026-08-28 site-reputation 정책은 sponsor/affiliate/UGC 거버넌스에 계속 직접 적용한다.
+- favicon QA는 현재 Google 기준인 crawlable homepage/favicon, stable URL, square asset, 권장 48×48 초과를 따른다. public SEO read-model/canonical/robots/sitemap/lastModified/structured-data/hreflang/SSR 또는 동등 server output/CWV와 private/account/admin/transaction noindex 계약을 유지한다.
+- 보안 baseline은 OWASP ASVS 5.0.0 + API Security Top 10이다. 카지노에는 sensitive-business-flow/replay/resource-abuse 통제를 명시하고 인증/session/admin/economy/upload/SSRF/BOLA/BFLA/least-privilege/audit/backup gate는 fail-closed다.
+- Google Play 수수료는 단일율이 아니다. unit economics key는 `market × effective-date/install-cohort × transaction-type × billing-path × programme`이다. EEA/UK/US는 2026-06-30부터 현재 standard 예시로 자동갱신 구독 10%, 기타 new-install 20%, 기타 existing-install 25%이며 Play Billing 적용 시 5% billing fee가 붙는다. 아직 rollout 전인 시장은 현재 적용 program 규칙을 사용한다. 실측하지 않은 conversion/ARPU/ARPDAU/ARPPU/churn/refund/CAC/LTV는 `HYPOTHESIS`/`TEST TARGET`이다.
+
+### v157 worklog 및 구현 백로그
+- 외부 조사: Google Search Central 9월 update/site-reputation/favicon/regional Search 문서, OWASP baseline, Google Play 현재 수수료. 런타임/코드 증거: current main, PR #384, Actions #888, branch protection.
+- 개발순서: P0 exact-SHA/runtime/DB evidence → 독립 restore 가능한 backup → false-green status → HIGH casino contract exact-runtime 검증 → runtime writable-path ownership → privileged recovery → migration/Work-clock integrity → repository enforcement → economy/admin/casino authorization → core completeness → monetization → SEO/growth/accessibility.
+- 기획 자동화는 문서만 변경했다. 구현은 `new branch → tests/CI → isolated exact-SHA Test → backend/API/DB/user-flow QA → main → exact-main retest → Production promotion → smoke/monitoring/rollback` 순서를 유지한다.
+
+
+## v2026.09.16.157 — 카지노 계약 정확성·릴리스 진실성 갱신
+
+### CASINO-CONTRACT-157-01 — HIGH — FIX MERGED / EXACT-SHA REVERIFY REQUIRED
+- 최초/최근 증거: 2026-09-16 병합 PR #384, 현재 `main` `f6fd312025dcb9c517edfa2ad4986de0db1df54d`. 포맷된 베팅액이 `wholeAmount()`에서 문자열이 되었으나 카지노 DTO는 의도적으로 JSON 정수만 허용해 10 WLD 같은 정상 베팅도 HTTP 400이 됐다. 병합 수정은 bounded stake를 JSON number로 전송하고 주사위 홀짝/숫자 서버결과 시각 단계를 추가했다. PR 증거는 frontend 609 tests, backend casino E2E 29 tests, typecheck/production build 통과, lint 오류 0(기존 image warning 11)이다.
+- 사용자/UX 계약: 카지노 진입 → 게임 선택 → 베팅액 입력 → 명시적 플레이 CTA → 중복 CTA가 비활성화된 pending → 서버 권위 결과 → 지갑/최근 플레이 대사. 빈 값, 비정수, 서버 최소/최대 초과, 잔액부족, timeout, 4xx 검증, 401/403 인증, 409 멱등 충돌, 5xx를 서로 다른 복구 상태로 표시한다. 결과가 모호한 timeout/5xx에서는 최근 권위 플레이와 지갑을 대사하기 전 재베팅을 유도하지 않는다.
+- API 계약: numeric JSON 변환은 어댑터 책임일 뿐 서버는 정수/범위/잔액/자격/세션/rate-limit/idempotency의 권위다. API를 의도적으로 versioning하지 않는 한 numeric string은 계속 거부한다. JavaScript safe-integer 범위를 넘는 금액을 `Number`로 변환하지 않으며, 카지노 허용 베팅 상한이 안전범위임을 증명하거나 string-safe money DTO를 versioned 계약으로 종단간 사용한다.
+- DB/동시성: 정산은 actor/idempotency uniqueness, balance/ledger invariant, append-only audit를 포함한 하나의 transaction이다. 같은 idempotency key의 동시 중복 요청은 같은 권위 결과를 반환/복구하고, 서로 다른 동시 요청도 서버 잔액·한도 검사를 통해 음수잔액/중복지급을 막는다.
+- 보안/악용: 카지노 플레이를 OWASP sensitive business flow로 취급한다. BOLA/BFLA, replay, 자동화/resource abuse, 결과/지급 위조, client odds/stake authority, 로그 누출을 차단한다. 비정상 요청속도, duplicate-key conflict, validation failure 급증, payout/ledger reconciliation mismatch를 탐지한다. 실제 현금·환전·도박수익 표현은 도입하지 않는다.
+- 마이그레이션/롤백: 이 어댑터 수정에는 schema migration이 없다. 마지막 verified immutable frontend/backend pair로 rollback하며 계약 불일치가 재발하면 서버 DTO 검증을 약화하지 않고 casino play를 feature flag로 중지한다.
+- QA: min-1/min/min+1/max-1/max/max+1, 포맷 입력, 소수/음수/0/초대형 정수, numeric string 직접 API negative, 잔액부족, 세션만료, double click, timeout retry, concurrent bets, 모든 dice 결과, keyboard/screen-reader pending/result 알림, mobile/tablet/desktop, wallet/recent-play 대사, real PostgreSQL ledger invariant를 검증한다.
+- 운영승격: current-main CI만으로 부족하다. 캡처 시 exact-main `Build Production Release #888`은 `in_progress`였다. exact `f6fd312...` isolated Test lineage, backend/API/DB/casino QA, public exact SHA, Production smoke 후 예상 밖 casino HTTP-400 contract failure와 settlement reconciliation alert 0건이어야 DONE이다.
+- KPI/사업성: 직접매출은 가정하지 않는다. play-start→accepted-play conversion, validation-error rate, ambiguous-result CS, D1/D7 casino return, fraud/reconciliation loss, support cost를 본다. 수익화는 별도 법률/제품 검토이며 정확성을 플레이 빈도 증가와 교환하지 않는다.
+
+### REL-EVIDENCE-157-01 — P0 — IN PROGRESS
+- exact current main의 `Build Production Release #888`은 캡처 시 실행 중이다. source commit → CI → immutable image digest → GitOps desired → applied revision → workload digest → pod-local version → public Test version → backend readiness → authoritative DB/schema → changed-feature QA → main exact retest → Production promotion/smoke를 서로 다른 증거 상태로 유지한다.
+- 성공/실패 bundle은 expected/observed SHA/digest/revision, workload generation, 최초 불일치 계층, timestamp/latency, rollback target을 기록한다. secret/cookie/Authorization/DSN/private key는 금지한다. P0 증거가 누락·오류·stale이면 pass가 아니라 `BLOCKED`다.
+- 저장소 보호도 미충족이다. 현재 `main` metadata는 protection enabled지만 required-status-check enforcement `off`, required contexts/checks 비어 있음이다. runtime 경로는 신뢰된 required checks와 reviewed integration을 저장소에서 강제하되 docs 자동화가 runtime bypass가 되지 않게 한다.
+
+### SEO·보안·수익성 레퍼런스 결정
+- Google Search Central 2026-09-08/09-14 글은 행사 공지라 crawl/index 계약을 바꾸지 않는다. 09-08 regional Search experience 문서는 참고용이며 Moneyverse 가상주식/WDX를 EEA finance carousel을 노린 실제 금융정보 provider처럼 표현하지 않는다. 2026-08-28 site-reputation 정책은 sponsor/affiliate/UGC 거버넌스에 계속 직접 적용한다.
+- favicon QA는 현재 Google 기준인 crawlable homepage/favicon, stable URL, square asset, 권장 48×48 초과를 따른다. public SEO read-model/canonical/robots/sitemap/lastModified/structured-data/hreflang/SSR 또는 동등 server output/CWV와 private/account/admin/transaction noindex 계약을 유지한다.
+- 보안 baseline은 OWASP ASVS 5.0.0 + API Security Top 10이다. 카지노에는 sensitive-business-flow/replay/resource-abuse 통제를 명시하고 인증/session/admin/economy/upload/SSRF/BOLA/BFLA/least-privilege/audit/backup gate는 fail-closed다.
+- Google Play 수수료는 단일율이 아니다. unit economics key는 `market × effective-date/install-cohort × transaction-type × billing-path × programme`이다. EEA/UK/US는 2026-06-30부터 현재 standard 예시로 자동갱신 구독 10%, 기타 new-install 20%, 기타 existing-install 25%이며 Play Billing 적용 시 5% billing fee가 붙는다. 아직 rollout 전인 시장은 현재 적용 program 규칙을 사용한다. 실측하지 않은 conversion/ARPU/ARPDAU/ARPPU/churn/refund/CAC/LTV는 `HYPOTHESIS`/`TEST TARGET`이다.
+
+### v157 worklog 및 구현 백로그
+- 외부 조사: Google Search Central 9월 update/site-reputation/favicon/regional Search 문서, OWASP baseline, Google Play 현재 수수료. 런타임/코드 증거: current main, PR #384, Actions #888, branch protection.
+- 개발순서: P0 exact-SHA/runtime/DB evidence → 독립 restore 가능한 backup → false-green status → HIGH casino contract exact-runtime 검증 → runtime writable-path ownership → privileged recovery → migration/Work-clock integrity → repository enforcement → economy/admin/casino authorization → core completeness → monetization → SEO/growth/accessibility.
+- 기획 자동화는 문서만 변경했다. 구현은 `new branch → tests/CI → isolated exact-SHA Test → backend/API/DB/user-flow QA → main → exact-main retest → Production promotion → smoke/monitoring/rollback` 순서를 유지한다.
