@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.16.158
+> **현재 통합 버전:** v2026.09.16.159
 > **구현·증거 동기화:** 2026-09-16
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -578,3 +578,14 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 최신 조사: Google Search Central 2026년 9월 변경/블로그, favicon/site-reputation 기준, Google Play 현재 수수료/rollout, OWASP/ASVS baseline을 재대조했다. 2026-09-16 crawler identity 운영 영향과 한국 수수료 시행일 guardrail을 채택했고 행사 공지는 SEO 알고리즘 변경으로 취급하지 않았다.
 - runtime/QA/CI: main `88452f14...`, #888의 exact-Test SHA 실패와 Production build skip, #755 verify/check green 및 frontend candidate build 진행 상태를 확인했다. Production 성공을 추론하지 않는다.
 - 개발 연결: P0 release evidence/root-cause 제거가 casino Production 재검증과 신규 기능보다 우선이다. 이번 자동화는 문서만 변경하며 runtime/DB/Flux/Production 승격은 수행하지 않는다.
+
+## v2026.09.16.159 — 직업 일/주간 초기화 권위 수렴
+
+### WORK-CLOCK-149-01 — HIGH — 구현 완료 / exact-SHA Test 필요
+- 새 forward migration `203-work-reset-convergence.sql`로 남은 read-model 시간축 분리를 수정한다. 적용된 migration 202는 수정하거나 번호를 바꾸지 않는다.
+- Work settlement, task board, reward preview, dashboard가 모두 `server_game_day_*` / `server_game_week_*` 권위를 공유한다. 게임 1일은 현실 600초이며 7게임일 주간은 현실 70분이다.
+- `GET /api/v1/work`에 권위 있는 `game_day_key`, `game_week_key`, `day_ends_at`, `week_ends_at`을 추가하고 `/work`는 서버값으로 일/주간 지급 WLD, 잔여 한도, 정확한 다음 초기화 시각을 표시한다.
+- task 일일, 회원 일일, 회원 주간 한도 도달 시 실행을 fail-closed한다. reward preview도 settlement와 동일한 현재 게임시간 창과 cap을 사용해 실제 정산에서 거절/감액될 금액을 미리 약속하지 않는다.
+- 모바일 API 계약을 `v2026.09.16.159`로 올리고 TypeScript 컴파일러 내부 `__@...` 심볼 속성을 생성 계약에서 제외해 관련 없는 타입 그래프 변경이 공개 JSON 응답 스키마를 흔들지 않게 한다.
+- isolated PostgreSQL에서 migration 203과 Work/clock 실DB 15개 테스트를 통과했다. 현실 10분 day, 70분 week rollover, timezone 독립성, task/global cap, 직업 전환, 멱등성/무결성, preview/지급/dashboard 일치를 검증했다. 로컬 DB package 7/7, backend 871, frontend 612, lint 오류 0, typecheck, production build도 통과했다.
+- GitHub CI, exact-head Test 수렴, 권위 DB backup/migration, Production smoke 전에는 운영 완료로 선언하지 않는다. v158의 P0 release-evidence gate를 이 수정 때문에 완화하지 않는다.
