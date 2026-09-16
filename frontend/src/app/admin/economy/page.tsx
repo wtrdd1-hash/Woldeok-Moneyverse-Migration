@@ -1,4 +1,5 @@
 import { AdminControlCenterV2 } from './admin-control-center-v2';
+import { EconomyAiStatusCard, type EconomyAiStatus } from './ai-status-card';
 import type { MacroEconomyV2 } from './macro-v2-types';
 import { FaucetSinkGauge, type FaucetSinkStats } from './faucet-sink-gauge';
 import type { Metadata } from 'next';
@@ -111,7 +112,7 @@ export default async function AdminEconomyPage({
   const payoutId = UUID.test(requested) ? requested : null;
 
   const macroV2Section = await section<MacroEconomyV2>('/api/v1/admin/economy/macro-v2');
-  const [dashboard, alerts, autoPolicy, health, report] = await Promise.all([
+  const [dashboard, alerts, autoPolicy, health, report, aiStatus] = await Promise.all([
     section<EconomyDashboard>('/api/v1/admin/economy'),
     section<{ alerts: EconomyAlert[] }>(`/api/v1/admin/economy/alerts?limit=${ALERT_LIMIT}`),
     section<AutoPolicyBoard>('/api/v1/admin/controls/auto-policy'),
@@ -121,6 +122,7 @@ export default async function AdminEconomyPage({
       : section<{ items: BulkPayoutItem[] }>(
           `/api/v1/admin/economy/bulk-payouts/${payoutId}/report`,
         ),
+    section<EconomyAiStatus>('/api/v1/admin/economy/ai-status'),
   ]);
 
   const board = dashboard.ok ? dashboard.data : null;
@@ -153,6 +155,12 @@ export default async function AdminEconomyPage({
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}
       </PageHeader>
+
+      {aiStatus.ok ? (
+        <EconomyAiStatusCard status={aiStatus.data} />
+      ) : (
+        <Card><CardContent className="pt-6"><EmptyState title={problem(aiStatus, 'AI 상태를 불러오지 못했어요.') ?? 'AI 상태를 불러오지 못했어요.'} /></CardContent></Card>
+      )}
 
       <Card>
         <CardHeader>

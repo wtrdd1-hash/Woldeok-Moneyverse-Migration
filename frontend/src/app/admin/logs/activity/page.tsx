@@ -10,6 +10,7 @@ import { ApiError } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../../admin-back';
 import { adminArea } from '../../areas';
+import { TrafficDashboard, type TrafficAnalyticsDashboard } from './traffic-dashboard';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,13 +72,21 @@ export default async function AdminActivityLogsPage({
   await requireAdminConsole(AREA.href);
   const params = await searchParams;
 
+  const granularity = params.granularity === 'month' || params.granularity === 'year' ? params.granularity : 'day';
+  const periods = granularity === 'day' ? 30 : granularity === 'month' ? 24 : 10;
   const eventType = typeof params.eventType === 'string' ? params.eventType : '';
   const limit = typeof params.limit === 'string' ? params.limit : '50';
   const page = typeof params.page === 'string' ? Math.max(1, parseInt(params.page, 10)) : 1;
   const offset = (page - 1) * parseInt(limit, 10);
 
   let logs: ActivityLogRow[] = [];
+  let traffic: TrafficAnalyticsDashboard | null = null;
   let loadProblem = '';
+  try {
+    traffic = await api<TrafficAnalyticsDashboard>(`/api/v1/admin/activity/traffic?granularity=${granularity}&periods=${periods}`);
+  } catch {
+    traffic = null;
+  }
   try {
     const query = new URLSearchParams({ limit, offset: String(offset) });
     if (eventType) query.set('eventType', eventType);
@@ -111,6 +120,16 @@ export default async function AdminActivityLogsPage({
           <Link href="/admin/logs/integrity">무결성 검증</Link>
         </Button>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">접속 분석</CardTitle>
+          <CardDescription>원시 IP나 전체 referrer URL을 복제하지 않고 페이지 접속·세션·진입 경로를 집계합니다.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {traffic ? <TrafficDashboard data={traffic} /> : <EmptyState title="접속 분석을 불러오지 못했습니다." description="집계 API와 관리자 권한을 확인해 주세요." />}
+        </CardContent>
+      </Card>
 
       {/* Filter Card */}
       <Card>

@@ -2,9 +2,9 @@
 
 [English](mobile-api-schema-reference.md) | **한국어** | [기계 판독 계약](mobile-api-contract.json)
 
-업데이트 버전: **v2026.09.15.125**
+업데이트 버전: **v2026.09.16.144**
 
-이 문서는 147개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
+이 문서는 155개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
 
 ## 공통 호환성 규칙
 
@@ -230,6 +230,441 @@ _None._
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
 | recorded | true | number |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/admin/activity/logs` — 관리자 사용자 활동 로그 조회
+
+- 인증/권한: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답 로그를 관리자 활동 화면에 표시
+- Operation ID: `ActivityController_listLogs`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| limit | query | false | integer | minimum=1; maximum=200 |
+| offset | query | false | integer | minimum=0 |
+| eventType | query | false | string |  |
+| userId | query | false | string (uuid) |  |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/admin/activity/traffic` — 관리자 접속량·유입경로·접속경로 집계
+
+- 인증/권한: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 일/월/년 집계와 유입·진입 경로를 표시
+- Operation ID: `ActivityController_traffic`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| granularity | query | false | string | enum="day","month","year" |
+| periods | query | false | integer | minimum=1; maximum=366 |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| granularity | true | string="day" \| string="month" \| string="year" |  |
+| periods | true | number |  |
+| rangeStart | true | string |  |
+| generatedAt | true | string |  |
+| summary | true | object |  |
+| summary.pageViews | true | number |  |
+| summary.uniqueSessions | true | number |  |
+| summary.authenticatedUsers | true | number |  |
+| summary.anonymousSessions | true | number |  |
+| series[] | true | object[] |  |
+| series[] | true | object |  |
+| series[].bucket | true | string |  |
+| series[].pageViews | true | number |  |
+| series[].uniqueSessions | true | number |  |
+| series[].authenticatedUsers | true | number |  |
+| landingPages[] | true | object[] |  |
+| landingPages[] | true | object |  |
+| landingPages[].path | true | string |  |
+| landingPages[].entries | true | number |  |
+| landingPages[].anonymousEntries | true | number |  |
+| sources[] | true | object[] |  |
+| sources[] | true | object |  |
+| sources[].source | true | string |  |
+| sources[].entries | true | number |  |
+| countries[] | true | object[] |  |
+| countries[] | true | object |  |
+| countries[].country | true | string |  |
+| countries[].entries | true | number |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/admin/economy/ai-status` — 경제 AI 위원회 상태 조회
+
+- 인증/권한: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 스위치·최근 리뷰·에이전트 상태를 표시
+- Operation ID: `AdminEconomyController_aiStatus`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+_None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/admin/me` — 관리자 역할 확인
+
+- 인증/권한: 로그인 + 최신 동의 + 관리자 역할
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: roles를 관리자 UI 권한 상태에 반영
+- Operation ID: `AdminController_me`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| roles[] | true | string[] |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/admin/security/sessions` — 관리자 콘솔 세션 열기
+
+- 인증/권한: 로그인 + 최신 동의 + 관리자 역할 + CSRF + 관리자 보안 정책
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 회전된 세션/CSRF를 저장한 뒤 관리자 데이터를 다시 조회
+- Operation ID: `AdminSecurityController_openConsole`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| state | true | string="open" \| string="idle_locked" \| string="expired" \| string="closed" \| string="none" |  |
+| expiresAt | true | null \| string (date-time) |  |
+| idleExpiresAt | true | null \| string (date-time) |  |
+| csrfToken | true | string |  |
+| loginContext | true | object |  |
+| loginContext.decision | true | string="allow" \| string="block" |  |
+| loginContext.reason | true | string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/admin/support/threads` — 관리자 문의함 조회
+
+- 인증/권한: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답을 현재 화면 상태에 반영
+- Operation ID: `AdminSupportController_threads`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| status | query | false | string | enum="open","waiting_user","resolved" |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| threads[] | true | object[] |  |
+| threads[] | true | object |  |
+| threads[].thread_id | true | string |  |
+| threads[].subject | true | string |  |
+| threads[].status | true | string |  |
+| threads[].created_at | true | string (date-time) |  |
+| threads[].updated_at | false | string (date-time) |  |
+| threads[].last_message_at | false | string (date-time) |  |
+| threads[].user_id | false | string |  |
+| threads[].display_name | false | string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/admin/support/threads/:id/messages` — 관리자가 문의 대화 조회
+
+- 인증/권한: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답을 현재 화면 상태에 반영
+- Operation ID: `AdminSupportController_messages`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| messages[] | true | object[] |  |
+| messages[] | true | object |  |
+| messages[].message_id | true | string |  |
+| messages[].sender_kind | true | string="user" \| string="admin" |  |
+| messages[].sender_user_id | false | string |  |
+| messages[].body | true | string |  |
+| messages[].created_at | true | string (date-time) |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/admin/support/threads/:id/messages` — 관리자가 회원 문의에 답장
+
+- 인증/권한: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션 + CSRF
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 문의 목록/대화를 서버에서 다시 조회
+- Operation ID: `AdminSupportController_reply`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### 요청 본문
+
+- Content-Type: `application/json`
+- DTO: `NewMessageDto`
+
+| 필드 | 필수 | 타입 | 제약 |
+|---|---|---|---|
+| body | true | string | minLength=1; maxLength=2000 |
+| idempotencyKey | true | string (uuid) |  |
+
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| message | true | object |  |
+| message.message_id | true | string |  |
+| message.sender_kind | true | string="user" \| string="admin" |  |
+| message.sender_user_id | false | string |  |
+| message.body | true | string |  |
+| message.created_at | true | string (date-time) |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `PUT` `/app-api/v1/admin/support/threads/:id/status` — 관리자가 문의 처리 상태 변경
+
+- 인증/권한: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션 + CSRF
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 문의 목록/대화를 서버에서 다시 조회
+- Operation ID: `AdminSupportController_status`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### 요청 본문
+
+- Content-Type: `application/json`
+- DTO: `StatusDto`
+
+| 필드 | 필수 | 타입 | 제약 |
+|---|---|---|---|
+| status | true | string | enum="open","waiting_user","resolved" |
+
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| status | true | string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/admin/users` — 관리자 회원 목록 조회
+
+- 인증/권한: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 서버 회원 목록으로 관리자 화면을 갱신
+- Operation ID: `AdminController_users`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| users[] | true | unknown[] |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/admin/work` — 관리자 직업·보상 정책 현황 조회
+
+- 인증/권한: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 직업 카탈로그·레벨·정책 상태를 갱신
+- Operation ID: `AdminWorkOperationsController_overview`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| catalogue[] | true | object[] |  |
+| catalogue[] | true | object |  |
+| catalogue[].task_id | true | string |  |
+| catalogue[].code | true | string |  |
+| catalogue[].name | true | string |  |
+| catalogue[].job_type | true | string |  |
+| catalogue[].difficulty | true | number |  |
+| catalogue[].base_reward | true | string |  |
+| catalogue[].base_experience | true | string |  |
+| catalogue[].minimum_duration_seconds | true | number |  |
+| catalogue[].daily_limit | true | number |  |
+| catalogue[].active | true | boolean |  |
+| catalogue[].open_assignment_count | true | string |  |
+| catalogue[].awaiting_verification_count | true | string |  |
+| catalogue[].approved_24h | true | string |  |
+| catalogue[].rejected_24h | true | string |  |
+| catalogue[].paid_24h | true | string |  |
+| catalogue[].last_assigned_at | true | null \| string (date-time) |  |
+| jobLevels[] | true | object[] |  |
+| jobLevels[] | true | object |  |
+| jobLevels[].job_type | true | string |  |
+| jobLevels[].member_count | true | string |  |
+| jobLevels[].average_level | true | string |  |
+| jobLevels[].top_level | true | number |  |
+| jobLevels[].total_experience | true | string |  |
+| jobLevels[].active_7d_count | true | string |  |
+| policy | true | object |  |
+| policy.policy_id | true | null \| number |  |
+| policy.effective_at | true | null \| string (date-time) |  |
+| policy.daily_cap | true | null \| string |  |
+| policy.weekly_cap | true | null \| string |  |
+| policy.repeat_decay_percent | true | null \| number |  |
+| policy.enabled | true | null \| boolean=false \| boolean=true |  |
+| policy.reason | true | null \| string |  |
+| policy.active_task_count | true | string |  |
+| policy.open_assignment_count | true | string |  |
+| policy.awaiting_verification_count | true | string |  |
+| policy.paid_24h | true | string |  |
+| policy.members_paid_24h | true | string |  |
+| policy.experience_24h | true | string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/auth/:provider/authorize` — Google/Discord OAuth 시작; 모바일은 client=mobile 필수
+
+- 인증/권한: 인증 흐름 전용: 상태머신 준수
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `AuthController_authorize`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| provider | path | true | string |  |
+| client | query | true | string |  |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| authorizationUrl | true | string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/auth/:provider/callback` — OAuth provider callback 처리; 앱이 직접 호출하지 않음
+
+- 인증/권한: 인증 흐름 전용: 상태머신 준수
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `AuthController_callback`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| provider | path | true | string |  |
+| state | query | true | string |  |
+| code | query | true | string |  |
+| error | query | true | string |  |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+_None._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
@@ -2113,6 +2548,36 @@ _요청 본문 없음._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
+## `GET` `/app-api/v1/content/status` — 서비스 상태 정보 조회
+
+- 인증/권한: 공개: 로그인 불필요
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `ContentController_status`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| status[] | true | object[] |  |
+| status[] | true | object |  |
+| status[].sourceKey | true | string |  |
+| status[].displayName | true | string |  |
+| status[].state | true | string |  |
+| status[].detail | true | null \| string |  |
+| status[].observedAt | true | null \| string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
 ## `POST` `/app-api/v1/early-game/claims` — 오늘 초반 이벤트 보상 수령
 
 - 인증/권한: 로그인 + 최신 동의 + CSRF(변경 요청)
@@ -2351,6 +2816,83 @@ _None._
 | notifications_enabled | true | boolean |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/game-clock` — 가속 게임 서버 시간 조회
+
+- 인증/권한: 공개 읽기
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 서버 기준 게임 날짜·주차로 UI를 갱신
+- Operation ID: `GameClockController_current`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| policy_version | true | string |  |
+| day_index | true | string |  |
+| week_index | true | string |  |
+| day_of_week | true | number |  |
+| real_seconds_per_day | true | number |  |
+| game_days_per_week | true | number |  |
+| day_started_at | true | string (date-time) |  |
+| day_ends_at | true | string (date-time) |  |
+| week_started_at | true | string (date-time) |  |
+| week_ends_at | true | string (date-time) |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/media/:key` — 일반 미디어 파일 조회
+
+- 인증/권한: 공개: 로그인 불필요
+- 성공 상태: 200
+- 응답 모드: binary
+- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `MediaController_media`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| key | path | true | string |  |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+_바이너리 본문. JSON 디코딩 금지._
+
+## `GET` `/app-api/v1/media/profile/:key` — 프로필 미디어 파일 조회
+
+- 인증/권한: 공개: 로그인 불필요
+- 성공 상태: 200
+- 응답 모드: binary
+- 성공 후 동기화: 프로필 GET 재조회 후 화면 교체
+- Operation ID: `ProfileImageController_image`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| key | path | true | string |  |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+_바이너리 본문. JSON 디코딩 금지._
 
 ## `GET` `/app-api/v1/photos` — 갤러리 사진 목록 조회
 
@@ -3435,36 +3977,6 @@ _요청 본문 없음._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
-## `GET` `/app-api/v1/content/status` — 서비스 상태 정보 조회
-
-- 인증/권한: 공개: 로그인 불필요
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
-- Operation ID: `ContentController_status`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| status[] | true | object[] |  |
-| status[] | true | object |  |
-| status[].sourceKey | true | string |  |
-| status[].displayName | true | string |  |
-| status[].state | true | string |  |
-| status[].detail | true | null \| string |  |
-| status[].observedAt | true | null \| string |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
 ## `GET` `/app-api/v1/stocks` — 거래 가능한 주식 종목 목록 조회
 
 - 인증/권한: 로그인 필요(기능에 따라 최신 동의 필요)
@@ -3936,6 +4448,149 @@ _요청 본문 없음._
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
+## `GET` `/app-api/v1/support/threads` — 내 관리자 문의 목록 조회
+
+- 인증/권한: 로그인 + 최신 동의
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답을 현재 화면 상태에 반영
+- Operation ID: `SupportController_threads`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| threads[] | true | object[] |  |
+| threads[] | true | object |  |
+| threads[].thread_id | true | string |  |
+| threads[].subject | true | string |  |
+| threads[].status | true | string |  |
+| threads[].created_at | true | string (date-time) |  |
+| threads[].updated_at | false | string (date-time) |  |
+| threads[].last_message_at | false | string (date-time) |  |
+| threads[].user_id | false | string |  |
+| threads[].display_name | false | string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/support/threads` — 새 관리자 문의 생성
+
+- 인증/권한: 로그인 + 최신 동의 + CSRF
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 문의 목록/대화를 서버에서 다시 조회
+- Operation ID: `SupportController_create`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+- Content-Type: `application/json`
+- DTO: `NewThreadDto`
+
+| 필드 | 필수 | 타입 | 제약 |
+|---|---|---|---|
+| subject | true | string | minLength=1; maxLength=120 |
+| body | true | string | minLength=1; maxLength=2000 |
+| idempotencyKey | true | string (uuid) |  |
+
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| thread | true | object |  |
+| thread.thread_id | true | string |  |
+| thread.subject | true | string |  |
+| thread.status | true | string |  |
+| thread.created_at | true | string (date-time) |  |
+| thread.updated_at | false | string (date-time) |  |
+| thread.last_message_at | false | string (date-time) |  |
+| thread.user_id | false | string |  |
+| thread.display_name | false | string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/support/threads/:id/messages` — 내 문의 대화 메시지 조회
+
+- 인증/권한: 로그인 + 최신 동의
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답을 현재 화면 상태에 반영
+- Operation ID: `SupportController_messages`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| messages[] | true | object[] |  |
+| messages[] | true | object |  |
+| messages[].message_id | true | string |  |
+| messages[].sender_kind | true | string="user" \| string="admin" |  |
+| messages[].sender_user_id | false | string |  |
+| messages[].body | true | string |  |
+| messages[].created_at | true | string (date-time) |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/support/threads/:id/messages` — 내 문의에 추가 메시지 전송
+
+- 인증/권한: 로그인 + 최신 동의 + CSRF
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 문의 목록/대화를 서버에서 다시 조회
+- Operation ID: `SupportController_reply`
+
+### 경로/쿼리 파라미터
+
+| 이름 | 위치 | 필수 | 타입 | 제약 |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### 요청 본문
+
+- Content-Type: `application/json`
+- DTO: `NewMessageDto`
+
+| 필드 | 필수 | 타입 | 제약 |
+|---|---|---|---|
+| body | true | string | minLength=1; maxLength=2000 |
+| idempotencyKey | true | string (uuid) |  |
+
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| message | true | object |  |
+| message.message_id | true | string |  |
+| message.sender_kind | true | string="user" \| string="admin" |  |
+| message.sender_user_id | false | string |  |
+| message.body | true | string |  |
+| message.created_at | true | string (date-time) |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
 ## `GET` `/app-api/v1/wallet` — 내 현금/은행 잔액과 지갑 상태 조회
 
 - 인증/권한: 로그인 필요(기능에 따라 최신 동의 필요)
@@ -4298,384 +4953,6 @@ _요청 본문 없음._
 ### 성공 응답 필드
 
 _None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/auth/:provider/authorize` — Google/Discord OAuth 시작; 모바일은 client=mobile 필수
-
-- 인증/권한: 인증 흐름 전용: 상태머신 준수
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
-- Operation ID: `AuthController_authorize`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| provider | path | true | string |  |
-| client | query | true | string |  |
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| authorizationUrl | true | string |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/auth/:provider/callback` — OAuth provider callback 처리; 앱이 직접 호출하지 않음
-
-- 인증/권한: 인증 흐름 전용: 상태머신 준수
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
-- Operation ID: `AuthController_callback`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| provider | path | true | string |  |
-| state | query | true | string |  |
-| code | query | true | string |  |
-| error | query | true | string |  |
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-_None._
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/media/:key` — 일반 미디어 파일 조회
-
-- 인증/권한: 공개: 로그인 불필요
-- 성공 상태: 200
-- 응답 모드: binary
-- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
-- Operation ID: `MediaController_media`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| key | path | true | string |  |
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-_바이너리 본문. JSON 디코딩 금지._
-
-## `GET` `/app-api/v1/media/profile/:key` — 프로필 미디어 파일 조회
-
-- 인증/권한: 공개: 로그인 불필요
-- 성공 상태: 200
-- 응답 모드: binary
-- 성공 후 동기화: 프로필 GET 재조회 후 화면 교체
-- Operation ID: `ProfileImageController_image`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| key | path | true | string |  |
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-_바이너리 본문. JSON 디코딩 금지._
-
-## `GET` `/app-api/v1/support/threads` — 내 관리자 문의 목록 조회
-
-- 인증/권한: 로그인 + 최신 동의
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 응답을 현재 화면 상태에 반영
-- Operation ID: `SupportController_threads`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| threads[] | true | object[] |  |
-| threads[] | true | object |  |
-| threads[].thread_id | true | string |  |
-| threads[].subject | true | string |  |
-| threads[].status | true | string |  |
-| threads[].created_at | true | string (date-time) |  |
-| threads[].updated_at | false | string (date-time) |  |
-| threads[].last_message_at | false | string (date-time) |  |
-| threads[].user_id | false | string |  |
-| threads[].display_name | false | string |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `POST` `/app-api/v1/support/threads` — 새 관리자 문의 생성
-
-- 인증/권한: 로그인 + 최신 동의 + CSRF
-- 성공 상태: 201
-- 응답 모드: json
-- 성공 후 동기화: 문의 목록/대화를 서버에서 다시 조회
-- Operation ID: `SupportController_create`
-
-### 경로/쿼리 파라미터
-
-_None._
-
-### 요청 본문
-
-- Content-Type: `application/json`
-- DTO: `NewThreadDto`
-
-| 필드 | 필수 | 타입 | 제약 |
-|---|---|---|---|
-| subject | true | string | minLength=1; maxLength=120 |
-| body | true | string | minLength=1; maxLength=2000 |
-| idempotencyKey | true | string (uuid) |  |
-
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| thread | true | object |  |
-| thread.thread_id | true | string |  |
-| thread.subject | true | string |  |
-| thread.status | true | string |  |
-| thread.created_at | true | string (date-time) |  |
-| thread.updated_at | false | string (date-time) |  |
-| thread.last_message_at | false | string (date-time) |  |
-| thread.user_id | false | string |  |
-| thread.display_name | false | string |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/support/threads/:id/messages` — 내 문의 대화 메시지 조회
-
-- 인증/권한: 로그인 + 최신 동의
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 응답을 현재 화면 상태에 반영
-- Operation ID: `SupportController_messages`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| messages[] | true | object[] |  |
-| messages[] | true | object |  |
-| messages[].message_id | true | string |  |
-| messages[].sender_kind | true | string="user" \| string="admin" |  |
-| messages[].sender_user_id | false | string |  |
-| messages[].body | true | string |  |
-| messages[].created_at | true | string (date-time) |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `POST` `/app-api/v1/support/threads/:id/messages` — 내 문의에 추가 메시지 전송
-
-- 인증/권한: 로그인 + 최신 동의 + CSRF
-- 성공 상태: 201
-- 응답 모드: json
-- 성공 후 동기화: 문의 목록/대화를 서버에서 다시 조회
-- Operation ID: `SupportController_reply`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### 요청 본문
-
-- Content-Type: `application/json`
-- DTO: `NewMessageDto`
-
-| 필드 | 필수 | 타입 | 제약 |
-|---|---|---|---|
-| body | true | string | minLength=1; maxLength=2000 |
-| idempotencyKey | true | string (uuid) |  |
-
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| message | true | object |  |
-| message.message_id | true | string |  |
-| message.sender_kind | true | string="user" \| string="admin" |  |
-| message.sender_user_id | false | string |  |
-| message.body | true | string |  |
-| message.created_at | true | string (date-time) |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/admin/support/threads` — 관리자 문의함 조회
-
-- 인증/권한: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 응답을 현재 화면 상태에 반영
-- Operation ID: `AdminSupportController_threads`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| status | query | false | string | enum="open","waiting_user","resolved" |
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| threads[] | true | object[] |  |
-| threads[] | true | object |  |
-| threads[].thread_id | true | string |  |
-| threads[].subject | true | string |  |
-| threads[].status | true | string |  |
-| threads[].created_at | true | string (date-time) |  |
-| threads[].updated_at | false | string (date-time) |  |
-| threads[].last_message_at | false | string (date-time) |  |
-| threads[].user_id | false | string |  |
-| threads[].display_name | false | string |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `GET` `/app-api/v1/admin/support/threads/:id/messages` — 관리자가 문의 대화 조회
-
-- 인증/권한: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 응답을 현재 화면 상태에 반영
-- Operation ID: `AdminSupportController_messages`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### 요청 본문
-
-_요청 본문 없음._
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| messages[] | true | object[] |  |
-| messages[] | true | object |  |
-| messages[].message_id | true | string |  |
-| messages[].sender_kind | true | string="user" \| string="admin" |  |
-| messages[].sender_user_id | false | string |  |
-| messages[].body | true | string |  |
-| messages[].created_at | true | string (date-time) |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `POST` `/app-api/v1/admin/support/threads/:id/messages` — 관리자가 회원 문의에 답장
-
-- 인증/권한: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션 + CSRF
-- 성공 상태: 201
-- 응답 모드: json
-- 성공 후 동기화: 문의 목록/대화를 서버에서 다시 조회
-- Operation ID: `AdminSupportController_reply`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### 요청 본문
-
-- Content-Type: `application/json`
-- DTO: `NewMessageDto`
-
-| 필드 | 필수 | 타입 | 제약 |
-|---|---|---|---|
-| body | true | string | minLength=1; maxLength=2000 |
-| idempotencyKey | true | string (uuid) |  |
-
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| message | true | object |  |
-| message.message_id | true | string |  |
-| message.sender_kind | true | string="user" \| string="admin" |  |
-| message.sender_user_id | false | string |  |
-| message.body | true | string |  |
-| message.created_at | true | string (date-time) |  |
-
-> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
-
-## `PUT` `/app-api/v1/admin/support/threads/:id/status` — 관리자가 문의 처리 상태 변경
-
-- 인증/권한: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션 + CSRF
-- 성공 상태: 200
-- 응답 모드: json
-- 성공 후 동기화: 문의 목록/대화를 서버에서 다시 조회
-- Operation ID: `AdminSupportController_status`
-
-### 경로/쿼리 파라미터
-
-| 이름 | 위치 | 필수 | 타입 | 제약 |
-|---|---|---|---|---|
-| id | path | true | string (uuid) |  |
-
-### 요청 본문
-
-- Content-Type: `application/json`
-- DTO: `StatusDto`
-
-| 필드 | 필수 | 타입 | 제약 |
-|---|---|---|---|
-| status | true | string | enum="open","waiting_user","resolved" |
-
-
-### 성공 응답 필드
-
-| 필드 | 필수 | 타입 | 제약/의미 |
-|---|---|---|---|
-| status | true | string |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 

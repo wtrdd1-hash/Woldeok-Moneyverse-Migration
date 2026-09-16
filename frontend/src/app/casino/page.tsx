@@ -33,7 +33,8 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: '럭키존 (가상 미니게임) — 동전·주사위·테마 게임',
   description:
-    '동전·주사위 기반 서버 게임과 슬롯·하이로우 테마 화면을 일일 이용 한도 안에서 즐기는 WLD 가상 미니게임입니다.',
+    '동전·주사위·슬롯·하이로우 등 서버 판정 기반 게임을 WLD로 즐기는 게임 전용 가상 미니게임 공간입니다.',
+  alternates: { canonical: '/casino' },
   robots: { index: true, follow: true },
 };
 

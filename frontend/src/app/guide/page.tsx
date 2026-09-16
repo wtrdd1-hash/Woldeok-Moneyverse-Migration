@@ -30,9 +30,10 @@ import {
 } from './guide';
 
 export const metadata: Metadata = {
-  title: '시작 가이드 | 월덕 머니버스 (Getting Started Guide)',
+  title: '시작 가이드 (Getting Started Guide)',
   description:
-    '월덕 머니버스를 처음 이용하는 분을 위한 가상경제 입문서. 8대 전문 직업, 일일 퀘스트, 은행 복리 예금과 국채, 가상 사업체 창업 및 주식 거래소, 아이템 상점과 카지노 이용 방법을 안내합니다.',
+    '월덕 머니버스를 처음 이용하는 분을 위한 가상경제 입문서. 5개 전문 직업, 일일 퀘스트, 은행 복리 예금과 국채, 가상 사업체 창업 및 주식 거래소, 아이템 상점과 카지노 이용 방법을 안내합니다.',
+  alternates: { canonical: '/guide' },
 };
 
 const PILLAR_ICONS = {
@@ -61,8 +62,8 @@ export default function GuidePage() {
           </h1>
           <p className="text-sm leading-[1.8] text-muted-foreground sm:text-base [word-break:keep-all]">
             <T
-              korean="월덕 머니버스는 Discord 커뮤니티와 긴밀하게 이어지는 차세대 가상경제 포털입니다. 8대 전문 직업, 일일 퀘스트, 은행 복리 예금과 국채, 가상 기업 창업 및 주식 거래소, 상점과 카지노까지 하나의 완성된 경제 생태계를 자유롭게 누려보세요."
-              english="Woldeok Moneyverse is an interconnected virtual economy portal linked with Discord. Explore 8 professions, daily quests, compound bank savings, virtual enterprise founding, stock exchange, items shop, and casino entertainment."
+              korean="월덕 머니버스는 Discord 커뮤니티와 긴밀하게 이어지는 차세대 가상경제 포털입니다. 5개 전문 직업, 일일 퀘스트, 은행 복리 예금과 국채, 가상 기업 창업 및 주식 거래소, 상점과 카지노까지 하나의 완성된 경제 생태계를 자유롭게 누려보세요."
+              english="Woldeok Moneyverse is an interconnected virtual economy portal linked with Discord. Explore 5 professions, daily quests, compound bank savings, virtual enterprise founding, stock exchange, item shop, and casino entertainment."
             />
           </p>
 
@@ -198,9 +199,9 @@ export default function GuidePage() {
               {
                 step: '1. 생산 및 활동',
                 stepEn: '1. Production',
-                titleKo: '퀘스트 & 8대 직업',
+                titleKo: '퀘스트 & 5개 직업',
                 titleEn: 'Quests & Careers',
-                descKo: '출석 퀘스트 및 8대 전문 직업 활동을 통해 초기 시드 WLD를 채굴합니다.',
+                descKo: '출석 퀘스트 및 5개 전문 직업 활동을 통해 초기 시드 WLD를 채굴합니다.',
                 descEn: 'Mint initial seed WLD through check-in quests and career assignments.',
                 icon: Briefcase,
               },
@@ -522,7 +523,7 @@ export default function GuidePage() {
             <CardHeader>
               <CardTitle className="text-base">보상 제한 대신 소비처 확장</CardTitle>
               <CardDescription className="leading-relaxed">
-                직업 작업은 일일 횟수 제한 없이 매번 전액 보상합니다. 발행된 WLD는 상점의 반복 구매
+                직업 활동은 기본적으로 자유롭게 반복할 수 있지만, 반복 보상은 서버 정책과 경제 상태에 따라 점감되거나 보호 한도가 적용될 수 있습니다. 발행된 WLD는 상점의 반복 구매
                 상품, 금융·사업·거래·여가 기능으로 순환시키고 운영 지표로 균형을 점검합니다.
               </CardDescription>
             </CardHeader>

@@ -13,8 +13,8 @@ import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-ba
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '상점 2.0 · 월덕 머니버스',
-  description: '11대 카테고리 78종 아이템과 치장품, 한정판 Limited 컬렉션 및 실시간 피팅룸',
+  title: 'WLD 아이템 상점',
+  description: '월덕 머니버스의 게임 전용 WLD로 아이템·치장품·컬렉션을 확인하고 구매하는 가상 상점입니다.',
   alternates: { canonical: '/shop' },
 };
 

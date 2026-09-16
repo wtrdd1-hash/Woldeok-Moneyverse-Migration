@@ -457,6 +457,16 @@ export class EconomyConsoleRepository {
   }
 
 
+  async aiStatus(actorUserId: unknown): Promise<Record<string, unknown>> {
+    assertUuid(actorUserId, 'actor');
+    const row = await queryOne<{ result: Record<string, unknown> }>(
+      this.pool,
+      `SELECT public.admin_economy_ai_status($1::uuid) AS result`,
+      [actorUserId],
+    );
+    return row?.result ?? {};
+  }
+
   async macroEconomyV2(actorUserId: unknown): Promise<Record<string, unknown>> {
     assertUuid(actorUserId, 'actor');
     const row = await queryOne<{ result: Record<string, unknown> }>(

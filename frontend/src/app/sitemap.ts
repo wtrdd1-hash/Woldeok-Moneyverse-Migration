@@ -14,7 +14,6 @@ const PUBLIC_PATHS = [
   '/quests',
   '/businesses',
   '/board',
-  '/shop/catalog',
   '/terms',
   '/privacy',
   '/account-deletion',

@@ -424,6 +424,15 @@ export class AdminEconomyController {
     };
   }
 
+  @Get('ai-status')
+  @ApiOperation({ summary: 'Economy AI feature switch, latest council review and agent scoreboard' })
+  aiStatus(@Req() request: RequestWithSession) {
+    return this.guarded(
+      () => this.repository().aiStatus(requireUserId(request)),
+      'the economy AI status could not be read',
+    );
+  }
+
   @Get('macro-v2')
   @ApiOperation({ summary: 'Admin Control Center 2.0 Macro Economy statistics' })
   async macroV2(@Req() request: RequestWithSession) {
