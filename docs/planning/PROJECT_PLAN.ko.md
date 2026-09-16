@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.16.141
+> **현재 통합 버전:** v2026.09.16.152
 > **구현·증거 동기화:** 2026-09-15
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -313,3 +313,76 @@ punitive streak, loss-threat FOMO, fake scarcity, 과도한 알림을 피하고 
 - 기존 결정론 경제엔진은 항상 사용 가능한 classical lane으로 유지하며 AI 장애가 경제서비스 장애가 되지 않게 한다.
 - exact proposal hash, expiry, 집계판정, 최종 12개 좌석 증거를 저장한 뒤 결정론 중재를 수행한다.
 - 로컬 AI 모델/cache/dataset은 32GB 시스템 디스크가 아니라 100GB `/srv/moneyverse-data` 디스크에 저장한다.
+
+
+## 2026-09-16 — v2026.09.16.152 런타임 권위·릴리스·Work clock·교차기능 통합
+
+### 증거 스냅샷과 릴리스 권위
+
+- **통합 시점 application main:** `d6cf13d4236bd1298010ae5f165b15899356a59d`. 저장소가 계속 변경되므로 merge 직전 다시 확인한다.
+- `v2026.09.16.151` 런타임 증거는 Kubernetes/Flux가 현재 공개 권위라는 과거 가정을 대체한다. 현재 공개 Test/Production은 승인된 Debian 13 호스트의 분리된 systemd release와 로컬 PostgreSQL 권위 경로에서 서비스된다. NixOS/Kubernetes 노드는 **현재 Production 권위가 아니라 복구 대상**이다.
+- 공개 Test/Production과 application/GitOps desired 참조는 application SHA `3d87165f83bcb60903e85d4f3600fdf40074ef40`로 수렴했다고 기록됐다. Production Flux `apps`는 cluster-admin 접근과 DB 대사가 독립적으로 증명될 때까지 suspend 상태를 유지한다.
+- `REL-110-01 / P0`은 일반 exact-SHA divergence에서 **RECOVERY_IN_PROGRESS / AUTHORITY_SPLIT_CONTAINED**로 바꾼다. Kubernetes 접근, DB 대사, 통제된 Flux 복귀가 끝나기 전에는 DONE이 아니다.
+- current-main `Build Production Release #878`은 확인 시점에 `in_progress`였다. 문서 commit, candidate build, GitOps 선언, 과거 runtime convergence는 더 최신 main SHA가 운영 중이라는 증거가 아니다. 승격 SHA의 exact-main Test, backend/API/DB/user-flow QA, Production smoke가 없으면 fail-closed한다.
+
+### OPS-RUNTIME-152-01 — 이중 control-plane/권위 모호성
+
+- **우선순위/severity/status:** P0 / CRITICAL 운영 무결성 / IN PROGRESS.
+- **최초발견:** 2026-09-16 incident recovery, **최근재현:** current main의 v151 runtime-authority 기록.
+- **영향:** Debian systemd와 suspend된 Kubernetes를 동시에 권위로 오인하면 deploy/rollback, DB write, backup/restore, 장애대응, version truth가 잘못된 control plane을 향할 수 있다.
+- **확정원인:** 의도한 Flux/Kubernetes 제어면의 관리자 접근이 복구되지 않은 상태에서 Debian 호스트로 공개 서비스를 복구했고, 과거 문서는 런타임 권위 이동 뒤에도 Kubernetes를 권위로 설명했다.
+- **수정설계:** 운영이 소유하는 machine-readable `runtime-authority.json`을 두고 `environment`, `authority_generation`, `runtime_type`, host/workload identity, `application_sha`, `db_authority_id`, `desired_gitops_sha`, `flux_suspended`, `verified_at`, `evidence_run`, `rollback_target`을 기록한다. release automation은 시작 시 generation을 고정하고 실행 중 바뀌면 권위 변경 작업을 거부한다.
+- **DB/마이그레이션:** 권위 기록만을 위한 product-data migration은 하지 않는다. Kubernetes 재활성화 전에 현재 Debian PostgreSQL과 candidate cluster DB의 schema migration/checksum, ledger invariant, 핵심 row count, bounded reconciliation snapshot을 비교한다. 두 DB를 동시에 writable authority로 합치지 않고 하나의 source of truth를 정해 rehearsal된 단방향 migration/cutover를 수행한다.
+- **롤백:** Debian이 권위인 동안 rollback은 마지막 verified Debian release와 호환 DB state로 한다. Flux unsuspend를 rollback shortcut으로 사용하지 않는다.
+- **테스트/승격게이트:** exact-SHA Test, DB connectivity/schema, 비경제 probe read/write canary, ledger reconciliation, backup restore rehearsal, DNS/tunnel routing, process restart, stale GitOps negative test, authority-generation race test. 권위 모호성·dual writer·stale schema·rollback evidence 누락은 Production 차단이다.
+- **모니터링:** public `/api/version`, systemd working directory/release SHA, DB authority fingerprint, GitOps desired SHA, Flux suspend, schema version, backup freshness, reconciliation drift. 둘 이상의 권위 신호가 5분 넘게 다르면 alert한다.
+
+### OPS-FLUX-150-01 — privileged recovery 정리
+
+- jump-host/SSH 복구는 incident 도구이며 영구 deployment backdoor가 아니다. private key, kubeconfig, DB credential, bearer/session secret을 repository/artifact/일반 로그에 남기지 않는다.
+- 완료조건은 임시 authorized key/capability 제거, immutable operator/run audit, pinned host-key evidence, 명시적 Flux suspend/resume 결정, normal approval boundary 없이 workflow가 Production을 변경하지 못한다는 사후검증이다.
+- controller restart 전후 source revision, last-applied/attempted revision, readiness/event를 저장한다. restart 성공만으로 root cause를 종료하지 않는다.
+- 운영 API/자동화에도 OWASP ASVS 5.0 검증 원칙과 API Security 2023 access-control/resource-consumption 경계를 적용해 least privilege, bounded execution, explicit authorization, tamper-evident audit, fail-closed secret handling을 요구한다.
+
+### WORK-CLOCK-149-01 — dashboard/write clock 수렴
+
+- **우선순위/severity/status:** P1 정확성+경제무결성 영향 / HIGH / PR #370 FIX PENDING.
+- settlement는 가속 Moneyverse server clock을 사용하지만 legacy `work_my_dashboard` read model은 실제 Asia/Seoul day/week window를 사용할 수 있어 화면의 `daily_paid`/`weekly_paid`와 실제 settlement quota window가 달라질 수 있다.
+- migration 202에서 dashboard key를 settlement와 동일한 `server_game_day_key()` / `server_game_week_key()` 권위로 통일한다. 적용된 migration은 immutable이며 migration 번호 중복과 checksum 변경은 CI hard fail이다.
+- QA: 경계 -1/0/+1초, 가속 day/week rollover, 동시 completion, idempotent retry, restart, timezone 설정, stale dashboard cache, API/UI parity, real PostgreSQL regression. 모든 시험 시각에서 settlement/dashboard key가 동일해야 통과한다.
+- UX는 다음 reset을 server-authoritative time으로 표시하며 loading/error/offline에서 남은 quota를 추측하지 않는다. 접근성은 색상 없이 reset time/quota를 읽을 수 있어야 하고 모바일/데스크톱 의미는 동일하다.
+- 사업 KPI는 매출이 아니라 work completion, quota-confusion CS, retry/error, D1/D7/D30 job retention이다. retention이 좋아도 reward authority 불일치는 허용하지 않는다.
+
+### 현재 기능군 공통 구현 계약
+
+- **인증/세션/보안센터:** session actor가 권위다. OAuth/OIDC에는 해당되는 state/nonce/PKCE, session rotation/revocation, 민감변경 recent reauth를 적용한다. profile/admin/stock/bank/business/community/telemetry object에는 BOLA/BFLA negative test가 필수다.
+- **경제/인벤토리/상점/결제/구독:** 가치변경은 server-authoritative, integer-safe, transactional, idempotent다. client 표시가격은 settlement authority가 아니다. 실결제 SKU는 receipt/webhook 검증, entitlement reconciliation, refund/revoke/restore state machine, append-only audit가 필요하다. 미실측 conversion/ARPU/ARPPU/refund/churn/CAC/LTV는 `HYPOTHESIS`/`TEST TARGET`이다.
+- **직업/퀘스트/레벨/보상:** reward와 quota는 server game clock, durable receipt/idempotency, append-only ledger를 사용하고 client timer는 표시 전용이다.
+- **은행/대출/사업/가상주식:** simulated/game-only 표시를 강제한다. 이자, 대출자격, 주식체결, 사업정산, portfolio history는 DB/server 권위이며 실제 증권·예금·수익보장 표현을 금지한다.
+- **카지노/확률형:** themed UI는 하나의 typed server action schema에 매핑한다. client RNG/animation은 payout을 결정하지 않는다. eligibility, bet debit, server RNG, payout, ledger, audit, idempotency를 원자적으로 처리하고 retry는 동일 receipt를 반환한다.
+- **커뮤니티/친구/클럽/추천:** moderation/block/report, invite/referral anti-replay, rate limit이 필요하다. 추천보상은 server-side idempotent이며 fraud 관측이 가능해야 한다. multi-account signal 하나만으로 비공개 자동제재하지 않고 risk control/review와 조합한다.
+- **알림/Discord/email/push:** 외부전송은 post-commit/outbox 기반이다. 전송실패가 이미 commit된 경제 transaction을 rollback시키지 않으며 retry는 bounded/deduplicated다.
+- **검색/갤러리/upload/public content:** signature/content-type, size/dimension, generated storage name, 필요한 malware/content 검사, private-by-default ownership, safe download header를 적용한다. 공개 UGC는 publication과 별도의 moderation/index-policy 상태를 가진다.
+- **관리자/audit/analytics:** raw telemetry와 aggregate analytics 권한을 분리한다. raw IP/session/user-agent는 recent reauth+purpose+audit를 요구하고 retention/minimization을 적용한다. 가치/정책 변경 admin mutation은 명시적 function authorization과 reason/idempotency가 필요하다.
+- **backup/restore/운영:** backup 존재는 recovery 증거가 아니다. independent restore rehearsal, RPO/RTO, encrypted/off-host copy, schema/application compatibility, authority cutover를 검증한다. rehearsal되지 않은 restore는 `UNVERIFIED`다.
+
+### SEO 및 SEO 백엔드
+
+- 이번 회차 최신 Google Search 자료는 핵심 indexing 계약을 바꾸지 않았다. 2026-08-28 site reputation update는 third-party/sponsored/UGC governance에 계속 적용하며 host reputation을 빌리기 위한 제3자 section을 만들지 않는다.
+- public SEO read-model은 stable canonical identity, slug/redirect history, `updatedAt/lastModified`, language, ownership/editorial/sponsor/index-policy, image metadata, structured-data input을 제공한다. private/account/admin/transaction/casino-history/payment-callback은 강제 `noindex` + sitemap 제외다.
+- dynamic sitemap/robots는 publish/index 상태에서 결정론적으로 생성하고 search-engine limit 이전에 분할하며 stable `lastmod`를 제공하고 private object ID를 유출하지 않는다. 한국 시장 smoke에는 Naver robots 검증+sitemap discovery를 넣고 rendering/index policy 변경 배포 후 Google/Naver 대표 URL 검사를 수행한다.
+- 공개 페이지는 SSR/ISR 또는 동등한 crawlable server output, stable canonical, 실제 번역본에만 hreflang, 명확한 title/H1, 필요한 breadcrumb/internal link, OG, image dimensions/alt, visible content와 일치하는 JSON-LD를 사용한다. filter/query 변형은 canonical/noindex 처리하고 삭제는 404/410, 영구이동은 one-hop permanent redirect를 사용한다.
+- LCP/INP/CLS를 public template/device별 관측하고 robots/noindex/canonical regression, sitemap private leak, structured-data mismatch는 SEO release blocker다. KPI는 impressions→CTR→visit→signup→activation→D7/D30→payer/ad contribution이다.
+
+### 수익화와 unit economics 게이트
+
+- Google Play 수수료는 market/cohort/transaction에 따라 달라 하나의 고정 store rate를 쓰지 않는다. EEA/UK/US의 2026-06-30 구조에서 표준 자동갱신 subscription은 10%, 기타 new-install transaction은 20%, existing-install은 25%이며 Play Billing 적용 시 5% billing fee가 추가된다. 다른 시장은 실제 rollout 전 해당 기존/program 정책을 적용한다.
+- 모든 실결제 SKU는 `market`, effective-date/install cohort, recurring 여부, billing path/program, gross price, platform/billing fee, tax 가정, refund/fraud loss, entitlement/support/infra cost, contribution margin을 모델링한다. discount가 contribution margin/fairness guardrail을 깨면 거부한다.
+- 상점/결제/구독 SCALE은 기준 시나리오 contribution margin 양수, refund/fraud/support cost bounded, D7/D30·신뢰 악화 없음이 조건이다. conversion은 있으나 margin/retention 미달이면 ITERATE, 지속적 negative contribution 또는 P2W/dark-pattern/regulatory risk면 KILL한다.
+- 광고는 incremental ad net revenue에서 광고 유발 session/retention 감소와 support/privacy cost를 뺀 순효과로 본다. SEO는 CAC 절감과 activation/LTV, 보안/QA/운영은 사고·fraud·refund·downtime·operator cost 회피효과로 평가한다.
+
+### 릴리스/백로그 순서
+
+`P0 runtime authority/exact-SHA truth → P0 independent backup+restore evidence → P0 false-green/status truth → HIGH privileged recovery cleanup → HIGH migration sequence+Work clock convergence → HIGH repository required-check enforcement → HIGH economy/admin/casino authorization+integrity → P1 core correctness → payment/shop unit economics → SEO acquisition → retention/growth → accessibility/장기확장`.
+
+v152 통합은 문서만 변경한다. runtime code, product data/DB schema, Flux suspend, credential, Production을 변경하지 않는다. 실제 구현은 새 branch → tests/CI → exact-SHA Test → backend/API/DB/user-flow QA → main → Production promotion → smoke/rollback evidence 순서를 유지한다.
