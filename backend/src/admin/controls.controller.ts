@@ -136,8 +136,7 @@ export class RoleDesignationDto extends ReasonedCommandDto {
  *
  * The guard chain is the console's, plus two more on every write:
  * `ReauthGuard`, so the caller has proved control of their OAuth identity,
- * and `SecondFactorGuard`, so they typed a code into the dialog that named
- * what was about to change. Flipping a feature off, moving the economy to a
+ *; the retired second factor is no longer part of the request. Flipping a feature off, moving the economy to a
  * new policy version and handing somebody the superadmin designation are the
  * three things nobody else can now object to, so each of them costs both.
  *
@@ -190,7 +189,7 @@ export class AdminControlsController {
    * not a direct balance mutation. The operator explicitly requested that
    * this one switch require only the authenticated admin session, CSRF token,
    * reason and audit logging. This concrete route must stay above the parameter
-   * route so every other feature switch retains SecondFactorGuard.
+   * route while every other feature switch retains the same authorization boundary.
    */
   @Put('feature-switches/economy_auto_policy')
   @UseGuards(CsrfGuard)

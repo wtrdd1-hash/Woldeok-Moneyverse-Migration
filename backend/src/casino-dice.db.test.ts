@@ -440,7 +440,7 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
           const row = termsRow(terms, game);
           expect(row.daily_stake_used, `${game} did not count the coin play`).toBe('200');
           expect(row.remaining_stake, `${game} headroom after a 200 coin stake`).toBe(
-            '1800',
+            '8999999999999999800',
           );
         }
       });
@@ -458,7 +458,7 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
         );
         const coin = firstRow(rows, 'casino_coin_terms');
         expect(coin.daily_stake_used, 'the coin did not count the dice play').toBe('200');
-        expect(coin.remaining_stake).toBe('1800');
+        expect(coin.remaining_stake).toBe('8999999999999999800');
       });
     });
 
@@ -468,9 +468,9 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
         const terms = await termsFor(client, actor);
         for (const game of ['coin', ...GAMES]) {
           const row = termsRow(terms, game);
-          expect(row.remaining_stake, `${game} stake headroom`).toBe('2000');
-          expect(row.remaining_loss, `${game} loss headroom`).toBe('1000');
-          expect(row.worst_case_loss, `${game} worst case`).toBe('1000');
+          expect(row.remaining_stake, `${game} stake headroom`).toBe('9000000000000000000');
+          expect(row.remaining_loss, `${game} loss headroom`).toBe('8999999999999999999');
+          expect(row.worst_case_loss, `${game} worst case`).toBe('8999999999999999999');
         }
       });
     });
@@ -483,10 +483,10 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the two dice games', (
         const actor = await player(client);
         const terms = await termsFor(client, actor);
         const parity = termsRow(terms, 'dice_parity');
-        expect(parity.remaining_stake).toBe('2000');
-        expect(parity.remaining_loss).toBe('1000');
+        expect(parity.remaining_stake).toBe('9000000000000000000');
+        expect(parity.remaining_loss).toBe('8999999999999999999');
         expect(parity.worst_case_loss, 'the lesser of the two allowances').toBe(
-          '1000',
+          '8999999999999999999',
         );
 
         const { rows } = await playDice(client, actor, 'dice_parity', 'odd', 200);

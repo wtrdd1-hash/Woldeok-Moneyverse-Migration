@@ -248,7 +248,7 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
       });
     });
 
-    it('does not clamp a reward to the legacy daily cap', async () => {
+    it('clamps the final legacy reward to the administrator daily cap', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
         const chosen = await task(client, 'dev_refactor');
@@ -268,7 +268,17 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
            FROM public.work_verify_and_reward($1, $2, $3) AS reward`,
           [randomUUID(), actor, assignment],
         );
-        expect(rows[0]?.reward_amount).toBe(chosen.reward);
+        expect(rows[0]?.reward_amount).toBe('10');
+
+        const second = await assigned(client, actor, chosen.id);
+        await client.query('SELECT * FROM public.work_submit_completion($1, $2, $3, NULL)', [
+          randomUUID(), actor, second,
+        ]);
+        const error = await rejectionOf(() =>
+          client.query('SELECT * FROM public.work_verify_and_reward($1, $2, $3)', [randomUUID(), actor, second]),
+        );
+        expect((error as { code?: string }).code).toBe('22023');
+        expect(String((error as { message?: string }).message)).toContain('work reward quota reached');
       });
     });
 

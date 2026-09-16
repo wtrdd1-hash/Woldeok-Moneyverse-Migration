@@ -1,54 +1,42 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsUUID, registerDecorator } from 'class-validator';
-import { isWldAmount } from '@moneyverse/contract';
+import { IsIn, IsUUID, registerDecorator, type ValidationArguments, type ValidationOptions } from 'class-validator';
 
-/**
- * Accept both the legacy JSON integer shape and the new exact decimal-string
- * shape. Legacy numbers are accepted only while JavaScript can represent them
- * exactly; large WLD values must travel as strings.
- */
-function IsPositiveWldInput() {
-  return (target: object, propertyName: string): void => {
+/** Monetary request values prefer canonical decimal strings. Safe integer JSON
+ * numbers remain accepted for backward compatibility with older app builds. */
+const POSITIVE_WLD = /^[1-9][0-9]*$/;
+
+function IsWldRequestAmount(options?: ValidationOptions) {
+  return (object: object, propertyName: string): void => {
     registerDecorator({
-      name: 'isPositiveWldInput',
-      target: target.constructor,
+      name: 'isWldRequestAmount',
+      target: object.constructor,
       propertyName,
+      ...(options ? { options } : {}),
       validator: {
         validate(value: unknown): boolean {
-          if (typeof value === 'number') {
-            return Number.isSafeInteger(value) && value > 0;
-          }
           return (
-            typeof value === 'string' &&
-            isWldAmount(value) &&
-            value !== '0' &&
-            !value.startsWith('-')
+            (typeof value === 'string' && POSITIVE_WLD.test(value)) ||
+            (typeof value === 'number' && Number.isSafeInteger(value) && value > 0)
           );
         },
-        defaultMessage(): string {
-          return 'amount must be a positive whole WLD value';
+        defaultMessage(args: ValidationArguments): string {
+          return `${args.property} must be a positive WLD integer string`;
         },
       },
     });
   };
 }
 
-const WLD_INPUT_SCHEMA = {
-  oneOf: [
-    { type: 'string', pattern: '^[1-9][0-9]*$', example: '10000000000000000' },
-    { type: 'integer', minimum: 1, example: 1000 },
-  ],
-  description: 'Exact whole WLD amount. Use a decimal string for large values.',
-} as const;
+type WldRequestAmount = string | number;
 
 export class TransferDto {
   @ApiProperty({ format: 'uuid', description: 'Recipient user id' })
   @IsUUID()
   readonly recipientUserId!: string;
 
-  @ApiProperty(WLD_INPUT_SCHEMA)
-  @IsPositiveWldInput()
-  readonly amount!: string | number;
+  @ApiProperty({ oneOf: [{ type: 'string', pattern: '^[1-9][0-9]*$' }, { type: 'integer', minimum: 1 }], example: '100000000000000000000' })
+  @IsWldRequestAmount()
+  readonly amount!: WldRequestAmount;
 
   @ApiProperty({ format: 'uuid', description: 'Client-generated idempotency key' })
   @IsUUID()
@@ -60,9 +48,9 @@ export class BankMovementDto {
   @IsIn(['deposit', 'withdraw'])
   readonly direction!: 'deposit' | 'withdraw';
 
-  @ApiProperty(WLD_INPUT_SCHEMA)
-  @IsPositiveWldInput()
-  readonly amount!: string | number;
+  @ApiProperty({ oneOf: [{ type: 'string', pattern: '^[1-9][0-9]*$' }, { type: 'integer', minimum: 1 }] })
+  @IsWldRequestAmount()
+  readonly amount!: WldRequestAmount;
 
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
@@ -70,9 +58,9 @@ export class BankMovementDto {
 }
 
 export class BorrowDto {
-  @ApiProperty(WLD_INPUT_SCHEMA)
-  @IsPositiveWldInput()
-  readonly principalAmount!: string | number;
+  @ApiProperty({ oneOf: [{ type: 'string', pattern: '^[1-9][0-9]*$' }, { type: 'integer', minimum: 1 }] })
+  @IsWldRequestAmount()
+  readonly principalAmount!: WldRequestAmount;
 
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
@@ -80,9 +68,9 @@ export class BorrowDto {
 }
 
 export class RepayDto {
-  @ApiProperty(WLD_INPUT_SCHEMA)
-  @IsPositiveWldInput()
-  readonly amount!: string | number;
+  @ApiProperty({ oneOf: [{ type: 'string', pattern: '^[1-9][0-9]*$' }, { type: 'integer', minimum: 1 }] })
+  @IsWldRequestAmount()
+  readonly amount!: WldRequestAmount;
 
   @ApiProperty({ format: 'uuid' })
   @IsUUID()

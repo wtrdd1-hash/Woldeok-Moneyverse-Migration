@@ -2,7 +2,6 @@ import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { describe, expect, it } from 'vitest';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { ReauthGuard } from '../auth/guards/reauth.guard';
-import { SecondFactorGuard } from '../auth/guards/second-factor.guard';
 import { AdminControlsController } from './controls.controller';
 
 function guardsOn(method: keyof AdminControlsController): unknown[] {
@@ -19,13 +18,11 @@ describe('AdminControlsController feature switch guards', () => {
     const guards = guardsOn('setAutoPolicyFeatureSwitch');
     expect(guards).toContain(CsrfGuard);
     expect(guards).not.toContain(ReauthGuard);
-    expect(guards).not.toContain(SecondFactorGuard);
   });
 
   it('keeps every other feature switch behind CSRF without additional authentication', () => {
     const guards = guardsOn('setFeatureSwitch');
     expect(guards).toContain(CsrfGuard);
     expect(guards).not.toContain(ReauthGuard);
-    expect(guards).not.toContain(SecondFactorGuard);
   });
 });

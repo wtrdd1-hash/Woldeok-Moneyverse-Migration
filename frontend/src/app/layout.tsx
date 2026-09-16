@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     template: '%s · 월덕 머니버스',
   },
   description:
-    'Discord로 이어지는 월덕 커뮤니티의 가상경제 서비스. 활동 기록, WLD 보상, 게임 상점과 시즌 이벤트를 한곳에서 확인하세요.',
+    '월덕 머니버스는 Discord 커뮤니티와 연결된 가상경제·커뮤니티 게임 서비스입니다. 활동 기록과 WLD 게임 보상, 상점, 주식, 퀘스트, 시즌 이벤트를 한곳에서 살펴보고 커뮤니티와 함께 성장하는 게임 경제를 경험하세요.',
   applicationName: '월덕 머니버스',
   category: '커뮤니티 게임',
   keywords: [
@@ -92,12 +92,14 @@ export const metadata: Metadata = {
     description:
       'Discord 커뮤니티 활동을 기록하고 WLD 보상과 게임 상점을 함께 이용하는 월덕 머니버스입니다.',
     url: '/',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: '월덕 머니버스 — Discord 커뮤니티 가상경제' }],
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: '월덕 머니버스 — Discord 커뮤니티 가상경제',
     description:
       'Discord 커뮤니티 활동을 기록하고 WLD 보상과 게임 상점을 함께 이용하는 월덕 머니버스입니다.',
+    images: ['/opengraph-image'],
   },
 };
 

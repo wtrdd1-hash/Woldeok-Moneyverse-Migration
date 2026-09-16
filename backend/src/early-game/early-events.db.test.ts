@@ -122,12 +122,12 @@ describe.skipIf(!DATABASE_URL)('the early game events against a real database', 
     };
 
     /** The day the functions mean, named by the database rather than by Node. */
-    const seoulToday = async (client: PoolClient): Promise<string> => {
+    const serverGameDay = async (client: PoolClient): Promise<string> => {
       const day = await client.query<{ day: string }>(
-        `SELECT (clock_timestamp() AT TIME ZONE 'Asia/Seoul')::date::text AS day`,
+        'SELECT public.server_game_day_key()::text AS day',
       );
       const value = day.rows[0]?.day;
-      if (value === undefined) throw new Error('the database did not answer with a Seoul date');
+      if (value === undefined) throw new Error('the database did not answer with a Moneyverse game day');
       return value;
     };
 
@@ -180,7 +180,7 @@ describe.skipIf(!DATABASE_URL)('the early game events against a real database', 
       await rolledBack(async (client) => {
         const actor = await member(client);
         await onlyEvent(client, 'lost_and_found');
-        const today = await seoulToday(client);
+        const today = await serverGameDay(client);
 
         const receipt = await client.query<{
           event_code: string;
@@ -218,7 +218,7 @@ describe.skipIf(!DATABASE_URL)('the early game events against a real database', 
       await rolledBack(async (client) => {
         const actor = await member(client);
         await onlyEvent(client, 'rainy_day');
-        const today = await seoulToday(client);
+        const today = await serverGameDay(client);
         const key = randomUUID();
 
         await client.query('SELECT * FROM public.early_event_claim($1, $2, $3::date)', [
@@ -249,7 +249,7 @@ describe.skipIf(!DATABASE_URL)('the early game events against a real database', 
       await rolledBack(async (client) => {
         const actor = await member(client);
         await onlyEvent(client, 'rainy_day');
-        const today = await seoulToday(client);
+        const today = await serverGameDay(client);
 
         await client.query('SELECT * FROM public.early_event_claim($1, $2, $3::date)', [
           randomUUID(),
@@ -280,13 +280,13 @@ describe.skipIf(!DATABASE_URL)('the early game events against a real database', 
       });
     });
 
-    it('refuses a day that is not today in Seoul', async () => {
+    it('refuses a day that is not the current Moneyverse game day', async () => {
       await rolledBack(async (client) => {
         const actor = await member(client);
         const error = await rejectionOf(() =>
           client.query(
             `SELECT * FROM public.early_event_claim($1, $2,
-               ((clock_timestamp() AT TIME ZONE 'Asia/Seoul')::date + 1))`,
+               (public.server_game_day_key() + 1))`,
             [randomUUID(), actor],
           ),
         );
@@ -304,7 +304,7 @@ describe.skipIf(!DATABASE_URL)('the early game events against a real database', 
       await rolledBack(async (client) => {
         const actor = await member(client);
         await onlyEvent(client, 'lucky_box');
-        const today = await seoulToday(client);
+        const today = await serverGameDay(client);
 
         await client.query('SELECT * FROM public.early_event_claim($1, $2, $3::date)', [
           randomUUID(),
@@ -335,7 +335,7 @@ describe.skipIf(!DATABASE_URL)('the early game events against a real database', 
       await rolledBack(async (client) => {
         const actor = await member(client);
         await onlyEvent(client, 'bulk_order');
-        const today = await seoulToday(client);
+        const today = await serverGameDay(client);
 
         await client.query('SAVEPOINT before_any_work');
         const error = await rejectionOf(() =>

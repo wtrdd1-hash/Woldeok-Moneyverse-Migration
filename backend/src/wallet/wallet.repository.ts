@@ -4,7 +4,6 @@ import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 export class WalletInputError extends Error {
   constructor(message: string) {
@@ -20,45 +19,10 @@ export function requireUuid(value: unknown, field: string): string {
   return value.toLowerCase();
 }
 
-/**
- * Canonicalize a positive WLD input without ever passing a large amount
- * through JavaScript Number. Legacy safe integers remain accepted for old
- * clients; values beyond 2^53 must be decimal strings.
- */
-export function requirePositiveWldInput(value: unknown, field: string): string {
-  if (typeof value === 'number') {
-    if (!Number.isSafeInteger(value) || value <= 0) {
-      throw new WalletInputError(`${field} must be a positive whole WLD value`);
-    }
-    return String(value);
-  }
-  if (
-    typeof value === 'string' &&
-    isWldAmount(value) &&
-    value !== '0' &&
-    !value.startsWith('-')
-  ) {
-    return value;
-  }
-  throw new WalletInputError(`${field} must be a positive canonical WLD integer string`);
-}
-
-/**
- * Historical name kept so service and older tests do not need a flag-day
- * change. It now accepts exact decimal strings as well as legacy safe numbers.
- */
-export function requirePositiveSafeInteger(value: unknown, field: string): string | number {
-  if (typeof value === 'number') {
-    if (!Number.isSafeInteger(value) || value <= 0) {
-      throw new WalletInputError(`${field} must be a positive safe integer`);
-    }
-    return value;
-  }
-  try {
-    return requirePositiveWldInput(value, field);
-  } catch {
-    throw new WalletInputError(`${field} must be a positive safe integer or canonical WLD string`);
-  }
+export function requirePositiveWld(value: unknown, field: string): string {
+  if (typeof value === 'number' && Number.isSafeInteger(value) && value > 0) return String(value);
+  if (typeof value === 'string' && /^[1-9][0-9]*$/.test(value)) return value;
+  throw new WalletInputError(`${field} must be a positive safe integer or canonical WLD integer string`);
 }
 
 export function requireRecentLimit(value: unknown): number {
@@ -68,13 +32,7 @@ export function requireRecentLimit(value: unknown): number {
   return value;
 }
 
-function requireRewardDate(value: unknown): string {
-  if (typeof value !== 'string' || !DATE_PATTERN.test(value)) {
-    throw new WalletInputError('reward date must be YYYY-MM-DD');
-  }
-  return value;
-}
-
+/** accounts / account_balances columns: packages/database/init/001-economy-core.sql */
 export interface WalletBalanceRow {
   readonly account_type: string;
   readonly available_amount: string;
@@ -143,13 +101,12 @@ export interface WalletRepayRow {
 export interface WalletTransferInput {
   readonly actorUserId: string;
   readonly recipientUserId: string;
-  readonly amount: string | number;
+  readonly amount: string;
   readonly idempotencyKey: string;
 }
 
 export interface WalletClaimDailyInput {
   readonly actorUserId: string;
-  readonly rewardDate: string;
   readonly idempotencyKey: string;
 }
 
@@ -161,20 +118,20 @@ export interface WalletClaimWorkInput {
 export interface WalletMoveBankBalanceInput {
   readonly actorUserId: string;
   readonly direction: unknown;
-  readonly amount: string | number;
+  readonly amount: string;
   readonly idempotencyKey: string;
 }
 
 export interface WalletBorrowInput {
   readonly actorUserId: string;
-  readonly principalAmount: string | number;
+  readonly principalAmount: string;
   readonly idempotencyKey: string;
 }
 
 export interface WalletRepayInput {
   readonly actorUserId: string;
   readonly loanId: string;
-  readonly amount: string | number;
+  readonly amount: string;
   readonly idempotencyKey: string;
 }
 
@@ -241,7 +198,7 @@ export class PostgresWalletRepository {
   async transfer({ actorUserId, recipientUserId, amount, idempotencyKey }: WalletTransferInput): Promise<{ transactionId: string }> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const recipient = requireUuid(recipientUserId, 'recipient user id');
-    const transferAmount = requirePositiveWldInput(amount, 'amount');
+    const transferAmount = requirePositiveWld(amount, 'amount');
     const key = requireUuid(idempotencyKey, 'idempotency key');
     if (actor === recipient) throw new WalletInputError('cannot transfer to yourself');
     const row = await queryOne<WalletTransferRow>(
@@ -253,15 +210,14 @@ export class PostgresWalletRepository {
     return { transactionId: requireUuid(row.transaction_id, 'database transaction id') };
   }
 
-  async claimDaily({ actorUserId, rewardDate, idempotencyKey }: WalletClaimDailyInput): Promise<WalletRewardRow> {
+  async claimDaily({ actorUserId, idempotencyKey }: WalletClaimDailyInput): Promise<WalletRewardRow> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
-    const date = requireRewardDate(rewardDate);
     const key = requireUuid(idempotencyKey, 'idempotency key');
     const row = await queryOne<WalletRewardRow>(
       this.pool,
       `SELECT transaction_id::text AS transaction_id, amount::text AS amount, replayed
-       FROM public.economy_claim_daily($1, $2, $3)`,
-      [key, actor, date],
+       FROM public.economy_claim_daily($1, $2, public.server_game_day_key())`,
+      [key, actor],
     );
     if (!row?.transaction_id) throw new Error('database did not return a daily-reward receipt');
     return row;
@@ -295,7 +251,7 @@ export class PostgresWalletRepository {
   async moveBankBalance({ actorUserId, direction, amount, idempotencyKey }: WalletMoveBankBalanceInput): Promise<WalletBankMoveRow> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
-    const transferAmount = requirePositiveWldInput(amount, 'amount');
+    const transferAmount = requirePositiveWld(amount, 'amount');
     if (direction !== 'deposit' && direction !== 'withdraw')
       throw new WalletInputError('invalid bank direction');
     const row = await queryOne<WalletBankMoveRow>(
@@ -321,12 +277,10 @@ export class PostgresWalletRepository {
   async borrow({ actorUserId, principalAmount, idempotencyKey }: WalletBorrowInput): Promise<WalletBorrowRow> {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
-    const principal = requirePositiveWldInput(principalAmount, 'principal amount');
+    const principal = requirePositiveWld(principalAmount, 'principal amount');
     const row = await queryOne<WalletBorrowRow>(
       this.pool,
-      `SELECT loan_id::text, principal_amount::text, interest_amount::text,
-              outstanding_amount::text, transaction_id::text, replayed
-       FROM public.bank_borrow($1,$2,$3::numeric)`,
+      `SELECT loan_id::text, principal_amount::text, interest_amount::text, outstanding_amount::text, transaction_id::text, replayed FROM public.bank_borrow($1,$2,$3::numeric)`,
       [key, actor, principal],
     );
     if (!row?.loan_id) throw new Error('database did not return a loan receipt');
@@ -337,12 +291,10 @@ export class PostgresWalletRepository {
     const actor = requireUuid(actorUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
     const loan = requireUuid(loanId, 'loan id');
-    const payment = requirePositiveWldInput(amount, 'amount');
+    const payment = requirePositiveWld(amount, 'amount');
     const row = await queryOne<WalletRepayRow>(
       this.pool,
-      `SELECT loan_id::text, paid_amount::text, outstanding_amount::text,
-              transaction_id::text, replayed
-       FROM public.bank_repay($1,$2,$3,$4::numeric)`,
+      `SELECT loan_id::text, paid_amount::text, outstanding_amount::text, transaction_id::text, replayed FROM public.bank_repay($1,$2,$3,$4::numeric)`,
       [key, actor, loan, payment],
     );
     if (!row?.loan_id) throw new Error('database did not return a repayment receipt');

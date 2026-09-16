@@ -1,22 +1,16 @@
 /**
- * Money in this application is an exact integer string, never a JavaScript number.
- * PostgreSQL stores authoritative WLD balances in unbounded-precision NUMERIC
- * columns; node-postgres returns those values as strings. Branding the type
- * prevents accidental conversion to IEEE-754 numbers in application code.
+ * Money in this application is an integer string, never a JavaScript number.
+ * Database money columns are NUMERIC integer values and node-postgres returns
+ * them as strings. Services may use BigInt only for exact in-process arithmetic. Branding the type
+ * makes it a compile error to put a number where an amount belongs.
  */
 export type WldAmount = string & { readonly __wld: unique symbol };
 
-/** PostgreSQL NUMERIC's documented maximum digits before the decimal point. */
-export const WLD_MAX_DIGITS = 131_072;
-
-// Canonical: no leading zeros, no plus sign, no exponent, no separators and no
-// negative zero. WLD is integer-only. The digit limit mirrors PostgreSQL's
-// physical NUMERIC maximum rather than a game/economy policy limit.
+// Canonical: no leading zeros, no plus sign, no exponent, no separators, no
+// negative zero. Monetary magnitude is intentionally not capped here; HTTP body
+// limits remain the abuse-control boundary, while PostgreSQL NUMERIC stores the
+// authoritative integer exactly.
 const CANONICAL_INTEGER = /^(0|-?[1-9][0-9]*)$/;
-
-function digitCount(value: string): number {
-  return value.startsWith('-') ? value.length - 1 : value.length;
-}
 
 export function isWldAmount(value: unknown): value is WldAmount {
   return (

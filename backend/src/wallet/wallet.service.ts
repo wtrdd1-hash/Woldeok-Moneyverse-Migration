@@ -20,7 +20,7 @@ import type {
 import {
   PostgresWalletRepository,
   WalletInputError,
-  requirePositiveSafeInteger,
+  requirePositiveWld,
   requireRecentLimit,
   requireUuid,
 } from './wallet.repository';
@@ -295,21 +295,6 @@ function normalizeTransactions(rows: readonly WalletTransactionRow[]): WalletTra
   });
 }
 
-function koreaDate(now: Date): string {
-  if (!(now instanceof Date) || Number.isNaN(now.valueOf()))
-    throw new TypeError('clock must return a valid Date');
-  const parts = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Seoul',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(now);
-  const year = parts.find((part) => part.type === 'year')?.value;
-  const month = parts.find((part) => part.type === 'month')?.value;
-  const day = parts.find((part) => part.type === 'day')?.value;
-  return `${year}-${month}-${day}`;
-}
-
 /**
  * Application-facing wallet use cases. The authenticated user ID is a method
  * argument supplied by the session layer; no request DTO can choose a sender.
@@ -364,7 +349,7 @@ export class WalletService {
   ): Promise<WalletTransferReceipt> {
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
     const recipient = requireUuid(recipientUserId, 'recipient user id');
-    const transferAmount = requirePositiveSafeInteger(amount, 'amount');
+    const transferAmount = requirePositiveWld(amount, 'amount');
     const key = requireUuid(idempotencyKey, 'idempotency key');
     if (actorUserId === recipient) throw new WalletInputError('cannot transfer to yourself');
 
@@ -388,11 +373,7 @@ export class WalletService {
   ): Promise<WalletRewardReceipt> {
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
     const key = requireUuid(idempotencyKey, 'idempotency key');
-    const reward = await this.repository.claimDaily({
-      actorUserId,
-      rewardDate: koreaDate(this.clock()),
-      idempotencyKey: key,
-    });
+    const reward = await this.repository.claimDaily({ actorUserId, idempotencyKey: key });
     if (typeof reward.replayed !== 'boolean')
       throw new Error('database returned an invalid daily-reward receipt');
     return {
@@ -447,7 +428,7 @@ export class WalletService {
     const receipt = await this.repository.moveBankBalance({
       actorUserId,
       direction,
-      amount: requirePositiveSafeInteger(amount, 'amount'),
+      amount: requirePositiveWld(amount, 'amount'),
       idempotencyKey: requireUuid(idempotencyKey, 'idempotency key'),
     });
     return { transactionId: requireUuid(receipt.transaction_id, 'database transaction id') };
@@ -476,7 +457,7 @@ export class WalletService {
     const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
     const receipt = await this.repository.borrow({
       actorUserId,
-      principalAmount: requirePositiveSafeInteger(principalAmount, 'principal amount'),
+      principalAmount: requirePositiveWld(principalAmount, 'principal amount'),
       idempotencyKey: requireUuid(idempotencyKey, 'idempotency key'),
     });
     return {
@@ -496,7 +477,7 @@ export class WalletService {
     const receipt = await this.repository.repay({
       actorUserId,
       loanId: requireUuid(loanId, 'loan id'),
-      amount: requirePositiveSafeInteger(amount, 'amount'),
+      amount: requirePositiveWld(amount, 'amount'),
       idempotencyKey: requireUuid(idempotencyKey, 'idempotency key'),
     });
     return {
@@ -507,5 +488,3 @@ export class WalletService {
     };
   }
 }
-
-export { koreaDate };

@@ -36,9 +36,9 @@ describe('wldAmount', () => {
     expect(() => wldAmount('1e3', 'balance')).toThrow(TypeError);
   });
 
-  it('rejects a value wider than PostgreSQL NUMERIC can hold', () => {
-    const tooWide = `9${'0'.repeat(WLD_MAX_DIGITS)}`;
-    expect(() => wldAmount(tooWide, 'balance')).toThrow(TypeError);
+  it('accepts magnitudes beyond bigint and the former 38-digit storage contract', () => {
+    const huge = `9${'0'.repeat(199)}`;
+    expect(wldAmount(huge, 'balance')).toBe(huge);
   });
 
   it('names the field in the error message', () => {
