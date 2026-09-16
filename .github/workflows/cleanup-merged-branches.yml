@@ -7,11 +7,12 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: '17 3 * * *'
+    - cron: '7,37 * * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
   group: cleanup-merged-branches
@@ -42,24 +43,49 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - name: Delete only branches fully contained in main
+      - name: Close stale PRs and delete branches fully contained in main
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
           main_sha="$(gh api "repos/${GITHUB_REPOSITORY}/branches/main" --jq '.commit.sha')"
+          deleted=0
+          closed=0
+
           gh api --paginate "repos/${GITHUB_REPOSITORY}/branches?per_page=100" --jq '.[].name' |
           while IFS= read -r branch; do
             case "$branch" in
-              main|production|staging|develop|release/*) continue ;;
+              main|production|staging|develop|release/*|planning/*) continue ;;
             esac
+
             encoded="$(jq -rn --arg v "$branch" '$v|@uri')"
             cmp="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${encoded}...${main_sha}" 2>/dev/null || true)"
             [[ -n "$cmp" ]] || continue
             behind="$(jq -r '.behind_by // -1' <<<"$cmp")"
+
             if [[ "$behind" == "0" ]]; then
+              pr="$(
+                gh api --method GET "repos/${GITHUB_REPOSITORY}/pulls" \
+                  -f state=open -f base=main -f head="${GITHUB_REPOSITORY_OWNER}:${branch}" -f per_page=10 \
+                  --jq '.[0].number // empty'
+              )"
+              if [[ -n "$pr" ]]; then
+                gh api --method PATCH "repos/${GITHUB_REPOSITORY}/pulls/${pr}" -f state=closed >/dev/null || true
+                closed=$((closed + 1))
+                echo "closed stale contained PR #${pr}: ${branch}"
+              fi
+
               echo "deleting branch fully contained in main: $branch"
-              gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${encoded}" || true
+              if gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${encoded}" >/dev/null 2>&1; then
+                deleted=$((deleted + 1))
+              fi
             fi
           done
+
+          {
+            echo '## Contained branch cleanup summary'
+            echo
+            echo "- stale PRs closed: ${closed}"
+            echo "- contained branches deleted: ${deleted}"
+          } >> "$GITHUB_STEP_SUMMARY"
