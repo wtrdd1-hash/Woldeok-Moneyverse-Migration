@@ -9,18 +9,18 @@ Expand the Moneyverse AI economy planning into an adversarial multi-agent archit
 - [x] Re-read the current AI economy controller specification before editing.
 - [x] Re-read the current economy simulation/tuning specification before editing.
 - [x] Reconfirm repository documentation and worklog standards.
-- [ ] Add separately trained specialist-agent roles and adversarial debate protocol.
-- [ ] Add ensemble/judge/safety-agent decision gates and anti-collusion requirements.
-- [ ] Add bounded stock price formation/market-maker policy automation without direct arbitrary price setting.
-- [ ] Add bounded shop price automation with elasticity, affordability, and cooldown constraints.
-- [ ] Add automatic product/SKU proposal and generation pipeline with human-approved templates and risk classes.
-- [ ] Add training/data/model registry requirements for each agent.
-- [ ] Add test/shadow/canary/rollback requirements.
-- [ ] Update Korean counterpart.
-- [ ] Update internal update log and GitHub-facing planning history.
-- [ ] Re-read the latest GitHub planning source mid-task and reconcile conflicts.
-- [ ] Validate documentation consistency and record deployment state.
+- [x] Add separately trained specialist-agent roles and adversarial debate protocol.
+- [x] Add ensemble/judge/safety-agent decision gates and anti-collusion requirements.
+- [x] Add bounded stock price formation/market-maker policy automation without direct arbitrary price setting.
+- [x] Add bounded shop price automation with elasticity, affordability, and cooldown constraints.
+- [x] Add automatic product/SKU proposal and generation pipeline with human-approved templates and risk classes.
+- [x] Add training/data/model registry requirements for each agent.
+- [x] Add test/shadow/canary/rollback requirements.
+- [x] Update Korean counterpart.
+- [x] Update internal update log and GitHub-facing planning history.
+- [x] Re-read the latest GitHub planning source mid-task and reconcile conflicts.
+- [x] Validate documentation consistency and record deployment state.
 
-## Current state
+## Final state
 
-Planning work started on branch `planning/multi-agent-economy-v2026.09.16.1`. No runtime or production economy values are changed by this planning task.
+Updated the English canonical plan, Korean counterpart, simulation extension, planning changelog and update log. `git diff --check` passes. This is documentation/planning only, so no Test or Production deployment was performed.

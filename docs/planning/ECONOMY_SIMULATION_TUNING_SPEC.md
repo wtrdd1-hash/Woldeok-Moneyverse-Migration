@@ -1,8 +1,8 @@
 # Woldeok Moneyverse — Economy Simulation & Dynamic Sink Tuning Specification
 
-> Version: v2026.09.13.4
+> Version: v2026.09.16.136
 > Status: Living implementation-oriented planning specification
-> Date: 2026-09-13
+> Date: 2026-09-16
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
 > Korean counterpart: [ECONOMY_SIMULATION_TUNING_SPEC.ko.md](ECONOMY_SIMULATION_TUNING_SPEC.ko.md)
 
@@ -351,3 +351,13 @@ This planning slice is complete when:
 - changelog and worklog record research, runtime-verification status and next steps.
 
 Runtime implementation remains separate and requires development branch -> isolated Test -> backend/DB/API/UI verification -> Production.
+
+## 21. Multi-agent adversarial simulation extension — v2026.09.16.136
+
+Scenario Lab SHALL support independent specialist-agent predictions and disagreement analysis for stock price formation, shop repricing and generated catalog items. A run stores per-agent estimates before debate, critiques, revised estimates, ensemble/judge output, deterministic guardrail results and the final counterfactual frontier.
+
+Stock scenarios must model at least fundamentals, flow/liquidity, momentum/reversal, common-factor shocks, manipulation attempts, circuit breakers and stale-market behavior. The AI does not directly choose an unconstrained price; it supplies bounded components to a deterministic price-formation model.
+
+Shop scenarios must model elasticity uncertainty, substitution/cannibalization, protected-cohort affordability, sink burn, retention and complaint/support guardrails. Product-generation scenarios must compare `do nothing`, `reprice existing catalog`, `rotate existing content` and `publish generated low-risk variant` before a new SKU is eligible for automatic rollout.
+
+A multi-agent consensus without independent evidence is not sufficient. Large disagreement, correlated assumptions or failed red-team/integrity agents force proposal-only/shadow behavior.

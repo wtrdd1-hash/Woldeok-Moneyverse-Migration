@@ -1,8 +1,8 @@
 # 월덕 머니버스 — 경제 시뮬레이션 및 동적 소비처 조정 명세
 
-> 버전: v2026.09.13.4
+> 버전: v2026.09.16.136
 > 상태: Living 구현 지향 기획 명세
-> 날짜: 2026-09-13
+> 날짜: 2026-09-16
 > 상위 명세: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
 > 영문 기준본: [ECONOMY_SIMULATION_TUNING_SPEC.md](ECONOMY_SIMULATION_TUNING_SPEC.md)
 
@@ -349,3 +349,13 @@ Unity 공식 문서는 2026-09-08부터 신규 Unity Economy 프로젝트 가입
 - changelog/worklog에 조사근거, 실제서비스 검증상태, 다음단계 기록
 
 런타임 구현은 별도 개발 브랜치 -> isolated Test -> backend/DB/API/UI 검증 -> Production 순서를 따른다.
+
+## 21. 다중 에이전트 적대적 시뮬레이션 확장 — v2026.09.16.136
+
+Scenario Lab은 주식 가격형성, 상점 가격조절, 생성 카탈로그 상품에 대해 전문 에이전트별 독립 예측과 불일치 분석을 지원해야 한다. 각 run은 토론 전 에이전트별 추정, 비판, 수정 추정, ensemble/judge 결과, deterministic guardrail 결과, 최종 counterfactual frontier를 저장한다.
+
+주식 scenario는 최소한 펀더멘털, flow/liquidity, momentum/reversal, 공통요인 shock, 조작 시도, circuit breaker, stale-market 동작을 모델링한다. AI가 무제한 가격을 직접 고르지 않고 결정론적 가격형성 모델에 제한형 component를 제공한다.
+
+상점 scenario는 가격탄력성 uncertainty, 대체/잠식효과, 보호 cohort 구매력, sink burn, retention, complaint/support guardrail을 모델링한다. 상품생성 scenario는 신규 SKU 자동 rollout 전에 `아무것도 하지 않음`, `기존 catalog repricing`, `기존 content rotation`, `저위험 생성 variant 게시`를 비교해야 한다.
+
+독립 증거 없는 다중 에이전트 합의만으로는 충분하지 않다. 큰 불일치, 상관된 가정, red-team/integrity agent 실패 시 proposal-only/shadow로 강등한다.

@@ -1,8 +1,8 @@
 # 월덕 머니버스 — AI 경제 컨트롤러 명세
 
-> 버전: v2026.09.13.24
+> 버전: v2026.09.16.136
 > 상태: Living 구현 지향 기획 명세
-> 날짜: 2026-09-13
+> 날짜: 2026-09-16
 > 상위 명세: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
 > 영문 기준본: [AI_ECONOMY_CONTROLLER_SPEC.md](AI_ECONOMY_CONTROLLER_SPEC.md)
 
@@ -583,6 +583,201 @@ versioned proposal과 사람이 이해할 수 있는 근거를 생성한다. 전
 10. 강제 rollback -> 이전 config 복구, ledger 무변경
 11. 관리자 입력 중 -> 비파괴 새로고침
 12. 무권한 mutation -> 거부 및 감사기록
+
+
+## 25. 적대적 다중 에이전트 경제 위원회
+
+Moneyverse는 하나의 거대한 경제 모델 대신 서로 독립 학습 또는 독립 적응된 전문 에이전트를 사용한다. 목적은 의도적인 불일치다. 각 에이전트는 서로 다른 관점에서 최적화하고 다른 에이전트의 가정을 공격해 운영 정책 적용 전에 숨은 실패를 찾는다.
+
+### 25.1 필수 전문 에이전트
+
+초기 역할은 다음을 포함한다.
+
+- `MACRO_AGENT`: WLD 공급, 인플레이션, 구매력, 자산집중, 장기 안정성
+- `PLAYER_WELFARE_AGENT`: 신규유저 구매력, 리텐션, 공정성, 회복경로
+- `SINK_COMMERCE_AGENT`: 상점 수요, sink 사용, 가격탄력성, 카탈로그 공백, 상품수명주기
+- `STOCK_FUNDAMENTAL_AGENT`: 가상기업 펀더멘털, 섹터 상태, 장기 가치 기준
+- `STOCK_FLOW_AGENT`: 주문흐름, 유동성, 거래량, 단기 수급
+- `STOCK_MOMENTUM_AGENT`: 모멘텀/반전과 변동성 국면
+- `MARKET_INTEGRITY_AGENT`: 시세조작, wash/self-trading, 순환거래, stale market, 비정상 변동
+- `BUSINESS_AGENT`: 사업 수익성, 유지비 부담, 재고/수요, 확장경제
+- `CASINO_RISK_AGENT`: 게임 전용 카지노의 발행/소각·악용·집중위험. 실제 돈 도박 최적화는 금지
+- `ABUSE_AGENT`: 파밍, 자동화, 다계정, exploit 왜곡
+- `CAUSAL_AGENT`: 관측 변화가 정책 때문인지 이벤트/교란변수 때문인지 반박
+- `RED_TEAM_AGENT`: 2차 효과, Goodhart식 KPI 악용, 최악조건 탐색
+- `AUDITOR_AGENT`: 증거, 모델/버전, 재현성, policy registry 준수 확인
+- `JUDGE_AGENT`: 불일치를 요약하고 허용 가능한 후보집합을 만들지만 결정론적 guardrail은 우회할 수 없음
+
+가능하면 에이전트별 prompt, adapter/checkpoint, 학습데이터 slice, 평가 suite를 분리한다. 같은 prompt/context에 이름만 여러 개 붙이는 것은 독립 분석으로 인정하지 않는다.
+
+### 25.2 토론 프로토콜
+
+중요 의사결정은 최소 3단계를 거친다.
+
+1. **독립 제안:** 다른 에이전트 답을 보지 않고 결론 작성
+2. **적대적 비판:** 모든 제안에 반대 비판 1개 이상, 안전/무결성 비판 1개 이상
+3. **반론·수정:** 원래 증거와 변경 delta를 남긴 채 추정치를 수정 가능
+
+vote/disagreement matrix, 근거, 기각된 논리, 최종 rationale을 저장한다. 높은 불일치는 자동화를 줄이는 신호이지 단순 평균할 이유가 아니다.
+
+`MODEL_DISAGREEMENT_HIGH`, 증거부족, 상관된 실패, 에이전트 담합 의심 시 `RECOMMEND` 또는 `SHADOW`만 허용한다.
+
+### 25.3 개별 학습과 담합 방지
+
+에이전트 레지스트리는 최소 다음을 기록한다.
+
+```text
+agent_id
+role
+base_model
+adapter_or_checkpoint
+training_dataset_version
+feature_allowlist
+tool_allowlist
+objective_vector
+forbidden_objectives
+evaluation_suite_version
+calibration_version
+last_validation_at
+artifact_hash
+```
+
+가능한 데이터는 시간 기준으로 분리해 leakage를 줄인다. 서로 토론하는 모든 에이전트를 동일 preference label로만 fine-tuning하지 않는다. 평가에는 상충 시나리오, 조작 시도, 오염 telemetry, regime shift, 미관측 카탈로그/시장 상태를 포함한다.
+
+Production에서 어떤 에이전트도 다른 에이전트의 weight를 직접 수정할 수 없다. 학습과 모델 승격은 별도의 버전형 release 절차다.
+
+## 26. 가상주식 자동 가격형성
+
+주식시장은 자동으로 동작할 수 있지만 AI 에이전트가 임의의 절대 WDX 가격을 직접 쓰면 안 된다.
+
+### 26.1 가격 위원회
+
+종목/tick마다 주식 전문 에이전트들이 다음과 같은 제한형 component를 독립 추정한다.
+
+- fundamental anchor return
+- demand/order-flow pressure
+- liquidity spread/impact
+- momentum/reversal contribution
+- sector/common-factor contribution
+- event shock contribution
+- volatility regime
+- manipulation/integrity penalty
+- uncertainty interval
+
+결정론적 `StockPriceFormationEngine`이 버전형 공식과 hard bound 안에서 allowlist component만 결합한다. rounding, 정수정밀도, 최소/최대가격, tick당 최대수익률, volatility clamp, circuit breaker, stale-data 동작, idempotent tick identity는 이 엔진이 소유한다.
+
+### 26.2 자동화 단계
+
+- `SHADOW`: 권위 ticker 옆에서 가상 tick 계산
+- `BOUNDED_AUTO`: 검증 후 agent component가 권위 결정론적 가격 엔진 입력으로 사용 가능
+- `FREEZE`: 무결성/stale/reconciliation 문제 시 AI-derived component를 중지하고 안전 pause/fallback 계약 사용
+
+자동시장 운영은 종목 freshness, replay 방어, 조작감시, 저장된 component 입력으로부터의 결정론적 재현, 전체 tick audit trail을 요구한다.
+
+### 26.3 시장무결성 제한
+
+다음은 금지한다.
+
+- 특정 사용자 보유주식의 이익/손실을 만들기 위한 가격 설정
+- 유료지출·광고·스폰서십·사용자 identity를 유리한 가격입력으로 사용
+- private holdings를 본 뒤 특정 사용자/cohort에 불리하게 가격을 의도 이동
+- circuit breaker/stale-market 제한 우회
+- 과거 가격/ledger trade 사후 재작성
+
+## 27. 상점 자동 가격조절
+
+명시적으로 eligible한 SKU는 제한형 자동 가격최적화를 사용할 수 있다.
+
+```text
+auto_price_enabled
+base_price
+min_price
+max_price
+max_step_bps
+max_drift_bps_7d
+cooldown_minutes
+minimum_sample_size
+elasticity_estimate
+elasticity_uncertainty
+affordability_floor
+protected_new_user
+prestige_only
+requires_human_approval
+```
+
+commerce, welfare, macro, causal, red-team agent가 중요한 가격변경을 토론하고 최종 범위는 deterministic validator가 결정한다. 필수 progression, starter item, 유료연계 혜택, 경쟁/P2W 민감 상품은 사람 승인 전용이다.
+
+conversion, WLD burn, purchase days, retention, complaint rate, cohort affordability를 함께 평가한다. burn만 좋아지고 보호된 affordability/welfare 제약을 위반하는 가격인상은 거부한다.
+
+## 28. 자동 상품 및 SKU 생성
+
+Moneyverse는 콘텐츠와 경제행동이 모두 사전 승인된 템플릿 family에서 오는 경우 **저위험 카탈로그 변형**을 자동 생성·게시할 수 있다.
+
+### 28.1 자동 게시 가능 예시
+
+shadow 근거와 운영자 enable 이후 다음을 허용할 수 있다.
+
+- cosmetic 색상/theme 변형
+- profile frame/background 변형
+- display case, 가구, 장식 변형
+- 시즌 visual 변형
+- power가 없는 collectible 변형
+- vanity engraving/restoration service 변형
+- 새 경제효과가 없는 prestige visual bundle
+
+### 28.2 제안 전용 예시
+
+다음은 사람 승인이 필수다.
+
+- 신규 통화/환전규칙
+- gameplay/reward multiplier
+- 주식결과·rank·경쟁력·수입 compounding에 영향을 주는 상품
+- 대출/credit/interest 상품
+- 유료 random/chance mechanic
+- 신규 sink family/transaction semantic
+- 신규 real-money linkage
+- 법적/compliance 분류가 불명확한 SKU
+
+### 28.3 Product Factory
+
+`CatalogGapAgent -> ProductDesignerAgent -> EconomyPricingAgent -> PlayerWelfareAgent -> RedTeamAgent -> Content/Schema Validator -> Scenario Lab -> Judge -> deterministic ProductPolicyGate -> Test -> limited rollout -> observe -> keep/rollback`
+
+생성 상품마다 template ID, 생성 입력, 다국어 copy version, price policy version, asset reference, value-flow class, P2W 분류, target cohort, simulation 근거, rollout 결정, rollback 상태를 저장한다.
+
+자동 상품은 존재하지 않는 asset을 발명해서는 안 된다. 이후 asset 생성 pipeline이 생겨도 생성 asset은 별도 artifact로 취급하며 저작권/콘텐츠/접근성 검증을 통과해야 catalog에 활성화할 수 있다.
+
+## 29. 다중 에이전트 의사결정 정족수
+
+제한형 자동화 후보가 되려면 다음을 모두 만족해야 한다.
+
+- 필수 safety/integrity agent PASS
+- deterministic guard PASS
+- veto-class 제약 위반 없음
+- calibration된 uncertainty가 threshold 이하
+- model disagreement가 threshold 이하이거나 근거로 명시 해결
+- Scenario Lab과 counterfactual 대안 평가 완료
+- 저장된 snapshot/model artifact로 재현 가능
+- 적용 전 rollback 실행 가능
+
+judge agent는 hard constraint에 대한 tie-break 권한이 없다. safety veto는 더 많은 commerce agent 표로 뒤집을 수 없다.
+
+## 30. 다중 에이전트 추가 QA
+
+필수 테스트:
+
+- agent 순서를 바꾼 동일 scenario로 anchoring/order effect 검사
+- 고의로 잘못되거나 손상된 agent 1개 주입
+- 같은 잘못된 가정을 공유하는 correlated-agent failure
+- 조작된 shop-demand telemetry
+- stock pump/dump와 wash-trading simulation
+- 갑작스러운 liquidity 소멸/stale ticker
+- Product Generator의 P2W 상품 생성 시도
+- protected cohort 과금 과도화 시도
+- judge가 존재하지 않는 policy key hallucination
+- 자동 게시 SKU 이후 rollback
+- 저장 run의 deterministic replay에서 같은 admissibility 결과 확인
+
+에이전트가 서로 동의했다는 이유만으로 production-ready로 간주하지 않는다. 독립 증거 없는 합의는 상관위험 신호다.
 
 ## 24. Definition of Done
 
