@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
+import type { CasinoPlayState } from './casino-state';
 import { canonicalIntegerString, groupDigits } from '@/lib/money';
 import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
 import {
@@ -15,18 +16,7 @@ import {
   selfLimitAmount,
 } from './coin';
 import type { PlayResult } from './coin';
-import { faceRolled, isDieFace, isParityChoice, parityLabel } from './dice';
-
-
-export interface CasinoPlayState extends ActionState {
-  readonly result?: PlayResult;
-  readonly netAmount?: string;
-  readonly replayed?: boolean;
-  readonly outcomeFace?: number;
-  readonly coinOutcome?: string;
-}
-
-export const CASINO_IDLE: CasinoPlayState = { status: 'idle' };
+import { faceRolled, isDieFace, isParityChoice } from './dice';
 
 function resultTone(result: PlayResult): NonNullable<ActionState['tone']> {
   if (result === 'win') return 'success';
@@ -271,6 +261,3 @@ export async function playDiceNumber(
 ): Promise<CasinoPlayState> {
   return rollDie('dice_number', formData, isDieFace, '1부터 6 사이의 숫자를 골라 주세요.');
 }
-
-/** Re-exported so nothing else has to import two modules for one label. */
-export { parityLabel };
