@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.163
+> **현재 통합 버전:** v2026.09.17.164
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -669,3 +669,36 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 최신 레퍼런스: Google Search Central 9월 최신 업데이트/site-reputation, OWASP ASVS/API security, Google Play 현행 service-fee 문서를 재확인했다. 근거 없는 ranking·보안인증·매출 주장은 추가하지 않았다.
 - 런타임/QA/CI: 시작 및 중간 main은 `f3014e67...`이다. 해당 docs-only exact head의 Build Production Release #907은 `Wait for exact SHA on isolated test and verify backend/database path`에서 실패했고 build는 skip됐다. 이 때문에 REL-DOCS-163-01을 추가하며 기존 `18c7a132...` Production exact-SHA 증거는 유지한다.
 - 개발순서: 독립 restore 증거 → false-green 제거 → release identity/classifier 수정 및 dual-runtime 권위 제거 → HIGH auth/admin/casino/Work/DB integrity QA → repository required-check enforcement → 핵심 correctness → 수익화 → SEO/acquisition → retention/accessibility. 이번 기획 변경은 runtime code, DB/Flux, Production을 변경하지 않는다.
+
+
+## v2026.09.17.164 — docs-head 반복 릴리스 실행 및 crawler/runtime 증거 강화
+
+### REL-DOCS-164-01 — P0 — IN PROGRESS / EXACT MAIN 반복 재현
+- 최초 발견: 2026-09-17 REL-DOCS-163-01. 최신 재현: 이번 회차 exact main `4f568afbce37d59612f483ed2c5bf60c6217bf68`. 문서 전용 v163 head인데도 `Build Test Candidate #806`(`35131802624`)이 성공했고, 이어 `Build Production Release #909`(`35132313855`)가 `test-gate`에 진입해 증거 마감 시점에도 exact Test SHA를 기다리고 있었다. CI #1160(`35131803817`)은 성공했다. 즉 현재 workflow에는 release-input classifier/eligibility 수정이 아직 구현되지 않았다는 반복 증거다.
+- 재현절차: 변경 경로가 `docs/planning/**`뿐인 commit을 merge → Test candidate workflow가 runtime candidate를 만드는지 확인 → Production Release가 repository head를 application candidate로 해석해 exact-SHA Test polling에 들어가는지 확인한다.
+- 영향: 릴리스 처리량, runner/registry 비용, 운영자 alert fatigue, Test 환경 churn, 잘못된 incident 분류, release evidence 무결성. 기존에 검증된 Production application runtime 자체가 장애라는 증거는 아니다.
+- 확정 원인: orchestration 동작이 `repository_head_sha == application_source_sha`로 두 identity를 혼동한다. candidate 생성/exact-SHA gate 앞에 권위 있고 테스트된 changed-input classifier가 없다.
+- 구현 백로그: (1) FE/BE/shared/lockfile/migration/container/build/deploy/security-config 입력을 버전 관리하는 `release-inputs.yml`; (2) merge-base→head의 rename/delete까지 diff해 `repository_head_sha`, `application_source_sha`, `classification`, `matched_runtime_paths`, `classifier_version`을 내는 결정론적 classifier job; (3) candidate build/Test GitOps/Production Release는 `RUNTIME_RELEASE_REQUIRED`일 때만 실행; (4) `DOCS_ONLY_NO_RUNTIME_RELEASE`는 signed/machine-readable evidence만 남기고 image build/Test mutation/Production promotion 없이 종료; (5) history 부족·unknown path·classifier error는 fail-closed; (6) 운영 UI/evidence에서 문서 freshness와 runtime freshness를 분리한다.
+- Evidence/API schema: `releaseEvidence={repositoryHeadSha,applicationSourceSha,classification,classifierVersion,changedPathsHash,backendDigest?,frontendDigest?,testAppliedRevision?,testPublicSha?,productionPublicSha?,dbMigrationHead?,createdAt,workflowRunIds}`. runtime field null은 `DOCS_ONLY_NO_RUNTIME_RELEASE`에서만 허용하며 이유를 명시한다.
+- 보안: classifier와 inventory는 supply-chain control이다. CODEOWNERS/review로 classifier/build/deploy workflow/inventory를 보호한다. `.github/workflows/**`, lockfile, Docker/container, migration, runtime config/secret reference, generated runtime artifact, 미분류 executable extension은 runtime-relevant다. docs처럼 보이는 파일명으로 실행 의미를 숨겨 우회할 수 없어야 한다. provenance는 mutable branch가 아니라 `application_source_sha`에 digest를 결합한다.
+- migration/rollback: application DB migration 없음. workflow rollback은 runtime input을 계속 fail-closed하는 버전으로만 허용한다. `/api/version`을 docs SHA에 맞추기 위한 synthetic image rebuild/deploy는 금지한다. 실제 runtime candidate가 모든 gate를 통과할 때까지 Production은 마지막 검증 application pair를 유지한다.
+- 필수 테스트: docs-only, FE, BE, shared, lockfile, SQL migration, Docker, CI workflow, GitOps, config, mixed, rename/delete, symlink, generated file, merge commit, multi-commit, shallow clone의 table-driven classifier; docs-only에서 registry push/GitOps write/Test polling이 모두 0인 integration fixture; runtime fixture의 exact SHA/digest/DB/user-flow gate; documentation-looking path에 runtime payload를 넣는 security negative fixture.
+- Test 수용조건: docs-only p95 <2분, `candidate_images_built=0`, `test_gitops_mutations=0`, `production_mutations=0`, classification evidence 존재, CI 유지. runtime 변경은 exact-SHA/실DB gate를 보존한다. classifier ambiguity면 Production promotion을 차단한다.
+- 관측: `release_classification_total{class}`, `release_classifier_error_total`, `docs_only_candidate_build_violation_total=0`, `docs_only_test_poll_violation_total=0`, `release_source_head_distance`, classification별 runner minutes/registry bytes. docs-only runtime mutation은 즉시 alert한다.
+- 상태/작업순서: `P0 IN PROGRESS`; release/platform → input inventory security review → classifier unit/integration QA → isolated workflow dry-run → current-main docs-only proof → synthetic runtime proof → REL-DOCS-163/164 동시 종료. 반복 BLOCKED는 신규 기능보다 우선한다.
+- 사업효과: 직접매출 0. 절감된 CI runner minute, registry/storage/network, 운영자 시간, release delay를 측정한다. classifier corpus 정확도 100%·bypass 0일 때 SCALE, false-positive는 ITERATE, false-negative/runtime bypass는 KILL/ROLLBACK한다.
+
+### SEO/SEO 백엔드 증분 — crawlable infinite scroll 및 crawler-family 관측
+- Google Search 공식 문서는 2026-09-17 infinite-scroll 지침을 현행 문서로 이전했으며 지침 자체는 변경되지 않았다고 밝혔다. indexable Moneyverse community/market/collection/public-search 목록은 사용자 scroll/click을 해야만 검색엔진이 다음 콘텐츠를 발견하는 구조를 금지한다. 각 chunk는 영구·안정 URL(예: bounded absolute `?page=N`), 결정론적 콘텐츠, 순차 crawlable `<a href>` 링크를 갖고 scroll로 주 콘텐츠가 바뀌면 History API로 URL을 갱신한다. 독립 검색가치가 없는 filter는 route policy에 따라 canonical/noindex하고 private/account/admin/transaction은 sitemap 제외+강제 `noindex`다.
+- SEO backend는 `{canonicalUrl,page,pageSize,totalPages,prevUrl,nextUrl,updatedAt,indexPolicy}` pagination read-model을 소유하며 hydration 전 SSR HTML에 canonical/robots/breadcrumb/structured-data를 일관되게 출력한다. 범위 초과 page는 empty 200 soft-404가 아니라 canonical 404다. sitemap은 canonical indexable page만 포함하고 `lastModified`는 request 시간이 아니라 의미 있는 공개 콘텐츠 갱신시각을 사용한다.
+- Google은 2026-09-16 `GoogleProducer` UA 문자열 변경과 crawler content-encoding 정보도 문서화했다. crawler 분석은 brittle full-UA equality가 아니라 검증된 crawler/fetcher family와 해당되는 공식 token/IP 검증을 사용한다. crawler 분류로 인증·권한·rate safety·`noindex`를 우회하거나 ranking용 primary content를 다르게 제공하지 않는다.
+- SEO QA: 대표 pagination route의 JS-off/rendered HTML 및 Search Console URL Inspection, page>1 orphan 0, hydration 전후 canonical 안정성, page-1 alias 중복 0, 불가능 page 404, crawler log에 family/status/canonical/robots/render/cache/latency 기록. KPI는 organic impression→CTR→landing→signup→activation→D7/D30→revenue이며 crawl error/index exclusion/CWV를 guardrail로 둔다.
+
+### 보안·수익성 재검증 — 2026-09-17
+- OWASP ASVS 최신 stable은 5.0.0이고 API Security 최신 프로젝트판은 2023이다. API6 sensitive-business-flow abuse는 casino/reward/referral/market/release-control endpoint에 직접 적용한다. 2026 GenAI LLM Top 10/Agent Control Standard는 Economy-AI에 계속 적용하며 모델 출력은 advisory/bounded이고 ledger/balance/entitlement 권위가 될 수 없다.
+- Google Play는 단일 보편 수수료가 아니다. 현재 공식표도 시장 rollout, recurring/non-recurring, new/existing install, programme, billing path를 구분한다. 상점/결제/구독 unit economics는 `market × transaction_at × install cohort(if applicable) × transaction type × billing path × programme`별 versioned fee policy를 유지하고 실측 없는 conversion/attach/ARPU/ARPDAU/ARPPU/refund/churn/CAC/LTV는 `가설`/`테스트 기준`이다.
+
+### v164 worklog
+- 외부조사 선행: Google Search Central 2026-09-17 infinite-scroll 이전 및 2026-09-16 crawler 변경, OWASP ASVS 5.0.0/API Security 2023/GenAI 2026, Google Play 현행 수수료표를 확인했다. 행사 공지를 ranking 변화로 취급하지 않았다.
+- 저장소/runtime/QA: exact main `4f568afb...`, EN/KO v163, 현재 workflow를 읽었다. CI #1160과 Test Candidate #806은 성공했고 docs-only head의 Production Release #909가 exact-SHA test-gate에 진입해 release-identity 결함을 반복 재현했다. Production application 장애 증거로 해석하지 않았다.
+- 통합 직전 main을 재확인한다. 우선순위는 독립 restore → stale-status false-green → release classifier/dual-runtime authority → HIGH auth/admin/casino/Work/DB integrity → required-check enforcement → core correctness → monetization → SEO/acquisition → retention/accessibility다. 이번 회차는 문서만 변경하며 runtime/DB/Flux/Production을 직접 변경하지 않는다.
