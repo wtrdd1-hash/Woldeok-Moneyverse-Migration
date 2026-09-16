@@ -2,11 +2,27 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.167
+> **현재 통합 버전:** v2026.09.17.168
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 변경 — v2026.09.17.168 (2026-09-17)
+
+### 근거와 결정
+
+- **저장소/CI 근거:** 회차 시작 및 작업 중간 `main`은 `5a5dfdb4c6b83849f5eda7a6b7ef05fcb83b5b35` (`docs: integrate Moneyverse plan v2026.09.17.167`)이다. branch protection은 켜져 있지만 required-status-check enforcement는 `off`이고 required context/check도 없다. 이 커밋은 기획문서만 변경했는데도 push 직후 `Build Test Candidate` #794가 시작됐다. `verify / check` job은 container 초기화, 의존성 설치, lint/typecheck/build를 수행했고 test 단계 전에 **`Apply database migrations`를 성공 수행**했다. 즉 docs-only 변경이 runtime-input eligibility 판정 전에 DB를 사용하는 test-candidate setup까지 실행한다는 직접 증거다. 이 CI 증거만으로 Test/Production runtime 상태를 추정하지 않는다.
+- **P0 `REL-DOCS-168-01` — OPEN / 최신 재현 2026-09-17:** 비런타임 변경이 migration/build surface를 불필요하게 실행해 CI/DB/registry/release 자원을 소비하고 release identity를 오인하게 만들 수 있으므로 P0이다. 재현: docs-only `5a5dfdb...` 통합 → `Build Test Candidate` #794 관찰 → job step 확인 → dependency install/build/`Apply database migrations`가 classification 전에 실행. 영향은 release engineering, test DB, CI capacity와 repository SHA를 application SHA로 해석하는 운영자다. 원인은 side effect 이전 runtime-input classifier가 실제 workflow에 구현되지 않은 것으로 한정한다.
+- **구체 수정/마이그레이션/롤백:** dependency가 거의 없는 `classify-release-inputs` job을 release-control 최선행으로 둔다. merge-base→head metadata와 versioned `release-inputs.yml`을 읽고 `{repositoryHeadSha, applicationSourceSha, classification, matchedRuntimePaths, classifierVersion, evidenceCreatedAt}` 불변 증거를 생성해 dependency install, app build, migration container, candidate image/registry, Test GitOps write, exact-SHA poll, Production promotion 전체를 gate한다. `DOCS_ONLY_NO_RUNTIME_RELEASE`는 문서/static-policy 검사만 허용하며 DB credential을 받지 않는다. `RELEASE_INPUT_CLASSIFICATION_ERROR`는 fail-closed다. 이 control-plane 변경 자체의 application DB migration은 없다. rollback은 workflow/classifier wiring만 되돌리며 성공 release를 위조하거나 application data를 변경해서는 안 된다.
+- **테스트/수용/관측:** unit corpus는 docs-only, FE/BE/shared, lockfile, migration, Docker/build, workflow/GitOps, runtime config/secret reference, mixed, rename/delete, symlink/submodule, merge commit, shallow history, path-normalization/executable-smuggling을 포함한다. docs-only integration acceptance는 `dependency_install_for_runtime=0`, `app_build=0`, `db_migration=0`, `image_build=0`, `registry_push=0`, `test_gitops_write=0`, `exact_sha_poll=0`, `production_mutation=0`이다. runtime 변경은 immutable candidate → isolated exact-SHA Test → real API/DB/user-flow QA → main → Production evidence/smoke를 그대로 거친다. classifier false-negative 또는 evidence 누락 시 promotion 차단. `docs_only_runtime_job_total`, `docs_only_db_migration_total`, `release_classifier_error_total`, CI minute/storage, repository/application SHA divergence를 관측하며 docs-only DB migration은 즉시 alert한다.
+- **SEO 조사판정:** Google Search Central 최신 주요 문서 변경 페이지에서 2026-09-08 regional Search-experience 문서가 9월 최신 주요 update로 확인된다. 2026-09-16 Search Central Live Deep Dive Europe 글은 행사/커뮤니티 공지라 ranking/indexing 계약 변경으로 채택하지 않는다. 2026-08-28 site-reputation 정책은 third-party/sponsor/affiliate/UGC governance에 계속 적용한다. 따라서 서버 권위 canonical/robots/sitemap/structured-data/hreflang/SSR/CWV/UGC 계약은 이번 회차 변경하지 않으며 공개 SEO 변경은 행사 글이 아니라 Search Console/Naver 등 검증 증거를 요구한다.
+- **보안 조사판정:** OWASP API Security Project는 API Security Top 10 **2023**을 최신판으로 계속 표시한다. BOLA, broken authentication/property/function authorization, resource consumption, sensitive-business-flow abuse, SSRF, misconfiguration, inventory, unsafe upstream consumption을 route inventory와 negative release test에 유지한다. release classifier 자체도 supply-chain authorization boundary이며 docs-only 분류 단계에는 privileged DB/runtime credential을 주지 않는다.
+- **사업성:** Google Play 현행 공식 수수료표는 install cohort, recurring/non-recurring, programme, billing path별로 달라 단일 수수료를 가정하지 않는다. SKU별 `feePolicyVersion` 회계를 유지한다. 이번 회차에는 release-control 비용 KPI `docs_only_ci_cost`, `docs_only_db_minutes`, `docs_only_registry_bytes`, 운영/지원 시간을 추가한다. 이는 매출이 아니라 측정 비용이다. classifier false-negative=0을 유지하면서 docs-only CI/release 비용을 유의미하게 줄이면 scale, false-positive는 iterate, runtime-relevant 변경을 skip할 가능성이 있는 최적화는 kill한다.
+
+### v168 백로그/수용 순서
+
+`P0 독립 암호화 backup + isolated restore/reconciliation` → `P0 stale-status false-green` → `P0 side-effect 이전 release classifier / docs-only runtime+DB side-effect 0` → `P0 GitOps/public edge/systemd 단일 release authority` → `P1 auth/session/admin/casino/Work/DB authorization+ledger QA` → `P1 repository required-check enforcement` → core correctness → monetization → SEO/acquisition → retention/accessibility. runtime 구현은 별도 branch/test/release 흐름이며 이 기획 회차에서 runtime code를 배포하지 않는다.
 
 ## 회차 변경 — v2026.09.17.167 (2026-09-17)
 
