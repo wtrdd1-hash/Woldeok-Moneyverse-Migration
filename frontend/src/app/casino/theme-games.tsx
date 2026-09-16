@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { groupDigits } from '@/lib/money';
 import { absAmount } from './coin';
-import { CASINO_IDLE, playDiceNumber, playDiceParity } from './actions';
+import { playDiceNumber, playDiceParity } from './actions';
+import { CASINO_IDLE } from './casino-state';
 
 type ThemeGame = 'wheel' | 'treasure' | 'gems';
 

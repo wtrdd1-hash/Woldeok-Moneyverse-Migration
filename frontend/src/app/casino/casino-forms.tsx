@@ -15,7 +15,8 @@ import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
 import { LOCK_CHOICES } from './coin';
 import { DIE_FACES, PARITY_CHOICES } from './dice';
-import { CASINO_IDLE, playCoin, playDiceNumber, playDiceParity, setSelfLimit } from './actions';
+import { playCoin, playDiceNumber, playDiceParity, setSelfLimit } from './actions';
+import { CASINO_IDLE } from './casino-state';
 
 /**
  * The coin game's write surface.
