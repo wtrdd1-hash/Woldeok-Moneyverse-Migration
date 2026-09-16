@@ -24,3 +24,7 @@ Moneyverse AI 경제 기획을 에이전트별 독립 학습, 상호 반박·경
 ## 최종 상태
 
 영문 기준본과 한국어 대응본, 시뮬레이션 확장, planning changelog, update log를 갱신했다. `git diff --check`를 통과했으며 이 작업은 문서/기획 전용이라 Test/Production 배포는 수행하지 않았다.
+
+## 연구 재평가 v2026.09.16.137
+
+추가 출처 검증을 수행하고 데이터 보정형 digital-twin ensemble 방향으로 구조를 수정했다. EconGrowthAgent 검증 실패와 debate/judge 한계를 기록했다. runtime 배포는 수행하지 않았다.

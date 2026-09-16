@@ -24,3 +24,7 @@ Expand the Moneyverse AI economy planning into an adversarial multi-agent archit
 ## Final state
 
 Updated the English canonical plan, Korean counterpart, simulation extension, planning changelog and update log. `git diff --check` passes. This is documentation/planning only, so no Test or Production deployment was performed.
+
+## Research reassessment v2026.09.16.137
+
+Completed an additional source-validation pass and revised the architecture toward a calibrated digital-twin ensemble; recorded the EconGrowthAgent verification failure and debate/judge limitations. No runtime deployment.

@@ -1,6 +1,6 @@
 # Woldeok Moneyverse — AI Economy Controller Specification
 
-> Version: v2026.09.16.136
+> Version: v2026.09.16.137
 > Status: Living implementation-oriented planning specification
 > Date: 2026-09-16
 > Parent specs: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -800,3 +800,35 @@ This planning slice is complete when:
 - changelog and worklog record v2026.09.13.24.
 
 This is a documentation-only planning change. It does not enable runtime self-tuning by itself.
+
+## 31. Research reassessment — 2026-09-16
+
+This reassessment rejects using LLM economic agents as standalone policy authorities. The design is grounded jointly in EconGym, EconAgent, the AI Economist, MALLES, Market-Bench, generative MMO ABM work, StockAgent/StockSim-style market simulators, LLM economic-behavior validation work, and classical ABM, causal-inference and robust-control literature.
+
+### 31.1 Final architecture decision
+
+The center of Moneyverse Economy AI is a **data-calibrated economic digital twin**, not an LLM. The twin ensembles deterministic accounting/market rules, econometric and causal models, classical ABM, learned agents and bounded LLM agents. No single model is a truth source.
+
+- LLM agents model behavioral hypotheses and stress scenarios for consumption, saving, shop choice and trading.
+- RL/MARL searches policies and adversarial behavior inside replayable simulation only.
+- Real policy effects are re-estimated from observed data with A/B or switchback experiments, interrupted time-series, synthetic control/SDID or another justified causal design.
+- High cross-model disagreement blocks automatic enforcement.
+- An LLM judge never has enforcement authority; deterministic validation and empirical evidence remain final gates.
+
+### 31.2 Revised agent-training strategy
+
+Do not train a separate foundation model for every role from the start. Begin with a shared base model plus role-specific prompts/tool policies. Once sufficient Moneyverse behavior data exists, split role-specific SFT/LoRA adapters. Offline RL or preference optimization is permitted only for roles that pass replayable-simulator and holdout evaluation. Agent independence must be substantive: at least two of different data splits, adapters/checkpoints, objectives, seeds, or feature/tool allowlists should differ; renaming the same model does not create independent evidence.
+
+### 31.3 Limits of adversarial debate
+
+Multi-agent debate is an error-discovery and alternative-generation mechanism, not an accuracy guarantee. QA must explicitly test shared-base correlation, majority cascades, persuasive-but-wrong judges and context dilution. If debate underperforms an independent deterministic/econometric baseline, the baseline wins.
+
+### 31.4 Reconfirmed stock, shop-price and product automation
+
+- **Virtual stocks:** LLMs never write prices directly. A deterministic price-formation engine combines order-book/flow/fundamental/event inputs; LLM agents provide scenarios and behavioral flow only. Circuit breakers, tick bounds and stale-market locks dominate.
+- **Shop pricing:** automatic moves stay within narrow approved min/max/step/cooldown envelopes. Elasticity is updated from real experiments; affordability, retention, complaint and sink-diversity regressions trigger rollback.
+- **Product creation:** cosmetic/non-power variants from approved templates may progress through generate -> lint -> simulate -> Test -> limited rollout -> rollback-ready bounded auto-publish. New economic mechanics, earning multipliers, P2W, currencies/conversions, loans/interest and paid random-chance products remain human-approved.
+
+### 31.5 Reference verification status
+
+`EconGym`, `MALLES`, `EconAgent`, the `AI Economist`, `Generative Agents`, generative MMO ABM work, `Market-Bench`, `StockAgent`, `StockSim`, and `Tokenomics-AI/Tokenomics` are treated as verified research/public projects. The exact claimed title `EconGrowthAgent (ICLR 2024)` was not verified against a reliable primary record in this reassessment and is excluded as design evidence. Tokenomics-AI is an inference-cost/routing reference, not an economic-model reference.

@@ -1,6 +1,6 @@
 # Woldeok Moneyverse — Economy Simulation & Dynamic Sink Tuning Specification
 
-> Version: v2026.09.16.136
+> Version: v2026.09.16.137
 > Status: Living implementation-oriented planning specification
 > Date: 2026-09-16
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -361,3 +361,7 @@ Stock scenarios must model at least fundamentals, flow/liquidity, momentum/rever
 Shop scenarios must model elasticity uncertainty, substitution/cannibalization, protected-cohort affordability, sink burn, retention and complaint/support guardrails. Product-generation scenarios must compare `do nothing`, `reprice existing catalog`, `rotate existing content` and `publish generated low-risk variant` before a new SKU is eligible for automatic rollout.
 
 A multi-agent consensus without independent evidence is not sufficient. Large disagreement, correlated assumptions or failed red-team/integrity agents force proposal-only/shadow behavior.
+
+## 21. 2026-09-16 research reassessment
+
+The simulator SHALL use an ensemble hierarchy: deterministic flow/accounting baseline, calibrated cohort/ABM model, econometric/causal response model, stochastic stress model, and bounded LLM-agent population. LLM-agent output is never substituted for empirical calibration. Cross-model disagreement is a first-class risk metric and blocks bounded-auto when above policy threshold. Multi-agent debate is evaluated against no-debate and deterministic baselines. Stock scenarios should use an order-level or microstructure-aware engine where practical rather than allowing language agents to invent clearing prices.

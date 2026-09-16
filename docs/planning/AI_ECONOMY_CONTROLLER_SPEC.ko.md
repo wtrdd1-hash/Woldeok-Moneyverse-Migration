@@ -1,6 +1,6 @@
 # 월덕 머니버스 — AI 경제 컨트롤러 명세
 
-> 버전: v2026.09.16.136
+> 버전: v2026.09.16.137
 > 상태: Living 구현 지향 기획 명세
 > 날짜: 2026-09-16
 > 상위 명세: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -796,3 +796,35 @@ judge agent는 hard constraint에 대한 tie-break 권한이 없다. safety veto
 - changelog/worklog에 v2026.09.13.24 기록
 
 이번 변경은 문서 전용 기획 변경이며 이것만으로 운영 자동조정 기능이 활성화되지는 않는다.
+
+## 31. 2026-09-16 연구 재평가
+
+이번 재평가는 LLM 경제 에이전트를 단독 정책결정자로 두는 접근을 채택하지 않는다. EconGym, EconAgent, AI Economist, MALLES, Market-Bench, MMO 생성형 ABM, StockAgent/StockSim 계열, LLM 경제행동 검증 연구와 전통 ABM·인과추론·강건제어 문헌을 함께 근거로 삼는다.
+
+### 31.1 최종 아키텍처 결정
+
+Moneyverse 경제 AI의 중심은 `LLM`이 아니라 **데이터로 보정된 경제 디지털트윈**이다. 디지털트윈은 결정론적 회계/시장 규칙, econometric/causal 모델, 전통 ABM, 학습형 agent, 제한된 LLM agent를 ensemble로 사용한다. 어느 한 모델도 truth source가 아니다.
+
+- LLM agent는 소비·저축·상점 선택·거래 의사결정의 행동 가설과 stress scenario 생성에 사용한다.
+- RL/MARL은 simulator 안의 policy search 및 adversarial behavior 탐색에 사용한다.
+- 실제 정책 효과는 A/B, switchback, interrupted time series, synthetic control/SDID 등 실측 인과추정으로 재검증한다.
+- disagreement가 큰 경우 자동 집행을 금지한다.
+- Judge LLM의 결론 자체는 집행 권한이 없으며 deterministic validator와 실험 evidence가 최종 gate다.
+
+### 31.2 에이전트 학습 전략 수정
+
+모든 역할을 처음부터 별도 foundation model로 학습하지 않는다. 공통 base model 위에 역할별 prompt/tool policy로 시작하고, Moneyverse 행동 로그가 충분해지면 역할별 SFT/LoRA adapter를 분리한다. 이후 offline RL 또는 preference optimization은 replayable simulator와 holdout 평가를 통과한 역할에만 적용한다. 에이전트 독립성은 단순 이름 차이가 아니라 서로 다른 데이터 split, adapter/checkpoint, objective, seed, tool/feature allowlist 중 둘 이상으로 확보한다.
+
+### 31.3 적대적 토론의 제한
+
+다중 에이전트 토론은 오류 탐지와 대안 생성 수단이지 정확성 보증이 아니다. shared-base correlation, majority cascade, persuasive-but-wrong judge, context dilution을 별도 QA한다. 토론 결과가 독립 deterministic/econometric baseline보다 나쁘면 자동으로 baseline을 우선한다.
+
+### 31.4 주가·상점가격·상품 자동화 재확정
+
+- **가상주식:** LLM이 가격을 직접 쓰지 않는다. 주문장/수급/펀더멘털/이벤트 입력을 deterministic price-formation engine이 결합하고, LLM agent는 scenario와 behavioral flow를 제공한다. circuit breaker, tick bounds, stale-market lock이 우선한다.
+- **상점가격:** 승인된 SKU의 좁은 min/max/step/cooldown 안에서만 자동 조정한다. 가격탄력성은 실제 실험으로 갱신하고, 신규유저 affordability·retention·불만·sink diversity가 악화되면 자동 rollback한다.
+- **상품추가:** cosmetic/non-power 승인 템플릿은 생성→lint→simulation→Test→limited rollout→rollback-ready 절차를 통과하면 bounded auto-publish를 허용할 수 있다. 신규 경제 메커니즘, earning multiplier, P2W, currency/conversion, loan/interest, paid random chance는 human approval을 유지한다.
+
+### 31.5 레퍼런스 검증 상태
+
+`EconGym`, `MALLES`, `EconAgent`, `AI Economist`, `Generative Agents`, MMO generative ABM, `Market-Bench`, `StockAgent`, `StockSim`, `Tokenomics-AI/Tokenomics`는 확인된 연구/공개 프로젝트로 분류한다. `EconGrowthAgent (ICLR 2024)`라는 정확한 명칭은 이번 검증에서 신뢰할 수 있는 원문을 확인하지 못했으므로 근거 목록에서 제외한다. Tokenomics-AI는 경제모델이 아니라 inference cost/routing 참고 구현으로만 취급한다.
