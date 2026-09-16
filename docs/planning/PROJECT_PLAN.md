@@ -2,7 +2,7 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.16.159
+> Current integrated version: v2026.09.16.160
 > Implementation/evidence sync: 2026-09-16
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
@@ -596,3 +596,22 @@ External references rechecked: Google Search Central September 2026 updates and 
 - Mobile API contract advances to `v2026.09.16.159`. Contract generation now excludes TypeScript compiler-internal `__@...` symbol properties so unrelated type graph changes cannot rewrite public JSON response schemas.
 - Isolated PostgreSQL validation passed migration 203 plus 15 Work/clock tests covering 10-minute day rollover, 70-minute week rollover, timezone invariance, task/global caps, career switching, idempotency/integrity and preview/payout/dashboard parity. Local DB package 7/7, backend 871, frontend 612, lint 0 errors, typecheck and production build passed.
 - Production remains fail-closed pending GitHub CI, exact-head Test convergence, authoritative DB backup/migration and Production smoke. The current P0 release-evidence rules from v158 are not weakened for this fix.
+
+
+## v2026.09.16.160 — local dual-model economy-AI production activation
+
+### ECON-AI-160-01 — IMPLEMENTED / RUNTIME-CONFIG ACTIVATION
+- Runtime authority remains the approved Debian 13 systemd/PostgreSQL path. This operation did not deploy newer application `main`; public Production continued to serve application SHA `be218f0403372689dbdf8af9bf8700264f39348f`, which already contains the dual economy-AI reviewer. Documentation was rebased on application main `03a8ae9c5313d0915589691afc6fff022323c305` only for record integration.
+- `economy_ai_policy_review` is enabled in Production through the audited `admin_set_feature_switch` path. A provisional v159 activation label was reconciled to v160 after concurrent main used v159; reconciliation kept the state `enabled -> enabled` and added a separate receipt/audit reason rather than rewriting history.
+- Local inference is localhost-only at `127.0.0.1:11434`, with runtime/models on `/srv/moneyverse-data/ai`. Seat A is `llama3.2:3b`; seat B is `gemma3:1b`. `qwen2.5:3b` was rejected from the production profile after violating the confidence `0..1` output contract.
+- Resource bounds are explicit: one parallel request, at most two resident models, 2-minute keep-alive, `MemoryHigh=6G`, `MemoryMax=7G`, no Ollama cloud, and model weights excluded from the constrained system disk.
+- Backend configuration uses the OpenAI-compatible local endpoint, 180-second per-call timeout, concurrency 1, 300-second exact-result cache and 120-minute review TTL. Secrets are not committed; repository files include only the non-secret service/config template.
+
+### Test/Production evidence and safety contract
+- Existing economy reviewer unit tests passed 10/10. Both selected models returned the required `decision`, confidence in `0..1`, rationale and risks contract.
+- Validation ran against the deployed `test-be218f040337` application release plus the authoritative Test PostgreSQL. The public Test route also returns `be218f...`; this operation does not claim current-main exact-SHA Test convergence and does not close `REL-EVIDENCE-158-01`.
+- Isolated Test exercised real model calls and Test PostgreSQL: four routed domains/eight seat calls, append-only review storage, scoreboard evidence, exact-hash `dual_agree`, exact-only `ai_veto`, changed-proposal `ai_missing_classical_fallback`, and missing-model `unconfigured_classical_fallback`. Application-role direct table reads remained denied.
+- The first enabled Production reviewer check returned `no_eligible_classical_proposal` in about 40 ms, so no model council ran, no review row was created, and no policy value changed. Production backend and AI services remained active; public home returned HTTP 200.
+- The deterministic/classical engine remains accounting/policy authority. AI may only append a review and veto the exact matching proposal. Missing, expired, mismatched, unavailable or abstaining AI evidence cannot invent replacement values and falls back to the classical lane.
+- Rollback is fail-safe: audited switch to `disabled`, restore/remove backend AI runtime variables if required, restart backend, then stop/disable local inference when unused. Never weaken deterministic validation, ledger reconciliation or exact-proposal matching to preserve AI availability.
+- Monitoring: feature switch, reviewer outcome, council decision mix, confidence, latency/token usage, service memory/restarts, backend errors and economy reconciliation. Model-quality regression is an operations incident, not authority to bypass deterministic gates.
