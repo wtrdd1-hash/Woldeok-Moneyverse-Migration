@@ -1,6 +1,6 @@
 # 월덕 머니버스 — 경제 시뮬레이션 및 동적 소비처 조정 명세
 
-> 버전: v2026.09.16.138
+> 버전: v2026.09.16.139
 > 상태: Living 구현 지향 기획 명세
 > 날짜: 2026-09-16
 > 상위 명세: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -369,3 +369,13 @@ Scenario Lab은 주식 가격형성, 상점 가격조절, 생성 카탈로그 �
 Scenario Lab은 일일 cap을 고립된 counter로 보지 않고 보상과 함께 직업정책 변화를 모델링해야 한다. 표준 사례는 무제한 baseline, marginal-reward-only 제어, 직업 수요 재균형, 한시적 정상보상 작업 보호제한, 한시적 전체작업 보호제한, 무제한으로의 자동 완화를 포함한다.
 
 각 시나리오는 발행량, 일일 완료 median/P95, 신규사용자 성장시간, 숙련 성장, 직업 전환, 포기, retention, abuse displacement, sink 상호작용, 직업 간 대체효과를 보고한다. 더 부드러운 제어로 플레이 마찰이 훨씬 적으면서 동등하거나 더 나은 안전결과를 낼 수 있으면 유한 제한 후보는 거부한다.
+
+## 22. 이중 모델 ensemble·불일치 시뮬레이션 — v2026.09.16.139
+
+중요 시나리오는 최소 두 개의 독립 예측, 즉 전통/결정론 예측과 AI/학습 예측을 함께 만든다. Scenario Lab은 불일치를 하나의 평균값으로 숨기지 않고 두 결과를 나란히 보여준다.
+
+필수 비교필드는 `classical_prediction`, `ai_prediction`, `direction_agreement`, `magnitude_gap_bps`, `uncertainty_overlap`, `coverage_gap`, `safe_intersection`, `arbitration_result`, `evidence_needed_next`다.
+
+stress case에는 AI 장애 중 전통 lane 지속, econometric baseline 장애 중 회계기준 유지, LLM 합의가 원장/인과근거와 충돌, 상점가격 방향 반대, 전통모델에 없는 신규 farming 패턴 AI 탐지, 결정론 tick bound 밖 움직임을 예상하는 LLM trader, 실제 rollout 결과가 두 모델을 모두 반증하는 경우를 포함한다.
+
+어떤 ensemble 점수도 대사·회계·시장무결성·등록 정책제약을 넘을 수 없다. 모델 불일치는 평균으로 지울 noise가 아니라 조사해야 할 정보다.

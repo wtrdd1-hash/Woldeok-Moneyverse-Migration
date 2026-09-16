@@ -1,6 +1,6 @@
 # Woldeok Moneyverse — Economy Simulation & Dynamic Sink Tuning Specification
 
-> Version: v2026.09.16.138
+> Version: v2026.09.16.139
 > Status: Living implementation-oriented planning specification
 > Date: 2026-09-16
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -371,3 +371,13 @@ The simulator SHALL use an ensemble hierarchy: deterministic flow/accounting bas
 Scenario Lab must model profession-policy changes together with rewards rather than treating daily caps as isolated counters. Standard cases include unlimited baseline, marginal-reward-only control, profession-demand rebalance, temporary rewarded-assignment protection limit, temporary total-assignment protection limit, and automatic relaxation back to unlimited.
 
 Each scenario reports issuance, median/P95 completion counts, new-user progression time, mastery growth, profession switching, abandonment, retention, abuse displacement, sink interaction and cross-profession substitution. A finite limit is rejected when an equivalent or better safety outcome is achievable with materially lower player-friction through softer controls.
+
+## 22. Dual-model ensemble and disagreement simulation — v2026.09.16.139
+
+Every material scenario SHALL produce at least two independently generated projections: a classical/deterministic projection and an AI/learned projection. Scenario Lab displays both rather than hiding disagreement behind one blended number.
+
+Required comparison fields include `classical_prediction`, `ai_prediction`, `direction_agreement`, `magnitude_gap_bps`, `uncertainty_overlap`, `coverage_gap`, `safe_intersection`, `arbitration_result`, and `evidence_needed_next`.
+
+Stress cases explicitly include: AI unavailable while the classical lane continues; econometric baseline failure while deterministic accounting remains available; persuasive LLM consensus that contradicts ledger/causal evidence; classical and AI lanes choosing opposite shop-price moves; AI discovering a novel farming behavior absent from the classical model; a stock shock where LLM traders predict a move outside deterministic tick bounds; and post-rollout outcomes that invalidate both models.
+
+No ensemble score may override reconciliation, accounting, market-integrity or registered policy constraints. Model disagreement is information to investigate, not noise to average away.

@@ -1,6 +1,6 @@
 # 월덕 머니버스 — AI 경제 컨트롤러 명세
 
-> 버전: v2026.09.16.138
+> 버전: v2026.09.16.139
 > 상태: Living 구현 지향 기획 명세
 > 날짜: 2026-09-16
 > 상위 명세: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -850,3 +850,42 @@ non-null 일일 제한이 `BOUNDED_AUTO`에 들어가려면 정책 레지스트�
 주직업 슬롯은 정체성에 영향을 준다. 자동화는 슬롯 확대 또는 미래 정책 축소 제안은 가능하지만 기존 선택 직업 박탈, 숙련도 삭제, 임의 재배정, 이미 획득한 성장 접근 차단은 할 수 없다. 넓은 슬롯 정책에서 좁은 정책으로 이동할 때는 grandfathering 또는 사람 승인 transition rule이 필요하다.
 
 필수 telemetry는 직업별 활성 사용자, 완료/보상 발행량, 반복 집중도, 일일 완료 median/P95, 숙련 성장, 전환율, 포기율, 봇/악용 confidence, 신규 사용자 성장시간, 직업 과부족, 제한 도달/완화율을 포함한다. 모든 제한 결정은 전후 값, 영향 인구, 근거 시간창, 모델 불일치, 사유, 만료/재평가 시각, 롤백 기준을 기록한다.
+
+## 33. 전통 + AI 이중 연속 제어 — v2026.09.16.139
+
+Moneyverse는 동일한 불변 경제 snapshot을 보는 두 개의 독립 감사가능 제어 lane을 병렬 운영한다. 목표는 기존 경제방법을 AI로 대체하는 것이 아니라 결정론/전통 기준선을 항상 살려 두고 학습시스템이 더 넓은 행동·정책 공간을 탐색하게 하는 것이다.
+
+### 33.1 Lane A — 전통/결정론 기준선
+
+권위 회계 항등식, 원장 대사, rule-based ABM, 계량/탄력성 모델, 인과추론, 결정론 시장 매칭·주가형성, 공개 정책식, 필요한 경우 제약 optimization/MPC, hard safety/integrity 범위를 포함한다. 모든 학습모델이 unavailable/stale/quarantine 상태여도 Lane A는 비상 fallback으로 계속 운영 가능해야 한다.
+
+### 33.2 Lane B — AI/학습 탐색
+
+LLM 행동 에이전트, 근거가 충분할 때 역할별 SFT/LoRA adapter, 재현 가능한 simulator 안의 RL/MARL 정책탐색, 이상·원인 설명, 적대 stress agent, 반사실 정책생성, 수요가설, 상품/SKU 아이디어, 다중 에이전트 비판을 포함한다. 탐색범위를 넓히지만 원장 진실, 잔액 직접변경, 과거기록 수정, 주가 직접쓰기, hard constraint 권한은 갖지 않는다.
+
+### 33.3 병렬 실행 계약
+
+각 의사결정 cycle은 하나의 `economy_snapshot_id`를 저장하고 두 lane이 정확히 그 snapshot만 사용한다. 각 lane은 예측 horizon/outcome vector, 정책후보와 no-op, 보정된 불확실성/모델위험, 가정과 모델/feature version, 구매력·집중도·발행·리텐션·무결성 영향, rollback trigger/관찰기간을 출력한다.
+
+### 33.4 자동 중재
+
+- 안전 교집합 안에서 방향·크기가 일치하면 저위험 bounded action을 Scenario Lab/결정론 검증으로 보낸다.
+- 방향은 같지만 크기차가 크면 보수적 안전 교집합 또는 더 낮은 위험 후보를 택한다.
+- 방향이 크게 충돌하거나 model disagreement/불확실성이 높으면 `SHADOW`, `NO_OP`, 사람검토로 내린다.
+- Lane B 장애/stale이면 Lane A만으로 계속 운영한다.
+- Lane A가 새 행동을 모델링하지 못하고 Lane B가 탐지해도 AI는 shadow 가설까지만 만들며 실측 검증을 우회할 수 없다.
+- 무결성·보안·회계 hard constraint는 두 lane과 judge 투표보다 우선한다.
+
+### 33.5 연속 자동 루프
+
+`telemetry -> 대사 -> 불변 snapshot -> Lane A || Lane B -> 불일치/calibration gate -> Scenario Lab -> 결정론 policy validator -> shadow/canary/bounded apply -> 인과효과 평가 -> keep/rollback -> 두 lane 재보정`
+
+관측은 매시간 가능하지만 일반 경제 정책변경은 기존 cooldown/step 범위를 지킨다. exploit, stale market, ledger mismatch 같은 무결성 사고는 별도 빠른 결정론 containment 경로로 처리하며 AI 설명 때문에 차단이 지연되면 안 된다.
+
+### 33.6 도메인 권한
+
+원장/WLD는 회계·대사·atomic settlement가 결정론 권위이고 AI는 이상해석/시나리오만 만든다. WDX는 주문장·매칭·tick bound·주가형성·circuit breaker가 권위이고 AI는 trader behavior/event/manipulation stress를 만든다. 상점가격은 min/max/step/cooldown·탄력성 기준·구매력 floor가 권위이며 AI는 수요가설과 가격후보를 만든다. 상품은 schema/entitlement/economy class/P2W-abuse validator가 권위이고 AI는 승인 template variant를 제안한다. 직업/일일제한은 발행 envelope·무결성 threshold·grandfather/reset 규칙이 권위이고 AI는 행동분석과 bounded 후보를 만든다.
+
+### 33.7 조사 근거
+
+v2026.09.16.139 연구 회차에서 OpenAlex와 Crossref를 합쳐 중복 제거된 11,749건 후보군을 만들고 `docs/findings/`에 목록을 커밋한다. 이 목록은 발견용 색인이며 모든 원문 정독을 의미하지 않는다. 운영판단은 직접 관련 핵심 원문, 최신 Moneyverse 증거, 재현 가능한 테스트, 적용 후 인과효과 측정을 근거로 한다.

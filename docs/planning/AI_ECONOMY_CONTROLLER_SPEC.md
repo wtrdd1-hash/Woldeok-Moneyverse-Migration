@@ -1,6 +1,6 @@
 # Woldeok Moneyverse — AI Economy Controller Specification
 
-> Version: v2026.09.16.138
+> Version: v2026.09.16.139
 > Status: Living implementation-oriented planning specification
 > Date: 2026-09-16
 > Parent specs: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -854,3 +854,60 @@ A non-null daily limit may enter `BOUNDED_AUTO` only when the policy registry de
 Primary-profession slot changes are identity-sensitive. Automation may widen available slots or propose a narrower future policy, but it must not revoke an already selected profession, erase mastery, reassign a user, or make earned progression inaccessible. Any migration from a wider to narrower slot policy requires grandfathering or explicit human-approved transition rules.
 
 Required telemetry includes per-profession active users, completion/reward issuance, repeat concentration, median/P95 daily completions, mastery progression, switch rate, abandonment, bot/abuse confidence, new-user progression time, profession shortage/oversupply, and limit-hit/relaxation rates. Every limit decision records before/after value, affected population, evidence windows, model disagreement, reason, expiry/reevaluation time and rollback threshold.
+
+## 33. Dual classical + AI continuous control — v2026.09.16.139
+
+Moneyverse SHALL operate two independently auditable control lanes from the same immutable economy snapshot. The goal is not to replace established economics with AI, but to keep a deterministic/classical baseline alive while learned systems search a wider behavioral and policy space.
+
+### 33.1 Lane A — classical/deterministic baseline
+
+Lane A includes authoritative accounting identities, ledger reconciliation, rule-based ABM, econometric/elasticity models, causal estimators, deterministic market matching and price formation, published policy formulas, constrained optimization/MPC where justified, and hard safety/integrity bounds. Lane A is the emergency fallback and must remain operational when all learned models are unavailable, stale or quarantined.
+
+### 33.2 Lane B — AI/learned exploration
+
+Lane B includes LLM behavioral agents, role-specialized SFT/LoRA adapters when evidence supports them, RL/MARL policy search inside replayable simulation, anomaly/cause explanation, adversarial stress agents, counterfactual policy generation, demand hypotheses, product/SKU ideation and multi-agent critique. Lane B expands search and behavioral coverage but never becomes the authority for ledger truth, direct balance mutation, historical rewriting, stock-price writes or hard constraints.
+
+### 33.3 Parallel run contract
+
+Each decision cycle stores one `economy_snapshot_id` and runs both lanes against that exact snapshot. Each lane must emit:
+
+- prediction horizon and outcome vector;
+- proposed policy/action and no-op alternative;
+- calibrated uncertainty or model-risk estimate;
+- assumptions and feature/model versions;
+- expected affordability, concentration, issuance, retention and integrity effects;
+- rollback trigger and observation window.
+
+The arbiter compares direction, magnitude, uncertainty and known model coverage. It SHALL NOT average incompatible predictions merely to manufacture consensus.
+
+### 33.4 Automatic arbitration
+
+- agreement inside the safe intersection -> low-risk bounded action may proceed to Scenario Lab and deterministic validation;
+- same direction but materially different magnitude -> choose the conservative safe intersection or lower-risk candidate;
+- strong directional disagreement, high model disagreement or missing calibration -> `SHADOW`, `NO_OP` or human review;
+- Lane B unavailable/stale -> Lane A continues without AI;
+- Lane A cannot model a novel behavior but Lane B finds one -> AI may create a shadow hypothesis, never bypass empirical validation;
+- hard integrity/security/accounting constraints override both lanes and any judge vote.
+
+### 33.5 Continuous automatic loop
+
+Normal loop:
+
+`telemetry -> reconciliation -> immutable snapshot -> Lane A || Lane B -> disagreement/calibration gate -> Scenario Lab -> deterministic policy validator -> shadow/canary/bounded apply -> causal outcome evaluation -> keep/rollback -> recalibrate both lanes`
+
+Observation may run hourly. Routine economy mutations retain policy-family cooldowns and change-size bounds. Exploit, stale-market, ledger mismatch and other integrity incidents use a separate faster deterministic containment path; AI may explain the incident but does not delay containment.
+
+### 33.6 Domain authority matrix
+
+| Domain | Classical/deterministic authority | AI contribution |
+|---|---|---|
+| Ledger/WLD | accounting, reconciliation, atomic settlement | anomaly explanation, scenario hypotheses |
+| WDX stocks | order book, matching, tick bounds, price formation, circuit breaker | trader behavior, event scenarios, manipulation stress |
+| Shop price | min/max/step/cooldown, elasticity baseline, affordability floor | demand hypothesis, segment response, candidate repricing |
+| Product/SKU | schema, entitlement, economy class, P2W/abuse validator | approved-template ideation/copy/variant proposal |
+| Jobs/limits | issuance envelope, integrity threshold, grandfathering and reset rules | adaptive behavior analysis and bounded policy candidate |
+| Faucet/sink | transaction taxonomy and measured flows | portfolio/content-policy alternatives |
+
+### 33.7 Research evidence baseline
+
+The v2026.09.16.139 research pass created a deduplicated 11,749-record candidate corpus from OpenAlex and Crossref and committed the manifest under `docs/findings/`. The corpus is a discovery index, not a claim that every work was read in full. Production decisions rely on the smaller set of directly relevant primary references, current Moneyverse evidence, replayable tests and causal post-rollout measurements. The dual-lane decision is reinforced by EconGym's strong hybrid results, classical ACE literature, robust-control/model-uncertainty work, LLM economic-agent research, safe/constrained RL and algorithmic-pricing risk evidence.

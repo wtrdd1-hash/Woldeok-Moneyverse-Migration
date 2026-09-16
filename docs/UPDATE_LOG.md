@@ -143,3 +143,10 @@ This file records incremental project changes so concurrent work can avoid overl
 - Added bounded AI control for primary-profession slots, active-profession concurrency, daily assignment/full-reward protection limits, and automatic relaxation back to unlimited.
 - Kept ordinary daily limits unlimited by default and protected existing primary-profession selections/mastery through grandfathering.
 - Updated integrated planning, scenario/QA requirements, and rollback/audit contracts. Planning only; no runtime deployment.
+
+## 2026-09-16 — v2026.09.16.139 Dual classical + AI economy control research
+
+- Built and committed a deduplicated 11,749-record OpenAlex+Crossref research candidate corpus with an English/Korean evidence review.
+- Reframed Economy AI as two continuously running lanes: classical/deterministic authority/fallback plus AI/learned exploration.
+- Added disagreement arbitration, failover, causal post-rollout calibration and explicit authority boundaries for stocks, shops, generated SKUs, jobs/limits and faucet/sink policy.
+- Planning only; no runtime deployment in this version.
