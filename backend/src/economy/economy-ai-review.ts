@@ -29,6 +29,7 @@ export interface EconomyAiReviewConfig {
   readonly timeoutMs: number;
   readonly ttlMinutes: number;
   readonly maxConcurrency: number;
+  readonly cacheTtlSeconds: number;
 }
 
 export interface EconomyAiReview {
@@ -36,6 +37,9 @@ export interface EconomyAiReview {
   readonly confidence: number;
   readonly rationale: string;
   readonly risks: readonly string[];
+  readonly inputTokens?: number;
+  readonly outputTokens?: number;
+  readonly totalTokens?: number;
 }
 
 export interface EconomyAiAgentContext {
@@ -50,6 +54,7 @@ export interface EconomyAiAgentReview extends EconomyAiReview {
   readonly seat: EconomyAiSeat;
   readonly stage: 'independent' | 'rebuttal';
   readonly model: string;
+  readonly latencyMs?: number;
 }
 
 export type EconomyAiModelCaller = (
@@ -78,6 +83,7 @@ const ChatResponseSchema = z.object({
       }),
     )
     .min(1),
+  usage: z.object({ prompt_tokens: z.number().optional(), completion_tokens: z.number().optional(), total_tokens: z.number().optional() }).optional(),
 });
 
 export function economyAiConfig(
@@ -106,6 +112,7 @@ export function economyAiConfig(
   const timeout = Number.parseInt(env.ECONOMY_AI_TIMEOUT_MS ?? '', 10);
   const ttl = Number.parseInt(env.ECONOMY_AI_REVIEW_TTL_MINUTES ?? '', 10);
   const concurrency = Number.parseInt(env.ECONOMY_AI_MAX_CONCURRENCY ?? '', 10);
+  const cacheTtl = Number.parseInt(env.ECONOMY_AI_CACHE_TTL_SECONDS ?? '', 10);
   return {
     agents,
     timeoutMs:
@@ -113,6 +120,7 @@ export function economyAiConfig(
     ttlMinutes: Number.isSafeInteger(ttl) && ttl >= 15 && ttl <= 1_440 ? ttl : 120,
     maxConcurrency:
       Number.isSafeInteger(concurrency) && concurrency >= 1 && concurrency <= 6 ? concurrency : 2,
+    cacheTtlSeconds: Number.isSafeInteger(cacheTtl) && cacheTtl >= 0 && cacheTtl <= 3600 ? cacheTtl : 300,
   };
 }
 
@@ -242,7 +250,13 @@ export const callEconomyAiModel: EconomyAiModelCaller = async (config, proposal,
       const envelope = ChatResponseSchema.safeParse(decoded);
       if (!envelope.success)
         throw new Error('economy AI endpoint returned an unsupported chat response');
-      return parseReview(textContent(envelope.data));
+      const review = parseReview(textContent(envelope.data));
+      return {
+        ...review,
+        ...(envelope.data.usage?.prompt_tokens !== undefined ? { inputTokens: envelope.data.usage.prompt_tokens } : {}),
+        ...(envelope.data.usage?.completion_tokens !== undefined ? { outputTokens: envelope.data.usage.completion_tokens } : {}),
+        ...(envelope.data.usage?.total_tokens !== undefined ? { totalTokens: envelope.data.usage.total_tokens } : {}),
+      };
     }
     throw new Error(lastError);
   } finally {
@@ -268,54 +282,75 @@ async function runWithConcurrency<T>(
   return results;
 }
 
-export function aggregateCouncil(reviews: readonly EconomyAiAgentReview[]): EconomyAiReview {
-  const final = reviews.filter((review) => review.stage === 'rebuttal');
-  const source = final.length > 0 ? final : reviews;
-  if (source.length < ECONOMY_AI_DOMAINS.length * 2) {
-    return {
-      decision: 'abstain',
-      confidence: 0,
-      rationale: 'the specialist council was incomplete',
-      risks: ['council_incomplete'],
-    };
+
+export function selectDomainsForProposal(proposal: Record<string, unknown>): EconomyAiDomain[] {
+  const selected = new Set<EconomyAiDomain>(['macro', 'welfare', 'integrity']);
+  const adjustments = Array.isArray(proposal.adjustments) ? proposal.adjustments : [];
+  for (const adjustment of adjustments) {
+    if (!adjustment || typeof adjustment !== 'object') continue;
+    const knob = String((adjustment as Record<string, unknown>).knob ?? '');
+    if (knob.startsWith('shop.') || knob.startsWith('business.')) selected.add('shop');
+    if (knob.startsWith('stock.') || knob.startsWith('market.')) selected.add('stock');
+    if (knob.startsWith('work.') || knob.startsWith('jobs.')) selected.add('jobs');
+  }
+  return ECONOMY_AI_DOMAINS.filter((domain) => selected.has(domain));
+}
+
+function disputedDomains(reviews: readonly EconomyAiAgentReview[], domains: readonly EconomyAiDomain[]): EconomyAiDomain[] {
+  return domains.filter((domain) => {
+    const pair = reviews.filter((review) => review.domain === domain);
+    if (pair.length !== 2) return true;
+    return pair.some((review) => review.decision === 'abstain' || review.confidence < MIN_ACTION_CONFIDENCE)
+      || pair[0]!.decision !== pair[1]!.decision;
+  });
+}
+
+function isHighRiskProposal(proposal: Record<string, unknown>): boolean {
+  const adjustments = Array.isArray(proposal.adjustments) ? proposal.adjustments : [];
+  return adjustments.some((adjustment) => {
+    if (!adjustment || typeof adjustment !== 'object') return false;
+    const knob = String((adjustment as Record<string, unknown>).knob ?? '');
+    return /(?:daily_cap|weekly_cap|deposit_rate|stock\.|market\.|credit|loan|casino)/.test(knob);
+  });
+}
+
+export function aggregateCouncil(
+  reviews: readonly EconomyAiAgentReview[],
+  domains: readonly EconomyAiDomain[] = ECONOMY_AI_DOMAINS,
+): EconomyAiReview {
+  const latest = domains.flatMap((domain) =>
+    (['A', 'B'] as const).flatMap((seat) => {
+      const candidates = reviews.filter((review) => review.domain === domain && review.seat === seat);
+      const chosen = candidates.find((review) => review.stage === 'rebuttal') ?? candidates.find((review) => review.stage === 'independent');
+      return chosen ? [chosen] : [];
+    }),
+  );
+  if (latest.length < domains.length * 2) {
+    return { decision: 'abstain', confidence: 0, rationale: 'the specialist council was incomplete', risks: ['council_incomplete'] };
   }
   const disputed: EconomyAiDomain[] = [];
   const vetoDomains: EconomyAiDomain[] = [];
   const agreeDomains: EconomyAiDomain[] = [];
-  for (const domain of ECONOMY_AI_DOMAINS) {
-    const pair = source.filter((review) => review.domain === domain);
-    const actionable = pair.filter(
-      (review) => review.confidence >= MIN_ACTION_CONFIDENCE && review.decision !== 'abstain',
-    );
-    if (
-      actionable.some((review) => review.decision === 'veto') &&
-      actionable.some((review) => review.decision === 'agree')
-    )
-      disputed.push(domain);
-    else if (actionable.length === 2 && actionable.every((review) => review.decision === 'veto'))
-      vetoDomains.push(domain);
-    else if (actionable.length === 2 && actionable.every((review) => review.decision === 'agree'))
-      agreeDomains.push(domain);
+  for (const domain of domains) {
+    const pair = latest.filter((review) => review.domain === domain);
+    const actionable = pair.filter((review) => review.confidence >= MIN_ACTION_CONFIDENCE && review.decision !== 'abstain');
+    if (actionable.some((review) => review.decision === 'veto') && actionable.some((review) => review.decision === 'agree')) disputed.push(domain);
+    else if (actionable.length === 2 && actionable.every((review) => review.decision === 'veto')) vetoDomains.push(domain);
+    else if (actionable.length === 2 && actionable.every((review) => review.decision === 'agree')) agreeDomains.push(domain);
     else disputed.push(domain);
   }
   const criticalVeto = vetoDomains.some((domain) => domain === 'integrity' || domain === 'welfare');
-  const decision: EconomyAiReview['decision'] =
-    criticalVeto || vetoDomains.length >= 2
-      ? 'veto'
-      : disputed.length === 0 && agreeDomains.length === ECONOMY_AI_DOMAINS.length
-        ? 'agree'
-        : 'abstain';
-  const confidence = source.reduce((sum, review) => sum + review.confidence, 0) / source.length;
-  const risks = [...new Set(source.flatMap((review) => review.risks))].slice(0, 12);
-  return {
-    decision,
-    confidence: Number(confidence.toFixed(4)),
-    risks,
-    rationale: `council decision=${decision}; agree=${agreeDomains.join(',') || 'none'}; veto=${vetoDomains.join(',') || 'none'}; disputed=${disputed.join(',') || 'none'}`,
-  };
+  const decision: EconomyAiReview['decision'] = criticalVeto || vetoDomains.length >= 2
+    ? 'veto'
+    : disputed.length === 0 && agreeDomains.length === domains.length ? 'agree' : 'abstain';
+  const confidence = latest.reduce((sum, review) => sum + review.confidence, 0) / latest.length;
+  const risks = [...new Set(latest.flatMap((review) => review.risks))].slice(0, 12);
+  return { decision, confidence: Number(confidence.toFixed(4)), risks, rationale: `council decision=${decision}; domains=${domains.join(',')}; agree=${agreeDomains.join(',') || 'none'}; veto=${vetoDomains.join(',') || 'none'}; disputed=${disputed.join(',') || 'none'}` };
 }
 
 export class EconomyAiReviewer {
+  private readonly cache = new Map<string, { expiresAt: number; aggregate: EconomyAiReview; evidence: EconomyAiAgentReview[]; domains: EconomyAiDomain[]; mode: string }>();
+
   constructor(
     private readonly db: Queryable,
     private readonly config: EconomyAiReviewConfig | null,
@@ -344,10 +379,38 @@ export class EconomyAiReviewer {
       return { reviewed: false, status: 'unconfigured_classical_fallback' };
     }
 
-    const independent = await this.runCouncilStage(proposal, 'independent');
-    const rebuttal = await this.runCouncilStage(proposal, 'rebuttal', independent);
-    const finalReviews = rebuttal.length === ECONOMY_AI_DOMAINS.length * 2 ? rebuttal : independent;
-    const aggregate = aggregateCouncil(finalReviews);
+    const domains = selectDomainsForProposal(proposal);
+    const cacheKey = JSON.stringify({ proposal, prompt: ECONOMY_AI_PROMPT_VERSION, models: domains.map((domain) => this.config!.agents[domain]) });
+    const cached = this.cache.get(cacheKey);
+    let aggregate: EconomyAiReview;
+    let finalReviews: EconomyAiAgentReview[];
+    let mode: string;
+    if (cached && cached.expiresAt > Date.now()) {
+      aggregate = cached.aggregate;
+      finalReviews = cached.evidence;
+      mode = 'cache_hit';
+    } else {
+      const independent = await this.runCouncilStage(proposal, 'independent', [], domains);
+      const initialAggregate = aggregateCouncil(independent, domains);
+      const disputed = disputedDomains(independent, domains);
+      const highRisk = isHighRiskProposal(proposal);
+      const rebuttalDomains = highRisk ? domains : disputed;
+      if (initialAggregate.decision === 'agree' && initialAggregate.risks.length === 0 && rebuttalDomains.length === 0) {
+        finalReviews = independent;
+        aggregate = initialAggregate;
+        mode = 'early_exit';
+      } else if (rebuttalDomains.length > 0) {
+        const rebuttal = await this.runCouncilStage(proposal, 'rebuttal', independent, rebuttalDomains);
+        finalReviews = [...independent, ...rebuttal];
+        aggregate = aggregateCouncil(finalReviews, domains);
+        mode = highRisk ? 'full_risk_rebuttal' : 'targeted_rebuttal';
+      } else {
+        finalReviews = independent;
+        aggregate = initialAggregate;
+        mode = 'independent_only';
+      }
+      if (this.config.cacheTtlSeconds > 0) this.cache.set(cacheKey, { expiresAt: Date.now() + this.config.cacheTtlSeconds * 1000, aggregate, evidence: finalReviews, domains, mode });
+    }
     const stored = await queryOne<{ id: string }>(
       this.db,
       `SELECT public.economy_record_ai_policy_review(
@@ -375,7 +438,11 @@ export class EconomyAiReviewer {
       confidence: aggregate.confidence,
       risks: aggregate.risks,
       agentCount: finalReviews.length,
-      domainCount: ECONOMY_AI_DOMAINS.length,
+      domainCount: domains.length,
+      domains,
+      mode,
+      totalTokens: finalReviews.reduce((sum, review) => sum + (review.totalTokens ?? 0), 0),
+      totalLatencyMs: finalReviews.reduce((sum, review) => sum + (review.latencyMs ?? 0), 0),
     };
   }
 
@@ -383,13 +450,15 @@ export class EconomyAiReviewer {
     proposal: Record<string, unknown>,
     stage: 'independent' | 'rebuttal',
     previous: readonly EconomyAiAgentReview[] = [],
+    domains: readonly EconomyAiDomain[] = ECONOMY_AI_DOMAINS,
   ): Promise<EconomyAiAgentReview[]> {
     if (!this.config) return [];
-    const jobs = ECONOMY_AI_DOMAINS.flatMap((domain) =>
+    const jobs = domains.flatMap((domain) =>
       (['A', 'B'] as const).map((seat) => async () => {
         const modelConfig = this.config!.agents[domain][seat];
         const peer = previous.find((review) => review.domain === domain && review.seat !== seat);
         try {
+          const startedAt = Date.now();
           const context: EconomyAiAgentContext = peer
             ? { domain, seat, stage, peerReview: peer }
             : { domain, seat, stage };
@@ -399,7 +468,7 @@ export class EconomyAiReviewer {
             context,
           );
           const decision = review.confidence >= MIN_ACTION_CONFIDENCE ? review.decision : 'abstain';
-          return { ...review, decision, domain, seat, stage, model: modelConfig.model };
+          return { ...review, decision, domain, seat, stage, model: modelConfig.model, latencyMs: Date.now() - startedAt };
         } catch (error: unknown) {
           return {
             decision: 'abstain' as const,
