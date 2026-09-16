@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.16.154
+> **현재 통합 버전:** v2026.09.16.155
 > **구현·증거 동기화:** 2026-09-16
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -440,3 +440,28 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 조사: Google Search Central 9월 최신 글 및 2026-08 site reputation update, Naver Search Advisor robots/meta/resource, OWASP API/ASVS, Google Play 수수료/rollout, GitHub main/branch protection/Actions/PR #370.
 - 채택: exact-main CI 상태 분리, repository enforcement 결함, PR #370 rebase+real-DB gate, SEO crawler/resource 계약, 시장·시행일 기반 수수료 모델.
 - 보류: 기획 자동화에서는 runtime/DB/Flux/Production을 변경하지 않았다. `Build Test Candidate #740`이 관측 시 실행 중이므로 Test/Production 통과를 주장하지 않는다.
+
+
+## v2026.09.16.155 — 시간별 릴리스 진실성·외부근거 갱신
+
+### REL-EVIDENCE-155-01 — P0 — IN PROGRESS
+- 기획 시작/중간 권위 `main`은 `a4455ad342fbf66a128c1221c25b45ff4d20d6bf`이다. 이 exact SHA의 `Build Production Release #882`는 현재 `in_progress`이며 immutable SHA 결정은 통과했고 `Wait for exact SHA on isolated test and verify backend/database path` 단계가 실행 중이다. 이는 Test 또는 Production 성공 증거가 아니다.
+- 반복 릴리스 게이트 실패는 원인 제거 작업으로 유지한다. test-gate는 성공/실패 모두 expected/observed `release_sha`, GitOps desired/applied revision, Deployment generation, ReplicaSet/Pod image digest, pod-local/public version, backend readiness, DB authority/schema checksum, 최초 불일치 계층, probe timestamp/latency, rollback target을 남겨야 한다. secret header/cookie/DSN/key/token은 evidence에서 금지한다.
+- 수용조건: exact-SHA/DB assertion 하나라도 다르면 승격 0건, 실패/timeout에도 비밀 없는 완전한 evidence 보존, 복구 후 동일 candidate의 source→image→desired→applied→workload→public→DB lineage 증명, exact-main 재시험과 Production smoke 통과.
+
+### SEO/SEO 백엔드 결정 갱신
+- 2026-09-08/09-14 Google Search Central 글은 행사 공지이므로 crawl/index 계약을 변경하지 않는다. 2026-08-28 site reputation policy 변경은 sponsor/affiliate/UGC 거버넌스에 계속 직접 적용한다.
+- favicon QA는 현재 Google 기준에 따라 Googlebot/Googlebot-Image가 홈페이지와 favicon을 수집할 수 있어야 하고, 안정적인 URL과 정사각형 자산(권장 48×48 초과)을 사용한다. public metadata/canonical/sitemap/structured data/private noindex 계약은 유지한다.
+- Google European Search Dataset Licensing Program은 SEO 순위 우회수단이 아니므로, Moneyverse가 별도 자격과 독립 assurance/privacy 의무를 수용하는 경우가 아니면 제품 범위에서 제외한다.
+
+### 보안·AI 경계 갱신
+- OWASP API Security Top 10은 일반 API baseline, ASVS는 검증 baseline으로 유지한다. OWASP GenAI Security Project의 2026 LLM Top 10/Agent Control Standard는 계획된 economy-AI/agent lane에 한해 추가 적용한다. model/tool 권한, prompt/data provenance, bounded tool permission, output validation, model/dataset supply-chain, secret isolation, auditability, deterministic economy arbitration을 필수화한다. AI는 ledger/balance/entitlement를 직접 변경하거나 classical safety lane을 우회할 수 없다.
+- AI 간 불일치, 모델 장애, 잘못된 출력, 만료 proposal, provenance 누락은 `NO_OP`/shadow/human review로 귀결하며 조용히 실경제 동작으로 승격하지 않는다.
+
+### 수익성/사업성 갱신
+- Google Play 현재 서비스 수수료는 market/cohort/program 의존적이다. EEA/UK/US 새 요율은 이미 시행 중이고 나머지 시장은 각 rollout 전까지 해당 기존/program 조건을 사용한다. SKU 모델은 market × effective-date/install-cohort × transaction-type × billing-path × programme 키를 유지한다.
+- 실측하지 않은 conversion, ARPU/ARPDAU/ARPPU, churn, refund, CAC, LTV는 사실값으로 승격하지 않는다. release-control/backup/status 작업은 임의 매출이 아니라 회피된 downtime/fraud/refund/support/operator 비용으로 평가한다.
+
+### v155 worklog
+- 확인 근거: Google Search Central 9월 최신 글과 8월 site reputation 변경, Google favicon 가이드, Google European Search Dataset Licensing Program, OWASP API/ASVS 및 GenAI 2026 기준, Google Play 현재 수수료 문서, 최신 GitHub main/Actions.
+- 이번 기획 통합은 runtime code, DB, Flux, Production을 변경하지 않는다. 우선순위는 P0 release truth → 독립 restore 증거 → false-green status → privileged recovery cleanup → migration/Work-clock 무결성 → repository enforcement → economy/admin/casino 권한 → core correctness → monetization → SEO/growth/accessibility 순서를 유지한다.
