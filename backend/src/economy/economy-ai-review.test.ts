@@ -21,6 +21,7 @@ const config: EconomyAiReviewConfig = {
   timeoutMs: 10_000,
   ttlMinutes: 120,
   maxConcurrency: 2,
+  cacheTtlSeconds: 300,
 };
 
 function dbFor(options: {
@@ -82,6 +83,7 @@ describe('economy AI review lane', () => {
       timeoutMs: 25_000,
       ttlMinutes: 45,
       maxConcurrency: 1,
+      cacheTtlSeconds: 300,
     });
   });
 
@@ -114,7 +116,8 @@ describe('economy AI review lane', () => {
     const insert = calls.find((call) => call.text.includes('economy_record_ai_policy_review'));
     expect(insert?.values[1]).toBe('agree');
     expect(insert?.values[5]).toBe('multi-agent-council');
-    expect(JSON.parse(String(insert?.values[8]))).toHaveLength(12);
+    expect(JSON.parse(String(insert?.values[8]))).toHaveLength(8);
+    expect(result).toMatchObject({ domainCount: 4, agentCount: 8, mode: 'independent_only' });
   });
 
   it('downgrades a low-confidence veto to abstain instead of blocking policy', async () => {
@@ -180,4 +183,33 @@ describe('economy AI review lane', () => {
     );
     expect(aggregateCouncil(reviews)).toMatchObject({ decision: 'veto' });
   });
+
+  it('routes shop proposals only to macro, shop, welfare and integrity specialists', async () => {
+    const { db } = dbFor({});
+    const seen: string[] = [];
+    const caller: EconomyAiModelCaller = async (_config, _proposal, context) => {
+      seen.push(`${context.stage}:${context.domain}:${context.seat}`);
+      return { decision: 'agree', confidence: 0.95, rationale: 'safe', risks: [] };
+    };
+    const result = await new EconomyAiReviewer(db, config, caller).run();
+    expect(result).toMatchObject({ mode: 'early_exit', domainCount: 4, agentCount: 8 });
+    expect(seen).toHaveLength(8);
+    expect(seen.some((entry) => entry.includes(':stock:'))).toBe(false);
+    expect(seen.some((entry) => entry.includes(':jobs:'))).toBe(false);
+    expect(seen.some((entry) => entry.startsWith('rebuttal:'))).toBe(false);
+  });
+
+  it('runs full rebuttal for selected domains when a job-cap proposal is high risk', async () => {
+    const { db } = dbFor({ proposal: { eligible: true, sourceMetrics: { days: 7 }, adjustments: [{ knob: 'work.daily_cap', from: 100, to: 90 }] } });
+    const seen: string[] = [];
+    const caller: EconomyAiModelCaller = async (_config, _proposal, context) => {
+      seen.push(`${context.stage}:${context.domain}:${context.seat}`);
+      return { decision: 'agree', confidence: 0.95, rationale: 'bounded', risks: [] };
+    };
+    const result = await new EconomyAiReviewer(db, config, caller).run();
+    expect(result).toMatchObject({ mode: 'full_risk_rebuttal', domainCount: 4, agentCount: 16 });
+    expect(seen.filter((entry) => entry.startsWith('independent:'))).toHaveLength(8);
+    expect(seen.filter((entry) => entry.startsWith('rebuttal:'))).toHaveLength(8);
+  });
+
 });
