@@ -1,6 +1,6 @@
 # 월덕 머니버스 — AI 경제 컨트롤러 명세
 
-> 버전: v2026.09.16.139
+> 버전: v2026.09.16.141
 > 상태: Living 구현 지향 기획 명세
 > 날짜: 2026-09-16
 > 상위 명세: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -889,3 +889,10 @@ LLM 행동 에이전트, 근거가 충분할 때 역할별 SFT/LoRA adapter, 재
 ### 33.7 조사 근거
 
 v2026.09.16.139 연구 회차에서 OpenAlex와 Crossref를 합쳐 중복 제거된 11,749건 후보군을 만들고 `docs/findings/`에 목록을 커밋한다. 이 목록은 발견용 색인이며 모든 원문 정독을 의미하지 않는다. 운영판단은 직접 관련 핵심 원문, 최신 Moneyverse 증거, 재현 가능한 테스트, 적용 후 인과효과 측정을 근거로 한다.
+## 34. 분야별 2중 전문 AI 위원회 런타임 — v2026.09.16.141
+
+AI lane은 `macro`, `shop`, `stock`, `jobs`, `welfare`, `integrity` 6개 분야와 분야별 A/B 두 좌석으로 구성한다. 각 좌석은 먼저 독립 판단하고 같은 분야의 상대 좌석 결과만 받아 반박/수정하는 2차 판단을 수행한다. 한 분야에서 A/B가 충돌하면 평균내지 않고 abstain한다. `integrity` 또는 `welfare` 두 좌석이 함께 veto하면 안전 중요 veto로 처리하며, 그 외에도 두 개 이상 분야가 pair-veto이면 전체 위원회가 veto한다. 최종 12개 좌석 증거는 append-only review에 저장한다.
+
+각 분야/좌석은 서로 다른 OpenAI-compatible endpoint/model/adapter를 지정할 수 있다. 공통 기본값은 운영 편의일 뿐 독립 증거로 인정하지 않는다. 운영 독립성은 서로 다른 모델 계열, checkpoint/adapter, 학습 split, 목적함수 또는 tool/feature 정책 중 실질적 차이를 요구한다. AI 위원회가 비활성·불완전·장애·abstain 상태여도 기존 classical lane은 계속 동작한다.
+
+로컬 AI 저장소는 앱 시스템 디스크와 분리하며 `/srv/moneyverse-data/ai/{models,adapters,cache,datasets,evals,logs}`를 기본 root로 사용한다. 12개 모델을 동시에 상주시킬 필요는 없고 로컬 추론은 제한된 동시성으로 실행한다.

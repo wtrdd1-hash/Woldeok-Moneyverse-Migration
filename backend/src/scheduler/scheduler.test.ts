@@ -86,6 +86,31 @@ describe('the scheduler', () => {
     expect(app.calls).toHaveLength(0);
   });
 
+  it('runs a named handler instead of SQL for external jobs', async () => {
+    const app = connection((sql) =>
+      sql.includes('schedule_claim_run') ? [{ claimed: true, period_key: '2026-W38' }] : [],
+    );
+    let handled = 0;
+    await new Scheduler({
+      app: app as never,
+      reconciler: null,
+      intervalMs: 1000,
+      logger: silent,
+      jobs: [{ job: 'economy.ai_policy_review', cadence: 'weekly', notBefore: 20, connection: 'app' }],
+      handlers: {
+        'economy.ai_policy_review': async () => {
+          handled += 1;
+          return { reviewed: true, status: 'review_agree' };
+        },
+      },
+    }).tick();
+
+    expect(handled).toBe(1);
+    const finish = app.calls.find((call) => call.sql.includes('schedule_finish_run'));
+    expect(finish?.values[2]).toBe('succeeded');
+    expect(String(finish?.values[3])).toContain('review_agree');
+  });
+
   it('runs the work on the connection the job names', async () => {
     const app = connection((sql) =>
       sql.includes('schedule_claim_run') ? [{ claimed: true, period_key: '2026-08-31' }] : [],

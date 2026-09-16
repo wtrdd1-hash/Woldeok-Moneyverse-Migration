@@ -150,3 +150,8 @@ This file records incremental project changes so concurrent work can avoid overl
 - Reframed Economy AI as two continuously running lanes: classical/deterministic authority/fallback plus AI/learned exploration.
 - Added disagreement arbitration, failover, causal post-rollout calibration and explicit authority boundaries for stocks, shops, generated SKUs, jobs/limits and faucet/sink policy.
 - Planning only; no runtime deployment in this version.
+
+## 2026-09-16 — v2026.09.16.141 Paired specialist economy AI council
+- Implemented six economy-AI specialist domains with two A/B seats each, independent/rebuttal review, exact-proposal arbitration and append-only 12-seat evidence.
+- Preserved the existing deterministic policy engine as the fallback authority.
+- Verified migration 200 on the development PostgreSQL instance and created AI storage on the second 100GB disk.
