@@ -2,8 +2,8 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.16.161
-> **구현·증거 동기화:** 2026-09-16
+> **현재 통합 버전:** v2026.09.17.162
+> **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
@@ -635,3 +635,12 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 최신 외부자료: Google Search Central 2026년 9월 blog/update/site-reputation/favicon, OWASP API Security/ASVS 및 GenAI 2026, Google Play 현행 수수료 문서. 행사 공지를 랭킹 변경으로 오인하지 않았다.
 - 코드/QA/운영: 최신 main과 v160 EN/KO 문서를 재확인하고 #390 원인·로컬 검증, branch protection, Production Release #904를 대조했다. 통합 직전 main도 재확인한다.
 - 작업순서: P0 release truth/evidence → 독립 restore 증거 → false-green 제거 → HIGH 관리자 exact-SHA/authorization QA → casino/runtime/cache/privileged recovery → migration integrity → repository enforcement → core correctness → monetization → SEO/growth/accessibility. 기획 자동화는 문서만 변경한다.
+
+
+## 통합 증거 — v2026.09.17.162 Production exact-SHA 수렴
+
+- 릴리스 권위: 완료 처리 전에 애플리케이션 `main`, 격리 Test, Production, GitOps Production desired state가 동일 immutable SHA로 수렴해야 한다.
+- 검증 릴리스: `18c7a1324013099e47b2d6e22c5108c4d378139c`. Production release workflow `35113806254`와 인프라 reconcile `35117875121`이 성공했다.
+- DB 게이트: `203-work-reset-convergence.sql` 적용 전에 Production 백업을 생성했고 migration은 immutable checksum과 함께 기록됐다.
+- 현재 공개 edge 제약: Nginx는 아직 host systemd 서비스(Production `3000/3001`, Test `3100/3101`)를 사용한다. GitOps manifest 성공만으로 충분하지 않으며 host runtime과 공개 `/api/version`, catalog/status, SEO probe도 함께 수렴해야 한다.
+- 승격 뒤 경제 제어: `economy_ai_policy_review`, `economy_auto_policy`는 enabled를 유지하고 로컬 A/B 추론 서비스는 결정론적 회계 권위를 대체하지 않는 advisory/veto lane으로 유지된다.
