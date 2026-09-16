@@ -11,84 +11,18 @@ import { getServerLocale } from '@/lib/locale-server';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 
-interface TradeRow {
-  readonly trade_id: string;
-  readonly symbol: string;
-  readonly side: string;
-  readonly quantity: string;
-  readonly unit_price: string;
-  readonly gross_amount: string;
-  readonly tax_amount: string;
-  readonly created_at: string;
-}
-
+interface TradeRow { readonly trade_id: string; readonly symbol: string; readonly side: string; readonly quantity: string; readonly unit_price: string; readonly gross_amount: string; readonly tax_amount: string; readonly created_at: string; }
 type SideFilter = 'all' | 'buy' | 'sell';
 type SortOrder = 'newest' | 'oldest' | 'gross_desc' | 'quantity_desc';
-
-function normalizeSide(value: string | undefined): SideFilter {
-  return value === 'buy' || value === 'sell' ? value : 'all';
-}
-
-function normalizeSort(value: string | undefined): SortOrder {
-  return value === 'oldest' || value === 'gross_desc' || value === 'quantity_desc' ? value : 'newest';
-}
-
-function compareIntegerStringsDesc(left: string, right: string): number {
-  const leftValue = BigInt(left);
-  const rightValue = BigInt(right);
-  return leftValue === rightValue ? 0 : leftValue > rightValue ? -1 : 1;
-}
-
-function compareTrades(left: TradeRow, right: TradeRow, sort: SortOrder): number {
-  if (sort === 'oldest') return left.created_at.localeCompare(right.created_at);
-  if (sort === 'gross_desc') return compareIntegerStringsDesc(left.gross_amount, right.gross_amount) || right.created_at.localeCompare(left.created_at);
-  if (sort === 'quantity_desc') return compareIntegerStringsDesc(left.quantity, right.quantity) || right.created_at.localeCompare(left.created_at);
-  return right.created_at.localeCompare(left.created_at);
-}
+function normalizeSide(value: string | undefined): SideFilter { return value === 'buy' || value === 'sell' ? value : 'all'; }
+function normalizeSort(value: string | undefined): SortOrder { return value === 'oldest' || value === 'gross_desc' || value === 'quantity_desc' ? value : 'newest'; }
+function compareIntegerStringsDesc(left: string, right: string): number { const leftValue = BigInt(left); const rightValue = BigInt(right); return leftValue === rightValue ? 0 : leftValue > rightValue ? -1 : 1; }
+function compareTrades(left: TradeRow, right: TradeRow, sort: SortOrder): number { if (sort === 'oldest') return left.created_at.localeCompare(right.created_at); if (sort === 'gross_desc') return compareIntegerStringsDesc(left.gross_amount, right.gross_amount) || right.created_at.localeCompare(left.created_at); if (sort === 'quantity_desc') return compareIntegerStringsDesc(left.quantity, right.quantity) || right.created_at.localeCompare(left.created_at); return right.created_at.localeCompare(left.created_at); }
 
 export default async function StockHistoryPage({ searchParams }: { readonly searchParams: Promise<{ readonly q?: string; readonly side?: string; readonly sort?: string }> }) {
-  await requireMember();
-  const locale = await getServerLocale();
-  const isEn = locale === 'en';
-  const { q = '', side: rawSide, sort: rawSort } = await searchParams;
-  const query = q.trim().slice(0, 80);
-  const side = normalizeSide(rawSide);
-  const sort = normalizeSort(rawSort);
-  const history = await apiOrNull<{ trades: TradeRow[] }>('/api/v1/stocks/history');
-  const visible = history?.trades.filter((trade) => {
-    const matchesSide = side === 'all' || trade.side === side;
-    const matchesQuery = !query || trade.symbol.toLocaleLowerCase(locale).includes(query.toLocaleLowerCase(locale));
-    return matchesSide && matchesQuery;
-  }).sort((left, right) => compareTrades(left, right, sort)) ?? [];
-
-  const summary = visible.reduce((total, trade) => ({
-    buys: total.buys + (trade.side === 'buy' ? 1 : 0),
-    sells: total.sells + (trade.side === 'sell' ? 1 : 0),
-    buyGross: total.buyGross + (trade.side === 'buy' ? BigInt(trade.gross_amount) : 0n),
-    sellGross: total.sellGross + (trade.side === 'sell' ? BigInt(trade.gross_amount) : 0n),
-    tax: total.tax + BigInt(trade.tax_amount),
-  }), { buys: 0, sells: 0, buyGross: 0n, sellGross: 0n, tax: 0n });
-  const netFlow = summary.sellGross - summary.buyGross - summary.tax;
-
-  return (
-    <div className="grid gap-6">
-      <PageHeader eyebrow="TRADE HISTORY" title={isEn ? 'My Stock Trade History' : '내 주식 거래 내역'}>
-        {isEn ? 'Find and sort past virtual-stock buys and sells by symbol, trade type, size, or time.' : '과거 가상 주식 매수·매도 내역을 종목, 거래 유형, 규모, 시각 기준으로 빠르게 찾아보세요.'}
-      </PageHeader>
-      <div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link href="/stocks">{isEn ? 'Back to market' : '거래소로 돌아가기'}</Link></Button><Button asChild variant="outline"><Link href="/stocks/watchlist">{isEn ? 'Watchlist' : '관심 종목'}</Link></Button></div>
-      {history === null ? <EmptyState title={isEn ? 'Failed to load trade history.' : '거래 내역을 불러오지 못했어요.'} /> : history.trades.length === 0 ? <EmptyState title={isEn ? 'No trade history yet.' : '아직 거래 내역이 없습니다.'} /> : (
-        <section className="grid gap-4" aria-labelledby="trade-history-results">
-          <form method="get" role="search" className="grid gap-3 rounded-lg border p-4 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto]">
-            <Input name="q" defaultValue={query} maxLength={80} placeholder={isEn ? 'Search symbol' : '종목 코드 검색'} aria-label={isEn ? 'Search trade history by symbol' : '종목 코드로 거래 내역 검색'} />
-            <select name="side" defaultValue={side} aria-label={isEn ? 'Filter by trade type' : '거래 유형 필터'} className="min-h-10 rounded-md border bg-background px-3 text-sm"><option value="all">{isEn ? 'All trades' : '전체 거래'}</option><option value="buy">{isEn ? 'Buys' : '매수'}</option><option value="sell">{isEn ? 'Sells' : '매도'}</option></select>
-            <select name="sort" defaultValue={sort} aria-label={isEn ? 'Sort trade history' : '거래 내역 정렬'} className="min-h-10 rounded-md border bg-background px-3 text-sm"><option value="newest">{isEn ? 'Newest first' : '최신순'}</option><option value="oldest">{isEn ? 'Oldest first' : '오래된순'}</option><option value="gross_desc">{isEn ? 'Largest trade value' : '거래금액 큰순'}</option><option value="quantity_desc">{isEn ? 'Largest quantity' : '수량 많은순'}</option></select>
-            <Button type="submit">{isEn ? 'Apply' : '적용'}</Button>
-          </form>
-          <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="trade-history-results" className="text-lg">{isEn ? `${visible.length} of ${history.trades.length} trades` : `전체 ${history.trades.length}건 중 ${visible.length}건`}</h2>{(query || side !== 'all' || sort !== 'newest') ? <Button asChild variant="outline"><Link href="/stocks/history">{isEn ? 'Clear filters' : '필터 초기화'}</Link></Button> : null}</div>
-          {visible.length > 0 ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5" aria-label={isEn ? 'Filtered trade summary' : '필터된 거래 요약'}><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Buy / sell count' : '매수 / 매도 건수'}</CardTitle></CardHeader><CardContent>{summary.buys} / {summary.sells}</CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Buy volume' : '총 매수금액'}</CardTitle></CardHeader><CardContent><Amount value={summary.buyGross.toString()} /></CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Sell volume' : '총 매도금액'}</CardTitle></CardHeader><CardContent><Amount value={summary.sellGross.toString()} /></CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Total tax' : '총 세금'}</CardTitle></CardHeader><CardContent><Amount value={summary.tax.toString()} /></CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Net cash flow' : '순 현금흐름'}</CardTitle></CardHeader><CardContent>{netFlow < 0n ? '-' : ''}<Amount value={(netFlow < 0n ? -netFlow : netFlow).toString()} /></CardContent></Card></div> : null}
-          {visible.length === 0 ? <EmptyState title={isEn ? 'No trades match these filters.' : '조건에 맞는 거래 내역이 없습니다.'} description={isEn ? 'Try another symbol or clear the filters.' : '다른 종목 코드를 입력하거나 필터를 초기화해 보세요.'} /> : <div className="grid gap-3">{visible.map((trade) => <Card key={trade.trade_id}><CardContent className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"><div className="grid gap-1"><div className="flex flex-wrap items-center gap-2"><Link href={`/stocks/${encodeURIComponent(trade.symbol)}`} className="font-mono font-semibold underline-offset-4 hover:underline">{trade.symbol}</Link><Badge variant={trade.side === 'buy' ? 'default' : 'outline'}>{trade.side === 'buy' ? (isEn ? 'Buy' : '매수') : (isEn ? 'Sell' : '매도')}</Badge></div><p className="text-sm text-muted-foreground">{formatMoment(trade.created_at, isEn ? 'Checking...' : '기록 확인 중')}</p></div><div className="grid gap-1 text-sm sm:text-right"><p>{trade.quantity}{isEn ? ' shares' : '주'} × <Amount value={trade.unit_price} /></p><p className="text-muted-foreground">{isEn ? 'Gross' : '거래금액'} <Amount value={trade.gross_amount} /> · {isEn ? 'Tax' : '세금'} <Amount value={trade.tax_amount} /></p></div></CardContent></Card>)}</div>}
-        </section>
-      )}
-    </div>
-  );
+  await requireMember(); const locale = await getServerLocale(); const isEn = locale === 'en'; const { q = '', side: rawSide, sort: rawSort } = await searchParams; const query = q.trim().slice(0, 80); const side = normalizeSide(rawSide); const sort = normalizeSort(rawSort); const history = await apiOrNull<{ trades: TradeRow[] }>('/api/v1/stocks/history');
+  const visible = history?.trades.filter((trade) => { const matchesSide = side === 'all' || trade.side === side; const matchesQuery = !query || trade.symbol.toLocaleLowerCase(locale).includes(query.toLocaleLowerCase(locale)); return matchesSide && matchesQuery; }).sort((left, right) => compareTrades(left, right, sort)) ?? [];
+  const summary = visible.reduce((total, trade) => ({ buys: total.buys + (trade.side === 'buy' ? 1 : 0), sells: total.sells + (trade.side === 'sell' ? 1 : 0), buyGross: total.buyGross + (trade.side === 'buy' ? BigInt(trade.gross_amount) : 0n), sellGross: total.sellGross + (trade.side === 'sell' ? BigInt(trade.gross_amount) : 0n), buyQuantity: total.buyQuantity + (trade.side === 'buy' ? BigInt(trade.quantity) : 0n), sellQuantity: total.sellQuantity + (trade.side === 'sell' ? BigInt(trade.quantity) : 0n), tax: total.tax + BigInt(trade.tax_amount) }), { buys: 0, sells: 0, buyGross: 0n, sellGross: 0n, buyQuantity: 0n, sellQuantity: 0n, tax: 0n });
+  const netFlow = summary.sellGross - summary.buyGross - summary.tax; const averageBuyPrice = summary.buyQuantity > 0n ? summary.buyGross / summary.buyQuantity : null; const averageSellPrice = summary.sellQuantity > 0n ? summary.sellGross / summary.sellQuantity : null;
+  return <div className="grid gap-6"><PageHeader eyebrow="TRADE HISTORY" title={isEn ? 'My Stock Trade History' : '내 주식 거래 내역'}>{isEn ? 'Find and sort past virtual-stock buys and sells by symbol, trade type, size, or time.' : '과거 가상 주식 매수·매도 내역을 종목, 거래 유형, 규모, 시각 기준으로 빠르게 찾아보세요.'}</PageHeader><div className="flex flex-wrap gap-2"><Button asChild variant="outline"><Link href="/stocks">{isEn ? 'Back to market' : '거래소로 돌아가기'}</Link></Button><Button asChild variant="outline"><Link href="/stocks/watchlist">{isEn ? 'Watchlist' : '관심 종목'}</Link></Button></div>{history === null ? <EmptyState title={isEn ? 'Failed to load trade history.' : '거래 내역을 불러오지 못했어요.'} /> : history.trades.length === 0 ? <EmptyState title={isEn ? 'No trade history yet.' : '아직 거래 내역이 없습니다.'} /> : <section className="grid gap-4" aria-labelledby="trade-history-results"><form method="get" role="search" className="grid gap-3 rounded-lg border p-4 sm:grid-cols-[minmax(0,1fr)_auto_auto_auto]"><Input name="q" defaultValue={query} maxLength={80} placeholder={isEn ? 'Search symbol' : '종목 코드 검색'} aria-label={isEn ? 'Search trade history by symbol' : '종목 코드로 거래 내역 검색'} /><select name="side" defaultValue={side} aria-label={isEn ? 'Filter by trade type' : '거래 유형 필터'} className="min-h-10 rounded-md border bg-background px-3 text-sm"><option value="all">{isEn ? 'All trades' : '전체 거래'}</option><option value="buy">{isEn ? 'Buys' : '매수'}</option><option value="sell">{isEn ? 'Sells' : '매도'}</option></select><select name="sort" defaultValue={sort} aria-label={isEn ? 'Sort trade history' : '거래 내역 정렬'} className="min-h-10 rounded-md border bg-background px-3 text-sm"><option value="newest">{isEn ? 'Newest first' : '최신순'}</option><option value="oldest">{isEn ? 'Oldest first' : '오래된순'}</option><option value="gross_desc">{isEn ? 'Largest trade value' : '거래금액 큰순'}</option><option value="quantity_desc">{isEn ? 'Largest quantity' : '수량 많은순'}</option></select><Button type="submit">{isEn ? 'Apply' : '적용'}</Button></form><div className="flex flex-wrap items-center justify-between gap-3"><h2 id="trade-history-results" className="text-lg">{isEn ? `${visible.length} of ${history.trades.length} trades` : `전체 ${history.trades.length}건 중 ${visible.length}건`}</h2>{(query || side !== 'all' || sort !== 'newest') ? <Button asChild variant="outline"><Link href="/stocks/history">{isEn ? 'Clear filters' : '필터 초기화'}</Link></Button> : null}</div>{visible.length > 0 ? <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-7" aria-label={isEn ? 'Filtered trade summary' : '필터된 거래 요약'}><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Buy / sell count' : '매수 / 매도 건수'}</CardTitle></CardHeader><CardContent>{summary.buys} / {summary.sells}</CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Buy volume' : '총 매수금액'}</CardTitle></CardHeader><CardContent><Amount value={summary.buyGross.toString()} /></CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Average buy price' : '평균 매수가'}</CardTitle></CardHeader><CardContent>{averageBuyPrice === null ? '—' : <Amount value={averageBuyPrice.toString()} />}</CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Sell volume' : '총 매도금액'}</CardTitle></CardHeader><CardContent><Amount value={summary.sellGross.toString()} /></CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Average sell price' : '평균 매도가'}</CardTitle></CardHeader><CardContent>{averageSellPrice === null ? '—' : <Amount value={averageSellPrice.toString()} />}</CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Total tax' : '총 세금'}</CardTitle></CardHeader><CardContent><Amount value={summary.tax.toString()} /></CardContent></Card><Card><CardHeader className="pb-2"><CardTitle className="text-sm">{isEn ? 'Net cash flow' : '순 현금흐름'}</CardTitle></CardHeader><CardContent>{netFlow < 0n ? '-' : ''}<Amount value={(netFlow < 0n ? -netFlow : netFlow).toString()} /></CardContent></Card></div> : null}{visible.length === 0 ? <EmptyState title={isEn ? 'No trades match these filters.' : '조건에 맞는 거래 내역이 없습니다.'} description={isEn ? 'Try another symbol or clear the filters.' : '다른 종목 코드를 입력하거나 필터를 초기화해 보세요.'} /> : <div className="grid gap-3">{visible.map((trade) => <Card key={trade.trade_id}><CardContent className="grid gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"><div className="grid gap-1"><div className="flex flex-wrap items-center gap-2"><Link href={`/stocks/${encodeURIComponent(trade.symbol)}`} className="font-mono font-semibold underline-offset-4 hover:underline">{trade.symbol}</Link><Badge variant={trade.side === 'buy' ? 'default' : 'outline'}>{trade.side === 'buy' ? (isEn ? 'Buy' : '매수') : (isEn ? 'Sell' : '매도')}</Badge></div><p className="text-sm text-muted-foreground">{formatMoment(trade.created_at, isEn ? 'Checking...' : '기록 확인 중')}</p></div><div className="grid gap-1 text-sm sm:text-right"><p>{trade.quantity}{isEn ? ' shares' : '주'} × <Amount value={trade.unit_price} /></p><p className="text-muted-foreground">{isEn ? 'Gross' : '거래금액'} <Amount value={trade.gross_amount} /> · {isEn ? 'Tax' : '세금'} <Amount value={trade.tax_amount} /></p></div></CardContent></Card>)}</div>}</section>}</div>;
 }
