@@ -62,3 +62,7 @@
 - `/stocks` can now combine its existing symbol/name/description search with shareable sorting by movers, price, availability, or name.
 - Search submissions preserve the active sort and sort links preserve the active search query, so refining a market view no longer resets the other discovery control.
 - Numeric ordering uses `BigInt` integer-string comparisons; percentage movers use exact cross multiplication rather than floating-point division.
+
+## v2026.09.16.4 — Searchable stock trade history
+- Added a member-only `/stocks/history` workspace with symbol search, buy/sell filtering, detailed execution amounts, and stock-hub navigation.
+- Read-only over the existing actor-scoped history API; no ledger, schema, migration, authorization, or trade mutation changes.
