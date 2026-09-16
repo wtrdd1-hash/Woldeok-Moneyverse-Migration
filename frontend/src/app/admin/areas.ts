@@ -43,6 +43,13 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'safety',
   },
   {
+    href: '/admin/support',
+    eyebrow: 'MEMBER SUPPORT',
+    title: '문의 채팅',
+    summary: '회원 문의를 확인하고 운영자 응답을 남깁니다.',
+    group: 'safety',
+  },
+  {
     href: '/admin/market',
     eyebrow: 'VIRTUAL MARKET',
     title: '가상 주식 종목 관리',
@@ -75,6 +82,13 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     eyebrow: 'ECONOMY OPERATIONS',
     title: '경제 운영',
     summary: '통화량과 발행, 알림, 자동 조정 엔진, 일괄 지급.',
+    group: 'economy',
+  },
+  {
+    href: '/admin/shop',
+    eyebrow: 'SHOP OPERATIONS',
+    title: '상점 관리',
+    summary: '상점 상품의 가격, 재고, 활성 상태를 관리합니다.',
     group: 'economy',
   },
   {
