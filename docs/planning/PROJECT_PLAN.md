@@ -2,7 +2,7 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.16.155
+> Current integrated version: v2026.09.16.156
 > Implementation/evidence sync: 2026-09-16
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
@@ -471,3 +471,25 @@ External references rechecked: Google Search Central September 2026 updates and 
 ### v155 worklog
 - Sources checked: current Google Search Central September posts and August site-reputation update, Google favicon guidance, Google European Search Dataset Licensing Program, OWASP API/ASVS baseline and OWASP GenAI 2026 guidance, Google Play current fee documentation, current GitHub main and Actions.
 - Runtime code, DB, Flux and Production are not changed by this planning integration. Priority remains P0 release truth → independent restore evidence → false-green status → privileged recovery cleanup → migration/Work-clock integrity → repository enforcement → economy/admin/casino authorization → core correctness → monetization → SEO/growth/accessibility.
+
+
+## v2026.09.16.156 — casino runtime incident and release-host hygiene refresh
+
+### CASINO-RUNTIME-156-01 — HIGH — FIX MERGED / PRODUCTION REVERIFY REQUIRED
+- Production evidence on 2026-09-16: casino interaction could enter the global error boundary; digest `3286936712@E352` mapped to `A "use server" file can only export async functions, found object.` The merged root-cause fix is `main` `23ae36082b8a4875797314682efef8e99b8b9484` (#383). `CasinoPlayState`/`CASINO_IDLE` moved to a client-safe module, synchronous re-export was removed from the `use server` file, and a static regression test now rejects non-async runtime exports.
+- Impact: casino browser play/recovery UX. Settlement authority, ledger, balance and DB schema were not changed. Error recovery must not encourage duplicate submission: after an ambiguous browser failure, refresh/read recent server-authoritative play history and wallet before another bet; replay remains protected by idempotency.
+- QA: merged evidence is focused casino 14/14, typecheck pass, ESLint 0 errors with 11 unrelated warnings, production build pass. Current-main Build Test Candidate #749 is still running; therefore this is not exact-main Test or Production verification. Acceptance requires exact SHA Test, API/user-flow regression, duplicate-submit/idempotency negative cases, public runtime SHA, then Production smoke and absence of the recorded server-action error.
+
+### OPS-CACHE-156-01 — HIGH — MITIGATED RUNTIME / PERMANENT FIX TODO
+- The active Debian frontend runs as `debian` while `.next/cache/fetch-cache` had root-owned files, causing repeated `EACCES`. Ownership was repaired live to `debian:debian`; no member/ledger/settlement data changed.
+- Root-cause-removal design: release assembly and service startup must never create writable runtime paths as root. Pre-start verifies uid/gid and writable cache/temp/upload paths; immutable release files remain read-only, mutable cache is an explicitly owned runtime directory. A mismatch fails deployment before traffic.
+- Test/monitoring: clean-host install, upgrade, rollback, restart and cache-rebuild tests; assert zero `EACCES` for runtime paths; alert on permission-denied rate and cache write failures. Rollback restores the last verified release plus its ownership manifest, never `chmod -R 777`.
+
+### External-reference and business decision refresh
+- Google Search Central posts dated 2026-09-08 and 2026-09-14 remain event announcements, not crawl/index policy changes. The 2026-08-28 site-reputation policy remains applicable to sponsor/affiliate/UGC governance. Current favicon requirements remain crawlable homepage/favicon, stable URL and square asset.
+- OWASP API Security Top 10 remains the general API baseline; the planned economy-AI lane additionally uses the OWASP GenAI 2026 controls already specified in v155.
+- Google Play fee modeling remains market/cohort/program/effective-date aware. For markets not yet migrated to the announced new schedule, do not prematurely apply the EEA/UK/US new-install rates. Unmeasured commercial metrics remain hypotheses/test targets.
+
+### v156 worklog
+- Sources checked: Google Search Central September posts and August site-reputation update; Google favicon guidance; OWASP API/GenAI current guidance; Google Play current fee documentation; current GitHub main, merged #383, open #382/#381 and exact-main Actions.
+- Planning automation changed documentation only. Runtime code/DB/Flux/Production promotion were not performed here. Priority remains release truth/restore/status P0, then cache/recovery/migration/authorization HIGH before feature expansion.
