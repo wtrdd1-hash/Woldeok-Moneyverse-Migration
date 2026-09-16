@@ -74,6 +74,10 @@ export interface WorkDashboardRow {
   weekly_paid: string;
   weekly_cap: string;
   active_assignments: string;
+  game_day_key: string;
+  game_week_key: string;
+  day_ends_at: Date;
+  week_ends_at: Date;
 }
 
 export interface WorkCompleteV2Row {
@@ -158,8 +162,10 @@ export class WorkRepository {
       this.pool,
       `SELECT summary.daily_paid::text, summary.daily_cap::text,
               summary.weekly_paid::text, summary.weekly_cap::text,
-              summary.active_assignments::text
-       FROM public.work_my_dashboard($1) AS summary`,
+              summary.active_assignments::text,
+              summary.game_day_key::text, summary.game_week_key::text,
+              summary.day_ends_at, summary.week_ends_at
+       FROM public.work_my_dashboard_v2($1) AS summary`,
       [actor],
     );
   }
@@ -224,7 +230,11 @@ export class WorkRepository {
     );
   }
 
-  async completeTaskV2(key: unknown, actor: unknown, taskId: unknown): Promise<WorkCompleteV2Row | null> {
+  async completeTaskV2(
+    key: unknown,
+    actor: unknown,
+    taskId: unknown,
+  ): Promise<WorkCompleteV2Row | null> {
     assertUuid(key, 'idempotency key');
     assertUuid(actor, 'actor');
     assertUuid(taskId, 'task id');

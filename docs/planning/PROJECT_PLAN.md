@@ -2,7 +2,7 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.16.158
+> Current integrated version: v2026.09.16.159
 > Implementation/evidence sync: 2026-09-16
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
@@ -585,3 +585,14 @@ External references rechecked: Google Search Central September 2026 updates and 
 - Fresh research: Google Search Central September 2026 updates/blog, current favicon/site-reputation guidance, current Google Play service-fee and rollout documentation, OWASP/ASVS baseline cross-check. Adopted the 2026-09-16 crawler-identity operational implication and Korea fee effective-date guardrail; event announcements were reference-only, not SEO algorithm changes.
 - Runtime/QA/CI: confirmed main `88452f14...`; confirmed #888 failed specifically because isolated Test never served exact `f6fd312...`; confirmed Production build was skipped; confirmed #755 verify/check green while frontend candidate build remained in progress. No Production success is inferred.
 - Development linkage: P0 release-evidence/root-cause work precedes casino Production reverification and all feature expansion. This planning run changes documentation only; it does not deploy runtime code, alter DB/Flux, or promote Production.
+
+## v2026.09.16.159 — Work day/week reset authority convergence
+
+### WORK-CLOCK-149-01 — HIGH — IMPLEMENTED / EXACT-SHA TEST REQUIRED
+- Forward migration `203-work-reset-convergence.sql` fixes the remaining read-model split without editing or renumbering any applied migration. Migration 202 remains immutable.
+- Work settlement, task board, reward preview and dashboard now share `server_game_day_*` / `server_game_week_*` authority. One game day is 600 real seconds and one seven-day game week is 70 real minutes.
+- `GET /api/v1/work` adds the authoritative `game_day_key`, `game_week_key`, `day_ends_at` and `week_ends_at`. `/work` renders daily/weekly paid WLD, remaining quota and exact next reset from those server values.
+- Task actions fail closed at task-daily, member-daily or member-weekly exhaustion. Reward preview uses the same current game windows and caps as settlement instead of advertising an amount that settlement would refuse or clamp.
+- Mobile API contract advances to `v2026.09.16.159`. Contract generation now excludes TypeScript compiler-internal `__@...` symbol properties so unrelated type graph changes cannot rewrite public JSON response schemas.
+- Isolated PostgreSQL validation passed migration 203 plus 15 Work/clock tests covering 10-minute day rollover, 70-minute week rollover, timezone invariance, task/global caps, career switching, idempotency/integrity and preview/payout/dashboard parity. Local DB package 7/7, backend 871, frontend 612, lint 0 errors, typecheck and production build passed.
+- Production remains fail-closed pending GitHub CI, exact-head Test convergence, authoritative DB backup/migration and Production smoke. The current P0 release-evidence rules from v158 are not weakened for this fix.

@@ -8,15 +8,21 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { IDLE } from '@/lib/action-state';
-import { claimReward, completeTaskV2Action, submitTask, switchJobAction, takeTask } from './actions';
+import {
+  claimReward,
+  completeTaskV2Action,
+  submitTask,
+  switchJobAction,
+  takeTask,
+} from './actions';
 import {
   difficultyLabel,
   jobLabel,
   jobMeta,
   type JobMeta,
   type WorkTask,
+  type WorkTaskBlock,
 } from './work';
-
 
 export function JobSwitchButton({
   job,
@@ -87,7 +93,10 @@ function TaskCompletionPanel({
       <Card className="w-full max-w-md border-border/80 bg-background/95 shadow-2xl backdrop-blur-md">
         <CardHeader>
           <div className="flex items-center justify-between gap-2">
-            <Badge variant="secondary" className="flex items-center gap-1.5 font-medium px-2.5 py-1">
+            <Badge
+              variant="secondary"
+              className="flex items-center gap-1.5 font-medium px-2.5 py-1"
+            >
               <span>{meta?.icon ?? '💼'}</span>
               <span>{jobLabel(task.job_type, locale)}</span>
               <span className="text-muted-foreground/60">·</span>
@@ -146,7 +155,11 @@ function TaskCompletionPanel({
           )}
 
           {pending && (
-            <div className="rounded-xl border border-sky-500/30 bg-sky-500/10 p-3 text-sm text-sky-200" role="status" aria-live="polite">
+            <div
+              className="rounded-xl border border-sky-500/30 bg-sky-500/10 p-3 text-sm text-sky-200"
+              role="status"
+              aria-live="polite"
+            >
               {slow
                 ? isEn
                   ? 'The response is taking longer than usual. The request is protected against duplicates and will time out safely instead of spinning forever.'
@@ -181,9 +194,11 @@ function TaskCompletionPanel({
 export function TaskCompleteModalButton({
   task,
   isActiveJob,
+  blockedReason,
 }: {
   readonly task: WorkTask;
   readonly isActiveJob: boolean;
+  readonly blockedReason?: WorkTaskBlock;
 }) {
   const { locale } = useLocale();
   const isEn = locale === 'en';
@@ -208,7 +223,7 @@ export function TaskCompleteModalButton({
     <div className="w-full">
       <Button
         variant={isActiveJob ? 'default' : 'outline'}
-        disabled={!isActiveJob || rewardPaused}
+        disabled={!isActiveJob || rewardPaused || Boolean(blockedReason)}
         onClick={open}
         className="w-full font-semibold shadow-sm transition-all"
       >
@@ -216,13 +231,25 @@ export function TaskCompleteModalButton({
           ? isEn
             ? 'Switch career first'
             : '해당 직업으로 먼저 전직'
-          : rewardPaused
+          : blockedReason === 'weekly'
             ? isEn
-              ? 'Rewards paused'
-              : '보상 지급 일시 중지'
-            : isEn
-              ? 'Perform career task'
-              : '직업 업무 수행'}
+              ? 'Weekly reward limit reached'
+              : '주간 보상 한도 도달'
+            : blockedReason === 'daily'
+              ? isEn
+                ? 'Daily reward limit reached'
+                : '일간 보상 한도 도달'
+              : blockedReason === 'task_daily'
+                ? isEn
+                  ? 'Task daily limit reached'
+                  : '업무 일일 횟수 도달'
+                : rewardPaused
+                  ? isEn
+                    ? 'Rewards paused'
+                    : '보상 지급 일시 중지'
+                  : isEn
+                    ? 'Perform career task'
+                    : '직업 업무 수행'}
       </Button>
 
       {isOpen && requestKey && (
