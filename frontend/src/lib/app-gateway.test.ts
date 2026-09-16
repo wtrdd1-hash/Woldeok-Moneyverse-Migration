@@ -47,7 +47,7 @@ describe('app API compatibility contract', () => {
     expect(APP_API_GROUPS).toEqual([
       'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'businesses',
       'casino', 'content', 'early-game', 'engagement', 'media', 'photos', 'privacy',
-      'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'stocks', 'wallet', 'work',
+      'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'stocks', 'support', 'wallet', 'work',
     ]);
   });
 

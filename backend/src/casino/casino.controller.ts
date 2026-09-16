@@ -130,7 +130,21 @@ export class CasinoController {
     if (isAuthorizationFailure(error) || isRoleRefusal(error)) {
       return new ForbiddenException(refusal.forbidden);
     }
-    if (isExpectedCommandFailure(error)) return new ConflictException(refusal.conflict);
+    if (isExpectedCommandFailure(error)) {
+      const detail = error instanceof Error && error.message ? error.message : refusal.conflict;
+      const code = detail.includes('daily stake limit reached')
+        ? 'casino_daily_stake_limit_reached'
+        : detail.includes('daily loss limit reached')
+          ? 'casino_daily_loss_limit_reached'
+          : detail.includes('your own daily stake limit')
+            ? 'casino_self_stake_limit_reached'
+            : detail.includes('your own daily loss limit')
+              ? 'casino_self_loss_limit_reached'
+              : detail.includes('locked yourself out')
+                ? 'casino_self_excluded'
+                : undefined;
+      return new ConflictException(code ? { message: detail, code } : detail);
+    }
     return error;
   }
 

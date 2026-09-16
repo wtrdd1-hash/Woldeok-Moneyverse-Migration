@@ -31,8 +31,7 @@ import { OperationsInputError, OperationsRepository } from './operations.reposit
  * log screen. One controller with three sub-paths would have recorded all
  * three under whatever prefix it claimed.
  *
- * READS ONLY, AND SO NO STEP-UP. `CsrfGuard`, `ReauthGuard` and
- * `SecondFactorGuard` are absent because nothing here writes. Asking for an
+ * READS ONLY, AND SO NO STEP-UP. `CsrfGuard`, `ReauthGuard` are absent because nothing here writes. Asking for an
  * authenticator code to read a number is how operators learn to type codes
  * without reading what they are for -- the same reasoning
  * `AdminEconomyController` gives for its preview route.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createFixedWindowLimiter } from './rate-limiter';
-import { MAX_MESSAGE_LENGTH, attachMarketRoom, sanitizeMessage } from './lobby';
+import { MAX_MESSAGE_LENGTH, attachMarketRoom, lobbyDisplayName, sanitizeMessage } from './lobby';
 import {
   MARKET_ROOM,
   MARKET_SUBSCRIBE_EVENT,
@@ -52,6 +52,15 @@ describe('fixed window limiter', () => {
 
   it('rejects a nonsensical table size rather than accepting it', () => {
     expect(() => createFixedWindowLimiter({ maxEntries: 0 })).toThrow(TypeError);
+  });
+});
+
+describe('lobby identity', () => {
+  it('uses the authoritative member nickname and keeps a safe fallback', () => {
+    expect(lobbyDisplayName('12345678-1234-4234-8234-123456789012', '월덕')).toBe('월덕');
+    expect(lobbyDisplayName('12345678-1234-4234-8234-123456789012', '<관리자>')).toBe('관리자');
+    expect(lobbyDisplayName('12345678-1234-4234-8234-123456789012')).toBe('회원-123456');
+    expect(lobbyDisplayName(null)).toBe('회원');
   });
 });
 

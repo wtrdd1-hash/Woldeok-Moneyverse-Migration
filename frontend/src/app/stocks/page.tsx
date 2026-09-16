@@ -24,6 +24,7 @@ import { LiveBadge, LiveHoldingValue, LiveQuote, LiveSparkline } from './live';
 import { MarketNews } from './market-news';
 import type { MarketEvent } from './market-news';
 import { StockDetailDialog } from './stock-detail-dialog';
+import { normalizeStockSort, sortMarketStocks } from './stock-market-sort';
 import { TradeDialog } from './trade-dialog';
 import { WatchlistToggle } from './watchlist-toggle';
 import { filterStocks, normalizeStockQuery } from './stock-search';
@@ -100,13 +101,14 @@ const SPARK_POINTS = 60;
 export default async function StocksPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly q?: string | string[] }>;
+  readonly searchParams: Promise<{ readonly q?: string | string[]; readonly sort?: string | string[] }>;
 }) {
   await requireMember();
   const locale = await getServerLocale();
   const isEn = locale === 'en';
-  const { q: rawQuery } = await searchParams;
+  const { q: rawQuery, sort: rawSort } = await searchParams;
   const query = normalizeStockQuery(rawQuery);
+  const sort = normalizeStockSort(Array.isArray(rawSort) ? rawSort[0] : rawSort);
 
 // Four calls, not three plus one per listed stock. The preview lines used
   // to be fetched a card at a time, after the list came back, so the page
@@ -125,7 +127,8 @@ export default async function StocksPage({
   ]);
 
   const allStocks = market?.stocks ?? [];
-  const stocks = filterStocks(allStocks, query, locale);
+  const filteredStocks = filterStocks(allStocks, query, locale);
+  const stocks = sortMarketStocks(filteredStocks, sort);
   const watchedStockIds = new Set((watchlist?.stocks ?? []).map((row) => row.stock_id));
 
   const seriesFor = new Map<string, readonly SparkPoint[]>(
@@ -157,6 +160,7 @@ export default async function StocksPage({
           <LiveBadge />
         </div>
         <form action="/stocks" method="get" role="search" className="flex w-full max-w-2xl flex-wrap gap-2">
+          {sort !== 'default' ? <input type="hidden" name="sort" value={sort} /> : null}
           <label htmlFor="stock-search" className="sr-only">
             {isEn ? 'Search virtual stocks' : '가상 주식 종목 검색'}
           </label>
@@ -174,10 +178,29 @@ export default async function StocksPage({
           </Button>
           {query ? (
             <Button asChild type="button" variant="outline" className="min-h-11">
-              <Link href="/stocks">{isEn ? 'Clear' : '초기화'}</Link>
+              <Link href={sort === 'default' ? '/stocks' : `/stocks?sort=${sort}`}>{isEn ? 'Clear' : '초기화'}</Link>
             </Button>
           ) : null}
         </form>
+        <nav aria-label={isEn ? 'Sort stocks' : '종목 정렬'} className="flex flex-wrap gap-2">
+          {[
+            ['default', isEn ? 'Default' : '기본순'],
+            ['change', isEn ? 'Top movers' : '등락률순'],
+            ['price', isEn ? 'Price' : '가격순'],
+            ['available', isEn ? 'Availability' : '거래 가능순'],
+            ['name', isEn ? 'Name' : '이름순'],
+          ].map(([value, label]) => {
+            const params = new URLSearchParams();
+            if (query) params.set('q', query);
+            if (value && value !== 'default') params.set('sort', value);
+            const href = params.size ? `/stocks?${params.toString()}` : '/stocks';
+            return (
+              <Button key={value} asChild size="sm" variant={sort === value ? 'default' : 'outline'}>
+                <Link href={href} aria-current={sort === value ? 'page' : undefined}>{label}</Link>
+              </Button>
+            );
+          })}
+        </nav>
         {query ? (
           <p className="text-sm text-muted-foreground" role="status" aria-live="polite">
             {isEn
@@ -328,8 +351,9 @@ export default async function StocksPage({
       </Card>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex-row items-center justify-between gap-3">
           <CardTitle>{isEn ? 'My Trade History' : '내 거래 내역'}</CardTitle>
+          <Button asChild size="sm" variant="outline"><Link href="/stocks/history">{isEn ? 'Search history' : '거래 내역 찾기'}</Link></Button>
         </CardHeader>
         <CardContent>
           {history === null ? (

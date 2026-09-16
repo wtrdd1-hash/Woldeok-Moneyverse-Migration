@@ -4,9 +4,9 @@ import { AiNewsRepository } from './ai-news.repository';
 import { AiNewsService } from './ai-news.service';
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
-import { SecondFactorRepository } from '../auth/second-factor.repository';
 import { SessionRepository } from '../auth/session.repository';
 import { sealingKeyFrom } from '../auth/totp';
+import { AdminLoginPolicyRepository } from './admin-login-policy.repository';
 import type { AppConfig } from '../core/config';
 import { CONFIG } from '../core/config';
 import type { Queryable } from '../core/db';
@@ -84,21 +84,15 @@ function devicePepper(config: AppConfig): string {
       useFactory: (pool: Queryable | null) => (pool ? new AbuseSecurityRepository(pool) : null),
     },
     {
+      provide: AdminLoginPolicyRepository,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => pool ? new AdminLoginPolicyRepository(pool) : null,
+    },
+    {
       provide: AdminSecurityService,
-      inject: [CONFIG, SecondFactorRepository, SessionRepository],
-      useFactory: (
-        config: AppConfig,
-        factors: SecondFactorRepository | null,
-        sessions: SessionRepository | null,
-      ) =>
-        factors && sessions
-          ? new AdminSecurityService({
-              factors,
-              sessions,
-              sealing: sealingKeyFrom(process.env),
-              issuer: new URL(config.baseUrl).host,
-            })
-          : null,
+      inject: [AdminLoginPolicyRepository, SessionRepository],
+      useFactory: (policy: AdminLoginPolicyRepository | null, sessions: SessionRepository | null) =>
+        policy && sessions ? new AdminSecurityService({ policy, sessions }) : null,
     },
     {
       provide: AiNewsService,

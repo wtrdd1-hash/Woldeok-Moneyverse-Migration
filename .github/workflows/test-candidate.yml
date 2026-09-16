@@ -6,11 +6,20 @@ on:
       - main
       - 'feat/**'
       - 'fix/**'
+      - 'feature/**'
+      - 'bugfix/**'
+      - 'security/**'
       - 'integrate/**'
       - 'ops/**'
       - 'auto/**'
       - 'test-candidate/**'
   workflow_dispatch:
+    inputs:
+      promote:
+        description: Dispatch the Production exact-SHA gate after a successful main candidate
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -103,3 +112,28 @@ jobs:
               echo 'This development-branch candidate is automatically CI/build validated. Production promotion remains fail-closed until the validated change reaches main and the same main SHA passes isolated Test.'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
+
+  dispatch-production-gate:
+    needs: build
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.ref == 'refs/heads/main' &&
+      inputs.promote == true
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Dispatch Production exact-SHA gate for unchanged main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          current_main="$(gh api "repos/${GITHUB_REPOSITORY}/branches/main" --jq '.commit.sha')"
+          if [[ "$current_main" != "$GITHUB_SHA" ]]; then
+            echo "::warning::main moved from candidate ${GITHUB_SHA} to ${current_main}; newer main candidate must own promotion"
+            exit 0
+          fi
+          gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo "dispatched Production gate for exact current main ${GITHUB_SHA}"

@@ -301,6 +301,19 @@ export class SessionRepository {
     return row?.has_current_consent === true;
   }
 
+  /** Authoritative member-facing nickname used by ephemeral realtime chat. */
+  async memberDisplayName(userId: string): Promise<string | null> {
+    const row = await queryOne<{ readonly display_name: string | null }>(
+      this.pool,
+      'SELECT profile.display_name FROM public.member_profile_view($1::uuid, $1::uuid) AS profile',
+      [userId],
+    );
+    if (!row?.display_name) return null;
+    const decrypted = this.encryptionService.decrypt(row.display_name) ?? row.display_name;
+    const normalized = decrypted.replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 80);
+    return normalized || null;
+  }
+
   async createChallenge(
     sessionId: string,
     challenge: OAuthChallengeLike,

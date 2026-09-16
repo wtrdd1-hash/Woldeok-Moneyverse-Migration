@@ -34,6 +34,7 @@ import { TieredThrottlerGuard } from './security/tiered-throttler.guard';
 import { InternalTokenGuard } from './auth/guards/internal-token.guard';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { GameClockModule } from './game-clock/game-clock.module';
+import { SupportModule } from './support/support.module';
 
 const ONE_MINUTE_MS = 60_000;
 
@@ -52,6 +53,7 @@ const ONE_MINUTE_MS = 60_000;
     BusinessModule,
     SeasonModule,
     BoardModule,
+    SupportModule,
     PrivacyModule,
     EconomyModule,
     AdminModule,

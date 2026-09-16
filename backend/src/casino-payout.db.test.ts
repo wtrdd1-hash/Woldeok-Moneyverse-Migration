@@ -161,7 +161,7 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
     expect(rows[0]).toEqual({
       min_stake: '10',
       max_stake: '200',
-      daily_stake_limit: '2000',
+      daily_stake_limit: '9000000000000000000',
     });
   });
 
@@ -201,8 +201,8 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)('the casino as a sink',
          FROM public.casino_coin_terms($1)`,
         [actor],
       );
-      expect(rows[0]?.daily_stake_limit).toBe('2000');
-      expect(rows[0]?.daily_loss_limit).toBe('1000');
+      expect(rows[0]?.daily_stake_limit).toBe('9000000000000000000');
+      expect(rows[0]?.daily_loss_limit).toBe('8999999999999999999');
     });
   });
 
