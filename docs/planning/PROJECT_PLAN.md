@@ -2,7 +2,7 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.16.152
+> Current integrated version: v2026.09.16.153
 > Implementation/evidence sync: 2026-09-16
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
@@ -392,3 +392,28 @@ Read-only filtered-history summary added to /stocks/history; no economy mutation
 `P0 runtime authority / exact-SHA truth → P0 independent backup+restore evidence → P0 false-green/status truth → HIGH privileged recovery cleanup → HIGH migration sequence + Work clock convergence → HIGH repository required-check enforcement → HIGH economy/admin/casino authorization and integrity → P1 core feature correctness → payment/shop unit economics → SEO acquisition → retention/growth → accessibility/long-term expansion`.
 
 This v152 planning integration changes documentation only. It does not deploy runtime code, mutate product data/DB schema, unsuspend Flux, rotate credentials or promote Production. Runtime implementation continues through a new branch, tests/CI, exact-SHA Test, backend/API/DB/user-flow QA, main integration, Production promotion, smoke and rollback evidence.
+
+
+## 18. Hourly integration delta — v2026.09.16.153
+
+### 18.1 Evidence snapshot and release truth
+
+- Evidence date: 2026-09-16. Planning base at the start and mid-run remained `main` `9ca10bed71bf0175c146324ee9e6eca111f35ad8`; no source drift was observed before this documentation branch was cut.
+- `Build Production Release #880` for that exact `main` SHA was still `in_progress` when inspected. Therefore current-main Production verification is `UNVERIFIED`; a documentation merge, skipped auto-promotion, or an in-progress release is not release evidence.
+- `REL-110/REL-133` remains P0 until exact Test workload SHA, public Test SHA, backend readiness, authoritative DB path/schema, then Production SHA and smoke evidence all agree. A timeout/rerun alone does not close the incident.
+- Open PR #370 (`WORK-CLOCK-149-01`) is currently non-mergeable against the newer main and remains `HIGH / FIX_PENDING`. Rebase/update must preserve immutable migration numbering and rerun real-PostgreSQL accelerated day/week boundary tests before merge.
+
+### 18.2 Implementable backlog delta
+
+1. `REL-EVIDENCE-153-01 / P0 / IN_PROGRESS`: every release attempt emits an `always()` evidence bundle containing release SHA, desired/applied revision, workload generation, image digest, pod-local/public version SHA, backend readiness, DB authority/schema checksum, first failing layer, timestamps/latencies and rollback target. Secrets, cookies, Authorization headers, DSNs and private keys are forbidden. Acceptance: failed releases with missing evidence = 0; Production promotion when any exact-SHA/DB assertion differs = 0.
+2. `WORK-CLOCK-149-01 / HIGH / FIX_PENDING`: the dashboard and settlement must use the same authoritative `server_game_day_key()`/`server_game_week_key()`. Test `boundary -1/0/+1s`, 10-real-minute game-day rollover, 70-real-minute game-week rollover, concurrent completion, retry/idempotency, process restart and DB timezone changes. Migration rollback is forward-only correction; applied migrations are never edited or renumbered.
+3. `SEO-153-01 / P1 / ADOPT`: Google Search Central's current September 8 update adds regional Search-experience documentation, while the August 28 site-reputation-policy update remains material. Moneyverse must not present WDX/game stocks as real financial-provider content to qualify for finance surfaces. Public SEO read models retain content owner/editorial control/sponsor/index policy; account, transaction, casino-history, payment-callback and admin surfaces remain `noindex` and sitemap-excluded. Favicon QA keeps a stable square URL, crawlable home page and crawlable favicon asset.
+4. `MONETIZATION-153-01 / P1 / ADOPT`: Google Play has no single universal fee. Unit economics must key on market, effective-date/install cohort, recurring vs non-recurring transaction, billing path and enrolled program. For EEA/UK/US from 2026-06-30, standard auto-renewing subscriptions are 10%, other new-install transactions 20%, existing-install transactions 25%, plus the 5% billing fee when applicable. Remaining markets keep their currently applicable program rules until rollout. All conversion, ARPU/ARPDAU/ARPPU, churn, refund, CAC and LTV figures remain `HYPOTHESIS/TEST TARGET` until measured.
+
+### 18.3 Cross-functional completion gates
+
+No P0/HIGH item is `DONE` from documentation alone. Required flow remains branch → static/unit/integration/real-DB/security tests → immutable candidate → isolated exact-SHA Test → backend/API/DB/user-flow QA → main → exact-main re-test → Production promotion → smoke/monitoring → rollback if required. Revenue or growth work cannot bypass data-loss, authorization, economy-integrity, DB-integrity, backup/restore or release-truth gates.
+
+### 18.4 v153 worklog
+
+External references rechecked: Google Search Central September 2026 updates and August 28 site-reputation policy; OWASP API Security Top 10/ASVS baseline; Google Play current service-fee documentation. Repository evidence rechecked: main SHA, both v152 integrated plans, current Actions state and open PR #370. Decision: no speculative runtime promotion; preserve P0 release truth, add exact release-evidence acceptance, keep Work-clock fix blocked until mergeability/exact-SHA real-DB QA, and retain market/cohort-aware monetization math. Runtime code, DB, Flux and Production were not changed by this planning run.
