@@ -133,3 +133,20 @@ This file records incremental project changes so concurrent work can avoid overl
 - Added an opt-in middleware bridge that forwards only the Test hostname to `TEST_FRONTEND_ORIGIN`; Production behavior is unchanged when the variable is absent.
 - Verified the bridge on an alternate port: Production host stayed on the router build while Test host returned exact main SHA `c82153917095bf380b5336ef95ad6932c9d7a295`, public-catalog smoke returned 200, and Test remained `noindex`.
 - Rebuilt the isolated Test frontend/backend from exact current main SHA instead of trusting a mismatched manual BUILD_ID.
+## 2026-09-16 — v2026.09.16.136 Multi-agent economy AI planning
+
+- Expanded the Moneyverse AI economy plan into separately versioned specialist agents that debate, challenge and audit one another before a policy is eligible for bounded automation.
+- Added deterministic bounded stock-price formation, automatic shop repricing, and low-risk template-based SKU auto-publication with safety, affordability, anti-manipulation and rollback gates.
+- Updated English/Korean controller and simulation specifications. Planning only; no runtime deployment.
+## 2026-09-16 — v2026.09.16.138 Adaptive profession/daily-limit AI planning
+
+- Added bounded AI control for primary-profession slots, active-profession concurrency, daily assignment/full-reward protection limits, and automatic relaxation back to unlimited.
+- Kept ordinary daily limits unlimited by default and protected existing primary-profession selections/mastery through grandfathering.
+- Updated integrated planning, scenario/QA requirements, and rollback/audit contracts. Planning only; no runtime deployment.
+
+## 2026-09-16 — v2026.09.16.139 Dual classical + AI economy control research
+
+- Built and committed a deduplicated 11,749-record OpenAlex+Crossref research candidate corpus with an English/Korean evidence review.
+- Reframed Economy AI as two continuously running lanes: classical/deterministic authority/fallback plus AI/learned exploration.
+- Added disagreement arbitration, failover, causal post-rollout calibration and explicit authority boundaries for stocks, shops, generated SKUs, jobs/limits and faucet/sink policy.
+- Planning only; no runtime deployment in this version.

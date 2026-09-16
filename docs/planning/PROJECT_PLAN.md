@@ -2,7 +2,7 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.15.110
+> Current integrated version: v2026.09.16.139
 > Implementation/evidence sync: 2026-09-15
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
@@ -296,3 +296,17 @@ All flows cover loading/empty/error/offline/timeout, keyboard and focus, labels,
 
 ### v2026.09.16.1 delta — composable stock discovery
 `/stocks` discovery composes URL-backed `q` search with `sort=change|price|available|name`. Either control must preserve the other when changed, keeping the resulting view bookmarkable/shareable. Integer-string precision remains mandatory for economy values and invalid sort values fall back to API order.
+
+## 2026-09-16 — v2026.09.16.138 adaptive profession/daily-limit integration
+
+- Moneyverse Economy AI may jointly analyze and tune primary-profession slots, concurrently active professions, profession repeat-reward curves, and daily assignment/full-reward protection limits through the policy registry.
+- Ordinary daily limits remain `null = unlimited` by default. A finite cap is a temporary protection action only after multi-window evidence, simulation, causal evaluation and deterministic guardrails pass; automatic relaxation and return-to-unlimited are mandatory.
+- AI cannot silently replace or revoke an existing primary profession or erase mastery. Slot reductions require grandfathering or a separately human-approved migration.
+- As with stock pricing, shop pricing and low-risk SKU generation, multi-agent models may generate profession-policy candidates, but a versioned deterministic policy gate retains final enforcement authority.
+
+## 2026-09-16 — v2026.09.16.139 dual classical + AI economy control integration
+
+- Economy automation now requires two continuously available analytical lanes: a classical/deterministic baseline and an AI/learned exploratory lane using the same immutable snapshot.
+- The classical lane remains the operational fallback and authority for accounting, reconciliation, market matching/price bounds, policy constraints and safety. AI adds behavioral agents, counterfactuals, RL/MARL simulation, demand/product hypotheses and adversarial analysis.
+- Strong cross-lane disagreement cannot be averaged into a live action. It falls back to `SHADOW`, `NO_OP` or human review; agreement only makes a candidate eligible for deterministic validation.
+- The research pass created a deduplicated **11,749-record** OpenAlex+Crossref candidate corpus and committed a machine-readable manifest plus English/Korean review under `docs/findings/`. The corpus supports discovery breadth; production decisions still require primary evidence, current runtime data and causal post-rollout evaluation.
