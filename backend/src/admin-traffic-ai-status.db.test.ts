@@ -6,6 +6,21 @@ import { databaseUrl, rejectionOf } from './testing/database';
 const DATABASE_URL = databaseUrl();
 const MIGRATOR_DATABASE_URL = process.env.MIGRATOR_DATABASE_URL;
 
+
+interface TrafficDashboardFixture {
+  readonly granularity: 'day' | 'month' | 'year';
+  readonly summary: { readonly pageViews: number; readonly uniqueSessions: number };
+  readonly series: readonly unknown[];
+  readonly sources: readonly { readonly source: string }[];
+}
+
+interface AiStatusFixture {
+  readonly switchState: string;
+  readonly agents: readonly unknown[];
+  readonly prompt?: unknown;
+  readonly proposal?: unknown;
+}
+
 function errorCode(error: unknown): string | undefined {
   return typeof error === 'object' && error !== null && 'code' in error
     ? String((error as { code?: unknown }).code)
@@ -85,7 +100,7 @@ describe.skipIf(!DATABASE_URL)('administrator traffic and AI status against a re
           [admin],
         );
         for (const granularity of ['day', 'month', 'year'] as const) {
-          const { rows } = await client.query<{ dashboard: Record<string, any> }>(
+          const { rows } = await client.query<{ dashboard: TrafficDashboardFixture }>(
             'SELECT public.admin_activity_traffic_dashboard($1, $2, $3) AS dashboard',
             [admin, granularity, granularity === 'day' ? 30 : 12],
           );
@@ -95,7 +110,7 @@ describe.skipIf(!DATABASE_URL)('administrator traffic and AI status against a re
           expect(dashboard.summary.uniqueSessions).toBeGreaterThanOrEqual(2);
           expect(dashboard.series.length).toBeGreaterThan(0);
         }
-        const { rows } = await client.query<{ dashboard: Record<string, any> }>(
+        const { rows } = await client.query<{ dashboard: TrafficDashboardFixture }>(
           "SELECT public.admin_activity_traffic_dashboard($1, 'day', 30) AS dashboard",
           [admin],
         );
@@ -109,7 +124,7 @@ describe.skipIf(!DATABASE_URL)('administrator traffic and AI status against a re
     it('reports the current AI switch and review summary without exposing raw prompts', async () => {
       await rolledBack(async (client) => {
         const admin = await user(client, true);
-        const { rows } = await client.query<{ status: Record<string, any> }>(
+        const { rows } = await client.query<{ status: AiStatusFixture }>(
           'SELECT public.admin_economy_ai_status($1) AS status',
           [admin],
         );
