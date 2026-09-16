@@ -4,6 +4,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Pool } from 'pg';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
+import { EconomyAiReviewer, economyAiConfig } from '../economy/economy-ai-review';
 import { Scheduler } from './scheduler';
 
 /**
@@ -48,6 +49,7 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
         if (!pool) return null;
         const reconcilerUrl = process.env.RECONCILER_DATABASE_URL;
         const logger = new Logger('Scheduler');
+        const economyAiReviewer = new EconomyAiReviewer(pool, economyAiConfig());
         return new Scheduler({
           app: pool,
           reconciler: reconcilerUrl ? new Pool({ connectionString: reconcilerUrl, max: 1 }) : null,
@@ -56,6 +58,9 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
             log: (message) => logger.log(message),
             warn: (message) => logger.warn(message),
             error: (message, stack) => logger.error(message, stack),
+          },
+          handlers: {
+            'economy.ai_policy_review': () => economyAiReviewer.run(),
           },
         });
       },

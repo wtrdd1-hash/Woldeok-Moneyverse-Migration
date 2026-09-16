@@ -284,7 +284,7 @@ export class AdminControlsController {
    * reads here is what would happen, not a description of it.
    */
   @Get('auto-policy')
-  @ApiOperation({ summary: 'Policy knobs and the adjustment the engine would propose today' })
+  @ApiOperation({ summary: 'Policy knobs plus classical proposal and matching AI review evidence' })
   async autoPolicy(@Req() request: RequestWithSession) {
     const actor = requireUserId(request);
     const repository = this.repository();
@@ -297,7 +297,7 @@ export class AdminControlsController {
 
   @Post('auto-policy/runs')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Run the automatic adjustment now instead of waiting for Monday' })
+  @ApiOperation({ summary: 'Run the dual-lane automatic adjustment now instead of waiting for Monday' })
   runAutoPolicy(@Req() request: RequestWithSession, @Body() body: ReasonedCommandDto) {
     return this.guarded(
       () =>
