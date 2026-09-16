@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { WorkTask } from './work';
+import type { WorkSummary, WorkTask } from './work';
 import {
   boardOrder,
   difficultyLabel,
@@ -7,6 +7,9 @@ import {
   hasExpired,
   isOpen,
   isSpent,
+  quotaReached,
+  workQuotaBlock,
+  workTaskBlock,
   jobLabel,
   progressPercent,
   remaining,
@@ -208,5 +211,40 @@ describe('boardOrder', () => {
     const tasks = [task({ code: 'a' }), task({ code: 'b', recommended: true })];
     boardOrder(tasks);
     expect(tasks.map((entry) => entry.code)).toEqual(['a', 'b']);
+  });
+});
+
+describe('server-authoritative work quota blocking', () => {
+  const summary = (overrides: Partial<WorkSummary> = {}): WorkSummary => ({
+    daily_paid: '100',
+    daily_cap: '400',
+    weekly_paid: '500',
+    weekly_cap: '2200',
+    active_assignments: '0',
+    game_day_key: '2000-10-06',
+    game_week_key: '2000-09-30',
+    day_ends_at: '2026-09-16T13:40:00.000Z',
+    week_ends_at: '2026-09-16T13:40:00.000Z',
+    ...overrides,
+  });
+
+  it('blocks only positive caps that are actually reached', () => {
+    expect(quotaReached('400', '400')).toBe(true);
+    expect(quotaReached('401', '400')).toBe(true);
+    expect(quotaReached('0', '0')).toBe(false);
+    expect(quotaReached('399', '400')).toBe(false);
+  });
+
+  it('prioritizes the daily window, then the weekly window', () => {
+    expect(workQuotaBlock(summary({ daily_paid: '400' }))).toBe('daily');
+    expect(workQuotaBlock(summary({ weekly_paid: '2200' }))).toBe('weekly');
+    expect(workQuotaBlock(summary())).toBeNull();
+    expect(workQuotaBlock(null)).toBeNull();
+  });
+
+  it('blocks a task at its own server-day completion limit', () => {
+    expect(workTaskBlock(task({ daily_limit: 2, taken_today: 2 }), null)).toBe('task_daily');
+    expect(workTaskBlock(task({ daily_limit: 2, taken_today: 1 }), null)).toBeNull();
+    expect(workTaskBlock(task({ daily_limit: 2, taken_today: 1 }), 'weekly')).toBe('weekly');
   });
 });

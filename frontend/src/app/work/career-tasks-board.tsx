@@ -4,7 +4,14 @@ import { useState, useActionState } from 'react';
 import { useLocale } from '@/components/locale-provider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { EmptyState } from '@/components/empty-state';
 import { SubmitButton } from '@/components/action-form';
 import { IDLE } from '@/lib/action-state';
@@ -18,7 +25,9 @@ import {
   durationLabel,
   jobLabel,
   jobMeta,
+  type WorkQuotaBlock,
   type WorkTask,
+  workTaskBlock,
 } from './work';
 
 function QuickCareerSwitchButton({
@@ -48,30 +57,25 @@ function QuickCareerSwitchButton({
 export function CareerTasksBoard({
   tasks,
   activeJobType,
+  quotaBlock,
 }: {
   readonly tasks: readonly WorkTask[];
   readonly activeJobType?: string | null | undefined;
+  readonly quotaBlock?: WorkQuotaBlock | null;
 }) {
   const { locale } = useLocale();
   const isEn = locale === 'en';
 
-  const [filter, setFilter] = useState<'my_job' | 'all'>(
-    activeJobType ? 'my_job' : 'all',
-  );
+  const [filter, setFilter] = useState<'my_job' | 'all'>(activeJobType ? 'my_job' : 'all');
   const [searchQuery, setSearchQuery] = useState('');
 
   const activeMeta = activeJobType ? jobMeta(activeJobType, locale) : undefined;
   const activeJobName = activeJobType ? jobLabel(activeJobType, locale) : '';
 
-  const myTasks = activeJobType
-    ? tasks.filter((t) => t.job_type === activeJobType)
-    : [];
+  const myTasks = activeJobType ? tasks.filter((t) => t.job_type === activeJobType) : [];
   const myCompletedToday = myTasks.reduce((sum, t) => sum + t.taken_today, 0);
 
-  const scopedTasks =
-    filter === 'my_job' && activeJobType && myTasks.length > 0
-      ? myTasks
-      : tasks;
+  const scopedTasks = filter === 'my_job' && activeJobType && myTasks.length > 0 ? myTasks : tasks;
   const displayTasks = boardOrder(filterWorkTasks(scopedTasks, searchQuery), activeJobType);
 
   return (
@@ -85,9 +89,7 @@ export function CareerTasksBoard({
                 variant={filter === 'my_job' ? 'default' : 'outline'}
                 onClick={() => setFilter('my_job')}
                 className={`font-semibold text-xs transition-all ${
-                  filter === 'my_job'
-                    ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-sm'
-                    : ''
+                  filter === 'my_job' ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-sm' : ''
                 }`}
               >
                 <span>{activeMeta?.icon ?? '💼'}</span>
@@ -107,7 +109,9 @@ export function CareerTasksBoard({
               className="font-semibold text-xs"
             >
               <span>🌐</span>
-              <span className="ml-1.5">{isEn ? 'Explore Other Careers' : '다른 직업 둘러보기'}</span>
+              <span className="ml-1.5">
+                {isEn ? 'Explore Other Careers' : '다른 직업 둘러보기'}
+              </span>
               <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0">
                 {tasks.length}
               </Badge>
@@ -134,7 +138,9 @@ export function CareerTasksBoard({
             type="search"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder={isEn ? 'Search by task, description, or career…' : '업무명, 설명, 직업으로 검색…'}
+            placeholder={
+              isEn ? 'Search by task, description, or career…' : '업무명, 설명, 직업으로 검색…'
+            }
             className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
           />
         </label>
@@ -157,6 +163,7 @@ export function CareerTasksBoard({
           {displayTasks.map((task) => {
             const isActiveJob = activeJobType === task.job_type;
             const meta = jobMeta(task.job_type, locale);
+            const blockedReason = workTaskBlock(task, quotaBlock ?? null);
 
             return (
               <Card
@@ -236,7 +243,11 @@ export function CareerTasksBoard({
 
                 <CardFooter className="pt-2">
                   {isActiveJob ? (
-                    <TaskCompleteModalButton task={task} isActiveJob />
+                    <TaskCompleteModalButton
+                      task={task}
+                      isActiveJob
+                      blockedReason={blockedReason}
+                    />
                   ) : (
                     <QuickCareerSwitchButton
                       jobCode={task.job_type}

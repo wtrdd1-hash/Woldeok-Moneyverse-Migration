@@ -1,5 +1,5 @@
 {
-  "contractVersion": "v2026.09.16.144",
+  "contractVersion": "v2026.09.16.159",
   "apiVersion": "1",
   "baseUrl": "https://easy-scraping.com/app-api/v1",
   "languagePolicy": {
@@ -2774,14 +2774,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -2811,14 +2807,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -2848,14 +2840,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -2989,14 +2977,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -3026,14 +3010,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -3063,14 +3043,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -3179,14 +3155,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -3216,14 +3188,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -5342,14 +5310,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -5379,14 +5343,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -5416,14 +5376,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -5611,14 +5567,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -5648,14 +5600,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -5685,14 +5633,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -5804,14 +5748,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -5841,14 +5781,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -5878,14 +5814,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -5996,14 +5928,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -6033,14 +5961,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -6127,14 +6051,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -6164,14 +6084,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -6201,14 +6117,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -6320,14 +6232,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -6406,14 +6314,10 @@
                                 "type": "string"
                               }
                             ]
-                          },
-                          "__@toStringTag@576": {
-                            "type": "string"
                           }
                         },
                         "required": [
-                          "description",
-                          "__@toStringTag@576"
+                          "description"
                         ]
                       }
                     },
@@ -6443,14 +6347,10 @@
                                 "type": "string"
                               }
                             ]
-                          },
-                          "__@toStringTag@576": {
-                            "type": "string"
                           }
                         },
                         "required": [
-                          "description",
-                          "__@toStringTag@576"
+                          "description"
                         ]
                       }
                     },
@@ -6480,14 +6380,10 @@
                                 "type": "string"
                               }
                             ]
-                          },
-                          "__@toStringTag@576": {
-                            "type": "string"
                           }
                         },
                         "required": [
-                          "description",
-                          "__@toStringTag@576"
+                          "description"
                         ]
                       }
                     },
@@ -6602,14 +6498,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -6639,14 +6531,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -6676,14 +6564,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -10576,14 +10460,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -10706,14 +10586,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -11652,14 +11528,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -11773,14 +11645,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -12019,14 +11887,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -12112,14 +11976,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -12149,14 +12009,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -12198,14 +12054,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -12235,14 +12087,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -12407,14 +12255,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -12444,14 +12288,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -12481,14 +12321,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -12518,14 +12354,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -12580,14 +12412,10 @@
                                         "note": "depth-limited"
                                       }
                                     ]
-                                  },
-                                  "__@toStringTag@576": {
-                                    "type": "string"
                                   }
                                 },
                                 "required": [
-                                  "description",
-                                  "__@toStringTag@576"
+                                  "description"
                                 ]
                               }
                             },
@@ -12626,14 +12454,10 @@
                                         "note": "depth-limited"
                                       }
                                     ]
-                                  },
-                                  "__@toStringTag@576": {
-                                    "type": "string"
                                   }
                                 },
                                 "required": [
-                                  "description",
-                                  "__@toStringTag@576"
+                                  "description"
                                 ]
                               }
                             },
@@ -12672,14 +12496,10 @@
                                         "note": "depth-limited"
                                       }
                                     ]
-                                  },
-                                  "__@toStringTag@576": {
-                                    "type": "string"
                                   }
                                 },
                                 "required": [
-                                  "description",
-                                  "__@toStringTag@576"
+                                  "description"
                                 ]
                               }
                             },
@@ -12718,14 +12538,10 @@
                                         "note": "depth-limited"
                                       }
                                     ]
-                                  },
-                                  "__@toStringTag@576": {
-                                    "type": "string"
                                   }
                                 },
                                 "required": [
-                                  "description",
-                                  "__@toStringTag@576"
+                                  "description"
                                 ]
                               }
                             },
@@ -12860,14 +12676,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -12897,14 +12709,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -12934,14 +12742,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -12971,14 +12775,10 @@
                             "type": "string"
                           }
                         ]
-                      },
-                      "__@toStringTag@576": {
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "description",
-                      "__@toStringTag@576"
+                      "description"
                     ]
                   }
                 },
@@ -13075,14 +12875,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -13623,14 +13419,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -13660,14 +13452,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -13697,14 +13485,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -13928,14 +13712,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -13965,14 +13745,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -14002,14 +13778,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -14109,14 +13881,10 @@
                                     "note": "depth-limited"
                                   }
                                 ]
-                              },
-                              "__@toStringTag@576": {
-                                "type": "string"
                               }
                             },
                             "required": [
-                              "description",
-                              "__@toStringTag@576"
+                              "description"
                             ]
                           }
                         },
@@ -14205,14 +13973,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -14242,14 +14006,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -14728,14 +14488,10 @@
                                     "type": "string"
                                   }
                                 ]
-                              },
-                              "__@toStringTag@576": {
-                                "type": "string"
                               }
                             },
                             "required": [
-                              "description",
-                              "__@toStringTag@576"
+                              "description"
                             ]
                           }
                         },
@@ -14777,14 +14533,10 @@
                                     "type": "string"
                                   }
                                 ]
-                              },
-                              "__@toStringTag@576": {
-                                "type": "string"
                               }
                             },
                             "required": [
-                              "description",
-                              "__@toStringTag@576"
+                              "description"
                             ]
                           }
                         },
@@ -14823,14 +14575,10 @@
                                 "type": "string"
                               }
                             ]
-                          },
-                          "__@toStringTag@576": {
-                            "type": "string"
                           }
                         },
                         "required": [
-                          "description",
-                          "__@toStringTag@576"
+                          "description"
                         ]
                       }
                     },
@@ -14882,14 +14630,10 @@
                                   "type": "string"
                                 }
                               ]
-                            },
-                            "__@toStringTag@576": {
-                              "type": "string"
                             }
                           },
                           "required": [
-                            "description",
-                            "__@toStringTag@576"
+                            "description"
                           ]
                         }
                       },
@@ -15057,6 +14801,18 @@
               },
               "active_assignments": {
                 "type": "string"
+              },
+              "game_day_key": {
+                "type": "string"
+              },
+              "game_week_key": {
+                "type": "string"
+              },
+              "day_ends_at": {
+                "type": "string"
+              },
+              "week_ends_at": {
+                "type": "string"
               }
             },
             "required": [
@@ -15064,7 +14820,11 @@
               "daily_cap",
               "weekly_paid",
               "weekly_cap",
-              "active_assignments"
+              "active_assignments",
+              "game_day_key",
+              "game_week_key",
+              "day_ends_at",
+              "week_ends_at"
             ]
           }
         ]

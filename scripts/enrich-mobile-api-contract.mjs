@@ -63,6 +63,8 @@ function schemaOf(type, depth = 0, seen = new Set()) {
   const required = [];
   for (const prop of checker.getPropertiesOfType(type)) {
     if (prop.name === 'then' || prop.name === 'catch' || prop.name === 'finally') continue;
+    // Compiler-internal well-known-symbol names are not serialized JSON fields.
+    if (prop.name.startsWith('__@')) continue;
     const decl = prop.valueDeclaration ?? prop.declarations?.[0];
     if (!decl) continue;
     if (ts.isMethodDeclaration(decl) || ts.isMethodSignature(decl) || ts.isFunctionDeclaration(decl)) continue;
