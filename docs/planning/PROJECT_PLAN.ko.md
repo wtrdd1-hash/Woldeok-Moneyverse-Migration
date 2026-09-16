@@ -2,11 +2,27 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.168
+> **현재 통합 버전:** v2026.09.17.169
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 변경 — v2026.09.17.169 (2026-09-17)
+
+### 근거와 결정
+
+- **저장소/CI 근거:** 회차 시작 및 작업 중간 `main`은 `cafa12cbd1e9a36487966e3c72bda46b16f9aff7` (`docs: update Moneyverse plan v2026.09.17.168 (#399)`)이며 docs-only다. CI #1172는 성공했지만 `Build Test Candidate` #795도 성공했다. `verify / check`는 dependency install, lint, typecheck, app build와 `Apply database migrations`를 성공 수행했고, 이어 `build` job은 GHCR login 후 **backend/frontend candidate image를 모두 build+push 성공**했다. `dispatch-production-gate`와 `Auto Integrate and Promote` #128은 skip됐다. 즉 downstream promotion은 없었지만 v168 docs-only 수용계약은 DB migration, image build, registry write 경계에서 위반됐다. 이 workflow 증거로 Test/Production runtime 상태를 추정하지 않는다.
+- **P0 `REL-DOCS-169-01` — OPEN / 최신 재현 2026-09-17:** docs-only가 단순 orchestration을 넘어 DB와 registry mutation surface를 실제 소비한다. 재현: docs-only v168 merge → CI #1172 success → Test Candidate #795 → migration success → GHCR login → backend/frontend candidate build+push success. 영향은 privileged credential 노출면 확대, registry/storage 비용, candidate identity 오염, 운영자 혼동과 supply-chain blast radius 증가다. 원인은 privileged runtime 작업보다 release eligibility 판정이 늦거나 candidate 생성 전 판정이 없는 control-plane ordering이다.
+- **수정/권한경계:** `classify-release-inputs`만 push 직후 최초 실행을 허용하며 repository metadata read-only 외에는 package-registry write token, DB/network secret, GitOps credential을 받지 않는다. signed/immutable `RUNTIME_RELEASE_REQUIRED` 결과가 있어야만 OIDC 기반 단기 stage-scoped credential을 dependency/build DB, GHCR, GitOps 단계에 발급한다. `DOCS_ONLY_NO_RUNTIME_RELEASE`는 docs/static-policy check만 수행하고 `RELEASE_INPUT_CLASSIFICATION_ERROR`는 fail-closed다. candidate tag/digest는 docs-only `repositoryHeadSha`가 아니라 `applicationSourceSha`에 결합한다. unreferenced candidate GC는 어떤 release evidence도 참조하지 않음을 증명한 뒤에만 수행한다.
+- **테스트/수용/롤백/관측:** docs-only acceptance를 `runtime_dependency_install=0`, `app_build=0`, `db_migration=0`, `registry_login=0`, `backend_image_build_push=0`, `frontend_image_build_push=0`, `test_gitops_write=0`, `exact_sha_poll=0`, `production_mutation=0`으로 고정한다. classifier/docs job에 privileged secret이 없고 OIDC audience/subject가 stage-scoped인지 negative test한다. rollback은 workflow wiring만 되돌리며 referenced image 삭제나 application data 변경을 금지한다. `docs_only_db_migration_total`, `docs_only_registry_login_total`, `docs_only_image_push_total`, pushed bytes/storage cost, orphan candidate, repository/application SHA divergence를 관측하고 docs-only privileged side effect가 하나라도 발생하면 release engineering alert를 낸다.
+- **SEO 조사:** Google Search Central 최신 major-update 페이지는 2026-09-08 regional Search-experience 문서를 9월 최신 주요 변경으로 계속 표시한다. 2026-09-16 Search Central Live Deep Dive Europe는 행사/커뮤니티 자료라 ranking/indexing 계약 변경으로 채택하지 않는다. 2026-08-28 site-reputation update는 third-party/sponsor/affiliate/UGC governance에 계속 직접 적용한다. server-authoritative canonical/robots/sitemap/hreflang/structured-data/SSR/CWV 계약을 유지하고 공개 UGC/affiliate indexability는 domain authority 상속이 아니라 moderation/ownership/thin-content gate를 통과해야 한다.
+- **보안 조사:** OWASP API Security Project의 최신 API-specific Top 10은 계속 2023이다. `REL-DOCS-169-01`을 API8/security misconfiguration 및 supply-chain least-privilege 문제와 연결한다. docs-only 변경은 DB/registry mutation capability를 얻어서는 안 된다. BOLA/BFLA/authentication/resource/sensitive-business-flow/SSRF/inventory 통제는 그대로 유지한다.
+- **사업성:** Google Play 공식 fee table은 install cohort, recurring/non-recurring, programme, billing path별로 달라 SKU별 `feePolicyVersion`을 유지하고 미실측 conversion/ARPU/churn/CAC/LTV는 가설로 둔다. release-control 비용은 docs-only CI minute, DB minute, registry egress/storage, orphan-candidate cleanup/support time을 별도 측정한다. maintained corpus false-negative=0이고 runtime gate를 약화하지 않을 때만 classifier를 scale하며 runtime-relevant 변경을 skip할 수 있는 최적화는 kill한다.
+
+### v169 백로그/수용 순서
+
+`P0 독립 암호화 backup + isolated restore/reconciliation` → `P0 stale-status false-green` → `P0 privilege 이전 release classifier / docs-only DB+registry side-effect 0` → `P0 GitOps/public edge/systemd 단일 release authority` → `P1 auth/session/admin/casino/Work/DB authorization+ledger QA` → `P1 repository required-check enforcement` → core correctness → monetization → SEO/acquisition → retention/accessibility. runtime 구현은 별도 branch/test/release 흐름이며 이 기획 회차에서 runtime code를 배포하지 않는다.
 
 ## 회차 변경 — v2026.09.17.168 (2026-09-17)
 
