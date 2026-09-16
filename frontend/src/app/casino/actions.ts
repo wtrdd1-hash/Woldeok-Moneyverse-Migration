@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
 import type { CasinoPlayState } from './casino-state';
 import { canonicalIntegerString, groupDigits } from '@/lib/money';
-import { failure, idempotencyKey, mutate, wholeAmount } from '@/lib/mutate';
+import { failure, idempotencyKey, mutate, wholeNumber } from '@/lib/mutate';
 import {
   CLOSURE_COPY,
   absAmount,
@@ -58,9 +58,12 @@ interface PlayReceipt {
   readonly replayed: boolean;
 }
 
-export async function playCoin(_previous: CasinoPlayState, formData: FormData): Promise<CasinoPlayState> {
+export async function playCoin(
+  _previous: CasinoPlayState,
+  formData: FormData,
+): Promise<CasinoPlayState> {
   const choice = String(formData.get('choice') ?? '');
-  const stake = wholeAmount(formData.get('stake'));
+  const stake = wholeNumber(formData.get('stake'));
 
   if (choice !== 'heads' && choice !== 'tails') {
     return { status: 'error', message: '앞면과 뒷면 중 하나를 골라 주세요.' };
@@ -84,7 +87,8 @@ export async function playCoin(_previous: CasinoPlayState, formData: FormData): 
     // amount than the form currently holds.
     const face = faceLabel(receipt.outcome);
     const netAmount = canonicalIntegerString(receipt.net_amount);
-    if (netAmount === null) throw new TypeError('casino coin receipt returned an invalid net amount');
+    if (netAmount === null)
+      throw new TypeError('casino coin receipt returned an invalid net amount');
     const amount = groupDigits(absAmount(netAmount));
     const result = resultOf(netAmount);
     const outcome =
@@ -197,7 +201,7 @@ async function rollDie(
   choiceHelp: string,
 ): Promise<CasinoPlayState> {
   const choice = String(formData.get('choice') ?? '');
-  const stake = wholeAmount(formData.get('stake'));
+  const stake = wholeNumber(formData.get('stake'));
 
   if (!choiceIsValid(choice)) {
     return { status: 'error', message: choiceHelp };
@@ -217,7 +221,8 @@ async function rollDie(
     // roll, which may have been for a different amount than the form holds.
     const face = faceRolled(receipt.outcome_face);
     const netAmount = canonicalIntegerString(receipt.net_amount);
-    if (netAmount === null) throw new TypeError('casino dice receipt returned an invalid net amount');
+    if (netAmount === null)
+      throw new TypeError('casino dice receipt returned an invalid net amount');
     const amount = groupDigits(absAmount(netAmount));
     const result = resultOf(netAmount);
     const outcome =
@@ -228,7 +233,9 @@ async function rollDie(
           : `주사위는 ${face}이 나왔어요.`;
 
     const outcomeFace =
-      Number.isInteger(receipt.outcome_face) && receipt.outcome_face >= 1 && receipt.outcome_face <= 6
+      Number.isInteger(receipt.outcome_face) &&
+      receipt.outcome_face >= 1 &&
+      receipt.outcome_face <= 6
         ? receipt.outcome_face
         : null;
     return {

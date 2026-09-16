@@ -193,7 +193,7 @@
     --clay-ink: oklch(from var(--point) 0.52 clamp(0.04, c * 0.8, 0.11) h);
     --clay-soft: oklch(from var(--point) 0.91 clamp(0.01, c * 0.2, 0.04) h);
     --mint: oklch(from var(--point) 0.92 clamp(0.01, c * 0.2, 0.04) h);
-    --highlight: oklch(from var(--point) 0.90 clamp(0.02, c * 0.45, 0.07) h);
+    --highlight: oklch(from var(--point) 0.9 clamp(0.02, c * 0.45, 0.07) h);
 
     /* The button face, the masthead underline and the active tab. Derived
        at --clay's lightness rather than inheriting --forest-soft's 0.47: the
@@ -201,17 +201,17 @@
        hue should get that hue at the weight they are used to, not a darker
        version of every control. */
     --primary: oklch(from var(--point) 0.62 clamp(0.04, c, 0.15) h);
-    --accent-foreground: oklch(from var(--point) 0.40 clamp(0.03, c * 0.8, 0.11) h);
+    --accent-foreground: oklch(from var(--point) 0.4 clamp(0.03, c * 0.8, 0.11) h);
     --ring: oklch(from var(--point) 0.62 clamp(0.04, c, 0.15) h / 0.7);
-    --chart-4: oklch(from var(--point) 0.70 clamp(0.06, c, 0.14) calc(h + 45));
+    --chart-4: oklch(from var(--point) 0.7 clamp(0.06, c, 0.14) calc(h + 45));
   }
 
   /* Dark restates every role the dark block set literally, because a literal
      cannot be reached by redefining the token it was copied from. */
   .dark[data-point] {
-    --forest: oklch(from var(--point) 0.30 clamp(0.02, c * 0.5, 0.08) h);
+    --forest: oklch(from var(--point) 0.3 clamp(0.02, c * 0.5, 0.08) h);
     --forest-deep: oklch(from var(--point) 0.22 clamp(0.01, c * 0.45, 0.06) h);
-    --forest-soft: oklch(from var(--point) 0.75 clamp(0.03, c * 0.6, 0.10) h);
+    --forest-soft: oklch(from var(--point) 0.75 clamp(0.03, c * 0.6, 0.1) h);
     --clay: oklch(from var(--point) 0.71 clamp(0.04, c * 0.9, 0.13) h);
     /* Restated rather than inherited from `.dark`: `:root[data-point]` above
        is the more specific selector and would otherwise win here. */
@@ -473,10 +473,18 @@ html[data-notice='dismissed'] [data-notice-bar] {
 }
 
 @keyframes moneyverse-coin-flip {
-  0% { transform: perspective(700px) rotateY(0deg) translateY(0); }
-  35% { transform: perspective(700px) rotateY(540deg) translateY(-10px); }
-  70% { transform: perspective(700px) rotateY(900deg) translateY(-4px); }
-  100% { transform: perspective(700px) rotateY(1080deg) translateY(0); }
+  0% {
+    transform: perspective(700px) rotateY(0deg) translateY(0);
+  }
+  35% {
+    transform: perspective(700px) rotateY(540deg) translateY(-10px);
+  }
+  70% {
+    transform: perspective(700px) rotateY(900deg) translateY(-4px);
+  }
+  100% {
+    transform: perspective(700px) rotateY(1080deg) translateY(0);
+  }
 }
 
 .casino-coin-stage {
@@ -486,7 +494,11 @@ html[data-notice='dismissed'] [data-notice-bar] {
   overflow: hidden;
   border: 1px solid color-mix(in oklab, var(--primary) 24%, transparent);
   border-radius: 1.25rem;
-  background: radial-gradient(circle at 50% 25%, color-mix(in oklab, var(--primary) 20%, transparent), transparent 62%);
+  background: radial-gradient(
+    circle at 50% 25%,
+    color-mix(in oklab, var(--primary) 20%, transparent),
+    transparent 62%
+  );
   padding: 1.25rem;
 }
 
@@ -495,11 +507,15 @@ html[data-notice='dismissed'] [data-notice-bar] {
   width: 5.5rem;
   height: 5.5rem;
   transform-style: preserve-3d;
-  transition: transform 420ms cubic-bezier(.2,.8,.2,1);
+  transition: transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.casino-coin--spinning { animation: moneyverse-coin-flip 850ms linear infinite; }
-.casino-coin--tails { transform: perspective(700px) rotateY(180deg); }
+.casino-coin--spinning {
+  animation: moneyverse-coin-flip 850ms linear infinite;
+}
+.casino-coin--tails {
+  transform: perspective(700px) rotateY(180deg);
+}
 
 .casino-coin__face {
   position: absolute;
@@ -508,16 +524,78 @@ html[data-notice='dismissed'] [data-notice-bar] {
   place-items: center;
   border: 0.35rem solid color-mix(in oklab, #f59e0b 78%, #fff);
   border-radius: 999px;
-  background: radial-gradient(circle at 35% 28%, #fef3c7 0 7%, #fbbf24 27%, #d97706 72%, #92400e 100%);
-  box-shadow: inset 0 0 0 0.2rem rgba(255,255,255,.18), 0 0.65rem 1.6rem rgba(0,0,0,.22);
+  background: radial-gradient(
+    circle at 35% 28%,
+    #fef3c7 0 7%,
+    #fbbf24 27%,
+    #d97706 72%,
+    #92400e 100%
+  );
+  box-shadow:
+    inset 0 0 0 0.2rem rgba(255, 255, 255, 0.18),
+    0 0.65rem 1.6rem rgba(0, 0, 0, 0.22);
   color: #3b2205;
   font-size: 2rem;
   font-weight: 1000;
   backface-visibility: hidden;
 }
 
-.casino-coin__face--back { transform: rotateY(180deg); }
+.casino-coin__face--back {
+  transform: rotateY(180deg);
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .casino-coin--spinning { animation: none; }
+  .casino-coin--spinning {
+    animation: none;
+  }
+}
+
+/* Casino dice: a substantial play surface matching the coin game's visual hierarchy. */
+.casino-dice-stage {
+  border: 1px solid rgba(120, 139, 184, 0.24);
+  border-radius: 1.25rem;
+  padding: 1.75rem;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 0.65rem;
+  background: radial-gradient(circle at center, rgba(93, 109, 154, 0.17), transparent 58%);
+}
+
+.casino-die {
+  width: 6.75rem;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 1.35rem;
+  font-size: 5.6rem;
+  line-height: 1;
+  color: rgba(246, 248, 255, 0.96);
+  background: linear-gradient(145deg, rgba(54, 65, 94, 0.96), rgba(24, 30, 48, 0.98));
+  border: 1px solid rgba(155, 171, 218, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 18px 40px rgba(0, 0, 0, 0.28);
+}
+
+.casino-die--rolling {
+  animation: moneyverse-die-roll 720ms ease-in-out infinite;
+}
+
+@keyframes moneyverse-die-roll {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  45% {
+    transform: rotate(14deg) scale(1.06);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .casino-die--rolling {
+    animation: none;
+  }
 }

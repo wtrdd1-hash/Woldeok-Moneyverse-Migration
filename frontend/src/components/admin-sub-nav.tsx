@@ -13,6 +13,10 @@ import {
   TrendingUp,
   ShoppingBag,
   MessageCircle,
+  ShieldAlert,
+  BriefcaseBusiness,
+  Building2,
+  Radio,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
@@ -22,15 +26,19 @@ interface AdminTabItem {
   readonly icon: React.ElementType;
 }
 
-const ADMIN_TABS: readonly AdminTabItem[] = [
+export const ADMIN_TABS: readonly AdminTabItem[] = [
   { href: '/admin', label: '대시보드', icon: LayoutDashboard },
   { href: '/admin/users', label: '회원 관리', icon: Users },
+  { href: '/admin/security', label: '보안·차단', icon: ShieldAlert },
   { href: '/admin/support', label: '문의 채팅', icon: MessageCircle },
   { href: '/admin/economy', label: '경제·원장', icon: Coins },
+  { href: '/admin/catalog', label: '사업·시즌', icon: Building2 },
+  { href: '/admin/work', label: '작업·직업', icon: BriefcaseBusiness },
   { href: '/admin/shop', label: '상점 관리', icon: ShoppingBag },
   { href: '/admin/logs', label: '감사 로그', icon: ShieldCheck },
   { href: '/admin/controls', label: '기능 스위치', icon: Sliders },
   { href: '/admin/content', label: '공지·갤러리', icon: Megaphone },
+  { href: '/admin/discord', label: 'Discord', icon: Radio },
   { href: '/admin/bank', label: '은행·대출', icon: Landmark },
   { href: '/admin/market', label: '가상 시장', icon: TrendingUp },
 ];
@@ -82,7 +90,7 @@ export function AdminSubNav() {
                 className={cn(
                   'flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-colors',
                   isActive
-? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
+                    ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
                     : 'text-muted-foreground hover:bg-surface hover:text-foreground',
                 )}
               >

@@ -31,10 +31,12 @@ describe('adminAreaFor', () => {
     expect(adminAreaFor('/admin/logs/delivery')?.href).toBe('/admin/logs/delivery');
     expect(adminAreaFor('/admin/logs/x')?.href).toBe('/admin/logs');
     expect(adminAreaFor('/admin/users/abc')?.href).toBe('/admin/users');
+    expect(adminAreaFor('/admin/shop')?.href).toBe('/admin/shop');
+    expect(adminAreaFor('/admin/support')?.href).toBe('/admin/support');
   });
 
   it('answers null for the front door and for a page without an area', () => {
     expect(adminAreaFor('/admin')).toBeNull();
-    expect(adminAreaFor('/admin/shop')).toBeNull();
+    expect(adminAreaFor('/admin/not-a-real-area')).toBeNull();
   });
 });

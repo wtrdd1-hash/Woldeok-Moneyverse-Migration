@@ -65,7 +65,9 @@ export function CoinPlayForm({
                   ? '뒷면 결과'
                   : '앞면 또는 뒷면을 선택해 동전을 던져보세요'}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">결과는 애니메이션이 아니라 서버 영수증으로 결정됩니다.</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            결과는 애니메이션이 아니라 서버 영수증으로 결정됩니다.
+          </p>
         </div>
       </div>
 
@@ -173,6 +175,43 @@ export function SelfLimitForm() {
   );
 }
 
+function DiceStage({
+  state,
+  pending,
+  mode,
+}: {
+  readonly state: typeof CASINO_IDLE;
+  readonly pending: boolean;
+  readonly mode: 'parity' | 'number';
+}) {
+  const face = state.outcomeFace ?? 1;
+  const glyph = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][face - 1] ?? '⚀';
+  const idleTitle =
+    mode === 'parity'
+      ? '홀 또는 짝을 선택해 주사위를 굴려보세요'
+      : '1부터 6까지 숫자를 골라 주사위를 굴려보세요';
+
+  return (
+    <div className="casino-dice-stage" aria-live="polite">
+      <div className={`casino-die ${pending ? 'casino-die--rolling' : ''}`} aria-hidden="true">
+        {glyph}
+      </div>
+      <div className="text-center">
+        <p className="text-sm font-extrabold">
+          {pending
+            ? '서버가 주사위 결과를 확정하는 중…'
+            : state.outcomeFace
+              ? `서버 결과: ${state.outcomeFace}`
+              : idleTitle}
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          결과와 당첨 여부는 화면 효과가 아니라 서버 영수증으로 결정됩니다.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 /**
  * 주사위 홀짝: a stake and one of two sides.
  *
@@ -194,10 +233,12 @@ export function DiceParityForm({
   readonly remainingStake: string;
   readonly exhausted: boolean;
 }) {
-  const [state, action] = useActionState(playDiceParity, CASINO_IDLE);
+  const [state, action, pending] = useActionState(playDiceParity, CASINO_IDLE);
 
   return (
     <form action={action} className="grid gap-4">
+      <DiceStage state={state} pending={pending} mode="parity" />
+
       <Field>
         <FieldLabel htmlFor="dice-parity-stake">걸 WLD</FieldLabel>
         <AmountInput
@@ -209,7 +250,8 @@ export function DiceParityForm({
         />
         <FieldDescription>
           한 판에 {groupDigits(minStake)} ~ {groupDigits(maxStake)} WLD를 걸 수 있어요. 오늘 남은
-          베팅 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 현실 하루 보호 한도를 함께 씁니다.
+          베팅 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 현실 하루 보호 한도를 함께
+          씁니다.
         </FieldDescription>
       </Field>
 
@@ -258,10 +300,12 @@ export function DiceNumberForm({
   readonly remainingStake: string;
   readonly exhausted: boolean;
 }) {
-  const [state, action] = useActionState(playDiceNumber, CASINO_IDLE);
+  const [state, action, pending] = useActionState(playDiceNumber, CASINO_IDLE);
 
   return (
     <form action={action} className="grid gap-4">
+      <DiceStage state={state} pending={pending} mode="number" />
+
       <Field>
         <FieldLabel htmlFor="dice-number-stake">걸 WLD</FieldLabel>
         <AmountInput
@@ -273,7 +317,8 @@ export function DiceNumberForm({
         />
         <FieldDescription>
           한 판에 {groupDigits(minStake)} ~ {groupDigits(maxStake)} WLD를 걸 수 있어요. 오늘 남은
-          베팅 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 현실 하루 보호 한도를 함께 씁니다.
+          베팅 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 현실 하루 보호 한도를 함께
+          씁니다.
         </FieldDescription>
       </Field>
 
