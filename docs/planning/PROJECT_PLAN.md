@@ -2,7 +2,7 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.16.139
+> Current integrated version: v2026.09.16.141
 > Implementation/evidence sync: 2026-09-15
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
@@ -312,3 +312,10 @@ All flows cover loading/empty/error/offline/timeout, keyboard and focus, labels,
 - The research pass created a deduplicated **11,749-record** OpenAlex+Crossref candidate corpus and committed a machine-readable manifest plus English/Korean review under `docs/findings/`. The corpus supports discovery breadth; production decisions still require primary evidence, current runtime data and causal post-rollout evaluation.
 ### v2026.09.16.6 — trade-history summary
 Read-only filtered-history summary added to /stocks/history; no economy mutation or schema change. Exact-SHA runtime verification remains required before promotion.
+
+## 2026-09-16 — v2026.09.16.141 paired specialist economy AI runtime
+
+- Implement the economy AI lane as six specialist domains with two independently configurable A/B seats per domain, independent-pass + rebuttal-pass debate, domain disagreement abstention and safety-critical paired vetoes.
+- Preserve the existing deterministic economy engine as the continuously available classical lane; AI unavailability never becomes an economy-service outage.
+- Store exact proposal hashes, expiry, aggregate decision and all 12 final seat artifacts before deterministic arbitration.
+- Place local AI model/cache/dataset artifacts on the 100GB `/srv/moneyverse-data` disk rather than the 32GB system disk.

@@ -295,7 +295,7 @@ export class ControlsRepository {
     assertUuid(actorUserId, 'actor user id');
     const row = await queryOne<{ readonly preview: Record<string, unknown> }>(
       this.pool,
-      'SELECT public.admin_preview_auto_policy($1, 7) AS preview',
+      'SELECT public.admin_preview_dual_auto_policy($1, 7) AS preview',
       [actorUserId],
     );
     return row?.preview ?? {};
@@ -311,7 +311,7 @@ export class ControlsRepository {
     const reason = assertReason(input.reason);
     const row = await queryOne<{ readonly result: Record<string, unknown> }>(
       this.pool,
-      'SELECT public.admin_run_auto_policy_now($1, $2, $3) AS result',
+      'SELECT public.admin_run_dual_auto_policy_now($1, $2, $3) AS result',
       [input.idempotencyKey, input.actorUserId, reason],
     );
     return row?.result ?? {};

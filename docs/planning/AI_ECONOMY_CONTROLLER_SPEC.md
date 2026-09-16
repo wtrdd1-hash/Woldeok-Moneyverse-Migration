@@ -1,6 +1,6 @@
 # Woldeok Moneyverse — AI Economy Controller Specification
 
-> Version: v2026.09.16.139
+> Version: v2026.09.16.141
 > Status: Living implementation-oriented planning specification
 > Date: 2026-09-16
 > Parent specs: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -911,3 +911,10 @@ Observation may run hourly. Routine economy mutations retain policy-family coold
 ### 33.7 Research evidence baseline
 
 The v2026.09.16.139 research pass created a deduplicated 11,749-record candidate corpus from OpenAlex and Crossref and committed the manifest under `docs/findings/`. The corpus is a discovery index, not a claim that every work was read in full. Production decisions rely on the smaller set of directly relevant primary references, current Moneyverse evidence, replayable tests and causal post-rollout measurements. The dual-lane decision is reinforced by EconGym's strong hybrid results, classical ACE literature, robust-control/model-uncertainty work, LLM economic-agent research, safe/constrained RL and algorithmic-pricing risk evidence.
+## 34. Paired specialist council runtime — v2026.09.16.141
+
+The AI lane is implemented as six specialist domains (`macro`, `shop`, `stock`, `jobs`, `welfare`, `integrity`) with two independently configurable seats per domain. Each seat performs an independent pass and a rebuttal pass against only its domain peer. A domain disagreement yields abstention rather than averaging. Paired `integrity` or `welfare` vetoes are safety-critical; two paired-veto domains also veto the council. The resulting council record is append-only and carries all 12 final seat artifacts.
+
+Every domain/seat can use a separate OpenAI-compatible endpoint/model/adapter. Shared defaults are operational conveniences, not evidence of independence. Production independence requires materially different model families, checkpoints/adapters, training splits, objectives or tool/feature policies. The classical lane remains authoritative and continues when the AI council is disabled, incomplete, unavailable or abstains.
+
+Runtime storage is separated from the application disk: `/srv/moneyverse-data/ai/{models,adapters,cache,datasets,evals,logs}` is the preferred local AI root. Models are not required to be resident simultaneously; local inference must use bounded concurrency.

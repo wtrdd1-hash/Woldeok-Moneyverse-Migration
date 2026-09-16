@@ -22,7 +22,7 @@ export interface SchedulerJob {
   /** Minutes into the window before the job may start. */
   readonly notBefore: number;
   readonly connection: 'app' | 'reconciler';
-  readonly statement: string;
+  readonly statement?: string;
 }
 
 export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
@@ -91,13 +91,23 @@ export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
       'SELECT upkeep.charged_count, upkeep.unpaid_count, upkeep.suspended_count, upkeep.failed_count, upkeep.charged_amount::text AS charged_amount FROM public.shop_charge_weekly_upkeep() AS upkeep',
   },
   {
-    // 15.2: Monday 04:30 KST. The window arithmetic counts from the daily
-    // 04:00 boundary, so thirty minutes into it is half past four.
+    // The learned lane reviews the exact classical proposal first. It does
+    // not write policy; 200 stores only an append-only review keyed by the
+    // proposal hash. Ten minutes leaves room for a slow local model before
+    // the deterministic weekly policy window opens.
+    job: 'economy.ai_policy_review',
+    cadence: 'weekly',
+    notBefore: 20,
+    connection: 'app',
+  },
+  {
+    // 15.2: Monday 04:30 KST. The dual wrapper preserves the 092 engine and
+    // only blocks it when a fresh AI review vetoes this exact proposal.
     job: 'economy.auto_policy',
     cadence: 'weekly',
     notBefore: 30,
     connection: 'app',
-    statement: 'SELECT public.economy_run_auto_policy() AS result',
+    statement: 'SELECT public.economy_run_dual_auto_policy() AS result',
   },
   {
     job: 'economy.reconciliation',
@@ -121,6 +131,7 @@ export interface SchedulerOptions {
   readonly intervalMs: number;
   readonly logger: SchedulerLogger;
   readonly jobs?: readonly SchedulerJob[];
+  readonly handlers?: Readonly<Record<string, () => Promise<Record<string, unknown>>>>;
 }
 
 interface ClaimRow {
@@ -186,7 +197,11 @@ export class Scheduler {
     if (!claim?.claimed) return;
 
     try {
-      const result = await queryOne<Record<string, unknown>>(connection, job.statement, []);
+      const handler = this.options.handlers?.[job.job];
+      if (!handler && !job.statement) throw new Error(`no scheduler handler or statement for ${job.job}`);
+      const result = handler
+        ? await handler()
+        : await queryOne<Record<string, unknown>>(connection, job.statement as string, []);
       await this.finish(job, claim.period_key, 'succeeded', result ?? {});
       this.options.logger.log(`${job.job} ${claim.period_key}: done`);
     } catch (error: unknown) {

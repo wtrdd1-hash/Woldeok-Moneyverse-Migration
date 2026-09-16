@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.16.139
+> **현재 통합 버전:** v2026.09.16.141
 > **구현·증거 동기화:** 2026-09-15
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -306,3 +306,10 @@ punitive streak, loss-threat FOMO, fake scarcity, 과도한 알림을 피하고 
 - 전통 lane은 회계·대사·시장 매칭/가격범위·정책제약·안전의 권위이자 AI 장애 시 운영 fallback이다. AI는 행동 agent, 반사실, RL/MARL simulation, 수요/상품 가설, 적대 분석을 추가한다.
 - 두 lane이 크게 충돌하면 평균으로 운영에 넣지 않고 `SHADOW`, `NO_OP`, 사람검토로 내린다. 합의하더라도 결정론 검증을 통과해야 자동적용 후보가 된다.
 - 이번 연구에서 OpenAlex+Crossref를 합쳐 중복 제거된 **11,749건** 후보군과 machine-readable 목록, 영문/한국어 검토 문서를 `docs/findings/`에 추가한다. 후보군 규모는 탐색범위이며 운영판단은 핵심 원문·현재 런타임 데이터·적용 후 인과효과를 요구한다.
+
+## 2026-09-16 — v2026.09.16.141 분야별 2중 경제 AI 런타임
+
+- 경제 AI lane을 6개 전문분야와 분야별 독립 설정 가능한 A/B 2개 좌석으로 구현하고 독립판단 → 상호반박, 분야 충돌 시 abstain, 안전 중요 pair-veto를 적용한다.
+- 기존 결정론 경제엔진은 항상 사용 가능한 classical lane으로 유지하며 AI 장애가 경제서비스 장애가 되지 않게 한다.
+- exact proposal hash, expiry, 집계판정, 최종 12개 좌석 증거를 저장한 뒤 결정론 중재를 수행한다.
+- 로컬 AI 모델/cache/dataset은 32GB 시스템 디스크가 아니라 100GB `/srv/moneyverse-data` 디스크에 저장한다.
