@@ -1,8 +1,8 @@
 # Woldeok Moneyverse — Economy Simulation & Dynamic Sink Tuning Specification
 
-> Version: v2026.09.13.4
+> Version: v2026.09.16.139
 > Status: Living implementation-oriented planning specification
-> Date: 2026-09-13
+> Date: 2026-09-16
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
 > Korean counterpart: [ECONOMY_SIMULATION_TUNING_SPEC.ko.md](ECONOMY_SIMULATION_TUNING_SPEC.ko.md)
 
@@ -351,3 +351,33 @@ This planning slice is complete when:
 - changelog and worklog record research, runtime-verification status and next steps.
 
 Runtime implementation remains separate and requires development branch -> isolated Test -> backend/DB/API/UI verification -> Production.
+
+## 21. Multi-agent adversarial simulation extension — v2026.09.16.136
+
+Scenario Lab SHALL support independent specialist-agent predictions and disagreement analysis for stock price formation, shop repricing and generated catalog items. A run stores per-agent estimates before debate, critiques, revised estimates, ensemble/judge output, deterministic guardrail results and the final counterfactual frontier.
+
+Stock scenarios must model at least fundamentals, flow/liquidity, momentum/reversal, common-factor shocks, manipulation attempts, circuit breakers and stale-market behavior. The AI does not directly choose an unconstrained price; it supplies bounded components to a deterministic price-formation model.
+
+Shop scenarios must model elasticity uncertainty, substitution/cannibalization, protected-cohort affordability, sink burn, retention and complaint/support guardrails. Product-generation scenarios must compare `do nothing`, `reprice existing catalog`, `rotate existing content` and `publish generated low-risk variant` before a new SKU is eligible for automatic rollout.
+
+A multi-agent consensus without independent evidence is not sufficient. Large disagreement, correlated assumptions or failed red-team/integrity agents force proposal-only/shadow behavior.
+
+## 21. 2026-09-16 research reassessment
+
+The simulator SHALL use an ensemble hierarchy: deterministic flow/accounting baseline, calibrated cohort/ABM model, econometric/causal response model, stochastic stress model, and bounded LLM-agent population. LLM-agent output is never substituted for empirical calibration. Cross-model disagreement is a first-class risk metric and blocks bounded-auto when above policy threshold. Multi-agent debate is evaluated against no-debate and deterministic baselines. Stock scenarios should use an order-level or microstructure-aware engine where practical rather than allowing language agents to invent clearing prices.
+
+## 21. Profession-limit scenario family
+
+Scenario Lab must model profession-policy changes together with rewards rather than treating daily caps as isolated counters. Standard cases include unlimited baseline, marginal-reward-only control, profession-demand rebalance, temporary rewarded-assignment protection limit, temporary total-assignment protection limit, and automatic relaxation back to unlimited.
+
+Each scenario reports issuance, median/P95 completion counts, new-user progression time, mastery growth, profession switching, abandonment, retention, abuse displacement, sink interaction and cross-profession substitution. A finite limit is rejected when an equivalent or better safety outcome is achievable with materially lower player-friction through softer controls.
+
+## 22. Dual-model ensemble and disagreement simulation — v2026.09.16.139
+
+Every material scenario SHALL produce at least two independently generated projections: a classical/deterministic projection and an AI/learned projection. Scenario Lab displays both rather than hiding disagreement behind one blended number.
+
+Required comparison fields include `classical_prediction`, `ai_prediction`, `direction_agreement`, `magnitude_gap_bps`, `uncertainty_overlap`, `coverage_gap`, `safe_intersection`, `arbitration_result`, and `evidence_needed_next`.
+
+Stress cases explicitly include: AI unavailable while the classical lane continues; econometric baseline failure while deterministic accounting remains available; persuasive LLM consensus that contradicts ledger/causal evidence; classical and AI lanes choosing opposite shop-price moves; AI discovering a novel farming behavior absent from the classical model; a stock shock where LLM traders predict a move outside deterministic tick bounds; and post-rollout outcomes that invalidate both models.
+
+No ensemble score may override reconciliation, accounting, market-integrity or registered policy constraints. Model disagreement is information to investigate, not noise to average away.

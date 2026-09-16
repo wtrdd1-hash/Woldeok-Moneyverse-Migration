@@ -1,8 +1,8 @@
 # 월덕 머니버스 — 경제 시뮬레이션 및 동적 소비처 조정 명세
 
-> 버전: v2026.09.13.4
+> 버전: v2026.09.16.139
 > 상태: Living 구현 지향 기획 명세
-> 날짜: 2026-09-13
+> 날짜: 2026-09-16
 > 상위 명세: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
 > 영문 기준본: [ECONOMY_SIMULATION_TUNING_SPEC.md](ECONOMY_SIMULATION_TUNING_SPEC.md)
 
@@ -349,3 +349,33 @@ Unity 공식 문서는 2026-09-08부터 신규 Unity Economy 프로젝트 가입
 - changelog/worklog에 조사근거, 실제서비스 검증상태, 다음단계 기록
 
 런타임 구현은 별도 개발 브랜치 -> isolated Test -> backend/DB/API/UI 검증 -> Production 순서를 따른다.
+
+## 21. 다중 에이전트 적대적 시뮬레이션 확장 — v2026.09.16.136
+
+Scenario Lab은 주식 가격형성, 상점 가격조절, 생성 카탈로그 상품에 대해 전문 에이전트별 독립 예측과 불일치 분석을 지원해야 한다. 각 run은 토론 전 에이전트별 추정, 비판, 수정 추정, ensemble/judge 결과, deterministic guardrail 결과, 최종 counterfactual frontier를 저장한다.
+
+주식 scenario는 최소한 펀더멘털, flow/liquidity, momentum/reversal, 공통요인 shock, 조작 시도, circuit breaker, stale-market 동작을 모델링한다. AI가 무제한 가격을 직접 고르지 않고 결정론적 가격형성 모델에 제한형 component를 제공한다.
+
+상점 scenario는 가격탄력성 uncertainty, 대체/잠식효과, 보호 cohort 구매력, sink burn, retention, complaint/support guardrail을 모델링한다. 상품생성 scenario는 신규 SKU 자동 rollout 전에 `아무것도 하지 않음`, `기존 catalog repricing`, `기존 content rotation`, `저위험 생성 variant 게시`를 비교해야 한다.
+
+독립 증거 없는 다중 에이전트 합의만으로는 충분하지 않다. 큰 불일치, 상관된 가정, red-team/integrity agent 실패 시 proposal-only/shadow로 강등한다.
+
+## 21. 2026-09-16 연구 재평가
+
+시뮬레이터는 결정론적 flow/accounting baseline, 보정된 cohort/ABM, econometric/causal response model, stochastic stress model, 제한형 LLM agent population을 ensemble 계층으로 사용해야 한다. LLM agent 출력은 실측 보정을 대체하지 않는다. 모델 간 불일치는 독립 risk metric이며 정책 threshold를 넘으면 bounded-auto를 차단한다. 다중 에이전트 토론은 no-debate 및 deterministic baseline과 비교평가한다. 주식 시나리오는 가능하면 order-level 또는 market-microstructure-aware engine을 사용하며 language agent가 clearing price를 직접 발명하게 하지 않는다.
+
+## 21. 직업 제한 시나리오군
+
+Scenario Lab은 일일 cap을 고립된 counter로 보지 않고 보상과 함께 직업정책 변화를 모델링해야 한다. 표준 사례는 무제한 baseline, marginal-reward-only 제어, 직업 수요 재균형, 한시적 정상보상 작업 보호제한, 한시적 전체작업 보호제한, 무제한으로의 자동 완화를 포함한다.
+
+각 시나리오는 발행량, 일일 완료 median/P95, 신규사용자 성장시간, 숙련 성장, 직업 전환, 포기, retention, abuse displacement, sink 상호작용, 직업 간 대체효과를 보고한다. 더 부드러운 제어로 플레이 마찰이 훨씬 적으면서 동등하거나 더 나은 안전결과를 낼 수 있으면 유한 제한 후보는 거부한다.
+
+## 22. 이중 모델 ensemble·불일치 시뮬레이션 — v2026.09.16.139
+
+중요 시나리오는 최소 두 개의 독립 예측, 즉 전통/결정론 예측과 AI/학습 예측을 함께 만든다. Scenario Lab은 불일치를 하나의 평균값으로 숨기지 않고 두 결과를 나란히 보여준다.
+
+필수 비교필드는 `classical_prediction`, `ai_prediction`, `direction_agreement`, `magnitude_gap_bps`, `uncertainty_overlap`, `coverage_gap`, `safe_intersection`, `arbitration_result`, `evidence_needed_next`다.
+
+stress case에는 AI 장애 중 전통 lane 지속, econometric baseline 장애 중 회계기준 유지, LLM 합의가 원장/인과근거와 충돌, 상점가격 방향 반대, 전통모델에 없는 신규 farming 패턴 AI 탐지, 결정론 tick bound 밖 움직임을 예상하는 LLM trader, 실제 rollout 결과가 두 모델을 모두 반증하는 경우를 포함한다.
+
+어떤 ensemble 점수도 대사·회계·시장무결성·등록 정책제약을 넘을 수 없다. 모델 불일치는 평균으로 지울 noise가 아니라 조사해야 할 정보다.

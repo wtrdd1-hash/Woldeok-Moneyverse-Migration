@@ -1,6 +1,6 @@
 # Woldeok Moneyverse — Jobs & Profession Mastery Specification
 
-> Version: v2026.09.12.26
+> Version: v2026.09.16.138
 > Status: Living implementation-oriented product specification
 > Date: 2026-09-12
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `SEASON_SYSTEM_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `LIMIT_CONSISTENCY_IMPLEMENTATION_SPEC.md`, `BUSINESS_OPERATIONS_SUPPLY_CHAIN_SPEC.md`
@@ -445,3 +445,40 @@ P0 is complete only when:
 - **P2:** player commission contracts with escrow/transfer accounting, prestige halls, broader city endowments.
 
 This document is planning-only. Runtime implementation must use a separate development branch, forward-only migrations, CI and exact-SHA isolated Test verification before Production.
+
+## 22. AI-managed profession and daily protection policies
+
+Jobs participates in the Moneyverse Economy AI policy registry while preserving the unlimited-by-default contract.
+
+`primary profession` is an identity designation, not permission for the AI to rewrite a member's career choice. `primary_profession_slots` and `concurrent_active_professions` may be versioned/tuned inside approved ranges, but reductions cannot evict an existing selection or erase mastery. A narrower future rule requires grandfathering or explicit migration approval.
+
+Daily controls are independent knobs. `assignment_daily_limit` and `rewarded_assignment_daily_limit` default to `null = unlimited`. If a temporary finite value is justified, it must be global or clearly defined by non-sensitive gameplay cohort, published in server policy, time-bounded, auditable and reversible. The UI shows the current rule, reset/reevaluation time and reason category before the user starts an affected assignment.
+
+The AI council may tighten or loosen these policies only after deterministic validation. Routine inflation pressure should first use task-mix changes, diminishing rewards, sink/reward tuning and profession-demand balancing. Finite daily limits are a later protection lever for sustained issuance/integrity risk, not the default economy tool.
+
+Automatic relaxation is mandatory: each finite limit carries `expires_at` or `reevaluate_at`, a relaxation step, a maximum consecutive duration and a return-to-unlimited condition. A controller that can tighten but cannot automatically loosen fails Definition of Done.
+
+Suggested policy metadata:
+
+```text
+policy_key
+profession_code | null
+current_value | null
+min_value | null
+max_value | null
+max_step
+cooldown_minutes
+reason_class
+required_windows
+min_observation_count
+max_duration_minutes
+reevaluate_at
+auto_relax_step
+return_to_unlimited_condition
+grandfather_existing
+requires_human_approval
+version
+config_hash
+```
+
+QA must cover unlimited -> finite -> relaxed -> unlimited transitions, midnight/reset boundaries, game-day clock changes, concurrent completions, duplicate settlement, stale policy reads, server restart, grandfathered primary professions, abuse-shock tightening, false-positive recovery and exact-SHA Test verification.
