@@ -32,6 +32,19 @@ describe('casino themed games stay faithful to the server result', () => {
     expect(hilo).not.toContain('1.9배로 정산');
   });
 
+  it('submits themed choices using the server action contract field name', () => {
+    const slots = readFileSync(join(__dirname, 'slots-game.tsx'), 'utf8');
+    const themes = readFileSync(join(__dirname, 'theme-games.tsx'), 'utf8');
+    const hilo = readFileSync(join(__dirname, 'hilo-game.tsx'), 'utf8');
+
+    expect(slots).toContain('name="choice" value="6"');
+    expect(slots).not.toContain('name="number"');
+    expect(themes).toContain('name="choice"');
+    expect(themes).not.toContain("name={theme.mode === 'parity' ? 'parity' : 'number'}");
+    expect(hilo).toContain('name="choice" value={choice}');
+    expect(hilo).not.toContain('name="parity"');
+  });
+
   it('uses a dedicated casino history endpoint rather than filtering the wallet feed', () => {
     const page = readFileSync(join(__dirname, 'page.tsx'), 'utf8');
     expect(page).toContain("/api/v1/casino/history");

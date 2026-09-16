@@ -101,7 +101,7 @@ export function LuckySlotsGame({
         </div>
 
         <form action={formAction} className="grid gap-4">
-          <input type="hidden" name="number" value="6" />
+          <input type="hidden" name="choice" value="6" />
           <div className="grid gap-2">
             <Label htmlFor="slot-stake" className="text-sm font-medium">
               베팅할 WLD 금액
