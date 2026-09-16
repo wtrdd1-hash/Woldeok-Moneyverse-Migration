@@ -2,7 +2,7 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.16.153
+> Current integrated version: v2026.09.16.154
 > Implementation/evidence sync: 2026-09-16
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
@@ -417,3 +417,32 @@ No P0/HIGH item is `DONE` from documentation alone. Required flow remains branch
 ### 18.4 v153 worklog
 
 External references rechecked: Google Search Central September 2026 updates and August 28 site-reputation policy; OWASP API Security Top 10/ASVS baseline; Google Play current service-fee documentation. Repository evidence rechecked: main SHA, both v152 integrated plans, current Actions state and open PR #370. Decision: no speculative runtime promotion; preserve P0 release truth, add exact release-evidence acceptance, keep Work-clock fix blocked until mergeability/exact-SHA real-DB QA, and retain market/cohort-aware monetization math. Runtime code, DB, Flux and Production were not changed by this planning run.
+
+
+## v2026.09.16.154 — hourly evidence refresh
+
+### Release/CI evidence — REL-EVIDENCE-154-01 — P0 — IN PROGRESS
+- Evidence captured 2026-09-16: current `main` is `83f00a978e8e1bed0c5b94a7b4cda81893f4c669` (`docs: integrate Moneyverse plan v2026.09.16.153 (#379)`). Mid-run re-check returned the same SHA; no planning-time main drift was observed.
+- The exact-main `Build Test Candidate #740` verification job passed lint, typecheck, build, migrations, tests, Prisma-mutation rejection and production dependency audit. At observation time its image build job was still in progress after the backend candidate image completed while the frontend candidate image was building. This is `CI verification green / candidate image build pending`, not isolated-Test or Production evidence.
+- Branch metadata still reports protection enabled but required-status-check enforcement `off` with no required contexts/checks. `REL-104-03` therefore remains confirmed and HIGH/P1 until runtime-sensitive paths are repository-enforced.
+- Acceptance remains fail-closed: candidate image completion alone cannot advance beyond `IMAGE_BUILT`; isolated Test must prove exact SHA/digests, backend/API/DB path, least-privilege DB access, changed-feature QA and noindex before main/Production promotion. Every failed or timed-out attempt must retain machine-readable expected/observed evidence without secrets.
+
+### Work clock integrity — WORK-CLOCK-149-01 — HIGH — FIX PENDING / REBASE REQUIRED
+- PR #370 remains open with head `8ff8314a4425f874508b3d8d966e95ae40450b2a` while its recorded base SHA is `3d87165f83bcb60903e85d4f3600fdf40074ef40`; current main has advanced. The fix aligns `work_my_dashboard.daily_paid/weekly_paid` with `server_game_day_key()` / `server_game_week_key()` and adds real-PostgreSQL regression coverage.
+- Before merge, rebase/reconcile against current main, re-run duplicate/immutable migration checks and real-DB tests, then require exact-head isolated Test evidence. Do not edit or rename an already-applied migration; conflicts are resolved by a new forward migration.
+- QA: game-day/week boundary -1/0/+1 second, 10-real-minute day and 70-real-minute week rollover, concurrent completion, duplicate/retry idempotency, process restart, DB timezone, stale read-model/cache, and equality between settlement authority and dashboard counters.
+
+### SEO/SEO backend refresh
+- Fresh Google Search Central posts dated 2026-09-08 and 2026-09-14 are event announcements, not a crawl/index contract change. The 2026-08-28 site-reputation-policy update remains applicable: third-party sponsor/affiliate/UGC must not exploit Moneyverse host reputation.
+- Public SEO read models continue to own canonical URL, slug/redirect history, title/description/H1, index policy, content owner/editorial control/sponsor type, locale/hreflang, updatedAt/lastModified, image metadata and structured-data inputs. Account/admin/payment callback/private transaction/casino-history surfaces remain sitemap-excluded and `noindex`.
+- Naver official guidance confirms robots.txt sitemap discovery, per-page robots meta, and crawlability of rendering-critical JS/resources. Release QA therefore verifies robots → sitemap → canonical → server-rendered content/resources → representative Google/Naver URL inspection.
+
+### Security and business/economics refresh
+- OWASP API Security Top 10 remains the API threat baseline and ASVS remains the verification baseline. No P0/HIGH control is relaxed: actor-scoped authorization, recent reauth for sensitive admin operations, DB least privilege, BOLA/BFLA negative tests, CSRF/XSS/SQLi/SSRF/upload controls, bounded resource/business-flow limits, idempotency/replay prevention, append-only audit and secret-safe logs remain release gates.
+- Google Play's current fee documentation states there is no single universal fee. For EEA/UK/US from 2026-06-30, standard auto-renewing subscriptions are 10%, other new-install transactions 20%, other existing-install transactions 25%, with a 5% billing fee where Play Billing applies. AU/JP rollout is 2026-09-30 and KR 2026-12-31, so Korean unit economics must not prematurely apply the future regional schedule.
+- SKU models therefore key assumptions by market × effective date/install cohort × transaction type × billing path × programme and calculate gross → platform/billing fee → tax/refund/fraud → entitlement/infra/support → contribution margin. Conversion, ARPU/ARPDAU/ARPPU, churn, refund, CAC and LTV remain `HYPOTHESIS`/`TEST TARGET` until measured.
+
+### v154 worklog
+- Sources checked: Google Search Central current September posts and 2026-08 site-reputation update; Naver Search Advisor robots/meta/resource guidance; OWASP API/ASVS baseline; Google Play current service-fee/timeline guidance; GitHub main/branch protection, Actions and PR #370.
+- Adopted: exact-main CI state separation, repository-enforcement finding, PR #370 rebase+real-DB gate, SEO crawler/resource contract, market/effective-date-aware fee model.
+- Deferred: no runtime, DB, Flux or Production mutation from planning automation. `Build Test Candidate #740` was still running when captured, so no Test/Production pass is claimed.

@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.16.153
+> **현재 통합 버전:** v2026.09.16.154
 > **구현·증거 동기화:** 2026-09-16
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -411,3 +411,32 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 ### 18.4 v153 worklog
 
 외부 근거는 Google Search Central 2026년 9월 변경·8월 28일 site reputation policy, OWASP API Security Top 10/ASVS baseline, Google Play 현재 서비스 수수료 문서를 재확인했다. 저장소 근거는 최신 main, v152 영문/한국어 통합본, Actions 상태, 열린 PR #370을 재확인했다. 결론은 운영승격을 추정하지 않고 P0 release truth를 유지하며 exact release-evidence 수용조건을 추가하고, Work clock 수정은 mergeability/exact-SHA 실DB QA 전까지 blocked로 유지하며, 수익성은 market/cohort별 계산을 유지하는 것이다. 이번 기획 회차에서 runtime code, DB, Flux, Production은 변경하지 않았다.
+
+
+## v2026.09.16.154 — 시간별 증거 갱신
+
+### 릴리스/CI 증거 — REL-EVIDENCE-154-01 — P0 — IN PROGRESS
+- 2026-09-16 확인 시 현재 `main`은 `83f00a978e8e1bed0c5b94a7b4cda81893f4c669` (`docs: integrate Moneyverse plan v2026.09.16.153 (#379)`)이다. 작업 중간 재확인도 동일 SHA여서 기획 중 main drift는 없었다.
+- exact-main `Build Test Candidate #740`의 verification job은 lint, typecheck, build, migration, test, Prisma schema mutation 차단, production dependency audit를 통과했다. 관측 시점에는 backend candidate image가 완료되고 frontend candidate image가 빌드 중이었다. 이는 `CI verification green / candidate image build pending`이지 isolated Test 또는 Production 증거가 아니다.
+- branch metadata는 protection enabled이나 required-status-check enforcement가 `off`이고 required context/check가 비어 있다. 따라서 `REL-104-03`은 runtime-sensitive path가 저장소 차원에서 강제되기 전까지 confirmed 상태를 유지한다.
+- 수용조건은 fail-closed다. 이미지 빌드 완료만으로 `IMAGE_BUILT` 이후 상태로 승격하지 않는다. isolated Test에서 exact SHA/digest, backend/API/DB path, least-privilege DB, 변경기능 QA, noindex를 증명해야 한다. 실패/timeout 회차도 secret 없이 expected/observed evidence를 보존한다.
+
+### Work clock 무결성 — WORK-CLOCK-149-01 — HIGH — FIX PENDING / REBASE REQUIRED
+- PR #370은 head `8ff8314a4425f874508b3d8d966e95ae40450b2a`, 기록된 base `3d87165f83bcb60903e85d4f3600fdf40074ef40` 상태로 열려 있고 현재 main은 더 전진했다. 수정 목적은 `work_my_dashboard.daily_paid/weekly_paid`를 `server_game_day_key()` / `server_game_week_key()`와 일치시키고 real-PostgreSQL regression을 추가하는 것이다.
+- 병합 전 current main과 rebase/reconcile하고 migration 번호 중복/적용 migration 불변성 및 real-DB 테스트를 다시 수행한 뒤 exact-head isolated Test를 요구한다. 이미 적용된 migration은 수정/rename하지 않고 새 forward migration으로 충돌을 해결한다.
+- QA: game-day/week 경계 -1/0/+1초, 현실 10분 day·70분 week rollover, 동시 완료, duplicate/retry idempotency, process restart, DB timezone, stale read-model/cache, settlement 권위와 dashboard counter 동일성을 검증한다.
+
+### SEO/SEO 백엔드 갱신
+- 2026-09-08/09-14 Google Search Central 최신 글은 행사 공지이며 crawl/index 계약 변경이 아니다. 2026-08-28 site reputation policy 변경은 계속 적용해 sponsor/affiliate/UGC가 Moneyverse host 평판만 이용하는 구조를 제외한다.
+- 공개 SEO read-model은 canonical URL, slug/redirect history, title/description/H1, index policy, content owner/editorial control/sponsor type, locale/hreflang, updatedAt/lastModified, image metadata, structured-data input을 권위 있게 공급한다. 계정/관리자/payment callback/private transaction/casino history는 sitemap 제외 + `noindex`다.
+- Naver 공식 가이드는 robots.txt의 sitemap discovery, 페이지별 robots meta, 렌더링 필수 JS/resource crawlability를 요구한다. 따라서 release QA는 robots → sitemap → canonical → server-rendered content/resources → Google/Naver 대표 URL 검사를 수행한다.
+
+### 보안 및 사업/경제성 갱신
+- OWASP API Security Top 10을 API 위협 baseline, ASVS를 검증 baseline으로 유지한다. actor-scoped authorization, 민감 관리자 recent reauth, DB least privilege, BOLA/BFLA negative test, CSRF/XSS/SQLi/SSRF/upload 통제, resource/business-flow 제한, idempotency/replay 방지, append-only audit, secret-safe log는 P0/HIGH release gate다.
+- Google Play 최신 수수료 문서는 단일 보편 수수료가 없음을 명시한다. EEA/UK/US는 2026-06-30부터 standard auto-renew subscription 10%, 기타 new-install 20%, existing-install 25%이고 Play Billing 적용 시 5% billing fee가 붙는다. AU/JP rollout은 2026-09-30, KR은 2026-12-31이므로 한국 unit economics에 미래 지역 요율을 조기 적용하지 않는다.
+- SKU 가정키는 market × effective date/install cohort × transaction type × billing path × programme이며 gross → platform/billing fee → tax/refund/fraud → entitlement/infra/support → contribution margin으로 계산한다. conversion, ARPU/ARPDAU/ARPPU, churn, refund, CAC, LTV는 실측 전 `HYPOTHESIS`/`TEST TARGET`이다.
+
+### v154 worklog
+- 조사: Google Search Central 9월 최신 글 및 2026-08 site reputation update, Naver Search Advisor robots/meta/resource, OWASP API/ASVS, Google Play 수수료/rollout, GitHub main/branch protection/Actions/PR #370.
+- 채택: exact-main CI 상태 분리, repository enforcement 결함, PR #370 rebase+real-DB gate, SEO crawler/resource 계약, 시장·시행일 기반 수수료 모델.
+- 보류: 기획 자동화에서는 runtime/DB/Flux/Production을 변경하지 않았다. `Build Test Candidate #740`이 관측 시 실행 중이므로 Test/Production 통과를 주장하지 않는다.
