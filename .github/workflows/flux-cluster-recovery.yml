@@ -1,0 +1,181 @@
+name: Recover Flux Cluster
+
+on:
+  workflow_dispatch:
+    inputs:
+      restart_flux_controllers:
+        description: Restart Flux source/kustomize controllers if source remains stale
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 15
+    steps:
+      - name: Resolve desired GitOps state
+        id: desired
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/wtrdd1-hash/kuber-infrastructure /tmp/infra >/dev/null 2>&1
+          infra_sha="$(git -C /tmp/infra rev-parse HEAD)"
+          test_sha="$(sed -n 's/.*moneyverse.openai\/candidate-sha: "\([0-9a-f]\{40\}\)".*/\1/p' /tmp/infra/staging/wdmv-test/backend.yaml | head -n1)"
+          prod_sha="$(sed -n 's#.*wdmv/backend:\([0-9a-f]\{40\}\)-production.*#\1#p' /tmp/infra/apps/wdmvp/backend.yaml | head -n1)"
+          [[ "$infra_sha" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$test_sha" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$prod_sha" =~ ^[0-9a-f]{40}$ ]]
+          echo "infra_sha=$infra_sha" >> "$GITHUB_OUTPUT"
+          echo "test_sha=$test_sha" >> "$GITHUB_OUTPUT"
+          echo "prod_sha=$prod_sha" >> "$GITHUB_OUTPUT"
+          echo "Desired infra=$infra_sha test=$test_sha production=$prod_sha"
+
+      - name: Configure existing cluster SSH credential
+        shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          for required in DEPLOY_HOST DEPLOY_PORT DEPLOY_USER DEPLOY_SSH_KEY DEPLOY_KNOWN_HOSTS; do
+            [[ -n "${!required:-}" ]] || { echo "::error::$required is not configured"; exit 1; }
+          done
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<CONFIG
+          Host target
+            HostName $DEPLOY_HOST
+            User $DEPLOY_USER
+            Port $DEPLOY_PORT
+            IdentityFile ~/.ssh/deploy
+            IdentitiesOnly yes
+            IdentityAgent none
+            BatchMode yes
+            StrictHostKeyChecking yes
+          CONFIG
+          chmod 600 ~/.ssh/config
+          ssh target 'sudo -n true && command -v kubectl >/dev/null && hostname && . /etc/os-release && echo "$PRETTY_NAME"'
+
+      - name: Repair Flux source and reconcile
+        shell: bash
+        env:
+          EXPECTED_INFRA_SHA: ${{ steps.desired.outputs.infra_sha }}
+          RESTART_CONTROLLERS: ${{ inputs.restart_flux_controllers }}
+        run: |
+          set -euo pipefail
+          cat > /tmp/recover.sh <<'REMOTE'
+          set -euo pipefail
+          expected_url='https://github.com/wtrdd1-hash/kuber-infrastructure'
+          expected_sha='__EXPECTED_INFRA_SHA__'
+          restart_controllers='__RESTART_CONTROLLERS__'
+          k='sudo -n kubectl'
+
+          echo '--- cluster ---'
+          $k get nodes -o custom-columns='NAME:.metadata.name,READY:.status.conditions[?(@.type=="Ready")].status,KUBELET:.status.nodeInfo.kubeletVersion,OS:.status.nodeInfo.osImage'
+          echo '--- Flux source before ---'
+          $k -n flux-system get gitrepository flux-system -o jsonpath='{.spec.url}{"\n"}{.status.artifact.revision}{"\n"}{range .status.conditions[*]}{.type}={.status} {.reason}{"\n"}{end}' || true
+
+          current_url="$($k -n flux-system get gitrepository flux-system -o jsonpath='{.spec.url}')"
+          if [[ "$current_url" != "$expected_url" ]]; then
+            echo "Repairing Flux source URL: $current_url -> $expected_url"
+            $k -n flux-system patch gitrepository flux-system --type=merge -p '{"spec":{"url":"https://github.com/wtrdd1-hash/kuber-infrastructure","interval":"1m0s"}}'
+          fi
+
+          request_reconcile() {
+            local stamp
+            stamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            $k -n flux-system annotate gitrepository flux-system reconcile.fluxcd.io/requestedAt="$stamp" --overwrite
+            $k -n flux-system annotate kustomization flux-system reconcile.fluxcd.io/requestedAt="$stamp" --overwrite || true
+          }
+
+          source_converged() {
+            local revision
+            revision="$($k -n flux-system get gitrepository flux-system -o jsonpath='{.status.artifact.revision}' 2>/dev/null || true)"
+            [[ "$revision" == *"$expected_sha"* ]]
+          }
+
+          request_reconcile
+          for _ in $(seq 1 18); do
+            source_converged && break
+            sleep 10
+          done
+
+          if ! source_converged && [[ "$restart_controllers" == 'true' ]]; then
+            echo 'Source is still stale; restarting Flux source/kustomize controllers.'
+            $k -n flux-system rollout restart deployment/source-controller deployment/kustomize-controller
+            $k -n flux-system rollout status deployment/source-controller --timeout=120s
+            $k -n flux-system rollout status deployment/kustomize-controller --timeout=120s
+            request_reconcile
+            for _ in $(seq 1 18); do
+              source_converged && break
+              sleep 10
+            done
+          fi
+
+          if ! source_converged; then
+            echo '--- Flux diagnostics ---'
+            $k -n flux-system get pods -o wide
+            $k -n flux-system get gitrepository flux-system -o yaml | sed -n '/^status:/,$p' | head -120
+            $k -n flux-system get kustomizations
+            echo '::error::Flux source did not converge to the current infrastructure main SHA.'
+            exit 1
+          fi
+
+          echo '--- Flux source after ---'
+          $k -n flux-system get gitrepository flux-system -o jsonpath='{.spec.url}{"\n"}{.status.artifact.revision}{"\n"}{range .status.conditions[*]}{.type}={.status} {.reason}{"\n"}{end}'
+
+          stamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          for name in flux-system infrastructure-controllers infrastructure-storage infrastructure-configs apps wdmv-test; do
+            if $k -n flux-system get kustomization "$name" >/dev/null 2>&1; then
+              $k -n flux-system annotate kustomization "$name" reconcile.fluxcd.io/requestedAt="$stamp" --overwrite
+            fi
+          done
+          sleep 20
+
+          echo '--- Flux kustomizations ---'
+          $k -n flux-system get kustomizations
+          echo '--- Production rollout ---'
+          $k -n wdmvp get deployment wdmvp-backend wdmvp-frontend -o custom-columns='NAME:.metadata.name,READY:.status.readyReplicas,AVAILABLE:.status.availableReplicas,IMAGE:.spec.template.spec.containers[0].image' || true
+          $k -n wdmvp get deployment wdmvp-backend wdmvp-frontend -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{range .status.conditions[*]}  {.type}={.status} {.reason}{"\n"}{end}{end}' || true
+          echo '--- Test rollout ---'
+          if $k get namespace wdmv-test >/dev/null 2>&1; then
+            $k -n wdmv-test get deployments -o custom-columns='NAME:.metadata.name,READY:.status.readyReplicas,AVAILABLE:.status.availableReplicas,IMAGE:.spec.template.spec.containers[0].image' || true
+            $k -n wdmv-test get pods -o wide || true
+          else
+            echo 'wdmv-test namespace is not present'
+          fi
+          REMOTE
+          sed -i "s/__EXPECTED_INFRA_SHA__/$EXPECTED_INFRA_SHA/g; s/__RESTART_CONTROLLERS__/$RESTART_CONTROLLERS/g" /tmp/recover.sh
+          payload="$(base64 -w0 /tmp/recover.sh)"
+          ssh target "echo '$payload' | base64 -d | bash"
+
+      - name: Verify public runtime identities
+        shell: bash
+        env:
+          TEST_SHA: ${{ steps.desired.outputs.test_sha }}
+          PROD_SHA: ${{ steps.desired.outputs.prod_sha }}
+        run: |
+          set -euo pipefail
+          probe() {
+            local name="$1" url="$2" expected="$3" live=''
+            for _ in $(seq 1 24); do
+              live="$(curl -fsS --max-time 10 "$url/api/version" | jq -r '.id // empty' || true)"
+              [[ "$live" == "$expected" ]] && break
+              sleep 10
+            done
+            echo "$name desired=$expected live=${live:-unavailable}"
+            [[ "$live" == "$expected" ]]
+          }
+          probe Test https://test.easy-scraping.com "$TEST_SHA"
+          probe Production https://easy-scraping.com "$PROD_SHA"
+          curl -fsS --max-time 15 https://easy-scraping.com/app-api/v1/shop/public-catalog | jq -e '.catalogItems | type == "array" and length > 0' >/dev/null
