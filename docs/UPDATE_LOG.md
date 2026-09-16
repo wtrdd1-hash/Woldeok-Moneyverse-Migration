@@ -1,6 +1,16 @@
 # Update Log
 
+## v2026.09.16.151 — Runtime and GitOps convergence
+
+- Converged application `main`, public Test, public Production, and GitOps desired Test/Production references on exact SHA `3d87165f83bcb60903e85d4f3600fdf40074ef40`.
+- Promoted exact-SHA Test first and passed public backend/API/SEO-boundary QA before Production.
+- Created a fresh Production database backup before the exact-SHA Production promotion and preserved the previous Test/Production release directories as rollback anchors.
+- Re-ran the GitHub Production Release successfully; immutable Production images and the Production-ready signal now exist for the exact SHA.
+- Merged GitOps Test PR #78 and Production PR #79, then passed Runtime Drift Watch run `35069150294`.
+- Production Kubernetes reconciliation remains intentionally suspended until NixOS administrative access and cluster-database reconciliation are restored; the Debian systemd runtime is the current public authority.
+
 ## v2026.09.12.13 — Automatic Test→Production release pipeline
+
 - Internal release pipeline version: `v2026.09.12.13`.
 - Branch: `ops/auto-test-prod-v2026.09.12.13`.
 - Added exact-SHA Test identity, fail-closed Test smoke gating, automatic Production image creation, and a cross-repository Production-ready signal.
@@ -72,6 +82,7 @@ This file records incremental project changes so concurrent work can avoid overl
 - Fixed stale member screens by invalidating both the directory and the active detail page after restrictions or forced logouts.
 - Made authentication cookie requests preserve Cloudflare's authoritative client-address header like all other API requests.
 - Final verification passed: workspace lint, 435 frontend tests, frontend type-check, and the optimized production build including both new dynamic routes.
+
 # 2026-09-07 — Activity reliability, unrestricted work, and economy references
 
 - Audited GitHub integration through merged PR #75. `main` contains the recent AI news,
@@ -100,6 +111,7 @@ This file records incremental project changes so concurrent work can avoid overl
   bringing the newly added voluntary sink catalogue to fifteen products.
 - Added `docs/SITE_GAP_AUDIT_2026-09-07.md` with confirmed gaps, priorities, evidence, and release
   acceptance criteria.
+
 # 2026-09-07 — 사진 공개·관리 및 단일 지갑 잔액 표시 복구
 
 - 회원 사진 승인 후 DB는 공개 상태였지만 API가 내부 `/media/<key>` 경로를 외부 HTTPS 주소로 잘못 거부해 500을 내던 오류를 수정했습니다.
@@ -107,6 +119,7 @@ This file records incremental project changes so concurrent work can avoid overl
 - 관리자 콘텐츠 화면에서 대기·공개 사진 전체를 조회하고 공개/비공개 전환 및 영구 삭제할 수 있게 했으며, 삭제 시 내부 이미지 파일도 함께 정리합니다.
 - 상점이 제거된 `cashBalance` 필드를 읽어 잔액을 0으로 표시하던 오류를 수정했습니다. 지갑과 상점 모두 동일한 `WalletOverview.balances.cash.availableAmount`를 사용합니다.
 - 운영 원장 정합성 스냅샷에서 미균형 거래·누락 계좌·잔액 불일치가 모두 0임을 확인했습니다.
+
 # 2026-09-07 — Account continuity, safe merge and resilient backups
 
 - OAuth login now finds a provider identity by a key-independent hash, so a
@@ -133,11 +146,13 @@ This file records incremental project changes so concurrent work can avoid overl
 - Added an opt-in middleware bridge that forwards only the Test hostname to `TEST_FRONTEND_ORIGIN`; Production behavior is unchanged when the variable is absent.
 - Verified the bridge on an alternate port: Production host stayed on the router build while Test host returned exact main SHA `c82153917095bf380b5336ef95ad6932c9d7a295`, public-catalog smoke returned 200, and Test remained `noindex`.
 - Rebuilt the isolated Test frontend/backend from exact current main SHA instead of trusting a mismatched manual BUILD_ID.
+
 ## 2026-09-16 — v2026.09.16.136 Multi-agent economy AI planning
 
 - Expanded the Moneyverse AI economy plan into separately versioned specialist agents that debate, challenge and audit one another before a policy is eligible for bounded automation.
 - Added deterministic bounded stock-price formation, automatic shop repricing, and low-risk template-based SKU auto-publication with safety, affordability, anti-manipulation and rollback gates.
 - Updated English/Korean controller and simulation specifications. Planning only; no runtime deployment.
+
 ## 2026-09-16 — v2026.09.16.138 Adaptive profession/daily-limit AI planning
 
 - Added bounded AI control for primary-profession slots, active-profession concurrency, daily assignment/full-reward protection limits, and automatic relaxation back to unlimited.
@@ -152,9 +167,11 @@ This file records incremental project changes so concurrent work can avoid overl
 - Planning only; no runtime deployment in this version.
 
 ## 2026-09-16 — v2026.09.16.141 Paired specialist economy AI council
+
 - Implemented six economy-AI specialist domains with two A/B seats each, independent/rebuttal review, exact-proposal arbitration and append-only 12-seat evidence.
 - Preserved the existing deterministic policy engine as the fallback authority.
 - Verified migration 200 on the development PostgreSQL instance and created AI storage on the second 100GB disk.
 
 ## v2026.09.16.143
+
 Optimized the paired economy AI council for remote inference with dynamic domain routing, early exit, targeted rebuttal, bounded concurrency, exact-proposal cache and agent telemetry/scoreboard.

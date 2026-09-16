@@ -1,5 +1,28 @@
 # What this deployment actually is
 
+> [!IMPORTANT]
+>
+> **Current runtime authority — 2026-09-16 / v2026.09.16.151**
+>
+> The public Production and Test origins are currently served by the authorized
+> Debian 13 runtime at `192.168.100.190`, using systemd-managed release
+> directories and local PostgreSQL containers. Both public origins, the
+> application repository `main`, and the GitOps desired image/source references
+> are converged on exact application SHA
+> `3d87165f83bcb60903e85d4f3600fdf40074ef40`.
+>
+> The NixOS/Kubernetes node at `192.168.100.186` is **not the current public
+> authority**: administrative SSH authorization could not be re-established with
+> the configured deploy credential. The Production Flux `apps` Kustomization is
+> therefore intentionally `suspend: true`. **Do not resume it or route Production
+> traffic to the Kubernetes database** until cluster administrative access is
+> restored and its database is reconciled against the current public Production
+> PostgreSQL authority.
+>
+> The Kubernetes sections below describe the intended/previous GitOps target
+> architecture. Where they conflict with this incident-state notice, this notice
+> is authoritative until a later versioned runtime-convergence record supersedes it.
+
 Read this before touching anything under `deploy/`, `.github/workflows/`, or any
 document that describes releasing. It exists because the repository spent a week
 describing a machine that no longer exists, and more than one change was made
@@ -11,70 +34,64 @@ The Korean summary is at the end.
 
 ## The one-paragraph version
 
-Production is a **single-node Kubernetes cluster on NixOS**, reconciled by
-**Flux** from **`wtrdd1-hash/kuber-infrastructure`**. This repository builds
-images and pushes them to GHCR. It does not deploy. A release happens when the
-image tag in the other repository changes; Flux notices within a minute and
-rolls the Deployment. **There is no Docker on the host and no `docker compose`
-anywhere in the running system.**
+The **target architecture** is a single-node Kubernetes cluster on NixOS, reconciled by **Flux** from `wtrdd1-hash/kuber-infrastructure`. During the v2026.09.16.151 recovery, however, the verified public authority is the Debian 13 systemd runtime at `192.168.100.190`, with local PostgreSQL containers. This repository still builds immutable GHCR images and the GitOps repository now pins the same exact SHA as public Test/Production, but the Kubernetes Production `apps` Kustomization remains suspended. Treat Kubernetes as a recovery target, not the live Production authority, until the access and database-reconciliation gates above are cleared.
 
-## The machine
+## Kubernetes recovery target (not current live authority)
 
-| | |
-| --- | --- |
-| host | `minipc`, NixOS 26.05 |
-| cluster | kubeadm, Kubernetes v1.36.3, single node |
-| runtime | containerd 2.3.3 — **not Docker** |
-| CNI | Cilium |
-| ingress | Traefik, LoadBalancer `192.168.100.201` |
-| public edge | Cloudflare Tunnel; nothing but mail ports is open inbound |
-| storage | `local-path` (default), reclaim `Retain` |
+|             |                                                                            |
+| ----------- | -------------------------------------------------------------------------- |
+| host        | `minipc`, NixOS 26.05                                                      |
+| cluster     | kubeadm, Kubernetes v1.36.3, single node                                   |
+| runtime     | containerd 2.3.3 — **not Docker**                                          |
+| CNI         | Cilium                                                                     |
+| ingress     | Traefik, LoadBalancer `192.168.100.201`                                    |
+| public edge | Cloudflare Tunnel; nothing but mail ports is open inbound                  |
+| storage     | `local-path` (default), reclaim `Retain`                                   |
 | declared by | `ridanit-ruma/kuber-nixos-flakes` fork at `wtrdd1-hash/kuber-nixos-flakes` |
 
-The machine was reinstalled on 2026-09-07. Before that it was a Debian box
-running Docker Compose. Everything written before that date about hosts,
-`STACK`, `~/moneyverse-production`, loopback ports or `docker compose` describes
-a machine that is gone.
+This table describes the Kubernetes recovery target recorded before the current incident. It is not evidence that those workloads are currently serving public traffic. The verified public runtime must be determined from public exact-SHA probes, the active systemd working directories, and the current database connection evidence described above.
 
-## Where production lives
+## Where Production currently lives
 
-| | production |
-| --- | --- |
-| URL | `https://easy-scraping.com`, `www.` |
-| namespace | `wdmvp` |
-| workloads | `wdmvp-backend`, `wdmvp-frontend`, `wdmvp-db` (StatefulSet), `wdmvp-discord-voice` |
-| manifests | `wtrdd1-hash/kuber-infrastructure` → `apps/wdmvp/` |
-| backups | `wdmvp-db-backup` CronJob, hourly at `:17` |
+| role                          | current authority                                                  |
+| ----------------------------- | ------------------------------------------------------------------ |
+| public Production URL         | `https://easy-scraping.com`                                        |
+| public Test URL               | `https://test.easy-scraping.com`                                   |
+| active host                   | Debian 13, `192.168.100.190`                                       |
+| Production services           | `moneyverse-backend`, `moneyverse-frontend` via systemd            |
+| Test services                 | `test-main-backend`, `test-main-frontend` via systemd              |
+| Production database authority | local PostgreSQL used by the active backend at `127.0.0.1:5433`    |
+| exact live application SHA    | `3d87165f83bcb60903e85d4f3600fdf40074ef40`                         |
+| GitOps desired target         | `wtrdd1-hash/kuber-infrastructure` → `apps/wdmvp/`, same exact SHA |
+| Kubernetes Production state   | `clusters/minipc/apps.yaml` → `suspend: true`                      |
 
-**There is one stack.** A `wdmv-test` namespace existed for one day and was
-removed on 2026-09-09; `test.easy-scraping.com` now answers 404. Nothing
-rehearses a release before production, which is why the checks in
-`operations/production-deployment.md` are the whole gate.
+The current public recovery topology has **separate Test and Production systemd services** on the Debian authority. `test.easy-scraping.com` is active and is the exact-SHA release gate before Production. The GitOps repository also declares a `wdmv-test` target. Historical notes saying Test was removed or returns 404 are obsolete as of v2026.09.16.151.
 
 Other namespaces on the same node run unrelated services (`mail`, `economy`,
 `launcher`, `discord`, `cloudflared`, `gpt-plugin`). Do not assume the cluster
 is yours alone.
 
-## How a release actually reaches production
+## Current release path while Kubernetes Production is suspended
 
+```text
+application repo main
+  -> Build Test Candidate / immutable exact SHA
+  -> exact-SHA Test on the active Debian authority
+  -> public Test backend/API/SEO-boundary QA
+  -> fresh Production DB backup
+  -> same exact SHA on Debian Production systemd services
+  -> public Production smoke + SEO checks
+  -> Build Production Release publishes exact-SHA GHCR images
+  -> GitOps Test/Production desired refs updated to the same SHA
+  -> Runtime Drift Watch proves desired == public live
+
+Kubernetes Production apps remain suspend=true.
+Do not resume them until SSH administration and cluster-DB reconciliation pass.
 ```
-this repo:  gh workflow run deploy.yml        (Build Production Release)
-              ref -> verify -> build
-              pushes ghcr.io/wtrdd1-hash/wdmv/{backend,frontend}:<sha>-production
 
-other repo: edit the image tag in apps/wdmvp/{backend,frontend}.yaml
-            commit to main
+The long-term target is to return to normal Flux-controlled Production after the NixOS access and database gates are restored. During the current recovery state, updating a GitOps image tag **does not authorize a Kubernetes rollout** and must not be treated as proof that the cluster is serving Production.
 
-cluster:    Flux reconciles within ~1m and rolls the Deployment
-```
-
-The workflow in this repository **stops after the build.** It has no deploy job
-and no SSH. If you are looking for the step that changes what is running, it is
-a commit in `wtrdd1-hash/kuber-infrastructure`, not a workflow here.
-
-The full procedure, including the gates around it, is
-[`operations/production-deployment.md`](operations/production-deployment.md).
-This document does not repeat it.
+The full release safety contract is in [`operations/production-deployment.md`](operations/production-deployment.md).
 
 ### Images are private, and the cluster has its own credential
 
@@ -141,11 +158,11 @@ The Compose control plane is gone: `compose.yml`, `roll.sh`, `update.sh`,
 What remains are **data tools, not release tools**, and every one of them was
 written for the Docker host:
 
-| file | state |
-| --- | --- |
-| `backup.sh`, `restore.sh`, `backup-figures.sql` | call `docker compose exec`. **They do not run on the current host.** |
-| `recover-display-names*.sh`, `merge-forked-account.sh` | same |
-| `seed.sh` | no Docker dependency; still readable as the seeding contract |
+| file                                                   | state                                                                |
+| ------------------------------------------------------ | -------------------------------------------------------------------- |
+| `backup.sh`, `restore.sh`, `backup-figures.sql`        | call `docker compose exec`. **They do not run on the current host.** |
+| `recover-display-names*.sh`, `merge-forked-account.sh` | same                                                                 |
+| `seed.sh`                                              | no Docker dependency; still readable as the seeding contract         |
 
 `docs/BACKUP.md` documents those scripts and is therefore also describing the
 retired host.
@@ -156,8 +173,7 @@ retired host.
 
 > **Open gap.** Only `ghcr-pull` is declared in git. `wdmvp-app` (32 keys),
 > `wdmvp-db-superuser` and `wdmvp-registry` were created by hand and are
-> managed by nothing — `kubectl -n wdmvp get secret -o custom-columns=`
-> `NAME:.metadata.name,MANAGED:.metadata.labels.kustomize\.toolkit\.fluxcd\.io/name`
+> managed by nothing — `kubectl -n wdmvp get secret -o custom-columns=` > `NAME:.metadata.name,MANAGED:.metadata.labels.kustomize\.toolkit\.fluxcd\.io/name`
 > shows `<none>` for all three. Delete the namespace and the application's
 > entire environment is gone. They belong in `kuber-infrastructure` as sops
 > files, the way `ghcr-pull` is.
@@ -168,11 +184,11 @@ retired host.
 
 ## Which repository to change
 
-| you want to change | repository |
-| --- | --- |
-| application code, CI, image build | this one |
+| you want to change                                     | repository                         |
+| ------------------------------------------------------ | ---------------------------------- |
+| application code, CI, image build                      | this one                           |
 | what runs in the cluster, image tags, secrets, ingress | `wtrdd1-hash/kuber-infrastructure` |
-| the machine itself: disks, network, firewall, k8s node | `wtrdd1-hash/kuber-nixos-flakes` |
+| the machine itself: disks, network, firewall, k8s node | `wtrdd1-hash/kuber-nixos-flakes`   |
 
 The two infrastructure repositories take **direct pushes to `main`**. Do not
 open branches or pull requests there.
