@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.16.160
+> **현재 통합 버전:** v2026.09.16.161
 > **구현·증거 동기화:** 2026-09-16
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -608,3 +608,30 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 결정론/classical 엔진이 회계와 정책 권위다. AI는 review append와 exact matching proposal veto만 가능하다. AI 증거가 누락·만료·불일치·장애·abstain이면 대체값을 만들지 않고 classical lane으로 fallback한다.
 - rollback은 fail-safe다. 감사 함수로 switch를 `disabled`로 바꾸고 필요 시 backend AI runtime 변수를 복원/제거한 뒤 backend 재시작, 미사용 시 local inference 중지/비활성화 순서다. AI 가용성을 위해 결정론 검증·원장대사·exact-proposal matching을 약화하지 않는다.
 - 모니터링은 feature switch, reviewer outcome, council decision mix, confidence, latency/token, service memory/restart, backend error, economy reconciliation을 본다. 모델 품질저하는 결정론 gate 우회 사유가 아니라 운영 incident다.
+
+
+## v2026.09.16.161 — 관리자 내비게이션 완전성 및 현재 릴리스 증거
+
+### ADMIN-NAV-161-01 — HIGH — MAIN 구현 / EXACT-SHA TEST 필요
+- 증거: 현재 main `7acc3c02e4fc015d6800f2d5a7e51180f2dc02a5`는 PR #390을 통합했다. 원인은 독립 관리되던 두 관리자 목록의 drift다. `AdminSubNav`에는 보안·사업/시즌·작업/직업·Discord가, `ADMIN_AREAS`에는 문의·상점이 누락됐다. 운영도 같은 불완전한 상단 내비게이션을 제공했으므로 백엔드 미구현이 아니라 프론트 탐색/목록 결함이다.
+- 사용자/권한 계약: 기존 관리자 권한 경계를 유지한다. 메뉴 노출은 권한 부여가 아니며 각 목적지는 서버에서 관리자 actor/session, 필요한 최근 재인증/2차 인증, function/object authorization, 특권·경제 변경 감사로그를 독립 검증한다. 숨은 URL을 접근통제로 사용하지 않는다.
+- UX: `/admin` 대시보드와 상단 메뉴는 하나의 canonical area registry를 공유한다. Dashboard, Users, Security, Economy, Business/Season, Work/Jobs, Shop, Support, Discord 등 현재 등록된 1급 영역은 모두 도달 가능해야 하고 activity/delivery/integrity/AI-news/scenario는 부모 아래 유지한다. 모바일은 접근 가능한 overflow/menu, 데스크톱은 탭을 허용하되 목적지를 누락하지 않는다. 현재 위치, 키보드 포커스, 스크린리더 이름/상태, loading/error/403/404/stale-session 재인증 상태를 명시한다.
+- 프론트/백엔드/API/DB: registry는 stable route id, 다국어 label, route, required capability, optional badge source를 가진다. badge API 장애가 메뉴를 숨기면 안 된다. 이번 수정에 DB migration은 없다. capability 판정은 backend 권위이며 client registry에 경제 권한 로직을 복제하지 않는다.
+- 보안/악용: 비관리자 direct URL, stale admin session, 부족한 capability, mutation CSRF, BOLA/BFLA, audit actor 무결성을 negative test한다. 내비게이션 telemetry에는 secret/session/private payload를 기록하지 않는다. 관리자 경로는 `noindex` 및 sitemap 제외이며 crawler 신원으로 권한을 우회하지 않는다.
+- QA 증거: 병합 업데이트는 local typecheck/build/lint 0 error(기존 image warning 11), frontend 68 files/611 tests, backend non-DB 871 tests를 기록하지만 로컬 DB 환경 부재로 DB 351 tests가 skip됐다. 따라서 registry completeness, route→capability, keyboard/mobile E2E, 403/reauth, DB-backed admin mutation, Test HTML 전체 top-level 목적지 검증이 승격 전 필수다.
+- 수용/승격: exact `7acc3c02...` candidate의 DB 포함 CI, isolated Test 동일 SHA/digest, backend/database readiness/catalog, 권한 있는 Test admin의 모든 등록 영역 접근과 권한 비확대가 필요하다. Production smoke에서도 route inventory와 authorization negative를 반복한다. 실패 시 마지막 verified immutable pair로 롤백하거나 해당 관리자 surface만 닫으며 권한을 완화하지 않는다.
+- 관측/사업성: `admin_nav_view`, `admin_area_open`, `admin_area_403`, `admin_reauth_required`, route-not-found, badge-failure를 제한된 pseudonymous actor 기준으로 집계한다. 직접 매출 기능이 아니라 운영비/사고대응 효율 기능이다. median time-to-area, navigation failure, admin task completion, support burden, incident-response time을 본다. completeness 100%와 오류/지원비 감소 시 SCALE, 접근성/탐색 마찰은 ITERATE, 권한 확대나 거짓 접근 신호가 생기면 KILL/ROLLBACK한다.
+
+### REL-EVIDENCE-161-02 — P0 — IN PROGRESS
+- 확인 시 `Build Production Release #904`는 exact main `7acc3c02e4fc015d6800f2d5a7e51180f2dc02a5`를 대상으로 실행 중이다. immutable SHA resolve는 성공했고 isolated Test exact-SHA/backend/database gate는 진행 중이다. Test/Production 성공으로 판정하지 않는다.
+- v158의 candidate digest → GitOps desired/applied → workload generation/digest → Service/ingress → pod-local/public Test SHA → backend readiness → DB identity/schema head → changed-flow QA 증거계약을 그대로 적용한다. 누락 계층은 BLOCKED이고 실패 시 first-mismatch를 보존한다. branch protection의 required-status-check enforcement가 `off`, contexts/checks가 비어 있어 repository enforcement도 HIGH로 유지한다.
+
+### SEO·보안·수익성 결정 — 2026-09-16 재검증
+- Google Search Central의 2026-09-14 최신 블로그는 행사 공지이며 crawl/index 알고리즘 변경으로 채택하지 않는다. 9월 문서 변경 로그의 지역별 Search experience와 2026-09-16 `GoogleProducer` UA 변경은 운영계약에 반영한다. full UA 고정 매칭에 의존하지 않고 crawler 신원으로 auth/noindex를 우회하지 않는다. 2026-08-28 site-reputation 정책은 sponsor/affiliate/UGC에 유지하고 favicon은 crawlable homepage/file, stable URL, square asset 계약을 유지한다.
+- OWASP API Security Top 10 최신 버전은 2023이며 ASVS를 구현 검증 baseline으로 유지한다. 관리자 내비게이션은 BFLA/BOLA, 인증/세션, CSRF, 감사통제를 적용한다. Economy AI는 OWASP GenAI 2026/Agent Control lane을 추가 적용하되 deterministic 경제 권위를 대체하지 않는다.
+- Google Play 수수료는 단일률이 아니므로 market/effective date/install cohort(적용 시)/transaction type/billing path/programme별 unit economics를 유지한다. 실측되지 않은 conversion, ARPU/ARPDAU/ARPPU, churn, refund, CAC, LTV는 `HYPOTHESIS`/`TEST TARGET`이다.
+
+### v161 worklog
+- 최신 외부자료: Google Search Central 2026년 9월 blog/update/site-reputation/favicon, OWASP API Security/ASVS 및 GenAI 2026, Google Play 현행 수수료 문서. 행사 공지를 랭킹 변경으로 오인하지 않았다.
+- 코드/QA/운영: 최신 main과 v160 EN/KO 문서를 재확인하고 #390 원인·로컬 검증, branch protection, Production Release #904를 대조했다. 통합 직전 main도 재확인한다.
+- 작업순서: P0 release truth/evidence → 독립 restore 증거 → false-green 제거 → HIGH 관리자 exact-SHA/authorization QA → casino/runtime/cache/privileged recovery → migration integrity → repository enforcement → core correctness → monetization → SEO/growth/accessibility. 기획 자동화는 문서만 변경한다.
