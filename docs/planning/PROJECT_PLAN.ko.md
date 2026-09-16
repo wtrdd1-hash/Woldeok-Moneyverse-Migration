@@ -2,8 +2,8 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.16.161
-> **구현·증거 동기화:** 2026-09-16
+> **현재 통합 버전:** v2026.09.17.162
+> **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
@@ -635,3 +635,28 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 최신 외부자료: Google Search Central 2026년 9월 blog/update/site-reputation/favicon, OWASP API Security/ASVS 및 GenAI 2026, Google Play 현행 수수료 문서. 행사 공지를 랭킹 변경으로 오인하지 않았다.
 - 코드/QA/운영: 최신 main과 v160 EN/KO 문서를 재확인하고 #390 원인·로컬 검증, branch protection, Production Release #904를 대조했다. 통합 직전 main도 재확인한다.
 - 작업순서: P0 release truth/evidence → 독립 restore 증거 → false-green 제거 → HIGH 관리자 exact-SHA/authorization QA → casino/runtime/cache/privileged recovery → migration integrity → repository enforcement → core correctness → monetization → SEO/growth/accessibility. 기획 자동화는 문서만 변경한다.
+
+
+## v2026.09.17.162 — exact-main 릴리스 수렴 및 릴리스 증거 종료조건
+
+### REL-EVIDENCE-162-01 — P0 — TEST GATE 복구 / Production 배포는 별도
+- 최신 저장소 증거: 시작·중간 `main`은 `18c7a1324013099e47b2d6e22c5108c4d378139c`이다. exact SHA의 Build Test Candidate #778이 성공했고 Build Production Release #905도 성공했다. #905는 immutable SHA 결정, isolated Test exact SHA, 비어 있지 않은 public catalog, Test `X-Robots-Tag: noindex`, backend/frontend production image build/push, exact-SHA production-ready signal까지 성공했다. test-gate log는 2026-09-16T15:19:30Z에 수렴을 기록해 polling 시작 후 약 6분31초가 걸렸다. 반복되던 exact-SHA Test 수렴 실패가 복구될 수 있음을 증명하지만 Production 트래픽이 이 SHA로 실제 승격·서비스된 증거는 아니다.
+- 상태 전환: 과거 반복 Test 수렴 실패는 P0 이력/관측 대상으로 유지하되 현재 exact main에서는 `isolated test never served exact SHA`가 재현되지 않았다. Production desired/applied 권위, runtime SHA/digest, 권위 DB identity/schema, 변경기능 QA, Production smoke까지 없으면 전체 release-truth incident를 DONE으로 닫지 않는다.
+- 증거 공백: 성공한 test-gate는 public `/api/version`, non-empty `/app-api/v1/shop/public-catalog`, Test `noindex`를 확인하지만 인증된 관리자 내비게이션, 카지노 정산, Work clock, 인증/session, DB least privilege, migration checksum, ledger reconciliation, backup restore, Production runtime은 증명하지 않는다. `production-ready signal`은 workflow상 build-ready이지 `PROD_DEPLOYED`/`PROD_SMOKE_GREEN`이 아니다.
+- 구현 백로그: evidence artifact에 `test_public_sha`, backend/frontend immutable digest, Test DB authority hash/migration head, authenticated synthetic actor class, changed-feature QA result ID, 필요한 backup evidence freshness, Production desired/applied/runtime SHA+digest, smoke 결과, rollback target을 추가하고 observed-at/expiry를 둔다. 누락/stale downstream evidence를 aggregate green으로 만들지 않는다.
+- 테스트/수용: wrong public SHA, empty catalog, missing noindex, wrong DB identity, stale migration, unauthorized admin, ledger mismatch, missing backup evidence, wrong Production SHA, smoke failure를 fault injection한다. 각 실패는 정확한 state에서 차단되고 secret 없는 evidence를 보존해야 한다. 성공은 반복 exact-main Test 수렴+backend/API/DB/auth/변경흐름 QA 뒤 별도 승인 Production 승격+runtime smoke다. rollback은 호환 DB를 가진 마지막 verified immutable pair다.
+- 관측/사업성: Test convergence latency(이번 성공 약 391초), exact-SHA mismatch, evidence missing/stale, promotion lead time, rerun compute/operator time, rollback rate, escaped defect를 측정한다. 직접매출은 없고 wrong-version QA·장애·환불/fraud/support·개발대기 비용 회피가 가치다. evidence completeness 100%와 안정 수렴이면 SCALE, 지연/flaky면 ITERATE, false-green/wrong-runtime이면 자동승격 HOLD/KILL이다.
+
+### SEO-162-02 — P1 — 9월 17일 문서 이동 / 정책 의미 변경 없음
+- Google Search Central 변경 로그는 2026-09-17 infinite-scroll JavaScript guidance를 현행 문서로 이동했고 guidance 자체는 바뀌지 않았다고 명시한다. 랭킹 정책 변경으로 취급하지 않는다. indexable list/search/community/market 콘텐츠는 crawlable pagination URL 또는 동등한 발견 가능한 link를 유지하고 infinite scroll만을 유일한 발견수단으로 사용하지 않는다. filter/query variant는 의도적 curated page가 아니면 canonical/noindex한다.
+- 2026-08-28 site-reputation 정책은 sponsor/affiliate/UGC에 계속 적용하고 favicon은 crawlable homepage/file, stable URL, square asset을 유지한다. private account/admin/payment/transaction/casino-history는 sitemap 제외+noindex다. SEO backend의 canonical/redirect/sitemap/robots/lastModified/hreflang/structured-data/SSR-or-equivalent/CWV/crawler 관측 계약을 유지한다.
+
+### SECURITY-162-03 — P0/HIGH baseline 유지
+- 최신 OWASP 대조에서 통제를 완화할 근거가 없다. ASVS 5.0.0을 구현 검증, API Security Top 10을 API 위협 baseline으로 유지한다. BOLA/BFLA negative, session/reauth/CSRF, resource/business-flow abuse, idempotency/replay, DB least privilege, audit integrity, secret-safe evidence, supply-chain provenance는 계속 릴리스 게이트다. public catalog/noindex probe 성공이 이를 대체하지 않는다.
+
+### MONETIZATION-162-04 — P1 — 수수료 모델 재확인
+- Google Play 현행 공식 수수료는 market, 시행일/install cohort, recurring 여부, billing path, programme에 따라 다르다. 새 구조 EEA/UK/US standard 예시는 자동갱신 subscription 10%, 기타 new-install 20%, existing-install 25%이며 Play Billing 적용 시 5% billing fee가 붙는다. 나머지 시장은 rollout 전 현재 적용 규칙을 사용한다. SKU forecast는 fee-policy version/effective date를 저장하고 미실측 conversion, ARPU/ARPDAU/ARPPU, refund, churn, CAC, LTV를 `HYPOTHESIS`/`TEST TARGET`으로 유지한다.
+
+### v162 worklog
+- 최신 조사: Google Search Central 9월 17일 문서 변경 및 site-reputation/favicon, OWASP API/ASVS, Google Play 수수료. 저장소/런타임: exact main, EN/KO v161, Actions #778/#905, #905 test-gate log를 확인했다. 작업 중간 main도 `18c7a132...`로 동일했다.
+- 결정: exact-main isolated Test 수렴 복구는 기록하되 Production 검증으로 합치지 않는다. 독립 restore 가능한 backup과 false-green/status truth를 최우선으로 하고 release evidence 완결, admin/casino/Work/auth/DB 보안 QA, repository enforcement 뒤 수익화/성장을 진행한다. 이번 기획 자동화는 문서만 변경하며 runtime/DB/Flux/Production 승격은 하지 않는다.
