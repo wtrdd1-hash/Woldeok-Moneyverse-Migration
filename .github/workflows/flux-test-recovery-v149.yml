@@ -1,0 +1,210 @@
+name: Recover Flux Test Runtime v149
+
+on:
+  workflow_dispatch:
+    inputs:
+      restart_flux_controllers:
+        description: Restart Flux source/kustomize controllers if source remains stale
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  recover-test:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 15
+    steps:
+      - name: Resolve desired Test GitOps state
+        id: desired
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/wtrdd1-hash/kuber-infrastructure /tmp/infra >/dev/null 2>&1
+          infra_sha="$(git -C /tmp/infra rev-parse HEAD)"
+          test_sha="$(sed -n 's/.*moneyverse.openai\/candidate-sha: "\([0-9a-f]\{40\}\)".*/\1/p' /tmp/infra/staging/wdmv-test/backend.yaml | head -n1)"
+          [[ "$infra_sha" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$test_sha" =~ ^[0-9a-f]{40}$ ]]
+          echo "infra_sha=$infra_sha" >> "$GITHUB_OUTPUT"
+          echo "test_sha=$test_sha" >> "$GITHUB_OUTPUT"
+          echo "Desired infra=$infra_sha test=$test_sha"
+
+      - name: Recover trusted SSH endpoint
+        shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          for required in DEPLOY_HOST DEPLOY_PORT DEPLOY_USER DEPLOY_SSH_KEY DEPLOY_KNOWN_HOSTS; do
+            [[ -n "${!required:-}" ]] || { echo "::error::$required is not configured"; exit 1; }
+          done
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts.configured
+          chmod 600 ~/.ssh/deploy ~/.ssh/known_hosts.configured
+
+          trusted_port=''
+          for port in "$DEPLOY_PORT" 22 2212; do
+            [[ -n "$port" ]] || continue
+            [[ " ${seen:-} " == *" $port "* ]] && continue
+            seen="${seen:-} $port"
+            scan="$(mktemp)"
+            if ! ssh-keyscan -T 5 -p "$port" "$DEPLOY_HOST" >"$scan" 2>/dev/null; then
+              rm -f "$scan"
+              continue
+            fi
+            if awk 'NR==FNR { if (NF >= 3) allowed[$2 " " $3]=1; next }
+                    NF >= 3 && allowed[$2 " " $3] { found=1 }
+                    END { exit(found ? 0 : 1) }' ~/.ssh/known_hosts.configured "$scan"; then
+              cat ~/.ssh/known_hosts.configured "$scan" > ~/.ssh/known_hosts
+              chmod 600 ~/.ssh/known_hosts
+              cat > ~/.ssh/config <<CONFIG
+          Host target
+            HostName $DEPLOY_HOST
+            User $DEPLOY_USER
+            Port $port
+            IdentityFile ~/.ssh/deploy
+            IdentitiesOnly yes
+            IdentityAgent none
+            PubkeyAuthentication yes
+            PreferredAuthentications publickey
+            PasswordAuthentication no
+            KbdInteractiveAuthentication no
+            BatchMode yes
+            StrictHostKeyChecking yes
+            UserKnownHostsFile ~/.ssh/known_hosts
+            ConnectTimeout 10
+          CONFIG
+              chmod 600 ~/.ssh/config
+              if ssh target 'true' >/dev/null 2>&1; then
+                trusted_port="$port"
+                rm -f "$scan"
+                break
+              fi
+            fi
+            rm -f "$scan"
+          done
+          [[ -n "$trusted_port" ]] || { echo '::error::No reachable SSH port matched the configured trusted host key and deploy key'; exit 1; }
+          echo 'Authorized SSH endpoint recovered with strict host-key verification.'
+          ssh target 'hostname; if [ -r /etc/os-release ]; then . /etc/os-release; echo "$PRETTY_NAME"; else uname -srm; fi'
+
+      - name: Recover Flux source and isolated Test
+        shell: bash
+        env:
+          EXPECTED_INFRA_SHA: ${{ steps.desired.outputs.infra_sha }}
+          RESTART_CONTROLLERS: ${{ inputs.restart_flux_controllers }}
+        run: |
+          set -euo pipefail
+          cat > /tmp/recover-test.sh <<'REMOTE'
+          set -euo pipefail
+          expected_url='https://github.com/wtrdd1-hash/kuber-infrastructure'
+          expected_sha='__EXPECTED_INFRA_SHA__'
+          restart_controllers='__RESTART_CONTROLLERS__'
+
+          if kubectl get nodes >/dev/null 2>&1; then
+            kc() { kubectl "$@"; }
+            echo 'Kubernetes CLI: kubectl'
+          elif sudo -n kubectl get nodes >/dev/null 2>&1; then
+            kc() { sudo -n kubectl "$@"; }
+            echo 'Kubernetes CLI: sudo kubectl'
+          elif [ -x /run/current-system/sw/bin/kubectl ] && sudo -n /run/current-system/sw/bin/kubectl get nodes >/dev/null 2>&1; then
+            kc() { sudo -n /run/current-system/sw/bin/kubectl "$@"; }
+            echo 'Kubernetes CLI: Nix system kubectl'
+          elif command -v k3s >/dev/null 2>&1 && sudo -n k3s kubectl get nodes >/dev/null 2>&1; then
+            kc() { sudo -n k3s kubectl "$@"; }
+            echo 'Kubernetes CLI: k3s kubectl'
+          elif [ -x /usr/local/bin/k3s ] && sudo -n /usr/local/bin/k3s kubectl get nodes >/dev/null 2>&1; then
+            kc() { sudo -n /usr/local/bin/k3s kubectl "$@"; }
+            echo 'Kubernetes CLI: /usr/local/bin/k3s kubectl'
+          else
+            echo '::error::Authorized SSH host is reachable but no authorized Kubernetes CLI path can access the cluster.'
+            command -v kubectl || true
+            command -v k3s || true
+            exit 2
+          fi
+
+          echo '--- cluster ---'
+          kc get nodes -o wide
+
+          # Fail closed: keep Production frozen before source recovery.
+          if kc -n flux-system get kustomization apps >/dev/null 2>&1; then
+            kc -n flux-system patch kustomization apps --type=merge -p '{"spec":{"suspend":true}}'
+          fi
+
+          echo '--- Flux source before ---'
+          kc -n flux-system get gitrepository flux-system -o jsonpath='{.spec.url}{"\n"}{.status.artifact.revision}{"\n"}{range .status.conditions[*]}{.type}={.status} {.reason}{"\n"}{end}' || true
+          kc -n flux-system patch gitrepository flux-system --type=merge -p '{"spec":{"url":"https://github.com/wtrdd1-hash/kuber-infrastructure","ref":{"branch":"main"},"interval":"1m0s"}}'
+
+          reconcile() {
+            stamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            kc -n flux-system annotate gitrepository flux-system reconcile.fluxcd.io/requestedAt="$stamp" --overwrite
+            kc -n flux-system annotate kustomization flux-system reconcile.fluxcd.io/requestedAt="$stamp" --overwrite || true
+            kc -n flux-system annotate kustomization wdmv-test reconcile.fluxcd.io/requestedAt="$stamp" --overwrite || true
+          }
+          converged() {
+            revision="$(kc -n flux-system get gitrepository flux-system -o jsonpath='{.status.artifact.revision}' 2>/dev/null || true)"
+            [[ "$revision" == *"$expected_sha"* ]]
+          }
+
+          reconcile
+          for _ in $(seq 1 18); do converged && break; sleep 10; done
+          if ! converged && [[ "$restart_controllers" == 'true' ]]; then
+            echo 'Flux source stale; restarting only source/kustomize controllers.'
+            kc -n flux-system rollout restart deployment/source-controller deployment/kustomize-controller
+            kc -n flux-system rollout status deployment/source-controller --timeout=120s
+            kc -n flux-system rollout status deployment/kustomize-controller --timeout=120s
+            reconcile
+            for _ in $(seq 1 18); do converged && break; sleep 10; done
+          fi
+          if ! converged; then
+            echo '--- Flux diagnostics ---'
+            kc -n flux-system get pods -o wide || true
+            kc -n flux-system get gitrepository flux-system -o yaml | sed -n '/^status:/,$p' | head -140 || true
+            kc -n flux-system get kustomizations || true
+            exit 3
+          fi
+
+          # Reassert Production freeze after root Flux reconciliation.
+          if kc -n flux-system get kustomization apps >/dev/null 2>&1; then
+            kc -n flux-system patch kustomization apps --type=merge -p '{"spec":{"suspend":true}}'
+          fi
+          stamp="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          kc -n flux-system annotate kustomization wdmv-test reconcile.fluxcd.io/requestedAt="$stamp" --overwrite
+          sleep 30
+
+          echo '--- Flux source after ---'
+          kc -n flux-system get gitrepository flux-system -o jsonpath='{.spec.url}{"\n"}{.status.artifact.revision}{"\n"}'
+          echo '--- Flux kustomizations ---'
+          kc -n flux-system get kustomizations
+          echo '--- Test rollout ---'
+          kc -n wdmv-test get deployments -o custom-columns='NAME:.metadata.name,READY:.status.readyReplicas,AVAILABLE:.status.availableReplicas,IMAGE:.spec.template.spec.containers[0].image' || true
+          kc -n wdmv-test get pods -o wide || true
+          REMOTE
+          sed -i "s/__EXPECTED_INFRA_SHA__/$EXPECTED_INFRA_SHA/g; s/__RESTART_CONTROLLERS__/$RESTART_CONTROLLERS/g" /tmp/recover-test.sh
+          payload="$(base64 -w0 /tmp/recover-test.sh)"
+          ssh target "echo '$payload' | base64 -d | bash"
+
+      - name: Verify exact public Test SHA
+        shell: bash
+        env:
+          TEST_SHA: ${{ steps.desired.outputs.test_sha }}
+        run: |
+          set -euo pipefail
+          live=''
+          for _ in $(seq 1 30); do
+            live="$(curl -fsS --max-time 10 https://test.easy-scraping.com/api/version | jq -r '.id // empty' || true)"
+            [[ "$live" == "$TEST_SHA" ]] && break
+            sleep 10
+          done
+          echo "Test desired=$TEST_SHA live=${live:-unavailable}"
+          [[ "$live" == "$TEST_SHA" ]]
+          curl -fsS --max-time 15 https://test.easy-scraping.com/app-api/v1/shop/public-catalog | jq -e '.catalogItems | type == "array" and length > 0' >/dev/null
+          headers="$(curl -fsSI --max-time 10 https://test.easy-scraping.com/ || true)"
+          grep -Eiq '^x-robots-tag:.*noindex' <<<"$headers"
