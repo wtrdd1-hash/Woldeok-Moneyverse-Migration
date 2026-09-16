@@ -2,8 +2,8 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.16.161
-> Implementation/evidence sync: 2026-09-16
+> Current integrated version: v2026.09.17.162
+> Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
@@ -642,3 +642,12 @@ External references rechecked: Google Search Central September 2026 updates and 
 - Fresh references: Google Search Central September 2026 blog/update log/site-reputation/favicon; OWASP API Security/ASVS guidance and GenAI 2026 update; Google Play current service-fee guidance. Event announcements were not misclassified as ranking changes.
 - Runtime/code/QA: re-read latest main and both v160 plans; inspected main commit #390 and its local verification evidence; checked current main branch protection and Production Release #904. Rechecked main before integration.
 - Development order remains P0 release truth/evidence → independent restore proof → false-green elimination → HIGH admin exact-SHA/authorization QA → casino/runtime/cache/privileged recovery → migration integrity → repository enforcement → core correctness → monetization → SEO/growth/accessibility. Planning changes documentation only.
+
+
+## Integrated evidence — v2026.09.17.162 Production exact-SHA convergence
+
+- Release authority: application `main`, isolated Test, Production and GitOps Production desired state must converge on the same immutable SHA before completion.
+- Verified release: `18c7a1324013099e47b2d6e22c5108c4d378139c`. Production release workflow `35113806254` and infrastructure reconcile `35117875121` completed successfully.
+- Database gate: a Production backup was created before `203-work-reset-convergence.sql`; the migration is recorded with its immutable checksum.
+- Current public-edge constraint: Nginx still reaches host systemd services (`3000/3001` Production, `3100/3101` Test). GitOps manifest success alone is insufficient; the host runtime and public `/api/version`, catalog/status and SEO probes must converge too.
+- Economy controls after promotion: `economy_ai_policy_review` and `economy_auto_policy` remain enabled; the local A/B inference service remains an advisory/veto lane and does not replace deterministic accounting authority.
