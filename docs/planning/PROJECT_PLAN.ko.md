@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.165
+> **현재 통합 버전:** v2026.09.17.166
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -741,3 +741,41 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 기획 변경: P0 release classifier를 path taxonomy 수준에서 선행 control-plane gate + side-effect-zero 수용지표로 강화하고 SEO list read-model, API inventory/security, monetization measurement, release evidence 구현계약을 추가했다.
 - 통합 직전 main을 다시 확인한다. main이 전진하면 rebase 후 두 통합본을 재확인하고 더 최신 증거를 덮어쓰지 않는다.
 - 런타임 배포: **기획 자동화에서 수행하지 않음**. 구현은 별도 branch→tests/CI→exact-SHA Test→backend/API/DB/user-flow QA→main→Production promotion→smoke/rollback 흐름을 따른다.
+
+
+## 2026-09-17 v166 증거/작업로그 — 릴리스 적격성 P0 지속 및 공개 검색 계약 강화
+
+### 최신 증거와 판정
+- **저장소/런타임 증거(2026-09-17):** 시작 기준 protected `main=c2a61cbee88db0f711925f4ebfe898a676ce4d0a`는 `docs: integrate Moneyverse plan v2026.09.17.165`인 문서 전용 커밋이다. 그런데 required status check enforcement는 여전히 `off`, contexts/checks는 비어 있고, 이 exact 문서 SHA에 대해 `Build Production Release #913`이 다시 시작되어 증거 수집 시 `in_progress`였다. 이는 배포 앱 변경 증거가 아니라 `REL-DOCS-*`의 신규 재현이다. **P0 / OPEN.**
+- **원인 경계:** 신뢰 가능한 배포 적격성 분류보다 release orchestrator가 먼저 시작되어 repository head identity가 application release identity처럼 소비되고 있다. 수정 전까지 docs-only merge가 build/Test/promotion 자원을 소비하고 잘못된 release evidence를 만들 수 있다.
+- **구체 수정:** 모든 candidate build/registry push/GitOps write/Test polling/promotion보다 `classify-release-inputs`를 먼저 실행한다. merge-base→head diff의 rename/delete/symlink/submodule 의미까지 판정하고 `{repositoryHeadSha, applicationSourceSha, classification, matchedRuntimePaths, classifierVersion, evidenceCreatedAt}`를 불변 증거로 남긴다. 결과는 `RUNTIME_RELEASE_REQUIRED`, `DOCS_ONLY_NO_RUNTIME_RELEASE`, fail-closed `RELEASE_INPUT_CLASSIFICATION_ERROR`만 허용한다. frontend/backend/shared 실행코드, package/lock, migration, Docker/build, runtime에 영향을 주는 workflow/GitOps, generated runtime artifact, runtime config/secret reference 및 영향 불명 executable은 runtime-relevant다.
+- **재현/수용:** 알려진 application SHA 뒤 docs/planning-only commit을 merge한다. 수정 후 CI/docs validation은 가능하지만 registry push=0, Test GitOps mutation=0, exact-SHA runtime polling=0, Production mutation=0이어야 한다.
+- **롤백/마이그레이션:** DB migration 없음. classifier/orchestrator 롤백은 release를 막는 fail-closed 상태로만 허용하며 unconditional promotion으로 복귀하지 않는다. workflow/classifier evidence ID는 감사용으로 보존한다.
+- **테스트:** path table corpus, rename/delete, symlink/submodule/path-normalization trick, merge/multi-commit range, shallow-history failure, docs+runtime mixed, lockfile/migration/container/workflow/GitOps, generated artifact, 문서처럼 보이는 경로에 숨긴 executable payload. 공격자가 경로 선택으로 release를 우회할 수 없어야 한다.
+- **모니터링/종료:** docs-only side effect=0, runtime false-negative=0, classifier error는 release 차단, docs-only 분류/evidence p95 <2분(`TEST TARGET`). `release_classification_total`, `docs_only_runtime_side_effect_total=0`, `classifier_error_total`, `release_application_source_mismatch_total=0`을 관측한다. Production 승격에는 exact application SHA/digest, authoritative Test DB/API/user-flow, GitOps/public-edge identity, Production smoke/rollback 증거가 별도로 필요하다.
+
+### 공개 SEO/SEO 백엔드 계약 증분
+- 2026-09-17 확인 기준 Google Search Central 업데이트 로그의 2026-09-08 변경은 지역별 Search experience 문서 추가다. 2026-09-16 Search Central Live 글은 행사/커뮤니티 공지이므로 ranking/indexing 계약 변경 근거에서 제외한다. Breadcrumb structured data는 계속 hierarchy signal로 사용 가능하며 Rich Results Test/URL Inspection 검증 후 확대한다.
+- indexable 공개 route family(community, 공개 collection, 공개 market/catalog, 개인정보 정책상 허용된 공개 profile/content)는 서버 SEO read-model `{canonicalUrl,indexPolicy,title,description,h1,breadcrumbs,localeAlternates,updatedAt,imageMeta,structuredDataVersion}`을 사용한다. account/admin/transaction/private inventory·bank·casino history/personalized search는 `noindex`이며 sitemap에서 제외한다.
+- 공개 entity는 canonical 1개만 가진다. slug 변경은 불변 redirect map을 쓰고 영구 method-preserving redirect는 308을 기본으로 한다. 의도적 영구 삭제는 410, 그 외 부재는 404. filter/sort/query variant는 별도 승인된 고유 검색의도/콘텐츠 landing contract가 없으면 base canonical/noindex다. sitemap `lastmod`는 실제 의미 있는 콘텐츠 변경시각이다.
+- structured data는 visible SSR과 같은 authoritative read-model에서 직렬화한다. `BreadcrumbList` URL은 canonical이고 화면 hierarchy와 일치해야 한다. template validation 실패는 해당 SEO rollout을 막는다. crawler 식별은 관측용일 뿐 auth/authorization/rate/privacy/`noindex` 우회에 쓰지 않는다.
+- SEO KPI chain은 `eligible/indexable URL → crawl/index health → impressions → CTR → organic session → signup → activation → D7/D30 → net revenue/LTV`다. 금전 효과는 관측 전 `HYPOTHESIS/TEST TARGET`; thin/duplicate/unsafe UGC index 증가, crawler error 악화, moderation/support economics 악화 시 iterate/kill한다.
+
+### 보안/API inventory 증분
+- OWASP API Security Project는 현재 API-specific 최신판을 2023으로 표시한다. 모든 구현 API route는 owner/domain, authn, capability, object ownership, request/response schema, idempotency, rate/resource/business-flow limit, PII class, audit event, datastore, feature flag, deprecation을 inventory에 등록하며 미등록 runtime route는 CI 실패다.
+- 사용자 object에는 BOLA negative test, privileged admin에는 BFLA + recent reauth/2FA, casino/reward/referral/shop/payment/loan/market/recovery에는 sensitive-business-flow abuse test가 필수다. 예방은 서버 권한/트랜잭션 불변식/idempotency/quota, 탐지는 append-only audit/anomaly metric으로 구성한다. scanner green만으로 종료하지 않고 CRITICAL/HIGH 실패는 승격을 막는다.
+
+### 수익성/unit economics 증분
+- Google Play 현행 공식자료는 단일 보편 service fee가 없음을 명시한다. EEA/UK/US의 2026-06-30 이후 standard 예시는 자동갱신 구독 10% + 해당 시 5% billing fee, 기타 new-install 20% + 해당 fee, 기타 existing-install 25% + 해당 fee로 구분되고 다른 시장은 rollout 전 각 적용 모델을 따른다. 따라서 실제결제 SKU/구독은 `feePolicyVersion, market, transactionAt, installCohort, transactionType, billingPath, programme, grossPrice, tax, platformFee, paymentFee, refundReserve, directOpsCost`를 보존한 뒤 net revenue/contribution margin을 계산한다.
+- SKU dashboard는 units, gross/net revenue, gross/contribution margin, attach/repeat/subscription conversion, renewal/churn/refund, ARPU/ARPDAU/ARPPU, CAC/LTV/LTV:CAC/payback, fraud loss, infra/support cost/user, D1/D7/D30을 분리한다. 미실측값은 `HYPOTHESIS` 또는 `TEST TARGET`이다. contribution margin과 retention/trust guardrail이 통과해야 scale하며 P2W/economy abuse, 유의한 refund/fraud/support 손실 또는 D7/D30 악화가 발생하면 kill한다.
+
+### 개발 순서/상태
+1. **P0:** 독립 암호화 backup + 격리 full restore/reconciliation 증거(`BAK-106-01`).
+2. **P0:** stale public-status false-green 원인 제거와 freshness 회귀(`OPS-107-01`).
+3. **P0:** release-input classifier 구현 및 docs-only runtime side effect=0 증명(`REL-DOCS-166-01`, OPEN, 최신 재현 Release #913).
+4. **P0:** GitOps desired workload와 public edge/systemd runtime/public version·digest를 단일 release authority로 수렴.
+5. **P1/HIGH:** auth/session/admin/casino/Work/DB authorization·idempotency·ledger/reconciliation 증거.
+6. **P1:** protected-main required checks/ruleset을 실제 machine-enforced gate로 전환.
+7. core correctness → shop/payment/subscription unit economics → SEO/acquisition → retention/growth → accessibility/장기확장. 런타임 구현은 별도 branch/test/exact-SHA/QA/promotion/smoke/rollback 흐름을 따른다.
+
+**v166 사업효과:** release classifier의 직접매출은 0이며 CI/registry/Test/운영 낭비와 잘못된 application identity 승격·감사 위험 감소가 가치다. SEO는 acquisition/CAC 효율 투자, API/security/backup/status는 사고·다운타임·환불·fraud·support 기대손실 감소다. 관측되지 않은 금액은 실제값으로 단정하지 않는다.
