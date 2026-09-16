@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.16.152
+> **현재 통합 버전:** v2026.09.16.153
 > **구현·증거 동기화:** 2026-09-16
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -386,3 +386,28 @@ punitive streak, loss-threat FOMO, fake scarcity, 과도한 알림을 피하고 
 `P0 runtime authority/exact-SHA truth → P0 independent backup+restore evidence → P0 false-green/status truth → HIGH privileged recovery cleanup → HIGH migration sequence+Work clock convergence → HIGH repository required-check enforcement → HIGH economy/admin/casino authorization+integrity → P1 core correctness → payment/shop unit economics → SEO acquisition → retention/growth → accessibility/장기확장`.
 
 v152 통합은 문서만 변경한다. runtime code, product data/DB schema, Flux suspend, credential, Production을 변경하지 않는다. 실제 구현은 새 branch → tests/CI → exact-SHA Test → backend/API/DB/user-flow QA → main → Production promotion → smoke/rollback evidence 순서를 유지한다.
+
+
+## 18. 시간별 통합 변경 — v2026.09.16.153
+
+### 18.1 증거 스냅샷·릴리스 진실성
+
+- 증거일: 2026-09-16. 시작 및 작업 중간 기준 `main`은 `9ca10bed71bf0175c146324ee9e6eca111f35ad8`로 동일했고 문서 브랜치 생성 전 source drift는 없었다.
+- 해당 exact-main SHA의 `Build Production Release #880`은 확인 시점 `in_progress`였다. 따라서 current-main Production 검증은 `UNVERIFIED`다. 문서 merge, skipped auto-promotion, 진행 중 release는 운영 증거가 아니다.
+- `REL-110/REL-133`은 exact Test workload SHA, public Test SHA, backend readiness, 권위 DB path/schema, Production SHA와 smoke evidence가 모두 일치할 때까지 P0다. timeout 연장이나 rerun만으로 incident를 종료하지 않는다.
+- 열린 PR #370(`WORK-CLOCK-149-01`)은 새 main 기준 현재 non-mergeable이며 `HIGH / FIX_PENDING`을 유지한다. rebase/update 과정에서 적용 migration의 번호·내용 불변성을 지키고 실제 PostgreSQL 가속 day/week 경계 회귀시험을 다시 통과해야 한다.
+
+### 18.2 구현 가능한 백로그 변경
+
+1. `REL-EVIDENCE-153-01 / P0 / IN_PROGRESS`: 모든 release attempt는 성공/실패와 무관하게 release SHA, desired/applied revision, workload generation, image digest, pod-local/public version SHA, backend readiness, DB authority/schema checksum, 최초 실패계층, probe timestamp/latency, rollback target을 evidence bundle로 남긴다. secret/cookie/Authorization/DSN/private key는 금지한다. 수용조건은 실패 release 중 evidence 누락 0건, exact-SHA/DB assertion 불일치 상태 Production promotion 0건이다.
+2. `WORK-CLOCK-149-01 / HIGH / FIX_PENDING`: dashboard와 settlement는 동일한 `server_game_day_key()`/`server_game_week_key()`를 사용한다. 경계 -1/0/+1초, 현실 10분 game-day rollover, 현실 70분 game-week rollover, 동시 completion, retry/idempotency, process restart, DB timezone 변경을 시험한다. rollback은 forward-only corrective migration이며 적용 migration을 수정하거나 renumber하지 않는다.
+3. `SEO-153-01 / P1 / ADOPT`: Google Search Central의 현재 9월 8일 변경은 지역별 Search experience 문서를 추가했고 8월 28일 site reputation policy 변경은 계속 중요하다. WDX/가상주식을 실제 금융정보 provider처럼 표현해 finance surface 자격을 노리지 않는다. 공개 SEO read-model은 content owner/editorial control/sponsor/index policy를 유지하고 계정·거래·카지노내역·결제 callback·관리자 화면은 `noindex` 및 sitemap 제외를 유지한다. favicon QA는 안정적인 정사각형 URL과 homepage/favicon crawlability를 검사한다.
+4. `MONETIZATION-153-01 / P1 / ADOPT`: Google Play에는 하나의 보편적 수수료율이 없다. unit economics는 market, effective-date/install cohort, recurring/non-recurring, billing path, enrolled program을 key로 한다. EEA/UK/US의 2026-06-30 이후 standard 기준은 auto-renewing subscription 10%, 기타 new-install 20%, existing-install 25%이며 해당 시 5% billing fee를 더한다. 나머지 시장은 새 구조가 실제 적용되기 전 현재 적용 프로그램 규칙을 사용한다. conversion, ARPU/ARPDAU/ARPPU, churn, refund, CAC, LTV는 측정 전 `가설/테스트 기준`이다.
+
+### 18.3 교차영역 완료 게이트
+
+P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch → 정적/단위/통합/실DB/보안시험 → immutable candidate → isolated exact-SHA Test → backend/API/DB/사용자흐름 QA → main → exact-main 재시험 → Production 승격 → smoke/관측 → 필요 시 rollback이다. 매출·성장 작업은 데이터손실·권한·경제무결성·DB무결성·backup/restore·release-truth gate를 우회하지 않는다.
+
+### 18.4 v153 worklog
+
+외부 근거는 Google Search Central 2026년 9월 변경·8월 28일 site reputation policy, OWASP API Security Top 10/ASVS baseline, Google Play 현재 서비스 수수료 문서를 재확인했다. 저장소 근거는 최신 main, v152 영문/한국어 통합본, Actions 상태, 열린 PR #370을 재확인했다. 결론은 운영승격을 추정하지 않고 P0 release truth를 유지하며 exact release-evidence 수용조건을 추가하고, Work clock 수정은 mergeability/exact-SHA 실DB QA 전까지 blocked로 유지하며, 수익성은 market/cohort별 계산을 유지하는 것이다. 이번 기획 회차에서 runtime code, DB, Flux, Production은 변경하지 않았다.
