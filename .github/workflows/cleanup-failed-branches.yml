@@ -1,0 +1,96 @@
+name: Cleanup Repeatedly Failing Branches
+
+on:
+  workflow_run:
+    workflows: [Build Test Candidate]
+    types: [completed]
+  schedule:
+    - cron: '12,42 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+concurrency:
+  group: cleanup-repeatedly-failing-branches
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Archive failed work in a closed PR and delete stale branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          deleted=0
+
+          mapfile -t branches < <(
+            gh api --paginate "repos/${REPO}/branches?per_page=100" --jq '.[].name' | sort
+          )
+
+          for branch in "${branches[@]}"; do
+            case "$branch" in
+              main|production|staging|develop|release/*|planning/*) continue ;;
+              feat/*|feature/*|fix/*|bugfix/*|integrate/*|ops/*|auto/*|test-candidate/*|security/*) ;;
+              *) continue ;;
+            esac
+
+            encoded="$(jq -rn --arg v "$branch" '$v|@uri')"
+            branch_sha="$(gh api "repos/${REPO}/branches/${encoded}" --jq '.commit.sha' 2>/dev/null || true)"
+            [[ -n "$branch_sha" ]] || continue
+
+            compare="$(gh api "repos/${REPO}/compare/main...${encoded}" 2>/dev/null || true)"
+            [[ -n "$compare" ]] || continue
+            ahead="$(jq -r '.ahead_by // 0' <<<"$compare")"
+            behind="$(jq -r '.behind_by // -1' <<<"$compare")"
+            [[ "$ahead" -gt 0 ]] || continue
+
+            failed_count="$(
+              gh api --method GET "repos/${REPO}/actions/workflows/test-candidate.yml/runs" \
+                -f branch="$branch" -f status=completed -f per_page=50 \
+                --jq "[.workflow_runs[] | select(.head_sha == \"${branch_sha}\" and .conclusion == \"failure\")] | length"
+            )"
+
+            # Do not discard a branch that still needs current main reconciliation.
+            # The integration workflow handles that first. Terminal cleanup applies only
+            # after three exact-SHA failures while the branch is already current with main.
+            if [[ "$failed_count" -lt 3 || "$behind" -ne 0 ]]; then
+              continue
+            fi
+
+            pr="$(
+              gh api --method GET "repos/${REPO}/pulls" \
+                -f state=open -f base=main -f head="${GITHUB_REPOSITORY_OWNER}:${branch}" -f per_page=10 \
+                --jq '.[0].number // empty'
+            )"
+
+            if [[ -z "$pr" ]]; then
+              title="archive: repeatedly failing ${branch}"
+              body="Automatic terminal cleanup: exact head ${branch_sha} failed Build Test Candidate ${failed_count} times after the branch was already current with main. The closed PR preserves the branch history before branch deletion."
+              pr="$(gh api --method POST "repos/${REPO}/pulls" \
+                -f title="$title" -f head="$branch" -f base=main -f body="$body" \
+                --jq '.number')"
+            fi
+
+            gh api --method PATCH "repos/${REPO}/pulls/${pr}" -f state=closed >/dev/null || true
+            gh api --method DELETE "repos/${REPO}/git/refs/heads/${encoded}" >/dev/null
+            deleted=$((deleted + 1))
+            echo "archived in closed PR #${pr} and deleted repeatedly failing branch: ${branch} (${branch_sha})"
+          done
+
+          {
+            echo '## Repeated-failure terminal cleanup'
+            echo
+            echo "- branches archived and deleted: ${deleted}"
+            echo '- threshold: 3 failed Build Test Candidate runs for the same exact HEAD SHA'
+            echo '- guard: branch must already include current main (behind_by == 0)'
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -7,5 +7,6 @@ describe('StepUpField', () => {
     const { container } = render(<StepUpField id="feature" undo="restore the previous value" />);
     expect(container.querySelector('input[name="code"]')).toBeNull();
     expect(container.textContent).toContain('되돌리기');
+    expect(container.textContent).not.toContain('2단계 인증');
   });
 });
