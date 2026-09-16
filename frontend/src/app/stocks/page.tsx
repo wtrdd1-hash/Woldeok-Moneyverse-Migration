@@ -351,8 +351,9 @@ export default async function StocksPage({
       </Card>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex-row items-center justify-between gap-3">
           <CardTitle>{isEn ? 'My Trade History' : '내 거래 내역'}</CardTitle>
+          <Button asChild size="sm" variant="outline"><Link href="/stocks/history">{isEn ? 'Search history' : '거래 내역 찾기'}</Link></Button>
         </CardHeader>
         <CardContent>
           {history === null ? (
