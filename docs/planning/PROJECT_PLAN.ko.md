@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.162
+> **현재 통합 버전:** v2026.09.17.163
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -644,3 +644,28 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - DB 게이트: `203-work-reset-convergence.sql` 적용 전에 Production 백업을 생성했고 migration은 immutable checksum과 함께 기록됐다.
 - 현재 공개 edge 제약: Nginx는 아직 host systemd 서비스(Production `3000/3001`, Test `3100/3101`)를 사용한다. GitOps manifest 성공만으로 충분하지 않으며 host runtime과 공개 `/api/version`, catalog/status, SEO probe도 함께 수렴해야 한다.
 - 승격 뒤 경제 제어: `economy_ai_policy_review`, `economy_auto_policy`는 enabled를 유지하고 로컬 A/B 추론 서비스는 결정론적 회계 권위를 대체하지 않는 advisory/veto lane으로 유지된다.
+
+
+## v2026.09.17.163 — 문서 전용 main의 릴리스 자격과 게이트 정확성
+
+### REL-DOCS-163-01 — P0 — OPEN / 근본원인 제거 필요
+- 최초/최근 재현: 2026-09-17. 문서 전용 PR #393으로 `main`이 검증된 애플리케이션 SHA `18c7a1324013099e47b2d6e22c5108c4d378139c`에서 문서 커밋 `f3014e67a7cff37eb5c5eb4c92672a93609fbac4`로 전진한 뒤 Build Production Release #907이 `f3014e67...`을 immutable release SHA로 결정했다. 이후 약 15분간 격리 Test가 이 문서 SHA를 제공하기를 기다리다가 exact-SHA gate가 실패했고 Production build는 skip됐다. 이는 신규 CI/릴리스 오케스트레이션 결함이며 기존 `18c7a132...` Production 애플리케이션 런타임 증거를 무효화하지 않는다.
+- 영향/severity: 비런타임 커밋만으로 릴리스 자동화가 영구 차단될 수 있고 문서 SHA를 애플리케이션 artifact identity로 잘못 모델링하므로 P0이다. 이를 이유로 exact-SHA 검사를 완화하는 것은 금지한다. 영향 영역은 CI/CD, Test 수렴, Production 승격, 릴리스 증거와 장애대응이며 이번 실패만으로 사용자 런타임 장애가 증명된 것은 아니다.
+- 확정 원인 경계: 현재 릴리스 자격 판정이 head가 실제 애플리케이션/runtime build input을 바꾸는지 확인하기 전에 repository `main` head를 배포 identity로 사용한다. 문서 전용 커밋 때문에 이미 실행 중인 Test `/api/version`이 문서 SHA로 바뀌어야 할 정당한 이유는 없다. 즉 repository-history SHA와 deployable application-source SHA라는 서로 다른 identity domain을 비교하고 있다.
+- 수정설계: 명시적 `release_source_sha`/`application_source_sha`를 도입한다. 현재 main 이하에서 frontend/backend/shared runtime package, lockfile, migration, container/build 설정 또는 release-relevant infrastructure를 마지막으로 변경한 커밋을 결정론적으로 계산한다. docs/planning/changelog 전용 커밋은 `repository_head_sha`로 추적하되 새 application candidate를 만들지 않는다. path-aware workflow trigger와 별개로 결정론적 eligibility job을 반드시 두고 결과는 `RUNTIME_RELEASE_REQUIRED`, `DOCS_ONLY_NO_RUNTIME_RELEASE`, `RELEASE_INPUT_CLASSIFICATION_ERROR` 중 하나로 한다. 분류 오류는 fail closed다.
+- 증거/API/관측성: evidence에는 `repository_head_sha`, `application_source_sha`, changed-path 분류, frontend/backend candidate digest, GitOps desired/applied SHA, 이중 런타임 기간 host-systemd mirror SHA, public `/api/version`, DB migration head/checksum, workflow/run ID를 기록한다. `/api/version`은 애플리케이션 build identity이며 문서 identity가 아니다. dashboard는 docs-head 전진과 runtime freshness를 분리한다. 지표는 `release_docs_only_skip_total`, `release_input_classification_error_total`, `release_source_head_distance`, `test_exact_sha_wait_seconds`, `release_identity_mismatch_total`이다.
+- 보안/공급망: path classifier 자체가 repository-controlled security code다. 애매한 경로, lockfile/build tool, migration, secret-reference/config template, container/deployment input 변경은 모두 runtime-relevant로 보고 fail closed한다. 실행 가능한 입력을 docs로 위장해 CI를 우회할 수 없어야 한다. provenance는 candidate digest를 `application_source_sha`에 결합한다. branch protection required-check 문제는 별도 HIGH backlog로 유지한다.
+- 마이그레이션/롤백: workflow 수정 자체에는 DB migration이 필요 없다. 이전 workflow로의 롤백은 docs-head deadlock을 재도입하지 않을 때만 허용한다. Production은 마지막 검증 immutable application pair를 유지한다. `/api/version`을 문서 SHA에 맞추려고 의미 없는 rebuild/deploy를 하지 않으며 진짜 runtime release의 equality gate도 완화하지 않는다.
+- 테스트: docs/changelog/planning-only, frontend-only, backend-only, shared package, lockfile, migration, Docker/build config, workflow/release config, GitOps config, mixed commit의 unit matrix; merge/multi-commit range, rename/delete, shallow-history fallback; classifier error fail-closed; docs-only main은 Test polling 없이 no-runtime-release evidence로 성공하는 integration; runtime commit은 exact application SHA/digest와 authoritative Test DB를 계속 요구하는 회귀; Test gate 실패 후 build/promotion skip 회귀를 수행한다.
+- 수용조건: exact-main docs-only run이 빠르게 `DOCS_ONLY_NO_RUNTIME_RELEASE`로 끝나고 다음 runtime release 승인 전까지 public application SHA `18c7a132...`을 유지하며 완전한 evidence를 남긴다. 이후 synthetic/runtime PR은 여전히 exact `application_source_sha`를 Test → backend/API/DB/user-flow QA → GitOps/host mirror → Production smoke로 증명해야 한다.
+- 사업/UX: 직접매출은 0이며 릴리스 차단, 운영자 시간, 불필요 rebuild/deploy, 허위 장애/지원 비용을 줄이는 비용절감 기능이다. test corpus 분류 정확도 100%, docs-only p95 <2분, runtime mutation 0이면 SCALE; 애매한 분류는 ITERATE; runtime-relevant path가 candidate/QA gate를 우회할 수 있으면 즉시 KILL/ROLLBACK한다.
+
+### SEO/보안/수익성 갱신 — 2026-09-17
+- Google Search Central의 최신 9월 자료는 새로운 ranking 계약이 아니라 문서/행사 갱신이며 2026-08-28 site-reputation 변경은 sponsor/affiliate/UGC 거버넌스에 계속 직접 적용한다. 공개 SEO 계약은 서버에서 읽을 수 있는 주요 콘텐츠, stable canonical, sitemap/robots 일관성, indexable list의 crawlable pagination, structured-data 검증, 다국어 hreflang, CWV 관측을 유지하고 private/admin/transaction 페이지는 sitemap 제외와 `noindex`를 강제한다.
+- OWASP ASVS 5.0은 구현 검증 baseline, API Security Top 10은 API threat discovery baseline으로 유지한다. 새 release classifier는 공급망 보안 영역이므로 애매한 실행 입력은 fail closed하고 provenance가 digest와 application source identity를 결합해야 한다.
+- Google Play 현행 수수료는 market/programme/install cohort/transaction type/billing path별로 달라진다. SKU unit economics는 versioned fee policy를 유지하며 실측되지 않은 conversion, ARPU/ARPDAU/ARPPU, churn, refund, CAC, LTV는 `HYPOTHESIS`/`TEST TARGET`이다. 이번 회차에 가격 가정 변경은 없다.
+
+### v163 worklog
+- 최신 레퍼런스: Google Search Central 9월 최신 업데이트/site-reputation, OWASP ASVS/API security, Google Play 현행 service-fee 문서를 재확인했다. 근거 없는 ranking·보안인증·매출 주장은 추가하지 않았다.
+- 런타임/QA/CI: 시작 및 중간 main은 `f3014e67...`이다. 해당 docs-only exact head의 Build Production Release #907은 `Wait for exact SHA on isolated test and verify backend/database path`에서 실패했고 build는 skip됐다. 이 때문에 REL-DOCS-163-01을 추가하며 기존 `18c7a132...` Production exact-SHA 증거는 유지한다.
+- 개발순서: 독립 restore 증거 → false-green 제거 → release identity/classifier 수정 및 dual-runtime 권위 제거 → HIGH auth/admin/casino/Work/DB integrity QA → repository required-check enforcement → 핵심 correctness → 수익화 → SEO/acquisition → retention/accessibility. 이번 기획 변경은 runtime code, DB/Flux, Production을 변경하지 않는다.
