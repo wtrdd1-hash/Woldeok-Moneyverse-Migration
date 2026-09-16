@@ -1,6 +1,6 @@
 # Woldeok Moneyverse — Default Limit Policy
 
-> Version: v2026.09.12.4
+> Version: v2026.09.16.138
 > Status: Living product-policy specification
 > Date: 2026-09-12
 > Applies to: product, season, shop, jobs, businesses, quests, collections, progression, social systems, and virtual-market UX
@@ -116,3 +116,13 @@ A new feature is not product-complete until reviewers confirm:
 - abuse/system protections remain server-authoritative;
 - economy impact was evaluated without relying only on caps;
 - English/Korean docs match.
+
+## 9. AI-adjustable protection limits
+
+The unlimited default does not prohibit a temporary AI-managed protection limit when a registered invariant is demonstrably at risk. Economy AI may adjust only policy-registry keys with explicit bounds, evidence requirements, maximum duration and rollback semantics.
+
+For Jobs/Professions, ordinary daily completion and rewarded-completion limits remain `null = unlimited` by default. A finite value is allowed only as a bounded, disclosed, reversible protection response after softer levers are evaluated. The controller must be able to relax a finite value and return it to `null`; permanent one-way tightening is prohibited.
+
+Primary-profession identity rules are separate from daily play limits. Slot-count policy may be tuned prospectively, but existing selections and earned mastery are grandfathered unless a separately approved migration says otherwise.
+
+Any AI-adjusted user-facing limit must expose a reason category and reevaluation/reset semantics. It must never be personalized using sensitive attributes, hidden willingness-to-pay, advertising value or paid status.

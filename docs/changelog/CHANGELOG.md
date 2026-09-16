@@ -66,3 +66,6 @@
 ## v2026.09.16.4 — Searchable stock trade history
 - Added a member-only `/stocks/history` workspace with symbol search, buy/sell filtering, detailed execution amounts, and stock-hub navigation.
 - Read-only over the existing actor-scoped history API; no ledger, schema, migration, authorization, or trade mutation changes.
+
+### v2026.09.16.6 — filtered trade summary
+Private stock history now summarizes the active filtered result set with buy/sell counts, gross WLD volume, tax, and matching count using BigInt-safe integer-string aggregation.
