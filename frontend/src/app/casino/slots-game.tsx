@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { absAmount } from './coin';
-import { CASINO_IDLE, playDiceNumber } from './actions';
+import { playDiceNumber } from './actions';
+import { CASINO_IDLE } from './casino-state';
 import { groupDigits } from '@/lib/money';
 
 const SPIN_SYMBOLS = ['🍒', '🍋', '🔔', '💎', '⭐', '7️⃣'] as const;
