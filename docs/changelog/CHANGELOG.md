@@ -1,8 +1,7 @@
+## v2026.09.15.121 — Virtual Stock Discovery Search
+- Added shareable symbol/name/description search to the authenticated virtual-stock market with localized result and empty states.
+- No database, ledger, authorization, or trading mutation path changed.
 
-## v2026.09.15.123 — Shareable stock-market sorting
-- Added URL-backed sorting on `/stocks` for top movers, price, available shares, and name while preserving the API's default market order.
-- Price, availability, and percentage-change comparisons use `BigInt` integer-string math so large WLD/share values never pass through lossy JavaScript `Number` conversion.
-- Sort controls are keyboard-native links with a visible active state and `aria-current`; the selected view is bookmarkable/shareable.
 # Changelog
 
 ## v2026.09.12.13 — Automatic Test-to-Production GitOps Reconciliation
@@ -58,3 +57,12 @@
 - Added casino history and balanced exposure limits.
 - Reconciled banking interest and credit policy paths.
 - Added migrations 170–172 and validated official Test/Production deployment.
+
+## v2026.09.16.1 — Combined stock search and sorting
+- `/stocks` can now combine its existing symbol/name/description search with shareable sorting by movers, price, availability, or name.
+- Search submissions preserve the active sort and sort links preserve the active search query, so refining a market view no longer resets the other discovery control.
+- Numeric ordering uses `BigInt` integer-string comparisons; percentage movers use exact cross multiplication rather than floating-point division.
+
+## v2026.09.16.4 — Searchable stock trade history
+- Added a member-only `/stocks/history` workspace with symbol search, buy/sell filtering, detailed execution amounts, and stock-hub navigation.
+- Read-only over the existing actor-scoped history API; no ledger, schema, migration, authorization, or trade mutation changes.

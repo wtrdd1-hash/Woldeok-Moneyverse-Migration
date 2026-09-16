@@ -46,7 +46,7 @@ function checkCode(_code: string): ActionState | null {
 
 /**
  * A 401 here is the step-up refusing, not the session expiring: these routes
- * sit behind `ReauthGuard` and `SecondFactorGuard`, which answer 401 for a
+ * sit behind the administrator session guards, which answer 401 for a
  * stale reauthentication or a code that has already been spent. `failure`
  * reads 401 as "sign in", which would send an operator who is signed in to
  * the login page looking for a problem that is not there.

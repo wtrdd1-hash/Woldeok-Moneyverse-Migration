@@ -28,13 +28,28 @@ function compareChange(a: SortableStock, b: SortableStock): number {
   return left === right ? 0 : left > right ? -1 : 1;
 }
 
-export function sortMarketStocks<T extends SortableStock>(stocks: readonly T[], sort: StockSort): T[] {
+export function sortMarketStocks<T extends SortableStock>(
+  stocks: readonly T[],
+  sort: StockSort,
+): T[] {
   if (sort === 'default') return [...stocks];
   return [...stocks].sort((a, b) => {
     let order = 0;
     if (sort === 'name') order = a.name.localeCompare(b.name);
-    if (sort === 'price') order = integer(a.current_price) === integer(b.current_price) ? 0 : integer(a.current_price) > integer(b.current_price) ? -1 : 1;
-    if (sort === 'available') order = integer(a.shares_available) === integer(b.shares_available) ? 0 : integer(a.shares_available) > integer(b.shares_available) ? -1 : 1;
+    if (sort === 'price')
+      order =
+        integer(a.current_price) === integer(b.current_price)
+          ? 0
+          : integer(a.current_price) > integer(b.current_price)
+            ? -1
+            : 1;
+    if (sort === 'available')
+      order =
+        integer(a.shares_available) === integer(b.shares_available)
+          ? 0
+          : integer(a.shares_available) > integer(b.shares_available)
+            ? -1
+            : 1;
     if (sort === 'change') order = compareChange(a, b);
     return order || a.symbol.localeCompare(b.symbol);
   });

@@ -1,7 +1,12 @@
+import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { getServerLocale } from '@/lib/locale-server';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function StocksLayout({ children }: { readonly children: ReactNode }) {
   const locale = await getServerLocale();
@@ -11,6 +16,7 @@ export default async function StocksLayout({ children }: { readonly children: Re
     <div className="grid gap-4">
       <nav aria-label={isEn ? 'Virtual stock tools' : '가상 주식 도구'} className="flex flex-wrap gap-2">
         <Button asChild variant="outline" size="sm"><Link href="/stocks">{isEn ? 'Market' : '거래소'}</Link></Button>
+        <Button asChild variant="outline" size="sm"><Link href="/stocks/watchlist">{isEn ? 'Watchlist' : '관심 종목'}</Link></Button>
         <Button asChild variant="outline" size="sm"><Link href="/stocks/portfolio">{isEn ? 'Portfolio' : '포트폴리오'}</Link></Button>
         <Button asChild variant="outline" size="sm"><Link href="/stocks/compare">{isEn ? 'Compare stocks' : '종목 비교'}</Link></Button>
         <Button asChild variant="outline" size="sm"><Link href="/stocks/alerts">{isEn ? 'Alerts' : '조건부 알림'}</Link></Button>

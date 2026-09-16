@@ -31,7 +31,7 @@ import type {
  * and previewing a batch change nothing a second look cannot undo, so they
  * ask for a reason and no more. Executing a payout, running the adjustment
  * engine early and taking a knob off automatic all sit behind `ReauthGuard`
- * and `SecondFactorGuard` on the API, so each of those spends a code in this
+ * on the API, while the retired second factor is not collected in this
  * same server call, immediately before the change -- a step-up taken on a
  * separate screen minutes earlier authorises whatever came next rather than
  * this.

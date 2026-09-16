@@ -36,6 +36,7 @@ const MAX_MESSAGE_LENGTH = 180;
 
 interface LobbyMessage {
   readonly id: number;
+  readonly sender: string;
   readonly text: string;
   readonly at: string;
 }
@@ -80,17 +81,15 @@ export function Lobby() {
     // says 확인 중 rather than inventing a zero.
     const headcount = (value: unknown) => setOnline(readOnlineCount(value));
     const said = (value: unknown) => {
-      const text = String(value ?? '')
-        .trim()
-        .slice(0, MAX_MESSAGE_LENGTH);
+      if (!value || typeof value !== 'object') return;
+      const payload = value as { sender?: unknown; text?: unknown; sentAt?: unknown };
+      const text = String(payload.text ?? '').trim().slice(0, MAX_MESSAGE_LENGTH);
       if (!text) return;
+      const sender = String(payload.sender ?? '회원').trim().slice(0, 40) || '회원';
+      const at = typeof payload.sentAt === 'string' ? payload.sentAt : new Date().toISOString();
       nextId.current += 1;
       const id = nextId.current;
-      setMessages((current) =>
-        // Bounded: a long-lived tab in a busy lobby would otherwise grow this
-        // list without limit.
-        [...current, { id, text, at: new Date().toISOString() }].slice(-100),
-      );
+      setMessages((current) => [...current, { id, sender, text, at }].slice(-100));
     };
 
     connected.on('connect', opened);
@@ -99,7 +98,7 @@ export function Lobby() {
     connected.on('lobby:permissions', permissions);
     connected.on('message:error', refused);
     connected.on('online', headcount);
-    connected.on('message', said);
+    connected.on('lobby:message', said);
 
     return () => {
       // Listeners off, socket left open: it is shared, and closing it here
@@ -110,7 +109,7 @@ export function Lobby() {
       connected.off('lobby:permissions', permissions);
       connected.off('message:error', refused);
       connected.off('online', headcount);
-      connected.off('message', said);
+      connected.off('lobby:message', said);
       socket.current = null;
       releaseSiteSocket();
     };
@@ -162,7 +161,7 @@ export function Lobby() {
           ) : (
             messages.map((message) => (
               <p key={message.id} className="flex items-baseline justify-between gap-3 text-sm">
-                <span className="min-w-0 break-words">{message.text}</span>
+                <span className="min-w-0 break-words"><b className="mr-2 text-xs">{message.sender}</b>{message.text}</span>
                 <time dateTime={message.at} className="shrink-0 text-xs text-muted-foreground">
                   {new Intl.DateTimeFormat('ko-KR', {
                     hour: '2-digit',

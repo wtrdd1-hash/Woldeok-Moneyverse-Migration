@@ -3,9 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { StepUpField } from './step-up-field';
 
 describe('StepUpField', () => {
-  it('renders a fresh authenticator code field for high-risk operator changes', () => {
+  it('keeps recovery guidance without a retired authenticator code field', () => {
     const { container } = render(<StepUpField id="feature" undo="restore the previous value" />);
-    expect(container.querySelector('input[name="code"]')).not.toBeNull();
+    expect(container.querySelector('input[name="code"]')).toBeNull();
     expect(container.textContent).toContain('되돌리기');
   });
 });

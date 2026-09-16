@@ -2,9 +2,9 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.09.14.76**
+Update version: **v2026.09.15.125**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 139 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 147 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -4398,4 +4398,284 @@ _No request body._
 ### Success response fields
 
 _Binary body. Do not JSON-decode._
+
+## `GET` `/app-api/v1/support/threads` — My administrator support conversations
+
+- Authorization: 로그인 + 최신 동의
+- Success status: 200
+- Response mode: json
+- After success: 응답을 현재 화면 상태에 반영
+- Operation ID: `SupportController_threads`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| threads[] | true | object[] |  |
+| threads[] | true | object |  |
+| threads[].thread_id | true | string |  |
+| threads[].subject | true | string |  |
+| threads[].status | true | string |  |
+| threads[].created_at | true | string (date-time) |  |
+| threads[].updated_at | false | string (date-time) |  |
+| threads[].last_message_at | false | string (date-time) |  |
+| threads[].user_id | false | string |  |
+| threads[].display_name | false | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/support/threads` — Open an administrator support conversation
+
+- Authorization: 로그인 + 최신 동의 + CSRF
+- Success status: 201
+- Response mode: json
+- After success: 문의 목록/대화를 서버에서 다시 조회
+- Operation ID: `SupportController_create`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `NewThreadDto`
+
+| Field | Required | Type | Constraints |
+|---|---|---|---|
+| subject | true | string | minLength=1; maxLength=120 |
+| body | true | string | minLength=1; maxLength=2000 |
+| idempotencyKey | true | string (uuid) |  |
+
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| thread | true | object |  |
+| thread.thread_id | true | string |  |
+| thread.subject | true | string |  |
+| thread.status | true | string |  |
+| thread.created_at | true | string (date-time) |  |
+| thread.updated_at | false | string (date-time) |  |
+| thread.last_message_at | false | string (date-time) |  |
+| thread.user_id | false | string |  |
+| thread.display_name | false | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/support/threads/:id/messages` — Messages in my support conversation
+
+- Authorization: 로그인 + 최신 동의
+- Success status: 200
+- Response mode: json
+- After success: 응답을 현재 화면 상태에 반영
+- Operation ID: `SupportController_messages`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| messages[] | true | object[] |  |
+| messages[] | true | object |  |
+| messages[].message_id | true | string |  |
+| messages[].sender_kind | true | string="user" \| string="admin" |  |
+| messages[].sender_user_id | false | string |  |
+| messages[].body | true | string |  |
+| messages[].created_at | true | string (date-time) |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/support/threads/:id/messages` — Reply to my support conversation
+
+- Authorization: 로그인 + 최신 동의 + CSRF
+- Success status: 201
+- Response mode: json
+- After success: 문의 목록/대화를 서버에서 다시 조회
+- Operation ID: `SupportController_reply`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `NewMessageDto`
+
+| Field | Required | Type | Constraints |
+|---|---|---|---|
+| body | true | string | minLength=1; maxLength=2000 |
+| idempotencyKey | true | string (uuid) |  |
+
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| message | true | object |  |
+| message.message_id | true | string |  |
+| message.sender_kind | true | string="user" \| string="admin" |  |
+| message.sender_user_id | false | string |  |
+| message.body | true | string |  |
+| message.created_at | true | string (date-time) |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/admin/support/threads` — Administrator support inbox
+
+- Authorization: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션
+- Success status: 200
+- Response mode: json
+- After success: 응답을 현재 화면 상태에 반영
+- Operation ID: `AdminSupportController_threads`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| status | query | false | string | enum="open","waiting_user","resolved" |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| threads[] | true | object[] |  |
+| threads[] | true | object |  |
+| threads[].thread_id | true | string |  |
+| threads[].subject | true | string |  |
+| threads[].status | true | string |  |
+| threads[].created_at | true | string (date-time) |  |
+| threads[].updated_at | false | string (date-time) |  |
+| threads[].last_message_at | false | string (date-time) |  |
+| threads[].user_id | false | string |  |
+| threads[].display_name | false | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/admin/support/threads/:id/messages` — Read a support conversation as administrator
+
+- Authorization: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션
+- Success status: 200
+- Response mode: json
+- After success: 응답을 현재 화면 상태에 반영
+- Operation ID: `AdminSupportController_messages`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| messages[] | true | object[] |  |
+| messages[] | true | object |  |
+| messages[].message_id | true | string |  |
+| messages[].sender_kind | true | string="user" \| string="admin" |  |
+| messages[].sender_user_id | false | string |  |
+| messages[].body | true | string |  |
+| messages[].created_at | true | string (date-time) |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/admin/support/threads/:id/messages` — Reply to a member support conversation
+
+- Authorization: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션 + CSRF
+- Success status: 201
+- Response mode: json
+- After success: 문의 목록/대화를 서버에서 다시 조회
+- Operation ID: `AdminSupportController_reply`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `NewMessageDto`
+
+| Field | Required | Type | Constraints |
+|---|---|---|---|
+| body | true | string | minLength=1; maxLength=2000 |
+| idempotencyKey | true | string (uuid) |  |
+
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| message | true | object |  |
+| message.message_id | true | string |  |
+| message.sender_kind | true | string="user" \| string="admin" |  |
+| message.sender_user_id | false | string |  |
+| message.body | true | string |  |
+| message.created_at | true | string (date-time) |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `PUT` `/app-api/v1/admin/support/threads/:id/status` — Change support conversation status
+
+- Authorization: 로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션 + CSRF
+- Success status: 200
+- Response mode: json
+- After success: 문의 목록/대화를 서버에서 다시 조회
+- Operation ID: `AdminSupportController_status`
+
+### Path/query parameters
+
+| Name | In | Required | Type | Constraints |
+|---|---|---|---|---|
+| id | path | true | string (uuid) |  |
+
+### Request body
+
+- Content-Type: `application/json`
+- DTO: `StatusDto`
+
+| Field | Required | Type | Constraints |
+|---|---|---|---|
+| status | true | string | enum="open","waiting_user","resolved" |
+
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| status | true | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
