@@ -28,3 +28,11 @@ Updated the English canonical plan, Korean counterpart, simulation extension, pl
 ## Research reassessment v2026.09.16.137
 
 Completed an additional source-validation pass and revised the architecture toward a calibrated digital-twin ensemble; recorded the EconGrowthAgent verification failure and debate/judge limitations. No runtime deployment.
+
+## v2026.09.16.138 extension — in progress
+
+- [x] Re-fetched `origin/main` and re-read the current AI controller, jobs/profession, and default-limit planning contracts before editing.
+- [ ] Add bounded AI control for primary-profession constraints, per-profession concurrency/selection constraints, daily work/reward protection limits, and automatic relaxation/removal.
+- [ ] Keep `null = unlimited` as the normal product default; require an explicit evidence-backed reason for any non-null user-facing cap.
+- [ ] Add deterministic guardrails, policy-registry fields, simulation/causal evaluation, audit, rollback, and UI disclosure requirements.
+- [ ] Update English/Korean canonical planning, changelog/update log, validate, commit, and push.
