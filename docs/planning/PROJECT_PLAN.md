@@ -2,7 +2,7 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.15.110
+> Current integrated version: v2026.09.16.138
 > Implementation/evidence sync: 2026-09-15
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
@@ -296,3 +296,10 @@ All flows cover loading/empty/error/offline/timeout, keyboard and focus, labels,
 
 ### v2026.09.16.1 delta — composable stock discovery
 `/stocks` discovery composes URL-backed `q` search with `sort=change|price|available|name`. Either control must preserve the other when changed, keeping the resulting view bookmarkable/shareable. Integer-string precision remains mandatory for economy values and invalid sort values fall back to API order.
+
+## 2026-09-16 — v2026.09.16.138 adaptive profession/daily-limit integration
+
+- Moneyverse Economy AI may jointly analyze and tune primary-profession slots, concurrently active professions, profession repeat-reward curves, and daily assignment/full-reward protection limits through the policy registry.
+- Ordinary daily limits remain `null = unlimited` by default. A finite cap is a temporary protection action only after multi-window evidence, simulation, causal evaluation and deterministic guardrails pass; automatic relaxation and return-to-unlimited are mandatory.
+- AI cannot silently replace or revoke an existing primary profession or erase mastery. Slot reductions require grandfathering or a separately human-approved migration.
+- As with stock pricing, shop pricing and low-risk SKU generation, multi-agent models may generate profession-policy candidates, but a versioned deterministic policy gate retains final enforcement authority.

@@ -1,6 +1,6 @@
 # Woldeok Moneyverse — AI Economy Controller Specification
 
-> Version: v2026.09.16.137
+> Version: v2026.09.16.138
 > Status: Living implementation-oriented planning specification
 > Date: 2026-09-16
 > Parent specs: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -832,3 +832,25 @@ Multi-agent debate is an error-discovery and alternative-generation mechanism, n
 ### 31.5 Reference verification status
 
 `EconGym`, `MALLES`, `EconAgent`, the `AI Economist`, `Generative Agents`, generative MMO ABM work, `Market-Bench`, `StockAgent`, `StockSim`, and `Tokenomics-AI/Tokenomics` are treated as verified research/public projects. The exact claimed title `EconGrowthAgent (ICLR 2024)` was not verified against a reliable primary record in this reassessment and is excluded as design evidence. Tokenomics-AI is an inference-cost/routing reference, not an economic-model reference.
+
+## 32. Adaptive profession and daily-limit controller
+
+Jobs/profession policy joins the same multi-model economy control loop. Limits are first-class versioned policies, not hard-coded frontend numbers.
+
+Tunable policy keys include:
+
+- `jobs.primary_profession_slots`: semantic number of simultaneously designated primary-profession identities; the controller may only change this inside an operator-approved range and never silently replace or demote a user's existing primary profession;
+- `jobs.concurrent_active_professions`: number of professions that may be actively progressed at once;
+- `jobs.assignment_daily_limit`: ordinary assignment completion count; default `null = unlimited`;
+- `jobs.rewarded_assignment_daily_limit`: assignments eligible for full WLD payout before another configured reward policy applies; default `null = unlimited`;
+- `jobs.daily_wld_budget_per_cohort`: optional cohort/system issuance protection budget, never an individual hidden confiscation rule;
+- `jobs.repeat_reward_floor_multiplier`, `jobs.repeat_curve_k`, and related marginal-reward controls;
+- profession-specific concurrency, reward, settlement and protective-limit keys where explicitly registered.
+
+The preferred control order is: detect abuse/data error -> tune marginal rewards and task mix -> tune optional sinks/rewards -> rebalance profession demand -> only then consider a temporary finite daily protection limit. Inflation alone is not sufficient evidence for a hard play cap when softer controls remain viable.
+
+A non-null daily limit may enter `BOUNDED_AUTO` only when the policy registry declares it auto-tunable and all of the following pass: multi-window evidence, minimum sample, scenario/counterfactual comparison, affordability/progression checks, integrity review, published reason code, maximum duration, automatic relaxation test and rollback readiness. The controller must evaluate both tightening and loosening; when the triggering condition clears, it should relax toward `null = unlimited` rather than preserving a stale cap.
+
+Primary-profession slot changes are identity-sensitive. Automation may widen available slots or propose a narrower future policy, but it must not revoke an already selected profession, erase mastery, reassign a user, or make earned progression inaccessible. Any migration from a wider to narrower slot policy requires grandfathering or explicit human-approved transition rules.
+
+Required telemetry includes per-profession active users, completion/reward issuance, repeat concentration, median/P95 daily completions, mastery progression, switch rate, abandonment, bot/abuse confidence, new-user progression time, profession shortage/oversupply, and limit-hit/relaxation rates. Every limit decision records before/after value, affected population, evidence windows, model disagreement, reason, expiry/reevaluation time and rollback threshold.

@@ -1,6 +1,6 @@
 # 월덕 머니버스 — AI 경제 컨트롤러 명세
 
-> 버전: v2026.09.16.137
+> 버전: v2026.09.16.138
 > 상태: Living 구현 지향 기획 명세
 > 날짜: 2026-09-16
 > 상위 명세: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -828,3 +828,25 @@ Moneyverse 경제 AI의 중심은 `LLM`이 아니라 **데이터로 보정된 �
 ### 31.5 레퍼런스 검증 상태
 
 `EconGym`, `MALLES`, `EconAgent`, `AI Economist`, `Generative Agents`, MMO generative ABM, `Market-Bench`, `StockAgent`, `StockSim`, `Tokenomics-AI/Tokenomics`는 확인된 연구/공개 프로젝트로 분류한다. `EconGrowthAgent (ICLR 2024)`라는 정확한 명칭은 이번 검증에서 신뢰할 수 있는 원문을 확인하지 못했으므로 근거 목록에서 제외한다. Tokenomics-AI는 경제모델이 아니라 inference cost/routing 참고 구현으로만 취급한다.
+
+## 32. 직업·일일 제한 적응형 컨트롤러
+
+직업/숙련도 정책도 동일한 다중 모델 경제 제어 루프에 포함한다. 제한값은 프론트 상수가 아니라 버전 관리되는 정책이다.
+
+자동조절 후보 정책 키는 다음을 포함한다.
+
+- `jobs.primary_profession_slots`: 동시에 주직업으로 지정할 수 있는 정체성 슬롯 수. 운영자가 승인한 범위 안에서만 바꿀 수 있으며 기존 사용자의 주직업을 몰래 교체·강등하지 않는다.
+- `jobs.concurrent_active_professions`: 동시에 성장시킬 수 있는 활성 직업 수.
+- `jobs.assignment_daily_limit`: 일반 작업 완료 횟수. 기본은 `null = 무제한`.
+- `jobs.rewarded_assignment_daily_limit`: 별도 보상정책 전까지 정상 WLD 보상을 받을 수 있는 작업 수. 기본은 `null = 무제한`.
+- `jobs.daily_wld_budget_per_cohort`: 선택적 cohort/시스템 발행 보호 예산. 개인별 숨은 몰수 규칙으로 사용하지 않는다.
+- `jobs.repeat_reward_floor_multiplier`, `jobs.repeat_curve_k` 등 반복 보상 체감 정책.
+- 정책 레지스트리에 명시적으로 등록된 직업별 동시성·보상·정산·보호 제한 키.
+
+우선순위는 악용/데이터오류 탐지 -> 반복 보상과 작업 구성 조정 -> 선택적 sink/reward 조정 -> 직업 수요 재균형 -> 마지막으로 한시적 유한 일일 보호 제한 검토 순서다. 더 부드러운 조절수단이 가능한데 단순 인플레이션만을 이유로 플레이 hard cap을 만들면 안 된다.
+
+non-null 일일 제한이 `BOUNDED_AUTO`에 들어가려면 정책 레지스트리가 auto-tunable로 허용하고 다중 시간창 근거, 최소 표본, 시나리오/반사실 비교, 구매력·성장성 검증, 무결성 검토, 공개 가능한 reason code, 최대 지속기간, 자동 완화 시험, 롤백 준비를 모두 통과해야 한다. 컨트롤러는 강화뿐 아니라 완화도 평가하며 조건이 해소되면 오래된 제한을 유지하지 않고 `null = 무제한` 방향으로 자동 완화한다.
+
+주직업 슬롯은 정체성에 영향을 준다. 자동화는 슬롯 확대 또는 미래 정책 축소 제안은 가능하지만 기존 선택 직업 박탈, 숙련도 삭제, 임의 재배정, 이미 획득한 성장 접근 차단은 할 수 없다. 넓은 슬롯 정책에서 좁은 정책으로 이동할 때는 grandfathering 또는 사람 승인 transition rule이 필요하다.
+
+필수 telemetry는 직업별 활성 사용자, 완료/보상 발행량, 반복 집중도, 일일 완료 median/P95, 숙련 성장, 전환율, 포기율, 봇/악용 confidence, 신규 사용자 성장시간, 직업 과부족, 제한 도달/완화율을 포함한다. 모든 제한 결정은 전후 값, 영향 인구, 근거 시간창, 모델 불일치, 사유, 만료/재평가 시각, 롤백 기준을 기록한다.

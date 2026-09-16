@@ -1,6 +1,6 @@
 # Woldeok Moneyverse — Economy Simulation & Dynamic Sink Tuning Specification
 
-> Version: v2026.09.16.137
+> Version: v2026.09.16.138
 > Status: Living implementation-oriented planning specification
 > Date: 2026-09-16
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -365,3 +365,9 @@ A multi-agent consensus without independent evidence is not sufficient. Large di
 ## 21. 2026-09-16 research reassessment
 
 The simulator SHALL use an ensemble hierarchy: deterministic flow/accounting baseline, calibrated cohort/ABM model, econometric/causal response model, stochastic stress model, and bounded LLM-agent population. LLM-agent output is never substituted for empirical calibration. Cross-model disagreement is a first-class risk metric and blocks bounded-auto when above policy threshold. Multi-agent debate is evaluated against no-debate and deterministic baselines. Stock scenarios should use an order-level or microstructure-aware engine where practical rather than allowing language agents to invent clearing prices.
+
+## 21. Profession-limit scenario family
+
+Scenario Lab must model profession-policy changes together with rewards rather than treating daily caps as isolated counters. Standard cases include unlimited baseline, marginal-reward-only control, profession-demand rebalance, temporary rewarded-assignment protection limit, temporary total-assignment protection limit, and automatic relaxation back to unlimited.
+
+Each scenario reports issuance, median/P95 completion counts, new-user progression time, mastery growth, profession switching, abandonment, retention, abuse displacement, sink interaction and cross-profession substitution. A finite limit is rejected when an equivalent or better safety outcome is achievable with materially lower player-friction through softer controls.

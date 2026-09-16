@@ -138,3 +138,8 @@ This file records incremental project changes so concurrent work can avoid overl
 - Expanded the Moneyverse AI economy plan into separately versioned specialist agents that debate, challenge and audit one another before a policy is eligible for bounded automation.
 - Added deterministic bounded stock-price formation, automatic shop repricing, and low-risk template-based SKU auto-publication with safety, affordability, anti-manipulation and rollback gates.
 - Updated English/Korean controller and simulation specifications. Planning only; no runtime deployment.
+## 2026-09-16 — v2026.09.16.138 Adaptive profession/daily-limit AI planning
+
+- Added bounded AI control for primary-profession slots, active-profession concurrency, daily assignment/full-reward protection limits, and automatic relaxation back to unlimited.
+- Kept ordinary daily limits unlimited by default and protected existing primary-profession selections/mastery through grandfathering.
+- Updated integrated planning, scenario/QA requirements, and rollback/audit contracts. Planning only; no runtime deployment.

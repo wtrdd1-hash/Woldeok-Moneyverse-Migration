@@ -1,6 +1,6 @@
 # 월덕 머니버스 — 경제 시뮬레이션 및 동적 소비처 조정 명세
 
-> 버전: v2026.09.16.137
+> 버전: v2026.09.16.138
 > 상태: Living 구현 지향 기획 명세
 > 날짜: 2026-09-16
 > 상위 명세: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -363,3 +363,9 @@ Scenario Lab은 주식 가격형성, 상점 가격조절, 생성 카탈로그 �
 ## 21. 2026-09-16 연구 재평가
 
 시뮬레이터는 결정론적 flow/accounting baseline, 보정된 cohort/ABM, econometric/causal response model, stochastic stress model, 제한형 LLM agent population을 ensemble 계층으로 사용해야 한다. LLM agent 출력은 실측 보정을 대체하지 않는다. 모델 간 불일치는 독립 risk metric이며 정책 threshold를 넘으면 bounded-auto를 차단한다. 다중 에이전트 토론은 no-debate 및 deterministic baseline과 비교평가한다. 주식 시나리오는 가능하면 order-level 또는 market-microstructure-aware engine을 사용하며 language agent가 clearing price를 직접 발명하게 하지 않는다.
+
+## 21. 직업 제한 시나리오군
+
+Scenario Lab은 일일 cap을 고립된 counter로 보지 않고 보상과 함께 직업정책 변화를 모델링해야 한다. 표준 사례는 무제한 baseline, marginal-reward-only 제어, 직업 수요 재균형, 한시적 정상보상 작업 보호제한, 한시적 전체작업 보호제한, 무제한으로의 자동 완화를 포함한다.
+
+각 시나리오는 발행량, 일일 완료 median/P95, 신규사용자 성장시간, 숙련 성장, 직업 전환, 포기, retention, abuse displacement, sink 상호작용, 직업 간 대체효과를 보고한다. 더 부드러운 제어로 플레이 마찰이 훨씬 적으면서 동등하거나 더 나은 안전결과를 낼 수 있으면 유한 제한 후보는 거부한다.

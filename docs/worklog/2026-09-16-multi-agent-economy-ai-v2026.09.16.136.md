@@ -32,7 +32,7 @@ Completed an additional source-validation pass and revised the architecture towa
 ## v2026.09.16.138 extension — in progress
 
 - [x] Re-fetched `origin/main` and re-read the current AI controller, jobs/profession, and default-limit planning contracts before editing.
-- [ ] Add bounded AI control for primary-profession constraints, per-profession concurrency/selection constraints, daily work/reward protection limits, and automatic relaxation/removal.
-- [ ] Keep `null = unlimited` as the normal product default; require an explicit evidence-backed reason for any non-null user-facing cap.
-- [ ] Add deterministic guardrails, policy-registry fields, simulation/causal evaluation, audit, rollback, and UI disclosure requirements.
-- [ ] Update English/Korean canonical planning, changelog/update log, validate, commit, and push.
+- [x] Added bounded AI control for primary-profession constraints, profession concurrency/selection constraints, daily work/reward protection limits, and automatic relaxation/removal.
+- [x] Kept `null = unlimited` as the normal product default and required explicit evidence-backed reason/duration for any non-null user-facing cap.
+- [x] Added deterministic guardrails, policy-registry fields, simulation/causal evaluation, audit, rollback, and UI disclosure requirements.
+- [x] Updated English/Korean canonical planning, integrated plan, changelog/update log, and validation. Final commit/push follows this checkpoint.
