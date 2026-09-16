@@ -17,3 +17,16 @@
 - Expanded the generated mobile API contract from 147 to 155 endpoints and moved the contract version to `v2026.09.16.144`.
 - Android baseline QA: 20/20 unit tests pass, lint has 0 errors, debug APK builds; Gradle wrapper executable mode was identified as a repository-level reproducibility defect and is being fixed in the app QA branch.
 - Deployment: not yet promoted. Full repository CI-equivalent and isolated Test gates remain mandatory.
+
+## Local validation — final pre-Test gate
+
+- `pnpm typecheck`: PASS across contract/database/backend/frontend.
+- API contract generation/check: PASS; generated contract has 155 documented endpoints.
+- Workspace tests without DB credentials: contract 23/23, database package 7/7, backend 871 passed, frontend 605/605.
+- ESLint: 0 errors; 11 pre-existing Next.js `<img>` optimization warnings remain non-blocking.
+- Production build: PASS for contract, backend and Next.js frontend.
+- Fresh database: init + every numbered migration through `202-admin-traffic-and-ai-status.sql` applied successfully from an empty database.
+- Full backend suite against that fresh database: 1438/1438 PASS with both application and migrator DB roles configured.
+- Raw telemetry boundary verified: `moneyverse_app` has zero direct privileges on `user_activity_logs`; direct SELECT is denied.
+- Android branch `qa/full-stack-v1.0.16` commit `90609d5`: `lintDebug`, `testDebugUnitTest`, `assembleDebug` PASS; dead `business-types` purchase fallback removed; Gradle wrapper executable bit restored.
+- Next gate: push exact branch SHA, run GitHub CI/Test Candidate, verify `test.easy-scraping.com` exact SHA and runtime paths, then only promote via the production gate if healthy.
