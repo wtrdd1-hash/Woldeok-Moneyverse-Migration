@@ -2,8 +2,8 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.16.141
-> Implementation/evidence sync: 2026-09-15
+> Current integrated version: v2026.09.16.152
+> Implementation/evidence sync: 2026-09-16
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
@@ -319,3 +319,76 @@ Read-only filtered-history summary added to /stocks/history; no economy mutation
 - Preserve the existing deterministic economy engine as the continuously available classical lane; AI unavailability never becomes an economy-service outage.
 - Store exact proposal hashes, expiry, aggregate decision and all 12 final seat artifacts before deterministic arbitration.
 - Place local AI model/cache/dataset artifacts on the 100GB `/srv/moneyverse-data` disk rather than the 32GB system disk.
+
+
+## 2026-09-16 — v2026.09.16.152 runtime-authority, release, Work-clock and cross-cutting integration
+
+### Evidence snapshot and release authority
+
+- **Observed application main:** `d6cf13d4236bd1298010ae5f165b15899356a59d` at this planning integration point; re-check immediately before merge because the repository remains active.
+- `v2026.09.16.151` runtime evidence supersedes the older assumption that Kubernetes/Flux is the current public authority. Public Test and Production are currently served by the approved Debian 13 host through separate systemd release directories and a local PostgreSQL authority path. The NixOS/Kubernetes node is a **recovery target, not current Production authority**.
+- Public Test, public Production, application/GitOps desired references were recorded as converged on application SHA `3d87165f83bcb60903e85d4f3600fdf40074ef40`; Production Flux `apps` remains suspended until cluster-admin access and DB reconciliation are independently proven.
+- `REL-110-01 / P0` therefore changes from generic exact-SHA divergence to **RECOVERY_IN_PROGRESS / AUTHORITY_SPLIT_CONTAINED**. It is not DONE while Kubernetes access, DB reconciliation and controlled return-to-Flux are incomplete.
+- Current-main `Build Production Release #878` was still `in_progress` when checked. A docs commit, candidate build, GitOps declaration or prior runtime convergence is not evidence that this newer main SHA is live. Promotion remains fail-closed until exact-main Test evidence, backend/API/DB/user-flow QA and Production smoke exist for the promoted SHA.
+
+### OPS-RUNTIME-152-01 — dual control-plane / authority ambiguity
+
+- **Priority/severity/status:** P0 / CRITICAL operational integrity / IN PROGRESS.
+- **First observed:** 2026-09-16 incident recovery; **latest reproduction:** v151 runtime-authority record on current main.
+- **Impact:** deploy/rollback, DB writes, backup/restore, incident response, version truth and operator decisions can target the wrong control plane if Debian systemd and suspended Kubernetes are treated as co-authoritative.
+- **Confirmed cause:** the intended Flux/Kubernetes control plane lost usable administrator access while public service was recovered on the Debian host. Documentation previously described Kubernetes as authoritative after runtime authority had moved.
+- **Implementation design:** introduce one machine-readable `runtime-authority.json` owned by operations with `environment`, `authority_generation`, `runtime_type`, `host/workload identity`, `application_sha`, `db_authority_id`, `desired_gitops_sha`, `flux_suspended`, `verified_at`, `evidence_run`, and `rollback_target`. Release automation must read this contract and refuse an authority-changing action if its generation changed after the run began.
+- **DB migration/data:** no product-data migration merely to record authority. Before Kubernetes reactivation, compare schema migration set/checksums, ledger invariants, critical row counts and a bounded reconciliation snapshot between the current Debian PostgreSQL authority and candidate cluster DB. Never merge two writable DB authorities. Select one source of truth and perform a rehearsed one-way migration/cutover.
+- **Rollback:** while Debian remains authority, rollback means last verified Debian release + its compatible DB state; do not unsuspend Flux as a rollback shortcut. Kubernetes return requires a separately approved cutover plan.
+- **Tests/gates:** exact-SHA Test; DB connectivity/schema; read/write canary on non-economic probe data; ledger reconciliation; backup restore rehearsal; DNS/tunnel routing; process restart; stale GitOps negative test; authority-generation race test. Production promotion is blocked on any ambiguous authority, dual writer, stale schema or missing rollback evidence.
+- **Monitoring:** public `/api/version`, service working directory/release SHA, DB authority fingerprint, GitOps desired SHA, Flux suspend state, schema version, backup freshness and reconciliation drift. Alert when any two authority signals disagree for >5 minutes.
+
+### OPS-FLUX-150-01 — privileged recovery cleanup
+
+- Jump-host/SSH recovery is incident tooling, not a permanent deployment backdoor. Private keys, kubeconfig, DB credentials and bearer/session secrets must never enter repository content, artifacts or ordinary logs.
+- Recovery completion requires removal of temporary authorized keys/capabilities, immutable operator/run audit, pinned host-key evidence, explicit Flux suspend/resume decision, and post-incident verification that the workflow cannot mutate Production without the normal approval boundary.
+- Controller restart is a privileged incident action. Capture source revision, last-applied/attempted revision, readiness/events before and after restart; a successful restart does not establish root cause.
+- Apply OWASP ASVS 5.0 verification principles and API Security 2023 access-control/resource-consumption boundaries to operational APIs and automation: least privilege, bounded execution, explicit authorization, tamper-evident audit and fail-closed secret handling.
+
+### WORK-CLOCK-149-01 — dashboard/write-clock convergence
+
+- **Priority/severity/status:** P1 correctness with economy-integrity implications / HIGH / FIX PENDING in PR #370.
+- Settlement already uses the accelerated Moneyverse server clock, while the legacy `work_my_dashboard` read model can use real Asia/Seoul day/week windows. This can display a different `daily_paid`/`weekly_paid` quota window from the one the settlement path enforces.
+- Migration 202 must make dashboard day/week keys use the same authoritative `server_game_day_key()` / `server_game_week_key()` contract as settlement. Applied migrations remain immutable; migration-number uniqueness and checksum immutability become hard CI gates.
+- QA: boundary -1/0/+1 second, accelerated day rollover, accelerated week rollover, concurrent completions, idempotent retry, restart, timezone configuration, stale dashboard cache, API/UI parity and real-PostgreSQL regression. Acceptance requires settlement and dashboard to resolve identical keys for every tested instant.
+- UX: show the next reset using server-authoritative time; loading/error/offline states must not invent remaining quota. Accessibility must expose reset time and quota text without relying on color alone. Mobile/desktop semantics are identical.
+- Analytics/business: this is not revenue. Measure work-flow completion, quota-confusion support contacts, retry/error rate and D1/D7/D30 job retention. Scale only if correctness is preserved; no retention gain can justify inconsistent reward authority.
+
+### Cross-cutting current feature contracts
+
+- **Auth/session/security center:** session actor remains the authority; OAuth/OIDC uses state/nonce/PKCE where applicable, session rotation/revocation and recent reauthentication protect sensitive changes. BOLA/BFLA negative tests are mandatory for profile, admin, stock, bank, business, community and telemetry objects.
+- **Economy/inventory/shop/payment/subscription:** all value changes are server-authoritative, integer-safe, transactional and idempotent. Product price shown by the client is never settlement authority. Real-money SKUs require receipt/webhook verification, account entitlement reconciliation, refund/revoke/restore state machines and append-only audit. Unknown conversion/ARPU/ARPPU/refund/churn/CAC/LTV values remain `HYPOTHESIS`/`TEST TARGET`.
+- **Jobs/quests/levels/rewards:** reward grant and quota windows use the server game clock, durable receipt/idempotency keys and append-only ledger. Client timers are display-only.
+- **Bank/loan/business/virtual stocks:** simulated/game-only labeling is mandatory. Interest, loan eligibility, stock execution, business settlement and portfolio history remain DB/server authoritative; no real-security/deposit/yield claim is allowed.
+- **Casino/probability systems:** themed UI action contracts must map to one typed server action schema. Client RNG/animation never decides payout. Eligibility, bet debit, server RNG, payout, ledger, audit and idempotency execute atomically; retries return the same receipt.
+- **Community/friends/clubs/referral:** moderation, block/report, invite/referral anti-replay and rate limits are required. Referral reward issuance is server-side, idempotent and fraud-observable; multi-account signals trigger review/risk controls rather than an undocumented single-signal ban.
+- **Notifications/Discord/email/push:** external delivery is post-commit/outbox based. Delivery failure cannot roll back an already committed economy transaction; retries are bounded and deduplicated.
+- **Search/gallery/upload/public content:** uploads require content-type/signature validation, size/dimension limits, generated storage names, malware/content checks where appropriate, private-by-default ownership and safe download headers. Public UGC has moderation/index-policy state separate from publication state.
+- **Admin/audit/analytics:** raw telemetry and aggregate analytics permissions are separate. Sensitive raw IP/session/user-agent access requires recent reauth, purpose capture and audit; retention/minimization apply. Admin mutations require explicit function-level authorization and reason/idempotency where value or policy changes.
+- **Backup/restore/operations:** backup existence is not recovery evidence. Maintain independent restore rehearsal, RPO/RTO evidence, encrypted/off-host copies, schema/application compatibility and a documented authority cutover. A restore that has not been rehearsed is `UNVERIFIED`.
+
+### SEO and SEO backend
+
+- Latest Google Search material checked this round did not change Moneyverse's core indexing contract; the 2026-08-28 site-reputation update remains relevant to third-party/sponsored/UGC governance. Do not create third-party sections primarily to borrow host reputation.
+- Public SEO read models carry stable canonical identity, slug/redirect history, `updatedAt/lastModified`, language, ownership/editorial/sponsor/index-policy state, image metadata and structured-data inputs. Private/account/admin/transaction/casino-history/payment-callback surfaces are forced `noindex` and excluded from sitemaps.
+- Dynamic sitemap/robots generation must be deterministic from publish/index state, split before search-engine limits, expose stable `lastmod`, and never leak private object IDs. Naver robots validation and sitemap discovery are part of Korean-market smoke; Google/Naver representative URL inspection follows deploys that change rendering/index policy.
+- Public pages use SSR/ISR or equivalent crawlable server output, stable canonical, hreflang for genuinely translated equivalents, descriptive title/H1, breadcrumbs/internal links where useful, OG metadata, image dimensions/alt, and JSON-LD only when the visible content actually satisfies the schema. Filter/query permutations are canonicalized or noindexed; deleted content uses 404/410 and moved permanent content uses one-hop permanent redirects.
+- Performance guardrails: monitor LCP/INP/CLS by public template and device class; SEO release is blocked on accidental robots/noindex/canonical regressions, sitemap/private leakage or structured-data mismatch. Organic KPI chain is impressions → CTR → visit → signup → activation → D7/D30 → payer/ad contribution, not impressions alone.
+
+### Monetization and unit-economics gate
+
+- Google Play's current fee policy is market/cohort/transaction dependent; never model one universal store rate. For EEA/UK/US transactions under the June 30 2026 structure, standard auto-renewing subscriptions are 10% service fee, other new-install transactions 20% and other existing-install transactions 25%, with a 5% billing fee when Play Billing applies. Remaining markets use the applicable pre-rollout/program rules until their announced rollout.
+- Every real-money SKU therefore stores/model-tests `market`, effective-date/install cohort, recurring/non-recurring type, billing path/program, gross price, platform/billing fee, tax assumption, refund/fraud loss, entitlement/support/infra cost and contribution margin. Discounts are rejected when contribution margin or fairness guardrails fail.
+- Shop/payment/subscription scale criteria require positive contribution margin under the base scenario, bounded refund/fraud/support cost and no material D7/D30 or trust regression. Iterate when conversion exists but margin/retention guardrails miss; kill when negative contribution persists or monetization creates P2W/dark-pattern/regulatory risk.
+- Ads are evaluated as incremental ad net revenue minus ad-induced session/retention loss and support/privacy cost. SEO is evaluated as CAC reduction and downstream activation/LTV, while security/QA/operations are evaluated as avoided incident, fraud, refund, downtime and operator cost.
+
+### Release and backlog order
+
+`P0 runtime authority / exact-SHA truth → P0 independent backup+restore evidence → P0 false-green/status truth → HIGH privileged recovery cleanup → HIGH migration sequence + Work clock convergence → HIGH repository required-check enforcement → HIGH economy/admin/casino authorization and integrity → P1 core feature correctness → payment/shop unit economics → SEO acquisition → retention/growth → accessibility/long-term expansion`.
+
+This v152 planning integration changes documentation only. It does not deploy runtime code, mutate product data/DB schema, unsuspend Flux, rotate credentials or promote Production. Runtime implementation continues through a new branch, tests/CI, exact-SHA Test, backend/API/DB/user-flow QA, main integration, Production promotion, smoke and rollback evidence.
