@@ -30,7 +30,7 @@ jobs:
           fetch-depth: 0
           persist-credentials: true
 
-      - name: Drain, reconcile, and prune managed development branches
+      - name: Drain, reconcile, retry, and prune managed development branches
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -41,16 +41,57 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
 
-          mapfile -t branches < <(
-            gh api --paginate "repos/${REPO}/branches?per_page=100" --jq '.[].name' | sort
-          )
-
           merged_count=0
           validated_count=0
           validation_dispatched_count=0
           reconciled_count=0
           contained_deleted_count=0
           conflict_count=0
+          failed_validation_reconcile_count=0
+
+          reconcile_current_branch() {
+            local reason="$1"
+            echo "reconciling ${branch} against current main: ${reason}"
+
+            git reset --hard HEAD >/dev/null
+            git clean -fd >/dev/null
+            git fetch --prune origin main "$branch"
+            git checkout -B "$branch" "origin/$branch"
+
+            if ! git merge --no-edit -X theirs origin/main; then
+              git merge --abort >/dev/null 2>&1 || true
+              git reset --hard "origin/$branch" >/dev/null
+              echo "::warning::automatic main-authoritative reconciliation failed for ${branch}"
+              return 1
+            fi
+
+            if git diff --quiet origin/main HEAD -- .; then
+              if [[ -n "${pr:-}" ]]; then
+                gh api --method PATCH "repos/${REPO}/pulls/${pr}" -f state=closed >/dev/null || true
+              fi
+              gh api --method DELETE "repos/${REPO}/git/refs/heads/${encoded}" >/dev/null 2>&1 || true
+              contained_deleted_count=$((contained_deleted_count + 1))
+              echo "reconciled ${branch} became identical to main; closed stale PR when present and deleted branch"
+              return 0
+            fi
+
+            git push origin HEAD:"refs/heads/${branch}"
+            reconciled_count=$((reconciled_count + 1))
+
+            # Pushes authenticated with GITHUB_TOKEN do not reliably trigger another workflow.
+            # Explicit workflow_dispatch guarantees exact-SHA revalidation of the new head.
+            if gh workflow run test-candidate.yml --repo "$REPO" --ref "$branch"; then
+              validation_dispatched_count=$((validation_dispatched_count + 1))
+              echo "pushed reconciled head for ${branch}; explicitly dispatched exact-SHA candidate validation"
+            else
+              echo "::warning::reconciled ${branch}, but candidate dispatch failed"
+            fi
+            return 0
+          }
+
+          mapfile -t branches < <(
+            gh api --paginate "repos/${REPO}/branches?per_page=100" --jq '.[].name' | sort
+          )
 
           for branch in "${branches[@]}"; do
             case "$branch" in
@@ -90,12 +131,25 @@ jobs:
                 --jq ".workflow_runs[] | select(.head_sha == \"${branch_sha}\") | .id" \
                 | head -n 1
             )"
+
             if [[ -z "$validated" ]]; then
-              echo "dispatch validation for ${branch}: exact head ${branch_sha} has no successful Build Test Candidate run"
-              if gh workflow run test-candidate.yml --repo "$REPO" --ref "$branch"; then
-                validation_dispatched_count=$((validation_dispatched_count + 1))
+              failed_count="$(
+                gh api --method GET "repos/${REPO}/actions/workflows/test-candidate.yml/runs" \
+                  -f branch="$branch" -f status=completed -f per_page=30 \
+                  --jq "[.workflow_runs[] | select(.head_sha == \"${branch_sha}\" and .conclusion == \"failure\")] | length"
+              )"
+
+              if [[ "$failed_count" -ge 2 ]]; then
+                failed_validation_reconcile_count=$((failed_validation_reconcile_count + 1))
+                echo "${branch} has ${failed_count} failed exact-SHA candidate runs; reconcile instead of dispatching the same broken head again"
+                reconcile_current_branch "repeated exact-SHA candidate failure" || true
               else
-                echo "::warning::failed to dispatch Build Test Candidate for ${branch}"
+                echo "dispatch validation for ${branch}: exact head ${branch_sha} has no successful Build Test Candidate run"
+                if gh workflow run test-candidate.yml --repo "$REPO" --ref "$branch"; then
+                  validation_dispatched_count=$((validation_dispatched_count + 1))
+                else
+                  echo "::warning::failed to dispatch Build Test Candidate for ${branch}"
+                fi
               fi
               continue
             fi
@@ -111,7 +165,7 @@ jobs:
                 "- successful Build Test Candidate run: ${validated}" \
                 '- target: main' \
                 '' \
-                'The automation merges clean validated branches, reconciles conflicts against current main, revalidates any reconciled head, and deletes source branches after integration.'
+                'The automation merges clean validated branches, reconciles conflicts or repeatedly failing heads against current main, revalidates every reconciled exact SHA, and deletes the source branch after integration.'
               pr="$(gh api --method POST "repos/${REPO}/pulls" \
                 -f title="$title" -f head="$branch" -f base=main -f body="$body" \
                 --jq '.number')"
@@ -141,37 +195,12 @@ jobs:
               continue
             fi
 
-            if [[ "$merge_state" != "dirty" ]]; then
+            if [[ "$merge_state" == "dirty" ]]; then
+              conflict_count=$((conflict_count + 1))
+              reconcile_current_branch "merge conflict in PR #${pr}" || true
+            else
               echo "skip PR #${pr}: mergeable=${mergeable}, state=${merge_state}"
-              continue
             fi
-
-            conflict_count=$((conflict_count + 1))
-            echo "reconciling conflicted PR #${pr} (${branch}) against current main"
-
-            git reset --hard HEAD >/dev/null
-            git clean -fd >/dev/null
-            git fetch --prune origin main "$branch"
-            git checkout -B "$branch" "origin/$branch"
-
-            if ! git merge --no-edit -X theirs origin/main; then
-              git merge --abort >/dev/null 2>&1 || true
-              git reset --hard "origin/$branch" >/dev/null
-              echo "::warning::automatic main-authoritative reconciliation failed for ${branch}; keeping PR #${pr} open"
-              continue
-            fi
-
-            if git diff --quiet origin/main HEAD -- .; then
-              gh api --method PATCH "repos/${REPO}/pulls/${pr}" -f state=closed >/dev/null || true
-              gh api --method DELETE "repos/${REPO}/git/refs/heads/${encoded}" >/dev/null 2>&1 || true
-              contained_deleted_count=$((contained_deleted_count + 1))
-              echo "reconciled ${branch} became identical to main; closed PR #${pr} and deleted branch"
-              continue
-            fi
-
-            git push origin HEAD:"refs/heads/${branch}"
-            reconciled_count=$((reconciled_count + 1))
-            echo "pushed reconciled head for ${branch}; exact-SHA candidate validation will run before merge"
           done
 
           if [[ "$merged_count" -gt 0 ]]; then
@@ -184,11 +213,12 @@ jobs:
             echo '## Automatic branch drain and cleanup summary'
             echo
             echo "- exact-SHA validated branches observed: ${validated_count}"
-            echo "- missing validation runs dispatched: ${validation_dispatched_count}"
+            echo "- candidate validations dispatched: ${validation_dispatched_count}"
             echo "- branches reconciled against main: ${reconciled_count}"
+            echo "- repeated-failure reconciliations attempted: ${failed_validation_reconcile_count}"
             echo "- clean branches merged: ${merged_count}"
             echo "- contained/redundant branches deleted: ${contained_deleted_count}"
             echo "- conflicted PRs encountered: ${conflict_count}"
             echo
-            echo 'Reconciled branch heads are never merged immediately: each new head must pass Build Test Candidate for that exact SHA, then a later run merges it and deletes the source branch.'
+            echo 'Every reconciled branch head is explicitly revalidated by workflow_dispatch before merge; no reconciled SHA bypasses Build Test Candidate.'
           } >> "$GITHUB_STEP_SUMMARY"
