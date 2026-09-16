@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.16.157
+> **현재 통합 버전:** v2026.09.16.158
 > **구현·증거 동기화:** 2026-09-16
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -546,3 +546,35 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 외부 조사: Google Search Central 9월 update/site-reputation/favicon/regional Search 문서, OWASP baseline, Google Play 현재 수수료. 런타임/코드 증거: current main, PR #384, Actions #888, branch protection.
 - 개발순서: P0 exact-SHA/runtime/DB evidence → 독립 restore 가능한 backup → false-green status → HIGH casino contract exact-runtime 검증 → runtime writable-path ownership → privileged recovery → migration/Work-clock integrity → repository enforcement → economy/admin/casino authorization → core completeness → monetization → SEO/growth/accessibility.
 - 기획 자동화는 문서만 변경했다. 구현은 `new branch → tests/CI → isolated exact-SHA Test → backend/API/DB/user-flow QA → main → exact-main retest → Production promotion → smoke/monitoring/rollback` 순서를 유지한다.
+
+
+## v2026.09.16.158 — 반복 릴리스 게이트 실패·크롤러 식별·한국 수수료 시행일 갱신
+
+### REL-EVIDENCE-158-01 — P0 — BLOCKED / 원인 제거 필수
+- 최초/최근 재현: isolated Test exact-SHA 게이트 실패가 반복됐고 최신 확정 재현은 2026-09-16 runtime 후보 `f6fd312025dcb9c517edfa2ad4986de0db1df54d`의 Production Release #888이다. immutable SHA 결정은 성공했지만 `https://test.easy-scraping.com/api/version`을 15초 간격 60회 확인한 뒤 13:10:08Z `isolated test never served exact SHA ...`로 종료됐고 Production build는 skipped됐다. 반복 BLOCKED이므로 단순 timeout이 아니라 원인 제거 백로그로 승격한다.
+- 영향/severity: 카지노 계약 수정까지 포함한 모든 변경의 P0 승격 차단이다. source/PR test green은 Test Service가 해당 candidate를 실제 라우팅한다는 증거가 아니며, 원인을 제거하지 않은 승격은 stale code/wrong image/wrong DB/false-green 위험이 있다.
+- 증거 설계: 매 시도마다 `{release_sha, candidate_backend_digest, candidate_frontend_digest, gitops_desired_revision, flux_applied_revision, deployment_generation, replicaset_uid, pod_uid, pod_image_digest, pod_local_version, service_endpoint_set, ingress_target, public_test_version, backend_ready, db_identity_hash, schema_migration_head, probe_at, latency_ms, first_mismatch_layer}`를 machine-readable로 보존한다. secret/cookie/Authorization/DSN/private key는 금지한다.
+- 원인 결정 트리: candidate digest 없음=build/publish, desired stale=GitOps writer, desired!=applied=Flux reconcile/auth/source, applied 정상+workload stale=rollout/imagePull/deployment, Pod 정상+Service stale=selector/readiness, Service 정상+public stale=ingress/CDN/cache/routing, public SHA 정상+catalog/readiness/DB 실패=backend/DB authority 문제로 분류한다. 최종 timeout만 출력하지 말고 최초 실패 계층을 출력한다.
+- 수정 백로그: Infra는 reconciliation 전후 probe와 immutable digest assertion, API는 build SHA+DB identity hash에 묶인 비밀 없는 version/readiness, DB는 credential 대신 least-privilege schema/migration-head assertion, observability는 계층별 convergence latency/mismatch counter, workflow는 실패 시에도 evidence bundle upload를 구현한다. evidence 형식 자체는 운영 evidence table을 택하지 않는 한 schema migration이 필요 없으며 우선 immutable workflow artifact/object storage를 사용한다.
+- 롤백/fallback: SHA 비교를 약화하거나 timeout만 늘리는 것을 해결책으로 삼지 않는다. Production은 마지막 verified immutable frontend/backend pair를 유지한다. Test 수렴 전 위험 기능은 server-authoritative feature flag로 닫고 authorization/DTO validation/ledger constraint/DB identity 검사를 완화하지 않는다.
+- 테스트: evidence serializer/redaction 단위시험, 각 mismatch 계층 synthetic workflow test, desired→applied 통합시험, cluster/service/ingress routing, real PostgreSQL DB identity/schema-head, stale-cache/wrong-selector negative, evidence secret 누출 보안시험, 실패/timeout에도 bundle 생성+Production build 미실행 회귀시험을 수행한다.
+- Test 수용: candidate digest 실행, pod-local/public Test SHA=requested release, backend readiness/catalog=권위 Test DB 정상, Test `noindex`, 모든 계층에 fresh timestamp가 있어야 한다. Production 승격은 동일 candidate lineage+current-main exact retest+changed-feature QA+미해결 P0/HIGH gate 없음이 조건이다.
+
+### CI-158-02 — HIGH — IN PROGRESS / 릴리스 증거 아님
+- 현재 exact main은 문서 commit `88452f14ca344ee1d060b58b84953599bf657538`. Build Test Candidate #755의 `verify/check`는 secret rejection, lint, raw-control-byte 검사, typecheck, build, DB migration 적용, tests, Prisma schema mutation 차단, production dependency audit까지 성공했다. 캡처 시 backend candidate push는 성공했고 frontend candidate image build는 진행 중이다.
+- `VERIFY_GREEN`, `BACKEND_IMAGE_BUILT`, `FRONTEND_IMAGE_PENDING`을 분리한다. 어느 것도 `TEST_APPLIED`, `TEST_PUBLIC_EXACT`, `DB_VERIFIED`, `CHANGED_FLOW_QA_GREEN`, `PRODUCTION_VERIFIED`를 의미하지 않는다. 상태 API/대시보드는 downstream 필수 상태가 없을 때 aggregate green을 만들지 않는다.
+
+### SEO-CRAWLER-158-03 — P1 — 설계 갱신 / 구현 미검증
+- 2026-09-16 Google Search Central 문서 변경 로그는 `GoogleProducer` HTTP User-Agent 문자열 갱신을 기록했다. 따라서 crawler 분류를 고정된 전체 UA 문자열에 의존시키지 않는다. crawler identity가 필요한 경우 Google의 공식 검증 방법을 따르며, 일반 익명 HTTP client와 다른 privileged/indexable content를 crawler에게만 제공하지 않는다.
+- SEO backend crawler 관측에는 정규화 bot family, 제한 보존/마스킹된 raw UA, verification 결과, canonical URL, HTTP status, robots directive, canonical, render mode, cache status, latency를 저장한다. UA 매칭으로 인증/noindex를 우회하지 않는다. 알려진 crawler 검증의 체계적 실패 또는 rendering-critical asset 차단을 경보한다.
+- 공개 페이지 QA는 canonical/robots/sitemap/lastModified/hreflang/structured data/server-rendered primary content/rendering resource/CWV 계약을 유지한다. 계정/관리자/payment callback/private transaction/private casino history는 sitemap 제외+`noindex`다.
+
+### MONETIZATION-158-04 — P1 — 한국 시행일 기반 unit economics
+- Google Play 현재 공식 문서상 new install-cohort 수수료 구조의 한국 rollout은 2026-12-31이다. 그 전까지 한국은 기존 규칙을 적용하며 예를 들어 자동갱신 구독은 15%, 15% tier 적격 개발자는 연 USD 1M까지 15%, 초과분 30%다. 한국 alternative billing은 프로그램 조건에 따라 해당 Play 수수료에서 4%p 감소한다. 2026년 9월 전망에 미래 KR 10%/20%/25% cohort 표를 이미 시행된 것처럼 사용하지 않는다.
+- unit-economics engine은 모든 유료 SKU를 `market + transaction_at + install_cohort_if_applicable + recurring/nonrecurring + billing_path + enrolled_programme + tax/refund/fraud assumptions`로 계산하고 forecast에 사용한 fee-policy version/effective date를 저장한다. 실측 없는 attach rate/paid conversion/ARPU/ARPDAU/ARPPU/refund/churn/CAC/LTV는 `HYPOTHESIS`/`TEST TARGET`이다.
+- guardrail: 해당 시장에서 아직 시행되지 않은 fee regime으로 contribution margin을 계산한 pricing experiment는 출시하지 않는다. KR rollout 시 낙관/기준/보수 시나리오를 재계산하고 매출 증가를 churn/refund/support/trust 비용과 비교한다.
+
+### v158 worklog
+- 최신 조사: Google Search Central 2026년 9월 변경/블로그, favicon/site-reputation 기준, Google Play 현재 수수료/rollout, OWASP/ASVS baseline을 재대조했다. 2026-09-16 crawler identity 운영 영향과 한국 수수료 시행일 guardrail을 채택했고 행사 공지는 SEO 알고리즘 변경으로 취급하지 않았다.
+- runtime/QA/CI: main `88452f14...`, #888의 exact-Test SHA 실패와 Production build skip, #755 verify/check green 및 frontend candidate build 진행 상태를 확인했다. Production 성공을 추론하지 않는다.
+- 개발 연결: P0 release evidence/root-cause 제거가 casino Production 재검증과 신규 기능보다 우선이다. 이번 자동화는 문서만 변경하며 runtime/DB/Flux/Production 승격은 수행하지 않는다.
