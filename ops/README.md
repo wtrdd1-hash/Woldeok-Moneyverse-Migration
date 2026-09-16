@@ -68,3 +68,6 @@ host holds a credential for:
 Each needs `https://<host>/auth/<provider>/callback` — the exact value
 `APP_BASE_URL` names, which the API also checks against `APP_BASE_URL`
 before it will enable the provider at all.
+## Economy AI local inference
+
+The non-secret systemd unit and backend environment profile for the current local dual-model economy-AI lane are documented in [`README.economy-ai.md`](systemd/README.economy-ai.md). Model weights and credentials stay outside Git.

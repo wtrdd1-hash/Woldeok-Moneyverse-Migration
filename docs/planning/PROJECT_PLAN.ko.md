@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.16.159
+> **현재 통합 버전:** v2026.09.16.160
 > **구현·증거 동기화:** 2026-09-16
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -589,3 +589,22 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 모바일 API 계약을 `v2026.09.16.159`로 올리고 TypeScript 컴파일러 내부 `__@...` 심볼 속성을 생성 계약에서 제외해 관련 없는 타입 그래프 변경이 공개 JSON 응답 스키마를 흔들지 않게 한다.
 - isolated PostgreSQL에서 migration 203과 Work/clock 실DB 15개 테스트를 통과했다. 현실 10분 day, 70분 week rollover, timezone 독립성, task/global cap, 직업 전환, 멱등성/무결성, preview/지급/dashboard 일치를 검증했다. 로컬 DB package 7/7, backend 871, frontend 612, lint 오류 0, typecheck, production build도 통과했다.
 - GitHub CI, exact-head Test 수렴, 권위 DB backup/migration, Production smoke 전에는 운영 완료로 선언하지 않는다. v158의 P0 release-evidence gate를 이 수정 때문에 완화하지 않는다.
+
+
+## v2026.09.16.160 — 로컬 이중 모델 경제 AI 운영 활성화
+
+### ECON-AI-160-01 — IMPLEMENTED / RUNTIME-CONFIG ACTIVATION
+- 런타임 권위는 승인된 Debian 13 systemd/PostgreSQL 경로를 유지한다. 이번 작업은 최신 application `main`을 운영에 배포한 것이 아니다. 공개 Production은 이미 이중 경제 AI reviewer를 포함한 application SHA `be218f0403372689dbdf8af9bf8700264f39348f`를 계속 제공했고, 문서 통합만 application main `03a8ae9c5313d0915589691afc6fff022323c305` 위에 rebase했다.
+- Production `economy_ai_policy_review`를 감사 가능한 `admin_set_feature_switch` 경로로 enabled 처리했다. 최초 provisional v159 라벨 뒤 동시 작업이 main의 v159를 먼저 사용해 v160으로 버전 정정을 남겼다. 정정 시 상태는 `enabled -> enabled`이며 기존 이력을 덮어쓰지 않고 별도 receipt/audit 사유를 추가했다.
+- 로컬 inference는 `127.0.0.1:11434` localhost에만 바인딩하고 runtime/model은 `/srv/moneyverse-data/ai`에 둔다. A 좌석은 `llama3.2:3b`, B 좌석은 `gemma3:1b`이다. `qwen2.5:3b`는 confidence `0..1` 출력 계약을 위반해 운영 프로필에서 제외했다.
+- 자원 경계는 병렬요청 1, 최대 상주모델 2, keep-alive 2분, `MemoryHigh=6G`, `MemoryMax=7G`, Ollama cloud 비활성화이며 제한된 시스템 디스크에는 모델 weight를 저장하지 않는다.
+- 백엔드는 OpenAI-compatible 로컬 endpoint, 호출당 timeout 180초, concurrency 1, exact-result cache 300초, review TTL 120분을 사용한다. secret은 Git에 넣지 않고 비민감 service/config template만 저장한다.
+
+### Test/Production 증거와 안전 계약
+- 기존 economy reviewer 단위시험 10/10 통과. 선택한 두 모델 모두 `decision`, `0..1` confidence, rationale, risks 계약을 만족했다.
+- 검증은 배포된 `test-be218f040337` application release와 권위 Test PostgreSQL을 사용했다. 공개 Test route도 `be218f...`를 반환하므로 current-main exact-SHA Test 수렴을 주장하지 않으며 `REL-EVIDENCE-158-01`은 종료하지 않는다.
+- 격리 Test에서 실제 모델 호출과 Test PostgreSQL을 사용해 4개 routed domain/8개 seat call, append-only review 저장, scoreboard, exact-hash `dual_agree`, exact-only `ai_veto`, 변경 proposal `ai_missing_classical_fallback`, 모델 미설정 `unconfigured_classical_fallback`을 검증했다. application role의 직접 table read는 계속 거부됐다.
+- 활성화 후 첫 Production reviewer 점검은 약 40ms 안에 `no_eligible_classical_proposal`로 끝나 model council, review row, 정책값 변경이 모두 없었다. Production backend/AI service는 active였고 공개 홈은 HTTP 200이었다.
+- 결정론/classical 엔진이 회계와 정책 권위다. AI는 review append와 exact matching proposal veto만 가능하다. AI 증거가 누락·만료·불일치·장애·abstain이면 대체값을 만들지 않고 classical lane으로 fallback한다.
+- rollback은 fail-safe다. 감사 함수로 switch를 `disabled`로 바꾸고 필요 시 backend AI runtime 변수를 복원/제거한 뒤 backend 재시작, 미사용 시 local inference 중지/비활성화 순서다. AI 가용성을 위해 결정론 검증·원장대사·exact-proposal matching을 약화하지 않는다.
+- 모니터링은 feature switch, reviewer outcome, council decision mix, confidence, latency/token, service memory/restart, backend error, economy reconciliation을 본다. 모델 품질저하는 결정론 gate 우회 사유가 아니라 운영 incident다.
