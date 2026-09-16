@@ -2,11 +2,28 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.166
+> **현재 통합 버전:** v2026.09.17.167
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 변경 — v2026.09.17.167 (2026-09-17)
+
+### 근거와 결정
+
+- **저장소/런타임 근거:** 회차 시작 및 중간 재확인 `main`은 `e9b5743c2305f0d5fc38f3c473d8a7c891561d3f` (`docs: integrate Moneyverse plan v2026.09.17.166`)이다. branch protection은 켜져 있지만 required-status-check enforcement는 `off`이고 required context/check도 없다. CI #1168은 성공했다. 그러나 docs-only SHA에서 `Build Test Candidate` #793도 성공했고 `Build Production Release` #914가 `test-gate`에 진입해 근거 수집 시점에도 실행 중이었다. `Auto Integrate and Promote` #125가 skip됐지만 candidate build와 Production release orchestration이 이미 시작됐으므로 zero-side-effect 계약을 충족한 것은 아니다. 승인된 Debian 장치의 public runtime probe는 DNS 해석 실패로 불가능했으므로 새 Test/Production runtime 상태를 추정하지 않는다.
+- **P0 `REL-DOCS-167-01` — OPEN / 반복 재현:** docs-only repository head가 결정론적 runtime-input 분류 전에 Test/release 자원을 소비한다. 최신 재현일은 2026-09-17, SHA는 `e9b5743c...`이다. 재현은 docs-only 통합 → CI green → Test candidate #793 성공 → Production Release #914 `test-gate`다. 영향은 CI/registry/Test 자원 낭비, release identity 오판, 실제 릴리스 지연과 repository head/deployed application 혼동이다. 원인은 control-plane trigger/eligibility 순서로 한정되며 코드 검색에서 제안된 classifier는 아직 기획문서에서만 확인된다.
+- **수정 계약:** candidate build, registry write, GitOps mutation, exact-SHA polling, promotion보다 앞서 단일 authoritative classifier를 둔다. merge-base→head diff와 rename/delete/submodule/symlink metadata, versioned `release-inputs.yml`을 입력받아 `{repositoryHeadSha, applicationSourceSha, classification, matchedRuntimePaths, classifierVersion, evidenceCreatedAt}`를 immutable evidence로 출력한다. 허용값은 `RUNTIME_RELEASE_REQUIRED`, `DOCS_ONLY_NO_RUNTIME_RELEASE`, `RELEASE_INPUT_CLASSIFICATION_ERROR`뿐이며 unknown/error는 fail-closed다. frontend/backend/shared runtime, lockfile, generated runtime artifact, DB migration, Docker/build, workflow/GitOps/deploy input, runtime config/secret reference는 runtime-relevant다.
+- **마이그레이션/롤백/테스트:** DB migration 없음. rollback은 classifier/workflow wiring만 되돌린다. unit corpus는 docs-only, FE/BE/shared, lockfile, migration, container, workflow/GitOps, mixed, rename/delete, symlink/submodule, merge commit, shallow history, path-normalization trick을 포함한다. docs-only integration acceptance는 `image_build=0`, `registry_push=0`, `test_gitops_write=0`, `exact_sha_poll=0`, `production_mutation=0`이다. runtime 변경은 immutable candidate → isolated exact-SHA Test → API/DB/user-flow QA → main → Production evidence/smoke를 그대로 통과한다. 유지 corpus false-negative 0 전 promotion을 차단한다. `release_classifier_errors`, `docs_only_release_side_effect_total`, docs-only candidate minute/storage, application/repository SHA divergence를 관측한다.
+- **SEO:** Google Search Central의 2026-09-17 infinite-scroll 문서 이전은 guidance 변경이 아니다. indexable community/market/collection/search는 안정적인 page/chunk URL과 crawlable link를 유지한다. 2026-08-28 site-reputation 변경은 sponsor/affiliate/third-party/UGC governance에 적용하고 2026-09-16 Search Central Live 게시물은 행사 정보라 ranking/indexing 정책 변경에서 제외한다. 공개 SEO read model `{canonicalUrl,indexPolicy,title,description,h1,breadcrumbs,localeAlternates,updatedAt,imageMeta,structuredDataVersion}`과 pagination metadata를 서버 권위로 유지하며 private/account/admin/transaction은 `noindex`+sitemap 제외, 404/410/redirect/`lastmod` 의미를 서버에서 일관되게 보장한다. KPI는 impression→click→signup→activation→D7/D30→revenue/LTV이고 crawl/index error와 CWV를 guardrail로 둔다.
+- **광고/UX:** Google Publisher Tag release note상 2026-09-08부터 bfcache 복귀 시 actively viewed ad slot이 자동 refresh될 수 있고 `AutoRefreshConfig.backForwardCache`로 비활성화할 수 있다. provider impression/event identity로 광고 분석을 중복 제거하고 단순 page restore를 provider의 실제 새 impression 없이 신규 business impression으로 세지 않는다. 실험은 `광고매출 - 광고유발 이탈/리텐션 손실` 순효과로 판단하며 back-button/interstitial은 navigation을 가로채지 않는다.
+- **보안:** OWASP ASVS 5.0.0과 API Security Top 10 2023을 유지한다. release classification을 supply-chain authorization boundary로 취급해 docs-path executable smuggling, ambiguous generated artifact, classifier failure를 배포차단한다. economy/admin/payment/reward/casino/referral route는 authn, capability/object authorization, idempotency, rate/business-flow limit, PII class, audit event, datastore inventory와 BOLA/BFLA/sensitive-business-flow negative test를 유지한다.
+- **사업성:** Google Play 현행 수수료는 market/install cohort/transaction type/programme/billing path별로 달라 단일 요율을 쓰지 않는다. 실제결제 SKU는 `feePolicyVersion, market, transactionAt, installCohort, transactionType, billingPath, programme, grossPrice, tax, platformFee, paymentFee, refundReserve, directOpsCost`를 보존한다. revenue/net revenue/gross·contribution margin/ARPU/ARPDAU/ARPPU/conversion/renewal·churn/refund/CAC·LTV·payback/fraud/infra·support/D1·D7·D30을 분리 측정하고 미실측 값은 `HYPOTHESIS`/`TEST TARGET`이다. contribution margin과 retention/fairness/security guardrail을 함께 통과할 때만 scale한다.
+
+### v167 백로그/수용 순서
+
+`P0 독립 암호화 backup + isolated restore/reconciliation` → `P0 stale-status false-green` → `P0 release classifier / docs-only side-effect zero` → `P0 GitOps/public edge/systemd release authority 단일화` → `P1 auth/session/admin/casino/Work/DB authorization+ledger QA` → `P1 repository required-check enforcement` → 핵심 correctness → monetization → SEO/acquisition → retention/accessibility 순이다. 런타임 구현은 별도 branch/test/release 흐름으로 수행하며 이 기획 회차에서 runtime code를 배포하지 않는다.
 
 ## 0. 유지관리·증거·우선순위 원칙
 
