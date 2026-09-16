@@ -120,7 +120,6 @@ const siteStructuredData = {
       '@id': `${siteUrl}/#organization`,
       name: '월덕 머니버스',
       url: siteUrl,
-      email: 'jungchwimisaenghwal63@gmail.com',
     },
   ],
 };

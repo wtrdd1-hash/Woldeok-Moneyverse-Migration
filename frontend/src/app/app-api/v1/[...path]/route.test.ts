@@ -23,7 +23,7 @@ describe('app API route compatibility', () => {
     const response = await GET(request('/app-api/v1/meta/contract'), context('meta', 'contract'));
     expect(response.status).toBe(200);
     expect(response.headers.get('x-moneyverse-api-version')).toBe('1');
-    expect(response.headers.get('x-moneyverse-contract-version')).toBe('v2026.09.15.125');
+    expect(response.headers.get('x-moneyverse-contract-version')).toBe('v2026.09.16.144');
     const body = await response.json();
     expect(body.baseUrl).toBe('https://easy-scraping.com/app-api/v1');
     expect(body.auth.persistentCookieJarRequired).toBe(true);
@@ -72,7 +72,7 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('accept-ranges')).toBe('bytes');
     expect(response.headers.get('etag')).toBe('"def"');
     expect(response.headers.get('retry-after')).toBe('3');
-    expect(response.headers.get('x-moneyverse-contract-version')).toBe('v2026.09.15.125');
+    expect(response.headers.get('x-moneyverse-contract-version')).toBe('v2026.09.16.144');
   });
 
   it('turns upstream transport failures into stable JSON gateway errors', async () => {

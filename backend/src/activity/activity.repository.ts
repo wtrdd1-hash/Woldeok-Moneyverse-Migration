@@ -18,6 +18,19 @@ export interface ActivityLogRow {
   readonly created_at: Date;
 }
 
+
+export interface TrafficAnalyticsDashboard {
+  readonly granularity: 'day' | 'month' | 'year';
+  readonly periods: number;
+  readonly rangeStart: string;
+  readonly generatedAt: string;
+  readonly summary: { readonly pageViews: number; readonly uniqueSessions: number; readonly authenticatedUsers: number; readonly anonymousSessions: number };
+  readonly series: readonly { readonly bucket: string; readonly pageViews: number; readonly uniqueSessions: number; readonly authenticatedUsers: number }[];
+  readonly landingPages: readonly { readonly path: string; readonly entries: number; readonly anonymousEntries: number }[];
+  readonly sources: readonly { readonly source: string; readonly entries: number }[];
+  readonly countries: readonly { readonly country: string; readonly entries: number }[];
+}
+
 @Injectable()
 export class ActivityRepository {
   constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
@@ -43,6 +56,7 @@ export class ActivityRepository {
   }
 
   async listLogs(
+    actor: string,
     limit: number,
     offset: number,
     eventType?: string,
@@ -51,13 +65,27 @@ export class ActivityRepository {
     const client = await this.pool.connect();
     try {
       const result = await client.query<ActivityLogRow>(
-        'SELECT * FROM public.activity_list_logs($1::integer, $2::integer, $3::text, $4::uuid)',
-        [limit, offset, eventType ?? null, userId ?? null],
+        'SELECT * FROM public.admin_activity_list_logs($1::uuid, $2::integer, $3::integer, $4::text, $5::uuid)',
+        [actor, limit, offset, eventType ?? null, userId ?? null],
       );
       return result.rows;
     } finally {
       client.release();
     }
+  }
+
+  async trafficDashboard(
+    actor: string,
+    granularity: 'day' | 'month' | 'year',
+    periods: number,
+  ): Promise<TrafficAnalyticsDashboard> {
+    const result = await this.pool.query<{ dashboard: TrafficAnalyticsDashboard }>(
+      'SELECT public.admin_activity_traffic_dashboard($1::uuid, $2::text, $3::integer) AS dashboard',
+      [actor, granularity, periods],
+    );
+    const dashboard = result.rows[0]?.dashboard;
+    if (!dashboard) throw new Error('admin_activity_traffic_dashboard did not return a row');
+    return dashboard;
   }
 
   async logRequest(input: {

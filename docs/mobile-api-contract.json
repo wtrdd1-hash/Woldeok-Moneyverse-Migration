@@ -1,5 +1,5 @@
 {
-  "contractVersion": "v2026.09.15.125",
+  "contractVersion": "v2026.09.16.144",
   "apiVersion": "1",
   "baseUrl": "https://easy-scraping.com/app-api/v1",
   "languagePolicy": {
@@ -489,6 +489,1483 @@
         },
         "required": [
           "recorded"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/admin/activity/logs",
+      "purpose": "관리자 사용자 활동 로그 조회",
+      "callWhen": "관리자 활동 로그 화면 진입/페이지 이동",
+      "authorization": "로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션",
+      "afterSuccess": "응답 로그를 관리자 활동 화면에 표시",
+      "backendRoute": "/api/v1/admin/activity/logs",
+      "operationId": "ActivityController_listLogs",
+      "backendOpenApiPath": "/admin/activity/logs",
+      "summary": "List user activity logs for administrators",
+      "parameters": [
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200,
+            "default": 50
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+          }
+        },
+        {
+          "name": "eventType",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "userId",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-array",
+        "topLevelKeys": []
+      },
+      "responseSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "user_id": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "username": {
+              "type": "string"
+            },
+            "session_id": {
+              "type": "string"
+            },
+            "event_type": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "target_label": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "dwell_time_ms": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "number"
+                }
+              ]
+            },
+            "ip": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "user_agent": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "metadata": {
+              "type": "object",
+              "tsType": "Record<string, unknown>"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "id",
+            "user_id",
+            "username",
+            "session_id",
+            "event_type",
+            "path",
+            "target_label",
+            "dwell_time_ms",
+            "ip",
+            "user_agent",
+            "metadata",
+            "created_at"
+          ]
+        }
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/admin/activity/traffic",
+      "purpose": "관리자 접속량·유입경로·접속경로 집계",
+      "callWhen": "관리자 트래픽 분석 화면 진입/기간 변경",
+      "authorization": "로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션",
+      "afterSuccess": "일/월/년 집계와 유입·진입 경로를 표시",
+      "backendRoute": "/api/v1/admin/activity/traffic",
+      "operationId": "ActivityController_traffic",
+      "backendOpenApiPath": "/admin/activity/traffic",
+      "summary": "Aggregated visitor traffic, landing paths and acquisition sources",
+      "parameters": [
+        {
+          "name": "granularity",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "day",
+              "month",
+              "year"
+            ],
+            "default": "day"
+          }
+        },
+        {
+          "name": "periods",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 366,
+            "default": 30
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "granularity",
+          "periods",
+          "rangeStart",
+          "generatedAt",
+          "summary",
+          "series",
+          "landingPages",
+          "sources",
+          "countries"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "granularity": {
+            "oneOf": [
+              {
+                "type": "string",
+                "const": "day"
+              },
+              {
+                "type": "string",
+                "const": "month"
+              },
+              {
+                "type": "string",
+                "const": "year"
+              }
+            ]
+          },
+          "periods": {
+            "type": "number"
+          },
+          "rangeStart": {
+            "type": "string"
+          },
+          "generatedAt": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "object",
+            "properties": {
+              "pageViews": {
+                "type": "number"
+              },
+              "uniqueSessions": {
+                "type": "number"
+              },
+              "authenticatedUsers": {
+                "type": "number"
+              },
+              "anonymousSessions": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "pageViews",
+              "uniqueSessions",
+              "authenticatedUsers",
+              "anonymousSessions"
+            ]
+          },
+          "series": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "bucket": {
+                  "type": "string"
+                },
+                "pageViews": {
+                  "type": "number"
+                },
+                "uniqueSessions": {
+                  "type": "number"
+                },
+                "authenticatedUsers": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "bucket",
+                "pageViews",
+                "uniqueSessions",
+                "authenticatedUsers"
+              ]
+            }
+          },
+          "landingPages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "entries": {
+                  "type": "number"
+                },
+                "anonymousEntries": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "path",
+                "entries",
+                "anonymousEntries"
+              ]
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "type": "string"
+                },
+                "entries": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "source",
+                "entries"
+              ]
+            }
+          },
+          "countries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "country": {
+                  "type": "string"
+                },
+                "entries": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "country",
+                "entries"
+              ]
+            }
+          }
+        },
+        "required": [
+          "granularity",
+          "periods",
+          "rangeStart",
+          "generatedAt",
+          "summary",
+          "series",
+          "landingPages",
+          "sources",
+          "countries"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/admin/economy/ai-status",
+      "purpose": "경제 AI 위원회 상태 조회",
+      "callWhen": "관리자 경제 화면 진입/새로고침",
+      "authorization": "로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션",
+      "afterSuccess": "스위치·최근 리뷰·에이전트 상태를 표시",
+      "backendRoute": "/api/v1/admin/economy/ai-status",
+      "operationId": "AdminEconomyController_aiStatus",
+      "backendOpenApiPath": "/admin/economy/ai-status",
+      "summary": "Economy AI council status",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "switchState",
+          "reviewCount",
+          "latestReview",
+          "agents"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "tsType": "Record<string, unknown>"
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/admin/me",
+      "purpose": "관리자 역할 확인",
+      "callWhen": "관리자 화면 진입 전 역할 재확인",
+      "authorization": "로그인 + 최신 동의 + 관리자 역할",
+      "afterSuccess": "roles를 관리자 UI 권한 상태에 반영",
+      "backendRoute": "/api/v1/admin/me",
+      "operationId": "AdminController_me",
+      "backendOpenApiPath": "/admin/me",
+      "summary": "Roles held by the caller",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "roles"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "roles"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/admin/security/sessions",
+      "purpose": "관리자 콘솔 세션 열기",
+      "callWhen": "관리자 기능 진입 시",
+      "authorization": "로그인 + 최신 동의 + 관리자 역할 + CSRF + 관리자 보안 정책",
+      "afterSuccess": "회전된 세션/CSRF를 저장한 뒤 관리자 데이터를 다시 조회",
+      "backendRoute": "/api/v1/admin/security/sessions",
+      "operationId": "AdminSecurityController_openConsole",
+      "backendOpenApiPath": "/admin/security/sessions",
+      "summary": "Enter the operations console, rotating the session",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "state",
+          "expiresAt",
+          "idleExpiresAt",
+          "csrfToken",
+          "loginContext"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "state": {
+            "oneOf": [
+              {
+                "type": "string",
+                "const": "open"
+              },
+              {
+                "type": "string",
+                "const": "idle_locked"
+              },
+              {
+                "type": "string",
+                "const": "expired"
+              },
+              {
+                "type": "string",
+                "const": "closed"
+              },
+              {
+                "type": "string",
+                "const": "none"
+              }
+            ]
+          },
+          "expiresAt": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "format": "date-time"
+              }
+            ]
+          },
+          "idleExpiresAt": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "string",
+                "format": "date-time"
+              }
+            ]
+          },
+          "csrfToken": {
+            "type": "string"
+          },
+          "loginContext": {
+            "type": "object",
+            "properties": {
+              "decision": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "const": "allow"
+                  },
+                  {
+                    "type": "string",
+                    "const": "block"
+                  }
+                ]
+              },
+              "reason": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "decision",
+              "reason"
+            ]
+          }
+        },
+        "required": [
+          "state",
+          "expiresAt",
+          "idleExpiresAt",
+          "csrfToken",
+          "loginContext"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/admin/support/threads",
+      "purpose": "관리자 문의함 조회",
+      "callWhen": "화면 진입 또는 새로고침 시",
+      "authorization": "로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션",
+      "afterSuccess": "응답을 현재 화면 상태에 반영",
+      "backendRoute": "/api/v1/admin/support/threads",
+      "operationId": "AdminSupportController_threads",
+      "backendOpenApiPath": "/admin/support/threads",
+      "summary": "Administrator support inbox",
+      "parameters": [
+        {
+          "name": "status",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string",
+            "enum": [
+              "open",
+              "waiting_user",
+              "resolved"
+            ]
+          }
+        }
+      ],
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "threads"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "threads": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "thread_id": {
+                  "type": "string"
+                },
+                "subject": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "last_message_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "thread_id",
+                "subject",
+                "status",
+                "created_at"
+              ]
+            }
+          }
+        },
+        "required": [
+          "threads"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/admin/support/threads/:id/messages",
+      "purpose": "관리자가 문의 대화 조회",
+      "callWhen": "화면 진입 또는 새로고침 시",
+      "authorization": "로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션",
+      "afterSuccess": "응답을 현재 화면 상태에 반영",
+      "backendRoute": "/api/v1/admin/support/threads/:id/messages",
+      "operationId": "AdminSupportController_messages",
+      "backendOpenApiPath": "/admin/support/threads/{id}/messages",
+      "summary": "Read a support conversation as administrator",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "messages"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "message_id": {
+                  "type": "string"
+                },
+                "sender_kind": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "const": "user"
+                    },
+                    {
+                      "type": "string",
+                      "const": "admin"
+                    }
+                  ]
+                },
+                "sender_user_id": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "message_id",
+                "sender_kind",
+                "body",
+                "created_at"
+              ]
+            }
+          }
+        },
+        "required": [
+          "messages"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/admin/support/threads/:id/messages",
+      "purpose": "관리자가 회원 문의에 답장",
+      "callWhen": "사용자가 해당 저장/실행 작업을 확정했을 때",
+      "authorization": "로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션 + CSRF",
+      "afterSuccess": "문의 목록/대화를 서버에서 다시 조회",
+      "backendRoute": "/api/v1/admin/support/threads/:id/messages",
+      "operationId": "AdminSupportController_reply",
+      "backendOpenApiPath": "/admin/support/threads/{id}/messages",
+      "summary": "Reply to a member support conversation",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "mediaType": "application/json",
+        "schema": {
+          "$ref": "#/components/schemas/NewMessageDto"
+        },
+        "schemaName": "NewMessageDto",
+        "resolvedSchema": {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "idempotencyKey": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "body",
+            "idempotencyKey"
+          ]
+        }
+      },
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "message"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "object",
+            "properties": {
+              "message_id": {
+                "type": "string"
+              },
+              "sender_kind": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "const": "user"
+                  },
+                  {
+                    "type": "string",
+                    "const": "admin"
+                  }
+                ]
+              },
+              "sender_user_id": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "message_id",
+              "sender_kind",
+              "body",
+              "created_at"
+            ]
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/app-api/v1/admin/support/threads/:id/status",
+      "purpose": "관리자가 문의 처리 상태 변경",
+      "callWhen": "사용자가 해당 저장/실행 작업을 확정했을 때",
+      "authorization": "로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션 + CSRF",
+      "afterSuccess": "문의 목록/대화를 서버에서 다시 조회",
+      "backendRoute": "/api/v1/admin/support/threads/:id/status",
+      "operationId": "AdminSupportController_status",
+      "backendOpenApiPath": "/admin/support/threads/{id}/status",
+      "summary": "Change support conversation status",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "mediaType": "application/json",
+        "schema": {
+          "$ref": "#/components/schemas/StatusDto"
+        },
+        "schemaName": "StatusDto",
+        "resolvedSchema": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "open",
+                "waiting_user",
+                "resolved"
+              ]
+            }
+          },
+          "required": [
+            "status"
+          ]
+        }
+      },
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "status"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/admin/users",
+      "purpose": "관리자 회원 목록 조회",
+      "callWhen": "관리자 사용자 화면 진입/새로고침",
+      "authorization": "로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션",
+      "afterSuccess": "서버 회원 목록으로 관리자 화면을 갱신",
+      "backendRoute": "/api/v1/admin/users",
+      "operationId": "AdminController_users",
+      "backendOpenApiPath": "/admin/users",
+      "summary": "Members and their status",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "users"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "type": "unknown"
+            }
+          }
+        },
+        "required": [
+          "users"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/admin/work",
+      "purpose": "관리자 직업·보상 정책 현황 조회",
+      "callWhen": "관리자 직업 화면 진입/새로고침",
+      "authorization": "로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션",
+      "afterSuccess": "직업 카탈로그·레벨·정책 상태를 갱신",
+      "backendRoute": "/api/v1/admin/work",
+      "operationId": "AdminWorkOperationsController_overview",
+      "backendOpenApiPath": "/admin/work",
+      "summary": "The work catalogue, the reward policy in force, and job levels",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "catalogue",
+          "jobLevels",
+          "policy"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "catalogue": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "task_id": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "job_type": {
+                  "type": "string"
+                },
+                "difficulty": {
+                  "type": "number"
+                },
+                "base_reward": {
+                  "type": "string"
+                },
+                "base_experience": {
+                  "type": "string"
+                },
+                "minimum_duration_seconds": {
+                  "type": "number"
+                },
+                "daily_limit": {
+                  "type": "number"
+                },
+                "active": {
+                  "type": "boolean"
+                },
+                "open_assignment_count": {
+                  "type": "string"
+                },
+                "awaiting_verification_count": {
+                  "type": "string"
+                },
+                "approved_24h": {
+                  "type": "string"
+                },
+                "rejected_24h": {
+                  "type": "string"
+                },
+                "paid_24h": {
+                  "type": "string"
+                },
+                "last_assigned_at": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "task_id",
+                "code",
+                "name",
+                "job_type",
+                "difficulty",
+                "base_reward",
+                "base_experience",
+                "minimum_duration_seconds",
+                "daily_limit",
+                "active",
+                "open_assignment_count",
+                "awaiting_verification_count",
+                "approved_24h",
+                "rejected_24h",
+                "paid_24h",
+                "last_assigned_at"
+              ]
+            }
+          },
+          "jobLevels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "job_type": {
+                  "type": "string"
+                },
+                "member_count": {
+                  "type": "string"
+                },
+                "average_level": {
+                  "type": "string"
+                },
+                "top_level": {
+                  "type": "number"
+                },
+                "total_experience": {
+                  "type": "string"
+                },
+                "active_7d_count": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "job_type",
+                "member_count",
+                "average_level",
+                "top_level",
+                "total_experience",
+                "active_7d_count"
+              ]
+            }
+          },
+          "policy": {
+            "type": "object",
+            "properties": {
+              "policy_id": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "effective_at": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                ]
+              },
+              "daily_cap": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "weekly_cap": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "repeat_decay_percent": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ]
+              },
+              "enabled": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "boolean",
+                    "const": false
+                  },
+                  {
+                    "type": "boolean",
+                    "const": true
+                  }
+                ]
+              },
+              "reason": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "active_task_count": {
+                "type": "string"
+              },
+              "open_assignment_count": {
+                "type": "string"
+              },
+              "awaiting_verification_count": {
+                "type": "string"
+              },
+              "paid_24h": {
+                "type": "string"
+              },
+              "members_paid_24h": {
+                "type": "string"
+              },
+              "experience_24h": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "policy_id",
+              "effective_at",
+              "daily_cap",
+              "weekly_cap",
+              "repeat_decay_percent",
+              "enabled",
+              "reason",
+              "active_task_count",
+              "open_assignment_count",
+              "awaiting_verification_count",
+              "paid_24h",
+              "members_paid_24h",
+              "experience_24h"
+            ]
+          }
+        },
+        "required": [
+          "catalogue",
+          "jobLevels",
+          "policy"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/auth/:provider/authorize",
+      "purpose": "Google/Discord OAuth 시작; 모바일은 client=mobile 필수",
+      "callWhen": "해당 화면 진입/새로고침/관련 write 후",
+      "authorization": "인증 흐름 전용: 상태머신 준수",
+      "afterSuccess": "응답을 화면의 서버 기준 상태로 교체",
+      "backendRoute": "/auth/:provider/authorize",
+      "operationId": "AuthController_authorize",
+      "backendOpenApiPath": "/auth/{provider}/authorize",
+      "summary": "Begin login with a provider",
+      "parameters": [
+        {
+          "name": "provider",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "client",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "authorizationUrl"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "authorizationUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "authorizationUrl"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/auth/:provider/callback",
+      "purpose": "OAuth provider callback 처리; 앱이 직접 호출하지 않음",
+      "callWhen": "해당 화면 진입/새로고침/관련 write 후",
+      "authorization": "인증 흐름 전용: 상태머신 준수",
+      "afterSuccess": "응답을 화면의 서버 기준 상태로 교체",
+      "backendRoute": "/auth/:provider/callback",
+      "operationId": "AuthController_callback",
+      "backendOpenApiPath": "/auth/{provider}/callback",
+      "summary": "Complete an OAuth round trip",
+      "parameters": [
+        {
+          "name": "provider",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "state",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "code",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "error",
+          "in": "query",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "outcome",
+          "provider",
+          "mobileHandoff",
+          "consentCurrent",
+          "csrfToken"
+        ]
+      },
+      "responseSchema": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "const": "reauthenticated"
+              },
+              "provider": {
+                "type": "never"
+              },
+              "mobileHandoff": {
+                "type": "never"
+              },
+              "consentCurrent": {
+                "type": "never"
+              },
+              "csrfToken": {
+                "type": "never"
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "const": "linked"
+              },
+              "provider": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "const": "discord"
+                  },
+                  {
+                    "type": "string",
+                    "const": "google"
+                  }
+                ]
+              },
+              "mobileHandoff": {
+                "type": "never"
+              },
+              "consentCurrent": {
+                "type": "never"
+              },
+              "csrfToken": {
+                "type": "never"
+              }
+            },
+            "required": [
+              "outcome",
+              "provider"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "const": "signed-in"
+              },
+              "mobileHandoff": {
+                "type": "string"
+              },
+              "consentCurrent": {
+                "type": "boolean"
+              },
+              "provider": {
+                "type": "never"
+              },
+              "csrfToken": {
+                "type": "never"
+              }
+            },
+            "required": [
+              "outcome",
+              "mobileHandoff",
+              "consentCurrent"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "outcome": {
+                "type": "string",
+                "const": "signed-in"
+              },
+              "csrfToken": {
+                "type": "string"
+              },
+              "consentCurrent": {
+                "type": "boolean"
+              },
+              "provider": {
+                "type": "never"
+              },
+              "mobileHandoff": {
+                "type": "never"
+              }
+            },
+            "required": [
+              "outcome",
+              "csrfToken",
+              "consentCurrent"
+            ]
+          }
         ]
       },
       "responseCompatibility": {
@@ -1298,13 +2775,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -1335,13 +2812,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -1372,13 +2849,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -1513,13 +2990,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -1550,13 +3027,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -1587,13 +3064,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -1703,13 +3180,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -1740,13 +3217,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -3866,13 +5343,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -3903,13 +5380,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -3940,13 +5417,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -4135,13 +5612,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -4172,13 +5649,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -4209,13 +5686,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -4328,13 +5805,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -4365,13 +5842,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -4402,13 +5879,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -4520,13 +5997,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -4557,13 +6034,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -4651,13 +6128,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -4688,13 +6165,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -4725,13 +6202,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -4844,13 +6321,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -4930,13 +6407,13 @@
                               }
                             ]
                           },
-                          "__@toStringTag@743": {
+                          "__@toStringTag@576": {
                             "type": "string"
                           }
                         },
                         "required": [
                           "description",
-                          "__@toStringTag@743"
+                          "__@toStringTag@576"
                         ]
                       }
                     },
@@ -4967,13 +6444,13 @@
                               }
                             ]
                           },
-                          "__@toStringTag@743": {
+                          "__@toStringTag@576": {
                             "type": "string"
                           }
                         },
                         "required": [
                           "description",
-                          "__@toStringTag@743"
+                          "__@toStringTag@576"
                         ]
                       }
                     },
@@ -5004,13 +6481,13 @@
                               }
                             ]
                           },
-                          "__@toStringTag@743": {
+                          "__@toStringTag@576": {
                             "type": "string"
                           }
                         },
                         "required": [
                           "description",
-                          "__@toStringTag@743"
+                          "__@toStringTag@576"
                         ]
                       }
                     },
@@ -5126,13 +6603,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -5163,13 +6640,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -5200,13 +6677,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -6323,6 +7800,87 @@
       }
     },
     {
+      "method": "GET",
+      "path": "/app-api/v1/content/status",
+      "purpose": "서비스 상태 정보 조회",
+      "callWhen": "해당 화면 진입/새로고침/관련 write 후",
+      "authorization": "공개: 로그인 불필요",
+      "afterSuccess": "응답을 화면의 서버 기준 상태로 교체",
+      "backendRoute": "/api/status",
+      "operationId": "ContentController_status",
+      "backendOpenApiPath": "/status",
+      "summary": "Server status board",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "status"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "sourceKey": {
+                  "type": "string"
+                },
+                "displayName": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string"
+                },
+                "detail": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "observedAt": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "sourceKey",
+                "displayName",
+                "state",
+                "detail",
+                "observedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
       "method": "POST",
       "path": "/app-api/v1/early-game/claims",
       "purpose": "오늘 초반 이벤트 보상 수령",
@@ -7087,6 +8645,163 @@
         "required": [
           "notifications_enabled"
         ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/game-clock",
+      "purpose": "가속 게임 서버 시간 조회",
+      "callWhen": "게임 날짜/주차 표시가 필요한 화면 진입·새로고침",
+      "authorization": "공개 읽기",
+      "afterSuccess": "서버 기준 게임 날짜·주차로 UI를 갱신",
+      "backendRoute": "/api/v1/game-clock",
+      "operationId": "GameClockController_current",
+      "backendOpenApiPath": "/game-clock",
+      "summary": "Read the authoritative accelerated Moneyverse server day/week",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [],
+        "note": "Controller returns the service/repository result directly; preserve unknown additive fields."
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "policy_version": {
+            "type": "string"
+          },
+          "day_index": {
+            "type": "string"
+          },
+          "week_index": {
+            "type": "string"
+          },
+          "day_of_week": {
+            "type": "number"
+          },
+          "real_seconds_per_day": {
+            "type": "number"
+          },
+          "game_days_per_week": {
+            "type": "number"
+          },
+          "day_started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "day_ends_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "week_started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "week_ends_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "policy_version",
+          "day_index",
+          "week_index",
+          "day_of_week",
+          "real_seconds_per_day",
+          "game_days_per_week",
+          "day_started_at",
+          "day_ends_at",
+          "week_started_at",
+          "week_ends_at"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/media/:key",
+      "purpose": "일반 미디어 파일 조회",
+      "callWhen": "해당 화면 진입/새로고침/관련 write 후",
+      "authorization": "공개: 로그인 불필요",
+      "afterSuccess": "응답을 화면의 서버 기준 상태로 교체",
+      "backendRoute": "/media/:key",
+      "operationId": "MediaController_media",
+      "backendOpenApiPath": "/media/{key}",
+      "summary": "Bytes of a published gallery photo",
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "binary",
+      "responseShape": {
+        "kind": "binary",
+        "topLevelKeys": []
+      },
+      "responseSchema": {
+        "type": "void"
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/media/profile/:key",
+      "purpose": "프로필 미디어 파일 조회",
+      "callWhen": "해당 화면 진입/새로고침/관련 write 후",
+      "authorization": "공개: 로그인 불필요",
+      "afterSuccess": "프로필 GET 재조회 후 화면 교체",
+      "backendRoute": "/media/profile/:key",
+      "operationId": "ProfileImageController_image",
+      "backendOpenApiPath": "/media/profile/{key}",
+      "summary": "Bytes of a member’s profile picture, on their terms",
+      "parameters": [
+        {
+          "name": "key",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "binary",
+      "responseShape": {
+        "kind": "binary",
+        "topLevelKeys": []
+      },
+      "responseSchema": {
+        "type": "void"
       },
       "responseCompatibility": {
         "preferredFieldNaming": "camelCase",
@@ -8862,13 +10577,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -8992,13 +10707,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -9938,13 +11653,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -10059,13 +11774,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -10305,13 +12020,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -10338,87 +12053,6 @@
         },
         "required": [
           "purchases"
-        ]
-      },
-      "responseCompatibility": {
-        "preferredFieldNaming": "camelCase",
-        "legacySnakeCasePreserved": true,
-        "camelCaseAliasesAddedRecursively": true
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/app-api/v1/content/status",
-      "purpose": "서비스 상태 정보 조회",
-      "callWhen": "해당 화면 진입/새로고침/관련 write 후",
-      "authorization": "공개: 로그인 불필요",
-      "afterSuccess": "응답을 화면의 서버 기준 상태로 교체",
-      "backendRoute": "/api/status",
-      "operationId": "ContentController_status",
-      "backendOpenApiPath": "/status",
-      "summary": "Server status board",
-      "parameters": [],
-      "requestBody": null,
-      "successStatuses": [
-        200
-      ],
-      "responseMode": "json",
-      "responseShape": {
-        "kind": "json-object",
-        "topLevelKeys": [
-          "status"
-        ]
-      },
-      "responseSchema": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "sourceKey": {
-                  "type": "string"
-                },
-                "displayName": {
-                  "type": "string"
-                },
-                "state": {
-                  "type": "string"
-                },
-                "detail": {
-                  "oneOf": [
-                    {
-                      "type": "null"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                },
-                "observedAt": {
-                  "oneOf": [
-                    {
-                      "type": "null"
-                    },
-                    {
-                      "type": "string"
-                    }
-                  ]
-                }
-              },
-              "required": [
-                "sourceKey",
-                "displayName",
-                "state",
-                "detail",
-                "observedAt"
-              ]
-            }
-          }
-        },
-        "required": [
-          "status"
         ]
       },
       "responseCompatibility": {
@@ -10479,13 +12113,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -10516,13 +12150,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -10565,13 +12199,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -10602,13 +12236,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -10774,13 +12408,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -10811,13 +12445,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -10848,13 +12482,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -10885,13 +12519,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -10947,13 +12581,13 @@
                                       }
                                     ]
                                   },
-                                  "__@toStringTag@743": {
+                                  "__@toStringTag@576": {
                                     "type": "string"
                                   }
                                 },
                                 "required": [
                                   "description",
-                                  "__@toStringTag@743"
+                                  "__@toStringTag@576"
                                 ]
                               }
                             },
@@ -10993,13 +12627,13 @@
                                       }
                                     ]
                                   },
-                                  "__@toStringTag@743": {
+                                  "__@toStringTag@576": {
                                     "type": "string"
                                   }
                                 },
                                 "required": [
                                   "description",
-                                  "__@toStringTag@743"
+                                  "__@toStringTag@576"
                                 ]
                               }
                             },
@@ -11039,13 +12673,13 @@
                                       }
                                     ]
                                   },
-                                  "__@toStringTag@743": {
+                                  "__@toStringTag@576": {
                                     "type": "string"
                                   }
                                 },
                                 "required": [
                                   "description",
-                                  "__@toStringTag@743"
+                                  "__@toStringTag@576"
                                 ]
                               }
                             },
@@ -11085,13 +12719,13 @@
                                       }
                                     ]
                                   },
-                                  "__@toStringTag@743": {
+                                  "__@toStringTag@576": {
                                     "type": "string"
                                   }
                                 },
                                 "required": [
                                   "description",
-                                  "__@toStringTag@743"
+                                  "__@toStringTag@576"
                                 ]
                               }
                             },
@@ -11227,13 +12861,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -11264,13 +12898,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -11301,13 +12935,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -11338,13 +12972,13 @@
                           }
                         ]
                       },
-                      "__@toStringTag@743": {
+                      "__@toStringTag@576": {
                         "type": "string"
                       }
                     },
                     "required": [
                       "description",
-                      "__@toStringTag@743"
+                      "__@toStringTag@576"
                     ]
                   }
                 },
@@ -11442,13 +13076,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -11990,13 +13624,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -12027,13 +13661,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -12064,13 +13698,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -12295,13 +13929,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -12332,13 +13966,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -12369,13 +14003,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -12476,13 +14110,13 @@
                                   }
                                 ]
                               },
-                              "__@toStringTag@743": {
+                              "__@toStringTag@576": {
                                 "type": "string"
                               }
                             },
                             "required": [
                               "description",
-                              "__@toStringTag@743"
+                              "__@toStringTag@576"
                             ]
                           }
                         },
@@ -12572,13 +14206,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -12609,13 +14243,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -12643,6 +14277,382 @@
         },
         "required": [
           "stocks"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/support/threads",
+      "purpose": "내 관리자 문의 목록 조회",
+      "callWhen": "화면 진입 또는 새로고침 시",
+      "authorization": "로그인 + 최신 동의",
+      "afterSuccess": "응답을 현재 화면 상태에 반영",
+      "backendRoute": "/api/v1/support/threads",
+      "operationId": "SupportController_threads",
+      "backendOpenApiPath": "/support/threads",
+      "summary": "My administrator support conversations",
+      "parameters": [],
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "threads"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "threads": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "thread_id": {
+                  "type": "string"
+                },
+                "subject": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "updated_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "last_message_at": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "display_name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "thread_id",
+                "subject",
+                "status",
+                "created_at"
+              ]
+            }
+          }
+        },
+        "required": [
+          "threads"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/support/threads",
+      "purpose": "새 관리자 문의 생성",
+      "callWhen": "사용자가 해당 저장/실행 작업을 확정했을 때",
+      "authorization": "로그인 + 최신 동의 + CSRF",
+      "afterSuccess": "문의 목록/대화를 서버에서 다시 조회",
+      "backendRoute": "/api/v1/support/threads",
+      "operationId": "SupportController_create",
+      "backendOpenApiPath": "/support/threads",
+      "summary": "Open an administrator support conversation",
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "mediaType": "application/json",
+        "schema": {
+          "$ref": "#/components/schemas/NewThreadDto"
+        },
+        "schemaName": "NewThreadDto",
+        "resolvedSchema": {
+          "type": "object",
+          "properties": {
+            "subject": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "body": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "idempotencyKey": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "subject",
+            "body",
+            "idempotencyKey"
+          ]
+        }
+      },
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "thread"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "thread": {
+            "type": "object",
+            "properties": {
+              "thread_id": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "updated_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "last_message_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "thread_id",
+              "subject",
+              "status",
+              "created_at"
+            ]
+          }
+        },
+        "required": [
+          "thread"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/support/threads/:id/messages",
+      "purpose": "내 문의 대화 메시지 조회",
+      "callWhen": "화면 진입 또는 새로고침 시",
+      "authorization": "로그인 + 최신 동의",
+      "afterSuccess": "응답을 현재 화면 상태에 반영",
+      "backendRoute": "/api/v1/support/threads/:id/messages",
+      "operationId": "SupportController_messages",
+      "backendOpenApiPath": "/support/threads/{id}/messages",
+      "summary": "Messages in my support conversation",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "messages"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "message_id": {
+                  "type": "string"
+                },
+                "sender_kind": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "const": "user"
+                    },
+                    {
+                      "type": "string",
+                      "const": "admin"
+                    }
+                  ]
+                },
+                "sender_user_id": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              },
+              "required": [
+                "message_id",
+                "sender_kind",
+                "body",
+                "created_at"
+              ]
+            }
+          }
+        },
+        "required": [
+          "messages"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/support/threads/:id/messages",
+      "purpose": "내 문의에 추가 메시지 전송",
+      "callWhen": "사용자가 해당 저장/실행 작업을 확정했을 때",
+      "authorization": "로그인 + 최신 동의 + CSRF",
+      "afterSuccess": "문의 목록/대화를 서버에서 다시 조회",
+      "backendRoute": "/api/v1/support/threads/:id/messages",
+      "operationId": "SupportController_reply",
+      "backendOpenApiPath": "/support/threads/{id}/messages",
+      "summary": "Reply to my support conversation",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "mediaType": "application/json",
+        "schema": {
+          "$ref": "#/components/schemas/NewMessageDto"
+        },
+        "schemaName": "NewMessageDto",
+        "resolvedSchema": {
+          "type": "object",
+          "properties": {
+            "body": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "idempotencyKey": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": [
+            "body",
+            "idempotencyKey"
+          ]
+        }
+      },
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "message"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "object",
+            "properties": {
+              "message_id": {
+                "type": "string"
+              },
+              "sender_kind": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "const": "user"
+                  },
+                  {
+                    "type": "string",
+                    "const": "admin"
+                  }
+                ]
+              },
+              "sender_user_id": {
+                "type": "string"
+              },
+              "body": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            },
+            "required": [
+              "message_id",
+              "sender_kind",
+              "body",
+              "created_at"
+            ]
+          }
+        },
+        "required": [
+          "message"
         ]
       },
       "responseCompatibility": {
@@ -12719,13 +14729,13 @@
                                   }
                                 ]
                               },
-                              "__@toStringTag@743": {
+                              "__@toStringTag@576": {
                                 "type": "string"
                               }
                             },
                             "required": [
                               "description",
-                              "__@toStringTag@743"
+                              "__@toStringTag@576"
                             ]
                           }
                         },
@@ -12768,13 +14778,13 @@
                                   }
                                 ]
                               },
-                              "__@toStringTag@743": {
+                              "__@toStringTag@576": {
                                 "type": "string"
                               }
                             },
                             "required": [
                               "description",
-                              "__@toStringTag@743"
+                              "__@toStringTag@576"
                             ]
                           }
                         },
@@ -12814,13 +14824,13 @@
                               }
                             ]
                           },
-                          "__@toStringTag@743": {
+                          "__@toStringTag@576": {
                             "type": "string"
                           }
                         },
                         "required": [
                           "description",
-                          "__@toStringTag@743"
+                          "__@toStringTag@576"
                         ]
                       }
                     },
@@ -12873,13 +14883,13 @@
                                 }
                               ]
                             },
-                            "__@toStringTag@743": {
+                            "__@toStringTag@576": {
                               "type": "string"
                             }
                           },
                           "required": [
                             "description",
-                            "__@toStringTag@743"
+                            "__@toStringTag@576"
                           ]
                         }
                       },
@@ -13785,1054 +15795,6 @@
               "transaction_id"
             ]
           }
-        ]
-      },
-      "responseCompatibility": {
-        "preferredFieldNaming": "camelCase",
-        "legacySnakeCasePreserved": true,
-        "camelCaseAliasesAddedRecursively": true
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/app-api/v1/auth/:provider/authorize",
-      "purpose": "Google/Discord OAuth 시작; 모바일은 client=mobile 필수",
-      "callWhen": "해당 화면 진입/새로고침/관련 write 후",
-      "authorization": "인증 흐름 전용: 상태머신 준수",
-      "afterSuccess": "응답을 화면의 서버 기준 상태로 교체",
-      "backendRoute": "/auth/:provider/authorize",
-      "operationId": "AuthController_authorize",
-      "backendOpenApiPath": "/auth/{provider}/authorize",
-      "summary": "Begin login with a provider",
-      "parameters": [
-        {
-          "name": "provider",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        },
-        {
-          "name": "client",
-          "in": "query",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
-      "requestBody": null,
-      "successStatuses": [
-        200
-      ],
-      "responseMode": "json",
-      "responseShape": {
-        "kind": "json-object",
-        "topLevelKeys": [
-          "authorizationUrl"
-        ]
-      },
-      "responseSchema": {
-        "type": "object",
-        "properties": {
-          "authorizationUrl": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "authorizationUrl"
-        ]
-      },
-      "responseCompatibility": {
-        "preferredFieldNaming": "camelCase",
-        "legacySnakeCasePreserved": true,
-        "camelCaseAliasesAddedRecursively": true
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/app-api/v1/auth/:provider/callback",
-      "purpose": "OAuth provider callback 처리; 앱이 직접 호출하지 않음",
-      "callWhen": "해당 화면 진입/새로고침/관련 write 후",
-      "authorization": "인증 흐름 전용: 상태머신 준수",
-      "afterSuccess": "응답을 화면의 서버 기준 상태로 교체",
-      "backendRoute": "/auth/:provider/callback",
-      "operationId": "AuthController_callback",
-      "backendOpenApiPath": "/auth/{provider}/callback",
-      "summary": "Complete an OAuth round trip",
-      "parameters": [
-        {
-          "name": "provider",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        },
-        {
-          "name": "state",
-          "in": "query",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        },
-        {
-          "name": "code",
-          "in": "query",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        },
-        {
-          "name": "error",
-          "in": "query",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
-      "requestBody": null,
-      "successStatuses": [
-        200
-      ],
-      "responseMode": "json",
-      "responseShape": {
-        "kind": "json-object",
-        "topLevelKeys": [
-          "outcome",
-          "provider",
-          "mobileHandoff",
-          "consentCurrent",
-          "csrfToken"
-        ]
-      },
-      "responseSchema": {
-        "oneOf": [
-          {
-            "type": "object",
-            "properties": {
-              "outcome": {
-                "type": "string",
-                "const": "reauthenticated"
-              },
-              "provider": {
-                "type": "never"
-              },
-              "mobileHandoff": {
-                "type": "never"
-              },
-              "consentCurrent": {
-                "type": "never"
-              },
-              "csrfToken": {
-                "type": "never"
-              }
-            },
-            "required": [
-              "outcome"
-            ]
-          },
-          {
-            "type": "object",
-            "properties": {
-              "outcome": {
-                "type": "string",
-                "const": "linked"
-              },
-              "provider": {
-                "oneOf": [
-                  {
-                    "type": "string",
-                    "const": "discord"
-                  },
-                  {
-                    "type": "string",
-                    "const": "google"
-                  }
-                ]
-              },
-              "mobileHandoff": {
-                "type": "never"
-              },
-              "consentCurrent": {
-                "type": "never"
-              },
-              "csrfToken": {
-                "type": "never"
-              }
-            },
-            "required": [
-              "outcome",
-              "provider"
-            ]
-          },
-          {
-            "type": "object",
-            "properties": {
-              "outcome": {
-                "type": "string",
-                "const": "signed-in"
-              },
-              "mobileHandoff": {
-                "type": "string"
-              },
-              "consentCurrent": {
-                "type": "boolean"
-              },
-              "provider": {
-                "type": "never"
-              },
-              "csrfToken": {
-                "type": "never"
-              }
-            },
-            "required": [
-              "outcome",
-              "mobileHandoff",
-              "consentCurrent"
-            ]
-          },
-          {
-            "type": "object",
-            "properties": {
-              "outcome": {
-                "type": "string",
-                "const": "signed-in"
-              },
-              "csrfToken": {
-                "type": "string"
-              },
-              "consentCurrent": {
-                "type": "boolean"
-              },
-              "provider": {
-                "type": "never"
-              },
-              "mobileHandoff": {
-                "type": "never"
-              }
-            },
-            "required": [
-              "outcome",
-              "csrfToken",
-              "consentCurrent"
-            ]
-          }
-        ]
-      },
-      "responseCompatibility": {
-        "preferredFieldNaming": "camelCase",
-        "legacySnakeCasePreserved": true,
-        "camelCaseAliasesAddedRecursively": true
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/app-api/v1/media/:key",
-      "purpose": "일반 미디어 파일 조회",
-      "callWhen": "해당 화면 진입/새로고침/관련 write 후",
-      "authorization": "공개: 로그인 불필요",
-      "afterSuccess": "응답을 화면의 서버 기준 상태로 교체",
-      "backendRoute": "/media/:key",
-      "operationId": "MediaController_media",
-      "backendOpenApiPath": "/media/{key}",
-      "summary": "Bytes of a published gallery photo",
-      "parameters": [
-        {
-          "name": "key",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
-      "requestBody": null,
-      "successStatuses": [
-        200
-      ],
-      "responseMode": "binary",
-      "responseShape": {
-        "kind": "binary",
-        "topLevelKeys": []
-      },
-      "responseSchema": {
-        "type": "void"
-      },
-      "responseCompatibility": {
-        "preferredFieldNaming": "camelCase",
-        "legacySnakeCasePreserved": true,
-        "camelCaseAliasesAddedRecursively": true
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/app-api/v1/media/profile/:key",
-      "purpose": "프로필 미디어 파일 조회",
-      "callWhen": "해당 화면 진입/새로고침/관련 write 후",
-      "authorization": "공개: 로그인 불필요",
-      "afterSuccess": "프로필 GET 재조회 후 화면 교체",
-      "backendRoute": "/media/profile/:key",
-      "operationId": "ProfileImageController_image",
-      "backendOpenApiPath": "/media/profile/{key}",
-      "summary": "Bytes of a member’s profile picture, on their terms",
-      "parameters": [
-        {
-          "name": "key",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
-      "requestBody": null,
-      "successStatuses": [
-        200
-      ],
-      "responseMode": "binary",
-      "responseShape": {
-        "kind": "binary",
-        "topLevelKeys": []
-      },
-      "responseSchema": {
-        "type": "void"
-      },
-      "responseCompatibility": {
-        "preferredFieldNaming": "camelCase",
-        "legacySnakeCasePreserved": true,
-        "camelCaseAliasesAddedRecursively": true
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/app-api/v1/support/threads",
-      "purpose": "내 관리자 문의 목록 조회",
-      "callWhen": "화면 진입 또는 새로고침 시",
-      "authorization": "로그인 + 최신 동의",
-      "afterSuccess": "응답을 현재 화면 상태에 반영",
-      "backendRoute": "/api/v1/support/threads",
-      "operationId": "SupportController_threads",
-      "backendOpenApiPath": "/support/threads",
-      "summary": "My administrator support conversations",
-      "parameters": [],
-      "successStatuses": [
-        200
-      ],
-      "responseMode": "json",
-      "responseShape": {
-        "kind": "json-object",
-        "topLevelKeys": [
-          "threads"
-        ]
-      },
-      "responseSchema": {
-        "type": "object",
-        "properties": {
-          "threads": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "thread_id": {
-                  "type": "string"
-                },
-                "subject": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "string"
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "updated_at": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "last_message_at": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "user_id": {
-                  "type": "string"
-                },
-                "display_name": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "thread_id",
-                "subject",
-                "status",
-                "created_at"
-              ]
-            }
-          }
-        },
-        "required": [
-          "threads"
-        ]
-      },
-      "responseCompatibility": {
-        "preferredFieldNaming": "camelCase",
-        "legacySnakeCasePreserved": true,
-        "camelCaseAliasesAddedRecursively": true
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/app-api/v1/support/threads",
-      "purpose": "새 관리자 문의 생성",
-      "callWhen": "사용자가 해당 저장/실행 작업을 확정했을 때",
-      "authorization": "로그인 + 최신 동의 + CSRF",
-      "afterSuccess": "문의 목록/대화를 서버에서 다시 조회",
-      "backendRoute": "/api/v1/support/threads",
-      "operationId": "SupportController_create",
-      "backendOpenApiPath": "/support/threads",
-      "summary": "Open an administrator support conversation",
-      "parameters": [],
-      "requestBody": {
-        "required": true,
-        "mediaType": "application/json",
-        "schema": {
-          "$ref": "#/components/schemas/NewThreadDto"
-        },
-        "schemaName": "NewThreadDto",
-        "resolvedSchema": {
-          "type": "object",
-          "properties": {
-            "subject": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 120
-            },
-            "body": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 2000
-            },
-            "idempotencyKey": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "required": [
-            "subject",
-            "body",
-            "idempotencyKey"
-          ]
-        }
-      },
-      "successStatuses": [
-        201
-      ],
-      "responseMode": "json",
-      "responseShape": {
-        "kind": "json-object",
-        "topLevelKeys": [
-          "thread"
-        ]
-      },
-      "responseSchema": {
-        "type": "object",
-        "properties": {
-          "thread": {
-            "type": "object",
-            "properties": {
-              "thread_id": {
-                "type": "string"
-              },
-              "subject": {
-                "type": "string"
-              },
-              "status": {
-                "type": "string"
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "updated_at": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "last_message_at": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "user_id": {
-                "type": "string"
-              },
-              "display_name": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "thread_id",
-              "subject",
-              "status",
-              "created_at"
-            ]
-          }
-        },
-        "required": [
-          "thread"
-        ]
-      },
-      "responseCompatibility": {
-        "preferredFieldNaming": "camelCase",
-        "legacySnakeCasePreserved": true,
-        "camelCaseAliasesAddedRecursively": true
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/app-api/v1/support/threads/:id/messages",
-      "purpose": "내 문의 대화 메시지 조회",
-      "callWhen": "화면 진입 또는 새로고침 시",
-      "authorization": "로그인 + 최신 동의",
-      "afterSuccess": "응답을 현재 화면 상태에 반영",
-      "backendRoute": "/api/v1/support/threads/:id/messages",
-      "operationId": "SupportController_messages",
-      "backendOpenApiPath": "/support/threads/{id}/messages",
-      "summary": "Messages in my support conversation",
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      ],
-      "successStatuses": [
-        200
-      ],
-      "responseMode": "json",
-      "responseShape": {
-        "kind": "json-object",
-        "topLevelKeys": [
-          "messages"
-        ]
-      },
-      "responseSchema": {
-        "type": "object",
-        "properties": {
-          "messages": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "message_id": {
-                  "type": "string"
-                },
-                "sender_kind": {
-                  "oneOf": [
-                    {
-                      "type": "string",
-                      "const": "user"
-                    },
-                    {
-                      "type": "string",
-                      "const": "admin"
-                    }
-                  ]
-                },
-                "sender_user_id": {
-                  "type": "string"
-                },
-                "body": {
-                  "type": "string"
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time"
-                }
-              },
-              "required": [
-                "message_id",
-                "sender_kind",
-                "body",
-                "created_at"
-              ]
-            }
-          }
-        },
-        "required": [
-          "messages"
-        ]
-      },
-      "responseCompatibility": {
-        "preferredFieldNaming": "camelCase",
-        "legacySnakeCasePreserved": true,
-        "camelCaseAliasesAddedRecursively": true
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/app-api/v1/support/threads/:id/messages",
-      "purpose": "내 문의에 추가 메시지 전송",
-      "callWhen": "사용자가 해당 저장/실행 작업을 확정했을 때",
-      "authorization": "로그인 + 최신 동의 + CSRF",
-      "afterSuccess": "문의 목록/대화를 서버에서 다시 조회",
-      "backendRoute": "/api/v1/support/threads/:id/messages",
-      "operationId": "SupportController_reply",
-      "backendOpenApiPath": "/support/threads/{id}/messages",
-      "summary": "Reply to my support conversation",
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      ],
-      "requestBody": {
-        "required": true,
-        "mediaType": "application/json",
-        "schema": {
-          "$ref": "#/components/schemas/NewMessageDto"
-        },
-        "schemaName": "NewMessageDto",
-        "resolvedSchema": {
-          "type": "object",
-          "properties": {
-            "body": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 2000
-            },
-            "idempotencyKey": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "required": [
-            "body",
-            "idempotencyKey"
-          ]
-        }
-      },
-      "successStatuses": [
-        201
-      ],
-      "responseMode": "json",
-      "responseShape": {
-        "kind": "json-object",
-        "topLevelKeys": [
-          "message"
-        ]
-      },
-      "responseSchema": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "object",
-            "properties": {
-              "message_id": {
-                "type": "string"
-              },
-              "sender_kind": {
-                "oneOf": [
-                  {
-                    "type": "string",
-                    "const": "user"
-                  },
-                  {
-                    "type": "string",
-                    "const": "admin"
-                  }
-                ]
-              },
-              "sender_user_id": {
-                "type": "string"
-              },
-              "body": {
-                "type": "string"
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time"
-              }
-            },
-            "required": [
-              "message_id",
-              "sender_kind",
-              "body",
-              "created_at"
-            ]
-          }
-        },
-        "required": [
-          "message"
-        ]
-      },
-      "responseCompatibility": {
-        "preferredFieldNaming": "camelCase",
-        "legacySnakeCasePreserved": true,
-        "camelCaseAliasesAddedRecursively": true
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/app-api/v1/admin/support/threads",
-      "purpose": "관리자 문의함 조회",
-      "callWhen": "화면 진입 또는 새로고침 시",
-      "authorization": "로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션",
-      "afterSuccess": "응답을 현재 화면 상태에 반영",
-      "backendRoute": "/api/v1/admin/support/threads",
-      "operationId": "AdminSupportController_threads",
-      "backendOpenApiPath": "/admin/support/threads",
-      "summary": "Administrator support inbox",
-      "parameters": [
-        {
-          "name": "status",
-          "in": "query",
-          "required": false,
-          "schema": {
-            "type": "string",
-            "enum": [
-              "open",
-              "waiting_user",
-              "resolved"
-            ]
-          }
-        }
-      ],
-      "successStatuses": [
-        200
-      ],
-      "responseMode": "json",
-      "responseShape": {
-        "kind": "json-object",
-        "topLevelKeys": [
-          "threads"
-        ]
-      },
-      "responseSchema": {
-        "type": "object",
-        "properties": {
-          "threads": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "thread_id": {
-                  "type": "string"
-                },
-                "subject": {
-                  "type": "string"
-                },
-                "status": {
-                  "type": "string"
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "updated_at": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "last_message_at": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "user_id": {
-                  "type": "string"
-                },
-                "display_name": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "thread_id",
-                "subject",
-                "status",
-                "created_at"
-              ]
-            }
-          }
-        },
-        "required": [
-          "threads"
-        ]
-      },
-      "responseCompatibility": {
-        "preferredFieldNaming": "camelCase",
-        "legacySnakeCasePreserved": true,
-        "camelCaseAliasesAddedRecursively": true
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/app-api/v1/admin/support/threads/:id/messages",
-      "purpose": "관리자가 문의 대화 조회",
-      "callWhen": "화면 진입 또는 새로고침 시",
-      "authorization": "로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션",
-      "afterSuccess": "응답을 현재 화면 상태에 반영",
-      "backendRoute": "/api/v1/admin/support/threads/:id/messages",
-      "operationId": "AdminSupportController_messages",
-      "backendOpenApiPath": "/admin/support/threads/{id}/messages",
-      "summary": "Read a support conversation as administrator",
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      ],
-      "successStatuses": [
-        200
-      ],
-      "responseMode": "json",
-      "responseShape": {
-        "kind": "json-object",
-        "topLevelKeys": [
-          "messages"
-        ]
-      },
-      "responseSchema": {
-        "type": "object",
-        "properties": {
-          "messages": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "message_id": {
-                  "type": "string"
-                },
-                "sender_kind": {
-                  "oneOf": [
-                    {
-                      "type": "string",
-                      "const": "user"
-                    },
-                    {
-                      "type": "string",
-                      "const": "admin"
-                    }
-                  ]
-                },
-                "sender_user_id": {
-                  "type": "string"
-                },
-                "body": {
-                  "type": "string"
-                },
-                "created_at": {
-                  "type": "string",
-                  "format": "date-time"
-                }
-              },
-              "required": [
-                "message_id",
-                "sender_kind",
-                "body",
-                "created_at"
-              ]
-            }
-          }
-        },
-        "required": [
-          "messages"
-        ]
-      },
-      "responseCompatibility": {
-        "preferredFieldNaming": "camelCase",
-        "legacySnakeCasePreserved": true,
-        "camelCaseAliasesAddedRecursively": true
-      }
-    },
-    {
-      "method": "POST",
-      "path": "/app-api/v1/admin/support/threads/:id/messages",
-      "purpose": "관리자가 회원 문의에 답장",
-      "callWhen": "사용자가 해당 저장/실행 작업을 확정했을 때",
-      "authorization": "로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션 + CSRF",
-      "afterSuccess": "문의 목록/대화를 서버에서 다시 조회",
-      "backendRoute": "/api/v1/admin/support/threads/:id/messages",
-      "operationId": "AdminSupportController_reply",
-      "backendOpenApiPath": "/admin/support/threads/{id}/messages",
-      "summary": "Reply to a member support conversation",
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      ],
-      "requestBody": {
-        "required": true,
-        "mediaType": "application/json",
-        "schema": {
-          "$ref": "#/components/schemas/NewMessageDto"
-        },
-        "schemaName": "NewMessageDto",
-        "resolvedSchema": {
-          "type": "object",
-          "properties": {
-            "body": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 2000
-            },
-            "idempotencyKey": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "required": [
-            "body",
-            "idempotencyKey"
-          ]
-        }
-      },
-      "successStatuses": [
-        201
-      ],
-      "responseMode": "json",
-      "responseShape": {
-        "kind": "json-object",
-        "topLevelKeys": [
-          "message"
-        ]
-      },
-      "responseSchema": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "object",
-            "properties": {
-              "message_id": {
-                "type": "string"
-              },
-              "sender_kind": {
-                "oneOf": [
-                  {
-                    "type": "string",
-                    "const": "user"
-                  },
-                  {
-                    "type": "string",
-                    "const": "admin"
-                  }
-                ]
-              },
-              "sender_user_id": {
-                "type": "string"
-              },
-              "body": {
-                "type": "string"
-              },
-              "created_at": {
-                "type": "string",
-                "format": "date-time"
-              }
-            },
-            "required": [
-              "message_id",
-              "sender_kind",
-              "body",
-              "created_at"
-            ]
-          }
-        },
-        "required": [
-          "message"
-        ]
-      },
-      "responseCompatibility": {
-        "preferredFieldNaming": "camelCase",
-        "legacySnakeCasePreserved": true,
-        "camelCaseAliasesAddedRecursively": true
-      }
-    },
-    {
-      "method": "PUT",
-      "path": "/app-api/v1/admin/support/threads/:id/status",
-      "purpose": "관리자가 문의 처리 상태 변경",
-      "callWhen": "사용자가 해당 저장/실행 작업을 확정했을 때",
-      "authorization": "로그인 + 최신 동의 + 관리자 역할 + 열린 관리자 콘솔 세션 + CSRF",
-      "afterSuccess": "문의 목록/대화를 서버에서 다시 조회",
-      "backendRoute": "/api/v1/admin/support/threads/:id/status",
-      "operationId": "AdminSupportController_status",
-      "backendOpenApiPath": "/admin/support/threads/{id}/status",
-      "summary": "Change support conversation status",
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      ],
-      "requestBody": {
-        "required": true,
-        "mediaType": "application/json",
-        "schema": {
-          "$ref": "#/components/schemas/StatusDto"
-        },
-        "schemaName": "StatusDto",
-        "resolvedSchema": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "type": "string",
-              "enum": [
-                "open",
-                "waiting_user",
-                "resolved"
-              ]
-            }
-          },
-          "required": [
-            "status"
-          ]
-        }
-      },
-      "successStatuses": [
-        200
-      ],
-      "responseMode": "json",
-      "responseShape": {
-        "kind": "json-object",
-        "topLevelKeys": [
-          "status"
-        ]
-      },
-      "responseSchema": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "status"
         ]
       },
       "responseCompatibility": {

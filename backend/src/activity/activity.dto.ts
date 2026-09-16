@@ -91,3 +91,18 @@ export class QueryActivityLogsDto {
   @IsUUID()
   readonly userId?: string;
 }
+
+export class QueryTrafficAnalyticsDto {
+  @ApiPropertyOptional({ enum: ['day', 'month', 'year'], default: 'day' })
+  @IsOptional()
+  @IsIn(['day', 'month', 'year'])
+  readonly granularity: 'day' | 'month' | 'year' = 'day';
+
+  @ApiPropertyOptional({ default: 30, minimum: 1, maximum: 366 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(366)
+  readonly periods: number = 30;
+}

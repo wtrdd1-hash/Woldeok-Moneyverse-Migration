@@ -20,8 +20,9 @@ import { equityGateNote, equitySummary, meetsEquityRequirement } from './equity'
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '가상 사업체 2.0 — 월덕 머니버스 비즈니스 및 부스트',
-  description: '편의점, 유기농 농장, 스마트 물류 등 다양한 사업체를 설립하고 부스트 아이템을 장착하여 일일 정산 순수익을 극대화하세요.',
+  title: '가상 사업체 — 게임 내 비즈니스 운영',
+  description: '월덕 머니버스 게임 안에서 다양한 가상 사업체를 설립·운영하고 정산 기록과 부스트 아이템을 확인합니다.',
+  alternates: { canonical: '/businesses' },
   robots: { index: true, follow: true },
 };
 
