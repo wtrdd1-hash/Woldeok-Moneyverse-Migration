@@ -8,18 +8,21 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import { ActivityController } from './activity.controller';
 
 describe('ActivityController admin log guards', () => {
-  it('hydrates the session before checking consent and administrator access', () => {
-    const guards = (Reflect.getMetadata(
-      GUARDS_METADATA,
-      ActivityController.prototype.listLogs,
-    ) as unknown[]) ?? [];
+  it.each(['listLogs', 'traffic'] as const)(
+    'hydrates the session before checking consent and administrator access on %s',
+    (method) => {
+      const guards = (Reflect.getMetadata(
+        GUARDS_METADATA,
+        ActivityController.prototype[method],
+      ) as unknown[]) ?? [];
 
-    expect(guards).toEqual([
-      SessionGuard,
-      AuthenticatedGuard,
-      ConsentGuard,
-      AdminGuard,
-      AdminSessionGuard,
-    ]);
-  });
+      expect(guards).toEqual([
+        SessionGuard,
+        AuthenticatedGuard,
+        ConsentGuard,
+        AdminGuard,
+        AdminSessionGuard,
+      ]);
+    },
+  );
 });

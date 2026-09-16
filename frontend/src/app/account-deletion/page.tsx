@@ -3,7 +3,7 @@ import { DeletionRequestInfo } from '@/components/deletion-request-info';
 import { PageHeader } from '@/components/page-header';
 
 export const metadata: Metadata = {
-  title: '계정 삭제 요청 · 월덕 머니버스',
+  title: '계정 삭제 요청',
   description: '월덕 머니버스 계정 및 관련 데이터 삭제 요청 방법과 보관 기준',
   alternates: { canonical: '/account-deletion' },
 };

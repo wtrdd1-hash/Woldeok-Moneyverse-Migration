@@ -20,8 +20,9 @@ import { sessionToken } from '../auth/cookies';
 import { SessionRepository } from '../auth/session.repository';
 import { requestClientKey } from '../security/rate-limit';
 import type { RequestWithSession } from '../auth/session.context';
+import { requireUserId } from '../auth/session.context';
 import { CONFIG, type AppConfig } from '../core/config';
-import { IngestActivityEventsDto, QueryActivityLogsDto } from './activity.dto';
+import { IngestActivityEventsDto, QueryActivityLogsDto, QueryTrafficAnalyticsDto } from './activity.dto';
 import { ActivityService } from './activity.service';
 
 @ApiTags('activity')
@@ -68,10 +69,27 @@ export class ActivityController {
     return this.activityService.recordEvents(body.events, actor, ip, userAgent, country);
   }
 
+  @Get('admin/activity/traffic')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
+  @ApiOperation({ summary: 'Privacy-safe day/month/year traffic analytics for administrators' })
+  async traffic(@Req() request: RequestWithSession, @Query() query: QueryTrafficAnalyticsDto) {
+    return this.activityService.trafficDashboard(
+      requireUserId(request),
+      query.granularity,
+      query.periods,
+    );
+  }
+
   @Get('admin/activity/logs')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
   @ApiOperation({ summary: 'List user activity logs for administrators' })
-  async listLogs(@Query() query: QueryActivityLogsDto) {
-    return this.activityService.getLogs(query.limit, query.offset, query.eventType, query.userId);
+  async listLogs(@Req() request: RequestWithSession, @Query() query: QueryActivityLogsDto) {
+    return this.activityService.getLogs(
+      requireUserId(request),
+      query.limit,
+      query.offset,
+      query.eventType,
+      query.userId,
+    );
   }
 }

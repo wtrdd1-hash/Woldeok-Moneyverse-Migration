@@ -17,7 +17,8 @@ describe('public search surface', () => {
     process.env.SEO_INDEXING_ENABLED = 'true';
     process.env.APP_BASE_URL = 'https://easy-scraping.com';
 
-    expect(sitemap().map((entry) => entry.url)).toEqual([
+    const urls = sitemap().map((entry) => entry.url);
+    expect(urls).toEqual([
       'https://easy-scraping.com',
       'https://easy-scraping.com/guide',
       'https://easy-scraping.com/announcements',
@@ -28,12 +29,12 @@ describe('public search surface', () => {
       'https://easy-scraping.com/quests',
       'https://easy-scraping.com/businesses',
       'https://easy-scraping.com/board',
-      'https://easy-scraping.com/shop/catalog',
       'https://easy-scraping.com/terms',
       'https://easy-scraping.com/privacy',
       'https://easy-scraping.com/account-deletion',
       'https://easy-scraping.com/data-deletion',
     ]);
+    expect(urls).not.toContain('https://easy-scraping.com/shop/catalog');
   });
 
   it('keeps service monitoring out of crawler paths', () => {
