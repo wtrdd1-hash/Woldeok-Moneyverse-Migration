@@ -16,3 +16,12 @@ Global fallback variables: `ECONOMY_AI_API_BASE_URL`, `ECONOMY_AI_MODEL_A`, `ECO
 
 ## Resource rule
 Remote inference: current host memory is sufficient. Local inference: keep model residency bounded; do not load twelve models concurrently. With ~13 GiB RAM, run one small quantized model at a time. For two 7–8B Q4 models plus backend/DB headroom, prefer at least 32 GiB RAM. Disk expansion is not currently required because the data disk has ~85 GB free.
+
+## v2026.09.16.143 remote-inference optimization
+- Route only domains implicated by proposal knobs; macro, welfare and integrity remain mandatory sentinels.
+- Skip rebuttal for low-risk unanimous no-risk first-pass decisions.
+- Rebut only disputed domains; high-risk controls rebut every selected domain.
+- `ECONOMY_AI_MAX_CONCURRENCY` bounds remote/local pressure; default 2.
+- `ECONOMY_AI_CACHE_TTL_SECONDS` caches an exact proposal+model council result briefly; default 300 seconds.
+- Council evidence records latency and provider token usage when supplied.
+- `economy_ai_agent_scoreboard` exposes per-domain/seat/model volume, decision mix, confidence, latency and token usage for later quality/cost evaluation.
