@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.16.154
+> **현재 통합 버전:** v2026.09.16.156
 > **구현·증거 동기화:** 2026-09-16
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -440,3 +440,50 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 조사: Google Search Central 9월 최신 글 및 2026-08 site reputation update, Naver Search Advisor robots/meta/resource, OWASP API/ASVS, Google Play 수수료/rollout, GitHub main/branch protection/Actions/PR #370.
 - 채택: exact-main CI 상태 분리, repository enforcement 결함, PR #370 rebase+real-DB gate, SEO crawler/resource 계약, 시장·시행일 기반 수수료 모델.
 - 보류: 기획 자동화에서는 runtime/DB/Flux/Production을 변경하지 않았다. `Build Test Candidate #740`이 관측 시 실행 중이므로 Test/Production 통과를 주장하지 않는다.
+
+
+## v2026.09.16.155 — 시간별 릴리스 진실성·외부근거 갱신
+
+### REL-EVIDENCE-155-01 — P0 — IN PROGRESS
+- 기획 시작/중간 권위 `main`은 `a4455ad342fbf66a128c1221c25b45ff4d20d6bf`이다. 이 exact SHA의 `Build Production Release #882`는 현재 `in_progress`이며 immutable SHA 결정은 통과했고 `Wait for exact SHA on isolated test and verify backend/database path` 단계가 실행 중이다. 이는 Test 또는 Production 성공 증거가 아니다.
+- 반복 릴리스 게이트 실패는 원인 제거 작업으로 유지한다. test-gate는 성공/실패 모두 expected/observed `release_sha`, GitOps desired/applied revision, Deployment generation, ReplicaSet/Pod image digest, pod-local/public version, backend readiness, DB authority/schema checksum, 최초 불일치 계층, probe timestamp/latency, rollback target을 남겨야 한다. secret header/cookie/DSN/key/token은 evidence에서 금지한다.
+- 수용조건: exact-SHA/DB assertion 하나라도 다르면 승격 0건, 실패/timeout에도 비밀 없는 완전한 evidence 보존, 복구 후 동일 candidate의 source→image→desired→applied→workload→public→DB lineage 증명, exact-main 재시험과 Production smoke 통과.
+
+### SEO/SEO 백엔드 결정 갱신
+- 2026-09-08/09-14 Google Search Central 글은 행사 공지이므로 crawl/index 계약을 변경하지 않는다. 2026-08-28 site reputation policy 변경은 sponsor/affiliate/UGC 거버넌스에 계속 직접 적용한다.
+- favicon QA는 현재 Google 기준에 따라 Googlebot/Googlebot-Image가 홈페이지와 favicon을 수집할 수 있어야 하고, 안정적인 URL과 정사각형 자산(권장 48×48 초과)을 사용한다. public metadata/canonical/sitemap/structured data/private noindex 계약은 유지한다.
+- Google European Search Dataset Licensing Program은 SEO 순위 우회수단이 아니므로, Moneyverse가 별도 자격과 독립 assurance/privacy 의무를 수용하는 경우가 아니면 제품 범위에서 제외한다.
+
+### 보안·AI 경계 갱신
+- OWASP API Security Top 10은 일반 API baseline, ASVS는 검증 baseline으로 유지한다. OWASP GenAI Security Project의 2026 LLM Top 10/Agent Control Standard는 계획된 economy-AI/agent lane에 한해 추가 적용한다. model/tool 권한, prompt/data provenance, bounded tool permission, output validation, model/dataset supply-chain, secret isolation, auditability, deterministic economy arbitration을 필수화한다. AI는 ledger/balance/entitlement를 직접 변경하거나 classical safety lane을 우회할 수 없다.
+- AI 간 불일치, 모델 장애, 잘못된 출력, 만료 proposal, provenance 누락은 `NO_OP`/shadow/human review로 귀결하며 조용히 실경제 동작으로 승격하지 않는다.
+
+### 수익성/사업성 갱신
+- Google Play 현재 서비스 수수료는 market/cohort/program 의존적이다. EEA/UK/US 새 요율은 이미 시행 중이고 나머지 시장은 각 rollout 전까지 해당 기존/program 조건을 사용한다. SKU 모델은 market × effective-date/install-cohort × transaction-type × billing-path × programme 키를 유지한다.
+- 실측하지 않은 conversion, ARPU/ARPDAU/ARPPU, churn, refund, CAC, LTV는 사실값으로 승격하지 않는다. release-control/backup/status 작업은 임의 매출이 아니라 회피된 downtime/fraud/refund/support/operator 비용으로 평가한다.
+
+### v155 worklog
+- 확인 근거: Google Search Central 9월 최신 글과 8월 site reputation 변경, Google favicon 가이드, Google European Search Dataset Licensing Program, OWASP API/ASVS 및 GenAI 2026 기준, Google Play 현재 수수료 문서, 최신 GitHub main/Actions.
+- 이번 기획 통합은 runtime code, DB, Flux, Production을 변경하지 않는다. 우선순위는 P0 release truth → 독립 restore 증거 → false-green status → privileged recovery cleanup → migration/Work-clock 무결성 → repository enforcement → economy/admin/casino 권한 → core correctness → monetization → SEO/growth/accessibility 순서를 유지한다.
+
+
+## v2026.09.16.156 — 카지노 런타임 장애·릴리스 호스트 위생 갱신
+
+### CASINO-RUNTIME-156-01 — HIGH — FIX MERGED / PRODUCTION REVERIFY REQUIRED
+- 2026-09-16 운영 증거: 카지노 조작 후 전체 오류 경계로 이동할 수 있었고 digest `3286936712@E352`는 `A "use server" file can only export async functions, found object.`에 대응했다. 원인 수정은 `main` `23ae36082b8a4875797314682efef8e99b8b9484` (#383)에 병합됐다. `CasinoPlayState`/`CASINO_IDLE`을 client-safe 모듈로 이동하고 `use server` 파일의 동기 재내보내기를 제거했으며 non-async runtime export를 차단하는 정적 회귀 테스트를 추가했다.
+- 영향은 카지노 브라우저 플레이/복구 UX이며 정산 권위, 원장, 잔액, DB 스키마는 변경하지 않았다. 모호한 브라우저 실패 후 중복 베팅을 유도하지 않는다. 새 제출 전에 서버 권위 최근 게임 기록과 지갑을 읽어 확정 결과를 확인하고 replay는 멱등성으로 방어한다.
+- QA: 병합 증거는 카지노 14/14, typecheck 통과, ESLint 오류 0/무관 경고 11, production build 통과다. current-main Build Test Candidate #749는 아직 실행 중이므로 exact-main Test/Production 검증 완료가 아니다. exact SHA Test, API/사용자 흐름, duplicate-submit/idempotency negative case, 공개 runtime SHA, Production smoke와 해당 server-action 오류 0건이 수용조건이다.
+
+### OPS-CACHE-156-01 — HIGH — MITIGATED RUNTIME / PERMANENT FIX TODO
+- 활성 Debian frontend는 `debian` 사용자로 실행되지만 `.next/cache/fetch-cache`에 root 소유 파일이 있어 반복 `EACCES`가 발생했다. 운영에서 `debian:debian`으로 소유권을 복구했으며 회원/원장/정산 데이터는 변경하지 않았다.
+- 영구 수정: release assembly/service startup이 root 권한으로 writable runtime path를 생성하지 못하게 한다. pre-start에서 uid/gid와 cache/temp/upload writable path를 검증하고 immutable release 파일은 read-only, mutable cache는 명시적 runtime-owned directory로 분리한다. 불일치 시 트래픽 투입 전에 배포 실패 처리한다.
+- 테스트/관측: clean-host install, upgrade, rollback, restart, cache rebuild를 검증하고 runtime path `EACCES` 0건을 요구한다. permission-denied/cache-write failure rate를 경보한다. 롤백은 마지막 verified release와 ownership manifest를 복구하며 `chmod -R 777`은 금지한다.
+
+### 외부근거·사업성 결정 갱신
+- Google Search Central 2026-09-08/09-14 글은 행사 공지이므로 crawl/index 정책을 변경하지 않는다. 2026-08-28 site reputation policy는 sponsor/affiliate/UGC 거버넌스에 계속 적용한다. favicon은 crawlable homepage/favicon, stable URL, square asset 계약을 유지한다.
+- OWASP API Security Top 10은 일반 API baseline이며 계획된 economy-AI lane에는 v155에서 정한 OWASP GenAI 2026 통제를 추가 적용한다.
+- Google Play 수수료는 market/cohort/program/effective-date별로 모델링한다. 아직 새 일정이 시행되지 않은 시장에 EEA/UK/US new-install 요율을 선적용하지 않는다. 실측하지 않은 사업 지표는 가설/테스트 기준이다.
+
+### v156 worklog
+- 확인: Google Search Central 9월 글과 8월 site-reputation 변경, favicon 가이드, OWASP API/GenAI 최신 기준, Google Play 현재 수수료 문서, 최신 GitHub main, 병합 #383, open #382/#381, exact-main Actions.
+- 이번 자동화는 문서만 변경한다. runtime code/DB/Flux/Production 승격은 수행하지 않았다. 우선순위는 release truth/restore/status P0 이후 cache/recovery/migration/authorization HIGH, 그 다음 기능 확장이다.
