@@ -79,7 +79,7 @@ export function HiLoCardGame({
         </div>
 
         <form action={formAction} className="grid gap-4">
-          <input type="hidden" name="parity" value={choice} />
+          <input type="hidden" name="choice" value={choice} />
           <div className="grid gap-2">
             <Label htmlFor="hilo-stake" className="text-sm font-medium">
               베팅할 WLD 금액

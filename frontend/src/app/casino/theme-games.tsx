@@ -109,7 +109,7 @@ export function ThemeGameCard({
         <form action={formAction} className="grid gap-5">
           <input
             type="hidden"
-            name={theme.mode === 'parity' ? 'parity' : 'number'}
+            name="choice"
             value={choice}
           />
 
