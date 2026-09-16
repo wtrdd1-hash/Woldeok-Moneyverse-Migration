@@ -46,6 +46,10 @@ export interface WorkSummary {
   readonly weekly_paid: string;
   readonly weekly_cap: string;
   readonly active_assignments: string;
+  readonly game_day_key: string;
+  readonly game_week_key: string;
+  readonly day_ends_at: string;
+  readonly week_ends_at: string;
 }
 
 export interface ActiveJobProgress {
@@ -267,6 +271,27 @@ export function remaining(paid: string, cap: string): string {
   return left > 0n ? left.toString() : '0';
 }
 
+export type WorkQuotaBlock = 'daily' | 'weekly';
+export type WorkTaskBlock = WorkQuotaBlock | 'task_daily' | null;
+
+export function quotaReached(paid: string, cap: string): boolean {
+  if (!/^\d+$/.test(paid) || !/^\d+$/.test(cap)) return false;
+  const limit = BigInt(cap);
+  return limit > 0n && BigInt(paid) >= limit;
+}
+
+export function workQuotaBlock(summary: WorkSummary | null | undefined): WorkQuotaBlock | null {
+  if (!summary) return null;
+  if (quotaReached(summary.daily_paid, summary.daily_cap)) return 'daily';
+  if (quotaReached(summary.weekly_paid, summary.weekly_cap)) return 'weekly';
+  return null;
+}
+
+export function workTaskBlock(task: WorkTask, quotaBlock: WorkQuotaBlock | null): WorkTaskBlock {
+  if (quotaBlock) return quotaBlock;
+  return task.daily_limit > 0 && task.taken_today >= task.daily_limit ? 'task_daily' : null;
+}
+
 export function progressPercent(paid: string, cap: string): number {
   if (!/^\d+$/.test(paid) || !/^\d+$/.test(cap)) return 0;
   const total = BigInt(cap);
@@ -282,7 +307,8 @@ export function rewardSentence(task: WorkTask, locale?: Locale | unknown): strin
       ? 'Career work rewards are temporarily paused.'
       : '현재 직업 업무 보상 지급이 일시 중지되어 있어요.';
   }
-  const levelBonus = task.reward_preview !== task.base_reward || task.experience_preview !== task.base_experience;
+  const levelBonus =
+    task.reward_preview !== task.base_reward || task.experience_preview !== task.base_experience;
   if (locale === 'en') {
     return levelBonus
       ? `Complete now to earn ${task.reward_preview} WLD and ${task.experience_preview} EXP, including your career-level bonus.`

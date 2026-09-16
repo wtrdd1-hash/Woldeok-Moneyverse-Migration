@@ -115,18 +115,27 @@ describe.skipIf(!MIGRATOR_DATABASE_URL)('work daily quota contract', () => {
         await complete(client, actor, task.id);
       }
 
-      const board = await client.query<{ daily_limit: number; taken_today: number }>(
-        'SELECT daily_limit, taken_today FROM public.work_task_board($1) WHERE task_id = $2',
+      const board = await client.query<{
+        daily_limit: number;
+        taken_today: number;
+        reward_preview: string;
+      }>(
+        'SELECT daily_limit, taken_today, reward_preview::text FROM public.work_task_board($1) WHERE task_id = $2',
         [actor, task.id],
       );
-      expect(board.rows[0]).toEqual({ daily_limit: task.dailyLimit, taken_today: task.dailyLimit });
+      expect(board.rows[0]).toEqual({
+        daily_limit: task.dailyLimit,
+        taken_today: task.dailyLimit,
+        reward_preview: '0',
+      });
 
       const error = await rejectionOf(() => complete(client, actor, task.id));
       expect((error as { code?: string }).code).toBe('22023');
-      expect(String((error as { message?: string }).message)).toContain('daily completion limit reached');
+      expect(String((error as { message?: string }).message)).toContain(
+        'daily completion limit reached',
+      );
     });
   });
-
 
   it('enforces the administrator member-wide daily cap on direct completion', async () => {
     await rolledBack(async (client) => {
@@ -139,15 +148,75 @@ describe.skipIf(!MIGRATOR_DATABASE_URL)('work daily quota contract', () => {
          VALUES (10, 2200, 0, true, 'global cap regression test')`,
       );
 
+      const previewBefore = await client.query<{ reward_preview: string }>(
+        `SELECT public.work_reward_preview($1,$2)::text AS reward_preview`,
+        [actor, task.id],
+      );
+      expect(previewBefore.rows[0]?.reward_preview).toBe('10');
+
       const first = await client.query<{ reward_amount: string }>(
         `SELECT reward_amount::text FROM public.work_complete_task_v2($1,$2,$3)`,
         [actor, task.id, randomUUID()],
       );
       expect(first.rows[0]?.reward_amount).toBe('10');
 
+      const previewAfter = await client.query<{ reward_preview: string }>(
+        `SELECT public.work_reward_preview($1,$2)::text AS reward_preview`,
+        [actor, task.id],
+      );
+      expect(previewAfter.rows[0]?.reward_preview).toBe('0');
+
+      const dashboard = await client.query<{
+        daily_paid: string;
+        daily_cap: string;
+        weekly_paid: string;
+        weekly_cap: string;
+        game_day_key: string;
+        game_week_key: string;
+        day_ends_at: Date;
+        week_ends_at: Date;
+      }>(
+        `SELECT daily_paid::text, daily_cap::text, weekly_paid::text, weekly_cap::text,
+                game_day_key::text, game_week_key::text, day_ends_at, week_ends_at
+         FROM public.work_my_dashboard_v2($1)`,
+        [actor],
+      );
+      const keys = await client.query<{ day_key: string; week_key: string }>(
+        `SELECT public.server_game_day_key()::text AS day_key,
+                public.server_game_week_key()::text AS week_key`,
+      );
+      expect(dashboard.rows[0]).toMatchObject({
+        daily_paid: '10',
+        daily_cap: '10',
+        weekly_paid: '10',
+        weekly_cap: '2200',
+        game_day_key: keys.rows[0]?.day_key,
+        game_week_key: keys.rows[0]?.week_key,
+      });
+      expect(dashboard.rows[0]?.day_ends_at.getTime()).toBeGreaterThan(Date.now() - 1_000);
+      expect(dashboard.rows[0]?.week_ends_at.getTime()).toBeGreaterThan(Date.now() - 1_000);
+
+      const legacy = await client.query<{ daily_paid: string; weekly_paid: string }>(
+        `SELECT daily_paid::text, weekly_paid::text FROM public.work_my_dashboard($1)`,
+        [actor],
+      );
+      expect(legacy.rows[0]).toEqual({ daily_paid: '10', weekly_paid: '10' });
+
+      const windows = await client.query<{ day_amount: string; week_amount: string }>(
+        `SELECT
+           coalesce(max(paid_amount) FILTER (WHERE window_kind = 'day' AND window_start = public.server_game_day_key()), 0)::text AS day_amount,
+           coalesce(max(paid_amount) FILTER (WHERE window_kind = 'week' AND window_start = public.server_game_week_key()), 0)::text AS week_amount
+         FROM public.work_reward_windows
+         WHERE user_id = $1`,
+        [actor],
+      );
+      expect(windows.rows[0]).toEqual({ day_amount: '10', week_amount: '10' });
+
       const error = await rejectionOf(() => complete(client, actor, task.id));
       expect((error as { code?: string }).code).toBe('22023');
-      expect(String((error as { message?: string }).message)).toContain('work reward quota reached');
+      expect(String((error as { message?: string }).message)).toContain(
+        'work reward quota reached',
+      );
     });
   });
 

@@ -2,7 +2,7 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.16.158
+> Current integrated version: v2026.09.16.161
 > Implementation/evidence sync: 2026-09-16
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
@@ -585,3 +585,60 @@ External references rechecked: Google Search Central September 2026 updates and 
 - Fresh research: Google Search Central September 2026 updates/blog, current favicon/site-reputation guidance, current Google Play service-fee and rollout documentation, OWASP/ASVS baseline cross-check. Adopted the 2026-09-16 crawler-identity operational implication and Korea fee effective-date guardrail; event announcements were reference-only, not SEO algorithm changes.
 - Runtime/QA/CI: confirmed main `88452f14...`; confirmed #888 failed specifically because isolated Test never served exact `f6fd312...`; confirmed Production build was skipped; confirmed #755 verify/check green while frontend candidate build remained in progress. No Production success is inferred.
 - Development linkage: P0 release-evidence/root-cause work precedes casino Production reverification and all feature expansion. This planning run changes documentation only; it does not deploy runtime code, alter DB/Flux, or promote Production.
+
+## v2026.09.16.159 — Work day/week reset authority convergence
+
+### WORK-CLOCK-149-01 — HIGH — IMPLEMENTED / EXACT-SHA TEST REQUIRED
+- Forward migration `203-work-reset-convergence.sql` fixes the remaining read-model split without editing or renumbering any applied migration. Migration 202 remains immutable.
+- Work settlement, task board, reward preview and dashboard now share `server_game_day_*` / `server_game_week_*` authority. One game day is 600 real seconds and one seven-day game week is 70 real minutes.
+- `GET /api/v1/work` adds the authoritative `game_day_key`, `game_week_key`, `day_ends_at` and `week_ends_at`. `/work` renders daily/weekly paid WLD, remaining quota and exact next reset from those server values.
+- Task actions fail closed at task-daily, member-daily or member-weekly exhaustion. Reward preview uses the same current game windows and caps as settlement instead of advertising an amount that settlement would refuse or clamp.
+- Mobile API contract advances to `v2026.09.16.159`. Contract generation now excludes TypeScript compiler-internal `__@...` symbol properties so unrelated type graph changes cannot rewrite public JSON response schemas.
+- Isolated PostgreSQL validation passed migration 203 plus 15 Work/clock tests covering 10-minute day rollover, 70-minute week rollover, timezone invariance, task/global caps, career switching, idempotency/integrity and preview/payout/dashboard parity. Local DB package 7/7, backend 871, frontend 612, lint 0 errors, typecheck and production build passed.
+- Production remains fail-closed pending GitHub CI, exact-head Test convergence, authoritative DB backup/migration and Production smoke. The current P0 release-evidence rules from v158 are not weakened for this fix.
+
+
+## v2026.09.16.160 — local dual-model economy-AI production activation
+
+### ECON-AI-160-01 — IMPLEMENTED / RUNTIME-CONFIG ACTIVATION
+- Runtime authority remains the approved Debian 13 systemd/PostgreSQL path. This operation did not deploy newer application `main`; public Production continued to serve application SHA `be218f0403372689dbdf8af9bf8700264f39348f`, which already contains the dual economy-AI reviewer. Documentation was rebased on application main `03a8ae9c5313d0915589691afc6fff022323c305` only for record integration.
+- `economy_ai_policy_review` is enabled in Production through the audited `admin_set_feature_switch` path. A provisional v159 activation label was reconciled to v160 after concurrent main used v159; reconciliation kept the state `enabled -> enabled` and added a separate receipt/audit reason rather than rewriting history.
+- Local inference is localhost-only at `127.0.0.1:11434`, with runtime/models on `/srv/moneyverse-data/ai`. Seat A is `llama3.2:3b`; seat B is `gemma3:1b`. `qwen2.5:3b` was rejected from the production profile after violating the confidence `0..1` output contract.
+- Resource bounds are explicit: one parallel request, at most two resident models, 2-minute keep-alive, `MemoryHigh=6G`, `MemoryMax=7G`, no Ollama cloud, and model weights excluded from the constrained system disk.
+- Backend configuration uses the OpenAI-compatible local endpoint, 180-second per-call timeout, concurrency 1, 300-second exact-result cache and 120-minute review TTL. Secrets are not committed; repository files include only the non-secret service/config template.
+
+### Test/Production evidence and safety contract
+- Existing economy reviewer unit tests passed 10/10. Both selected models returned the required `decision`, confidence in `0..1`, rationale and risks contract.
+- Validation ran against the deployed `test-be218f040337` application release plus the authoritative Test PostgreSQL. The public Test route also returns `be218f...`; this operation does not claim current-main exact-SHA Test convergence and does not close `REL-EVIDENCE-158-01`.
+- Isolated Test exercised real model calls and Test PostgreSQL: four routed domains/eight seat calls, append-only review storage, scoreboard evidence, exact-hash `dual_agree`, exact-only `ai_veto`, changed-proposal `ai_missing_classical_fallback`, and missing-model `unconfigured_classical_fallback`. Application-role direct table reads remained denied.
+- The first enabled Production reviewer check returned `no_eligible_classical_proposal` in about 40 ms, so no model council ran, no review row was created, and no policy value changed. Production backend and AI services remained active; public home returned HTTP 200.
+- The deterministic/classical engine remains accounting/policy authority. AI may only append a review and veto the exact matching proposal. Missing, expired, mismatched, unavailable or abstaining AI evidence cannot invent replacement values and falls back to the classical lane.
+- Rollback is fail-safe: audited switch to `disabled`, restore/remove backend AI runtime variables if required, restart backend, then stop/disable local inference when unused. Never weaken deterministic validation, ledger reconciliation or exact-proposal matching to preserve AI availability.
+- Monitoring: feature switch, reviewer outcome, council decision mix, confidence, latency/token usage, service memory/restarts, backend errors and economy reconciliation. Model-quality regression is an operations incident, not authority to bypass deterministic gates.
+
+
+## v2026.09.16.161 — administrator navigation completeness and current release evidence
+
+### ADMIN-NAV-161-01 — HIGH — IMPLEMENTED ON MAIN / EXACT-SHA TEST REQUIRED
+- Evidence: current main `7acc3c02e4fc015d6800f2d5a7e51180f2dc02a5` integrates PR #390. The root cause was two independently maintained administrator inventories drifting: `AdminSubNav` omitted Security, Business/Season, Work/Jobs and Discord, while `ADMIN_AREAS` omitted Support and Shop. Production had served the same incomplete top-level navigation, so this is a frontend discoverability/inventory defect, not evidence of missing backend endpoints.
+- User/permission contract: authenticated administrators keep the existing authorization boundary; navigation visibility never grants capability. Every destination must independently enforce administrator actor/session policy, recent reauthentication/second factor where required, server-side function/object authorization and append-only audit for privileged/economic mutations. A hidden route is not an access-control mechanism.
+- UX contract: `/admin` dashboard and top-level sub-navigation share one canonical area registry. Required top-level areas are Dashboard, Users, Security, Economy, Business/Season, Work/Jobs, Shop, Support, Discord and other currently registered first-class areas; nested activity/delivery/integrity/AI-news/scenario pages remain under parents. Mobile uses an accessible overflow/menu without dropping destinations; desktop may render tabs. Current route, keyboard focus, screen-reader name/state, loading/error/403/404 and stale-session reauth states are explicit.
+- Frontend/backend/API/DB: the registry contains stable route id, localized label, route, required capability and optional badge source. Badge APIs are read-only and failure-isolated: badge timeout must not hide navigation. No DB migration is required for the navigation fix. Backend remains authoritative for capability checks; client registry must not duplicate economic authorization logic.
+- Security/abuse: test direct URL access for non-admin, stale admin session, insufficient admin capability, CSRF on mutations, BOLA/BFLA negatives and audit actor integrity. Navigation telemetry must not log secrets, session tokens or private user payloads. Privileged routes remain `noindex`, excluded from sitemap and inaccessible to crawler-only privilege.
+- QA evidence: merged update reports local typecheck/build/lint 0 errors (11 pre-existing image warnings), frontend 68 files/611 tests, backend 871 non-DB tests with 351 DB tests skipped locally. Therefore local success is insufficient for promotion. Add registry-completeness regression, route→capability contract test, keyboard/mobile navigation E2E, 403/reauth tests, DB-backed admin mutation regression and Test HTML checks for every top-level destination.
+- Acceptance/promotion: exact `7acc3c02...` candidate must pass DB-backed CI, isolated Test must serve the same SHA/digests, backend/database public-catalog/readiness probe must pass, and an authorized Test admin must reach every registered top-level area without widening permissions. Production smoke repeats route inventory plus authorization negatives. Roll back to the last verified immutable frontend/backend pair or disable only the affected admin surface; never relax authorization.
+- Observability/business: emit `admin_nav_view`, `admin_area_open`, `admin_area_403`, `admin_reauth_required`, route-not-found and badge-failure counts with bounded actor pseudonymization. This is an operations-efficiency feature, not direct revenue: measure median time-to-area, failed navigation rate, admin task completion, support burden and incident-response time. `SCALE` when completeness is 100% and error/support burden falls without auth regressions; `ITERATE` on discoverability/accessibility friction; `KILL/ROLLBACK` any change that widens privilege or creates false access cues.
+
+### REL-EVIDENCE-161-02 — P0 — IN PROGRESS
+- At capture, `Build Production Release #904` targets exact main `7acc3c02e4fc015d6800f2d5a7e51180f2dc02a5`. Immutable SHA resolution passed; `Wait for exact SHA on isolated test and verify backend/database path` is still in progress. No Test/Production success is inferred.
+- The v158 evidence contract remains authoritative: candidate digests → GitOps desired/applied → workload generation/digests → Service endpoints/ingress → pod-local/public Test SHA → backend readiness → DB identity/schema head → changed-flow QA. A missing layer is BLOCKED, and failure must persist first-mismatch evidence. Repository protection still reports required-status-check enforcement `off` with no required contexts/checks, so repository enforcement remains HIGH backlog.
+
+### SEO/security/economics decisions — 2026-09-16 refresh
+- Google Search Central's newest 2026-09-14 blog entry is an event announcement, not a crawl/index algorithm contract. The September documentation log still records regional Search-experience documentation and the 2026-09-16 `GoogleProducer` HTTP User-Agent update. Keep crawler classification resilient to full-UA changes and never use crawler identity to bypass auth/noindex. The 2026-08-28 site-reputation policy remains applicable to sponsor/affiliate/UGC governance; favicon remains crawlable homepage/file, stable URL and square asset.
+- OWASP API Security Top 10 remains version 2023; ASVS remains the implementation-verification baseline. Admin navigation is specifically covered by BFLA/BOLA, authentication/session, CSRF and audit controls. Planned/active economy AI additionally keeps the OWASP GenAI 2026/Agent Control safety lane without replacing deterministic economic authority.
+- Google Play still documents market/program/cohort-dependent fees rather than one universal rate. Unit economics remain keyed by market/effective date/install cohort when applicable/transaction type/billing path/programme, with conversion, ARPU/ARPDAU/ARPPU, churn, refund, CAC and LTV marked `HYPOTHESIS`/`TEST TARGET` unless measured.
+
+### v161 worklog
+- Fresh references: Google Search Central September 2026 blog/update log/site-reputation/favicon; OWASP API Security/ASVS guidance and GenAI 2026 update; Google Play current service-fee guidance. Event announcements were not misclassified as ranking changes.
+- Runtime/code/QA: re-read latest main and both v160 plans; inspected main commit #390 and its local verification evidence; checked current main branch protection and Production Release #904. Rechecked main before integration.
+- Development order remains P0 release truth/evidence → independent restore proof → false-green elimination → HIGH admin exact-SHA/authorization QA → casino/runtime/cache/privileged recovery → migration integrity → repository enforcement → core correctness → monetization → SEO/growth/accessibility. Planning changes documentation only.

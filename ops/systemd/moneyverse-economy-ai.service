@@ -1,0 +1,29 @@
+[Unit]
+Description=Moneyverse Economy AI Local Inference
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=debian
+Group=debian
+ExecStart=/srv/moneyverse-data/ai/runtime/ollama/bin/ollama serve
+Restart=always
+RestartSec=5
+Environment=OLLAMA_HOST=127.0.0.1:11434
+Environment=OLLAMA_MODELS=/srv/moneyverse-data/ai/models/ollama
+Environment=OLLAMA_MAX_LOADED_MODELS=2
+Environment=OLLAMA_NUM_PARALLEL=1
+Environment=OLLAMA_KEEP_ALIVE=2m
+Environment=OLLAMA_LLM_LIBRARY=cpu_avx2
+Environment=OLLAMA_NO_CLOUD=true
+CPUWeight=25
+MemoryHigh=6G
+MemoryMax=7G
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/srv/moneyverse-data/ai/models/ollama /srv/moneyverse-data/ai/logs /home/debian/.ollama
+
+[Install]
+WantedBy=multi-user.target

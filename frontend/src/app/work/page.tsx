@@ -22,6 +22,7 @@ import type {
   JobProfileResponse,
   WorkAssignment,
   WorkReceipt,
+  WorkSummary,
   WorkTask,
 } from './work';
 import {
@@ -31,7 +32,10 @@ import {
   isOpen,
   jobLabel,
   jobMeta,
+  progressPercent,
+  remaining,
   secondsUntilSubmittable,
+  workQuotaBlock,
   statusLabel,
 } from './work';
 
@@ -50,11 +54,12 @@ export default async function WorkPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const [board, assignments, receipts, profile] = await Promise.all([
+  const [board, assignments, receipts, profile, summary] = await Promise.all([
     apiOrNull<{ tasks: readonly WorkTask[] }>('/api/v1/work/tasks'),
     apiOrNull<{ assignments: readonly WorkAssignment[] }>('/api/v1/work/assignments'),
     apiOrNull<{ receipts: readonly WorkReceipt[] }>('/api/v1/work/receipts'),
     apiOrNull<JobProfileResponse>('/api/v1/work/profile'),
+    apiOrNull<WorkSummary>('/api/v1/work'),
   ]);
 
   const tasks = board?.tasks ?? [];
@@ -70,6 +75,9 @@ export default async function WorkPage() {
   const currentExp = activeJob?.experience ?? 0;
   const nextExp = activeJob?.next_level_exp ?? 100;
   const expPercent = Math.min(100, Math.round((currentExp / (nextExp || 1)) * 100));
+  const dailyRemaining = summary ? remaining(summary.daily_paid, summary.daily_cap) : null;
+  const weeklyRemaining = summary ? remaining(summary.weekly_paid, summary.weekly_cap) : null;
+  const quotaBlock = workQuotaBlock(summary);
 
   return (
     <div className="grid gap-8 pb-12">
@@ -97,7 +105,8 @@ export default async function WorkPage() {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-2xl font-black tracking-tight">
-                    {activeMeta?.name ?? (isEn ? 'None selected (Choose a career)' : '미선택 (전직을 선택하세요)')}
+                    {activeMeta?.name ??
+                      (isEn ? 'None selected (Choose a career)' : '미선택 (전직을 선택하세요)')}
                   </span>
                   <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm font-semibold">
                     Lv.{activeJob?.level ?? 1}
@@ -114,7 +123,9 @@ export default async function WorkPage() {
 
             <div className="w-full md:w-80 grid gap-2">
               <div className="flex justify-between text-xs font-semibold">
-                <span className="text-muted-foreground">{isEn ? 'Proficiency EXP' : '숙련도 경험치'}</span>
+                <span className="text-muted-foreground">
+                  {isEn ? 'Proficiency EXP' : '숙련도 경험치'}
+                </span>
                 <span className="text-primary font-mono">
                   {currentExp.toLocaleString()} / {nextExp.toLocaleString()} EXP ({expPercent}%)
                 </span>
@@ -135,11 +146,89 @@ export default async function WorkPage() {
         </div>
       </section>
 
+      <section aria-labelledby="work-quota-title" className="grid gap-4">
+        <div>
+          <h2 id="work-quota-title" className="text-xl font-bold flex items-center gap-2">
+            <span>⏱️</span> {isEn ? 'Reward limits & server resets' : '보상 한도 및 서버 초기화'}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {isEn
+              ? 'These counters use the authoritative Moneyverse game clock. The API and payout engine use the same day/week window.'
+              : '아래 카운터는 권위 있는 머니버스 게임시간을 사용합니다. API 표시와 실제 보상 정산이 같은 일간·주간 창을 사용합니다.'}
+          </p>
+        </div>
+
+        {summary ? (
+          <div className="grid gap-3 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardDescription>GAME DAY RESET</CardDescription>
+                <CardTitle>{isEn ? 'Daily work reward' : '일간 직업 보상'}</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-3">
+                <div className="flex items-end justify-between gap-3">
+                  <span className="font-mono text-lg font-black">
+                    {summary.daily_paid} / {summary.daily_cap} WLD
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {isEn ? `${dailyRemaining} WLD left` : `${dailyRemaining} WLD 남음`}
+                  </span>
+                </div>
+                <Progress
+                  value={progressPercent(summary.daily_paid, summary.daily_cap)}
+                  aria-label={isEn ? 'Daily work reward usage' : '일간 직업 보상 사용량'}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {isEn ? 'Next reset' : '다음 초기화'}:{' '}
+                  <strong>{formatMoment(summary.day_ends_at)}</strong>
+                  <span className="ml-2 font-mono">({summary.game_day_key})</span>
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardDescription>GAME WEEK RESET</CardDescription>
+                <CardTitle>{isEn ? 'Weekly work reward' : '주간 직업 보상'}</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-3">
+                <div className="flex items-end justify-between gap-3">
+                  <span className="font-mono text-lg font-black">
+                    {summary.weekly_paid} / {summary.weekly_cap} WLD
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {isEn ? `${weeklyRemaining} WLD left` : `${weeklyRemaining} WLD 남음`}
+                  </span>
+                </div>
+                <Progress
+                  value={progressPercent(summary.weekly_paid, summary.weekly_cap)}
+                  aria-label={isEn ? 'Weekly work reward usage' : '주간 직업 보상 사용량'}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {isEn ? 'Next reset' : '다음 초기화'}:{' '}
+                  <strong>{formatMoment(summary.week_ends_at)}</strong>
+                  <span className="ml-2 font-mono">({summary.game_week_key})</span>
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <Card>
+            <CardContent className="py-5 text-sm text-muted-foreground" role="status">
+              {isEn
+                ? 'The server reward-window summary is temporarily unavailable. No reset or remaining quota is guessed on the client.'
+                : '서버 보상 창 정보를 불러오지 못했습니다. 클라이언트에서 초기화 시각이나 남은 한도를 추측하지 않습니다.'}
+            </CardContent>
+          </Card>
+        )}
+      </section>
+
       {/* 2. 8대 직업 탐색 및 즉시 전직 카드 그리드 */}
       <section aria-labelledby="careers-grid-title" className="grid gap-4">
         <div>
           <h2 id="careers-grid-title" className="text-xl font-bold flex items-center gap-2">
-            <span>🏛️</span> {isEn ? 'Available Careers (Zero-Fee Instant Switch)' : '8대 전문 직업군 탐색 및 전직'}
+            <span>🏛️</span>{' '}
+            {isEn ? 'Available Careers (Zero-Fee Instant Switch)' : '8대 전문 직업군 탐색 및 전직'}
           </h2>
           <p className="text-sm text-muted-foreground">
             {isEn
@@ -162,7 +251,9 @@ export default async function WorkPage() {
             );
             const isActive = activeJob?.job_type === job.code;
             const jobDisplayName = isEn ? (job.enName ?? job.name) : job.name;
-            const jobDisplayDesc = isEn ? (job.enRoleDescription ?? job.roleDescription) : job.roleDescription;
+            const jobDisplayDesc = isEn
+              ? (job.enRoleDescription ?? job.roleDescription)
+              : job.roleDescription;
 
             return (
               <Card
@@ -176,7 +267,10 @@ export default async function WorkPage() {
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <span className="text-2xl">{job.icon}</span>
-                    <Badge variant={isActive ? 'default' : 'secondary'} className="font-mono text-xs">
+                    <Badge
+                      variant={isActive ? 'default' : 'secondary'}
+                      className="font-mono text-xs"
+                    >
                       Lv.{level}
                     </Badge>
                   </div>
@@ -193,7 +287,10 @@ export default async function WorkPage() {
                       {exp.toLocaleString()} / {nextLevelExp.toLocaleString()} EXP
                     </span>
                   </div>
-                  <Progress value={levelProgress} aria-label={isEn ? 'Career proficiency progress' : '직업 숙련도 진행률'} />
+                  <Progress
+                    value={levelProgress}
+                    aria-label={isEn ? 'Career proficiency progress' : '직업 숙련도 진행률'}
+                  />
                   <p className="text-[11px] text-muted-foreground">
                     {level >= 50
                       ? isEn
@@ -227,7 +324,11 @@ export default async function WorkPage() {
           </p>
         </div>
 
-        <CareerTasksBoard tasks={tasks} activeJobType={activeJob?.job_type} />
+        <CareerTasksBoard
+          tasks={tasks}
+          activeJobType={activeJob?.job_type}
+          quotaBlock={quotaBlock}
+        />
       </section>
 
       {/* 4. 진행 중인 작업 */}
@@ -260,7 +361,11 @@ export default async function WorkPage() {
                   </CardHeader>
                   {expired ? (
                     <CardContent className="text-sm text-muted-foreground">
-                      <p>{isEn ? 'Expired and cannot be submitted. You may take this task again.' : '기한이 지나 제출할 수 없어요. 같은 작업을 다시 맡을 수 있어요.'}</p>
+                      <p>
+                        {isEn
+                          ? 'Expired and cannot be submitted. You may take this task again.'
+                          : '기한이 지나 제출할 수 없어요. 같은 작업을 다시 맡을 수 있어요.'}
+                      </p>
                     </CardContent>
                   ) : assignment.status === 'submitted' ? (
                     <CardFooter>
@@ -277,8 +382,8 @@ export default async function WorkPage() {
                               ? `Submittable in ${durationLabel(wait, locale)}`
                               : `${durationLabel(wait)} 후 제출 가능`
                             : isEn
-                            ? 'Submit Work'
-                            : '작업 완료 제출'
+                              ? 'Submit Work'
+                              : '작업 완료 제출'
                         }
                       />
                     </CardFooter>
@@ -307,11 +412,15 @@ export default async function WorkPage() {
               >
                 <div>
                   <p className="font-semibold">{receipt.name}</p>
-                  <p className="text-xs text-muted-foreground">{formatMoment(receipt.created_at)}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatMoment(receipt.created_at)}
+                  </p>
                 </div>
                 <div className="text-right font-mono">
                   <span className="font-bold text-emerald-400">+{receipt.reward_amount} WLD</span>
-                  <span className="text-xs text-muted-foreground ml-2">+{receipt.experience_amount} EXP</span>
+                  <span className="text-xs text-muted-foreground ml-2">
+                    +{receipt.experience_amount} EXP
+                  </span>
                 </div>
               </div>
             ))}

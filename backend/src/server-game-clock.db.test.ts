@@ -48,31 +48,45 @@ describe.skipIf(!DATABASE_URL)('accelerated server game clock', () => {
     });
   });
 
-  it('keeps the work dashboard on the authoritative server day and week keys', async () => {
-    const actor = randomUUID();
+  it('changes the authoritative day and week keys only at their exact accelerated boundaries', async () => {
+    const { rows } = await pool.query<{
+      day_before: string;
+      day_at: string;
+      day_after: string;
+      week_before: string;
+      week_at: string;
+      week_after: string;
+    }>(
+      `SELECT
+         public.server_game_day_key('2026-09-15T00:09:59+09:00'::timestamptz)::text AS day_before,
+         public.server_game_day_key('2026-09-15T00:10:00+09:00'::timestamptz)::text AS day_at,
+         public.server_game_day_key('2026-09-15T00:10:01+09:00'::timestamptz)::text AS day_after,
+         public.server_game_week_key('2026-09-15T01:09:59+09:00'::timestamptz)::text AS week_before,
+         public.server_game_week_key('2026-09-15T01:10:00+09:00'::timestamptz)::text AS week_at,
+         public.server_game_week_key('2026-09-15T01:10:01+09:00'::timestamptz)::text AS week_after`,
+    );
+
+    expect(rows[0]?.day_before).not.toBe(rows[0]?.day_at);
+    expect(rows[0]?.day_at).toBe(rows[0]?.day_after);
+    expect(rows[0]?.week_before).not.toBe(rows[0]?.week_at);
+    expect(rows[0]?.week_at).toBe(rows[0]?.week_after);
+  });
+
+  it('keeps game day/week keys independent of the database session timezone', async () => {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
-      await client.query('INSERT INTO public.users (id) VALUES ($1)', [actor]);
-      const { rows: keys } = await client.query<{ day_key: string; week_key: string }>(
-        `SELECT public.server_game_day_key()::text AS day_key,
-                public.server_game_week_key()::text AS week_key`,
+      await client.query(`SET LOCAL TIME ZONE 'UTC'`);
+      const utc = await client.query<{ day_key: string; week_key: string }>(
+        `SELECT public.server_game_day_key('2026-09-15T01:10:00+09:00'::timestamptz)::text AS day_key,
+                public.server_game_week_key('2026-09-15T01:10:00+09:00'::timestamptz)::text AS week_key`,
       );
-      const dayKey = keys[0]?.day_key;
-      const weekKey = keys[0]?.week_key;
-      if (!dayKey || !weekKey) throw new Error('server game keys were not returned');
-
-      await client.query(
-        `INSERT INTO public.work_reward_windows (user_id, window_start, window_kind, paid_amount)
-         VALUES ($1, $2::date, 'day', 111), ($1, $3::date, 'week', 222)`,
-        [actor, dayKey, weekKey],
+      await client.query(`SET LOCAL TIME ZONE 'America/New_York'`);
+      const newYork = await client.query<{ day_key: string; week_key: string }>(
+        `SELECT public.server_game_day_key('2026-09-15T01:10:00+09:00'::timestamptz)::text AS day_key,
+                public.server_game_week_key('2026-09-15T01:10:00+09:00'::timestamptz)::text AS week_key`,
       );
-
-      const { rows } = await client.query<{ daily_paid: string; weekly_paid: string }>(
-        `SELECT daily_paid::text, weekly_paid::text FROM public.work_my_dashboard($1)`,
-        [actor],
-      );
-      expect(rows[0]).toMatchObject({ daily_paid: '111', weekly_paid: '222' });
+      expect(newYork.rows[0]).toEqual(utc.rows[0]);
     } finally {
       await client.query('ROLLBACK');
       client.release();

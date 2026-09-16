@@ -8,7 +8,11 @@ export class WorkAssignmentDto {
 
 export class WorkCompletionDto {
   @ApiProperty({ format: 'uuid' }) @IsUUID() readonly idempotencyKey!: string;
-  @ApiProperty({ required: false, maxLength: 1000 }) @IsOptional() @IsString() @MaxLength(1000) readonly evidence?: string;
+  @ApiProperty({ required: false, maxLength: 1000 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  readonly evidence?: string;
 }
 
 export class JobSwitchDto {
@@ -41,4 +45,48 @@ export class WorkCompleteTaskDto {
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
   readonly idempotencyKey!: string;
+}
+
+export class WorkDashboardResponseDto {
+  @ApiProperty({ pattern: '^\\d+$', description: 'WLD paid in the current accelerated game day' })
+  readonly daily_paid!: string;
+
+  @ApiProperty({
+    pattern: '^\\d+$',
+    description: 'Current member-wide daily Work reward cap in WLD',
+  })
+  readonly daily_cap!: string;
+
+  @ApiProperty({ pattern: '^\\d+$', description: 'WLD paid in the current accelerated game week' })
+  readonly weekly_paid!: string;
+
+  @ApiProperty({
+    pattern: '^\\d+$',
+    description: 'Current member-wide weekly Work reward cap in WLD',
+  })
+  readonly weekly_cap!: string;
+
+  @ApiProperty({ pattern: '^\\d+$', description: 'Assigned/submitted Work items still open' })
+  readonly active_assignments!: string;
+
+  @ApiProperty({ format: 'date', description: 'Authoritative accelerated Moneyverse game-day key' })
+  readonly game_day_key!: string;
+
+  @ApiProperty({
+    format: 'date',
+    description: 'Authoritative accelerated Moneyverse game-week key',
+  })
+  readonly game_week_key!: string;
+
+  @ApiProperty({
+    format: 'date-time',
+    description: 'Exact server timestamp when the current game day resets',
+  })
+  readonly day_ends_at!: string;
+
+  @ApiProperty({
+    format: 'date-time',
+    description: 'Exact server timestamp when the current game week resets',
+  })
+  readonly week_ends_at!: string;
 }

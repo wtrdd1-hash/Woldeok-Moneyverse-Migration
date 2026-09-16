@@ -21,7 +21,13 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
-import { JobSwitchDto, WorkAssignmentDto, WorkCompletionDto, WorkCompleteTaskDto } from './work.dto';
+import {
+  JobSwitchDto,
+  WorkAssignmentDto,
+  WorkCompletionDto,
+  WorkCompleteTaskDto,
+  WorkDashboardResponseDto,
+} from './work.dto';
 import { WorkInputError, WorkRepository } from './work.repository';
 
 @ApiTags('work')
@@ -56,11 +62,22 @@ export class WorkController {
 
   @Get()
   @ApiOperation({ summary: 'Caps, what has been paid against them, and open assignments' })
-  dashboard(@Req() request: RequestWithSession) {
-    return this.guarded(
-      () => this.repository().dashboard(requireUserId(request)),
-      'the work summary is unavailable',
-    );
+  dashboard(@Req() request: RequestWithSession): Promise<WorkDashboardResponseDto | null> {
+    return this.guarded(async () => {
+      const row = await this.repository().dashboard(requireUserId(request));
+      if (!row) return null;
+      return {
+        daily_paid: row.daily_paid,
+        daily_cap: row.daily_cap,
+        weekly_paid: row.weekly_paid,
+        weekly_cap: row.weekly_cap,
+        active_assignments: row.active_assignments,
+        game_day_key: row.game_day_key,
+        game_week_key: row.game_week_key,
+        day_ends_at: row.day_ends_at.toISOString(),
+        week_ends_at: row.week_ends_at.toISOString(),
+      };
+    }, 'the work summary is unavailable');
   }
 
   @Get('profile')
@@ -94,7 +111,9 @@ export class WorkController {
   }
 
   @Post('tasks/:id/complete')
-  @ApiOperation({ summary: 'Directly complete a career task with EXP and instant WLD faucet payout' })
+  @ApiOperation({
+    summary: 'Directly complete a career task with EXP and instant WLD faucet payout',
+  })
   completeTask(
     @Req() request: RequestWithSession,
     @Param('id', ParseUUIDPipe) taskId: string,
