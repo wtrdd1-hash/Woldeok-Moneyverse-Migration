@@ -2,6 +2,14 @@
 
 [English](UPDATE_LOG.md) | **한국어** | [문서 색인](INDEX.ko.md)
 
+## v2026.09.18.201 — 모바일 반응형 UI QA 및 가로 넘침 방지 강화
+
+- 브랜치: `fix/ui-responsive-qa-v2026.09.18.201`, v200 권위 기획/main 기준에서 작업했습니다.
+- 전역 모바일 메뉴, 5개 하단 탭, 은행 카드·액션, 인벤토리 quick-slot의 고정 폭/과밀 배치를 수정했습니다.
+- 모바일 반응형 회귀 테스트를 추가했고 frontend 70개 파일/619개 테스트, workspace typecheck, Production build, repository lint 오류 0건을 통과했습니다. 기존 이미지 경고 11건은 유지됩니다.
+- Headless Chromium 320/360/390px에서 공개 경로 21개 렌더링 조합 모두 document-level 가로 overflow 0건을 확인했습니다. Gallery의 기존 Google 광고 품질 스크립트 CSP 거부는 별도 추적합니다.
+- DB migration 및 API/auth/ledger/entitlement 계약 변경은 없습니다. Production 전 exact-SHA Test backend/frontend smoke를 반드시 통과합니다.
+
 ## v2026.09.17.195 — v193 Production 증거
 
 - v193 Next.js API-cache 권한 수정의 무중단 Production 적용 증거를 기록했습니다.

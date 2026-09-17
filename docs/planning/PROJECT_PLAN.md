@@ -2,11 +2,23 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.18.200
+> Current integrated version: v2026.09.18.201
 > Implementation/evidence sync: 2026-09-18
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.18.201 (2026-09-18)
+
+### Mobile-responsive UI QA and overflow hardening
+
+- **Branch / scope:** `fix/ui-responsive-qa-v2026.09.18.201` is based on authoritative `main` v200. This cycle is runtime-relevant frontend work and therefore follows branch → CI/tests → exact-SHA Test → backend/API/user-flow QA → main/Production promotion → smoke/rollback.
+- **Responsive fixes:** cap the global mobile drawer to the viewport, let the five bottom tabs share narrow widths without fixed minimum columns, stack/wrap dense banking headers/actions and loan summaries, use one banking summary column below 480 px, and let inventory profile/quick-slot content shrink safely.
+- **Pre-release evidence:** repository lint has 0 errors with 11 pre-existing image warnings; workspace typecheck, frontend Production build, and 70 frontend test files / 619 tests pass. Chromium at 320/360/390 px across seven public routes passes 21/21 HTTP 200 renders with zero document-level horizontal overflow. Gallery still logs a pre-existing third-party Google ad-quality CSP rejection, tracked separately.
+- **Release safety:** no database migration, API contract, ledger, entitlement or authentication behavior changes. Production remains blocked until the exact candidate passes Test backend/API/frontend smoke; the current Debian systemd authority must preserve the previous release as rollback anchor.
+
+### v201 worklog / acceptance order
+Current plan/main recheck → clean branch/worktree → baseline QA → responsive audit and fixes → regression coverage → Production build → 320/360/390 px browser QA → EN/KO plan/update/worklog → branch push/CI → exact-SHA Test backend/frontend smoke → Production promotion and post-deploy smoke.
 
 ## Cycle delta — v2026.09.18.200 (2026-09-18)
 

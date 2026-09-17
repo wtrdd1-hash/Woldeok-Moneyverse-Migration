@@ -109,7 +109,7 @@ export default async function BankPage() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-4">
         <Card className="border-border/60 bg-gradient-to-br from-primary/10 via-background to-muted/20 backdrop-blur-md">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -261,7 +261,7 @@ export default async function BankPage() {
             />
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button asChild variant="outline" size="sm">
             <Link href="/wallet">
               <T korean="내 지갑 가기" english="Go to Wallet" />
