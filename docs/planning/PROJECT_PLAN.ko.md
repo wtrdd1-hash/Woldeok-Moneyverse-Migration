@@ -2,13 +2,28 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.183
+> **현재 통합 버전:** v2026.09.17.184
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
 
+
+## 회차 델타 — v2026.09.17.184 (2026-09-17)
+
+### P0 릴리스 분류 수정이 불완전함: explicit dispatch가 계속 runtime release에 진입
+
+- **정확한 증거/심각도/상태:** main `89d84271c43e713a69bbbc65329fefe93b355d07` (`fix(release): skip docs-only candidate builds (#425)`)은 `test-candidate.yml`의 `push`에만 docs/README/Markdown `paths-ignore`를 추가했습니다. 좁은 방어로는 유효하지만 `workflow_dispatch`를 분류하지 못합니다. 이 exact main에서 Production Release run `35199318368` (#948)이 17:22 KST explicit dispatch되어 `test-gate`가 repository head를 release SHA로 해석했고 isolated Test를 약 15분31초 polling한 뒤 `Wait for exact SHA...`에서 실패, build는 skipped됐습니다. `REL-DOCS-181-01`은 **P0 OPEN / IN PROGRESS**이며 불완전 수정 회귀가 추가됐습니다. 최초 14:15 KST, 최신재현 17:22~17:38 KST. 영향은 false-red release, Test polling 비용, manual/bot dispatch의 권한경계 통과 위험입니다.
+- **확정원인/구현설계:** trigger-level `paths-ignore`는 `workflow_dispatch`에 path filter가 없어 권위가 될 수 없습니다. `push`, `workflow_dispatch`, `workflow_run`, bot/gh dispatch, recovery/manual 모든 진입점이 credential 전에 하나의 reusable classifier를 반드시 호출하게 합니다. merge-base changed paths로 immutable `{repositoryHeadSha, applicationSourceSha|null, classification, changedPathsHash, classifierVersion, dispatchReason}`을 생성합니다. `DOCS_ONLY_NO_RUNTIME_RELEASE`는 Test polling, DB/migration, registry login/push, Production environment/secret, GitOps write 전에 성공 종료합니다. Explicit dispatch는 검증된 runtime `applicationSourceSha` 또는 runtime-relevant로 분류된 operator-selected commit만 허용하며 repository head 단독은 runtime 권위가 아닙니다. unknown/mixed는 credential 전에 fail-closed합니다.
+- **마이그레이션/롤백/QA/수용:** application-data migration 없음. 롤백은 repository-head-as-runtime 복원이 아니라 자동/수동 Production dispatch 중지입니다. path normalization/rename/delete/submodule/workflow/migration 단위테스트, push+workflow_dispatch+bot dispatch+workflow_run 통합테스트, docs-only head manual dispatch negative corpus를 추가하고 `test_poll_count=db_connection_count=registry_login_count=production_secret_materialization_count=gitops_write_count=0`을 검증합니다. 진입점별 docs-only 3회, runtime 2회 exact application SHA/image digest/migration hash+API/catalog/실DB/Test-noindex를 요구합니다. runtime false-negative, 분류 전 secret, docs-only privileged side effect는 배포차단입니다. classifier entry-point coverage/unknown/false-red/Test-poll/privileged-side-effect를 관측합니다. 담당 Release/Infra → Security → QA → Backend/DB → Operations.
+- **런타임/백업:** 18시대 권위 Debian 재확인에서 backend/frontend active, `moneyverse-backup.timer`는 `not-found`, backend 직접 `/api/version`은 HTTP 404입니다. `BAK-RUNTIME-177-01`은 **P0 OPEN**. scheduled encrypted backup→checksum/decrypt/구조검증→isolated restore/reconciliation→off-host immutable copy 전까지 파괴적 schema/data/ledger/entitlement 승격을 금지합니다. application-owned source SHA+artifact digest+migration-set immutable evidence 전 runtime identity는 UNKNOWN입니다.
+- **전체 기능 구현계약:** 인증/OAuth/세션/보안센터, 프로필, 인벤토리/컬렉션, 상점/장바구니/결제/구독/광고제거, 시즌/퀘스트/직업/레벨/보상, 사업/은행/대출, 가상주식/포트폴리오/알림/비교, 카지노/확률형, 커뮤니티/댓글/신고/차단, 친구/클럽/초대/추천, 알림/검색/업로드/공개콘텐츠, App API, 관리자/감사, 백업/복구, 분석/실험, 광고, SEO backend/tooling, 장애대응의 기존 상세 matrix를 유지합니다. 코드/문서 근거와 UX empty/loading/error/offline/timeout, 소유권/권한, API 오류/멱등성/rate limit, DB constraint/index/transaction/concurrency, 감사/fallback/privacy/abuse, SEO/분석/성능/cache, QA/배포/롤백 증거 없이는 상태 승격 금지입니다.
+- **최신 레퍼런스 판정:** 2026-09-17 확인한 Google Search Central changelog의 최신 major 문서변경은 Sep-16 Search profile badge이며 ranking 계약 변경으로 해석하지 않습니다. server-authoritative metadata/canonical/robots/sitemap/lastModified/breadcrumb/structured data/hreflang/SSR-ISR/CWV/redirect/UGC 정책을 유지합니다. Google은 2026년 6월 FAQ rich-result 문서를 제거했으므로 FAQ rich-result ROI를 신규 기획하지 않습니다. Aug-28 site-reputation 정책은 sponsored/affiliate/third-party/UGC governance에 적용합니다. OWASP API Security 최신은 2023, ASVS 5.0은 검증 baseline입니다. Google Play 수수료는 시장/install cohort/transaction type/billing path별로 달라 상점/결제/구독 SKU unit economics를 fee-policy-versioned로 유지합니다. 새 실측 구매/광고 cohort가 없어 revenue/net revenue/margin/ARPU/ARPDAU/ARPPU/conversion/retention/churn/refund/CAC/LTV/fraud/infra/support는 실측 또는 `HYPOTHESIS/TEST TARGET`만 허용합니다.
+- **사업/UX/성장 guardrail:** classifier는 간접수익 기능으로 false-red 대기시간, Test/registry/DB/environment 비용, on-call/engineer 시간, release lead time 절감을 측정합니다. entry-point coverage 100%, runtime false-negative 0, docs-only privileged side effect 0일 때만 scale하고 false-positive/unknown은 iterate하며 secret 노출/무권한 side effect 즉시 자동승격을 kill합니다. 다크패턴·도박의 금융 오인·숨은 갱신·P2W 정책 변경은 도입하지 않습니다.
+
+### v184 worklog / 수용순서
+최신 공식자료 → exact main/CI/runtime 대조 → #425 구현검사 → #948 explicit-dispatch gap 재현 → P0 수정/QA/수익성 → 전체기능 parity → 중간 exact-main 재확인 → EN/KO 동기화 → PR CI → exact base 유지 시 병합. Planning-only이며 runtime/application DB/Test/Production을 변경하지 않습니다.
 
 ## 회차 델타 — v2026.09.17.183 (2026-09-17)
 
