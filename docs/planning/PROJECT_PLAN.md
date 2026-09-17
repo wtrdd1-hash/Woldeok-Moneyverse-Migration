@@ -2,11 +2,20 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.193
+> Current integrated version: v2026.09.17.195
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.17.195 (2026-09-17)
+
+### v193 API-cache Production evidence
+
+- **Evidence branch / base:** `docs/api-cache-production-evidence-v2026.09.17.195` from exact merged v193 main `4ab9665bc7ae14469575b6bd9c60c2c41b16b083`.
+- **Production proof:** the active v186 frontend cache changed from `root:root` to `debian:debian` using the merged v193 helper. There were 16 cache `EACCES` events in the preceding ten-minute window and zero new cache errors after repair verification.
+- **Zero downtime:** frontend PID `1204581` and backend PID `400161` were unchanged. Direct/public health, BFF viewer/wallet summary, status, announcements and shop all returned HTTP 200. No backend/database mutation or migration promotion occurred.
+- **Boundary:** direct public NestJS `/api/v1/*` remains intentionally unpublished; Next BFF remains the browser API boundary.
 
 ## Cycle delta — v2026.09.17.193 (2026-09-17)
 

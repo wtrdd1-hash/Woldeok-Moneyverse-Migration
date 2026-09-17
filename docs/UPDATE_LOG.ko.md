@@ -2,6 +2,12 @@
 
 [English](UPDATE_LOG.md) | **한국어** | [문서 색인](INDEX.ko.md)
 
+## v2026.09.17.195 — v193 Production 증거
+
+- v193 Next.js API-cache 권한 수정의 무중단 Production 적용 증거를 기록했습니다.
+- 활성 cache 소유권은 `debian:debian`이며 frontend/backend PID는 그대로 유지됐습니다.
+- health/BFF/공개 화면 probe가 통과했고 수정 후 구간에 새 cache 또는 backend 치명/DB 오류가 없었습니다.
+
 ## v2026.09.17.193 — Frontend API 캐시 런타임 권한 보호
 
 - 브랜치: `fix/frontend-api-cache-permissions-v2026.09.17.193`, 기준 `5d5826b21a9e4ae98fd0dcbe771d57fa8c674c84`.

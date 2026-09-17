@@ -2,11 +2,20 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.193
+> **현재 통합 버전:** v2026.09.17.195
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 델타 — v2026.09.17.195 (2026-09-17)
+
+### v193 API-cache Production 증거
+
+- **증거 브랜치 / 기준:** `docs/api-cache-production-evidence-v2026.09.17.195`, 정확한 v193 병합 main `4ab9665bc7ae14469575b6bd9c60c2c41b16b083`.
+- **Production 증거:** 병합된 v193 helper로 활성 v186 frontend cache를 `root:root`에서 `debian:debian`으로 수정했다. 수정 전 10분에 cache `EACCES` 16건이 있었고 수정 후 검증에서 새 cache 오류는 0건이다.
+- **무중단:** frontend PID `1204581`, backend PID `400161`이 유지됐다. backend 직접/공개 health, BFF viewer/wallet summary, status, announcements, shop 모두 HTTP 200이다. backend/DB 변경이나 migration 승격은 없었다.
+- **경계 유지:** public NestJS `/api/v1/*` 직접 노출 금지는 그대로이며 browser API 경계는 Next BFF다.
 
 ## 회차 델타 — v2026.09.17.193 (2026-09-17)
 
