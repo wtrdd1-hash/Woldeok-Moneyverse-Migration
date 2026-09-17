@@ -1,0 +1,23 @@
+[Unit]
+Description=Moneyverse encrypted database and photo backup
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/lib/moneyverse-backup/moneyverse-backup.sh
+Environment=BACKUP_DEST=/var/backups/moneyverse
+Environment=BACKUP_DB_CONTAINER=woldeok-moneyverse-dev-db-1
+Environment=BACKUP_PHOTO_DIR=/srv/moneyverse-data/images/photos
+Environment=BACKUP_KEY_FILE=/etc/moneyverse/backup.key
+Environment=BACKUP_RETENTION_DAYS=14
+UMask=0077
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadOnlyPaths=/srv/moneyverse-data/images/photos /srv/moneyverse-data/postgres /etc/moneyverse/backup.key
+ReadWritePaths=/var/backups/moneyverse
