@@ -2,7 +2,7 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.176
+> Current integrated version: v2026.09.17.177
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
@@ -10,6 +10,28 @@ This is the current implementation-facing contract. Historical details remain re
 
 
 ## Cycle delta — v2026.09.17.176 (2026-09-17)
+## Cycle delta — v2026.09.17.177 (2026-09-17)
+
+### P0 backup control re-reproduction + release/observability gate
+
+- **Branch/work history:** `docs/plan-v177-runtime-backup-repro`, exact base `f7d2087f342a087bc568ffc4abcaac5540f62e5b`; planning-only. No runtime unit, DB, Test, GitOps or Production mutation is authorized by this cycle.
+- **Fresh evidence (2026-09-17 12:01 KST):** authoritative Debian host again reports all five Moneyverse services active and no backend/frontend warning-or-higher journal entries for the preceding hour. `moneyverse-backup.timer` is still absent, `/var/backups/moneyverse` still does not exist, and direct backend `GET /api/version` still returns HTTP 404. The P0 is therefore reproduced, not stale documentation.
+- **P0 `BAK-RUNTIME-177-01` — OPEN / destructive-release blocker:** first observed 11:03 KST, reproduced 12:01 KST. Affected data: balance, ledger, inventory/entitlement, profile and uploaded photos. Repository backup implementation exists while runtime scheduler/destination is absent. Deployment/configuration drift is confirmed; the specific skipped installer decision remains UNKNOWN.
+- **Remediation/ownership:** Infra owns exact-SHA install/systemd enable; Security owns external key and restore-role separation; Backend/DB owns dump/migration/ledger reconciliation; QA owns fault injection/isolated restore; Operations owns RPO/RTO dashboard and off-host immutable copy. No destructive migration/data cleanup/ledger rewrite may promote until scheduled backup, structural verification, isolated restore and `BAK-106-01` off-host evidence all PASS.
+- **Migration/rollback/tests:** no application-data migration is needed. Roll back by disabling the timer/restoring prior units while preserving artifacts, audit evidence and the last verified backup. Test same-filesystem, missing-key, permission, disk-full, interrupted-write, retention, reboot persistence, outer/inner hashes, `pg_restore -l`, photo archive/manifest, and isolated restore reconciliation of migration-set, ledger sums, entitlement uniqueness and sampled photo hashes.
+- **Monitoring/release authority:** alert on missing/disabled timer, RPO-age threshold, verify failure, low destination space, zero verified copies, stale off-host copy and release-evidence mismatch. `/api/version` must eventually expose non-secret immutable application identity; HTTP 404 means runtime identity UNKNOWN and blocks exact-SHA completion claims.
+
+### Reference, security, SEO and economics decisions
+
+- **SEO / direct adopt:** Google Search Central's latest major documentation update remains 2026-09-08 regional Search experience; no new ranking contract changes current canonical/robots/sitemap/hreflang/SSR/ISR rules. Public SEO read-model stays server-authoritative; private account/admin/transaction/economy-history stays noindex+sitemap-excluded; structured data only represents visible eligible content.
+- **Security / direct adopt:** OWASP Top 10:2025 includes Broken Access Control, Software Supply Chain Failures, Authentication Failures, Software/Data Integrity Failures and Logging/Alerting Failures; OWASP recommends ASVS for verifiable SDLC requirements. Keep object/function authorization, fail-closed release classification, provenance-bound artifacts, least-privilege runtime/restore credentials, masked audit logs and negative abuse tests release-blocking. API-specific BOLA/BFLA/business-flow tests remain mapped to API Security Top 10 2023.
+- **Feature-wide contract:** existing detailed matrices for auth/session/OAuth, profile/security center, inventory/collection, shop/cart/payment/subscription/ad-removal, season/quest/job/level/reward, business/bank/loan, virtual stock/portfolio/alerts, casino, community/moderation, friend/club/referral, notifications/search/upload/public content, app API/admin/audit/backup/analytics/ads/SEO/incident response remain authoritative. PARTIAL/PLANNED cannot become DONE without screen states, roles/ownership, API request/response/error/idempotency/rate-limit, DB constraints/transaction/concurrency, audit/fallback/privacy/abuse, SEO/analytics/performance/cache, QA and deploy/rollback evidence.
+- **Economics:** no new measured purchase/ad cohort was found. Revenue/net revenue/margin/ARPU/ARPDAU/ARPPU/conversion/retention/churn/refund/CAC/LTV/fraud/infra/support remain measured-only or `HYPOTHESIS/TEST TARGET`; SKU fees remain transaction-versioned. Backup value is avoided data-loss/downtime/refund/support/fraud-reconciliation loss. Scale only after repeated RPO/RTO PASS + off-host immutable restore; iterate on misses; kill destructive eligibility on stale/missing backup or unreconciled runtime identity.
+
+### v177 acceptance order
+
+`fresh official references` → `exact main + runtime + CI reconciliation` → `P0 reproduced` → `feature/security/SEO/economics contracts preserved` → `mid-work exact-main recheck` → `EN/KO parity + diff check` → `PR CI` → `merge only if exact base remains unchanged`.
+
 
 ### P0 runtime backup installation gap + authority reconciliation
 
