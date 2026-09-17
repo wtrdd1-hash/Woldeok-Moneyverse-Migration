@@ -345,3 +345,63 @@
   0% { box-shadow: 0 0 10px rgba(223, 249, 251, 0.4); }
   100% { box-shadow: 0 0 22px rgba(255, 255, 255, 0.85); }
 }
+
+/* v2026.09.17.172 — Bootstrap 5.3.8-informed local UI polish.
+ * Bootstrap is bundled locally by Next; no CDN request is required at runtime. */
+.moneyverse-app-shell {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--primary) 10%, transparent) 0, transparent 30rem),
+    radial-gradient(circle at 88% 8%, color-mix(in srgb, var(--clay) 8%, transparent) 0, transparent 26rem),
+    var(--background);
+}
+.moneyverse-app-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.34;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--border) 45%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--border) 45%, transparent) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+}
+.moneyverse-main { animation: moneyverse-page-in 220ms ease-out both; }
+.moneyverse-card {
+  border-color: color-mix(in srgb, var(--border) 82%, var(--primary) 18%);
+  box-shadow: 0 .5rem 1.25rem rgb(24 28 25 / 0.06), 0 .125rem .35rem rgb(24 28 25 / 0.05);
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .moneyverse-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--primary) 28%, var(--border));
+    box-shadow: 0 .85rem 2rem rgb(24 28 25 / 0.09), 0 .2rem .5rem rgb(24 28 25 / 0.06);
+  }
+}
+.moneyverse-button {
+  min-height: 2.25rem;
+  box-shadow: 0 .125rem .3rem rgb(24 28 25 / 0.08);
+  transform: translateZ(0);
+}
+.moneyverse-button:not(:disabled):active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+.moneyverse-button:focus-visible {
+  box-shadow: 0 0 0 .25rem color-mix(in srgb, var(--ring) 32%, transparent);
+}
+.dark .moneyverse-card {
+  box-shadow: 0 .5rem 1.4rem rgb(0 0 0 / 0.24), inset 0 1px rgb(255 255 255 / 0.025);
+}
+@keyframes moneyverse-page-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .moneyverse-main { animation: none; }
+  .moneyverse-card, .moneyverse-button { transition: none; }
+}

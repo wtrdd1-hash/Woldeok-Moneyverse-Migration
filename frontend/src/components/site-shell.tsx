@@ -9,10 +9,10 @@ import { MobileBottomNav } from '@/components/mobile-bottom-nav';
  */
 export function SiteShell({ children }: { readonly children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="moneyverse-app-shell flex min-h-dvh flex-col">
       <NoticeBar />
       <SiteHeader />
-      <main id="main" className="mx-auto w-full max-w-[1180px] flex-1 p-4 sm:p-6 pb-24 lg:pb-6">
+      <main id="main" className="moneyverse-main mx-auto w-full max-w-[1240px] flex-1 p-4 sm:p-6 lg:px-8 pb-24 lg:pb-8">
         {children}
       </main>
       <SiteFooter />
