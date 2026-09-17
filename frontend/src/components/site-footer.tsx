@@ -16,7 +16,7 @@ export function SiteFooter() {
   const { locale } = useLocale();
   const en = locale === 'en';
   return (
-    <footer className="mt-20 bg-paper-dark text-muted-foreground">
+    <footer className="moneyverse-site-footer mt-20 bg-paper-dark text-muted-foreground">
       <div className="mx-auto w-full max-w-[1180px] px-6">
         <div className="flex flex-col items-start justify-between gap-6 border-b py-9 sm:flex-row sm:items-center">
           <Brand />

@@ -2,11 +2,27 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.174
+> **현재 통합 버전:** v2026.09.17.175
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 변경 — v2026.09.17.175 (2026-09-17)
+
+### UI 정돈 + Bootstrap 로컬 자산 계약
+
+- **작업 브랜치:** `feat/ui-local-assets-v2026.09.17.175`; 기준 및 작업 중간 `main` SHA: `57feac0e2f701ed4bba12b868ddf19c2f916a32a`.
+- **Bootstrap 출처/보관:** getbootstrap.kr 5.3 다운로드 문서가 가리키는 Bootstrap **5.3.8** compiled distribution을 확인했다. ZIP 원본과 SHA-256은 별도 `/dev/sdb1` 데이터 디스크의 `/srv/moneyverse-data/vendor/bootstrap/5.3.8/`에 보관한다.
+- **런타임 자산 규칙:** Bootstrap은 제3자 CDN에서 불러오지 않는다. `frontend/src/styles/vendor/bootstrap-5.3.8.min.css`를 Next.js 빌드에 직접 포함한다.
+- **UI 범위:** 공통 앱 배경, sticky header, main spacing, 카드 depth/hover, footer 경계를 정돈하고 desktop 홈 현황 카드와 mobile quick action에 동일 시각 계층을 적용한다. API/DB/사업 규칙은 변경하지 않는다.
+- **접근성/성능:** `prefers-reduced-motion`에서는 hover 이동을 제거하고 모바일에서는 fixed background를 해제한다. 새 외부 runtime asset request를 추가하지 않는다.
+- **검증 증거:** 공유 contract build 후 frontend typecheck PASS, frontend 68 test files / 614 tests PASS, production build PASS. Test/Production runtime 승격은 아래 게이트를 통과해야 한다.
+- **승격 순서:** exact branch → isolated Test frontend/backend/API smoke → main 통합 → exact-main 재검증 → Production 승격 → Production smoke. 게이트 전에는 운영 완료로 기록하지 않는다.
+
+### v175 수용조건
+
+`Bootstrap 원본 별도 디스크 보관 + checksum` → `runtime Bootstrap CDN 0` → `frontend 정적/단위/build PASS` → `isolated Test frontend/backend/API smoke` → `main 통합` → `exact-main Production smoke`.
 
 ## 회차 변경 — v2026.09.17.174 (2026-09-17)
 

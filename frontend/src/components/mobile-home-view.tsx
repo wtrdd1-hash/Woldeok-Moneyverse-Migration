@@ -33,7 +33,7 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
       {/* 1. 상단 섹션: 스마트폰에서는 1열, 패드(태블릿 md:)에서는 2열 나란히 배치 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-stretch">
         {/* 달빛 지갑 대시보드 카드 */}
-        <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-5 md:p-6 shadow-lg shadow-primary/5">
+        <div className="moneyverse-feature-card relative flex flex-col justify-between overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-5 md:p-6 shadow-lg shadow-primary/5">
           <div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
@@ -223,7 +223,7 @@ function QuickActionButton({
   return (
     <Link
       href={href}
-      className="group flex flex-col items-center justify-center rounded-2xl border border-border/40 bg-card p-3 md:p-4 text-center shadow-sm transition-all active:scale-95 hover:border-primary/30 min-h-[90px] md:min-h-[105px]"
+      className="moneyverse-action-card group flex flex-col items-center justify-center rounded-2xl border border-border/40 bg-card p-3 md:p-4 text-center shadow-sm transition-all active:scale-95 hover:border-primary/30 min-h-[90px] md:min-h-[105px]"
     >
       <div className={`mb-2 flex size-10 md:size-12 items-center justify-center rounded-xl transition-colors ${accentColors[accent]}`}>
         <Icon className="size-5 md:size-6" />
