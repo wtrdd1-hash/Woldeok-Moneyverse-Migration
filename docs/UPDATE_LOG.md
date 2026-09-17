@@ -6,6 +6,13 @@
 - Active cache ownership is now `debian:debian`; frontend/backend PIDs remained unchanged.
 - Health/BFF/public page probes passed and the post-repair window contained no new cache or backend fatal/database errors.
 
+## v2026.09.17.194 — Discord guild command synchronization
+
+- Branch: `fix/discord-command-sync-v2026.09.17.194`, rebased onto current `main`.
+- Found a contract gap: startup logged seven commands as registered, but registration used fetch/edit/create and did not reset the guild command collection.
+- Changed music registration to atomically replace guild commands with the exact seven supported music commands; application-global commands remain untouched.
+- Added a regression test and expanded the bot test script; local `npm ci` and `npm test` passed with 0 vulnerabilities and 1/1 regression test.
+
 ## v2026.09.17.193 — Frontend API cache runtime permission guard
 
 - Branch: `fix/frontend-api-cache-permissions-v2026.09.17.193`, based on `5d5826b21a9e4ae98fd0dcbe771d57fa8c674c84`.

@@ -8,6 +8,13 @@
 - 활성 cache 소유권은 `debian:debian`이며 frontend/backend PID는 그대로 유지됐습니다.
 - health/BFF/공개 화면 probe가 통과했고 수정 후 구간에 새 cache 또는 backend 치명/DB 오류가 없었습니다.
 
+## v2026.09.17.194 — 디스코드 길드 명령어 동기화
+
+- 브랜치: `fix/discord-command-sync-v2026.09.17.194`, 현재 `main` 기준으로 재정렬했습니다.
+- 시작 로그에는 7개 등록으로 보였지만 실제 등록 로직은 fetch/edit/create 방식이라 길드 명령어 집합을 초기화하지 않는 계약 불일치를 확인했습니다.
+- 길드 명령어를 지원 음악 명령어 7개로 원자적으로 교체하도록 수정했으며 애플리케이션 글로벌 명령어는 변경하지 않습니다.
+- 회귀 테스트와 봇 테스트 스크립트를 보강했고 로컬 `npm ci`, `npm test`가 취약점 0건 및 회귀 테스트 1/1로 통과했습니다.
+
 ## v2026.09.17.193 — Frontend API 캐시 런타임 권한 보호
 
 - 브랜치: `fix/frontend-api-cache-permissions-v2026.09.17.193`, 기준 `5d5826b21a9e4ae98fd0dcbe771d57fa8c674c84`.
