@@ -16,6 +16,12 @@ GitOps remains the declarative release authority, but the current public Nginx e
 
 The host mirror must use the same approved SHA, preserve the previous unit configuration for rollback, and pass the same catalog/status/SEO probes before a release is reported complete.
 
+## Backend session continuity
+
+Production backend promotion must not log members out. Member sessions are PostgreSQL-backed in `auth_sessions`; browser and server-side member-session lifetime are both 30 days. A backend process restart or release-directory change therefore must reuse the same Production database and must not revoke, truncate, recreate, or re-key live session rows. Administrator console sessions retain their separate short lifetime and are not extended by this rule.
+
+For the host systemd mirror, keep secrets and `DATABASE_URL` outside immutable release directories in `/etc/moneyverse/backend-production.env`, keep release identity in `/etc/moneyverse/backend-release.env`, and point `WorkingDirectory` through `/srv/moneyverse-data/releases/production-current/backend`. The reviewed drop-in template is `ops/systemd/moneyverse-backend-session-continuity.conf.example`. Before Production promotion, Test must prove that a cookie issued before a backend restart is accepted after the restart without a new session, and the real-database auth test must prove an authenticated session survives repository/process recreation. Rollback changes code/runtime pointers only; it does not mutate `auth_sessions`.
+
 ## Expected order
 
 1. Merge validated application code to `main`.

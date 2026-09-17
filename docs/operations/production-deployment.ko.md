@@ -15,6 +15,12 @@ GitOps는 계속 선언형 릴리스 권위이지만 현재 미니PC의 공개 N
 
 host mirror는 동일 승인 SHA를 사용하고 이전 unit 설정을 롤백용으로 보존해야 하며, 릴리스 완료 보고 전에 같은 catalog/status/SEO probe를 통과해야 합니다.
 
+## 백엔드 로그인 세션 연속성
+
+Production 백엔드 승격으로 회원 로그인이 풀리면 안 됩니다. 일반 회원 세션은 PostgreSQL `auth_sessions`에 저장되며 브라우저 쿠키와 서버 세션 수명은 모두 30일입니다. 따라서 백엔드 프로세스 재시작이나 릴리스 디렉터리 변경 시 동일 Production DB를 계속 사용하고, 활성 세션 행을 revoke/truncate/recreate/re-key 하면 안 됩니다. 관리자 콘솔 세션의 별도 단기 만료 정책은 이 규칙으로 연장하지 않습니다.
+
+호스트 systemd mirror에서는 비밀값과 `DATABASE_URL`을 immutable release 디렉터리 밖의 `/etc/moneyverse/backend-production.env`에 고정하고, 릴리스 식별자는 `/etc/moneyverse/backend-release.env`에 분리하며, `WorkingDirectory`는 `/srv/moneyverse-data/releases/production-current/backend`를 사용합니다. 검토된 drop-in 예시는 `ops/systemd/moneyverse-backend-session-continuity.conf.example`입니다. Production 승격 전 Test에서 재시작 전에 발급한 쿠키가 재시작 후 새 세션 발급 없이 그대로 승인되는지 확인하고, 실 DB 인증 테스트에서 로그인된 세션이 repository/process 재생성 후에도 유지되는지 확인합니다. 롤백은 코드/런타임 포인터만 되돌리고 `auth_sessions`는 변경하지 않습니다.
+
 ## 예상 순서
 1. 검증된 애플리케이션 코드를 `main`에 병합합니다.
 2. CI가 정확한 SHA의 `-test` 이미지를 자동 빌드합니다.
