@@ -2,11 +2,37 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.175
+> Current integrated version: v2026.09.17.176
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+
+## Cycle delta — v2026.09.17.176 (2026-09-17)
+
+### P0 runtime backup installation gap + authority reconciliation
+
+- **Work branch / base:** `docs/plan-v176-runtime-backup-gap` from `faa047fdb637df74b4327ef45c9585be1c15d8c5`. This cycle changes planning only; it does not install units, alter DB state, or promote runtime.
+- **Fresh runtime evidence (2026-09-17 10:58–11:05 KST):** `moneyverse-backend`, `moneyverse-frontend`, `moneyverse-discord-bot`, `moneyverse-economy-ai`, and `moneyverse-mcp` are active on the authorized Debian host. Backend listens on `127.0.0.1:3000`; frontend listens on `:3001`. No warning-or-higher backend/frontend journal entries were observed for the preceding hour.
+- **P0 issue `BAK-RUNTIME-176-01` — OPEN / deployment-blocking for destructive work:** repository `main` contains the v174 encrypted scheduled-backup implementation, but the authorized runtime has no `moneyverse-backup.timer` unit file and no `/var/backups/moneyverse` destination directory. Therefore merged code/plan evidence MUST NOT be interpreted as an active backup control. First observed/reproduced: 2026-09-17 11:03 KST. Affected scope: DB/photo disaster recovery, destructive migration safety, incident recovery, RPO/RTO claims.
+- **Cause status:** confirmed deployment/configuration gap at the runtime authority boundary; repository implementation exists, runtime installation evidence does not. Do not infer whether this is intentional until the release/operations path records the installer decision.
+- **Remediation design:** create an operations backlog item, not an automatic planning-time deployment: (1) verify `/dev/sda1` destination capacity/ownership and source/destination filesystem separation; (2) provision the external encryption key through the approved secret channel; (3) install scripts and systemd service/timer from the exact reviewed application SHA; (4) `daemon-reload` + enable/start timer; (5) run one non-destructive backup; (6) verify outer SHA, decrypt, inner SHA, `pg_restore -l`, photo archive integrity and manifest; (7) restore to an isolated DB/filesystem and reconcile schema/migration set, ledger/entitlement invariants and sampled photo hashes; (8) only then mark local scheduled backup ACTIVE. Off-host immutable replication remains separately required for DR closure.
+- **Rollback:** disable timer, preserve generated encrypted artifacts and audit evidence, restore previous unit/script version if one existed, never delete the last known-good backup during rollback. No production DB restore is part of rollback.
+- **QA / acceptance:** unit shell/static checks; negative same-filesystem guard; missing-key/permission/disk-full/interrupted-write tests; real backup structural verification; isolated restore drill; reboot/persistent-timer test; retention test that cannot delete the sole good backup. Test acceptance requires timer installed+enabled, successful recent backup age within RPO, verification PASS, isolated restore PASS. Production/destructive-migration gate additionally requires off-host/immutable evidence according to `BAK-106-01`.
+- **Monitoring:** export `backup_last_success_timestamp`, `backup_age_seconds`, `backup_verify_failures_total`, `backup_bytes`, `backup_duration_seconds`, `backup_destination_free_bytes`, timer next-run state and off-host-copy age. Alert before RPO breach and immediately on verification failure, missing timer, missing key, destination/source filesystem collision or retention leaving zero verified copies.
+- **Runtime version observability gap:** direct backend `GET /api/version` currently returns 404, so repository `main` SHA cannot be equated to deployed application identity. Keep `{repositoryHeadSha, applicationSourceSha, deployedRuntimeId, imageDigest/packageHash, migrationSetHash, environment, observedAt}` as separate release evidence and block exact-SHA promotion claims when reconciliation is unavailable.
+
+### External-reference decisions and cross-cutting backlog
+
+- **SEO:** Google Search Central's latest major documentation update remains 2026-09-08 (regional Search experience). The 2026-08-28 site-reputation update remains applicable to sponsored/affiliate/third-party/UGC governance. Public SEO read-model, canonical/robots/sitemap/hreflang/SSR and structured-data contracts remain unchanged; private account/admin/transaction pages stay noindex and excluded from sitemaps.
+- **Security:** continue API-specific gates against OWASP API Security Top 10 2023 and application verification against ASVS; supply-chain/release authority remains least-privilege and fail-closed. Backup keys are never committed, logged or copied into backup metadata; restore authority is separated from routine application credentials.
+- **Economics:** no new measured purchase/ad cohort data was found this cycle. ARPU/ARPDAU/ARPPU/conversion/churn/CAC/LTV remain `HYPOTHESIS/TEST TARGET`. Google Play fees remain versioned by market, transaction time/type, install cohort, programme and billing path. Backup/restore business value is measured as avoided data-loss, downtime, refund/support/fraud-reconciliation cost rather than invented direct revenue.
+- **Priority:** `BAK-RUNTIME-176-01` and `BAK-106-01` stay ahead of new monetization/growth work. Scale criterion: verified scheduled local backups + isolated restore drill + off-host immutable copy meet defined RPO/RTO repeatedly. Iterate on any RPO/RTO miss; kill/rollback destructive-release eligibility on stale/missing backup evidence.
+
+### v176 acceptance order
+
+`external reference refresh` → `main/runtime/CI evidence reconciliation` → `runtime backup gap recorded P0` → `no destructive work while evidence is missing` → `EN/KO parity + diff check` → `PR CI` → `merge only from unchanged exact base`.
 
 ## Cycle delta — v2026.09.17.175 (2026-09-17)
 

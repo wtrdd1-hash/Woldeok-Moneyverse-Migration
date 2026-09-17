@@ -2,11 +2,37 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.175
+> **현재 통합 버전:** v2026.09.17.176
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+
+## 회차 변경 — v2026.09.17.176 (2026-09-17)
+
+### P0 런타임 백업 설치 공백 + 권위 정합성
+
+- **작업 브랜치/기준:** `docs/plan-v176-runtime-backup-gap`, 기준 `faa047fdb637df74b4327ef45c9585be1c15d8c5`. 이번 회차는 기획 문서만 변경하며 unit 설치, DB 상태 변경, 런타임 승격을 수행하지 않는다.
+- **최신 런타임 증거(2026-09-17 10:58–11:05 KST):** 권위 Debian 호스트에서 `moneyverse-backend`, `moneyverse-frontend`, `moneyverse-discord-bot`, `moneyverse-economy-ai`, `moneyverse-mcp`가 active다. backend는 `127.0.0.1:3000`, frontend는 `:3001`에서 listen한다. 직전 1시간 backend/frontend journal에서 warning 이상 항목은 관측되지 않았다.
+- **P0 `BAK-RUNTIME-176-01` — OPEN / 파괴적 작업 배포차단:** repository `main`에는 v174 암호화 정기백업 구현이 존재하지만 권위 런타임에는 `moneyverse-backup.timer` unit file과 `/var/backups/moneyverse` 목적지 디렉터리가 없다. 따라서 merge된 코드/기획 증거를 실제 백업 통제로 간주하면 안 된다. 최초 확인/재현: 2026-09-17 11:03 KST. 영향: DB/사진 DR, 파괴적 migration 안전성, 사고복구, RPO/RTO 주장.
+- **원인 상태:** repository 구현과 runtime 설치 사이의 배포/구성 공백은 확인됨. 운영/release 경로가 설치 여부 결정을 기록하기 전에는 의도 여부를 추정하지 않는다.
+- **수정설계:** 기획 자동화에서 직접 설치하지 않고 운영 백로그로 연결한다. (1) `/dev/sda1` 용량/소유권 및 source/destination filesystem 분리 확인, (2) 승인된 secret 경로로 외부 암호화 키 공급, (3) exact reviewed application SHA의 script/systemd unit 설치, (4) daemon-reload 후 timer enable/start, (5) 비파괴 backup 1회, (6) outer SHA/decrypt/inner SHA/`pg_restore -l`/사진 archive/manifest 검증, (7) 격리 DB/filesystem restore 후 schema/migration set, ledger/entitlement invariant, 사진 hash sample 정합성 검증, (8) 이후에만 local scheduled backup을 ACTIVE로 판정한다. DR 종료에는 별도 off-host immutable copy가 계속 필요하다.
+- **롤백:** timer disable, 생성된 암호화 artifact와 audit evidence 보존, 이전 unit/script가 있었다면 복구하며 rollback 중 마지막 정상 backup을 삭제하지 않는다. Production DB restore는 rollback 절차에 포함하지 않는다.
+- **QA/수용조건:** shell/static unit 검사, 동일-filesystem 차단, key 누락/권한/disk-full/interrupted-write, 실제 backup 구조 검증, isolated restore drill, reboot/persistent timer, 유일한 정상 backup을 삭제하지 않는 retention 시험. Test 수용은 timer installed+enabled, RPO 내 최근 성공 backup, verification PASS, isolated restore PASS다. Production/파괴적 migration 게이트는 `BAK-106-01`의 off-host/immutable 증거까지 요구한다.
+- **모니터링:** `backup_last_success_timestamp`, `backup_age_seconds`, `backup_verify_failures_total`, `backup_bytes`, `backup_duration_seconds`, `backup_destination_free_bytes`, timer next-run, off-host-copy age를 수집한다. RPO 초과 전 경고하고 검증 실패, timer/key 누락, source/destination filesystem 충돌, verified copy 0개가 되는 retention 상태는 즉시 알림한다.
+- **런타임 버전 관측 공백:** backend 직접 `GET /api/version`은 현재 404다. 따라서 repository `main` SHA를 deployed application identity로 동일시할 수 없다. `{repositoryHeadSha, applicationSourceSha, deployedRuntimeId, imageDigest/packageHash, migrationSetHash, environment, observedAt}`을 별도 release evidence로 보존하고 정합성 확인이 불가능하면 exact-SHA 승격 완료 주장을 차단한다.
+
+### 외부 레퍼런스 판정 및 교차 백로그
+
+- **SEO:** Google Search Central 최신 주요 문서 변경은 계속 2026-09-08 regional Search experience 추가다. 2026-08-28 site-reputation 변경은 sponsored/affiliate/third-party/UGC 거버넌스에 계속 적용한다. public SEO read-model, canonical/robots/sitemap/hreflang/SSR/structured-data 계약은 유지하고 private account/admin/transaction은 noindex+sitemap 제외한다.
+- **보안:** API별 OWASP API Security Top 10 2023과 application 검증 ASVS를 유지하고 supply-chain/release 권위는 least-privilege+fail-closed로 운영한다. 백업 키는 Git/log/backup metadata에 저장하지 않으며 restore 권한은 일상 application credential과 분리한다.
+- **사업성:** 이번 회차 새 실측 구매/광고 cohort는 확인되지 않았다. ARPU/ARPDAU/ARPPU/conversion/churn/CAC/LTV는 `HYPOTHESIS/TEST TARGET`을 유지한다. Google Play fee는 market, transaction 시점/종류, install cohort, programme, billing path별 versioning을 유지한다. 백업/복구 사업효과는 가상의 직접매출이 아니라 data-loss/downtime/refund/support/fraud-reconciliation 비용 회피로 측정한다.
+- **우선순위:** `BAK-RUNTIME-176-01`과 `BAK-106-01`은 신규 monetization/growth보다 우선한다. Scale 기준은 verified scheduled local backup + isolated restore + off-host immutable copy가 정의된 RPO/RTO를 반복 충족하는 것이다. RPO/RTO 미달은 iterate, backup 증거 누락/노후화는 파괴적 release eligibility kill/rollback 조건이다.
+
+### v176 수용 순서
+
+`외부 레퍼런스 갱신` → `main/runtime/CI 증거 대조` → `runtime backup 공백 P0 기록` → `증거 누락 중 파괴적 작업 금지` → `EN/KO parity + diff check` → `PR CI` → `동일 exact base에서만 merge`.
 
 ## 회차 변경 — v2026.09.17.175 (2026-09-17)
 
