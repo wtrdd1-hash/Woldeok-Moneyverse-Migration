@@ -2,12 +2,26 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.210
+> **현재 통합 버전:** v2026.09.18.211
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.18.211 (2026-09-18)
+
+### 08:07 authoritative 재검증, v210 exact-head 승격, crawler/fetcher·세션·KR unit-economics 계약 강화
+
+- **Exact main / CI / writer — 08:07 KST:** 직전 v210 PR #462의 exact head `76a706ae4329983fce58114af9eb898b7f0290f2`에 CI run `35285115954`가 success이고 PR mergeable=true임을 확인한 뒤 exact-head squash merge했다. 새 authoritative base는 `c451c393000342c7686d7a30fe11f7b8f84db390`; 별도 `planning/v211-20260918-0807` branch에서만 문서를 수정하며 기존 미추적 `backend/src/economy-ai/`는 손대거나 stage하지 않는다. Branch protection은 직전 authoritative read에서 protected=true이나 required checks enforcement=off/0 contexts이므로 `CI-ENFORCE-204-01`은 **P1 / OPEN**: classifier/policy/runtime/security required gate + audited bypass + deliberately-failing merge negative test가 완료조건이다.
+- **P0 runtime/DR — 08:07 KST 재현:** Debian backend/frontend/backup timer active, timer enabled; last backup 06:26:17, next 12:22:15. Canonical HTTPS `/api/version`은 HTTP/2 200, `Cache-Control: no-store`, deployed application `75e69e77cdc18ef221106a008563151a4c790728`; 최근 1시간 warning+ backend journal은 0. 따라서 repository main과 Production application identity가 다르고 `REL-AUTH-184-01`은 P0, `BAK-RUNTIME-177-01`도 isolated restore→schema/migration/economic reconciliation→RPO/RTO→off-host immutable copy→실제 alert 전달 전까지 P0/IN PROGRESS다.
+- **SEO/SEO backend crawler authority — DIRECT ADOPT:** Google의 2026-09-16 crawler 문서 재구성은 crawler와 user-triggered fetcher가 영향을 주는 제품, robots token, 지원 content-encoding을 명시한다. `Googlebot`/Search indexing, `Mediapartners-Google`/광고, `GoogleProducer` 등 user-triggered fetcher를 동일 bot으로 합치지 않는다. SEO backend에 `{crawlerFamily,verifiedIdentity,productScope,robotsDecision,contentEncoding,status,canonicalTarget,renderLatency,cacheResult}` telemetry를 두되 개인 query/body는 저장하지 않는다. gzip/br/지원 encoding별 SSR body parity, robots allow/disallow, 200/noindex/404/410/301/308, canonical/hreflang/sitemap/structured-data를 crawler-family별 회귀검사한다. 압축 variant가 빈 HTML·오래된 canonical·잘못된 robots를 내면 SEO release blocker다.
+- **Security/session + service boundary — DIRECT ADOPT:** OWASP ASVS 5.0은 민감 계정속성 변경 전 full re-auth, re-auth 후 active-session 전체/개별 종료, 고위험 거래의 추가 인증을 요구한다. security center는 `GET /sessions`, `DELETE /sessions/:id`, `POST /sessions/revoke-all`을 소유하고 세션에는 opaque id/device label/createdAt/lastSeenAt/current flag만 노출하며 token/secret은 반환하지 않는다. revoke는 server-side 즉시 무효화 + refresh family replay 차단 + immutable masked audit + notification을 수행한다. 이메일/전화/MFA/recovery 변경, 관리자 권한, 결제수단/고액 경제 작업은 fresh-auth timestamp와 risk policy를 검증한다. BOLA로 타 사용자 session revoke, stale reauth, revoked refresh replay, concurrent revoke/use 성공은 HIGH deploy blocker다. Backend worker는 ASVS V13.2에 따라 개별 service identity/short-lived credential/least privilege를 유지한다.
+- **Monetization/KR unit economics — DIRECT ADOPT:** Google Play 현행 remaining-market 정책상 global rollout 전 auto-renew subscription은 15%, 15% tier는 연 $1M까지 15%/초과 30%, 적격 KR alternative-billing 거래는 otherwise-applicable Play service fee에서 4 percentage points 감소한다. 이를 EEA/UK/US new/existing-install 표와 혼합하지 않는다. 주문 시 `feePolicyVersion`, market, eligibility/programme, billingPath, gross, platformFeeBasisPoints, billingFee, tax, refund reserve를 immutable snapshot으로 저장하고 entitlement는 결제수수료 계산과 분리한다. SKU별 base/optimistic/conservative contribution margin과 refund/fraud/support/infra 민감도를 계산하며 미실측 conversion/ARPU/LTV는 가설이다.
+- **전체 기능 실행계약 / QA·성장:** auth/profile/security-center/inventory/collection/shop/cart/payment/subscription/ad-removal/progression/business/bank/loan/stocks/casino/community/social/notifications/search/gallery/upload/public content/App API/admin/audit/DR/analytics/experiments/ads/SEO/Discord/incident 전체는 기존 구현상태+코드근거와 screen states, RBAC/BOLA, API schema/errors/idempotency/rate-limit, DB constraints/transaction/concurrency, audit/fallback/privacy/abuse, SEO/KPI/cache/performance, unit/integration/E2E/real-DB/security/regression, exact-SHA Test→main→Production smoke/rollback 계약을 유지한다. 신규 수익화보다 P0/P1 무결성·권한·DR·release authority가 선행한다.
+
+### v211 worklog / acceptance order
+Google Search/Crawling + OWASP ASVS + Google Play 공식자료 → exact main/PR/CI → Debian services/version/journal/timer → 전체 기능 security/SEO/economics delta → 중간 main 재확인 → EN/KO 동기화 → diff/CI/PR.
 
 ## 회차 델타 — v2026.09.18.210 (2026-09-18)
 
