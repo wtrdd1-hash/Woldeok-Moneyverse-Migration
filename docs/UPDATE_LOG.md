@@ -1,5 +1,14 @@
 # Update Log
 
+## v2026.09.17.184 — AI profession assignment-limit auto control
+
+- Branch: `feat/ai-job-limit-auto-v2026.09.17.184`, based on `3f523e6708af2bd9d24b60282f26619263a8c53d`.
+- Added migration 204 with captured work-task daily-limit reference baselines and eight bounded per-profession adjustment knobs.
+- Added soft-control-first tightening, shortage loosening, evidence-gated automatic relaxation and deterministic rollback compatibility.
+- Marked assignment daily-limit proposals high risk in the dual AI council (`dual-economy-council-v3`).
+- Reconciled PROJECT_PLAN, AI Economy Controller and Jobs/Mastery specs in English and Korean with the actual runtime quota contract.
+- Local pre-release evidence: migrations 002→204 succeeded on isolated PostgreSQL 17.11; targeted AI/economy/work regression tests passed 42/42 across five files; repository lint completed with 0 errors and 11 pre-existing image warnings; full workspace typecheck and production build passed; `git diff --check` passed.
+
 ## v2026.09.16.151 — Runtime and GitOps convergence
 
 - Converged application `main`, public Test, public Production, and GitOps desired Test/Production references on exact SHA `3d87165f83bcb60903e85d4f3600fdf40074ef40`.

@@ -1,8 +1,8 @@
 # Woldeok Moneyverse — Jobs & Profession Mastery Specification
 
-> Version: v2026.09.16.138
+> Version: v2026.09.17.184
 > Status: Living implementation-oriented product specification
-> Date: 2026-09-12
+> Date: 2026-09-17
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `SEASON_SYSTEM_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `LIMIT_CONSISTENCY_IMPLEMENTATION_SPEC.md`, `BUSINESS_OPERATIONS_SUPPLY_CHAIN_SPEC.md`
 > Korean counterpart: [JOBS_PROFESSION_MASTERY_SPEC.ko.md](JOBS_PROFESSION_MASTERY_SPEC.ko.md)
 
@@ -444,19 +444,19 @@ P0 is complete only when:
 - **P1:** specialization trees, profession workspaces, Business/Crafting/Club integration.
 - **P2:** player commission contracts with escrow/transfer accounting, prestige halls, broader city endowments.
 
-This document is planning-only. Runtime implementation must use a separate development branch, forward-only migrations, CI and exact-SHA isolated Test verification before Production.
+This remains a living product specification. The v184 compatibility bridge in section 22 is implemented on a separate development branch with a forward-only migration; exact-SHA isolated Test verification is still required before Production.
 
 ## 22. AI-managed profession and daily protection policies
 
-Jobs participates in the Moneyverse Economy AI policy registry while preserving the unlimited-by-default contract.
+Jobs participates in the Moneyverse Economy AI policy registry. The long-term product target remains unlimited-by-default, while v184 explicitly reconciles that target with the currently enforced finite per-task `work_task_catalog.daily_limit` runtime contract instead of pretending the target is already implemented.
 
 `primary profession` is an identity designation, not permission for the AI to rewrite a member's career choice. `primary_profession_slots` and `concurrent_active_professions` may be versioned/tuned inside approved ranges, but reductions cannot evict an existing selection or erase mastery. A narrower future rule requires grandfathering or explicit migration approval.
 
-Daily controls are independent knobs. `assignment_daily_limit` and `rewarded_assignment_daily_limit` default to `null = unlimited`. If a temporary finite value is justified, it must be global or clearly defined by non-sensitive gameplay cohort, published in server policy, time-bounded, auditable and reversible. The UI shows the current rule, reset/reevaluation time and reason category before the user starts an affected assignment.
+Daily controls are independent knobs. The target semantic `assignment_daily_limit` and `rewarded_assignment_daily_limit` policies remain `null = unlimited` by default, but current runtime compatibility is explicit: each active task already has a finite `daily_limit`. v184 registers only `jobs.assignment_daily_limit_delta.<profession>` for the eight supported professions, stores each task's captured reference `baseline_daily_limit`, and permits a bounded integer delta of `-1..+2` with one-step maximum movement. The AI cannot invent a profession key, rewrite profession identity/mastery, or bypass the existing server-side reset/quota contract. A future migration to semantic `null = unlimited` must be designed separately rather than inferred from this bridge.
 
 The AI council may tighten or loosen these policies only after deterministic validation. Routine inflation pressure should first use task-mix changes, diminishing rewards, sink/reward tuning and profession-demand balancing. Finite daily limits are a later protection lever for sustained issuance/integrity risk, not the default economy tool.
 
-Automatic relaxation is mandatory: each finite limit carries `expires_at` or `reevaluate_at`, a relaxation step, a maximum consecutive duration and a return-to-unlimited condition. A controller that can tighten but cannot automatically loosen fails Definition of Done.
+Automatic relaxation is mandatory. Under the v184 compatibility bridge, a restrictive negative delta returns one step toward baseline `0` when concentration falls to 45% or less, work issuance falls to 50% or less, or the evidence volume is below 40 assignments; a positive shortage delta also returns toward `0` once share reaches 8%. Tightening a profession above 60% share additionally requires work issuance above 50% and `work.repeat_decay_percent >= 25`, so the softer repeat-reward control is attempted first. The broader future semantic policy still requires `expires_at`/`reevaluate_at`, a relaxation step, maximum duration and return-to-unlimited condition.
 
 Suggested policy metadata:
 

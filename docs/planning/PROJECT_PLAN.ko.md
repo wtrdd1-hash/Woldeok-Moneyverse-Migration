@@ -2,11 +2,26 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.183
+> **현재 통합 버전:** v2026.09.17.184
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+
+## 회차 델타 — v2026.09.17.184 (2026-09-17)
+
+### AI 직업 작업횟수 제한 자동조절 정합화
+
+- **정확한 기준/브랜치:** `feat/ai-job-limit-auto-v2026.09.17.184`에서 `main=3f523e6708af2bd9d24b60282f26619263a8c53d`를 정확한 기준으로 구현한다. 작업은 v181에서 시작했지만 작업 중 `origin/main`을 다시 확인해 v182/v183 기획 및 docs-only candidate-build 수정이 반영된 뒤 v184로 재정렬했으며, 미푸시 로컬 v182 시도는 기존 권위 버전을 덮지 않고 폐기한다.
+- **해결한 불일치:** 기획은 의미론적 `jobs.assignment_daily_limit`를 `null = 무제한`으로 설명했지만 권위 런타임 migration 189/190/203은 유한 `work_task_catalog.daily_limit`를 강제한다. 기존 AI 레지스트리는 WLD `work.daily_cap`, `work.weekly_cap`, 반복 감쇠만 조절해 실제 작업 횟수 제한을 바꿀 수 없었다. 따라서 기존 문서의 구현상태와 AI 제어범위를 실제 코드와 맞춘다.
+- **구현된 호환 계층:** forward-only `204-adaptive-profession-limits.sql`이 작업 기준값을 보존하고 8개 허용 `jobs.assignment_daily_limit_delta.<profession>` knob를 등록한다. 범위는 `-1..+2`, 정책 주기당 최대 이동은 1이며 직전 AI 결과가 아닌 기준값에서 실제 제한을 계산하므로 누적복리가 생기지 않는다. 기존 직업선택·숙련도·assignment 이력·보상 receipt·원장 이력은 재작성하지 않는다.
+- **의사결정 계약:** 최신 job-selection snapshot 자체가 7일 구간을 나타낸다. 수요조정은 최소 40건 assignment를 요구한다. 점유율 `<3%`는 `+1` 완화할 수 있고, 점유율 `>60%` 강화는 작업 발행비중 `>50%`와 `work.repeat_decay_percent >=25`를 모두 만족해야 해 반복보상 완화책을 먼저 적용한다. 이전에 변경된 직업이 정상구간으로 회복되면 delta를 기준 `0` 방향으로 한 단계 복원한다. 기존 표본충분성·원장대사·feature switch·cooldown·동일 proposal 이중 AI 검토·rollback gate는 계속 최종권한이며, 근거부족 상태의 baseline 복원 후보도 이 fail-closed gate를 우회하지 않는다.
+- **AI 검토:** prompt 계약은 `dual-economy-council-v3`로 올라가며 Jobs 전문 agent가 직업 과부족·적응형 작업제한·완화를 명시 검토한다. 모든 `daily_limit` 제안은 고위험으로 분류해 결정론 엔진 적용 전 선택 도메인의 전체 rebuttal을 수행한다. AI는 여전히 임의 정책키를 만들거나 사용자 진행도를 직접 재작성할 수 없다.
+- **QA 증거:** 깨끗한 PostgreSQL 17.11 scratch DB에서 002→204 전체 migration 체인을 적용했다. AI/경제/직업 회귀 테스트 5개 파일 42/42 통과, 전체 lint 오류 0건(기존 `<img>` 경고 11건), workspace 전체 typecheck 및 production build 통과, `git diff --check` 통과를 확인했다. 이는 로컬 사전검증 증거이며 배포 증거가 아니다.
+- **릴리스 게이트:** 격리 Test가 exact runtime candidate를 제공하고 backend/API/DB smoke를 통과해야 병합/Production 대상이 된다. Production은 무중단 승격 및 사후 smoke를 요구하며 로컬 성공을 배포 성공으로 해석하지 않는다.
+- **백업 경계:** `BAK-RUNTIME-177-01`은 OPEN을 유지한다. 이번 migration은 추가형이며 ledger/data/entitlement를 삭제하지 않지만 예약 백업 런타임 문제가 해결됐다고 간주하지 않고 파괴적 후속작업은 계속 차단한다.
+- **브랜치/작업기록:** 내부 worklog와 GitHub용 changelog는 v2026.09.17.184로 기록하고 정확한 branch/base, 정책키, 테스트, Test 증거, 운영 승격 증거를 단계별로 갱신한다.
 
 
 

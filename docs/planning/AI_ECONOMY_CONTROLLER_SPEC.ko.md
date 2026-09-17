@@ -1,8 +1,8 @@
 # 월덕 머니버스 — AI 경제 컨트롤러 명세
 
-> 버전: v2026.09.16.141
+> 버전: v2026.09.17.184
 > 상태: Living 구현 지향 기획 명세
-> 날짜: 2026-09-16
+> 날짜: 2026-09-17
 > 상위 명세: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
 > 영문 기준본: [AI_ECONOMY_CONTROLLER_SPEC.md](AI_ECONOMY_CONTROLLER_SPEC.md)
 
@@ -793,9 +793,10 @@ judge agent는 hard constraint에 대한 tie-break 권한이 없다. safety veto
 - policy registry, DB, API, 관리자화면 계약 정의
 - 모델 거버넌스, 분석, QA 시나리오 정의
 - 런타임은 개발 브랜치 -> `wdmv-test` 검증 -> Production 순서 강제
-- changelog/worklog에 v2026.09.13.24 기록
+- 과거 기획 baseline v2026.09.13.24는 이력으로 보존하고 실제 런타임 구현 단위는 자체 버전 changelog/worklog 증거 기록
+- v2026.09.17.184에서 32절의 직업별 작업횟수 제한 호환 계층과 AI 고위험 검토 경로를 실제 구현
 
-이번 변경은 문서 전용 기획 변경이며 이것만으로 운영 자동조정 기능이 활성화되지는 않는다.
+전체 controller는 계속 living specification이다. v2026.09.17.184는 실제 런타임 기능을 추가하지만 **문서나 로컬 테스트만으로 Production 활성화를 주장하지 않는다**. exact-SHA 격리 Test, 배포 증거, Production smoke가 반드시 필요하다.
 
 ## 31. 2026-09-16 연구 재평가
 
@@ -837,13 +838,16 @@ Moneyverse 경제 AI의 중심은 `LLM`이 아니라 **데이터로 보정된 �
 
 - `jobs.primary_profession_slots`: 동시에 주직업으로 지정할 수 있는 정체성 슬롯 수. 운영자가 승인한 범위 안에서만 바꿀 수 있으며 기존 사용자의 주직업을 몰래 교체·강등하지 않는다.
 - `jobs.concurrent_active_professions`: 동시에 성장시킬 수 있는 활성 직업 수.
-- `jobs.assignment_daily_limit`: 일반 작업 완료 횟수. 기본은 `null = 무제한`.
-- `jobs.rewarded_assignment_daily_limit`: 별도 보상정책 전까지 정상 WLD 보상을 받을 수 있는 작업 수. 기본은 `null = 무제한`.
+- `jobs.assignment_daily_limit`: 일반 작업 완료 횟수의 목표 의미 정책. 장기 기본값은 `null = 무제한`이지만 현재 P0 런타임은 작업별 유한 `work_task_catalog.daily_limit`를 강제한다.
+- `jobs.assignment_daily_limit_delta.<profession>`: **v2026.09.17.184에서 구현된 호환 계층**. 8개 허용 직업에 대해 캡처된 작업별 참조 기준값에 정수 delta를 더하며 범위는 `[-1,+2]`, 한 정책 주기 최대 변화는 1이다. 모델이 임의 키를 만드는 것이 아니라 이 등록된 키 family만 현재 작업횟수 bounded-auto 권한을 가진다.
+- `jobs.rewarded_assignment_daily_limit`: 별도 보상정책 전까지 정상 WLD 보상을 받을 수 있는 작업 수의 계획된 의미 정책. 목표 기본값은 `null = 무제한`이며 v184에서는 구현하지 않는다.
 - `jobs.daily_wld_budget_per_cohort`: 선택적 cohort/시스템 발행 보호 예산. 개인별 숨은 몰수 규칙으로 사용하지 않는다.
 - `jobs.repeat_reward_floor_multiplier`, `jobs.repeat_curve_k` 등 반복 보상 체감 정책.
 - 정책 레지스트리에 명시적으로 등록된 직업별 동시성·보상·정산·보호 제한 키.
 
 우선순위는 악용/데이터오류 탐지 -> 반복 보상과 작업 구성 조정 -> 선택적 sink/reward 조정 -> 직업 수요 재균형 -> 마지막으로 한시적 유한 일일 보호 제한 검토 순서다. 더 부드러운 조절수단이 가능한데 단순 인플레이션만을 이유로 플레이 hard cap을 만들면 안 된다.
+
+**v184 런타임 계약.** 호환 컨트롤러는 기존 7일 직업선택 telemetry를 읽는다. assignment가 최소 40건일 때 점유율 3% 미만 직업은 `+1` 완화할 수 있고, 60% 초과 직업은 작업 발행비중 50% 초과와 `work.repeat_decay_percent >= 25`를 모두 만족해야 `-1` 강화할 수 있어 반복보상 완화책이 먼저 적용된다. 편중이 해소되거나 근거량이 낮아지면 non-zero delta는 기준 `0` 쪽으로 한 단계 복원한다. 기존 표본충분성·원장대사·정책 cooldown·feature switch·동일 proposal AI 검토·rollback gate가 최종 권한이다.
 
 non-null 일일 제한이 `BOUNDED_AUTO`에 들어가려면 정책 레지스트리가 auto-tunable로 허용하고 다중 시간창 근거, 최소 표본, 시나리오/반사실 비교, 구매력·성장성 검증, 무결성 검토, 공개 가능한 reason code, 최대 지속기간, 자동 완화 시험, 롤백 준비를 모두 통과해야 한다. 컨트롤러는 강화뿐 아니라 완화도 평가하며 조건이 해소되면 오래된 제한을 유지하지 않고 `null = 무제한` 방향으로 자동 완화한다.
 
