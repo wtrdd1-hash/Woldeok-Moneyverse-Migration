@@ -2,11 +2,27 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.197
+> **현재 통합 버전:** v2026.09.17.198
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 델타 — v2026.09.17.198 (2026-09-17)
+
+### Production identity 확인, 백업 DR 증거는 P0 유지, 저장소 required-check 강제는 미완료
+
+- **정확한 main / 이전 회차 종결:** v197 PR #444 exact head `9c533c33389995880716489b5bae603da82aeb42`는 CI #1242 성공 후 squash merge됐다. 이번 회차 시작점은 `dfeddd2c680e0f3324abf9149105152e09c2a331`이다. Branch protection은 켜져 있지만 required status check는 `enforcement_level=off`, required context/check 0개이므로 **P1 / OPEN**이다. P0 직후 classifier+policy+runtime/security check를 repository-required로 만들고 실패 check가 merge를 차단하는 음성 테스트가 필요하다.
+- **P0 백업/DR `BAK-RUNTIME-177-01`: IN PROGRESS.** 약 23:00 KST backend/frontend/backup timer는 active이고 21:22·21:57 encrypted backup 검증 성공과 다음 timer 예약을 확인했다. DONE에는 최신 archive isolated restore, decrypt/checksum/schema/migration-set 검증, identity/session·inventory/entitlement·ledger/reward·bank/loan·stocks·casino·community/referral·audit reconciliation, 실측 RPO/RTO, off-host immutable 복제/retention, missed-run/verification/replication/restore alert 증거가 모두 필요하다. 불일치는 fail-closed이며 reconciliation 전 Production restore와 destructive schema/ledger/entitlement rewrite를 금지한다.
+- **Production runtime identity:** backend 직접 `/api/version`은 HTTP 200과 `Cache-Control: no-store`를 반환한다. 배포 application build와 repository head는 별도 권위이며 docs/bot/planning commit을 application rollout으로 해석하지 않는다. Runtime 승격은 candidate manifest `{applicationSourceSha,imageDigest,migrationSetHash,deploymentId}`, isolated-Test attestation, `/health`, BFF/public smoke, session continuity, migration equality, journal review, rollback manifest가 필요하다.
+- **전체 기능 구현/QA 계약:** auth/signup/login/OAuth/logout/session/security center, profile, inventory/collection, shop/cart/payment/subscription/ad-removal, season/quest/job/level/reward, business/bank/loan, virtual stocks/portfolio/alerts/comparison, casino/randomized flow, community/posts/comments/report/block, friends/clubs/invite/referral, notifications/search/gallery/upload/public content, App API, admin/audit, backup/restore, analytics/experiments, ads, SEO backend/tooling, Discord 연동, incident operations의 기존 화면상태·권한/소유권·API error/idempotency/rate-limit·DB key/index/constraint/transaction/concurrency·audit/fallback/privacy/abuse·KPI·performance/cache·unit/integration/E2E/real-DB/security/regression·deploy/rollback 계약을 유지한다. 코드/문서 근거와 exact-environment QA 없이는 DONE 금지다. #441 Discord reset은 **MERGED / production-smoke-pending**이다.
+- **SEO/SEO 백엔드:** Google Search Central update log는 2026-09-17 infinite-scroll JavaScript 지침을 현행 문서로 이전했고 지침 변경은 없다고 기록한다. Public community/catalog/collection/search 목록은 crawlable pagination URL, server-renderable link, stable ordering, page별 self-canonical/title/H1, 정상 200/404를 제공하고 독립 가치 page만 sitemap에 포함한다. Cursor는 API 내부용이다. Server metadata/canonical/robots/sitemap+lastModified/breadcrumb/JSON-LD/hreflang/SSR-ISR/CWV/permanent redirect, private/account/admin/transaction `noindex`, UGC/sponsored governance, Search Console/Naver 상태수집, crawler-log 진단, organic→signup→activation→D7/D30→revenue attribution을 유지한다.
+- **보안:** OWASP API Security 최신 API-specific Top 10은 계속 2023이다. BOLA, broken authentication, object-property/function authorization, resource exhaustion, sensitive-business-flow abuse, SSRF, misconfiguration, API inventory, unsafe-upstream consumption을 release-blocking QA로 둔다. Cookie mutation CSRF, reward/payment/ledger replay-safe idempotency, DB least privilege, payment/webhook signature, upload isolation, secret/log redaction, immutable audit receipt도 필수다. Backup/release manifest 불일치는 차단한다.
+- **수익성/unit economics:** Google Play 수수료는 market/install cohort/transaction/programme/billing path별로 다르다. EEA/UK/US standard 예시는 auto-renew 10%, 기타 new-install 20%, 기타 existing-install 25%와 applicable billing fee이며 한국 alternative billing은 현재 programme terms상 해당 Play fee에서 4%p 감액된다. 모든 SKU는 effective fee policy를 resolve한 뒤 net revenue/contribution margin을 계산한다. Revenue/net revenue/margin, ARPU/ARPDAU/ARPPU, conversion, repeat/renewal/churn/refund, CAC/LTV/payback, 광고 순효과, infra/support/fraud, D1/D7/D30은 실측 또는 `HYPOTHESIS/TEST TARGET`만 허용하고 kill/iterate/scale은 fairness/retention/security guardrail을 함께 본다.
+- **우선순위:** P0 isolated restore + off-host immutable backup + alert → P0 release-class matrix/candidate authority → migration-204 real-DB/economy-integrity → HIGH auth/BOLA/CSRF/idempotency/ledger-abuse/payment/webhook → P1 required-check enforcement → Discord Production smoke → correctness → monetization → SEO/acquisition → retention/accessibility. 기획 자동화는 runtime/DB를 배포하지 않는다.
+
+### v198 worklog
+Google Search/Play와 OWASP 최신 공식자료 → exact main/PR/CI 및 Debian runtime/backup 대조 → 전체 기능/SEO/보안/사업성 delta → 작업 중간 exact-main 재확인 → EN/KO 동기화 → diff/CI/PR.
 
 ## 회차 델타 — v2026.09.17.197 (2026-09-17)
 
