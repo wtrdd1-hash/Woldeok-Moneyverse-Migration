@@ -2,11 +2,32 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.170
+> Current integrated version: v2026.09.17.171
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.17.171 (2026-09-17)
+
+### Current source-code synchronization
+
+- **Authoritative repository head:** `main` is `d398f6ef1a821496c92ef2916a1b0b36c964f4ec` at this review. Recent commits after the latest runtime-feature merges are primarily planning/operations documentation, so the inventory below describes implementation currently present on `main` without claiming Production verification.
+- **Casino browser/runtime recovery (`23ae3608`, #383):** `frontend/src/app/casino/actions.ts` no longer exposes synchronous exports across the `use server` boundary; client-safe state moved to `casino-state.ts`, an error boundary was added, and casino forms/theme games/loading paths were adjusted. `actions-boundary.test.ts` guards the boundary contract.
+- **Casino play contract + dice UX (`f6fd3120`, #384):** the frontend action adapter sends bounded stakes using the backend integer JSON contract instead of formatted numeric strings. `casino-forms.tsx` and `globals.css` add server-result dice presentation while server authority remains responsible for RNG, eligibility, debit/payout, ledger and idempotency.
+- **Work day/week reset convergence (`03a8ae9c`, #388):** backend Work API returns authoritative `game_day_key`, `game_week_key`, `day_ends_at`, and `week_ends_at` through `WorkDashboardResponseDto`; `WorkRepository.dashboard()` reads `work_my_dashboard_v2`. Migration `packages/database/migrations/203-work-reset-convergence.sql` is the DB authority for accelerated windows and reward-window convergence. Frontend Work screens and mobile API contract/schema docs use the same reset fields. Real-DB tests cover exact accelerated boundaries and DB-session-timezone independence.
+- **Economy AI operations activation (`e992d44d`, #389):** the repository contains a reproducible Debian/systemd service profile under `ops/systemd/` plus EN/KO runtime operations documentation. This is runtime-configuration evidence; it does not by itself prove that a newer application SHA was promoted.
+- **Administrator navigation convergence (`7acc3c02`, #390):** administrator UI inventory exposes Security, Business/Season, Work/Jobs and Discord in sub-navigation and Support/Shop in the dashboard inventory, with a regression contract intended to prevent hidden top-level admin areas. Navigation visibility does not widen backend authorization.
+
+### Planning consequence
+
+- Treat the commits and paths above as the current implementation-evidence baseline for Casino, Work reset, Economy AI operations and administrator navigation. Future planning must inspect these paths before proposing duplicate work.
+- Status remains evidence-scoped: `main` implementation evidence is not exact-SHA Test or Production proof. Existing isolated-Test, DB/API/user-flow, authorization, monitoring and rollback gates remain mandatory.
+- The existing P0 release-control defect remains open: docs-only commits can still reach migration/registry surfaces before runtime-input classification. v171 is documentation-only and does not weaken that gate or claim runtime promotion.
+
+### v171 backlog/order and acceptance
+
+`P0 independent encrypted backup + isolated restore/reconciliation` → `P0 stale-status false-green` → `P0 pre-privilege release classifier / docs-only DB+registry side-effect zero` → `P0 single release authority across GitOps/public edge/systemd` → `P1 exact-SHA verification for Casino/Work/Admin/Economy-AI runtime evidence` → `P1 auth/session/admin/casino/Work/DB authorization+ledger QA` → `P1 repository required-check enforcement` → core correctness → monetization → SEO/acquisition → retention/accessibility.
 
 ## Cycle delta — v2026.09.17.170 (2026-09-17)
 
