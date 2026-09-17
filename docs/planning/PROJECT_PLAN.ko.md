@@ -2,13 +2,28 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.183
+> **현재 통합 버전:** v2026.09.17.184
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
 
+
+## 회차 델타 — v2026.09.17.184 (2026-09-17)
+
+### 문서 전용 차단은 병합, control-plane 릴리스 identity는 계속 P0
+
+- **정확한 main / 구현상태:** 기준 `89d84271c43e713a69bbbc65329fefe93b355d07`에는 PR #425가 병합되어 `test-candidate.yml`에 `docs/**`, `README/**`, `README.md`, `**/*.md`의 좁은 `paths-ignore`가 추가되었습니다. 순수 문서 push의 candidate image/registry/downstream release 진입을 막는 **부분 DONE containment**이며 `REL-DOCS-181-01` 전체 해결은 아닙니다. runtime/control-plane 변경은 계속 eligible입니다.
+- **신규/최신 재현 `REL-AUTH-184-01`, P0 OPEN:** #425 자체는 release-control 변경이므로 Production Release #948/run `35199318368`이 시작되는 것은 합리적이지만 `test-gate`의 `Wait for exact SHA on isolated test and verify backend/database path`에서 실패하고 build는 skipped됐습니다. workflow-only/control-plane repository SHA를 Test가 동일 application runtime SHA로 제공해야 한다고 취급하는 문제가 남았습니다. 최초/최근 2026-09-17 17:22~17:38 KST. 영향은 false-red, 약 15분 Test polling, 운영자 혼선과 향후 privilege 노출 위험입니다.
+- **구현 설계 / migration / rollback:** #425 ignore는 유지합니다. credential 전 manifest를 `{repositoryHeadSha,applicationSourceSha,controlPlaneSha,classification,changedPathsHash,classifierVersion,imageDigest,migrationSetHash}`로 확장합니다. `DOCS_ONLY`는 candidate/release 0, `CONTROL_PLANE_ONLY`는 workflow/static/security 검증만 하고 repository SHA Test polling/application image build를 하지 않습니다. 명시적 E2E release rehearsal만 마지막 deployable `applicationSourceSha`와 digest를 resolve해 Test를 검증합니다. `RUNTIME_RELEVANT`는 application exact-SHA, `MIXED`는 두 lane 모두 통과하며 unknown은 secret 전 fail-closed입니다. 데이터 migration은 없습니다. rollback은 자동 Production dispatch를 끄고 docs-only ignore는 보존합니다.
+- **QA / 수용 / 승격:** docs/README/backend/frontend/package/lockfile/migration/workflow/GitOps/mixed corpus를 유지합니다. docs-only push 3회 candidate/release=0; control-plane-only 3회 application image push=0 및 Test repository-SHA poll=0; runtime 2회 applicationSourceSha+digest+실DB/API/catalog/Test-noindex 일치; mixed 1회 두 lane PASS; 분류 전 secret=0. runtime false-negative, 잘못된 Test identity, secret 노출, 무권한 DB/registry/GitOps side effect는 승격 차단입니다. classification, false-red, Test-poll minutes, registry push, secret materialization, `repository_sha_runtime_mismatch_total`을 관측합니다.
+- **런타임 / 백업:** 약 18:05 KST Debian에서 backend/frontend active, 최근 1시간 warning 이상 없음, `moneyverse-backup.timer` 없음, `/api/version` HTTP 404를 재확인했습니다. `BAK-RUNTIME-177-01`은 P0 OPEN입니다. scheduled encrypted backup→checksum/decrypt/structure 검증→isolated restore/reconciliation→off-host immutable copy 전까지 파괴적 schema/data/ledger/entitlement 변경을 금지합니다.
+- **전체 기능 계약:** 인증/가입/로그인/OAuth/로그아웃/세션/보안센터, 프로필, 인벤토리/컬렉션, 상점/장바구니/결제/구독/광고제거, 시즌/퀘스트/직업/레벨/보상, 사업/은행/대출, 가상주식/포트폴리오/알림/비교, 카지노, 커뮤니티/댓글/신고/차단, 친구/클럽/초대/추천, 알림/검색/업로드/공개콘텐츠, App API, 관리자/감사, 백업/복구, 분석/실험, 광고, SEO 도구, 장애대응의 기존 상세 matrix를 유지합니다. UX 상태·반응형·접근성·i18n, 권한/소유권, API 오류/멱등성/rate limit, DB key/index/constraint/transaction/concurrency, audit/fallback/privacy/abuse, SEO/KPI/performance/cache, 단위/통합/E2E/실DB/보안/회귀, 배포/롤백 증거 없이는 DONE 승격 금지입니다.
+- **SEO / 보안 / 사업성:** Google Search Central 최신 major 문서변경은 2026-09-16 Search profile badge이며 기존 title/meta/canonical/robots/sitemap/lastModified/breadcrumb/structured-data/hreflang/SSR-ISR/CWV/redirect/UGC 및 private noindex 계약을 유지합니다. 2026-08-28 site-reputation 정책은 third-party/sponsored/affiliate 평판 악용 방지 기준입니다. 보안은 OWASP ASVS 5.0.0 + API Security Top 10 2023 + Top 10:2025를 유지하고 2026-09-10 Cornucopia Mobile App Edition v2.0은 향후 native/mobile threat-model 참고로만 채택합니다. 새 실측 구매/광고 cohort가 없어 모든 재무 KPI는 실측 또는 `HYPOTHESIS/TEST TARGET`이며 release-control 가치는 false-red/Test/registry/DB/secret/on-call 비용 회피로 측정합니다.
+
+### v184 worklog / 수용순서
+최신 공식자료 → exact main/runtime/QA/CI → #425 docs-only containment → #948 control-plane identity 실패 → backup/runtime P0 → 전체기능/SEO/보안/수익성 → 중간 exact-main 재확인 → EN/KO 동기화 → PR CI → exact base 유지 시 병합. Planning-only입니다.
 
 ## 회차 델타 — v2026.09.17.183 (2026-09-17)
 
