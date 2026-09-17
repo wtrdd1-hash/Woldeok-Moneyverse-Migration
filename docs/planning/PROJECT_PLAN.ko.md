@@ -2,11 +2,23 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.200
+> **현재 통합 버전:** v2026.09.18.201
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 델타 — v2026.09.18.201 (2026-09-18)
+
+### 모바일 반응형 UI QA 및 가로 넘침 방지 강화
+
+- **브랜치/범위:** `fix/ui-responsive-qa-v2026.09.18.201`은 권위 `main` v200 기준이다. 이번 회차는 runtime-relevant 프론트엔드 변경이므로 branch → CI/tests → exact-SHA Test → backend/API/user-flow QA → main/Production 승격 → smoke/rollback 순서를 따른다.
+- **반응형 수정:** 전역 모바일 drawer를 viewport 안으로 제한하고, 하단 5개 탭이 고정 최소 폭 없이 좁은 화면을 나눠 쓰게 했다. 은행의 과밀한 헤더·액션·대출 요약은 stack/wrap하고, 480px 미만 은행 요약은 1열이며, 인벤토리 profile/quick-slot은 안전하게 줄어든다.
+- **릴리스 전 증거:** repository lint 오류 0건과 기존 이미지 경고 11건, workspace typecheck, frontend Production build, frontend 70개 파일/619개 테스트가 통과했다. Chromium 320/360/390px에서 공개 경로 7개를 점검한 21/21 조합이 HTTP 200이고 document-level 가로 overflow는 0건이다. Gallery의 기존 Google 광고 품질 CSP 거부는 별도 추적한다.
+- **릴리스 안전:** DB migration, API contract, ledger, entitlement, authentication 동작 변경은 없다. exact candidate가 Test backend/API/frontend smoke를 통과하기 전 Production은 차단하며, 현재 Debian systemd 권위에서 이전 release를 rollback anchor로 보존한다.
+
+### v201 worklog / 수용 순서
+현재 plan/main 재확인 → clean branch/worktree → baseline QA → 반응형 감사·수정 → 회귀 테스트 → Production build → 320/360/390px 브라우저 QA → EN/KO plan/update/worklog → branch push/CI → exact-SHA Test backend/frontend smoke → Production 승격 및 사후 smoke.
 
 ## 회차 델타 — v2026.09.18.200 (2026-09-18)
 

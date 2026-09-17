@@ -1,5 +1,13 @@
 # Update Log
 
+## v2026.09.18.201 — Mobile-responsive UI QA and overflow hardening
+
+- Branch: `fix/ui-responsive-qa-v2026.09.18.201`, based on the v200 authoritative plan/main baseline.
+- Removed fixed-width mobile overflow risks in the global menu, five-tab bottom navigation, banking cards/actions, and inventory quick slots.
+- Added a mobile responsive regression test; frontend validation passed 70 files / 619 tests, workspace typecheck, Production build, and repository lint with 0 errors and 11 pre-existing image warnings.
+- Headless Chromium at 320/360/390 px passed 21 public-route render combinations with no document-level horizontal overflow. A pre-existing Google ad-quality script CSP rejection on Gallery remains tracked separately.
+- No database migration or API/auth/ledger/entitlement contract changed. Exact-SHA Test backend/frontend smoke remains required before Production promotion.
+
 ## v2026.09.17.195 — v193 Production evidence
 
 - Recorded zero-downtime Production remediation for the v193 Next.js API-cache permission fix.

@@ -34,7 +34,7 @@ export function MobileBottomNav() {
       aria-label={locale === 'en' ? 'Mobile bottom navigation' : '모바일 하단 내비게이션'}
       className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-background/90 backdrop-blur-xl pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] lg:hidden"
     >
-      <div className="mx-auto flex max-w-md items-center justify-around px-2">
+      <div className="mx-auto grid w-full max-w-md grid-cols-5 items-center px-1 sm:px-2">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
@@ -46,7 +46,7 @@ export function MobileBottomNav() {
               prefetch={false}
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'group relative flex min-w-[60px] flex-col items-center justify-center gap-1 py-1 text-[11px] font-bold transition-all',
+                'group relative flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 px-0.5 py-1 text-[10px] font-bold transition-all min-[360px]:text-[11px]',
                 isActive
                   ? 'text-primary scale-105'
                   : 'text-muted-foreground hover:text-foreground',

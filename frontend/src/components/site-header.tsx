@@ -119,7 +119,7 @@ export function SiteHeader() {
                 <Menu className="size-4.5 sm:size-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-80 gap-0">
+            <SheetContent side="right" className="w-[min(20rem,calc(100vw-1rem))] max-w-full gap-0">
               <SheetHeader>
                 <SheetTitle className="text-left">{locale === 'en' ? 'Menu' : '메뉴'}</SheetTitle>
               </SheetHeader>

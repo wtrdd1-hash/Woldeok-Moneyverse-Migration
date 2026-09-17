@@ -85,8 +85,8 @@ export function DepositWithdrawCard({
   return (
     <Card className="border-border/60 bg-background/80 backdrop-blur-md">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 items-center gap-2">
             <div className="flex size-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
               <PiggyBank className="size-5" />
             </div>
@@ -102,12 +102,12 @@ export function DepositWithdrawCard({
               </CardDescription>
             </div>
           </div>
-          <div className="flex rounded-lg border border-border/60 bg-muted/40 p-1">
+          <div className="flex w-full rounded-lg border border-border/60 bg-muted/40 p-1 sm:w-auto">
             <Button
               type="button"
               variant={tab === 'deposit' ? 'default' : 'ghost'}
               size="sm"
-              className="h-8 px-3 text-xs font-bold"
+              className="h-8 flex-1 px-3 text-xs font-bold sm:flex-none"
               onClick={() => {
                 setTab('deposit');
                 setAmountStr('');
@@ -119,7 +119,7 @@ export function DepositWithdrawCard({
               type="button"
               variant={tab === 'withdraw' ? 'default' : 'ghost'}
               size="sm"
-              className="h-8 px-3 text-xs font-bold"
+              className="h-8 flex-1 px-3 text-xs font-bold sm:flex-none"
               onClick={() => {
                 setTab('withdraw');
                 setAmountStr('');
@@ -256,8 +256,8 @@ export function CompoundInterestCard({
   return (
     <Card className="border-border/60 bg-gradient-to-br from-emerald-500/5 via-background to-blue-500/5 backdrop-blur-md">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 items-center gap-2">
             <div className="flex size-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
               <Sparkles className="size-5" />
             </div>
@@ -345,8 +345,8 @@ export function SmartLoanCard({
   return (
     <Card className="border-border/60 bg-background/80 backdrop-blur-md">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 items-center gap-2">
             <div className="flex size-10 items-center justify-center rounded-xl bg-purple-500/10 text-purple-500">
               <CreditCard className="size-5" />
             </div>
@@ -399,7 +399,7 @@ export function SmartLoanCard({
                 발행: {new Date(activeLoan.issued_at).toLocaleDateString('ko-KR')}
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-center text-xs py-2 border-y border-destructive/10">
+            <div className="grid grid-cols-1 gap-2 text-center text-xs py-2 border-y border-destructive/10 min-[480px]:grid-cols-3">
               <div>
                 <span className="text-muted-foreground">대출 원금</span>
                 <p className="font-bold mt-0.5">{groupDigits(principal)} WLD</p>
@@ -430,7 +430,7 @@ export function SmartLoanCard({
                   />
                 </Field>
               </FieldGroup>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Button
                   type="button"
                   variant="outline"
@@ -506,8 +506,8 @@ export function VirtualBondsCard({
   return (
     <Card className="border-border/60 bg-background/80 backdrop-blur-md">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 items-center gap-2">
             <div className="flex size-10 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
               <Landmark className="size-5" />
             </div>

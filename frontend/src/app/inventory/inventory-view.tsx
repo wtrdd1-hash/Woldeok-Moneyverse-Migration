@@ -121,15 +121,15 @@ export function InventoryView({
           equippedBg?.animation_css || 'bg-card',
         )}
       >
-        <div className="flex items-center gap-5">
+        <div className="flex w-full min-w-0 items-center gap-4 sm:gap-5">
           <AvatarWithCosmetics
             cosmetics={activeCosmetics}
             name={currentUsername}
             src={userAvatarUrl}
             size="xl"
           />
-          <div>
-            <div className="flex items-center gap-2 mb-1">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
               <span className="text-xs font-bold uppercase tracking-wider text-amber-500 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
                 ACTIVE COSMETICS
               </span>
@@ -144,19 +144,19 @@ export function InventoryView({
 
         {/* Quick Slot Indicators */}
         <div className="grid grid-cols-3 gap-2 text-center text-[11px] w-full md:w-auto">
-          <div className="p-2 rounded-xl bg-surface/60 border border-border/40 min-w-[70px]">
+          <div className="p-2 rounded-xl bg-surface/60 border border-border/40 min-w-0">
             <span className="text-muted-foreground block">프레임</span>
             <span className="font-bold text-foreground truncate block">
               {equippedFrame ? equippedFrame.name : '기본'}
             </span>
           </div>
-          <div className="p-2 rounded-xl bg-surface/60 border border-border/40 min-w-[70px]">
+          <div className="p-2 rounded-xl bg-surface/60 border border-border/40 min-w-0">
             <span className="text-muted-foreground block">배경</span>
             <span className="font-bold text-foreground truncate block">
               {equippedBg ? equippedBg.name : '기본'}
             </span>
           </div>
-          <div className="p-2 rounded-xl bg-surface/60 border border-border/40 min-w-[70px]">
+          <div className="p-2 rounded-xl bg-surface/60 border border-border/40 min-w-0">
             <span className="text-muted-foreground block">이펙트</span>
             <span className="font-bold text-foreground truncate block">
               {equippedEffect ? equippedEffect.name : '없음'}
