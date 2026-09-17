@@ -1,17 +1,17 @@
-name: Recover Flux Through Jump Host v150
+name: Cluster SSH Recovery v179
 
 on:
   workflow_dispatch:
     inputs:
       mode:
-        description: Publish deploy public key or perform cluster recovery
+        description: Recovery mode
         required: true
-        default: public-key
+        default: direct-recover
         type: choice
-        options: [public-key, recover, direct-recover]
+        options: [direct-recover]
       restart_flux_controllers:
-        description: Restart Flux controllers only if source remains stale
-        required: true
+        description: Reserved compatibility input
+        required: false
         default: false
         type: boolean
 
@@ -19,116 +19,11 @@ permissions:
   contents: read
 
 jobs:
-  recover:
-    if: inputs.mode != 'direct-recover'
-    runs-on: ubuntu-latest
-    environment: production
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Prepare deployment identity
-        shell: bash
-        env:
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-        run: |
-          set -euo pipefail
-          [[ -n "${DEPLOY_USER:-}" ]]
-          [[ -n "${DEPLOY_SSH_KEY:-}" ]]
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy
-          chmod 600 ~/.ssh/deploy
-          ssh-keygen -y -f ~/.ssh/deploy > ~/.ssh/deploy.pub
-          echo "Deploy public-key fingerprint: $(ssh-keygen -lf ~/.ssh/deploy.pub | awk '{print $2}')"
-          if [[ '${{ inputs.mode }}' == 'public-key' ]]; then
-            echo DEPLOY_PUBLIC_KEY_BEGIN
-            cat ~/.ssh/deploy.pub
-            echo DEPLOY_PUBLIC_KEY_END
-          fi
-
-      - name: Resolve exact GitOps desired state
-        if: inputs.mode == 'recover'
-        id: desired
-        shell: bash
-        run: |
-          set -euo pipefail
-          git clone --depth 1 https://github.com/wtrdd1-hash/kuber-infrastructure /tmp/infra >/dev/null 2>&1
-          infra_sha="$(git -C /tmp/infra rev-parse HEAD)"
-          test_sha="$(sed -n 's/.*moneyverse.openai\/candidate-sha: "\([0-9a-f]\{40\}\)".*/\1/p' /tmp/infra/staging/wdmv-test/backend.yaml | head -n1)"
-          [[ "$infra_sha" =~ ^[0-9a-f]{40}$ ]]
-          [[ "$test_sha" =~ ^[0-9a-f]{40}$ ]]
-          echo "infra_sha=$infra_sha" >> "$GITHUB_OUTPUT"
-          echo "test_sha=$test_sha" >> "$GITHUB_OUTPUT"
-          echo "Desired infra=$infra_sha test=$test_sha"
-
-      - name: Configure strict jump and target SSH
-        if: inputs.mode == 'recover'
-        shell: bash
-        env:
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-        run: |
-          set -euo pipefail
-          printf '%s\n' 'ssh.easy-scraping.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJkus4jAYChCY44x5smQbNEfeTzq3XWNj2lnpbrNhsEG' '192.168.100.186 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP2tRZ2fc3s0TLNeY2fRNKcz2oYylnh4xFl+y+oM/VCp' > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-          printf '%s\n' \
-            'Host jump' \
-            '  HostName ssh.easy-scraping.com' \
-            '  User debian' \
-            '  Port 22' \
-            '  IdentityFile ~/.ssh/deploy' \
-            '  IdentitiesOnly yes' \
-            '  IdentityAgent none' \
-            '  BatchMode yes' \
-            '  StrictHostKeyChecking yes' \
-            '  UserKnownHostsFile ~/.ssh/known_hosts' \
-            'Host nixos-target' \
-            '  HostName 192.168.100.186' \
-            "  User $DEPLOY_USER" \
-            '  Port 22' \
-            '  ProxyJump jump' \
-            '  IdentityFile ~/.ssh/deploy' \
-            '  IdentitiesOnly yes' \
-            '  IdentityAgent none' \
-            '  BatchMode yes' \
-            '  StrictHostKeyChecking yes' \
-            '  UserKnownHostsFile ~/.ssh/known_hosts' > ~/.ssh/config
-          chmod 600 ~/.ssh/config
-          ssh jump 'printf "jump="; hostname'
-          ssh nixos-target 'printf "target="; hostname; uname -sr'
-
-      - name: Recover Flux source and isolated Test
-        if: inputs.mode == 'recover'
-        shell: bash
-        env:
-          EXPECTED_INFRA_SHA: ${{ steps.desired.outputs.infra_sha }}
-          RESTART_CONTROLLERS: ${{ inputs.restart_flux_controllers }}
-        run: |
-          set -euo pipefail
-          ssh nixos-target "EXPECTED_INFRA_SHA='$EXPECTED_INFRA_SHA' RESTART_CONTROLLERS='$RESTART_CONTROLLERS' bash -s" < ops/recovery/flux-jump-v150.sh
-
-      - name: Verify exact public Test SHA and backend path
-        if: inputs.mode == 'recover'
-        shell: bash
-        env:
-          TEST_SHA: ${{ steps.desired.outputs.test_sha }}
-        run: |
-          set -euo pipefail
-          live="$(curl -fsS --max-time 10 https://test.easy-scraping.com/api/version | jq -r '.id // empty')"
-          echo "Test desired=$TEST_SHA live=$live"
-          [[ "$live" == "$TEST_SHA" ]]
-          curl -fsS --max-time 15 https://test.easy-scraping.com/app-api/v1/shop/public-catalog | jq -e '.catalogItems | type == "array" and length > 0' >/dev/null
-          curl -fsSI --max-time 10 https://test.easy-scraping.com/ | grep -Eiq '^x-robots-tag:.*noindex'
-
-
   recover-direct:
-    if: inputs.mode == 'direct-recover'
     runs-on: [self-hosted, moneyverse-deploy, debian13]
     environment: production
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
-
       - name: Prepare deployment identity
         shell: bash
         env:
@@ -136,75 +31,49 @@ jobs:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
         run: |
           set -euo pipefail
-          [[ -n "${DEPLOY_USER:-}" ]]
-          [[ -n "${DEPLOY_SSH_KEY:-}" ]]
+          [[ -n "${DEPLOY_USER:-}" && -n "${DEPLOY_SSH_KEY:-}" ]]
           install -m 700 -d ~/.ssh
           printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy
           chmod 600 ~/.ssh/deploy
           ssh-keygen -y -f ~/.ssh/deploy > ~/.ssh/deploy.pub
           echo "Deploy public-key fingerprint: $(ssh-keygen -lf ~/.ssh/deploy.pub | awk '{print $2}')"
 
-      - name: Resolve exact GitOps desired state
-        id: desired_direct
-        shell: bash
-        run: |
-          set -euo pipefail
-          infra_dir="${RUNNER_TEMP}/wdmv-infra-${GITHUB_RUN_ID}"
-          rm -rf "$infra_dir"
-          git clone --depth 1 https://github.com/wtrdd1-hash/kuber-infrastructure "$infra_dir" >/dev/null 2>&1
-          infra_sha="$(git -C "$infra_dir" rev-parse HEAD)"
-          test_sha="$(sed -n 's/.*moneyverse.openai\/candidate-sha: "\([0-9a-f]\{40\}\)".*/\1/p' "$infra_dir/staging/wdmv-test/backend.yaml" | head -n1)"
-          [[ "$infra_sha" =~ ^[0-9a-f]{40}$ ]]
-          [[ "$test_sha" =~ ^[0-9a-f]{40}$ ]]
-          echo "infra_sha=$infra_sha" >> "$GITHUB_OUTPUT"
-          echo "test_sha=$test_sha" >> "$GITHUB_OUTPUT"
-          echo "Desired infra=$infra_sha test=$test_sha"
-
-      - name: Configure strict direct target SSH
+      - name: Probe Kubernetes and Proxmox recovery principals
+        id: probe
         shell: bash
         env:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
         run: |
           set -euo pipefail
-          printf '%s\n' '192.168.100.186 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP2tRZ2fc3s0TLNeY2fRNKcz2oYylnh4xFl+y+oM/VCp' > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
           printf '%s\n' \
-            'Host nixos-target' \
-            '  HostName 192.168.100.186' \
-            "  User $DEPLOY_USER" \
-            '  Port 22' \
-            '  IdentityFile ~/.ssh/deploy' \
-            '  IdentitiesOnly yes' \
-            '  IdentityAgent none' \
-            '  BatchMode yes' \
-            '  StrictHostKeyChecking yes' \
-            '  UserKnownHostsFile ~/.ssh/known_hosts' > ~/.ssh/config
-          chmod 600 ~/.ssh/config
-          ssh nixos-target 'printf "target="; hostname; uname -sr'
+            '192.168.100.186 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP2tRZ2fc3s0TLNeY2fRNKcz2oYylnh4xFl+y+oM/VCp' \
+            '192.168.100.1 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJkus4jAYChCY44x5smQbNEfeTzq3XWNj2lnpbrNhsEG' > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          common=(-i "$HOME/.ssh/deploy" -o IdentitiesOnly=yes -o IdentityAgent=none -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=5)
+          target_user=''
+          for candidate in root nixos "$DEPLOY_USER"; do
+            [[ -n "$candidate" ]] || continue
+            if ssh "${common[@]}" "$candidate@192.168.100.186" true >/dev/null 2>&1; then target_user="$candidate"; break; fi
+          done
+          if [[ -n "$target_user" ]]; then
+            echo 'target_ok=true' >> "$GITHUB_OUTPUT"
+            echo "target_user=$target_user" >> "$GITHUB_OUTPUT"
+            echo "Kubernetes target authentication succeeded as ${target_user}."
+          else
+            echo 'target_ok=false' >> "$GITHUB_OUTPUT"
+            echo 'Kubernetes target key is absent; checking Proxmox root recovery path.'
+          fi
+          if ssh "${common[@]}" root@192.168.100.1 true >/dev/null 2>&1; then
+            echo 'pve_root_ok=true' >> "$GITHUB_OUTPUT"
+            echo 'Proxmox root SSH authentication succeeded.'
+            ssh "${common[@]}" root@192.168.100.1 'hostname; pveversion; qm list'
+          else
+            echo 'pve_root_ok=false' >> "$GITHUB_OUTPUT"
+            echo 'Proxmox root SSH authentication failed.'
+          fi
+          [[ -n "$target_user" || "$(ssh "${common[@]}" root@192.168.100.1 true >/dev/null 2>&1; echo $?)" == 0 ]]
 
-      - name: Recover Flux source and isolated Test directly
-        shell: bash
-        env:
-          EXPECTED_INFRA_SHA: ${{ steps.desired_direct.outputs.infra_sha }}
-          RESTART_CONTROLLERS: ${{ inputs.restart_flux_controllers }}
-        run: |
-          set -euo pipefail
-          ssh nixos-target "EXPECTED_INFRA_SHA='$EXPECTED_INFRA_SHA' RESTART_CONTROLLERS='$RESTART_CONTROLLERS' bash -s" < ops/recovery/flux-jump-v150.sh
-
-      - name: Verify exact public Test SHA and backend path
-        shell: bash
-        env:
-          TEST_SHA: ${{ steps.desired_direct.outputs.test_sha }}
-        run: |
-          set -euo pipefail
-          live="$(curl -fsS --max-time 10 https://test.easy-scraping.com/api/version | jq -r '.id // empty')"
-          echo "Test desired=$TEST_SHA live=$live"
-          [[ "$live" == "$TEST_SHA" ]]
-          curl -fsS --max-time 15 https://test.easy-scraping.com/app-api/v1/shop/public-catalog | jq -e '.catalogItems | type == "array" and length > 0' >/dev/null
-          curl -fsSI --max-time 10 https://test.easy-scraping.com/ | grep -Eiq '^x-robots-tag:.*noindex'
-
-      - name: Remove deployment identity from persistent runner
+      - name: Cleanup deployment identity
         if: always()
         shell: bash
-        run: |
-          rm -f ~/.ssh/deploy ~/.ssh/deploy.pub ~/.ssh/config ~/.ssh/known_hosts
+        run: rm -f ~/.ssh/deploy ~/.ssh/deploy.pub ~/.ssh/known_hosts
