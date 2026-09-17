@@ -2,11 +2,32 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.171
+> **현재 통합 버전:** v2026.09.17.172
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 변경 — v2026.09.17.172 (2026-09-17)
+
+### 현재 소스코드 동기화
+
+- **권위 저장소 기준:** 이번 재분석은 `main` `0eabcc19d8c970689533d6a006c12701a62190fc`(기획 v2026.09.17.171)를 기준으로 한다. v171의 CI/runtime 증거는 그대로 권위가 있으며 이번 회차는 구현 파일 경로 동기화를 추가한다. v171의 release-control 증거를 대체하거나 완화하지 않는다.
+- **카지노 브라우저/런타임 복구 (`23ae3608`, #383):** `frontend/src/app/casino/actions.ts`의 `use server` 경계에서 동기 export가 노출되지 않도록 정리했고 client-safe 상태를 `casino-state.ts`로 분리했다. error boundary를 추가하고 casino forms/theme games/loading 경로를 수정했으며 `actions-boundary.test.ts`가 경계 계약의 회귀를 막는다.
+- **카지노 플레이 계약 + 주사위 UX (`f6fd3120`, #384):** 프론트 action adapter가 포맷 문자열이 아니라 backend 정수 JSON 계약에 맞는 bounded stake를 전송한다. `casino-forms.tsx`와 `globals.css`에 서버 결과 기반 주사위 표현을 추가하되 RNG, 자격, 베팅 차감/지급, 원장, 멱등성 권위는 서버에 유지한다.
+- **직업 일/주 초기화 수렴 (`03a8ae9c`, #388):** backend Work API가 `WorkDashboardResponseDto`를 통해 권위 `game_day_key`, `game_week_key`, `day_ends_at`, `week_ends_at`를 반환하며 `WorkRepository.dashboard()`는 `work_my_dashboard_v2`를 사용한다. `packages/database/migrations/203-work-reset-convergence.sql`이 가속 window와 reward-window 수렴의 DB 권위다. frontend Work 화면과 mobile API contract/schema 문서도 동일 reset 필드를 사용한다. 실DB 테스트는 정확한 가속 경계와 DB session timezone 독립성을 검증한다.
+- **경제 AI 운영 활성화 (`e992d44d`, #389):** `ops/systemd/`에 재현 가능한 Debian/systemd service profile이 있고 EN/KO 런타임 운영 문서가 연결되어 있다. 이는 runtime configuration 증거이며 더 최신 application SHA가 승격됐다는 증거로 단독 사용하지 않는다.
+- **관리자 내비게이션 수렴 (`7acc3c02`, #390):** 관리자 UI inventory에서 상단 메뉴에 보안·사업/시즌·작업/직업·Discord를, dashboard inventory에 문의·상점을 노출하고 최상위 관리자 영역 누락을 막는 회귀 계약을 추가했다. 메뉴 노출은 backend 권한 확대를 뜻하지 않는다.
+
+### 기획 반영 결론
+
+- Casino, Work reset, Economy AI 운영, 관리자 내비게이션 기획은 위 커밋과 실제 파일 경로를 현재 구현 증거 baseline으로 사용한다. 이후 기능 기획은 중복 개발을 제안하기 전에 이 경로를 먼저 확인한다.
+- 상태는 증거 범위로 구분한다. `main` 구현 증거는 exact-SHA Test 또는 Production 증거와 같지 않으며 기존 isolated Test, DB/API/user-flow, authorization, monitoring, rollback gate를 계속 적용한다.
+- v171의 P0 공통 pre-privilege classifier 문제는 미해결이다. v172는 문서 전용 변경이며 runtime 승격을 주장하거나 docs-only CI/DB/registry side-effect 결함이 해결됐다고 보지 않는다.
+
+### v172 백로그/순서 및 수용조건
+
+`P0 독립 암호화 backup + isolated restore/reconciliation` → `P0 stale-status false-green` → `P0 generic CI + candidate/release 공통 pre-privilege classifier` → `P0 docs-only runtime/DB/registry/GitOps side-effect 0` → `P0 단일 release authority와 runtime-id reconciliation` → `P1 Casino/Work/Admin/Economy-AI exact-SHA runtime 증거 검증` → `P1 auth/session/admin/casino/Work/DB authorization+ledger QA` → `P1 required-check enforcement` → core correctness → monetization → SEO/acquisition → retention/accessibility.
 
 ## 회차 변경 — v2026.09.17.171 (2026-09-17)
 
