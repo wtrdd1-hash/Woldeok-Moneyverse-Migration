@@ -13,7 +13,8 @@ This is the current implementation-facing contract. Historical details remain re
 ### Branch and work-history contract
 
 - **Working branch:** `docs/plan-v173-branch-work-history`
-- **Base `main` SHA:** `2d819484d01d54b6d6e35b4e21e94c98c784bb0d`
+- **Base `main` SHA:** `2d819484d01d54b6d6e35b4e21e94c98c784bb0d`; **final re-check `main` SHA:** `8c236be3d5508925db3c52da2ab8f2f4de1d1a7d` after unrelated UI PR #406.
+- **Current work commit/PR:** `d554c0874c6e1ff71fefd153df68dc8e0970e20c` / PR #407 (open at final documentation update; merge state is recorded after integration).
 - **Superseded prior attempt:** `docs/plan-v172-branch-work-history` / `c16d9c86d0d2305532514fd4196a26434c7b53c7` / PR #405. `main` advanced concurrently with a separate v172 planning update, so that branch is intentionally not merged and remains recorded as superseded.
 - **Scope:** documentation-governance only; no runtime, database, API, Test or Production behavior changes in this cycle.
 - **Work performed:** added a mandatory planning traceability rule requiring every future plan edit to record its working branch and concrete work history in the integrated plan. Required fields are branch, base/current main SHA, commit/PR identifiers when available, changed files/functional areas, concise work summary, validation evidence, and merge/Test/Production status.

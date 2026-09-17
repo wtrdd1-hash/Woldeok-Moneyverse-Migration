@@ -13,7 +13,8 @@
 ### 브랜치 및 작업내역 기록 계약
 
 - **작업 브랜치:** `docs/plan-v173-branch-work-history`
-- **기준 `main` SHA:** `2d819484d01d54b6d6e35b4e21e94c98c784bb0d`
+- **기준 `main` SHA:** `2d819484d01d54b6d6e35b4e21e94c98c784bb0d`; **최종 재확인 `main` SHA:** `8c236be3d5508925db3c52da2ab8f2f4de1d1a7d` (별도 UI PR #406 반영 후).
+- **현재 작업 commit/PR:** `d554c0874c6e1ff71fefd153df68dc8e0970e20c` / PR #407 (최종 문서 갱신 시점 open, 통합 후 merge 상태를 기록).
 - **대체된 선행 시도:** `docs/plan-v172-branch-work-history` / `c16d9c86d0d2305532514fd4196a26434c7b53c7` / PR #405. 작업 도중 `main`이 별도 v172 변경으로 전진해 버전 충돌이 발생했으므로 선행 브랜치는 병합하지 않고 대체 상태로 보존했다.
 - **범위:** 문서 거버넌스 변경만 수행하며 런타임, DB, API, Test 또는 Production 동작은 변경하지 않는다.
 - **작업내역:** 향후 모든 기획서 수정 회차에 작업 브랜치와 실제 수행 내역을 기획서 본문에 의무 기록하도록 규칙을 추가했다. 필수 항목은 브랜치, 기준/현재 main SHA, 확인 가능한 commit/PR, 변경 파일·기능영역, 작업 요약, 검증 근거, merge/Test/Production 상태다.
