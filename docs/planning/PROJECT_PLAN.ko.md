@@ -2,12 +2,26 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.208
+> **현재 통합 버전:** v2026.09.18.209
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.18.209 (2026-09-18)
+
+### 06:59 권위 DR 갱신; 광고 bfcache 수명주기; 최신 Search profile 표면
+
+- **Exact main / writer 해소 / CI:** v208 PR #459 exact head `a72f42f56b2ee218062c7c8e751d828974012ea4`는 `classify=success`, `policy=success`, planning-only `runtime-check=skipped`를 완료했다. exact-head 검증 후 squash merge하여 authoritative main은 `158369cf187baa840cedd893e8159ca898805b6c`가 됐다. Branch protection은 켜져 있지만 required status check 강제는 꺼져 있고 required context/check가 0개이므로 `CI-ENFORCE-204-01`은 **P1 / OPEN**이다. 완료조건은 권위 ruleset/protection 설정과 의도적으로 실패한 required check가 merge를 실제 차단하는 negative test, 감사 가능한 emergency bypass test다. 단순 workflow green은 merge-control 증거가 아니다. DB migration 없음, rollback은 rule만 되돌리며 bypass/direct-push와 required-check 지연/실패를 관측한다.
+- **P0 runtime/DR — 06:59 KST 재현:** 권위 Debian backend/frontend/backup timer는 active이고 timer는 enabled다. 새 06:26:17 백업은 06:26:19 완료됐고 encrypted archive, `database.dump`, `photos.tar.zst`, `manifest.txt`, verify가 모두 `OK`; 다음 timer는 12:22:15다. Canonical HTTPS `/api/version`은 HTTP/2 200, `Cache-Control: no-store`, application `75e69e77cdc18ef221106a008563151a4c790728`; 표본 warning+ backend journal은 비어 있다. `BAK-RUNTIME-177-01`은 백업 생성이 복구 증명이 아니므로 **P0 / IN PROGRESS**다. 최신 archive isolated restore→decrypt/checksum→schema/migration-set→identity/session/inventory/entitlement/ledger/reward/bank/loan/stocks/casino/community/referral/audit reconciliation→실측 RPO/RTO→off-host immutable replication/retention→missed-run/verify/replication/restore alert 실제 전달까지 필요하다. Repository main과 배포 application identity가 다르므로 `REL-AUTH-184-01`도 P0다.
+- **광고/UX/분석 — Google Publisher Tag 2026-08-24 release note, 2026-09-08 효력 DIRECT ADOPT:** GPT는 사용자가 bfcache로 페이지에 복귀하면 actively viewed ad slot을 자동 refresh한다. Moneyverse는 `pageshow.persisted=true`를 별도 resume 경로로 처리해 slot/listener 중복 생성 금지, provider impression ID reconciliation, provider event ID + page-session/slot instance 기준 내부 `ad_impression`/revenue 중복제거, frequency cap 보존을 요구한다. Auto-refresh가 attribution 중복·layout shift·consent 불일치·이탈을 만들면 ad feature flag 아래 provider `AutoRefreshConfig.backForwardCache`로 비활성화한다. QA는 public/gallery/community에서 back→forward, logical slot 1개, analytics 중복 0, consent 우회 0, CLS 회귀 0을 검증한다. Rollback은 flag/config only. 사업 gate는 raw request가 아니라 검증된 광고 순매출 증가분 - bfcache 복귀 이탈/session/D1-D7 악화다.
+- **SEO/SEO backend — 최신 Search Central DIRECT ADOPT:** Google은 2026-09-16 Search profile badge 문서, 2026-09-08 지역별 Search experience 문서를 추가했다. 이는 선택적 discovery surface이지 순위 보장이 아니다. Moneyverse는 destination ownership·locale·접근성 label·outbound telemetry·privacy review를 통과한 durable public brand/about/profile에만 badge를 검토하며 auth/transaction/admin에는 삽입하지 않는다. 지역 기능은 전역 markup 대신 `{market,locale,pageType,feature,requiredMarkup,policyState,lastVerifiedAt}` eligibility matrix로 관리한다. SEO admin은 채택/보류/제외 이유와 Search Console 증거를 저장한다. 기존 canonical/robots/sitemap/lastModified/hreflang/SSR-ISR/CWV/UGC/site-reputation gate는 유지한다.
+- **보안 / 전체기능 계약:** OWASP API Security 2023 + ASVS 5.0 통제를 auth/profile/inventory/commerce/reward/bank/stocks/casino/community/upload/admin에 계속 매핑한다. 새 광고 resume 이벤트는 신뢰하지 않는 third-party lifecycle input으로 취급한다. Client/provider callback을 entitlement/economy 권위로 쓰지 않고, 적용 가능한 origin/message schema 검증, 최소권한 CSP, 식별자 마스킹, telemetry rate-limit을 적용한다. 모든 현재/계획 기능은 구현근거, 화면/CTA/loading-empty-error-offline-timeout/recovery, responsive/a11y/i18n, RBAC/BOLA, API error/idempotency/rate-limit, DB constraint/transaction/concurrency, audit/fallback/privacy/abuse, SEO/KPI/cache/performance, real-DB/security/E2E/regression, exact-SHA deploy/rollback 증거를 계속 요구한다.
+- **수익성/unit economics:** market/effective-date/install-cohort/programme/billing-path fee authority를 유지한다. Google Play 현행 문서는 updated EEA/UK/US fee와 rollout 전 remaining-market schedule을 구분한다. 모든 order/refund에 fee-policy version을 저장하며 실측되지 않은 revenue/net revenue/margin/ARPU/ARPDAU/ARPPU/conversion/repeat/renewal/churn/refund/CAC/LTV/payback/fraud/infra/support/D1-D30은 `가설/테스트 기준`이다. 광고에는 `bfcache_return_sessions`, `bfcache_refresh_impressions`, `deduped_provider_revenue`, `return_abandonment`, `return_CLS`, `ad_induced_D7_delta`를 추가하고 contribution lift가 양수이면서 retention/accessibility/privacy guardrail을 위반하지 않을 때만 scale한다.
+
+### v209 worklog / 수용 순서
+최신 Google Search Central + Google Publisher Tag + OWASP/API/ASVS + Google Play 공식 조사 → exact main/protection/open PR/check-runs → Debian services/version/journal/새 06:26 backup → 전체기능 security/SEO/ad/economics delta → 작업 중간 main 재확인 → EN/KO 동기화 → diff/CI/PR. 기획 변경은 runtime/DB 상태를 바꾸지 않는다.
 
 ## 회차 델타 — v2026.09.18.208 (2026-09-18)
 
