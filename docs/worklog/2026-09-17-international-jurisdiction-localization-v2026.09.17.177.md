@@ -28,3 +28,10 @@ Research and planning only. No application, DB, Test or Production mutation.
 - Run `git diff --check` and relative Markdown-link validation.
 - Repository environment does not expose a Prettier executable; `pnpm exec prettier --check` was unavailable (`Command "prettier" not found`).
 - Docs-only; Test/Production promotion not applicable. The v176 backup/DR P0 remains OPEN.
+
+## PR / CI evidence
+
+- Initial commit: `af2f359f33a0a73da6b9d5a14d622fc20466058f`
+- PR: #413
+- GitHub Actions CI: run `35173516232` full PASS
+- Status: docs-only, runtime Test/Production promotion N/A, PR merge pending

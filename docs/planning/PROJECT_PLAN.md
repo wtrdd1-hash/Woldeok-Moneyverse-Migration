@@ -25,6 +25,8 @@ This is the current implementation-facing contract. Historical details remain re
 - **Google SEO:** separate locale URLs, self-canonical, reciprocal hreflang for true equivalents, useful `x-default`, locale sitemaps and one primary visible language per page. IP/browser-language forced redirects and thin mass machine-translated pages are prohibited.
 - **Detailed authority:** `INTERNATIONAL_LOCALE_JURISDICTION_MONETIZATION_SPEC.md`, `INTERNATIONAL_COMPLIANCE_REFERENCE_MATRIX.md` and Korean counterparts. Casino/monetization/search specs receive linked v177 integration deltas.
 - **Promotion:** docs-only. No runtime/Test/Production feature enablement occurs in this cycle. Implementation order is policy engine → localization/SEO → billing → casino value isolation → isolated Test exact-SHA matrix → per-market approval → feature-flag enablement.
+- **Traceability / validation:** initial documentation commit `af2f359f33a0a73da6b9d5a14d622fc20466058f` / PR #413. GitHub Actions CI run `35173516232` passed secret scan, install, lint, control-byte check, typecheck, production build, database migrations, full tests, Prisma-schema mutation guard and production-dependency audit. Static `git diff --check` and relative Markdown-link validation also passed.
+- **Merge/Test/Production status:** PR #413 is merge-pending at this final plan sync. This cycle is docs-only, so isolated Test runtime promotion and Production runtime promotion are **N/A**; no payment/casino/country-policy runtime flag is enabled by this change.
 
 ### v177 acceptance order
 

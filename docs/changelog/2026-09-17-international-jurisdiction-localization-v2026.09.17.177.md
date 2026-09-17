@@ -17,3 +17,10 @@
 ## Validation
 
 Documentation parity, link/index presence, forbidden stale EN/KO-only wording replacement and `git diff --check` are required before PR.
+
+## PR / CI evidence
+
+- Initial commit: `af2f359f33a0a73da6b9d5a14d622fc20466058f`
+- PR: #413
+- GitHub Actions CI: run `35173516232` full PASS
+- Status: docs-only, runtime Test/Production promotion N/A, PR merge pending

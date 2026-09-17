@@ -28,3 +28,10 @@
 - `git diff --check`와 상대 Markdown 링크 검사를 수행한다.
 - 저장소 환경에는 Prettier 실행파일이 없어 `pnpm exec prettier --check`는 실행 불가(`Command "prettier" not found`)였다.
 - 문서 전용이므로 Test/Production 승격 대상 아님. v176 backup/DR P0는 계속 OPEN이다.
+
+## PR/CI 증거
+
+- 초기 commit: `af2f359f33a0a73da6b9d5a14d622fc20466058f`
+- PR: #413
+- GitHub Actions CI: run `35173516232` 전체 PASS
+- 상태: docs-only, runtime Test/Production 승격 N/A, PR merge 대기

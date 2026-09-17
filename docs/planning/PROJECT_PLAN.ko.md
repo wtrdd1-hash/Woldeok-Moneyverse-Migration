@@ -25,6 +25,8 @@
 - **Google SEO:** 언어별 URL, locale self-canonical, 진짜 대응번역에 상호 hreflang, 유용한 `x-default`, locale sitemap, 한 페이지 한 주언어를 적용한다. IP/브라우저언어 강제 redirect와 검색용 얇은 자동번역 대량생성을 금지한다.
 - **세부 권위:** `INTERNATIONAL_LOCALE_JURISDICTION_MONETIZATION_SPEC.md`, `INTERNATIONAL_COMPLIANCE_REFERENCE_MATRIX.md` 및 한국어 대응 문서가 세부계약이다. 카지노·수익화·검색 명세에도 v177 통합 델타를 연결한다.
 - **승격:** 문서 전용 회차다. runtime/Test/Production 기능 활성화는 하지 않는다. 실제 구현 시 정책엔진 → 번역/SEO → 결제 → 카지노 격리 → isolated Test exact-SHA → 국가별 승인 → 기능 flag 순서를 따른다.
+- **추적성/검증:** 초기 문서 commit `af2f359f33a0a73da6b9d5a14d622fc20466058f` / PR #413. GitHub Actions CI run `35173516232`에서 secret scan, install, lint, control-byte 검사, typecheck, production build, DB migration, 전체 test, Prisma schema mutation guard, production dependency audit가 모두 PASS했다. `git diff --check`와 상대 Markdown 링크 검사도 PASS했다.
+- **merge/Test/Production 상태:** 최종 기획 동기화 시점 PR #413는 merge 대기다. 이번 회차는 docs-only이므로 isolated Test 런타임 승격과 Production 런타임 승격은 **N/A**이며, 결제/카지노/국가정책 runtime flag는 이 변경으로 활성화되지 않는다.
 
 ### v177 수용순서
 

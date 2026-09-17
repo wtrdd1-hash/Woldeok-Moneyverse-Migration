@@ -17,3 +17,10 @@
 ## 검증
 
 영문/한국어 의미동기화, index link, 기존 EN/KO 한정 문구 제거, `git diff --check`를 PR 전에 확인한다.
+
+## PR/CI 증거
+
+- 초기 commit: `af2f359f33a0a73da6b9d5a14d622fc20466058f`
+- PR: #413
+- GitHub Actions CI: run `35173516232` 전체 PASS
+- 상태: docs-only, runtime Test/Production 승격 N/A, PR merge 대기
