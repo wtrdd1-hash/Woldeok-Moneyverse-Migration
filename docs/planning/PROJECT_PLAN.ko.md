@@ -2,12 +2,28 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.184
+> **현재 통합 버전:** v2026.09.17.185
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.17.185 (2026-09-17)
+
+### 런타임 경제 변경 병합 후 release identity P0 재현
+
+- **정확한 main/상태:** 시작·중간 재확인 `main=8e958e9dcc28c88c0dffeacb6849de94b1cea089`이다. PR #429의 migration 204, 8개 직업별 daily-limit delta knob, baseline-relative 적용, soft-control-first tightening, 회복 relaxation, `dual-economy-council-v3`는 **MERGED / NOT PRODUCTION-PROVEN**이다. PostgreSQL 17.11 migration 002→204, targeted regression 42/42, lint/typecheck/build/diff-check는 로컬 사전증거일 뿐 Test/Production 증거가 아니다.
+- **P0 `REL-AUTH-184-01` OPEN:** exact runtime SHA `8e958e9...`의 Production Release #950/run `35205652659`가 18:32~18:47 KST 실패했다. immutable release SHA resolve는 성공했으나 isolated Test exact-SHA/backend/DB gate가 실패했고 build는 skipped됐다. 따라서 repository head와 deployable application candidate 권위 혼동은 docs/control-plane뿐 아니라 실제 runtime 변경도 차단한다.
+- **수정설계/rollback/QA:** credential 전 immutable manifest `{repositoryHeadSha,applicationSourceSha,controlPlaneSha,classification,changedPathsHash,classifierVersion,migrationSetHash}`를 만들고 runtime candidate build/push 후 `imageDigest`, Test deploy 후 `{applicationSourceSha,imageDigest,migrationSetHash,deploymentId}`를 attestation한다. 그 다음에만 application-owned identity와 API/catalog/실DB/noindex를 검사한다. docs-only는 privilege 0, control-plane-only는 application build/repository-SHA Test poll 0, mixed는 두 lane 모두 통과한다. manual dispatch도 attested candidate manifest를 요구한다. rollback은 Production dispatch를 끄고 마지막 attested Production manifest를 유지한다. docs/control-plane/runtime/mixed corpus와 docs-only 3회, control-plane 3회, runtime 2회 rehearsal을 요구하며 classification 전 secret, identity mismatch, 무권한 DB/registry/GitOps side effect는 승격 차단이다.
+- **P0 backup/runtime:** 약 19:00 KST Debian에서 backend/frontend active, 최근 1시간 warning+ 없음, `moneyverse-backup.timer` 없음, `/api/version` HTTP 404다. `BAK-RUNTIME-177-01` OPEN과 runtime identity UNKNOWN을 유지하며 scheduled encrypted backup→검증→isolated restore/reconciliation→off-host immutable copy 전 destructive DB/ledger/entitlement 작업을 차단한다.
+- **직업한도 UX/API/DB/보안:** 사용자는 서버권위 task daily limit/remaining을 보고 loading/error/offline에서 quota를 추정하지 않는다. completion은 인증·서버권위·transaction·idempotency이며 member+task+day 사용량을 동시성 안전하게 검증한 뒤 reward/ledger receipt를 원자 반영한다. policy write는 admin/AI control-plane allowlist/bound 전용이고 before/after·proposal/review·metric-window 감사로그를 남긴다. 당일 tightening은 과거 정상보상을 회수하지 않고 미래 completion만 제한한다. BOLA, replay, concurrent double-completion, stale quota, unauthorized policy write, metric poisoning, multi-account farming, audit integrity를 테스트한다.
+- **경제/성장/사업:** 직접 수익이 아닌 economy-integrity/retention 통제이며 실측 cohort가 없어 전부 `HYPOTHESIS/TEST TARGET`이다. profession share, completion/user/day, repeat reward, profession별 WLD issuance, sink/source, blocked-at-limit, abandonment, CS, D1/D7/D30, fraud loss를 추적한다. concentration 개선+retention/completion 악화 없음+reward duplication 0이면 scale, scarcity/CS 증가면 iterate, ledger mismatch/exploit/retention 악화/starvation이면 kill한다. P2W 구매압박에 사용하지 않는다.
+- **SEO/보안/수익성:** Google Search Central 최신 major update는 2026-09-16 Search profile badge이며 structured data는 노출을 보장하지 않고 FAQ rich result는 2026-05-07부터 deprecated다. 기존 canonical/robots/sitemap/lastModified/breadcrumb/JSON-LD/hreflang/SSR-ISR/CWV/UGC/private-noindex 계약을 유지한다. OWASP API Security Top 10 2023을 API baseline으로 유지한다. Google Play 수수료는 market/install cohort/transaction type/billing path별 policy-versioned unit economics로 계산하고 실측 없는 값을 확정하지 않는다.
+- **전체 기능 parity:** auth/OAuth/session/security, profile, inventory/collection, shop/cart/payment/subscription/ad-removal, season/quest/job/level/reward, business/bank/loan, virtual stock, casino, community/moderation, friend/club/referral, notification/search/upload/public content, App API, admin/audit, backup/restore, analytics/experiment, ads, SEO tooling, incident operation의 기존 상세계약을 유지한다. `DONE`은 코드/문서 근거, UX, 권한, API/idempotency/rate-limit, DB constraint/transaction/concurrency, audit/fallback/privacy/abuse, SEO/KPI/performance/cache, QA/deploy/rollback 증거가 모두 필요하다.
+
+### v185 worklog / 수용 순서
+최신 공식 레퍼런스 → exact main/runtime/QA/CI → runtime release #950 실패 → 직업한도 merged/deployed 정합화 → backup/runtime P0 → 전체 기능/SEO/보안/경제성 parity → 중간 main 재확인 → EN/KO 동기화 → PR CI → exact base 불변 시에만 병합. Planning-only.
 
 ## 회차 델타 — v2026.09.17.184 (2026-09-17)
 
