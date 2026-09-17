@@ -19,6 +19,14 @@
 - **경제 AI 운영 활성화 (`e992d44d`, #389):** `ops/systemd/`에 재현 가능한 Debian/systemd service profile이 있고 EN/KO 런타임 운영 문서가 연결되어 있다. 이는 runtime configuration 증거이며 더 최신 application SHA가 승격됐다는 증거로 단독 사용하지 않는다.
 - **관리자 내비게이션 수렴 (`7acc3c02`, #390):** 관리자 UI inventory에서 상단 메뉴에 보안·사업/시즌·작업/직업·Discord를, dashboard inventory에 문의·상점을 노출하고 최상위 관리자 영역 누락을 막는 회귀 계약을 추가했다. 메뉴 노출은 backend 권한 확대를 뜻하지 않는다.
 
+### 현재 런타임 플랫폼 (2026-09-17 실측)
+
+- **호스트/OS:** 승인된 런타임 호스트 `debian13`; Debian GNU/Linux 13.6 (`trixie`), `amd64`/x86_64, Linux kernel `6.12.94+deb13-amd64`.
+- **초기화/서비스 관리자:** systemd `257 (257.13-1~deb13u1)`. 확인 시점에 `moneyverse-backend`, `moneyverse-frontend`, `moneyverse-discord-bot`, `moneyverse-economy-ai`, `moneyverse-mcp`가 모두 `active`다.
+- **호스트에서 관측된 런타임/도구:** Node.js `v24.21.0`, pnpm `10.0.0`, Python `3.13.5`, Docker `29.8.0`. 이는 현재 호스트 실측값이며 지원 애플리케이션 버전 계약을 자동으로 의미하지 않는다. 빌드 권위는 application manifest/lockfile과 CI image에 있다.
+- **가상화/플랫폼:** 승인 호스트는 x86-64 KVM 가상화를 보고한다. machine ID, boot ID, product UUID 같은 식별정보는 기획서에서 의도적으로 제외한다.
+- **권위 규칙:** 더 최신 exact-SHA release evidence가 런타임 권위 전환을 증명하기 전까지 현재 공개 런타임 권위는 확인된 Debian/systemd 경로다. repository `main`, GitOps desired state, Test runtime, Production runtime은 서로 별도 증거 영역으로 유지한다.
+
 ### 기획 반영 결론
 
 - Casino, Work reset, Economy AI 운영, 관리자 내비게이션 기획은 위 커밋과 실제 파일 경로를 현재 구현 증거 baseline으로 사용한다. 이후 기능 기획은 중복 개발을 제안하기 전에 이 경로를 먼저 확인한다.

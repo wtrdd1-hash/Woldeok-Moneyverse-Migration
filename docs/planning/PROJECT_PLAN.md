@@ -19,6 +19,14 @@ This is the current implementation-facing contract. Historical details remain re
 - **Economy AI operations activation (`e992d44d`, #389):** the repository contains a reproducible Debian/systemd service profile under `ops/systemd/` plus EN/KO runtime operations documentation. This is runtime-configuration evidence; it does not by itself prove that a newer application SHA was promoted.
 - **Administrator navigation convergence (`7acc3c02`, #390):** administrator UI inventory exposes Security, Business/Season, Work/Jobs and Discord in sub-navigation and Support/Shop in the dashboard inventory, with a regression contract intended to prevent hidden top-level admin areas. Navigation visibility does not widen backend authorization.
 
+### Current runtime platform (verified 2026-09-17)
+
+- **Host/OS:** authorized runtime host `debian13`; Debian GNU/Linux 13.6 (`trixie`), `amd64`/x86_64, Linux kernel `6.12.94+deb13-amd64`.
+- **Init/service manager:** systemd `257 (257.13-1~deb13u1)`. The verified Moneyverse units `moneyverse-backend`, `moneyverse-frontend`, `moneyverse-discord-bot`, `moneyverse-economy-ai`, and `moneyverse-mcp` are all `active` at capture time.
+- **Runtime/toolchain observed on host:** Node.js `v24.21.0`, pnpm `10.0.0`, Python `3.13.5`, Docker `29.8.0`. These are observed host facts, not automatically the supported application-version contract; application manifests/lockfiles and CI images remain the build authority.
+- **Virtualization/platform note:** the authorized host reports KVM virtualization on x86-64. Hardware identifiers such as machine ID, boot ID and product UUID are intentionally excluded from the plan.
+- **Authority rule:** current public runtime authority is the verified Debian/systemd path unless a newer exact-SHA release-evidence record proves an authority transition. Repository `main`, GitOps desired state, Test runtime and Production runtime remain separate evidence domains.
+
 ### Planning consequence
 
 - Treat the commits and paths above as the current implementation-evidence baseline for Casino, Work reset, Economy AI operations and administrator navigation. Future planning must inspect these paths before proposing duplicate work.
