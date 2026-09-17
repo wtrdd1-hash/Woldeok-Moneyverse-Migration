@@ -2,11 +2,21 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.189
+> Current integrated version: v2026.09.17.193
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.17.193 (2026-09-17)
+
+### API anomaly audit — frontend server-cache runtime ownership
+
+- **Branch / exact base:** `fix/frontend-api-cache-permissions-v2026.09.17.193` from `5d5826b21a9e4ae98fd0dcbe771d57fa8c674c84`. Production NestJS `/health` and public Next BFF JSON paths are healthy; direct public `/api/v1/*` remains intentionally unpublished except documented edge exceptions.
+- **Confirmed anomaly:** Production Next.js repeatedly logs `EACCES` while updating `.next/cache/fetch-cache`. The v186 Production frontend cache is `root:root` while `moneyverse-frontend.service` runs as `debian`; Test cache is `debian:debian`. This can leave API-derived ISR/fetch data stale even when the backend is healthy.
+- **Prevention:** add a guarded host-mirror helper that changes ownership only for `frontend/.next/cache`, rejects paths outside the release root, and verifies an actual write as the runtime user. Whole-release recursive ownership changes are prohibited.
+- **Release gate:** helper regression test → exact Test cache preparation → Test backend health/BFF/revalidation/no-EACCES checks → mid-work plan/main recheck → GitHub CI → zero-downtime Production cache repair → Production smoke/journal verification. No backend restart, database change, session mutation or migration 204 promotion belongs to this repair.
+- **Parallel P0:** v192 backup/runtime-identity recovery remains independent and retains its existing safety gates.
 
 
 

@@ -2,11 +2,21 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.189
+> **현재 통합 버전:** v2026.09.17.193
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 델타 — v2026.09.17.193 (2026-09-17)
+
+### API 이상 점검 — frontend 서버 cache 런타임 소유권
+
+- **브랜치 / 정확한 기준:** `fix/frontend-api-cache-permissions-v2026.09.17.193`, 기준 `5d5826b21a9e4ae98fd0dcbe771d57fa8c674c84`. Production NestJS `/health`와 공개 Next BFF JSON 경로는 정상이며 문서화된 edge 예외 외 public `/api/v1/*` 직접 노출 금지는 의도된 경계다.
+- **확인된 이상:** Production Next.js가 `.next/cache/fetch-cache` 갱신 중 `EACCES`를 반복 기록한다. v186 Production frontend cache는 `root:root`인데 `moneyverse-frontend.service`는 `debian`으로 실행되고, Test cache는 `debian:debian`이다. backend가 정상이어도 API 기반 ISR/fetch 데이터가 오래된 상태로 남을 수 있다.
+- **예방 통제:** `frontend/.next/cache`만 runtime 사용자 소유로 맞추고 release root 밖 경로를 거부하며 runtime 사용자 실제 쓰기를 확인하는 host-mirror helper를 추가한다. release 전체 recursive ownership 변경은 금지한다.
+- **릴리스 gate:** helper 회귀 테스트 → exact Test cache 준비 → Test backend health/BFF/revalidation/no-EACCES → 작업 중간 plan/main 재확인 → GitHub CI → Production cache 무중단 수정 → Production smoke/journal 검증. backend 재시작, DB 변경, 사용자 상태 변경, migration 204 승격은 이 수정 범위에 포함하지 않는다.
+- **병렬 P0:** v192 backup/runtime identity 복구는 독립 작업이며 기존 안전 gate를 그대로 유지한다.
 
 
 ## 회차 델타 — v2026.09.17.189 (2026-09-17)

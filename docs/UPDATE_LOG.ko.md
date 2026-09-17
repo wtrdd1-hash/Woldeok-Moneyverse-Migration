@@ -2,6 +2,13 @@
 
 [English](UPDATE_LOG.md) | **한국어** | [문서 색인](INDEX.ko.md)
 
+## v2026.09.17.193 — Frontend API 캐시 런타임 권한 보호
+
+- 브랜치: `fix/frontend-api-cache-permissions-v2026.09.17.193`, 기준 `5d5826b21a9e4ae98fd0dcbe771d57fa8c674c84`.
+- API 점검에서 NestJS/BFF 경로는 정상이었지만 Production Next.js의 `.next/cache/fetch-cache`에서 반복 `EACCES`를 확인했습니다.
+- release root 안의 mutable Next.js cache만 준비하고 runtime 사용자 실제 쓰기를 검증하는 helper와 회귀 테스트를 추가했습니다.
+- EN/KO host-mirror 배포 절차를 보강했으며 backend, database, migration 204는 변경하지 않습니다.
+
 ## v2026.09.16.151 — 런타임 및 GitOps 수렴
 
 - 애플리케이션 `main`, 공개 Test, 공개 Production, GitOps desired Test/Production 참조를 정확한 SHA `3d87165f83bcb60903e85d4f3600fdf40074ef40`로 수렴했습니다.

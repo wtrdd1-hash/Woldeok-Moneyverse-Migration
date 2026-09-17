@@ -15,6 +15,12 @@ GitOps는 계속 선언형 릴리스 권위이지만 현재 미니PC의 공개 N
 
 host mirror는 동일 승인 SHA를 사용하고 이전 unit 설정을 롤백용으로 보존해야 하며, 릴리스 완료 보고 전에 같은 catalog/status/SEO probe를 통과해야 합니다.
 
+## 프론트엔드 런타임 캐시 소유권
+
+host systemd frontend는 `debian` 사용자로 실행되고 Next.js는 서버 fetch 재검증을 위해 런타임에 `.next/cache`를 갱신합니다. root로 복사하거나 빌드한 릴리스는 canary/start 전에 이 mutable cache 하위만 준비해야 하며 immutable application release 전체의 소유권을 재귀 변경하면 안 됩니다.
+
+먼저 Test에서 `ops/systemd/prepare-frontend-runtime-cache.sh <release-dir> debian debian`을 실행합니다. helper는 기본적으로 `/srv/moneyverse-data/releases` 밖 경로를 거부하고 `frontend/.next/cache`만 소유권 변경하며 runtime 사용자로 실제 쓰기를 검증합니다. 재검증이 발생하는 요청을 보낸 뒤 frontend journal에 새 `EACCES` cache-write 오류가 없는지 확인한 후 Production을 승격합니다.
+
 ## 백엔드 로그인 세션 연속성
 
 Production 백엔드 승격으로 회원 로그인이 풀리면 안 됩니다. 일반 회원 세션은 PostgreSQL `auth_sessions`에 저장되며 브라우저 쿠키와 서버 세션 수명은 모두 30일입니다. 따라서 백엔드 프로세스 재시작이나 릴리스 디렉터리 변경 시 동일 Production DB를 계속 사용하고, 활성 세션 행을 revoke/truncate/recreate/re-key 하면 안 됩니다. 관리자 콘솔 세션의 별도 단기 만료 정책은 이 규칙으로 연장하지 않습니다.
