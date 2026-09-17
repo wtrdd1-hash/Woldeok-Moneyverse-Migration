@@ -2,11 +2,26 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.170
+> **현재 통합 버전:** v2026.09.17.171
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 변경 — v2026.09.17.171 (2026-09-17)
+
+### 증거와 결정
+
+- **저장소/CI/런타임 증거:** 회차 시작 및 중간 `main`은 문서 전용 `d398f6ef1a821496c92ef2916a1b0b36c964f4ec` (`docs: update Moneyverse plan v2026.09.17.170 (#401)`)이다. 브랜치 보호는 활성화되어 있으나 required status-check enforcement는 `off`이고 required context/check는 0개다. 이 docs-only SHA의 CI #1176은 완료 전 이미 runtime dependency 설치, lint/typecheck/application build를 수행하고 `Apply database migrations` 단계에 진입했다. 즉 generic CI도 release-input 분류 전에 runtime/DB 작업을 허용하는 결함이 재현됐다. 별도 Test 실측에서 2026-09-17 09:10 KST `GET /api/version`은 200과 runtime id `18c7a1324013099e47b2d6e22c5108c4d378139c`를 반환했고 `/api/health`, `/api/health/ready`는 404였다. Test는 `X-Robots-Tag: noindex, nofollow`, `robots.txt`의 `Disallow: /`, 빈 sitemap을 반환했다. repository head와 runtime id는 서로 다른 권위이며 상호 대체하지 않는다.
+- **P0 `REL-DOCS-171-01` — OPEN / 최근 재현 2026-09-17:** v163-v170의 기존 최초/반복 증거를 유지하며 최신 재현은 `d398f6e...`의 CI #1176이다. 재현은 docs-only 병합 → CI 시작 → runtime dependency/build → migration 시작이다. 영향은 불필요한 DB 권한/비용, 잠재 schema side effect, 잘못된 release identity, 운영자 혼선이다. 원인은 generic CI와 release workflow가 동일한 필수 pre-privilege classifier를 공유하지 않는 것이다. 하나의 재사용 `classify-release-inputs` workflow가 generic CI와 candidate/release 모두를 선행 gate한다. `DOCS_ONLY_NO_RUNTIME_RELEASE`는 markdown/link/secret/static-policy 검사만 실행하고 DB URL, package write token, deployment credential, runtime network secret을 받지 않는다. `RUNTIME_RELEASE_REQUIRED`만 immutable 분류 증거 이후 stage-scoped 단기 credential을 발급한다. 오류/불명은 fail-closed한다. application DB migration은 필요 없고 rollback은 workflow wiring만 되돌린다.
+- **런타임 권위/관측 계약:** 운영상 필요할 때만 하나의 내부 readiness 권위와 public-safe liveness를 명시하며 404인 `/api/health*`에 임의 의미를 부여하지 않는다. Release evidence는 `{repositoryHeadSha, applicationSourceSha, deployedRuntimeId, imageDigest, migrationSetHash, environment, observedAt}`를 저장하고 runtime version endpoint와 applicationSourceSha/imageDigest를 reconcile할 수 없으면 승격을 차단한다. Test probe는 status, latency, cache/security header, exact runtime id를 보존하며 stale status page는 direct evidence보다 우선하지 않는다.
+- **SEO/SEO 백엔드:** Google Search Central 공식 changelog는 2026-09-08 업데이트가 현재 9월 최신 주요 문서 변경이다. Google은 template/code 변경 후 structured-data 유효성 모니터링과 Search Console/API 관측을 권고한다. 공개 route별 versioned server SEO read-model `{canonicalUrl,indexPolicy,title,description,h1,breadcrumbs,hreflang,updatedAt,imageMeta,structuredDataType,structuredDataVersion}`을 사용하고 rendered-visible content와 JSON-LD 일치를 검증하며 invalid-item 회귀 시 template rollout을 차단한다. Test/staging은 전역 `noindex,nofollow` + `Disallow: /` + 빈 sitemap을 유지한다. Production의 account/admin/transaction/private inventory/bank/casino-history는 noindex 및 sitemap 제외다.
+- **보안:** OWASP API Security Top 10 2023을 최신 API-specific 기준으로, ASVS를 application verification baseline으로 유지한다. CI/release classification을 least-privilege supply-chain authorization으로 취급한다. Route inventory는 authn, capability, object ownership/BOLA, function authorization/BFLA, property/schema authorization, idempotency/replay, rate/resource/business-flow limit, SSRF/upstream trust, PII class, audit event를 계속 매핑한다. docs-only job이 DB/GHCR/GitOps mutation capability를 받으면 release-blocking이다.
+- **수익성/사업성:** Google Play 현행 공식 수수료는 cohort/transaction/programme/billing-path에 따라 달라 단일 수수료를 가정하지 않는다. SKU unit economics는 `feePolicyVersion`, market, transaction timestamp, install cohort, transaction type, billing path, tax/refund reserve, direct ops cost를 유지한다. 실측 없는 conversion/ARPU/ARPDAU/ARPPU/churn/CAC/LTV는 `HYPOTHESIS`/`TEST TARGET`이다. Release-control 사업효과는 절감된 docs-only CI/DB minutes, registry bytes/storage, orphan-candidate cleanup, support/on-call 시간으로 측정하고 유지 corpus false-negative=0일 때만 scale한다.
+
+### v171 백로그/순서 및 수용조건
+
+`P0 독립 암호화 backup + isolated restore/reconciliation` → `P0 stale-status false-green` → `P0 generic CI + candidate/release 공통 pre-privilege classifier` → `P0 docs-only runtime/DB/registry/GitOps side-effect 0` → `P0 단일 release authority와 runtime-id reconciliation` → `P1 auth/session/admin/casino/Work/DB authorization+ledger QA` → `P1 required-check enforcement` → 핵심 correctness → monetization → SEO/acquisition → retention/accessibility. docs-only 수용조건은 `runtime_dependency_install=0`, `app_build=0`, `db_migration=0`, `registry_login/push=0`, `test_gitops_write=0`, `runtime_exact_sha_poll=0`, `production_mutation=0`이다. Runtime 구현은 별도 branch → CI → exact-SHA Test → API/DB/user-flow QA → main → Production → smoke/rollback 흐름을 유지한다.
 
 ## 회차 변경 — v2026.09.17.170 (2026-09-17)
 
