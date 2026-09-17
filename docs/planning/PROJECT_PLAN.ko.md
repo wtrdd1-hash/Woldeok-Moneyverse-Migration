@@ -2,12 +2,30 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.180
+> **현재 통합 버전:** v2026.09.17.181
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.17.181 (2026-09-17)
+
+### P0 문서 전용 릴리스 분류 실패 + Production 세션 증거 정합화
+
+- **기준/증거:** exact base `198ecc37585deefa8fafecb03a59283d2758bfa5`는 문서 전용이며 v180 Production byte-identical 승격에서 backend PID 유지, 기존 회원 cookie 재발급 없이 유효, 활성 인증세션 집계 동일, health/viewer/catalog 통과를 기록합니다. `SESSION-DEPLOY-181-01`은 **해당 v180 승격에 한해 DONE**이며 향후 backend/session-schema 변경마다 동일-cookie Test 연속성과 Production smoke를 재검증합니다.
+- **P0 `REL-DOCS-181-01` — OPEN:** docs-only `198ecc375...`에서 `Build Production Release` run `35185009127`가 실행되어 repository head를 `RELEASE_SHA`로 사용하고 약 15분간 Test `/api/version`에서 문서 SHA를 기다린 뒤 실패했습니다. 최신 재현 2026-09-17 14:15~14:30 KST. 영향은 Production false-red, release/Test capacity 낭비, downstream gate 퇴행 시 불필요한 권한 노출입니다. 확정원인은 `repositoryHeadSha`와 `applicationSourceSha` 혼동입니다.
+- **수정설계:** 권한 획득 전 단일 classifier가 merge-base diff로 signed/immutable `release-input.json`=`{repositoryHeadSha, applicationSourceSha|null, classification, changedPathsHash, classifierVersion}`을 생성합니다. `DOCS_ONLY_NO_RUNTIME_RELEASE`, `RUNTIME_RELEVANT`, `MIGRATION_RELEVANT`, `CONTROL_PLANE_RELEVANT`, `MIXED_FAIL_CLOSED`만 허용합니다. docs-only는 Test exact-SHA polling, DB migration/connection, registry login/push, environment secret, GitOps write, Production environment 접근 전에 종료합니다. runtime은 `applicationSourceSha`+image digest+migration-set hash를 권위로 사용하고 unknown/error는 privileged side effect 없이 fail-closed합니다.
+- **마이그레이션/롤백:** application-data migration 없음. workflow-only classifier를 release-control flag로 배포하고 이전 YAML은 rollback reference로만 보존합니다. rollback 시 자동 Production dispatch를 먼저 끄며 repository-head-as-runtime 권위로 상시 회귀하지 않습니다.
+- **QA/수용:** path/hash 단위시험, docs/planning/changelog/worklog negative corpus, backend/frontend/package/migration/GitOps/workflow positive corpus, docs-only에서 DB connection=0·registry login/push=0·Test exact-SHA poll=0·Production environment access=0, mixed/unknown fail-closed, runtime fixture의 isolated Test exact application SHA+API/catalog/DB+`noindex`를 검증합니다. 분류 전 secret materialization=0이어야 합니다. corpus 100%, docs-only dry-run 3회, runtime rehearsal 2회 후 승격합니다. classification count, `docs_only_privileged_side_effect_total=0`, false-red, Test poll minutes, credential materialization, unknown path를 관측하며 위반 시 배포차단합니다. 작업순서 Release/Infra→Security→Backend/DB→QA→Operations.
+- **런타임/백업:** 최신 Debian 확인에서도 backend/frontend active, `moneyverse-backup.timer` not found, backend 직접 `GET /api/version` 404입니다. `BAK-RUNTIME-177-01`은 **P0 OPEN**이며 scheduled encrypted backup→검증→isolated restore/reconciliation→off-host immutable copy 전까지 파괴적 schema/data/ledger/entitlement 작업을 금지합니다.
+- **전체 기능 계약:** 인증/가입/로그인/OAuth/로그아웃/세션, 프로필/보안, 인벤토리/컬렉션, 상점/장바구니/결제/구독/광고제거, 시즌/퀘스트/직업/레벨/보상, 사업/은행/대출, 가상주식/포트폴리오/알림/비교, 카지노/확률형, 커뮤니티/댓글/신고/차단, 친구/클럽/초대/추천, 알림/검색/업로드/공개콘텐츠, App API, 관리자/감사, 백업/복구, 분석/실험, 광고, SEO 도구, 장애대응은 기존 상세 matrix를 유지합니다. 코드/문서 근거와 UX 상태, 권한/소유권, API 오류·멱등성·rate limit, DB constraint·transaction·concurrency, 감사/fallback/privacy/abuse, SEO/analytics/performance/cache, QA/deploy/rollback 증거 없이는 DONE으로 올리지 않습니다.
+- **보안:** ASVS 5.0.0을 검증 baseline, API Security Top 10 2023을 BOLA/auth/property·function authorization/resource/business-flow/SSRF/config/inventory/upstream 시험에, Top 10:2025를 access-control/supply-chain/authentication/integrity/logging 교차위험에 적용합니다. classifier 증거는 least-privilege/supply-chain 배포 gate입니다.
+- **SEO/SEO backend:** Google Search Central 최신 주요 문서 변경은 2026-09-16 Search profile badge 가이드입니다. 공개 profile의 선택적 outbound affordance일 뿐 ranking 보장으로 해석하지 않습니다. 기존 server-authoritative metadata/canonical/robots/sitemap/lastModified/breadcrumb/JSON-LD/hreflang/SSR-ISR/CWV/redirect/UGC-index 계약을 유지하고 account/admin/security/transaction/economy-history는 noindex+sitemap 제외입니다. badge 실험은 visible/accessibility/localization/privacy/feature-flag와 organic profile visit→signup→activation→D7/D30 측정을 요구합니다.
+- **수익성/성장:** 새 실측 purchase/ad cohort가 없어 revenue/net revenue/margin/ARPU/ARPDAU/ARPPU/conversion/retention/churn/refund/CAC/LTV/fraud/infra/support는 실측 또는 `HYPOTHESIS/TEST TARGET`만 허용합니다. classifier 가치는 CI/Test-poll/registry/DB/engineer/on-call 비용과 false-red 회피입니다. false-negative=0·docs-only privileged side effect=0일 때만 scale, unknown/false-positive 비용은 iterate, runtime false-negative/secret 노출/무단 side effect면 자동승격을 kill합니다.
+
+### v181 worklog / 수용 순서
+`최신 공식 레퍼런스` → `exact main/runtime/CI 대조` → `v180 세션 증거 해당 승격 DONE` → `REL-DOCS-181-01 P0` → `backup/runtime P0 유지` → `전체 기능 parity` → `작업 중 exact-main 재확인` → `EN/KO parity` → `PR CI` → `exact base 유지 시에만 병합`. 기획문서 전용이며 runtime/DB/Test/Production 변경 없음.
 
 ## 회차 변경 — v2026.09.17.180 (2026-09-17)
 
