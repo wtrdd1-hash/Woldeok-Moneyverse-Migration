@@ -1,6 +1,6 @@
 # 월덕 머니버스 — 작업·직업 숙련도 기획 명세서
 
-> 버전: v2026.09.16.138
+> 버전: v2026.09.17.184
 > 상태: 구현 지향형 Living 제품 기획 명세
 > 기준일: 2026-09-12
 > 상위 문서: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `SEASON_SYSTEM_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `LIMIT_CONSISTENCY_IMPLEMENTATION_SPEC.md`, `BUSINESS_OPERATIONS_SUPPLY_CHAIN_SPEC.md`
@@ -141,19 +141,19 @@ P0: `GET /api/jobs/catalog`, `POST /api/jobs/{templateId}/accept`, `GET /api/job
 
 P0 완료에는 서버 권위 상태머신, 중복지급 방지, 일반 작업횟수 무제한, 반복계수 서버계산/표시, 시즌비리셋 숙련도, 5개 이상 완성 직업군, 자격/4종 이상 소비처, faucet/sink/transfer 대사, 감사가능 review-hold, 경제분석, 영문/한국어 UX parity, exact-SHA 격리 Test 검증이 필요하다.
 
-이번 변경은 문서-only다. 실제 구현은 별도 개발 브랜치, forward-only migration, CI, exact-SHA 격리 Test 검증 후 Production으로 승격해야 한다.
+이 문서는 계속 living 제품 명세다. 22절의 v184 호환 계층은 별도 개발 브랜치와 forward-only migration으로 구현됐으며, Production 전 exact-SHA 격리 Test 검증은 여전히 필수다.
 
 ## 22. AI 관리 직업·일일 보호 정책
 
-직업 시스템은 무제한 기본 계약을 유지하면서 Moneyverse Economy AI 정책 레지스트리에 참여한다.
+직업 시스템은 Moneyverse Economy AI 정책 레지스트리에 참여한다. 장기 제품 목표는 무제한 기본 계약이지만, v184는 그 목표가 이미 구현된 것처럼 쓰지 않고 현재 서버가 강제하는 유한 `work_task_catalog.daily_limit` 계약과 명시적으로 정합시킨다.
 
 `주직업`은 사용자 정체성 지정이며 AI가 회원의 직업 선택을 다시 쓰는 권한이 아니다. `primary_profession_slots`, `concurrent_active_professions`는 승인 범위 안에서 버전 관리·조정할 수 있지만 축소 시 기존 선택 직업을 밀어내거나 숙련도를 삭제할 수 없다. 더 좁은 미래 정책에는 grandfathering 또는 명시적 migration 승인이 필요하다.
 
-일일 제어는 별도 정책이다. `assignment_daily_limit`, `rewarded_assignment_daily_limit`의 기본값은 `null = 무제한`이다. 한시적 유한값이 정당화되면 전역 또는 비민감 gameplay cohort 기준이어야 하고 서버 정책에 공개되며 기간 제한·감사·롤백이 가능해야 한다. 영향받는 작업을 시작하기 전에 UI가 현재 규칙, reset/재평가 시각, 사유 분류를 보여준다.
+일일 제어는 별도 정책이다. 목표 의미의 `assignment_daily_limit`, `rewarded_assignment_daily_limit`는 계속 `null = 무제한` 기본을 지향하지만 현재 런타임 호환 계약은 명확하다. 각 활성 작업에는 이미 유한 `daily_limit`이 있으며, v184는 8개 지원 직업에 대해서만 `jobs.assignment_daily_limit_delta.<profession>`를 등록한다. 각 작업의 캡처된 참조 기준 `baseline_daily_limit`에 `-1..+2` 정수 delta를 더하고 정책 주기당 최대 1만 움직인다. AI는 임의 직업 키를 만들거나 직업 정체성/숙련도를 수정하거나 기존 서버 reset/quota 계약을 우회할 수 없다. 향후 의미 정책을 실제 `null = 무제한`으로 전환하는 것은 별도 migration으로 설계해야 한다.
 
 AI 위원회는 결정론적 검증 뒤에만 정책을 강화하거나 완화할 수 있다. 일반 인플레이션 압력에는 먼저 작업 구성, diminishing reward, sink/reward, 직업 수요 균형을 사용한다. 유한 일일 제한은 지속적 발행/무결성 위험에 쓰는 후순위 보호수단이지 기본 경제도구가 아니다.
 
-자동 완화는 필수다. 모든 유한 제한은 `expires_at` 또는 `reevaluate_at`, 완화 step, 최대 연속 지속시간, 무제한 복귀조건을 가진다. 강화만 가능하고 자동 완화가 불가능한 컨트롤러는 Definition of Done을 통과하지 못한다.
+자동 완화는 필수다. v184 호환 계층에서는 제한 강화 상태인 음수 delta가 직업 점유율 45% 이하, 작업 발행비중 50% 이하 또는 근거 작업량 40건 미만이면 기준 `0` 쪽으로 한 단계 복원된다. 부족 직업에 적용된 양수 delta도 점유율이 8% 이상으로 회복되면 `0` 쪽으로 돌아간다. 60% 초과 편중 직업의 제한 강화는 작업 발행비중 50% 초과와 `work.repeat_decay_percent >= 25`를 동시에 요구해 반복보상 완화책을 먼저 적용한다. 장기 의미 정책은 여전히 `expires_at`/`reevaluate_at`, 완화 step, 최대 지속기간, 무제한 복귀조건을 요구한다.
 
 권장 정책 metadata:
 

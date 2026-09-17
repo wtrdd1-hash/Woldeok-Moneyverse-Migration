@@ -2,11 +2,26 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.183
+> Current integrated version: v2026.09.17.184
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+
+## Cycle delta — v2026.09.17.184 (2026-09-17)
+
+### AI-managed profession assignment-limit convergence
+
+- **Exact base / branch:** implementation is rebased onto `main=3f523e6708af2bd9d24b60282f26619263a8c53d` on `feat/ai-job-limit-auto-v2026.09.17.184`. Work began from v181, then `origin/main` was re-read mid-work after v182/v183 planning and the docs-only candidate-build fix landed; this v184 delta supersedes the unpushed local v182 attempt rather than overwriting those authoritative versions.
+- **Problem reconciled:** planning described semantic `jobs.assignment_daily_limit` as `null = unlimited`, while authoritative runtime migrations 189/190/203 enforce finite `work_task_catalog.daily_limit` values and the existing AI registry controls WLD `work.daily_cap`, `work.weekly_cap` and repeat decay but not the actual per-task completion count. The previous plan therefore overstated deployed unlimited semantics and understated the automatic-control gap.
+- **Implemented compatibility bridge:** forward-only migration `204-adaptive-profession-limits.sql` stores a task baseline and registers eight allowlisted `jobs.assignment_daily_limit_delta.<profession>` knobs. Each knob is bounded to `-1..+2`, moves by at most one step per policy cycle, and derives the live task limit from its baseline so repeated cycles do not compound. Existing profession selection, mastery, assignment history, reward receipts and ledger history are not rewritten.
+- **Decision contract:** the latest job-selection snapshot already represents a seven-day window. Demand balancing requires at least 40 assignments. Profession share `<3%` may loosen by `+1`. Share `>60%` may tighten by `-1` only when work issuance is `>50%` and `work.repeat_decay_percent >=25`, so the softer repeat-reward lever is tried first. When a previously changed profession returns to a normal band, the delta moves one step toward baseline `0`. Existing sample-sufficiency, reconciliation, feature-switch, cooldown, exact-proposal dual-AI review and rollback gates remain authoritative; low evidence may generate a baseline-restoration candidate but does not bypass those fail-closed gates.
+- **AI review:** the prompt contract advances to `dual-economy-council-v3`; Jobs specialists explicitly review profession supply/shortage, adaptive assignment limits and relaxation. Any `daily_limit` proposal is high risk and runs the full selected-domain rebuttal path before deterministic application. AI still cannot invent policy keys or directly rewrite player progression.
+- **QA evidence:** fresh PostgreSQL 17.11 scratch DB applied the complete 002→204 chain. Targeted AI/economy/work regression suite passed 42/42 across five test files. Repository lint completed with 0 errors and 11 pre-existing `<img>` warnings; full workspace typecheck and production build passed; `git diff --check` passed. These are local pre-release facts only.
+- **Release gate:** isolated Test must serve the exact runtime candidate and pass backend/API/DB smoke before merge/Production. Production promotion remains zero-downtime and requires post-promotion smoke; local success is not deployment evidence.
+- **Backup boundary:** `BAK-RUNTIME-177-01` remains OPEN. This migration is additive and does not delete ledger/data/entitlements, but the backup-runtime gap is not considered fixed and continues to block destructive follow-up work.
+- **Branch/work records:** internal worklog and GitHub-facing changelog use v2026.09.17.184 and record the exact branch/base, policy keys, tests, Test evidence and promotion evidence as they become available.
 
 
 

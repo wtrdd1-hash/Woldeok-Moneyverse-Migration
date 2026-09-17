@@ -200,7 +200,13 @@ describe('economy AI review lane', () => {
   });
 
   it('runs full rebuttal for selected domains when a job-cap proposal is high risk', async () => {
-    const { db } = dbFor({ proposal: { eligible: true, sourceMetrics: { days: 7 }, adjustments: [{ knob: 'work.daily_cap', from: 100, to: 90 }] } });
+    const { db } = dbFor({
+      proposal: {
+        eligible: true,
+        sourceMetrics: { days: 7 },
+        adjustments: [{ knob: 'jobs.assignment_daily_limit_delta.developer', from: 0, to: -1 }],
+      },
+    });
     const seen: string[] = [];
     const caller: EconomyAiModelCaller = async (_config, _proposal, context) => {
       seen.push(`${context.stage}:${context.domain}:${context.seat}`);
@@ -211,5 +217,4 @@ describe('economy AI review lane', () => {
     expect(seen.filter((entry) => entry.startsWith('independent:'))).toHaveLength(8);
     expect(seen.filter((entry) => entry.startsWith('rebuttal:'))).toHaveLength(8);
   });
-
 });

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { Queryable } from '../core/db';
 import { queryOne } from '../core/db';
 
-export const ECONOMY_AI_PROMPT_VERSION = 'dual-economy-council-v2';
+export const ECONOMY_AI_PROMPT_VERSION = 'dual-economy-council-v3';
 
 export const ECONOMY_AI_DOMAINS = [
   'macro',
@@ -191,7 +191,7 @@ export const callEconomyAiModel: EconomyAiModelCaller = async (config, proposal,
     shop: 'Focus on shop pricing, demand elasticity, supply, affordability, sink diversity and catalog effects.',
     stock:
       'Focus on virtual-stock liquidity, price formation, manipulation risk, stale data and market integrity.',
-    jobs: 'Focus on profession rewards, repeat farming, daily/weekly controls, progression and labor-like faucet concentration.',
+    jobs: 'Focus on profession rewards, repeat farming, profession supply/shortage, adaptive assignment limits, automatic relaxation, progression and labor-like faucet concentration.',
     welfare:
       'Focus on new-player affordability, retention, fairness, accessibility and avoiding punitive economics.',
     integrity:
@@ -310,7 +310,7 @@ function isHighRiskProposal(proposal: Record<string, unknown>): boolean {
   return adjustments.some((adjustment) => {
     if (!adjustment || typeof adjustment !== 'object') return false;
     const knob = String((adjustment as Record<string, unknown>).knob ?? '');
-    return /(?:daily_cap|weekly_cap|deposit_rate|stock\.|market\.|credit|loan|casino)/.test(knob);
+    return /(?:daily_cap|weekly_cap|daily_limit|deposit_rate|stock\.|market\.|credit|loan|casino)/.test(knob);
   });
 }
 

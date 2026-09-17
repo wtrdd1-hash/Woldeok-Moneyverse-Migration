@@ -1,8 +1,8 @@
 # Woldeok Moneyverse — AI Economy Controller Specification
 
-> Version: v2026.09.16.141
+> Version: v2026.09.17.184
 > Status: Living implementation-oriented planning specification
-> Date: 2026-09-16
+> Date: 2026-09-17
 > Parent specs: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
 > Korean counterpart: [AI_ECONOMY_CONTROLLER_SPEC.ko.md](AI_ECONOMY_CONTROLLER_SPEC.ko.md)
 
@@ -797,9 +797,10 @@ This planning slice is complete when:
 - policy registry, DB, API and admin-console contracts are defined;
 - model governance, analytics and QA cases are defined;
 - implementation phases require development branch -> `wdmv-test` verification -> Production;
-- changelog and worklog record v2026.09.13.24.
+- the historical planning baseline remains traceable to v2026.09.13.24, while implemented runtime slices record their own versioned changelog/worklog evidence;
+- v2026.09.17.184 implements the bounded per-profession assignment-limit compatibility bridge and AI high-risk review path described in section 32.
 
-This is a documentation-only planning change. It does not enable runtime self-tuning by itself.
+The broader controller remains a living specification. v2026.09.17.184 adds real runtime capability, but **no Production activation is claimed from documentation or local tests alone**: exact-SHA isolated Test, deployment evidence and Production smoke remain mandatory.
 
 ## 31. Research reassessment — 2026-09-16
 
@@ -841,13 +842,16 @@ Tunable policy keys include:
 
 - `jobs.primary_profession_slots`: semantic number of simultaneously designated primary-profession identities; the controller may only change this inside an operator-approved range and never silently replace or demote a user's existing primary profession;
 - `jobs.concurrent_active_professions`: number of professions that may be actively progressed at once;
-- `jobs.assignment_daily_limit`: ordinary assignment completion count; default `null = unlimited`;
-- `jobs.rewarded_assignment_daily_limit`: assignments eligible for full WLD payout before another configured reward policy applies; default `null = unlimited`;
+- `jobs.assignment_daily_limit`: target semantic policy for ordinary assignment completion count; the long-term default remains `null = unlimited`, but the current P0 runtime still enforces finite per-task `work_task_catalog.daily_limit` values;
+- `jobs.assignment_daily_limit_delta.<profession>`: **implemented v2026.09.17.184 compatibility bridge** over the current finite runtime. Eight allowlisted professions use a captured per-task reference baseline plus an integer delta bounded to `[-1,+2]` with a maximum one-step change per policy cycle. This key family, not an arbitrary model-generated key, is the current bounded-auto authority for assignment-count tuning;
+- `jobs.rewarded_assignment_daily_limit`: planned semantic policy for assignments eligible for full WLD payout before another configured reward policy applies; default target is `null = unlimited`, and it is not implemented by v184;
 - `jobs.daily_wld_budget_per_cohort`: optional cohort/system issuance protection budget, never an individual hidden confiscation rule;
 - `jobs.repeat_reward_floor_multiplier`, `jobs.repeat_curve_k`, and related marginal-reward controls;
 - profession-specific concurrency, reward, settlement and protective-limit keys where explicitly registered.
 
 The preferred control order is: detect abuse/data error -> tune marginal rewards and task mix -> tune optional sinks/rewards -> rebalance profession demand -> only then consider a temporary finite daily protection limit. Inflation alone is not sufficient evidence for a hard play cap when softer controls remain viable.
+
+**v184 runtime contract.** The compatibility controller reads the existing seven-day profession selection telemetry. With at least 40 assignments, a profession below 3% share may loosen by `+1`; a profession above 60% share may tighten by `-1` only when work exceeds 50% of issuance **and** `work.repeat_decay_percent >= 25`, proving the softer repeat-control stage was attempted first. When concentration clears, or evidence volume becomes too low, any non-zero delta moves one step toward baseline `0`. The existing sample-sufficiency, reconciliation, policy-cooldown, feature-switch, exact-proposal AI review and rollback gates remain authoritative.
 
 A non-null daily limit may enter `BOUNDED_AUTO` only when the policy registry declares it auto-tunable and all of the following pass: multi-window evidence, minimum sample, scenario/counterfactual comparison, affordability/progression checks, integrity review, published reason code, maximum duration, automatic relaxation test and rollback readiness. The controller must evaluate both tightening and loosening; when the triggering condition clears, it should relax toward `null = unlimited` rather than preserving a stale cap.
 
