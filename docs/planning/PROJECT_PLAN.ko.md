@@ -2,11 +2,25 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.169
+> **현재 통합 버전:** v2026.09.17.170
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 변경 — v2026.09.17.170 (2026-09-17)
+
+### 근거와 결정
+
+- **저장소/CI 근거:** 회차 시작 및 작업 중간 `main`은 `bd047d9a7b9bd4e3d2b1cde4badbe80b07ae7684` (`docs: integrate Moneyverse plan v2026.09.17.169`)이며 docs-only다. CI #1174는 성공했지만 `Build Test Candidate` #797도 성공했다. `verify / check`는 dependency install, lint, typecheck, app build와 `Apply database migrations`를 성공 수행했고 `build` job은 GHCR login 후 backend/frontend candidate를 모두 build+push했다. `dispatch-production-gate`는 skip됐다. 즉 v169 기획 통합 후에도 P0 privileged side-effect 결함이 재현됐다. workflow 성공을 runtime health 증거로 사용하지 않는다.
+- **P0 `REL-DOCS-170-01` — OPEN / 최신 재현 2026-09-17:** docs-only가 계속 DB migration과 registry write surface에 도달한다. 수정은 privilege 이전 분류와 capability isolation이다. classifier/docs job에는 repository metadata read-only만 주고 immutable `RUNTIME_RELEASE_REQUIRED` 뒤에만 DB/GHCR/GitOps OIDC credential을 발급한다. docs-only 수용조건은 runtime install/build/migration/registry/GitOps/poll/production side effect 모두 0이다. rollback은 workflow wiring만 되돌리고 application data 또는 referenced image를 삭제하지 않는다. docs-only CI/DB minute, registry login/push, bytes/storage, orphan candidate, repository/application SHA divergence를 관측한다.
+- **SEO 조사:** Google Search Central 공식 changelog는 2026-09-08 regional Search-experience 문서를 9월 최신 주요 변경으로 계속 표시한다. 2026-09-16 Deep Dive Europe 글은 행사/커뮤니티 자료로 ranking/indexing 계약 변경이 아니다. 2026-08-28 site-reputation update는 third-party/sponsored/affiliate/UGC governance에 계속 직접 적용한다. server-authoritative metadata/canonical/robots/sitemap/hreflang/structured-data/SSR/CWV와 moderation/thin-content index gate를 유지한다.
+- **보안 조사:** OWASP API Security Project 최신 API-specific Top 10은 계속 2023이다. release eligibility는 least-privilege/supply-chain authorization boundary이며 BOLA, authentication, property/function authorization, resource limit, sensitive-business-flow abuse, SSRF, misconfiguration, API inventory, unsafe upstream consumption을 route-level release gate로 유지한다.
+- **사업성:** Google Play 공식 수수료는 cohort/transaction/programme/billing-path별로 달라 단일 요율을 가정하지 않는다. SKU `feePolicyVersion`과 revenue/net revenue/margin/ARPU/ARPDAU/ARPPU/conversion/retention/churn/refund/CAC/LTV/fraud/infra/support 실측을 유지하고 미실측 값은 `가설/테스트 기준`으로 둔다. release-control 비용에는 docs-only CI/DB minute, pushed bytes/storage, cleanup/support burden을 포함한다.
+
+### v170 백로그/수용 순서
+
+`P0 독립 암호화 backup + isolated restore/reconciliation` → `P0 stale-status false-green` → `P0 privilege 이전 release classifier / docs-only DB+registry side-effect 0` → `P0 GitOps/public edge/systemd 단일 release authority` → `P1 auth/session/admin/casino/Work/DB authorization+ledger QA` → `P1 repository required-check enforcement` → core correctness → monetization → SEO/acquisition → retention/accessibility. runtime 구현은 별도 branch/test/release 흐름이며 이 기획 회차에서 runtime code를 배포하지 않는다.
 
 ## 회차 변경 — v2026.09.17.169 (2026-09-17)
 

@@ -2,11 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.169
+> Current integrated version: v2026.09.17.170
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.17.170 (2026-09-17)
+
+### Evidence and decisions
+
+- **Repository/CI evidence:** cycle start and mid-run `main` are `bd047d9a7b9bd4e3d2b1cde4badbe80b07ae7684` (`docs: integrate Moneyverse plan v2026.09.17.169`), documentation-only. CI #1174 succeeded, but `Build Test Candidate` #797 also succeeded. Its `verify / check` installed dependencies, linted, typechecked, built the app and successfully ran `Apply database migrations`; its `build` job then logged into GHCR and successfully built+pushed backend and frontend candidates. `dispatch-production-gate` skipped. This reproduces the P0 privileged side-effect defect after v169 planning integration; workflow success is not runtime-health evidence.
+- **P0 `REL-DOCS-170-01` — OPEN / latest reproduction 2026-09-17:** docs-only still reaches DB migration and registry write surfaces. Required fix remains pre-privilege classification plus capability isolation: classifier/docs jobs get read-only repository metadata only; DB/GHCR/GitOps OIDC credentials are minted only after immutable `RUNTIME_RELEASE_REQUIRED`. Acceptance remains zero runtime install/build/migration/registry/GitOps/poll/production side effects for docs-only. Rollback changes workflow wiring only; no application data or referenced image deletion. Monitor docs-only CI/DB minutes, registry login/push, bytes/storage, orphan candidates and repository/application SHA divergence.
+- **SEO research:** Google Search Central's official changelog still lists 2026-09-08 regional Search-experience documentation as September's latest major update. The 2026-09-16 Deep Dive Europe post is event/community material, not a ranking/indexing contract change. The 2026-08-28 site-reputation update remains directly applicable to third-party/sponsored/affiliate/UGC governance. Keep server-authoritative metadata/canonical/robots/sitemap/hreflang/structured-data/SSR/CWV and moderation/thin-content index gates.
+- **Security research:** OWASP API Security Project still marks API Security Top 10 2023 as latest. Release eligibility remains a least-privilege/supply-chain authorization boundary; BOLA, authentication, property/function authorization, resource limits, sensitive-business-flow abuse, SSRF, misconfiguration, API inventory and unsafe upstream consumption remain route-level release gates.
+- **Economics/business:** Google Play official fees remain cohort/transaction/programme/billing-path dependent; no universal rate is assumed. SKU `feePolicyVersion` and measured revenue/net revenue/margin/ARPU/ARPDAU/ARPPU/conversion/retention/churn/refund/CAC/LTV/fraud/infra/support accounting remain authoritative; unknown values remain `HYPOTHESIS`/`TEST TARGET`. Release-control cost additionally measures docs-only CI/DB minutes, pushed bytes/storage and cleanup/support burden.
+
+### v170 backlog/order and acceptance
+
+`P0 independent encrypted backup + isolated restore/reconciliation` → `P0 stale-status false-green` → `P0 pre-privilege release classifier / docs-only DB+registry side-effect zero` → `P0 single release authority across GitOps/public edge/systemd` → `P1 auth/session/admin/casino/Work/DB authorization+ledger QA` → `P1 repository required-check enforcement` → core correctness → monetization → SEO/acquisition → retention/accessibility. Runtime implementation remains a separate branch/test/release workflow; this planning cycle does not deploy runtime code.
 
 ## Cycle delta — v2026.09.17.169 (2026-09-17)
 
