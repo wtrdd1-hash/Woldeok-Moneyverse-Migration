@@ -2,11 +2,27 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.199
-> **구현·증거 동기화:** 2026-09-17
+> **현재 통합 버전:** v2026.09.18.200
+> **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 델타 — v2026.09.18.200 (2026-09-18)
+
+### 자정 증거 갱신, 백업 실행 임박, 전체 기능 게이트 fail-closed 유지
+
+- **정확한 main / CI / runtime 증거:** 시작 및 작업 중간 main은 `08cb420b8770334009033396b8ea9511b5d8cad7`(v199 planning merge)로 동일하다. Main Actions에는 더 새로운 application commit이 없고 runtime 권위는 저장소 head와 의도적으로 분리한다. 약 00:08 KST 권위 Debian에서 backend/frontend/backup timer는 `active`, backup timer는 `enabled`, 다음 실행은 00:22 KST이며 backend 직접 `/api/version`은 HTTP 200 + `Cache-Control: no-store`, build `75e69e77cdc18ef221106a008563151a4c790728`이다. 기획 회차는 runtime/DB를 변경하지 않는다.
+- **P0 백업/DR `BAK-RUNTIME-177-01`: IN PROGRESS.** Scheduled encrypted backup은 동작하지만 DONE에는 fresh archive isolated restore, decrypt/checksum/schema/migration-set 검증, identity/session·inventory/entitlement·ledger/reward·bank/loan·stocks·casino·community/referral·audit reconciliation, 실측 RPO/RTO, off-host immutable 복제/retention, missed-run·verification·replication·restore 실패 alert 증거가 필요하다. 하나라도 불일치하면 fail-closed다. 완료 전 destructive schema/ledger/entitlement rewrite는 차단한다. 00:22 실행은 관측 지점이지 restore 증거가 아니다.
+- **릴리스 권위 `REL-AUTH-184-01`: P0 / IN PROGRESS.** DOCS_ONLY containment 3회는 유지하며 CONTROL_PLANE_ONLY ×3, RUNTIME_RELEVANT exact-candidate ×2, MIXED ×1, missing/stale/foreign-candidate negative dispatch가 남는다. Runtime 승격은 `{applicationSourceSha,imageDigest,migrationSetHash,deploymentId}`, isolated-Test attestation, `/health`, BFF/public smoke, session continuity, migration equality, journal review, rollback manifest를 결합한다. Repository head는 application identity가 아니다.
+- **전체 기능 구현 계약:** auth/signup/login/OAuth/logout/session/security center, profile, inventory/collection, shop/cart/payment/subscription/ad-removal, season/quest/job/level/reward, business/bank/loan, virtual stocks/portfolio/alerts/comparison, casino/randomized flow, community/posts/comments/report/block, friends/clubs/invite/referral, notifications/search/gallery/upload/public content, App API, admin/audit, backup/restore, analytics/experiments, ads, SEO backend/tooling, Discord, incident operations은 화면별 진입/CTA/loading/empty/error/offline/timeout/recovery, role/ownership/BOLA, request/response/error/idempotency/rate-limit, DB PK/FK/unique/check/index/transaction/concurrency, immutable audit, feature flag/fallback, privacy/abuse, analytics/KPI, performance/cache, real-DB/E2E/security/regression 수용조건과 rollback을 유지한다. 코드/문서와 exact-environment 증거 없이는 구현상태를 승격하지 않는다.
+- **SEO / SEO 백엔드 — 직접채택:** Google Search Central 현행 update log는 9월 17일 infinite-scroll 지침을 변경 없이 현행 문서로 이전했고 9월 16일 Search profile badge 문서를 추가했다. Public community/catalog/collection/search infinite scroll은 crawlable pagination URL, server-renderable link, stable ordering, page별 self-canonical/title/H1, 정상 200/404, 독립 가치 page만 sitemap 포함을 요구한다. Cursor/facet 조합은 SEO read-model이 명시적으로 승격하기 전 API 내부 또는 noindex/canonical 대상이다. Server metadata, canonical generator, dynamic robots/split sitemap+`lastModified`, breadcrumb/JSON-LD, hreflang, image metadata, SSR/ISR, CWV, permanent redirect map, crawler log, Search Console/Naver 수집은 backend-owned 책임이다. Search profile badge는 선택적 acquisition UX이며 ranking 보장이 아니다.
+- **보안 — 직접채택:** OWASP API Security Project 최신 API-specific Top 10은 계속 2023이다. BOLA, broken authentication, property/function authorization, unrestricted resource consumption, sensitive-business-flow abuse, SSRF, misconfiguration, API inventory, unsafe upstream consumption은 release-blocking이다. Cookie-auth mutation은 CSRF, payment/reward/ledger/entitlement는 replay-safe idempotency, signed receipt/webhook 검증, server-authoritative SKU/price, DB least privilege, immutable masked audit, fraud/multi-account 탐지를 요구한다. 외부 API는 TLS, schema validation/sanitization, redirect policy, timeout/body-size/concurrency limit, circuit-breaker/fallback을 가져야 하며 upstream 신뢰를 전이하지 않는다.
+- **수익성 / unit economics — 레퍼런스 결합:** 현재 Google Play에는 단일 universal fee가 없다. EEA/UK/US standard 예시는 auto-renew subscription 10%, 기타 new-install 20%, 기타 existing-install 25%이며 applicable 경우 5% billing fee가 추가된다. `market × effectiveDate × installCohort × transactionType × programme × billingPath × tax/refund assumption`을 먼저 resolve한 뒤 net revenue/contribution margin을 계산한다. 모든 SKU는 price/discount/bundle/coupon, entitlement/refund/renewal, inventory grant, sink/source/P2W, fraud, attach/repeat, cannibalization, margin guardrail을 유지한다. 미실측 revenue, ARPU/ARPDAU/ARPPU, conversion, churn/refund, CAC/LTV/payback, infra/support/fraud, D1/D7/D30은 `HYPOTHESIS/TEST TARGET`만 허용하며 cohort와 retention/fairness/security guardrail이 있어야 scale한다.
+- **우선순위 / 실행 백로그:** P0 isolated restore + off-host immutable backup + alerts → P0 잔여 release-class/candidate-authority matrix → migration-204 real-DB/economy-integrity → HIGH auth/BOLA/CSRF/idempotency/ledger/payment/webhook/upstream gate → P1 required-check enforcement → Discord Production smoke → correctness → monetization → SEO/acquisition → retention/accessibility. 실제 구현은 branch → CI/tests → exact-SHA Test → backend/API/DB/user-flow QA → main → Production promotion → smoke/rollback 순서다.
+
+### v200 worklog / 수용 순서
+최신 Google Search/Play·OWASP 공식자료 → exact main/Actions와 권위 Debian runtime/backup 대조 → 전체 기능/SEO/보안/수익성 delta → 작업 중간 exact-main 재확인 → EN/KO 동기화 → diff/CI/PR.
 
 ## 회차 델타 — v2026.09.17.199 (2026-09-17)
 
