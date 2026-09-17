@@ -13,6 +13,14 @@ on:
       - 'ops/**'
       - 'auto/**'
       - 'test-candidate/**'
+    # Documentation-only changes must never enter candidate image/registry or
+    # downstream Production release paths. Runtime/control-plane files remain
+    # included because this ignore list is deliberately narrow.
+    paths-ignore:
+      - 'docs/**'
+      - 'README/**'
+      - 'README.md'
+      - '**/*.md'
   workflow_dispatch:
     inputs:
       promote:
