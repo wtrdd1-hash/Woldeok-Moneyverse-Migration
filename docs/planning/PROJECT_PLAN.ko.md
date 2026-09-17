@@ -2,12 +2,28 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.187
+> **현재 통합 버전:** v2026.09.17.188
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.17.188 (2026-09-17)
+
+### 릴리스 identity 구현 병합 및 containment 증명, Production runtime은 의도적으로 미변경
+
+- **Exact main / 증거:** 시작·중간 재확인 기준 `main=4c467cff2f2bbfc25eb30d5acd33736a142c74d5`(PR #433)이다. release-control 구현은 `DOCS_ONLY|CONTROL_PLANE_ONLY|RUNTIME_RELEVANT|MIXED` 폐쇄형 분류, immutable `release-input.json`, candidate manifest 검증, application-source identity, CI runtime gating을 추가했다. 이 control-plane-only main의 Production Release #955 / run `35211473275`는 7초 만에 성공해 과거 약 15분 repository-head Test polling false-red가 이 사례에서 차단됐음을 증명했다. 이는 **control-plane 증거**일 뿐 새 application image, migration 204 또는 backend 배포 증거가 아니다.
+- **P0 `REL-AUTH-184-01`: IN PROGRESS, DONE 아님.** 원인은 repository head를 runtime authority로 사용한 것이다. 현재 예방통제는 privileged runtime 작업 전에 `repositoryHeadSha`, `applicationSourceSha`, `controlPlaneSha`, classification, changed-path hash, migration-set hash를 분리한다. 남은 수용조건은 docs-only 3회(runtime/DB/registry/environment side effect=0), control-plane-only 3회(application build와 repository-SHA Test poll=0), runtime-relevant 2회(candidate digest + applicationSourceSha + migrationSetHash + Test deployment attestation 일치), mixed 1회, missing/stale/foreign candidate run ID manual-dispatch 음성 테스트다. classification 전 secret 사용, digest/SHA/migration 불일치, 무권한 DB/registry/GitOps 접근, rollback manifest 부재는 Production 차단이다. 롤백은 새 dispatch 경로를 끄고 마지막 attested Production manifest로 복귀하며 repository head로 runtime identity를 추정하지 않는다.
+- **P0 backup/runtime 재점검:** 약 20:00 KST Debian에서 backend/frontend active, `moneyverse-backup.timer` 부재, backend 직접 `GET /api/version` HTTP 404가 재현됐다. `BAK-RUNTIME-177-01`은 OPEN이다. v187의 외부 frontend 경로 version 증거와 별개로 backend-owned runtime identity는 불완전하다. scheduled encrypted backup → checksum/decrypt/structure 검증 → isolated restore/reconciliation → off-host immutable copy가 증명되기 전 destructive schema/data/ledger/entitlement 작업은 차단한다.
+- **기능/UX/API/DB 정합:** v187 Bootstrap 격리는 frontend-only Production 증거가 있고 backend/DB를 보존했다. migration 204 adaptive profession limit은 merged지만 Production-proven이 아니다. 인증/OAuth/session/security center, profile, inventory/collection, shop/cart/payment/subscription/ad-removal, season/quest/job/level/reward, business/bank/loan, virtual stocks, casino/randomized flows, community/moderation, friends/clubs/referral, notifications/search/upload/public content, App API, admin/audit, backup/restore, analytics/experiments, ads, SEO backend/tooling, incident operations의 기존 상세 계약은 계속 권위다. 코드/문서 근거와 UX 상태, ownership/authorization, API error/idempotency/rate limit, DB constraint/transaction/concurrency, audit/fallback/privacy/abuse, SEO/KPI/performance/cache, QA 및 deploy/rollback 증거가 없으면 `DONE`으로 올리지 않는다.
+- **SEO 최신 판정:** Google Search Central 최신 major 문서 변경은 2026-09-16 Search profile badge이며, 9월 8일 regional Search experience, 8월 28일 site-reputation enforcement 변경도 재검증했다. 서버권위 title/meta/canonical/robots/sitemap/lastModified/breadcrumb/JSON-LD/hreflang/SSR-ISR/CWV/redirect, private/account/admin/transaction `noindex`, UGC index governance를 유지한다. Search-profile/preferred-source 기능은 선택적 acquisition 실험이며 ranking 보장으로 사용하지 않는다. FAQ rich-result ROI는 제외한다.
+- **보안 최신 판정:** OWASP API Security Project의 최신 API-specific Top 10은 계속 2023이다. BOLA, broken authentication, object-property/function authorization, resource consumption, sensitive-business-flow abuse, SSRF, misconfiguration, inventory, unsafe upstream consumption을 기능별 release gate로 유지하고 ASVS 5.0을 검증 가능한 application-control baseline으로 유지한다. Release manifest/artifact도 보안 민감 control-plane 객체로 취급해 provenance, immutable digest/SHA binding, 최소권한 token, retention, audit를 검증한다.
+- **사업성/unit economics:** 새 실측 purchase/ad cohort는 없다. revenue/net revenue/gross·contribution margin/ARPU/ARPDAU/ARPPU/conversion/D1·D7·D30/churn/refund/CAC·LTV/fraud/infra/support는 실측 또는 `HYPOTHESIS/TEST TARGET`만 허용한다. Google Play fee는 market/install cohort/transaction type/program/billing path별 versioned policy를 사용한다. 현재 EEA/UK/US standard 예시는 recurring 10%, new-install non-recurring 20%, existing-install non-recurring 25%에 해당 billing fee가 더해질 수 있다. 모든 shop/payment/subscription SKU는 단일 수수료가 아니라 effective fee policy로 net revenue와 margin을 계산한다. Release-control의 사업효과는 허위 실패 대기시간, Test/DB/registry privileged 사용, engineer/on-call 비용 감소로 측정한다.
+- **우선순위/개발 연결:** P0 encrypted backup+isolated/off-host restore 증명 → release-class acceptance matrix 완료 → backend/Production runtime identity → migration 204 exact-candidate Test/real-DB/economy-integrity QA → auth/BOLA/CSRF/idempotency/ledger-abuse HIGH gate → required-check enforcement → correctness → monetization → SEO/acquisition → retention/accessibility. 기획 자동화는 runtime을 배포하지 않는다. 실제 구현은 branch → CI → exact-candidate Test → backend/API/DB/user-flow QA → main → Production → smoke/rollback 순서를 유지한다.
+
+### v188 worklog / 수용 순서
+최신 공식자료 → exact main/runtime/QA/CI 대조 → PR #433/#955 release-control 증거 → backup/runtime P0 → 전체 기능/SEO/보안/사업성 정합 → 작업 중간 exact-main 재확인 → EN/KO 동기화 → PR CI, exact base가 유지될 때만 병합한다.
 
 ## 회차 델타 — v2026.09.17.187 (2026-09-17)
 
