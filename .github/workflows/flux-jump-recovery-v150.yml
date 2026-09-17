@@ -8,7 +8,7 @@ on:
         required: true
         default: public-key
         type: choice
-        options: [public-key, recover]
+        options: [public-key, recover, direct-recover]
       restart_flux_controllers:
         description: Restart Flux controllers only if source remains stale
         required: true
@@ -20,6 +20,7 @@ permissions:
 
 jobs:
   recover:
+    if: inputs.mode != 'direct-recover'
     runs-on: ubuntu-latest
     environment: production
     timeout-minutes: 15
@@ -118,3 +119,92 @@ jobs:
           [[ "$live" == "$TEST_SHA" ]]
           curl -fsS --max-time 15 https://test.easy-scraping.com/app-api/v1/shop/public-catalog | jq -e '.catalogItems | type == "array" and length > 0' >/dev/null
           curl -fsSI --max-time 10 https://test.easy-scraping.com/ | grep -Eiq '^x-robots-tag:.*noindex'
+
+
+  recover-direct:
+    if: inputs.mode == 'direct-recover'
+    runs-on: [self-hosted, moneyverse-deploy, debian13]
+    environment: production
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Prepare deployment identity
+        shell: bash
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          [[ -n "${DEPLOY_USER:-}" ]]
+          [[ -n "${DEPLOY_SSH_KEY:-}" ]]
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy
+          chmod 600 ~/.ssh/deploy
+          ssh-keygen -y -f ~/.ssh/deploy > ~/.ssh/deploy.pub
+          echo "Deploy public-key fingerprint: $(ssh-keygen -lf ~/.ssh/deploy.pub | awk '{print $2}')"
+
+      - name: Resolve exact GitOps desired state
+        id: desired_direct
+        shell: bash
+        run: |
+          set -euo pipefail
+          infra_dir="${RUNNER_TEMP}/wdmv-infra-${GITHUB_RUN_ID}"
+          rm -rf "$infra_dir"
+          git clone --depth 1 https://github.com/wtrdd1-hash/kuber-infrastructure "$infra_dir" >/dev/null 2>&1
+          infra_sha="$(git -C "$infra_dir" rev-parse HEAD)"
+          test_sha="$(sed -n 's/.*moneyverse.openai\/candidate-sha: "\([0-9a-f]\{40\}\)".*/\1/p' "$infra_dir/staging/wdmv-test/backend.yaml" | head -n1)"
+          [[ "$infra_sha" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$test_sha" =~ ^[0-9a-f]{40}$ ]]
+          echo "infra_sha=$infra_sha" >> "$GITHUB_OUTPUT"
+          echo "test_sha=$test_sha" >> "$GITHUB_OUTPUT"
+          echo "Desired infra=$infra_sha test=$test_sha"
+
+      - name: Configure strict direct target SSH
+        shell: bash
+        env:
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+        run: |
+          set -euo pipefail
+          printf '%s\n' '192.168.100.186 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP2tRZ2fc3s0TLNeY2fRNKcz2oYylnh4xFl+y+oM/VCp' > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+          printf '%s\n' \
+            'Host nixos-target' \
+            '  HostName 192.168.100.186' \
+            "  User $DEPLOY_USER" \
+            '  Port 22' \
+            '  IdentityFile ~/.ssh/deploy' \
+            '  IdentitiesOnly yes' \
+            '  IdentityAgent none' \
+            '  BatchMode yes' \
+            '  StrictHostKeyChecking yes' \
+            '  UserKnownHostsFile ~/.ssh/known_hosts' > ~/.ssh/config
+          chmod 600 ~/.ssh/config
+          ssh nixos-target 'printf "target="; hostname; uname -sr'
+
+      - name: Recover Flux source and isolated Test directly
+        shell: bash
+        env:
+          EXPECTED_INFRA_SHA: ${{ steps.desired_direct.outputs.infra_sha }}
+          RESTART_CONTROLLERS: ${{ inputs.restart_flux_controllers }}
+        run: |
+          set -euo pipefail
+          ssh nixos-target "EXPECTED_INFRA_SHA='$EXPECTED_INFRA_SHA' RESTART_CONTROLLERS='$RESTART_CONTROLLERS' bash -s" < ops/recovery/flux-jump-v150.sh
+
+      - name: Verify exact public Test SHA and backend path
+        shell: bash
+        env:
+          TEST_SHA: ${{ steps.desired_direct.outputs.test_sha }}
+        run: |
+          set -euo pipefail
+          live="$(curl -fsS --max-time 10 https://test.easy-scraping.com/api/version | jq -r '.id // empty')"
+          echo "Test desired=$TEST_SHA live=$live"
+          [[ "$live" == "$TEST_SHA" ]]
+          curl -fsS --max-time 15 https://test.easy-scraping.com/app-api/v1/shop/public-catalog | jq -e '.catalogItems | type == "array" and length > 0' >/dev/null
+          curl -fsSI --max-time 10 https://test.easy-scraping.com/ | grep -Eiq '^x-robots-tag:.*noindex'
+
+      - name: Remove deployment identity from persistent runner
+        if: always()
+        shell: bash
+        run: |
+          rm -f ~/.ssh/deploy ~/.ssh/deploy.pub ~/.ssh/config ~/.ssh/known_hosts
