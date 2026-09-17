@@ -1,8 +1,8 @@
 # 월덕 머니버스 — 검색 노출 운영 명세
 
-> 버전: v2026.09.13.1
+> 버전: v2026.09.17.177
 > 상태: 구현 지향형 Living SEO/검색 운영 명세
-> 기준일: 2026-09-13
+> 기준일: 2026-09-17
 > 상위 문서: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `MONETIZATION_COMPLIANCE_SEO_SPEC.md`
 > 영문 기준 문서: [SEARCH_DISCOVERY_OPERATIONS_SPEC.md](SEARCH_DISCOVERY_OPERATIONS_SPEC.md)
 
@@ -52,18 +52,19 @@
 
 운영/Test 교차 canonical이나 대량 중복 색인을 만들 수 있는 canonical 충돌은 출시 차단 결함이다.
 
-## 4. EN/KO 현지화와 hreflang
+## 4. 다국어 현지화와 hreflang
 
-영문/한국어 대응 페이지는 다음과 같이 운영한다.
+초기 지원 locale은 `en`, `ko`, `ja`, `de`, `fr`, `es`, `pt-BR`이다. 각 실제 번역 페이지는 자신의 URL을 canonical로 사용하고, 존재하는 대응 번역만 상호 `hreflang`으로 묶는다. 모든 locale에 동일한 가상 페이지를 만들 필요는 없다.
 
-- `/en/...`은 자신을 canonical로 지정한다.
-- `/ko/...`는 자신을 canonical로 지정한다.
-- 양쪽 페이지에 `hreflang="en"`, `hreflang="ko"`를 상호 연결한다.
-- `x-default`는 실제로 유용한 언어선택/중립 홈이 있을 때만 사용한다.
-- title, description, H1, 본문 언어가 locale과 일치해야 한다.
-- 검색 키워드 확보만을 위한 미완성 번역 페이지는 색인하지 않는다.
+- `/en/...`, `/ko/...`, `/ja/...`, `/de/...`, `/fr/...`, `/es/...`, `/pt-br/...`처럼 언어별 독립 URL을 사용한다.
+- `x-default`는 실제로 유용한 중립 언어/국가 선택기 또는 기본 페이지를 가리킨다.
+- IP/브라우저 언어로 강제 redirect하지 않고 사용자가 언어를 직접 선택할 수 있는 crawlable link를 둔다.
+- title, description, H1, 본문, 내비게이션 주 언어가 locale과 일치한다.
+- region-specific URL은 실제 지역별 내용이 다를 때만 만든다.
+- `DRAFT/STALE` 번역과 얇은 자동번역은 noindex+sitemap 제외이며 hreflang cluster에 넣지 않는다.
+- 법률/결제/카지노/안전 페이지의 raw machine translation은 색인하지 않는다.
 
-번역 동등성은 SEO가 아니라 제품 품질 요구사항이기도 하다.
+번역 동등성은 SEO가 아니라 제품·법적 품질 요구사항이다. 상세 번역 lifecycle은 국제 locale/관할 명세를 따른다.
 
 ## 5. 사이트맵 구조
 

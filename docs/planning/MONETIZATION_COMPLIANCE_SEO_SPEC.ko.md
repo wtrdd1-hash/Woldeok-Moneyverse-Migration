@@ -1,10 +1,18 @@
 # 월덕 머니버스 — 수익화·한국/미국 준수·검색 성장 명세
 
-> 버전: v2026.09.12.27
+> 버전: v2026.09.17.177
 > 상태: 구현 지향형 Living 제품 기획서
-> 기준일: 2026-09-12
+> 기준일: 2026-09-17
 > 상위 문서: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`
 > 영문 기준 문서: [MONETIZATION_COMPLIANCE_SEO_SPEC.md](MONETIZATION_COMPLIANCE_SEO_SPEC.md)
+
+## v2026.09.17.177 국제 수익화 통합 델타
+
+- 국가/주/채널별 판매가능 상품과 결제경로는 `INTERNATIONAL_LOCALE_JURISDICTION_MONETIZATION_SPEC.ko.md`의 정책엔진이 권위다.
+- `WLD_CASH_PURCHASE`, `PAID_RANDOM_ITEM`, `paid -> casino stake`는 기본 BLOCK이다.
+- 한국 Android 대체결제, EEA/GB/US Google Play 프로그램, Apple storefront 예외 등은 출시 시점 스토어정책을 versioned evidence로 저장하며 오래된 문서로 일반화하지 않는다.
+- 수익 KPI는 국가/locale/channel별 gross revenue뿐 아니라 store/PSP fee, tax, refund, chargeback, support/moderation, localization/legal cost를 차감한 contribution margin으로 본다.
+- 카지노 자체의 직접 매출 목표는 0이며 결제와 카지노 release train은 독립한다.
 
 ## 1. 목적
 

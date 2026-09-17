@@ -1,8 +1,8 @@
 # Woldeok Moneyverse — Search Discovery Operations Specification
 
-> Version: v2026.09.13.1
+> Version: v2026.09.17.177
 > Status: Living implementation-oriented SEO/search operations specification
-> Date: 2026-09-13
+> Date: 2026-09-17
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `MONETIZATION_COMPLIANCE_SEO_SPEC.md`
 > Korean counterpart: [SEARCH_DISCOVERY_OPERATIONS_SPEC.ko.md](SEARCH_DISCOVERY_OPERATIONS_SPEC.ko.md)
 
@@ -52,18 +52,19 @@ For every indexable page:
 
 Canonical conflicts are a release-blocking SEO defect when they can create duplicate or cross-environment indexing.
 
-## 4. EN/KO localization and hreflang
+## 4. Multilingual localization and hreflang
 
-For paired English/Korean pages:
+Initial supported locales are `en`, `ko`, `ja`, `de`, `fr`, `es`, and `pt-BR`. Each genuinely translated page uses a self-canonical URL and emits reciprocal `hreflang` only for localized equivalents that actually exist. There is no requirement to fabricate every locale for every page.
 
-- `/en/...` canonicalizes to itself;
-- `/ko/...` canonicalizes to itself;
-- each page emits reciprocal `hreflang="en"` and `hreflang="ko"` links;
-- optional `x-default` points to the neutral language selector/home only when that route is genuinely useful;
-- title, description, H1 and visible body language must match the locale;
-- untranslated placeholder pages must not be indexed merely to create keyword coverage.
+- use independent URLs such as `/en/...`, `/ko/...`, `/ja/...`, `/de/...`, `/fr/...`, `/es/...`, `/pt-br/...`;
+- `x-default` points to a genuinely useful neutral language/country selector or default;
+- never force IP/browser-language redirects; provide crawlable language-switch links and optional non-blocking suggestions;
+- title, description, H1, visible body and navigation primary language match the locale;
+- create regional variants only where visible content materially differs;
+- `DRAFT/STALE` translations and thin automated translations are noindex, sitemap-excluded and absent from hreflang clusters;
+- raw machine translation of legal, billing, casino or safety pages is never indexable.
 
-Translation parity is product quality, not only SEO. A materially incomplete Korean page should remain noindex until useful.
+Translation parity is product/legal quality, not only SEO. Detailed translation lifecycle follows the international locale/jurisdiction specification.
 
 ## 5. Sitemap architecture
 

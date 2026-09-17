@@ -1,10 +1,16 @@
 # Woldeok Moneyverse — Virtual Casino Game System Specification
 
-> Version: v2026.09.12.28
+> Version: v2026.09.17.177
 > Status: implementation-oriented planning specification
-> Date: 2026-09-12
+> Date: 2026-09-17
 > Korean counterpart: [CASINO_GAME_SYSTEM_SPEC.ko.md](CASINO_GAME_SYSTEM_SPEC.ko.md)
 > Parent specs: `PROJECT_PLAN.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `MONETIZATION_COMPLIANCE_SEO_SPEC.md` when merged
+
+## v2026.09.17.177 international integration delta
+
+The authoritative market/locale/billing matrix is `INTERNATIONAL_LOCALE_JURISDICTION_MONETIZATION_SPEC.md`. Casino remains independently gated from billing. Before any cash monetization coexists with casino, migrate staking to non-purchasable/non-transferable/non-redeemable CSP or prove equivalent paid-value provenance isolation. `No cash-out` is required but is not treated as sufficient for every jurisdiction.
+
+Korea requires explicit rating/GRAC, 19+ casino policy and store/legal evidence; Australia simulated gambling requires R18+ classification; U.S. availability is state-aware and Washington defaults blocked pending explicit review.
 
 ## 1. Product boundary
 

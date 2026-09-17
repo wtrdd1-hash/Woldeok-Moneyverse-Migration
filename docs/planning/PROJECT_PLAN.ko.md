@@ -2,12 +2,33 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.176
+> **현재 통합 버전:** v2026.09.17.177
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 변경 — v2026.09.17.177 (2026-09-17)
+
+### 국제 국가정책·다국어·카지노·유료화 통합 기획
+
+- **작업 브랜치/현재 기준:** `docs/international-jurisdiction-localization-v2026.09.17.177`, 기준 `f7d2087f342a087bc568ffc4abcaac5540f62e5b`. 사용자 범위 확장 후와 선행 로컬 기획 시도 이후 최신 `main`을 다시 확인했다. 이번 회차는 문서/조사 전용이며 런타임·DB·Test·Production 상태를 변경하지 않는다.
+- **대체된 로컬 시도:** `docs/casino-legal-safety-v2026.09.17.176` / `faa047fdb637df74b4327ef45c9585be1c15d8c5`는 GitHub에 push/merge되지 않았다. 조사 중 `main`에 권위 v176 런타임 백업 기획이 먼저 반영되어 같은 버전을 경쟁시키지 않고 이 v177 브랜치로 재기준·대체했다.
+- **기존 P0 유지:** v176의 `BAK-RUNTIME-176-01`, `BAK-106-01`은 계속 OPEN이며 파괴적 작업·수익화 rollout보다 우선한다. 이번 회차는 scheduled backup, off-host DR, exact-SHA 런타임 관측 공백이 해결됐다고 주장하지 않는다.
+- **범위:** `국가 × 주/지역 × 채널 × 연령 × 기능` 정책 엔진, 카지노 국제 규제 게이트, 비-P2W 유료화, Google Play/App Store/Web 결제경로, 미성년자/개인정보/광고, 사이트 언어 확대, 자연스러운 번역 품질, Google 다국어/다지역 SEO를 통합한다.
+- **핵심 설계:** `locale != jurisdiction`. 언어선택은 표현/검색만 바꾸고 국가 기능제한은 우회하지 못한다. 고위험 기능은 서버의 버전형 정책에서 `ALLOW/ALLOW_WITH_CONTROLS/BLOCK/REVIEW_REQUIRED/TEMPORARILY_DISABLED`로 판정하고 법률·등급·스토어 증거가 누락/만료되면 fail-closed한다.
+- **국가 기본값:** KR/US/GB/EEA/AU/JP/BR을 초기 정책 매트릭스로 만들고, CA/SG/TW는 현지검토 전 REVIEW_REQUIRED, 중국 본토는 별도 인허가 프로젝트 전 기본 미출시다. 미국 카지노는 주별, EEA는 회원국별 판정한다.
+- **카지노:** 직접수익 목표 0. 현금 유료화와 공존하기 전 비구매·비양도·비환전 전용 `CSP` 또는 동등한 provenance 격리가 필요하다. KR은 GRAC/19+/스토어/법률 게이트, AU는 simulated gambling R18+, Washington은 별도 승인 전 기본 차단한다. `현금화 없음`은 필수지만 전세계 충분조건으로 보지 않는다.
+- **유료화:** 광고제거, 계정귀속 꾸미기, 비경쟁 편의만 P0 후보. WLD 현금판매·유료 랜덤아이템·카지노 베팅재원 판매는 기본 BLOCK. Android/iOS/Web 결제는 국가/스토어 정책별 route를 사용하고 클라이언트 가격/통화/entitlement를 신뢰하지 않는다. 국가별 수익성은 gross revenue가 아니라 스토어/PSP 수수료·세금·환불·차지백·지원·모더레이션·번역·법률/등급비를 차감한 contribution margin으로 본다.
+- **언어:** 사이트/앱 P0/P1 locale을 `en`, `ko`, `ja`, `de`, `fr`, `es`, `pt-BR`로 확대한다. 프로젝트 문서 표준은 계속 영문 원문 + 한국어 2순위다. 번역은 source hash, glossary, linguistic/product/legal/SEO review 상태를 가진 버전형 자산으로 관리한다.
+- **Google SEO:** 언어별 URL, locale self-canonical, 진짜 대응번역에 상호 hreflang, 유용한 `x-default`, locale sitemap, 한 페이지 한 주언어를 적용한다. IP/브라우저언어 강제 redirect와 검색용 얇은 자동번역 대량생성을 금지한다.
+- **세부 권위:** `INTERNATIONAL_LOCALE_JURISDICTION_MONETIZATION_SPEC.md`, `INTERNATIONAL_COMPLIANCE_REFERENCE_MATRIX.md` 및 한국어 대응 문서가 세부계약이다. 카지노·수익화·검색 명세에도 v177 통합 델타를 연결한다.
+- **승격:** 문서 전용 회차다. runtime/Test/Production 기능 활성화는 하지 않는다. 실제 구현 시 정책엔진 → 번역/SEO → 결제 → 카지노 격리 → isolated Test exact-SHA → 국가별 승인 → 기능 flag 순서를 따른다.
+
+### v177 수용순서
+
+`권위자료 조사` → `국가/주/채널 정책` → `언어와 관할 분리` → `자연번역 review gate` → `Google 국제 SEO` → `국가별 billing` → `카지노 CSP/유료출처 격리` → `Test matrix` → `국가별 법률/제품 승인` → `Production feature flag`. 적용되는 기존 backup/DR P0 게이트는 계속 선행조건이다.
 
 ## 회차 변경 — v2026.09.17.176 (2026-09-17)
 
