@@ -2,11 +2,28 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.195
+> **현재 통합 버전:** v2026.09.17.196
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 델타 — v2026.09.17.196 (2026-09-17)
+
+### 백업 런타임 활성화, backend identity 코드는 병합됐지만 운영 backend는 아직 구버전, 9월 17일 SEO pagination 델타
+
+- **Exact main / 구현 대조:** 회차 시작 main은 `75e69e77cdc18ef221106a008563151a4c790728`이다. PR #442는 backend-owned `GET /api/version`, `Cache-Control: no-store`, E2E를 병합했고 commit에는 isolated Test exact candidate, migration 204, public smoke, noindex, session continuity 증거가 기록돼 있다. 이는 코드/Test 증거이며 Production backend 승격 증거가 아니다.
+- **P0 `BAK-RUNTIME-177-01`: 부분 해소 / IN PROGRESS.** 권위 Debian의 `moneyverse-backup.timer`가 이제 enabled+active이며 6시간 주기, Persistent, randomized delay로 예약된다. Service는 oneshot, `UMask=0077`, `NoNewPrivileges=true`, `ProtectSystem=strict`, source read-only, backup destination 단일 write 경계를 가진다. 약 21:22와 21:57 KST 실행에서 encrypted archive 검증, `database.dump`, `photos.tar.zst`, `manifest.txt`가 모두 OK였다. 따라서 기존 “timer 없음/자동 암호화 로컬백업 없음” 결함은 닫지만 **P0 전체는 닫지 않는다.** Isolated restore+domain reconciliation drill, 실측 RPO/RTO, off-host immutable copy/retention, 실패 alert 증거가 남았다. 로컬 암호화 사본만으로 DR로 인정하지 않는다. 그 전 destructive migration/ledger/entitlement rewrite는 계속 차단한다. Rollback은 timer disable + 생성된 good archive 보존이며 마지막 정상 archive를 rollback 과정에서 삭제하지 않는다. last-success age, next trigger, archive size/checksum, decrypt/structure, disk free, retention deletion, off-host replication lag, restore reconciliation을 관측한다.
+- **P0 backend runtime identity: MERGED / TEST-PROVEN / PRODUCTION-NOT-PROVEN.** Production `moneyverse-backend`는 active이고 표본 구간 warning 이상 journal은 없지만 직접 `http://127.0.0.1:3000/api/version`은 아직 404다. 즉 main에는 #442가 있어도 운영 backend process는 이전 build다. 승격은 attested exact candidate로만 수행한다. 수용조건은 expected application build ID의 `/api/version=200` + `no-store`, `/health=200`, BFF viewer/wallet/status/announcements/shop smoke, session-count continuity, migration-set equality, 신규 warning/error burst 없음, rollback manifest다. Blind restart는 금지한다.
+- **Release/QA 순서:** `REL-AUTH-184-01`은 P0 IN PROGRESS다. Backend identity endpoint는 attestation primitive지만 candidate digest + applicationSourceSha + migrationSetHash + deploymentId 결합을 대체하지 않는다. 기존 docs-only/control-plane/runtime/mixed와 stale/foreign/missing-candidate matrix를 완료해야 DONE이다. GitHub required checks 강제는 P0 데이터안전/release identity 다음 P1이다.
+- **전체 기능 계약 델타:** 모든 stateful 기능(identity/session, inventory/entitlement, shop/payment/subscription, jobs/rewards/ledger, business/bank/loan, stocks, casino, community/referral, admin/audit/analytics)은 destructive 또는 경제적으로 비가역적인 변경의 운영승격 선행조건으로 `backup_last_verified_at`, `offhost_replication_at`, `restore_drill_at`, `restore_reconciliation_status`, deployed backend build identity를 요구한다. Admin/incident UI는 stale backup/identity mismatch를 안내 배너가 아니라 blocking 상태로 표시한다. API mutation은 idempotency key, ownership/BOLA, transaction constraint, audit receipt를 유지하며 backup/restore는 사용자 호출 API로 노출하지 않는다.
+- **SEO/SEO backend 델타(Google Search Central 2026-09-17): 공개 목록 화면에 직접 채택.** Google은 infinite-scroll 지침을 최신 문서로 이전했고 지침 자체는 변경하지 않았다. Infinite scroll을 쓰는 커뮤니티 feed, 공개 collection/catalog/search landing은 stable ordering의 crawlable paginated URL과 server-renderable link를 제공해야 하며 scroll-only JavaScript discovery를 indexability 계약으로 삼지 않는다. Index 가능한 각 page는 자기 URL self-canonical, 결정적 title/H1 context, 정상 200/404, 정책상 독립 가치가 있을 때만 sitemap 포함을 갖는다. Facet/query 조합은 SEO read-model이 명시적으로 승격하지 않으면 기본 noindex/canonical 정책이다. Cursor token은 API 내부 구현이며 영구 public slug가 아니다. QA는 JS-disabled link traversal, Google-rendered HTML parity, duplicate/canonical, out-of-range 404, sitemap/lastModified, append CWV, crawler-log sampling을 포함한다. KPI는 organic impression/CTR→signup→activation→D7/D30→revenue이며 thin/duplicate index 증가는 guardrail이다.
+- **보안 레퍼런스 갱신:** OWASP API Security는 API-specific 최신판을 2023으로 유지한다. BOLA, broken authentication, object-property/function authorization, resource consumption, sensitive-business-flow abuse, SSRF, misconfiguration, inventory, unsafe-upstream을 release-blocking test로 유지한다. Backup key는 release/backup destination 밖에 두고 log 금지, restore는 decrypt/checksum/schema/reconciliation mismatch 시 fail-closed한다. Runtime identity 공개 응답에는 immutable build identity만 두며 secret/host/DB/commit author/environment metadata는 금지한다.
+- **수익성/unit economics 갱신:** Google Play는 단일 universal fee가 없음을 명시한다. EEA/UK/US는 2026-06-30부터 standard 예시가 auto-renew subscription 10%, new-install 기타 20%, existing-install 기타 25%이며 해당 Play Billing에는 5% billing fee가 더해질 수 있고 KR rollout은 2026-12-31 예정이다. SKU는 `market × effectiveDate × installCohort × transactionType × programme × billingPath`를 먼저 resolve한 뒤 net revenue/contribution margin을 계산한다. 새 실측 purchase/ad cohort는 없어 ARPU/ARPDAU/ARPPU, conversion, churn/refund, CAC/LTV, fraud, infra/support는 실측 또는 명시적 가설/테스트 기준만 허용한다. Backup/identity 작업의 사업효과는 직접매출이 아니라 expected-loss/downtime/refund/support 감소로 평가한다.
+- **우선순위/개발 연결:** P0 isolated restore + off-host immutable backup 증거 → P0 exact-candidate Production backend identity 승격 + release-class matrix → migration-204 real-DB/economy-integrity 증거 → HIGH auth/BOLA/CSRF/idempotency/ledger-abuse gate → P1 required-check enforcement → correctness → monetization → SEO/acquisition → retention/accessibility. 기획 자동화는 runtime 배포나 DB mutation을 하지 않는다.
+
+### v196 worklog / 수용 순서
+최신 Google Search/Play·OWASP 공식자료 → exact main/PR/CI·권위 Debian runtime 대조 → backup/identity 증거 재분류 → 전체 기능/SEO/보안/사업성 계약 델타 → 작업 중간 exact-main 재확인 → EN/KO 동기화 → diff/CI/PR.
 
 ## 회차 델타 — v2026.09.17.195 (2026-09-17)
 
