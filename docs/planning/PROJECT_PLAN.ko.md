@@ -9,6 +9,18 @@
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
 
+## 회차 변경 — v2026.09.17.179 (2026-09-17)
+
+### 로컬 UI 자산 운영 승격 증거 및 런타임 복구
+
+- **릴리스 계보:** UI 브랜치 `feat/ui-local-assets-v2026.09.17.175`, 커밋 `e8f89b482d2d92ed284629e2214f273fb8623302`가 PR #411로 애플리케이션 SHA `faa047fdb637df74b4327ef45c9585be1c15d8c5`에 병합되었다. 현재 main은 이 SHA 이후 backend/frontend/package 런타임 변경이 없고 후속 차이는 문서/복구 workflow뿐이다.
+- **로컬 자산 계약:** Bootstrap 5.3.8은 `frontend/src/styles/vendor/bootstrap-5.3.8.min.css`에서 번들된다. 다운로드 원본은 별도 데이터 디스크 `/srv/moneyverse-data/vendor/bootstrap/5.3.8/`에 보관하며 SHA-256은 `3258c873cbcb1e2d81f4374afea2ea6437d9eee9077041073fd81dd579c5ba6b`이다. 운영 HTML에는 Bootstrap/getbootstrap/jsDelivr/unpkg 런타임 자산 참조가 없다.
+- **Test 증거:** `test.easy-scraping.com/api/version`은 정확한 SHA `faa047fdb637df74b4327ef45c9585be1c15d8c5`를 반환한다. `/health` 정상, 공개 상점 카탈로그 146개, Test `X-Robots-Tag: noindex, nofollow`를 확인했다. Test 프론트 env/cache 권한은 비밀 파일을 world-readable로 만들지 않고 교정했다.
+- **Production 승격:** 기존 Production `18c7a1324013099e47b2d6e22c5108c4d378139c`에서 `faa047f...`까지 backend/DB migration 차이는 0이다. 프론트는 `/srv/moneyverse-data/releases/prod-faa047fdb637`에서 운영 env로 재빌드하고 3201 canary 검증 후 nginx를 원자적으로 canary로 전환했다. 그동안 정식 3001 서비스를 새 release로 교체/재기동하고 검증한 뒤 nginx를 3001로 복귀했다. 외부 Production은 현재 정확한 SHA `faa047f...`를 반환하며 health/home/shop/casino/guide와 카탈로그 146개 검증이 통과했다.
+- **롤백 증거:** nginx 백업 `/etc/nginx/backups/moneyverse.before-v175-prod-20260917132435`, 프론트 drop-in 백업 `/etc/systemd/system/moneyverse-frontend.service.d/release.conf.before-v175-20260917132435`. 백엔드 소스/DB migration이 동일하므로 Production 백엔드는 재시작하지 않았다.
+- **클러스터 복구 발견사항:** stale Flux 경로는 UI 릴리스 실패와 별개의 제어면 장애다. `kuber-nixos-flakes/keys/admins.pub`가 placeholder만 가진 상태였고 `modules/users.nix`는 비밀번호 로그인을 끄고 이 파일을 선언형 SSH 키로 사용한다. `wtrdd1-hash/kuber-nixos-flakes#1`에서 기존 배포 공개키로 placeholder를 교체했고 `7a0a1438bae0b17b28b0597ea37e759ac1db6530`으로 병합했다. 이미 실행 중인 `192.168.100.186` 노드는 콘솔 또는 out-of-band NixOS 재적용 전까지 직접 SSH/Flux 복구 완료로 간주하지 않는다.
+- **보안:** 임시 진단 브랜치 `fix/cluster-ssh-recovery-v2026.09.17.179`는 incident-only이며 병합하지 않는다. 개인 SSH 키는 커밋하지 않았고 NixOS 선언 파일에는 공개키만 저장했다.
+
 ## 회차 변경 — v2026.09.17.178 (2026-09-17)
 
 ### P0 복구 권한·영구 러너 자격증명·백업 런타임 정합성

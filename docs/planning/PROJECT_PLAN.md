@@ -2,12 +2,24 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.178
+> Current integrated version: v2026.09.17.179
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+## Cycle delta — v2026.09.17.179 (2026-09-17)
+
+### Local UI asset release evidence and runtime recovery
+
+- **Release lineage:** UI branch `feat/ui-local-assets-v2026.09.17.175` commit `e8f89b482d2d92ed284629e2214f273fb8623302` merged by PR #411 to application SHA `faa047fdb637df74b4327ef45c9585be1c15d8c5`. Current main contains no backend/frontend/package runtime changes after that SHA; later deltas are documentation/recovery workflow only.
+- **Local asset contract:** Bootstrap 5.3.8 is bundled from `frontend/src/styles/vendor/bootstrap-5.3.8.min.css`; the downloaded distribution is retained on the separate data disk at `/srv/moneyverse-data/vendor/bootstrap/5.3.8/` with SHA-256 `3258c873cbcb1e2d81f4374afea2ea6437d9eee9077041073fd81dd579c5ba6b`. Production HTML contains no Bootstrap/getbootstrap/jsDelivr/unpkg runtime asset reference.
+- **Test evidence:** `test.easy-scraping.com/api/version` returns exact SHA `faa047fdb637df74b4327ef45c9585be1c15d8c5`; `/health` is healthy, public shop catalog returns 146 items, and Test emits `X-Robots-Tag: noindex, nofollow`. Test frontend env/cache permissions were corrected without widening secret files to world-readable.
+- **Production promotion:** backend/database diff from prior Production `18c7a1324013099e47b2d6e22c5108c4d378139c` to `faa047f...` is zero. Frontend was rebuilt with Production env in `/srv/moneyverse-data/releases/prod-faa047fdb637`, canaried on port 3201, nginx was atomically switched to the canary while the normal 3001 service was repointed/restarted, then nginx was returned to 3001. External Production now reports exact SHA `faa047f...`, health/home/shop/casino/guide checks pass, and catalog returns 146 items.
+- **Rollback evidence:** nginx backup `/etc/nginx/backups/moneyverse.before-v175-prod-20260917132435`; frontend drop-in backup `/etc/systemd/system/moneyverse-frontend.service.d/release.conf.before-v175-20260917132435`. Production backend was not restarted because its source and database migration set are unchanged.
+- **Cluster recovery finding:** the stale Flux path is a separate control-plane incident, not a UI-release failure. `kuber-nixos-flakes/keys/admins.pub` contained only a placeholder while `modules/users.nix` disables password login and sources that file for declarative SSH keys. Infrastructure PR `wtrdd1-hash/kuber-nixos-flakes#1` replaced the placeholder with the existing deploy public key and merged as `7a0a1438bae0b17b28b0597ea37e759ac1db6530`. The already-running `192.168.100.186` node still requires an out-of-band NixOS rebuild/console application before direct SSH/Flux recovery is considered restored.
+- **Security:** temporary diagnostic workflow branch `fix/cluster-ssh-recovery-v2026.09.17.179` is incident-only and must not be merged. No private SSH key was committed; only the public half is stored in the NixOS declarative key file.
 
 ## Cycle delta — v2026.09.17.178 (2026-09-17)
 
