@@ -13,18 +13,10 @@ on:
       - 'ops/**'
       - 'auto/**'
       - 'test-candidate/**'
-    # Documentation-only changes must never enter candidate image/registry or
-    # downstream Production release paths. Runtime/control-plane files remain
-    # included because this ignore list is deliberately narrow.
-    paths-ignore:
-      - 'docs/**'
-      - 'README/**'
-      - 'README.md'
-      - '**/*.md'
   workflow_dispatch:
     inputs:
       promote:
-        description: Dispatch the Production exact-SHA gate after a successful main candidate
+        description: Dispatch the Production gate after a successful attested main runtime candidate
         required: false
         default: false
         type: boolean
@@ -41,36 +33,145 @@ env:
   IMAGE_PREFIX: ${{ github.repository_owner }}/wdmv
 
 jobs:
+  release-input:
+    runs-on: ubuntu-latest
+    outputs:
+      classification: ${{ steps.classify.outputs.classification }}
+      repository_head_sha: ${{ steps.classify.outputs.repository_head_sha }}
+      application_source_sha: ${{ steps.classify.outputs.application_source_sha }}
+      control_plane_sha: ${{ steps.classify.outputs.control_plane_sha }}
+      changed_paths_hash: ${{ steps.classify.outputs.changed_paths_hash }}
+      migration_set_hash: ${{ steps.classify.outputs.migration_set_hash }}
+      classifier_version: ${{ steps.classify.outputs.classifier_version }}
+    steps:
+      - name: Checkout repository history before release classification
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Resolve comparison base without release credentials
+        id: base
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_BEFORE: ${{ github.event.before }}
+          BRANCH_NAME: ${{ github.ref_name }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          zero=0000000000000000000000000000000000000000
+          if [[ "$BRANCH_NAME" == main && "$EVENT_NAME" == push && -n "${EVENT_BEFORE:-}" && "$EVENT_BEFORE" != "$zero" ]] \
+            && git cat-file -e "${EVENT_BEFORE}^{commit}" 2>/dev/null; then
+            base="$EVENT_BEFORE"
+          elif [[ "$BRANCH_NAME" == main ]]; then
+            base="$(git rev-parse "${HEAD_SHA}^")"
+          else
+            base="$(git merge-base origin/main "$HEAD_SHA")"
+          fi
+          [[ "$base" =~ ^[0-9a-f]{40}$ ]]
+          echo "sha=$base" >> "$GITHUB_OUTPUT"
+
+      - name: Classify immutable release input before privileged actions
+        id: classify
+        continue-on-error: true
+        shell: bash
+        env:
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          node scripts/release/classify-release.mjs \
+            --base "$BASE_SHA" \
+            --head "$HEAD_SHA" \
+            --output release-input.json \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Upload immutable release input
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-input
+          path: release-input.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Fail closed on unclassified release paths
+        shell: bash
+        env:
+          CLASSIFICATION: ${{ steps.classify.outputs.classification }}
+          CLASSIFY_OUTCOME: ${{ steps.classify.outcome }}
+        run: |
+          set -euo pipefail
+          if [[ "$CLASSIFY_OUTCOME" != success || "$CLASSIFICATION" == UNKNOWN || -z "$CLASSIFICATION" ]]; then
+            echo '::error::release path classification is unknown or invalid; update the classifier before any candidate/release action'
+            exit 1
+          fi
+
   verify:
+    needs: release-input
     uses: ./.github/workflows/ci.yml
 
   build:
-    needs: verify
+    needs: [release-input, verify]
+    if: >-
+      needs.release-input.outputs.classification == 'RUNTIME_RELEVANT' ||
+      needs.release-input.outputs.classification == 'MIXED'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    outputs:
-      backend: ${{ steps.meta.outputs.backend }}
-      frontend: ${{ steps.meta.outputs.frontend }}
+      deployments: write
+    env:
+      APPLICATION_SOURCE_SHA: ${{ needs.release-input.outputs.application_source_sha }}
+      REPOSITORY_HEAD_SHA: ${{ needs.release-input.outputs.repository_head_sha }}
+      MIGRATION_SET_HASH: ${{ needs.release-input.outputs.migration_set_hash }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Download classified release input
+        uses: actions/download-artifact@v4
+        with:
+          name: release-input
+          path: release-evidence
+
+      - name: Validate runtime identity before registry access
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s release-evidence/release-input.json
+          [[ "$APPLICATION_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$REPOSITORY_HEAD_SHA" == "$GITHUB_SHA" ]]
+          jq -e \
+            --arg repo "$REPOSITORY_HEAD_SHA" \
+            --arg app "$APPLICATION_SOURCE_SHA" \
+            --arg migrations "$MIGRATION_SET_HASH" \
+            '.repositoryHeadSha == $repo and .applicationSourceSha == $app and .migrationSetHash == $migrations and (.classification == "RUNTIME_RELEVANT" or .classification == "MIXED")' \
+            release-evidence/release-input.json >/dev/null
+
+      - name: Checkout attested application source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ env.APPLICATION_SOURCE_SHA }}
+
       - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
-      - name: Log in to GHCR
+
+      - name: Log in to GHCR after runtime classification
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Compute immutable candidate image references
         id: meta
         shell: bash
         run: |
           set -euo pipefail
           prefix=$(echo "${REGISTRY}/${IMAGE_PREFIX}" | tr '[:upper:]' '[:lower:]')
-          echo "backend=${prefix}/backend:${GITHUB_SHA}-test" >> "$GITHUB_OUTPUT"
-          echo "frontend=${prefix}/frontend:${GITHUB_SHA}-test" >> "$GITHUB_OUTPUT"
+          echo "backend=${prefix}/backend:${APPLICATION_SOURCE_SHA}-test" >> "$GITHUB_OUTPUT"
+          echo "frontend=${prefix}/frontend:${APPLICATION_SOURCE_SHA}-test" >> "$GITHUB_OUTPUT"
+
       - name: Build and push backend candidate
+        id: backend
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
           context: .
@@ -82,7 +183,9 @@ jobs:
           tags: ${{ steps.meta.outputs.backend }}
           cache-from: type=gha,scope=backend-test
           cache-to: type=gha,mode=max,scope=backend-test
+
       - name: Build and push frontend candidate
+        id: frontend
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         with:
           context: .
@@ -93,7 +196,7 @@ jobs:
           sbom: true
           build-args: |
             APP_BASE_URL=https://test.easy-scraping.com
-            BUILD_ID=${{ github.sha }}
+            BUILD_ID=${{ env.APPLICATION_SOURCE_SHA }}
             SEO_INDEXING_ENABLED=false
             SEARCH_CONSOLE_VERIFICATION=
             ADS_ENABLED=false
@@ -102,28 +205,114 @@ jobs:
           tags: ${{ steps.meta.outputs.frontend }}
           cache-from: type=gha,scope=frontend-test
           cache-to: type=gha,mode=max,scope=frontend-test
+
+      - name: Register pending isolated-Test deployment
+        id: deployment
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          payload="$(jq -n \
+            --arg ref "$APPLICATION_SOURCE_SHA" \
+            --arg description "Attested candidate for repository head $REPOSITORY_HEAD_SHA" \
+            '{ref:$ref,environment:"isolated-test",auto_merge:false,required_contexts:[],transient_environment:false,production_environment:false,description:$description}')"
+          deployment_id="$(gh api --method POST "repos/${GITHUB_REPOSITORY}/deployments" --input - --jq '.id' <<<"$payload")"
+          status_payload="$(jq -n '{state:"pending",environment:"isolated-test",environment_url:"https://test.easy-scraping.com",description:"Candidate built; waiting for exact application identity on isolated Test",auto_inactive:false}')"
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/deployments/${deployment_id}/statuses" --input - <<<"$status_payload" >/dev/null
+          echo "id=$deployment_id" >> "$GITHUB_OUTPUT"
+
+      - name: Write immutable candidate manifest
+        shell: bash
+        env:
+          BACKEND_IMAGE: ${{ steps.meta.outputs.backend }}
+          FRONTEND_IMAGE: ${{ steps.meta.outputs.frontend }}
+          BACKEND_DIGEST: ${{ steps.backend.outputs.digest }}
+          FRONTEND_DIGEST: ${{ steps.frontend.outputs.digest }}
+          DEPLOYMENT_ID: ${{ steps.deployment.outputs.id }}
+          CLASSIFICATION: ${{ needs.release-input.outputs.classification }}
+          CONTROL_PLANE_SHA: ${{ needs.release-input.outputs.control_plane_sha }}
+          CHANGED_PATHS_HASH: ${{ needs.release-input.outputs.changed_paths_hash }}
+          CLASSIFIER_VERSION: ${{ needs.release-input.outputs.classifier_version }}
+        run: |
+          set -euo pipefail
+          [[ "$BACKEND_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          [[ "$FRONTEND_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          [[ "$DEPLOYMENT_ID" =~ ^[0-9]+$ ]]
+          jq -n \
+            --arg repositoryHeadSha "$REPOSITORY_HEAD_SHA" \
+            --arg applicationSourceSha "$APPLICATION_SOURCE_SHA" \
+            --arg controlPlaneSha "$CONTROL_PLANE_SHA" \
+            --arg classification "$CLASSIFICATION" \
+            --arg changedPathsHash "$CHANGED_PATHS_HASH" \
+            --arg classifierVersion "$CLASSIFIER_VERSION" \
+            --arg migrationSetHash "$MIGRATION_SET_HASH" \
+            --arg backendImage "$BACKEND_IMAGE" \
+            --arg backendDigest "$BACKEND_DIGEST" \
+            --arg frontendImage "$FRONTEND_IMAGE" \
+            --arg frontendDigest "$FRONTEND_DIGEST" \
+            --argjson deploymentId "$DEPLOYMENT_ID" \
+            --argjson candidateRunId "$GITHUB_RUN_ID" \
+            --argjson candidateRunAttempt "$GITHUB_RUN_ATTEMPT" \
+            --arg createdAt "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            '{schemaVersion:1,candidateRunId:$candidateRunId,candidateRunAttempt:$candidateRunAttempt,repositoryHeadSha:$repositoryHeadSha,applicationSourceSha:$applicationSourceSha,controlPlaneSha:($controlPlaneSha|select(length>0)//null),classification:$classification,changedPathsHash:$changedPathsHash,classifierVersion:$classifierVersion,migrationSetHash:$migrationSetHash,backendImage:$backendImage,backendDigest:$backendDigest,frontendImage:$frontendImage,frontendDigest:$frontendDigest,deploymentId:$deploymentId,createdAt:$createdAt}' \
+            > candidate-manifest.json
+
+      - name: Upload immutable candidate manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-manifest
+          path: candidate-manifest.json
+          if-no-files-found: error
+          retention-days: 30
+
       - name: Write candidate summary
         shell: bash
         run: |
           set -euo pipefail
           {
-            echo '## Test candidate images built'
+            echo '## Attested Test candidate built'
             echo
-            echo "- commit: \`${GITHUB_SHA}\`"
-            echo "- source branch: \`${GITHUB_REF_NAME}\`"
-            echo "- backend: \`${{ steps.meta.outputs.backend }}\`"
-            echo "- frontend: \`${{ steps.meta.outputs.frontend }}\`"
+            echo "- repository head: \`${REPOSITORY_HEAD_SHA}\`"
+            echo "- application source: \`${APPLICATION_SOURCE_SHA}\`"
+            echo "- classification: \`${{ needs.release-input.outputs.classification }}\`"
+            echo "- migration-set hash: \`${MIGRATION_SET_HASH}\`"
+            echo "- backend: \`${{ steps.meta.outputs.backend }}@${{ steps.backend.outputs.digest }}\`"
+            echo "- frontend: \`${{ steps.meta.outputs.frontend }}@${{ steps.frontend.outputs.digest }}\`"
+            echo "- isolated-Test deployment id: \`${{ steps.deployment.outputs.id }}\`"
             echo
-            if [[ "$GITHUB_REF_NAME" == "main" ]]; then
-              echo 'This main candidate is eligible for the automated isolated-Test -> exact-SHA gate -> Production GitOps promotion chain.'
+            if [[ "$GITHUB_REF_NAME" == main ]]; then
+              echo 'This main runtime candidate may enter the isolated-Test identity gate using this manifest; repository HEAD alone is not release identity.'
             else
-              echo 'This development-branch candidate is automatically CI/build validated. Production promotion remains fail-closed until the validated change reaches main and the same main SHA passes isolated Test.'
+              echo 'This branch candidate is validation evidence only. Production remains fail-closed until a main runtime candidate is attested.'
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
-  dispatch-production-gate:
-    needs: build
+  non-runtime-summary:
+    needs: [release-input, verify]
     if: >-
+      needs.release-input.outputs.classification == 'DOCS_ONLY' ||
+      needs.release-input.outputs.classification == 'CONTROL_PLANE_ONLY'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Record zero-runtime candidate decision
+        shell: bash
+        run: |
+          {
+            echo '## No runtime candidate required'
+            echo
+            echo "- repository head: \`${{ needs.release-input.outputs.repository_head_sha }}\`"
+            echo "- application source remains: \`${{ needs.release-input.outputs.application_source_sha }}\`"
+            echo "- classification: \`${{ needs.release-input.outputs.classification }}\`"
+            echo '- registry login/build/push: skipped'
+            echo '- isolated-Test repository-SHA polling: skipped'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  dispatch-production-gate:
+    needs: [release-input, build]
+    if: >-
+      always() &&
+      needs.build.result == 'success' &&
       github.event_name == 'workflow_dispatch' &&
       github.ref == 'refs/heads/main' &&
       inputs.promote == true
@@ -132,7 +321,7 @@ jobs:
       actions: write
       contents: read
     steps:
-      - name: Dispatch Production exact-SHA gate for unchanged main
+      - name: Dispatch Production gate with this attested candidate run
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -140,8 +329,8 @@ jobs:
           set -euo pipefail
           current_main="$(gh api "repos/${GITHUB_REPOSITORY}/branches/main" --jq '.commit.sha')"
           if [[ "$current_main" != "$GITHUB_SHA" ]]; then
-            echo "::warning::main moved from candidate ${GITHUB_SHA} to ${current_main}; newer main candidate must own promotion"
+            echo "::warning::main moved from repository head ${GITHUB_SHA} to ${current_main}; newer main classification owns promotion"
             exit 0
           fi
-          gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main
-          echo "dispatched Production gate for exact current main ${GITHUB_SHA}"
+          gh workflow run deploy.yml --repo "$GITHUB_REPOSITORY" --ref main -f candidate_run_id="$GITHUB_RUN_ID"
+          echo "dispatched Production gate using candidate run ${GITHUB_RUN_ID}"

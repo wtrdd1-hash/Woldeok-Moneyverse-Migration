@@ -43,6 +43,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Test release identity classifier and workflow contract
+        run: node --test scripts/release/*.test.mjs
+
       # A stale dist from an earlier run hides an ordering defect: a consumer
       # typechecks against build output that a clean checkout would not have.
       # That is exactly what got through review once, so the checks below run
