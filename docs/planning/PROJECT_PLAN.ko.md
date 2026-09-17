@@ -2,11 +2,26 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.173
+> **현재 통합 버전:** v2026.09.17.174
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 변경 — v2026.09.17.174 (2026-09-17)
+
+### 자동 백업 시스템
+
+- **현재 호스트 증거:** 권위 PostgreSQL 데이터와 운영 사진은 `/dev/sdb1`, 새 백업 목적지 `/var/backups/moneyverse`는 `/dev/sda1`이다. 기존 `/srv/moneyverse-data/backups` dump는 원본과 같은 `/dev/sdb1`이므로 편의/릴리스 롤백 자료이지 독립 디스크 백업이 아니다.
+- **구현:** `ops/backup/moneyverse-backup.sh`가 PostgreSQL custom-format dump + zstd 사진 archive, manifest, SHA-256을 만들고 root-only 외부 키로 암호화한다. 암호화 파일에도 SHA-256을 만들고 `moneyverse-backup-verify.sh`로 검증하며 14일 보존한다. 목적지와 DB/사진 원본이 같은 filesystem이면 fail-closed한다.
+- **주기:** `ops/systemd/moneyverse-backup.service` + `.timer`가 6시간마다 랜덤 지연을 포함해 실행되며 reboot 후 missed run을 보완한다. CPU/IO 우선순위를 낮추고 systemd filesystem hardening을 적용한다.
+- **검증 증거:** `/srv/moneyverse-data/backups` 대상 negative test는 원본과 목적지가 모두 `/dev/sdb1`이라 의도대로 실패했다. `/var/backups/moneyverse-v173-test` positive test는 약 9.4 MiB 암호화 archive를 생성했고 외부 SHA-256, 복호화, 내부 SHA-256, `pg_restore -l`, 사진 zstd integrity, format marker를 모두 통과했다.
+- **보안/복구:** 암호화 키는 `/etc/moneyverse`의 root-only `0600`이며 Git/backup metadata에 저장하지 않는다. 운영 restore를 자동 파괴 작업으로 수행하지 않으며 격리 target에서 source/target identity, migration/ledger/entitlement/photo reconciliation, audit evidence를 요구한다.
+- **잔여 P0:** `/dev/sda1`과 `/dev/sdb1`은 별도 block device지만 같은 KVM VM 안에 있다. local disk 장애 복구는 개선되지만 off-host/immutable DR은 아니다. 독립 관리 off-host 복사본과 isolated restore drill로 RPO/RTO를 증명하기 전까지 `BAK-106-01`은 OPEN이다.
+
+### v174 백업 수용조건
+
+`주기 암호화 backup` → `별도 filesystem guard` → `외부+내부 checksum` → `DB dump/사진 archive 구조 검증` → `retention` → `restore drill 증거` → `off-host immutable replication` 순이다. 파괴적 schema/data 작업은 backup/restore 증거가 없거나 오래되면 계속 차단한다.
 
 ## 회차 변경 — v2026.09.17.173 (2026-09-17)
 

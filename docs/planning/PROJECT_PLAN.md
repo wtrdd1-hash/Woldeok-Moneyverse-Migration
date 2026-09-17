@@ -2,11 +2,26 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.173
+> Current integrated version: v2026.09.17.174
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.17.174 (2026-09-17)
+
+### Automated backup system
+
+- **Current host evidence:** authoritative PostgreSQL data and production photos resolve to `/dev/sdb1`; the new backup destination `/var/backups/moneyverse` resolves to `/dev/sda1`. Historical dumps under `/srv/moneyverse-data/backups` share `/dev/sdb1` with source data and therefore remain convenience/release rollback artifacts, not independent disk backups.
+- **Implementation:** `ops/backup/moneyverse-backup.sh` creates a PostgreSQL custom-format dump + zstd photo archive, manifest and SHA-256 set, encrypts the package with a root-only external key, writes an encrypted-file SHA-256, verifies it through `moneyverse-backup-verify.sh`, and applies 14-day retention. The script fails closed when destination and DB/photo source resolve to the same filesystem.
+- **Scheduling:** `ops/systemd/moneyverse-backup.service` + `.timer` run every six hours with randomized delay and persist across reboot. Backup work is low CPU/IO priority and constrained by systemd filesystem hardening.
+- **Validation evidence:** negative test to `/srv/moneyverse-data/backups` correctly failed because source and destination were both `/dev/sdb1`. Positive test to `/var/backups/moneyverse-v173-test` generated a 9.4 MiB encrypted archive and passed outer SHA-256, decrypt, internal SHA-256, `pg_restore -l`, photo-zstd integrity and format-marker checks.
+- **Security/restore:** the encryption key is root-only `0600` under `/etc/moneyverse` and is never stored in Git or backup metadata. Production restore is not an automated destructive action; verification uses isolated/disposable targets and requires source/target identity, migration/ledger/entitlement/photo reconciliation and audit evidence.
+- **Residual P0:** `/dev/sda1` and `/dev/sdb1` are separate block devices but still inside the same KVM VM. This improves local disk-failure recovery but is not off-host/immutable DR. `BAK-106-01` remains OPEN until an independently administered off-host copy plus isolated restore drill proves RPO/RTO.
+
+### v174 backup acceptance
+
+`scheduled encrypted backup` → `separate-filesystem guard` → `outer+inner checksum` → `logical dump/photo archive structural verification` → `retention` → `restore-drill evidence` → `off-host immutable replication`. Destructive schema/data work remains blocked if backup/restore evidence is stale or missing.
 
 ## Cycle delta — v2026.09.17.173 (2026-09-17)
 

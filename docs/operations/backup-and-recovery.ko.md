@@ -2,22 +2,40 @@
 
 [English](backup-and-recovery.md) | **한국어** | [문서 색인](../INDEX.ko.md)
 
-## 릴리스 백업의 보호 범위
-운영 환경을 변경하는 마이그레이션이나 런타임 롤아웃 전에 운영 데이터베이스와 사진 오브젝트 저장소를 암호화 백업합니다.
+> 현재 Debian/systemd 권위: v2026.09.17.174. 과거 Docker 백업 스크립트는 명시적으로 현재 환경에 맞게 수정하고 재검증하기 전에는 참고자료로만 취급합니다.
 
-파일이 존재한다는 이유만으로 검증된 백업으로 보지 않습니다. 다음을 확인해야 합니다.
-- 암호화된 데이터베이스 덤프가 정상적으로 복호화되는지
-- 덤프가 정상 종료되고 구조적으로 읽을 수 있는지
-- 사진 아카이브를 열고 읽을 수 있는지
-- 백업이 의도한 스택(Production/Test)에 속하는지
+## 현재 자동 백업 계약
 
-## 스택 식별
-백업 도구는 호출된 배포 디렉터리/스택을 대상으로 동작해야 합니다. 과거에는 운영 수동 백업 명령이 Test 배포 디렉터리를 기본값으로 선택하는 문제가 있었으며, 실행 중인 스택 위치를 명시/기본값으로 사용하도록 수정되었습니다.
+권위 Debian 호스트는 `ops/backup/moneyverse-backup.sh`와 `moneyverse-backup.timer`로 6시간 주기 암호화 백업을 수행합니다. 보호 대상은 권위 PostgreSQL 논리 DB와 운영 사진 오브젝트 디렉터리입니다.
 
-## 호스트 외부 재해 복구
-현재 호스트 로컬 백업은 소프트웨어 실수 복구에는 도움이 되지만 모든 복사본이 같은 장비에 있으면 전체 호스트/스토리지 장애를 보호하지 못합니다. 실제 재해 복구를 위해 NAS나 원격 저장 경로 같은 호스트 외부 대상을 구성하고 주기적으로 복구 테스트해야 합니다.
+기본 운영 계약:
 
-## 복구 정책
-데이터베이스 복구는 영향이 큰 작업입니다. 안전하다면 전진 수정을 우선합니다. 현재 상태를 안전하게 수리할 수 없고 복구 범위가 명시적으로 승인된 경우에만 복구를 사용합니다.
+- DB 컨테이너: `woldeok-moneyverse-dev-db-1`(legacy 이름이며 실제 DB 권위는 별도 검증)
+- 사진 원본: `/srv/moneyverse-data/images/photos`
+- 암호화 백업 목적지: `/var/backups/moneyverse`
+- 암호화 키: `/etc/moneyverse/backup.key`, root 전용 `0600`, Git에 절대 저장하지 않음
+- 주기: 현지시간 00:20, 06:20, 12:20, 18:20 + 최대 10분 랜덤 지연
+- 보존: 14일
+- 아카이브 형식: `moneyverse-backup-v1`
 
-복구를 강제로 수행하려고 Docker 볼륨을 삭제해서는 안 됩니다.
+## 장애영역 분리 가드
+
+백업이 DB 데이터 또는 사진과 같은 파일시스템에 저장되면 안 됩니다. 스크립트는 Docker PostgreSQL host mount와 사진 원본을 `findmnt`로 확인하고 `BACKUP_DEST`가 둘 중 하나와 같은 장치면 fail-closed 합니다.
+
+2026-09-17 실측 기준 DB 데이터와 사진은 `/dev/sdb1`, `/var/backups/moneyverse`는 `/dev/sda1`입니다. 따라서 애플리케이션 데이터 디스크 장애에는 대비하지만 두 디스크 모두 같은 VM에 연결되어 있으므로 이는 **별도 디스크 로컬 복구**이지 검증된 off-host DR은 아닙니다.
+
+## 암호화 및 검증
+
+각 실행은 PostgreSQL custom-format dump와 zstd 사진 아카이브를 만들고 manifest 및 내부 SHA-256을 기록한 뒤 하나의 패키지로 묶어 OpenSSL AES-256-CBC + PBKDF2/SHA-256으로 암호화합니다. 암호화 파일에도 별도 SHA-256을 생성합니다.
+
+성공 조건은 `moneyverse-backup-verify.sh`가 암호화 파일 checksum, 복호화, 내부 checksum, `pg_restore -l` DB 구조 검사, zstd 사진 아카이브 검사, 형식 marker를 모두 통과하는 것입니다. 평문 staging 데이터는 실행 종료 시 제거합니다.
+
+## 복구 및 복구훈련 정책
+
+검증을 이유로 Production에 직접 복구하지 않습니다. 복구 훈련은 격리된 일회용 PostgreSQL과 email/Discord/webhook/indexing outbound를 끈 환경에서 수행합니다. migration parity, ledger/balance, entitlement/provenance, 대표 사진, 주요 application read path까지 검증해야 `VERIFIED_RESTORABLE`로 표시할 수 있습니다.
+
+운영 복구는 명시적 범위, backup identity/checksum, source/target identity, rollback target, operator/audit 기록이 필요합니다. 복구를 강제하려고 Docker volume을 삭제하면 안 됩니다.
+
+## 남은 P0: 호스트 외부 재해복구
+
+현재 자동 로컬 별도디스크 백업만으로 host/hypervisor/site/credential/ransomware 장애를 막을 수 없습니다. 독립 failure domain에 암호화 immutable/off-host 복사본이 존재하고 정기 isolated restore로 RPO/RTO를 실측하기 전까지 P0는 OPEN입니다. 별도 관리 NAS 또는 versioning/retention lock이 있는 object storage처럼 application runtime이 삭제 권한을 갖지 않는 대상이 필요합니다.
