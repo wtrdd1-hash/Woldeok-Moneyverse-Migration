@@ -19,7 +19,9 @@ import {
   LOCALE_COOKIE,
   isLocale,
 } from '@/lib/locale';
-import '../styles/vendor/bootstrap-5.3.8.min.css';
+// Keep the downloaded Bootstrap distribution quarantined in styles/vendor.
+// Global Bootstrap utilities use !important (for example .bg-primary/.text-primary)
+// and collide with this Tailwind theme, so the application shell must not import it.
 import './globals.css';
 import './cosmetics.css';
 

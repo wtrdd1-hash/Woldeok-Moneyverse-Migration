@@ -2,13 +2,27 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.185
+> Current integrated version: v2026.09.17.186
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
 
+
+## Cycle delta — v2026.09.17.186 (2026-09-17)
+
+### Mobile UI regression fix — quarantine global Bootstrap utilities
+
+- **Exact base / branch:** `fix/ui-bootstrap-collision-v2026.09.17.186` starts from and was rechecked mid-work against `main=17801cab463e9c93490b3f93f03c719f95896cb0`. The v175 UI release globally imported the complete Bootstrap 5.3.8 stylesheet into a Tailwind-semantic application shell.
+- **Confirmed root cause:** the vendored Bootstrap file defines generic utilities such as `.bg-primary`, `.text-primary` and `.border-primary` with `!important`, while the frontend intentionally reuses those names for theme-token Tailwind utilities across home, wallet, admin, support and other surfaces. This global namespace collision overrides product colors and layout semantics; the mobile screenshot's blue primary pills/controls is consistent with that collision.
+- **Implementation:** remove the Bootstrap stylesheet from the global Next.js layout while retaining the downloaded Bootstrap 5.3.8 distribution under `frontend/src/styles/vendor/` and on the separate vendor archive disk. Product-owned `globals.css` and `cosmetics.css` remain the only global application styles. No API, backend, database, economy or user-state contract changes.
+- **Regression guard:** `frontend/src/app/ui-style-isolation.test.ts` asserts that the local Bootstrap asset still exists but is not globally imported, and that product global styles load in the intended order. Any future Bootstrap component adoption must be scoped/prefixed rather than reintroducing generic global utility classes.
+- **Local QA evidence:** contract build passed; changed-file ESLint passed; frontend typecheck passed; frontend tests passed 69/69 files and 616/616 tests; Next.js production build passed. `git diff --check` remains a pre-push gate.
+- **Release / rollback gate:** exact branch must be served on isolated Test first, with frontend render plus `/api/version`, backend health, public-catalog/real-backend smoke and Test `noindex` verified. Then merge to `main`, rebuild the exact merged runtime, and promote to Production with zero-downtime cutover and post-promotion home/wallet/casino/shop/guide smoke. Rollback is frontend-only: restore the previous frontend release pointer/nginx target; backend/DB must not be restarted for this CSS isolation change.
+
+### v186 acceptance order
+`exact base + plan recheck` → `global Bootstrap collision removed` → `regression test + typecheck + 69/616 tests + production build` → `isolated Test frontend/backend/API/noindex` → `main merge` → `exact-main zero-downtime Production` → `Production visual/API smoke`.
 
 ## Cycle delta — v2026.09.17.185 (2026-09-17)
 

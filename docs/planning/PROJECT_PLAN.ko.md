@@ -2,12 +2,26 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.185
+> **현재 통합 버전:** v2026.09.17.186
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.17.186 (2026-09-17)
+
+### 모바일 UI 회귀 수정 — Bootstrap 전역 유틸리티 격리
+
+- **정확한 기준/브랜치:** `fix/ui-bootstrap-collision-v2026.09.17.186`은 `main=17801cab463e9c93490b3f93f03c719f95896cb0`에서 시작했고 작업 중간에도 동일 main을 다시 확인했다. v175 UI 릴리스에서 Tailwind 의미 토큰 기반 앱 셸에 Bootstrap 5.3.8 전체 CSS를 전역 import했다.
+- **확정 원인:** 로컬 Bootstrap CSS는 `.bg-primary`, `.text-primary`, `.border-primary` 같은 범용 utility를 `!important`로 정의하고, 프론트는 동일 이름을 테마 토큰 Tailwind utility로 홈·지갑·관리자·지원 등 다수 화면에서 사용한다. 이 전역 네임스페이스 충돌이 제품 색상/표현을 덮어쓰며, 제보된 모바일 화면의 파란 primary pill/control 현상과 일치한다.
+- **구현:** Bootstrap 전체 CSS의 전역 Next.js layout import를 제거한다. Bootstrap 5.3.8 원본은 `frontend/src/styles/vendor/` 및 별도 vendor archive 디스크에 그대로 보존하고, 앱 전역 스타일은 제품 소유 `globals.css`, `cosmetics.css`만 사용한다. API/backend/DB/경제/사용자 상태 규칙은 변경하지 않는다.
+- **회귀 방지:** `frontend/src/app/ui-style-isolation.test.ts`가 Bootstrap 로컬 자산은 존재하지만 전역 import되지 않는지와 제품 global style 순서를 검사한다. 이후 Bootstrap 구성요소가 필요하면 범용 global utility를 다시 넣지 않고 scope/prefix 방식으로만 도입한다.
+- **로컬 QA 증거:** contract build 통과, 변경 파일 ESLint 통과, frontend typecheck 통과, frontend test 69/69 files·616/616 tests 통과, Next.js production build 통과. push 전 `git diff --check`를 추가 gate로 적용한다.
+- **릴리스/rollback gate:** exact branch를 isolated Test에 먼저 배포해 frontend render, `/api/version`, backend health, public-catalog/실backend smoke, Test `noindex`를 확인한다. 이후 `main` 병합, exact merged runtime 재빌드, 무중단 Production 전환과 home/wallet/casino/shop/guide 사후 smoke를 수행한다. rollback은 frontend-only로 이전 frontend release pointer/nginx target을 복원하며 이 CSS 격리 변경 때문에 backend/DB를 재시작하지 않는다.
+
+### v186 수용 순서
+`exact base + 기획 재확인` → `Bootstrap 전역 충돌 제거` → `회귀테스트 + typecheck + 69/616 tests + production build` → `isolated Test frontend/backend/API/noindex` → `main 병합` → `exact-main 무중단 Production` → `Production UI/API smoke`.
 
 ## 회차 델타 — v2026.09.17.185 (2026-09-17)
 
