@@ -2,11 +2,25 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.172
+> **현재 통합 버전:** v2026.09.17.173
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 변경 — v2026.09.17.173 (2026-09-17)
+
+### 증거와 결정
+
+- **저장소/CI/릴리스 증거:** 회차 시작은 문서 전용 `0eabcc19d8c970689533d6a006c12701a62190fc`(v171)였고 필수 중간 재확인에서 `main`이 문서 전용 `2d819484d01d54b6d6e35b4e21e94c98c784bb0d`(v172)로 전진한 것을 확인했다. v171 docs-only SHA에서 `Build Production Release` #919가 시작됐고 `test-gate`가 immutable release SHA를 해석한 뒤 `Wait for exact SHA on isolated test and verify backend/database path`에 진입했다. 즉 문서 전용 repository head도 Production release orchestration과 exact-SHA runtime polling에 들어갈 수 있다. v172 push에서도 generic CI #1181이 시작됐다. 진행 중 gate만으로 Production mutation이 발생했다고 추정하지 않는다.
+- **P0 `REL-DOCS-173-01` — OPEN / 최근 재현 2026-09-17:** 재현은 docs-only 병합 -> workflow_run Production release -> repository 기반 immutable SHA -> isolated Test exact-SHA/backend/database 대기다. 영향은 release identity 혼선, Test polling 비용, 운영자 혼란과 후속 단계 도달 시 credential 노출 가능성이다. 공통 runtime-input classifier가 `applicationSourceSha`를 확정하기 전에 release orchestration 자격을 얻는 것이 원인이다. `deploy.yml`은 triggering run의 서명된 classifier artifact만 소비하고 `DOCS_ONLY_NO_RUNTIME_RELEASE`이면 environment binding 전에 종료한다. repositoryHeadSha는 감사 메타데이터일 뿐 deployable identity가 아니다. 누락/만료/불명 classifier 증거는 fail-closed한다. application-data migration은 필요 없고 rollback은 workflow wiring만 되돌린다. docs-only 수용조건은 Production dispatch/test-gate/exact-SHA poll/environment credential/image/GitOps/DB mutation 모두 0이다.
+- **보안 레퍼런스 갱신:** OWASP Top 10:2025가 현재 일반 웹 애플리케이션 awareness 목록이며 A03 Software Supply Chain Failures를 명시한다. OWASP는 검증 가능한 요구사항에는 ASVS를 권고한다. CI/release provenance, dependency/lockfile integrity, artifact signing/SBOM, reusable-workflow pinning, stage-scoped OIDC를 supply-chain 통제로 매핑한다. API 권한은 OWASP API Security Top 10 2023 + ASVS를 계속 사용하며 일반 Top 10이 BOLA/BFLA/business-flow 시험을 대체하지 않는다. docs-only event가 DB/GHCR/GitOps/Production capability를 받으면 배포 차단이다.
+- **SEO/SEO 백엔드:** Google Search Central 공식 changelog의 2026년 9월 최신 주요 변경은 계속 2026-09-08 regional Search-experience 문서다. structured-data 배포는 rendered-visible content 일치, Rich Results 검증, live URL inspection, template/code 변경 뒤 Search Console 관측을 요구한다. 공개 ProfilePage/SoftwareApplication/Breadcrumb markup은 실제 route 콘텐츠가 지원 type 요구사항을 충족할 때만 출력하고 private account/admin/transaction/economy history는 noindex+sitemap 제외를 유지한다. metadata/JSON-LD serializer와 canonical/redirect history를 versioning하며 crawler identity는 authorization 우회 근거가 아니다.
+- **수익성/운옍:** 새 실측 구매/광고 cohort 데이터는 확인되지 않아 ARPU/ARPDAU/ARPPU, conversion, churn, CAC, LTV는 HYPOTHESIS/TEST TARGET이다. release-control unit economics에는 낭비된 Production-gate minute와 Test-poll minute를 추가한다. 유지 classifier corpus false-negative=0과 docs-only privileged/runtime side-effect=0이 지속될 때만 SCALE, false-positive는 runtime gate를 약화하지 않고 ITERATE, runtime-relevant mixed change를 놓치는 최적화는 KILL/ROLLBACK한다.
+
+### v173 백로그/순서 및 수용조건
+
+`P0 독립 암호화 backup + isolated restore/reconciliation` -> `P0 stale-status false-green` -> `P0 generic CI + candidate + deploy가 하나의 classifier artifact 소비` -> `P0 docs-only Production workflow/test-gate/exact-SHA poll = 0` -> `P0 docs-only DB/GHCR/GitOps capability = 0` -> `P0 단일 applicationSourceSha/runtime-id 권위` -> `P1 auth/session/admin/casino/Work/DB authorization+ledger QA` -> `P1 required-check enforcement` -> 핵심 correctness -> monetization -> SEO/acquisition -> retention/accessibility. 실제 runtime 구현은 별도 branch -> CI -> exact-SHA Test -> API/DB/user-flow QA -> main -> Production -> smoke/rollback 흐름을 유지한다.
 
 ## 회차 변경 — v2026.09.17.172 (2026-09-17)
 
