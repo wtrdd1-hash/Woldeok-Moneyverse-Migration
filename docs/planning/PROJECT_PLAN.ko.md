@@ -2,12 +2,26 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.206
+> **현재 통합 버전:** v2026.09.18.207
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.18.207 (2026-09-18)
+
+### 06:01 런타임/CI 재검증, 한국 Play 수수료 전환일 명시, ASVS 서비스 인증 게이트
+
+- **Exact main / CI:** 시작 및 중간 재확인 authoritative `main`은 `bf392f69ff49ad0cf4078f763879b3776a5f69a8`(v206)이다. branch는 protected이나 `required_status_checks.enforcement_level=off`, contexts/checks 0이므로 `CI-ENFORCE-204-01`은 **P1 / OPEN**이다. 최신 main scheduled `Cleanup Repeatedly Failing Branches` run `35269984569`는 success지만 required merge gate 증거가 아니다. 수정은 change-class별 required classifier/policy/runtime/security check + audited bypass + deliberately-failing negative merge test이며 DB migration은 없다.
+- **P0 runtime/DR — 06:01 KST 재현:** Debian backend/frontend/backup timer는 active, timer enabled, last 00:22:17, next 06:26 KST. canonical HTTPS `/api/version`은 HTTP/2 200, `Cache-Control: no-store`, deployed application `75e69e77cdc18ef221106a008563151a4c790728`; 최근 1시간 warning+ backend journal 0. 00:22 encrypted archive/database.dump/photos.tar.zst/manifest.txt 검증은 모두 OK. `BAK-RUNTIME-177-01`은 **P0 / IN PROGRESS**: 최신 archive isolated restore→decrypt/checksum→schema/migration-set→identity/session/inventory/entitlement/ledger/reward/bank/loan/stocks/casino/community/referral/audit reconciliation→RPO/RTO 실측→off-host immutable replication/retention→missed-run/verify/replication/restore alert 실제 전달 전 destructive schema/ledger/entitlement Production 변경 차단. `REL-AUTH-184-01`도 repository main과 deployed application이 다르므로 immutable candidate binding/exact-SHA Test/migration equality/session+API+user-flow smoke/journal/rollback manifest 전 승격 금지.
+- **Security — DIRECT ADOPT:** OWASP ASVS 5.0 V13.2.1/V13.2.2를 backend/API/data-layer 통신에 적용한다. 사용자 session을 공유하지 않는 service-to-service 통신은 개별 service account, short-lived token 또는 certificate 인증을 사용하고 static privileged password/API key/shared account를 금지하며 최소권한을 강제한다. auth/payment/reward/bank/stock/casino/admin worker별 credential scope를 분리하고 issuer/audience/expiry/replay 검증, rotation/revocation, masked audit와 auth-failure alert를 둔다. negative tests는 expired/wrong-audience/revoked token, cross-service privilege, replay를 포함하며 실패 시 HIGH deploy-block. 기존 OWASP API 2023 + Top 10 2025/BOLA/CSRF/XSS/SQLi/SSRF/upload/idempotency/webhook/supply-chain/integrity/exception gates를 유지한다.
+- **SEO/SEO backend — DIRECT ADOPT:** Google Search Central은 Breadcrumb, Discussion forum, Profile page 등 지원 structured-data 유형을 현재 명시한다. 실제 공개 community/profile 페이지가 eligibility와 visible-content 일치를 충족할 때만 serializer를 활성화하고 존재하지 않는 rating/author/entity를 합성하지 않는다. canonical/robots/split sitemap+lastModified/hreflang/redirect/read-model/SSR-ISR/CWV/UGC index 정책을 유지하며 Rich Results/schema validation failure를 release gate와 SEO admin crawl/index report에 연결한다. KPI는 organic impression→CTR→visit→signup→activation→D7/D30→revenue이고 structured-data 노출 자체를 매출로 간주하지 않는다.
+- **Monetization/unit economics — DIRECT ADOPT, KR date correction:** Google Play 공식 rollout 표는 KR의 updated service fees + expanded billing choice 및 new Apps/Games programme 적용일을 **2026-12-31**로 명시한다. 따라서 2026-09-18 현재 한국 거래에 EEA/UK/US의 10% subscription/20% new-install/25% existing-install 표를 선적용하지 않는다. SKU pricing service는 `{market,effectiveDate,installCohort,transactionType,programme,billingPath,tax/refund}`를 저장/resolve하고 KR 전환 전후 cohort를 분리한다. 모든 revenue/net revenue/gross+contribution margin/ARPU/ARPDAU/ARPPU/conversion/repeat/renewal/churn/refund/CAC/LTV/payback/fraud/infra/support/D1-D30 미실측치는 `HYPOTHESIS/TEST TARGET`; scale/iterate/kill은 cohort margin+retention+fairness+policy+support guardrail 동시 통과가 조건이다.
+- **전체 기능 실행계약:** auth/signup/login/OAuth/logout/session/security center; profile; inventory/collection; shop/cart/payment/subscription/ad-removal; season/quest/job/level/reward; business/bank/loan; stocks/portfolio/alerts/comparison; casino; community/posts/comments/report/block; friends/clubs/invite/referral; notifications/search/gallery/upload/public content; App API; admin/audit; backup/restore; analytics/experiments; ads; SEO tooling/backend; Discord/incident 전부에 구현상태+코드/문서 근거, 화면 entry/CTA/loading-empty-error-offline-timeout/recovery, responsive/a11y/i18n, ownership/RBAC, API schema/errors/idempotency/rate-limit, DB PK/FK/unique/check/index/transaction/concurrency, immutable audit/observability, admin/flag/fallback, privacy/abuse, SEO/KPI/cache/performance, unit/integration/E2E/real-DB/security/regression, exact-SHA deploy/rollback 증거를 요구한다. 우선순위는 P0 DR→P0 release authority→real-DB/economy integrity→HIGH auth/payment/economy/upstream/service-auth→P1 CI enforcement/responsive Production proof→correctness→monetization→SEO/acquisition→retention/accessibility. 기획 변경은 runtime/DB를 변경하지 않는다.
+
+### v207 worklog / acceptance order
+Google Search Central + OWASP ASVS/API + Google Play 공식자료 재조사 → exact main/protection/Actions → Debian services/version/journal/backup → 전체 기능/security/SEO/economics delta → 중간 main 재확인 → EN/KO 동기화 → diff/CI/PR.
 
 ## 회차 델타 — v2026.09.18.206 (2026-09-18)
 
