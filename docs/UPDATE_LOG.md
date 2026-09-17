@@ -1,5 +1,11 @@
 # Update Log
 
+## v2026.09.17.195 — v193 Production evidence
+
+- Recorded zero-downtime Production remediation for the v193 Next.js API-cache permission fix.
+- Active cache ownership is now `debian:debian`; frontend/backend PIDs remained unchanged.
+- Health/BFF/public page probes passed and the post-repair window contained no new cache or backend fatal/database errors.
+
 ## v2026.09.17.193 — Frontend API cache runtime permission guard
 
 - Branch: `fix/frontend-api-cache-permissions-v2026.09.17.193`, based on `5d5826b21a9e4ae98fd0dcbe771d57fa8c674c84`.
