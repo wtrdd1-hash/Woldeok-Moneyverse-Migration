@@ -2,12 +2,30 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.181
+> **현재 통합 버전:** v2026.09.17.182
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+
+## 회차 델타 — v2026.09.17.182 (2026-09-17)
+
+### P0 문서 전용 릴리스 실패 재재현 + 백업/런타임 게이트 유지
+
+- **정확한 기준/CI 증거:** exact base `b03e76816b843404ae7daeedf926b421d56ed05f`는 문서 전용입니다. `Build Test Candidate` run `35188609866`은 성공했지만 downstream `Build Production Release` run `35188947483`은 15:14~15:29 KST에 **failure**로 종료했습니다. 현 main에서도 `REL-DOCS-181-01`이 연속 재현되어 문서 repository identity가 runtime release 경로로 진입합니다. `Auto Integrate and Promote`는 skipped이므로 Production 승격으로 해석하지 않습니다. Severity P0, 최초관측 2026-09-17 14:15 KST, 최신재현 15:14~15:29 KST입니다.
+- **영향/원인/담당:** CI release 상태, isolated Test 용량, registry/DB/environment 권한경계, red/green 신호에 대한 운영 신뢰가 영향받습니다. 확정 설계결함은 `repositoryHeadSha == applicationSourceSha` 권위 혼동과 pre-privilege path classifier 이전 runtime-release dispatch입니다. 담당순서 Release/Infra → Security → Backend/DB → QA → Operations. 상태 OPEN이며 반복 BLOCKED/재현은 신규기능보다 우선합니다.
+- **구현 가능한 수정:** merge-base classifier만 signed/immutable `release-input.json={repositoryHeadSha,applicationSourceSha|null,classification,changedPathsHash,classifierVersion}`을 생성합니다. `DOCS_ONLY_NO_RUNTIME_RELEASE`는 Test polling, DB 연결/마이그레이션, registry 인증/push, Production environment/secret, GitOps mutation 전에 종료합니다. `RUNTIME_RELEVANT`는 candidate/Test/release를 `applicationSourceSha`+image digest+migration-set hash에 결합하고 migration/control-plane은 명시적 별도 gate를 사용합니다. mixed/unknown은 credential 전에 fail-closed합니다. application-data migration은 없습니다. 롤백은 자동 Production dispatch를 먼저 끄며 repository-head-as-runtime을 정상상태로 되돌리지 않습니다.
+- **QA/수용/관측:** path+hash 단위 corpus, docs/planning/changelog/worklog negative corpus, backend/frontend/package/migration/workflow/GitOps positive corpus, docs-only dry-run 3회 privileged side effect=0, runtime rehearsal 2회 exact application SHA+API/catalog/실DB+Test `noindex`, classification 전 secret materialization=0을 요구합니다. `docs_only_privileged_side_effect_total`, unknown/false-positive/false-negative, Test-poll minutes, registry/DB access, environment-secret materialization, release false-red를 관측합니다. runtime false-negative, secret 노출, docs-only privileged side effect는 승격 차단입니다.
+- **최신 런타임 증거:** 약 16:00 KST 권위 Debian에서 backend/frontend는 active이고 최근 1시간 warning 이상 journal은 없지만 `moneyverse-backup.timer`는 여전히 not found, backend 직접 `/api/version`은 HTTP 404입니다. `BAK-RUNTIME-177-01`은 P0 OPEN이며 scheduled encrypted backup→checksum/decrypt/구조검증→isolated restore/reconciliation→off-host immutable copy 전까지 파괴적 schema/data/ledger/entitlement 변경을 금지합니다. application-owned version endpoint 또는 동등한 immutable evidence가 source SHA/artifact digest/migration set을 결합하기 전 runtime identity는 UNKNOWN입니다.
+- **전체 기능 동등성:** 인증/OAuth/세션/보안센터, 프로필, 인벤토리/컬렉션, 상점/장바구니/결제/구독/광고제거, 시즌/퀘스트/직업/레벨/보상, 사업/은행/대출, 가상주식/포트폴리오/알림/비교, 카지노/확률형, 커뮤니티/모더레이션, 친구/클럽/추천, 알림/검색/업로드/공개콘텐츠, App API, 관리자/감사, 백업/복구, 분석/실험, 광고, SEO 도구, 장애대응의 기존 상세계약을 유지합니다. 코드/문서 근거, UX 상태, 권한/소유권, API 오류·멱등성·rate limit, DB constraint·transaction·concurrency, 감사/fallback/privacy/abuse, SEO/analytics/performance/cache, QA/deploy/rollback 증거 없이는 DONE 승격 금지입니다.
+- **SEO/광고:** Google Search Central 최신 주요 문서변경은 2026-09-16 Search profile badge 가이드이며 선택적 공개 프로필 affordance이지 ranking 보장이 아닙니다. server-authoritative canonical/robots/sitemap/lastModified/breadcrumb/JSON-LD/hreflang/SSR-ISR/CWV/redirect/UGC-index와 private-route noindex 계약을 유지합니다. Google Publisher Tag의 2026-09-08 bfcache 자동 refresh는 provider impression identity 기준 analytics 중복제거와 광고 유발 이탈/retention을 차감한 순가치 평가를 요구합니다.
+- **보안:** 검증 가능한 통제는 OWASP ASVS 5.0.0, API별 BOLA/auth/property·function authorization/resource exhaustion/sensitive-business-flow/SSRF/config/inventory/unsafe-upstream 시험은 API Security Top 10 2023을 사용합니다. release classifier는 least-privilege/supply-chain 통제이므로 배포차단 항목입니다.
+- **수익성/성장:** 새 실측 purchase/ad cohort가 없어 revenue/net revenue/margin/ARPU/ARPDAU/ARPPU/conversion/retention/churn/refund/CAC/LTV/fraud/infra/support는 실측 또는 `HYPOTHESIS/TEST TARGET`만 허용합니다. Google Play 수수료는 market/install cohort/transaction type/programme/billing path에 따라 달라 SKU unit economics는 policy-versioned로 유지합니다. classifier 가치는 Test polling, registry/DB/environment 사용, engineer/on-call 시간과 false-red 조사비용 회피입니다. runtime false-negative=0 및 docs-only privileged side effect=0에서만 scale, false-positive/unknown 비용은 iterate, secret 노출/무단 side effect면 자동승격을 kill합니다.
+
+### v182 worklog / 수용순서
+`최신 공식 레퍼런스` → `exact main/runtime/CI 대조` → `REL-DOCS 두 번째 재현` → `backup/runtime P0 유지` → `전체기능/SEO/보안/수익성 동등성` → `작업 중 exact-main 재확인` → `EN/KO 동기화` → `PR CI` → `exact base 유지 시에만 병합`. Planning-only이며 runtime/DB/Test/Production을 변경하지 않습니다.
 
 ## 회차 델타 — v2026.09.17.181 (2026-09-17)
 
