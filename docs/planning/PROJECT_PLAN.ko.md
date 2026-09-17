@@ -2,12 +2,26 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.186
+> **현재 통합 버전:** v2026.09.17.187
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.17.187 (2026-09-17)
+
+### v186 UI 핫픽스 운영 승격 증거
+
+- **릴리스 계보:** PR #431이 `fix/ui-bootstrap-collision-v2026.09.17.186`을 exact main `9e1342ca3a30ec9d0fb01d868b13c392231d97a0`로 병합했고 CI run `35210149830`의 secret/lint/typecheck/build/migration/test/Prisma/audit gate가 모두 성공했다.
+- **Exact-main Test 증거:** immutable Test release `/srv/moneyverse-data/releases/test-9e1342ca3a30-ui186`가 `9e1342ca3a30ec9d0fb01d868b13c392231d97a0`를 반환했다. backend `/health` 정상, 공개 catalog 146개, 홈 Moonlight/빠른 메뉴 문구 유지, `X-Robots-Tag: noindex, nofollow` 유지, 생성 CSS에서 Bootstrap 전역 `--bs-primary-rgb` signature 없음까지 확인했다.
+- **무중단 Production 승격:** immutable Production frontend `/srv/moneyverse-data/releases/prod-9e1342ca3a30-ui186`를 3201 canary에서 먼저 검증했다. nginx를 3001 → 3201로 원자 전환한 상태에서 supervised 3001 frontend release pointer를 교체·재기동했고 exact-SHA/catalog 검증 후 3201 → 3001로 복귀했다. 외부 `/api/version`은 현재 `9e1342ca3a30ec9d0fb01d868b13c392231d97a0`를 반환한다.
+- **Production smoke:** `/health` 정상, `/`, `/wallet`, `/casino`, `/shop`, `/guide` HTTP 200, 공개 catalog 146개, 홈 핵심 문구 확인, 렌더링 CSS 5개에서 Bootstrap global signature 없음까지 확인했다.
+- **Backend/DB 보존:** backend PID `400161`, 활성 시각 `Thu 2026-09-17 00:57:08 KST`가 승격 전후 동일했다. 이 frontend-only 복구 때문에 backend 재시작이나 DB migration을 수행하지 않았다.
+- **Rollback 증거:** nginx backup `/etc/nginx/backups/moneyverse.before-v186-prod-20260917192743`, frontend service drop-in backup `/etc/systemd/system/moneyverse-frontend.service.d/release.conf.before-v186-20260917192743`, exact-main Test nginx backup `/etc/nginx/backups/moneyverse.before-v186-main-test-20260917192645`.
+
+### v187 상태
+문서/증거 전용이다. 런타임 대상은 v186 exact main `9e1342ca3a30ec9d0fb01d868b13c392231d97a0`이며 v187은 새 애플리케이션 동작을 추가하지 않는다.
 
 ## 회차 델타 — v2026.09.17.186 (2026-09-17)
 
