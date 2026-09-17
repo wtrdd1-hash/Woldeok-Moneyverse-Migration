@@ -2,11 +2,27 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.196
+> Current integrated version: v2026.09.17.197
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.17.197 (2026-09-17)
+
+### Production backend identity proven; backup P0 narrowed
+
+- Exact-main evidence: v196 exact-head CI #1239 succeeded and PR #443 was merged; mid-cycle authoritative main is . Authoritative Debian backend/frontend are active. Direct backend  now returns HTTP 200, , and deployed application build ; backend-owned runtime identity is therefore PRODUCTION-PROVEN for this application SHA. A docs-only repository head may legitimately differ and is never runtime authority.
+- P0  remains IN PROGRESS: the six-hour timer is enabled/active and 21:22/21:57 encrypted archive/database/photos/manifest verification passed. Remaining gates are isolated restore plus domain reconciliation, measured RPO/RTO, off-host immutable replication/retention, and failure-alert evidence. Destructive schema, ledger or entitlement rewrites remain blocked until all are proven.
+- Release/security:  remains P0 until DOCS_ONLY/CONTROL_PLANE_ONLY/RUNTIME_RELEVANT/MIXED and missing/stale/foreign-candidate matrices prove candidate-manifest authority. OWASP API Security still lists 2023 as latest API-specific Top 10; BOLA, authentication, property/function authorization, resource exhaustion, sensitive-flow abuse, SSRF, misconfiguration, inventory and unsafe-upstream tests remain blocking. Public runtime identity exposes build id only and stays .
+- All-feature contract remains authoritative across auth/session/security center, profile, inventory/collection, shop/cart/payment/subscription, seasons/jobs/rewards, business/bank/loan, stocks, casino, community/moderation, friends/referral, notifications/search/upload/public content, App API, admin/audit, analytics/experiments, ads and SEO tooling. State mutations require ownership/BOLA, idempotency/replay, transaction/unique constraints, audit receipts and real-DB concurrency tests; irreversible releases additionally require fresh backup, off-host copy, restore drill and deployed identity.
+- SEO: Google Search Central on 2026-09-17 migrated infinite-scroll guidance without changing it. Infinite-scroll public feeds/catalog/collections/search require crawlable paginated URLs, server-renderable links, stable ordering, self-canonical, deterministic title/H1 and correct 200/404; cursors remain API-internal and facets default noindex/canonical unless promoted by the SEO read-model.
+- Economics: Google Play has no universal fee; current EEA/UK/US standard examples are 10% auto-renew, 20% other new-install and 25% other existing-install plus applicable 5% billing fee; KR rollout is scheduled 2026-12-31. SKU economics remain policy-versioned and unmeasured ARPU/ARPDAU/ARPPU, conversion, churn/refund, CAC/LTV, fraud, infra/support remain explicit hypotheses/test targets.
+- Bot/main delta: mid-cycle main also merged PR #441, atomically resetting guild-scoped Discord commands to the supported seven-command music set while leaving global commands untouched. Treat this as MERGED / PRODUCTION-POST-RESTART-SMOKE-PENDING until command/voice runtime evidence is recorded.
+- Priority: P0 isolated restore/off-host backup evidence → P0 release-class matrix → migration-204 real-DB/economy-integrity → HIGH auth/BOLA/CSRF/idempotency/ledger-abuse → P1 required-check enforcement → correctness → monetization → SEO/acquisition → retention/accessibility. Planning performs no runtime or DB mutation.
+
+### v197 worklog
+Fresh official references → exact main/PR/CI → Debian backup/runtime identity → feature/SEO/security/economics delta → mid-cycle main recheck → EN/KO synchronization → diff/CI/PR.
 
 ## Cycle delta — v2026.09.17.196 (2026-09-17)
 
