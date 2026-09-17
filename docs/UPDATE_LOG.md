@@ -1,5 +1,12 @@
 # Update Log
 
+## v2026.09.17.193 — Frontend API cache runtime permission guard
+
+- Branch: `fix/frontend-api-cache-permissions-v2026.09.17.193`, based on `5d5826b21a9e4ae98fd0dcbe771d57fa8c674c84`.
+- API audit found healthy NestJS/BFF paths but repeated Production Next.js `EACCES` failures under `.next/cache/fetch-cache`.
+- Added a release-root constrained helper and regression test that prepares only the mutable Next.js cache and verifies runtime-user write access.
+- Added EN/KO host-mirror deployment guidance; backend, database and migration 204 are unchanged.
+
 ## v2026.09.17.184 — AI profession assignment-limit auto control
 
 - Branch: `feat/ai-job-limit-auto-v2026.09.17.184`, based on `3f523e6708af2bd9d24b60282f26619263a8c53d`.

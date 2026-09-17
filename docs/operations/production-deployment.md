@@ -16,6 +16,12 @@ GitOps remains the declarative release authority, but the current public Nginx e
 
 The host mirror must use the same approved SHA, preserve the previous unit configuration for rollback, and pass the same catalog/status/SEO probes before a release is reported complete.
 
+## Frontend runtime cache ownership
+
+The host systemd frontend runs as `debian`, while Next.js updates `.next/cache` at runtime for server-side fetch revalidation. A release copied or built as root must therefore prepare only that mutable cache subtree before canary/start; do not recursively change ownership of the immutable application release.
+
+Run `ops/systemd/prepare-frontend-runtime-cache.sh <release-dir> debian debian` on Test first. The helper refuses paths outside `/srv/moneyverse-data/releases` by default, limits ownership changes to `frontend/.next/cache`, and verifies a real write as the runtime user. After requests that exercise revalidation, confirm the frontend journal has no new `EACCES` cache-write errors before Production promotion.
+
 ## Backend session continuity
 
 Production backend promotion must not log members out. Member sessions are PostgreSQL-backed in `auth_sessions`; browser and server-side member-session lifetime are both 30 days. A backend process restart or release-directory change therefore must reuse the same Production database and must not revoke, truncate, recreate, or re-key live session rows. Administrator console sessions retain their separate short lifetime and are not extended by this rule.
