@@ -9,6 +9,29 @@
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
 
+## Cycle delta — v2026.09.17.177 (2026-09-17)
+
+### International jurisdiction, localization, casino and monetization plan
+
+- **Work branch / current base:** `docs/international-jurisdiction-localization-v2026.09.17.177` from `f7d2087f342a087bc568ffc4abcaac5540f62e5b`. The authoritative `main` was rechecked after scope expansion and again after the prior local planning attempt; this cycle is documentation/research only and does not alter runtime, DB, Test or Production state.
+- **Superseded local attempt:** `docs/casino-legal-safety-v2026.09.17.176` from `faa047fdb637df74b4327ef45c9585be1c15d8c5` was never pushed or merged. While research was in progress, `main` advanced with the authoritative v176 runtime-backup plan, so the local attempt was rebased/replaced by this v177 branch rather than competing for the same version.
+- **Existing P0 remains authoritative:** v176 `BAK-RUNTIME-176-01` and `BAK-106-01` remain open and ahead of destructive or monetization rollout work. This cycle does not claim that scheduled backup, off-host DR or exact-SHA runtime observability gaps are fixed.
+- **Scope:** one `country × subdivision × channel × age × feature` policy engine integrating international casino gates, non-P2W monetization, Google Play/App Store/Web billing routes, minors/privacy/ads controls, expanded site languages, natural localization quality and Google multilingual/multi-regional SEO.
+- **Core architecture:** `locale != jurisdiction`. Language selection changes presentation/search only and cannot bypass country feature restrictions. High-risk features resolve through versioned server policy states `ALLOW/ALLOW_WITH_CONTROLS/BLOCK/REVIEW_REQUIRED/TEMPORARILY_DISABLED`; missing/stale legal, rating or store evidence fails closed.
+- **Initial market matrix:** KR/US/GB/EEA/AU/JP/BR receive explicit baselines; CA/SG/TW remain REVIEW_REQUIRED until local review; China mainland is not launched by default pending a separate licensing/compliance project. U.S. casino is state-aware and EEA policy is Member-State-aware.
+- **Casino:** zero direct revenue target. Before cash monetization coexists with casino, use non-purchasable/non-transferable/non-redeemable CSP or equivalent provenance isolation. KR requires GRAC/19+/store/legal gates; AU simulated gambling is R18+; Washington defaults blocked pending explicit approval. `No cash-out` remains necessary but is not treated as globally sufficient.
+- **Monetization:** P0 candidates are ad removal, account-bound cosmetics and non-competitive convenience. Cash WLD sale, paid randomized items and paid casino stake are globally blocked by default. Android/iOS/Web billing route is jurisdiction/store policy data; client price/currency/entitlement is never authoritative. Market rollout uses contribution margin after store/PSP fees, tax, refunds, chargebacks, support, moderation, localization and legal/rating cost rather than gross revenue alone.
+- **Locales:** product/public-site target expands to `en`, `ko`, `ja`, `de`, `fr`, `es`, `pt-BR`; project documentation remains English canonical with Korean second. Translation becomes a source-hash/glossary/review-versioned artifact with linguistic/product/legal/SEO gates.
+- **Google SEO:** separate locale URLs, self-canonical, reciprocal hreflang for true equivalents, useful `x-default`, locale sitemaps and one primary visible language per page. IP/browser-language forced redirects and thin mass machine-translated pages are prohibited.
+- **Detailed authority:** `INTERNATIONAL_LOCALE_JURISDICTION_MONETIZATION_SPEC.md`, `INTERNATIONAL_COMPLIANCE_REFERENCE_MATRIX.md` and Korean counterparts. Casino/monetization/search specs receive linked v177 integration deltas.
+- **Promotion:** docs-only. No runtime/Test/Production feature enablement occurs in this cycle. Implementation order is policy engine → localization/SEO → billing → casino value isolation → isolated Test exact-SHA matrix → per-market approval → feature-flag enablement.
+- **Traceability / validation:** initial documentation commit `af2f359f33a0a73da6b9d5a14d622fc20466058f` / PR #413. GitHub Actions CI run `35173516232` passed secret scan, install, lint, control-byte check, typecheck, production build, database migrations, full tests, Prisma-schema mutation guard and production-dependency audit. Static `git diff --check` and relative Markdown-link validation also passed.
+- **Merge/Test/Production status:** PR #413 is merge-pending at this final plan sync. This cycle is docs-only, so isolated Test runtime promotion and Production runtime promotion are **N/A**; no payment/casino/country-policy runtime flag is enabled by this change.
+
+### v177 acceptance order
+
+`authority-first research` → `country/subdivision/channel policy` → `locale/jurisdiction separation` → `natural-translation review gates` → `Google international SEO` → `market billing` → `casino CSP/paid-value isolation` → `Test matrix` → `per-market legal/product approval` → `Production feature flag`. Existing backup/DR P0 gates remain prerequisite where applicable.
+
 ## Cycle delta — v2026.09.17.176 (2026-09-17)
 ## Cycle delta — v2026.09.17.177 (2026-09-17)
 

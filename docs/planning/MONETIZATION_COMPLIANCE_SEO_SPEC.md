@@ -1,10 +1,18 @@
 # Woldeok Moneyverse — Monetization, Korea/US Compliance & Search Growth Specification
 
-> Version: v2026.09.12.27
+> Version: v2026.09.17.177
 > Status: Living implementation-oriented product specification
-> Date: 2026-09-12
+> Date: 2026-09-17
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`
 > Korean counterpart: [MONETIZATION_COMPLIANCE_SEO_SPEC.ko.md](MONETIZATION_COMPLIANCE_SEO_SPEC.ko.md)
+
+## v2026.09.17.177 international monetization integration delta
+
+- Country/subdivision/channel sale eligibility and billing route are authoritative in `INTERNATIONAL_LOCALE_JURISDICTION_MONETIZATION_SPEC.md`.
+- `WLD_CASH_PURCHASE`, `PAID_RANDOM_ITEM`, and any `paid -> casino stake` path are blocked by default.
+- Korea Android alternative billing, EEA/GB/US Google Play programs, Apple storefront exceptions and similar channel rules are versioned release evidence; old planning snapshots are never generalized into permanent billing logic.
+- Revenue KPIs use contribution margin by market/locale/channel after store/PSP fees, tax, refunds, chargebacks, support/moderation, localization and legal/compliance cost.
+- Casino has zero direct revenue target and an independent release train from billing.
 
 ## 1. Purpose
 
