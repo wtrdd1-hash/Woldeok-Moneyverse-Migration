@@ -161,6 +161,7 @@ jobs:
           echo "Desired infra=$infra_sha test=$test_sha"
 
       - name: Configure strict direct target SSH
+        id: direct_ssh
         shell: bash
         env:
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
@@ -168,10 +169,25 @@ jobs:
           set -euo pipefail
           printf '%s\n' '192.168.100.186 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP2tRZ2fc3s0TLNeY2fRNKcz2oYylnh4xFl+y+oM/VCp' > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
+          common=(-i "$HOME/.ssh/deploy" -o IdentitiesOnly=yes -o IdentityAgent=none -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=5)
+          selected=''
+          for candidate in root nixos "$DEPLOY_USER"; do
+            [[ -n "$candidate" ]] || continue
+            if ssh "${common[@]}" "$candidate@192.168.100.186" true >/dev/null 2>&1; then
+              selected="$candidate"
+              break
+            fi
+          done
+          [[ -n "$selected" ]] || { echo '::error::Deployment key is not authorized for root, nixos, or configured deploy user on the Kubernetes target.'; exit 255; }
+          if [[ "$selected" == root || "$selected" == nixos ]]; then
+            echo "Authenticated Kubernetes target as $selected."
+          else
+            echo 'Authenticated Kubernetes target as configured deployment user.'
+          fi
           printf '%s\n' \
             'Host nixos-target' \
             '  HostName 192.168.100.186' \
-            "  User $DEPLOY_USER" \
+            "  User $selected" \
             '  Port 22' \
             '  IdentityFile ~/.ssh/deploy' \
             '  IdentitiesOnly yes' \
