@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.176
+> **현재 통합 버전:** v2026.09.17.177
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -10,6 +10,28 @@
 
 
 ## 회차 변경 — v2026.09.17.176 (2026-09-17)
+## 회차 변경 — v2026.09.17.177 (2026-09-17)
+
+### P0 백업 통제 재재현 + 릴리스/관측 게이트
+
+- **브랜치/작업이력:** `docs/plan-v177-runtime-backup-repro`, exact base `f7d2087f342a087bc568ffc4abcaac5540f62e5b`; 기획 전용이다. runtime unit, DB, Test, GitOps, Production은 변경하지 않는다.
+- **최신 증거(2026-09-17 12:01 KST):** 권위 Debian 호스트의 Moneyverse 5개 서비스는 모두 active이고 직전 1시간 backend/frontend warning 이상 journal은 없다. `moneyverse-backup.timer`와 `/var/backups/moneyverse`는 여전히 없고 backend 직접 `GET /api/version`은 HTTP 404다. 따라서 P0은 현재 재현된 결함이다.
+- **P0 `BAK-RUNTIME-177-01` — OPEN / 파괴적 릴리스 차단:** 최초 11:03 KST, 12:01 KST 재현. balance, ledger, inventory/entitlement, profile, uploaded photo가 영향 범위다. 저장소 backup 구현은 존재하지만 runtime scheduler/destination은 없다. deployment/configuration drift는 확인됐고 installer 생략의 구체 원인은 UNKNOWN이다.
+- **수정/담당:** Infra=exact-SHA 설치/systemd enable, Security=외부 키/restore-role 분리, Backend/DB=dump·migration·ledger 정합성, QA=fault injection/isolated restore, Operations=RPO/RTO dashboard/off-host immutable copy. scheduled backup+구조검증+isolated restore+`BAK-106-01` off-host 증거가 모두 PASS하기 전 destructive migration/data cleanup/ledger rewrite 운영승격을 금지한다.
+- **마이그레이션/롤백/시험:** application-data migration은 없다. timer disable/이전 unit 복구로 rollback하되 artifact·audit·마지막 verified backup은 보존한다. same-filesystem, missing-key, permission, disk-full, interrupted-write, retention, reboot persistence, outer/inner hash, `pg_restore -l`, photo archive/manifest, isolated restore의 migration-set·ledger 합계·entitlement uniqueness·sample photo hash 정합성을 시험한다.
+- **모니터링/릴리스 권위:** timer 누락/disabled, RPO age, verify failure, destination 여유공간, verified copy 0, off-host copy 노후, release-evidence mismatch를 경보한다. `/api/version`은 non-secret immutable application identity뉼 제공하도록 백로그화하며 404는 runtime identity UNKNOWN으로 처리해 exact-SHA 완료 주장을 차단한다.
+
+### 레퍼런스·보안·SEO·사업성 판정
+
+- **SEO / 직접채택:** Google Search Central 최신 주요 문서 변경은 2026-09-08 regional Search experience다. 현재 canonical/robots/sitemap/hreflang/SSR/ISR 계약을 바꿀 새 ranking 근거는 없다. public SEO read-model은 server-authoritative, private account/admin/transaction/economy-history는 noindex+sitemap 제외, structured data는 visible eligible content에만 출력한다.
+- **보안 / 직접채택:** OWASP Top 10:2025는 Broken Access Control, Software Supply Chain Failures, Authentication Failures, Software/Data Integrity Failures, Logging/Alerting Failures를 포함하고 OWASP는 검증 가능한 SDLC 요구에 ASVS를 권고한다. object/function authorization, fail-closed release classification, provenance-bound artifact, least-privilege runtime/restore credential, masked audit log, negative abuse test를 배포차단 통제로 유지한다. API별 BOLA/BFLA/business-flow 시험은 API Security Top 10 2023을 유지한다.
+- **전 기능 계약:** auth/session/OAuth, profile/security center, inventory/collection, shop/cart/payment/subscription/ad-removal, season/quest/job/level/reward, business/bank/loan, virtual stock/portfolio/alerts, casino, community/moderation, friend/club/referral, notification/search/upload/public content, app API/admin/audit/backup/analytics/ads/SEO/incident response의 기존 상세 matrix를 계속 권위로 둔다. 화면상태, role/ownership, API request/response/error/idempotency/rate-limit, DB constraint/transaction/concurrency, audit/fallback/privacy/abuse, SEO/analytics/performance/cache, QA, deploy/rollback 증거 없이는 PARTIAL/PLANNED를 DONE으로 바꾸지 않는다.
+- **사업성:** 새 실측 purchase/ad cohort는 없다. revenue/net revenue/margin/ARPU/ARPDAU/ARPPU/conversion/retention/churn/refund/CAC/LTV/fraud/infra/support는 실측 또는 `HYPOTHESIS/TEST TARGET`만 허용하고 SKU fee는 거래별 versioning을 유지한다. backup 가치는 data-loss/downtime/refund/support/fraud-reconciliation 손실 회피다. 반복 RPO/RTO PASS+off-host immutable restore에서만 scale, 미달은 iterate, stale/missing backup 또는 runtime identity 미정합은 destructive eligibility kill이다.
+
+### v177 수용 순서
+
+`최신 공식 레퍼런스` → `exact main + runtime + CI 대조` → `P0 재현` → `기능/보안/SEO/사업성 계약 유지` → `작업 중 exact-main 재확인` → `EN/KO parity + diff check` → `PR CI` → `exact base 불변일 때만 merge`.
+
 
 ### P0 런타임 백업 설치 공백 + 권위 정합성
 
