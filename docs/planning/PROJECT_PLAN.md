@@ -2,11 +2,27 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.174
+> Current integrated version: v2026.09.17.175
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.17.175 (2026-09-17)
+
+### UI polish + local Bootstrap asset contract
+
+- **Work branch:** `feat/ui-local-assets-v2026.09.17.175`; base and mid-work `main` SHA: `57feac0e2f701ed4bba12b868ddf19c2f916a32a`.
+- **Bootstrap source/storage:** the getbootstrap.kr 5.3 download page points to Bootstrap **5.3.8** compiled distribution. Its ZIP and SHA-256 are retained on the separate `/dev/sdb1` data disk under `/srv/moneyverse-data/vendor/bootstrap/5.3.8/`.
+- **Runtime asset rule:** Bootstrap is not loaded from a third-party CDN. `frontend/src/styles/vendor/bootstrap-5.3.8.min.css` is bundled by Next.js.
+- **UI scope:** shared app background, sticky header, main spacing, card depth/hover and footer boundary; desktop home status and mobile quick actions use the same hierarchy. API, DB and business rules are unchanged.
+- **Accessibility/performance:** hover motion is removed for `prefers-reduced-motion`; fixed background treatment is disabled on mobile; no new third-party runtime asset request is introduced.
+- **Verification evidence:** shared contract build and frontend typecheck pass; 68 frontend test files / 614 tests pass; production build passes. Test/Production runtime promotion remains gated below.
+- **Promotion order:** exact branch → isolated Test frontend/backend/API smoke → main merge → exact-main recheck → Production promotion → Production smoke. Runtime completion is not claimed before those gates.
+
+### v175 acceptance order
+
+`separate-disk Bootstrap archive + checksum` → `zero runtime Bootstrap CDN` → `frontend static/unit/build PASS` → `isolated Test frontend/backend/API smoke` → `main merge` → `exact-main Production smoke`.
 
 ## Cycle delta — v2026.09.17.174 (2026-09-17)
 

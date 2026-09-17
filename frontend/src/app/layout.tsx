@@ -19,7 +19,7 @@ import {
   LOCALE_COOKIE,
   isLocale,
 } from '@/lib/locale';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import '../styles/vendor/bootstrap-5.3.8.min.css';
 import './globals.css';
 import './cosmetics.css';
 

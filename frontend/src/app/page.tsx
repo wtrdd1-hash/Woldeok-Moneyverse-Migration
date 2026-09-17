@@ -83,7 +83,7 @@ export default async function HomePage() {
             the page stops being a document and looks like a ledger card. */}
         <aside
           aria-labelledby="status-panel-title"
-          className="rounded-[28px] border border-primary/30 bg-card p-6 text-card-foreground shadow-raised shadow-primary/10 ring-1 ring-primary/20 lg:rotate-[1deg]"
+          className="moneyverse-feature-card rounded-[28px] border border-primary/30 bg-card p-6 text-card-foreground shadow-raised shadow-primary/10 ring-1 ring-primary/20 lg:rotate-[1deg]"
         >
           <div className="flex items-center gap-2">
             <span className="text-base">🌙</span>

@@ -84,7 +84,7 @@ export function SiteHeader() {
   const mobileAdmin = mobileAdminEntries(viewer);
 
   return (
-    <header className="sticky top-0 z-30 border-b bg-background/94 backdrop-blur-lg">
+    <header className="moneyverse-site-header sticky top-0 z-30 border-b bg-background/94 backdrop-blur-lg">
       <div className="mx-auto flex h-16 sm:h-[70px] lg:h-[76px] w-full max-w-[1180px] items-center gap-2 min-[480px]:gap-3 lg:gap-6 px-3 min-[480px]:px-4 sm:px-6">
         <Brand />
 
