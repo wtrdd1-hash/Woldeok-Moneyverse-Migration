@@ -2,11 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.173
+> Current integrated version: v2026.09.17.174
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.17.174 (2026-09-17)
+
+### Evidence and decisions
+
+- **Repository/CI/release evidence:** cycle start was documentation-only `0eabcc19d8c970689533d6a006c12701a62190fc` (v171); mandatory mid-run recheck observed `main` advance to documentation-only `2d819484d01d54b6d6e35b4e21e94c98c784bb0d` (v172). For the v171 docs-only SHA, `Build Production Release` #919 nevertheless started; `test-gate` resolved an immutable release SHA and entered `Wait for exact SHA on isolated test and verify backend/database path`. This proves a docs-only repository head can still enter Production-release orchestration and exact-SHA runtime polling. v172 generic CI #1181 also started on push. No Production mutation is inferred from an in-progress gate.
+- **P0 `REL-DOCS-173-01` — OPEN / latest reproduction 2026-09-17:** reproduction is docs-only merge -> workflow_run Production release -> repository-derived immutable SHA -> isolated-Test exact-SHA/backend/database wait. Impact: release-identity ambiguity, Test polling cost, operator confusion and possible later credential exposure. Root cause is release orchestration eligibility before shared runtime-input classification establishes `applicationSourceSha`. `deploy.yml` must consume only a signed classifier artifact and terminate before environment binding for `DOCS_ONLY_NO_RUNTIME_RELEASE`; repositoryHeadSha is audit metadata, never deployable identity. Missing/stale/unknown classifier evidence fails closed. No application-data migration is required; rollback reverts workflow wiring only. Docs-only acceptance: Production dispatch/test-gate/exact-SHA poll/environment credential/image/GitOps/DB mutation all zero. Monitor docs-only Production workflow/test-gate/exact-SHA counters, classifier age/version and repository/application SHA divergence.
+- **Security reference refresh:** OWASP Top 10:2025 is the current general web-application awareness list and explicitly includes A03 Software Supply Chain Failures; OWASP recommends ASVS for verifiable application-security requirements. Map CI/release provenance, dependency/lockfile integrity, artifact signing/SBOM, reusable-workflow pinning and stage-scoped OIDC to this control family. API authorization continues to use OWASP API Security Top 10 2023 plus ASVS; the general Top 10 does not replace BOLA/BFLA/business-flow testing. Docs-only events receiving DB/GHCR/GitOps/Production capability are release-blocking.
+- **SEO/SEO backend:** Google Search Central still lists 2026-09-08 regional Search-experience documentation as September's latest major documentation update. Structured-data rollout requires rendered-visible-content parity, Rich Results validation, live URL inspection and Search Console monitoring after template/code changes. Emit public ProfilePage/SoftwareApplication/Breadcrumb markup only where visible route content satisfies the supported type; private account/admin/transaction/economy history remains noindex and outside sitemap. Version metadata/JSON-LD serializers and canonical/redirect history; crawler identity never bypasses authorization.
+- **Economics/operations:** no new measured purchase/ad cohort data was found, so ARPU/ARPDAU/ARPPU, conversion, churn, CAC and LTV remain HYPOTHESIS/TEST TARGET. Release-control unit economics adds wasted Production-gate and Test-poll minutes. SCALE requires maintained-corpus false-negative=0 and sustained docs-only privileged/runtime side-effect=0; ITERATE false positives without weakening runtime gates; KILL/ROLLBACK any optimization that misses runtime-relevant mixed changes.
+
+### v174 backlog/order and acceptance
+
+`P0 independent encrypted backup + isolated restore/reconciliation` -> `P0 stale-status false-green` -> `P0 one classifier artifact consumed by generic CI + candidate + deploy` -> `P0 docs-only Production workflow/test-gate/exact-SHA poll = 0` -> `P0 docs-only DB/GHCR/GitOps capability = 0` -> `P0 single applicationSourceSha/runtime-id authority` -> `P1 auth/session/admin/casino/Work/DB authorization+ledger QA` -> `P1 required-check enforcement` -> core correctness -> monetization -> SEO/acquisition -> retention/accessibility. Runtime implementation remains separate branch -> CI -> exact-SHA Test -> API/DB/user-flow QA -> main -> Production -> smoke/rollback.
 
 ## Cycle delta — v2026.09.17.173 (2026-09-17)
 
