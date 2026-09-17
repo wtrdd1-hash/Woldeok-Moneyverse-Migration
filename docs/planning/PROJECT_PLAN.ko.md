@@ -13,8 +13,8 @@
 
 ### 런타임·세션·CI 재대조
 
-- 기준 main:  (v180). PostgreSQL  연속성 테스트는 구현됐으나 Production runtime 증거는 별도 게이트다.
-- **P0 BAK-RUNTIME-181-01 OPEN:** 14:01 KST backend/frontend active,  없음, backend  HTTP 404. 암호화 backup→검증→isolated restore/reconciliation→off-host immutable copy 전 destructive DB/data/ledger/entitlement 승격 금지.
+- 기준 main: c7720282eb8bb4c672c1782861e3be251cf2bfa5 (v180). PostgreSQL auth_sessions 연속성 테스트는 구현됐으나 Production runtime 증거는 별도 게이트다.
+- **P0 BAK-RUNTIME-181-01 OPEN:** 14:01 KST backend/frontend active, moneyverse-backup.timer 없음, backend GET /api/version HTTP 404. 암호화 backup→검증→isolated restore/reconciliation→off-host immutable copy 전 destructive DB/data/ledger/entitlement 승격 금지.
 - **HIGH SESSION-DEPLOY-181-01 IN PROGRESS:** Test exact-SHA에서 deploy/restart 전후 동일 cookie fingerprint·user·DB session row를 확인하고 새 Set-Cookie, revoke/re-key/truncate, 강제 logout을 금지한다. raw cookie/token/PII는 로그·artifact에 남기지 않는다.
 - **P0 release-control:** Build Test Candidate #823 verify/check는 DB migration까지 성공했고 build job은 GHCR backend candidate build/push에 진입했다. runtime 변경에는 정당하지만 docs-only negative corpus에서 privileged side effect=0을 required check로 증명해야 한다.
 - 보안 기준은 OWASP ASVS 5.0.0, API Security Top 10 2023, Top 10:2025다. 세션의 broken authentication/BOLA, fixation/replay, CSRF, token leakage, stale privilege를 검증한다.
@@ -25,7 +25,7 @@
 
 ### v181 수용 순서
 
- →  →  →  →  →  →  → .
+공식 레퍼런스 → main/runtime/CI → P0/HIGH gate → 전체 기능 계약 → 중간 main → EN/KO parity → PR CI → exact base 불변 merge.
 
 ## 회차 변경 — v2026.09.17.180 (2026-09-17)
 
