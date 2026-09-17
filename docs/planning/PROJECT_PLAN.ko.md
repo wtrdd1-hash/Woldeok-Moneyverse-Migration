@@ -2,12 +2,29 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.205
+> **현재 통합 버전:** v2026.09.18.206
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.18.206 (2026-09-18)
+
+### 04:04 런타임/CI 갱신, v205 종결, canonical origin 증거 강화
+
+- **정확한 main / writer 종결:** v205 PR #454 exact head `99bb52ac1539777c9831fb5298369f91a6c0314f`는 CI run `35256844107` (#1258) 성공 후 squash merge됐다. 회차 시작 authoritative main은 `5c3286c57b7c0c6a84e6c76f80a7f0339060ceb2`였고 검증된 v205 종결 후 `59d6032d22db9de804438ee8d5b7ca4190326f39`가 되었으며 작업 중간 재확인에서도 동일했다. 이번 기획은 docs-only이며 runtime/DB 승격을 수행하지 않는다.
+- **런타임/API 증거 — 04:04 KST:** Debian backend/frontend/backup timer는 active, timer enabled, 마지막 예약 백업은 00:22:17 KST, 다음은 06:26 KST다. sampled backend warning+ journal은 비어 있다. `http://127.0.0.1:3001/api/version`은 `https://easy-scraping.com/api/version`으로 정상 308을 반환하며 3001 포트에 직접 TLS를 시도하면 실패한다. 이는 해당 listener가 HTTP이기 때문이다. Canonical public HTTPS `https://easy-scraping.com/api/version`은 HTTP/2 200, `Cache-Control: no-store`, deployed application `75e69e77cdc18ef221106a008563151a4c790728`을 반환한다. 릴리스 QA는 scheme+host+port를 기록하고 redirect/listener topology를 application failure와 구분하며 Production identity는 repository HEAD가 아니라 canonical public HTTPS 응답으로 판정한다.
+- **P0 백업/DR `BAK-RUNTIME-177-01`: IN PROGRESS / 04:04 KST 재현.** 00:22 archive의 encrypted archive, `database.dump`, `photos.tar.zst`, `manifest.txt` 검증은 계속 유효하다. DONE은 최신 archive → 격리 폐기 가능 restore → decrypt/checksum/schema/migration-set 검증 → identity/session, inventory/entitlement, ledger/reward, bank/loan, stocks, casino, community/referral, audit 불변조건 reconciliation → 실측 RPO/RTO → off-host immutable replication/retention → missed-run/verify/replication/restore alert 실제 전달이다. 불일치는 fail-closed이며 Production restore와 destructive schema/ledger/entitlement rewrite를 차단한다.
+- **CI/릴리스 권위:** planning head CI 성공은 해당 docs candidate를 현재 workflow가 수용했다는 증거일 뿐이다. `REL-AUTH-184-01`은 CONTROL_PLANE_ONLY/RUNTIME_RELEVANT/MIXED와 missing/stale/foreign candidate 음성 클래스에서 immutable candidate binding, exact-SHA Test attestation, migration equality, session continuity, smoke, journal review, rollback manifest가 증명될 때까지 **P0 / IN PROGRESS**다. `CI-ENFORCE-204-01`은 administration 권한 ruleset/protection read와 의도적으로 실패한 required check의 실제 merge 차단 증거 전까지 **P1 / EVIDENCE-STALE**다.
+- **전체 기능 실행계약:** auth/signup/login/OAuth/logout/session/security center, profile, inventory/collection, shop/cart/payment/subscription/ad-removal, season/quest/job/level/reward, business/bank/loan, stocks/portfolio/alerts/comparison, casino, community/moderation, friends/clubs/invite/referral, notifications/search/gallery/upload/public content, App API, admin/audit, backup/restore, analytics/experiments, ads, SEO backend/tooling, Discord, incident operations는 화면별 entry/CTA/loading-empty-error-offline-timeout/recovery, responsive/a11y/i18n, ownership/RBAC/BOLA, API request/response/error/idempotency/rate-limit, service rule, DB PK/FK/unique/check/index/transaction/concurrency, immutable audit/observability, admin/flag/fallback, privacy/abuse, SEO, KPI, performance/cache, unit/integration/E2E/real-DB/security/regression, deploy/rollback 요구를 유지한다. Stateful/economic 기능은 fresh backup, off-host copy, restore proof, exact deployed identity 없이 DONE으로 승격하지 않는다.
+- **SEO — 직접채택 / 2026-09-18 공식 재확인:** Google Search Central pagination/infinite-scroll 지침에 따라 public community/catalog/collection/search는 crawlable server-renderable links, stable ordering, self-canonical/title/H1, 정확한 status/redirect, sitemap+`lastModified`, breadcrumbs/structured data/hreflang, SSR/ISR/CWV를 유지한다. Cursor/facet은 SEO read-model이 durable landing으로 승격하기 전 API-only 또는 noindex/canonical이다. SEO backend는 metadata/canonical/robots/sitemap/redirect serializer, crawler log, Search Console/Naver ingestion을 소유하고 private/account/admin/security/transaction route는 noindex를 강제한다.
+- **보안 — 직접채택 / 2026-09-18 공식 재확인:** OWASP API Security Project latest는 계속 2023이다. BOLA, broken authentication/property/function authorization, resource consumption, sensitive-business-flow abuse, SSRF, misconfiguration, inventory, unsafe upstream consumption을 release-block한다. Third-party input은 TLS, destination policy, schema validation/sanitization, bounded redirect/timeout/body/concurrency, circuit breaker/fallback을 요구한다. Cookie mutation은 CSRF, 경제/payment/reward write는 server authority, replay-safe idempotency, signed receipt/webhook, immutable masked audit를 요구한다.
+- **수익성/unit economics — 직접채택 / 2026-09-18 공식 재확인:** Google Play는 현재 EEA/UK/US standard 예시로 auto-renew subscription 10%, 기타 new-install 20%, 기타 existing-install 25%와 Play Billing 적용 시 5% billing fee를 제시하며, 나머지 시장은 updated fee global rollout 전까지 적용 가능한 기존 schedule을 유지한다. 각 SKU는 market/effective-date/install-cohort/transaction/programme/billing-path/tax/refund를 먼저 resolve한다. 미실측 revenue/margin/ARPU/ARPDAU/ARPPU/conversion/repeat/renewal/churn/refund/eCPM/fill/CTR/CAC/LTV/payback/infra/support/fraud/D1-D30은 `HYPOTHESIS/TEST TARGET`이며 scale/iterate/kill은 cohort 및 fairness/retention/policy guardrail로 판정한다.
+- **우선순위:** P0 restore/off-host/alerts → P0 release-authority matrix → migration-204 real-DB/economy integrity → HIGH auth/BOLA/CSRF/idempotency/ledger/payment/webhook/upstream abuse → P1 required-check 권위증거 + responsive Production proof → Discord smoke → P2 Gallery CSP → correctness → monetization → SEO/acquisition → retention/accessibility.
+
+### v206 작업로그 / 수용 순서
+최신 Google Search Central/OWASP/Google Play 공식자료 → exact main/canonical/open-v205 writer+CI → 검증된 v205 merge → Debian service/version/backup/journal 재현 → 전체 기능/security/SEO/economics 실행 delta → 작업 중간 exact-main 재확인 → EN/KO 동기화 → diff/CI/PR.
 
 ## 회차 델타 — v2026.09.18.205 (2026-09-18)
 
