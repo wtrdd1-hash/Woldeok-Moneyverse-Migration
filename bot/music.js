@@ -155,16 +155,8 @@ export class MusicManager {
   }
 
   async registerCommands(guild) {
-    const existing = await guild.commands.fetch();
-    for (const definition of MUSIC_COMMANDS) {
-      const command = existing.find((item) => item.name === definition.name);
-      if (command) {
-        await guild.commands.edit(command.id, definition);
-      } else {
-        await guild.commands.create(definition);
-      }
-    }
-    this.logger.log?.(`[Music] Registered ${MUSIC_COMMANDS.length} guild music commands.`);
+    await guild.commands.set(MUSIC_COMMANDS);
+    this.logger.log?.(`[Music] Reset and registered ${MUSIC_COMMANDS.length} guild music commands.`);
   }
 
   async handleInteraction(interaction) {
