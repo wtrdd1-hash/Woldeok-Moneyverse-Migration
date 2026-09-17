@@ -2,12 +2,30 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.180
+> **현재 통합 버전:** v2026.09.17.181
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 변경 — v2026.09.17.181 (2026-09-17)
+
+### 런타임·세션·CI 재대조
+
+- 기준 main:  (v180). PostgreSQL  연속성 테스트는 구현됐으나 Production runtime 증거는 별도 게이트다.
+- **P0 BAK-RUNTIME-181-01 OPEN:** 14:01 KST backend/frontend active,  없음, backend  HTTP 404. 암호화 backup→검증→isolated restore/reconciliation→off-host immutable copy 전 destructive DB/data/ledger/entitlement 승격 금지.
+- **HIGH SESSION-DEPLOY-181-01 IN PROGRESS:** Test exact-SHA에서 deploy/restart 전후 동일 cookie fingerprint·user·DB session row를 확인하고 새 Set-Cookie, revoke/re-key/truncate, 강제 logout을 금지한다. raw cookie/token/PII는 로그·artifact에 남기지 않는다.
+- **P0 release-control:** Build Test Candidate #823 verify/check는 DB migration까지 성공했고 build job은 GHCR backend candidate build/push에 진입했다. runtime 변경에는 정당하지만 docs-only negative corpus에서 privileged side effect=0을 required check로 증명해야 한다.
+- 보안 기준은 OWASP ASVS 5.0.0, API Security Top 10 2023, Top 10:2025다. 세션의 broken authentication/BOLA, fixation/replay, CSRF, token leakage, stale privilege를 검증한다.
+- SEO는 Google Search Central 2026-09-08 최신 major update 기준을 유지한다. 9월 16일 행사 게시물은 ranking 정책 변경으로 사용하지 않는다. 공개 canonical/robots/sitemap/lastModified/hreflang/structured-data/SSR, Test noindex, private route noindex+sitemap 제외를 유지한다.
+- 기존 전체 기능 matrix의 UX/API/DB/권한/감사/fallback/abuse/SEO/KPI/성능/QA/rollback 계약을 유지한다. deploy-induced forced logout과 mutation idempotency/authorization 회귀는 승격 차단이다.
+- 새 실측 구매/광고 cohort가 없어 수익 지표는 실측 또는 HYPOTHESIS/TEST TARGET만 허용한다. 세션 KPI는 deploy-induced logout, re-login abandonment, auth CS, D1/D7 retention이다.
+- 순서: backup P0 → runtime identity → Test session continuity → auth/BOLA/CSRF/idempotency → exact-SHA API/DB/user-flow QA → main → Production canary → smoke → rollback drill. 기획 회차는 runtime/DB를 변경하지 않는다.
+
+### v181 수용 순서
+
+ →  →  →  →  →  →  → .
 
 ## 회차 변경 — v2026.09.17.180 (2026-09-17)
 
