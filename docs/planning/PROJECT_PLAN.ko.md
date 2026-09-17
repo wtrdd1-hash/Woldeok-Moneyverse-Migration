@@ -2,12 +2,31 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.177
+> **현재 통합 버전:** v2026.09.17.178
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 변경 — v2026.09.17.178 (2026-09-17)
+
+### P0 복구 권한·영구 러너 자격증명·백업 런타임 정합성
+
+- **정확한 기준 / 구현 상태:** 기획 브랜치 `docs/plan-v178-recovery-authority`는 `70565ac9ef88d34f0234e3173fdee98428aa5987` 기준이다. 해당 main 커밋은 `.github/workflows/flux-jump-recovery-v150.yml`에 `direct-recover`를 추가했다. production environment의 `[self-hosted, moneyverse-deploy, debian13]` 러너가 `DEPLOY_SSH_KEY`를 파일로 만들고 대상 host key를 고정한 뒤 GitOps desired state를 clone하고 NixOS 대상에 SSH하여 `ops/recovery/flux-jump-v150.sh`를 실행한다. 이후 공개 Test exact SHA/카탈로그/noindex를 검증하고 `always()` 단계에서 SSH 파일을 삭제한다. 이는 구현 코드이며 실제 복구 성공 증거는 아니다.
+- **최신 런타임 증거 (2026-09-17 13:00 KST):** 권위 Debian 호스트에서 backend/frontend는 active지만 `moneyverse-backup.timer`는 여전히 없고 backend 직접 `GET /api/version`도 HTTP 404다. 따라서 `BAK-RUNTIME-177-01`은 계속 **P0 OPEN**, runtime identity는 UNKNOWN이다. 파괴적 DB/data/ledger/entitlement 작업은 승격 금지다.
+- **P0 `RECOVERY-AUTH-178-01` — OPEN / 운영 control-plane 보안 게이트:** 새 direct-recovery는 영구 self-hosted runner와 production environment를 사용하며 장기 SSH private key를 `~/.ssh/deploy`에 기록한다. cleanup과 strict host-key checking이 있고 private key 대신 fingerprint만 로그하지만, 사용 후 삭제는 ephemeral credential 발급과 동일한 통제가 아니다. 실행 중 다른 프로세스의 key 읽기, 정상 cleanup 밖의 runner/host 장애 후 잔존, runner 침해, 과도한 production secret 노출, 잘못되거나 stale한 GitOps authority 대상 복구가 위협이다.
+- **수정 설계:** direct recovery는 break-glass 전용으로 유지한다. OIDC/broker/certificate 기반의 짧은 수명 stage-scoped credential을 우선하며 audience·target host·command/scope·run-id·TTL을 결합한다. 정적 SSH key가 임시로 필요하면 recovery 전용 제한 계정/key, 가능한 forced-command/source allowlist, agent forwarding 금지, recovery command 외 shell 금지, 일반 deploy secret과 분리, 사용/사고 후 rotation, secret 기록 전 stale identity 파일 제거를 적용한다. 영구 runner는 단일 목적·패치 유지·비대화형이어야 하며 untrusted PR workload를 실행하지 않고 job 간 workspace를 정리하며 비정상 process/network를 감시한다.
+- **복구 authority 계약:** immutable evidence는 `{repositoryHeadSha, applicationSourceSha, gitOpsInfraSha, desiredTestSha, deployedTestRuntimeId, imageDigest/packageHash, migrationSetHash, workflowRunId, runnerIdentity, targetHostKeyFingerprint, observedAt}`를 결합한다. repository head 단독은 deployable identity가 아니다. 필드 누락/stale/mismatch는 fail-closed한다. `direct-recover`는 Flux/Test convergence 복구만 허용하며 Production application 승격이나 파괴적 DB 작업 권한이 아니다.
+- **QA / 롤백 / 모니터링:** 잘못된/missing host key, wrong target, stale GitOps SHA, candidate SHA 누락/형식 오류, key 누락, credential 만료, 동시 recovery, SSH 중단, runner reboot, cleanup 실패, Test SHA mismatch, catalog 실패, Test `noindex` 누락을 negative test한다. 수용조건은 log/artifact/process args의 secret 값 0, 실행 전후 stale credential file 0, exact GitOps/Test identity 일치, recovery audit event, controlled failure 뒤 cleanup 성공이다. 롤백은 `direct-recover` 비활성화, credential revoke/rotate, audit evidence 보존 후 이전 reviewed recovery path로 복귀하며 application DB data를 변경하지 않는다. recovery 호출/성공/실패/시간, credential age/rotation, runner identity, host-key mismatch, exact-SHA convergence latency, cleanup failure를 관측한다. 설명되지 않는 호출 또는 credential residue는 triage 전 HIGH/P0 보안사고로 취급한다.
+- **전체 기능 영향:** auth/session/OAuth, profile/security center, inventory/collection, shop/cart/payment/subscription/ad-removal, season/quest/job/level/reward, business/bank/loan, virtual stock, casino, community/moderation, friend/club/referral, notifications/search/upload/public content, app API/admin/audit/analytics/ads/SEO는 기존 상세 matrix를 계속 따른다. Recovery는 DB constraint, authorization, idempotency, ledger invariant, privacy, abuse control, feature flag를 우회할 수 없다. `PARTIAL/PLANNED → DONE`은 구현과 exact-SHA Test 증거가 필요하다.
+- **SEO:** 이번 회차에 새로운 Google ranking contract는 확인되지 않았다. 공개 페이지의 server-authoritative canonical/robots/sitemap/hreflang/SSR/ISR/structured-data 계약을 유지하고 Test는 `noindex`를 유지하며 recovery 성공 전 해당 header를 검증한다. private account/admin/transaction/economy-history는 noindex+sitemap 제외를 유지한다.
+- **보안 레퍼런스:** OWASP Top 10:2025 A01 access control, A03 software supply-chain failures, A07 authentication failures, A08 software/data integrity, A09 logging/alerting을 recovery 교차통제로 직접 채택하고, 검증 가능한 요구사항은 ASVS를 사용한다. API authorization/business-flow 시험은 API Security Top 10 2023 mapping을 유지한다.
+- **사업성:** 신규 실측 purchase/ad cohort가 없으므로 revenue/net revenue/margin/ARPU/ARPDAU/ARPPU/conversion/retention/churn/refund/CAC/LTV/fraud/infra/support는 실측 또는 `HYPOTHESIS/TEST TARGET`만 허용한다. Recovery 가치는 outage/on-call/rollback/support 손실 회피다. self-hosted runner 고정비, recovery minutes, engineer/on-call minutes, 회피 incident loss를 측정한다. 반복 break-glass drill에서 credential residue=0 및 exact-SHA convergence가 지속될 때만 **scale**, cleanup/convergence miss는 **iterate**, 설명되지 않는 호출·credential leak/residue·wrong-target reachability·authority mismatch는 **kill/disable**한다.
+
+### v178 수용 순서
+
+`최신 공식 레퍼런스` → `exact main/runtime/CI 정합` → `P0 backup gap 유지` → `direct-recovery 위협/authority 계약` → `작업 중 exact-main 재확인` → `EN/KO parity + diff/link 검사` → `PR CI` → `exact base 불변일 때만 병합`.
 
 ## 회차 변경 — v2026.09.17.177 (2026-09-17)
 
