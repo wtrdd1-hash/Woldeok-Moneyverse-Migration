@@ -2,12 +2,28 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.188
+> **현재 통합 버전:** v2026.09.17.189
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.17.189 (2026-09-17)
+
+### docs-only containment 증거 추가, backup/runtime P0 유지, required-check 공백 지속
+
+- **Exact main / CI 증거:** 시작·중간 재확인 `main=060968b0b7e6ed462fa653fa9e3e50b7f3a84459`(v188 문서 병합)이다. branch protection은 켜져 있지만 required status check는 `enforcement_level=off`, required context/check 0개로 여전히 저장소 강제 gate가 아니다. 이 docs-only main에는 Actions run 6개가 연결돼 있고 cleanup은 예상대로 skipped다. docs-only workflow의 부재/skipped를 runtime 성공 증거로 해석하지 않는다.
+- **P0 `REL-AUTH-184-01`: IN PROGRESS.** v188 자체가 `DOCS_ONLY` main이므로 repository head가 바뀌었다는 이유만으로 application/runtime 배포가 허용되지 않는 containment 관측 1건을 추가한다. 전체 matrix 완료는 아니다. docs-only 3회(runtime/DB/registry/Production environment side effect=0), control-plane-only 3회(application build/repository-SHA Test polling=0), runtime-relevant exact-candidate 2회, mixed 1회, missing/stale/foreign candidate 음성 dispatch를 모두 요구한다. required-check enforcement는 P0 backup/release identity 직후 P1로 둔다.
+- **P0 `BAK-RUNTIME-177-01`: OPEN / 약 21:00 KST 재현.** 권위 Debian backend/frontend service는 active이나 `moneyverse-backup.timer`는 여전히 없고 backend 직접 `GET /api/version`은 HTTP 404다. 영향은 auth/session, inventory/collection, shop/payment/subscription entitlement, jobs/reward/ledger, business/bank/loan, stocks, casino, community/moderation, referral, audit/analytics 전체 상태영역이다. 원인은 UI가 아니라 운영 capability/evidence 부재다. least-privilege scheduled encrypted backup과 `{backupId,startedAt,completedAt,sourceDbVersion,schemaMigrationSetHash,objectCounts,checksum,encryptionKeyVersion}` manifest, decrypt/checksum/structure 검증, isolated restore, domain reconciliation, off-host immutable retention, restore drill/alerting을 구현한다. RPO/RTO와 restore 증거 전 destructive migration 및 ledger/entitlement rewrite는 운영승격 금지다.
+- **전체 기능 구현계약 유지:** auth/signup/login/OAuth/logout/session/security center, profile, inventory/collection, shop/cart/payment/subscription/ad-removal, season/quest/job/level/reward, business/bank/loan, virtual stocks/portfolio/alerts/comparison, casino/randomized mechanics, community/posts/comments/report/block, friends/clubs/invite/referral, notifications/search/gallery/upload/public content, App API, admin/audit, backup/restore, analytics/experiments, ads, SEO backend/tooling, incident operations의 화면 상태, ownership/authorization, API error/idempotency/rate limit, DB key/constraint/transaction/concurrency, audit/fallback/privacy/abuse, analytics/KPI, performance/cache, QA와 deploy/rollback 계약을 유지한다. v187 Bootstrap 격리는 frontend-only Production-proven이고 migration 204 adaptive profession limits는 MERGED / NOT PRODUCTION-PROVEN이다.
+- **SEO/성장 최신 판정:** Google Search Central 최신 major 문서 변경은 2026-09-16 Search profile badge이고 9월 8일 regional Search experience, 8월 28일 site-reputation enforcement 변경을 함께 적용한다. 서버권위 metadata/canonical/robots/sitemap/lastModified/breadcrumb/structured data/hreflang/SSR-ISR/CWV/redirect, private/account/admin/transaction `noindex`, crawler-observable SEO read model, UGC/sponsored index governance를 유지한다. SEO backend는 permanent slug/redirect map, sitemap partition, indexability state, Search Console/Naver 상태 수집, crawler-log 진단, organic→signup→activation→D7/D30→revenue attribution을 제공한다. Search profile badge는 선택적 acquisition affordance이지 ranking 보장이 아니다.
+- **보안 최신 판정:** OWASP API Security Project의 최신 API-specific Top 10은 2023이다. BOLA, broken authentication, object-property/function authorization, resource exhaustion, sensitive-business-flow abuse, SSRF, misconfiguration, API inventory, unsafe-upstream consumption을 release-blocking 테스트로 유지하고 ASVS 5.0을 검증 baseline으로 둔다. Backup/release manifest, payment receipt, entitlement grant, economy ledger receipt는 보안 민감 integrity 객체이므로 immutable identity, least privilege, replay 방지, audit retention, 로그 마스킹이 필수다.
+- **광고/수익화/unit economics:** Google Publisher Tag는 2026-09-08부터 bfcache 복귀 시 actively viewed slot을 자동 refresh할 수 있으므로 provider impression identity로 중복제거하고 `광고매출 - 광고 유발 session/retention 손실` 순효과를 본다. Google Play EEA/UK/US standard 예시는 auto-renewing subscription 10%, new-install non-recurring 20%, existing-install non-recurring 25%이며 Play Billing 적용 시 해당 5% billing fee가 추가될 수 있다. 각 SKU는 market × effective date × install cohort × transaction type × programme × billing path로 fee policy를 resolve한 뒤 net revenue/contribution margin을 계산한다. 새 실측 cohort가 없어 revenue/net revenue/margin/ARPU/ARPDAU/ARPPU/conversion/retention/churn/refund/CAC/LTV/fraud/infra/support는 실측 또는 `HYPOTHESIS/TEST TARGET`만 허용하고 kill/iterate/scale 기준을 사전 정의한다.
+- **우선순위/backlog:** P0 scheduled encrypted backup + isolated/off-host verified restore → P0 release-class acceptance matrix → backend-owned Production runtime identity → migration 204 exact-candidate real-DB/economy-integrity QA → HIGH auth/BOLA/CSRF/idempotency/ledger-abuse gate → P1 required-check enforcement → correctness → monetization → SEO/acquisition → retention/accessibility. 이번 회차는 planning-only이며 runtime code/DB/Test/Production을 배포하지 않는다.
+
+### v189 worklog / 수용 순서
+최신 Google Search/Play/GPT·OWASP 공식자료 → exact main/CI/runtime 대조 → backup/release-identity/branch-protection 이슈 갱신 → 전체 기능/SEO/보안/사업성 정합 → 작업 중간 exact-main 재확인 → EN/KO 동기화 → PR CI.
 
 ## 회차 델타 — v2026.09.17.188 (2026-09-17)
 
