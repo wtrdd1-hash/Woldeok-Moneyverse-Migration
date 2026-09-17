@@ -2,12 +2,26 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.205
+> **현재 통합 버전:** v2026.09.18.206
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.18.206 (2026-09-18)
+
+### 04:05 authoritative protection 증거, OWASP 2025 웹 기준선 추가
+
+- **정확한 main / CI enforcement:** 시작 authoritative `main`은 v204 `5c3286c57b7c0c6a84e6c76f80a7f0339060ceb2`였으나 작업 중 v205 PR #454가 병합되어 중간 재확인 main이 `59d6032d22db9de804438ee8d5b7ca4190326f39`로 이동했다. 동시 writer 작업을 덮지 않고 해당 exact main으로 rebase했다. Branch payload는 `protected=true`, `required_status_checks.enforcement_level=off`, contexts/checks empty를 현재 증거로 제공한다. 따라서 `CI-ENFORCE-204-01`은 **P1 / OPEN**이며 EVIDENCE-STALE이 아니다. `/branches/main` read로 재현하고 change-class별 ruleset/protection을 required로 만든 뒤 의도적 failing check merge 차단과 audited bypass를 negative-test한다. DB migration은 없고 잘못된 rule만 롤백하며 bypass/direct-push/check latency/failure를 감시한다.
+- **런타임/DR:** 04:05 Debian에서 backend/frontend/backup timer active, timer enabled, last 00:22:17/next 06:26 KST를 확인했다. 이번 회차 loopback `/api/version`의 새 body는 얻지 못했으므로 v205 canonical-HTTPS deployed-build 관측을 현재 증거처럼 재표기하지 않는다. `BAK-RUNTIME-177-01`은 isolated restore+schema/migration-set+stateful/economic reconciliation+실측 RPO/RTO+off-host immutable replication/retention+실패 alert 전달 전까지 **P0 / IN PROGRESS**다. `REL-AUTH-184-01`도 **P0 / IN PROGRESS**이며 exact-v204 main Auto Integrate and Promote run `35256807085`의 skipped는 planning containment 증거일 뿐이다.
+- **보안 기준선 교정/확장 — 직접채택:** OWASP API Security **2023**은 최신 API-specific Top 10이지만 OWASP Top 10 **2025**가 최신 일반 web-application release다. 둘을 병행한다. 기존 BOLA/auth/property/function/resource/sensitive-flow/SSRF/inventory/upstream gate에 2025 Broken Access Control, Security Misconfiguration, Software Supply Chain Failures, Cryptographic Failures, Injection, Insecure Design, Authentication Failures, Software/Data Integrity Failures, Security Logging and Alerting Failures, Mishandling Exceptional Conditions를 매핑한다. Release 증거는 dependency provenance+lockfile/advisory scan, fail-closed integrity/signature, secret/crypto config review, 경제/auth mutation이 예외에서 fail-open하지 않는 structured exception test, alert-delivery test를 포함한다. HIGH는 예방+탐지+negative test+residual-risk owner 전까지 deploy-block이다.
+- **SEO/SEO backend 직접채택:** Google Search Central 최신 로그의 2026-09-17 infinite-scroll guidance 이전은 guidance 변경이 없다. Crawlable pagination/server-renderable link, stable ordering, self-canonical/title/H1, 정확한 200/404/410/301/308, durable-only sitemap+`lastModified`, structured data/breadcrumb/hreflang, SSR/ISR/CWV, private/account/admin/transaction noindex, UGC thin/duplicate governance를 유지한다. SEO backend는 metadata/canonical/robots/sitemap/redirect serializer, public read-model, crawler log, Search Console/Naver ingestion을 소유한다.
+- **수익성/unit economics 직접채택:** Google Play 현행 정책은 market/effective-date/install-cohort/programme/billing-path별 판정을 요구한다. EEA/UK/US standard 예시는 auto-renew 10%, 기타 new-install 20%, 기타 existing-install 25%, 해당 시 billing fee 5%이며 나머지 시장은 rollout 전 적용 가능한 현행 schedule을 유지한다. Universal fee는 금지한다. Shop/payment/subscription SKU는 authoritative price/entitlement/refund/restore/renewal/economy/fraud rule과 가설 표시된 revenue/net revenue/margin/ARPU/ARPDAU/ARPPU/conversion/churn/refund/CAC/LTV/infra/support를 유지하고 cohort scale/iterate/kill gate로 판정한다.
+- **전체 기능 실행계약/우선순위:** auth, profile/security, inventory/collection, commerce, progression/economy, business/bank/loan, stocks, casino, community/social/moderation, notification/search/upload/public content, App API, admin/audit, backup/restore, analytics/experiments, ads, SEO, Discord/incident 전체에 screen state, RBAC/BOLA, API contract/idempotency/rate-limit, DB constraint/transaction/concurrency, audit/fallback/privacy/abuse, KPI/cache/performance, QA/rollback 증거를 유지한다. 우선순위는 P0 DR → P0 release authority → real-DB/economy integrity → HIGH auth/economic/payment/upstream+신규 supply-chain/integrity/exception gate → P1 CI enforcement/responsive Production proof → correctness/monetization/SEO/growth다. Planning은 runtime/DB를 변경하지 않는다.
+
+### v206 작업로그 / 수용 순서
+최신 Google Search Central+OWASP API 2023+OWASP Top 10 2025+Google Play 공식자료 → exact main/canonical/Actions/protection → Debian service/timer 증거 → 동시 main 재확인/rebase → 전체 기능·보안·SEO·사업성 delta → EN/KO 동기화 → diff/CI/PR.
 
 ## 회차 델타 — v2026.09.18.205 (2026-09-18)
 
