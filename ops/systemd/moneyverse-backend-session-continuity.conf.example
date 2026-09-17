@@ -1,0 +1,7 @@
+# Backend release drop-in for the host systemd mirror.
+# Secrets and DATABASE_URL are stable across releases; release identity is separate.
+[Service]
+WorkingDirectory=/srv/moneyverse-data/releases/production-current/backend
+EnvironmentFile=
+EnvironmentFile=/etc/moneyverse/backend-production.env
+EnvironmentFile=/etc/moneyverse/backend-release.env

@@ -2,12 +2,21 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.178
+> **현재 통합 버전:** v2026.09.17.180
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 변경 — v2026.09.17.180 (2026-09-17)
+
+### 백엔드 세션 연속성 및 무로그아웃 배포 계약
+
+- 일반 회원 로그인 세션은 PostgreSQL `auth_sessions`가 권위이며 쿠키/서버 수명은 30일이다. 정상 백엔드 배포/롤백은 활성 회원 세션을 revoke/truncate/recreate하지 않는다. 관리자 콘솔 단기 세션은 별도 보안 경계로 유지한다.
+- Test에서 동일 쿠키가 백엔드 재시작 전후 유지되고 DB 행도 유지되는 런타임 검증을 요구한다. 실 DB 테스트는 로그인 세션이 새 repository/backend 인스턴스에서도 같은 사용자로 해석됨을 고정한다.
+- Production host mirror의 DB 자격증명/비밀은 `/etc/moneyverse/backend-production.env`, release 식별자는 `/etc/moneyverse/backend-release.env`, 코드 pointer는 `/srv/moneyverse-data/releases/production-current/backend`로 분리한다.
+- byte-identical backend artifact 승격은 live 프로세스를 불필요하게 재시작하지 않는다. 실제 backend 코드가 변경된 후속 승격은 Test 세션 연속성 검증 후 무중단 전환을 사용한다.
 
 ## 회차 변경 — v2026.09.17.179 (2026-09-17)
 

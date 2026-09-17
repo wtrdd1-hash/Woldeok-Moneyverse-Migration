@@ -2,12 +2,21 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.179
+> Current integrated version: v2026.09.17.180
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+## Cycle delta — v2026.09.17.180 (2026-09-17)
+
+### Backend session continuity and no-logout deployment contract
+
+- PostgreSQL `auth_sessions` is authoritative for member login; browser and server lifetime remain 30 days. Normal backend deploy/rollback must not revoke, truncate or recreate active member sessions. The short administrator-console session remains a separate security boundary.
+- Test must prove the same cookie and database row survive a backend restart. A real-database regression test pins that an authenticated session resolves to the same user through a fresh repository/backend instance.
+- The Production host mirror separates stable DB credentials/secrets in `/etc/moneyverse/backend-production.env`, release identity in `/etc/moneyverse/backend-release.env`, and the code pointer at `/srv/moneyverse-data/releases/production-current/backend`.
+- A byte-identical backend artifact is promoted without an unnecessary live-process restart. Future backend-code changes require the same Test session-continuity proof and a zero-downtime switch.
 
 ## Cycle delta — v2026.09.17.179 (2026-09-17)
 

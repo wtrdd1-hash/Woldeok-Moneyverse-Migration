@@ -70,6 +70,25 @@ describe.skipIf(!DATABASE_URL)('against a real database', () => {
       expect(found?.id).toBe(created.id);
     });
 
+    it('keeps an authenticated session valid across backend repository recreation', async () => {
+      const beforeRestart = new SessionRepository(pool);
+      const prelogin = await beforeRestart.create();
+      const login = await beforeRestart.completeOAuthLogin({
+        preAuthSessionId: prelogin.id,
+        provider: 'discord',
+        subject: `qa-deploy-session-${crypto.randomUUID()}`,
+        displayName: 'Deploy continuity QA',
+      });
+
+      // A new repository instance models a new backend process: no token or
+      // user state is allowed to depend on process memory. The database row is
+      // the authority, so the same browser cookie must still resolve.
+      const afterRestart = new SessionRepository(pool);
+      const found = await afterRestart.get(login.token);
+      expect(found?.id).toBe(login.session_id);
+      expect(found?.user_id).toBe(login.user_id);
+    });
+
     it('does not find a session by a token that was never issued', async () => {
       const repository = new SessionRepository(pool);
       await repository.create();
