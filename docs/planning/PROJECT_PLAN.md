@@ -2,11 +2,26 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.171
+> Current integrated version: v2026.09.17.172
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.17.172 (2026-09-17)
+
+### Branch and work-history contract
+
+- **Working branch:** `docs/plan-v172-branch-work-history`
+- **Base `main` SHA:** `0eabcc19d8c970689533d6a006c12701a62190fc`
+- **Scope:** documentation-only governance change; no runtime, database, API or production behavior is changed by this cycle.
+- **Work performed:** added a mandatory planning-document traceability rule so every future plan edit records its working branch and concrete work history in the integrated plan itself. The record must include branch name, base/main SHA, relevant commit/PR identifiers when available, changed files/areas, concise work summary, validation evidence, and merge/Test/Production status.
+- **Files changed:** `docs/planning/PROJECT_PLAN.md`, `docs/planning/PROJECT_PLAN.ko.md`.
+- **Validation:** English/Korean plan parity, version marker, required traceability fields and clean diff are checked before commit. Runtime deployment is not required for a documentation-only change.
+
+### v172 decision
+
+Planning history must be recoverable without relying on Git archaeology alone. Each future cycle delta that modifies this authoritative plan therefore carries a **Branch / Work history** record. If a cycle spans multiple branches, list every branch and map each to its work item or PR. If a branch is superseded, abandoned or merged, preserve that state instead of deleting the historical entry. A planning change without this traceability block is incomplete.
 
 ## Cycle delta — v2026.09.17.171 (2026-09-17)
 
@@ -97,6 +112,7 @@ This is the current implementation-facing contract. Historical details remain re
 6. Unknown business figures are `HYPOTHESIS` or `TEST TARGET`. WLD/WDX activity is game-economy activity, not real-currency revenue.
 7. Priority order: `P0 data loss/security/auth/authorization/asset duplication/economy abuse/outage/DB integrity/release truth` → `P1 major correctness/core completeness` → `P1 shop/payment/monetization` → `P1 SEO/acquisition` → `P2 retention/growth` → `P2 UX/accessibility` → `P3 long-term expansion`.
 8. Runtime development remains separate: `new branch → static/unit/integration/real-DB/security tests → immutable candidate → isolated exact-SHA test → backend/API/DB/user-flow QA → main integration → exact-main-SHA re-test → Production evidence → GitOps promotion → Production smoke/monitoring → rollback if required`.
+9. Every modification to this authoritative plan must record a **Branch / Work history** entry in the same cycle delta. At minimum record the working branch, base/current `main` SHA, relevant commit/PR identifiers when available, changed files or functional areas, concise work performed, validation evidence, and merge/Test/Production status. Multi-branch work lists each branch separately; merged, superseded and abandoned branches remain recorded for auditability.
 
 ## 1. Product and non-negotiable boundaries
 
