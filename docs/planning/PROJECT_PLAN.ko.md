@@ -2,11 +2,27 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.196
+> **현재 통합 버전:** v2026.09.17.197
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 델타 — v2026.09.17.197 (2026-09-17)
+
+### 운영 backend identity 증명 완료, backup P0 잔여범위 축소
+
+- 작업 중간 main은 bd07f6d8ffd9fb1956c15db9850afe699865f08e다. 권위 Debian backend/frontend는 active이며 backend 직접 /api/version은 HTTP 200, no-store, deployed application build 75e69e77cdc18ef221106a008563151a4c790728을 반환한다. Backend-owned runtime identity는 이 application SHA에 대해 PRODUCTION-PROVEN이다.
+- P0 BAK-RUNTIME-177-01은 IN PROGRESS다. 6시간 timer는 enabled/active이고 21:22/21:57 encrypted backup 검증은 성공했다. 남은 gate는 isolated restore+domain reconciliation, 실측 RPO/RTO, off-host immutable replication/retention, failure alert 증거다. 그 전 destructive schema/ledger/entitlement rewrite는 차단한다.
+- REL-AUTH-184-01은 전체 release-class 및 invalid-candidate matrix 완료 전까지 P0다. OWASP API Security 최신 API-specific Top 10은 2023이며 BOLA, authentication, authorization, resource exhaustion, sensitive-flow abuse, SSRF, misconfiguration, inventory, unsafe-upstream test를 release blocking으로 유지한다.
+- 기존 전체 기능의 화면상태, 권한, API, DB/동시성, 감사, fallback, privacy/abuse, KPI, 성능, QA, rollback 계약은 유지한다. 상태 mutation은 ownership/BOLA, idempotency/replay, transaction/unique constraint, audit receipt, real-DB concurrency test가 필수다.
+- SEO: Google Search Central은 2026-09-17 infinite-scroll 지침을 변경 없이 현행 문서로 이전했다. 공개 infinite-scroll 화면은 crawlable paginated URL, server-renderable link, stable ordering, self-canonical, deterministic title/H1, 정상 200/404를 제공하고 cursor는 API 내부용, facet은 승격 전 기본 noindex/canonical로 한다.
+- 수익성: Google Play EEA/UK/US standard 예시는 auto-renew 10%, 기타 new-install 20%, 기타 existing-install 25%와 applicable 5% billing fee이며 KR rollout은 2026-12-31 예정이다. SKU economics는 policy-versioned로 계산하고 미실측 지표는 가설/테스트 기준으로만 기록한다.
+- Bot/main 델타: 작업 중간 main에는 PR #441도 병합되어 길드 범위 Discord 명령어를 지원 음악 명령 7개로 원자 교체하고 global command는 유지한다. 운영 재시작 후 command/voice smoke 증거 전까지 MERGED / PRODUCTION-POST-RESTART-SMOKE-PENDING으로 분류한다.
+- 우선순위: P0 isolated restore/off-host backup → P0 release-class matrix → migration-204 real-DB/economy-integrity → HIGH auth/BOLA/CSRF/idempotency/ledger-abuse → P1 required-check enforcement → correctness → monetization → SEO/acquisition → retention/accessibility.
+
+### v197 worklog
+최신 공식자료 → exact main/PR/CI → Debian backup/runtime identity → 전체 기능/SEO/보안/사업성 delta → 작업 중간 main 재확인 → EN/KO 동기화 → diff/CI/PR.
 
 ## 회차 델타 — v2026.09.17.196 (2026-09-17)
 
