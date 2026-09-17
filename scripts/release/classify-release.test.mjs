@@ -39,6 +39,15 @@ test('unclassified paths fail closed', () => {
   assert.equal(classifyPaths(['../outside']), 'UNKNOWN');
 });
 
+test('CI keeps package/database work behind runtime classification', async () => {
+  const workflow = await readFile(new URL('../../.github/workflows/ci.yml', import.meta.url), 'utf8');
+  assert.match(workflow, /workflow_call:[\s\S]*classification:/);
+  assert.match(workflow, /runtime-check:[\s\S]*needs\.classify\.outputs\.classification == 'RUNTIME_RELEVANT'/);
+  assert.match(workflow, /runtime-check:[\s\S]*needs\.classify\.outputs\.classification == 'MIXED'/);
+  const policy = workflow.slice(workflow.indexOf('  policy:'), workflow.indexOf('  runtime-check:'));
+  assert.doesNotMatch(policy, /pnpm install|postgres:|ci-apply\.sh/);
+});
+
 test('candidate workflow publishes identity and digest evidence', async () => {
   const workflow = await readFile(
     new URL('../../.github/workflows/test-candidate.yml', import.meta.url),
@@ -54,6 +63,7 @@ test('candidate workflow publishes identity and digest evidence', async () => {
   ]) {
     assert.match(workflow, new RegExp(needle));
   }
+  assert.match(workflow, /classification: \$\{\{ needs\.release-input\.outputs\.classification \}\}/);
 });
 
 test('production workflow consumes candidate evidence and polls application identity', async () => {

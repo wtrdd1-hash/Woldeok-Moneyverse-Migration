@@ -4,11 +4,145 @@ on:
   push:
     branches: [main]
   pull_request:
-  # Called by deploy.yml so a deployment cannot skip the checks.
   workflow_call:
+    inputs:
+      classification:
+        description: Precomputed immutable release classification from the caller
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
-  check:
+  classify:
+    runs-on: ubuntu-latest
+    outputs:
+      classification: ${{ steps.effective.outputs.classification }}
+    steps:
+      - name: Accept a caller classification only from the closed class set
+        id: source
+        shell: bash
+        env:
+          CALLER_CLASSIFICATION: ${{ inputs.classification }}
+        run: |
+          set -euo pipefail
+          value="${CALLER_CLASSIFICATION:-}"
+          if [[ -n "$value" ]]; then
+            case "$value" in
+              DOCS_ONLY|CONTROL_PLANE_ONLY|RUNTIME_RELEVANT|MIXED) ;;
+              *) echo "::error::invalid caller release classification: $value"; exit 1 ;;
+            esac
+          fi
+          echo "caller=$value" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout history for standalone CI classification
+        if: steps.source.outputs.caller == ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Resolve standalone CI comparison base
+        if: steps.source.outputs.caller == ''
+        id: base
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_BEFORE: ${{ github.event.before }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          zero=0000000000000000000000000000000000000000
+          if [[ "$EVENT_NAME" == pull_request && -n "${PR_BASE_SHA:-}" ]]; then
+            base="$PR_BASE_SHA"
+          elif [[ "$EVENT_NAME" == push && -n "${EVENT_BEFORE:-}" && "$EVENT_BEFORE" != "$zero" ]] \
+            && git cat-file -e "${EVENT_BEFORE}^{commit}" 2>/dev/null; then
+            base="$EVENT_BEFORE"
+          else
+            base="$(git rev-parse HEAD^)"
+          fi
+          [[ "$base" =~ ^[0-9a-f]{40}$ ]]
+          echo "sha=$base" >> "$GITHUB_OUTPUT"
+
+      - name: Classify standalone CI before dependency, database, or runtime work
+        if: steps.source.outputs.caller == ''
+        id: path
+        shell: bash
+        env:
+          BASE_SHA: ${{ steps.base.outputs.sha }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          node scripts/release/classify-release.mjs \
+            --base "$BASE_SHA" \
+            --head "$HEAD_SHA" \
+            --output ci-release-input.json \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Upload standalone immutable CI release input
+        if: steps.source.outputs.caller == '' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-release-input
+          path: ci-release-input.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Resolve effective CI classification
+        id: effective
+        shell: bash
+        env:
+          CALLER_CLASSIFICATION: ${{ steps.source.outputs.caller }}
+          STANDALONE_CLASSIFICATION: ${{ steps.path.outputs.classification }}
+        run: |
+          set -euo pipefail
+          value="${CALLER_CLASSIFICATION:-}"
+          if [[ -z "$value" ]]; then
+            value="${STANDALONE_CLASSIFICATION:-}"
+          fi
+          case "$value" in
+            DOCS_ONLY|CONTROL_PLANE_ONLY|RUNTIME_RELEVANT|MIXED) ;;
+            *) echo "::error::missing or unknown release classification: $value"; exit 1 ;;
+          esac
+          echo "classification=$value" >> "$GITHUB_OUTPUT"
+
+  policy:
+    needs: classify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Reject a committed secret
+        run: scripts/check-secrets.sh
+
+      - name: Test release identity classifier and workflow contract
+        run: node --test scripts/release/*.test.mjs
+
+      - name: Reject raw control bytes in source
+        run: scripts/check-control-bytes.sh
+
+      - name: Record non-runtime CI decision
+        if: >-
+          needs.classify.outputs.classification == 'DOCS_ONLY' ||
+          needs.classify.outputs.classification == 'CONTROL_PLANE_ONLY'
+        shell: bash
+        run: |
+          {
+            echo '## Lightweight CI lane'
+            echo
+            echo "- classification: \`${{ needs.classify.outputs.classification }}\`"
+            echo '- package install: skipped'
+            echo '- application lint/typecheck/build: skipped'
+            echo '- PostgreSQL service/migrations/tests: skipped'
+            echo '- registry/deployment credentials: unavailable'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  runtime-check:
+    needs: [classify, policy]
+    if: >-
+      needs.classify.outputs.classification == 'RUNTIME_RELEVANT' ||
+      needs.classify.outputs.classification == 'MIXED'
     runs-on: ubuntu-latest
 
     services:
@@ -25,15 +159,7 @@ jobs:
           - 5432:5432
 
     steps:
-      - uses: actions/checkout@v7
-
-      # First, because it needs nothing but the checkout and because a leaked
-      # credential is the one failure whose cost grows for as long as it goes
-      # unnoticed. Every secret this project uses is generated on the host or
-      # held by GitHub, so anything credential-shaped in a tracked file is a
-      # mistake -- see the script for the conventions it relies on.
-      - name: Reject a committed secret
-        run: scripts/check-secrets.sh
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
@@ -43,27 +169,12 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Test release identity classifier and workflow contract
-        run: node --test scripts/release/*.test.mjs
-
-      # A stale dist from an earlier run hides an ordering defect: a consumer
-      # typechecks against build output that a clean checkout would not have.
-      # That is exactly what got through review once, so the checks below run
-      # from nothing.
       - name: Remove any build output
         run: rm -rf packages/*/dist backend/dist frontend/.next
       - run: pnpm lint
-
-      # ESLint cannot tell a backslash-u escape from the raw byte it denotes.
-      # This can, and that substitution has silently broken input sanitisation
-      # in this codebase's history.
-      - name: Reject raw control bytes in source
-        run: scripts/check-control-bytes.sh
       - run: pnpm typecheck
       - run: pnpm build
 
-      # The development machine has no container runtime and no PostgreSQL
-      # server, so CI is where database-backed tests actually execute.
       - name: Apply database migrations
         env:
           PGHOST: localhost
@@ -74,33 +185,14 @@ jobs:
           APP_DB_PASSWORD: ci_app_password
         run: packages/database/ci-apply.sh
 
-      # Two connections, because two things are being proved. DATABASE_URL is
-      # the role the application actually runs as, and almost every database
-      # test asserts what that role can and cannot reach. MIGRATOR_DATABASE_URL
-      # is for the handful of guards that live on tables the application cannot
-      # write at all -- the casino's activation trigger is the first -- which
-      # can only be exercised by the role that owns the schema. Those tests run
-      # inside transactions they roll back; a run without this variable skips
-      # them rather than reporting a guard nobody checked.
       - name: Test
         env:
           DATABASE_URL: postgresql://moneyverse_app:ci_app_password@localhost:5432/woldeok_moneyverse_ci
           MIGRATOR_DATABASE_URL: postgresql://moneyverse_migrator:ci_migrator_password@localhost:5432/woldeok_moneyverse_ci
         run: pnpm test
 
-      # Prisma introspects the schema; it never owns it. The guard lives in a
-      # script so it cannot match its own source -- spelling the phrase
-      # inline here made the first version fail on every run.
       - name: Reject Prisma schema mutation
         run: scripts/reject-prisma-migrate.sh
 
-      # --prod, because an advisory in a build tool cannot reach a request and
-      # blocking every unrelated pull request on one is how a gate stops being
-      # read. --audit-level=high for the same reason: what is gated here is the
-      # class of advisory that would justify an out-of-band release.
-      #
-      # It runs last on purpose. It is the only step that talks to the registry
-      # rather than to this checkout, so an outage here should not hide a real
-      # failure in the steps above it.
       - name: Audit production dependencies
         run: pnpm audit --prod --audit-level=high
