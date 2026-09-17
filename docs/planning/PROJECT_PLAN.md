@@ -2,13 +2,27 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.182
+> Current integrated version: v2026.09.17.183
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
 
+
+## Cycle delta — v2026.09.17.183 (2026-09-17)
+
+### P0 docs-only runtime-release failure reproduced for a third consecutive main
+
+- **Evidence / status:** exact base b96d44d61dd11ae7ed1f74ceae3097733ff0cefc is docs-only. CI 35192799085 and Test Candidate 35192799677 succeeded, but Production Release 35193283403 (#944) ran 16:11–16:26 KST and failed; promotion skipped. REL-DOCS-181-01 is P0 OPEN, third consecutive reproduction. Owners: Release/Infra → Security → Backend/DB → QA → Operations.
+- **Fix / rollback:** pre-credential merge-base classifier alone emits immutable release-input.json with repositoryHeadSha, applicationSourceSha, classification, changedPathsHash and classifierVersion. Docs-only requires Test polling=0, DB connection/migration=0, registry auth/push=0, Production environment/secret=0, GitOps mutation=0. Runtime binds application SHA+image digest+migration-set hash; mixed/unknown fails closed. No data migration. Rollback disables automatic Production dispatch, never repository-head-as-runtime authority.
+- **QA / acceptance / monitoring:** negative corpus docs/planning/changelog/worklog plus positive backend/frontend/package/migration/workflow/GitOps; corpus=100%; 3 docs-only dry runs with privileged side effects=0; 2 runtime rehearsals proving exact application identity/API/catalog/real-DB/Test-noindex; pre-classification secret materialization=0. Monitor docs_only_privileged_side_effect_total, false-reds, Test-poll minutes, registry/DB/environment access and classifier false negatives/positives/unknown. Any secret exposure, runtime false-negative or docs-only privileged side effect blocks release.
+- **Runtime / backup:** ~16:57 KST authoritative Debian: backend/frontend active, prior-hour warning+ journal empty, moneyverse-backup.timer absent, direct /api/version HTTP 404. BAK-RUNTIME-177-01 stays P0 OPEN. Destructive schema/data/ledger/entitlement work is blocked until scheduled encrypted backup → checksum/decrypt/structure verification → isolated restore/reconciliation → off-host immutable copy. Runtime identity stays UNKNOWN until source SHA+artifact digest+migration set are application-owned immutable evidence.
+- **All-feature contract:** existing detailed matrices remain authoritative for auth/OAuth/session/security, profile, inventory/collection, shop/cart/payment/subscription/ad-removal, season/quest/job/level/reward, business/bank/loan, virtual stocks, casino, community/moderation, friends/clubs/referrals, notifications/search/upload/public content, App API, admin/audit, backup/restore, analytics/experiments, ads, SEO tooling and incident operations. DONE requires code/doc evidence, UX states, authorization, API errors/idempotency/rate limits, DB constraints/transactions/concurrency, audit/fallback/privacy/abuse, SEO/analytics/performance/cache, QA and deploy/rollback evidence.
+- **SEO/security/economics:** fresh Google Search Central material does not justify a ranking-contract change; keep server-authoritative metadata/canonical/robots/sitemap/lastModified/breadcrumb/JSON-LD/hreflang/SSR-ISR/CWV/redirect/UGC-index and private-route noindex. The 2026-09-17 European Search Dataset Licensing Program is excluded as unrelated to ordinary SEO. OWASP ASVS 5.0.0 + API Security Top 10 2023 + Top 10:2025 remain baselines. No new measured purchase/ad cohort exists; financial KPIs remain measured-only or HYPOTHESIS/TEST TARGET; Google Play SKU economics remain fee-policy-versioned. Classifier value is avoided ~15-minute false-red waits, Test/registry/DB/environment privilege and engineer/on-call cost.
+
+### v183 worklog / acceptance order
+fresh official references → exact main/runtime/QA/CI → third REL-DOCS reproduction → backup/runtime P0 → all-feature/SEO/security/economics parity → mid-work main recheck → EN/KO sync → PR CI → merge only on unchanged exact base. Planning-only.
 
 ## Cycle delta — v2026.09.17.182 (2026-09-17)
 

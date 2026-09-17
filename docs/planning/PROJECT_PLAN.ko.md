@@ -2,13 +2,27 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.17.182
+> **현재 통합 버전:** v2026.09.17.183
 > **구현·증거 동기화:** 2026-09-17
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
 
+
+## 회차 델타 — v2026.09.17.183 (2026-09-17)
+
+### P0 문서 전용 runtime-release 실패 3회 연속 재현
+
+- 정확한 기준 b96d44d61dd11ae7ed1f74ceae3097733ff0cefc는 문서 전용입니다. CI 35192799085와 Test Candidate 35192799677은 성공했지만 Production Release 35193283403 (#944)은 16:11~16:26 KST 실행 후 failure, promotion은 skipped였습니다. REL-DOCS-181-01은 P0 OPEN이며 세 번째 연속 재현입니다.
+- 수정계약은 credential 전 merge-base classifier가 repositoryHeadSha와 applicationSourceSha를 분리하는 immutable release-input을 생성하는 것입니다. docs-only는 Test polling, DB/migration, registry, Production secret/environment, GitOps mutation이 모두 0이어야 하고 runtime은 application SHA+image digest+migration-set hash에 결합하며 unknown/mixed는 fail-closed합니다. 데이터 migration은 없고 rollback은 자동 Production dispatch를 끕니다.
+- QA는 docs/planning/changelog/worklog negative corpus와 runtime/control-plane positive corpus 100%, docs-only dry-run 3회 privileged side effect=0, runtime rehearsal 2회 exact identity/API/catalog/실DB/Test-noindex, 분류 전 secret=0을 요구합니다. 위반은 승격차단입니다.
+- 약 16:57 KST Debian에서 backend/frontend active, 최근 1시간 warning 이상 없음, moneyverse-backup.timer 없음, /api/version HTTP 404를 재확인했습니다. BAK-RUNTIME-177-01은 P0 OPEN이며 scheduled encrypted backup→검증→isolated restore/reconciliation→off-host immutable copy 전까지 파괴적 DB/ledger/entitlement 변경을 금지합니다.
+- 전체 기능 상세 matrix는 인증/OAuth/세션/보안, 프로필, 인벤토리/컬렉션, 상점/장바구니/결제/구독, 시즌/퀘스트/직업/보상, 사업/은행/대출, 가상주식, 카지노, 커뮤니티/모더레이션, 친구/클럽/추천, 알림/검색/업로드/공개콘텐츠, App API, 관리자/감사, 백업/복구, 분석/실험, 광고, SEO, 장애대응에 계속 적용하며 코드·UX·권한·API·DB·감사·fallback·privacy/abuse·SEO·KPI·성능·QA·배포/롤백 증거 없이는 DONE 승격 금지입니다.
+- 최신 Google Search Central 자료는 ranking 계약 변경 근거가 아니므로 canonical/robots/sitemap/lastModified/breadcrumb/JSON-LD/hreflang/SSR-ISR/CWV/UGC-index 및 private noindex 계약을 유지합니다. 2026-09-17 European Search Dataset Licensing Program은 일반 SEO와 무관해 제외합니다. 보안은 OWASP ASVS 5.0.0, API Security Top 10 2023, Top 10:2025를 유지합니다. 새 실측 구매/광고 cohort가 없어 재무 KPI는 실측 또는 HYPOTHESIS/TEST TARGET만 허용하고 Google Play SKU economics는 fee-policy-versioned로 유지합니다.
+
+### v183 worklog / 수용순서
+최신 공식자료 → exact main/runtime/QA/CI → REL-DOCS 3회 재현 → backup/runtime P0 → 전체기능/SEO/보안/수익성 → 중간 main 재확인 → EN/KO 동기화 → PR CI → exact base 유지 시 병합. Planning-only입니다.
 
 ## 회차 델타 — v2026.09.17.182 (2026-09-17)
 
