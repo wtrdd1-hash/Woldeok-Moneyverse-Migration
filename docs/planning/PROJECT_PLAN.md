@@ -2,13 +2,27 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.17.186
+> Current integrated version: v2026.09.17.187
 > Implementation/evidence sync: 2026-09-17
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
 
+
+## Cycle delta — v2026.09.17.187 (2026-09-17)
+
+### v186 UI hotfix Production evidence
+
+- **Release lineage:** PR #431 merged `fix/ui-bootstrap-collision-v2026.09.17.186` to exact main `9e1342ca3a30ec9d0fb01d868b13c392231d97a0` after CI run `35210149830` completed all secret/lint/typecheck/build/migration/test/Prisma/audit gates successfully.
+- **Exact-main Test evidence:** immutable Test release `/srv/moneyverse-data/releases/test-9e1342ca3a30-ui186` served `9e1342ca3a30ec9d0fb01d868b13c392231d97a0`; backend `/health` returned healthy, public catalog returned 146 items, home render retained the expected Moonlight/quick-action labels, `X-Robots-Tag: noindex, nofollow` remained enforced, and generated CSS contained no Bootstrap global `--bs-primary-rgb` signature.
+- **Zero-downtime Production promotion:** immutable Production frontend `/srv/moneyverse-data/releases/prod-9e1342ca3a30-ui186` was first verified on canary port 3201. nginx atomically moved 3001 → 3201 while the supervised 3001 frontend release pointer was replaced/restarted, then returned 3201 → 3001 after exact-SHA and catalog checks. External `/api/version` now reports `9e1342ca3a30ec9d0fb01d868b13c392231d97a0`.
+- **Production smoke:** `/health` healthy; `/`, `/wallet`, `/casino`, `/shop`, `/guide` returned HTTP 200; public catalog returned 146 items; expected home labels were present; five rendered CSS assets were checked and the Bootstrap global signature was absent.
+- **Backend/DB preservation:** backend PID remained `400161` with unchanged activation timestamp `Thu 2026-09-17 00:57:08 KST`; no backend restart or database migration was performed for this frontend-only repair.
+- **Rollback evidence:** nginx backup `/etc/nginx/backups/moneyverse.before-v186-prod-20260917192743`; frontend service drop-in backup `/etc/systemd/system/moneyverse-frontend.service.d/release.conf.before-v186-20260917192743`. Test exact-main nginx backup `/etc/nginx/backups/moneyverse.before-v186-main-test-20260917192645`.
+
+### v187 status
+Documentation/evidence only. Runtime target remains v186 exact main `9e1342ca3a30ec9d0fb01d868b13c392231d97a0`; no new application behavior is introduced by v187.
 
 ## Cycle delta — v2026.09.17.186 (2026-09-17)
 
