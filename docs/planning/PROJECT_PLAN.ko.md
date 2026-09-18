@@ -2,13 +2,27 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.228
+> **현재 통합 버전:** v2026.09.18.229
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
 
+
+## 회차 델타 — v2026.09.18.229 (2026-09-18)
+
+### 22:06 DNS 릴리스 의존성 + 크롤러/SEO 증거 + CI negative-control 계약
+- **레퍼런스 우선 / 직접채택:** 저장소·런타임 점검 전에 Google Crawling Infrastructure 변경로그(2026-09-17: `Mediapartners-Google`이 여러 광고 제품에 적용), Google Search Central 2026 업데이트/Breadcrumb 가이드, Naver Search Advisor robots·리소스/링크 가이드, OWASP ASVS 5.0.0을 재확인했다. 2026-09-18 확인 출처: https://developers.google.com/crawling/docs/changelog ; https://developers.google.com/search/updates ; https://developers.google.com/search/docs/appearance/structured-data/breadcrumb ; https://searchadvisor.naver.com/guide/resource-and-link ; https://searchadvisor.naver.com/guide/seo-basic-robots ; https://owasp.org/projects/asvs . 판정: crawler family는 관측/정책 입력일 뿐 인증수단이 아니며, 공개 리소스 crawl 가능성과 안정적인 실제 링크를 릴리스 요구사항으로 두고 ASVS 5.0을 보안 검증 기준선으로 유지한다.
+- **권위 / 작업 중간 재확인:** 시작·중간 `origin/main=cdb4efb88da56358d41e39de37d096c9ad90a2e2`, 양 통합문서는 v228이었다. 해당 exact main SHA의 GitHub combined status는 0개라 `CI-ENFORCE-204-01` P1 OPEN 유지. 완료조건은 exact-head required check가 외부에서 보이고, 의도적으로 실패시킨 auth/economy/SEO negative-control PR이 거절되며, bypass는 담당자·만료시각·감사기록을 가져 조용히 gate를 만족시킬 수 없어야 한다.
+- **HIGH `OBS-NET-216-01` / 22:06 KST 재현:** backend/frontend/backup timer는 active이고 다음 backup trigger는 2026-09-19 00:23:37 KST다. host-local `woldeok.com` DNS는 계속 실패하고 canonical HTTPS `/api/version`은 curl(6)/HTTP 000이나 loopback `127.0.0.1:3002/api/version`은 HTTP 200, backend `75e69e77cdc18ef221106a008563151a4c790728`을 반환한다. 직전 1시간 backend warning journal은 비어 있다. 이를 앱 프로세스 장애가 아니라 사용자 트래픽·OAuth/결제 callback·SEO·광고 crawler가 공유하는 DNS 의존성 장애로 취급한다. 정상 unit 재시작 금지. resolver -> authoritative NS/A/AAAA -> UDP/TCP 53 -> 외부 2 vantage -> TLS/SNI -> HTTP manifest 순으로 진단한다. 승격 수용조건은 독립 2 vantage 각각 DNS+TLS+HTTP 30회 연속 성공, false NXDOMAIN/SERVFAIL 0, auth/payment dependency resolution 성공, 실제 alert 전달이다.
+- **P0 DR / 릴리스 차단:** `BAK-RUNTIME-177-01` BLOCKED 유지. active timer나 정상 encrypted archive는 restore 증거가 아니다. 최신 backup decrypt -> 격리 restore -> schema/migration equality -> auth/session/inventory/entitlement/ledger/reward/bank/loan/stock/casino/community/referral/audit invariant reconciliation -> RPO/RTO 실측 -> off-host immutable retention 증거 -> 실제 failure alert 전달 순으로 증명한다. 이 증거 전 destructive schema/economy 승격을 차단한다.
+- **SEO/SEO 백엔드 구현:** v227-v228의 `SeoDocument`/crawler-policy 증거에 `availabilityEvidence={dnsOk,tlsOk,httpStatus,renderedAt,vantage}`와 `crawlerPolicyFamily={search,ads,userTriggered,unknown}`를 결합한다. 공개 URL index eligibility는 DNS/TLS 도달성과 server-rendered 핵심 콘텐츠를 모두 요구하며 `canonical`, robots meta, hreflang, Breadcrumb JSON-LD, sitemap `lastmod`는 동일한 서버 권위 read model에서 생성한다. 계정/관리자/거래/보안센터/비공개 업로드는 인증을 적용하고 강제 `noindex`; robots.txt로 비밀정보를 보호하지 않는다. `Mediapartners-Google`은 Search crawler와 별도 테스트한다. DNS 실패, private indexability, 공개 non-200 render, canonical split, 필수 리소스 차단, stale sitemap 증거, 화면/schema 불일치는 SEO 승격차단이다.
+- **보안 + 전체기능 QA 계약:** auth/profile/security-center/inventory/collection/shop/cart/payment/subscription/ad-removal/progression/business/bank/loan/stock/casino/community/social/notification/search/upload/public/App API/admin/audit/DR/analytics/ads/SEO/incident의 모든 backlog는 구현상태/근거와 전체 UX 상태, RBAC/BOLA, DTO allowlist, API error/idempotency/rate/resource budget, DB constraint/index/transaction/concurrency, audit/observability, fallback/flag/DR/privacy/abuse, SEO, cache/performance, 분석/재무 KPI, unit/integration/E2E/real-DB/security/regression gate를 유지한다. 새 릴리스 증거에는 cross-account ID, mass assignment, replay, duplicate reward/entitlement, quota race, crawler/private-route negative test를 포함한다. auth bypass, 타계정 노출, 순자산 중복, 복구불능 데이터 경로, private indexing은 P0/P1로 신규기능보다 우선한다.
+- **사업/UX guardrail:** DNS/SEO는 회복된 organic/ad availability와 CAC·지원비 손실 회피, 보안/DR/CI는 fraud/refund/downtime 손실 회피로 평가한다. 운영 실측 전 conversion, attach, ARPU/ARPDAU/ARPPU, CAC/LTV/payback, eCPM/fill/CTR, churn/refund, fraud/support/infra cost는 `HYPOTHESIS/TEST TARGET`이다. incremental contribution margin이 양수이고 D1/D7/D30·공정성·민원·latency·support·fraud가 유의하게 악화되지 않을 때만 수익화를 scale하며 아니면 iterate/kill한다. 다크패턴·숨은 자동갱신·실제금융 오인·강압적 FOMO는 금지한다.
+
+### v229 작업로그
+레퍼런스 조사 -> exact-main/runtime/CI 대조 -> DNS/SEO/보안/수익성/QA 상세 델타 -> 작업 중간 main 재확인 -> 한영 통합 반영 완료. 우선순위는 P0 격리 restore proof -> HIGH DNS/dependency proof -> auth/economy negative controls -> P1 required-check enforcement -> crawler-family SEO probes -> 실측 growth/commerce experiment. 기획 전용이며 runtime/DNS/ledger/Production DB는 변경하지 않았다.
 
 ## 회차 델타 — v2026.09.18.228 (2026-09-18)
 
