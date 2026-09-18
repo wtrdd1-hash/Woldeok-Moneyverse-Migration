@@ -72,6 +72,7 @@ export async function LoginProvidersView({ error }: { readonly error?: string | 
                 inputMode="email"
                 maxLength={254}
                 required
+                className="min-h-11"
               />
             </div>
             <div className="grid gap-2">
@@ -83,6 +84,7 @@ export async function LoginProvidersView({ error }: { readonly error?: string | 
                 autoComplete="current-password"
                 maxLength={128}
                 required
+                className="min-h-11"
               />
             </div>
             <Button type="submit" className="min-h-11 w-full sm:w-fit">
