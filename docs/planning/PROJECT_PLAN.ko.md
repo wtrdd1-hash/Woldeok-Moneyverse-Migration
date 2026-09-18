@@ -2,11 +2,27 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.222
+> **현재 통합 버전:** v2026.09.18.223
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+
+## 회차 델타 — v2026.09.18.223 (2026-09-18)
+
+### 17:00 권위/런타임 + 외부의존성 보안 + Naver AI 출처설명 거버넌스
+
+- **증거 / 권위:** 저장소·런타임 기획 전에 Google Search Central, Naver Search Advisor, OWASP ASVS 5.0.0 최신 공식자료를 조사했다. 직전 v222 PR #478은 exact head `34ae49f828ef4732feccc3b694ba35322cf66327`, CI run `35318256654` `success`, mergeable 상태를 확인한 뒤 exact-head squash merge했다. 따라서 v223 시작 base는 `94a11fededc291ba8360a566e240838e90655eb8`이다. 최종 write/push 전 작업 중간 main도 같은 SHA여야 하며 이동 시 rebase+재검증한다.
+- **P1 CI enforcement / OPEN:** main commit-status 가시성만으로 merge enforcement를 증명할 수 없다. v221은 combined status 0개였고 v222 CI는 PR head에서 성공했다. `CI-ENFORCE-204-01` 완료에는 실제 repository rules/protection 조회, change-classifier+docs-sync+runtime/API/DB/security required check, exact-SHA 연결, 의도적으로 실패한 required check가 merge를 차단하는 negative-control PR 증거가 필요하다. Emergency bypass는 명시적 담당자·시간제한·감사를 요구한다.
+- **HIGH `OBS-NET-216-01` / 17:00 KST 재현 / IN PROGRESS:** canonical Debian의 backend/frontend/backup timer는 `active`, timer는 `enabled`; host-local `woldeok.com`은 주소가 없고 canonical HTTPS `/api/version`은 `curl(6)`이지만 `127.0.0.1:3002/api/version`은 HTTP 200 + `Cache-Control: no-store`, backend id `75e69e77cdc18ef221106a008563151a4c790728`; 직전 1시간 backend warning journal은 없다. 최신 검증 backup은 12:22:44→12:22:46 KST, 다음 trigger는 18:29:25다. 영향은 canonical reachability/dependency 증거이며 앱 프로세스 장애는 입증되지 않았다. 수용은 독립 2 vantage 각각 DNS+TLS+HTTP 30회 연속 성공, false NXDOMAIN/SERVFAIL 0, auth/payment dependency resolution, 실제 alert 전달이다. TLS 우회/insecure HTTP fallback 금지.
+- **P0 DR / release authority:** archive verify는 restore proof가 아니므로 `BAK-RUNTIME-177-01`은 승격차단 유지. 최신 archive isolated decrypt+restore, schema/migration-set equality, identity/session/inventory/entitlement/ledger/reward/bank/loan/stock/casino/community/referral/audit reconciliation, 실측 RPO/RTO, off-host immutable retention, 실제 failure alert가 필요하다. `REL-AUTH-184-01`은 하나의 모호한 application SHA가 아니라 component source SHA, artifact digest, schema/migration/config revision, deployment ID, rollback identity를 요구한다.
+- **보안 / dependency egress — 직접채택(OWASP ASVS 5.0.0 V13.2.4–V13.2.6):** 모든 backend outbound integration(OAuth issuer/JWKS, payment/receipt/webhook verification, ads, notification/email/Discord, object storage/CDN, SEO submission/verification, analytics, internal service)에 destination allowlist, protocol+port, DNS/IP 검증정책, connect/read/overall timeout, 최대 병렬연결, jitter 포함 bounded retry, idempotency 요구, circuit-breaker/fail-open-vs-fail-closed 결정, owner를 명시한다. 사용자 입력 URL을 raw egress destination으로 사용하지 않고 connect 전 resolve/validate, redirect 후 재검증하여 SSRF/DNS-rebinding escape를 막는다. Auth/payment/entitlement/reward/bank/admin은 fail-closed, analytics/telemetry만 명시적 bounded buffer/drop 정책을 허용한다. 로그는 secret/PII 없이 dependency class, sanitized host, result/rcode/status, latency, retry count, circuit state를 기록한다. Negative test는 disallowed host/port, private/link-local target, DNS rebinding, redirect escape, timeout storm, retry amplification, connection-pool exhaustion이다. 민감 경계 우회 또는 경제 mutation 중복 성공은 HIGH/CRITICAL 배포차단이다.
+- **SEO / Naver AI 출처설명 거버넌스 — 직접채택:** Naver는 페이지 단위 `nosourceinfo`로 AI 자동 출처설명을 제외할 수 있음을 문서화한다. 이를 전역 기본값으로 쓰지 않는다. Server-owned SEO eligibility record에 `naverSourceDescriptionPolicy={allow|deny|review}`, `policyReason`, `contentOwner`, `editorialControl`, `reviewedAt`을 추가한다. Public first-party help/catalog/editorial은 publication+quality review 후에만 `allow`; private/account/admin/transaction은 인증보호+noindex이며 privacy를 `nosourceinfo`에 의존하지 않는다. 분쟁·법적 민감·editorial-control 낮은 sponsored/unreviewed UGC는 owner 결정 전 `deny/review` 가능. `seo_render_probe`는 robots meta와 authority 일치 및 redirect target 정책 보존을 검증한다. KPI는 organic impression→visit→signup→activation→D7/D30→revenue이며 출처설명 오표현/민원을 trust guardrail로 둔다. 순위 상승 효과는 가정하지 않는다.
+- **수익화 / 전체 기능 실행계약:** 이번 회차에는 검증되지 않은 fee 변경을 채택하지 않는다. 기존 server-trusted market/effective-date/install-cohort/transaction/programme/billing-path/fee-policy snapshot과 SKU 보수/기준/낙관 contribution model을 유지한다. 모든 현재/계획 auth/profile/inventory/collection/shop/cart/payment/subscription/ad-removal/progression/business/bank/loan/stock/casino/community/social/referral/notification/search/upload/public/App API/admin/audit/DR/analytics/ads/SEO/incident 기능은 구현근거, UX 상태, RBAC/BOLA, API/error/idempotency/rate-limit, DB constraint/transaction/concurrency, audit/fallback/DR, privacy/abuse, KPI/cache/performance, unit/integration/E2E/real-DB/security/regression, exact-SHA Test→main→Production smoke/rollback gate를 유지한다. 미실측 재무/리텐션 수치는 `HYPOTHESIS/TEST TARGET`이다.
+
+### v223 작업로그 / 실행순서
+P0 isolated restore proof + component release identity → HIGH DNS/dependency 진단 → outbound allowlist/timeout/retry/SSRF negative control → auth/session/economy negative gate → P1 CI enforcement proof → SEO render/index/source-description 정책 → monetization/growth backlog. 기획 전용 회차로 runtime code, DNS 설정, Production DB는 변경하지 않는다.
 
 
 ## 회차 델타 — v2026.09.18.222 (2026-09-18)
