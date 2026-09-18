@@ -2,11 +2,23 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.19.239
+> **현재 통합 버전:** v2026.09.19.244
 > **구현·증거 동기화:** 2026-09-19
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 변경 — v2026.09.19.244 (2026-09-19)
+
+### 05:03 접근성 병합 + 상태 권위 후보 / 런타임 / CI 대조
+- **권위 / 동시 작업:** 시작과 필수 중간 재확인 모두 authoritative `main=f1904964ee6f27ec33b29faad092b94d42622b49`이다. Main에는 PR #508 (`fix(frontend): enlarge footer touch targets v2026.09.19.242`)이 병합되어 Terms/Privacy/서비스 상태/운영 소식 footer 링크가 >=44px 세로 터치영역, 360px compact wrapping, 명시적 keyboard focus를 가진다. 이는 병합된 frontend 구현이지 Production 증거가 아니다. 열린 PR #509는 exact head `fd361f5d0b49f924bdb02bfe76c148734b36254f`, base=current main, 4 files/+77/-3의 별도 후보이며 #507 runtime CI 실패 뒤 server-authoritative public/App API status freshness를 복구한다. 관측 시 GitHub CI run 35389255156은 아직 `in_progress`이므로 후보로만 취급한다. Planning PR #506은 v242 이전 증거 기반이라 독립 병합하지 말고 이 통합 회차가 supersede한다.
+- **런타임 / HIGH `OBS-NET-216-01` 05:03 KST 재현:** backend, frontend, backup timer, Economy AI unit은 active이고 backup timer는 enabled, 직전 trigger 00:23:48, 다음 06:22:37 KST다. Canonical `https://woldeok.com/api/version`은 host-local DNS `curl(6)`/HTTP 000으로 계속 실패하고 loopback `127.0.0.1:3002/api/version`은 HTTP 200, `Cache-Control: no-store`, backend id `75e69e77cdc18ef221106a008563151a4c790728`이다. 정상 application unit은 재시작하지 않는다. DNS 완료조건은 resolver/authoritative record + 독립 외부 vantage 2개 + TLS/SNI + HTTP/callback dependency, vantage별 30회 연속 성공, false NXDOMAIN/SERVFAIL 0건, 실제 alert 전달이다.
+- **P1 접근성 후속 (frontend + QA):** #508의 44px 프로젝트 기준은 WCAG 2.2 AA SC 2.5.8의 24x24 CSS-pixel 최소치보다 엄격하고 44x44 enhanced target과 정렬된다. 비-inline 주요/내비게이션 control의 Moneyverse mobile design-system floor로 유지한다. 장기적으로 source-string 검사만 의존하지 말고 rendered DOM/layout 검증으로 전환한다: 320/360/390/768px reflow, keyboard focus visible/not-obscured, 200% zoom, pointer target bounding box, 한/영 줄바꿈, axe/manual screen-reader landmark. 완료조건은 overlap/가로스크롤 0, footer 4개 링크의 effective hit height >=44px, visible focus, Terms/Privacy/Status/Announcements 이동 회귀 0이다. Production에는 exact tested frontend SHA만 승격하고 layout 회귀 시 footer component/test만 직전 호환본으로 롤백한다.
+- **P1 status authority / App API:** #509가 fully green이면 server-owned `StatusFreshnessPolicy{sourceKey,expectedIntervalMs,staleAfterMs,maxFutureSkewMs,policyVersion}`와 sanitized public/App DTO `{observedAt,state,freshnessState,ageMs,policyVersion}`를 유지한다. DB write는 collector identity 인증, source별 monotonic/idempotent observation, `(source_key,observed_at DESC)` index, bounded retention, stale/future replay 거부를 요구한다. `unknown/stale`은 aggregate health를 개선할 수 없다. Admin diagnostics는 RBAC + immutable masked audit를 요구하고 public DTO는 hostname/private address/secret을 노출하지 않는다.
+- **Status QA / 승격:** exact #509 head가 lint/typecheck/unit/build/runtime checks를 모두 끝낸 뒤 isolated Test에서 >=3 collector interval, update 1회 의도적 중단과 회복, invalid/missing timestamp, 59,999/60,000/60,001ms stale 경계, +5s/+5,001ms future skew, degraded/outage 전환, forged source key, stale replay, cross-source overwrite, real-DB concurrent out-of-order write를 검증한다. stale false-green, auth bypass, topology leak, duplicate observation corruption, Test SHA 불일치면 Production을 차단한다. 동일 backend/API/frontend/schema tuple만 승격하며 rollback도 stale/unknown fail-closed를 유지해야 한다.
+- **CI / P1 `CI-ENFORCE-204-01`:** `main`은 protected지만 branch protection의 required-status enforcement는 `off`, required contexts/checks는 0개이며 exact main에 연결된 PR-triggered workflow run도 없다. Workflow 존재는 enforcement가 아니다. exact-head classifier/policy/runtime/security check를 required로 만들고 의도적으로 실패하는 auth/economy/status/mobile negative-control PR이 named/expiring/audited bypass 없이 병합 불가능함을 증명해야 한다.
+- **P0 연속성 / 순서:** `BAK-RUNTIME-177-01`은 newest-backup isolated decrypt+restore, schema/migration equality, auth/session/economy/audit reconciliation, 실측 RPO/RTO, off-host immutable retention, 실제 failure alert 전까지 BLOCKED다. AI/economy authority containment, migration-205 concurrency, authenticated admin/mobile/MASWE evidence도 미완료다. 순서: P0 restore + AI/economy containment → HIGH DNS 증거 → #509 exact-head CI/Test + status authority → 접근성 rendered QA → P1 CI enforcement negative control → mobile/App-API security → SEO/ad probe → 실측 commerce/growth. Planning-only이며 runtime/DNS/ledger/policy/Production DB를 변경하지 않는다.
+
 
 ## 회차 델타 — v2026.09.19.239 (2026-09-19)
 
