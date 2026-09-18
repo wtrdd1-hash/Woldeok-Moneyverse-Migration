@@ -60,6 +60,7 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
             error: (message, stack) => logger.error(message, stack),
           },
           handlers: {
+            'economy.ai_shadow_health': () => economyAiReviewer.runShadow(),
             'economy.ai_policy_review': () => economyAiReviewer.run(),
           },
         });

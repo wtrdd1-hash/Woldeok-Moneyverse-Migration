@@ -849,6 +849,14 @@ Moneyverse 경제 AI의 중심은 `LLM`이 아니라 **데이터로 보정된 �
 
 **v184 런타임 계약.** 호환 컨트롤러는 기존 7일 직업선택 telemetry를 읽는다. assignment가 최소 40건일 때 점유율 3% 미만 직업은 `+1` 완화할 수 있고, 60% 초과 직업은 작업 발행비중 50% 초과와 `work.repeat_decay_percent >= 25`를 모두 만족해야 `-1` 강화할 수 있어 반복보상 완화책이 먼저 적용된다. 편중이 해소되거나 근거량이 낮아지면 non-zero delta는 기준 `0` 쪽으로 한 단계 복원한다. 기존 표본충분성·원장대사·정책 cooldown·feature switch·동일 proposal AI 검토·rollback gate가 최종 권한이다.
 
+### 32.1 v236 운영 권한 재검토
+
+2026-09-18 Production 증거에서 active member는 12명으로 고정 최소표본 20명보다 적으며, 직업 telemetry에 assignment 370건이 있어도 최근 7개 daily metric row 모두 표본불충분이다. 이는 표본 threshold를 낮출 이유가 아니라 정책 적용을 계속 fail-closed로 유지할 근거다. 관측성을 위해 차단 proposal을 SHADOW AI review로 생성할 수는 있으나 `eligible=false`를 그대로 보존해야 하며 결정론 apply 경로를 절대 해제해서는 안 된다.
+
+스키마/이력 호환을 위해 등록 범위 `[-1,+2]`는 유지하되, 인구·welfare 근거가 부족한 동안 bounded automatic 권한은 운영상 축소한다. `0..+2`는 접근 완화에 사용할 수 있으나 `-1` 강화는 SHADOW/HUMAN-APPROVAL 전용이다. 자동 강화를 허용하기 전 구현은 `effective_daily_limit >= 2`를 강제하고, 1 policy cycle 뒤 명시적 만료/재평가, soft-control-first 순서, rollback 증거와 limit-hit/포기율/progression welfare telemetry를 요구한다.
+
+AI runtime health와 AI 정책참여는 서로 다른 상태다. model endpoint 도달, feature switch enabled, shadow review 성공, eligible council review, bounded policy 실제 적용을 관리자 증거에서 각각 구분한다. 주간 review window가 이미 claim된 뒤 AI를 활성화한 경우 권위 apply window를 다시 열거나 소비하지 않는 비권위 health/shadow run을 제공해야 한다.
+
 non-null 일일 제한이 `BOUNDED_AUTO`에 들어가려면 정책 레지스트리가 auto-tunable로 허용하고 다중 시간창 근거, 최소 표본, 시나리오/반사실 비교, 구매력·성장성 검증, 무결성 검토, 공개 가능한 reason code, 최대 지속기간, 자동 완화 시험, 롤백 준비를 모두 통과해야 한다. 컨트롤러는 강화뿐 아니라 완화도 평가하며 조건이 해소되면 오래된 제한을 유지하지 않고 `null = 무제한` 방향으로 자동 완화한다.
 
 주직업 슬롯은 정체성에 영향을 준다. 자동화는 슬롯 확대 또는 미래 정책 축소 제안은 가능하지만 기존 선택 직업 박탈, 숙련도 삭제, 임의 재배정, 이미 획득한 성장 접근 차단은 할 수 없다. 넓은 슬롯 정책에서 좁은 정책으로 이동할 때는 grandfathering 또는 사람 승인 transition rule이 필요하다.

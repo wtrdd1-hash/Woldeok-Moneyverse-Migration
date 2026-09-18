@@ -63,23 +63,36 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
       });
     });
 
-    it('applies a profession delta from the captured task baseline and restores it', async () => {
+    it('keeps tightening disabled by default and enforces a two-task floor when enabled', async () => {
       await rolledBack(async (client) => {
         const key = 'jobs.assignment_daily_limit_delta.developer';
+        await client.query('SAVEPOINT tightening_disabled');
+        await expect(
+          client.query('SELECT public.economy_apply_policy_values($1::jsonb)', [
+            JSON.stringify({ [key]: -1 }),
+          ]),
+        ).rejects.toMatchObject({ code: '55000' });
+        await client.query('ROLLBACK TO SAVEPOINT tightening_disabled');
+
+        await client.query(
+          "UPDATE public.feature_switches SET state = 'enabled' WHERE feature_key = 'economy_job_limit_tightening'",
+        );
         await client.query('SELECT public.economy_apply_policy_values($1::jsonb)', [
           JSON.stringify({ [key]: -1 }),
         ]);
-        const { rows: tightened } = await client.query<{ ok: boolean }>(
-          `SELECT bool_and(daily_limit = greatest(1, baseline_daily_limit - 1)) AS ok
+        const { rows: tightened } = await client.query<{ ok: boolean; minimum: number }>(
+          `SELECT bool_and(daily_limit = greatest(2, baseline_daily_limit - 1)) AS ok,
+                  min(daily_limit)::integer AS minimum
            FROM public.work_task_catalog WHERE job_type = 'developer'::public.work_job_type`,
         );
         expect(tightened[0]?.ok).toBe(true);
+        expect(tightened[0]?.minimum).toBeGreaterThanOrEqual(2);
 
         await client.query('SELECT public.economy_apply_policy_values($1::jsonb)', [
           JSON.stringify({ [key]: 0 }),
         ]);
         const { rows: restored } = await client.query<{ ok: boolean }>(
-          `SELECT bool_and(daily_limit = baseline_daily_limit) AS ok
+          `SELECT bool_and(daily_limit = greatest(2, baseline_daily_limit)) AS ok
            FROM public.work_task_catalog WHERE job_type = 'developer'::public.work_job_type`,
         );
         expect(restored[0]?.ok).toBe(true);
@@ -125,10 +138,20 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
         await client.query(
           "UPDATE public.economy_policy_knobs SET current_value = 25 WHERE knob_key = 'work.repeat_decay_percent'",
         );
-        const { rows: second } = await client.query<{
+        const { rows: guarded } = await client.query<{
           proposal: { adjustments: { knob: string; to: number }[] };
         }>('SELECT public.economy_propose_policy_adjustment(7) AS proposal');
-        expect(second[0]!.proposal.adjustments).toContainEqual(
+        expect(guarded[0]!.proposal.adjustments).not.toContainEqual(
+          expect.objectContaining({ knob: 'jobs.assignment_daily_limit_delta.developer', to: -1 }),
+        );
+
+        await client.query(
+          "UPDATE public.feature_switches SET state = 'enabled' WHERE feature_key = 'economy_job_limit_tightening'",
+        );
+        const { rows: enabled } = await client.query<{
+          proposal: { adjustments: { knob: string; to: number }[] };
+        }>('SELECT public.economy_propose_policy_adjustment(7) AS proposal');
+        expect(enabled[0]!.proposal.adjustments).toContainEqual(
           expect.objectContaining({ knob: 'jobs.assignment_daily_limit_delta.developer', to: -1 }),
         );
       });
@@ -146,6 +169,9 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
           { jobType: 'civil_servant', assignments: 10 },
         ];
         await seedMetrics(client, balanced);
+        await client.query(
+          "UPDATE public.feature_switches SET state = 'enabled' WHERE feature_key = 'economy_job_limit_tightening'",
+        );
         await client.query('SELECT public.economy_apply_policy_values($1::jsonb)', [
           JSON.stringify({ 'jobs.assignment_daily_limit_delta.developer': -1 }),
         ]);

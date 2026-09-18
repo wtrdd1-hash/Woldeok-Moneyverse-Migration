@@ -2,11 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.19.235
+> Current integrated version: v2026.09.19.236
 > Implementation/evidence sync: 2026-09-19
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.19.236 (2026-09-19)
+
+### AI shadow-health, adaptive-limit safety and mobile administrator implementation
+- **Authority:** rebased after the v235 audit onto exact `main=bbb44cef9c77260948806f4828a046bd5eef3526`. The v235 audit remains the immediate operational baseline; this cycle implements its AI-health/admin/mobile guardrails.
+- **AI shadow health:** add daily `economy.ai_shadow_health` after the metric snapshot window. It may call the configured council even when the deterministic proposal is ineligible, but writes only to separate append-only `economy_ai_shadow_reviews`; the authoritative `economy_ai_policy_guard` does not read shadow evidence.
+- **Adaptive profession-limit safety:** add default-disabled `economy_job_limit_tightening`. Negative `jobs.assignment_daily_limit_delta.*` is blocked at the DB layer unless this switch is explicitly enabled; even then effective task limits are clamped to at least 2/day. Relaxation remains available while Production evidence is insufficient.
+- **Truthful admin status:** Economy AI admin data now separates feature configuration, model reachability, authoritative review, shadow review, deterministic proposal eligibility/block reasons and scheduler outcomes. Failed/stale/configured-but-unexercised states are explicit; prompt bodies, endpoints and secrets remain hidden.
+- **Mobile admin UX:** AI agent evidence, traffic series and activity logs use stacked cards on narrow screens while retaining desktop tables. Activity filters become full-width on mobile.
+- **Validation before Test:** focused backend AI/scheduler 18/18; frontend AI/mobile 5/5; isolated PostgreSQL 17.11 applied migrations 002–205 successfully; DB-backed economy/AI/admin regressions 24/24; failed-state DB regression 7/7; backend/frontend typecheck passed. Full repository lint/build/parity/CI and exact-SHA Test deployment remain release gates.
+- **Promotion:** version v236 is not Production-complete until exact branch/main CI passes, the exact merged SHA is live on isolated Test with migration 205, AI shadow evidence is recorded without policy mutation, authenticated admin/mobile QA passes, and the same SHA is promoted with the no-midpoint Production procedure plus public/backend/data-integrity smoke.
+
+### v236 worklog
+See `docs/worklog/2026-09-19-ai-mobile-admin-fix-v2026.09.19.236.md` and release note `docs/releases/v2026.09.19.236.md`.
 
 ## Cycle delta — v2026.09.19.235 (2026-09-19)
 

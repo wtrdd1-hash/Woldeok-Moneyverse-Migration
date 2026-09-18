@@ -2,11 +2,25 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.19.235
+> **현재 통합 버전:** v2026.09.19.236
 > **구현·증거 동기화:** 2026-09-19
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 델타 — v2026.09.19.236 (2026-09-19)
+
+### AI SHADOW health·적응형 제한 안전장치·모바일 관리자 구현
+- **권위:** v235 감사 이후 exact `main=bbb44cef9c77260948806f4828a046bd5eef3526` 위로 재정렬했다. v235 감사를 즉시 운영 기준으로 유지하고 이번 회차에서 해당 AI health/관리자/mobile guardrail을 구현한다.
+- **AI SHADOW health:** metric snapshot 이후 매일 `economy.ai_shadow_health`를 실행한다. 결정론 proposal이 부적격이어도 설정된 council 모델을 실제 호출할 수 있지만 결과는 별도 append-only `economy_ai_shadow_reviews`에만 기록한다. 권위 `economy_ai_policy_guard`는 SHADOW 증거를 읽지 않는다.
+- **직업 제한 안전장치:** 기본 disabled `economy_job_limit_tightening` switch를 추가한다. 이 switch를 명시 활성화하지 않으면 음수 `jobs.assignment_daily_limit_delta.*`를 DB가 거부하며, 활성화해도 실제 task limit은 최소 2회/일을 보장한다. 운영 근거가 부족한 동안 완화 방향은 유지한다.
+- **관리자 상태 정직화:** Economy AI 관리자 데이터에서 feature 설정, 모델 도달성, 권위 review, SHADOW review, 결정론 proposal 적격/차단사유, scheduler 결과를 분리한다. failed/stale/configured-but-unexercised 상태를 명시하고 prompt 본문·endpoint·secret은 노출하지 않는다.
+- **모바일 관리자 UX:** AI agent 증거, 접속 추이, 활동 로그는 좁은 화면에서 stacked card를 사용하고 desktop에서는 표를 유지한다. 활동 필터는 모바일 전체폭으로 변경한다.
+- **Test 전 검증:** backend AI/scheduler 18/18, frontend AI/mobile 5/5, 격리 PostgreSQL 17.11 migration 002–205 전체 적용 성공, DB-backed 경제/AI/관리자 회귀 24/24, 실패상태 DB 회귀 7/7, backend/frontend typecheck 통과. 전체 저장소 lint/build/parity/CI와 exact-SHA Test 배포는 계속 릴리스 gate다.
+- **승격:** branch/main exact CI 통과, 병합 exact SHA의 격리 Test migration 205 적용, 정책 mutation 없는 AI SHADOW 증거, 인증 관리자/mobile QA를 확인하고 동일 SHA를 무중간 Production 절차로 승격해 공개/backend/data-integrity smoke까지 통과하기 전에는 v236을 운영 완료로 판정하지 않는다.
+
+### v236 작업기록
+상세는 `docs/worklog/2026-09-19-ai-mobile-admin-fix-v2026.09.19.236.ko.md`, 릴리스 노트는 `docs/releases/v2026.09.19.236.ko.md`를 따른다.
 
 ## 회차 델타 — v2026.09.19.235 (2026-09-19)
 
