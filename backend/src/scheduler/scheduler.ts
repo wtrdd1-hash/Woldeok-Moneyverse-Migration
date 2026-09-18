@@ -91,9 +91,18 @@ export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
       'SELECT upkeep.charged_count, upkeep.unpaid_count, upkeep.suspended_count, upkeep.failed_count, upkeep.charged_amount::text AS charged_amount FROM public.shop_charge_weekly_upkeep() AS upkeep',
   },
   {
-    // The learned lane reviews the exact classical proposal first. It does
-    // not write policy; 200 stores only an append-only review keyed by the
-    // proposal hash. Ten minutes leaves room for a slow local model before
+    // A daily shadow run proves the configured models are actually reachable
+    // even when sample sufficiency blocks policy. It writes only shadow
+    // evidence and therefore cannot authorize an automatic economy change.
+    job: 'economy.ai_shadow_health',
+    cadence: 'daily',
+    notBefore: 15,
+    connection: 'app',
+  },
+  {
+    // The learned lane reviews the exact eligible classical proposal first.
+    // It does not write policy; 200 stores only an append-only review keyed by
+    // the proposal hash. Ten minutes leaves room for a slow local model before
     // the deterministic weekly policy window opens.
     job: 'economy.ai_policy_review',
     cadence: 'weekly',

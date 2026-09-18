@@ -1,3 +1,9 @@
+## v2026.09.19.236 — AI Shadow Health and Mobile Admin Safety
+- Added daily non-authoritative AI shadow health evidence separated from authoritative policy reviews.
+- Added default-disabled profession-limit tightening with a DB-enforced 2/day effective floor.
+- Made administrator AI status distinguish model reachability, review evidence, proposal blocking and scheduler failure/staleness.
+- Added narrow-screen card layouts for AI evidence, traffic series and activity logs.
+
 ## v2026.09.18.232 — Admin User Recent Access
 - Added a dedicated recent-access field to the administrator member directory with full Asia/Seoul date-time display.
 - Added sorting by most recent access while preserving search, restriction filtering, asset inspection and detail/audit navigation.

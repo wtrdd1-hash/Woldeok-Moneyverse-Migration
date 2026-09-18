@@ -139,7 +139,7 @@ export default async function AdminActivityLogsPage({
         </CardHeader>
         <CardContent>
           <form method="GET" className="flex flex-wrap items-center gap-4">
-            <div className="w-48">
+            <div className="w-full sm:w-48">
               <label htmlFor="eventType" className="mb-1 block text-xs text-muted-foreground">이벤트 종류</label>
               <select
                 id="eventType"
@@ -156,7 +156,7 @@ export default async function AdminActivityLogsPage({
               </select>
             </div>
 
-            <div className="w-28">
+            <div className="w-full sm:w-28">
               <label htmlFor="limit" className="mb-1 block text-xs text-muted-foreground">출력 개수</label>
               <select
                 id="limit"
@@ -170,8 +170,8 @@ export default async function AdminActivityLogsPage({
               </select>
             </div>
 
-            <div className="mt-5">
-              <Button type="submit" size="sm">조회</Button>
+            <div className="w-full sm:mt-5 sm:w-auto">
+              <Button type="submit" size="sm" className="w-full sm:w-auto">조회</Button>
             </div>
           </form>
         </CardContent>
@@ -194,7 +194,47 @@ export default async function AdminActivityLogsPage({
               description="새로운 접속이나 클릭이 발생하면 여기에 실시간으로 기록됩니다."
             />
           ) : (
-            <div className="overflow-x-auto">
+            <>
+              <div className="grid gap-3 md:hidden">
+                {logs.map((log) => {
+                  let badgeColor: 'default' | 'secondary' | 'outline' | 'destructive' = 'outline';
+                  let badgeLabel = log.event_type;
+                  if (log.event_type === 'page_view') {
+                    badgeColor = 'secondary';
+                    badgeLabel = '👁️ 페이지 접속';
+                  } else if (log.event_type === 'page_dwell') {
+                    badgeColor = 'default';
+                    badgeLabel = '⏱️ 체류 시간';
+                  } else if (log.event_type === 'button_click') {
+                    badgeLabel = '👆 버튼 클릭';
+                  } else if (log.event_type === 'api_request') {
+                    badgeLabel = '🌐 API 요청';
+                  } else if (log.event_type === 'admin_request') {
+                    badgeColor = 'destructive';
+                    badgeLabel = '🛡️ 관리자 요청';
+                  }
+                  const detail = log.event_type === 'page_dwell'
+                    ? `체류 시간: ${formatDwellTime(log.dwell_time_ms)}`
+                    : log.event_type === 'button_click'
+                      ? log.target_label || '클릭'
+                      : log.event_type === 'page_view'
+                        ? '페이지 진입'
+                        : `${String(log.metadata.method ?? '')} · ${String(log.metadata.status ?? '')} · ${String(log.metadata.durationMs ?? '')}ms`;
+                  return <div key={log.id} className="rounded-md border p-3 text-sm">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <strong className="block truncate">{log.username}</strong>
+                        <span className="font-mono text-[11px] text-muted-foreground">{formatTime(log.created_at)}</span>
+                      </div>
+                      <Badge variant={badgeColor} className="text-xs">{badgeLabel}</Badge>
+                    </div>
+                    <p className="mt-3 break-all font-mono text-xs text-primary">{log.path}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">{detail}</p>
+                    <p className="mt-2 font-mono text-[11px] text-muted-foreground">IP {log.ip || '-'}</p>
+                  </div>;
+                })}
+              </div>
+              <div className="hidden overflow-x-auto md:block">
               <table className="w-full border-collapse text-left text-sm">
                 <thead>
                   <tr className="border-b border-border bg-muted/40 text-xs font-semibold text-muted-foreground">
@@ -275,6 +315,7 @@ export default async function AdminActivityLogsPage({
                 </tbody>
               </table>
             </div>
+            </>
           )}
 
           {/* Pagination */}

@@ -16,7 +16,19 @@ interface TrafficDashboardFixture {
 
 interface AiStatusFixture {
   readonly switchState: string;
+  readonly operationalState: string;
+  readonly modelReachability: string;
+  readonly reviewCount: number;
+  readonly shadowReviewCount: number;
+  readonly latestShadowReview: Record<string, unknown> | null;
+  readonly proposalState: {
+    readonly eligible: boolean;
+    readonly blockedBy: readonly string[];
+    readonly minimumActiveSample: number;
+  };
+  readonly lastRuns: Record<string, unknown>;
   readonly agents: readonly unknown[];
+  readonly shadowAgents: readonly unknown[];
   readonly prompt?: unknown;
   readonly proposal?: unknown;
 }
@@ -38,8 +50,11 @@ describe.skipIf(!DATABASE_URL)('administrator traffic and AI status against a re
     await pool.end();
   });
 
-  it('does not expose the raw activity table to the application role', async () => {
-    const error = await rejectionOf(() => pool.query('SELECT * FROM public.user_activity_logs LIMIT 1'));
+  it.each([
+    ['activity', 'SELECT * FROM public.user_activity_logs LIMIT 1'],
+    ['AI shadow', 'SELECT * FROM public.economy_ai_shadow_reviews LIMIT 1'],
+  ])('does not expose the raw %s table to the application role', async (_label, statement) => {
+    const error = await rejectionOf(() => pool.query(statement));
     expect(errorCode(error)).toBe('42501');
     expect(String((error as { message?: string }).message)).toMatch(/permission denied/i);
   });
@@ -121,17 +136,52 @@ describe.skipIf(!DATABASE_URL)('administrator traffic and AI status against a re
       });
     });
 
-    it('reports the current AI switch and review summary without exposing raw prompts', async () => {
+    it('reports truthful AI operational and shadow evidence without exposing raw proposals', async () => {
       await rolledBack(async (client) => {
         const admin = await user(client, true);
+        await client.query(
+          "UPDATE public.feature_switches SET state = 'enabled' WHERE feature_key = 'economy_ai_policy_review'",
+        );
+        await client.query(
+          `SELECT public.economy_record_ai_shadow_review(
+             '{"eligible":false,"blockedBy":["sample too small"],"adjustments":[]}'::jsonb,
+             'agree', 0.91, 'shadow path healthy', '[]'::jsonb,
+             'qa-shadow', 'qa-v1',
+             '[{"domain":"macro","seat":"A","stage":"independent","model":"qa-a","decision":"agree","confidence":0.91,"rationale":"ok","risks":[],"latencyMs":12,"totalTokens":24}]'::jsonb
+           )`,
+        );
         const { rows } = await client.query<{ status: AiStatusFixture }>(
           'SELECT public.admin_economy_ai_status($1) AS status',
           [admin],
         );
-        expect(['enabled', 'disabled', 'shadow', 'emergency']).toContain(rows[0]!.status.switchState);
-        expect(Array.isArray(rows[0]!.status.agents)).toBe(true);
-        expect(rows[0]!.status).not.toHaveProperty('prompt');
-        expect(rows[0]!.status).not.toHaveProperty('proposal');
+        const status = rows[0]!.status;
+        expect(status.switchState).toBe('enabled');
+        expect(status.operationalState).toBeTruthy();
+        expect(status.modelReachability).toBe('healthy');
+        expect(status.shadowReviewCount).toBeGreaterThanOrEqual(1);
+        expect(status.latestShadowReview).not.toBeNull();
+        expect(status.proposalState.minimumActiveSample).toBeGreaterThan(0);
+        expect(Array.isArray(status.proposalState.blockedBy)).toBe(true);
+        expect(Array.isArray(status.agents)).toBe(true);
+        expect(Array.isArray(status.shadowAgents)).toBe(true);
+        expect(status.lastRuns).toBeTruthy();
+        expect(status).not.toHaveProperty('prompt');
+        expect(status).not.toHaveProperty('proposal');
+        expect(status.latestShadowReview).not.toHaveProperty('proposal');
+        expect(status.latestShadowReview).not.toHaveProperty('council_evidence');
+
+        await client.query(
+          `INSERT INTO public.scheduled_job_runs
+             (job, period_key, started_at, finished_at, status, detail)
+           VALUES
+             ('economy.ai_shadow_health', 'qa-failed', clock_timestamp(), clock_timestamp(), 'failed',
+              '{"error":"qa model failure"}'::jsonb)`,
+        );
+        const { rows: failedRows } = await client.query<{ status: AiStatusFixture }>(
+          'SELECT public.admin_economy_ai_status($1) AS status',
+          [admin],
+        );
+        expect(failedRows[0]!.status.operationalState).toBe('failed');
       });
     });
   });

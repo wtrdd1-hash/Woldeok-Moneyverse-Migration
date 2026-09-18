@@ -358,91 +358,188 @@ export class EconomyAiReviewer {
   ) {}
 
   async run(): Promise<Record<string, unknown>> {
-    const switchRow = await queryOne<{ state: string }>(
-      this.db,
-      "SELECT public.feature_switch_state('economy_ai_policy_review') AS state",
-    );
-    if (switchRow?.state !== 'enabled') {
-      return { reviewed: false, status: 'disabled', switchState: switchRow?.state ?? 'disabled' };
+    const gate = await this.reviewGate();
+    if (gate.switchState !== 'enabled') {
+      return { reviewed: false, status: 'disabled', switchState: gate.switchState };
     }
-
-    const proposalRow = await queryOne<{ proposal: Record<string, unknown> }>(
-      this.db,
-      'SELECT public.economy_propose_policy_adjustment(7) AS proposal',
-    );
-    const proposal = proposalRow?.proposal ?? {};
-    const adjustments = Array.isArray(proposal.adjustments) ? proposal.adjustments : [];
-    if (proposal.eligible !== true || adjustments.length === 0) {
+    const adjustments = Array.isArray(gate.proposal.adjustments) ? gate.proposal.adjustments : [];
+    if (gate.proposal.eligible !== true || adjustments.length === 0) {
       return { reviewed: false, status: 'no_eligible_classical_proposal' };
     }
     if (!this.config) {
       return { reviewed: false, status: 'unconfigured_classical_fallback' };
     }
 
-    const domains = selectDomainsForProposal(proposal);
-    const cacheKey = JSON.stringify({ proposal, prompt: ECONOMY_AI_PROMPT_VERSION, models: domains.map((domain) => this.config!.agents[domain]) });
-    const cached = this.cache.get(cacheKey);
-    let aggregate: EconomyAiReview;
-    let finalReviews: EconomyAiAgentReview[];
-    let mode: string;
-    if (cached && cached.expiresAt > Date.now()) {
-      aggregate = cached.aggregate;
-      finalReviews = cached.evidence;
-      mode = 'cache_hit';
-    } else {
-      const independent = await this.runCouncilStage(proposal, 'independent', [], domains);
-      const initialAggregate = aggregateCouncil(independent, domains);
-      const disputed = disputedDomains(independent, domains);
-      const highRisk = isHighRiskProposal(proposal);
-      const rebuttalDomains = highRisk ? domains : disputed;
-      if (initialAggregate.decision === 'agree' && initialAggregate.risks.length === 0 && rebuttalDomains.length === 0) {
-        finalReviews = independent;
-        aggregate = initialAggregate;
-        mode = 'early_exit';
-      } else if (rebuttalDomains.length > 0) {
-        const rebuttal = await this.runCouncilStage(proposal, 'rebuttal', independent, rebuttalDomains);
-        finalReviews = [...independent, ...rebuttal];
-        aggregate = aggregateCouncil(finalReviews, domains);
-        mode = highRisk ? 'full_risk_rebuttal' : 'targeted_rebuttal';
-      } else {
-        finalReviews = independent;
-        aggregate = initialAggregate;
-        mode = 'independent_only';
-      }
-      if (this.config.cacheTtlSeconds > 0) this.cache.set(cacheKey, { expiresAt: Date.now() + this.config.cacheTtlSeconds * 1000, aggregate, evidence: finalReviews, domains, mode });
-    }
+    const evaluated = await this.evaluateProposal(gate.proposal, true, false);
     const stored = await queryOne<{ id: string }>(
       this.db,
       `SELECT public.economy_record_ai_policy_review(
          $1::jsonb, $2, $3::numeric, $4, $5::jsonb, $6, $7, $8, $9::jsonb
        )::text AS id`,
       [
-        JSON.stringify(proposal),
-        aggregate.decision,
-        aggregate.confidence,
-        aggregate.rationale,
-        JSON.stringify(aggregate.risks),
+        JSON.stringify(gate.proposal),
+        evaluated.aggregate.decision,
+        evaluated.aggregate.confidence,
+        evaluated.aggregate.rationale,
+        JSON.stringify(evaluated.aggregate.risks),
         'multi-agent-council',
         ECONOMY_AI_PROMPT_VERSION,
         this.config.ttlMinutes,
-        JSON.stringify(finalReviews),
+        JSON.stringify(evaluated.finalReviews),
       ],
     );
 
+    return this.result(evaluated, stored?.id ?? null, false, gate.proposal);
+  }
+
+  async runShadow(): Promise<Record<string, unknown>> {
+    const gate = await this.reviewGate();
+    if (gate.switchState !== 'enabled') {
+      return {
+        reviewed: false,
+        shadow: true,
+        status: 'disabled',
+        switchState: gate.switchState,
+      };
+    }
+    if (!this.config) {
+      return {
+        reviewed: false,
+        shadow: true,
+        status: 'unconfigured_shadow',
+      };
+    }
+
+    // Shadow health deliberately calls the models even when the deterministic
+    // proposal is ineligible. It writes to a separate table and never feeds
+    // economy_ai_policy_guard, so proving inference health cannot unlock policy.
+    const evaluated = await this.evaluateProposal(gate.proposal, false, true);
+    const stored = await queryOne<{ id: string }>(
+      this.db,
+      `SELECT public.economy_record_ai_shadow_review(
+         $1::jsonb, $2, $3::numeric, $4, $5::jsonb, $6, $7, $8::jsonb
+       )::text AS id`,
+      [
+        JSON.stringify(gate.proposal),
+        evaluated.aggregate.decision,
+        evaluated.aggregate.confidence,
+        evaluated.aggregate.rationale,
+        JSON.stringify(evaluated.aggregate.risks),
+        'multi-agent-council-shadow',
+        ECONOMY_AI_PROMPT_VERSION,
+        JSON.stringify(evaluated.finalReviews),
+      ],
+    );
+
+    return this.result(evaluated, stored?.id ?? null, true, gate.proposal);
+  }
+
+  private async reviewGate(): Promise<{
+    readonly switchState: string;
+    readonly proposal: Record<string, unknown>;
+  }> {
+    const switchRow = await queryOne<{ state: string }>(
+      this.db,
+      "SELECT public.feature_switch_state('economy_ai_policy_review') AS state",
+    );
+    const switchState = switchRow?.state ?? 'disabled';
+    if (switchState !== 'enabled') return { switchState, proposal: {} };
+
+    const proposalRow = await queryOne<{ proposal: Record<string, unknown> }>(
+      this.db,
+      'SELECT public.economy_propose_policy_adjustment(7) AS proposal',
+    );
+    return { switchState, proposal: proposalRow?.proposal ?? {} };
+  }
+
+  private async evaluateProposal(
+    proposal: Record<string, unknown>,
+    allowCache: boolean,
+    shadowIndependentOnly: boolean,
+  ): Promise<{
+    readonly aggregate: EconomyAiReview;
+    readonly finalReviews: EconomyAiAgentReview[];
+    readonly domains: EconomyAiDomain[];
+    readonly mode: string;
+  }> {
+    if (!this.config) throw new Error('economy AI is not configured');
+    const domains = selectDomainsForProposal(proposal);
+    const cacheKey = JSON.stringify({
+      proposal,
+      prompt: ECONOMY_AI_PROMPT_VERSION,
+      models: domains.map((domain) => this.config!.agents[domain]),
+    });
+    const cached = allowCache ? this.cache.get(cacheKey) : undefined;
+    if (cached && cached.expiresAt > Date.now()) {
+      return {
+        aggregate: cached.aggregate,
+        finalReviews: cached.evidence,
+        domains: cached.domains,
+        mode: 'cache_hit',
+      };
+    }
+
+    const independent = await this.runCouncilStage(proposal, 'independent', [], domains);
+    let aggregate = aggregateCouncil(independent, domains);
+    let finalReviews = independent;
+    let mode = shadowIndependentOnly ? 'shadow_independent_only' : 'independent_only';
+
+    if (!shadowIndependentOnly) {
+      const disputed = disputedDomains(independent, domains);
+      const highRisk = isHighRiskProposal(proposal);
+      const rebuttalDomains = highRisk ? domains : disputed;
+      if (aggregate.decision === 'agree' && aggregate.risks.length === 0 && rebuttalDomains.length === 0) {
+        mode = 'early_exit';
+      } else if (rebuttalDomains.length > 0) {
+        const rebuttal = await this.runCouncilStage(proposal, 'rebuttal', independent, rebuttalDomains);
+        finalReviews = [...independent, ...rebuttal];
+        aggregate = aggregateCouncil(finalReviews, domains);
+        mode = highRisk ? 'full_risk_rebuttal' : 'targeted_rebuttal';
+      }
+      if (allowCache && this.config.cacheTtlSeconds > 0) {
+        this.cache.set(cacheKey, {
+          expiresAt: Date.now() + this.config.cacheTtlSeconds * 1000,
+          aggregate,
+          evidence: finalReviews,
+          domains,
+          mode,
+        });
+      }
+    }
+
+    return { aggregate, finalReviews, domains, mode };
+  }
+
+  private result(
+    evaluated: {
+      readonly aggregate: EconomyAiReview;
+      readonly finalReviews: EconomyAiAgentReview[];
+      readonly domains: EconomyAiDomain[];
+      readonly mode: string;
+    },
+    reviewId: string | null,
+    shadow: boolean,
+    proposal: Record<string, unknown>,
+  ): Record<string, unknown> {
     return {
       reviewed: true,
+      shadow,
       status:
-        aggregate.decision === 'abstain' ? 'council_abstained' : `council_${aggregate.decision}`,
-      reviewId: stored?.id ?? null,
-      decision: aggregate.decision,
-      confidence: aggregate.confidence,
-      risks: aggregate.risks,
-      agentCount: finalReviews.length,
-      domainCount: domains.length,
-      domains,
-      mode,
-      totalTokens: finalReviews.reduce((sum, review) => sum + (review.totalTokens ?? 0), 0),
-      totalLatencyMs: finalReviews.reduce((sum, review) => sum + (review.latencyMs ?? 0), 0),
+        evaluated.aggregate.decision === 'abstain'
+          ? shadow ? 'shadow_council_abstained' : 'council_abstained'
+          : `${shadow ? 'shadow_' : ''}council_${evaluated.aggregate.decision}`,
+      reviewId,
+      decision: evaluated.aggregate.decision,
+      confidence: evaluated.aggregate.confidence,
+      risks: evaluated.aggregate.risks,
+      proposalEligible: proposal.eligible === true,
+      blockedBy: Array.isArray(proposal.blockedBy) ? proposal.blockedBy : [],
+      agentCount: evaluated.finalReviews.length,
+      domainCount: evaluated.domains.length,
+      domains: evaluated.domains,
+      mode: evaluated.mode,
+      totalTokens: evaluated.finalReviews.reduce((sum, review) => sum + (review.totalTokens ?? 0), 0),
+      totalLatencyMs: evaluated.finalReviews.reduce((sum, review) => sum + (review.latencyMs ?? 0), 0),
     };
   }
 

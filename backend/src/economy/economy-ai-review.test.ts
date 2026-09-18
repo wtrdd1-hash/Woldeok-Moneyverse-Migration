@@ -56,6 +56,11 @@ function dbFor(options: {
           rows: [{ id: options.storedId ?? '11111111-1111-4111-8111-111111111111' }],
         } as never;
       }
+      if (text.includes('economy_record_ai_shadow_review')) {
+        return {
+          rows: [{ id: options.storedId ?? '22222222-2222-4222-8222-222222222222' }],
+        } as never;
+      }
       throw new Error(`unexpected query: ${text}`);
     },
   };
@@ -197,6 +202,55 @@ describe('economy AI review lane', () => {
     expect(seen.some((entry) => entry.includes(':stock:'))).toBe(false);
     expect(seen.some((entry) => entry.includes(':jobs:'))).toBe(false);
     expect(seen.some((entry) => entry.startsWith('rebuttal:'))).toBe(false);
+  });
+
+
+
+  it('runs a shadow council for a blocked proposal without creating authoritative review evidence', async () => {
+    const { db, calls } = dbFor({
+      proposal: {
+        eligible: false,
+        blockedBy: ['at least one day had too few active members to read'],
+        sourceMetrics: { days: 7, activeMemberCount: 12, sampleSufficientDays: 0 },
+        adjustments: [{ knob: 'jobs.assignment_daily_limit_delta.artisan', from: 0, to: 1 }],
+      },
+    });
+    const caller: EconomyAiModelCaller = async () => ({
+      decision: 'agree',
+      confidence: 0.93,
+      rationale: 'Inference path is healthy; deterministic eligibility remains authoritative.',
+      risks: [],
+    });
+
+    const result = await new EconomyAiReviewer(db, config, caller).runShadow();
+
+    expect(result).toMatchObject({
+      reviewed: true,
+      shadow: true,
+      status: 'shadow_council_agree',
+      proposalEligible: false,
+      mode: 'shadow_independent_only',
+      domainCount: 4,
+      agentCount: 8,
+    });
+    expect(calls.some((call) => call.text.includes('economy_record_ai_shadow_review'))).toBe(true);
+    expect(calls.some((call) => call.text.includes('economy_record_ai_policy_review'))).toBe(false);
+  });
+
+  it('does not call shadow models when the AI switch is disabled', async () => {
+    const { db, calls } = dbFor({ state: 'disabled' });
+    const caller = vi.fn<EconomyAiModelCaller>();
+
+    const result = await new EconomyAiReviewer(db, config, caller).runShadow();
+
+    expect(result).toEqual({
+      reviewed: false,
+      shadow: true,
+      status: 'disabled',
+      switchState: 'disabled',
+    });
+    expect(caller).not.toHaveBeenCalled();
+    expect(calls).toHaveLength(1);
   });
 
   it('runs full rebuttal for selected domains when a job-cap proposal is high risk', async () => {

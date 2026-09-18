@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Scheduler, type SchedulerJob } from './scheduler';
+import { SCHEDULER_JOBS, Scheduler, type SchedulerJob } from './scheduler';
 
 /**
  * The runner holds one decision -- which connection a job needs -- and one
@@ -34,6 +34,16 @@ const job: SchedulerJob = {
 };
 
 describe('the scheduler', () => {
+  it('schedules non-authoritative AI shadow health daily after the metric snapshot window opens', () => {
+    const shadow = SCHEDULER_JOBS.find((candidate) => candidate.job === 'economy.ai_shadow_health');
+    expect(shadow).toMatchObject({
+      cadence: 'daily',
+      notBefore: 15,
+      connection: 'app',
+    });
+    expect(shadow?.statement).toBeUndefined();
+  });
+
   it('does nothing when the window is already claimed', async () => {
     const app = connection((sql) =>
       sql.includes('schedule_claim_run') ? [{ claimed: false, period_key: '2026-08-31' }] : [],
