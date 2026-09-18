@@ -5,12 +5,10 @@ const source = readFileSync('src/components/site-footer.tsx', 'utf8');
 
 describe('SiteFooter mobile accessibility', () => {
   it('keeps every footer navigation link at least 44px tall with a visible keyboard focus affordance', () => {
-    const links = source.match(/className="inline-flex min-h-11[^"]+"/g) ?? [];
-    expect(links).toHaveLength(4);
-    for (const link of links) {
-      expect(link).toContain('items-center');
-      expect(link).toContain('focus-visible:outline');
-    }
+    expect(source).toContain("const linkClass = 'inline-flex min-h-11 items-center");
+    expect(source).toContain('focus-visible:outline');
+    const links = source.match(/<Link href="\/[^"]+" className=\{linkClass\}>/g) ?? [];
+    expect(links).toHaveLength(5);
   });
 
   it('uses compact wrapping gaps so 360px layouts do not depend on oversized inter-link spacing', () => {
