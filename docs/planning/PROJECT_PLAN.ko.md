@@ -2,11 +2,22 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.19.238
+> **현재 통합 버전:** v2026.09.19.239
 > **구현·증거 동기화:** 2026-09-19
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 델타 — v2026.09.19.239 (2026-09-19)
+
+### 03:05 상태 신선도 후보·런타임·보안/SEO 백로그 재대조
+- **권위 / 병행 작업:** 시작과 필수 중간 재확인 모두 authoritative `main=0747add239da724a85335758fd98a41613841c94`(v238)이다. PR #502는 `auto/hourly-a-status-freshness-repair-v2026.09.19.239`의 exact head `88376ab764e4f5d8fc262aa89372db71bea112d3`로 OPEN이며 `frontend/src/app/status/page.tsx`, 신규 `status-freshness.ts`와 단위테스트만 변경한다. 이는 병합된 사실이 아니라 후보 구현이다. 문서상 30초 collector 주기를 기준으로 누락/잘못된/미래 또는 60초 초과 관측을 `unknown`/“최신 확인 필요”로 낮추는 계약이다. 관측 시 9개 check-run이 있었고 `verify / runtime-check`는 성공했지만 `build`와 별도 `runtime-check`는 진행 중이므로 exact head 전체 green과 Test 증거 전에는 merge/Production 완료로 기록하지 않는다.
+- **런타임 / HIGH `OBS-NET-216-01` 03:05 KST 재현:** backend/frontend/backup timer/Economy AI unit은 active이고 backup timer는 enabled다. Canonical `https://woldeok.com/api/version`은 host-local DNS 실패(`curl(6)`, HTTP 000)가 계속되며 loopback `127.0.0.1:3002/api/version`은 HTTP 200, backend id `75e69e77cdc18ef221106a008563151a4c790728`을 반환한다. 상태 신선도 수정은 DNS 해결이 아니라 UX 진실성/fail-safe 표시다. Resolver→authoritative record→독립 외부 2 vantage→TLS/SNI→HTTP/callback dependency와 실제 alert 전달을 HIGH 수용 gate로 유지하고 정상 application unit을 재시작하지 않는다.
+- **P1 상태 관측 백로그(frontend + API/backend + QA):** #502가 통과하면 60초 stale demotion은 유지하되 장기적으로 hard-code를 권위로 두지 않는다. 서버 권위 `StatusFreshnessPolicy{sourceKey,expectedIntervalMs,staleAfterMs,maxFutureSkewMs,policyVersion}`를 추가하고 public status API가 내부 hostname/secret 없이 `observedAt`, `state`, `freshnessState`, `ageMs`, `policyVersion`을 반환한다. Collector write는 source별 단조성을 보장해 현저히 오래된 관측을 거부하고 `(source_key, observed_at DESC)` index와 bounded retention을 둔다. Frontend는 `operational/degraded/outage/unknown-stale`을 구분하며 stale 데이터가 aggregate health를 개선해서는 안 된다. Admin/ops source 진단은 RBAC, public은 sanitized evidence만 제공한다.
+- **상태 QA / 수용 / 롤백:** 59,999/60,000/60,001ms 경계, missing/invalid timestamp, +5s/+5,001ms future skew, degraded/outage stale transition을 단위테스트한다. API policy/version/age contract, real-DB out-of-order concurrent collector write, 인증 admin source diagnostics E2E, public 360/390px 접근성 및 색상 외 상태표현을 검증한다. Exact PR SHA가 lint/typecheck/unit/build/runtime check를 통과한 뒤 isolated Test에서 최소 3 collector interval 동안 의도적 collector update 중단과 회복을 재현한다. Production은 같은 tested SHA, DNS/health regression 없음, stale이 healthy로 표시되지 않는 smoke가 필요하다. Rollback은 frontend/API policy를 마지막 호환 tuple로 함께 되돌리며 stale/unknown을 operational로 바꾸면 안 된다.
+- **보안 / 직접채택:** OWASP ASVS 5.0.0은 최신 stable이며 version-qualified requirement ID 사용을 권장한다. Browser state-changing status/admin 호출에는 해당 시 `v5.0.0-3.5.1/3.5.2` origin/CSRF 통제를, backend component 통신에는 `v5.0.0-13.2.1/13.2.2` 인증·최소권한을 적용한다. Public status는 read-only, rate/resource bounded, DTO allowlist이며 collector/admin mutation은 service/admin identity, object/action authorization, replay resistance, immutable masked audit를 요구한다. forged source key, stale replay, cross-source overwrite, secret/internal-topology leakage를 negative test한다.
+- **SEO / 최신 공식지침:** Google Search Central은 2026-09-17 infinite-scroll 지침을 유지관리 문서로 이동했고 지침 자체는 변경하지 않았다. Moneyverse community/catalog/search의 infinite-scroll UX는 crawler scroll/client-only state에 의존하지 않고 crawlable pagination URL/link와 안정적인 canonical/index semantics를 제공해야 한다. Public status는 운영 투명성이지 growth landing page가 아니므로 의도적으로 index할 때만 self-canonical을 쓰고 아니면 SEO authority의 명시적 index policy를 적용한다. Search/ad crawler가 auth를 우회하거나 조작된 health를 받으면 안 된다.
+- **P0/P1 연속성과 순서:** `BAK-RUNTIME-177-01`은 최신 backup isolated restore/reconciliation, 실측 RPO/RTO, off-host immutable retention, 실제 failure alert 전까지 P0 BLOCKED다. AI/economy 권한봉쇄, migration-205 concurrency, 인증 admin/mobile 검증, MASWE-linked release evidence와 `CI-ENFORCE-204-01`도 open이다. 순서: P0 restore + AI/economy 봉쇄 → HIGH DNS 증거 → #502 exact-head CI/Test와 status-policy backend contract → P1 required-check negative-control enforcement → mobile/App-API security → SEO crawl probe → 실측 commerce/growth. Planning-only; runtime/DNS/ledger/policy/Production DB 변경 없음.
 
 ## 회차 델타 — v2026.09.19.238 (2026-09-19)
 
