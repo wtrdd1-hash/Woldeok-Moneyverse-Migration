@@ -2,11 +2,25 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.19.239
+> **현재 통합 버전:** v2026.09.19.241
 > **구현·증거 동기화:** 2026-09-19
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 델타 — v2026.09.19.241 (2026-09-19)
+
+### 04:05 상태 전역영향 구현 병합 + 런타임/CI + 상태 진실성 백로그
+- **권위/브랜치 상태:** 시작 및 필수 중간 재확인 모두 authoritative `main=9d8c369e40a76fe8e93eb3a0f0d6c375e5cba427`; 열린 PR은 없었다. Main에는 `feat(frontend): surface global service impact v2026.09.19.240 (#505)`가 병합됐다. 이는 MERGED 프론트엔드 구현이며 backend 상태 권위, DNS 장애 또는 Production exact-SHA 경로 복구 증거가 아니다. Main은 protected지만 required-status enforcement가 `off`, required contexts/checks가 0개이고 exact-main combined status도 0개다. `CI-ENFORCE-204-01`은 P1 OPEN 유지.
+- **런타임 / HIGH `OBS-NET-216-01` 04:06 KST 재현:** backend, frontend, backup timer, Economy AI 서비스는 active이고 backup timer는 enabled이며 직전 실행 00:23:48, 다음 실행 06:22:37 KST다. Canonical `https://woldeok.com/api/version`은 host-local DNS `curl(6)`/HTTP 000으로 계속 실패하고 loopback `127.0.0.1:3002/api/version`은 HTTP 200, `Cache-Control: no-store`, backend id `75e69e77cdc18ef221106a008563151a4c790728`을 반환한다. 정상 application unit은 재시작하지 않는다. DNS는 사용자 트래픽, OAuth/payment callback, SEO/ad crawler, release evidence의 공통 dependency다.
+- **P1 상태 진실성 백로그(frontend + backend/API + DB):** v240의 전역 영향 표시를 유지하되 freshness와 aggregate impact의 권위는 backend로 이동한다. `StatusFreshnessPolicy{sourceKey,expectedIntervalMs,staleAfterMs,maxFutureSkewMs,policyVersion}`와 `StatusObservation{sourceKey,state,observedAt,receivedAt,evidenceId}`를 추가한다. Public API는 sanitized `{state,freshnessState,observedAt,ageMs,impactScope,policyVersion}`만 반환하고 collector/source 상세는 RBAC가 적용된 internal/admin 진단에서만 제공한다. Aggregate health는 필수 fresh source 중 최악 상태를 따르며 stale/missing은 `unknown`으로만 강등되고 operational로 개선할 수 없다. DB는 source identity, timestamp bounds, evidence idempotency/uniqueness를 강제하고 `(source_key, observed_at DESC)` index와 bounded retention을 둔다.
+- **상태 QA/승격 조건:** stale 경계 -1/0/+1ms, future-skew 경계, missing/invalid timestamp, global-impact mapping unit test; sanitized DTO/policy version API contract; out-of-order/concurrent collector write와 duplicate evidence ID real-DB test; 인증 admin 진단 E2E; 360/390px+keyboard/screen-reader에서 전역 영향이 색상에만 의존하지 않는지 검증한다. Isolated Test exact SHA를 최소 3 collector interval 실행하고 필수 source 하나를 의도적으로 중단하여 API+UI가 green이 아닌 unknown/degraded가 되는지 증명한 뒤 fresh trusted observation에서만 회복해야 한다. Production은 동일 tested SHA, DNS/dependency 증거, smoke와 호환 frontend/API/policy tuple rollback을 요구한다.
+- **보안 / DIRECT ADOPT:** OWASP ASVS 5.0.0이 최신 stable이며 version-qualified ID를 유지한다. Public status는 read-only, DTO allowlist, resource bounded다. Collector/admin write는 개별 service/admin identity, least privilege, replay resistance, immutable masked audit가 필요하다. Forged source identity, stale/future replay, cross-source overwrite, topology/secret leakage, public credential을 통한 상태변조는 release-negative gate다. App API/economy/admin에는 OWASP API 2023의 BOLA/auth/property/resource/sensitive-flow 통제를 계속 적용한다.
+- **SEO / DIRECT ADOPT:** Google Search Central 2026년 9월 문서는 Search 기능이 지역/적격성에 따라 달라지고 rich-result 노출을 보장하지 않는다는 현재 계약을 유지한다. ProfilePage guidance는 2026-09-08 갱신됐다. Engine+market+feature eligibility를 versioned policy로 유지하고 structured data는 visible content와 일치해야 한다. Public status는 acquisition landing이 아니라 운영 투명성 화면이므로 제품정책 변경 전까지 의도적으로 `noindex` 유지한다. `Mediapartners-Google`은 ads crawler family로 별도 관리하며 private/privileged health를 제공하지 않는다.
+- **P0/P1 연속성과 순서:** `BAK-RUNTIME-177-01`은 newest-backup isolated decrypt+restore/reconciliation, 실측 RPO/RTO, off-host immutable retention, 실제 failure alert 전까지 P0 BLOCKED다. AI/economy authority containment, migration-205 concurrency, authenticated admin/mobile 검증, MASWE evidence도 open이다. 순서: P0 restore+AI/economy containment → HIGH DNS proof → P1 status backend authority/exact-SHA Test → P1 required-check negative-control enforcement → mobile/App-API security → SEO/ad probes → measured commerce/growth. 기획 전용이며 runtime/DNS/ledger/policy/Production DB를 변경하지 않는다.
+
+### v241 worklog
+최신 Google Search Central+OWASP 조사 → exact main/open PR/protection/status 확인 → Debian authoritative runtime probe → 중간 exact-main 재확인 → EN/KO 통합기획 동기화. 작업 브랜치 `automation/hourly-plan-v241`, exact base `9d8c369e40a76fe8e93eb3a0f0d6c375e5cba427`; 변경 파일은 canonical 통합기획 2개뿐이다.
 
 ## 회차 델타 — v2026.09.19.239 (2026-09-19)
 
