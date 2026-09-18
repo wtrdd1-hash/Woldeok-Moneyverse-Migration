@@ -15,22 +15,26 @@ import { useLocale } from '@/components/locale-provider';
 export function SiteFooter() {
   const { locale } = useLocale();
   const en = locale === 'en';
+  const linkClass = 'inline-flex min-h-11 items-center px-2 hover:text-forest-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
   return (
     <footer className="moneyverse-site-footer mt-20 bg-paper-dark text-muted-foreground">
       <div className="mx-auto w-full max-w-[1180px] px-6">
         <div className="flex flex-col items-start justify-between gap-6 border-b py-9 sm:flex-row sm:items-center">
           <Brand />
           <nav aria-label={en ? 'Footer menu' : '하단 메뉴'} className="flex flex-wrap gap-x-2 gap-y-1 text-xs font-bold sm:gap-x-3">
-            <Link href="/terms" className="inline-flex min-h-11 items-center px-2 hover:text-forest-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+            <Link href="/search" className={linkClass}>
+              {en ? 'Search' : '통합 검색'}
+            </Link>
+            <Link href="/terms" className={linkClass}>
               {en ? 'Terms' : '이용약관'}
             </Link>
-            <Link href="/privacy" className="inline-flex min-h-11 items-center px-2 hover:text-forest-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+            <Link href="/privacy" className={linkClass}>
               {en ? 'Privacy' : '개인정보처리방침'}
             </Link>
-            <Link href="/status" className="inline-flex min-h-11 items-center px-2 hover:text-forest-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+            <Link href="/status" className={linkClass}>
               {en ? 'Service status' : '서비스 상태'}
             </Link>
-            <Link href="/announcements" className="inline-flex min-h-11 items-center px-2 hover:text-forest-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+            <Link href="/announcements" className={linkClass}>
               {en ? 'Updates' : '운영 소식'}
             </Link>
           </nav>
