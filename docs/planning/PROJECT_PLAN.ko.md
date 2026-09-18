@@ -2,12 +2,26 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.216
+> **현재 통합 버전:** v2026.09.18.217
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.18.217 (2026-09-18)
+
+### 12:04 권위·지속 DNS 증거·SEO 적격성·릴리스 게이트 갱신
+
+- **권위 / CI — P1 OPEN:** 시작과 작업 중간 authoritative `main`은 모두 `b8480e0c969de63039f7a4bafdf7a3708717f6cb`이며 동기화된 v216을 포함한다. Main은 protected지만 required status checks는 `enforcement_level=off`, contexts/checks 0개이고 최신 main cleanup run은 skipped다. `CI-ENFORCE-204-01`은 P1/OPEN이다. 완료조건은 classifier+policy/runtime/security required gate, 감사 가능한 emergency bypass, 의도적으로 실패한 required check가 실제 merge를 차단하는 증거다.
+- **HIGH 관측성/네트워크 — `OBS-NET-216-01` 12:05 KST 재현 / IN PROGRESS:** canonical backend/frontend/backup timer는 active, timer enabled, 마지막 trigger 06:26:17, 다음 12:22:24이며 직전 1시간 backend warning journal은 비어 있다. 권한 있는 Debian host는 `/etc/resolv.conf`에 `1.1.1.1`, `8.8.8.8`을 명시했는데도 `woldeok.com`을 계속 resolve하지 못해 이 evidence path에서는 fresh HTTPS `/api/version`을 확립할 수 없다. Host/network DNS 가설은 강화되지만 public DNS나 애플리케이션 장애를 증명하지는 않는다. Infra backlog는 UDP/TCP 53 reachability와 `dig @1.1.1.1`/`@8.8.8.8`, authoritative NS 및 독립 외부 resolver를 비교한 뒤 TLS/SNI와 `/api/version`을 검사한다. Host-only 실패면 runtime restart 없이 resolver/egress를 복구하고 service-unaffected로 닫으며, public authoritative 실패면 promotion 동결→last-known-good DNS 복구→TTL 전파 실측→다중 네트워크 smoke를 수행한다. Resolver success ratio, DNS latency/NXDOMAIN/SERVFAIL, TLS/version probe를 관측하고 독립 외부 2개 probe가 의도한 deployment identity를 확인하지 못하면 승격을 차단한다.
+- **P0 DR / release authority:** `REL-AUTH-184-01`은 immutable `{deploymentId,frontendSourceSha,backendSourceSha,frontendArtifactDigest,backendArtifactDigest,migrationSetHash,schemaVersion,configRevision,rollbackDeploymentId}`가 release metadata/runtime/version API에서 일치할 때까지 P0다. `BAK-RUNTIME-177-01`은 최신 encrypted archive isolated restore, decrypt/checksum, schema+migration equality, identity/entitlement/ledger balance reconciliation, RPO/RTO 실측, off-host immutable retention, 실제 failure alert 전달 전까지 P0다. 증거 시점에는 12:22 backup이 아직 실행 전이므로 새 backup 성공을 주장하지 않는다.
+- **SEO / SEO backend — 직접채택(Google + Naver 2026-09-18 현행):** Google은 2026-05-07부터 FAQ rich result를 Search에서 폐지했고 Naver Search Advisor도 2026-07-08 FAQ 구조화데이터 노출 종료를 공지했다. 따라서 Moneyverse는 노출을 위해 지원 종료된 FAQ markup을 계속 생성하지 않고 eligible schema registry에서 제거한다. 사용자에게 독립적으로 유용한 FAQ/help 본문은 index 가능하다. DiscussionForum/Profile/Breadcrumb 등 다른 schema도 엔진의 현행 지원과 visible-content/ownership/moderation eligibility를 통과할 때만 생성한다. Naver의 crawlable JS/CSS/render-critical resource, root robots, sitemap discovery 요구도 유지한다. SEO backend는 엔진별 `{schemaType,supportedFrom,supportedUntil,eligibility,lastVerifiedAt}`와 metadata/canonical/robots/split-sitemap/redirect/public-read-model serializer를 소유한다. CI는 Google/Naver render, canonical, robots, hreflang, sitemap, schema parity를 snapshot 검사한다. Unsupported schema, private indexing, critical asset crawler 차단, stale canonical, SSR/cache divergence는 SEO 승격 차단 조건이다. KPI는 impression→CTR→organic visit→signup→activation→D7/D30→net revenue다.
+- **보안 / 전체 기능 gate — 직접채택(OWASP ASVS 5.0):** V13.2.1/V13.2.2에 따라 backend component 통신은 개별 service account, short-lived token 또는 certificate로 인증하고 least privilege를 적용한다. Auth/session/profile/inventory/shop/payment/reward/bank/stock/casino/community/upload/admin mutation은 object/function authorization, 민감 작업 fresh re-auth, CSRF/XSS/SQLi/SSRF/path/command/upload 통제, server-authoritative price/value, idempotency/replay 방지, transaction uniqueness/concurrency, immutable masked audit, anomaly detection을 유지한다. Cross-account BOLA, privileged mass assignment, stale/revoked session 사용, entitlement/reward/payment 중복, webhook signature 우회, service-token audience/scope/expiry/revocation 우회, DB-role overreach, secret/PII logging은 HIGH/CRITICAL이며 승격을 차단한다.
+- **사업성 / UX / 성장 / QA:** 모든 shop/payment/subscription/ad-removal SKU는 market/effective-date/programme/billing-path fee snapshot을 immutable하게 유지하고 보수/기준/낙관 gross→platform/billing fee→tax/refund/fraud→infra/storage/CDN/notification/moderation/support→contribution margin을 계산한다. 미실측 revenue/net revenue/margin/ARPU/ARPDAU/ARPPU/conversion/attach/repeat/renewal/churn/refund/CAC/LTV/payback/fraud/D1/D7/D30은 `HYPOTHESIS/TEST TARGET`이다. 모든 현재/계획 기능은 status+code evidence, screen/CTA/loading-empty-error/offline-timeout/recovery, responsive/a11y/i18n, ownership/RBAC, API contract/error/idempotency/rate limit, DB index/constraint/transaction/concurrency, audit/admin/flag/fallback/DR, privacy/abuse, SEO, analytics/financial KPI, cache/performance, unit/integration/E2E/real-DB/security/regression gate와 exact-SHA rollback을 유지한다. P0/P1 integrity/security/release/DR이 monetization/growth보다 우선한다.
+
+### v217 worklog / 수용 순서
+Google Search + Naver Search Advisor + OWASP ASVS 최신 공식자료 → exact main/plan/protection/CI → Debian canonical runtime/DNS/version 증거 → 상세 issue/SEO/security/economics/QA delta → 작업 중간 exact-main 재확인 → EN/KO 동기화 → diff check → planning branch/PR/CI. 이 기획 회차는 runtime code와 Production DB를 변경하지 않는다.
 
 ## 회차 델타 — v2026.09.18.216 (2026-09-18)
 
