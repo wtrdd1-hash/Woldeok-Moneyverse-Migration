@@ -2,13 +2,27 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.230
+> **현재 통합 버전:** v2026.09.18.231
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
 
+
+## 회차 델타 — v2026.09.18.231 (2026-09-18)
+
+### 23:07 OWASP-2025 인증/세션 게이트 + 플랫폼 수수료 unit economics + 런타임/CI 재검증
+- **레퍼런스 우선 / 직접채택:** 저장소·런타임 확인 전에 OWASP Top 10:2025/A07 Authentication Failures, Apple App Store Small Business Program/현행 Developer Program 약관, Google Play 현행 service-fee 가이드를 재조사했다. 2026-09-18 확인 출처: https://top10.owasp.org/2025/ ; https://top10.owasp.org/2025/A07_2025-Authentication_Failures/ ; https://developer.apple.com/app-store/small-business-program/ ; https://developer.apple.com/support/terms/apple-developer-program-license-agreement/ ; https://support.google.com/googleplay/android-developer/answer/112622 . 판정: 인증/세션 릴리스 증거는 session fixation/rotation, logout+idle+absolute 만료, JWT issuer/audience/scope, 고위험 관리자·경제행위 MFA/reauth, 계정열거 방지, credential-stuffing throttle+alert를 명시 검증한다. 상거래 예측은 15/30% 고정 수수료가 아니라 시장+스토어+설치 cohort+거래유형별 effective-dated 정책으로 계산한다.
+- **권위 / 작업 중간 재확인:** 시작 GitHub `main=7a8563ae73f63e72cf860b515e78c44c05e4cfff`, 양 계획=v230이며 작업 중간에도 동일 exact main을 확인했다. 해당 SHA combined status는 `total_count=0`/pending이라 `CI-ENFORCE-204-01` P1 OPEN 유지. 로컬 주 checkout은 `HEAD=5f8f77a...`, `origin/main=7a8563a...`로 divergence가 있어 reset/덮어쓰기하지 않고 exact `origin/main` 격리 detached worktree에서 이번 문서 변경만 수행한다.
+- **HIGH `OBS-NET-216-01` / 23:07 KST 재현:** backend/frontend/backup timer active, timer enabled. loopback `127.0.0.1:3002/api/version` HTTP 200, backend id `75e69e77cdc18ef221106a008563151a4c790728`; host-local `woldeok.com` DNS는 계속 실패하고 canonical HTTPS `/api/version`은 HTTP 000/curl(6)이다. 정상 app unit은 재시작하지 않는다. DNS를 사용자·OAuth/결제 callback·검색/광고 crawler 공통 릴리스 의존성으로 유지하고 resolver→authoritative NS/A/AAAA→UDP/TCP53→외부 2 vantage→TLS/SNI→HTTP 순으로 진단한다. 수용조건은 vantage별 30회 연속 성공, false NXDOMAIN/SERVFAIL 0, callback dependency 성공, 실제 alert 전달이다.
+- **P0 인증/경제 보안 계약:** `AuthSecurityEvidence={loginSessionRotated,logoutRevoked,idleExpiryTested,absoluteExpiryTested,issuerChecked,audienceChecked,scopeChecked,mfaOrReauthPolicy,enumerationNegativeTest,stuffingThrottleTest,alertDelivered,checkedSha}`를 둔다. 관리자 고권한 작업, password/email/MFA 변경, payment/refund, entitlement mutation, WLD transfer/reward, bank/loan/stock/casino settlement는 위험도에 따라 recent-auth/step-up을 요구한다. session fixation, revoked-token replay, cross-account/BOLA, issuer/audience 미검증, 무제한 자동 로그인, 경제 mutation 중복, alert 전달 실패는 승격차단이다. unit claim validator, integration rotation/revocation, E2E multi-device logout/reauth, real-DB duplicate/replay/concurrency, security stuffing/enumeration, OAuth/mobile/API 회귀를 필수화한다. 롤백은 위험 feature flag를 끄고 last-known-good auth policy로 복귀하되 revoked session을 부활시키지 않는다.
+- **상거래/unit economics 구체 델타:** effective-dated `PlatformFeePolicy{platform,storefront,program,installCohort,transactionType,billingRoute,serviceFeePct,billingFeePct,effectiveFrom,effectiveTo,source,verifiedAt}`와 order/refund 불변 `FeeSnapshot`을 도입한다. Apple Small Business 15%는 **조건부 참고값**이며 보편 수수료가 아니다. Google Play 현행 가이드는 subscription/non-recurring, first-$1M/program 자격, billing route 및 일부 시장의 install cohort에 따라 달라지므로 SKU별 `gross - tax - platform/service - billing - refundReserve - fraudLoss - variableInfra - support = contributionMargin`을 계산한다. 자격 미확인은 `HYPOTHESIS/BLOCKED FOR FORECAST`; 임의 기본값 금지. 관리자 가격 시뮬레이터는 활성화 전 base/conservative/optimistic 수수료·환불·전환 민감도를 표시한다.
+- **전체기능 UX/SEO/운영 연결:** auth/profile/security-center/inventory/collection/shop/cart/payment/subscription/ad-removal/progression/business/bank/loan/stock/casino/community/social/notification/search/upload/public/App API/admin/audit/DR/analytics/ads/SEO/incident는 구현상태+근거, loading/empty/error/offline/timeout/permission, 반응형+a11y+i18n, subject-resource-action 권한, DTO allowlist, idempotency/rate/resource budget, DB constraint/index/transaction/concurrency, masked immutable audit, fallback/flag/DR/privacy/abuse, SEO/cache/performance, 분석+재무 KPI, unit/integration/E2E/real-DB/security/regression/exact-SHA 승격·롤백 gate를 유지한다. 공개 SEO는 stable canonical/hreflang/sitemap/화면일치 structured data를 서버 렌더링하고 account/admin/transaction/security/private-upload는 인증+noindex다.
+- **사업/UX guardrail:** 실측 전 수익화 수치는 `HYPOTHESIS/TEST TARGET`. 기능/SKU별 gross/net revenue, contribution margin, ARPU/ARPDAU/ARPPU, attach/paid/subscription conversion, renewal/churn/refund, 광고 순효과, CAC/LTV/payback, D1/D7/D30, infra+support cost/user, fraud loss를 측정한다. `kill`: incremental contribution 음수 또는 fraud/refund/retention/fairness/trust 유의 악화; `iterate`: 수요 양수지만 guardrail/payback 미달; `scale`: incremental contribution 양수+payback 허용범위이며 D7/D30/support/latency/fairness 악화 없음. 숨은 갱신·강압적 FOMO·다크패턴·실제금융/도박 오인은 금지한다.
+
+### v231 작업로그
+외부 공식자료 조사 -> exact GitHub main/계획 + runtime/QA/CI 대조 -> 인증/세션·수수료정책 전체기능 델타 -> exact-main 중간 재확인 -> 한영 통합 반영. 우선순위는 P0 격리 restore proof+인증/경제 무결성 -> HIGH DNS/dependency 증거 -> P1 CI required-check negative control -> 실측 commerce/SEO/growth다. 기획 전용이며 runtime/DNS/ledger/Production DB는 변경하지 않았다.
 
 ## 회차 델타 — v2026.09.18.230 (2026-09-18)
 
