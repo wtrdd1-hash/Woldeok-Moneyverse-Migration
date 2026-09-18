@@ -1,3 +1,8 @@
+## v2026.09.18.232 — Admin User Recent Access
+- Added a dedicated recent-access field to the administrator member directory with full Asia/Seoul date-time display.
+- Added sorting by most recent access while preserving search, restriction filtering, asset inspection and detail/audit navigation.
+- Reused the existing access-summary/activity logging backend; no schema, ledger or authorization mutation.
+
 ## v2026.09.15.121 — Virtual Stock Discovery Search
 - Added shareable symbol/name/description search to the authenticated virtual-stock market with localized result and empty states.
 - No database, ledger, authorization, or trading mutation path changed.

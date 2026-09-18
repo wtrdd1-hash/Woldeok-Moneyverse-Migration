@@ -13,6 +13,9 @@ const USERS: readonly AdminUser[] = [
     created_at: '2026-09-01T00:00:00.000Z',
     restricted_at: null,
     restriction_reason: null,
+    last_login_at: '2026-09-18T10:00:00.000Z',
+    last_seen_at: '2026-09-18T11:00:00.000Z',
+    last_admin_at: null,
   },
   {
     user_id: '00000000-0000-4000-8000-000000000002',
@@ -21,6 +24,9 @@ const USERS: readonly AdminUser[] = [
     created_at: '2026-09-02T00:00:00.000Z',
     restricted_at: '2026-09-03T00:00:00.000Z',
     restriction_reason: '운영 검토 중',
+    last_login_at: '2026-09-18T12:00:00.000Z',
+    last_seen_at: '2026-09-18T13:45:00.000Z',
+    last_admin_at: '2026-09-18T13:30:00.000Z',
   },
 ];
 
@@ -47,5 +53,18 @@ describe('UserDirectory', () => {
     expect(screen.queryByText('월덕')).toBeNull();
     expect(screen.getByText('테스트 사용자')).toBeDefined();
     expect(screen.getByText('운영 검토 중')).toBeDefined();
+  });
+
+  it('shows full Korea-time access dates and sorts by most recent access', () => {
+    render(<UserDirectory users={USERS} />);
+
+    expect(screen.getByText(/2026.*09.*18.*22.*45.*00/)).toBeDefined();
+
+    fireEvent.click(screen.getByRole('button', { name: /최근 접속 순/ }));
+
+    const detailLinks = screen.getAllByRole('link', { name: /상세·로그/ });
+    expect(detailLinks[0]?.getAttribute('href')).toBe(
+      '/admin/users/00000000-0000-4000-8000-000000000002',
+    );
   });
 });

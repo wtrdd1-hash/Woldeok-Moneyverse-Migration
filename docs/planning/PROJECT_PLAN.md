@@ -2,13 +2,23 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.18.231
+> Current integrated version: v2026.09.18.232
 > Implementation/evidence sync: 2026-09-18
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+## Cycle delta — v2026.09.18.232 (2026-09-18)
 
+### Admin user recent-access visibility
+- **Implementation:** the administrator member directory exposes recent activity, last login and administrator-console access as a dedicated field. Timestamps render with full Asia/Seoul date and time, and operators can sort by most recent activity.
+- **Authority recheck:** start and mid-work GitHub `main=70fcc164fc6b8265975738a9af92ba35345d102c`; both canonical plans were v231 and unchanged during implementation.
+- **Backend/data reuse:** no schema or ledger mutation. The existing `activity_user_access_summaries` read model and request activity logging remain authoritative; Production read-only inspection confirmed populated access summaries.
+- **QA/Test:** focused user-directory regression 3/3, frontend typecheck, workspace-contract + frontend production build, and exact runtime commit `b82f6ca4554cbd81153c1a9aab840ac29556e673` on an isolated Test canary. Test backend route/guard remained active and rejected an unauthenticated admin-users request with 401.
+- **Promotion:** do not claim Production complete until merged exact-main passes Test→Production release gates and public post-promotion checks. Existing Test/Production services remain available as rollback anchors.
+
+### v232 worklog
+Branch `feat/admin-user-last-access-v2026.09.18.232`; details in `docs/worklog/2026-09-18-admin-user-last-access-v2026.09.18.232.md` and release note `docs/releases/v2026.09.18.232.md`.
 
 ## Cycle delta — v2026.09.18.231 (2026-09-18)
 
