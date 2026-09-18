@@ -2,11 +2,20 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.19.246
+> **현재 통합 버전:** v2026.09.19.249
 > **구현·증거 동기화:** 2026-09-19
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 변경 — v2026.09.19.249 (2026-09-19)
+
+### 07:06 통합검색 병합 및 P0/P1 재대조
+- **권위:** 시작·중간 `main=8c2ddb28a12fa4a471b94da779a9100ecd0ce79e`. #513 `/search`가 병합되어 viewer 권한에 따라 navigation만 검색한다. Backend 콘텐츠 검색은 아직 아니다. #511 `680adbcdcde99f1545cf2fa04255ea238f34985c`는 CI 35396098255의 `runtime-check -> Test` 실패로 P0 차단이다. #509 `176ef6c83b83a190be0ac0431d226e5c9b558659`는 최신 workflow가 job 0개의 `action_required`라 P1 후보 상태다.
+- **Runtime / HIGH:** 07:06 KST backend/frontend/backup-timer/Economy-AI active, backup timer enabled(직전 06:23:04, 다음 12:23:47). `woldeok.com/api/version`은 DNS `curl(6)`/HTTP 000, loopback은 HTTP 200·`no-store`, backend `75e69e77cdc18ef221106a008563151a4c790728`. `OBS-NET-216-01`은 HIGH다.
+- **P1 검색 확장:** 콘텐츠/상품 검색 전 server-owned `SearchDocument{id,type,visibility,ownerId,title,summary,locale,updatedAt,indexVersion}`와 `GET /api/search?q&types&cursor&limit`를 만들고 subject/session/consent/resource 권한을 직렬화 전에 적용한다. App API도 동일 정책을 사용한다. Secret/private note/raw audit/hidden moderation은 index하지 않는다. Authoritative row/outbox의 monotonic version projection, idempotent delete/visibility tombstone, bounded cursor/page/query/resource budget을 사용하고 장애 시 navigation-only/degraded로 fail closed한다.
+- **QA/보안/승격:** OWASP ASVS 5.0.0 기준으로 signed-out/member/admin, revoked session, BOLA, admin metadata/timing leak, injection/oversized/Unicode query, cursor tamper, enumeration, permission downgrade stale projection, deleted replay를 negative test한다. 320/360/390px·keyboard/focus·`role=search`·한/영 matching도 검증한다. Exact frontend/backend/App-API/index-schema tuple이 isolated Test의 unit/contract/real-DB/security/E2E를 통과해야 한다.
+- **SEO/순서:** `/search`는 `noindex,nofollow`, dynamic, sitemap 제외다. `BAK-RUNTIME-177-01` P0 BLOCKED, `CI-ENFORCE-204-01` P1 OPEN을 유지한다. 순서: DR restore·AI/economy containment → #511 Test/replay-concurrency → HIGH DNS → #509 executable CI → 필요 시 search backend → required-check negative control → mobile/App-API → SEO/ad → 실측 growth. Runtime/DNS/ledger/Production DB는 변경하지 않는다.
 
 ## 회차 변경 — v2026.09.19.246 (2026-09-19)
 

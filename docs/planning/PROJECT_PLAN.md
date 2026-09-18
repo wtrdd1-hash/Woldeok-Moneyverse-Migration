@@ -2,11 +2,20 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.19.246
+> Current integrated version: v2026.09.19.249
 > Implementation/evidence sync: 2026-09-19
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.19.249 (2026-09-19)
+
+### 07:06 merged global search + P0/P1/CI/runtime reconciliation
+- **Authority:** start/mid-work `main=8c2ddb28a12fa4a471b94da779a9100ecd0ce79e`. Merged #513 adds dynamic/noindex `/search`, 80-char query bound, PUBLIC/MEMBER/ADMIN navigation filtering by viewer consent/admin role, dedupe and accessible footer entry. This is merged frontend navigation discovery, not backend content search or Production proof. #511 head `680adbcdcde99f1545cf2fa04255ea238f34985c` remains P0 candidate; CI 35396098255 passes classify/policy/lint/typecheck/build/migrations then fails `runtime-check -> Test`. #509 head `176ef6c83b83a190be0ac0431d226e5c9b558659` remains P1 candidate; latest workflow is `action_required` with zero jobs, so no executable green evidence.
+- **Runtime / HIGH `OBS-NET-216-01` 07:06 KST:** backend/frontend/backup-timer/Economy-AI active; backup timer enabled, last 06:23:04, next 12:23:47. `https://woldeok.com/api/version` still DNS `curl(6)`/HTTP 000; loopback is HTTP 200 + `Cache-Control: no-store`, backend `75e69e77cdc18ef221106a008563151a4c790728`. Keep healthy units running; existing DNS acceptance gate remains.
+- **P1 search expansion contract (frontend/backend/API/App API/DB):** current navigation-only scope is safe. Before content/product search, add server-owned `SearchDocument{id,type,visibility,ownerId,title,summary,locale,updatedAt,indexVersion}` and `GET /api/search?q&types&cursor&limit`; authorize subject/session/consent/resource **before** serialization and use identical App-API policy. Never ship a broad private/admin index for client filtering. Index only explicit searchable fields, derive projection from authoritative row/outbox with monotonic `sourceVersion/indexVersion`, idempotently remove/tombstone delete/visibility downgrade, bound cursor/page/query time/resource budget, and never expose secrets/private notes/raw audit/hidden moderation. Index outage fails degraded/unavailable or navigation-only, never stale unauthorized.
+- **Search QA/security/release:** OWASP ASVS 5.0.0 remains stable. Negative tests cover signed-out/member/admin, revoked session, stale consent, BOLA/cross-account, admin metadata/count/timing leak, oversized/Unicode-confusable/injection query, cursor tamper, enumeration, permission downgrade stale projection and deleted replay. Test 320/360/390px, keyboard/focus, `role=search`, KO/EN matching and empty states. Exact frontend/backend/App-API/index-schema tuple must pass unit/contract/real-DB/security/E2E in isolated Test; rollback returns to navigation-only without broadening visibility.
+- **SEO/continuity/order:** `/search` stays `noindex,nofollow`, dynamic and out of sitemap/crawlable parameter generation. Google Search Central September 2026 guidance keeps regional feature eligibility explicit; internal search is not an SEO landing page. `Mediapartners-Google` remains separate ads crawler family. `BAK-RUNTIME-177-01` stays P0 BLOCKED and `CI-ENFORCE-204-01` P1 OPEN because main required-check enforcement is off/empty. Order: DR restore + AI/economy containment -> #511 Test/replay-concurrency -> HIGH DNS -> #509 executable CI -> search backend only if scope expands -> required-check negative control -> mobile/App-API security -> SEO/ad probes -> measured growth. Planning-only; no runtime/DNS/ledger/policy/Production-DB mutation.
 
 ## Cycle delta — v2026.09.19.246 (2026-09-19)
 
