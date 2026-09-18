@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.224
+> **현재 통합 버전:** v2026.09.18.225
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -603,6 +603,20 @@ Google Search/Play와 OWASP 최신 공식자료 → exact main/PR/CI 및 Debian 
 
 ### v181 worklog / 수용 순서
 `최신 공식 레퍼런스` → `exact main/runtime/CI 대조` → `v180 세션 증거 해당 승격 DONE` → `REL-DOCS-181-01 P0` → `backup/runtime P0 유지` → `전체 기능 parity` → `작업 중 exact-main 재확인` → `EN/KO parity` → `PR CI` → `exact base 유지 시에만 병합`. 기획문서 전용이며 runtime/DB/Test/Production 변경 없음.
+
+## 회차 변경 — v2026.09.18.225 (2026-09-18)
+
+### 19:02 증거 변경
+- **권위/CI:** Google Search Central, OWASP ASVS/API Security, Google Play 공식자료를 먼저 갱신했다. 시작/중간 `origin/main=84f4ff298fb5b93bdba3cf2949370d8cc9008e1e`(v224). main은 protected지만 required-status enforcement `off`, contexts/checks/statuses 0개라 `CI-ENFORCE-204-01`은 P1 OPEN이다.
+- **HIGH `OBS-NET-216-01`:** 19:02 KST backend/frontend/backup timer active+enabled. Host-local `woldeok.com` DNS와 canonical HTTPS는 계속 curl(6) 실패하지만 loopback `/api/version`은 200/no-store, backend `75e69e77cdc18ef221106a008563151a4c790728`, warning journal은 비어 있다. 수용조건은 독립 vantage 2곳×DNS+TLS+HTTP 30회 성공, false NXDOMAIN/SERVFAIL 0, auth/payment resolution 및 실제 alert이며 TLS 우회/app restart를 해결책으로 금지한다.
+- **P0 DR:** 신규 18:29:36→18:29:38 백업은 encrypted archive, `database.dump`, `photos.tar.zst`, `manifest.txt` 검증 성공, 다음은 00:20:41 KST다. Artifact freshness는 restore 증명이 아니다. `BAK-RUNTIME-177-01`은 isolated decrypt/restore, schema/migration 및 경제/auth/audit reconciliation, 실측 RPO/RTO, off-host immutable retention, 실제 failure alert 전까지 차단한다.
+- **SEO:** Google Search Central은 2026-09-16 `GoogleProducer` HTTP UA를 변경했다. Crawler identity는 권한이 아니라 버전형 관측 데이터 `{crawlerFamily,documentedToken,policyVersion,verifiedAt}`다. `seo_render_probe`가 user/crawler canonical·robots·sitemap·hreflang·structured data·HTTP semantics를 비교하며 private 노출, critical-resource 차단, cloaking 유사 차이는 SEO 승격차단이다. Unknown UA는 일반 public 동작이다.
+- **API 보안:** OWASP API Security 2023이 현재판이다. 모든 route inventory에 API3 response-property allowlist와 API4 resource budget(DTO allowlist, body/upload/page/batch 최대값, query work units, timeout, concurrency/rate quota, cost owner)을 추가하고 ORM entity 직접 직렬화를 금지한다. PII/internal-field leakage 또는 resource-limit 우회는 HIGH 배포차단이다.
+- **경제/전체기능:** Google Play EEA/UK/US 2026-06-30 cohort 정책과 remaining markets를 분리하고 order별 server-trusted market/cohort/transaction/programme/billing-path/fee-policy 및 gross/fee/tax/refund/direct cost를 snapshot한다. 미실측 사업 KPI는 `HYPOTHESIS/TEST TARGET`이다. 기존 전체 기능 UX/RBAC/API/DB/audit/fallback/privacy/SEO/KPI/performance/QA/exact-SHA 계약을 유지하며 v225에 crawler-policy와 response/resource-budget 증거 필드를 추가한다.
+
+### v225 worklog
+P0 restore 증명 → P0 release identity → HIGH DNS/dependency → HIGH API/auth/economy gate → P1 CI 강제 → SEO probe → 실측 growth. 기획 전용이며 runtime/DNS/Production DB를 변경하지 않는다.
+
 
 ## 회차 변경 — v2026.09.17.180 (2026-09-17)
 
