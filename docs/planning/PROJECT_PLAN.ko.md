@@ -2,11 +2,23 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.19.236
+> **현재 통합 버전:** v2026.09.19.237
 > **구현·증거 동기화:** 2026-09-19
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 델타 — v2026.09.19.237 (2026-09-19)
+
+### 01:05 v236 이후 권위·런타임·AI 보안 재대조
+- **권위 / CI:** 시작 `main=bbb44cef...`; 필수 작업중간 재확인 중 PR #495가 merge되어 authoritative main이 exact `8fa2bc3a5f4eb067d4d71f5b84234d2b233799f6`(v236)으로 변경됐다. 따라서 stale-base patch를 유지하지 않고 새 exact main에서 v237을 다시 구성했다. Merge 전 main combined status는 0개였으므로 `CI-ENFORCE-204-01`은 P1 OPEN이다. exact-head required classifier/policy/runtime/security check와 의도적 실패 auth/economy/AI negative-control PR이 이름·만료·감사기록이 있는 bypass 없이는 merge되지 않는 증명이 필요하다.
+- **v236 구현상태:** PR #495는 이제 후보가 아니라 merge된 구현이다. shadow-health evidence, DB 강제 profession-limit floor, configured/reachable/reviewed/blocked/stale/failed를 구분하는 관리자 AI 상태, mobile card, migration 205와 보고된 lint/typecheck/build, contract 23/23, DB 7/7, backend 1451/1451, frontend 629/629, PostgreSQL 17.11 migration 002–205를 현재 baseline으로 둔다. Production `economy_auto_policy`는 계속 disabled이며 merge 자체가 auto-write 권한을 주지 않는다.
+- **런타임 / HIGH `OBS-NET-216-01` 01:05 KST 재현:** backend/frontend/backup timer/Economy AI service active, timer enabled, 직전 00:23:48, 다음 06:22:37 KST. Host-local `woldeok.com` DNS와 canonical HTTPS `/api/version`은 curl(6)/HTTP 000, loopback은 HTTP 200과 backend id `75e69e77cdc18ef221106a008563151a4c790728`. 정상 unit은 재시작하지 않는다. 수용조건은 resolver→authoritative DNS→외부 2 vantage→TLS/SNI→HTTP, vantage별 30회 연속 성공, false NXDOMAIN/SERVFAIL 0, callback dependency 성공, 실제 alert 전달이다.
+- **P0 DR:** `BAK-RUNTIME-177-01` BLOCKED 유지. Timer/artifact 정상은 restore 증명이 아니다. 최신 backup 격리 decrypt+restore, migration/schema equality, identity/session/inventory/entitlement/ledger/reward/bank/loan/stock/casino/community/referral/audit reconciliation, 실측 RPO/RTO, off-host immutable retention, 실제 failure alert 전달 전 destructive schema/economy 승격 금지.
+- **AI 보안 / 직접채택:** OWASP ASVS 5.0.0과 OWASP AISVS 1.0(최신 stable, 운영 시스템 최소 Level 2 권고)을 재확인했다. exact proposal/model/config SHA마다 `AiSecurityEvidence={modelId,modelDigest,promptPolicyVersion,inputClassification,outputSchemaValidated,toolOrWriteAuthority,proposalHash,reviewFreshness,failClosedTest,promptInjectionTest,sensitiveDataLeakTest,resourceBudgetTest,auditRef,checkedSha}`를 요구한다. AI 출력은 entitlement 부여, ledger balance 변경, auth/RBAC 변경, Production auto-policy 활성화를 직접 할 수 없다. Negative release test는 prompt/context injection, malformed/oversized output, stale/replayed proposal, model timeout/unavailability, sensitive-data exfiltration, cross-user evidence 혼합, write/tool 권한상승이다. 권한탈출·secret/PII 유출·미검토 경제 mutation·fail-open은 P0/P1 차단이다.
+- **v236 후속 백로그:** exact merged main으로 인증 Test 관리자 E2E(AI status/auto-policy/member-access/mobile card), production-like snapshot migration-205 upgrade+rollback, concurrent profession-assignment DB-floor, scheduler idempotency와 stale/failed/reachable 상태 진실성, 360/390px touch-target 회귀, shadow-evidence→policy-apply 권한경로 부재를 증명한다. Exact tested SHA만 Test→Production 승격하며 rollback은 feature/policy flag 비활성화와 검증된 app/schema 호환 pair를 사용한다.
+- **SEO/광고:** Google은 2026-09-17 `Mediapartners-Google`을 여러 광고 관련 제품 범위로 일반화했다. crawler family는 별도 버전화하고 공개 페이지는 SSR/ISR metadata/canonical/robots/sitemap/hreflang/화면일치 structured data를 유지한다. private/admin/security/transaction은 인증+noindex다. DNS는 SEO/광고 공통 release dependency다.
+- **순서:** P0 restore + AI/economy 권한봉쇄 → HIGH DNS 증거 → exact-main Test/real-DB/admin-mobile v236 검증 → P1 CI negative-control enforcement → SEO/ad probe → 실측 commerce/growth. Planning-only; runtime/DNS/ledger/policy/Production DB 변경 없음.
 
 ## 회차 델타 — v2026.09.19.236 (2026-09-19)
 
