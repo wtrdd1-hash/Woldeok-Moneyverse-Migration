@@ -2,11 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.18.224
+> Current integrated version: v2026.09.18.225
 > Implementation/evidence sync: 2026-09-18
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+
+## Cycle delta — v2026.09.18.225 (2026-09-18)
+
+### 19:02 evidence delta
+- **Authority/CI:** official Google Search Central, OWASP ASVS/API Security and Google Play guidance refreshed first. Start/mid `origin/main=84f4ff298fb5b93bdba3cf2949370d8cc9008e1e` (v224). Main is protected but required-status enforcement is `off`, zero contexts/checks/statuses; `CI-ENFORCE-204-01` stays P1 OPEN.
+- **HIGH `OBS-NET-216-01`:** 19:02 KST backend/frontend/backup timer active+enabled; host-local `woldeok.com` DNS and canonical HTTPS still fail curl(6), while loopback `/api/version` is 200/no-store, backend `75e69e77cdc18ef221106a008563151a4c790728`, warning journal empty. Acceptance: 2 independent vantages × 30 DNS+TLS+HTTP successes, zero false NXDOMAIN/SERVFAIL, auth/payment resolution and delivered alert; no TLS bypass/app restart workaround.
+- **P0 DR:** new 18:29:36→18:29:38 backup verified encrypted archive + `database.dump` + `photos.tar.zst` + `manifest.txt`; next 00:20:41 KST. Artifact freshness is not restore proof. Keep `BAK-RUNTIME-177-01` blocked until isolated decrypt/restore, schema/migration and economic/auth/audit reconciliation, measured RPO/RTO, off-host immutable retention and delivered failure alert.
+- **SEO:** Google Search Central changed `GoogleProducer` HTTP UA on 2026-09-16. Treat crawler identity as versioned observability data `{crawlerFamily,documentedToken,policyVersion,verifiedAt}`, never authorization. `seo_render_probe` compares user/crawler canonical, robots, sitemap, hreflang, structured data and HTTP semantics; private exposure, critical-resource denial or cloaking-like divergence blocks SEO promotion. Unknown UA gets ordinary public behavior.
+- **API security:** OWASP API Security 2023 remains current. Extend every route inventory with API3 response-property allowlist and API4 resource budgets: DTO allowlist, body/upload/page/batch maxima, query work units, timeout, concurrency/rate quota, cost owner. Never serialize ORM entities directly. PII/internal-field leakage or resource-limit bypass is HIGH and blocks release.
+- **Economics/features:** Google Play EEA/UK/US 2026-06-30 cohort policy remains distinct from remaining markets. Snapshot server-trusted market/cohort/transaction/programme/billing-path/fee-policy plus gross/fees/tax/refund/direct cost per order. Unmeasured business KPIs remain `HYPOTHESIS/TEST TARGET`. Existing all-feature UX/RBAC/API/DB/audit/fallback/privacy/SEO/KPI/performance/QA/exact-SHA contracts remain authoritative; v225 adds crawler-policy and response/resource-budget evidence fields.
+
+### v225 worklog
+P0 restore proof → P0 release identity → HIGH DNS/dependency → HIGH API/auth/economy gates → P1 CI enforcement → SEO probes → measured growth. Planning-only; no runtime/DNS/Production DB mutation.
 
 
 ## Cycle delta — v2026.09.18.224 (2026-09-18)
