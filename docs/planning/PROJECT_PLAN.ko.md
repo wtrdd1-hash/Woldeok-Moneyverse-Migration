@@ -2,11 +2,25 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.232
-> **구현·증거 동기화:** 2026-09-18
+> **현재 통합 버전:** v2026.09.19.235
+> **구현·증거 동기화:** 2026-09-19
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 델타 — v2026.09.19.235 (2026-09-19)
+
+### AI 런타임·자동조절 범위·모바일 웹·관리자 화면 감사
+- **권위/브랜치:** v234 문서 자동정리 merge 이후 exact GitHub `main=f44a87b`에서 격리 브랜치 `audit/ai-auto-mobile-admin-v2026.09.19.235`를 생성했다. 기존 주 checkout과 추적되지 않은 DB compose 파일은 reset/덮어쓰기하지 않았다.
+- **AI 실제 작동 증거:** `moneyverse-economy-ai.service`가 active이며 로컬 Ollama에 `gemma3:1b`, `llama3.2:3b`가 있다. journal에는 2026-09-18 23:54 KST 실제 `POST /v1/chat/completions` HTTP 200 완료 기록이 있다. 운영 DB read-only 확인에서 `economy_ai_policy_review=enabled`, 2026-09-16 저장된 AI review 2건(8개 council evidence를 가진 multi-agent agree 1건, test-evidence veto 1건), 관리자 AI 상태 read model/API 존재를 확인했다.
+- **자동조절 현재 상태:** 운영 `economy_auto_policy=disabled`. 현재 7일 proposal은 daily metric snapshot 3일, sample-sufficient day 0, 직업 assignment 0/최소 40으로 부적격이다. 최근 `economy.auto_policy` 주간 scheduler는 정상적으로 blocked 결과를 기록했고 정책을 적용하지 않았다. 이번 감사에서는 운영 knob/policy/ledger를 변경하지 않았다.
+- **자동조절 범위 재검토:** 구현된 호환 계층은 8개 allowlist `jobs.assignment_daily_limit_delta.<profession>`만 사용하며 기준값 대비 `-1..+2`, 정책 주기당 최대 1 step, soft-control-first tightening, dual-AI high-risk review를 따른다. 운영 auto-write 활성화 전 7일 전체표본, 최소 표본/assignment, exact proposal hash의 최신 AI review, Test shadow/replay, reconciliation 정상, rollback proof를 모두 요구한다.
+- **모바일 웹 실측(390×844 CSS px):** `/`, `/login`, `/admin`, `/admin/economy`에서 가로 overflow 없음(`scrollWidth=390`). 다만 44×44 모바일 권장보다 작은 터치 요소가 다수다: header logo 32×32, Sign in 65×36, menu 36×36, 로그인 input/action 높이 36px, footer link 높이 약 16px. 비로그인 모바일에서 admin route는 정상적으로 login으로 redirect한다.
+- **관리자페이지 확인:** 경제 관리자 페이지는 `/api/v1/admin/economy/ai-status`를 요청하고 AI status card를 렌더하며, 백엔드는 `admin_economy_ai_status` 기반 guarded `GET admin/economy/ai-status`를 제공한다. 현재 브라우저는 관리자 로그인 세션이 없어 privileged card 실제 값까지 UI에서 확인할 수 없으므로 권한 포함 E2E는 Test 서버 필수 항목으로 둔다.
+- **수정 우선순위:** P0 운영 auto-write는 data sufficiency + exact-proposal AI review + rollback gate 전까지 disabled 유지; P1 관리자 AI 카드에 scheduler freshness/staleness를 추가하고 model service health와 review freshness를 분리 표시; P1 모바일 터치 타깃/viewport regression 수정; P1 인증된 Test 관리자 E2E에서 AI status, auto-policy board, 회원 최근접속, 반응형 table/card를 검증; exact tested SHA만 Test→main→Production 무중간 승격 후 사후 probe한다.
+
+### v235 작업기록
+상세 내부 기록은 `docs/worklog/2026-09-19-ai-auto-mobile-admin-audit-v2026.09.19.235.ko.md`, GitHub용 변경내역은 `docs/releases/v2026.09.19.235.ko.md`를 따른다.
 
 ## 회차 델타 — v2026.09.18.232 (2026-09-18)
 

@@ -2,11 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.18.232
-> Implementation/evidence sync: 2026-09-18
+> Current integrated version: v2026.09.19.235
+> Implementation/evidence sync: 2026-09-19
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.19.235 (2026-09-19)
+
+### AI runtime, bounded-auto scope, mobile web and administrator-surface audit
+- **Authority and branch:** started from exact GitHub `main=f44a87b` after the v234 docs-reconciliation merge, in isolated branch `audit/ai-auto-mobile-admin-v2026.09.19.235`. The pre-existing primary checkout and its untracked database compose file were not reset or overwritten.
+- **AI runtime evidence:** `moneyverse-economy-ai.service` is active. The local Ollama runtime exposes `gemma3:1b` and `llama3.2:3b`; the service journal records a real `POST /v1/chat/completions` completion with HTTP 200 at 2026-09-18 23:54 KST. Production DB read-only inspection shows `economy_ai_policy_review=enabled`, two stored AI reviews from 2026-09-16 (one multi-agent agree with 8 evidence rows and one test-evidence veto), and the admin AI-status read model/API are present.
+- **Automatic adjustment state:** Production `economy_auto_policy=disabled`; the current 7-day proposal is ineligible because only 3 daily metric snapshots exist, sample-sufficient days are 0, and profession assignment count is 0 versus the 40-assignment minimum. The last weekly `economy.auto_policy` scheduler run succeeded as a safe blocked result and applied no policy. No Production knob/policy/ledger mutation was performed by this audit.
+- **Scope recheck / guardrails:** the implemented compatibility bridge permits only the eight allowlisted `jobs.assignment_daily_limit_delta.<profession>` keys, baseline-relative `-1..+2`, maximum one step per policy cycle, with soft-control-first tightening and dual-AI high-risk review. Before enabling Production auto-write, require a complete 7-day sample window, minimum sample/assignment thresholds, fresh AI review evidence for the exact proposal hash, Test shadow/replay evidence, reconciliation health and rollback proof.
+- **Mobile web audit (390×844 CSS px):** `/`, `/login`, `/admin`, and `/admin/economy` produced no horizontal overflow (`scrollWidth=390`). However several interactive targets are below the project's 44×44 mobile guidance: header logo 32×32, Sign in 65×36, menu 36×36, login inputs/actions 36px high, and footer links about 16px high. Admin routes correctly redirect unauthenticated mobile sessions to login.
+- **Administrator page:** the economy admin page already requests `/api/v1/admin/economy/ai-status` and renders an AI status card; the backend exposes the guarded `GET admin/economy/ai-status` path backed by `admin_economy_ai_status`. Browser verification without an authenticated admin session can confirm guard/redirect behavior, not privileged card contents.
+- **Implementation plan / priority:** P0 keep Production auto-write disabled until data sufficiency + exact-proposal AI review + rollback gates pass; P1 add scheduler freshness/staleness visibility to the admin AI card and distinguish model-service health from review freshness; P1 fix mobile touch targets and add 360/390px regressions; P1 run authenticated Test-server admin E2E for AI status, auto-policy board, member recent-access and responsive tables/cards; then promote only the exact tested SHA through Test→main→Production with no-midpoint promotion and post-promotion probes.
+
+### v235 worklog
+See `docs/worklog/2026-09-19-ai-auto-mobile-admin-audit-v2026.09.19.235.md` and GitHub-facing release note `docs/releases/v2026.09.19.235.md`.
 
 ## Cycle delta — v2026.09.18.232 (2026-09-18)
 
