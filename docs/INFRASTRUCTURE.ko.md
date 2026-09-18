@@ -60,6 +60,26 @@
 
 현재 공개 복구 토폴로지는 Debian 권위 호스트에서 **Test와 Production systemd 서비스를 분리**해 운영합니다. `test.easy-scraping.com`은 활성 상태이며 Production 전 exact-SHA 릴리스 게이트로 사용됩니다. GitOps 저장소도 `wdmv-test` 대상을 선언합니다. Test가 제거됐거나 404를 반환한다는 과거 기록은 v2026.09.16.151 기준으로 폐기된 정보입니다.
 
+### 부팅 연속성 규칙 — v2026.09.18.215
+
+승인된 Debian 13 Production 호스트는 전원 재인가 또는 재부팅 뒤 Moneyverse 런타임을 자동 복구해야 합니다. 다음 unit은 항상 enabled 상태를 유지하고 부팅 후 active인지 확인합니다: `moneyverse-backend.service`, `moneyverse-frontend.service`, `moneyverse-discord-bot.service`, `moneyverse-economy-ai.service`, `moneyverse-mcp.service`, `docker.service`.
+
+Discord 봇은 선택적인 수동 작업이 아니라 부팅 계약의 일부입니다. systemd에서 `multi-user.target` 자동 시작 및 자동 재시작을 유지합니다. 서버 부팅 또는 봇 재시작 뒤 journal에서 봇 로그인 성공과 대상 음성 채널 `1536572442422550538`의 초기 연결 ready 상태를 확인합니다. Discord 음성 연결이 끊기면 봇 voice watchdog이 자동 재입장해야 합니다.
+
+운영 확인 명령:
+
+```bash
+systemctl is-enabled moneyverse-backend.service moneyverse-frontend.service \
+  moneyverse-discord-bot.service moneyverse-economy-ai.service \
+  moneyverse-mcp.service docker.service
+systemctl is-active moneyverse-backend.service moneyverse-frontend.service \
+  moneyverse-discord-bot.service moneyverse-economy-ai.service \
+  moneyverse-mcp.service docker.service
+journalctl -u moneyverse-discord-bot.service -n 80 --no-pager
+```
+
+2026-09-18 승인된 Debian 13 호스트에서 이 계약을 재검증했습니다. 6개 unit 모두 enabled/active였고, 활성 프론트엔드 런타임 포트가 HTTP 200을 반환했으며, Discord 봇 journal에서 로그인 성공과 설정된 대상 음성 채널의 voice-ready 상태를 확인했습니다.
+
 같은 노드의 `mail`, `economy`, `launcher`, `discord`, `cloudflared`, `gpt-plugin` 등 다른 네임스페이스는 별도 서비스입니다. 클러스터 전체가 이 프로젝트만을 위한 것이라고 가정하지 않습니다.
 
 ## Kubernetes Production suspend 중 현재 릴리스 흐름
