@@ -2,11 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.18.223
+> Current integrated version: v2026.09.18.224
 > Implementation/evidence sync: 2026-09-18
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+
+## Cycle delta — v2026.09.18.224 (2026-09-18)
+
+### 18:07 authority/runtime + fee-policy + authentication gate
+- **Authority/research:** official OWASP Top 10:2025 A07, Apple Small Business Program and Google Play 2026 lower-fee guidance checked first. Start/mid-work `origin/main`=`3346216bf035a6905c7212ead7b11e4ec8db1f31`; main combined status exposes 0 statuses, so `CI-ENFORCE-204-01` remains P1 OPEN. Sources checked 2026-09-18: https://top10.owasp.org/2025/A07_2025-Authentication_Failures/ ; https://developer.apple.com/app-store/small-business-program/ ; https://support.google.com/googleplay/android-developer/answer/16954621 .
+- **HIGH `OBS-NET-216-01` / 18:07 KST:** backend/frontend/backup timer active; host-local `woldeok.com` DNS fails and canonical HTTPS `/api/version` is curl(6)/000; loopback `127.0.0.1:3002/api/version` is 200/no-store, backend `75e69e77cdc18ef221106a008563151a4c790728`. Latest verified backup 12:22:44→12:22:46 KST; next 18:29:25. Acceptance remains two independent vantages × 30 DNS+TLS+HTTP successes, zero false NXDOMAIN/SERVFAIL, auth/payment dependency resolution and delivered alert; no TLS/HTTP bypass.
+- **P0 DR:** archive verify is not restore proof. `BAK-RUNTIME-177-01` blocks destructive migration/economic promotion until isolated newest-archive decrypt+restore, schema/migration equality, economic/auth/audit reconciliation, measured RPO/RTO, off-host immutable retention and delivered failure alert.
+- **Security / DIRECT ADOPT:** A07 drives session rotation on login/privilege change, server-side revoke on logout/reset/lock, issuer+audience+scope+expiry validation, short-lived single-use recovery, re-auth/MFA for admin/payment/entitlement/bank/loan high-impact mutations, account+IP+device-risk limits and credential-stuffing detection. Fixed-session reuse, revoked-token replay, cross-audience token, expired recovery, MFA fallback bypass or credential-stuffing oracle success blocks promotion; never log raw credentials/tokens.
+- **Monetization / DIRECT ADOPT as policy engine:** Apple currently documents 15% for qualifying Small Business Program paid apps/IAP; Google Play 2026 guidance varies fees by market/program/install cohort/transaction type. Never hard-code one global 15%/30%. Each shop/payment/subscription transaction snapshots `platform,market,installCohort,transactionType,programmeEnrollment,billingPath,policyEffectiveAt,grossPrice,tax,platformFee,refundReserve,netRevenue,directCost,contributionMargin`. Fee-policy changes are effective-dated, four-eyes approved, audited, simulation-tested and immutable after settlement. Receipt/webhook→order→ledger→entitlement reconciliation is server-authoritative+idempotent; mismatch, duplicate entitlement, unsigned webhook, stale policy or unexplained negative settlement variance blocks promotion.
+- **Economics/all features:** unmeasured conversion/ARPU/ARPDAU/ARPPU/refund/churn/CAC/LTV/ad/support/fraud/infra remain `HYPOTHESIS/TEST TARGET`. Scale SKU cohorts only on positive contribution plus D7/D30/fairness/complaint/refund/fraud guardrails. Every current/planned feature retains concrete implementation evidence, UX/error/offline states, RBAC/BOLA, API/idempotency/rate-limit, DB constraints/transactions/concurrency, audit/DR/privacy/abuse/SEO/KPI/performance/cache, unit/integration/E2E/real-DB/security/regression and exact-SHA release/rollback gates; missing evidence means `UNIMPLEMENTED/PARTIAL/REDESIGN`.
+
+### v224 worklog
+P0 restore proof+release identity → HIGH DNS/dependency evidence → auth/session/economy negative controls → fee-policy+settlement reconciliation → P1 CI enforcement proof → SEO probes → growth experiments. Planning-only; no runtime/DNS/Production DB mutation.
 
 
 ## Cycle delta — v2026.09.18.223 (2026-09-18)

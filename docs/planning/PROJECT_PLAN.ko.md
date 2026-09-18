@@ -2,11 +2,25 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.223
+> **현재 통합 버전:** v2026.09.18.224
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+
+## 회차 델타 — v2026.09.18.224 (2026-09-18)
+
+### 18:07 권위/런타임 + 수수료 정책 + 인증 게이트
+- **권위/조사:** OWASP Top 10:2025 A07, Apple Small Business Program, Google Play 2026 lower-fee 공식자료를 먼저 확인했다. 시작·중간 `origin/main`=`3346216bf035a6905c7212ead7b11e4ec8db1f31`; main combined status 0개로 `CI-ENFORCE-204-01` P1 OPEN 유지. 2026-09-18 확인: https://top10.owasp.org/2025/A07_2025-Authentication_Failures/ ; https://developer.apple.com/app-store/small-business-program/ ; https://support.google.com/googleplay/android-developer/answer/16954621 .
+- **HIGH `OBS-NET-216-01` / 18:07 KST:** backend/frontend/backup timer active; host-local `woldeok.com` DNS 실패, canonical HTTPS `/api/version` curl(6)/000, loopback `127.0.0.1:3002/api/version` 200/no-store, backend `75e69e77cdc18ef221106a008563151a4c790728`. 최신 검증 backup 12:22:44→12:22:46 KST, 다음 18:29:25. 수용은 독립 2 vantage 각각 DNS+TLS+HTTP 30회 성공, false NXDOMAIN/SERVFAIL 0, auth/payment dependency resolution, 실제 alert 전달; TLS/HTTP 우회 금지.
+- **P0 DR:** archive verify는 restore proof가 아니다. `BAK-RUNTIME-177-01`은 최신 archive isolated decrypt+restore, schema/migration equality, 경제/auth/audit reconciliation, 실측 RPO/RTO, off-host immutable retention, 실제 failure alert 전까지 destructive migration/economy 승격차단.
+- **보안 / 직접채택:** A07에 따라 login/권한상승 session 회전, logout/reset/lock server-side revoke, issuer+audience+scope+expiry 검증, short-lived single-use recovery, admin/payment/entitlement/bank/loan 고영향 mutation re-auth/MFA, account+IP+device-risk rate limit와 credential-stuffing 탐지를 요구한다. fixed-session reuse, revoked-token replay, cross-audience token, expired recovery, MFA fallback bypass, credential-stuffing oracle 성공은 승격차단하며 raw credential/token 로그 금지.
+- **수익화 / 정책엔진으로 직접채택:** Apple은 자격 Small Business Program paid app/IAP 15%를 현재 문서화하고 Google Play 2026 가이드는 market/program/install cohort/transaction type별 차등 수수료를 둔다. 전역 15%/30% 하드코딩 금지. 각 shop/payment/subscription 거래는 `platform,market,installCohort,transactionType,programmeEnrollment,billingPath,policyEffectiveAt,grossPrice,tax,platformFee,refundReserve,netRevenue,directCost,contributionMargin` snapshot. fee-policy 변경은 effective-date+four-eyes 승인+감사+simulation, settlement 후 불변. Receipt/webhook→order→ledger→entitlement는 server-authoritative+idempotent reconciliation하며 mismatch, duplicate entitlement, unsigned webhook, stale policy, 설명 안 되는 negative settlement variance는 승격차단.
+- **사업성/전체기능:** 미실측 conversion/ARPU/ARPDAU/ARPPU/refund/churn/CAC/LTV/ad/support/fraud/infra는 `HYPOTHESIS/TEST TARGET`. SKU cohort는 positive contribution+D7/D30·공정성·민원·refund·fraud guardrail 통과 때만 scale. 모든 현재/계획 기능은 구현근거, UX/error/offline, RBAC/BOLA, API/idempotency/rate-limit, DB constraint/transaction/concurrency, audit/DR/privacy/abuse/SEO/KPI/performance/cache, unit/integration/E2E/real-DB/security/regression, exact-SHA release/rollback gate를 유지하며 증거 없으면 `UNIMPLEMENTED/PARTIAL/REDESIGN`.
+
+### v224 작업로그
+P0 restore proof+release identity → HIGH DNS/dependency 증거 → auth/session/economy negative control → fee-policy+settlement reconciliation → P1 CI enforcement proof → SEO probe → growth experiment. 기획 전용이며 runtime/DNS/Production DB는 변경하지 않는다.
 
 
 ## 회차 델타 — v2026.09.18.223 (2026-09-18)
