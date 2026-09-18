@@ -2,11 +2,22 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.19.249
+> **현재 통합 버전:** v2026.09.19.250
 > **구현·증거 동기화:** 2026-09-19
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 변경 — v2026.09.19.250 (2026-09-19)
+
+### 08:03 계정보안 접근성 병합 + exact CI 실패 원인 / runtime 재대조
+- **권위/병합 사실:** 시작·중간 authoritative `main=5ee060af20bbc62922d2c5538f171a243cce2e93`. #515가 병합되어 계정보안의 세션 종료, 다른 세션 종료, 재인증, 돌아가기 control이 `min-h-11`(프로젝트 44px 기준)을 사용하고 `requireMember()`/`noindex` 경계도 유지한다. 다만 rendered/mobile Production 증거는 아니다. 320/360/390px reflow, 200%/400% zoom, keyboard focus-visible/not-obscured, screen-reader name, 실제 bounding-box를 P1 완료조건으로 유지한다. WCAG 2.2 AA 2.5.8은 24x24 CSS px 또는 충분한 간격을 요구하며 44px 프로젝트 기준은 이를 상회하고 2.5.5 enhanced 지침과 맞는다.
+- **#509 exact CI 원인:** #509는 exact head `8801c93371064704c173845482e0814435854883`, OPEN/mergeable이다. CI `35403884708`은 classify/policy/lint/typecheck/build와 migration 207까지 성공한 뒤 Test에서 `docs/mobile-api-contract.json`, `docs/mobile-api-schema-reference.md`, `.ko.md` 생성물 drift로 실패했다. 이는 status freshness assertion 실패가 아니라 App API 계약 동기화 실패다. Exact controller/contract head에서 세 파일을 재생성하고 의미 변경을 검토한 뒤 deterministic output만 commit한다. `api:contract:check` 비활성화/완화는 금지한다.
+- **P1 App API 계약 gate:** controller/App API 변경은 endpoint/schema 생성물과 EN/KO parity를 같은 변경에 포함한다. CI는 clean workspace에서 재생성 후 diff가 있으면 실패해야 한다. DTO/route만 바꾸고 생성물을 누락한 negative control, EN/KO schema-reference divergence를 추가한다. Test/Production은 exact backend/contract/generated-doc SHA tuple만 승격하며 rollback도 같은 호환 tuple로 되돌린다.
+- **#511 P0:** exact head `582c05e6ff956534644cd739796935e07cdbadd7`, 최신 workflow `35403183072`가 `action_required`라 새로운 executable green 증거가 없다. migration 208은 exact-head CI + isolated Test의 replay/concurrency/fault/real-PostgreSQL 증명 전 병합하지 않는다.
+- **Runtime / HIGH:** 08:03 KST backend/frontend/backup timer active, timer enabled. `woldeok.com/api/version`은 DNS `curl(6)`/HTTP 000, loopback은 HTTP 200·backend `75e69e77cdc18ef221106a008563151a4c790728`. `OBS-NET-216-01`은 기존 DNS acceptance gate 충족 전 HIGH다.
+- **P1 framework/performance debt:** Next.js 16.3.4 build는 성공하지만 `middleware` convention이 `proxy`로 deprecated 경고를 내며 lint는 admin content/announcements/board/gallery/profile/cosmetics에서 `no-img-element` 11건을 경고한다. Middleware의 auth/header/redirect 동작을 inventory한 뒤 route parity test와 함께 proxy로 이동하고, 이미지 최적화는 protected media authorization·aspect ratio·alt·URL policy를 보존한 채 적용한다. 전후 LCP/bytes를 측정하며 최적화를 위해 보호 media를 public URL로 바꾸지 않는다.
+- **CI/연속성:** exact main status는 0개이고 required-status enforcement는 `off`/empty라 `CI-ENFORCE-204-01`은 P1 OPEN이다. `BAK-RUNTIME-177-01`도 isolated restore/reconciliation, RPO/RTO, off-host immutable retention, 실제 alert 전까지 P0 BLOCKED다. 순서: DR+AI/economy containment -> #511 executable replay/concurrency -> HIGH DNS -> #509 App-API 생성계약 drift/status Test -> required-check negative control -> 계정보안 rendered a11y -> middleware/image debt -> mobile security/SEO/ad/실측 growth. Runtime/DNS/ledger/Production DB는 변경하지 않는다.
 
 ## 회차 변경 — v2026.09.19.249 (2026-09-19)
 
