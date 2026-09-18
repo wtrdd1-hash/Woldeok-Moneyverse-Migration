@@ -113,7 +113,7 @@ export function SiteHeader() {
               <Button
                 variant="outline"
                 size="icon"
-                className="size-9 sm:size-11 rounded-[10px] lg:hidden shrink-0"
+                className="size-11 rounded-[10px] lg:hidden shrink-0"
                 aria-label={locale === 'en' ? 'Open menu' : '메뉴 열기'}
               >
                 <Menu className="size-4.5 sm:size-5" />
@@ -298,11 +298,11 @@ function Group({
 }
 
 function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; readonly locale: 'ko' | 'en' }) {
-  if (!viewer) return <Skeleton className="h-9 sm:h-11 w-20 sm:w-24 rounded-[10px] sm:rounded-[12px]" />;
+  if (!viewer) return <Skeleton className="h-11 w-20 sm:w-24 rounded-[10px] sm:rounded-[12px]" />;
 
   if (!viewer.signedIn) {
     return (
-      <Button asChild className="h-9 sm:h-11 rounded-[10px] sm:rounded-[12px] px-3 sm:px-5 text-xs sm:text-sm font-extrabold shadow-plate shrink-0">
+      <Button asChild className="h-11 rounded-[10px] sm:rounded-[12px] px-3 sm:px-5 text-xs sm:text-sm font-extrabold shadow-plate shrink-0">
         <Link href="/login">{locale === 'en' ? 'Sign in' : '로그인'}</Link>
       </Button>
     );
@@ -317,7 +317,7 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
       >
         <Link href="/account">{locale === 'en' ? 'My account' : '내 계정'}</Link>
       </Button>
-      <Button asChild className="h-9 sm:h-11 rounded-[10px] sm:rounded-[12px] px-3 sm:px-5 text-xs sm:text-sm font-extrabold shadow-plate shrink-0">
+      <Button asChild className="h-11 rounded-[10px] sm:rounded-[12px] px-3 sm:px-5 text-xs sm:text-sm font-extrabold shadow-plate shrink-0">
         <Link href="/wallet">{locale === 'en' ? 'My wallet' : '내 지갑'}</Link>
       </Button>
       {/* Hidden on a phone, where it is the last item in the menu instead. */}
