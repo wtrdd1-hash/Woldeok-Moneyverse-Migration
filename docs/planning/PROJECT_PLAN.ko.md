@@ -2,12 +2,22 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.227
+> **현재 통합 버전:** v2026.09.18.228
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+
+## 회차 델타 — v2026.09.18.228 (2026-09-18)
+
+### 21:08 브랜치 정합성 복구 및 유효 증거 보존
+- **정합성 복구 / v227 고유 의도 보존:** 현재 v227 통합 이전 기준에서 독립 생성된 오래된 v227 기획 브랜치 두 개는 각각 CI를 통과했지만 main 진전 후 직접 병합할 수 없다. 현재 main에는 한국어 v225 복구와 공통 DNS/DR/인증/경제 통제가 이미 포함돼 있다. 남은 유효 델타를 여기서 권위 계약으로 보존한다. SEO/광고 크롤 정책은 `crawlerPolicyFamily={search,ads,userTriggered,unknown}`와 엔진별 정책 버전을 분류해야 하며 `Mediapartners-Google`은 Google Search와 독립 평가한다. 크롤러 신원은 인증/RBAC/개인정보 보호를 우회할 수 없다. 렌더 증거는 `{url,httpStatus,rendered,title,canonical,robots,sitemapLastmod,breadcrumbSchema,hreflang,contentHash,checkedAt}`를 기록하고 비공개 페이지 색인 가능, 공개 페이지 non-200 렌더 회귀, canonical 분기, 오래된 sitemap 증거, 화면/스키마 불일치 시 승격을 차단한다.
+- **릴리스 상태:** 이번 변경은 기획 정합성 복구만 수행한다. P0 격리 복구/복원 가능성 및 릴리스 신원, HIGH DNS 증거는 계속 승격 차단 조건이며 runtime/DNS/ledger/Production DB 변경을 허가하지 않는다.
+
+### v228 작업 기록
+오래된 v227 두 브랜치의 유효한 크롤러/증거 계약을 누락 없이 통합하고 이미 대체된 내용은 Git 이력으로 남겼다. 다음 순서: P0 격리 복구 증명 -> HIGH DNS/dependency 증거 -> 인증/경제 negative controls -> SEO crawler-family probes.
 
 ## 회차 델타 — v2026.09.18.227 (2026-09-18)
 

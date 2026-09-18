@@ -2,12 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.18.227
+> Current integrated version: v2026.09.18.228
 > Implementation/evidence sync: 2026-09-18
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+
+## Cycle delta — v2026.09.18.228 (2026-09-18)
+
+### 21:08 branch-reconciliation evidence preservation
+- **Reconciliation / preserved unique v227 intent:** two stale v227 planning branches were independently based before the current v227 integration and both CI runs passed, but neither is mergeable after main advanced. Current main already contains the Korean v225 repair and the shared DNS/DR/auth/economics controls. The remaining useful delta is made canonical here: SEO/ad crawl policy MUST classify `crawlerPolicyFamily={search,ads,userTriggered,unknown}` with engine-specific policy version; `Mediapartners-Google` is evaluated independently from Google Search, and crawler identity never bypasses authentication, RBAC or privacy. Render evidence records `{url,httpStatus,rendered,title,canonical,robots,sitemapLastmod,breadcrumbSchema,hreflang,contentHash,checkedAt}` and blocks promotion on private indexability, non-200 public render regressions, canonical split, stale sitemap evidence or visible/schema mismatch.
+- **Release state:** this is planning-only reconciliation. P0 isolated restore/recoverability and release identity plus HIGH DNS evidence remain promotion blockers; no runtime, DNS, ledger or Production DB mutation is authorized by this delta.
+
+### v228 worklog
+Reconciled both stale v227 branches without dropping their useful unique crawler/evidence contract; superseded material remains historical in Git. Next: P0 isolated restore proof -> HIGH DNS/dependency evidence -> auth/economy negative controls -> SEO crawler-family probes.
 
 ## Cycle delta — v2026.09.18.227 (2026-09-18)
 
