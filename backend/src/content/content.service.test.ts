@@ -47,3 +47,38 @@ describe('ContentService public photos', () => {
     await expect(service.publicPhotos()).rejects.toThrow('unsafe photo image URL');
   });
 });
+
+
+describe('ContentService status freshness contract', () => {
+  function repositoryWithStatus(observedAt: Date | null, state = 'operational') {
+    const repository = repositoryWithPhoto('/media/7eede72c-432b-4a45-8ba6-420dd24350c7.jpg');
+    repository.publicStatus = vi.fn().mockResolvedValue([{
+      source_key: 'backend_api', display_name: 'Backend API', state, detail: 'ok', observed_at: observedAt,
+    }]);
+    return repository;
+  }
+
+  it('returns server-owned freshness metadata and never promotes stale health', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-19T04:20:00.000Z'));
+    const fresh = new ContentService(repositoryWithStatus(new Date('2026-09-19T04:19:00.000Z')));
+    await expect(fresh.serviceStatus()).resolves.toEqual([expect.objectContaining({
+      state: 'operational', freshnessState: 'fresh', ageMs: 60_000, policyVersion: 'status-v1',
+    })]);
+    const stale = new ContentService(repositoryWithStatus(new Date('2026-09-19T04:18:59.999Z')));
+    await expect(stale.serviceStatus()).resolves.toEqual([expect.objectContaining({
+      state: 'unknown', freshnessState: 'stale', ageMs: 60_001, policyVersion: 'status-v1',
+    })]);
+    vi.useRealTimers();
+  });
+
+  it('fails closed for observations beyond the allowed future skew', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-19T04:20:00.000Z'));
+    const service = new ContentService(repositoryWithStatus(new Date('2026-09-19T04:20:05.001Z')));
+    await expect(service.serviceStatus()).resolves.toEqual([expect.objectContaining({
+      state: 'unknown', freshnessState: 'unknown', ageMs: null, policyVersion: 'status-v1',
+    })]);
+    vi.useRealTimers();
+  });
+});
