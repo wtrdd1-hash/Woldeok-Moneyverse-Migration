@@ -1,5 +1,12 @@
 # Update Log
 
+## v2026.09.18.212 — Full UI QA and browser hardening
+
+- Branch: `fix/ui-full-qa-v2026.09.18.212`, exact base `d6d2798535894c54854135c23e37d972d267baa1`.
+- Fixed 280 px grid min-content overflow on deletion/legal/shop surfaces, mobile shop-search focus zoom, duplicated site-brand titles, and the confirmed Gallery AdSense auxiliary-script CSP rejection.
+- QA: targeted regressions 15/15, frontend 71 files / 623 tests, typecheck/build pass, lint 0 errors; 300 responsive browser checks contained no confirmed UI defect after redirect-race reruns.
+- Runtime promotion remains Test-first and frontend-only; backend/database are unchanged.
+
 ## v2026.09.18.201 — Mobile-responsive UI QA and overflow hardening
 
 - Branch: `fix/ui-responsive-qa-v2026.09.18.201`, based on the v200 authoritative plan/main baseline.

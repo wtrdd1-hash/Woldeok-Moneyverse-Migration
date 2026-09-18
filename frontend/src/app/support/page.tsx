@@ -5,7 +5,7 @@ import { requireMember } from '@/lib/session';
 import { createSupportThread, replySupportThread } from './actions';
 
 export const dynamic = 'force-dynamic';
-export const metadata: Metadata = { title: '관리자 문의 · Woldeok Moneyverse', robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: '관리자 문의', robots: { index: false, follow: false } };
 
 type Thread = { thread_id: string; subject: string; status: string; created_at: string; last_message_at: string };
 type Message = { message_id: string; sender_kind: 'user'|'admin'; body: string; created_at: string };

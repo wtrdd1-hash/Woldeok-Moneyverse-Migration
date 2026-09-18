@@ -11,7 +11,7 @@ import type { AlertEvent, AlertRule, AlertStock } from './alert-manager';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 export const metadata: Metadata = {
-  title: '가상 주식 조건부 알림 — 월덕 머니버스',
+  title: '가상 주식 조건부 알림',
   description: '서버에서 가상 주식 가격과 일일 변동 조건을 감시하는 회원 전용 알림 설정입니다.',
   robots: { index: false, follow: false },
 };

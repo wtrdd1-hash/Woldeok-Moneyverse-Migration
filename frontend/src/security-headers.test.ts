@@ -59,6 +59,7 @@ describe('security headers', () => {
     delete process.env.NEXT_PUBLIC_ADS_ENABLED;
     const csp = directives((await headersFor('https://test.example.com')).get('content-security-policy')!);
     expect(csp.get('script-src')).toContain('https://pagead2.googlesyndication.com');
+    expect(csp.get('script-src')).toContain('https://*.adtrafficquality.google');
     expect(csp.get('frame-src')).toBe('https://googleads.g.doubleclick.net https://tpc.googlesyndication.com');
     expect(csp.get('connect-src')).toContain('https://googleads.g.doubleclick.net');
   });
@@ -67,6 +68,7 @@ describe('security headers', () => {
     process.env.ADS_ENABLED = 'false';
     const csp = directives((await headersFor('https://test.example.com')).get('content-security-policy')!);
     expect(csp.get('script-src')).not.toContain('https://pagead2.googlesyndication.com');
+    expect(csp.get('script-src')).not.toContain('https://*.adtrafficquality.google');
     expect(csp.get('frame-src')).toBe("'none'");
     expect(csp.get('connect-src')).not.toContain('https://googleads.g.doubleclick.net');
   });
@@ -85,6 +87,7 @@ describe('security headers', () => {
     process.env.ADS_ENABLED = 'true';
     const csp = directives((await headersFor('https://test.example.com')).get('content-security-policy')!);
     expect(csp.get('script-src')).toContain('https://pagead2.googlesyndication.com');
+    expect(csp.get('script-src')).toContain('https://*.adtrafficquality.google');
     expect(csp.get('frame-src')).toBe('https://googleads.g.doubleclick.net https://tpc.googlesyndication.com');
     expect(csp.get('connect-src')).toContain('https://googleads.g.doubleclick.net');
     expect(csp.get('connect-src')).toContain('https://*.adtrafficquality.google');

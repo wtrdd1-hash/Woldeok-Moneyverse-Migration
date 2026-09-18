@@ -7,7 +7,7 @@ import { LoginProvidersView } from '../login-providers-view';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '로그인 선택 · 월덕 머니버스',
+  title: '로그인 선택',
   description: 'Discord 또는 Google 계정으로 월덕 머니버스에 로그인',
   robots: { index: false, follow: false },
 };

@@ -15,7 +15,7 @@ import Link from 'next/link';
  */
 export function TermsDocument() {
   return (
-      <article className="policy-document grid gap-6">
+      <article className="policy-document grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 [overflow-wrap:anywhere]">
       <p className="section-label">WOLDEOK MONEYVERSE · TERMS OF SERVICE</p>
       <p className="max-w-prose text-sm text-muted-foreground">
       월덕 머니버스는 Discord와 웹에서 함께 사용하는 커뮤니티형 가상경제 서비스입니다.

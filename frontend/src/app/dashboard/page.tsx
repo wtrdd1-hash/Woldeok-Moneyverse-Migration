@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: '내 대시보드 — 월덕 머니버스',
+  title: '내 대시보드',
   description: '내 WLD, 가상 주식 관심종목과 보유 현황, 최근 활동과 조건부 알림을 한곳에서 확인합니다.',
   robots: { index: false, follow: false },
 };

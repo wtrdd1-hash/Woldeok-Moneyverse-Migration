@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: '가상 주식 포트폴리오 분석 — 월덕 머니버스',
+  title: '가상 주식 포트폴리오 분석',
   description: '보유 중인 게임 전용 가상 주식의 평가금액, 비중과 미실현 손익을 확인합니다.',
   robots: { index: false, follow: false },
 };

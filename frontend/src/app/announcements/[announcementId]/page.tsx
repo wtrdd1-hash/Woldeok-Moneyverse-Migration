@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const notice = data.current;
   return {
-    title: `${notice.title} · 월덕 머니버스`,
+    title: notice.title,
     description: notice.body.slice(0, 150),
     alternates: { canonical: `/announcements/${notice.announcementId}` },
     openGraph: {

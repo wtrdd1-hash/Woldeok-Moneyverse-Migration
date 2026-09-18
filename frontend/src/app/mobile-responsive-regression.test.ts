@@ -37,3 +37,28 @@ describe('mobile responsive overflow guards', () => {
     expect(inventory).not.toContain('min-w-[70px]');
   });
 });
+
+describe('ultra-narrow responsive guards', () => {
+  it('prevents legal and deletion documents from expanding their parent grid', () => {
+    const deletion = source('../components/deletion-request-info.tsx');
+    const privacy = source('../components/policy/privacy-document.tsx');
+    const terms = source('../components/policy/terms-document.tsx');
+    const pageHeader = source('../components/page-header.tsx');
+
+    for (const content of [deletion, privacy, terms, pageHeader]) {
+      expect(content).toContain('min-w-0');
+      expect(content).toContain('grid-cols-[minmax(0,1fr)]');
+    }
+    expect(deletion).toContain('[overflow-wrap:anywhere]');
+    expect(privacy).toContain('[overflow-wrap:anywhere]');
+    expect(terms).toContain('[overflow-wrap:anywhere]');
+  });
+
+  it('keeps the shop shrinkable and avoids mobile browser input zoom', () => {
+    const shop = source('shop/page.tsx');
+
+    expect(shop).toContain('grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 pb-16');
+    expect(shop).toContain('flex min-w-0 w-full max-w-2xl gap-2');
+    expect(shop).toContain('text-base outline-none focus:border-amber-500 md:text-sm');
+  });
+});

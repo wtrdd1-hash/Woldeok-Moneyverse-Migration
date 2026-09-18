@@ -8,7 +8,8 @@ import type { NextConfig } from 'next';
  */
 const BEACON_SCRIPT = 'https://static.cloudflareinsights.com';
 const BEACON_REPORT = 'https://cloudflareinsights.com';
-const ADSENSE_SCRIPT = 'https://pagead2.googlesyndication.com';
+const ADSENSE_SCRIPT =
+  'https://pagead2.googlesyndication.com https://adtrafficquality.google https://*.adtrafficquality.google';
 const ADSENSE_FRAME = 'https://googleads.g.doubleclick.net https://tpc.googlesyndication.com';
 const ADSENSE_CONNECT =
   'https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://adtrafficquality.google https://*.adtrafficquality.google';
