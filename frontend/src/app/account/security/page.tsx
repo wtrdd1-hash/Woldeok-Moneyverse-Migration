@@ -107,7 +107,7 @@ export default async function AccountSecurityPage({
                   {!session.current ? (
                     <form action={terminateSession}>
                       <input type="hidden" name="sessionId" value={session.sessionId} />
-                      <Button type="submit" variant="outline">이 세션 종료</Button>
+                      <Button type="submit" variant="outline" className="min-h-11">이 세션 종료</Button>
                     </form>
                   ) : (
                     <p className="text-xs text-muted-foreground">현재 세션은 이 화면에서 종료할 수 없습니다. 로그아웃을 이용해 주세요.</p>
@@ -126,7 +126,7 @@ export default async function AccountSecurityPage({
         </CardHeader>
         <CardContent>
           <form action={terminateOtherSessions}>
-            <Button type="submit" variant="destructive" disabled={otherCount === 0}>
+            <Button type="submit" variant="destructive" disabled={otherCount === 0} className="min-h-11">
               다른 세션 {otherCount}개 종료
             </Button>
           </form>
@@ -142,7 +142,7 @@ export default async function AccountSecurityPage({
           {identities.map((identity) => (
             <form action={beginSecurityReauthentication} key={identity.provider}>
               <input type="hidden" name="provider" value={identity.provider} />
-              <Button type="submit" variant="outline">
+              <Button type="submit" variant="outline" className="min-h-11">
                 {PROVIDER_NAME[identity.provider] ?? identity.provider}로 본인 확인
               </Button>
             </form>
@@ -153,7 +153,7 @@ export default async function AccountSecurityPage({
         </CardContent>
       </Card>
 
-      <Button asChild variant="ghost" className="w-fit">
+      <Button asChild variant="ghost" className="min-h-11 w-fit">
         <Link href="/account">내 계정으로 돌아가기</Link>
       </Button>
     </div>
