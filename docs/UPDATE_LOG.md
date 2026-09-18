@@ -1,5 +1,11 @@
 # Update Log
 
+## v2026.09.18.213 — AdSense iframe CSP Test-gate repair
+
+- Real Test-edge Chromium found `ep2.adtrafficquality.google` and `www.google.com` iframe blocks after v212.
+- Ads-enabled `frame-src` now admits only those reproduced AdSense origins; ads-disabled mode remains `frame-src 'none'`.
+- Production remains blocked until v213 exact-main Test browser QA reports zero relevant CSP errors.
+
 ## v2026.09.18.212 — Full UI QA and browser hardening
 
 - Branch: `fix/ui-full-qa-v2026.09.18.212`, exact base `d6d2798535894c54854135c23e37d972d267baa1`.
