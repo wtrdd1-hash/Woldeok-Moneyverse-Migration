@@ -2,12 +2,25 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.213
+> **현재 통합 버전:** v2026.09.18.214
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.18.214 (2026-09-18)
+
+### v213 Test → Production 승격 증거 (문서 전용)
+
+- **권위:** runtime 릴리스는 PR #467, CI #1279 / run `35292212685` 성공 후 생성된 v2026.09.18.213 exact main `24b85df1e0e5f922e461b1dcea82ec291bf54e48`을 유지한다. v214는 문서/증거만 변경하며 새 runtime 후보를 만들지 않는다.
+- **Test 증거:** exact-main frontend release `/srv/moneyverse-data/releases/test-24b85df1e0e5-ui213`가 `moneyverse-test-ui-v213-main.service` port 3115에서 실행되고 Test Nginx frontend upstream이다. 공개 Test 핵심 route는 200이며 280/320/390px Chromium에서 responsive width, 상점 모바일 입력 16px, title 조합, Gallery CSP를 통과했다. `/data-deletion`의 일시적 `ERR_NETWORK_CHANGED` 1건은 280px에서 3회 재검증해 HTTP 200, viewport 일치, console/request 실패 0건이었다. Test backend PID `1282208`은 2026-09-17 21:55:39 KST부터 그대로 유지됐다. Test Nginx rollback backup은 `/etc/nginx/backups/moneyverse.before-v213-test-20260918-094530`이다.
+- **Production 증거:** exact-main frontend release `/srv/moneyverse-data/releases/prod-24b85df1e0e5-ui213`를 먼저 3202 canary에서 검증하고 Nginx를 원자 전환한 뒤, 영구 `moneyverse-frontend.service` port 3001에 같은 exact release를 설치하고 Nginx를 3001로 복귀했다. 공개 핵심 route와 `/health`는 모두 200이다. Browser gate는 3202 canary에서 27/27, 영구 3001 전환 후 다시 27/27 통과했으며 280/320/390px에서 document overflow 0, brand title 중복 없음, 모바일 input 16px, relevant CSP 오류 0건이다.
+- **무중단/롤백:** 이전 frontend `moneyverse-frontend-v196-canary.service` port 3201은 `/srv/moneyverse-data/releases/prod-75e69e77cdc1-v196/frontend`에서 계속 실행해 rollback anchor로 유지한다. Production Nginx backup은 `/etc/nginx/backups/moneyverse.before-v213-prod-20260918-094856`, `/etc/nginx/backups/moneyverse.before-v213-persistent-20260918-095200`, 영구 frontend drop-in backup은 `/etc/systemd/system/moneyverse-frontend.service.d/release.conf.before-v213-20260918-095145`이다.
+- **Backend 연속성:** Production backend `moneyverse-backend-v196-canary.service` PID `1286971`, 시작 2026-09-17 22:01:38 KST는 재시작하지 않았다. 배포 후 frontend/backend warning journal은 0건이다. 공개 `/api/version`은 Nginx가 backend 3002로 라우팅하므로 의도적으로 backend identity `75e69e77...`을 반환하고, 3001 frontend direct `/api/version`은 exact runtime frontend `24b85df...`을 반환한다.
+
+### v214 수용 조건
+문서 전용 evidence branch → diff/CI → merge. v214 때문에 runtime을 다시 배포하지 않으며 Production runtime은 v213 exact SHA `24b85df1e0e5f922e461b1dcea82ec291bf54e48`을 유지한다.
 
 ## 회차 델타 — v2026.09.18.213 (2026-09-18)
 
