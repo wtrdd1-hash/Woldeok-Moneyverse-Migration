@@ -2,6 +2,13 @@
 
 [English](UPDATE_LOG.md) | **한국어** | [문서 색인](INDEX.ko.md)
 
+## v2026.09.18.215 — Debian 부팅 연속성 및 Discord 음성 자동 시작 계약
+
+- 문서 전용 버전이며 애플리케이션 SHA 또는 런타임 릴리스는 변경하지 않았습니다.
+- 승인된 Debian 13 호스트에서 backend, frontend, Discord bot, Economy AI, MCP gateway, Docker가 모두 systemd enabled/active인지 재검증했습니다.
+- 서버 부팅 시 Discord 봇을 자동 시작하고 대상 음성 채널 `1536572442422550538`에 자동 연결해야 한다는 운영 계약을 기록했습니다. 음성 연결 해제 시 기존 voice watchdog이 자동 재입장을 담당합니다.
+- 핵심 6개 unit에 `systemctl enable --now`를 다시 적용했고 활성 프론트엔드가 HTTP 200을 반환하는 것을 확인했습니다.
+
 ## v2026.09.18.214 — v213 Production 승격 증거
 
 - 문서 전용 버전이며 runtime은 v213 exact main `24b85df1e0e5f922e461b1dcea82ec291bf54e48`을 유지합니다.
