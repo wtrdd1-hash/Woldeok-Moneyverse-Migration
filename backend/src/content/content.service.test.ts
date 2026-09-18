@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ContentService } from './content.service';
 
 const PHOTO_ID = '2e090c86-3cd8-47ca-b7db-4be7d7b8daad';
@@ -32,6 +32,10 @@ function repositoryWithPhoto(imageUrl: string) {
     adminUpdateAnnouncement: vi.fn(),
   };
 }
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe('ContentService public photos', () => {
   it('serves an approved same-origin member upload', async () => {
@@ -69,7 +73,6 @@ describe('ContentService status freshness contract', () => {
     await expect(stale.serviceStatus()).resolves.toEqual([expect.objectContaining({
       state: 'unknown', freshnessState: 'stale', ageMs: 60_001, policyVersion: 'status-v1',
     })]);
-    vi.useRealTimers();
   });
 
   it('fails closed for observations beyond the allowed future skew', async () => {
@@ -79,6 +82,5 @@ describe('ContentService status freshness contract', () => {
     await expect(service.serviceStatus()).resolves.toEqual([expect.objectContaining({
       state: 'unknown', freshnessState: 'unknown', ageMs: null, policyVersion: 'status-v1',
     })]);
-    vi.useRealTimers();
   });
 });
