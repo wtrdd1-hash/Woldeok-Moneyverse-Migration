@@ -2,12 +2,24 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.212
+> **현재 통합 버전:** v2026.09.18.213
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.18.213 (2026-09-18)
+
+### Test 게이트 AdSense iframe CSP 보완
+
+- **발견:** v212를 실제 Test edge(`3114`)에 연결한 뒤 280px Chromium에서 반응형 수정은 통과했지만 AdSense iframe 2건이 추가로 차단됐다. `https://ep2.adtrafficquality.google/`, `https://www.google.com/`이 `frame-src`에 없어 거부됐다.
+- **수정:** 광고 활성 `frame-src`에만 `https://adtrafficquality.google`, `https://*.adtrafficquality.google`, `https://www.google.com`을 추가한다. v212의 script/connect 정책은 유지하고 광고 비활성 모드는 계속 `frame-src 'none'`이다.
+- **보안 근거:** Google은 AdSense 사용 도메인이 변할 수 있어 strict/nonce CSP를 권장한다. 이번 릴리스는 모든 frame에 `https:`를 허용하지 않고 exact Test에서 재현된 origin만 최소 허용한다. strict CSP 전환은 장기 계약으로 남긴다.
+- **릴리스 게이트:** GitHub CI → merged-main exact Test edge에서 relevant CSP 오류 0건 + Test backend health → Production frontend canary 무중단 전환 순서를 지킨다. Production backend는 변경하지 않는다.
+
+### v213 수용 순서
+Test edge 재현 → 공식 AdSense CSP 지침 재확인 → 최소 frame-src 수정 → 타깃/전체 frontend QA → EN/KO 증거 → PR/CI → exact-main Test → Production canary → Nginx 원자 전환 → 운영 browser smoke.
 
 ## 회차 델타 — v2026.09.18.212 (2026-09-18)
 

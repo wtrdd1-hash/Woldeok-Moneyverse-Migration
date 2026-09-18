@@ -2,12 +2,24 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.18.212
+> Current integrated version: v2026.09.18.213
 > Implementation/evidence sync: 2026-09-18
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+## Cycle delta — v2026.09.18.213 (2026-09-18)
+
+### Test-gate AdSense iframe CSP repair
+
+- **Trigger:** after v212 reached the real Test edge (`3114`), Chromium at 280 px confirmed the responsive fixes but exposed two remaining AdSense iframe CSP violations: `https://ep2.adtrafficquality.google/` and `https://www.google.com/` were blocked by `frame-src`.
+- **Fix:** extend only the ads-enabled `frame-src` allowlist with `https://adtrafficquality.google`, `https://*.adtrafficquality.google`, and `https://www.google.com`. Script/connect policy remains unchanged from v212; ads-disabled mode still resolves to `frame-src 'none'`.
+- **Security rationale:** Google documents that AdSense domains can change and recommends strict/nonce-based CSP; this release does not weaken all frame sources or adopt a broad `https:` frame policy. It admits only the origins reproduced on the exact Test path and keeps a future strict-CSP migration as the longer-term contract.
+- **Release gate:** v213 must pass GitHub CI, exact merged-main Test edge browser QA with zero relevant CSP errors, Test backend health, then zero-downtime Production frontend canary cutover. Production backend remains untouched.
+
+### v213 acceptance order
+Test-edge reproduction → official AdSense CSP guidance recheck → minimal frame-src patch → targeted/full frontend QA → EN/KO evidence → PR/CI → exact-main Test → Production canary → atomic Nginx cutover → production browser smoke.
 
 ## Cycle delta — v2026.09.18.212 (2026-09-18)
 

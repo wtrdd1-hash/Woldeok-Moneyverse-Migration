@@ -2,6 +2,12 @@
 
 [English](UPDATE_LOG.md) | **한국어** | [문서 색인](INDEX.ko.md)
 
+## v2026.09.18.213 — AdSense iframe CSP Test 게이트 보완
+
+- v212 실제 Test edge Chromium에서 `ep2.adtrafficquality.google`, `www.google.com` iframe 차단을 추가 확인했습니다.
+- 광고 활성 `frame-src`에 재현된 AdSense origin만 최소 추가하며 광고 비활성은 계속 `frame-src 'none'`입니다.
+- v213 merged-main Test browser QA에서 relevant CSP 오류 0건을 확인하기 전까지 Production 승격을 차단합니다.
+
 ## v2026.09.18.212 — 전체 UI QA 및 브라우저 호환성 강화
 
 - 브랜치: `fix/ui-full-qa-v2026.09.18.212`, 정확한 기준 `d6d2798535894c54854135c23e37d972d267baa1`.
