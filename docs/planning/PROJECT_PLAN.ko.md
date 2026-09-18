@@ -2,11 +2,26 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.226
+> **현재 통합 버전:** v2026.09.18.227
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+
+## 회차 델타 — v2026.09.18.227 (2026-09-18)
+
+### 20:07 권위 + 런타임 + SEO/보안 증거 강화
+- **레퍼런스 우선 / 직접채택:** 기획 전에 Google Search Central 최신 업데이트·canonical·breadcrumb 공식문서와 OWASP API Security Top 10을 재확인했다. Google은 non-200 응답이 200 페이지처럼 렌더링되지 않을 수 있고 canonical은 검색엔진이 다른 URL을 선택할 수 있는 신호이며 breadcrumb 구조화데이터는 실제 탐색 가능한 계층과 일치해야 하고 sitemap 제출은 발견/갱신 경로라고 설명한다. 따라서 SEO 릴리스 증거는 사용자/크롤러 probe별 `{url,httpStatus,rendered,title,canonical,robots,sitemapLastmod,breadcrumbSchema,hreflang,contentHash,checkedAt}`를 저장한다. 비공개 페이지 index 가능, canonical 분기, 공개 페이지 non-200 렌더 회귀, stale sitemap timestamp, 화면-스키마 불일치는 SEO 승격차단이다.
+- **저장소 권위 / HIGH `DOC-SYNC-226-01`:** 시작·중간 `origin/main=7ca1fb5babb073acf8cd7d3702c6481d828fa7f3`(v226). 감사 결과 v226이 기존 누락을 실제 복구하지 못했다. 영문은 v225 전체 회차가 있지만 한국어는 v226 다음이 v224로 건너뛴다. v227에서 한국어 v225 의사결정 동등 회차를 복원하고 두 문서를 함께 변경한다. CI 완료조건은 header 일치만이 아니라 당일 모든 cycle version 양쪽 존재, normalized decision key 동등성, 의도적 one-sided fixture 실패다. 이 negative control이 없으므로 HIGH 상태는 유지한다.
+- **런타임 / HIGH `OBS-NET-216-01` 20:07 KST 재현:** backend/frontend/backup timer active, loopback `/api/version` HTTP 200 및 backend id `75e69e77cdc18ef221106a008563151a4c790728`; host-local `woldeok.com` resolve는 계속 실패하고 canonical HTTPS도 curl(6)/HTTP 000이다. 정상 application unit 재시작 금지. resolver→authoritative DNS→외부 vantage→TLS/SNI→HTTP 순으로 진단하며 독립 2 vantage 각각 DNS+TLS+HTTP 30회 연속 성공, auth/payment dependency 성공, 실제 alert 전달이 수용조건이다.
+- **P0 DR / 증거 규율:** 이번 회차에 새 isolated restore 증거는 없으므로 기존 artifact integrity를 recoverability로 승격하지 않는다. `BAK-RUNTIME-177-01`은 isolated decrypt+restore, schema/migration equality, auth/session/inventory/entitlement/ledger/reward/bank/loan/stock/casino/community/referral/audit reconciliation, 실측 RPO/RTO, off-host immutable retention, 실제 failure alert 전까지 BLOCKED다.
+- **보안 / 직접채택:** OWASP API1~API6에 따라 object/function/property authorization, 강한 인증, resource budget, 민감 business flow 악용통제를 적용한다. 모든 금전/자산/커뮤니티 mutation backlog는 subject-resource-action 권한검사, DTO allowlist, route별 body/page/batch/time/concurrency/cost budget, server-authoritative idempotency key+replay result, abuse telemetry를 가진다. 타계정 read/write, mass assignment, reward/entitlement replay, quota bypass, 고가치 flow 자동악용 성공은 HIGH/CRITICAL 승격차단이다.
+- **사업성/운영:** SEO·보안·DR은 가짜 직접매출이 아니라 acquisition CAC 절감 또는 fraud/downtime/support 손실회피로 평가한다. cohort 실측 전 conversion, D1/D7/D30, CAC/LTV, ARPU/ARPDAU/ARPPU, refund/churn, infra/support/fraud loss는 `HYPOTHESIS/TEST TARGET`; scale/kill에는 cohort denominator, 관찰기간, confidence bound가 필요하다.
+- **개발 연결:** 기획 자동화는 배포하지 않는다. P0 restore proof → HIGH DNS/dependency+한영 구조동기화 → HIGH auth/economy negative control → P1 required CI enforcement → SEO render/index probe → 실측 commerce/growth experiment 순이다. 구현은 branch→CI→Test exact SHA→API/DB/user-flow QA→main→Production smoke/rollback을 따른다.
+
+### v227 작업로그
+2026-09-18 확인 출처: Google Search Central updates/canonical/breadcrumb 공식문서, OWASP API Security Top 10. 시작·중간 main `7ca1fb5babb073acf8cd7d3702c6481d828fa7f3`; 런타임 증거는 위와 같다. 기획문서만 변경하며 runtime/DNS/Production DB는 변경하지 않는다.
 
 
 ## 회차 델타 — v2026.09.18.226 (2026-09-18)
@@ -22,6 +37,20 @@
 
 ### v226 작업로그
 P0 restore proof → HIGH 한영 문서동기화 + DNS/dependency 증거 → HIGH auth/economy negative control → P1 required-check enforcement → SEO render/crawler probe → 실측 commerce/growth experiment. 기획 전용이며 runtime code, DNS, Production DB는 변경하지 않는다.
+
+
+## 회차 델타 — v2026.09.18.225 (2026-09-18)
+
+### 19:02 증거 델타
+- **권위/CI:** Google Search Central, OWASP ASVS/API Security, Google Play 공식 가이드를 먼저 재확인했다. 당시 시작·중간 main은 `84f4ff298fb5b93bdba3cf2949370d8cc9008e1e`(v224). required-status enforcement는 off이고 context/check/status 0으로 `CI-ENFORCE-204-01` P1 OPEN을 유지했다.
+- **HIGH `OBS-NET-216-01`:** 19:02 KST backend/frontend/backup timer active+enabled, host-local `woldeok.com` DNS와 canonical HTTPS 실패, loopback `/api/version` 200/no-store, backend `75e69e77cdc18ef221106a008563151a4c790728`, warning journal empty. 수용은 독립 2 vantage ×30 DNS+TLS+HTTP 성공, false NXDOMAIN/SERVFAIL 0, auth/payment resolution, 실제 alert 전달이다.
+- **P0 DR:** 18:29:36→18:29:38 backup encrypted archive + `database.dump` + `photos.tar.zst` + `manifest.txt` 검증 성공은 freshness/integrity이지 restore proof가 아니다. isolated restore+schema/migration+경제/auth/audit reconciliation+RPO/RTO+off-host immutable+failure alert까지 BLOCKED다.
+- **SEO:** 2026-09-16 GoogleProducer HTTP UA 변경을 반영해 crawler identity를 권한이 아닌 versioned observability `{crawlerFamily,documentedToken,policyVersion,verifiedAt}`로 취급한다. `seo_render_probe`는 user/crawler canonical·robots·sitemap·hreflang·structured data·HTTP semantics를 비교하며 private exposure/critical-resource denial/cloaking-like divergence를 차단한다.
+- **API 보안:** 모든 route inventory에 API3 response-property allowlist와 API4 resource budget(DTO allowlist, body/upload/page/batch 최대치, query work unit, timeout, concurrency/rate quota, cost owner)을 요구한다. ORM entity 직접 serialize 금지. PII/internal-field leakage 또는 resource-limit bypass는 HIGH 승격차단이다.
+- **사업성/전체기능:** Google Play EEA/UK/US 2026-06-30 cohort 정책을 타 시장과 분리하고 거래별 server-trusted market/cohort/transaction/programme/billing-path/fee-policy와 gross/fees/tax/refund/direct cost를 snapshot한다. 실측 전 사업 KPI는 `HYPOTHESIS/TEST TARGET`; 기존 전체 기능 UX/RBAC/API/DB/audit/fallback/privacy/SEO/KPI/performance/QA/exact-SHA 계약은 계속 권위다.
+
+### v225 작업로그
+P0 restore proof → P0 release identity → HIGH DNS/dependency → HIGH API/auth/economy gate → P1 CI enforcement → SEO probe → 실측 growth. 기획 전용이며 runtime/DNS/Production DB는 변경하지 않는다.
 
 
 ## 회차 델타 — v2026.09.18.224 (2026-09-18)

@@ -2,11 +2,26 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.18.226
+> Current integrated version: v2026.09.18.227
 > Implementation/evidence sync: 2026-09-18
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+
+## Cycle delta — v2026.09.18.227 (2026-09-18)
+
+### 20:07 authority + runtime + SEO/security evidence hardening
+- **Research first / DIRECT ADOPT:** refreshed Google Search Central current updates/canonical/breadcrumb guidance and OWASP API Security Top 10 before planning. Google documents that non-200 responses may not be rendered like 200 pages, canonical is a signal Google may override, breadcrumb structured data must match crawlable page hierarchy, and sitemap submission remains the discovery/update mechanism. SEO release evidence therefore records `{url,httpStatus,rendered,title,canonical,robots,sitemapLastmod,breadcrumbSchema,hreflang,contentHash,checkedAt}` for user and crawler probes; any private-page indexability, canonical split, non-200 public render regression, stale sitemap timestamp or visible/schema mismatch blocks SEO promotion.
+- **Repository authority / HIGH `DOC-SYNC-226-01`:** start and mid-work `origin/main=7ca1fb5babb073acf8cd7d3702c6481d828fa7f3` (v226). Audit found v226 did not actually repair the pre-existing omission: English still contains the full v225 cycle while Korean jumps from v226 directly to v224. v227 repairs this by restoring a Korean v225 decision-equivalent cycle and changes both files together. CI acceptance is structural, not header-only: current versions equal, every current-day cycle version present in both documents, normalized decision keys equivalent, and an intentionally one-sided fixture fails. Status remains HIGH until that CI negative control exists.
+- **Runtime / HIGH `OBS-NET-216-01` reproduced 20:07 KST:** backend, frontend and backup timer are active; loopback `/api/version` is HTTP 200 with backend id `75e69e77cdc18ef221106a008563151a4c790728`; host-local `woldeok.com` resolution still fails and canonical HTTPS remains curl(6)/HTTP 000. Do not restart healthy application units. Diagnose resolver/authoritative DNS/external vantage/TLS-SNI/HTTP in order; acceptance remains two independent vantages ×30 consecutive DNS+TLS+HTTP successes, auth/payment dependency success and delivered alert.
+- **P0 DR / evidence discipline:** no new isolated restore proof was produced this cycle, so prior artifact-integrity evidence must not be promoted to recoverability. `BAK-RUNTIME-177-01` stays BLOCKED until isolated decrypt+restore, schema/migration equality, auth/session/inventory/entitlement/ledger/reward/bank/loan/stock/casino/community/referral/audit reconciliation, measured RPO/RTO, off-host immutable retention and delivered failure alert.
+- **Security / DIRECT ADOPT:** OWASP API1-API6 requires object/function/property authorization, robust authentication, bounded resource consumption and abuse controls for sensitive business flows. Every money/asset/community mutation backlog therefore carries subject-resource-action authorization, DTO allowlists, per-route body/page/batch/time/concurrency/cost budgets, server-authoritative idempotency key+replay result, and abuse telemetry. Cross-account read/write, mass assignment, replay reward/entitlement, quota bypass or automated high-value flow abuse is HIGH/CRITICAL and blocks Test→main/Production.
+- **Economics/operations:** SEO/security/DR work is evaluated as acquisition-CAC reduction or avoided fraud/downtime/support loss, not fake direct revenue. Until measured cohorts exist, conversion, D1/D7/D30, CAC/LTV, ARPU/ARPDAU/ARPPU, refund/churn, infra/support/fraud loss remain `HYPOTHESIS/TEST TARGET`; scale/kill decisions require cohort denominator, observation window and confidence bounds.
+- **Implementation linkage:** planning remains non-deploying. Backlog order is P0 restore proof → HIGH DNS/dependency + bilingual structural sync → HIGH auth/economy negative controls → P1 required CI enforcement → SEO render/index probes → measured commerce/growth experiments. Each implementation still follows branch→CI→Test exact SHA→API/DB/user-flow QA→main→Production smoke/rollback.
+
+### v227 worklog
+Sources checked 2026-09-18: Google Search Central updates/canonical/breadcrumb documentation; OWASP API Security Top 10. Start/mid main `7ca1fb5babb073acf8cd7d3702c6481d828fa7f3`; runtime evidence above. Planning documents only; no runtime, DNS or Production DB mutation.
 
 
 ## Cycle delta — v2026.09.18.226 (2026-09-18)
