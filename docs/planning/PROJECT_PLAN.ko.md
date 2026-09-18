@@ -2,11 +2,27 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.226
+> **현재 통합 버전:** v2026.09.18.227
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+
+## 회차 델타 — v2026.09.18.227 (2026-09-18)
+
+### 21:06 런타임/권위 + 크롤러 접근성 + API 악용예산 게이트
+- **레퍼런스 우선 / 직접채택:** 저장소·런타임 점검 전에 Naver Search Advisor 리소스/링크·robots/meta 가이드와 OWASP API Security Top 10을 최신 확인했다. Naver는 렌더링에 필요한 리소스의 crawl 가능성과 실제 `href` 링크를 요구하며, robots.txt가 비공개 데이터의 접근통제가 될 수 없음을 명시하고 sitemap 및 페이지별 noindex를 안내한다. OWASP는 BOLA, broken authentication/property authorization, unrestricted resource consumption, sensitive-business-flow abuse를 API 릴리스 위험으로 유지한다. 2026-09-18 확인: https://searchadvisor.naver.com/guide/resource-and-link ; https://searchadvisor.naver.com/guide/seo-basic-robots ; https://searchadvisor.naver.com/guide/markup-structure ; https://devguide.owasp.org/en/07-training-education/07-api-top-ten/ .
+- **권위 / 작업 중간 재확인:** 시작·중간 `origin/main=3cc021db869875fe44c5c8ee6638b1cd39a7ede7`; 양 통합문서는 v226 선언 상태였다. 현재 main commit status는 0개라 `CI-ENFORCE-204-01` P1 OPEN 유지. 완료는 단순 workflow 존재가 아니라 exact-head required check가 보이고, 의도적으로 실패시킨 negative-control PR이 감사·만료되는 bypass 없이는 merge 불가능함을 증명해야 한다.
+- **HIGH `OBS-NET-216-01` / 21:06 KST 재현:** `moneyverse-backend.service`, `moneyverse-frontend.service`, `moneyverse-backup.timer` active, timer enabled, 다음 trigger 2026-09-19 00:23:37 KST. host-local `woldeok.com`은 여전히 resolve 실패, canonical HTTPS `/api/version`은 curl(6)/HTTP 000이나 loopback `127.0.0.1:3002/api/version`은 HTTP 200, `Cache-Control: no-store`, backend id `75e69e77cdc18ef221106a008563151a4c790728`; 직전 1시간 backend warning journal은 비어 있다. 정상 app unit 재시작 금지. resolver → authoritative A/AAAA/NS → UDP/TCP 53 → 외부 2 vantage → TLS/SNI → HTTP manifest 순으로 진단한다. 수용은 독립 2 vantage 각각 DNS+TLS+HTTP 30회 연속 성공, false NXDOMAIN/SERVFAIL 0, auth/payment dependency resolution, 실제 alert 전달이다. authoritative 변경은 TTL을 관찰하며 last-known-good record로 rollback한다.
+- **P0 DR / BLOCKED:** runtime 정상과 암호화 artifact 검증은 recoverability 증거가 아니다. `BAK-RUNTIME-177-01`은 최신 backup을 격리환경에서 decrypt+restore하고 schema+migration set 및 auth/session/inventory/entitlement/ledger/reward/bank/loan/stock/casino/community/referral/audit invariant를 대조하며 RPO/RTO 실측, off-host immutable retention, 실제 failure alert를 증명할 때까지 destructive migration/economy 승격을 차단한다.
+- **SEO 백엔드 / 구체 구현:** 서버 권위 `SeoDocument` read model `{url,locale,title,description,h1,canonical,indexDirective,updatedAt,image,structuredDataVersion}`과 `SeoRedirect{fromPath,toPath,status,createdAt,reason}`를 둔다. 공개 SSR/ISR은 client hydration 없이도 핵심 콘텐츠를 반환하고 canonical/robots/hreflang/JSON-LD/sitemap `lastmod`를 동일 read model에서 직렬화한다. 계정·관리자·거래·보안센터·비공개 업로드는 robots.txt와 별개로 인증을 적용하고 강제 `noindex`. `seo_render_probe`는 일반 UA와 문서화된 crawler UA를 모두 요청해 private 노출, 필수 JS/CSS 차단, canonical/robots 불일치, sitemap non-2xx, redirect loop, 미지원 structured data, 실질적 cloaking 차이를 승격차단한다. UGC는 moderation+최소 콘텐츠+stable slug 조건 후에만 index; filter/search/query variant는 기본 noindex하고 안정 collection URL로 canonical한다.
+- **API/보안 / 구체 악용예산:** 모든 object/economy mutation에 `{authorizationPolicy,idempotencyScope,bodyBytes,pageMax,batchMax,timeoutMs,concurrencyMax,rateBucket,costOwner}`를 선언한다. read/write 전 subject-resource-action 권한검사, request/response DTO allowlist, payment/reward/inventory/bank/loan/referral mutation은 결과 hash와 함께 unique idempotency key를 저장한다. cross-account ID, mass assignment, replay, duplicate reward, pagination amplification, oversized upload/batch, quota race가 타계정 변경이나 순자산 생성을 못함을 negative test로 증명한다. auth bypass·타계정 정보노출·중복 entitlement/asset·무제한 경제 mutation은 HIGH/CRITICAL이며 Test→Production 승격차단이다.
+- **수익성 / 비용귀속:** SEO는 `impression→visit→signup→activation→D7→D30→net revenue`의 organic CAC 절감, 보안/QA/DR은 fraud/refund/support/downtime 손실 회피로 평가한다. 실측 전 conversion, CAC/LTV, ARPU/ARPDAU/ARPPU, support/fraud/infra cost와 uplift는 `HYPOTHESIS/TEST TARGET`. incremental contribution margin이 양수이고 D7/D30·민원·fraud·공정성·latency·support guardrail이 악화되지 않을 때만 scale한다.
+- **전체기능 backlog 계약:** auth/profile/security-center/inventory/collection/shop/cart/payment/subscription/ad-removal/progression/business/bank/loan/stock/casino/community/social/notification/search/upload/public/App API/admin/audit/DR/analytics/ads/SEO/incident 항목은 구현근거/상태, 전체 UX 상태, RBAC/BOLA, API/error/idempotency/rate limit, DB constraint/index/transaction/concurrency, audit/observability, feature flag/fallback/DR/privacy/abuse, SEO, performance/cache, 분석+재무 KPI, unit/integration/E2E/real-DB/security/regression, exact-SHA Test→main→Production smoke/rollback gate를 계속 필수로 가진다. 증거가 없으면 `UNIMPLEMENTED/PARTIAL/REDESIGN`이며 완료로 추정하지 않는다.
+
+### v227 작업로그
+P0 격리 restore proof → HIGH DNS/dependency 증거 → HIGH auth/economy abuse-budget negative control → P1 exact-SHA required-check enforcement → SEO read-model/render probe → 실측 acquisition/commerce experiment. 기획 전용이며 runtime code, DNS, Production DB는 변경하지 않았다.
 
 
 ## 회차 델타 — v2026.09.18.226 (2026-09-18)
