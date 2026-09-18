@@ -3,9 +3,9 @@
 ## v2026.09.18.215 — Debian boot continuity and Discord voice auto-start contract
 
 - Documentation-only version; no application SHA or runtime release was changed.
-- Re-verified the authorized Debian 13 host: backend, frontend, Discord bot, Economy AI, MCP gateway, and Docker are all systemd-enabled and active.
+- Re-verified the authorized Debian 13 host: backend, frontend, Discord bot, Economy AI, MCP gateway, Docker, Nginx, and the GitHub Actions runner are enabled/active; the Production PostgreSQL container on host port 5433 is running with Docker restart policy `unless-stopped`.
 - Recorded the boot contract that the Discord bot must start automatically and reconnect to target voice channel `1536572442422550538`; the existing voice watchdog remains the recovery path for dropped voice sessions.
-- Re-applied `systemctl enable --now` to the six core units and confirmed the active frontend returned HTTP 200.
+- Re-applied `systemctl enable --now` to the core runtime plus Nginx/runner, confirmed public Production and Test returned HTTP 200, and confirmed backend `/health` returned HTTP 200.
 
 ## v2026.09.18.214 — v213 Production release evidence
 
