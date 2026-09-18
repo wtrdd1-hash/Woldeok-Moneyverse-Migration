@@ -2,13 +2,27 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.229
+> **현재 통합 버전:** v2026.09.18.230
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
 
+
+## 회차 델타 — v2026.09.18.230 (2026-09-18)
+
+### 23:00 지역별 검색 적격성 + 증거 신선도 + 런타임/CI 재검증
+- **레퍼런스 우선 / 직접채택:** Google Search Central 문서 업데이트(2026-09-16 지역별 Search experience 적격성, 2026-09-08 Practice Problem Search appearance 제거), Google Crawling Infrastructure 변경로그(2026-09-17 `Mediapartners-Google` 범위), Naver Search Advisor 사이트 상태/robots/리소스·링크 가이드, OWASP ASVS 5.0.0을 재확인했다. 2026-09-18 확인 출처: https://developers.google.com/search/updates ; https://developers.google.com/crawling/docs/changelog ; https://searchadvisor.naver.com/guide/site-summary ; https://searchadvisor.naver.com/guide/markup-structure ; https://searchadvisor.naver.com/guide/resource-and-link ; https://owasp.org/projects/asvs . 판정: 검색 기능 적격성은 엔진+시장+정책버전별이며 구조화데이터 존재가 노출을 보장하지 않는다. crawler/site-status 증거에는 명시적 신선도를 두고 ASVS version-qualified requirement를 검증 기준선으로 유지한다.
+- **권위 / 작업 중간 재확인:** 시작·중간 `origin/main=ba4c0545a93155f68d0a6ea61b30aa86c7d93955`; 양 canonical plan은 v229다. 이 exact main SHA의 GitHub combined status는 0개라 `CI-ENFORCE-204-01` P1 OPEN 유지. 완료조건은 exact-head required classifier/policy/runtime/security check와 의도적으로 실패시킨 auth/economy/SEO negative-control PR이 담당자·만료·감사기록이 있는 bypass 없이는 병합되지 않는 증거다.
+- **HIGH `OBS-NET-216-01` / 23:00 KST 재현:** `moneyverse-backend.service`, `moneyverse-frontend.service`, `moneyverse-backup.timer` active, timer enabled, 다음 trigger는 2026-09-19 00:23:37 KST다. host-local `woldeok.com` DNS는 계속 실패하고 canonical HTTPS `/api/version`은 curl(6)/HTTP 000이나 loopback `127.0.0.1:3002/api/version`은 HTTP 200, backend id `75e69e77cdc18ef221106a008563151a4c790728`을 반환하며 직전 1시간 backend warning journal은 비어 있다. 정상 app unit을 재시작하지 않고 resolver -> authoritative NS/A/AAAA -> UDP/TCP 53 -> 외부 2 vantage -> TLS/SNI -> HTTP 순으로 진단한다. 승격은 독립 2 vantage 각각 DNS+TLS+HTTP 30회 연속 성공, false NXDOMAIN/SERVFAIL 0, auth/payment dependency resolution 및 실제 alert 전달을 요구한다.
+- **P0 DR / BLOCKED:** timer 정상은 recoverability가 아니다. `BAK-RUNTIME-177-01`은 최신 backup의 격리 decrypt+restore, schema/migration equality, auth/session/inventory/entitlement/ledger/reward/bank/loan/stock/casino/community/referral/audit invariant reconciliation, RPO/RTO 실측, off-host immutable retention, 실제 failure alert 전달 전까지 destructive schema/economy 승격을 차단한다. 롤백은 last-known-good schema/app pair와 ledger reconciliation이며 정산된 경제 이력을 재작성하지 않는다.
+- **SEO/SEO 백엔드 구체 델타:** `searchFeatureEligibility`를 `{engine,market,feature,pageType,policyVersion,eligible,reason,sourceUrl,verifiedAt,expiresAt}`, `SeoEvidence`를 `{source,observedAt,expectedRefreshAt,status,artifactRef}`로 확장한다. 지역별 aggregator/supplier/carousel 적격성과 폐기된 Search appearance는 데이터로 관리하고 UI에 하드코딩하지 않는다. Naver 사이트 상태는 약 1~2일 주기로 갱신되므로 실시간 배포 health가 아닌 비동기 보조증거로 취급하며 DNS/TLS/HTTP/render probe가 릴리스 gate다. 공개 profile/community/gallery/catalog/help/durable-search는 stable SSR/ISR URL, 고유 metadata/H1, self-canonical, robots, sitemap, hreflang, 지원되는 visible-content-parity JSON-LD, 실제 `href`를 유지한다. account/admin/transaction/security/private-upload는 인증+`noindex`다. stale eligibility policy, private indexability, 공개 non-200 render, canonical split, 필수리소스 차단, sitemap 실패, schema/화면 불일치, crawler/user material cloaking은 SEO 승격차단이다.
+- **보안/QA + 전체기능 구현계약:** auth/profile/security-center/inventory/collection/shop/cart/payment/subscription/ad-removal/progression/business/bank/loan/stock/casino/community/social/notification/search/upload/public/App API/admin/audit/DR/analytics/ads/SEO/incident row는 구현상태와 코드/문서 근거, UX loading/empty/error/offline/permission 상태, subject-resource-action 권한, request/response DTO allowlist, idempotency/rate/resource budget, DB constraint/index/transaction/concurrency, immutable masked audit, fallback/feature flag/DR/privacy/abuse, SEO/cache/performance, 분석+재무 KPI, unit/integration/E2E/real-DB/security/regression/exact-SHA 승격/롤백 gate를 계속 가져야 한다. negative test는 cross-account ID, mass assignment, revoked-session replay, duplicate payment/reward/entitlement, quota race, SSRF/redirect escape, private crawler access, stale SEO-policy fixture를 포함한다. auth bypass, 타계정 노출, 순자산 중복, 복구불능 데이터 경로, private indexing, 통제되지 않은 경제 mutation은 신규기능보다 우선한다.
+- **상거래/사업/UX:** shop/payment/subscription/ad-removal의 SKU/order/refund는 effective-dated market/cohort/billing policy와 gross/tax/platform+billing fee/refund reserve/fraud/infra-storage-CDN-notification-support 배부/net revenue/contribution margin immutable snapshot을 유지한다. revenue, net revenue, margin, ARPU, ARPDAU, ARPPU, conversion, retention, churn, refund, CAC, LTV, fraud, infra/support cost, SEO/ad uplift는 실측 전 `HYPOTHESIS/TEST TARGET`이다. `kill`: contribution margin 음수 또는 fraud/refund/D7-D30/support/fairness 유의 악화; `iterate`: 수요는 양수이나 guardrail/payback 미달; `scale`: incremental contribution margin 양수, CAC payback 허용범위, retention/fairness/latency/support 유의 악화 없음. 다크패턴·숨은 갱신·실제금융 오인·강압적 FOMO는 금지한다.
+
+### v230 작업로그
+레퍼런스 조사 -> exact-main/runtime/QA/CI 대조 -> 지역별 SEO/증거신선도/보안/수익성 델타 -> 작업 중간 exact-main 재확인 -> 한영 동기화 반영. 우선순위: P0 격리 restore proof -> HIGH DNS/dependency proof -> auth/economy negative controls -> P1 required-check enforcement -> engine/market SEO render probe -> 실측 commerce/growth. 기획 전용이며 runtime/DNS/ledger/Production DB는 변경하지 않았다.
 
 ## 회차 델타 — v2026.09.18.229 (2026-09-18)
 
