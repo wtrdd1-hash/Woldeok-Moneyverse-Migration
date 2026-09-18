@@ -2,12 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.18.213
+> Current integrated version: v2026.09.18.214
 > Implementation/evidence sync: 2026-09-18
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+## Cycle delta — v2026.09.18.214 (2026-09-18)
+
+### v213 Test → Production release evidence (documentation-only)
+
+- **Authority:** runtime release remains v2026.09.18.213 exact main `24b85df1e0e5f922e461b1dcea82ec291bf54e48`, produced by PR #467 after CI #1279 / run `35292212685` succeeded. v214 changes documentation/evidence only and does not create a new runtime candidate.
+- **Test evidence:** exact-main frontend release `/srv/moneyverse-data/releases/test-24b85df1e0e5-ui213` runs as `moneyverse-test-ui-v213-main.service` on port 3115 and is the Test Nginx frontend upstream. Public Test critical routes return 200; 280/320/390 px Chromium checks pass responsive width, 16 px mobile shop input, title composition and Gallery CSP. One transient `ERR_NETWORK_CHANGED` on `/data-deletion` was rerun three times at 280 px with HTTP 200, exact viewport width and zero console/request failures. Test backend PID `1282208` remained active from 2026-09-17 21:55:39 KST. Test Nginx rollback backup: `/etc/nginx/backups/moneyverse.before-v213-test-20260918-094530`.
+- **Production evidence:** exact-main frontend release `/srv/moneyverse-data/releases/prod-24b85df1e0e5-ui213` was first validated on port 3202, then atomically cut over through Nginx, then installed into persistent `moneyverse-frontend.service` on port 3001 and Nginx returned to port 3001. Public critical routes and `/health` return 200. Browser gate passed 27/27 on the 3202 canary and 27/27 again after persistent 3001 promotion at 280/320/390 px with zero document overflow, no duplicated brand title, 16 px mobile inputs and zero relevant CSP errors.
+- **Zero-downtime / rollback:** the pre-release frontend `moneyverse-frontend-v196-canary.service` on port 3201 remains active from `/srv/moneyverse-data/releases/prod-75e69e77cdc1-v196/frontend` as rollback anchor. Production Nginx backups are `/etc/nginx/backups/moneyverse.before-v213-prod-20260918-094856` and `/etc/nginx/backups/moneyverse.before-v213-persistent-20260918-095200`; persistent frontend drop-in backup is `/etc/systemd/system/moneyverse-frontend.service.d/release.conf.before-v213-20260918-095145`.
+- **Backend continuity:** Production backend `moneyverse-backend-v196-canary.service` PID `1286971`, active since 2026-09-17 22:01:38 KST, was not restarted. Frontend/backend warning journals were empty after deployment. Public `/api/version` intentionally still reports backend identity `75e69e77...` because Nginx routes that endpoint to backend 3002; direct frontend `/api/version` on 3001 reports exact runtime frontend `24b85df...`.
+
+### v214 acceptance
+Documentation-only evidence branch → diff/CI → merge. Do not redeploy runtime for v214; Production runtime remains v213 exact SHA `24b85df1e0e5f922e461b1dcea82ec291bf54e48`.
 
 ## Cycle delta — v2026.09.18.213 (2026-09-18)
 

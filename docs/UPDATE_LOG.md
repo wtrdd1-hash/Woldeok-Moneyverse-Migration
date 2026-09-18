@@ -1,5 +1,11 @@
 # Update Log
 
+## v2026.09.18.214 — v213 Production release evidence
+
+- Documentation-only version; runtime remains v213 exact main `24b85df1e0e5f922e461b1dcea82ec291bf54e48`.
+- PR #467 / CI #1279 passed, Test exact-main edge passed responsive/CSP/backend gates, and Production was promoted zero-downtime through canary then persistent port 3001.
+- Production browser QA: 27/27 on canary and 27/27 after persistent cutover; backend unchanged; old port 3201 frontend retained as rollback anchor.
+
 ## v2026.09.18.213 — AdSense iframe CSP Test-gate repair
 
 - Real Test-edge Chromium found `ep2.adtrafficquality.google` and `www.google.com` iframe blocks after v212.

@@ -2,6 +2,12 @@
 
 [English](UPDATE_LOG.md) | **한국어** | [문서 색인](INDEX.ko.md)
 
+## v2026.09.18.214 — v213 Production 승격 증거
+
+- 문서 전용 버전이며 runtime은 v213 exact main `24b85df1e0e5f922e461b1dcea82ec291bf54e48`을 유지합니다.
+- PR #467 / CI #1279 통과 후 Test exact-main responsive/CSP/backend 게이트를 통과했고, Production은 canary 후 영구 3001로 무중단 승격했습니다.
+- 운영 browser QA는 canary 27/27, 영구 전환 후 27/27 통과했고 backend는 변경하지 않았으며 기존 3201 frontend를 rollback anchor로 유지합니다.
+
 ## v2026.09.18.213 — AdSense iframe CSP Test 게이트 보완
 
 - v212 실제 Test edge Chromium에서 `ep2.adtrafficquality.google`, `www.google.com` iframe 차단을 추가 확인했습니다.
