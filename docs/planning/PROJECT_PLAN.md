@@ -2,11 +2,26 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.18.225
+> Current integrated version: v2026.09.18.226
 > Implementation/evidence sync: 2026-09-18
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+
+## Cycle delta — v2026.09.18.226 (2026-09-18)
+
+### 19:08 authority/runtime + bilingual-sync + commerce policy hardening
+- **Research first / DIRECT ADOPT:** refreshed Apple Small Business Program (qualifying paid apps/IAP 15%), Apple 2026 regional agreement changes, Google Play 2026 cohort/transaction fee guidance, and OWASP API Security Top 10. Platform economics MUST resolve an effective-dated policy by `{platform,storefront,market,installCohort,transactionType,programmeEnrollment,billingPath,effectiveAt}`; no global fee constant. Store policy changes require source URL/date, four-eyes approval, simulation, immutable settlement snapshot and rollback to the prior policy version without rewriting settled orders.
+- **Repository authority / P0 docs-sync defect:** start and mid-work `origin/main=4497b1fae9a968b4c80cc26f3262feb2bb86a929` (v225). English contained the v225 delta while Korean declared v225 in its header but omitted that delta. This is concrete bilingual drift, so `DOC-SYNC-226-01` is HIGH until both files expose identical current version and equivalent cycle decisions. Required CI gate: parse current-version headers, require both files changed for planning-version bumps, require matching cycle heading/version and fail PR on one-sided delta.
+- **Runtime evidence / HIGH `OBS-NET-216-01`:** canonical units are `moneyverse-backend.service` and `moneyverse-frontend.service`; both are active/running. `moneyverse-backup.timer` is active with next trigger 2026-09-19 00:20:41 KST. Host-local `woldeok.com` still does not resolve and canonical HTTPS `/api/version` fails curl(6)/HTTP 000, while loopback `127.0.0.1:3002/api/version` is HTTP 200/no-store. Prior-hour backend warning journal is empty. Diagnose resolver→authoritative DNS→external vantages→TLS/SNI→HTTP; do not restart healthy app units. Acceptance remains two independent vantages ×30 consecutive DNS+TLS+HTTP successes, zero false NXDOMAIN/SERVFAIL, auth/payment dependency resolution and delivered alert.
+- **P0 DR:** 18:29:36→18:29:38 KST encrypted backup and `database.dump`, `photos.tar.zst`, `manifest.txt` verified OK. This proves artifact integrity only, not recoverability. `BAK-RUNTIME-177-01` remains BLOCKED until isolated decrypt/restore, schema+migration equality, auth/session/inventory/entitlement/ledger/reward/bank/loan/stock/casino/community/referral/audit reconciliation, measured RPO/RTO, off-host immutable retention and a delivered failure alert.
+- **Security / API:** OWASP API Top 10 keeps BOLA, broken authentication, property authorization, resource consumption and sensitive-business-flow abuse in scope. Every object route requires subject/resource/action authorization before read/write; response DTO allowlists; request/page/upload/batch/work-unit/time/concurrency budgets; idempotency for payment/reward/inventory/bank/loan/referral mutations; and negative tests for cross-account IDs, mass assignment, replay, duplicate rewards and quota bypass. Any asset duplication, cross-account access, auth bypass or unbounded economic mutation is HIGH/CRITICAL and blocks promotion.
+- **Commerce + business KPI:** each SKU/order/refund snapshot includes gross, tax, platform/service/billing fee, refund reserve, fraud loss allocation, infra/storage/CDN/notification/support allocation, net revenue and contribution margin. Unmeasured attach/paid conversion/repeat/renewal/churn/refund/ARPU/ARPDAU/ARPPU/CAC/LTV/payback/D1/D7/D30 stay `HYPOTHESIS/TEST TARGET`. Scale only when incremental contribution is positive without worsening retention, fairness, complaint, fraud or support guardrails; otherwise iterate/kill.
+- **All-feature contract:** existing auth/profile/security-center/inventory/collection/shop/cart/payment/subscription/ad-removal/progression/business/bank/loan/stock/casino/community/social/notification/search/upload/public/App API/admin/audit/DR/analytics/ads/SEO/incident specifications remain authoritative. Every backlog item must name implementation evidence/status, UX states, RBAC/BOLA, API+errors+idempotency+rate limit, DB constraints/index/transaction/concurrency, audit/observability, fallback/flag/DR/privacy/abuse, SEO, performance/cache, analytics+financial KPI, unit/integration/E2E/real-DB/security/regression tests and exact-SHA Test→main→Production smoke/rollback gates.
+
+### v226 worklog
+P0 restore proof → HIGH bilingual-doc sync + DNS/dependency evidence → HIGH auth/economy negative controls → P1 required-check enforcement → SEO render/crawler probes → measured commerce/growth experiments. Planning-only; runtime code, DNS and Production DB are unchanged.
 
 
 ## Cycle delta — v2026.09.18.225 (2026-09-18)
