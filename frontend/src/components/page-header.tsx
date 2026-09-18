@@ -26,11 +26,11 @@ export function PageHeader({
   readonly children?: React.ReactNode;
 }) {
   return (
-    <header className="grid gap-2">
+    <header className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2">
       {eyebrow && <p className="eyebrow">{eyebrow}</p>}
       <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)]">{title}</h1>
       {children && (
-        <div className="max-w-prose leading-[1.8] text-muted-foreground [word-break:keep-all]">
+        <div className="min-w-0 max-w-prose leading-[1.8] text-muted-foreground [overflow-wrap:anywhere] [word-break:keep-all]">
           {children}
         </div>
       )}

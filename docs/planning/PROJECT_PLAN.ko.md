@@ -2,12 +2,25 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.211
+> **현재 통합 버전:** v2026.09.18.212
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 델타 — v2026.09.18.212 (2026-09-18)
+
+### 전체 UI QA: 초소형 overflow, CSP, 모바일 입력 확대, title 조합 수정
+
+- **정확한 기준/브랜치:** `fix/ui-full-qa-v2026.09.18.212`은 권위 main `d6d2798535894c54854135c23e37d972d267baa1` / plan v211 기준이다. 문서 반영 전 작업 중간 재확인에서도 main과 권위 기획서가 그대로임을 확인했다.
+- **반응형 정확성:** v201 휴대폰 QA를 280px까지 확장했다. 삭제 요청·약관/개인정보 문서의 CSS grid min-content 확장을 수정하고 공통 `PageHeader`와 상점 page/search를 명시적으로 shrink 가능하게 했다. 상점 검색 입력은 휴대폰에서 16px을 유지해 focus 자동 확대를 막는다.
+- **브라우저/보안 정확성:** Gallery에서 실제 재현된 AdSense 보조 스크립트 CSP 차단을 해결하기 위해 기존 광고 경로가 사용하는 검토된 `adtrafficquality.google` script origin만 추가했다. 광고 비활성 CSP는 계속 fail-closed다. 개별 page metadata에서 root title template와 중복되던 사이트명을 제거해 browser title 중복을 없앴고, 홈은 absolute brand title을 사용한다.
+- **릴리스 전 QA 증거:** responsive/CSP/title 타깃 회귀 15/15, frontend typecheck, frontend 71개 파일/623개 테스트, Production frontend build가 통과했다. repository lint는 오류 0건이며 동적/사용자 미디어 경계의 의도된 `<img>` 경고 11건만 남는다. Chromium 280/320/390 타깃 재검증과 60 route × 5 width = 300회 전체 순회에서 확인 UI 결함은 0건이며 redirect 탐색 abort 3건은 개별 재실행 통과했다.
+- **릴리스 안전:** backend, DB migration, ledger, entitlement, 인증 상태 동작은 변경하지 않는다. 병합 exact SHA를 Test에서 먼저 검증한 뒤 Production frontend만 무중단 승격하며 Production backend는 재시작하지 않고 이전 frontend release를 rollback anchor로 보존한다.
+
+### v212 worklog / 수용 순서
+권위 plan/main 재확인 → responsive/dialog/table 정적 감사 → current-main+Test-backend local canary → 300 browser 조합 → 확인 결함 수정+회귀 테스트 → 전체 frontend 검증 → 작업 중간 plan/main 재확인 → EN/KO 기록 → branch PR/CI → exact-SHA Test 공개 QA → 무중단 Production frontend cutover → 사후 증거 기록.
 
 ## 회차 델타 — v2026.09.18.211 (2026-09-18)
 

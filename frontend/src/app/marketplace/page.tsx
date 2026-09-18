@@ -20,7 +20,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '플레이어 마켓 작업대 · 월덕 머니버스',
+  title: '플레이어 마켓 작업대',
   description:
     '보유 아이템을 확인하고 향후 플레이어 거래와 제작에 사용할 재료를 준비하는 회원 전용 작업대',
   robots: { index: false, follow: false },

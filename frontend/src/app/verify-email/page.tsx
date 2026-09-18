@@ -9,7 +9,7 @@ import { completeEmailVerification } from './actions';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '이메일 인증 · 월덕 머니버스',
+  title: '이메일 인증',
   robots: { index: false, follow: false },
 };
 

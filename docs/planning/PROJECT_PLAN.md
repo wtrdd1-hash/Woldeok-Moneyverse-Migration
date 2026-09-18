@@ -2,12 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.18.211
+> Current integrated version: v2026.09.18.212
 > Implementation/evidence sync: 2026-09-18
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+## Cycle delta — v2026.09.18.212 (2026-09-18)
+
+### Full UI QA: ultra-narrow overflow, CSP, mobile input zoom, and title composition
+
+- **Exact base / branch:** `fix/ui-full-qa-v2026.09.18.212` is based on authoritative main `d6d2798535894c54854135c23e37d972d267baa1` / plan v211. A mid-work recheck confirmed both main and the authoritative plan were unchanged.
+- **Responsive correctness:** extended the v201 phone audit down to 280 px. Fixed CSS-grid min-content expansion in deletion-request and policy documents, hardened shared `PageHeader`, and made the shop page/search layout explicitly shrinkable. The shop search input now stays at 16 px on phones to avoid mobile-browser focus zoom.
+- **Browser/security correctness:** fixed the confirmed Gallery AdSense auxiliary-script CSP rejection by admitting only the reviewed `adtrafficquality.google` script origins already used by the AdSense path. Advertising-disabled CSP remains fail-closed. Child-page metadata no longer embeds the site brand before the root title template, eliminating duplicated browser titles; the home page uses an explicit absolute branded title.
+- **QA evidence before release:** targeted responsive/CSP/title regression tests pass 15/15; frontend typecheck passes; frontend suite passes 71 files / 623 tests; Production frontend build passes; repository lint has 0 errors and 11 intentional dynamic-media `<img>` warnings. Chromium targeted regression passes at 280/320/390 px. A 60-route × 5-width audit completed 300 checks with no confirmed UI defect; three redirect-navigation aborts were rerun individually and passed.
+- **Release safety:** no backend, database migration, ledger, entitlement or authentication-state behavior changes. Test must run the exact merged SHA before zero-downtime Production frontend promotion; the Production backend is not restarted and the prior frontend release remains the rollback anchor.
+
+### v212 worklog / acceptance order
+Authoritative plan/main recheck → static responsive/dialog/table audit → current-main local Test-backend canary → 300 browser combinations → confirmed defect repair + regression tests → full frontend validation → mid-work plan/main recheck → EN/KO records → branch PR/CI → exact-SHA Test public QA → zero-downtime Production frontend cutover → post-deploy evidence.
 
 ## Cycle delta — v2026.09.18.211 (2026-09-18)
 

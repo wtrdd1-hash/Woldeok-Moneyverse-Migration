@@ -4,7 +4,7 @@ export function DeletionRequestInfo({ mode }: { readonly mode: 'account' | 'data
   const isAccount = mode === 'account';
 
   return (
-    <article className="grid gap-6 text-sm leading-7">
+    <article className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 text-sm leading-7 [overflow-wrap:anywhere]">
       <section className="grid gap-2">
         <h2 className="text-xl font-semibold">대상 서비스</h2>
         <p><strong>앱:</strong> 월덕 머니버스</p>

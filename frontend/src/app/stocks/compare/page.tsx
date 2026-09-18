@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: '가상 주식 종목 비교 — 월덕 머니버스',
+  title: '가상 주식 종목 비교',
   description: '월덕 머니버스 가상 주식 2~3개를 현재가, 시가 대비 변동, 일중 범위, 거래 가능 수량으로 비교합니다.',
   robots: { index: false, follow: false },
 };

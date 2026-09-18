@@ -22,7 +22,7 @@ import { formatDay } from '@/lib/money';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: '월덕 머니버스 — Discord 커뮤니티 가상경제와 게임 보상',
+  title: { absolute: '월덕 머니버스 — Discord 커뮤니티 가상경제와 게임 보상' },
   description:
     'Discord 커뮤니티 활동을 기록하고 WLD 보상, 게임 상점, 시즌 이벤트를 함께 이용하는 월덕 머니버스입니다.',
   alternates: { canonical: '/' },

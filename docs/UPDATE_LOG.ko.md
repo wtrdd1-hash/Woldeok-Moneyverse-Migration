@@ -2,6 +2,13 @@
 
 [English](UPDATE_LOG.md) | **한국어** | [문서 색인](INDEX.ko.md)
 
+## v2026.09.18.212 — 전체 UI QA 및 브라우저 호환성 강화
+
+- 브랜치: `fix/ui-full-qa-v2026.09.18.212`, 정확한 기준 `d6d2798535894c54854135c23e37d972d267baa1`.
+- 삭제/법적 문서/상점의 280px grid min-content overflow, 모바일 상점 검색 focus 확대, site brand title 중복, Gallery AdSense 보조 script CSP 차단을 수정했습니다.
+- QA: 타깃 회귀 15/15, frontend 71개 파일/623개 테스트, typecheck/build 통과, lint 오류 0건. 300개 반응형 browser 조합에서 redirect race 재검증 후 확인 UI 결함 0건입니다.
+- Runtime 승격은 Test 우선 frontend-only이며 backend/DB는 변경하지 않습니다.
+
 ## v2026.09.18.201 — 모바일 반응형 UI QA 및 가로 넘침 방지 강화
 
 - 브랜치: `fix/ui-responsive-qa-v2026.09.18.201`, v200 권위 기획/main 기준에서 작업했습니다.

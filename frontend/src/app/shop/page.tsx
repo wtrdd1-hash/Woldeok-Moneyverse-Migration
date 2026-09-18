@@ -53,8 +53,8 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   const avatarUrl = profileData?.avatarUrl;
 
   return (
-    <div className="grid gap-8 pb-16">
-      <div className="grid gap-4">
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8 pb-16">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-4">
         <PageHeader
           eyebrow="WOLDEOK MARKET · STORE 2.0"
           title={
@@ -73,14 +73,14 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
           />
         </PageHeader>
 
-        <form action="/shop" method="get" className="flex w-full max-w-2xl gap-2" role="search">
+        <form action="/shop" method="get" className="flex min-w-0 w-full max-w-2xl gap-2" role="search">
           <input
             type="search"
             name="q"
             defaultValue={query}
             placeholder="상품명, 설명, 카테고리 검색"
             aria-label="상점 검색"
-            className="min-w-0 flex-1 rounded-xl border border-border bg-card px-4 py-2 text-sm outline-none focus:border-amber-500"
+            className="min-w-0 flex-1 rounded-xl border border-border bg-card px-4 py-2 text-base outline-none focus:border-amber-500 md:text-sm"
           />
           <Button type="submit">
             <T korean="검색" english="Search" />

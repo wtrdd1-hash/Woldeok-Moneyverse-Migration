@@ -12,7 +12,7 @@ import { LoginProvidersView } from './login-providers-view';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: '로그인 · 월덕 머니버스',
+  title: '로그인',
   robots: { index: false, follow: false },
 };
 

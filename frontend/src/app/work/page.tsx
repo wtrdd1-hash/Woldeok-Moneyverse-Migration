@@ -44,7 +44,7 @@ export const dynamic = 'force-dynamic';
 const RECEIPTS_ON_WORK = 5;
 
 export const metadata: Metadata = {
-  title: '직업 및 업무 — 월덕 머니버스 전문 직업 2.0',
+  title: '직업 및 업무 — 전문 직업 2.0',
   description: '8대 전문 직업군으로 자유롭게 전직하고 업무를 수행하여 WLD와 경험치를 획득하세요.',
   robots: { index: false, follow: false },
 };
