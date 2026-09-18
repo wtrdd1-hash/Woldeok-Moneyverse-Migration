@@ -2,12 +2,27 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.18.219
+> Current integrated version: v2026.09.18.220
 > Implementation/evidence sync: 2026-09-18
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+## 회차 델타 — v2026.09.18.220 (2026-09-18)
+
+### 14:57 authority, persistent DNS/DR, SEO, security and economics refresh
+
+- **Authority / CI — P1 OPEN:** authoritative `main` is `f125e4791f4757d3d432f470c569e4c72860fc70`, containing synchronized v219. Combined status has zero statuses and no PR-triggered workflow run is attached. This is commit-level evidence only; do not infer unread repository rules. Completion requires readable rules/protection, required classifier/policy/runtime/security checks, and negative proof that a deliberately failing required check blocks merge.
+- **HIGH network/dependency — `OBS-NET-216-01`, reproduced 14:57 KST / IN PROGRESS:** backend/frontend/backup timer are active and timer enabled. Host-local `woldeok.com` resolution still fails and canonical HTTPS `/api/version` returns curl(6), while loopback `127.0.0.1:3002/api/version` is HTTP 200 + `Cache-Control: no-store`, backend `75e69e77cdc18ef221106a008563151a4c790728`; prior-hour warning journal is empty. Collect resolver config, A/AAAA+rcode+latency, UDP/TCP53, authoritative NS, two external vantages, TLS/SNI and HTTP manifest. Acceptance: 30 consecutive DNS+TLS+HTTP successes per two vantages, zero false NXDOMAIN/SERVFAIL, auth/payment dependency resolution and delivered alert. Never bypass TLS or restart healthy app units as a DNS workaround.
+- **P0 DR / release authority:** latest verified backup remains 12:22:44→12:22:46 encrypted archive + `database.dump` + `photos.tar.zst` + `manifest.txt`; next trigger 18:29:25. `BAK-RUNTIME-177-01` stays P0 until isolated newest-archive decrypt+restore, schema/migration equality, identity/session/inventory/entitlement/ledger/reward/bank/loan/stock/casino/community/referral/audit reconciliation, measured RPO/RTO, off-host immutable retention and delivered failure alert. `REL-AUTH-184-01` requires component-scoped source SHAs, artifact digests, migration/schema/config revisions and rollback deployment.
+- **SEO / SEO backend — DIRECT ADOPT:** current Google Search Central updates add Sep-16 Search profile badge, Sep-8 regional Search eligibility and Aug-28 site-reputation enforcement. Treat these as eligibility, never ranking guarantees. One server-owned record `{engine,market,locale,pageType,indexEligibility,canonicalOwner,contentOwner,editorialControl,sponsorType,schemaEligibility,lastVerifiedAt}` drives sitemap/robots/canonical/structured-data eligibility. Public profile/community/gallery/catalog/help/durable-search require publication+moderation+quality; private/account/admin/transaction and unstable facet/cursor URLs stay noindex/excluded. Third-party/sponsored low-control sections remain noindex until site-reputation review passes.
+- **Security — DIRECT ADOPT (OWASP ASVS 5.0.0):** backlog/tests pin versioned identifiers (`v5.0.0-...`) to prevent requirement-number drift. V13.2.1/V13.2.2 require individual service accounts/short-lived tokens/certificates and least privilege outside the user-session mechanism. Each feature threat row links prerequisite→preventive control→detective telemetry→versioned requirement→negative test→residual risk. BOLA/BFLA, revoked-session replay, duplicate economic assets, invalid webhook, privileged mass assignment, service-token boundary bypass, DB overreach, injection/upload/SSRF escape or secret/PII logging blocks promotion.
+- **Monetization / unit economics:** Google Play still separates updated EEA/UK/US cohorts from remaining markets before global rollout. Orders/refunds immutably snapshot `{market,effectiveDate,installCohort,transactionType,programme,billingPath,feePolicyVersion,gross,platformFee,billingFee,tax,refundReserve}`. All SKU scenarios include fraud, infra, storage/CDN, notification, moderation and support. Unmeasured revenue/net revenue/margin/ARPU/ARPDAU/ARPPU/conversion/retention/churn/refund/CAC/LTV/payback/fraud/D1/D7/D30 remain `HYPOTHESIS/TEST TARGET`; scale only with positive contribution and intact fairness/privacy/retention/support/fraud guardrails.
+- **All-feature executable contract / QA:** existing auth, profile, inventory/collection, commerce, progression/economy, business/bank/loan, stock, casino, community/moderation, social/referral, notifications/search/upload/public content, App API, admin/audit, DR, analytics/experiments, ads, SEO and incident contracts remain authoritative with implementation evidence, UX states, RBAC/BOLA, API/error/idempotency/rate-limit, DB constraints/concurrency, audit/fallback/DR, privacy/abuse, KPI/cache/performance, unit/integration/E2E/real-DB/security/regression and exact-SHA Test→main→Production smoke/rollback gates.
+
+### v220 worklog / acceptance order
+Fresh Google Search + OWASP ASVS + Google Play official research → exact main/plans/status → Debian runtime/DNS/version/timer/journal/backup evidence → executable delta → mid-work exact-main recheck → synchronized EN/KO → diff check → isolated planning branch/PR/CI. No runtime code, DNS or Production DB change.
 
 ## Cycle delta — v2026.09.18.219 (2026-09-18)
 
