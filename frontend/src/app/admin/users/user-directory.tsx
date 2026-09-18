@@ -32,16 +32,24 @@ import { compareAmounts, groupDigits } from '@/lib/money';
 import type { AdminUser } from '../types';
 
 type StatusFilter = 'all' | 'active' | 'restricted';
-type SortOption = 'wealth' | 'cash' | 'stock' | 'created';
+type SortOption = 'wealth' | 'cash' | 'stock' | 'lastSeen' | 'created';
+
+function accessEpoch(value: string | null | undefined): number {
+  if (!value) return 0;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
 
 function accessTime(value: string | null | undefined): string {
-  if (!value) return '기록 없음';
+  if (!value || accessEpoch(value) === 0) return '기록 없음';
   return new Date(value).toLocaleString('ko-KR', {
     timeZone: 'Asia/Seoul',
+    year: 'numeric',
     month: '2-digit',
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
+    second: '2-digit',
     hour12: false,
   });
 }
@@ -85,6 +93,11 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
         }
         if (sort === 'stock') {
           const order = compareAmounts(b.stock_eval ?? '0', a.stock_eval ?? '0');
+          if (order !== 0) return order;
+          return a.display_name.localeCompare(b.display_name, 'ko-KR');
+        }
+        if (sort === 'lastSeen') {
+          const order = accessEpoch(b.last_seen_at) - accessEpoch(a.last_seen_at);
           if (order !== 0) return order;
           return a.display_name.localeCompare(b.display_name, 'ko-KR');
         }
@@ -203,6 +216,15 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
               <Button
                 type="button"
                 size="xs"
+                variant={sort === 'lastSeen' ? 'default' : 'ghost'}
+                onClick={() => setSort('lastSeen')}
+                className="h-7 text-xs font-medium"
+              >
+                🕒 최근 접속 순
+              </Button>
+              <Button
+                type="button"
+                size="xs"
                 variant={sort === 'created' ? 'default' : 'ghost'}
                 onClick={() => setSort('created')}
                 className="h-7 text-xs font-medium"
@@ -271,6 +293,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                     <TableHead>회원 정보</TableHead>
                     <TableHead className="text-right font-bold">총 순자산</TableHead>
                     <TableHead>자산 세부 구성</TableHead>
+                    <TableHead>최근 접속</TableHead>
                     <TableHead className="text-center">상태</TableHead>
                     <TableHead className="text-right">관리 조치</TableHead>
                   </TableRow>
@@ -305,12 +328,6 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                             <code className="truncate font-mono text-[0.68rem] text-muted-foreground">
                               {user.user_id}
                             </code>
-                            <span className="mt-1 text-[0.68rem] text-muted-foreground">
-                              로그인 {accessTime(user.last_login_at)} · 최근 접속 {accessTime(user.last_seen_at)}
-                            </span>
-                            <span className="text-[0.68rem] text-muted-foreground">
-                              관리자 페이지 {accessTime(user.last_admin_at)}
-                            </span>
                           </div>
                         </TableCell>
 
@@ -350,6 +367,17 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                           </div>
                         </TableCell>
 
+                        {/* 최근 접속 / 로그인 시각 */}
+                        <TableCell className="col-span-2 p-0 md:table-cell md:p-2">
+                          <div className="grid gap-1.5 text-[0.72rem]">
+                            <AccessTimestamp label="최근 접속" value={user.last_seen_at} emphasis />
+                            <AccessTimestamp label="마지막 로그인" value={user.last_login_at} />
+                            {user.last_admin_at && (
+                              <AccessTimestamp label="관리자 접속" value={user.last_admin_at} />
+                            )}
+                          </div>
+                        </TableCell>
+
                         {/* 이용 상태 및 제재 사유 */}
                         <TableCell className="col-span-1 p-0 text-left md:table-cell md:p-2 md:text-center">
                           <Badge variant={restricted ? 'destructive' : 'secondary'} className="text-[0.7rem]">
@@ -379,6 +407,35 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
           )}
         </CardContent>
       </Card>
+    </div>
+  );
+}
+
+function AccessTimestamp({
+  label,
+  value,
+  emphasis = false,
+}: {
+  readonly label: string;
+  readonly value: string | null | undefined;
+  readonly emphasis?: boolean;
+}) {
+  const formatted = accessTime(value);
+
+  return (
+    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+      <span className="font-semibold text-muted-foreground">{label}</span>
+      {value && accessEpoch(value) > 0 ? (
+        <time
+          dateTime={value}
+          title={value}
+          className={emphasis ? 'font-semibold text-foreground' : 'text-muted-foreground'}
+        >
+          {formatted}
+        </time>
+      ) : (
+        <span className="text-muted-foreground">기록 없음</span>
+      )}
     </div>
   );
 }
