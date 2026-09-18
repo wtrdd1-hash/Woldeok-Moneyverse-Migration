@@ -67,6 +67,26 @@ This table describes the Kubernetes recovery target recorded before the current 
 
 The current public recovery topology has **separate Test and Production systemd services** on the Debian authority. `test.easy-scraping.com` is active and is the exact-SHA release gate before Production. The GitOps repository also declares a `wdmv-test` target. Historical notes saying Test was removed or returns 404 are obsolete as of v2026.09.16.151.
 
+### Boot continuity rule — v2026.09.18.215
+
+On the authorized Debian 13 Production host, a host boot/reboot must restore the Moneyverse runtime automatically. Keep these units enabled and verify that they are active after boot: `moneyverse-backend.service`, `moneyverse-frontend.service`, `moneyverse-discord-bot.service`, `moneyverse-economy-ai.service`, `moneyverse-mcp.service`, and `docker.service`.
+
+The Discord bot is part of the boot contract, not an optional operator step. Its systemd unit is enabled for `multi-user.target` with automatic restart. After a boot or bot restart, verify the journal shows a successful bot login and an initial voice connection becoming ready in target voice channel `1536572442422550538`. The bot voice watchdog must continue to rejoin if the Discord voice connection is dropped.
+
+Operator verification:
+
+```bash
+systemctl is-enabled moneyverse-backend.service moneyverse-frontend.service \
+  moneyverse-discord-bot.service moneyverse-economy-ai.service \
+  moneyverse-mcp.service docker.service
+systemctl is-active moneyverse-backend.service moneyverse-frontend.service \
+  moneyverse-discord-bot.service moneyverse-economy-ai.service \
+  moneyverse-mcp.service docker.service
+journalctl -u moneyverse-discord-bot.service -n 80 --no-pager
+```
+
+On 2026-09-18 this contract was re-verified on the authorized Debian 13 host: all six units were enabled and active, the frontend answered HTTP 200 on its active runtime port, and the Discord bot journal showed successful login plus voice-ready state for the configured target channel.
+
 Other namespaces on the same node run unrelated services (`mail`, `economy`,
 `launcher`, `discord`, `cloudflared`, `gpt-plugin`). Do not assume the cluster
 is yours alone.
