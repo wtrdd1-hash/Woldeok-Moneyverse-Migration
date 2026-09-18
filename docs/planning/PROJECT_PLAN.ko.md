@@ -2,11 +2,27 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.221
+> **현재 통합 버전:** v2026.09.18.222
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+
+## 회차 델타 — v2026.09.18.222 (2026-09-18)
+
+### 16:10 최신 권위/런타임 + 인증·SEO 릴리스 게이트 정교화
+
+- **증거 순서 완료:** Google Search Central, Naver Search Advisor 리소스/robots/사이트상태, OWASP Top 10:2025 A07·ASVS 5.0.0 최신 공식자료 조사 → exact `main`/두 기획서/CI → Debian 런타임 probe → 실행가능 delta → 작업 중간 `main` 재확인 → EN/KO 동기화. 2026-09-18 확인 출처: https://developers.google.com/search/updates, https://searchadvisor.naver.com/guide/resource-and-link, https://searchadvisor.naver.com/guide/seo-basic-robots, https://searchadvisor.naver.com/guide/site-summary, https://top10.owasp.org/2025/A07_2025-Authentication_Failures/, https://owasp.org/projects/asvs.
+- **P1 CI 권위 / OPEN:** 시작·중간 `main`=`a622dadaaa68881ed38846ca1d7469d957c4afc2`(v221 동기화), combined status는 계속 **0개**다. 이는 commit-status enforcement 가시성 부재 증거이지 모든 repository rule 부재 증명은 아니다. `CI-ENFORCE-204-01`: change-classifier+docs-sync+runtime/API/DB/security check required, 감사되는 emergency bypass만 허용, 의도적 실패 required check가 merge를 막는 negative-control PR을 증명한다. 수용: exact-SHA check가 visible+required; 잘못된 ruleset만 rollback; bypass/direct-push/missing-context/check latency 관측.
+- **HIGH `OBS-NET-216-01` / 16:10 KST 재현 / IN PROGRESS:** backend/frontend/backup timer active, timer enabled. Host-local `woldeok.com`은 주소 없음, canonical HTTPS `/api/version`은 `curl(6)`; loopback `127.0.0.1:3002/api/version`은 HTTP 200 + `Cache-Control: no-store`, backend id `75e69e77cdc18ef221106a008563151a4c790728`; 직전 1시간 warning journal 0건; 다음 backup 18:29:25 KST. 영향은 canonical reachability/dependency 증거이며 앱 프로세스 장애는 입증되지 않았다. Resolver config→A/AAAA rcode+latency→UDP/TCP53→authoritative NS→외부 2 vantage→TLS/SNI→HTTP component manifest 순으로 진단한다. Host-only면 앱 재시작 없이 resolver/egress 복구, authoritative면 promotion 동결→last-known-good DNS→TTL 관측→multi-network smoke. 수용: 두 vantage 각각 DNS+TLS+HTTP 30회 연속 성공, false NXDOMAIN/SERVFAIL 0, auth/payment dependency resolution, 실제 alert 전달. insecure HTTP/TLS 우회 금지.
+- **P0 DR 승격차단 유지:** archive verify는 restore proof가 아니다. `BAK-RUNTIME-177-01`은 최신 archive isolated decrypt+restore, schema/migration-set equality, identity/session/inventory/entitlement/ledger/reward/bank/loan/stock/casino/community/referral/audit reconciliation, 실측 RPO/RTO, off-host immutable retention, 실제 failure alert가 완료조건이다. 증거 전 destructive migration/economy release 금지.
+- **인증/세션 보안 — 직접채택:** OWASP Top 10:2025 A07은 취약 recovery, MFA 누락/무효, unsafe session-ID 노출, login 후 session ID 미회전, logout/idle session 미무효화, token scope/audience 미검증을 명시한다. Signup/login/OAuth/logout/security-center/admin은 인증·권한상승 시 session rotate, issuer/audience/scope/expiry 검증, logout/password-reset/account-lock 시 server-side revoke, browser session은 HttpOnly+Secure+SameSite cookie, account+IP/device-risk rate limit, single-use short-lived recovery, 민감 account/admin/economy action re-auth/MFA를 요구한다. Negative test: fixed-session reuse, revoked-token replay, cross-audience token, expired recovery token, credential stuffing, MFA fallback bypass. 성공하면 HIGH/CRITICAL 배포차단; raw token/secret 없이 actor/session hash/risk/result 감사로그.
+- **SEO/SEO backend — 직접채택:** Google은 non-200 응답이 정상 JavaScript rendering 대상이 아닐 수 있음을 명시하고, Naver는 render-critical resource crawlability, root `robots.txt`의 유효 2xx text 응답, sitemap reachability, HTTPS/certificate health, unique title/description을 요구한다. `seo_render_probe`에 server response의 primary public content+crawlable `<a href>`, critical JS/CSS/image fetchability, robots MIME/status, sitemap 200, HTTPS redirect/certificate, canonical/hreflang/JSON-LD parity, 정확한 200/301/308/404/410을 검증한다. Private/account/admin/transaction은 인증보호+noindex+sitemap 제외이며 robots는 privacy boundary가 아니다. Private indexing, public accidental noindex, critical resource 차단, canonical drift, soft-404, sitemap non-200, mixed HTTP, crawler/user mismatch는 승격차단.
+- **전체 기능 계약·사업성:** auth/profile/inventory/collection/shop/cart/payment/subscription/ad-removal/progression/business/bank/loan/stock/casino/community/social/referral/notification/search/upload/public/App API/admin/audit/DR/analytics/ads/SEO/incident 전 기능은 구현근거+UX 상태+RBAC/BOLA+API/error/idempotency/rate-limit+DB constraint/transaction/concurrency+audit/fallback/DR+privacy/abuse+KPI/performance/cache+unit/integration/E2E/real-DB/security/regression+exact-SHA Test→main→Production smoke/rollback을 유지한다. 미실측 revenue/net revenue/margin/ARPU/ARPDAU/ARPPU/conversion/retention/churn/refund/CAC/LTV/payback/fraud/infra/support/D1/D7/D30은 `HYPOTHESIS/TEST TARGET`; SKU unit economics는 market/cohort/fee/tax/refund 가정을 snapshot하고 positive contribution+fairness/privacy/retention/fraud guardrail 통과 시에만 scale한다.
+
+### v222 작업로그 / 개발 순서
+P0 restore proof+release identity → HIGH DNS/dependency proof → auth/session negative controls → CI enforcement proof → SEO render/index probe → monetization/feature backlog. 이번 회차는 문서만 변경하며 runtime code, DNS, Production DB는 건드리지 않는다.
 
 
 ## 회차 델타 — v2026.09.18.221 (2026-09-18)
