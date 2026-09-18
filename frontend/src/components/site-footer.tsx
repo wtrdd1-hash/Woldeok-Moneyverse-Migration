@@ -20,17 +20,17 @@ export function SiteFooter() {
       <div className="mx-auto w-full max-w-[1180px] px-6">
         <div className="flex flex-col items-start justify-between gap-6 border-b py-9 sm:flex-row sm:items-center">
           <Brand />
-          <nav aria-label={en ? 'Footer menu' : '하단 메뉴'} className="flex flex-wrap gap-x-6 gap-y-2 text-xs font-bold">
-            <Link href="/terms" className="hover:text-forest-soft">
+          <nav aria-label={en ? 'Footer menu' : '하단 메뉴'} className="flex flex-wrap gap-x-2 gap-y-1 text-xs font-bold sm:gap-x-3">
+            <Link href="/terms" className="inline-flex min-h-11 items-center px-2 hover:text-forest-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
               {en ? 'Terms' : '이용약관'}
             </Link>
-            <Link href="/privacy" className="hover:text-forest-soft">
+            <Link href="/privacy" className="inline-flex min-h-11 items-center px-2 hover:text-forest-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
               {en ? 'Privacy' : '개인정보처리방침'}
             </Link>
-            <Link href="/status" className="hover:text-forest-soft">
+            <Link href="/status" className="inline-flex min-h-11 items-center px-2 hover:text-forest-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
               {en ? 'Service status' : '서비스 상태'}
             </Link>
-            <Link href="/announcements" className="hover:text-forest-soft">
+            <Link href="/announcements" className="inline-flex min-h-11 items-center px-2 hover:text-forest-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
               {en ? 'Updates' : '운영 소식'}
             </Link>
           </nav>
