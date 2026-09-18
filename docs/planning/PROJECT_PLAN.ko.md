@@ -2,11 +2,22 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.19.237
+> **현재 통합 버전:** v2026.09.19.238
 > **구현·증거 동기화:** 2026-09-19
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 델타 — v2026.09.19.238 (2026-09-19)
+
+### 02:05 모바일 보안·CI·런타임 증거 갱신
+- **권위 / 브랜치 상태:** 시작과 필수 중간 재확인 모두 authoritative `main=f5aeec3a6460a209f8617efaa369f7ee5310c5e1`(v237)이며 열린 PR은 관측되지 않았다. Main은 protected지만 required-status enforcement가 `off`, required context/check가 0개이고 exact-main combined status도 0개다. 따라서 `CI-ENFORCE-204-01`은 P1 OPEN이다. Exact-head classifier/policy/runtime/security check를 required로 만들고, 의도적으로 실패하는 auth/economy/AI/mobile-security negative-control PR이 이름·만료·감사기록이 있는 bypass 없이는 실제 merge되지 않는 증명이 완료조건이다.
+- **런타임 / HIGH `OBS-NET-216-01` 02:05 KST 재현:** backend/frontend/backup timer/Economy AI service는 active이고 backup timer는 enabled다. Host-local canonical `https://woldeok.com/api/version`은 DNS 실패(`curl(6)`, HTTP 000)가 계속되며 loopback `127.0.0.1:3002/api/version`은 HTTP 200, backend id `75e69e77cdc18ef221106a008563151a4c790728`을 반환한다. 정상 application unit은 재시작하지 않는다. Resolver→authoritative DNS→독립 외부 2 vantage→TLS/SNI→HTTP/callback dependency 증명과 실제 alert 전달을 수용 gate로 유지한다.
+- **모바일 보안 / 직접채택:** OWASP MASWE v1.0.0이 2026-08-17 stable로 출시되어 STORAGE/CRYPTO/AUTH/NETWORK/PLATFORM/CODE/RESILIENCE/PRIVACY 8개 범주에 78개 안정 ID를 제공하며 MASTG v2.0.0은 `MASVS control → MASWE weakness → MASTG test` 추적성을 제공한다. App API/mobile 릴리스 증거에 `MobileSecurityEvidence={platform,appVersion,buildSha,masvsControl,masweId,mastgTest,testResult,artifactRef,checkedAt}`를 추가한다. P1 최소 백로그는 로컬 token/session 안전저장, backup/screenshot/clipboard/privacy 유출, TLS/trust와 cleartext negative test, deep-link/intent/custom-scheme 권한, WebView/JS bridge와 exported component 노출, dependency/debuggable/log secret, root/jailbreak/tamper 잔여위험, 개인정보 최소수집이다. 모바일 클라이언트가 payment/entitlement/ledger/reward/bank/loan/stock/casino/admin mutation을 승인하는 권위가 되어서는 안 되며 서버 subject-resource-action authorization과 idempotency가 최종 권위다.
+- **모바일 QA / 승격 gate:** 지원 Android/iOS build마다 exact app SHA + backend/API contract SHA를 매핑하고 인증 Test E2E로 login/logout/revocation, deep link, offline/retry, upload, payment/subscription callback, 경제 replay를 검증한다. MASWE-linked negative test는 debug가 아닌 release build에서 실행한다. Cleartext transport, 복구 가능한 secret/token 유출, exported privileged component/deep-link auth bypass, WebView bridge 권한탈출, revoked-session replay, cross-account/BOLA, duplicate economic mutation은 Production 차단이다. Rollback은 마지막 호환 app/backend/schema tuple을 사용하고 revoked session이나 stale entitlement를 되살리면 안 된다.
+- **P0/P1 연속성:** `BAK-RUNTIME-177-01`은 최신 backup 격리 restore+reconciliation+실측 RPO/RTO+off-host immutable retention+실제 failure alert 전까지 P0 BLOCKED다. v236 AI/economy 권한봉쇄와 exact-main 인증 admin/mobile/migration-205 concurrency 검증도 P0/P1 후속으로 유지하며 Production `economy_auto_policy`는 기존 증거 gate 통과 전까지 disabled다.
+- **SEO/광고 증거 신선도:** Google Search Central의 2026년 9월 최신 변경에는 지역별 Search experience eligibility와 Search profile 문서 추가가 유지된다. Rich-result 가능성을 전역으로 가정하지 않고 engine+market+feature eligibility를 버전화한다. 공개 SSR/ISR canonical/robots/sitemap/hreflang/화면일치와 crawler-family 분리를 유지하고 private/admin/security/transaction은 인증+noindex를 유지한다.
+- **순서:** P0 restore + AI/economy 권한봉쇄 → HIGH DNS 증거 → P1 exact-main CI negative-control enforcement → P1 MASWE-linked mobile/App-API 보안증거 + 인증 Test QA → SEO/ad probe → 실측 commerce/growth. Planning-only; runtime/DNS/ledger/policy/Production DB 변경 없음.
 
 ## 회차 델타 — v2026.09.19.237 (2026-09-19)
 
