@@ -2,11 +2,26 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.18.225
+> **현재 통합 버전:** v2026.09.18.226
 > **구현·증거 동기화:** 2026-09-18
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+
+## 회차 델타 — v2026.09.18.226 (2026-09-18)
+
+### 19:08 권위/런타임 + 한영 동기화 + 커머스 정책 강화
+- **레퍼런스 우선 / 직접채택:** Apple Small Business Program(자격 paid app/IAP 15%), Apple 2026 지역별 계약 변경, Google Play 2026 install cohort/transaction별 수수료, OWASP API Security Top 10을 먼저 재확인했다. 플랫폼 경제정책은 `{platform,storefront,market,installCohort,transactionType,programmeEnrollment,billingPath,effectiveAt}`로 effective-dated resolve하며 전역 수수료 상수는 금지한다. 정책 변경은 출처 URL/확인일, 4-eyes 승인, simulation, settlement immutable snapshot, 이미 정산된 주문을 재작성하지 않는 이전 정책버전 rollback을 요구한다.
+- **저장소 권위 / P0 문서동기화 결함:** 시작·중간 `origin/main=4497b1fae9a968b4c80cc26f3262feb2bb86a929`(v225). 영문에는 v225 delta가 있으나 한국어는 header만 v225이고 해당 delta가 누락돼 실제 bilingual drift가 확인됐다. `DOC-SYNC-226-01`을 HIGH로 두고 두 문서의 current version과 회차 핵심결정이 동등해야 완료한다. CI는 version header 파싱, planning version bump 시 EN/KO 동시변경, 동일 cycle heading/version 존재를 검사하고 한쪽 delta 누락 시 PR을 실패시킨다.
+- **런타임 증거 / HIGH `OBS-NET-216-01`:** canonical unit은 `moneyverse-backend.service`, `moneyverse-frontend.service`이며 둘 다 active/running. `moneyverse-backup.timer` active, 다음 trigger 2026-09-19 00:20:41 KST. host-local `woldeok.com`은 여전히 resolve되지 않고 canonical HTTPS `/api/version`은 curl(6)/HTTP 000이지만 loopback `127.0.0.1:3002/api/version`은 HTTP 200/no-store다. 직전 1시간 backend warning journal은 비어 있다. resolver→authoritative DNS→외부 vantage→TLS/SNI→HTTP 순으로 진단하며 정상 app unit 재시작은 금지한다. 수용조건은 독립 2 vantage 각각 DNS+TLS+HTTP 30회 연속 성공, false NXDOMAIN/SERVFAIL 0, auth/payment dependency resolution, 실제 alert 전달이다.
+- **P0 DR:** 18:29:36→18:29:38 KST encrypted backup과 `database.dump`, `photos.tar.zst`, `manifest.txt` 검증은 OK다. 이는 artifact integrity일 뿐 recoverability 증거가 아니다. `BAK-RUNTIME-177-01`은 isolated decrypt/restore, schema+migration equality, auth/session/inventory/entitlement/ledger/reward/bank/loan/stock/casino/community/referral/audit reconciliation, 실측 RPO/RTO, off-host immutable retention, 실제 failure alert 전까지 BLOCKED다.
+- **보안/API:** OWASP API Top 10의 BOLA, broken authentication, property authorization, resource consumption, sensitive-business-flow abuse를 전체 route에 적용한다. 모든 object route는 read/write 전에 subject/resource/action 권한검사, response DTO allowlist, request/page/upload/batch/work-unit/time/concurrency budget, payment/reward/inventory/bank/loan/referral mutation idempotency를 갖추고 cross-account ID, mass assignment, replay, reward duplication, quota bypass negative test를 통과해야 한다. 자산중복·타계정 접근·인증우회·무제한 경제 mutation은 HIGH/CRITICAL 승격차단이다.
+- **커머스/사업 KPI:** SKU/order/refund마다 gross, tax, platform/service/billing fee, refund reserve, fraud loss allocation, infra/storage/CDN/notification/support allocation, net revenue, contribution margin을 snapshot한다. 실측 전 attach/paid conversion/repeat/renewal/churn/refund/ARPU/ARPDAU/ARPPU/CAC/LTV/payback/D1/D7/D30은 `HYPOTHESIS/TEST TARGET`이다. incremental contribution이 양수이면서 retention/fairness/complaint/fraud/support guardrail을 악화시키지 않을 때만 scale하고 아니면 iterate/kill한다.
+- **전체기능 계약:** 기존 auth/profile/security-center/inventory/collection/shop/cart/payment/subscription/ad-removal/progression/business/bank/loan/stock/casino/community/social/notification/search/upload/public/App API/admin/audit/DR/analytics/ads/SEO/incident 명세는 계속 권위다. 각 backlog는 구현상태/근거, UX 상태, RBAC/BOLA, API+error+idempotency+rate limit, DB constraint/index/transaction/concurrency, audit/observability, fallback/flag/DR/privacy/abuse, SEO, performance/cache, 분석+재무 KPI, unit/integration/E2E/real-DB/security/regression, exact-SHA Test→main→Production smoke/rollback gate를 명시한다.
+
+### v226 작업로그
+P0 restore proof → HIGH 한영 문서동기화 + DNS/dependency 증거 → HIGH auth/economy negative control → P1 required-check enforcement → SEO render/crawler probe → 실측 commerce/growth experiment. 기획 전용이며 runtime code, DNS, Production DB는 변경하지 않는다.
 
 
 ## 회차 델타 — v2026.09.18.224 (2026-09-18)
