@@ -69,7 +69,7 @@ The current public recovery topology has **separate Test and Production systemd 
 
 ### Boot continuity rule — v2026.09.18.215
 
-On the authorized Debian 13 Production host, a host boot/reboot must restore the Moneyverse runtime automatically. Keep these units enabled and verify that they are active after boot: `moneyverse-backend.service`, `moneyverse-frontend.service`, `moneyverse-discord-bot.service`, `moneyverse-economy-ai.service`, `moneyverse-mcp.service`, and `docker.service`.
+On the authorized Debian 13 Production host, a host boot/reboot must restore the Moneyverse runtime automatically. Keep these units enabled and verify that they are active after boot: `moneyverse-backend.service`, `moneyverse-frontend.service`, `moneyverse-discord-bot.service`, `moneyverse-economy-ai.service`, `moneyverse-mcp.service`, `docker.service`, `nginx.service`, and the repository GitHub Actions runner service. The Production PostgreSQL container bound at host port `5433` must keep Docker restart policy `unless-stopped`; short-lived QA database containers on `554xx` ports are not part of the Production boot contract.
 
 The Discord bot is part of the boot contract, not an optional operator step. Its systemd unit is enabled for `multi-user.target` with automatic restart. After a boot or bot restart, verify the journal shows a successful bot login and an initial voice connection becoming ready in target voice channel `1536572442422550538`. The bot voice watchdog must continue to rejoin if the Discord voice connection is dropped.
 
@@ -81,11 +81,13 @@ systemctl is-enabled moneyverse-backend.service moneyverse-frontend.service \
   moneyverse-mcp.service docker.service
 systemctl is-active moneyverse-backend.service moneyverse-frontend.service \
   moneyverse-discord-bot.service moneyverse-economy-ai.service \
-  moneyverse-mcp.service docker.service
+  moneyverse-mcp.service docker.service nginx.service
 journalctl -u moneyverse-discord-bot.service -n 80 --no-pager
+docker inspect -f '{{.HostConfig.RestartPolicy.Name}} {{.State.Status}}' \
+  woldeok-moneyverse-dev-db-1
 ```
 
-On 2026-09-18 this contract was re-verified on the authorized Debian 13 host: all six units were enabled and active, the frontend answered HTTP 200 on its active runtime port, and the Discord bot journal showed successful login plus voice-ready state for the configured target channel.
+On 2026-09-18 this contract was re-verified on the authorized Debian 13 host: all six core Moneyverse units plus Nginx and the GitHub Actions runner were enabled and active, the Production PostgreSQL container was running with `unless-stopped`, the public Production and Test origins answered HTTP 200, backend `/health` answered HTTP 200, and the Discord bot journal showed successful login plus voice-ready state for the configured target channel.
 
 Other namespaces on the same node run unrelated services (`mail`, `economy`,
 `launcher`, `discord`, `cloudflared`, `gpt-plugin`). Do not assume the cluster
