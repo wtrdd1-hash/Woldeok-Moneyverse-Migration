@@ -62,7 +62,7 @@
 
 ### 부팅 연속성 규칙 — v2026.09.18.215
 
-승인된 Debian 13 Production 호스트는 전원 재인가 또는 재부팅 뒤 Moneyverse 런타임을 자동 복구해야 합니다. 다음 unit은 항상 enabled 상태를 유지하고 부팅 후 active인지 확인합니다: `moneyverse-backend.service`, `moneyverse-frontend.service`, `moneyverse-discord-bot.service`, `moneyverse-economy-ai.service`, `moneyverse-mcp.service`, `docker.service`.
+승인된 Debian 13 Production 호스트는 전원 재인가 또는 재부팅 뒤 Moneyverse 런타임을 자동 복구해야 합니다. 다음 unit은 항상 enabled 상태를 유지하고 부팅 후 active인지 확인합니다: `moneyverse-backend.service`, `moneyverse-frontend.service`, `moneyverse-discord-bot.service`, `moneyverse-economy-ai.service`, `moneyverse-mcp.service`, `docker.service`, `nginx.service`, 저장소 GitHub Actions runner service. 호스트 `5433`에 연결된 Production PostgreSQL 컨테이너는 Docker restart policy `unless-stopped`를 유지해야 하며, `554xx` 포트의 단기 QA DB 컨테이너는 Production 부팅 필수 대상이 아닙니다.
 
 Discord 봇은 선택적인 수동 작업이 아니라 부팅 계약의 일부입니다. systemd에서 `multi-user.target` 자동 시작 및 자동 재시작을 유지합니다. 서버 부팅 또는 봇 재시작 뒤 journal에서 봇 로그인 성공과 대상 음성 채널 `1536572442422550538`의 초기 연결 ready 상태를 확인합니다. Discord 음성 연결이 끊기면 봇 voice watchdog이 자동 재입장해야 합니다.
 
@@ -74,11 +74,13 @@ systemctl is-enabled moneyverse-backend.service moneyverse-frontend.service \
   moneyverse-mcp.service docker.service
 systemctl is-active moneyverse-backend.service moneyverse-frontend.service \
   moneyverse-discord-bot.service moneyverse-economy-ai.service \
-  moneyverse-mcp.service docker.service
+  moneyverse-mcp.service docker.service nginx.service
 journalctl -u moneyverse-discord-bot.service -n 80 --no-pager
+docker inspect -f '{{.HostConfig.RestartPolicy.Name}} {{.State.Status}}' \
+  woldeok-moneyverse-dev-db-1
 ```
 
-2026-09-18 승인된 Debian 13 호스트에서 이 계약을 재검증했습니다. 6개 unit 모두 enabled/active였고, 활성 프론트엔드 런타임 포트가 HTTP 200을 반환했으며, Discord 봇 journal에서 로그인 성공과 설정된 대상 음성 채널의 voice-ready 상태를 확인했습니다.
+2026-09-18 승인된 Debian 13 호스트에서 이 계약을 재검증했습니다. 핵심 Moneyverse 6개 unit과 Nginx, GitHub Actions runner가 모두 enabled/active였고, Production PostgreSQL 컨테이너는 `unless-stopped`로 실행 중이었습니다. 공개 Production/Test는 HTTP 200, backend `/health`는 HTTP 200을 반환했으며, Discord 봇 journal에서 로그인 성공과 설정된 대상 음성 채널의 voice-ready 상태를 확인했습니다.
 
 같은 노드의 `mail`, `economy`, `launcher`, `discord`, `cloudflared`, `gpt-plugin` 등 다른 네임스페이스는 별도 서비스입니다. 클러스터 전체가 이 프로젝트만을 위한 것이라고 가정하지 않습니다.
 
