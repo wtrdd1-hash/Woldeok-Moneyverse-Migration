@@ -12,6 +12,12 @@ describe('account security mobile accessibility', () => {
     expect(source).toContain('<Button asChild variant="ghost" className="min-h-11 w-fit">');
   });
 
+  it('shows privacy-safe device and recent-activity context for each session', () => {
+    expect(source).toContain('{session.deviceLabel}');
+    expect(source).toContain('최근 활동 {formatMoment(session.lastSeenAt)}');
+    expect(source).not.toContain('userAgent');
+  });
+
   it('retains the member-only and noindex security boundary', () => {
     expect(source).toContain('await requireMember();');
     expect(source).toContain('robots: { index: false, follow: false }');
