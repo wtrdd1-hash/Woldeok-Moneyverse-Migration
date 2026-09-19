@@ -8,6 +8,7 @@ interface VerificationEmail {
   readonly to: string;
   readonly token: string;
   readonly baseUrl: string;
+  readonly purpose?: 'verify-email' | 'password-reset';
 }
 
 interface SmtpSettings {
@@ -52,16 +53,23 @@ function headerValue(value: string): string {
 }
 
 function messageBody(input: VerificationEmail, from: string): string {
-  const verifyUrl = new URL('/verify-email', input.baseUrl);
-  verifyUrl.searchParams.set('token', input.token);
-  const subject = 'Verify your Woldeok Moneyverse email';
+  const passwordReset = input.purpose === 'password-reset';
+  const actionUrl = new URL(passwordReset ? '/reset-password' : '/verify-email', input.baseUrl);
+  actionUrl.searchParams.set('token', input.token);
+  const subject = passwordReset
+    ? 'Reset your Woldeok Moneyverse password'
+    : 'Verify your Woldeok Moneyverse email';
   const text = [
-    'Woldeok Moneyverse email verification',
+    passwordReset ? 'Woldeok Moneyverse password reset' : 'Woldeok Moneyverse email verification',
     '',
-    'Open the link below to finish creating your account:',
-    verifyUrl.toString(),
+    passwordReset
+      ? 'Open the link below to choose a new password:'
+      : 'Open the link below to finish creating your account:',
+    actionUrl.toString(),
     '',
-    'If you did not request this account, you can ignore this email.',
+    passwordReset
+      ? 'This link expires in 30 minutes and can be used once. If you did not request a password reset, you can ignore this email.'
+      : 'If you did not request this account, you can ignore this email.',
   ].join('\r\n');
 
   return [

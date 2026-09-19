@@ -35,9 +35,9 @@ const ERRORS: Readonly<Record<string, string>> = {
 export default async function LoginPage({
   searchParams,
 }: {
-  readonly searchParams: Promise<{ readonly error?: string }>;
+  readonly searchParams: Promise<{ readonly error?: string; readonly password_reset?: string }>;
 }) {
-  const [{ error }, viewer, policy] = await Promise.all([
+  const [{ error, password_reset }, viewer, policy] = await Promise.all([
     searchParams,
     currentViewer(),
     apiOrNull<{ termsVersion: string; privacyVersion: string }>('/api/v1/auth/policy'),
@@ -50,7 +50,7 @@ export default async function LoginPage({
   const errorMessage = error && ERRORS[error] ? ERRORS[error] : undefined;
 
   if (!viewer.signedIn) {
-    return <LoginProvidersView {...(errorMessage ? { error: errorMessage } : {})} />;
+    return <LoginProvidersView {...(errorMessage ? { error: errorMessage } : {})} {...(password_reset === '1' ? { notice: '비밀번호가 변경되었습니다. 새 비밀번호로 로그인해 주세요.' } : {})} />;
   }
 
   return (
