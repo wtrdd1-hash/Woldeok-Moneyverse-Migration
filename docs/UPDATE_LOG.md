@@ -1,5 +1,19 @@
 # Update Log
 
+## v2026.09.19.265 — Test routing guard and zero-downtime Production promotion
+
+- Closed split-brain Test routing: backend identity/health and frontend/BFF now use stable 3100/3101 from one exact application SHA.
+- Added a host Nginx routing regression checker that rejects transient Test UI ports and asserts stable Test/Production upstreams.
+- Advanced Test and Production schema through migration 208 after a fresh encrypted Production backup, then promoted application `b1b1f7a…` via tested canaries and Nginx reloads without interrupting public traffic.
+- Final Test/Production version, health, 146-item catalog and required public-page smoke checks passed; obsolete canaries were stopped and failed-unit count is zero.
+
+
+## v2026.09.19.263 — Exact-SHA Test runtime repair
+
+- Added split Test systemd release templates so stable secrets are no longer mixed with release-local `.env` files.
+- Added a validated release-env generator that pins Test backend/frontend to the same exact Git SHA and API origin without writing secrets.
+- Recorded and fixed the `EnvironmentFile` precedence failure that made a v259 candidate bind the stable 3100 port instead of its intended candidate port.
+- Promotion remains Test-first: exact-SHA public version, backend health, catalog, noindex and page smoke must pass before zero-downtime Production promotion.
 ## v2026.09.18.215 — Debian boot continuity and Discord voice auto-start contract
 
 - Documentation-only version; no application SHA or runtime release was changed.

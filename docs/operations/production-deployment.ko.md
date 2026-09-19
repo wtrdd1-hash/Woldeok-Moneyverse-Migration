@@ -15,6 +15,15 @@ GitOps는 계속 선언형 릴리스 권위이지만 현재 미니PC의 공개 N
 
 host mirror는 동일 승인 SHA를 사용하고 이전 unit 설정을 롤백용으로 보존해야 하며, 릴리스 완료 보고 전에 같은 catalog/status/SEO probe를 통과해야 합니다.
 
+
+### Stable Test 환경 소유권 — v2026.09.19.263
+
+영구 Test service는 release 디렉터리의 `backend/.env` 또는 `frontend/.env.local`을 직접 로드하지 않습니다. systemd `EnvironmentFile=` 값이 후보의 `PORT`/`BUILD_ID`를 덮으면 잘못된 listener에 바인딩하거나 잘못된 release identity를 보고할 수 있습니다.
+
+비밀값을 포함하는 안정 설정은 `/etc/moneyverse/test-backend.env`, `/etc/moneyverse/test-frontend.env`에 두고, 릴리스별 `/etc/moneyverse/test-backend-release.env`, `/etc/moneyverse/test-frontend-release.env`를 마지막에 로드합니다. 후자의 두 파일은 `ops/systemd/write-test-release-env.sh <exact-sha> /etc/moneyverse`로 생성합니다. 검토된 drop-in 예시는 `ops/systemd/test-main-backend-release.conf.example`, `ops/systemd/test-main-frontend-release.conf.example`입니다.
+
+두 Test service는 같은 `/srv/moneyverse-data/releases/test-current` root를 사용해야 합니다. restart 전 같은 exact SHA의 backend/frontend build인지 확인하고, restart 후 backend `:3100/health`, 공개 Test `/api/version`, frontend BFF catalog, `X-Robots-Tag: noindex`를 모두 검증합니다. backend/frontend가 서로 다른 release면 각 process가 healthy여도 gate 실패입니다.
+
 ## 프론트엔드 런타임 캐시 소유권
 
 host systemd frontend는 `debian` 사용자로 실행되고 Next.js는 서버 fetch 재검증을 위해 런타임에 `.next/cache`를 갱신합니다. root로 복사하거나 빌드한 릴리스는 canary/start 전에 이 mutable cache 하위만 준비해야 하며 immutable application release 전체의 소유권을 재귀 변경하면 안 됩니다.

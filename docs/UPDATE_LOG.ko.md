@@ -1,5 +1,18 @@
 # 업데이트 로그
 
+## v2026.09.19.265 — Test 라우팅 가드 및 무중단 Production 승격
+
+- Test split-brain 라우팅을 종결해 backend identity/health와 frontend/BFF가 하나의 exact application SHA 및 stable 3100/3101을 사용하도록 맞췄습니다.
+- 임시 Test UI 포트를 거부하고 Test/Production stable upstream을 확인하는 Nginx 라우팅 회귀검사를 추가했습니다.
+- 신규 암호화 운영 backup 후 Test/Production schema를 migration 208까지 적용하고 application `b1b1f7a…`를 canary + Nginx reload 방식으로 공개 중단 없이 승격했습니다.
+- 최종 Test/Production version, health, catalog 146개, 필수 공개 경로 smoke를 통과했고 구형 canary를 종료해 failed unit 0을 확인했습니다.
+
+## v2026.09.19.263 — exact-SHA Test 런타임 복구
+
+- stable secret과 release-local `.env`를 섞지 않도록 Test systemd release 템플릿을 backend/frontend로 분리했습니다.
+- 비밀값을 기록하지 않고 Test backend/frontend를 동일 exact Git SHA와 API origin으로 고정하는 release-env 생성기를 추가했습니다.
+- v259 후보가 의도한 후보 포트 대신 stable 3100 포트에 바인딩하려다 실패한 `EnvironmentFile` 우선순위 문제를 기록하고 차단했습니다.
+- 승격은 Test 우선입니다. 공개 exact-SHA version, backend health, catalog, noindex, 핵심 페이지 smoke 통과 후에만 무중단 Production으로 승격합니다.
 [English](UPDATE_LOG.md) | **한국어** | [문서 색인](INDEX.ko.md)
 
 ## v2026.09.18.215 — Debian 부팅 연속성 및 Discord 음성 자동 시작 계약
