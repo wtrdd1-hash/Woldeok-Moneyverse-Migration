@@ -75,6 +75,16 @@ Merged source branches are deleted by the automatic integration workflow. `.gith
 
 Protected branches and `main`, `production`, `staging`, `develop`, and `release/*` are excluded from pruning.
 
+## 6. Mandatory continuity and cache-freshness gate
+
+Every frontend or backend runtime change must be promoted without an intentional public outage. The host mirror or cluster rollout must keep the old instance available until the replacement is healthy, then switch traffic through the normal readiness/rolling mechanism. Do not stop the only healthy Production process before its replacement is serving.
+
+Member login state must survive frontend/backend rollout and restart. Production backend instances must keep using the same Production PostgreSQL session store and cookie signing/encryption contract; deployment must not revoke, truncate, recreate, rotate, or re-key active member sessions. Test must prove that a member session created before restart is accepted after restart without issuing a replacement login session.
+
+Frontend delivery must force users onto the newly deployed application shell while preserving safe immutable caching. HTML/document and version-sensitive bootstrap responses must use revalidation/no-cache semantics; content-hashed Next.js static assets remain long-cacheable. A release must not rely on users manually clearing browser cache. After promotion, verify the public document/version endpoint identifies the intended SHA and that a fresh request cannot receive the previous application shell from an intermediate cache.
+
+For the host systemd mirror, prepare only `frontend/.next/cache` with `ops/systemd/prepare-frontend-runtime-cache.sh`; never delete member session rows as a cache-clearing technique. Backend and frontend restart/rollout steps are considered complete only after readiness, session-continuity, version-freshness, and smoke probes all pass.
+
 ## 6. Production verification
 
 Production is not considered successfully released until the intended Flux revision is Ready, changed workloads complete rollout, their running images match the intended SHA-qualified Production images, and the public smoke checks pass.
