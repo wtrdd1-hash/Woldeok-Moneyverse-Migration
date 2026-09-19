@@ -1,5 +1,17 @@
 # Update Log
 
+## v2026.09.19.275 — Blue/green continuity and automatic latest-build refresh
+
+- Branch: `ops/blue-green-cache-refresh-v2026.09.19.275`.
+- Added automatic cache-busted stale-build refresh without clearing login state and a reusable canary-first host blue/green deployment helper.
+- Pre-promotion checks: helper regressions, frontend 7/7, typecheck, and real-DB authenticated-session continuity passed.
+
+## v2026.09.19.274 — Deployment continuity and cache-freshness standard
+
+- Branch: .
+- Made zero-downtime frontend/backend handoff, PostgreSQL-backed member-session continuity, and automatic latest-shell cache revalidation mandatory release gates.
+- Runtime code and Production services are unchanged by this documentation-only release.
+
 ## v2026.09.19.265 — Test routing guard and zero-downtime Production promotion
 
 - Closed split-brain Test routing: backend identity/health and frontend/BFF now use stable 3100/3101 from one exact application SHA.

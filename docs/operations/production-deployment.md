@@ -37,6 +37,12 @@ Production backend promotion must not log members out. Member sessions are Postg
 
 For the host systemd mirror, keep secrets and `DATABASE_URL` outside immutable release directories in `/etc/moneyverse/backend-production.env`, keep release identity in `/etc/moneyverse/backend-release.env`, and point `WorkingDirectory` through `/srv/moneyverse-data/releases/production-current/backend`. The reviewed drop-in template is `ops/systemd/moneyverse-backend-session-continuity.conf.example`. Before Production promotion, Test must prove that a cookie issued before a backend restart is accepted after the restart without a new session, and the real-database auth test must prove an authenticated session survives repository/process recreation. Rollback changes code/runtime pointers only; it does not mutate `auth_sessions`.
 
+## Mandatory rollout continuity and cache freshness
+
+All runtime-affecting frontend/backend promotions use a zero-downtime handoff: start or roll the replacement, wait for readiness, then remove the previous instance. Never create an avoidable public gap by stopping the only healthy Production process first. Member auth continuity is a release gate, not a best-effort check: pre-restart member cookies must remain valid after the backend restart against the same `auth_sessions` store.
+
+Cache invalidation must make the new application shell effective without user action. Version-sensitive HTML/bootstrap responses must revalidate instead of being served indefinitely from browser/proxy cache, while content-hashed immutable assets may keep long cache TTLs. Promotion verification must confirm the public version/SHA and fetch a fresh document that is not the prior release shell. Cache cleanup must not touch PostgreSQL member sessions.
+
 ## Expected order
 
 1. Merge validated application code to `main`.
