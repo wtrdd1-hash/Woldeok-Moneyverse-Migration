@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { IDLE } from '@/lib/action-state';
-import type { ProfileSettings, ProfileView } from './profile';
+import type { EarnedTitle, ProfileSettings, ProfileView } from './profile';
 import {
   DISPLAY_NAME_MAX,
   FIELD_CHOICES,
@@ -51,9 +51,11 @@ import { removeProfileImage, saveProfile, uploadProfileImage } from './actions';
 export function ProfileSettingsForm({
   profile,
   settings,
+  earnedTitles,
 }: {
   readonly profile: ProfileView;
   readonly settings: ProfileSettings;
+  readonly earnedTitles: readonly EarnedTitle[];
 }) {
   const [state, action] = useActionState(saveProfile, IDLE);
   const [visibility, setVisibility] = useState<string>(profile.visibility);
@@ -76,7 +78,7 @@ export function ProfileSettingsForm({
   );
 
   const chosen = VISIBILITY_CHOICES.find((choice) => choice.value === visibility);
-  const titles = titleChoices(profile.featured_title);
+  const titles = titleChoices(earnedTitles, profile.featured_title);
 
   return (
     <form action={action} className="grid gap-6">
@@ -163,8 +165,7 @@ export function ProfileSettingsForm({
           </SelectContent>
         </Select>
         <FieldDescription>
-          받은 적이 있는 칭호만 걸 수 있어요. 받지 않은 칭호를 고르면 저장되지 않고 그대로
-          남아 있어요.
+          실제로 받은 칭호만 목록에 보여요. 아직 받은 칭호가 없다면 ‘칭호 없음’만 선택할 수 있어요.
         </FieldDescription>
       </Field>
 

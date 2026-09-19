@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.16.159**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 158 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 159 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -3355,6 +3355,34 @@ _No request body._
 | settings.image_url | true | null \| string |  |
 | settings.field_visibility | true | object |  |
 | settings.featured_title | true | null \| string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/profile/titles` — Profile titles actually awarded to the caller
+
+- Authorization: 로그인 필요(기능에 따라 최신 동의 필요)
+- Success status: 200
+- Response mode: json
+- After success: 프로필 화면의 대표 칭호 선택 목록 갱신
+- Operation ID: `ProfileController_titles`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| titles[] | true | object[] |  |
+| titles[] | true | object |  |
+| titles[].code | true | string |  |
+| titles[].name | true | string |  |
+| titles[].awardedAt | true | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
