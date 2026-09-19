@@ -1842,4 +1842,6 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 6. **P1:** protected-main required checks/ruleset을 실제 machine-enforced gate로 전환.
 7. core correctness → shop/payment/subscription unit economics → SEO/acquisition → retention/growth → accessibility/장기확장. 런타임 구현은 별도 branch/test/exact-SHA/QA/promotion/smoke/rollback 흐름을 따른다.
 
-**v166 사업효과:** release classifier의 직접매출은 0이며 CI/registry/Test/운영 낭비와 잘못된 application identity 승격·감사 위험 감소가 가치다. SEO는 acquisition/CAC 효율 투자, API/security/backup/status는 사고·다운타임·환불·fraud·support 기대손실 감소다. 관측되지 않은 금액은 실제값으로 단정하지 않는다.
+**v166 사업효과:** release classifier의 직접매출은 0이며 CI/registry/Test/운영 낭비와 잘못된 application identity 승격·감사 위험 감소가 가치다. SEO는 acquisition/CAC 효율 투자, API/security/backup/status는 사고·다운타임·환불·fraud·support 기대손실 감소다. 관측되지 않은 금액은 실제값으로 단정하지 않는다.\n\n### v2026.09.19.261 — AI 주식 시나리오 자동 생성·게시
+
+가상 주식시장에 opt-in 시간별 AI 뉴스룸 자동화 경로를 추가한다. AI는 제한된 이벤트 시나리오를 만들고 실제 주가 권위는 기존 결정론적 market-event 로직이 유지한다. 자동 게시는 전체시장·강도 3 충격을 제외하고 한 시나리오의 변동 종목을 최대 2개, 기간을 최대 24시간으로 제한한다. 자격증명, 감사 actor 또는 안전 후보가 없으면 fail-closed로 아무 이벤트도 게시하지 않는다. 브랜치: feat/ai-stock-auto-scenarios-v2026.09.19.261.

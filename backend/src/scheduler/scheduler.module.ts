@@ -5,6 +5,9 @@ import { Pool } from 'pg';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import { EconomyAiReviewer, economyAiConfig } from '../economy/economy-ai-review';
+import { AiNewsRepository } from '../admin/ai-news.repository';
+import { AiNewsService } from '../admin/ai-news.service';
+import { sealingKeyFrom } from '../auth/totp';
 import { Scheduler } from './scheduler';
 
 /**
@@ -50,6 +53,7 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
         const reconcilerUrl = process.env.RECONCILER_DATABASE_URL;
         const logger = new Logger('Scheduler');
         const economyAiReviewer = new EconomyAiReviewer(pool, economyAiConfig());
+        const aiNews = new AiNewsService(new AiNewsRepository(pool), sealingKeyFrom(process.env));
         return new Scheduler({
           app: pool,
           reconciler: reconcilerUrl ? new Pool({ connectionString: reconcilerUrl, max: 1 }) : null,
@@ -60,6 +64,12 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
             error: (message, stack) => logger.error(message, stack),
           },
           handlers: {
+            'stock.ai_scenario_auto': async () => {
+              if (process.env.AI_NEWS_AUTO_ENABLED !== 'true') return { skipped: true, reason: 'disabled' };
+              const actorUserId = process.env.AI_NEWS_AUTO_ACTOR_USER_ID?.trim();
+              if (!actorUserId) return { skipped: true, reason: 'actor_missing' };
+              return aiNews.autoGenerateAndPublish(actorUserId);
+            },
             'economy.ai_shadow_health': () => economyAiReviewer.runShadow(),
             'economy.ai_policy_review': () => economyAiReviewer.run(),
           },
