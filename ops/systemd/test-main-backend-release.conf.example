@@ -1,0 +1,7 @@
+# Test backend release drop-in for the Debian host mirror.
+# Stable secrets/database settings and release identity are deliberately split.
+[Service]
+WorkingDirectory=/srv/moneyverse-data/releases/test-current/backend
+EnvironmentFile=
+EnvironmentFile=/etc/moneyverse/test-backend.env
+EnvironmentFile=/etc/moneyverse/test-backend-release.env

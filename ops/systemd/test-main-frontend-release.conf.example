@@ -1,0 +1,7 @@
+# Test frontend release drop-in for the Debian host mirror.
+# Do not point at a release-local .env.local: that permits stale API/build identity.
+[Service]
+WorkingDirectory=/srv/moneyverse-data/releases/test-current/frontend
+EnvironmentFile=
+EnvironmentFile=/etc/moneyverse/test-frontend.env
+EnvironmentFile=/etc/moneyverse/test-frontend-release.env

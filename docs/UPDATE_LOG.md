@@ -1,5 +1,12 @@
 # Update Log
 
+
+## v2026.09.19.263 — Exact-SHA Test runtime repair
+
+- Added split Test systemd release templates so stable secrets are no longer mixed with release-local `.env` files.
+- Added a validated release-env generator that pins Test backend/frontend to the same exact Git SHA and API origin without writing secrets.
+- Recorded and fixed the `EnvironmentFile` precedence failure that made a v259 candidate bind the stable 3100 port instead of its intended candidate port.
+- Promotion remains Test-first: exact-SHA public version, backend health, catalog, noindex and page smoke must pass before zero-downtime Production promotion.
 ## v2026.09.18.215 — Debian boot continuity and Discord voice auto-start contract
 
 - Documentation-only version; no application SHA or runtime release was changed.
