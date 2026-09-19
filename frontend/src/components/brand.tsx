@@ -21,12 +21,12 @@ export function Brand({
       href="/"
       aria-label={locale === 'en' ? 'Woldeok Moneyverse home' : '월덕 머니버스 홈'}
       className={cn(
-        'group shrink-0 hidden min-[360px]:inline-flex min-h-11 items-center gap-2 sm:gap-2.5 text-base sm:text-[19px] font-extrabold tracking-[-0.03em] sm:tracking-[-0.045em] transition-transform hover:scale-[1.02] whitespace-nowrap',
+        'group shrink-0 hidden min-[360px]:inline-flex min-h-11 items-center gap-2 text-base font-extrabold tracking-[-0.035em] transition-transform hover:scale-[1.02] whitespace-nowrap sm:gap-2.5 sm:text-[19px]',
         tone === 'muted' ? 'text-foreground' : 'text-foreground',
         className,
       )}
     >
-      <div className="relative flex size-8 sm:size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/20 ring-1 ring-primary/30">
+      <div className="relative flex size-9 shrink-0 items-center justify-center rounded-[13px] bg-primary text-primary-foreground shadow-[0_10px_28px_rgba(248,198,92,0.2)] ring-1 ring-primary/40 sm:size-10">
         <svg viewBox="0 0 24 24" fill="none" className="size-4.5 sm:size-5" aria-hidden="true">
           <path
             d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1Z"
