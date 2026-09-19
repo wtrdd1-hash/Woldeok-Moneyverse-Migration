@@ -758,6 +758,61 @@ export class AiNewsService {
     }
   }
 
+  /**
+   * Generate one batch and deterministically auto-publish one bounded scenario.
+   * AI never writes an absolute price. Existing event publication remains the
+   * only path that moves prices, preserving all market safety controls.
+   */
+  async autoGenerateAndPublish(actorUserId: string): Promise<Record<string, unknown>> {
+    const credential = await this.open(actorUserId);
+    const context = await this.repository.context(actorUserId);
+    const batch = await this.caller({
+      apiBaseUrl: credential.apiBaseUrl,
+      apiKey: credential.apiKey,
+      model: credential.model,
+      system: SYSTEM_PROMPT,
+      user: userPrompt(context, '자동 시장 뉴스: 현재 흐름을 자연스럽게 이어가되 과도한 충격은 피하세요.'),
+    });
+    const scenarios = normalise(batch, context);
+    if (scenarios.length === 0) {
+      throw new AiNewsUnavailableError('ai_news_model_unusable', 'the model wrote nothing safe enough to store');
+    }
+    const created = await this.repository.createBatch({
+      idempotencyKey: randomUUID(), actorUserId, prompt: 'AUTO',
+      model: credential.model, context, scenarios,
+    });
+    const stored = await this.repository.latest(actorUserId);
+    const candidates = (stored?.scenarios ?? []).filter((scenario) => {
+      const movers = scenario.effects.filter((effect) => effect.direction !== 'none');
+      return scenario.status === 'proposed'
+        && movers.length >= 1 && movers.length <= 2
+        && movers.every((effect) => effect.stock_id !== null && effect.strength <= 2);
+    });
+    const selected = [...candidates].sort((a, b) => {
+      const strengthA = a.effects.reduce((sum, effect) => sum + (effect.direction === 'none' ? 0 : effect.strength), 0);
+      const strengthB = b.effects.reduce((sum, effect) => sum + (effect.direction === 'none' ? 0 : effect.strength), 0);
+      return strengthA - strengthB || a.effects.length - b.effects.length || a.ordinal - b.ordinal;
+    })[0];
+    if (!selected) {
+      return { generated: scenarios.length, published: false, batchId: created.batch_id, reason: 'no_bounded_candidate' };
+    }
+    const receipt = await this.publish({
+      actorUserId,
+      scenarioId: selected.id,
+      hours: Math.min(24, selected.hours),
+      headline: selected.headline,
+      body: selected.body,
+      effects: selected.effects.map((effect) => ({
+        stockId: effect.stock_id, direction: effect.direction, strength: effect.strength,
+      })),
+    });
+    return {
+      generated: scenarios.length, published: true, batchId: created.batch_id,
+      scenarioId: selected.id, headline: selected.headline,
+      eventId: receipt.event_id, eventsPublished: receipt.published,
+    };
+  }
+
   publish(input: {
     readonly actorUserId: string;
     readonly scenarioId: string;

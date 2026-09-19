@@ -2,11 +2,30 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.19.256
+> Current integrated version: v2026.09.19.265
 > Implementation/evidence sync: 2026-09-19
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+
+## Cycle delta — v2026.09.19.265 (2026-09-19)
+
+### Exact-SHA Test/Production promotion evidence and host routing guard
+- **Authority:** this evidence cycle starts from repository `main=6f8ee496173cbf4effffba4527cf01eb2faa3ccf`. Release classification keeps repository/control-plane identity separate from application runtime identity: the promoted application source is `b1b1f7aa63e630bba266c5dcbb72731faccdae8d`.
+- **Test repair/evidence:** Test DB advanced from migration 204 through 208; backend/frontend now share one exact application source, stable ports 3100/3101, health 200, catalog 146, noindex, and the required public route smoke set all returned 200.
+- **Routing defect closed:** the Test Nginx server had `/health` and `/api/version` on 3100 while general `/` still targeted obsolete transient UI port 3119. The live route now targets stable 3101. `ops/nginx/check-moneyverse-host-routing.sh` rejects transient Test UI/candidate ports and asserts stable Test 3100/3101 plus Production 3000/3001 routing.
+- **Production promotion:** a fresh encrypted Production backup and checksum were created before migration. Production DB advanced 204→208. Same-SHA backend/frontend canaries passed on 3003/3202, Nginx reloaded to them without stopping the old listeners, persistent 3000/3001 services were then restarted on the same release, verified, and Nginx reloaded back to stable ports. Final Production exact SHA, health, catalog 146 and the required public route smoke set passed; recent backend/frontend fatal-error scan was empty.
+- **Cleanup / rollback:** old Test UIs, v196 canaries and temporary v263 canaries were stopped. `systemctl --failed` is zero and only stable Moneyverse listeners 3000/3001/3100/3101 remain. Previous unit drop-ins, Nginx config backup and previous release directories remain rollback anchors.
+
+## Cycle delta — v2026.09.19.263 (2026-09-19)
+
+### Host Test exact-SHA runtime repair and promotion hygiene
+- **Authority / branch:** work starts from `origin/main=b1b1f7aa63e630bba266c5dcbb72731faccdae8d` on `fix/test-runtime-v2026.09.19.263`. The English and Korean living-plan headers had drifted to different versions; v263 restores one shared authoritative version.
+- **Observed release defect:** the v259 transient backend declared `PORT=3120` but also loaded a release-local `.env` containing `PORT=3100`. systemd `EnvironmentFile=` values won, so the candidate tried to bind the already-used stable Test port and failed with `EADDRINUSE`. The stable Test units were also composed from different historical release directories and an old shared `BUILD_ID`, allowing public Test to report an obsolete application SHA instead of the candidate.
+- **Runtime contract:** stable Test secrets/config must live in `/etc/moneyverse/test-backend.env` and `/etc/moneyverse/test-frontend.env`. Release-scoped identity/routing must live in separate generated `/etc/moneyverse/test-backend-release.env` and `/etc/moneyverse/test-frontend-release.env`, loaded last by the reviewed drop-ins. Do not load release-local backend `.env` or frontend `.env.local` into persistent Test units. Backend and frontend must share one exact 40-character Git SHA, one `test-current` release root and one backend API origin.
+- **Automation:** `ops/systemd/write-test-release-env.sh` generates only non-secret release identity/routing files and rejects malformed SHAs. Reviewed backend/frontend drop-in templates keep stable secrets separate from release identity. Regression coverage asserts the generated Test backend port, frontend API origin, identical BUILD_ID and absence of secret-bearing keys.
+- **QA / promotion:** first run helper regression, repository lint/typecheck/test/build as applicable, then construct the exact candidate release, activate it on isolated Test, and require public `/api/version` exact SHA, backend `/health`, BFF catalog, `noindex`, core page smoke and no fatal unit logs. Re-read this plan and remote `main` mid-work. Only the exact Test-proven SHA may enter zero-downtime Production promotion; preserve the previous release pointer/unit definition as rollback anchor and verify Production `/api/version`, health/catalog and critical pages after cutover.
 
 ## Cycle delta — v2026.09.19.256 (2026-09-19)
 
@@ -1851,4 +1870,6 @@ External references rechecked: Google Search Central September 2026 updates and 
 6. **P1:** enforce repository required checks/ruleset so protected-main policy is machine-enforced rather than advisory.
 7. Core correctness → shop/payment/subscription unit economics → SEO/acquisition → retention/growth → accessibility/long-term expansion. Runtime implementation remains a separate branch/test/exact-SHA/QA/promotion/smoke/rollback flow.
 
-**v166 business effect:** release classifier work has no direct revenue; expected value is avoided CI/registry/Test/ops waste and reduced probability of promoting or auditing the wrong application identity. SEO work is acquisition/CAC-efficiency investment; API/security and backup/status work are expected-loss, downtime, refund, fraud and support-cost reduction. No unobserved monetary amount is asserted as actual.
+**v166 business effect:** release classifier work has no direct revenue; expected value is avoided CI/registry/Test/ops waste and reduced probability of promoting or auditing the wrong application identity. SEO work is acquisition/CAC-efficiency investment; API/security and backup/status work are expected-loss, downtime, refund, fraud and support-cost reduction. No unobserved monetary amount is asserted as actual.\n\n### v2026.09.19.261 — Automatic AI stock scenarios
+
+Add an opt-in hourly AI newsroom automation path for the fictional stock market. AI generates bounded event scenarios; deterministic market-event logic remains the sole stock-price authority. Auto-publish excludes market-wide and strength-3 shocks, limits a story to two moving stocks and 24 hours, and fails closed when credentials, actor identity or a bounded candidate are unavailable. Branch: feat/ai-stock-auto-scenarios-v2026.09.19.261.

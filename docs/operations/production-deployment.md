@@ -16,6 +16,15 @@ GitOps remains the declarative release authority, but the current public Nginx e
 
 The host mirror must use the same approved SHA, preserve the previous unit configuration for rollback, and pass the same catalog/status/SEO probes before a release is reported complete.
 
+
+### Stable Test environment ownership — v2026.09.19.263
+
+Persistent Test services must not load `backend/.env` or `frontend/.env.local` from a release directory. systemd loads `EnvironmentFile=` values late enough that a stale release-local `PORT` or `BUILD_ID` can override a candidate value and silently bind the wrong listener or report the wrong release identity.
+
+Use stable secret-bearing files `/etc/moneyverse/test-backend.env` and `/etc/moneyverse/test-frontend.env`, then load generated release-scoped files `/etc/moneyverse/test-backend-release.env` and `/etc/moneyverse/test-frontend-release.env` last. Generate the latter pair with `ops/systemd/write-test-release-env.sh <exact-sha> /etc/moneyverse`. The reviewed unit drop-ins are `ops/systemd/test-main-backend-release.conf.example` and `ops/systemd/test-main-frontend-release.conf.example`.
+
+Both Test services must resolve through the same `/srv/moneyverse-data/releases/test-current` root. Before restart, verify that root contains a built backend and frontend from one exact SHA; after restart require backend `:3100/health`, public Test `/api/version`, frontend BFF catalog and `X-Robots-Tag: noindex` to pass. A mixed backend/frontend release is a failed gate even when both processes are individually healthy.
+
 ## Frontend runtime cache ownership
 
 The host systemd frontend runs as `debian`, while Next.js updates `.next/cache` at runtime for server-side fetch revalidation. A release copied or built as root must therefore prepare only that mutable cache subtree before canary/start; do not recursively change ownership of the immutable application release.
