@@ -173,7 +173,7 @@ describe('SessionRepository.rotateCsrf', () => {
     await new SessionRepository(pool).rotateCsrf('session-id');
     const text = queries[0]?.text.replace(/\s+/g, ' ') ?? '';
     expect(text).toContain(
-      "WHEN user_id IS NOT NULL AND admin_opened_at IS NULL THEN now() + interval '30 days'",
+      "WHEN user_id IS NOT NULL AND admin_opened_at IS NULL THEN now() + interval '180 days'",
     );
     expect(text).toContain('ELSE expires_at');
   });

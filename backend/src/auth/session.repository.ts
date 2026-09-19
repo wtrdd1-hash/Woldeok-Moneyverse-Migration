@@ -5,7 +5,8 @@ import { queryOne } from '../core/db';
 import { randomToken, sha256 } from './crypto';
 import { EncryptionService } from '../security/encryption.service';
 
-const SESSION_INTERVAL = "interval '30 days'";
+const PRELOGIN_SESSION_INTERVAL = "interval '30 days'";
+const MEMBER_SESSION_INTERVAL = "interval '180 days'";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
@@ -158,7 +159,7 @@ export class SessionRepository {
     const session = await queryOne<CreatedSessionRow>(
       this.pool,
       `INSERT INTO auth_sessions(id, token_hash, csrf_hash, expires_at)
-       VALUES($1,$2,$3,now()+${SESSION_INTERVAL})
+       VALUES($1,$2,$3,now()+${PRELOGIN_SESSION_INTERVAL})
        RETURNING id, user_id, expires_at`,
       [randomUUID(), sha256(token), sha256(csrfToken)],
     );
@@ -192,7 +193,7 @@ export class SessionRepository {
       `UPDATE auth_sessions
        SET csrf_hash=$2,
            expires_at = CASE
-             WHEN user_id IS NOT NULL AND admin_opened_at IS NULL THEN now() + ${SESSION_INTERVAL}
+             WHEN user_id IS NOT NULL AND admin_opened_at IS NULL THEN now() + ${MEMBER_SESSION_INTERVAL}
              ELSE expires_at
            END
        WHERE id=$1 AND revoked_at IS NULL AND expires_at>now()
