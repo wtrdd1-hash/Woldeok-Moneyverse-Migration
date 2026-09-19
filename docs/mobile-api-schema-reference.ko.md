@@ -1102,9 +1102,9 @@ _요청 본문 없음._
 | loans[] | true | object[] |  |
 | loans[] | true | object |  |
 | loans[].loanId | true | string |  |
-| loans[].principalAmount | true | string & object |  |
-| loans[].interestAmount | true | string & object |  |
-| loans[].outstandingAmount | true | string & object |  |
+| loans[].principalAmount | true | any |  |
+| loans[].interestAmount | true | any |  |
+| loans[].outstandingAmount | true | any |  |
 | loans[].status | true | string="active" \| string="repaid" \| string="overdue" |  |
 | loans[].issuedAt | true | string |  |
 | loans[].repaidAt | true | null \| string |  |
@@ -1139,9 +1139,9 @@ _None._
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
 | loanId | true | string |  |
-| principalAmount | true | string & object |  |
-| interestAmount | true | string & object |  |
-| outstandingAmount | true | string & object |  |
+| principalAmount | true | any |  |
+| interestAmount | true | any |  |
+| outstandingAmount | true | any |  |
 | replayed | true | boolean |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
@@ -1176,8 +1176,8 @@ _None._
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
 | loanId | true | string |  |
-| paidAmount | true | string & object |  |
-| outstandingAmount | true | string & object |  |
+| paidAmount | true | any |  |
+| outstandingAmount | true | any |  |
 | replayed | true | boolean |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
@@ -2007,9 +2007,9 @@ _요청 본문 없음._
 | businesses[].symbol | true | string |  |
 | businesses[].name | true | string |  |
 | businesses[].description | true | string |  |
-| businesses[].purchaseCost | true | string & object |  |
-| businesses[].dailyRevenue | true | string & object |  |
-| businesses[].dailyOperatingCost | true | string & object |  |
+| businesses[].purchaseCost | true | any |  |
+| businesses[].dailyRevenue | true | any |  |
+| businesses[].dailyOperatingCost | true | any |  |
 | businesses[].purchasedAt | true | string |  |
 | businesses[].lastSettlementDate | true | null \| string |  |
 
@@ -2075,9 +2075,9 @@ _None._
 |---|---|---|---|
 | ownershipId | true | string |  |
 | settlementDate | true | string |  |
-| grossRevenue | true | string & object |  |
-| operatingCost | true | string & object |  |
-| netAmount | true | string & object |  |
+| grossRevenue | true | any |  |
+| operatingCost | true | any |  |
+| netAmount | true | any |  |
 | transactionId | true | string |  |
 | replayed | true | boolean |  |
 
@@ -2113,9 +2113,9 @@ _None._
 |---|---|---|---|
 | ownershipId | true | string |  |
 | settlementDate | true | string |  |
-| grossRevenue | true | string & object |  |
-| operatingCost | true | string & object |  |
-| netAmount | true | string & object |  |
+| grossRevenue | true | any |  |
+| operatingCost | true | any |  |
+| netAmount | true | any |  |
 | transactionId | true | string |  |
 | replayed | true | boolean |  |
 
@@ -2151,8 +2151,8 @@ _None._
 | ownershipId | true | string |  |
 | businessSymbol | true | string |  |
 | businessName | true | string |  |
-| dailyRevenue | true | string & object |  |
-| dailyOperatingCost | true | string & object |  |
+| dailyRevenue | true | any |  |
+| dailyOperatingCost | true | any |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
@@ -2182,9 +2182,9 @@ _요청 본문 없음._
 | businessTypes[].symbol | true | string |  |
 | businessTypes[].name | true | string |  |
 | businessTypes[].description | true | string |  |
-| businessTypes[].purchaseCost | true | string & object |  |
-| businessTypes[].dailyRevenue | true | string & object |  |
-| businessTypes[].dailyOperatingCost | true | string & object |  |
+| businessTypes[].purchaseCost | true | any |  |
+| businessTypes[].dailyRevenue | true | any |  |
+| businessTypes[].dailyOperatingCost | true | any |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
@@ -2218,7 +2218,7 @@ _요청 본문 없음._
 |---|---|---|---|
 | ownershipId | true | string |  |
 | businessTypeId | true | string |  |
-| purchaseCost | true | string & object |  |
+| purchaseCost | true | any |  |
 | transactionId | true | string |  |
 | replayed | true | boolean |  |
 
@@ -2245,9 +2245,9 @@ _요청 본문 없음._
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
 | equity | true | object |  |
-| equity.holdingsAmount | true | string & object |  |
-| equity.debtAmount | true | string & object |  |
-| equity.equityAmount | true | string & object |  |
+| equity.holdingsAmount | true | any |  |
+| equity.debtAmount | true | any |  |
+| equity.equityAmount | true | any |  |
 | equity.minimumRatioBps | true | number |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
@@ -2282,9 +2282,9 @@ _요청 본문 없음._
 | businesses[].symbol | true | string |  |
 | businesses[].name | true | string |  |
 | businesses[].description | true | string |  |
-| businesses[].purchaseCost | true | string & object |  |
-| businesses[].dailyRevenue | true | string & object |  |
-| businesses[].dailyOperatingCost | true | string & object |  |
+| businesses[].purchaseCost | true | any |  |
+| businesses[].dailyRevenue | true | any |  |
+| businesses[].dailyOperatingCost | true | any |  |
 | businesses[].purchasedAt | true | string |  |
 | businesses[].lastSettlementDate | true | null \| string |  |
 
@@ -3569,7 +3569,7 @@ _None._
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
 | transactionId | true | string |  |
-| amount | true | string & object |  |
+| amount | true | any |  |
 | replayed | true | boolean |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
@@ -3623,7 +3623,7 @@ _요청 본문 없음._
 | events[].season_name | true | string |  |
 | events[].title | true | string |  |
 | events[].description | true | string |  |
-| events[].cost_wld | true | string & object |  |
+| events[].cost_wld | true | any |  |
 | events[].points_per_entry | true | number |  |
 | events[].ends_at | true | unknown |  |
 
@@ -3971,7 +3971,7 @@ _요청 본문 없음._
 | items[].itemId | true | string |  |
 | items[].name | true | string |  |
 | items[].description | true | string |  |
-| items[].price | true | string & object |  |
+| items[].price | true | any |  |
 | items[].createdAt | true | string |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
@@ -4006,7 +4006,7 @@ _요청 본문 없음._
 |---|---|---|---|
 | purchaseId | true | string |  |
 | transactionId | true | string |  |
-| amount | true | string & object |  |
+| amount | true | any |  |
 | replayed | true | boolean |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
@@ -4080,7 +4080,7 @@ _요청 본문 없음._
 | purchases[].itemId | true | string |  |
 | purchases[].itemName | true | string |  |
 | purchases[].transactionId | true | string |  |
-| purchases[].amount | true | string & object |  |
+| purchases[].amount | true | any |  |
 | purchases[].purchasedAt | true | string |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
@@ -4107,14 +4107,14 @@ _요청 본문 없음._
 |---|---|---|---|
 | stocks[] | true | object[] |  |
 | stocks[] | true | object |  |
-| stocks[].day_high_price | true | string & object |  |
-| stocks[].day_low_price | true | string & object |  |
+| stocks[].day_high_price | true | any |  |
+| stocks[].day_low_price | true | any |  |
 | stocks[].symbol | true | string |  |
 | stocks[].id | true | string |  |
 | stocks[].name | true | string |  |
 | stocks[].description | true | string |  |
-| stocks[].current_price | true | string & object |  |
-| stocks[].day_open_price | true | string & object |  |
+| stocks[].current_price | true | any |  |
+| stocks[].day_open_price | true | any |  |
 | stocks[].updated_at | true | string (date-time) |  |
 | stocks[].shares_outstanding | true | string |  |
 | stocks[].shares_available | true | string |  |
@@ -4149,10 +4149,10 @@ _요청 본문 없음._
 | candles[] | true | object[] |  |
 | candles[] | true | object |  |
 | candles[].bucket_at | true | string (date-time) |  |
-| candles[].open_price | true | string & object |  |
-| candles[].high_price | true | string & object |  |
-| candles[].low_price | true | string & object |  |
-| candles[].close_price | true | string & object |  |
+| candles[].open_price | true | any |  |
+| candles[].high_price | true | any |  |
+| candles[].low_price | true | any |  |
+| candles[].close_price | true | any |  |
 | range | true | null \| object |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
@@ -4188,10 +4188,10 @@ _요청 본문 없음._
 | 필드 | 필수 | 타입 | 제약/의미 |
 |---|---|---|---|
 | trade_id | true | string |  |
-| unit_price | true | string & object |  |
-| gross_amount | true | string & object |  |
-| tax_amount | true | string & object |  |
-| current_price | true | string & object |  |
+| unit_price | true | any |  |
+| gross_amount | true | any |  |
+| tax_amount | true | any |  |
+| current_price | true | any |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
@@ -4221,7 +4221,7 @@ _요청 본문 없음._
 | prices[] | true | object[] |  |
 | prices[] | true | object |  |
 | prices[].recorded_at | true | string (date-time) |  |
-| prices[].price | true | string & object |  |
+| prices[].price | true | any |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
@@ -4421,9 +4421,9 @@ _요청 본문 없음._
 | trades[].symbol | true | string |  |
 | trades[].side | true | string |  |
 | trades[].quantity | true | string |  |
-| trades[].unit_price | true | string & object |  |
-| trades[].gross_amount | true | string & object |  |
-| trades[].tax_amount | true | string & object |  |
+| trades[].unit_price | true | any |  |
+| trades[].gross_amount | true | any |  |
+| trades[].tax_amount | true | any |  |
 | trades[].created_at | true | string (date-time) |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
@@ -4490,9 +4490,9 @@ _요청 본문 없음._
 | holdings[].symbol | true | string |  |
 | holdings[].name | true | string |  |
 | holdings[].quantity | true | string |  |
-| holdings[].average_cost | true | string & object |  |
-| holdings[].market_value | true | string & object |  |
-| holdings[].current_price | true | string & object |  |
+| holdings[].average_cost | true | any |  |
+| holdings[].market_value | true | any |  |
+| holdings[].current_price | true | any |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
@@ -4521,7 +4521,7 @@ _요청 본문 없음._
 | series[] | true | object[] |  |
 | series[] | true | object |  |
 | series[].stock_id | true | string |  |
-| series[].prices[] | true | string & object[] |  |
+| series[].prices[] | true | any[] |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
@@ -4550,8 +4550,8 @@ _요청 본문 없음._
 | stocks[].stock_id | true | string |  |
 | stocks[].symbol | true | string |  |
 | stocks[].name | true | string |  |
-| stocks[].current_price | true | string & object |  |
-| stocks[].day_open_price | true | string & object |  |
+| stocks[].current_price | true | any |  |
+| stocks[].day_open_price | true | any |  |
 | stocks[].created_at | true | string (date-time) |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
@@ -4725,18 +4725,18 @@ _요청 본문 없음._
 | balances | true | object |  |
 | balances.currency | true | string="WLD" | const="WLD" |
 | balances.cash | true | object |  |
-| balances.cash.availableAmount | true | string & object |  |
+| balances.cash.availableAmount | true | any |  |
 | balances.cash.updatedAt | true | string |  |
 | balances.bank | true | object |  |
-| balances.bank.availableAmount | true | string & object |  |
+| balances.bank.availableAmount | true | any |  |
 | balances.bank.updatedAt | true | string |  |
-| balances.totalAvailableAmount | true | string & object |  |
+| balances.totalAvailableAmount | true | any |  |
 | recentTransactions[] | true | object[] |  |
 | recentTransactions[] | true | object |  |
 | recentTransactions[].transactionId | true | string |  |
 | recentTransactions[].type | true | string |  |
 | recentTransactions[].label | true | string |  |
-| recentTransactions[].netAmount | true | string & object |  |
+| recentTransactions[].netAmount | true | any |  |
 | recentTransactions[].direction | true | string="neutral" \| string="in" \| string="out" |  |
 | recentTransactions[].occurredAt | true | string |  |
 
