@@ -1,5 +1,12 @@
 # Update Log
 
+## v2026.09.19.265 — Test routing guard and zero-downtime Production promotion
+
+- Closed split-brain Test routing: backend identity/health and frontend/BFF now use stable 3100/3101 from one exact application SHA.
+- Added a host Nginx routing regression checker that rejects transient Test UI ports and asserts stable Test/Production upstreams.
+- Advanced Test and Production schema through migration 208 after a fresh encrypted Production backup, then promoted application `b1b1f7a…` via tested canaries and Nginx reloads without interrupting public traffic.
+- Final Test/Production version, health, 146-item catalog and required public-page smoke checks passed; obsolete canaries were stopped and failed-unit count is zero.
+
 
 ## v2026.09.19.263 — Exact-SHA Test runtime repair
 
