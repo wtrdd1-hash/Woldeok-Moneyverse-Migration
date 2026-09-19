@@ -28,7 +28,7 @@ interface MobileHomeViewProps {
 }
 
 const PRIMARY_LINKS = [
-  { href: '/work', icon: BriefcaseBusiness, ko: '오늘의 일', en: 'Work', hintKo: '보상 확인', hintEn: 'Earn WLD' },
+  { href: '/work', icon: BriefcaseBusiness, ko: '오늘의 일', en: 'Work', hintKo: '보상 받기', hintEn: 'Earn WLD' },
   { href: '/wallet', icon: Wallet, ko: '지갑', en: 'Wallet', hintKo: '잔액과 기록', hintEn: 'Balance & history' },
   { href: '/stocks', icon: TrendingUp, ko: '거래소', en: 'Market', hintKo: '가상 주식', hintEn: 'Virtual stocks' },
   { href: '/quests', icon: ArrowRight, ko: '퀘스트', en: 'Quests', hintKo: '오늘 목표', hintEn: 'Today’s goals' },
@@ -50,24 +50,24 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
           </p>
           <span className="inline-flex items-center gap-2 text-[11px] text-muted-foreground">
             <span className="size-1.5 rounded-full bg-emerald-400" />
-            <T korean="연결됨" english="Connected" />
+            <T korean="서비스 연결됨" english="Connected" />
           </span>
         </div>
 
         <div className="mt-7 grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
           <div>
             <p className="text-xs font-semibold text-muted-foreground">
-              <T korean="현재 가상 잔액" english="Current virtual balance" />
+              <T korean="내 가상경제 현황" english="Your economy at a glance" />
             </p>
             <div className="mt-1 font-mono text-[clamp(2.6rem,13vw,5.4rem)] font-medium leading-none tracking-[-0.075em] text-foreground">
               <WalletGlance />
             </div>
           </div>
           <div className="flex gap-5 text-sm font-semibold">
-            <Link href="/work" className="border-b border-primary/70 pb-1 text-foreground">
-              <T korean="오늘 할 일" english="Today" />
+            <Link href="/work" className="inline-flex min-h-11 items-center border-b border-primary/70 text-foreground">
+              <T korean="오늘 할 일 보기" english="Start today" />
             </Link>
-            <Link href="/wallet/activity" className="border-b border-border pb-1 text-muted-foreground hover:text-foreground">
+            <Link href="/wallet/activity" className="inline-flex min-h-11 items-center border-b border-border text-muted-foreground hover:text-foreground">
               <T korean="거래 기록" english="Activity" />
             </Link>
           </div>
@@ -75,8 +75,8 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
 
         <p className="mt-5 max-w-2xl text-sm leading-6 text-muted-foreground">
           <T
-            korean="오늘 필요한 기능만 순서대로 확인할 수 있게 정리했습니다."
-            english="A compact starting point for the actions you are most likely to need today."
+            korean="오늘 할 일, 잔액, 시장과 커뮤니티를 한 화면에서 이어서 확인하세요."
+            english="Continue from today’s work into your wallet, market, and community without losing context."
           />
         </p>
       </section>
@@ -144,7 +144,7 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
               </h2>
             </div>
             <Link href="/announcements" className="min-h-11 py-3 text-xs font-semibold text-muted-foreground underline underline-offset-4">
-              <T korean="전체 보기" english="All updates" />
+              <T korean="전체 기록" english="All updates" />
             </Link>
           </div>
 
