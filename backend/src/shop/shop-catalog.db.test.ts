@@ -61,7 +61,9 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
 
     it('lists the seeded catalogue with every amount still a string', async () => {
       const rows = await catalogue().catalog(UNKNOWN_MEMBER);
-      expect(rows.length, 'all Store 2.0 products need an inventory policy').toBeGreaterThanOrEqual(78);
+      expect(rows.length, 'all Store 2.0 products need an inventory policy').toBeGreaterThanOrEqual(
+        78,
+      );
 
       const gloves = rows.find((row) => row.code === 'work_gloves');
       expect(gloves, 'work_gloves is seeded by 073').toBeDefined();
@@ -243,7 +245,7 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
       });
     });
 
-    it('reports the stored amount on a replay, not the quantity the caller repeated', async () => {
+    it('replays an identical purchase payload and rejects conflicting retries', async () => {
       await rolledBack(async (client) => {
         const actor = await buyer(client, 1000);
         const kit = await item(client, 'repair_kit'); // 80, limit `unlimited`
@@ -256,11 +258,20 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
         ]);
         const { rows } = await client.query<{ amount: string; replayed: boolean }>(
           `SELECT purchase.amount::text, purchase.replayed
-           FROM public.shop_purchase_catalog($1, $2, $3, 5) AS purchase`,
+           FROM public.shop_purchase_catalog($1, $2, $3, 2) AS purchase`,
           [key, actor, kit],
         );
         expect(rows[0]?.replayed).toBe(true);
-        expect(rows[0]?.amount, 'a replay must report what was charged').toBe('160');
+        expect(rows[0]?.amount, 'an identical replay must report what was charged').toBe('160');
+
+        const error = await rejectionOf(() =>
+          client.query('SELECT * FROM public.shop_purchase_catalog($1, $2, $3, 5)', [
+            key,
+            actor,
+            kit,
+          ]),
+        );
+        expect(code(error)).toBe('22023');
         expect(await cash(client, actor)).toBe('840');
       });
     });
@@ -350,11 +361,10 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
         const { rows: replay } = await client.query<{
           remaining_quantity: number;
           replayed: boolean;
-        }>(`SELECT used.remaining_quantity, used.replayed FROM public.shop_use_item($1, $2, $3) AS used`, [
-          key,
-          actor,
-          kit,
-        ]);
+        }>(
+          `SELECT used.remaining_quantity, used.replayed FROM public.shop_use_item($1, $2, $3) AS used`,
+          [key, actor, kit],
+        );
         expect(replay[0]?.replayed).toBe(true);
         expect(replay[0]?.remaining_quantity).toBe(2);
       });
