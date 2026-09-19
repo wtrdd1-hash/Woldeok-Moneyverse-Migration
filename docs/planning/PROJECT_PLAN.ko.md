@@ -1894,3 +1894,12 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 - 모바일은 데스크톱 축소판이 아니라 재구성한다. 최소 44px touch target, keyboard/focus, reduced-motion, 403/404/loading/empty/error/reauth 상태를 유지한다.
 - API/backend/auth/ledger 권위는 시각 작업 때문에 약화하지 않는다.
 - 브랜치: feat/frontend-full-rebuild-v2026.09.19.271.
+
+
+### v2026.09.19.273 — 모바일 홈 실제 화면 재설계 체크포인트
+
+- v271의 route-family 기준선만으로는 실제 재설계 완료 증거가 되지 않는다. 운영 캡처에서 모바일 홈이 여전히 큰 둥근 hero card, 반복 rounded surface, glow, pill action, 떠 있는 둥근 하단 navigation 구조를 유지하는 것이 확인됐다.
+- v273에서는 실제 렌더링 구조 자체를 변경한다. 큰 rounded/glow hero를 제거하고 잔액 영역을 평면 원장형 header로 바꾸며, 오늘의 동선을 card가 아닌 rule 기반 선형 list로 변경한다. secondary action/공지도 평면화하고 하단 navigation은 떠 있는 둥근 panel 대신 화면 폭 전체의 flat tab bar로 변경한다.
+- 검수 기준: screenshot 비교에서 CSS token이나 marker만 달라진 것이 아니라 정보 구조가 명확하게 달라 보여야 한다.
+- 이번 버전은 70개 route 전체 재설계의 첫 번째 실제 가시적 구현 checkpoint이며, 나머지 페이지별 작업이 끝났다는 의미는 아니다.
+- 브랜치: feat/mobile-home-human-redesign-v2026.09.19.273.
