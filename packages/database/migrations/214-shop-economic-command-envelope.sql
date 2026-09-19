@@ -31,6 +31,8 @@ DECLARE
   v_amount bigint;
   v_tx uuid;
   v_policy_replayed boolean;
+  v_receipt_catalog uuid;
+  v_receipt_quantity integer;
   v_hash bytea;
 BEGIN
   IF p_key IS NULL OR p_actor IS NULL OR p_catalog IS NULL OR p_quantity IS NULL THEN
@@ -75,6 +77,20 @@ BEGIN
 
   IF v_purchase IS NULL OR v_amount IS NULL OR v_tx IS NULL THEN
     RAISE EXCEPTION USING ERRCODE = '55000', MESSAGE = 'shop purchase policy returned an incomplete result';
+  END IF;
+
+  -- Legacy receipts can predate the common command envelope. The private policy
+  -- replays them by key, so verify their original payload before snapshotting.
+  IF v_policy_replayed THEN
+    SELECT purchase_row.catalog_id, purchase_row.quantity
+      INTO v_receipt_catalog, v_receipt_quantity
+    FROM public.shop_purchases AS purchase_row
+    WHERE purchase_row.id = v_purchase;
+
+    IF v_receipt_catalog IS DISTINCT FROM p_catalog
+       OR v_receipt_quantity IS DISTINCT FROM p_quantity THEN
+      RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'shop idempotency key payload mismatch';
+    END IF;
   END IF;
 
   v_result := pg_catalog.jsonb_build_object(
