@@ -45,7 +45,7 @@ export default async function WalletPage() {
 
   if (!wallet) {
     return (
-      <div className="grid gap-4">
+      <div data-page="wallet" className="mv-page mv-page--finance grid gap-4">
         <PageHeader title={<T korean="내 지갑" english="My Wallet" />} />
         <EmptyState
           title={<T korean="지금은 지갑을 불러올 수 없어요." english="Cannot load wallet at this time." />}

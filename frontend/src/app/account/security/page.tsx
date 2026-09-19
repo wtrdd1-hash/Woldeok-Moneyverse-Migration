@@ -13,6 +13,7 @@ import {
   terminateOtherSessions,
   terminateSession,
   reauthenticateWithLocalPassword,
+  changeLocalPassword,
 } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -60,13 +61,16 @@ export default async function AccountSecurityPage({
   const revoked = typeof params.revoked === 'string' ? params.revoked : null;
 
   return (
-    <div className="grid gap-6">
+    <div data-page="account-security" className="mv-page mv-page--member grid gap-6">
       <PageHeader eyebrow="ACCOUNT SECURITY" title="계정 보안 센터">
         로그인 중인 세션을 확인하고, 사용하지 않는 다른 세션을 종료할 수 있습니다.
       </PageHeader>
 
       {params.reauth === 'done' ? (
         <Alert><AlertDescription>본인 확인이 완료되었습니다. 민감한 보안 작업을 계속할 수 있습니다.</AlertDescription></Alert>
+      ) : null}
+      {params.password === 'changed' ? (
+        <Alert><AlertDescription>비밀번호를 변경했고 다른 로그인 세션을 모두 종료했습니다.</AlertDescription></Alert>
       ) : null}
       {params.session === 'revoked' ? (
         <Alert><AlertDescription>선택한 다른 세션을 종료했습니다.</AlertDescription></Alert>
@@ -81,6 +85,10 @@ export default async function AccountSecurityPage({
               ? '세션을 종료하려면 최근 본인 확인이 필요합니다.'
               : error === 'local-reauth'
                 ? '이메일 또는 비밀번호를 확인한 뒤 다시 시도해 주세요.'
+                : error === 'password-mismatch'
+                  ? '새 비밀번호 확인 값이 일치하지 않습니다.'
+                  : error === 'password-change'
+                    ? '최근 본인 확인 후 다시 비밀번호 변경을 시도해 주세요.'
                 : '요청을 완료하지 못했습니다. 세션 상태를 새로 확인해 주세요.'}
           </AlertDescription>
         </Alert>
@@ -126,6 +134,13 @@ export default async function AccountSecurityPage({
           </div>
         )}
       </section>
+
+      {hasLocalIdentity ? (
+        <Card>
+          <CardHeader><CardTitle className="text-base">비밀번호 변경</CardTitle><CardDescription>최근 본인 확인 후 새 비밀번호로 변경합니다. 변경하면 현재 세션을 제외한 다른 세션은 종료됩니다.</CardDescription></CardHeader>
+          <CardContent><form action={changeLocalPassword} className="grid max-w-sm gap-2"><label htmlFor="new-password" className="text-sm font-medium">새 비밀번호</label><input id="new-password" name="password" type="password" autoComplete="new-password" maxLength={128} required className="min-h-11 rounded-md border bg-background px-3 text-base"/><label htmlFor="confirm-password" className="text-sm font-medium">새 비밀번호 확인</label><input id="confirm-password" name="confirmPassword" type="password" autoComplete="new-password" maxLength={128} required className="min-h-11 rounded-md border bg-background px-3 text-base"/><Button type="submit" className="min-h-11">비밀번호 변경</Button></form></CardContent>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader>

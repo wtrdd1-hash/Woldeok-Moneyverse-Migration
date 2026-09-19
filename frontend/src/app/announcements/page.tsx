@@ -30,7 +30,7 @@ export default async function AnnouncementsPage() {
   const data = await publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60);
 
   return (
-    <div className="grid gap-4">
+    <div data-page="announcements" className="mv-page mv-page--community grid gap-4">
       <PageHeader
         eyebrow="COMMUNITY NOTICE"
         title={

@@ -15,6 +15,10 @@
 
 # Changelog
 
+## v2026.09.19.274
+
+Standardized zero-downtime frontend/backend rollout, member-session continuity across restart, and cache-freshness verification so clients receive the current release without manual cache clearing.
+
 ## v2026.09.12.13 — Automatic Test-to-Production GitOps Reconciliation
 - Added an exact application SHA as the public build identity used by `/api/version`.
 - A successful `main` Test Candidate now drives isolated Test GitOps reconciliation automatically.

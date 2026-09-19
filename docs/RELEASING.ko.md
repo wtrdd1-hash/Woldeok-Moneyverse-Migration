@@ -78,6 +78,16 @@ kubectl -n wdmvp get pods
 
 의도한 Flux revision이 Ready이고 변경된 workload rollout이 끝났으며 실제 image가 의도한 SHA-qualified Production image와 일치하기 전에는 배포 성공으로 보고하지 않습니다.
 
+## 6. 필수 무중단·세션·캐시 최신화 게이트
+
+모든 프론트엔드/백엔드 런타임 변경은 의도적인 공개 중단 없이 승격합니다. host mirror 또는 cluster rollout은 새 인스턴스가 healthy가 될 때까지 기존 인스턴스를 유지하고 readiness/rolling 절차로 트래픽을 전환합니다. 대체 인스턴스가 준비되기 전에 유일한 정상 Production 프로세스를 먼저 중지하면 안 됩니다.
+
+회원 로그인 상태는 프론트엔드/백엔드 rollout과 재시작을 지나도 유지되어야 합니다. Production backend는 동일한 Production PostgreSQL 세션 저장소와 쿠키 서명/암호화 계약을 계속 사용해야 하며, 배포 과정에서 활성 회원 세션을 revoke/truncate/recreate/rotate/re-key 하면 안 됩니다. Test에서는 재시작 전에 만들어진 회원 세션이 재시작 뒤에도 새 로그인 세션 발급 없이 그대로 승인되는지 증명합니다.
+
+프론트엔드는 사용자가 수동으로 브라우저 캐시를 지우지 않아도 최신 애플리케이션 shell을 강제로 받도록 구성합니다. HTML/document와 버전에 민감한 bootstrap 응답은 재검증/no-cache 의미를 사용하고, content-hash가 붙은 Next.js 정적 자산만 장기 캐시합니다. 승격 뒤 공개 document/version endpoint가 의도한 SHA를 식별하는지, 새 요청이 중간 캐시에서 이전 application shell을 받지 않는지 확인합니다.
+
+host systemd mirror에서는 `ops/systemd/prepare-frontend-runtime-cache.sh`로 `frontend/.next/cache`만 준비합니다. 캐시 초기화를 이유로 회원 세션 행을 삭제하면 안 됩니다. backend/frontend 재시작·rollout은 readiness, 로그인 세션 연속성, 버전 최신성, 공개 smoke가 모두 통과한 뒤에만 완료로 판단합니다.
+
 ## 6. 공개 스모크체크
 
 최소 확인 대상은 `/`, `/status`, `/robots.txt`, `/sitemap.xml`, `/ads.txt`입니다. 광고가 켜져 있으면 `ads.txt`와 승인된 AdSense 설정을 확인하고 검색 노출이 켜져 있으면 `robots.txt`와 sitemap의 Production origin을 확인합니다.

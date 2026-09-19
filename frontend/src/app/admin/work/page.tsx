@@ -73,7 +73,7 @@ export default async function AdminWorkPage() {
   }>('/api/v1/admin/work');
 
   return (
-    <div className="grid gap-5">
+    <div data-page="admin-work" className="mv-page mv-page--admin grid gap-5">
       <AdminBack />
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}

@@ -21,6 +21,7 @@ import { sessionCookie } from './cookies';
 import { randomToken, sha256 } from './crypto';
 import { CsrfGuard } from './guards/csrf.guard';
 import { SessionGuard } from './guards/session.guard';
+import { ReauthGuard } from './guards/reauth.guard';
 import { LocalAuthRepository } from './local-auth.repository';
 import { hashPassword, spendDummyPasswordWork, verifyPassword } from './password-hasher';
 import type { RequestWithSession } from './session.context';
@@ -119,6 +120,14 @@ export class LocalReauthenticationDto {
   @MaxLength(254)
   readonly email!: string;
 
+  @ApiProperty({ maxLength: 128 })
+  @IsString()
+  @MaxLength(128)
+  readonly password!: string;
+}
+
+
+export class LocalPasswordChangeDto {
   @ApiProperty({ maxLength: 128 })
   @IsString()
   @MaxLength(128)
@@ -237,6 +246,18 @@ export class LocalAuthController {
       }
     }
     return { accepted: true };
+  }
+
+  @Post('password/change')
+  @UseGuards(SessionGuard, CsrfGuard, ReauthGuard)
+  @ApiOperation({ summary: 'Change the current local password after recent reauthentication' })
+  async changePassword(@Req() request: RequestWithSession, @Body() body: LocalPasswordChangeDto) {
+    const session = requireSession(request);
+    if (!session.user_id) throw new ForbiddenException('login required');
+    if (!acceptablePassword(body.password)) throw new ForbiddenException('password does not meet policy');
+    const changed = await this.credentialStore().changePassword(session.id, session.user_id, await hashPassword(body.password));
+    if (!changed) throw new ForbiddenException('local credential required');
+    return { outcome: 'password-changed' as const };
   }
 
   @Post('password-reset/complete')

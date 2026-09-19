@@ -34,7 +34,7 @@ export default async function ProfilePage() {
   const settings = stored?.settings ?? null;
 
   return (
-    <div className="grid gap-8">
+    <div data-page="profile" className="mv-page mv-page--member grid gap-8">
       <PageHeader
         eyebrow="MEMBER PROFILE"
         title={

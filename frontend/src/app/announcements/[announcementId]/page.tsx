@@ -67,7 +67,7 @@ export default async function AnnouncementDetailPage({ params }: PageProps) {
   const { current: notice, others } = data;
 
   return (
-    <div className="mx-auto max-w-3xl grid gap-8">
+    <div data-page="announcements-announcementId" className="mv-page mv-page--community mx-auto max-w-3xl grid gap-8">
       {/* 상단 네비게이션 */}
       <div className="flex items-center justify-between">
         <Link
