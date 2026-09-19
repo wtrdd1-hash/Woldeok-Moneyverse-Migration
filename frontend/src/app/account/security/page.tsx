@@ -140,9 +140,9 @@ export default async function AccountSecurityPage({
                     최근 본인 확인: {session.reauthenticatedAt ? formatMoment(session.reauthenticatedAt) : '기록 없음'}
                   </div>
                   {!session.current ? (
-                    <form action={terminateSession}>
+                    <form action={terminateSession} className="w-full sm:w-auto">
                       <input type="hidden" name="sessionId" value={session.sessionId} />
-                      <Button type="submit" variant="outline" className="min-h-11">이 세션 종료</Button>
+                      <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">이 세션 종료</Button>
                     </form>
                   ) : (
                     <p className="text-xs text-muted-foreground">현재 세션은 이 화면에서 종료할 수 없습니다. 로그아웃을 이용해 주세요.</p>
@@ -181,8 +181,8 @@ export default async function AccountSecurityPage({
           <CardDescription>현재 브라우저 세션은 유지하고 나머지 활성 세션만 종료합니다.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={terminateOtherSessions}>
-            <Button type="submit" variant="destructive" disabled={otherCount === 0} className="min-h-11">
+          <form action={terminateOtherSessions} className="w-full sm:w-auto">
+            <Button type="submit" variant="destructive" disabled={otherCount === 0} className="min-h-11 w-full sm:w-auto">
               다른 세션 {otherCount}개 종료
             </Button>
           </form>
@@ -195,8 +195,8 @@ export default async function AccountSecurityPage({
           <CardDescription>다른 활성 세션을 먼저 종료한 뒤 현재 브라우저에서도 로그아웃합니다. 최근 본인 확인이 필요합니다.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form action={terminateAllSessions}>
-            <Button type="submit" variant="destructive" className="min-h-11">모든 기기에서 로그아웃</Button>
+          <form action={terminateAllSessions} className="w-full sm:w-auto">
+            <Button type="submit" variant="destructive" className="min-h-11 w-full sm:w-auto">모든 기기에서 로그아웃</Button>
           </form>
         </CardContent>
       </Card>
@@ -204,7 +204,7 @@ export default async function AccountSecurityPage({
       <Card>
         <CardHeader>
           <CardTitle className="text-base">민감한 작업 본인 확인</CardTitle>
-          <CardDescription>다른 세션 종료는 최근 OAuth 본인 확인 후에만 허용됩니다.</CardDescription>
+          <CardDescription>다른 세션 종료는 최근 본인 확인 후에만 허용됩니다. 연결된 이메일·비밀번호 또는 OAuth 로그인 수단으로 확인할 수 있습니다.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           {hasLocalIdentity ? (
@@ -217,9 +217,9 @@ export default async function AccountSecurityPage({
             </form>
           ) : null}
           {oauthIdentities.map((identity) => (
-            <form action={beginSecurityReauthentication} key={identity.provider}>
+            <form action={beginSecurityReauthentication} key={identity.provider} className="w-full sm:w-auto">
               <input type="hidden" name="provider" value={identity.provider} />
-              <Button type="submit" variant="outline" className="min-h-11">
+              <Button type="submit" variant="outline" className="min-h-11 w-full sm:w-auto">
                 {PROVIDER_NAME[identity.provider] ?? identity.provider}로 본인 확인
               </Button>
             </form>
