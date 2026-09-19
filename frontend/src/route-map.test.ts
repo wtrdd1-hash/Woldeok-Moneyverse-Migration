@@ -37,9 +37,11 @@ function servedBy(routePath: string): string | null {
   return existsSync(generated) ? generated : null;
 }
 
-const FRONTEND_ROUTES = ROUTE_MAP.filter(
-  (mapping) => mapping.module === 'frontend' && mapping.replacement !== null,
-).map((mapping) => (mapping.replacement as string).split(' ')[1] as string);
+type RouteMapping = { readonly module: string; readonly replacement: string | null };
+
+const FRONTEND_ROUTES: string[] = (ROUTE_MAP as readonly RouteMapping[])
+  .filter((mapping: RouteMapping) => mapping.module === 'frontend' && mapping.replacement !== null)
+  .map((mapping: RouteMapping) => (mapping.replacement as string).split(' ')[1] as string);
 
 describe('every mapped frontend route is served', () => {
   it('has frontend routes to check', () => {
