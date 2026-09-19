@@ -127,6 +127,13 @@ export class LocalReauthenticationDto {
 }
 
 
+export class LocalEmailChangeRequestDto {
+  @ApiProperty({ example: 'new-email@example.com', maxLength: 254 }) @IsEmail() @MaxLength(254) readonly email!: string;
+}
+export class LocalEmailChangeCompleteDto {
+  @ApiProperty({ minLength: 32, maxLength: 512 }) @IsString() @MinLength(32) @MaxLength(512) readonly token!: string;
+}
+
 export class LocalPasswordChangeDto {
   @ApiProperty({ maxLength: 128 })
   @IsString()
@@ -246,6 +253,29 @@ export class LocalAuthController {
       }
     }
     return { accepted: true };
+  }
+
+  @Post('email-change/request')
+  @HttpCode(202)
+  @UseGuards(SessionGuard, CsrfGuard, ReauthGuard)
+  @ApiOperation({ summary: 'Send a verification link for a new login email' })
+  async requestEmailChange(@Req() request: RequestWithSession, @Body() body: LocalEmailChangeRequestDto) {
+    const session = requireSession(request);
+    if (!session.user_id) throw new ForbiddenException('login required');
+    const email = normalizeEmail(body.email);
+    const token = randomToken();
+    const accepted = await this.credentialStore().startEmailChange(session.id, session.user_id, email, emailHash(email), sha256(token));
+    if (!accepted) throw new BadRequestException('email change unavailable');
+    await this.verificationEmails.send({ to: email, token, baseUrl: this.config.baseUrl, purpose: 'email-change' });
+    return { accepted: true, verificationRequired: true };
+  }
+
+  @Post('email-change/complete')
+  @ApiOperation({ summary: 'Verify and activate a new login email' })
+  async completeEmailChange(@Body() body: LocalEmailChangeCompleteDto) {
+    const completed = await this.credentialStore().completeEmailChange(body.token);
+    if (!completed) throw new UnauthorizedException('email change failed');
+    return { outcome: 'email-changed' as const, sessionsRevoked: true };
   }
 
   @Post('password/change')
