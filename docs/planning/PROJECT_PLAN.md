@@ -1894,3 +1894,12 @@ Add an opt-in hourly AI newsroom automation path for the fictional stock market.
 - Mobile is recomposed rather than scaled down. Preserve 44px touch targets, keyboard/focus, reduced motion and explicit 403/404/loading/empty/error/reauth states.
 - Visual work must not weaken API/backend/auth/ledger authority.
 - Branch: feat/frontend-full-rebuild-v2026.09.19.271.
+
+
+### v2026.09.19.273 — Visible mobile-home redesign checkpoint
+
+- The v271 route-family baseline was not sufficient evidence of a visible redesign. A real production screenshot showed the mobile home still dominated by a large rounded hero card, repeated rounded surfaces, glow, pill-style actions and a floating rounded bottom navigation.
+- v273 changes the rendered mobile home composition itself: remove the oversized rounded/glowing hero card, convert the balance area to a flat ruled ledger-like header, convert Today’s route into a linear list with rules instead of another card, flatten secondary actions and announcements, and replace the floating rounded bottom navigation with a full-width flat tab bar.
+- Review criterion: a screenshot comparison must show a clearly different information architecture, not only CSS-token or route-marker changes.
+- This is the first visible implementation checkpoint of the broader 70-route redesign program; it does not close the remaining page-by-page work.
+- Branch: feat/mobile-home-human-redesign-v2026.09.19.273.
