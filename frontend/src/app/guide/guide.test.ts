@@ -49,6 +49,15 @@ describe('the getting-started guide', () => {
     expect(guideDestinations()).toContain('/work');
   });
 
+  it('does not advertise unlimited profession work when the server enforces per-task daily limits', () => {
+    const work = GUIDE_STEPS.find((step) => step.id === 'work');
+    expect(work).toBeDefined();
+    expect((work?.points ?? []).join(' ')).toContain('서버 일일 배정 한도');
+    expect((work?.pointsEn ?? []).join(' ')).toContain('server-enforced daily assignment limit');
+    expect((work?.points ?? []).join(' ')).not.toContain('일일 횟수 제한 없이');
+    expect((work?.pointsEn ?? []).join(' ')).not.toContain('without a daily count cap');
+  });
+
   it('gives every step something to read', () => {
     for (const step of GUIDE_STEPS) {
       expect(step.title.length, step.id).toBeGreaterThan(0);
