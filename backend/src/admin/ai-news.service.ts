@@ -766,14 +766,21 @@ export class AiNewsService {
   async autoGenerateAndPublish(actorUserId: string): Promise<Record<string, unknown>> {
     const credential = await this.open(actorUserId);
     const context = await this.repository.context(actorUserId);
+    const listedSymbols = registeredStockSymbols(context);
+    if (listedSymbols.size === 0) {
+      return { skipped: true, reason: 'no_registered_stocks' };
+    }
     const batch = await this.caller({
       apiBaseUrl: credential.apiBaseUrl,
       apiKey: credential.apiKey,
       model: credential.model,
       system: SYSTEM_PROMPT,
-      user: userPrompt(context, '자동 시장 뉴스: 현재 흐름을 자연스럽게 이어가되 과도한 충격은 피하세요.'),
+      user: userPrompt(
+        context,
+        '자동 시장 뉴스: 현재 활성 등록 종목만 사용하세요. 전체시장(null) 효과는 만들지 말고, 실제 등록 심볼을 정확히 사용하며 현재 흐름을 자연스럽게 이어가되 과도한 충격은 피하세요.',
+      ),
     });
-    const scenarios = normalise(batch, context);
+    const scenarios = normaliseRegisteredStockAuto(batch, context);
     if (scenarios.length === 0) {
       throw new AiNewsUnavailableError('ai_news_model_unusable', 'the model wrote nothing safe enough to store');
     }
@@ -864,13 +871,44 @@ export class AiNewsService {
  * scenario that moves nothing -- or has no headline left after trimming --
  * is dropped rather than taking the four beside it down.
  */
-export function normalise(batch: ScenarioBatch, context: Record<string, unknown>): ScenarioProposal[] {
-  const listed = new Set(
+export function registeredStockSymbols(context: Record<string, unknown>): Set<string> {
+  return new Set(
     (Array.isArray(context.stocks) ? context.stocks : [])
       .map((stock) => (typeof stock === 'object' && stock !== null ? (stock as { symbol?: unknown }).symbol : undefined))
       .filter((symbol): symbol is string => typeof symbol === 'string')
-      .map((symbol) => symbol.toUpperCase()),
+      .map((symbol) => symbol.trim().toUpperCase())
+      .filter((symbol) => symbol.length > 0),
   );
+}
+
+/**
+ * Automatic publication is deliberately narrower than the operator newsroom:
+ * every effect must name a currently active registered stock. Whole-market
+ * legs are removed, unknown/inactive symbols are already removed by normalise,
+ * and candidates are bounded to two movers, strength 1-2 and 24 hours before
+ * they can ever reach the price-writing event function.
+ */
+export function normaliseRegisteredStockAuto(
+  batch: ScenarioBatch,
+  context: Record<string, unknown>,
+): ScenarioProposal[] {
+  const listed = registeredStockSymbols(context);
+  if (listed.size === 0) return [];
+  return normalise(batch, context)
+    .map((scenario) => ({
+      ...scenario,
+      hours: Math.min(24, scenario.hours),
+      effects: scenario.effects.filter((effect) =>
+        effect.stock_symbol !== null && listed.has(effect.stock_symbol) && effect.strength <= 2),
+    }))
+    .filter((scenario) => {
+      const movers = scenario.effects.filter((effect) => effect.direction !== 'none');
+      return movers.length >= 1 && movers.length <= 2;
+    });
+}
+
+export function normalise(batch: ScenarioBatch, context: Record<string, unknown>): ScenarioProposal[] {
+  const listed = registeredStockSymbols(context);
   const proposals: ScenarioProposal[] = [];
   for (const scenario of batch.scenarios.slice(0, HOW_MANY)) {
     const headline = scenario.headline.trim().slice(0, 120);

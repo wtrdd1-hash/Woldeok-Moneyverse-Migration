@@ -8,6 +8,7 @@ import {
   SYSTEM_PROMPT,
   endpoint,
   normalise,
+  normaliseRegisteredStockAuto,
   openAiCaller,
   openAiLister,
   userPrompt,
@@ -157,6 +158,43 @@ describe('normalise', () => {
   it('never stores more than five', () => {
     const out = normalise({ scenarios: Array.from({ length: 5 }, () => proposal()) }, CONTEXT);
     expect(out).toHaveLength(5);
+  });
+});
+
+describe('registered-stock automatic scenarios', () => {
+  it('keeps only currently registered stock effects and rejects whole-market or strength-3 effects', () => {
+    const out = normaliseRegisteredStockAuto({
+      scenarios: [
+        proposal({
+          hours: 72,
+          effects: [
+            effect({ stock_symbol: 'myuy', direction: 'up', strength: 2 }),
+            effect({ stock_symbol: 'GHOST', direction: 'down', strength: 1 }),
+            effect({ stock_symbol: null, direction: 'down', strength: 1 }),
+            effect({ stock_symbol: 'DUCK', direction: 'up', strength: 3 }),
+          ],
+        }),
+      ],
+    }, CONTEXT);
+    expect(out).toHaveLength(1);
+    expect(out[0]?.hours).toBe(24);
+    expect(out[0]?.effects).toEqual([{ stock_symbol: 'MYUY', direction: 'up', strength: 2 }]);
+  });
+
+  it('returns no automatic scenario when no registered stock exists', () => {
+    expect(normaliseRegisteredStockAuto({ scenarios: [proposal()] }, { ...CONTEXT, stocks: [] })).toEqual([]);
+  });
+
+  it('does not call the model when the registered-stock catalog is empty', async () => {
+    const repository = fakeRepository({ context: vi.fn(async () => ({ ...CONTEXT, stocks: [] })) } as Partial<AiNewsRepository>);
+    const caller = vi.fn();
+    const service = new AiNewsService(repository, SEALING, caller);
+    await expect(service.autoGenerateAndPublish(ACTOR)).resolves.toEqual({
+      skipped: true,
+      reason: 'no_registered_stocks',
+    });
+    expect(caller).not.toHaveBeenCalled();
+    expect(repository.createBatch).not.toHaveBeenCalled();
   });
 });
 
