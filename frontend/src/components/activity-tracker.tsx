@@ -25,7 +25,7 @@ function eventId(): string {
 export function ActivityTracker() {
   const pathname = usePathname();
   // Query strings may contain member IDs, IP addresses, or other private filters.
-  // Request middleware records the server route; client telemetry records pathname only.
+  // Request proxy records the server route; client telemetry records pathname only.
   const currentPath = pathname;
 
   const pageEnteredAtRef = useRef<number>(Date.now());
