@@ -84,6 +84,13 @@ describe('every game the screen declares is reachable on it', () => {
     expect(page).toContain('/api/v1/casino/self-limit');
   });
 
+  it('does not call a failed authoritative terms read a game that is still being built', () => {
+    expect(page).toContain("games.state === 'unavailable'");
+    expect(page).toContain('주사위 서버 규칙을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.');
+    expect(page).not.toContain('주사위 홀짝 게임을 준비 중입니다.');
+    expect(page).not.toContain('주사위 숫자 게임을 준비 중입니다.');
+  });
+
   it('reads dedicated casino history instead of filtering the wallet feed', () => {
     expect(page).toContain('/api/v1/casino/history');
     expect(page).toContain('ThemeGameCard');
