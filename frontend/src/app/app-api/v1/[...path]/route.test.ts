@@ -113,4 +113,15 @@ describe('app API route compatibility', () => {
     expect([...new Uint8Array(await response.arrayBuffer())]).toEqual([1, 2, 3]);
   });
 
+  it('does not reflect a spoofed forwarded host into contract metadata', async () => {
+    const response = await GET(
+      request('/app-api/v1/meta/contract', { 'x-forwarded-host': 'attacker.example', 'x-forwarded-proto': 'http' }),
+      context('meta', 'contract'),
+    );
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.baseUrl).toBe('https://easy-scraping.com/app-api/v1');
+    expect(JSON.stringify(body)).not.toContain('attacker.example');
+  });
+
 });

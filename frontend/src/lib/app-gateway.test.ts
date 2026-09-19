@@ -31,13 +31,26 @@ describe('appGatewayPath', () => {
 });
 
 describe('appGatewayOrigin', () => {
-  it('derives the public origin from trusted proxy headers', () => {
+  it('derives the public origin from deployment configuration', () => {
     const headers = new Headers({ 'x-forwarded-host': 'easy-scraping.com', 'x-forwarded-proto': 'https' });
-    expect(appGatewayOrigin(headers)).toBe('https://easy-scraping.com');
+    expect(appGatewayOrigin(headers, 'https://easy-scraping.com')).toBe('https://easy-scraping.com');
   });
 
-  it('rejects a malformed host', () => {
-    expect(appGatewayOrigin(new Headers())).toBeNull();
+  it('fails closed when the public base URL is missing', () => {
+    expect(appGatewayOrigin(new Headers(), '')).toBeNull();
+  });
+
+  it('does not trust spoofed forwarded host or protocol for public URLs', () => {
+    const headers = new Headers({
+      host: 'attacker.example',
+      'x-forwarded-host': 'attacker.example',
+      'x-forwarded-proto': 'http',
+    });
+    expect(appGatewayOrigin(headers, 'https://easy-scraping.com')).toBe('https://easy-scraping.com');
+  });
+
+  it('fails closed when the configured public base URL is invalid', () => {
+    expect(appGatewayOrigin(new Headers({ host: 'easy-scraping.com' }), 'javascript:alert(1)')).toBeNull();
   });
 });
 
