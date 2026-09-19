@@ -14,14 +14,14 @@ server {
   location / { proxy_pass http://127.0.0.1:3101; }
 }
 server {
-  server_name prod.example;
+  server_name _;
   location = /health { proxy_pass http://127.0.0.1:3000/health; }
   location /api { proxy_pass http://127.0.0.1:3000; }
   location / { proxy_pass http://127.0.0.1:3001; }
 }
 '''
 
-updated = mod.switch_ports(sample, 'prod.example', 3000, 3002, 3001, 3003)
+updated = mod.switch_ports(sample, '_', 3000, 3002, 3001, 3003)
 assert '127.0.0.1:3002/health' in updated
 assert '127.0.0.1:3002;' in updated
 assert '127.0.0.1:3003;' in updated

@@ -40,7 +40,10 @@ case "$ENVIRONMENT" in
     RELEASE_WRITER="$SCRIPT_DIR/write-test-release-env.sh"
     ;;
   production)
-    SERVER_NAME='easy-scraping.com'
+    # The public site is intentionally the default catch-all block. Keep the
+    # selector aligned with the authoritative Nginx configuration rather than
+    # assuming a named virtual host that does not exist.
+    SERVER_NAME='_'
     PRIMARY_BACKEND=3000
     PRIMARY_FRONTEND=3001
     CANARY_BACKEND=3002
@@ -71,6 +74,7 @@ cp "$RELEASE_BACKEND_ENV" "$TMP_BACKEND_ENV"
 cp "$RELEASE_FRONTEND_ENV" "$TMP_FRONTEND_ENV"
 sed -i -E "s/^PORT=.*/PORT=$CANARY_BACKEND/; s/^BUILD_ID=.*/BUILD_ID=$SHA/; s#^API_ORIGIN=.*#API_ORIGIN=http://127.0.0.1:$CANARY_BACKEND#" "$TMP_BACKEND_ENV"
 sed -i -E "s/^BUILD_ID=.*/BUILD_ID=$SHA/; s#^API_ORIGIN=.*#API_ORIGIN=http://127.0.0.1:$CANARY_BACKEND#" "$TMP_FRONTEND_ENV"
+if ! grep -q '^PORT=' "$TMP_BACKEND_ENV"; then echo "PORT=$CANARY_BACKEND" >>"$TMP_BACKEND_ENV"; fi
 if ! grep -q '^BUILD_ID=' "$TMP_BACKEND_ENV"; then echo "BUILD_ID=$SHA" >>"$TMP_BACKEND_ENV"; fi
 if ! grep -q '^BUILD_ID=' "$TMP_FRONTEND_ENV"; then echo "BUILD_ID=$SHA" >>"$TMP_FRONTEND_ENV"; fi
 if ! grep -q '^API_ORIGIN=' "$TMP_FRONTEND_ENV"; then echo "API_ORIGIN=http://127.0.0.1:$CANARY_BACKEND" >>"$TMP_FRONTEND_ENV"; fi
