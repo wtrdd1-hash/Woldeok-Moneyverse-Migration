@@ -7,7 +7,7 @@ import { DETECTED_LOCALE_COOKIE, LOCALE_COOKIE, detectLocale, isLocale } from '@
  * public proxy; the Nest service remains private loopback HTTP and is reached
  * only through the same-origin BFF.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // The host Nginx sends ordinary website traffic to the production frontend.
