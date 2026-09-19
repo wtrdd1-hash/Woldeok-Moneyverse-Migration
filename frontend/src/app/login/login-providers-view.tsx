@@ -28,7 +28,7 @@ const PROVIDERS = {
 type ProviderId = keyof typeof PROVIDERS;
 const ORDER: readonly ProviderId[] = ['discord', 'google'];
 
-export async function LoginProvidersView({ error }: { readonly error?: string | undefined }) {
+export async function LoginProvidersView({ error, notice }: { readonly error?: string | undefined; readonly notice?: string | undefined }) {
   const data = await apiOrNull<{ providers: { id: string; enabled: boolean }[] }>(
     '/api/v1/auth/providers',
   );
@@ -48,6 +48,8 @@ export async function LoginProvidersView({ error }: { readonly error?: string | 
       >
         월덕 머니버스 자체 계정 또는 Discord·Google 계정으로 로그인할 수 있어요.
       </PageHeader>
+
+      {notice && <Alert><AlertDescription>{notice}</AlertDescription></Alert>}
 
       {error && (
         <Alert variant="destructive">
@@ -92,7 +94,8 @@ export async function LoginProvidersView({ error }: { readonly error?: string | 
               <ArrowRight />
             </Button>
             <p className="text-xs text-muted-foreground">
-              비밀번호는 로그인 확인에만 사용되며 브라우저 저장소에 보관하지 않습니다.
+              비밀번호는 로그인 확인에만 사용되며 브라우저 저장소에 보관하지 않습니다.{' '}
+              <Link href="/forgot-password" className="text-primary">비밀번호를 잊으셨나요?</Link>
             </p>
           </form>
         </CardContent>
