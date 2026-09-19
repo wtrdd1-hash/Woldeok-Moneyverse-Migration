@@ -910,3 +910,9 @@ AI lane은 `macro`, `shop`, `stock`, `jobs`, `welfare`, `integrity` 6개 분야�
 로컬 AI 저장소는 앱 시스템 디스크와 분리하며 `/srv/moneyverse-data/ai/{models,adapters,cache,datasets,evals,logs}`를 기본 root로 사용한다. 12개 모델을 동시에 상주시킬 필요는 없고 로컬 추론은 제한된 동시성으로 실행한다.\n\n## 34. AI 주식 시나리오 자동 게시 (v2026.09.19.261)
 
 기존 AI 뉴스룸은 AI_NEWS_AUTO_ENABLED=true이고 감사 가능한 운영자 actor UUID가 설정된 경우 시간별 스케줄러에서 실행할 수 있다. 모델은 가상 시장 시나리오만 생성하며 절대 주가를 직접 기록하지 않는다. 자동 선택 범위는 수동 게시보다 좁다. 전체시장 leg 금지, 강도 3 금지, 실제 변동 종목 최대 2개, 지속시간 최대 24시간이다. 게시는 기존 market-event 함수를 그대로 사용하므로 서킷브레이커, 일중 가격 밴드, 멱등성, 이벤트 점프 파라미터와 지속 drift가 계속 최종 권위다. 안전 후보가 없으면 배치만 저장하고 아무 시나리오도 자동 게시하지 않는다.
+
+### 34.1 실제 등록 주식 전용 자동 생성 (v2026.09.19.285)
+
+자동 생성은 권위 있는 AI 뉴스 context가 제공하는 `virtual_stocks`의 현재 `active=true` 등록 종목만 사용해야 한다. 자동 게시 가능한 모든 effect는 이 등록 심볼 중 하나를 반드시 지정해야 하며 전체시장/null effect, 미등록 심볼, 비활성 종목, 강도 3 effect는 자동 후보에서 제외한다. 활성 등록 종목이 0개면 모델을 호출하기 전에 fail-closed로 종료한다. 자동 시나리오는 최대 24시간으로 제한하고 실제로 움직이는 등록 종목은 최대 2개다.
+
+스케줄러 feature flag가 존재하는 것만으로 기능 작동을 증명하지 않는다. Test와 Production 승격 증거에는 기능 활성화, 감사 가능한 actor UUID 설정, 시간별 job 성공, 저장된 AI batch/scenario의 effect가 실제 활성 `virtual_stocks`에 resolve되는지 확인한 결과, 기존 market-event 경로를 통한 게시 결과가 포함되어야 한다. 실행 detail이 `disabled` 또는 `actor_missing`인 scheduler row는 생성 성공이 아니라 skip으로 보고해야 한다.
