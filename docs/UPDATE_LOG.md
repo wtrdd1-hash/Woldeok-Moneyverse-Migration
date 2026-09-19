@@ -1,5 +1,11 @@
 # Update Log
 
+## v2026.09.19.275 — Blue/green continuity and automatic latest-build refresh
+
+- Branch: `ops/blue-green-cache-refresh-v2026.09.19.275`.
+- Added automatic cache-busted stale-build refresh without clearing login state and a reusable canary-first host blue/green deployment helper.
+- Pre-promotion checks: helper regressions, frontend 7/7, typecheck, and real-DB authenticated-session continuity passed.
+
 ## v2026.09.19.274 — Deployment continuity and cache-freshness standard
 
 - Branch: .
