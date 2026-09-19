@@ -4,6 +4,10 @@
 - Made administrator AI status distinguish model reachability, review evidence, proposal blocking and scheduler failure/staleness.
 - Added narrow-screen card layouts for AI evidence, traffic series and activity logs.
 
+## v2026.09.19.275
+
+Added automatic stale-build refresh and repeatable canary-first blue/green host promotion while preserving PostgreSQL-backed login sessions.
+
 ## v2026.09.18.232 — Admin User Recent Access
 - Added a dedicated recent-access field to the administrator member directory with full Asia/Seoul date-time display.
 - Added sorting by most recent access while preserving search, restriction filtering, asset inspection and detail/audit navigation.
@@ -14,6 +18,10 @@
 - No database, ledger, authorization, or trading mutation path changed.
 
 # Changelog
+
+## v2026.09.19.274
+
+Standardized zero-downtime frontend/backend rollout, member-session continuity across restart, and cache-freshness verification so clients receive the current release without manual cache clearing.
 
 ## v2026.09.12.13 — Automatic Test-to-Production GitOps Reconciliation
 - Added an exact application SHA as the public build identity used by `/api/version`.

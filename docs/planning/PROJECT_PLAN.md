@@ -2,12 +2,21 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.19.265
+> Current integrated version: v2026.09.19.275
 > Implementation/evidence sync: 2026-09-19
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+## Cycle delta — v2026.09.19.275 (2026-09-19)
+
+### Automatic latest-build refresh and repeatable host blue/green promotion
+- **Authority / branch:** implementation is isolated on `ops/blue-green-cache-refresh-v2026.09.19.275` from current `main`; the plan and remote `main` were re-read mid-work before runtime promotion.
+- **Frontend freshness:** the existing stale-tab detector no longer requires the member to click refresh for a normal deployment. When frontend `/frontend-version` reports a different build, the visible tab performs one cache-busted same-route navigation using `__mv_release=<build>`, preserving cookies/session state and existing query/hash. A sessionStorage transition guard prevents reload loops if an intermediary cache still serves the old shell; only then is a manual fallback shown.
+- **Host rollout:** add a fail-closed blue/green helper that starts exact-release backend/frontend canaries on alternate ports, verifies health/version, switches only the selected Nginx server block, restarts stable systemd services behind the canary, verifies the stable ports on the exact SHA, then returns Nginx to stable ports. Failure preserves the canary edge if the primary is unhealthy rather than creating downtime.
+- **Session continuity:** the existing real-PostgreSQL authenticated-session recreation test remains mandatory and passed before Test promotion. Release environment generation keeps secrets outside release directories and writes only runtime identity/routing.
+- **QA / promotion:** helper regression, frontend stale-tab regression, frontend typecheck/build, real-DB session continuity, exact-SHA isolated Test blue/green promotion, public Test health/version/catalog/noindex/page smoke and fatal-log scan precede any Production promotion. Production uses the same exact merged SHA and zero-downtime sequence.
 
 ## Cycle delta — v2026.09.19.265 (2026-09-19)
 

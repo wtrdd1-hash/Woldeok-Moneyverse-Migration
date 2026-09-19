@@ -2,12 +2,21 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.19.265
+> **현재 통합 버전:** v2026.09.19.275
 > **구현·증거 동기화:** 2026-09-19
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 변경 — v2026.09.19.275 (2026-09-19)
+
+### 최신 빌드 자동 갱신과 반복 가능한 host blue/green 승격
+- **기준/브랜치:** 현재 `main`에서 `ops/blue-green-cache-refresh-v2026.09.19.275` 브랜치를 분리했으며 런타임 승격 전에 기획서와 원격 `main`을 작업 중간에 다시 확인했습니다.
+- **프론트 최신성:** 기존 stale-tab 감지는 일반 배포에서 사용자의 새로고침 클릭을 요구하지 않습니다. frontend `/frontend-version`이 다른 build를 보고하면 보이는 탭이 `__mv_release=<build>`를 붙여 같은 경로를 한 번 cache-bust 재이동하며 쿠키/로그인 세션과 기존 query/hash는 유지합니다. 중간 캐시가 계속 이전 shell을 주는 경우 sessionStorage 전환 가드가 reload loop를 막고 그때만 수동 fallback을 표시합니다.
+- **Host rollout:** 정확한 release backend/frontend canary를 대체 포트에 먼저 기동하고 health/version을 검증한 뒤 선택한 Nginx server block만 전환합니다. canary가 트래픽을 받는 동안 stable systemd 서비스를 재시작하고 exact SHA를 확인한 다음 Nginx를 stable port로 되돌립니다. 실패 시 primary가 비정상이면 canary edge를 유지해 중단을 만들지 않습니다.
+- **세션 연속성:** 기존 실 PostgreSQL 인증 세션 repository 재생성 테스트를 필수로 유지하며 Test 승격 전 통과했습니다. 릴리스 환경 생성은 비밀값을 release 밖에 유지하고 runtime identity/routing만 기록합니다.
+- **QA/승격:** helper regression, frontend stale-tab regression, frontend typecheck/build, 실 DB session continuity, exact-SHA 격리 Test blue/green 승격, 공개 Test health/version/catalog/noindex/page smoke와 fatal log 확인 후에만 Production 승격합니다. Production도 동일한 merged exact SHA와 무중단 절차를 사용합니다.
 
 ## 회차 변경 — v2026.09.19.265 (2026-09-19)
 

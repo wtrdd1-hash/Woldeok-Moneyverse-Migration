@@ -36,6 +36,12 @@ Production 백엔드 승격으로 회원 로그인이 풀리면 안 됩니다. �
 
 호스트 systemd mirror에서는 비밀값과 `DATABASE_URL`을 immutable release 디렉터리 밖의 `/etc/moneyverse/backend-production.env`에 고정하고, 릴리스 식별자는 `/etc/moneyverse/backend-release.env`에 분리하며, `WorkingDirectory`는 `/srv/moneyverse-data/releases/production-current/backend`를 사용합니다. 검토된 drop-in 예시는 `ops/systemd/moneyverse-backend-session-continuity.conf.example`입니다. Production 승격 전 Test에서 재시작 전에 발급한 쿠키가 재시작 후 새 세션 발급 없이 그대로 승인되는지 확인하고, 실 DB 인증 테스트에서 로그인된 세션이 repository/process 재생성 후에도 유지되는지 확인합니다. 롤백은 코드/런타임 포인터만 되돌리고 `auth_sessions`는 변경하지 않습니다.
 
+## 필수 무중단 전환과 캐시 최신화
+
+프론트엔드/백엔드 런타임 승격은 모두 무중단 handoff를 사용합니다. 새 인스턴스를 시작하거나 rolling rollout하고 readiness를 확인한 다음 이전 인스턴스를 제거하며, 유일한 정상 Production 프로세스를 먼저 내려 의도적인 공개 공백을 만들지 않습니다. 회원 인증 연속성은 권고가 아니라 릴리스 게이트이며, 재시작 전에 발급된 회원 쿠키가 동일 `auth_sessions` 저장소를 사용하는 재시작 후 backend에서도 유효해야 합니다.
+
+캐시 초기화는 사용자 조작 없이 새 application shell이 적용되도록 해야 합니다. 버전에 민감한 HTML/bootstrap 응답은 browser/proxy에서 무기한 재사용하지 않고 재검증하며, content-hash가 붙은 immutable asset만 장기 TTL을 유지할 수 있습니다. 승격 검증에서는 공개 version/SHA를 확인하고 새 요청이 이전 릴리스 shell이 아닌지 확인합니다. 캐시 정리를 위해 PostgreSQL 회원 세션을 건드리면 안 됩니다.
+
 ## 예상 순서
 1. 검증된 애플리케이션 코드를 `main`에 병합합니다.
 2. CI가 정확한 SHA의 `-test` 이미지를 자동 빌드합니다.
