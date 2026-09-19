@@ -70,3 +70,10 @@ describe('AccountSecurityRepository', () => {
     await expect(repository.revokeOtherSessions('user', 'current')).resolves.toBe(3);
   });
 });
+
+describe('AccountSecurityRepository recent events', () => {
+  it('returns privacy-minimized recent security events', async () => {
+    const repository = new AccountSecurityRepository(db((text) => text.includes('account_recent_security_events') ? [{ event_type: 'local_login_succeeded', created_at: new Date('2026-09-19T10:00:00.000Z') }] : []));
+    await expect(repository.recentEvents('user')).resolves.toEqual([{ type: 'local_login_succeeded', createdAt: '2026-09-19T10:00:00.000Z' }]);
+  });
+});
