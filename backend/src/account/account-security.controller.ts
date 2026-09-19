@@ -45,6 +45,12 @@ export class AccountSecurityController {
     };
   }
 
+  @Get('events')
+  @ApiOperation({ summary: 'Recent security events belonging to the caller' })
+  async events(@Req() request: RequestWithSession) {
+    return { events: await this.repository().recentEvents(requireUserId(request)) };
+  }
+
   @Delete('sessions/:id')
   @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Revoke one other active session belonging to the caller' })
