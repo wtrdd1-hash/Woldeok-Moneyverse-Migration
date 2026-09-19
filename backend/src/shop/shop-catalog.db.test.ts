@@ -61,7 +61,9 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
 
     it('lists the seeded catalogue with every amount still a string', async () => {
       const rows = await catalogue().catalog(UNKNOWN_MEMBER);
-      expect(rows.length, 'all Store 2.0 products need an inventory policy').toBeGreaterThanOrEqual(78);
+      expect(rows.length, 'all Store 2.0 products need an inventory policy').toBeGreaterThanOrEqual(
+        78,
+      );
 
       const gloves = rows.find((row) => row.code === 'work_gloves');
       expect(gloves, 'work_gloves is seeded by 073').toBeDefined();
@@ -359,11 +361,10 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
         const { rows: replay } = await client.query<{
           remaining_quantity: number;
           replayed: boolean;
-        }>(`SELECT used.remaining_quantity, used.replayed FROM public.shop_use_item($1, $2, $3) AS used`, [
-          key,
-          actor,
-          kit,
-        ]);
+        }>(
+          `SELECT used.remaining_quantity, used.replayed FROM public.shop_use_item($1, $2, $3) AS used`,
+          [key, actor, kit],
+        );
         expect(replay[0]?.replayed).toBe(true);
         expect(replay[0]?.remaining_quantity).toBe(2);
       });
