@@ -26,6 +26,9 @@ import {
 
 const STATUS_STATES = new Set(['operational', 'degraded', 'outage', 'maintenance', 'unknown']);
 const SOURCE_KEY_PATTERN = /^[a-z][a-z0-9_-]{2,63}$/;
+const STATUS_POLICY_VERSION = 'status-v1';
+const STATUS_STALE_AFTER_MS = 60_000;
+const STATUS_MAX_FUTURE_SKEW_MS = 5_000;
 
 function timestamp(
   value: unknown,
@@ -129,9 +132,12 @@ export interface ContentStatus {
   readonly state: string;
   readonly detail: string | null;
   readonly observedAt: string | null;
+  readonly freshnessState: 'fresh' | 'stale' | 'unknown';
+  readonly ageMs: number | null;
+  readonly policyVersion: string;
 }
 
-function normalizeStatus(row: ContentStatusRow): ContentStatus {
+function normalizeStatus(row: ContentStatusRow, nowMs = Date.now()): ContentStatus {
   const sourceKey = String(row?.source_key ?? '');
   if (!SOURCE_KEY_PATTERN.test(sourceKey))
     throw new Error('database returned an invalid status source');
@@ -145,12 +151,25 @@ function normalizeStatus(row: ContentStatusRow): ContentStatus {
   if ((state === 'unknown') !== (observedAt === null)) {
     throw new Error('database returned an inconsistent status snapshot');
   }
+  const observedMs = observedAt === null ? null : Date.parse(observedAt);
+  const rawAgeMs = observedMs === null ? null : nowMs - observedMs;
+  const futureInvalid = rawAgeMs !== null && rawAgeMs < -STATUS_MAX_FUTURE_SKEW_MS;
+  const ageMs = rawAgeMs === null || futureInvalid ? null : Math.max(0, rawAgeMs);
+  const freshnessState =
+    observedAt === null || futureInvalid
+      ? 'unknown'
+      : ageMs !== null && ageMs > STATUS_STALE_AFTER_MS
+        ? 'stale'
+        : 'fresh';
   return {
     sourceKey,
     displayName: databasePlainText(row?.display_name, 'status display name', 80),
-    state,
+    state: freshnessState === 'fresh' ? state : 'unknown',
     detail,
     observedAt,
+    freshnessState,
+    ageMs,
+    policyVersion: STATUS_POLICY_VERSION,
   };
 }
 
@@ -322,7 +341,7 @@ export class ContentService {
   }
 
   async serviceStatus(): Promise<ContentStatus[]> {
-    return (await this.repository.publicStatus()).map(normalizeStatus);
+    return (await this.repository.publicStatus()).map((row) => normalizeStatus(row));
   }
 
   async publicPage({
