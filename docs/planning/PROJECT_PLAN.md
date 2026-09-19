@@ -2,11 +2,23 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.19.279
+> Current integrated version: v2026.09.19.286
 > Implementation/evidence sync: 2026-09-19
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.19.286 (2026-09-19)
+
+### Next development phase: full frontend rebuild with backend-authority verification
+- **Scope:** the next implementation phase must rebuild the web frontend from the ground up rather than incrementally restyling the current shell. Existing screens may be used only as behavioral/reference evidence; the new information architecture, page composition, component structure, spacing, typography, interaction patterns, empty/loading/error states and responsive behavior must be deliberately redesigned.
+- **Backend/API first:** before rebuilding each route, inventory the backend/API capability actually available for that route, including authentication/authorization, validation, persistence, pagination, idempotency, economy/ledger authority, admin boundaries, error contracts and realtime/refresh behavior. Do not invent client-only behavior that conflicts with server authority. Any backend-only capability missing a usable frontend must be mapped into the rebuild backlog.
+- **Human-designed visual standard:** avoid repetitive AI-generated-looking card grids, excessive gradients/glass effects, generic dashboard shells, placeholder-copy patterns, over-uniform spacing, duplicated section templates and decorative complexity without product meaning. UI decisions must be traceable to real product tasks, content hierarchy, accessibility and reference research. Visual consistency comes from a maintained design system, not from cloning one template across all pages.
+- **Responsive contract:** every rebuilt route must be designed and verified at mobile, tablet, laptop and wide-desktop widths, with no horizontal overflow, clipped controls, inaccessible dialogs, fixed-width tables, broken navigation or touch targets. Required baseline viewports include 320, 360, 390, 768, 1024, 1280 and 1440 CSS px, plus zoom/reflow checks where applicable.
+- **Component/system rebuild:** define new tokens for typography, spacing, radius, border, elevation, motion and density; establish shared navigation, form, table/list, modal/drawer, feedback, data-visualization and page-shell primitives; preserve semantic HTML, keyboard navigation, visible focus, reduced-motion handling and screen-reader structure.
+- **Route-by-route acceptance:** a route is complete only when its backend contract is verified, all user states are represented, loading/empty/error/permission/expired-session paths are implemented, responsive QA passes, visual regression checks are clean, and desktop/mobile behavior is validated against the same server-authoritative data.
+- **Execution order:** (1) backend/API inventory and route matrix, (2) design-system foundation, (3) global shell/navigation, (4) authentication/account, (5) core economy/work/stocks/wallet flows, (6) shop/market/community/content surfaces, (7) admin/operations surfaces, (8) full responsive/accessibility/performance QA, then exact-SHA Test promotion and Production promotion under the existing zero-downtime release contract.
+- **Release gate:** rebuild work must remain isolated on feature branches, merge only after Test proves the exact candidate SHA, and promote only the exact merged SHA. Production promotion remains zero-downtime and must preserve authenticated sessions. Any route with unverified backend behavior, broken responsive layout, stale contract assumptions or regression in critical flows blocks promotion.
 
 ## Cycle delta — v2026.09.19.279 (2026-09-19)
 
