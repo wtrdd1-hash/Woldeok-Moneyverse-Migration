@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET } from './route';
 
@@ -12,7 +12,12 @@ function context(...path: string[]) {
   return { params: Promise.resolve({ path }) };
 }
 
+beforeEach(() => {
+  vi.stubEnv('APP_BASE_URL', 'https://easy-scraping.com');
+});
+
 afterEach(() => {
+  vi.unstubAllEnvs();
   vi.unstubAllGlobals();
 });
 
