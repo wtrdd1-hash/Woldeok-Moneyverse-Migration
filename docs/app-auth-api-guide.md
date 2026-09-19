@@ -79,7 +79,6 @@ PUT /app-api/v1/auth/consent HTTP/1.1
 Host: easy-scraping.com
 Content-Type: application/json
 Cookie: <prelogin cookie>
-x-csrf-token: <current csrf token>
 
 {
   "termsCompleted": true,
@@ -99,7 +98,6 @@ POST /app-api/v1/auth/local/register HTTP/1.1
 Host: easy-scraping.com
 Content-Type: application/json
 Cookie: <prelogin cookie>
-x-csrf-token: <current csrf token>
 
 {
   "email": "member@example.com",
@@ -133,15 +131,13 @@ Production does not return the raw verification token. The user receives it thro
 POST /app-api/v1/auth/local/verify-email HTTP/1.1
 Host: easy-scraping.com
 Content-Type: application/json
-Cookie: <same prelogin cookie>
-x-csrf-token: <current csrf token>
 
 {
   "token": "<verification token from email>"
 }
 ```
 
-Successful verification activates the account and signs the user in. Replace the CookieJar state with any returned `Set-Cookie` update and save the new CSRF token.
+The email token is single-use and is sufficient for this verification request; the originating prelogin cookie and CSRF token are not required, including cross-browser completion. Successful verification activates the account and signs the user in. Replace the CookieJar state with any returned `Set-Cookie` update and save the new CSRF token.
 
 Example response:
 
@@ -153,7 +149,7 @@ Example response:
 }
 ```
 
-A failed or expired verification returns an authentication failure and must not expose internal token state.
+Invalid, expired, and already-used tokens return the same authentication failure and must not expose internal token state.
 
 ## 9. Login with email and password
 
@@ -164,7 +160,6 @@ POST /app-api/v1/auth/local/login HTTP/1.1
 Host: easy-scraping.com
 Content-Type: application/json
 Cookie: <prelogin cookie>
-x-csrf-token: <current csrf token>
 
 {
   "email": "member@example.com",
@@ -211,7 +206,6 @@ POST /app-api/v1/auth/logout HTTP/1.1
 Host: easy-scraping.com
 Content-Type: application/json
 Cookie: <signed-in session cookie>
-x-csrf-token: <current csrf token>
 
 {}
 ```

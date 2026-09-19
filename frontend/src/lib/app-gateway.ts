@@ -66,11 +66,21 @@ export function appGatewayPath(parts: readonly string[]): string | null {
   return `/api/v1/${clean.map(encodeURIComponent).join('/')}`;
 }
 
-export function appGatewayOrigin(headers: Headers): string | null {
-  const host = headers.get('x-forwarded-host') ?? headers.get('host');
-  if (!host || /[\r\n]/.test(host)) return null;
-  const proto = headers.get('x-forwarded-proto') === 'http' ? 'http' : 'https';
-  return `${proto}://${host}`;
+export function appGatewayOrigin(headers: Headers, configuredBase = process.env.APP_BASE_URL): string | null {
+  if (!configuredBase) return null;
+  try {
+    const base = new URL(configuredBase);
+    if (base.protocol !== 'https:' && base.protocol !== 'http:') return null;
+
+    // The public origin is deployment configuration, never a client-controlled
+    // Host/X-Forwarded-Host value. Keep reading the headers only to fail closed
+    // on explicit CR/LF injection attempts before forwarding the request.
+    const suppliedHost = headers.get('x-forwarded-host') ?? headers.get('host');
+    if (suppliedHost && /[\r\n]/.test(suppliedHost)) return null;
+    return base.origin;
+  } catch {
+    return null;
+  }
 }
 
 function camelAlias(key: string): string | null {
