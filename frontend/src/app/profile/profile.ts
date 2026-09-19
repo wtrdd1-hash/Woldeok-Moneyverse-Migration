@@ -57,6 +57,12 @@ export interface ProfileSettings {
   readonly featured_title: string | null;
 }
 
+export interface EarnedTitle {
+  readonly code: string;
+  readonly name: string;
+  readonly awardedAt: string;
+}
+
 export interface VisibilityChoice {
   readonly value: ProfileVisibility;
   readonly label: string;
@@ -218,14 +224,18 @@ export const NO_TITLE = 'none';
  * gets cleared.
  */
 export function titleChoices(
+  earned: readonly EarnedTitle[],
   current: string | null,
 ): readonly { readonly value: string; readonly label: string }[] {
-  const known = Object.keys(TITLE_LABELS).map((code) => ({ value: code, label: titleLabel(code) }));
+  const awarded = earned.map((title) => ({
+    value: title.code,
+    label: titleLabel(title.code) === title.code ? title.name : titleLabel(title.code),
+  }));
   const extra =
-    current !== null && !(current in TITLE_LABELS)
-      ? [{ value: current, label: current }]
+    current !== null && !awarded.some((title) => title.value === current)
+      ? [{ value: current, label: titleLabel(current) }]
       : [];
-  return [{ value: NO_TITLE, label: '칭호 없음' }, ...known, ...extra];
+  return [{ value: NO_TITLE, label: '칭호 없음' }, ...awarded, ...extra];
 }
 
 /** 079: member_titles.code CHECK (code ~ '^[a-z0-9_]{3,64}$'). */
