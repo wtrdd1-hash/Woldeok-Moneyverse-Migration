@@ -1,5 +1,11 @@
 # 업데이트 로그
 
+## v2026.09.19.275 — Blue/green 연속성 및 최신 빌드 자동 갱신
+
+- 브랜치: `ops/blue-green-cache-refresh-v2026.09.19.275`.
+- 로그인 상태를 지우지 않는 cache-bust stale-build 자동 갱신과 canary-first host blue/green 배포 helper를 추가했습니다.
+- 승격 전 helper 회귀시험, frontend 7/7, typecheck, 실 DB 인증 세션 연속성 검증을 통과했습니다.
+
 ## v2026.09.19.274 — 배포 연속성·캐시 최신화 표준
 
 - 브랜치: ops/deployment-continuity-v2026.09.19.274.
