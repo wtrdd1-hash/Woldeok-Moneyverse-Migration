@@ -18,3 +18,9 @@ grep -qx 'BUILD_ID=test-sha' "$tmp"
 grep -qx 'API_ORIGIN=http://127.0.0.1:3002' "$tmp"
 
 echo 'host-blue-green-promote-port: PASS'
+
+# Production is served by the authoritative default catch-all Nginx block.
+grep -q "SERVER_NAME='_'" "$(dirname "$0")/host-blue-green-promote.sh" || {
+  echo 'production catch-all selector missing' >&2
+  exit 1
+}

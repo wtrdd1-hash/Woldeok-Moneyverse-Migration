@@ -150,6 +150,8 @@ _No request body._
 | sessions[].reauthenticatedAt | true | null \| string |  |
 | sessions[].current | true | boolean |  |
 | sessions[].administratorSession | true | boolean |  |
+| sessions[].lastSeenAt | true | string |  |
+| sessions[].deviceLabel | true | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
