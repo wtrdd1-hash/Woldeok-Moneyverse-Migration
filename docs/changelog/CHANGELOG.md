@@ -1,3 +1,9 @@
+## v2026.09.19.291 — Durable member login sessions
+- Extended ordinary member cookie and PostgreSQL session lifetime from 30 to 180 days with sliding refresh.
+- Preserved pre-login and privileged administrator-session lifetimes.
+- Existing active member DB sessions are extended by migration; authenticated session refresh reissues the same opaque cookie without logging the user out.
+- Server/process restarts continue to reuse PostgreSQL-backed sessions rather than in-memory auth state.
+
 ## v2026.09.19.236 — AI Shadow Health and Mobile Admin Safety
 - Added daily non-authoritative AI shadow health evidence separated from authoritative policy reviews.
 - Added default-disabled profession-limit tightening with a DB-enforced 2/day effective floor.
