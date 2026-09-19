@@ -907,4 +907,6 @@ AI lane은 `macro`, `shop`, `stock`, `jobs`, `welfare`, `integrity` 6개 분야�
 
 각 분야/좌석은 서로 다른 OpenAI-compatible endpoint/model/adapter를 지정할 수 있다. 공통 기본값은 운영 편의일 뿐 독립 증거로 인정하지 않는다. 운영 독립성은 서로 다른 모델 계열, checkpoint/adapter, 학습 split, 목적함수 또는 tool/feature 정책 중 실질적 차이를 요구한다. AI 위원회가 비활성·불완전·장애·abstain 상태여도 기존 classical lane은 계속 동작한다.
 
-로컬 AI 저장소는 앱 시스템 디스크와 분리하며 `/srv/moneyverse-data/ai/{models,adapters,cache,datasets,evals,logs}`를 기본 root로 사용한다. 12개 모델을 동시에 상주시킬 필요는 없고 로컬 추론은 제한된 동시성으로 실행한다.
+로컬 AI 저장소는 앱 시스템 디스크와 분리하며 `/srv/moneyverse-data/ai/{models,adapters,cache,datasets,evals,logs}`를 기본 root로 사용한다. 12개 모델을 동시에 상주시킬 필요는 없고 로컬 추론은 제한된 동시성으로 실행한다.\n\n## 34. AI 주식 시나리오 자동 게시 (v2026.09.19.261)
+
+기존 AI 뉴스룸은 AI_NEWS_AUTO_ENABLED=true이고 감사 가능한 운영자 actor UUID가 설정된 경우 시간별 스케줄러에서 실행할 수 있다. 모델은 가상 시장 시나리오만 생성하며 절대 주가를 직접 기록하지 않는다. 자동 선택 범위는 수동 게시보다 좁다. 전체시장 leg 금지, 강도 3 금지, 실제 변동 종목 최대 2개, 지속시간 최대 24시간이다. 게시는 기존 market-event 함수를 그대로 사용하므로 서킷브레이커, 일중 가격 밴드, 멱등성, 이벤트 점프 파라미터와 지속 drift가 계속 최종 권위다. 안전 후보가 없으면 배치만 저장하고 아무 시나리오도 자동 게시하지 않는다.

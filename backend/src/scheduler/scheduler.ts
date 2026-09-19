@@ -91,6 +91,13 @@ export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
       'SELECT upkeep.charged_count, upkeep.unpaid_count, upkeep.suspended_count, upkeep.failed_count, upkeep.charged_amount::text AS charged_amount FROM public.shop_charge_weekly_upkeep() AS upkeep',
   },
   {
+    // Opt-in automatic fictional-stock scenario generation/publication.
+    job: 'stock.ai_scenario_auto',
+    cadence: 'hourly',
+    notBefore: 25,
+    connection: 'app',
+  },
+  {
     // A daily shadow run proves the configured models are actually reachable
     // even when sample sufficiency blocks policy. It writes only shadow
     // evidence and therefore cannot authorize an automatic economy change.

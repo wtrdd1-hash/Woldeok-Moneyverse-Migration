@@ -5,6 +5,9 @@ import { Pool } from 'pg';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import { EconomyAiReviewer, economyAiConfig } from '../economy/economy-ai-review';
+import { AiNewsRepository } from '../admin/ai-news.repository';
+import { AiNewsService } from '../admin/ai-news.service';
+import { sealingKeyFrom } from '../auth/totp';
 import { Scheduler } from './scheduler';
 
 /**
