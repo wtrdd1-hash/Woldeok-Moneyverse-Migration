@@ -7742,6 +7742,35 @@
                       "type": "string"
                     }
                   ]
+                },
+                "freshnessState": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "const": "fresh"
+                    },
+                    {
+                      "type": "string",
+                      "const": "stale"
+                    },
+                    {
+                      "type": "string",
+                      "const": "unknown"
+                    }
+                  ]
+                },
+                "ageMs": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ]
+                },
+                "policyVersion": {
+                  "type": "string"
                 }
               },
               "required": [
@@ -7749,7 +7778,10 @@
                 "displayName",
                 "state",
                 "detail",
-                "observedAt"
+                "observedAt",
+                "freshnessState",
+                "ageMs",
+                "policyVersion"
               ]
             }
           }
