@@ -38,7 +38,7 @@ export default async function AdminDeliveryLogsPage() {
   const retried = events.filter((event) => event.delivery_attempts > 1).length;
 
   return (
-    <div className="grid gap-5">
+    <div data-page="admin-logs-delivery" className="mv-page mv-page--admin grid gap-5">
       <AdminBack href="/admin/logs" label="감사 로그로" />
       <PageHeader eyebrow="DELIVERY LOG" title="Discord 전달 로그">
         감사 기록과 분리해 알림 전달 성공 여부와 재시도 상태만 빠르게 확인합니다.

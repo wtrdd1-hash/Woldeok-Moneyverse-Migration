@@ -55,7 +55,7 @@ export default async function CalendarPage() {
   const shopDeadlines = upcomingShopDeadlines(shopData?.catalogItems ?? []);
 
   return (
-    <div className="grid gap-8">
+    <div data-page="calendar" className="mv-page mv-page--gameplay grid gap-8">
       <PageHeader
         eyebrow="ECONOMY & EVENT CALENDAR"
         title={

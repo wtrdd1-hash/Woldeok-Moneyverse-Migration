@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function LobbyPage() {
   return (
-    <div className="grid gap-8">
+    <div data-page="lobby" className="mv-page mv-page--community grid gap-8">
       <PageHeader title="커뮤니티 로비">
         지금 접속한 사람들과 짧게 인사하는 공간입니다. 메시지는 서버에 저장하지 않고 접속 중인
         사람에게만 전달돼요.

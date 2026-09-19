@@ -45,7 +45,7 @@ export default async function BankPage() {
 
   if (!standing) {
     return (
-      <div className="grid gap-4">
+      <div data-page="bank" className="mv-page mv-page--finance grid gap-4">
         <PageHeader title={<T korean="가상 은행 (월덕 파이낸스)" english="Virtual Banking" />} />
         <EmptyState
           title={<T korean="지금은 은행 서비스를 불러올 수 없어요." english="Cannot load banking services right now." />}

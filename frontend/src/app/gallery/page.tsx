@@ -30,7 +30,7 @@ export default async function GalleryPage() {
   const photos = data?.photos ?? [];
 
   return (
-    <div className="grid gap-4">
+    <div data-page="gallery" className="mv-page mv-page--community grid gap-4">
       <PageHeader
         eyebrow="COMMUNITY ARCHIVE"
         title={

@@ -36,7 +36,7 @@ export default async function GallerySubmitPage() {
   const submissions = data?.submissions ?? [];
 
   return (
-    <div className="grid gap-6">
+    <div data-page="gallery-submit" className="mv-page mv-page--community grid gap-6">
       <Button asChild variant="ghost" className="-ml-3 w-fit text-muted-foreground">
         <Link href="/gallery">
           <ArrowLeft />

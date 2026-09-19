@@ -15,7 +15,7 @@ export default async function NotificationSettingsPage({ searchParams }: { reado
   await requireMember();
   const params = await searchParams;
   const board = await apiOrNull<{ notifications_enabled: boolean }>('/api/v1/engagement');
-  return <div className="grid gap-6">
+  return <div data-page="account-notifications" className="mv-page mv-page--member grid gap-6">
     <PageHeader eyebrow="NOTIFICATIONS" title="알림 설정">목표와 NPC 주문 알림 수신 여부를 계정에서 관리합니다.</PageHeader>
     {params.saved === '1' ? <Alert><AlertDescription>알림 설정을 저장했습니다.</AlertDescription></Alert> : null}
     {params.error ? <Alert variant="destructive"><AlertDescription>알림 설정을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.</AlertDescription></Alert> : null}

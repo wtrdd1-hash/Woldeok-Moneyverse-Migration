@@ -53,7 +53,7 @@ export default async function AdminDiscordPage() {
   const stuck = console_ === null ? 0 : Number(console_.outbox.stuck_count);
 
   return (
-    <div className="grid gap-5">
+    <div data-page="admin-discord" className="mv-page mv-page--admin grid gap-5">
       <AdminBack />
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}
