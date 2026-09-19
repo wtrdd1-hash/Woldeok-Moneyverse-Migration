@@ -11,6 +11,7 @@ import { requireMember } from '@/lib/session';
 import {
   beginSecurityReauthentication,
   terminateOtherSessions,
+  terminateAllSessions,
   terminateSession,
   reauthenticateWithLocalPassword,
   changeLocalPassword,
@@ -184,6 +185,18 @@ export default async function AccountSecurityPage({
             <Button type="submit" variant="destructive" disabled={otherCount === 0} className="min-h-11">
               다른 세션 {otherCount}개 종료
             </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">모든 기기에서 로그아웃</CardTitle>
+          <CardDescription>다른 활성 세션을 먼저 종료한 뒤 현재 브라우저에서도 로그아웃합니다. 최근 본인 확인이 필요합니다.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={terminateAllSessions}>
+            <Button type="submit" variant="destructive" className="min-h-11">모든 기기에서 로그아웃</Button>
           </form>
         </CardContent>
       </Card>
