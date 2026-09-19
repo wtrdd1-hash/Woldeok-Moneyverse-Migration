@@ -30,6 +30,8 @@ interface SecuritySession {
   readonly reauthenticatedAt: string | null;
   readonly current: boolean;
   readonly administratorSession: boolean;
+  readonly lastSeenAt: string;
+  readonly deviceLabel: string;
 }
 
 interface Identity {
@@ -107,13 +109,13 @@ export default async function AccountSecurityPage({
                 <CardHeader className="gap-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <CardTitle className="text-base">
-                      {session.current ? '현재 세션' : '다른 로그인 세션'}
+                      {session.deviceLabel}
                     </CardTitle>
                     {session.current ? <Badge>현재 사용 중</Badge> : <Badge variant="secondary">다른 세션</Badge>}
                     {session.administratorSession ? <Badge variant="outline">운영 콘솔 사용 이력</Badge> : null}
                   </div>
                   <CardDescription>
-                    생성 {formatMoment(session.createdAt)} · 만료 {formatMoment(session.expiresAt)}
+                    최근 활동 {formatMoment(session.lastSeenAt)} · 로그인 {formatMoment(session.createdAt)} · 만료 {formatMoment(session.expiresAt)}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-3 text-sm">

@@ -8,6 +8,8 @@ interface ActiveSessionRow {
   readonly expires_at: Date;
   readonly reauthenticated_at: Date | null;
   readonly admin_opened_at: Date | null;
+  readonly last_seen_at: Date;
+  readonly device_label: string;
 }
 
 export interface MemberSessionView {
@@ -17,6 +19,8 @@ export interface MemberSessionView {
   readonly reauthenticatedAt: string | null;
   readonly current: boolean;
   readonly administratorSession: boolean;
+  readonly lastSeenAt: string;
+  readonly deviceLabel: string;
 }
 
 interface RevokedCountRow {
@@ -32,11 +36,10 @@ export class AccountSecurityRepository {
   async activeSessions(userId: string, currentSessionId: string): Promise<MemberSessionView[]> {
     const rows = await queryRows<ActiveSessionRow>(
       this.pool,
-      `SELECT id::text AS session_id, created_at, expires_at, reauthenticated_at, admin_opened_at
-       FROM auth_sessions
-       WHERE user_id=$1 AND revoked_at IS NULL AND expires_at>now()
-       ORDER BY created_at DESC, id DESC`,
-      [userId],
+      `SELECT session_id::text AS session_id, created_at, expires_at, reauthenticated_at, admin_opened_at,
+              last_seen_at, device_label
+       FROM account_active_sessions($1::uuid, $2::uuid)`,
+      [userId, currentSessionId],
     );
     return rows.map((row) => ({
       sessionId: row.session_id,
@@ -45,6 +48,8 @@ export class AccountSecurityRepository {
       reauthenticatedAt: row.reauthenticated_at?.toISOString() ?? null,
       current: row.session_id === currentSessionId,
       administratorSession: row.admin_opened_at !== null,
+      lastSeenAt: row.last_seen_at.toISOString(),
+      deviceLabel: row.device_label,
     }));
   }
 
