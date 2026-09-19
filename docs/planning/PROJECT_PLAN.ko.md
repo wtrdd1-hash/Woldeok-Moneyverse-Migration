@@ -2,11 +2,21 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.19.256
+> **현재 통합 버전:** v2026.09.19.263
 > **구현·증거 동기화:** 2026-09-19
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+
+## 회차 변경 — v2026.09.19.263 (2026-09-19)
+
+### 호스트 Test exact-SHA 런타임 복구 및 승격 정합성
+- **권위 / 브랜치:** `origin/main=b1b1f7aa63e630bba266c5dcbb72731faccdae8d`에서 `fix/test-runtime-v2026.09.19.263`으로 작업을 시작한다. 영문·한국어 통합기획서 헤더가 서로 다른 버전으로 드리프트한 상태를 v263에서 하나의 권위 버전으로 맞춘다.
+- **확인된 릴리스 결함:** v259 임시 backend는 `PORT=3120`을 선언했지만 `PORT=3100`이 든 release-local `.env`도 함께 로드했다. systemd `EnvironmentFile=` 값이 우선해 이미 사용 중인 stable Test 포트 3100 바인딩을 시도했고 `EADDRINUSE`로 실패했다. stable Test unit 역시 서로 다른 과거 release 디렉터리와 오래된 공용 `BUILD_ID`를 섞어 공개 Test가 후보가 아닌 오래된 application SHA를 반환할 수 있었다.
+- **런타임 계약:** stable Test 비밀/기본 설정은 `/etc/moneyverse/test-backend.env`, `/etc/moneyverse/test-frontend.env`에 둔다. 릴리스별 identity/routing은 생성된 `/etc/moneyverse/test-backend-release.env`, `/etc/moneyverse/test-frontend-release.env`로 분리하고 검토된 drop-in에서 마지막에 로드한다. 영구 Test unit이 release-local backend `.env` 또는 frontend `.env.local`을 직접 읽으면 안 된다. backend/frontend는 하나의 정확한 40자 Git SHA, 하나의 `test-current` release root, 하나의 backend API origin을 공유해야 한다.
+- **자동화:** `ops/systemd/write-test-release-env.sh`가 비밀값 없이 release identity/routing 파일만 생성하고 잘못된 SHA를 거부한다. backend/frontend drop-in 템플릿은 stable secret과 release identity를 분리한다. 회귀시험은 Test backend port, frontend API origin, 동일 BUILD_ID, secret-bearing key 부재를 검증한다.
+- **QA / 승격:** helper 회귀시험과 repository lint/typecheck/test/build를 거친 뒤 exact candidate release를 isolated Test에 올리고 공개 `/api/version` exact SHA, backend `/health`, BFF catalog, `noindex`, 핵심 페이지, 치명적 unit log 부재를 확인한다. 작업 중간에 이 기획서와 원격 `main`을 다시 읽는다. Test에서 검증한 동일 SHA만 무중단 Production 승격에 사용하고 이전 release pointer/unit 정의를 rollback anchor로 보존하며 전환 후 Production `/api/version`, health/catalog, 핵심 페이지를 재검증한다.
 
 ## 회차 변경 — v2026.09.19.256 (2026-09-19)
 
@@ -1842,4 +1852,6 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 6. **P1:** protected-main required checks/ruleset을 실제 machine-enforced gate로 전환.
 7. core correctness → shop/payment/subscription unit economics → SEO/acquisition → retention/growth → accessibility/장기확장. 런타임 구현은 별도 branch/test/exact-SHA/QA/promotion/smoke/rollback 흐름을 따른다.
 
-**v166 사업효과:** release classifier의 직접매출은 0이며 CI/registry/Test/운영 낭비와 잘못된 application identity 승격·감사 위험 감소가 가치다. SEO는 acquisition/CAC 효율 투자, API/security/backup/status는 사고·다운타임·환불·fraud·support 기대손실 감소다. 관측되지 않은 금액은 실제값으로 단정하지 않는다.
+**v166 사업효과:** release classifier의 직접매출은 0이며 CI/registry/Test/운영 낭비와 잘못된 application identity 승격·감사 위험 감소가 가치다. SEO는 acquisition/CAC 효율 투자, API/security/backup/status는 사고·다운타임·환불·fraud·support 기대손실 감소다. 관측되지 않은 금액은 실제값으로 단정하지 않는다.\n\n### v2026.09.19.261 — AI 주식 시나리오 자동 생성·게시
+
+가상 주식시장에 opt-in 시간별 AI 뉴스룸 자동화 경로를 추가한다. AI는 제한된 이벤트 시나리오를 만들고 실제 주가 권위는 기존 결정론적 market-event 로직이 유지한다. 자동 게시는 전체시장·강도 3 충격을 제외하고 한 시나리오의 변동 종목을 최대 2개, 기간을 최대 24시간으로 제한한다. 자격증명, 감사 actor 또는 안전 후보가 없으면 fail-closed로 아무 이벤트도 게시하지 않는다. 브랜치: feat/ai-stock-auto-scenarios-v2026.09.19.261.

@@ -119,6 +119,14 @@ jobs:
       - name: Test release identity classifier and workflow contract
         run: node --test scripts/release/*.test.mjs
 
+      - name: Test host systemd release helpers
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n ops/systemd/*.sh
+          ops/systemd/prepare-frontend-runtime-cache.test.sh
+          ops/systemd/write-test-release-env.test.sh
+
       - name: Reject raw control bytes in source
         run: scripts/check-control-bytes.sh
 
