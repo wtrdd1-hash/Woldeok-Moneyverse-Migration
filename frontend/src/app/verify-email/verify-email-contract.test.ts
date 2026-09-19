@@ -10,4 +10,9 @@ describe('verify-email user contract', () => {
     expect(page).toContain('이미 사용되었습니다');
     expect(page).not.toContain('현재 가입 세션과 일치하지 않아요');
   });
+
+  it('keeps verification actions reachable on narrow and touch screens', () => {
+    expect(page).toContain('className="min-h-11 w-full sm:w-auto"');
+    expect(page).toContain('className="inline-flex min-h-11 items-center text-primary');
+  });
 });

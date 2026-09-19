@@ -48,9 +48,9 @@ export default async function VerifyEmailPage({
         </CardHeader>
         <CardContent className="grid gap-4">
           {usableToken ? (
-            <form action={completeEmailVerification}>
+            <form action={completeEmailVerification} className="w-full sm:w-auto">
               <input type="hidden" name="token" value={token} />
-              <Button type="submit">이메일 인증하고 가입 완료</Button>
+              <Button type="submit" className="min-h-11 w-full sm:w-auto">이메일 인증하고 가입 완료</Button>
             </form>
           ) : (
             <Alert>
@@ -59,7 +59,7 @@ export default async function VerifyEmailPage({
           )}
           <p className="text-sm text-muted-foreground">
             인증이 끝나면 앱으로 돌아가 로그인 상태를 다시 확인해 주세요.{' '}
-            <Link href="/login" className="text-primary underline-offset-4 hover:underline">
+            <Link href="/login" className="inline-flex min-h-11 items-center text-primary underline-offset-4 hover:underline">
               로그인 화면으로 돌아가기
             </Link>
           </p>
