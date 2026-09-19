@@ -441,7 +441,13 @@ export default async function CasinoPage() {
                   </CardContent>
                 </Card>
               ) : (
-                <EmptyState title="주사위 홀짝 게임을 준비 중입니다." />
+                <EmptyState
+                  title={
+                    games.state === 'unavailable'
+                      ? '주사위 서버 규칙을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.'
+                      : '주사위 홀짝 게임을 현재 이용할 수 없어요.'
+                  }
+                />
               )}
             </TabsContent>
 
@@ -470,7 +476,13 @@ export default async function CasinoPage() {
                   </CardContent>
                 </Card>
               ) : (
-                <EmptyState title="주사위 숫자 게임을 준비 중입니다." />
+                <EmptyState
+                  title={
+                    games.state === 'unavailable'
+                      ? '주사위 서버 규칙을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.'
+                      : '주사위 숫자 게임을 현재 이용할 수 없어요.'
+                  }
+                />
               )}
             </TabsContent>
 
