@@ -98,7 +98,7 @@ export default async function StockHubPage({
   const stockAlerts = (alertResult?.alerts ?? []).filter((rule) => rule.stock_id === stock.id);
 
   return (
-    <div className="grid gap-6">
+    <div data-page="stocks-symbol" className="mv-page mv-page--finance grid gap-6">
       <Button asChild variant="ghost" className="w-fit -ml-3 text-muted-foreground">
         <Link href="/stocks">
           <ArrowLeft />

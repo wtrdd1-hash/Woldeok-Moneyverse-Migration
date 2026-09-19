@@ -98,7 +98,7 @@ export default async function AdminActivityLogsPage({
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
+    <div data-page="admin-logs-activity" className="mv-page mv-page--admin mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
       <AdminBack />
 
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>

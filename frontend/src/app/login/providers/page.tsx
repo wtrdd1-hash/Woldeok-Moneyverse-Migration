@@ -22,7 +22,9 @@ export default async function LoginProvidersPage({
 
   return (
     <ScrollToTop>
+      <div data-page="login-providers" className="mv-page mv-page--utility">
       <LoginProvidersView {...(error ? { error } : {})} />
+      </div>
     </ScrollToTop>
   );
 }

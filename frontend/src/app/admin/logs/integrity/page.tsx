@@ -67,7 +67,7 @@ export default async function AdminAuditIntegrityPage() {
   const categories = retention?.categories.map((entry) => entry.category) ?? [];
 
   return (
-    <div className="grid gap-5">
+    <div data-page="admin-logs-integrity" className="mv-page mv-page--admin grid gap-5">
       <div className="flex flex-wrap items-center gap-1">
         <AdminBack />
         <Button asChild variant="ghost" className="w-fit text-muted-foreground">

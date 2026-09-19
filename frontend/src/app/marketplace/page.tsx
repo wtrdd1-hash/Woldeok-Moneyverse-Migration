@@ -67,7 +67,7 @@ export default async function MarketplacePage({
   const uniqueItems = holdings.filter((item) => item.serial_number !== null).length;
 
   return (
-    <div className="grid gap-6 pb-16">
+    <div data-page="marketplace" className="mv-page mv-page--finance grid gap-6 pb-16">
       <PageHeader
         eyebrow="PLAYER MARKETPLACE · WORKBENCH"
         title={<T korean="플레이어 마켓 작업대" english="Player marketplace workbench" />}

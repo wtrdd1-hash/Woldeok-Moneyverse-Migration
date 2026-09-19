@@ -42,7 +42,7 @@ export default async function PortfolioAnalysisPage() {
   }
 
   return (
-    <div className="grid gap-6">
+    <div data-page="stocks-portfolio" className="mv-page mv-page--finance grid gap-6">
       <PageHeader eyebrow="VIRTUAL PORTFOLIO" title={isEn ? 'Portfolio Analysis' : '포트폴리오 분석'}>
         {isEn
           ? 'Review valuation, allocation and unrealized gain/loss for your game-only virtual-stock holdings.'

@@ -68,7 +68,7 @@ export default async function EconomyScenarioLabPage({
   }
 
   return (
-    <div className="grid gap-5">
+    <div data-page="admin-economy-scenario-lab" className="mv-page mv-page--admin grid gap-5">
       <AdminBack />
       <PageHeader eyebrow="ECONOMY SCENARIO LAB" title="경제 시나리오 실험실">
         실제 정책이나 잔액을 바꾸지 않고 최근 24시간 흐름을 기준으로 통화량 변화를 계산합니다.

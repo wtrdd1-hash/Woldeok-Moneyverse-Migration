@@ -112,7 +112,7 @@ export default async function BusinessesPage() {
     }));
 
   return (
-    <div className="grid gap-8 pb-12">
+    <div data-page="businesses" className="mv-page mv-page--finance grid gap-8 pb-12">
       <PageHeader eyebrow="BUSINESS ECONOMY 2.0" title="가상 사업체 및 일일 정산">
         상점에서 라이선스를 획득하여 사업체를 설립하고, 전문 소모품 부스트를 장착하여 일일 순수익을 극대화하세요.
         일일 매출은 SYSTEM_MINT에서 지급되며, 운영비는 SYSTEM_SINK로 소각되는 안전한 복식부기 가상 경제입니다.

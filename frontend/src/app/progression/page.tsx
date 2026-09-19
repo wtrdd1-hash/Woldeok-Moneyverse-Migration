@@ -66,7 +66,7 @@ export default async function ProgressionPage() {
   const requirements = requirementLines(status?.next_requirements ?? null);
 
   return (
-    <div className="grid gap-6">
+    <div data-page="progression" className="mv-page mv-page--gameplay grid gap-6">
       <PageHeader eyebrow="GROWTH STAGE" title="성장 단계와 신용">
         단계와 신용 등급은 게임 활동 기록으로만 정해집니다. 실제 신용 평가·금융 거래와는 관련이
         없습니다.

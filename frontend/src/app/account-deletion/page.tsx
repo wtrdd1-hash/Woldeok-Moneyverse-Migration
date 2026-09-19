@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function AccountDeletionPage() {
   return (
-    <div className="grid gap-6">
+    <div data-page="account-deletion" className="mv-page mv-page--utility grid gap-6">
       <PageHeader title="계정 삭제 요청" />
       <DeletionRequestInfo mode="account" />
     </div>

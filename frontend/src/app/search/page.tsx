@@ -38,7 +38,7 @@ export default async function SearchPage({
   const results = filterSearchEntries(entries, query);
 
   return (
-    <div className="grid gap-6">
+    <div data-page="search" className="mv-page mv-page--member grid gap-6">
       <PageHeader eyebrow="SEARCH" title="통합 검색">
         현재 계정에서 사용할 수 있는 Moneyverse 화면과 기능을 찾아 바로 이동합니다.
       </PageHeader>

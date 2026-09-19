@@ -81,7 +81,7 @@ export default async function WorkPage() {
   const quotaBlock = workQuotaBlock(summary);
 
   return (
-    <div className="grid gap-8 pb-12">
+    <div data-page="work" className="mv-page mv-page--gameplay grid gap-8 pb-12">
       <LiveRefresh everyMs={10_000} />
       <PageHeader
         eyebrow="CAREER & WORK 2.0"

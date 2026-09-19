@@ -23,7 +23,7 @@ export default async function AdminUsersPage() {
   const users = await apiOrNull<{ users: AdminUser[] }>('/api/v1/admin/users');
 
   return (
-    <div className="grid gap-5">
+    <div data-page="admin-users" className="mv-page mv-page--admin grid gap-5">
       <AdminBack />
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}
