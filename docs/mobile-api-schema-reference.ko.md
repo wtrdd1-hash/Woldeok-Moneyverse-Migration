@@ -4,7 +4,7 @@
 
 업데이트 버전: **v2026.09.16.159**
 
-이 문서는 155개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
+이 문서는 157개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
 
 ## 공통 호환성 규칙
 
@@ -758,6 +758,54 @@ _None._
 | outcome | true | string="signed-in" | const="signed-in" |
 | csrfToken | true | string |  |
 | consentCurrent | true | boolean |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/auth/local/password-reset/complete` — 일회용 token으로 로컬 계정 비밀번호 재설정 완료
+
+- 인증/권한: 30분 만료 일회용 reset token
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 기존 세션은 모두 폐기되므로 새 비밀번호로 다시 로그인
+- Operation ID: `LocalAuthController_completePasswordReset`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| outcome | true | string="password-reset" | const="password-reset" |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/auth/local/password-reset/request` — 로컬 계정 비밀번호 재설정 링크 요청
+
+- 인증/권한: 인증 전 공개 흐름; 계정 존재 여부를 노출하지 않음
+- 성공 상태: 202
+- 응답 모드: json
+- 성공 후 동기화: 항상 동일한 접수 안내를 표시하고 이메일 링크를 기다림
+- Operation ID: `LocalAuthController_requestPasswordReset`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| accepted | true | boolean |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 

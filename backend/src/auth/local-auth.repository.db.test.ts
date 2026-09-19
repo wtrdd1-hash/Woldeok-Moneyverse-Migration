@@ -92,4 +92,30 @@ describe.skipIf(!DATABASE_URL)('LocalAuthRepository against a real database', ()
     expect(mobile?.session_id).not.toBe(member.session_id);
     expect(await sessions.consumeMobileOAuthHandoff(handoff)).toBeNull();
   });
+
+  it('resets a local password once and revokes active sessions', async () => {
+    const sessions = new SessionRepository(pool);
+    const local = new LocalAuthRepository(pool);
+    const prelogin = await sessions.create();
+    const policy = await sessions.currentConsentVersion();
+    expect(policy).not.toBeNull();
+    await sessions.grantPreloginConsent(prelogin.id, {
+      termsCompleted: true, privacyCompleted: true, ageConfirmed: true,
+      termsVersion: policy!.terms_version, privacyVersion: policy!.privacy_version,
+    });
+    const email = `qa-reset-${crypto.randomUUID()}@example.test`;
+    const verificationToken = randomToken();
+    await local.startRegistration({
+      preAuthSessionId: prelogin.id, email, emailHash: sha256(email),
+      passwordVerifier: await hashPassword('old secure password 2026!'),
+      displayName: 'Password Reset QA', verificationTokenHash: sha256(verificationToken),
+    });
+    const member = await local.completeRegistration(verificationToken);
+    const resetToken = randomToken();
+    expect(await local.startPasswordReset(sha256(email), sha256(resetToken))).toBe(true);
+    expect(await local.completePasswordReset(resetToken, await hashPassword('new secure password 2026!'))).toBe(true);
+    expect(await local.completePasswordReset(resetToken, await hashPassword('another secure password 2026!'))).toBe(false);
+    const { rows } = await pool.query<{ revoked_at: Date | null }>('SELECT revoked_at FROM public.auth_sessions WHERE id=$1', [member.session_id]);
+    expect(rows[0]?.revoked_at).not.toBeNull();
+  });
 });
