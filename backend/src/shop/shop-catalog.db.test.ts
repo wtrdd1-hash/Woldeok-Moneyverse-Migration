@@ -243,7 +243,7 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
       });
     });
 
-    it('reports the stored amount on a replay, not the quantity the caller repeated', async () => {
+    it('replays an identical purchase payload and rejects conflicting retries', async () => {
       await rolledBack(async (client) => {
         const actor = await buyer(client, 1000);
         const kit = await item(client, 'repair_kit'); // 80, limit `unlimited`
@@ -256,11 +256,20 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
         ]);
         const { rows } = await client.query<{ amount: string; replayed: boolean }>(
           `SELECT purchase.amount::text, purchase.replayed
-           FROM public.shop_purchase_catalog($1, $2, $3, 5) AS purchase`,
+           FROM public.shop_purchase_catalog($1, $2, $3, 2) AS purchase`,
           [key, actor, kit],
         );
         expect(rows[0]?.replayed).toBe(true);
-        expect(rows[0]?.amount, 'a replay must report what was charged').toBe('160');
+        expect(rows[0]?.amount, 'an identical replay must report what was charged').toBe('160');
+
+        const error = await rejectionOf(() =>
+          client.query('SELECT * FROM public.shop_purchase_catalog($1, $2, $3, 5)', [
+            key,
+            actor,
+            kit,
+          ]),
+        );
+        expect(code(error)).toBe('22023');
         expect(await cash(client, actor)).toBe('840');
       });
     });
