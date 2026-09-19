@@ -23,9 +23,9 @@ function status(overrides: Partial<EconomyAiStatus> = {}): EconomyAiStatus {
       days: 7,
     },
     lastRuns: {
-      authoritativeReview: { status: 'succeeded', period_key: '2026-W38' },
-      shadowHealth: { status: 'succeeded', period_key: '2026-09-19' },
-      autoPolicy: { status: 'succeeded', period_key: '2026-W38' },
+      authoritativeReview: { status: 'succeeded', period_key: '2026-W38', finished_at: '2026-09-19T03:10:00Z' },
+      shadowHealth: { status: 'succeeded', period_key: '2026-09-19', finished_at: '2026-09-19T03:20:00Z' },
+      autoPolicy: { status: 'succeeded', period_key: '2026-W38', finished_at: '2026-09-19T03:30:00Z' },
     },
     shadowAgents: [{
       domain: 'jobs',
@@ -52,6 +52,14 @@ describe('EconomyAiStatusCard', () => {
     expect(screen.getByText('0 / 7')).toBeDefined();
     expect(screen.getByText('at least one day had too few active members to read')).toBeDefined();
     expect(screen.getAllByText('SHADOW').length).toBeGreaterThan(0);
+    expect(screen.getByText(/최근 실행 2026\. 9\. 19\. 12시 10분 0초/)).toBeDefined();
+    expect(screen.getByText(/최근 실행 2026\. 9\. 19\. 12시 20분 0초/)).toBeDefined();
+    expect(screen.getByText(/최근 실행 2026\. 9\. 19\. 12시 30분 0초/)).toBeDefined();
+  });
+
+  it('shows missing scheduler timestamps explicitly instead of implying freshness', () => {
+    render(<EconomyAiStatusCard status={status({ lastRuns: { authoritativeReview: { status: 'succeeded', period_key: '2026-W38' } } })} />);
+    expect(screen.getAllByText('최근 실행 실행 시각 없음').length).toBeGreaterThan(0);
   });
 
   it('does not describe an enabled but unexercised switch as active AI review', () => {

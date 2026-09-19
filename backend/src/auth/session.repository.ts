@@ -445,6 +445,15 @@ export class SessionRepository {
     return row?.reauthenticated === true;
   }
 
+  async markLocalReauthenticated(sessionId: string, userId: string): Promise<boolean> {
+    const row = await queryOne<{ readonly id: string }>(
+      this.pool,
+      'UPDATE auth_sessions SET reauthenticated_at=now() WHERE id=$1 AND user_id=$2 AND revoked_at IS NULL AND expires_at>now() RETURNING id',
+      [sessionId, userId],
+    );
+    return Boolean(row?.id);
+  }
+
   async hasRecentReauthentication(sessionId: string, maxAgeSeconds = 900): Promise<boolean> {
     const row = await queryOne<{ readonly recent: boolean }>(
       this.pool,

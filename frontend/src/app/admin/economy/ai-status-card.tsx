@@ -90,6 +90,14 @@ function number(value: string | number | null | undefined, digits = 0): string {
     : '—';
 }
 
+function runTimestamp(run: SchedulerRun | null | undefined): string {
+  const raw = run?.finished_at ?? run?.started_at;
+  if (!raw) return '실행 시각 없음';
+  const value = new Date(raw);
+  if (Number.isNaN(value.getTime())) return '실행 시각 오류';
+  return value.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', hour12: false });
+}
+
 function RunState({ title, run }: { readonly title: string; readonly run: SchedulerRun | null | undefined }) {
   return (
     <div className="rounded-md border p-3">
@@ -100,6 +108,7 @@ function RunState({ title, run }: { readonly title: string; readonly run: Schedu
         </Badge>
       </div>
       <p className="mt-1 font-mono text-xs">{run?.period_key ?? '—'}</p>
+      <p className="mt-1 text-xs text-muted-foreground">최근 실행 {runTimestamp(run)}</p>
     </div>
   );
 }

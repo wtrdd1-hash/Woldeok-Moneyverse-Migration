@@ -356,3 +356,19 @@ describe('SessionRepository.revoke', () => {
     expect(queries[0]?.text).toMatch(/coalesce\(revoked_at, now\(\)\)/);
   });
 });
+
+describe('SessionRepository.markLocalReauthenticated', () => {
+  it('marks only the active session owned by the authenticated user', async () => {
+    const { pool, queries } = recordingPool(() => [{ id: 'session-id' }]);
+    await expect(new SessionRepository(pool).markLocalReauthenticated('session-id', 'user-id')).resolves.toBe(true);
+    expect(queries[0]?.text).toContain('user_id=$2');
+    expect(queries[0]?.text).toContain('revoked_at IS NULL');
+    expect(queries[0]?.text).toContain('expires_at>now()');
+    expect(queries[0]?.values).toEqual(['session-id', 'user-id']);
+  });
+
+  it('fails closed when the session is no longer active for that user', async () => {
+    const { pool } = recordingPool(() => []);
+    await expect(new SessionRepository(pool).markLocalReauthenticated('session-id', 'other-user')).resolves.toBe(false);
+  });
+});
