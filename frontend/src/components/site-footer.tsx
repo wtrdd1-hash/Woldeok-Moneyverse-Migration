@@ -17,9 +17,9 @@ export function SiteFooter() {
   const en = locale === 'en';
   const linkClass = 'inline-flex min-h-11 items-center px-2 hover:text-forest-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
   return (
-    <footer className="moneyverse-site-footer mt-20 bg-paper-dark text-muted-foreground">
-      <div className="mx-auto w-full max-w-[1180px] px-6">
-        <div className="flex flex-col items-start justify-between gap-6 border-b py-9 sm:flex-row sm:items-center">
+    <footer className="moneyverse-site-footer mt-16 text-muted-foreground sm:mt-24">
+      <div className="mx-auto w-full max-w-[1320px] px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-start justify-between gap-6 border-b border-border/70 py-9 sm:flex-row sm:items-center">
           <Brand />
           <nav aria-label={en ? 'Footer menu' : '하단 메뉴'} className="flex flex-wrap gap-x-2 gap-y-1 text-xs font-bold sm:gap-x-3">
             <Link href="/search" className={linkClass}>

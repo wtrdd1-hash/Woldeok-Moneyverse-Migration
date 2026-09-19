@@ -24,6 +24,7 @@ import {
 // and collide with this Tailwind theme, so the application shell must not import it.
 import './globals.css';
 import './cosmetics.css';
+import './redesign.css';
 
 /**
  * The product's own pairing, kept: a Korean serif for display and a Korean

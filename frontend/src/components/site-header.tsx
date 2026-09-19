@@ -84,8 +84,8 @@ export function SiteHeader() {
   const mobileAdmin = mobileAdminEntries(viewer);
 
   return (
-    <header className="moneyverse-site-header sticky top-0 z-30 border-b bg-background/94 backdrop-blur-lg">
-      <div className="mx-auto flex h-16 sm:h-[70px] lg:h-[76px] w-full max-w-[1180px] items-center gap-2 min-[480px]:gap-3 lg:gap-6 px-3 min-[480px]:px-4 sm:px-6">
+    <header className="moneyverse-site-header sticky top-0 z-30 border-b backdrop-blur-xl">
+      <div className="mx-auto flex h-[68px] w-full max-w-[1320px] items-center gap-2 px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:h-[76px] lg:gap-6 lg:px-8">
         <Brand />
 
         <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="ml-auto hidden items-center gap-4 xl:gap-5 lg:flex">
@@ -198,10 +198,10 @@ function HeaderLink({
       // The underline grows from nothing on hover and stays for the current
       // page — the original's one piece of navigation motion, kept.
       className={cn(
-        'relative whitespace-nowrap py-[26px] text-sm font-semibold transition-colors',
-        'after:absolute after:inset-x-0 after:bottom-[17px] after:h-0.5 after:bg-primary after:transition-transform',
-        'after:origin-left after:scale-x-0 hover:after:scale-x-100',
-        current ? 'text-foreground after:scale-x-100' : 'text-muted-foreground',
+        'relative min-h-10 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold transition-colors',
+        current
+          ? 'bg-primary/12 text-primary'
+          : 'text-muted-foreground hover:bg-white/[0.04] hover:text-foreground',
       )}
     >
       {navLabel(entry.label, locale)}
@@ -229,11 +229,10 @@ function HeaderGroup({
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          'relative flex items-center gap-1 whitespace-nowrap py-[26px] text-sm font-semibold transition-colors outline-none',
-          'after:absolute after:inset-x-0 after:bottom-[17px] after:h-0.5 after:bg-primary after:transition-transform',
-          'after:origin-left after:scale-x-0 hover:after:scale-x-100',
-          'focus-visible:after:scale-x-100',
-          current ? 'text-foreground after:scale-x-100' : 'text-muted-foreground',
+          'relative flex min-h-10 items-center gap-1 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold transition-colors outline-none',
+          current
+            ? 'bg-primary/12 text-primary'
+            : 'text-muted-foreground hover:bg-white/[0.04] hover:text-foreground',
         )}
       >
         {navLabel(group.label, locale)}

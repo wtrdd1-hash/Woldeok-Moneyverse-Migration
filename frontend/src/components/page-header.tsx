@@ -26,11 +26,12 @@ export function PageHeader({
   readonly children?: React.ReactNode;
 }) {
   return (
-    <header className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2">
+    <header className="relative grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 overflow-hidden rounded-[24px] border border-border/80 bg-card/55 px-5 py-6 shadow-[0_18px_50px_rgba(0,0,0,0.16)] backdrop-blur-sm sm:px-7 sm:py-8">
+      <div aria-hidden className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-primary via-primary/45 to-transparent" />
       {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-      <h1 className="text-[clamp(1.75rem,3.5vw,2.5rem)]">{title}</h1>
+      <h1 className="max-w-[18ch] text-[clamp(1.8rem,3.8vw,2.75rem)] leading-[1.12]">{title}</h1>
       {children && (
-        <div className="min-w-0 max-w-prose leading-[1.8] text-muted-foreground [overflow-wrap:anywhere] [word-break:keep-all]">
+        <div className="min-w-0 max-w-2xl text-sm leading-[1.8] text-muted-foreground [overflow-wrap:anywhere] [word-break:keep-all] sm:text-base">
           {children}
         </div>
       )}
@@ -79,10 +80,10 @@ export function SectionHeader({
   readonly action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <p className="eyebrow mb-2">{eyebrow}</p>
-        <h2 id={id} className="text-lg">
+    <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border/70 pb-4">
+      <div className="grid gap-2">
+        <p className="eyebrow">{eyebrow}</p>
+        <h2 id={id} className="text-xl leading-tight sm:text-2xl">
           {title}
         </h2>
       </div>

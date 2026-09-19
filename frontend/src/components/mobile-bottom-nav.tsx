@@ -32,9 +32,9 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label={locale === 'en' ? 'Mobile bottom navigation' : '모바일 하단 내비게이션'}
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border/50 bg-background/90 backdrop-blur-xl pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] lg:hidden"
+      className="fixed bottom-2 left-1/2 z-50 w-[min(calc(100%_-_1rem),30rem)] -translate-x-1/2 rounded-[22px] border border-border/80 bg-[#0b1322]/92 px-1.5 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_18px_60px_rgba(0,0,0,0.48)] backdrop-blur-2xl lg:hidden"
     >
-      <div className="mx-auto grid w-full max-w-md grid-cols-5 items-center px-1 sm:px-2">
+      <div className="mx-auto grid w-full grid-cols-5 items-center">
         {TABS.map((tab) => {
           const Icon = tab.icon;
           const isActive = tab.href === '/' ? pathname === '/' : pathname.startsWith(tab.href);
@@ -46,14 +46,14 @@ export function MobileBottomNav() {
               prefetch={false}
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'group relative flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 px-0.5 py-1 text-[10px] font-bold transition-all min-[360px]:text-[11px]',
+                'group relative flex min-h-[54px] min-w-0 flex-col items-center justify-center gap-0.5 rounded-[16px] px-0.5 py-1 text-[10px] font-bold transition-all min-[360px]:text-[11px]',
                 isActive
-                  ? 'text-primary scale-105'
-                  : 'text-muted-foreground hover:text-foreground',
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:bg-white/[0.04] hover:text-foreground',
               )}
             >
               {isActive && (
-                <span className="absolute -top-1 size-1 rounded-full bg-primary shadow-[0_0_8px_var(--primary)]" />
+                <span className="absolute top-1 h-0.5 w-5 rounded-full bg-primary shadow-[0_0_10px_rgba(248,198,92,0.55)]" />
               )}
               <div
                 className={cn(
