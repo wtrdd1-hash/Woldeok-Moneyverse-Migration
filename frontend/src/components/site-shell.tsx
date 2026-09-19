@@ -14,7 +14,7 @@ export function SiteShell({ children }: { readonly children: React.ReactNode }) 
       <NoticeBar />
       <ServiceImpactBanner />
       <SiteHeader />
-      <main id="main" className="moneyverse-main mx-auto w-full max-w-[1240px] flex-1 p-4 sm:p-6 lg:px-8 pb-24 lg:pb-8">
+      <main id="main" className="moneyverse-main mx-auto w-full max-w-[1320px] flex-1 px-4 pb-28 pt-6 sm:px-6 sm:pt-8 lg:px-8 lg:pb-12 lg:pt-10">
         {children}
       </main>
       <SiteFooter />
