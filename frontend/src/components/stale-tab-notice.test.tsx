@@ -65,7 +65,7 @@ describe('StaleTabNotice', () => {
     answers('build-two');
     render(<StaleTabNotice everyMs={10} navigate={vi.fn()} />);
     document.dispatchEvent(new Event('visibilitychange'));
-    await waitFor(() => expect(fetch).toHaveBeenCalledWith('/api/version', { cache: 'no-store' }));
+    await waitFor(() => expect(fetch).toHaveBeenCalledWith('/frontend-version', { cache: 'no-store' }));
   });
 
   it('asks nothing while the tab is hidden', async () => {

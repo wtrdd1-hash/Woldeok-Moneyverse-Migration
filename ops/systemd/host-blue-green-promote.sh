@@ -141,7 +141,7 @@ cleanup() {
   fi
   log "promotion failed; preserving availability before cleanup"
   if [[ "$edge_mode" == 'canary' ]]; then
-    if wait_http "http://127.0.0.1:$PRIMARY_BACKEND/health" 3 && wait_http "http://127.0.0.1:$PRIMARY_FRONTEND/api/version" 3; then
+    if wait_http "http://127.0.0.1:$PRIMARY_BACKEND/health" 3 && wait_http "http://127.0.0.1:$PRIMARY_FRONTEND/frontend-version" 3; then
       "$SCRIPT_DIR/switch-nginx-server-ports.py" "$NGINX_CONFIG" "$SERVER_NAME" "$CANARY_BACKEND" "$PRIMARY_BACKEND" "$CANARY_FRONTEND" "$PRIMARY_FRONTEND" || true
       nginx -t >/dev/null 2>&1 && systemctl reload nginx || true
       systemctl stop "$CANARY_FRONTEND_UNIT" "$CANARY_BACKEND_UNIT" >/dev/null 2>&1 || true
@@ -165,8 +165,8 @@ systemctl start "$CANARY_BACKEND_UNIT"
 wait_http "http://127.0.0.1:$CANARY_BACKEND/health" || fail 'canary backend did not become healthy'
 assert_version "http://127.0.0.1:$CANARY_BACKEND/api/version"
 systemctl start "$CANARY_FRONTEND_UNIT"
-wait_http "http://127.0.0.1:$CANARY_FRONTEND/api/version" || fail 'canary frontend did not become healthy'
-assert_version "http://127.0.0.1:$CANARY_FRONTEND/api/version"
+wait_http "http://127.0.0.1:$CANARY_FRONTEND/frontend-version" || fail 'canary frontend did not become healthy'
+assert_version "http://127.0.0.1:$CANARY_FRONTEND/frontend-version"
 log "canary healthy backend=$CANARY_BACKEND frontend=$CANARY_FRONTEND"
 
 NGINX_BACKUP="$NGINX_CONFIG.before-blue-green-$ENVIRONMENT-$(date +%Y%m%d%H%M%S)"
@@ -187,8 +187,8 @@ systemctl restart "$BACKEND_UNIT"
 wait_http "http://127.0.0.1:$PRIMARY_BACKEND/health" || fail 'primary backend did not recover'
 assert_version "http://127.0.0.1:$PRIMARY_BACKEND/api/version"
 systemctl restart "$FRONTEND_UNIT"
-wait_http "http://127.0.0.1:$PRIMARY_FRONTEND/api/version" || fail 'primary frontend did not recover'
-assert_version "http://127.0.0.1:$PRIMARY_FRONTEND/api/version"
+wait_http "http://127.0.0.1:$PRIMARY_FRONTEND/frontend-version" || fail 'primary frontend did not recover'
+assert_version "http://127.0.0.1:$PRIMARY_FRONTEND/frontend-version"
 log 'primary services restarted behind canary and are healthy'
 
 "$SCRIPT_DIR/switch-nginx-server-ports.py" "$NGINX_CONFIG" "$SERVER_NAME" "$CANARY_BACKEND" "$PRIMARY_BACKEND" "$CANARY_FRONTEND" "$PRIMARY_FRONTEND"

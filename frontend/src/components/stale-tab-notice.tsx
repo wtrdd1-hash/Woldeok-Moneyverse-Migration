@@ -33,7 +33,7 @@ export function StaleTabNotice({
   const check = useCallback(async (): Promise<void> => {
     if (mine === '' || document.visibilityState !== 'visible') return;
     try {
-      const response = await fetch('/api/version', { cache: 'no-store' });
+      const response = await fetch('/frontend-version', { cache: 'no-store' });
       if (!response.ok) return;
       const body = (await response.json()) as { id?: unknown };
       if (typeof body.id !== 'string' || body.id === '' || body.id === mine) return;
