@@ -2,6 +2,8 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { api, apiWithCookie } from '@/lib/api';
+import { relaySetCookie } from '@/lib/cookie-relay';
 import { mutate } from '@/lib/mutate';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -35,6 +37,28 @@ export async function terminateOtherSessions(): Promise<void> {
   }
   revalidatePath('/account/security');
   redirect(`/account/security?revoked=${revokedSessions}`);
+}
+
+/** Ends every active session for the caller, including this browser. */
+export async function terminateAllSessions(): Promise<void> {
+  try {
+    await mutate<{ revokedSessions: number }>('/api/v1/account/security/sessions/revoke-others');
+  } catch {
+    redirect('/account/security?error=reauth-required');
+  }
+
+  try {
+    const { csrfToken } = await api<{ csrfToken: string }>('/api/v1/auth/session');
+    const { setCookie } = await apiWithCookie<null>('/api/v1/auth/logout', {
+      method: 'POST',
+      csrfToken,
+    });
+    await relaySetCookie(setCookie);
+  } catch {
+    // Other sessions are already revoked. If this session disappeared in the
+    // meantime, navigating to login is still the safe requested outcome.
+  }
+  redirect('/login?signed_out_all=1');
 }
 
 export async function beginSecurityReauthentication(formData: FormData): Promise<void> {
