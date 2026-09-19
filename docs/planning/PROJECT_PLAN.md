@@ -2,11 +2,19 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.19.246
+> Current integrated version: v2026.09.19.256
 > Implementation/evidence sync: 2026-09-19
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Cycle delta — v2026.09.19.256 (2026-09-19)
+
+### `/work` stale-deploy false positive + accelerated reset visibility repair
+- **Authority:** implementation start and required mid-work recheck both resolved `origin/main=97a301bd39b1f80a3d423b68d16a86d91c4ceb58`; no plan/main movement occurred before code changes. Work is isolated on `fix/work-mobile-reset-v2026.09.19.256`.
+- **Root cause:** Production Nginx reserves `/api/version` for backend runtime identity (3002), while the frontend stale-tab detector compared that backend SHA with `NEXT_PUBLIC_BUILD_ID`. This made healthy tabs look stale. `/work` also lacked live refresh, so authoritative 10-minute day / 70-minute week boundaries could advance in DB while an open page stayed visually old.
+- **Implementation:** use frontend-owned `/frontend-version`, update stale-tab regression coverage, add visible-tab 10-second `LiveRefresh` on `/work`, and stop rendering synthetic game-day/week persistence keys as user-facing dates. No backend/schema/ledger/policy mutation.
+- **QA / release:** stale-tab tests 5/5, contract build, frontend typecheck and Next production build pass. Sequence remains branch CI -> exact-SHA isolated Test -> verify frontend/backend identities + authenticated `/work` + backend health -> merge -> exact merged SHA rebuild -> zero-downtime Production -> post-deploy probes.
 
 ## Cycle delta — v2026.09.19.246 (2026-09-19)
 
