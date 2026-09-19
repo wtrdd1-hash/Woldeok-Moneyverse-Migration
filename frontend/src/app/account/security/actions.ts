@@ -51,3 +51,19 @@ export async function beginSecurityReauthentication(formData: FormData): Promise
   }
   redirect(authorizationUrl);
 }
+
+export async function reauthenticateWithLocalPassword(formData: FormData): Promise<void> {
+  const email = String(formData.get('email') ?? '').trim();
+  const password = String(formData.get('password') ?? '');
+  if (!email || !password) redirect('/account/security?error=local-reauth');
+
+  try {
+    await mutate<{ outcome: 'reauthenticated' }>('/api/v1/auth/local/reauthentication', {
+      body: { email, password },
+    });
+  } catch {
+    redirect('/account/security?error=local-reauth');
+  }
+  revalidatePath('/account/security');
+  redirect('/account/security?reauth=done');
+}
