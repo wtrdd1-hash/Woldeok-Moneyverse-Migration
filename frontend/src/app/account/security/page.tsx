@@ -15,6 +15,7 @@ import {
   terminateSession,
   reauthenticateWithLocalPassword,
   changeLocalPassword,
+  requestLocalEmailChange,
 } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -88,6 +89,9 @@ export default async function AccountSecurityPage({
       {params.reauth === 'done' ? (
         <Alert><AlertDescription>본인 확인이 완료되었습니다. 민감한 보안 작업을 계속할 수 있습니다.</AlertDescription></Alert>
       ) : null}
+      {params.email === 'verification-sent' ? (
+        <Alert><AlertDescription>새 로그인 이메일로 확인 링크를 보냈습니다. 링크 확인이 끝나면 모든 세션이 종료됩니다.</AlertDescription></Alert>
+      ) : null}
       {params.password === 'changed' ? (
         <Alert><AlertDescription>비밀번호를 변경했고 다른 로그인 세션을 모두 종료했습니다.</AlertDescription></Alert>
       ) : null}
@@ -104,6 +108,8 @@ export default async function AccountSecurityPage({
               ? '세션을 종료하려면 최근 본인 확인이 필요합니다.'
               : error === 'local-reauth'
                 ? '이메일 또는 비밀번호를 확인한 뒤 다시 시도해 주세요.'
+                : error === 'email-change'
+                  ? '새 로그인 이메일 변경을 시작하지 못했습니다. 최근 본인 확인 후 다른 이메일로 다시 시도해 주세요.'
                 : error === 'password-mismatch'
                   ? '새 비밀번호 확인 값이 일치하지 않습니다.'
                   : error === 'password-change'
@@ -167,6 +173,13 @@ export default async function AccountSecurityPage({
           )}
         </CardContent></Card>
       </section>
+
+      {hasLocalIdentity ? (
+        <Card>
+          <CardHeader><CardTitle className="text-base">로그인 이메일 변경</CardTitle><CardDescription>최근 본인 확인 후 새 이메일로 확인 링크를 보냅니다. 링크를 확인하면 로그인 이메일이 바뀌고 모든 세션이 종료됩니다.</CardDescription></CardHeader>
+          <CardContent><form action={requestLocalEmailChange} className="grid max-w-sm gap-2"><label htmlFor="new-login-email" className="text-sm font-medium">새 로그인 이메일</label><input id="new-login-email" name="email" type="email" autoComplete="email" maxLength={254} required className="min-h-11 rounded-md border bg-background px-3 text-base"/><Button type="submit" className="min-h-11">확인 이메일 보내기</Button></form></CardContent>
+        </Card>
+      ) : null}
 
       {hasLocalIdentity ? (
         <Card>

@@ -75,6 +75,16 @@ export class LocalAuthRepository {
     return row?.accepted === true;
   }
 
+  async startEmailChange(sessionId: string, userId: string, email: string, emailHash: string, tokenHash: string): Promise<boolean> {
+    const row = await queryOne<{ readonly accepted: boolean }>(this.pool, 'SELECT public.auth_start_local_email_change(,,,,) AS accepted', [sessionId, userId, email, emailHash, tokenHash]);
+    return row?.accepted === true;
+  }
+
+  async completeEmailChange(token: string): Promise<boolean> {
+    const row = await queryOne<{ readonly completed: boolean }>(this.pool, 'SELECT public.auth_complete_local_email_change() AS completed', [sha256(token)]);
+    return row?.completed === true;
+  }
+
   async changePassword(sessionId: string, userId: string, passwordVerifier: string): Promise<boolean> {
     const row = await queryOne<{ readonly changed: boolean }>(
       this.pool,
