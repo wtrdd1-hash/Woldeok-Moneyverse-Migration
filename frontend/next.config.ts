@@ -25,8 +25,8 @@ const ADSENSE_CONNECT =
  * and which build the server is serving.
  *
  * `env` is inlined at build time into both bundles, so the browser has the id
- * of the build it was served by and `/api/build` has the id of the build
- * answering now. When they differ, the tab is stale.
+ * of the build it was served by and `/frontend-version` has the id of the
+ * frontend build answering now. When they differ, the tab is stale.
  */
 const BUILD_ID = process.env.BUILD_ID ?? String(Date.now());
 
