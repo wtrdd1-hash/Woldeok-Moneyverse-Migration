@@ -5,16 +5,16 @@
 
 BEGIN;
 
-ALTER FUNCTION public.bank_borrow(uuid, uuid, bigint) RENAME TO bank_borrow_policy_v210;
-ALTER FUNCTION public.bank_repay(uuid, uuid, uuid, bigint) RENAME TO bank_repay_policy_v210;
+ALTER FUNCTION public.bank_borrow(uuid, uuid, numeric) RENAME TO bank_borrow_policy_v210;
+ALTER FUNCTION public.bank_repay(uuid, uuid, uuid, numeric) RENAME TO bank_repay_policy_v210;
 
-REVOKE ALL ON FUNCTION public.bank_borrow_policy_v210(uuid, uuid, bigint) FROM PUBLIC, moneyverse_app;
-REVOKE ALL ON FUNCTION public.bank_repay_policy_v210(uuid, uuid, uuid, bigint) FROM PUBLIC, moneyverse_app;
+REVOKE ALL ON FUNCTION public.bank_borrow_policy_v210(uuid, uuid, numeric) FROM PUBLIC, moneyverse_app;
+REVOKE ALL ON FUNCTION public.bank_repay_policy_v210(uuid, uuid, uuid, numeric) FROM PUBLIC, moneyverse_app;
 
 CREATE OR REPLACE FUNCTION public.bank_borrow(
-  p_key uuid, p_actor uuid, p_principal bigint
+  p_key uuid, p_actor uuid, p_principal numeric
 )
-RETURNS TABLE(loan_id uuid, principal_amount bigint, interest_amount bigint, outstanding_amount bigint, transaction_id uuid, replayed boolean)
+RETURNS TABLE(loan_id uuid, principal_amount numeric, interest_amount numeric, outstanding_amount numeric, transaction_id uuid, replayed boolean)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE
   v_command uuid;
@@ -22,9 +22,9 @@ DECLARE
   v_command_tx uuid;
   v_result jsonb;
   v_loan uuid;
-  v_principal bigint;
-  v_interest bigint;
-  v_outstanding bigint;
+  v_principal numeric;
+  v_interest numeric;
+  v_outstanding numeric;
   v_tx uuid;
   v_policy_replayed boolean;
   v_hash bytea;
@@ -41,9 +41,9 @@ BEGIN
   IF v_replayed THEN
     RETURN QUERY SELECT
       (v_result->>'loanId')::uuid,
-      (v_result->>'principalAmount')::bigint,
-      (v_result->>'interestAmount')::bigint,
-      (v_result->>'outstandingAmount')::bigint,
+      (v_result->>'principalAmount')::numeric,
+      (v_result->>'interestAmount')::numeric,
+      (v_result->>'outstandingAmount')::numeric,
       v_command_tx,
       true;
     RETURN;
@@ -66,9 +66,9 @@ END;
 $$;
 
 CREATE OR REPLACE FUNCTION public.bank_repay(
-  p_key uuid, p_actor uuid, p_loan uuid, p_amount bigint
+  p_key uuid, p_actor uuid, p_loan uuid, p_amount numeric
 )
-RETURNS TABLE(loan_id uuid, paid_amount bigint, outstanding_amount bigint, transaction_id uuid, replayed boolean)
+RETURNS TABLE(loan_id uuid, paid_amount numeric, outstanding_amount numeric, transaction_id uuid, replayed boolean)
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE
   v_command uuid;
@@ -76,8 +76,8 @@ DECLARE
   v_command_tx uuid;
   v_result jsonb;
   v_loan uuid;
-  v_paid bigint;
-  v_outstanding bigint;
+  v_paid numeric;
+  v_outstanding numeric;
   v_tx uuid;
   v_policy_replayed boolean;
   v_hash bytea;
@@ -94,8 +94,8 @@ BEGIN
   IF v_replayed THEN
     RETURN QUERY SELECT
       (v_result->>'loanId')::uuid,
-      (v_result->>'paidAmount')::bigint,
-      (v_result->>'outstandingAmount')::bigint,
+      (v_result->>'paidAmount')::numeric,
+      (v_result->>'outstandingAmount')::numeric,
       v_command_tx,
       true;
     RETURN;
@@ -116,14 +116,14 @@ BEGIN
 END;
 $$;
 
-ALTER FUNCTION public.bank_borrow_policy_v210(uuid, uuid, bigint) OWNER TO moneyverse_migrator;
-ALTER FUNCTION public.bank_repay_policy_v210(uuid, uuid, uuid, bigint) OWNER TO moneyverse_migrator;
-ALTER FUNCTION public.bank_borrow(uuid, uuid, bigint) OWNER TO moneyverse_migrator;
-ALTER FUNCTION public.bank_repay(uuid, uuid, uuid, bigint) OWNER TO moneyverse_migrator;
+ALTER FUNCTION public.bank_borrow_policy_v210(uuid, uuid, numeric) OWNER TO moneyverse_migrator;
+ALTER FUNCTION public.bank_repay_policy_v210(uuid, uuid, uuid, numeric) OWNER TO moneyverse_migrator;
+ALTER FUNCTION public.bank_borrow(uuid, uuid, numeric) OWNER TO moneyverse_migrator;
+ALTER FUNCTION public.bank_repay(uuid, uuid, uuid, numeric) OWNER TO moneyverse_migrator;
 
-REVOKE ALL ON FUNCTION public.bank_borrow(uuid, uuid, bigint) FROM PUBLIC;
-REVOKE ALL ON FUNCTION public.bank_repay(uuid, uuid, uuid, bigint) FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION public.bank_borrow(uuid, uuid, bigint) TO moneyverse_app;
-GRANT EXECUTE ON FUNCTION public.bank_repay(uuid, uuid, uuid, bigint) TO moneyverse_app;
+REVOKE ALL ON FUNCTION public.bank_borrow(uuid, uuid, numeric) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.bank_repay(uuid, uuid, uuid, numeric) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.bank_borrow(uuid, uuid, numeric) TO moneyverse_app;
+GRANT EXECUTE ON FUNCTION public.bank_repay(uuid, uuid, uuid, numeric) TO moneyverse_app;
 
 COMMIT;
