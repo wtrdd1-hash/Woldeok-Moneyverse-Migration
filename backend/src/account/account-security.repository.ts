@@ -23,6 +23,16 @@ export interface MemberSessionView {
   readonly deviceLabel: string;
 }
 
+interface SecurityEventRow {
+  readonly event_type: string;
+  readonly created_at: Date;
+}
+
+export interface MemberSecurityEventView {
+  readonly type: string;
+  readonly createdAt: string;
+}
+
 interface RevokedCountRow {
   readonly revoked_sessions: number;
 }
@@ -51,6 +61,15 @@ export class AccountSecurityRepository {
       lastSeenAt: row.last_seen_at.toISOString(),
       deviceLabel: row.device_label,
     }));
+  }
+
+  async recentEvents(userId: string): Promise<MemberSecurityEventView[]> {
+    const rows = await queryRows<SecurityEventRow>(
+      this.pool,
+      `SELECT event_type, created_at FROM account_recent_security_events($1::uuid, 20)`,
+      [userId],
+    );
+    return rows.map((row) => ({ type: row.event_type, createdAt: row.created_at.toISOString() }));
   }
 
   async revokeOtherSession(

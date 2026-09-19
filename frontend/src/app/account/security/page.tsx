@@ -34,9 +34,23 @@ interface SecuritySession {
   readonly deviceLabel: string;
 }
 
+interface SecurityEvent {
+  readonly type: string;
+  readonly createdAt: string;
+}
+
 interface Identity {
   readonly provider: string;
 }
+
+
+const SECURITY_EVENT_LABEL: Readonly<Record<string, string>> = {
+  local_registration_completed: '이메일 계정 가입 완료',
+  local_login_succeeded: '이메일 계정 로그인',
+  local_password_reset_requested: '비밀번호 재설정 요청',
+  local_password_reset_completed: '비밀번호 재설정 완료',
+  local_password_changed: '비밀번호 변경',
+};
 
 const PROVIDER_NAME: Readonly<Record<string, string>> = {
   discord: 'Discord',
@@ -50,14 +64,16 @@ export default async function AccountSecurityPage({
 }) {
   await requireMember();
   const params = await searchParams;
-  const [sessionData, identityData] = await Promise.all([
+  const [sessionData, identityData, eventData] = await Promise.all([
     apiOrNull<{ sessions: SecuritySession[] }>('/api/v1/account/security/sessions'),
     apiOrNull<{ identities: Identity[] }>('/api/v1/account/identities'),
+    apiOrNull<{ events: SecurityEvent[] }>('/api/v1/account/security/events'),
   ]);
   const sessions = sessionData?.sessions ?? [];
   const identities = identityData?.identities ?? [];
   const hasLocalIdentity = identities.some((identity) => identity.provider === 'local_email');
   const oauthIdentities = identities.filter((identity) => identity.provider !== 'local_email');
+  const events = eventData?.events ?? [];
   const otherCount = sessions.filter((session) => !session.current).length;
   const error = typeof params.error === 'string' ? params.error : null;
   const revoked = typeof params.revoked === 'string' ? params.revoked : null;
@@ -135,6 +151,20 @@ export default async function AccountSecurityPage({
             ))}
           </div>
         )}
+      </section>
+
+      <section className="grid gap-3" aria-labelledby="security-events">
+        <SectionHeader id="security-events" eyebrow="SECURITY EVENTS" title="최근 보안 활동" />
+        <Card><CardContent className="pt-6">
+          {eventData === null ? <p className="text-sm text-muted-foreground">보안 활동을 불러오지 못했습니다.</p> : events.length === 0 ? <p className="text-sm text-muted-foreground">최근 보안 활동이 없습니다.</p> : (
+            <ul className="grid gap-3">{events.map((event, index) => (
+              <li key={`${event.createdAt}-${event.type}-${index}`} className="flex flex-wrap items-center justify-between gap-2 border-b pb-3 last:border-0 last:pb-0">
+                <span className="text-sm font-medium">{SECURITY_EVENT_LABEL[event.type] ?? '계정 보안 활동'}</span>
+                <span className="text-xs text-muted-foreground">{formatMoment(event.createdAt)}</span>
+              </li>
+            ))}</ul>
+          )}
+        </CardContent></Card>
       </section>
 
       {hasLocalIdentity ? (

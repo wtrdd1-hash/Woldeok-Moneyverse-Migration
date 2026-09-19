@@ -2,12 +2,21 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.19.275
+> Current integrated version: v2026.09.19.279
 > Implementation/evidence sync: 2026-09-19
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+## Cycle delta — v2026.09.19.279 (2026-09-19)
+
+### Active-session details and v279 exact-SHA Test/Production synchronization
+- **Authority / branch:** implementation authority is `main=3712f7989b7a9441cc0a5f9d45784b4252a2c610`; documentation synchronization uses `docs/plan-v279-runtime-sync`. Remote `main` was re-read at the start and again immediately before Production promotion and matched the same exact SHA.
+- **Implementation:** migration 213 adds the least-output `account_active_sessions(uuid,uuid)` read function. Account → Security shows a privacy-safe device category, recent activity, login and expiry while excluding raw User-Agent/IP/token/CSRF material. The v278 mobile accessibility repair for administrator support is also included in this SHA.
+- **Static/unit evidence:** release-helper regressions, full typecheck, lint with 0 errors (11 existing image-optimization warnings), 157-endpoint API-contract parity, backend 888 PASS/360 environment-dependent skip, frontend 667/667 PASS, and production build all passed.
+- **Test promotion:** missing Test migrations 211→213 were applied through checksum-verified migration tooling. `/srv/moneyverse-data/releases/test-3712f7989b7a-v279` was promoted blue/green. `/api/version` and `/frontend-version` both return the exact SHA; health, required route smoke, global noindex/nofollow and recent warning-or-higher log scan passed.
+- **Production promotion:** a fresh encrypted database/photo backup was created and SHA-256 verified before migration 213. The same build was promoted from `/srv/moneyverse-data/releases/prod-3712f7989b7a-v279` canary→stable without taking the primary edge down. Post-promotion version/health and home/work/account-security/admin-support/status/stocks/casino/wallet/shop smoke passed; backend/frontend/Economy AI/backup timer are active and recent warning-or-higher journals are empty.
+- **Rollback:** preserve pre-blue-green Nginx backups and prior immutable releases. Migration 213 is additive and its recorded history remains in place even if application behavior rolls back.
 
 ## Cycle delta — v2026.09.19.275 (2026-09-19)
 
