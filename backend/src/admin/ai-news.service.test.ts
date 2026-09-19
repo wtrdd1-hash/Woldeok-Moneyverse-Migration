@@ -7,6 +7,7 @@ import {
   AiNewsUnavailableError,
   SYSTEM_PROMPT,
   endpoint,
+  aiNewsRuntimeCredentialFrom,
   normalise,
   normaliseRegisteredStockAuto,
   openAiCaller,
@@ -158,6 +159,72 @@ describe('normalise', () => {
   it('never stores more than five', () => {
     const out = normalise({ scenarios: Array.from({ length: 5 }, () => proposal()) }, CONTEXT);
     expect(out).toHaveLength(5);
+  });
+});
+
+describe('automatic AI-news runtime configuration', () => {
+  it('uses a deployment-owned OpenAI-compatible endpoint without requiring a stored human API key', async () => {
+    const repository = fakeRepository({
+      credential: vi.fn(async () => ({ api_base_url: 'unused', model: 'unused', api_key_sealed: null, api_key_key_id: null })),
+      latest: vi.fn(async () => ({
+        batch_id: '33333333-3333-4333-8333-333333333333',
+        created_at: new Date().toISOString(),
+        operator_prompt: 'AUTO',
+        model: 'llama3.2:3b',
+        scenarios: [{
+          id: '55555555-5555-4555-8555-555555555555',
+          ordinal: 1,
+          stock_id: '66666666-6666-4666-8666-666666666666',
+          stock_symbol: 'MYUY',
+          stock_name: '뮤야얌 전자',
+          direction: 'up',
+          strength: 2,
+          hours: 6,
+          headline: '등록 종목 뉴스',
+          body: '본문',
+          rationale: '근거',
+          status: 'proposed',
+          published_event_id: null,
+          decided_at: null,
+          effects: [{
+            stock_id: '66666666-6666-4666-8666-666666666666',
+            stock_symbol: 'MYUY',
+            stock_name: '뮤야얌 전자',
+            direction: 'up',
+            strength: 2,
+          }],
+        }],
+      })),
+    } as Partial<AiNewsRepository>);
+    const caller = vi.fn(async () => ({ scenarios: [proposal()] }));
+    const service = new AiNewsService(repository, null, caller);
+    await expect(service.autoGenerateAndPublish(ACTOR, {
+      apiBaseUrl: 'http://127.0.0.1:11434/v1',
+      model: 'llama3.2:3b',
+      apiKey: '',
+    })).resolves.toMatchObject({ generated: 1, published: true });
+    expect(repository.credential).not.toHaveBeenCalled();
+    expect(caller).toHaveBeenCalledWith(expect.objectContaining({
+      apiBaseUrl: 'http://127.0.0.1:11434/v1',
+      model: 'llama3.2:3b',
+      apiKey: '',
+    }));
+  });
+
+  it('reads and validates unattended runtime configuration from environment', () => {
+    expect(aiNewsRuntimeCredentialFrom({
+      AI_NEWS_AUTO_API_BASE_URL: 'http://127.0.0.1:11434/v1/',
+      AI_NEWS_AUTO_MODEL: 'llama3.2:3b',
+    })).toEqual({
+      apiBaseUrl: 'http://127.0.0.1:11434/v1',
+      model: 'llama3.2:3b',
+      apiKey: '',
+    });
+    expect(aiNewsRuntimeCredentialFrom({})).toBeNull();
+    expect(() => aiNewsRuntimeCredentialFrom({
+      AI_NEWS_AUTO_API_BASE_URL: 'file:///tmp/model',
+      AI_NEWS_AUTO_MODEL: 'x',
+    })).toThrow('automatic AI news runtime model configuration is invalid');
   });
 });
 

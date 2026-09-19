@@ -916,3 +916,7 @@ AI lane은 `macro`, `shop`, `stock`, `jobs`, `welfare`, `integrity` 6개 분야�
 자동 생성은 권위 있는 AI 뉴스 context가 제공하는 `virtual_stocks`의 현재 `active=true` 등록 종목만 사용해야 한다. 자동 게시 가능한 모든 effect는 이 등록 심볼 중 하나를 반드시 지정해야 하며 전체시장/null effect, 미등록 심볼, 비활성 종목, 강도 3 effect는 자동 후보에서 제외한다. 활성 등록 종목이 0개면 모델을 호출하기 전에 fail-closed로 종료한다. 자동 시나리오는 최대 24시간으로 제한하고 실제로 움직이는 등록 종목은 최대 2개다.
 
 스케줄러 feature flag가 존재하는 것만으로 기능 작동을 증명하지 않는다. Test와 Production 승격 증거에는 기능 활성화, 감사 가능한 actor UUID 설정, 시간별 job 성공, 저장된 AI batch/scenario의 effect가 실제 활성 `virtual_stocks`에 resolve되는지 확인한 결과, 기존 market-event 경로를 통한 게시 결과가 포함되어야 한다. 실행 detail이 `disabled` 또는 `actor_missing`인 scheduler row는 생성 성공이 아니라 skip으로 보고해야 한다.
+
+### 34.2 배포 소유 자동 모델 런타임 (v2026.09.19.289)
+
+무인 주식 시나리오 생성은 배포 환경의 `AI_NEWS_AUTO_API_BASE_URL`, `AI_NEWS_AUTO_MODEL`, 선택적 `AI_NEWS_AUTO_API_KEY`를 사용할 수 있다. 이 경로는 PostgreSQL에 암호화 저장되는 수동 관리자 뉴스룸 자격정보와 분리한다. 자동 actor UUID는 계속 필수이며 operator 권한으로 resolve되어야 하므로 context 조회, batch 생성, market-event 게시의 기존 권한·감사 경계를 유지한다. Ollama 같은 로컬 OpenAI-compatible 추론은 API key를 비워둘 수 있다. HTTP(S)가 아닌 잘못된 endpoint는 모델 호출 전에 fail-closed 처리한다.
