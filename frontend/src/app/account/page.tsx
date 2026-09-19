@@ -182,6 +182,11 @@ export default async function AccountPage({
       )}
 
       <Card>
+        <CardHeader><CardDescription>NOTIFICATIONS</CardDescription><CardTitle>알림 설정.</CardTitle><CardDescription>목표와 NPC 주문 알림 수신 여부를 계정에서 관리합니다.</CardDescription></CardHeader>
+        <CardContent><Link href="/account/notifications" className="inline-flex min-h-11 items-center rounded-md border px-4 text-sm font-medium">알림 설정 열기 →</Link></CardContent>
+      </Card>
+
+      <Card>
         <CardHeader>
           <CardDescription>ADD A SIGN-IN METHOD</CardDescription>
           <CardTitle>다른 로그인 수단 연결하기.</CardTitle>
