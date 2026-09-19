@@ -162,7 +162,7 @@ per-account, per-IP/network rate limit, password spraying 탐지, progressive ba
 
 ## 14. 세션·CSRF·XSS
 
-세션 ID는 secret이면서 외부 입력이므로 format validation + parameterized lookup을 적용한다. login/권한상승 후 rotate, logout 서버 revoke, revoke-one/revoke-all, idle/absolute expiry, 의심 replay step-up/revoke를 지원한다.
+세션 ID는 secret이면서 외부 입력이므로 format validation + parameterized lookup을 적용한다. login/권한상승 후 rotate, logout 서버 revoke, revoke-one/revoke-all, idle/absolute expiry, 의심 replay step-up/revoke를 지원한다. 일반 회원 세션은 PostgreSQL을 정본으로 하는 180일 sliding lifetime을 사용해 프로세스/호스트 재시작으로 로그인 상태가 무효화되지 않게 하며, pre-login과 권한 관리자 콘솔 세션의 짧은 수명은 별도로 유지한다.
 
 Cookie 인증 mutation은 CSRF 보호를 사용하고 GET mutation은 금지한다. Auth 화면에는 광고/행태추적/불필요한 3rd-party script를 두지 않는다. CSP/output encoding을 적용하고 reset/login token이 referrer, analytics, log, screenshot으로 새지 않게 한다.
 
