@@ -40,7 +40,7 @@ export default async function ContentAdminPage() {
   const allPhotos = allPhotosRes ?? [];
 
   return (
-    <div className="grid gap-6">
+    <div data-page="admin-content" className="mv-page mv-page--admin grid gap-6">
       <PageHeader
         eyebrow="PUBLISHED CONTENT CONTROL"
         title={

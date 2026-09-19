@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="grid gap-6">
+    <div data-page="privacy" className="mv-page mv-page--utility grid gap-6">
       <PageHeader title="개인정보처리방침" />
       <PrivacyDocument />
     </div>

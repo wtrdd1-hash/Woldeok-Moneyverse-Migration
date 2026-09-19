@@ -21,7 +21,7 @@ export default async function AdminShopPage() {
   const items = data?.items || [];
 
   return (
-    <div className="grid gap-8 pb-16">
+    <div data-page="admin-shop" className="mv-page mv-page--admin grid gap-8 pb-16">
       <AdminSubNav />
 
       <PageHeader

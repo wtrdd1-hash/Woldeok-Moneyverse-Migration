@@ -195,7 +195,7 @@ export default async function CasinoPage() {
     !numberGame || selfExcluded || belowMinimum(numberHeadroom, numberGame.min_stake);
 
   return (
-    <div className="grid gap-6">
+    <div data-page="casino" className="mv-page mv-page--gameplay grid gap-6">
       <PageHeader
         eyebrow="LUCKY ZONE"
         title={

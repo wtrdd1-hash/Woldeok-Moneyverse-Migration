@@ -50,7 +50,7 @@ export default async function QuestsPage() {
   ]);
 
   return (
-    <div className="grid gap-6">
+    <div data-page="quests" className="mv-page mv-page--gameplay grid gap-6">
       <PageHeader eyebrow="DAILY QUESTS" title="퀘스트와 NPC 주문">
         퀘스트와 NPC 주문은 모두 게임 안의 활동 기록입니다. 달성하더라도 실제 현금이나 실물
         경품은 지급되지 않습니다.

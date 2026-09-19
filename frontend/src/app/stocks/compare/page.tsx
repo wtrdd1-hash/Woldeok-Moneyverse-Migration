@@ -34,7 +34,7 @@ export default async function StockComparePage({
     .slice(0, 3);
 
   return (
-    <div className="grid gap-6">
+    <div data-page="stocks-compare" className="mv-page mv-page--finance grid gap-6">
       <PageHeader
         eyebrow="VIRTUAL MARKET"
         title={isEn ? 'Compare Virtual Stocks' : '가상 주식 종목 비교'}

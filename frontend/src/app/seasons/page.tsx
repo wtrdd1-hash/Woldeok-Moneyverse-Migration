@@ -55,7 +55,7 @@ export default async function SeasonsPage({
     : null;
 
   return (
-    <div className="grid gap-6">
+    <div data-page="seasons" className="mv-page mv-page--gameplay grid gap-6">
       <PageHeader eyebrow="COMMUNITY SEASON" title="시즌 소비 이벤트">
         WLD 소비와 점수는 게임 안에서만 사용됩니다.
       </PageHeader>

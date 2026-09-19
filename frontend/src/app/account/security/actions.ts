@@ -67,3 +67,16 @@ export async function reauthenticateWithLocalPassword(formData: FormData): Promi
   revalidatePath('/account/security');
   redirect('/account/security?reauth=done');
 }
+
+export async function changeLocalPassword(formData: FormData): Promise<void> {
+  const password = String(formData.get('password') ?? '');
+  const confirm = String(formData.get('confirmPassword') ?? '');
+  if (!password || password !== confirm) redirect('/account/security?error=password-mismatch');
+  try {
+    await mutate<{ outcome: 'password-changed' }>('/api/v1/auth/local/password/change', { body: { password } });
+  } catch {
+    redirect('/account/security?error=password-change');
+  }
+  revalidatePath('/account/security');
+  redirect('/account/security?password=changed');
+}

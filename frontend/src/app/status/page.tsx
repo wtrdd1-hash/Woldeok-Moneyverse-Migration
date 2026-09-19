@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { OVERALL_HEADLINE, STATUS_LABEL, overallState } from '@/lib/status';
-import { statusWithFreshness } from '@/lib/status-freshness';
+import { asStatusState } from '@/lib/status';
 import type { StatusState } from '@/lib/status';
 
 /**
@@ -34,6 +34,9 @@ interface StatusRow {
   readonly state: string;
   readonly detail: string | null;
   readonly observedAt: string | null;
+  readonly freshnessState: 'fresh' | 'stale' | 'unknown';
+  readonly ageMs: number | null;
+  readonly policyVersion: string;
 }
 
 /**
@@ -53,13 +56,11 @@ const VARIANT: Readonly<Record<StatusState, 'default' | 'secondary' | 'destructi
 export default async function StatusPage() {
   const data = await publicApi<{ status: StatusRow[] }>('/api/v1/status', 30);
   const rows = data?.status ?? [];
-  const nowMs = Date.now();
-  const snapshots = rows.map((row) => statusWithFreshness(row.state, row.observedAt, nowMs));
-  const overall = overallState(snapshots.map((snapshot) => snapshot.state));
-  const staleCount = snapshots.filter((snapshot) => snapshot.stale).length;
+  const overall = overallState(rows.map((row) => asStatusState(row.state)));
+  const staleCount = rows.filter((row) => row.freshnessState !== 'fresh').length;
 
   return (
-    <div className="grid gap-6">
+    <div data-page="status" className="mv-page mv-page--utility grid gap-6">
       <PageHeader
         eyebrow="LIVE SERVICE STATUS"
         title={
@@ -107,8 +108,8 @@ export default async function StatusPage() {
             <CardContent>
               <dl className="grid gap-3">
                 {rows.map((row) => {
-                  const snapshot = statusWithFreshness(row.state, row.observedAt, nowMs);
-                  const state = snapshot.state;
+                  const state = asStatusState(row.state);
+                  const needsFreshness = row.freshnessState !== 'fresh';
                   return (
                     <div
                       key={row.sourceKey}
@@ -132,7 +133,7 @@ export default async function StatusPage() {
                         )}
                       </div>
                       <dd className="shrink-0">
-                        <Badge variant={VARIANT[state]}>{snapshot.stale ? '최신 확인 필요' : STATUS_LABEL[state]}</Badge>
+                        <Badge variant={VARIANT[state]}>{needsFreshness ? '최신 확인 필요' : STATUS_LABEL[state]}</Badge>
                       </dd>
                     </div>
                   );

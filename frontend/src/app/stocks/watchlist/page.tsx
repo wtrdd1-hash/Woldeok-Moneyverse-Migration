@@ -63,7 +63,7 @@ export default async function StockWatchlistPage({ searchParams }: { readonly se
   const visibleStocks = sortWatchlist(filtered, sort);
 
   return (
-    <div className="grid gap-6">
+    <div data-page="stocks-watchlist" className="mv-page mv-page--finance grid gap-6">
       <PageHeader eyebrow="WATCHLIST" title={isEn ? 'My Stock Watchlist' : '내 관심 종목'}>
         {isEn ? 'Search and prioritize saved virtual stocks in one focused view. Prices are game-only data, not real securities or investment products.' : '저장한 가상 종목을 검색하고 원하는 순서로 빠르게 확인하세요. 표시되는 가격은 게임 전용 데이터이며 실제 증권·투자 상품이 아닙니다.'}
       </PageHeader>

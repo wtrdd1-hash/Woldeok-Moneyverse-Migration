@@ -31,7 +31,7 @@ export default async function GalleryPhotoPage({
   if (!photo) notFound();
 
   return (
-    <div className="grid gap-5">
+    <div data-page="gallery-photoId" className="mv-page mv-page--community grid gap-5">
       <Button asChild variant="ghost" className="w-fit -ml-3 text-muted-foreground">
         <Link href="/gallery">
           <ArrowLeft />

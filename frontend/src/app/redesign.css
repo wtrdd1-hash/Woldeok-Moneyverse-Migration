@@ -263,3 +263,91 @@ a {
     transition-duration: 0.001ms !important;
   }
 }
+
+
+/* v2026.09.19.271 — route-level rebuild primitives.
+   These families intentionally do not share one dashboard template. */
+.mv-page {
+  min-width: 0;
+}
+
+.mv-page--finance {
+  --mv-page-rule: rgb(148 163 184 / 0.22);
+  font-variant-numeric: tabular-nums;
+}
+.mv-page--finance > [data-slot="card"],
+.mv-page--finance section > [data-slot="card"] {
+  border-radius: 12px;
+}
+.mv-page--finance table,
+.mv-page--finance [role="table"] {
+  font-variant-numeric: tabular-nums;
+}
+.mv-page--finance h1,
+.mv-page--finance h2 {
+  letter-spacing: -0.045em;
+}
+
+.mv-page--member {
+  max-width: 1120px;
+  margin-inline: auto;
+}
+.mv-page--member > section {
+  scroll-margin-top: 7rem;
+}
+
+.mv-page--community {
+  --mv-community-measure: 72ch;
+}
+.mv-page--community article,
+.mv-page--community [data-content-body] {
+  max-width: var(--mv-community-measure);
+}
+.mv-page--community h1 {
+  text-wrap: balance;
+}
+
+.mv-page--gameplay {
+  --mv-game-rule: rgb(248 198 92 / 0.24);
+}
+.mv-page--gameplay > section {
+  border-top-color: var(--mv-game-rule);
+}
+.mv-page--gameplay [data-slot="card"] {
+  box-shadow: none;
+}
+
+.mv-page--admin {
+  font-variant-numeric: tabular-nums;
+}
+.mv-page--admin [data-slot="card"] {
+  border-radius: 10px;
+  box-shadow: none;
+}
+.mv-page--admin table,
+.mv-page--admin [role="table"] {
+  font-size: 0.875rem;
+}
+.mv-page--admin h1 {
+  max-width: none;
+}
+
+.mv-page--utility {
+  max-width: 760px;
+  margin-inline: auto;
+}
+.mv-page--utility [data-slot="card"] {
+  border-radius: 14px;
+}
+
+@media (max-width: 767px) {
+  .mv-page--finance table {
+    font-size: 0.8125rem;
+  }
+  .mv-page--admin [data-slot="card"] {
+    border-radius: 8px;
+  }
+  .mv-page--utility {
+    max-width: none;
+  }
+}

@@ -26,7 +26,7 @@ export default async function InventoryPage() {
   const avatarUrl = profileData?.avatarUrl;
 
   return (
-    <div className="grid gap-8 pb-16">
+    <div data-page="inventory" className="mv-page mv-page--gameplay grid gap-8 pb-16">
       <PageHeader
         eyebrow="WOLDEOK INVENTORY"
         title={
