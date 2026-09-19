@@ -77,7 +77,6 @@ PUT /app-api/v1/auth/consent HTTP/1.1
 Host: easy-scraping.com
 Content-Type: application/json
 Cookie: <prelogin cookie>
-x-csrf-token: <현재 csrf token>
 
 {
   "termsCompleted": true,
@@ -97,7 +96,6 @@ POST /app-api/v1/auth/local/register HTTP/1.1
 Host: easy-scraping.com
 Content-Type: application/json
 Cookie: <prelogin cookie>
-x-csrf-token: <현재 csrf token>
 
 {
   "email": "member@example.com",
@@ -129,15 +127,13 @@ x-csrf-token: <현재 csrf token>
 POST /app-api/v1/auth/local/verify-email HTTP/1.1
 Host: easy-scraping.com
 Content-Type: application/json
-Cookie: <동일한 prelogin cookie>
-x-csrf-token: <현재 csrf token>
 
 {
   "token": "<이메일에서 받은 인증 token>"
 }
 ```
 
-성공하면 계정이 활성화되고 로그인 상태로 전환된다. 응답 `Set-Cookie`를 CookieJar에 반영하고 새 CSRF를 저장한다.
+이메일 token은 1회용이며 이 인증 요청에는 token만 필요하다. 가입을 시작한 prelogin cookie와 CSRF token은 다른 브라우저에서 완료할 때도 필요하지 않다. 성공하면 계정이 활성화되고 로그인 상태로 전환된다. 응답 `Set-Cookie`를 CookieJar에 반영하고 새 CSRF를 저장한다.
 
 ```json
 {
@@ -147,7 +143,7 @@ x-csrf-token: <현재 csrf token>
 }
 ```
 
-만료/잘못된 인증은 내부 상태를 노출하지 않는 인증 실패로 처리한다.
+잘못되었거나 만료되었거나 이미 사용된 token은 모두 내부 상태를 구분해 노출하지 않는 동일한 인증 실패로 처리한다.
 
 ## 9. 이메일/비밀번호 로그인
 
@@ -158,7 +154,6 @@ POST /app-api/v1/auth/local/login HTTP/1.1
 Host: easy-scraping.com
 Content-Type: application/json
 Cookie: <prelogin cookie>
-x-csrf-token: <현재 csrf token>
 
 {
   "email": "member@example.com",
@@ -203,7 +198,6 @@ POST /app-api/v1/auth/logout HTTP/1.1
 Host: easy-scraping.com
 Content-Type: application/json
 Cookie: <로그인 세션 cookie>
-x-csrf-token: <현재 csrf token>
 
 {}
 ```

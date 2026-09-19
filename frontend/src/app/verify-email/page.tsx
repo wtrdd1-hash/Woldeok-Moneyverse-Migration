@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 const STATUS_COPY: Readonly<Record<string, string>> = {
   invalid: '인증 링크 형식이 올바르지 않아요. 회원가입을 다시 진행해 주세요.',
-  failed: '인증 링크가 만료되었거나 현재 가입 세션과 일치하지 않아요. 회원가입을 다시 진행해 주세요.',
+  failed: '인증 링크가 만료되었거나 이미 사용되었습니다. 회원가입을 다시 진행해 새 인증 링크를 받아 주세요.',
 };
 
 export default async function VerifyEmailPage({
@@ -43,7 +43,7 @@ export default async function VerifyEmailPage({
         <CardHeader>
           <CardTitle>가입 이메일 확인</CardTitle>
           <CardDescription>
-            인증 링크는 30분 동안 유효하며 한 번만 사용할 수 있습니다. 가입을 시작한 앱과 다른 브라우저에서도 인증할 수 있습니다.
+            인증 링크는 30분 동안 유효하며 한 번만 사용할 수 있습니다. 가입을 시작한 앱의 쿠키나 CSRF 토큰 없이도 다른 브라우저에서 인증할 수 있습니다.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4">
