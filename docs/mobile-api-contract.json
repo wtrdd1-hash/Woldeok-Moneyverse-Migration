@@ -325,6 +325,12 @@
                 },
                 "administratorSession": {
                   "type": "boolean"
+                },
+                "lastSeenAt": {
+                  "type": "string"
+                },
+                "deviceLabel": {
+                  "type": "string"
                 }
               },
               "required": [
@@ -333,7 +339,9 @@
                 "expiresAt",
                 "reauthenticatedAt",
                 "current",
-                "administratorSession"
+                "administratorSession",
+                "lastSeenAt",
+                "deviceLabel"
               ]
             }
           }

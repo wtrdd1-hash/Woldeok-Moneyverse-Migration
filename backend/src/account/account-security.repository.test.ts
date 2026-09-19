@@ -25,6 +25,8 @@ describe('AccountSecurityRepository', () => {
           expires_at: expires,
           reauthenticated_at: null,
           admin_opened_at: null,
+          last_seen_at: new Date('2026-09-19T09:00:00.000Z'),
+          device_label: 'Windows device',
         },
       ]),
     );
@@ -40,9 +42,12 @@ describe('AccountSecurityRepository', () => {
       reauthenticatedAt: null,
       current: true,
       administratorSession: false,
+      lastSeenAt: '2026-09-19T09:00:00.000Z',
+      deviceLabel: 'Windows device',
     });
     expect(session).not.toHaveProperty('token_hash');
     expect(session).not.toHaveProperty('csrf_hash');
+    expect(session).not.toHaveProperty('user_agent');
   });
 
   it('protects the current session when revoking one other session', async () => {
