@@ -160,6 +160,39 @@ export interface ModelCall {
 
 export type ModelCaller = (call: ModelCall) => Promise<ScenarioBatch>;
 
+export interface AiNewsRuntimeCredential {
+  readonly apiBaseUrl: string;
+  readonly model: string;
+  readonly apiKey: string;
+}
+
+/**
+ * Deployment-owned credential for unattended AI-news automation.
+ *
+ * Manual newsroom credentials remain encrypted in PostgreSQL. The scheduler may
+ * instead use a local/OpenAI-compatible deployment endpoint so unattended work
+ * is not coupled to a human operator's stored API key. The actor UUID is still
+ * required separately and remains the authority/audit identity for database
+ * writes.
+ */
+export function aiNewsRuntimeCredentialFrom(env: NodeJS.ProcessEnv): AiNewsRuntimeCredential | null {
+  const apiBaseUrl = env.AI_NEWS_AUTO_API_BASE_URL?.trim() ?? '';
+  const model = env.AI_NEWS_AUTO_MODEL?.trim() ?? '';
+  const apiKey = env.AI_NEWS_AUTO_API_KEY?.trim() ?? '';
+  if (apiBaseUrl === '' && model === '' && apiKey === '') return null;
+  let parsed: URL;
+  try {
+    parsed = new URL(apiBaseUrl);
+  } catch {
+    throw new AiNewsInputError('AI_NEWS_AUTO_API_BASE_URL must be an http(s) URL');
+  }
+  if (!['http:', 'https:'].includes(parsed.protocol) || model.length < 1 || model.length > 100) {
+    throw new AiNewsInputError('automatic AI news runtime model configuration is invalid');
+  }
+  if (apiKey.length > 512) throw new AiNewsInputError('automatic AI news API key must be at most 512 characters');
+  return { apiBaseUrl: apiBaseUrl.replace(/\/+$/, ''), model, apiKey };
+}
+
 /** What the console offers in the model field. Empty when the API will not say. */
 export type ModelLister = (call: { readonly apiBaseUrl: string; readonly apiKey: string }) => Promise<readonly string[]>;
 
@@ -763,8 +796,11 @@ export class AiNewsService {
    * AI never writes an absolute price. Existing event publication remains the
    * only path that moves prices, preserving all market safety controls.
    */
-  async autoGenerateAndPublish(actorUserId: string): Promise<Record<string, unknown>> {
-    const credential = await this.open(actorUserId);
+  async autoGenerateAndPublish(
+    actorUserId: string,
+    runtimeCredential?: AiNewsRuntimeCredential,
+  ): Promise<Record<string, unknown>> {
+    const credential = runtimeCredential ?? await this.open(actorUserId);
     const context = await this.repository.context(actorUserId);
     const listedSymbols = registeredStockSymbols(context);
     if (listedSymbols.size === 0) {
