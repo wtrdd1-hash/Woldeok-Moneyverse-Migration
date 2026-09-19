@@ -97,6 +97,7 @@ export async function createPrivacyRequest(
       },
     });
     revalidatePath('/account');
+    revalidatePath('/account/privacy');
     return { status: 'ok', message: '요청을 접수 기록으로 남겼어요.' };
   } catch (error) {
     return failure(error, '지금은 요청을 기록할 수 없어요.');

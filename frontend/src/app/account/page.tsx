@@ -7,12 +7,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
-import { formatDay, formatMoment } from '@/lib/money';
+import { formatDay } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import {
   DeleteAccountForm,
   LinkButton,
-  PrivacyRequestForm,
   ReauthButton,
   UnlinkButton,
 } from './account-forms';
@@ -31,27 +30,13 @@ interface Identity {
   readonly linkedAt: string;
 }
 
-interface PrivacyRequest {
-  readonly requestId: string;
-  readonly requestType: string;
-  readonly detail: string | null;
-  readonly status: string;
-  readonly createdAt: string;
-}
-
 const PROVIDER_NAME: Readonly<Record<string, string>> = {
   discord: 'Discord',
   google: 'Google',
   local_email: '이메일·비밀번호',
 };
 
-const REQUEST_TYPE_NAME: Readonly<Record<string, string>> = {
-  access: '개인정보 열람 요청',
-  correction: '개인정보 정정 요청',
-  restriction: '개인정보 처리 제한 요청',
-  withdrawal: '개인정보 동의 철회 요청',
-  deletion: '개인정보 삭제 요청',
-};
+
 
 export default async function AccountPage({
   searchParams,
@@ -61,10 +46,9 @@ export default async function AccountPage({
   await requireMember();
   const { linked, reauth } = await searchParams;
 
-  const [identityData, providerData, privacyData] = await Promise.all([
+  const [identityData, providerData] = await Promise.all([
     apiOrNull<{ identities: Identity[] }>('/api/v1/account/identities'),
     apiOrNull<{ providers: { id: string; enabled: boolean }[] }>('/api/v1/auth/providers'),
-    apiOrNull<{ requests: PrivacyRequest[] }>('/api/v1/privacy/requests'),
   ]);
 
   const identities = identityData?.identities ?? [];
@@ -227,70 +211,18 @@ export default async function AccountPage({
         </CardContent>
       </Card>
 
-      <section id="privacy-requests" className="grid gap-3" aria-labelledby="privacy-request-title">
-        <div>
-          <SectionHeader
-            eyebrow="PRIVACY REQUESTS"
-            title="내 정보에 관한 요청 남기기."
-            id="privacy-request-title"
-          />
-          <p className="max-w-prose text-sm text-muted-foreground">
-            열람·정정·처리 제한·동의 철회·삭제 요청을 내 계정으로 기록할 수 있어요. 이 양식은
-            이메일·파일·데이터 전달 주소를 받지 않으며, 요청 자체가 즉시 처리 완료를 뜻하지는
-            않습니다.{' '}
-            <Link href="/privacy#privacy-rights" className="text-primary">
-              이용자 권리와 처리 기준 보기 →
-            </Link>
-          </p>
-        </div>
-
-        {privacyData === null ? (
-          <EmptyState
-            title="개인정보 요청 기록을 지금 불러올 수 없어요."
-            description="계정 설정은 그대로 사용할 수 있습니다."
-          />
-        ) : (
-          <div className="grid gap-4 lg:grid-cols-2">
-            <Card>
-              <CardContent>
-                <PrivacyRequestForm />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">내 요청 기록</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {privacyData.requests.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    아직 기록한 개인정보 요청이 없어요.
-                  </p>
-                ) : (
-                  <ul className="grid gap-3">
-                    {privacyData.requests.map((request) => (
-                      <li key={request.requestId} className="border-b pb-3 last:border-b-0 last:pb-0">
-                        <p className="text-sm font-medium">
-                          {REQUEST_TYPE_NAME[request.requestType] ?? request.requestType}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          <time dateTime={request.createdAt}>
-                            {formatMoment(request.createdAt)}
-                          </time>{' '}
-                          · 접수됨
-                        </p>
-                        {request.detail && <p className="mt-1 text-sm">{request.detail}</p>}
-                        <code className="mt-1 block overflow-x-auto font-mono text-[0.7rem] text-muted-foreground">
-                          {request.requestId}
-                        </code>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </section>
+      <Card>
+        <CardHeader>
+          <CardDescription>PRIVACY CENTER</CardDescription>
+          <CardTitle>개인정보 요청과 처리 현황.</CardTitle>
+          <CardDescription>열람·정정·처리 제한·동의 철회·삭제 요청을 전용 개인정보 센터에서 기록하고 확인합니다.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Link href="/account/privacy" className="inline-flex min-h-11 items-center rounded-md border px-4 text-sm font-medium">
+            개인정보 센터 열기 →
+          </Link>
+        </CardContent>
+      </Card>
 
       <Card id="leave-moneyverse" className="border-destructive/40">
         <CardHeader>
