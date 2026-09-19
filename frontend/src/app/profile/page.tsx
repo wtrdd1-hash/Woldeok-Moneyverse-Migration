@@ -4,7 +4,7 @@ import { Accent, PageHeader, SectionHeader } from '@/components/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
-import type { ProfileSettings, ProfileView } from './profile';
+import type { EarnedTitle, ProfileSettings, ProfileView } from './profile';
 import { ProfileImageForm, ProfileSettingsForm } from './profile-forms';
 import { ProfileCard } from './profile-parts';
 
@@ -26,12 +26,14 @@ export default async function ProfilePage() {
   // every control as "inherit" and saving a display name would republish an
   // image the member had made private, because the write replaces the map
   // rather than patching it.
-  const [data, stored] = await Promise.all([
+  const [data, stored, awarded] = await Promise.all([
     apiOrNull<{ profile: ProfileView }>('/api/v1/profile'),
     apiOrNull<{ settings: ProfileSettings }>('/api/v1/profile/settings'),
+    apiOrNull<{ titles: EarnedTitle[] }>('/api/v1/profile/titles'),
   ]);
   const profile = data?.profile ?? null;
   const settings = stored?.settings ?? null;
+  const earnedTitles = awarded?.titles ?? null;
 
   return (
     <div data-page="profile" className="mv-page mv-page--member grid gap-8">
@@ -65,7 +67,7 @@ export default async function ProfilePage() {
       <section aria-labelledby="visibility-title" className="grid gap-3">
         <SectionHeader eyebrow="WHO SEES WHAT" title="공개 범위 설정" id="visibility-title" />
 
-        {profile === null || settings === null ? (
+        {profile === null || settings === null || earnedTitles === null ? (
           // Deliberately not a blank form. Saving replaces every column from
           // what the form holds, so an empty one submitted over a failed read
           // would clear the name, the image and the title that are still
@@ -80,7 +82,7 @@ export default async function ProfilePage() {
             <Card>
               <CardContent className="grid gap-6">
                 <ProfileImageForm imagePath={settings.image_url} />
-                <ProfileSettingsForm profile={profile} settings={settings} />
+                <ProfileSettingsForm profile={profile} settings={settings} earnedTitles={earnedTitles} />
               </CardContent>
             </Card>
             <p className="max-w-prose text-xs text-muted-foreground">

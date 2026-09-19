@@ -112,23 +112,22 @@ describe('titles', () => {
     expect(titleLabel('season_honour')).toBe('시즌 명예');
   });
 
-  it('offers no title as well as the seeded ones', () => {
-    const values = titleChoices(null).map((choice) => choice.value);
-    expect(values[0]).toBe(NO_TITLE);
-    expect(values).toContain('helper');
+  it('offers no title plus only titles actually awarded to the member', () => {
+    const values = titleChoices([{ code: 'helper', name: 'Helper', awardedAt: '2026-09-20T00:00:00.000Z' }], null).map((choice) => choice.value);
+    expect(values).toEqual([NO_TITLE, 'helper']);
   });
 
   // The write is a replacement, so a title missing from the control is a
   // title that gets cleared. One awarded by a later migration has to stay
   // selectable by whoever is already wearing it.
   it('keeps a title the member is already displaying that this build does not know', () => {
-    expect(titleChoices('founding_member').map((choice) => choice.value)).toContain(
+    expect(titleChoices([], 'founding_member').map((choice) => choice.value)).toContain(
       'founding_member',
     );
   });
 
   it('does not offer an unknown title twice when it is also a seeded one', () => {
-    const values = titleChoices('helper').map((choice) => choice.value);
+    const values = titleChoices([{ code: 'helper', name: 'Helper', awardedAt: '2026-09-20T00:00:00.000Z' }], 'helper').map((choice) => choice.value);
     expect(values.filter((value) => value === 'helper')).toHaveLength(1);
   });
 

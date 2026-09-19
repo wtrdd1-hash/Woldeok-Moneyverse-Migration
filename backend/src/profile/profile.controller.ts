@@ -163,6 +163,22 @@ export class ProfileController {
    * field on the profile, because only the owner may ever read this and
    * putting it on a shape another member also receives invites the mistake.
    */
+  @Get('titles')
+  @ApiOperation({ summary: 'Profile titles actually awarded to the caller' })
+  async titles(@Req() request: RequestWithSession) {
+    const titles = await this.guarded(
+      () => this.repository().earnedTitles(requireUserId(request)),
+      ProfileController.HIDDEN,
+    );
+    return {
+      titles: titles.map((title) => ({
+        code: title.code,
+        name: title.name,
+        awardedAt: title.awarded_at instanceof Date ? title.awarded_at.toISOString() : title.awarded_at,
+      })),
+    };
+  }
+
   @Get('settings')
   @ApiOperation({ summary: 'The caller’s own profile settings, as stored' })
   async settings(@Req() request: RequestWithSession) {
