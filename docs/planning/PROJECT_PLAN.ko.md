@@ -2,11 +2,19 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.19.246
+> **현재 통합 버전:** v2026.09.19.256
 > **구현·증거 동기화:** 2026-09-19
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 회차 변경 — v2026.09.19.256 (2026-09-19)
+
+### `/work` 배포 오탐 배너 + 가속 초기화 화면 갱신 수정
+- **권위:** 구현 시작과 필수 작업중간 재확인 모두 `origin/main=97a301bd39b1f80a3d423b68d16a86d91c4ceb58`였고 코드 변경 전 main/기획 이동은 없었다. 작업은 `fix/work-mobile-reset-v2026.09.19.256` 격리 브랜치에서 진행한다.
+- **원인:** 운영 Nginx는 `/api/version`을 백엔드 런타임 identity(3002)로 예약하는데 프론트 stale-tab 감지가 해당 백엔드 SHA를 `NEXT_PUBLIC_BUILD_ID`와 비교했다. 그래서 정상 탭도 오래된 것으로 오판했다. 또한 `/work`에 live refresh가 없어 DB의 현실 10분 일간/70분 주간 경계가 넘어가도 이미 열린 화면은 이전 수치를 유지할 수 있었다.
+- **구현:** 프론트 소유 `/frontend-version`을 사용하고 stale-tab 회귀 테스트를 수정한다. `/work`에 visible-tab 10초 `LiveRefresh`를 추가하고 synthetic game-day/week 저장 키를 사용자 날짜처럼 노출하지 않는다. 백엔드/스키마/원장/정책 변경은 없다.
+- **QA / 승격:** stale-tab 집중 테스트 5/5, contract build, 프론트 typecheck, Next production build 통과. 브랜치 CI -> exact-SHA 격리 Test -> 프론트/백엔드 identity + 인증 `/work` + backend health 확인 -> merge -> 병합 exact SHA 재빌드 -> 무중단 Production -> 사후 probe 순서로 진행한다.
 
 ## 회차 변경 — v2026.09.19.246 (2026-09-19)
 

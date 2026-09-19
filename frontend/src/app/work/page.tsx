@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { LiveRefresh } from '@/components/live-refresh';
 import { PageHeader } from '@/components/page-header';
 import { TruncatedList } from '@/components/truncated-list';
 import { Badge } from '@/components/ui/badge';
@@ -81,6 +82,7 @@ export default async function WorkPage() {
 
   return (
     <div className="grid gap-8 pb-12">
+      <LiveRefresh everyMs={10_000} />
       <PageHeader
         eyebrow="CAREER & WORK 2.0"
         title={isEn ? 'Professional Careers & Work Tasks' : '전문 직업 및 업무 수행'}
@@ -181,7 +183,6 @@ export default async function WorkPage() {
                 <p className="text-xs text-muted-foreground">
                   {isEn ? 'Next reset' : '다음 초기화'}:{' '}
                   <strong>{formatMoment(summary.day_ends_at)}</strong>
-                  <span className="ml-2 font-mono">({summary.game_day_key})</span>
                 </p>
               </CardContent>
             </Card>
@@ -207,7 +208,6 @@ export default async function WorkPage() {
                 <p className="text-xs text-muted-foreground">
                   {isEn ? 'Next reset' : '다음 초기화'}:{' '}
                   <strong>{formatMoment(summary.week_ends_at)}</strong>
-                  <span className="ml-2 font-mono">({summary.game_week_key})</span>
                 </p>
               </CardContent>
             </Card>
