@@ -70,7 +70,7 @@ export default async function MemberProfilePage({
   const outcome = await readProfile(userId);
 
   return (
-    <div className="grid gap-6">
+    <div data-page="profile-userId" className="mv-page mv-page--member grid gap-6">
       <Button asChild variant="ghost" className="-ml-3 w-fit text-muted-foreground">
         <Link href="/profile">
           <ArrowLeft />

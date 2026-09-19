@@ -75,7 +75,7 @@ export default async function DashboardPage() {
   const events = alertEvents?.events ?? [];
 
   return (
-    <div className="grid gap-6">
+    <div data-page="dashboard" className="mv-page mv-page--member grid gap-6">
       <PageHeader eyebrow="MY MONEYVERSE" title={isEn ? 'Personal Dashboard' : '내 대시보드'}>
         {isEn
           ? 'Your ledger balance, virtual-stock activity and next actions in one member-only view.'

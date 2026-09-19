@@ -75,6 +75,15 @@ export class LocalAuthRepository {
     return row?.accepted === true;
   }
 
+  async changePassword(sessionId: string, userId: string, passwordVerifier: string): Promise<boolean> {
+    const row = await queryOne<{ readonly changed: boolean }>(
+      this.pool,
+      'SELECT public.auth_change_local_password($1,$2,$3) AS changed',
+      [sessionId, userId, passwordVerifier],
+    );
+    return row?.changed === true;
+  }
+
   async completePasswordReset(token: string, passwordVerifier: string): Promise<boolean> {
     const row = await queryOne<{ readonly completed: boolean }>(
       this.pool,

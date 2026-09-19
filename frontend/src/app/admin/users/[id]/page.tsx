@@ -56,7 +56,7 @@ export default async function AdminUserDetailPage({
 
   if (!user) {
     return (
-      <div className="grid gap-5">
+      <div data-page="admin-users-id" className="mv-page mv-page--admin grid gap-5">
         <AdminBack href="/admin/users" label="사용자 관리로" />
         <PageHeader eyebrow="USER SAFETY" title="사용자를 찾을 수 없습니다">
           삭제됐거나 현재 관리자에게 표시되지 않는 사용자입니다.

@@ -35,7 +35,7 @@ export default async function WalletActivityPage() {
   const wallet = await apiOrNull<Overview>('/api/v1/wallet?recent=50');
 
   return (
-    <div className="grid gap-5">
+    <div data-page="wallet-activity" className="mv-page mv-page--finance grid gap-5">
       <Button asChild variant="ghost" className="-ml-3 w-fit text-muted-foreground">
         <Link href="/wallet">
           <ArrowLeft />

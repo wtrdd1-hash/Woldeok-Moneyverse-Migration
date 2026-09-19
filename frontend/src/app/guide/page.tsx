@@ -46,7 +46,7 @@ const PILLAR_ICONS = {
 
 export default function GuidePage() {
   return (
-    <div className="mx-auto max-w-5xl space-y-16 py-6 sm:py-10">
+    <div data-page="guide" className="mv-page mv-page--utility mx-auto max-w-5xl space-y-16 py-6 sm:py-10">
       {/* 1. Hero & Quick Start */}
       <section className="relative overflow-hidden rounded-[28px] border bg-gradient-to-br from-primary/10 via-background to-accent/20 p-6 sm:p-12 shadow-sm">
         <div className="relative z-10 max-w-3xl space-y-4">

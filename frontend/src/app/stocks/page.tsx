@@ -141,7 +141,7 @@ export default async function StocksPage({
 
   return (
     <MarketPricesProvider>
-    <div className="grid gap-6">
+    <div data-page="stocks" className="mv-page mv-page--finance grid gap-6">
       <PageHeader
         eyebrow="VIRTUAL MARKET"
         title={isEn ? 'Virtual Stock Market' : '가상 주식 시장'}

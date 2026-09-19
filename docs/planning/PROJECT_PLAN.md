@@ -1873,3 +1873,24 @@ External references rechecked: Google Search Central September 2026 updates and 
 **v166 business effect:** release classifier work has no direct revenue; expected value is avoided CI/registry/Test/ops waste and reduced probability of promoting or auditing the wrong application identity. SEO work is acquisition/CAC-efficiency investment; API/security and backup/status work are expected-loss, downtime, refund, fraud and support-cost reduction. No unobserved monetary amount is asserted as actual.\n\n### v2026.09.19.261 — Automatic AI stock scenarios
 
 Add an opt-in hourly AI newsroom automation path for the fictional stock market. AI generates bounded event scenarios; deterministic market-event logic remains the sole stock-price authority. Auto-publish excludes market-wide and strength-3 shocks, limits a story to two moving stocks and 24 hours, and fails closed when credentials, actor identity or a bounded candidate are unavailable. Branch: feat/ai-stock-auto-scenarios-v2026.09.19.261.
+
+### v2026.09.19.271 — Human-authored visual standard
+
+- A page that visibly resembles a generic AI-generated UI template fails review.
+- Ban mechanical repetition of bento grids, neon/purple glow, glass cards everywhere, generic KPI quartets, identical radii/spacing, decorative icon tiles, fake insight panels, and symmetric dashboard composition when the information architecture does not require them.
+- Each route must be reviewed as a distinct product surface with its own hierarchy, density, reading order, primary action, empty/error/loading states, and mobile composition.
+- Reference research is pattern analysis only; do not clone any specific product or designer.
+- Reviewers must explicitly record whether a route still looks synthetic or template-generated. Any route marked synthetic blocks completion.
+
+
+### v2026.09.19.271 — Full-page rebuild from a 1,000+ real-UI reference corpus
+
+- Completion means individual review and direct tracking of all 70 current page routes, not a shared-theme refresh.
+- Re-read the integrated plan before implementation, at the mid-work checkpoint, and immediately before PR creation.
+- Research a corpus containing at least 1,000 interfaces designed by people or captured from shipped products. Verified on 2026-09-19: Mobbin lists 1,428 apps / 621,500+ screens / 323,900 flows; SiteInspire exposes multiple curated categories above 1,000 examples; Gummble lists 1,500+ apps/sites / 300,000+ screens / 21,000+ flows. SaaSFrame's 170 dashboard examples are a focused subset, not the corpus by themselves.
+- References are for information hierarchy, density, typography, tables/charts, forms, error/empty states and mobile recomposition; do not clone a specific product.
+- Any route that still resembles a generic AI-generated UI template fails review. Ban mechanical bento grids, ubiquitous neon/purple glow, glass cards everywhere, meaningless four-KPI rows, identical radii/spacing, decorative icon tiles, fake AI-insight panels, excessive pills/badges and symmetry unrelated to reading order.
+- Use distinct product families: finance terminal, member workspace, community/editorial, gameplay, operations console and utility/auth/legal, while designing the reading order and primary action of each route individually.
+- Mobile is recomposed rather than scaled down. Preserve 44px touch targets, keyboard/focus, reduced motion and explicit 403/404/loading/empty/error/reauth states.
+- Visual work must not weaken API/backend/auth/ledger authority.
+- Branch: feat/frontend-full-rebuild-v2026.09.19.271.

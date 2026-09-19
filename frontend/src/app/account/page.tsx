@@ -74,7 +74,7 @@ export default async function AccountPage({
   const hasLocalIdentity = identities.some((identity) => identity.provider === 'local_email');
 
   return (
-    <div className="grid gap-8">
+    <div data-page="account" className="mv-page mv-page--member grid gap-8">
       {/* Coming back from a provider changed what every other screen would
           say, and those screens are already in the client router cache. This
           drops it, so `/admin` stops telling somebody who has just confirmed

@@ -1,5 +1,11 @@
 # 업데이트 로그
 
+## v2026.09.19.274 — 배포 연속성·캐시 최신화 표준
+
+- 브랜치: ops/deployment-continuity-v2026.09.19.274.
+- 프론트엔드/백엔드 무중단 전환, PostgreSQL 기반 회원 세션 유지, 최신 shell 자동 재검증을 필수 릴리스 게이트로 고정했습니다.
+- 문서 전용 릴리스이므로 런타임 코드와 Production 서비스는 변경하지 않습니다.
+
 ## v2026.09.19.265 — Test 라우팅 가드 및 무중단 Production 승격
 
 - Test split-brain 라우팅을 종결해 backend identity/health와 frontend/BFF가 하나의 exact application SHA 및 stable 3100/3101을 사용하도록 맞췄습니다.
