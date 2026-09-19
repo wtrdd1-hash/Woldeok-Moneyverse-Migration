@@ -15,7 +15,7 @@ AS $fn$
   JOIN public.member_titles AS title_row ON title_row.id = holding_row.title_id
   JOIN public.users AS user_row ON user_row.id = holding_row.user_id
   WHERE holding_row.user_id = p_actor
-    AND user_row.closed_at IS NULL
+    AND user_row.deleted_at IS NULL
   ORDER BY holding_row.awarded_at DESC, title_row.code ASC;
 $fn$;
 
