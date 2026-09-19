@@ -1,5 +1,5 @@
 -- 210-work-economic-command-envelope.sql
--- Update version: v2026.09.19.267
+-- Update version: v2026.09.19.268
 -- P0 ECON-233-02: adopt the common immutable economic command envelope for work rewards.
 -- Forward-only: preserve the latest authoritative work policy implementation as a private delegate.
 
@@ -45,7 +45,7 @@ BEGIN
     RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'invalid work verification';
   END IF;
 
-  v_hash := pg_catalog.digest(
+  v_hash := public.digest(
     pg_catalog.convert_to(p_assignment::text, 'UTF8'),
     'sha256'
   );
