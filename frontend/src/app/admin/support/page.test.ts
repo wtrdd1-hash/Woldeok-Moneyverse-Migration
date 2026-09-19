@@ -12,8 +12,8 @@ describe('admin support responsive and accessibility contract', () => {
   });
 
   it('keeps primary admin controls at least 44px tall and labelled', () => {
-    expect(page).toContain('aria-label=\"관리자 답장\"');
-    expect(page).toContain('aria-label=\"문의 처리 상태\"');
+    expect(page).toContain('aria-label="관리자 답장"');
+    expect(page).toContain('aria-label="문의 처리 상태"');
     expect(page.match(/min-h-11/g)?.length).toBeGreaterThanOrEqual(3);
   });
 
