@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="grid gap-6">
+    <div data-page="terms" className="mv-page mv-page--utility grid gap-6">
       <PageHeader title="이용약관" />
       <TermsDocument />
     </div>

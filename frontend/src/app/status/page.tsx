@@ -59,7 +59,7 @@ export default async function StatusPage() {
   const staleCount = snapshots.filter((snapshot) => snapshot.stale).length;
 
   return (
-    <div className="grid gap-6">
+    <div data-page="status" className="mv-page mv-page--utility grid gap-6">
       <PageHeader
         eyebrow="LIVE SERVICE STATUS"
         title={

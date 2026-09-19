@@ -28,7 +28,7 @@ export default async function VerifyEmailPage({
   const usableToken = token.length >= 32 && token.length <= 512;
 
   return (
-    <div className="grid gap-6">
+    <div data-page="verify-email" className="mv-page mv-page--utility grid gap-6">
       <PageHeader title="이메일 인증">
         회원가입을 완료하려면 이메일로 받은 인증 링크를 열어 주세요.
       </PageHeader>

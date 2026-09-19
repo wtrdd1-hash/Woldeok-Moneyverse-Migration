@@ -36,7 +36,7 @@ const variants = [
 
 export default function DesignPreviewPage() {
   return (
-    <main className="mx-auto grid max-w-7xl gap-10 px-5 py-10 md:px-10 md:py-16">
+    <main data-page="design-preview" className="mv-page mv-page--utility mx-auto grid max-w-7xl gap-10 px-5 py-10 md:px-10 md:py-16">
       <header className="grid gap-5 border-b pb-8 md:grid-cols-[1fr_auto] md:items-end">
         <div>
           <p className="eyebrow mb-4">Stitch-informed UX exploration</p>

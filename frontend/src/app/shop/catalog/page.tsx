@@ -60,7 +60,7 @@ export default async function ShopCatalogPage({
   const groups = groupByCategory(items);
 
   return (
-    <div className="grid gap-6">
+    <div data-page="shop-catalog" className="mv-page mv-page--gameplay grid gap-6">
       <PageHeader eyebrow="ITEM SHOP" title="아이템 상점">
         아이템과 가격은 모두 WLD 게임 데이터입니다. 실제 현금 결제나 환전, 실물 배송과는 관련이
         없습니다.

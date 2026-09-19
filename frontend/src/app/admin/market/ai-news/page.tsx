@@ -41,7 +41,7 @@ export default async function AiNewsPage() {
     : 0;
 
   return (
-    <div className="grid gap-5">
+    <div data-page="admin-market-ai-news" className="mv-page mv-page--admin grid gap-5">
       <Button asChild variant="ghost" size="sm" className="w-fit">
         <Link href="/admin/market">← 가상 시장으로</Link>
       </Button>

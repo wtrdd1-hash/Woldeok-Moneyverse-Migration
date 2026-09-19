@@ -88,7 +88,7 @@ export default async function PostPage({
   const comments = commentData?.comments ?? [];
 
   return (
-    <div className="grid gap-6">
+    <div data-page="board-postId" className="mv-page mv-page--community grid gap-6">
       <Button asChild variant="ghost" className="w-fit -ml-3 text-muted-foreground">
         <Link href="/board">
           <ArrowLeft />

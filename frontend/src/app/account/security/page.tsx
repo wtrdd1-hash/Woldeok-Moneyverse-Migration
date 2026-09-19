@@ -60,7 +60,7 @@ export default async function AccountSecurityPage({
   const revoked = typeof params.revoked === 'string' ? params.revoked : null;
 
   return (
-    <div className="grid gap-6">
+    <div data-page="account-security" className="mv-page mv-page--member grid gap-6">
       <PageHeader eyebrow="ACCOUNT SECURITY" title="계정 보안 센터">
         로그인 중인 세션을 확인하고, 사용하지 않는 다른 세션을 종료할 수 있습니다.
       </PageHeader>

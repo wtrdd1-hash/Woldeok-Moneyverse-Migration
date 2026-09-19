@@ -60,7 +60,7 @@ export default async function BoardPage({
   );
 
   return (
-    <div className="grid gap-6">
+    <div data-page="board" className="mv-page mv-page--community grid gap-6">
       <PageHeader eyebrow="COMMUNITY" title="커뮤니티 광장">
         게시글과 댓글은 누구나 읽을 수 있습니다. 글과 댓글 작성은 로그인하고 최신 정책에
         동의한 회원만 가능합니다.

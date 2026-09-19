@@ -48,7 +48,7 @@ export default async function HomePage() {
   const notices = announcements?.announcements.slice(0, 3) ?? [];
 
   return (
-    <>
+    <div data-page="home" className="mv-page mv-page--community">
       <MobileHomeView notices={notices} />
       <div className="hidden lg:grid gap-14 xl:gap-16">
       <section
@@ -237,7 +237,7 @@ export default async function HomePage() {
 
       <HomeAdvertisement />
       </div>
-    </>
+    </div>
   );
 }
 

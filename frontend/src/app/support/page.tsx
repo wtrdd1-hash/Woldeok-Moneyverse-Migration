@@ -18,7 +18,7 @@ export default async function SupportPage({ searchParams }: { searchParams: Prom
   const messages = selected
     ? (await api<{ messages: Message[] }>(`/api/v1/support/threads/${encodeURIComponent(selected)}/messages`)).messages
     : [];
-  return <main className="mx-auto grid w-full max-w-5xl gap-5 p-4 md:grid-cols-[320px_1fr]">
+  return <main data-page="support" className="mv-page mv-page--community mx-auto grid w-full max-w-5xl gap-5 p-4 md:grid-cols-[320px_1fr]">
     <section className="grid content-start gap-4">
       <div><h1 className="text-2xl font-black">관리자 문의</h1><p className="text-sm text-muted-foreground">관리자와 1:1로 대화합니다. 문의 내용과 답변은 처리 기록으로 저장됩니다.</p></div>
       <form action={createSupportThread} className="grid gap-2 rounded-2xl border bg-card p-4">
