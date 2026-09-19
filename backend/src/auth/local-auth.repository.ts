@@ -66,6 +66,24 @@ export class LocalAuthRepository {
     return { ...row, token, csrfToken };
   }
 
+  async startPasswordReset(emailHash: string, tokenHash: string): Promise<boolean> {
+    const row = await queryOne<{ readonly accepted: boolean }>(
+      this.pool,
+      'SELECT public.auth_start_local_password_reset($1,$2) AS accepted',
+      [emailHash, tokenHash],
+    );
+    return row?.accepted === true;
+  }
+
+  async completePasswordReset(token: string, passwordVerifier: string): Promise<boolean> {
+    const row = await queryOne<{ readonly completed: boolean }>(
+      this.pool,
+      'SELECT public.auth_complete_local_password_reset($1,$2) AS completed',
+      [sha256(token), passwordVerifier],
+    );
+    return row?.completed === true;
+  }
+
   async completeLogin(
     preAuthSessionId: string,
     userId: string,

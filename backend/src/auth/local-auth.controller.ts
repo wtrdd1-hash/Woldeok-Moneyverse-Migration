@@ -113,6 +113,38 @@ export class LocalLoginDto {
   readonly password!: string;
 }
 
+export class LocalReauthenticationDto {
+  @ApiProperty({ example: 'member@example.com', maxLength: 254 })
+  @IsEmail()
+  @MaxLength(254)
+  readonly email!: string;
+
+  @ApiProperty({ maxLength: 128 })
+  @IsString()
+  @MaxLength(128)
+  readonly password!: string;
+}
+
+export class LocalPasswordResetRequestDto {
+  @ApiProperty({ example: 'member@example.com', maxLength: 254 })
+  @IsEmail()
+  @MaxLength(254)
+  readonly email!: string;
+}
+
+export class LocalPasswordResetCompleteDto {
+  @ApiProperty({ minLength: 32, maxLength: 512 })
+  @IsString()
+  @MinLength(32)
+  @MaxLength(512)
+  readonly token!: string;
+
+  @ApiProperty({ maxLength: 128 })
+  @IsString()
+  @MaxLength(128)
+  readonly password!: string;
+}
+
 export class LocalVerifyDto {
   @ApiProperty({ minLength: 32, maxLength: 512 })
   @IsString()
@@ -188,6 +220,43 @@ export class LocalAuthController {
     };
   }
 
+  @Post('password-reset/request')
+  @HttpCode(202)
+  @ApiOperation({ summary: 'Request a one-time local password reset link' })
+  async requestPasswordReset(@Body() body: LocalPasswordResetRequestDto) {
+    const email = normalizeEmail(body.email);
+    const token = randomToken();
+    const accepted = await this.credentialStore().startPasswordReset(emailHash(email), sha256(token));
+    if (accepted) {
+      try {
+        await this.verificationEmails.send({
+          to: email, token, baseUrl: this.config.baseUrl, purpose: 'password-reset',
+        });
+      } catch {
+        // Keep the public response indistinguishable from an unknown address.
+      }
+    }
+    return { accepted: true };
+  }
+
+  @Post('password-reset/complete')
+  @ApiOperation({ summary: 'Consume a password reset token and replace the local password' })
+  async completePasswordReset(@Body() body: LocalPasswordResetCompleteDto) {
+    if (!acceptablePassword(body.password)) {
+      throw new ForbiddenException('password does not meet policy');
+    }
+    try {
+      const completed = await this.credentialStore().completePasswordReset(
+        body.token,
+        await hashPassword(body.password),
+      );
+      if (!completed) throw new Error('password reset failed');
+      return { outcome: 'password-reset' as const };
+    } catch {
+      throw new UnauthorizedException('password reset failed');
+    }
+  }
+
   @Post('verify-email')
   @ApiOperation({ summary: 'Verify first-party email and activate the account' })
   async verifyEmail(
@@ -201,6 +270,27 @@ export class LocalAuthController {
     } catch {
       throw new UnauthorizedException('verification failed');
     }
+  }
+
+  @Post('reauthentication')
+  @UseGuards(SessionGuard, CsrfGuard)
+  @ApiOperation({ summary: 'Confirm current member password' })
+  async reauthenticate(@Req() request: RequestWithSession, @Body() body: LocalReauthenticationDto) {
+    const session = requireSession(request);
+    if (!session.user_id) throw new ForbiddenException('login required');
+    const credential = await this.credentialStore().credential(emailHash(body.email));
+    let valid = credential?.user_id === session.user_id;
+    if (valid && credential) {
+      try { valid = await verifyPassword(body.password, credential.password_verifier); }
+      catch { valid = false; }
+    } else {
+      await spendDummyPasswordWork(body.password);
+    }
+    if (!valid) throw new UnauthorizedException('invalid credentials');
+    if (!(await this.sessionStore().markLocalReauthenticated(session.id, session.user_id))) {
+      throw new UnauthorizedException('reauthentication failed');
+    }
+    return { outcome: 'reauthenticated' as const };
   }
 
   @Post('login')
