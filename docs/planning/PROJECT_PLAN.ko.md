@@ -2,12 +2,21 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.19.275
+> **현재 통합 버전:** v2026.09.19.279
 > **구현·증거 동기화:** 2026-09-19
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+## 회차 변경 — v2026.09.19.279 (2026-09-19)
+
+### 활성 세션 상세 + v279 Test/Production exact-SHA 동기화
+- **기준/브랜치:** 구현 기준 `main=3712f7989b7a9441cc0a5f9d45784b4252a2c610`; 문서 동기화 브랜치는 `docs/plan-v279-runtime-sync`다. 작업 시작과 운영 승격 직전 원격 `main`을 다시 확인해 동일 exact SHA임을 검증했다.
+- **구현:** migration 213이 사용자 활성 세션 조회 함수 `account_active_sessions(uuid,uuid)`를 추가하고, 계정 → 보안 화면은 개인정보를 최소화한 기기 분류, 최근 활동, 로그인, 만료 시각을 표시한다. 원본 User-Agent/IP/token/CSRF는 사용자 응답에 노출하지 않는다. v278 관리자 지원 화면의 모바일 접근성 보완도 이 SHA에 포함된다.
+- **정적/단위 검증:** release helper 회귀, 전체 typecheck, lint 오류 0건(기존 이미지 최적화 warning 11건), API 계약 157 endpoint 일치, backend 888 PASS/360 환경 의존 skip, frontend 667/667 PASS, production build PASS.
+- **Test 승격:** Test DB에 migration 211→213 누락분을 checksum 검증 방식으로 적용했고, `/srv/moneyverse-data/releases/test-3712f7989b7a-v279`를 blue/green으로 승격했다. `/api/version`과 `/frontend-version`은 모두 exact SHA를 반환하고 health 200, 핵심 route smoke, 전역 noindex/nofollow, 최근 warning 이상 journal 0건을 확인했다.
+- **Production 승격:** 신규 암호화 DB/사진 backup을 생성해 SHA-256 검증 후 Production DB에 migration 213을 적용했다. 동일 빌드를 `/srv/moneyverse-data/releases/prod-3712f7989b7a-v279`로 승격했고 canary→stable 전환 동안 primary 중단 없이 진행했다. 승격 후 `/api/version`, `/frontend-version`, `/health`, 홈/작업/계정보안/관리자지원/상태/주식/카지노/지갑/상점 smoke가 통과했고 backend/frontend/Economy AI/backup timer가 active이며 최근 warning 이상 journal은 0건이다.
+- **롤백:** Test/Production Nginx pre-blue-green backup과 이전 immutable release를 유지한다. DB migration 213은 함수 추가형이므로 데이터 이력을 재작성하지 않으며 애플리케이션 rollback 시에도 적용 기록을 보존한다.
 
 ## 회차 변경 — v2026.09.19.275 (2026-09-19)
 

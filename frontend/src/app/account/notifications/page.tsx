@@ -21,9 +21,9 @@ export default async function NotificationSettingsPage({ searchParams }: { reado
     {params.error ? <Alert variant="destructive"><AlertDescription>알림 설정을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.</AlertDescription></Alert> : null}
     <Card><CardHeader><CardTitle className="text-base">목표·주문 알림</CardTitle><CardDescription>퀘스트 화면과 같은 서버 설정을 사용하므로 어느 화면에서 바꿔도 동일하게 적용됩니다.</CardDescription></CardHeader>
       <CardContent>{board === null ? <p className="text-sm text-muted-foreground">현재 설정을 불러오지 못했습니다.</p> :
-        <form action={saveGoalNotifications} className="flex flex-wrap gap-2">
-          <Button name="notificationsEnabled" value="true" type="submit" variant={board.notifications_enabled ? 'default' : 'outline'} className="min-h-11">알림 받기</Button>
-          <Button name="notificationsEnabled" value="false" type="submit" variant={!board.notifications_enabled ? 'default' : 'outline'} className="min-h-11">알림 받지 않기</Button>
+        <form action={saveGoalNotifications} className="grid gap-2 sm:grid-cols-2">
+          <Button name="notificationsEnabled" value="true" type="submit" aria-pressed={board.notifications_enabled} variant={board.notifications_enabled ? 'default' : 'outline'} className="min-h-11 w-full">알림 받기</Button>
+          <Button name="notificationsEnabled" value="false" type="submit" aria-pressed={!board.notifications_enabled} variant={!board.notifications_enabled ? 'default' : 'outline'} className="min-h-11 w-full">알림 받지 않기</Button>
         </form>}
       </CardContent></Card>
     <Button asChild variant="ghost" className="min-h-11 w-fit"><Link href="/account">내 계정으로 돌아가기</Link></Button>
