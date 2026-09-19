@@ -4,7 +4,7 @@
 
 Update version: **v2026.09.16.159**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 157 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 158 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -119,6 +119,33 @@ _No request body._
 | Field | Required | Type | Constraints/meaning |
 |---|---|---|---|
 | authorizationUrl | true | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/account/security/events` — Recent security events belonging to the caller
+
+- Authorization: 로그인 및 최신 동의 필요
+- Success status: 200
+- Response mode: json
+- After success: 최근 보안 활동 목록을 서버 기준 상태로 교체
+- Operation ID: `AccountSecurityController_events`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| events[] | true | object[] |  |
+| events[] | true | object |  |
+| events[].type | true | string |  |
+| events[].createdAt | true | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
