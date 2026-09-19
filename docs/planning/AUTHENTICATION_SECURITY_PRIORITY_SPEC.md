@@ -243,7 +243,7 @@ Require recent reauthentication, and MFA where policy demands it, for:
 
 ## 15. Session management
 
-Treat session identifiers as secrets and untrusted input simultaneously. Validate format before lookup and use parameterized DB access.
+Treat session identifiers as secrets and untrusted input simultaneously. Validate format before lookup and use parameterized DB access. Ordinary member sessions use a PostgreSQL-backed 180-day sliding lifetime so process or host restarts do not invalidate login state; pre-login and privileged administrator-console lifetimes remain shorter and independent.
 
 Required lifecycle:
 - rotate after login;

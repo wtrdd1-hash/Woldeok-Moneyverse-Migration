@@ -104,3 +104,14 @@ export async function changeLocalPassword(formData: FormData): Promise<void> {
   revalidatePath('/account/security');
   redirect('/account/security?password=changed');
 }
+
+export async function requestLocalEmailChange(formData: FormData): Promise<void> {
+  const email = String(formData.get('email') ?? '').trim();
+  if (!email) redirect('/account/security?error=email-change');
+  try {
+    await mutate<{ accepted: true; verificationRequired: true }>('/api/v1/auth/local/email-change/request', { body: { email } });
+  } catch {
+    redirect('/account/security?error=email-change');
+  }
+  redirect('/account/security?email=verification-sent');
+}
