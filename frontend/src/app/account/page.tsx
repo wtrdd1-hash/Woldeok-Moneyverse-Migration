@@ -42,6 +42,7 @@ interface PrivacyRequest {
 const PROVIDER_NAME: Readonly<Record<string, string>> = {
   discord: 'Discord',
   google: 'Google',
+  local_email: '이메일·비밀번호',
 };
 
 const REQUEST_TYPE_NAME: Readonly<Record<string, string>> = {
@@ -69,7 +70,8 @@ export default async function AccountPage({
   const identities = identityData?.identities ?? [];
   const linkedProviders = new Set(identities.map((identity) => identity.provider));
   const available = (providerData?.providers ?? []).filter((provider) => provider.enabled);
-  const firstIdentity = identities[0];
+  const oauthIdentity = identities.find((identity) => identity.provider !== 'local_email');
+  const hasLocalIdentity = identities.some((identity) => identity.provider === 'local_email');
 
   return (
     <div className="grid gap-8">
@@ -154,18 +156,27 @@ export default async function AccountPage({
         )}
       </section>
 
-      {firstIdentity && (
+      {(oauthIdentity || hasLocalIdentity) && (
         <Card>
           <CardHeader>
             <CardDescription>SECURITY CHECK</CardDescription>
             <CardTitle>중요한 변경 전 본인 확인.</CardTitle>
             <CardDescription>
-              로그인 수단 해제, 계정 삭제와 관리자 사용자 제한은 최근 OAuth 본인 확인이 필요해요.
+              로그인 수단 해제, 계정 삭제와 관리자 사용자 제한은 최근 본인 확인이 필요해요.
               연결된 로그인 수단으로 한 번 더 확인하면 15분 동안 보호된 작업을 진행할 수 있어요.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ReauthButton provider={firstIdentity.provider} />
+            {oauthIdentity ? (
+              <ReauthButton provider={oauthIdentity.provider} />
+            ) : (
+              <Link
+                href="/account/security"
+                className="inline-flex min-h-11 items-center rounded-md border px-4 text-sm font-medium"
+              >
+                이메일·비밀번호로 본인 확인 →
+              </Link>
+            )}
           </CardContent>
         </Card>
       )}
