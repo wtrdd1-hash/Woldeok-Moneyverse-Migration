@@ -7,6 +7,7 @@ SHA="${3:?usage: host-blue-green-promote.sh test|production RELEASE_DIR SHA}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NGINX_CONFIG="${MONEYVERSE_NGINX_CONFIG:-/etc/nginx/sites-enabled/moneyverse}"
 RELEASES_ROOT="${MONEYVERSE_RELEASES_ROOT:-/srv/moneyverse-data/releases}"
+NGINX_BACKUP_DIR="${MONEYVERSE_NGINX_BACKUP_DIR:-/etc/nginx/backups}"
 
 fail() { printf 'blue-green: %s\n' "$*" >&2; exit 1; }
 log() { printf 'blue-green: %s\n' "$*"; }
@@ -144,6 +145,7 @@ assert_frontend_version() {
 }
 
 edge_mode='primary'
+nginx_mutated=0
 success=0
 cleanup() {
   local rc=$?
@@ -165,6 +167,10 @@ cleanup() {
       return "$rc"
     fi
   else
+    if [[ "$nginx_mutated" -eq 1 && -n "${NGINX_BACKUP:-}" && -f "$NGINX_BACKUP" ]]; then
+      cp -a "$NGINX_BACKUP" "$NGINX_CONFIG"
+      nginx -t >/dev/null 2>&1 && systemctl reload nginx || true
+    fi
     systemctl stop "$CANARY_FRONTEND_UNIT" "$CANARY_BACKEND_UNIT" >/dev/null 2>&1 || true
   fi
   rm -f "$FRONTEND_UNIT_FILE" "$BACKEND_UNIT_FILE"
@@ -184,9 +190,11 @@ wait_frontend "$CANARY_FRONTEND" || fail 'canary frontend did not become healthy
 assert_frontend_version "$CANARY_FRONTEND"
 log "canary healthy backend=$CANARY_BACKEND frontend=$CANARY_FRONTEND"
 
-NGINX_BACKUP="$NGINX_CONFIG.before-blue-green-$ENVIRONMENT-$(date +%Y%m%d%H%M%S)"
+install -d -m 0755 "$NGINX_BACKUP_DIR"
+NGINX_BACKUP="$NGINX_BACKUP_DIR/moneyverse.before-blue-green-$ENVIRONMENT-$(date +%Y%m%d%H%M%S)"
 cp -a "$NGINX_CONFIG" "$NGINX_BACKUP"
 "$SCRIPT_DIR/switch-nginx-server-ports.py" "$NGINX_CONFIG" "$SERVER_NAME" "$PRIMARY_BACKEND" "$CANARY_BACKEND" "$PRIMARY_FRONTEND" "$CANARY_FRONTEND"
+nginx_mutated=1
 nginx -t
 systemctl reload nginx
 edge_mode='canary'
