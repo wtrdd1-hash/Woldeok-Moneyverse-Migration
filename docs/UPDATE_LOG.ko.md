@@ -1,5 +1,11 @@
 # 업데이트 로그
 
+## v2026.09.19.265 — Test 라우팅 가드 및 무중단 Production 승격
+
+- Test split-brain 라우팅을 종결해 backend identity/health와 frontend/BFF가 하나의 exact application SHA 및 stable 3100/3101을 사용하도록 맞췄습니다.
+- 임시 Test UI 포트를 거부하고 Test/Production stable upstream을 확인하는 Nginx 라우팅 회귀검사를 추가했습니다.
+- 신규 암호화 운영 backup 후 Test/Production schema를 migration 208까지 적용하고 application `b1b1f7a…`를 canary + Nginx reload 방식으로 공개 중단 없이 승격했습니다.
+- 최종 Test/Production version, health, catalog 146개, 필수 공개 경로 smoke를 통과했고 구형 canary를 종료해 failed unit 0을 확인했습니다.
 
 ## v2026.09.19.263 — exact-SHA Test 런타임 복구
 

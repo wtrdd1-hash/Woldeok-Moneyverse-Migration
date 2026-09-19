@@ -2,12 +2,21 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.19.263
+> Current integrated version: v2026.09.19.265
 > Implementation/evidence sync: 2026-09-19
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+## Cycle delta — v2026.09.19.265 (2026-09-19)
+
+### Exact-SHA Test/Production promotion evidence and host routing guard
+- **Authority:** this evidence cycle starts from repository `main=6f8ee496173cbf4effffba4527cf01eb2faa3ccf`. Release classification keeps repository/control-plane identity separate from application runtime identity: the promoted application source is `b1b1f7aa63e630bba266c5dcbb72731faccdae8d`.
+- **Test repair/evidence:** Test DB advanced from migration 204 through 208; backend/frontend now share one exact application source, stable ports 3100/3101, health 200, catalog 146, noindex, and the required public route smoke set all returned 200.
+- **Routing defect closed:** the Test Nginx server had `/health` and `/api/version` on 3100 while general `/` still targeted obsolete transient UI port 3119. The live route now targets stable 3101. `ops/nginx/check-moneyverse-host-routing.sh` rejects transient Test UI/candidate ports and asserts stable Test 3100/3101 plus Production 3000/3001 routing.
+- **Production promotion:** a fresh encrypted Production backup and checksum were created before migration. Production DB advanced 204→208. Same-SHA backend/frontend canaries passed on 3003/3202, Nginx reloaded to them without stopping the old listeners, persistent 3000/3001 services were then restarted on the same release, verified, and Nginx reloaded back to stable ports. Final Production exact SHA, health, catalog 146 and the required public route smoke set passed; recent backend/frontend fatal-error scan was empty.
+- **Cleanup / rollback:** old Test UIs, v196 canaries and temporary v263 canaries were stopped. `systemctl --failed` is zero and only stable Moneyverse listeners 3000/3001/3100/3101 remain. Previous unit drop-ins, Nginx config backup and previous release directories remain rollback anchors.
 
 ## Cycle delta — v2026.09.19.263 (2026-09-19)
 
