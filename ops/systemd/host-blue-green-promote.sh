@@ -40,7 +40,10 @@ case "$ENVIRONMENT" in
     RELEASE_WRITER="$SCRIPT_DIR/write-test-release-env.sh"
     ;;
   production)
-    SERVER_NAME='easy-scraping.com'
+    # The public site is intentionally the default catch-all block. Keep the
+    # selector aligned with the authoritative Nginx configuration rather than
+    # assuming a named virtual host that does not exist.
+    SERVER_NAME='_'
     PRIMARY_BACKEND=3000
     PRIMARY_FRONTEND=3001
     CANARY_BACKEND=3002
