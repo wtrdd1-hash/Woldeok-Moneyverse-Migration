@@ -113,6 +113,18 @@ export class LocalLoginDto {
   readonly password!: string;
 }
 
+export class LocalReauthenticationDto {
+  @ApiProperty({ example: 'member@example.com', maxLength: 254 })
+  @IsEmail()
+  @MaxLength(254)
+  readonly email!: string;
+
+  @ApiProperty({ maxLength: 128 })
+  @IsString()
+  @MaxLength(128)
+  readonly password!: string;
+}
+
 export class LocalVerifyDto {
   @ApiProperty({ minLength: 32, maxLength: 512 })
   @IsString()
@@ -201,6 +213,27 @@ export class LocalAuthController {
     } catch {
       throw new UnauthorizedException('verification failed');
     }
+  }
+
+  @Post('reauthentication')
+  @UseGuards(SessionGuard, CsrfGuard)
+  @ApiOperation({ summary: 'Confirm current member password' })
+  async reauthenticate(@Req() request: RequestWithSession, @Body() body: LocalReauthenticationDto) {
+    const session = requireSession(request);
+    if (!session.user_id) throw new ForbiddenException('login required');
+    const credential = await this.credentialStore().credential(emailHash(body.email));
+    let valid = credential?.user_id === session.user_id;
+    if (valid && credential) {
+      try { valid = await verifyPassword(body.password, credential.password_verifier); }
+      catch { valid = false; }
+    } else {
+      await spendDummyPasswordWork(body.password);
+    }
+    if (!valid) throw new UnauthorizedException('invalid credentials');
+    if (!(await this.sessionStore().markLocalReauthenticated(session.id, session.user_id))) {
+      throw new UnauthorizedException('reauthentication failed');
+    }
+    return { outcome: 'reauthenticated' as const };
   }
 
   @Post('login')

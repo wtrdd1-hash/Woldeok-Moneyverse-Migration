@@ -2,12 +2,21 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.19.263
+> **현재 통합 버전:** v2026.09.19.265
 > **구현·증거 동기화:** 2026-09-19
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 회차 변경 — v2026.09.19.265 (2026-09-19)
+
+### exact-SHA Test/Production 승격 증거 및 호스트 라우팅 가드
+- **권위:** repository `main=6f8ee496173cbf4effffba4527cf01eb2faa3ccf`에서 증거 회차를 시작한다. repository/control-plane identity와 application runtime identity를 분리하며 실제 승격 application source는 `b1b1f7aa63e630bba266c5dcbb72731faccdae8d`이다.
+- **Test 복구/증거:** Test DB를 migration 204→208로 올리고 backend/frontend를 하나의 exact application source 및 stable 3100/3101로 통일했다. health 200, catalog 146, noindex, 필수 공개 경로 smoke 모두 200을 확인했다.
+- **라우팅 결함 종결:** Test Nginx는 `/health`, `/api/version`만 3100을 보면서 일반 `/`는 폐기 대상 임시 UI 3119를 가리켰다. 현재 live route는 stable 3101이다. `ops/nginx/check-moneyverse-host-routing.sh`가 transient Test UI/candidate port를 거부하고 Test 3100/3101, Production 3000/3001 고정 라우팅을 검증한다.
+- **Production 승격:** migration 전에 신규 암호화 운영 backup+checksum을 생성했고 운영 DB를 204→208로 올렸다. 같은 SHA canary backend/frontend를 3003/3202에서 검증한 뒤 기존 listener를 유지한 채 Nginx reload로 전환했다. 이후 persistent 3000/3001을 같은 release로 재기동·검증하고 Nginx를 stable port로 reload했다. 최종 Production exact SHA, health, catalog 146, 필수 공개 경로 모두 통과했고 최근 backend/frontend fatal error scan은 0건이었다.
+- **정리 / rollback:** 구형 Test UI, v196 canary, 임시 v263 canary를 모두 중지했다. `systemctl --failed`는 0이며 Moneyverse listener는 stable 3000/3001/3100/3101만 남았다. 이전 unit drop-in, Nginx backup, 이전 release directory는 rollback anchor로 보존한다.
 
 ## 회차 변경 — v2026.09.19.263 (2026-09-19)
 

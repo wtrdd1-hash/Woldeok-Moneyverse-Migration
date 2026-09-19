@@ -12,6 +12,7 @@ import {
   beginSecurityReauthentication,
   terminateOtherSessions,
   terminateSession,
+  reauthenticateWithLocalPassword,
 } from './actions';
 
 export const dynamic = 'force-dynamic';
@@ -52,6 +53,8 @@ export default async function AccountSecurityPage({
   ]);
   const sessions = sessionData?.sessions ?? [];
   const identities = identityData?.identities ?? [];
+  const hasLocalIdentity = identities.some((identity) => identity.provider === 'local_email');
+  const oauthIdentities = identities.filter((identity) => identity.provider !== 'local_email');
   const otherCount = sessions.filter((session) => !session.current).length;
   const error = typeof params.error === 'string' ? params.error : null;
   const revoked = typeof params.revoked === 'string' ? params.revoked : null;
@@ -62,6 +65,9 @@ export default async function AccountSecurityPage({
         로그인 중인 세션을 확인하고, 사용하지 않는 다른 세션을 종료할 수 있습니다.
       </PageHeader>
 
+      {params.reauth === 'done' ? (
+        <Alert><AlertDescription>본인 확인이 완료되었습니다. 민감한 보안 작업을 계속할 수 있습니다.</AlertDescription></Alert>
+      ) : null}
       {params.session === 'revoked' ? (
         <Alert><AlertDescription>선택한 다른 세션을 종료했습니다.</AlertDescription></Alert>
       ) : null}
@@ -73,7 +79,9 @@ export default async function AccountSecurityPage({
           <AlertDescription>
             {error === 'reauth-required'
               ? '세션을 종료하려면 최근 본인 확인이 필요합니다.'
-              : '요청을 완료하지 못했습니다. 세션 상태를 새로 확인해 주세요.'}
+              : error === 'local-reauth'
+                ? '이메일 또는 비밀번호를 확인한 뒤 다시 시도해 주세요.'
+                : '요청을 완료하지 못했습니다. 세션 상태를 새로 확인해 주세요.'}
           </AlertDescription>
         </Alert>
       ) : null}
@@ -139,7 +147,16 @@ export default async function AccountSecurityPage({
           <CardDescription>다른 세션 종료는 최근 OAuth 본인 확인 후에만 허용됩니다.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
-          {identities.map((identity) => (
+          {hasLocalIdentity ? (
+            <form action={reauthenticateWithLocalPassword} className="grid w-full max-w-sm gap-2">
+              <label htmlFor="reauth-email" className="text-sm font-medium">이메일</label>
+              <input id="reauth-email" name="email" type="email" autoComplete="username" required className="min-h-11 rounded-md border bg-background px-3 text-base" />
+              <label htmlFor="reauth-password" className="text-sm font-medium">비밀번호</label>
+              <input id="reauth-password" name="password" type="password" autoComplete="current-password" required className="min-h-11 rounded-md border bg-background px-3 text-base" />
+              <Button type="submit" variant="outline" className="min-h-11">이메일·비밀번호로 본인 확인</Button>
+            </form>
+          ) : null}
+          {oauthIdentities.map((identity) => (
             <form action={beginSecurityReauthentication} key={identity.provider}>
               <input type="hidden" name="provider" value={identity.provider} />
               <Button type="submit" variant="outline" className="min-h-11">
