@@ -20,6 +20,7 @@ export default async function StocksLayout({ children }: { readonly children: Re
         <Button asChild variant="outline" size="sm"><Link href="/stocks/portfolio">{isEn ? 'Portfolio' : '포트폴리오'}</Link></Button>
         <Button asChild variant="outline" size="sm"><Link href="/stocks/compare">{isEn ? 'Compare stocks' : '종목 비교'}</Link></Button>
         <Button asChild variant="outline" size="sm"><Link href="/stocks/alerts">{isEn ? 'Alerts' : '조건부 알림'}</Link></Button>
+        <Button asChild variant="outline" size="sm"><Link href="/stocks/history">{isEn ? 'History' : '거래 내역'}</Link></Button>
       </nav>
       {children}
     </div>
