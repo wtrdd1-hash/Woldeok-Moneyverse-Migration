@@ -133,6 +133,11 @@ OWNER TO moneyverse_migrator;
 ALTER FUNCTION public.shop_purchase_catalog(uuid, uuid, uuid, integer)
 OWNER TO moneyverse_migrator;
 
+REVOKE ALL ON FUNCTION public.economic_command_claim(uuid, text, text, uuid, bytea, text)
+FROM PUBLIC, moneyverse_app;
+REVOKE ALL ON FUNCTION public.economic_command_complete(uuid, uuid, jsonb)
+FROM PUBLIC, moneyverse_app;
+
 REVOKE ALL ON FUNCTION public.shop_purchase_catalog(uuid, uuid, uuid, integer)
 FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.shop_purchase_catalog(uuid, uuid, uuid, integer)
