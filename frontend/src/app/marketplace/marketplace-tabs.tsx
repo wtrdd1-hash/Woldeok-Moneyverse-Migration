@@ -5,6 +5,7 @@ import { ShoppingBag, Hammer, PackageOpen, Boxes, PlusCircle, Coins, Flame, Arro
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
 import { CraftingPanel } from './crafting-panel';
 import { MarketListingsView } from './market-listings-view';
