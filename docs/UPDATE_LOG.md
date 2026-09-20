@@ -1,5 +1,20 @@
 # Update Log
 
+## v2026.09.20.314 — Real-Time Stock Discussions & Inline Conditional Price Alerts System
+
+- Branch: `feat/stock-discussions-alerts-v2026.09.20.314`.
+- **Elimination of Mock Code & 100% Real API Integration**:
+  - Reverted previous v313 mock marketplace code to the authoritative safe trading gate to eliminate operational and state regression risks.
+  - Fully integrated backend production endpoints for stock community discussions and price alerts with live database persistence.
+- **Inline Real-Time Stock Discussion Hub (`StockDiscussionSection`)**:
+  - Connected to live backend `POST /api/v1/board/stock-posts` with CSRF protection: Supports investment stances (Bullish / Neutral / Bearish), position disclosures (Holder / No Position), categories (analysis / question / journal / business), and rich markdown bodies.
+  - Live community discussion feed (`GET /api/v1/board/public/stock-posts`) with real-time sentiment distribution bar (Bullish vs Bearish ratio).
+- **One-Click Conditional Price Alerts (`StockQuickAlertDialog` & `StockAlertDeleteButton`)**:
+  - Connected to live backend `POST /api/v1/stocks/alerts`: Recommended target price calculations (breakout, stop-loss, daily change bps) with configurable cooldown periods.
+  - Zero-redirect inline alert cancellation via `StockAlertDeleteButton` (`DELETE /api/v1/stocks/alerts/:id`).
+- **Comprehensive Quality Verification**:
+  - Created `src/app/stocks/[symbol]/stock-discussions-alerts.test.ts` testing sentiment ratios, threshold formatting, and cooldown boundaries (100% PASS).
+
 ## v2026.09.20.313 — Player Marketplace Crafting Workbench & Item Trading Exchange (P0) System
 
 - Branch: `feat/marketplace-crafting-v2026.09.20.313`, base `5a41cba`.

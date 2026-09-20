@@ -1,3 +1,18 @@
+## v2026.09.20.314 — 가상 주식 실시간 토론(Discussions) & 종목별 인라인 목표가 조건부 알림(Alerts) 100% 실동작 시스템 구축
+
+- 브랜치: `feat/stock-discussions-alerts-v2026.09.20.314`.
+- **모의(Mock) 방식 전면 탈피 및 100% 실동작 API 전환**:
+  - 이전 v313의 마켓플레이스 모의 코드를 전면 정리하고 원래의 안전 거래 게이트로 원복하여 버그와 오작동 리스크를 원천 차단.
+  - 백엔드에 DB 모델, 서비스, 컨트롤러가 이미 완벽히 구축되어 있는 주식 토론 및 조건부 알림 엔드포인트와 프론트엔드를 100% 실제 연동하여 모의 없는 진짜 동작 제공.
+- **종목 상세(/stocks/[symbol]) 내 실시간 주식 토론 허브 (`StockDiscussionSection`) 구축**:
+  - `POST /api/v1/board/stock-posts` 실제 서버 API 호출 연동: 투자 의견(🚀 상승 Bullish / ⚖️ 중립 Neutral / 📉 하락 Bearish) 스탠스, 포지션 공개(🏷️ 보유자 / ⚪ 미보유자), 카테고리 태그(분석/질문/일지/사업) 및 제목/본문 작성 다이얼로그 제공.
+  - 종목별 공개 토론 글(`GET /api/v1/board/public/stock-posts`) 실시간 렌더링, 스탠스/포지션 뱃지 및 투자자 센티먼트 비율(Bullish vs Bearish Sentiment Bar) 시각화.
+- **종목 상세 내 원클릭 목표가 조건부 알림 (`StockQuickAlertDialog` & `StockAlertDeleteButton`) 구축**:
+  - `POST /api/v1/stocks/alerts` 실제 서버 API 호출 연동: 현재가 기반 자동 추천 목표가 설정(상승 돌파, 하락 손절, 일일 급등/급락 bp) 및 쿨다운 설정 모달 제공.
+  - 이 종목의 내 알림 카드 목록에서 화면 이동 없이 즉각 감시 알림을 해제할 수 있는 `StockAlertDeleteButton` (`DELETE /api/v1/stocks/alerts/:id`) 연동.
+- **품질 검증**:
+  - `src/app/stocks/[symbol]/stock-discussions-alerts.test.ts` 신설을 통한 센티먼트 비율 계산, 알림 기준값 포맷터 및 유효성 검증 테스트 100% PASS.
+
 ## v2026.09.20.313 — 기획서(PLAYER_MARKETPLACE_CRAFTING_SPEC) 기반 플레이어 마켓플레이스 제작(Crafting) & 아이템 거래소(P0) 인터랙션 시스템 구축
 
 - 브랜치: `feat/marketplace-crafting-v2026.09.20.313`, 베이스 `5a41cba`.
