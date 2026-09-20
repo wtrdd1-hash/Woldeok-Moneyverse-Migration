@@ -74,6 +74,11 @@ export function proxy(request: NextRequest) {
       secure: true,
     });
   }
+
+  if (requestHost === 'test.easy-scraping.com' || process.env.SEO_INDEXING_ENABLED === 'false') {
+    response.headers.set('x-robots-tag', 'noindex, nofollow');
+  }
+
   return response;
 }
 

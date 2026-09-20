@@ -71,8 +71,8 @@ export function SiteHeader() {
   const mobileAdmin = mobileAdminEntries(viewer);
 
   return (
-    <header className="moneyverse-site-header sticky top-0 z-30 border-b backdrop-blur-xl">
-      <div className="mx-auto flex h-[68px] w-full max-w-7xl items-center gap-2 px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:h-[76px] lg:gap-4 xl:gap-6 lg:px-8">
+    <header className="moneyverse-site-header sticky top-0 z-30 border-b backdrop-blur-xl w-full max-w-full overflow-hidden">
+      <div className="mx-auto flex h-[60px] min-[400px]:h-[64px] sm:h-[68px] lg:h-[76px] w-full max-w-[1440px] items-center justify-between gap-1.5 px-2.5 min-[400px]:gap-2 min-[400px]:px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:gap-6 lg:px-8">
         <Brand />
 
         <nav
@@ -88,7 +88,7 @@ export function SiteHeader() {
           )}
         </nav>
 
-        <div className={cn('flex min-w-0 items-center gap-1.5 sm:gap-2 lg:gap-2.5 shrink-0', 'ml-auto lg:ml-2 xl:ml-4')}>
+        <div className={cn('flex min-w-0 items-center gap-1 min-[400px]:gap-1.5 sm:gap-2 lg:gap-3 shrink-0', 'ml-auto lg:ml-4')}>
           <div className="hidden min-[420px]:block">
             <ServerClockPill className="hidden 2xl:inline-flex" />
             <LanguageSwitcher />

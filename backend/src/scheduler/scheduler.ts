@@ -34,6 +34,13 @@ export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
     statement: 'SELECT sweep.raised FROM public.economy_run_anomaly_sweep() AS sweep',
   },
   {
+    // Evaluates rolling 24h work faucet/sink metrics & cap usage, auto-tuning caps & repeat decay
+    job: 'work.auto_tune_policy',
+    cadence: 'hourly',
+    notBefore: 10,
+    connection: 'app',
+  },
+  {
     job: 'audit.chain_verification',
     cadence: 'daily',
     notBefore: 0,

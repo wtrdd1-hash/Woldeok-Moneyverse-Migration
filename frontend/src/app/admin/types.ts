@@ -572,3 +572,41 @@ export interface AdminDiscordRoute {
   readonly delivered_24h_count: string;
   readonly last_delivered_at: string | null;
 }
+
+export interface AdminWorkJobRanking {
+  readonly job_type: string;
+  readonly rank: number;
+  readonly completions_24h: number;
+  readonly members_24h: number;
+  readonly total_paid_24h: string;
+  readonly total_exp_24h: string;
+  readonly share_percentage: number;
+}
+
+export interface AdminWorkDailyCapBucket {
+  readonly bucket: string;
+  readonly label: string;
+  readonly user_count: number;
+  readonly percentage: number;
+}
+
+export interface AdminWorkTrendDay {
+  readonly date: string;
+  readonly count: number;
+  readonly total_paid: string;
+}
+
+export interface AdminWorkRealtimeStats {
+  readonly rankings: readonly AdminWorkJobRanking[];
+  readonly total_completions_24h: number;
+  readonly total_paid_24h: string;
+  readonly total_members_24h: number;
+  readonly current_daily_cap: string | null;
+  readonly capped_users_count: number;
+  readonly average_cap_usage_percent: number;
+  readonly economy_health_status: 'stable' | 'active' | 'overheated' | 'cooling';
+  readonly recommended_daily_cap: number;
+  readonly recommended_decay_percent: number;
+  readonly cap_buckets: readonly AdminWorkDailyCapBucket[];
+  readonly trend_7d: readonly AdminWorkTrendDay[];
+}

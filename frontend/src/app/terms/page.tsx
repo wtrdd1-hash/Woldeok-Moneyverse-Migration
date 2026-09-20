@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { PageHeader } from '@/components/page-header';
 import { TermsDocument } from '@/components/policy/terms-document';
+import { canonicalUrl } from '@/lib/seo';
 
 /**
  * Static. Policy text changes on a deliberate deploy, never on a schedule,
@@ -10,7 +11,7 @@ import { TermsDocument } from '@/components/policy/terms-document';
 export const metadata: Metadata = {
   title: '이용약관',
   description: '월덕 머니버스 이용약관 전문',
-  alternates: { canonical: '/terms' },
+  alternates: { canonical: canonicalUrl('/terms') },
 };
 
 export default function TermsPage() {

@@ -6,6 +6,7 @@ import { PublicAdvertisement } from '@/components/public-advertisement';
 import { publicApi } from '@/lib/api';
 import { jsonLd } from '@/lib/json-ld';
 import { formatDay } from '@/lib/money';
+import { canonicalUrl, breadcrumbJsonLd, buildOgImageUrl } from '@/lib/seo';
 
 export const revalidate = 60;
 
@@ -38,20 +39,33 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const notice = data.current;
+  const noticeUrl = canonicalUrl(`/announcements/${notice.announcementId}`);
+  const ogImageUrl =
+    notice.imageUrl ||
+    buildOgImageUrl({
+      title: notice.title,
+      description: notice.body.slice(0, 120),
+      type: 'announcement',
+      badge: '운영 소식',
+      metric: notice.publishedAt ? formatDay(notice.publishedAt) : undefined,
+      metricLabel: '발행일',
+    });
+
   return {
     title: notice.title,
     description: notice.body.slice(0, 150),
-    alternates: { canonical: `/announcements/${notice.announcementId}` },
+    alternates: { canonical: noticeUrl },
     openGraph: {
       title: `${notice.title} — 월덕 머니버스`,
       description: notice.body.slice(0, 150),
-      images: notice.imageUrl ? [{ url: notice.imageUrl }] : undefined,
+      url: noticeUrl,
+      images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     },
     twitter: {
-      card: notice.imageUrl ? 'summary_large_image' : 'summary',
+      card: 'summary_large_image',
       title: notice.title,
       description: notice.body.slice(0, 150),
-      images: notice.imageUrl ? [notice.imageUrl] : undefined,
+      images: [ogImageUrl],
     },
   };
 }
@@ -65,6 +79,12 @@ export default async function AnnouncementDetailPage({ params }: PageProps) {
   }
 
   const { current: notice, others } = data;
+
+  const noticeBreadcrumb = breadcrumbJsonLd([
+    { name: '홈', path: '/' },
+    { name: '운영 소식', path: '/announcements' },
+    { name: notice.title, path: `/announcements/${notice.announcementId}` },
+  ]);
 
   return (
     <div data-page="announcements-announcementId" className="mv-page mv-page--community mx-auto max-w-3xl grid gap-8">
@@ -86,6 +106,10 @@ export default async function AnnouncementDetailPage({ params }: PageProps) {
       </div>
 
       {/* 구조화 데이터 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(noticeBreadcrumb) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

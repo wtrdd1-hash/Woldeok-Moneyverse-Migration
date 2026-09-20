@@ -72,12 +72,51 @@ export async function generateAiNews(_previous: ActionState, formData: FormData)
       body: { ...(prompt === '' ? {} : { prompt }), idempotencyKey: idempotencyKey() },
     });
     revalidatePath(PAGE);
-    // The batch is not here yet: the model is slower than any gateway in
-    // front of this page will wait, so the request starts a run and the page
-    // shows what that run is doing.
     return { status: 'ok', message: '모델에 물어보는 중이에요. 다 되면 아래에 다섯 개가 나타납니다.' };
   } catch (error) {
     return explain(error, '시나리오 만들기를 시작하지 못했어요.');
+  }
+}
+
+/**
+ * 1-Click 자동 AI 주식 뉴스 생성 및 즉시 발행 액션
+ */
+export async function autoGenerateAiNews(_previous: ActionState, formData: FormData): Promise<ActionState> {
+  const publishImmediate = formData.get('publishImmediate') === 'true' || formData.get('publishImmediate') === 'on';
+  try {
+    const result = await mutate<{
+      success: boolean;
+      published: boolean;
+      publishedCount?: number;
+      stocksAnalyzed?: number;
+      scenarioCount?: number;
+      scenario?: {
+        headline: string;
+        effects: Array<{ stock_id: string | null; direction: string; strength: number }>;
+      };
+      message?: string;
+    }>('/api/v1/admin/ai-news/auto-generate', {
+      body: { publishImmediate, idempotencyKey: idempotencyKey() },
+    });
+
+    revalidatePath(PAGE);
+    revalidatePath('/admin/market');
+    revalidatePath('/stocks');
+
+    if (result.published && result.scenario) {
+      const effectCount = result.scenario.effects.filter((e) => e.direction !== 'none').length;
+      return {
+        status: 'ok',
+        message: `AI 뉴스가 자동 생성되어 즉시 발행되었습니다: "${result.scenario.headline}" (${effectCount}개 종목 시세 반영 중)`,
+      };
+    }
+
+    return {
+      status: 'ok',
+      message: `활성 상장 종목 분석을 완료하고 AI 뉴스 시나리오가 자동 생성되었습니다. 아래 시나리오 목록을 확인하세요.`,
+    };
+  } catch (error) {
+    return explain(error, 'AI 뉴스 자동 생성을 실행하지 못했습니다.');
   }
 }
 
@@ -102,8 +141,6 @@ export async function decideAiNewsScenario(_previous: ActionState, formData: For
   const hours = Number(text(formData.get('hours')));
   const headline = text(formData.get('headline'));
   const body = text(formData.get('body'));
-  // One row of controls per stock the story touches (152), named by index so
-  // each radio group is its own.
   const count = Number(text(formData.get('effectCount')));
   if (!Number.isSafeInteger(count) || count < 1 || count > 4) {
     return { status: 'error', message: '종목별 영향이 비어 있어요. 새로고침해 주세요.' };

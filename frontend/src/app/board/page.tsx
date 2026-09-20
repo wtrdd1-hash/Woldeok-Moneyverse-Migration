@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatDay, formatMoment } from '@/lib/money';
+import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
+import { jsonLd } from '@/lib/json-ld';
 import { BoardParticipation } from './board-participation';
 
 export const revalidate = 60;
@@ -16,7 +18,7 @@ export const metadata: Metadata = {
   title: '커뮤니티 광장 — 공략 및 자유 토론',
   description:
     '월덕 머니버스 이용자들의 가상경제 팁, 공략과 자유 토론을 누구나 읽을 수 있는 커뮤니티 게시판입니다.',
-  alternates: { canonical: '/board' },
+  alternates: { canonical: canonicalUrl('/board') },
   robots: { index: true, follow: true },
 };
 
@@ -59,8 +61,17 @@ export default async function BoardPage({
     60,
   );
 
+  const boardBreadcrumb = breadcrumbJsonLd([
+    { name: '홈', path: '/' },
+    { name: '커뮤니티 광장', path: '/board' },
+  ]);
+
   return (
     <div data-page="board" className="mv-page mv-page--community grid gap-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(boardBreadcrumb) }}
+      />
       <PageHeader eyebrow="COMMUNITY" title="커뮤니티 광장">
         게시글과 댓글은 누구나 읽을 수 있습니다. 글과 댓글 작성은 로그인하고 최신 정책에
         동의한 회원만 가능합니다.

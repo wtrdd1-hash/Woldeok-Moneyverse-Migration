@@ -7,6 +7,7 @@ import { PG_POOL } from '../core/pool.provider';
 import { EconomyAiReviewer, economyAiConfig } from '../economy/economy-ai-review';
 import { AiNewsRepository } from '../admin/ai-news.repository';
 import { AiNewsService, aiNewsRuntimeCredentialFrom } from '../admin/ai-news.service';
+import { OperationsRepository } from '../admin/operations.repository';
 import { sealingKeyFrom } from '../auth/totp';
 import { Scheduler } from './scheduler';
 
@@ -54,6 +55,7 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
         const logger = new Logger('Scheduler');
         const economyAiReviewer = new EconomyAiReviewer(pool, economyAiConfig());
         const aiNews = new AiNewsService(new AiNewsRepository(pool), sealingKeyFrom(process.env));
+        const operations = new OperationsRepository(pool);
         return new Scheduler({
           app: pool,
           reconciler: reconcilerUrl ? new Pool({ connectionString: reconcilerUrl, max: 1 }) : null,
@@ -70,6 +72,13 @@ export class SchedulerRunner implements OnApplicationBootstrap, OnApplicationShu
               if (!actorUserId) return { skipped: true, reason: 'actor_missing' };
               const runtimeCredential = aiNewsRuntimeCredentialFrom(process.env);
               return aiNews.autoGenerateAndPublish(actorUserId, runtimeCredential ?? undefined);
+            },
+            'work.auto_tune_policy': async () => {
+              if (process.env.WORK_AUTOTUNE_ENABLED === 'false') {
+                return { skipped: true, reason: 'disabled' };
+              }
+              const actorUserId = process.env.WORK_AUTOTUNE_ACTOR_USER_ID?.trim() || '5f7b8b44-e4aa-40b8-b93a-800ec0151d20';
+              return operations.autoTuneWorkPolicy(actorUserId);
             },
             'economy.ai_shadow_health': () => economyAiReviewer.runShadow(),
             'economy.ai_policy_review': () => economyAiReviewer.run(),

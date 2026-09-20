@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { apiOrNull } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
 import type { AiNewsBatch, AiNewsModelList, AiNewsRun, AiNewsSettings } from '../../types';
-import { AiNewsGenerateForm, AiNewsSettingsForm, ScenarioCard } from './ai-news-console';
+import { AiNewsAutoGenerateCard, AiNewsGenerateForm, AiNewsSettingsForm, ScenarioCard } from './ai-news-console';
 
 export const dynamic = 'force-dynamic';
 
@@ -51,6 +51,7 @@ export default async function AiNewsPage() {
       </PageHeader>
 
       <AiNewsSettingsForm settings={settings?.settings ?? null} models={models ?? { models: [], problem: null }} />
+      <AiNewsAutoGenerateCard ready={ready} />
       <AiNewsGenerateForm batch={batch} run={run} runningFor={runningFor} ready={ready} />
 
       {latest === null ? (
