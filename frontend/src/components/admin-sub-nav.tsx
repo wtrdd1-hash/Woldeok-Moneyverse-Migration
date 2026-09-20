@@ -70,7 +70,7 @@ export function AdminSubNav() {
   return (
     <nav
       aria-label="관리자 세부 내비게이션"
-      className="-mx-4 mb-4 overflow-x-auto border-y border-border/50 bg-card p-1.5 shadow-sm sm:mx-0 sm:rounded-2xl sm:border"
+      className="-mx-4 mb-4 overflow-x-auto scrollbar-none border-y border-border/50 bg-card p-1.5 shadow-sm sm:mx-0 sm:rounded-2xl sm:border"
     >
       <ul className="flex w-max items-center gap-1 px-2 sm:w-auto sm:flex-wrap sm:px-0">
         {ADMIN_TABS.map((tab) => {

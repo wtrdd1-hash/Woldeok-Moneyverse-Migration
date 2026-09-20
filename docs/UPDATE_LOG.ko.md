@@ -1,3 +1,18 @@
+## v2026.09.21.314 — Playwright 헤드리스 브라우저 실시간 QA 전수 감사, 모바일 헤더 브랜드 가시성 복원 & 관리자 세부 내비게이션(AdminSubNav) 가로 스크롤 최적화
+
+- 브랜치: `feat/frontend-mobile-qa-audit-v2026.09.21.314`, 베이스 `cf8902d`.
+- **Playwright 실시간 브라우저 QA 테스트베드 구성 & 7대 뷰포트 전수 감사**:
+  - 미니PC 환경에 Chromium 153 기반 Playwright QA 감사 스크립트(`qa_responsive_audit.js`) 구축.
+  - Galaxy Fold(320px), iPhone SE(375px), iPhone 14/15(390px), Galaxy S23(412px), iPad Mini(768px), Laptop(1280px), Desktop(1440px) 7대 뷰포트에서 27개 주요 라우트(총 189개 체크) 실시간 검사 실행 -> **가로 스크롤 오버플로우 0건 달성**.
+- **모바일 헤더 브랜드명 가시성 복원 (`Brand`)**:
+  - 320px~359px 초소형 화면에서 브랜드 전체가 숨겨지던 현상을 해결하여 기본 `inline-flex`로 상시 노출.
+  - 520px 미만 화면에서 브랜드명 텍스트("월덕 머니버스")가 숨겨지던 결함을 수정하여 320px 이상 모바일에서도 컴팩트한 `text-xs min-[400px]:text-sm sm:text-base` 폰트 크기로 브랜드를 균형감 있게 노출.
+- **관리자 세부 내비게이션 (`AdminSubNav`) 가로 스크롤 및 터치 타깃 최적화**:
+  - 모바일 브라우저에서 투박한 스크롤바가 화면을 가리지 않도록 `scrollbar-none` 클래스 적용.
+  - 최소 터치 높이 `min-h-11` (44px 터치 규격) 준수 및 부드러운 스크롤 여백 유지.
+- **단위 테스트 동기화**:
+  - `src/components/brand-responsive.test.ts` 단정문을 갱신하여 320px 지원 및 반응형 클래스 정합성 100% 검증.
+
 ## v2026.09.20.313 — 기획서(PLAYER_MARKETPLACE_CRAFTING_SPEC) 기반 플레이어 마켓플레이스 제작(Crafting) & 아이템 거래소(P0) 인터랙션 시스템 구축
 
 - 브랜치: `feat/marketplace-crafting-v2026.09.20.313`, 베이스 `5a41cba`.

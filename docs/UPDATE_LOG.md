@@ -1,5 +1,20 @@
 # Update Log
 
+## v2026.09.21.314 — Playwright Headless Browser Real-Time QA Audit, Mobile Header Brand Visibility Restoration & Admin Sub-Navigation Scroll Optimization
+
+- Branch: `feat/frontend-mobile-qa-audit-v2026.09.21.314`, Base `cf8902d`.
+- **Playwright Real-Time Browser QA Testbed & 7-Viewport Full Audit**:
+  - Built an automated Chromium 153 Playwright QA audit script (`qa_responsive_audit.js`) on the remote Mini PC.
+  - Verified 27 primary routes across 7 device viewports (Galaxy Fold 320px, iPhone SE 375px, iPhone 14/15 390px, Galaxy S23 412px, iPad Mini 768px, Laptop 1280px, Desktop 1440px; 189 total checks) with **0 horizontal overflow defects**.
+- **Mobile Header Brand Visibility Restoration (`Brand`)**:
+  - Resolved the issue where the brand disappeared entirely on 320px~359px narrow viewports by switching to default `inline-flex`.
+  - Fixed brand text hiding below 520px by providing responsive typography (`text-xs min-[400px]:text-sm sm:text-base`) for seamless mobile brand presentation.
+- **Admin Sub-Navigation (`AdminSubNav`) Horizontal Scroll Optimization**:
+  - Applied `scrollbar-none` to eliminate intrusive native scrollbars on mobile viewports.
+  - Maintained 44px (`min-h-11`) minimum touch targets and smooth horizontal scrolling padding.
+- **Unit Test Synchronization**:
+  - Synchronized `src/components/brand-responsive.test.ts` assertions for full coverage of responsive classes and 320px viewports.
+
 ## v2026.09.20.313 — Player Marketplace Crafting Workbench & Item Trading Exchange (P0) System
 
 - Branch: `feat/marketplace-crafting-v2026.09.20.313`, base `5a41cba`.
