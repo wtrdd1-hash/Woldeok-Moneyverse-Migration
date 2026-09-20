@@ -1,8 +1,8 @@
 # 월덕 머니버스 — AI 경제 컨트롤러 명세
 
-> 버전: v2026.09.17.184
+> 버전: v2026.09.20.290
 > 상태: Living 구현 지향 기획 명세
-> 날짜: 2026-09-17
+> 날짜: 2026-09-20
 > 상위 명세: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
 > 영문 기준본: [AI_ECONOMY_CONTROLLER_SPEC.md](AI_ECONOMY_CONTROLLER_SPEC.md)
 
@@ -920,3 +920,22 @@ AI lane은 `macro`, `shop`, `stock`, `jobs`, `welfare`, `integrity` 6개 분야�
 ### 34.2 배포 소유 자동 모델 런타임 (v2026.09.19.289)
 
 무인 주식 시나리오 생성은 배포 환경의 `AI_NEWS_AUTO_API_BASE_URL`, `AI_NEWS_AUTO_MODEL`, 선택적 `AI_NEWS_AUTO_API_KEY`를 사용할 수 있다. 이 경로는 PostgreSQL에 암호화 저장되는 수동 관리자 뉴스룸 자격정보와 분리한다. 자동 actor UUID는 계속 필수이며 operator 권한으로 resolve되어야 하므로 context 조회, batch 생성, market-event 게시의 기존 권한·감사 경계를 유지한다. Ollama 같은 로컬 OpenAI-compatible 추론은 API key를 비워둘 수 있다. HTTP(S)가 아닌 잘못된 endpoint는 모델 호출 전에 fail-closed 처리한다.
+
+
+## 35. AI 수정 작업의 다음 작업 재확인 게이트 — v2026.09.20.290
+
+AI 경제·주식 시나리오·자동조절 기능을 수정하거나 확장하는 모든 개발 작업은 **현재 기획을 한 번 읽고 그대로 끝까지 구현하는 방식으로 진행하지 않는다**. 기획서는 living specification이며 작업 도중에도 변경될 수 있으므로 다음 재확인 게이트를 필수 절차로 둔다.
+
+1. **작업 시작 직전 재확인**: 구현 대상 AI 항목, 연결된 상위/하위 명세, 최신 사용자 지시, 현재 main 브랜치 기획서, 실제 런타임 상태를 다시 확인하고 이번 작업 범위를 고정한다.
+2. **중간 재확인**: 설계·구현이 절반 정도 진행되었거나 주요 단계 하나가 완료되면, 다음 작업 항목을 실행하기 전에 최신 기획서와 사용자 지시를 다시 확인한다. 새 지시나 기획 변경이 있으면 기존 계획보다 최신 내용을 우선한다.
+3. **다음 작업 진입 전 확인**: AI 관련 한 작업이 끝나고 다음 작업으로 넘어가기 전에 다음 작업의 요구사항·우선순위·의존성·안전경계·테스트 기준을 다시 읽고, 이미 구현된 코드와 충돌하거나 중복되지 않는지 확인한다.
+4. **승격 전 최종 대조**: Test 승격 전과 Production 승격 전에 각각 기획서의 최신 버전과 실제 변경사항을 다시 대조한다. 오래된 초안만 근거로 승격하지 않는다.
+5. **변경 발견 시 처리**: 재확인 과정에서 기획이 바뀌었으면 구현을 새 기획에 맞게 조정하고, 문서 버전과 변경내역도 함께 갱신한다. 불일치 상태를 알고도 다음 단계로 진행하지 않는다.
+
+필수 기록 항목은 `planning_version_checked`, `instruction_checked_at`, `midpoint_recheck_result`, `next_task_recheck_result`, `changed_scope`, `test_evidence`, `promotion_evidence`이다. AI 관련 작업내역/PR/내부 업데이트 기록에는 어떤 기획 버전을 확인했는지 남겨 추적 가능하게 한다.
+
+### 35.1 이번 문서 업데이트 내역
+
+- **v2026.09.20.290**: AI 수정 작업에서 시작 전 확인뿐 아니라 **작업 중간과 다음 작업 진입 직전에 최신 기획·사용자 지시를 다시 확인**하도록 필수 게이트를 추가했다.
+- 기획 변경이 발견되면 새 기획을 우선하고, Test/Production 승격 전에 다시 대조하도록 명시했다.
+- 구현 증거에 확인한 기획 버전과 중간/다음 작업 재확인 결과를 기록하도록 추적성 요구사항을 추가했다.
