@@ -16,13 +16,14 @@ import {
 } from './business-forms';
 import type { EquityStanding } from './equity';
 import { equityGateNote, equitySummary, meetsEquityRequirement } from './equity';
+import { canonicalUrl } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '가상 사업체 — 게임 내 비즈니스 운영',
   description: '월덕 머니버스 게임 안에서 다양한 가상 사업체를 설립·운영하고 정산 기록과 부스트 아이템을 확인합니다.',
-  alternates: { canonical: '/businesses' },
+  alternates: { canonical: canonicalUrl('/businesses') },
   robots: { index: true, follow: true },
 };
 

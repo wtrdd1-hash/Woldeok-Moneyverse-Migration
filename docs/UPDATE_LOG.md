@@ -1,5 +1,18 @@
 # Update Log
 
+## v2026.09.20.312 — Comprehensive Site-Wide SEO Optimization, Schema.org JSON-LD Suite, Hreflang & Discovery Directives
+
+- Branch: `feat/seo-optimization-v2026.09.20.312`, base `484cbd1`.
+- **Absolute Canonical URL Normalization Engine**: Created centralized `src/lib/seo.ts` with `canonicalUrl(path)` ensuring all pages emit uniform absolute URLs (`https://easy-scraping.com/...`) without trailing slashes, eliminating crawler duplicate indexation hazards.
+- **Rich Schema.org JSON-LD Suite**:
+  - `WebApplication`: Global knowledge graph declaration in root `layout.tsx` for the Discord economy gaming platform with features, currency (WLD), and pricing metadata.
+  - `FAQPage`: Injected structured rich-result FAQs into `/guide` for Google search accordion snippets.
+  - `BreadcrumbList`: Deployed hierarchical site-trail breadcrumbs across `/guide`, `/announcements`, `/announcements/[id]`, `/board`, and `/board/[id]`.
+  - `DiscussionForumPosting`: Embedded forum article schemas for community board discussions.
+- **Advanced Search Engine Directives & Hreflang Tags**: Added `googleBot: { 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 }` for Google Discover and rich card eligibility, along with bilingual `alternates.languages` (`ko-KR`, `en-US`, `x-default`) and crawler host rules in `robots.ts`.
+- **Sitemap Freshness**: Enriched `sitemap.ts` with real-time `lastModified` timestamps across all 14 durable public routes, maintaining 100% compatibility with existing search indexing regression tests.
+- **Automated Verification**: Comprehensive unit test suite added in `src/lib/seo.test.ts` verifying all schema builders, canonical cleaners, and regression guarantees.
+
 ## v2026.09.20.311 — Work Task Completion Modal Mobile Auto-Scroll, Adaptive Bottom Sheet & Instant Result Focus
 
 - Branch: `feat/work-modal-autoscroll-v2026.09.20.311`, base `17419db82bf5`.

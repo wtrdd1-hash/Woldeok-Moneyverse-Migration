@@ -19,6 +19,7 @@ import {
   LOCALE_COOKIE,
   isLocale,
 } from '@/lib/locale';
+import { canonicalUrl, webApplicationJsonLd } from '@/lib/seo';
 // Keep the downloaded Bootstrap distribution quarantined in styles/vendor.
 // Global Bootstrap utilities use !important (for example .bg-primary/.text-primary)
 // and collide with this Tailwind theme, so the application shell must not import it.
@@ -58,9 +59,10 @@ const plexMono = IBM_Plex_Mono({
 });
 
 const indexingEnabled = process.env.SEO_INDEXING_ENABLED !== 'false';
+const siteUrl = (process.env.APP_BASE_URL ?? 'https://easy-scraping.com').replace(/\/$/, '');
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.APP_BASE_URL ?? 'https://easy-scraping.com'),
+  metadataBase: new URL(siteUrl),
   title: {
     default: '월덕 머니버스',
     template: '%s · 월덕 머니버스',
@@ -81,6 +83,14 @@ export const metadata: Metadata = {
     '게임 경제',
     '출석 보상',
   ],
+  alternates: {
+    canonical: siteUrl,
+    languages: {
+      'ko-KR': siteUrl,
+      'en-US': siteUrl,
+      'x-default': siteUrl,
+    },
+  },
   verification: {
     google: process.env.SEARCH_CONSOLE_VERIFICATION || process.env.GOOGLE_SITE_VERIFICATION || undefined,
     other: {
@@ -91,6 +101,13 @@ export const metadata: Metadata = {
   robots: {
     index: indexingEnabled,
     follow: indexingEnabled,
+    googleBot: {
+      index: indexingEnabled,
+      follow: indexingEnabled,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
   },
   openGraph: {
     type: 'website',
@@ -99,7 +116,7 @@ export const metadata: Metadata = {
     title: '월덕 머니버스 — Discord 커뮤니티 가상경제',
     description:
       'Discord 커뮤니티 활동을 기록하고 WLD 보상과 게임 상점을 함께 이용하는 월덕 머니버스입니다.',
-    url: '/',
+    url: siteUrl,
     images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: '월덕 머니버스 — Discord 커뮤니티 가상경제' }],
   },
   twitter: {
@@ -111,7 +128,6 @@ export const metadata: Metadata = {
   },
 };
 
-const siteUrl = (process.env.APP_BASE_URL ?? 'https://easy-scraping.com').replace(/\/$/, '');
 const siteStructuredData = {
   '@context': 'https://schema.org',
   '@graph': [
@@ -129,6 +145,7 @@ const siteStructuredData = {
       name: '월덕 머니버스',
       url: siteUrl,
     },
+    webApplicationJsonLd(),
   ],
 };
 

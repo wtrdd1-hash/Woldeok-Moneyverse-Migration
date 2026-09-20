@@ -14,6 +14,7 @@ import { NotificationForm, NpcOrderButton } from './quest-forms';
 import { GoalCard, NextUnlock, NpcCard } from './quest-parts';
 import { NPCS } from './quests';
 import type { EngagementBoard } from './quests';
+import { canonicalUrl } from '@/lib/seo';
 
 /** One member's own goals and standing. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
@@ -21,7 +22,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: '일일 퀘스트 및 도전과제 — 활동 보상 시스템',
   description: '디스코드 커뮤니티 활동과 연동되는 일일 퀘스트와 연속 출석 도전과제를 달성하고 WLD 보상을 수령하세요.',
-  alternates: { canonical: '/quests' },
+  alternates: { canonical: canonicalUrl('/quests') },
   robots: { index: true, follow: true },
 };
 

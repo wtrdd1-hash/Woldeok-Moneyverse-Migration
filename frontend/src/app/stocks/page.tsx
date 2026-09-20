@@ -28,13 +28,14 @@ import { normalizeStockSort, sortMarketStocks } from './stock-market-sort';
 import { TradeDialog } from './trade-dialog';
 import { WatchlistToggle } from './watchlist-toggle';
 import { filterStocks, normalizeStockQuery } from './stock-search';
+import { canonicalUrl } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '가상 주식 거래소 — 실시간 종목 시세 및 캔들 차트 분석',
   description: '월덕 머니버스 게임 안의 가상 주식 시세·캔들 차트·거래 정보를 확인하는 커뮤니티 가상 거래소입니다.',
-  alternates: { canonical: '/stocks' },
+  alternates: { canonical: canonicalUrl('/stocks') },
   robots: { index: true, follow: true },
 };
 

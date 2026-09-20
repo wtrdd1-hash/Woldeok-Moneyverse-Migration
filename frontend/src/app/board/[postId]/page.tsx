@@ -8,6 +8,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
+import { canonicalUrl, breadcrumbJsonLd, forumPostingJsonLd } from '@/lib/seo';
+import { jsonLd } from '@/lib/json-ld';
 import { CommentForm, DeleteCommentButton, PostControls } from './post-forms';
 
 export const dynamic = 'force-dynamic';
@@ -48,16 +50,17 @@ export async function generateMetadata({
   const post = await publicPost(postId);
   if (!post) return { title: '게시글', robots: { index: false, follow: false } };
   const description = post.body.replace(/\s+/g, ' ').trim().slice(0, 155);
+  const postUrl = canonicalUrl(`/board/${post.postId}`);
   return {
     title: post.title,
     description,
-    alternates: { canonical: `/board/${post.postId}` },
+    alternates: { canonical: postUrl },
     robots: { index: true, follow: true },
     openGraph: {
       type: 'article',
       title: post.title,
       description,
-      url: `/board/${post.postId}`,
+      url: postUrl,
       publishedTime: post.createdAt,
       modifiedTime: post.updatedAt ?? undefined,
     },
@@ -87,8 +90,33 @@ export default async function PostPage({
   const post = postData.post;
   const comments = commentData?.comments ?? [];
 
+  const postBreadcrumb = breadcrumbJsonLd([
+    { name: '홈', path: '/' },
+    { name: '커뮤니티 게시판', path: '/board' },
+    { name: post.title, path: `/board/${post.postId}` },
+  ]);
+
+  const postSchema = forumPostingJsonLd({
+    postId: post.postId,
+    title: post.title,
+    body: post.body,
+    authorName: post.authorName,
+    createdAt: post.createdAt,
+    updatedAt: post.updatedAt,
+  });
+
   return (
     <div data-page="board-postId" className="mv-page mv-page--community grid gap-6">
+      {/* 구조화 데이터 (Schema.org Breadcrumb & DiscussionForumPosting) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(postBreadcrumb) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(postSchema) }}
+      />
+
       <Button asChild variant="ghost" className="w-fit -ml-3 text-muted-foreground">
         <Link href="/board">
           <ArrowLeft />

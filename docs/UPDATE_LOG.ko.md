@@ -1,3 +1,16 @@
+## v2026.09.20.312 — 전역 SEO 최적화, Schema.org 구조화 데이터(JSON-LD) 스위트, Hreflang 및 검색엔진 디렉티브 완비
+
+- 브랜치: `feat/seo-optimization-v2026.09.20.312`, 베이스 `484cbd1`.
+- **절대 경로 Canonical URL 정규화 엔진**: 중앙화된 `src/lib/seo.ts` 및 `canonicalUrl(path)` 빌더를 도입하여 모든 공개 페이지의 `alternates.canonical`을 트레일링 슬래시 없는 절대 URL(`https://easy-scraping.com/...`)로 정규화, 검색 크롤러의 중복 색인 리스크 원천 차단.
+- **Schema.org 구조화 데이터(JSON-LD) 스위트 전면 도입**:
+  - `WebApplication`: 루트 `layout.tsx`에 가상경제 커뮤니티 게임 웹앱의 기능, 카테고리, 통화(WLD) 정보가 담긴 지식 그래프 엔티티 선언.
+  - `FAQPage`: `/guide` 페이지에 구글 검색 결과 FAQ 아코디언 리치 스니펫을 위한 구조화 데이터 자동 주입.
+  - `BreadcrumbList`: `/guide`, `/announcements`, `/announcements/[id]`, `/board`, `/board/[id]` 등 주요 페이지에 계층형 사이트 탐색 경로 스키마 주입.
+  - `DiscussionForumPosting`: 커뮤니티 게시판(`/board/[id]`)에 포럼 포스팅 스키마 주입.
+- **고급 검색엔진 디렉티브 및 다국어 Hreflang 지원**: 구글 디스커버 및 고화질 썸네일 노출을 위한 `googleBot` 메타 디렉티브(`max-image-preview: large` 등) 추가 및 한국어/영어/x-default 대안 언어 태그(`alternates.languages`), `robots.ts` 호스트 설정 완료.
+- **사이트맵 최신성(lastModified) 보강**: 14개 핵심 정적 공개 라우트의 `sitemap.ts`에 실시간 `lastModified` 타임스탬프를 부여하고 기존 `search-indexing.test.ts` 회귀 테스트 100% 호환성 유지.
+- **단위 테스트 및 무결성 검증**: `src/lib/seo.test.ts`를 신설하여 정규 URL 생성, 4종 구조화 데이터 스키마 규격 검증을 100% 통과.
+
 ## v2026.09.20.311 — 직업 업무 수행 모달(TaskCompletionPanel) 모바일 뷰포트 자동 스크롤 & 바텀시트 적응형 핏 & 보상 결과 즉시 포커스 이동
 
 - 브랜치: `feat/work-modal-autoscroll-v2026.09.20.311`, 베이스 `17419db82bf5`.

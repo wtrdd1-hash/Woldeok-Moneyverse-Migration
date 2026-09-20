@@ -20,6 +20,7 @@ import {
   type HubHolding,
   type HubStock,
 } from '../stock-hub';
+import { canonicalUrl } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -67,7 +68,7 @@ export async function generateMetadata({
   return {
     title: `${stock.symbol} ${stock.name} — 가상 주식 상세`,
     description: `${stock.name}의 월덕 머니버스 가상 시세, 보유 현황, 차트와 관련 커뮤니티 토론을 한곳에서 확인하세요. 실제 금융상품이 아닙니다.`,
-    alternates: { canonical: `/stocks/${encodeURIComponent(stock.symbol)}` },
+    alternates: { canonical: canonicalUrl(`/stocks/${encodeURIComponent(stock.symbol)}`) },
     robots: { index: false, follow: true },
   };
 }
