@@ -2,8 +2,8 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.19.286
-> Implementation/evidence sync: 2026-09-19
+> Current integrated version: v2026.09.20.292
+> Implementation/evidence sync: 2026-09-20
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
@@ -1933,3 +1933,12 @@ Add an opt-in hourly AI newsroom automation path for the fictional stock market.
 - Review criterion: a screenshot comparison must show a clearly different information architecture, not only CSS-token or route-marker changes.
 - This is the first visible implementation checkpoint of the broader 70-route redesign program; it does not close the remaining page-by-page work.
 - Branch: feat/mobile-home-human-redesign-v2026.09.19.273.
+
+
+## Cycle delta — v2026.09.20.292 (2026-09-20)
+
+### Mandatory next-work AI re-audit and reconstruction
+
+Before any new AI feature implementation, the next AI work unit must complete the full re-audit/reconstruction gate defined in AI_ECONOMY_CONTROLLER_SPEC.md v2026.09.20.292. The audit covers every existing AI implementation and its real runtime behavior, not only documents or feature switches. Changed, partial, stale, duplicated, compatibility-layered or plan-conflicting AI areas must be redesigned and rebuilt against the latest requirement rather than preserved by default.
+
+Required sequence: full AI inventory -> latest-plan/main/user-instruction recheck -> implementation/runtime contract audit -> reconstruction of changed/weak areas -> cross-system regression -> exact-SHA Test runtime proof including fail-closed and rollback -> final plan re-read -> zero-downtime Production promotion only after all evidence passes. New AI feature work is blocked until this gate is completed or remaining exclusions are explicitly documented and approved.
