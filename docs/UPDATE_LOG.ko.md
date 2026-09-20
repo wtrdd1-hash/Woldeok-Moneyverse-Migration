@@ -1,5 +1,13 @@
 # 업데이트 로그
 
+## v2026.09.20.303 — 2단계: 핵심 경제 화면군 전면 재구축 (/work, /stocks, /wallet, /bank)
+
+- 브랜치: `feat/frontend-economic-v2026.09.20.303`, 기준 `feat/frontend-rebuild-v2026.09.20.302`.
+- 가상 주식 거래소 및 주문 편의성 (`stocks/layout.tsx`, `stocks/page.tsx`, `stocks/trade-form.tsx`): 거래소 상단 도구 모음에 거래 내역(History) 탭을 통합 연결하고 중복 정렬 내비게이션을 제거하여 UI를 간소화함. 모바일 주문 폼에 1-탭 퀵 수량 버튼(+1, +5, +10, +50, MAX)과 44px+ 터치 타깃을 제공하여 로빈후드형 기동성을 극대화함.
+- 지갑 및 뱅킹 연동성 (`wallet/page.tsx`, `wallet/wallet-forms.tsx`, `wallet/actions.ts`): 지갑·은행·활동기록 간 상호 전환 퀵 내비게이션을 신설하고, 활동 원장 내역을 즉시 내보낼 수 있는 UTF-8 BOM 지원 CSV 다운로드 기능을 탑재함. 송금 시 이중 출금을 차단하는 분산 멱등성 키 연동 및 퀵 금액 버튼(+1,000, +5,000, +10,000, +50,000 WLD)을 완비함.
+- 품질 검증 게이트: Vitest 91/91 테스트 스위트 (683/683개 단위 및 회귀 테스트 100% 통과), TypeScript 타입 검사 오류 0건 (`tsc --noEmit`), exact BUILD_ID Next.js 프로덕션 빌드 완료.
+- 무중단 배포: 격리 테스트 서버(`test.easy-scraping.com`) 헬스체크 200 검증 후 운영 서버(`easy-scraping.com`) 무중단 블루그린 승격 완료 및 유저 세션 100% 연속성 보존.
+
 ## v2026.09.20.302 — 1단계: 전역 셸, 반응형 인증 플로우 및 계정 센터 전면 재구축
 
 - 브랜치: `feat/frontend-rebuild-v2026.09.20.302`, 기준 `421353c84852c93d93bf7c32bf28a8677eb9319b`.
