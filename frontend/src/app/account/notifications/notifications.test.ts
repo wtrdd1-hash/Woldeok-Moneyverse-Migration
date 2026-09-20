@@ -10,10 +10,12 @@ describe('account notification settings', () => {
     expect(page).toContain("apiOrNull<{ notifications_enabled: boolean }>('/api/v1/engagement')");
     expect(page).toContain('value="true"');
     expect(page).toContain('value="false"');
-    expect(page).toContain('aria-pressed={board.notifications_enabled}');
-    expect(page).toContain('aria-pressed={!board.notifications_enabled}');
-    expect(page).toContain('className="grid gap-2 sm:grid-cols-2"');
-    expect(page.match(/className="min-h-11 w-full"/g)).toHaveLength(2);
+    expect(page).toContain('aria-pressed={enabled}');
+    expect(page).toContain('aria-pressed={!enabled}');
+    expect(page).toContain('aria-label="목표 및 NPC 주문 알림 설정"');
+    expect(page).toContain("enabled ? '알림 받는 중' : '알림 꺼짐'");
+    expect(page.match(/className="min-h-12 w-full"/g)).toHaveLength(2);
+    expect(page).toContain('설정을 바꾸지 않았으니');
   });
   it('writes through the existing member preference API and refreshes quests', () => {
     expect(actions).toContain("'/api/v1/engagement/preferences'");
