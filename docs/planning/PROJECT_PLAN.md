@@ -2,14 +2,14 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.20.306
+> Current integrated version: v2026.09.20.311
 > Implementation/evidence sync: 2026-09-20
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
 
-## Planning cycle — v2026.09.20.306 (2026-09-20)
+## Planning cycle — v2026.09.20.311 (2026-09-20)
 
 ### Administrator Treasury Management
 - **Scope:** add a dedicated **Admin → Economy → Treasury** planning stream for server-authoritative public/economy reserve management. The treasury is not a member wallet and never permits a raw “set balance” shortcut.
@@ -18,7 +18,7 @@ This is the current implementation-facing contract. Historical details remain re
 - **Accounting authority:** every monetary mutation must settle through append-only ledger/accounting state using integer-string amounts, stable references, actor identity and idempotency. Historical ledger rows are not editable/deletable from administrator UI.
 - **High-risk mutation controls:** step-up authentication, CSRF protection, DB-side actor authorization, mandatory reason/evidence, deterministic preview, transaction atomicity, immutable audit and post-write readback. A single-superadmin deployment may add a confirmation challenge without inventing a second approver role.
 - **Reconciliation:** detect and expose variance; never silently rewrite balances. Any repair is a separately authorized and audited correction transaction.
-- **QA/release:** unauthorized access, malformed/overflow amounts, duplicate idempotency, concurrent corrections, rollback, budget arithmetic, reconciliation, audit, mobile 320/360/390px and BigInt safety are Production blockers. Runtime implementation follows v2026.09.20.306-01 through -07 and exact-SHA Test → merge → exact merged SHA rebuild → zero-downtime Production promotion.
+- **QA/release:** unauthorized access, malformed/overflow amounts, duplicate idempotency, concurrent corrections, rollback, budget arithmetic, reconciliation, audit, mobile 320/360/390px and BigInt safety are Production blockers. Runtime implementation follows v2026.09.20.311-01 through -07 and exact-SHA Test → merge → exact merged SHA rebuild → zero-downtime Production promotion.
 - **Current state:** planning/documentation only; no claim that a dedicated treasury runtime is already implemented.
 
 ## URGENT / P0 planning directive — v2026.09.20.305 (2026-09-20)
