@@ -1,5 +1,13 @@
 # Update Log
 
+## v2026.09.20.305 — Phase 4: Header & Home Ergonomics Resolution & Operations Modernization
+
+- Branch: `feat/frontend-admin-v2026.09.20.305`, base `feat/frontend-community-v2026.09.20.304`.
+- Global Header Responsiveness & User Menu (`components/site-header.tsx`): Completely resolved the horizontal overflow and truncation issue where the 'My wallet' button was clipped and the sign-out button was hidden on 1024px~1440px desktop screens. Unified account navigation into a sleek member dropdown menu containing profile, wallet, security, and admin console actions with 44px+ touch targets; converted the wallet button into a compact chip and set the server clock pill to 1440px+ display (`hidden 2xl:inline-flex`) to guarantee zero overflow across all viewports.
+- Home Quick-Action Dashboard Ergonomics (`components/mobile-home-view.tsx`): Upgraded the today's route section into a responsive 2x2 fintech action card grid (`grid grid-cols-1 lg:grid-cols-2 gap-3.5`) on desktop viewports with step number badges (01~04), icons, descriptive hints, and interactive hover transitions; normalized the orphan '04' counter into a standard '4 steps' badge; styled secondary quick links as clean pill chips.
+- Operations & Master Console Refinements (`app/admin/...`): Maintained 100% regression parity across admin mobile cards (`ai-status-card.tsx`, `traffic-dashboard.tsx`, `activity/page.tsx`), user directory moderation with step-up security, and realtime faucet/sink economic flow gauges.
+- Quality Gates & Zero-Downtime Deployment: Passed Vitest 91/91 test suites (683/683 unit & regression tests 100% PASS), TypeScript 0 errors (`tsc --noEmit`), Next.js Turbopack production build verified; staged and promoted to Test (`test.easy-scraping.com`) and Production (`easy-scraping.com`) via host blue-green zero-downtime pipeline with 100% active session continuity (816 sessions preserved).
+
 ## v2026.09.20.304 — Phase 3: Community, Businesses, Casino & Progression Modernization
 
 - Branch: `feat/frontend-community-v2026.09.20.304`, base `feat/frontend-economic-v2026.09.20.303`.
