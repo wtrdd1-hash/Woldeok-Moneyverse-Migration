@@ -10095,6 +10095,65 @@
     },
     {
       "method": "GET",
+      "path": "/app-api/v1/profile/titles",
+      "purpose": "내가 실제로 획득한 프로필 칭호 조회",
+      "callWhen": "해당 화면 진입/새로고침/관련 write 후",
+      "authorization": "로그인 필요(기능에 따라 최신 동의 필요)",
+      "afterSuccess": "프로필 화면의 대표 칭호 선택 목록 갱신",
+      "backendRoute": "/api/profile/titles",
+      "operationId": "ProfileController_titles",
+      "backendOpenApiPath": "/profile/titles",
+      "summary": "Profile titles actually awarded to the caller",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json-object",
+        "topLevelKeys": [
+          "titles"
+        ]
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "titles": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "awardedAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "name",
+                "awardedAt"
+              ]
+            }
+          }
+        },
+        "required": [
+          "titles"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
       "path": "/app-api/v1/progression",
       "purpose": "내 전체 성장/레벨 상태 조회",
       "callWhen": "해당 화면 진입/새로고침/관련 write 후",

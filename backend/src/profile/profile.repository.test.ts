@@ -267,3 +267,13 @@ describe('ProfileRepository.ownAccountEmail', () => {
     await expect(new ProfileRepository(pool).ownAccountEmail(NOBODY)).resolves.toBeNull();
   });
 });
+
+describe('ProfileRepository.earnedTitles', () => {
+  it('reads titles through the least-privilege member function for the caller', async () => {
+    const { pool, queries } = recordingPool();
+    await new ProfileRepository(pool).earnedTitles(NOBODY);
+    expect(queries).toHaveLength(1);
+    expect(queries[0]?.text).toContain('public.member_earned_titles($1::uuid)');
+    expect(queries[0]?.values).toEqual([NOBODY]);
+  });
+});

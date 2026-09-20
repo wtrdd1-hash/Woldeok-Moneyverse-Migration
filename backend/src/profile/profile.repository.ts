@@ -204,6 +204,12 @@ export interface ProfileSettingsRow {
 }
 
 /** public.member_set_profile_image RETURNS TABLE: migration 094. */
+export interface EarnedTitleRow {
+  readonly code: string;
+  readonly name: string;
+  readonly awarded_at: Date;
+}
+
 export interface ProfileImageChange {
   readonly image_path: string;
   readonly replaced_key: string | null;
@@ -359,6 +365,16 @@ export class ProfileRepository {
       [viewer, storageKey],
     );
     return row?.visible === true;
+  }
+
+  async earnedTitles(actor: unknown): Promise<readonly EarnedTitleRow[]> {
+    assertUuid(actor, 'actor user id');
+    const result = await this.pool.query<EarnedTitleRow>(
+      `SELECT title.code, title.name, title.awarded_at
+       FROM public.member_earned_titles($1::uuid) AS title`,
+      [actor],
+    );
+    return result.rows;
   }
 
   async settings(actor: unknown): Promise<ProfileSettingsRow> {
