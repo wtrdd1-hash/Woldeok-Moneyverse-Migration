@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Building2, CheckCircle2, Clock, Sparkles, TrendingUp, AlertTriangle } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
@@ -111,12 +112,80 @@ export default async function BusinessesPage() {
       quantity: item.quantity,
     }));
 
+  // Aggregate daily financials
+  let totalDailyGross = BigInt(0);
+  let totalDailyCost = BigInt(0);
+  let unsettledCount = 0;
+
+  for (const b of businesses) {
+    totalDailyGross += BigInt(b.dailyRevenue);
+    totalDailyCost += BigInt(b.dailyOperatingCost);
+    if (!b.isSettledToday) {
+      unsettledCount += 1;
+    }
+  }
+  const totalDailyNet = totalDailyGross - totalDailyCost;
+
   return (
     <div data-page="businesses" className="mv-page mv-page--finance grid gap-8 pb-12">
       <PageHeader eyebrow="BUSINESS ECONOMY 2.0" title="가상 사업체 및 일일 정산">
         상점에서 라이선스를 획득하여 사업체를 설립하고, 전문 소모품 부스트를 장착하여 일일 순수익을 극대화하세요.
         일일 매출은 SYSTEM_MINT에서 지급되며, 운영비는 SYSTEM_SINK로 소각되는 안전한 복식부기 가상 경제입니다.
       </PageHeader>
+
+      {/* Toss-style Business Executive Summary Card */}
+      {businesses.length > 0 && (
+        <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-card via-card to-primary/5 p-6 shadow-md backdrop-blur-md">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/60 pb-5">
+            <div>
+              <span className="text-xs font-bold tracking-wider text-primary uppercase flex items-center gap-1.5">
+                <Building2 className="size-4" /> 내 사업체 포트폴리오 요약
+              </span>
+              <h2 className="text-2xl font-black mt-1 text-foreground">
+                총 {businesses.length}개 사업장 운영 중
+              </h2>
+            </div>
+            <div className="flex items-center gap-2">
+              {unsettledCount > 0 ? (
+                <Badge className="bg-amber-500/15 text-amber-500 border-amber-500/30 px-3 py-1.5 font-bold text-xs flex items-center gap-1.5">
+                  <Clock className="size-3.5" /> 오늘 정산 대기 {unsettledCount}건
+                </Badge>
+              ) : (
+                <Badge className="bg-emerald-500/15 text-emerald-500 border-emerald-500/30 px-3 py-1.5 font-bold text-xs flex items-center gap-1.5">
+                  <CheckCircle2 className="size-3.5" /> 오늘 모든 정산 완료
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-5">
+            <div className="rounded-2xl bg-muted/40 p-4 border border-border/50">
+              <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                <TrendingUp className="size-3.5 text-emerald-500" /> 일일 총 매출
+              </span>
+              <p className="text-xl font-black font-mono mt-1 text-emerald-500">
+                +{groupDigits(totalDailyGross.toString())} WLD
+              </p>
+            </div>
+            <div className="rounded-2xl bg-muted/40 p-4 border border-border/50">
+              <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                <AlertTriangle className="size-3.5 text-rose-500" /> 일일 총 운영비 (소각)
+              </span>
+              <p className="text-xl font-black font-mono mt-1 text-rose-500">
+                -{groupDigits(totalDailyCost.toString())} WLD
+              </p>
+            </div>
+            <div className="rounded-2xl bg-primary/10 p-4 border border-primary/20">
+              <span className="text-xs text-primary font-bold flex items-center gap-1">
+                <Sparkles className="size-3.5" /> 일일 예상 순수익
+              </span>
+              <p className="text-xl font-black font-mono mt-1 text-primary">
+                +{groupDigits(totalDailyNet.toString())} WLD
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 1. 인벤토리 내 보유 사업 라이선스 (설립 대기) */}
       {licenseItems.length > 0 && (
@@ -128,7 +197,7 @@ export default async function BusinessesPage() {
             {licenseItems.map((lic) => {
               const bizName = LICENSE_NAMES[lic.code] ?? lic.name;
               return (
-                <Card key={lic.id} className="border-primary/40 bg-primary/5 shadow-md">
+                <Card key={lic.id} className="border-primary/40 bg-primary/5 shadow-md rounded-2xl">
                   <CardHeader className="pb-2">
                     <Badge className="w-fit bg-primary/20 text-primary border-primary/30">
                       라이선스 보유
@@ -157,7 +226,7 @@ export default async function BusinessesPage() {
             <span>🏢</span> 내 사업체 ({businesses.length}개 운영 중)
           </h2>
           <p className="text-sm text-muted-foreground">
-            매일 한 번 일일 정산 버튼을 눌러 매출 WLD를 수령하고 운영비를 소각 정산하세요.
+            매일 한 번 일일 정산 버튼을 눌러 매출 WLD를 수령하고 운영비를 소각 정산하세요. (매일 00:00 KST 갱신)
           </p>
         </div>
 
@@ -178,11 +247,11 @@ export default async function BusinessesPage() {
               return (
                 <Card
                   key={business.ownershipId}
-                  className="flex flex-col justify-between border-border/80 bg-card shadow-md transition-all hover:shadow-lg backdrop-blur-sm"
+                  className="flex flex-col justify-between border-border/80 bg-card shadow-md transition-all hover:shadow-lg backdrop-blur-sm rounded-2xl"
                 >
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <Badge variant="secondary" className="font-mono text-xs">
+                      <Badge variant="secondary" className="font-mono text-xs font-bold">
                         {business.symbol}
                       </Badge>
                       <ApplyBoostModalButton
@@ -192,7 +261,7 @@ export default async function BusinessesPage() {
                         activeBoost={boost}
                       />
                     </div>
-                    <CardTitle className="text-lg mt-2">{business.name}</CardTitle>
+                    <CardTitle className="text-lg mt-2 font-black">{business.name}</CardTitle>
                     <CardDescription className="text-xs">
                       {formatDay(business.purchasedAt)} 설립 ·{' '}
                       {business.lastSettlementDate
@@ -203,30 +272,32 @@ export default async function BusinessesPage() {
 
                   <CardContent className="grid gap-3 text-xs py-2">
                     {hasBoost ? (
-                      <div className="rounded-lg border border-primary/30 bg-primary/10 p-2 text-[11px] flex items-center justify-between">
-                        <span className="font-bold text-primary">⚡ {String(boost.name)}</span>
+                      <div className="rounded-xl border border-primary/30 bg-primary/10 p-2.5 text-[11px] flex items-center justify-between">
+                        <span className="font-bold text-primary flex items-center gap-1">
+                          <Sparkles className="size-3.5" /> {String(boost.name)}
+                        </span>
                         <span className="text-muted-foreground">
                           {String(boost.expires_at).slice(5, 10)} 만료
                         </span>
                       </div>
                     ) : null}
 
-                    <div className="rounded-xl bg-muted/40 p-3 grid gap-1.5 border border-border/50">
-                      <div className="flex justify-between">
+                    <div className="rounded-2xl bg-muted/40 p-3.5 grid gap-2 border border-border/50">
+                      <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">일일 매출</span>
-                        <span className="font-mono font-bold text-emerald-400">
+                        <span className="font-mono font-bold text-emerald-500">
                           +{groupDigits(gross)} WLD
                         </span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">일일 운영비 (소각)</span>
-                        <span className="font-mono font-medium text-rose-400">
+                        <span className="font-mono font-medium text-rose-500">
                           -{groupDigits(cost)} WLD
                         </span>
                       </div>
-                      <div className="border-t border-border/60 pt-1.5 flex justify-between font-bold text-sm">
+                      <div className="border-t border-border/60 pt-2 flex justify-between items-center font-bold text-sm">
                         <span>일일 순수익</span>
-                        <span className="font-mono text-primary">
+                        <span className="font-mono text-primary font-black">
                           +{groupDigits(net)} WLD
                         </span>
                       </div>
@@ -264,15 +335,15 @@ export default async function BusinessesPage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {catalog.businessTypes.map((type) => (
-              <Card key={type.id} className="flex flex-col justify-between border-border/70">
+              <Card key={type.id} className="flex flex-col justify-between border-border/70 rounded-2xl">
                 <CardHeader className="pb-2">
                   <Badge variant="secondary" className="w-fit font-mono text-xs">
                     {type.symbol}
                   </Badge>
-                  <CardTitle className="text-base mt-2">{type.name}</CardTitle>
+                  <CardTitle className="text-base mt-2 font-bold">{type.name}</CardTitle>
                   <CardDescription className="text-xs">{type.description}</CardDescription>
                 </CardHeader>
-                <CardContent className="grid gap-1.5 text-xs py-2">
+                <CardContent className="grid gap-2 text-xs py-2">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">인수 비용</span>
                     <span className="font-mono font-bold text-foreground">
@@ -281,20 +352,20 @@ export default async function BusinessesPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">일일 매출</span>
-                    <span className="font-mono text-emerald-400">
+                    <span className="font-mono text-emerald-500 font-bold">
                       +{groupDigits(type.dailyRevenue)} WLD
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">일일 운영비</span>
-                    <span className="font-mono text-rose-400">
+                    <span className="font-mono text-rose-500">
                       -{groupDigits(type.dailyOperatingCost)} WLD
                     </span>
                   </div>
                 </CardContent>
                 <CardFooter className="pt-2">
                   {owned.has(type.id) ? (
-                    <Badge variant="outline" className="w-full justify-center py-1.5">
+                    <Badge variant="outline" className="w-full justify-center py-2.5 min-h-11 rounded-xl">
                       이미 운영 중
                     </Badge>
                   ) : (

@@ -1,5 +1,14 @@
 # Update Log
 
+## v2026.09.20.304 — Phase 3: Community, Businesses, Casino & Progression Modernization
+
+- Branch: `feat/frontend-community-v2026.09.20.304`, base `feat/frontend-economic-v2026.09.20.303`.
+- Community & Gallery Modernization (`board/board-forms.tsx`, `gallery/submit/submit-forms.tsx`): Built client-side mobile photo submission with drag-and-drop, camera access, instant client-side WebP canvas compression (downsizing 20MB+ mobile photos under 1.5MB), magic byte validation (PNG, JPEG, WebP), and accessibility alt-text counter; added live markdown preview tab and quick markdown formatting toolbar (Bold, Italic, Quote, Code, List, Link) with 44px+ touch targets.
+- Business Portfolio Executive Dashboard (`businesses/page.tsx`, `businesses/business-forms.tsx`): Built Toss-style business metrics banner displaying aggregated daily gross revenue, operating costs (burn), net profit, and pending settlement alerts; updated all business interaction buttons (Purchase, Settle, Boost, License) to 44px+ touch standards (`min-h-11`).
+- Provably Fair Casino & Ergonomics (`casino/page.tsx`, `casino/casino-forms.tsx`): Surfaced the statistical Provably Fair cryptographic report (1,000,000 random trials, observed vs expected win rate, and normal distribution Z-score verification); added 1-tap quick stake buttons (+1,000, +5,000, +10,000, +50,000, MAX) to Coin, Dice Parity, and Dice Number games with `min-h-11` touch targets.
+- Progression Roadmap & Seasonal Tiers (`progression/page.tsx`, `seasons/page.tsx`): Implemented interactive timeline stage unlock roadmap with stage status badges (Completed, Active, Locked); added tiered leaderboard badges (🥇, 🥈, 🥉, Top Ranks) and full 44px+ touch targets on all seasonal actions.
+- Quality Gates & Zero-Downtime Deployment: Vitest 91/91 suites (683/683 tests 100% PASS), TypeScript 0 errors (`tsc --noEmit`), Next.js production build verified; deployed to Test (`test.easy-scraping.com`) and promoted to Production (`easy-scraping.com`) via blue-green zero-downtime pipeline with 100% session preservation.
+
 ## v2026.09.20.303 — Phase 2: Core Economic Surfaces Rebuild (/work, /stocks, /wallet, /bank)
 
 - Branch: `feat/frontend-economic-v2026.09.20.303`, base `feat/frontend-rebuild-v2026.09.20.302`.

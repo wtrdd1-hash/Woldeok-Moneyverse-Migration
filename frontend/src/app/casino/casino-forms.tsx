@@ -18,16 +18,53 @@ import { DIE_FACES, PARITY_CHOICES } from './dice';
 import { playCoin, playDiceNumber, playDiceParity, setSelfLimit } from './actions';
 import { CASINO_IDLE } from './casino-state';
 
-/**
- * The coin game's write surface.
- *
- * Both controls are a `<form action={serverAction}>`, so they work before
- * hydration and carry no CSRF token into the browser — the action fetches one
- * on the server and spends it in the same call. `SubmitButton` disables
- * itself while a request is in flight, which is what stops a second stake
- * being placed by a double click; the idempotency key is the second line of
- * defence, not the first.
- */
+function QuickStakeButtons({
+  onAdd,
+  onMax,
+}: {
+  readonly onAdd: (amount: number) => void;
+  readonly onMax: () => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5 pt-1">
+      <button
+        type="button"
+        onClick={() => onAdd(1000)}
+        className="min-h-9 px-3 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+      >
+        +1,000
+      </button>
+      <button
+        type="button"
+        onClick={() => onAdd(5000)}
+        className="min-h-9 px-3 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+      >
+        +5,000
+      </button>
+      <button
+        type="button"
+        onClick={() => onAdd(10000)}
+        className="min-h-9 px-3 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+      >
+        +10,000
+      </button>
+      <button
+        type="button"
+        onClick={() => onAdd(50000)}
+        className="min-h-9 px-3 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+      >
+        +50,000
+      </button>
+      <button
+        type="button"
+        onClick={onMax}
+        className="min-h-9 px-3 py-1 text-xs font-bold rounded-lg border border-primary/30 bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
+      >
+        MAX
+      </button>
+    </div>
+  );
+}
 
 export function CoinPlayForm({
   minStake,
@@ -38,10 +75,25 @@ export function CoinPlayForm({
   readonly minStake: string;
   readonly maxStake: string;
   readonly remainingStake: string;
-  /** True when today's headroom is spent, so the two buttons refuse locally. */
   readonly exhausted: boolean;
 }) {
   const [state, action, pending] = useActionState(playCoin, CASINO_IDLE);
+  const [stake, setStake] = useState(minStake);
+
+  const handleQuickAdd = (add: number) => {
+    const cur = BigInt((stake || '0').replace(/,/g, ''));
+    const nxt = cur + BigInt(add);
+    const max = BigInt((remainingStake || '0').replace(/,/g, ''));
+    if (max > BigInt(0) && nxt > max) {
+      setStake(max.toString());
+    } else {
+      setStake(nxt.toString());
+    }
+  };
+
+  const handleMax = () => {
+    setStake(remainingStake);
+  };
 
   return (
     <form action={action} className="grid gap-4">
@@ -76,25 +128,25 @@ export function CoinPlayForm({
         <AmountInput
           id="casino-stake"
           name="stake"
-          defaultValue={minStake}
+          value={stake}
+          onChange={setStake}
           placeholder="0"
+          className="min-h-11 rounded-xl text-base"
           required
         />
+        <QuickStakeButtons onAdd={handleQuickAdd} onMax={handleMax} />
         <FieldDescription>
           한 판에 {groupDigits(minStake)} ~ {groupDigits(maxStake)} WLD를 걸 수 있어요. 오늘 남은
           베팅 한도는 {groupDigits(remainingStake)} WLD예요.
         </FieldDescription>
       </Field>
 
-      {/* One form, two intents. The face is exactly what the two controls
-          differ by and the API takes it as one field, so the button carries
-          it rather than a duplicated form doing so. */}
       <div className="flex flex-wrap gap-2">
-        <SubmitButton name="choice" value="heads" disabled={exhausted}>
-          앞면에 걸기
+        <SubmitButton name="choice" value="heads" disabled={exhausted} className="min-h-11 rounded-xl font-bold px-6">
+          🪙 앞면에 걸기
         </SubmitButton>
-        <SubmitButton name="choice" value="tails" variant="outline" disabled={exhausted}>
-          뒷면에 걸기
+        <SubmitButton name="choice" value="tails" variant="outline" disabled={exhausted} className="min-h-11 rounded-xl font-bold px-6">
+          🪙 뒷면에 걸기
         </SubmitButton>
       </div>
 
@@ -115,8 +167,6 @@ export function SelfLimitForm() {
 
   return (
     <form action={action} className="grid gap-4">
-      {/* Radix Select is not a native control, so the chosen value travels in
-          a hidden field the way a <select name> would. */}
       <input type="hidden" name="lock" value={lock} />
 
       <FieldGroup className="gap-4 sm:grid-cols-2">
@@ -126,6 +176,7 @@ export function SelfLimitForm() {
             id="casino-bet-limit"
             name="dailyBetLimit"
             placeholder="0 (무제한)"
+            className="min-h-11 rounded-xl"
             required
           />
           <FieldDescription>원할 때만 설정하세요. 0은 무제한입니다.</FieldDescription>
@@ -137,6 +188,7 @@ export function SelfLimitForm() {
             id="casino-loss-limit"
             name="dailyLossLimit"
             placeholder="0 (무제한)"
+            className="min-h-11 rounded-xl"
             required
           />
           <FieldDescription>원할 때만 설정하세요. 0은 무제한입니다.</FieldDescription>
@@ -146,7 +198,7 @@ export function SelfLimitForm() {
       <Field>
         <FieldLabel htmlFor="casino-lock">플레이 잠금 (자가 제외)</FieldLabel>
         <Select value={lock} onValueChange={setLock}>
-          <SelectTrigger id="casino-lock" className="min-h-11 w-full sm:w-64">
+          <SelectTrigger id="casino-lock" className="min-h-11 w-full sm:w-64 rounded-xl">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -163,11 +215,13 @@ export function SelfLimitForm() {
         </FieldDescription>
       </Field>
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
         <p className="text-xs text-muted-foreground">
           시스템 제한은 없으며 0으로 저장하면 해당 자가 한도를 사용하지 않습니다.
         </p>
-        <SubmitButton>한도 저장</SubmitButton>
+        <SubmitButton className="min-h-11 rounded-xl px-6 font-bold">
+          한도 저장
+        </SubmitButton>
       </div>
 
       <ActionAlert state={state} />
@@ -212,16 +266,6 @@ function DiceStage({
   );
 }
 
-/**
- * 주사위 홀짝: a stake and one of two sides.
- *
- * The same shape as `CoinPlayForm`, and deliberately so -- one stake field and
- * one button per intent, each carrying its own choice, so the form works
- * before hydration and a double click cannot place a second stake. What the
- * two forms do not share is a component: the API takes a game as well as a
- * choice, and a single form parameterised by game would put the game on the
- * wire as a field the browser fills in.
- */
 export function DiceParityForm({
   minStake,
   maxStake,
@@ -234,6 +278,22 @@ export function DiceParityForm({
   readonly exhausted: boolean;
 }) {
   const [state, action, pending] = useActionState(playDiceParity, CASINO_IDLE);
+  const [stake, setStake] = useState(minStake);
+
+  const handleQuickAdd = (add: number) => {
+    const cur = BigInt((stake || '0').replace(/,/g, ''));
+    const nxt = cur + BigInt(add);
+    const max = BigInt((remainingStake || '0').replace(/,/g, ''));
+    if (max > BigInt(0) && nxt > max) {
+      setStake(max.toString());
+    } else {
+      setStake(nxt.toString());
+    }
+  };
+
+  const handleMax = () => {
+    setStake(remainingStake);
+  };
 
   return (
     <form action={action} className="grid gap-4">
@@ -244,10 +304,13 @@ export function DiceParityForm({
         <AmountInput
           id="dice-parity-stake"
           name="stake"
-          defaultValue={minStake}
+          value={stake}
+          onChange={setStake}
           placeholder="0"
+          className="min-h-11 rounded-xl text-base"
           required
         />
+        <QuickStakeButtons onAdd={handleQuickAdd} onMax={handleMax} />
         <FieldDescription>
           한 판에 {groupDigits(minStake)} ~ {groupDigits(maxStake)} WLD를 걸 수 있어요. 오늘 남은
           베팅 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 현실 하루 보호 한도를 함께
@@ -262,6 +325,7 @@ export function DiceParityForm({
             name="choice"
             value={choice.value}
             disabled={exhausted}
+            className="min-h-11 rounded-xl font-bold px-6"
             {...(index === 0 ? {} : { variant: 'outline' as const })}
           >
             {choice.label}에 걸기
@@ -280,15 +344,6 @@ export function DiceParityForm({
   );
 }
 
-/**
- * 주사위 숫자 맞히기: a stake and one of six faces.
- *
- * Six buttons rather than a select, for the reason the coin has two: a native
- * submit carries its own value with no client state, so the form still works
- * with no JavaScript and there is no hidden field to keep in step. Each label
- * says what pressing it does, because `4` alone is a number on a screen full
- * of numbers.
- */
 export function DiceNumberForm({
   minStake,
   maxStake,
@@ -301,6 +356,22 @@ export function DiceNumberForm({
   readonly exhausted: boolean;
 }) {
   const [state, action, pending] = useActionState(playDiceNumber, CASINO_IDLE);
+  const [stake, setStake] = useState(minStake);
+
+  const handleQuickAdd = (add: number) => {
+    const cur = BigInt((stake || '0').replace(/,/g, ''));
+    const nxt = cur + BigInt(add);
+    const max = BigInt((remainingStake || '0').replace(/,/g, ''));
+    if (max > BigInt(0) && nxt > max) {
+      setStake(max.toString());
+    } else {
+      setStake(nxt.toString());
+    }
+  };
+
+  const handleMax = () => {
+    setStake(remainingStake);
+  };
 
   return (
     <form action={action} className="grid gap-4">
@@ -311,10 +382,13 @@ export function DiceNumberForm({
         <AmountInput
           id="dice-number-stake"
           name="stake"
-          defaultValue={minStake}
+          value={stake}
+          onChange={setStake}
           placeholder="0"
+          className="min-h-11 rounded-xl text-base"
           required
         />
+        <QuickStakeButtons onAdd={handleQuickAdd} onMax={handleMax} />
         <FieldDescription>
           한 판에 {groupDigits(minStake)} ~ {groupDigits(maxStake)} WLD를 걸 수 있어요. 오늘 남은
           베팅 한도는 {groupDigits(remainingStake)} WLD예요. 세 게임이 현실 하루 보호 한도를 함께
@@ -330,6 +404,7 @@ export function DiceNumberForm({
             value={face}
             variant="outline"
             disabled={exhausted}
+            className="min-h-11 rounded-xl font-bold px-5"
           >
             {face}에 걸기
           </SubmitButton>
