@@ -2,11 +2,23 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.19.286
-> Implementation/evidence sync: 2026-09-19
+> Current integrated version: v2026.09.20.292
+> Implementation/evidence sync: 2026-09-20
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Immediate execution directive — v2026.09.20.292 (2026-09-20)
+
+### NEXT WORK: start the full UI rebuild now
+- **Priority:** this is the immediate next development task. Do not defer it behind incremental visual cleanup, cosmetic patches, or isolated page restyling.
+- **Start condition:** begin by auditing every current frontend route against the real backend/API implementation and authoritative project plan. Identify missing UI coverage, stale assumptions, hidden backend-only features, permission/error/session states, and mobile defects before replacing the route.
+- **Rebuild rule:** recreate the frontend UI from the ground up. Existing UI may be referenced for required behavior and route coverage, but must not constrain the new layout/component architecture. Do not treat the work as a theme refresh.
+- **Design quality:** the result must look intentionally product-designed rather than AI-generated. Avoid repeated card-grid templates, generic dashboard composition, excessive gradients/glass, uniform placeholder sections, ornamental clutter, and copy-pasted page structures. Each surface must follow its actual user task and information hierarchy.
+- **Responsive requirement:** responsive behavior is mandatory from the first implementation pass, not a later cleanup phase. Validate mobile, tablet, laptop and desktop continuously, including 320/360/390/768/1024/1280/1440 CSS px.
+- **Backend completeness:** verify that every existing backend capability intended for users/admins has an appropriate frontend surface or an explicitly documented reason not to expose it. Frontend behavior must remain server-authoritative for auth, permissions, economy/ledger, jobs, stocks, wallet, admin operations and other protected state.
+- **Completion gate:** do not mark the rebuild complete until route-by-route functional QA, API contract checks, responsive/accessibility QA, visual regression, authenticated-session behavior and critical-flow E2E checks pass.
+- **Release sequence:** implementation branch -> exact-SHA Test deployment -> Test backend/frontend/API verification -> merge -> rebuild exact merged SHA -> zero-downtime Production promotion -> post-promotion smoke/health/session verification. Broken responsive behavior, missing backend coverage or critical regressions block Production.
 
 ## Cycle delta — v2026.09.19.286 (2026-09-19)
 
