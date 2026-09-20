@@ -1,8 +1,8 @@
 # Woldeok Moneyverse — AI Economy Controller Specification
 
-> Version: v2026.09.17.184
+> Version: v2026.09.20.292
 > Status: Living implementation-oriented planning specification
-> Date: 2026-09-17
+> Date: 2026-09-20
 > Parent specs: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
 > Korean counterpart: [AI_ECONOMY_CONTROLLER_SPEC.ko.md](AI_ECONOMY_CONTROLLER_SPEC.ko.md)
 
@@ -942,3 +942,50 @@ The scheduler feature flag is an operational gate, not proof that the feature is
 ### 34.2 Deployment-owned automatic model runtime (v2026.09.19.289)
 
 Unattended stock-scenario generation may use `AI_NEWS_AUTO_API_BASE_URL`, `AI_NEWS_AUTO_MODEL`, and optional `AI_NEWS_AUTO_API_KEY` from the deployment environment. This path is separate from the manually managed newsroom credential stored encrypted in PostgreSQL. The automatic actor UUID remains mandatory and must resolve to an operator so all context reads, batch creation and market-event publication keep the existing authorization and audit boundary. Local OpenAI-compatible inference such as Ollama may use an empty API key. Invalid non-HTTP(S) endpoints fail closed before a model call.
+
+
+## 35. Next-task revalidation gate for AI changes — v2026.09.20.290
+
+Every development task that modifies or extends AI economy control, stock-scenario automation, or adaptive tuning SHALL NOT treat the planning document as a one-time read. This specification is living and may change while implementation is in progress, so the following revalidation gates are mandatory.
+
+1. **Pre-work revalidation**: immediately before implementation, re-read the target AI requirement, linked parent/child specifications, latest user instructions, current main-branch planning documents, and observed runtime state; then freeze the scope for the current work unit.
+2. **Mid-work revalidation**: around the implementation midpoint or after completion of a major stage, re-check the latest planning documents and user instructions before starting the next implementation step. Newer instructions or plan changes supersede the older working assumption.
+3. **Before-next-task check**: after one AI work unit completes and before entering the next one, re-read the next task's requirements, priority, dependencies, safety boundaries, and test criteria, and verify that it does not conflict with or duplicate already implemented behavior.
+4. **Pre-promotion comparison**: before Test promotion and again before Production promotion, compare the implemented change against the latest planning version. Promotion SHALL NOT rely only on an older draft.
+5. **Plan-change handling**: when revalidation detects a changed plan, adjust implementation to the newer plan and update the document version/change record. Do not knowingly continue with a stale conflicting plan.
+
+Required trace fields are `planning_version_checked`, `instruction_checked_at`, `midpoint_recheck_result`, `next_task_recheck_result`, `changed_scope`, `test_evidence`, and `promotion_evidence`. AI worklogs/PRs/internal update records must state which planning version was checked so the decision path remains auditable.
+
+### 35.1 Document update record
+
+- **v2026.09.20.290**: added mandatory latest-plan/user-instruction revalidation at work start, mid-work, and immediately before entering the next AI task.
+- Required a fresh comparison before Test and Production promotion, with newer planning taking precedence when changes are discovered.
+- Added traceability fields for the planning version and midpoint/next-task revalidation evidence.
+
+
+## 36. Mandatory full AI implementation re-audit and reconstruction gate — v2026.09.20.292
+
+The **next AI development work SHALL begin with a full re-audit of every AI-related implementation created so far before any new AI feature work starts**. This gate covers, at minimum, economy-AI review/control, specialist council/runtime, profession and daily-limit automation, stock/news scenario generation and publication, admin AI status/controls, schedulers, persistence/audit records, frontend/mobile surfaces that expose AI state, deployment configuration, model/runtime health checks, and all deterministic guardrails that accept or reject AI output.
+
+This is not a documentation-only review. The worker must trace each planned AI requirement to the current implementation and to observed runtime behavior. Any area that has been modified since its original implementation, partially implemented, layered with compatibility patches, duplicated, stale, or inconsistent with the latest plan **must be redesigned from the current requirement and reconstructed as necessary rather than preserved merely because old code exists**.
+
+Mandatory next-work sequence:
+
+1. **Inventory all AI surfaces:** enumerate every AI-related plan section, code path, migration/schema object, scheduler/job, environment/config key, admin/user UI surface, test, runbook and release evidence item. Record planned / implemented / runtime-proven / partial / stale / conflicting / remove-or-rebuild status.
+2. **Re-read authority before touching code:** re-read the latest PROJECT_PLAN.md, this specification, linked AI/economy/stock/job specifications, the latest user instructions, and current main. Treat older GitHub planning text as draft material when a newer instruction conflicts.
+3. **Contract and behavior audit:** verify AI input/output schemas, deterministic validators, authorization, auditability, idempotency, scheduler behavior, model/runtime health, fail-closed behavior, rollback, Test/Production config separation, and the distinction between configured, model reached, AI reviewed, eligible, and actually applied/published.
+4. **Reconstruct changed/weak areas:** for every AI component whose requirement has changed or whose implementation is patch-on-patch, rebuild the affected module/flow around the latest contract. Remove obsolete branches, duplicate adapters and misleading fallback behavior when safe migration permits. Preserve data/history only where the latest schema/audit contract requires it.
+5. **Cross-system regression:** verify frontend, backend, database, scheduler, API, auth/session, admin, mobile/responsive surfaces and deterministic economy/market authority together. AI success must never be inferred from a feature switch or a healthy model endpoint alone.
+6. **Runtime proof on the available Test validation lane:** deploy the exact candidate SHA through the repository-authoritative Test path (currently the isolated host Test service at `test.easy-scraping.com` where available), prove backend/API/database/scheduler/AI-runtime behavior with real Test evidence, exercise success + fail-closed + rollback paths, and record exact versions/config hashes. Do not assume a removed Kubernetes namespace exists, and do not promote when any mandatory AI path remains configured but unproven.
+7. **Pre-promotion re-read:** immediately before Production promotion, re-read the latest plan and user instructions again. If requirements changed during the audit/rebuild, update the implementation and repeat affected tests before promotion.
+8. **Zero-downtime Production promotion:** only after all gates pass, promote using the established zero-downtime release path, preserve logged-in sessions, verify public/backend health after promotion, and keep rollback evidence.
+
+Required audit artifacts are an AI implementation matrix, changed-scope/rebuild list, removed/retained compatibility list, Test evidence, failure/rollback evidence, exact source SHA/config hashes, and internal + GitHub-facing update notes. A new AI task is **blocked** until this audit/reconstruction gate is completed or the remaining blocked items are explicitly documented and approved as out of scope.
+
+### 36.1 Version record
+
+- **v2026.09.20.292-01** — full AI surface inventory and latest-plan revalidation.
+- **v2026.09.20.292-02** — implementation/runtime contract audit across AI, deterministic validators, scheduler, data, UI and deployment.
+- **v2026.09.20.292-03** — reconstruct every changed, stale, partial or patch-layered AI area against the latest requirement.
+- **v2026.09.20.292-04** — full regression and fail-closed/rollback verification on Test using the exact candidate SHA.
+- **v2026.09.20.292-05** — final plan re-read, zero-downtime Production promotion only if all evidence passes, followed by Production smoke verification.
