@@ -91,7 +91,7 @@ export const CAREER_JOBS: readonly JobMeta[] = [
     icon: '💻',
     roleDescription: '알고리즘 및 시스템 구축, WLD 트랜잭션 최적화 엔진 개발',
     enRoleDescription: 'Build algorithms, systems, and optimize WLD transaction engines',
-    colorClass: 'border-blue-500/30 text-blue-400 bg-blue-500/10',
+    colorClass: 'border-blue-300 text-blue-800 bg-blue-50 dark:border-blue-800 dark:text-blue-200 dark:bg-blue-950/50',
   },
   {
     code: 'trader',
@@ -100,7 +100,7 @@ export const CAREER_JOBS: readonly JobMeta[] = [
     icon: '📈',
     roleDescription: '시장 호가 분석, 차익 거래 및 유동성 공급',
     enRoleDescription: 'Analyze market quotes, arbitrage trading, and provide liquidity',
-    colorClass: 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10',
+    colorClass: 'border-emerald-300 text-emerald-800 bg-emerald-50 dark:border-emerald-800 dark:text-emerald-200 dark:bg-emerald-950/50',
   },
   {
     code: 'entertainer',
@@ -109,7 +109,7 @@ export const CAREER_JOBS: readonly JobMeta[] = [
     icon: '🎭',
     roleDescription: '커뮤니티 콘텐츠 제작, 방송 및 소셜 이벤트 활성화',
     enRoleDescription: 'Produce community content, live streaming, and social events',
-    colorClass: 'border-purple-500/30 text-purple-400 bg-purple-500/10',
+    colorClass: 'border-purple-300 text-purple-800 bg-purple-50 dark:border-purple-800 dark:text-purple-200 dark:bg-purple-950/50',
   },
   {
     code: 'detective',
@@ -118,7 +118,7 @@ export const CAREER_JOBS: readonly JobMeta[] = [
     icon: '🔍',
     roleDescription: '이상 거래 탐지, 자금 세탁 및 시장 부정행위 조사',
     enRoleDescription: 'Detect anomalies, investigate money laundering & market abuse',
-    colorClass: 'border-amber-500/30 text-amber-400 bg-amber-500/10',
+    colorClass: 'border-amber-300 text-amber-800 bg-amber-50 dark:border-amber-800 dark:text-amber-200 dark:bg-amber-950/50',
   },
   {
     code: 'miner',
@@ -127,7 +127,7 @@ export const CAREER_JOBS: readonly JobMeta[] = [
     icon: '⛏️',
     roleDescription: '지하 희귀 광물 탐사 및 가상 원자재 채굴',
     enRoleDescription: 'Explore subterranean rare minerals and mine raw resources',
-    colorClass: 'border-orange-500/30 text-orange-400 bg-orange-500/10',
+    colorClass: 'border-orange-300 text-orange-800 bg-orange-50 dark:border-orange-800 dark:text-orange-200 dark:bg-orange-950/50',
   },
   {
     code: 'farmer',
@@ -136,7 +136,7 @@ export const CAREER_JOBS: readonly JobMeta[] = [
     icon: '🌾',
     roleDescription: '친환경 작물 재배 및 유기농 식량 생산 공급망 운영',
     enRoleDescription: 'Cultivate eco-friendly crops and operate organic food chains',
-    colorClass: 'border-green-500/30 text-green-400 bg-green-500/10',
+    colorClass: 'border-green-300 text-green-800 bg-green-50 dark:border-green-800 dark:text-green-200 dark:bg-green-950/50',
   },
   {
     code: 'artisan',
@@ -145,7 +145,7 @@ export const CAREER_JOBS: readonly JobMeta[] = [
     icon: '⚒️',
     roleDescription: '고급 장비 제작, 희귀 인테리어 소품 및 예술품 세공',
     enRoleDescription: 'Craft premium gear, rare interior props, and fine artwork',
-    colorClass: 'border-rose-500/30 text-rose-400 bg-rose-500/10',
+    colorClass: 'border-rose-300 text-rose-800 bg-rose-50 dark:border-rose-800 dark:text-rose-200 dark:bg-rose-950/50',
   },
   {
     code: 'civil_servant',
@@ -154,7 +154,7 @@ export const CAREER_JOBS: readonly JobMeta[] = [
     icon: '🏛️',
     roleDescription: '도시 공공 서비스 집행, 복지 분배 및 규제 감사',
     enRoleDescription: 'Administer civic public services, welfare grants, and audits',
-    colorClass: 'border-cyan-500/30 text-cyan-400 bg-cyan-500/10',
+    colorClass: 'border-cyan-300 text-cyan-800 bg-cyan-50 dark:border-cyan-800 dark:text-cyan-200 dark:bg-cyan-950/50',
   },
 ];
 

@@ -61,8 +61,9 @@ export default tseslint.config(
   {
     // Operator scripts. Plain Node ESM, run inside a container on the
     // deployment host rather than bundled or executed here, so the browser
-    // and Node globals they use are simply present.
-    files: ['ops/**/*.mjs'],
+    // and Node globals they use are simply present. Backup/DR verification
+    // scripts share the same Node operator runtime contract.
+    files: ['ops/**/*.mjs', 'scripts/backup/**/*.mjs'],
     languageOptions: {
       globals: { console: 'readonly', fetch: 'readonly', process: 'readonly' },
     },

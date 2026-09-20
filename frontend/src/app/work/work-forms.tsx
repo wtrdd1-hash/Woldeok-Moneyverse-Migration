@@ -39,7 +39,7 @@ export function JobSwitchButton({
 
   if (isActive) {
     return (
-      <Badge className="bg-emerald-600/20 text-emerald-400 border-emerald-500/40 px-3 py-1 font-semibold">
+      <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800 px-3 py-1 font-semibold">
         {isEn ? `Active Career (Lv.${level})` : `현재 활성 직업 (Lv.${level})`}
       </Badge>
     );
@@ -116,7 +116,7 @@ function TaskCompletionPanel({
               <span className="text-xs text-muted-foreground block">
                 {isEn ? 'WLD paid this run' : '이번 지급 WLD'}
               </span>
-              <span className="text-lg font-black text-emerald-400">
+              <span className="text-lg font-black text-emerald-700 dark:text-emerald-300">
                 {task.reward_preview === null ? '—' : `+${task.reward_preview} WLD`}
               </span>
             </div>
@@ -124,20 +124,20 @@ function TaskCompletionPanel({
               <span className="text-xs text-muted-foreground block">
                 {isEn ? 'Proficiency EXP' : '숙련도 EXP'}
               </span>
-              <span className="text-lg font-black text-amber-400">
+              <span className="text-lg font-black text-amber-700 dark:text-amber-300">
                 {task.experience_preview === null ? '—' : `+${task.experience_preview} EXP`}
               </span>
             </div>
           </div>
 
           {rewardPaused ? (
-            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
+            <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
               {isEn
                 ? 'Career work payouts are temporarily paused by the current operations policy.'
                 : '현재 운영 정책에 따라 직업 업무 보상 지급이 일시 중지되어 있습니다.'}
             </div>
           ) : (
-            <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-3 text-xs leading-5 text-emerald-300">
+            <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-xs leading-5 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
               {isEn
                 ? 'The server validates your active career, writes one idempotent ledger transaction, then records EXP. Repeating the task is allowed.'
                 : '서버가 현재 활성 직업을 확인한 뒤 멱등 원장 거래 1건과 숙련도 EXP를 기록합니다. 같은 업무는 반복 수행할 수 있습니다.'}
@@ -156,7 +156,7 @@ function TaskCompletionPanel({
 
           {pending && (
             <div
-              className="rounded-xl border border-sky-500/30 bg-sky-500/10 p-3 text-sm text-sky-200"
+              className="rounded-xl border border-sky-300 bg-sky-50 p-3 text-sm text-sky-800 dark:border-sky-800 dark:bg-sky-950/50 dark:text-sky-200"
               role="status"
               aria-live="polite"
             >
@@ -173,7 +173,7 @@ function TaskCompletionPanel({
           <ActionAlert state={state} />
 
           {state.status === 'ok' && (
-            <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm font-semibold text-emerald-300">
+            <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-sm font-semibold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
               {isEn
                 ? 'Completed. The ledger and career proficiency have been refreshed.'
                 : '완료되었습니다. 지갑 원장과 직업 숙련도가 최신 상태로 갱신되었습니다.'}

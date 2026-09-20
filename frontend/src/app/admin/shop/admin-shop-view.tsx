@@ -180,8 +180,8 @@ className="w-full rounded-2xl border border-border/50 bg-card py-2 pl-10 pr-4 te
                           className={cn(
                             'px-2.5 py-1 rounded-lg text-[10px] font-bold border transition-all',
                             editActive
-                              ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
-                              : 'bg-red-500/20 text-red-400 border-red-500/40',
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800'
+                              : 'bg-red-50 text-red-800 border-red-300 dark:bg-red-950/50 dark:text-red-200 dark:border-red-800',
                           )}
                         >
                           {editActive ? '판매 중' : '판매 중지'}
@@ -190,7 +190,7 @@ className="w-full rounded-2xl border border-border/50 bg-card py-2 pl-10 pr-4 te
                         <span
                           className={cn(
                             'inline-flex items-center gap-1 text-[11px] font-bold',
-                            item.active ? 'text-emerald-400' : 'text-red-400',
+                            item.active ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300',
                           )}
                         >
                           {item.active ? (

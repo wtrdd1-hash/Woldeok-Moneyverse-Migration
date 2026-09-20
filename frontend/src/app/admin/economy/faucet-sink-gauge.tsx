@@ -66,7 +66,7 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
             className={cn(
               'px-2.5 py-1 rounded-xl text-xs font-extrabold border flex items-center gap-1',
               ratioAtLeastHalf
-                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40'
+                ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/40'
                 : 'bg-primary/20 text-primary border-primary/40',
             )}
           >
@@ -95,11 +95,11 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
 
         {/* Today Minted (Faucet) */}
         <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4">
-          <div className="flex items-center justify-between text-blue-400 mb-1">
+          <div className="flex items-center justify-between text-blue-700 dark:text-blue-300 mb-1">
             <span className="text-xs font-semibold">오늘의 배출량 (Faucet)</span>
-            <Droplets className="size-4 text-blue-400" />
+            <Droplets className="size-4 text-blue-700 dark:text-blue-300" />
           </div>
-          <p className="text-xl font-extrabold text-blue-400">
+          <p className="text-xl font-extrabold text-blue-700 dark:text-blue-300">
             +{groupDigits(todayMinted)}{' '}
             <span className="text-xs font-bold">WLD</span>
           </p>
@@ -108,11 +108,11 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
 
         {/* Today Burned (Sink) */}
         <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-4">
-          <div className="flex items-center justify-between text-red-400 mb-1">
+          <div className="flex items-center justify-between text-red-700 dark:text-red-300 mb-1">
             <span className="text-xs font-semibold">오늘의 소각량 (Sink)</span>
-            <Flame className="size-4 text-red-400" />
+            <Flame className="size-4 text-red-700 dark:text-red-300" />
           </div>
-          <p className="text-xl font-extrabold text-red-400">
+          <p className="text-xl font-extrabold text-red-700 dark:text-red-300">
             -{groupDigits(todayBurned)}{' '}
             <span className="text-xs font-bold">WLD</span>
           </p>
@@ -126,13 +126,13 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
             {!todayNet.startsWith('-') ? (
               <ArrowUpRight className="size-4 text-primary" />
             ) : (
-              <ArrowDownRight className="size-4 text-emerald-400" />
+              <ArrowDownRight className="size-4 text-emerald-700 dark:text-emerald-300" />
             )}
           </div>
           <p
             className={cn(
               'text-xl font-extrabold',
-              !todayNet.startsWith('-') ? 'text-primary' : 'text-emerald-400',
+              !todayNet.startsWith('-') ? 'text-primary' : 'text-emerald-700 dark:text-emerald-300',
             )}
           >
             {todayNet.startsWith('-') ? groupDigits(todayNet) : `+${groupDigits(todayNet)}`}{' '}
@@ -147,10 +147,10 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
       {/* Visual Balance Bar */}
       <div className="rounded-2xl bg-surface/60 border border-border/40 p-4 mb-6">
         <div className="flex items-center justify-between text-xs font-bold mb-2">
-          <span className="text-blue-400 flex items-center gap-1">
+          <span className="text-blue-700 dark:text-blue-300 flex items-center gap-1">
             <Droplets className="size-3.5" /> 배출(Faucet) {mintedPercent.toFixed(1)}%
           </span>
-          <span className="text-red-400 flex items-center gap-1">
+          <span className="text-red-700 dark:text-red-300 flex items-center gap-1">
             <Flame className="size-3.5" /> 소각(Sink) {burnedPercent.toFixed(1)}%
           </span>
         </div>
@@ -177,8 +177,8 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
               <thead className="bg-surface/30 text-[10px] uppercase font-bold text-muted-foreground border-b border-border/20">
                 <tr>
                   <th className="px-4 py-2">일자 (KST)</th>
-                  <th className="px-4 py-2 text-blue-400">배출량 (Faucet)</th>
-                  <th className="px-4 py-2 text-red-400">소각량 (Sink)</th>
+                  <th className="px-4 py-2 text-blue-700 dark:text-blue-300">배출량 (Faucet)</th>
+                  <th className="px-4 py-2 text-red-700 dark:text-red-300">소각량 (Sink)</th>
                   <th className="px-4 py-2">순증감 (Net)</th>
                   <th className="px-4 py-2 text-right">소각률</th>
                 </tr>
@@ -187,10 +187,10 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
                 {stats.daily.slice(0, 7).map((d) => (
                   <tr key={d.stat_date} className="hover:bg-surface/40">
                     <td className="px-4 py-2 text-muted-foreground font-mono">{d.stat_date}</td>
-                    <td className="px-4 py-2 text-blue-400 font-bold">
+                    <td className="px-4 py-2 text-blue-700 dark:text-blue-300 font-bold">
                       +{groupDigits(d.faucet_amount)}
                     </td>
-                    <td className="px-4 py-2 text-red-400 font-bold">
+                    <td className="px-4 py-2 text-red-700 dark:text-red-300 font-bold">
                       -{groupDigits(d.sink_amount)}
                     </td>
                     <td className="px-4 py-2 font-bold text-foreground">
