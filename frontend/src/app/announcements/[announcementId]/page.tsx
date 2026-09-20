@@ -6,7 +6,7 @@ import { PublicAdvertisement } from '@/components/public-advertisement';
 import { publicApi } from '@/lib/api';
 import { jsonLd } from '@/lib/json-ld';
 import { formatDay } from '@/lib/money';
-import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
+import { canonicalUrl, breadcrumbJsonLd, buildOgImageUrl } from '@/lib/seo';
 
 export const revalidate = 60;
 
@@ -40,6 +40,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const notice = data.current;
   const noticeUrl = canonicalUrl(`/announcements/${notice.announcementId}`);
+  const ogImageUrl =
+    notice.imageUrl ||
+    buildOgImageUrl({
+      title: notice.title,
+      description: notice.body.slice(0, 120),
+      type: 'announcement',
+      badge: '운영 소식',
+      metric: notice.publishedAt ? formatDay(notice.publishedAt) : undefined,
+      metricLabel: '발행일',
+    });
+
   return {
     title: notice.title,
     description: notice.body.slice(0, 150),
@@ -48,13 +59,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${notice.title} — 월덕 머니버스`,
       description: notice.body.slice(0, 150),
       url: noticeUrl,
-      images: notice.imageUrl ? [{ url: notice.imageUrl }] : undefined,
+      images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     },
     twitter: {
-      card: notice.imageUrl ? 'summary_large_image' : 'summary',
+      card: 'summary_large_image',
       title: notice.title,
       description: notice.body.slice(0, 150),
-      images: notice.imageUrl ? [notice.imageUrl] : undefined,
+      images: [ogImageUrl],
     },
   };
 }

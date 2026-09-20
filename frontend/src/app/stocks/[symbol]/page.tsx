@@ -20,7 +20,7 @@ import {
   type HubHolding,
   type HubStock,
 } from '../stock-hub';
-import { canonicalUrl } from '@/lib/seo';
+import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
@@ -65,11 +65,33 @@ export async function generateMetadata({
   const { symbol } = await params;
   const stock = await selectedStock(symbol);
   if (!stock) return { title: '가상 주식', robots: { index: false, follow: false } };
+  const stockUrl = canonicalUrl(`/stocks/${encodeURIComponent(stock.symbol)}`);
+  const ogImageUrl = buildOgImageUrl({
+    title: `${stock.name} (${stock.symbol})`,
+    description: `${stock.name} 가상 시세 및 차트. ${stock.description || '월덕 머니버스 실시간 거래소.'}`,
+    type: 'stock',
+    badge: '가상 주식 시세',
+    metric: `${groupDigits(stock.current_price)} WLD`,
+    metricLabel: '현재가',
+  });
+
   return {
     title: `${stock.symbol} ${stock.name} — 가상 주식 상세`,
     description: `${stock.name}의 월덕 머니버스 가상 시세, 보유 현황, 차트와 관련 커뮤니티 토론을 한곳에서 확인하세요. 실제 금융상품이 아닙니다.`,
-    alternates: { canonical: canonicalUrl(`/stocks/${encodeURIComponent(stock.symbol)}`) },
-    robots: { index: false, follow: true },
+    alternates: { canonical: stockUrl },
+    robots: { index: true, follow: true },
+    openGraph: {
+      title: `${stock.name} (${stock.symbol}) — 가상 주식 시세`,
+      description: `${stock.name}의 실시간 가상 주식 호가 및 차트`,
+      url: stockUrl,
+      images: [{ url: ogImageUrl, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${stock.name} (${stock.symbol})`,
+      description: `${stock.name} 실시간 시세`,
+      images: [ogImageUrl],
+    },
   };
 }
 

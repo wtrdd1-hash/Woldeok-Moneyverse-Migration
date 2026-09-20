@@ -1,5 +1,24 @@
 # Update Log
 
+## v2026.09.20.313 — Player Marketplace Crafting Workbench & Item Trading Exchange (P0) System
+
+- Branch: `feat/marketplace-crafting-v2026.09.20.313`, base `5a41cba`.
+- **Authoritative P0 Crafting Workbench Architecture**:
+  - Implemented `P0_CRAFTING_RECIPES` supporting 4 core recipes (Moonlight Emerald Frame Tinting, Ancient Relic Restoration, Master Gold Nameplate Engraving, Smart Logistics 35% Turbo Boost).
+  - Material prerequisite verifier (`CraftingPanel`) comparing held inventory quantities vs required recipe items in real-time.
+  - Interactive Crafting Confirmation Dialog: Displays WLD crafting fee burning (HARD_SINK) and immediate inventory delivery with 1.2s tactile progress feedback.
+- **P0 Fixed-Price Marketplace Explorer (Market Listings) & Atomic Purchase Flow**:
+  - Fixed-price peer-to-peer marketplace browsing with real-time text search, category filters (frames, relics, business boosts, materials, nameplates), and multi-criteria sorting.
+  - Atomic Buy Dialog (`MarketListingsView`): Real-time WLD balance verification, 1% deflationary burning fee (`SINK_MARKETPLACE_FEE`), 99% seller net payout visualization, and escrow inventory transfer.
+- **Sell Listing Creation Dialog & Real-Time Fee Calculator**:
+  - Created modal interface allowing members to list inventory items at fixed prices with automated fee estimation.
+  - Implements authoritative fee formulas: Listing Fee `max(25 WLD, ceil(price * 0.001))` and Sale Fee `1%` (`ceil(price * 0.01)`), projecting seller net proceeds dynamically.
+- **Active Escrow Listings Management & Instant Cancellation (`MyListingsView`)**:
+  - Management dashboard for active seller listings with one-tap cancellation restoring items atomically from escrow back to personal vault.
+- **Comprehensive Unit Testing**:
+  - Added `src/app/marketplace/crafting-recipes.test.ts` validating fee calculation boundaries, net proceeds, and crafting recipe integrity.
+
+
 ## v2026.09.20.312 — Comprehensive Site-Wide SEO Optimization, Schema.org JSON-LD Suite, Hreflang & Discovery Directives
 
 - Branch: `feat/seo-optimization-v2026.09.20.312`, base `484cbd1`.
