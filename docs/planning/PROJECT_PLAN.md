@@ -2,12 +2,24 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.20.305
-> Implementation/evidence sync: 2026-09-20
+> Current integrated version: v2026.09.21.315
+> Implementation/evidence sync: 2026-09-21
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+## Planning directive — v2026.09.21.315 (2026-09-21)
+
+### Stock halt cost-basis auto-settlement and safe deletion
+- **Product rule:** when an individual stock enters the configured sale/trading-halt state, all remaining user holdings in that issuer are automatically settled to WLD at authoritative acquisition cost basis. This is a server settlement, not a market sell, and must not use the current/last quote.
+- **Cost-basis authority:** prefer remaining acquisition lots and their adjusted unit cost; legacy holdings may use only their authoritative stored weighted-average cost. Missing basis fails closed and blocks final halt completion rather than guessing a value. Halt settlement charges no trading fee, spread, slippage or price impact under this contract.
+- **Atomicity/idempotency:** halt blocks new trades first, freezes issuer price movement, cancels pending orders, then atomically credits WLD and reduces settled shares to zero with one idempotent command per halt/stock/account. Retries must return persisted results and cannot double-credit.
+- **Deletion despite halt history:** after all holdings reach `HALTED_SETTLED`, administrators may delete/archive the live stock even if halt records exist. Settlement/ledger/audit history remains immutable through a stock tombstone or stable ticker/name snapshot; destructive cascade deletion of financial history is forbidden. If an operational halt-history row is hidden/deleted from ordinary admin views, that deletion itself is audited and financial evidence remains retained.
+- **Admin/user UX:** admin halt confirmation exposes affected-holder count and refundable principal, settlement progress/failures and retry controls; delete remains disabled until settlement completes. Users receive a clearly labelled halt/refund receipt showing quantity and refunded principal rather than a normal sell/profit event.
+- **Detailed implementation contract:** [STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC.md](STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC.md).
+- **Execution sequence:** v2026.09.21.315-01 through -07: schema/state/basis/tombstone -> transactional settlement -> admin APIs -> responsive UI -> real-DB concurrency/failure/security -> latest-plan re-read + exact-SHA Test -> merge + exact merged SHA zero-downtime Production.
+- **Current state:** planning/documentation only. No runtime, DB, API or Production change is claimed by this planning cycle.
 
 ## URGENT / P0 planning directive — v2026.09.20.305 (2026-09-20)
 

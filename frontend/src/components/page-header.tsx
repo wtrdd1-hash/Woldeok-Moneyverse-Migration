@@ -8,13 +8,13 @@ export function PageHeader({
   readonly children?: React.ReactNode;
 }) {
   return (
-    <header className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 border-b border-border pb-5 sm:pb-7">
-      {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-      <h1 className="max-w-[22ch] text-[clamp(1.85rem,3.8vw,3.2rem)] font-black leading-[1.04] tracking-[-0.045em]">
+    <header className="grid w-full max-w-full min-w-0 grid-cols-[minmax(0,1fr)] gap-2 sm:gap-3 border-b border-border pb-4 sm:pb-7 overflow-hidden">
+      {eyebrow && <p className="eyebrow truncate">{eyebrow}</p>}
+      <h1 className="max-w-[22ch] text-[clamp(1.45rem,3.2vw,2.75rem)] font-black leading-[1.1] tracking-[-0.045em] break-words">
         {title}
       </h1>
       {children && (
-        <div className="min-w-0 max-w-3xl text-sm leading-7 text-muted-foreground [overflow-wrap:anywhere] [word-break:keep-all] sm:text-base">
+        <div className="min-w-0 max-w-3xl text-xs sm:text-sm leading-relaxed sm:leading-7 text-muted-foreground [overflow-wrap:anywhere] [word-break:keep-all]">
           {children}
         </div>
       )}

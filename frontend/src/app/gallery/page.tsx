@@ -6,6 +6,7 @@ import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 import { TranslatedText as T } from '@/components/translated-text';
+import { canonicalUrl } from '@/lib/seo';
 
 // Publication changes must be visible immediately. The public API query still
 // remains cheap and bounded; caching this page hid freshly approved photos for
@@ -15,7 +16,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: '사진 | Gallery',
   description: '월덕 머니버스 커뮤니티 사진 | Woldeok Moneyverse Community Gallery',
-  alternates: { canonical: '/gallery' },
+  alternates: { canonical: canonicalUrl('/gallery') },
 };
 
 interface Photo {

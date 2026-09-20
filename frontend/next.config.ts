@@ -98,7 +98,9 @@ const config: NextConfig = {
     // module evaluation time. Reviewed public-page advertising defaults on;
     // an explicit false removes all AdSense CSP origins for test/emergency use.
     const adsEnabled = (process.env.NEXT_PUBLIC_ADS_ENABLED || process.env.ADS_ENABLED || 'true') === 'true';
-    const base = process.env.APP_BASE_URL ?? 'http://127.0.0.1:3000';
+    const base =
+      process.env.APP_BASE_URL ||
+      (process.env.NODE_ENV === 'production' ? 'https://easy-scraping.com' : 'http://127.0.0.1:3000');
     // The lobby's socket shares this origin. `connect-src 'self'` has never
     // reliably covered ws:/wss: across browsers, so the socket origin is
     // named outright.
@@ -134,7 +136,10 @@ const config: NextConfig = {
       { key: 'cross-origin-opener-policy', value: 'same-origin' },
     ];
 
-    if (process.env.SEO_INDEXING_ENABLED !== 'true') {
+    const indexingAllowed =
+      process.env.SEO_INDEXING_ENABLED === 'true' ||
+      (process.env.NODE_ENV === 'production' && process.env.SEO_INDEXING_ENABLED !== 'false');
+    if (!indexingAllowed) {
       security.push({ key: 'x-robots-tag', value: 'noindex, nofollow' });
     }
 
