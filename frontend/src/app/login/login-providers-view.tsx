@@ -154,7 +154,7 @@ export async function LoginProvidersView({
           {/* Registration Notice */}
           <div className="mt-6 border-t border-border/60 pt-5 text-center text-xs text-muted-foreground">
             아직 월덕 머니버스 회원이 아니신가요?{' '}
-            <Link href="/login" className="font-semibold text-primary hover:underline">
+            <Link href="/register" className="font-semibold text-primary hover:underline">
               계정 만들기
             </Link>
           </div>
