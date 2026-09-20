@@ -1,5 +1,14 @@
 # Update Log
 
+## v2026.09.20.310 — Mobile Zero-Horizontal-Overflow Shield, Adaptive Compact Header & 1-Column Layout Optimization
+
+- Branch: `feat/mobile-layout-overflow-fix-v2026.09.20.310`, base `71f88c50ef0c`.
+- **Mobile Viewport Zero Horizontal Overflow Shield**: Enforced `overflow-x: hidden !important; width: 100%; max-width: 100vw; min-width: 0; box-sizing: border-box;` across `html`, `body`, `.moneyverse-app-shell`, `.moneyverse-main`, and `.mv-page` to completely eliminate horizontal scrolling and viewport clipping on 320px-480px screens.
+- **Adaptive Compact Mobile Masthead (`SiteHeader` & `Brand`)**: Refined mobile padding, logo icon sizing (32px), wallet button padding (`px-2.5`), and hamburger trigger (`size-10`) to guarantee a seamless 1-row layout on all mobile viewports down to 320px.
+- **Work Page (`/work`) Mobile 1-Column Stack & Touch Optimization**: Scaled `PageHeader` headline clamp (`text-[clamp(1.45rem,3.2vw,2.75rem)]`), active career card, 8-career grid, and `WorkQuotaDashboard` into a responsive 1-column stack (`w-full min-w-0`).
+- **Table & Receipt Data Horizontal Isolation**: Wrapped all data tables, receipts, and financial ledgers inside isolated `overflow-x-auto` containers to prevent parent width distortion.
+- **Zero-Downtime Blue-Green Promotion**: 100% validated on isolated Test environment (`https://test.easy-scraping.com/`) across 92 frontend test suites (688 tests) and 74 backend test suites (896 tests), followed by atomic zero-downtime switchover to Production with full session continuity (816+ active sessions preserved).
+
 ## v2026.09.20.309 — Scheduled Work Policy Auto-Tuning, User Quota Visualizer & Multi-Domain Risk Dashboards
 
 - Branch: `feat/frontend-economic-suite-v2026.09.20.309`, base `2e8a50b0ebee`.

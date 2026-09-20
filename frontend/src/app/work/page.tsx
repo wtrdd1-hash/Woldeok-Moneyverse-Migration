@@ -82,7 +82,7 @@ export default async function WorkPage() {
   const quotaBlock = workQuotaBlock(summary);
 
   return (
-    <div data-page="work" className="mv-page mv-page--gameplay grid gap-8 pb-12">
+    <div data-page="work" className="mv-page mv-page--gameplay grid w-full max-w-full min-w-0 gap-6 sm:gap-8 pb-12 overflow-x-hidden">
       <LiveRefresh everyMs={10_000} />
       <PageHeader
         eyebrow="CAREER & WORK 2.0"
@@ -94,28 +94,28 @@ export default async function WorkPage() {
       </PageHeader>
 
       {/* 1. 활성 직업 및 숙련도 게이지 섹션 */}
-      <section aria-labelledby="active-job-title" className="grid gap-4">
-        <h2 id="active-job-title" className="text-xl font-bold flex items-center gap-2">
+      <section aria-labelledby="active-job-title" className="grid w-full max-w-full min-w-0 gap-3 sm:gap-4 overflow-hidden">
+        <h2 id="active-job-title" className="text-lg sm:text-xl font-bold flex items-center gap-2">
           <span>🎯</span> {isEn ? 'Active Career & Proficiency' : '현재 활성 직업 및 숙련도'}
         </h2>
 
-        <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-card via-card/80 to-primary/5 p-6 shadow-xl relative overflow-hidden backdrop-blur-sm">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-3xl shadow-inner">
+        <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-card via-card/80 to-primary/5 p-4 sm:p-6 shadow-xl relative overflow-hidden backdrop-blur-sm w-full min-w-0">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 min-w-0">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-2xl sm:text-3xl shadow-inner shrink-0">
                 {activeMeta?.icon ?? '💼'}
               </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-black tracking-tight">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-lg sm:text-2xl font-black tracking-tight truncate">
                     {activeMeta?.name ??
                       (isEn ? 'None selected (Choose a career)' : '미선택 (전직을 선택하세요)')}
                   </span>
-                  <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800 text-sm font-semibold">
+                  <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800 text-xs sm:text-sm font-semibold shrink-0">
                     Lv.{activeJob?.level ?? 1}
                   </Badge>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">
                   {activeMeta?.roleDescription ??
                     (isEn
                       ? 'Select one of the 8 professional careers below to start work.'
@@ -124,7 +124,7 @@ export default async function WorkPage() {
               </div>
             </div>
 
-            <div className="w-full md:w-80 grid gap-2">
+            <div className="w-full md:w-80 min-w-0 grid gap-1.5 sm:gap-2">
               <div className="flex justify-between text-xs font-semibold">
                 <span className="text-muted-foreground">
                   {isEn ? 'Proficiency EXP' : '숙련도 경험치'}
@@ -133,13 +133,13 @@ export default async function WorkPage() {
                   {currentExp.toLocaleString()} / {nextExp.toLocaleString()} EXP ({expPercent}%)
                 </span>
               </div>
-              <div className="w-full h-3.5 bg-secondary/80 rounded-full overflow-hidden p-0.5 border border-border/50">
+              <div className="w-full h-3 sm:h-3.5 bg-secondary/80 rounded-full overflow-hidden p-0.5 border border-border/50">
                 <div
                   className="h-full bg-gradient-to-r from-primary to-emerald-400 rounded-full transition-all duration-300 ease-out shadow-sm"
                   style={{ width: `${expPercent}%` }}
                 />
               </div>
-              <p className="text-[11px] text-muted-foreground text-right">
+              <p className="text-[10px] sm:text-[11px] text-muted-foreground text-right">
                 {isEn
                   ? `${(nextExp - currentExp).toLocaleString()} EXP needed to Lv.${(activeJob?.level ?? 1) + 1}`
                   : `다음 레벨(Lv.${(activeJob?.level ?? 1) + 1})까지 ${(nextExp - currentExp).toLocaleString()} EXP 필요`}
@@ -162,20 +162,20 @@ export default async function WorkPage() {
       )}
 
       {/* 2. 8대 직업 탐색 및 즉시 전직 카드 그리드 */}
-      <section aria-labelledby="careers-grid-title" className="grid gap-4">
+      <section aria-labelledby="careers-grid-title" className="grid w-full max-w-full min-w-0 gap-3 sm:gap-4 overflow-hidden">
         <div>
-          <h2 id="careers-grid-title" className="text-xl font-bold flex items-center gap-2">
+          <h2 id="careers-grid-title" className="text-lg sm:text-xl font-bold flex items-center gap-2">
             <span>🏛️</span>{' '}
             {isEn ? 'Available Careers (Zero-Fee Instant Switch)' : '8대 전문 직업군 탐색 및 전직'}
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
             {isEn
               ? 'Career switches are instant and free. Each career keeps its own proficiency EXP even after you switch away.'
               : '전직은 수수료와 대기시간 없이 즉시 적용되며, 다른 직업으로 옮겨도 각 직업에서 쌓은 숙련도 EXP는 그대로 보존됩니다.'}
           </p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-4 w-full min-w-0">
           {CAREER_JOBS.map((job) => {
             const mastery = allJobsMap.get(job.code);
             const level = mastery?.level ?? 1;
@@ -196,7 +196,7 @@ export default async function WorkPage() {
             return (
               <Card
                 key={job.code}
-                className={`transition-all duration-200 hover:shadow-lg relative flex flex-col justify-between ${
+                className={`transition-all duration-200 hover:shadow-lg relative flex flex-col justify-between w-full min-w-0 overflow-hidden ${
                   isActive
                     ? 'border-primary ring-1 ring-primary/50 bg-primary/[0.03]'
                     : 'border-border/60 hover:border-border'
@@ -212,16 +212,16 @@ export default async function WorkPage() {
                       Lv.{level}
                     </Badge>
                   </div>
-                  <CardTitle className="text-base mt-2">{jobDisplayName}</CardTitle>
+                  <CardTitle className="text-base mt-2 truncate">{jobDisplayName}</CardTitle>
                   <CardDescription className="text-xs line-clamp-2 min-h-[32px]">
                     {jobDisplayDesc}
                   </CardDescription>
                 </CardHeader>
 
-                <CardContent className="pb-3 text-xs grid gap-2">
+                <CardContent className="pb-3 text-xs grid gap-2 min-w-0">
                   <div className="flex justify-between gap-3 text-muted-foreground">
                     <span>{isEn ? 'Proficiency' : '직업 숙련도'}</span>
-                    <span className="font-mono font-medium text-foreground">
+                    <span className="font-mono font-medium text-foreground truncate">
                       {exp.toLocaleString()} / {nextLevelExp.toLocaleString()} EXP
                     </span>
                   </div>
@@ -250,12 +250,12 @@ export default async function WorkPage() {
       </section>
 
       {/* 3. Repeatable career task list */}
-      <section aria-labelledby="tasks-title" className="grid gap-4">
+      <section aria-labelledby="tasks-title" className="grid w-full max-w-full min-w-0 gap-3 sm:gap-4 overflow-hidden">
         <div>
-          <h2 id="tasks-title" className="text-xl font-bold flex items-center gap-2">
+          <h2 id="tasks-title" className="text-lg sm:text-xl font-bold flex items-center gap-2">
             <span>📋</span> {isEn ? 'Career Work' : '직업 업무'}
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
             {isEn
               ? 'Only work for your active career can be performed. Tasks may be repeated, and each completion pays the server-validated WLD and proficiency EXP shown below.'
               : '현재 활성 직업의 업무만 수행할 수 있습니다. 같은 업무는 반복 가능하며, 아래에 표시된 WLD와 숙련도 EXP가 서버 검증 후 매회 즉시 지급됩니다.'}
@@ -271,11 +271,11 @@ export default async function WorkPage() {
 
       {/* 4. 진행 중인 작업 */}
       {open.length > 0 && (
-        <section aria-labelledby="open-title" className="grid gap-3">
-          <h2 id="open-title" className="text-lg font-semibold">
+        <section aria-labelledby="open-title" className="grid w-full max-w-full min-w-0 gap-3 overflow-hidden">
+          <h2 id="open-title" className="text-base sm:text-lg font-semibold">
             {isEn ? 'Active In-Progress Tasks' : '기존 진행 중인 작업'}
           </h2>
-          <div className="grid gap-3">
+          <div className="grid gap-3 w-full min-w-0">
             {open.map((assignment) => {
               const wait = secondsUntilSubmittable(
                 assignment.assigned_at,
@@ -284,21 +284,21 @@ export default async function WorkPage() {
               );
               const expired = hasExpired(assignment.expires_at, now);
               return (
-                <Card key={assignment.assignment_id}>
+                <Card key={assignment.assignment_id} className="w-full min-w-0 overflow-hidden">
                   <CardHeader>
                     <CardDescription>{jobLabel(assignment.job_type, locale)}</CardDescription>
-                    <CardTitle className="flex flex-wrap items-center gap-2">
-                      {assignment.name}
+                    <CardTitle className="flex flex-wrap items-center gap-2 text-base sm:text-lg">
+                      <span className="truncate">{assignment.name}</span>
                       <Badge variant="secondary">{statusLabel(assignment.status, locale)}</Badge>
                     </CardTitle>
-                    <CardDescription>
+                    <CardDescription className="text-xs sm:text-sm">
                       {isEn
                         ? `Assigned at ${formatMoment(assignment.assigned_at)}. Due by ${formatMoment(assignment.expires_at)}.`
                         : `${formatMoment(assignment.assigned_at)}에 맡았어요. 기한은 ${formatMoment(assignment.expires_at)}까지예요.`}
                     </CardDescription>
                   </CardHeader>
                   {expired ? (
-                    <CardContent className="text-sm text-muted-foreground">
+                    <CardContent className="text-xs sm:text-sm text-muted-foreground">
                       <p>
                         {isEn
                           ? 'Expired and cannot be submitted. You may take this task again.'
@@ -335,28 +335,28 @@ export default async function WorkPage() {
 
       {/* 5. 최근 수령 영수증 */}
       {paid.length > 0 && (
-        <section aria-labelledby="receipts-title" className="grid gap-3">
-          <h2 id="receipts-title" className="text-lg font-semibold">
+        <section aria-labelledby="receipts-title" className="grid w-full max-w-full min-w-0 gap-3 overflow-hidden">
+          <h2 id="receipts-title" className="text-base sm:text-lg font-semibold">
             {isEn ? 'Recent Rewards Claimed' : '최근 수령한 보상'}
           </h2>
           <TruncatedList
             title={isEn ? 'Recent Rewards Claimed' : '최근 수령한 보상'}
             visibleCount={RECEIPTS_ON_WORK}
-            listClassName="grid gap-2"
+            listClassName="grid gap-2 w-full min-w-0"
             rows={paid.map((receipt) => (
               <div
                 key={receipt.receipt_id}
-                className="flex items-center justify-between rounded-xl border border-border/50 bg-card/60 p-4 text-sm"
+                className="flex items-center justify-between rounded-xl border border-border/50 bg-card/60 p-3 sm:p-4 text-xs sm:text-sm w-full min-w-0 overflow-hidden"
               >
-                <div>
-                  <p className="font-semibold">{receipt.name}</p>
-                  <p className="text-xs text-muted-foreground">
+                <div className="min-w-0 truncate mr-2">
+                  <p className="font-semibold truncate">{receipt.name}</p>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground">
                     {formatMoment(receipt.created_at)}
                   </p>
                 </div>
-                <div className="text-right font-mono">
+                <div className="text-right font-mono shrink-0">
                   <span className="font-bold text-emerald-700 dark:text-emerald-300">+{receipt.reward_amount} WLD</span>
-                  <span className="text-xs text-muted-foreground ml-2">
+                  <span className="text-[11px] sm:text-xs text-muted-foreground ml-1.5 sm:ml-2">
                     +{receipt.experience_amount} EXP
                   </span>
                 </div>

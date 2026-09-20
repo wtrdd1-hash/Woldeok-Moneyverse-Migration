@@ -79,24 +79,24 @@ export function CareerTasksBoard({
   const displayTasks = boardOrder(filterWorkTasks(scopedTasks, searchQuery), activeJobType);
 
   return (
-    <div className="grid gap-4">
-      <div className="flex flex-col gap-3 bg-card/60 border border-border/60 rounded-xl p-3 backdrop-blur-sm shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
+    <div className="grid gap-4 w-full max-w-full min-w-0 overflow-hidden">
+      <div className="flex flex-col gap-3 bg-card/60 border border-border/60 rounded-xl p-3 backdrop-blur-sm shadow-sm w-full min-w-0 overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+          <div className="flex items-center gap-1.5 min-[400px]:gap-2 flex-wrap min-w-0">
             {activeJobType && (
               <Button
                 size="sm"
                 variant={filter === 'my_job' ? 'default' : 'outline'}
                 onClick={() => setFilter('my_job')}
-                className={`font-semibold text-xs transition-all ${
+                className={`font-semibold text-xs transition-all h-8 sm:h-9 py-1 px-2.5 ${
                   filter === 'my_job' ? 'bg-amber-700 hover:bg-amber-800 text-white shadow-sm' : ''
                 }`}
               >
                 <span>{activeMeta?.icon ?? '💼'}</span>
-                <span className="ml-1.5">
-                  {isEn ? `My Career: ${activeJobName}` : `내 직업 전용 (${activeJobName})`}
+                <span className="ml-1.5 truncate max-w-[140px] sm:max-w-none">
+                  {isEn ? `My Career: ${activeJobName}` : `내 직업 (${activeJobName})`}
                 </span>
-                <Badge className="ml-2 border-0 bg-amber-950/15 px-1.5 py-0 text-[10px] text-amber-950 dark:bg-black/25 dark:text-white">
+                <Badge className="ml-1.5 border-0 bg-amber-950/15 px-1.5 py-0 text-[10px] text-amber-950 dark:bg-black/25 dark:text-white">
                   {myTasks.length}
                 </Badge>
               </Button>
@@ -106,33 +106,33 @@ export function CareerTasksBoard({
               size="sm"
               variant={filter === 'all' ? 'default' : 'outline'}
               onClick={() => setFilter('all')}
-              className="font-semibold text-xs"
+              className="font-semibold text-xs h-8 sm:h-9 py-1 px-2.5"
             >
               <span>🌐</span>
               <span className="ml-1.5">
                 {isEn ? 'Explore Other Careers' : '다른 직업 둘러보기'}
               </span>
-              <Badge variant="secondary" className="ml-2 text-[10px] px-1.5 py-0">
+              <Badge variant="secondary" className="ml-1.5 text-[10px] px-1.5 py-0">
                 {tasks.length}
               </Badge>
             </Button>
           </div>
 
           {activeJobType && (
-            <div className="flex items-center gap-2 text-xs">
-              <Badge variant="secondary" className="flex items-center gap-1.5 py-1 px-2.5">
+            <div className="flex items-center gap-2 text-xs min-w-0">
+              <Badge variant="secondary" className="flex items-center gap-1.5 py-1 px-2.5 max-w-full truncate">
                 <span className="text-emerald-700 dark:text-emerald-300 font-mono font-bold">
-                  {myCompletedToday}회 완료 · 반복 가능
+                  {myCompletedToday}회 완료
                 </span>
                 <span className="text-muted-foreground">
-                  {isEn ? 'Career work today' : '오늘의 직업 업무'}
+                  · {isEn ? 'Today' : '오늘'}
                 </span>
               </Badge>
             </div>
           )}
         </div>
 
-        <label className="grid gap-1 text-xs text-muted-foreground">
+        <label className="grid gap-1 text-xs text-muted-foreground min-w-0">
           <span>{isEn ? 'Find a task' : '업무 검색'}</span>
           <input
             type="search"
@@ -141,7 +141,7 @@ export function CareerTasksBoard({
             placeholder={
               isEn ? 'Search by task, description, or career…' : '업무명, 설명, 직업으로 검색…'
             }
-            className="h-9 rounded-md border border-input bg-background px-3 text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-9 w-full rounded-md border border-input bg-background px-3 text-xs sm:text-sm text-foreground outline-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
           />
         </label>
       </div>
@@ -159,7 +159,7 @@ export function CareerTasksBoard({
           }
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full min-w-0">
           {displayTasks.map((task) => {
             const isActiveJob = activeJobType === task.job_type;
             const meta = jobMeta(task.job_type, locale);
@@ -168,7 +168,7 @@ export function CareerTasksBoard({
             return (
               <Card
                 key={task.task_id}
-                className={`flex flex-col justify-between transition-all ${
+                className={`flex flex-col justify-between transition-all w-full min-w-0 overflow-hidden ${
                   isActiveJob
                     ? 'border-amber-500/50 dark:border-amber-500/30 bg-card shadow-md ring-1 ring-amber-500/20'
                     : 'opacity-70 bg-muted/20 border-dashed hover:opacity-100 hover:border-solid transition-opacity'
@@ -176,7 +176,7 @@ export function CareerTasksBoard({
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <Badge
                         variant={isActiveJob ? 'default' : 'outline'}
                         className={`text-xs ${
@@ -198,19 +198,19 @@ export function CareerTasksBoard({
                         </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 shrink-0">
                       <Badge variant="secondary" className="text-xs">
                         {difficultyLabel(task.difficulty, locale)}
                       </Badge>
                     </div>
                   </div>
                   <CardTitle className="text-base mt-2 flex items-center justify-between">
-                    <span>{task.name}</span>
+                    <span className="truncate">{task.name}</span>
                   </CardTitle>
-                  <CardDescription className="text-xs">{task.description}</CardDescription>
+                  <CardDescription className="text-xs line-clamp-2">{task.description}</CardDescription>
                 </CardHeader>
 
-                <CardContent className="grid gap-2 text-xs py-2">
+                <CardContent className="grid gap-2 text-xs py-2 min-w-0">
                   <div className="rounded-lg bg-muted/50 p-2.5 grid grid-cols-2 gap-2 text-center">
                     <div>
                       <span className="text-muted-foreground block text-[11px]">
@@ -229,13 +229,13 @@ export function CareerTasksBoard({
                       </span>
                     </div>
                   </div>
-                  <div className="flex justify-between text-muted-foreground text-[11px] px-1">
-                    <span>
+                  <div className="flex justify-between text-muted-foreground text-[11px] px-1 min-w-0">
+                    <span className="truncate">
                       {isEn
                         ? `Duration: ${durationLabel(task.minimum_duration_seconds, locale)}`
-                        : `소요 시간: ${durationLabel(task.minimum_duration_seconds, locale)}`}
+                        : `소요: ${durationLabel(task.minimum_duration_seconds, locale)}`}
                     </span>
-                    <span className="text-emerald-700 dark:text-emerald-300 font-semibold">
+                    <span className="text-emerald-700 dark:text-emerald-300 font-semibold shrink-0">
                       {dailyQuotaLabel(task.taken_today, task.daily_limit, isEn)}
                     </span>
                   </div>

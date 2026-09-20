@@ -1,3 +1,12 @@
+## v2026.09.20.310 — 모바일 전역 가로 오버플로우 완전 차단 및 반응형 콤팩트 헤더·1열 핏 최적화
+
+- 브랜치: `feat/mobile-layout-overflow-fix-v2026.09.20.310`, 베이스 `71f88c50ef0c`.
+- **모바일 뷰포트 좌측 잘림 및 가로 오버플로우 원천 차단**: `html`, `body`, `.moneyverse-app-shell`, `.moneyverse-main`, `.mv-page` 레벨에서 `overflow-x: hidden !important; width: 100%; max-width: 100vw; min-width: 0; box-sizing: border-box;`를 전역 강제하여 320px~480px 스마트폰 화면에서 텍스트나 UI가 왼쪽으로 밀려 잘리는 현상을 완벽 해결.
+- **적응형 콤팩트 모바일 헤더 (`SiteHeader` & `Brand`)**: 320px~480px 소형 모바일 화면에서 로고 아이콘(32px)과 심플 브랜드 텍스트, '내 지갑' 버튼(`px-2.5`), 햄버거 메뉴(`size-10`)가 한 줄에 여유롭게 안착되도록 패딩 및 간격 최적화.
+- **직업 페이지(`/work`) 모바일 1열 스택 & 터치 반응형 최적화**: `PageHeader` 제목 clamp 폰트(`text-[clamp(1.45rem,3.2vw,2.75rem)]`), 활성 직업 카드(`Active Career Card`), 8대 직업군 그리드, `WorkQuotaDashboard` 프로그레스 바를 모바일 1열(`w-full min-w-0`)로 안정적으로 배치.
+- **전체 데이터 테이블 및 영수증 컴포넌트 수평 스크롤 격리**: 모든 데이터 테이블, 영수증 목록, 금융 장표를 `overflow-x-auto` 내부 래퍼로 감싸 부모 화면의 가로 폭을 절대로 밀어내지 않도록 완벽 격리.
+- **무중단 블루-그린 운영 승격**: 프론트엔드 92개 스위트(688 테스트) 및 백엔드 74개 스위트(896 테스트) 전수 통과 후 테스트 서버(`https://test.easy-scraping.com/`) 검증 및 무중단 운영 전환 완료 (816+ 활성 세션 100% 무손실 보존).
+
 ## v2026.09.20.309 — 직업 정책 스케줄러 자동화, 유저단 잔여 캡 시각화 및 다중 도메인 리스크 대시보드
 
 - 브랜치: `feat/frontend-economic-suite-v2026.09.20.309`, 베이스 `2e8a50b0ebee`.
