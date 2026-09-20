@@ -6,6 +6,7 @@
 
 ## 기획
 - [상시 갱신 프로젝트 계획](planning/PROJECT_PLAN.ko.md)
+- [관리자 국고 관리 상세 기획서](planning/ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md) / [English](planning/ADMIN_TREASURY_MANAGEMENT_SPEC.md)
 - [제품 성장 및 리텐션 계획](planning/PRODUCT_GROWTH_PLAN.ko.md)
 - [상세 제품 설계 명세](planning/PRODUCT_DESIGN_SPEC.ko.md)
 - [기본 제한 정책](planning/DEFAULT_LIMIT_POLICY.ko.md)
