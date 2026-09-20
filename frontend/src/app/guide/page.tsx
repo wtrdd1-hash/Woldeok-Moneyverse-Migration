@@ -28,12 +28,14 @@ import {
   QUICK_START_STEPS,
   QUICK_START_STEPS_EN,
 } from './guide';
+import { canonicalUrl, breadcrumbJsonLd, faqPageJsonLd } from '@/lib/seo';
+import { jsonLd } from '@/lib/json-ld';
 
 export const metadata: Metadata = {
   title: '시작 가이드 (Getting Started Guide)',
   description:
     '월덕 머니버스를 처음 이용하는 분을 위한 가상경제 입문서. 5개 전문 직업, 일일 퀘스트, 은행 복리 예금과 국채, 가상 사업체 창업 및 주식 거래소, 아이템 상점과 카지노 이용 방법을 안내합니다.',
-  alternates: { canonical: '/guide' },
+  alternates: { canonical: canonicalUrl('/guide') },
 };
 
 const PILLAR_ICONS = {
@@ -45,8 +47,30 @@ const PILLAR_ICONS = {
 } as const;
 
 export default function GuidePage() {
+  const guideBreadcrumb = breadcrumbJsonLd([
+    { name: '홈', path: '/' },
+    { name: '시작 가이드', path: '/guide' },
+  ]);
+
+  const guideFaqSchema = faqPageJsonLd(
+    GUIDE_FAQS.map((faq) => ({
+      question: faq.question,
+      answer: faq.answer,
+    })),
+  );
+
   return (
     <div data-page="guide" className="mv-page mv-page--utility mx-auto max-w-5xl space-y-16 py-6 sm:py-10">
+      {/* 구조화 데이터 (Schema.org Breadcrumb & FAQPage) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(guideBreadcrumb) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(guideFaqSchema) }}
+      />
+
       {/* 1. Hero & Quick Start */}
       <section className="relative overflow-hidden rounded-[28px] border bg-gradient-to-br from-primary/10 via-background to-accent/20 p-6 sm:p-12 shadow-sm">
         <div className="relative z-10 max-w-3xl space-y-4">

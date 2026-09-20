@@ -12,6 +12,7 @@ import { formatMoment } from '@/lib/money';
 import { OVERALL_HEADLINE, STATUS_LABEL, overallState } from '@/lib/status';
 import { asStatusState } from '@/lib/status';
 import type { StatusState } from '@/lib/status';
+import { canonicalUrl } from '@/lib/seo';
 
 /**
  * Thirty seconds, matching the collector's own interval: a page cached longer
@@ -22,7 +23,7 @@ export const revalidate = 30;
 export const metadata: Metadata = {
   title: '서비스 상태',
   description: '월덕 머니버스가 기록한 서비스 상태',
-  alternates: { canonical: '/status' },
+  alternates: { canonical: canonicalUrl('/status') },
   // The service monitor may expose transient operational information. It is
   // useful to visitors but is not durable public content for search results.
   robots: { index: false, follow: false },

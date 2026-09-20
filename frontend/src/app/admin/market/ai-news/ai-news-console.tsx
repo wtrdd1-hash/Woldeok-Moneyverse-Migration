@@ -21,7 +21,7 @@ import type {
   AiNewsSettings,
 } from '../../types';
 import { STRENGTHS, strengthLabel } from '../strengths';
-import { decideAiNewsScenario, generateAiNews, saveAiNewsSettings } from './actions';
+import { autoGenerateAiNews, decideAiNewsScenario, generateAiNews, saveAiNewsSettings } from './actions';
 import { aiNewsSentence } from './sentences';
 
 /** Why the model field has no list beside it, in a sentence an operator can act on. */
@@ -118,9 +118,7 @@ export function AiNewsSettingsForm({
             <StepUpField id="ai-news-settings" undo="같은 화면에서 이전 주소·모델로 다시 저장하거나 새 키를 넣습니다." />
           </div>
           <div className="sm:col-span-2 flex items-center gap-3">
-            <SubmitButton>연결 정보 저장</SubmitButton>
-          </div>
-          <div className="sm:col-span-2">
+            <SubmitButton>설정 저장</SubmitButton>
             <ActionAlert state={state} />
           </div>
         </form>
@@ -129,8 +127,70 @@ export function AiNewsSettingsForm({
   );
 }
 
-/** Seconds as a reader says them, so the figure beside a wait means something. */
-function elapsed(seconds: number): string {
+/**
+ * 1-Click 자동 AI 주식 뉴스 생성 및 즉시 발행 카드
+ */
+export function AiNewsAutoGenerateCard({
+  ready,
+}: {
+  readonly ready: boolean;
+}) {
+  const [state, action] = useActionState(autoGenerateAiNews, IDLE);
+  const [publishImmediate, setPublishImmediate] = useState(true);
+
+  return (
+    <Card className="border-primary/30 bg-primary/5">
+      <CardHeader>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <span className="text-lg">🤖</span> 활성 상장 주식 기반 AI 뉴스 자동 생성 및 즉시 발행
+          </CardTitle>
+          <Badge variant="outline" className="border-primary/40 text-primary font-mono text-xs">
+            Auto Stock Analyzer &amp; Generator
+          </Badge>
+        </div>
+        <CardDescription>
+          현재 DB에 상장 및 활성화된 가상 주식(WDT, WDM, WDB, CHIMU314, FNAK 등)의 최근 시세·변동률을 자동으로 조회하고,
+          AI 모델이 시장 상황에 맞는 시나리오를 자동 구성하여 즉시 시장에 발행합니다.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form action={action} className="grid gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-4 p-3.5 rounded-lg border bg-background">
+            <label className="flex items-center gap-2.5 cursor-pointer text-sm">
+              <input
+                type="checkbox"
+                name="publishImmediate"
+                value="true"
+                checked={publishImmediate}
+                onChange={(e) => setPublishImmediate(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <span className="font-semibold text-foreground">생성 즉시 시장에 뉴스 발행 (시세 변동 즉시 반영)</span>
+            </label>
+            <span className="text-xs text-muted-foreground">
+              {publishImmediate ? '선정된 1위 시나리오가 즉시 시장에 반영됩니다.' : '시나리오 5개만 생성되고 검토 후 수동 발행합니다.'}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <SubmitButton disabled={!ready} variant="default" className="font-semibold shadow-sm">
+              ⚡ 1-클릭 AI 주식 뉴스 자동 생성{publishImmediate ? ' & 즉시 발행' : ''}
+            </SubmitButton>
+            {!ready && (
+              <span className="text-xs text-destructive">
+                위 모델 연결 카드에서 API 키를 먼저 저장해 주세요.
+              </span>
+            )}
+            <ActionAlert state={state} />
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+function duration(seconds: number): string {
   if (seconds < 60) return `${seconds}초`;
   const minutes = Math.floor(seconds / 60);
   const rest = seconds % 60;
@@ -172,10 +232,6 @@ export function AiNewsGenerateForm({
         <form action={action} className="grid gap-4">
           <Field>
             <FieldLabel htmlFor="ai-prompt">원하는 방향 (선택)</FieldLabel>
-            {/* Deliberately empty on every load. Prefilling it with the last
-                wish meant a refresh put words back in the operator's mouth,
-                and the next batch quietly served a request they had already
-                had answered. What was asked last time is below, as text. */}
             <Textarea
               id="ai-prompt"
               name="prompt"
@@ -185,35 +241,31 @@ export function AiNewsGenerateForm({
             />
             <FieldDescription>비워 두면 지금 흐름을 그대로 이어 갑니다. 적으면 그 방향으로, 단 흐름과 어긋나지 않게 만들어요.</FieldDescription>
             {batch?.operator_prompt && (
-              <FieldDescription className="[word-break:keep-all]">
-                지난 요청: “{batch.operator_prompt}”
-              </FieldDescription>
+              <p className="mt-1 text-xs text-muted-foreground">
+                이전 요청: &ldquo;{batch.operator_prompt}&rdquo;
+              </p>
             )}
           </Field>
+
           <div className="flex flex-wrap items-center gap-3">
-            <SubmitButton disabled={!ready || running}>
-              {running ? '만드는 중…' : batch ? '다시 5개 만들기' : '시나리오 5개 만들기'}
+            <SubmitButton disabled={running || !ready}>
+              {running ? '소재 만드는 중…' : '새 소재 다섯 개 제안받기'}
             </SubmitButton>
-            <span className="text-xs text-muted-foreground">
-              {!ready
-                ? '먼저 위에서 키를 저장해 주세요.'
-                : running
-                  ? '창을 닫아도 계속 만들어져요. 돌아와서 새로고침하면 결과가 있습니다.'
-                  : '모델이 답하는 데 보통 30초에서 2분 걸려요.'}
-            </span>
+            {!ready && (
+              <span className="text-xs text-muted-foreground">
+                모델 연결에 키를 넣어야 만들 수 있어요.
+              </span>
+            )}
+            {running && (
+              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="inline-block size-2 animate-ping rounded-full bg-primary" />
+                모델에 물어보고 있어요 ({duration(runningFor)}째)
+              </span>
+            )}
           </div>
 
-          {running && (
-            <div className="rounded-[10px] border border-primary/40 bg-primary/5 px-3 py-2 text-sm">
-              <p className="font-bold">모델이 다섯 개를 쓰고 있어요 · {elapsed(runningFor)} 경과</p>
-              <p className="text-xs text-muted-foreground">
-                보통 30초~2분, 최대 10분까지 기다립니다. 입력값 보호를 위해 자동 새로고침하지 않습니다.
-              </p>
-            </div>
-          )}
-
           {failed && (
-            <div className="rounded-[10px] border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm">
+            <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
               <p className="font-bold">{aiNewsSentence(run.failure_code, '시나리오를 만들지 못했어요.')}</p>
               {run.failure_detail !== '' && (
                 <p className="mt-1 font-mono text-xs break-all text-muted-foreground">{run.failure_detail}</p>

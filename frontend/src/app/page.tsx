@@ -14,6 +14,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
 
+import { canonicalUrl } from '@/lib/seo';
+
 /**
  * Server-rendered and revalidated rather than fetched per request: this is the
  * page a crawler and a first-time visitor see, so it has to arrive as finished
@@ -25,7 +27,7 @@ export const metadata: Metadata = {
   title: { absolute: '월덕 머니버스 — Discord 커뮤니티 가상경제와 게임 보상' },
   description:
     'Discord 커뮤니티 활동을 기록하고 WLD 보상, 게임 상점, 시즌 이벤트를 함께 이용하는 월덕 머니버스입니다.',
-  alternates: { canonical: '/' },
+  alternates: { canonical: canonicalUrl('/') },
 };
 
 interface Announcement {

@@ -1,8 +1,11 @@
 import type { MetadataRoute } from 'next';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function robots(): MetadataRoute.Robots {
-  const enabled = process.env.SEO_INDEXING_ENABLED === 'true';
-  const base = process.env.APP_BASE_URL ?? 'http://127.0.0.1:3000';
+  const enabled = process.env.SEO_INDEXING_ENABLED !== 'false';
+  const base = (process.env.APP_BASE_URL || 'https://easy-scraping.com').replace(/\/$/, '');
 
   if (!enabled) {
     return { rules: { userAgent: '*', disallow: '/' } };
@@ -25,5 +28,6 @@ export default function robots(): MetadataRoute.Robots {
       ],
     },
     sitemap: `${base}/sitemap.xml`,
+    host: base,
   };
 }

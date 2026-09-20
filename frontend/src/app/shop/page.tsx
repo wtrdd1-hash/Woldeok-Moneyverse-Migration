@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { apiOrNull, publicApi } from '@/lib/api';
 import { isLoggedInMember } from '@/lib/session';
+import { canonicalUrl } from '@/lib/seo';
 import { ShopStoreView, type CatalogItem } from './shop-store-view';
 import { cashBalanceFromWallet, type CanonicalWalletOverview } from './wallet-balance';
 
@@ -15,7 +16,7 @@ export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'WLD 아이템 상점',
   description: '월덕 머니버스의 게임 전용 WLD로 아이템·치장품·컬렉션을 확인하고 구매하는 가상 상점입니다.',
-  alternates: { canonical: '/shop' },
+  alternates: { canonical: canonicalUrl('/shop') },
 };
 
 const PRINCIPLES = [
