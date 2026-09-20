@@ -8,6 +8,7 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 
 ## Planning
 - [Living Project Plan](planning/PROJECT_PLAN.md) / [한국어](planning/PROJECT_PLAN.ko.md)
+- [Administrator Treasury Management Specification](planning/ADMIN_TREASURY_MANAGEMENT_SPEC.md) / [한국어](planning/ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md)
 - [Product Growth & Retention Plan](planning/PRODUCT_GROWTH_PLAN.md) / [한국어](planning/PRODUCT_GROWTH_PLAN.ko.md)
 - [Detailed Product Design Specification](planning/PRODUCT_DESIGN_SPEC.md) / [한국어](planning/PRODUCT_DESIGN_SPEC.ko.md)
 - [Default Limit Policy](planning/DEFAULT_LIMIT_POLICY.md) / [한국어](planning/DEFAULT_LIMIT_POLICY.ko.md)
