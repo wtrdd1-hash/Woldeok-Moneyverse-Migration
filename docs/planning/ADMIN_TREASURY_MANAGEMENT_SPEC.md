@@ -1,6 +1,6 @@
 # Administrator Treasury Management Specification
 
-> Version: v2026.09.20.306
+> Version: v2026.09.20.311
 > Status: implementation-oriented Living product specification
 > Baseline date: 2026-09-20
 > Korean counterpart: [ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md](ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md)
@@ -238,13 +238,13 @@ Production is blocked until tests cover:
 
 ## 13. Delivery sequence
 
-- **v2026.09.20.306-01** — finalize treasury accounting/domain contract and category mapping.
-- **v2026.09.20.306-02** — schema/functions/read models with DB actor authorization and ledger invariants.
-- **v2026.09.20.306-03** — admin summary/history/revenue/expenditure APIs.
-- **v2026.09.20.306-04** — correction, budget and reconciliation commands with step-up auth/idempotency/audit.
-- **v2026.09.20.306-05** — responsive administrator Treasury UI, export and alert surfaces.
-- **v2026.09.20.306-06** — security/concurrency/accounting/reconciliation E2E on exact-SHA Test.
-- **v2026.09.20.306-07** — re-read latest plan, resolve drift, merge, rebuild exact merged SHA and zero-downtime Production promotion only after all gates pass.
+- **v2026.09.20.311-01** — finalize treasury accounting/domain contract and category mapping.
+- **v2026.09.20.311-02** — schema/functions/read models with DB actor authorization and ledger invariants.
+- **v2026.09.20.311-03** — admin summary/history/revenue/expenditure APIs.
+- **v2026.09.20.311-04** — correction, budget and reconciliation commands with step-up auth/idempotency/audit.
+- **v2026.09.20.311-05** — responsive administrator Treasury UI, export and alert surfaces.
+- **v2026.09.20.311-06** — security/concurrency/accounting/reconciliation E2E on exact-SHA Test.
+- **v2026.09.20.311-07** — re-read latest plan, resolve drift, merge, rebuild exact merged SHA and zero-downtime Production promotion only after all gates pass.
 
 ## 14. Current implementation status
 
