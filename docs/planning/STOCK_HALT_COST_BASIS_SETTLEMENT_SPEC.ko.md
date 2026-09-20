@@ -1,6 +1,6 @@
 # 주식 거래정지 매수원가 자동정산 상세기획
 
-> 버전: v2026.09.21.313
+> 버전: v2026.09.21.315
 > 상태: 기획 / 구현 계약
 > 영문 기준 문서: [STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC.md](STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC.md)
 
@@ -62,7 +62,7 @@ timeout/crash 후 재시도는 저장된 결과를 반환해야 하며 WLD를 �
 - metric: 시작/완료/실패, 영향 계정수, 환급총액, replay 차단, 격리 보유분, latency. 잔액/PII/token 원문 로그 금지.
 
 ## 9. 구현순서 / 릴리스 게이트
-1. `v2026.09.21.313-01` schema/state/cost-basis/tombstone 계약.
+1. `v2026.09.21.315-01` schema/state/cost-basis/tombstone 계약.
 2. `-02` transaction 정산 + idempotency + ledger.
 3. `-03` 관리자 halt/progress/retry/delete API와 권한.
 4. `-04` 사용자/관리자 반응형 UI와 receipt.

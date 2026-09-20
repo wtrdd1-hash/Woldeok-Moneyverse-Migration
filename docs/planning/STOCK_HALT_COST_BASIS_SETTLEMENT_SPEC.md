@@ -1,6 +1,6 @@
 # Stock Halt Cost-Basis Auto-Settlement Specification
 
-> Version: v2026.09.21.313
+> Version: v2026.09.21.315
 > Status: Planning / implementation contract
 > Korean counterpart: [STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC.ko.md](STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC.ko.md)
 
@@ -62,7 +62,7 @@ Invariant: for each account/stock/halt event, credited WLD equals authoritative 
 - Metrics: halt start/completion/failure, affected accounts, refund total, replay prevention, quarantined holdings and latency; no raw balances, PII or tokens in logs.
 
 ## 9. Implementation sequence / release gate
-1. `v2026.09.21.313-01` schema/state/cost-basis/tombstone contract.
+1. `v2026.09.21.315-01` schema/state/cost-basis/tombstone contract.
 2. `-02` transactional settlement + idempotency + ledger.
 3. `-03` admin halt/progress/retry/delete APIs and authorization.
 4. `-04` responsive user/admin UI and receipts.
