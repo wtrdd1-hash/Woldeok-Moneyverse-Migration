@@ -447,7 +447,7 @@ export function PhotoReviewQueue({ items }: { readonly items: readonly PendingPh
             <div className="mt-2 flex items-center gap-2 pt-2 border-t">
               <Button
                 size="sm"
-                className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-medium"
+                className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-medium"
                 disabled={loadingId === item.photo_id}
                 onClick={() => handleApprove(item.photo_id)}
               >

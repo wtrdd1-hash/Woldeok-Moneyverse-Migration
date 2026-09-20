@@ -166,7 +166,7 @@ export function InventoryView({
       </div>
 
       {actionStatus && (
-        <div className="p-3 text-center text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-2xl animate-in fade-in">
+        <div className="p-3 text-center text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800 rounded-2xl animate-in fade-in">
           {actionStatus}
         </div>
       )}

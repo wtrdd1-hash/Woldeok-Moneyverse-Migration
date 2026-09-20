@@ -1,5 +1,14 @@
 # 업데이트 로그
 
+## v2026.09.20.301 — 프론트엔드 색상·대비 전수 점검
+
+- 브랜치: `feat/frontend-contrast-v2026.09.20.301`, 기준 `0b973824d85379119813f9b9f53cd7cdd4ddeb93`.
+- 라이트/다크 semantic palette를 분리하고 hard-coded 밝은 chrome을 제거했으며 홈·상점·작업·인벤토리·사업체·관리자 화면의 저대비 글자/액션 색을 수정했습니다.
+- 라이트 3차 텍스트는 페이지 배경 기준 3.77:1에서 4.90:1로 개선했고, 검증한 다크 foreground role은 6.14:1 이상입니다.
+- WCAG 대비 회귀 테스트를 추가하고 사용자 point color도 흰 primary-button 글자가 읽히도록 밝기를 제한했습니다.
+- 레퍼런스 corpus는 SeeClick 웹 10,000개 subset, WebUI 41,970개 웹 화면, RICO 66k+ UI 화면과 WCAG/GOV.UK/Atlassian/Material 지침을 함께 사용합니다.
+- exact-SHA Test 검증 및 전체 프론트 재구축 게이트 전 Production 승격은 차단합니다.
+
 ## v2026.09.20.297 — 프론트엔드 재구축 기반
 
 - 브랜치: `feat/frontend-rebuild-v2026.09.20.297`, 기준 `4dcd2ba112ae57565eed7444fe1d36512b926a3b`.

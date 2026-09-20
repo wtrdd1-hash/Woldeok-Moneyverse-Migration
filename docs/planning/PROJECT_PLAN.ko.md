@@ -2,12 +2,25 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.20.298
+> **현재 통합 버전:** v2026.09.20.301
 > **구현·증거 동기화:** 2026-09-20
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 구현 회차 — v2026.09.20.301 (2026-09-20)
+
+### 재구축 기반 이후 프론트엔드 전체 색상·대비 전수 점검
+
+- **권위 / 브랜치:** `feat/frontend-contrast-v2026.09.20.301`은 v298 계정 라우트가 반영된 최신 `main=0b973824d85379119813f9b9f53cd7cdd4ddeb93`에서 시작합니다.
+- **원인 확인:** v297에서 `:root`와 `.dark`가 동일한 재구축 팔레트를 공유한 반면 일부 컴포넌트는 다크 표면 전용 utility 색상을 그대로 사용했습니다. 따라서 다크 모드 선택 시 밝은 실제 surface와 dark utility가 섞일 수 있었고, 라이트 모드에도 300/400 계열의 저대비 강조 글자가 여러 화면에 남아 있었습니다.
+- **토큰 수정:** 라이트/다크 모드를 별도 semantic palette로 분리했습니다. 일반/보조/3차/강조 텍스트는 페이지 바탕과 raised card 모두에서 WCAG 2.2 AA 일반 텍스트 기준 4.5:1 이상을 요구합니다. 수정 후 측정 최저치는 라이트 4.90:1, 검증한 다크 foreground role은 6.14:1 이상입니다.
+- **테마 안전 chrome:** masthead, footer, table, skeleton, input, popover, hover 상태를 하드코딩 밝은 색 대신 semantic surface token으로 변경했습니다. 사용자가 고른 point color는 색조는 유지하되 라이트 테마 primary 밝기를 제한해 흰 버튼 글자가 AA 대비를 유지하도록 했습니다.
+- **라우트 전수 수정:** 홈, 상점, 작업, 인벤토리, 사업체, 관리자 경제/상점/회원/콘텐츠에서 상태·순위·희귀도·금액·액션 글자의 저대비 조합을 수정했습니다. 카지노 hero처럼 명시적으로 어두운 presentation surface는 inverse text를 의도적으로 유지합니다.
+- **회귀 게이트:** 새 자동 contrast regression test가 라이트/다크 rebuild token의 WCAG 상대휘도 대비를 계산하고, 홈/상점에서 확인된 저대비 패턴 재유입을 차단합니다.
+- **1만 건 이상 레퍼런스 기준:** 1만 화면을 수동 검토했다고 과장하지 않고 공개 대규모 UI corpus를 기준으로 사용합니다. SeeClick은 270k 웹 crawl 중 10,000개 웹 screenshot subset을 공개하고, WebUI는 41,970개 웹 screenshot, RICO는 66k+ UI screen을 제공합니다. 이 corpus-level 참고와 WCAG·GOV.UK·Atlassian·Material 색상/토큰 접근성 지침을 함께 적용합니다.
+- **릴리스:** exact-SHA CI, Production build, 전체 frontend test, 반응형 검사, isolated Test 승격이 병합 전 필수입니다. 전체 프론트 재구축 완료 게이트 전 Production 승격은 계속 차단합니다.
 
 ## 구현 회차 — v2026.09.20.298 (2026-09-20)
 

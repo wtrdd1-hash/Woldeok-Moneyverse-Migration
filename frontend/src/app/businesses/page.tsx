@@ -214,13 +214,13 @@ export default async function BusinessesPage() {
                     <div className="rounded-xl bg-muted/40 p-3 grid gap-1.5 border border-border/50">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">일일 매출</span>
-                        <span className="font-mono font-bold text-emerald-400">
+                        <span className="font-mono font-bold text-emerald-700 dark:text-emerald-300">
                           +{groupDigits(gross)} WLD
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">일일 운영비 (소각)</span>
-                        <span className="font-mono font-medium text-rose-400">
+                        <span className="font-mono font-medium text-rose-700 dark:text-rose-300">
                           -{groupDigits(cost)} WLD
                         </span>
                       </div>
@@ -281,13 +281,13 @@ export default async function BusinessesPage() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">일일 매출</span>
-                    <span className="font-mono text-emerald-400">
+                    <span className="font-mono text-emerald-700 dark:text-emerald-300">
                       +{groupDigits(type.dailyRevenue)} WLD
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">일일 운영비</span>
-                    <span className="font-mono text-rose-400">
+                    <span className="font-mono text-rose-700 dark:text-rose-300">
                       -{groupDigits(type.dailyOperatingCost)} WLD
                     </span>
                   </div>

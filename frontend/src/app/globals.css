@@ -195,14 +195,12 @@
     --mint: oklch(from var(--point) 0.92 clamp(0.01, c * 0.2, 0.04) h);
     --highlight: oklch(from var(--point) 0.9 clamp(0.02, c * 0.45, 0.07) h);
 
-    /* The button face, the masthead underline and the active tab. Derived
-       at --clay's lightness rather than inheriting --forest-soft's 0.47: the
-       gold this product ships with sits near 0.65, and a reader picking a
-       hue should get that hue at the weight they are used to, not a darker
-       version of every control. */
-    --primary: oklch(from var(--point) 0.62 clamp(0.04, c, 0.15) h);
+    /* The button face, masthead underline and active tab. Keep the
+       light-theme primary dark enough that white button text stays at or
+       above the normal-text AA floor even for yellow/orange point picks. */
+    --primary: oklch(from var(--point) 0.5 clamp(0.04, c * 0.8, 0.11) h);
     --accent-foreground: oklch(from var(--point) 0.4 clamp(0.03, c * 0.8, 0.11) h);
-    --ring: oklch(from var(--point) 0.62 clamp(0.04, c, 0.15) h / 0.7);
+    --ring: oklch(from var(--point) 0.5 clamp(0.04, c * 0.8, 0.11) h / 0.78);
     --chart-4: oklch(from var(--point) 0.7 clamp(0.06, c, 0.14) calc(h + 45));
   }
 
