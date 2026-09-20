@@ -1,4 +1,4 @@
--- 219-private-chat-core.sql
+-- 220-private-chat-core.sql
 -- Update version: v2026.09.20.311
 -- P0 CHAT-305-02: authoritative one-to-one conversation/message persistence.
 -- Forward-only: private tables, least-privilege SECURITY DEFINER contracts.

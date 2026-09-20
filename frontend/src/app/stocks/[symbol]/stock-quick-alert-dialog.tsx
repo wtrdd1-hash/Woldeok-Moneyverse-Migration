@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useActionState } from 'react';
-import { Bell, BellPlus, CheckCircle2, TrendingUp, TrendingDown } from 'lucide-react';
+import { Bell, BellPlus, CheckCircle2 as _CheckCircle2, TrendingUp, TrendingDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

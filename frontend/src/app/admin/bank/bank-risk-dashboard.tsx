@@ -12,8 +12,8 @@ interface BankRiskDashboardProps {
   readonly loans: readonly AdminLoan[];
 }
 
-export function BankRiskDashboard({ overview, grades, loans }: BankRiskDashboardProps) {
-  const deposit = BigInt(overview.deposit_amount || '0');
+export function BankRiskDashboard({ overview, grades, loans: _loans }: BankRiskDashboardProps) {
+  const _deposit = BigInt(overview.deposit_amount || '0');
   const outstanding = BigInt(overview.outstanding_amount || '0');
   const overdue = BigInt(overview.overdue_amount || '0');
   const issued24h = BigInt(overview.issued_24h_amount || '0');
