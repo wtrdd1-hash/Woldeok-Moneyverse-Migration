@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { AmountInput } from '@/components/amount-input';
@@ -69,6 +69,17 @@ export function RewardButtons({ availability }: { readonly availability: RewardA
 
 export function TransferForm({ currency }: { readonly currency: string }) {
   const [state, action] = useActionState(transfer, IDLE);
+  const [amount, setAmount] = useState('');
+  const [requestKey, setRequestKey] = useState('');
+
+  useEffect(() => {
+    setRequestKey(crypto.randomUUID());
+  }, [state]);
+
+  const addAmount = (num: number) => {
+    const cur = parseInt(amount, 10) || 0;
+    setAmount(String(cur + num));
+  };
 
   return (
     <Card>
@@ -82,6 +93,7 @@ export function TransferForm({ currency }: { readonly currency: string }) {
       </CardHeader>
       <CardContent>
         <form action={action} className="grid gap-4">
+          <input type="hidden" name="idempotencyKey" value={requestKey} />
           <FieldGroup className="gap-4 sm:grid-cols-2">
             <Field>
               <FieldLabel htmlFor="recipientUserId">
@@ -96,6 +108,7 @@ export function TransferForm({ currency }: { readonly currency: string }) {
                 maxLength={36}
                 placeholder="UUID"
                 required
+                className="min-h-11"
               />
               <FieldDescription>
                 <T
@@ -118,10 +131,27 @@ export function TransferForm({ currency }: { readonly currency: string }) {
                   min={1}
                   step={1}
                   placeholder="0"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
                   required
+                  className="min-h-11"
                 />
                 <InputGroupAddon align="inline-end">{currency}</InputGroupAddon>
               </InputGroup>
+              <div className="flex flex-wrap gap-1.5 pt-1.5">
+                {[1000, 5000, 10000, 50000].map((val) => (
+                  <Button
+                    key={val}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs px-2"
+                    onClick={() => addAmount(val)}
+                  >
+                    +{val.toLocaleString()}
+                  </Button>
+                ))}
+              </div>
               <FieldDescription>
                 <T
                   korean="송금 후에는 내 경제 원장에 기록됩니다. 받는 사람과 금액을 다시 확인해 주세요."
@@ -135,7 +165,7 @@ export function TransferForm({ currency }: { readonly currency: string }) {
             <p className="text-xs text-muted-foreground">
               <T korean={`1 ${currency} 이상 정수만 보낼 수 있어요.`} english={`Only whole integers of 1 ${currency} or more can be sent.`} />
             </p>
-            <SubmitButton>
+            <SubmitButton className="min-h-11 font-bold">
               <T korean="확인 →" english="Send WLD →" />
             </SubmitButton>
           </div>

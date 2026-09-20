@@ -22,7 +22,7 @@ export function PurchaseButton({
     <div className="grid gap-2 w-full">
       <form action={action} className="w-full">
         <input type="hidden" name="businessTypeId" value={businessTypeId} />
-        <SubmitButton disabled={locked} className="w-full">
+        <SubmitButton disabled={locked} className="w-full min-h-11 rounded-xl font-bold">
           {locked ? '아직 살 수 없어요' : '사업권 구입'}
         </SubmitButton>
       </form>
@@ -41,7 +41,9 @@ export function SettleButton({ ownershipId }: { readonly ownershipId: string }) 
     <div className="grid gap-2">
       <form action={action}>
         <input type="hidden" name="ownershipId" value={ownershipId} />
-        <SubmitButton variant="outline">오늘 정산하기</SubmitButton>
+        <SubmitButton variant="outline" className="min-h-11 rounded-xl">
+          오늘 정산하기
+        </SubmitButton>
       </form>
       <ActionAlert state={state} />
     </div>
@@ -92,10 +94,10 @@ export function ActivateLicenseButton({
   const [state, action] = useActionState(activateLicenseAction, IDLE);
 
   return (
-    <div className="grid gap-2">
-      <form action={action}>
+    <div className="grid gap-2 w-full">
+      <form action={action} className="w-full">
         <input type="hidden" name="catalogCode" value={catalogCode} />
-        <SubmitButton className="w-full font-semibold">
+        <SubmitButton className="w-full font-bold min-h-11 rounded-xl">
           {businessName} 설립하기 (보유: {quantity}개)
         </SubmitButton>
       </form>
@@ -126,7 +128,7 @@ export function ApplyBoostModalButton({
         variant="outline"
         size="sm"
         onClick={() => setIsOpen(true)}
-        className="text-xs h-8 gap-1.5"
+        className="text-xs min-h-9 px-3 rounded-xl gap-1.5 font-semibold"
       >
         <span>⚡</span>
         <span>{hasBoost ? '부스트 관리' : '부스트 장착'}</span>
@@ -134,7 +136,7 @@ export function ApplyBoostModalButton({
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <Card className="w-full max-w-md border-border/80 bg-background/95 shadow-2xl backdrop-blur-md">
+          <Card className="w-full max-w-md border-border/80 bg-background/95 shadow-2xl backdrop-blur-md rounded-2xl">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <Badge variant="secondary">부스트 관리</Badge>
@@ -142,7 +144,7 @@ export function ApplyBoostModalButton({
                   {businessName}
                 </Badge>
               </div>
-              <CardTitle className="text-xl mt-2">사업체 부스트 소모품 장착</CardTitle>
+              <CardTitle className="text-xl mt-2 font-black">사업체 부스트 소모품 장착</CardTitle>
               <CardDescription className="text-xs">
                 인벤토리에 보유한 부스트 소모품을 장착하여 일일 매출을 증폭하거나 운영비를 대폭 절감하세요.
               </CardDescription>
@@ -166,14 +168,14 @@ export function ApplyBoostModalButton({
               <div className="grid gap-2">
                 <span className="text-xs font-semibold text-muted-foreground">장착 가능한 보유 부스트 아이템</span>
                 {boostItems.length === 0 ? (
-                  <p className="text-xs text-muted-foreground p-3 text-center bg-muted/40 rounded-lg">
+                  <p className="text-xs text-muted-foreground p-3 text-center bg-muted/40 rounded-xl">
                     인벤토리에 보유 중인 사업체 부스트 아이템이 없습니다. 상점 2.0에서 구매하실 수 있습니다.
                   </p>
                 ) : (
                   boostItems.map((item) => (
                     <div
                       key={item.code}
-                      className="flex items-center justify-between p-2.5 rounded-lg border border-border/60 bg-muted/30"
+                      className="flex items-center justify-between p-3 rounded-xl border border-border/60 bg-muted/30"
                     >
                       <div>
                         <p className="text-sm font-semibold">{item.name}</p>
@@ -182,7 +184,7 @@ export function ApplyBoostModalButton({
                       <form action={action}>
                         <input type="hidden" name="ownershipId" value={ownershipId} />
                         <input type="hidden" name="boostCode" value={item.code} />
-                        <SubmitButton size="sm" className="text-xs font-medium">
+                        <SubmitButton size="sm" className="min-h-9 px-4 rounded-lg text-xs font-bold">
                           장착
                         </SubmitButton>
                       </form>
@@ -194,7 +196,7 @@ export function ApplyBoostModalButton({
               <ActionAlert state={state} />
 
               <div className="flex justify-end mt-2">
-                <Button variant="ghost" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" onClick={() => setIsOpen(false)} className="min-h-11 px-5 rounded-xl">
                   닫기
                 </Button>
               </div>

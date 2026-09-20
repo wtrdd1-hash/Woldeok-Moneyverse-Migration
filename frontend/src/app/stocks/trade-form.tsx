@@ -1,8 +1,9 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { useLocale } from '@/components/locale-provider';
+import { Button } from '@/components/ui/button';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { IDLE } from '@/lib/action-state';
@@ -36,6 +37,13 @@ export function TradeForm({
   const quote = useQuote(stockId, { price: currentPrice, open: dayOpenPrice ?? currentPrice });
   const label = side === 'buy' ? (isEn ? 'Buy' : '매수') : (isEn ? 'Sell' : '매도');
   const fieldId = `quantity-${side}-${stockId}${idSuffix}`;
+  const [quantity, setQuantity] = useState('1');
+
+  const addQty = (amount: number) => {
+    const current = parseInt(quantity, 10) || 0;
+    const next = Math.max(1, current + amount);
+    setQuantity(String(next));
+  };
 
   return (
     <form action={action} className="grid gap-3">
@@ -54,11 +62,62 @@ export function TradeForm({
             inputMode="numeric"
             min={1}
             step={1}
-            defaultValue={1}
+            value={quantity}
+            onChange={(e) => setQuantity(e.target.value)}
             required
           />
           <InputGroupAddon align="inline-end">{isEn ? 'shares' : '주'}</InputGroupAddon>
         </InputGroup>
+
+        <div className="flex flex-wrap gap-1.5 pt-1.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs px-2"
+            onClick={() => setQuantity('1')}
+          >
+            1{isEn ? 'sh' : '주'}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs px-2"
+            onClick={() => addQty(5)}
+          >
+            +5
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs px-2"
+            onClick={() => addQty(10)}
+          >
+            +10
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs px-2"
+            onClick={() => addQty(50)}
+          >
+            +50
+          </Button>
+          {side === 'buy' && available && Number(available) > 0 && (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="h-7 text-xs px-2 font-semibold"
+              onClick={() => setQuantity(available)}
+            >
+              MAX ({groupDigits(available)})
+            </Button>
+          )}
+        </div>
       </Field>
 
       <p className="tabular text-xs text-muted-foreground">
@@ -69,7 +128,7 @@ export function TradeForm({
       </p>
 
       <ActionAlert state={state} />
-      <SubmitButton variant={side === 'buy' ? 'default' : 'outline'}>
+      <SubmitButton variant={side === 'buy' ? 'default' : 'outline'} className="min-h-11 font-bold">
         {isEn ? `Confirm ${label}` : `${label} 확정`}
       </SubmitButton>
     </form>

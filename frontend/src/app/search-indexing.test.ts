@@ -44,4 +44,14 @@ describe('public search surface', () => {
     if (Array.isArray(rules)) throw new Error('expected one crawler rule');
     expect(rules.disallow).toContain('/status');
   });
+
+  it('exposes canonical sitemap to search crawlers in robots.txt', () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    process.env.APP_BASE_URL = 'https://easy-scraping.com';
+    const sitemapUrl = robots().sitemap;
+
+    expect(sitemapUrl).toBe('https://easy-scraping.com/sitemap.xml');
+  });
 });
+
+

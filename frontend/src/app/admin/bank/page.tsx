@@ -19,6 +19,7 @@ import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
 import { Figure } from '../economy/economy-parts';
 import type { AdminBankOverview, AdminCreditGrade, AdminLoan } from '../types';
+import { BankRiskDashboard } from './bank-risk-dashboard';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,21 +29,6 @@ export const metadata: Metadata = {
   title: AREA.title,
   robots: { index: false, follow: false },
 };
-
-/**
- * The loan book, which nobody could read.
- *
- * 096 applied 14.4's credit ladder -- a member under seven days old or with
- * fewer than ten paid tasks cannot borrow, and each grade carries its own
- * ceiling and rate. Whether that was set right is a question about the book,
- * and the book was only ever visible one member at a time through
- * `bank_my_loans`.
- *
- * The totals come from `admin_bank_overview`, which counts every loan, and the
- * table below is a bounded page of the open ones. They are separate reads for
- * that reason: a total added up from a page would be a subtotal wearing a
- * total's label, and this is a screen somebody acts on.
- */
 
 /** `virtual_bank_loans.status` (035, widened by 076), in Korean. */
 const STATUS_LABELS: Readonly<Record<string, string>> = {
@@ -69,7 +55,7 @@ export default async function AdminBankPage() {
   }>('/api/v1/admin/bank');
 
   return (
-    <div data-page="admin-bank" className="mv-page mv-page--admin grid gap-5">
+    <div data-page="admin-bank" className="mv-page mv-page--admin grid gap-6">
       <AdminBack />
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}
@@ -82,9 +68,16 @@ export default async function AdminBankPage() {
         />
       ) : (
         <>
+          {/* 실시간 여신 건전성 및 신용등급 리스크 대시보드 */}
+          <BankRiskDashboard
+            overview={console_.overview}
+            grades={console_.grades}
+            loans={console_.loans}
+          />
+
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">은행 현황</CardTitle>
+              <CardTitle className="text-base">은행 기본 장부 요약</CardTitle>
               <CardDescription>
                 아래 합계는 전체 장부 기준이고, 목록은 그중 일부입니다.
               </CardDescription>
@@ -129,7 +122,7 @@ export default async function AdminBankPage() {
           </Card>
 
           <section aria-labelledby="credit-grades" className="grid gap-3">
-            <SectionHeader eyebrow="CREDIT LADDER" title="신용 등급" id="credit-grades" />
+            <SectionHeader eyebrow="CREDIT LADDER" title="신용 등급 상세 목록" id="credit-grades" />
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">등급별 조건과 장부</CardTitle>
@@ -208,7 +201,7 @@ export default async function AdminBankPage() {
           </section>
 
           <section aria-labelledby="loan-book" className="grid gap-3">
-            <SectionHeader eyebrow="LOAN BOOK" title="남은 대출" id="loan-book" />
+            <SectionHeader eyebrow="LOAN BOOK" title="남은 대출 목록" id="loan-book" />
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">상환이 끝나지 않은 대출</CardTitle>

@@ -28,13 +28,14 @@ import { normalizeStockSort, sortMarketStocks } from './stock-market-sort';
 import { TradeDialog } from './trade-dialog';
 import { WatchlistToggle } from './watchlist-toggle';
 import { filterStocks, normalizeStockQuery } from './stock-search';
+import { canonicalUrl } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '가상 주식 거래소 — 실시간 종목 시세 및 캔들 차트 분석',
   description: '월덕 머니버스 게임 안의 가상 주식 시세·캔들 차트·거래 정보를 확인하는 커뮤니티 가상 거래소입니다.',
-  alternates: { canonical: '/stocks' },
+  alternates: { canonical: canonicalUrl('/stocks') },
   robots: { index: true, follow: true },
 };
 
@@ -161,21 +162,9 @@ export default async function StocksPage({
             </h2>
             <LiveBadge />
           </div>
-          <nav aria-label={isEn ? 'Sort stocks' : '종목 정렬'} className="flex flex-wrap gap-2">
-            {[
-              ['default', isEn ? 'Default' : '기본순'],
-              ['change', isEn ? 'Top movers' : '등락률순'],
-              ['price', isEn ? 'Price' : '가격순'],
-              ['available', isEn ? 'Availability' : '거래 가능순'],
-              ['name', isEn ? 'Name' : '이름순'],
-            ].map(([value, label]) => (
-              <Button key={value} asChild size="sm" variant={sort === value ? 'default' : 'outline'}>
-                <Link href={value === 'default' ? '/stocks' : `/stocks?sort=${value}`} aria-current={sort === value ? 'page' : undefined}>
-                  {label}
-                </Link>
-              </Button>
-            ))}
-          </nav>
+          <div className="text-xs text-muted-foreground font-medium">
+            {isEn ? `Total ${allStocks.length} listed` : `총 ${allStocks.length}개 상장`}
+          </div>
         </div>
         <form action="/stocks" method="get" role="search" className="flex w-full max-w-2xl flex-wrap gap-2">
           {sort !== 'default' ? <input type="hidden" name="sort" value={sort} /> : null}

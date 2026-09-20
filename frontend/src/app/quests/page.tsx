@@ -14,16 +14,40 @@ import { NotificationForm, NpcOrderButton } from './quest-forms';
 import { GoalCard, NextUnlock, NpcCard } from './quest-parts';
 import { NPCS } from './quests';
 import type { EngagementBoard } from './quests';
+import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 
 /** One member's own goals and standing. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
 
+const questsUrl = canonicalUrl('/quests');
+const questsOgImage = buildOgImageUrl({
+  title: '일일 퀘스트 & 출석 도전과제',
+  description: '디스코드 활동과 연동되는 일일 퀘스트와 연속 출석을 달성하고 WLD 게임 보상을 수령하세요.',
+  type: 'quest',
+  badge: '퀘스트 & 도전과제',
+  metric: '일일 보상 수령',
+  metricLabel: 'WLD 지급',
+});
+
 export const metadata: Metadata = {
   title: '일일 퀘스트 및 도전과제 — 활동 보상 시스템',
   description: '디스코드 커뮤니티 활동과 연동되는 일일 퀘스트와 연속 출석 도전과제를 달성하고 WLD 보상을 수령하세요.',
-  alternates: { canonical: '/quests' },
+  alternates: { canonical: questsUrl },
   robots: { index: true, follow: true },
+  openGraph: {
+    title: '일일 퀘스트 및 도전과제 — 월덕 머니버스',
+    description: '디스코드 커뮤니티 활동과 연동되는 일일 퀘스트와 연속 출석 도전과제를 달성하고 WLD 보상을 수령하세요.',
+    url: questsUrl,
+    images: [{ url: questsOgImage, width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '일일 퀘스트 및 도전과제 — 월덕 머니버스',
+    description: '디스코드 커뮤니티 활동 연동 보상',
+    images: [questsOgImage],
+  },
 };
+
 
 /*
  * The progress cards are read-only. `engagement_record_progress` grants a
