@@ -1,9 +1,9 @@
 'use client';
 
-import { Amount } from '@/components/amount';
+import { Amount as _Amount } from '@/components/amount';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { groupDigits } from '@/lib/money';
+import { groupDigits as _groupDigits } from '@/lib/money';
 
 export function CasinoEconomyDashboard() {
   return (

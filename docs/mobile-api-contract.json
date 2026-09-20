@@ -1613,8 +1613,7 @@
                       "type": "null"
                     },
                     {
-                      "type": "string",
-                      "format": "date-time"
+                      "type": "string"
                     }
                   ]
                 }
@@ -1692,8 +1691,7 @@
                     "type": "null"
                   },
                   {
-                    "type": "string",
-                    "format": "date-time"
+                    "type": "string"
                   }
                 ]
               },

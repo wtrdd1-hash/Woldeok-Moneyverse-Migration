@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { PackageOpen, XCircle, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import { PackageOpen, XCircle, CheckCircle2 as _CheckCircle2, AlertCircle, ArrowRight as _ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

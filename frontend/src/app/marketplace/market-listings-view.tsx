@@ -37,7 +37,7 @@ export function MarketListingsView({
   const [isBuying, setIsBuying] = useState(false);
   const [buySuccessItem, setBuySuccessItem] = useState<MarketListing | null>(null);
 
-  const categories = ['all', 'frame', 'display', 'business', 'material', 'nameplate'];
+  const _categories = ['all', 'frame', 'display', 'business', 'material', 'nameplate'];
 
   const filtered = listings.filter((item) => {
     if (item.status !== 'active') return false;
