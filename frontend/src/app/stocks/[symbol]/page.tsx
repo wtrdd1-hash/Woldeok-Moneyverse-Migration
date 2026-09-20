@@ -14,6 +14,9 @@ import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { StockDetailDialog } from '../stock-detail-dialog';
 import { WatchlistToggle } from '../watchlist-toggle';
+import { StockQuickAlertDialog } from './stock-quick-alert-dialog';
+import { StockAlertDeleteButton } from './stock-alert-delete-button';
+import { StockDiscussionSection } from './stock-discussion-section';
 import {
   findHoldingForStock,
   findStockBySymbol,
@@ -175,11 +178,13 @@ export default async function StockHubPage({
                   {isEn ? 'Compare' : '다른 종목과 비교'}
                 </Link>
               </Button>
-              <Button asChild variant="outline">
-                <Link href={`/stocks/alerts?stock=${encodedSymbol}`}>
-                  {isEn ? 'Set alert' : '조건부 알림 설정'}
-                </Link>
-              </Button>
+              <StockQuickAlertDialog
+                stockId={stock.id}
+                symbol={stock.symbol}
+                name={stock.name}
+                currentPrice={stock.current_price}
+                isEn={isEn}
+              />
             </div>
           </CardContent>
         </Card>
@@ -260,9 +265,12 @@ export default async function StockHubPage({
                 <li key={rule.alert_id} className="rounded-md border p-3 text-sm">
                   <div className="flex items-center justify-between gap-2">
                     <b>{stockAlertConditionLabel(rule.condition_kind, isEn)}</b>
-                    <Badge variant={rule.condition_met ? 'default' : 'secondary'}>
-                      {rule.condition_met ? (isEn ? 'Met' : '충족') : isEn ? 'Watching' : '감시 중'}
-                    </Badge>
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant={rule.condition_met ? 'default' : 'secondary'}>
+                        {rule.condition_met ? (isEn ? 'Met' : '충족') : isEn ? 'Watching' : '감시 중'}
+                      </Badge>
+                      <StockAlertDeleteButton alertId={rule.alert_id} isEn={isEn} />
+                    </div>
                   </div>
                   <p className="mt-1 text-muted-foreground">{stockAlertThreshold(rule)}</p>
                 </li>
@@ -272,64 +280,13 @@ export default async function StockHubPage({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex-row items-start justify-between gap-3">
-          <div>
-            <CardTitle>{isEn ? 'Related community' : '관련 커뮤니티'}</CardTitle>
-            <CardDescription>
-              {isEn
-                ? 'Recent posts tagged with this virtual stock.'
-                : '이 종목이 태그된 최근 토론입니다.'}
-            </CardDescription>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild size="sm">
-              <Link href={`/board?stock=${encodedSymbol}#board-composer`}>
-                {isEn ? 'Start discussion' : '이 종목으로 글쓰기'}
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/board?stock=${encodedSymbol}`}>
-                {isEn ? 'All discussions' : '전체 토론'}
-              </Link>
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {discussion === null ? (
-            <EmptyState
-              title={isEn ? 'Unable to load discussions.' : '토론을 불러오지 못했어요.'}
-            />
-          ) : posts.length === 0 ? (
-            <EmptyState title={isEn ? 'No discussion yet.' : '아직 관련 토론이 없어요.'} />
-          ) : (
-            <ul className="divide-y">
-              {posts.slice(0, 5).map((post) => (
-                <li key={post.postId}>
-                  <Link
-                    href={`/board/${post.postId}`}
-                    className="flex min-h-14 items-center gap-3 py-3 hover:underline"
-                  >
-                    <span className="min-w-0 flex-1">
-                      <b className="block truncate">{post.title}</b>
-                      <span className="text-xs text-muted-foreground">
-                        {post.authorName} ·{' '}
-                        {formatMoment(post.createdAt, isEn ? 'Time unavailable' : '시간 확인 중')}
-                      </span>
-                    </span>
-                    {post.commentCount > 0 ? (
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <MessageSquare className="size-3.5" aria-hidden />
-                        {post.commentCount}
-                      </span>
-                    ) : null}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+      <StockDiscussionSection
+        stockId={stock.id}
+        symbol={stock.symbol}
+        name={stock.name}
+        posts={posts}
+        isEn={isEn}
+      />
     </div>
   );
 }

@@ -1,19 +1,19 @@
 # Update Log
 
-## v2026.09.21.314 — Playwright Headless Browser Real-Time QA Audit, Mobile Header Brand Visibility Restoration & Admin Sub-Navigation Scroll Optimization
+## v2026.09.20.314 — Real-Time Stock Discussions & Inline Conditional Price Alerts System
 
-- Branch: `feat/frontend-mobile-qa-audit-v2026.09.21.314`, Base `cf8902d`.
-- **Playwright Real-Time Browser QA Testbed & 7-Viewport Full Audit**:
-  - Built an automated Chromium 153 Playwright QA audit script (`qa_responsive_audit.js`) on the remote Mini PC.
-  - Verified 27 primary routes across 7 device viewports (Galaxy Fold 320px, iPhone SE 375px, iPhone 14/15 390px, Galaxy S23 412px, iPad Mini 768px, Laptop 1280px, Desktop 1440px; 189 total checks) with **0 horizontal overflow defects**.
-- **Mobile Header Brand Visibility Restoration (`Brand`)**:
-  - Resolved the issue where the brand disappeared entirely on 320px~359px narrow viewports by switching to default `inline-flex`.
-  - Fixed brand text hiding below 520px by providing responsive typography (`text-xs min-[400px]:text-sm sm:text-base`) for seamless mobile brand presentation.
-- **Admin Sub-Navigation (`AdminSubNav`) Horizontal Scroll Optimization**:
-  - Applied `scrollbar-none` to eliminate intrusive native scrollbars on mobile viewports.
-  - Maintained 44px (`min-h-11`) minimum touch targets and smooth horizontal scrolling padding.
-- **Unit Test Synchronization**:
-  - Synchronized `src/components/brand-responsive.test.ts` assertions for full coverage of responsive classes and 320px viewports.
+- Branch: `feat/stock-discussions-alerts-v2026.09.20.314`.
+- **Elimination of Mock Code & 100% Real API Integration**:
+  - Reverted previous v313 mock marketplace code to the authoritative safe trading gate to eliminate operational and state regression risks.
+  - Fully integrated backend production endpoints for stock community discussions and price alerts with live database persistence.
+- **Inline Real-Time Stock Discussion Hub (`StockDiscussionSection`)**:
+  - Connected to live backend `POST /api/v1/board/stock-posts` with CSRF protection: Supports investment stances (Bullish / Neutral / Bearish), position disclosures (Holder / No Position), categories (analysis / question / journal / business), and rich markdown bodies.
+  - Live community discussion feed (`GET /api/v1/board/public/stock-posts`) with real-time sentiment distribution bar (Bullish vs Bearish ratio).
+- **One-Click Conditional Price Alerts (`StockQuickAlertDialog` & `StockAlertDeleteButton`)**:
+  - Connected to live backend `POST /api/v1/stocks/alerts`: Recommended target price calculations (breakout, stop-loss, daily change bps) with configurable cooldown periods.
+  - Zero-redirect inline alert cancellation via `StockAlertDeleteButton` (`DELETE /api/v1/stocks/alerts/:id`).
+- **Comprehensive Quality Verification**:
+  - Created `src/app/stocks/[symbol]/stock-discussions-alerts.test.ts` testing sentiment ratios, threshold formatting, and cooldown boundaries (100% PASS).
 
 ## v2026.09.20.313 — Player Marketplace Crafting Workbench & Item Trading Exchange (P0) System
 
