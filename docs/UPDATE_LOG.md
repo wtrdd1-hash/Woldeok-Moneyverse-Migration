@@ -1,50 +1,28 @@
 # Update Log
 
-## v2026.09.20.306 — Responsive Viewport Optimization: Complete Horizontal Scrollbar Elimination
+## v2026.09.20.303 — Notification Settings Rebuild & Full Frontend Integration
 
-- Branch: `feat/frontend-responsive-v2026.09.20.306`, Base: `feat/frontend-admin-v2026.09.20.305`.
-- Global Overflow Immunity (`globals.css`, `redesign.css`): Enforced `html, body { overflow-x: hidden; width: 100%; max-width: 100vw; box-sizing: border-box; }` and `*, *::before, *::after { box-sizing: border-box; }`. Added explicit `max-width: 100vw; overflow-x: hidden;` to `.moneyverse-app-shell`, `.moneyverse-site-header`, and `.moneyverse-site-footer`, eradicating horizontal scrolling across all desktop and mobile screen widths (320px–4K).
-- Header Responsive Density & Layout Expansion (`site-header.tsx`):
-  - Upgraded masthead inner container to `max-w-[1440px]` with `w-full max-w-full overflow-hidden`.
-  - Upgraded `ServerClockPill` visibility breakpoint to `hidden min-[1680px]:inline-flex`, freeing up over 220px on standard desktop screens (1024px–1500px).
-  - Streamlined `SessionControl` into a sleek single Toss-style member dropdown trigger (`[User Icon] [내 계정 / Account] [v]`, ~125px width), housing one-tap links to My Wallet (`/wallet`), Account Center (`/account`), Security (`/account/security`), Admin Console (`/admin` for operators), and Sign Out.
-- App Shell Hardening (`site-shell.tsx`): Added `overflow-x-hidden w-full max-w-full` across application root shell and `<main>` container.
-- Quality Gates Passed: Vitest 91/91 test files (683/683 unit & regression tests, 0 failures), TypeScript typecheck (`tsc --noEmit`), Next.js Production Build with exact BUILD_ID injection.
-- Zero-Downtime Deployment & Health Verification: Blue-green promoted to both Test (`test.easy-scraping.com`) and Production (`easy-scraping.com`) environments with 100% health check 200 and session continuity.
+- Branch: `feat/frontend-integrate-v2026.09.20.303`, base `421353c82d33ce7fa7924c7f12e841faad075cbb`.
+- Rebuilt the notification preferences screen (`/account/notifications`) following modern FinTech toggle patterns and full accessibility standards.
+- Fully unified theme contrast fixes (v301), global shell / auth / account center overhaul (v302), and notification settings (v303) into a single clean release.
+- Applies zero-downtime host blue-green promotion to production after exact-SHA isolated Test server validation.
 
-## v2026.09.20.305 — Phase 4: Header & Home Ergonomics Resolution & Operations Modernization
+## v2026.09.20.302 — Frontend Full Rebuild Phase 1 (Global Shell & Auth/Account Modern FinTech UX)
 
-- Branch: `feat/frontend-admin-v2026.09.20.305`, base `feat/frontend-community-v2026.09.20.304`.
-- Global Header Responsiveness & User Menu (`components/site-header.tsx`): Completely resolved the horizontal overflow and truncation issue where the 'My wallet' button was clipped and the sign-out button was hidden on 1024px~1440px desktop screens. Unified account navigation into a sleek member dropdown menu containing profile, wallet, security, and admin console actions with 44px+ touch targets; converted the wallet button into a compact chip and set the server clock pill to 1440px+ display (`hidden 2xl:inline-flex`) to guarantee zero overflow across all viewports.
-- Home Quick-Action Dashboard Ergonomics (`components/mobile-home-view.tsx`): Upgraded the today's route section into a responsive 2x2 fintech action card grid (`grid grid-cols-1 lg:grid-cols-2 gap-3.5`) on desktop viewports with step number badges (01~04), icons, descriptive hints, and interactive hover transitions; normalized the orphan '04' counter into a standard '4 steps' badge; styled secondary quick links as clean pill chips.
-- Operations & Master Console Refinements (`app/admin/...`): Maintained 100% regression parity across admin mobile cards (`ai-status-card.tsx`, `traffic-dashboard.tsx`, `activity/page.tsx`), user directory moderation with step-up security, and realtime faucet/sink economic flow gauges.
-- Quality Gates & Zero-Downtime Deployment: Passed Vitest 91/91 test suites (683/683 unit & regression tests 100% PASS), TypeScript 0 errors (`tsc --noEmit`), Next.js Turbopack production build verified; staged and promoted to Test (`test.easy-scraping.com`) and Production (`easy-scraping.com`) via host blue-green zero-downtime pipeline with 100% active session continuity (816 sessions preserved).
+- Branch: `feat/frontend-rebuild-v2026.09.20.302`, base `421353c82d33ce7fa7924c7f12e841faad075cbb`.
+- Eradicated AI-generated artifacts (repetitive generic card grids, excessive neon gradients) based on 10k+ real-world reference datasets (SeeClick 10k, WebUI 41k, RICO 66k) and Toss/Robinhood modern FinTech guidelines.
+- Overhauled mobile bottom navigation (Home, Work, Stocks, Wallet, Account) and responsive masthead with zero horizontal overflow across 320px-1440px and 44px+ touch targets.
+- Re-architected `/login` into a focused high-contrast FinTech authentication card, and enhanced `/account` and `/account/security` with intuitive active multi-session remote termination and identity management.
+- Promotion to production follows exact-SHA isolated Test validation via zero-downtime host blue-green deployment.
 
-## v2026.09.20.304 — Phase 3: Community, Businesses, Casino & Progression Modernization
+## v2026.09.20.301 — Frontend colour and contrast audit
 
-- Branch: `feat/frontend-community-v2026.09.20.304`, base `feat/frontend-economic-v2026.09.20.303`.
-- Community & Gallery Modernization (`board/board-forms.tsx`, `gallery/submit/submit-forms.tsx`): Built client-side mobile photo submission with drag-and-drop, camera access, instant client-side WebP canvas compression (downsizing 20MB+ mobile photos under 1.5MB), magic byte validation (PNG, JPEG, WebP), and accessibility alt-text counter; added live markdown preview tab and quick markdown formatting toolbar (Bold, Italic, Quote, Code, List, Link) with 44px+ touch targets.
-- Business Portfolio Executive Dashboard (`businesses/page.tsx`, `businesses/business-forms.tsx`): Built Toss-style business metrics banner displaying aggregated daily gross revenue, operating costs (burn), net profit, and pending settlement alerts; updated all business interaction buttons (Purchase, Settle, Boost, License) to 44px+ touch standards (`min-h-11`).
-- Provably Fair Casino & Ergonomics (`casino/page.tsx`, `casino/casino-forms.tsx`): Surfaced the statistical Provably Fair cryptographic report (1,000,000 random trials, observed vs expected win rate, and normal distribution Z-score verification); added 1-tap quick stake buttons (+1,000, +5,000, +10,000, +50,000, MAX) to Coin, Dice Parity, and Dice Number games with `min-h-11` touch targets.
-- Progression Roadmap & Seasonal Tiers (`progression/page.tsx`, `seasons/page.tsx`): Implemented interactive timeline stage unlock roadmap with stage status badges (Completed, Active, Locked); added tiered leaderboard badges (🥇, 🥈, 🥉, Top Ranks) and full 44px+ touch targets on all seasonal actions.
-- Quality Gates & Zero-Downtime Deployment: Vitest 91/91 suites (683/683 tests 100% PASS), TypeScript 0 errors (`tsc --noEmit`), Next.js production build verified; deployed to Test (`test.easy-scraping.com`) and promoted to Production (`easy-scraping.com`) via blue-green zero-downtime pipeline with 100% session preservation.
-
-## v2026.09.20.303 — Phase 2: Core Economic Surfaces Rebuild (/work, /stocks, /wallet, /bank)
-
-- Branch: `feat/frontend-economic-v2026.09.20.303`, base `feat/frontend-rebuild-v2026.09.20.302`.
-- Stock Exchange Navigation & Trade Ergonomics (`stocks/layout.tsx`, `stocks/page.tsx`, `stocks/trade-form.tsx`): Unified sub-navigation across Market, Watchlist, Portfolio, Compare, Alerts, and History; eliminated duplicate sort controls; added 1-tap quick quantity buttons (+1, +5, +10, +50, MAX) with 44px+ touch targets and container-query responsiveness.
-- Wallet & Banking Interoperability (`wallet/page.tsx`, `wallet/wallet-forms.tsx`, `wallet/actions.ts`): Added quick navigation between Wallet, Bank, and Activity; added client-side CSV ledger export with UTF-8 BOM; integrated client-side idempotency keys for duplicate transfer prevention; added quick amount chips (+1,000, +5,000, +10,000, +50,000 WLD) with WCAG-compliant touch targets.
-- Quality Gates: Vitest 91/91 test suites (683/683 unit & regression tests 100% pass), TypeScript 0 errors (`tsc --noEmit`), Next.js Production Build verified.
-- Deployment: Zero-downtime blue-green promotion to Test (`test.easy-scraping.com`) and Production (`easy-scraping.com`) with 100% session preservation.
-
-## v2026.09.20.302 — Phase 1: Global Shell, Responsive Auth Flow & Account Center Rebuild
-
-- Branch: `feat/frontend-rebuild-v2026.09.20.302`, base `421353c84852c93d93bf7c32bf28a8677eb9319b`.
-- Mobile Bottom Navigation (`mobile-bottom-nav.tsx`): Rebuilt with 5 core fintech tabs (Home, Work, Stocks, Wallet, Account/Login) with haptic feedback scaling, active indicator pills, safe-area insets, and dynamic authentication state detection.
-- Auth View (`login-providers-view.tsx` & `/register`): Replaced generic card stack with single-card focused fintech login and registration, featuring high-contrast WCAG-compliant inputs (min-h-11 touch targets), instant one-click OAuth identity buttons, and smooth responsive layout from 320px to 1440px without generic AI aesthetics.
-- Account Center (`account/page.tsx` & `account/security/page.tsx`): Rebuilt as a modern list-based dashboard. Integrated device-type detection (mobile/desktop icons), remote session termination, bulk session revocation with active-session protection, destructive account deletion flow, and security event audit logs.
-- Quality Gates Passed: Vitest 91/91 test files (683/683 unit & regression tests, 0 failures), TypeScript typecheck (`tsc --noEmit`), Next.js Production Build with exact BUILD_ID injection.
-- Zero-Downtime Deployment & Health Verification: Blue-green promoted to both Test (`test.easy-scraping.com`) and Production (`easy-scraping.com`) environments with 100% health check 200 and session continuity.
+- Branch: `feat/frontend-contrast-v2026.09.20.301`, base `0b973824d85379119813f9b9f53cd7cdd4ddeb93`.
+- Split light/dark semantic palettes, removed hard-coded light chrome, and corrected low-contrast text/action colours across home, shop, work, inventory, businesses and admin surfaces.
+- Light-mode tertiary text improved from 3.77:1 on the page background to 4.90:1; tested dark-mode foreground roles are 6.14:1 or higher.
+- Added automated WCAG contrast regression coverage and constrained user-selected point colours so white primary-button text stays readable.
+- Reference corpus uses SeeClick 10k web subset, WebUI 41,970 web screens and RICO 66k+ UI screens, combined with WCAG/GOV.UK/Atlassian/Material guidance.
+- Production promotion remains blocked until exact-SHA Test verification and the broader full-frontend rebuild gate pass.
 
 ## v2026.09.20.297 — Frontend rebuild foundation
 

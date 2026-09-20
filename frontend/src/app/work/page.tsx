@@ -110,7 +110,7 @@ export default async function WorkPage() {
                     {activeMeta?.name ??
                       (isEn ? 'None selected (Choose a career)' : '미선택 (전직을 선택하세요)')}
                   </span>
-                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm font-semibold">
+                  <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800 text-sm font-semibold">
                     Lv.{activeJob?.level ?? 1}
                   </Badge>
                 </div>
@@ -417,7 +417,7 @@ export default async function WorkPage() {
                   </p>
                 </div>
                 <div className="text-right font-mono">
-                  <span className="font-bold text-emerald-400">+{receipt.reward_amount} WLD</span>
+                  <span className="font-bold text-emerald-700 dark:text-emerald-300">+{receipt.reward_amount} WLD</span>
                   <span className="text-xs text-muted-foreground ml-2">
                     +{receipt.experience_amount} EXP
                   </span>

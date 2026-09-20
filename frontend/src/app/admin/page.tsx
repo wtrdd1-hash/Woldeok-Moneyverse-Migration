@@ -188,7 +188,7 @@ export default async function AdminPage({
                       <div className="flex items-center justify-between gap-1">
                         <span className={`inline-flex items-center justify-center font-bold text-xs size-6 rounded-full ${
                           rank === 1 ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40' :
-                          rank === 2 ? 'bg-slate-400/20 text-slate-300 border border-slate-400/40' :
+                          rank === 2 ? 'bg-slate-200 text-slate-700 border border-slate-400 dark:bg-slate-700/40 dark:text-slate-200 dark:border-slate-500' :
                           rank === 3 ? 'bg-amber-800/20 text-amber-600 border border-amber-700/40' :
                           'bg-muted text-muted-foreground'
                         }`}>

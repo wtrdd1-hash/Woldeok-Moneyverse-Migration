@@ -2,12 +2,52 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.20.298
+> Current integrated version: v2026.09.20.305
 > Implementation/evidence sync: 2026-09-20
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+## URGENT / P0 planning directive — v2026.09.20.305 (2026-09-20)
+
+### One-to-one private chat is an immediate implementation priority
+- **Priority:** **URGENT / P0**. Treat 1:1 private chat as an immediate product/security implementation stream, not a future social-growth idea.
+- **Authoritative detailed specification:** [ONE_TO_ONE_PRIVATE_CHAT_SPEC.md](ONE_TO_ONE_PRIVATE_CHAT_SPEC.md).
+- **Required scope:** server-authoritative eligibility, canonical conversation identity, persistence/order/idempotency, realtime reconnect recovery, unread/read state, DM privacy controls, block/mute/report, privacy-minimized notifications, least-privilege moderation evidence, age-sensitive safety gates, abuse/rate-limit controls, responsive/mobile UX, accessibility, observability, retention/deletion and rollback.
+- **Production blockers:** frontend-only messaging, unverified cross-account authorization, block bypass, sender spoofing, private-content logging, broken reconnect recovery, missing report/audit path or unresolved age/privacy safety gate.
+- **Execution order:** follow v2026.09.20.305-01 through -07 in the dedicated specification. Re-read the latest plan before implementation and again mid-work because concurrent planning may change.
+- **Current state:** planning/documentation only. Runtime implementation must use a new implementation branch and exact-SHA Test -> backend/realtime/API/mobile QA -> merge -> exact merged SHA rebuild -> zero-downtime Production promotion.
+
+## Planning cycle — v2026.09.20.304 (2026-09-20)
+
+### One-to-one private chat
+- **Product scope:** add authenticated member-to-member 1:1 private chat as a planned social feature. Initial scope is text-first direct conversations; group chat, anonymous chat, public-room chat, voice/video calls and end-to-end encryption are separate future decisions and must not be implied by this plan.
+- **Conversation authority:** the backend owns conversation creation, membership, message ordering, delivery state, read state and moderation state. A client must never add a third participant, spoof another sender, overwrite message authorship, or mark another account's messages as read.
+- **Eligibility and privacy:** direct messaging is deny-by-default until both accounts satisfy the configured interaction policy. Support user-level DM controls, block lists and policy restrictions without exposing private friend/club graphs, account-security state, balances, holdings or other sensitive profile data.
+- **Core UX:** provide a conversation list, unread counts, latest-message preview, conversation view, send/retry state, timestamps, policy-permitted read indicators, blocked/unavailable states, mobile keyboard-safe composition and deterministic empty/loading/error/session-expired handling. Chat must not be a mandatory onboarding action.
+- **Safety:** blocking immediately prevents new messages in both directions and suppresses further interaction prompts. Reporting is available from the conversation surface and preserves immutable moderation evidence. Rate limits, spam/duplicate-message controls, abuse throttling, link/mention policy and content filtering are server-enforced.
+- **Age-sensitive interaction:** open private messaging and adult-minor contact expansion require explicit age/privacy/safety/legal review before Production enablement. Policy gates may restrict DM initiation or receipt by verified eligibility without leaking sensitive restriction reasons to unauthorized peers.
+- **Data model/API direction:** use stable conversation/message identifiers, server timestamps, monotonic per-conversation ordering, idempotent send keys, pagination cursors, bounded payloads and normalized message status. User-visible hide/delete behavior is distinct from moderation/audit retention.
+- **Realtime and resilience:** WebSocket/SSE or equivalent may provide realtime delivery, but correctness must not depend on a live socket. Reconnect recovers missed messages from authoritative API cursor/order state and duplicate reconnect events are idempotent. Failed/offline sends cannot appear delivered before server acknowledgement.
+- **Notifications:** chat notifications integrate with existing notification/privacy controls, use privacy-minimized previews, and respect block/mute/session state. Sensitive message content must not be exposed unnecessarily on lock screens, logs, analytics or push-provider payloads.
+- **Admin/moderation:** privileged review is least-privilege, purpose-limited and audited. Admin tools expose report/evidence state rather than unrestricted browsing of private conversations. Exceptional message-content access requires explicit authorization and immutable audit records.
+- **QA/acceptance:** cover cross-account authorization/BOLA, forged sender/conversation IDs, blocked-user sends, duplicate idempotency keys, out-of-order/replayed events, pagination boundaries, reconnect recovery, unread/read races, rate limits, report flow, session expiry, 320/360/390px mobile composition, accessibility and privacy-safe logging. Production is blocked until exact-SHA Test proves backend/API/realtime behavior and the configured safety policy.
+- **Delivery sequence:** v2026.09.20.304-01 schema/policy contract -> -02 backend APIs and authorization -> -03 realtime/recovery -> -04 responsive frontend plus block/report/notification integration -> -05 security/abuse/accessibility E2E on exact-SHA Test -> -06 final plan re-read and zero-downtime Production promotion only if all gates pass.
+- **Current change classification:** planning/documentation only. This cycle does not claim the 1:1 chat runtime is implemented or enabled.
+
+## Implementation cycle — v2026.09.20.301 (2026-09-20)
+
+### Full frontend colour/contrast audit after the rebuild foundation
+
+- **Authority / branch:** `feat/frontend-contrast-v2026.09.20.301` starts from current `main=0b973824d85379119813f9b9f53cd7cdd4ddeb93` after v298 account-route integration.
+- **Root cause found:** v297 reused the same rebuilt palette for `:root` and `.dark`, while some components still contained dark-surface-only utility colours. A user selecting dark mode could therefore receive light physical surfaces with dark-mode utility variants, and multiple light-mode pages still used low-contrast 300/400 accent text.
+- **Token repair:** light and dark modes now have separate semantic palettes. Normal text, secondary text, tertiary text and accent text are required to meet WCAG 2.2 AA (4.5:1 for normal text) against both the page background and raised card surface. The repaired measured floors are 4.90:1 in light mode and 6.14:1 or higher for the tested dark-mode foreground roles.
+- **Theme-safe chrome:** masthead, footer, tables, skeletons, inputs, popovers and hover states now use semantic surface tokens rather than hard-coded light colours. User-selected point colours keep their hue but clamp the light-theme primary role to an AA-safe luminance for white button text.
+- **Route sweep:** corrected low-contrast status, ranking, rarity, state, amount and action colours across home, shop, work, inventory, businesses and administrator economy/shop/users/content surfaces. Explicit dark presentation surfaces such as casino hero panels keep inverse text intentionally.
+- **Regression gate:** a new automated contrast regression test calculates WCAG relative-luminance ratios from the active light/dark rebuild tokens and rejects reintroduction of the known home/shop failures.
+- **Reference scale:** visual research is grounded in public large-scale UI corpora rather than claiming one-by-one manual review: SeeClick publishes a 10,000-web-screenshot subset from a 270k crawl; WebUI contributes 41,970 web screenshots; RICO contains 66k+ UI screens. These corpus-level references are combined with WCAG, GOV.UK, Atlassian and Material accessibility/design-token guidance.
+- **Release:** exact-SHA CI, Production build, full frontend tests, responsive checks and isolated Test promotion are mandatory before merge. Production remains blocked until the broader frontend rebuild completion gate is met.
 
 ## Implementation cycle — v2026.09.20.298 (2026-09-20)
 
