@@ -1,8 +1,8 @@
 # Woldeok Moneyverse — AI Economy Controller Specification
 
-> Version: v2026.09.17.184
+> Version: v2026.09.20.290
 > Status: Living implementation-oriented planning specification
-> Date: 2026-09-17
+> Date: 2026-09-20
 > Parent specs: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
 > Korean counterpart: [AI_ECONOMY_CONTROLLER_SPEC.ko.md](AI_ECONOMY_CONTROLLER_SPEC.ko.md)
 
@@ -942,3 +942,22 @@ The scheduler feature flag is an operational gate, not proof that the feature is
 ### 34.2 Deployment-owned automatic model runtime (v2026.09.19.289)
 
 Unattended stock-scenario generation may use `AI_NEWS_AUTO_API_BASE_URL`, `AI_NEWS_AUTO_MODEL`, and optional `AI_NEWS_AUTO_API_KEY` from the deployment environment. This path is separate from the manually managed newsroom credential stored encrypted in PostgreSQL. The automatic actor UUID remains mandatory and must resolve to an operator so all context reads, batch creation and market-event publication keep the existing authorization and audit boundary. Local OpenAI-compatible inference such as Ollama may use an empty API key. Invalid non-HTTP(S) endpoints fail closed before a model call.
+
+
+## 35. Next-task revalidation gate for AI changes — v2026.09.20.290
+
+Every development task that modifies or extends AI economy control, stock-scenario automation, or adaptive tuning SHALL NOT treat the planning document as a one-time read. This specification is living and may change while implementation is in progress, so the following revalidation gates are mandatory.
+
+1. **Pre-work revalidation**: immediately before implementation, re-read the target AI requirement, linked parent/child specifications, latest user instructions, current main-branch planning documents, and observed runtime state; then freeze the scope for the current work unit.
+2. **Mid-work revalidation**: around the implementation midpoint or after completion of a major stage, re-check the latest planning documents and user instructions before starting the next implementation step. Newer instructions or plan changes supersede the older working assumption.
+3. **Before-next-task check**: after one AI work unit completes and before entering the next one, re-read the next task's requirements, priority, dependencies, safety boundaries, and test criteria, and verify that it does not conflict with or duplicate already implemented behavior.
+4. **Pre-promotion comparison**: before Test promotion and again before Production promotion, compare the implemented change against the latest planning version. Promotion SHALL NOT rely only on an older draft.
+5. **Plan-change handling**: when revalidation detects a changed plan, adjust implementation to the newer plan and update the document version/change record. Do not knowingly continue with a stale conflicting plan.
+
+Required trace fields are `planning_version_checked`, `instruction_checked_at`, `midpoint_recheck_result`, `next_task_recheck_result`, `changed_scope`, `test_evidence`, and `promotion_evidence`. AI worklogs/PRs/internal update records must state which planning version was checked so the decision path remains auditable.
+
+### 35.1 Document update record
+
+- **v2026.09.20.290**: added mandatory latest-plan/user-instruction revalidation at work start, mid-work, and immediately before entering the next AI task.
+- Required a fresh comparison before Test and Production promotion, with newer planning taking precedence when changes are discovered.
+- Added traceability fields for the planning version and midpoint/next-task revalidation evidence.
