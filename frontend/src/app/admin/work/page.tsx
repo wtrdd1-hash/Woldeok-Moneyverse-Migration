@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import { Amount } from '@/components/amount';
+import { Amount as _Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader, SectionHeader } from '@/components/page-header';
-import { Badge } from '@/components/ui/badge';
+import { Badge as _Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,

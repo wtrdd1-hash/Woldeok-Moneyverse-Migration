@@ -12,7 +12,7 @@ interface StockAlertDeleteButtonProps {
 }
 
 export function StockAlertDeleteButton({ alertId, isEn = false }: StockAlertDeleteButtonProps) {
-  const [deleteState, deleteAction, isPending] = useActionState(deleteStockAlert, IDLE);
+  const [_deleteState, deleteAction, isPending] = useActionState(deleteStockAlert, IDLE);
 
   return (
     <form action={deleteAction} className="inline-block">
