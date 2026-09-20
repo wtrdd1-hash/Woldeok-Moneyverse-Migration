@@ -2,12 +2,22 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.20.304
+> **현재 통합 버전:** v2026.09.20.305
 > **구현·증거 동기화:** 2026-09-20
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 긴급 / P0 기획 지시 — v2026.09.20.305 (2026-09-20)
+
+### 1:1 개인 채팅을 즉시 구현 우선순위로 격상
+- **우선순위:** **긴급 / P0**. 1:1 개인 채팅을 미래 소셜 아이디어가 아니라 즉시 추진할 제품·보안 구현 스트림으로 취급한다.
+- **권위 상세기획:** [ONE_TO_ONE_PRIVATE_CHAT_SPEC.ko.md](ONE_TO_ONE_PRIVATE_CHAT_SPEC.ko.md).
+- **필수 범위:** 서버 권위 적격성, canonical conversation, 메시지 영속화·순서·idempotency, realtime 재연결 복구, 안읽음/읽음, DM 개인정보 설정, 차단/음소거/신고, 개인정보 최소화 알림, 최소권한 moderation 증거, 연령 민감 안전 gate, abuse/rate-limit, 반응형 모바일 UX, 접근성, 관측성, 보존/삭제, rollback.
+- **Production 차단조건:** frontend-only 메시징, cross-account authorization 미검증, 차단 우회, sender spoof, private-content 로그 유출, reconnect 복구 오류, 신고/audit 누락, 연령/개인정보 gate 미해결.
+- **작업 순서:** 상세기획의 v2026.09.20.305-01 ~ -07을 따른다. 동시 기획 변경 가능성이 있으므로 구현 직전과 작업 중간에 최신 기획을 다시 확인한다.
+- **현재 상태:** 기획/문서 전용. 실제 구현은 신규 구현 브랜치에서 exact-SHA Test -> 백엔드/realtime/API/mobile QA -> merge -> exact merged SHA 재빌드 -> 무중단 Production 승격 순서를 따른다.
 
 ## 기획 회차 — v2026.09.20.304 (2026-09-20)
 

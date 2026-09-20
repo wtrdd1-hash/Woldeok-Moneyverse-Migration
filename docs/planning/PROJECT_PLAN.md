@@ -2,12 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.20.304
+> Current integrated version: v2026.09.20.305
 > Implementation/evidence sync: 2026-09-20
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+## URGENT / P0 planning directive — v2026.09.20.305 (2026-09-20)
+
+### One-to-one private chat is an immediate implementation priority
+- **Priority:** **URGENT / P0**. Treat 1:1 private chat as an immediate product/security implementation stream, not a future social-growth idea.
+- **Authoritative detailed specification:** [ONE_TO_ONE_PRIVATE_CHAT_SPEC.md](ONE_TO_ONE_PRIVATE_CHAT_SPEC.md).
+- **Required scope:** server-authoritative eligibility, canonical conversation identity, persistence/order/idempotency, realtime reconnect recovery, unread/read state, DM privacy controls, block/mute/report, privacy-minimized notifications, least-privilege moderation evidence, age-sensitive safety gates, abuse/rate-limit controls, responsive/mobile UX, accessibility, observability, retention/deletion and rollback.
+- **Production blockers:** frontend-only messaging, unverified cross-account authorization, block bypass, sender spoofing, private-content logging, broken reconnect recovery, missing report/audit path or unresolved age/privacy safety gate.
+- **Execution order:** follow v2026.09.20.305-01 through -07 in the dedicated specification. Re-read the latest plan before implementation and again mid-work because concurrent planning may change.
+- **Current state:** planning/documentation only. Runtime implementation must use a new implementation branch and exact-SHA Test -> backend/realtime/API/mobile QA -> merge -> exact merged SHA rebuild -> zero-downtime Production promotion.
 
 ## Planning cycle — v2026.09.20.304 (2026-09-20)
 
