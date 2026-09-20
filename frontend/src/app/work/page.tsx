@@ -18,6 +18,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { ClaimButton, JobSwitchButton, SubmitTaskButton } from './work-forms';
 import { CareerTasksBoard } from './career-tasks-board';
+import { WorkQuotaDashboard } from './work-quota-card';
 
 import type {
   JobProfileResponse,
@@ -148,80 +149,17 @@ export default async function WorkPage() {
         </div>
       </section>
 
-      <section aria-labelledby="work-quota-title" className="grid gap-4">
-        <div>
-          <h2 id="work-quota-title" className="text-xl font-bold flex items-center gap-2">
-            <span>⏱️</span> {isEn ? 'Reward limits & server resets' : '보상 한도 및 서버 초기화'}
-          </h2>
-          <p className="text-sm text-muted-foreground">
+      {summary ? (
+        <WorkQuotaDashboard summary={summary} isEn={isEn} />
+      ) : (
+        <Card>
+          <CardContent className="py-5 text-sm text-muted-foreground" role="status">
             {isEn
-              ? 'These counters use the authoritative Moneyverse game clock. The API and payout engine use the same day/week window.'
-              : '아래 카운터는 권위 있는 머니버스 게임시간을 사용합니다. API 표시와 실제 보상 정산이 같은 일간·주간 창을 사용합니다.'}
-          </p>
-        </div>
-
-        {summary ? (
-          <div className="grid gap-3 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardDescription>GAME DAY RESET</CardDescription>
-                <CardTitle>{isEn ? 'Daily work reward' : '일간 직업 보상'}</CardTitle>
-              </CardHeader>
-              <CardContent className="grid gap-3">
-                <div className="flex items-end justify-between gap-3">
-                  <span className="font-mono text-lg font-black">
-                    {summary.daily_paid} / {summary.daily_cap} WLD
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {isEn ? `${dailyRemaining} WLD left` : `${dailyRemaining} WLD 남음`}
-                  </span>
-                </div>
-                <Progress
-                  value={progressPercent(summary.daily_paid, summary.daily_cap)}
-                  aria-label={isEn ? 'Daily work reward usage' : '일간 직업 보상 사용량'}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {isEn ? 'Next reset' : '다음 초기화'}:{' '}
-                  <strong>{formatMoment(summary.day_ends_at)}</strong>
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardDescription>GAME WEEK RESET</CardDescription>
-                <CardTitle>{isEn ? 'Weekly work reward' : '주간 직업 보상'}</CardTitle>
-              </CardHeader>
-              <CardContent className="grid gap-3">
-                <div className="flex items-end justify-between gap-3">
-                  <span className="font-mono text-lg font-black">
-                    {summary.weekly_paid} / {summary.weekly_cap} WLD
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {isEn ? `${weeklyRemaining} WLD left` : `${weeklyRemaining} WLD 남음`}
-                  </span>
-                </div>
-                <Progress
-                  value={progressPercent(summary.weekly_paid, summary.weekly_cap)}
-                  aria-label={isEn ? 'Weekly work reward usage' : '주간 직업 보상 사용량'}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {isEn ? 'Next reset' : '다음 초기화'}:{' '}
-                  <strong>{formatMoment(summary.week_ends_at)}</strong>
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        ) : (
-          <Card>
-            <CardContent className="py-5 text-sm text-muted-foreground" role="status">
-              {isEn
-                ? 'The server reward-window summary is temporarily unavailable. No reset or remaining quota is guessed on the client.'
-                : '서버 보상 창 정보를 불러오지 못했습니다. 클라이언트에서 초기화 시각이나 남은 한도를 추측하지 않습니다.'}
-            </CardContent>
-          </Card>
-        )}
-      </section>
+              ? 'The server reward-window summary is temporarily unavailable. No reset or remaining quota is guessed on the client.'
+              : '서버 보상 창 정보를 불러오지 못했습니다. 클라이언트에서 초기화 시각이나 남은 한도를 추측하지 않습니다.'}
+          </CardContent>
+        </Card>
+      )}
 
       {/* 2. 8대 직업 탐색 및 즉시 전직 카드 그리드 */}
       <section aria-labelledby="careers-grid-title" className="grid gap-4">

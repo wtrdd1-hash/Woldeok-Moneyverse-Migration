@@ -1,5 +1,14 @@
 # Update Log
 
+## v2026.09.20.309 — Scheduled Work Policy Auto-Tuning, User Quota Visualizer & Multi-Domain Risk Dashboards
+
+- Branch: `feat/frontend-economic-suite-v2026.09.20.309`, base `2e8a50b0ebee`.
+- **Scheduled Work Policy Auto-Tuning**: Registered hourly background task (`work.auto_tune_policy`) in `SchedulerModule` to continuously analyze rolling 24-hour issuance vs. sink ratios and auto-tune reward caps and decay limits with zero manual operator intervention.
+- **User-Facing Work Quota Visualizer**: Upgraded `/work` with `WorkQuotaDashboard` displaying live progress bars, remaining allowances, next reset timestamp, and a polite warning banner when the 100% daily cap is reached.
+- **Bank Risk & Credit Ladder Dashboard**: Added `BankRiskDashboard` to `/admin/bank` visualizing overdue loan risk ratios, 24-hour net lending flow, and credit grade distribution bars.
+- **Casino House Edge & Sink Monitor**: Integrated `CasinoEconomyDashboard` into `/admin/economy` to monitor Provably Fair game return-to-player (RTP) and deflationary currency sink performance.
+- **Zero-Downtime Blue-Green Promotion**: 100% validated on isolated Test environment (`https://test.easy-scraping.com/`) across 92 frontend test suites (688 tests) and 74 backend test suites (896 tests), followed by atomic zero-downtime switchover to Production with full session continuity.
+
 ## v2026.09.20.308 — Real-time Work Statistics Visualization & Economy Auto-Tuning Engine
 
 - Branch: `feat/frontend-work-stats-v2026.09.20.308`, base `421353c82d33ce7fa7924c7f12e841faad075cbb`.
