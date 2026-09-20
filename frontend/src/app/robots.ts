@@ -27,7 +27,14 @@ export default function robots(): MetadataRoute.Robots {
         '/auth/',
       ],
     },
-    sitemap: `${base}/sitemap.xml`,
+    sitemap: [
+      `${base}/sitemap.xml`,
+      `${base}/sitemap-index.xml`,
+      `${base}/sitemap-announcements.xml`,
+      `${base}/sitemap-board.xml`,
+      `${base}/sitemap-stocks.xml`,
+    ],
     host: base,
   };
 }
+

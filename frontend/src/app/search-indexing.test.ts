@@ -44,4 +44,19 @@ describe('public search surface', () => {
     if (Array.isArray(rules)) throw new Error('expected one crawler rule');
     expect(rules.disallow).toContain('/status');
   });
+
+  it('exposes sitemap index and sub-sitemaps to search crawlers in robots.txt', () => {
+    process.env.SEO_INDEXING_ENABLED = 'true';
+    process.env.APP_BASE_URL = 'https://easy-scraping.com';
+    const sitemaps = robots().sitemap;
+
+    expect(sitemaps).toEqual([
+      'https://easy-scraping.com/sitemap.xml',
+      'https://easy-scraping.com/sitemap-index.xml',
+      'https://easy-scraping.com/sitemap-announcements.xml',
+      'https://easy-scraping.com/sitemap-board.xml',
+      'https://easy-scraping.com/sitemap-stocks.xml',
+    ]);
+  });
 });
+

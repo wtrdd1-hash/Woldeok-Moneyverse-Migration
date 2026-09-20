@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
 
-import { canonicalUrl } from '@/lib/seo';
+import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 
 /**
  * Server-rendered and revalidated rather than fetched per request: this is the
@@ -23,12 +23,34 @@ import { canonicalUrl } from '@/lib/seo';
  */
 export const revalidate = 60;
 
+const homeOgImage = buildOgImageUrl({
+  title: '월덕 머니버스 — Discord 가상경제 메타버스',
+  description:
+    'Discord 커뮤니티 활동을 기록하고 WLD 보상, 가상 주식, 상점, 시즌 이벤트를 함께 이용하세요.',
+  type: 'default',
+  badge: '가상경제 메타버스',
+});
+
 export const metadata: Metadata = {
   title: { absolute: '월덕 머니버스 — Discord 커뮤니티 가상경제와 게임 보상' },
   description:
     'Discord 커뮤니티 활동을 기록하고 WLD 보상, 게임 상점, 시즌 이벤트를 함께 이용하는 월덕 머니버스입니다.',
   alternates: { canonical: canonicalUrl('/') },
+  openGraph: {
+    title: '월덕 머니버스 — Discord 커뮤니티 가상경제와 게임 보상',
+    description:
+      'Discord 커뮤니티 활동을 기록하고 WLD 보상, 게임 상점, 시즌 이벤트를 함께 이용하는 월덕 머니버스입니다.',
+    url: canonicalUrl('/'),
+    images: [{ url: homeOgImage, width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '월덕 머니버스',
+    description: 'Discord 커뮤니티 활동 연동 가상경제',
+    images: [homeOgImage],
+  },
 };
+
 
 interface Announcement {
   readonly announcementId: string;

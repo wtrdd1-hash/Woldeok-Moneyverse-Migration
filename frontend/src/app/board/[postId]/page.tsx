@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
-import { canonicalUrl, breadcrumbJsonLd, forumPostingJsonLd } from '@/lib/seo';
+import { canonicalUrl, breadcrumbJsonLd, forumPostingJsonLd, buildOgImageUrl } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
 import { CommentForm, DeleteCommentButton, PostControls } from './post-forms';
 
@@ -51,6 +51,18 @@ export async function generateMetadata({
   if (!post) return { title: '게시글', robots: { index: false, follow: false } };
   const description = post.body.replace(/\s+/g, ' ').trim().slice(0, 155);
   const postUrl = canonicalUrl(`/board/${post.postId}`);
+  const ogImageUrl =
+    post.imageUrl ||
+    buildOgImageUrl({
+      title: post.title,
+      description,
+      type: 'board',
+      badge: '커뮤니티 토론',
+      metric: post.authorName,
+      metricLabel: '작성자',
+      subMetric: formatMoment(post.createdAt),
+    });
+
   return {
     title: post.title,
     description,
@@ -63,6 +75,13 @@ export async function generateMetadata({
       url: postUrl,
       publishedTime: post.createdAt,
       modifiedTime: post.updatedAt ?? undefined,
+      images: [{ url: ogImageUrl, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description,
+      images: [ogImageUrl],
     },
   };
 }

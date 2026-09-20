@@ -1,3 +1,23 @@
+## v2026.09.20.313 — 동적 사이트맵(Sitemap Index) 체계 구축 및 Next.js ImageResponse 기반 실시간 동적 OG 이미지 프리뷰 카드 엔진 도입
+
+- 브랜치: `feat/dynamic-sitemap-og-v2026.09.20.313`, 베이스 `2625dcc`.
+- **Sitemap Index 및 동적 서브 사이트맵 엔드포인트 분리 구축**:
+  - `/sitemap-index.xml`: 표준 `<sitemapindex>` XML 문서를 생성하여 전체 서브 사이트맵을 하나로 체계적으로 바인딩.
+  - `/sitemap-static.xml`: 14개 핵심 정적 공개 라우트의 실시간 타임스탬프 XML 제공 (`search-indexing.test.ts` 100% 영속 호환).
+  - `/sitemap-announcements.xml`: `/api/v1/announcements`와 연동되어 모든 실시간 운영 공지사항의 상세 URL과 발행일자(`lastmod`) 자동 색인.
+  - `/sitemap-board.xml`: `/api/v1/board/public/stock-posts`와 연동되어 커뮤니티 공개 토론 및 공략 게시글의 상세 URL 자동 색인.
+  - `/sitemap-stocks.xml`: `/api/v1/stocks`와 연동되어 상장된 전체 가상 주식 종목의 상세 시세 페이지 URL 자동 색인.
+  - `robots.ts`: `sitemap` 디렉티브에 `sitemap.xml`, `sitemap-index.xml`, `sitemap-announcements.xml`, `sitemap-board.xml`, `sitemap-stocks.xml`을 배열로 공식 등록.
+- **Next.js ImageResponse 기반 실시간 동적 오픈 그래프(OG) 이미지 생성기 (`/api/og`)**:
+  - 1200x630 고해상도 다크 네온 핀테크 테마 카드를 렌더링하는 Edge API 엔드포인트 신설.
+  - 짙은 흑연/인디고 배경에 네온 배지(NOTICE, BOARD, STOCK, QUEST), 메인 타이틀, 서브 설명, 동적 메트릭(주가, 작성자, 날짜) 레이아웃 지원.
+  - 시스템 웹 안전 산세리프 및 인라인 SVG 벡터 심볼을 탑재하여 외부 폰트 실패 없는 무중단 안정적 렌더링 보장.
+- **주요 공개/공유 라우트 전수 OG 카드 연결**:
+  - 가상 주식(`/stocks/[symbol]`), 커뮤니티 게시글(`/board/[postId]`), 공지사항(`/announcements/[announcementId]`), 퀘스트(`/quests`), 메인 홈(`/`)의 메타데이터에 `buildOgImageUrl` 기반 동적 프리뷰 카드 연결.
+- **단위 테스트 및 회귀 방지 검증**:
+  - `src/lib/seo.test.ts`에 `buildOgImageUrl`, `buildUrlsetXml`, `buildSitemapIndexXml` 단위 테스트 추가.
+  - `src/app/search-indexing.test.ts`에 동적 사이트맵 엔드포인트 목록 검증 테스트 추가.
+
 ## v2026.09.20.312 — 전역 SEO 최적화, Schema.org 구조화 데이터(JSON-LD) 스위트, Hreflang 및 검색엔진 디렉티브 완비
 
 - 브랜치: `feat/seo-optimization-v2026.09.20.312`, 베이스 `484cbd1`.

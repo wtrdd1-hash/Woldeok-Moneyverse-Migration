@@ -7,6 +7,9 @@ import {
   faqPageJsonLd,
   webApplicationJsonLd,
   forumPostingJsonLd,
+  buildOgImageUrl,
+  buildUrlsetXml,
+  buildSitemapIndexXml,
 } from './seo';
 
 describe('SEO utility: canonicalUrl', () => {
@@ -100,3 +103,62 @@ describe('SEO utility: JSON-LD builders', () => {
     });
   });
 });
+
+describe('SEO utility: buildOgImageUrl', () => {
+  it('encodes parameters properly into /api/og URL', () => {
+    const url = buildOgImageUrl({
+      title: '테스트 공지사항',
+      description: '공지 내용 요약입니다.',
+      type: 'announcement',
+      badge: '운영 소식',
+      metric: '2026-09-21',
+      metricLabel: '발행일',
+    });
+
+    expect(url).toContain(`${APP_BASE_URL}/api/og?`);
+    expect(url).toContain('title=%ED%85%8C%EC%8A%A4%ED%8A%B8+%EA%B3%B5%EC%A7%80%EC%82%AC%ED%95%AD');
+    expect(url).toContain('type=announcement');
+    expect(url).toContain('badge=%EC%9A%B4%EC%98%81+%EC%86%8C%EC%8B%9D');
+    expect(url).toContain('metric=2026-09-21');
+  });
+});
+
+describe('SEO utility: XML Sitemap builders', () => {
+  it('builds standard urlset XML', () => {
+    const xml = buildUrlsetXml([
+      {
+        loc: 'https://easy-scraping.com/stocks',
+        lastmod: '2026-09-21T00:00:00.000Z',
+        changefreq: 'daily',
+        priority: 0.9,
+      },
+    ]);
+
+    expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
+    expect(xml).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+    expect(xml).toContain('<loc>https://easy-scraping.com/stocks</loc>');
+    expect(xml).toContain('<lastmod>2026-09-21T00:00:00.000Z</lastmod>');
+    expect(xml).toContain('<changefreq>daily</changefreq>');
+    expect(xml).toContain('<priority>0.9</priority>');
+    expect(xml).toContain('</urlset>');
+  });
+
+  it('builds standard sitemapindex XML', () => {
+    const xml = buildSitemapIndexXml([
+      {
+        loc: 'https://easy-scraping.com/sitemap-static.xml',
+        lastmod: '2026-09-21T00:00:00.000Z',
+      },
+      {
+        loc: 'https://easy-scraping.com/sitemap-announcements.xml',
+      },
+    ]);
+
+    expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
+    expect(xml).toContain('<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+    expect(xml).toContain('<loc>https://easy-scraping.com/sitemap-static.xml</loc>');
+    expect(xml).toContain('<loc>https://easy-scraping.com/sitemap-announcements.xml</loc>');
+    expect(xml).toContain('</sitemapindex>');
+  });
+});
+
