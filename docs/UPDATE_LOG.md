@@ -1,5 +1,14 @@
 # Update Log
 
+## v2026.09.20.308 — Real-time Work Statistics Visualization & Economy Auto-Tuning Engine
+
+- Branch: `feat/frontend-work-stats-v2026.09.20.308`, base `421353c82d33ce7fa7924c7f12e841faad075cbb`.
+- **Real-Time Job Execution Ranking**: Visualizes 24-hour job completion ranking (Farmer, Miner, Carrier, Technician, Merchant) with execution count, participant count, payout volume, and dynamic CSS bar market-share gauges in `/admin/work`.
+- **5-Tier Daily Cap Consumption Gauge**: Visualizes daily cap exhaustion distribution (0~25%, 25~50%, 50~75%, 75~99%, 100% Capped) along with real-time exhausted user counts and average consumption percentages.
+- **AI Economy Auto-Tuning Engine**: Analyzes rolling 24-hour currency issuance (Faucet) vs. sink volume and cap exhaustion ratios to intelligently compute and apply recommended daily cap limits (2,000 ~ 10,000 WLD) and decay percentages with 1-click execution.
+- **7-Day Execution Trend Sparkline**: Displays historical 7-day job completion counts and reward payouts to track player engagement and macroeconomic progression.
+- **Zero-Downtime Blue-Green Promotion**: 100% validated on isolated Test environment (`https://test.easy-scraping.com/`) across 92 frontend test suites (688 tests) and 74 backend test suites (895 tests), followed by atomic zero-downtime switchover to Production with full session continuity.
+
 ## v2026.09.20.307 — AI Stock News Automation & Admin Work Reward/Limit Precision Tuning
 
 - Branch: `feat/frontend-ai-work-v2026.09.20.307`, base `421353c82d33ce7fa7924c7f12e841faad075cbb`.

@@ -21,12 +21,15 @@ function explain(error: unknown, fallback: string): ActionState {
     if (error.code === 'admin_work_task_failed') {
       return { status: 'error', message: '작업 카탈로그 항목 갱신에 실패했습니다.' };
     }
+    if (error.code === 'admin_work_autotune_failed') {
+      return { status: 'error', message: '경제 기반 자동 밸런싱 수행에 실패했습니다.' };
+    }
   }
   return failure(error, fallback);
 }
 
 /**
- * 전역 직업 보상 정책(일일 캡, 주간 캡, 반복 감액률, 활성화 상태) 튜닝 서버 액션
+ * 1. 전역 직업 보상 정책 튜닝 서버 액션
  */
 export async function updateWorkRewardPolicy(
   _previous: ActionState,
@@ -96,7 +99,7 @@ export async function updateWorkRewardPolicy(
 }
 
 /**
- * 개별 직업 카탈로그 작업(기본 보상, 경험치, 최소 수행시간, 일일 한도, 활성 상태) 튜닝 서버 액션
+ * 2. 개별 직업 카탈로그 작업 튜닝 서버 액션
  */
 export async function updateWorkTask(
   _previous: ActionState,
@@ -170,5 +173,40 @@ export async function updateWorkTask(
     };
   } catch (error) {
     return explain(error, `[${taskName}] 작업 설정을 갱신하지 못했습니다.`);
+  }
+}
+
+/**
+ * 3. 경제 기반 직업 보상 및 일일 캡 1-클릭 자동 밸런싱 서버 액션
+ */
+export async function autoTuneWorkPolicyAction(
+  _previous: ActionState,
+  _formData: FormData,
+): Promise<ActionState> {
+  try {
+    const response = await mutate<{
+      result: {
+        previous_cap: string | null;
+        tuned_cap: number;
+        decay_percent: number;
+        status: string;
+        reason: string;
+      };
+    }>('/api/v1/admin/work/auto-tune', {
+      method: 'POST',
+      body: { idempotencyKey: idempotencyKey() },
+    });
+
+    revalidatePath(PAGE);
+    revalidatePath('/work');
+    revalidatePath('/admin/economy');
+
+    const res = response.result;
+    return {
+      status: 'ok',
+      message: `경제 기반 자동 밸런싱이 적용되었습니다 (상태: ${res.status.toUpperCase()}, 일일캡: ${res.tuned_cap} WLD, 반복감액: ${res.decay_percent}%).`,
+    };
+  } catch (error) {
+    return explain(error, '경제 기반 자동 밸런싱을 실행하지 못했습니다.');
   }
 }

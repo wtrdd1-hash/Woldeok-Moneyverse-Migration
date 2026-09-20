@@ -18,8 +18,9 @@ import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
 import { Figure } from '../economy/economy-parts';
-import type { AdminJobLevel, AdminWorkPolicy, AdminWorkTask } from '../types';
+import type { AdminJobLevel, AdminWorkPolicy, AdminWorkRealtimeStats, AdminWorkTask } from '../types';
 import { WorkPolicyTuningCard, WorkTaskTuningTable } from './admin-work-forms';
+import { WorkStatsDashboard } from './admin-work-stats';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,14 +45,18 @@ function jobLabel(code: string): string {
 
 export default async function AdminWorkPage() {
   await requireAdminConsole(AREA.href);
-  const console_ = await apiOrNull<{
-    readonly catalogue: readonly AdminWorkTask[];
-    readonly jobLevels: readonly AdminJobLevel[];
-    readonly policy: AdminWorkPolicy;
-  }>('/api/v1/admin/work');
+
+  const [console_, stats] = await Promise.all([
+    apiOrNull<{
+      readonly catalogue: readonly AdminWorkTask[];
+      readonly jobLevels: readonly AdminJobLevel[];
+      readonly policy: AdminWorkPolicy;
+    }>('/api/v1/admin/work'),
+    apiOrNull<AdminWorkRealtimeStats>('/api/v1/admin/work/stats'),
+  ]);
 
   return (
-    <div data-page="admin-work" className="mv-page mv-page--admin grid gap-5">
+    <div data-page="admin-work" className="mv-page mv-page--admin grid gap-6">
       <AdminBack />
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}
@@ -64,8 +69,23 @@ export default async function AdminWorkPage() {
         />
       ) : (
         <>
-          {/* 전역 정책 실시간 튜닝 카드 */}
-          <WorkPolicyTuningCard policy={console_.policy} />
+          {/* 실시간 직업 수행 순위 및 캡 통계 시각화 & 자동 밸런싱 대시보드 */}
+          {stats !== null && (
+            <section aria-labelledby="work-stats-dashboard" className="grid gap-4">
+              <SectionHeader
+                eyebrow="WORK STATS & AUTO-TUNING"
+                title="직업 수행 통계 시각화 및 자동 밸런싱"
+                id="work-stats-dashboard"
+              />
+              <WorkStatsDashboard stats={stats} />
+            </section>
+          )}
+
+          {/* 수동 전역 정책 정밀 튜닝 카드 */}
+          <section aria-labelledby="work-policy" className="grid gap-4">
+            <SectionHeader eyebrow="GLOBAL POLICY" title="보상 정책 수동 설정" id="work-policy" />
+            <WorkPolicyTuningCard policy={console_.policy} />
+          </section>
 
           {/* 24시간 실시간 직업 지표 요약 카드 */}
           <Card>

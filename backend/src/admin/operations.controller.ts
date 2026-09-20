@@ -8,6 +8,7 @@ import {
   Param,
   ParseUUIDPipe,
   Patch,
+  Post,
   Put,
   Query,
   Req,
@@ -25,7 +26,7 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure, isMalformedInput, isRoleRefusal } from '../core/pg-error';
-import { OperationsInputError, OperationsRepository } from './operations.repository';
+import { OperationsRepository } from './operations.repository';
 
 export class UpdateWorkPolicyDto {
   @ApiProperty({ required: false, minimum: 1, maximum: 1000000000 })
@@ -107,7 +108,6 @@ async function guarded<T>(work: () => Promise<T>, message: string): Promise<T> {
   try {
     return await work();
   } catch (error: unknown) {
-    if (error instanceof OperationsInputError) throw new BadRequestException(error.message);
     if (isRoleRefusal(error)) throw new ForbiddenException('this screen needs a higher role');
     if (isMalformedInput(error)) throw new BadRequestException(message);
     if (isExpectedCommandFailure(error)) throw new BadRequestException(message);
@@ -138,6 +138,31 @@ export class AdminWorkOperationsController {
       'the work console could not be read',
     );
     return { catalogue, jobLevels, policy };
+  }
+
+  @Get('stats')
+  @ApiOperation({ summary: 'Real-time 24h work ranking, daily cap usage buckets, and 7-day trend' })
+  async stats(@Req() request: RequestWithSession) {
+    const actor = requireUserId(request);
+    const repository = required(this.operations);
+    const stats = await guarded(
+      () => repository.getWorkRealtimeStats(actor),
+      'the work statistics could not be calculated',
+    );
+    return { stats };
+  }
+
+  @Post('auto-tune')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Automatically calculate and tune daily reward cap based on economy health' })
+  async autoTune(@Req() request: RequestWithSession) {
+    const actor = requireUserId(request);
+    const repository = required(this.operations);
+    const result = await guarded(
+      () => repository.autoTuneWorkPolicy(actor),
+      'auto-tuning work policy failed',
+    );
+    return { result };
   }
 
   @Put('policy')
