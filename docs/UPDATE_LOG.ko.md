@@ -1,22 +1,21 @@
-## v2026.09.20.313 — 동적 사이트맵(Sitemap Index) 체계 구축 및 Next.js ImageResponse 기반 실시간 동적 OG 이미지 프리뷰 카드 엔진 도입
+## v2026.09.20.313 — 기획서(PLAYER_MARKETPLACE_CRAFTING_SPEC) 기반 플레이어 마켓플레이스 제작(Crafting) & 아이템 거래소(P0) 인터랙션 시스템 구축
 
-- 브랜치: `feat/dynamic-sitemap-og-v2026.09.20.313`, 베이스 `2625dcc`.
-- **Sitemap Index 및 동적 서브 사이트맵 엔드포인트 분리 구축**:
-  - `/sitemap-index.xml`: 표준 `<sitemapindex>` XML 문서를 생성하여 전체 서브 사이트맵을 하나로 체계적으로 바인딩.
-  - `/sitemap-static.xml`: 14개 핵심 정적 공개 라우트의 실시간 타임스탬프 XML 제공 (`search-indexing.test.ts` 100% 영속 호환).
-  - `/sitemap-announcements.xml`: `/api/v1/announcements`와 연동되어 모든 실시간 운영 공지사항의 상세 URL과 발행일자(`lastmod`) 자동 색인.
-  - `/sitemap-board.xml`: `/api/v1/board/public/stock-posts`와 연동되어 커뮤니티 공개 토론 및 공략 게시글의 상세 URL 자동 색인.
-  - `/sitemap-stocks.xml`: `/api/v1/stocks`와 연동되어 상장된 전체 가상 주식 종목의 상세 시세 페이지 URL 자동 색인.
-  - `robots.ts`: `sitemap` 디렉티브에 `sitemap.xml`, `sitemap-index.xml`, `sitemap-announcements.xml`, `sitemap-board.xml`, `sitemap-stocks.xml`을 배열로 공식 등록.
-- **Next.js ImageResponse 기반 실시간 동적 오픈 그래프(OG) 이미지 생성기 (`/api/og`)**:
-  - 1200x630 고해상도 다크 네온 핀테크 테마 카드를 렌더링하는 Edge API 엔드포인트 신설.
-  - 짙은 흑연/인디고 배경에 네온 배지(NOTICE, BOARD, STOCK, QUEST), 메인 타이틀, 서브 설명, 동적 메트릭(주가, 작성자, 날짜) 레이아웃 지원.
-  - 시스템 웹 안전 산세리프 및 인라인 SVG 벡터 심볼을 탑재하여 외부 폰트 실패 없는 무중단 안정적 렌더링 보장.
-- **주요 공개/공유 라우트 전수 OG 카드 연결**:
-  - 가상 주식(`/stocks/[symbol]`), 커뮤니티 게시글(`/board/[postId]`), 공지사항(`/announcements/[announcementId]`), 퀘스트(`/quests`), 메인 홈(`/`)의 메타데이터에 `buildOgImageUrl` 기반 동적 프리뷰 카드 연결.
-- **단위 테스트 및 회귀 방지 검증**:
-  - `src/lib/seo.test.ts`에 `buildOgImageUrl`, `buildUrlsetXml`, `buildSitemapIndexXml` 단위 테스트 추가.
-  - `src/app/search-indexing.test.ts`에 동적 사이트맵 엔드포인트 목록 검증 테스트 추가.
+- 브랜치: `feat/marketplace-crafting-v2026.09.20.313`, 베이스 `5a41cba`.
+- **기획서 P0 제작 작업대 (Crafting Workbench) 전면 도입**:
+  - `P0_CRAFTING_RECIPES` 4종(달빛 에메랄드 프레임 염색, 고대 황금 유물 완벽 복원, 마스터 칭호 명판 골드 각인, 스마트 물류 35% 터보 부스트) 정식 탑재.
+  - 레시피별 필요 재료(보유량 / 필요량) 실시간 비교 및 제작 가능 상태 감지기(`CraftingPanel`) 연동.
+  - 제작 확인 모달: 제작 수수료 WLD 소각(HARD_SINK) 및 결과물 즉시 인벤토리 지급 인터랙션 완비.
+- **P0 마켓플레이스 거래소 (Market Listings) 둘러보기 및 원자적 구매 모달**:
+  - 고정가격 등록 방식의 유저 간 마켓플레이스 둘러보기, 실시간 검색, 카테고리 필터(프레임, 전시품, 사업체 부스트, 재료, 네임플레이트), 가격순 정렬 지원.
+  - 원자적 구매 모달(`MarketListingsView`): 내 WLD 잔액 실시간 비교, 1% 소각 수수료(`SINK_MARKETPLACE_FEE`) 및 판매자 99% 안전 정산 구조 시각화, 구매 즉시 인벤토리 보관함 이전.
+- **내 물품 판매 등록 (Sell Listing Modal) 및 수수료 자동 계산기**:
+  - 내 보유 아이템을 선택하여 마켓에 고정가격으로 판매 등록하는 모달 구현.
+  - 기획서 공식 기반 실시간 수수료 자동 계산: 등록 수수료 `max(25 WLD, ceil(price * 0.001))` 및 판매 수수료 `1%`, 정산 예상 순수령액 실시간 미리보기 제공.
+- **내 판매 등록 관리 및 에스크로 취소 반환 (`MyListingsView`)**:
+  - 에스크로에 보관 중인 내 판매 등록 물품 목록 확인 및 등록 취소 시 원자적 보관함 반환 인터랙션 구현.
+- **단위 테스트 검증**:
+  - `src/app/marketplace/crafting-recipes.test.ts` 신설을 통해 등록 수수료/판매 수수료/순수령액 계산 공식 및 레시피 무결성 100% 검증.
+
 
 ## v2026.09.20.312 — 전역 SEO 최적화, Schema.org 구조화 데이터(JSON-LD) 스위트, Hreflang 및 검색엔진 디렉티브 완비
 

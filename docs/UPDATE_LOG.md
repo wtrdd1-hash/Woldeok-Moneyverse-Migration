@@ -1,24 +1,23 @@
 # Update Log
 
-## v2026.09.20.313 — Dynamic Sitemap Index Architecture & Real-Time Open Graph (OG) Preview Engine with Next.js ImageResponse
+## v2026.09.20.313 — Player Marketplace Crafting Workbench & Item Trading Exchange (P0) System
 
-- Branch: `feat/dynamic-sitemap-og-v2026.09.20.313`, base `2625dcc`.
-- **Sitemap Index & Dedicated Sub-Sitemap Endpoints**:
-  - `/sitemap-index.xml`: Emits standard XML `<sitemapindex>` aggregating all sub-sitemaps into a coherent search discovery tree.
-  - `/sitemap-static.xml`: Delivers 14 core static public routes with real-time timestamps (preserving 100% regression compatibility with `search-indexing.test.ts`).
-  - `/sitemap-announcements.xml`: Dynamically queries `/api/v1/announcements` to index all published administrative notices with real-time `lastmod` metadata.
-  - `/sitemap-board.xml`: Dynamically queries `/api/v1/board/public/stock-posts` to index all community discussion posts and game strategies.
-  - `/sitemap-stocks.xml`: Dynamically queries `/api/v1/stocks` to index all listed virtual equity quote pages (`/stocks/[symbol]`).
-  - `robots.ts`: Registered all sitemap endpoints in the `sitemap` directive array for Google, Naver, and Bing crawler discovery.
-- **Real-Time Dynamic Open Graph Image Generator (`/api/og`) with Next.js ImageResponse**:
-  - Built 1200x630 high-definition Dark Neon FinTech card renderer on Next.js Edge runtime.
-  - Features gradient backdrop, Woldeok Moneyverse brand glyph, dynamic category badge (NOTICE, BOARD, STOCK, QUEST), bold headline, descriptive snippet, and key metrics (share price, author, date).
-  - Uses system web-safe sans-serif typography and inline SVG vectors to guarantee zero network latency and 100% crash-free rendering.
-- **Dynamic OG Social Preview Integration Across Public Routes**:
-  - Bound dynamic cards to `/stocks/[symbol]`, `/board/[postId]`, `/announcements/[announcementId]`, `/quests`, and home (`/`).
-- **Unit & Regression Verification**:
-  - Added test suites for `buildOgImageUrl`, `buildUrlsetXml`, and `buildSitemapIndexXml` in `src/lib/seo.test.ts`.
-  - Added sitemap index registry tests in `src/app/search-indexing.test.ts`.
+- Branch: `feat/marketplace-crafting-v2026.09.20.313`, base `5a41cba`.
+- **Authoritative P0 Crafting Workbench Architecture**:
+  - Implemented `P0_CRAFTING_RECIPES` supporting 4 core recipes (Moonlight Emerald Frame Tinting, Ancient Relic Restoration, Master Gold Nameplate Engraving, Smart Logistics 35% Turbo Boost).
+  - Material prerequisite verifier (`CraftingPanel`) comparing held inventory quantities vs required recipe items in real-time.
+  - Interactive Crafting Confirmation Dialog: Displays WLD crafting fee burning (HARD_SINK) and immediate inventory delivery with 1.2s tactile progress feedback.
+- **P0 Fixed-Price Marketplace Explorer (Market Listings) & Atomic Purchase Flow**:
+  - Fixed-price peer-to-peer marketplace browsing with real-time text search, category filters (frames, relics, business boosts, materials, nameplates), and multi-criteria sorting.
+  - Atomic Buy Dialog (`MarketListingsView`): Real-time WLD balance verification, 1% deflationary burning fee (`SINK_MARKETPLACE_FEE`), 99% seller net payout visualization, and escrow inventory transfer.
+- **Sell Listing Creation Dialog & Real-Time Fee Calculator**:
+  - Created modal interface allowing members to list inventory items at fixed prices with automated fee estimation.
+  - Implements authoritative fee formulas: Listing Fee `max(25 WLD, ceil(price * 0.001))` and Sale Fee `1%` (`ceil(price * 0.01)`), projecting seller net proceeds dynamically.
+- **Active Escrow Listings Management & Instant Cancellation (`MyListingsView`)**:
+  - Management dashboard for active seller listings with one-tap cancellation restoring items atomically from escrow back to personal vault.
+- **Comprehensive Unit Testing**:
+  - Added `src/app/marketplace/crafting-recipes.test.ts` validating fee calculation boundaries, net proceeds, and crafting recipe integrity.
+
 
 ## v2026.09.20.312 — Comprehensive Site-Wide SEO Optimization, Schema.org JSON-LD Suite, Hreflang & Discovery Directives
 
