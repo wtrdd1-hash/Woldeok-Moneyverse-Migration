@@ -182,18 +182,18 @@ export function ShopStoreView({
                   <span
                     className={cn(
                       'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider',
-                      item.rarity === 'mythic' && 'bg-red-500/20 text-red-400 border border-red-500/30',
-                      item.rarity === 'legendary' && 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
-                      item.rarity === 'epic' && 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
-                      item.rarity === 'rare' && 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-                      item.rarity === 'uncommon' && 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
-                      item.rarity === 'common' && 'bg-zinc-500/20 text-zinc-400 border border-zinc-500/30',
+                      item.rarity === 'mythic' && 'bg-red-50 text-red-800 border border-red-200 dark:bg-red-950/50 dark:text-red-200 dark:border-red-800',
+                      item.rarity === 'legendary' && 'bg-amber-50 text-amber-800 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800',
+                      item.rarity === 'epic' && 'bg-purple-50 text-purple-800 border border-purple-200 dark:bg-purple-950/50 dark:text-purple-200 dark:border-purple-800',
+                      item.rarity === 'rare' && 'bg-blue-50 text-blue-800 border border-blue-200 dark:bg-blue-950/50 dark:text-blue-200 dark:border-blue-800',
+                      item.rarity === 'uncommon' && 'bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800',
+                      item.rarity === 'common' && 'bg-zinc-100 text-zinc-800 border border-zinc-300 dark:bg-zinc-800 dark:text-zinc-200 dark:border-zinc-700',
                     )}
                   >
                     {item.rarity}
                   </span>
                   {isLimited && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1">
+                    <span className="flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
                       <Sparkles className="size-3" />
                       LIMITED {item.quantity !== null ? `${item.quantity}개` : ''}
                     </span>
@@ -232,7 +232,7 @@ export function ShopStoreView({
                     <NameplateWithTitle cosmetics={{ nameplate: item }} username={currentUsername} />
                   )}
                   {item.category === 'title' && (
-                    <span className="text-sm font-extrabold text-amber-400 tracking-wider px-3 py-1 rounded bg-black/40 border border-amber-500/30">
+                    <span className="rounded border border-amber-700 bg-neutral-900 px-3 py-1 text-sm font-extrabold tracking-wider text-amber-200">
                       {item.name}
                     </span>
                   )}
@@ -261,8 +261,8 @@ export function ShopStoreView({
               <div className="pt-3 border-t border-border/40">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-xs text-muted-foreground">가격</span>
-                  <div className="flex items-center gap-1 font-extrabold text-sm text-amber-500">
-                    <Coins className="size-4 text-amber-500" />
+                  <div className="flex items-center gap-1 font-extrabold text-sm text-amber-700 dark:text-amber-300">
+                    <Coins className="size-4 text-amber-700 dark:text-amber-300" />
                     <span>{groupDigits(item.price)} WLD</span>
                   </div>
                 </div>
@@ -279,7 +279,7 @@ export function ShopStoreView({
                   {isOwned && item.purchase_limit === 'account_one' ? (
                     <button
                       disabled
-                      className="flex-1 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center gap-1"
+                      className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-emerald-300 bg-emerald-50 py-2 text-xs font-bold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
                     >
                       <Check className="size-3.5" />
                       <span>보유 중</span>
@@ -315,7 +315,7 @@ export function ShopStoreView({
           <div className="w-full max-w-md rounded-3xl border border-amber-500/30 bg-card p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Sparkles className="size-5 text-amber-500" />
+                <Sparkles className="size-5 text-amber-700 dark:text-amber-300" />
                 <h3 className="text-base font-bold text-foreground">피팅룸 · 실시간 착용 미리보기</h3>
               </div>
               <button
@@ -348,8 +348,8 @@ export function ShopStoreView({
             <div className="text-center mb-5">
               <h4 className="font-bold text-base text-foreground">{previewItem.name}</h4>
               <p className="text-xs text-muted-foreground mt-1">{previewItem.description}</p>
-              <div className="flex items-center justify-center gap-1 font-extrabold text-amber-500 text-lg mt-2">
-                <Coins className="size-5 text-amber-500" />
+              <div className="flex items-center justify-center gap-1 font-extrabold text-amber-700 dark:text-amber-300 text-lg mt-2">
+                <Coins className="size-5 text-amber-700 dark:text-amber-300" />
                 <span>{groupDigits(previewItem.price)} WLD</span>
               </div>
             </div>
@@ -390,7 +390,7 @@ export function ShopStoreView({
                 <p className="text-xs text-muted-foreground mt-0.5">{buyingItem.category}</p>
               </div>
               <div className="text-right">
-                <p className="font-extrabold text-sm text-amber-500">
+                <p className="font-extrabold text-sm text-amber-700 dark:text-amber-300">
                   {groupDigits(buyingItem.price)} WLD
                 </p>
                 <p className="text-[11px] text-muted-foreground">내 잔액: {groupDigits(userBalance)} WLD</p>
@@ -398,7 +398,7 @@ export function ShopStoreView({
             </div>
 
             {buyStatus && (
-              <div className="mb-4 text-center text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl py-2">
+              <div className="mb-4 text-center text-xs font-bold text-amber-800 bg-amber-50 border border-amber-300 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800 rounded-xl py-2">
                 {buyStatus}
               </div>
             )}

@@ -49,7 +49,7 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
             Woldeok Moneyverse
           </p>
           <span className="inline-flex items-center gap-2 text-[11px] text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-emerald-400" />
+            <span className="size-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400" />
             <T korean="서비스 연결됨" english="Connected" />
           </span>
         </div>

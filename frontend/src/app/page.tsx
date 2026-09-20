@@ -89,7 +89,7 @@ export default async function HomePage() {
             <span className="text-base">🌙</span>
             <p className="eyebrow text-primary font-bold">Woldeok Moonlight</p>
           </div>
-          <h2 id="status-panel-title" className="mt-2 text-2xl font-black text-white flex items-center gap-2">
+          <h2 id="status-panel-title" className="mt-2 flex items-center gap-2 text-2xl font-black text-foreground">
             <T korean="오늘의 현황" english="Today at a glance" />
             <span className="size-2 rounded-full bg-primary animate-pulse" />
           </h2>
@@ -255,20 +255,20 @@ function StatusRowItem({
   readonly children: React.ReactNode;
 }) {
   return (
-    <li className="flex items-center gap-3 rounded-[14px] bg-white/[0.06] p-3">
+    <li className="flex items-center gap-3 rounded-[10px] border border-border/70 bg-muted/55 p-3">
       <span
         aria-hidden
-        className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-white/10 text-sm"
+        className="grid size-9 shrink-0 place-items-center rounded-[8px] bg-secondary text-sm text-secondary-foreground"
       >
         {glyph}
       </span>
       <span className="min-w-0 grid gap-0.5">
         <b className="truncate text-sm">{term}</b>
-        <small className="truncate text-xs text-white/65">{detail}</small>
+        <small className="truncate text-xs text-muted-foreground">{detail}</small>
       </span>
       <Link
         href={href}
-        className="ml-auto flex shrink-0 items-center gap-1.5 text-xs font-extrabold text-highlight"
+        className="ml-auto flex shrink-0 items-center gap-1.5 text-xs font-extrabold text-primary"
       >
         {children}
       </Link>

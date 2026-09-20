@@ -19,6 +19,14 @@ test('control-plane-only paths do not pretend to be application runtime', () => 
   );
 });
 
+test('backup and restore tooling is release control plane', () => {
+  assert.equal(classifyPaths(['scripts/backup/verify-backup-evidence.mjs']), 'CONTROL_PLANE_ONLY');
+  assert.equal(
+    classifyPaths(['scripts/backup/verify-backup-evidence.mjs', 'package.json']),
+    'MIXED',
+  );
+});
+
 test('application paths are runtime relevant even with documentation', () => {
   assert.equal(
     classifyPaths(['backend/src/app.module.ts', 'docs/UPDATE_LOG.md']),
