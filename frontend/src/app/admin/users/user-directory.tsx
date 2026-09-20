@@ -450,7 +450,7 @@ function RankBadge({ rank }: { readonly rank: number }) {
   }
   if (rank === 2) {
     return (
-      <span className="inline-flex items-center justify-center font-bold text-xs size-7 rounded-full bg-slate-400/20 text-slate-300 border border-slate-400/40 shadow-xs">
+      <span className="inline-flex items-center justify-center font-bold text-xs size-7 rounded-full bg-slate-200 text-slate-700 border border-slate-400 dark:bg-slate-700/40 dark:text-slate-200 dark:border-slate-500 shadow-xs">
         🥈 2
       </span>
     );

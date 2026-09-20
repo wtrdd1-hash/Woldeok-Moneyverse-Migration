@@ -89,14 +89,14 @@ export function CareerTasksBoard({
                 variant={filter === 'my_job' ? 'default' : 'outline'}
                 onClick={() => setFilter('my_job')}
                 className={`font-semibold text-xs transition-all ${
-                  filter === 'my_job' ? 'bg-amber-600 hover:bg-amber-500 text-white shadow-sm' : ''
+                  filter === 'my_job' ? 'bg-amber-700 hover:bg-amber-800 text-white shadow-sm' : ''
                 }`}
               >
                 <span>{activeMeta?.icon ?? '💼'}</span>
                 <span className="ml-1.5">
                   {isEn ? `My Career: ${activeJobName}` : `내 직업 전용 (${activeJobName})`}
                 </span>
-                <Badge className="ml-2 bg-black/20 text-white border-0 text-[10px] px-1.5 py-0">
+                <Badge className="ml-2 border-0 bg-amber-950/15 px-1.5 py-0 text-[10px] text-amber-950 dark:bg-black/25 dark:text-white">
                   {myTasks.length}
                 </Badge>
               </Button>
@@ -121,7 +121,7 @@ export function CareerTasksBoard({
           {activeJobType && (
             <div className="flex items-center gap-2 text-xs">
               <Badge variant="secondary" className="flex items-center gap-1.5 py-1 px-2.5">
-                <span className="text-emerald-400 font-mono font-bold">
+                <span className="text-emerald-700 dark:text-emerald-300 font-mono font-bold">
                   {myCompletedToday}회 완료 · 반복 가능
                 </span>
                 <span className="text-muted-foreground">
@@ -181,19 +181,19 @@ export function CareerTasksBoard({
                         variant={isActiveJob ? 'default' : 'outline'}
                         className={`text-xs ${
                           isActiveJob
-                            ? 'bg-amber-500/20 text-amber-400 border-amber-500/30 font-semibold'
+                            ? 'bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-950/50 dark:text-amber-200 dark:border-amber-800 font-semibold'
                             : ''
                         }`}
                       >
                         {meta?.icon ?? '💼'} {jobLabel(task.job_type, locale)}
                       </Badge>
                       {isActiveJob && (
-                        <Badge className="bg-amber-500/20 text-amber-300 border-0 text-[10px] px-1.5 py-0 font-bold">
+                        <Badge className="bg-amber-50 text-amber-800 border-0 dark:bg-amber-950/50 dark:text-amber-200 text-[10px] px-1.5 py-0 font-bold">
                           ✨ {isEn ? 'Mine' : '내 직업'}
                         </Badge>
                       )}
                       {task.recommended && (
-                        <Badge className="bg-emerald-500/15 text-emerald-300 border-emerald-500/30 text-[10px] px-1.5 py-0 font-bold">
+                        <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800 text-[10px] px-1.5 py-0 font-bold">
                           ★ {isEn ? 'Today’s pick' : '오늘 추천'}
                         </Badge>
                       )}
@@ -216,7 +216,7 @@ export function CareerTasksBoard({
                       <span className="text-muted-foreground block text-[11px]">
                         {isEn ? 'WLD this run' : '이번 지급 WLD'}
                       </span>
-                      <span className="font-bold text-emerald-400 font-mono">
+                      <span className="font-bold text-emerald-700 dark:text-emerald-300 font-mono">
                         {task.reward_preview === null ? '—' : `+${task.reward_preview} WLD`}
                       </span>
                     </div>
@@ -224,7 +224,7 @@ export function CareerTasksBoard({
                       <span className="text-muted-foreground block text-[11px]">
                         {isEn ? 'Proficiency EXP' : '숙련도 EXP'}
                       </span>
-                      <span className="font-bold text-amber-400 font-mono">
+                      <span className="font-bold text-amber-700 dark:text-amber-300 font-mono">
                         {task.experience_preview === null ? '—' : `+${task.experience_preview} EXP`}
                       </span>
                     </div>
@@ -235,7 +235,7 @@ export function CareerTasksBoard({
                         ? `Duration: ${durationLabel(task.minimum_duration_seconds, locale)}`
                         : `소요 시간: ${durationLabel(task.minimum_duration_seconds, locale)}`}
                     </span>
-                    <span className="text-emerald-400 font-semibold">
+                    <span className="text-emerald-700 dark:text-emerald-300 font-semibold">
                       {dailyQuotaLabel(task.taken_today, task.daily_limit, isEn)}
                     </span>
                   </div>

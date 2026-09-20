@@ -294,7 +294,7 @@ export function CompoundInterestCard({
         <form action={doClaim}>
           <SubmitButton
             disabled={compareAmounts(bank, '0') <= 0 || compareAmounts(unclaimed, '1') < 0}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-11 shadow-sm"
+            className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold h-11 shadow-sm"
           >
             <Sparkles className="mr-2 size-4" />
             <T korean="복리 이자 원클릭 정산 수령" english="Claim Accrued Interest" />
@@ -478,7 +478,7 @@ export function SmartLoanCard({
               </Field>
             </FieldGroup>
 
-            <SubmitButton className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold">
+            <SubmitButton className="w-full bg-purple-700 hover:bg-purple-800 text-white font-bold">
               <T korean="신용 대출 신청 및 즉시 입금" english="Apply & Receive Smart Loan" />
             </SubmitButton>
             <ActionAlert state={borrowState} />
@@ -607,7 +607,7 @@ export function VirtualBondsCard({
             </Button>
           </div>
 
-          <SubmitButton className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold">
+          <SubmitButton className="w-full bg-amber-700 hover:bg-amber-800 text-white font-bold">
             <T korean="가상 국채 매입 신청" english="Purchase Virtual Bond" />
           </SubmitButton>
           <ActionAlert state={purchaseState} />
@@ -652,7 +652,7 @@ export function VirtualBondsCard({
                   {bond.is_matured && (
                     <form action={doRedeem} className="shrink-0">
                       <input type="hidden" name="bondId" value={bond.id} />
-                      <SubmitButton size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-9">
+                      <SubmitButton size="sm" className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold h-9">
                         <Coins className="mr-1.5 size-4" />
                         <T korean="만기 원리금 수령" english="Claim Payout" />
                       </SubmitButton>

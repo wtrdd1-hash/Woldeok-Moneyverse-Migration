@@ -9,7 +9,7 @@
   "scripts": {
     "build": "pnpm -r --sequential build",
     "typecheck": "pnpm --filter @moneyverse/contract build && pnpm -r --sequential typecheck",
-    "test": "pnpm api:contract:check && pnpm --filter @moneyverse/contract build && pnpm -r --sequential test",
+    "test": "node --test scripts/backup/verify-backup-evidence.test.mjs scripts/release/verify-main-required-checks.test.mjs && pnpm api:contract:check && pnpm --filter @moneyverse/contract build && pnpm -r --sequential test",
     "lint": "eslint .",
     "format": "prettier --write .",
     "api:contract:generate": "pnpm --filter @moneyverse/contract build && node scripts/enrich-mobile-api-contract.mjs && node scripts/generate-mobile-api-schema-reference.mjs",

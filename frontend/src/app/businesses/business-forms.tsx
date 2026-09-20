@@ -61,9 +61,9 @@ export function SettleV2Button({
 
   if (isSettledToday) {
     return (
-      <div className="flex items-center justify-center w-full">
-        <Badge className="w-full justify-center bg-emerald-500/15 text-emerald-500 border-emerald-500/30 px-3 py-2.5 font-bold text-xs min-h-11 rounded-xl">
-          ✓ 오늘 정산 완료 (00:00 갱신)
+      <div className="flex items-center gap-2">
+        <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800 px-3 py-1.5 font-semibold text-xs">
+          ✓ 오늘 정산 완료 (내일 00시 갱신)
         </Badge>
       </div>
     );
@@ -73,8 +73,8 @@ export function SettleV2Button({
     <div className="grid gap-2 w-full">
       <form action={action} className="w-full">
         <input type="hidden" name="ownershipId" value={ownershipId} />
-        <SubmitButton className="w-full font-bold shadow-md bg-emerald-600 hover:bg-emerald-700 text-white min-h-11 rounded-xl text-sm">
-          ⚡ 오늘 수익 일괄 정산 (WLD 입금)
+        <SubmitButton className="w-full font-bold shadow-md bg-emerald-700 hover:bg-emerald-800 text-white">
+          ⚡ 일일 정산 수령 (WLD 입금)
         </SubmitButton>
       </form>
       <ActionAlert state={state} />
