@@ -6,9 +6,9 @@ describe('responsive brand visibility', () => {
   const brand = readFileSync(join(__dirname, 'brand.tsx'), 'utf8');
   const header = readFileSync(join(__dirname, 'site-header.tsx'), 'utf8');
 
-  it('keeps the brand in the DOM and switches visibility with CSS breakpoints', () => {
-    expect(brand).toContain('hidden min-[360px]:inline-flex');
-    expect(brand).toContain('hidden min-[520px]:inline-flex');
+  it('keeps the brand in the DOM and visible across mobile and desktop breakpoints', () => {
+    expect(brand).toContain('inline-flex min-h-11 items-center');
+    expect(brand).toContain('text-xs min-[400px]:text-sm sm:text-base');
     expect(brand).not.toContain('window.innerWidth');
     expect(brand).not.toContain('matchMedia');
   });
@@ -26,7 +26,7 @@ describe('mobile touch targets', () => {
   const header = readFileSync(join(__dirname, 'site-header.tsx'), 'utf8');
 
   it('keeps primary header controls at the 44px mobile target floor', () => {
-    expect(brand).toContain('min-[360px]:inline-flex min-h-11');
+    expect(brand).toContain('min-h-11');
     expect(header).toContain('className="size-11 rounded-[10px] lg:hidden shrink-0"');
     expect(header).toContain('className="h-11 rounded-[10px] sm:rounded-[12px]');
   });
