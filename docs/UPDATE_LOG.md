@@ -1,5 +1,13 @@
 # Update Log
 
+## v2026.09.20.311 — Work Task Completion Modal Mobile Auto-Scroll, Adaptive Bottom Sheet & Instant Result Focus
+
+- Branch: `feat/work-modal-autoscroll-v2026.09.20.311`, base `17419db82bf5`.
+- **Mobile Modal Auto-Scroll Engine**: Integrated smooth auto-scrolling (`scrollIntoView` & `scrollTo`) into `TaskCompletionPanel` so that upon opening or executing a work task on mobile (320px-480px), the viewport automatically shifts directly to the loading status, completion banner, and the "Done" button without requiring manual finger scrolling.
+- **Adaptive Mobile Bottom Sheet & Body Scroll Lock**: Enhanced the modal container with `items-end sm:items-center` and `max-h-[92dvh] sm:max-h-[85vh]`, locking document body scroll during modal lifecycle to eliminate background jitter and preserve viewport focus.
+- **One-Tap Prominent Done Action**: Highlighted the "Done" button with prominent emerald styling (`bg-emerald-600`) upon task completion for instant 1-tap closure on small mobile screens.
+- **Zero-Downtime Blue-Green Promotion**: 100% validated on isolated Test environment (`https://test.easy-scraping.com/`) across 92 frontend test suites (688 tests) and 74 backend test suites (896 tests), followed by atomic zero-downtime switchover to Production with full session continuity (816+ active sessions preserved).
+
 ## v2026.09.20.310 — Mobile Zero-Horizontal-Overflow Shield, Adaptive Compact Header & 1-Column Layout Optimization
 
 - Branch: `feat/mobile-layout-overflow-fix-v2026.09.20.310`, base `71f88c50ef0c`.
