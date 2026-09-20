@@ -1,5 +1,14 @@
 # Update Log
 
+## v2026.09.20.301 — Frontend colour and contrast audit
+
+- Branch: `feat/frontend-contrast-v2026.09.20.301`, base `0b973824d85379119813f9b9f53cd7cdd4ddeb93`.
+- Split light/dark semantic palettes, removed hard-coded light chrome, and corrected low-contrast text/action colours across home, shop, work, inventory, businesses and admin surfaces.
+- Light-mode tertiary text improved from 3.77:1 on the page background to 4.90:1; tested dark-mode foreground roles are 6.14:1 or higher.
+- Added automated WCAG contrast regression coverage and constrained user-selected point colours so white primary-button text stays readable.
+- Reference corpus uses SeeClick 10k web subset, WebUI 41,970 web screens and RICO 66k+ UI screens, combined with WCAG/GOV.UK/Atlassian/Material guidance.
+- Production promotion remains blocked until exact-SHA Test verification and the broader full-frontend rebuild gate pass.
+
 ## v2026.09.20.297 — Frontend rebuild foundation
 
 - Branch: `feat/frontend-rebuild-v2026.09.20.297`, base `4dcd2ba112ae57565eed7444fe1d36512b926a3b`.

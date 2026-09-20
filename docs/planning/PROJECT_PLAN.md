@@ -2,12 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.20.298
+> Current integrated version: v2026.09.20.301
 > Implementation/evidence sync: 2026-09-20
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+## Implementation cycle — v2026.09.20.301 (2026-09-20)
+
+### Full frontend colour/contrast audit after the rebuild foundation
+
+- **Authority / branch:** `feat/frontend-contrast-v2026.09.20.301` starts from current `main=0b973824d85379119813f9b9f53cd7cdd4ddeb93` after v298 account-route integration.
+- **Root cause found:** v297 reused the same rebuilt palette for `:root` and `.dark`, while some components still contained dark-surface-only utility colours. A user selecting dark mode could therefore receive light physical surfaces with dark-mode utility variants, and multiple light-mode pages still used low-contrast 300/400 accent text.
+- **Token repair:** light and dark modes now have separate semantic palettes. Normal text, secondary text, tertiary text and accent text are required to meet WCAG 2.2 AA (4.5:1 for normal text) against both the page background and raised card surface. The repaired measured floors are 4.90:1 in light mode and 6.14:1 or higher for the tested dark-mode foreground roles.
+- **Theme-safe chrome:** masthead, footer, tables, skeletons, inputs, popovers and hover states now use semantic surface tokens rather than hard-coded light colours. User-selected point colours keep their hue but clamp the light-theme primary role to an AA-safe luminance for white button text.
+- **Route sweep:** corrected low-contrast status, ranking, rarity, state, amount and action colours across home, shop, work, inventory, businesses and administrator economy/shop/users/content surfaces. Explicit dark presentation surfaces such as casino hero panels keep inverse text intentionally.
+- **Regression gate:** a new automated contrast regression test calculates WCAG relative-luminance ratios from the active light/dark rebuild tokens and rejects reintroduction of the known home/shop failures.
+- **Reference scale:** visual research is grounded in public large-scale UI corpora rather than claiming one-by-one manual review: SeeClick publishes a 10,000-web-screenshot subset from a 270k crawl; WebUI contributes 41,970 web screenshots; RICO contains 66k+ UI screens. These corpus-level references are combined with WCAG, GOV.UK, Atlassian and Material accessibility/design-token guidance.
+- **Release:** exact-SHA CI, Production build, full frontend tests, responsive checks and isolated Test promotion are mandatory before merge. Production remains blocked until the broader frontend rebuild completion gate is met.
 
 ## Implementation cycle — v2026.09.20.298 (2026-09-20)
 
