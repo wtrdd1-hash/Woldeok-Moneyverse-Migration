@@ -57,7 +57,7 @@ const plexMono = IBM_Plex_Mono({
   display: 'swap',
 });
 
-const indexingEnabled = process.env.SEO_INDEXING_ENABLED === 'true';
+const indexingEnabled = process.env.SEO_INDEXING_ENABLED !== 'false';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_BASE_URL ?? 'https://easy-scraping.com'),
@@ -83,6 +83,10 @@ export const metadata: Metadata = {
   ],
   verification: {
     google: process.env.SEARCH_CONSOLE_VERIFICATION || process.env.GOOGLE_SITE_VERIFICATION || undefined,
+    other: {
+      'naver-site-verification':
+        process.env.NAVER_SITE_VERIFICATION || 'f77f52636d9465715f5d6f1dfc2ad65b68df9f2e',
+    },
   },
   robots: {
     index: indexingEnabled,
