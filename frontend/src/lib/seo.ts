@@ -1,4 +1,4 @@
-import { jsonLd } from './json-ld';
+import { jsonLd as _jsonLd } from './json-ld';
 
 export const APP_BASE_URL = (
   process.env.APP_BASE_URL || 'https://easy-scraping.com'

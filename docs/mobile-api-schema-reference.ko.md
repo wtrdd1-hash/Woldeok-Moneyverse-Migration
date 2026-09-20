@@ -617,7 +617,7 @@ _요청 본문 없음._
 | catalogue[].approved_24h | true | string |  |
 | catalogue[].rejected_24h | true | string |  |
 | catalogue[].paid_24h | true | string |  |
-| catalogue[].last_assigned_at | true | null \| string (date-time) |  |
+| catalogue[].last_assigned_at | true | null \| string |  |
 | jobLevels[] | true | object[] |  |
 | jobLevels[] | true | object |  |
 | jobLevels[].job_type | true | string |  |
@@ -628,7 +628,7 @@ _요청 본문 없음._
 | jobLevels[].active_7d_count | true | string |  |
 | policy | true | object |  |
 | policy.policy_id | true | null \| number |  |
-| policy.effective_at | true | null \| string (date-time) |  |
+| policy.effective_at | true | null \| string |  |
 | policy.daily_cap | true | null \| string |  |
 | policy.weekly_cap | true | null \| string |  |
 | policy.repeat_decay_percent | true | null \| number |  |

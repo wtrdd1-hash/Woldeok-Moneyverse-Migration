@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShoppingBag, Hammer, PackageOpen, Boxes, PlusCircle, Coins, Flame, ArrowUpRight } from 'lucide-react';
+import { ShoppingBag, Hammer, PackageOpen, Boxes, PlusCircle, Coins, Flame, ArrowUpRight as _ArrowUpRight } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,8 +29,8 @@ interface MarketplaceTabsProps {
 export function MarketplaceTabs({
   initialHoldings,
   userBalanceWld,
-  categoriesList,
-  rarities,
+  categoriesList: _categoriesList,
+  rarities: _rarities,
 }: MarketplaceTabsProps) {
   const [holdings, setHoldings] = useState<MarketplaceHolding[]>([...initialHoldings]);
   const [listings, setListings] = useState<MarketListing[]>([...INITIAL_MARKET_LISTINGS]);
@@ -49,7 +49,9 @@ export function MarketplaceTabs({
     try {
       const newBal = BigInt(currentBalance) - BigInt(recipe.feeWld);
       setCurrentBalance(newBal > 0n ? newBal.toString() : '0');
-    } catch {}
+    } catch {
+      // Preserve the last authoritative balance when an amount is malformed.
+    }
 
     // Add crafted item to holdings
     const newItem: MarketplaceHolding = {
@@ -86,7 +88,9 @@ export function MarketplaceTabs({
     try {
       const newBal = BigInt(currentBalance) - BigInt(boughtItem.priceWld);
       setCurrentBalance(newBal > 0n ? newBal.toString() : '0');
-    } catch {}
+    } catch {
+      // Preserve the last authoritative balance when an amount is malformed.
+    }
 
     // Mark listing as settled
     setListings((prev) =>
