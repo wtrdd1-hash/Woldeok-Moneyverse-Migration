@@ -119,13 +119,26 @@
 
 html {
   min-width: 320px;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
   background: var(--mv-bg);
   scroll-padding-top: 5.5rem;
+  box-sizing: border-box;
 }
 body {
   min-width: 320px;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
   background: var(--mv-bg);
   color: var(--mv-ink);
+  box-sizing: border-box;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 body::before {
   content: none;
@@ -141,6 +154,9 @@ body::before {
 
 .moneyverse-app-shell {
   isolation: isolate;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 .moneyverse-main {
   position: relative;
@@ -301,11 +317,24 @@ textarea::placeholder {
 }
 
 @media (max-width: 767px) {
+  html,
+  body,
+  .moneyverse-app-shell,
+  .moneyverse-main,
+  .mv-page {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
   .moneyverse-main {
-    padding-inline: 0.875rem !important;
+    padding-inline: 0.75rem !important;
   }
   [data-slot='card'] {
     border-radius: 9px;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
   .mv-page--finance table {
     font-size: 0.8125rem;

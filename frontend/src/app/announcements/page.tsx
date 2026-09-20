@@ -7,13 +7,14 @@ import { PublicAdvertisement } from '@/components/public-advertisement';
 import { publicApi } from '@/lib/api';
 import { jsonLd } from '@/lib/json-ld';
 import { formatDay } from '@/lib/money';
+import { canonicalUrl, breadcrumbJsonLd } from '@/lib/seo';
 
 export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: '운영 소식',
   description: '월덕 머니버스의 공개된 운영 공지',
-  alternates: { canonical: '/announcements' },
+  alternates: { canonical: canonicalUrl('/announcements') },
 };
 
 interface Announcement {
@@ -29,8 +30,17 @@ interface Announcement {
 export default async function AnnouncementsPage() {
   const data = await publicApi<{ announcements: Announcement[] }>('/api/v1/announcements', 60);
 
+  const announcementsBreadcrumb = breadcrumbJsonLd([
+    { name: '홈', path: '/' },
+    { name: '운영 소식', path: '/announcements' },
+  ]);
+
   return (
     <div data-page="announcements" className="mv-page mv-page--community grid gap-4">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(announcementsBreadcrumb) }}
+      />
       <PageHeader
         eyebrow="COMMUNITY NOTICE"
         title={

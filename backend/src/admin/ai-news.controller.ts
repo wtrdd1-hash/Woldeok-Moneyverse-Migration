@@ -79,7 +79,6 @@ export class GenerateAiNewsDto {
   readonly idempotencyKey?: string;
 }
 
-/** One leg: what the story does to one stock (153). */
 export class AiNewsScenarioEffectDto {
   @ApiProperty({ required: false, format: 'uuid', nullable: true, description: 'Absent or null is the whole market' })
   @IsOptional()
@@ -137,13 +136,6 @@ export class DiscardAiNewsScenarioDto {
   readonly idempotencyKey?: string;
 }
 
-/**
- * The AI newsroom, for operators. Storing the key is the one step-up act
- * here: a key is a credential, and the deployment's second factor is what
- * stands between an open console and a stored secret. Generating,
- * publishing and discarding are ordinary audited writes -- what a
- * published scenario can do to prices is bounded by 124's vocabulary.
- */
 @ApiTags('admin')
 @Controller('admin/ai-news')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
@@ -210,6 +202,18 @@ export class AiNewsController {
     return this.guarded(
       async () => ({ run: await this.service().begin({ actorUserId: requireUserId(request), ...body }) }),
       'the run could not be started',
+    );
+  }
+
+  @Post('auto-generate')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({
+    summary: 'Auto-generate and optionally publish market news based on currently registered active stocks',
+  })
+  autoGenerate(@Req() request: RequestWithSession) {
+    return this.guarded(
+      () => this.service().autoGenerateAndPublish(requireUserId(request)),
+      'failed to auto-generate AI stock news',
     );
   }
 

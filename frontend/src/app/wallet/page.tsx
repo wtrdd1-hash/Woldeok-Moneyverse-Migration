@@ -15,6 +15,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { sides } from './sides';
 import type { Overview } from './sides';
+import { ExportLedgerCsvButton } from './export-ledger-csv';
 import {
   BankPanel,
   RewardButtons,
@@ -67,6 +68,18 @@ export default async function WalletPage() {
           english="WLD is virtual game currency used only inside the community economy. It is not real money."
         />
       </PageHeader>
+
+      <nav aria-label="Wallet tools" className="flex flex-wrap gap-2">
+        <Button asChild variant="default" size="sm">
+          <Link href="/wallet"><T korean="지갑 홈" english="Wallet Home" /></Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link href="/bank"><T korean="가상 은행" english="Virtual Bank" /></Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link href="/wallet/activity"><T korean="전체 거래 내역" english="All Activity" /></Link>
+        </Button>
+      </nav>
 
       <Alert>
         <AlertTitle>
@@ -141,9 +154,12 @@ export default async function WalletPage() {
           title={<T korean="내 지갑 기록" english="Transaction History" />}
           id="activity-title"
           action={
-            <Link href="/wallet/activity" className="shrink-0 text-sm font-extrabold text-clay-ink">
-              <T korean="전체 보기 →" english="View All →" />
-            </Link>
+            <div className="flex items-center gap-2">
+              <ExportLedgerCsvButton transactions={recentTransactions} />
+              <Link href="/wallet/activity" className="shrink-0 text-sm font-extrabold text-clay-ink">
+                <T korean="전체 보기 →" english="View All →" />
+              </Link>
+            </div>
           }
         />
         <Card>

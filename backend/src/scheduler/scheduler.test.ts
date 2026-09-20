@@ -44,6 +44,16 @@ describe('the scheduler', () => {
     expect(shadow?.statement).toBeUndefined();
   });
 
+  it('schedules work.auto_tune_policy hourly to rebalance caps and reward decay', () => {
+    const autoTune = SCHEDULER_JOBS.find((candidate) => candidate.job === 'work.auto_tune_policy');
+    expect(autoTune).toMatchObject({
+      cadence: 'hourly',
+      notBefore: 10,
+      connection: 'app',
+    });
+    expect(autoTune?.statement).toBeUndefined();
+  });
+
   it('does nothing when the window is already claimed', async () => {
     const app = connection((sql) =>
       sql.includes('schedule_claim_run') ? [{ claimed: false, period_key: '2026-08-31' }] : [],
@@ -75,8 +85,6 @@ describe('the scheduler', () => {
     }).tick();
 
     const finish = app.calls.find((call) => call.sql.includes('schedule_finish_run'));
-    // Not left running: a window nobody closed is claimed forever, and one
-    // that is retried every tick writes the same failure 288 times a day.
     expect(finish?.values[2]).toBe('failed');
     expect(String(finish?.values[3])).toContain('the job blew up');
   });
@@ -91,8 +99,6 @@ describe('the scheduler', () => {
       jobs: [{ ...job, connection: 'reconciler' }],
     }).tick();
 
-    // Not even claimed: claiming a window it cannot run would mark the day
-    // done and skip it on the deployment that does have the credential.
     expect(app.calls).toHaveLength(0);
   });
 
