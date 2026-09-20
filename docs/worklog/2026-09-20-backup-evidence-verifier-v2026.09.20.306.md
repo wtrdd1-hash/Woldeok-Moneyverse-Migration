@@ -21,3 +21,13 @@ Development B advances P0 `BAK-106-01` from planning-only evidence requirements 
 - PITR이면 WAL coverage 성공 증거도 필수다.
 - Node 회귀 테스트를 전체 `test` gate에 연결했다.
 - archive 검증만으로 복구 가능성을 주장하지 않으며 실제 isolated restore drill은 계속 Production 승격의 필수 조건이다.
+
+## v2026.09.20.309 — CI unblock
+
+### English (canonical)
+- Removed a stale unused `Input` import in the account security page that caused the repository-wide lint gate to fail before DR tests could run.
+- Re-ran `pnpm lint` and `git diff --check`; lint now completes with warnings only and no errors.
+
+### 한국어 (secondary)
+- DR 테스트 실행 전에 전체 저장소 lint gate를 막던 account security 페이지의 미사용 `Input` import를 제거했습니다.
+- `pnpm lint`와 `git diff --check`를 다시 실행했으며 lint error 0건을 확인했습니다.
