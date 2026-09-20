@@ -1,5 +1,29 @@
 # Update Log
 
+## v2026.09.20.303 — Notification Settings Rebuild & Full Frontend Integration
+
+- Branch: `feat/frontend-integrate-v2026.09.20.303`, base `421353c82d33ce7fa7924c7f12e841faad075cbb`.
+- Rebuilt the notification preferences screen (`/account/notifications`) following modern FinTech toggle patterns and full accessibility standards.
+- Fully unified theme contrast fixes (v301), global shell / auth / account center overhaul (v302), and notification settings (v303) into a single clean release.
+- Applies zero-downtime host blue-green promotion to production after exact-SHA isolated Test server validation.
+
+## v2026.09.20.302 — Frontend Full Rebuild Phase 1 (Global Shell & Auth/Account Modern FinTech UX)
+
+- Branch: `feat/frontend-rebuild-v2026.09.20.302`, base `421353c82d33ce7fa7924c7f12e841faad075cbb`.
+- Eradicated AI-generated artifacts (repetitive generic card grids, excessive neon gradients) based on 10k+ real-world reference datasets (SeeClick 10k, WebUI 41k, RICO 66k) and Toss/Robinhood modern FinTech guidelines.
+- Overhauled mobile bottom navigation (Home, Work, Stocks, Wallet, Account) and responsive masthead with zero horizontal overflow across 320px-1440px and 44px+ touch targets.
+- Re-architected `/login` into a focused high-contrast FinTech authentication card, and enhanced `/account` and `/account/security` with intuitive active multi-session remote termination and identity management.
+- Promotion to production follows exact-SHA isolated Test validation via zero-downtime host blue-green deployment.
+
+## v2026.09.20.301 — Frontend colour and contrast audit
+
+- Branch: `feat/frontend-contrast-v2026.09.20.301`, base `0b973824d85379119813f9b9f53cd7cdd4ddeb93`.
+- Split light/dark semantic palettes, removed hard-coded light chrome, and corrected low-contrast text/action colours across home, shop, work, inventory, businesses and admin surfaces.
+- Light-mode tertiary text improved from 3.77:1 on the page background to 4.90:1; tested dark-mode foreground roles are 6.14:1 or higher.
+- Added automated WCAG contrast regression coverage and constrained user-selected point colours so white primary-button text stays readable.
+- Reference corpus uses SeeClick 10k web subset, WebUI 41,970 web screens and RICO 66k+ UI screens, combined with WCAG/GOV.UK/Atlassian/Material guidance.
+- Production promotion remains blocked until exact-SHA Test verification and the broader full-frontend rebuild gate pass.
+
 ## v2026.09.20.297 — Frontend rebuild foundation
 
 - Branch: `feat/frontend-rebuild-v2026.09.20.297`, base `4dcd2ba112ae57565eed7444fe1d36512b926a3b`.

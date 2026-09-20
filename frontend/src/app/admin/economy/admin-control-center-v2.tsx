@@ -214,7 +214,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
               onClick={() => handleToggleKillswitch('master', policy.master_killswitch_active)}
               className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-lg active:scale-95 disabled:opacity-50 ${
                 policy.master_killswitch_active
-                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-950/50'
+                  ? 'bg-emerald-700 hover:bg-emerald-800 text-white shadow-emerald-950/50'
                   : 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-950/50'
               }`}
             >
@@ -286,7 +286,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
               disabled={isPending || !codeReady}
               onClick={() => handleToggleKillswitch('auto_balancing', policy.auto_balancing_active)}
               className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-colors ${
-                policy.auto_balancing_active ? 'bg-cyan-600 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/70'
+                policy.auto_balancing_active ? 'bg-cyan-700 text-white' : 'bg-muted text-muted-foreground hover:bg-muted/70'
               }`}
             >
               {policy.auto_balancing_active ? '자동 ON' : '수동 OFF'}
@@ -323,19 +323,19 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
           <div className="flex justify-between items-center">
             <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">24시간 넷 플로우</span>
             {data.inflation_alert && (
-              <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 animate-pulse">
+              <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-50 text-rose-800 border border-rose-300 dark:bg-rose-950/50 dark:text-rose-200 dark:border-rose-800 animate-pulse">
                 인플레이션 위험
               </span>
             )}
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={`text-3xl font-black ${netFlowValue >= 0n ? 'text-emerald-400' : 'text-rose-400'}`}>
+            <span className={`text-3xl font-black ${netFlowValue >= 0n ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}`}>
               {netFlowValue > 0n ? `+${formatNumber(netFlow)}` : formatNumber(netFlow)}
             </span>
             <span className="text-sm font-bold text-muted-foreground">WLD / 24h</span>
           </div>
           <div className="pt-2 text-xs text-muted-foreground flex justify-between border-t border-border">
-            <span className="text-cyan-400">발행: +{formatNumber(faucetToday)} WLD</span>
+            <span className="text-cyan-700 dark:text-cyan-300">발행: +{formatNumber(faucetToday)} WLD</span>
             <span className="text-primary">소모: -{formatNumber(sinkToday)} WLD</span>
           </div>
         </div>
@@ -343,12 +343,12 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
         <div className="p-6 rounded-2xl bg-card backdrop-blur-md border border-border shadow-xl space-y-3">
           <span className="text-xs font-semibold tracking-wider text-muted-foreground uppercase">금융 포털 수신고 현황</span>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-sky-400">{formatNumber(data.bonds_stats.holding_principal)}</span>
+            <span className="text-3xl font-black text-sky-700 dark:text-sky-300">{formatNumber(data.bonds_stats.holding_principal)}</span>
             <span className="text-sm font-bold text-muted-foreground">WLD 국채 잔존</span>
           </div>
           <div className="pt-2 text-xs text-muted-foreground flex justify-between border-t border-border">
             <span>국채 {data.bonds_stats.holding_count}건 보유</span>
-            <span className="text-rose-400">대출 잔존: {formatNumber(data.loans_stats.active_outstanding)} WLD</span>
+            <span className="text-rose-700 dark:text-rose-300">대출 잔존: {formatNumber(data.loans_stats.active_outstanding)} WLD</span>
           </div>
         </div>
       </div>
@@ -373,7 +373,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
         <div className="space-y-4">
           <div>
             <div className="flex justify-between text-xs font-medium mb-1.5">
-              <span className="text-cyan-400 font-semibold">💧 유입 통화 (Faucet): +{formatNumber(faucetToday)} WLD</span>
+              <span className="text-cyan-700 dark:text-cyan-300 font-semibold">💧 유입 통화 (Faucet): +{formatNumber(faucetToday)} WLD</span>
               <span className="text-muted-foreground">{faucetPercent}%</span>
             </div>
             <div className="w-full h-3.5 bg-background rounded-full overflow-hidden p-0.5 border border-border">
@@ -413,7 +413,7 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground">자동 제어 모드:</span>
             <span className={`px-2.5 py-1 text-xs font-bold rounded-lg ${
-              policy.auto_balancing_active ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'bg-muted text-muted-foreground'
+              policy.auto_balancing_active ? 'bg-cyan-50 text-cyan-800 border border-cyan-300 dark:bg-cyan-950/50 dark:text-cyan-200 dark:border-cyan-800' : 'bg-muted text-muted-foreground'
             }`}>
               {policy.auto_balancing_active ? '자율 조절 ON' : '수동 조절만 허용'}
             </span>
@@ -426,7 +426,7 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
             <div className="p-4 rounded-xl bg-muted/60 border border-border space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-semibold text-foreground/80">일일 복리 예금 금리</span>
-                <span className="font-mono text-cyan-400 font-bold">{(depositRateBps / 100).toFixed(2)}% / 일</span>
+                <span className="font-mono text-cyan-700 dark:text-cyan-300 font-bold">{(depositRateBps / 100).toFixed(2)}% / 일</span>
               </div>
               <input
                 type="range"
@@ -448,7 +448,7 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
             <div className="p-4 rounded-xl bg-muted/60 border border-border space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-semibold text-foreground/80">7일 국채 만기 수익률</span>
-                <span className="font-mono text-sky-400 font-bold">{(bond7dBps / 100).toFixed(1)}%</span>
+                <span className="font-mono text-sky-700 dark:text-sky-300 font-bold">{(bond7dBps / 100).toFixed(1)}%</span>
               </div>
               <input
                 type="range"
@@ -470,7 +470,7 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
             <div className="p-4 rounded-xl bg-muted/60 border border-border space-y-2">
               <div className="flex justify-between items-center text-xs">
                 <span className="font-semibold text-foreground/80">30일 국채 만기 수익률</span>
-                <span className="font-mono text-indigo-400 font-bold">{(bond30dBps / 100).toFixed(1)}%</span>
+                <span className="font-mono text-indigo-700 dark:text-indigo-300 font-bold">{(bond30dBps / 100).toFixed(1)}%</span>
               </div>
               <input
                 type="range"
@@ -515,7 +515,7 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
             <button
               type="submit"
               disabled={isPending || !codeReady}
-              className="px-6 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-sm transition-all shadow-lg shadow-cyan-950/50 active:scale-95 disabled:opacity-50"
+              className="px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold text-sm transition-all shadow-lg shadow-cyan-950/50 active:scale-95 disabled:opacity-50"
             >
               {isPending ? '정책 파라미터 적용 중...' : '경제 정책 파라미터 즉시 적용'}
             </button>
@@ -571,7 +571,7 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
               </div>
               <div className="text-xs text-muted-foreground">
                 {activeInspectedJob ? (
-                  <span className="px-2.5 py-1 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-800">
+                  <span className="px-2.5 py-1 rounded-full bg-cyan-950 text-cyan-200 border border-cyan-800">
                     {activeInspectedJob.job_type} (Lv.{activeInspectedJob.level} / Exp.{activeInspectedJob.experience})
                   </span>
                 ) : (
@@ -590,13 +590,13 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
               </div>
               <div className="p-4 rounded-xl bg-card border border-border">
                 <span className="text-xs text-muted-foreground">은행 정기예금 (Deposit)</span>
-                <div className="text-xl font-black text-cyan-400 mt-1">
+                <div className="text-xl font-black text-cyan-700 dark:text-cyan-300 mt-1">
                   {formatNumber(inspectedUser.bank_balance)} <span className="text-xs font-normal">WLD</span>
                 </div>
               </div>
               <div className="p-4 rounded-xl bg-card border border-border">
                 <span className="text-xs text-muted-foreground">대출 잔존 채무 (Loan)</span>
-                <div className="text-xl font-black text-rose-400 mt-1">
+                <div className="text-xl font-black text-rose-700 dark:text-rose-300 mt-1">
                   {formatNumber(inspectedUser.active_loan?.outstanding ?? '0')} <span className="text-xs font-normal">WLD</span>
                 </div>
               </div>
@@ -642,7 +642,7 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
                         onClick={() => setOverrideDirection('credit_grant')}
                         className={`py-2 text-xs font-bold rounded-xl border transition-colors ${
                           overrideDirection === 'credit_grant'
-                            ? 'bg-emerald-600 border-emerald-500 text-white'
+                            ? 'bg-emerald-700 border-emerald-700 text-white'
                             : 'bg-card border-border text-muted-foreground hover:text-foreground'
                         }`}
                       >

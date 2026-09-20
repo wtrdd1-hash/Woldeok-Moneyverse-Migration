@@ -201,7 +201,7 @@ function HeaderLink({
         'relative min-h-10 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold transition-colors',
         current
           ? 'bg-primary/12 text-primary'
-          : 'text-muted-foreground hover:bg-white/[0.04] hover:text-foreground',
+          : 'text-muted-foreground hover:bg-muted hover:text-foreground',
       )}
     >
       {navLabel(entry.label, locale)}
@@ -232,7 +232,7 @@ function HeaderGroup({
           'relative flex min-h-10 items-center gap-1 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold transition-colors outline-none',
           current
             ? 'bg-primary/12 text-primary'
-            : 'text-muted-foreground hover:bg-white/[0.04] hover:text-foreground',
+            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
         )}
       >
         {navLabel(group.label, locale)}

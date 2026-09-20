@@ -1,71 +1,79 @@
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
-import { Accent, PageHeader } from '@/components/page-header';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { apiOrNull } from '@/lib/api';
 import { submitLocalLogin } from './actions';
 
 const PROVIDERS = {
   discord: {
     name: 'Discord',
-    action: 'Discord로 계속',
-    description: 'Discord 계정으로 빠르게 시작해요.',
-    note: 'Discord의 계정 비밀번호는 월덕 머니버스에 전달되지 않아요.',
+    action: 'Discord로 계속하기',
+    bgColor: 'hover:bg-[#5865F2]/10 hover:text-[#5865F2] hover:border-[#5865F2]/30',
   },
   google: {
     name: 'Google',
-    action: 'Google로 계속',
-    description: 'Google 계정으로 안전하게 시작해요.',
-    note: 'Google의 계정 비밀번호는 월덕 머니버스에 전달되지 않아요.',
+    action: 'Google로 계속하기',
+    bgColor: 'hover:bg-foreground/5 hover:border-foreground/20',
   },
 } as const;
 
 type ProviderId = keyof typeof PROVIDERS;
-const ORDER: readonly ProviderId[] = ['discord', 'google'];
+const ORDER: readonly ProviderId[] = ['google', 'discord'];
 
-export async function LoginProvidersView({ error, notice }: { readonly error?: string | undefined; readonly notice?: string | undefined }) {
+export async function LoginProvidersView({
+  error,
+  notice,
+}: {
+  readonly error?: string | undefined;
+  readonly notice?: string | undefined;
+}) {
   const data = await apiOrNull<{ providers: { id: string; enabled: boolean }[] }>(
     '/api/v1/auth/providers',
   );
   const enabled = new Set((data?.providers ?? []).filter((p) => p.enabled).map((p) => p.id));
-  const anyEnabled = ORDER.some((id) => enabled.has(id));
+  const availableProviders = ORDER.filter((id) => enabled.has(id));
 
   return (
-    <div className="grid gap-6">
-      <PageHeader
-        title={
-          <>
-            어떤 계정으로
-            <br />
-            <Accent>시작할까요?</Accent>
-          </>
-        }
-      >
-        월덕 머니버스 자체 계정 또는 Discord·Google 계정으로 로그인할 수 있어요.
-      </PageHeader>
+    <div className="mx-auto w-full max-w-[420px] py-4 sm:py-8">
+      {/* Brand & Heading */}
+      <div className="mb-8 text-center">
+        <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <ShieldCheck className="size-6" />
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          반가워요!
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          월덕 머니버스에서 경제와 자산을 시작해보세요.
+        </p>
+      </div>
 
-      {notice && <Alert><AlertDescription>{notice}</AlertDescription></Alert>}
-
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+      {notice && (
+        <Alert className="mb-5 border-primary/30 bg-primary/5 text-foreground">
+          <AlertDescription className="text-xs font-medium leading-relaxed">{notice}</AlertDescription>
         </Alert>
       )}
 
-      <Card className="gap-3">
-        <CardHeader>
-          <CardTitle className="text-base">월덕 머니버스 계정으로 로그인</CardTitle>
-          <CardDescription>가입한 이메일과 비밀번호로 로그인합니다.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form action={submitLocalLogin} className="grid max-w-md gap-4">
+      {error && (
+        <Alert variant="destructive" className="mb-5">
+          <AlertDescription className="text-xs font-medium leading-relaxed">{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {/* Main FinTech Card */}
+      <Card className="border-border/80 bg-card/95 shadow-sm backdrop-blur-sm">
+        <CardContent className="p-6 sm:p-7">
+          {/* Local Email Login Form */}
+          <form action={submitLocalLogin} className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="local-email">이메일</Label>
+              <Label htmlFor="local-email" className="text-xs font-semibold text-muted-foreground">
+                이메일 주소
+              </Label>
               <Input
                 id="local-email"
                 name="email"
@@ -74,11 +82,23 @@ export async function LoginProvidersView({ error, notice }: { readonly error?: s
                 inputMode="email"
                 maxLength={254}
                 required
+                placeholder="name@example.com"
                 className="min-h-11"
               />
             </div>
+
             <div className="grid gap-2">
-              <Label htmlFor="local-password">비밀번호</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="local-password" className="text-xs font-semibold text-muted-foreground">
+                  비밀번호
+                </Label>
+                <Link
+                  href="/forgot-password"
+                  className="text-xs text-primary transition-colors hover:underline"
+                >
+                  비밀번호 찾기
+                </Link>
+              </div>
               <Input
                 id="local-password"
                 name="password"
@@ -86,71 +106,72 @@ export async function LoginProvidersView({ error, notice }: { readonly error?: s
                 autoComplete="current-password"
                 maxLength={128}
                 required
+                placeholder="비밀번호 입력"
                 className="min-h-11"
               />
             </div>
-            <Button type="submit" className="min-h-11 w-full sm:w-fit">
+
+            <Button
+              type="submit"
+              className="min-h-11 w-full sm:w-fit"
+            >
               자체 계정으로 로그인
-              <ArrowRight />
+              <ArrowRight className="ml-1 size-4" />
             </Button>
-            <p className="text-xs text-muted-foreground">
-              비밀번호는 로그인 확인에만 사용되며 브라우저 저장소에 보관하지 않습니다.{' '}
-              <Link href="/forgot-password" className="text-primary">비밀번호를 잊으셨나요?</Link>
-            </p>
           </form>
+
+          {/* Social Sign-in Divider */}
+          {availableProviders.length > 0 && (
+            <>
+              <div className="relative my-6 text-center">
+                <Separator className="absolute inset-x-0 top-1/2" />
+                <span className="relative bg-card px-3 text-xs font-medium text-muted-foreground">
+                  또는 간편 로그인
+                </span>
+              </div>
+
+              <div className="grid gap-2.5">
+                {availableProviders.map((id) => {
+                  const copy = PROVIDERS[id];
+                  return (
+                    <Button
+                      key={id}
+                      variant="outline"
+                      size="lg"
+                      asChild
+                      className={'w-full justify-center rounded-xl border-border/80 text-sm font-medium transition-colors ' + copy.bgColor}
+                    >
+                      <a href={'/auth/' + id + '/authorize'}>
+                        {copy.action}
+                      </a>
+                    </Button>
+                  );
+                })}
+              </div>
+            </>
+          )}
+
+          {/* Registration Notice */}
+          <div className="mt-6 border-t border-border/60 pt-5 text-center text-xs text-muted-foreground">
+            아직 월덕 머니버스 회원이 아니신가요?{' '}
+            <Link href="/login" className="font-semibold text-primary hover:underline">
+              계정 만들기
+            </Link>
+          </div>
         </CardContent>
       </Card>
 
-      <nav aria-label="외부 로그인 제공자 선택" className="grid gap-3">
-        {ORDER.map((id) => {
-          const copy = PROVIDERS[id];
-          const available = enabled.has(id);
-          return (
-            <Card key={id} className="gap-3">
-              <CardHeader>
-                <CardTitle className="text-base">{copy.action}</CardTitle>
-                <CardDescription>
-                  {available ? copy.description : '운영자가 연결 준비 중이에요.'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-2">
-                {available ? (
-                  <Button asChild className="min-h-11 w-full sm:w-fit">
-                    <a href={`/auth/${id}/authorize`}>
-                      {copy.action}
-                      <ArrowRight />
-                    </a>
-                  </Button>
-                ) : (
-                  <Badge variant="outline" className="w-fit">
-                    준비 중
-                  </Badge>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  {available
-                    ? copy.note
-                    : `${copy.name} 로그인은 아직 테스트 서버에 연결되지 않았어요.`}
-                </p>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </nav>
-
-      {!anyEnabled && (
-        <Alert>
-          <AlertDescription>
-            외부 로그인 제공자는 연결 준비 중이지만 월덕 머니버스 자체 계정 로그인은 계속 사용할 수
-            있습니다.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <p className="text-sm text-muted-foreground">
-        로그인하면 서비스 이용 정책이 적용됩니다.{' '}
-        <Link href="/privacy" className="text-primary">
-          개인정보 처리 안내
+      {/* Footer Legal Links */}
+      <p className="mt-6 text-center text-[11px] leading-relaxed text-muted-foreground/80">
+        로그인 시 월덕 머니버스의{' '}
+        <Link href="/terms" className="underline underline-offset-2 hover:text-foreground">
+          이용약관
         </Link>
+        과{' '}
+        <Link href="/privacy" className="underline underline-offset-2 hover:text-foreground">
+          개인정보처리방침
+        </Link>
+        에 동의하게 됩니다.
       </p>
     </div>
   );
