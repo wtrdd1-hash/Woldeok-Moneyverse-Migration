@@ -54,8 +54,8 @@ export default function GuidePage() {
 
   const guideFaqSchema = faqPageJsonLd(
     GUIDE_FAQS.map((faq) => ({
-      question: faq.q,
-      answer: `${faq.a} ${faq.tip ? `(팁: ${faq.tip})` : ''}`.trim(),
+      question: faq.question,
+      answer: faq.answer,
     })),
   );
 
