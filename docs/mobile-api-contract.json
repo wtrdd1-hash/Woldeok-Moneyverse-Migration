@@ -15811,4 +15811,4 @@
     "responseTypes": "backend TypeScript controller return types",
     "requestTypes": "NestJS OpenAPI DTO metadata captured in requestBody.resolvedSchema"
   }
-}\n
+}
