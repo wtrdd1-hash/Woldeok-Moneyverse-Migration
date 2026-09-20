@@ -19,7 +19,7 @@ import {
   LOCALE_COOKIE,
   isLocale,
 } from '@/lib/locale';
-import { canonicalUrl, webApplicationJsonLd } from '@/lib/seo';
+import { canonicalUrl as _canonicalUrl, webApplicationJsonLd } from '@/lib/seo';
 // Keep the downloaded Bootstrap distribution quarantined in styles/vendor.
 // Global Bootstrap utilities use !important (for example .bg-primary/.text-primary)
 // and collide with this Tailwind theme, so the application shell must not import it.

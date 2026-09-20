@@ -16,7 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { IDLE } from '@/lib/action-state';
-import { formatMoment, groupDigits } from '@/lib/money';
+import { formatMoment as _formatMoment, groupDigits } from '@/lib/money';
 import { StepUpField } from '../step-up-field';
 import type { AdminWorkPolicy, AdminWorkTask } from '../types';
 import { updateWorkRewardPolicy, updateWorkTask } from './actions';
@@ -33,7 +33,7 @@ function jobLabel(code: string): string {
   return JOB_LABELS[code] ?? code;
 }
 
-function durationLabel(seconds: number): string {
+function _durationLabel(seconds: number): string {
   return seconds < 60 ? `${seconds}초` : `${Math.round(seconds / 60)}분`;
 }
 
