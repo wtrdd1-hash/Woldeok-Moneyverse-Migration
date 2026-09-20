@@ -32,6 +32,7 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '성장 단계': 'Progression',
   '장기 성장 단계': 'Long-term progression',
   '내 프로필': 'My profile',
+  '쪽지함': 'Messages',
   '아이템 상점': 'Item shop',
   '게시판': 'Board',
   '관리자 문의': 'Support',
@@ -100,6 +101,7 @@ export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/casino', label: '럭키존 (카지노)' },
   { href: '/progression', label: '커리어패스 (성장)' },
   { href: '/profile', label: '내 프로필' },
+  { href: '/chat', label: '쪽지함' },
   { href: '/support', label: '관리자 문의' },
   { href: '/account', label: '내 계정' },
   { href: '/account/security', label: '계정 보안' },
@@ -176,6 +178,7 @@ export const HEADER_MEMBER: readonly NavItem[] = [
     entries: [
       { href: '/seasons', label: '시즌' },
       { href: '/profile', label: '내 프로필' },
+      { href: '/chat', label: '쪽지함' },
       { href: '/support', label: '관리자 문의' },
       { href: '/account/security', label: '계정 보안' },
     ],

@@ -8,6 +8,7 @@ import { Brand } from '@/components/brand';
 import { ThemeMenu, ThemePanel } from '@/components/theme-controls';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { ServerClockPill } from '@/components/server-clock-pill';
+import { ChatHeaderButton } from '@/components/chat-header-button';
 import { useLocale } from '@/components/locale-provider';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -309,6 +310,7 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
 
   return (
     <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+      <ChatHeaderButton />
       <Button
         asChild
         variant="ghost"

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, MessageSquare } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { Button } from '@/components/ui/button';
@@ -84,7 +84,17 @@ export default async function MemberProfilePage({
       </PageHeader>
 
       {outcome.state === 'shown' ? (
-        <ProfileCard profile={outcome.profile} self={false} />
+        <div className="grid gap-4">
+          <ProfileCard profile={outcome.profile} self={false} />
+          <div className="flex justify-end">
+            <Button asChild className="gap-2 font-bold shadow-plate">
+              <Link href={`/chat?peer=${encodeURIComponent(userId)}`}>
+                <MessageSquare className="size-4" />
+                쪽지 보내기
+              </Link>
+            </Button>
+          </div>
+        </div>
       ) : outcome.state === 'hidden' ? (
         // One sentence for all three of the API's reasons, because the API
         // gives one answer for all three.

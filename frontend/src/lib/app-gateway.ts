@@ -3,7 +3,7 @@ export const APP_API_CONTRACT_VERSION = 'v2026.09.16.144';
 
 export const APP_API_GROUPS = Object.freeze([
   'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'businesses',
-  'casino', 'content', 'early-game', 'engagement', 'media', 'photos', 'privacy',
+  'casino', 'chat', 'content', 'early-game', 'engagement', 'media', 'photos', 'privacy',
   'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'stocks', 'support', 'wallet', 'work',
 ] as const);
 
