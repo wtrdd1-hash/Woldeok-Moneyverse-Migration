@@ -1,4 +1,4 @@
--- 216-shop-economic-command-envelope.sql
+-- 218-shop-economic-command-envelope.sql
 -- Update version: v2026.09.20.295
 -- P0 ECON-233-02: adopt the common economic command envelope for catalogue purchases.
 -- The existing inventory, purchase-limit, pricing and ledger policy remains authoritative in a private delegate.
