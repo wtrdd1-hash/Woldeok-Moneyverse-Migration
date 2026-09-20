@@ -8,7 +8,7 @@ CREATE OR REPLACE FUNCTION public.member_earned_titles(p_actor uuid)
 RETURNS TABLE(code text, name text, awarded_at timestamptz)
 LANGUAGE sql
 SECURITY DEFINER
-SET search_path = pg_catalog, public
+SET search_path = pg_catalog, pg_temp
 AS $fn$
   SELECT title_row.code, title_row.name, holding_row.awarded_at
   FROM public.user_titles AS holding_row
