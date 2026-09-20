@@ -131,13 +131,14 @@ export function forumPostingJsonLd(post: ForumPostData) {
 
 export interface OgImageOptions {
   readonly title: string;
-  readonly description?: string;
-  readonly badge?: string;
-  readonly type?: 'stock' | 'board' | 'announcement' | 'quest' | 'default';
-  readonly metric?: string;
-  readonly metricLabel?: string;
-  readonly subMetric?: string;
+  readonly description?: string | undefined;
+  readonly badge?: string | undefined;
+  readonly type?: 'stock' | 'board' | 'announcement' | 'quest' | 'default' | undefined;
+  readonly metric?: string | undefined;
+  readonly metricLabel?: string | undefined;
+  readonly subMetric?: string | undefined;
 }
+
 
 /**
  * Builds an absolute dynamic Open Graph Image URL with encoded metadata parameters.
@@ -156,10 +157,19 @@ export function buildOgImageUrl(options: OgImageOptions): string {
 
 export interface SitemapUrlEntry {
   readonly loc: string;
-  readonly lastmod?: string;
-  readonly changefreq?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
-  readonly priority?: number;
+  readonly lastmod?: string | undefined;
+  readonly changefreq?:
+    | 'always'
+    | 'hourly'
+    | 'daily'
+    | 'weekly'
+    | 'monthly'
+    | 'yearly'
+    | 'never'
+    | undefined;
+  readonly priority?: number | undefined;
 }
+
 
 /**
  * Builds standard XML urlset string for sitemaps.
