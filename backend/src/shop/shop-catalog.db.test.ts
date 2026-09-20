@@ -262,6 +262,7 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
         expect(rows[0]?.replayed).toBe(true);
         expect(rows[0]?.amount, 'a replay must report what was charged').toBe('160');
 
+        await client.query('SAVEPOINT conflicting_replay');
         const mismatch = await rejectionOf(() =>
           client.query('SELECT * FROM public.shop_purchase_catalog($1, $2, $3, 5)', [
             key,
@@ -270,6 +271,8 @@ describe.skipIf(!DATABASE_URL)('the shop catalogue against a real database', () 
           ]),
         );
         expect(code(mismatch)).toBe('22023');
+        await client.query('ROLLBACK TO SAVEPOINT conflicting_replay');
+        await client.query('RELEASE SAVEPOINT conflicting_replay');
         expect(await cash(client, actor)).toBe('840');
       });
     });
