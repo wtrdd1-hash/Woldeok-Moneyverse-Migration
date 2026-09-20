@@ -5,6 +5,9 @@ import type {
   StockCorporateActionResultRow,
   StockCreateInput,
   StockDynamicsRow,
+  StockHaltResultRow,
+  StockHaltSettlementReceiptRow,
+  StockHaltSettlementStatusRow,
   StockMarketEventAdminRow,
   StockMarketEventCancelInput,
   StockMarketEventPublishInput,
@@ -60,6 +63,9 @@ export interface StockRepository {
   adminDynamics(actorUserId: unknown): Promise<readonly StockDynamicsRow[]>;
   publishMarketEvent(input: StockMarketEventPublishInput): Promise<StockMarketEventReceipt>;
   cancelMarketEvent(input: StockMarketEventCancelInput): Promise<{ readonly cancelled: boolean }>;
+  halt(actorUserId: unknown, stockId: unknown, haltEventId?: unknown): Promise<StockHaltResultRow>;
+  haltSettlementStatus(actorUserId: unknown, stockId: unknown): Promise<StockHaltSettlementStatusRow>;
+  haltSettlementReceipts(userId: unknown): Promise<readonly StockHaltSettlementReceiptRow[]>;
 }
 
 @Injectable()
@@ -168,4 +174,17 @@ export class StockService {
   cancelMarketEvent(input: StockMarketEventCancelInput): Promise<{ readonly cancelled: boolean }> {
     return this.repository.cancelMarketEvent(input);
   }
+
+  halt(actorUserId: unknown, stockId: unknown, haltEventId?: unknown): Promise<StockHaltResultRow> {
+    return this.repository.halt(actorUserId, stockId, haltEventId);
+  }
+
+  haltSettlementStatus(actorUserId: unknown, stockId: unknown): Promise<StockHaltSettlementStatusRow> {
+    return this.repository.haltSettlementStatus(actorUserId, stockId);
+  }
+
+  haltSettlementReceipts(userId: unknown): Promise<readonly StockHaltSettlementReceiptRow[]> {
+    return this.repository.haltSettlementReceipts(userId);
+  }
 }
+

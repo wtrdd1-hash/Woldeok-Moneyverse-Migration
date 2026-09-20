@@ -107,5 +107,5 @@ BEGIN
 END;
 $function$;
 
-DEVOKE ALL ON FUNCTION public.admin_update_work_reward_policy(uuid, bigint, bigint, smallint, boolean, text) FROM PUBLIC;
+REVOKE ALL ON FUNCTION public.admin_update_work_reward_policy(uuid, bigint, bigint, smallint, boolean, text) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.admin_update_work_reward_policy(uuid, bigint, bigint, smallint, boolean, text) TO moneyverse_app, moneyverse_migrator;

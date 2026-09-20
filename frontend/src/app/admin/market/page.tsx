@@ -25,6 +25,8 @@ import { cn } from '@/lib/cn';
 import { eventScope } from '@/app/stocks/market-news';
 import { CancelMarketEventButton, PublishMarketEventDialog } from './market-events';
 import { strengthLabel } from './strengths';
+import { HaltStockDialog, HaltSettlementStatusDialog } from './admin-market-halt-dialog';
+import { LimitPolicyGuardCard } from './limit-policy-guard-card';
 import {
   CorporateActionDialog,
   DeleteStockDialog,
@@ -240,12 +242,27 @@ export default async function AdminMarketPage() {
                           </span>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={stock.active ? 'secondary' : 'outline'}>
-                            {stock.active ? '거래 중' : '정지'}
-                          </Badge>
+                          {stock.halt_status === 'HALTED_SETTLED' ? (
+                            <Badge variant="destructive" className="font-semibold text-xs">
+                              거래정지 (정산완료)
+                            </Badge>
+                          ) : stock.halt_status === 'HALTED_SETTLING' || stock.halt_status === 'HALTING' ? (
+                            <Badge variant="outline" className="border-amber-500 text-amber-600 dark:text-amber-400 font-semibold text-xs animate-pulse">
+                              정산 진행 중
+                            </Badge>
+                          ) : (
+                            <Badge variant={stock.active ? 'secondary' : 'outline'}>
+                              {stock.active ? '거래 중' : '비활성'}
+                            </Badge>
+                          )}
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap justify-end gap-2">
+                            {stock.halt_status === 'HALTED_SETTLED' || stock.halt_status === 'HALTED_SETTLING' ? (
+                              <HaltSettlementStatusDialog stock={stock} />
+                            ) : (
+                              <HaltStockDialog stock={stock} />
+                            )}
                             <ToggleActive id={stock.id} active={stock.active} kind="stock" />
                             <SetPriceDialog
                               stockId={stock.id}
@@ -269,6 +286,9 @@ export default async function AdminMarketPage() {
             )}
           </CardContent>
         </Card>
+
+      {/* 기본 무제한 정책 정합성 및 시장 무결성 보호 가드 (LIMIT_CONSISTENCY_IMPLEMENTATION_SPEC) */}
+      <LimitPolicyGuardCard />
     </div>
   );
 }

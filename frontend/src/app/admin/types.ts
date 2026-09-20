@@ -270,6 +270,20 @@ export interface AdminStock {
   readonly holders: number;
   readonly trades: number;
   readonly active: boolean;
+  readonly halt_status?: string;
+  readonly halted_at?: string | null;
+}
+
+export interface AdminStockHaltSettlement {
+  readonly stock_id: string;
+  readonly symbol: string;
+  readonly name: string;
+  readonly halt_status: string;
+  readonly halted_at: string | null;
+  readonly settled_count: string;
+  readonly total_refund_amount: string;
+  readonly quarantined_count: string;
+  readonly pending_holdings_count: string;
 }
 
 /** One stock's mood beside its price: `stock_market_dynamics_admin` (124). */

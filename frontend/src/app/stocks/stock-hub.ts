@@ -1,3 +1,5 @@
+export type StockHaltStatus = 'ACTIVE' | 'HALTING' | 'HALTED_SETTLING' | 'HALTED_SETTLED' | 'HALTED';
+
 export interface HubStock {
   readonly id: string;
   readonly symbol: string;
@@ -9,6 +11,9 @@ export interface HubStock {
   readonly day_low_price: string;
   readonly shares_outstanding: string;
   readonly shares_available: string;
+  readonly halt_status?: StockHaltStatus;
+  readonly halted_at?: string | null;
+  readonly active?: boolean;
 }
 
 export interface HubHolding {
@@ -17,6 +22,7 @@ export interface HubHolding {
   readonly average_cost: string;
   readonly market_value: string;
   readonly current_price: string;
+  readonly halt_status?: StockHaltStatus;
 }
 
 export function normalizeStockSymbol(value: string): string | null {

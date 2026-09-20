@@ -369,6 +369,45 @@ export class GameCatalogController {
     );
   }
 
+  @Post('stocks/:id/halt')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Halt stock trading and auto-settle all holdings into cost-basis WLD' })
+  haltStock(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) stockId: string,
+    @Body() body?: { haltEventId?: string },
+  ) {
+    return this.guarded(
+      () => this.stockService().halt(requireUserId(request), stockId, body?.haltEventId),
+      'failed to halt stock',
+    );
+  }
+
+  @Get('stocks/:id/halt-settlement')
+  @ApiOperation({ summary: 'Get stock halt settlement progress and statistics' })
+  getHaltSettlement(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) stockId: string,
+  ) {
+    return this.guarded(
+      () => this.stockService().haltSettlementStatus(requireUserId(request), stockId),
+      'failed to get halt settlement status',
+    );
+  }
+
+  @Post('stocks/:id/halt-settlement/retry')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Retry failed or quarantined stock halt settlements' })
+  retryHaltSettlement(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) stockId: string,
+  ) {
+    return this.guarded(
+      () => this.stockService().halt(requireUserId(request), stockId),
+      'failed to retry halt settlement',
+    );
+  }
+
   @Post('stocks/:id/corporate-actions')
   @UseGuards(CsrfGuard)
   @ApiOperation({ summary: 'Apply a split or reverse split' })

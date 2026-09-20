@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, MessageSquare } from 'lucide-react';
+import { ArrowLeft, MessageSquare, AlertTriangle } from 'lucide-react';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
@@ -14,6 +14,9 @@ import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { StockDetailDialog } from '../stock-detail-dialog';
 import { WatchlistToggle } from '../watchlist-toggle';
+import { StockQuickAlertDialog } from './stock-quick-alert-dialog';
+import { StockAlertDeleteButton } from './stock-alert-delete-button';
+import { StockDiscussionSection } from './stock-discussion-section';
 import {
   findHoldingForStock,
   findStockBySymbol,
@@ -26,6 +29,19 @@ export const dynamic = 'force-dynamic';
 
 interface WatchlistRow {
   readonly stock_id: string;
+}
+interface StockHaltReceipt {
+  readonly id: string;
+  readonly halt_event_id: string;
+  readonly stock_id: string;
+  readonly stock_symbol: string;
+  readonly stock_name: string;
+  readonly quantity: string;
+  readonly basis_method: string;
+  readonly basis_unit_amount: string;
+  readonly refund_amount: string;
+  readonly status: string;
+  readonly created_at: string;
 }
 interface StockContext {
   readonly stockId: string;
@@ -109,16 +125,24 @@ export default async function StockHubPage({
   if (!stock) notFound();
 
   const encodedSymbol = encodeURIComponent(stock.symbol);
-  const [portfolio, watchlist, discussion, alertResult] = await Promise.all([
+  const [portfolio, watchlist, discussion, alertResult, receiptsResult] = await Promise.all([
     apiOrNull<{ holdings: HubHolding[] }>('/api/v1/stocks/portfolio'),
     apiOrNull<{ stocks: WatchlistRow[] }>('/api/v1/stocks/watchlist'),
     apiOrNull<{ posts: PostSummary[] }>(`/api/v1/board/public/stock-posts?stock=${encodedSymbol}`),
     apiOrNull<{ alerts: StockAlertRule[] }>('/api/v1/stocks/alerts'),
+    apiOrNull<{ receipts: StockHaltReceipt[] }>('/api/v1/stocks/halt-receipts'),
   ]);
   const holding = findHoldingForStock(portfolio?.holdings ?? [], stock.id);
   const watching = (watchlist?.stocks ?? []).some((row) => row.stock_id === stock.id);
   const posts = discussion?.posts ?? [];
   const stockAlerts = (alertResult?.alerts ?? []).filter((rule) => rule.stock_id === stock.id);
+  const stockReceipt = (receiptsResult?.receipts ?? []).find((r) => r.stock_id === stock.id);
+  const isHalted =
+    stock.halt_status === 'HALTED_SETTLED' ||
+    stock.halt_status === 'HALTED_SETTLING' ||
+    stock.halt_status === 'HALTING' ||
+    holding?.halt_status === 'HALTED_SETTLED' ||
+    !stock.active;
 
   return (
     <div data-page="stocks-symbol" className="mv-page mv-page--finance grid gap-6">
@@ -128,6 +152,22 @@ export default async function StockHubPage({
           {isEn ? 'Back to market' : '시장으로 돌아가기'}
         </Link>
       </Button>
+
+      {isHalted && (
+        <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-destructive flex items-start gap-3 shadow-sm">
+          <AlertTriangle className="size-5 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h4 className="font-bold text-sm">
+              {isEn ? 'Trading Halted & Authoritative Settlement' : '종목 거래정지 및 권위 매수원가 자동정산 안내'}
+            </h4>
+            <p className="text-xs text-destructive/90 leading-relaxed [word-break:keep-all]">
+              {isEn
+                ? 'Trading for this stock is currently halted by operator policy. All user holdings are automatically settled into WLD based on authoritative cost basis with zero trading fees.'
+                : '해당 종목은 현재 운영 정책에 의해 거래정지(HALTED) 상태입니다. 기획 명세(STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC)에 따라 모든 사용자 보유분은 시장가가 아닌 서버 권위 매수원가(Cost Basis) WLD로 1회 원자적 자동환급되었으며 신규 매매 주문은 안전하게 차단됩니다.'}
+            </p>
+          </div>
+        </div>
+      )}
 
       <PageHeader eyebrow="VIRTUAL STOCK HUB" title={`${stock.symbol} · ${stock.name}`}>
         {stock.description ||
@@ -141,9 +181,16 @@ export default async function StockHubPage({
           <CardHeader>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <Badge variant="secondary" className="font-mono">
-                  {stock.symbol}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="font-mono">
+                    {stock.symbol}
+                  </Badge>
+                  {isHalted && (
+                    <Badge variant="destructive" className="text-xs font-semibold">
+                      {isEn ? 'HALTED' : '거래정지'}
+                    </Badge>
+                  )}
+                </div>
                 <CardTitle className="mt-2">{isEn ? 'Market snapshot' : '시장 요약'}</CardTitle>
               </div>
               <WatchlistToggle stockId={stock.id} watching={watching} />
@@ -162,24 +209,32 @@ export default async function StockHubPage({
                 : `거래 가능 ${groupDigits(stock.shares_available)}주 · 총 발행 ${groupDigits(stock.shares_outstanding)}주`}
             </p>
             <div className="flex flex-wrap gap-2">
-              <StockDetailDialog
-                stockId={stock.id}
-                symbol={stock.symbol}
-                name={stock.name}
-                currentPrice={stock.current_price}
-                dayOpenPrice={stock.day_open_price}
-                available={stock.shares_available}
-              />
+              {isHalted ? (
+                <Button variant="outline" disabled className="opacity-60 cursor-not-allowed">
+                  {isEn ? 'Trading Halted' : '거래정지 (주문 차단됨)'}
+                </Button>
+              ) : (
+                <StockDetailDialog
+                  stockId={stock.id}
+                  symbol={stock.symbol}
+                  name={stock.name}
+                  currentPrice={stock.current_price}
+                  dayOpenPrice={stock.day_open_price}
+                  available={stock.shares_available}
+                />
+              )}
               <Button asChild variant="outline">
                 <Link href={`/stocks/compare?symbols=${encodedSymbol}`}>
                   {isEn ? 'Compare' : '다른 종목과 비교'}
                 </Link>
               </Button>
-              <Button asChild variant="outline">
-                <Link href={`/stocks/alerts?stock=${encodedSymbol}`}>
-                  {isEn ? 'Set alert' : '조건부 알림 설정'}
-                </Link>
-              </Button>
+              <StockQuickAlertDialog
+                stockId={stock.id}
+                symbol={stock.symbol}
+                name={stock.name}
+                currentPrice={stock.current_price}
+                isEn={isEn}
+              />
             </div>
           </CardContent>
         </Card>
@@ -198,7 +253,7 @@ export default async function StockHubPage({
               <EmptyState
                 title={isEn ? 'Unable to load holdings.' : '보유 현황을 불러오지 못했어요.'}
               />
-            ) : holding ? (
+            ) : holding && Number(holding.quantity) > 0 ? (
               <dl className="grid gap-3">
                 <Position
                   label={isEn ? 'Quantity' : '보유 수량'}
@@ -213,6 +268,31 @@ export default async function StockHubPage({
                   value={<Amount value={holding.market_value} />}
                 />
               </dl>
+            ) : stockReceipt ? (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-emerald-700 dark:text-emerald-300">
+                    {isEn ? 'Cost-Basis Settlement Receipt' : '거래정지 원가환급 영수증'}
+                  </span>
+                  <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-500/40">
+                    {stockReceipt.status}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-muted-foreground pt-1">
+                  <div>
+                    <span>정산 수량: </span>
+                    <span className="font-mono font-medium text-foreground">{groupDigits(stockReceipt.quantity)}주</span>
+                  </div>
+                  <div>
+                    <span>취득 단가: </span>
+                    <span className="font-mono font-medium text-foreground">{groupDigits(stockReceipt.basis_unit_amount)} WLD</span>
+                  </div>
+                  <div className="col-span-2 text-foreground font-semibold text-xs pt-1 border-t border-emerald-500/20">
+                    <span>총 환급 WLD: </span>
+                    <span className="font-mono font-bold text-primary text-sm">{groupDigits(stockReceipt.refund_amount)} WLD</span>
+                  </div>
+                </div>
+              </div>
             ) : (
               <EmptyState
                 title={
@@ -260,9 +340,12 @@ export default async function StockHubPage({
                 <li key={rule.alert_id} className="rounded-md border p-3 text-sm">
                   <div className="flex items-center justify-between gap-2">
                     <b>{stockAlertConditionLabel(rule.condition_kind, isEn)}</b>
-                    <Badge variant={rule.condition_met ? 'default' : 'secondary'}>
-                      {rule.condition_met ? (isEn ? 'Met' : '충족') : isEn ? 'Watching' : '감시 중'}
-                    </Badge>
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant={rule.condition_met ? 'default' : 'secondary'}>
+                        {rule.condition_met ? (isEn ? 'Met' : '충족') : isEn ? 'Watching' : '감시 중'}
+                      </Badge>
+                      <StockAlertDeleteButton alertId={rule.alert_id} isEn={isEn} />
+                    </div>
                   </div>
                   <p className="mt-1 text-muted-foreground">{stockAlertThreshold(rule)}</p>
                 </li>
@@ -272,64 +355,13 @@ export default async function StockHubPage({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex-row items-start justify-between gap-3">
-          <div>
-            <CardTitle>{isEn ? 'Related community' : '관련 커뮤니티'}</CardTitle>
-            <CardDescription>
-              {isEn
-                ? 'Recent posts tagged with this virtual stock.'
-                : '이 종목이 태그된 최근 토론입니다.'}
-            </CardDescription>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Button asChild size="sm">
-              <Link href={`/board?stock=${encodedSymbol}#board-composer`}>
-                {isEn ? 'Start discussion' : '이 종목으로 글쓰기'}
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/board?stock=${encodedSymbol}`}>
-                {isEn ? 'All discussions' : '전체 토론'}
-              </Link>
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {discussion === null ? (
-            <EmptyState
-              title={isEn ? 'Unable to load discussions.' : '토론을 불러오지 못했어요.'}
-            />
-          ) : posts.length === 0 ? (
-            <EmptyState title={isEn ? 'No discussion yet.' : '아직 관련 토론이 없어요.'} />
-          ) : (
-            <ul className="divide-y">
-              {posts.slice(0, 5).map((post) => (
-                <li key={post.postId}>
-                  <Link
-                    href={`/board/${post.postId}`}
-                    className="flex min-h-14 items-center gap-3 py-3 hover:underline"
-                  >
-                    <span className="min-w-0 flex-1">
-                      <b className="block truncate">{post.title}</b>
-                      <span className="text-xs text-muted-foreground">
-                        {post.authorName} ·{' '}
-                        {formatMoment(post.createdAt, isEn ? 'Time unavailable' : '시간 확인 중')}
-                      </span>
-                    </span>
-                    {post.commentCount > 0 ? (
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <MessageSquare className="size-3.5" aria-hidden />
-                        {post.commentCount}
-                      </span>
-                    ) : null}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+      <StockDiscussionSection
+        stockId={stock.id}
+        symbol={stock.symbol}
+        name={stock.name}
+        posts={posts}
+        isEn={isEn}
+      />
     </div>
   );
 }

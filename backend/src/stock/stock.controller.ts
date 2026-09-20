@@ -92,6 +92,12 @@ export class StockController {
     return { holdings: await this.service().portfolio(requireUserId(request)) };
   }
 
+  @Get('halt-receipts')
+  @ApiOperation({ summary: 'Stock halt cost-basis settlement receipts for caller' })
+  async haltReceipts(@Req() request: RequestWithSession) {
+    return { receipts: await this.service().haltSettlementReceipts(requireUserId(request)) };
+  }
+
   @Get('history')
   @ApiOperation({ summary: 'Trades made by the caller' })
   async history(@Req() request: RequestWithSession) {

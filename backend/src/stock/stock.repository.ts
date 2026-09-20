@@ -34,7 +34,42 @@ export interface StockRow {
   readonly current_price: WldAmount;
   readonly day_open_price: WldAmount;
   readonly active: boolean;
+  readonly halt_status?: string;
+  readonly halted_at?: Date | null;
   readonly updated_at: Date;
+}
+
+export interface StockHaltResultRow {
+  readonly settled_count: string;
+  readonly total_refund_amount: string;
+  readonly quarantined_count: string;
+  readonly halt_status: string;
+}
+
+export interface StockHaltSettlementStatusRow {
+  readonly stock_id: string;
+  readonly symbol: string;
+  readonly name: string;
+  readonly halt_status: string;
+  readonly halted_at: string | null;
+  readonly settled_count: string;
+  readonly total_refund_amount: string;
+  readonly quarantined_count: string;
+  readonly pending_holdings_count: string;
+}
+
+export interface StockHaltSettlementReceiptRow {
+  readonly id: string;
+  readonly halt_event_id: string;
+  readonly stock_id: string;
+  readonly stock_symbol: string;
+  readonly stock_name: string;
+  readonly quantity: string;
+  readonly basis_method: string;
+  readonly basis_unit_amount: string;
+  readonly refund_amount: string;
+  readonly status: string;
+  readonly created_at: Date;
 }
 
 /**
@@ -136,6 +171,7 @@ export interface StockPortfolioRow {
   readonly average_cost: WldAmount;
   readonly market_value: WldAmount;
   readonly current_price: WldAmount;
+  readonly halt_status?: string;
 }
 
 // virtual_stock_trades joined with virtual_stocks (see migration
@@ -418,7 +454,7 @@ export class PostgresStockRepository {
     uuid(actorUserId, 'actor user id');
     return queryRows<StockAdminRow>(
       this.pool,
-      'SELECT id::text, symbol, name, description, current_price::text AS current_price, day_open_price::text AS day_open_price, shares_outstanding::text AS shares_outstanding, shares_available::text AS shares_available, holders, trades, active, updated_at FROM public.stock_admin_list($1)',
+      'SELECT s.id::text, s.symbol, s.name, s.description, s.current_price::text AS current_price, s.day_open_price::text AS day_open_price, s.shares_outstanding::text AS shares_outstanding, s.shares_available::text AS shares_available, s.holders, s.trades, s.active, coalesce(v.halt_status, \'ACTIVE\') AS halt_status, v.halted_at, s.updated_at FROM public.stock_admin_list($1) s LEFT JOIN public.virtual_stocks v ON v.id = s.id',
       [actorUserId],
     );
   }
@@ -455,7 +491,7 @@ export class PostgresStockRepository {
     uuid(userId, 'user id');
     return queryRows<StockPortfolioRow>(
       this.pool,
-      'SELECT stock_id::text, symbol, name, quantity::text, average_cost::text, market_value::text, current_price::text FROM public.stock_my_positions($1)',
+      'SELECT p.stock_id::text, p.symbol, p.name, p.quantity::text, p.average_cost::text, p.market_value::text, p.current_price::text, coalesce(v.halt_status, \'ACTIVE\') AS halt_status FROM public.stock_my_positions($1) p LEFT JOIN public.virtual_stocks v ON v.id = p.stock_id',
       [userId],
     );
   }
@@ -501,6 +537,16 @@ export class PostgresStockRepository {
     uuid(idempotencyKey, 'idempotency key');
     if ((side !== 'buy' && side !== 'sell') || !positive(quantity))
       throw new StockInputError('invalid stock trade');
+
+    const stockRow = await queryOne<{ halt_status: string; active: boolean }>(
+      this.pool,
+      'SELECT coalesce(halt_status, \'ACTIVE\') AS halt_status, active FROM public.virtual_stocks WHERE id = $1',
+      [stockId],
+    );
+    if (!stockRow || !stockRow.active || stockRow.halt_status !== 'ACTIVE') {
+      throw new StockInputError('stock is currently halted or inactive');
+    }
+
     const row = await queryOne<StockTradeResultRow>(
       this.pool,
       'SELECT trade_id::text, unit_price::text, gross_amount::text, tax_amount::text, current_price::text FROM public.stock_trade($1,$2,$3,$4,$5)',
@@ -736,4 +782,58 @@ export class PostgresStockRepository {
     );
     return row ?? { cancelled: false };
   }
+
+  /**
+   * Halts a stock and auto-settles all user holdings into authoritative cost-basis WLD.
+   * See STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC.ko.md (v2026.09.21.315).
+   */
+  async halt(
+    actorUserId: unknown,
+    stockId: unknown,
+    haltEventId: unknown = randomUUID(),
+  ): Promise<StockHaltResultRow> {
+    uuid(actorUserId, 'actor user id');
+    uuid(stockId, 'stock id');
+    const eventId = typeof haltEventId === 'string' && UUID.test(haltEventId) ? haltEventId : randomUUID();
+    const row = await queryOne<StockHaltResultRow>(
+      this.pool,
+      'SELECT settled_count::text, total_refund_amount::text, quarantined_count::text, halt_status FROM public.stock_halt_and_settle($1, $2, $3)',
+      [actorUserId, stockId, eventId],
+    );
+    if (!row) throw new Error('failed to halt stock settlement');
+    return row;
+  }
+
+  /**
+   * Retrieves the real-time settlement status, pending holdings, and refund total for a stock.
+   */
+  async haltSettlementStatus(
+    actorUserId: unknown,
+    stockId: unknown,
+  ): Promise<StockHaltSettlementStatusRow> {
+    uuid(actorUserId, 'actor user id');
+    uuid(stockId, 'stock id');
+    const row = await queryOne<StockHaltSettlementStatusRow>(
+      this.pool,
+      'SELECT stock_id::text, symbol, name, halt_status, halted_at::text, settled_count::text, total_refund_amount::text, quarantined_count::text, pending_holdings_count::text FROM public.stock_halt_settlement_status($1, $2)',
+      [actorUserId, stockId],
+    );
+    if (!row) throw new Error('stock not found or status unavailable');
+    return row;
+  }
+
+  /**
+   * Returns immutable halt settlement receipts for a user.
+   */
+  async haltSettlementReceipts(
+    userId: unknown,
+  ): Promise<readonly StockHaltSettlementReceiptRow[]> {
+    uuid(userId, 'user id');
+    return queryRows<StockHaltSettlementReceiptRow>(
+      this.pool,
+      'SELECT id::text, halt_event_id::text, stock_id::text, stock_symbol, stock_name, quantity::text, basis_method, basis_unit_amount::text, refund_amount::text, status, created_at FROM public.virtual_stock_halt_settlements WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50',
+      [userId],
+    );
+  }
 }
+
