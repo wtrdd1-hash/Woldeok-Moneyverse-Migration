@@ -1,4 +1,4 @@
--- 215-member-session-180-day-persistence.sql
+-- 216-member-session-180-day-persistence.sql
 -- Update version: v2026.09.19.291
 --
 -- Keep ordinary member logins durable across host/process restarts and reduce
