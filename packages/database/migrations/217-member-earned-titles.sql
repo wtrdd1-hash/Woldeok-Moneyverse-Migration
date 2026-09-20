@@ -1,4 +1,4 @@
--- 216-member-earned-titles.sql
+-- 217-member-earned-titles.sql
 -- Update version: v2026.09.20.293
 -- Let a signed-in member discover only the profile titles actually awarded to them.
 

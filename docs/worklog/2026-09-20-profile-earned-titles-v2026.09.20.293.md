@@ -4,7 +4,7 @@
 Expose only titles actually awarded to the signed-in member and make them selectable on the profile surface.
 
 ## Checklist
-- [x] Add server-authoritative earned-title read function.
+- [x] Add server-authoritative earned-title read function as migration 217.
 - [x] Keep `moneyverse_app` on EXECUTE-only access with the required SECURITY DEFINER template.
 - [x] Add backend route and profile UI integration.
 - [x] Regenerate and verify mobile API contract artifacts.
