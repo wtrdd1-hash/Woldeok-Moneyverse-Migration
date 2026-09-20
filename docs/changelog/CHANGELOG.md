@@ -1,3 +1,8 @@
+## v2026.09.20.311 — Administrator Treasury Management planning
+- Added bilingual implementation-oriented planning for Admin → Economy → Treasury.
+- Defined server-authoritative treasury accounting, immutable history, revenue/expenditure, budgets, privileged corrections, reconciliation, reserve alerts, audit and exact-SHA release gates.
+- Documentation-only; no runtime/database/Production behavior changed.
+
 ## v2026.09.19.291 — Durable member login sessions
 - Extended ordinary member cookie and PostgreSQL session lifetime from 30 to 180 days with sliding refresh.
 - Preserved pre-login and privileged administrator-session lifetimes.
