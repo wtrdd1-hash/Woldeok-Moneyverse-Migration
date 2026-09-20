@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowLeft, MessageSquare } from 'lucide-react';
+import { ArrowLeft, MessageSquare as _MessageSquare } from 'lucide-react';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
-import { formatMoment, groupDigits } from '@/lib/money';
+import { formatMoment as _formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { StockDetailDialog } from '../stock-detail-dialog';
 import { WatchlistToggle } from '../watchlist-toggle';
