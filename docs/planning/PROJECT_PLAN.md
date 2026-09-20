@@ -2,12 +2,29 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.20.298
+> Current integrated version: v2026.09.20.303
 > Implementation/evidence sync: 2026-09-20
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+## Planning cycle — v2026.09.20.303 (2026-09-20)
+
+### One-to-one private chat
+- **Product scope:** add authenticated member-to-member 1:1 private chat as a planned social feature. Initial scope is text-first direct conversations; group chat, anonymous chat, public-room chat, voice/video calls and end-to-end encryption are separate future decisions and must not be implied by this plan.
+- **Conversation authority:** the backend owns conversation creation, membership, message ordering, delivery state, read state and moderation state. A client must never add a third participant, spoof another sender, overwrite message authorship, or mark another account's messages as read.
+- **Eligibility and privacy:** direct messaging is deny-by-default until both accounts satisfy the configured interaction policy. Support user-level DM controls, block lists and policy restrictions without exposing private friend/club graphs, account-security state, balances, holdings or other sensitive profile data.
+- **Core UX:** provide a conversation list, unread counts, latest-message preview, conversation view, send/retry state, timestamps, policy-permitted read indicators, blocked/unavailable states, mobile keyboard-safe composition and deterministic empty/loading/error/session-expired handling. Chat must not be a mandatory onboarding action.
+- **Safety:** blocking immediately prevents new messages in both directions and suppresses further interaction prompts. Reporting is available from the conversation surface and preserves immutable moderation evidence. Rate limits, spam/duplicate-message controls, abuse throttling, link/mention policy and content filtering are server-enforced.
+- **Age-sensitive interaction:** open private messaging and adult-minor contact expansion require explicit age/privacy/safety/legal review before Production enablement. Policy gates may restrict DM initiation or receipt by verified eligibility without leaking sensitive restriction reasons to unauthorized peers.
+- **Data model/API direction:** use stable conversation/message identifiers, server timestamps, monotonic per-conversation ordering, idempotent send keys, pagination cursors, bounded payloads and normalized message status. User-visible hide/delete behavior is distinct from moderation/audit retention.
+- **Realtime and resilience:** WebSocket/SSE or equivalent may provide realtime delivery, but correctness must not depend on a live socket. Reconnect recovers missed messages from authoritative API cursor/order state and duplicate reconnect events are idempotent. Failed/offline sends cannot appear delivered before server acknowledgement.
+- **Notifications:** chat notifications integrate with existing notification/privacy controls, use privacy-minimized previews, and respect block/mute/session state. Sensitive message content must not be exposed unnecessarily on lock screens, logs, analytics or push-provider payloads.
+- **Admin/moderation:** privileged review is least-privilege, purpose-limited and audited. Admin tools expose report/evidence state rather than unrestricted browsing of private conversations. Exceptional message-content access requires explicit authorization and immutable audit records.
+- **QA/acceptance:** cover cross-account authorization/BOLA, forged sender/conversation IDs, blocked-user sends, duplicate idempotency keys, out-of-order/replayed events, pagination boundaries, reconnect recovery, unread/read races, rate limits, report flow, session expiry, 320/360/390px mobile composition, accessibility and privacy-safe logging. Production is blocked until exact-SHA Test proves backend/API/realtime behavior and the configured safety policy.
+- **Delivery sequence:** v2026.09.20.303-01 schema/policy contract -> -02 backend APIs and authorization -> -03 realtime/recovery -> -04 responsive frontend plus block/report/notification integration -> -05 security/abuse/accessibility E2E on exact-SHA Test -> -06 final plan re-read and zero-downtime Production promotion only if all gates pass.
+- **Current change classification:** planning/documentation only. This cycle does not claim the 1:1 chat runtime is implemented or enabled.
 
 ## Implementation cycle — v2026.09.20.298 (2026-09-20)
 
