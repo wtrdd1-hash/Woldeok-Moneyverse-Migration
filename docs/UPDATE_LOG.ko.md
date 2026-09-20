@@ -1,5 +1,12 @@
 # 업데이트 로그
 
+## v2026.09.20.297 — 프론트엔드 재구축 기반
+
+- 브랜치: `feat/frontend-rebuild-v2026.09.20.297`, 기준 `4dcd2ba112ae57565eed7444fe1d36512b926a3b`.
+- 백엔드 권위를 변경하지 않고 전역 시각 기반, shell 간격, page heading, card, button을 다시 만들었습니다.
+- frontend typecheck/build와 테스트 90/90 파일, 681/681 테스트를 통과했습니다.
+- 이번 회차는 재구축 기반이며 전체 라우트 구성을 계속 다시 만든 뒤에만 완료로 처리합니다.
+
 ## v2026.09.19.275 — Blue/green 연속성 및 최신 빌드 자동 갱신
 
 - 브랜치: `ops/blue-green-cache-refresh-v2026.09.19.275`.
