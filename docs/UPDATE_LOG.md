@@ -1,5 +1,12 @@
 # Update Log
 
+## v2026.09.20.297 — Frontend rebuild foundation
+
+- Branch: `feat/frontend-rebuild-v2026.09.20.297`, base `4dcd2ba112ae57565eed7444fe1d36512b926a3b`.
+- Rebuilt the global visual foundation, shell spacing, page headings, cards and buttons without changing backend authority.
+- Frontend typecheck/build and 90/90 test files with 681/681 tests pass.
+- This is the rebuild foundation; route-by-route composition continues before the rebuild can be marked complete.
+
 ## v2026.09.19.275 — Blue/green continuity and automatic latest-build refresh
 
 - Branch: `ops/blue-green-cache-refresh-v2026.09.19.275`.

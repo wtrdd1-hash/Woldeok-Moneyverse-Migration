@@ -2,11 +2,30 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.20.292
+> Current integrated version: v2026.09.20.298
 > Implementation/evidence sync: 2026-09-20
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+
+## Implementation cycle — v2026.09.20.298 (2026-09-20)
+
+### Account route rebuild slice
+- Rebuilt `/account` from a repeated-card stack into a task-oriented primary column plus sticky account-tools rail.
+- Preserved server-authoritative identity linking/unlinking, recent re-authentication and account deletion flows; no API/DB authority changed.
+- Security sessions, notifications and privacy remain directly reachable with semantic navigation and 44px-minimum controls.
+- Verification requires frontend typecheck, full Vitest, production build, exact-SHA CI and isolated Test before merge; Production remains blocked by the full UI rebuild gate.
+
+## Implementation cycle — v2026.09.20.297 (2026-09-20)
+
+### Frontend rebuild foundation started
+- **Authority:** branch `feat/frontend-rebuild-v2026.09.20.297` starts from `main=4dcd2ba112ae57565eed7444fe1d36512b926a3b`. The authoritative plan and remote main were re-read during implementation and were unchanged.
+- **Foundation:** the old dark gradient/glass presentation layer is replaced with a restrained light product system using flat surfaces, strong type hierarchy, compact radii, task-specific density and a wider application canvas.
+- **Shared primitives:** page headers, cards, buttons and the global shell were rebuilt so the new visual system reaches every route without changing API, auth, ledger or permission authority.
+- **Responsive/accessibility:** the shell keeps the existing 320px minimum, mobile navigation, focus-visible treatment and reduced-motion contract. Route-specific finance/member/community/game/admin/utility density rules remain explicit rather than forcing one dashboard template everywhere.
+- **Verification:** frontend typecheck and production build pass. Frontend Vitest passes 90/90 files and 681/681 tests after building the shared contract package first.
+- **Release gate:** this is the first implementation slice of the full rebuild, not completion of the route-by-route rebuild. It must pass exact-SHA Test deployment and runtime verification before merge or any Production promotion.
 
 ## Immediate execution directive — v2026.09.20.292 (2026-09-20)
 
