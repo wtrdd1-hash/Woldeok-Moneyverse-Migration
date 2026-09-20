@@ -1,5 +1,5 @@
 -- 218-shop-economic-command-envelope.sql
--- Update version: v2026.09.20.295
+-- Update version: v2026.09.20.301
 -- P0 ECON-233-02: adopt the common economic command envelope for catalogue purchases.
 -- The existing inventory, purchase-limit, pricing and ledger policy remains authoritative in a private delegate.
 
@@ -38,8 +38,18 @@ DECLARE
   v_receipt_tx uuid;
   v_hash bytea;
 BEGIN
-  IF p_key IS NULL OR p_actor IS NULL OR p_catalog IS NULL OR p_quantity IS NULL THEN
-    RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'shop command identity is required';
+  IF p_key IS NULL OR p_actor IS NULL OR p_catalog IS NULL
+     OR p_quantity IS NULL OR p_quantity NOT BETWEEN 1 AND 100 THEN
+    RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'invalid shop purchase';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.users AS user_row
+    WHERE user_row.id = p_actor
+      AND user_row.status = 'active'::public.user_status
+  ) THEN
+    RAISE EXCEPTION USING ERRCODE = '22023', MESSAGE = 'active member required';
   END IF;
 
   v_hash := public.digest(
@@ -69,7 +79,7 @@ BEGIN
     END IF;
 
     SELECT purchase_row.user_id, purchase_row.catalog_id, purchase_row.quantity,
-           purchase_row.amount, purchase_row.transaction_id
+           purchase_row.unit_price * purchase_row.quantity, purchase_row.transaction_id
       INTO v_receipt_actor, v_receipt_catalog, v_receipt_quantity,
            v_receipt_amount, v_receipt_tx
     FROM public.shop_purchases AS purchase_row
