@@ -6,9 +6,9 @@ import { queryOne, queryRows } from '../core/db';
  * The three operations screens of spec 14.9 that the console never grew:
  * work and jobs, the bank and its loan book, and Discord delivery.
  *
- * Every method calls a SECURITY DEFINER function from migration 106. None of
- * the tables behind them is readable by `moneyverse_app`, and each function
- * re-decides the caller's authority for itself -- the guards on the
+ * Every method calls a SECURITY DEFINER function from migration 106 and 219.
+ * None of the tables behind them is readable by `moneyverse_app`, and each
+ * function re-decides the caller's authority for itself -- the guards on the
  * controllers decide who may knock, not who may read.
  *
  * Every bigint and numeric is cast to text in the query and stays a string
@@ -61,7 +61,6 @@ export interface WorkCatalogueRow {
   readonly last_assigned_at: Date | null;
 }
 
-/** packages/database/migrations/106-admin-operations-read-models.sql */
 export interface JobLevelRow {
   readonly job_type: string;
   readonly member_count: string;
@@ -71,14 +70,6 @@ export interface JobLevelRow {
   readonly active_7d_count: string;
 }
 
-/**
- * packages/database/migrations/106-admin-operations-read-models.sql.
- *
- * The first seven fields are null together when no reward policy is in force.
- * That is a state, not a failure -- the counts beside them are still real,
- * and a screen has to be able to say "nothing is in force" rather than go
- * blank.
- */
 export interface WorkPolicyRow {
   readonly policy_id: number | null;
   readonly effective_at: Date | null;
@@ -95,7 +86,6 @@ export interface WorkPolicyRow {
   readonly experience_24h: string;
 }
 
-/** packages/database/migrations/106-admin-operations-read-models.sql */
 export interface BankOverviewRow {
   readonly deposit_amount: string;
   readonly depositor_count: string;
@@ -110,7 +100,6 @@ export interface BankOverviewRow {
   readonly borrower_count: string;
 }
 
-/** packages/database/migrations/106-admin-operations-read-models.sql */
 export interface CreditGradeRow {
   readonly grade: string;
   readonly minimum_account_days: number;
@@ -127,7 +116,6 @@ export interface CreditGradeRow {
   readonly issued_principal: string;
 }
 
-/** packages/database/migrations/106-admin-operations-read-models.sql */
 export interface LoanBookRow {
   readonly loan_id: string;
   readonly user_id: string;
@@ -140,12 +128,11 @@ export interface LoanBookRow {
   readonly repaid_amount: string;
   readonly minimum_repayment: string;
   readonly issued_at: Date;
-  readonly maturity_at: Date | null;
+  readonly maturity_at: Date;
   readonly overdue_at: Date | null;
   readonly status_reason: string | null;
 }
 
-/** packages/database/migrations/106-admin-operations-read-models.sql */
 export interface OutboxHealthRow {
   readonly pending_count: string;
   readonly retry_pending_count: string;
@@ -161,17 +148,10 @@ export interface OutboxHealthRow {
   readonly unrouted_type_count: string;
 }
 
-/**
- * packages/database/migrations/106-admin-operations-read-models.sql.
- *
- * `routed` false means there is no row in `discord_outbox_routes` for this
- * type, so `outbox_claim_pending` will never claim it -- the four route
- * fields are null there because there is no route to describe.
- */
 export interface DiscordRouteRow {
   readonly event_type: string;
-  readonly channel_key: string | null;
-  readonly enabled: boolean | null;
+  readonly channel_key: string;
+  readonly enabled: boolean;
   readonly note: string | null;
   readonly routed: boolean;
   readonly total_count: string;
@@ -180,6 +160,22 @@ export interface DiscordRouteRow {
   readonly suppressed_count: string;
   readonly delivered_24h_count: string;
   readonly last_delivered_at: Date | null;
+}
+
+export interface UpdateWorkTaskInput {
+  readonly baseReward?: number;
+  readonly baseExperience?: number;
+  readonly minimumDurationSeconds?: number;
+  readonly dailyLimit?: number;
+  readonly active?: boolean;
+}
+
+export interface UpdateWorkRewardPolicyInput {
+  readonly dailyCap?: number;
+  readonly weeklyCap?: number;
+  readonly repeatDecayPercent?: number;
+  readonly enabled?: boolean;
+  readonly reason?: string;
 }
 
 @Injectable()
@@ -230,11 +226,6 @@ export class OperationsRepository {
     );
   }
 
-  /**
-   * One row, always: the function answers with scalar subqueries rather than
-   * a join precisely so that a deployment with no policy in force still says
-   * so instead of returning nothing.
-   */
   async workRewardPolicy(actorUserId: unknown): Promise<WorkPolicyRow> {
     assertUuid(actorUserId, 'actor user id');
     const row = await queryOne<WorkPolicyRow>(
@@ -256,6 +247,84 @@ export class OperationsRepository {
       [actorUserId],
     );
     if (!row) throw new Error('admin_work_reward_policy did not return a row');
+    return row;
+  }
+
+  async updateWorkTask(
+    actorUserId: unknown,
+    taskId: unknown,
+    input: UpdateWorkTaskInput,
+  ): Promise<WorkCatalogueRow> {
+    assertUuid(actorUserId, 'actor user id');
+    assertUuid(taskId, 'task id');
+    const row = await queryOne<WorkCatalogueRow>(
+      this.pool,
+      `SELECT updated.task_id::text AS task_id,
+              updated.code,
+              updated.name,
+              '' AS job_type,
+              0 AS difficulty,
+              updated.base_reward::text AS base_reward,
+              updated.base_experience::text AS base_experience,
+              updated.minimum_duration_seconds,
+              updated.daily_limit,
+              updated.active,
+              '0' AS open_assignment_count,
+              '0' AS awaiting_verification_count,
+              '0' AS approved_24h,
+              '0' AS rejected_24h,
+              '0' AS paid_24h,
+              updated.updated_at AS last_assigned_at
+       FROM public.admin_update_work_task(
+         $1, $2, $3, $4, $5, $6, $7
+       ) AS updated`,
+      [
+        actorUserId,
+        taskId,
+        input.baseReward ?? null,
+        input.baseExperience ?? null,
+        input.minimumDurationSeconds ?? null,
+        input.dailyLimit ?? null,
+        input.active ?? null,
+      ],
+    );
+    if (!row) throw new Error('admin_update_work_task did not return a row');
+    return row;
+  }
+
+  async updateWorkRewardPolicy(
+    actorUserId: unknown,
+    input: UpdateWorkRewardPolicyInput,
+  ): Promise<WorkPolicyRow> {
+    assertUuid(actorUserId, 'actor user id');
+    const row = await queryOne<WorkPolicyRow>(
+      this.pool,
+      `SELECT updated.policy_id,
+              updated.effective_at,
+              updated.daily_cap::text AS daily_cap,
+              updated.weekly_cap::text AS weekly_cap,
+              updated.repeat_decay_percent,
+              updated.enabled,
+              updated.reason,
+              '0' AS active_task_count,
+              '0' AS open_assignment_count,
+              '0' AS awaiting_verification_count,
+              '0' AS paid_24h,
+              '0' AS members_paid_24h,
+              '0' AS experience_24h
+       FROM public.admin_update_work_reward_policy(
+         $1, $2, $3, $4, $5, $6
+       ) AS updated`,
+      [
+        actorUserId,
+        input.dailyCap ?? null,
+        input.weeklyCap ?? null,
+        input.repeatDecayPercent ?? null,
+        input.enabled ?? null,
+        input.reason ?? null,
+      ],
+    );
+    if (!row) throw new Error('admin_update_work_reward_policy did not return a row');
     return row;
   }
 

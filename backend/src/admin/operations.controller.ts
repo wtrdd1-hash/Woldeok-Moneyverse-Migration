@@ -1,47 +1,101 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   ForbiddenException,
   Get,
   Inject,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Put,
   Query,
   Req,
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { IsBoolean, IsInt, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isExpectedCommandFailure, isMalformedInput, isRoleRefusal } from '../core/pg-error';
 import { OperationsInputError, OperationsRepository } from './operations.repository';
 
-/**
- * The three operations screens spec 14.9 lists and this build did not have:
- * 작업·직업, 은행·대출 and Discord.
- *
- * THREE CONTROLLERS, NOT ONE. The audit trail derives an event's `feature`
- * from the first path segment under `/admin` (`featureFromPath` in
- * `audit-context.ts`), so `/admin/work`, `/admin/bank` and `/admin/discord`
- * record as `work`, `bank` and `discord` and are searchable by feature in the
- * log screen. One controller with three sub-paths would have recorded all
- * three under whatever prefix it claimed.
- *
- * READS ONLY, AND SO NO STEP-UP. `CsrfGuard`, `ReauthGuard` are absent because nothing here writes. Asking for an
- * authenticator code to read a number is how operators learn to type codes
- * without reading what they are for -- the same reasoning
- * `AdminEconomyController` gives for its preview route.
- *
- * The view itself is still recorded: `adminAuditTrail` writes one audit row
- * per request under `/api/v1/admin` through `admin_record_console_access`,
- * which is what 14.9 asks for when it says every console view is logged.
- */
+export class UpdateWorkPolicyDto {
+  @ApiProperty({ required: false, minimum: 1, maximum: 1000000000 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(1000000000)
+  readonly dailyCap?: number;
 
-/** One request per screen: each handler issues its reads together. */
+  @ApiProperty({ required: false, minimum: 1, maximum: 10000000000 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(10000000000)
+  readonly weeklyCap?: number;
+
+  @ApiProperty({ required: false, minimum: 0, maximum: 100 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100)
+  readonly repeatDecayPercent?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsBoolean()
+  readonly enabled?: boolean;
+
+  @ApiProperty({ required: false, maxLength: 500 })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  readonly reason?: string;
+}
+
+export class UpdateWorkTaskDto {
+  @ApiProperty({ required: false, minimum: 1, maximum: 100000 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(100000)
+  readonly baseReward?: number;
+
+  @ApiProperty({ required: false, minimum: 0, maximum: 100000 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(100000)
+  readonly baseExperience?: number;
+
+  @ApiProperty({ required: false, minimum: 1, maximum: 86400 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(86400)
+  readonly minimumDurationSeconds?: number;
+
+  @ApiProperty({ required: false, minimum: 1, maximum: 1000 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(1000)
+  readonly dailyLimit?: number;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsBoolean()
+  readonly active?: boolean;
+}
+
 function required(repository: OperationsRepository | null): OperationsRepository {
   if (!repository) {
     throw new ServiceUnavailableException('the operations console is unavailable');
@@ -49,12 +103,6 @@ function required(repository: OperationsRepository | null): OperationsRepository
   return repository;
 }
 
-/**
- * 42501 from one of these functions is the role refusal working, and belongs
- * to the caller as a 403. PostgreSQL's own "permission denied for ..." is a
- * missing GRANT and is deliberately not caught, so a broken deployment stays
- * a 500 that somebody has to look at.
- */
 async function guarded<T>(work: () => Promise<T>, message: string): Promise<T> {
   try {
     return await work();
@@ -91,6 +139,39 @@ export class AdminWorkOperationsController {
     );
     return { catalogue, jobLevels, policy };
   }
+
+  @Put('policy')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Update work reward policy daily cap, weekly cap, and repeat decay' })
+  async updatePolicy(
+    @Req() request: RequestWithSession,
+    @Body() body: UpdateWorkPolicyDto,
+  ) {
+    const actor = requireUserId(request);
+    const repository = required(this.operations);
+    const policy = await guarded(
+      () => repository.updateWorkRewardPolicy(actor, body),
+      'the work reward policy could not be updated',
+    );
+    return { policy };
+  }
+
+  @Patch('tasks/:id')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Update base reward, duration, daily limit, and active state of a work task' })
+  async updateTask(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) taskId: string,
+    @Body() body: UpdateWorkTaskDto,
+  ) {
+    const actor = requireUserId(request);
+    const repository = required(this.operations);
+    const task = await guarded(
+      () => repository.updateWorkTask(actor, taskId, body),
+      'the work task could not be updated',
+    );
+    return { task };
+  }
 }
 
 @ApiTags('admin')
@@ -101,11 +182,6 @@ export class AdminBankOperationsController {
     @Inject(OperationsRepository) private readonly operations: OperationsRepository | null,
   ) {}
 
-  /**
-   * `limit` bounds the loan book alone. The totals beside it come from
-   * `admin_bank_overview`, which counts the whole book -- a total added up
-   * from a page of fifty would be a subtotal presented as a total.
-   */
   @Get()
   @ApiOperation({ summary: 'Deposits and the loan book, with the credit ladder behind it' })
   async overview(@Req() request: RequestWithSession, @Query('limit') limit?: string) {
@@ -138,11 +214,6 @@ export class AdminDiscordOperationsController {
     @Inject(OperationsRepository) private readonly operations: OperationsRepository | null,
   ) {}
 
-  /**
-   * The routing table and the outbox backlog. The recent-deliveries list is a
-   * different question and stays where it is, beside the audit trail at
-   * `GET /admin/discord-outbox-events`.
-   */
   @Get()
   @ApiOperation({ summary: 'Discord delivery: which types are routed, and what is stuck' })
   async overview(@Req() request: RequestWithSession) {
