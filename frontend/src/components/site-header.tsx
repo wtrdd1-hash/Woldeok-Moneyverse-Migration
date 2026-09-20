@@ -71,8 +71,8 @@ export function SiteHeader() {
   const mobileAdmin = mobileAdminEntries(viewer);
 
   return (
-    <header className="moneyverse-site-header sticky top-0 z-30 border-b backdrop-blur-xl">
-      <div className="mx-auto flex h-[68px] w-full max-w-7xl items-center gap-2 px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:h-[76px] lg:gap-4 xl:gap-6 lg:px-8">
+    <header className="moneyverse-site-header sticky top-0 z-30 border-b backdrop-blur-xl w-full max-w-full overflow-hidden">
+      <div className="mx-auto flex h-[68px] w-full max-w-[1440px] items-center gap-1.5 min-[480px]:gap-2 sm:gap-3 px-3 sm:px-6 lg:h-[76px] lg:gap-3 xl:gap-4 lg:px-6 xl:px-8">
         <Brand />
 
         <nav
@@ -88,9 +88,9 @@ export function SiteHeader() {
           )}
         </nav>
 
-        <div className={cn('flex min-w-0 items-center gap-1.5 sm:gap-2 lg:gap-2.5 shrink-0', 'ml-auto lg:ml-2 xl:ml-4')}>
+        <div className={cn('flex min-w-0 items-center gap-1.5 sm:gap-2 shrink-0', 'ml-auto lg:ml-2 xl:ml-3')}>
           <div className="hidden min-[420px]:block">
-            <ServerClockPill className="hidden 2xl:inline-flex" />
+            <ServerClockPill className="hidden min-[1680px]:inline-flex" />
             <LanguageSwitcher />
           </div>
           <div className="hidden sm:block">
@@ -288,29 +288,18 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
   const isAdmin = Boolean(viewer.consentCurrent && viewer.adminRoles.length > 0);
 
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-      <Button
-        asChild
-        size="sm"
-        className="h-10 sm:h-11 rounded-xl px-3 sm:px-4 text-xs sm:text-sm font-extrabold shadow-plate shrink-0"
-      >
-        <Link href="/wallet" className="flex items-center gap-1.5">
-          <Wallet className="size-4" />
-          <span>{locale === 'en' ? 'Wallet' : '내 지갑'}</span>
-        </Link>
-      </Button>
-
+    <div className="flex items-center shrink-0">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
-            className="flex h-10 sm:h-11 items-center gap-1.5 rounded-xl px-2.5 sm:px-3 text-xs sm:text-sm font-bold text-foreground hover:bg-secondary shrink-0 outline-none"
-            aria-label={locale === 'en' ? 'Account menu' : '내 계정 메뉴'}
+            variant="outline"
+            className="flex h-10 sm:h-11 items-center gap-1.5 rounded-xl px-2.5 sm:px-3 text-xs sm:text-sm font-bold text-foreground hover:bg-secondary shrink-0 border-border/80 shadow-plate outline-none"
+            aria-label={locale === 'en' ? 'Account and wallet menu' : '내 계정 및 지갑 메뉴'}
           >
             <span className="flex size-7 items-center justify-center rounded-lg bg-primary/15 text-xs font-black text-primary">
               <User className="size-4" />
             </span>
-            <span className="hidden sm:inline-block text-xs font-bold text-muted-foreground">
+            <span className="inline-block text-xs font-extrabold text-foreground">
               {locale === 'en' ? 'Account' : '내 계정'}
             </span>
             <ChevronDown className="size-3 text-muted-foreground" />
@@ -327,15 +316,15 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
           </div>
           <Separator className="my-1" />
           <DropdownMenuItem asChild>
-            <Link href="/account" className="flex min-h-10 items-center gap-2 font-bold cursor-pointer">
-              <User className="size-4 text-muted-foreground" />
-              <span>{locale === 'en' ? 'My account' : '내 계정'}</span>
+            <Link href="/wallet" className="flex min-h-10 items-center gap-2 font-bold cursor-pointer text-primary">
+              <Wallet className="size-4" />
+              <span>{locale === 'en' ? 'My wallet' : '내 지갑'}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href="/wallet" className="flex min-h-10 items-center gap-2 font-bold cursor-pointer">
-              <Wallet className="size-4 text-muted-foreground" />
-              <span>{locale === 'en' ? 'My wallet' : '내 지갑'}</span>
+            <Link href="/account" className="flex min-h-10 items-center gap-2 font-bold cursor-pointer">
+              <User className="size-4 text-muted-foreground" />
+              <span>{locale === 'en' ? 'My account' : '내 계정'}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>

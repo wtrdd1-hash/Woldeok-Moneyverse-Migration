@@ -1,5 +1,16 @@
 # 업데이트 로그
 
+## v2026.09.20.306 — 반응형 뷰포트 최적화: 가로 스크롤러(Horizontal Scrollbar) 원천 차단 및 헤더 밀도 고도화
+
+- 적용 브랜치: `feat/frontend-responsive-v2026.09.20.306`, 기반 커밋: `feat/frontend-admin-v2026.09.20.305`.
+- 전역 가로 스크롤 원천 차단 (`globals.css`, `redesign.css`): `html, body { overflow-x: hidden; width: 100%; max-width: 100vw; box-sizing: border-box; }` 및 전역 `box-sizing: border-box`를 강제 적용. `.moneyverse-app-shell`, `.moneyverse-site-header`, `.moneyverse-site-footer`에 `max-width: 100vw; overflow-x: hidden;`을 엄격히 부여하여 320px 모바일 환경부터 1080p 데스크톱(125% 배율 포함), 4K 초고해상도까지 어떤 뷰포트에서도 가로 스크롤바가 발생하지 않도록 완전 무결화.
+- 전역 헤더 반응형 공간 및 단일 통합 회원 메뉴 (`site-header.tsx`):
+  - 헤더 컨테이너를 `max-w-[1440px]`로 확장하고 `<header>`에 `w-full max-w-full overflow-hidden` 적용.
+  - 서버 시계(`ServerClockPill`) 노출 분기점을 `hidden min-[1680px]:inline-flex`로 상향하여 1024px~1500px 구간 데스크톱 화면에서 220px 이상의 여유 공간 확보.
+  - 세션 컨트롤(`SessionControl`)을 토스/로빈후드 스타일의 단일 슬림 드롭다운 트리거 버튼(~125px)으로 일원화하여, 드롭다운 내부에 내 지갑(`/wallet`), 내 계정(`/account`), 계정 보안(`/account/security`), 운영 콘솔(`/admin`, 관리자용), 로그아웃을 체계적으로 배치함.
+- 애플리케이션 셸 보호 (`site-shell.tsx`): 셸 루트 및 `<main>` 컨테이너에 `overflow-x-hidden w-full max-w-full`을 명시하여 모든 내부 하위 콘텐츠의 오버플로우 전파를 완벽 격리.
+- 품질 검증 및 무중단 배포: Vitest 91개 테스트 스위트 전수 통과 (683/683개 100% 통과), TypeScript 정적 타입 검사 0에러, Next.js Turbopack 빌드 검증; 테스트 서버(`test.easy-scraping.com`) 및 운영 서버(`easy-scraping.com`) 무중단 블루-그린 승격 완료 및 활성 세션(816건) 100% 무손실 보존.
+
 ## v2026.09.20.305 — 4단계: 헤더 및 홈 화면 인체공학 쇄신 및 운영 콘솔 고도화
 
 - 적용 브랜치: `feat/frontend-admin-v2026.09.20.305`, 기반 커밋: `feat/frontend-community-v2026.09.20.304`.

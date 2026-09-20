@@ -1,5 +1,17 @@
 # Update Log
 
+## v2026.09.20.306 — Responsive Viewport Optimization: Complete Horizontal Scrollbar Elimination
+
+- Branch: `feat/frontend-responsive-v2026.09.20.306`, Base: `feat/frontend-admin-v2026.09.20.305`.
+- Global Overflow Immunity (`globals.css`, `redesign.css`): Enforced `html, body { overflow-x: hidden; width: 100%; max-width: 100vw; box-sizing: border-box; }` and `*, *::before, *::after { box-sizing: border-box; }`. Added explicit `max-width: 100vw; overflow-x: hidden;` to `.moneyverse-app-shell`, `.moneyverse-site-header`, and `.moneyverse-site-footer`, eradicating horizontal scrolling across all desktop and mobile screen widths (320px–4K).
+- Header Responsive Density & Layout Expansion (`site-header.tsx`):
+  - Upgraded masthead inner container to `max-w-[1440px]` with `w-full max-w-full overflow-hidden`.
+  - Upgraded `ServerClockPill` visibility breakpoint to `hidden min-[1680px]:inline-flex`, freeing up over 220px on standard desktop screens (1024px–1500px).
+  - Streamlined `SessionControl` into a sleek single Toss-style member dropdown trigger (`[User Icon] [내 계정 / Account] [v]`, ~125px width), housing one-tap links to My Wallet (`/wallet`), Account Center (`/account`), Security (`/account/security`), Admin Console (`/admin` for operators), and Sign Out.
+- App Shell Hardening (`site-shell.tsx`): Added `overflow-x-hidden w-full max-w-full` across application root shell and `<main>` container.
+- Quality Gates Passed: Vitest 91/91 test files (683/683 unit & regression tests, 0 failures), TypeScript typecheck (`tsc --noEmit`), Next.js Production Build with exact BUILD_ID injection.
+- Zero-Downtime Deployment & Health Verification: Blue-green promoted to both Test (`test.easy-scraping.com`) and Production (`easy-scraping.com`) environments with 100% health check 200 and session continuity.
+
 ## v2026.09.20.305 — Phase 4: Header & Home Ergonomics Resolution & Operations Modernization
 
 - Branch: `feat/frontend-admin-v2026.09.20.305`, base `feat/frontend-community-v2026.09.20.304`.

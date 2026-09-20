@@ -63,13 +63,21 @@
 }
 html {
   min-width: 320px;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
   background: var(--mv-bg);
   scroll-padding-top: 5.5rem;
+  box-sizing: border-box;
 }
 body {
   min-width: 320px;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
   background: var(--mv-bg);
   color: var(--mv-ink);
+  box-sizing: border-box;
 }
 body::before {
   content: none;
