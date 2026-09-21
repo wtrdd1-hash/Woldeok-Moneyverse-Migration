@@ -1,6 +1,5 @@
 /*
- * Moneyverse Modern FinTech Rebuild Foundation (v316).
- * Toss & Apple minimalist fintech tone & feel.
+ * Moneyverse — WCAG AA compliant palette & responsive redesign foundation
  */
 :root {
   --mv-bg: #f4f2ec;
@@ -9,16 +8,16 @@
   --mv-surface-strong: #ebe7dd;
   --mv-ink: #171a1f;
   --mv-ink-2: #4d5561;
-  --mv-ink-3: #626a73;
+  --mv-ink-3: #59616d;
   --mv-line: #d7d2c7;
-  --mv-line-strong: #aaa295;
+  --mv-line-strong: #b9b2a5;
   --mv-accent: #9b3f22;
   --mv-accent-strong: #763019;
   --mv-accent-soft: #f2ddd3;
   --mv-focus: #28557a;
-  --mv-positive: #176044;
-  --mv-negative: #923232;
-  --mv-radius: 16px;
+  --mv-positive: #1d6b4e;
+  --mv-negative: #a03737;
+  --mv-radius: 10px;
 
   --background: var(--mv-bg);
   --foreground: var(--mv-ink);
@@ -34,48 +33,30 @@
   --muted-foreground: var(--mv-ink-2);
   --accent: var(--mv-accent-soft);
   --accent-foreground: var(--mv-accent-strong);
-  --destructive: #923232;
+  --destructive: #a03737;
   --destructive-foreground: #ffffff;
   --border: var(--mv-line);
   --input: var(--mv-line-strong);
   --ring: color-mix(in srgb, var(--mv-focus) 65%, transparent);
-  --paper: var(--mv-bg);
-  --paper-dark: var(--mv-surface-strong);
-  --surface: var(--mv-surface-raised);
-  --ink: var(--mv-ink);
-  --ink-soft: var(--mv-ink-2);
-  --line: var(--mv-line);
-  --forest: #243e36;
-  --forest-deep: #15261f;
-  --forest-soft: #315b4d;
-  --clay: var(--mv-accent);
-  --clay-soft: var(--mv-accent-soft);
-  --clay-ink: var(--mv-accent-strong);
-  --mint: #e6eee9;
-  --highlight: #f1e8c9;
-  --rise: #a73535;
-  --fall: #315f9b;
-  --shadow-plate: 0 1px 0 rgb(23 26 31 / 0.05);
-  --shadow-raised: 0 14px 34px rgb(23 26 31 / 0.09);
-  color-scheme: light;
 }
 
 .dark {
-  --mv-bg: #101318;
-  --mv-surface: #171b22;
-  --mv-surface-raised: #1e242d;
-  --mv-surface-strong: #28303b;
-  --mv-ink: #f4f7fb;
-  --mv-ink-2: #c4ccd7;
-  --mv-ink-3: #a8b2bf;
-  --mv-line: #343d49;
-  --mv-line-strong: #4b5665;
-  --mv-accent: #e88a67;
-  --mv-accent-strong: #f3a88a;
-  --mv-accent-soft: #43271f;
-  --mv-focus: #77b8ea;
-  --mv-positive: #69c8a0;
-  --mv-negative: #ef8d8d;
+  --mv-bg: #12100e;
+  --mv-surface: #181614;
+  --mv-surface-raised: #181614;
+  --mv-surface-strong: #24201c;
+  --mv-ink: #fef8ee;
+  --mv-ink-2: #d6cfc7;
+  --mv-ink-3: #b5aca2;
+  --mv-line: #292524;
+  --mv-line-strong: #44403c;
+  --mv-accent: #fbbf24;
+  --mv-accent-strong: #f59e0b;
+  --mv-accent-soft: #292524;
+  --mv-focus: #60a5fa;
+  --mv-positive: #34d399;
+  --mv-negative: #f87171;
+  --mv-radius: 10px;
 
   --background: var(--mv-bg);
   --foreground: var(--mv-ink);
@@ -84,37 +65,18 @@
   --popover: var(--mv-surface-raised);
   --popover-foreground: var(--mv-ink);
   --primary: var(--mv-accent);
-  --primary-foreground: #1b100c;
+  --primary-foreground: #12100e;
   --secondary: var(--mv-surface-strong);
   --secondary-foreground: var(--mv-ink);
-  --muted: #222933;
+  --muted: var(--mv-surface-strong);
   --muted-foreground: var(--mv-ink-2);
   --accent: var(--mv-accent-soft);
-  --accent-foreground: #ffd0bd;
-  --destructive: #b94d4d;
+  --accent-foreground: var(--mv-accent-strong);
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --border: var(--mv-line);
   --input: var(--mv-line-strong);
-  --ring: color-mix(in srgb, var(--mv-focus) 72%, transparent);
-  --paper: var(--mv-bg);
-  --paper-dark: var(--mv-surface-strong);
-  --surface: var(--mv-surface-raised);
-  --ink: var(--mv-ink);
-  --ink-soft: var(--mv-ink-2);
-  --line: var(--mv-line);
-  --forest: #8dbda9;
-  --forest-deep: #1a2c25;
-  --forest-soft: #acd8c6;
-  --clay: var(--mv-accent);
-  --clay-soft: var(--mv-accent-soft);
-  --clay-ink: #ffc1aa;
-  --mint: #20342d;
-  --highlight: #f4d98a;
-  --rise: #ef8d8d;
-  --fall: #82abe0;
-  --shadow-plate: 0 1px 0 rgb(0 0 0 / 0.28);
-  --shadow-raised: 0 16px 38px rgb(0 0 0 / 0.26);
-  color-scheme: dark;
+  --ring: color-mix(in srgb, var(--mv-focus) 65%, transparent);
 }
 
 html {
@@ -122,243 +84,38 @@ html {
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
-  background: var(--mv-bg);
+  background: var(--background);
   scroll-padding-top: 5.5rem;
   box-sizing: border-box;
 }
+
 body {
   min-width: 320px;
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
-  background: var(--mv-bg);
-  color: var(--mv-ink);
+  background: var(--background);
+  color: var(--foreground);
   box-sizing: border-box;
-}
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-body::before {
-  content: none;
-}
-::selection {
-  background: color-mix(in srgb, var(--mv-accent) 28%, var(--mv-bg));
-  color: var(--mv-ink);
-}
-:focus-visible {
-  outline: 2px solid var(--mv-focus);
-  outline-offset: 3px;
 }
 
-.moneyverse-app-shell {
-  isolation: isolate;
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-.moneyverse-main {
-  position: relative;
-}
-.moneyverse-main::before {
-  content: none;
-}
-.moneyverse-site-header {
-  border-color: var(--mv-line) !important;
+.site-header-redesign {
   background: color-mix(in srgb, var(--mv-surface) 96%, transparent) !important;
-  box-shadow: none !important;
-  backdrop-filter: blur(12px);
 }
-.moneyverse-site-footer {
-  border-top: 1px solid var(--mv-line);
+
+.site-footer-redesign {
   background: var(--mv-surface-strong) !important;
 }
 
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  color: var(--mv-accent-strong);
-  font-family: var(--font-plex-mono), monospace;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.11em;
-  line-height: 1.2;
-  text-transform: uppercase;
+/* Redesign density classes */
+.mv-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
 }
-.eyebrow::before {
-  content: '';
-  width: 1.15rem;
-  height: 2px;
-  background: currentColor;
-}
-h1,
-h2,
-h3 {
-  color: var(--mv-ink);
-  font-family: var(--font-noto-kr), Pretendard, system-ui, sans-serif;
-  letter-spacing: -0.035em;
-}
-a {
-  text-underline-offset: 4px;
-}
-
-.moneyverse-card,
-[data-slot='card'] {
-  border-radius: 16px;
-  border-color: var(--mv-line);
-  background: var(--mv-surface-raised);
-  box-shadow: var(--shadow-plate);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.moneyverse-card:hover {
-  border-color: var(--mv-line-strong);
-}
-.moneyverse-feature-card {
-  border-radius: 16px;
-  border-color: var(--mv-line-strong);
-  background: var(--mv-surface-raised);
-}
-.moneyverse-button {
-  min-height: 44px;
-  border-radius: 12px;
-}
-.moneyverse-button[data-variant='default'] {
-  box-shadow: none;
-}
-
-input,
-textarea,
-select,
-[data-slot='select-trigger'] {
-  border-radius: 12px !important;
-  border-color: var(--mv-line-strong) !important;
-  background: var(--mv-surface-raised) !important;
-  color: var(--mv-ink) !important;
-}
-input::placeholder,
-textarea::placeholder {
-  color: var(--mv-ink-3) !important;
-}
-[data-slot='table-header'] {
-  color: var(--mv-ink-2);
-  background: var(--mv-surface-strong);
-}
-[data-slot='table-row'] {
-  border-color: var(--mv-line);
-}
-[data-slot='table-row']:hover {
-  background: color-mix(in srgb, var(--mv-surface-strong) 58%, var(--mv-surface-raised));
-}
-[data-slot='dialog-content'],
-[data-slot='sheet-content'],
-[data-slot='dropdown-menu-content'],
-[data-slot='popover-content'] {
-  border-radius: 18px !important;
-  border-color: var(--mv-line-strong) !important;
-  background: var(--mv-surface-raised) !important;
-  box-shadow: 0 18px 50px rgb(23 26 31 / 0.16) !important;
-}
-[data-slot='badge'] {
-  border-radius: 8px;
-  border-color: var(--mv-line-strong);
-  font-weight: 700;
-}
-[data-slot='skeleton'] {
-  background: var(--mv-surface-strong);
-}
-
-.mv-page {
-  min-width: 0;
-}
-.mv-page--finance {
-  font-variant-numeric: tabular-nums;
-}
-.mv-page--finance > [data-slot='card'],
-.mv-page--finance section > [data-slot='card'] {
-  border-radius: 16px;
-}
-.mv-page--finance table,
-.mv-page--finance [role='table'] {
-  font-variant-numeric: tabular-nums;
-}
-.mv-page--member {
-  max-width: 1120px;
-  margin-inline: auto;
-}
-.mv-page--member > section {
-  scroll-margin-top: 7rem;
-}
-.mv-page--community article,
-.mv-page--community [data-content-body] {
-  max-width: 72ch;
-}
-.mv-page--community h1 {
-  text-wrap: balance;
-}
-.mv-page--gameplay [data-slot='card'] {
-  border-radius: 16px;
-}
-.mv-page--admin {
-  font-variant-numeric: tabular-nums;
-}
-.mv-page--admin [data-slot='card'] {
-  border-radius: 14px;
-  box-shadow: none;
-}
-.mv-page--admin table,
-.mv-page--admin [role='table'] {
-  font-size: 0.875rem;
-}
-.mv-page--admin h1 {
-  max-width: none;
-}
-.mv-page--utility {
-  max-width: 760px;
-  margin-inline: auto;
-}
-.mv-page--utility [data-slot='card'] {
-  border-radius: 16px;
-}
-
-@media (max-width: 767px) {
-  html,
-  body,
-  .moneyverse-app-shell,
-  .moneyverse-main,
-  .mv-page {
-    overflow-x: hidden !important;
-    max-width: 100vw !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
-  }
-  .moneyverse-main {
-    padding-inline: 0.75rem !important;
-  }
-  [data-slot='card'] {
-    border-radius: 14px;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-  .mv-page--finance table {
-    font-size: 0.8125rem;
-  }
-  .mv-page--admin [data-slot='card'] {
-    border-radius: 10px;
-  }
-  .mv-page--utility {
-    max-width: none;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
+@media (min-width: 640px) {
+  .mv-kpi-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
   }
 }

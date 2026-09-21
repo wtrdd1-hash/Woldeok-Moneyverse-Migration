@@ -17,7 +17,7 @@ export function SiteFooter() {
   const en = locale === 'en';
   const linkClass = 'inline-flex min-h-11 items-center px-2 hover:text-forest-soft focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2';
   return (
-    <footer className="moneyverse-site-footer mt-16 text-muted-foreground sm:mt-24">
+    <footer className="moneyverse-site-footer mt-16 text-muted-foreground sm:mt-24 pb-24 lg:pb-8">
       <div className="mx-auto w-full max-w-[1320px] px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-start justify-between gap-6 border-b border-border/70 py-9 sm:flex-row sm:items-center">
           <Brand />

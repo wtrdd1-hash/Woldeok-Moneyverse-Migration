@@ -123,8 +123,19 @@ function TaskCompletionPanel({
   }, [state]);
 
   return (
-    <div className="fixed inset-0 z-50 flex min-h-[100dvh] w-full items-end sm:items-center justify-center overflow-y-auto overscroll-contain bg-black/75 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-150">
-      <Card className="w-full max-w-md max-h-[92dvh] sm:max-h-[85vh] flex flex-col my-auto rounded-t-2xl sm:rounded-2xl border-border/80 bg-background/95 shadow-2xl backdrop-blur-md overflow-hidden">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="task-completion-title"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-end sm:justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4 overflow-hidden animate-in fade-in duration-150"
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !pending) onClose();
+      }}
+    >
+      <Card className="w-full max-w-lg max-h-[90dvh] flex flex-col rounded-t-3xl sm:rounded-2xl border-t sm:border border-border/80 bg-card text-card-foreground shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-200">
+        {/* Mobile touch grab handle */}
+        <div className="mx-auto mt-2.5 h-1.5 w-12 rounded-full bg-muted-foreground/30 sm:hidden" />
+
         <CardHeader className="shrink-0 p-4 sm:p-6 pb-2">
           <div className="flex items-center justify-between gap-2">
             <Badge
@@ -136,64 +147,57 @@ function TaskCompletionPanel({
               <span className="text-muted-foreground/60">·</span>
               <span>{difficultyLabel(task.difficulty, locale)}</span>
             </Badge>
-            <Badge className="bg-primary/20 text-primary border-primary/30">
+            <Badge className="bg-primary/20 text-primary border-primary/30 font-bold">
               {isEn ? `Completed today ${task.taken_today}` : `오늘 ${task.taken_today}회 완료`}
             </Badge>
           </div>
-          <CardTitle className="text-lg sm:text-xl mt-2">{task.name}</CardTitle>
-          <CardDescription className="text-xs sm:text-sm">{task.description}</CardDescription>
+          <CardTitle id="task-completion-title" className="text-lg sm:text-xl mt-2 font-bold">{task.name}</CardTitle>
+          <CardDescription className="text-xs sm:text-sm text-muted-foreground">{task.description}</CardDescription>
         </CardHeader>
 
         <CardContent ref={scrollContainerRef} className="flex-1 overflow-y-auto overscroll-contain grid gap-3.5 px-4 sm:px-6 py-3">
-          <div className="rounded-xl border border-border/50 bg-muted/40 p-3 grid grid-cols-2 gap-2 text-center text-sm">
-            <div>
-              <span className="text-xs text-muted-foreground block">
-                {isEn ? 'WLD paid this run' : '이번 지급 WLD'}
+          <div className="rounded-xl border border-border/60 bg-muted/40 p-3.5 grid grid-cols-2 gap-2 text-center text-sm">
+            <div className="border-r border-border/40 pr-2">
+              <span className="text-xs text-muted-foreground block font-medium">
+                {isEn ? 'WLD reward' : '이번 지급 WLD'}
               </span>
-              <span className="text-base sm:text-lg font-black text-emerald-700 dark:text-emerald-300">
+              <span className="font-extrabold text-emerald-600 dark:text-emerald-400 font-mono text-base sm:text-lg">
                 {task.reward_preview === null ? '—' : `+${task.reward_preview} WLD`}
               </span>
             </div>
-            <div>
-              <span className="text-xs text-muted-foreground block">
+            <div className="pl-2">
+              <span className="text-xs text-muted-foreground block font-medium">
                 {isEn ? 'Proficiency EXP' : '숙련도 EXP'}
               </span>
-              <span className="text-base sm:text-lg font-black text-amber-700 dark:text-amber-300">
+              <span className="font-extrabold text-amber-600 dark:text-amber-400 font-mono text-base sm:text-lg">
                 {task.experience_preview === null ? '—' : `+${task.experience_preview} EXP`}
               </span>
             </div>
           </div>
 
-          {rewardPaused ? (
-            <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs sm:text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
-              {isEn
-                ? 'Career work payouts are temporarily paused by the current operations policy.'
-                : '현재 운영 정책에 따라 직업 업무 보상 지급이 일시 중지되어 있습니다.'}
-            </div>
-          ) : (
-            <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-3 text-xs leading-5 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200">
-              {isEn
-                ? 'The server validates your active career, writes one idempotent ledger transaction, then records EXP. Repeating the task is allowed.'
-                : '서버가 현재 활성 직업을 확인한 뒤 멱등 원장 거래 1건과 숙련도 EXP를 기록합니다. 같은 업무는 반복 수행할 수 있습니다.'}
-            </div>
-          )}
+          <form action={action} className="grid gap-3">
+            <input type="hidden" name="taskId" value={task.task_id} />
+            <input type="hidden" name="idempotencyKey" value={requestKey} />
 
-          {state.status !== 'ok' && (
-            <form action={action} className="grid gap-2">
-              <input type="hidden" name="taskId" value={task.task_id} />
-              <input type="hidden" name="idempotencyKey" value={requestKey} />
-              <SubmitButton disabled={rewardPaused} className="w-full font-bold min-h-11">
-                {isEn ? 'Perform task and receive reward' : '업무 수행하고 보상 받기'}
-              </SubmitButton>
-            </form>
-          )}
+            <SubmitButton
+              disabled={rewardPaused}
+              className="w-full min-h-12 bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm sm:text-base shadow-md transition-all active:scale-[0.98]"
+            >
+              {rewardPaused
+                ? isEn
+                  ? 'Rewards temporarily unavailable'
+                  : '보상 지급 일시 중지'
+                : isEn
+                  ? 'Complete Task Immediately'
+                  : '업무 완료 및 보상 수령'}
+            </SubmitButton>
+          </form>
 
-          <div ref={resultRef} className="grid gap-3">
+          <div ref={resultRef} className="grid gap-2">
             {pending && (
               <div
-                className="rounded-xl border border-sky-300 bg-sky-50 p-3 text-xs sm:text-sm text-sky-800 dark:border-sky-800 dark:bg-sky-950/50 dark:text-sky-200 animate-pulse"
+                className="rounded-xl border border-border/80 bg-muted/70 p-3.5 text-xs sm:text-sm text-foreground animate-pulse shadow-sm font-medium"
                 role="status"
-                aria-live="polite"
               >
                 {slow
                   ? isEn
@@ -208,9 +212,9 @@ function TaskCompletionPanel({
             <ActionAlert state={state} />
 
             {state.status === 'ok' && (
-              <div className="rounded-xl border border-emerald-300 bg-emerald-50 p-3.5 text-xs sm:text-sm font-semibold text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-200">
+              <div className="rounded-xl border border-emerald-400/60 bg-emerald-500/10 p-3.5 text-xs sm:text-sm font-semibold text-emerald-800 dark:text-emerald-300 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-200">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">🎉</span>
+                  <span className="text-lg">🎉</span>
                   <span>
                     {isEn
                       ? 'Completed. The ledger and career proficiency have been refreshed.'
@@ -222,7 +226,7 @@ function TaskCompletionPanel({
           </div>
         </CardContent>
 
-        <div className="shrink-0 flex items-center justify-end gap-2 px-4 sm:px-6 py-3 border-t bg-muted/10">
+        <div className="shrink-0 flex items-center justify-end gap-2 px-4 sm:px-6 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] border-t border-border/60 bg-muted/20">
           <Button
             type="button"
             variant={state.status === 'ok' ? 'default' : 'ghost'}
