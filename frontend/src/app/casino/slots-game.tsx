@@ -9,6 +9,7 @@ import { absAmount } from './coin';
 import { playDiceNumber } from './actions';
 import { CASINO_IDLE } from './casino-state';
 import { groupDigits } from '@/lib/money';
+import { QuickStakeButtons } from './casino-forms';
 
 const SPIN_SYMBOLS = ['🍒', '🍋', '🔔', '💎', '⭐', '7️⃣'] as const;
 const randomSymbol = (): string =>
@@ -48,7 +49,23 @@ export function LuckySlotsGame({
 }) {
   const [state, formAction, pending] = useActionState(playDiceNumber, CASINO_IDLE);
   const [reels, setReels] = useState<[string, string, string]>(['❔', '❔', '❔']);
+  const [stake, setStake] = useState(minStake);
   const maxPlayable = minAmount(maxStake, remainingStake);
+
+  const handleQuickAdd = (add: number) => {
+    const cur = BigInt((stake || '0').replace(/,/g, ''));
+    const nxt = cur + BigInt(add);
+    const max = BigInt((maxPlayable || '0').replace(/,/g, ''));
+    if (max > BigInt(0) && nxt > max) {
+      setStake(max.toString());
+    } else {
+      setStake(nxt.toString());
+    }
+  };
+
+  const handleMax = () => {
+    setStake(maxPlayable);
+  };
 
   useEffect(() => {
     if (pending) {
@@ -114,7 +131,8 @@ export function LuckySlotsGame({
                 type="number"
                 min={minStake}
                 max={maxPlayable}
-                defaultValue={minStake}
+                value={stake}
+                onChange={(e) => setStake(e.target.value)}
                 required
                 disabled={pending || exhausted}
                 className="pr-12 text-lg font-mono font-bold"
@@ -123,6 +141,7 @@ export function LuckySlotsGame({
                 WLD
               </span>
             </div>
+            <QuickStakeButtons onAdd={handleQuickAdd} onMax={handleMax} />
             <p className="text-xs text-muted-foreground">
               한 판 최소 {groupDigits(minStake)} WLD · 현재 한도 기준 최대 {groupDigits(maxPlayable)} WLD
             </p>

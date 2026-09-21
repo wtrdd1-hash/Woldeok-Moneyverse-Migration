@@ -18,7 +18,7 @@ import { DIE_FACES, PARITY_CHOICES } from './dice';
 import { playCoin, playDiceNumber, playDiceParity, setSelfLimit } from './actions';
 import { CASINO_IDLE } from './casino-state';
 
-function QuickStakeButtons({
+export function QuickStakeButtons({
   onAdd,
   onMax,
 }: {

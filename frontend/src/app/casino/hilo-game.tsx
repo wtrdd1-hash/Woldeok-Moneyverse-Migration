@@ -9,6 +9,7 @@ import { groupDigits } from '@/lib/money';
 import { absAmount } from './coin';
 import { playDiceParity } from './actions';
 import { CASINO_IDLE } from './casino-state';
+import { QuickStakeButtons } from './casino-forms';
 
 function minAmount(...values: readonly string[]): string {
   return values.reduce((lowest, value) => (BigInt(value) < BigInt(lowest) ? value : lowest));
@@ -31,7 +32,23 @@ export function HiLoCardGame({
 }) {
   const [state, formAction, pending] = useActionState(playDiceParity, CASINO_IDLE);
   const [choice, setChoice] = useState<'odd' | 'even'>('odd');
+  const [stake, setStake] = useState(minStake);
   const maxPlayable = minAmount(maxStake, remainingStake);
+
+  const handleQuickAdd = (add: number) => {
+    const cur = BigInt((stake || '0').replace(/,/g, ''));
+    const nxt = cur + BigInt(add);
+    const max = BigInt((maxPlayable || '0').replace(/,/g, ''));
+    if (max > BigInt(0) && nxt > max) {
+      setStake(max.toString());
+    } else {
+      setStake(nxt.toString());
+    }
+  };
+
+  const handleMax = () => {
+    setStake(maxPlayable);
+  };
 
   const serverSide =
     state.outcomeFace === undefined ? null : state.outcomeFace % 2 === 1 ? 'High' : 'Low';
@@ -64,7 +81,7 @@ export function HiLoCardGame({
             variant={choice === 'odd' ? 'default' : 'outline'}
             onClick={() => setChoice('odd')}
             disabled={pending || exhausted}
-            className="h-16 text-base font-bold"
+            className="h-16 text-base font-bold rounded-xl"
           >
             🔺 High (홀수)
           </Button>
@@ -73,7 +90,7 @@ export function HiLoCardGame({
             variant={choice === 'even' ? 'default' : 'outline'}
             onClick={() => setChoice('even')}
             disabled={pending || exhausted}
-            className="h-16 text-base font-bold"
+            className="h-16 text-base font-bold rounded-xl"
           >
             🔻 Low (짝수)
           </Button>
@@ -92,7 +109,8 @@ export function HiLoCardGame({
                 type="number"
                 min={minStake}
                 max={maxPlayable}
-                defaultValue={minStake}
+                value={stake}
+                onChange={(e) => setStake(e.target.value)}
                 required
                 disabled={pending || exhausted}
                 className="pr-12 text-lg font-mono font-bold"
@@ -101,12 +119,13 @@ export function HiLoCardGame({
                 WLD
               </span>
             </div>
+            <QuickStakeButtons onAdd={handleQuickAdd} onMax={handleMax} />
             <p className="text-xs text-muted-foreground">
               한 판 최소 {groupDigits(minStake)} WLD · 현재 한도 기준 최대 {groupDigits(maxPlayable)} WLD
             </p>
           </div>
 
-          <Button type="submit" disabled={pending || exhausted} className="h-12 w-full text-base font-bold">
+          <Button type="submit" disabled={pending || exhausted} className="h-12 w-full text-base font-bold rounded-xl">
             {pending
               ? '서버에서 결과 확인 중…'
               : exhausted

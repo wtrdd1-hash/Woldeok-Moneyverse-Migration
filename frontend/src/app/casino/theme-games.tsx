@@ -9,6 +9,7 @@ import { groupDigits } from '@/lib/money';
 import { absAmount } from './coin';
 import { playDiceNumber, playDiceParity } from './actions';
 import { CASINO_IDLE } from './casino-state';
+import { QuickStakeButtons } from './casino-forms';
 
 type ThemeGame = 'wheel' | 'treasure' | 'gems';
 
@@ -64,7 +65,24 @@ export function ThemeGameCard({
   const action = theme.mode === 'parity' ? playDiceParity : playDiceNumber;
   const [state, formAction, pending] = useActionState(action, CASINO_IDLE);
   const [choice, setChoice] = useState(theme.mode === 'parity' ? 'odd' : '1');
+  const [stake, setStake] = useState(minStake);
   const maxPlayable = minAmount(maxStake, remainingStake);
+
+  const handleQuickAdd = (add: number) => {
+    const cur = BigInt((stake || '0').replace(/,/g, ''));
+    const nxt = cur + BigInt(add);
+    const max = BigInt((maxPlayable || '0').replace(/,/g, ''));
+    if (max > BigInt(0) && nxt > max) {
+      setStake(max.toString());
+    } else {
+      setStake(nxt.toString());
+    }
+  };
+
+  const handleMax = () => {
+    setStake(maxPlayable);
+  };
+
   const choices =
     theme.mode === 'parity'
       ? [
@@ -102,8 +120,8 @@ export function ThemeGameCard({
       </CardHeader>
       <CardContent className="grid gap-5">
         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-          <span className="rounded-full border px-2.5 py-1">적중 확률 {winProbability}%</span>
-          <span className="rounded-full border px-2.5 py-1">적중 시 {payoutMultiplier}배 배당</span>
+          <span className="rounded-full border px-2.5 py-1 font-mono">적중 확률 {winProbability}%</span>
+          <span className="rounded-full border px-2.5 py-1 font-mono text-primary font-bold">적중 시 {payoutMultiplier}배 배당</span>
           <span className="rounded-full border px-2.5 py-1">서버 원장 정산</span>
         </div>
 
@@ -124,6 +142,7 @@ export function ThemeGameCard({
                   variant={choice === item.value ? 'default' : 'outline'}
                   onClick={() => setChoice(item.value)}
                   disabled={pending || exhausted}
+                  className="rounded-xl font-bold"
                 >
                   {item.label}
                 </Button>
@@ -139,16 +158,19 @@ export function ThemeGameCard({
               type="number"
               min={minStake}
               max={maxPlayable}
-              defaultValue={minStake}
+              value={stake}
+              onChange={(e) => setStake(e.target.value)}
               required
               disabled={pending || exhausted}
+              className="rounded-xl font-mono text-base"
             />
+            <QuickStakeButtons onAdd={handleQuickAdd} onMax={handleMax} />
             <p className="text-xs text-muted-foreground">
               한 판 최소 {groupDigits(minStake)} WLD · 현재 한도 기준 최대 {groupDigits(maxPlayable)} WLD
             </p>
           </div>
 
-          <Button type="submit" disabled={pending || exhausted} className="h-12 w-full font-bold">
+          <Button type="submit" disabled={pending || exhausted} className="h-12 w-full font-bold rounded-xl">
             {pending ? '서버에서 결과 확인 중…' : exhausted ? '현재 한도로 플레이 불가' : `${theme.icon} 플레이`}
           </Button>
 

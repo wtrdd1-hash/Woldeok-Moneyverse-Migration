@@ -43,11 +43,11 @@ function QuickCareerSwitchButton({
   const [, action] = useActionState(switchJobAction, IDLE);
 
   return (
-    <form action={action} className="w-full mt-1.5">
+    <form action={action} className="w-full mt-1">
       <input type="hidden" name="jobType" value={jobCode} />
       <SubmitButton
         variant="ghost"
-        className="w-full text-xs text-muted-foreground hover:text-foreground h-7 py-1 px-2 border border-border/40 hover:border-border"
+        className="w-full text-xs text-muted-foreground hover:text-foreground min-h-9 h-9 py-1 px-2 border border-border/40 hover:border-border rounded-xl font-medium"
       >
         {isEn ? `Switch to ${jobName}` : `${jobName}(으)로 전직하기`}
       </SubmitButton>
@@ -80,8 +80,8 @@ export function CareerTasksBoard({
   const displayTasks = boardOrder(filterWorkTasks(scopedTasks, searchQuery), activeJobType);
 
   return (
-    <div className="grid gap-4 w-full max-w-full min-w-0 overflow-hidden">
-      <div className="flex flex-col gap-3 bg-card/60 border border-border/60 rounded-xl p-3 backdrop-blur-sm shadow-sm w-full min-w-0 overflow-hidden">
+    <div className="grid gap-4 w-full max-w-full min-w-0">
+      <div className="flex flex-col gap-3 bg-card/60 border border-border/60 rounded-xl p-3 backdrop-blur-sm shadow-sm w-full min-w-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
           <div className="flex items-center gap-1.5 min-[400px]:gap-2 flex-wrap min-w-0">
             {activeJobType && (
@@ -89,13 +89,11 @@ export function CareerTasksBoard({
                 size="sm"
                 variant={filter === 'my_job' ? 'default' : 'outline'}
                 onClick={() => setFilter('my_job')}
-                className={`font-semibold text-xs transition-all h-8 sm:h-9 py-1 px-2.5 ${
-                  filter === 'my_job' ? 'bg-amber-700 hover:bg-amber-800 text-white shadow-sm' : ''
-                }`}
+                className="font-semibold text-xs h-8 sm:h-9 py-1 px-2.5 rounded-lg"
               >
                 <Briefcase className="size-3.5 shrink-0" />
-                <span className="ml-1.5 truncate max-w-[140px] sm:max-w-none">
-                  {isEn ? `My Career: ${activeJobName}` : `내 직업 (${activeJobName})`}
+                <span className="ml-1.5 truncate">
+                  {isEn ? `My Career (${activeJobName})` : `내 직업 (${activeJobName})`}
                 </span>
                 <Badge className="ml-1.5 border-0 bg-amber-950/15 px-1.5 py-0 text-[10px] text-amber-950 dark:bg-black/25 dark:text-white">
                   {myTasks.length}
@@ -107,7 +105,7 @@ export function CareerTasksBoard({
               size="sm"
               variant={filter === 'all' ? 'default' : 'outline'}
               onClick={() => setFilter('all')}
-              className="font-semibold text-xs h-8 sm:h-9 py-1 px-2.5"
+              className="font-semibold text-xs h-8 sm:h-9 py-1 px-2.5 rounded-lg"
             >
               <Compass className="size-3.5 shrink-0" />
               <span className="ml-1.5">
@@ -160,7 +158,7 @@ export function CareerTasksBoard({
           }
         />
       ) : (
-        <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full min-w-0">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full min-w-0">
           {displayTasks.map((task) => {
             const isActiveJob = activeJobType === task.job_type;
             const meta = jobMeta(task.job_type, locale);
@@ -169,15 +167,15 @@ export function CareerTasksBoard({
             return (
               <Card
                 key={task.task_id}
-                className={`flex flex-col justify-between transition-all duration-150 active:scale-[0.99] w-full min-w-0 overflow-hidden ${
+                className={`flex flex-col justify-between h-full min-h-[320px] transition-all duration-150 active:scale-[0.99] w-full min-w-0 ${
                   isActiveJob
                     ? 'border-amber-500/50 dark:border-amber-500/30 bg-card shadow-md ring-1 ring-amber-500/20'
-                    : 'opacity-70 bg-muted/20 border-dashed hover:opacity-100 hover:border-solid transition-opacity'
+                    : 'opacity-75 bg-muted/20 border-dashed hover:opacity-100 hover:border-solid transition-opacity'
                 }`}
               >
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 flex-wrap">
+                <CardHeader className="pb-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                       <Badge
                         variant={isActiveJob ? 'default' : 'outline'}
                         className={`text-xs ${
@@ -186,16 +184,16 @@ export function CareerTasksBoard({
                             : ''
                         }`}
                       >
-                        <span className="flex items-center gap-1"><Briefcase className="size-3" /> {jobLabel(task.job_type, locale)}</span>
+                        <span className="flex items-center gap-1"><Briefcase className="size-3 shrink-0" /> {jobLabel(task.job_type, locale)}</span>
                       </Badge>
                       {isActiveJob && (
                         <Badge className="bg-amber-50 text-amber-800 border-0 dark:bg-amber-950/50 dark:text-amber-200 text-[10px] px-1.5 py-0 font-bold">
-                          <span className="flex items-center gap-1"><Sparkles className="size-2.5 text-amber-500" /> {isEn ? 'Mine' : '내 직업'}</span>
+                          <span className="flex items-center gap-1"><Sparkles className="size-2.5 text-amber-500 shrink-0" /> {isEn ? 'Mine' : '내 직업'}</span>
                         </Badge>
                       )}
                       {task.recommended && (
                         <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800 text-[10px] px-1.5 py-0 font-bold">
-                          <span className="flex items-center gap-1"><Star className="size-2.5 text-emerald-500 fill-emerald-500" /> {isEn ? 'Today’s pick' : '오늘 추천'}</span>
+                          <span className="flex items-center gap-1"><Star className="size-2.5 text-emerald-500 fill-emerald-500 shrink-0" /> {isEn ? 'Today’s pick' : '오늘 추천'}</span>
                         </Badge>
                       )}
                     </div>
@@ -208,7 +206,7 @@ export function CareerTasksBoard({
                   <CardTitle className="text-base mt-2 flex items-center justify-between">
                     <span className="truncate">{task.name}</span>
                   </CardTitle>
-                  <CardDescription className="text-xs line-clamp-2">{task.description}</CardDescription>
+                  <CardDescription className="text-xs line-clamp-2 min-h-[32px]">{task.description}</CardDescription>
                 </CardHeader>
 
                 <CardContent className="grid gap-2 text-xs py-2 min-w-0">
@@ -217,7 +215,7 @@ export function CareerTasksBoard({
                       <span className="text-muted-foreground block text-[11px]">
                         {isEn ? 'WLD this run' : '이번 지급 WLD'}
                       </span>
-                      <span className="font-bold text-emerald-700 dark:text-emerald-300 font-mono">
+                      <span className="font-bold text-emerald-700 dark:text-emerald-300 font-mono text-sm">
                         {task.reward_preview === null ? '—' : `+${task.reward_preview} WLD`}
                       </span>
                     </div>
@@ -225,7 +223,7 @@ export function CareerTasksBoard({
                       <span className="text-muted-foreground block text-[11px]">
                         {isEn ? 'Proficiency EXP' : '숙련도 EXP'}
                       </span>
-                      <span className="font-bold text-amber-700 dark:text-amber-300 font-mono">
+                      <span className="font-bold text-amber-700 dark:text-amber-300 font-mono text-sm">
                         {task.experience_preview === null ? '—' : `+${task.experience_preview} EXP`}
                       </span>
                     </div>
@@ -242,7 +240,7 @@ export function CareerTasksBoard({
                   </div>
                 </CardContent>
 
-                <CardFooter className="pt-2">
+                <CardFooter className="pt-2.5 pb-4 px-5 shrink-0">
                   {isActiveJob ? (
                     <TaskCompleteModalButton
                       task={task}
