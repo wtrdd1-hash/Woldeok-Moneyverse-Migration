@@ -1,5 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
+import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { describe, expect, it } from 'vitest';
+import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { ProfileController } from '../profile/profile.controller';
 import type { ProfileRepository } from '../profile/profile.repository';
@@ -13,6 +17,16 @@ const invalidStorage = {
     throw new ImageUploadError('invalid image');
   },
 } as unknown as PrivateImageStorage;
+
+describe('operator photo upload security boundary', () => {
+  it('requires an admin session, CSRF, and recent reauthentication', () => {
+    const guards =
+      (Reflect.getMetadata(GUARDS_METADATA, PhotoUploadController) as unknown[]) ?? [];
+    expect(guards).toContain(AdminSessionGuard);
+    expect(guards).toContain(CsrfGuard);
+    expect(guards).toContain(ReauthGuard);
+  });
+});
 
 describe('image upload error responses', () => {
   it('answers an invalid operator upload as a bad request', async () => {

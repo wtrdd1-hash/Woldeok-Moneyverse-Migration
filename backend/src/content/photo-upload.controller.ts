@@ -16,6 +16,7 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { ImageUploadError } from './image-upload-validation';
@@ -33,7 +34,15 @@ import { PrivateImageStorage } from './private-image-storage';
  */
 @ApiTags('admin')
 @Controller('admin/photos')
-@UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
+@UseGuards(
+  SessionGuard,
+  AuthenticatedGuard,
+  ConsentGuard,
+  AdminGuard,
+  AdminSessionGuard,
+  CsrfGuard,
+  ReauthGuard,
+)
 export class PhotoUploadController {
   constructor(@Inject(PrivateImageStorage) private readonly storage: PrivateImageStorage | null) {}
 
