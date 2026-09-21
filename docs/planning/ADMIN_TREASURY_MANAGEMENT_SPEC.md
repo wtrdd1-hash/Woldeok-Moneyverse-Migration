@@ -1,251 +1,139 @@
-# Administrator Treasury Management Specification
+# Administrator Treasury, Tax, and Fiscal Operations Specification
 
-> Version: v2026.09.20.306
+> Version: v2026.09.21.323
 > Status: implementation-oriented Living product specification
-> Baseline date: 2026-09-20
+> Baseline date: 2026-09-21
 > Korean counterpart: [ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md](ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md)
+> Supersedes: v2026.09.20.306
+> Scope: planning/documentation only; no runtime, DB, API, or Production mutation in this revision.
 
 ## 1. Purpose
 
-Add a dedicated **Treasury Management** surface to the administrator control center. The treasury is the server-authoritative public/economy reserve used to account for platform-controlled inflows and outflows. It is not a normal member wallet and must never be implemented as an unrestricted balance-edit field.
+Define treasury as a server-authoritative fiscal subsystem connecting **tax/fee revenue → treasury inflow → budget commitment → authorized expenditure → reconciliation/audit → economy stabilization**.
 
-The implementation must preserve the existing ledger, BigInt-safe amount handling, database authorization, immutable audit, exact-SHA Test gate and zero-downtime Production promotion contracts.
+Treasury is not a member wallet. It uses a non-login system account and every WLD mutation must pass the Economy Core/ledger contract.
 
-## 2. Product boundaries
+## 2. Principles
 
-Treasury Management covers:
-- current treasury balance and available/reserved amounts;
-- categorized revenue and expenditure;
-- tax, fee, sink, subsidy, grant, reward-funding and system-adjustment flows when those flows are configured to settle through treasury;
-- manual administrator deposits/withdrawals only through explicit correction transactions;
-- planned/scheduled budget allocations and transfers;
-- transaction history, reconciliation status and variance evidence;
-- reserve thresholds, alerts and operational notes;
-- exportable accounting views that do not bypass authorization or expose secrets.
+1. Treasury is not burn. WLD held by treasury remains supply unless an explicit non-recirculating sink policy says otherwise.
+2. Tax is a tuning instrument, not an objective. It must not become an onboarding barrier.
+3. Baseline rates stay low and move slowly. Any tax/fee policy stays within the approved 0–10% envelope and normally remains unchanged for at least seven days.
+4. Budget allocation never mints money; it reserves existing treasury balance.
+5. Fiscal changes are evidence-driven using faucet/sink, velocity, turnover, profitability, concentration, reserve and reconciliation metrics.
+6. Reconciliation failure is fail-closed for automatic tax changes, subsidies, and large payouts.
 
-It does not permit:
-- direct SQL/table editing from the UI;
-- editing or deleting historical ledger entries;
-- silently rewriting member balances;
-- using the treasury to bypass normal reward, tax, shop, stock, bank or business contracts;
-- floating-point amount arithmetic;
-- unaudited “set balance” operations.
+## 3. Initial tax schedule
 
-## 3. Administrator information architecture
+| Tax | Tax base / event | Initial | Allowed | Treasury share |
+|---|---|---:|---:|---:|
+| Member transfer tax | settled transferred WLD | 0% | 0–2% | 100% |
+| Marketplace sales tax | executed seller gross | 2% | 0–5% | 100% |
+| Stock transaction tax | executed sell notional | 1% | 0–3% | 100% |
+| Business profit tax | positive profit after recognized costs | 3% | 0–8% | 100% |
+| B2B transaction tax | settled business payment | 1% | 0–3% | 100% |
+| Standard shop consumption tax | taxable SKU price | 1% | 0–3% | 100% |
+| Luxury SKU tax | designated luxury SKU price | 3% | 0–8% | 100% |
+| Club/city administration tax | designated non-refundable fee base | 1% | 0–3% | 100% |
+| Casino/probability flows | governed by casino contract | 0% | fixed 0% | 0% |
+| Job/check-in/quest reward | reward payout | 0% | fixed 0% | 0% |
+| Halt cost-basis refund | refunded principal | 0% | fixed 0% | 0% |
 
-Add **Admin → Economy → Treasury** with these sections:
+These are launch hypotheses and must be revalidated against simulation and measured economy data before runtime activation.
 
-1. **Overview**
-   - total balance;
-   - available balance;
-   - reserved/committed amount;
-   - today / 7-day / 30-day inflow and outflow;
-   - net flow;
-   - reserve ratio and threshold status;
-   - last successful reconciliation time;
-   - unresolved reconciliation variance count.
+## 4. Exemptions
 
-2. **Transactions**
-   - immutable chronological ledger view;
-   - filters for date, direction, category, source system, reference type, actor and status;
-   - cursor pagination;
-   - stable transaction/reference IDs;
-   - before/after treasury balance snapshots where the ledger contract can safely provide them;
-   - linked source record for tax, fee, reward, grant, correction or other originating event.
+Default non-taxable events: onboarding rewards, baseline job/quest/check-in rewards, incident compensation, correction refunds, stock-halt cost-basis settlement, internal same-account sub-ledger transfers, and reversal/refund principal.
 
-3. **Revenue**
-   - tax/fee/system revenue summaries;
-   - source breakdown;
-   - gross vs refunded/reversed values;
-   - period comparisons without changing ledger truth.
+## 5. Tax calculation
 
-4. **Expenditure**
-   - rewards, subsidies, grants, operational economy transfers and other configured treasury-funded flows;
-   - recipient/reference information constrained by least privilege;
-   - committed vs settled amount where reservations are supported.
+Use integer/basis-point arithmetic only. Tax = floor(base × bps / 10,000). Stable taxable event IDs prevent duplicate tax. Receipts record base, bps, tax, net amount, rounding remainder, policy version and transaction ID. New policy versions apply only from effective_at forward.
 
-5. **Budget / Allocation**
-   - create named budget envelopes;
-   - optional period, purpose, cap and remaining amount;
-   - allocation does not create money by itself;
-   - spending must settle as ledger transactions against the treasury.
+## 6. Treasury balances
 
-6. **Corrections**
-   - privileged manual inflow/outflow;
-   - mandatory reason, amount, category, evidence/reference and idempotency key;
-   - preview of resulting balance and reserve impact;
-   - step-up authentication before commit;
-   - no direct balance overwrite.
+Expose total, committed, available, protected reserve, pending inflow/outflow, 1d/7d/30d flow, net flow and reserve coverage days.
 
-7. **Reconciliation**
-   - compare treasury ledger balance with configured source aggregates;
-   - show exact variance and affected period/source;
-   - reconciliation findings are evidence, not automatic destructive fixes;
-   - fixes use a separate audited correction transaction.
+available = total - committed - protected_reserve.
 
-8. **Policy / Alerts**
-   - low-reserve warning threshold;
-   - optional critical reserve floor;
-   - unusual inflow/outflow thresholds;
-   - reconciliation staleness threshold;
-   - read-only display for policy values controlled elsewhere unless this surface has an actor-scoped safe mutation.
+## 7. Spending priorities
 
-## 4. Treasury accounting model
+Priority order:
+1. refunds/recovery;
+2. treasury-funded rewards;
+3. economic stabilization;
+4. temporary business subsidies;
+5. community/city projects;
+6. season/event budgets;
+7. audited administrator corrections.
 
-Use a dedicated treasury account identity that cannot log in and cannot be treated as a member account.
+Treasury may not arbitrarily enrich selected accounts, compensate speculative losses, reimburse casino losses, or erase ledger history to force a balance.
 
-Every monetary mutation must produce an append-only ledger entry with at least:
-- treasury transaction ID;
-- direction;
-- integer-string amount;
-- asset/currency identifier;
-- category;
-- source/reference type and reference ID;
-- acting system/admin identity;
-- reason code and optional note;
-- idempotency key for mutable commands;
-- created/settled timestamp;
-- reversal/correction linkage when applicable.
+## 8. Budget envelopes
 
-The displayed treasury balance is derived from authoritative ledger/accounting state. The UI must never calculate the canonical balance from a partial transaction page.
+Initial envelopes: ESSENTIAL_REFUND, REWARD_POOL, NEW_USER_SUPPORT, RETURNING_USER_SUPPORT, BUSINESS_STABILIZATION, MARKET_STABILIZATION, CITY_COMMUNITY, SEASON_EVENT, INCIDENT_RESPONSE, ADMIN_CORRECTION.
 
-## 5. Categories
+Each stores stable ID, period, allocation, committed, settled, remaining, priority, automation eligibility, actor and immutable history.
 
-Initial normalized categories should include:
-- TAX_REVENUE
-- PLATFORM_FEE
-- SHOP_OR_MARKET_FEE
-- ECONOMY_SINK_TRANSFER
-- REWARD_FUNDING
-- SUBSIDY
-- GRANT
-- EVENT_BUDGET
-- SYSTEM_TRANSFER
-- ADMIN_CORRECTION_IN
-- ADMIN_CORRECTION_OUT
-- REVERSAL
+## 9. Reserve policy
 
-New categories require schema/API/documentation parity rather than free-text-only categorization.
+Initial protected reserve target: 14 days of recent essential spending.
+- Warning: <14 days
+- Critical: <7 days
+- Emergency: <3 days
 
-## 6. Manual correction safety
+Emergency state suspends optional/event spending and new discretionary subsidies while preserving essential refunds and recovery.
 
-A manual correction is a high-risk operation.
+## 10. Automatic fiscal tuning
 
-Required controls:
-- superadmin/operator permission according to the current administrator authority model;
-- recent re-authentication / step-up authentication;
-- CSRF protection for browser mutation;
-- positive integer-string amount with server-side limits;
-- explicit inflow/outflow direction;
-- mandatory structured reason plus human-readable note;
-- optional/required evidence reference according to amount threshold;
-- preview endpoint or deterministic server-side preview;
-- idempotency key;
-- database-side actor verification;
-- transaction-level atomicity;
-- immutable audit record;
-- post-write readback showing exact committed transaction.
+Observe faucet/sink, treasury flow, velocity, marketplace/stock turnover, business profitability, asset concentration, new-vs-established wealth gap, reserve coverage and reconciliation variance.
 
-For large amounts, the policy may require an additional confirmation challenge. This does not introduce a second administrator role when the product is configured for a single superadmin.
+Automatic changes: max ±0.5 percentage points per change, max once per week, minimum seven-day hold, absolute 0–10% envelope. Disable automation on stale data, sample insufficiency, or reconciliation failure. Never retroactively alter casino probabilities, existing loan contracts, or historical transactions.
 
-## 7. Budget and reserved funds
+## 11. Admin UI
 
-Budget allocation is an accounting commitment, not minting.
+Admin → Economy → Treasury:
+Overview, Revenue, Taxes, Expenditure, Budgets, Corrections, Reconciliation, Policy & Alerts, Audit.
 
-A budget envelope should contain:
-- stable budget ID;
-- name and purpose;
-- period/start/end;
-- allocated amount;
-- committed amount;
-- settled amount;
-- remaining amount;
-- status;
-- creator/updater actor;
-- timestamps.
+Tax policy UI shows current rate, allowed band, next eligible change time, actor/reason, 24h/7d revenue, effective burden, estimated seven-day impact and rollback version.
 
-Reserved/committed funds must not be counted as freely available. Expiry or cancellation releases commitment without falsifying historical expenditure.
+## 12. Member receipts
 
-## 8. API direction
+Every taxed transaction exposes gross/base amount, tax name, rate, tax amount, net amount, policy version and transaction ID. Hidden taxes are prohibited.
 
-The implementation should expose actor-scoped administrator APIs approximately equivalent to:
-- treasury summary;
-- transaction list/detail;
-- revenue/expenditure breakdown;
-- budget list/create/update/status;
-- correction preview/commit;
-- reconciliation status/run;
-- policy/alert read and narrowly scoped mutation where supported.
+## 13. Ledger categories
 
-All mutation APIs must be server-authoritative, validated, idempotent where replay is possible, and protected by administrator authorization plus database-side actor checks.
+TAX_MARKETPLACE, TAX_STOCK_SELL, TAX_BUSINESS_PROFIT, TAX_B2B, TAX_CONSUMPTION, TAX_LUXURY, TREASURY_FEE, TREASURY_REWARD, TREASURY_SUBSIDY, TREASURY_GRANT, TREASURY_REFUND, TREASURY_INCIDENT, ADMIN_CORRECTION_IN, ADMIN_CORRECTION_OUT, REVERSAL.
 
-## 9. Security and authorization
+Treasury and burn use distinct double-entry paths.
 
-- deny by default;
-- no direct protected-table writes for the application role;
-- do not trust UI role state as final authorization;
-- prevent IDOR/BOLA across treasury transactions, budgets and evidence;
-- never log secrets, session cookies, CSRF tokens or unrestricted private member data;
-- use least-output DTOs for recipient/member references;
-- rate-limit high-risk mutations;
-- record actor, request correlation ID, previous policy value and new policy value for settings changes;
-- audit every manual correction, budget mutation, reconciliation execution and policy mutation.
+## 14. API direction
 
-## 10. UI/UX requirements
+Read: treasury summary, transactions, revenue, expenditure, taxes, budgets, reconciliation, audit.
+Mutation: tax preview/commit, budget create/update, correction preview/commit, reconciliation run.
 
-- Desktop may use dense accounting tables; mobile switches to readable transaction cards rather than horizontal clipping.
-- Amounts use locale-aware formatting while preserving exact integer-string values in transport.
-- Inflow/outflow must not be distinguishable by color alone.
-- Critical mutations require explicit confirmation describing direction, amount, destination/source, reason and resulting treasury balance.
-- Loading, empty, partial-data, unauthorized, stale-reconciliation and error states are explicit.
-- A failed mutation must never be displayed as committed.
-- CSV/export actions must honor the same filter and authorization scope and must not export secrets.
+Every mutation requires actor-scoped authorization, step-up authentication, CSRF protection, request hash, idempotency key, DB-side actor validation and immutable audit.
 
-## 11. Observability and alerts
+## 15. Data model direction
 
-Track:
-- treasury balance and available balance;
-- inflow/outflow rate;
-- failed correction count;
-- duplicate/idempotency rejection count;
-- reconciliation duration/result/variance;
-- low-reserve and critical-reserve state;
-- stale reconciliation;
-- mutation latency and error rate.
+Recommended tables: treasury_accounts, treasury_transactions, treasury_tax_policies, treasury_tax_policy_versions, treasury_budgets, treasury_budget_commitments, treasury_reconciliations, treasury_adjustments, treasury_alerts.
 
-Alerting must not create money or automatically “fix” a variance.
+Core constraints: amount > 0; rate_bps between 0 and 1000; unique taxable-event/tax-code pair; unique actor/action/idempotency key; append-only transaction rows; activated policy versions immutable.
 
-## 12. QA acceptance
+## 16. Reconciliation
 
-Production is blocked until tests cover:
-- unauthorized/non-admin access;
-- stale/forged admin identity;
-- CSRF and missing step-up auth;
-- negative, zero, decimal, overflow and malformed amounts;
-- duplicate idempotency keys;
-- concurrent corrections;
-- failed transaction rollback;
-- exact balance after inflow/outflow/reversal;
-- budget available/committed arithmetic;
-- pagination/filter integrity;
-- reconciliation match and mismatch;
-- immutable audit presence;
-- responsive 320/360/390px layouts;
-- keyboard and screen-reader operation;
-- BigInt-safe formatting;
-- no secret/private-data leakage in logs/export;
-- exact-SHA Test backend/API/database verification.
+Plan hourly lightweight reconciliation and daily full reconciliation across treasury account balance, ledger aggregate, tax/fee sources, budget settlement and refund/reversal aggregates. Variance never triggers destructive auto-fix; it creates evidence and safe-mode restrictions.
 
-## 13. Delivery sequence
+## 17. QA
 
-- **v2026.09.20.306-01** — finalize treasury accounting/domain contract and category mapping.
-- **v2026.09.20.306-02** — schema/functions/read models with DB actor authorization and ledger invariants.
-- **v2026.09.20.306-03** — admin summary/history/revenue/expenditure APIs.
-- **v2026.09.20.306-04** — correction, budget and reconciliation commands with step-up auth/idempotency/audit.
-- **v2026.09.20.306-05** — responsive administrator Treasury UI, export and alert surfaces.
-- **v2026.09.20.306-06** — security/concurrency/accounting/reconciliation E2E on exact-SHA Test.
-- **v2026.09.20.306-07** — re-read latest plan, resolve drift, merge, rebuild exact merged SHA and zero-downtime Production promotion only after all gates pass.
+Verify tax base/timing, exemptions, basis-point rounding, duplicate prevention, concurrency, effective_at boundaries, budget invariants, reserve floors, safe mode, correction preview/commit consistency, BOLA/IDOR, re-auth/CSRF/idempotency, responsive 320–1440px views, BigInt-safe formatting and exact-SHA Test backend/API/DB behavior.
 
-## 14. Current implementation status
+## 18. Reference application
 
-Planning/documentation only. The current repository contains administrator economy controls, but this document does not claim a dedicated treasury ledger/UI/API is already implemented. Runtime work must begin on a new implementation branch after re-reading the latest Living Project Plan.
+The design draws from large-scale game-economy, virtual-economy intervention and public-financial-management bodies of work. It does not claim manual review of 10,000 individual pages. Applied patterns are source/sink separation, measured post-intervention impact, centralized authoritative cash view, controlled budget execution, reconciliation and immutable accounting evidence.
+
+## 19. Delivery sequence
+
+v2026.09.21.323-01 domain/tax event contract; -02 schema/auth; -03 atomic tax settlement; -04 budget/reserve/safe-mode; -05 admin API/UI + member receipts; -06 real-DB concurrency/reconciliation/security/responsive E2E; -07 re-read latest Living Project Plan and exact-SHA Test; -08 merge, rebuild exact merged SHA, zero-downtime Production promotion and smoke verification.
+
+## 20. Current implementation status
+
+Planning/documentation only. Existing economy/ledger/policy infrastructure may be reused, but this document does not claim the tax schedule, dedicated treasury ledger, budgets, reconciliation, UI or APIs are already implemented.
