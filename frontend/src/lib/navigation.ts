@@ -1,6 +1,7 @@
 export interface NavEntry {
   readonly href: string;
   readonly label: string;
+  readonly icon?: string;
 }
 
 const ENGLISH_LABELS: Readonly<Record<string, string>> = {
@@ -16,6 +17,8 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '서비스 상태': 'Service status',
   '상점': 'Shop',
   '내 지갑': 'My wallet',
+  '자산': 'Assets',
+  '거래소': 'Exchange',
   '작업': 'Work',
   '직업 업무': 'Career work',
   '가상 금융': 'Banking',
@@ -74,13 +77,25 @@ export function navLabel(label: string, locale: 'ko' | 'en'): string {
   return locale === 'en' ? (ENGLISH_LABELS[label] ?? label) : label;
 }
 
+/**
+ * 4 Primary Core Navigation Tabs for Clean Human FinTech UI
+ */
+export const PRIMARY_NAV: readonly NavEntry[] = [
+  { href: '/', label: '홈' },
+  { href: '/stocks', label: '거래소' },
+  { href: '/wallet', label: '자산' },
+  { href: '/board', label: '커뮤니티' },
+];
+
 /** Readable by anyone, indexed, and the only group a signed-out visitor sees. */
 export const PUBLIC_NAV: readonly NavEntry[] = [
   { href: '/', label: '홈' },
+  { href: '/stocks', label: '거래소' },
+  { href: '/wallet', label: '자산' },
+  { href: '/board', label: '커뮤니티' },
   { href: '/guide', label: '이용 방법' },
   { href: '/announcements', label: '운영 소식' },
   { href: '/gallery', label: '사진' },
-  { href: '/board', label: '게시판' },
   { href: '/status', label: '서비스 상태' },
   { href: '/terms', label: '이용약관' },
   { href: '/privacy', label: '개인정보처리방침' },
@@ -133,13 +148,15 @@ export function isGroup(item: NavItem): item is NavGroup {
 
 export const HEADER_PUBLIC: readonly NavItem[] = [
   { href: '/', label: '홈' },
-  { href: '/guide', label: '이용 방법' },
-  { href: '/gallery', label: '사진' },
-  { href: '/board', label: '게시판' },
+  { href: '/stocks', label: '거래소' },
+  { href: '/wallet', label: '자산' },
+  { href: '/board', label: '커뮤니티' },
   {
     label: '안내',
     entries: [
+      { href: '/guide', label: '이용 방법' },
       { href: '/announcements', label: '운영 소식' },
+      { href: '/gallery', label: '사진' },
       { href: '/status', label: '서비스 상태' },
       { href: '/terms', label: '이용약관' },
       { href: '/privacy', label: '개인정보처리방침' },
@@ -149,7 +166,6 @@ export const HEADER_PUBLIC: readonly NavItem[] = [
     label: '경제',
     entries: [
       { href: '/bank', label: '가상 금융' },
-      { href: '/stocks', label: '가상 주식' },
       { href: '/businesses', label: '게임 사업' },
       { href: '/shop', label: '아이템 상점' },
     ],
@@ -159,32 +175,23 @@ export const HEADER_PUBLIC: readonly NavItem[] = [
 export const HEADER_MEMBER: readonly NavItem[] = [
   { href: '/dashboard', label: '내 대시보드' },
   {
-    label: '경제',
-    entries: [
-      { href: '/bank', label: '가상 금융' },
-      { href: '/stocks', label: '가상 주식' },
-      { href: '/businesses', label: '게임 사업' },
-      { href: '/shop', label: '아이템 상점' },
-      { href: '/casino', label: '카지노' },
-    ],
-  },
-  {
     label: '활동',
     entries: [
       { href: '/work', label: '직업 업무' },
       { href: '/quests', label: '일일·주간 퀘스트' },
       { href: '/calendar', label: '일정' },
+      { href: '/casino', label: '카지노' },
       { href: '/progression', label: '장기 성장 단계' },
     ],
   },
   {
-    label: '커뮤니티',
+    label: '소식',
     entries: [
       { href: '/seasons', label: '시즌' },
       { href: '/profile', label: '내 프로필' },
       { href: '/chat', label: '쪽지함' },
+      { href: '/clubs', label: '클럽·협동조합' },
       { href: '/support', label: '관리자 문의' },
-      { href: '/account/security', label: '계정 보안' },
     ],
   },
 ];

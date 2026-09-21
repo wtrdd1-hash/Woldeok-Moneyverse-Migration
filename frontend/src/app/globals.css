@@ -4,27 +4,14 @@
 @custom-variant dark (&:is(.dark *));
 
 /**
- * Woldeok Neighbourhood Ledger.
+ * Woldeok Moneyverse - Modern Minimalist FinTech Design System.
  *
- * The palette, the type pairing and the proportions are the product's own,
- * carried across from the original stylesheet rather than reinvented: warm
- * paper, deep forest green, a terracotta accent kept for one thing at a time.
- * A rewrite of the front end is not a licence to change what the product
- * looks like.
- *
- * What is new is underneath. These are shadcn/ui's token names, so every
- * component from the registry arrives already wearing this identity instead
- * of the registry's default stone — the components are modern, the surface
- * they paint is the one this community already knows.
- *
- * `--rise` and `--fall` follow Korean market convention, red for up and blue
- * for down, which is the opposite of the Western default. This audience reads
- * a red number as a gain. Neither colour is ever the only signal: a sign and
- * a direction glyph always accompany it.
+ * Inspired by Toss & Apple Design Systems.
+ * Clean, soft layered surfaces, ambient radial glow, 16px radius, and high contrast typography.
  */
 
 :root {
-  --radius: 0.75rem;
+  --radius: 1rem;
 
   /* Paper and ink - Warm Moonlit Ivory */
   --paper: #faf8f2;
@@ -42,8 +29,8 @@
   --ink-soft: #5c635e;
   --line: #e6dfce;
 
-  --shadow-plate: 0 8px 30px rgb(245 158 11 / 0.08);
-  --shadow-raised: 0 28px 70px rgb(180 83 9 / 0.16);
+  --shadow-plate: 0 4px 20px rgb(245 158 11 / 0.06);
+  --shadow-raised: 0 16px 40px rgb(180 83 9 / 0.12);
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -52,13 +39,6 @@
   --popover: var(--surface);
   --popover-foreground: var(--ink);
 
-  /*
-   * Spelled in terms of the point-aware tokens above rather than as hex, and
-   * that is the whole point: the current-page underline in the masthead, the
-   * active tab in the bottom bar and every primary button are `--primary`,
-   * and a literal here is what kept them amber for a reader who had chosen a
-   * different point colour. The values are the same ones the literals were.
-   */
   --primary: var(--forest-soft);
   --primary-foreground: #ffffff;
 
@@ -99,25 +79,23 @@
 }
 
 /*
- * Night in the same neighbourhood. The forest becomes the ground and the
- * clay brightens, because a terracotta that reads as warm on paper reads as
- * mud on a dark field.
+ * Dark Mode - Deep Slate & Navy Obsidian with Ambient Luminescence
  */
 .dark {
-  --paper: #0b0f17; /* Midnight Sky */
-  --paper-dark: #070a10;
-  --surface: #111827; /* Deep Navy Obsidian */
+  --paper: #090d16; /* Deep Obsidian Slate */
+  --paper-dark: #05080f;
+  --surface: #0f172a; /* Deep Navy Slate */
   --ink: #f8fafc;
   --ink-soft: #94a3b8;
   --line: #1e293b;
 
   --forest: #1e293b;
-  --forest-deep: #0f172a;
+  --forest-deep: #0a0f1d;
   --forest-soft: #fbbf24; /* Radiant Moonbeam */
   --clay: #f59e0b; /* Glowing Gold */
-  --clay-soft: #242217;
+  --clay-soft: #1e1b13;
   --clay-ink: #fbbf24;
-  --mint: #1c1d18;
+  --mint: #111a16;
 
   --background: var(--paper);
   --foreground: var(--ink);
@@ -126,18 +104,18 @@
   --popover: var(--surface);
   --popover-foreground: var(--ink);
 
-  --primary: var(--forest-soft); /* Brilliant Moonlight Gold */
+  --primary: var(--forest-soft);
   --primary-foreground: #0b0f17;
   --secondary: var(--clay-soft);
   --secondary-foreground: #fef08a;
-  --muted: #161f30;
+  --muted: #131d2e;
   --muted-foreground: var(--ink-soft);
   --accent: var(--clay-soft);
   --accent-foreground: #fde047;
   --destructive: #d97256;
   --destructive-foreground: #0b0f17;
   --border: var(--line);
-  --input: #293548;
+  --input: #1e293b;
   --ring: rgb(251 191 36 / 0.6);
 
   --rise: #f87171;
@@ -149,70 +127,28 @@
   --chart-5: var(--ink-soft);
 }
 
-/*
- * The reader's point colour.
- *
- * `--point` is one hex, set on the document element by the pre-paint script
- * in the root layout or by the panel in the masthead. Every shade below is
- * derived from it here rather than in JavaScript, so there is no colour
- * arithmetic in the application to drift out of step with this palette.
- *
- * Lightness is fixed per role and only chroma and hue are taken from the
- * reader's colour. That is the whole contrast guarantee: in OKLCH the L
- * channel is perceived lightness, so a role that always renders at L 0.62
- * keeps its relationship to the paper behind it no matter which hue lands in
- * it. Chroma is clamped rather than copied, because a deep structural green
- * borrowed from a fluorescent pick would be a different design.
- *
- * Nothing here touches --background, --foreground, --card or --muted, so a
- * pick cannot put text and its ground at the same lightness. Measured across
- * the six presets the derived contrasts land within 0.3 of each other and
- * within 0.3 of the product's own palette — the point colour never reads
- * worse than the accent it replaces. Where a role carries body-sized text it
- * is an AA floor as well: --clay-ink is fixed at L 0.52, which measures at or
- * above 4.6:1 on paper for every hue on the wheel. --clay itself stays at
- * L 0.62, the lightness that reproduces the product's own terracotta, and is
- * used where 3:1 is the bar — the wordmark, icons, borders, chart lines.
- *
- * The @supports test is the exact form used below, clamp and all, rather than
- * the bare `oklch(from red l c h)`. A browser that takes relative colours but
- * not a math function in a channel would pass the looser test and then drop
- * every declaration inside it one at a time — which is the same palette as
- * skipping the block, arrived at less predictably. Testing what is actually
- * written means the block is all applied or none of it is.
- */
 @supports (color: oklch(from red 0.5 clamp(0.02, c * 0.5, 0.09) h)) {
   :root[data-point] {
     --forest: oklch(from var(--point) 0.34 clamp(0.02, c * 0.55, 0.09) h);
     --forest-deep: oklch(from var(--point) 0.26 clamp(0.02, c * 0.5, 0.08) h);
     --forest-soft: oklch(from var(--point) 0.47 clamp(0.03, c * 0.7, 0.11) h);
     --clay: oklch(from var(--point) 0.62 clamp(0.04, c, 0.15) h);
-    /* L 0.52 with the chroma held below 0.11: measured across the wheel the
-       worst hue lands at 4.60:1 on paper, so this role is an AA floor for any
-       colour a reader can pick, not only for the six offered. */
     --clay-ink: oklch(from var(--point) 0.52 clamp(0.04, c * 0.8, 0.11) h);
     --clay-soft: oklch(from var(--point) 0.91 clamp(0.01, c * 0.2, 0.04) h);
     --mint: oklch(from var(--point) 0.92 clamp(0.01, c * 0.2, 0.04) h);
     --highlight: oklch(from var(--point) 0.9 clamp(0.02, c * 0.45, 0.07) h);
 
-    /* The button face, masthead underline and active tab. Keep the
-       light-theme primary dark enough that white button text stays at or
-       above the normal-text AA floor even for yellow/orange point picks. */
     --primary: oklch(from var(--point) 0.5 clamp(0.04, c * 0.8, 0.11) h);
     --accent-foreground: oklch(from var(--point) 0.4 clamp(0.03, c * 0.8, 0.11) h);
     --ring: oklch(from var(--point) 0.5 clamp(0.04, c * 0.8, 0.11) h / 0.78);
     --chart-4: oklch(from var(--point) 0.7 clamp(0.06, c, 0.14) calc(h + 45));
   }
 
-  /* Dark restates every role the dark block set literally, because a literal
-     cannot be reached by redefining the token it was copied from. */
   .dark[data-point] {
     --forest: oklch(from var(--point) 0.3 clamp(0.02, c * 0.5, 0.08) h);
     --forest-deep: oklch(from var(--point) 0.22 clamp(0.01, c * 0.45, 0.06) h);
     --forest-soft: oklch(from var(--point) 0.75 clamp(0.03, c * 0.6, 0.1) h);
     --clay: oklch(from var(--point) 0.71 clamp(0.04, c * 0.9, 0.13) h);
-    /* Restated rather than inherited from `.dark`: `:root[data-point]` above
-       is the more specific selector and would otherwise win here. */
     --clay-ink: var(--clay);
     --clay-soft: oklch(from var(--point) 0.27 clamp(0.01, c * 0.4, 0.05) h);
     --mint: oklch(from var(--point) 0.28 clamp(0.01, c * 0.35, 0.05) h);
@@ -278,7 +214,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  --font-display: var(--font-myeongjo), 'Iropke Batang', Georgia, serif;
+  --font-display: var(--font-noto-kr), Pretendard, 'Apple SD Gothic Neo', system-ui, sans-serif;
   --font-sans: var(--font-noto-kr), Pretendard, 'Apple SD Gothic Neo', system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, Consolas, monospace;
 
@@ -287,8 +223,8 @@
 
   --radius-sm: 0.625rem;
   --radius-md: 0.75rem;
-  --radius-lg: 1.125rem;
-  --radius-xl: 1.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
 }
 
 @layer base {
@@ -303,49 +239,34 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /*
-   * The display face is a Korean serif, and it carries the product's voice.
-   * Tight tracking and `word-break: keep-all` are both load-bearing for
-   * Hangul: without the latter a headline breaks mid-word.
-   */
   h1,
   h2,
   h3 {
     font-family: var(--font-display);
     font-weight: 800;
-    letter-spacing: -0.045em;
-    line-height: 1.2;
+    letter-spacing: -0.035em;
+    line-height: 1.25;
     word-break: keep-all;
   }
 
   :focus-visible {
-    outline: 3px solid var(--ring);
-    outline-offset: 3px;
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
   }
 
-  /* Every amount is a bigint rendered as a string. Tabular figures keep a
-     column of them aligned, which is the whole point of showing a ledger. */
   .tabular {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     font-feature-settings: 'tnum' 1;
   }
 
-  /* The mono eyebrow with its leading rule, from the original. */
   .eyebrow {
     color: var(--clay-ink);
     font: 700 11px/1.2 var(--font-mono);
-    letter-spacing: 0.13em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
   }
 
-  /*
-   * The label inside a policy document. Same clay mono as `.eyebrow` and
-   * deliberately without its leading rule: the original gave documents their
-   * own `.section-label` for exactly this, and the rule is a section-head
-   * device. It also stays out of `text-transform`, because these labels are
-   * Korean and uppercasing does nothing to Hangul but the tracking does.
-   */
   .section-label {
     color: var(--clay-ink);
     font: 700 11px/1.45 var(--font-mono);
@@ -355,8 +276,8 @@
   .eyebrow::before {
     content: '';
     display: inline-block;
-    width: 24px;
-    height: 1px;
+    width: 18px;
+    height: 1.5px;
     margin-right: 7px;
     vertical-align: middle;
     background: currentColor;
@@ -372,11 +293,6 @@
     }
   }
 
-  /*
-   * The two policy documents. Long-form prose is the one thing the registry
-   * has no component for — Card and Table describe an application's controls,
-   * and a legal document is a document.
-   */
   .policy-document section {
     display: grid;
     gap: 0.75rem;
@@ -434,7 +350,6 @@
     margin-bottom: 0.25rem;
   }
 
-  /* The table scrolls inside its own container so the page body never does. */
   .policy-document table {
     border-collapse: collapse;
     font-size: 0.8125rem;
@@ -462,10 +377,6 @@
   }
 }
 
-/* The notice strip, once the reader has closed it. Set before first paint by
-   the script in the root layout and on a click by the strip's own button, so
-   there is one rule and one attribute rather than a rule and a React state
-   that can disagree. */
 html[data-notice='dismissed'] [data-notice-bar] {
   display: none;
 }
@@ -548,7 +459,6 @@ html[data-notice='dismissed'] [data-notice-bar] {
   }
 }
 
-/* Casino dice: a substantial play surface matching the coin game's visual hierarchy. */
 .casino-dice-stage {
   border: 1px solid rgba(120, 139, 184, 0.24);
   border-radius: 1.25rem;
@@ -598,15 +508,16 @@ html[data-notice='dismissed'] [data-notice-bar] {
   }
 }
 
-
-/* v2026.09.17.175 — shared shell polish. Bootstrap is bundled locally; these
-   product-level rules provide the Moneyverse visual hierarchy without adding
-   any third-party runtime asset request. */
+/*
+ * Modern FinTech Surfaces & Ambient Glow (No Grids)
+ */
 body {
   min-height: 100dvh;
+  background-color: var(--background);
   background-image:
-    radial-gradient(circle at 8% -8%, color-mix(in oklab, var(--primary) 11%, transparent), transparent 32rem),
-    radial-gradient(circle at 92% 4%, color-mix(in oklab, var(--clay) 8%, transparent), transparent 30rem);
+    radial-gradient(circle at 10% -10%, color-mix(in oklab, var(--primary) 10%, transparent), transparent 38rem),
+    radial-gradient(circle at 90% 0%, color-mix(in oklab, var(--clay) 8%, transparent), transparent 34rem),
+    radial-gradient(circle at 50% 100%, color-mix(in oklab, var(--primary) 6%, transparent), transparent 40rem);
   background-attachment: fixed;
 }
 
@@ -621,22 +532,16 @@ body {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.34;
-  background-image: linear-gradient(
-    color-mix(in oklab, var(--border) 24%, transparent) 1px,
-    transparent 1px
-  ), linear-gradient(
-    90deg,
-    color-mix(in oklab, var(--border) 20%, transparent) 1px,
-    transparent 1px
-  );
-  background-size: 40px 40px;
-  mask-image: linear-gradient(to bottom, black, transparent 46rem);
+  opacity: 0.55;
+  background:
+    radial-gradient(ellipse 65% 45% at 50% -15%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 70%),
+    radial-gradient(ellipse 45% 35% at 95% 15%, color-mix(in oklab, var(--clay) 9%, transparent), transparent 65%),
+    radial-gradient(ellipse 55% 40% at 5% 85%, color-mix(in oklab, var(--primary) 7%, transparent), transparent 75%);
 }
 
 .moneyverse-site-header {
-  box-shadow: 0 10px 34px color-mix(in oklab, var(--foreground) 6%, transparent);
-  border-color: color-mix(in oklab, var(--border) 72%, transparent);
+  box-shadow: 0 4px 24px color-mix(in oklab, var(--foreground) 4%, transparent);
+  border-color: color-mix(in oklab, var(--border) 60%, transparent);
 }
 
 .moneyverse-site-header > div {
@@ -659,36 +564,31 @@ body {
   inset: 0;
   pointer-events: none;
   border-radius: inherit;
-  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.18);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12);
 }
 
 .moneyverse-action-card {
-  box-shadow: 0 8px 22px color-mix(in oklab, var(--foreground) 6%, transparent);
+  box-shadow: 0 4px 16px color-mix(in oklab, var(--foreground) 4%, transparent);
 }
 
 .moneyverse-action-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 30px color-mix(in oklab, var(--primary) 12%, transparent);
+  box-shadow: 0 10px 26px color-mix(in oklab, var(--primary) 10%, transparent);
 }
 
 .moneyverse-site-footer {
-  border-top: 1px solid color-mix(in oklab, var(--border) 76%, transparent);
-  box-shadow: 0 -18px 50px color-mix(in oklab, var(--foreground) 4%, transparent);
+  border-top: 1px solid color-mix(in oklab, var(--border) 60%, transparent);
+  box-shadow: 0 -10px 30px color-mix(in oklab, var(--foreground) 3%, transparent);
 }
 
 .dark .moneyverse-site-header {
-  background: color-mix(in oklab, var(--background) 88%, transparent);
-  box-shadow: 0 12px 38px rgb(0 0 0 / 0.28);
+  background: color-mix(in oklab, var(--background) 85%, transparent);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 0.32);
 }
 
 @media (max-width: 767px) {
   body {
     background-attachment: scroll;
-  }
-
-  .moneyverse-app-shell::before {
-    background-size: 32px 32px;
-    opacity: 0.22;
   }
 }
 

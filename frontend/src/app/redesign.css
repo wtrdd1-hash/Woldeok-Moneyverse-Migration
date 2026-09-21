@@ -1,6 +1,6 @@
 /*
- * Moneyverse v2026.09.20.297 — frontend rebuild foundation.
- * Product-first, dense where the task is dense, quiet where content is primary.
+ * Moneyverse Modern FinTech Rebuild Foundation (v316).
+ * Toss & Apple minimalist fintech tone & feel.
  */
 :root {
   --mv-bg: #f4f2ec;
@@ -18,7 +18,7 @@
   --mv-focus: #28557a;
   --mv-positive: #176044;
   --mv-negative: #923232;
-  --mv-radius: 10px;
+  --mv-radius: 16px;
 
   --background: var(--mv-bg);
   --foreground: var(--mv-ink);
@@ -206,20 +206,23 @@ a {
 
 .moneyverse-card,
 [data-slot='card'] {
+  border-radius: 16px;
   border-color: var(--mv-line);
   background: var(--mv-surface-raised);
   box-shadow: var(--shadow-plate);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .moneyverse-card:hover {
   border-color: var(--mv-line-strong);
 }
 .moneyverse-feature-card {
+  border-radius: 16px;
   border-color: var(--mv-line-strong);
   background: var(--mv-surface-raised);
 }
 .moneyverse-button {
   min-height: 44px;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 .moneyverse-button[data-variant='default'] {
   box-shadow: none;
@@ -229,6 +232,7 @@ input,
 textarea,
 select,
 [data-slot='select-trigger'] {
+  border-radius: 12px !important;
   border-color: var(--mv-line-strong) !important;
   background: var(--mv-surface-raised) !important;
   color: var(--mv-ink) !important;
@@ -251,11 +255,13 @@ textarea::placeholder {
 [data-slot='sheet-content'],
 [data-slot='dropdown-menu-content'],
 [data-slot='popover-content'] {
+  border-radius: 18px !important;
   border-color: var(--mv-line-strong) !important;
   background: var(--mv-surface-raised) !important;
   box-shadow: 0 18px 50px rgb(23 26 31 / 0.16) !important;
 }
 [data-slot='badge'] {
+  border-radius: 8px;
   border-color: var(--mv-line-strong);
   font-weight: 700;
 }
@@ -271,7 +277,7 @@ textarea::placeholder {
 }
 .mv-page--finance > [data-slot='card'],
 .mv-page--finance section > [data-slot='card'] {
-  border-radius: 7px;
+  border-radius: 16px;
 }
 .mv-page--finance table,
 .mv-page--finance [role='table'] {
@@ -292,13 +298,13 @@ textarea::placeholder {
   text-wrap: balance;
 }
 .mv-page--gameplay [data-slot='card'] {
-  border-radius: 12px;
+  border-radius: 16px;
 }
 .mv-page--admin {
   font-variant-numeric: tabular-nums;
 }
 .mv-page--admin [data-slot='card'] {
-  border-radius: 6px;
+  border-radius: 14px;
   box-shadow: none;
 }
 .mv-page--admin table,
@@ -313,7 +319,7 @@ textarea::placeholder {
   margin-inline: auto;
 }
 .mv-page--utility [data-slot='card'] {
-  border-radius: 8px;
+  border-radius: 16px;
 }
 
 @media (max-width: 767px) {
@@ -331,7 +337,7 @@ textarea::placeholder {
     padding-inline: 0.75rem !important;
   }
   [data-slot='card'] {
-    border-radius: 9px;
+    border-radius: 14px;
     min-width: 0 !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
@@ -340,7 +346,7 @@ textarea::placeholder {
     font-size: 0.8125rem;
   }
   .mv-page--admin [data-slot='card'] {
-    border-radius: 4px;
+    border-radius: 10px;
   }
   .mv-page--utility {
     max-width: none;
