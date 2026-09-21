@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.21.315
+> **현재 통합 버전:** v2026.09.21.325
 > **구현·증거 동기화:** 2026-09-21
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -1988,6 +1988,10 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 **v166 사업효과:** release classifier의 직접매출은 0이며 CI/registry/Test/운영 낭비와 잘못된 application identity 승격·감사 위험 감소가 가치다. SEO는 acquisition/CAC 효율 투자, API/security/backup/status는 사고·다운타임·환불·fraud·support 기대손실 감소다. 관측되지 않은 금액은 실제값으로 단정하지 않는다.\n\n### v2026.09.19.261 — AI 주식 시나리오 자동 생성·게시
 
 가상 주식시장에 opt-in 시간별 AI 뉴스룸 자동화 경로를 추가한다. AI는 제한된 이벤트 시나리오를 만들고 실제 주가 권위는 기존 결정론적 market-event 로직이 유지한다. 자동 게시는 전체시장·강도 3 충격을 제외하고 한 시나리오의 변동 종목을 최대 2개, 기간을 최대 24시간으로 제한한다. 자격증명, 감사 actor 또는 안전 후보가 없으면 fail-closed로 아무 이벤트도 게시하지 않는다. 브랜치: feat/ai-stock-auto-scenarios-v2026.09.19.261.
+
+### v2026.09.21.325 — AI 시나리오 사용자 신문
+
+기존 v2026.09.19.261 AI 주식 시나리오 자동생성·게시 기능을 일반 사용자에게 안전하게 노출하는 신문형 소비자 제품 계층을 추가한다. 권위 상세 문서는 [AI_SCENARIO_USER_NEWSPAPER_SPEC.ko.md](AI_SCENARIO_USER_NEWSPAPER_SPEC.ko.md)다. 기존 `ai-news` 생성기와 bounded auto-publish 경계를 재사용하되, 공개 지면은 대표기사/최신기사/진행사건/아카이브/상세기사 구조, `AI 생성 가상뉴스` 및 `게임 내 가상시장 정보` 표시, 중복 억제, 현실 기업·인물 및 투자권유 표현 차단, 정정/철회, provenance/audit, selective canonical indexing을 필수로 한다. publication 데이터는 기사 투영 계층이며 가격 권위는 계속 결정론적 market-event 로직에 남는다. 이번 버전은 문서 전용이며 코드 구현은 별도 개발 브랜치와 exact-SHA Test 검증 후 무중단 Production 승격 대상으로 둔다.
 
 ### v2026.09.19.271 — 사람 제작 UI 기준
 
