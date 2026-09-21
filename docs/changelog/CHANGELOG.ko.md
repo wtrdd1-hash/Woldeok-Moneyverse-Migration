@@ -1,3 +1,8 @@
+## v2026.09.21.323 — 사용자 문맥 쪽지 진입점 기획
+- 긴급 1:1 개인채팅 기획을 확장해 게시판 글/댓글 작성자, 프로필, 정확한 아이디/username 검색, 중복 안전 닉네임 검색, 허용 회원목록에서 canonical 대화를 시작/열 수 있도록 정의했습니다.
+- canonical 회원 ID 권위, 개인정보 안전 적격성, 삭제/익명화/stale 작성자 처리, 회원열거 방지 검색, 공통 UI primitive, API 문맥 규칙, cross-surface QA를 명시했습니다.
+- 문서 전용 변경이며 런타임·DB·API 배포·Production 동작은 변경하지 않았습니다.
+
 ## v2026.09.21.322 — 마이그레이션 권위 fail-closed 게이트
 - Production migration 실행이 exact repository checkout에 없는 DB 적용 migration 파일명을 발견하면 실패하도록 보강했습니다.
 - checksum 불변성을 유지하면서 DB-ahead/미추적 schema drift가 배포 migration gate를 조용히 통과하는 문제를 차단합니다.
