@@ -2,7 +2,7 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.21.315
+> Current integrated version: v2026.09.21.325
 > Implementation/evidence sync: 2026-09-21
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
@@ -1997,6 +1997,10 @@ External references rechecked: Google Search Central September 2026 updates and 
 **v166 business effect:** release classifier work has no direct revenue; expected value is avoided CI/registry/Test/ops waste and reduced probability of promoting or auditing the wrong application identity. SEO work is acquisition/CAC-efficiency investment; API/security and backup/status work are expected-loss, downtime, refund, fraud and support-cost reduction. No unobserved monetary amount is asserted as actual.\n\n### v2026.09.19.261 — Automatic AI stock scenarios
 
 Add an opt-in hourly AI newsroom automation path for the fictional stock market. AI generates bounded event scenarios; deterministic market-event logic remains the sole stock-price authority. Auto-publish excludes market-wide and strength-3 shocks, limits a story to two moving stocks and 24 hours, and fails closed when credentials, actor identity or a bounded candidate are unavailable. Branch: feat/ai-stock-auto-scenarios-v2026.09.19.261.
+
+### v2026.09.21.325 — AI scenario user newspaper
+
+Add a consumer newspaper layer over the existing v2026.09.19.261 automatic AI stock-scenario system. The authoritative detail is [AI_SCENARIO_USER_NEWSPAPER_SPEC.md](AI_SCENARIO_USER_NEWSPAPER_SPEC.md). Reuse the current AI-news generator and bounded auto-publish boundaries, while requiring lead/recent/active/archive/detail surfaces, visible AI-generated and game-only disclosures, duplicate suppression, real-person/real-company and financial-persuasion blocking, correction/retraction, provenance/audit and selective canonical indexing. Publication data is a presentation projection only; deterministic market-event logic remains the price authority. This version is documentation-only; implementation belongs on a separate development branch with exact-SHA Test evidence before zero-downtime Production promotion.
 
 ### v2026.09.19.271 — Human-authored visual standard
 
