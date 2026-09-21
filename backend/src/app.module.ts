@@ -35,6 +35,7 @@ import { InternalTokenGuard } from './auth/guards/internal-token.guard';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { GameClockModule } from './game-clock/game-clock.module';
 import { SupportModule } from './support/support.module';
+import { ChatModule } from './chat.module';
 
 const ONE_MINUTE_MS = 60_000;
 
@@ -54,6 +55,7 @@ const ONE_MINUTE_MS = 60_000;
     SeasonModule,
     BoardModule,
     SupportModule,
+    ChatModule,
     PrivacyModule,
     EconomyModule,
     AdminModule,
