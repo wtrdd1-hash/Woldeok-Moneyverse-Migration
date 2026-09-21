@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { LiveRefresh } from '@/components/live-refresh';
 import { PageHeader } from '@/components/page-header';
+import { Briefcase, Target, Award, Sparkles, CheckCircle2 } from 'lucide-react';
 import { TruncatedList } from '@/components/truncated-list';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -96,7 +97,7 @@ export default async function WorkPage() {
       {/* 1. 활성 직업 및 숙련도 게이지 섹션 */}
       <section aria-labelledby="active-job-title" className="grid w-full max-w-full min-w-0 gap-3 sm:gap-4 overflow-hidden">
         <h2 id="active-job-title" className="text-lg sm:text-xl font-bold flex items-center gap-2">
-          <span>🎯</span> {isEn ? 'Active Career & Proficiency' : '현재 활성 직업 및 숙련도'}
+          <div className="flex size-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400"><Target className="size-4" /></div> {isEn ? 'Active Career & Proficiency' : '현재 활성 직업 및 숙련도'}
         </h2>
 
         <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-card via-card/80 to-primary/5 p-4 sm:p-6 shadow-xl relative overflow-hidden backdrop-blur-sm w-full min-w-0">

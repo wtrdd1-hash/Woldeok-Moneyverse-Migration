@@ -3,6 +3,7 @@
 import { useState, useActionState } from 'react';
 import { useLocale } from '@/components/locale-provider';
 import { Badge } from '@/components/ui/badge';
+import { Briefcase, Compass, Sparkles, Star, CheckCircle2, Clock, Zap, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -92,7 +93,7 @@ export function CareerTasksBoard({
                   filter === 'my_job' ? 'bg-amber-700 hover:bg-amber-800 text-white shadow-sm' : ''
                 }`}
               >
-                <span>{activeMeta?.icon ?? '💼'}</span>
+                <Briefcase className="size-3.5 shrink-0" />
                 <span className="ml-1.5 truncate max-w-[140px] sm:max-w-none">
                   {isEn ? `My Career: ${activeJobName}` : `내 직업 (${activeJobName})`}
                 </span>
@@ -108,7 +109,7 @@ export function CareerTasksBoard({
               onClick={() => setFilter('all')}
               className="font-semibold text-xs h-8 sm:h-9 py-1 px-2.5"
             >
-              <span>🌐</span>
+              <Compass className="size-3.5 shrink-0" />
               <span className="ml-1.5">
                 {isEn ? 'Explore Other Careers' : '다른 직업 둘러보기'}
               </span>
@@ -168,7 +169,7 @@ export function CareerTasksBoard({
             return (
               <Card
                 key={task.task_id}
-                className={`flex flex-col justify-between transition-all w-full min-w-0 overflow-hidden ${
+                className={`flex flex-col justify-between transition-all duration-150 active:scale-[0.99] w-full min-w-0 overflow-hidden ${
                   isActiveJob
                     ? 'border-amber-500/50 dark:border-amber-500/30 bg-card shadow-md ring-1 ring-amber-500/20'
                     : 'opacity-70 bg-muted/20 border-dashed hover:opacity-100 hover:border-solid transition-opacity'
@@ -185,16 +186,16 @@ export function CareerTasksBoard({
                             : ''
                         }`}
                       >
-                        {meta?.icon ?? '💼'} {jobLabel(task.job_type, locale)}
+                        <span className="flex items-center gap-1"><Briefcase className="size-3" /> {jobLabel(task.job_type, locale)}</span>
                       </Badge>
                       {isActiveJob && (
                         <Badge className="bg-amber-50 text-amber-800 border-0 dark:bg-amber-950/50 dark:text-amber-200 text-[10px] px-1.5 py-0 font-bold">
-                          ✨ {isEn ? 'Mine' : '내 직업'}
+                          <span className="flex items-center gap-1"><Sparkles className="size-2.5 text-amber-500" /> {isEn ? 'Mine' : '내 직업'}</span>
                         </Badge>
                       )}
                       {task.recommended && (
                         <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800 text-[10px] px-1.5 py-0 font-bold">
-                          ★ {isEn ? 'Today’s pick' : '오늘 추천'}
+                          <span className="flex items-center gap-1"><Star className="size-2.5 text-emerald-500 fill-emerald-500" /> {isEn ? 'Today’s pick' : '오늘 추천'}</span>
                         </Badge>
                       )}
                     </div>
