@@ -2,11 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.21.325
-> Implementation/evidence sync: 2026-09-21
+> Current integrated version: v2026.09.22.334
+> Implementation/evidence sync: 2026-09-22
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## QA defect-retention directive — v2026.09.22.334 (2026-09-22)
+
+### Every failed, skipped or degraded QA result remains in the plan until closed with evidence
+- **Permanent tracking rule:** any functional defect, regression, warning with user/performance risk, skipped required test, blocked environment-dependent test, frontend/backend/API mismatch, mobile/responsive defect, auth/session defect, deployment defect or release-evidence gap found by QA must be recorded in the authoritative plan and a versioned QA worklog. A green aggregate command must never erase unresolved sub-results.
+- **Required defect record:** each open QA finding must include `id`, discovery version/SHA, affected feature/surface, environment, reproducible evidence or test name, expected vs actual behavior, severity (`P0`-`P3`), release-blocking status, owner/workstream, workaround if any, remediation target, retest evidence and closure version/SHA. Unknown fields stay explicitly `TBD`; they are not silently omitted.
+- **Lifecycle:** `OPEN -> TRIAGED -> FIX_IN_PROGRESS -> RETEST_REQUIRED -> VERIFIED -> CLOSED`. A finding can become `CLOSED` only after the relevant automated/manual QA passes on the exact candidate SHA. A skipped, not-run, cancelled or stale prior pass is not closure evidence. Reopened regressions keep the original defect id and append a new occurrence.
+- **Release policy:** unresolved P0/P1 findings and missing required real-DB/security/auth/payment/economy/deployment evidence block Production. P2/P3 findings may ship only when the plan explicitly records why they are non-blocking, their user impact, owner and target version.
+- **Current QA evidence on `origin/main=55cea0ba49fa53e17c924cc54bff5689e2bad172`:** repository lint, typecheck, aggregate test and production build all exited `0`; API contract generation/check covered 159 endpoints. Frontend tests passed 707/707 and backend/contract/database non-skipped tests passed, but this run is **not defect-free** because the items below remain open.
+- **QA-334-01 — frontend lint degradation (P2, non-blocking for docs-only cycle):** ESLint reported 12 warnings: 11 `@next/next/no-img-element` warnings across admin content, announcements, board, gallery, profile and cosmetics surfaces, plus one `react-hooks/exhaustive-deps` warning in `gallery/submit/submit-forms.tsx`. These remain product-quality/performance/maintainability debt until fixed and re-linted at zero warnings or explicitly justified per occurrence.
+- **QA-334-02 — real-database QA coverage gap (P1 release blocker):** backend Vitest reported `907 passed | 361 skipped`; 52 DB-oriented test files contain skipped suites/tests gated by missing `DATABASE_URL` and/or `MIGRATOR_DATABASE_URL`. A local green aggregate test therefore does not prove real-PostgreSQL behavior for wallet, stock, casino, work, shop, admin, auth/session, audit, profile, business, scheduler, security boundaries and other DB-backed flows. Production promotion requires the required real-DB suite on an isolated Test database with exact-SHA evidence.
+- **Not classified as a defect from this run:** the verification-email sender tests intentionally exercised the SMTP-unconfigured error path and still passed; this log alone is not evidence that deployed SMTP is broken. Runtime SMTP health must be verified separately in Test/Production release checks.
+- **Implementation order:** v2026.09.22.334-01 preserve this defect ledger -> -02 eliminate or justify all lint warnings -> -03 provision isolated real-DB QA credentials and run all required DB suites -> -04 run authenticated/API/responsive/security smoke on exact-SHA Test -> -05 re-read the latest plan mid-work -> -06 merge only with updated evidence -> -07 zero-downtime Production promotion only if all blocking defects are closed -> -08 post-promotion smoke/session/version verification.
+- **Documentation rule:** every future QA cycle must append newly discovered defects and update existing ids rather than deleting them. Historical closed defects remain recoverable through Git/changelog/worklog history.
 
 
 ## Security planning directive — v2026.09.21.324 (2026-09-21)
