@@ -30,7 +30,14 @@ if [[ "$SOURCE" == *:* && ! -f "$SOURCE" ]]; then
 fi
 
 [[ -f "$ARCHIVE" && -f "$ARCHIVE.sha256" ]] || { echo 'restore-drill: archive/checksum missing' >&2; exit 1; }
-(cd "$(dirname "$ARCHIVE")" && sha256sum -c "$(basename "$ARCHIVE").sha256")
+if [[ "$SOURCE_KIND" == offsite ]]; then
+  EXPECTED_SHA="$(awk 'NR==1 {print $1}' "$ARCHIVE.sha256")"
+  [[ "$EXPECTED_SHA" =~ ^[0-9a-fA-F]{64}$ ]] || { echo 'restore-drill: invalid off-host checksum sidecar' >&2; exit 1; }
+  ACTUAL_SHA="$(sha256sum "$ARCHIVE" | awk '{print $1}')"
+  [[ "${ACTUAL_SHA,,}" == "${EXPECTED_SHA,,}" ]] || { echo 'restore-drill: off-host archive checksum mismatch' >&2; exit 1; }
+else
+  (cd "$(dirname "$ARCHIVE")" && sha256sum -c "$(basename "$ARCHIVE").sha256")
+fi
 openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -md sha256 -pass file:"$BACKUP_KEY_FILE" -in "$ARCHIVE" | zstd -q -d | tar -C "$TMP" -xf -
 (cd "$TMP" && sha256sum -c SHA256SUMS)
 grep -q '^format=moneyverse-backup-v1$' "$TMP/manifest.txt"

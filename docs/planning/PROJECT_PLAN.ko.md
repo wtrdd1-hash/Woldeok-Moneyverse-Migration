@@ -2,12 +2,23 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.21.315
+> **현재 통합 버전:** v2026.09.21.325
 > **구현·증거 동기화:** 2026-09-21
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+
+## 보안 기획 지시 — v2026.09.21.324 (2026-09-21)
+
+### 전 기능 보안 보증 기준
+- **권위 상세 문서:** [SECURITY_ASSURANCE_MASTER_PLAN.ko.md](SECURITY_ASSURANCE_MASTER_PLAN.ko.md).
+- **근거 원칙:** 검증 불가능한 단순 레퍼런스 개수 대신 OWASP ASVS 5.0.0, OWASP Top 10, OWASP API Security Top 10:2023, MITRE CWE/2025 CWE Top 25, NIST SSDF·SP 800-63B-4, CISA Secure-by-Design, CVE/CISA KEV, 벤더 공지를 추적 가능한 근거로 사용한다.
+- **전체 기능 범위:** 인증/세션, OAuth, 지갑·송금·국고, 주식, 은행, 카지노, 직업·퀘스트·사업, 채팅/쪽지, 게시판·댓글·업로드·검색, 관리자, API/webhook, AI/agent, 결제/구독, 모바일, 인프라·DB·백업·CI/CD에 각각 위협모델과 릴리스 증거를 둔다.
+- **필수 통제:** deny-by-default 서버 권한, cross-account negative test, bounded validation, CSRF/CORS/browser hardening, idempotency/concurrency/value integrity, abuse/resource limit, privacy-safe audit/logging, secret/dependency/IaC scan, SBOM, exact-SHA Test 보안 회귀.
+- **승격 차단:** P0/P1 보안 이슈는 수정 또는 권한소유자의 공식 위험수용+보완통제 없이는 Production 승격을 막는다. Production을 주요 취약점 탐색 대상으로 사용하지 않는다.
+- **실행 순서:** v2026.09.21.324-01~-08: 전체 인벤토리 → 표준 매핑 → P0/P1 보완 → 자동 gate → 인증 exact-SHA Test → 작업 중간 기획 재확인 → exact merged SHA 무중단 승격 → 사후 점검.
+- **현재 상태:** 기획/문서 단계이며 모든 통제가 이미 구현됐거나 1억 개 개별 레퍼런스를 수동 검토했다고 주장하지 않는다.
 
 ## 기획 지시 — v2026.09.21.315 (2026-09-21)
 
@@ -1977,6 +1988,10 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 **v166 사업효과:** release classifier의 직접매출은 0이며 CI/registry/Test/운영 낭비와 잘못된 application identity 승격·감사 위험 감소가 가치다. SEO는 acquisition/CAC 효율 투자, API/security/backup/status는 사고·다운타임·환불·fraud·support 기대손실 감소다. 관측되지 않은 금액은 실제값으로 단정하지 않는다.\n\n### v2026.09.19.261 — AI 주식 시나리오 자동 생성·게시
 
 가상 주식시장에 opt-in 시간별 AI 뉴스룸 자동화 경로를 추가한다. AI는 제한된 이벤트 시나리오를 만들고 실제 주가 권위는 기존 결정론적 market-event 로직이 유지한다. 자동 게시는 전체시장·강도 3 충격을 제외하고 한 시나리오의 변동 종목을 최대 2개, 기간을 최대 24시간으로 제한한다. 자격증명, 감사 actor 또는 안전 후보가 없으면 fail-closed로 아무 이벤트도 게시하지 않는다. 브랜치: feat/ai-stock-auto-scenarios-v2026.09.19.261.
+
+### v2026.09.21.325 — AI 시나리오 사용자 신문
+
+기존 v2026.09.19.261 AI 주식 시나리오 자동생성·게시 기능을 일반 사용자에게 안전하게 노출하는 신문형 소비자 제품 계층을 추가한다. 권위 상세 문서는 [AI_SCENARIO_USER_NEWSPAPER_SPEC.ko.md](AI_SCENARIO_USER_NEWSPAPER_SPEC.ko.md)다. 기존 `ai-news` 생성기와 bounded auto-publish 경계를 재사용하되, 공개 지면은 대표기사/최신기사/진행사건/아카이브/상세기사 구조, `AI 생성 가상뉴스` 및 `게임 내 가상시장 정보` 표시, 중복 억제, 현실 기업·인물 및 투자권유 표현 차단, 정정/철회, provenance/audit, selective canonical indexing을 필수로 한다. publication 데이터는 기사 투영 계층이며 가격 권위는 계속 결정론적 market-event 로직에 남는다. 이번 버전은 문서 전용이며 코드 구현은 별도 개발 브랜치와 exact-SHA Test 검증 후 무중단 Production 승격 대상으로 둔다.
 
 ### v2026.09.19.271 — 사람 제작 UI 기준
 
