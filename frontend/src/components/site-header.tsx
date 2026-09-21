@@ -247,8 +247,22 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        {/* Right: Controls & Consolidated Profile Hub */}
+        {/* Right: Controls & Direct Admin Access & Consolidated Profile Hub */}
         <div className="flex min-w-0 items-center gap-1.5 sm:gap-2 lg:gap-3 shrink-0 ml-auto">
+          {/* Direct Admin Access Button for Logged-in Operators */}
+          {isAdmin && (
+            <Button
+              asChild
+              variant="default"
+              className="hidden sm:inline-flex h-10 sm:h-11 rounded-xl px-3 sm:px-4 text-xs font-extrabold bg-gradient-to-r from-amber-500 to-primary text-white shadow-sm hover:brightness-110 shrink-0"
+            >
+              <Link href="/admin">
+                <ShieldAlert className="mr-1.5 size-4" />
+                <span>{locale === 'en' ? 'Admin Console' : '관리자 콘솔'}</span>
+              </Link>
+            </Button>
+          )}
+
           <div className="hidden min-[420px]:block">
             <ServerClockPill className="hidden 2xl:inline-flex" />
             <LanguageSwitcher />
@@ -285,6 +299,22 @@ export function SiteHeader() {
                 <div className="px-1 pb-3">
                   <ServerClockPill className="w-full justify-center" />
                 </div>
+
+                {/* Direct Admin Banner on Top for Mobile */}
+                {isAdmin && (
+                  <div className="py-2">
+                    <Link
+                      href="/admin"
+                      className="flex min-h-12 items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-bold bg-gradient-to-r from-amber-500/15 via-primary/15 to-transparent text-primary border border-primary/30"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <ShieldAlert className="size-4 text-amber-500" />
+                        <span>{locale === 'en' ? 'Open Master Admin Console' : '운영 마스터 콘솔 열기'}</span>
+                      </div>
+                      <ChevronRight className="size-4 opacity-70" />
+                    </Link>
+                  </div>
+                )}
 
                 {/* 4 Major Categories in Mobile Drawer */}
                 {CATEGORY_NAV.map((category) => (
@@ -568,8 +598,8 @@ function SessionControl({
               <DropdownMenuSeparator className="my-1 opacity-70" />
               <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
-                  <Link href="/admin" className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-bold text-primary cursor-pointer">
-                    <ShieldAlert className="size-4" />
+                  <Link href="/admin" className="flex items-center gap-2.5 p-2 rounded-xl text-xs font-bold text-primary cursor-pointer bg-primary/5">
+                    <ShieldAlert className="size-4 text-primary" />
                     <span>{locale === 'en' ? 'Admin Master Console' : '운영 마스터 콘솔'}</span>
                   </Link>
                 </DropdownMenuItem>
