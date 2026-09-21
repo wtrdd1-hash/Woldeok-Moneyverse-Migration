@@ -20,6 +20,7 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -146,7 +147,7 @@ export class AdminController {
   }
 
   @Put('users/:id/restriction')
-  @UseGuards(AdminSessionGuard, CsrfGuard)
+  @UseGuards(AdminSessionGuard, CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Restrict or unrestrict a member' })
   restrict(
     @Req() request: RequestWithSession,
