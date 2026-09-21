@@ -74,6 +74,42 @@ VALUES (:'migration_filename', :'migration_checksum');
 SQL
 done
 
+# Fail closed when the database knows about a migration that is absent from
+# this checkout. Without this reverse-parity check, a deployment from an older
+# or incomplete repository can silently accept a database whose schema was
+# mutated by an untracked/newer migration. That breaks rollback, DR and exact-
+# SHA release authority even though every local file checksum still matches.
+applied_filenames="$(
+  psql -X -qAt -v ON_ERROR_STOP=1 <<'SQL'
+SELECT filename FROM public.schema_migrations ORDER BY filename;
+SQL
+)"
+
+unknown_migration_seen=0
+old_ifs="$IFS"
+IFS='
+'
+for applied_filename in $applied_filenames; do
+  [ -n "$applied_filename" ] || continue
+  case "$applied_filename" in
+    */*|*'..'*)
+      echo "Refusing unsafe migration filename recorded in database: $applied_filename" >&2
+      unknown_migration_seen=1
+      continue
+      ;;
+  esac
+  if [ ! -f "$migrations_dir/$applied_filename" ]; then
+    echo "Refusing database-ahead migration absent from repository: $applied_filename" >&2
+    unknown_migration_seen=1
+  fi
+done
+IFS="$old_ifs"
+
+if [ "$unknown_migration_seen" -ne 0 ]; then
+  echo "Database migration history is not authoritative for this checkout" >&2
+  exit 1
+fi
+
 # Never report success after accepting the one historical revision unless the
 # immutable follow-up repair was also recorded. The loop verifies 016's own
 # checksum before reaching this guard.

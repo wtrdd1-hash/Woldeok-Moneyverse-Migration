@@ -1,3 +1,7 @@
+## v2026.09.21.322 — Migration authority fail-closed gate
+- Production migration execution now rejects database-applied migration filenames absent from the exact repository checkout.
+- This prevents database-ahead/untracked schema drift from silently passing deploy migration gates while preserving checksum immutability.
+
 ## v2026.09.20.311 — Administrator Treasury Management planning
 - Added bilingual implementation-oriented planning for Admin → Economy → Treasury.
 - Defined server-authoritative treasury accounting, immutable history, revenue/expenditure, budgets, privileged corrections, reconciliation, reserve alerts, audit and exact-SHA release gates.
