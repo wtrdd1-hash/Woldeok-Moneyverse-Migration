@@ -2,12 +2,27 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.21.315
+> Current integrated version: v2026.09.21.323
 > Implementation/evidence sync: 2026-09-21
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+
+## Planning directive — v2026.09.21.323 (2026-09-21)
+
+### Cross-surface direct-message initiation from member identities
+- Authenticated users can start/open private 1:1 chat from board post authors, comment/reply authors, member profiles, exact ID/username results, duplicate-safe nickname results and eligible member-list rows.
+- Every surface resolves the target to the server-authoritative canonical member ID. Rendered nickname/username/post/comment identifiers are discovery context only.
+- Every initiation reuses the existing DM eligibility gate for self-target, account state, DM preference, block relation, moderation restriction, age/safety policy, rollout and rate limiting. Denials do not disclose sensitive peer state.
+- Repeated initiation from any surface opens/creates the same pair conversation idempotently; archived threads do not cause duplicates.
+- Deleted, anonymized, suspended, stale or system-authored board content cannot retain a misleading DM target.
+- Nickname duplicates require public-safe disambiguation; free-form nickname targeting, bulk enumeration and discovery by email/phone/OAuth/security attributes are prohibited.
+- API direction: POST /api/v1/chat/conversations with targetUserId and optional sourceContext. sourceContext never affects authorization.
+- Board/profile/search/list share one member-action primitive; QA covers forged target IDs, stale identity, duplicate nicknames, logged-out revalidation, blocked/DM-disabled targets, repeated initiation and mobile back-stack/accessibility.
+- Authoritative detail: ONE_TO_ONE_PRIVATE_CHAT_SPEC.md section 29.
+- Implementation sequence: v2026.09.21.323-08 through -11. Re-read the latest plan immediately before implementation and again mid-work.
+- Current state: planning/documentation only; no runtime, DB, API or Production behavior changed in this cycle.
 
 ## Planning directive — v2026.09.21.315 (2026-09-21)
 
