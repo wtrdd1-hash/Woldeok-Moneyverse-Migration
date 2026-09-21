@@ -55,6 +55,9 @@ mv "$BACKUP_DEST/${NAME}.tar.zst.enc.partial" "$BACKUP_DEST/${NAME}.tar.zst.enc"
 sha256sum "$BACKUP_DEST/${NAME}.tar.zst.enc" > "$BACKUP_DEST/${NAME}.tar.zst.enc.sha256"
 
 "$(dirname "$0")/moneyverse-backup-verify.sh" "$BACKUP_DEST/${NAME}.tar.zst.enc"
+if [[ -n "${OFFSITE_REMOTE:-}" ]]; then
+  "$(dirname "$0")/moneyverse-backup-offsite.sh" "$BACKUP_DEST/${NAME}.tar.zst.enc"
+fi
 find "$BACKUP_DEST" -maxdepth 1 -type f -name 'moneyverse-*.tar.zst.enc' -mtime "+$BACKUP_RETENTION_DAYS" -delete
 find "$BACKUP_DEST" -maxdepth 1 -type f -name 'moneyverse-*.tar.zst.enc.sha256' -mtime "+$BACKUP_RETENTION_DAYS" -delete
 printf 'backup: verified %s\n' "$BACKUP_DEST/${NAME}.tar.zst.enc"
