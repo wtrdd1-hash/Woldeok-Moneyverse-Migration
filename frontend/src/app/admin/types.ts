@@ -624,3 +624,42 @@ export interface AdminWorkRealtimeStats {
   readonly cap_buckets: readonly AdminWorkDailyCapBucket[];
   readonly trend_7d: readonly AdminWorkTrendDay[];
 }
+
+export interface AdminTreasuryVault {
+  readonly id: string;
+  readonly code: string;
+  readonly name: string;
+  readonly balance_wld: string;
+  readonly description: string;
+  readonly created_at: string;
+  readonly updated_at: string;
+}
+
+export interface AdminTreasuryLedger {
+  readonly id: string;
+  readonly vault_id: string;
+  readonly vault_code: string;
+  readonly vault_name: string;
+  readonly tx_type: 'INJECTION' | 'ABSORPTION_SINK' | 'STOCK_HALT_SETTLEMENT' | 'FEE_RECIRCULATION' | 'EMERGENCY_RESERVE_TRANSFER';
+  readonly amount_wld: string;
+  readonly actor_id: string | null;
+  readonly actor_name: string | null;
+  readonly reason: string;
+  readonly balance_before: string;
+  readonly balance_after: string;
+  readonly created_at: string;
+}
+
+export interface AdminTreasuryOverview {
+  readonly vaults: readonly AdminTreasuryVault[];
+  readonly total_treasury_wld: string;
+  readonly total_circulating_wld: string;
+  readonly reserve_ratio_pct: number;
+  readonly stats_24h: {
+    readonly injected_wld: string;
+    readonly absorbed_wld: string;
+    readonly stock_halt_funded_wld: string;
+    readonly recirculated_wld: string;
+  };
+}
+

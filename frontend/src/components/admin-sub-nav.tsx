@@ -17,6 +17,7 @@ import {
   BriefcaseBusiness,
   Building2,
   Radio,
+  Vault,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
@@ -32,6 +33,7 @@ export const ADMIN_TABS: readonly AdminTabItem[] = [
   { href: '/admin/security', label: '보안·차단', icon: ShieldAlert },
   { href: '/admin/support', label: '문의 채팅', icon: MessageCircle },
   { href: '/admin/economy', label: '경제·원장', icon: Coins },
+  { href: '/admin/treasury', label: '국고·비축', icon: Vault },
   { href: '/admin/catalog', label: '사업·시즌', icon: Building2 },
   { href: '/admin/work', label: '작업·직업', icon: BriefcaseBusiness },
   { href: '/admin/shop', label: '상점 관리', icon: ShoppingBag },

@@ -46,9 +46,14 @@ function devicePepper(config: AppConfig): string {
   return process.env.ADMIN_DEVICE_HASH_PEPPER || config.internalToken;
 }
 
+import { AdminTreasuryController } from './treasury/treasury.controller';
+import { TreasuryRepository } from './treasury/treasury.repository';
+import { TreasuryService } from './treasury/treasury.service';
+
 @Module({
   imports: [AuthModule, StockModule],
   controllers: [
+    AdminTreasuryController,
     AdminShopController,
     AdminController,
     AdminAuditController,
@@ -115,6 +120,16 @@ function devicePepper(config: AppConfig): string {
       provide: OperationsRepository,
       inject: [PG_POOL],
       useFactory: (pool: Queryable | null) => (pool ? new OperationsRepository(pool) : null),
+    },
+    {
+      provide: TreasuryRepository,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => (pool ? new TreasuryRepository(pool as any) : null),
+    },
+    {
+      provide: TreasuryService,
+      inject: [TreasuryRepository],
+      useFactory: (repo: TreasuryRepository | null) => (repo ? new TreasuryService(repo) : null),
     },
   ],
   exports: [AdminService, AuditRepository],

@@ -115,6 +115,7 @@ export default async function AdminPage({
     // behind the door.
     '/admin/work': null,
     '/admin/bank': null,
+    '/admin/treasury': null,
     '/admin/discord': null,
     '/admin/logs': null,
     '/admin/logs/delivery': null,

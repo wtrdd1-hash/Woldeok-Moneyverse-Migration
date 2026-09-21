@@ -468,3 +468,72 @@ export async function reverseUserTransaction(
     return failure(error, '거래를 회수하지 못했습니다. 이미 역분개됐거나 종속된 기록이 있는지 확인해 주세요.');
   }
 }
+
+export async function injectTreasuryFunds(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const vaultCode = formData.get('vaultCode');
+  const amountWld = formData.get('amountWld');
+  const reason = formData.get('reason');
+
+  if (typeof vaultCode !== 'string' || !vaultCode.trim()) {
+    return { status: 'error', message: '대상 금고 코드를 선택해 주세요.' };
+  }
+  if (typeof amountWld !== 'string' || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
+    return { status: 'error', message: '주입할 금액은 0보다 큰 정수 WLD여야 합니다.' };
+  }
+  if (typeof reason !== 'string' || reason.trim().length < 10) {
+    return { status: 'error', message: '감사 사유를 10자 이상 구체적으로 적어 주세요.' };
+  }
+
+  try {
+    await mutate('/api/v1/admin/treasury/inject', {
+      method: 'POST',
+      body: JSON.stringify({
+        vaultCode: vaultCode.trim(),
+        amountWld: amountWld.trim(),
+        reason: reason.trim(),
+      }),
+    });
+    revalidatePath('/admin/treasury');
+    return { status: 'ok', message: `${groupDigits(amountWld)} WLD를 국고에 긴급 주입했습니다.` };
+  } catch (error) {
+    return failure(error, '국고 자금 주입에 실패했습니다. 관리자 권한 및 감사 사유를 확인해 주세요.');
+  }
+}
+
+export async function absorbTreasuryFunds(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const vaultCode = formData.get('vaultCode');
+  const amountWld = formData.get('amountWld');
+  const reason = formData.get('reason');
+
+  if (typeof vaultCode !== 'string' || !vaultCode.trim()) {
+    return { status: 'error', message: '대상 금고 코드를 선택해 주세요.' };
+  }
+  if (typeof amountWld !== 'string' || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
+    return { status: 'error', message: '소각할 금액은 0보다 큰 정수 WLD여야 합니다.' };
+  }
+  if (typeof reason !== 'string' || reason.trim().length < 10) {
+    return { status: 'error', message: '감사 사유를 10자 이상 구체적으로 적어 주세요.' };
+  }
+
+  try {
+    await mutate('/api/v1/admin/treasury/drain', {
+      method: 'POST',
+      body: JSON.stringify({
+        vaultCode: vaultCode.trim(),
+        amountWld: amountWld.trim(),
+        reason: reason.trim(),
+      }),
+    });
+    revalidatePath('/admin/treasury');
+    return { status: 'ok', message: `${groupDigits(amountWld)} WLD를 국고에서 영구 소각했습니다.` };
+  } catch (error) {
+    return failure(error, '국고 자금 소각에 실패했습니다. 잔액이 부족하거나 권한이 유효하지 않습니다.');
+  }
+}
+

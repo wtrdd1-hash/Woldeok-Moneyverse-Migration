@@ -85,6 +85,13 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'economy',
   },
   {
+    href: '/admin/treasury',
+    eyebrow: 'SYSTEM TREASURY',
+    title: '국고 · 비축 자금',
+    summary: '중앙 국고 비축금과 발행/소각 재순환 흐름을 관제합니다.',
+    group: 'economy',
+  },
+  {
     href: '/admin/shop',
     eyebrow: 'SHOP OPERATIONS',
     title: '상점 관리',

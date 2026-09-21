@@ -801,6 +801,16 @@ export class PostgresStockRepository {
       [actorUserId, stockId, eventId],
     );
     if (!row) throw new Error('failed to halt stock settlement');
+
+    // 국고 비축금 우선 충당 모델 연동 (Treasury Reserve Funding)
+    if (row.total_refund_amount && BigInt(row.total_refund_amount) > BigInt(0)) {
+      try {
+        await this.pool.query('SELECT public.treasury_fund_stock_halt($1, $2)', [stockId, row.total_refund_amount]);
+      } catch {
+        // 국고 연동 비차단 safe fallback
+      }
+    }
+
     return row;
   }
 
