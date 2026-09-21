@@ -2,13 +2,13 @@
 set -euo pipefail
 umask 077
 
-ARCHIVE="${1:?usage: moneyverse-restore-drill.sh ARCHIVE}"
+SOURCE="${1:?usage: moneyverse-restore-drill.sh ARCHIVE_OR_RCLONE_REMOTE}"
 BACKUP_KEY_FILE="${BACKUP_KEY_FILE:-/etc/moneyverse/backup.key}"
 RESTORE_IMAGE="${RESTORE_IMAGE:-postgres:17.11-alpine}"
 MIGRATIONS_DIR="${MIGRATIONS_DIR:-$(cd "$(dirname "$0")/../.." && pwd)/packages/database/migrations}"
-[[ -f "$ARCHIVE" && -f "$ARCHIVE.sha256" ]] || { echo 'restore-drill: archive/checksum missing' >&2; exit 1; }
 [[ -f "$BACKUP_KEY_FILE" ]] || { echo 'restore-drill: encryption key missing' >&2; exit 1; }
 command -v docker >/dev/null || { echo 'restore-drill: docker is required' >&2; exit 1; }
+command -v sha256sum >/dev/null || { echo 'restore-drill: sha256sum is required' >&2; exit 1; }
 
 TMP="$(mktemp -d)"
 NAME="moneyverse-restore-drill-$$"
@@ -16,6 +16,20 @@ PASSWORD="$(openssl rand -hex 24)"
 cleanup() { docker rm -f "$NAME" >/dev/null 2>&1 || true; rm -rf "$TMP"; }
 trap cleanup EXIT
 
+SOURCE_KIND=local
+ARCHIVE="$SOURCE"
+if [[ "$SOURCE" == *:* && ! -f "$SOURCE" ]]; then
+  SOURCE_KIND=offsite
+  command -v rclone >/dev/null || { echo 'restore-drill: rclone is required for off-host restore' >&2; exit 1; }
+  [[ "$SOURCE" != *$'\n'* && "$SOURCE" != *$'\r'* ]] || { echo 'restore-drill: invalid off-host source' >&2; exit 1; }
+  BASE="$(basename "$SOURCE")"
+  [[ "$BASE" == moneyverse-*.tar.zst.enc ]] || { echo 'restore-drill: unexpected off-host archive name' >&2; exit 1; }
+  ARCHIVE="$TMP/$BASE"
+  rclone copyto --no-traverse "$SOURCE" "$ARCHIVE"
+  rclone copyto --no-traverse "$SOURCE.sha256" "$ARCHIVE.sha256"
+fi
+
+[[ -f "$ARCHIVE" && -f "$ARCHIVE.sha256" ]] || { echo 'restore-drill: archive/checksum missing' >&2; exit 1; }
 (cd "$(dirname "$ARCHIVE")" && sha256sum -c "$(basename "$ARCHIVE").sha256")
 openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -md sha256 -pass file:"$BACKUP_KEY_FILE" -in "$ARCHIVE" | zstd -q -d | tar -C "$TMP" -xf -
 (cd "$TMP" && sha256sum -c SHA256SUMS)
@@ -42,4 +56,4 @@ unbalanced="$(docker exec -e PGPASSWORD="$PASSWORD" "$NAME" psql -X -U postgres 
 [[ "$unbalanced" == 0 ]] || { echo "restore-drill: unbalanced ledger transactions=$unbalanced" >&2; exit 1; }
 
 created="$(sed -n 's/^created_at_utc=//p' "$TMP/manifest.txt")"
-printf 'restore-drill: OK archive=%s created_at=%s migrations=%s orphan_postings=0 unbalanced_transactions=0 network=none\n' "$ARCHIVE" "$created" "$(printf '%s\n' "$actual" | wc -l)"
+printf 'restore-drill: OK source=%s source_kind=%s created_at=%s migrations=%s orphan_postings=0 unbalanced_transactions=0 network=none\n' "$SOURCE" "$SOURCE_KIND" "$created" "$(printf '%s\n' "$actual" | wc -l)"
