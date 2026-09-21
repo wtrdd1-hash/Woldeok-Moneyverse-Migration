@@ -1,18 +1,27 @@
 import Link from 'next/link';
 import {
   ArrowRight,
+  Award,
   BriefcaseBusiness,
+  Building2,
+  Calendar,
+  CheckSquare,
   Dices,
+  Landmark,
   MessageSquare,
   ShieldCheck,
   ShoppingBag,
+  Sparkles,
   TrendingUp,
+  Users,
   Wallet,
+  Zap,
 } from 'lucide-react';
-import { WalletGlance } from '@/components/wallet-glance';
-import { LobbyCount } from '@/components/lobby-count';
 import { HomeAdvertisement } from '@/components/home-advertisement';
+import { LobbyCount } from '@/components/lobby-count';
 import { TranslatedText as T } from '@/components/translated-text';
+import { Badge } from '@/components/ui/badge';
+import { WalletGlance } from '@/components/wallet-glance';
 import { formatDay } from '@/lib/money';
 
 interface Announcement {
@@ -27,6 +36,19 @@ interface MobileHomeViewProps {
   readonly notices: readonly Announcement[];
 }
 
+const QUICK_SERVICES = [
+  { href: '/stocks', icon: TrendingUp, ko: '거래소', en: 'Exchange', badge: '주식', color: 'text-emerald-500 bg-emerald-500/10' },
+  { href: '/wallet', icon: Wallet, ko: '지갑', en: 'Wallet', badge: '자산', color: 'text-primary bg-primary/10' },
+  { href: '/bank', icon: Landmark, ko: '가상은행', en: 'Bank', badge: '예적금', color: 'text-amber-500 bg-amber-500/10' },
+  { href: '/work', icon: BriefcaseBusiness, ko: '직업', en: 'Work', badge: '보상', color: 'text-blue-500 bg-blue-500/10' },
+  { href: '/businesses', icon: Building2, ko: '사업체', en: 'Biz', badge: '법인', color: 'text-indigo-500 bg-indigo-500/10' },
+  { href: '/shop', icon: ShoppingBag, ko: '상점', en: 'Shop', badge: '아이템', color: 'text-rose-500 bg-rose-500/10' },
+  { href: '/casino', icon: Dices, ko: '카지노', en: 'Casino', badge: '게임', color: 'text-amber-400 bg-amber-400/10' },
+  { href: '/quests', icon: CheckSquare, ko: '퀘스트', en: 'Quests', badge: '미션', color: 'text-purple-500 bg-purple-500/10' },
+  { href: '/seasons', icon: Zap, ko: '시즌', en: 'Seasons', badge: '랭킹', color: 'text-yellow-500 bg-yellow-500/10' },
+  { href: '/clubs', icon: Users, ko: '클럽', en: 'Clubs', badge: '협동', color: 'text-emerald-400 bg-emerald-400/10' },
+] as const;
+
 const PRIMARY_LINKS = [
   { href: '/work', icon: BriefcaseBusiness, ko: '오늘의 일', en: 'Work', hintKo: '보상 받기', hintEn: 'Earn WLD' },
   { href: '/wallet', icon: Wallet, ko: '지갑', en: 'Wallet', hintKo: '잔액과 기록', hintEn: 'Balance & history' },
@@ -35,14 +57,18 @@ const PRIMARY_LINKS = [
 ] as const;
 
 const SECONDARY_LINKS = [
+  { href: '/bank', icon: Landmark, ko: '가상 금융', en: 'Banking' },
+  { href: '/businesses', icon: Building2, ko: '게임 사업', en: 'Businesses' },
   { href: '/shop', icon: ShoppingBag, ko: '상점', en: 'Shop' },
   { href: '/casino', icon: Dices, ko: '미니게임', en: 'Games' },
+  { href: '/board', icon: MessageSquare, ko: '커뮤니티', en: 'Board' },
   { href: '/lobby', icon: MessageSquare, ko: '로비', en: 'Lobby' },
 ] as const;
 
 export function MobileHomeView({ notices }: MobileHomeViewProps) {
   return (
     <div className="flex flex-col gap-6">
+      {/* Hero Asset Overview Section */}
       <section className="border-y border-border/80 py-5 sm:py-7">
         <div className="flex items-center justify-between gap-4">
           <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -81,6 +107,40 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
         </p>
       </section>
 
+      {/* Toss-Style Quick Services Grid */}
+      <section aria-labelledby="quick-services-title" className="grid gap-3">
+        <div className="flex items-center justify-between">
+          <h2 id="quick-services-title" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            <T korean="전체 주요 서비스 바로가기" english="Quick Services" />
+          </h2>
+          <span className="text-[11px] font-semibold text-primary">10대 핵심 기능</span>
+        </div>
+
+        <div className="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-10 gap-2 sm:gap-2.5">
+          {QUICK_SERVICES.map((srv) => {
+            const Icon = srv.icon;
+            return (
+              <Link
+                key={srv.href}
+                href={srv.href}
+                className="group flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl border border-border/60 bg-card/60 hover:bg-card hover:border-primary/40 transition-all shadow-2xs hover:shadow-xs text-center"
+              >
+                <div className={`flex size-10 sm:size-11 items-center justify-center rounded-xl mb-1.5 transition-transform group-hover:scale-105 ${srv.color}`}>
+                  <Icon className="size-5 sm:size-5.5" />
+                </div>
+                <span className="text-[11px] sm:text-xs font-bold text-foreground truncate w-full">
+                  <T korean={srv.ko} english={srv.en} />
+                </span>
+                <span className="text-[9px] text-muted-foreground mt-0.5">
+                  {srv.badge}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Today Route Section */}
       <section aria-labelledby="today-route-title" className="grid gap-3">
         <div className="flex items-end justify-between gap-4">
           <div>
@@ -123,7 +183,11 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
           {SECONDARY_LINKS.map((item) => {
             const Icon = item.icon;
             return (
-              <Link key={item.href} href={item.href} className="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+              <Link
+                key={item.href}
+                href={item.href}
+                className="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+              >
                 <Icon className="size-3.5" />
                 <T korean={item.ko} english={item.en} />
               </Link>
