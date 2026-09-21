@@ -1,23 +1,23 @@
 /*
- * Moneyverse — WCAG AA compliant palette & responsive redesign foundation
+ * Moneyverse — Modern FinTech Palette & Responsive Redesign
  */
 :root {
-  --mv-bg: #f4f2ec;
-  --mv-surface: #fbfaf7;
+  --mv-bg: #f8fafc;
+  --mv-surface: #ffffff;
   --mv-surface-raised: #ffffff;
-  --mv-surface-strong: #ebe7dd;
-  --mv-ink: #171a1f;
-  --mv-ink-2: #4d5561;
-  --mv-ink-3: #59616d;
-  --mv-line: #d7d2c7;
-  --mv-line-strong: #b9b2a5;
-  --mv-accent: #9b3f22;
-  --mv-accent-strong: #763019;
-  --mv-accent-soft: #f2ddd3;
-  --mv-focus: #28557a;
-  --mv-positive: #1d6b4e;
-  --mv-negative: #a03737;
-  --mv-radius: 10px;
+  --mv-surface-strong: #f1f5f9;
+  --mv-ink: #0f172a;
+  --mv-ink-2: #475569;
+  --mv-ink-3: #64748b;
+  --mv-line: #e2e8f0;
+  --mv-line-strong: #cbd5e1;
+  --mv-accent: #b45309;
+  --mv-accent-strong: #92400e;
+  --mv-accent-soft: #fef3c7;
+  --mv-focus: #2563eb;
+  --mv-positive: #16a34a;
+  --mv-negative: #dc2626;
+  --mv-radius: 12px;
 
   --background: var(--mv-bg);
   --foreground: var(--mv-ink);
@@ -26,14 +26,14 @@
   --popover: var(--mv-surface-raised);
   --popover-foreground: var(--mv-ink);
   --primary: var(--mv-accent);
-  --primary-foreground: #fffaf6;
+  --primary-foreground: #ffffff;
   --secondary: var(--mv-surface-strong);
   --secondary-foreground: var(--mv-ink);
-  --muted: #ece9e2;
+  --muted: #f1f5f9;
   --muted-foreground: var(--mv-ink-2);
   --accent: var(--mv-accent-soft);
   --accent-foreground: var(--mv-accent-strong);
-  --destructive: #a03737;
+  --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: var(--mv-line);
   --input: var(--mv-line-strong);
@@ -41,38 +41,38 @@
 }
 
 .dark {
-  --mv-bg: #12100e;
-  --mv-surface: #181614;
-  --mv-surface-raised: #181614;
-  --mv-surface-strong: #24201c;
-  --mv-ink: #fef8ee;
-  --mv-ink-2: #d6cfc7;
-  --mv-ink-3: #b5aca2;
-  --mv-line: #292524;
-  --mv-line-strong: #44403c;
+  --mv-bg: #090d16;
+  --mv-surface: #0f172a;
+  --mv-surface-raised: #131d35;
+  --mv-surface-strong: #1e293b;
+  --mv-ink: #f8fafc;
+  --mv-ink-2: #cbd5e1;
+  --mv-ink-3: #94a3b8;
+  --mv-line: #1e293b;
+  --mv-line-strong: #334155;
   --mv-accent: #fbbf24;
   --mv-accent-strong: #f59e0b;
-  --mv-accent-soft: #292524;
+  --mv-accent-soft: #1e1b13;
   --mv-focus: #60a5fa;
   --mv-positive: #34d399;
   --mv-negative: #f87171;
-  --mv-radius: 10px;
+  --mv-radius: 12px;
 
   --background: var(--mv-bg);
   --foreground: var(--mv-ink);
-  --card: var(--mv-surface-raised);
+  --card: var(--mv-surface);
   --card-foreground: var(--mv-ink);
-  --popover: var(--mv-surface-raised);
+  --popover: var(--mv-surface);
   --popover-foreground: var(--mv-ink);
   --primary: var(--mv-accent);
-  --primary-foreground: #12100e;
+  --primary-foreground: #090d16;
   --secondary: var(--mv-surface-strong);
   --secondary-foreground: var(--mv-ink);
   --muted: var(--mv-surface-strong);
   --muted-foreground: var(--mv-ink-2);
   --accent: var(--mv-accent-soft);
   --accent-foreground: var(--mv-accent-strong);
-  --destructive: #ef4444;
+  --destructive: #f87171;
   --destructive-foreground: #ffffff;
   --border: var(--mv-line);
   --input: var(--mv-line-strong);
@@ -107,7 +107,6 @@ body {
   background: var(--mv-surface-strong) !important;
 }
 
-/* Redesign density classes */
 .mv-kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

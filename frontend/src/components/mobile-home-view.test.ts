@@ -1,11 +1,22 @@
-import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import React from 'react';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { MobileHomeView } from './mobile-home-view';
 
-const source = readFileSync('src/components/mobile-home-view.tsx', 'utf8');
+beforeAll(() => {
+  global.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as any;
+});
 
-describe('home dashboard responsive visibility', () => {
-  it('keeps the quick-action dashboard visible on desktop', () => {
-    expect(source).toContain('<div className="flex flex-col gap-6">');
-    expect(source).not.toContain('flex flex-col gap-6 lg:hidden');
+describe('MobileHomeView', () => {
+  it('renders the overhauled fintech super-app dashboard', () => {
+    render(React.createElement(MobileHomeView, { notices: [] }));
+    expect(screen.getByText(/WOLDEOK MONEYVERSE/i)).toBeTruthy();
+    expect(screen.getByText(/돈 보내기/i)).toBeTruthy();
+    expect(screen.getAllByText(/직업 업무/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/가상 주식 시장 주요 종목/i)).toBeTruthy();
   });
 });
