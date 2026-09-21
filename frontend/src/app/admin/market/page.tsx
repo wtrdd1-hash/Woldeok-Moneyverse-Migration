@@ -97,7 +97,7 @@ export default async function AdminMarketPage() {
           ) : dynamics.stocks.length === 0 ? (
             <EmptyState title="거래 중인 종목이 없습니다." />
           ) : (
-            <Table className="table-fixed">
+            <Table className="table-fixed min-w-[580px]">
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[28%]">종목</TableHead>
@@ -215,7 +215,7 @@ export default async function AdminMarketPage() {
               <EmptyState title="등록된 종목이 없습니다." />
             ) : (
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[720px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead>코드</TableHead>

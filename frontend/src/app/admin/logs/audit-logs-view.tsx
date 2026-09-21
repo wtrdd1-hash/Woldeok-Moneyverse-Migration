@@ -127,13 +127,13 @@ export function AuditLogsView({ events }: AuditLogsViewProps) {
       {/* 1. 상단 스마트 컨트롤 바 */}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         {/* 원클릭 카테고리 필터 탭 */}
-        <div className="flex flex-wrap items-center gap-1.5 rounded-lg border bg-muted/40 p-1 text-xs">
+        <div className="flex flex-nowrap overflow-x-auto no-scrollbar items-center gap-1.5 rounded-lg border bg-muted/40 p-1 text-xs max-w-full">
           <Button
             type="button"
             size="xs"
             variant={category === 'all' ? 'default' : 'ghost'}
             onClick={() => setCategory('all')}
-            className="h-7 text-xs"
+            className="h-7 text-xs shrink-0"
           >
             전체 ({totalCount})
           </Button>
@@ -142,7 +142,7 @@ export function AuditLogsView({ events }: AuditLogsViewProps) {
             size="xs"
             variant={category === 'error' ? 'destructive' : 'ghost'}
             onClick={() => setCategory('error')}
-            className="h-7 text-xs font-semibold"
+            className="h-7 text-xs font-semibold shrink-0"
           >
             🚨 오류/실패 ({failureCount})
           </Button>
@@ -151,7 +151,7 @@ export function AuditLogsView({ events }: AuditLogsViewProps) {
             size="xs"
             variant={category === 'economy' ? 'default' : 'ghost'}
             onClick={() => setCategory('economy')}
-            className="h-7 text-xs"
+            className="h-7 text-xs shrink-0"
           >
             💰 경제/지급 ({economyCount})
           </Button>
@@ -160,7 +160,7 @@ export function AuditLogsView({ events }: AuditLogsViewProps) {
             size="xs"
             variant={category === 'security' ? 'default' : 'ghost'}
             onClick={() => setCategory('security')}
-            className="h-7 text-xs"
+            className="h-7 text-xs shrink-0"
           >
             🔐 보안/인증 ({securityCount})
           </Button>
@@ -169,7 +169,7 @@ export function AuditLogsView({ events }: AuditLogsViewProps) {
             size="xs"
             variant={category === 'content' ? 'default' : 'ghost'}
             onClick={() => setCategory('content')}
-            className="h-7 text-xs"
+            className="h-7 text-xs shrink-0"
           >
             📸 콘텐츠
           </Button>
@@ -178,7 +178,7 @@ export function AuditLogsView({ events }: AuditLogsViewProps) {
             size="xs"
             variant={category === 'moderation' ? 'default' : 'ghost'}
             onClick={() => setCategory('moderation')}
-            className="h-7 text-xs"
+            className="h-7 text-xs shrink-0"
           >
             👤 제재/관리
           </Button>
@@ -359,7 +359,7 @@ export function AuditLogsView({ events }: AuditLogsViewProps) {
       ) : (
         /* 고밀도 테이블 뷰 */
         <div className="overflow-x-auto rounded-xl border border-border/70">
-          <Table>
+          <Table className="min-w-[640px]">
             <TableHeader className="bg-muted/30">
               <TableRow>
                 <TableHead className="w-20">상태</TableHead>

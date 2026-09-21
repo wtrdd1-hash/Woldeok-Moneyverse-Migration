@@ -182,8 +182,8 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
             </div>
 
             {/* 정렬 옵션 탭 */}
-            <div className="flex flex-wrap items-center gap-1.5 bg-muted/40 p-1 rounded-lg border text-xs">
-              <span className="text-[0.7rem] font-bold text-muted-foreground px-2 flex items-center gap-1">
+            <div className="flex flex-nowrap overflow-x-auto no-scrollbar items-center gap-1.5 bg-muted/40 p-1 rounded-lg border text-xs max-w-full">
+              <span className="text-[0.7rem] font-bold text-muted-foreground px-2 flex items-center gap-1 shrink-0">
                 <SlidersHorizontal className="size-3" /> 정렬:
               </span>
               <Button
@@ -191,7 +191,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                 size="xs"
                 variant={sort === 'wealth' ? 'default' : 'ghost'}
                 onClick={() => setSort('wealth')}
-                className="h-7 text-xs font-medium"
+                className="h-7 text-xs font-medium shrink-0"
               >
                 🏆 부자 순위 순
               </Button>
@@ -200,7 +200,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                 size="xs"
                 variant={sort === 'cash' ? 'default' : 'ghost'}
                 onClick={() => setSort('cash')}
-                className="h-7 text-xs font-medium"
+                className="h-7 text-xs font-medium shrink-0"
               >
                 💵 현금 많은 순
               </Button>
@@ -209,7 +209,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                 size="xs"
                 variant={sort === 'stock' ? 'default' : 'ghost'}
                 onClick={() => setSort('stock')}
-                className="h-7 text-xs font-medium"
+                className="h-7 text-xs font-medium shrink-0"
               >
                 📈 주식 자산 순
               </Button>
@@ -218,7 +218,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                 size="xs"
                 variant={sort === 'lastSeen' ? 'default' : 'ghost'}
                 onClick={() => setSort('lastSeen')}
-                className="h-7 text-xs font-medium"
+                className="h-7 text-xs font-medium shrink-0"
               >
                 🕒 최근 접속 순
               </Button>
@@ -227,7 +227,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                 size="xs"
                 variant={sort === 'created' ? 'default' : 'ghost'}
                 onClick={() => setSort('created')}
-                className="h-7 text-xs font-medium"
+                className="h-7 text-xs font-medium shrink-0"
               >
                 📅 최근 가입 순
               </Button>

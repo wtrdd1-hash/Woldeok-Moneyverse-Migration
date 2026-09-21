@@ -355,7 +355,7 @@ export function WorkTaskTuningTable({
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
-          <Table>
+          <Table className="min-w-[720px]">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-40">작업명 / 코드</TableHead>

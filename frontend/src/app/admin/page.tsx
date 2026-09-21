@@ -182,7 +182,7 @@ export default async function AdminPage({
                   <Link
                     key={u.user_id}
                     href={`/admin/users/${encodeURIComponent(u.user_id)}`}
-                    className="group flex flex-col justify-between rounded-xl border border-border/80 bg-card p-3.5 hover:border-amber-500/40 hover:bg-muted/30 transition-all shadow-xs"
+                    className="group flex min-w-0 flex-col justify-between rounded-xl border border-border/80 bg-card p-3.5 hover:border-amber-500/40 hover:bg-muted/30 transition-all shadow-xs"
                   >
                     <div>
                       <div className="flex items-center justify-between gap-1">
@@ -241,7 +241,7 @@ export default async function AdminPage({
               {controls.featureSwitches.slice(0, 8).map((fs) => (
                 <div
                   key={fs.feature_key}
-                  className="flex items-center justify-between rounded-xl border border-border/40 bg-surface/40 p-2.5 text-xs"
+                  className="flex min-w-0 items-center justify-between rounded-xl border border-border/40 bg-surface/40 p-2 sm:p-2.5 text-xs"
                 >
                   <span className="font-medium text-foreground truncate mr-2">{fs.title || fs.feature_key}</span>
                   <Badge

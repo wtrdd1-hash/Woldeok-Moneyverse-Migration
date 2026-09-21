@@ -44,6 +44,7 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
   const todayRatio = `${ratioTenths / 10n}.${ratioTenths % 10n}`;
   const ratioAtLeastHalf = ratioTenths >= 500n;
 
+  // Only the 0..100 presentation ratio becomes a Number; WLD never does.
   const totalFlow = minted + burned;
   const percent = (value: bigint): number =>
     totalFlow > 0n ? Number((value * 100n + totalFlow / 2n) / totalFlow) : 50;
@@ -51,15 +52,15 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
   const burnedPercent = percent(burned);
 
   return (
-    <div className="w-full max-w-full min-w-0 overflow-hidden rounded-2xl sm:rounded-3xl border border-primary/30 bg-card p-4 sm:p-6 shadow-md mb-6 sm:mb-8">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5 sm:mb-6">
-        <div className="min-w-0">
-          <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20 inline-block">
+    <div className="rounded-3xl border border-primary/30 bg-card p-4 sm:p-6 shadow-lg mb-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-primary bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
             REALTIME FAUCET · SINK ENGINE
           </span>
-          <h3 className="text-base sm:text-lg font-bold text-foreground mt-1 tracking-tight">WLD 통화 유통 및 소각(Sink) 실시간 관제</h3>
+          <h3 className="text-lg font-bold text-foreground mt-1">WLD 통화 유통 및 소각(Sink) 실시간 관제</h3>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2">
           <span className="text-xs text-muted-foreground font-semibold">소각율(Sink Ratio):</span>
           <span
             className={cn(
@@ -76,81 +77,81 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
       </div>
 
       {/* 4 Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-5 sm:mb-6 min-w-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {/* Total Circulating */}
-        <div className="rounded-xl sm:rounded-2xl border border-border/50 bg-surface/50 p-3.5 sm:p-4 min-w-0">
+        <div className="rounded-2xl border border-border/50 bg-surface/50 p-4">
           <div className="flex items-center justify-between text-muted-foreground mb-1">
-            <span className="text-xs font-semibold truncate">현재 총 유통 통화량</span>
-            <Coins className="size-4 text-primary shrink-0" />
+            <span className="text-xs font-semibold">현재 총 유통 통화량</span>
+            <Coins className="size-4 text-primary" />
           </div>
-          <p className="text-lg sm:text-xl font-extrabold text-foreground truncate">
+          <p className="text-xl font-extrabold text-foreground">
             {groupDigits(totalCirculating)}{' '}
             <span className="text-xs text-primary font-bold">WLD</span>
           </p>
-          <p className="text-[11px] text-muted-foreground mt-1 truncate">
+          <p className="text-[11px] text-muted-foreground mt-1">
             누적 발행: {groupDigits(totalMinted)} · 소각: {groupDigits(totalBurned)}
           </p>
         </div>
 
         {/* Today Minted (Faucet) */}
-        <div className="rounded-xl sm:rounded-2xl border border-blue-500/20 bg-blue-500/5 p-3.5 sm:p-4 min-w-0">
+        <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-4">
           <div className="flex items-center justify-between text-blue-700 dark:text-blue-300 mb-1">
-            <span className="text-xs font-semibold truncate">오늘의 배출량 (Faucet)</span>
-            <Droplets className="size-4 text-blue-700 dark:text-blue-300 shrink-0" />
+            <span className="text-xs font-semibold">오늘의 배출량 (Faucet)</span>
+            <Droplets className="size-4 text-blue-700 dark:text-blue-300" />
           </div>
-          <p className="text-lg sm:text-xl font-extrabold text-blue-700 dark:text-blue-300 truncate">
+          <p className="text-xl font-extrabold text-blue-700 dark:text-blue-300">
             +{groupDigits(todayMinted)}{' '}
             <span className="text-xs font-bold">WLD</span>
           </p>
-          <p className="text-[11px] text-muted-foreground mt-1 truncate">퀘스트/활동 보상/이자 지급</p>
+          <p className="text-[11px] text-muted-foreground mt-1">퀘스트/활동 보상/이자 지급</p>
         </div>
 
         {/* Today Burned (Sink) */}
-        <div className="rounded-xl sm:rounded-2xl border border-red-500/20 bg-red-500/5 p-3.5 sm:p-4 min-w-0">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-4">
           <div className="flex items-center justify-between text-red-700 dark:text-red-300 mb-1">
-            <span className="text-xs font-semibold truncate">오늘의 소각량 (Sink)</span>
-            <Flame className="size-4 text-red-700 dark:text-red-300 shrink-0" />
+            <span className="text-xs font-semibold">오늘의 소각량 (Sink)</span>
+            <Flame className="size-4 text-red-700 dark:text-red-300" />
           </div>
-          <p className="text-lg sm:text-xl font-extrabold text-red-700 dark:text-red-300 truncate">
+          <p className="text-xl font-extrabold text-red-700 dark:text-red-300">
             -{groupDigits(todayBurned)}{' '}
             <span className="text-xs font-bold">WLD</span>
           </p>
-          <p className="text-[11px] text-muted-foreground mt-1 truncate">상점 2.0 구매/수수료 100% 소각</p>
+          <p className="text-[11px] text-muted-foreground mt-1">상점 2.0 구매/수수료 100% 소각</p>
         </div>
 
         {/* Today Net Change */}
-        <div className="rounded-xl sm:rounded-2xl border border-border/50 bg-surface/50 p-3.5 sm:p-4 min-w-0">
+        <div className="rounded-2xl border border-border/50 bg-surface/50 p-4">
           <div className="flex items-center justify-between text-muted-foreground mb-1">
-            <span className="text-xs font-semibold truncate">금일 순증감 (Net Flow)</span>
+            <span className="text-xs font-semibold">금일 순증감 (Net Flow)</span>
             {!todayNet.startsWith('-') ? (
-              <ArrowUpRight className="size-4 text-primary shrink-0" />
+              <ArrowUpRight className="size-4 text-primary" />
             ) : (
-              <ArrowDownRight className="size-4 text-emerald-700 dark:text-emerald-300 shrink-0" />
+              <ArrowDownRight className="size-4 text-emerald-700 dark:text-emerald-300" />
             )}
           </div>
           <p
             className={cn(
-              'text-lg sm:text-xl font-extrabold truncate',
+              'text-xl font-extrabold',
               !todayNet.startsWith('-') ? 'text-primary' : 'text-emerald-700 dark:text-emerald-300',
             )}
           >
             {todayNet.startsWith('-') ? groupDigits(todayNet) : `+${groupDigits(todayNet)}`}{' '}
             <span className="text-xs font-bold">WLD</span>
           </p>
-          <p className="text-[11px] text-muted-foreground mt-1 truncate">
+          <p className="text-[11px] text-muted-foreground mt-1">
             {!todayNet.startsWith('-') ? '통화 팽창 중' : '통화 수축 디플레이션 중'}
           </p>
         </div>
       </div>
 
       {/* Visual Balance Bar */}
-      <div className="rounded-xl sm:rounded-2xl bg-surface/60 border border-border/40 p-3.5 sm:p-4 mb-5 sm:mb-6 min-w-0">
-        <div className="flex items-center justify-between text-xs font-bold mb-2 min-w-0">
-          <span className="text-blue-700 dark:text-blue-300 flex items-center gap-1 truncate">
-            <Droplets className="size-3.5 shrink-0" /> 배출 {mintedPercent.toFixed(1)}%
+      <div className="rounded-2xl bg-surface/60 border border-border/40 p-4 mb-6">
+        <div className="flex items-center justify-between text-xs font-bold mb-2">
+          <span className="text-blue-700 dark:text-blue-300 flex items-center gap-1">
+            <Droplets className="size-3.5" /> 배출(Faucet) {mintedPercent.toFixed(1)}%
           </span>
-          <span className="text-red-700 dark:text-red-300 flex items-center gap-1 truncate">
-            <Flame className="size-3.5 shrink-0" /> 소각 {burnedPercent.toFixed(1)}%
+          <span className="text-red-700 dark:text-red-300 flex items-center gap-1">
+            <Flame className="size-3.5" /> 소각(Sink) {burnedPercent.toFixed(1)}%
           </span>
         </div>
         <div className="h-3 w-full rounded-full bg-muted overflow-hidden flex">
@@ -167,35 +168,35 @@ export function FaucetSinkGauge({ stats }: FaucetSinkGaugeProps) {
 
       {/* Recent 7 Days Mini Table */}
       {stats.daily.length > 0 && (
-        <div className="rounded-xl sm:rounded-2xl border border-border/40 overflow-hidden min-w-0">
-          <div className="px-3 sm:px-4 py-2 bg-surface/70 border-b border-border/40 text-[11px] font-bold text-muted-foreground">
+        <div className="rounded-2xl border border-border/40 overflow-hidden">
+          <div className="px-4 py-2 bg-surface/70 border-b border-border/40 text-[11px] font-bold text-muted-foreground">
             최근 일자별 배출(Faucet) vs 소각(Sink) 내역
           </div>
-          <div className="overflow-x-auto scrollbar-none">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[480px] text-left text-xs">
               <thead className="bg-surface/30 text-[10px] uppercase font-bold text-muted-foreground border-b border-border/20">
                 <tr>
-                  <th className="px-3 sm:px-4 py-2 whitespace-nowrap">일자 (KST)</th>
-                  <th className="px-3 sm:px-4 py-2 text-blue-700 dark:text-blue-300 whitespace-nowrap">배출량</th>
-                  <th className="px-3 sm:px-4 py-2 text-red-700 dark:text-red-300 whitespace-nowrap">소각량</th>
-                  <th className="px-3 sm:px-4 py-2 whitespace-nowrap">순증감</th>
-                  <th className="px-3 sm:px-4 py-2 text-right whitespace-nowrap">소각률</th>
+                  <th className="px-4 py-2">일자 (KST)</th>
+                  <th className="px-4 py-2 text-blue-700 dark:text-blue-300">배출량 (Faucet)</th>
+                  <th className="px-4 py-2 text-red-700 dark:text-red-300">소각량 (Sink)</th>
+                  <th className="px-4 py-2">순증감 (Net)</th>
+                  <th className="px-4 py-2 text-right">소각률</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/20 font-medium">
                 {stats.daily.slice(0, 7).map((d) => (
                   <tr key={d.stat_date} className="hover:bg-surface/40">
-                    <td className="px-3 sm:px-4 py-2 text-muted-foreground font-mono whitespace-nowrap">{d.stat_date}</td>
-                    <td className="px-3 sm:px-4 py-2 text-blue-700 dark:text-blue-300 font-bold whitespace-nowrap">
+                    <td className="px-4 py-2 text-muted-foreground font-mono">{d.stat_date}</td>
+                    <td className="px-4 py-2 text-blue-700 dark:text-blue-300 font-bold">
                       +{groupDigits(d.faucet_amount)}
                     </td>
-                    <td className="px-3 sm:px-4 py-2 text-red-700 dark:text-red-300 font-bold whitespace-nowrap">
+                    <td className="px-4 py-2 text-red-700 dark:text-red-300 font-bold">
                       -{groupDigits(d.sink_amount)}
                     </td>
-                    <td className="px-3 sm:px-4 py-2 font-bold text-foreground whitespace-nowrap">
+                    <td className="px-4 py-2 font-bold text-foreground">
                       {d.net_change.startsWith('-') ? groupDigits(d.net_change) : `+${groupDigits(d.net_change)}`}
                     </td>
-                    <td className="px-3 sm:px-4 py-2 text-right font-extrabold text-primary whitespace-nowrap">
+                    <td className="px-4 py-2 text-right font-extrabold text-primary">
                       {d.sink_ratio_percent}%
                     </td>
                   </tr>
