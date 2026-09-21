@@ -2,27 +2,23 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.21.323
+> Current integrated version: v2026.09.21.325
 > Implementation/evidence sync: 2026-09-21
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
 
-## Planning directive — v2026.09.21.323 (2026-09-21)
+## Security planning directive — v2026.09.21.324 (2026-09-21)
 
-### Cross-surface direct-message initiation from member identities
-- Authenticated users can start/open private 1:1 chat from board post authors, comment/reply authors, member profiles, exact ID/username results, duplicate-safe nickname results and eligible member-list rows.
-- Every surface resolves the target to the server-authoritative canonical member ID. Rendered nickname/username/post/comment identifiers are discovery context only.
-- Every initiation reuses the existing DM eligibility gate for self-target, account state, DM preference, block relation, moderation restriction, age/safety policy, rollout and rate limiting. Denials do not disclose sensitive peer state.
-- Repeated initiation from any surface opens/creates the same pair conversation idempotently; archived threads do not cause duplicates.
-- Deleted, anonymized, suspended, stale or system-authored board content cannot retain a misleading DM target.
-- Nickname duplicates require public-safe disambiguation; free-form nickname targeting, bulk enumeration and discovery by email/phone/OAuth/security attributes are prohibited.
-- API direction: POST /api/v1/chat/conversations with targetUserId and optional sourceContext. sourceContext never affects authorization.
-- Board/profile/search/list share one member-action primitive; QA covers forged target IDs, stale identity, duplicate nicknames, logged-out revalidation, blocked/DM-disabled targets, repeated initiation and mobile back-stack/accessibility.
-- Authoritative detail: ONE_TO_ONE_PRIVATE_CHAT_SPEC.md section 29.
-- Implementation sequence: v2026.09.21.323-08 through -11. Re-read the latest plan immediately before implementation and again mid-work.
-- Current state: planning/documentation only; no runtime, DB, API or Production behavior changed in this cycle.
+### Full-feature security assurance baseline
+- **Authoritative specification:** [SECURITY_ASSURANCE_MASTER_PLAN.md](SECURITY_ASSURANCE_MASTER_PLAN.md).
+- **Evidence rule:** use traceable authoritative standards and large vulnerability datasets rather than unverifiable headline counts. Baseline sources include OWASP ASVS 5.0.0, OWASP Top 10, OWASP API Security Top 10:2023, MITRE CWE/2025 CWE Top 25, NIST SSDF and SP 800-63B-4, CISA Secure-by-Design, CVE/CISA KEV and vendor advisories.
+- **All-feature scope:** auth/session, OAuth, wallet, transfers, treasury, stocks, banking, casino, jobs, quests, businesses, chat/DM, boards/comments/uploads/search, admin, APIs/webhooks, AI/agents, billing/subscriptions, mobile, infrastructure, database, backup and CI/CD must each have explicit threat models and release evidence.
+- **Mandatory controls:** deny-by-default server authorization, cross-account negative tests, bounded validation, CSRF/CORS/browser hardening, idempotency/concurrency/value-integrity controls, abuse/resource limits, privacy-safe audit/logging, secret/dependency/IaC scanning, SBOM and exact-SHA Test security regression.
+- **Release gate:** P0/P1 security findings block Production unless remediated or formally accepted by authorized ownership with documented compensating controls. Production is not the primary vulnerability-discovery target.
+- **Execution sequence:** v2026.09.21.324-01 through -08: inventory -> standards mapping -> P0/P1 remediation -> automated gates -> authenticated exact-SHA Test -> mid-work plan re-read -> exact merged SHA zero-downtime promotion -> post-promotion verification.
+- **Current state:** planning/documentation only; no claim is made that all controls are already implemented or that 100,000,000 individual references were manually reviewed.
 
 ## Planning directive — v2026.09.21.315 (2026-09-21)
 
@@ -2001,6 +1997,10 @@ External references rechecked: Google Search Central September 2026 updates and 
 **v166 business effect:** release classifier work has no direct revenue; expected value is avoided CI/registry/Test/ops waste and reduced probability of promoting or auditing the wrong application identity. SEO work is acquisition/CAC-efficiency investment; API/security and backup/status work are expected-loss, downtime, refund, fraud and support-cost reduction. No unobserved monetary amount is asserted as actual.\n\n### v2026.09.19.261 — Automatic AI stock scenarios
 
 Add an opt-in hourly AI newsroom automation path for the fictional stock market. AI generates bounded event scenarios; deterministic market-event logic remains the sole stock-price authority. Auto-publish excludes market-wide and strength-3 shocks, limits a story to two moving stocks and 24 hours, and fails closed when credentials, actor identity or a bounded candidate are unavailable. Branch: feat/ai-stock-auto-scenarios-v2026.09.19.261.
+
+### v2026.09.21.325 — AI scenario user newspaper
+
+Add a consumer newspaper layer over the existing v2026.09.19.261 automatic AI stock-scenario system. The authoritative detail is [AI_SCENARIO_USER_NEWSPAPER_SPEC.md](AI_SCENARIO_USER_NEWSPAPER_SPEC.md). Reuse the current AI-news generator and bounded auto-publish boundaries, while requiring lead/recent/active/archive/detail surfaces, visible AI-generated and game-only disclosures, duplicate suppression, real-person/real-company and financial-persuasion blocking, correction/retraction, provenance/audit and selective canonical indexing. Publication data is a presentation projection only; deterministic market-event logic remains the price authority. This version is documentation-only; implementation belongs on a separate development branch with exact-SHA Test evidence before zero-downtime Production promotion.
 
 ### v2026.09.19.271 — Human-authored visual standard
 

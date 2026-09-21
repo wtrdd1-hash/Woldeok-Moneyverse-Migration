@@ -7,6 +7,8 @@ This directory is the long-form documentation for Woldeok Moneyverse. The root R
 > Documentation language order: **1. English canonical source / 2. Korean maintained translation.** When a paired Korean document exists, it is linked beside the English source.
 
 ## Planning
+- [Security assurance master plan](planning/SECURITY_ASSURANCE_MASTER_PLAN.md) / [Korean](planning/SECURITY_ASSURANCE_MASTER_PLAN.ko.md)
+- [Repository-Wide Security Master Plan](planning/SECURITY_MASTER_PLAN.md) / [한국어](planning/SECURITY_MASTER_PLAN.ko.md)
 - [Living Project Plan](planning/PROJECT_PLAN.md) / [한국어](planning/PROJECT_PLAN.ko.md)
 - [Administrator Treasury Management Specification](planning/ADMIN_TREASURY_MANAGEMENT_SPEC.md) / [한국어](planning/ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md)
 - [Product Growth & Retention Plan](planning/PRODUCT_GROWTH_PLAN.md) / [한국어](planning/PRODUCT_GROWTH_PLAN.ko.md)
@@ -81,6 +83,9 @@ The project plan is a living specification. Intentional, validated implementatio
 - [Stock read grant finding](findings/stock-reads-lack-grants.md) — source document is already Korean
 
 ## Release history and work logs
+
+- [Security Master Plan v2026.09.21.324 changelog](changelog/2026-09-21-security-master-plan-v2026.09.21.324.md) / [한국어](changelog/2026-09-21-security-master-plan-v2026.09.21.324.ko.md)
+- [Security Master Plan v2026.09.21.324 worklog](worklog/2026-09-21-security-master-plan-v2026.09.21.324.md) / [한국어](worklog/2026-09-21-security-master-plan-v2026.09.21.324.ko.md)
 
 - [Clubhouse UX & Operations v2026.09.13.18 changelog](changelog/2026-09-13-clubhouse-ux-operations-v2026.09.13.18.md) / [한국어](changelog/2026-09-13-clubhouse-ux-operations-v2026.09.13.18.ko.md)
 - [Product planning v2026.09.13.18 worklog](worklog/2026-09-13-product-planning-v2026.09.13.18.md) / [한국어](worklog/2026-09-13-product-planning-v2026.09.13.18.ko.md)
