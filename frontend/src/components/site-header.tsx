@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronDown, LogIn, LogOut, Menu } from 'lucide-react';
+import { ChevronDown, LogIn, LogOut, Menu, ShieldCheck, Sliders, User, Wallet } from 'lucide-react';
 import { logout } from '@/app/actions';
 import { Brand } from '@/components/brand';
 import { ThemeMenu, ThemePanel } from '@/components/theme-controls';
@@ -51,16 +51,6 @@ import { isAdministrator } from '@/lib/viewer-state';
  * control — the original used a `<details>` for that, and this uses the
  * registry's Sheet, which traps focus and closes on Escape without this file
  * re-implementing either.
- *
- * It lives in the root layout, so moving between pages never remounts it.
- * That, and the prefetch `<Link>` does on its own, is most of what makes
- * navigation feel immediate.
- *
- * The viewer arrives after hydration rather than during render: asking here
- * would read a cookie in the root layout and opt every page in the
- * application out of static generation, including the ones that exist to be
- * crawled. Until the answer lands, the session control is a placeholder of
- * its final size, so nothing on the page moves when it does.
  */
 export function SiteHeader() {
   const pathname = usePathname();
@@ -69,9 +59,8 @@ export function SiteHeader() {
 
   const isAdmin = Boolean(viewer && viewer.consentCurrent && viewer.adminRoles.length > 0);
 
-  // The wide bar, grouped. Thirteen flat links wrapped onto a second row and
-  // pushed the wordmark out of line. When signed in, the member version of
-  // '경제' replaces the public version to avoid duplicate menus.
+  // The wide bar, grouped. When signed in, the member version of '경제' replaces
+  // the public version to avoid duplicate menus.
   const publicItems = viewer?.signedIn
     ? HEADER_PUBLIC.filter((item) => !isGroup(item) || item.label !== '경제')
     : HEADER_PUBLIC;
@@ -79,8 +68,6 @@ export function SiteHeader() {
   if (viewer?.signedIn) items.push(...HEADER_MEMBER);
   if (isAdmin) items.push(...HEADER_ADMIN);
 
-  // The sheet stays flat: a drawer has the room, and a menu inside a menu is
-  // worse than a long list.
   const mobileAdmin = mobileAdminEntries(viewer);
 
   return (
@@ -88,7 +75,10 @@ export function SiteHeader() {
       <div className="mx-auto flex h-[60px] min-[400px]:h-[64px] sm:h-[68px] lg:h-[76px] w-full max-w-[1440px] items-center justify-between gap-1.5 px-2.5 min-[400px]:gap-2 min-[400px]:px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:gap-6 lg:px-8">
         <Brand />
 
-        <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="ml-auto hidden items-center gap-4 xl:gap-5 lg:flex">
+        <nav
+          aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'}
+          className="ml-auto hidden items-center gap-4 xl:gap-5 lg:flex"
+        >
           {items.map((item) =>
             isGroup(item) ? (
               <HeaderGroup key={item.label} group={item} pathname={pathname} locale={locale} />
@@ -100,7 +90,7 @@ export function SiteHeader() {
 
         <div className={cn('flex min-w-0 items-center gap-1 min-[400px]:gap-1.5 sm:gap-2 lg:gap-3 shrink-0', 'ml-auto lg:ml-4')}>
           <div className="hidden min-[420px]:block">
-            <ServerClockPill className="hidden md:inline-flex lg:hidden 2xl:inline-flex" />
+            <ServerClockPill className="hidden 2xl:inline-flex" />
             <LanguageSwitcher />
           </div>
           <div className="hidden sm:block">
@@ -190,15 +180,10 @@ function HeaderLink({
   return (
     <Link
       href={entry.href}
-      // The console state changes outside this tab during OAuth. Do not let a
-      // speculative payload from before that redirect win over the server's
-      // current session decision when the operator returns.
       prefetch={!entry.href.startsWith('/admin')}
       aria-current={current ? 'page' : undefined}
-      // The underline grows from nothing on hover and stays for the current
-      // page — the original's one piece of navigation motion, kept.
       className={cn(
-        'relative min-h-10 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold transition-colors',
+        'relative min-h-10 whitespace-nowrap rounded-xl px-2.5 xl:px-3 py-2 text-xs xl:text-sm font-bold transition-colors',
         current
           ? 'bg-primary/12 text-primary'
           : 'text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -209,12 +194,6 @@ function HeaderLink({
   );
 }
 
-/**
- * A group of links behind one label.
- *
- * The label underlines while the reader is anywhere inside the group, so the
- * bar still answers "where am I" without the destination being visible.
- */
 function HeaderGroup({
   group,
   pathname,
@@ -229,7 +208,7 @@ function HeaderGroup({
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          'relative flex min-h-10 items-center gap-1 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold transition-colors outline-none',
+          'relative flex min-h-10 items-center gap-1 whitespace-nowrap rounded-xl px-2.5 xl:px-3 py-2 text-xs xl:text-sm font-bold transition-colors outline-none',
           current
             ? 'bg-primary/12 text-primary'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -281,7 +260,6 @@ function Group({
             href={entry.href}
             prefetch={!entry.href.startsWith('/admin')}
             aria-current={current ? 'page' : undefined}
-            // 44px is the minimum comfortable tap target.
             className={cn(
               'flex min-h-11 items-center rounded-[8px] px-3 text-sm font-bold',
               current ? 'bg-secondary text-secondary-foreground' : 'hover:bg-paper-dark',
@@ -307,30 +285,85 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
     );
   }
 
+  const isAdmin = Boolean(viewer.consentCurrent && viewer.adminRoles.length > 0);
+
   return (
     <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
       <Button
         asChild
-        variant="ghost"
-        className="hidden h-11 text-sm font-bold text-muted-foreground sm:inline-flex"
+        size="sm"
+        className="h-10 sm:h-11 rounded-xl px-3 sm:px-4 text-xs sm:text-sm font-extrabold shadow-plate shrink-0"
       >
-        <Link href="/account">{locale === 'en' ? 'My account' : '내 계정'}</Link>
+        <Link href="/wallet" className="flex items-center gap-1.5">
+          <Wallet className="size-4" />
+          <span>{locale === 'en' ? 'Wallet' : '내 지갑'}</span>
+        </Link>
       </Button>
-      <Button asChild className="h-11 rounded-[10px] sm:rounded-[12px] px-3 sm:px-5 text-xs sm:text-sm font-extrabold shadow-plate shrink-0">
-        <Link href="/wallet">{locale === 'en' ? 'My wallet' : '내 지갑'}</Link>
-      </Button>
-      {/* Hidden on a phone, where it is the last item in the menu instead. */}
-      <form action={logout} className="hidden sm:block">
-        <Button
-          type="submit"
-          variant="ghost"
-          size="icon"
-          className="size-11 text-muted-foreground"
-          aria-label={locale === 'en' ? 'Sign out' : '로그아웃'}
-        >
-          <LogOut />
-        </Button>
-      </form>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            className="flex h-10 sm:h-11 items-center gap-1.5 rounded-xl px-2.5 sm:px-3 text-xs sm:text-sm font-bold text-foreground hover:bg-secondary shrink-0 outline-none"
+            aria-label={locale === 'en' ? 'Account menu' : '내 계정 메뉴'}
+          >
+            <span className="flex size-7 items-center justify-center rounded-lg bg-primary/15 text-xs font-black text-primary">
+              <User className="size-4" />
+            </span>
+            <span className="hidden sm:inline-block text-xs font-bold text-muted-foreground">
+              {locale === 'en' ? 'Account' : '내 계정'}
+            </span>
+            <ChevronDown className="size-3 text-muted-foreground" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56 p-1.5">
+          <div className="px-2.5 py-2">
+            <p className="text-xs font-bold text-muted-foreground">{locale === 'en' ? 'Session status' : '세션 상태'}</p>
+            <p className="truncate text-sm font-black text-foreground">
+              {isAdmin
+                ? (locale === 'en' ? 'Administrator' : '운영 관리자')
+                : (locale === 'en' ? 'Active Member' : '인증된 회원')}
+            </p>
+          </div>
+          <Separator className="my-1" />
+          <DropdownMenuItem asChild>
+            <Link href="/account" className="flex min-h-10 items-center gap-2 font-bold cursor-pointer">
+              <User className="size-4 text-muted-foreground" />
+              <span>{locale === 'en' ? 'My account' : '내 계정'}</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/wallet" className="flex min-h-10 items-center gap-2 font-bold cursor-pointer">
+              <Wallet className="size-4 text-muted-foreground" />
+              <span>{locale === 'en' ? 'My wallet' : '내 지갑'}</span>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/account/security" className="flex min-h-10 items-center gap-2 font-bold cursor-pointer">
+              <ShieldCheck className="size-4 text-muted-foreground" />
+              <span>{locale === 'en' ? 'Account security' : '계정 보안'}</span>
+            </Link>
+          </DropdownMenuItem>
+          {isAdmin && (
+            <DropdownMenuItem asChild>
+              <Link href="/admin" className="flex min-h-10 items-center gap-2 font-bold text-primary cursor-pointer">
+                <Sliders className="size-4" />
+                <span>{locale === 'en' ? 'Admin console' : '운영 콘솔'}</span>
+              </Link>
+            </DropdownMenuItem>
+          )}
+          <Separator className="my-1" />
+          <form action={logout} className="w-full">
+            <button
+              type="submit"
+              className="flex min-h-10 w-full items-center gap-2 rounded-lg px-2 text-sm font-bold text-destructive hover:bg-destructive/10 transition-colors text-left"
+            >
+              <LogOut className="size-4" />
+              <span>{locale === 'en' ? 'Sign out' : '로그아웃'}</span>
+            </button>
+          </form>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }

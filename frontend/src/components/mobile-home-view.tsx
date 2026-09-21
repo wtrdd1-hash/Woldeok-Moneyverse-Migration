@@ -9,10 +9,10 @@ import {
   TrendingUp,
   Wallet,
 } from 'lucide-react';
-import { WalletGlance } from '@/components/wallet-glance';
-import { LobbyCount } from '@/components/lobby-count';
 import { HomeAdvertisement } from '@/components/home-advertisement';
+import { LobbyCount } from '@/components/lobby-count';
 import { TranslatedText as T } from '@/components/translated-text';
+import { WalletGlance } from '@/components/wallet-glance';
 import { formatDay } from '@/lib/money';
 
 interface Announcement {
@@ -63,11 +63,17 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
               <WalletGlance />
             </div>
           </div>
-          <div className="flex gap-5 text-sm font-semibold">
-            <Link href="/work" className="inline-flex min-h-11 items-center border-b border-primary/70 text-foreground">
+          <div className="flex gap-3 sm:gap-5 text-sm font-semibold">
+            <Link
+              href="/work"
+              className="inline-flex min-h-11 items-center rounded-xl bg-primary/10 hover:bg-primary/20 px-4 py-2 font-bold text-primary transition-colors"
+            >
               <T korean="오늘 할 일 보기" english="Start today" />
             </Link>
-            <Link href="/wallet/activity" className="inline-flex min-h-11 items-center border-b border-border text-muted-foreground hover:text-foreground">
+            <Link
+              href="/wallet/activity"
+              className="inline-flex min-h-11 items-center rounded-xl border border-border/80 hover:bg-secondary px-4 py-2 font-bold text-muted-foreground hover:text-foreground transition-colors"
+            >
               <T korean="거래 기록" english="Activity" />
             </Link>
           </div>
@@ -91,39 +97,49 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
               <T korean="오늘의 동선" english="Today’s route" />
             </h2>
           </div>
-          <span className="font-mono text-[10px] text-muted-foreground">04</span>
+          <span className="rounded-full bg-secondary/80 px-2.5 py-0.5 font-mono text-xs font-semibold text-muted-foreground">
+            <T korean="4개 동선" english="4 steps" />
+          </span>
         </div>
 
-        <nav className="border-t border-border/80" aria-label="Quick routes">
+        <nav aria-label="Quick routes" className="grid grid-cols-1 lg:grid-cols-2 gap-3 pt-1">
           {PRIMARY_LINKS.map((item, index) => {
             const Icon = item.icon;
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className="group grid min-h-[68px] grid-cols-[2.25rem_minmax(0,1fr)_auto] items-center gap-3 border-b border-border/70"
+                className="group flex min-h-[72px] items-center justify-between gap-3.5 rounded-2xl border border-border/80 bg-card/60 p-4 transition-all hover:border-primary/40 hover:bg-card hover:shadow-sm"
               >
-                <span className="font-mono text-[11px] text-muted-foreground">{String(index + 1).padStart(2, '0')}</span>
-                <span className="min-w-0">
-                  <span className="flex items-center gap-2 text-[15px] font-semibold text-foreground">
-                    <Icon className="size-4 text-muted-foreground" />
-                    <T korean={item.ko} english={item.en} />
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 font-mono text-xs font-black text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                    {String(index + 1).padStart(2, '0')}
                   </span>
-                  <span className="mt-0.5 block text-xs text-muted-foreground">
-                    <T korean={item.hintKo} english={item.hintEn} />
-                  </span>
-                </span>
-                <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-foreground" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 text-[15px] font-bold text-foreground">
+                      <Icon className="size-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <T korean={item.ko} english={item.en} />
+                    </div>
+                    <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                      <T korean={item.hintKo} english={item.hintEn} />
+                    </span>
+                  </div>
+                </div>
+                <ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-foreground" />
               </Link>
             );
           })}
         </nav>
 
-        <div className="flex flex-wrap gap-x-5 gap-y-2 pt-1">
+        <div className="flex flex-wrap gap-2 pt-2">
           {SECONDARY_LINKS.map((item) => {
             const Icon = item.icon;
             return (
-              <Link key={item.href} href={item.href} className="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+              <Link
+                key={item.href}
+                href={item.href}
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-secondary/60 hover:bg-secondary px-4 py-2 text-xs font-bold text-muted-foreground hover:text-foreground transition-colors"
+              >
                 <Icon className="size-3.5" />
                 <T korean={item.ko} english={item.en} />
               </Link>
