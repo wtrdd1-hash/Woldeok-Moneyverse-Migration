@@ -9,6 +9,17 @@
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
 
+## 보안 기획 지시 — v2026.09.21.324 (2026-09-21)
+
+### 전 기능 보안 보증 기준
+- **권위 상세 문서:** [SECURITY_ASSURANCE_MASTER_PLAN.ko.md](SECURITY_ASSURANCE_MASTER_PLAN.ko.md).
+- **근거 원칙:** 검증 불가능한 단순 레퍼런스 개수 대신 OWASP ASVS 5.0.0, OWASP Top 10, OWASP API Security Top 10:2023, MITRE CWE/2025 CWE Top 25, NIST SSDF·SP 800-63B-4, CISA Secure-by-Design, CVE/CISA KEV, 벤더 공지를 추적 가능한 근거로 사용한다.
+- **전체 기능 범위:** 인증/세션, OAuth, 지갑·송금·국고, 주식, 은행, 카지노, 직업·퀘스트·사업, 채팅/쪽지, 게시판·댓글·업로드·검색, 관리자, API/webhook, AI/agent, 결제/구독, 모바일, 인프라·DB·백업·CI/CD에 각각 위협모델과 릴리스 증거를 둔다.
+- **필수 통제:** deny-by-default 서버 권한, cross-account negative test, bounded validation, CSRF/CORS/browser hardening, idempotency/concurrency/value integrity, abuse/resource limit, privacy-safe audit/logging, secret/dependency/IaC scan, SBOM, exact-SHA Test 보안 회귀.
+- **승격 차단:** P0/P1 보안 이슈는 수정 또는 권한소유자의 공식 위험수용+보완통제 없이는 Production 승격을 막는다. Production을 주요 취약점 탐색 대상으로 사용하지 않는다.
+- **실행 순서:** v2026.09.21.324-01~-08: 전체 인벤토리 → 표준 매핑 → P0/P1 보완 → 자동 gate → 인증 exact-SHA Test → 작업 중간 기획 재확인 → exact merged SHA 무중단 승격 → 사후 점검.
+- **현재 상태:** 기획/문서 단계이며 모든 통제가 이미 구현됐거나 1억 개 개별 레퍼런스를 수동 검토했다고 주장하지 않는다.
+
 ## 기획 지시 — v2026.09.21.315 (2026-09-21)
 
 ### 주식 거래정지 매수원가 자동정산 + 안전한 종목 삭제

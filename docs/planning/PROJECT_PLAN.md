@@ -9,6 +9,17 @@
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
 
+## Security planning directive — v2026.09.21.324 (2026-09-21)
+
+### Full-feature security assurance baseline
+- **Authoritative specification:** [SECURITY_ASSURANCE_MASTER_PLAN.md](SECURITY_ASSURANCE_MASTER_PLAN.md).
+- **Evidence rule:** use traceable authoritative standards and large vulnerability datasets rather than unverifiable headline counts. Baseline sources include OWASP ASVS 5.0.0, OWASP Top 10, OWASP API Security Top 10:2023, MITRE CWE/2025 CWE Top 25, NIST SSDF and SP 800-63B-4, CISA Secure-by-Design, CVE/CISA KEV and vendor advisories.
+- **All-feature scope:** auth/session, OAuth, wallet, transfers, treasury, stocks, banking, casino, jobs, quests, businesses, chat/DM, boards/comments/uploads/search, admin, APIs/webhooks, AI/agents, billing/subscriptions, mobile, infrastructure, database, backup and CI/CD must each have explicit threat models and release evidence.
+- **Mandatory controls:** deny-by-default server authorization, cross-account negative tests, bounded validation, CSRF/CORS/browser hardening, idempotency/concurrency/value-integrity controls, abuse/resource limits, privacy-safe audit/logging, secret/dependency/IaC scanning, SBOM and exact-SHA Test security regression.
+- **Release gate:** P0/P1 security findings block Production unless remediated or formally accepted by authorized ownership with documented compensating controls. Production is not the primary vulnerability-discovery target.
+- **Execution sequence:** v2026.09.21.324-01 through -08: inventory -> standards mapping -> P0/P1 remediation -> automated gates -> authenticated exact-SHA Test -> mid-work plan re-read -> exact merged SHA zero-downtime promotion -> post-promotion verification.
+- **Current state:** planning/documentation only; no claim is made that all controls are already implemented or that 100,000,000 individual references were manually reviewed.
+
 ## Planning directive — v2026.09.21.315 (2026-09-21)
 
 ### Stock halt cost-basis auto-settlement and safe deletion

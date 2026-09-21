@@ -5,6 +5,7 @@
 > 기본 순서: **1. 영어 원문 / 2. 한국어 번역본**. 한국어 사용자는 이 페이지에서 한국어 문서로 바로 이동할 수 있습니다. 영어 파일 `NAME.md`의 한국어 파일은 기본적으로 `NAME.ko.md`입니다.
 
 ## 기획
+- [보안 보증 마스터 기획서](planning/SECURITY_ASSURANCE_MASTER_PLAN.ko.md) / [English](planning/SECURITY_ASSURANCE_MASTER_PLAN.md)
 - [전 저장소 보안 마스터 기획](planning/SECURITY_MASTER_PLAN.ko.md) / [English](planning/SECURITY_MASTER_PLAN.md)
 - [상시 갱신 프로젝트 계획](planning/PROJECT_PLAN.ko.md)
 - [관리자 국고 관리 상세 기획서](planning/ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md) / [English](planning/ADMIN_TREASURY_MANAGEMENT_SPEC.md)
