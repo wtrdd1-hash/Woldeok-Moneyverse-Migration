@@ -1,3 +1,8 @@
+## v2026.09.21.323 — Cross-surface direct-message entry-point planning
+- Extended urgent 1:1 private-chat planning so users can start/open a canonical conversation from board authors, comment authors, profiles, ID/username lookup, duplicate-safe nickname search and eligible member lists.
+- Defined canonical member-ID authority, privacy-safe eligibility, stale/deleted/anonymized author handling, anti-enumeration search rules, shared UI primitive, API context rules and cross-surface QA.
+- Documentation-only; no runtime, database, API deployment or Production behavior changed.
+
 ## v2026.09.21.322 — Migration authority fail-closed gate
 - Production migration execution now rejects database-applied migration filenames absent from the exact repository checkout.
 - This prevents database-ahead/untracked schema drift from silently passing deploy migration gates while preserving checksum immutability.
