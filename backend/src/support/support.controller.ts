@@ -9,6 +9,7 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -76,14 +77,14 @@ export class AdminSupportController {
     return { messages: await this.repo().adminMessages(requireUserId(req), id) };
   }
 
-  @Post('threads/:id/messages') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Reply to a member support conversation' })
+  @Post('threads/:id/messages') @UseGuards(CsrfGuard, ReauthGuard) @ApiOperation({ summary: 'Reply to a member support conversation' })
   async reply(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string, @Body() body: NewMessageDto) {
     const message = await this.repo().adminReply(requireUserId(req), body.idempotencyKey, id, body.body);
     if (!message) throw new ServiceUnavailableException('support reply was not created');
     return { message };
   }
 
-  @Put('threads/:id/status') @UseGuards(CsrfGuard) @ApiOperation({ summary: 'Change support conversation status' })
+  @Put('threads/:id/status') @UseGuards(CsrfGuard, ReauthGuard) @ApiOperation({ summary: 'Change support conversation status' })
   async status(@Req() req: RequestWithSession, @Param('id', ParseUUIDPipe) id: string, @Body() body: StatusDto) {
     const changed = await this.repo().adminSetStatus(requireUserId(req), id, body.status);
     if (!changed) throw new NotFoundException('support thread not found');
