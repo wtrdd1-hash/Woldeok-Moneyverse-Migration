@@ -82,7 +82,7 @@ jobs:
 
       - name: Upload standalone immutable CI release input
         if: steps.source.outputs.caller == '' && always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ci-release-input
           path: ci-release-input.json

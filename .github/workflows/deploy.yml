@@ -273,7 +273,7 @@ jobs:
             > test-attestation.json
 
       - name: Upload isolated-Test attestation
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-attestation
           path: test-attestation.json
@@ -403,7 +403,7 @@ jobs:
             > production-release-manifest.json
 
       - name: Upload immutable production release manifest
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: production-release-manifest
           path: production-release-manifest.json

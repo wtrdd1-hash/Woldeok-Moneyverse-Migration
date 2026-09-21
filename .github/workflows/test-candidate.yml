@@ -89,7 +89,7 @@ jobs:
 
       - name: Upload immutable release input
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: release-input
           path: release-input.json
@@ -261,7 +261,7 @@ jobs:
             > candidate-manifest.json
 
       - name: Upload immutable candidate manifest
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: candidate-manifest
           path: candidate-manifest.json
