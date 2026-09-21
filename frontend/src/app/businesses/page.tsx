@@ -192,7 +192,7 @@ export default async function BusinessesPage() {
       {licenseItems.length > 0 && (
         <section aria-labelledby="licenses-title" className="grid gap-4">
           <h2 id="licenses-title" className="text-xl font-bold flex items-center gap-2">
-            <span>📜</span> 인벤토리 보유 사업 라이선스 (즉시 설립 가능)
+            인벤토리 보유 사업 라이선스 (즉시 설립 가능)
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {licenseItems.map((lic) => {
@@ -224,7 +224,7 @@ export default async function BusinessesPage() {
       <section aria-labelledby="mine-title" className="grid gap-4">
         <div>
           <h2 id="mine-title" className="text-xl font-bold flex items-center gap-2">
-            <span>🏢</span> 내 사업체 ({businesses.length}개 운영 중)
+            내 사업체 ({businesses.length}개 운영 중)
           </h2>
           <p className="text-sm text-muted-foreground">
             매일 한 번 일일 정산 버튼을 눌러 매출 WLD를 수령하고 운영비를 소각 정산하세요. (매일 00:00 KST 갱신)
@@ -322,7 +322,7 @@ export default async function BusinessesPage() {
       <section aria-labelledby="catalog-title" className="grid gap-4">
         <div>
           <h2 id="catalog-title" className="text-xl font-bold flex items-center gap-2">
-            <span>🛒</span> 사업체 인수 카탈로그
+            사업체 인수 카탈로그
           </h2>
           {standing ? (
             <p className="text-xs text-muted-foreground mt-1">{equitySummary(standing)}</p>

@@ -79,7 +79,7 @@ export function LuckySlotsGame({
     <Card className="border-amber-500/20 bg-gradient-to-b from-card to-amber-500/5">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl text-amber-500">
-          <span>🎰</span> 럭키 777 슬롯
+          럭키 777 슬롯
         </CardTitle>
         <CardDescription>
           서버의 주사위 숫자 규칙을 슬롯 테마로 보여줍니다. 서버 결과 6만 777이며 적중 확률{' '}
@@ -129,7 +129,7 @@ export function LuckySlotsGame({
           </div>
 
           <Button type="submit" disabled={pending || exhausted} className="h-12 w-full text-base font-bold">
-            {pending ? '서버에서 결과 확인 중…' : exhausted ? '현재 한도로 플레이 불가' : '🎰 777에 베팅하기'}
+            {pending ? '서버에서 결과 확인 중…' : exhausted ? '현재 한도로 플레이 불가' : '777에 베팅하기'}
           </Button>
 
           {resultText && (

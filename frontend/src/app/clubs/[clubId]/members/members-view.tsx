@@ -118,7 +118,7 @@ export function MembersView({
                       href={`/chat?peer=${member.user_id}`}
                       className="inline-flex items-center gap-1.5 bg-secondary text-secondary-foreground hover:bg-secondary/80 font-medium px-3 py-1.5 rounded-lg text-xs transition-colors shadow-sm"
                     >
-                      <span>✉️</span>
+                      
                       <span>1:1 쪽지</span>
                     </Link>
                   )}
@@ -137,7 +137,7 @@ function RoleBadge({ role }: { readonly role: string }) {
     case 'owner':
       return (
         <span className="text-[10px] bg-amber-500/20 text-amber-500 border border-amber-500/30 px-2 py-0.5 rounded-full font-bold">
-          👑 클럽장
+          클럽장
         </span>
       );
     case 'steward':
@@ -149,7 +149,7 @@ function RoleBadge({ role }: { readonly role: string }) {
     case 'moderator':
       return (
         <span className="text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
-          🛡️ 중재자
+          중재자
         </span>
       );
     default:

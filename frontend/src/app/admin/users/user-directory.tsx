@@ -220,7 +220,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                 onClick={() => setSort('lastSeen')}
                 className="h-7 text-xs font-medium shrink-0"
               >
-                🕒 최근 접속 순
+                최근 접속 순
               </Button>
               <Button
                 type="button"
@@ -229,7 +229,7 @@ export function UserDirectory({ users }: { readonly users: readonly AdminUser[] 
                 onClick={() => setSort('created')}
                 className="h-7 text-xs font-medium shrink-0"
               >
-                📅 최근 가입 순
+                최근 가입 순
               </Button>
             </div>
           </div>
@@ -444,21 +444,21 @@ function RankBadge({ rank }: { readonly rank: number }) {
   if (rank === 1) {
     return (
       <span className="inline-flex items-center justify-center font-bold text-xs size-7 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/40 shadow-xs">
-        🥇 1
+        1
       </span>
     );
   }
   if (rank === 2) {
     return (
       <span className="inline-flex items-center justify-center font-bold text-xs size-7 rounded-full bg-slate-200 text-slate-700 border border-slate-400 dark:bg-slate-700/40 dark:text-slate-200 dark:border-slate-500 shadow-xs">
-        🥈 2
+        2
       </span>
     );
   }
   if (rank === 3) {
     return (
       <span className="inline-flex items-center justify-center font-bold text-xs size-7 rounded-full bg-amber-800/20 text-amber-600 border border-amber-700/40 shadow-xs">
-        🥉 3
+        3
       </span>
     );
   }

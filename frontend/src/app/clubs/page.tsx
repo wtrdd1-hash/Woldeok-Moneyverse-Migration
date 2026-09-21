@@ -75,7 +75,7 @@ export default async function ClubsPage({
           href="/clubs/new"
           className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 font-medium px-5 py-2.5 rounded-lg text-sm transition-colors shadow-sm"
         >
-          <span>✨</span>
+          
           <span>새 클럽 창설하기 (10,000 WLD)</span>
         </Link>
       </div>
@@ -84,7 +84,7 @@ export default async function ClubsPage({
       {myClubs.length > 0 && (
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <span className="text-xl">🏛️</span>
+            
             <h2 className="text-xl font-bold tracking-tight">내가 소속된 클럽</h2>
             <span className="text-xs bg-primary/20 text-primary px-2 py-0.5 rounded-full font-semibold">
               {myClubs.length}개
@@ -103,7 +103,7 @@ export default async function ClubsPage({
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xl">🌐</span>
+            
             <h2 className="text-xl font-bold tracking-tight">
               {myClubs.length > 0 ? '다른 클럽 둘러보기' : '전체 클럽 목록'}
             </h2>
@@ -115,7 +115,7 @@ export default async function ClubsPage({
 
         {otherClubs.length === 0 ? (
           <div className="text-center py-16 bg-card border border-dashed border-border rounded-xl space-y-3">
-            <span className="text-4xl">🏷️</span>
+            
             <p className="text-muted-foreground font-medium">
               {searchQuery ? `'${searchQuery}' 검색 결과가 없습니다.` : '아직 등록된 다른 클럽이 없습니다.'}
             </p>
@@ -164,7 +164,7 @@ function ClubCard({ club }: { readonly club: ClubItem }) {
 
       <div className="pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
         <div className="flex items-center gap-3">
-          <span>👥 {club.member_count.toLocaleString()}명</span>
+          <span>{club.member_count.toLocaleString()}명</span>
           <span>⭐ {Number(club.experience).toLocaleString()} EXP</span>
         </div>
 

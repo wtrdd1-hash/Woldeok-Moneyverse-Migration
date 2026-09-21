@@ -3,6 +3,7 @@
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Clock, AlertTriangle } from 'lucide-react';
 import { formatMoment, groupDigits } from '@/lib/money';
 import type { WorkSummary } from './work';
 import { progressPercent, remaining } from './work';
@@ -26,12 +27,12 @@ export function WorkQuotaDashboard({ summary, isEn }: WorkQuotaDashboardProps) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
         <div>
           <h2 id="work-quota-title" className="text-lg sm:text-xl font-bold flex items-center gap-2">
-            <span>⏱️</span> {isEn ? 'Reward limits & server resets' : '일일·주간 보상 한도 및 초기화'}
+            <Clock className="size-5 text-amber-600 dark:text-amber-400" /> {isEn ? 'Reward limits & server resets' : '일일·주간 보상 한도 및 초기화'}
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
             {isEn
               ? 'These counters use the authoritative Moneyverse game clock. The API and payout engine use the same day/week window.'
-              : '권위 있는 머니버스 게임시간을 기준으로 하며, 자정(00:00)에 일일 한도가 자동으로 초기화됩니다.'}
+              : '게임 시계를 기준으로 하며, 매일 자정(00:00)에 보상 한도가 새롭게 충전돼요.'}
           </p>
         </div>
       </div>
@@ -40,15 +41,15 @@ export function WorkQuotaDashboard({ summary, isEn }: WorkQuotaDashboardProps) {
       {isDailyCapped && (
         <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 sm:p-4 text-amber-800 dark:text-amber-300 text-xs sm:text-sm flex items-center justify-between gap-3 sm:gap-4 w-full min-w-0 overflow-hidden">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="text-lg sm:text-xl shrink-0">🚨</span>
+            <AlertTriangle className="size-5 text-amber-600 dark:text-amber-400 shrink-0" />
             <div className="min-w-0">
               <p className="font-bold truncate">
-                {isEn ? 'Daily reward cap reached (100%)' : '오늘 일일 보상 한도(100%)에 도달했습니다'}
+                {isEn ? 'Daily reward cap reached (100%)' : '오늘 받을 수 있는 보상을 모두 채웠어요'}
               </p>
               <p className="text-[11px] sm:text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5 line-clamp-2">
                 {isEn
                   ? 'Additional work completions today will not yield WLD rewards. Resets at UTC 00:00.'
-                  : '오늘의 일일 상한에 도달하여 추가 보상 획득이 제한됩니다. 내일 자정(00:00)에 다시 시작하세요.'}
+                  : '오늘 보상 한도를 100% 달성했어요. 내일 자정에 한도가 리셋되면 다시 보상을 받을 수 있어요.'}
               </p>
             </div>
           </div>

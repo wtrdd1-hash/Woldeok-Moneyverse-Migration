@@ -40,21 +40,21 @@ function getRankBadge(rank: number) {
   if (rank === 1) {
     return (
       <span className="flex items-center justify-center size-7 rounded-full bg-amber-500/20 text-amber-500 font-black text-xs border border-amber-500/30">
-        🥇 1
+        1위
       </span>
     );
   }
   if (rank === 2) {
     return (
       <span className="flex items-center justify-center size-7 rounded-full bg-slate-400/20 text-slate-300 font-black text-xs border border-slate-400/30">
-        🥈 2
+        2위
       </span>
     );
   }
   if (rank === 3) {
     return (
       <span className="flex items-center justify-center size-7 rounded-full bg-amber-700/20 text-amber-600 font-black text-xs border border-amber-700/30">
-        🥉 3
+        3위
       </span>
     );
   }

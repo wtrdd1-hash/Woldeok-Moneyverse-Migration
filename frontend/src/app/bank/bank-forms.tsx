@@ -303,7 +303,7 @@ export function CompoundInterestCard({
         <ActionAlert state={state} />
 
         <div className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
-          <p className="font-semibold text-foreground">💡 가상 은행 복리 시스템 안내</p>
+          <p className="font-semibold text-foreground">가상 은행 복리 시스템 안내</p>
           <p>• 수령한 이자는 예금 계좌로 즉시 재예치되어 원금에 합산되는 자동 복리 구조입니다.</p>
           <p>• 입금·출금으로 예금 잔액이 바뀌면 새 잔액 기준으로 이자 누적 시간이 다시 시작됩니다.</p>
         </div>
@@ -517,7 +517,7 @@ export function VirtualBondsCard({
               </CardTitle>
               <CardDescription>
                 <T
-                  korean="약정 기간 동안 WLD를 락업하여 확정 만기 고수익을 달성하세요."
+                  korean="원하는 기간 동안 WLD를 보관하고 만기에 확정 이자를 챙겨받아요."
                   english="Lock up WLD for a fixed tenure to earn guaranteed high maturity yields."
                 />
               </CardDescription>
@@ -608,7 +608,7 @@ export function VirtualBondsCard({
           </div>
 
           <SubmitButton className="w-full bg-amber-700 hover:bg-amber-800 text-white font-bold">
-            <T korean="가상 국채 매입 신청" english="Purchase Virtual Bond" />
+            <T korean="국채 투자하기" english="Purchase Virtual Bond" />
           </SubmitButton>
           <ActionAlert state={purchaseState} />
         </form>
@@ -620,7 +620,7 @@ export function VirtualBondsCard({
 
           {bonds.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border/60 p-6 text-center text-xs text-muted-foreground">
-              <T korean="현재 보유 중인 가상 국채가 없습니다. 위의 국채 상품에 투자해 보세요." english="You do not hold any virtual treasury bonds. Invest in the bonds above to earn interest." />
+              <T korean="아직 가입한 국채가 없어요. 위 상품으로 만기 이자를 받아보세요." english="You do not hold any virtual treasury bonds. Invest in the bonds above to earn interest." />
             </div>
           ) : (
             <div className="grid gap-2">
@@ -654,7 +654,7 @@ export function VirtualBondsCard({
                       <input type="hidden" name="bondId" value={bond.id} />
                       <SubmitButton size="sm" className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold h-9">
                         <Coins className="mr-1.5 size-4" />
-                        <T korean="만기 원리금 수령" english="Claim Payout" />
+                        <T korean="원금과 이자 챙겨받기" english="Claim Payout" />
                       </SubmitButton>
                     </form>
                   )}

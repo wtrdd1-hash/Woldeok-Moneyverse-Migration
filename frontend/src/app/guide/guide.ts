@@ -217,8 +217,8 @@ export const ECONOMY_PILLARS: readonly EconomyPillar[] = [
     id: 'bank',
     badgeKo: '가상 금융 2.0',
     badgeEn: 'Virtual Banking 2.0',
-    titleKo: '🏦 복리 정기예금 & 만기 국채 & 스마트 대출',
-    titleEn: '🏦 Compound Savings, Treasury Bonds & Loans',
+    titleKo: '복리 정기예금 & 만기 국채 & 스마트 대출',
+    titleEn: 'Compound Savings, Treasury Bonds & Loans',
     descKo:
       '모은 WLD를 은행에 예치하면 일 단위로 복리 이자가 누적되고, 은행 화면에서 직접 정산할 수 있습니다. 7일/30일 만기 가상 국채와 신용도 기반 가상 대출도 이용할 수 있습니다.',
     descEn:
@@ -239,8 +239,8 @@ export const ECONOMY_PILLARS: readonly EconomyPillar[] = [
     id: 'work',
     badgeKo: '전문 직업군 2.0',
     badgeEn: 'Careers 2.0',
-    titleKo: '💼 8대 전문 직업 및 승급 시스템',
-    titleEn: '💼 8 Major Occupations & Mastery System',
+    titleKo: '8대 전문 직업 및 승급 시스템',
+    titleEn: '8 Major Occupations & Mastery System',
     descKo:
       '광부, 농부, 엔지니어, 트레이더, 연구원, 예술가, 경비원, 상인 등 8개 특화 직업군을 선택하고 작업을 완수해 보세요. 직업 레벨이 오를수록 작업 완수 보상과 마스터리 보너스가 급상승합니다.',
     descEn:
@@ -261,8 +261,8 @@ export const ECONOMY_PILLARS: readonly EconomyPillar[] = [
     id: 'businesses',
     badgeKo: '기업 & 주식',
     badgeEn: 'Enterprises & Stocks',
-    titleKo: '🏢 가상 사업체 창업 & 📈 주식 거래소',
-    titleEn: '🏢 Found Virtual Businesses & 📈 Trade Stocks',
+    titleKo: '가상 사업체 창업 & 주식 거래소',
+    titleEn: 'Found Virtual Businesses & Trade Stocks',
     descKo:
       '시드머니를 모아 직접 스타트업이나 상거래 기업을 설립해 매일 들어오는 기업 배당금을 누리거나, 주식 거래소에서 상장 기업 주식을 매매하여 시세 차익과 주주 배당 소득을 거둘 수 있습니다.',
     descEn:
@@ -283,8 +283,8 @@ export const ECONOMY_PILLARS: readonly EconomyPillar[] = [
     id: 'shop',
     badgeKo: '아이템 상점 2.0',
     badgeEn: 'Item Shop 2.0',
-    titleKo: '🛍️ 생산성 도구 & 에너지 회복 상점',
-    titleEn: '🛍️ Productivity Tools & Consumables',
+    titleKo: '생산성 도구 & 에너지 회복 상점',
+    titleEn: 'Productivity Tools & Consumables',
     descKo:
       '작업 보상을 획기적으로 높여주는 장비와 도구, 소모된 피로도를 즉시 채워주는 회복 물약, 개성 있는 프로필을 꾸며주는 전용 칭호와 한정판 아이템을 WLD로 구매할 수 있습니다.',
     descEn:
@@ -305,8 +305,8 @@ export const ECONOMY_PILLARS: readonly EconomyPillar[] = [
     id: 'casino',
     badgeKo: '카지노 & 미니게임',
     badgeEn: 'Casino & Mini-games',
-    titleKo: '🎲 가상 미니게임 엔터테인먼트',
-    titleEn: '🎲 Virtual Mini-Game Entertainment',
+    titleKo: '가상 미니게임 엔터테인먼트',
+    titleEn: 'Virtual Mini-Game Entertainment',
     descKo:
       '서버가 정산하는 동전·주사위 규칙과 이를 활용한 슬롯·하이로우·컬러 휠·보물 상자·럭키 젬 테마 화면을 제공합니다. 시스템 일일 상한은 없으며 사용자가 원할 때 자가 한도를 설정합니다.',
     descEn:

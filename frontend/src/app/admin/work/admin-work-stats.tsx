@@ -19,15 +19,15 @@ import type { AdminWorkDailyCapBucket, AdminWorkJobRanking, AdminWorkRealtimeSta
 import { autoTuneWorkPolicyAction } from './actions';
 
 const JOB_LABELS: Readonly<Record<string, { label: string; icon: string; color: string }>> = {
-  farmer: { label: '농부', icon: '🌾', color: 'bg-emerald-500' },
-  miner: { label: '광부', icon: '⛏️', color: 'bg-amber-500' },
-  carrier: { label: '운반원', icon: '📦', color: 'bg-blue-500' },
-  technician: { label: '기술자', icon: '⚙️', color: 'bg-indigo-500' },
+  farmer: { label: '농부', icon: 'farmer', color: 'bg-emerald-500' },
+  miner: { label: '광부', icon: 'miner', color: 'bg-amber-500' },
+  carrier: { label: '운반원', icon: 'carrier', color: 'bg-blue-500' },
+  technician: { label: '기술자', icon: 'technician', color: 'bg-indigo-500' },
   merchant: { label: '상인', icon: '🪙', color: 'bg-purple-500' },
 };
 
 function getJobMeta(code: string) {
-  return JOB_LABELS[code] ?? { label: code, icon: '💼', color: 'bg-neutral-500' };
+  return JOB_LABELS[code] ?? { label: code, icon: 'briefcase', color: 'bg-neutral-500' };
 }
 
 interface WorkStatsProps {
@@ -93,7 +93,7 @@ export function WorkAutoTuneCard({ stats }: WorkStatsProps) {
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <CardTitle className="text-base flex items-center gap-2">
-              <span>🤖</span> AI 경제 지표 기반 일일 캡 & 보상 자동 조절 (Auto-Tuning)
+              AI 경제 지표 기반 일일 캡 & 보상 자동 조절 (Auto-Tuning)
             </CardTitle>
             <CardDescription>
               최근 24시간 통화 유출량, 캡 도달 인원 비율, 직업 완료 건수를 실시간 분석하여 최적 밸런스를 자동 산출합니다.
@@ -135,9 +135,9 @@ export function WorkAutoTuneCard({ stats }: WorkStatsProps) {
 
         {/* AI 추천 의견 안내 */}
         <div className="rounded-md border border-border/60 bg-background/50 p-3 text-xs text-muted-foreground">
-          <p className="font-medium text-foreground mb-1">💡 자동 밸런싱 분석 리포트</p>
+          <p className="font-medium text-foreground mb-1">자동 밸런싱 분석 리포트</p>
           <p>{statusConfig.description}</p>
-          <p className="mt-1 text-primary/90 font-medium">👉 권장 정책: {statusConfig.recommendation}</p>
+          <p className="mt-1 text-primary/90 font-medium">권장 정책: {statusConfig.recommendation}</p>
         </div>
 
         {/* 상태 메시지 출력 */}
@@ -174,13 +174,13 @@ export function WorkRankingChart({
   readonly rankings: readonly AdminWorkJobRanking[];
   readonly totalExecutions: number;
 }) {
-  const rankBadges = ['🥇 1위', '🥈 2위', '🥉 3위', '4위', '5위'];
+  const rankBadges = ['1위', '2위', '3위', '4위', '5위'];
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base flex items-center justify-between">
-          <span>📊 오늘 가장 많이 수행한 직업 순위</span>
+          <span>오늘 가장 많이 수행한 직업 순위</span>
           <span className="text-xs font-normal text-muted-foreground tabular">
             총 완료: {groupDigits(totalExecutions)}건
           </span>
@@ -314,7 +314,7 @@ export function WorkDailyCapGaugeCard({ stats }: WorkStatsProps) {
         <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3 text-xs">
           <div className="flex items-center justify-between">
             <span className="font-semibold text-amber-700 dark:text-amber-400">
-              🚨 오늘 일일 상한 100% 한도 도달자
+              오늘 일일 상한 100% 한도 도달자
             </span>
             <span className="tabular font-bold text-amber-700 dark:text-amber-400">
               {groupDigits(stats.capped_users_count)}명
@@ -337,7 +337,7 @@ export function WorkTrendMiniChart({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">📈 최근 7일간 일일 직업 수행 추세 (Trend)</CardTitle>
+        <CardTitle className="text-base">최근 7일간 일일 직업 수행 추세 (Trend)</CardTitle>
         <CardDescription>
           과거 7일 동안의 일자별 총 직업 완료 건수와 보상 지급 총액 추세입니다.
         </CardDescription>

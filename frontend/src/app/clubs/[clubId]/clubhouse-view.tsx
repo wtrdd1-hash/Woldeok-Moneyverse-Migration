@@ -193,7 +193,7 @@ export function ClubhouseView({
               href={`/clubs/${club.id}/members`}
               className="inline-flex items-center gap-1.5 bg-muted text-foreground hover:bg-muted/80 font-medium px-4 py-2 rounded-lg text-sm transition-colors border border-border"
             >
-              <span>👥</span>
+              
               <span>회원 명부 ({club.member_count}명)</span>
             </Link>
 
@@ -240,7 +240,7 @@ export function ClubhouseView({
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          🚀 협동 프로젝트 ({projects.length})
+          협동 프로젝트 ({projects.length})
         </button>
         <button
           type="button"
@@ -251,7 +251,7 @@ export function ClubhouseView({
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          💬 클럽 소통 피드 ({feed.length})
+          클럽 소통 피드 ({feed.length})
         </button>
         <button
           type="button"
@@ -262,7 +262,7 @@ export function ClubhouseView({
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          📜 클럽 헌장
+          클럽 헌장
         </button>
       </div>
 
@@ -271,7 +271,7 @@ export function ClubhouseView({
         <div className="space-y-6">
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 flex items-center justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
-              <span className="text-base">🛡️</span>
+              
               <span>
                 <strong>Pay-to-Win 배제 원칙:</strong> 프로젝트 기여는 순수한 협동 목표 및 명예/외형 해금에만 사용되며, 게임 내 개인 스펙에는 영향을 주지 않습니다.
               </span>
@@ -342,7 +342,7 @@ export function ClubhouseView({
 
                     {isCompleted && (
                       <div className="text-center py-1 text-xs text-emerald-500 font-semibold flex items-center justify-center gap-1">
-                        <span>🏆</span>
+                        
                         <span>거점 구축 완료 (해금 뱃지: {project.reward_badge || 'PIONEER'})</span>
                       </div>
                     )}
@@ -389,7 +389,7 @@ export function ClubhouseView({
                       onChange={(e) => setIsAnnouncement(e.target.checked)}
                       className="rounded border-input text-primary focus:ring-primary"
                     />
-                    <span>📢 중요 공지사항으로 등록</span>
+                    <span>중요 공지사항으로 등록</span>
                   </label>
                 ) : <div />}
 
@@ -454,7 +454,7 @@ export function ClubhouseView({
       {activeTab === 'charter' && (
         <div className="bg-card border border-border rounded-xl p-6 sm:p-8 space-y-4 shadow-sm">
           <h3 className="text-base font-bold flex items-center gap-2">
-            <span>📜</span>
+            
             <span>클럽 헌장 및 강령</span>
           </h3>
           <div className="p-4 bg-muted/40 rounded-lg border border-border/60 text-sm whitespace-pre-wrap leading-relaxed text-foreground/90 font-serif">
@@ -473,7 +473,7 @@ export function ClubhouseView({
             </p>
 
             <div className="bg-amber-500/10 border border-amber-500/30 p-3 rounded-lg text-xs text-amber-500 font-medium">
-              🔥 출자된 WLD는 즉시 영구 소각(SINK_CLUB_PROJECT)되며, 완료 시 클럽 명예 랜드마크로 전환됩니다.
+              출자된 WLD는 즉시 영구 소각(SINK_CLUB_PROJECT)되며, 완료 시 클럽 명예 랜드마크로 전환됩니다.
             </div>
 
             {fundError && (

@@ -272,11 +272,11 @@ export function NewPostForm({ defaultStockSymbol }: { readonly defaultStockSymbo
               name="category"
               className="min-h-11 w-full rounded-xl border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <option value="analysis">📊 종목 분석</option>
-              <option value="question">❓ 질문과 답변</option>
-              <option value="journal">📝 매매 일지</option>
-              <option value="business">🏢 사업체 이야기</option>
-              <option value="system">⚙️ 시스템 정보</option>
+              <option value="analysis">종목 분석</option>
+              <option value="question">질문과 답변</option>
+              <option value="journal">매매 일지</option>
+              <option value="business">사업체 이야기</option>
+              <option value="system">시스템 정보</option>
             </select>
           </Field>
 
@@ -292,7 +292,7 @@ export function NewPostForm({ defaultStockSymbol }: { readonly defaultStockSymbo
               <option value="none">없음</option>
               <option value="bullish">🟢 긍정 (상승 기대)</option>
               <option value="neutral">🟡 중립 (관망)</option>
-              <option value="bearish">🔴 부정 (하락 주의)</option>
+              <option value="bearish">부정 (하락 주의)</option>
             </select>
           </Field>
 

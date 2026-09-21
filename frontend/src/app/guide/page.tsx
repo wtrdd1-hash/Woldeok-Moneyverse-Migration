@@ -93,7 +93,7 @@ export default function GuidePage() {
 
           <div className="pt-2">
             <p className="mb-3 text-xs font-extrabold uppercase tracking-wider text-muted-foreground">
-              <T korean="⚡ 빠른 시작 4단계 요약" english="⚡ Quick Start 4-Step Summary" />
+              <T korean="빠른 시작 4단계 요약" english="Quick Start 4-Step Summary" />
             </p>
             <div className="grid gap-2.5 sm:grid-cols-2">
               {QUICK_START_STEPS.map((step, idx) => (

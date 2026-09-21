@@ -1,3 +1,4 @@
+import { Badge } from '@/components/ui/badge';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, Image as ImageIcon, Pin } from 'lucide-react';
@@ -130,7 +131,7 @@ export default async function AnnouncementsPage() {
                     )}
                   </div>
                   <h3 className="text-lg font-bold text-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors flex items-center gap-1.5">
-                    {notice.isPinned && <span className="text-amber-500 text-base font-bold">📌</span>}
+                    {notice.isPinned && <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">고정 공지</Badge>}
                     <span>{notice.title}</span>
                   </h3>
                   <p className="mt-2 text-sm text-muted-foreground line-clamp-2 leading-relaxed">

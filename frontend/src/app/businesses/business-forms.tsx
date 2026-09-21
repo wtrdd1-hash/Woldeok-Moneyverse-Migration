@@ -63,7 +63,7 @@ export function SettleV2Button({
     return (
       <div className="flex items-center gap-2">
         <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800 px-3 py-1.5 font-semibold text-xs">
-          ✓ 오늘 정산 완료 (내일 00시 갱신)
+          오늘 정산 완료 (내일 00시 갱신)
         </Badge>
       </div>
     );
@@ -74,7 +74,7 @@ export function SettleV2Button({
       <form action={action} className="w-full">
         <input type="hidden" name="ownershipId" value={ownershipId} />
         <SubmitButton className="w-full font-bold shadow-md bg-emerald-700 hover:bg-emerald-800 text-white">
-          ⚡ 일일 정산 수령 (WLD 입금)
+          일일 정산 수령 (WLD 입금)
         </SubmitButton>
       </form>
       <ActionAlert state={state} />
@@ -130,7 +130,7 @@ export function ApplyBoostModalButton({
         onClick={() => setIsOpen(true)}
         className="text-xs min-h-9 px-3 rounded-xl gap-1.5 font-semibold"
       >
-        <span>⚡</span>
+        
         <span>{hasBoost ? '부스트 관리' : '부스트 장착'}</span>
       </Button>
 

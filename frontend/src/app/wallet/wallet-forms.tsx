@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useActionState, useState, useEffect } from 'react';
-import { Check, Copy } from 'lucide-react';
+import { Check, Copy, Sparkles } from 'lucide-react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { AmountInput } from '@/components/amount-input';
 import { Amount } from '@/components/amount';
@@ -42,7 +42,7 @@ export function RewardButtons({ availability }: { readonly availability: RewardA
       <div className="flex flex-wrap gap-2">
         <form action={daily}>
           <SubmitButton disabled={dailyClaimed}>
-            ✦ <T korean="오늘의 보상 받기" english="Claim Daily Reward" />
+            <Sparkles className="size-4 text-amber-500 mr-1.5" /> <T korean="오늘의 보상 받기" english="Claim Daily Reward" />
           </SubmitButton>
         </form>
         <Button asChild variant="outline">
@@ -154,7 +154,7 @@ export function TransferForm({ currency }: { readonly currency: string }) {
               </div>
               <FieldDescription>
                 <T
-                  korean="송금 후에는 내 경제 원장에 기록됩니다. 받는 사람과 금액을 다시 확인해 주세요."
+                  korean="송금 즉시 지갑에서 전송돼요. 받는 사람과 보낼 금액을 한 번 더 확인해 주세요."
                   english="Recorded directly to the ledger upon sending. Double check the recipient and amount."
                 />
               </FieldDescription>
@@ -166,7 +166,7 @@ export function TransferForm({ currency }: { readonly currency: string }) {
               <T korean={`1 ${currency} 이상 정수만 보낼 수 있어요.`} english={`Only whole integers of 1 ${currency} or more can be sent.`} />
             </p>
             <SubmitButton className="min-h-11 font-bold">
-              <T korean="확인 →" english="Send WLD →" />
+              <T korean="돈 보내기" english="Send WLD" />
             </SubmitButton>
           </div>
           <ActionAlert state={state} />
@@ -188,7 +188,7 @@ export function BankPanel() {
         </CardTitle>
         <CardDescription>
           <T
-            korean="대출은 게임 안에서만 사용되며 이자는 5%입니다."
+            korean="가상 경제 안에서 유연하게 활용할 수 있어요. (고정 연이율 5%)"
             english="Loans are used strictly inside the in-game economy with 5% fixed interest."
           />
         </CardDescription>
@@ -223,7 +223,7 @@ export function BankPanel() {
             </FieldDescription>
           </Field>
           <SubmitButton className="w-fit">
-            <T korean="대출 신청" english="Apply for Loan" />
+            <T korean="대출금 받기" english="Apply for Loan" />
           </SubmitButton>
           <ActionAlert state={borrowState} />
         </form>

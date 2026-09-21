@@ -71,7 +71,7 @@ export function WorkPolicyTuningCard({
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <span>⚙️</span> 전역 직업 보상 한도 &amp; 정책 실시간 튜닝
+            전역 직업 보상 한도 &amp; 정책 실시간 튜닝
           </CardTitle>
           <Badge variant={enabled ? 'default' : 'destructive'} className="font-mono">
             {enabled ? '보상 지급 활성화' : '지급 중지됨'}
@@ -218,7 +218,7 @@ export function WorkPolicyTuningCard({
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <SubmitButton variant="default">💾 직업 보상 정책 저장</SubmitButton>
+            <SubmitButton variant="default">직업 보상 정책 저장</SubmitButton>
             <ActionAlert state={state} />
           </div>
         </form>

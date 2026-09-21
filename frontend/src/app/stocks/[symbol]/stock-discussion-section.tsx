@@ -180,8 +180,8 @@ export function StockDiscussionSection({
                       onChange={(e) => setPositionDisclosure(e.target.value as any)}
                       className="h-10 rounded-md border bg-background px-3 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
                     >
-                      <option value="holder">{isEn ? '🏷️ Currently holding' : '🏷️ 종목 보유 중'}</option>
-                      <option value="no_position">{isEn ? '⚪ No position' : '⚪ 미보유 (관심)'}</option>
+                      <option value="holder">{isEn ? 'Currently holding' : '종목 보유 중'}</option>
+                      <option value="no_position">{isEn ? 'No position' : '미보유 (관심)'}</option>
                     </select>
                   </div>
 
@@ -194,10 +194,10 @@ export function StockDiscussionSection({
                       onChange={(e) => setCategory(e.target.value as any)}
                       className="h-10 rounded-md border bg-background px-3 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
                     >
-                      <option value="analysis">{isEn ? '📊 Stock Analysis' : '📊 종목 분석'}</option>
-                      <option value="question">{isEn ? '❓ Question' : '❓ 종목 질문'}</option>
-                      <option value="journal">{isEn ? '📝 Trade Journal' : '📝 매매 일지'}</option>
-                      <option value="business">{isEn ? '🏢 Business Insight' : '🏢 사업 연계'}</option>
+                      <option value="analysis">{isEn ? 'Stock Analysis' : '종목 분석'}</option>
+                      <option value="question">{isEn ? 'Question' : '종목 질문'}</option>
+                      <option value="journal">{isEn ? 'Trade Journal' : '매매 일지'}</option>
+                      <option value="business">{isEn ? 'Business Insight' : '사업 연계'}</option>
                     </select>
                   </div>
                 </div>

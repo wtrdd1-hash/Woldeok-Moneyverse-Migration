@@ -1,5 +1,7 @@
 'use client';
 
+import { Sparkles, Briefcase } from 'lucide-react';
+
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
@@ -142,7 +144,7 @@ function TaskCompletionPanel({
               variant="secondary"
               className="flex items-center gap-1.5 font-medium px-2.5 py-1"
             >
-              <span>{meta?.icon ?? '💼'}</span>
+              <Briefcase className="size-5 text-amber-600 dark:text-amber-400" />
               <span>{jobLabel(task.job_type, locale)}</span>
               <span className="text-muted-foreground/60">·</span>
               <span>{difficultyLabel(task.difficulty, locale)}</span>
@@ -204,8 +206,8 @@ function TaskCompletionPanel({
                     ? 'The response is taking longer than usual. The request is protected against duplicates and will time out safely instead of spinning forever.'
                     : '응답이 평소보다 늦습니다. 동일 요청은 중복 지급되지 않으며, 무한 로딩 대신 안전하게 시간 초과 후 다시 시도할 수 있습니다.'
                   : isEn
-                    ? 'The server is recording the ledger transaction and proficiency EXP…'
-                    : '서버가 원장 거래와 직업 숙련도를 기록하고 있습니다…'}
+                    ? 'Recording reward and proficiency safely…'
+                    : '보상과 직업 숙련도를 안전하게 저장하고 있어요…'}
               </div>
             )}
 
@@ -214,11 +216,11 @@ function TaskCompletionPanel({
             {state.status === 'ok' && (
               <div className="rounded-xl border border-emerald-400/60 bg-emerald-500/10 p-3.5 text-xs sm:text-sm font-semibold text-emerald-800 dark:text-emerald-300 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-200">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">🎉</span>
+                  <Sparkles className="size-5 text-emerald-600 dark:text-emerald-400" />
                   <span>
                     {isEn
                       ? 'Completed. The ledger and career proficiency have been refreshed.'
-                      : '완료되었습니다. 지갑 원장과 직업 숙련도가 최신 상태로 갱신되었습니다.'}
+                      : '업무 완료! 지갑에 WLD 보상이 입금되고 직업 숙련도가 올랐어요.'}
                   </span>
                 </div>
               </div>
@@ -304,7 +306,7 @@ export function TaskCompleteModalButton({
                     : '보상 지급 일시 중지'
                   : isEn
                     ? 'Perform career task'
-                    : '직업 업무 수행'}
+                    : '업무 시작하고 보상 받기'}
       </Button>
 
       {isOpen && requestKey && (

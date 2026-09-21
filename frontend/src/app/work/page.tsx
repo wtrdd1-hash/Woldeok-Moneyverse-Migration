@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { LiveRefresh } from '@/components/live-refresh';
 import { PageHeader } from '@/components/page-header';
-import { Briefcase, Target, Award, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Briefcase, Target, Award, Sparkles, CheckCircle2, Landmark, ClipboardList } from 'lucide-react';
 import { TruncatedList } from '@/components/truncated-list';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -104,7 +104,7 @@ export default async function WorkPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 min-w-0">
             <div className="flex items-center gap-3 sm:gap-4 min-w-0">
               <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-2xl sm:text-3xl shadow-inner shrink-0">
-                {activeMeta?.icon ?? '💼'}
+                
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
@@ -166,7 +166,7 @@ export default async function WorkPage() {
       <section aria-labelledby="careers-grid-title" className="grid w-full max-w-full min-w-0 gap-3 sm:gap-4 overflow-hidden">
         <div>
           <h2 id="careers-grid-title" className="text-lg sm:text-xl font-bold flex items-center gap-2">
-            <span>🏛️</span>{' '}
+            <Landmark className="size-4 text-muted-foreground" />{' '}
             {isEn ? 'Available Careers (Zero-Fee Instant Switch)' : '8대 전문 직업군 탐색 및 전직'}
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
@@ -254,7 +254,7 @@ export default async function WorkPage() {
       <section aria-labelledby="tasks-title" className="grid w-full max-w-full min-w-0 gap-3 sm:gap-4 overflow-hidden">
         <div>
           <h2 id="tasks-title" className="text-lg sm:text-xl font-bold flex items-center gap-2">
-            <span>📋</span> {isEn ? 'Career Work' : '직업 업무'}
+            <ClipboardList className="size-4 text-muted-foreground" /> {isEn ? 'Career Work' : '직업 업무'}
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
             {isEn

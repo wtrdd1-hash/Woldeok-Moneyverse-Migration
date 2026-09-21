@@ -134,7 +134,7 @@ export function SpacesView({
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          🛋️ 내 개인 공간 ({spaces.length})
+          내 개인 공간 ({spaces.length})
         </button>
         <button
           type="button"
@@ -145,7 +145,7 @@ export function SpacesView({
               : 'border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          🏙️ 공공 도시 프로젝트 ({cityProjects.length})
+          공공 도시 프로젝트 ({cityProjects.length})
         </button>
       </div>
 
@@ -155,13 +155,13 @@ export function SpacesView({
           {/* 보유 공간 목록 */}
           <div className="space-y-4">
             <h3 className="text-base font-bold flex items-center gap-2">
-              <span>🏠</span>
+              
               <span>보유 중인 나만의 공간</span>
             </h3>
 
             {spaces.length === 0 ? (
               <div className="text-center py-12 bg-card border border-dashed border-border rounded-xl space-y-2">
-                <span className="text-3xl">📦</span>
+                
                 <p className="text-sm font-medium text-muted-foreground">
                   아직 분양받은 개인 공간이 없습니다.
                 </p>
@@ -187,7 +187,7 @@ export function SpacesView({
 
                     <div className="pt-2 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
                       <span>입주: {new Date(s.created_at).toLocaleDateString('ko-KR')}</span>
-                      <span className="text-emerald-500 font-semibold">입주 완료 ✨</span>
+                      <span className="text-emerald-500 font-semibold">입주 완료</span>
                     </div>
                   </div>
                 ))}
@@ -199,7 +199,7 @@ export function SpacesView({
           <div className="space-y-4 pt-4 border-t border-border">
             <div>
               <h3 className="text-base font-bold flex items-center gap-2">
-                <span>🏢</span>
+                
                 <span>신규 개인 공간 분양 센터</span>
               </h3>
               <p className="text-xs text-muted-foreground">
@@ -241,7 +241,7 @@ export function SpacesView({
       {activeTab === 'city' && (
         <div className="space-y-6">
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-xs text-muted-foreground leading-relaxed">
-            🏙️ <strong>공공 도시 프로젝트 크라우드펀딩:</strong> 머니버스 시민들이 WLD를 공동 출자하여 도시 공공 시설과 랜드마크를 완성합니다. 기여된 WLD는 즉시 전액 소각(SINK_PROJECT_DONATION)되며, 도시 역사와 공공 명예로 영구 보존됩니다.
+            <strong>공공 도시 프로젝트 크라우드펀딩:</strong> 머니버스 시민들이 WLD를 공동 출자하여 도시 공공 시설과 랜드마크를 완성합니다. 기여된 WLD는 즉시 전액 소각(SINK_PROJECT_DONATION)되며, 도시 역사와 공공 명예로 영구 보존됩니다.
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -270,7 +270,7 @@ export function SpacesView({
                           isCompleted ? 'bg-emerald-500/20 text-emerald-500' : 'bg-primary/20 text-primary'
                         }`}
                       >
-                        {isCompleted ? '건립 완공 🏛️' : '모금 진행 중'}
+                        {isCompleted ? '건립 완공' : '모금 진행 중'}
                       </span>
                     </div>
                     <p className="text-xs text-muted-foreground leading-relaxed">{p.description}</p>
@@ -325,7 +325,7 @@ export function SpacesView({
             </p>
 
             <div className="bg-amber-500/10 border border-amber-500/30 p-3 rounded-lg text-xs text-amber-500 font-medium">
-              🔥 분양 대금은 즉시 영구 소각(SINK_HOUSING_PURCHASE)되며 게임 밸런스에 영향을 주지 않는 순수한 정체성 공간으로 귀속됩니다.
+              분양 대금은 즉시 영구 소각(SINK_HOUSING_PURCHASE)되며 게임 밸런스에 영향을 주지 않는 순수한 정체성 공간으로 귀속됩니다.
             </div>
 
             {buyError && (
@@ -379,7 +379,7 @@ export function SpacesView({
             </p>
 
             <div className="bg-amber-500/10 border border-amber-500/30 p-3 rounded-lg text-xs text-amber-500 font-medium">
-              🔥 출자된 WLD는 공공 기여로 영구 소각(SINK_PROJECT_DONATION)되며, 도시 랜드마크 기록에 등재됩니다.
+              출자된 WLD는 공공 기여로 영구 소각(SINK_PROJECT_DONATION)되며, 도시 랜드마크 기록에 등재됩니다.
             </div>
 
             {cityError && (

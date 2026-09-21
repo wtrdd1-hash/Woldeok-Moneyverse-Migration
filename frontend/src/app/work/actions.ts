@@ -62,7 +62,7 @@ export async function completeTaskV2Action(
       revalidatePath('/wallet');
       revalidatePath('/profile');
 
-      const levelMsg = result.level_up ? ` 🎉 축하합니다! 레벨 ${result.current_level}로 올랐습니다!` : '';
+      const levelMsg = result.level_up ? ` 축하합니다! 레벨 ${result.current_level}로 올랐습니다!` : '';
       return {
         status: 'ok',
         message: `업무를 완수했습니다! ${result.reward_amount} WLD 지급 + 숙련도 ${result.experience_gained} EXP 획득!${levelMsg}`,

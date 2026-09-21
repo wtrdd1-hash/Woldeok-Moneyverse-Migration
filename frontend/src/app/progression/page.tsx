@@ -284,7 +284,7 @@ export default async function ProgressionPage() {
       {earlyGame?.unlocks && earlyGame.unlocks.length > 0 && (
         <section aria-labelledby="unlocks-title" className="grid gap-4">
           <h2 id="unlocks-title" className="text-xl font-bold flex items-center gap-2">
-            <span>🔓</span> 주요 기능 해금 현황
+            주요 기능 해금 현황
           </h2>
           <UnlockLadder unlocks={earlyGame.unlocks} />
         </section>

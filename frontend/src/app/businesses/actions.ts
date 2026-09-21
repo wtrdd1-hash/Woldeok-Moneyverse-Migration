@@ -81,7 +81,7 @@ export async function settleBusinessV2(
     }
     return {
       status: 'ok',
-      message: `🎉 일일 정산 완료! 총 매출 ${groupDigits(receipt.grossRevenue)} WLD 지급 (SYSTEM_MINT), 운영비 ${groupDigits(receipt.operatingCost)} WLD 소각 (SYSTEM_SINK). 순수익 ${groupDigits(receipt.netAmount)} WLD가 지갑에 입금되었습니다!`,
+      message: `일일 정산 완료! 총 매출 ${groupDigits(receipt.grossRevenue)} WLD 지급 (SYSTEM_MINT), 운영비 ${groupDigits(receipt.operatingCost)} WLD 소각 (SYSTEM_SINK). 순수익 ${groupDigits(receipt.netAmount)} WLD가 지갑에 입금되었습니다!`,
     };
   } catch (error) {
     return failure(error, '오늘 이미 정산되었거나, 잔액 부족 또는 미정산 유예 기간을 확인해 주세요.');
@@ -108,7 +108,7 @@ export async function activateLicenseAction(
     revalidatePath('/inventory');
     return {
       status: 'ok',
-      message: `🏢 축하합니다! [${res.business_name}] 가상 사업체가 성공적으로 설립되었습니다! 이제 매일 일일 정산 수익을 수령할 수 있습니다.`,
+      message: `축하합니다! [${res.business_name}] 가상 사업체가 성공적으로 설립되었습니다! 이제 매일 일일 정산 수익을 수령할 수 있습니다.`,
     };
   } catch (error) {
     return failure(error, '사업체 설립에 실패했습니다. 인벤토리에 라이선스를 보유 중인지, 이미 동일한 사업체를 운영 중인지 확인해 주세요.');
@@ -131,7 +131,7 @@ export async function applyBoostAction(
     revalidatePath('/inventory');
     return {
       status: 'ok',
-      message: '⚡ 사업체 부스트 아이템이 성공적으로 장착되었습니다! 향후 일일 정산에 즉시 반영됩니다.',
+      message: '사업체 부스트 아이템이 성공적으로 장착되었습니다! 향후 일일 정산에 즉시 반영됩니다.',
     };
   } catch (error) {
     return failure(error, '부스트 장착에 실패했습니다. 인벤토리에 소모품을 보유 중인지 확인해 주세요.');

@@ -69,7 +69,7 @@ export function ThemeGameCard({
     theme.mode === 'parity'
       ? [
           { value: 'odd', label: '🟡 황금색' },
-          { value: 'even', label: '🔵 푸른색' },
+          { value: 'even', label: '푸른색' },
         ]
       : Array.from({ length: 6 }, (_, index) => ({
           value: String(index + 1),

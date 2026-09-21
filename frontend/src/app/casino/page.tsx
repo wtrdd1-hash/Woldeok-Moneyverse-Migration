@@ -362,28 +362,28 @@ export default async function CasinoPage() {
                   value="dice_parity"
                   className="min-h-11 px-4 text-sm font-semibold rounded-xl"
                 >
-                  🎲 <T korean="주사위 홀짝" english="Dice Parity" />
+                  <T korean="주사위 홀짝" english="Dice Parity" />
                 </TabsTrigger>
                 <TabsTrigger
                   value="dice_number"
                   className="min-h-11 px-4 text-sm font-semibold rounded-xl"
                 >
-                  🎯 <T korean="주사위 숫자" english="Dice Number" />
+                  <T korean="주사위 숫자" english="Dice Number" />
                 </TabsTrigger>
                 <TabsTrigger value="slots" className="min-h-11 px-4 text-sm font-semibold rounded-xl">
-                  🎰 <T korean="럭키 슬롯" english="Lucky Slots" />
+                  <T korean="럭키 슬롯" english="Lucky Slots" />
                 </TabsTrigger>
                 <TabsTrigger value="hilo" className="min-h-11 px-4 text-sm font-semibold rounded-xl">
                   🃏 <T korean="하이 앤 로우" english="Hi-Lo Cards" />
                 </TabsTrigger>
                 <TabsTrigger value="wheel" className="min-h-11 px-4 text-sm font-semibold rounded-xl">
-                  🎡 컬러 휠
+                  컬러 휠
                 </TabsTrigger>
                 <TabsTrigger value="treasure" className="min-h-11 px-4 text-sm font-semibold rounded-xl">
-                  🗝️ 보물 상자
+                  보물 상자
                 </TabsTrigger>
                 <TabsTrigger value="gems" className="min-h-11 px-4 text-sm font-semibold rounded-xl">
-                  💎 럭키 젬
+                  럭키 젬
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -418,7 +418,7 @@ export default async function CasinoPage() {
                 <Card className="rounded-2xl border-border/80 shadow-md">
                   <CardHeader>
                     <CardTitle className="text-xl flex items-center gap-2 font-bold">
-                      🎲 <T korean="주사위 홀짝 맞추기" english="Dice Parity Guess" />
+                      <T korean="주사위 홀짝 맞추기" english="Dice Parity Guess" />
                     </CardTitle>
                     <CardDescription>
                       주사위 눈이 홀수인지 짝수인지 예측합니다. 적중 확률{' '}
@@ -452,7 +452,7 @@ export default async function CasinoPage() {
                 <Card className="rounded-2xl border-border/80 shadow-md">
                   <CardHeader>
                     <CardTitle className="text-xl flex items-center gap-2 font-bold">
-                      🎯 <T korean="주사위 단일 숫자 맞추기" english="Dice Single Number" />
+                      <T korean="주사위 단일 숫자 맞추기" english="Dice Single Number" />
                     </CardTitle>
                     <CardDescription>
                       1부터 6까지 나올 눈을 정확히 맞춥니다. 적중 확률{' '}
@@ -751,7 +751,7 @@ function FairnessNote({ fairness }: { readonly fairness: Loaded<CoinFairness> })
     <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 grid gap-3 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-primary/20 pb-2.5">
         <span className="text-xs font-bold text-primary flex items-center gap-1.5">
-          🛡️ 암호학적 난수(RNG) 공정성 100만 회 통계 검증 보고서
+          암호학적 난수(RNG) 공정성 100만 회 통계 검증 보고서
         </span>
         <Badge variant="outline" className="text-[11px] font-mono text-emerald-500 border-emerald-500/30 bg-emerald-500/10">
           신뢰도 99.7% 정규분포 적합

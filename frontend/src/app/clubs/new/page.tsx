@@ -72,7 +72,7 @@ export default function NewClubPage() {
       <div className="bg-card border border-border rounded-xl p-6 sm:p-8 space-y-6 shadow-sm">
         {/* WLD 소각 안내 경고 배너 */}
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3">
-          <span className="text-2xl mt-0.5">🔥</span>
+          
           <div className="space-y-1">
             <h4 className="text-sm font-bold text-amber-500">
               클럽 헌장 등록비: 10,000 WLD 영구 소각 (Hard Sink)
