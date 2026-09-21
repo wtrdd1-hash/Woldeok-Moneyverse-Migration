@@ -8,6 +8,7 @@ import {
   LOCALE_COOKIE,
   type Locale,
   isLocale,
+  detectBrowserLocale,
 } from '@/lib/locale';
 
 interface LocaleContextValue {
@@ -21,7 +22,8 @@ const LocaleContext = createContext<LocaleContextValue>({
 });
 
 function readCookie(name: string): string | null {
-  const prefix = `${name}=`;
+  if (typeof document === 'undefined') return null;
+  const prefix = name + '=';
   const entry = document.cookie.split(';').map((item) => item.trim()).find((item) => item.startsWith(prefix));
   return entry ? decodeURIComponent(entry.slice(prefix.length)) : null;
 }
@@ -34,7 +36,12 @@ export function LocaleProvider({ children }: { readonly children: React.ReactNod
   useEffect(() => {
     const explicit = readCookie(LOCALE_COOKIE);
     const detected = readCookie(DETECTED_LOCALE_COOKIE);
-    const resolved = isLocale(explicit) ? explicit : isLocale(detected) ? detected : DEFAULT_LOCALE;
+    const resolved = isLocale(explicit)
+      ? explicit
+      : isLocale(detected)
+      ? detected
+      : detectBrowserLocale();
+
     updateLocale(resolved);
     document.documentElement.lang = resolved;
   }, []);
@@ -42,7 +49,7 @@ export function LocaleProvider({ children }: { readonly children: React.ReactNod
   const value = useMemo<LocaleContextValue>(() => ({
     locale,
     setLocale(nextLocale) {
-      document.cookie = `${LOCALE_COOKIE}=${nextLocale}; Path=/; Max-Age=31536000; SameSite=Lax; Secure`;
+      document.cookie = LOCALE_COOKIE + '=' + nextLocale + '; Path=/; Max-Age=31536000; SameSite=Lax; Secure';
       document.documentElement.lang = nextLocale;
       updateLocale(nextLocale);
       startTransition(() => {

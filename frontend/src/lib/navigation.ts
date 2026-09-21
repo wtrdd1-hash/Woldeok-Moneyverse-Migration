@@ -1,3 +1,4 @@
+import { type Locale } from './locale';
 export interface NavEntry {
   readonly href: string;
   readonly label: string;
@@ -13,6 +14,89 @@ export interface NavCategory {
   readonly description?: string;
   readonly entries: readonly NavEntry[];
 }
+
+
+const JAPANESE_LABELS: Readonly<Record<string, string>> = {
+  '홈': 'ホーム',
+  '내 대시보드': 'ダッシュボード',
+  '이용 방법': 'ガイド',
+  '공지': 'お知らせ',
+  '운영 소식': '運営ニュース',
+  '안내': 'ご案内',
+  '이용약관': '利用規約',
+  '개인정보처리방침': 'プライバシーポリシー',
+  '사진': 'ギャラリー',
+  '서비스 상태': 'サービス状況',
+  '상점': 'ショップ',
+  '내 지갑': 'マイウォレット',
+  '자산': '資産',
+  '거래소': '取引所',
+  '작업': '業務',
+  '직업 업무': '職業・業務',
+  '가상 금융': '仮想金融',
+  '가상 은행': '仮想銀行',
+  '가상 금융 (은행)': '仮想銀行',
+  '가상 주식': '仮想株式',
+  '게임 사업': 'ゲーム事業',
+  '시즌': 'シーズン',
+  '퀘스트': 'クエスト',
+  '일일·주간 퀘스트': 'デイリー・ウィークリークエスト',
+  '일정': 'カレンダー',
+  '이벤트 일정': 'イベントカレンダー',
+  '카지노': 'カジノ',
+  '성장 단계': '成長段階',
+  '장기 성장 단계': '長期成長段階',
+  '내 프로필': 'マイプロフィール',
+  '쪽지함': 'メッセージ',
+  '클럽·협동조합': 'クラブ・ギルド',
+  '개인 공간 & 도시': 'マイスペース・都市',
+  '금융·투자': '金融・投資',
+  '경제·활동': '経済・活動',
+  '플레이·시즌': 'プレイ・シーズン',
+  '커뮤니티': 'コミュニティ',
+  '자산 활동 내역': '資産活動履歴',
+};
+
+const CHINESE_LABELS: Readonly<Record<string, string>> = {
+  '홈': '首页',
+  '내 대시보드': '我的仪表盘',
+  '이용 방법': '使用指南',
+  '공지': '公告',
+  '운영 소식': '运营动态',
+  '안내': '说明',
+  '이용약관': '服务条款',
+  '개인정보처리방침': '隐私政策',
+  '사진': '媒体画廊',
+  '서비스 상태': '服务状态',
+  '상점': '道具商城',
+  '내 지갑': '我的钱包',
+  '자산': '资产',
+  '거래소': '交易所',
+  '작업': '工作',
+  '직업 업무': '职业工作',
+  '가상 금융': '虚拟金融',
+  '가상 은행': '虚拟银行',
+  '가상 금융 (은행)': '虚拟银行',
+  '가상 주식': '虚拟股票',
+  '게임 사업': '商业运营',
+  '시즌': '赛季',
+  '퀘스트': '任务',
+  '일일·주간 퀘스트': '每日与每周任务',
+  '일정': '日历日程',
+  '이벤트 일정': '活动日历',
+  '카지노': '娱乐场',
+  '성장 단계': '成长阶段',
+  '장기 성장 단계': '长期成长历程',
+  '내 프로필': '个人资料',
+  '쪽지함': '消息箱',
+  '클럽·협동조합': '公会与合作社',
+  '개인 공간 & 도시': '个人空间与城市',
+  '금융·투자': '金融与投资',
+  '경제·활동': '经济与活动',
+  '플레이·시즌': '娱乐与赛季',
+  '커뮤니티': '玩家社区',
+  '자산 활동 내역': '资产明细',
+};
 
 const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '홈': 'Home',
@@ -87,8 +171,11 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '자산 활동 내역': 'Asset Activity',
 };
 
-export function navLabel(label: string, locale: 'ko' | 'en'): string {
-  return locale === 'en' ? (ENGLISH_LABELS[label] ?? label) : label;
+export function navLabel(label: string, locale: Locale): string {
+  if (locale === 'ja') return JAPANESE_LABELS[label] ?? ENGLISH_LABELS[label] ?? label;
+  if (locale === 'zh') return CHINESE_LABELS[label] ?? ENGLISH_LABELS[label] ?? label;
+  if (locale === 'en') return ENGLISH_LABELS[label] ?? label;
+  return label;
 }
 
 /**

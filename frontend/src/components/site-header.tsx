@@ -1,5 +1,7 @@
 'use client';
 
+import { type Locale } from '@/lib/locale';
+
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -129,7 +131,7 @@ function NavCategoryDropdown({
 }: {
   readonly category: NavCategory;
   readonly pathname: string;
-  readonly locale: 'ko' | 'en';
+  readonly locale: Locale;
 }) {
   const isCategoryActive = category.entries.some((entry) => isCurrent(pathname, entry.href));
 
@@ -428,7 +430,7 @@ export function MobileSessionAction({
   locale,
 }: {
   readonly viewer: Viewer | null;
-  readonly locale: 'ko' | 'en';
+  readonly locale: Locale;
 }) {
   if (!viewer) return <Skeleton className="h-11 w-full rounded-xl" />;
   if (!viewer.signedIn) {
@@ -464,7 +466,7 @@ function SessionControl({
   isAdmin,
 }: {
   readonly viewer: Viewer | null;
-  readonly locale: 'ko' | 'en';
+  readonly locale: Locale;
   readonly isAdmin?: boolean;
 }) {
   if (!viewer) return <Skeleton className="h-11 w-20 sm:w-28 rounded-[10px] sm:rounded-[12px]" />;
