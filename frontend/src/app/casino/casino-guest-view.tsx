@@ -138,8 +138,8 @@ const GAME_SHOWCASE: readonly GameItem[] = [
 export function CasinoGuestView() {
   const [filter, setFilter] = useState<GameCategory>('all');
   const [demoMode, setDemoMode] = useState<'coin' | 'slot' | 'dice'>('coin');
-  const [demoCoin, setDemoCoin] = useState<'앞면' | '뒷면' | null>(null);
-  const [demoSlots, setDemoSlots] = useState<[string, string, string]>(['🍒', '🍋', '7️⃣']);
+  const [demoCoin, setDemoCoin] = useState<'HEADS (앞면)' | 'TAILS (뒷면)' | null>(null);
+  const [demoSlots, setDemoSlots] = useState<[string, string, string]>(['CHERRY', 'LEMON', '777']);
   const [demoDice, setDemoDice] = useState<number | null>(null);
   const [isDemoSpinning, setIsDemoSpinning] = useState(false);
 
@@ -152,37 +152,37 @@ export function CasinoGuestView() {
     setIsDemoSpinning(true);
 
     if (demoMode === 'coin') {
-      const faces: ('앞면' | '뒷면')[] = ['앞면', '뒷면'];
+      const faces: ('HEADS (앞면)' | 'TAILS (뒷면)')[] = ['HEADS (앞면)', 'TAILS (뒷면)'];
       let count = 0;
       const interval = setInterval(() => {
-        setDemoCoin(faces[count % 2] ?? '앞면');
+        setDemoCoin(faces[count % 2] ?? 'HEADS (앞면)');
         count++;
         if (count > 8) {
           clearInterval(interval);
-          setDemoCoin(Math.random() > 0.5 ? '앞면' : '뒷면');
+          setDemoCoin(Math.random() > 0.5 ? 'HEADS (앞면)' : 'TAILS (뒷면)');
           setIsDemoSpinning(false);
         }
       }, 70);
     } else if (demoMode === 'slot') {
-      const symbols = ['🍒', '🍋', '🔔', '💎', '⭐', '7️⃣'];
+      const symbols = ['CHERRY', 'LEMON', 'BELL', 'DIAMOND', 'STAR', '777'];
       let count = 0;
       const interval = setInterval(() => {
         setDemoSlots([
-          symbols[Math.floor(Math.random() * symbols.length)] ?? '🍒',
-          symbols[Math.floor(Math.random() * symbols.length)] ?? '🍋',
-          symbols[Math.floor(Math.random() * symbols.length)] ?? '7️⃣'
+          symbols[Math.floor(Math.random() * symbols.length)] ?? 'CHERRY',
+          symbols[Math.floor(Math.random() * symbols.length)] ?? 'LEMON',
+          symbols[Math.floor(Math.random() * symbols.length)] ?? '777'
         ]);
         count++;
         if (count > 10) {
           clearInterval(interval);
           const isJackpot = Math.random() < 0.25;
           if (isJackpot) {
-            setDemoSlots(['7️⃣', '7️⃣', '7️⃣']);
+            setDemoSlots(['777', '777', '777']);
           } else {
             setDemoSlots([
-              symbols[Math.floor(Math.random() * 5)] ?? '🍒',
-              symbols[Math.floor(Math.random() * 5)] ?? '🍋',
-              symbols[Math.floor(Math.random() * 5)] ?? '🔔'
+              symbols[Math.floor(Math.random() * 5)] ?? 'CHERRY',
+              symbols[Math.floor(Math.random() * 5)] ?? 'LEMON',
+              symbols[Math.floor(Math.random() * 5)] ?? 'BELL'
             ]);
           }
           setIsDemoSpinning(false);
@@ -274,22 +274,22 @@ export function CasinoGuestView() {
             <div className="flex items-center justify-center min-h-20 w-full sm:w-auto px-6 py-3 rounded-2xl bg-card border border-border/80 shadow-inner">
               {demoMode === 'coin' && (
                 <div className="flex items-center gap-3">
-                  <span className={`text-4xl transition-transform ${isDemoSpinning ? 'animate-spin' : ''}`}>
-                    🪙
-                  </span>
+                  <div className={`size-11 rounded-full border-2 border-amber-500/50 bg-amber-500/10 flex items-center justify-center text-amber-500 ${isDemoSpinning ? 'animate-spin' : ''}`}>
+                    <Coins className="size-6" />
+                  </div>
                   <div className="text-left">
                     <span className="text-xs text-muted-foreground block font-mono">가상 동전 결과</span>
-                    <span className="text-base font-bold font-mono text-foreground">
+                    <span className="text-sm sm:text-base font-bold font-mono text-foreground">
                       {demoCoin ? `[${demoCoin}]` : '버튼을 눌러 체험'}
                     </span>
                   </div>
                 </div>
               )}
               {demoMode === 'slot' && (
-                <div className="flex items-center gap-2 font-mono text-3xl sm:text-4xl">
+                <div className="flex items-center gap-2 font-mono text-sm sm:text-base font-bold">
                   <div className="flex gap-2 bg-background/90 px-3 py-1.5 rounded-xl border border-amber-500/30">
                     {demoSlots.map((s, idx) => (
-                      <span key={idx} className={`select-none transition-transform ${isDemoSpinning ? 'animate-bounce' : ''}`}>
+                      <span key={idx} className={`px-2 py-1 rounded bg-card border border-border select-none transition-transform ${isDemoSpinning ? 'animate-bounce text-amber-500' : s === '777' ? 'text-amber-500 font-extrabold' : 'text-foreground'}`}>
                         {s}
                       </span>
                     ))}
@@ -298,13 +298,13 @@ export function CasinoGuestView() {
               )}
               {demoMode === 'dice' && (
                 <div className="flex items-center gap-3">
-                  <span className={`text-4xl transition-transform ${isDemoSpinning ? 'animate-spin' : ''}`}>
-                    {demoDice ? ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'][demoDice - 1] : '🎲'}
-                  </span>
+                  <div className={`size-11 rounded-xl border-2 border-blue-500/50 bg-blue-500/10 flex items-center justify-center text-blue-500 ${isDemoSpinning ? 'animate-spin' : ''}`}>
+                    <Dices className="size-6" />
+                  </div>
                   <div className="text-left">
                     <span className="text-xs text-muted-foreground block font-mono">가상 주사위 눈금</span>
-                    <span className="text-base font-bold font-mono text-foreground">
-                      {demoDice ? `[${demoDice}번]` : '버튼을 눌러 체험'}
+                    <span className="text-sm sm:text-base font-bold font-mono text-foreground">
+                      {demoDice ? `[${demoDice}번 (${demoDice % 2 === 1 ? '홀' : '짝'})]` : '버튼을 눌러 체험'}
                     </span>
                   </div>
                 </div>
@@ -316,7 +316,7 @@ export function CasinoGuestView() {
                 type="button"
                 onClick={handleRunDemo}
                 disabled={isDemoSpinning}
-                className="w-full sm:w-auto min-h-11 px-6 rounded-xl font-bold gap-2"
+                className="w-full sm:w-auto min-h-11 px-6 rounded-xl font-bold gap-2 bg-amber-500 text-black hover:bg-amber-400"
               >
                 <RotateCw className={`size-4 ${isDemoSpinning ? 'animate-spin' : ''}`} />
                 <span>{isDemoSpinning ? '체험 진행 중…' : '무료 시뮬레이션 돌려보기'}</span>
