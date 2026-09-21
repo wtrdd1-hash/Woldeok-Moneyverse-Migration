@@ -59,8 +59,8 @@ describe('app API compatibility contract', () => {
   it('keeps every documented app group in the gateway allow-list', () => {
     expect(APP_API_GROUPS).toEqual([
       'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'businesses',
-      'casino', 'chat', 'content', 'early-game', 'engagement', 'media', 'photos', 'privacy',
-      'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'stocks', 'support', 'wallet', 'work',
+      'casino', 'chat', 'clubs', 'content', 'early-game', 'engagement', 'media', 'photos', 'privacy',
+      'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'spaces', 'stocks', 'support', 'wallet', 'work',
     ]);
   });
 

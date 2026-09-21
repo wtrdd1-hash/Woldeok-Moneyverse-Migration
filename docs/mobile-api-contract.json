@@ -1613,8 +1613,7 @@
                       "type": "null"
                     },
                     {
-                      "type": "string",
-                      "format": "date-time"
+                      "type": "string"
                     }
                   ]
                 }
@@ -1692,8 +1691,7 @@
                     "type": "null"
                   },
                   {
-                    "type": "string",
-                    "format": "date-time"
+                    "type": "string"
                   }
                 ]
               },
@@ -12331,6 +12329,20 @@
                     }
                   ]
                 },
+                "halt_status": {
+                  "type": "string"
+                },
+                "halted_at": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  ]
+                },
                 "updated_at": {
                   "type": "string",
                   "format": "date-time"
@@ -14021,6 +14033,9 @@
                       ]
                     }
                   ]
+                },
+                "halt_status": {
+                  "type": "string"
                 }
               },
               "required": [

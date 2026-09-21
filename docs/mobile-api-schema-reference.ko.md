@@ -617,7 +617,7 @@ _요청 본문 없음._
 | catalogue[].approved_24h | true | string |  |
 | catalogue[].rejected_24h | true | string |  |
 | catalogue[].paid_24h | true | string |  |
-| catalogue[].last_assigned_at | true | null \| string (date-time) |  |
+| catalogue[].last_assigned_at | true | null \| string |  |
 | jobLevels[] | true | object[] |  |
 | jobLevels[] | true | object |  |
 | jobLevels[].job_type | true | string |  |
@@ -628,7 +628,7 @@ _요청 본문 없음._
 | jobLevels[].active_7d_count | true | string |  |
 | policy | true | object |  |
 | policy.policy_id | true | null \| number |  |
-| policy.effective_at | true | null \| string (date-time) |  |
+| policy.effective_at | true | null \| string |  |
 | policy.daily_cap | true | null \| string |  |
 | policy.weekly_cap | true | null \| string |  |
 | policy.repeat_decay_percent | true | null \| number |  |
@@ -4115,6 +4115,8 @@ _요청 본문 없음._
 | stocks[].description | true | string |  |
 | stocks[].current_price | true | string & object |  |
 | stocks[].day_open_price | true | string & object |  |
+| stocks[].halt_status | false | string |  |
+| stocks[].halted_at | false | null \| string (date-time) |  |
 | stocks[].updated_at | true | string (date-time) |  |
 | stocks[].shares_outstanding | true | string |  |
 | stocks[].shares_available | true | string |  |
@@ -4493,6 +4495,7 @@ _요청 본문 없음._
 | holdings[].average_cost | true | string & object |  |
 | holdings[].market_value | true | string & object |  |
 | holdings[].current_price | true | string & object |  |
+| holdings[].halt_status | false | string |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 

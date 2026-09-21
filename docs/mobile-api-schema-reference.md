@@ -617,7 +617,7 @@ _No request body._
 | catalogue[].approved_24h | true | string |  |
 | catalogue[].rejected_24h | true | string |  |
 | catalogue[].paid_24h | true | string |  |
-| catalogue[].last_assigned_at | true | null \| string (date-time) |  |
+| catalogue[].last_assigned_at | true | null \| string |  |
 | jobLevels[] | true | object[] |  |
 | jobLevels[] | true | object |  |
 | jobLevels[].job_type | true | string |  |
@@ -628,7 +628,7 @@ _No request body._
 | jobLevels[].active_7d_count | true | string |  |
 | policy | true | object |  |
 | policy.policy_id | true | null \| number |  |
-| policy.effective_at | true | null \| string (date-time) |  |
+| policy.effective_at | true | null \| string |  |
 | policy.daily_cap | true | null \| string |  |
 | policy.weekly_cap | true | null \| string |  |
 | policy.repeat_decay_percent | true | null \| number |  |
@@ -4115,6 +4115,8 @@ _No request body._
 | stocks[].description | true | string |  |
 | stocks[].current_price | true | string & object |  |
 | stocks[].day_open_price | true | string & object |  |
+| stocks[].halt_status | false | string |  |
+| stocks[].halted_at | false | null \| string (date-time) |  |
 | stocks[].updated_at | true | string (date-time) |  |
 | stocks[].shares_outstanding | true | string |  |
 | stocks[].shares_available | true | string |  |
@@ -4493,6 +4495,7 @@ _No request body._
 | holdings[].average_cost | true | string & object |  |
 | holdings[].market_value | true | string & object |  |
 | holdings[].current_price | true | string & object |  |
+| holdings[].halt_status | false | string |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 
