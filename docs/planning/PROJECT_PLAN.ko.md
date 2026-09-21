@@ -2,11 +2,38 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.21.325
-> **구현·증거 동기화:** 2026-09-21
+> **현재 통합 버전:** v2026.09.22.335
+> **구현·증거 동기화:** 2026-09-22
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 긴급 전수 QA / 관리자 포함 수정요망 — v2026.09.22.335 (2026-09-22)
+
+### 현재 Test/Production 릴리스 상태를 정상으로 간주하지 않는다
+- **우선순위:** **긴급 / P0-P1**. 관리자 기능을 포함한 전 기능 재검증에서 Test 서버 다수 500, Test SHA 지연, Production 프론트/백엔드 split-release가 재현됐다. 아래 항목을 닫기 전 신규 Production 승격을 금지한다.
+- **QA-335-01 — Production split-release (P0, OPEN, 운영 차단):** 실행 중인 Production frontend CWD는 `/srv/moneyverse-data/releases/prod-cd29db4-v336/frontend`이지만 backend CWD는 `/srv/moneyverse-data/releases/prod-5cc3641-v328/backend`이다. `production-current`는 `prod-cd29db4-v336`을 가리키는데 backend process는 이전 release에 남아 있다. 기대값은 frontend/backend가 동일한 exact release SHA/세대를 실행하는 것이다. 수정 후 두 process CWD, backend `/api/version`, frontend `/frontend-version`, public smoke, session continuity를 같은 candidate로 증명해야 한다.
+- **QA-335-02 — Test 서버 핵심/관리자 화면 500 (P0, OPEN, 운영 차단):** `https://test.easy-scraping.com/`만 200이고 `/login`, `/register`, `/guide`, `/stocks`, `/shop`, `/work`, `/status`, `/privacy`, `/terms`, `/support`, `/announcements`, `/gallery`는 모두 500으로 재현됐다. 관리자 `/admin`, `/admin/users`, `/admin/economy`, `/admin/security`, `/admin/support`, `/admin/controls`, `/admin/content`, `/admin/shop`, `/admin/work`, `/admin/market/ai-news`도 모두 500이다. Production 동일 public/admin path는 이번 비인증 HTTP smoke에서 200이었다. Test가 고쳐지기 전에는 Test 통과/승격 증거를 생성할 수 없다.
+- **QA-335-03 — Test runtime 74 commits stale (P1, OPEN, 운영 차단):** Test backend `/api/version`은 `7298bb92d44bd1122cea0929b1d2eb4afbb1a258`이며 현재 `origin/main=55cea0ba49fa53e17c924cc54bff5689e2bad172`보다 74 commits 뒤다. Test process는 `test-5cc3641-v328` release에서 실행 중이다. 따라서 최근 관리자/보안/콘텐츠 변경을 Test에서 검증했다는 주장을 금지한다.
+- **QA-335-04 — 최신 관리자 보안 수정이 실행 runtime에 미반영 (P0/P1, OPEN):** 최신 main에는 `v329` sensitive admin step-up, `v331` abuse/security mutation step-up, `v332` member restriction step-up, `v333` admin private photo upload step-up 수정이 존재한다. 현재 Test와 Production backend가 보고하는 runtime build는 그 이전 `7298bb92...`이므로 이 보호조치가 실행 backend에 반영됐다는 증거가 없다. 관리자 민감 mutation은 최신 exact SHA Test에서 재인증 요구/권한/CSRF/audit/negative-path까지 재검증한 뒤 운영 backend를 동일 SHA로 무중단 교체한다.
+- **QA-335-05 — release provenance/identity 불일치 (P1, OPEN):** 실행 release directory 이름(`5cc3641-v328`, `cd29db4-v336`)과 backend가 노출하는 immutable build id(`7298bb92...`)가 일치하지 않는다. 디렉터리명·symlink·process CWD·`BUILD_ID`·Git commit·artifact digest를 하나의 exact-SHA lineage로 묶고, 불일치 시 자동 승격을 fail-closed 해야 한다.
+- **QA-335-06 — 관리자 화면 직접 회귀증거 부족 (P1 verification gap, OPEN):** frontend에는 관리자 `page.tsx`가 20개인데 admin 하위 직접 test file은 9개다. 공통 테스트가 일부 화면을 간접 커버할 수 있으므로 이것만으로 기능 결함이라고 단정하지 않지만, `/admin` 전 영역을 인증된 exact-SHA Test에서 route-by-route smoke/E2E로 증명하기 전에는 관리자 전체 정상 판정을 금지한다. backend admin test는 21개(그중 DB test 9개)이며, 최신 runtime PR의 GitHub CI에서는 real-PostgreSQL `runtime-check`가 성공했지만 현재 Test/Production running SHA와 동일하지 않다.
+- **긴급 수정 순서:** v2026.09.22.335-01 Test 500 root cause 수정 -> -02 최신 main exact SHA로 isolated Test backend/frontend 동시 배포 -> -03 Test backend/frontend identity 일치 확인 -> -04 관리자 20개 화면 + 핵심 사용자 route 인증/비인증 smoke 및 DB/API/security E2E -> -05 작업 중간 최신 기획 재확인 -> -06 Production frontend/backend를 동일 exact merged SHA로 무중단 교체 -> -07 세션 유지/health/version/admin critical mutation/로그 오류 재검증 -> -08 `QA-335-*`별 evidence를 기록한 뒤에만 CLOSED.
+- **롤백:** 어느 단계든 5xx, identity mismatch, DB migration mismatch, 관리자 인증/step-up 회귀, 세션 손실이 발생하면 새 승격을 중단하고 last-known-good 동일 frontend/backend pair로 원복한다. split-release 상태를 정상 fallback으로 사용하지 않는다.
+
+## QA 결함 보존 지시 — v2026.09.22.334 (2026-09-22)
+
+### QA에서 발견한 불량·미실행·저하 항목은 검증 종료 전까지 기획서에 계속 남긴다
+- **상시 추적 규칙:** QA에서 발견한 기능 불량, 회귀, 사용자/성능 위험이 있는 경고, 필수 테스트 skip, 환경 부족으로 막힌 테스트, 프론트/백엔드/API 불일치, 모바일·반응형 문제, 인증·세션 문제, 배포 문제, 릴리스 증거 공백은 모두 권위 기획서와 버전별 QA worklog에 기록한다. 전체 명령이 성공해도 내부 미해결 항목을 삭제하거나 “정상”으로 덮지 않는다.
+- **필수 결함 필드:** 각 미해결 QA 항목은 `id`, 발견 버전/SHA, 영향 기능/화면, 환경, 재현 증거 또는 테스트명, 기대/실제 동작, 심각도(`P0`~`P3`), 릴리스 차단 여부, 담당 workstream, 임시 우회책, 수정 목표, 재시험 증거, 종료 버전/SHA를 가진다. 아직 모르는 값은 `TBD`로 명시하고 생략하지 않는다.
+- **상태 흐름:** `OPEN -> TRIAGED -> FIX_IN_PROGRESS -> RETEST_REQUIRED -> VERIFIED -> CLOSED`. 관련 자동/수동 QA가 exact candidate SHA에서 통과해야만 `CLOSED`로 변경한다. skipped/not-run/cancelled 또는 과거 SHA의 성공 기록은 종료 증거가 아니다. 같은 문제가 재발하면 기존 defect id를 유지하고 occurrence를 추가한다.
+- **승격 규칙:** 미해결 P0/P1과 필수 real-DB/security/auth/payment/economy/deployment 증거 누락은 Production을 차단한다. P2/P3를 남긴 채 배포하려면 비차단 근거, 사용자 영향, 담당자, 목표 버전을 기획서에 명시해야 한다.
+- **현재 QA 증거 — `origin/main=55cea0ba49fa53e17c924cc54bff5689e2bad172`:** repository lint, typecheck, aggregate test, Production build는 모두 exit `0`이었고 API 계약 생성/검사는 159 endpoints를 확인했다. frontend test는 707/707 통과했고 backend/contract/database의 실행된 테스트도 통과했지만 아래 미해결 항목 때문에 **결함 0 상태는 아니다**.
+- **QA-334-01 — frontend lint 저하 (P2, 이번 docs-only 회차는 비차단):** ESLint 경고 12건. admin content, announcements, board, gallery, profile, cosmetics의 11개 `@next/next/no-img-element` 경고와 `gallery/submit/submit-forms.tsx`의 `react-hooks/exhaustive-deps` 경고 1건이다. 각 항목을 수정해 lint 경고 0으로 재검증하거나 항목별 명시적 예외 근거를 남길 때까지 제품 품질/성능/유지보수 부채로 유지한다.
+- **QA-334-02 — 실제 DB QA 검증 공백 (P1, 릴리스 차단):** backend Vitest 결과는 `907 passed | 361 skipped`였고 52개 DB 계열 test file의 suite/test가 `DATABASE_URL` 및/또는 `MIGRATOR_DATABASE_URL` 부재 조건으로 skip됐다. 따라서 로컬 aggregate test 성공만으로 wallet, stock, casino, work, shop, admin, auth/session, audit, profile, business, scheduler, security boundary 등 real-PostgreSQL 동작을 증명하지 못한다. Production 승격 전 isolated Test DB에서 필요한 real-DB suite를 exact-SHA 증거로 실행해야 한다.
+- **이번 실행에서 결함으로 분류하지 않는 항목:** verification-email sender 테스트는 SMTP 미설정 오류 경로를 의도적으로 검증했고 테스트 자체는 통과했다. 해당 로그만으로 배포 SMTP 장애라고 판정하지 않는다. 실제 SMTP health는 Test/Production 릴리스 점검에서 별도 검증한다.
+- **작업 순서:** v2026.09.22.334-01 결함 ledger 보존 -> -02 모든 lint 경고 수정 또는 근거 있는 예외화 -> -03 isolated real-DB QA credential 구성 및 필수 DB suite 전부 실행 -> -04 exact-SHA Test에서 인증/API/반응형/security smoke -> -05 작업 중간 최신 기획 재확인 -> -06 최신 증거 반영 후 병합 -> -07 blocking defect 전부 종료된 경우에만 무중단 Production 승격 -> -08 승격 후 smoke/session/version 검증.
+- **문서 규칙:** 이후 모든 QA 회차는 새 결함을 추가하고 기존 id 상태를 갱신한다. 미해결 항목을 단순 삭제하지 않으며 종료된 과거 결함은 Git/changelog/worklog에서 계속 추적 가능해야 한다.
 
 
 ## 보안 기획 지시 — v2026.09.21.324 (2026-09-21)
