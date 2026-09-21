@@ -82,7 +82,7 @@ jobs:
           echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
 
       - name: Download immutable release input from candidate run
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: release-input
           path: release-evidence
@@ -134,7 +134,7 @@ jobs:
 
       - name: Download runtime candidate manifest only for runtime release lanes
         if: steps.release.outputs.requires_runtime == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: candidate-manifest
           path: candidate-evidence

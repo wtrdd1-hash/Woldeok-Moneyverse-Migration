@@ -130,7 +130,7 @@ jobs:
       MIGRATION_SET_HASH: ${{ needs.release-input.outputs.migration_set_hash }}
     steps:
       - name: Download classified release input
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: release-input
           path: release-evidence
