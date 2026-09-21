@@ -1,8 +1,8 @@
 # Woldeok Moneyverse — One-to-One Private Chat Specification
 
-> Version: v2026.09.20.305
+> Version: v2026.09.21.323
 > Status: **URGENT / P0 product-planning priority**
-> Date: 2026-09-20
+> Date: 2026-09-21
 > Parent plan: `PROJECT_PLAN.md`
 > Korean counterpart: [ONE_TO_ONE_PRIVATE_CHAT_SPEC.ko.md](ONE_TO_ONE_PRIVATE_CHAT_SPEC.ko.md)
 > Change type: planning/documentation only. Runtime, DB, API, realtime infrastructure and Production behavior remain unchanged until implementation gates pass.
@@ -279,3 +279,62 @@ Rollback must disable new sends/entry points by server policy, stop chat realtim
 5. **v2026.09.20.305-05 P0:** block, mute, report, notification and moderator-evidence integration.
 6. **v2026.09.20.305-06 P0:** security/privacy/abuse/concurrency/mobile/accessibility E2E.
 7. **v2026.09.20.305-07 P0:** latest-plan re-read, exact-SHA Test, rollback drill and zero-downtime Production promotion.
+
+## 29. Cross-surface direct-message entry points — v2026.09.21.323
+Private messaging must be reachable from the member context where another user is encountered, without creating a separate authorization model per surface.
+
+Required first-party entry points:
+- public board post author identity;
+- public board comment/reply author identity;
+- member profile/header;
+- member ID/username/nickname search result;
+- eligible member directory/list rows where such a directory already exists;
+- other authenticated user chips/cards only when the displayed identity resolves to one canonical member ID.
+
+Every entry point must resolve the target to an immutable server-side member ID before conversation creation. Display names, nicknames, usernames, post IDs or comment IDs are discovery context only and must never become authorization keys.
+
+### 29.1 Entry-point interaction flow
+1. User activates the message action from a post, comment, profile, search result or member row.
+2. Client sends only the canonical target member ID plus optional non-authoritative source context.
+3. Server re-evaluates authenticated principal, self-target rejection, account state, DM preference, block relation, moderation restrictions, age/safety eligibility, rollout state and rate limits.
+4. If allowed, server returns the existing canonical conversation or creates it idempotently.
+5. Client opens the canonical conversation screen. Message delivery is shown only after the send request is committed.
+6. If denied, client shows a generic privacy-safe unavailable state and does not reveal block, age, moderation or security details about the peer.
+
+### 29.2 Board-specific rules
+- Board post/comment actions bind to authoritative author_user_id, not rendered nickname text.
+- Deleted, anonymized, suspended or system-authored content must not expose a stale message action.
+- If content survives account deletion/anonymization, direct-message initiation is removed unless a live eligible member principal still exists.
+- Quoted/reposted content messages the explicitly selected displayed author and never infers a recipient from quoted text.
+- Board moderation and DM moderation remain separate. Removing a post does not delete an existing private conversation.
+
+### 29.3 ID, username and nickname lookup
+- Exact user ID/username lookup may expose a message action only after the server returns a public-safe member result.
+- Nickname search may contain duplicates; UI disambiguates with public-safe fields while internally retaining canonical member IDs.
+- Client never constructs a DM target from a free-form nickname without server resolution.
+- Search endpoints must resist bulk enumeration, apply rate limits and return only approved public member fields.
+- Email, phone, OAuth identifiers, non-public internal IDs, balances and security/moderation attributes are not DM discovery keys.
+
+### 29.4 Self, block, privacy and unavailable states
+- Self-target is hidden or disabled in UI and rejected again by the server.
+- DM disabled, blocked, restricted or otherwise ineligible peers use a privacy-safe unavailable state unless policy explicitly permits a non-sensitive distinction.
+- Logged-out users may authenticate, but target context is restored only after login and revalidated.
+- Existing or archived pair conversations open the same canonical thread instead of creating duplicates.
+
+### 29.5 API contract addition
+POST /api/v1/chat/conversations accepts { targetUserId, sourceContext? }.
+sourceContext is optional navigation/telemetry context from a fixed enum such as profile, board_post, board_comment, member_search or member_list. It never affects authorization.
+A lightweight eligibility endpoint may be added only for UI affordances and must not leak block direction, exact age-verification state or moderation reason.
+
+### 29.6 Frontend contract
+Use one shared member-action primitive across board, profile, search and member-list surfaces. It receives canonical member ID plus public-safe display metadata and always revalidates eligibility on activation.
+Mobile requirements: action reachable at 320/360/390px, minimum 44px touch target, back navigation returns to the originating post/search/profile, virtual keyboard does not cover composer, and deep-link/back restoration cannot resend a message or create a duplicate conversation.
+
+### 29.7 QA additions
+QA must cover post author -> message, comment author -> message, profile -> message, exact username/user-ID -> message, duplicate nickname disambiguation, self-target, blocked pair, DM-disabled peer, suspended/deleted/anonymized author, logged-out login-and-revalidation, forged target ID, stale board metadata after username/nickname change, repeated initiation idempotency, mobile back-stack/accessibility, and sourceContext tampering having zero authorization effect.
+
+### 29.8 Implementation order extension
+8. v2026.09.21.323-08 P0: canonical member-resolution contract and shared DM entry-action component.
+9. v2026.09.21.323-09 P0: board post/comment author actions plus profile/member-search/list entry points.
+10. v2026.09.21.323-10 P0: enumeration/rate-limit/privacy/stale-identity tests and cross-surface E2E on isolated Test.
+11. v2026.09.21.323-11 P0: mid-work latest-plan re-read, exact-SHA regression pass and zero-downtime Production promotion only after all original private-chat gates also pass.
