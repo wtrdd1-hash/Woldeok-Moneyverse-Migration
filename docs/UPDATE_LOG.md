@@ -1,3 +1,13 @@
+## v2026.09.23.388 — Complete Main Integration of 23 Step-Up Security & Economy PRs, Zero-Downtime Promotion to Test & Production, 1061 Active Sessions Preserved
+
+- Target Branch: `main` (Release: `prod-bc2f820-v388`, Exact Git SHA: `bc2f8207`)
+- **P0/P1 Security Step-Up & Economy Idempotency Consolidation**:
+  1. **Mutation Idempotency Contracts**: Enforced mandatory idempotency keys on clubs (#684), spaces (#682), asset overrides (#681), and stock operations (#680).
+  2. **Privileged Step-Up 2FA Guards**: Integrated ReauthGuard & CSRF protection across shop catalog (#672), audit logs (#671), AI news (#670), market events (#669), catalog economy (#668), admin roles (#667), work policy (#666), safety takedowns (#661), stock mutations (#659), and content publishing (#657).
+  3. **Infrastructure Gates & Authoritative Planning**: App API client minimum version gate (#678), staging registration unblocking (#683), backend CI lint gates (#679, #673, #665), and planning reconciliation (#674, #646, #645, #644).
+  4. **Verification Gates**: Backend Vitest 97 test suites (974 tests passed, 0 failed), frontend unread-count tests (3/3 passed), Next.js Turbopack production compilation (100% routes).
+  5. **Zero-Downtime Blue-Green Promotion**: Test server 200 OK, production server 200 OK, BFF routes 200 OK, 0 Nginx errors, **1,061 active PostgreSQL user sessions 100% preserved**.
+
 ## v2026.09.22.368 — Hourly authoritative planning reconciliation
 
 - Recorded G368-01~05 for v352↔v360 authority drift, retired admin-TOTP current-control wording, mixed mobile/API contract versions, unmerged shop reauth candidate, and bounded release-evidence scope.
