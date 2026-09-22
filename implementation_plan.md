@@ -1,6 +1,8 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v50)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v52)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v52**: 1:1 개인 채팅 관리자 신고 증거 검토 콘솔 & 조치 거버넌스 엔진(Migration 228, /admin/safety 탭형 통합 큐, 10건 메시지 타임라인 뷰어, 원터치 조치 다이얼로그) 사양 누적 수록 (+118, -0)
+- **v51**: 1:1 개인 채팅 P0 안전 제어 풀스택 구현(Migration 227, NestJS API 4종, 토스풍 헤더 메뉴 및 44px 터치타깃 모달, 한글 IME isComposing 조합 가드) 및 v353 승격 사양 수록 (+113, -0)
 - **v50**: 4차 확정 조율 문답 반영 누적 — 관리자 약관 버전 실시간 발행 UI(/admin/controls, 2단계 확인 다이얼로그 연동), G352-01 정책 조회 실패 시 Fail-Safe 제출 방어(비권위 Fallback 저장 원천 차단), G352-02 & G352-04 docs/releases/ledger.json 불변 릴리스 원장 신설 및 rollback_production.sh 불변 증거 기반 롤백 고도화, G352-03 normalizePath 경로 정규화 및 화이트리스트 우회 방지 단위 테스트 확정 (+155, -0)
 - **v49**: 3차 긴급 조율 문답 확정 사양 반영 누적 및 최종 통합 구현 확정 — 관리자 제어 패널(/admin/controls) 실시간 약관 버전 개정 폼, 긴급 롤백 디스코드 웹훅 알림, 모달 내 인라인 탭형 아코디언 약관 전문 뷰어, OAuth 콜백 즉시 인라인 락 온보딩 파이프라인 확정 (+135, -0)
 - **v48**: 2차 긴급 조율 문답 확정 사양 반영 누적 — SWR 60초 캐싱 및 로컬 Fallback 회로, 토스형 축하 토스트 및 심리스 모달 언마운트 UX, PostgreSQL audit_logs 감사 원장 영구 보존(USER_CONSENT_GRANTED), rollback_production.sh 활성 세션(927개) 실시간 보호 안전 게이트 확정 (+110, -0)
@@ -1758,3 +1760,117 @@ flowchart TD
 3. **프로덕션 무중단 승격 (`v2026.09.22.353`)**:
    - 929개 이상 활성 세션 100% 무손실 보존 검증.
    - `docs/releases/ledger.json`에 `v353` 불변 원장 등록.
+
+---
+
+## 🏛️ [v52 Specification] 1:1 개인 채팅 관리자 신고 증거 검토 콘솔 & 조치 거버넌스 엔진
+
+### 1. 개요 및 배경
+- **상위 권위 기획**: `ONE_TO_ONE_PRIVATE_CHAT_SPEC.ko.md` 14절(신고·moderation) 및 23절(운영·관리자 지표), `PROJECT_PLAN.ko.md` v352 P0 긴급 과제.
+- **배경**: 직전 `v353`에서 사용자 간 1:1 개인 채팅 차단, 음소거, 4대 사유 신고 및 10개 메시지 증거 스냅샷(`evidence_snapshot`) 저장 기능이 완성되었습니다. 그러나 관리자가 `/admin/safety` 콘솔에서 접수된 신고를 검토하고, 증거 스냅샷을 안전하게 열람하며, 적절한 제재(경고, 차단, 기각)를 내릴 수 있는 운영자 전용 백오피스 인터페이스가 부재했습니다.
+- **핵심 목표**:
+  1. PostgreSQL 마이그레이션 228번 (`228-private-chat-moderation-admin.sql`)을 통해 최소 권한(Least-Privilege) SECURITY DEFINER 기반 관리자 신고 큐 조회, 10건 메시지 증적 안전 열람(열람 시 감사 로그 불변 기록), 조치 프로시저 신설.
+  2. 백엔드 NestJS `/api/v1/admin/safety/chat-reports` 컨트롤러/서비스/레포지토리 풀스택 구현.
+  3. 프론트엔드 `/admin/safety` 화면에 탭 인터페이스를 도입하여 `1:1 개인 채팅 신고 심사 큐`와 `비회원 긴급 콘텐츠 삭제 큐`를 통합 제공하고, 카카오톡/토스 스타일의 증거 스냅샷 타임라인 모달 및 조치 다이얼로그 탑재 (`admin-control-tower-craft`, `anti-ai-frontend-craftsmanship`, `fintech-responsive-layout-engine` 스킬 전면 적용).
+  4. Exact Git SHA 기반 무중단 배포 승격 (`v2026.09.22.354`) 및 929개 이상 활성 세션 100% 무손실 보존.
+
+---
+
+### 2. 시스템 아키텍처 및 감사 흐름 다이어그램
+
+```mermaid
+flowchart TD
+    subgraph AdminUI["관리자 안전 관제 타워 (/admin/safety)"]
+        Tab1["탭 1: 1:1 개인 채팅 신고 심사 큐 (긴급 P0)"]
+        Tab2["탭 2: 비회원 긴급 콘텐츠 삭제 큐 (TAKE IT DOWN)"]
+        Tab1 --> ReportList["신고 접수 목록 테이블 (SLA 상태 배지, 사유, 신고자/피신고자)"]
+        ReportList --> EvidenceModal["증거 스냅샷 열람 모달 (10개 메시지 타임라인 뷰어)"]
+        ReportList --> ActionModal["모더레이션 조치 모달 (경고 / 차단 / 기각)"]
+    end
+
+    subgraph ServerActions["Next.js Server Actions (app/admin/safety/actions.ts)"]
+        EvidenceModal --> GetEvidence["getChatReportEvidenceAction"]
+        ActionModal --> SubmitAction["actionChatReportAction"]
+    end
+
+    subgraph BackendAPI["백엔드 엔드포인트 (/api/v1/admin/safety/)"]
+        ReportList --> APIList["GET /admin/safety/chat-reports"]
+        GetEvidence --> APIGet["GET /admin/safety/chat-reports/:id"]
+        SubmitAction --> APIAction["POST /admin/safety/chat-reports/:id/action"]
+    end
+
+    subgraph Database["PostgreSQL 17.11 (Migration 228)"]
+        APIList --> SPList["private_chat_admin_list_reports()"]
+        APIGet --> SPGet["private_chat_admin_get_report() -> audit_logs (EVIDENCE_VIEWED)"]
+        APIAction --> SPAction["private_chat_admin_action_report() -> audit_logs (ACTIONED)"]
+    end
+```
+
+---
+
+### 3. 컴포넌트별 상세 변경 명세 (Proposed Changes)
+
+#### ① 데이터베이스 마이그레이션 (`packages/database/migrations/228-private-chat-moderation-admin.sql`)
+- **`public.private_chat_admin_list_reports(p_admin_id uuid, p_status text, p_limit int, p_offset int)`**:
+  - 관리자 권한 확인 (관리자 콘솔 세션 적격성 검증).
+  - `private_chat_reports`와 `users` 테이블을 조인하여 신고자/피신고자 닉네임, 계정 상태, 사유, 상세 메모, 증거 스냅샷 메시지 수(`jsonb_array_length`), 처리 상태, 접수 일시 반환.
+- **`public.private_chat_admin_get_report(p_admin_id uuid, p_report_id uuid)`**:
+  - 관리자 권한 확인.
+  - 신고 건의 `evidence_snapshot` 10개 메시지 전문 반환.
+  - 기획서 14절에 따라 `public.audit_logs`에 `CHAT_REPORT_EVIDENCE_VIEWED` 불변 감사 레코드 영구 기록 (누가, 언제, 어떤 신고의 본문 증거를 열람했는지 증명).
+- **`public.private_chat_admin_action_report(p_admin_id uuid, p_report_id uuid, p_action text, p_note text)`**:
+  - `p_action` ∈ `['ACTIONED_BLOCKED', 'ACTIONED_WARNED', 'REJECTED']` 유효성 검증.
+  - 신고 상태를 갱신하고 `actioned_at`, `actioned_by` 기록.
+  - 'ACTIONED_BLOCKED' 선택 시 피신고자의 시스템 제재 플래그 또는 강제 차단 연동.
+  - `public.audit_logs`에 `CHAT_REPORT_ACTIONED` 감사 기록 영구 보존.
+- **권한 제어**:
+  - 소유권: `moneyverse_migrator`.
+  - 실행 권한: `moneyverse_app`에만 `GRANT EXECUTE`, 일반 `PUBLIC`은 차단.
+
+#### ② 백엔드 안전 모듈 확장 (`backend/src/safety/`)
+- `safety.dto.ts`:
+  - `AdminChatReportActionDto`: `action` (Enum), `note` (string, 2~500자).
+  - `AdminChatReportQueryDto`: `status`, `limit`, `offset`.
+- `safety.repository.ts`:
+  - `adminListChatReports(adminId, status, limit, offset)`
+  - `adminGetChatReport(adminId, reportId)`
+  - `adminActionChatReport(adminId, reportId, action, note)`
+- `safety.service.ts`:
+  - 파라미터 검증, 예외 변환 및 비즈니스 오케스트레이션.
+- `safety.controller.ts`:
+  - `GET /api/v1/admin/safety/chat-reports`: 관리자 세션 가드 (`AdminGuard`, `AdminSessionGuard`, `SessionGuard`).
+  - `GET /api/v1/admin/safety/chat-reports/:id`: 단건 상세 및 증거 스냅샷 조회.
+  - `POST /api/v1/admin/safety/chat-reports/:id/action`: 조치 실행 (`CsrfGuard` 필수 적용).
+
+#### ③ 프론트엔드 관리자 안전 화면 쇄신 (`frontend/src/app/admin/safety/`)
+- **적용 스킬**: `admin-control-tower-craft`, `anti-ai-frontend-craftsmanship`, `fintech-responsive-layout-engine`
+- `actions.ts`:
+  - `getChatReportDetailAction(reportId)`: 10개 메시지 증거 스냅샷 페치.
+  - `actionChatReportAction(reportId, action, note)`: 조치 실행 및 `revalidatePath('/admin/safety')`.
+- `chat-report-evidence-dialog.tsx`:
+  - 신고 당시 캡처된 10개 메시지를 시각화하는 모달 컴포넌트.
+  - 발신자/수신자 시각적 구분(좌/우 말풍선), 타임스탬프, 메시지 순번(Sequence) 배지.
+  - 신고 사유 및 상세 설명 콜아웃 표시.
+- `chat-report-action-dialog.tsx`:
+  - 원터치 조치 다이얼로그 (경고 조치, 피신고자 차단 조치, 기각 처리).
+  - 조치 사유 메모 필수 입력 폼 및 위험 작업 2단계 확인.
+- `page.tsx`:
+  - 상단 탭: `[1:1 개인 채팅 신고 심사 큐]` / `[비회원 긴급 콘텐츠 삭제 큐]`.
+  - 상단 메트릭 카드: `미처리 채팅 신고 (SLA 24시간)`, `누적 제재 조치 건수`, `전체 인입 신고`.
+  - 반응형 테이블: 320px 모바일 수평 스크롤 방어, 44px 이상 터치 타깃 준수.
+
+---
+
+### 4. 검증 및 무중단 승격 계획 (Verification Plan)
+1. **타입체크 및 단위 테스트**:
+   - `pnpm --filter @moneyverse/backend test` (신규 관리자 신고 API 테스트)
+   - `pnpm --filter @moneyverse/frontend test` (모더레이션 모달 및 액션 테스트)
+2. **미니 PC DB 마이그레이션 적용**:
+   - `packages/database/migrations/228-private-chat-moderation-admin.sql` 실행.
+3. **Exact Git SHA 빌드 및 스테이징**:
+   - Next.js Turbopack 빌드 시 커밋 SHA 주입 (`BUILD_ID`).
+4. **프로덕션 무중단 승격 (`v2026.09.22.354`)**:
+   - 929개 이상 PostgreSQL 활성 세션 100% 보존 검증.
+   - 런타임 신원 일치(Exact SHA) 확인.
+   - `docs/releases/ledger.json` 및 `PROJECT_MEMORY.md` 동기화.
+

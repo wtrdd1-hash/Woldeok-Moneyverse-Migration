@@ -17,6 +17,8 @@ import {
   EmergencyTakedownSubmitSchema,
   EmergencyTakedownStatusQuerySchema,
   AdminTakedownActionSchema,
+  AdminChatReportActionSchema,
+  AdminChatReportQuerySchema,
 } from './safety.dto';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
@@ -96,4 +98,61 @@ export class SafetyController {
     }
     return this.safetyService.adminActionTakedown(actorUserId, caseId, parsed.data);
   }
+
+  /**
+   * 관리자 1:1 개인 채팅 신고 큐 목록 조회
+   */
+  @Get('admin/safety/chat-reports')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
+  @ApiOperation({ summary: '관리자 1:1 개인 채팅 신고 큐 목록 조회' })
+  async adminListChatReports(
+    @Req() req: RequestWithSession,
+    @Query('status') status?: string,
+    @Query('limit') limit = '50',
+    @Query('offset') offset = '0',
+  ) {
+    const actorUserId = requireUserId(req);
+    const parsed = AdminChatReportQuerySchema.safeParse({ status, limit, offset });
+    const query = parsed.success ? parsed.data : { status: undefined, limit: 50, offset: 0 };
+    return this.safetyService.adminListChatReports(
+      actorUserId,
+      query.status,
+      query.limit,
+      query.offset,
+    );
+  }
+
+  /**
+   * 특정 1:1 개인 채팅 신고 건 상세 및 10개 메시지 증거 스냅샷 열람
+   */
+  @Get('admin/safety/chat-reports/:id')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
+  @ApiOperation({ summary: '관리자 1:1 개인 채팅 신고 상세 및 증거 스냅샷 열람' })
+  async adminGetChatReport(
+    @Req() req: RequestWithSession,
+    @Param('id') reportId: string,
+  ) {
+    const actorUserId = requireUserId(req);
+    return this.safetyService.adminGetChatReport(actorUserId, reportId);
+  }
+
+  /**
+   * 관리자 1:1 개인 채팅 신고 조치 (제재/경고/기각) 실행
+   */
+  @Post('admin/safety/chat-reports/:id/action')
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
+  @ApiOperation({ summary: '관리자 1:1 개인 채팅 신고 조치 실행' })
+  async adminActionChatReport(
+    @Req() req: RequestWithSession,
+    @Param('id') reportId: string,
+    @Body() rawBody: unknown,
+  ) {
+    const actorUserId = requireUserId(req);
+    const parsed = AdminChatReportActionSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      throw new BadRequestException(parsed.error.issues.map((e: { message: string }) => e.message).join(', '));
+    }
+    return this.safetyService.adminActionChatReport(actorUserId, reportId, parsed.data);
+  }
 }
+

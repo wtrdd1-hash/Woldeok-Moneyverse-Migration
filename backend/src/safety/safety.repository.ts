@@ -33,6 +33,35 @@ export interface TakedownStatusRow {
   readonly created_at: Date;
 }
 
+export interface ChatReportRow {
+  readonly report_id: string;
+  readonly reporter_id: string;
+  readonly reporter_username: string;
+  readonly reporter_nickname: string;
+  readonly reported_user_id: string;
+  readonly reported_username: string;
+  readonly reported_nickname: string;
+  readonly conversation_id: string;
+  readonly reason: string;
+  readonly details: string;
+  readonly evidence_count: number;
+  readonly status: string;
+  readonly created_at: Date;
+  readonly actioned_at: Date | null;
+  readonly actioned_by: string | null;
+  readonly actioner_nickname: string | null;
+}
+
+export interface ChatReportDetailRow extends ChatReportRow {
+  readonly evidence_snapshot: Array<{
+    id: string;
+    sender_id: string;
+    sequence: number;
+    body: string;
+    created_at: string;
+  }>;
+}
+
 @Injectable()
 export class SafetyRepository {
   readonly pool: Queryable;
@@ -103,4 +132,52 @@ export class SafetyRepository {
     );
     return Boolean(row?.success);
   }
+
+  async adminListChatReports(
+    actorUserId: string,
+    statusFilter?: string,
+    limit = 50,
+    offset = 0,
+  ): Promise<ChatReportRow[]> {
+    return queryRows<ChatReportRow>(
+      this.pool,
+      `SELECT report_id::text, reporter_id::text, reporter_username, reporter_nickname,
+              reported_user_id::text, reported_username, reported_nickname,
+              conversation_id::text, reason, details, evidence_count, status,
+              created_at, actioned_at, actioned_by::text, actioner_nickname
+       FROM public.private_chat_admin_list_reports($1, $2, $3, $4)`,
+      [actorUserId, statusFilter ?? null, limit, offset],
+    );
+  }
+
+  async adminGetChatReport(
+    actorUserId: string,
+    reportId: string,
+  ): Promise<ChatReportDetailRow | null> {
+    const row = await queryOne<ChatReportDetailRow>(
+      this.pool,
+      `SELECT report_id::text, reporter_id::text, reporter_username, reporter_nickname,
+              reported_user_id::text, reported_username, reported_nickname,
+              conversation_id::text, reason, details, evidence_snapshot, status,
+              created_at, actioned_at, actioned_by::text, actioner_nickname
+       FROM public.private_chat_admin_get_report($1, $2)`,
+      [actorUserId, reportId],
+    );
+    return row ?? null;
+  }
+
+  async adminActionChatReport(
+    actorUserId: string,
+    reportId: string,
+    action: string,
+    note?: string,
+  ): Promise<boolean> {
+    const row = await queryOne<{ success: boolean }>(
+      this.pool,
+      `SELECT public.private_chat_admin_action_report($1, $2, $3, $4) AS success`,
+      [actorUserId, reportId, action, note ?? null],
+    );
+    return Boolean(row?.success);
+  }
 }
+

@@ -54,4 +54,42 @@ export class SafetyService {
       newStatus: dto.newStatus,
     };
   }
+
+  async adminListChatReports(actorUserId: string, status?: string, limit?: number, offset?: number) {
+    const items = await this.repository.adminListChatReports(actorUserId, status, limit, offset);
+    return {
+      items,
+      count: items.length,
+    };
+  }
+
+  async adminGetChatReport(actorUserId: string, reportId: string) {
+    const report = await this.repository.adminGetChatReport(actorUserId, reportId);
+    if (!report) {
+      throw new NotFoundException('해당 신고 건을 찾을 수 없습니다.');
+    }
+    return report;
+  }
+
+  async adminActionChatReport(
+    actorUserId: string,
+    reportId: string,
+    dto: { action: string; note?: string },
+  ) {
+    const success = await this.repository.adminActionChatReport(
+      actorUserId,
+      reportId,
+      dto.action,
+      dto.note,
+    );
+    if (!success) {
+      throw new BadRequestException('신고 건 조치 처리에 실패했습니다.');
+    }
+    return {
+      success: true,
+      reportId,
+      newStatus: dto.action,
+    };
+  }
 }
+

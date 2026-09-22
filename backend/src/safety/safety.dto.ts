@@ -39,3 +39,19 @@ export const AdminTakedownActionSchema = z.object({
 });
 
 export type AdminTakedownActionDto = z.infer<typeof AdminTakedownActionSchema>;
+
+export const AdminChatReportActionSchema = z.object({
+  action: z.enum(['ACTIONED_BLOCKED', 'ACTIONED_WARNED', 'REJECTED']),
+  note: z.string().max(1000).optional(),
+});
+
+export type AdminChatReportActionDto = z.infer<typeof AdminChatReportActionSchema>;
+
+export const AdminChatReportQuerySchema = z.object({
+  status: z.enum(['SUBMITTED', 'ACTIONED_BLOCKED', 'ACTIONED_WARNED', 'REJECTED']).optional(),
+  limit: z.coerce.number().min(1).max(100).default(50),
+  offset: z.coerce.number().min(0).default(0),
+});
+
+export type AdminChatReportQueryDto = z.infer<typeof AdminChatReportQuerySchema>;
+
