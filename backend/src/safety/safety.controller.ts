@@ -35,7 +35,7 @@ export class SafetyController {
   /**
    * 비회원 공개 긴급 콘텐츠 삭제 접수 (TAKE IT DOWN Act)
    */
-  @Post('api/v1/safety/takedown')
+  @Post('safety/takedown')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: '비회원 공개 긴급 콘텐츠 삭제 접수' })
   async submitEmergencyTakedown(@Body() rawBody: unknown) {
@@ -49,7 +49,7 @@ export class SafetyController {
   /**
    * 비회원 공개 긴급 콘텐츠 삭제 접수 상태 조회
    */
-  @Post('api/v1/safety/takedown/status')
+  @Post('safety/takedown/status')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: '비회원 접수 상태 조회' })
   async getTakedownStatus(@Body() rawBody: unknown) {
@@ -63,7 +63,7 @@ export class SafetyController {
   /**
    * 관리자 긴급 삭제 모더레이션 큐 목록 조회
    */
-  @Get('api/v1/admin/safety/takedowns')
+  @Get('admin/safety/takedowns')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
   @ApiOperation({ summary: '관리자 긴급 콘텐츠 삭제 큐 조회' })
   async adminListTakedowns(
@@ -81,7 +81,7 @@ export class SafetyController {
   /**
    * 관리자 긴급 삭제 조치 (승인/반려/삭제) 실행
    */
-  @Post('api/v1/admin/safety/takedowns/:caseId/action')
+  @Post('admin/safety/takedowns/:caseId/action')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: '관리자 긴급 콘텐츠 삭제 조치' })
   async adminActionTakedown(
