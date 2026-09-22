@@ -4,13 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { ConsentStepUpModal } from './consent-step-up-modal';
 
-const EXEMPT_PATHS = ['/login', '/terms', '/privacy'];
 
-/**
- * Ensures signed-in users who have not yet consented to the latest policy
- * are presented with an elegant, in-place step-up consent modal rather than
- * being abruptly redirected away and crashing the client router.
- */
 interface ConsentGuardProps {
   readonly signedIn: boolean;
   readonly consentCurrent: boolean;
