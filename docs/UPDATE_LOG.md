@@ -2,7 +2,7 @@
 
 ## v2026.09.22.350 — Dynamic Consent Policy Binding, Inline Tab Accordion Viewer & 10s Production Rollback Script
 
-- Branch: `main` (Release: `prod-<SHA>-v350`)
+- Branch: `main` (Release: `prod-d67a915-v350`)
 - **Consent Defense Hardening & Operational Resilience Upgrade**:
   1. **Server-Side Dynamic Policy Version Binding (`fetchLatestPolicy`)**:
      - Connected backend `GET /api/v1/auth/policy` in `frontend/src/lib/api.ts` with 60s SWR caching (`revalidate: 60`) and graceful fallback on backend outages.
