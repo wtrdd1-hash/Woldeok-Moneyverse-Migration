@@ -2,11 +2,28 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.22.335
+> Current integrated version: v2026.09.22.348
 > Implementation/evidence sync: 2026-09-22
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Integrated planning re-review and authority reconciliation — v2026.09.22.348 (2026-09-22)
+
+- **Authority drift fixed:** the header was v335 while this document already contained v337 and repository/runtime work had advanced through v342, v343, v347 and v347.1. v348 is now the current integrated authority; older sections remain historical evidence and are superseded where v348 explicitly conflicts.
+- **10,000+ research rule:** this means a traceable corpus threshold plus focused normative review, not a claim of manually opening 10,000 pages. Existing plan research records SeeClick 10,000 screenshots, WebUI 41,970 and RICO 66,000+ (>117,970 UI artifacts combined). Current normative refresh covers WCAG 2.2, OpenAPI 3.1.1, RFC 9110/9457, OWASP API Security Top 10:2023, NIST SP 800-63-4/63B-4 and SSDF, ISO 20022:2026 and the Bank of Korea 2025 payment-system report.
+- **Detailed re-review:** [INTEGRATED_REVIEW_V348.md](INTEGRATED_REVIEW_V348.md). It records evidence classes, gap IDs, detailed contracts, acceptance criteria and source URLs.
+- **Runtime evidence vs plan authority:** v342/v343/v347/v347.1 prove implementation/release facts at specific SHAs, but they do not silently override product intent, safety boundaries, QA, rollback or acceptance in this plan.
+- **QA-335 reconciliation:** old OPEN findings remain historical discoveries until a defect-ledger transition records exact candidate SHA, Test evidence, Production evidence and closure SHA/date. Later healthy-release claims alone do not retroactively close them.
+- **Stock halt:** v315 remains the cost-basis settlement product contract; v342 is implementation/bug-fix evidence. Current integrated state is implemented with release evidence but still subject to real-DB/concurrency/invariant regression gates.
+- **Newspaper poll authority:** for shared/public polls, server data is authoritative; localStorage may remember only the current browser's participation UX. A deliberately local/demo poll must be labelled as such and cannot present local percentages as global opinion.
+- **Developer Portal/API:** v347 is a first-class product surface. OpenAPI is the machine contract; current 3.0-compatible output must have a tested compatibility/migration path to OAS 3.1.1. Endpoint contracts include auth/BOLA, DTO allowlists, mutation idempotency, bounds/pagination, rate/resource/time budgets, cache/retry/deprecation and stable machine errors converging on RFC 9457 where compatible.
+- **Try It Out safety:** Production documentation must not become an unrestricted privileged mutation console. Destructive/economic/admin writes are disabled or sandbox-routed by default; normal authorization, CSRF and step-up stay enforced; tokens/secrets are never persisted to analytics/localStorage; request/response data is redacted by policy.
+- **Consent step-up:** v347.1's in-place modal is the intended UX, with server-authoritative versioned age/terms/privacy grants, idempotent submission, session-expiry recovery, labelled/focus-managed accessible dialog behavior and protected actions blocked until server confirmation.
+- **v46/v47 draft refinement:** dynamic policy binding, route exemptions, hydration guard and emergency rollback are accepted only with stronger fail-closed contracts: policy fetch/cache failure cannot invent a consent version; route matching is canonicalized and server/API enforcement cannot rely on a client overlay; a 200ms fade is UX only and does not prove CLS=0; rollback selects a recorded last-known-good frontend/backend pair with migration compatibility and health/session proof rather than "previous directory" heuristics. `reload-or-restart` alone is not evidence of zero downtime; use the proven blue/green/canary cutover contract.
+- **Live/real-time semantics:** home/newspaper/developer data requires source/fetch timestamps, maximum staleness, stale-state UI, retry/backoff and safe fallback. Animation alone never proves freshness.
+- **Governance:** English remains primary and Korean synchronized second language. Every planning cycle updates this integrated plan, re-reads remote main before implementation and once mid-work, preserves GitHub Markdown conventions, and distinguishes planning from implementation/deployment evidence.
+- **v348 acceptance:** EN/KO version parity; new/changed runtime features must define authority, data/API contract, negative paths, privacy/security, accessibility/responsive behavior, observability, QA, release and rollback. Future implementation must re-read the living plan immediately before and during work.
 
 ## Automatic main integration directive — v2026.09.22.337 (2026-09-22)
 
