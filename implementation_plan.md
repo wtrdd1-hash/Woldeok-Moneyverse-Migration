@@ -1,6 +1,7 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v46)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v47)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v47**: 1차 긴급 조율 문답 확정 사양 반영 누적 — 동적 서버 사이드 정책 패치(Root Layout/BFF 연동), 엄격 화이트리스트 경로 매트릭스, 마운트 가드 + 200ms Fade-In 오버레이, 10초 원클릭 자동 롤백 스크립트(ops/release/rollback_production.sh) 확정 (+115, -0)
 - **v46**: 긴급 결함 방어 아키텍처 및 무장애 운영 플레이북 심화 기획 — 동적 정책 버전 연동 파이프라인, 전 도메인 예외/보호 경로 거버넌스, 클라이언트 하이드레이션 깜빡임 방지, 원클릭 비상 롤백 플레이북(RTO < 10s) 및 GPT 다자간 작업 잠금 명세 수록 (+125, -0)
 - **v45**: 긴급 복구 및 메인 포털 전면 고도화 — 이용약관 미동의 세션 접속 시 강제 튕김(router.replace)으로 인한 화면 블랙아웃(본문 증발) 결함 원천 해결(토스형 원터치 ConsentStepUpModal 인라인 다이얼로그 탑재 및 백엔드 PUT /api/v1/auth/consent 원자적 연동), anti-ai-frontend-craftsmanship 및 fintech-responsive-layout-engine 기반 홈 화면(/) 전면 리빌드(실시간 순자산 헤어로, 2열 비대칭 핀테크 라이브 콘솔, 4대 기둥 전 도메인 서비스 디렉터리, 320px~1440px 클리핑 제로 반응형), 백엔드-프론트엔드 동시 무중단 승격(v347) 확정 (+210, -0)
 - **v44**: 가상 주식 거래소(`/stocks`) 고도화 착수 — 토스/로빈후드형 하이브리드 호가 스프레드 및 원터치 빠른 주문 패널, 미니 SVG 실시간 캔들 스파크라인, 종목별 실시간 토론(Discussions) 피드 연동, 맞춤형 목표가 도달 알림(Price Alerts) 모달 설계 확정 (+160, -0)
@@ -1443,6 +1444,44 @@ flowchart TD
   - `PROJECT_MEMORY.md`의 Section 8을 SSOT(Single Source of Truth)로 운영.
   - Antigravity 또는 GPT가 작업을 개시할 때 `PROJECT_MEMORY.md`의 배포 상태 및 최근 커밋을 확인하여 충돌 방지.
   - 작업 전 `git fetch origin main`, 작업 후 원자적 커밋 & 푸시 및 미니 PC 워크트리 동시 동기화 강제.
+
+---
+
+## 🚀 [v47 Specification] 1차 조율 결정 사항 및 세부 엔지니어링 명세 (누적 추가)
+
+### 1. 동적 서버 사이드 정책 패치 아키텍처 (A1 결정 사항)
+- **요구사항**: `ConsentStepUpModal` 및 `ConsentGuard`에 하드코딩된 약관 버전을 제거하고 백엔드 원천 데이터베이스의 최신 버전을 실시간 주입.
+- **구현 구조**:
+  - `frontend/src/lib/api.ts`에 `fetchLatestPolicy()` 헬퍼 추가: 백엔드 `GET /api/v1/auth/policy` 호출 (`revalidate: 60` 초 캐싱 적용하여 DB 부하 방어).
+  - 최상위 서버 레이아웃 `frontend/src/app/layout.tsx`에서 `fetchLatestPolicy()`를 호출하여 `termsVersion`, `privacyVersion`을 `ConsentGuard`에 주입.
+  - `ConsentGuard` -> `ConsentStepUpModal`로 props 전달 및 제출 폼(`formData.set('termsVersion', termsVersion)`)에 완벽 동기화.
+
+### 2. 엄격 화이트리스트 경로 차단 매트릭스 (A2 결정 사항)
+- **요구사항**: 법률 문서 및 규제 안전 센터를 제외한 모든 도메인에서 미동의 회원의 무단 금융/원장 조작을 원천 방어.
+- **예외 화이트리스트 (`EXEMPT_PATHS`) 정밀 정의**:
+  - 법률 문서: `/login`, `/terms`, `/privacy`, `/data-deletion`, `/account-deletion`
+  - 안전 및 규제 센터: `/safety`, `/safety/takedown`
+  - 메타데이터 및 에셋: `/robots.txt`, `/sitemap.xml`, `/sitemap-*.xml`, `/api/og`, `/icon.svg`, `/apple-icon.png`, `/_next/*`, `/frontend-version`, `/api/health`
+- **화면 동작**:
+  - 보호 경로 진입 시 본문(`children`)은 렌더링되되, 화면 전체에 `backdrop-blur-md bg-background/80` 레이어와 함께 `ConsentStepUpModal`이 중앙에 고정 마운트됨.
+  - 바깥 영역 클릭 및 ESC 키 차단 (`onPointerDownOutside`, `onEscapeKeyDown` 방지).
+
+### 3. 마운트 가드 및 200ms 심리스 페이드인 (A3 결정 사항)
+- **요구사항**: SSR과 브라우저 하이드레이션 타이밍 불일치로 인한 화면 번쩍임 및 레이아웃 시프트(CLS) 0% 달성.
+- **구현 코드 패턴**:
+  - `ConsentStepUpModal` 내부 `mounted` 상태 관리 (`const [mounted, setMounted] = useState(false); useEffect(() => setMounted(true), []);`).
+  - 모달 오버레이에 `transition-opacity duration-200 ease-out` 적용.
+  - 마운트 완료 전에는 투명(`opacity-0`)을 유지하다가 하이드레이션 완료 직후 부드럽게 페이드인(`opacity-100`).
+
+### 4. 10초 원클릭 자동 롤백 스크립트 규격 (A4 결정 사항)
+- **파일 경로**: `ops/release/rollback_production.sh`
+- **스크립트 동작 명세**:
+  - `/srv/moneyverse-data/releases/` 내 직전 안정 릴리스(직전 `prod-*-v*` 디렉토리) 자동 탐지.
+  - 원자적 심볼릭 링크 스위칭: `sudo ln -sfn "$PREV_STABLE_RELEASE" /srv/moneyverse-data/releases/production-current`
+  - Systemd graceful reload: `sudo systemctl reload-or-restart moneyverse-backend.service moneyverse-frontend.service`
+  - `verify-runtime-identity.sh` 자동 실행 및 927+개 활성 세션 보존 상태 콘솔 출력.
+  - 복구 완료 시간 목표: **10초 이내 (RTO < 10s)**.
+
 
 
 
