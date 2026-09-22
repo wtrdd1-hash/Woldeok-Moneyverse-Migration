@@ -215,6 +215,22 @@ export async function publicApi<T>(path: string, revalidate: number): Promise<T 
   }
 }
 
+export interface PolicyResponse {
+  readonly termsVersion: string;
+  readonly privacyVersion: string;
+}
+
+const DEFAULT_POLICY: PolicyResponse = {
+  termsVersion: '2026-09-02',
+  privacyVersion: '2026-09-02',
+};
+
+/** Fetches latest legal policy version from the backend with 60s SWR cache and graceful fallback. */
+export async function fetchLatestPolicy(): Promise<PolicyResponse> {
+  const policy = await publicApi<PolicyResponse>('/api/v1/auth/policy', 60);
+  return policy ?? DEFAULT_POLICY;
+}
+
 /**
  * The same request as `api`, with the response's `set-cookie` handed back
  * instead of dropped.

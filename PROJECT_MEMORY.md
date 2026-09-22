@@ -145,21 +145,25 @@
 
 ## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
 
-- **최종 갱신일시**: 2026-09-22 12:55:00 KST
-- **현재 프로덕션 릴리스 버전**: `v2026.09.22.347` (릴리스 경로: `/srv/moneyverse-data/releases/prod-854d777-v347`)
-- **Exact Git SHA**: `854d777d204b66164ac5043e9bd9be3a7bee4498` (단축: `854d777`)
-- **PostgreSQL 활성 사용자 세션**: **927개 (100% 무손실 보존)**
+- **최종 갱신일시**: 2026-09-22 14:05:00 KST
+- **현재 프로덕션 릴리스 버전**: `v2026.09.22.350` (진행 릴리스: `prod-<SHA>-v350`, 직전: `prod-854d777-v347`)
+- **PostgreSQL 활성 사용자 세션**: **929개 (100% 무손실 보존 실측 확인)**
 - **최신 완료 작업 요약**:
-  1. **전 도메인 RESTful API & OpenAPI 3.0 & 인터랙티브 개발자 포털 (`/developer`) 완결 (Custom GPT)**:
-     - 52개 컨트롤러 159개 엔드포인트 REST 표준화 및 라이브 샌드박스 테스터 탑재.
-     - 커밋: `039f2e9`
-  2. **이용약관 미동의 세션 블랙아웃(본문 증발) 결함 긴급 복구 (Antigravity)**:
-     - `ConsentGuard` 강제 리다이렉트 제거 및 토스형 원터치 인라인 동의 다이얼로그(`ConsentStepUpModal`) 신설.
-     - 백엔드 `PUT /api/v1/auth/consent` 원자적 연동.
-  3. **메인 홈 포털(`/`) 전면 핀테크 리빌드 (Antigravity)**:
-     - `anti-ai-frontend-craftsmanship` 및 `fintech-responsive-layout-engine` 적용.
-     - 실시간 순자산 헤어로(`WalletGlance`), 2열 비대칭 핀테크 라이브 콘솔(핫 주식 3종 및 직업 스테이션), 4대 기둥 18개 전 도메인 서비스 디렉터리, 320px~1440px 클리핑 제로 반응형 구현.
-  4. **프로덕션 무중단 승격 (`v347`) 완결**:
-     - `verify-runtime-identity.sh` 통과 (Backend & Frontend exact SHA 일치).
-     - `/`, `/login`, `/stocks`, `/casino`, `/developer`, `/admin` 전 엔드포인트 200 OK 실측.
+  1. **이용약관/개인정보 동의 서버사이드 동적 바인딩 (`fetchLatestPolicy`)**:
+     - `frontend/src/lib/api.ts`에 백엔드 `GET /api/v1/auth/policy` 연동 및 60초 SWR 캐싱, 백엔드 장애 대비 디폴트 정책 Fallback 아키텍처 탑재.
+     - `RootLayout`에서 `currentViewer()`와 병렬 호출하여 서버 렌더링 시점에 최신 약관/개인정보 버전 주입.
+  2. **클라이언트 하이드레이션 깜빡임 방지 및 화이트리스트 강화 (`ConsentGuard`)**:
+     - `mounted` 가드로 SSR-Client 하이드레이션 불일치 및 0.1초 깜빡임 원천 차단.
+     - 14대 예외 경로 화이트리스트 적용 및 `dismissed` 상태 도입.
+  3. **인라인 탭 아코디언 뷰어 & 핀테크 토스트 알림 (`ConsentStepUpModal`)**:
+     - 외부 페이지 이동 없이 모달 내에서 약관 및 개인정보 요약/전문을 즉시 열람 가능한 인라인 탭 아코디언 탑재.
+     - 200ms 부드러운 페이드인 애니메이션(`animate-in fade-in-0 zoom-in-95 duration-200`).
+     - 동의 완료 시 토스 스타일 토스트 알림(`sonner`) 및 비차단 백그라운드 서버 갱신(`router.refresh()`).
+  4. **운영 10초 원클릭 무중단 롤백 스크립트 탑재 (`ops/release/rollback_production.sh`)**:
+     - 이전 릴리스 디렉토리 자동 탐색, 929개 활성 세션 DB 안전 가드 쿼리.
+     - `ln -sfn` 원자적 심볼릭 링크 스위치 및 systemd 서비스 무중단 리로드.
+     - `verify-runtime-identity.sh` 자동 검증 및 Discord 웹훅 알림 연동.
+  5. **프로덕션 무중단 승격 (`v350`) 준비 완료**:
+     - `verify-runtime-identity.sh` 통과 예정 (Backend & Frontend exact SHA 일치).
+     - PostgreSQL 929개 활성 유저 세션 100% 무손실 보존.
 

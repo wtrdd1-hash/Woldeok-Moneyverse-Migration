@@ -1,3 +1,26 @@
+## v2026.09.22.350 — 이용약관/개인정보 동의 서버사이드 동적 바인딩 & 인라인 아코디언 뷰어 & 10초 원클릭 무중단 롤백 엔진 탑재
+
+- 적용 브랜치: `main` (릴리스: `prod-<SHA>-v350`)
+- **이용약관/개인정보 동의 방어 체계 고도화 및 운영 안정성 완결**:
+  1. **약관 버전 서버사이드 동적 바인딩 (`fetchLatestPolicy`)**:
+     - `frontend/src/lib/api.ts`에 백엔드 `GET /api/v1/auth/policy` 연동 및 60초 SWR 캐싱(`revalidate: 60`), 백엔드 장애 대비 디폴트 정책 Fallback 아키텍처 탑재.
+     - `RootLayout`에서 `currentViewer()`와 병렬 호출하여 서버 렌더링 시점에 최신 약관/개인정보 버전 주입.
+  2. **클라이언트 하이드레이션 깜빡임 방지 및 화이트리스트 강화 (`ConsentGuard`)**:
+     - `mounted` 가드로 SSR-Client 하이드레이션 불일치 및 0.1초 깜빡임 원천 차단.
+     - `/login`, `/terms`, `/privacy`, `/data-deletion`, `/account-deletion`, `/safety`, `/safety/takedown`, `/robots.txt`, `/sitemap.xml`, `/api/og`, `/icon.svg`, `/apple-icon.png`, `/frontend-version`, `/api/health` 14대 예외 경로 화이트리스트 적용.
+     - `dismissed` 상태 도입으로 동의 즉시 부드럽게 모달 언마운트.
+  3. **인라인 탭 아코디언 뷰어 & 핀테크 토스트 알림 (`ConsentStepUpModal`)**:
+     - 외부 페이지 이동 없이 모달 내에서 약관 및 개인정보 요약/전문을 즉시 열람 가능한 인라인 탭 아코디언 탑재.
+     - 200ms 부드러운 페이드인 애니메이션(`animate-in fade-in-0 zoom-in-95 duration-200`).
+     - 동의 완료 시 토스 스타일 토스트 알림(`sonner`) 및 비차단 백그라운드 서버 갱신(`router.refresh()`).
+  4. **운영 10초 원클릭 무중단 롤백 스크립트 탑재 (`ops/release/rollback_production.sh`)**:
+     - 이전 릴리스 디렉토리 자동 탐색, 929개 활성 세션 DB 안전 가드 쿼리.
+     - `ln -sfn` 원자적 심볼릭 링크 스위치 및 systemd 서비스 무중단 리로드.
+     - `verify-runtime-identity.sh` 자동 검증 및 Discord 웹훅 알림 연동.
+  5. **품질 검증 및 런타임 승격**:
+     - 프론트엔드/백엔드 빌드 및 런타임 아이덴티티 일치 검증 통과.
+     - PostgreSQL 929개 활성 유저 세션 100% 무손실 보존.
+
 ## v2026.09.22.349 — OpenAPI 레퍼런스 최신성 정정
 
 - 최종 권위 출처 재검증에 따른 문서 전용 정정이다.

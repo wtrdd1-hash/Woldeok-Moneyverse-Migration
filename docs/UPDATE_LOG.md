@@ -1,5 +1,28 @@
 # Update Log
 
+## v2026.09.22.350 — Dynamic Consent Policy Binding, Inline Tab Accordion Viewer & 10s Production Rollback Script
+
+- Branch: `main` (Release: `prod-<SHA>-v350`)
+- **Consent Defense Hardening & Operational Resilience Upgrade**:
+  1. **Server-Side Dynamic Policy Version Binding (`fetchLatestPolicy`)**:
+     - Connected backend `GET /api/v1/auth/policy` in `frontend/src/lib/api.ts` with 60s SWR caching (`revalidate: 60`) and graceful fallback on backend outages.
+     - Fetched in parallel with `currentViewer()` in `RootLayout`, injecting authoritative terms and privacy versions at SSR render time.
+  2. **Hydration Flicker Prevention & Extended Exemption Whitelist (`ConsentGuard`)**:
+     - Mounted state guard prevents SSR-client hydration mismatch and transient 0.1s popups.
+     - Strict whitelist of 14 exempt paths: `/login`, `/terms`, `/privacy`, `/data-deletion`, `/account-deletion`, `/safety`, `/safety/takedown`, `/robots.txt`, `/sitemap.xml`, `/api/og`, `/icon.svg`, `/apple-icon.png`, `/frontend-version`, `/api/health`.
+     - Introduced `dismissed` state for immediate and seamless modal unmount upon consent.
+  3. **Inline Tab Accordion Viewer & FinTech Toast Notifications (`ConsentStepUpModal`)**:
+     - Built-in accordion viewer allows reviewing terms and privacy summaries directly inside the modal without leaving the page.
+     - Smooth 200ms fade-in transition (`animate-in fade-in-0 zoom-in-95 duration-200`).
+     - Toss-style celebratory toast notification (`sonner`) and non-blocking `router.refresh()` on agreement.
+  4. **Production 10s One-Click Emergency Rollback Script (`ops/release/rollback_production.sh`)**:
+     - Automated detection of prior releases, active session safety check (929+ sessions guarded in PostgreSQL).
+     - Atomic symlink switch (`ln -sfn`) and zero-downtime systemd service reload.
+     - Coherent runtime identity verification via `verify-runtime-identity.sh` and Discord webhook alert support.
+  5. **Verification & Zero-Downtime Deployment**:
+     - Frontend/backend build passing with exact-SHA runtime verification.
+     - All 929 active user sessions in PostgreSQL preserved with zero disruption.
+
 ## v2026.09.22.349 — OpenAPI Reference Freshness Correction
 
 - Documentation-only correction after final authoritative-source verification.
