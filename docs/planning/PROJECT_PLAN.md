@@ -2,11 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.22.349
+> Current integrated version: v2026.09.22.352
 > Implementation/evidence sync: 2026-09-22
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Hourly planning reconciliation — v2026.09.22.352 (2026-09-22)
+
+- **Exact baseline:** start and mid-work re-read both resolved `origin/main=29115dc726055def8510acb4c25ed15aad67f9b9`; no concurrent main movement occurred during this planning cycle.
+- **Authority drift:** runtime/update evidence is now v350 while the implementation-facing plan remained v349. v352 restores planning authority without rewriting v350 implementation history.
+- **G352-01 — consent fail-safe contradiction (P0 planning gap):** v348 G348-08 requires policy lookup failure to enter an explicit fail-safe state and never invent a consent version from stale/hard-coded fallback, while the v350 implementation record says `fetchLatestPolicy` gracefully falls back to constant defaults. Required contract: policy fetch/cache failure yields `POLICY_UNAVAILABLE`/equivalent, blocks protected consent-dependent mutations, preserves already-audited grants without fabricating a new current version, exposes retry/correlation telemetry, and has explicit offline/degraded UX. A constant may be used only as display copy metadata, never as authoritative grant version.
+- **G352-02 — rollback target/proof contradiction (P0 release gap):** v348 requires a recorded last-known-good paired frontend/backend release and says `reload-or-restart` alone is not zero-downtime proof; v350 describes automatic previous-release detection plus symlink/systemd reload as a 10-second zero-downtime rollback. Required contract: rollback manifest pins frontend/backend commit, artifact digests, schema/migration set, config compatibility and session compatibility; selection fails closed if any field is unknown; cutover evidence must include old/new process overlap or equivalent proven blue/green/canary mechanism, health/version/session checks and rollback duration measurement.
+- **G352-03 — exemption-route boundary underspecified (P1 security gap):** the 14-path client whitelist is UX-only. Canonicalize path/percent-encoding/trailing slash, test prefix/suffix confusion and encoded bypasses, and keep server authorization/consent enforcement on protected API mutations. Public diagnostics must disclose no secret/session/private state.
+- **G352-04 — release evidence provenance (P1 governance gap):** v350 claims exact-SHA build compatibility, 929 preserved sessions and zero disruption. Preserve these as implementation evidence, but do not convert them into planning acceptance until exact candidate/Test/Production commands or immutable evidence links are attached to the defect/release ledger.
+- **Standards freshness:** OpenAPI 3.2.1 remains current (2026-09-10); NIST SP 800-63-4 remains final (2025-07); OWASP Top 10:2025 is current; WCAG 2.2 remains the W3C Recommendation baseline and ISO/IEC 40500:2025 mapping. Version/date/status/URL are treated as one provenance tuple.
+- **Acceptance:** EN/KO semantic parity; G352-01/02 are Production blockers for the affected consent/rollback behavior until exact-SHA Test evidence closes them. This cycle is planning/docs only and makes no new implementation or deployment claim.
 
 ## Reference freshness correction — v2026.09.22.349 (2026-09-22)
 

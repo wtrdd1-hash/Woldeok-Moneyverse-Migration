@@ -62,7 +62,7 @@ v315는 planning-only라고 하지만 v342는 실제 DB 수정·릴리스 증거
 ## 4. 최신 레퍼런스 재확인 — 2026-09-22
 
 - W3C WCAG 2.2: https://www.w3.org/TR/WCAG22/
-- OpenAPI Specification 3.1.1: https://spec.openapis.org/oas/v3.2.1.html
+- OpenAPI Specification 3.2.1 (v349에서 표기 정정, URL 유지): https://spec.openapis.org/oas/v3.2.1.html
 - RFC 9110 HTTP Semantics: https://www.rfc-editor.org/rfc/rfc9110
 - RFC 9457 Problem Details for HTTP APIs: https://www.rfc-editor.org/rfc/rfc9457
 - OWASP API Security Top 10:2023: https://owasp.org/API-Security/

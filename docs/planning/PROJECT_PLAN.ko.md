@@ -2,11 +2,22 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.22.349
+> **현재 통합 버전:** v2026.09.22.352
 > **구현·증거 동기화:** 2026-09-22
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 시간별 기획 정합화 — v2026.09.22.352 (2026-09-22)
+
+- **정확한 기준:** 시작/작업 중간 재확인 모두 `origin/main=29115dc726055def8510acb4c25ed15aad67f9b9`였고 이번 기획 중 main 이동은 없었다.
+- **권위 드리프트:** runtime/update 증거는 v350까지 진행됐지만 구현 대면 기획은 v349에 머물렀다. v352에서 v350 구현 이력을 삭제하지 않고 기획 권위를 다시 동기화한다.
+- **G352-01 — 동의 fail-safe 충돌(P0 기획 gap):** v348 G348-08은 policy 조회 실패 시 명시적 fail-safe 상태를 사용하고 stale/hard-coded 버전을 권위 동의 버전으로 만들지 말라고 규정하지만 v350 구현 기록은 상수 기본값 fallback을 명시한다. 필수 계약: fetch/cache 실패는 `POLICY_UNAVAILABLE` 등 명시 상태가 되고 보호된 동의 의존 mutation을 차단하며, 기존 감사 grant는 보존하되 새 current version을 만들어내지 않는다. retry/correlation 관측과 degraded UX를 정의한다. 상수는 표시용 copy metadata로만 허용하고 권위 grant version으로 사용하지 않는다.
+- **G352-02 — rollback 대상/증명 충돌(P0 release gap):** v348은 기록된 last-known-good frontend/backend pair와 blue/green/canary 증거를 요구하고 `reload-or-restart`만으로 무중단을 증명하지 못한다고 규정하지만 v350은 이전 release 자동탐지+symlink/systemd reload를 10초 무중단 rollback으로 기록한다. rollback manifest에 frontend/backend commit, artifact digest, schema/migration set, config/session compatibility를 고정하고 하나라도 unknown이면 fail-closed한다. cutover는 old/new overlap 또는 동등한 검증된 전환, health/version/session, 실제 rollback 소요시간을 증명한다.
+- **G352-03 — 예외 경로 경계 미상세(P1 보안 gap):** 14개 client whitelist는 UX 전용이다. path/percent-encoding/trailing slash canonicalization, prefix/suffix confusion, encoded bypass를 시험하고 보호 API mutation의 서버 authorization/consent enforcement를 유지한다. 공개 diagnostics는 secret/session/private state를 노출하지 않는다.
+- **G352-04 — release evidence provenance(P1 거버넌스 gap):** v350의 exact-SHA build 호환, 929 세션 보존, 무중단 주장은 구현 증거로 보존하되 exact candidate/Test/Production 명령 또는 불변 evidence link가 defect/release ledger에 연결되기 전에는 기획 수용 완료로 변환하지 않는다.
+- **표준 최신성:** OpenAPI 3.2.1(2026-09-10), NIST SP 800-63-4 final(2025-07), OWASP Top 10:2025, WCAG 2.2 및 ISO/IEC 40500:2025 매핑을 재확인했다. 버전/날짜/status/URL을 하나의 provenance tuple로 관리한다.
+- **수용:** 영/한 의미 동기화. G352-01/02는 해당 동의/rollback 동작의 exact-SHA Test 증거가 닫힐 때까지 Production blocker다. 이번 회차는 기획/문서 전용이며 새 구현·배포 완료를 주장하지 않는다.
 
 ## 레퍼런스 최신성 정정 — v2026.09.22.349 (2026-09-22)
 

@@ -62,7 +62,7 @@ Home/newspaper/developer surfaces use live/real-time language without one stale-
 ## 4. Current reference refresh — checked 2026-09-22
 
 - W3C WCAG 2.2: https://www.w3.org/TR/WCAG22/
-- OpenAPI Specification 3.1.1: https://spec.openapis.org/oas/v3.2.1.html
+- OpenAPI Specification 3.2.1 (label corrected by v349; URL unchanged): https://spec.openapis.org/oas/v3.2.1.html
 - RFC 9110 HTTP Semantics: https://www.rfc-editor.org/rfc/rfc9110
 - RFC 9457 Problem Details for HTTP APIs: https://www.rfc-editor.org/rfc/rfc9457
 - OWASP API Security Top 10:2023: https://owasp.org/API-Security/
