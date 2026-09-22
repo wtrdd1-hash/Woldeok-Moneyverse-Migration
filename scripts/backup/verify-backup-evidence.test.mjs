@@ -56,3 +56,8 @@ test('rejects production credentials/endpoints and malformed hashes', () => {
   assert.ok(errors.some((value) => value.includes('backupSha256')));
   assert.ok(errors.some((value) => value.includes('migrationSetHash')));
 });
+
+test('rejects restore evidence timestamped before the backup existed', () => {
+  const errors = validateEvidence({ ...valid, restoreDrillAt: '2026-09-20T06:59:59Z' }, now);
+  assert.ok(errors.some((value) => value.includes('restoreDrillAt cannot be earlier than createdAt')));
+});
