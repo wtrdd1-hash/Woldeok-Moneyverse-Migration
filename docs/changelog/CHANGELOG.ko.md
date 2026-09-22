@@ -7,5 +7,8 @@
 - 수동 주가 변경, 시장 이벤트 게시, 기업행위에 호출자 소유 UUID idempotency key를 필수화했습니다.
 - 기존 관리자 클라이언트는 이미 키를 보내며 schema, DB 권한, ledger 의미는 변경하지 않았습니다.
 
+## v2026.09.22.367 — Backend API 완전성 감사 CI 차단 해소
+- backend API 완전성 감사기의 prefer-const CI 차단을 감사 의미 변경 없이 해소했습니다.
+
 ## v2026.09.21.322 — 마이그레이션 권위 fail-closed 게이트
 - Production migration 실행이 exact repository checkout에 없는 DB 적용 migration 파일명을 발견하면 실패하도록 보강했습니다.
