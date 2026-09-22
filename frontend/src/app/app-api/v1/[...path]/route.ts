@@ -15,6 +15,19 @@ const API_ORIGIN = process.env.API_ORIGIN ?? 'http://127.0.0.1:3020';
 const METHODS_WITH_BODY = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 const ANDROID_ONLY = process.env.APP_API_ANDROID_ONLY === 'true';
 
+function parseAppVersion(value: string | null): [number, number, number] | null {
+  const match = value?.trim().match(/^(\d+)\.(\d+)\.(\d+)$/);
+  if (!match) return null;
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+function isVersionBelow(current: [number, number, number], minimum: [number, number, number]): boolean {
+  for (let i = 0; i < 3; i += 1) {
+    if (current[i]! !== minimum[i]!) return current[i]! < minimum[i]!;
+  }
+  return false;
+}
+
 function looksLikeOfficialAndroid(request: NextRequest): boolean {
   const client = request.headers.get('x-moneyverse-client')?.toLowerCase();
   const userAgent = request.headers.get('user-agent') ?? '';
@@ -52,6 +65,20 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
 
   const path = appGatewayPath(parts);
   if (!path) return gatewayProblem(404, 'Not Found', 'app_gateway_path', 'this path is not part of the public app API');
+
+  const minimumVersionRaw = process.env.APP_API_MIN_VERSION?.trim();
+  if (minimumVersionRaw) {
+    const minimumVersion = parseAppVersion(minimumVersionRaw);
+    if (!minimumVersion) {
+      return gatewayProblem(503, 'Service Unavailable', 'app_gateway_version_policy_invalid', 'the app compatibility policy is unavailable');
+    }
+    const currentVersion = parseAppVersion(request.headers.get('x-moneyverse-app-version'));
+    if (!currentVersion || isVersionBelow(currentVersion, minimumVersion)) {
+      const response = gatewayProblem(426, 'Upgrade Required', 'app_upgrade_required', `app version ${minimumVersionRaw} or newer is required`);
+      response.headers.set('x-moneyverse-min-app-version', minimumVersionRaw);
+      return response;
+    }
+  }
 
   // Optional coarse filter for the native public surface only. Normal web
   // /api routes are unaffected. This is intentionally not cryptographic proof;
