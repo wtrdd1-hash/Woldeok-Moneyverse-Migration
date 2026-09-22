@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET } from './route';
+import { APP_API_CONTRACT_VERSION } from '@/lib/app-gateway';
 
 function request(path: string, headers: Record<string, string> = {}) {
   return new NextRequest(`https://easy-scraping.com${path}`, {
@@ -28,7 +29,7 @@ describe('app API route compatibility', () => {
     const response = await GET(request('/app-api/v1/meta/contract'), context('meta', 'contract'));
     expect(response.status).toBe(200);
     expect(response.headers.get('x-moneyverse-api-version')).toBe('1');
-    expect(response.headers.get('x-moneyverse-contract-version')).toBe('v2026.09.16.144');
+    expect(response.headers.get('x-moneyverse-contract-version')).toBe(APP_API_CONTRACT_VERSION);
     const body = await response.json();
     expect(body.baseUrl).toBe('https://easy-scraping.com/app-api/v1');
     expect(body.auth.persistentCookieJarRequired).toBe(true);
@@ -77,7 +78,7 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('accept-ranges')).toBe('bytes');
     expect(response.headers.get('etag')).toBe('"def"');
     expect(response.headers.get('retry-after')).toBe('3');
-    expect(response.headers.get('x-moneyverse-contract-version')).toBe('v2026.09.16.144');
+    expect(response.headers.get('x-moneyverse-contract-version')).toBe(APP_API_CONTRACT_VERSION);
   });
 
   it('turns upstream transport failures into stable JSON gateway errors', async () => {

@@ -1,4 +1,4 @@
-﻿﻿import { type Locale } from './locale';
+import { type Locale } from './locale';
 
 export interface NavEntry {
   readonly href: string;
@@ -57,6 +57,8 @@ const JAPANESE_LABELS: Readonly<Record<string, string>> = {
   '자산 활동 내역': '資産活動履歴',
   '주간 경제 브리프': '週刊経済ブリーフ',
   '경제 브리프': '経済ブリーフ',
+  '개발자 포털': '開発者ポータル',
+  '개발자 API': '開発者API',
 };
 
 const CHINESE_LABELS: Readonly<Record<string, string>> = {
@@ -100,6 +102,8 @@ const CHINESE_LABELS: Readonly<Record<string, string>> = {
   '자산 활동 내역': '资产明细',
   '주간 경제 브리프': '每周经济快报',
   '경제 브리프': '经济快报',
+  '개발자 포털': '开发者门户',
+  '개발자 API': '开发者API',
 };
 
 const ENGLISH_LABELS: Readonly<Record<string, string>> = {
@@ -153,6 +157,7 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '덕지갑': 'Deok Wallet',
   '잡보드': 'Job Board',
   '잡보드 (작업)': 'Job Board (Work)',
+  '잡보드 (직업)': 'Job Board (Career)',
   '월덕거래소': 'Woldeok Exchange',
   '월덕거래소 (주식)': 'Woldeok Exchange (Stocks)',
   '마이비즈': 'MyBiz',
@@ -175,6 +180,8 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '자산 활동 내역': 'Asset Activity',
   '주간 경제 브리프': 'Weekly World Brief',
   '경제 브리프': 'World Brief',
+  '개발자 포털': 'Developer Portal',
+  '개발자 API': 'Developer API',
 };
 
 export function navLabel(label: string, locale: Locale): string {
@@ -234,6 +241,7 @@ export const CATEGORY_NAV: readonly NavCategory[] = [
     description: '자유 토론 게시판, 사진 갤러리, 운영 소식 및 1:1 고객지원',
     entries: [
       { href: '/board', label: '커뮤니티 게시판', description: '종목 토론, 자유 소통 및 정보 공유' },
+      { href: '/developer', label: '개발자 포털', description: 'OpenAPI 3.0 명세 및 라이브 API 샌드박스', badge: 'API' },
       { href: '/gallery', label: '사진 갤러리', description: '유저 인증샷 및 미디어 갤러리' },
       { href: '/announcements', label: '운영 소식', description: '시스템 패치 노트 및 공식 공지사항' },
       { href: '/guide', label: '이용 가이드', description: '신규 유저 가이드 및 게임 플레이 팁' },
@@ -258,6 +266,7 @@ export const PUBLIC_NAV: readonly NavEntry[] = [
   { href: '/', label: '홈' },
   { href: '/stocks', label: '거래소' },
   { href: '/newspaper', label: '주간 경제 브리프' },
+  { href: '/developer', label: '개발자 포털' },
   { href: '/wallet', label: '자산' },
   { href: '/board', label: '커뮤니티' },
   { href: '/guide', label: '이용 방법' },
@@ -274,6 +283,7 @@ export const PUBLIC_NAV: readonly NavEntry[] = [
 export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/dashboard', label: '내 대시보드' },
   { href: '/newspaper', label: '주간 경제 브리프' },
+  { href: '/developer', label: '개발자 포털' },
   { href: '/wallet', label: '덕지갑' },
   { href: '/bank', label: '가상 금융 (은행)' },
   { href: '/work', label: '잡보드 (작업)' },
@@ -325,6 +335,7 @@ export const HEADER_PUBLIC: readonly NavItem[] = [
     entries: [
       { href: '/guide', label: '이용 방법' },
       { href: '/announcements', label: '운영 소식' },
+      { href: '/developer', label: '개발자 포털' },
       { href: '/gallery', label: '사진' },
       { href: '/status', label: '서비스 상태' },
       { href: '/terms', label: '이용약관' },
@@ -357,6 +368,7 @@ export const HEADER_MEMBER: readonly NavItem[] = [
     label: '소식',
     entries: [
       { href: '/newspaper', label: '경제 브리프' },
+      { href: '/developer', label: '개발자 포털' },
       { href: '/seasons', label: '시즌' },
       { href: '/profile', label: '내 프로필' },
       { href: '/chat', label: '쪽지함' },

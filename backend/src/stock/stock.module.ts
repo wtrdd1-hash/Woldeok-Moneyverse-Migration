@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
+import { NewspaperController } from './newspaper.controller';
 import { StockAlertController } from './stock-alert.controller';
 import { StockAlertRepository } from './stock-alert.repository';
 import { StockController } from './stock.controller';
@@ -10,7 +11,7 @@ import { StockService } from './stock.service';
 
 @Module({
   imports: [AuthModule],
-  controllers: [StockController, StockAlertController],
+  controllers: [StockController, StockAlertController, NewspaperController],
   providers: [
     {
       provide: StockService,

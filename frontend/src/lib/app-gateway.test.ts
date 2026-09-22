@@ -17,6 +17,8 @@ describe('appGatewayPath', () => {
     expect(appGatewayPath(['wallet', 'transfers'])).toBe('/api/v1/wallet/transfers');
     expect(appGatewayPath(['auth', 'session'])).toBe('/api/v1/auth/session');
     expect(appGatewayPath(['stocks'])).toBe('/api/v1/stocks');
+    expect(appGatewayPath(['developer'])).toBe('/api/v1/developer');
+    expect(appGatewayPath(['newspaper', 'pulse'])).toBe('/api/v1/newspaper/pulse');
     expect(appGatewayPath(['media', 'profile', 'avatar.webp'])).toBe('/media/profile/avatar.webp');
     expect(appGatewayPath(['auth', 'google', 'authorize'])).toBe('/auth/google/authorize');
     expect(appGatewayPath(['auth', 'discord', 'callback'])).toBe('/auth/discord/callback');
@@ -54,12 +56,11 @@ describe('appGatewayOrigin', () => {
   });
 });
 
-
 describe('app API compatibility contract', () => {
   it('keeps every documented app group in the gateway allow-list', () => {
     expect(APP_API_GROUPS).toEqual([
       'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'businesses',
-      'casino', 'chat', 'clubs', 'content', 'early-game', 'engagement', 'media', 'photos', 'privacy',
+      'casino', 'chat', 'clubs', 'content', 'developer', 'early-game', 'engagement', 'media', 'newspaper', 'photos', 'privacy',
       'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'spaces', 'stocks', 'support', 'wallet', 'work',
     ]);
   });
@@ -145,5 +146,4 @@ describe('app API compatibility contract', () => {
     expect(isJsonMediaType('image/png')).toBe(false);
     expect(isJsonMediaType(null)).toBe(false);
   });
-
 });

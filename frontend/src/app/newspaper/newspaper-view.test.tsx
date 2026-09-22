@@ -1,4 +1,4 @@
-﻿﻿import { cleanup, render, fireEvent } from '@testing-library/react';
+import { cleanup, render, fireEvent } from '@testing-library/react';
 import { afterEach, describe, it, expect } from 'vitest';
 import { NewspaperView } from './newspaper-view';
 import type { MarketEvent, StockTickerItem } from './newspaper-view';
@@ -73,11 +73,15 @@ describe('NewspaperView', () => {
 
   it('handles user poll interaction and shows percentage tally', () => {
     const { container } = render(<NewspaperView events={MOCK_EVENTS} stocks={MOCK_STOCKS} />);
-    const buttons = container.querySelectorAll('button');
-    expect(buttons.length).toBeGreaterThan(0);
+    const pollButtons = Array.from(container.querySelectorAll('button')).filter((b) =>
+      b.textContent?.includes('강력 상승') || b.textContent?.includes('Bullish')
+    );
+    expect(pollButtons.length).toBeGreaterThan(0);
 
     // Click first poll option button
-    if (buttons[0]) { fireEvent.click(buttons[0]); }
+    if (pollButtons[0]) {
+      fireEvent.click(pollButtons[0]);
+    }
 
     const text = container.textContent ?? '';
     expect(text).toContain('투표에 참여해 주셔서 감사합니다');

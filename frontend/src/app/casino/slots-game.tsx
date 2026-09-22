@@ -1,17 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Scale,
   Sparkles,
   ShieldCheck,
   AlertCircle,
-  Info,
   Lock,
   Play,
   RotateCcw,
   CheckCircle2,
-  ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -160,7 +158,7 @@ export function LuckySlotsGame({
         </div>
         <CardDescription className="text-xs sm:text-sm leading-relaxed [word-break:keep-all]">
           기획서 제6절(Slots deferred) 규정에 따라 게임물관리위원회(GRAC) 19+ 청소년 보호 심의 완료 시점까지{' '}
-          <strong className="text-foreground">실제 WLD 베팅이 엄격히 차단</strong>됩니다. 
+          <strong className="text-foreground">실제 WLD 베팅이 엄격히 차단</strong>됩니다.{' '}
           현재 모드는 0 WLD 가상 시뮬레이션 및 배당률 공시 검증용으로만 안전하게 구동됩니다.
         </CardDescription>
       </CardHeader>
@@ -245,8 +243,9 @@ export function LuckySlotsGame({
           </Button>
         </div>
 
-        {/* 실베팅 잠금 안내 배너 */}
+        {/* 실베팅 잠금 안내 배너 & 계약 호환 히든 필드 */}
         <div className="rounded-xl border border-border/80 bg-muted/30 p-4 text-xs text-muted-foreground">
+          <input type="hidden" name="choice" value="6" />
           <div className="flex items-start gap-2.5">
             <Lock className="size-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
             <div className="space-y-1">
@@ -286,7 +285,7 @@ export function LuckySlotsGame({
                 </Badge>
               </div>
               <p className="text-muted-foreground leading-relaxed [word-break:keep-all]">
-                본 게임은 청소년 이용불가(19+) 등급 심의 및 가상 자산 베팅 적합성 검토 대상입니다. 
+                본 게임은 청소년 이용불가(19+) 등급 심의 및 가상 자산 베팅 적합성 검토 대상입니다.{' '}
                 현재 이용자 보호를 위해 실베팅 파이프라인이 fail-closed 잠금 상태로 유지됩니다.
               </p>
             </div>

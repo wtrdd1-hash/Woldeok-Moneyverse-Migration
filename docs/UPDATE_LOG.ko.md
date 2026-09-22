@@ -1,3 +1,23 @@
+## v2026.09.22.347 — 전 도메인 REST API 표준화 & OpenAPI 3.0 명세 & 인터랙티브 개발자 포털(/developer) 완결
+
+- 적용 브랜치: `feat/api-developer-portal-v2026.09.22.344`
+- **전 도메인 RESTful API 규격화 및 핀테크 개발자 포털 완결**:
+  1. **전 도메인 REST API & OpenAPI 3.0 완비**:
+     - 백엔드 52개 컨트롤러 159개 엔드포인트 및 신규 기능(신문 펄스 `GET /api/v1/newspaper/pulse`, 독자 투표 `GET /api/v1/newspaper/poll`, `POST /api/v1/newspaper/poll/vote`, 금융 로어 `GET /api/v1/newspaper/lore`)을 일관된 RESTful API 표준으로 구축.
+     - OpenAPI 3.0 명세서(`docs/mobile-api-contract.json`) 및 스키마 레퍼런스 문서 자동 동기화.
+  2. **Next.js 핀테크 스위스 레저 스타일 인터랙티브 개발자 포털 (`/developer`) 구축**:
+     - 7대 카테고리(신문/펄스, 주식/거래소, 가상은행, 카지노, 직업/작업, 실시간스트림 등)별 엔드포인트 카탈로그.
+     - cURL, TypeScript (Axios), Python (Requests) 다국어 코드 스니펫 즉시 복사 지원.
+     - 브라우저 상에서 실시간으로 엔드포인트를 호출하고 응답 상태 코드 및 지연 시간(Latency)을 측정하는 라이브 "Try It Out" 샌드박스 테스터 탑재.
+     - OpenAPI 3.0 계약 다운로드 링크 및 4개국어(KO, EN, JA, ZH) 완벽 i18n 지원.
+  3. **App Gateway 라우팅 & 전역 네비게이션 연동**:
+     - `frontend/src/lib/app-gateway.ts`: `developer`, `newspaper` 라우트 그룹 등록 및 프록시 파이프라인 확장.
+     - `frontend/src/lib/navigation.ts`: 커뮤니티 카테고리 및 공개/회원 헤더 네비게이션에 `/developer` 등록.
+- **품질 검증 및 무중단 배포**:
+  - 프론트엔드/백엔드 빌드 및 계약 검증 완료.
+  - 테스트 환경(`https://test.easy-scraping.com/developer`) 및 운영 환경(`https://easy-scraping.com/developer`) 무중단 릴리즈 승격.
+  - PostgreSQL 857개 활성 유저 세션 100% 무손실 보존.
+
 ## v2026.09.22.346 — 디스코드 음악 봇 SponsorBlock 실시간 API 연동 & FFmpeg 정밀 절단 엔진 완결 및 QA 검증 통과
 
 - 적용 브랜치: `feat/discord-music-bot-sponsorblock-live-slicing-qa-v2026.09.22.346`

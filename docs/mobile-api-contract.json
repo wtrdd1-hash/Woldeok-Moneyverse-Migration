@@ -7475,6 +7475,22 @@
                 {
                   "type": "string",
                   "const": "coin"
+                },
+                {
+                  "type": "string",
+                  "const": "hilo_20"
+                },
+                {
+                  "type": "string",
+                  "const": "treasure_4"
+                },
+                {
+                  "type": "string",
+                  "const": "gem_5"
+                },
+                {
+                  "type": "string",
+                  "const": "wheel_20"
                 }
               ]
             },
