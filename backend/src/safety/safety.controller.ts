@@ -23,6 +23,7 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -82,7 +83,7 @@ export class SafetyController {
    * 관리자 긴급 삭제 조치 (승인/반려/삭제) 실행
    */
   @Post('admin/safety/takedowns/:caseId/action')
-  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: '관리자 긴급 콘텐츠 삭제 조치' })
   async adminActionTakedown(
     @Req() req: RequestWithSession,
