@@ -1,3 +1,25 @@
+## v2026.09.22.357 — 주식 거래정지 매수원가 자동정산 엔진 완비, 카탈로그 가시성 복구 및 포트폴리오 영수증 연동
+
+- 적용 브랜치: `main` (릴리스: `prod-2ec47a9-v357`)
+- **P0 주식 거래정지 매수원가 자동정산 엔진 및 가시성 완결 (STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC)**:
+  1. **PostgreSQL 229 마이그레이션 적용 (`packages/database/migrations/229-stock-market-overview-halt-visibility.sql`)**:
+     - `stock_market_overview()` 함수에 `halt_status` 반환 컬럼을 추가하고, `WHERE stock.active OR stock.halt_status IN ('HALTING', 'HALTED_SETTLING', 'HALTED_SETTLED')` 조건으로 거래정지 종목이 카탈로그에 안전하게 보존되도록 개편.
+     - 활성 종목 우선, 거래정지 종목 후순위 정렬 규칙 적용.
+  2. **백엔드 저장소 및 인터페이스 갱신 (`backend/src/stock/`)**:
+     - `StockMarketRow`에 `halt_status: string` 추가 및 `list()` 쿼리 바인딩.
+     - `stock-halt-settlement.test.ts`에 거래정지 카탈로그 가시성 검증 케이스 추가 (6종 단위 테스트 100% 통과).
+  3. **가상 주식 거래소 메인 화면 쇄신 (`frontend/src/app/stocks/page.tsx`)**:
+     - 거래정지 종목에 `거래정지 (Halted)` 배지 부여 및 매수/매도 버튼 비활성화(`disabled`).
+     - 공시 및 정산 내역 확인을 위해 `종목 허브` 및 상세 다이얼로그 접근성 보존.
+  4. **포트폴리오 분석 화면 원가환급 영수증 카드 신설 (`frontend/src/app/stocks/portfolio/page.tsx`)**:
+     - `/api/v1/stocks/halt-receipts` 병렬 연동으로 **거래정지 원가환급 영수증 (Halt Settlement Receipts)** 카드 신설.
+     - 정산 수량, 취득 단가, 환급 총액, `ShieldCheck` 면제 배지 완비.
+  5. **종목 상세 화면(`/stocks/[symbol]`) 404 결함 원천 해소**:
+     - 거래정지된 종목에 진입 시 카탈로그 누락으로 발생하던 404를 해결하여 거래정지 안내 배너 및 영수증이 완벽하게 렌더링되도록 복구.
+  6. **무중단 승격 및 런타임 신원 일치**:
+     - Exact Git SHA `2ec47a9` 기반 테스트/프로덕션 런타임 신원 일치 검증.
+     - 933개 PostgreSQL 활성 사용자 세션 100% 무손실 보존 완료.
+
 ## v2026.09.22.356 — 가상 주식 거래소 메인 주문 폼 프리셋 & 세금 요약 및 포트폴리오 자산 배분 스택 바 완결
 
 - 적용 브랜치: `main` (릴리스: `prod-7e46b22-v356`)

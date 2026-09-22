@@ -81,10 +81,21 @@
     "commitSha": "7e46b22296ace8f9ecea55f5d649373927d66506",
     "shortSha": "7e46b22",
     "releasePath": "/srv/moneyverse-data/releases/prod-7e46b22-v356",
-    "status": "promoted",
+    "status": "archived",
     "activeSessions": 929,
     "timestamp": "2026-09-22T10:00:00Z",
     "author": "System Engineer",
     "notes": "P0 Stock Main Order Form Presets, Estimated Tax Breakdown & Portfolio Asset Allocation Stack Bar"
+  },
+  {
+    "version": "v2026.09.22.357",
+    "commitSha": "2ec47a970dc0e1513b49bed9cca50a582b2e8319",
+    "shortSha": "2ec47a9",
+    "releasePath": "/srv/moneyverse-data/releases/prod-2ec47a9-v357",
+    "status": "promoted",
+    "activeSessions": 933,
+    "timestamp": "2026-09-22T10:22:00Z",
+    "author": "System Engineer",
+    "notes": "P0 Stock Halt Cost-Basis Settlement Visibility, Market 229 Migration, Receipt Cards & 404 Prevention"
   }
 ]

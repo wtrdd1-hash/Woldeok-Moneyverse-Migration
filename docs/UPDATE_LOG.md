@@ -1,5 +1,28 @@
 # Update Log
 
+## v2026.09.22.357 — Stock Halt Cost-Basis Settlement Visibility, Market 229 Migration, Receipt Cards & 404 Prevention
+
+- Applied Branch: `main` (Release: `prod-2ec47a9-v357`)
+- **P0 Stock Halt Cost-Basis Settlement Engine & Visibility (STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC)**:
+  1. **PostgreSQL Migration 229 Applied (`packages/database/migrations/229-stock-market-overview-halt-visibility.sql`)**:
+     - Extended `stock_market_overview()` function with `halt_status text` return column.
+     - Preserves halted stocks in the market overview catalog via `WHERE stock.active OR stock.halt_status IN ('HALTING', 'HALTED_SETTLING', 'HALTED_SETTLED')`.
+     - Orders active stocks first, halted stocks subsequently by symbol.
+  2. **Backend Repository & Interface Updates (`backend/src/stock/`)**:
+     - Added `halt_status: string` to `StockMarketRow` and bound in `list()` query.
+     - Added halt catalog visibility test cases in `stock-halt-settlement.test.ts` (6/6 unit tests PASS).
+  3. **Virtual Stock Exchange Main Page Enhancement (`frontend/src/app/stocks/page.tsx`)**:
+     - Displayed `Halted` badge on halted stocks and disabled Buy/Sell trade buttons (`disabled`).
+     - Kept `Open Hub` and detail modal accessible so users can inspect disclosures and settlement details.
+  4. **Portfolio Analytics Page Settlement Receipts Card (`frontend/src/app/stocks/portfolio/page.tsx`)**:
+     - Integrated `/api/v1/stocks/halt-receipts` to render the **Stock Halt Settlement Receipts** card.
+     - Outlined settled shares, cost basis unit price, total refunded WLD, and `ShieldCheck` zero-fee exemption notice.
+  5. **Resolved 404 Defect on Stock Detail Hub (`/stocks/[symbol]`)**:
+     - Fixed 404 error when navigating to a halted stock's hub page, restoring access to the halt announcement banner and refund receipt.
+  6. **Zero-Downtime Promotion & Runtime Identity Coherence**:
+     - Exact Git SHA `2ec47a9` deployed to both Test and Production.
+     - 933 PostgreSQL active user sessions 100% loss-free preserved.
+
 ## v2026.09.22.356 — Virtual Stock Exchange Main Order Form Presets, Estimated Tax Breakdown & Portfolio Asset Allocation Stack Bar
 
 - Applied Branch: `main` (Release: `prod-7e46b22-v356`)

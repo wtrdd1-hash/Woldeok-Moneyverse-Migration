@@ -145,23 +145,23 @@
 
 ## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
 
-- **최종 갱신일시**: 2026-09-22 19:00:00 KST
-- **현재 프로덕션 릴리스 버전**: `v2026.09.22.356` (릴리스 경로: `/srv/moneyverse-data/releases/prod-7e46b22-v356`, 직전: `prod-0714368-v355`)
-- **Exact Git SHA**: `7e46b22296ace8f9ecea55f5d649373927d66506` (단축: `7e46b22`)
-- **PostgreSQL 활성 사용자 세션**: **929개 (100% 무손실 보존 실측 확인)**
+- **최종 갱신일시**: 2026-09-22 19:25:00 KST
+- **현재 프로덕션 릴리스 버전**: `v2026.09.22.357` (릴리스 경로: `/srv/moneyverse-data/releases/prod-2ec47a9-v357`, 직전: `prod-7e46b22-v356`)
+- **Exact Git SHA**: `2ec47a970dc0e1513b49bed9cca50a582b2e8319` (단축: `2ec47a9`)
+- **PostgreSQL 활성 사용자 세션**: **933개 (100% 무손실 보존 실측 확인)**
 - **최신 완료 작업 요약**:
-  1. **P0 가상 주식 메인 주문 폼 프리셋 및 실시간 세금 계산 카드 완비 (`frontend/src/app/stocks/trade-form.tsx` & `trade-dialog.tsx`)**:
-     - `TradeForm`: 44px 이상 터치 타깃(`min-h-9` 및 칩 버튼), 25%/50%/MAX 퍼센티지 퀵 프리셋 칩 제공.
-     - 매수 시 보유 현금 기준, 매도 시 보유 주식 수량(`holdingQuantity`) 기준으로 퍼센티지 즉시 자동 환산.
-     - 실시간 예상 결제/수령 총액(`수량 × 단가`) 및 0.3% 거래세(`TaxBreakdown`) 요약 카드 탑재.
-     - `TradeDialog`: `holdingQuantity`, `triggerLabel`, `triggerVariant`, `triggerClassName` 등 커스텀 트리거 확장 지원.
-  2. **P0 포트폴리오 자산 배분 멀티 세그먼트 스택 바 및 원터치 리밸런싱 완비 (`frontend/src/app/stocks/portfolio/`)**:
-     - `analysis.ts`: BigInt 기반 안전 연산으로 `gain_loss_bps`(종목별 및 포트폴리오 전체 수익률) 및 8색 고유 팔레트 색상 매핑 계산 로직 분리.
-     - `analysis.test.ts`: 수익률 bps 계산 정합성 및 색상 할당 검증 단위 테스트 4종 100% PASS.
-     - `page.tsx`: 3대 히어로 지표 카드(총 평가 자산, 총 투자 원금, 누적 평가 손익 및 bps 배지), 멀티 세그먼트 자산 배분 가로형 스택 바 및 레전드 칩, 보유 종목별 수익률 배지 및 원터치 매수/매도 `TradeDialog` 리밸런싱 트리거 탑재.
-  3. **무중단 승격 및 런타임 신원 일치 (v356)**:
-     - Exact SHA `7e46b22` 기반 테스트 및 프로덕션 동시 빌드 및 릴리스 배포.
-     - 929개 PostgreSQL 활성 사용자 세션 100% 무손실 보존 실측 확인 및 전 엔드포인트 200 OK.
+  1. **P0 주식 거래정지 매수원가 자동정산 엔진 가시성 완비 (STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC)**:
+     - `229-stock-market-overview-halt-visibility.sql`: PostgreSQL `stock_market_overview()` 함수에 `halt_status` 반환 컬럼을 추가하고 거래정지 종목(`HALTING`, `HALTED_SETTLING`, `HALTED_SETTLED`)이 카탈로그에 보존되도록 필터 및 정렬 규칙 개편.
+     - `backend/src/stock/stock.repository.ts`: `StockMarketRow`에 `halt_status` 명시 및 `list()` 쿼리 바인딩 완료.
+     - `backend/src/stock/stock-halt-settlement.test.ts`: 거래정지 종목 가시성 단위 테스트 추가 (6 tests PASS).
+  2. **프론트엔드 거래소 메인 및 포트폴리오 가시성 혁신 (`stocks/page.tsx` & `stocks/portfolio/page.tsx`)**:
+     - `stocks/page.tsx`: 거래정지 종목에 `거래정지 (정산완료)` 배지 표시 및 매수/매도 주문 버튼 비활성화 가드 적용, 종목 상세 허브 링크 보존.
+     - `stocks/portfolio/page.tsx`: `/api/v1/stocks/halt-receipts` 병렬 연동으로 **거래정지 원가환급 영수증 (Halt Settlement Receipts)** 카드 신설 (정산 수량, 취득 단가, 환급 총액, `ShieldCheck` 면제 배지 완비).
+     - `stocks/[symbol]/page.tsx`: 거래정지된 종목에 접근 시 404가 발생하던 결함을 원천 해결하여 거래정지 공시 및 100% 원가 환급 영수증이 완벽하게 렌더링되도록 복구.
+  3. **무중단 승격 및 런타임 신원 일치 (v357)**:
+     - Exact SHA `2ec47a9` 기반 테스트 및 프로덕션 동시 빌드 및 릴리스 배포.
+     - 933개 PostgreSQL 활성 사용자 세션 100% 무손실 보존 실측 확인 및 전 엔드포인트 200 OK.
+
 
 
 
