@@ -64,9 +64,9 @@ BEGIN
     RAISE EXCEPTION USING ERRCODE='42501', MESSAGE='operator role required';
   END IF;
 
-  SELECT id, symbol, name, halt_status
+  SELECT s.id, s.symbol, s.name, s.halt_status
   INTO v_id, v_symbol, v_name, v_current_status
-  FROM public.virtual_stocks
+  FROM public.virtual_stocks s
   WHERE id = p_stock
   FOR UPDATE;
 
@@ -93,8 +93,8 @@ BEGIN
   WHERE id = p_stock;
 
   SELECT id INTO v_sink
-  FROM public.accounts
-  WHERE system_key = 'sink' AND account_type = 'SINK'::public.account_type AND status = 'active'::public.account_status
+  FROM public.accounts a
+  WHERE a.system_key = 'sink' AND account_type = 'SINK'::public.account_type AND status = 'active'::public.account_status
   FOR UPDATE;
 
   IF v_sink IS NULL THEN
@@ -218,7 +218,7 @@ BEGIN
 
   SELECT id, public.virtual_stocks.symbol, public.virtual_stocks.name, public.virtual_stocks.halt_status, public.virtual_stocks.halted_at
   INTO v_stock
-  FROM public.virtual_stocks
+  FROM public.virtual_stocks s
   WHERE id = p_stock;
 
   IF v_stock.id IS NULL THEN
@@ -264,7 +264,7 @@ BEGIN
     RAISE EXCEPTION USING ERRCODE='42501', MESSAGE='operator role required';
   END IF;
 
-  SELECT halt_status INTO v_halt_status FROM public.virtual_stocks WHERE id = p_stock FOR UPDATE;
+  SELECT halt_status INTO v_halt_status FROM public.virtual_stocks s WHERE id = p_stock FOR UPDATE;
   IF v_halt_status IS NULL THEN
     RETURN false;
   END IF;
