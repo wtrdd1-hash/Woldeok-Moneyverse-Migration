@@ -1645,3 +1645,116 @@ flowchart TD
 
 
 
+
+
+---
+
+## 🚀 [v51 Specification] 1:1 개인 채팅 P0 긴급 과제 완결: 차단(Block)·음소거(Mute)·신고(Report) 및 핀테크 안전 UX 전면 고도화 사양 (누적 추가)
+
+### 1. 개요 및 사용자 확정 사항 (A1~A5)
+- **우선순위**: **P0 긴급 (ONE_TO_ONE_PRIVATE_CHAT_SPEC v2026.09.20.305-05)**.
+- **조율 결과 확정**:
+  1. **[Q1 범위]**: PostgreSQL 마이그레이션 `227-private-chat-safety-controls.sql` (chat_blocks, chat_reports, mute 프로시저) + 백엔드 4종 API (`/mute`, `/block`, `/unblock`, `/report`) + 프론트엔드 3종 모달 전면 탑재 (A1 확정).
+  2. **[Q2 UX]**: 토스/메신저형 하이브리드 UX — 상단 헤더 더보기 메뉴(음소거 토글, 원터치 차단/해제, 4대 사유 신고 모달), 한글 IME 조합(`isComposing`) 오발송 방지, 320px 극소 모바일 44px 터치 타겟 준수 (A2 확정).
+  3. **[Q3 관리자 연동]**: 접수된 채팅 신고를 `/admin/safety` (TAKE IT DOWN 관제 큐)에 `CHAT_REPORT` 유형으로 통합 노출하여 관리자가 증거 스냅샷과 함께 원터치 심사 조치 가능하도록 연계 (A3 확정).
+  4. **[Q4 배포 목표]**: 백엔드-프론트엔드 동시 개발 후 exact-SHA 빌드, 미니 PC 929개 활성 세션 100% 무손실 보존 무중단 승격 (`v2026.09.22.353`) (A4 확정).
+  5. **[Q5 자율 권한]**: AI 자율 실행 모드로 기획서 누적, 백엔드/DB/프론트엔드 동시 구현, 빌드 및 배포까지 완결 (A5 확정).
+
+---
+
+### 2. 아키텍처 및 안전 데이터 흐름 다이어그램
+
+```mermaid
+flowchart TD
+    subgraph Client["프론트엔드 채팅 룸 (/chat)"]
+        A["ChatRoom 헤더 더보기"] --> B["음소거 토글 모달/액션"]
+        A --> C["상대방 차단/해제 모달"]
+        A --> D["4대 사유 신고 모달"]
+        E["Composer 입력창"] -->|한글 IME isComposing 가드| F["sendMessageAction"]
+    end
+
+    subgraph ServerActions["Next.js Server Actions (app/chat/actions.ts)"]
+        B --> G["muteConversationAction"]
+        C --> H["blockUserAction / unblockUserAction"]
+        D --> I["reportConversationAction"]
+        F --> J["sendMessageAction"]
+    end
+
+    subgraph BackendAPI["백엔드 엔드포인트 (/api/v1/chat/)"]
+        G --> K["POST /api/v1/chat/conversations/:id/mute"]
+        H --> L["POST/DELETE /api/v1/chat/users/:id/block"]
+        I --> M["POST /api/v1/chat/conversations/:id/report"]
+        J --> N["POST /api/v1/chat/conversations/:id/messages"]
+    end
+
+    subgraph Database["PostgreSQL 17.11"]
+        K --> O["private_chat_participant_state.muted"]
+        L --> P["private_chat_blocks"]
+        M --> Q["private_chat_reports and audit_logs"]
+        N -->|private_chat_is_blocked 검사| R["private_chat_messages (차단 시 42501 거절)"]
+        Q -->|신고 큐 연동| S["/admin/safety 관제 큐"]
+    end
+```
+
+---
+
+### 3. 컴포넌트별 상세 변경 명세 (Proposed Changes)
+
+#### ① 데이터베이스 마이그레이션 (`packages/database/migrations/227-private-chat-safety-controls.sql`)
+- **`public.private_chat_blocks` 테이블 신설**:
+  - `(blocker_id uuid, blocked_id uuid, created_at timestamptz, PRIMARY KEY (blocker_id, blocked_id))`
+- **`public.private_chat_reports` 테이블 신설**:
+  - `(id uuid, reporter_id uuid, reported_user_id uuid, conversation_id uuid, reason text, details text, evidence_snapshot jsonb, status text, created_at timestamptz, actioned_at timestamptz, actioned_by uuid)`
+- **`public.private_chat_mute(p_actor uuid, p_conversation uuid, p_muted boolean)` 프로시저**:
+  - 참여자 상태의 `muted` 컬럼 원자적 갱신.
+- **`public.private_chat_block(p_actor uuid, p_target uuid)` / `public.private_chat_unblock(p_actor uuid, p_target uuid)` 프로시저**:
+  - 차단 관계 등록 및 해제.
+- **`public.private_chat_is_blocked(p_user_a uuid, p_user_b uuid)` 함수**:
+  - 두 사용자 간 어느 한쪽이라도 차단이 걸려있는지 여부 반환.
+- **`public.private_chat_send` 프로시저 강화**:
+  - 메시지 전송 시 상대방과의 차단 상태를 검사하여 차단 상태일 경우 `RAISE EXCEPTION USING ERRCODE='42501';`로 Fail-closed 방어.
+- **`public.private_chat_report(p_actor uuid, p_conversation uuid, p_reason text, p_details text)` 프로시저**:
+  - 최근 10개 메시지를 JSONB 증거 스냅샷으로 자동 캡처하여 신고 원장 생성.
+
+#### ② 백엔드 서비스 및 컨트롤러 확장 (`backend/src/chat/`)
+- `chat.repository.ts`:
+  - `muteConversation(actorUserId, conversationId, muted): Promise<boolean>`
+  - `blockUser(actorUserId, targetUserId): Promise<boolean>`
+  - `unblockUser(actorUserId, targetUserId): Promise<boolean>`
+  - `isBlocked(actorUserId, peerUserId): Promise<boolean>`
+  - `reportConversation(actorUserId, conversationId, reason, details): Promise<{ reportId: string }>`
+  - `listConversations`에 `is_peer_blocked` 필드 추가.
+- `chat.service.ts`:
+  - DTO 유효성 검사 및 정규화 예외 처리.
+- `chat.controller.ts`:
+  - `POST /api/v1/chat/conversations/:id/mute`
+  - `POST /api/v1/chat/users/:id/block`
+  - `DELETE /api/v1/chat/users/:id/block`
+  - `POST /api/v1/chat/conversations/:id/report`
+
+#### ③ 프론트엔드 서버 액션 및 UI 쇄신 (`frontend/src/app/chat/`)
+- `actions.ts`:
+  - `muteConversationAction`, `blockUserAction`, `unblockUserAction`, `reportConversationAction` 서버 액션 신설.
+- `chat-room.tsx`:
+  - 헤더 더보기 드롭다운 메뉴:
+    - [음소거 켜기 / 끄기] 원클릭 토글.
+    - [상대방 차단 / 차단 해제] 모달 다이얼로그 연동.
+    - [대화 내용 신고하기] 4대 사유(스팸/광고, 사기/피싱, 언어폭력/욕설, 기타) 선택 폼 모달.
+  - 한글 IME 오발송 방지:
+    - `handleKeyDown` 시 `e.nativeEvent.isComposing` 확인하여 조합 완료 전 전송 방지.
+  - 차단 상태 배너:
+    - 차단된 대화방의 경우 입력창 상단에 `[차단된 회원과의 대화입니다. 메시지를 전송하거나 받을 수 없습니다.]` 경고 배너 및 전송 버튼 비활성화.
+  - 320px 모바일 및 44px 터치 타겟 준수 (`fintech-responsive-layout-engine`).
+
+---
+
+### 4. 검증 및 무중단 승격 계획 (Verification Plan)
+1. **타입체크 및 Vitest 단위 테스트**:
+   - `pnpm --filter @moneyverse/backend test`
+   - `pnpm --filter @moneyverse/frontend test`
+2. **미니 PC DB 마이그레이션 및 스테이징**:
+   - `227-private-chat-safety-controls.sql` Docker DB 적용.
+   - exact-SHA 빌드 및 스테이징 (`stage_v353.sh`).
+3. **프로덕션 무중단 승격 (`v2026.09.22.353`)**:
+   - 929개 이상 활성 세션 100% 무손실 보존 검증.
+   - `docs/releases/ledger.json`에 `v353` 불변 원장 등록.

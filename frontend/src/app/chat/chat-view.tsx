@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { MessageSquare, Archive, Search, ArrowLeft, Clock, CheckCheck, User } from 'lucide-react';
+import { MessageSquare, Archive, Search, ArrowLeft, Clock, CheckCheck, User, BellOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -128,9 +128,17 @@ export function ChatView({
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1 mb-1">
-                      <span className="font-bold text-sm truncate text-foreground">
-                        {item.peer_display_name}
-                      </span>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="font-bold text-sm truncate text-foreground">
+                          {item.peer_display_name}
+                        </span>
+                        {item.muted && <BellOff className="size-3 text-muted-foreground shrink-0" />}
+                        {item.is_peer_blocked && (
+                          <Badge variant="outline" className="text-[9px] px-1 py-0 h-3.5 border-destructive/40 text-destructive shrink-0">
+                            차단
+                          </Badge>
+                        )}
+                      </div>
                       {item.last_message_at && (
                         <span className="text-[11px] text-muted-foreground shrink-0">
                           {new Date(item.last_message_at).toLocaleDateString([], {

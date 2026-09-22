@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -12,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
-import { IsBoolean, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min, MinLength } from 'class-validator';
+import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min, MinLength } from 'class-validator';
 import { randomUUID } from 'node:crypto';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
@@ -51,6 +52,27 @@ export class ArchiveConversationDto {
   @ApiProperty({ description: '대화방 보관 여부' })
   @IsBoolean()
   readonly archived!: boolean;
+}
+
+export class MuteConversationDto {
+  @ApiProperty({ description: '대화방 알림 음소거 여부' })
+  @IsBoolean()
+  readonly muted!: boolean;
+}
+
+export class ReportConversationDto {
+  @ApiProperty({
+    description: '신고 사유 코드',
+    enum: ['spam_promotional', 'fraud_scam', 'abuse_harassment', 'other'],
+  })
+  @IsIn(['spam_promotional', 'fraud_scam', 'abuse_harassment', 'other'])
+  readonly reason!: string;
+
+  @ApiProperty({ description: '구체적 신고 상세 사유', minLength: 2, maxLength: 2000 })
+  @IsString()
+  @MinLength(2)
+  @MaxLength(2000)
+  readonly details!: string;
 }
 
 @ApiTags('chat')
@@ -135,5 +157,51 @@ export class ChatController {
     const actorUserId = requireUserId(req);
     const ok = await this.chat.archiveConversation(actorUserId, conversationId, dto.archived);
     return { ok };
+  }
+
+  @ApiOperation({ summary: '대화방 알림 음소거 또는 해제' })
+  @Post('conversations/:id/mute')
+  async muteConversation(
+    @Req() req: RequestWithSession,
+    @Param('id', ParseUUIDPipe) conversationId: string,
+    @Body() dto: MuteConversationDto,
+  ) {
+    const actorUserId = requireUserId(req);
+    const ok = await this.chat.muteConversation(actorUserId, conversationId, dto.muted);
+    return { ok, muted: dto.muted };
+  }
+
+  @ApiOperation({ summary: '특정 회원 1:1 쪽지 차단' })
+  @Post('users/:id/block')
+  async blockUser(
+    @Req() req: RequestWithSession,
+    @Param('id', ParseUUIDPipe) targetUserId: string,
+  ) {
+    const actorUserId = requireUserId(req);
+    const ok = await this.chat.blockUser(actorUserId, targetUserId);
+    return { ok, blocked: true };
+  }
+
+  @ApiOperation({ summary: '특정 회원 1:1 쪽지 차단 해제' })
+  @Delete('users/:id/block')
+  async unblockUser(
+    @Req() req: RequestWithSession,
+    @Param('id', ParseUUIDPipe) targetUserId: string,
+  ) {
+    const actorUserId = requireUserId(req);
+    const ok = await this.chat.unblockUser(actorUserId, targetUserId);
+    return { ok, blocked: false };
+  }
+
+  @ApiOperation({ summary: '부적절한 대화 내용 신고 및 증거 스냅샷 접수' })
+  @Post('conversations/:id/report')
+  async reportConversation(
+    @Req() req: RequestWithSession,
+    @Param('id', ParseUUIDPipe) conversationId: string,
+    @Body() dto: ReportConversationDto,
+  ) {
+    const actorUserId = requireUserId(req);
+    const result = await this.chat.reportConversation(actorUserId, conversationId, dto.reason, dto.details);
+    return { ok: true, reportId: result.reportId };
   }
 }

@@ -122,6 +122,70 @@ export class ChatService {
     }
   }
 
+  async muteConversation(actorUserId: string, conversationId: string, muted: boolean): Promise<boolean> {
+    try {
+      return await this.repo.muteConversation(actorUserId, conversationId, muted);
+    } catch (error) {
+      if (error instanceof ChatInputError) {
+        throw new BadRequestException(error.message);
+      }
+      const err = error as { code?: string };
+      if (err.code === '42501') {
+        throw new ForbiddenException('대화방에 참여하고 있지 않아요.');
+      }
+      throw error;
+    }
+  }
+
+  async blockUser(actorUserId: string, targetUserId: string): Promise<boolean> {
+    if (actorUserId === targetUserId) {
+      throw new BadRequestException('자기 자신은 차단할 수 없어요.');
+    }
+    try {
+      return await this.repo.blockUser(actorUserId, targetUserId);
+    } catch (error) {
+      if (error instanceof ChatInputError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
+  }
+
+  async unblockUser(actorUserId: string, targetUserId: string): Promise<boolean> {
+    try {
+      return await this.repo.unblockUser(actorUserId, targetUserId);
+    } catch (error) {
+      if (error instanceof ChatInputError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
+  }
+
+  async reportConversation(
+    actorUserId: string,
+    conversationId: string,
+    reason: string,
+    details: string,
+  ): Promise<{ reportId: string }> {
+    const trimmedDetails = details.trim();
+    if (trimmedDetails.length < 2 || trimmedDetails.length > 2000) {
+      throw new BadRequestException('신고 상세 사유는 2자 이상 2000자 이하여야 해요.');
+    }
+    try {
+      return await this.repo.reportConversation(actorUserId, conversationId, reason, trimmedDetails);
+    } catch (error) {
+      if (error instanceof ChatInputError) {
+        throw new BadRequestException(error.message);
+      }
+      const err = error as { code?: string };
+      if (err.code === '42501') {
+        throw new ForbiddenException('대화방에 참여하고 있지 않아요.');
+      }
+      throw error;
+    }
+  }
+
   async totalUnreadCount(actorUserId: string): Promise<number> {
     return this.repo.totalUnreadCount(actorUserId);
   }

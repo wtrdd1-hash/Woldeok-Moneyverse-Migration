@@ -20,6 +20,7 @@ export interface ConversationRow {
   readonly muted: boolean;
   readonly archived: boolean;
   readonly last_message_body: string | null;
+  readonly is_peer_blocked?: boolean;
 }
 
 export interface MessageRow {
@@ -117,6 +118,7 @@ export class PostgresChatRepository {
          GREATEST(0, c.latest_sequence - ps.last_read_sequence)::text AS unread_count,
          ps.muted,
          ps.archived,
+         public.private_chat_is_blocked($1::uuid, (CASE WHEN c.participant_a_id = $1::uuid THEN c.participant_b_id ELSE c.participant_a_id END)) AS is_peer_blocked,
          (
            SELECT m.body
            FROM public.private_chat_messages m
@@ -181,6 +183,77 @@ export class PostgresChatRepository {
       [actorUserId, conversationId, archived],
     );
     return true;
+  }
+
+  async muteConversation(actorUserId: string, conversationId: string, muted: boolean): Promise<boolean> {
+    if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
+    if (!UUID_REGEX.test(conversationId)) throw new ChatInputError('conversationId must be a valid UUID');
+
+    const row = await queryOne<{ private_chat_mute: boolean }>(
+      this.client,
+      `SELECT public.private_chat_mute($1::uuid, $2::uuid, $3::boolean);`,
+      [actorUserId, conversationId, muted],
+    );
+    return row?.private_chat_mute ?? true;
+  }
+
+  async blockUser(actorUserId: string, targetUserId: string): Promise<boolean> {
+    if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
+    if (!UUID_REGEX.test(targetUserId)) throw new ChatInputError('targetUserId must be a valid UUID');
+    if (actorUserId === targetUserId) throw new ChatInputError('cannot block oneself');
+
+    const row = await queryOne<{ private_chat_block: boolean }>(
+      this.client,
+      `SELECT public.private_chat_block($1::uuid, $2::uuid);`,
+      [actorUserId, targetUserId],
+    );
+    return row?.private_chat_block ?? true;
+  }
+
+  async unblockUser(actorUserId: string, targetUserId: string): Promise<boolean> {
+    if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
+    if (!UUID_REGEX.test(targetUserId)) throw new ChatInputError('targetUserId must be a valid UUID');
+
+    const row = await queryOne<{ private_chat_unblock: boolean }>(
+      this.client,
+      `SELECT public.private_chat_unblock($1::uuid, $2::uuid);`,
+      [actorUserId, targetUserId],
+    );
+    return row?.private_chat_unblock ?? true;
+  }
+
+  async isBlocked(userA: string, userB: string): Promise<boolean> {
+    if (!UUID_REGEX.test(userA) || !UUID_REGEX.test(userB)) return false;
+    const row = await queryOne<{ is_blocked: boolean }>(
+      this.client,
+      `SELECT public.private_chat_is_blocked($1::uuid, $2::uuid) AS is_blocked;`,
+      [userA, userB],
+    );
+    return row?.is_blocked ?? false;
+  }
+
+  async reportConversation(
+    actorUserId: string,
+    conversationId: string,
+    reason: string,
+    details: string,
+  ): Promise<{ reportId: string }> {
+    if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
+    if (!UUID_REGEX.test(conversationId)) throw new ChatInputError('conversationId must be a valid UUID');
+    if (!['spam_promotional', 'fraud_scam', 'abuse_harassment', 'other'].includes(reason)) {
+      throw new ChatInputError('invalid report reason');
+    }
+    if (details.length < 2 || details.length > 2000) {
+      throw new ChatInputError('details must be between 2 and 2000 characters');
+    }
+
+    const row = await queryOne<{ report_id: string }>(
+      this.client,
+      `SELECT public.private_chat_report($1::uuid, $2::uuid, $3::text, $4::text) AS report_id;`,
+      [actorUserId, conversationId, reason, details],
+    );
+    if (!row?.report_id) throw new Error('failed to submit chat report');
+    return { reportId: row.report_id };
   }
 
   async totalUnreadCount(actorUserId: string): Promise<number> {

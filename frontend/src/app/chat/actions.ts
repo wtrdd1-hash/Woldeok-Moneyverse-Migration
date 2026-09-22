@@ -18,6 +18,7 @@ export interface ChatConversation {
   readonly muted: boolean;
   readonly archived: boolean;
   readonly last_message_body: string | null;
+  readonly is_peer_blocked?: boolean;
 }
 
 export interface ChatMessage {
@@ -116,3 +117,82 @@ export async function archiveConversationAction(
     return failure(error, '대화방 설정을 변경할 수 없어요.');
   }
 }
+
+export async function muteConversationAction(
+  conversationId: string,
+  muted: boolean,
+): Promise<ActionState> {
+  if (!conversationId) return { status: 'error', message: '대화방 정보를 확인할 수 없어요.' };
+  try {
+    await mutate(`/api/v1/chat/conversations/${encodeURIComponent(conversationId)}/mute`, {
+      body: { muted },
+    });
+    revalidatePath('/chat');
+    return {
+      status: 'ok',
+      message: muted ? '대화방 알림을 음소거했어요.' : '대화방 알림을 다시 켰어요.',
+    };
+  } catch (error) {
+    return failure(error, '대화방 알림 설정을 변경할 수 없어요.');
+  }
+}
+
+export async function blockUserAction(targetUserId: string): Promise<ActionState> {
+  if (!targetUserId) return { status: 'error', message: '차단할 회원 정보를 확인할 수 없어요.' };
+  try {
+    await mutate(`/api/v1/chat/users/${encodeURIComponent(targetUserId)}/block`, {
+      method: 'POST',
+    });
+    revalidatePath('/chat');
+    return {
+      status: 'ok',
+      message: '회원을 차단했어요. 이후 이 회원의 쪽지는 안전하게 거절돼요.',
+    };
+  } catch (error) {
+    return failure(error, '회원을 차단할 수 없어요.');
+  }
+}
+
+export async function unblockUserAction(targetUserId: string): Promise<ActionState> {
+  if (!targetUserId) return { status: 'error', message: '차단 해제할 회원 정보를 확인할 수 없어요.' };
+  try {
+    await mutate(`/api/v1/chat/users/${encodeURIComponent(targetUserId)}/block`, {
+      method: 'DELETE',
+    });
+    revalidatePath('/chat');
+    return {
+      status: 'ok',
+      message: '회원 차단을 해제했어요.',
+    };
+  } catch (error) {
+    return failure(error, '회원 차단을 해제할 수 없어요.');
+  }
+}
+
+export async function reportConversationAction(
+  conversationId: string,
+  reason: string,
+  details: string,
+): Promise<ActionState & { reportId?: string }> {
+  if (!conversationId) return { status: 'error', message: '대화방 정보를 확인할 수 없어요.' };
+  if (!details || details.trim().length < 2) {
+    return { status: 'error', message: '신고 사유를 2자 이상 입력해 주세요.' };
+  }
+  try {
+    const res = await mutate<{ reportId: string }>(
+      `/api/v1/chat/conversations/${encodeURIComponent(conversationId)}/report`,
+      {
+        body: { reason, details: details.trim() },
+      },
+    );
+    revalidatePath('/chat');
+    return {
+      status: 'ok',
+      message: '신고가 접수되었으며 최근 대화 증거가 안전 관리 센터에 보존되었어요.',
+      reportId: res.reportId,
+    };
+  } catch (error) {
+    return failure(error, '신고를 접수할 수 없어요.');
+  }
+}
+
