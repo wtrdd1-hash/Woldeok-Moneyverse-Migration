@@ -8,9 +8,9 @@ import { groupDigits } from '@/lib/money';
 
 interface StockOrderbookProps {
   readonly currentPrice: string;
-  readonly dayOpenPrice?: string;
-  readonly isEn?: boolean;
-  readonly onSelectPrice?: (price: string) => void;
+  readonly dayOpenPrice?: string | undefined;
+  readonly isEn?: boolean | undefined;
+  readonly onSelectPrice?: ((price: string) => void) | undefined;
 }
 
 interface OrderbookRow {

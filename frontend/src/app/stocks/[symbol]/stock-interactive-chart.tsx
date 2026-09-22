@@ -8,11 +8,11 @@ import { groupDigits } from '@/lib/money';
 
 interface StockInteractiveChartProps {
   readonly currentPrice: string;
-  readonly dayOpenPrice?: string;
-  readonly dayHighPrice?: string;
-  readonly dayLowPrice?: string;
+  readonly dayOpenPrice?: string | undefined;
+  readonly dayHighPrice?: string | undefined;
+  readonly dayLowPrice?: string | undefined;
   readonly symbol: string;
-  readonly isEn?: boolean;
+  readonly isEn?: boolean | undefined;
 }
 
 type Timeframe = '1D' | '1W' | '1M' | '1Y';

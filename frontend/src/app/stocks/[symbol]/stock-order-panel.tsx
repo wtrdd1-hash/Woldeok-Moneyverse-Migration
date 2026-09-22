@@ -30,10 +30,10 @@ interface StockOrderPanelProps {
   readonly symbol: string;
   readonly name: string;
   readonly currentPrice: string;
-  readonly availableShares?: string;
-  readonly holdingQuantity?: string;
-  readonly isHalted?: boolean;
-  readonly isEn?: boolean;
+  readonly availableShares?: string | undefined;
+  readonly holdingQuantity?: string | undefined;
+  readonly isHalted?: boolean | undefined;
+  readonly isEn?: boolean | undefined;
 }
 
 export function StockOrderPanel({
