@@ -1,4 +1,22 @@
+## v2026.09.22.347.1 — 이용약관 동의 화면 블랙아웃(본문 증발) 긴급 복구 및 메인 포털(/) 핀테크 전면 리빌드
+
+- 적용 브랜치: `main` (릴리스: `prod-854d777-v347`)
+- **이용약관 동의 화면 블랙아웃 긴급 복구 및 핀테크 메인 포털 리빌드 완결**:
+  1. **약관 미동의 세션 블랙아웃 버그 원천 해결 (`ConsentStepUpModal`)**:
+     - `ConsentGuard`의 강제 화면 이탈(`router.replace`)로 인한 클라이언트 라우터 충돌 및 메인 본문 언마운트 결함 제거.
+     - 토스형 원터치 인라인 이용 동의 다이얼로그(`ConsentStepUpModal`) 신설: 만 14세 이상 확인, 이용약관, 개인정보처리방침 3종 원클릭 동의 및 백엔드 `PUT /api/v1/auth/consent` (`auth_grant_current_user_consent` RPC) 원자적 연동.
+  2. **메인 홈 포털(`/`) 전면 핀테크 리빌드 (`anti-ai-frontend-craftsmanship` & `fintech-responsive-layout-engine`)**:
+     - 실시간 내 지갑 순자산 헤어로(`WalletGlance` 연동) 및 4대 퀵 프리셋(송금, 직업, 주식, 가상은행).
+     - 2열 비대칭 핀테크 라이브 콘솔: 실시간 주식 핫 종목 3종(WDG, FNAK, CHIMU) 및 직업 업무 스테이션(진행률 바, 8대 직업 배정).
+     - 4대 기둥 18개 전 도메인 서비스 디렉터리(금융&투자, 경제&활동, 플레이&시즌, 커뮤니티&공간).
+     - 320px 극소 모바일 ~ 1440px 데스크톱 완벽 대응 클리핑 제로 반응형 레이아웃.
+  3. **품질 검증 및 무중단 승격**:
+     - `stage_v347.sh`를 통한 프로덕션 무중단 승격 (`854d777`).
+     - Exact-SHA identity coherent (`854d777`) 검증 및 전 엔드포인트 200 OK 실측.
+     - PostgreSQL 927개 활성 유저 세션 100% 무손실 보존.
+
 ## v2026.09.22.347 — 전 도메인 REST API 표준화 & OpenAPI 3.0 명세 & 인터랙티브 개발자 포털(/developer) 완결
+
 
 - 적용 브랜치: `feat/api-developer-portal-v2026.09.22.344`
 - **전 도메인 RESTful API 규격화 및 핀테크 개발자 포털 완결**:

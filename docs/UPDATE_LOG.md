@@ -1,6 +1,38 @@
 # Update Log
 
+## v2026.09.22.347.1 — Consent Step-Up Modal Blackout Recovery & Main Portal FinTech Rebuild Complete
+
+- Branch: `main` (Release: `prod-854d777-v347`)
+- **Emergency Blackout Bug Eradication & FinTech Portal Rebuild**:
+  1. **Consent Screen Blackout Eradication (`ConsentStepUpModal`)**:
+     - Eliminated client-side router conflict and page unmounting caused by abrupt `router.replace` in `ConsentGuard`.
+     - Introduced Toss-style in-place `ConsentStepUpModal`: 14+ age confirmation, Terms of Service, and Privacy Policy one-click agreement bound atomically to backend `PUT /api/v1/auth/consent` (`auth_grant_current_user_consent` RPC).
+  2. **Main Home Portal (`/`) Overhaul (`anti-ai-frontend-craftsmanship` & `fintech-responsive-layout-engine`)**:
+     - Real-time net worth hero card (`WalletGlance` integration) with 4 quick presets (Send, Work, Stocks, Bank).
+     - 2-column asymmetric FinTech live console: 3 hot stocks (WDG, FNAK, CHIMU) with price delta badges and Career Station (daily reward progress bar, 8 professions).
+     - 4-pillar 18-domain service directory (Finance & Invest, Economy & Work, Play & Season, Community & Spaces).
+     - Zero-clipping responsive layout adapted across 320px ultra-mobile to 1440px desktop displays.
+  3. **Verification & Zero-Downtime Release Promotion**:
+     - Production zero-downtime promotion via `stage_v347.sh` (`854d777`).
+     - Exact-SHA identity coherent (`854d777`) verified across frontend and backend, all endpoints responding 200 OK.
+     - PostgreSQL 927 active user sessions preserved 100% losslessly.
+
+## v2026.09.22.347 — Full-Domain REST API Standardization, OpenAPI 3.0 & Interactive Developer Portal (/developer)
+
+- Branch: `feat/api-developer-portal-v2026.09.22.344`
+- **Full-Domain RESTful API Standardization & FinTech Developer Portal**:
+  1. **Full-Domain REST API & OpenAPI 3.0 Specification**:
+     - Standardized 159 endpoints across 52 NestJS controllers with full OpenAPI 3.0 specification (`docs/mobile-api-contract.json`).
+     - Added newspaper pulse, poll voting, and lore endpoints under unified REST standards.
+  2. **Next.js Swiss Ledger FinTech Interactive Developer Portal (`/developer`)**:
+     - Endpoint catalog across 7 categories with copyable snippets in cURL, TypeScript, and Python.
+     - Interactive in-browser "Try It Out" live sandbox tester with real-time response code and latency telemetry.
+     - Downloadable OpenAPI 3.0 contract and full i18n (KO, EN, JA, ZH).
+  3. **App Gateway Routing & Global Navigation Integration**:
+     - Updated `frontend/src/lib/app-gateway.ts` and registered `/developer` across navigation menus.
+
 ## v2026.09.22.346 — Discord Music Bot Real-Time SponsorBlock API & FFmpeg Stream Slicing Engine QA Complete
+
 
 - Branch: `feat/discord-music-bot-sponsorblock-live-slicing-qa-v2026.09.22.346`
 - **Real-Time SponsorBlock API & FFmpeg aselect Stream Slicing**:
