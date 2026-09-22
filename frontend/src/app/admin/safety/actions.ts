@@ -3,6 +3,40 @@
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
 import { failure, mutate } from '@/lib/mutate';
+import { apiOrNull } from '@/lib/api';
+
+export interface EvidenceMessage {
+  id: string;
+  sender_id: string;
+  sequence: number;
+  body: string;
+  created_at: string;
+}
+
+export interface ChatReportDetail {
+  report_id: string;
+  reporter_id: string;
+  reporter_username: string;
+  reporter_nickname: string;
+  reported_user_id: string;
+  reported_username: string;
+  reported_nickname: string;
+  conversation_id: string;
+  reason: string;
+  details: string;
+  evidence_count: number;
+  evidence_snapshot: EvidenceMessage[];
+  status: string;
+  created_at: string;
+  actioned_at: string | null;
+  actioned_by: string | null;
+  actioner_nickname: string | null;
+}
+
+export async function getChatReportDetailAction(reportId: string): Promise<ChatReportDetail | null> {
+  if (!reportId) return null;
+  return apiOrNull<ChatReportDetail>(`/api/v1/admin/safety/chat-reports/${encodeURIComponent(reportId)}`);
+}
 
 function text(value: FormDataEntryValue | null): string {
   return typeof value === 'string' ? value.trim() : '';

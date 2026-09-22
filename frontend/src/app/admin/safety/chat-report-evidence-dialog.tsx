@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { apiOrNull } from '@/lib/api';
+import { getChatReportDetailAction, type ChatReportDetail } from './actions';
 
 export interface ChatReportItem {
   report_id: string;
@@ -31,18 +31,6 @@ export interface ChatReportItem {
   actioned_at: string | null;
   actioned_by: string | null;
   actioner_nickname: string | null;
-}
-
-interface EvidenceMessage {
-  id: string;
-  sender_id: string;
-  sequence: number;
-  body: string;
-  created_at: string;
-}
-
-interface ChatReportDetail extends ChatReportItem {
-  evidence_snapshot: EvidenceMessage[];
 }
 
 function reasonBadge(reason: string) {
@@ -70,9 +58,7 @@ export function ChatReportEvidenceDialog({ item }: { item: ChatReportItem }) {
       setLoading(true);
       setError(null);
       try {
-        const res = await apiOrNull<ChatReportDetail>(
-          `/api/v1/admin/safety/chat-reports/${encodeURIComponent(item.report_id)}`
-        );
+        const res = await getChatReportDetailAction(item.report_id);
         if (res) {
           setDetail(res);
         } else {
