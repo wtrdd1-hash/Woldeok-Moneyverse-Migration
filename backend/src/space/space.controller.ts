@@ -10,9 +10,8 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
-import { IsIn, IsInt, IsObject, IsOptional, IsPositive, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
-import { randomUUID } from 'node:crypto';
+import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { IsIn, IsInt, IsObject, IsPositive, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
@@ -34,10 +33,9 @@ export class PurchaseSpaceDto {
   @MaxLength(50)
   readonly name!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: '클라이언트 멱등성 키' })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid', description: '클라이언트 소유 멱등성 키' })
   @IsUUID()
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey!: string;
 }
 
 export class UpdateLayoutDto {
@@ -52,10 +50,9 @@ export class ContributeCityProjectDto {
   @IsPositive()
   readonly amountWld!: number;
 
-  @ApiPropertyOptional({ format: 'uuid', description: '클라이언트 멱등성 키' })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid', description: '클라이언트 소유 멱등성 키' })
   @IsUUID()
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey!: string;
 }
 
 @ApiTags('spaces')
@@ -76,8 +73,7 @@ export class SpaceController {
   @Post('purchase')
   async purchaseSpace(@Req() req: RequestWithSession, @Body() dto: PurchaseSpaceDto) {
     const actorUserId = requireUserId(req);
-    const idempotencyKey = dto.idempotencyKey || randomUUID();
-    return this.spaceService.purchaseSpace(actorUserId, dto.spaceType, dto.name, idempotencyKey);
+    return this.spaceService.purchaseSpace(actorUserId, dto.spaceType, dto.name, dto.idempotencyKey);
   }
 
   @ApiOperation({ summary: '개인 공간 상세 조회' })
@@ -114,7 +110,6 @@ export class SpaceController {
     @Body() dto: ContributeCityProjectDto,
   ) {
     const actorUserId = requireUserId(req);
-    const idempotencyKey = dto.idempotencyKey || randomUUID();
-    return this.spaceService.contributeCityProject(actorUserId, projectId, dto.amountWld, idempotencyKey);
+    return this.spaceService.contributeCityProject(actorUserId, projectId, dto.amountWld, dto.idempotencyKey);
   }
 }
