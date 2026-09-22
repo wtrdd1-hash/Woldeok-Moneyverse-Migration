@@ -35,10 +35,17 @@ export function validateEvidence(evidence, now = new Date()) {
     errors.push('restoreTargetEnvironment must be an isolated non-production environment');
   }
   if (/prod/i.test(evidence?.restoreTargetEnvironment ?? '')) errors.push('production restore target is forbidden');
+  const timestamps = {};
   for (const key of ['createdAt', 'restoreDrillAt']) {
     const parsed = Date.parse(evidence?.[key] ?? '');
     if (!Number.isFinite(parsed)) errors.push(`${key} must be an ISO-8601 timestamp`);
-    else if (parsed > now.getTime() + 300_000) errors.push(`${key} cannot be in the future`);
+    else {
+      timestamps[key] = parsed;
+      if (parsed > now.getTime() + 300_000) errors.push(`${key} cannot be in the future`);
+    }
+  }
+  if (Number.isFinite(timestamps.createdAt) && Number.isFinite(timestamps.restoreDrillAt) && timestamps.restoreDrillAt < timestamps.createdAt) {
+    errors.push('restoreDrillAt cannot be earlier than createdAt');
   }
   if (evidence?.restoreDrillPassed !== true) errors.push('restoreDrillPassed must be true');
   if (evidence?.migrationParityPassed !== true) errors.push('migrationParityPassed must be true');
