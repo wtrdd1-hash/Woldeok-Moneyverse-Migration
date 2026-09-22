@@ -1,6 +1,7 @@
 # Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v58)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v59**: GitHub 활성 23개 Step-Up 보안/경제 PR (#644~#684) main 완전 병합 및 충돌 해소, 백엔드 Vitest 97개 파일 974개 테스트 & 프론트엔드 전 라우트 빌드 완벽 통과, 테스트 서버(https://test.easy-scraping.com) 및 운영 서버(https://easy-scraping.com) 무중단 Blue-Green 승격(v2026.09.23.388) 및 1,061개 PostgreSQL 활성 세션 100% 무손실 보존 완료 (+180, -0)
 - **v58**: 상단 글로벌 헤더 15초 주기 404 폴링 폭풍 원천 차단(Next.js BFF /api/notifications/unread-count 신설) 및 채팅/알림 document.visibilityState 가드·지수 백오프 적용 사양 (v2026.09.22.359) (+140, -0)
 - **v57**: 전 도메인 REST API 완전 통합(4대 미연동 DB 도메인 컨트롤러 신설: 저금통, 제작대, 마켓플레이스, 인앱알림) 및 OpenAPI 3.0 명세서 & 11종 API 문서 전수 갱신 사양 수록 (+160, -0)
 - **v56**: 직업 업무(/work) 10초 무한 깜빡임/폴링 루프 및 팝업창(TaskCompletionPanel) CSS 뷰포트 클리핑·30px 스크롤바 붕괴 결함 전면 해소 사양 수록 (+150, -0)
@@ -2258,3 +2259,59 @@ flowchart TD
    - 미니 PC worktree 동기화, `stage_v360.sh` 승격.
    - Nginx 로그 실시간 점검: `/api/notifications/unread-count` 404 에러 0건 확인.
    - PostgreSQL 활성 세션(1,028개) 100% 보존 확인.
+
+---
+
+## 🚀 [v59 Specification] GitHub 원격 활성 PR 23종 main 완전 통합 및 테스트/운영 무중단 Blue-Green 승격 사양 (누적 추가)
+
+### 1. 개요 및 배경 (Incident Analysis & Root Causes)
+- **사용자 요청**: "자 메인 통합시켜줘 깃허브 에 브래치 통합 테스트서버 운영서버 승격 시켜줘 오류 해결해서 진행해"
+- **통합 배경**:
+  - GitHub 원격 저장소(`Woldeok-Moneyverse-Migration`)에 머지되지 않고 쌓여 있던 활성 PR 23개(보안 권한 격상, 멱등성 보장, 국고/채팅 기획 정합, 백엔드 린트 게이트 등)를 `main` 브랜치에 완전 통합.
+  - 병합 중 발생한 컨트롤러 가드 및 체인지로그 충돌을 완벽하게 해소하고, 전체 백엔드 단위/E2E 테스트 및 프론트엔드 Turbopack 빌드를 통과시킨 후 GitHub origin에 푸시.
+  - 테스트 서버(`https://test.easy-scraping.com`) 및 운영 서버(`https://easy-scraping.com`)에 Blue-Green 무중단 승격(v2026.09.23.388)을 완료하고 1,061개 PostgreSQL 활성 세션을 100% 무손실 보존.
+
+### 2. 통합 완료된 PR 23종 목록 및 변경 내역
+1. **PR #684**: `auto/hourly-b-club-idempotency-v2026.09.23.388` (클럽 돌연변이 멱등성 키 요구 계약)
+2. **PR #683**: `fix/staging-local-auth-token-v2026.09.23.387` (격리 테스트 회원가입 언블락 및 토큰 게이트)
+3. **PR #682**: `auto/hourly-b-space-idempotency-v2026.09.23.384` (스페이스 돌연변이 멱등성 키 계약)
+4. **PR #681**: `auto/hourly-b-economy-override-idempotency-v2026.09.23.383` (자산 재정의 멱등성 계약)
+5. **PR #680**: `auto/hourly-b-stock-idempotency-v2026.09.23.381` (주식 운영자 멱등성 키 요구 계약)
+6. **PR #679**: `auto/hourly-b-backend-lint-v2026.09.23.373` (백엔드 필수 CI 린트 게이트 강화)
+7. **PR #678**: `auto/hourly-b-app-api-version-gate-v2026.09.23.372` (앱 API 최소 클라이언트 버전 게이트)
+8. **PR #674**: `docs/hourly-plan-v2026.09.22.368` (권위 기획 문서 재정합)
+9. **PR #673**: `auto/hourly-b-api-audit-lint-v2026.09.22.367` (백엔드 API 완전성 감사 린트 언블락)
+10. **PR #672**: `auto/hourly-b-shop-stepup-v2026.09.22.366` (상점 카탈로그 돌연변이 Step-up 2FA 가드)
+11. **PR #671**: `auto/hourly-b-audit-stepup-v2026.09.22.365` (감사 로그 돌연변이 Step-up 2FA 가드)
+12. **PR #670**: `auto/hourly-b-ai-news-stepup-v2026.09.22.363` (AI 뉴스 생성 및 돌연변이 Step-up 2FA 가드)
+13. **PR #669**: `auto/hourly-b-market-event-stepup-v2026.09.22.359` (시장 이벤트 돌연변이 Step-up 2FA 가드)
+14. **PR #668**: `auto/hourly-b-shop-stepup-v2026.09.22.358` (상점 경제 돌연변이 Step-up 2FA 가드)
+15. **PR #667**: `auto/hourly-b-admin-role-stepup-v2026.09.22.357` (관리자 권한 변경 Step-up 2FA 가드)
+16. **PR #666**: `auto/hourly-b-work-policy-stepup-v2026.09.22.355` (직업 경제 정책 Step-up 2FA 가드)
+17. **PR #665**: `auto/hourly-b-backend-lint-consolidate-v2026.09.22.353` (백엔드 린트 차단 요인 정리)
+18. **PR #661**: `auto/hourly-b-safety-stepup-v2026.09.22.347` (안전 센터 긴급 삭제 조치 Step-up 2FA 가드)
+19. **PR #659**: `auto/hourly-b-stock-stepup-v2026.09.22.344` (주식 고영향 관리자 돌연변이 Step-up 2FA 가드)
+20. **PR #657**: `auto/hourly-b-content-publication-stepup-v2026.09.22.338` (공개 콘텐츠 발행 Step-up 2FA 가드)
+21. **PR #646**: `docs/treasury-fiscal-v2026.09.21.323` (국고 재정 관리 명세 기획 통합)
+22. **PR #645**: `docs/direct-message-entrypoints-v2026.09.21.316` (1:1 비공개 채팅 진입점 명세 기획 통합)
+23. **PR #644**: `auto/hourly-b-offsite-restore-v2026.09.21.324` (오프사이트 복구 검증 체계 통합)
+
+### 3. 검증 결과 및 운영 승격 (Verification & Promotion)
+1. **백엔드 단위 및 E2E 테스트**:
+   - `NODE_ENV=test pnpm --filter @moneyverse/backend test`: 97개 파일, 974개 테스트 100% 통과 (0 failed).
+2. **프론트엔드 테스트 및 빌드**:
+   - `unread-count.test.ts`: 3개 테스트 100% 통과.
+   - `BUILD_ID=$(git rev-parse HEAD) pnpm --filter @moneyverse/frontend build`: Next.js Turbopack 90여 개 라우트 컴파일 100% 성공.
+3. **GitHub main 동기화**:
+   - `git push origin main` 성공 (`676db1a6..bc2f8207`, 23개 PR 전체 자동 머지/종료).
+   - 로컬 작업 공간(`tset/Woldeok-Moneyverse-Migration`) 리베이스 동기화 완료.
+4. **스테이징 & 블루-그린 무중단 승격**:
+   - `stage_v388.sh`: `test-bc2f820-v388` 및 `prod-bc2f820-v388` 빌드 아티팩트 안전 복제.
+   - `promote_v388.sh`:
+     - 테스트 서버(`https://test.easy-scraping.com/`): HTTP 200 OK.
+     - 테스트 개발자 포털(`https://test.easy-scraping.com/developer`): HTTP 200 OK.
+     - 운영 서버 메인(`https://easy-scraping.com/`): HTTP 200 OK.
+     - 운영 알림 미확인 카운트 BFF(`https://easy-scraping.com/api/notifications/unread-count`): HTTP 200 OK (`{"unreadCount":0}`).
+     - 운영 앱 API 쪽지 미확인(`https://easy-scraping.com/app-api/v1/chat/unread-count`): HTTP 401 Unauthorized (정상 인증 가드 작동).
+     - Nginx 에러 로그: 0건.
+     - **PostgreSQL 활성 사용자 세션**: **1,061개 세션 100% 무손실 보존 완료**.
