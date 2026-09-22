@@ -1,3 +1,15 @@
+## v2026.09.22.342 — 주식 거래정지 및 매수원가 자동정산 버그 수정 & 듀얼 무중단 배포 완결
+
+- 적용 브랜치: `main` (커밋: `06fde76`)
+- **종목 거래정지 및 매수원가 자동정산 버그 근본 수정**:
+  - `packages/database/migrations/221-stock-halt-cost-basis-settlement.sql`의 `public.stock_halt_and_settle` 함수 내 `halt_status` 모호한 컬럼 참조(`ambiguous column reference`)를 `s.halt_status`로 수정하여 관리자 콘솔 500 에러를 원천 해결.
+  - PostgreSQL 실DB 트랜잭션 실행 테스트 완료 (`settled_count: 1`, `total_refund: 28,230 WLD`, `halt_status: HALTED_SETTLED`).
+- **전체 기능 GitHub Remote Main 완전 통합**:
+  - 18개 전 백엔드 도메인 프론트엔드 연동, 4개국어 i18n 엔진, 카지노 8종 게임, 직업 카드 버튼 짤림 방지, 관리자 관제탑을 GitHub `origin/main`에 100% 병합 및 푸시 완료.
+- **테스트 및 운영 환경 듀얼 무중단 배포 검증**:
+  - 테스트 환경 (`https://test.easy-scraping.com`): `test-be6344f-v337` 릴리즈, HTTP 200 OK.
+  - 운영 환경 (`https://easy-scraping.com`): `prod-be6344f-v337` 릴리즈, HTTP 200 OK, 819개 유저 활성 세션 100% 무손실 보존.
+
 # 업데이트 로그
 
 ## v2026.09.21.330 — 사용자 조율 확정 기반 스위스 핀테크 원장(Swiss Ledger) 시스템 전면 완결
