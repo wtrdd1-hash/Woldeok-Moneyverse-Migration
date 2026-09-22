@@ -380,9 +380,13 @@ export function StockOrderPanel({
                   취소
                 </Button>
                 <SubmitButton
-                  label={side === 'buy' ? '매수 주문 확정' : '매도 주문 확정'}
-                  pendingLabel="주문 체결 중..."
-                />
+                  variant={side === 'buy' ? 'default' : 'destructive'}
+                  size="sm"
+                >
+                  {side === 'buy'
+                    ? (isEn ? 'Confirm Buy Order' : '매수 주문 확정')
+                    : (isEn ? 'Confirm Sell Order' : '매도 주문 확정')}
+                </SubmitButton>
               </DialogFooter>
             </form>
           </DialogContent>
