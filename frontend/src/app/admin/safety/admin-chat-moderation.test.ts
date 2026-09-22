@@ -35,12 +35,12 @@ describe('Admin Chat Moderation Safety Queue Logic', () => {
     ];
 
     expect(mockEvidence.length).toBeLessThanOrEqual(10);
-    expect(mockEvidence[0].sequence).toBeLessThan(mockEvidence[1].sequence);
+    expect(mockEvidence[0]!.sequence).toBeLessThan(mockEvidence[1]!.sequence);
 
     // 피신고자 메시지 판정 로직 검증
     const reportedUserId = 'user-b';
-    const isReportedUser0 = mockEvidence[0].sender_id === reportedUserId;
-    const isReportedUser1 = mockEvidence[1].sender_id === reportedUserId;
+    const isReportedUser0 = mockEvidence[0]!.sender_id === reportedUserId;
+    const isReportedUser1 = mockEvidence[1]!.sender_id === reportedUserId;
 
     expect(isReportedUser0).toBe(false);
     expect(isReportedUser1).toBe(true);
