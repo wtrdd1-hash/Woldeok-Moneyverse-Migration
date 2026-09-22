@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import type { Pool } from 'pg';
+import type { Queryable } from '../../core/db';
 import { PG_POOL } from '../../core/pool.provider';
 
 export interface TreasuryVaultRow {
@@ -42,7 +42,7 @@ export interface TreasuryOverview {
 
 @Injectable()
 export class TreasuryRepository {
-  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+  constructor(@Inject(PG_POOL) private readonly pool: Queryable) {}
 
   async getOverview(): Promise<TreasuryOverview> {
     // 1. Vaults

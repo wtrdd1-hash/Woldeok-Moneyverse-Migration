@@ -124,7 +124,7 @@ import { TreasuryService } from './treasury/treasury.service';
     {
       provide: TreasuryRepository,
       inject: [PG_POOL],
-      useFactory: (pool: Queryable | null) => (pool ? new TreasuryRepository(pool as any) : null),
+      useFactory: (pool: Queryable | null) => (pool ? new TreasuryRepository(pool) : null),
     },
     {
       provide: TreasuryService,
