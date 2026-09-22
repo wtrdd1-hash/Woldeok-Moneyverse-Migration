@@ -2,11 +2,23 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.22.352
+> **현재 통합 버전:** v2026.09.22.368
 > **구현·증거 동기화:** 2026-09-22
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 시간별 기획 정합화 — v2026.09.22.368 (2026-09-22)
+
+- **통합 원장:** 이번 회차를 [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)에도 기록했으며 향후 기획 회차도 일반 changelog/worklog와 함께 통합 원장에 누적한다.
+- **정확한 기준:** 시작/작업 중간 재확인 모두 `origin/main=3f42ad8c6b12c8e13693ff246935eebceab951e1`였고 재검토 중 main 이동은 없었다.
+- **G368-01 — 권위/버전 드리프트(P1 거버넌스 gap):** 권위 기획은 v352에 머문 반면 main release/update 증거는 v360까지 진행됐다. v353~v360 구현 이력은 보존하되 release note가 제품/보안 수용조건을 묵시적으로 바꾸지 못한다. v368에서 기획 추적성을 복구한다.
+- **G368-02 — 폐기된 관리자 TOTP가 현재 통제로 남은 문제(P0 보안계약 gap):** migration 197과 DB test는 관리자 TOTP credential/function 폐기를 검증하지만 권위 기획과 여러 세부 명세는 민감 관리자 작업에 TOTP/`SecondFactorGuard`가 현재 필요하다고 남아 있다. 현재 통제는 실제 증거가 있는 `AdminSessionGuard`, 필요한 최근 `ReauthGuard`, 브라우저 mutation의 CSRF, 서버 role/actor 검사, 최소권한, 필요 시 사유/멱등성, append-only audit로 표현한다. TOTP는 역사 또는 향후 의도라고 명시한 경우에만 남기며 runtime+DB 증거 없이 현재 보완통제로 계산하지 않는다.
+- **G368-03 — 모바일/API 계약 버전 드리프트(P1 계약 gap):** v359는 backend 57 controller/335 endpoint, mobile contract 179 endpoint를 기록하지만 `mobile-api-complete-spec.md` 헤더는 v2026.09.14.2이고 본문에 과거 52 controller/163 endpoint와 신규 수치가 함께 있다. method/path/auth/request/response/error/idempotency/rate/resource limit의 machine diff, additive/breaking/behavioral 분류, 영/한 의미 동기화, exact-SHA contract snapshot이 있어야 수용한다. endpoint 개수 일치만으로 동기화를 증명하지 않는다.
+- **G368-04 — 관리자 shop step-up은 WIP 증거(P1 보안 gap):** 원격 후보 `auto/hourly-b-shop-stepup-v2026.09.22.366`은 catalog 경제 변경에 `ReauthGuard`를 추가하지만 main 미병합이다. 수용 전 최신 main rebase, admin-session+CSRF+recent-reauth 조합, missing/stale/expired reauth·lower-role·CSRF 음성시험, 가격/재고/활성상태 old/new·사유·actor 감사, 경제 변경 멱등성/동시성, 영/한 기록, merged exact-SHA Test 검증을 요구한다.
+- **G368-05 — release 증거 범위(P1 evidence gap):** v360의 1,028 active session 보존/무중단 표현은 해당 release 증거로 보존하되 인증·CSRF·reauth 상태와 모든 중요 mutation이 무손실이었다는 일반 증명으로 확대하지 않는다. 향후 authenticated continuity, 필요한 CSRF/reauth 의미, frontend/backend identity, fatal log, 대표 중요 mutation을 표본 검증한다.
+- **표준 최신성:** OWASP ASVS 5.0.0은 latest stable이고 NIST SP 800-63B-4는 2025-07 final이며 주기적 재인증/session timeout을 규정한다. 이는 검증·재인증 설계 근거이지 폐기된 Moneyverse TOTP가 존재한다는 증거가 아니다.
+- **수용:** 영/한 의미 동기화와 추적 가능한 worklog/changelog. 이번 회차는 기획/문서만 변경하며 새 구현·Test·Production 완료를 주장하지 않는다.
 
 ## 시간별 기획 정합화 — v2026.09.22.352 (2026-09-22)
 

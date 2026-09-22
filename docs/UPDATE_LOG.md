@@ -1,3 +1,8 @@
+## v2026.09.22.368 — Hourly authoritative planning reconciliation
+
+- Recorded G368-01~05 for v352↔v360 authority drift, retired admin-TOTP current-control wording, mixed mobile/API contract versions, unmerged shop reauth candidate, and bounded release-evidence scope.
+- Synchronized EN/KO PROJECT_PLAN, changelog and worklog. Planning/docs only; no new implementation/deployment claim.
+
 ## v2026.09.22.360 — Header 15s 404 Polling Elimination (Next.js BFF /api/notifications/unread-count), ChatModule Routing Bind & Visibility Guards
 
 - Branch: `main` (Release: `prod-74be1c0-v360`, Exact Git SHA: `1e4cabc`)
