@@ -40,7 +40,7 @@ export function ConsentStepUpModal({
     try {
       const res = await submitConsent({ status: 'idle' }, formData);
       if (res?.status === 'error') {
-        setErrorMsg(res.message);
+        setErrorMsg(res.message ?? '약관 동의 처리에 실패했습니다.');
         setIsSubmitting(false);
       } else {
         // 성공 시 페이지 새로고침하여 최신 권한으로 즉시 언락
