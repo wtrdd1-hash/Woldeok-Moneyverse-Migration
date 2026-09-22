@@ -34,6 +34,7 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -287,7 +288,7 @@ export class GameCatalogController {
   }
 
   @Post('stocks/market-events')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Publish a market event: news that leans the market' })
   publishMarketEvent(@Req() request: RequestWithSession, @Body() body: PublishMarketEventDto) {
     return this.guarded(
@@ -297,7 +298,7 @@ export class GameCatalogController {
   }
 
   @Delete('stocks/market-events/:id')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'End a market event now' })
   cancelMarketEvent(
     @Req() request: RequestWithSession,
