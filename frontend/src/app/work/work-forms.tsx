@@ -2,13 +2,18 @@
 
 import { Sparkles, Briefcase } from 'lucide-react';
 
-import { useActionState, useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useActionState, useEffect, useState } from 'react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { useLocale } from '@/components/locale-provider';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { IDLE } from '@/lib/action-state';
 import {
   claimReward,
@@ -62,43 +67,22 @@ export function JobSwitchButton({
   );
 }
 
-function TaskCompletionPanel({
+function TaskCompletionModal({
+  open,
   task,
   requestKey,
   onClose,
 }: {
+  readonly open: boolean;
   readonly task: WorkTask;
   readonly requestKey: string;
   readonly onClose: () => void;
 }) {
   const { locale } = useLocale();
   const isEn = locale === 'en';
-  const router = useRouter();
   const [state, action, pending] = useActionState(completeTaskV2Action, IDLE);
-  const meta = jobMeta(task.job_type, locale);
   const rewardPaused = task.reward_preview === null || task.experience_preview === null;
   const [slow, setSlow] = useState(false);
-
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const resultRef = useRef<HTMLDivElement>(null);
-
-  // Lock body scroll on modal mount, restore on unmount
-  useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
-  }, []);
-
-  // Initial scroll to top on modal mount
-  useEffect(() => {
-    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'instant' });
-  }, []);
-
-  useEffect(() => {
-    if (state.status === 'ok') router.refresh();
-  }, [router, state.status]);
 
   useEffect(() => {
     setSlow(false);
@@ -107,104 +91,98 @@ function TaskCompletionPanel({
     return () => window.clearTimeout(timer);
   }, [pending]);
 
-  // Auto smooth scroll to pending status
-  useEffect(() => {
-    if (pending) {
-      resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  }, [pending]);
-
-  // Auto smooth scroll when completion state or error is received
-  useEffect(() => {
-    if (state.status === 'ok' || state.status === 'error' || state.message) {
-      const timer = window.setTimeout(() => {
-        resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 50);
-      return () => window.clearTimeout(timer);
-    }
-  }, [state]);
-
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="task-completion-title"
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-end sm:justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4 overflow-hidden animate-in fade-in duration-150"
-      onClick={(e) => {
-        if (e.target === e.currentTarget && !pending) onClose();
-      }}
-    >
-      <Card className="w-full max-w-lg max-h-[90dvh] flex flex-col rounded-t-3xl sm:rounded-2xl border-t sm:border border-border/80 bg-card text-card-foreground shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-200">
-        {/* Mobile touch grab handle */}
-        <div className="mx-auto mt-2.5 h-1.5 w-12 rounded-full bg-muted-foreground/30 sm:hidden" />
-
-        <CardHeader className="shrink-0 p-4 sm:p-6 pb-2">
+    <Dialog open={open} onOpenChange={(next) => { if (!next && !pending) onClose(); }}>
+      <DialogContent className="max-w-md w-[calc(100vw-2rem)] p-5 sm:p-6 sm:rounded-2xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader className="space-y-2 text-left">
           <div className="flex items-center justify-between gap-2">
             <Badge
               variant="secondary"
-              className="flex items-center gap-1.5 font-medium px-2.5 py-1"
+              className="flex items-center gap-1.5 font-medium px-2.5 py-1 text-xs"
             >
-              <Briefcase className="size-5 text-amber-600 dark:text-amber-400" />
+              <Briefcase className="size-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
               <span>{jobLabel(task.job_type, locale)}</span>
               <span className="text-muted-foreground/60">·</span>
               <span>{difficultyLabel(task.difficulty, locale)}</span>
             </Badge>
-            <Badge className="bg-primary/20 text-primary border-primary/30 font-bold">
+            <Badge className="bg-primary/20 text-primary border-primary/30 font-bold text-[11px] shrink-0">
               {isEn ? `Completed today ${task.taken_today}` : `오늘 ${task.taken_today}회 완료`}
             </Badge>
           </div>
-          <CardTitle id="task-completion-title" className="text-lg sm:text-xl mt-2 font-bold">{task.name}</CardTitle>
-          <CardDescription className="text-xs sm:text-sm text-muted-foreground">{task.description}</CardDescription>
-        </CardHeader>
+          <DialogTitle className="text-lg sm:text-xl font-bold tracking-tight">{task.name}</DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            {task.description}
+          </DialogDescription>
+        </DialogHeader>
 
-        <CardContent ref={scrollContainerRef} className="flex-1 overflow-y-auto overscroll-contain grid gap-3.5 px-4 sm:px-6 py-3">
-          <div className="rounded-xl border border-border/60 bg-muted/40 p-3.5 grid grid-cols-2 gap-2 text-center text-sm">
-            <div className="border-r border-border/40 pr-2">
-              <span className="text-xs text-muted-foreground block font-medium">
-                {isEn ? 'WLD reward' : '이번 지급 WLD'}
-              </span>
-              <span className="font-extrabold text-emerald-600 dark:text-emerald-400 font-mono text-base sm:text-lg">
-                {task.reward_preview === null ? '—' : `+${task.reward_preview} WLD`}
-              </span>
-            </div>
-            <div className="pl-2">
-              <span className="text-xs text-muted-foreground block font-medium">
-                {isEn ? 'Proficiency EXP' : '숙련도 EXP'}
-              </span>
-              <span className="font-extrabold text-amber-600 dark:text-amber-400 font-mono text-base sm:text-lg">
-                {task.experience_preview === null ? '—' : `+${task.experience_preview} EXP`}
-              </span>
-            </div>
+        <div className="rounded-xl border border-border/70 bg-muted/40 p-4 grid grid-cols-2 gap-3 text-center my-3">
+          <div className="border-r border-border/50 pr-2">
+            <span className="text-xs text-muted-foreground block font-medium mb-1">
+              {isEn ? 'WLD reward' : '이번 지급 WLD'}
+            </span>
+            <span className="font-extrabold text-emerald-600 dark:text-emerald-400 font-mono text-lg sm:text-xl">
+              {task.reward_preview === null ? '—' : `+${task.reward_preview} WLD`}
+            </span>
           </div>
+          <div className="pl-2">
+            <span className="text-xs text-muted-foreground block font-medium mb-1">
+              {isEn ? 'Proficiency EXP' : '숙련도 EXP'}
+            </span>
+            <span className="font-extrabold text-amber-600 dark:text-amber-400 font-mono text-lg sm:text-xl">
+              {task.experience_preview === null ? '—' : `+${task.experience_preview} EXP`}
+            </span>
+          </div>
+        </div>
 
-          <form action={action} className="grid gap-3">
-            <input type="hidden" name="taskId" value={task.task_id} />
-            <input type="hidden" name="idempotencyKey" value={requestKey} />
-
-            <SubmitButton
-              disabled={rewardPaused}
-              className="w-full min-h-12 bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm sm:text-base shadow-md transition-all active:scale-[0.98]"
+        {state.status === 'ok' ? (
+          <div className="space-y-4 pt-1">
+            <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4 text-center space-y-2 animate-in fade-in zoom-in-95 duration-200">
+              <Sparkles className="size-8 text-emerald-500 mx-auto" />
+              <h4 className="font-bold text-base text-foreground">
+                {isEn ? 'Task Completed!' : '업무 완료!'}
+              </h4>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                {state.message || (isEn
+                  ? 'WLD reward and career proficiency EXP have been credited safely.'
+                  : '지갑에 WLD 보상이 입금되고 직업 숙련도가 상승했습니다.')}
+              </p>
+            </div>
+            <Button
+              type="button"
+              onClick={onClose}
+              className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition-all active:scale-[0.98]"
             >
-              {rewardPaused
-                ? isEn
-                  ? 'Rewards temporarily unavailable'
-                  : '보상 지급 일시 중지'
-                : isEn
-                  ? 'Complete Task Immediately'
-                  : '업무 완료 및 보상 수령'}
-            </SubmitButton>
-          </form>
+              {isEn ? 'Close' : '확인 및 닫기'}
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3 pt-1">
+            <form action={action} className="grid gap-2">
+              <input type="hidden" name="taskId" value={task.task_id} />
+              <input type="hidden" name="idempotencyKey" value={requestKey} />
+              <SubmitButton
+                disabled={rewardPaused}
+                className="w-full h-12 bg-amber-600 hover:bg-amber-700 text-white font-bold text-sm sm:text-base shadow-md transition-all active:scale-[0.98]"
+              >
+                {rewardPaused
+                  ? isEn
+                    ? 'Rewards temporarily unavailable'
+                    : '보상 지급 일시 중지'
+                  : isEn
+                    ? 'Complete Task Immediately'
+                    : '업무 완료 및 보상 수령'}
+              </SubmitButton>
+            </form>
 
-          <div ref={resultRef} className="grid gap-2">
             {pending && (
               <div
-                className="rounded-xl border border-border/80 bg-muted/70 p-3.5 text-xs sm:text-sm text-foreground animate-pulse shadow-sm font-medium"
+                className="rounded-xl border border-border/80 bg-muted/70 p-3 text-xs sm:text-sm text-foreground animate-pulse font-medium text-center shadow-sm"
                 role="status"
               >
                 {slow
                   ? isEn
-                    ? 'The response is taking longer than usual. The request is protected against duplicates and will time out safely instead of spinning forever.'
-                    : '응답이 평소보다 늦습니다. 동일 요청은 중복 지급되지 않으며, 무한 로딩 대신 안전하게 시간 초과 후 다시 시도할 수 있습니다.'
+                    ? 'The response is taking longer than usual. The request is protected against duplicates.'
+                    : '응답이 평소보다 늦습니다. 동일 요청은 중복 지급되지 않으며 안전하게 처리됩니다.'
                   : isEn
                     ? 'Recording reward and proficiency safely…'
                     : '보상과 직업 숙련도를 안전하게 저장하고 있어요…'}
@@ -213,38 +191,21 @@ function TaskCompletionPanel({
 
             <ActionAlert state={state} />
 
-            {state.status === 'ok' && (
-              <div className="rounded-xl border border-emerald-400/60 bg-emerald-500/10 p-3.5 text-xs sm:text-sm font-semibold text-emerald-800 dark:text-emerald-300 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-200">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="size-5 text-emerald-600 dark:text-emerald-400" />
-                  <span>
-                    {isEn
-                      ? 'Completed. The ledger and career proficiency have been refreshed.'
-                      : '업무 완료! 지갑에 WLD 보상이 입금되고 직업 숙련도가 올랐어요.'}
-                  </span>
-                </div>
-              </div>
-            )}
+            <div className="flex justify-end pt-1">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onClose}
+                disabled={pending}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                {isEn ? 'Cancel' : '취소'}
+              </Button>
+            </div>
           </div>
-        </CardContent>
-
-        <div className="shrink-0 flex items-center justify-end gap-2 px-4 sm:px-6 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] border-t border-border/60 bg-muted/20">
-          <Button
-            type="button"
-            variant={state.status === 'ok' ? 'default' : 'ghost'}
-            onClick={onClose}
-            disabled={pending}
-            className={`min-h-11 font-bold ${
-              state.status === 'ok'
-                ? 'w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm'
-                : 'w-full sm:w-auto'
-            }`}
-          >
-            {state.status === 'ok' ? (isEn ? 'Done' : '완료') : isEn ? 'Close' : '닫기'}
-          </Button>
-        </div>
-      </Card>
-    </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -260,20 +221,17 @@ export function TaskCompleteModalButton({
   const { locale } = useLocale();
   const isEn = locale === 'en';
   const [isOpen, setIsOpen] = useState(false);
-  const [cycle, setCycle] = useState(0);
   const [requestKey, setRequestKey] = useState('');
   const rewardPaused = task.reward_preview === null || task.experience_preview === null;
 
-  const open = () => {
+  const handleOpen = () => {
     setRequestKey(crypto.randomUUID());
-    setCycle((value) => value + 1);
     setIsOpen(true);
   };
 
-  const close = () => {
+  const handleClose = () => {
     setIsOpen(false);
     setRequestKey('');
-    setCycle((value) => value + 1);
   };
 
   return (
@@ -281,7 +239,7 @@ export function TaskCompleteModalButton({
       <Button
         variant={isActiveJob ? 'default' : 'outline'}
         disabled={!isActiveJob || rewardPaused || Boolean(blockedReason)}
-        onClick={open}
+        onClick={handleOpen}
         className="w-full font-semibold shadow-sm transition-all"
       >
         {!isActiveJob
@@ -310,7 +268,12 @@ export function TaskCompleteModalButton({
       </Button>
 
       {isOpen && requestKey && (
-        <TaskCompletionPanel key={cycle} task={task} requestKey={requestKey} onClose={close} />
+        <TaskCompletionModal
+          open={isOpen}
+          task={task}
+          requestKey={requestKey}
+          onClose={handleClose}
+        />
       )}
     </div>
   );

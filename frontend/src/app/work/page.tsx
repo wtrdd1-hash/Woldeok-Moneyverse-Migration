@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { LiveRefresh } from '@/components/live-refresh';
 import { PageHeader } from '@/components/page-header';
 import { Briefcase, Target, Award, Sparkles, CheckCircle2, Landmark, ClipboardList } from 'lucide-react';
 import { TruncatedList } from '@/components/truncated-list';
@@ -84,7 +83,6 @@ export default async function WorkPage() {
 
   return (
     <div data-page="work" className="mv-page mv-page--gameplay grid w-full max-w-full min-w-0 gap-6 sm:gap-8 pb-12 overflow-x-hidden">
-      <LiveRefresh everyMs={10_000} />
       <PageHeader
         eyebrow="CAREER & WORK 2.0"
         title={isEn ? 'Professional Careers & Work Tasks' : '전문 직업 및 업무 수행'}

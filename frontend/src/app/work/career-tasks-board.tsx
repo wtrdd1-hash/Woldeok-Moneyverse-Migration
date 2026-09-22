@@ -167,7 +167,7 @@ export function CareerTasksBoard({
             return (
               <Card
                 key={task.task_id}
-                className={`flex flex-col justify-between h-full min-h-[320px] transition-all duration-150 active:scale-[0.99] w-full min-w-0 ${
+                className={`flex flex-col justify-between h-full min-h-[320px] overflow-hidden transition-all duration-150 active:scale-[0.99] w-full min-w-0 ${
                   isActiveJob
                     ? 'border-amber-500/50 dark:border-amber-500/30 bg-card shadow-md ring-1 ring-amber-500/20'
                     : 'opacity-75 bg-muted/20 border-dashed hover:opacity-100 hover:border-solid transition-opacity'

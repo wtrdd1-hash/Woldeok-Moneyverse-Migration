@@ -1,6 +1,8 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v54)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v56)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v56**: 직업 업무(/work) 10초 무한 깜빡임/폴링 루프 및 팝업창(TaskCompletionPanel) CSS 뷰포트 클리핑·30px 스크롤바 붕괴 결함 전면 해소 사양 수록 (+150, -0)
+- **v55**: 주식 거래정지 매수원가 자동정산 엔진 완비 및 종목 허브/포트폴리오 가시성 쇄신 사양 수록 (+120, -0)
 - **v54**: 가상 주식 거래소 메인(/stocks) 주문 폼 핀테크 쇄신(TradeForm 44px 터치 프리셋 칩·실시간 주문총액) 및 포트폴리오(/stocks/portfolio) 비주얼 자산배분 스택바·수익률 배지·원터치 리밸런싱 주문 연동 사양 수록 (+115, -0)
 - **v53**: 가상 주식 거래소(/stocks/[symbol]) 토스/로빈후드형 실시간 호가-주문 양방향 연동 콘솔(StockTradingConsole), 5/10-Depth 호가 확장, 지정가/시장가 탭 및 모바일 320px 하단 고정 액션 바 구현 사양 수록 (+105, -0)
 - **v52**: 1:1 개인 채팅 관리자 신고 증거 검토 콘솔 & 조치 거버넌스 엔진(Migration 228, /admin/safety 탭형 통합 큐, 10건 메시지 타임라인 뷰어, 원터치 조치 다이얼로그) 사양 누적 수록 (+118, -0)
@@ -2076,3 +2078,57 @@ flowchart TD
 3. **미니 PC 스테이징 및 프로덕션 무중단 승격 (`v2026.09.22.357`)**:
    - 929개 이상 PostgreSQL 활성 세션 100% 무손실 보존 검증.
    - `docs/releases/ledger.json` 및 `PROJECT_MEMORY.md` 동기화.
+
+---
+
+## 🚀 [v56 Specification] 직업 업무(/work) 무한 깜빡임 해소 및 팝업창(TaskCompletionPanel) 핀테크 표준 UI 쇄신 사양 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Incident Analysis)
+- **사용자 제보 현상**:
+  1. `/work` 페이지에서 0.5초~10초 간격으로 화면이 깜빡거리며 Chrome 탭 로딩 스피너와 네트워크 버스트가 발생하여 정상적인 UI 조작이 불가능한 현상 ("0.5초마다 무슨 함수 실행 중이야? 깜빡여서 뭘 할 수가 없어").
+  2. 업무 완료 모달 팝업이 페이지 새로고침 시 계속 유지되거나 화면 상단으로 튕겨 올라가 '닫기' 버튼 외 상단 내용이 잘려 나가는 현상 (사진 2: `media_1790073234754.png`).
+  3. 모달 내부 본문(WLD/EXP 보상 안내 및 제출 버튼)이 30px 높이의 극도로 좁은 슬릿으로 축소되어 스크롤바가 발생하고, 하단에는 거대한 암흑 빈 공간만 남는 심각한 레이아웃 붕괴 현상 (사진 3: `media_1790073261019.png`).
+  4. 직업 업무 카드(예: 분산 결함 감내 아키텍처 구축) 우측에 불필요한 Windows 네이티브 세로 스크롤바 화살표가 노출되는 현상 (사진 1: `media_1790073231152.png`).
+- **근본 원인 분석 (Root Causes)**:
+  1. `frontend/src/app/work/page.tsx` line 87의 `<LiveRefresh everyMs={10_000} />`: 10초마다 `router.refresh()`를 무차별 실행하여 RSC 페이로드를 재요청하고, 재렌더링 시 전역 링크 컴포넌트 8종이 동시 prefetch를 발생시켜 매 주기마다 9~11건의 HTTP 버스트가 발생함.
+  2. `work-forms.tsx` line 100의 `useEffect(() => { if (state.status === 'ok') router.refresh(); }, [router, state.status])`: 서버 액션(`completeTaskV2Action`)에서 이미 `revalidatePath('/work')`가 호출되어 캐시가 갱신되었음에도, 클라이언트에서 중복으로 `router.refresh()`를 무한 트리거함.
+  3. 손수 작성된 flex 오버레이(`fixed inset-0 sm:justify-center overflow-hidden`): CSS Flexbox 중앙 정렬에서 뷰포트 높이를 초과하거나 내부 `scrollIntoView()` 호출 시 상단이 음수 좌표로 클리핑되어 화면 밖으로 밀려 올라가는 브라우저 렌더링 버그 유발.
+  4. `CardContent`의 `flex-1 overflow-y-auto`: 부모 카드가 고정 높이 없이 `max-h-[90dvh]`만 가질 때 `flex: 1`이 flexbox 최소 내용물 크기로 축소되어 보상창과 제출 버튼이 30px 슬릿에 갇히고 하단 여백만 비정상 팽창함.
+
+### 2. 세부 구현 계획 (Proposed Architecture & Changes)
+
+#### ① `/work` 무한 새로고침 및 네트워크 버스트 원천 차단 (`frontend/src/app/work/page.tsx`)
+- `<LiveRefresh everyMs={10_000} />` 제거:
+  * 업무 완료, 직업 변경 등 모든 상태 변경은 이미 Server Action(`revalidatePath('/work')`)을 통해 원자적으로 즉시 서버 컴포넌트가 최신화됨.
+  * 백그라운드 10초 무한 폴링과 8개 라우트 prefetch 연쇄 폭주를 원천 차단하여 화면 깜빡임과 탭 로딩 스피너 완전 제거.
+
+#### ② `TaskCompletionPanel` Radix UI 표준 Dialog 기반 전면 쇄신 (`frontend/src/app/work/work-forms.tsx`)
+- Radix UI `@radix-ui/react-dialog` (`Dialog`, `DialogContent`, `DialogHeader`, `DialogTitle`, `DialogDescription`) 전면 도입:
+  * `fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]` 수학적 완벽 중앙 정렬 적용으로 음수 좌표 클리핑 원천 차단.
+  * 전체 윈도우 스크롤을 튕기게 만들던 `scrollIntoView()` 및 `useEffect` 기반 `router.refresh()` 중복 호출 제거.
+- **토스/로빈후드형 핀테크 모달 레이아웃 (사진 3 결함 완벽 해결)**:
+  * 모달 헤더: 직업 배지, 난이도 배지, 업무명, 깔끔한 설명문.
+  * 보상 디스플레이: 30px 슬릿이 아닌, 시원한 2열 그리드로 `이번 지급 WLD` (+WLD, font-mono, emerald)와 `숙련도 EXP` (+EXP, font-mono, amber) 강조.
+  * 메인 액션 버튼: 스크롤 없이 즉시 누를 수 있는 48px 터치 타깃 `업무 완료 및 보상 수령` 버튼 배치 (`active:scale-[0.98]`).
+  * 완료 상태 피드백: 완료 시 축하 메시지와 함께 단일 `확인` 버튼으로 깔끔하게 모달이 닫히도록 개선.
+  * 우측 상단 `X` 닫기 버튼 및 오버레이 클릭 닫기 기본 지원.
+
+#### ③ 직업 업무 카드 반응형 여백 및 스크롤바 방지 (`frontend/src/app/work/career-tasks-board.tsx`)
+- `CardDescription` 및 내부 flex 레이아웃 여백 조정으로 Windows Chrome 환경에서 1픽셀 오버플로우로 인해 카드 우측에 발생하던 네이티브 스크롤바 화살표 완전 제거.
+
+#### ④ 상단 헤더 404 폴링 안정화 (`frontend/src/components/chat-header-button.tsx`, `notification-header-button.tsx`)
+- 존재하지 않는 경로로 인해 15초마다 발생하던 404 에러 정리 및 예외 방어.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. **정적 분석 및 린트/타입 검사**:
+   - `pnpm --filter @moneyverse/frontend test`
+   - Next.js 빌드 시 컴파일 에러 0건 검증.
+2. **동작 검증**:
+   - `/work` 페이지 접속 시 10초 주기 깜빡임 및 prefetch 폭주가 사라졌는지 확인.
+   - 업무 모달 클릭 시 화면 상단으로 잘려나가지 않고 정중앙에 시원하게 뜨는지 확인.
+   - 보상 금액과 제출 버튼이 스크롤 없이 한눈에 들어오고 원터치 제출 및 닫기가 정상 작동하는지 확인.
+3. **무중단 운영 배포 (`v2026.09.22.358`)**:
+   - Exact SHA 기반 빌드 후 미니 PC 프로덕션 무중단 승격 (933개 세션 보존).
+
