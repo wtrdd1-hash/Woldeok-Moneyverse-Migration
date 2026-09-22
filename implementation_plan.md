@@ -1,6 +1,8 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v56)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v58)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v58**: 상단 글로벌 헤더 15초 주기 404 폴링 폭풍 원천 차단(Next.js BFF /api/notifications/unread-count 신설) 및 채팅/알림 document.visibilityState 가드·지수 백오프 적용 사양 (v2026.09.22.359) (+140, -0)
+- **v57**: 전 도메인 REST API 완전 통합(4대 미연동 DB 도메인 컨트롤러 신설: 저금통, 제작대, 마켓플레이스, 인앱알림) 및 OpenAPI 3.0 명세서 & 11종 API 문서 전수 갱신 사양 수록 (+160, -0)
 - **v56**: 직업 업무(/work) 10초 무한 깜빡임/폴링 루프 및 팝업창(TaskCompletionPanel) CSS 뷰포트 클리핑·30px 스크롤바 붕괴 결함 전면 해소 사양 수록 (+150, -0)
 - **v55**: 주식 거래정지 매수원가 자동정산 엔진 완비 및 종목 허브/포트폴리오 가시성 쇄신 사양 수록 (+120, -0)
 - **v54**: 가상 주식 거래소 메인(/stocks) 주문 폼 핀테크 쇄신(TradeForm 44px 터치 프리셋 칩·실시간 주문총액) 및 포트폴리오(/stocks/portfolio) 비주얼 자산배분 스택바·수익률 배지·원터치 리밸런싱 주문 연동 사양 수록 (+115, -0)
@@ -2132,7 +2134,6 @@ flowchart TD
 3. **무중단 운영 배포 (`v2026.09.22.358`)**:
    - Exact SHA 기반 빌드 후 미니 PC 프로덕션 무중단 승격 (933개 세션 보존).
 
-
 ---
 
 ## 🚀 [v57 Specification] 전 도메인 REST API 완전 통합(4대 미연동 DB 도메인 컨트롤러 신설: 저금통, 제작대, 마켓플레이스, 인앱알림) 및 OpenAPI 3.0 명세서 & 11종 API 문서 전수 갱신
@@ -2196,3 +2197,64 @@ flowchart TD
    - `pnpm api:contract:check` (Drift 0건 통과)
 3. **무중단 운영 배포 (`v2026.09.22.358`)**:
    - PostgreSQL 933개 활성 유저 세션 100% 무손실 보존 검증.
+
+---
+
+## 🚀 [v58 Specification] 상단 글로벌 헤더 404 폴링 폭풍 원천 차단 및 BFF 알림/채팅 백그라운드 쿼리 안정화 사양 (누적 추가)
+
+### 1. 개요 및 배경 (Incident Analysis & Root Causes)
+- **사용자 제보 현상**: "기획서 조회 후 긴급 수정부터 시작해서 수정하자"
+- **진단 결과 및 프로덕션 긴급 결함**:
+  1. Nginx 에러 로그(`nginx/error.log`) 상에 매초 및 매 15초 단위로 404 에러가 끊임없이 누적 발생:
+     `GET /api/notifications/unread-count HTTP/1.1", upstream: "http://127.0.0.1:3001/api/notifications/unread-count"`
+  2. `frontend/src/components/notification-header-button.tsx`:
+     - 모든 로그인 유저에 대해 마운트 즉시 및 15초 주기로 `/api/notifications/unread-count`를 무차별 호출.
+     - 그러나 Next.js 프론트엔드 라우트 핸들러에 해당 엔드포인트(`frontend/src/app/api/notifications/unread-count/route.ts`)가 존재하지 않아 무조건 404 Not Found 반환.
+     - 404 응답을 받더라도 지수 백오프나 중단 없이 15초 주기로 계속 재호출하여 Nginx 로그와 브라우저 콘솔을 오염시키고 서버 불필요 트래픽 유발.
+     - `document.visibilityState` 가드가 없어 사용자가 탭을 백그라운드로 전환하거나 최소화한 상태에서도 15초마다 지속 폴링.
+  3. `frontend/src/components/chat-header-button.tsx`:
+     - 백엔드 쪽지 미확인 카운트(`/app-api/v1/chat/unread-count`)를 15초 주기로 폴링하나, `document.visibilityState` 가드 및 에러 지수 백오프 부재.
+     - 백엔드 응답 필드(`{ totalUnread: number }`)와 프론트엔드 파싱 키(`data.unreadCount`) 간 불일치로 항상 0으로 떨어지는 버그 잔존.
+
+### 2. 세부 구현 사양 (Proposed Changes)
+
+#### ① Next.js BFF 알림 미확인 카운트 엔드포인트 신설 (`frontend/src/app/api/notifications/unread-count/route.ts`)
+- `export const dynamic = 'force-dynamic';`
+- 세션 확인 및 무결성 보장:
+  - 비로그인 세션인 경우 `{ unreadCount: 0 }` (또는 200 OK + `cache-control: private, no-store`).
+  - 로그인 세션인 경우 백엔드 연동 또는 안전한 기본값 반환.
+  - 404 폭풍을 즉시 0건으로 소멸시키고 Nginx 업스트림 200 정상 응답 보장.
+
+#### ② `NotificationHeaderButton` 폴링 안정화 (`frontend/src/components/notification-header-button.tsx`)
+- **`document.visibilityState` 스마트 가드**:
+  - `document.hidden` 상태일 때 폴링 중단 (불필요한 백그라운드 리소스 소모 원천 차단).
+  - 브라우저 탭으로 복귀(`visibilitychange` 이벤트) 시 즉시 1회 최신화.
+- **지수 백오프(Exponential Backoff) 및 에러 방어 회로**:
+  - 실패 시 즉시 15초 재시도가 아닌 15s → 30s → 60s 순차 백오프 적용.
+  - 네트워크 장애나 서버 배포 중에도 불필요한 재시도 폭풍 억제.
+
+#### ③ `ChatHeaderButton` 필드 정합성 및 백그라운드 가드 (`frontend/src/components/chat-header-button.tsx`)
+- 백엔드 반환값 `{ totalUnread: number }` 및 레거시 `{ unreadCount: number }` 동시 지원:
+  - `const count = Number(data.totalUnread ?? data.unreadCount ?? data.unread_count ?? 0) || 0;`
+- 동일하게 `document.visibilityState` 가드 및 지수 백오프 적용.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan] 최종 통합 구현 명세
+### User Review Required
+- 프로덕션 배포 시 Active PostgreSQL 세션(1,028+개) 100% 무손실 유지.
+- 404 폴링 에러 Nginx 로그 0건 달성.
+
+### Proposed Changes (파일별 상세 변경점)
+1. `frontend/src/app/api/notifications/unread-count/route.ts`: [NEW] Next.js BFF 알림 미확인 카운트 핸들러 신설.
+2. `frontend/src/components/notification-header-button.tsx`: [MODIFY] document.visibilityState 가드 및 지수 백오프 적용.
+3. `frontend/src/components/chat-header-button.tsx`: [MODIFY] totalUnread 필드 파싱 및 visibility 가드, 지수 백오프 적용.
+4. `frontend/src/app/account/notifications/unread-count.test.ts`: [NEW] BFF 및 헤더 버튼 로직 회귀 검증 단위 테스트.
+
+### Verification Plan (테스트 및 검증 계획)
+1. **단위 테스트**: `pnpm --filter @moneyverse/frontend test` (알림 및 헤더 컴포넌트 검증).
+2. **빌드 검증**: `BUILD_ID=$(git rev-parse HEAD) pnpm --filter @moneyverse/frontend build` (Turbopack 컴파일 성공).
+3. **무중단 운영 배포 (`v2026.09.22.360`)**:
+   - 미니 PC worktree 동기화, `stage_v360.sh` 승격.
+   - Nginx 로그 실시간 점검: `/api/notifications/unread-count` 404 에러 0건 확인.
+   - PostgreSQL 활성 세션(1,028개) 100% 보존 확인.
