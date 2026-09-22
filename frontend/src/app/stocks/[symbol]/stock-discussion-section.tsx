@@ -13,6 +13,7 @@ import {
   Clock,
   Sparkles,
   User,
+  Heart,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -324,8 +325,9 @@ export function StockDiscussionSection({
                     )}
 
                     {positionKind === 'holder' && (
-                      <Badge variant="outline" className="text-blue-600 dark:text-blue-400 border-blue-500/30 text-[10px]">
-                        {isEn ? 'Holder' : '보유자'}
+                      <Badge variant="outline" className="border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-[10px] gap-0.5">
+                        <span>👑</span>
+                        <span>{isEn ? 'Shareholder' : '주주'}</span>
                       </Badge>
                     )}
 
@@ -333,12 +335,19 @@ export function StockDiscussionSection({
                       {post.title}
                     </span>
 
-                    {post.commentCount > 0 && (
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">
-                        <MessageSquare className="size-3" />
-                        {post.commentCount}
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="flex items-center gap-1 text-[11px] text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-full hover:text-rose-500 transition-colors">
+                        <Heart className="size-3 text-rose-500/70" />
+                        <span>추천</span>
                       </span>
-                    )}
+
+                      {post.commentCount > 0 && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/60 px-1.5 py-0.5 rounded">
+                          <MessageSquare className="size-3" />
+                          {post.commentCount}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/40">

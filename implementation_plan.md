@@ -1,6 +1,9 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v41)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v44)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v44**: 가상 주식 거래소(`/stocks`) 고도화 착수 — 토스/로빈후드형 하이브리드 호가 스프레드 및 원터치 빠른 주문 패널, 미니 SVG 실시간 캔들 스파크라인, 종목별 실시간 토론(Discussions) 피드 연동, 맞춤형 목표가 도달 알림(Price Alerts) 모달 설계 확정 (+160, -0)
+- **v43**: 카지노 슬롯 규제 심의 게이트(GRAC 19+ 및 0 WLD 무료 체험 스핀), 카지노 자가 보호(RG) 토스형 슬라이더(베팅 0~2,000 WLD, 손실 0~1,000 WLD) 및 24시간 타임락, AI 신문 가상 상장사 실시간 호가 Popover 연동, 관리자 국고 회계 사유 코드(TAX_REVENUE, SUBSIDY 등) 및 멱등성 Step-Up 다이얼로그 완결 프로덕션 무중단 승격 (v345, Exact Git SHA: `d20f828`, 855개 세션 보존) (+145, -0)
+- **v42**: QA-335 6대 핵심 결함(Split-Release, Test 500 등) 100% 해소, 미성년자 안전 & 비회원 긴급 콘텐츠 삭제 접수 센터 신설 및 exact-SHA v344 프로덕션 무중단 승격 (820개 세션 보존) (+105, -0)
 - **v41**: 기획서(PROJECT_PLAN.ko.md v335/v337) 핵심 미구현 과제 완결 — QA-335-01/02 Test 서버 500 오류 점검·해소 및 관리자 20개 화면 4대 핵심 제어 모달(주식 거래정지 매수원가 자동정산, 3대 국고 금고 제어, 비회원 긴급 콘텐츠 삭제, 유저 TOTP 제재) 실연동 및 텔레메트리 펄스 탑재 (+280, -0)
 - **v40**: 2026-09-22 최신 프로덕션 릴리스(`v2026.09.22.343`, HEAD: `42ce3f9`) 기준 10대 전 도메인 API 상세 명세서(API Detailed Specification) 집대성 — 인증/보안 세션, 관리자 관제 타워, 카지노 7대 게임 및 실시간 잭팟, 가상 주식 거래소, 은행 5대 탭/다중 저축 포켓, 직업/사업체, 미성년자 안전 센터 및 긴급 콘텐츠 삭제, 알림 거버넌스 인박스, 주간 경제 브리프 전수 수록 (+450, -0)
 - **v36**: 카지노 7대 게임(휠/룰렛 20-구획 SVG 스핀 애니메이션, 잭팟/하우스 리저브 풀 실시간 티커, 퀵 베팅 프리셋, 최근 10회 통계) 고도화 및 GitHub 최신 main 머지(v330~v336) 반영에 따른 관리자 백엔드 전면 기능 점검 누적 (+220, -0)
@@ -1198,7 +1201,163 @@ flowchart TD
 3. **주요 퍼블릭 사용자 라우트 HTTP 200 검증**:
    - `/`, `/login`, `/register`, `/guide`, `/stocks`, `/shop`, `/work`, `/status`, `/privacy`, `/terms`, `/announcements`, `/gallery`, `/casino`, `/safety`, `/safety/takedown` 전수 200 OK.
 4. **긴급 삭제 라이프사이클 E2E 검증**:
-   - 비회원 공개 접수 (`POST /api/v1/safety/takedown`) -> `TKD-20260922-76DB68` 생성 (HTTP 201).
-   - 상태 조회 (`POST /api/v1/safety/takedown/status`) -> `SUBMITTED` 확인.
-   - 관리자 조치 (`safety_admin_action_takedown`) -> `ACTIONED_REMOVED` 상태 전이 및 감사 기록 완료.
-   - 상태 재조회 -> `ACTIONED_REMOVED` 반영 확인.
+    - 비회원 공개 접수 (`POST /api/v1/safety/takedown`) -> `TKD-20260922-76DB68` 생성 (HTTP 201).
+    - 상태 조회 (`POST /api/v1/safety/takedown/status`) -> `SUBMITTED` 확인.
+    - 관리자 조치 (`safety_admin_action_takedown`) -> `ACTIONED_REMOVED` 상태 전이 및 감사 기록 완료.
+    - 상태 재조회 -> `ACTIONED_REMOVED` 반영 확인.
+
+---
+
+## 🚀 [v43 Specification] 카지노 심의 게이트·자가보호 슬라이더·신문 종목 팝오버·국고 Step-Up 완결 및 v345 프로덕션 무중단 승격 ([✅ 작업 완료])
+
+### 1. 완료 개요 및 핵심 성과
+- **배포 버전**: `v2026.09.22.345` (약칭: `v345`)
+- **Exact Git Commit SHA**: `d20f8285df44ce3b3dfb1ab50ff2a51f2c4cab60` (단축: `d20f828`)
+- **릴리스 디렉터리**:
+  - Test: `/srv/moneyverse-data/releases/test-d20f828-v345` (`test-current` 심볼릭 링크 연동)
+  - Production: `/srv/moneyverse-data/releases/prod-d20f828-v345` (`production-current` 심볼릭 링크 연동)
+- **세션 무손실 보존**: 프로덕션 무중단 승격 중 활성 사용자 세션 855개 100% 무손실 보존 완료 (`SELECT count(*) FROM auth_sessions WHERE expires_at > now();`).
+- **Exact-SHA 런타임 무결성 검증 통과**:
+  - `https://easy-scraping.com/api/version` = `d20f8285df44ce3b3dfb1ab50ff2a51f2c4cab60`
+  - `https://easy-scraping.com/frontend-version` = `d20f8285df44ce3b3dfb1ab50ff2a51f2c4cab60`
+  - `https://test.easy-scraping.com/api/version` = `d20f8285df44ce3b3dfb1ab50ff2a51f2c4cab60`
+  - `https://test.easy-scraping.com/frontend-version` = `d20f8285df44ce3b3dfb1ab50ff2a51f2c4cab60`
+
+---
+
+### 2. 세부 구현 도메인 및 4대 핵심 화면 쇄신 내역
+
+#### ① 카지노 슬롯 규제 심의 게이트 및 0 WLD 무료 체험 데모 스핀 (`slots-game.tsx`)
+- **규제 심의 게이트 (`CASINO_GAME_SYSTEM_SPEC` P0)**:
+  - 게임물관리위원회(GRAC) 19+ 청소년 보호 및 가상 자산 베팅 규제 심의 준비 중(P0 보류) 배너 연동.
+  - 실제 WLD 베팅 파이프라인의 안전 잠금(Fail-closed) 유지 및 실베팅 차단 안내.
+  - 이모지 글리치 배제를 위한 Lucide SVG 기반 릴 기호 매핑(`Sparkles`, `Scale`, `ShieldCheck`, `AlertCircle`, `RotateCcw`, `Play`).
+- **0 WLD 무료 체험 데모 스핀 엔진**:
+  - 이용자 자산 차감(0 WLD) 없이 릴 회전 시뮬레이션 및 당첨/낙첨 피드백 체험 모드 지원.
+  - 총 누적 데모 스핀 횟수 실시간 집계.
+- **심의 규정 및 배당률 공시 다이얼로그 (`SlotRegulationAuditDialog`)**:
+  - 심의 접수 예정 번호(`GRAC-2026-P0-DEFERRED`) 공시.
+  - 기호별 배당률 투명성 테이블 공시 (777 잭팟: 10배, 골든 스타: 5배, 다이아몬드: 3배, 리버티 벨: 2배, 체리: 1.5배, 레몬: 1.2배 / 환수율 RTP: 95.0%).
+  - 책임감 있는 게임 자가 보호 기능 안내 링크 결합.
+
+#### ② 카지노 책임감 있는 게임(RG) 토스형 슬라이더 & 원터치 타임락 (`casino-forms.tsx`)
+- **토스/핀테크형 부드러운 슬라이더 UX**:
+  - 하루 베팅 한도: 0 WLD(무제한) ~ 2,000 WLD 범위 슬라이더 및 직접 입력 양방향 실시간 동기화. 퀵 프리셋 버튼(무제한, 500, 1,000, 2,000 WLD).
+  - 하루 손실 한도: 0 WLD(무제한) ~ 1,000 WLD 범위 슬라이더 및 직접 입력 양방향 실시간 동기화. 퀵 프리셋 버튼(무제한, 200, 500, 1,000 WLD).
+- **원터치 24시간 쿨다운 (Time Lock, 1일 자가 제외)**:
+  - '24시간 원터치 휴식 (Time Lock)' 버튼 제공.
+  - 클릭 시 즉시 락 필드(`lock="1"`) 자동 바인딩 및 조기 해제 불가능 경고 배너 활성화.
+- **책임감 있는 게임(RG) 안내 배너**:
+  - 자율 규제 준수 및 KST 자정 기준 리셋 가이드라인 시각화.
+
+#### ③ AI 신문 가상 상장사 실시간 호가 Popover 연동 (`newspaper-view.tsx`)
+- **실시간 호가 팝오버 (`StockTickerPopover`)**:
+  - 신문 뷰 컴포넌트에 `stocks` props 실연동 완료.
+  - 기사 헤드라인 내 종목 태그 및 사이드 속보 피드 종목 칩 클릭 시 즉각적인 인터랙티브 팝오버 노출.
+  - 종목 체결가(WLD), 전일 대비 변동폭 및 등락률(%), 호가 모멘텀 미니 SVG 스파크라인 트렌드 차트 시각화.
+  - '가상 거래소에서 주문하기' 원클릭 링크(`Link href="/stocks/${symbol}"`) 탑재.
+- **실시간 상장사 호가 퀵 레일 (Section 2.5)**:
+  - 신문 상단 심리 지수 하단에 전체 가상 상장사의 실시간 시세 칩을 가로 스크롤로 나열하여 원클릭 팝오버 탐색 지원.
+
+#### ④ 관리자 국고 회계 사유 코드 및 멱등성 Step-Up 다이얼로그 (`treasury-operations-dialog.tsx`)
+- **공식 회계 보정 사유 코드 (`reasonCode`) 셀렉터 탑재**:
+  - `MARKET_INTERVENTION`: 시장 유동성 개입
+  - `TAX_REVENUE`: 세금 징수액 입고
+  - `SUBSIDY`: 정책 보조금 집행
+  - `OPERATIONAL_RESERVE`: 중앙 비축금 조정
+  - `SYSTEM_CORRECTION`: 장부 정합성 수동 보정
+  - 사유 코드 선택 시 기본 소명 사유 템플릿 자동 제안 및 최소 10자 이상 구체적 기술 검증.
+- **멱등성 트랜잭션 키 (`idempotencyKey`) 클라이언트 자동 발급**:
+  - 고유 키(`mv-treasury-op-<timestamp>-<hash>`) 발급을 통해 네트워크 지연 시 중복 국고 실행 원천 방지.
+- **금액 퀵 프리셋 및 2FA Step-Up 안전장치**:
+  - +100만, +500만, +1,000만 WLD 퀵 가산 버튼.
+  - 6자리 TOTP 2단계 인증 가드 및 반대 거래 역분개 지침 명시.
+
+---
+
+### 3. 검증 결과 및 서비스 상태
+- **HTTP 엔드포인트 200 OK**:
+  - `/` (홈), `/casino` (카지노 로비 및 슬롯), `/newspaper` (AI 주간 신문), `/admin/treasury` (관리자 국고 제어), `/login` 등 주요 엔드포인트 전수 정상 응답.
+- **활성 세션 유지**: 855개 활성 유저 세션 정상 유지.
+
+---
+
+## 🚀 [v44 Specification] 가상 주식 거래소(/stocks) 하이브리드 UX 및 실시간 호가/토론/알림 고도화 사양 (누적 추가)
+
+### 1. 개요 및 사용자 1차 조율 확정 사항 (A1~A5)
+- **우선순위**: **핵심 경제 엔진 UI / P0** (`PROJECT_PLAN.ko.md` v2026.09.20.292 5단계 및 `fintech-responsive-layout-engine`, `anti-ai-frontend-craftsmanship`).
+- **조율 결과 확정**:
+  1. **[타깃 영역]**: 가상 주식 거래소(`/stocks`, `/stocks/[symbol]`) 전면 고도화.
+  2. **[UI/UX 스타일]**: **토스 / 로빈후드형 하이브리드 UX** — 상단 미니멀 호가 스프레드 + 하단 원터치 빠른 매수/매도 슬라이더 및 프리셋 (모바일/데스크톱 320px~1440px 완벽 대응).
+  3. **[핵심 탑재 기능군]**:
+     - **미니 SVG 실시간 캔들/라인 차트 인터랙션**: 당일 1분/5분/일봉 모의 캔들 스파크라인 및 마우스 호버/터치 시 툴팁 가격 탐색.
+     - **종목별 실시간 토론(Discussions) 피드 연동**: 백엔드 기구현된 종목 게시판 실시간 댓글/의견 작성 및 감정 태그(호재/악재) 투표 실연동.
+     - **목표가 도달 알림(Price Alerts) 모달**: 사용자 맞춤 상한/하한 목표가 등록 및 인앱 알림 연동.
+  4. **[배포 페이스]**: 단위별 즉시 승격 (Step-by-Step, v346).
+
+---
+
+### 2. 아키텍처 및 데이터 흐름 다이어그램
+
+```mermaid
+flowchart TD
+    subgraph Frontend_Stocks["가상 주식 거래소 UI (/stocks/[symbol])"]
+        A[종목 상세 뷰포트] --> B[Hero 시세 & 미니 SVG 캔들 스파크라인]
+        A --> C[미니멀 호가창 Orderbook & Spread]
+        A --> D[토스형 원터치 매수/매도 슬라이더 패널]
+        A --> E[종목별 토론 Discussions 피드]
+        A --> F[목표가 알림 Price Alerts 모달]
+    end
+
+    subgraph Server_Actions_BFF["프론트엔드 Server Actions (app/stocks/actions.ts)"]
+        D -->|매수/매도 주문| G[submitStockOrder]
+        E -->|댓글/토론 작성| H[postStockDiscussion]
+        F -->|목표가 알림 등록| I[registerPriceAlert]
+    end
+
+    subgraph Backend_APIs["백엔드 엔드포인트 (/api/v1/stocks/)"]
+        G --> J["POST /api/v1/stocks/:id/orders (체결 원장)"]
+        H --> K["POST /api/v1/stocks/:id/discussions (토론 원장)"]
+        I --> L["POST /api/v1/stocks/:id/alerts (알림 등록)"]
+        B --> M["GET /api/v1/stocks/:id/candles (캔들 시세)"]
+    end
+```
+
+---
+
+### 3. 컴포넌트별 상세 변경 명세 (Proposed Changes)
+
+#### ① 종목 상세 뷰포트 및 미니멀 호가 스프레드 (`frontend/src/app/stocks/[symbol]/page.tsx` & `stock-detail-view.tsx`)
+- **Hero 시세 헤더**:
+  - 현재 체결가, 전일 대비 변동폭/변동률(%), 52주 최고/최저가, 당일 거래대금(WLD).
+  - SVG 캔들/라인 인터랙티브 스파크라인 (1D, 1W, 1M, 1Y 타임프레임 탭).
+- **미니멀 호가 스프레드 (Orderbook)**:
+  - 최우선 5단계 매도호가(Ask) 및 매수호가(Bid) 시각화 바.
+  - 호가별 잔량 게이지 및 스프레드(Spread) 차이 표시.
+
+#### ② 토스형 원터치 매수/매도 주문 패널 (`stock-order-panel.tsx`)
+- **지정가(Limit) / 시장가(Market) 탭 분리**.
+- **원터치 빠른 수량 슬라이더**:
+  - 매수 가능 잔액(WLD) 기준 10%, 25%, 50%, 100%(최대) 퀵 프리셋 버튼.
+  - 수량 및 예상 체결 금액 실시간 계산.
+- **주문 확인 모달 & 멱등성 키 발급**:
+  - 네트워크 지연 시 중복 주문 방지.
+
+#### ③ 종목별 토론(Discussions) 실시간 피드 (`stock-discussions-tab.tsx`)
+- 종목에 대한 주주/유저 의견 작성 및 실시간 피드 조회.
+- 호재(Bull) / 악재(Bear) 감정 태그 선택 및 찬반 투표.
+
+#### ④ 목표가 도달 알림(Price Alerts) 모달 (`stock-alert-modal.tsx`)
+- 현재가 대비 상향/하향 목표가 WLD 입력.
+- 도달 시 인앱 알림 및 이메일 알림 연동.
+
+---
+
+### 4. 검증 계획 (Verification Plan)
+- **로컬 및 미니 PC 빌드 검증**:
+  - `pnpm --filter @moneyverse/frontend build` 통과.
+- **Exact-SHA Test 서버 스테이징**:
+  - `https://test.easy-scraping.com/stocks/[symbol]` 접속 및 주문/토론/알림 모달 검증.
+- **프로덕션 무중단 승격 (`v346`)**:
+  - Exact-SHA 일체화 확인 및 855+개 활성 사용자 세션 무손실 보존 검증.
+
