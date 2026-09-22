@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiOrNull } from '@/lib/api';
 import { getServerLocale } from '@/lib/locale-server';
-import { groupDigits } from '@/lib/money';
+import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
 import { analyzePortfolio, type PortfolioHoldingInput } from './analysis';
@@ -24,6 +24,20 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+interface StockHaltReceipt {
+  readonly id: string;
+  readonly halt_event_id: string;
+  readonly stock_id: string;
+  readonly stock_symbol: string;
+  readonly stock_name: string;
+  readonly quantity: string;
+  readonly basis_method: string;
+  readonly basis_unit_amount: string;
+  readonly refund_amount: string;
+  readonly status: string;
+  readonly created_at: string;
+}
+
 function signedPercent(bpsText: string): string {
   const bps = Number(bpsText);
   if (!Number.isSafeInteger(bps)) return '—';
@@ -35,7 +49,11 @@ export default async function PortfolioAnalysisPage() {
   await requireMember();
   const locale = await getServerLocale();
   const isEn = locale === 'en';
-  const response = await apiOrNull<{ holdings: PortfolioHoldingInput[] }>('/api/v1/stocks/portfolio');
+  const [response, receiptsResult] = await Promise.all([
+    apiOrNull<{ holdings: PortfolioHoldingInput[] }>('/api/v1/stocks/portfolio'),
+    apiOrNull<{ receipts: StockHaltReceipt[] }>('/api/v1/stocks/halt-receipts'),
+  ]);
+  const haltReceipts = receiptsResult?.receipts ?? [];
 
   let analysis: ReturnType<typeof analyzePortfolio> | null = null;
   let invalid = false;
@@ -74,10 +92,13 @@ export default async function PortfolioAnalysisPage() {
             description={isEn ? 'Authoritative holding data could not be validated. Please try again later.' : '서버 기준 보유 데이터를 검증하지 못했습니다. 잠시 후 다시 시도해 주세요.'}
           />
         ) : analysis.holdings.length === 0 ? (
-          <EmptyState
-            title={isEn ? 'No virtual-stock holdings yet.' : '아직 보유 중인 가상 주식이 없어요.'}
-            description={isEn ? 'Buy a game-only virtual stock to see portfolio analytics here.' : '가상 주식 거래소에서 관심 종목을 매수하면 이곳에서 포트폴리오 분석과 리밸런싱을 진행할 수 있습니다.'}
-          />
+          <div className="grid gap-6">
+            <EmptyState
+              title={isEn ? 'No active virtual-stock holdings.' : '현재 보유 중인 가상 주식이 없어요.'}
+              description={isEn ? 'Buy a game-only virtual stock to see portfolio analytics here.' : '가상 주식 거래소에서 관심 종목을 매수하면 이곳에서 포트폴리오 분석과 리밸런싱을 진행할 수 있습니다.'}
+            />
+            <HaltReceiptsCard receipts={haltReceipts} isEn={isEn} />
+          </div>
         ) : (
           <>
             {/* 1. 핀테크 헤어로 요약 메트릭 카드 3종 */}
@@ -326,6 +347,9 @@ export default async function PortfolioAnalysisPage() {
               </CardContent>
             </Card>
 
+            {/* 4. 거래정지 원가환급 영수증 (STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC) */}
+            <HaltReceiptsCard receipts={haltReceipts} isEn={isEn} />
+
             <p className="text-xs text-muted-foreground">
               {isEn
                 ? 'This analysis covers service-internal virtual assets only. It is not investment advice and does not represent real securities or redeemable value.'
@@ -337,3 +361,87 @@ export default async function PortfolioAnalysisPage() {
     </MarketPricesProvider>
   );
 }
+
+function HaltReceiptsCard({
+  receipts,
+  isEn,
+}: {
+  readonly receipts: readonly StockHaltReceipt[];
+  readonly isEn: boolean;
+}) {
+  if (receipts.length === 0) return null;
+
+  return (
+    <Card className="border-border/80 bg-card/70 shadow-xs">
+      <CardHeader className="p-4 sm:p-5 pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="size-5 text-emerald-600 dark:text-emerald-400" />
+            <CardTitle className="text-base font-bold">
+              {isEn ? 'Stock Halt Settlement Receipts' : '종목 거래정지 원가환급 영수증'}
+            </CardTitle>
+          </div>
+          <Badge variant="outline" className="text-xs font-mono text-emerald-600 border-emerald-500/40">
+            {isEn ? `${receipts.length} Settled` : `${receipts.length}건 정산완료`}
+          </Badge>
+        </div>
+        <CardDescription className="text-xs text-muted-foreground leading-relaxed pt-1">
+          {isEn
+            ? 'Authoritative server-side cost basis refund receipts. All holdings were automatically settled into WLD with zero fees or taxes.'
+            : '운영 정책에 의해 거래정지된 종목의 매수원가(Cost Basis) 자동환급 영수증입니다. 시장가가 아닌 취득 원가 전액이 지갑으로 환급되었으며 수수료와 세금은 면제되었습니다.'}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="px-4 sm:px-5 pb-4 pt-0">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {receipts.map((receipt) => (
+            <div
+              key={receipt.id}
+              className="rounded-xl border border-border/80 bg-muted/20 p-3.5 space-y-2 hover:border-border transition-colors"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Badge variant="outline" className="font-mono text-xs font-bold">
+                    {receipt.stock_symbol}
+                  </Badge>
+                  <span className="font-semibold text-sm truncate max-w-[130px]" title={receipt.stock_name}>
+                    {receipt.stock_name}
+                  </span>
+                </div>
+                <Badge variant="destructive" className="text-[10px] py-0 px-1.5">
+                  {receipt.status}
+                </Badge>
+              </div>
+              <div className="grid grid-cols-2 gap-1.5 text-xs text-muted-foreground pt-1 border-t border-border/60">
+                <div>
+                  <span>정산 수량: </span>
+                  <span className="font-mono font-medium text-foreground">{groupDigits(receipt.quantity)}주</span>
+                </div>
+                <div>
+                  <span>취득 단가: </span>
+                  <span className="font-mono font-medium text-foreground">{groupDigits(receipt.basis_unit_amount)} WLD</span>
+                </div>
+                <div className="col-span-2 flex items-center justify-between pt-1 border-t border-border/40">
+                  <span className="text-foreground font-semibold">총 환급액:</span>
+                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-sm">
+                    +{groupDigits(receipt.refund_amount)} WLD
+                  </span>
+                </div>
+                <div className="col-span-2 flex items-center justify-between text-[11px] text-muted-foreground pt-0.5">
+                  <span>{receipt.created_at ? formatMoment(receipt.created_at) : ''}</span>
+                  <Link
+                    href={`/stocks/${encodeURIComponent(receipt.stock_symbol)}`}
+                    className="text-primary hover:underline flex items-center gap-0.5"
+                  >
+                    <span>{isEn ? 'View Hub' : '종목 허브'}</span>
+                    <ExternalLink className="size-3" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+

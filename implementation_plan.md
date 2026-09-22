@@ -2019,5 +2019,60 @@ flowchart TD
    - 929개 이상 PostgreSQL 활성 세션 100% 무손실 보존 검증.
    - `docs/releases/ledger.json` 및 `PROJECT_MEMORY.md` 동기화.
 
+---
 
+## 🚀 [v55 Specification] 주식 거래정지 매수원가 자동정산 엔진 완비 및 종목 허브/포트폴리오 가시성 쇄신 사양 (누적 추가)
 
+### 1. 개요 및 배경
+- **목적**:
+  - `STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC.ko.md` 상의 P0 필수 요구사항인 "거래정지 종목의 매수원가 권위 자동정산 및 사용자 투명성" 완결.
+  - 거래정지/상장폐지 시 모든 사용자 잔여 보유분을 시장가가 아닌 서버 권위 매수원가(Cost Basis)로 1회 원자적 자동환급하고 매매수수료와 세금을 100% 면제.
+- **해결할 핵심 결함 및 가시성 단절 (Gaps to Fix)**:
+  1. **종목 상세(`/stocks/[symbol]`) 404 결함 해결**:
+     - 기존 `stock_market_overview()`는 `WHERE stock.active` 조건만 조회하여 거래정지(`active = false`)된 종목이 카탈로그에서 제외됨.
+     - 이로 인해 종목 상세 페이지에 거래정지 배너 및 영수증 렌더링 로직이 있음에도 불구하고 종목 검색 시 `notFound()`(404)가 발생하는 문제 원천 차단.
+  2. **포트폴리오(`/stocks/portfolio`) 내 정산 영수증 부재 해결**:
+     - 정산 완료 시 활성 보유분(`stock_my_positions`, `quantity > 0`)에서 제외되어 포트폴리오에서 보유 종목이 단순 증발한 것처럼 보이는 현상 해소.
+     - `/api/v1/stocks/halt-receipts`를 연동하여 포트폴리오 화면에 **거래정지 원가환급 영수증 (Halt Settlement Receipts)** 카드 및 실시간 환급 내역 투명 제공.
+  3. **거래소 메인(`/stocks`) 거래정지 배지 및 비활성화 가드**:
+     - 거래정지된 종목에 대해 `거래정지 (Halted)` 배지 부여 및 매수/매도 버튼 비활성화.
+     - 사용자 혼란을 방지하고 상세 허브로 이동하여 정산 명세를 확인할 수 있도록 안내.
+
+### 2. 컴포넌트별 상세 변경점
+
+#### ① PostgreSQL 마이그레이션 (`packages/database/migrations/229-stock-market-overview-halt-visibility.sql`)
+- `DROP FUNCTION IF EXISTS public.stock_market_overview();`
+- `stock_market_overview()` 반환 테이블에 `halt_status text` 컬럼 추가.
+- 필터 조건 확장: `WHERE stock.active OR stock.halt_status IN ('HALTING', 'HALTED_SETTLING', 'HALTED_SETTLED')`.
+- 정렬 기준: 활성 종목 우선 정렬, 거래정지 종목 후순위 정렬, 심볼 순 정렬.
+- `moneyverse_migrator` 소유권 및 `moneyverse_app` 실행 권한 부여.
+
+#### ② 백엔드 저장소 및 인터페이스 갱신 (`backend/src/stock/stock.repository.ts`)
+- `StockMarketRow` 인터페이스에 `halt_status: string` 추가.
+- `list()` 쿼리에 `coalesce(halt_status, 'ACTIVE') AS halt_status` 추가.
+- `backend/src/stock/stock-halt-settlement.test.ts`에 카탈로그 가시성 검증 케이스 추가.
+
+#### ③ 가상 주식 거래소 메인 화면 쇄신 (`frontend/src/app/stocks/page.tsx`)
+- `StockRow`에 `halt_status?: string` 추가.
+- 거래정지 종목 카드 상단에 `거래정지 (정산완료)` 빨간색/Rose 배지 노출.
+- 매수/매도 `TradeDialog` 버튼 대신 비활성화된 `거래정지` 버튼 배치.
+- `종목 허브` 및 `StockDetailDialog`는 활성화 상태를 유지하여 공시 및 정산 내역 열람 지원.
+
+#### ④ 포트폴리오 분석 화면 영수증 연동 (`frontend/src/app/stocks/portfolio/page.tsx`)
+- `apiOrNull<{ receipts: StockHaltReceipt[] }>('/api/v1/stocks/halt-receipts')` 병렬 호출.
+- 거래정지 영수증이 존재할 경우, 자산 배분 바 하단에 **거래정지 원가환급 영수증 (Halt Settlement Receipts)** 섹션 렌더링.
+- 핀테크 안전 가이드라인에 따른 `ShieldCheck` 배지 ("서버 권위 매수원가 100% 자동환급 (수수료/세금 전액 면제)").
+- 정산 수량, 취득 단가, 총 환급 WLD, 정산 일시, 종목 상세 링크 표기.
+
+---
+
+### 3. 검증 및 무중단 승격 계획 (Verification Plan)
+1. **마이그레이션 적용 및 단위 테스트**:
+   - PostgreSQL 229 마이그레이션 적용.
+   - `pnpm --filter @moneyverse/backend test src/stock/stock-halt-settlement.test.ts` 통과.
+   - `pnpm --filter @moneyverse/frontend test src/app/stocks/portfolio/` 통과.
+2. **Next.js Turbopack Exact-SHA 빌드**:
+   - `NEXT_PUBLIC_BUILD_ID=$COMMIT_SHA BUILD_ID=$COMMIT_SHA pnpm build`
+3. **미니 PC 스테이징 및 프로덕션 무중단 승격 (`v2026.09.22.357`)**:
+   - 929개 이상 PostgreSQL 활성 세션 100% 무손실 보존 검증.
+   - `docs/releases/ledger.json` 및 `PROJECT_MEMORY.md` 동기화.

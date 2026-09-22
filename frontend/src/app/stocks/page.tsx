@@ -53,6 +53,7 @@ interface StockRow {
   /** How many shares exist, and how many nobody is holding (053). */
   readonly shares_outstanding: string;
   readonly shares_available: string;
+  readonly halt_status?: string;
 }
 
 /** Every listed stock's recent prices, most recent first (055). */
@@ -231,9 +232,16 @@ export default async function StocksPage({
               <Card key={row.id} className="gap-4">
                 <CardHeader>
                   <div className="flex items-center justify-between gap-2">
-                    <Badge variant="secondary" className="font-mono">
-                      {row.symbol}
-                    </Badge>
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant="secondary" className="font-mono">
+                        {row.symbol}
+                      </Badge>
+                      {(row.halt_status === 'HALTED_SETTLED' || row.halt_status === 'HALTED_SETTLING' || row.halt_status === 'HALTING') && (
+                        <Badge variant="destructive" className="font-semibold text-[11px] px-1.5 py-0">
+                          {isEn ? 'Halted' : '거래정지'}
+                        </Badge>
+                      )}
+                    </div>
                     <WatchlistToggle stockId={row.id} watching={watchedStockIds.has(row.id)} />
                   </div>
                   <CardTitle className="text-base">{row.name}</CardTitle>
@@ -268,22 +276,34 @@ export default async function StocksPage({
                       : `거래 가능 ${groupDigits(row.shares_available)}주 · 총 발행 ${groupDigits(row.shares_outstanding)}주`}
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    <TradeDialog
-                      stockId={row.id}
-                      symbol={row.symbol}
-                      name={row.name}
-                      currentPrice={row.current_price}
-                      available={row.shares_available}
-                      side="buy"
-                    />
-                    <TradeDialog
-                      stockId={row.id}
-                      symbol={row.symbol}
-                      name={row.name}
-                      currentPrice={row.current_price}
-                      available={row.shares_available}
-                      side="sell"
-                    />
+                    {row.halt_status === 'HALTED_SETTLED' || row.halt_status === 'HALTED_SETTLING' || row.halt_status === 'HALTING' ? (
+                      <Button
+                        disabled
+                        variant="outline"
+                        className="min-h-11 border-destructive/30 text-destructive bg-destructive/5 cursor-not-allowed opacity-80"
+                      >
+                        {isEn ? 'Trading Halted' : '거래정지 (정산완료)'}
+                      </Button>
+                    ) : (
+                      <>
+                        <TradeDialog
+                          stockId={row.id}
+                          symbol={row.symbol}
+                          name={row.name}
+                          currentPrice={row.current_price}
+                          available={row.shares_available}
+                          side="buy"
+                        />
+                        <TradeDialog
+                          stockId={row.id}
+                          symbol={row.symbol}
+                          name={row.name}
+                          currentPrice={row.current_price}
+                          available={row.shares_available}
+                          side="sell"
+                        />
+                      </>
+                    )}
                     <StockDetailDialog
                       stockId={row.id}
                       symbol={row.symbol}

@@ -88,6 +88,7 @@ export interface StockFloat {
 export interface StockMarketRow extends Omit<StockRow, 'active'>, StockFloat {
   readonly day_high_price: WldAmount;
   readonly day_low_price: WldAmount;
+  readonly halt_status: string;
 }
 
 /**
@@ -358,7 +359,7 @@ export class PostgresStockRepository {
   async list(): Promise<readonly StockMarketRow[]> {
     return queryRows<StockMarketRow>(
       this.pool,
-      'SELECT id::text, symbol, name, description, current_price::text AS current_price, day_open_price::text AS day_open_price, day_high_price::text AS day_high_price, day_low_price::text AS day_low_price, shares_outstanding::text AS shares_outstanding, shares_available::text AS shares_available, updated_at FROM public.stock_market_overview()',
+      'SELECT id::text, symbol, name, description, current_price::text AS current_price, day_open_price::text AS day_open_price, day_high_price::text AS day_high_price, day_low_price::text AS day_low_price, shares_outstanding::text AS shares_outstanding, shares_available::text AS shares_available, coalesce(halt_status, \'ACTIVE\') AS halt_status, updated_at FROM public.stock_market_overview()',
     );
   }
 

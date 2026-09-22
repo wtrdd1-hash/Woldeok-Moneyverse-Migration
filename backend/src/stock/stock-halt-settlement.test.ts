@@ -135,3 +135,33 @@ describe('PostgresStockRepository.haltSettlementReceipts', () => {
     expect(receipts[0]?.refund_amount).toBe('6000');
   });
 });
+
+describe('PostgresStockRepository.list with halt status visibility', () => {
+  it('returns halt_status from stock_market_overview', async () => {
+    const { pool, queries } = recordingPool(() => [
+      {
+        id: STOCK,
+        symbol: 'WDX',
+        name: '월덕 익스프레스',
+        description: '가상 주식',
+        current_price: '120',
+        day_open_price: '110',
+        day_high_price: '130',
+        day_low_price: '105',
+        shares_outstanding: '10000',
+        shares_available: '8000',
+        halt_status: 'HALTED_SETTLED',
+        updated_at: new Date('2026-09-22T00:00:00.000Z'),
+      },
+    ]);
+
+    const repo = new PostgresStockRepository(pool);
+    const stocks = await repo.list();
+
+    expect(queries[0]?.text).toContain('public.stock_market_overview()');
+    expect(queries[0]?.text).toContain('halt_status');
+    expect(stocks).toHaveLength(1);
+    expect(stocks[0]?.halt_status).toBe('HALTED_SETTLED');
+  });
+});
+
