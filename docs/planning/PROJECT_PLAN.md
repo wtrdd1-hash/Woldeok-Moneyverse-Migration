@@ -2,11 +2,23 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.22.352
+> Current integrated version: v2026.09.22.368
 > Implementation/evidence sync: 2026-09-22
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Hourly planning reconciliation — v2026.09.22.368 (2026-09-22)
+
+- **Integrated ledger:** this cycle is also recorded in [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md); future planning cycles must append there as well as keeping normal changelog/worklog evidence.
+- **Exact baseline:** start and mid-work re-read both resolved `origin/main=3f42ad8c6b12c8e13693ff246935eebceab951e1`; no main movement occurred during this review.
+- **G368-01 — authority/version drift (P1 governance gap):** the authoritative plan remained v352 while main release/update evidence reached v360. Preserve v353-v360 implementation history, but do not let release notes silently redefine product/security acceptance. This v368 delta restores planning traceability.
+- **G368-02 — retired admin TOTP still stated as current control (P0 security-contract gap):** migration 197 and DB tests retire admin TOTP credentials/functions, yet this plan and several detailed specs still say sensitive admin operations require TOTP/`SecondFactorGuard`. Current deployed-control claims must instead name `AdminSessionGuard`, recent `ReauthGuard` where required, CSRF for browser mutations, server-side role/actor checks, least privilege, reason/idempotency where relevant, and append-only audit. TOTP may remain historical or future-intent text only when explicitly labelled; it must not be counted as an active compensating control without runtime + DB evidence.
+- **G368-03 — mobile/API contract version drift (P1 contract gap):** v359 records 57 controllers/335 backend endpoints and 179 mobile-contract endpoints while `mobile-api-complete-spec.md` still carries v2026.09.14.2 and older 52-controller/163-endpoint text alongside newer counts. Acceptance requires a generated machine diff across method/path/auth/request/response/error/idempotency/rate/resource limits, classification as additive/breaking/behavioral, EN/KO parity, and one exact-SHA contract snapshot. Endpoint-count equality alone is insufficient.
+- **G368-04 — admin shop step-up is WIP evidence only (P1 security gap):** remote candidate `auto/hourly-b-shop-stepup-v2026.09.22.366` adds `ReauthGuard` to catalog-economics update, but it is not merged into main. Before acceptance: rebase to current main; verify admin-session + CSRF + recent-reauth composition; test missing/stale/expired reauth, lower-role denial and CSRF failure; prove price/stock/active-state audit old/new values, reason and actor; cover idempotency/concurrency for economically meaningful changes; synchronize EN/KO records; then verify exact merged SHA in Test.
+- **G368-05 — release evidence scope (P1 evidence gap):** v360's 1,028 active-session preservation and zero-downtime wording is retained as release evidence, not generalized proof that authentication, CSRF, reauth state and all critical mutations survived. Future acceptance samples authenticated continuity, required CSRF/reauth semantics, frontend/backend identity, fatal logs and representative critical mutations.
+- **Standards freshness:** OWASP ASVS 5.0.0 remains latest stable; NIST SP 800-63B-4 is final (July 2025) and requires periodic reauthentication/session timeout handling. These sources support verification and reauthentication design, not a claim that a retired Moneyverse TOTP control exists.
+- **Acceptance:** EN/KO semantic parity and traceable worklog/changelog. This cycle changes planning/docs only and makes no new implementation, Test or Production claim.
 
 ## Hourly planning reconciliation — v2026.09.22.352 (2026-09-22)
 
