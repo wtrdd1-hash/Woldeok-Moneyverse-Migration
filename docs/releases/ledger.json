@@ -42,5 +42,16 @@
     "timestamp": "2026-09-22T07:58:00Z",
     "author": "Antigravity",
     "notes": "Admin Consent Version Management UI, Fail-Safe Policy Submission Guard & Ledger-Based Rollback Engine"
+  },
+  {
+    "version": "v2026.09.22.353",
+    "commitSha": "dc011eeebf581cc32d4127754f03010fdaf988f2",
+    "shortSha": "dc011ee",
+    "releasePath": "/srv/moneyverse-data/releases/prod-dc011ee-v353",
+    "status": "promoted",
+    "activeSessions": 929,
+    "timestamp": "2026-09-22T08:49:00Z",
+    "author": "Antigravity",
+    "notes": "P0 Private Chat Safety Controls (Mute/Block/Report), Korean IME Protection & Evidence Snapshot Take-It-Down Queue"
   }
 ]

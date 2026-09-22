@@ -1,6 +1,28 @@
 # Update Log
 
-## v2026.09.22.352 — Admin Policy Version Management UI, Governance Contracts & Release Ledger Rollback Engine
+## v2026.09.22.353 — P0 Private Chat Safety Controls (Mute/Block/Report) & FinTech Safety UX and Korean IME Protection
+
+- Applied Branch: `main` (Release: `prod-dc011ee-v353`)
+- **P0 Private Chat Safety Controls & Governance (ONE_TO_ONE_PRIVATE_CHAT_SPEC v2026.09.20.305-05)**:
+  1. **PostgreSQL Migration 227 Applied (`packages/database/migrations/227-private-chat-safety-controls.sql`)**:
+     - `private_chat_blocks` table: mutual/unilateral 1:1 member block relation persistence and indexing.
+     - `private_chat_reports` table: 4 policy reasons (spam/fraud/abuse/other), detailed justifications, recent 10 messages JSONB evidence snapshot and SLA queue integration.
+     - Security procedures: `private_chat_mute`, `private_chat_block`, `private_chat_unblock`, `private_chat_is_blocked`, `private_chat_report`.
+     - Message dispatch hardening (`private_chat_send`): fail-closed rejection (`42501`) when sender/peer are blocked.
+  2. **Backend Endpoints Completed (`backend/src/chat/`)**:
+     - `POST /api/v1/chat/conversations/:id/mute`: atomic participant mute status toggle.
+     - `POST /api/v1/chat/users/:id/block` & `DELETE /api/v1/chat/users/:id/block`: member block and unblock endpoints.
+     - `POST /api/v1/chat/conversations/:id/report`: incident report submission and immutable evidence snapshot.
+  3. **Frontend Chat Room FinTech Safety UX Rebuild (`frontend/src/app/chat/`)**:
+     - `ChatRoom` header more menu: one-click mute toggle, block/unblock confirmation dialog, 4-reason report modal.
+     - Korean IME composition (`isComposing`) guard: prevents accidental dispatch during syllable composition.
+     - Blocked conversation banner and input disabled protection.
+     - `ChatView` list item mute badge (`BellOff`) and blocked status visual badge.
+  4. **Unit Tests & Zero-Downtime Promotion**:
+     - Vitest `chat-safety.test.ts` (4 tests passed 100%).
+     - Exact-SHA (`dc011ee`) runtime identity coherence verified across Test and Production with 929 active user sessions preserved.
+
+## v2026.09.22.352 — Admin Policy Version Live Management Console & G352 Governance and Immutable Release Ledger Rollback Engine
 
 - Branch: `main` (Release: `prod-f609af8-v352`)
 - **Admin Control Tower Policy Management & Immutable Ledger Governance**:

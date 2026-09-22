@@ -145,20 +145,22 @@
 
 ## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
 
-- **최종 갱신일시**: 2026-09-22 17:00:00 KST
-- **현재 프로덕션 릴리스 버전**: `v2026.09.22.352` (릴리스 경로: `/srv/moneyverse-data/releases/prod-f609af8-v352`, 직전: `prod-d67a915-v350`)
-- **Exact Git SHA**: `f609af8351a0fddc691afe15bb913b6855d6a32e` (단축: `f609af8`)
+- **최종 갱신일시**: 2026-09-22 17:50:00 KST
+- **현재 프로덕션 릴리스 버전**: `v2026.09.22.353` (릴리스 경로: `/srv/moneyverse-data/releases/prod-dc011ee-v353`, 직전: `prod-f609af8-v352`)
+- **Exact Git SHA**: `dc011eeebf581cc32d4127754f03010fdaf988f2` (단축: `dc011ee`)
 - **PostgreSQL 활성 사용자 세션**: **929개 (100% 무손실 보존 실측 확인)**
 - **최신 완료 작업 요약**:
-  1. **관리자 약관 버전 실시간 발행 콘솔 구축 (`/admin/controls`)**:
-     - `backend/src/admin/controls.controller.ts` & `controls.repository.ts`: `POST /api/v1/admin/controls/consent-versions` 엔드포인트(2단계 확인 `PUBLISH_NEW_POLICY_VERSION`, `audit_logs` 영구 기록, Superadmin 전용) 신설.
-     - `frontend/src/app/admin/controls/policy-version-card.tsx`: 2단계 확인 모달 및 관리자 정책 버전 제어 카드 탑재.
-  2. **G352-01 Fail-Safe 동의 제출 방어 (`ConsentStepUpModal`)**:
-     - 정책 버전 미동기화 시 동의 제출 버튼 비활성화(`disabled`) 및 재시도 UI 제공. 비권위 하드코딩 Fallback 저장 원천 차단.
-  3. **G352-02 & G352-04 불변 릴리스 원장 구축 (`docs/releases/ledger.json`, `rollback_production.sh`)**:
-     - `docs/releases/ledger.json` 불변 증거 원장 파일 신설 및 `rollback_production.sh` 롤백 스크립트에 ledger 기반 last-known-good candidate 검증 연동.
-  4. **G352-03 경로 정규화 및 화이트리스트 우회 방지 (`normalizePath`, `consent-guard.test.ts`)**:
-     - `frontend/src/lib/path-utils.ts`의 `normalizePath`로 디코딩, 소문자화, 연속 슬래시/트래버설 제거 후 화이트리스트 검사.
-     - Vitest 단위 테스트 7종 통과 검증.
+  1. **P0 1:1 개인 채팅 안전 제어 완비 (ONE_TO_ONE_PRIVATE_CHAT_SPEC v2026.09.20.305-05)**:
+     - `packages/database/migrations/227-private-chat-safety-controls.sql`: `private_chat_blocks`, `private_chat_reports` 테이블 신설 및 `private_chat_mute`, `private_chat_block`, `private_chat_unblock`, `private_chat_report` 프로시저 완비.
+     - `private_chat_send` 강화: 차단된 회원 간 메시지 전송 시 `42501` Fail-closed 방어.
+     - `backend/src/chat/`: `POST /mute`, `POST /block`, `DELETE /block`, `POST /report` 4종 신규 엔드포인트 연동.
+  2. **프론트엔드 채팅 룸 핀테크 안전 UX 쇄신 (`frontend/src/app/chat/`)**:
+     - `ChatRoom` 상단 더보기 메뉴: 원클릭 알림 음소거 토글, 상대방 차단/해제 모달, 4대 사유(스팸, 사기, 욕설, 기타) 신고 모달 완비.
+     - 한글 IME 조합(`isComposing`) 오발송 방지 처리 및 44px 터치 타겟 준수.
+     - 차단된 회원과의 대화 시 상단 경고 배너 및 입력창 잠금 처리.
+  3. **단위 테스트 및 무중단 승격**:
+     - Vitest `chat-safety.test.ts` (4개 테스트 100% PASS).
+     - Exact-SHA 런타임 일체화 검증 통과 및 929개 활성 세션 무손실 보존.
+
 
 

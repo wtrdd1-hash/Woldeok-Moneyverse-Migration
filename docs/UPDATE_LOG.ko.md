@@ -1,3 +1,25 @@
+## v2026.09.22.353 — 1:1 개인 채팅 P0 긴급 안전 제어(차단/음소거/신고) & 핀테크 안전 UX 및 한글 IME 오발송 방지 완결
+
+- 적용 브랜치: `main` (릴리스: `prod-dc011ee-v353`)
+- **P0 1:1 개인 채팅 안전 제어 및 거버넌스 완결 (ONE_TO_ONE_PRIVATE_CHAT_SPEC v2026.09.20.305-05)**:
+  1. **PostgreSQL 227 마이그레이션 적용 (`packages/database/migrations/227-private-chat-safety-controls.sql`)**:
+     - `private_chat_blocks` 테이블 신설: 회원 간 상호/단방향 1:1 차단 관계 저장 및 인덱싱.
+     - `private_chat_reports` 테이블 신설: 4대 사유(스팸/사기/욕설/기타), 상세 소명, 최근 10개 메시지 JSONB 증거 스냅샷 자동 캡처 및 SLA 관제 큐 연동.
+     - 보안 프로시저 완비: `private_chat_mute`, `private_chat_block`, `private_chat_unblock`, `private_chat_is_blocked`, `private_chat_report`.
+     - 메시지 전송 강화 (`private_chat_send`): 차단된 회원 간 메시지 전송 시 `42501` Fail-closed 방어.
+  2. **백엔드 엔드포인트 완비 (`backend/src/chat/`)**:
+     - `POST /api/v1/chat/conversations/:id/mute`: 대화방 알림 음소거/해제 원자적 갱신.
+     - `POST /api/v1/chat/users/:id/block` & `DELETE /api/v1/chat/users/:id/block`: 회원 차단 및 해제 엔드포인트.
+     - `POST /api/v1/chat/conversations/:id/report`: 부적절 대화 내용 신고 및 증거 스냅샷 영구 보존.
+  3. **프론트엔드 채팅 룸 핀테크 안전 UX 쇄신 (`frontend/src/app/chat/`)**:
+     - `ChatRoom` 상단 더보기 메뉴: 원클릭 알림 음소거 토글, 상대방 차단/해제 확인 모달, 4대 사유 신고 모달 탑재.
+     - 한글 IME 조합(`isComposing`) 오발송 방지: 한글 자모 조합 중 Enter 키로 오발송되는 현상 원천 차단.
+     - 차단된 회원과의 대화 시 상단 경고 배너 및 입력창 비활성화(`disabled`) 보호.
+     - `ChatView` 대화 목록에 음소거 배지(`BellOff`) 및 차단 상태 배지 시각화.
+  4. **단위 테스트 및 무중단 승격**:
+     - Vitest `chat-safety.test.ts` 4개 테스트 100% 통과.
+     - 미니 PC Exact-SHA(`dc011ee`) 런타임 일체화 검증 통과 및 929개 활성 세션 무손실 보존.
+
 ## v2026.09.22.352 — 관리자 약관 버전 실시간 개정 콘솔 & G352 거버넌스 계약 및 불변 릴리스 원장 완결
 
 - 적용 브랜치: `main` (릴리스: `prod-f609af8-v352`)
