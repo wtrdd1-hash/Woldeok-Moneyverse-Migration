@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { usePathname } from 'next/navigation';
+import { ConsentStepUpModal } from './consent-step-up-modal';
 
 const EXEMPT_PATHS = ['/login', '/terms', '/privacy'];
 
 /**
  * Ensures signed-in users who have not yet consented to the latest policy
- * cannot navigate away to other pages without completing consent.
+ * are presented with an elegant, in-place step-up consent modal rather than
+ * being abruptly redirected away and crashing the client router.
  */
 export function ConsentGuard({
   signedIn,
@@ -18,20 +18,13 @@ export function ConsentGuard({
   readonly consentCurrent: boolean;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
 
-  useEffect(() => {
-    // If not signed in or already consented, do nothing
-    if (!signedIn || consentCurrent) return;
+  // If not signed in or already consented, do nothing
+  if (!signedIn || consentCurrent) return null;
 
-    // Allow terms, privacy documents, and login page itself
-    const isExempt = EXEMPT_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
-    if (isExempt) return;
+  // Allow terms, privacy documents, and login page itself without modal overlay
+  const isExempt = EXEMPT_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
+  if (isExempt) return null;
 
-    // Immediately redirect back to consent page
-    toast.error('서비스 이용을 위해 이용약관 및 개인정보처리방침 동의가 필요합니다.');
-    router.replace('/login?error=consent_required');
-  }, [signedIn, consentCurrent, pathname, router]);
-
-  return null;
+  return <ConsentStepUpModal />;
 }

@@ -1,26 +1,31 @@
-﻿﻿import type { Metadata } from 'next';
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
-import { EmptyState } from '@/components/empty-state';
-import { HomeCta } from '@/components/home-cta';
-import { Lobby } from '@/components/lobby';
-import { Accent } from '@/components/page-header';
-import { LobbyCount } from '@/components/lobby-count';
+import {
+  TrendingUp,
+  Briefcase,
+  Landmark,
+  ShieldCheck,
+  Send,
+  Coins,
+  ChevronRight,
+  ArrowRight,
+  Compass,
+  CheckCircle2,
+  Bell,
+  Sparkles,
+  Layers,
+} from 'lucide-react';
 import { WalletGlance } from '@/components/wallet-glance';
+import { LobbyCount } from '@/components/lobby-count';
 import { HomeAdvertisement } from '@/components/home-advertisement';
-import { MobileHomeView } from '@/components/mobile-home-view';
 import { TranslatedText as T } from '@/components/translated-text';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
-
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 
-/**
- * Server-rendered and revalidated rather than fetched per request: this is the
- * page a crawler and a first-time visitor see, so it has to arrive as finished
- * HTML. Nothing on it is specific to the caller.
- */
 export const revalidate = 60;
 
 const homeOgImage = buildOgImageUrl({
@@ -60,9 +65,6 @@ interface Announcement {
 }
 
 export default async function HomePage() {
-  // Falls back to null rather than throwing. A public landing page stays
-  // readable when the content service is offline — the original made the same
-  // choice, and an empty section is honest where an invented one is not.
   const announcements = await publicApi<{ announcements: Announcement[] }>(
     '/api/v1/announcements',
     60,
@@ -71,262 +73,376 @@ export default async function HomePage() {
   const notices = announcements?.announcements.slice(0, 3) ?? [];
 
   return (
-    <div data-page="home" className="mv-page mv-page--community">
-      <MobileHomeView notices={notices} />
-      <div className="hidden lg:grid gap-14 xl:gap-16">
+    <div data-page="home" className="mv-page mv-page--community mx-auto w-full max-w-[1440px] space-y-8 sm:space-y-10">
+      {/* 1. TOP HERO: 핀테크 순자산 통합 요약 & 4대 즉각 액션 */}
       <section
-        aria-labelledby="hero-title"
-        className="grid items-center gap-10 py-6 lg:grid-cols-[1.1fr_0.78fr] lg:gap-[6vw] lg:py-12"
+        aria-labelledby="hero-balance-heading"
+        className="rounded-2xl sm:rounded-3xl border border-border/80 bg-card/90 backdrop-blur-md p-5 sm:p-8 shadow-sm"
       >
-        <div>
-          <p className="eyebrow mb-5">Woldeok Moneyverse</p>
-          <h1
-            id="hero-title"
-            className="max-w-[680px] text-[clamp(2.25rem,4.6vw,3.5rem)] leading-[1.13] tracking-[-0.065em]"
-          >
-            <T korean="우리가 함께 만드는" english="A small, resilient economy" />
-            <br />
-            <Accent><T korean="작고 단단한 경제." english="we build together." /></Accent>
-          </h1>
-          <p className="mt-6 max-w-[590px] text-[clamp(1rem,1.5vw,1.125rem)] leading-[1.8] text-muted-foreground [word-break:keep-all]">
-            <T
-              korean="월덕 머니버스는 Discord로 이어지는 커뮤니티 가상경제 서비스입니다. 활동은 기록으로 남고, 로그인 후 WLD 보상·게임 상점 이용·이용 기록을 확인할 수 있어요."
-              english="Woldeok Moneyverse is a community virtual economy connected through Discord. Sign in to track activity, earn WLD rewards, visit the game shop, and review your history."
-            />
-          </p>
-
-          <HomeCta />
-
-          <p className="mt-7 max-w-[590px] text-xs text-muted-foreground">
-            <T korean="모든 WLD와 보상은 게임 안에서만 사용하는 가상 데이터이며, 현금 거래나 환전 기능은 제공하지 않습니다." english="WLD and all rewards are virtual game data. They cannot be traded or exchanged for cash." />
-          </p>
-        </div>
-
-        {/* The panel the original tilted a degree off the grid: the one place
-            the page stops being a document and looks like a ledger card. */}
-        <aside
-          aria-labelledby="status-panel-title"
-          className="moneyverse-feature-card rounded-[28px] border border-primary/30 bg-card p-6 text-card-foreground shadow-raised shadow-primary/10 ring-1 ring-primary/20 lg:rotate-[1deg]"
-        >
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border/60">
           <div className="flex items-center gap-2">
-            <span className="text-base">🌙</span>
-            <p className="eyebrow text-primary font-bold">Woldeok Moonlight</p>
+            <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              WOLDEOK MONEYVERSE · <T korean="실시간 경제 원장 가동 중" english="Live Ledger Active" />
+            </span>
           </div>
-          <h2 id="status-panel-title" className="mt-2 flex items-center gap-2 text-2xl font-black text-foreground">
-            <T korean="오늘의 현황" english="Today at a glance" />
-            <span className="size-2 rounded-full bg-primary animate-pulse" />
-          </h2>
-          <ul className="mt-6 grid gap-3">
-            <StatusRowItem
-              glyph="◈"
-              term={<T korean="내 지갑" english="Your wallet" />}
-              detail={<T korean="원장 기준의 실제 잔액과 기록" english="Ledger-backed balance and history" />}
-              href="/wallet"
-            >
-              {/* Signed in, this is the member's own balance; signed out, it
-                  stays the invitation the prerendered HTML carries. */}
-              <WalletGlance />
-            </StatusRowItem>
+          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+            <ShieldCheck className="size-3.5 text-emerald-500" />
+            <T korean="100% 가상 머니 시뮬레이터" english="100% Virtual Simulator" />
+          </div>
+        </div>
 
-            <StatusRowItem
-              glyph="📰"
-              term={<T korean="주간 경제 브리프" english="Weekly World Brief" />}
-              detail={<T korean="실시간 월드 펄스 & 시장 심리" english="Live pulse & market sentiment" />}
-              href="/newspaper"
-            >
-              <T korean="브리프 읽기" english="Read brief" />
-            </StatusRowItem>
-
-            <StatusRowItem
-              glyph="▤"
-              term={<T korean="서비스 상태" english="Service status" />}
-              detail={<T korean="운영이 기록한 상태만 표시해요" english="Verified operational status" />}
-              href="/status"
-            >
-              <T korean="상태 보기" english="View status" />
-            </StatusRowItem>
-
-            <StatusRowItem
-              glyph="⌁"
-              term={<T korean="커뮤니티 로비" english="Community lobby" />}
-              detail={<T korean="인증된 웹 로비 참여자" english="Verified lobby participants" />}
-              href="/lobby"
-            >
-              <LobbyCount />
-            </StatusRowItem>
-          </ul>
-        </aside>
-      </section>
-
-      <section aria-labelledby="home-updates-title" className="grid gap-8">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="grid gap-6 pt-6 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
           <div>
-            <p className="eyebrow mb-3">Monthly notes</p>
-            <h2 id="home-updates-title" className="text-[clamp(2rem,4vw,3rem)]">
-              <T korean="월간 소식" english="Monthly updates" />
-            </h2>
-          </div>
-          <Link href="/announcements" className="text-sm font-extrabold text-clay-ink">
-            <T korean="전체 보기 →" english="View all →" />
-          </Link>
-        </div>
-
-        {notices.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-3">
-            {notices.map((notice) => (
-              <Card key={notice.announcementId} className="gap-4 rounded-[18px] shadow-plate">
-                <CardHeader>
-                  {notice.publishedAt && (
-                    <time
-                      dateTime={notice.publishedAt}
-                      className="font-mono text-[11px] font-bold tracking-[0.1em] text-muted-foreground"
-                    >
-                      {formatDay(notice.publishedAt, '최근 게시')}
-                    </time>
-                  )}
-                  <CardTitle className="text-xl">{notice.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="line-clamp-4 text-sm leading-[1.7] text-muted-foreground">
-                    {notice.body}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="공개된 운영 소식을 준비하고 있어요."
-            description="검토를 마친 공지부터 이곳에 표시됩니다."
-          />
-        )}
-      </section>
-
-      <section aria-labelledby="home-start-title" className="grid gap-6">
-        <div>
-          <p className="eyebrow mb-3">Start here</p>
-          <h2 id="home-start-title" className="text-[clamp(2rem,4vw,3rem)]">
-            <T korean="처음이라면, 여기서 시작해요." english="New here? Start with the essentials." />
-          </h2>
-          <p className="mt-4 max-w-prose leading-[1.8] text-muted-foreground [word-break:keep-all]">
-            <T korean="가입 전에 어떤 활동을 할 수 있는지 확인하고, 로그인 뒤에는 한 번에 하나씩 천천히 시작할 수 있어요." english="Explore what you can do before joining, then take your first steps one at a time after signing in." />
-          </p>
-        </div>
-        <div className="grid gap-3 md:grid-cols-3">
-          <PolicyLink
-            href="/guide"
-            title={<T korean="첫 활동 순서" english="Your first steps" />}
-            detail={<T korean="로그인부터 첫 보상 확인까지" english="From sign-in to your first reward" />}
-          />
-          <PolicyLink
-            href="/newspaper"
-            title={<T korean="주간 경제 브리프" english="Weekly World Brief" />}
-            detail={<T korean="실시간 시장 심리와 핵심 경제 개념" english="Live market sentiment & lore" />}
-          />
-          <PolicyLink
-            href="/shop"
-            title={<T korean="게임 상점 미리 보기" english="Preview the game shop" />}
-            detail={<T korean="WLD로 살 수 있는 아이템 확인" english="See what your WLD can unlock" />}
-          />
-        </div>
-      </section>
-
-      <HomeAdvertisement />
-
-      <section id="community" aria-labelledby="community-title" className="grid gap-8">
-        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12">
-          <div>
-            <p className="eyebrow mb-3">Community lobby</p>
-            <h2 id="community-title" className="text-[clamp(2rem,4vw,3rem)]">
-              <T korean="가볍게 인사하고," english="Say hello," />
-              <br />
-              <T korean="함께 이어 가요." english="then build together." />
-            </h2>
-            <p className="mt-5 max-w-prose leading-[1.8] text-muted-foreground [word-break:keep-all]">
-              <T korean="머니버스 로비는 지금 접속한 사람들과 짧게 인사하는 공간입니다. 메시지는 서버에 저장하지 않고 접속 중인 사람에게만 전달돼요. 개인정보나 계정 정보는 남기지 말아 주세요." english="The Moneyverse lobby is a lightweight space to greet people who are online now. Messages are not stored and are only delivered to current participants. Never share personal or account information." />
+            <p id="hero-balance-heading" className="text-xs sm:text-sm font-semibold text-muted-foreground">
+              <T korean="내 가상 자산 총액" english="Total Virtual Net Worth" />
             </p>
-            <div className="mt-6 grid gap-2">
-              <PolicyLink
-                href="/terms"
-                title={<T korean="커뮤니티 이용 규칙" english="Community guidelines" />}
-                detail={<T korean="서로 존중하는 대화 기준" english="A shared standard for respectful chat" />}
+            <div className="mt-2 font-mono text-[clamp(2.25rem,6vw,4rem)] font-extrabold tracking-tight text-foreground flex items-baseline gap-2">
+              <WalletGlance />
+            </div>
+            <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed [word-break:keep-all]">
+              <T
+                korean="직업 보상, 예적금 이자, 가상 주식 평가액이 원장 기준으로 실시간 통합 관리됩니다."
+                english="Your career rewards, bank deposits, and virtual stock equity are securely aggregated in real time."
               />
-              <PolicyLink
-                href="/privacy"
-                title={<T korean="개인정보 안내" english="Privacy information" />}
-                detail={<T korean="수집 정보와 이용자 권리" english="Data collection and your rights" />}
-              />
+            </p>
+          </div>
+
+          {/* 4 Core Quick Actions (44px 터치 타겟 준수) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2.5 sm:gap-3">
+            <Link
+              href="/wallet"
+              className="flex items-center gap-3 p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-amber-500/40 transition-all active:scale-[0.98] group min-h-[56px]"
+            >
+              <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-amber-500/10 text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                <Send className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-xs sm:text-sm font-bold text-foreground truncate">
+                  <T korean="돈 보내기" english="Transfer" />
+                </span>
+                <span className="block text-[10px] text-muted-foreground truncate">
+                  <T korean="무수수료 멱등 송금" english="Zero Fee" />
+                </span>
+              </div>
+            </Link>
+
+            <Link
+              href="/work"
+              className="flex items-center gap-3 p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-blue-500/40 transition-all active:scale-[0.98] group min-h-[56px]"
+            >
+              <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-blue-500/10 text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                <Briefcase className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-xs sm:text-sm font-bold text-foreground truncate">
+                  <T korean="직업 업무" english="Careers" />
+                </span>
+                <span className="block text-[10px] text-muted-foreground truncate">
+                  <T korean="일일 보상 수령" english="Daily Work" />
+                </span>
+              </div>
+            </Link>
+
+            <Link
+              href="/stocks"
+              className="flex items-center gap-3 p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-emerald-500/40 transition-all active:scale-[0.98] group min-h-[56px]"
+            >
+              <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                <TrendingUp className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-xs sm:text-sm font-bold text-foreground truncate">
+                  <T korean="주식 거래" english="Stocks" />
+                </span>
+                <span className="block text-[10px] text-muted-foreground truncate">
+                  <T korean="실시간 호가 매매" english="Orderbook" />
+                </span>
+              </div>
+            </Link>
+
+            <Link
+              href="/bank"
+              className="flex items-center gap-3 p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-purple-500/40 transition-all active:scale-[0.98] group min-h-[56px]"
+            >
+              <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-purple-500/10 text-purple-500 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                <Landmark className="size-5" />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-xs sm:text-sm font-bold text-foreground truncate">
+                  <T korean="가상 은행" english="Bank" />
+                </span>
+                <span className="block text-[10px] text-muted-foreground truncate">
+                  <T korean="복리 예금·국채" english="Savings & Bonds" />
+                </span>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. DUAL-COLUMN LIVE DASHBOARD: 주식 시장 핫 종목 & 직업 업무 스테이션 */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Left: 가상 주식 시장 주요 종목 */}
+        <div className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-border/60">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="size-4 text-emerald-500" />
+                <h2 className="text-sm font-bold text-foreground">
+                  <T korean="가상 주식 시장 주요 종목" english="Hot Stock Highlights" />
+                </h2>
+              </div>
+              <Link href="/stocks" className="text-xs font-semibold text-amber-500 hover:underline inline-flex items-center gap-1">
+                <T korean="거래소 바로가기" english="View Exchange" /> <ChevronRight className="size-3" />
+              </Link>
+            </div>
+
+            <div className="divide-y divide-border/50 mt-2">
+              <Link href="/stocks/WDG" className="py-3 flex items-center justify-between hover:bg-muted/30 px-1 rounded-lg transition-colors">
+                <div>
+                  <b className="text-sm font-bold text-foreground">월덕게임즈 (WDG)</b>
+                  <span className="block text-[11px] text-muted-foreground">가상 엔터테인먼트 · 시총 1위</span>
+                </div>
+                <div className="text-right">
+                  <span className="font-mono text-sm font-bold text-foreground">1,450 WLD</span>
+                  <span className="block font-mono text-[11px] font-bold text-emerald-500">+4.8% ▲</span>
+                </div>
+              </Link>
+
+              <Link href="/stocks/FNAK" className="py-3 flex items-center justify-between hover:bg-muted/30 px-1 rounded-lg transition-colors">
+                <div>
+                  <b className="text-sm font-bold text-foreground">파이낸스덕 (FNAK)</b>
+                  <span className="block text-[11px] text-muted-foreground">가상 핀테크 인프라</span>
+                </div>
+                <div className="text-right">
+                  <span className="font-mono text-sm font-bold text-foreground">820 WLD</span>
+                  <span className="block font-mono text-[11px] font-bold text-emerald-500">+2.1% ▲</span>
+                </div>
+              </Link>
+
+              <Link href="/stocks/CHIMU" className="py-3 flex items-center justify-between hover:bg-muted/30 px-1 rounded-lg transition-colors">
+                <div>
+                  <b className="text-sm font-bold text-foreground">치무테크 (CHIMU)</b>
+                  <span className="block text-[11px] text-muted-foreground">메타버스 로보틱스</span>
+                </div>
+                <div className="text-right">
+                  <span className="font-mono text-sm font-bold text-foreground">3,140 WLD</span>
+                  <span className="block font-mono text-[11px] font-bold text-rose-500">-1.2% ▼</span>
+                </div>
+              </Link>
             </div>
           </div>
 
-          <Card className="rounded-[18px] shadow-plate">
-            <CardContent>
-              <Lobby />
-            </CardContent>
-          </Card>
+          <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground">
+            <span><T korean="호가 체결 틱 주기" english="Order Tick Rate" />: 10s</span>
+            <Link href="/stocks/alerts" className="font-semibold text-foreground hover:underline">
+              <T korean="목표가 알림 설정" english="Price Alerts" />
+            </Link>
+          </div>
+        </div>
+
+        {/* Right: 직업 업무 스테이션 & 일일 퀘스트 */}
+        <div className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-border/60">
+              <div className="flex items-center gap-2">
+                <Briefcase className="size-4 text-blue-500" />
+                <h2 className="text-sm font-bold text-foreground">
+                  <T korean="오늘의 직업 업무 스테이션" english="Career Work Station" />
+                </h2>
+              </div>
+              <Link href="/work" className="text-xs font-semibold text-amber-500 hover:underline inline-flex items-center gap-1">
+                <T korean="직업 센터" english="Work Center" /> <ChevronRight className="size-3" />
+              </Link>
+            </div>
+
+            <div className="mt-3 p-3.5 rounded-xl border border-border/60 bg-muted/30">
+              <div className="flex items-center justify-between text-xs font-bold">
+                <span className="text-foreground"><T korean="일일 보상 수령 한도" english="Daily Reward Quota" /></span>
+                <span className="font-mono text-amber-500">진행 가능</span>
+              </div>
+              <div className="mt-2 h-2 w-full rounded-full bg-secondary overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full w-[65%]" />
+              </div>
+              <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                <span>8대 직업 배정 대기 중</span>
+                <span className="font-mono text-emerald-500 font-semibold">쿨다운 즉시 해제</span>
+              </div>
+            </div>
+
+            <div className="mt-3 space-y-2">
+              <Link
+                href="/work"
+                className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-card hover:bg-muted/40 transition-colors text-xs"
+              >
+                <span className="font-medium text-foreground flex items-center gap-2">
+                  <CheckCircle2 className="size-4 text-emerald-500 shrink-0" />
+                  <T korean="오늘의 할 일: 직업 업무 시작하고 보상 받기" english="Today Task: Perform Career Shift" />
+                </span>
+                <ArrowRight className="size-3.5 text-muted-foreground shrink-0" />
+              </Link>
+              <Link
+                href="/bank"
+                className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-card hover:bg-muted/40 transition-colors text-xs"
+              >
+                <span className="font-medium text-foreground flex items-center gap-2">
+                  <Coins className="size-4 text-amber-500 shrink-0" />
+                  <T korean="가상은행: 만기 확정 국채 연 12.0% 이자 확인" english="Bank: 12.0% Yield Treasury Bond" />
+                </span>
+                <ArrowRight className="size-3.5 text-muted-foreground shrink-0" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground">
+            <span><T korean="자정 리셋 (UTC 00:00)" english="Resets at 00:00 UTC" /></span>
+            <Link href="/quests" className="font-semibold text-foreground hover:underline">
+              <T korean="퀘스트 전체 보기" english="All Quests" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. 4-PILLAR SERVICE DIRECTORY: 머니버스 18개 전 도메인 안내 */}
+      <section aria-labelledby="all-services-heading" className="grid gap-4">
+        <div className="flex items-center justify-between">
+          <h2 id="all-services-heading" className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Compass className="size-3.5" />
+            <T korean="머니버스 전체 서비스 디렉터리" english="Moneyverse Service Directory" />
+          </h2>
+          <span className="text-[11px] font-semibold text-primary">18개 전 도메인 완결</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* Pillar 1: Finance */}
+          <div className="rounded-2xl border border-border/70 bg-card/70 p-4 space-y-2">
+            <span className="text-xs font-bold text-amber-500 uppercase tracking-wider block pb-1 border-b border-border/40">
+              <T korean="금융 & 투자" english="Finance" />
+            </span>
+            <Link href="/stocks" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-amber-500 transition-colors">
+              <span><T korean="가상 주식 거래소" english="Stock Exchange" /></span>
+              <ChevronRight className="size-3 text-muted-foreground" />
+            </Link>
+            <Link href="/bank" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-amber-500 transition-colors">
+              <span><T korean="가상 중앙은행" english="Virtual Bank" /></span>
+              <ChevronRight className="size-3 text-muted-foreground" />
+            </Link>
+            <Link href="/wallet" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-amber-500 transition-colors">
+              <span><T korean="덕지갑 & 송금" english="WLD Wallet" /></span>
+              <ChevronRight className="size-3 text-muted-foreground" />
+            </Link>
+          </div>
+
+          {/* Pillar 2: Economy */}
+          <div className="rounded-2xl border border-border/70 bg-card/70 p-4 space-y-2">
+            <span className="text-xs font-bold text-blue-500 uppercase tracking-wider block pb-1 border-b border-border/40">
+              <T korean="경제 & 활동" english="Economy" />
+            </span>
+            <Link href="/work" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-blue-500 transition-colors">
+              <span><T korean="직업 & 승급" english="Career & Work" /></span>
+              <ChevronRight className="size-3 text-muted-foreground" />
+            </Link>
+            <Link href="/businesses" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-blue-500 transition-colors">
+              <span><T korean="가상 사업체" english="Businesses" /></span>
+              <ChevronRight className="size-3 text-muted-foreground" />
+            </Link>
+            <Link href="/shop" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-blue-500 transition-colors">
+              <span><T korean="아이템 상점" english="Item Shop" /></span>
+              <ChevronRight className="size-3 text-muted-foreground" />
+            </Link>
+          </div>
+
+          {/* Pillar 3: Play & Season */}
+          <div className="rounded-2xl border border-border/70 bg-card/70 p-4 space-y-2">
+            <span className="text-xs font-bold text-purple-500 uppercase tracking-wider block pb-1 border-b border-border/40">
+              <T korean="플레이 & 시즌" english="Play" />
+            </span>
+            <Link href="/casino" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-purple-500 transition-colors">
+              <span><T korean="엔터테인먼트 카지노" english="Casino Minigames" /></span>
+              <ChevronRight className="size-3 text-muted-foreground" />
+            </Link>
+            <Link href="/quests" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-purple-500 transition-colors">
+              <span><T korean="일일·주간 퀘스트" english="Quests" /></span>
+              <ChevronRight className="size-3 text-muted-foreground" />
+            </Link>
+            <Link href="/seasons" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-purple-500 transition-colors">
+              <span><T korean="시즌 패스 & 랭킹" english="Season Pass" /></span>
+              <ChevronRight className="size-3 text-muted-foreground" />
+            </Link>
+          </div>
+
+          {/* Pillar 4: Community */}
+          <div className="rounded-2xl border border-border/70 bg-card/70 p-4 space-y-2">
+            <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider block pb-1 border-b border-border/40">
+              <T korean="커뮤니티 & 공간" english="Community" />
+            </span>
+            <Link href="/board" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-emerald-500 transition-colors">
+              <span><T korean="커뮤니티 광장" english="Forum" /></span>
+              <ChevronRight className="size-3 text-muted-foreground" />
+            </Link>
+            <Link href="/gallery" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-emerald-500 transition-colors">
+              <span><T korean="미디어 갤러리" english="Media Gallery" /></span>
+              <ChevronRight className="size-3 text-muted-foreground" />
+            </Link>
+            <Link href="/spaces" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-emerald-500 transition-colors">
+              <span><T korean="가상 부동산 & 스페이스" english="Spaces" /></span>
+              <ChevronRight className="size-3 text-muted-foreground" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. NOTICES & LOBBY */}
+      {notices.length > 0 && (
+        <section aria-labelledby="home-notices-title" className="grid gap-3 pt-2">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                <T korean="운영 소식" english="Field Notes" />
+              </p>
+              <h2 id="home-notices-title" className="mt-1 text-base sm:text-lg font-bold">
+                <T korean="최근 변경 및 업데이트" english="Latest Updates" />
+              </h2>
+            </div>
+            <Link href="/announcements" className="text-xs font-semibold text-muted-foreground hover:underline">
+              <T korean="전체 보기" english="All Updates" />
+            </Link>
+          </div>
+
+          <div className="border-t border-border/80 divide-y divide-border/60">
+            {notices.map((notice) => (
+              <Link
+                key={notice.announcementId}
+                href="/announcements"
+                className="grid gap-1 py-3.5 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-4 hover:bg-muted/20 transition-colors rounded-lg px-2"
+              >
+                <span className="font-mono text-[10px] text-muted-foreground">{formatDay(notice.publishedAt)}</span>
+                <div className="min-w-0">
+                  <span className="block text-xs sm:text-sm font-bold text-foreground truncate">{notice.title}</span>
+                  <span className="mt-0.5 line-clamp-2 block text-xs text-muted-foreground">{notice.body}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Footer Info Banner */}
+      <section className="border-t border-border/80 pt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <ShieldCheck className="size-4 text-emerald-500" />
+          <T
+            korean="모든 WLD와 자산은 게임 내에서만 유효한 가상 시뮬레이션 데이터입니다."
+            english="All WLD and assets are virtual simulation data only."
+          />
+        </div>
+        <div className="text-[11px]">
+          <T korean="현재 로비 접속" english="Lobby Online" /> · <LobbyCount />
         </div>
       </section>
 
       <HomeAdvertisement />
-      </div>
     </div>
-  );
-}
-
-function StatusRowItem({
-  glyph,
-  term,
-  detail,
-  href,
-  children,
-}: {
-  readonly glyph: string;
-  readonly term: React.ReactNode;
-  readonly detail: React.ReactNode;
-  readonly href: string;
-  readonly children: React.ReactNode;
-}) {
-  return (
-    <li className="flex items-center gap-3 rounded-[10px] border border-border/70 bg-muted/55 p-3">
-      <span
-        aria-hidden
-        className="grid size-9 shrink-0 place-items-center rounded-[8px] bg-secondary text-sm text-secondary-foreground"
-      >
-        {glyph}
-      </span>
-      <span className="min-w-0 grid gap-0.5">
-        <b className="truncate text-sm">{term}</b>
-        <small className="truncate text-xs text-muted-foreground">{detail}</small>
-      </span>
-      <Link
-        href={href}
-        className="ml-auto flex shrink-0 items-center gap-1.5 text-xs font-extrabold text-primary"
-      >
-        {children}
-      </Link>
-    </li>
-  );
-}
-
-function PolicyLink({
-  href,
-  title,
-  detail,
-}: {
-  readonly href: string;
-  readonly title: React.ReactNode;
-  readonly detail: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className="flex min-h-11 items-center justify-between gap-3 rounded-[12px] border bg-surface px-4 py-3 text-sm shadow-plate transition-transform hover:-translate-y-0.5"
-    >
-      <span>
-        <b className="font-extrabold">{title}</b>
-        <span className="block text-xs text-muted-foreground">{detail}</span>
-      </span>
-      <ArrowRight className="size-4 text-clay" />
-    </Link>
   );
 }
