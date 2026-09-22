@@ -1,5 +1,26 @@
 # Update Log
 
+## v2026.09.22.354 — P0 Admin Private Chat Moderation Queue, 10-Message Evidence Snapshot Viewer & Incident Action Governance
+
+- Applied Branch: `main` (Release: `prod-e60cf71-v354`)
+- **P0 Admin Private Chat Moderation & Evidence Snapshot Governance (ONE_TO_ONE_PRIVATE_CHAT_SPEC v2026.09.20.305-05)**:
+  1. **PostgreSQL Migration 228 Applied (`packages/database/migrations/228-private-chat-moderation-admin.sql`)**:
+     - `private_chat_admin_list_reports`: operator/superadmin moderation queue listing (reporter, reported user, reason, evidence count, timestamps).
+     - `private_chat_admin_get_report`: secure 10-message JSONB evidence snapshot inspection with immutable `CHAT_REPORT_EVIDENCE_VIEWED` audit log entry.
+     - `private_chat_admin_action_report`: incident resolution (warned/blocked/rejected) with permanent `CHAT_REPORT_ACTIONED` audit trail.
+  2. **Backend NestJS Safety Endpoints Completed (`backend/src/safety/`)**:
+     - `GET /api/v1/admin/safety/chat-reports`: admin session guarded report queue query.
+     - `GET /api/v1/admin/safety/chat-reports/:id`: single report details and evidence snapshot inspection.
+     - `POST /api/v1/admin/safety/chat-reports/:id/action`: moderation action enforcement with CSRF protection.
+  3. **Frontend Admin Safety Control Tower Rebuild (`frontend/src/app/admin/safety/`)**:
+     - Dual queue tab interface: `1:1 Private Chat Incident Queue` & `Emergency Content Takedown Queue`.
+     - `ChatReportEvidenceDialog`: Toss/messenger-style 10-message timeline modal (speech bubbles, sequence numbers, timestamps, participant distinctions).
+     - `ChatReportActionDialog`: one-touch action dialog (warn/block/dismiss) with required administrative rationale.
+     - `admin-chat-moderation.test.ts`: Vitest 4 unit tests passed 100%.
+  4. **Zero-Downtime Promotion & Runtime Identity Coherence**:
+     - Exact Git SHA `e60cf71` deployed to both Test and Production.
+     - 929 PostgreSQL active sessions 100% loss-free preserved.
+
 ## v2026.09.22.353 — P0 Private Chat Safety Controls (Mute/Block/Report) & FinTech Safety UX and Korean IME Protection
 
 - Applied Branch: `main` (Release: `prod-dc011ee-v353`)

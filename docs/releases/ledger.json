@@ -53,5 +53,16 @@
     "timestamp": "2026-09-22T08:49:00Z",
     "author": "Antigravity",
     "notes": "P0 Private Chat Safety Controls (Mute/Block/Report), Korean IME Protection & Evidence Snapshot Take-It-Down Queue"
+  },
+  {
+    "version": "v2026.09.22.354",
+    "commitSha": "e60cf71ed4088c5839e5e79474f83bf7d09cc2ad",
+    "shortSha": "e60cf71",
+    "releasePath": "/srv/moneyverse-data/releases/prod-e60cf71-v354",
+    "status": "promoted",
+    "activeSessions": 929,
+    "timestamp": "2026-09-22T09:01:00Z",
+    "author": "System Engineer",
+    "notes": "P0 Admin Private Chat Moderation Queue, Evidence Snapshot Timeline Modal & Incident Action Governance"
   }
 ]

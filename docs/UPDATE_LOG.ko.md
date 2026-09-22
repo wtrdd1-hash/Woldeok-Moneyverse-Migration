@@ -1,3 +1,24 @@
+## v2026.09.22.354 — 1:1 개인 채팅 관리자 모더레이션 큐, 10건 메시지 증거 스냅샷 뷰어 및 조치 거버넌스 완결
+
+- 적용 브랜치: `main` (릴리스: `prod-e60cf71-v354`)
+- **P0 1:1 개인 채팅 관리자 모더레이션 및 증거 스냅샷 거버넌스 완결 (ONE_TO_ONE_PRIVATE_CHAT_SPEC v2026.09.20.305-05)**:
+  1. **PostgreSQL 228 마이그레이션 적용 (`packages/database/migrations/228-private-chat-moderation-admin.sql`)**:
+     - `private_chat_admin_list_reports`: 관리자용 신고 큐 조회 (신고자/피신고자 정보, 사유, 증거 건수, 접수일시).
+     - `private_chat_admin_get_report`: 10개 메시지 증거 스냅샷(`evidence_snapshot` JSONB) 안전 열람 및 `audit_logs`에 `CHAT_REPORT_EVIDENCE_VIEWED` 불변 기록 (기획서 14절 준수).
+     - `private_chat_admin_action_report`: 제재(차단/경고/기각) 실행 및 `audit_logs`에 `CHAT_REPORT_ACTIONED` 감사 기록 영구 보존.
+  2. **백엔드 NestJS 안전 모듈 엔드포인트 완비 (`backend/src/safety/`)**:
+     - `GET /api/v1/admin/safety/chat-reports`: 관리자 세션 가드 기반 신고 큐 목록 조회.
+     - `GET /api/v1/admin/safety/chat-reports/:id`: 단건 상세 및 증거 스냅샷 조회.
+     - `POST /api/v1/admin/safety/chat-reports/:id/action`: 모더레이션 조치 실행 및 CSRF 가드 적용.
+  3. **프론트엔드 관리자 안전 관제 타워 전면 쇄신 (`frontend/src/app/admin/safety/`)**:
+     - 2대 큐 탭 인터페이스: `1:1 개인 채팅 신고 심사 큐` & `비회원 긴급 콘텐츠 삭제 큐`.
+     - `ChatReportEvidenceDialog`: 카카오톡/토스풍 10개 메시지 타임라인 모달 (말풍선, 순번, 시각, 발신자 구별).
+     - `ChatReportActionDialog`: 원터치 조치 다이얼로그(경고/차단/기각) 및 2단계 확인.
+     - `admin-chat-moderation.test.ts`: Vitest 단위 테스트 4종 100% PASS.
+  4. **무중단 승격 및 런타임 신원 일치**:
+     - Exact Git SHA `e60cf71` 기반 테스트/프로덕션 런타임 신원 일치 검증.
+     - 929개 PostgreSQL 활성 사용자 세션 100% 무손실 보존 완료.
+
 ## v2026.09.22.353 — 1:1 개인 채팅 P0 긴급 안전 제어(차단/음소거/신고) & 핀테크 안전 UX 및 한글 IME 오발송 방지 완결
 
 - 적용 브랜치: `main` (릴리스: `prod-dc011ee-v353`)

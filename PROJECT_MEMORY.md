@@ -145,22 +145,27 @@
 
 ## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
 
-- **최종 갱신일시**: 2026-09-22 17:50:00 KST
-- **현재 프로덕션 릴리스 버전**: `v2026.09.22.353` (릴리스 경로: `/srv/moneyverse-data/releases/prod-dc011ee-v353`, 직전: `prod-f609af8-v352`)
-- **Exact Git SHA**: `dc011eeebf581cc32d4127754f03010fdaf988f2` (단축: `dc011ee`)
+- **최종 갱신일시**: 2026-09-22 18:02:00 KST
+- **현재 프로덕션 릴리스 버전**: `v2026.09.22.354` (릴리스 경로: `/srv/moneyverse-data/releases/prod-e60cf71-v354`, 직전: `prod-dc011ee-v353`)
+- **Exact Git SHA**: `e60cf71ed4088c5839e5e79474f83bf7d09cc2ad` (단축: `e60cf71`)
 - **PostgreSQL 활성 사용자 세션**: **929개 (100% 무손실 보존 실측 확인)**
 - **최신 완료 작업 요약**:
-  1. **P0 1:1 개인 채팅 안전 제어 완비 (ONE_TO_ONE_PRIVATE_CHAT_SPEC v2026.09.20.305-05)**:
-     - `packages/database/migrations/227-private-chat-safety-controls.sql`: `private_chat_blocks`, `private_chat_reports` 테이블 신설 및 `private_chat_mute`, `private_chat_block`, `private_chat_unblock`, `private_chat_report` 프로시저 완비.
-     - `private_chat_send` 강화: 차단된 회원 간 메시지 전송 시 `42501` Fail-closed 방어.
-     - `backend/src/chat/`: `POST /mute`, `POST /block`, `DELETE /block`, `POST /report` 4종 신규 엔드포인트 연동.
-  2. **프론트엔드 채팅 룸 핀테크 안전 UX 쇄신 (`frontend/src/app/chat/`)**:
-     - `ChatRoom` 상단 더보기 메뉴: 원클릭 알림 음소거 토글, 상대방 차단/해제 모달, 4대 사유(스팸, 사기, 욕설, 기타) 신고 모달 완비.
-     - 한글 IME 조합(`isComposing`) 오발송 방지 처리 및 44px 터치 타겟 준수.
-     - 차단된 회원과의 대화 시 상단 경고 배너 및 입력창 잠금 처리.
-  3. **단위 테스트 및 무중단 승격**:
-     - Vitest `chat-safety.test.ts` (4개 테스트 100% PASS).
-     - Exact-SHA 런타임 일체화 검증 통과 및 929개 활성 세션 무손실 보존.
+  1. **P0 1:1 개인 채팅 관리자 모더레이션 큐 및 증거 원장 거버넌스 완비 (Migration 228)**:
+     - `packages/database/migrations/228-private-chat-moderation-admin.sql`: `private_chat_admin_list_reports`, `private_chat_admin_get_report`, `private_chat_admin_action_report` 보안 프로시저 완비.
+     - 기획서 14절 준수: 증거 스냅샷 열람 시 `audit_logs`에 `CHAT_REPORT_EVIDENCE_VIEWED` 불변 기록, 조치 시 `CHAT_REPORT_ACTIONED` 감사 원장 보존.
+  2. **백엔드 NestJS 안전 모듈 관리자 API 확장 (`backend/src/safety/`)**:
+     - `GET /api/v1/admin/safety/chat-reports`: 관리자 1:1 채팅 신고 큐 목록 조회.
+     - `GET /api/v1/admin/safety/chat-reports/:id`: 10건 메시지 증거 스냅샷 안전 열람.
+     - `POST /api/v1/admin/safety/chat-reports/:id/action`: 피신고자 제재(경고/차단/기각) 조치 실행 및 감사 메모 보존.
+  3. **프론트엔드 관리자 안전 관제 타워 쇄신 (`frontend/src/app/admin/safety/`)**:
+     - 2대 큐 탭 인터페이스 탑재: `1:1 개인 채팅 신고 심사 큐` & `비회원 긴급 콘텐츠 삭제 큐`.
+     - `ChatReportEvidenceDialog`: 10개 메시지 타임라인 뷰어 모달(발신자/수신자 말풍선 구별, 시각, 메시지 번호).
+     - `ChatReportActionDialog`: 원터치 조치 다이얼로그(경고/차단/기각) 및 2단계 확인.
+     - `admin-chat-moderation.test.ts`: Vitest 4개 단위 테스트 100% 통과.
+  4. **무중단 승격 및 런타임 신원 일치**:
+     - Exact SHA `e60cf71` 기반 테스트 및 프로덕션 동시 배포.
+     - 929개 PostgreSQL 활성 세션 100% 무손실 보존 및 전 엔드포인트 200 OK.
+
 
 
 
