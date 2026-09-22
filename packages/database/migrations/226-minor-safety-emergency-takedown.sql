@@ -88,14 +88,14 @@ $function$;
 
 -- 비회원 접수 상태 조회 프로시저 (개인정보 안전 격리)
 CREATE OR REPLACE FUNCTION public.safety_get_takedown_status(
-  p_case_id VARCHAR(32),
-  p_passcode_hash VARCHAR(128)
+  p_case_id TEXT,
+  p_passcode_hash TEXT
 )
 RETURNS TABLE (
-  case_id VARCHAR(32),
-  status VARCHAR(32),
-  reason_category VARCHAR(64),
-  target_content_type VARCHAR(32),
+  case_id TEXT,
+  status TEXT,
+  reason_category TEXT,
+  target_content_type TEXT,
   actioned_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ
 )
@@ -122,20 +122,20 @@ $function$;
 -- 관리자 긴급 삭제 목록 조회 프로시저
 CREATE OR REPLACE FUNCTION public.safety_admin_list_takedowns(
   p_actor UUID,
-  p_status_filter VARCHAR(32) DEFAULT NULL,
+  p_status_filter TEXT DEFAULT NULL,
   p_limit INT DEFAULT 50,
   p_offset INT DEFAULT 0
 )
 RETURNS TABLE (
   id UUID,
-  case_id VARCHAR(32),
-  requester_email VARCHAR(255),
-  requester_type VARCHAR(32),
-  reason_category VARCHAR(64),
-  target_content_url VARCHAR(1024),
-  target_content_type VARCHAR(32),
+  case_id TEXT,
+  requester_email TEXT,
+  requester_type TEXT,
+  reason_category TEXT,
+  target_content_url TEXT,
+  target_content_type TEXT,
   description TEXT,
-  status VARCHAR(32),
+  status TEXT,
   admin_notes TEXT,
   actioned_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ,
@@ -147,8 +147,8 @@ SECURITY DEFINER
 SET search_path = pg_catalog, public
 AS $function$
 BEGIN
-  IF p_actor IS NULL OR NOT public.admin_role_holder(p_actor, 'moderator'::public.admin_role) THEN
-    RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'access requires moderator or higher';
+  IF p_actor IS NULL OR NOT public.admin_role_holder(p_actor, 'operator'::public.admin_role) THEN
+    RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'access requires operator or higher';
   END IF;
 
   RETURN QUERY
@@ -179,8 +179,8 @@ $function$;
 -- 관리자 긴급 삭제 조치 실행 프로시저
 CREATE OR REPLACE FUNCTION public.safety_admin_action_takedown(
   p_actor UUID,
-  p_case_id VARCHAR(32),
-  p_new_status VARCHAR(32),
+  p_case_id TEXT,
+  p_new_status TEXT,
   p_admin_notes TEXT
 )
 RETURNS BOOLEAN
@@ -191,8 +191,8 @@ AS $function$
 DECLARE
   v_updated INT;
 BEGIN
-  IF p_actor IS NULL OR NOT public.admin_role_holder(p_actor, 'moderator'::public.admin_role) THEN
-    RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'action requires moderator or higher';
+  IF p_actor IS NULL OR NOT public.admin_role_holder(p_actor, 'operator'::public.admin_role) THEN
+    RAISE EXCEPTION USING ERRCODE = '42501', MESSAGE = 'action requires operator or higher';
   END IF;
 
   IF p_new_status NOT IN ('TRIAGED', 'ACTIONED_REMOVED', 'ACTIONED_RESTRICTED', 'REJECTED', 'APPEALED') THEN
@@ -203,6 +203,7 @@ BEGIN
   SET status = p_new_status,
       admin_notes = coalesce(p_admin_notes, admin_notes),
       actioned_at = clock_timestamp(),
+      actioned_by = p_actor,
       updated_at = clock_timestamp()
   WHERE case_id = trim(p_case_id);
 
@@ -215,6 +216,6 @@ $function$;
 GRANT ALL PRIVILEGES ON TABLE public.emergency_content_takedowns TO moneyverse_app, moneyverse_migrator;
 GRANT ALL PRIVILEGES ON TABLE public.account_age_policy_state TO moneyverse_app, moneyverse_migrator;
 GRANT EXECUTE ON FUNCTION public.safety_submit_emergency_takedown(VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, TEXT, VARCHAR) TO moneyverse_app, moneyverse_migrator;
-GRANT EXECUTE ON FUNCTION public.safety_get_takedown_status(VARCHAR, VARCHAR) TO moneyverse_app, moneyverse_migrator;
-GRANT EXECUTE ON FUNCTION public.safety_admin_list_takedowns(UUID, VARCHAR, INT, INT) TO moneyverse_app, moneyverse_migrator;
-GRANT EXECUTE ON FUNCTION public.safety_admin_action_takedown(UUID, VARCHAR, VARCHAR, TEXT) TO moneyverse_app, moneyverse_migrator;
+GRANT EXECUTE ON FUNCTION public.safety_get_takedown_status(TEXT, TEXT) TO moneyverse_app, moneyverse_migrator;
+GRANT EXECUTE ON FUNCTION public.safety_admin_list_takedowns(UUID, TEXT, INT, INT) TO moneyverse_app, moneyverse_migrator;
+GRANT EXECUTE ON FUNCTION public.safety_admin_action_takedown(UUID, TEXT, TEXT, TEXT) TO moneyverse_app, moneyverse_migrator;
