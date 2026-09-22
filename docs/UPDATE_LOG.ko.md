@@ -1,3 +1,17 @@
+﻿﻿## v2026.09.22.343 — 주간 경제 브리프 & 실시간 월드 펄스 신문 허브(/newspaper) 완결 및 듀얼 무중단 배포
+
+- 적용 브랜치: `main`
+- **주간 경제 브리프 신문 허브(`/newspaper`) 완결**:
+  - `WEEKLY_WORLD_BRIEF_PILOT_SPEC.ko.md` 및 `WORLD_PULSE_FRESHNESS_RETENTION_GROWTH_SPEC.ko.md` 기획에 기반한 풀스택 신문 및 시나리오 펄스 허브 구현.
+  - 신문 제호부(Masthead #343), 실시간 시장 심리 지수(Bullish/Bearish), 1면 특종 AI 시나리오 스토리, 실시간 속보 피드, 주간 금융 개념 배움터(3종 교육 아티클), 독자 참여형 시장 전망 투표(localStorage 연동 및 실시간 애니메이션 통계) 완비.
+- **글로벌 네비게이션 & 4개국어(KO, EN, JA, ZH) 통합**:
+  - `CATEGORY_NAV`, `PRIMARY_NAV`, `PUBLIC_NAV`, `MEMBER_NAV`, 데스크톱 상단 바 및 모바일 드로어 44px 터치 타겟 연동.
+  - 홈 화면 "오늘의 현황" 및 "처음이라면" 링크 카드, 주식 시장 뉴스 딥링크 연동.
+- **품질 검증 및 듀얼 무중단 배포**:
+  - 프론트엔드 96개 테스트 파일 (716개 테스트) 100% 통과, 백엔드 83개 테스트 파일 (928개 테스트) 100% 통과.
+  - Next.js 16.3.4 (Turbopack) 프로덕션 빌드 성공.
+  - 테스트 환경(`https://test.easy-scraping.com`) 및 운영 환경(`https://easy-scraping.com`) 듀얼 무중단 릴리즈 롤아웃.
+
 ## v2026.09.22.342 — 주식 거래정지 및 매수원가 자동정산 버그 수정 & 듀얼 무중단 배포 완결
 
 - 적용 브랜치: `main` (커밋: `06fde76`)
