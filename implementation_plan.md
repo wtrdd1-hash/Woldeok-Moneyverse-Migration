@@ -1,6 +1,7 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v45)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v46)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v46**: 긴급 결함 방어 아키텍처 및 무장애 운영 플레이북 심화 기획 — 동적 정책 버전 연동 파이프라인, 전 도메인 예외/보호 경로 거버넌스, 클라이언트 하이드레이션 깜빡임 방지, 원클릭 비상 롤백 플레이북(RTO < 10s) 및 GPT 다자간 작업 잠금 명세 수록 (+125, -0)
 - **v45**: 긴급 복구 및 메인 포털 전면 고도화 — 이용약관 미동의 세션 접속 시 강제 튕김(router.replace)으로 인한 화면 블랙아웃(본문 증발) 결함 원천 해결(토스형 원터치 ConsentStepUpModal 인라인 다이얼로그 탑재 및 백엔드 PUT /api/v1/auth/consent 원자적 연동), anti-ai-frontend-craftsmanship 및 fintech-responsive-layout-engine 기반 홈 화면(/) 전면 리빌드(실시간 순자산 헤어로, 2열 비대칭 핀테크 라이브 콘솔, 4대 기둥 전 도메인 서비스 디렉터리, 320px~1440px 클리핑 제로 반응형), 백엔드-프론트엔드 동시 무중단 승격(v347) 확정 (+210, -0)
 - **v44**: 가상 주식 거래소(`/stocks`) 고도화 착수 — 토스/로빈후드형 하이브리드 호가 스프레드 및 원터치 빠른 주문 패널, 미니 SVG 실시간 캔들 스파크라인, 종목별 실시간 토론(Discussions) 피드 연동, 맞춤형 목표가 도달 알림(Price Alerts) 모달 설계 확정 (+160, -0)
 - **v43**: 카지노 슬롯 규제 심의 게이트(GRAC 19+ 및 0 WLD 무료 체험 스핀), 카지노 자가 보호(RG) 토스형 슬라이더(베팅 0~2,000 WLD, 손실 0~1,000 WLD) 및 24시간 타임락, AI 신문 가상 상장사 실시간 호가 Popover 연동, 관리자 국고 회계 사유 코드(TAX_REVENUE, SUBSIDY 등) 및 멱등성 Step-Up 다이얼로그 완결 프로덕션 무중단 승격 (v345, Exact Git SHA: `d20f828`, 855개 세션 보존) (+145, -0)
@@ -1399,5 +1400,49 @@ flowchart TD
 - **동의 기록 엔드포인트**: 백엔드 `PUT /api/v1/auth/consent` (세션 기반 `auth_grant_current_user_consent` RPC 실행)과 프론트엔드 `submitConsent` 서버 액션 100% 바인딩.
 - **동의 정책 조회 엔드포인트**: 백엔드 `GET /api/v1/auth/policy` (`termsVersion`, `privacyVersion`) 실시간 응답.
 - **무중단 승격**: `v347` 릴리스 승격을 통해 Exact-SHA 일체화 및 890+ 활성 세션 무손실 유지.
+
+---
+
+## 🚀 [v46 Specification] 긴급 결함 방어 아키텍처 및 무장애 운영 플레이북 심화 명세 (누적 추가)
+
+### 1. 동적 이용약관 정책 연동 파이프라인 (Dynamic Policy Binding)
+- **현행 상태**: `ConsentStepUpModal`에서 `termsVersion = '2026-09-02'`, `privacyVersion = '2026-09-02'`가 fallback 기본값으로 지정됨.
+- **고도화 명세**:
+  - 백엔드 `GET /api/v1/auth/policy` 엔드포인트는 데이터베이스 및 운영 환경 설정(`TERMS_VERSION`, `PRIVACY_VERSION`)에 따른 최신 규약 버전을 JSON으로 제공함.
+  - 최상위 레이아웃(`frontend/src/app/layout.tsx`) 또는 `ConsentGuard` 상위 컨테이너에서 서버 사이드로 최신 정책 버전을 패치하여 `ConsentGuard`의 props(`termsVersion`, `privacyVersion`)로 안전하게 주입.
+  - 관리자가 어드민 패널에서 약관 버전을 갱신(`2026-10-01` 등)할 경우, 클라이언트 재배포 없이도 즉시 전 유저에게 새로운 약관 동의 팝업이 활성화되도록 유연성 확보.
+
+### 2. 전 도메인 예외 경로 거버넌스 (Whitelist Route Matrix)
+- **목적**: 미동의 유저라도 법적 고지, 안전 센터, 비회원 공개 검색엔진 봇 크롤링 경로는 차단 없이 열람 가능해야 함.
+- **예외 경로(Exempt Routes) 표준 규격**:
+  - **법률 및 인증 문서**: `/login`, `/terms`, `/privacy`, `/data-deletion`, `/account-deletion`
+  - **공공 안전 및 규제 센터**: `/safety`, `/safety/takedown` (미성년자 보호 및 비회원 긴급 삭제 요청 센터)
+  - **검색엔진 및 메타데이터**: `/robots.txt`, `/sitemap.xml`, `/sitemap-*.xml`, `/api/og`, `/icon.svg`, `/apple-icon.png`
+  - **정적 에셋 및 헬스체크**: `/_next/*`, `/api/health`, `/frontend-version`
+- **보호 경로(Protected Routes)**: 위 예외 경로를 제외한 모든 도메인(`/`, `/stocks/*`, `/wallet/*`, `/casino/*`, `/bank/*`, `/work/*`, `/board/*`, `/clubs/*`, `/developer/*` 등)에 대해 미동의 세션 접속 시 인라인 모달을 띄워 데이터 무단 조작 차단.
+
+### 3. 클라이언트 하이드레이션 깜빡임(Flicker) 제로 가드
+- **원인**: Next.js App Router의 SSR 렌더링 결과와 브라우저 클라이언트 세션 쿠키 하이드레이션 시점 간의 미세한 타이밍 차이로 모달이 순간적으로 깜빡이거나 번쩍이는 시각적 노이즈(Flicker) 발생 가능성.
+- **해결 패턴**:
+  - `mounted` 훅(`const [mounted, setMounted] = useState(false); useEffect(() => setMounted(true), []);`) 패턴을 적용하여 DOM 트리가 브라우저에 완전히 안착된 후 투명도 트랜지션(`opacity-0` -> `opacity-100`, duration: 200ms)과 함께 다이얼로그를 부드럽게 마운트.
+  - 배경 포커스 트랩(Focus Trap) 및 스크롤 락(`overflow-hidden`)을 기본 활성화하여 모달 외부 클릭이나 백그라운드 터치를 원천 방어.
+
+### 4. 원클릭 비상 롤백 및 세션 보존 플레이북 (Emergency Rollback Playbook)
+- **스크립트 경로**: `ops/release/rollback_production.sh`
+- **프로시저**:
+  1. 현재 배포 릴리스 심볼릭 링크(`production-current`) 확인.
+  2. 직전 정상 작동 릴리스 디렉토리(예: `prod-039f2e9-v347`) 자동 탐색.
+  3. `sudo ln -sfn "$PREV_PROD" /srv/moneyverse-data/releases/production-current` 원자적 교체.
+  4. `sudo systemctl reload-or-restart moneyverse-backend.service moneyverse-frontend.service` 무중단 리로드.
+  5. `verify-runtime-identity.sh`로 롤백된 Exact-SHA Coherence 검증.
+  6. PostgreSQL `auth_sessions` 927+개 세션 무손실 유지 실측.
+- **목표 복구 시간 (RTO)**: 10초 이내 무중단 완전 복구.
+
+### 5. Multi-Agent (Custom GPT & Antigravity) 긴급 동시 작업 충돌 방지 락
+- **동시성 락 규격**:
+  - `PROJECT_MEMORY.md`의 Section 8을 SSOT(Single Source of Truth)로 운영.
+  - Antigravity 또는 GPT가 작업을 개시할 때 `PROJECT_MEMORY.md`의 배포 상태 및 최근 커밋을 확인하여 충돌 방지.
+  - 작업 전 `git fetch origin main`, 작업 후 원자적 커밋 & 푸시 및 미니 PC 워크트리 동시 동기화 강제.
+
 
 
