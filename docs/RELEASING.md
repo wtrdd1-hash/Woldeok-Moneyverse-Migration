@@ -124,3 +124,9 @@ Do not delete Production PVCs, databases, ledgers, or audit data as part of an a
 - `docs/architecture/deployment-flow.md`
 - `docs/BACKUP.md`
 - `AGENTS.md`
+
+### Ready-only automatic main integration
+
+A development branch is treated as **work in progress** and is never automatically merged, reconciled, or deleted when it has no open PR, when its PR is Draft, or when it carries a WIP/hold/do-not-merge style blocking label. Automatic integration requires an open non-Draft PR to `main`, no blocking marker, a successful exact-HEAD `Build Test Candidate`, and a mergeable PR. Repeated candidate failures retain the branch/PR for repair; the automation does not discard failed work.
+
+[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]

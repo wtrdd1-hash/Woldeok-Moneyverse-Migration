@@ -8,6 +8,13 @@
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
 
+## Automatic main integration directive — v2026.09.22.337 (2026-09-22)
+
+- Completed work is automatically integrated to `main` only from an open non-Draft PR with no WIP/hold/do-not-merge marker and successful exact-HEAD candidate validation.
+- A branch without an open PR is authoritative work-in-progress and automation must not merge, reconcile or delete it. Draft/blocked PRs are equally excluded.
+- Repeatedly failing completed PRs are retained for repair; failure cleanup must not discard the branch. After repair, the new exact SHA must pass candidate validation before automatic merge.
+- After a successful merge, source-branch deletion is allowed only with merged-PR evidence.
+
 ## URGENT full QA / administrator remediation directive — v2026.09.22.335 (2026-09-22)
 
 ### Current Test/Production release state is not accepted as healthy evidence
@@ -791,7 +798,8 @@ Fresh Google Search/Play and OWASP official references → exact main/PR/CI and 
 - All-feature contract remains authoritative across auth/session/security center, profile, inventory/collection, shop/cart/payment/subscription, seasons/jobs/rewards, business/bank/loan, stocks, casino, community/moderation, friends/referral, notifications/search/upload/public content, App API, admin/audit, analytics/experiments, ads and SEO tooling. State mutations require ownership/BOLA, idempotency/replay, transaction/unique constraints, audit receipts and real-DB concurrency tests; irreversible releases additionally require fresh backup, off-host copy, restore drill and deployed identity.
 - SEO: Google Search Central on 2026-09-17 migrated infinite-scroll guidance without changing it. Infinite-scroll public feeds/catalog/collections/search require crawlable paginated URLs, server-renderable links, stable ordering, self-canonical, deterministic title/H1 and correct 200/404; cursors remain API-internal and facets default noindex/canonical unless promoted by the SEO read-model.
 - Economics: Google Play has no universal fee; current EEA/UK/US standard examples are 10% auto-renew, 20% other new-install and 25% other existing-install plus applicable 5% billing fee; KR rollout is scheduled 2026-12-31. SKU economics remain policy-versioned and unmeasured ARPU/ARPDAU/ARPPU, conversion, churn/refund, CAC/LTV, fraud, infra/support remain explicit hypotheses/test targets.
-- Bot/main delta: mid-cycle main also merged PR #441, atomically resetting guild-scoped Discord commands to the supported seven-command music set while leaving global commands untouched. Treat this as MERGED / PRODUCTION-POST-RESTART-SMOKE-PENDING until command/voice runtime evidence is recorded.
+
+[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]- Bot/main delta: mid-cycle main also merged PR #441, atomically resetting guild-scoped Discord commands to the supported seven-command music set while leaving global commands untouched. Treat this as MERGED / PRODUCTION-POST-RESTART-SMOKE-PENDING until command/voice runtime evidence is recorded.
 - Priority: P0 isolated restore/off-host backup evidence → P0 release-class matrix → migration-204 real-DB/economy-integrity → HIGH auth/BOLA/CSRF/idempotency/ledger-abuse → P1 required-check enforcement → correctness → monetization → SEO/acquisition → retention/accessibility. Planning performs no runtime or DB mutation.
 
 ### v197 worklog
@@ -1591,7 +1599,8 @@ Read-only filtered-history summary added to /stocks/history; no economy mutation
 - **Priority/severity/status:** P1 correctness with economy-integrity implications / HIGH / FIX PENDING in PR #370.
 - Settlement already uses the accelerated Moneyverse server clock, while the legacy `work_my_dashboard` read model can use real Asia/Seoul day/week windows. This can display a different `daily_paid`/`weekly_paid` quota window from the one the settlement path enforces.
 - Migration 202 must make dashboard day/week keys use the same authoritative `server_game_day_key()` / `server_game_week_key()` contract as settlement. Applied migrations remain immutable; migration-number uniqueness and checksum immutability become hard CI gates.
-- QA: boundary -1/0/+1 second, accelerated day rollover, accelerated week rollover, concurrent completions, idempotent retry, restart, timezone configuration, stale dashboard cache, API/UI parity and real-PostgreSQL regression. Acceptance requires settlement and dashboard to resolve identical keys for every tested instant.
+
+[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]- QA: boundary -1/0/+1 second, accelerated day rollover, accelerated week rollover, concurrent completions, idempotent retry, restart, timezone configuration, stale dashboard cache, API/UI parity and real-PostgreSQL regression. Acceptance requires settlement and dashboard to resolve identical keys for every tested instant.
 - UX: show the next reset using server-authoritative time; loading/error/offline states must not invent remaining quota. Accessibility must expose reset time and quota text without relying on color alone. Mobile/desktop semantics are identical.
 - Analytics/business: this is not revenue. Measure work-flow completion, quota-confusion support contacts, retry/error rate and D1/D7/D30 job retention. Scale only if correctness is preserved; no retention gain can justify inconsistent reward authority.
 
@@ -2067,3 +2076,5 @@ Add a consumer newspaper layer over the existing v2026.09.19.261 automatic AI st
 Before any new AI feature implementation, the next AI work unit must complete the full re-audit/reconstruction gate defined in AI_ECONOMY_CONTROLLER_SPEC.md v2026.09.20.292. The audit covers every existing AI implementation and its real runtime behavior, not only documents or feature switches. Changed, partial, stale, duplicated, compatibility-layered or plan-conflicting AI areas must be redesigned and rebuilt against the latest requirement rather than preserved by default.
 
 Required sequence: full AI inventory -> latest-plan/main/user-instruction recheck -> implementation/runtime contract audit -> reconstruction of changed/weak areas -> cross-system regression -> exact-SHA Test runtime proof including fail-closed and rollback -> final plan re-read -> zero-downtime Production promotion only after all evidence passes. New AI feature work is blocked until this gate is completed or remaining exclusions are explicitly documented and approved.
+
+[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]

@@ -8,6 +8,13 @@
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+## 자동 main 통합 지시 — v2026.09.22.337 (2026-09-22)
+
+- 완료된 작업은 열린 non-Draft PR이고 WIP/hold/do-not-merge 표시가 없으며 정확한 현재 HEAD 후보 검증을 통과한 경우에만 자동으로 `main`에 통합한다.
+- 열린 PR이 없는 브랜치는 권위적으로 작업 중으로 간주하고 자동 병합·충돌조정·삭제하지 않는다. Draft 또는 차단 표시 PR도 동일하게 제외한다.
+- 완료 PR이 반복 검증 실패해도 브랜치를 삭제하지 않고 수정 대상으로 보존한다. 수정 후 새 exact SHA가 후보 검증을 통과해야 자동 병합한다.
+- 성공 병합 후 소스 브랜치 삭제는 merged-PR 증거가 있는 경우에만 허용한다.
+
 ## 긴급 전수 QA / 관리자 포함 수정요망 — v2026.09.22.335 (2026-09-22)
 
 ### 현재 Test/Production 릴리스 상태를 정상으로 간주하지 않는다
@@ -791,7 +798,8 @@ Google Search/Play와 OWASP 최신 공식자료 → exact main/PR/CI 및 Debian 
 - **Exact main / 구현 대조:** 회차 시작 main은 `75e69e77cdc18ef221106a008563151a4c790728`이다. PR #442는 backend-owned `GET /api/version`, `Cache-Control: no-store`, E2E를 병합했고 commit에는 isolated Test exact candidate, migration 204, public smoke, noindex, session continuity 증거가 기록돼 있다. 이는 코드/Test 증거이며 Production backend 승격 증거가 아니다.
 - **P0 `BAK-RUNTIME-177-01`: 부분 해소 / IN PROGRESS.** 권위 Debian의 `moneyverse-backup.timer`가 이제 enabled+active이며 6시간 주기, Persistent, randomized delay로 예약된다. Service는 oneshot, `UMask=0077`, `NoNewPrivileges=true`, `ProtectSystem=strict`, source read-only, backup destination 단일 write 경계를 가진다. 약 21:22와 21:57 KST 실행에서 encrypted archive 검증, `database.dump`, `photos.tar.zst`, `manifest.txt`가 모두 OK였다. 따라서 기존 “timer 없음/자동 암호화 로컬백업 없음” 결함은 닫지만 **P0 전체는 닫지 않는다.** Isolated restore+domain reconciliation drill, 실측 RPO/RTO, off-host immutable copy/retention, 실패 alert 증거가 남았다. 로컬 암호화 사본만으로 DR로 인정하지 않는다. 그 전 destructive migration/ledger/entitlement rewrite는 계속 차단한다. Rollback은 timer disable + 생성된 good archive 보존이며 마지막 정상 archive를 rollback 과정에서 삭제하지 않는다. last-success age, next trigger, archive size/checksum, decrypt/structure, disk free, retention deletion, off-host replication lag, restore reconciliation을 관측한다.
 - **P0 backend runtime identity: MERGED / TEST-PROVEN / PRODUCTION-NOT-PROVEN.** Production `moneyverse-backend`는 active이고 표본 구간 warning 이상 journal은 없지만 직접 `http://127.0.0.1:3000/api/version`은 아직 404다. 즉 main에는 #442가 있어도 운영 backend process는 이전 build다. 승격은 attested exact candidate로만 수행한다. 수용조건은 expected application build ID의 `/api/version=200` + `no-store`, `/health=200`, BFF viewer/wallet/status/announcements/shop smoke, session-count continuity, migration-set equality, 신규 warning/error burst 없음, rollback manifest다. Blind restart는 금지한다.
-- **Release/QA 순서:** `REL-AUTH-184-01`은 P0 IN PROGRESS다. Backend identity endpoint는 attestation primitive지만 candidate digest + applicationSourceSha + migrationSetHash + deploymentId 결합을 대체하지 않는다. 기존 docs-only/control-plane/runtime/mixed와 stale/foreign/missing-candidate matrix를 완료해야 DONE이다. GitHub required checks 강제는 P0 데이터안전/release identity 다음 P1이다.
+
+[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]- **Release/QA 순서:** `REL-AUTH-184-01`은 P0 IN PROGRESS다. Backend identity endpoint는 attestation primitive지만 candidate digest + applicationSourceSha + migrationSetHash + deploymentId 결합을 대체하지 않는다. 기존 docs-only/control-plane/runtime/mixed와 stale/foreign/missing-candidate matrix를 완료해야 DONE이다. GitHub required checks 강제는 P0 데이터안전/release identity 다음 P1이다.
 - **전체 기능 계약 델타:** 모든 stateful 기능(identity/session, inventory/entitlement, shop/payment/subscription, jobs/rewards/ledger, business/bank/loan, stocks, casino, community/referral, admin/audit/analytics)은 destructive 또는 경제적으로 비가역적인 변경의 운영승격 선행조건으로 `backup_last_verified_at`, `offhost_replication_at`, `restore_drill_at`, `restore_reconciliation_status`, deployed backend build identity를 요구한다. Admin/incident UI는 stale backup/identity mismatch를 안내 배너가 아니라 blocking 상태로 표시한다. API mutation은 idempotency key, ownership/BOLA, transaction constraint, audit receipt를 유지하며 backup/restore는 사용자 호출 API로 노출하지 않는다.
 - **SEO/SEO backend 델타(Google Search Central 2026-09-17): 공개 목록 화면에 직접 채택.** Google은 infinite-scroll 지침을 최신 문서로 이전했고 지침 자체는 변경하지 않았다. Infinite scroll을 쓰는 커뮤니티 feed, 공개 collection/catalog/search landing은 stable ordering의 crawlable paginated URL과 server-renderable link를 제공해야 하며 scroll-only JavaScript discovery를 indexability 계약으로 삼지 않는다. Index 가능한 각 page는 자기 URL self-canonical, 결정적 title/H1 context, 정상 200/404, 정책상 독립 가치가 있을 때만 sitemap 포함을 갖는다. Facet/query 조합은 SEO read-model이 명시적으로 승격하지 않으면 기본 noindex/canonical 정책이다. Cursor token은 API 내부 구현이며 영구 public slug가 아니다. QA는 JS-disabled link traversal, Google-rendered HTML parity, duplicate/canonical, out-of-range 404, sitemap/lastModified, append CWV, crawler-log sampling을 포함한다. KPI는 organic impression/CTR→signup→activation→D7/D30→revenue이며 thin/duplicate index 증가는 guardrail이다.
 - **보안 레퍼런스 갱신:** OWASP API Security는 API-specific 최신판을 2023으로 유지한다. BOLA, broken authentication, object-property/function authorization, resource consumption, sensitive-business-flow abuse, SSRF, misconfiguration, inventory, unsafe-upstream을 release-blocking test로 유지한다. Backup key는 release/backup destination 밖에 두고 log 금지, restore는 decrypt/checksum/schema/reconciliation mismatch 시 fail-closed한다. Runtime identity 공개 응답에는 immutable build identity만 두며 secret/host/DB/commit author/environment metadata는 금지한다.
@@ -1591,7 +1599,8 @@ punitive streak, loss-threat FOMO, fake scarcity, 과도한 알림을 피하고 
 
 - **인증/세션/보안센터:** session actor가 권위다. OAuth/OIDC에는 해당되는 state/nonce/PKCE, session rotation/revocation, 민감변경 recent reauth를 적용한다. profile/admin/stock/bank/business/community/telemetry object에는 BOLA/BFLA negative test가 필수다.
 - **경제/인벤토리/상점/결제/구독:** 가치변경은 server-authoritative, integer-safe, transactional, idempotent다. client 표시가격은 settlement authority가 아니다. 실결제 SKU는 receipt/webhook 검증, entitlement reconciliation, refund/revoke/restore state machine, append-only audit가 필요하다. 미실측 conversion/ARPU/ARPPU/refund/churn/CAC/LTV는 `HYPOTHESIS`/`TEST TARGET`이다.
-- **직업/퀘스트/레벨/보상:** reward와 quota는 server game clock, durable receipt/idempotency, append-only ledger를 사용하고 client timer는 표시 전용이다.
+
+[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]- **직업/퀘스트/레벨/보상:** reward와 quota는 server game clock, durable receipt/idempotency, append-only ledger를 사용하고 client timer는 표시 전용이다.
 - **은행/대출/사업/가상주식:** simulated/game-only 표시를 강제한다. 이자, 대출자격, 주식체결, 사업정산, portfolio history는 DB/server 권위이며 실제 증권·예금·수익보장 표현을 금지한다.
 - **카지노/확률형:** themed UI는 하나의 typed server action schema에 매핑한다. client RNG/animation은 payout을 결정하지 않는다. eligibility, bet debit, server RNG, payout, ledger, audit, idempotency를 원자적으로 처리하고 retry는 동일 receipt를 반환한다.
 - **커뮤니티/친구/클럽/추천:** moderation/block/report, invite/referral anti-replay, rate limit이 필요하다. 추천보상은 server-side idempotent이며 fraud 관측이 가능해야 한다. multi-account signal 하나만으로 비공개 자동제재하지 않고 risk control/review와 조합한다.
@@ -2058,3 +2067,5 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 다음 AI 작업은 신규 기능 구현 전에 AI_ECONOMY_CONTROLLER_SPEC.ko.md v2026.09.20.292에 정의한 전수 재감사·재구축 게이트를 반드시 먼저 완료한다. 문서나 feature switch만 확인하는 것이 아니라 지금까지 만든 모든 AI 구현과 실제 런타임 동작을 대조한다. 요구사항이 수정됐거나 부분구현·stale·중복·호환패치 누적·기획 충돌 상태인 영역은 기존 코드를 기본 유지하지 않고 최신 요구사항을 기준으로 다시 설계·재구축한다.
 
 강제 순서: AI 전체 인벤토리 -> 최신 기획/main/사용자 지시 재확인 -> 구현·런타임 계약 감사 -> 변경·취약 영역 재구축 -> 시스템 전체 회귀 -> 정확한 SHA로 Test 런타임·fail-closed·rollback 입증 -> 최종 기획 재확인 -> 모든 증거 통과 시에만 무중단 Production 승격. 이 게이트가 끝나거나 남은 제외범위가 명시적으로 승인되기 전에는 신규 AI 기능 작업을 시작하지 않는다.
+
+[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]
