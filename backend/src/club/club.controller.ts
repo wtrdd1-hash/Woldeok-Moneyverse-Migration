@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsIn, IsInt, IsOptional, IsPositive, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
-import { randomUUID } from 'node:crypto';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
@@ -53,10 +52,9 @@ export class CreateClubDto {
   @IsIn(['public', 'invite', 'request'])
   readonly joinMode?: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: '클라이언트 멱등성 키' })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid', description: '클라이언트 멱등성 키' })
   @IsUUID()
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey!: string;
 }
 
 export class ContributeProjectDto {
@@ -65,10 +63,9 @@ export class ContributeProjectDto {
   @IsPositive()
   readonly amountWld!: number;
 
-  @ApiPropertyOptional({ format: 'uuid', description: '클라이언트 멱등성 키' })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid', description: '클라이언트 멱등성 키' })
   @IsUUID()
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey!: string;
 }
 
 export class UpdateMemberRoleDto {
@@ -121,8 +118,7 @@ export class ClubController {
   @Post()
   async createClub(@Req() req: RequestWithSession, @Body() dto: CreateClubDto) {
     const actorUserId = requireUserId(req);
-    const idempotencyKey = dto.idempotencyKey || randomUUID();
-    return this.clubService.createClub(actorUserId, dto, idempotencyKey);
+    return this.clubService.createClub(actorUserId, dto, dto.idempotencyKey);
   }
 
   @ApiOperation({ summary: '클럽 상세 정보 조회' })
@@ -202,8 +198,13 @@ export class ClubController {
     @Body() dto: ContributeProjectDto,
   ) {
     const actorUserId = requireUserId(req);
-    const key = dto.idempotencyKey || randomUUID();
-    return this.clubService.contributeToProject(actorUserId, clubId, projectId, dto.amountWld, key);
+    return this.clubService.contributeToProject(
+      actorUserId,
+      clubId,
+      projectId,
+      dto.amountWld,
+      dto.idempotencyKey,
+    );
   }
 
   @ApiOperation({ summary: '클럽 피드 글 목록 조회' })
