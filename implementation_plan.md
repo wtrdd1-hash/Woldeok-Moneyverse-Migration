@@ -1,6 +1,7 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v47)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v48)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v48**: 2차 긴급 조율 문답 확정 사양 반영 누적 — SWR 60초 캐싱 및 로컬 Fallback 회로, 토스형 축하 토스트 및 심리스 모달 언마운트 UX, PostgreSQL audit_logs 감사 원장 영구 보존(USER_CONSENT_GRANTED), rollback_production.sh 활성 세션(927개) 실시간 보호 안전 게이트 확정 (+110, -0)
 - **v47**: 1차 긴급 조율 문답 확정 사양 반영 누적 — 동적 서버 사이드 정책 패치(Root Layout/BFF 연동), 엄격 화이트리스트 경로 매트릭스, 마운트 가드 + 200ms Fade-In 오버레이, 10초 원클릭 자동 롤백 스크립트(ops/release/rollback_production.sh) 확정 (+115, -0)
 - **v46**: 긴급 결함 방어 아키텍처 및 무장애 운영 플레이북 심화 기획 — 동적 정책 버전 연동 파이프라인, 전 도메인 예외/보호 경로 거버넌스, 클라이언트 하이드레이션 깜빡임 방지, 원클릭 비상 롤백 플레이북(RTO < 10s) 및 GPT 다자간 작업 잠금 명세 수록 (+125, -0)
 - **v45**: 긴급 복구 및 메인 포털 전면 고도화 — 이용약관 미동의 세션 접속 시 강제 튕김(router.replace)으로 인한 화면 블랙아웃(본문 증발) 결함 원천 해결(토스형 원터치 ConsentStepUpModal 인라인 다이얼로그 탑재 및 백엔드 PUT /api/v1/auth/consent 원자적 연동), anti-ai-frontend-craftsmanship 및 fintech-responsive-layout-engine 기반 홈 화면(/) 전면 리빌드(실시간 순자산 헤어로, 2열 비대칭 핀테크 라이브 콘솔, 4대 기둥 전 도메인 서비스 디렉터리, 320px~1440px 클리핑 제로 반응형), 백엔드-프론트엔드 동시 무중단 승격(v347) 확정 (+210, -0)
@@ -1481,6 +1482,37 @@ flowchart TD
   - Systemd graceful reload: `sudo systemctl reload-or-restart moneyverse-backend.service moneyverse-frontend.service`
   - `verify-runtime-identity.sh` 자동 실행 및 927+개 활성 세션 보존 상태 콘솔 출력.
   - 복구 완료 시간 목표: **10초 이내 (RTO < 10s)**.
+
+---
+
+## 🚀 [v48 Specification] 2차 조율 결정 사항 및 무결성 보안·운영 가드 명세 (누적 추가)
+
+### 1. Stale-While-Revalidate (SWR) 60초 캐싱 및 로컬 Fallback 회로 (A1 결정 사항)
+- **요구사항**: 백엔드 일시 장애나 네트워크 지연이 발생하더라도 메인 포털 렌더링이 멈추지 않고 100% 정상 작동하도록 고가용성 회로 차단기(Circuit Breaker) 구축.
+- **구현 구조**:
+  - `fetchLatestPolicy()`에 Next.js `fetch(..., { next: { revalidate: 60 } })` 옵션 적용.
+  - 백엔드 응답 실패 시 catch 블록에서 로컬 기본 정책 상수(`{ termsVersion: '2026-09-02', privacyVersion: '2026-09-02' }`)를 즉시 반환하여 500 에러를 원천 차단.
+
+### 2. 토스형 축하 토스트 및 심리스 모달 언마운트 UX (A2 결정 사항)
+- **요구사항**: 전체 페이지 새로고침(`window.location.reload()`)에 따른 시각적 깜빡임을 배제하고, 네이티브 앱 수준의 매끄러운 화면 전환 제공.
+- **구현 구조**:
+  - `ConsentStepUpModal`에서 `submitConsent` 성공 응답 수신 시, 모달 내부 상태 `open = false`로 즉시 전환 및 부드러운 Exit 애니메이션(duration: 150ms) 실행.
+  - 성공 직후 Sonner 토스트 호출: `toast.success('월덕 머니버스 정식 이용 동의가 완료되었습니다. 환영합니다!')`.
+  - 부모 `ConsentGuard` 상태를 `consented = true`로 동기화하여 백그라운드 블러 레이어가 자연스럽게 걷히고 유저가 보던 화면 그대로 즉시 활동 재개 가능.
+
+### 3. PostgreSQL audit_logs 감사 원장 영구 보존 연동 (A3 결정 사항)
+- **요구사항**: 전자서명법, 정보통신망법 및 개인정보보호법에 따른 법적 동의 증빙을 완벽하게 무결 보존.
+- **구현 구조**:
+  - 백엔드 `auth_grant_current_user_consent` 프로시저 또는 `auth.controller.ts`의 `grantConsent` 핸들러에서 동의 완료 시점의 원격 IP(`req.ip`), User-Agent 헤더, 적용 약관 버전, 동의 시각(Timestamp)을 수집.
+  - `audit_logs` 테이블에 `action = 'USER_CONSENT_GRANTED'`, `entity = 'user_consents'`, `details = jsonb_build_object('termsVersion', p_terms_version, 'privacyVersion', p_privacy_version, 'ip', p_ip)` 레코드를 원자적 트랜잭션으로 기록.
+
+### 4. 비상 롤백 활성 세션(927개) 실시간 안전 가드 (A4 결정 사항)
+- **요구사항**: 롤백 스크립트 실행 중 인적 실수나 비정상 데이터베이스 연결로 인해 927개 이상의 활성 세션이 유실되는 재앙을 사전에 방어.
+- **구현 구조**:
+  - `ops/release/rollback_production.sh` 도입부에 세션 카운트 안전 검증 쿼리 실행:
+    `CURRENT_SESSIONS=$(sudo docker exec woldeok-moneyverse-dev-db-1 psql -U moneyverse_migrator -d woldeok_moneyverse_dev -t -c "SELECT count(*) FROM auth_sessions WHERE expires_at > now();")`
+  - 세션 수가 비정상적으로 급감(예: 800개 미만)하거나 DB 연결 실패 시 즉시 `CRITICAL WARNING`을 발생시키고 관리자의 명시적 승인(`read -p "Proceed with rollback? (yes/no): "`) 없이는 롤백 프로세스를 안전하게 일시 중단.
+
 
 
 
