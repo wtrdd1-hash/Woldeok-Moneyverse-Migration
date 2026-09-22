@@ -103,3 +103,15 @@ Per explicit user instruction on 2026-09-12, v2026.09.12.33 is merged without th
 | --- | --- | --- |
 | **Newspaper Hub** | `/app-api/v1/newspaper/*` | Market sentiment index (`pulse`), weekly poll (`poll`), voting (`poll/vote`), financial lore articles (`lore`) |
 | **Developer Portal** | `/developer` (Web Portal) | Live catalog across 163 endpoints, 3-language code snippets, in-browser sandbox tester |
+
+
+---
+
+## v2026.09.22.358 Additional Scope: 4 New Domain REST APIs & 335 Endpoints Complete
+
+| Feature Domain | App API Route / Base | Capabilities & Endpoints |
+| --- | --- | --- |
+| **Saving Pockets** | `/app-api/v1/banking/pockets` | List pockets, create, deposit/withdraw transfer, customize, archive refund (5 endpoints) |
+| **Crafting Workbench** | `/app-api/v1/crafting/*` | List 4 recipes (`recipes`), execute crafting with item consumption (`execute`) (2 endpoints) |
+| **P2P Marketplace** | `/app-api/v1/marketplace/*` | Browse listings (`listings`), my listings (`my-listings`), create listing, instant buy, cancel (5 endpoints) |
+| **Notification Center** | `/app-api/v1/notifications/*` | Notification feed, unread badge count (`unread-count`), single mark read, batch mark all read (`read-all`) (4 endpoints) |

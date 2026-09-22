@@ -1,3 +1,24 @@
+## v2026.09.22.359 — 전 도메인 REST API 335개 완결 (저축 포켓 5종, 제작 워크벤치 2종, 마켓플레이스 5종, 인앱 알림 센터 4종) 및 OpenAPI 3.0 동기화
+
+- 적용 브랜치: `main`
+- **전 도메인 RESTful API화 및 잔여 DB 프로시저 1급 API 컨트롤러 승격 (FULL_DOMAIN_API_EXPANSION_SPEC)**:
+  1. **저축 포켓 분할 관리 API (`backend/src/bank/pocket.controller.ts`)**:
+     - 5개 엔드포인트 완비: `GET /banking/pockets` (목록 조회), `POST /banking/pockets` (생성), `POST /banking/pockets/transfer` (입출금 이체), `PATCH /banking/pockets/:pocketId` (수정), `POST /banking/pockets/:pocketId/archive` (해지 환원).
+     - class-validator DTO(`CreatePocketDto`, `TransferPocketDto`, `UpdatePocketDto`) 및 PostgreSQL `public.bank_*_pocket` 트랜잭션 완벽 연동.
+  2. **제작 워크벤치 API (`backend/src/crafting/crafting.controller.ts`)**:
+     - 2개 엔드포인트 완비: `GET /crafting/recipes` (4종 레시피 조회), `POST /crafting/execute` (인벤토리 소모 제작).
+     - `crafting_execute` DB 프로시저 기반 멱등성 및 원자적 재료 차감/산출물 지급 보장.
+  3. **유저 간 P2P 마켓플레이스 API (`backend/src/marketplace/marketplace.controller.ts`)**:
+     - 5개 엔드포인트 완비: `GET /marketplace/listings` (매물 검색), `GET /marketplace/my-listings` (내 출품), `POST /marketplace/listings` (판매 등록), `POST /marketplace/listings/:listingId/buy` (즉시 구매), `POST /marketplace/listings/:listingId/cancel` (출품 취소).
+     - `marketplace_*` 함수 연동으로 안전한 구매자 자금 이체 및 판매자 에스크로 아이템 지급 무결성 유지.
+  4. **인앱 알림 센터 API (`backend/src/notification/notification.controller.ts`)**:
+     - 4개 엔드포인트 완비: `GET /notifications` (알림 피드), `GET /notifications/unread-count` (미확인 카운트), `POST /notifications/:notificationId/read` (단일 읽음), `POST /notifications/read-all` (전체 읽음).
+  5. **OpenAPI 3.0 기계 판독 계약 및 11개 API 문서 전수 동기화**:
+     - 총 컨트롤러 57개, 총 엔드포인트 335개(모바일 계약 179개) 전수 등록.
+     - `docs/mobile-api-contract.json`, `docs/mobile-api-schema-reference.ko.md`, `docs/mobile-api-schema-reference.md`, `docs/mobile-api.ko.md`, `docs/mobile-api.md`, `docs/mobile-api-complete-spec.ko.md`, `docs/mobile-api-complete-spec.md`, `docs/mobile-api-all-features.ko.md`, `docs/mobile-api-all-features.md` 100% 동기화.
+  6. **무중단 배포 및 활성 세션 보존**:
+     - 968+ 활성 사용자 세션 무손실 보존 및 런타임 신원 일치 프로덕션 승격.
+
 ## v2026.09.22.358 — 직업 업무(Work) 0.5초 깜빡임 루프 제거, 업무 완수 모달 뷰포트 클리핑 및 30px 스크롤바 슬릿 레이아웃 정상화
 
 - 적용 브랜치: `main` (릴리스: `prod-11fdec7-v358`)

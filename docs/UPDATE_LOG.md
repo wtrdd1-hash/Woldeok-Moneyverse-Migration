@@ -1,3 +1,24 @@
+## v2026.09.22.359 — Full-Domain REST API Expansion to 335 Endpoints (Saving Pockets, Crafting, Marketplace, Notifications) & OpenAPI 3.0 Sync
+
+- Branch: `main`
+- **Full-Domain RESTful API Standardization & 1st-Class Controllers (FULL_DOMAIN_API_EXPANSION_SPEC)**:
+  1. **Bank Saving Pockets API (`backend/src/bank/pocket.controller.ts`)**:
+     - 5 endpoints complete: `GET /banking/pockets`, `POST /banking/pockets`, `POST /banking/pockets/transfer`, `PATCH /banking/pockets/:pocketId`, `POST /banking/pockets/:pocketId/archive`.
+     - class-validator DTOs and PostgreSQL `public.bank_*_pocket` transactional integration.
+  2. **Crafting Workbench API (`backend/src/crafting/crafting.controller.ts`)**:
+     - 2 endpoints complete: `GET /crafting/recipes`, `POST /crafting/execute`.
+     - Atomic material consumption and output granting via `crafting_execute`.
+  3. **Player-to-Player Marketplace API (`backend/src/marketplace/marketplace.controller.ts`)**:
+     - 5 endpoints complete: `GET /marketplace/listings`, `GET /marketplace/my-listings`, `POST /marketplace/listings`, `POST /marketplace/listings/:listingId/buy`, `POST /marketplace/listings/:listingId/cancel`.
+     - Atomic escrow and buyer/seller fund transfers via `marketplace_*` procedures.
+  4. **In-App Notification Center API (`backend/src/notification/notification.controller.ts`)**:
+     - 4 endpoints complete: `GET /notifications`, `GET /notifications/unread-count`, `POST /notifications/:notificationId/read`, `POST /notifications/read-all`.
+  5. **OpenAPI 3.0 Machine-Readable Contract & 11 API Docs Fully Synchronized**:
+     - 57 controllers, 335 total endpoints (179 mobile contract endpoints).
+     - Fully verified contract consistency.
+  6. **Zero-Downtime Deployment & Session Continuity**:
+     - Preserves 968+ active user sessions and verifies runtime identity.
+
 # Update Log
 
 ## v2026.09.22.358 — Career Work Elimination of 0.5s Flickering Storm, Radix Modal Viewport Clipping Fix & Slit Scrollbar Resolution

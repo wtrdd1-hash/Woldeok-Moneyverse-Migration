@@ -145,6 +145,22 @@
 
 ## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
 
+- **최종 갱신일시**: 2026-09-22 20:45:00 KST
+- **현재 프로덕션 릴리스 버전**: `v2026.09.22.359`
+- **PostgreSQL 활성 사용자 세션**: **968개 (100% 무손실 보존 실측 확인)**
+- **백엔드 API 컨트롤러 및 엔드포인트**: **총 57개 컨트롤러, 335개 엔드포인트 (모바일 계약 179개)**
+- **최신 완료 작업 요약**:
+  1. **저축 포켓 분할 관리 API (`backend/src/bank/pocket.controller.ts`)**: 5개 엔드포인트 완비 (`GET /banking/pockets`, `POST /banking/pockets`, `POST /banking/pockets/transfer`, `PATCH /banking/pockets/:pocketId`, `POST /banking/pockets/:pocketId/archive`).
+  2. **제작 워크벤치 API (`backend/src/crafting/crafting.controller.ts`)**: 2개 엔드포인트 완비 (`GET /crafting/recipes`, `POST /crafting/execute`).
+  3. **유저 간 P2P 마켓플레이스 API (`backend/src/marketplace/marketplace.controller.ts`)**: 5개 엔드포인트 완비 (`GET /marketplace/listings`, `GET /marketplace/my-listings`, `POST /marketplace/listings`, `POST /marketplace/listings/:listingId/buy`, `POST /marketplace/listings/:listingId/cancel`).
+  4. **인앱 알림 센터 API (`backend/src/notification/notification.controller.ts`)**: 4개 엔드포인트 완비 (`GET /notifications`, `GET /notifications/unread-count`, `POST /notifications/:notificationId/read`, `POST /notifications/read-all`).
+  5. **OpenAPI 3.0 및 11개 API 문서 전수 동기화**: `docs/mobile-api-contract.json` 및 관련 마크다운 명세서 100% 일치.
+  6. **무중단 릴리스 승격**: 활성 세션 968개 무손실 보존.
+
+---
+
+## 9. 📜 직전 릴리스 히스토리 (v2026.09.22.358)
+
 - **최종 갱신일시**: 2026-09-22 20:28:00 KST
 - **현재 프로덕션 릴리스 버전**: `v2026.09.22.358` (릴리스 경로: `/srv/moneyverse-data/releases/prod-11fdec7-v358`, 직전: `prod-2ec47a9-v357`)
 - **Exact Git SHA**: `11fdec7fbb00ead5709b6e52069f89f1f6fb4440` (단축: `11fdec7`)

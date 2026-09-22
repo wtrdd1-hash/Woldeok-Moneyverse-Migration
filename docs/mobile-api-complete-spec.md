@@ -417,3 +417,47 @@ Four new endpoints integrated with the Weekly Brief & World Pulse Newspaper Hub 
 - **Multi-Language Snippets**: Ready-to-copy code tabs for cURL, TypeScript (`fetch`), and Python (`requests`).
 - **Live Sandbox Tester**: In-browser API execution with real-time latency (ms) and HTTP status code tracking.
 - **Full 4-Language i18n**: Korean, English, Japanese, and Chinese localization.
+
+
+---
+
+## v2026.09.22.358 — 4 New Domain REST APIs (Saving Pockets, Crafting Workbench, P2P Marketplace, Notification Center) & 335 Endpoints Complete
+
+### 1. Full-Domain API Overview & 16 New Endpoints
+The Moneyverse backend has transformed 4 remaining database-backed stored procedures and raw queries (Saving Pockets, Crafting Workbench, Player-to-Player Marketplace, In-App Notification Center) into first-class NestJS REST API controllers, reaching a total of 57 controllers and 335 endpoints (179 mobile contract endpoints).
+
+All new endpoints enforce class-validator DTO validation, user session boundary isolation, database transaction invariants, idempotency keys, and OpenAPI 3.0 schema synchronization.
+
+### 2. 4 New Domain REST API Specifications (16 Endpoints)
+
+#### ① Bank Saving Pockets API (`/banking/pockets`)
+| Method | App Path | Purpose | Auth / CSRF | Request DTO & Body | Response Format (JSON) |
+|---|---|---|---|---|---|
+| `GET` | `/app-api/v1/banking/pockets` | List active saving pockets and balances | Auth required | None | `{"success":true,"data":[{"id":"...","name":"Emergency Fund","balance":"50000","target_amount":"100000","color":"#3b82f6","icon":"piggy-bank","status":"ACTIVE"}]}` |
+| `POST` | `/app-api/v1/banking/pockets` | Create new saving pocket | Auth + CSRF | `CreatePocketDto` (`name`, `targetAmount`, `color`, `icon`) | `{"success":true,"data":{"id":"...","name":"...","status":"ACTIVE"}}` |
+| `POST` | `/app-api/v1/banking/pockets/transfer` | Transfer funds between main account and pocket | Auth + CSRF | `TransferPocketDto` (`pocketId`, `amount`, `direction`: `DEPOSIT`\|`WITHDRAW`, `idempotencyKey`) | `{"success":true,"data":{"pocketId":"...","newBalance":"60000","bankBalance":"140000"}}` |
+| `PATCH` | `/app-api/v1/banking/pockets/:pocketId` | Update pocket name, target, color, icon | Auth + CSRF | `UpdatePocketDto` (`name?`, `targetAmount?`, `color?`, `icon?`) | `{"success":true,"data":{"id":"...","name":"...","updated":true}}` |
+| `POST` | `/app-api/v1/banking/pockets/:pocketId/archive` | Archive pocket and return balance to main account | Auth + CSRF | None | `{"success":true,"data":{"id":"...","status":"ARCHIVED","refundedAmount":"50000"}}` |
+
+#### ② Crafting Workbench API (`/crafting`)
+| Method | App Path | Purpose | Auth / CSRF | Request DTO & Body | Response Format (JSON) |
+|---|---|---|---|---|---|
+| `GET` | `/app-api/v1/crafting/recipes` | List 4 crafting recipes and material requirements | Public / Auth | None | `{"success":true,"data":[{"recipeId":"craft_frame_v1","name":"Titanium Frame","inputs":[{"itemId":"iron_ore","amount":5}],"output":{"itemId":"titanium_frame","amount":1}}]}` |
+| `POST` | `/app-api/v1/crafting/execute` | Consume inventory items and craft item | Auth + CSRF | `CraftExecuteDto` (`recipeId`, `quantity`, `idempotencyKey`) | `{"success":true,"data":{"recipeId":"craft_frame_v1","produced":{"itemId":"titanium_frame","amount":1},"consumed":[{"itemId":"iron_ore","amount":5}]}}` |
+
+#### ③ Player-to-Player Marketplace API (`/marketplace`)
+| Method | App Path | Purpose | Auth / CSRF | Request DTO & Body | Response Format (JSON) |
+|---|---|---|---|---|---|
+| `GET` | `/app-api/v1/marketplace/listings` | Search and list active marketplace listings | Public / Auth | Query (`limit?`, `offset?`, `category?`, `search?`) | `{"success":true,"data":{"listings":[{"id":"...","sellerId":"...","itemId":"...","price":"15000","quantity":1,"status":"ACTIVE"}]}}` |
+| `GET` | `/app-api/v1/marketplace/my-listings` | List authenticated user active listings | Auth required | None | `{"success":true,"data":{"listings":[{"id":"...","price":"15000","status":"ACTIVE"}]}}` |
+| `POST` | `/app-api/v1/marketplace/listings` | Create new sell listing from inventory | Auth + CSRF | `CreateListingDto` (`itemId`, `quantity`, `unitPrice`, `idempotencyKey`) | `{"success":true,"data":{"listingId":"...","status":"ACTIVE"}}` |
+| `POST` | `/app-api/v1/marketplace/listings/:listingId/buy` | Instantly buy listing (deduct funds & grant item) | Auth + CSRF | `BuyListingDto` (`quantity`, `idempotencyKey`) | `{"success":true,"data":{"orderId":"...","totalPrice":"15000","status":"COMPLETED"}}` |
+| `POST` | `/app-api/v1/marketplace/listings/:listingId/cancel` | Cancel listing and return item to inventory | Auth + CSRF | None | `{"success":true,"data":{"listingId":"...","status":"CANCELLED"}}` |
+
+#### ④ In-App Notification Center API (`/notifications`)
+| Method | App Path | Purpose | Auth / CSRF | Request DTO & Body | Response Format (JSON) |
+|---|---|---|---|---|---|
+| `GET` | `/app-api/v1/notifications` | List user notification feed | Auth required | Query (`limit?`, `offset?`, `unreadOnly?`) | `{"success":true,"data":{"notifications":[{"id":"...","type":"MARKET_SOLD","title":"Item Sold","message":"...","read":false,"createdAt":"..."}]}}` |
+| `GET` | `/app-api/v1/notifications/unread-count` | Get unread notification badge count | Auth required | None | `{"success":true,"data":{"unreadCount":3}}` |
+| `POST` | `/app-api/v1/notifications/:notificationId/read` | Mark single notification as read | Auth + CSRF | None | `{"success":true,"data":{"id":"...","read":true}}` |
+| `POST` | `/app-api/v1/notifications/read-all` | Batch mark all notifications as read | Auth + CSRF | None | `{"success":true,"data":{"updatedCount":5}}` |

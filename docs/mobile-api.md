@@ -2,7 +2,7 @@
 
 [English](mobile-api.md) | [한국어](mobile-api.ko.md) | [Document Index](INDEX.md) | [Developer Portal](/developer)
 
-The Moneyverse backend exposes full-domain RESTful APIs (52 controllers, 163 endpoints) under `/api/v1`. The production service is intentionally private and accepts requests only from the Next.js frontend App Gateway (`/app-api/v1/*`) over the internal network with `x-internal-token`.
+The Moneyverse backend exposes full-domain RESTful APIs (57 controllers, 179 mobile contract endpoints / 335 total backend endpoints) under `/api/v1`. The production service is intentionally private and accepts requests only from the Next.js frontend App Gateway (`/app-api/v1/*`) over the internal network with `x-internal-token`.
 
 A native/mobile application or external client must **not** embed `INTERNAL_API_TOKEN`. Treat that secret as server-to-server only. The safe integration pattern is:
 
@@ -17,7 +17,7 @@ This preserves the existing session, consent, reauthentication, and database sec
 ## 🧭 Interactive Developer Portal (`/developer`) & Spec Discovery
 
 - **Interactive Developer Portal**: Access [`/developer`](/developer) via web browser for a real-time API catalog across 7 categories, multi-language code snippets (cURL, TypeScript, Python), and a live sandbox tester measuring real-time latency and status codes.
-- **Machine-Readable Contract**: [`docs/mobile-api-contract.json`](mobile-api-contract.json) provides the OpenAPI 3.0 specification covering all 163 full-domain endpoints.
+- **Machine-Readable Contract**: [`docs/mobile-api-contract.json`](mobile-api-contract.json) provides the OpenAPI 3.0 specification covering all 179 mobile contract endpoints.
 - **Swagger UI**: Non-production environments publish Swagger UI at `/docs` and raw OpenAPI JSON at `/docs-json`.
 
 ## 📦 Client-Visible API Groups
@@ -27,7 +27,10 @@ Based on OpenAPI 3.0 tags and App Gateway route groups. Standard application cli
 | Domain Group | Key Endpoints & Capabilities |
 | :--- | :--- |
 | **`auth` / `account`** | Email auth, Google/Discord OAuth, verification, session/device management, deletion |
-| **`wallet` / `bank` / `banking`** | WLD balance, P2P transfer, bank deposit/withdrawal, loan issuance/repayment, bond investment |
+| **`wallet` / `bank` / `banking`** | WLD balance, P2P transfer, bank deposit/withdrawal, loan issuance/repayment, bond investment, saving pockets (`/banking/pockets`) |
+| **`crafting`** | Crafting recipe catalog and item/gear/boost creation execution |
+| **`marketplace`** | Player-to-player item marketplace listings, user listings, instant buy, listing cancellation |
+| **`notifications`** | In-app notification feed, unread notification count, single read ack, batch read-all |
 | **`stocks`** | Stock quotes, OHLC candlestick charts, buy/sell orders, portfolio, price alerts |
 | **`newspaper`** | Live market sentiment (`pulse`), weekly market outlook poll (`poll`), financial lore articles (`lore`) |
 | **`shop` / `inventory`** | Item catalog, consumable/cosmetic purchases, item equipment/usage, upkeep settlement |

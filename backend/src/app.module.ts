@@ -29,6 +29,9 @@ import { MarketTickerModule } from './stock/market-ticker.module';
 import { WalletModule } from './wallet/wallet.module';
 import { WorkModule } from './work/work.module';
 import { BankModule } from './bank/bank.module';
+import { CraftingModule } from './crafting/crafting.module';
+import { MarketplaceModule } from './marketplace/marketplace.module';
+import { NotificationModule } from './notification/notification.module';
 import { AUTH_LIMIT, READ_LIMIT, SENSITIVE_LIMIT } from './security/rate-limit';
 import { TieredThrottlerGuard } from './security/tiered-throttler.guard';
 import { InternalTokenGuard } from './auth/guards/internal-token.guard';
@@ -49,6 +52,9 @@ const ONE_MINUTE_MS = 60_000;
     WalletModule,
     WorkModule,
     BankModule,
+    CraftingModule,
+    MarketplaceModule,
+    NotificationModule,
     ShopModule,
     StockModule,
     MarketTickerModule,

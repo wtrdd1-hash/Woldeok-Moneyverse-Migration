@@ -2132,3 +2132,67 @@ flowchart TD
 3. **무중단 운영 배포 (`v2026.09.22.358`)**:
    - Exact SHA 기반 빌드 후 미니 PC 프로덕션 무중단 승격 (933개 세션 보존).
 
+
+---
+
+## 🚀 [v57 Specification] 전 도메인 REST API 완전 통합(4대 미연동 DB 도메인 컨트롤러 신설: 저금통, 제작대, 마켓플레이스, 인앱알림) 및 OpenAPI 3.0 명세서 & 11종 API 문서 전수 갱신
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 지시**: "모든 기능 다 api 로만들고 명세서도작성해줘"
+- **현황 분석**:
+  - 백엔드에 53개 컨트롤러, 319개 REST 엔드포인트가 가동 중이나, PostgreSQL SECURITY DEFINER 함수로 구현된 4대 핵심 기능(저금통 포켓, P0 제작대, 유저 아이템 거래소, 인앱 알림 센터)이 독립 REST API 컨트롤러로 개설되지 않은 상태임.
+  - OpenAPI 3.0 명세서(`docs/mobile-api-contract.json`) 및 스키마 레퍼런스 문서들을 신규 추가되는 15개 엔드포인트를 포함하여 **총 334개 엔드포인트** 전체에 대해 기계 판독 계약 및 명세서로 전면 갱신해야 함.
+
+### 2. 세부 구현 계획 (Proposed Implementation)
+
+#### ① 4대 신규 REST API 컨트롤러 / 서비스 / DTO 구축
+1. **🏦 은행 통장 쪼개기/저금통 API (`backend/src/bank/pocket.controller.ts`, `pocket.service.ts`, `pocket.dto.ts`)**:
+   - `GET /banking/pockets`: 내 저금통 목록 및 잔액 조회 (`public.bank_list_pockets`)
+   - `POST /banking/pockets`: 신규 저금통 생성 (`public.bank_create_saving_pocket`)
+   - `POST /banking/pockets/:id/transfer`: 본계좌 ↔ 저금통 입출금 이체 (`public.bank_transfer_pocket`)
+   - `PUT /banking/pockets/:id`: 저금통 이름, 목표금액, 목표일, 색상, 아이콘 커스터마이즈 (`public.bank_customize_pocket`)
+   - `POST /banking/pockets/:id/archive`: 저금통 보관/해지 및 잔액 본계좌 자동 회수 (`public.bank_archive_pocket`)
+   - `BankModule`에 `PocketController`, `PocketService` 등록
+
+2. **⚒️ P0 제작 작업대 API (`backend/src/crafting/crafting.controller.ts`, `crafting.service.ts`, `crafting.dto.ts`, `crafting.module.ts`)**:
+   - `GET /crafting/recipes`: 4종 공식 P0 제작 레시피 목록, 필요 재료 및 소각 수수료 조회
+   - `POST /crafting/execute`: 레시피 아이템 원자적 조합, WLD 수수료 소각, 결과물 인벤토리 지급 (`public.crafting_execute`)
+   - `AppModule`에 `CraftingModule` 등록
+
+3. **🏷️ 플레이어 아이템 거래소 API (`backend/src/marketplace/marketplace.controller.ts`, `marketplace.service.ts`, `marketplace.dto.ts`, `marketplace.module.ts`)**:
+   - `GET /marketplace/listings`: 활성 마켓 판매 목록 조회 (카테고리, 검색, 정렬, 페이징)
+   - `GET /marketplace/my-listings`: 내 판매 등록 물품 목록 및 정산 상태 조회
+   - `POST /marketplace/listings`: 내 인벤토리 아이템 마켓 고정가격 판매 등록 (`public.marketplace_create_listing`)
+   - `POST /marketplace/listings/:id/buy`: 아이템 즉시 구매, WLD 1% 소각 및 99% 판매자 안전 정산 (`public.marketplace_buy_listing`)
+   - `POST /marketplace/listings/:id/cancel`: 판매 등록 취소 및 에스크로 인벤토리 반환 (`public.marketplace_cancel_listing`)
+   - `AppModule`에 `MarketplaceModule` 등록
+
+4. **🔔 인앱 알림 센터 API (`backend/src/notification/notification.controller.ts`, `notification.service.ts`, `notification.dto.ts`, `notification.module.ts`)**:
+   - `GET /notifications`: 내 알림 목록 및 확인 상태 조회
+   - `GET /notifications/unread-count`: 미확인 알림 개수 조회 (`public.notification_unread_count`)
+   - `POST /notifications/:id/read`: 단일 알림 읽음 처리 (`public.notification_mark_read`)
+   - `POST /notifications/read-all`: 전체 알림 일괄 읽음 처리 (`public.notification_mark_all_read`)
+   - `AppModule`에 `NotificationModule` 등록
+
+#### ② OpenAPI 3.0 기계 판독 계약 및 11종 문서 통합 동기화
+1. **OpenAPI 3.0 Contract (`docs/mobile-api-contract.json`)**:
+   - 신규 15개 엔드포인트 포함 총 334개 엔드포인트의 `operationId`, HTTP method, Request/Response 스키마 등록.
+2. **TypeScript AST 스키마 레퍼런스 (`docs/mobile-api-schema-reference.ko.md` & `.md`)**:
+   - `pnpm api:contract:generate`로 334개 엔드포인트 스키마 자동 추출.
+3. **8종 마크다운 API 가이드/카탈로그/통합명세서**:
+   - `docs/mobile-api.ko.md` & `docs/mobile-api.md`: 334개 엔드포인트 현황, 저금통/제작대/마켓플레이스/알림 그룹 가이드.
+   - `docs/mobile-api-endpoint-catalog.ko.md` & `docs/mobile-api-endpoint-catalog.md`: 4대 신규 모듈 상세 명세 추가.
+   - `docs/mobile-api-complete-spec.ko.md` & `docs/mobile-api-complete-spec.md`: Zero-Deletion 원칙 기반 누적 갱신.
+   - `docs/mobile-api-all-features.ko.md` & `docs/mobile-api-all-features.md`: 신규 도메인 범위 확장.
+   - `docs/UPDATE_LOG.ko.md` & `docs/UPDATE_LOG.md`: `v2026.09.22.358` 릴리즈 기록.
+   - `PROJECT_MEMORY.md`: 활성 릴리즈 및 334개 API 완비 상태 동기화.
+
+---
+
+### 3. 검증 계획 (Verification Plan)
+1. **백엔드 컴파일 및 단위 테스트**:
+   - `pnpm --filter @moneyverse/backend test` (신규 컨트롤러/서비스 테스트 포함)
+2. **OpenAPI 계약 무결성 검증**:
+   - `pnpm api:contract:check` (Drift 0건 통과)
+3. **무중단 운영 배포 (`v2026.09.22.358`)**:
+   - PostgreSQL 933개 활성 유저 세션 100% 무손실 보존 검증.

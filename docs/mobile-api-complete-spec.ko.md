@@ -1244,3 +1244,47 @@ Moneyverse 백엔드는 52개 컨트롤러, 163개 엔드포인트 전체에 걸
 - **다중 언어 스니펫**: cURL, TypeScript(`fetch`), Python(`requests`) 코드 탭 제공.
 - **실시간 샌드박스 테스터**: 실시간 API 호출 및 레이턴시(ms), HTTP 상태 코드 측정 지원.
 - **4개국어(KO, EN, JA, ZH) 완벽 i18n 연동**.
+
+
+---
+
+## v2026.09.22.358 — 4대 신규 도메인 REST API 16종 (저축 포켓, 제작 워크벤치, P2P 마켓플레이스, 인앱 알림 센터) 및 전체 335개 엔드포인트 완비
+
+### 1. 전 도메인 API화 및 신규 16개 엔드포인트 개요
+Moneyverse 백엔드는 기존에 API 컨트롤러가 부재하고 DB 저장 프로시저 및 원시 쿼리로만 잔존하던 4대 핵심 비즈니스 도메인(저축 포켓, 제작 워크벤치, 유저 간 마켓플레이스, 인앱 알림 센터)을 1급 NestJS REST API 컨트롤러로 완벽히 전환하여, 백엔드 총 57개 컨트롤러, 335개 엔드포인트(모바일 계약 179개) 전수 API화를 완성했습니다.
+
+모든 신규 엔드포인트는 class-validator DTO 유효성 검증, 세션 사용자 격리, DB 트랜잭션 무결성, 멱등성 키 보장, OpenAPI 3.0 스키마 동기화를 준수합니다.
+
+### 2. 신규 4대 도메인 16종 엔드포인트 상세 명세
+
+#### ① 저축 포켓 분할 관리 API (`/banking/pockets`)
+| Method | 앱 경로 | 기능 설명 | 인증/권한 | DTO 및 요청 Body | 응답 형식 (JSON) |
+|---|---|---|---|---|---|
+| `GET` | `/app-api/v1/banking/pockets` | 활성 저축 포켓 목록 및 잔액 조회 | 로그인 필수 | 없음 | `{"success":true,"data":[{"id":"...","name":"비상금","balance":"50000","target_amount":"100000","color":"#3b82f6","icon":"piggy-bank","status":"ACTIVE"}]}` |
+| `POST` | `/app-api/v1/banking/pockets` | 신규 저축 포켓 생성 | 로그인 + CSRF | `CreatePocketDto` (`name`, `targetAmount`, `color`, `icon`) | `{"success":true,"data":{"id":"...","name":"...","status":"ACTIVE"}}` |
+| `POST` | `/app-api/v1/banking/pockets/transfer` | 메인 은행 계좌 ↔ 포켓 간 자금 이체 | 로그인 + CSRF | `TransferPocketDto` (`pocketId`, `amount`, `direction`: `DEPOSIT`\|`WITHDRAW`, `idempotencyKey`) | `{"success":true,"data":{"pocketId":"...","newBalance":"60000","bankBalance":"140000"}}` |
+| `PATCH` | `/app-api/v1/banking/pockets/:pocketId` | 포켓 이름, 목표액, 색상/아이콘 수정 | 로그인 + CSRF | `UpdatePocketDto` (`name?`, `targetAmount?`, `color?`, `icon?`) | `{"success":true,"data":{"id":"...","name":"...","updated":true}}` |
+| `POST` | `/app-api/v1/banking/pockets/:pocketId/archive` | 포켓 해지 및 잔액 메인 계좌 자동 환원 | 로그인 + CSRF | 없음 | `{"success":true,"data":{"id":"...","status":"ARCHIVED","refundedAmount":"50000"}}` |
+
+#### ② 제작 워크벤치 API (`/crafting`)
+| Method | 앱 경로 | 기능 설명 | 인증/권한 | DTO 및 요청 Body | 응답 형식 (JSON) |
+|---|---|---|---|---|---|
+| `GET` | `/app-api/v1/crafting/recipes` | 제작 가능한 4종 레시피 목록 및 필요 재료 조회 | 공개 / 로그인 | 없음 | `{"success":true,"data":[{"recipeId":"craft_frame_v1","name":"티타늄 프레임","inputs":[{"itemId":"iron_ore","amount":5}],"output":{"itemId":"titanium_frame","amount":1}}]}` |
+| `POST` | `/app-api/v1/crafting/execute` | 인벤토리 재료를 소모하여 아이템 제작 실행 | 로그인 + CSRF | `CraftExecuteDto` (`recipeId`, `quantity`, `idempotencyKey`) | `{"success":true,"data":{"recipeId":"craft_frame_v1","produced":{"itemId":"titanium_frame","amount":1},"consumed":[{"itemId":"iron_ore","amount":5}]}}` |
+
+#### ③ 유저 간 P2P 마켓플레이스 API (`/marketplace`)
+| Method | 앱 경로 | 기능 설명 | 인증/권한 | DTO 및 요청 Body | 응답 형식 (JSON) |
+|---|---|---|---|---|---|
+| `GET` | `/app-api/v1/marketplace/listings` | 마켓플레이스 활성 출품 매물 검색/조회 | 공개 / 로그인 | Query (`limit?`, `offset?`, `category?`, `search?`) | `{"success":true,"data":{"listings":[{"id":"...","sellerId":"...","itemId":"...","price":"15000","quantity":1,"status":"ACTIVE"}]}}` |
+| `GET` | `/app-api/v1/marketplace/my-listings` | 본인이 등록한 출품 목록 및 거래 현황 조회 | 로그인 필수 | 없음 | `{"success":true,"data":{"listings":[{"id":"...","price":"15000","status":"ACTIVE"}]}}` |
+| `POST` | `/app-api/v1/marketplace/listings` | 보유 아이템을 마켓플레이스에 판매 등록 | 로그인 + CSRF | `CreateListingDto` (`itemId`, `quantity`, `unitPrice`, `idempotencyKey`) | `{"success":true,"data":{"listingId":"...","status":"ACTIVE"}}` |
+| `POST` | `/app-api/v1/marketplace/listings/:listingId/buy` | 출품된 아이템 즉시 구매 (자금 차감 + 아이템 지급) | 로그인 + CSRF | `BuyListingDto` (`quantity`, `idempotencyKey`) | `{"success":true,"data":{"orderId":"...","totalPrice":"15000","status":"COMPLETED"}}` |
+| `POST` | `/app-api/v1/marketplace/listings/:listingId/cancel` | 본인 출품 매물 취소 및 아이템 회수 | 로그인 + CSRF | 없음 | `{"success":true,"data":{"listingId":"...","status":"CANCELLED"}}` |
+
+#### ④ 인앱 알림 센터 API (`/notifications`)
+| Method | 앱 경로 | 기능 설명 | 인증/권한 | DTO 및 요청 Body | 응답 형식 (JSON) |
+|---|---|---|---|---|---|
+| `GET` | `/app-api/v1/notifications` | 수신된 알림 피드 목록 조회 | 로그인 필수 | Query (`limit?`, `offset?`, `unreadOnly?`) | `{"success":true,"data":{"notifications":[{"id":"...","type":"MARKET_SOLD","title":"아이템 판매 완료","message":"...","read":false,"createdAt":"..."}]}}` |
+| `GET` | `/app-api/v1/notifications/unread-count` | 미확인 알림 배지 카운트 조회 | 로그인 필수 | 없음 | `{"success":true,"data":{"unreadCount":3}}` |
+| `POST` | `/app-api/v1/notifications/:notificationId/read` | 단일 알림 읽음 처리 | 로그인 + CSRF | 없음 | `{"success":true,"data":{"id":"...","read":true}}` |
+| `POST` | `/app-api/v1/notifications/read-all` | 전체 알림 일괄 읽음 처리 | 로그인 + CSRF | 없음 | `{"success":true,"data":{"updatedCount":5}}` |

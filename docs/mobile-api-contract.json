@@ -1,6 +1,6 @@
 {
-  "contractVersion": "v2026.09.22.347",
-  "apiVersion": "v2026.09.22.347",
+  "contractVersion": "v2026.09.22.359",
+  "apiVersion": "v2026.09.22.359",
   "baseUrl": "https://easy-scraping.com/app-api/v1",
   "languagePolicy": {
     "primary": "en",
@@ -12267,6 +12267,9 @@
                     }
                   ]
                 },
+                "halt_status": {
+                  "type": "string"
+                },
                 "symbol": {
                   "type": "string"
                 },
@@ -12345,9 +12348,6 @@
                     }
                   ]
                 },
-                "halt_status": {
-                  "type": "string"
-                },
                 "halted_at": {
                   "oneOf": [
                     {
@@ -12373,6 +12373,7 @@
               "required": [
                 "day_high_price",
                 "day_low_price",
+                "halt_status",
                 "symbol",
                 "id",
                 "name",
@@ -16195,6 +16196,709 @@
           "success",
           "data"
         ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/banking/pockets",
+      "purpose": "내 저금통(통장 쪼개기) 목록 및 잔액 조회",
+      "callWhen": "저금통 화면 진입/새로고침/이체 후",
+      "authorization": "로그인 + 최신 동의",
+      "afterSuccess": "응답을 화면의 서버 기준 상태로 교체",
+      "backendRoute": "/api/v1/banking/pockets",
+      "operationId": "PocketController_listPockets",
+      "backendOpenApiPath": "/banking/pockets",
+      "summary": "List all saving pockets for current user",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "array",
+        "items": {
+          "type": "unknown"
+        }
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/banking/pockets",
+      "purpose": "신규 저금통 생성",
+      "callWhen": "저금통 개설 버튼 클릭 시",
+      "authorization": "로그인 + 최신 동의 + CSRF",
+      "afterSuccess": "저금통 목록을 다시 조회",
+      "backendRoute": "/api/v1/banking/pockets",
+      "operationId": "PocketController_createPocket",
+      "backendOpenApiPath": "/banking/pockets",
+      "summary": "Create a new saving pocket",
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "mediaType": "application/json",
+        "schema": {
+          "$ref": "#/components/schemas/CreatePocketDto"
+        },
+        "schemaName": "CreatePocketDto"
+      },
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "unknown"
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/banking/pockets/:id/transfer",
+      "purpose": "본계좌 ↔ 저금통 입출금 자금 이체",
+      "callWhen": "저금통 입금 또는 출금 실행 시",
+      "authorization": "로그인 + 최신 동의 + CSRF",
+      "afterSuccess": "저금통 및 은행 잔액 갱신",
+      "backendRoute": "/api/v1/banking/pockets/:id/transfer",
+      "operationId": "PocketController_transferPocket",
+      "backendOpenApiPath": "/banking/pockets/{id}/transfer",
+      "summary": "Transfer funds between main bank balance and saving pocket",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "mediaType": "application/json",
+        "schema": {
+          "$ref": "#/components/schemas/TransferPocketDto"
+        },
+        "schemaName": "TransferPocketDto"
+      },
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "unknown"
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/app-api/v1/banking/pockets/:id",
+      "purpose": "저금통 테마 색상 및 아이콘 커스터마이즈",
+      "callWhen": "저금통 설정 저장 시",
+      "authorization": "로그인 + 최신 동의 + CSRF",
+      "afterSuccess": "저금통 목록 갱신",
+      "backendRoute": "/api/v1/banking/pockets/:id",
+      "operationId": "PocketController_customizePocket",
+      "backendOpenApiPath": "/banking/pockets/{id}",
+      "summary": "Customize saving pocket appearance and theme",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "mediaType": "application/json",
+        "schema": {
+          "$ref": "#/components/schemas/CustomizePocketDto"
+        },
+        "schemaName": "CustomizePocketDto"
+      },
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "unknown"
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/banking/pockets/:id/archive",
+      "purpose": "저금통 해지 및 전액 본계좌 회수",
+      "callWhen": "저금통 해지/삭제 확정 시",
+      "authorization": "로그인 + 최신 동의 + CSRF",
+      "afterSuccess": "저금통 및 본계좌 잔액 갱신",
+      "backendRoute": "/api/v1/banking/pockets/:id/archive",
+      "operationId": "PocketController_archivePocket",
+      "backendOpenApiPath": "/banking/pockets/{id}/archive",
+      "summary": "Archive saving pocket and recover all funds to cash balance",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "mediaType": "application/json",
+        "schema": {
+          "$ref": "#/components/schemas/ArchivePocketDto"
+        },
+        "schemaName": "ArchivePocketDto"
+      },
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "unknown"
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/crafting/recipes",
+      "purpose": "P0 제작 레시피 목록 및 필요 재료 조회",
+      "callWhen": "제작대 화면 진입/새로고침 시",
+      "authorization": "로그인 + 최신 동의",
+      "afterSuccess": "레시피 목록 렌더링",
+      "backendRoute": "/api/v1/crafting/recipes",
+      "operationId": "CraftingController_listRecipes",
+      "backendOpenApiPath": "/crafting/recipes",
+      "summary": "List all official crafting recipes with required materials and fees",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string"
+            },
+            "rarity": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "feeWld": {
+              "type": "number"
+            },
+            "materials": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "itemCode": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "quantity": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "itemCode",
+                  "name",
+                  "quantity"
+                ]
+              }
+            },
+            "outputItem": {
+              "type": "object",
+              "properties": {
+                "itemCode": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "rarity": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "itemCode",
+                "name",
+                "category",
+                "rarity",
+                "description"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "category",
+            "rarity",
+            "description",
+            "feeWld",
+            "materials",
+            "outputItem"
+          ]
+        }
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/crafting/execute",
+      "purpose": "아이템 원자적 조합 및 WLD 수수료 소각 제작 실행",
+      "callWhen": "제작하기 버튼 클릭 시",
+      "authorization": "로그인 + 최신 동의 + CSRF",
+      "afterSuccess": "인벤토리 및 잔액 갱신",
+      "backendRoute": "/api/v1/crafting/execute",
+      "operationId": "CraftingController_executeCrafting",
+      "backendOpenApiPath": "/crafting/execute",
+      "summary": "Execute crafting recipe: consume materials and WLD fee to mint crafted item",
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "mediaType": "application/json",
+        "schema": {
+          "$ref": "#/components/schemas/ExecuteCraftingDto"
+        },
+        "schemaName": "ExecuteCraftingDto"
+      },
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "unknown"
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/marketplace/listings",
+      "purpose": "활성 마켓플레이스 판매 목록 조회",
+      "callWhen": "거래소 화면 진입/검색/필터 변경 시",
+      "authorization": "로그인 + 최신 동의",
+      "afterSuccess": "마켓 목록 렌더링",
+      "backendRoute": "/api/v1/marketplace/listings",
+      "operationId": "MarketplaceController_listListings",
+      "backendOpenApiPath": "/marketplace/listings",
+      "summary": "List active player marketplace listings with filter and search",
+      "parameters": [
+        {
+          "name": "category",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "search",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 50
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 0
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "array",
+        "items": {
+          "type": "unknown"
+        }
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/marketplace/my-listings",
+      "purpose": "내 판매 등록 물품 목록 및 정산 이력 조회",
+      "callWhen": "내 판매 관리 탭 진입 시",
+      "authorization": "로그인 + 최신 동의",
+      "afterSuccess": "내 리스팅 목록 렌더링",
+      "backendRoute": "/api/v1/marketplace/my-listings",
+      "operationId": "MarketplaceController_listMyListings",
+      "backendOpenApiPath": "/marketplace/my-listings",
+      "summary": "List current user marketplace listings and trade history",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "array",
+        "items": {
+          "type": "unknown"
+        }
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/marketplace/listings",
+      "purpose": "내 인벤토리 아이템 거래소 판매 등록",
+      "callWhen": "판매 등록 제출 시",
+      "authorization": "로그인 + 최신 동의 + CSRF",
+      "afterSuccess": "인벤토리 및 내 판매 목록 갱신",
+      "backendRoute": "/api/v1/marketplace/listings",
+      "operationId": "MarketplaceController_createListing",
+      "backendOpenApiPath": "/marketplace/listings",
+      "summary": "List an item for sale in player marketplace with escrow lock",
+      "parameters": [],
+      "requestBody": {
+        "required": true,
+        "mediaType": "application/json",
+        "schema": {
+          "$ref": "#/components/schemas/CreateListingDto"
+        },
+        "schemaName": "CreateListingDto"
+      },
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "oneOf": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/marketplace/listings/:id/buy",
+      "purpose": "거래소 등록 아이템 즉시 구매 (1% 소각 및 판매자 99% 정산)",
+      "callWhen": "구매 확정 시",
+      "authorization": "로그인 + 최신 동의 + CSRF",
+      "afterSuccess": "잔액 및 인벤토리 갱신",
+      "backendRoute": "/api/v1/marketplace/listings/:id/buy",
+      "operationId": "MarketplaceController_buyListing",
+      "backendOpenApiPath": "/marketplace/listings/{id}/buy",
+      "summary": "Buy a marketplace listing item with 1% burn fee and 99% seller settlement",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "mediaType": "application/json",
+        "schema": {
+          "$ref": "#/components/schemas/BuyListingDto"
+        },
+        "schemaName": "BuyListingDto"
+      },
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "oneOf": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "string"
+          }
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/marketplace/listings/:id/cancel",
+      "purpose": "활성 판매 등록 취소 및 에스크로 인벤토리 즉시 반환",
+      "callWhen": "판매 취소 클릭 시",
+      "authorization": "로그인 + 최신 동의 + CSRF",
+      "afterSuccess": "인벤토리 및 내 리스팅 갱신",
+      "backendRoute": "/api/v1/marketplace/listings/:id/cancel",
+      "operationId": "MarketplaceController_cancelListing",
+      "backendOpenApiPath": "/marketplace/listings/{id}/cancel",
+      "summary": "Cancel active marketplace listing and recover item to inventory",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "boolean"
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/notifications",
+      "purpose": "내 인앱 알림 목록 조회",
+      "callWhen": "알림 센터 열람 시",
+      "authorization": "로그인 + 최신 동의",
+      "afterSuccess": "알림 피드 렌더링",
+      "backendRoute": "/api/v1/notifications",
+      "operationId": "NotificationController_listNotifications",
+      "backendOpenApiPath": "/notifications",
+      "summary": "List in-app notifications for current user with unread filter and pagination",
+      "parameters": [
+        {
+          "name": "unreadOnly",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "boolean"
+          }
+        },
+        {
+          "name": "limit",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 50
+          }
+        },
+        {
+          "name": "offset",
+          "in": "query",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "default": 0
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "array",
+        "items": {
+          "type": "unknown"
+        }
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/notifications/unread-count",
+      "purpose": "미확인 알림 개수 조회",
+      "callWhen": "헤더 알림 배지 실시간 갱신 시",
+      "authorization": "로그인 + 최신 동의",
+      "afterSuccess": "헤더 배지 숫자 반영",
+      "backendRoute": "/api/v1/notifications/unread-count",
+      "operationId": "NotificationController_unreadCount",
+      "backendOpenApiPath": "/notifications/unread-count",
+      "summary": "Get total unread in-app notification count for current user",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "unreadCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "unreadCount"
+        ]
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/notifications/:id/read",
+      "purpose": "단일 알림 읽음 처리",
+      "callWhen": "알림 항목 클릭 시",
+      "authorization": "로그인 + 최신 동의 + CSRF",
+      "afterSuccess": "알림 상태 및 배지 갱신",
+      "backendRoute": "/api/v1/notifications/:id/read",
+      "operationId": "NotificationController_markRead",
+      "backendOpenApiPath": "/notifications/{id}/read",
+      "summary": "Mark a specific in-app notification as read",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "requestBody": null,
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "boolean"
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/notifications/read-all",
+      "purpose": "전체 알림 일괄 읽음 처리",
+      "callWhen": "모두 읽음 버튼 클릭 시",
+      "authorization": "로그인 + 최신 동의 + CSRF",
+      "afterSuccess": "알림 목록 및 배지 0으로 갱신",
+      "backendRoute": "/api/v1/notifications/read-all",
+      "operationId": "NotificationController_markAllRead",
+      "backendOpenApiPath": "/notifications/read-all",
+      "summary": "Mark all in-app notifications as read for current user",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseSchema": {
+        "type": "number"
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
       }
     }
   ],

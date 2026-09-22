@@ -4,10 +4,11 @@ import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import { BankController } from './bank.controller';
 import { BankRepository } from './bank.repository';
+import { PocketController } from './pocket.controller';
 
 @Module({
   imports: [AuthModule],
-  controllers: [BankController],
+  controllers: [BankController, PocketController],
   providers: [
     {
       provide: BankRepository,

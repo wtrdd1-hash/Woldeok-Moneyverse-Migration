@@ -1,5 +1,5 @@
 import type { Queryable } from '../core/db';
-import { queryOne } from '../core/db';
+import { queryOne, queryRows } from '../core/db';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -130,6 +130,91 @@ export class BankRepository {
       `SELECT bond_id::text, maturity_amount::text, transaction_id::text
        FROM public.bank_redeem_bond($1, $2, $3)`,
       [actor, bondId, key],
+    );
+  }
+
+  // Pocket (Saving Pockets) Operations
+  async listPockets(actor: unknown): Promise<unknown[]> {
+    assertUuid(actor, 'actor');
+    return queryRows(
+      this.pool,
+      `SELECT pocket_id::text, name, balance::text, target_amount::text,
+              target_date, theme_color, icon_code, is_archived, created_at, updated_at
+       FROM public.bank_list_pockets($1)`,
+      [actor],
+    );
+  }
+
+  async createPocket(
+    actor: unknown,
+    name: string,
+    targetAmountStr?: string,
+    targetDate?: string,
+    themeColor?: string,
+    iconCode?: string,
+  ): Promise<unknown> {
+    assertUuid(actor, 'actor');
+    const targetAmount = targetAmountStr ? assertAmount(targetAmountStr, 'target amount').toString() : null;
+
+    return queryOne(
+      this.pool,
+      `SELECT pocket_id::text, name, balance::text, target_amount::text,
+              target_date, theme_color, icon_code, is_archived, created_at
+       FROM public.bank_create_saving_pocket($1, $2, $3, $4, $5, $6)`,
+      [actor, name, targetAmount, targetDate || null, themeColor || 'sky', iconCode || 'piggy-bank'],
+    );
+  }
+
+  async transferPocket(
+    key: unknown,
+    actor: unknown,
+    pocketId: unknown,
+    direction: 'deposit' | 'withdraw',
+    amountStr: unknown,
+  ): Promise<unknown> {
+    assertUuid(key, 'idempotency key');
+    assertUuid(actor, 'actor');
+    assertUuid(pocketId, 'pocket id');
+    const amount = assertAmount(amountStr, 'amount');
+
+    return queryOne(
+      this.pool,
+      `SELECT pocket_id::text, pocket_name, new_pocket_balance::text,
+              new_cash_balance::text, transfer_amount::text, direction
+       FROM public.bank_transfer_pocket($1, $2, $3, $4, $5)`,
+      [key, actor, pocketId, direction, amount.toString()],
+    );
+  }
+
+  async customizePocket(
+    key: unknown,
+    actor: unknown,
+    pocketId: unknown,
+    themeColor?: string,
+    iconCode?: string,
+  ): Promise<unknown> {
+    assertUuid(key, 'idempotency key');
+    assertUuid(actor, 'actor');
+    assertUuid(pocketId, 'pocket id');
+
+    return queryOne(
+      this.pool,
+      `SELECT pocket_id::text, theme_color, icon_code, cost_wld::text, remaining_cash::text
+       FROM public.bank_customize_pocket($1, $2, $3, $4, $5)`,
+      [key, actor, pocketId, themeColor || 'sky', iconCode || 'piggy-bank'],
+    );
+  }
+
+  async archivePocket(key: unknown, actor: unknown, pocketId: unknown): Promise<unknown> {
+    assertUuid(key, 'idempotency key');
+    assertUuid(actor, 'actor');
+    assertUuid(pocketId, 'pocket id');
+
+    return queryOne(
+      this.pool,
+      `SELECT pocket_id::text, returned_balance::text, cost_wld::text, new_cash_balance::text
+       FROM public.bank_archive_pocket($1, $2, $3)`,
+      [key, actor, pocketId],
     );
   }
 }
