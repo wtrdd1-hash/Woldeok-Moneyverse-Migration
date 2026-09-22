@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import test from 'node:test';
-import { validateEvidence } from './verify-backup-evidence.mjs';
+import { validateEvidence, verifyBackupArtifact } from './verify-backup-evidence.mjs';
 
 const now = new Date('2026-09-20T08:30:00Z');
 const valid = {
@@ -60,4 +63,18 @@ test('rejects production credentials/endpoints and malformed hashes', () => {
 test('rejects restore evidence timestamped before the backup existed', () => {
   const errors = validateEvidence({ ...valid, restoreDrillAt: '2026-09-20T06:59:59Z' }, now);
   assert.ok(errors.some((value) => value.includes('restoreDrillAt cannot be earlier than createdAt')));
+});
+
+test('physical base backup rejects a file before invoking pg_verifybackup', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'moneyverse-backup-test-'));
+  const file = join(directory, 'base.tar');
+  writeFileSync(file, 'not-a-physical-backup');
+  try {
+    assert.throws(
+      () => verifyBackupArtifact({ ...valid, backupType: 'physical_basebackup' }, file),
+      /physical base backup must be a directory/,
+    );
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
 });
