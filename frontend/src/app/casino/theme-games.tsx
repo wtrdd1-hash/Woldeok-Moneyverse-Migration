@@ -98,7 +98,10 @@ export function ThemeGameCard({
 
   useEffect(() => {
     if (state.status === 'ok') {
-      if (state.won) {
+      const isWon = state.netAmount
+        ? !state.netAmount.startsWith('-') && BigInt(state.netAmount) > 0n
+        : false;
+      if (isWon) {
         synthSound.playWin();
       } else {
         synthSound.playLoss();
