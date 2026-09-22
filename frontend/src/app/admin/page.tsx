@@ -58,6 +58,7 @@ import { adminConsole } from '@/lib/session';
 import { ADMIN_AREAS, adminAreaFor, consoleReturnPath } from './areas';
 import { AdminQuickUserSearch } from './admin-quick-search';
 import { CloseConsole, OpenConsole } from './console-gate';
+import { TelemetryPulse } from './components/telemetry-pulse';
 import type {
   AdminBusiness,
   AdminConsole,
@@ -137,9 +138,11 @@ function getAreaIcon(href: string) {
     case '/admin/discord':
       return <Bell className="size-4.5 text-indigo-400" />;
     case '/admin/content':
-      return <ImageIcon className="size-4.5 text-pink-500" />;
+      return <ImageIcon className="size-4.5 text-rose-500" />;
+    case '/admin/safety':
+      return <ShieldCheck className="size-4.5 text-destructive" />;
     default:
-      return <Wrench className="size-4.5 text-muted-foreground" />;
+      return <Activity className="size-4.5 text-muted-foreground" />;
   }
 }
 
@@ -208,12 +211,16 @@ export default async function AdminPage({
     '/admin/support': '1:1 고객 문의 및 답변 티켓',
     '/admin/discord': 'Discord 웹훅 전달 채널 라우팅',
     '/admin/content': '공지사항 및 월덕 갤러리 공개 승인',
+    '/admin/safety': '비회원 긴급 콘텐츠 삭제 및 미성년자 안전 센터',
     '/admin/logs': '운영자 작업 감사 추적 로그',
     '/admin/logs/delivery': '외장 시스템 알림 발송 기록',
   };
 
   return (
     <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 sm:gap-8 px-3.5 sm:px-6 lg:px-8 py-4 sm:py-6 pb-20 min-w-0 overflow-hidden">
+      {/* 3초 주기 실시간 텔레메트리 펄스 인디케이터 */}
+      <TelemetryPulse />
+
       {/* Top Stripe-style System Master Health Telemetry Bar */}
       <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-background to-amber-500/10 p-4 sm:p-5 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

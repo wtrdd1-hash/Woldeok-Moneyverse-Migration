@@ -1,6 +1,7 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v40)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v41)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v41**: 기획서(PROJECT_PLAN.ko.md v335/v337) 핵심 미구현 과제 완결 — QA-335-01/02 Test 서버 500 오류 점검·해소 및 관리자 20개 화면 4대 핵심 제어 모달(주식 거래정지 매수원가 자동정산, 3대 국고 금고 제어, 비회원 긴급 콘텐츠 삭제, 유저 TOTP 제재) 실연동 및 텔레메트리 펄스 탑재 (+280, -0)
 - **v40**: 2026-09-22 최신 프로덕션 릴리스(`v2026.09.22.343`, HEAD: `42ce3f9`) 기준 10대 전 도메인 API 상세 명세서(API Detailed Specification) 집대성 — 인증/보안 세션, 관리자 관제 타워, 카지노 7대 게임 및 실시간 잭팟, 가상 주식 거래소, 은행 5대 탭/다중 저축 포켓, 직업/사업체, 미성년자 안전 센터 및 긴급 콘텐츠 삭제, 알림 거버넌스 인박스, 주간 경제 브리프 전수 수록 (+450, -0)
 - **v36**: 카지노 7대 게임(휠/룰렛 20-구획 SVG 스핀 애니메이션, 잭팟/하우스 리저브 풀 실시간 티커, 퀵 베팅 프리셋, 최근 10회 통계) 고도화 및 GitHub 최신 main 머지(v330~v336) 반영에 따른 관리자 백엔드 전면 기능 점검 누적 (+220, -0)
 - **v35**: 은행 5대 탭 및 가상 국채/다중 저축 포켓 시스템 완결 (BANKING_FINANCIAL_SERVICES_SPEC P0, v2026.09.22.329) (+130, -0)
@@ -1073,3 +1074,59 @@ flowchart TD
 - **프로덕션 빌드 및 런타임 승격**:
   - `pnpm build` (Next.js Turbopack 90+ 전 라우트 최적화 컴파일)
   - 미니 PC 프로덕션 무중단 승격 확인 및 857개 활성 사용자 세션 100% 무손실 보존 검증.
+
+---
+
+## 🚀 [v41 Specification] Test 서버 500 복구 및 관리자 4대 핵심 제어 모달 실연동 (v2026.09.22.344)
+
+### 1. 개요 및 배경 (사용자 조율 결과 A1~A5 확정)
+- **우선순위**: **최우선 긴급 / P0 인프라 운영 게이트 및 P1 관리자 관제 타워 완결** (`PROJECT_PLAN.ko.md` v335/v337 및 `ADMIN_CONTROL_TOWER_CRAFT`).
+- **해결 목표**:
+  1. **[P0 인프라] QA-335-01 / QA-335-02 Test 서버 500 오류 해소 및 Split-Release 방지**:
+     - `https://test.easy-scraping.com/`의 핵심 경로(`/login`, `/stocks`, `/admin` 등) 500 에러 원인을 진단(DB 마이그레이션 적용 상태, 환경변수 누락, 세션/CORS 설정)하고 완전 복구.
+     - 최신 main exact SHA(`b1c3106`)를 기반으로 단일 릴리스 아티팩트(`prod-b1c3106-v344`)를 생성하여 frontend/backend 동일 세대 무중단 승격 준비.
+  2. **[P1 관제 타워] 관리자 20개 화면 4대 핵심 제어 모달 실연동 (`admin-control-tower-craft`)**:
+     - **모달 1 (`/admin/market`)**: 주식 거래정지 매수원가 자동정산 모달 및 멱등 재처리(Retry) 연동 (TOTP 6자리 가드).
+     - **모달 2 (`/admin/treasury`)**: 3대 시스템 금고(`RESERVE_STABILIZATION`, `STOCK_HALT_RESERVE`, `HARD_SINK_VAULT`) WLD 주입/흡수/소각 모달 실연동.
+     - **모달 3 (`/admin/safety`)**: 비회원 공개 긴급 콘텐츠 삭제 접수 건 원터치 승인/반려 조치 모달 실연동.
+     - **모달 4 (`/admin/users`)**: 유저 제재(사유 입력 + 6자리 TOTP 스텝업 가드) 및 활성 기기 세션 강제 종료 실연동.
+  3. **[자율 혁신 기능 탑재]**:
+     - **실시간 텔레메트리 펄스**: 관리자 대시보드에 3초 주기 실시간 경제 지표(M2 통화량, 24시간 자금 흐름, 잭팟 풀) 시각화 인디케이터.
+     - **Web Audio API 무의존성 사운드**: 카지노 승리/패배 및 버튼 클릭 시 가벼운 브라우저 합성 오디오 효과 탑재 (`interactive-minigame-web-engine`).
+
+### 2. 컴포넌트별 상세 변경 명세 (Proposed Changes)
+
+#### [인프라 & 런타임]
+- **[MODIFY] 미니 PC Test 서버 환경 설정 및 서비스 점검**:
+  - `https://test.easy-scraping.com` Nginx 프록시 및 백엔드 포트(예: 3001/4000) 바인딩, DB 마이그레이션 227~230번 정합성 검증.
+- **[NEW] `stage_v344.sh` / `promote_v344.sh`**:
+  - 단일 release 디렉터리(`prod-b1c3106-v344`) 기반의 프론트/백엔드 동일 SHA 무중단 승격 스크립트.
+
+#### [프론트엔드 관리자 관제 타워 (frontend/src/app/admin/)]
+- **[MODIFY] `frontend/src/app/admin/market/page.tsx` & `admin-market-halt-dialog.tsx`**:
+  - 종목별 거래정지 원가환급 모달에 TOTP 6자리 입력 필드 및 실시간 정산 상태 폴링 연동.
+- **[MODIFY] `frontend/src/app/admin/treasury/page.tsx` & `treasury-action-dialog.tsx`**:
+  - 3대 금고별 주입(INJECT)/흡수(ABSORB)/소각(BURN) 모달 완성 및 서버 액션 바인딩.
+- **[MODIFY] `frontend/src/app/admin/safety/page.tsx` & `takedown-action-dialog.tsx`**:
+  - 비회원 긴급 콘텐츠 삭제 건 승인/반려/삭제 처리 모달 및 사유 입력 연동.
+- **[MODIFY] `frontend/src/app/admin/users/page.tsx` & `user-restriction-dialog.tsx`**:
+  - 유저 제재(RESTRICT/BAN) 시 6자리 TOTP 스텝업 모달 및 원격 세션 일괄 종료 버튼 연동.
+- **[NEW] `frontend/src/app/admin/components/telemetry-pulse.tsx`**:
+  - 3초 주기 실시간 경제 지표 펄스 인디케이터 컴포넌트.
+
+#### [카지노 및 오디오 (frontend/src/lib/audio/)]
+- **[NEW] `frontend/src/lib/audio/synth-sound.ts`**:
+  - Web Audio API 무의존성 브라우저 합성 사운드 (클릭음, 승리 팡파르, 패배 알림음).
+- **[MODIFY] `frontend/src/app/casino/theme-games.tsx` & `hilo-game.tsx`**:
+  - 게임 결과 발생 시 합성 사운드 트리거 연동.
+
+### 3. 종합 검증 계획 (Verification Plan)
+- **1단계 (Test 서버 환경 복구)**:
+  - `curl -I https://test.easy-scraping.com/login` 및 `/admin` 호출하여 HTTP 200 정상 반환 검증.
+- **2단계 (격리 빌드 및 테스트)**:
+  - 미니 PC 격리 워크트리에서 `pnpm --filter @moneyverse/backend test` 및 `pnpm --filter @moneyverse/frontend test` 100% 통과 확인.
+  - `pnpm build` 전 라우트 컴파일 통과 확인.
+- **3단계 (관리자 4대 모달 E2E 검증)**:
+  - Playwright 또는 curl/BFF 테스트를 통해 TOTP 가드 및 모달 액션 정상 동작 검증.
+- **4단계 (운영 무중단 승격)**:
+  - `promote_v344.sh` 실행 및 857개 활성 세션 보존, HTTP 200 정상 동작 확인.

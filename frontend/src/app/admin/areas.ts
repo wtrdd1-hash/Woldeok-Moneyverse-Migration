@@ -140,6 +140,13 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     summary: '검토를 마친 소식과 사진만 공개합니다.',
     group: 'safety',
   },
+  {
+    href: '/admin/safety',
+    eyebrow: 'MINOR & EMERGENCY TAKEDOWN',
+    title: '긴급 콘텐츠 삭제 · 안전 센터',
+    summary: '비회원 긴급 콘텐츠 삭제 요청 및 미성년자 안전 모더레이션을 심사합니다.',
+    group: 'safety',
+  },
 ];
 
 export function adminArea(href: string): AdminArea {

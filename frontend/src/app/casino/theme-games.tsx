@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { groupDigits } from '@/lib/money';
 import { absAmount } from './coin';
 import { playGem5, playTreasure4, playWheel20 } from './actions';
 import { CASINO_IDLE } from './casino-state';
+import { synthSound } from '@/lib/audio/synth-sound';
 
 export type ThemeGame = 'wheel' | 'treasure' | 'gems';
 
@@ -94,6 +95,16 @@ export function ThemeGameCard({
   const [state, formAction, pending] = useActionState(theme.action, CASINO_IDLE);
   const [choice, setChoice] = useState(theme.defaultChoice);
   const maxPlayable = minAmount(maxStake, remainingStake);
+
+  useEffect(() => {
+    if (state.status === 'ok') {
+      if (state.won) {
+        synthSound.playWin();
+      } else {
+        synthSound.playLoss();
+      }
+    }
+  }, [state]);
 
   const resultText =
     state.status === 'ok' && state.themeOutcome && state.netAmount
