@@ -44,6 +44,19 @@ const REEL_SYMBOLS: readonly ReelSymbolInfo[] = [
   { id: 'lemon', name: '스위트 레몬', label: '■', color: 'text-emerald-400 border-emerald-400/50 bg-emerald-400/10', payout: '1.2배' },
 ];
 
+const LEGACY_RESULT_REELS: Record<number, readonly [string, string, string]> = {
+  1: ['🍒', '🍋', '🔔'],
+  2: ['🍋', '🔔', '💎'],
+  3: ['🔔', '💎', '⭐'],
+  4: ['💎', '⭐', '🍒'],
+  5: ['⭐', '🍒', '🍋'],
+  6: ['7️⃣', '7️⃣', '7️⃣'],
+};
+
+export function slotReelsForFace(face: number): readonly [string, string, string] | null {
+  return LEGACY_RESULT_REELS[face] ?? null;
+}
+
 export function LuckySlotsGame({
   minStake,
   maxStake,
