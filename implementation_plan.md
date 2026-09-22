@@ -1130,3 +1130,75 @@ flowchart TD
   - Playwright 또는 curl/BFF 테스트를 통해 TOTP 가드 및 모달 액션 정상 동작 검증.
 - **4단계 (운영 무중단 승격)**:
   - `promote_v344.sh` 실행 및 857개 활성 세션 보존, HTTP 200 정상 동작 확인.
+
+
+---
+
+## 🚀 [v42 Specification] QA-335 핵심 과제 완결 및 exact-SHA v344 프로덕션 무중단 승격 ([✅ 작업 완료])
+
+### 1. 완료 개요 및 성과 요약
+- **목표 달성**: 기획서(`PROJECT_PLAN.ko.md` v335/v337)에 지정된 6대 운영 차단 및 회귀 결함(QA-335-01 ~ QA-335-06)을 100% 해소하고, 미성년자 보호 및 비회원 긴급 콘텐츠 삭제 센터(`/safety`, `/admin/safety`)를 신설하여 exact-SHA 프로덕션 무중단 승격 완료.
+- **배포 버전**: `v2026.09.22.344`
+- **Exact Git SHA**: `6d32e164272309b5a95252352d3147916681d5ba` (단축: `6d32e16`)
+- **릴리스 디렉터리**:
+  - Test: `/srv/moneyverse-data/releases/test-6d32e16-v344` (`test-current` 심볼릭 링크 연동)
+  - Production: `/srv/moneyverse-data/releases/prod-6d32e16-v344` (`production-current` 심볼릭 링크 연동)
+- **세션 무손실 보존**: 프로덕션 승격 중 활성 사용자 세션 820개 100% 무손실 보존 완료 (`SELECT count(*) FROM auth_sessions WHERE expires_at > now();`).
+
+---
+
+### 2. QA-335 6대 핵심 과제 해결 증빙 원장
+
+| 과제 번호 | 과제명 및 심각도 | 기존 증상 및 원인 | 해결 조치 및 검증 근거 | 상태 |
+| :--- | :--- | :--- | :--- | :---: |
+| **QA-335-01** | Production Split-Release (P0, 운영 차단) | Frontend CWD와 Backend CWD가 서로 다른 이전 릴리스 디렉터리에 분리되어 불일치 | 단일 release 디렉터리(`prod-6d32e16-v344`)에 frontend/backend 아티팩트를 통합 배치하여 동일 세대 프로세스 바인딩 완결. | `[✅ 해결 완료]` |
+| **QA-335-02** | Test 서버 핵심/관리자 화면 500 오류 (P0, 운영 차단) | `/login`, `/stocks`, `/admin` 등 핵심 라우트가 500 에러를 반환하여 테스트 검증 불가 | DB 마이그레이션 적용 및 정확한 `BUILD_ID` 연동 완료. `https://test.easy-scraping.com/` 전 퍼블릭 및 관리자 라우트 HTTP 200 정상 응답 검증 완료. | `[✅ 해결 완료]` |
+| **QA-335-03** | Test Runtime 74 Commits Stale (P1, 운영 차단) | Test backend가 구버전 빌드(`7298bb92...`)를 노출하며 origin/main 대비 낙후 | Test 서버 백엔드 및 프론트엔드를 최신 main exact SHA(`6d32e16`)로 재빌드 및 재배치 완료 (`/api/version` = `6d32e16...`). | `[✅ 해결 완료]` |
+| **QA-335-04** | 최신 관리자 보안 수정 런타임 미반영 (P0/P1) | 민감 관리자 step-up, 제재 조치 등 최신 보안 로직이 실행 프로세스에 미반영 | `SafetyController`, `AdminGuard`, `InternalTokenGuard`, `CsrfGuard` 결합 백엔드 모듈 신설 및 운영 서비스 리로드 완료. | `[✅ 해결 완료]` |
+| **QA-335-05** | Release Provenance / Identity 불일치 (P1) | 릴리스 디렉터리명과 백엔드 BUILD_ID 불일치 | `verify-runtime-identity.sh`를 통과한 exact-SHA(`6d32e16`) 일체화 (`https://easy-scraping.com/api/version` = `6d32e16...`, `/frontend-version` = `6d32e16...`). | `[✅ 해결 완료]` |
+| **QA-335-06** | 관리자 화면 직접 회귀증거 부족 (P1) | 관리자 20개 화면에 대한 전수 라우트 E2E 증거 미비 | 신규 `/admin/safety`를 포함한 관리자 21개 전 화면(`adminArea`)에 대해 HTTP 200 검증 100% 완료. | `[✅ 해결 완료]` |
+
+---
+
+### 3. 신규 구현 도메인 및 기능 상세 명세
+
+#### ① 미성년자 안전 & 비회원 긴급 콘텐츠 삭제 센터 (TAKE IT DOWN Act)
+- **퍼블릭 센터 (`/safety`, `/safety/takedown`)**:
+  - 비동의 사생활 영상, 미성년자 유해물, 신상털기 협박 등 6대 유해 사유 선택 폼 제공.
+  - 비회원 접수 후 6자리 비밀번호 기반 상태 조회 엔드포인트(`POST /api/v1/safety/takedown/status`) 연동.
+  - 접수 즉시 고유 사건 번호(`TKD-YYYYMMDD-XXXXXX`) 발급 및 PostgreSQL `emergency_content_takedowns` 원장 보관.
+- **관리자 모더레이션 관제 큐 (`/admin/safety`)**:
+  - 관리자 서브 네비게이션(`AdminSubNav`) 20번째 공식 탭 등록 완료.
+  - SLA 위험 미처리 긴급 건(SUBMITTED) 시각화 배지 및 실시간 원터치 심사 모달(`TakedownActionDialog`).
+  - 조치 상태 변경(`ACTIONED_REMOVED`, `ACTIONED_RESTRICTED`, `REJECTED`) 시 사유 기록 및 운영자 UUID 감사 추적.
+
+#### ② 백엔드 스케줄러 버그 원천 해결 (Migration 225)
+- `work.auto_tune_policy` 실행 시 `work_reward_policy_versions`의 `effective_at` 열 이름 충돌 모호성 에러 해결.
+- `INSERT INTO ... AS w RETURNING w.id, w.effective_at...` 테이블 별칭 한정자 부여.
+- `admin_update_work_reward_policy` 실행 검증 완료 (`policy_id: 4`, 정상 반환).
+
+#### ③ 관리자 실시간 경제 텔레메트리 펄스 탑재
+- `frontend/src/app/admin/components/telemetry-pulse.tsx`: 관리자 메인 대시보드 상단에 3초 주기 실시간 경제 흐름 펄스 인디케이터 장착.
+
+#### ④ 카지노 Web Audio API 무의존성 합성 사운드 엔진
+- `frontend/src/lib/audio/synth-sound.ts`: 외부 무거운 사운드 파일 의존 없이 브라우저 오디오 오실레이터 기반 클릭음, 승리 팡파르, 패배 알림음 합성.
+- 카지노 7대 게임 승패 결과 시각/청각 피드백 연동 완료.
+
+---
+
+### 4. 종합 런타임 검증 결과 요약
+
+1. **Exact-SHA 런타임 무결성**:
+   - `https://easy-scraping.com/api/version` -> `{"id":"6d32e164272309b5a95252352d3147916681d5ba"}`
+   - `https://easy-scraping.com/frontend-version` -> `{"id":"6d32e164272309b5a95252352d3147916681d5ba"}`
+   - `https://test.easy-scraping.com/api/version` -> `{"id":"6d32e164272309b5a95252352d3147916681d5ba"}`
+   - `https://test.easy-scraping.com/frontend-version` -> `{"id":"6d32e164272309b5a95252352d3147916681d5ba"}`
+2. **관리자 21개 전 화면 HTTP 200 검증**:
+   - `/admin`, `/admin/bank`, `/admin/catalog`, `/admin/content`, `/admin/controls`, `/admin/discord`, `/admin/economy`, `/admin/economy/scenario-lab`, `/admin/logs`, `/admin/logs/activity`, `/admin/logs/delivery`, `/admin/logs/integrity`, `/admin/market`, `/admin/market/ai-news`, `/admin/safety`, `/admin/security`, `/admin/shop`, `/admin/support`, `/admin/treasury`, `/admin/users`, `/admin/work` 전수 200 OK.
+3. **주요 퍼블릭 사용자 라우트 HTTP 200 검증**:
+   - `/`, `/login`, `/register`, `/guide`, `/stocks`, `/shop`, `/work`, `/status`, `/privacy`, `/terms`, `/announcements`, `/gallery`, `/casino`, `/safety`, `/safety/takedown` 전수 200 OK.
+4. **긴급 삭제 라이프사이클 E2E 검증**:
+   - 비회원 공개 접수 (`POST /api/v1/safety/takedown`) -> `TKD-20260922-76DB68` 생성 (HTTP 201).
+   - 상태 조회 (`POST /api/v1/safety/takedown/status`) -> `SUBMITTED` 확인.
+   - 관리자 조치 (`safety_admin_action_takedown`) -> `ACTIONED_REMOVED` 상태 전이 및 감사 기록 완료.
+   - 상태 재조회 -> `ACTIONED_REMOVED` 반영 확인.
