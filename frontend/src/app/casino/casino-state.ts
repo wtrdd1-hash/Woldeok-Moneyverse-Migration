@@ -7,6 +7,7 @@ export interface CasinoPlayState extends ActionState {
   readonly replayed?: boolean;
   readonly outcomeFace?: number;
   readonly coinOutcome?: string;
+  readonly themeOutcome?: string;
 }
 
 export const CASINO_IDLE: CasinoPlayState = { status: 'idle' };

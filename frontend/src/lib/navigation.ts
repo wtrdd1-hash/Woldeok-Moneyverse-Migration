@@ -1,4 +1,5 @@
-import { type Locale } from './locale';
+﻿﻿import { type Locale } from './locale';
+
 export interface NavEntry {
   readonly href: string;
   readonly label: string;
@@ -14,7 +15,6 @@ export interface NavCategory {
   readonly description?: string;
   readonly entries: readonly NavEntry[];
 }
-
 
 const JAPANESE_LABELS: Readonly<Record<string, string>> = {
   '홈': 'ホーム',
@@ -55,6 +55,8 @@ const JAPANESE_LABELS: Readonly<Record<string, string>> = {
   '플레이·시즌': 'プレイ・シーズン',
   '커뮤니티': 'コミュニティ',
   '자산 활동 내역': '資産活動履歴',
+  '주간 경제 브리프': '週刊経済ブリーフ',
+  '경제 브리프': '経済ブリーフ',
 };
 
 const CHINESE_LABELS: Readonly<Record<string, string>> = {
@@ -96,6 +98,8 @@ const CHINESE_LABELS: Readonly<Record<string, string>> = {
   '플레이·시즌': '娱乐与赛季',
   '커뮤니티': '玩家社区',
   '자산 활동 내역': '资产明细',
+  '주간 경제 브리프': '每周经济快报',
+  '경제 브리프': '经济快报',
 };
 
 const ENGLISH_LABELS: Readonly<Record<string, string>> = {
@@ -169,6 +173,8 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '경제·활동': 'Economy & Career',
   '플레이·시즌': 'Play & Seasons',
   '자산 활동 내역': 'Asset Activity',
+  '주간 경제 브리프': 'Weekly World Brief',
+  '경제 브리프': 'World Brief',
 };
 
 export function navLabel(label: string, locale: Locale): string {
@@ -186,9 +192,10 @@ export const CATEGORY_NAV: readonly NavCategory[] = [
     id: 'finance',
     label: '금융·투자',
     icon: 'TrendingUp',
-    description: '가상 주식 매매, 덕지갑 자산 관리, 가상 은행 금융 상품',
+    description: '가상 주식 매매, 덕지갑 자산 관리, 가상 은행 금융 상품, 주간 경제 브리프',
     entries: [
       { href: '/stocks', label: '월덕거래소', description: '실시간 가상 주식 매매 및 차트 호가', badge: '인기' },
+      { href: '/newspaper', label: '주간 경제 브리프', description: '실시간 월드 펄스 및 AI 시장 시나리오 속보', badge: 'NEW' },
       { href: '/wallet', label: '덕지갑', description: '총 보유 자산 현황 및 즉시 송금' },
       { href: '/bank', label: '가상 은행', description: '예적금 이자 수령 및 대출 상품', badge: '금융' },
       { href: '/wallet/activity', label: '자산 활동 내역', description: '수익 및 지출 원장 타임라인' },
@@ -241,6 +248,7 @@ export const CATEGORY_NAV: readonly NavCategory[] = [
 export const PRIMARY_NAV: readonly NavEntry[] = [
   { href: '/', label: '홈' },
   { href: '/stocks', label: '거래소' },
+  { href: '/newspaper', label: '경제 브리프' },
   { href: '/wallet', label: '자산' },
   { href: '/board', label: '커뮤니티' },
 ];
@@ -249,6 +257,7 @@ export const PRIMARY_NAV: readonly NavEntry[] = [
 export const PUBLIC_NAV: readonly NavEntry[] = [
   { href: '/', label: '홈' },
   { href: '/stocks', label: '거래소' },
+  { href: '/newspaper', label: '주간 경제 브리프' },
   { href: '/wallet', label: '자산' },
   { href: '/board', label: '커뮤니티' },
   { href: '/guide', label: '이용 방법' },
@@ -264,6 +273,7 @@ export const PUBLIC_NAV: readonly NavEntry[] = [
 /** Needs a session and current consent. Every one of these is `noindex`. */
 export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/dashboard', label: '내 대시보드' },
+  { href: '/newspaper', label: '주간 경제 브리프' },
   { href: '/wallet', label: '덕지갑' },
   { href: '/bank', label: '가상 금융 (은행)' },
   { href: '/work', label: '잡보드 (작업)' },
@@ -307,6 +317,7 @@ export function isGroup(item: NavItem): item is NavGroup {
 export const HEADER_PUBLIC: readonly NavItem[] = [
   { href: '/', label: '홈' },
   { href: '/stocks', label: '거래소' },
+  { href: '/newspaper', label: '경제 브리프' },
   { href: '/wallet', label: '자산' },
   { href: '/board', label: '커뮤니티' },
   {
@@ -345,6 +356,7 @@ export const HEADER_MEMBER: readonly NavItem[] = [
   {
     label: '소식',
     entries: [
+      { href: '/newspaper', label: '경제 브리프' },
       { href: '/seasons', label: '시즌' },
       { href: '/profile', label: '내 프로필' },
       { href: '/chat', label: '쪽지함' },

@@ -1,4 +1,7 @@
+﻿﻿import Link from 'next/link';
+import { Newspaper } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/cn';
 import { formatMoment } from '@/lib/money';
@@ -37,11 +40,19 @@ export function MarketNews({ events }: { readonly events: readonly MarketEvent[]
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="text-base">시장 소식</CardTitle>
-        <CardDescription>
-          진행 중인 소식이에요. 끝나는 시각까지 해당 종목의 흐름이 그쪽으로 기울어요.
-        </CardDescription>
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div>
+          <CardTitle className="text-base">시장 소식 & 월드 펄스</CardTitle>
+          <CardDescription>
+            진행 중인 소식이에요. 끝나는 시각까지 해당 종목의 흐름이 그쪽으로 기울어요.
+          </CardDescription>
+        </div>
+        <Button asChild variant="outline" size="sm" className="h-8 gap-1.5 text-xs font-semibold shrink-0">
+          <Link href="/newspaper">
+            <Newspaper className="size-3.5 text-primary" />
+            주간 경제 브리프 전문 보기 →
+          </Link>
+        </Button>
       </CardHeader>
       <CardContent className="grid gap-3">
         {events.map((event) => {

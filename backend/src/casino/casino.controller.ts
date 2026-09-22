@@ -21,7 +21,12 @@ import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure, isExpectedCommandFailure, isRoleRefusal } from '../core/pg-error';
-import { CasinoDicePlayDto, CasinoPlayDto, CasinoSelfLimitDto } from './casino.dto';
+import {
+  CasinoDicePlayDto,
+  CasinoPlayDto,
+  CasinoSelfLimitDto,
+  CasinoThemePlayDto,
+} from './casino.dto';
 import { CASINO_OPEN, CasinoInputError, CasinoRepository } from './casino.repository';
 
 /**
@@ -276,6 +281,35 @@ export class CasinoController {
   }
 
   /**
+   * One play of a theme game (hilo_20, treasure_4, gem_5, wheel_20).
+   *
+   * Idempotent, server-authoritative, and checked against limits.
+   */
+  @Post('theme/plays')
+  @ApiOperation({ summary: 'Stake WLD on one play of a theme catalog game' })
+  async playTheme(@Req() request: RequestWithSession, @Body() body: CasinoThemePlayDto) {
+    const repository = this.repository();
+    try {
+      return await repository.playTheme(
+        body.idempotencyKey,
+        requireUserId(request),
+        body.game,
+        body.choice,
+        body.stake,
+      );
+    } catch (error: unknown) {
+      if (isExpectedCommandFailure(error)) {
+        const state = await repository.switchState();
+        if (state !== CASINO_OPEN) throw casinoClosed(state);
+      }
+      throw this.mapped(error, {
+        conflict: 'the theme play was not accepted',
+        forbidden: 'the theme play was not yours to make',
+      });
+    }
+  }
+
+  /**
    * Answered from the request rather than read back, because nothing in the
    * schema can read `casino_self_limits`: 079 revokes the table from
    * moneyverse_app and 080 adds a writer and no reader. The write either
@@ -344,6 +378,15 @@ export class CasinoController {
     return this.guarded(() => this.repository().selfLimit(requireUserId(request)), {
       conflict: 'the self-limit is unavailable',
       forbidden: 'an active membership is required to read a casino limit',
+    });
+  }
+
+  @Get('jackpot')
+  @ApiOperation({ summary: 'Read current casino house reserve and jackpot pool' })
+  async jackpot() {
+    return this.guarded(() => this.repository().jackpotPool(), {
+      conflict: 'the jackpot pool is unavailable',
+      forbidden: 'the jackpot pool is unavailable',
     });
   }
 }

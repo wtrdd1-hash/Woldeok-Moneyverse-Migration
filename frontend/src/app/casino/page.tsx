@@ -28,6 +28,9 @@ import type { CasinoClosure } from './coin';
 import { LuckySlotsGame } from './slots-game';
 import { HiLoCardGame } from './hilo-game';
 import { ThemeGameCard } from './theme-games';
+import { WheelGame } from './wheel-game';
+import { CasinoJackpotTicker } from './casino-jackpot-ticker';
+import type { CasinoJackpotData } from './casino-jackpot-ticker';
 
 /** One member's stakes and headroom. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
@@ -135,18 +138,23 @@ export default async function CasinoPage() {
   }
   await requireMember();
 
-  const [terms, fairness, games, history, selfLimit, gameClock] = await Promise.all([
+  const [terms, fairness, games, history, selfLimit, gameClock, jackpot] = await Promise.all([
     loadCasino<CoinTerms>('/api/v1/casino/coin/terms'),
     loadCasino<CoinFairness>('/api/v1/casino/coin/fairness'),
     loadCasino<GameTerms[]>('/api/v1/casino/games/terms'),
     apiOrNull<CasinoHistoryEntry[]>('/api/v1/casino/history'),
     apiOrNull<SelfLimit>('/api/v1/casino/self-limit'),
     apiOrNull<ServerGameClock>('/api/v1/casino/clock'),
+    apiOrNull<CasinoJackpotData>('/api/v1/casino/jackpot'),
   ]);
 
   const dice = games.state === 'ok' ? games.data.filter((row) => row.game !== 'coin') : [];
   const parityGame = dice.find((g) => g.game === 'dice_parity');
   const numberGame = dice.find((g) => g.game === 'dice_number');
+  const hiloGame = dice.find((g) => g.game === 'hilo_20');
+  const treasureGame = dice.find((g) => g.game === 'treasure_4');
+  const gemGame = dice.find((g) => g.game === 'gem_5');
+  const wheelGame = dice.find((g) => g.game === 'wheel_20');
 
   const plays = history ?? [];
 
@@ -189,11 +197,52 @@ export default async function CasinoPage() {
         userLossRemaining,
       )
     : '0';
+  const hiloHeadroom = hiloGame
+    ? playableHeadroom(
+        hiloGame.remaining_stake,
+        hiloGame.remaining_loss,
+        userStakeRemaining,
+        userLossRemaining,
+      )
+    : parityHeadroom;
+  const treasureHeadroom = treasureGame
+    ? playableHeadroom(
+        treasureGame.remaining_stake,
+        treasureGame.remaining_loss,
+        userStakeRemaining,
+        userLossRemaining,
+      )
+    : numberHeadroom;
+  const gemHeadroom = gemGame
+    ? playableHeadroom(
+        gemGame.remaining_stake,
+        gemGame.remaining_loss,
+        userStakeRemaining,
+        userLossRemaining,
+      )
+    : numberHeadroom;
+  const wheelHeadroom = wheelGame
+    ? playableHeadroom(
+        wheelGame.remaining_stake,
+        wheelGame.remaining_loss,
+        userStakeRemaining,
+        userLossRemaining,
+      )
+    : parityHeadroom;
+
   const coinExhausted = !open || selfExcluded || belowMinimum(coinHeadroom, open.min_stake);
   const parityExhausted =
     !parityGame || selfExcluded || belowMinimum(parityHeadroom, parityGame.min_stake);
   const numberExhausted =
     !numberGame || selfExcluded || belowMinimum(numberHeadroom, numberGame.min_stake);
+  const hiloExhausted =
+    !hiloGame || selfExcluded || belowMinimum(hiloHeadroom, hiloGame.min_stake);
+  const treasureExhausted =
+    !treasureGame || selfExcluded || belowMinimum(treasureHeadroom, treasureGame.min_stake);
+  const gemExhausted =
+    !gemGame || selfExcluded || belowMinimum(gemHeadroom, gemGame.min_stake);
+  const wheelExhausted =
+    !wheelGame || selfExcluded || belowMinimum(wheelHeadroom, wheelGame.min_stake);
 
   return (
     <div data-page="casino" className="mv-page mv-page--gameplay grid gap-6 pb-12">
@@ -213,6 +262,7 @@ export default async function CasinoPage() {
       </PageHeader>
 
       <CasinoVisualHero />
+      <CasinoJackpotTicker data={jackpot} />
 
       {gameClock ? (
         <CasinoClock
@@ -305,12 +355,12 @@ export default async function CasinoPage() {
           <Card className="rounded-2xl border-border/80 shadow-sm">
             <CardHeader>
               <CardTitle className="text-base font-semibold">
-                <T korean="게임별 확률·배당 공개" english="Published Odds and Payouts" />
+                <T korean="7대 정규 게임별 확률·배당 공개" english="Published Odds and Payouts (7 Official Games)" />
               </CardTitle>
               <CardDescription>
                 <T
-                  korean="실제 서버 정산에 사용하는 공식 설정값입니다. 슬롯은 주사위 숫자, 하이로우는 주사위 홀짝 규칙을 사용합니다."
-                  english="These are the official server settlement settings. Slots use dice-number rules and Hi-Lo uses dice-parity rules."
+                  korean="기획서(CASINO_GAME_SYSTEM_SPEC) 7대 정규 게임의 실제 서버 권위적 원장 정산 공식 설정값입니다 (RTP 95% 공정성 보장)."
+                  english="Official server-authoritative settlement settings for the 7 launch games (95% baseline RTP)."
                 />
               </CardDescription>
             </CardHeader>
@@ -329,16 +379,16 @@ export default async function CasinoPage() {
                     {parityGame ? (
                       <>
                         <OddsRow name="주사위 홀짝" terms={parityGame} />
-                        <OddsRow name="하이 앤 로우" terms={parityGame} />
-                        <OddsRow name="컬러 휠" terms={parityGame} />
+                        <OddsRow name="하이 앤 로우" terms={hiloGame ?? parityGame} />
+                        <OddsRow name="컬러 휠" terms={wheelGame ?? parityGame} />
                       </>
                     ) : null}
                     {numberGame ? (
                       <>
                         <OddsRow name="주사위 숫자" terms={numberGame} />
                         <OddsRow name="럭키 슬롯" terms={numberGame} />
-                        <OddsRow name="보물 상자" terms={numberGame} />
-                        <OddsRow name="럭키 젬" terms={numberGame} />
+                        <OddsRow name="보물 상자" terms={treasureGame ?? numberGame} />
+                        <OddsRow name="럭키 젬" terms={gemGame ?? numberGame} />
                       </>
                     ) : null}
                   </TableBody>
@@ -351,7 +401,7 @@ export default async function CasinoPage() {
             </CardContent>
           </Card>
 
-          {/* 3개 서버 규칙과 5개 테마 인터페이스 */}
+          {/* 7대 정규 게임 카탈로그 탭 */}
           <Tabs defaultValue="coin" className="min-w-0 w-full space-y-6">
             <div className="sticky top-[70px] z-20 -mx-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
               <TabsList className="inline-flex h-auto min-w-max gap-1 rounded-2xl border border-border/80 bg-card/90 p-2 shadow-lg backdrop-blur-md">
@@ -362,28 +412,28 @@ export default async function CasinoPage() {
                   value="dice_parity"
                   className="min-h-11 px-4 text-sm font-semibold rounded-xl"
                 >
-                  <T korean="주사위 홀짝" english="Dice Parity" />
+                  🎲 <T korean="주사위 홀짝" english="Dice Parity" />
                 </TabsTrigger>
                 <TabsTrigger
                   value="dice_number"
                   className="min-h-11 px-4 text-sm font-semibold rounded-xl"
                 >
-                  <T korean="주사위 숫자" english="Dice Number" />
-                </TabsTrigger>
-                <TabsTrigger value="slots" className="min-h-11 px-4 text-sm font-semibold rounded-xl">
-                  <T korean="럭키 슬롯" english="Lucky Slots" />
+                  🎯 <T korean="주사위 숫자" english="Dice Number" />
                 </TabsTrigger>
                 <TabsTrigger value="hilo" className="min-h-11 px-4 text-sm font-semibold rounded-xl">
-                  🃏 <T korean="하이 앤 로우" english="Hi-Lo Cards" />
-                </TabsTrigger>
-                <TabsTrigger value="wheel" className="min-h-11 px-4 text-sm font-semibold rounded-xl">
-                  컬러 휠
+                  🃏 <T korean="하이 / 로우 20" english="Hi-Lo 20" />
                 </TabsTrigger>
                 <TabsTrigger value="treasure" className="min-h-11 px-4 text-sm font-semibold rounded-xl">
-                  보물 상자
+                  🗝️ <T korean="보물 상자" english="Treasure Vault" />
                 </TabsTrigger>
                 <TabsTrigger value="gems" className="min-h-11 px-4 text-sm font-semibold rounded-xl">
-                  럭키 젬
+                  💎 <T korean="럭키 젬" english="Gem Match 5" />
+                </TabsTrigger>
+                <TabsTrigger value="wheel" className="min-h-11 px-4 text-sm font-semibold rounded-xl">
+                  🎡 <T korean="20구획 휠" english="20-Segment Wheel" />
+                </TabsTrigger>
+                <TabsTrigger value="slots" className="min-h-11 px-4 text-sm font-semibold rounded-xl">
+                  🎰 <T korean="럭키 슬롯 (심의 중)" english="Lucky Slots (Review)" />
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -418,7 +468,7 @@ export default async function CasinoPage() {
                 <Card className="rounded-2xl border-border/80 shadow-md">
                   <CardHeader>
                     <CardTitle className="text-xl flex items-center gap-2 font-bold">
-                      <T korean="주사위 홀짝 맞추기" english="Dice Parity Guess" />
+                      🎲 <T korean="주사위 홀짝 맞추기" english="Dice Parity Guess" />
                     </CardTitle>
                     <CardDescription>
                       주사위 눈이 홀수인지 짝수인지 예측합니다. 적중 확률{' '}
@@ -452,7 +502,7 @@ export default async function CasinoPage() {
                 <Card className="rounded-2xl border-border/80 shadow-md">
                   <CardHeader>
                     <CardTitle className="text-xl flex items-center gap-2 font-bold">
-                      <T korean="주사위 단일 숫자 맞추기" english="Dice Single Number" />
+                      🎯 <T korean="주사위 단일 숫자 맞추기" english="Dice Single Number" />
                     </CardTitle>
                     <CardDescription>
                       1부터 6까지 나올 눈을 정확히 맞춥니다. 적중 확률{' '}
@@ -496,65 +546,67 @@ export default async function CasinoPage() {
               )}
             </TabsContent>
 
-            {/* 5. 하이 앤 로우 */}
+            {/* 4. 하이 앤 로우 20 */}
             <TabsContent value="hilo" className="mt-6 pt-2">
-              {parityGame ? (
+              {hiloGame && parityGame ? (
                 <HiLoCardGame
-                  minStake={parityGame.min_stake}
-                  maxStake={parityGame.max_stake}
+                  minStake={hiloGame.min_stake}
+                  maxStake={hiloGame.max_stake}
                   remainingStake={parityHeadroom}
-                  exhausted={parityExhausted}
-                  winProbability={percentFromPpm(parityGame.win_probability_ppm)}
+                  exhausted={hiloExhausted}
+                  winProbability={percentFromPpm(hiloGame.win_probability_ppm)}
                   payoutMultiplier={multiplierFromPpm(parityGame.payout_multiplier_ppm)}
                 />
               ) : (
-                <EmptyState title="하이앤로우의 서버 규칙을 불러오지 못했어요." />
+                <EmptyState title="하이앤로우 20의 서버 규칙을 불러오지 못했어요." />
               )}
             </TabsContent>
 
-            <TabsContent value="wheel" className="mt-6 pt-2">
-              {parityGame ? (
-                <ThemeGameCard
-                  game="wheel"
-                  minStake={parityGame.min_stake}
-                  maxStake={parityGame.max_stake}
-                  remainingStake={parityHeadroom}
-                  exhausted={parityExhausted}
-                  winProbability={percentFromPpm(parityGame.win_probability_ppm)}
-                  payoutMultiplier={multiplierFromPpm(parityGame.payout_multiplier_ppm)}
-                />
-              ) : (
-                <EmptyState title="컬러 휠의 서버 규칙을 불러오지 못했어요." />
-              )}
-            </TabsContent>
+            {/* 5. 보물 상자 */}
             <TabsContent value="treasure" className="mt-6 pt-2">
-              {numberGame ? (
+              {treasureGame ? (
                 <ThemeGameCard
                   game="treasure"
-                  minStake={numberGame.min_stake}
-                  maxStake={numberGame.max_stake}
-                  remainingStake={numberHeadroom}
-                  exhausted={numberExhausted}
-                  winProbability={percentFromPpm(numberGame.win_probability_ppm)}
-                  payoutMultiplier={multiplierFromPpm(numberGame.payout_multiplier_ppm)}
+                  minStake={treasureGame.min_stake}
+                  maxStake={treasureGame.max_stake}
+                  remainingStake={treasureHeadroom}
+                  exhausted={treasureExhausted}
+                  winProbability={percentFromPpm(treasureGame.win_probability_ppm)}
+                  payoutMultiplier={multiplierFromPpm(treasureGame.payout_multiplier_ppm)}
                 />
               ) : (
                 <EmptyState title="보물 상자의 서버 규칙을 불러오지 못했어요." />
               )}
             </TabsContent>
+
+            {/* 6. 럭키 젬 */}
             <TabsContent value="gems" className="mt-6 pt-2">
-              {numberGame ? (
+              {gemGame ? (
                 <ThemeGameCard
                   game="gems"
-                  minStake={numberGame.min_stake}
-                  maxStake={numberGame.max_stake}
-                  remainingStake={numberHeadroom}
-                  exhausted={numberExhausted}
-                  winProbability={percentFromPpm(numberGame.win_probability_ppm)}
-                  payoutMultiplier={multiplierFromPpm(numberGame.payout_multiplier_ppm)}
+                  minStake={gemGame.min_stake}
+                  maxStake={gemGame.max_stake}
+                  remainingStake={gemHeadroom}
+                  exhausted={gemExhausted}
+                  winProbability={percentFromPpm(gemGame.win_probability_ppm)}
+                  payoutMultiplier={multiplierFromPpm(gemGame.payout_multiplier_ppm)}
                 />
               ) : (
                 <EmptyState title="럭키 젬의 서버 규칙을 불러오지 못했어요." />
+              )}
+            </TabsContent>
+
+            {/* 7. 20구획 휠 */}
+            <TabsContent value="wheel" className="mt-6 pt-2">
+              {wheelGame ? (
+                <WheelGame
+                  minStake={wheelGame.min_stake}
+                  maxStake={wheelGame.max_stake}
+                  remainingStake={wheelHeadroom}
+                  exhausted={wheelExhausted}
+                />
+              ) : (
+                <EmptyState title="20구획 휠의 서버 규칙을 불러오지 못했어요." />
               )}
             </TabsContent>
           </Tabs>
@@ -751,7 +803,7 @@ function FairnessNote({ fairness }: { readonly fairness: Loaded<CoinFairness> })
     <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 grid gap-3 shadow-sm">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-primary/20 pb-2.5">
         <span className="text-xs font-bold text-primary flex items-center gap-1.5">
-          암호학적 난수(RNG) 공정성 100만 회 통계 검증 보고서
+          🛡️ 암호학적 난수(RNG) 공정성 100만 회 통계 검증 보고서
         </span>
         <Badge variant="outline" className="text-[11px] font-mono text-emerald-500 border-emerald-500/30 bg-emerald-500/10">
           신뢰도 99.7% 정규분포 적합

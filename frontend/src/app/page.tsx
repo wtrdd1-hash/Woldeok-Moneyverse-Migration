@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿﻿import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
@@ -50,7 +50,6 @@ export const metadata: Metadata = {
     images: [homeOgImage],
   },
 };
-
 
 interface Announcement {
   readonly announcementId: string;
@@ -119,14 +118,23 @@ export default async function HomePage() {
           </h2>
           <ul className="mt-6 grid gap-3">
             <StatusRowItem
-              glyph="▣"
-              term={<T korean="내 지갑" english="My wallet" />}
+              glyph="◈"
+              term={<T korean="내 지갑" english="Your wallet" />}
               detail={<T korean="원장 기준의 실제 잔액과 기록" english="Ledger-backed balance and history" />}
               href="/wallet"
             >
               {/* Signed in, this is the member's own balance; signed out, it
                   stays the invitation the prerendered HTML carries. */}
               <WalletGlance />
+            </StatusRowItem>
+
+            <StatusRowItem
+              glyph="📰"
+              term={<T korean="주간 경제 브리프" english="Weekly World Brief" />}
+              detail={<T korean="실시간 월드 펄스 & 시장 심리" english="Live pulse & market sentiment" />}
+              href="/newspaper"
+            >
+              <T korean="브리프 읽기" english="Read brief" />
             </StatusRowItem>
 
             <StatusRowItem
@@ -211,14 +219,14 @@ export default async function HomePage() {
             detail={<T korean="로그인부터 첫 보상 확인까지" english="From sign-in to your first reward" />}
           />
           <PolicyLink
+            href="/newspaper"
+            title={<T korean="주간 경제 브리프" english="Weekly World Brief" />}
+            detail={<T korean="실시간 시장 심리와 핵심 경제 개념" english="Live market sentiment & lore" />}
+          />
+          <PolicyLink
             href="/shop"
             title={<T korean="게임 상점 미리 보기" english="Preview the game shop" />}
             detail={<T korean="WLD로 살 수 있는 아이템 확인" english="See what your WLD can unlock" />}
-          />
-          <PolicyLink
-            href="/announcements"
-            title={<T korean="운영 소식 확인" english="Read the latest updates" />}
-            detail={<T korean="변경 사항과 새로운 콘텐츠" english="Changes and new content" />}
           />
         </div>
       </section>

@@ -268,3 +268,139 @@ export async function playDiceNumber(
 ): Promise<CasinoPlayState> {
   return rollDie('dice_number', formData, isDieFace, '1부터 6 사이의 숫자를 골라 주세요.');
 }
+
+interface ThemeReceipt {
+  readonly play_id: string;
+  readonly outcome: string;
+  readonly net_amount: unknown;
+  readonly replayed: boolean;
+}
+
+export async function playThemeGame(
+  game: 'hilo_20' | 'treasure_4' | 'gem_5' | 'wheel_20',
+  formData: FormData,
+  choiceIsValid: (choice: string) => boolean,
+  choiceHelp: string,
+  formatOutcome: (outcome: string) => string,
+): Promise<CasinoPlayState> {
+  const choice = String(formData.get('choice') ?? '');
+  const parsedStake = wholeNumber(formData.get('stake'));
+  const stake = parsedStake;
+
+  if (!choiceIsValid(choice)) {
+    return { status: 'error', message: choiceHelp };
+  }
+  if (stake === null) {
+    return { status: 'error', message: '1 WLD 이상 정수만 걸 수 있어요.' };
+  }
+
+  try {
+    const receipt = await mutate<ThemeReceipt>('/api/v1/casino/theme/plays', {
+      body: { game, choice, stake, idempotencyKey: idempotencyKey() },
+    });
+    revalidatePath('/casino');
+
+    const netAmount = canonicalIntegerString(receipt.net_amount);
+    if (netAmount === null)
+      throw new TypeError('casino theme receipt returned an invalid net amount');
+    const amount = groupDigits(absAmount(netAmount));
+    const result = resultOf(netAmount);
+    const detail = formatOutcome(receipt.outcome);
+    const outcome =
+      result === 'win'
+        ? `${detail}. ${amount} WLD를 얻었어요.`
+        : result === 'loss'
+          ? `${detail}. ${amount} WLD를 잃었어요.`
+          : detail;
+
+    return {
+      status: 'ok',
+      message: receipt.replayed ? `이미 처리된 판이에요. ${outcome}` : outcome,
+      tone: resultTone(result),
+      result,
+      netAmount,
+      replayed: receipt.replayed,
+      themeOutcome: receipt.outcome,
+    };
+  } catch (error) {
+    return closedOr(
+      error,
+      '이번 판은 받아들여지지 않았어요. 잔액과 오늘 남은 한도, 내가 건 잠금을 다시 확인해 주세요.',
+    );
+  }
+}
+
+export async function playHiLo20(
+  _previous: CasinoPlayState,
+  formData: FormData,
+): Promise<CasinoPlayState> {
+  return playThemeGame(
+    'hilo_20',
+    formData,
+    (c) => c === 'high' || c === 'low',
+    'High(11~20) 또는 Low(1~10)를 선택해 주세요.',
+    (outcome) => {
+      const face = Number(outcome);
+      const category = face >= 11 ? 'High (11~20)' : 'Low (1~10)';
+      return `추첨 숫자 ${face} (${category})`;
+    },
+  );
+}
+
+export async function playTreasure4(
+  _previous: CasinoPlayState,
+  formData: FormData,
+): Promise<CasinoPlayState> {
+  return playThemeGame(
+    'treasure_4',
+    formData,
+    (c) => ['1', '2', '3', '4'].includes(c),
+    '1번부터 4번 사이의 보물 상자를 골라 주세요.',
+    (outcome) => `보물이 든 상자는 ${outcome}번 상자였어요`,
+  );
+}
+
+const GEM_NAMES: Record<string, string> = {
+  ruby: '루비 (빨강)',
+  emerald: '에메랄드 (초록)',
+  sapphire: '사파이어 (파랑)',
+  topaz: '토파즈 (노랑)',
+  amethyst: '자수정 (보라)',
+};
+
+export async function playGem5(
+  _previous: CasinoPlayState,
+  formData: FormData,
+): Promise<CasinoPlayState> {
+  return playThemeGame(
+    'gem_5',
+    formData,
+    (c) => ['ruby', 'emerald', 'sapphire', 'topaz', 'amethyst'].includes(c),
+    '5가지 보석 중 하나를 골라 주세요.',
+    (outcome) => `추첨된 보석은 ${GEM_NAMES[outcome] ?? outcome}이었어요`,
+  );
+}
+
+const WHEEL_CLASSES: Record<string, string> = {
+  blue: '블루 구획 (50%)',
+  gold: '골드 구획 (25%)',
+  violet: '바이올렛 구획 (10%)',
+  neutral: '중립 구획 (꽝)',
+};
+
+export async function playWheel20(
+  _previous: CasinoPlayState,
+  formData: FormData,
+): Promise<CasinoPlayState> {
+  return playThemeGame(
+    'wheel_20',
+    formData,
+    (c) => ['blue', 'gold', 'violet'].includes(c),
+    '블루, 골드, 바이올렛 구획 중 하나를 골라 주세요.',
+    (outcome) => {
+      const [seg, cls] = outcome.split(':');
+      const clsName = WHEEL_CLASSES[cls ?? ''] ?? cls;
+      return `휠 결과: ${seg}번 슬롯 → ${clsName}`;
+    },
+  );
+}

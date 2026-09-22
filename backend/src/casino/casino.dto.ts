@@ -74,3 +74,54 @@ export class CasinoSelfLimitDto {
   @IsISO8601()
   readonly lockedUntil?: string;
 }
+
+export class CasinoThemePlayDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  readonly idempotencyKey!: string;
+
+  @ApiProperty({ enum: ['hilo_20', 'treasure_4', 'gem_5', 'wheel_20'] })
+  @IsIn(['hilo_20', 'treasure_4', 'gem_5', 'wheel_20'])
+  readonly game!: 'hilo_20' | 'treasure_4' | 'gem_5' | 'wheel_20';
+
+  @ApiProperty({
+    enum: [
+      'high',
+      'low',
+      '1',
+      '2',
+      '3',
+      '4',
+      'ruby',
+      'emerald',
+      'sapphire',
+      'topaz',
+      'amethyst',
+      'blue',
+      'gold',
+      'violet',
+    ],
+  })
+  @IsIn([
+    'high',
+    'low',
+    '1',
+    '2',
+    '3',
+    '4',
+    'ruby',
+    'emerald',
+    'sapphire',
+    'topaz',
+    'amethyst',
+    'blue',
+    'gold',
+    'violet',
+  ])
+  readonly choice!: string;
+
+  @ApiProperty({ type: Number, minimum: 1 })
+  @IsInt()
+  @IsPositive()
+  readonly stake!: number;
+}

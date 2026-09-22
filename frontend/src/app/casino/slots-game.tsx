@@ -9,7 +9,6 @@ import { absAmount } from './coin';
 import { playDiceNumber } from './actions';
 import { CASINO_IDLE } from './casino-state';
 import { groupDigits } from '@/lib/money';
-import { QuickStakeButtons } from './casino-forms';
 
 const SPIN_SYMBOLS = ['🍒', '🍋', '🔔', '💎', '⭐', '7️⃣'] as const;
 const randomSymbol = (): string =>
@@ -49,23 +48,7 @@ export function LuckySlotsGame({
 }) {
   const [state, formAction, pending] = useActionState(playDiceNumber, CASINO_IDLE);
   const [reels, setReels] = useState<[string, string, string]>(['❔', '❔', '❔']);
-  const [stake, setStake] = useState(minStake);
   const maxPlayable = minAmount(maxStake, remainingStake);
-
-  const handleQuickAdd = (add: number) => {
-    const cur = BigInt((stake || '0').replace(/,/g, ''));
-    const nxt = cur + BigInt(add);
-    const max = BigInt((maxPlayable || '0').replace(/,/g, ''));
-    if (max > BigInt(0) && nxt > max) {
-      setStake(max.toString());
-    } else {
-      setStake(nxt.toString());
-    }
-  };
-
-  const handleMax = () => {
-    setStake(maxPlayable);
-  };
 
   useEffect(() => {
     if (pending) {
@@ -95,11 +78,16 @@ export function LuckySlotsGame({
   return (
     <Card className="border-amber-500/20 bg-gradient-to-b from-card to-amber-500/5">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-xl text-amber-500">
-          럭키 777 슬롯
-        </CardTitle>
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="flex items-center gap-2 text-xl text-amber-500 font-bold">
+            <span>🎰</span> 럭키 777 슬롯
+          </CardTitle>
+          <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+            ⚖️ 연령등급 및 규제 심의 준비 중 (P0 보류)
+          </span>
+        </div>
         <CardDescription>
-          서버의 주사위 숫자 규칙을 슬롯 테마로 보여줍니다. 서버 결과 6만 777이며 적중 확률{' '}
+          기획서 제6절(Slots deferred)에 따라 정규 7대 카지노 카탈로그 외 별도 심의 진행 중인 테마입니다. 서버 주사위 6번 규칙을 기반으로 시연되며 적중 확률{' '}
           {winProbability}%, 적중 시 {payoutMultiplier}배로 정산됩니다.
         </CardDescription>
       </CardHeader>
@@ -131,8 +119,7 @@ export function LuckySlotsGame({
                 type="number"
                 min={minStake}
                 max={maxPlayable}
-                value={stake}
-                onChange={(e) => setStake(e.target.value)}
+                defaultValue={minStake}
                 required
                 disabled={pending || exhausted}
                 className="pr-12 text-lg font-mono font-bold"
@@ -141,14 +128,13 @@ export function LuckySlotsGame({
                 WLD
               </span>
             </div>
-            <QuickStakeButtons onAdd={handleQuickAdd} onMax={handleMax} />
             <p className="text-xs text-muted-foreground">
               한 판 최소 {groupDigits(minStake)} WLD · 현재 한도 기준 최대 {groupDigits(maxPlayable)} WLD
             </p>
           </div>
 
           <Button type="submit" disabled={pending || exhausted} className="h-12 w-full text-base font-bold">
-            {pending ? '서버에서 결과 확인 중…' : exhausted ? '현재 한도로 플레이 불가' : '777에 베팅하기'}
+            {pending ? '서버에서 결과 확인 중…' : exhausted ? '현재 한도로 플레이 불가' : '🎰 777에 베팅하기'}
           </Button>
 
           {resultText && (

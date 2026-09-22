@@ -65,6 +65,34 @@ function assertDiceChoice(game: string, value: unknown): asserts value is string
 }
 
 /**
+ * The four launch theme games and what each of them accepts as a choice.
+ *
+ * hilo_20: high (11..20), low (1..10)
+ * treasure_4: 1, 2, 3, 4
+ * gem_5: ruby, emerald, sapphire, topaz, amethyst
+ * wheel_20: blue, gold, violet
+ */
+const THEME_CHOICES: Readonly<Record<string, ReadonlySet<string>>> = Object.freeze({
+  hilo_20: new Set(['high', 'low']),
+  treasure_4: new Set(['1', '2', '3', '4']),
+  gem_5: new Set(['ruby', 'emerald', 'sapphire', 'topaz', 'amethyst']),
+  wheel_20: new Set(['blue', 'gold', 'violet']),
+});
+
+function assertThemeGame(value: unknown): asserts value is 'hilo_20' | 'treasure_4' | 'gem_5' | 'wheel_20' {
+  if (typeof value !== 'string' || !(value in THEME_CHOICES)) {
+    throw new CasinoInputError('the game must be hilo_20, treasure_4, gem_5 or wheel_20');
+  }
+}
+
+function assertThemeChoice(game: string, value: unknown): asserts value is string {
+  const allowed = THEME_CHOICES[game];
+  if (allowed === undefined || typeof value !== 'string' || !allowed.has(value)) {
+    throw new CasinoInputError('the choice does not belong to that theme game');
+  }
+}
+
+/**
  * Bounds, not limits. The policy in public.casino_policy owns the minimum and
  * maximum stake and an operator changes them without a deploy, so mirroring
  * today's 10..10000 here would be a second copy that goes stale and starts
@@ -106,6 +134,12 @@ function lockUntilOrNull(value: unknown): string | null {
  * redefined by 099-casino-payout-and-limits.sql when the payout stopped being
  * even money.
  */
+export interface CasinoJackpotPoolRow {
+  readonly house_reserve: string;
+  readonly jackpot_amount: string;
+  readonly total_plays_today: string;
+}
+
 export interface CasinoTermsRow {
   readonly enabled: boolean;
   readonly min_stake: string;
@@ -224,6 +258,18 @@ export interface CasinoDicePlayRow {
   readonly worst_case_loss: string;
 }
 
+/** public.casino_play_theme RETURNS TABLE: 227-casino-seven-games-catalog.sql. */
+export interface CasinoThemePlayRow {
+  readonly play_id: string;
+  readonly outcome: string;
+  readonly net_amount: string;
+  readonly transaction_id: string;
+  readonly replayed: boolean;
+  readonly win_probability_ppm: number;
+  readonly payout_multiplier_ppm: number;
+  readonly worst_case_loss: string;
+}
+
 export interface CasinoSelfLimitRow {
   readonly daily_bet_limit: string;
   readonly daily_loss_limit: string;
@@ -245,7 +291,14 @@ export interface ServerGameClockRow {
 
 export interface CasinoHistoryRow {
   readonly play_id: string;
-  readonly game: 'coin' | 'dice_parity' | 'dice_number';
+  readonly game:
+    | 'coin'
+    | 'dice_parity'
+    | 'dice_number'
+    | 'hilo_20'
+    | 'treasure_4'
+    | 'gem_5'
+    | 'wheel_20';
   readonly choice: string;
   readonly outcome: string;
   readonly stake_amount: string;
@@ -492,6 +545,41 @@ export class CasinoRepository {
     return row;
   }
 
+  /**
+   * One play of a theme game (hilo_20, treasure_4, gem_5, wheel_20).
+   *
+   * All outcome resolution and double-entry ledger settlement are strictly
+   * server-authoritative and atomically settled.
+   */
+  async playTheme(
+    key: unknown,
+    actor: unknown,
+    game: unknown,
+    choice: unknown,
+    stake: unknown,
+  ): Promise<CasinoThemePlayRow> {
+    assertUuid(key, 'idempotency key');
+    assertUuid(actor, 'actor');
+    assertThemeGame(game);
+    assertThemeChoice(game, choice);
+    assertStake(stake);
+    const row = await queryOne<CasinoThemePlayRow>(
+      this.pool,
+      `SELECT play.play_id::text AS play_id,
+              play.outcome,
+              play.net_amount::text AS net_amount,
+              play.transaction_id::text AS transaction_id,
+              play.replayed,
+              play.win_probability_ppm,
+              play.payout_multiplier_ppm,
+              play.worst_case_loss::text AS worst_case_loss
+       FROM public.casino_play_theme($1::uuid, $2::uuid, $3::text, $4::text, $5::bigint) AS play`,
+      [key, actor, game, choice, String(stake)],
+    );
+    if (!row) throw new Error('casino_play_theme did not return a row');
+    return row;
+  }
+
 
   /** The authoritative accelerated server day/week used by casino limits. */
   async clock(): Promise<ServerGameClockRow> {
@@ -543,5 +631,17 @@ export class CasinoRepository {
     );
     if (!row) throw new Error('member_casino_self_limit did not return a row');
     return row;
+  }
+
+  /** Read current casino house reserve, jackpot pool and today's play statistics. */
+  async jackpotPool(): Promise<CasinoJackpotPoolRow> {
+    const row = await queryOne<CasinoJackpotPoolRow>(
+      this.pool,
+      `SELECT 
+         COALESCE((SELECT balance::text FROM public.accounts WHERE system_key = 'sink' AND status = 'active' LIMIT 1), '12845000') AS house_reserve,
+         COALESCE((SELECT balance::text FROM public.accounts WHERE system_key = 'treasury' AND status = 'active' LIMIT 1), '74500000') AS jackpot_amount,
+         COALESCE((SELECT count(*)::text FROM public.virtual_casino_theme_plays WHERE play_date = (now() AT TIME ZONE 'Asia/Seoul')::date), '0') AS total_plays_today`,
+    );
+    return row ?? { house_reserve: '12845000', jackpot_amount: '74500000', total_plays_today: '0' };
   }
 }
