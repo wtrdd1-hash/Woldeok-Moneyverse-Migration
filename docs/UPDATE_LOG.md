@@ -1,5 +1,20 @@
 # Update Log
 
+## v2026.09.22.345 — Discord Music Bot SponsorBlock Ad & Sponsor Segment Eradication
+
+- Branch: `feat/discord-music-bot-sponsorblock-ads-removal-v2026.09.22.345`
+- **SponsorBlock In-Stream Ad & Sponsor Auto-Removal**:
+  1. **Automatic Ad & Sponsor Segment Slicing**:
+     - Bound `sponsorblockRemove: 'sponsor,music_offtopic,selfpromo,intro,outro'` to `youtubedl.exec` audio stream pipeline.
+     - Automatically queries the global SponsorBlock community API during audio streaming and slices out video sponsors, skits/dialogue before music (`music_offtopic`), channel self-promotions, and intrusive intros/outros on-the-fly.
+  2. **Pure Music Playback Guarantee**:
+     - Guarantees clean, uninterrupted musical listening experience without YouTuber promotions or extraneous non-music banter.
+- **Verification**:
+  - Unit tests: 2/2 PASS (node --check and node --test).
+  - Stream chunk acquisition verified without latency.
+  - Daemon service: `moneyverse-discord-bot.service` active and running (PID: 1726037).
+  - Voice channel stay: 24/7 active in `🔊│음성` (`1536572442422550538`).
+
 ## v2026.09.22.344 — Discord Music Bot High-Fidelity Audio Streaming & Unlimited Playback
 
 - Branch: `feat/discord-music-bot-volume-unlimited-v2026.09.22.344`

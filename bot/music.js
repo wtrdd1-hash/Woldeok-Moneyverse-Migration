@@ -347,6 +347,7 @@ export class MusicManager {
         quiet: true,
         noWarnings: true,
         jsRuntimes: 'node',
+        sponsorblockRemove: 'sponsor,music_offtopic,selfpromo,intro,outro',
       });
       this.currentProcess = process;
       process.catch((error) => {

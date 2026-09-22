@@ -1,3 +1,18 @@
+## v2026.09.22.345 — 디스코드 음악 봇 SponsorBlock 광고·협찬·인트로 자동 스킵 엔진 탑재
+
+- 적용 브랜치: `feat/discord-music-bot-sponsorblock-ads-removal-v2026.09.22.345`
+- **SponsorBlock 기반 광고/스폰서 구간 실시간 자동 절단**:
+  1. **광고·협찬·비음악 인트로 자동 스킵 연동**:
+     - `youtubedl.exec` 스트리밍 파이프라인에 `sponsorblockRemove: 'sponsor,music_offtopic,selfpromo,intro,outro'` 옵션 적용.
+     - 음원 스트리밍 시 글로벌 SponsorBlock 커뮤니티 데이터베이스와 실시간 연동하여 유튜버 자체 협찬 광고, 노래 전후의 대화/스킷 연기(`music_offtopic`), 채널 홍보(`selfpromo`), 인트로/아웃트로를 1초 지연 없이 온더플라이로 자동 절단.
+  2. **순수 음악 감상 환경 보장**:
+     - 불필요한 홍보 음성이나 긴 인트로 잡담 없이 곡 본편만 즉시 재생되도록 청취 품질 극대화.
+- **품질 검증 및 서비스 상태**:
+  - 단위 테스트: `npm test` -> 2/2 PASS (100% 통과).
+  - 스트림 청크 수신 지연 없는 정상 출력 검증 완료.
+  - 데몬 서비스: `moneyverse-discord-bot.service` 정상 가동 (PID: 1726037, Active).
+  - 음성 채널 상주: `🔊│음성` (`1536572442422550538`) 채널 24/7 불사 상주 정상 가동 확인.
+
 ## v2026.09.22.344 — 디스코드 음악 봇 실시간 볼륨 조절(/volume) & 무제한 스트리밍 지원 및 MCP 원격 통제 체계 완결
 
 - 적용 브랜치: `feat/discord-music-bot-volume-unlimited-v2026.09.22.344`
