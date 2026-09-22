@@ -1,3 +1,7 @@
+## v2026.09.23.381 — Stock operator idempotency contract
+- Manual price changes, market-event publication, and corporate actions now require caller-owned UUID idempotency keys.
+- Existing admin clients already send these keys; schema, privileges, and ledger semantics are unchanged.
+
 ## v2026.09.21.322 — Migration authority fail-closed gate
 - Production migration execution now rejects database-applied migration filenames absent from the exact repository checkout.
 - This prevents database-ahead/untracked schema drift from silently passing deploy migration gates while preserving checksum immutability.

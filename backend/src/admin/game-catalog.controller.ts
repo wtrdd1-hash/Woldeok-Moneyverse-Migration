@@ -92,10 +92,9 @@ export class SetStockPriceDto {
   @Min(10)
   readonly price!: number;
 
-  @ApiProperty({ required: false, format: 'uuid' })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid', description: 'Client-generated key reused when retrying the same mutation' })
   @IsUUID()
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey!: string;
 }
 
 /**
@@ -142,10 +141,9 @@ export class PublishMarketEventDto {
   @IsIn(['operator', 'ai'])
   readonly source?: 'operator' | 'ai';
 
-  @ApiProperty({ required: false, format: 'uuid' })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid', description: 'Client-generated key reused when retrying the same mutation' })
   @IsUUID()
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey!: string;
 }
 
 export class UpdateCatalogEntryDto {
@@ -177,10 +175,9 @@ export class CorporateActionDto {
   @IsPositive()
   readonly factor!: number;
 
-  @ApiProperty({ required: false, format: 'uuid' })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid', description: 'Client-generated key reused when retrying the same mutation' })
   @IsUUID()
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey!: string;
 }
 
 export class CreateSeasonEventDto {
