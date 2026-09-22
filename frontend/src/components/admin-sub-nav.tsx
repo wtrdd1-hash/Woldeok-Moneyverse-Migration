@@ -43,6 +43,7 @@ export const ADMIN_TABS: readonly AdminTabItem[] = [
   { href: '/admin/discord', label: 'Discord', icon: Radio },
   { href: '/admin/bank', label: '은행·대출', icon: Landmark },
   { href: '/admin/market', label: '가상 시장', icon: TrendingUp },
+  { href: '/admin/safety', label: '안전·삭제', icon: ShieldCheck },
 ];
 
 /**
