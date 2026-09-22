@@ -1,5 +1,26 @@
 # Update Log
 
+## v2026.09.22.355 — Virtual Stock Exchange Interactive Trading Console, 10-Depth Bidirectional Orderbook & Mobile Floating Quick Action
+
+- Applied Branch: `main` (Release: `prod-0714368-v355`)
+- **P0 Virtual Stock Exchange Interactive Trading Console (VIRTUAL_STOCK_EXCHANGE_SPEC)**:
+  1. **Real-time 5D/10D Orderbook Rebuild (`stock-orderbook.tsx`)**:
+     - 5-Depth and 10-Depth toggle switch expands trader visibility into market liquidity.
+     - Clicking an Ask automatically populates buy order (`side='buy'`); clicking a Bid populates sell order (`side='sell'`).
+     - Volume-proportional horizontal depth bars (Rose for Asks, Emerald for Bids) and real-time spread WLD / Bps indicator.
+  2. **Toss/Robinhood-Style Intuitive Order Panel (`stock-order-panel.tsx`)**:
+     - Limit and Market order type tabs.
+     - Automatic price binding from orderbook click, quantity slider + 10%/25%/50%/MAX 44px touch preset chips.
+     - Idempotent submission guard (`aria-busy`) and 2-step order confirmation dialog.
+  3. **Unified Trading Console & Mobile 320px Quick Action Surface (`stock-trading-console.tsx`)**:
+     - Single state container coordinating bidirectional orderbook-orderpanel interactions.
+     - Fixed bottom quick action bar (Buy/Sell buttons) on mobile screens (320px~768px) with bottom sheet order drawer.
+  4. **Pure Orderbook Calculation Extraction & Vitest Unit Tests**:
+     - Extracted `computeOrderbook` pure function; verified with 6 Vitest unit tests in `stock-trading-console.test.ts` (100% PASS).
+  5. **Zero-Downtime Promotion & Runtime Identity Coherence**:
+     - Exact Git SHA `0714368` deployed to both Test and Production.
+     - 929 PostgreSQL active user sessions 100% loss-free preserved.
+
 ## v2026.09.22.354 — P0 Admin Private Chat Moderation Queue, 10-Message Evidence Snapshot Viewer & Incident Action Governance
 
 - Applied Branch: `main` (Release: `prod-e60cf71-v354`)

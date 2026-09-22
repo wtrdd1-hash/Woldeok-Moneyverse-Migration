@@ -145,26 +145,23 @@
 
 ## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
 
-- **최종 갱신일시**: 2026-09-22 18:02:00 KST
-- **현재 프로덕션 릴리스 버전**: `v2026.09.22.354` (릴리스 경로: `/srv/moneyverse-data/releases/prod-e60cf71-v354`, 직전: `prod-dc011ee-v353`)
-- **Exact Git SHA**: `e60cf71ed4088c5839e5e79474f83bf7d09cc2ad` (단축: `e60cf71`)
+- **최종 갱신일시**: 2026-09-22 18:50:00 KST
+- **현재 프로덕션 릴리스 버전**: `v2026.09.22.355` (릴리스 경로: `/srv/moneyverse-data/releases/prod-0714368-v355`, 직전: `prod-e60cf71-v354`)
+- **Exact Git SHA**: `07143686dda0322d6c7628b79e2d3a60657bb543` (단축: `0714368`)
 - **PostgreSQL 활성 사용자 세션**: **929개 (100% 무손실 보존 실측 확인)**
 - **최신 완료 작업 요약**:
-  1. **P0 1:1 개인 채팅 관리자 모더레이션 큐 및 증거 원장 거버넌스 완비 (Migration 228)**:
-     - `packages/database/migrations/228-private-chat-moderation-admin.sql`: `private_chat_admin_list_reports`, `private_chat_admin_get_report`, `private_chat_admin_action_report` 보안 프로시저 완비.
-     - 기획서 14절 준수: 증거 스냅샷 열람 시 `audit_logs`에 `CHAT_REPORT_EVIDENCE_VIEWED` 불변 기록, 조치 시 `CHAT_REPORT_ACTIONED` 감사 원장 보존.
-  2. **백엔드 NestJS 안전 모듈 관리자 API 확장 (`backend/src/safety/`)**:
-     - `GET /api/v1/admin/safety/chat-reports`: 관리자 1:1 채팅 신고 큐 목록 조회.
-     - `GET /api/v1/admin/safety/chat-reports/:id`: 10건 메시지 증거 스냅샷 안전 열람.
-     - `POST /api/v1/admin/safety/chat-reports/:id/action`: 피신고자 제재(경고/차단/기각) 조치 실행 및 감사 메모 보존.
-  3. **프론트엔드 관리자 안전 관제 타워 쇄신 (`frontend/src/app/admin/safety/`)**:
-     - 2대 큐 탭 인터페이스 탑재: `1:1 개인 채팅 신고 심사 큐` & `비회원 긴급 콘텐츠 삭제 큐`.
-     - `ChatReportEvidenceDialog`: 10개 메시지 타임라인 뷰어 모달(발신자/수신자 말풍선 구별, 시각, 메시지 번호).
-     - `ChatReportActionDialog`: 원터치 조치 다이얼로그(경고/차단/기각) 및 2단계 확인.
-     - `admin-chat-moderation.test.ts`: Vitest 4개 단위 테스트 100% 통과.
-  4. **무중단 승격 및 런타임 신원 일치**:
-     - Exact SHA `e60cf71` 기반 테스트 및 프로덕션 동시 배포.
-     - 929개 PostgreSQL 활성 세션 100% 무손실 보존 및 전 엔드포인트 200 OK.
+  1. **P0 가상 주식 거래소 인터랙티브 트레이딩 콘솔 완비 (`/stocks/[symbol]`)**:
+     - `frontend/src/app/stocks/[symbol]/stock-orderbook.tsx`: 5D/10D 뎁스 토글 스위치 탑재, 실시간 매도/매수 호가 클릭 시 단가 및 매수/매도 탭 자동 연동(`onSelectPrice`), 볼륨 비례 시각적 게이지 바 및 스프레드 Bps 지표 표시.
+     - `frontend/src/app/stocks/[symbol]/stock-order-panel.tsx`: 지정가(Limit)/시장가(Market) 탭 인터페이스, 수량 슬라이더 및 10%/25%/50%/MAX 44px 터치 프리셋 칩, 이중 주문 방지(`aria-busy`) 및 주문 확인 다이얼로그 탑재.
+     - `frontend/src/app/stocks/[symbol]/stock-trading-console.tsx`: 데스크톱 2열 그리드 및 320px 극소 모바일 하단 플로팅 퀵 액션 바(매수/매도 바텀 서피스 모달) 통합 컨테이너.
+     - `frontend/src/app/stocks/[symbol]/page.tsx`: 독립되어 있던 컴포넌트들을 `StockTradingConsole` 중심의 고밀도 핀테크 인터페이스로 재배치 및 시장 요약/보유 현황 카드 정리.
+  2. **순수 호가 계산 로직 분리 및 Vitest 단위 테스트 완비**:
+     - `stock-orderbook.tsx` 내 `computeOrderbook` 순수 함수 분리 및 export.
+     - `stock-trading-console.test.ts`: 5D/10D 뎁스 길이 검증, 호가 단가 정합성, 스프레드 bps 산출, 콤마 문자열 처리 및 1 WLD 최저 호가 방어 등 6개 단위 테스트 100% PASS.
+  3. **무중단 승격 및 런타임 신원 일치 (v355)**:
+     - Exact SHA `0714368` 기반 테스트 및 프로덕션 동시 빌드 및 릴리스 배포.
+     - 929개 PostgreSQL 활성 사용자 세션 100% 무손실 보존 실측 확인 및 전 엔드포인트 200 OK.
+
 
 
 
