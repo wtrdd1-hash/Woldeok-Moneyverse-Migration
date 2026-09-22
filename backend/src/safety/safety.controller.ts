@@ -41,7 +41,7 @@ export class SafetyController {
   async submitEmergencyTakedown(@Body() rawBody: unknown) {
     const parsed = EmergencyTakedownSubmitSchema.safeParse(rawBody);
     if (!parsed.success) {
-      throw new BadRequestException(parsed.error.errors.map((e) => e.message).join(', '));
+      throw new BadRequestException(parsed.error.issues.map((e: { message: string }) => e.message).join(', '));
     }
     return this.safetyService.submitTakedown(parsed.data);
   }
@@ -55,7 +55,7 @@ export class SafetyController {
   async getTakedownStatus(@Body() rawBody: unknown) {
     const parsed = EmergencyTakedownStatusQuerySchema.safeParse(rawBody);
     if (!parsed.success) {
-      throw new BadRequestException(parsed.error.errors.map((e) => e.message).join(', '));
+      throw new BadRequestException(parsed.error.issues.map((e: { message: string }) => e.message).join(', '));
     }
     return this.safetyService.getTakedownStatus(parsed.data);
   }
@@ -92,7 +92,7 @@ export class SafetyController {
     const actorUserId = requireUserId(req);
     const parsed = AdminTakedownActionSchema.safeParse(rawBody);
     if (!parsed.success) {
-      throw new BadRequestException(parsed.error.errors.map((e) => e.message).join(', '));
+      throw new BadRequestException(parsed.error.issues.map((e: { message: string }) => e.message).join(', '));
     }
     return this.safetyService.adminActionTakedown(actorUserId, caseId, parsed.data);
   }
