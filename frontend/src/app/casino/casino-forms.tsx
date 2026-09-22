@@ -1,6 +1,17 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import {
+  ShieldAlert,
+  Clock,
+  Lock,
+  Sliders,
+  CheckCircle2,
+  ShieldCheck,
+  Sparkles,
+  AlertTriangle,
+} from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { AmountInput } from '@/components/amount-input';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
@@ -163,42 +174,219 @@ export function CoinPlayForm({
 
 export function SelfLimitForm() {
   const [state, action] = useActionState(setSelfLimit, IDLE);
+  const [betLimit, setBetLimit] = useState<string>('0');
+  const [lossLimit, setLossLimit] = useState<string>('0');
   const [lock, setLock] = useState<string>('none');
+  const [showTimeLockAlert, setShowTimeLockAlert] = useState<boolean>(false);
+
+  const betLimitNum = Number.parseInt(betLimit.replaceAll(',', '') || '0', 10);
+  const lossLimitNum = Number.parseInt(lossLimit.replaceAll(',', '') || '0', 10);
+
+  const handleQuickTimeLock = () => {
+    setLock('1');
+    setShowTimeLockAlert(true);
+  };
 
   return (
-    <form action={action} className="grid gap-4">
+    <form action={action} className="grid gap-6">
       <input type="hidden" name="lock" value={lock} />
 
-      <FieldGroup className="gap-4 sm:grid-cols-2">
-        <Field>
-          <FieldLabel htmlFor="casino-bet-limit">하루 베팅 한도</FieldLabel>
+      {/* 건전 게임 보호(RG) 배너 */}
+      <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-4 text-xs">
+        <div className="flex items-start gap-2.5">
+          <ShieldCheck className="size-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+          <div className="space-y-1 text-muted-foreground leading-relaxed">
+            <p className="font-bold text-foreground flex items-center gap-1.5">
+              <span>책임감 있는 게임(RG) 자가 보호 가이드</span>
+              <span className="rounded-md bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
+                자율 규제 준수
+              </span>
+            </p>
+            <p className="[word-break:keep-all]">
+              하루 동안 사용할 수 있는 최대 베팅액과 손실 한도를 미리 정해두세요. 설정한 한도에 도달하면
+              자정이 지날 때까지 추가 베팅이 시스템에 의해 안전하게 차단됩니다.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <FieldGroup className="gap-6 sm:grid-cols-2">
+        {/* 1. 하루 베팅 한도 (토스형 슬라이더 + 직접 입력) */}
+        <div className="rounded-2xl border border-border/80 bg-card/60 p-4 sm:p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <FieldLabel htmlFor="casino-bet-limit" className="text-sm font-bold flex items-center gap-1.5">
+              <Sliders className="size-3.5 text-primary" />
+              <span>하루 베팅 한도</span>
+            </FieldLabel>
+            <span className="font-mono text-xs font-bold text-primary">
+              {betLimitNum === 0 ? '무제한 (0 WLD)' : `${groupDigits(betLimitNum.toString())} WLD`}
+            </span>
+          </div>
+
           <AmountInput
             id="casino-bet-limit"
             name="dailyBetLimit"
+            value={betLimit}
+            onChange={setBetLimit}
             placeholder="0 (무제한)"
-            className="min-h-11 rounded-xl"
+            className="min-h-11 rounded-xl font-mono text-base font-bold"
             required
           />
-          <FieldDescription>원할 때만 설정하세요. 0은 무제한입니다.</FieldDescription>
-        </Field>
 
-        <Field>
-          <FieldLabel htmlFor="casino-loss-limit">하루 손실 한도</FieldLabel>
+          {/* 슬라이더 컨트롤 (0 ~ 2,000 WLD) */}
+          <div className="space-y-1.5 pt-1">
+            <input
+              type="range"
+              min={0}
+              max={2000}
+              step={50}
+              value={Math.min(2000, isNaN(betLimitNum) ? 0 : betLimitNum)}
+              onChange={(e) => setBetLimit(e.target.value)}
+              className="w-full h-2 rounded-lg bg-muted accent-primary cursor-pointer"
+              aria-label="하루 베팅 한도 슬라이더"
+            />
+            <div className="flex justify-between text-[11px] font-mono text-muted-foreground">
+              <span>0 (무제한)</span>
+              <span>1,000 WLD</span>
+              <span>2,000 WLD</span>
+            </div>
+          </div>
+
+          {/* 퀵 프리셋 버튼 */}
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            <button
+              type="button"
+              onClick={() => setBetLimit('0')}
+              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+            >
+              무제한
+            </button>
+            <button
+              type="button"
+              onClick={() => setBetLimit('500')}
+              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+            >
+              500 WLD
+            </button>
+            <button
+              type="button"
+              onClick={() => setBetLimit('1000')}
+              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+            >
+              1,000 WLD
+            </button>
+            <button
+              type="button"
+              onClick={() => setBetLimit('2000')}
+              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+            >
+              2,000 WLD
+            </button>
+          </div>
+        </div>
+
+        {/* 2. 하루 손실 한도 (토스형 슬라이더 + 직접 입력) */}
+        <div className="rounded-2xl border border-border/80 bg-card/60 p-4 sm:p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <FieldLabel htmlFor="casino-loss-limit" className="text-sm font-bold flex items-center gap-1.5">
+              <ShieldAlert className="size-3.5 text-rose-500" />
+              <span>하루 손실 한도</span>
+            </FieldLabel>
+            <span className="font-mono text-xs font-bold text-rose-600 dark:text-rose-400">
+              {lossLimitNum === 0 ? '무제한 (0 WLD)' : `${groupDigits(lossLimitNum.toString())} WLD`}
+            </span>
+          </div>
+
           <AmountInput
             id="casino-loss-limit"
             name="dailyLossLimit"
+            value={lossLimit}
+            onChange={setLossLimit}
             placeholder="0 (무제한)"
-            className="min-h-11 rounded-xl"
+            className="min-h-11 rounded-xl font-mono text-base font-bold"
             required
           />
-          <FieldDescription>원할 때만 설정하세요. 0은 무제한입니다.</FieldDescription>
-        </Field>
+
+          {/* 슬라이더 컨트롤 (0 ~ 1,000 WLD) */}
+          <div className="space-y-1.5 pt-1">
+            <input
+              type="range"
+              min={0}
+              max={1000}
+              step={50}
+              value={Math.min(1000, isNaN(lossLimitNum) ? 0 : lossLimitNum)}
+              onChange={(e) => setLossLimit(e.target.value)}
+              className="w-full h-2 rounded-lg bg-muted accent-rose-500 cursor-pointer"
+              aria-label="하루 손실 한도 슬라이더"
+            />
+            <div className="flex justify-between text-[11px] font-mono text-muted-foreground">
+              <span>0 (무제한)</span>
+              <span>500 WLD</span>
+              <span>1,000 WLD</span>
+            </div>
+          </div>
+
+          {/* 퀵 프리셋 버튼 */}
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            <button
+              type="button"
+              onClick={() => setLossLimit('0')}
+              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+            >
+              무제한
+            </button>
+            <button
+              type="button"
+              onClick={() => setLossLimit('200')}
+              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+            >
+              200 WLD
+            </button>
+            <button
+              type="button"
+              onClick={() => setLossLimit('500')}
+              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+            >
+              500 WLD
+            </button>
+            <button
+              type="button"
+              onClick={() => setLossLimit('1000')}
+              className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-border bg-muted/30 hover:bg-muted text-foreground transition-colors"
+            >
+              1,000 WLD
+            </button>
+          </div>
+        </div>
       </FieldGroup>
 
-      <Field>
-        <FieldLabel htmlFor="casino-lock">플레이 잠금 (자가 제외)</FieldLabel>
+      {/* 3. 플레이 잠금 (자가 제외) 및 원터치 24시간 쿨다운 */}
+      <div className="rounded-2xl border border-border/80 bg-card/60 p-4 sm:p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <FieldLabel htmlFor="casino-lock" className="text-sm font-bold flex items-center gap-1.5">
+              <Lock className="size-3.5 text-amber-500" />
+              <span>플레이 잠금 (자가 제외 장치)</span>
+            </FieldLabel>
+            <FieldDescription className="text-xs text-muted-foreground mt-0.5">
+              잠금을 설정하면 지정 기간 동안 카지노 플레이가 차단되며 한도도 다시 완화할 수 없습니다.
+            </FieldDescription>
+          </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleQuickTimeLock}
+            className="h-9 gap-1.5 text-xs font-semibold border-amber-500/40 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 shrink-0"
+          >
+            <Clock className="size-3.5" />
+            <span>24시간 원터치 휴식 (Time Lock)</span>
+          </Button>
+        </div>
+
         <Select value={lock} onValueChange={setLock}>
-          <SelectTrigger id="casino-lock" className="min-h-11 w-full sm:w-64 rounded-xl">
+          <SelectTrigger id="casino-lock" className="min-h-11 w-full sm:w-72 rounded-xl">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -209,18 +397,27 @@ export function SelfLimitForm() {
             ))}
           </SelectContent>
         </Select>
-        <FieldDescription>
-          잠가 두면 그 기간이 끝날 때까지 카지노 플레이가 차단되고 한도도 다시 바꿀 수 없어요.
-          스스로 쉬어 가기 위한 자가 제외 장치입니다.
-        </FieldDescription>
-      </Field>
+
+        {showTimeLockAlert && lock === '1' && (
+          <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-800 dark:text-amber-200 flex items-start gap-2 animate-in fade-in duration-300">
+            <AlertTriangle className="size-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+            <div>
+              <p className="font-bold">24시간 플레이 잠금이 선택되었습니다.</p>
+              <p className="mt-0.5 leading-relaxed [word-break:keep-all]">
+                아래 [한도 저장] 버튼을 누르면 즉시 24시간 동안 카지노 입장이 차단되며, 
+                관리자도 이를 조기 해제할 수 없습니다. 계속 진행하시려면 저장하세요.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
         <p className="text-xs text-muted-foreground">
-          시스템 제한은 없으며 0으로 저장하면 해당 자가 한도를 사용하지 않습니다.
+          0으로 저장하면 해당 자가 한도를 사용하지 않습니다. 한도는 한국 표준시(KST) 자정마다 초기화됩니다.
         </p>
-        <SubmitButton className="min-h-11 rounded-xl px-6 font-bold">
-          한도 저장
+        <SubmitButton className="min-h-11 rounded-xl px-8 font-bold shadow-md">
+          자가 보호 한도 저장
         </SubmitButton>
       </div>
 

@@ -1,4 +1,4 @@
-﻿﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -17,13 +17,15 @@ import {
   Landmark,
   Briefcase,
   Share2,
+  Activity,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
-import { formatMoment } from '@/lib/money';
+import { formatMoment, groupDigits } from '@/lib/money';
 import { cn } from '@/lib/cn';
 
 export interface MarketEvent {
@@ -59,7 +61,124 @@ const STRENGTH_LABEL: Readonly<Record<number, { ko: string; en: string; ja: stri
   3: { ko: '강력 영향', en: 'Major Impact', ja: '強力影響', zh: '重大影响' },
 };
 
-export function NewspaperView({ events }: NewspaperViewProps) {
+function StockTickerPopover({
+  symbol,
+  name,
+  stocks,
+}: {
+  readonly symbol: string;
+  readonly name?: string | null;
+  readonly stocks: readonly StockTickerItem[];
+}) {
+  const stock = stocks.find((s) => s.symbol === symbol);
+  const currentPrice = stock ? BigInt(stock.current_price || '0') : null;
+  const openPrice = stock ? BigInt(stock.day_open_price || '0') : null;
+  const diff = currentPrice !== null && openPrice !== null ? currentPrice - openPrice : BigInt(0);
+  const isUp = diff > BigInt(0);
+  const isDown = diff < BigInt(0);
+  const diffRate =
+    openPrice && openPrice > BigInt(0)
+      ? ((Number(diff) / Number(openPrice)) * 100).toFixed(2)
+      : '0.00';
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1 font-mono text-xs font-bold text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+        >
+          <Building2 className="size-3.5" />
+          <span>{symbol}</span>
+          {name && <span className="opacity-90">· {name}</span>}
+          {stock && (
+            <span
+              className={cn(
+                'ml-1 text-[10px] font-extrabold',
+                isUp ? 'text-emerald-500' : isDown ? 'text-rose-500' : 'text-muted-foreground'
+              )}
+            >
+              {isUp ? '▲' : isDown ? '▼' : '−'}
+              {Math.abs(Number(diffRate))}%
+            </span>
+          )}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 rounded-2xl p-4 shadow-xl border-border/80 bg-card">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between border-b border-border/60 pb-2.5">
+            <div className="flex items-center gap-2">
+              <div className="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-bold text-xs">
+                {symbol.slice(0, 2)}
+              </div>
+              <div>
+                <h4 className="font-bold text-sm text-foreground">{name || symbol}</h4>
+                <p className="font-mono text-[11px] text-muted-foreground">{symbol} · 가상 상장사</p>
+              </div>
+            </div>
+            <Badge variant="outline" className="font-mono text-[10px]">
+              실시간 호가
+            </Badge>
+          </div>
+
+          <div className="space-y-1">
+            <div className="text-[11px] text-muted-foreground">현재 체결가</div>
+            <div className="flex items-baseline justify-between">
+              <span className="font-mono text-xl font-extrabold text-foreground">
+                {stock ? groupDigits(stock.current_price) : '—'}{' '}
+                <span className="text-xs font-normal text-muted-foreground">WLD</span>
+              </span>
+              {stock && (
+                <span
+                  className={cn(
+                    'font-mono text-xs font-bold flex items-center gap-0.5',
+                    isUp ? 'text-emerald-500' : isDown ? 'text-rose-500' : 'text-muted-foreground'
+                  )}
+                >
+                  {isUp ? <TrendingUp className="size-3.5" /> : isDown ? <TrendingDown className="size-3.5" /> : null}
+                  {isUp ? '+' : ''}{diffRate}%
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* 미니 트렌드 스파크라인 SVG 시각화 */}
+          <div className="rounded-lg bg-muted/40 p-2.5">
+            <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground mb-1.5">
+              <span>호가 변동 모멘텀</span>
+              <span>{isUp ? '매수 우세' : isDown ? '매도 우세' : '균형'}</span>
+            </div>
+            <svg viewBox="0 0 100 24" className="w-full h-6 overflow-visible" preserveAspectRatio="none">
+              <polyline
+                fill="none"
+                stroke={isUp ? '#10b981' : isDown ? '#f43f5e' : '#6b7280'}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                points={
+                  isUp
+                    ? '0,20 20,16 40,18 60,10 80,12 100,4'
+                    : isDown
+                    ? '0,6 20,8 40,14 60,12 80,18 100,22'
+                    : '0,12 20,12 40,11 60,13 80,12 100,12'
+                }
+              />
+            </svg>
+          </div>
+
+          <Button asChild size="sm" className="w-full h-9 rounded-xl font-bold text-xs gap-1.5 shadow-sm">
+            <Link href={`/stocks/${symbol}`}>
+              <span>가상 거래소에서 주문하기</span>
+              <ArrowRight className="size-3.5" />
+            </Link>
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+export function NewspaperView({ events, stocks = [] }: NewspaperViewProps) {
   const { locale } = useLocale();
   const [selectedPoll, setSelectedPoll] = useState<number | null>(null);
   const [hasVoted, setHasVoted] = useState<boolean>(false);
@@ -278,6 +397,24 @@ export function NewspaperView({ events }: NewspaperViewProps) {
         </Card>
       </section>
 
+      {/* 2.5. Realtime Stocks Ticker Rail */}
+      {stocks.length > 0 && (
+        <section aria-labelledby="stocks-rail-heading" className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 id="stocks-rail-heading" className="text-xs font-mono font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <Activity className="size-3.5 text-primary" />
+              <span>{localeLabel(locale, '관련 가상 상장사 실시간 호가 (클릭 시 미니 호가 차트)', 'Virtual Market Stocks Pulse', '上場銘柄リアルタイム気配値', '挂牌企业实时行情')}</span>
+            </h3>
+            <span className="text-[11px] font-mono text-muted-foreground">총 {stocks.length}개 종목</span>
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-thin">
+            {stocks.map((s) => (
+              <StockTickerPopover key={s.id} symbol={s.symbol} name={s.name} stocks={stocks} />
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* 3. Lead Feature Story & Bento Feed */}
       <section aria-labelledby="lead-story-heading" className="space-y-4">
         <h2 id="lead-story-heading" className="text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
@@ -299,10 +436,11 @@ export function NewspaperView({ events }: NewspaperViewProps) {
                   </Badge>
                 )}
                 {leadEvent?.symbol && (
-                  <Link href={`/stocks/${leadEvent.symbol}`} className="font-mono text-xs font-bold text-primary hover:underline flex items-center gap-1">
-                    <Building2 className="size-3.5" />
-                    {leadEvent.symbol} {leadEvent.name}
-                  </Link>
+                  <StockTickerPopover
+                    symbol={leadEvent.symbol}
+                    name={leadEvent.name}
+                    stocks={stocks}
+                  />
                 )}
                 {leadEvent?.ends_at && (
                   <span className="ml-auto text-xs font-mono text-muted-foreground flex items-center gap-1">
@@ -354,11 +492,15 @@ export function NewspaperView({ events }: NewspaperViewProps) {
             {events.length > 1 ? (
               events.slice(1, 4).map((evt) => (
                 <Card key={evt.id} className="p-4 rounded-xl border-border/80 bg-card hover:border-primary/40 transition-colors">
-                  <div className="flex items-center gap-2 mb-1.5 text-xs font-mono">
+                  <div className="flex items-center justify-between gap-2 mb-1.5 text-xs font-mono">
                     <span className={cn('font-bold', evt.direction === 'up' ? 'text-emerald-500' : 'text-rose-500')}>
                       {evt.direction === 'up' ? '▲ 호재' : '▼ 악재'}
                     </span>
-                    <span className="text-muted-foreground truncate">{evt.symbol || '시장 전체'}</span>
+                    {evt.symbol ? (
+                      <StockTickerPopover symbol={evt.symbol} name={evt.name} stocks={stocks} />
+                    ) : (
+                      <span className="text-muted-foreground truncate">시장 전체</span>
+                    )}
                   </div>
                   <h4 className="text-sm font-bold [word-break:keep-all] text-foreground leading-snug">
                     {evt.headline}
