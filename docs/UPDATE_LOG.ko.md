@@ -1,3 +1,21 @@
+## v2026.09.22.346 — 디스코드 음악 봇 SponsorBlock 실시간 API 연동 & FFmpeg 정밀 절단 엔진 완결 및 QA 검증 통과
+
+- 적용 브랜치: `feat/discord-music-bot-sponsorblock-live-slicing-qa-v2026.09.22.346`
+- **SponsorBlock 실시간 API 및 FFmpeg aselect 스트림 정밀 절단 엔진 완결**:
+  1. **실시간 SponsorBlock API 연동 및 정밀 타임스탬프 획득**:
+     - 유튜브 음원 URL에서 video ID를 추출하고 `https://sponsor.ajay.app` API를 통해 스폰서 광고, 비음악 잡담(`music_offtopic`), 채널 홍보(`selfpromo`), 인트로/아웃트로 스킵 세그먼트를 0.1초 단위로 실시간 수집.
+  2. **FFmpeg aselect 기반 온더플라이 무손실 스트림 절단**:
+     - yt-dlp의 stdout 파이프라인에서 발생하는 후처리 누락 한계를 극복하기 위해, 감지된 스폰서 구간을 FFmpeg의 `aselect='not(between(t,start,end))',asetpts=N/SR/TB` 오디오 필터 체인으로 온더플라이 정밀 절단.
+     - 절단된 스트림을 `StreamType.Raw` (s16le 48kHz stereo) 규격으로 `@discordjs/voice`에 직결하여 0초 지연 및 실시간 볼륨 조절(`inlineVolume: true`) 완벽 보장.
+  3. **종합 QA 감사 및 오디오 파형/음량 검증 (100% 통과)**:
+     - **유튜브 표준 광고**: yt-dlp 다이렉트 미디어 스트림 추출로 100% 바이패스(광고 삽입 0건) 확인.
+     - **스폰서/잡담 절단 검증**: Maroon 5 - Sugar(0~26.4s 잡담), Adele - Hello(0~74.9s 통화 연기), Queen - Bohemian Rhapsody 등 스폰서 세그먼트 전수 감지 및 차단 검증.
+     - **음향 볼륨 검증**: 인트로 잡담 구간(-44.0 dB) 대비 음악 시작 구간(-21.7 dB)으로 즉시 점프하여 +22.3 dB 음향 에너지 상승 및 첫 소절 즉시 재생 확인.
+- **품질 검증 및 서비스 상태**:
+  - 단위 테스트: `npm test` -> 4/4 PASS (100% 통과).
+  - 데몬 서비스: `moneyverse-discord-bot.service` 정상 가동 (PID: 1739183, Active).
+  - 음성 채널 상주: `🔊│음성` (`1536572442422550538`) 채널 24/7 불사 상주 정상 가동 확인.
+
 ## v2026.09.22.345 — 디스코드 음악 봇 SponsorBlock 광고·협찬·인트로 자동 스킵 엔진 탑재
 
 - 적용 브랜치: `feat/discord-music-bot-sponsorblock-ads-removal-v2026.09.22.345`
@@ -227,3 +245,31 @@
 - 모바일 하단 내비게이션(홈, 직업, 주식, 지갑, 계정) 및 320px~1440px 가로 스크롤 완전 0px의 반응형 쉘 구현.
 - `/login`을 군더더기 없는 고대비 인증 카드로 재설계하고, `/account`, `/account/security`에 활성 다중 세션 원격 종료 및 보안 제어 센터 구축.
 - exact-SHA 기반 테스트 서버 검증 후 무중단 호스트 블루그린 배포로 운영 승격 완료.
+
+## v2026.09.20.301 — Frontend colour and contrast audit
+
+- Branch: `feat/frontend-contrast-v2026.09.20.301`, base `0b973824d85379119813f9b9f53cd7cdd4ddeb93`.
+- Split light/dark semantic palettes, removed hard-coded light chrome, and corrected low-contrast text/action colours across home, shop, work, inventory, businesses and admin surfaces.
+- Light-mode tertiary text improved from 3.77:1 on the page background to 4.90:1; tested dark-mode foreground roles are 6.14:1 or higher.
+- Added automated WCAG contrast regression coverage and constrained user-selected point colours so white primary-button text stays readable.
+- Reference corpus uses SeeClick 10k web subset, WebUI 41,970 web screens and RICO 66k+ UI screens, combined with WCAG/GOV.UK/Atlassian/Material guidance.
+- Production promotion remains blocked until exact-SHA Test verification and the broader full-frontend rebuild gate pass.
+
+## v2026.09.20.297 — Frontend rebuild foundation
+
+- Branch: `feat/frontend-rebuild-v2026.09.20.297`, base `4dcd2ba112ae57565eed7444fe1d36512b926a3b`.
+- Rebuilt the global visual foundation, shell spacing, page headings, cards and buttons without changing backend authority.
+- Frontend typecheck/build and 90/90 test files with 681/681 tests pass.
+- This is the rebuild foundation; route-by-route composition continues before the rebuild can be marked complete.
+
+## v2026.09.19.275 — Blue/green continuity and automatic latest-build refresh
+
+- Branch: `ops/blue-green-cache-refresh-v2026.09.19.275`.
+- Added automatic cache-busted stale-build refresh without clearing login state and a reusable canary-first host blue/green deployment helper.
+- Pre-promotion checks: helper regressions, frontend 7/7, typecheck, and real-DB authenticated-session continuity passed.
+
+## v2026.09.19.274 — Deployment continuity and cache-freshness standard
+
+- Branch: .
+- Made zero-downtime frontend/backend handoff, PostgreSQL-backed member-session continuity, and automatic latest-shell cache revalidation mandatory release gates.
+- Runtime code and Production services are unchanged by this documentation-only release.

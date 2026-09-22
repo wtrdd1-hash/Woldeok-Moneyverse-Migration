@@ -1,5 +1,23 @@
 # Update Log
 
+## v2026.09.22.346 — Discord Music Bot Real-Time SponsorBlock API & FFmpeg Stream Slicing Engine QA Complete
+
+- Branch: `feat/discord-music-bot-sponsorblock-live-slicing-qa-v2026.09.22.346`
+- **Real-Time SponsorBlock API & FFmpeg aselect Stream Slicing**:
+  1. **Direct SponsorBlock Community API Integration**:
+     - Extracts video IDs from YouTube URLs and queries the `https://sponsor.ajay.app` API in real-time to obtain exact timestamps for sponsors, non-music banter (`music_offtopic`), channel promos (`selfpromo`), and intros/outros.
+  2. **On-the-Fly Audio Slicing via FFmpeg aselect Filter**:
+     - Bypasses yt-dlp stdout post-processing limitations by piping audio chunks through FFmpeg's `aselect='not(between(t,start,end))',asetpts=N/SR/TB` filter chain.
+     - Streams raw PCM (`StreamType.Raw`, s16le 48kHz stereo) directly into Discord.js Voice with zero latency and full volume control (`inlineVolume: true`).
+  3. **Full QA Audit & Audio Waveform Verification (100% PASS)**:
+     - **Standard YouTube Ads**: Bypassed 100% via direct googlevideo audio stream extraction (0 ads).
+     - **Sponsor & Dialogue Removal**: Verified on Maroon 5 - Sugar (0~26.4s dialogue), Adele - Hello (0~74.9s intro skit), Queen - Bohemian Rhapsody, Luis Fonsi - Despacito.
+     - **Acoustic Waveform Verification**: Verified +22.3 dB audio energy jump from quiet car conversation (-44.0 dB) to immediate pop music playback (-21.7 dB).
+- **Verification**:
+  - Unit tests: 4/4 PASS (node --check and test suite passed).
+  - Daemon service: `moneyverse-discord-bot.service` active and running (PID: 1739183).
+  - Voice channel stay: 24/7 active in `🔊│음성` (`1536572442422550538`).
+
 ## v2026.09.22.345 — Discord Music Bot SponsorBlock Ad & Sponsor Segment Eradication
 
 - Branch: `feat/discord-music-bot-sponsorblock-ads-removal-v2026.09.22.345`

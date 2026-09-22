@@ -44,3 +44,20 @@ test('volume clamp and status verification', () => {
     manager.dispose();
   }
 });
+
+test('extractYouTubeVideoId handles multiple YouTube URL patterns', async () => {
+  const { extractYouTubeVideoId } = await import('./music.js');
+  assert.equal(extractYouTubeVideoId('https://www.youtube.com/watch?v=09R8_2nJtjg'), '09R8_2nJtjg');
+  assert.equal(extractYouTubeVideoId('https://youtu.be/09R8_2nJtjg?si=123'), '09R8_2nJtjg');
+  assert.equal(extractYouTubeVideoId('https://www.youtube.com/shorts/09R8_2nJtjg'), '09R8_2nJtjg');
+  assert.equal(extractYouTubeVideoId('https://music.youtube.com/watch?v=09R8_2nJtjg'), '09R8_2nJtjg');
+  assert.equal(extractYouTubeVideoId('not-a-url'), null);
+});
+
+test('fetchSponsorBlockSkipSegments handles empty and invalid video IDs safely', async () => {
+  const { fetchSponsorBlockSkipSegments } = await import('./music.js');
+  const emptyRes = await fetchSponsorBlockSkipSegments(null);
+  assert.deepEqual(emptyRes, []);
+  const invalidRes = await fetchSponsorBlockSkipSegments('invalid-video-id-999');
+  assert.deepEqual(invalidRes, []);
+});

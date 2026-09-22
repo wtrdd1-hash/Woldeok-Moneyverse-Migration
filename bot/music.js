@@ -1,13 +1,56 @@
+import https from 'node:https';
+import { spawn } from 'node:child_process';
 import youtubedl from 'youtube-dl-exec';
 import {
   AudioPlayerStatus,
   NoSubscriberBehavior,
+  StreamType,
   createAudioPlayer,
   createAudioResource,
   demuxProbe,
   getVoiceConnection,
 } from '@discordjs/voice';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+
+export function extractYouTubeVideoId(url) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname === 'youtu.be') return parsed.pathname.slice(1).split(/[?#]/)[0];
+    if (parsed.searchParams.has('v')) return parsed.searchParams.get('v');
+    const match = parsed.pathname.match(/\/(?:shorts|embed|v)\/([a-zA-Z0-9_-]{11})/);
+    if (match) return match[1];
+  } catch {}
+  return null;
+}
+
+export async function fetchSponsorBlockSkipSegments(videoId) {
+  if (!videoId) return [];
+  return new Promise((resolve) => {
+    const categories = JSON.stringify(['sponsor', 'music_offtopic', 'selfpromo', 'intro', 'outro']);
+    const url = `https://sponsor.ajay.app/api/skipSegments?videoID=${encodeURIComponent(videoId)}&categories=${encodeURIComponent(categories)}`;
+    const req = https.get(url, { timeout: 3000 }, (res) => {
+      if (res.statusCode !== 200) {
+        res.resume();
+        return resolve([]);
+      }
+      let raw = '';
+      res.on('data', (chunk) => { raw += chunk; });
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(raw);
+          const segments = Array.isArray(parsed)
+            ? parsed.filter((s) => Array.isArray(s.segment) && s.segment.length === 2 && s.actionType === 'skip')
+            : [];
+          resolve(segments);
+        } catch {
+          resolve([]);
+        }
+      });
+    });
+    req.on('error', () => resolve([]));
+    req.on('timeout', () => { req.destroy(); resolve([]); });
+  });
+}
 
 const MAX_QUEUE_LENGTH = 50;
 const DEFAULT_MAX_TRACK_SECONDS = Infinity;
@@ -145,6 +188,7 @@ export class MusicManager {
     this.queue = [];
     this.current = null;
     this.currentProcess = null;
+    this.currentFfmpegProcess = null;
     this.currentResource = null;
     this.volume = 100;
     this.starting = false;
@@ -340,6 +384,9 @@ export class MusicManager {
       if (!connection) throw new Error('음성 채널 연결이 준비되지 않았습니다.');
       this.attachConnection(connection);
 
+      const videoId = extractYouTubeVideoId(track.url);
+      const sponsorSegments = videoId ? await fetchSponsorBlockSkipSegments(videoId) : [];
+
       const process = youtubedl.exec(track.url, {
         output: '-',
         format: 'bestaudio[ext=webm][acodec=opus]/bestaudio[ext=webm]/bestaudio/best',
@@ -347,7 +394,6 @@ export class MusicManager {
         quiet: true,
         noWarnings: true,
         jsRuntimes: 'node',
-        sponsorblockRemove: 'sponsor,music_offtopic,selfpromo,intro,outro',
       });
       this.currentProcess = process;
       process.catch((error) => {
@@ -355,14 +401,43 @@ export class MusicManager {
         this.logger.error?.('[Music] yt-dlp stream error:', error.message);
       });
 
-      const probe = await demuxProbe(process.stdout, 15);
+      let resource;
+      if (sponsorSegments.length > 0) {
+        const ranges = sponsorSegments.map((s) => `not(between(t,${s.segment[0]},${s.segment[1]}))`).join('*');
+        const filter = `aselect='${ranges}',asetpts=N/SR/TB`;
+        this.logger.log?.(`[Music] Slicing out ${sponsorSegments.length} SponsorBlock segment(s) via FFmpeg filter: ${filter}`);
+
+        const ffmpeg = spawn('ffmpeg', [
+          '-i', 'pipe:0',
+          '-af', filter,
+          '-f', 's16le',
+          '-ar', '48000',
+          '-ac', '2',
+          'pipe:1',
+        ]);
+        this.currentFfmpegProcess = ffmpeg;
+        process.stdout.pipe(ffmpeg.stdin);
+        process.stdout.on('error', () => {});
+        ffmpeg.stdin.on('error', () => {});
+        ffmpeg.on('error', (err) => {
+          this.logger.error?.('[Music] FFmpeg sponsor filter error:', err.message);
+        });
+
+        resource = createAudioResource(ffmpeg.stdout, {
+          inputType: StreamType.Raw,
+          metadata: track,
+          inlineVolume: true,
+        });
+      } else {
+        const probe = await demuxProbe(process.stdout, 15);
+        resource = createAudioResource(probe.stream, {
+          inputType: probe.type,
+          metadata: track,
+          inlineVolume: true,
+        });
+      }
 
       this.current = track;
-      const resource = createAudioResource(probe.stream, {
-        inputType: probe.type,
-        metadata: track,
-        inlineVolume: true,
-      });
       if (resource.volume) {
         resource.volume.setVolume(this.volume / 100);
       }
@@ -383,12 +458,18 @@ export class MusicManager {
   #killCurrentProcess() {
     const process = this.currentProcess;
     this.currentProcess = null;
-    if (!process || process.killed) return;
-    process.catch(() => {});
-    try {
-      process.kill('SIGKILL');
-    } catch {
-      // Best effort only: the process may already have exited after EOF.
+    if (process && !process.killed) {
+      process.catch(() => {});
+      try {
+        process.kill('SIGKILL');
+      } catch {}
+    }
+    const ffmpeg = this.currentFfmpegProcess;
+    this.currentFfmpegProcess = null;
+    if (ffmpeg && !ffmpeg.killed) {
+      try {
+        ffmpeg.kill('SIGKILL');
+      } catch {}
     }
   }
 
