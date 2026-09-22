@@ -103,3 +103,7 @@ Standardized zero-downtime frontend/backend rollout, member-session continuity a
 
 ### v2026.09.16.6 — filtered trade summary
 Private stock history now summarizes the active filtered result set with buy/sell counts, gross WLD volume, tax, and matching count using BigInt-safe integer-string aggregation.
+
+## v2026.09.22.365 — Audit privileged-operation step-up
+- Require recent reauthentication before revealing masked audit data, changing retention policy, or recording retention disposition.
+- Preserve audit-chain verification, API payloads, immutable audit storage, database privileges, and ledger semantics.

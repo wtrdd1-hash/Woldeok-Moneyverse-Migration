@@ -32,6 +32,7 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -216,7 +217,7 @@ export class AdminAuditController {
   }
 
   @Post('events/:id/reveal')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Unmask one entry; the reveal is itself recorded' })
   reveal(
     @Req() request: RequestWithSession,
@@ -272,7 +273,7 @@ export class AdminAuditController {
   }
 
   @Put('retention/:category')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Append a retention policy version for one category' })
   setRetention(
     @Req() request: RequestWithSession,
@@ -307,7 +308,7 @@ export class AdminAuditController {
   }
 
   @Post('dispositions')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Record what was decided about a range past its retention period' })
   recordDisposition(@Req() request: RequestWithSession, @Body() body: DispositionDto) {
     return this.guarded(
