@@ -20,6 +20,8 @@ describe('local auth password policy', () => {
   it('keeps the documented technical maximum', () => {
     expect(acceptablePassword('a'.repeat(128))).toBe(true);
     expect(acceptablePassword('a'.repeat(129))).toBe(false);
+    expect(acceptablePassword('😀'.repeat(128))).toBe(true);
+    expect(acceptablePassword('😀'.repeat(129))).toBe(false);
   });
 });
 

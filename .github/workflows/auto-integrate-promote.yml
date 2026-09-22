@@ -48,6 +48,7 @@ jobs:
           contained_deleted_count=0
           conflict_count=0
           failed_validation_reconcile_count=0
+          work_in_progress_skipped_count=0
 
           reconcile_current_branch() {
             local reason="$1"
@@ -114,6 +115,26 @@ jobs:
                 --jq '.[0].number // empty'
             )"
 
+            # A branch without an open PR is treated as active work. Never create an
+            # integration PR automatically: opening a ready-for-review PR is the
+            # completion signal that makes a branch eligible for automatic main merge.
+            if [[ -z "$pr" ]]; then
+              work_in_progress_skipped_count=$((work_in_progress_skipped_count + 1))
+              echo "skip active work branch with no open PR: ${branch}"
+              continue
+            fi
+
+            pr_json="$(gh api "repos/${REPO}/pulls/${pr}")"
+            draft="$(jq -r '.draft // false' <<<"$pr_json")"
+            blocked_label="$(jq -r '[.labels[].name | ascii_downcase] | any(. == "wip" or . == "work-in-progress" or . == "work in progress" or . == "do-not-merge" or . == "do not merge" or . == "hold" or . == "merge-blocked" or . == "in-progress")' <<<"$pr_json")"
+            title_blocked="$(jq -r '(.title // "" | ascii_downcase) as $t | ($t | startswith("wip")) or ($t | startswith("draft")) or ($t | startswith("work in progress")) or ($t | startswith("작업중"))' <<<"$pr_json")"
+
+            if [[ "$draft" == "true" || "$blocked_label" == "true" || "$title_blocked" == "true" ]]; then
+              work_in_progress_skipped_count=$((work_in_progress_skipped_count + 1))
+              echo "skip work-in-progress PR #${pr} for ${branch}: draft=${draft}, blocked_label=${blocked_label}, title_blocked=${title_blocked}"
+              continue
+            fi
+
             if [[ "$ahead" -eq 0 ]]; then
               if [[ -n "$pr" ]]; then
                 gh api --method PATCH "repos/${REPO}/pulls/${pr}" -f state=closed >/dev/null || true
@@ -154,23 +175,6 @@ jobs:
               continue
             fi
             validated_count=$((validated_count + 1))
-
-            if [[ -z "$pr" ]]; then
-              title="auto: integrate ${branch}"
-              printf -v body '%s\n' \
-                'Automated integration candidate.' \
-                '' \
-                'Gate:' \
-                "- exact branch SHA: ${branch_sha}" \
-                "- successful Build Test Candidate run: ${validated}" \
-                '- target: main' \
-                '' \
-                'The automation merges clean validated branches, reconciles conflicts or repeatedly failing heads against current main, revalidates every reconciled exact SHA, and deletes the source branch after integration.'
-              pr="$(gh api --method POST "repos/${REPO}/pulls" \
-                -f title="$title" -f head="$branch" -f base=main -f body="$body" \
-                --jq '.number')"
-              echo "opened PR #${pr} for ${branch}"
-            fi
 
             mergeable="unknown"
             merge_state="unknown"
@@ -219,6 +223,9 @@ jobs:
             echo "- clean branches merged: ${merged_count}"
             echo "- contained/redundant branches deleted: ${contained_deleted_count}"
             echo "- conflicted PRs encountered: ${conflict_count}"
+            echo "- work-in-progress branches/PRs skipped: ${work_in_progress_skipped_count}"
             echo
             echo 'Every reconciled branch head is explicitly revalidated by workflow_dispatch before merge; no reconciled SHA bypasses Build Test Candidate.'
           } >> "$GITHUB_STEP_SUMMARY"
+
+[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]

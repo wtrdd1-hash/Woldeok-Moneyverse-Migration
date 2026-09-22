@@ -1,3 +1,12 @@
+## v2026.09.21.322 — 마이그레이션 권위 fail-closed 게이트
+- Production migration 실행이 exact repository checkout에 없는 DB 적용 migration 파일명을 발견하면 실패하도록 보강했습니다.
+- checksum 불변성을 유지하면서 DB-ahead/미추적 schema drift가 배포 migration gate를 조용히 통과하는 문제를 차단합니다.
+
+## v2026.09.20.311 — 관리자 국고 관리 기획
+- 관리자 → 경제 → 국고 관리 영문 원문/한국어 동등 구현 지향 기획을 추가했습니다.
+- 서버 권위 국고 회계, 불변 이력, 수입/지출, 예산, 권한 보정, 대사, 준비금 경고, 감사, exact-SHA 승격 게이트를 정의했습니다.
+- 문서 전용 변경이며 런타임·DB·Production 동작은 변경하지 않았습니다.
+
 ## v2026.09.19.274
 
 ## v2026.09.19.275

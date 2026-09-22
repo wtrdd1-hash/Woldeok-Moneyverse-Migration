@@ -24,14 +24,15 @@ jobs:
       github.event.workflow_run.conclusion == 'failure'
     runs-on: ubuntu-latest
     steps:
-      - name: Archive failed work in a closed PR and delete stale branch
+      - name: Keep repeatedly failing work for repair without deleting branches
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
-          deleted=0
+          retained=0
+          wip_skipped=0
 
           mapfile -t branches < <(
             gh api --paginate "repos/${REPO}/branches?per_page=100" --jq '.[].name' | sort
@@ -51,7 +52,6 @@ jobs:
             compare="$(gh api "repos/${REPO}/compare/main...${encoded}" 2>/dev/null || true)"
             [[ -n "$compare" ]] || continue
             ahead="$(jq -r '.ahead_by // 0' <<<"$compare")"
-            behind="$(jq -r '.behind_by // -1' <<<"$compare")"
             [[ "$ahead" -gt 0 ]] || continue
 
             failed_count="$(
@@ -59,13 +59,7 @@ jobs:
                 -f branch="$branch" -f status=completed -f per_page=50 \
                 --jq "[.workflow_runs[] | select(.head_sha == \"${branch_sha}\" and .conclusion == \"failure\")] | length"
             )"
-
-            # Do not discard a branch that still needs current main reconciliation.
-            # The integration workflow handles that first. Terminal cleanup applies only
-            # after three exact-SHA failures while the branch is already current with main.
-            if [[ "$failed_count" -lt 3 || "$behind" -ne 0 ]]; then
-              continue
-            fi
+            [[ "$failed_count" -ge 3 ]] || continue
 
             pr="$(
               gh api --method GET "repos/${REPO}/pulls" \
@@ -74,23 +68,30 @@ jobs:
             )"
 
             if [[ -z "$pr" ]]; then
-              title="archive: repeatedly failing ${branch}"
-              body="Automatic terminal cleanup: exact head ${branch_sha} failed Build Test Candidate ${failed_count} times after the branch was already current with main. The closed PR preserves the branch history before branch deletion."
-              pr="$(gh api --method POST "repos/${REPO}/pulls" \
-                -f title="$title" -f head="$branch" -f base=main -f body="$body" \
-                --jq '.number')"
+              wip_skipped=$((wip_skipped + 1))
+              echo "retain active branch with no open PR: ${branch}"
+              continue
             fi
 
-            gh api --method PATCH "repos/${REPO}/pulls/${pr}" -f state=closed >/dev/null || true
-            gh api --method DELETE "repos/${REPO}/git/refs/heads/${encoded}" >/dev/null
-            deleted=$((deleted + 1))
-            echo "archived in closed PR #${pr} and deleted repeatedly failing branch: ${branch} (${branch_sha})"
+            pr_json="$(gh api "repos/${REPO}/pulls/${pr}")"
+            draft="$(jq -r '.draft // false' <<<"$pr_json")"
+            blocked_label="$(jq -r '[.labels[].name | ascii_downcase] | any(. == "wip" or . == "work-in-progress" or . == "work in progress" or . == "do-not-merge" or . == "do not merge" or . == "hold" or . == "merge-blocked" or . == "in-progress")' <<<"$pr_json")"
+            if [[ "$draft" == "true" || "$blocked_label" == "true" ]]; then
+              wip_skipped=$((wip_skipped + 1))
+              echo "retain work-in-progress PR #${pr}: ${branch}"
+              continue
+            fi
+
+            retained=$((retained + 1))
+            echo "::warning::ready PR #${pr} exact SHA ${branch_sha} failed candidate validation ${failed_count} times; keep branch/PR for repair and later automatic integration"
           done
 
           {
-            echo '## Repeated-failure terminal cleanup'
+            echo '## Repeated-failure retention summary'
             echo
-            echo "- branches archived and deleted: ${deleted}"
-            echo '- threshold: 3 failed Build Test Candidate runs for the same exact HEAD SHA'
-            echo '- guard: branch must already include current main (behind_by == 0)'
+            echo "- ready PRs retained for repair: ${retained}"
+            echo "- work-in-progress branches/PRs skipped: ${wip_skipped}"
+            echo '- no repeatedly failing branch is automatically deleted; repair and revalidation must precede main integration'
           } >> "$GITHUB_STEP_SUMMARY"
+
+[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]

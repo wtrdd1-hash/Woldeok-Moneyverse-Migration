@@ -35,7 +35,7 @@ import {
   isOpen,
   jobLabel,
   jobMeta,
-  progressPercent,
+  progressPercent as _progressPercent,
   remaining,
   secondsUntilSubmittable,
   workQuotaBlock,
@@ -78,8 +78,8 @@ export default async function WorkPage() {
   const currentExp = activeJob?.experience ?? 0;
   const nextExp = activeJob?.next_level_exp ?? 100;
   const expPercent = Math.min(100, Math.round((currentExp / (nextExp || 1)) * 100));
-  const dailyRemaining = summary ? remaining(summary.daily_paid, summary.daily_cap) : null;
-  const weeklyRemaining = summary ? remaining(summary.weekly_paid, summary.weekly_cap) : null;
+  const _dailyRemaining = summary ? remaining(summary.daily_paid, summary.daily_cap) : null;
+  const _weeklyRemaining = summary ? remaining(summary.weekly_paid, summary.weekly_cap) : null;
   const quotaBlock = workQuotaBlock(summary);
 
   return (

@@ -110,3 +110,9 @@ Production DB는 PostgreSQL이며 원장이 잔액의 정본입니다. Productio
 - Kubernetes Deployment 문서
 - Kubernetes Service Account 문서
 - Flux 문서
+
+### 완료된 작업만 자동 main 통합
+
+개발 브랜치에 열린 PR이 없거나 PR이 Draft이거나 WIP/hold/do-not-merge 계열 차단 표시가 있으면 **작업 중**으로 취급하여 자동 병합·충돌조정·삭제를 하지 않는다. 자동 통합은 `main` 대상의 열린 non-Draft PR, 차단 표시 없음, 정확한 현재 HEAD의 `Build Test Candidate` 성공, mergeable 상태를 모두 만족해야 한다. 후보 검증이 반복 실패해도 브랜치/PR을 삭제하지 않고 수정 대상으로 보존하며, 수정 및 재검증 후 자동 통합한다.
+
+[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]

@@ -74,9 +74,10 @@ export function suggestedEmailForKnownDomainTypo(email: string): string | null {
 
 export function acceptablePassword(password: string): boolean {
   const normalized = password.normalize('NFC');
+  const codePointLength = Array.from(normalized).length;
   return (
-    normalized.length > 0 &&
-    normalized.length <= 128 &&
+    codePointLength > 0 &&
+    codePointLength <= 128 &&
     !COMMON_PASSWORDS.has(normalized.toLowerCase())
   );
 }

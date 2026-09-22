@@ -65,18 +65,17 @@ jobs:
             behind="$(jq -r '.behind_by // -1' <<<"$cmp")"
 
             if [[ "$behind" == "0" ]]; then
-              pr="$(
+              merged_pr="$(
                 gh api --method GET "repos/${GITHUB_REPOSITORY}/pulls" \
-                  -f state=open -f base=main -f head="${GITHUB_REPOSITORY_OWNER}:${branch}" -f per_page=10 \
-                  --jq '.[0].number // empty'
+                  -f state=closed -f base=main -f head="${GITHUB_REPOSITORY_OWNER}:${branch}" -f per_page=100 \
+                  --jq '[.[] | select(.merged_at != null)][0].number // empty'
               )"
-              if [[ -n "$pr" ]]; then
-                gh api --method PATCH "repos/${GITHUB_REPOSITORY}/pulls/${pr}" -f state=closed >/dev/null || true
-                closed=$((closed + 1))
-                echo "closed stale contained PR #${pr}: ${branch}"
+              if [[ -z "$merged_pr" ]]; then
+                echo "retain contained branch without merged PR evidence (may still be active work): $branch"
+                continue
               fi
 
-              echo "deleting branch fully contained in main: $branch"
+              echo "deleting branch fully contained in main with merged PR #${merged_pr}: $branch"
               if gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${encoded}" >/dev/null 2>&1; then
                 deleted=$((deleted + 1))
               fi
@@ -89,3 +88,5 @@ jobs:
             echo "- stale PRs closed: ${closed}"
             echo "- contained branches deleted: ${deleted}"
           } >> "$GITHUB_STEP_SUMMARY"
+
+[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]

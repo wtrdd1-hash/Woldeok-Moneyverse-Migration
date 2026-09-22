@@ -5,7 +5,10 @@
 > 기본 순서: **1. 영어 원문 / 2. 한국어 번역본**. 한국어 사용자는 이 페이지에서 한국어 문서로 바로 이동할 수 있습니다. 영어 파일 `NAME.md`의 한국어 파일은 기본적으로 `NAME.ko.md`입니다.
 
 ## 기획
+- [보안 보증 마스터 기획서](planning/SECURITY_ASSURANCE_MASTER_PLAN.ko.md) / [English](planning/SECURITY_ASSURANCE_MASTER_PLAN.md)
+- [전 저장소 보안 마스터 기획](planning/SECURITY_MASTER_PLAN.ko.md) / [English](planning/SECURITY_MASTER_PLAN.md)
 - [상시 갱신 프로젝트 계획](planning/PROJECT_PLAN.ko.md)
+- [관리자 국고 관리 상세 기획서](planning/ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md) / [English](planning/ADMIN_TREASURY_MANAGEMENT_SPEC.md)
 - [제품 성장 및 리텐션 계획](planning/PRODUCT_GROWTH_PLAN.ko.md)
 - [상세 제품 설계 명세](planning/PRODUCT_DESIGN_SPEC.ko.md)
 - [기본 제한 정책](planning/DEFAULT_LIMIT_POLICY.ko.md)
@@ -83,6 +86,8 @@
 - [v2026.09.08 공개 게시판 및 검색 노출](releases/v2026.09.08-public-board-seo.ko.md)
 
 ## 변경 기록 / 작업 로그
+- [보안 마스터 기획 v2026.09.21.324 변경 기록](changelog/2026-09-21-security-master-plan-v2026.09.21.324.ko.md) / [English](changelog/2026-09-21-security-master-plan-v2026.09.21.324.md)
+- [보안 마스터 기획 v2026.09.21.324 작업 로그](worklog/2026-09-21-security-master-plan-v2026.09.21.324.ko.md) / [English](worklog/2026-09-21-security-master-plan-v2026.09.21.324.md)
 - [전체 한국어 CHANGELOG](changelog/CHANGELOG.ko.md)
 - [클럽하우스 UX 및 운영 v2026.09.13.18 변경 기록](changelog/2026-09-13-clubhouse-ux-operations-v2026.09.13.18.ko.md)
 - [제품 기획 v2026.09.13.18 작업 로그](worklog/2026-09-13-product-planning-v2026.09.13.18.ko.md)

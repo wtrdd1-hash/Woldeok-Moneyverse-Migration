@@ -2,12 +2,69 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.20.305
-> **구현·증거 동기화:** 2026-09-20
+> **현재 통합 버전:** v2026.09.22.335
+> **구현·증거 동기화:** 2026-09-22
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+## 자동 main 통합 지시 — v2026.09.22.337 (2026-09-22)
+
+- 완료된 작업은 열린 non-Draft PR이고 WIP/hold/do-not-merge 표시가 없으며 정확한 현재 HEAD 후보 검증을 통과한 경우에만 자동으로 `main`에 통합한다.
+- 열린 PR이 없는 브랜치는 권위적으로 작업 중으로 간주하고 자동 병합·충돌조정·삭제하지 않는다. Draft 또는 차단 표시 PR도 동일하게 제외한다.
+- 완료 PR이 반복 검증 실패해도 브랜치를 삭제하지 않고 수정 대상으로 보존한다. 수정 후 새 exact SHA가 후보 검증을 통과해야 자동 병합한다.
+- 성공 병합 후 소스 브랜치 삭제는 merged-PR 증거가 있는 경우에만 허용한다.
+
+## 긴급 전수 QA / 관리자 포함 수정요망 — v2026.09.22.335 (2026-09-22)
+
+### 현재 Test/Production 릴리스 상태를 정상으로 간주하지 않는다
+- **우선순위:** **긴급 / P0-P1**. 관리자 기능을 포함한 전 기능 재검증에서 Test 서버 다수 500, Test SHA 지연, Production 프론트/백엔드 split-release가 재현됐다. 아래 항목을 닫기 전 신규 Production 승격을 금지한다.
+- **QA-335-01 — Production split-release (P0, OPEN, 운영 차단):** 실행 중인 Production frontend CWD는 `/srv/moneyverse-data/releases/prod-cd29db4-v336/frontend`이지만 backend CWD는 `/srv/moneyverse-data/releases/prod-5cc3641-v328/backend`이다. `production-current`는 `prod-cd29db4-v336`을 가리키는데 backend process는 이전 release에 남아 있다. 기대값은 frontend/backend가 동일한 exact release SHA/세대를 실행하는 것이다. 수정 후 두 process CWD, backend `/api/version`, frontend `/frontend-version`, public smoke, session continuity를 같은 candidate로 증명해야 한다.
+- **QA-335-02 — Test 서버 핵심/관리자 화면 500 (P0, OPEN, 운영 차단):** `https://test.easy-scraping.com/`만 200이고 `/login`, `/register`, `/guide`, `/stocks`, `/shop`, `/work`, `/status`, `/privacy`, `/terms`, `/support`, `/announcements`, `/gallery`는 모두 500으로 재현됐다. 관리자 `/admin`, `/admin/users`, `/admin/economy`, `/admin/security`, `/admin/support`, `/admin/controls`, `/admin/content`, `/admin/shop`, `/admin/work`, `/admin/market/ai-news`도 모두 500이다. Production 동일 public/admin path는 이번 비인증 HTTP smoke에서 200이었다. Test가 고쳐지기 전에는 Test 통과/승격 증거를 생성할 수 없다.
+- **QA-335-03 — Test runtime 74 commits stale (P1, OPEN, 운영 차단):** Test backend `/api/version`은 `7298bb92d44bd1122cea0929b1d2eb4afbb1a258`이며 현재 `origin/main=55cea0ba49fa53e17c924cc54bff5689e2bad172`보다 74 commits 뒤다. Test process는 `test-5cc3641-v328` release에서 실행 중이다. 따라서 최근 관리자/보안/콘텐츠 변경을 Test에서 검증했다는 주장을 금지한다.
+- **QA-335-04 — 최신 관리자 보안 수정이 실행 runtime에 미반영 (P0/P1, OPEN):** 최신 main에는 `v329` sensitive admin step-up, `v331` abuse/security mutation step-up, `v332` member restriction step-up, `v333` admin private photo upload step-up 수정이 존재한다. 현재 Test와 Production backend가 보고하는 runtime build는 그 이전 `7298bb92...`이므로 이 보호조치가 실행 backend에 반영됐다는 증거가 없다. 관리자 민감 mutation은 최신 exact SHA Test에서 재인증 요구/권한/CSRF/audit/negative-path까지 재검증한 뒤 운영 backend를 동일 SHA로 무중단 교체한다.
+- **QA-335-05 — release provenance/identity 불일치 (P1, OPEN):** 실행 release directory 이름(`5cc3641-v328`, `cd29db4-v336`)과 backend가 노출하는 immutable build id(`7298bb92...`)가 일치하지 않는다. 디렉터리명·symlink·process CWD·`BUILD_ID`·Git commit·artifact digest를 하나의 exact-SHA lineage로 묶고, 불일치 시 자동 승격을 fail-closed 해야 한다.
+- **QA-335-06 — 관리자 화면 직접 회귀증거 부족 (P1 verification gap, OPEN):** frontend에는 관리자 `page.tsx`가 20개인데 admin 하위 직접 test file은 9개다. 공통 테스트가 일부 화면을 간접 커버할 수 있으므로 이것만으로 기능 결함이라고 단정하지 않지만, `/admin` 전 영역을 인증된 exact-SHA Test에서 route-by-route smoke/E2E로 증명하기 전에는 관리자 전체 정상 판정을 금지한다. backend admin test는 21개(그중 DB test 9개)이며, 최신 runtime PR의 GitHub CI에서는 real-PostgreSQL `runtime-check`가 성공했지만 현재 Test/Production running SHA와 동일하지 않다.
+- **긴급 수정 순서:** v2026.09.22.335-01 Test 500 root cause 수정 -> -02 최신 main exact SHA로 isolated Test backend/frontend 동시 배포 -> -03 Test backend/frontend identity 일치 확인 -> -04 관리자 20개 화면 + 핵심 사용자 route 인증/비인증 smoke 및 DB/API/security E2E -> -05 작업 중간 최신 기획 재확인 -> -06 Production frontend/backend를 동일 exact merged SHA로 무중단 교체 -> -07 세션 유지/health/version/admin critical mutation/로그 오류 재검증 -> -08 `QA-335-*`별 evidence를 기록한 뒤에만 CLOSED.
+- **롤백:** 어느 단계든 5xx, identity mismatch, DB migration mismatch, 관리자 인증/step-up 회귀, 세션 손실이 발생하면 새 승격을 중단하고 last-known-good 동일 frontend/backend pair로 원복한다. split-release 상태를 정상 fallback으로 사용하지 않는다.
+
+## QA 결함 보존 지시 — v2026.09.22.334 (2026-09-22)
+
+### QA에서 발견한 불량·미실행·저하 항목은 검증 종료 전까지 기획서에 계속 남긴다
+- **상시 추적 규칙:** QA에서 발견한 기능 불량, 회귀, 사용자/성능 위험이 있는 경고, 필수 테스트 skip, 환경 부족으로 막힌 테스트, 프론트/백엔드/API 불일치, 모바일·반응형 문제, 인증·세션 문제, 배포 문제, 릴리스 증거 공백은 모두 권위 기획서와 버전별 QA worklog에 기록한다. 전체 명령이 성공해도 내부 미해결 항목을 삭제하거나 “정상”으로 덮지 않는다.
+- **필수 결함 필드:** 각 미해결 QA 항목은 `id`, 발견 버전/SHA, 영향 기능/화면, 환경, 재현 증거 또는 테스트명, 기대/실제 동작, 심각도(`P0`~`P3`), 릴리스 차단 여부, 담당 workstream, 임시 우회책, 수정 목표, 재시험 증거, 종료 버전/SHA를 가진다. 아직 모르는 값은 `TBD`로 명시하고 생략하지 않는다.
+- **상태 흐름:** `OPEN -> TRIAGED -> FIX_IN_PROGRESS -> RETEST_REQUIRED -> VERIFIED -> CLOSED`. 관련 자동/수동 QA가 exact candidate SHA에서 통과해야만 `CLOSED`로 변경한다. skipped/not-run/cancelled 또는 과거 SHA의 성공 기록은 종료 증거가 아니다. 같은 문제가 재발하면 기존 defect id를 유지하고 occurrence를 추가한다.
+- **승격 규칙:** 미해결 P0/P1과 필수 real-DB/security/auth/payment/economy/deployment 증거 누락은 Production을 차단한다. P2/P3를 남긴 채 배포하려면 비차단 근거, 사용자 영향, 담당자, 목표 버전을 기획서에 명시해야 한다.
+- **현재 QA 증거 — `origin/main=55cea0ba49fa53e17c924cc54bff5689e2bad172`:** repository lint, typecheck, aggregate test, Production build는 모두 exit `0`이었고 API 계약 생성/검사는 159 endpoints를 확인했다. frontend test는 707/707 통과했고 backend/contract/database의 실행된 테스트도 통과했지만 아래 미해결 항목 때문에 **결함 0 상태는 아니다**.
+- **QA-334-01 — frontend lint 저하 (P2, 이번 docs-only 회차는 비차단):** ESLint 경고 12건. admin content, announcements, board, gallery, profile, cosmetics의 11개 `@next/next/no-img-element` 경고와 `gallery/submit/submit-forms.tsx`의 `react-hooks/exhaustive-deps` 경고 1건이다. 각 항목을 수정해 lint 경고 0으로 재검증하거나 항목별 명시적 예외 근거를 남길 때까지 제품 품질/성능/유지보수 부채로 유지한다.
+- **QA-334-02 — 실제 DB QA 검증 공백 (P1, 릴리스 차단):** backend Vitest 결과는 `907 passed | 361 skipped`였고 52개 DB 계열 test file의 suite/test가 `DATABASE_URL` 및/또는 `MIGRATOR_DATABASE_URL` 부재 조건으로 skip됐다. 따라서 로컬 aggregate test 성공만으로 wallet, stock, casino, work, shop, admin, auth/session, audit, profile, business, scheduler, security boundary 등 real-PostgreSQL 동작을 증명하지 못한다. Production 승격 전 isolated Test DB에서 필요한 real-DB suite를 exact-SHA 증거로 실행해야 한다.
+- **이번 실행에서 결함으로 분류하지 않는 항목:** verification-email sender 테스트는 SMTP 미설정 오류 경로를 의도적으로 검증했고 테스트 자체는 통과했다. 해당 로그만으로 배포 SMTP 장애라고 판정하지 않는다. 실제 SMTP health는 Test/Production 릴리스 점검에서 별도 검증한다.
+- **작업 순서:** v2026.09.22.334-01 결함 ledger 보존 -> -02 모든 lint 경고 수정 또는 근거 있는 예외화 -> -03 isolated real-DB QA credential 구성 및 필수 DB suite 전부 실행 -> -04 exact-SHA Test에서 인증/API/반응형/security smoke -> -05 작업 중간 최신 기획 재확인 -> -06 최신 증거 반영 후 병합 -> -07 blocking defect 전부 종료된 경우에만 무중단 Production 승격 -> -08 승격 후 smoke/session/version 검증.
+- **문서 규칙:** 이후 모든 QA 회차는 새 결함을 추가하고 기존 id 상태를 갱신한다. 미해결 항목을 단순 삭제하지 않으며 종료된 과거 결함은 Git/changelog/worklog에서 계속 추적 가능해야 한다.
+
+
+## 보안 기획 지시 — v2026.09.21.324 (2026-09-21)
+
+### 전 기능 보안 보증 기준
+- **권위 상세 문서:** [SECURITY_ASSURANCE_MASTER_PLAN.ko.md](SECURITY_ASSURANCE_MASTER_PLAN.ko.md).
+- **근거 원칙:** 검증 불가능한 단순 레퍼런스 개수 대신 OWASP ASVS 5.0.0, OWASP Top 10, OWASP API Security Top 10:2023, MITRE CWE/2025 CWE Top 25, NIST SSDF·SP 800-63B-4, CISA Secure-by-Design, CVE/CISA KEV, 벤더 공지를 추적 가능한 근거로 사용한다.
+- **전체 기능 범위:** 인증/세션, OAuth, 지갑·송금·국고, 주식, 은행, 카지노, 직업·퀘스트·사업, 채팅/쪽지, 게시판·댓글·업로드·검색, 관리자, API/webhook, AI/agent, 결제/구독, 모바일, 인프라·DB·백업·CI/CD에 각각 위협모델과 릴리스 증거를 둔다.
+- **필수 통제:** deny-by-default 서버 권한, cross-account negative test, bounded validation, CSRF/CORS/browser hardening, idempotency/concurrency/value integrity, abuse/resource limit, privacy-safe audit/logging, secret/dependency/IaC scan, SBOM, exact-SHA Test 보안 회귀.
+- **승격 차단:** P0/P1 보안 이슈는 수정 또는 권한소유자의 공식 위험수용+보완통제 없이는 Production 승격을 막는다. Production을 주요 취약점 탐색 대상으로 사용하지 않는다.
+- **실행 순서:** v2026.09.21.324-01~-08: 전체 인벤토리 → 표준 매핑 → P0/P1 보완 → 자동 gate → 인증 exact-SHA Test → 작업 중간 기획 재확인 → exact merged SHA 무중단 승격 → 사후 점검.
+- **현재 상태:** 기획/문서 단계이며 모든 통제가 이미 구현됐거나 1억 개 개별 레퍼런스를 수동 검토했다고 주장하지 않는다.
+
+## 기획 지시 — v2026.09.21.315 (2026-09-21)
+
+### 주식 거래정지 매수원가 자동정산 + 안전한 종목 삭제
+- **제품 규칙:** 개별 주식이 설정된 판매/거래정지 상태로 들어가면 해당 종목의 모든 남은 사용자 보유분을 서버 권위 매수원가로 WLD 자동정산한다. 일반 시장매도가 아니며 현재가/최근 체결가를 정산가로 사용하지 않는다.
+- **원가 권위:** 남은 매수 lot의 조정 취득단가를 우선하고, legacy 보유분은 서버가 저장한 권위 가중평균 원가만 사용할 수 있다. 원가가 없으면 값을 추정하지 않고 fail-closed 처리하며 최종 거래정지 완료를 막는다. 이 계약의 거래정지 정산에는 매매수수료, spread, slippage, price impact를 부과하지 않는다.
+- **원자성/멱등성:** 먼저 신규 매매를 막고 종목 가격변동을 멈추며 대기주문을 취소한 뒤, halt/stock/account별 1개 멱등 command로 WLD 적립과 정산 주식수량 0 처리를 같은 transaction에서 수행한다. 재시도는 저장 결과를 재사용하며 중복지급을 금지한다.
+- **거래정지 이력이 있어도 삭제:** 모든 보유분이 `HALTED_SETTLED`에 도달하면 거래정지 기록이 있어도 관리자가 live 종목을 삭제/보관할 수 있다. settlement/ledger/audit 금융이력은 stock tombstone 또는 안정적인 ticker/name snapshot으로 불변 보존하며 cascade 삭제를 금지한다. operational halt-history를 일반 관리자 화면에서 숨김/삭제해도 그 행위 자체는 감사기록을 남기고 금융증거는 유지한다.
+- **관리자/사용자 UX:** 관리자 정지 확정 전 영향 보유자 수·환급원금을 보여주고 진행/실패/재처리를 제공하며 정산 완료 전 삭제버튼을 비활성화한다. 사용자는 일반 매도/수익실현이 아니라 거래정지 원가환급 receipt로 수량·환급원금을 확인한다.
+- **권위 상세기획:** [STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC.ko.md](STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC.ko.md).
+- **구현순서:** v2026.09.21.315-01 ~ -07: schema/state/basis/tombstone -> transaction 정산 -> 관리자 API -> 반응형 UI -> real-DB 동시성/장애/security -> 최신기획 재확인 + exact-SHA Test -> merge + 병합 exact SHA 무중단 Production.
+- **현재 상태:** 기획/문서만 변경했다. 이번 회차는 런타임, DB, API, Production 변경을 주장하지 않는다.
 
 ## 긴급 / P0 기획 지시 — v2026.09.20.305 (2026-09-20)
 
@@ -741,7 +798,8 @@ Google Search/Play와 OWASP 최신 공식자료 → exact main/PR/CI 및 Debian 
 - **Exact main / 구현 대조:** 회차 시작 main은 `75e69e77cdc18ef221106a008563151a4c790728`이다. PR #442는 backend-owned `GET /api/version`, `Cache-Control: no-store`, E2E를 병합했고 commit에는 isolated Test exact candidate, migration 204, public smoke, noindex, session continuity 증거가 기록돼 있다. 이는 코드/Test 증거이며 Production backend 승격 증거가 아니다.
 - **P0 `BAK-RUNTIME-177-01`: 부분 해소 / IN PROGRESS.** 권위 Debian의 `moneyverse-backup.timer`가 이제 enabled+active이며 6시간 주기, Persistent, randomized delay로 예약된다. Service는 oneshot, `UMask=0077`, `NoNewPrivileges=true`, `ProtectSystem=strict`, source read-only, backup destination 단일 write 경계를 가진다. 약 21:22와 21:57 KST 실행에서 encrypted archive 검증, `database.dump`, `photos.tar.zst`, `manifest.txt`가 모두 OK였다. 따라서 기존 “timer 없음/자동 암호화 로컬백업 없음” 결함은 닫지만 **P0 전체는 닫지 않는다.** Isolated restore+domain reconciliation drill, 실측 RPO/RTO, off-host immutable copy/retention, 실패 alert 증거가 남았다. 로컬 암호화 사본만으로 DR로 인정하지 않는다. 그 전 destructive migration/ledger/entitlement rewrite는 계속 차단한다. Rollback은 timer disable + 생성된 good archive 보존이며 마지막 정상 archive를 rollback 과정에서 삭제하지 않는다. last-success age, next trigger, archive size/checksum, decrypt/structure, disk free, retention deletion, off-host replication lag, restore reconciliation을 관측한다.
 - **P0 backend runtime identity: MERGED / TEST-PROVEN / PRODUCTION-NOT-PROVEN.** Production `moneyverse-backend`는 active이고 표본 구간 warning 이상 journal은 없지만 직접 `http://127.0.0.1:3000/api/version`은 아직 404다. 즉 main에는 #442가 있어도 운영 backend process는 이전 build다. 승격은 attested exact candidate로만 수행한다. 수용조건은 expected application build ID의 `/api/version=200` + `no-store`, `/health=200`, BFF viewer/wallet/status/announcements/shop smoke, session-count continuity, migration-set equality, 신규 warning/error burst 없음, rollback manifest다. Blind restart는 금지한다.
-- **Release/QA 순서:** `REL-AUTH-184-01`은 P0 IN PROGRESS다. Backend identity endpoint는 attestation primitive지만 candidate digest + applicationSourceSha + migrationSetHash + deploymentId 결합을 대체하지 않는다. 기존 docs-only/control-plane/runtime/mixed와 stale/foreign/missing-candidate matrix를 완료해야 DONE이다. GitHub required checks 강제는 P0 데이터안전/release identity 다음 P1이다.
+
+[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]- **Release/QA 순서:** `REL-AUTH-184-01`은 P0 IN PROGRESS다. Backend identity endpoint는 attestation primitive지만 candidate digest + applicationSourceSha + migrationSetHash + deploymentId 결합을 대체하지 않는다. 기존 docs-only/control-plane/runtime/mixed와 stale/foreign/missing-candidate matrix를 완료해야 DONE이다. GitHub required checks 강제는 P0 데이터안전/release identity 다음 P1이다.
 - **전체 기능 계약 델타:** 모든 stateful 기능(identity/session, inventory/entitlement, shop/payment/subscription, jobs/rewards/ledger, business/bank/loan, stocks, casino, community/referral, admin/audit/analytics)은 destructive 또는 경제적으로 비가역적인 변경의 운영승격 선행조건으로 `backup_last_verified_at`, `offhost_replication_at`, `restore_drill_at`, `restore_reconciliation_status`, deployed backend build identity를 요구한다. Admin/incident UI는 stale backup/identity mismatch를 안내 배너가 아니라 blocking 상태로 표시한다. API mutation은 idempotency key, ownership/BOLA, transaction constraint, audit receipt를 유지하며 backup/restore는 사용자 호출 API로 노출하지 않는다.
 - **SEO/SEO backend 델타(Google Search Central 2026-09-17): 공개 목록 화면에 직접 채택.** Google은 infinite-scroll 지침을 최신 문서로 이전했고 지침 자체는 변경하지 않았다. Infinite scroll을 쓰는 커뮤니티 feed, 공개 collection/catalog/search landing은 stable ordering의 crawlable paginated URL과 server-renderable link를 제공해야 하며 scroll-only JavaScript discovery를 indexability 계약으로 삼지 않는다. Index 가능한 각 page는 자기 URL self-canonical, 결정적 title/H1 context, 정상 200/404, 정책상 독립 가치가 있을 때만 sitemap 포함을 갖는다. Facet/query 조합은 SEO read-model이 명시적으로 승격하지 않으면 기본 noindex/canonical 정책이다. Cursor token은 API 내부 구현이며 영구 public slug가 아니다. QA는 JS-disabled link traversal, Google-rendered HTML parity, duplicate/canonical, out-of-range 404, sitemap/lastModified, append CWV, crawler-log sampling을 포함한다. KPI는 organic impression/CTR→signup→activation→D7/D30→revenue이며 thin/duplicate index 증가는 guardrail이다.
 - **보안 레퍼런스 갱신:** OWASP API Security는 API-specific 최신판을 2023으로 유지한다. BOLA, broken authentication, object-property/function authorization, resource consumption, sensitive-business-flow abuse, SSRF, misconfiguration, inventory, unsafe-upstream을 release-blocking test로 유지한다. Backup key는 release/backup destination 밖에 두고 log 금지, restore는 decrypt/checksum/schema/reconciliation mismatch 시 fail-closed한다. Runtime identity 공개 응답에는 immutable build identity만 두며 secret/host/DB/commit author/environment metadata는 금지한다.
@@ -1541,7 +1599,8 @@ punitive streak, loss-threat FOMO, fake scarcity, 과도한 알림을 피하고 
 
 - **인증/세션/보안센터:** session actor가 권위다. OAuth/OIDC에는 해당되는 state/nonce/PKCE, session rotation/revocation, 민감변경 recent reauth를 적용한다. profile/admin/stock/bank/business/community/telemetry object에는 BOLA/BFLA negative test가 필수다.
 - **경제/인벤토리/상점/결제/구독:** 가치변경은 server-authoritative, integer-safe, transactional, idempotent다. client 표시가격은 settlement authority가 아니다. 실결제 SKU는 receipt/webhook 검증, entitlement reconciliation, refund/revoke/restore state machine, append-only audit가 필요하다. 미실측 conversion/ARPU/ARPPU/refund/churn/CAC/LTV는 `HYPOTHESIS`/`TEST TARGET`이다.
-- **직업/퀘스트/레벨/보상:** reward와 quota는 server game clock, durable receipt/idempotency, append-only ledger를 사용하고 client timer는 표시 전용이다.
+
+[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]- **직업/퀘스트/레벨/보상:** reward와 quota는 server game clock, durable receipt/idempotency, append-only ledger를 사용하고 client timer는 표시 전용이다.
 - **은행/대출/사업/가상주식:** simulated/game-only 표시를 강제한다. 이자, 대출자격, 주식체결, 사업정산, portfolio history는 DB/server 권위이며 실제 증권·예금·수익보장 표현을 금지한다.
 - **카지노/확률형:** themed UI는 하나의 typed server action schema에 매핑한다. client RNG/animation은 payout을 결정하지 않는다. eligibility, bet debit, server RNG, payout, ledger, audit, idempotency를 원자적으로 처리하고 retry는 동일 receipt를 반환한다.
 - **커뮤니티/친구/클럽/추천:** moderation/block/report, invite/referral anti-replay, rate limit이 필요하다. 추천보상은 server-side idempotent이며 fraud 관측이 가능해야 한다. multi-account signal 하나만으로 비공개 자동제재하지 않고 risk control/review와 조합한다.
@@ -1966,6 +2025,10 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 
 가상 주식시장에 opt-in 시간별 AI 뉴스룸 자동화 경로를 추가한다. AI는 제한된 이벤트 시나리오를 만들고 실제 주가 권위는 기존 결정론적 market-event 로직이 유지한다. 자동 게시는 전체시장·강도 3 충격을 제외하고 한 시나리오의 변동 종목을 최대 2개, 기간을 최대 24시간으로 제한한다. 자격증명, 감사 actor 또는 안전 후보가 없으면 fail-closed로 아무 이벤트도 게시하지 않는다. 브랜치: feat/ai-stock-auto-scenarios-v2026.09.19.261.
 
+### v2026.09.21.325 — AI 시나리오 사용자 신문
+
+기존 v2026.09.19.261 AI 주식 시나리오 자동생성·게시 기능을 일반 사용자에게 안전하게 노출하는 신문형 소비자 제품 계층을 추가한다. 권위 상세 문서는 [AI_SCENARIO_USER_NEWSPAPER_SPEC.ko.md](AI_SCENARIO_USER_NEWSPAPER_SPEC.ko.md)다. 기존 `ai-news` 생성기와 bounded auto-publish 경계를 재사용하되, 공개 지면은 대표기사/최신기사/진행사건/아카이브/상세기사 구조, `AI 생성 가상뉴스` 및 `게임 내 가상시장 정보` 표시, 중복 억제, 현실 기업·인물 및 투자권유 표현 차단, 정정/철회, provenance/audit, selective canonical indexing을 필수로 한다. publication 데이터는 기사 투영 계층이며 가격 권위는 계속 결정론적 market-event 로직에 남는다. 이번 버전은 문서 전용이며 코드 구현은 별도 개발 브랜치와 exact-SHA Test 검증 후 무중단 Production 승격 대상으로 둔다.
+
 ### v2026.09.19.271 — 사람 제작 UI 기준
 
 - 일반적인 AI 생성 UI 템플릿처럼 보이는 페이지는 검수 실패로 처리한다.
@@ -2004,3 +2067,5 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 다음 AI 작업은 신규 기능 구현 전에 AI_ECONOMY_CONTROLLER_SPEC.ko.md v2026.09.20.292에 정의한 전수 재감사·재구축 게이트를 반드시 먼저 완료한다. 문서나 feature switch만 확인하는 것이 아니라 지금까지 만든 모든 AI 구현과 실제 런타임 동작을 대조한다. 요구사항이 수정됐거나 부분구현·stale·중복·호환패치 누적·기획 충돌 상태인 영역은 기존 코드를 기본 유지하지 않고 최신 요구사항을 기준으로 다시 설계·재구축한다.
 
 강제 순서: AI 전체 인벤토리 -> 최신 기획/main/사용자 지시 재확인 -> 구현·런타임 계약 감사 -> 변경·취약 영역 재구축 -> 시스템 전체 회귀 -> 정확한 SHA로 Test 런타임·fail-closed·rollback 입증 -> 최종 기획 재확인 -> 모든 증거 통과 시에만 무중단 Production 승격. 이 게이트가 끝나거나 남은 제외범위가 명시적으로 승인되기 전에는 신규 AI 기능 작업을 시작하지 않는다.
+
+[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]
