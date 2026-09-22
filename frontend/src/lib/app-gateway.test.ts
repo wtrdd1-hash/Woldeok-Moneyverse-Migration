@@ -19,6 +19,9 @@ describe('appGatewayPath', () => {
     expect(appGatewayPath(['stocks'])).toBe('/api/v1/stocks');
     expect(appGatewayPath(['developer'])).toBe('/api/v1/developer');
     expect(appGatewayPath(['newspaper', 'pulse'])).toBe('/api/v1/newspaper/pulse');
+    expect(appGatewayPath(['crafting', 'recipes'])).toBe('/api/v1/crafting/recipes');
+    expect(appGatewayPath(['marketplace', 'listings'])).toBe('/api/v1/marketplace/listings');
+    expect(appGatewayPath(['notifications', 'unread-count'])).toBe('/api/v1/notifications/unread-count');
     expect(appGatewayPath(['media', 'profile', 'avatar.webp'])).toBe('/media/profile/avatar.webp');
     expect(appGatewayPath(['auth', 'google', 'authorize'])).toBe('/auth/google/authorize');
     expect(appGatewayPath(['auth', 'discord', 'callback'])).toBe('/auth/discord/callback');
@@ -60,7 +63,7 @@ describe('app API compatibility contract', () => {
   it('keeps every documented app group in the gateway allow-list', () => {
     expect(APP_API_GROUPS).toEqual([
       'account', 'activity', 'admin', 'auth', 'bank', 'banking', 'board', 'businesses',
-      'casino', 'chat', 'clubs', 'content', 'developer', 'early-game', 'engagement', 'media', 'newspaper', 'photos', 'privacy',
+      'casino', 'chat', 'clubs', 'content', 'crafting', 'developer', 'early-game', 'engagement', 'marketplace', 'media', 'newspaper', 'notifications', 'photos', 'privacy',
       'profile', 'progression', 'rewards', 'seasons', 'game-clock', 'shop', 'spaces', 'stocks', 'support', 'wallet', 'work',
     ]);
   });
