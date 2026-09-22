@@ -336,7 +336,7 @@ export class GameCatalogController {
    * walk clamps to a band around that open — see migration 053.
    */
   @Post('stocks/:id/price')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Set a stock price by hand' })
   setStockPrice(
     @Req() request: RequestWithSession,
@@ -368,7 +368,7 @@ export class GameCatalogController {
   }
 
   @Post('stocks/:id/halt')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Halt stock trading and auto-settle all holdings into cost-basis WLD' })
   haltStock(
     @Req() request: RequestWithSession,
@@ -394,7 +394,7 @@ export class GameCatalogController {
   }
 
   @Post('stocks/:id/halt-settlement/retry')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Retry failed or quarantined stock halt settlements' })
   retryHaltSettlement(
     @Req() request: RequestWithSession,
@@ -407,7 +407,7 @@ export class GameCatalogController {
   }
 
   @Post('stocks/:id/corporate-actions')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Apply a split or reverse split' })
   corporateAction(
     @Req() request: RequestWithSession,
