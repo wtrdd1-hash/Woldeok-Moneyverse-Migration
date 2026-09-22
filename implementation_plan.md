@@ -1,6 +1,7 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v48)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v49)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v49**: 3차 긴급 조율 문답 확정 사양 반영 누적 및 최종 통합 구현 확정 — 관리자 제어 패널(/admin/controls) 실시간 약관 버전 개정 폼, 긴급 롤백 디스코드 웹훅 알림, 모달 내 인라인 탭형 아코디언 약관 전문 뷰어, OAuth 콜백 즉시 인라인 락 온보딩 파이프라인 확정 (+135, -0)
 - **v48**: 2차 긴급 조율 문답 확정 사양 반영 누적 — SWR 60초 캐싱 및 로컬 Fallback 회로, 토스형 축하 토스트 및 심리스 모달 언마운트 UX, PostgreSQL audit_logs 감사 원장 영구 보존(USER_CONSENT_GRANTED), rollback_production.sh 활성 세션(927개) 실시간 보호 안전 게이트 확정 (+110, -0)
 - **v47**: 1차 긴급 조율 문답 확정 사양 반영 누적 — 동적 서버 사이드 정책 패치(Root Layout/BFF 연동), 엄격 화이트리스트 경로 매트릭스, 마운트 가드 + 200ms Fade-In 오버레이, 10초 원클릭 자동 롤백 스크립트(ops/release/rollback_production.sh) 확정 (+115, -0)
 - **v46**: 긴급 결함 방어 아키텍처 및 무장애 운영 플레이북 심화 기획 — 동적 정책 버전 연동 파이프라인, 전 도메인 예외/보호 경로 거버넌스, 클라이언트 하이드레이션 깜빡임 방지, 원클릭 비상 롤백 플레이북(RTO < 10s) 및 GPT 다자간 작업 잠금 명세 수록 (+125, -0)
@@ -1512,6 +1513,65 @@ flowchart TD
   - `ops/release/rollback_production.sh` 도입부에 세션 카운트 안전 검증 쿼리 실행:
     `CURRENT_SESSIONS=$(sudo docker exec woldeok-moneyverse-dev-db-1 psql -U moneyverse_migrator -d woldeok_moneyverse_dev -t -c "SELECT count(*) FROM auth_sessions WHERE expires_at > now();")`
   - 세션 수가 비정상적으로 급감(예: 800개 미만)하거나 DB 연결 실패 시 즉시 `CRITICAL WARNING`을 발생시키고 관리자의 명시적 승인(`read -p "Proceed with rollback? (yes/no): "`) 없이는 롤백 프로세스를 안전하게 일시 중단.
+
+---
+
+## 🚀 [v49 Specification] 3차 조율 결정 사항 및 최종 통합 구현 확정 (누적 추가)
+
+### 1. 관리자 제어 패널 실시간 약관 버전 개정 폼 (`/admin/controls`) (A1 결정 사항)
+- **요구사항**: 향후 이용약관 및 개인정보처리방침 개정 시 소스코드 재배포 없이 웹 콘솔에서 즉시 버전을 수정하고 전 유저 재동의 Step-Up을 트리거할 수 있는 관리 기능 탑재.
+- **구현 구조**:
+  - `frontend/src/app/admin/controls/`에 약관 버전 제어 카드 (`policy-version-control-card.tsx`) 신설.
+  - `POST /api/v1/admin/controls/policy`를 통해 환경 설정(`TERMS_VERSION`, `PRIVACY_VERSION`)을 안전하게 변경.
+  - 관리자 2단계 인증(TOTP / Step-Up) 통과 시에만 변경 허용.
+
+### 2. 긴급 롤백 및 동의 실패 이상 감지 디스코드 웹훅 연동 (A2 결정 사항)
+- **요구사항**: `rollback_production.sh` 발동 시 또는 단시간 내 동의 실패 폭증 시 디스코드 보안 관제 채널에 24/7 실시간 Embed 알림 발송.
+- **구현 구조**:
+  - `ops/release/rollback_production.sh` 완료/중단 시점에 `curl -X POST "$DISCORD_WEBHOOK_URL"`을 호출하여 롤백 사유, 대상 SHA, 활성 세션 보존 상태를 Embed 포맷으로 실시간 발송.
+
+### 3. 모달 내 인라인 탭형 아코디언 약관 전문 뷰어 (A3 결정 사항)
+- **요구사항**: 외부 링크(`/terms`, `/privacy`)로 화면을 이탈하지 않고, 모달 내부에서 이용약관 전문과 개인정보처리방침을 탭 형태로 즉시 펼쳐볼 수 있는 원스톱 아코디언 뷰어 탑재.
+- **구현 구조**:
+  - `ConsentStepUpModal` 내부에 [이용약관] 탭과 [개인정보처리방침] 탭을 토글할 수 있는 인라인 뷰어 컨테이너(`max-h-48 overflow-y-auto text-xs bg-muted/40 p-3 rounded-lg border`)를 구성하여 0초 지연 인라인 열람 제공.
+
+### 4. OAuth 신규 가입자 즉시 인라인 약관 락 파이프라인 (A4 결정 사항)
+- **요구사항**: 디스코드/구글 소셜 로그인으로 첫 가입한 유저가 별도 가입 단계를 전전하지 않고 메인 화면 위에서 인라인 동의 모달을 통해 5초 내 온보딩을 완결.
+- **구현 구조**:
+  - OAuth 콜백 핸들러에서 세션 쿠키 발급 후 즉시 홈(`/`)으로 리다이렉트.
+  - `ConsentGuard`가 브라우저 마운트 즉시 `signedIn === true && consentCurrent === false`를 감지하여 부드러운 Fade-In과 함께 `ConsentStepUpModal`을 띄워 원터치 동의 완료 유도.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan] 긴급 결함 방어 및 포털 고도화 최종 구현 행동 명세
+
+### User Review Required
+> [!IMPORTANT]
+> 1. **Zero-Downtime Guarantee**: 모든 백엔드 및 프론트엔드 변경은 PostgreSQL 927개 활성 사용자 세션을 100% 무손실로 보존하며 무중단 승격됩니다.
+> 2. **Multi-Agent Coherence**: 원격 저장소(`origin/main`)에 GPT가 최근 푸시한 `d5e8783` (OpenAPI 명세 최신화)와 완벽히 rebase 병합된 상태에서 최종 빌드 및 승격을 수행합니다.
+
+### Proposed Changes (파일별 상세 변경점)
+
+#### 1. 프론트엔드 정책 연동 및 모달 고도화
+- **[MODIFY]** `frontend/src/lib/api.ts`: `fetchLatestPolicy()` 함수 신설 (SWR 60초 캐싱 및 Fallback 적용).
+- **[MODIFY]** `frontend/src/app/layout.tsx`: `fetchLatestPolicy()` 호출 및 `ConsentGuard`에 최신 `termsVersion`, `privacyVersion` 주입.
+- **[MODIFY]** `frontend/src/components/consent-guard.tsx`: `mounted` 가드 및 엄격 화이트리스트(`EXEMPT_PATHS`) 필터링 고도화.
+- **[MODIFY]** `frontend/src/components/consent-step-up-modal.tsx`: 인라인 탭형 아코디언 전문 뷰어, 200ms 심리스 Fade-In 트랜지션, 성공 시 토스형 축하 토스트 및 심리스 언마운트 적용.
+
+#### 2. 백엔드 감사 원장 연동
+- **[MODIFY]** `backend/src/auth/auth.controller.ts`: `PUT /api/v1/auth/consent` 시 `audit_logs`에 IP, User-Agent, 동의 버전을 기록하는 감사 로깅 연동.
+
+#### 3. 긴급 운영 롤백 플레이북
+- **[NEW]** `ops/release/rollback_production.sh`: 927개 활성 세션 실시간 안전 가드, 직전 릴리스 자동 탐색, 심볼릭 링크 원자적 교체, 디스코드 웹훅 알림이 포함된 10초 원클릭 롤백 스크립트 작성.
+
+### Verification Plan
+1. **타입 및 프로덕션 빌드 검증**:
+   - `pnpm --filter @moneyverse/backend build`
+   - `pnpm --filter @moneyverse/frontend build`
+2. **미니 PC 스테이징 및 프로덕션 승격 (`v348`)**:
+   - `stage_v348.sh` 실행 및 `verify-runtime-identity.sh` exact-SHA 일체화 검증.
+   - 전 엔드포인트 200 OK 실측 및 활성 세션(927개) 보존 확인.
+
 
 
 
