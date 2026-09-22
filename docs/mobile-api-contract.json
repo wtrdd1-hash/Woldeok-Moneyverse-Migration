@@ -1,6 +1,6 @@
 {
-  "contractVersion": "v2026.09.16.159",
-  "apiVersion": "1",
+  "contractVersion": "v2026.09.22.347",
+  "apiVersion": "v2026.09.22.347",
   "baseUrl": "https://easy-scraping.com/app-api/v1",
   "languagePolicy": {
     "primary": "en",
@@ -15823,6 +15823,378 @@
         "preferredFieldNaming": "camelCase",
         "legacySnakeCasePreserved": true,
         "camelCaseAliasesAddedRecursively": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/newspaper/pulse",
+      "purpose": "실시간 시장 심리 지수(0~100) 및 활성 시나리오 헤드라인 요약 조회",
+      "callWhen": "신문 화면 진입, 새로고침 또는 시세 변동 시",
+      "authorization": "공개: 로그인 불필요",
+      "afterSuccess": "응답을 화면의 서버 기준 상태로 교체",
+      "backendRoute": "/api/newspaper/pulse",
+      "operationId": "NewspaperController_getMarketPulse",
+      "backendOpenApiPath": "/newspaper/pulse",
+      "summary": "Get live market sentiment index and lead scenario summary",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [
+          "sentimentScore",
+          "sentimentLabel",
+          "activeEventsCount",
+          "leadHeadline",
+          "leadSummary",
+          "updatedAt"
+        ],
+        "note": "Controller returns live market sentiment pulse data."
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "sentimentScore": {
+                "type": "number"
+              },
+              "sentimentLabel": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "const": "VERY_BULLISH"
+                  },
+                  {
+                    "type": "string",
+                    "const": "BULLISH"
+                  },
+                  {
+                    "type": "string",
+                    "const": "NEUTRAL"
+                  },
+                  {
+                    "type": "string",
+                    "const": "BEARISH"
+                  },
+                  {
+                    "type": "string",
+                    "const": "VERY_BEARISH"
+                  }
+                ]
+              },
+              "activeEventsCount": {
+                "type": "number"
+              },
+              "leadHeadline": {
+                "type": "string"
+              },
+              "leadSummary": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "sentimentScore",
+              "sentimentLabel",
+              "activeEventsCount",
+              "leadHeadline",
+              "leadSummary",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/newspaper/poll",
+      "purpose": "주간 시장 전망 4지선다 여론조사 현황 및 득표수 조회",
+      "callWhen": "신문 화면 진입, 새로고침 시",
+      "authorization": "공개: 로그인 불필요",
+      "afterSuccess": "응답을 화면의 서버 기준 상태로 교체",
+      "backendRoute": "/api/newspaper/poll",
+      "operationId": "NewspaperController_getWeeklyPoll",
+      "backendOpenApiPath": "/newspaper/poll",
+      "summary": "Get weekly market sentiment opinion poll status",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [
+          "id",
+          "question",
+          "options",
+          "totalVotes"
+        ],
+        "note": "Controller returns weekly opinion poll status."
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "question": {
+                "type": "string"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "votes": {
+                      "type": "number"
+                    },
+                    "percentage": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label",
+                    "votes",
+                    "percentage"
+                  ]
+                }
+              },
+              "totalVotes": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "question",
+              "options",
+              "totalVotes"
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/app-api/v1/newspaper/poll/vote",
+      "purpose": "이번 주 시장 전망 여론조사 투표 참여 및 실시간 집계 반환",
+      "callWhen": "여론조사 보기 선택 후 투표 버튼을 눌렀을 때",
+      "authorization": "로그인 + 최신 동의 + CSRF(변경 요청)",
+      "afterSuccess": "관련 GET을 다시 호출해 서버 상태와 동기화",
+      "backendRoute": "/api/newspaper/poll/vote",
+      "operationId": "NewspaperController_voteWeeklyPoll",
+      "backendOpenApiPath": "/newspaper/poll/vote",
+      "summary": "Cast vote on weekly market outlook poll",
+      "parameters": [],
+      "requestBody": {
+        "type": "object",
+        "dtoName": "NewspaperPollVoteDto",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "optionId": {
+              "type": "string",
+              "enum": [
+                "bullish",
+                "sideways",
+                "bearish",
+                "cash"
+              ],
+              "description": "Selected poll option ID"
+            }
+          },
+          "required": [
+            "optionId"
+          ]
+        }
+      },
+      "successStatuses": [
+        201
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [
+          "pollId",
+          "optionId",
+          "votes",
+          "totalVotes"
+        ],
+        "note": "Controller returns recorded vote result."
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "question": {
+                "type": "string"
+              },
+              "options": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "votes": {
+                      "type": "number"
+                    },
+                    "percentage": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "label",
+                    "votes",
+                    "percentage"
+                  ]
+                }
+              },
+              "totalVotes": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "question",
+              "options",
+              "totalVotes"
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/app-api/v1/newspaper/lore",
+      "purpose": "주간 금융 개념 교육 아티클 3종(복리, 스프레드, 화폐유통) 조회",
+      "callWhen": "신문 화면 진입, 배움터 탭 조회 시",
+      "authorization": "공개: 로그인 불필요",
+      "afterSuccess": "응답을 화면의 서버 기준 상태로 교체",
+      "backendRoute": "/api/newspaper/lore",
+      "operationId": "NewspaperController_getFinancialLore",
+      "backendOpenApiPath": "/newspaper/lore",
+      "summary": "Get weekly financial education lore articles",
+      "parameters": [],
+      "requestBody": null,
+      "successStatuses": [
+        200
+      ],
+      "responseMode": "json",
+      "responseShape": {
+        "kind": "json",
+        "topLevelKeys": [],
+        "note": "Direct JSON array containing educational articles."
+      },
+      "responseCompatibility": {
+        "preferredFieldNaming": "camelCase",
+        "legacySnakeCasePreserved": true,
+        "camelCaseAliasesAddedRecursively": true
+      },
+      "responseSchema": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "summary": {
+                  "type": "string"
+                },
+                "readTimeMinutes": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "category",
+                "title",
+                "summary",
+                "readTimeMinutes"
+              ]
+            }
+          }
+        },
+        "required": [
+          "success",
+          "data"
+        ]
       }
     }
   ],

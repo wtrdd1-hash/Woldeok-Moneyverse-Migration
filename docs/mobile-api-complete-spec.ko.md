@@ -1220,3 +1220,27 @@ Google/Discord 네이티브 로그인은 외부 브라우저에 이미 웹사이
 이 규칙이 필요한 이유는 Android 시스템 브라우저/Custom Tab이 웹사이트의 기존 쿠키를 공유할 수 있기 때문이다. 기존 웹 로그인 세션(`user_id`가 이미 있는 세션)을 `auth_complete_oauth_login`의 prelogin 세션으로 넘기면 서버는 `active pre-login session required`로 거부한다. 앱은 이 오류를 자체 문제로 우회하면 안 되며, 서버가 모바일 challenge를 전용 익명 세션에 격리해야 한다.
 
 운영 점검 시 provider 인증은 성공했는데 앱으로 복귀하지 않으면 다음 순서로 확인한다. (1) authorize URL에 `client=mobile` 포함, (2) DB challenge `mobile_client=true`, (3) challenge 전용 세션 `user_id IS NULL`, (4) callback 뒤 `oauth_mobile_handoffs` row 생성, (5) 브라우저 완료 페이지의 custom URI, (6) 앱 intent-filter의 scheme=`woldeok-moneyverse`, host=`oauth`, path=`/callback`, (7) handoff 교환 후 `/auth/viewer`의 `signedIn:true`.
+
+
+---
+
+## v2026.09.22.347 — 전 도메인 RESTful API화, Newspaper API 4종 및 대화형 개발자 포털(/developer)
+
+### 1. 전 도메인 API화 개요
+Moneyverse 백엔드는 52개 컨트롤러, 163개 엔드포인트 전체에 걸쳐 RESTful 라우팅 표준화 및 OpenAPI 3.0 스키마 동기화를 완결했습니다. 모든 엔드포인트는 Next.js App Gateway(`https://easy-scraping.com/app-api/v1/*`)를 통해 안전하게 중계되며, Swagger/OpenAPI 3.0 스펙은 `docs/mobile-api-contract.json`에 영속화되어 있습니다.
+
+### 2. 신규 Newspaper API 4종 명세
+주간 경제 브리프 및 실시간 월드 펄스 신문 허브(`/newspaper`)와 연동되는 REST API 4종이 정식 추가되었습니다:
+
+| Method | 앱 경로 | 기능 설명 | 인증/권한 | 응답 형식 (JSON) |
+|---|---|---|---|---|
+| `GET` | `/app-api/v1/newspaper/pulse` | 실시간 시장 심리 지표(0~100) 및 활성 시나리오 헤드라인 요약 반환 | 공개 (로그인 불필요) | `{"success":true,"data":{"sentimentScore":68,"sentimentLabel":"BULLISH","activeEventsCount":4,"leadHeadline":"...","leadSummary":"...","updatedAt":"..."}}` |
+| `GET` | `/app-api/v1/newspaper/poll` | 이번 주 시장 전망 4지선다 여론조사 득표수/백분율 반환 | 공개 (로그인 불필요) | `{"success":true,"data":{"id":"poll-2026-09-w4","question":"...","options":[...],"totalVotes":744}}` |
+| `POST` | `/app-api/v1/newspaper/poll/vote` | 여론조사 실시간 투표 참여 및 즉시 재집계 결과 반환 | 로그인 + 최신 동의 + CSRF | `{"success":true,"data":{"pollId":"poll-2026-09-w4","optionId":"bullish","votes":343,"totalVotes":745}}` |
+| `GET` | `/app-api/v1/newspaper/lore` | 3대 핵심 금융 지식 교육 아티클(복리, 스프레드, 통화유통속도) 반환 | 공개 (로그인 불필요) | `{"success":true,"data":[{"id":"compound-interest",...},{"id":"liquidity-spread",...},{"id":"money-velocity",...}]}` |
+
+### 3. 대화형 개발자 포털 (`/developer`)
+- **실시간 API 카탈로그**: 7대 도메인 카테고리(ALL, STOCKS, BANK, CASINO, WORK, ECONOMY, NEWSPAPER) 필터링 지원.
+- **다중 언어 스니펫**: cURL, TypeScript(`fetch`), Python(`requests`) 코드 탭 제공.
+- **실시간 샌드박스 테스터**: 실시간 API 호출 및 레이턴시(ms), HTTP 상태 코드 측정 지원.
+- **4개국어(KO, EN, JA, ZH) 완벽 i18n 연동**.

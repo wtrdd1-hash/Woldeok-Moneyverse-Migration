@@ -93,3 +93,13 @@ This separation does not remove product functionality. It prevents a normal app 
 ## Merge exception
 
 Per explicit user instruction on 2026-09-12, v2026.09.12.33 is merged without the normal Test-server validation step. This is a one-release exception and does not change the default staging-first release policy.
+
+
+---
+
+## v2026.09.22.347 Extension: Newspaper Hub & Interactive Developer Portal (/developer)
+
+| Feature | App API Root / Typical Route | Support Scope |
+| --- | --- | --- |
+| **Newspaper Hub** | `/app-api/v1/newspaper/*` | Market sentiment index (`pulse`), weekly poll (`poll`), voting (`poll/vote`), financial lore articles (`lore`) |
+| **Developer Portal** | `/developer` (Web Portal) | Live catalog across 163 endpoints, 3-language code snippets, in-browser sandbox tester |

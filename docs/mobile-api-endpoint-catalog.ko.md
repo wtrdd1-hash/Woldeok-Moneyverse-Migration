@@ -216,6 +216,14 @@ ERROR
 | `POST` | `/app-api/v1/engagement/npcs/:code/orders` | NPC 주문/상호작용 실행 | 로그인 + 최신 동의 + CSRF(변경 요청) | params code[path]:string*; body EngagementNpcOrderDto (application/json) | `201` | JSON 직접 반환(필드 추가 허용) | 관련 GET을 다시 호출해 서버 상태와 동기화 |
 | `PUT` | `/app-api/v1/engagement/preferences` | 참여·알림 선호 설정 변경 | 로그인 + 최신 동의 + CSRF(변경 요청) | body EngagementPreferencesDto (application/json) | `200` | JSON 키: notifications_enabled | 관련 GET을 다시 호출해 서버 상태와 동기화 |
 
+### newspaper — 신문/시장 심리/설문/로어
+| Method | 앱 경로 | 기능 | 인증/CSRF | 요청 | 성공 | 응답 형태 | 성공 후 |
+|---|---|---|---|---|---|---|---|
+| `GET` | `/app-api/v1/newspaper/pulse` | 시장 심리 지수(0~100) 및 활성 시나리오 헤드라인 요약 조회 | 공개: 로그인 불필요 | 없음 / none | `200` | JSON 키: sentimentScore, sentimentLabel, activeEventsCount, leadHeadline, leadSummary, updatedAt | 응답을 화면의 서버 기준 상태로 교체 |
+| `GET` | `/app-api/v1/newspaper/poll` | 주간 시장 전망 4지선다 여론조사 현황 및 득표수 조회 | 공개: 로그인 불필요 | 없음 / none | `200` | JSON 키: id, question, options, totalVotes | 응답을 화면의 서버 기준 상태로 교체 |
+| `POST` | `/app-api/v1/newspaper/poll/vote` | 이번 주 시장 전망 여론조사 투표 참여 및 실시간 집계 반환 | 로그인 + 최신 동의 + CSRF(변경 요청) | body NewspaperPollVoteDto (application/json) | `201` | JSON 키: pollId, optionId, votes, totalVotes | 관련 GET을 다시 호출해 서버 상태와 동기화 |
+| `GET` | `/app-api/v1/newspaper/lore` | 주간 금융 개념 교육 아티클 3종(복리, 스프레드, 화폐유통) 조회 | 공개: 로그인 불필요 | 없음 / none | `200` | JSON 배열 직접 반환 (id, category, title, summary, readTimeMinutes) | 응답을 화면의 서버 기준 상태로 교체 |
+
 ### photos — 회원 갤러리 업로드
 | Method | 앱 경로 | 기능 | 인증/CSRF | 요청 | 성공 | 응답 형태 | 성공 후 |
 |---|---|---|---|---|---|---|---|

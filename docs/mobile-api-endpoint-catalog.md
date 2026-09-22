@@ -189,6 +189,14 @@ ERROR -> keep last successful state separate from transport/error state
 | `POST` | `/app-api/v1/engagement/npcs/:code/orders` | Take an order from an NPC | 로그인 + 최신 동의 + CSRF(변경 요청) | params code[path]:string*; body EngagementNpcOrderDto (application/json) | `201` | direct JSON result; additive fields allowed | 관련 GET을 다시 호출해 서버 상태와 동기화 |
 | `PUT` | `/app-api/v1/engagement/preferences` | Set whether the member hears about their goals | 로그인 + 최신 동의 + CSRF(변경 요청) | body EngagementPreferencesDto (application/json) | `200` | JSON keys: notifications_enabled | 관련 GET을 다시 호출해 서버 상태와 동기화 |
 
+### newspaper — newspaper
+| Method | App path | Purpose | Auth/CSRF | Request | Success | Response shape | After success |
+|---|---|---|---|---|---|---|---|
+| `GET` | `/app-api/v1/newspaper/pulse` | Market sentiment score (0-100) and active scenario lead summary | 공개: 로그인 불필요 | 없음 / none | `200` | JSON keys: sentimentScore, sentimentLabel, activeEventsCount, leadHeadline, leadSummary, updatedAt | 응답을 화면의 서버 기준 상태로 교체 |
+| `GET` | `/app-api/v1/newspaper/poll` | Weekly market sentiment poll status and vote tallies | 공개: 로그인 불필요 | 없음 / none | `200` | JSON keys: id, question, options, totalVotes | 응답을 화면의 서버 기준 상태로 교체 |
+| `POST` | `/app-api/v1/newspaper/poll/vote` | Cast vote on weekly market outlook poll | 로그인 + 최신 동의 + CSRF(변경 요청) | body NewspaperPollVoteDto (application/json) | `201` | JSON keys: pollId, optionId, votes, totalVotes | 관련 GET을 다시 호출해 서버 상태와 동기화 |
+| `GET` | `/app-api/v1/newspaper/lore` | Weekly financial education lore articles (compound interest, liquidity, money velocity) | 공개: 로그인 불필요 | 없음 / none | `200` | direct JSON array (id, category, title, summary, readTimeMinutes) | 응답을 화면의 서버 기준 상태로 교체 |
+
 ### photos — photos
 | Method | App path | Purpose | Auth/CSRF | Request | Success | Response shape | After success |
 |---|---|---|---|---|---|---|---|

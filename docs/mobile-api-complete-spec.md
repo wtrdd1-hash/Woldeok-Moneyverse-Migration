@@ -393,3 +393,27 @@ Basis: actual NestJS route map captured after the 2026-09-13 production restart.
 Native Google/Discord login must not reuse an already-authenticated website session that happens to exist in the external browser. For every `client=mobile` authorization, the API creates a dedicated anonymous pre-login session and binds the OAuth challenge to it. At callback time, ordinary web challenges remain bound to the browser session, while mobile challenges may be recovered by their high-entropy single-use `state + provider`. The server then verifies the provider code, completes OAuth login against the dedicated pre-login session, creates a one-time `mobileHandoff`, returns through `woldeok-moneyverse://oauth/callback`, and the app exchanges the handoff at `POST /app-api/v1/auth/mobile/handoff` before confirming `/auth/viewer` returns `signedIn:true`.
 
 This isolation is required because Android system browsers and Custom Tabs can share existing website cookies. Passing a browser session that already has a `user_id` into the OAuth login completer is invalid and is rejected as `active pre-login session required`; the native client must not attempt to work around that server invariant.
+
+
+---
+
+## v2026.09.22.347 — Full-Domain RESTful API Standardization, Newspaper 4 APIs & Interactive Developer Portal (/developer)
+
+### 1. Full-Domain API Overview
+The Moneyverse backend has standardized full-domain RESTful routing and OpenAPI 3.0 schema synchronization across 52 controllers and 163 endpoints. All endpoints are securely routed through the Next.js App Gateway (`https://easy-scraping.com/app-api/v1/*`), and the machine-readable OpenAPI 3.0 contract is persisted in `docs/mobile-api-contract.json`.
+
+### 2. New Newspaper REST API Specification
+Four new endpoints integrated with the Weekly Brief & World Pulse Newspaper Hub (`/newspaper`) are officially published:
+
+| Method | App Path | Purpose | Auth / CSRF | Response Format (JSON) |
+|---|---|---|---|---|
+| `GET` | `/app-api/v1/newspaper/pulse` | Live market sentiment index (0-100) and active lead scenario headline | Public (No auth required) | `{"success":true,"data":{"sentimentScore":68,"sentimentLabel":"BULLISH","activeEventsCount":4,"leadHeadline":"...","leadSummary":"...","updatedAt":"..."}}` |
+| `GET` | `/app-api/v1/newspaper/poll` | Weekly market outlook 4-choice opinion poll tallies & percentages | Public (No auth required) | `{"success":true,"data":{"id":"poll-2026-09-w4","question":"...","options":[...],"totalVotes":744}}` |
+| `POST` | `/app-api/v1/newspaper/poll/vote` | Cast vote on market outlook poll and return real-time aggregated counts | Auth + Consent + CSRF | `{"success":true,"data":{"pollId":"poll-2026-09-w4","optionId":"bullish","votes":343,"totalVotes":745}}` |
+| `GET` | `/app-api/v1/newspaper/lore` | 3 core financial lore educational articles (compound interest, spreads, velocity) | Public (No auth required) | `{"success":true,"data":[{"id":"compound-interest",...},{"id":"liquidity-spread",...},{"id":"money-velocity",...}]}` |
+
+### 3. Interactive Developer Portal (`/developer`)
+- **Real-Time API Catalog**: 7 domain categories (ALL, STOCKS, BANK, CASINO, WORK, ECONOMY, NEWSPAPER) with instant filtering.
+- **Multi-Language Snippets**: Ready-to-copy code tabs for cURL, TypeScript (`fetch`), and Python (`requests`).
+- **Live Sandbox Tester**: In-browser API execution with real-time latency (ms) and HTTP status code tracking.
+- **Full 4-Language i18n**: Korean, English, Japanese, and Chinese localization.

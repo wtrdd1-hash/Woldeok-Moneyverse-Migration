@@ -2,9 +2,9 @@
 
 **English** | [한국어](mobile-api-schema-reference.ko.md) | [Machine contract](mobile-api-contract.json)
 
-Update version: **v2026.09.16.159**
+Update version: **v2026.09.22.347**
 
-This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 159 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
+This document records actual request parameters, DTO fields, constraints, success statuses, and success response fields for all 163 app APIs. App developers and code-generating AIs should use this file together with `mobile-api-contract.json` and must not guess field names.
 
 ## Common compatibility rules
 
@@ -5064,6 +5064,139 @@ _No request body._
 ### Success response fields
 
 _None._
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/newspaper/pulse` — Get live market sentiment index and lead scenario summary
+
+- Authorization: 공개: 로그인 불필요
+- Success status: 200
+- Response mode: json
+- After success: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `NewspaperController_getMarketPulse`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| success | true | boolean |  |
+| data | true | object |  |
+| data.sentimentScore | true | number |  |
+| data.sentimentLabel | true | string="VERY_BULLISH" \| string="BULLISH" \| string="NEUTRAL" \| string="BEARISH" \| string="VERY_BEARISH" |  |
+| data.activeEventsCount | true | number |  |
+| data.leadHeadline | true | string |  |
+| data.leadSummary | true | string |  |
+| data.updatedAt | true | string |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/newspaper/poll` — Get weekly market sentiment opinion poll status
+
+- Authorization: 공개: 로그인 불필요
+- Success status: 200
+- Response mode: json
+- After success: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `NewspaperController_getWeeklyPoll`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| success | true | boolean |  |
+| data | true | object |  |
+| data.id | true | string |  |
+| data.question | true | string |  |
+| data.options[] | true | object[] |  |
+| data.options[] | true | object |  |
+| data.options[].id | true | string |  |
+| data.options[].label | true | string |  |
+| data.options[].votes | true | number |  |
+| data.options[].percentage | true | number |  |
+| data.totalVotes | true | number |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `POST` `/app-api/v1/newspaper/poll/vote` — Cast vote on weekly market outlook poll
+
+- Authorization: 로그인 + 최신 동의 + CSRF(변경 요청)
+- Success status: 201
+- Response mode: json
+- After success: 관련 GET을 다시 호출해 서버 상태와 동기화
+- Operation ID: `NewspaperController_voteWeeklyPoll`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+- Content-Type: `undefined`
+
+_None._
+
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| success | true | boolean |  |
+| data | true | object |  |
+| data.id | true | string |  |
+| data.question | true | string |  |
+| data.options[] | true | object[] |  |
+| data.options[] | true | object |  |
+| data.options[].id | true | string |  |
+| data.options[].label | true | string |  |
+| data.options[].votes | true | number |  |
+| data.options[].percentage | true | number |  |
+| data.totalVotes | true | number |  |
+
+> Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
+
+## `GET` `/app-api/v1/newspaper/lore` — Get weekly financial education lore articles
+
+- Authorization: 공개: 로그인 불필요
+- Success status: 200
+- Response mode: json
+- After success: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `NewspaperController_getFinancialLore`
+
+### Path/query parameters
+
+_None._
+
+### Request body
+
+_No request body._
+
+### Success response fields
+
+| Field | Required | Type | Constraints/meaning |
+|---|---|---|---|
+| success | true | boolean |  |
+| data[] | true | object[] |  |
+| data[] | true | object |  |
+| data[].id | true | string |  |
+| data[].category | true | string |  |
+| data[].title | true | string |  |
+| data[].summary | true | string |  |
+| data[].readTimeMinutes | true | number |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

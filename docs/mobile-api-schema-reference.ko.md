@@ -2,9 +2,9 @@
 
 [English](mobile-api-schema-reference.md) | **한국어** | [기계 판독 계약](mobile-api-contract.json)
 
-업데이트 버전: **v2026.09.16.159**
+업데이트 버전: **v2026.09.22.347**
 
-이 문서는 159개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
+이 문서는 163개 앱 API 각각의 실제 요청 파라미터, DTO 필드, 타입/제약, 성공 상태코드, 성공 응답 필드를 기록한다. 다른 AI나 앱 개발자는 이 문서와 `mobile-api-contract.json`을 기준으로 코드를 생성하고 필드명을 추측하지 않는다.
 
 ## 공통 호환성 규칙
 
@@ -5064,6 +5064,139 @@ _요청 본문 없음._
 ### 성공 응답 필드
 
 _None._
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/newspaper/pulse` — 실시간 시장 심리 지수(0~100) 및 활성 시나리오 헤드라인 요약 조회
+
+- 인증/권한: 공개: 로그인 불필요
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `NewspaperController_getMarketPulse`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| success | true | boolean |  |
+| data | true | object |  |
+| data.sentimentScore | true | number |  |
+| data.sentimentLabel | true | string="VERY_BULLISH" \| string="BULLISH" \| string="NEUTRAL" \| string="BEARISH" \| string="VERY_BEARISH" |  |
+| data.activeEventsCount | true | number |  |
+| data.leadHeadline | true | string |  |
+| data.leadSummary | true | string |  |
+| data.updatedAt | true | string |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/newspaper/poll` — 주간 시장 전망 4지선다 여론조사 현황 및 득표수 조회
+
+- 인증/권한: 공개: 로그인 불필요
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `NewspaperController_getWeeklyPoll`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| success | true | boolean |  |
+| data | true | object |  |
+| data.id | true | string |  |
+| data.question | true | string |  |
+| data.options[] | true | object[] |  |
+| data.options[] | true | object |  |
+| data.options[].id | true | string |  |
+| data.options[].label | true | string |  |
+| data.options[].votes | true | number |  |
+| data.options[].percentage | true | number |  |
+| data.totalVotes | true | number |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `POST` `/app-api/v1/newspaper/poll/vote` — 이번 주 시장 전망 여론조사 투표 참여 및 실시간 집계 반환
+
+- 인증/권한: 로그인 + 최신 동의 + CSRF(변경 요청)
+- 성공 상태: 201
+- 응답 모드: json
+- 성공 후 동기화: 관련 GET을 다시 호출해 서버 상태와 동기화
+- Operation ID: `NewspaperController_voteWeeklyPoll`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+- Content-Type: `undefined`
+
+_None._
+
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| success | true | boolean |  |
+| data | true | object |  |
+| data.id | true | string |  |
+| data.question | true | string |  |
+| data.options[] | true | object[] |  |
+| data.options[] | true | object |  |
+| data.options[].id | true | string |  |
+| data.options[].label | true | string |  |
+| data.options[].votes | true | number |  |
+| data.options[].percentage | true | number |  |
+| data.totalVotes | true | number |  |
+
+> 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
+
+## `GET` `/app-api/v1/newspaper/lore` — 주간 금융 개념 교육 아티클 3종(복리, 스프레드, 화폐유통) 조회
+
+- 인증/권한: 공개: 로그인 불필요
+- 성공 상태: 200
+- 응답 모드: json
+- 성공 후 동기화: 응답을 화면의 서버 기준 상태로 교체
+- Operation ID: `NewspaperController_getFinancialLore`
+
+### 경로/쿼리 파라미터
+
+_None._
+
+### 요청 본문
+
+_요청 본문 없음._
+
+### 성공 응답 필드
+
+| 필드 | 필수 | 타입 | 제약/의미 |
+|---|---|---|---|
+| success | true | boolean |  |
+| data[] | true | object[] |  |
+| data[] | true | object |  |
+| data[].id | true | string |  |
+| data[].category | true | string |  |
+| data[].title | true | string |  |
+| data[].summary | true | string |  |
+| data[].readTimeMinutes | true | number |  |
 
 > 앱에서는 camelCase 키를 우선 사용한다. 같은 객체의 legacy snake_case 키는 보존되며, 게이트웨이가 충돌하지 않는 camelCase 별칭을 재귀적으로 추가한다.
 
