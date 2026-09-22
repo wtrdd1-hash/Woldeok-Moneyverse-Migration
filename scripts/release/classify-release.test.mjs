@@ -27,6 +27,17 @@ test('backup and restore tooling is release control plane', () => {
   );
 });
 
+test('backend API audit tooling is release control plane', () => {
+  assert.equal(
+    classifyPaths(['scripts/audit-backend-api-completeness.mjs']),
+    'CONTROL_PLANE_ONLY',
+  );
+  assert.equal(
+    classifyPaths(['scripts/audit-backend-api-completeness.mjs', 'backend/src/app.module.ts']),
+    'MIXED',
+  );
+});
+
 test('application paths are runtime relevant even with documentation', () => {
   assert.equal(
     classifyPaths(['backend/src/app.module.ts', 'docs/UPDATE_LOG.md']),
