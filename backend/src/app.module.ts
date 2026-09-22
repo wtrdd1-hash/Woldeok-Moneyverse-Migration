@@ -38,7 +38,7 @@ import { InternalTokenGuard } from './auth/guards/internal-token.guard';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { GameClockModule } from './game-clock/game-clock.module';
 import { SupportModule } from './support/support.module';
-import { ChatModule } from './chat.module';
+import { ChatModule } from './chat/chat.module';
 import { SafetyModule } from './safety/safety.module';
 
 const ONE_MINUTE_MS = 60_000;
