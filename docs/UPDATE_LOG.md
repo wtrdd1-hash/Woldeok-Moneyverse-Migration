@@ -1,5 +1,28 @@
 # Update Log
 
+## v2026.09.22.358 — Career Work Elimination of 0.5s Flickering Storm, Radix Modal Viewport Clipping Fix & Slit Scrollbar Resolution
+
+- Applied Branch: `main` (Release: `prod-11fdec7-v358`)
+- **P0 Career Work UI Defects & High-Frequency Blinking Elimination (WORK_MODAL_STABILITY_SPEC)**:
+  1. **Eliminated 0.5s Flickering Storm and RSC Burst Loop (`frontend/src/app/work/page.tsx`)**:
+     - Completely removed `<LiveRefresh everyMs={10_000} />` which triggered `router.refresh()` every 10 seconds.
+     - Extinguished background burst bursts of 8 simultaneous link prefetch queries (`/?_rsc`, `/newspaper?_rsc`, `/stocks?_rsc`, etc.) that spun Chrome's tab icon and froze the UI every 0.5s.
+  2. **Radix UI Dialog Overhaul for Task Completion Modal (`frontend/src/app/work/work-forms.tsx`)**:
+     - Replaced custom CSS flex overlay with standard Radix UI `Dialog` from `@/components/ui/dialog`.
+     - Eliminated flexbox `justify-center` negative coordinate clipping bug where the top 80% of the modal was pushed outside the viewport and only "닫기" was visible.
+     - Resolved flexbox vertical shrink bug that compressed rewards (+WLD, +EXP) and the submit button into a 30px slit with vertical scroll arrows.
+     - Provided generous 2-column reward preview cards, comfortable 48px touch-target submit button, celebratory success card, and clean close handler.
+     - Removed redundant `router.refresh()` inside `useEffect` and window-level `scrollIntoView()` jumps.
+  3. **Removed Unnecessary Task Card Native Scrollbars (`frontend/src/app/work/career-tasks-board.tsx`)**:
+     - Added `overflow-hidden` to task `Card` to prevent Windows Chrome from displaying unnecessary vertical scrollbar arrows.
+  4. **Regression & Unit Test Suite Coverage (`frontend/src/app/work/`)**:
+     - Configured `@vitest-environment node` in `work-form-regression.test.ts` and restored `cycle` state support.
+     - 4 test suites, 41 unit tests 100% PASS.
+  5. **Zero-Downtime Promotion & Runtime Identity Coherence**:
+     - Exact Git SHA `11fdec7` verified across Test and Production (`backend=11fdec7...`, `frontend=11fdec7...`).
+     - All endpoints responded HTTP 200 OK.
+     - 968 PostgreSQL active user sessions 100% loss-free preserved.
+
 ## v2026.09.22.357 — Stock Halt Cost-Basis Settlement Visibility, Market 229 Migration, Receipt Cards & 404 Prevention
 
 - Applied Branch: `main` (Release: `prod-2ec47a9-v357`)

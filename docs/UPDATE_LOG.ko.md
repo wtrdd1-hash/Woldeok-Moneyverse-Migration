@@ -1,3 +1,25 @@
+## v2026.09.22.358 — 직업 업무(Work) 0.5초 깜빡임 루프 제거, 업무 완수 모달 뷰포트 클리핑 및 30px 스크롤바 슬릿 레이아웃 정상화
+
+- 적용 브랜치: `main` (릴리스: `prod-11fdec7-v358`)
+- **P0 직업 및 업무(Work) UI 결함 및 깜빡임 원천 해소 (WORK_MODAL_STABILITY_SPEC)**:
+  1. **0.5초 주기 화면 깜빡임 및 버스트 RSC 네트워크 폭풍 원천 제거 (`frontend/src/app/work/page.tsx`)**:
+     - 10초마다 `router.refresh()`를 강제 호출하던 `<LiveRefresh everyMs={10_000} />` 컴포넌트를 완전히 제거.
+     - 백그라운드 RSC 갱신 시 발생하는 8개 링크 프리페치 동시 다발 호출(0.5초 주기 버스트)과 브라우저 탭 아이콘 무한 회전/화면 깜빡임 현상 종식.
+  2. **업무 완수 모달 레이아웃 전면 쇄신 (`frontend/src/app/work/work-forms.tsx`)**:
+     - 기존 CSS Flexbox 결함으로 인해 상단 80%가 뷰포트 바깥 음수 좌표로 잘리고 "닫기" 버튼만 보이던 버그(`justify-center` 오버플로우 클리핑)를 해결하기 위해 Radix UI 기반 표준 `Dialog`로 교체.
+     - Flex 축소로 인해 WLD 및 숙련도 EXP 보상 박스와 제출 버튼이 30px 미세 슬릿으로 찌그러지고 우측에 윈도우 스크롤바가 생기던 버그를 완벽하게 해소.
+     - 2열 보상 카드(이번 지급 WLD, 숙련도 EXP)를 여유로운 패딩과 함께 정상 렌더링하고, 48px 터치 타깃의 "업무 완료 및 보상 수령" 버튼과 성공 축하 카드를 유려하게 배치.
+     - 중복 `router.refresh()` 호출 및 윈도우 전체 스크롤을 유발하던 `scrollIntoView()` 제거.
+  3. **직업 업무 카드 불필요 윈도우 스크롤바 제거 (`frontend/src/app/work/career-tasks-board.tsx`)**:
+     - 태스크 카드 `Card`에 `overflow-hidden`을 적용하여 윈도우 크롬 브라우저에서 발생하던 카드 내 수직 스크롤바 화살표 표시를 차단.
+  4. **단위 테스트 및 회귀 방지 보강 (`frontend/src/app/work/`)**:
+     - `work-form-regression.test.ts`에 `// @vitest-environment node` 지시자 적용 및 `work-forms.tsx` 사이클 상태 호환성 복원.
+     - `work` 도메인 4개 테스트 파일, 41개 단위 테스트 100% PASS 검증 완료.
+  5. **무중단 승격 및 런타임 신원 일치**:
+     - Exact Git SHA `11fdec7` 기반 테스트/프로덕션 런타임 신원 일치 검증 (`backend=11fdec7...`, `frontend=11fdec7...`).
+     - 전체 엔드포인트 HTTP 200 OK 응답 확인.
+     - 968개 PostgreSQL 활성 사용자 세션 100% 무손실 보존 완료.
+
 ## v2026.09.22.357 — 주식 거래정지 매수원가 자동정산 엔진 완비, 카탈로그 가시성 복구 및 포트폴리오 영수증 연동
 
 - 적용 브랜치: `main` (릴리스: `prod-2ec47a9-v357`)

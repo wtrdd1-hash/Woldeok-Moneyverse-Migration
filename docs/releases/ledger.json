@@ -97,5 +97,16 @@
     "timestamp": "2026-09-22T10:22:00Z",
     "author": "System Engineer",
     "notes": "P0 Stock Halt Cost-Basis Settlement Visibility, Market 229 Migration, Receipt Cards & 404 Prevention"
+  },
+  {
+    "version": "v2026.09.22.358",
+    "commitSha": "11fdec7fbb00ead5709b6e52069f89f1f6fb4440",
+    "shortSha": "11fdec7",
+    "releasePath": "/srv/moneyverse-data/releases/prod-11fdec7-v358",
+    "status": "promoted",
+    "activeSessions": 968,
+    "timestamp": "2026-09-22T11:27:00Z",
+    "author": "System Engineer",
+    "notes": "P0 Career Work Elimination of 0.5s Flickering Storm, Radix Modal Viewport Clipping Fix & Slit Scrollbar Resolution"
   }
 ]

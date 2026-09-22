@@ -145,22 +145,24 @@
 
 ## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
 
-- **최종 갱신일시**: 2026-09-22 19:25:00 KST
-- **현재 프로덕션 릴리스 버전**: `v2026.09.22.357` (릴리스 경로: `/srv/moneyverse-data/releases/prod-2ec47a9-v357`, 직전: `prod-7e46b22-v356`)
-- **Exact Git SHA**: `2ec47a970dc0e1513b49bed9cca50a582b2e8319` (단축: `2ec47a9`)
-- **PostgreSQL 활성 사용자 세션**: **933개 (100% 무손실 보존 실측 확인)**
+- **최종 갱신일시**: 2026-09-22 20:28:00 KST
+- **현재 프로덕션 릴리스 버전**: `v2026.09.22.358` (릴리스 경로: `/srv/moneyverse-data/releases/prod-11fdec7-v358`, 직전: `prod-2ec47a9-v357`)
+- **Exact Git SHA**: `11fdec7fbb00ead5709b6e52069f89f1f6fb4440` (단축: `11fdec7`)
+- **PostgreSQL 활성 사용자 세션**: **968개 (100% 무손실 보존 실측 확인)**
 - **최신 완료 작업 요약**:
-  1. **P0 주식 거래정지 매수원가 자동정산 엔진 가시성 완비 (STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC)**:
-     - `229-stock-market-overview-halt-visibility.sql`: PostgreSQL `stock_market_overview()` 함수에 `halt_status` 반환 컬럼을 추가하고 거래정지 종목(`HALTING`, `HALTED_SETTLING`, `HALTED_SETTLED`)이 카탈로그에 보존되도록 필터 및 정렬 규칙 개편.
-     - `backend/src/stock/stock.repository.ts`: `StockMarketRow`에 `halt_status` 명시 및 `list()` 쿼리 바인딩 완료.
-     - `backend/src/stock/stock-halt-settlement.test.ts`: 거래정지 종목 가시성 단위 테스트 추가 (6 tests PASS).
-  2. **프론트엔드 거래소 메인 및 포트폴리오 가시성 혁신 (`stocks/page.tsx` & `stocks/portfolio/page.tsx`)**:
-     - `stocks/page.tsx`: 거래정지 종목에 `거래정지 (정산완료)` 배지 표시 및 매수/매도 주문 버튼 비활성화 가드 적용, 종목 상세 허브 링크 보존.
-     - `stocks/portfolio/page.tsx`: `/api/v1/stocks/halt-receipts` 병렬 연동으로 **거래정지 원가환급 영수증 (Halt Settlement Receipts)** 카드 신설 (정산 수량, 취득 단가, 환급 총액, `ShieldCheck` 면제 배지 완비).
-     - `stocks/[symbol]/page.tsx`: 거래정지된 종목에 접근 시 404가 발생하던 결함을 원천 해결하여 거래정지 공시 및 100% 원가 환급 영수증이 완벽하게 렌더링되도록 복구.
-  3. **무중단 승격 및 런타임 신원 일치 (v357)**:
-     - Exact SHA `2ec47a9` 기반 테스트 및 프로덕션 동시 빌드 및 릴리스 배포.
-     - 933개 PostgreSQL 활성 사용자 세션 100% 무손실 보존 실측 확인 및 전 엔드포인트 200 OK.
+  1. **0.5초 주기 화면 깜빡임 및 버스트 RSC 네트워크 폭풍 원천 제거 (`frontend/src/app/work/page.tsx`)**:
+     - 10초마다 `router.refresh()`를 강제 호출하던 `<LiveRefresh everyMs={10_000} />` 컴포넌트를 완전히 제거.
+     - 백그라운드 RSC 갱신 시 발생하는 8개 링크 프리페치 동시 다발 호출(0.5초 주기 버스트)과 브라우저 탭 아이콘 무한 회전/화면 깜빡임 현상 종식.
+  2. **업무 완수 모달 레이아웃 전면 쇄신 (`frontend/src/app/work/work-forms.tsx`)**:
+     - 기존 CSS Flexbox 결함으로 인해 상단 80%가 뷰포트 바깥 음수 좌표로 잘리고 "닫기" 버튼만 보이던 버그(`justify-center` 오버플로우 클리핑)를 해결하기 위해 Radix UI 기반 표준 `Dialog`로 교체.
+     - Flex 축소로 인해 WLD 및 숙련도 EXP 보상 박스와 제출 버튼이 30px 미세 슬릿으로 찌그러지고 우측에 윈도우 스크롤바가 생기던 버그를 완벽하게 해소.
+     - 2열 보상 카드(이번 지급 WLD, 숙련도 EXP)를 여유로운 패딩과 함께 정상 렌더링하고, 48px 터치 타깃의 "업무 완료 및 보상 수령" 버튼과 성공 축하 카드를 유려하게 배치.
+     - 중복 `router.refresh()` 호출 및 윈도우 전체 스크롤을 유발하던 `scrollIntoView()` 제거.
+  3. **직업 업무 카드 불필요 윈도우 스크롤바 제거 (`frontend/src/app/work/career-tasks-board.tsx`)**:
+     - 태스크 카드 `Card`에 `overflow-hidden`을 적용하여 윈도우 크롬 브라우저에서 발생하던 카드 내 수직 스크롤바 화살표 표시를 차단.
+  4. **무중단 승격 및 런타임 신원 일치 (v358)**:
+     - Exact SHA `11fdec7` 기반 테스트 및 프로덕션 동시 빌드 및 릴리스 배포 (`backend=11fdec7...`, `frontend=11fdec7...`).
+     - 968개 PostgreSQL 활성 사용자 세션 100% 무손실 보존 실측 확인 및 전 엔드포인트 200 OK.
 
 
 
