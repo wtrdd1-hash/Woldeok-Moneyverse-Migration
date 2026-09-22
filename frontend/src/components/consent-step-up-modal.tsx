@@ -24,9 +24,9 @@ import { submitConsent } from '@/app/login/actions';
 import { toast } from 'sonner';
 
 interface ConsentStepUpModalProps {
-  readonly termsVersion?: string;
-  readonly privacyVersion?: string;
-  readonly onSuccess?: () => void;
+  readonly termsVersion?: string | undefined;
+  readonly privacyVersion?: string | undefined;
+  readonly onSuccess?: (() => void) | undefined;
 }
 
 export function ConsentStepUpModal({

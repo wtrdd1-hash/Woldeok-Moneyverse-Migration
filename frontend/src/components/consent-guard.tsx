@@ -8,8 +8,8 @@ import { ConsentStepUpModal } from './consent-step-up-modal';
 interface ConsentGuardProps {
   readonly signedIn: boolean;
   readonly consentCurrent: boolean;
-  readonly termsVersion?: string;
-  readonly privacyVersion?: string;
+  readonly termsVersion?: string | undefined;
+  readonly privacyVersion?: string | undefined;
 }
 
 const EXEMPT_PATHS = [
