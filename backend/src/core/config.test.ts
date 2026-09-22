@@ -47,6 +47,26 @@ describe('loadConfig', () => {
     expect(loadConfig({ ...MINIMAL }).cookieSecure).toBe(false);
   });
 
+  it('keeps test verification tokens off unless explicitly enabled on the isolated test host', () => {
+    expect(loadConfig({ ...MINIMAL }).localAuthTestVerificationTokenEnabled).toBe(false);
+    expect(
+      loadConfig({
+        ...MINIMAL,
+        NODE_ENV: 'production',
+        APP_BASE_URL: 'https://test.easy-scraping.com',
+        LOCAL_AUTH_TEST_VERIFICATION_TOKEN_ENABLED: 'true',
+      }).localAuthTestVerificationTokenEnabled,
+    ).toBe(true);
+    expect(
+      loadConfig({
+        ...MINIMAL,
+        NODE_ENV: 'production',
+        APP_BASE_URL: 'https://easy-scraping.com',
+        LOCAL_AUTH_TEST_VERIFICATION_TOKEN_ENABLED: 'true',
+      }).localAuthTestVerificationTokenEnabled,
+    ).toBe(false);
+  });
+
   it('keeps SEO indexing opt-in', () => {
     expect(loadConfig({ ...MINIMAL }).seoIndexingEnabled).toBe(false);
     expect(loadConfig({ ...MINIMAL, SEO_INDEXING_ENABLED: 'true' }).seoIndexingEnabled).toBe(true);

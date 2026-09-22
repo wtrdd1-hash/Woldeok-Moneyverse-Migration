@@ -226,14 +226,16 @@ export class LocalAuthController {
         // Production must never claim that verification was dispatched when
         // there is no functioning delivery path. Development keeps the
         // existing token-in-response escape hatch for isolated local work.
-        if (this.config.production) throw error;
+        if (this.config.production && !this.config.localAuthTestVerificationTokenEnabled) throw error;
       }
     }
 
     return {
       accepted: true,
       verificationRequired: true,
-      ...(this.config.production || !accepted ? {} : { verificationToken: token }),
+      ...((this.config.production && !this.config.localAuthTestVerificationTokenEnabled) || !accepted
+        ? {}
+        : { verificationToken: token }),
     };
   }
 
