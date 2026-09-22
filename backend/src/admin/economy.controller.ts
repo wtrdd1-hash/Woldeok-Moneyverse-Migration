@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import {
   BadRequestException,
   Body,
@@ -202,10 +201,9 @@ export class OverrideUserAssetDto {
   @MaxLength(500)
   readonly reason!: string;
 
-  @ApiProperty({ required: false })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid', description: 'Caller-owned idempotency key for retry-safe asset overrides' })
   @IsUUID()
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey!: string;
 }
 
 @ApiTags('admin')
@@ -497,7 +495,6 @@ export class AdminEconomyController {
     @Param('id', ParseUUIDPipe) userId: string,
     @Body() body: OverrideUserAssetDto,
   ) {
-    const idempotencyKey = body.idempotencyKey ?? randomUUID();
     return this.guarded(
       () =>
         this.repository().overrideUserAssetV2({
@@ -507,7 +504,7 @@ export class AdminEconomyController {
           direction: body.direction,
           reason: body.reason,
           adminId: requireUserId(request),
-          idempotencyKey,
+          idempotencyKey: body.idempotencyKey,
         }),
       'failed to override user asset',
     );
