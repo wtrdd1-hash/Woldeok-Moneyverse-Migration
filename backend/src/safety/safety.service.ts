@@ -74,7 +74,7 @@ export class SafetyService {
   async adminActionChatReport(
     actorUserId: string,
     reportId: string,
-    dto: { action: string; note?: string },
+    dto: { action: string; note?: string | undefined },
   ) {
     const success = await this.repository.adminActionChatReport(
       actorUserId,

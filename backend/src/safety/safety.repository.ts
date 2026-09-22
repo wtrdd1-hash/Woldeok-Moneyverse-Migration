@@ -170,7 +170,7 @@ export class SafetyRepository {
     actorUserId: string,
     reportId: string,
     action: string,
-    note?: string,
+    note?: string | undefined,
   ): Promise<boolean> {
     const row = await queryOne<{ success: boolean }>(
       this.pool,
