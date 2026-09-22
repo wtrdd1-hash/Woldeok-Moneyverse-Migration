@@ -22,6 +22,7 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -153,7 +154,7 @@ export class AdminWorkOperationsController {
   }
 
   @Post('auto-tune')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Automatically calculate and tune daily reward cap based on economy health' })
   async autoTune(@Req() request: RequestWithSession) {
     const actor = requireUserId(request);
@@ -166,7 +167,7 @@ export class AdminWorkOperationsController {
   }
 
   @Put('policy')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Update work reward policy daily cap, weekly cap, and repeat decay' })
   async updatePolicy(
     @Req() request: RequestWithSession,
@@ -182,7 +183,7 @@ export class AdminWorkOperationsController {
   }
 
   @Patch('tasks/:id')
-  @UseGuards(CsrfGuard)
+  @UseGuards(CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Update base reward, duration, daily limit, and active state of a work task' })
   async updateTask(
     @Req() request: RequestWithSession,
