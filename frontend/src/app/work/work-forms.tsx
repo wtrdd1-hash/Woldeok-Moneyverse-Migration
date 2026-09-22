@@ -221,17 +221,20 @@ export function TaskCompleteModalButton({
   const { locale } = useLocale();
   const isEn = locale === 'en';
   const [isOpen, setIsOpen] = useState(false);
+  const [cycle, setCycle] = useState(0);
   const [requestKey, setRequestKey] = useState('');
   const rewardPaused = task.reward_preview === null || task.experience_preview === null;
 
   const handleOpen = () => {
     setRequestKey(crypto.randomUUID());
+    setCycle((value) => value + 1);
     setIsOpen(true);
   };
 
   const handleClose = () => {
     setIsOpen(false);
     setRequestKey('');
+    setCycle((value) => value + 1);
   };
 
   return (
@@ -269,6 +272,7 @@ export function TaskCompleteModalButton({
 
       {isOpen && requestKey && (
         <TaskCompletionModal
+          key={cycle}
           open={isOpen}
           task={task}
           requestKey={requestKey}
