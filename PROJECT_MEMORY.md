@@ -145,22 +145,24 @@
 
 ## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
 
-- **최종 갱신일시**: 2026-09-22 18:50:00 KST
-- **현재 프로덕션 릴리스 버전**: `v2026.09.22.355` (릴리스 경로: `/srv/moneyverse-data/releases/prod-0714368-v355`, 직전: `prod-e60cf71-v354`)
-- **Exact Git SHA**: `07143686dda0322d6c7628b79e2d3a60657bb543` (단축: `0714368`)
+- **최종 갱신일시**: 2026-09-22 19:00:00 KST
+- **현재 프로덕션 릴리스 버전**: `v2026.09.22.356` (릴리스 경로: `/srv/moneyverse-data/releases/prod-7e46b22-v356`, 직전: `prod-0714368-v355`)
+- **Exact Git SHA**: `7e46b22296ace8f9ecea55f5d649373927d66506` (단축: `7e46b22`)
 - **PostgreSQL 활성 사용자 세션**: **929개 (100% 무손실 보존 실측 확인)**
 - **최신 완료 작업 요약**:
-  1. **P0 가상 주식 거래소 인터랙티브 트레이딩 콘솔 완비 (`/stocks/[symbol]`)**:
-     - `frontend/src/app/stocks/[symbol]/stock-orderbook.tsx`: 5D/10D 뎁스 토글 스위치 탑재, 실시간 매도/매수 호가 클릭 시 단가 및 매수/매도 탭 자동 연동(`onSelectPrice`), 볼륨 비례 시각적 게이지 바 및 스프레드 Bps 지표 표시.
-     - `frontend/src/app/stocks/[symbol]/stock-order-panel.tsx`: 지정가(Limit)/시장가(Market) 탭 인터페이스, 수량 슬라이더 및 10%/25%/50%/MAX 44px 터치 프리셋 칩, 이중 주문 방지(`aria-busy`) 및 주문 확인 다이얼로그 탑재.
-     - `frontend/src/app/stocks/[symbol]/stock-trading-console.tsx`: 데스크톱 2열 그리드 및 320px 극소 모바일 하단 플로팅 퀵 액션 바(매수/매도 바텀 서피스 모달) 통합 컨테이너.
-     - `frontend/src/app/stocks/[symbol]/page.tsx`: 독립되어 있던 컴포넌트들을 `StockTradingConsole` 중심의 고밀도 핀테크 인터페이스로 재배치 및 시장 요약/보유 현황 카드 정리.
-  2. **순수 호가 계산 로직 분리 및 Vitest 단위 테스트 완비**:
-     - `stock-orderbook.tsx` 내 `computeOrderbook` 순수 함수 분리 및 export.
-     - `stock-trading-console.test.ts`: 5D/10D 뎁스 길이 검증, 호가 단가 정합성, 스프레드 bps 산출, 콤마 문자열 처리 및 1 WLD 최저 호가 방어 등 6개 단위 테스트 100% PASS.
-  3. **무중단 승격 및 런타임 신원 일치 (v355)**:
-     - Exact SHA `0714368` 기반 테스트 및 프로덕션 동시 빌드 및 릴리스 배포.
+  1. **P0 가상 주식 메인 주문 폼 프리셋 및 실시간 세금 계산 카드 완비 (`frontend/src/app/stocks/trade-form.tsx` & `trade-dialog.tsx`)**:
+     - `TradeForm`: 44px 이상 터치 타깃(`min-h-9` 및 칩 버튼), 25%/50%/MAX 퍼센티지 퀵 프리셋 칩 제공.
+     - 매수 시 보유 현금 기준, 매도 시 보유 주식 수량(`holdingQuantity`) 기준으로 퍼센티지 즉시 자동 환산.
+     - 실시간 예상 결제/수령 총액(`수량 × 단가`) 및 0.3% 거래세(`TaxBreakdown`) 요약 카드 탑재.
+     - `TradeDialog`: `holdingQuantity`, `triggerLabel`, `triggerVariant`, `triggerClassName` 등 커스텀 트리거 확장 지원.
+  2. **P0 포트폴리오 자산 배분 멀티 세그먼트 스택 바 및 원터치 리밸런싱 완비 (`frontend/src/app/stocks/portfolio/`)**:
+     - `analysis.ts`: BigInt 기반 안전 연산으로 `gain_loss_bps`(종목별 및 포트폴리오 전체 수익률) 및 8색 고유 팔레트 색상 매핑 계산 로직 분리.
+     - `analysis.test.ts`: 수익률 bps 계산 정합성 및 색상 할당 검증 단위 테스트 4종 100% PASS.
+     - `page.tsx`: 3대 히어로 지표 카드(총 평가 자산, 총 투자 원금, 누적 평가 손익 및 bps 배지), 멀티 세그먼트 자산 배분 가로형 스택 바 및 레전드 칩, 보유 종목별 수익률 배지 및 원터치 매수/매도 `TradeDialog` 리밸런싱 트리거 탑재.
+  3. **무중단 승격 및 런타임 신원 일치 (v356)**:
+     - Exact SHA `7e46b22` 기반 테스트 및 프로덕션 동시 빌드 및 릴리스 배포.
      - 929개 PostgreSQL 활성 사용자 세션 100% 무손실 보존 실측 확인 및 전 엔드포인트 200 OK.
+
 
 
 

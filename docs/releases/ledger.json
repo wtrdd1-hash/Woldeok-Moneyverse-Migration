@@ -70,10 +70,21 @@
     "commitSha": "07143686dda0322d6c7628b79e2d3a60657bb543",
     "shortSha": "0714368",
     "releasePath": "/srv/moneyverse-data/releases/prod-0714368-v355",
-    "status": "promoted",
+    "status": "archived",
     "activeSessions": 929,
     "timestamp": "2026-09-22T09:49:00Z",
     "author": "System Engineer",
     "notes": "P0 Virtual Stock Exchange Interactive Trading Console, 10-Depth Bidirectional Orderbook & Mobile Floating Quick Action"
+  },
+  {
+    "version": "v2026.09.22.356",
+    "commitSha": "7e46b22296ace8f9ecea55f5d649373927d66506",
+    "shortSha": "7e46b22",
+    "releasePath": "/srv/moneyverse-data/releases/prod-7e46b22-v356",
+    "status": "promoted",
+    "activeSessions": 929,
+    "timestamp": "2026-09-22T10:00:00Z",
+    "author": "System Engineer",
+    "notes": "P0 Stock Main Order Form Presets, Estimated Tax Breakdown & Portfolio Asset Allocation Stack Bar"
   }
 ]

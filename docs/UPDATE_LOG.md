@@ -1,5 +1,22 @@
 # Update Log
 
+## v2026.09.22.356 — Virtual Stock Exchange Main Order Form Presets, Estimated Tax Breakdown & Portfolio Asset Allocation Stack Bar
+
+- Applied Branch: `main` (Release: `prod-7e46b22-v356`)
+- **P0 Virtual Stock Exchange Main Order Form & Portfolio Analytics Enhancement (VIRTUAL_STOCK_EXCHANGE_SPEC)**:
+  1. **Stock Main Order Dialog/Form Usability Innovations (`trade-form.tsx` & `trade-dialog.tsx`)**:
+     - 44px minimum touch targets (`min-h-9` and chip buttons) with 25%/50%/MAX percentage quick preset chips.
+     - Cash-relative conversion for Buy orders and holding-relative conversion for Sell orders (`holdingQuantity`).
+     - Real-time estimated gross transaction calculation (`quantity × price`) with 0.3% financial transaction tax breakdown (`TaxBreakdown`).
+     - Extended `TradeDialog` with `holdingQuantity`, `triggerLabel`, `triggerVariant`, and `triggerClassName` customization.
+  2. **Portfolio Asset Allocation Multi-Segment Stack Bar & One-Touch Rebalancing (`frontend/src/app/stocks/portfolio/`)**:
+     - `analysis.ts`: BigInt-safe arithmetic for `gain_loss_bps` (per-position and total portfolio return) and 8-color distinct palette mapping.
+     - `analysis.test.ts`: 4 Vitest unit tests verifying basis point calculation precision and color assignment (100% PASS).
+     - `page.tsx`: 3 hero metrics cards (Total Valuation, Total Cost Basis, Cumulative Gain/Loss and Bps badge), horizontal multi-segment asset allocation stack bar with legend chips, per-position return badges, and one-touch Buy More / Sell `TradeDialog` rebalancing triggers.
+  3. **Zero-Downtime Promotion & Runtime Identity Coherence**:
+     - Exact Git SHA `7e46b22` deployed to both Test and Production.
+     - 929 PostgreSQL active user sessions 100% loss-free preserved.
+
 ## v2026.09.22.355 — Virtual Stock Exchange Interactive Trading Console, 10-Depth Bidirectional Orderbook & Mobile Floating Quick Action
 
 - Applied Branch: `main` (Release: `prod-0714368-v355`)
