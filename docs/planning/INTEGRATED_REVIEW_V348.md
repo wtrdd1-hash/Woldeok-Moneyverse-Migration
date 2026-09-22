@@ -20,7 +20,7 @@ QA-335 findings remain OPEN while later release records report recovery. Accepta
 
 ### G348-03 — Developer Portal/API safety underspecified
 v347 implemented `/developer` and live requests, but the integrated plan lacked mutation safety, secret handling, auth/CSRF/step-up behavior, error shape, resource budgets, and OpenAPI evolution rules.
-Acceptance: validate generated OpenAPI against implementation; document OAS 3.0 compatibility and a tested path to OAS 3.1.1; use RFC 9110 semantics and RFC 9457-compatible problems where practical; forbid unrestricted Production admin/economic mutation from docs UI; define endpoint auth/BOLA, DTO allowlists, idempotency, pagination, size/rate/time budgets, cache/retry/deprecation; never persist credentials in analytics or localStorage.
+Acceptance: validate generated OpenAPI against implementation; document OAS 3.0 compatibility and a tested path to OAS 3.2.1; use RFC 9110 semantics and RFC 9457-compatible problems where practical; forbid unrestricted Production admin/economic mutation from docs UI; define endpoint auth/BOLA, DTO allowlists, idempotency, pagination, size/rate/time budgets, cache/retry/deprecation; never persist credentials in analytics or localStorage.
 
 ### G348-04 — newspaper vote authority conflict
 v343 records localStorage poll behavior while v347 adds a POST vote API. Acceptance: for a shared poll the server owns eligibility/votes/aggregate and localStorage remembers browser UX only. If intentionally local/demo, label it as local/demo and never present its percentages as global opinion.
@@ -62,7 +62,7 @@ Home/newspaper/developer surfaces use live/real-time language without one stale-
 ## 4. Current reference refresh — checked 2026-09-22
 
 - W3C WCAG 2.2: https://www.w3.org/TR/WCAG22/
-- OpenAPI Specification 3.1.1: https://spec.openapis.org/oas/v3.1.1.html
+- OpenAPI Specification 3.1.1: https://spec.openapis.org/oas/v3.2.1.html
 - RFC 9110 HTTP Semantics: https://www.rfc-editor.org/rfc/rfc9110
 - RFC 9457 Problem Details for HTTP APIs: https://www.rfc-editor.org/rfc/rfc9457
 - OWASP API Security Top 10:2023: https://owasp.org/API-Security/

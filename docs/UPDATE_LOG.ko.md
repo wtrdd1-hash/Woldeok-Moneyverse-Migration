@@ -1,9 +1,15 @@
+## v2026.09.22.349 — OpenAPI 레퍼런스 최신성 정정
+
+- 최종 권위 출처 재검증에 따른 문서 전용 정정이다.
+- 기존 v347의 OpenAPI 3.0 호환 구현 사실은 유지하면서 최신 API 진화 목표를 3.1.1에서 2026-09-10 공개된 3.2.1로 정정했다.
+- 전환 전 단계적 호환성 테스트 요구사항을 추가했다.
+
 ## v2026.09.22.348 — 통합 기획 재검토 및 권위 정합화
 
 - 범위: 문서/기획 전용이며 런타임 배포 완료를 주장하지 않는다.
 - 오래된 v335 헤더를 `docs/planning/PROJECT_PLAN.ko.md` v348로 올리고 영문 기준 문서와 동기화했다.
 - v342/v343/v347/v347.1 구현·릴리스 증거와 작업 중간 새로 확인한 v46/v47 긴급 방어 초안을 통합 기획과 정합화했다.
-- Developer Portal/API 안전, OpenAPI 3.1.1 호환 전환, 신문 투표 권위, 동의 상태/접근성, live-data freshness, 주식 halt 상태, 안전 rollback 상세 계약을 추가했다.
+- Developer Portal/API 안전, OpenAPI 3.2.1 호환 전환, 신문 투표 권위, 동의 상태/접근성, live-data freshness, 주식 halt 상태, 안전 rollback 상세 계약을 추가했다.
 - 1만+ 레퍼런스 요구는 대규모 corpus 기준 + 직접 확인한 규범 자료로 기록하고 1만 페이지를 개별 수동 검토했다는 과장 표현을 금지했다.
 - 상세 재검토: `docs/planning/INTEGRATED_REVIEW_V348.ko.md`; 작업기록: `docs/worklog/2026-09-22-integrated-planning-rereview-v2026.09.22.348.ko.md`.
 

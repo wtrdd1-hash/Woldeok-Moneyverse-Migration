@@ -20,7 +20,7 @@ QA-335는 OPEN인데 후속 릴리스 기록은 복구를 보고한다. 수용 �
 
 ### G348-03 — Developer Portal/API 안전경계 부족
 v347은 `/developer`와 live request를 구현했지만 mutation 안전, secret 보관, auth/CSRF/step-up, 오류 형식, resource budget, OpenAPI 진화 규칙이 통합 기획에 부족했다.
-수용 조건: 생성 OpenAPI와 구현 상호 검증, OAS 3.0 호환범위와 OAS 3.1.1 전환 경로 테스트, RFC 9110 의미론, 가능한 RFC 9457 problem 형식, 운영 docs UI의 무제한 관리자/경제 mutation 금지, endpoint별 auth/BOLA·DTO allowlist·idempotency·pagination·size/rate/time budget·cache/retry/deprecation, analytics/localStorage credential 영속 저장 금지.
+수용 조건: 생성 OpenAPI와 구현 상호 검증, OAS 3.0 호환범위와 OAS 3.2.1 전환 경로 테스트, RFC 9110 의미론, 가능한 RFC 9457 problem 형식, 운영 docs UI의 무제한 관리자/경제 mutation 금지, endpoint별 auth/BOLA·DTO allowlist·idempotency·pagination·size/rate/time budget·cache/retry/deprecation, analytics/localStorage credential 영속 저장 금지.
 
 ### G348-04 — 신문 투표 권위 충돌
 v343은 localStorage 투표 동작을 기록하고 v347은 POST vote API를 추가했다. 수용 조건: 공유 투표라면 서버가 eligibility/vote/aggregate 권위이고 localStorage는 브라우저 UX 기억만 담당한다. 로컬/데모라면 그렇게 표시하고 로컬 백분율을 전체 사용자 여론처럼 보여주지 않는다.
@@ -62,7 +62,7 @@ v315는 planning-only라고 하지만 v342는 실제 DB 수정·릴리스 증거
 ## 4. 최신 레퍼런스 재확인 — 2026-09-22
 
 - W3C WCAG 2.2: https://www.w3.org/TR/WCAG22/
-- OpenAPI Specification 3.1.1: https://spec.openapis.org/oas/v3.1.1.html
+- OpenAPI Specification 3.1.1: https://spec.openapis.org/oas/v3.2.1.html
 - RFC 9110 HTTP Semantics: https://www.rfc-editor.org/rfc/rfc9110
 - RFC 9457 Problem Details for HTTP APIs: https://www.rfc-editor.org/rfc/rfc9457
 - OWASP API Security Top 10:2023: https://owasp.org/API-Security/

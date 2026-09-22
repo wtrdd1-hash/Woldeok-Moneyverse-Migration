@@ -1,11 +1,17 @@
 # Update Log
 
+## v2026.09.22.349 — OpenAPI Reference Freshness Correction
+
+- Documentation-only correction after final authoritative-source verification.
+- Updated the current OpenAPI evolution target from 3.1.1 to 3.2.1 (published 2026-09-10), while preserving the existing v347 OpenAPI 3.0-compatible implementation fact.
+- Added staged compatibility testing requirements before migration.
+
 ## v2026.09.22.348 — Integrated Planning Re-review & Authority Reconciliation
 
 - Scope: documentation/planning only; no runtime deployment claim.
 - Promoted `docs/planning/PROJECT_PLAN.md` authority from stale v335 to v348 with synchronized Korean counterpart.
 - Reconciled implementation/release evidence through v342/v343/v347/v347.1 and the mid-work v46/v47 emergency-defense draft.
-- Added detailed contracts for Developer Portal/API safety, OpenAPI 3.1.1 compatibility path, newspaper poll authority, consent state/accessibility, live-data freshness, stock-halt state reconciliation, and safe rollback semantics.
+- Added detailed contracts for Developer Portal/API safety, OpenAPI 3.2.1 compatibility path, newspaper poll authority, consent state/accessibility, live-data freshness, stock-halt state reconciliation, and safe rollback semantics.
 - Recorded the 10,000+ reference requirement as a corpus threshold plus manually verified normative sources, avoiding a false claim of 10,000 individually reviewed pages.
 - Detailed review: `docs/planning/INTEGRATED_REVIEW_V348.md`; worklog: `docs/worklog/2026-09-22-integrated-planning-rereview-v2026.09.22.348.md`.
 

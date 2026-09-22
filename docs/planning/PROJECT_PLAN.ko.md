@@ -2,22 +2,28 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.22.348
+> **현재 통합 버전:** v2026.09.22.349
 > **구현·증거 동기화:** 2026-09-22
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+## 레퍼런스 최신성 정정 — v2026.09.22.349 (2026-09-22)
+
+- v348 이후 최종 권위 출처 검증에서 OpenAPI가 3.1.x보다 더 진행된 것을 확인했다. **OpenAPI Specification 3.2.1은 2026-09-10 공개**되었으므로 v349에서 API 진화 목표를 OAS 3.1.1이 아니라 **OAS 3.2.1**로 정정한다. 기존 v347 생성 계약이 OpenAPI 3.0 호환이라는 구현 사실은 그대로 보존한다.
+- **전환 계약:** 현재 3.0 소비자 호환성을 compatibility test 통과 전까지 유지하고, tooling/codegen/schema 동작을 3.2.1 기준으로 검증하며, 3.2 전용 의미를 도입하기 전에 문서화한다. 버전 문자열만 바꾸는 방식이 아니라 단계적 contract test를 적용한다.
+- v348은 본 재검토의 상세 기획 회차로 유지하며 v349는 출처 최신성 정정 회차다. 충돌 시 v349가 현재 권위다.
+
 ## 통합 기획 재검토 및 권위 정합화 — v2026.09.22.348 (2026-09-22)
 
 - **권위 버전 드리프트 해결:** 헤더는 v335였지만 문서 안에 v337이 이미 있고 저장소/런타임 작업은 v342, v343, v347, v347.1까지 진행됐다. v348을 현재 통합 권위로 올리며 과거 절은 역사적 증거로 보존하되 v348과 충돌하면 v348이 우선한다.
-- **1만+ 조사 규칙:** 1만 페이지를 각각 수동 열람했다는 뜻이 아니라 추적 가능한 대규모 corpus 기준 + 핵심 규범 직접 확인을 뜻한다. 기존 기획에는 SeeClick 10,000, WebUI 41,970, RICO 66,000+ 화면(합계 117,970+ UI artifact)이 기록돼 있다. 이번 최신 규범 확인은 WCAG 2.2, OpenAPI 3.1.1, RFC 9110/9457, OWASP API Security Top 10:2023, NIST SP 800-63-4/63B-4 및 SSDF, ISO 20022:2026, 한국은행 2025 지급결제 보고서를 포함한다.
+- **1만+ 조사 규칙:** 1만 페이지를 각각 수동 열람했다는 뜻이 아니라 추적 가능한 대규모 corpus 기준 + 핵심 규범 직접 확인을 뜻한다. 기존 기획에는 SeeClick 10,000, WebUI 41,970, RICO 66,000+ 화면(합계 117,970+ UI artifact)이 기록돼 있다. 이번 최신 규범 확인은 WCAG 2.2, OpenAPI 3.2.1, RFC 9110/9457, OWASP API Security Top 10:2023, NIST SP 800-63-4/63B-4 및 SSDF, ISO 20022:2026, 한국은행 2025 지급결제 보고서를 포함한다.
 - **상세 재검토:** [INTEGRATED_REVIEW_V348.ko.md](INTEGRATED_REVIEW_V348.ko.md)에 증거 등급, gap ID, 상세 계약, 수용 기준, 출처 URL을 기록한다.
 - **런타임 증거와 기획 권위 분리:** v342/v343/v347/v347.1은 특정 SHA의 구현·릴리스 사실을 증명하지만 제품 의도, 안전경계, QA, 롤백, 수용조건을 묵시적으로 덮어쓰지 않는다.
 - **QA-335 정합화:** 과거 OPEN 항목은 exact candidate SHA, Test 증거, Production 증거, 종료 SHA/날짜가 defect ledger에 기록될 때까지 역사적 발견으로 유지한다. 후속 정상 릴리스 주장만으로 소급 CLOSED 처리하지 않는다.
 - **주식 거래정지:** v315가 원가 기준 자동정산 제품 계약이고 v342는 구현/버그수정 증거다. 현재 통합 상태는 구현·릴리스 증거 있음이며 real-DB/concurrency/invariant 회귀 게이트는 계속 적용한다.
 - **신문 투표 권위:** 공유/공개 투표는 서버가 최종 권위이며 localStorage는 현재 브라우저의 참여 UX만 기억한다. 의도적으로 로컬/데모라면 그렇게 표시하고 로컬 백분율을 전체 사용자 여론처럼 표현하지 않는다.
-- **Developer Portal/API:** v347을 정식 제품 표면으로 편입한다. OpenAPI가 기계 판독 계약이며 현재 3.0 호환 산출물은 OAS 3.1.1로의 검증된 호환/전환 경로를 가져야 한다. endpoint별 auth/BOLA, DTO allowlist, mutation 멱등성, bounds/pagination, rate/resource/time budget, cache/retry/deprecation, 안정 machine error를 정의하고 가능한 범위에서 RFC 9457로 수렴한다.
+- **Developer Portal/API:** v347을 정식 제품 표면으로 편입한다. OpenAPI가 기계 판독 계약이며 현재 3.0 호환 산출물은 OAS 3.2.1로의 검증된 호환/전환 경로를 가져야 한다. endpoint별 auth/BOLA, DTO allowlist, mutation 멱등성, bounds/pagination, rate/resource/time budget, cache/retry/deprecation, 안정 machine error를 정의하고 가능한 범위에서 RFC 9457로 수렴한다.
 - **Try It Out 안전:** 운영 문서가 무제한 관리자/경제 mutation 콘솔이 되어서는 안 된다. 파괴적·경제적·관리자 write는 기본 비활성 또는 sandbox로 라우팅하고 일반 authorization, CSRF, step-up을 그대로 적용한다. token/secret은 analytics/localStorage에 영속 저장하지 않고 request/response는 정책에 따라 redaction한다.
 - **동의 step-up:** v347.1의 화면 내 modal을 의도된 UX로 채택하되 버전이 있는 age/terms/privacy grant는 서버가 권위다. 멱등 제출, 세션 만료 복구, label/focus 관리 접근성, server-confirmed grant 전 보호 동작 차단을 요구한다.
 - **v46/v47 초안 보강:** 동적 정책 연동, 예외 경로, hydration guard, 긴급 rollback은 더 강한 fail-closed 계약을 전제로 채택한다. policy fetch/cache 실패 시 임의 동의 버전을 만들어내지 않고, 경로는 canonicalize한 뒤 서버/API에서 강제하며 client overlay에 보안을 의존하지 않는다. 200ms fade는 UX일 뿐 CLS=0 증거가 아니다. rollback은 "직전 디렉터리" 추정이 아니라 기록된 last-known-good frontend/backend pair와 migration compatibility, health/session 증거를 사용한다. `reload-or-restart`만으로 무중단을 주장하지 않고 검증된 blue/green/canary 전환 계약을 따른다.

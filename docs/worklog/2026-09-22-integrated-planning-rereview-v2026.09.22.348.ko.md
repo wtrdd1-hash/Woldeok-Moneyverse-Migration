@@ -7,7 +7,7 @@
 - 권위 PROJECT_PLAN 영/한 및 현재 문서 정책을 다시 확인했다.
 - 최근 v342, v343, v347, v347.1 구현/릴리스 기록을 통합 기획과 대조했다.
 - v335 헤더와 후속 지시·릴리스 사이의 권위 버전 드리프트를 확인했다.
-- WCAG 2.2, OpenAPI 3.1.1, HTTP 의미론/problem details, OWASP API 보안, NIST 디지털 신원/SSDF, ISO 20022:2026, 한국은행 2025 지급결제 보고서 기준을 재확인했다.
+- WCAG 2.2, OpenAPI 3.2.1, HTTP 의미론/problem details, OWASP API 보안, NIST 디지털 신원/SSDF, ISO 20022:2026, 한국은행 2025 지급결제 보고서 기준을 재확인했다.
 - 1만+ 조사 요구를 corpus 규모 기준으로 보존하고 1만 페이지 개별 수동 열람으로 과장하지 않았다.
 - Developer Portal/API 안전, 신문 투표 권위, 동의 step-up 접근성/상태, live-data freshness, 주식 halt 구현상태 정합화 상세 계약을 추가했다.
 - 작업 중간 remote-main 재확인에서 새 implementation-plan v46/v47을 발견해 동적 정책, 예외 경로, hydration UX, rollback 안전성의 fail-closed 보강을 추가했다.
