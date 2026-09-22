@@ -23,6 +23,7 @@ import { AdminSessionGuard } from '../auth/guards/admin-session.guard';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
@@ -239,6 +240,7 @@ export class ContentController {
     AdminGuard,
     AdminSessionGuard,
     CsrfGuard,
+    ReauthGuard,
   )
   @ApiOperation({ summary: 'Publish or unpublish an announcement' })
   publishAnnouncement(
@@ -281,6 +283,7 @@ export class ContentController {
     AdminGuard,
     AdminSessionGuard,
     CsrfGuard,
+    ReauthGuard,
   )
   @ApiOperation({ summary: 'Publish or unpublish a photo' })
   publishPhoto(
@@ -302,6 +305,7 @@ export class ContentController {
     AdminGuard,
     AdminSessionGuard,
     CsrfGuard,
+    ReauthGuard,
   )
   @ApiOperation({ summary: 'Approve and publish a pending member photo' })
   approveMemberPhoto(

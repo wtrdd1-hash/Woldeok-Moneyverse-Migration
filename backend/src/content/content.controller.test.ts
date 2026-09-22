@@ -28,3 +28,18 @@ describe('member photo approval', () => {
     );
   });
 });
+
+import { GUARDS_METADATA } from '@nestjs/common/constants';
+import { CsrfGuard } from '../auth/guards/csrf.guard';
+import { ReauthGuard } from '../auth/guards/reauth.guard';
+
+describe('administrator publication security boundary', () => {
+  for (const method of ['publishAnnouncement', 'publishPhoto', 'approveMemberPhoto'] as const) {
+    it(`${method} requires CSRF and recent reauthentication`, () => {
+      const guards =
+        (Reflect.getMetadata(GUARDS_METADATA, ContentController.prototype[method]) as unknown[]) ?? [];
+      expect(guards).toContain(CsrfGuard);
+      expect(guards).toContain(ReauthGuard);
+    });
+  }
+});
