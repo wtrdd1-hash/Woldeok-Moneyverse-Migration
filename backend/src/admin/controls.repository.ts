@@ -425,6 +425,7 @@ export class ControlsRepository {
         'only operator, approver and server_operator can be revoked',
       );
     }
+    const reason = assertReason(input.reason);
     const row = await queryOne<{
       readonly designation_id: string;
       readonly revoked_role: string;
