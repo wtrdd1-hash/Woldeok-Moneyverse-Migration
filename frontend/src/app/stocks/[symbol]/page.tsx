@@ -18,8 +18,7 @@ import { StockQuickAlertDialog } from './stock-quick-alert-dialog';
 import { StockAlertDeleteButton } from './stock-alert-delete-button';
 import { StockDiscussionSection } from './stock-discussion-section';
 import { StockInteractiveChart } from './stock-interactive-chart';
-import { StockOrderbook } from './stock-orderbook';
-import { StockOrderPanel } from './stock-order-panel';
+import { StockTradingConsole } from './stock-trading-console';
 import {
   findHoldingForStock,
   findStockBySymbol,
@@ -194,64 +193,55 @@ export default async function StockHubPage({
         isEn={isEn}
       />
 
-      {/* 2. 본문 2열 트레이딩 콘솔 그리드 (좌측: 호가창+시장요약+토론, 우측: 토스형 주문패널+보유현황+알림) */}
-      <div className="grid gap-6 lg:grid-cols-[1.1fr_.9fr]">
-        {/* 좌측 컬럼: 실시간 5단계 호가창 및 시장 요약 */}
-        <div className="space-y-6">
-          <StockOrderbook
-            currentPrice={stock.current_price}
-            dayOpenPrice={stock.day_open_price}
-            isEn={isEn}
-          />
+      {/* 2. 본문 실시간 양방향 트레이딩 콘솔 (5/10-Depth 호가창 + 토스형 주문패널 + 모바일 하단 액션 바) */}
+      <StockTradingConsole
+        stockId={stock.id}
+        symbol={stock.symbol}
+        name={stock.name}
+        currentPrice={stock.current_price}
+        dayOpenPrice={stock.day_open_price}
+        availableShares={stock.shares_available}
+        holdingQuantity={holding?.quantity}
+        isHalted={isHalted}
+        isEn={isEn}
+      />
 
-          <Card className="border-border/80 bg-card/60 shadow-sm">
-            <CardHeader className="p-4 sm:p-5 pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-bold">{isEn ? 'Market Snapshot' : '시장 시세 요약'}</CardTitle>
-                <div className="flex items-center gap-1.5">
-                  <Button asChild variant="outline" size="sm" className="h-7 text-xs px-2.5">
-                    <Link href={`/stocks/compare?symbols=${encodedSymbol}`}>
-                      {isEn ? 'Compare' : '종목 비교'}
-                    </Link>
-                  </Button>
-                  <StockQuickAlertDialog
-                    stockId={stock.id}
-                    symbol={stock.symbol}
-                    name={stock.name}
-                    currentPrice={stock.current_price}
-                    isEn={isEn}
-                  />
-                </div>
+      {/* 3. 보조 2열 정보 그리드 (좌측: 시장 시세 요약, 우측: 내 보유 현황) */}
+      <div className="grid gap-6 lg:grid-cols-[1.05fr_.95fr]">
+        <Card className="border-border/80 bg-card/60 shadow-sm">
+          <CardHeader className="p-4 sm:p-5 pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-bold">{isEn ? 'Market Snapshot' : '시장 시세 요약'}</CardTitle>
+              <div className="flex items-center gap-1.5">
+                <Button asChild variant="outline" size="sm" className="h-7 text-xs px-2.5">
+                  <Link href={`/stocks/compare?symbols=${encodedSymbol}`}>
+                    {isEn ? 'Compare' : '종목 비교'}
+                  </Link>
+                </Button>
+                <StockQuickAlertDialog
+                  stockId={stock.id}
+                  symbol={stock.symbol}
+                  name={stock.name}
+                  currentPrice={stock.current_price}
+                  isEn={isEn}
+                />
               </div>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-5 pt-2 grid gap-3">
-              <dl className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                <Figure label={isEn ? 'Current' : '현재가'} value={stock.current_price} />
-                <Figure label={isEn ? 'Day open' : '오늘 시가'} value={stock.day_open_price} />
-                <Figure label={isEn ? 'Day high' : '오늘 고가'} value={stock.day_high_price} />
-                <Figure label={isEn ? 'Day low' : '오늘 저가'} value={stock.day_low_price} />
-              </dl>
-              <p className="text-xs font-mono text-muted-foreground pt-1">
-                {isEn
-                  ? `Available ${groupDigits(stock.shares_available)} shares · ${groupDigits(stock.shares_outstanding)} issued`
-                  : `시장 유통 가능 ${groupDigits(stock.shares_available)}주 · 총 발행 ${groupDigits(stock.shares_outstanding)}주`}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 우측 컬럼: 토스형 원터치 주문 패널 및 내 보유 현황 */}
-        <div className="space-y-6">
-          <StockOrderPanel
-            stockId={stock.id}
-            symbol={stock.symbol}
-            name={stock.name}
-            currentPrice={stock.current_price}
-            availableShares={stock.shares_available}
-            holdingQuantity={holding?.quantity}
-            isHalted={isHalted}
-            isEn={isEn}
-          />
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-5 pt-2 grid gap-3">
+            <dl className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <Figure label={isEn ? 'Current' : '현재가'} value={stock.current_price} />
+              <Figure label={isEn ? 'Day open' : '오늘 시가'} value={stock.day_open_price} />
+              <Figure label={isEn ? 'Day high' : '오늘 고가'} value={stock.day_high_price} />
+              <Figure label={isEn ? 'Day low' : '오늘 저가'} value={stock.day_low_price} />
+            </dl>
+            <p className="text-xs font-mono text-muted-foreground pt-1">
+              {isEn
+                ? `Available ${groupDigits(stock.shares_available)} shares · ${groupDigits(stock.shares_outstanding)} issued`
+                : `시장 유통 가능 ${groupDigits(stock.shares_available)}주 · 총 발행 ${groupDigits(stock.shares_outstanding)}주`}
+            </p>
+          </CardContent>
+        </Card>
 
           <Card className="border-border/80 bg-card/60 shadow-sm">
             <CardHeader className="p-4 sm:p-5 pb-2">

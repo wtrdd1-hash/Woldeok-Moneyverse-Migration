@@ -1,6 +1,7 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v52)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v53)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v53**: 가상 주식 거래소(/stocks/[symbol]) 토스/로빈후드형 실시간 호가-주문 양방향 연동 콘솔(StockTradingConsole), 5/10-Depth 호가 확장, 지정가/시장가 탭 및 모바일 320px 하단 고정 액션 바 구현 사양 수록 (+105, -0)
 - **v52**: 1:1 개인 채팅 관리자 신고 증거 검토 콘솔 & 조치 거버넌스 엔진(Migration 228, /admin/safety 탭형 통합 큐, 10건 메시지 타임라인 뷰어, 원터치 조치 다이얼로그) 사양 누적 수록 (+118, -0)
 - **v51**: 1:1 개인 채팅 P0 안전 제어 풀스택 구현(Migration 227, NestJS API 4종, 토스풍 헤더 메뉴 및 44px 터치타깃 모달, 한글 IME isComposing 조합 가드) 및 v353 승격 사양 수록 (+113, -0)
 - **v50**: 4차 확정 조율 문답 반영 누적 — 관리자 약관 버전 실시간 발행 UI(/admin/controls, 2단계 확인 다이얼로그 연동), G352-01 정책 조회 실패 시 Fail-Safe 제출 방어(비권위 Fallback 저장 원천 차단), G352-02 & G352-04 docs/releases/ledger.json 불변 릴리스 원장 신설 및 rollback_production.sh 불변 증거 기반 롤백 고도화, G352-03 normalizePath 경로 정규화 및 화이트리스트 우회 방지 단위 테스트 확정 (+155, -0)
@@ -1873,4 +1874,105 @@ flowchart TD
    - 929개 이상 PostgreSQL 활성 세션 100% 보존 검증.
    - 런타임 신원 일치(Exact SHA) 확인.
    - `docs/releases/ledger.json` 및 `PROJECT_MEMORY.md` 동기화.
+
+---
+
+## 🏛️ [v53 Specification] 가상 주식 거래소(/stocks/[symbol]) 토스/로빈후드형 실시간 호가-주문 양방향 연동 콘솔 및 10-Depth 호가 확장
+
+### 1. 개요 및 배경
+- **상위 권위 기획**: `PROJECT_PLAN.ko.md` v44 (가상 주식 거래소 토스/로빈후드형 하이브리드 호가 스프레드 및 원터치 빠른 주문 패널).
+- **배경**: 기존 `/stocks/[symbol]` 화면에서는 호가창(`StockOrderbook`)과 주문 패널(`StockOrderPanel`)이 서버 컴포넌트(`page.tsx`) 내에 독립적으로 분리 배치되어 있어, 이용자가 특정 매수/매도 호가를 클릭해도 주문 패널의 단가나 수량에 전혀 반영되지 않는 인터랙션 결함이 존재했습니다.
+- **핵심 목표**:
+  1. 클라이언트 통합 상위 컴포넌트 `StockTradingConsole`을 신설하여 호가창과 주문 패널 간의 **실시간 양방향 상태 연동** 완성:
+     - 매도호가 클릭 시: 주문 패널이 `매수(buy)` 탭으로 자동 전환되고 해당 호가가 주문 단가로 즉시 연동.
+     - 매수호가 클릭 시: 주문 패널이 `매도(sell)` 탭으로 자동 전환되고 해당 호가가 주문 단가로 즉시 연동.
+  2. **5-Depth ↔ 10-Depth 심화 호가 확장 토글** 탑재:
+     - 일반 이용자를 위한 5단계 호가와 전문 투자자를 위한 10단계 심화 호가 뷰 전환 스위치 제공.
+     - 각 호가별 물량 비율에 따른 누적 잔량(Cumulative Depth) 게이지 바 시각화.
+  3. **지정가(Limit) / 시장가(Market) 주문 모드** 지원:
+     - 호가창 연동 단가 기준 실시간 총 필요 WLD, 세금 및 예상 수수료 계산.
+  4. **모바일 320px~390px 반응형 하단 고정 액션 바 (Bottom Action Bar)** 탑재 (`fintech-responsive-layout-engine`, `anti-ai-frontend-craftsmanship`):
+     - 모바일에서 스크롤 이동 없이 화면 하단에 고정된 [매수 (빨간색/에메랄드)] / [매도 (파란색)] 원터치 바텀시트 호출 버튼 제공.
+     - 44px 이상 터치 타깃 및 클리핑/가로 오버플로우 원천 방지.
+  5. **Exact Git SHA 기반 무중단 배포 승격 (`v2026.09.22.355`)** 및 929개 이상 활성 세션 100% 무손실 보존.
+
+---
+
+### 2. 아키텍처 및 인터랙션 흐름 다이어그램
+
+```mermaid
+flowchart TD
+    subgraph Container["통합 트레이딩 콘솔 (StockTradingConsole.tsx)"]
+        State["공유 상태: selectedPrice, orderSide, depthMode(5|10), orderType(limit|market)"]
+        
+        subgraph LeftCol["좌측: 실시간 호가창 (StockOrderbook)"]
+            DepthToggle["5-Depth / 10-Depth 토글 스위치"]
+            AskList["매도호가 (Asks: Rose 색상 및 잔량 게이지)"]
+            CurrentBar["현재 체결가 및 스프레드 WLD (Bps)"]
+            BidList["매수호가 (Bids: Emerald 색상 및 잔량 게이지)"]
+        end
+
+        subgraph RightCol["우측: 원터치 주문 패널 (StockOrderPanel)"]
+            SideTab["매수(BUY) / 매도(SELL) 탭"]
+            TypeTab["지정가(Limit) / 시장가(Market) 탭"]
+            PriceInput["주문 단가 입력 (호가 클릭 시 자동 바인딩)"]
+            QtySlider["주문 수량 슬라이더 & 10%/25%/50%/MAX 프리셋"]
+            TotalCalc["총 결제 WLD 및 세금 실시간 계산"]
+            ConfirmDialog["주문 확인 모달 -> placeOrder Server Action"]
+        end
+
+        subgraph MobileBottom["모바일 하단 고정 액션 바 (lg:hidden)"]
+            BottomBar["화면 하단 44px+ [매수하기] / [매도하기] 고정 바"]
+            BottomSheet["주문 패널 바텀시트 드로어 오버레이"]
+        end
+    end
+
+    AskList -->|클릭 시 price 및 side='buy' 연동| State
+    BidList -->|클릭 시 price 및 side='sell' 연동| State
+    State --> RightCol
+    BottomBar -->|모바일 터치 시 드로어 오픈| BottomSheet
+```
+
+---
+
+### 3. 컴포넌트별 상세 변경 명세 (Proposed Changes)
+
+#### ① 신규 클라이언트 통합 컨테이너 (`frontend/src/app/stocks/[symbol]/stock-trading-console.tsx`)
+- `StockTradingConsole` 컴포넌트 구현:
+  - 상태: `selectedPrice: string`, `side: 'buy' | 'sell'`, `depthMode: 5 | 10`, `orderType: 'market' | 'limit'`, `isMobileDrawerOpen: boolean`.
+  - 호가창의 `onSelectPrice` 콜백을 주문 패널의 상태로 바인딩.
+  - 모바일 하단 고정 플로팅 액션 바 탑재 (`fixed bottom-0 left-0 right-0 z-40 bg-card/90 backdrop-blur-md border-t`).
+
+#### ② 호가창 고도화 (`frontend/src/app/stocks/[symbol]/stock-orderbook.tsx`)
+- 5-Depth 뿐만 아니라 10-Depth 호가 연산 및 렌더링 지원.
+- 상단 5/10 Depth 전환 배지 버튼 탑재.
+- 호가 셀 클릭 시 마이크로 인터랙션 피드백 (Active Ripple/Scale).
+- 스프레드 및 호가별 누적 잔량(Cumulative Depth) 바 시각화.
+
+#### ③ 주문 패널 고도화 (`frontend/src/app/stocks/[symbol]/stock-order-panel.tsx`)
+- `selectedPrice` prop 수신 및 지정가/시장가 탭 추가.
+- 호가창에서 선택한 가격으로 즉시 단가 필드 동기화.
+- 단가 x 수량 실시간 총액 및 세금/수수료 연산.
+- 터치 타깃 44px 이상 및 모바일 키보드 오버레이 대응.
+
+#### ④ 종목 상세 페이지 연동 (`frontend/src/app/stocks/[symbol]/page.tsx`)
+- 기존에 분리되어 있던 `StockOrderbook`과 `StockOrderPanel`을 `StockTradingConsole`로 교체 통합.
+- 서버 컴포넌트의 데이터 페칭 유지 및 클라이언트 인터랙션 극대화.
+
+#### ⑤ 단위 테스트 (`frontend/src/app/stocks/[symbol]/stock-trading-console.test.ts`)
+- 호가 클릭 시 단가 및 매수/매도 사이드 전환 로직 검증.
+- 5-Depth 및 10-Depth 호가 배열 생성 로직 검증.
+- 스프레드 Bps 계산 및 총 주문 금액 산출 검증.
+
+---
+
+### 4. 검증 및 무중단 승격 계획 (Verification Plan)
+1. **타입체크 및 단위 테스트**:
+   - `pnpm --filter @moneyverse/frontend test stock-trading-console.test.ts`
+2. **Next.js Turbopack Exact-SHA 빌드**:
+   - `NEXT_PUBLIC_BUILD_ID=$COMMIT_SHA BUILD_ID=$COMMIT_SHA pnpm build`
+3. **미니 PC 스테이징 및 프로덕션 무중단 승격 (`v2026.09.22.355`)**:
+   - 929개 이상 PostgreSQL 활성 세션 100% 무손실 보존 검증.
+   - `docs/releases/ledger.json` 및 `PROJECT_MEMORY.md` 동기화.
+
 
