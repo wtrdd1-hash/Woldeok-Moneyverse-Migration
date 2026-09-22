@@ -183,7 +183,7 @@ try {
   const unreferencedFuncs = [];
   
   for (const fn of appExecutableFuncs) {
-    let referencedFiles = [];
+    const referencedFiles = [];
     for (const [file, code] of backendCodeMap.entries()) {
       if (code.includes(fn.function_name)) {
         referencedFiles.push(file);

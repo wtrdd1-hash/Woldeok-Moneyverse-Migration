@@ -1,3 +1,6 @@
+## v2026.09.22.367 — Backend API completeness audit CI unblock
+- Fixed the prefer-const CI blocker in the backend API completeness auditor without changing audit semantics.
+
 ## v2026.09.21.322 — Migration authority fail-closed gate
 - Production migration execution now rejects database-applied migration filenames absent from the exact repository checkout.
 - This prevents database-ahead/untracked schema drift from silently passing deploy migration gates while preserving checksum immutability.
