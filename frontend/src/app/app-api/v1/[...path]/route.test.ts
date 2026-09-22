@@ -81,6 +81,46 @@ describe('app API route compatibility', () => {
     expect(response.headers.get('x-moneyverse-contract-version')).toBe(APP_API_CONTRACT_VERSION);
   });
 
+  it('rejects obsolete app versions with a stable 426 contract before proxying', async () => {
+    vi.stubEnv('APP_API_MIN_VERSION', '2.4.0');
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/stocks', { 'x-moneyverse-app-version': '2.3.9' }),
+      context('stocks'),
+    );
+    expect(response.status).toBe(426);
+    expect(response.headers.get('x-moneyverse-min-app-version')).toBe('2.4.0');
+    expect(await response.json()).toMatchObject({ status: 426, code: 'app_upgrade_required' });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('fails closed when the configured minimum app version is invalid', async () => {
+    vi.stubEnv('APP_API_MIN_VERSION', 'latest');
+    const fetchSpy = vi.fn();
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/stocks', { 'x-moneyverse-app-version': '9.9.9' }),
+      context('stocks'),
+    );
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ status: 503, code: 'app_gateway_version_policy_invalid' });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('allows a supported app version to reach the private API', async () => {
+    vi.stubEnv('APP_API_MIN_VERSION', '2.4.0');
+    process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
+    const fetchSpy = vi.fn(async () => new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchSpy);
+    const response = await GET(
+      request('/app-api/v1/stocks', { 'x-moneyverse-app-version': '2.4.1' }),
+      context('stocks'),
+    );
+    expect(response.status).toBe(200);
+    expect(fetchSpy).toHaveBeenCalledOnce();
+  });
+
   it('turns upstream transport failures into stable JSON gateway errors', async () => {
     process.env.INTERNAL_API_TOKEN = 'x'.repeat(32);
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('network down'); }));
