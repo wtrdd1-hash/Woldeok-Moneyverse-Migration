@@ -1,3 +1,8 @@
+## v2026.09.22.363 — AI news privileged mutation step-up
+- Require recent reauthentication when changing the AI provider/model/key configuration.
+- Require recent reauthentication before automatic publication or operator publication of AI-generated stock-market events.
+- Keep proposal generation and discard behind the existing administrator session and CSRF boundary without unnecessary step-up.
+
 ## v2026.09.21.322 — Migration authority fail-closed gate
 - Production migration execution now rejects database-applied migration filenames absent from the exact repository checkout.
 - This prevents database-ahead/untracked schema drift from silently passing deploy migration gates while preserving checksum immutability.

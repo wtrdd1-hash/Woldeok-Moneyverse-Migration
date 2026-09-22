@@ -1,3 +1,8 @@
+## v2026.09.22.363 — AI 뉴스 민감 작업 재인증 강화
+- AI 공급자·모델·API 키 설정 변경 시 최근 재인증을 요구합니다.
+- AI 기반 주식시장 이벤트 자동 게시 및 운영자 게시 전에 최근 재인증을 요구합니다.
+- 제안 생성과 폐기는 기존 관리자 세션·CSRF 경계를 유지하고 불필요한 재인증은 추가하지 않습니다.
+
 ## v2026.09.21.322 — 마이그레이션 권위 fail-closed 게이트
 - Production migration 실행이 exact repository checkout에 없는 DB 적용 migration 파일명을 발견하면 실패하도록 보강했습니다.
 - checksum 불변성을 유지하면서 DB-ahead/미추적 schema drift가 배포 migration gate를 조용히 통과하는 문제를 차단합니다.
