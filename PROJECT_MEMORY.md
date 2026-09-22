@@ -145,40 +145,53 @@
 
 ## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
 
-- **최종 갱신일시**: 2026-09-22 20:45:00 KST
-- **현재 프로덕션 릴리스 버전**: `v2026.09.22.359`
-- **PostgreSQL 활성 사용자 세션**: **968개 (100% 무손실 보존 실측 확인)**
-- **백엔드 API 컨트롤러 및 엔드포인트**: **총 57개 컨트롤러, 335개 엔드포인트 (모바일 계약 179개)**
+- **최종 갱신일시**: 2026-09-22 21:22:00 KST
+- **현재 프로덕션 릴리스 버전**: `v2026.09.22.360` (릴리스 경로: `/srv/moneyverse-data/releases/prod-74be1c0-v360`)
+- **Exact Git SHA**: `1e4cabc9b88cf3e2e2cfbc3f9cfb9f692095f903` (단축: `1e4cabc`)
+- **PostgreSQL 활성 사용자 세션**: **1,028개 (100% 무손실 보존 실측 확인)**
+- **백엔드 API 컨트롤러 및 엔드포인트**: **총 57개 컨트롤러, 335개 엔드포인트 완비**
 - **최신 완료 작업 요약**:
-  1. **저축 포켓 분할 관리 API (`backend/src/bank/pocket.controller.ts`)**: 5개 엔드포인트 완비 (`GET /banking/pockets`, `POST /banking/pockets`, `POST /banking/pockets/transfer`, `PATCH /banking/pockets/:pocketId`, `POST /banking/pockets/:pocketId/archive`).
-  2. **제작 워크벤치 API (`backend/src/crafting/crafting.controller.ts`)**: 2개 엔드포인트 완비 (`GET /crafting/recipes`, `POST /crafting/execute`).
-  3. **유저 간 P2P 마켓플레이스 API (`backend/src/marketplace/marketplace.controller.ts`)**: 5개 엔드포인트 완비 (`GET /marketplace/listings`, `GET /marketplace/my-listings`, `POST /marketplace/listings`, `POST /marketplace/listings/:listingId/buy`, `POST /marketplace/listings/:listingId/cancel`).
-  4. **인앱 알림 센터 API (`backend/src/notification/notification.controller.ts`)**: 4개 엔드포인트 완비 (`GET /notifications`, `GET /notifications/unread-count`, `POST /notifications/:notificationId/read`, `POST /notifications/read-all`).
+  1. **글로벌 헤더 15초 주기 404 폴링 폭풍 원천 차단 (`frontend/src/app/api/notifications/unread-count/route.ts`)**:
+     - Next.js BFF 라우트 핸들러 신설 (`dynamic = 'force-dynamic'`, `cache-control: private, no-store`).
+     - 비로그인/로그인 세션 구분 및 `{ unreadCount: 0 }` 정상 응답 반환으로 Nginx 에러 로그 404 폭풍 즉각 소멸.
+  2. **`NotificationHeaderButton` 스마트 폴링 및 안전 가드 (`frontend/src/components/notification-header-button.tsx`)**:
+     - `document.visibilityState` 스마트 가드 탑재 (`document.hidden` 상태 시 백그라운드 폴링 자동 일시정지).
+     - 탭 활성화 시(`visibilitychange`) 즉시 1회 최신화.
+     - 지수 백오프(Exponential Backoff: 15s → 30s → 60s) 도입으로 네트워크 이상/배포 시 재시도 폭풍 차단.
+  3. **`ChatHeaderButton` 필드 호환 정합성 및 백그라운드 가드 (`frontend/src/components/chat-header-button.tsx`)**:
+     - 백엔드 `{ totalUnread: number }` 및 레거시 `{ unreadCount: number }` 필드 호환 파싱 지원.
+     - 동일하게 `document.hidden` 가드 및 지수 백오프 적용.
+  4. **백엔드 `ChatModule` 완성형 라우트 바인딩 (`backend/src/app.module.ts`)**:
+     - 구버전 미연동 `./chat.module`을 완성형 `./chat/chat.module`로 전환하여 `/api/v1/chat/unread-count` 등 전체 엔드포인트 정상 활성화 (401 인증 가드 정상 응답 확인).
+  5. **무중단 승격 및 1,028개 활성 세션 보존**:
+     - `stage_v360.sh` 및 `promote_v360.sh` 실행으로 운영 환경 무중단 승격 완료, 1,028개 PostgreSQL 세션 무손실 보존 실측 확인.
+
+---
+
+## 9. 📜 직전 릴리스 히스토리 (v2026.09.22.359)
+
+- **최종 갱신일시**: 2026-09-22 20:45:00 KST
+- **프로덕션 릴리스 버전**: `v2026.09.22.359` (릴리스 경로: `/srv/moneyverse-data/releases/prod-11a6c4f-v359`)
+- **Exact Git SHA**: `11a6c4f9ff8fa106854eb01f21aaa8ae5f8de083` (단축: `11a6c4f`)
+- **PostgreSQL 활성 사용자 세션**: **968개 (100% 무손실 보존 실측 확인)**
+- **완료 작업 요약**:
+  1. **저축 포켓 분할 관리 API (`backend/src/bank/pocket.controller.ts`)**: 5개 엔드포인트 완비.
+  2. **제작 워크벤치 API (`backend/src/crafting/crafting.controller.ts`)**: 2개 엔드포인트 완비.
+  3. **유저 간 P2P 마켓플레이스 API (`backend/src/marketplace/marketplace.controller.ts`)**: 5개 엔드포인트 완비.
+  4. **인앱 알림 센터 API (`backend/src/notification/notification.controller.ts`)**: 4개 엔드포인트 완비.
   5. **OpenAPI 3.0 및 11개 API 문서 전수 동기화**: `docs/mobile-api-contract.json` 및 관련 마크다운 명세서 100% 일치.
   6. **무중단 릴리스 승격**: 활성 세션 968개 무손실 보존.
 
 ---
 
-## 9. 📜 직전 릴리스 히스토리 (v2026.09.22.358)
+## 10. 📜 직전 릴리스 히스토리 (v2026.09.22.358)
 
 - **최종 갱신일시**: 2026-09-22 20:28:00 KST
-- **현재 프로덕션 릴리스 버전**: `v2026.09.22.358` (릴리스 경로: `/srv/moneyverse-data/releases/prod-11fdec7-v358`, 직전: `prod-2ec47a9-v357`)
+- **프로덕션 릴리스 버전**: `v2026.09.22.358` (릴리스 경로: `/srv/moneyverse-data/releases/prod-11fdec7-v358`)
 - **Exact Git SHA**: `11fdec7fbb00ead5709b6e52069f89f1f6fb4440` (단축: `11fdec7`)
 - **PostgreSQL 활성 사용자 세션**: **968개 (100% 무손실 보존 실측 확인)**
-- **최신 완료 작업 요약**:
-  1. **0.5초 주기 화면 깜빡임 및 버스트 RSC 네트워크 폭풍 원천 제거 (`frontend/src/app/work/page.tsx`)**:
-     - 10초마다 `router.refresh()`를 강제 호출하던 `<LiveRefresh everyMs={10_000} />` 컴포넌트를 완전히 제거.
-     - 백그라운드 RSC 갱신 시 발생하는 8개 링크 프리페치 동시 다발 호출(0.5초 주기 버스트)과 브라우저 탭 아이콘 무한 회전/화면 깜빡임 현상 종식.
-  2. **업무 완수 모달 레이아웃 전면 쇄신 (`frontend/src/app/work/work-forms.tsx`)**:
-     - 기존 CSS Flexbox 결함으로 인해 상단 80%가 뷰포트 바깥 음수 좌표로 잘리고 "닫기" 버튼만 보이던 버그(`justify-center` 오버플로우 클리핑)를 해결하기 위해 Radix UI 기반 표준 `Dialog`로 교체.
-     - Flex 축소로 인해 WLD 및 숙련도 EXP 보상 박스와 제출 버튼이 30px 미세 슬릿으로 찌그러지고 우측에 윈도우 스크롤바가 생기던 버그를 완벽하게 해소.
-     - 2열 보상 카드(이번 지급 WLD, 숙련도 EXP)를 여유로운 패딩과 함께 정상 렌더링하고, 48px 터치 타깃의 "업무 완료 및 보상 수령" 버튼과 성공 축하 카드를 유려하게 배치.
-     - 중복 `router.refresh()` 호출 및 윈도우 전체 스크롤을 유발하던 `scrollIntoView()` 제거.
-  3. **직업 업무 카드 불필요 윈도우 스크롤바 제거 (`frontend/src/app/work/career-tasks-board.tsx`)**:
-     - 태스크 카드 `Card`에 `overflow-hidden`을 적용하여 윈도우 크롬 브라우저에서 발생하던 카드 내 수직 스크롤바 화살표 표시를 차단.
-  4. **무중단 승격 및 런타임 신원 일치 (v358)**:
-     - Exact SHA `11fdec7` 기반 테스트 및 프로덕션 동시 빌드 및 릴리스 배포 (`backend=11fdec7...`, `frontend=11fdec7...`).
-     - 968개 PostgreSQL 활성 사용자 세션 100% 무손실 보존 실측 확인 및 전 엔드포인트 200 OK.
+- **완료 작업 요약**: 직업 업무(/work) 0.5초 주기 화면 깜빡임 및 버스트 RSC 네트워크 폭풍 원천 제거, Radix UI 기반 표준 Dialog 교체로 30px 슬릿 붕괴 및 뷰포트 클리핑 해소.
+
 
 
 

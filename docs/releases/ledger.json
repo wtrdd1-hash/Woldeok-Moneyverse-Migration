@@ -103,10 +103,32 @@
     "commitSha": "11fdec7fbb00ead5709b6e52069f89f1f6fb4440",
     "shortSha": "11fdec7",
     "releasePath": "/srv/moneyverse-data/releases/prod-11fdec7-v358",
-    "status": "promoted",
+    "status": "archived",
     "activeSessions": 968,
     "timestamp": "2026-09-22T11:27:00Z",
     "author": "System Engineer",
     "notes": "P0 Career Work Elimination of 0.5s Flickering Storm, Radix Modal Viewport Clipping Fix & Slit Scrollbar Resolution"
+  },
+  {
+    "version": "v2026.09.22.359",
+    "commitSha": "11a6c4f9ff8fa106854eb01f21aaa8ae5f8de083",
+    "shortSha": "11a6c4f",
+    "releasePath": "/srv/moneyverse-data/releases/prod-11a6c4f-v359",
+    "status": "archived",
+    "activeSessions": 968,
+    "timestamp": "2026-09-22T11:47:00Z",
+    "author": "System Engineer",
+    "notes": "Expand Full-Domain REST API to 335 Endpoints (Pockets, Crafting, Marketplace, Notifications) & OpenAPI 3.0 Sync"
+  },
+  {
+    "version": "v2026.09.22.360",
+    "commitSha": "1e4cabc9b88cf3e2e2cfbc3f9cfb9f692095f903",
+    "shortSha": "1e4cabc",
+    "releasePath": "/srv/moneyverse-data/releases/prod-74be1c0-v360",
+    "status": "promoted",
+    "activeSessions": 1028,
+    "timestamp": "2026-09-22T12:21:00Z",
+    "author": "System Engineer",
+    "notes": "Header 15s 404 Polling Elimination (Next.js BFF /api/notifications/unread-count), ChatModule Routing Bind & Visibility Guards"
   }
 ]

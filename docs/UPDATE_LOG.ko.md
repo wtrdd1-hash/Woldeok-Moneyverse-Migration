@@ -1,3 +1,23 @@
+## v2026.09.22.360 — 상단 글로벌 헤더 15초 주기 404 폴링 폭풍 원천 차단, BFF 알림 미확인 라우트 신설, ChatModule 완성형 바인딩 및 가시성 가드 탑재
+
+- 적용 브랜치: `main` (릴리스: `prod-74be1c0-v360`, Exact Git SHA: `1e4cabc`)
+- **P0 글로벌 헤더 404 폴링 폭풍 및 백그라운드 쿼리 안정화 (HEADER_POLLING_STABILITY_SPEC)**:
+  1. **Next.js BFF 알림 미확인 카운트 엔드포인트 신설 (`frontend/src/app/api/notifications/unread-count/route.ts`)**:
+     - 상단 헤더 컴포넌트(`NotificationHeaderButton`)가 15초마다 호출하던 `/api/notifications/unread-count`가 라우트 부재로 404를 반환하고 Nginx 에러 로그를 오염시키던 결함을 즉시 해소.
+     - `export const dynamic = 'force-dynamic'`, `cache-control: private, no-store` 적용 및 비로그인/로그인 세션 구분으로 안전하게 `{ unreadCount: 0 }` 정상 반환.
+  2. **`NotificationHeaderButton` 스마트 가드 및 지수 백오프 적용 (`frontend/src/components/notification-header-button.tsx`)**:
+     - `document.visibilityState` 스마트 가드: 사용자가 브라우저 탭을 백그라운드로 전환하거나 최소화한 경우 불필요한 백그라운드 폴링 자동 일시정지.
+     - 탭 활성화 시(`visibilitychange` 이벤트) 즉시 1회 최신화.
+     - 지수 백오프(Exponential Backoff: 15s → 30s → 60s) 적용으로 네트워크 순단 또는 배포 중 불필요한 재시도 폭풍 차단.
+  3. **`ChatHeaderButton` 필드 정합성 및 백그라운드 가드 적용 (`frontend/src/components/chat-header-button.tsx`)**:
+     - 백엔드 반환값 키(`data.totalUnread`)와 레거시 키(`data.unreadCount`) 간 불일치로 항상 0으로 떨어지던 파싱 버그 수정: `data.totalUnread ?? data.unreadCount ?? 0`.
+     - 동일하게 `document.hidden` 가드 및 지수 백오프 탑재.
+  4. **백엔드 `ChatModule` 완성형 라우트 바인딩 (`backend/src/app.module.ts`)**:
+     - 구버전 미연동 `./chat.module`을 완성형 `./chat/chat.module`로 전환하여 `/api/v1/chat/unread-count` 등 전체 엔드포인트 정상 활성화 (401 인증 가드 정상 응답 확인).
+  5. **단위 테스트 및 무중단 승격**:
+     - `frontend/src/app/account/notifications/unread-count.test.ts` (3/3 PASS).
+     - 프로덕션 무중단 승격 완료, 1,028개 PostgreSQL 세션 100% 무손실 보존 실측 확인.
+
 ## v2026.09.22.359 — 전 도메인 REST API 335개 완결 (저축 포켓 5종, 제작 워크벤치 2종, 마켓플레이스 5종, 인앱 알림 센터 4종) 및 OpenAPI 3.0 동기화
 
 - 적용 브랜치: `main`

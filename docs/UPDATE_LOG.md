@@ -1,3 +1,23 @@
+## v2026.09.22.360 — Header 15s 404 Polling Elimination (Next.js BFF /api/notifications/unread-count), ChatModule Routing Bind & Visibility Guards
+
+- Branch: `main` (Release: `prod-74be1c0-v360`, Exact Git SHA: `1e4cabc`)
+- **P0 Global Header 404 Polling Storm & Background Query Stabilization (HEADER_POLLING_STABILITY_SPEC)**:
+  1. **Next.js BFF Notification Unread Count Route (`frontend/src/app/api/notifications/unread-count/route.ts`)**:
+     - Eliminates recurring 404 storm in Nginx error logs caused by missing route for `/api/notifications/unread-count`.
+     - Implements `export const dynamic = 'force-dynamic'` and `cache-control: private, no-store` with safe session fallback returning `{ unreadCount: 0 }`.
+  2. **`NotificationHeaderButton` Smart Visibility Guard & Exponential Backoff (`frontend/src/components/notification-header-button.tsx`)**:
+     - `document.visibilityState` guard: Automatically pauses unread count polling when the browser tab is hidden or minimized.
+     - Immediately fetches unread count once upon returning to tab (`visibilitychange` event).
+     - Applies exponential backoff (15s → 30s → 60s) on network failures or non-200 responses to prevent retry storming.
+  3. **`ChatHeaderButton` Field Parsing & Background Guard (`frontend/src/components/chat-header-button.tsx`)**:
+     - Fixes field mismatch (`data.totalUnread ?? data.unreadCount ?? 0`) ensuring unread counts from backend are accurately parsed.
+     - Adds `document.hidden` guard and exponential backoff.
+  4. **Backend `ChatModule` Routing Bind (`backend/src/app.module.ts`)**:
+     - Updates import from legacy `./chat.module` to modern `./chat/chat.module`, properly binding `/api/v1/chat/unread-count` and all chat controllers with 401 authentication guard verification.
+  5. **Regression Unit Tests & Zero-Downtime Deployment**:
+     - Unit tests in `frontend/src/app/account/notifications/unread-count.test.ts` (3/3 PASS).
+     - Promoted to production with 100% preservation of 1,028 active PostgreSQL user sessions.
+
 ## v2026.09.22.359 — Full-Domain REST API Expansion to 335 Endpoints (Saving Pockets, Crafting, Marketplace, Notifications) & OpenAPI 3.0 Sync
 
 - Branch: `main`
