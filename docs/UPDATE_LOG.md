@@ -1,5 +1,23 @@
 # Update Log
 
+## v2026.09.22.352 — Admin Policy Version Management UI, Governance Contracts & Release Ledger Rollback Engine
+
+- Branch: `main` (Release: `prod-<SHA>-v352`)
+- **Admin Control Tower Policy Management & Immutable Ledger Governance**:
+  1. **Real-time Admin Policy Revision Console (`/admin/controls`)**:
+     - `backend/src/admin/controls.controller.ts` & `controls.repository.ts`: Introduced `POST /api/v1/admin/controls/consent-versions` (2-step text confirmation `PUBLISH_NEW_POLICY_VERSION`, permanent audit logging in `audit_logs`, Superadmin only).
+     - `frontend/src/app/admin/controls/policy-version-card.tsx`: Added 2-step confirmation dialog and real-time policy version control card.
+  2. **G352-01 Fail-Safe Consent Submission Guard (`ConsentStepUpModal`)**:
+     - Disabled submission button (`disabled`) and provided retry UI when policy versions are not authoritatively synchronized. Eradicated unauthorized fallback version recording.
+  3. **G352-02 & G352-04 Immutable Release Ledger (`docs/releases/ledger.json`, `rollback_production.sh`)**:
+     - Created `docs/releases/ledger.json` immutable provenance ledger; integrated ledger-based last-known-good candidate lookup into `rollback_production.sh`.
+  4. **G352-03 Path Canonicalization & Whitelist Bypass Prevention (`normalizePath`, `consent-guard.test.ts`)**:
+     - Implemented `normalizePath` in `frontend/src/lib/path-utils.ts` to decode, lowercase, and resolve directory traversals before whitelist matching.
+     - Added 7 Vitest unit tests verifying traversal neutralization and path matching.
+  5. **Production Zero-Downtime Deployment (`v352`)**:
+     - Passed exact-SHA runtime identity coherent check with 200 OK across all endpoints.
+     - 929 active user sessions in PostgreSQL preserved without loss.
+
 ## v2026.09.22.350 — Dynamic Consent Policy Binding, Inline Tab Accordion Viewer & 10s Production Rollback Script
 
 - Branch: `main` (Release: `prod-d67a915-v350`)

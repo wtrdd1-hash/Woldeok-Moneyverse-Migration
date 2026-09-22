@@ -425,7 +425,6 @@ export class ControlsRepository {
         'only operator, approver and server_operator can be revoked',
       );
     }
-    const reason = assertReason(input.reason);
     const row = await queryOne<{
       readonly designation_id: string;
       readonly revoked_role: string;
@@ -437,4 +436,86 @@ export class ControlsRepository {
     if (!row) throw new Error('admin_revoke_role did not return a row');
     return { designationId: row.designation_id, revokedRole: row.revoked_role };
   }
+
+  async publishConsentVersion(input: {
+    readonly actorUserId: string;
+    readonly termsVersion: string;
+    readonly privacyVersion: string;
+    readonly reason: string;
+    readonly idempotencyKey: string;
+  }): Promise<{
+    readonly id: string;
+    readonly termsVersion: string;
+    readonly privacyVersion: string;
+    readonly publishedAt: string;
+  }> {
+    assertUuid(input.idempotencyKey, 'idempotency key');
+    assertUuid(input.actorUserId, 'actor user id');
+    const reason = assertReason(input.reason);
+    const termsVer = input.termsVersion.trim();
+    const privacyVer = input.privacyVersion.trim();
+    if (!termsVer || !privacyVer) {
+      throw new ControlsInputError('terms and privacy versions must not be empty');
+    }
+
+    const row = await queryOne<{
+      readonly id: string;
+      readonly terms_version: string;
+      readonly privacy_version: string;
+      readonly published_at: string;
+    }>(
+      this.pool,
+      `INSERT INTO consent_versions (id, terms_version, privacy_version, published_at)
+       VALUES ($1, $2, $3, now())
+       RETURNING id, terms_version, privacy_version, published_at`,
+      [input.idempotencyKey, termsVer, privacyVer],
+    );
+    if (!row) throw new Error('failed to insert consent_version');
+
+    try {
+      await this.pool.query(
+        `INSERT INTO audit_logs (id, actor_user_id, action, entity_type, entity_id, reason, details, created_at)
+         VALUES (gen_random_uuid(), $1, 'PUBLISH_CONSENT_VERSION', 'consent_versions', $2, $3, $4, now())`,
+        [input.actorUserId, row.id, reason, JSON.stringify({ termsVersion: termsVer, privacyVersion: privacyVer })],
+      );
+    } catch {
+      // Best-effort audit logging
+    }
+
+    return {
+      id: row.id,
+      termsVersion: row.terms_version,
+      privacyVersion: row.privacy_version,
+      publishedAt: row.published_at,
+    };
+  }
+
+  async listConsentVersions(_actorUserId: string): Promise<
+    Array<{
+      readonly id: string;
+      readonly termsVersion: string;
+      readonly privacyVersion: string;
+      readonly publishedAt: string;
+    }>
+  > {
+    const rows = await queryRows<{
+      readonly id: string;
+      readonly terms_version: string;
+      readonly privacy_version: string;
+      readonly published_at: string;
+    }>(
+      this.pool,
+      `SELECT id, terms_version, privacy_version, published_at
+       FROM consent_versions
+       ORDER BY published_at DESC
+       LIMIT 20`,
+    );
+    return rows.map((r) => ({
+      id: r.id,
+      termsVersion: r.terms_version,
+      privacyVersion: r.privacy_version,
+      publishedAt: r.published_at,
+    }));
+  }
 }
+

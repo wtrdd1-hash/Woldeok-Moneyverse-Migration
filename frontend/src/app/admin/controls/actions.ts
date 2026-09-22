@@ -248,3 +248,42 @@ async function designateRole(
     );
   }
 }
+
+export async function publishConsentVersionAction(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const termsVersion = text(formData.get('termsVersion'));
+  const privacyVersion = text(formData.get('privacyVersion'));
+  const reason = text(formData.get('reason'));
+  const confirmText = text(formData.get('confirmText'));
+
+  if (!termsVersion || !privacyVersion) {
+    return { status: 'error', message: '이용약관 및 개인정보처리방침 버전을 모두 입력해 주세요.' };
+  }
+  if (confirmText !== 'PUBLISH_NEW_POLICY_VERSION') {
+    return { status: 'error', message: '확인 문구(PUBLISH_NEW_POLICY_VERSION)를 정확히 입력해 주세요.' };
+  }
+  const badReason = checkReason(reason);
+  if (badReason) return badReason;
+
+  try {
+    await mutate('/api/v1/admin/controls/consent-versions', {
+      body: {
+        termsVersion,
+        privacyVersion,
+        reason,
+        confirmText,
+        idempotencyKey: idempotencyKey(),
+      },
+    });
+    revalidatePath('/admin/controls');
+    return {
+      status: 'ok',
+      message: `새 정책 버전(${termsVersion} / ${privacyVersion})이 성공적으로 발행되었습니다.`,
+    };
+  } catch (error) {
+    return failure(error, '새 정책 버전을 발행하지 못했습니다.');
+  }
+}
+

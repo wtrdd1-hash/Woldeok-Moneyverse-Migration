@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { ConsentStepUpModal } from './consent-step-up-modal';
+import { normalizePath } from '@/lib/path-utils';
 
 
 interface ConsentGuardProps {
@@ -55,8 +56,9 @@ export function ConsentGuard({
   if (!signedIn || consentCurrent || dismissed) return null;
 
   // Allow terms, privacy documents, and public safety/SEO paths without modal overlay
+  const cleanPath = normalizePath(pathname);
   const isExempt = EXEMPT_PATHS.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`)
+    (path) => cleanPath === path || cleanPath.startsWith(`${path}/`)
   );
   if (isExempt) return null;
 

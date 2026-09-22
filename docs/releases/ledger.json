@@ -1,0 +1,46 @@
+[
+  {
+    "version": "v2026.09.22.347",
+    "commitSha": "039f2e9bc47dd0208cb1364d941785ce9504f296",
+    "shortSha": "039f2e9",
+    "releasePath": "/srv/moneyverse-data/releases/prod-039f2e9-v347",
+    "status": "archived",
+    "activeSessions": 857,
+    "timestamp": "2026-09-22T03:40:00Z",
+    "author": "Custom GPT",
+    "notes": "Developer Portal & OpenAPI 3.0"
+  },
+  {
+    "version": "v2026.09.22.347.1",
+    "commitSha": "854d777d204b66164ac5043e9bd9be3a7bee4498",
+    "shortSha": "854d777",
+    "releasePath": "/srv/moneyverse-data/releases/prod-854d777-v347",
+    "status": "promoted",
+    "activeSessions": 927,
+    "timestamp": "2026-09-22T03:50:00Z",
+    "author": "Antigravity",
+    "notes": "Consent Step-Up Modal & FinTech Home Portal Rebuild"
+  },
+  {
+    "version": "v2026.09.22.350",
+    "commitSha": "d67a915ea224ce1febc6fece2574b17494259f7e",
+    "shortSha": "d67a915",
+    "releasePath": "/srv/moneyverse-data/releases/prod-d67a915-v350",
+    "status": "promoted",
+    "activeSessions": 929,
+    "timestamp": "2026-09-22T05:10:00Z",
+    "author": "Antigravity",
+    "notes": "Dynamic Policy Binding, Inline Tab Accordion & 10s Rollback Script"
+  },
+  {
+    "version": "v2026.09.22.352",
+    "commitSha": "pending",
+    "shortSha": "pending",
+    "releasePath": "/srv/moneyverse-data/releases/prod-pending-v352",
+    "status": "candidate",
+    "activeSessions": 929,
+    "timestamp": "2026-09-22T07:55:00Z",
+    "author": "Antigravity",
+    "notes": "Admin Consent Version Management UI, Fail-Safe Policy Submission Guard & Ledger-Based Rollback Engine"
+  }
+]

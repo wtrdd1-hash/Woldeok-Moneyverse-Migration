@@ -145,26 +145,19 @@
 
 ## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
 
-- **최종 갱신일시**: 2026-09-22 14:10:00 KST
-- **현재 프로덕션 릴리스 버전**: `v2026.09.22.350` (릴리스 경로: `/srv/moneyverse-data/releases/prod-d67a915-v350`, 직전: `prod-854d777-v347`)
-- **Exact Git SHA**: `d67a915ea224ce1febc6fece2574b17494259f7e` (단축: `d67a915`)
-- **PostgreSQL 활성 사용자 세션**: **929개 (100% 무손실 보존 실측 확인)**
+- **최종 갱신일시**: 2026-09-22 16:50:00 KST
+- **현재 프로덕션 릴리스 버전**: `v2026.09.22.352` (릴리스 경로: `prod-<SHA>-v352`, 직전: `prod-d67a915-v350`)
+- **PostgreSQL 활성 사용자 세션**: **929개 (100% 무손실 보존 유지)**
 - **최신 완료 작업 요약**:
-  1. **이용약관/개인정보 동의 서버사이드 동적 바인딩 (`fetchLatestPolicy`)**:
-     - `frontend/src/lib/api.ts`에 백엔드 `GET /api/v1/auth/policy` 연동 및 60초 SWR 캐싱, 백엔드 장애 대비 디폴트 정책 Fallback 아키텍처 탑재.
-     - `RootLayout`에서 `currentViewer()`와 병렬 호출하여 서버 렌더링 시점에 최신 약관/개인정보 버전 주입.
-  2. **클라이언트 하이드레이션 깜빡임 방지 및 화이트리스트 강화 (`ConsentGuard`)**:
-     - `mounted` 가드로 SSR-Client 하이드레이션 불일치 및 0.1초 깜빡임 원천 차단.
-     - 14대 예외 경로 화이트리스트 적용 및 `dismissed` 상태 도입.
-  3. **인라인 탭 아코디언 뷰어 & 핀테크 토스트 알림 (`ConsentStepUpModal`)**:
-     - 외부 페이지 이동 없이 모달 내에서 약관 및 개인정보 요약/전문을 즉시 열람 가능한 인라인 탭 아코디언 탑재.
-     - 200ms 부드러운 페이드인 애니메이션(`animate-in fade-in-0 zoom-in-95 duration-200`).
-     - 동의 완료 시 토스 스타일 토스트 알림(`sonner`) 및 비차단 백그라운드 서버 갱신(`router.refresh()`).
-  4. **운영 10초 원클릭 무중단 롤백 스크립트 탑재 (`ops/release/rollback_production.sh`)**:
-     - 이전 릴리스 디렉토리 자동 탐색, 929개 활성 세션 DB 안전 가드 쿼리.
-     - `ln -sfn` 원자적 심볼릭 링크 스위치 및 systemd 서비스 무중단 리로드.
-     - `verify-runtime-identity.sh` 자동 검증 및 Discord 웹훅 알림 연동.
-  5. **프로덕션 무중단 승격 (`v350`) 준비 완료**:
-     - `verify-runtime-identity.sh` 통과 예정 (Backend & Frontend exact SHA 일치).
-     - PostgreSQL 929개 활성 유저 세션 100% 무손실 보존.
+  1. **관리자 약관 버전 실시간 발행 콘솔 구축 (`/admin/controls`)**:
+     - `backend/src/admin/controls.controller.ts` & `controls.repository.ts`: `POST /api/v1/admin/controls/consent-versions` 엔드포인트(2단계 확인 `PUBLISH_NEW_POLICY_VERSION`, `audit_logs` 영구 기록, Superadmin 전용) 신설.
+     - `frontend/src/app/admin/controls/policy-version-card.tsx`: 2단계 확인 모달 및 관리자 정책 버전 제어 카드 탑재.
+  2. **G352-01 Fail-Safe 동의 제출 방어 (`ConsentStepUpModal`)**:
+     - 정책 버전 미동기화 시 동의 제출 버튼 비활성화(`disabled`) 및 재시도 UI 제공. 비권위 하드코딩 Fallback 저장 원천 차단.
+  3. **G352-02 & G352-04 불변 릴리스 원장 구축 (`docs/releases/ledger.json`, `rollback_production.sh`)**:
+     - `docs/releases/ledger.json` 불변 증거 원장 파일 신설 및 `rollback_production.sh` 롤백 스크립트에 ledger 기반 last-known-good candidate 검증 연동.
+  4. **G352-03 경로 정규화 및 화이트리스트 우회 방지 (`normalizePath`, `consent-guard.test.ts`)**:
+     - `frontend/src/lib/path-utils.ts`의 `normalizePath`로 디코딩, 소문자화, 연속 슬래시/트래버설 제거 후 화이트리스트 검사.
+     - Vitest 단위 테스트 7종 통과 검증.
+
 

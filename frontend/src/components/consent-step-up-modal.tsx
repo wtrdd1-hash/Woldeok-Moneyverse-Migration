@@ -30,8 +30,8 @@ interface ConsentStepUpModalProps {
 }
 
 export function ConsentStepUpModal({
-  termsVersion = '2026-09-02',
-  privacyVersion = '2026-09-02',
+  termsVersion,
+  privacyVersion,
   onSuccess,
 }: ConsentStepUpModalProps) {
   const router = useRouter();
@@ -40,8 +40,16 @@ export function ConsentStepUpModal({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'none' | 'terms' | 'privacy'>('none');
 
+  // G352-01: Must verify policy versions are authoritatively loaded
+  const isPolicyReady = Boolean(termsVersion && privacyVersion);
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!isPolicyReady || !termsVersion || !privacyVersion) {
+      setErrorMsg('최신 정책 버전이 동기화되지 않았습니다. 정책 새로고침을 시도해 주세요.');
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMsg(null);
 
@@ -102,16 +110,31 @@ export function ConsentStepUpModal({
             </div>
             <div className="flex items-start gap-2 text-foreground font-medium">
               <CheckCircle2 className="size-4 shrink-0 text-emerald-500 mt-0.5" />
-              <span>[필수] 월덕 머니버스 서비스 이용약관 동의 (버전: {termsVersion})</span>
+              <span>[필수] 월덕 머니버스 서비스 이용약관 동의 {termsVersion ? `(버전: ${termsVersion})` : '(동기화 중...)'}</span>
             </div>
             <div className="flex items-start gap-2 text-foreground font-medium">
               <CheckCircle2 className="size-4 shrink-0 text-emerald-500 mt-0.5" />
-              <span>[필수] 개인정보 수집 및 이용 동의 (버전: {privacyVersion})</span>
+              <span>[필수] 개인정보 수집 및 이용 동의 {privacyVersion ? `(버전: ${privacyVersion})` : '(동기화 중...)'}</span>
             </div>
             <p className="border-t border-border/40 pt-2 text-[11px] text-muted-foreground leading-relaxed [word-break:keep-all]">
               ⚠️ 모든 WLD와 보상은 게임 내 가상 데이터이며, 실제 현금 거래나 환전은 제공되지 않습니다.
             </p>
           </div>
+
+          {!isPolicyReady && (
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-600 dark:text-amber-400 space-y-2">
+              <p className="leading-relaxed">
+                현재 최신 법적 정책 버전을 안전하게 동기화하고 있습니다. 잠시만 기다리시거나 새로고침을 눌러주세요.
+              </p>
+              <button
+                type="button"
+                onClick={() => router.refresh()}
+                className="text-xs underline font-semibold hover:opacity-80"
+              >
+                정책 새로고침 시도
+              </button>
+            </div>
+          )}
 
           {/* 인라인 탭 토글 버튼 영역 */}
           <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
@@ -137,7 +160,7 @@ export function ConsentStepUpModal({
           {activeTab === 'terms' && (
             <div className="max-h-36 overflow-y-auto rounded-lg border border-border/60 bg-muted/40 p-3 text-[11px] text-muted-foreground space-y-1.5 leading-normal">
               <div className="flex items-center justify-between font-semibold text-foreground pb-1 border-b border-border/40">
-                <span>이용약관 요약 ({termsVersion})</span>
+                <span>이용약관 요약 {termsVersion ? `(${termsVersion})` : ''}</span>
                 <a href="/terms" target="_blank" rel="noopener noreferrer" className="flex items-center gap-0.5 text-primary hover:underline">
                   전문 보기 <ExternalLink className="size-2.5" />
                 </a>
@@ -151,7 +174,7 @@ export function ConsentStepUpModal({
           {activeTab === 'privacy' && (
             <div className="max-h-36 overflow-y-auto rounded-lg border border-border/60 bg-muted/40 p-3 text-[11px] text-muted-foreground space-y-1.5 leading-normal">
               <div className="flex items-center justify-between font-semibold text-foreground pb-1 border-b border-border/40">
-                <span>개인정보처리방침 요약 ({privacyVersion})</span>
+                <span>개인정보처리방침 요약 {privacyVersion ? `(${privacyVersion})` : ''}</span>
                 <a href="/privacy" target="_blank" rel="noopener noreferrer" className="flex items-center gap-0.5 text-primary hover:underline">
                   전문 보기 <ExternalLink className="size-2.5" />
                 </a>
@@ -171,15 +194,20 @@ export function ConsentStepUpModal({
 
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={!isPolicyReady || isSubmitting}
             className="w-full h-11 text-sm font-bold shadow-md active:scale-[0.98] transition-transform"
           >
-            {isSubmitting ? '동의 처리 중...' : '모두 동의하고 머니버스 시작하기'}
-            {!isSubmitting && <ArrowRight className="ml-1 size-4" />}
+            {!isPolicyReady
+              ? '최신 정책 동기화 중...'
+              : isSubmitting
+              ? '동의 처리 중...'
+              : '모두 동의하고 머니버스 시작하기'}
+            {isPolicyReady && !isSubmitting && <ArrowRight className="ml-1 size-4" />}
           </Button>
         </form>
       </DialogContent>
     </Dialog>
   );
 }
+
 

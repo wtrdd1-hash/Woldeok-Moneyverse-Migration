@@ -89,6 +89,32 @@ export class PolicyVersionDto {
   readonly idempotencyKey!: string;
 }
 
+export class ConsentVersionDto {
+  @ApiProperty({ maxLength: 32, example: '2026-09-22' })
+  @IsString()
+  @MaxLength(32)
+  readonly termsVersion!: string;
+
+  @ApiProperty({ maxLength: 32, example: '2026-09-22' })
+  @IsString()
+  @MaxLength(32)
+  readonly privacyVersion!: string;
+
+  @ApiProperty({ minLength: REASON_MIN, maxLength: REASON_MAX })
+  @IsString()
+  @MinLength(REASON_MIN)
+  @MaxLength(REASON_MAX)
+  readonly reason!: string;
+
+  @ApiProperty({ description: 'Must exactly match PUBLISH_NEW_POLICY_VERSION' })
+  @IsString()
+  readonly confirmText!: string;
+
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  readonly idempotencyKey!: string;
+}
+
 export class ReasonedCommandDto {
   @ApiProperty({ minLength: REASON_MIN, maxLength: REASON_MAX })
   @IsString()
@@ -366,4 +392,32 @@ export class AdminControlsController {
       'the role was not revoked',
     );
   }
+
+  @Post('consent-versions')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Publish a new terms and privacy policy version (Superadmin only)' })
+  publishConsentVersion(@Req() request: RequestWithSession, @Body() body: ConsentVersionDto) {
+    if (body.confirmText !== 'PUBLISH_NEW_POLICY_VERSION') {
+      throw new BadRequestException('확인 문구(PUBLISH_NEW_POLICY_VERSION)가 일치하지 않습니다.');
+    }
+    return this.guarded(
+      () =>
+        this.repository().publishConsentVersion({
+          actorUserId: requireUserId(request),
+          termsVersion: body.termsVersion,
+          privacyVersion: body.privacyVersion,
+          reason: body.reason,
+          idempotencyKey: body.idempotencyKey,
+        }),
+      'failed to publish new consent policy version',
+    );
+  }
+
+  @Get('consent-versions')
+  @ApiOperation({ summary: 'List recent terms and privacy policy versions' })
+  async listConsentVersions(@Req() request: RequestWithSession) {
+    const actor = requireUserId(request);
+    return this.repository().listConsentVersions(actor);
+  }
 }
+

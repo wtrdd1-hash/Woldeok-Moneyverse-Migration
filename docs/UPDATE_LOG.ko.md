@@ -1,3 +1,21 @@
+## v2026.09.22.352 — 관리자 약관 버전 실시간 개정 콘솔 & G352 거버넌스 계약 및 불변 릴리스 원장 완결
+
+- 적용 브랜치: `main` (릴리스: `prod-<SHA>-v352`)
+- **관리자 정책 제어 및 거버넌스 계약/불변 원장 롤백 완결**:
+  1. **관리자 약관 버전 실시간 발행 콘솔 (`/admin/controls`)**:
+     - `backend/src/admin/controls.controller.ts` & `controls.repository.ts`: `POST /api/v1/admin/controls/consent-versions` 엔드포인트(2단계 확인 `PUBLISH_NEW_POLICY_VERSION`, `audit_logs` 영구 기록, Superadmin 전용) 신설.
+     - `frontend/src/app/admin/controls/policy-version-card.tsx`: 2단계 확인 모달 및 관리자 정책 버전 제어 카드 탑재.
+  2. **G352-01 Fail-Safe 동의 제출 방어 (`ConsentStepUpModal`)**:
+     - 정책 버전 미동기화 시 동의 제출 버튼 비활성화(`disabled`) 및 재시도 UI 제공. 비권위 하드코딩 Fallback 저장 원천 차단.
+  3. **G352-02 & G352-04 불변 릴리스 원장 구축 (`docs/releases/ledger.json`, `rollback_production.sh`)**:
+     - `docs/releases/ledger.json` 불변 증거 원장 파일 신설 및 `rollback_production.sh` 롤백 스크립트에 ledger 기반 last-known-good candidate 검증 연동.
+  4. **G352-03 경로 정규화 및 화이트리스트 우회 방지 (`normalizePath`, `consent-guard.test.ts`)**:
+     - `frontend/src/lib/path-utils.ts`의 `normalizePath`로 디코딩, 소문자화, 연속 슬래시/트래버설 제거 후 화이트리스트 검사.
+     - Vitest 단위 테스트 7종 통과 검증.
+  5. **프로덕션 무중단 승격 (`v352`)**:
+     - exact-SHA 런타임 식별자 일체화 검증 통과 및 전 엔드포인트 200 OK.
+     - PostgreSQL 929개 활성 세션 100% 무손실 보존.
+
 ## v2026.09.22.350 — 이용약관/개인정보 동의 서버사이드 동적 바인딩 & 인라인 아코디언 뷰어 & 10초 원클릭 무중단 롤백 엔진 탑재
 
 - 적용 브랜치: `main` (릴리스: `prod-d67a915-v350`)

@@ -1,6 +1,7 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v49)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v50)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v50**: 4차 확정 조율 문답 반영 누적 — 관리자 약관 버전 실시간 발행 UI(/admin/controls, 2단계 확인 다이얼로그 연동), G352-01 정책 조회 실패 시 Fail-Safe 제출 방어(비권위 Fallback 저장 원천 차단), G352-02 & G352-04 docs/releases/ledger.json 불변 릴리스 원장 신설 및 rollback_production.sh 불변 증거 기반 롤백 고도화, G352-03 normalizePath 경로 정규화 및 화이트리스트 우회 방지 단위 테스트 확정 (+155, -0)
 - **v49**: 3차 긴급 조율 문답 확정 사양 반영 누적 및 최종 통합 구현 확정 — 관리자 제어 패널(/admin/controls) 실시간 약관 버전 개정 폼, 긴급 롤백 디스코드 웹훅 알림, 모달 내 인라인 탭형 아코디언 약관 전문 뷰어, OAuth 콜백 즉시 인라인 락 온보딩 파이프라인 확정 (+135, -0)
 - **v48**: 2차 긴급 조율 문답 확정 사양 반영 누적 — SWR 60초 캐싱 및 로컬 Fallback 회로, 토스형 축하 토스트 및 심리스 모달 언마운트 UX, PostgreSQL audit_logs 감사 원장 영구 보존(USER_CONSENT_GRANTED), rollback_production.sh 활성 세션(927개) 실시간 보호 안전 게이트 확정 (+110, -0)
 - **v47**: 1차 긴급 조율 문답 확정 사양 반영 누적 — 동적 서버 사이드 정책 패치(Root Layout/BFF 연동), 엄격 화이트리스트 경로 매트릭스, 마운트 가드 + 200ms Fade-In 오버레이, 10초 원클릭 자동 롤백 스크립트(ops/release/rollback_production.sh) 확정 (+115, -0)
@@ -1568,9 +1569,76 @@ flowchart TD
 1. **타입 및 프로덕션 빌드 검증**:
    - `pnpm --filter @moneyverse/backend build`
    - `pnpm --filter @moneyverse/frontend build`
+
 2. **미니 PC 스테이징 및 프로덕션 승격 (`v348`)**:
    - `stage_v348.sh` 실행 및 `verify-runtime-identity.sh` exact-SHA 일체화 검증.
    - 전 엔드포인트 200 OK 실측 및 활성 세션(927개) 보존 확인.
+
+---
+
+## 🚀 [v50 Specification] 4차 확정 결정 사항 및 관리자 정책 제어·불변 릴리스 원장 거버넌스 사양 (누적 추가)
+
+### 1. 관리자 약관 버전 실시간 발행 콘솔 (`/admin/controls`) (A1 결정 사항)
+- **적용 스킬**: `admin-control-tower-craft`, `anti-ai-frontend-craftsmanship`
+- **구현 구조**:
+  - **백엔드**:
+    - 엔드포인트: `POST /api/v1/admin/controls/consent-version`
+    - 권한: `Superadmin` 전용 (`AdminGuard`, `AdminSessionGuard`)
+    - DTO: `CreateConsentVersionDto` (`termsVersion`, `privacyVersion`, `reason`, `confirmText`)
+    - 유효성 검사: `confirmText === 'PUBLISH_NEW_POLICY_VERSION'` 2단계 텍스트 확인 필수.
+    - 레포지토리: `consent_versions` 테이블에 `(terms_version, privacy_version, published_at)` 원자적 INSERT 및 `audit_logs`에 관리자 ID, IP, 사유 영구 보존.
+  - **프론트엔드**:
+    - 컴포넌트: `frontend/src/app/admin/controls/policy-version-card.tsx`
+    - 2단계 확인 다이얼로그(Step-Up Confirmation Dialog) 탑재.
+    - 성공 시 Sonner 토스트 알림 및 현재 활성 정책 버전 실시간 리프레시.
+
+### 2. G352-01 준수: 정책 조회 실패 시 Fail-Safe 동의 제출 방어 정책 (A2 결정 사항)
+- **요구사항**: 백엔드 네트워크 오류나 정책 API 응답 장애 시, 임의의 하드코딩된 Fallback 값을 권위 동의 버전으로 DB에 저장하지 않는 fail-safe 방어 계약 수립.
+- **구현 구조**:
+  - `ConsentStepUpModal`에서 정책 버전이 유효하게 서버로부터 동기화되지 않았거나 조회 실패 상태인 경우:
+    - 제출 버튼을 `비활성화(disabled)` 처리하고 "정책 동기화 중..." 상태 표시.
+    - [다시 시도] 버튼을 인라인으로 제공하여 권위 있는 정책을 안전하게 가져온 후에만 동의 제출이 가능하도록 차단.
+    - 클라이언트-서버 간 법적 동의 버전의 100% 일치 보장.
+
+### 3. G352-02 & G352-04 준수: docs/releases/ledger.json 불변 원장 신설 및 rollback_production.sh 롤백 고도화 (A3 결정 사항)
+- **요구사항**: 단순 디렉터리 시간순 탐색에 의존하지 않고, 불변 원장(Release Ledger)에 기록된 검증된 `last-known-good` SHA 및 릴리스 경로를 기반으로 안전 롤백 실행.
+- **구현 구조**:
+  - 불변 원장 파일: `docs/releases/ledger.json`
+    - 스키마: `[ { "version": "v350", "commitSha": "...", "shortSha": "...", "releasePath": "...", "status": "promoted", "activeSessions": 929, "timestamp": "..." }, ... ]`
+  - `ops/release/rollback_production.sh`:
+    - `ledger.json`을 파싱하여 직전 정상 승격된(status: "promoted") candidate 목록을 확인.
+    - PostgreSQL 활성 세션(929+개) 안전 가드 쿼리 후 원자적 심볼릭 링크 스위칭.
+
+### 4. G352-03 준수: normalizePath 경로 정규화 및 화이트리스트 우회 방지 단위 테스트 (A4 결정 사항)
+- **요구사항**: 클라이언트 화이트리스트 검사 시 URL 인코딩 트릭, 대소문자 혼용, 중복 슬래시, 경로 탐색(`..`)을 통한 우회 시도를 원천 차단.
+- **구현 구조**:
+  - `frontend/src/lib/path-utils.ts`: `normalizePath(pathname: string): string` 유틸리티 함수 구현.
+  - `decodeURIComponent` 디코딩, 소문자화, 연속 슬래시(`//+`)를 단일 슬래시(`/`)로 치환, 트레일링 슬래시 제거.
+  - `ConsentGuard`에 `normalizePath(pathname)` 적용.
+  - Vitest 단위 테스트(`frontend/src/components/consent-guard.test.ts`) 신설하여 경로 우회 및 화이트리스트 일치 검증.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan] v50 최종 구현 행동 명세
+### User Review Required
+> [!IMPORTANT]
+> 1. **Zero-Deletion Invariant**: `implementation_plan.md` v1~v49 전수 보존 상태에서 v50 사양 완벽히 누적 기록됨.
+> 2. **Multi-Agent Coherence**: 원격 저장소(`origin/main`)에 GPT가 최근 푸시한 `1debcd9` (v352 기획 정합화)와 100% rebase 병합 완료 상태 유지.
+
+### Proposed Changes
+- **[NEW]** `frontend/src/lib/path-utils.ts`: 경로 정규화 유틸 (`normalizePath`).
+- **[NEW]** `frontend/src/components/consent-guard.test.ts`: 화이트리스트 및 경로 정규화 단위 테스트.
+- **[MODIFY]** `frontend/src/components/consent-guard.tsx`: `normalizePath` 적용.
+- **[MODIFY]** `frontend/src/components/consent-step-up-modal.tsx`: Fail-Safe 제출 방어 (정책 미동기화 시 제출 차단 및 재시도 UI).
+- **[MODIFY]** `backend/src/admin/controls.controller.ts` & `backend/src/admin/controls.repository.ts`: 약관 버전 신규 발행 엔드포인트 (`POST /api/v1/admin/controls/consent-version`).
+- **[NEW]** `frontend/src/app/admin/controls/policy-version-card.tsx`: 관리자 약관 버전 실시간 발행 카드 컴포넌트.
+- **[NEW]** `docs/releases/ledger.json`: 불변 릴리스 원장 파일.
+- **[MODIFY]** `ops/release/rollback_production.sh`: `ledger.json` 기반 롤백 탐색 및 안전 검증 고도화.
+
+### Verification Plan
+1. Vitest 단위 테스트: `pnpm --filter @moneyverse/frontend test`
+2. 프론트엔드/백엔드 빌드: `pnpm build`
+3. 미니 PC 스테이징 및 프로덕션 승격: `stage_v352.sh` 실행 및 런타임 검증, 929+ 활성 세션 무손실 보존 실측.
 
 
 

@@ -18,6 +18,7 @@ import {
   RoleDesignationForm,
   SwitchStateBadge,
 } from './controls-forms';
+import { PolicyVersionCard } from './policy-version-card';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,20 +51,29 @@ interface ControlsOverview {
  */
 export default async function AdminControlsPage() {
   await requireAdminConsole(AREA.href);
-  const overview = await apiOrNull<ControlsOverview>('/api/v1/admin/controls');
+  const [overview, policy] = await Promise.all([
+    apiOrNull<ControlsOverview>('/api/v1/admin/controls'),
+    apiOrNull<{ termsVersion: string; privacyVersion: string }>('/auth/policy'),
+  ]);
 
-  const active = overview?.policies.find((policy) => policy.status === 'active') ?? null;
+  const active = overview?.policies.find((p) => p.status === 'active') ?? null;
   const previous =
     overview?.policies.find(
-      (policy) => policy.status === 'superseded' && policy.superseded_by === active?.version,
+      (p) => p.status === 'superseded' && p.superseded_by === active?.version,
     ) ?? null;
 
   return (
-    <div data-page="admin-controls" className="mv-page mv-page--admin grid gap-5">
+    <div className="mx-auto max-w-5xl space-y-6">
       <AdminBack />
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}
       </PageHeader>
+
+      <PolicyVersionCard
+        currentTermsVersion={policy?.termsVersion ?? '2026-09-02'}
+        currentPrivacyVersion={policy?.privacyVersion ?? '2026-09-02'}
+        isSuperadmin={true}
+      />
 
       <Card>
         <CardHeader>
