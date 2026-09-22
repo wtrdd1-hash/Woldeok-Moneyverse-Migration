@@ -1,6 +1,6 @@
 ## v2026.09.22.352 — 관리자 약관 버전 실시간 개정 콘솔 & G352 거버넌스 계약 및 불변 릴리스 원장 완결
 
-- 적용 브랜치: `main` (릴리스: `prod-<SHA>-v352`)
+- 적용 브랜치: `main` (릴리스: `prod-f609af8-v352`)
 - **관리자 정책 제어 및 거버넌스 계약/불변 원장 롤백 완결**:
   1. **관리자 약관 버전 실시간 발행 콘솔 (`/admin/controls`)**:
      - `backend/src/admin/controls.controller.ts` & `controls.repository.ts`: `POST /api/v1/admin/controls/consent-versions` 엔드포인트(2단계 확인 `PUBLISH_NEW_POLICY_VERSION`, `audit_logs` 영구 기록, Superadmin 전용) 신설.

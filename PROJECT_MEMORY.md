@@ -145,9 +145,10 @@
 
 ## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
 
-- **최종 갱신일시**: 2026-09-22 16:50:00 KST
-- **현재 프로덕션 릴리스 버전**: `v2026.09.22.352` (릴리스 경로: `prod-<SHA>-v352`, 직전: `prod-d67a915-v350`)
-- **PostgreSQL 활성 사용자 세션**: **929개 (100% 무손실 보존 유지)**
+- **최종 갱신일시**: 2026-09-22 17:00:00 KST
+- **현재 프로덕션 릴리스 버전**: `v2026.09.22.352` (릴리스 경로: `/srv/moneyverse-data/releases/prod-f609af8-v352`, 직전: `prod-d67a915-v350`)
+- **Exact Git SHA**: `f609af8351a0fddc691afe15bb913b6855d6a32e` (단축: `f609af8`)
+- **PostgreSQL 활성 사용자 세션**: **929개 (100% 무손실 보존 실측 확인)**
 - **최신 완료 작업 요약**:
   1. **관리자 약관 버전 실시간 발행 콘솔 구축 (`/admin/controls`)**:
      - `backend/src/admin/controls.controller.ts` & `controls.repository.ts`: `POST /api/v1/admin/controls/consent-versions` 엔드포인트(2단계 확인 `PUBLISH_NEW_POLICY_VERSION`, `audit_logs` 영구 기록, Superadmin 전용) 신설.

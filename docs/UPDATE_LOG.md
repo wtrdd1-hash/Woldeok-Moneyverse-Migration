@@ -2,7 +2,7 @@
 
 ## v2026.09.22.352 — Admin Policy Version Management UI, Governance Contracts & Release Ledger Rollback Engine
 
-- Branch: `main` (Release: `prod-<SHA>-v352`)
+- Branch: `main` (Release: `prod-f609af8-v352`)
 - **Admin Control Tower Policy Management & Immutable Ledger Governance**:
   1. **Real-time Admin Policy Revision Console (`/admin/controls`)**:
      - `backend/src/admin/controls.controller.ts` & `controls.repository.ts`: Introduced `POST /api/v1/admin/controls/consent-versions` (2-step text confirmation `PUBLISH_NEW_POLICY_VERSION`, permanent audit logging in `audit_logs`, Superadmin only).

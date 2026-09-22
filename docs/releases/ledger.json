@@ -34,12 +34,12 @@
   },
   {
     "version": "v2026.09.22.352",
-    "commitSha": "pending",
-    "shortSha": "pending",
-    "releasePath": "/srv/moneyverse-data/releases/prod-pending-v352",
-    "status": "candidate",
+    "commitSha": "f609af8351a0fddc691afe15bb913b6855d6a32e",
+    "shortSha": "f609af8",
+    "releasePath": "/srv/moneyverse-data/releases/prod-f609af8-v352",
+    "status": "promoted",
     "activeSessions": 929,
-    "timestamp": "2026-09-22T07:55:00Z",
+    "timestamp": "2026-09-22T07:58:00Z",
     "author": "Antigravity",
     "notes": "Admin Consent Version Management UI, Fail-Safe Policy Submission Guard & Ledger-Based Rollback Engine"
   }
