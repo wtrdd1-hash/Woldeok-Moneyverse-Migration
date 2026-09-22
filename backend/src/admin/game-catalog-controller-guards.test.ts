@@ -14,6 +14,15 @@ function guardsOn(method: keyof GameCatalogController): unknown[] {
 }
 
 describe('GameCatalogController mutation guards', () => {
+  it.each(['publishMarketEvent', 'cancelMarketEvent'] as const)(
+    'requires CSRF and recent reauthentication on market-moving event mutation %s',
+    (method) => {
+      const guards = guardsOn(method);
+      expect(guards).toContain(CsrfGuard);
+      expect(guards).toContain(ReauthGuard);
+    },
+  );
+
   it.each(['setStockPrice', 'corporateAction'] as const)(
     'requires CSRF without additional authentication on %s',
     (method) => {
