@@ -30,10 +30,13 @@ describe('analyzePortfolio', () => {
     expect(result.total_market_value).toBe('2000');
     expect(result.total_cost_basis).toBe('2000');
     expect(result.total_unrealized_gain_loss).toBe('0');
-    expect(result.holdings.map((row) => [row.symbol, row.allocation_bps, row.unrealized_gain_loss])).toEqual([
-      ['AAA', '6000', '200'],
-      ['BBB', '4000', '-200'],
+    expect(result.total_gain_loss_bps).toBe('0');
+    expect(result.holdings.map((row) => [row.symbol, row.allocation_bps, row.unrealized_gain_loss, row.gain_loss_bps])).toEqual([
+      ['AAA', '6000', '200', '2000'],
+      ['BBB', '4000', '-200', '-2000'],
     ]);
+    expect(result.holdings[0]?.color).toBe('#10b981');
+    expect(result.holdings[1]?.color).toBe('#3b82f6');
   });
 
   it('handles an empty or zero-value portfolio', () => {
@@ -41,6 +44,7 @@ describe('analyzePortfolio', () => {
       total_market_value: '0',
       total_cost_basis: '0',
       total_unrealized_gain_loss: '0',
+      total_gain_loss_bps: '0',
       holdings: [],
     });
   });

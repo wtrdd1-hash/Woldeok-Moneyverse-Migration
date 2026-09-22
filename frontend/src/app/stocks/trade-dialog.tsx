@@ -21,31 +21,43 @@ export function TradeDialog({
   name,
   currentPrice,
   available,
+  holdingQuantity,
   side,
+  triggerLabel,
+  triggerVariant,
+  triggerClassName,
 }: {
   readonly stockId: string;
   readonly symbol: string;
   readonly name: string;
   readonly currentPrice: string;
   readonly available?: string;
+  readonly holdingQuantity?: string;
   readonly side: 'buy' | 'sell';
+  readonly triggerLabel?: React.ReactNode;
+  readonly triggerVariant?: 'default' | 'outline' | 'secondary' | 'destructive';
+  readonly triggerClassName?: string;
 }) {
   const { locale } = useLocale();
   const isEn = locale === 'en';
 
-  const label = side === 'buy' ? (isEn ? 'Buy' : '매수') : (isEn ? 'Sell' : '매도');
+  const defaultLabel = side === 'buy' ? (isEn ? 'Buy' : '매수') : (isEn ? 'Sell' : '매도');
+  const defaultVariant = side === 'buy' ? 'default' : 'outline';
 
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant={side === 'buy' ? 'default' : 'outline'} className="min-h-11">
-          {label}
+        <Button
+          variant={triggerVariant ?? defaultVariant}
+          className={triggerClassName ?? 'min-h-11'}
+        >
+          {triggerLabel ?? defaultLabel}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {symbol} · {name} {label}
+            {symbol} · {name} {defaultLabel}
           </DialogTitle>
           <DialogDescription>
             {isEn
@@ -58,6 +70,7 @@ export function TradeDialog({
           side={side}
           currentPrice={currentPrice}
           {...(available === undefined ? {} : { available })}
+          {...(holdingQuantity === undefined ? {} : { holdingQuantity })}
         />
       </DialogContent>
     </Dialog>

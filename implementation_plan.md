@@ -1,6 +1,7 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v53)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v54)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v54**: 가상 주식 거래소 메인(/stocks) 주문 폼 핀테크 쇄신(TradeForm 44px 터치 프리셋 칩·실시간 주문총액) 및 포트폴리오(/stocks/portfolio) 비주얼 자산배분 스택바·수익률 배지·원터치 리밸런싱 주문 연동 사양 수록 (+115, -0)
 - **v53**: 가상 주식 거래소(/stocks/[symbol]) 토스/로빈후드형 실시간 호가-주문 양방향 연동 콘솔(StockTradingConsole), 5/10-Depth 호가 확장, 지정가/시장가 탭 및 모바일 320px 하단 고정 액션 바 구현 사양 수록 (+105, -0)
 - **v52**: 1:1 개인 채팅 관리자 신고 증거 검토 콘솔 & 조치 거버넌스 엔진(Migration 228, /admin/safety 탭형 통합 큐, 10건 메시지 타임라인 뷰어, 원터치 조치 다이얼로그) 사양 누적 수록 (+118, -0)
 - **v51**: 1:1 개인 채팅 P0 안전 제어 풀스택 구현(Migration 227, NestJS API 4종, 토스풍 헤더 메뉴 및 44px 터치타깃 모달, 한글 IME isComposing 조합 가드) 및 v353 승격 사양 수록 (+113, -0)
@@ -1966,13 +1967,57 @@ flowchart TD
 
 ---
 
-### 4. 검증 및 무중단 승격 계획 (Verification Plan)
-1. **타입체크 및 단위 테스트**:
-   - `pnpm --filter @moneyverse/frontend test stock-trading-console.test.ts`
+---
+
+## 🚀 [v54 Specification] 가상 주식 메인 주문 폼 핀테크 쇄신 및 포트폴리오 분석 자산배분·원터치 리밸런싱 고도화 사양 (누적 추가)
+
+### 1. 개요 및 배경
+- **목적**:
+  - 주식 메인 카탈로그(`/stocks`) 내 빠른 주문 모달(`TradeDialog`, `TradeForm`)의 터치 타깃(최소 44px) 및 10%/25%/50%/MAX 수량 칩 연동.
+  - 가상 주식 포트폴리오(`/stocks/portfolio`) 분석 화면에 토스/로빈후드 수준의 시각적 자산 배분 스택 바(Asset Allocation Stack Bar) 및 수익률 배지 시각화.
+  - 포트폴리오 내 개별 보유 종목 카드에서 즉시 차익 실현(매도) 또는 추가 매수를 실행할 수 있는 원터치 주문 모달 트리거 탑재.
+  - `fintech-responsive-layout-engine` 및 `anti-ai-frontend-craftsmanship` 가이드라인 완벽 준수.
+
+### 2. 컴포넌트별 상세 변경점
+
+#### ① 주문 폼 핀테크 쇄신 (`frontend/src/app/stocks/trade-form.tsx`)
+- **터치 타깃 및 퀵 칩 확장**:
+  - 기존의 `h-7 text-xs px-2` 버튼을 모바일 친화적인 44px 높이 터치 프리셋 칩으로 전면 개선.
+  - 수량 가산(+1, +5, +10, +50)뿐만 아니라 잔여 수량/한도 기반의 10%, 25%, 50%, MAX 칩 지원.
+- **예상 결제/정산 총액 실시간 산출**:
+  - 단가 × 수량 = 총 체결 예상 WLD 및 예상 세금(0.3%) 실시간 계산 표시.
+  - 이중 제출 방지(`aria-busy`) 및 시각적 로딩 스피너.
+
+#### ② 포트폴리오 분석 계산 고도화 (`frontend/src/app/stocks/portfolio/analysis.ts`)
+- `PortfolioHoldingAnalysis`에 수익률 퍼센트(`gain_loss_bps: string`) 추가 계산.
+- 총 포트폴리오 수익률 퍼센트(`total_gain_loss_bps: string`) 추가 계산.
+- 종목별 고유 테마 컬러 매핑 지원 (자산 배분 스택 바 연동).
+
+#### ③ 포트폴리오 뷰 전면 쇄신 (`frontend/src/app/stocks/portfolio/page.tsx`)
+- **헤어로 요약 메트릭 카드**:
+  - 총 평가금액, 총 투자원금, 미실현 손익(WLD + %) 고대비 배지 표시.
+- **시각적 자산 배분 스택 바**:
+  - 각 종목의 비중에 비례하는 가로형 세그먼트 프로그레스 바.
+  - 비중 상위 순서대로 고유 컬러 매핑(Emerald, Blue, Purple, Amber, Rose 등).
+- **보유 종목 카드 인터랙션**:
+  - 개별 종목 카드에 "매도(차익 실현)" 및 "추가 매수" 버튼 탑재 (`TradeDialog` 연동).
+  - 종목 허브(`/stocks/[symbol]`)로의 심리스 딥링크.
+  - 320px 모바일 화면 완벽 대응 (수직 1열 스택 및 텍스트 클리핑 방지).
+
+#### ④ 단위 테스트 (`frontend/src/app/stocks/portfolio/analysis.test.ts`)
+- 수익률 Bps 및 퍼센트 계산 정합성 검증.
+- 자산 배분 비중(allocation_bps) 총합 10,000bps(100%) 정합성 검증.
+
+---
+
+### 3. 검증 및 무중단 승격 계획 (Verification Plan)
+1. **단위 테스트 실행**:
+   - `pnpm --filter @moneyverse/frontend test src/app/stocks/portfolio/`
 2. **Next.js Turbopack Exact-SHA 빌드**:
    - `NEXT_PUBLIC_BUILD_ID=$COMMIT_SHA BUILD_ID=$COMMIT_SHA pnpm build`
-3. **미니 PC 스테이징 및 프로덕션 무중단 승격 (`v2026.09.22.355`)**:
+3. **미니 PC 스테이징 및 프로덕션 무중단 승격 (`v2026.09.22.356`)**:
    - 929개 이상 PostgreSQL 활성 세션 100% 무손실 보존 검증.
    - `docs/releases/ledger.json` 및 `PROJECT_MEMORY.md` 동기화.
+
 
 

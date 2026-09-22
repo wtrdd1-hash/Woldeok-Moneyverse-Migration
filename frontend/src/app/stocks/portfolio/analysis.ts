@@ -11,18 +11,31 @@ export interface PortfolioHoldingInput {
 export interface PortfolioHoldingAnalysis extends PortfolioHoldingInput {
   readonly cost_basis: string;
   readonly unrealized_gain_loss: string;
+  readonly gain_loss_bps: string;
   readonly allocation_bps: string;
+  readonly color: string;
 }
 
 export interface PortfolioAnalysis {
   readonly total_market_value: string;
   readonly total_cost_basis: string;
   readonly total_unrealized_gain_loss: string;
+  readonly total_gain_loss_bps: string;
   readonly holdings: readonly PortfolioHoldingAnalysis[];
 }
 
 const INTEGER_TEXT = /^\d+$/;
 const BPS = 10_000n;
+const ALLOCATION_COLORS = [
+  '#10b981', // emerald
+  '#3b82f6', // blue
+  '#8b5cf6', // purple
+  '#f59e0b', // amber
+  '#ec4899', // pink
+  '#06b6d4', // cyan
+  '#6366f1', // indigo
+  '#64748b', // slate
+];
 
 function amount(value: string, field: string): bigint {
   if (!INTEGER_TEXT.test(value)) throw new Error(`${field} must be a non-negative integer string`);
@@ -40,22 +53,31 @@ export function analyzePortfolio(rows: readonly PortfolioHoldingInput[]): Portfo
 
   const totalMarketValue = prepared.reduce((sum, item) => sum + item.marketValue, 0n);
   const totalCostBasis = prepared.reduce((sum, item) => sum + item.costBasis, 0n);
+  const totalUnrealizedGainLoss = totalMarketValue - totalCostBasis;
+  const totalGainLossBps = totalCostBasis === 0n ? '0' : ((totalUnrealizedGainLoss * BPS) / totalCostBasis).toString();
+
+  const sorted = prepared
+    .map(({ row, marketValue, costBasis, gainLoss }) => ({
+      ...row,
+      cost_basis: costBasis.toString(),
+      unrealized_gain_loss: gainLoss.toString(),
+      gain_loss_bps: costBasis === 0n ? '0' : ((gainLoss * BPS) / costBasis).toString(),
+      allocation_bps: totalMarketValue === 0n ? '0' : ((marketValue * BPS) / totalMarketValue).toString(),
+    }))
+    .sort((a, b) => {
+      const left = BigInt(a.market_value);
+      const right = BigInt(b.market_value);
+      return left === right ? a.symbol.localeCompare(b.symbol) : left > right ? -1 : 1;
+    });
 
   return {
     total_market_value: totalMarketValue.toString(),
     total_cost_basis: totalCostBasis.toString(),
-    total_unrealized_gain_loss: (totalMarketValue - totalCostBasis).toString(),
-    holdings: prepared
-      .map(({ row, marketValue, costBasis, gainLoss }) => ({
-        ...row,
-        cost_basis: costBasis.toString(),
-        unrealized_gain_loss: gainLoss.toString(),
-        allocation_bps: totalMarketValue === 0n ? '0' : ((marketValue * BPS) / totalMarketValue).toString(),
-      }))
-      .sort((a, b) => {
-        const left = BigInt(a.market_value);
-        const right = BigInt(b.market_value);
-        return left === right ? a.symbol.localeCompare(b.symbol) : left > right ? -1 : 1;
-      }),
+    total_unrealized_gain_loss: totalUnrealizedGainLoss.toString(),
+    total_gain_loss_bps: totalGainLossBps,
+    holdings: sorted.map((item, index) => ({
+      ...item,
+      color: ALLOCATION_COLORS[index % ALLOCATION_COLORS.length] ?? '#3b82f6',
+    })),
   };
 }
