@@ -74,12 +74,15 @@ function run(command, args) {
 
 export function verifyBackupArtifact(evidence, backupPath) {
   const absolute = resolve(backupPath);
-  if (!statSync(absolute).isFile() && evidence.backupType === 'pg_dump_custom') throw new Error('pg_dump custom backup must be a file');
-  if (sha256File(absolute) !== evidence.backupSha256 && evidence.backupType === 'pg_dump_custom') {
-    throw new Error('backup SHA-256 does not match evidence');
+  const stats = statSync(absolute);
+  if (evidence.backupType === 'pg_dump_custom') {
+    if (!stats.isFile()) throw new Error('pg_dump custom backup must be a file');
+    if (sha256File(absolute) !== evidence.backupSha256) throw new Error('backup SHA-256 does not match evidence');
+    run('pg_restore', ['--list', absolute]);
+    return;
   }
-  if (evidence.backupType === 'pg_dump_custom') run('pg_restore', ['--list', absolute]);
-  else run('pg_verifybackup', [absolute]);
+  if (!stats.isDirectory()) throw new Error('physical base backup must be a directory');
+  run('pg_verifybackup', [absolute]);
 }
 
 function parseArgs(argv) {
