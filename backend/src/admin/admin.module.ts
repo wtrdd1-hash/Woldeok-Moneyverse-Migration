@@ -3,6 +3,7 @@ import { AiNewsController } from './ai-news.controller';
 import { AiNewsRepository } from './ai-news.repository';
 import { AiNewsService } from './ai-news.service';
 import { Module } from '@nestjs/common';
+import type { Pool } from 'pg';
 import { AuthModule } from '../auth/auth.module';
 import { SessionRepository } from '../auth/session.repository';
 import { sealingKeyFrom } from '../auth/totp';
@@ -124,7 +125,7 @@ import { TreasuryService } from './treasury/treasury.service';
     {
       provide: TreasuryRepository,
       inject: [PG_POOL],
-      useFactory: (pool: Queryable | null) => (pool ? new TreasuryRepository(pool as any) : null),
+      useFactory: (pool: Pool | null) => (pool ? new TreasuryRepository(pool) : null),
     },
     {
       provide: TreasuryService,
