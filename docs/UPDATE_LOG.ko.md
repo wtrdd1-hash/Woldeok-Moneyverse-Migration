@@ -1,4 +1,28 @@
-﻿﻿## v2026.09.22.343 — 주간 경제 브리프 & 실시간 월드 펄스 신문 허브(/newspaper) 완결 및 듀얼 무중단 배포
+## v2026.09.22.344 — 디스코드 음악 봇 실시간 볼륨 조절(/volume) & 무제한 스트리밍 지원 및 MCP 원격 통제 체계 완결
+
+- 적용 브랜치: `feat/discord-music-bot-volume-unlimited-v2026.09.22.344`
+- **디스코드 음악 봇 기능 개선 및 버그 수정**:
+  1. **실시간 볼륨 조절 명령어 `/volume` (0~200%) 완결**:
+     - `@discordjs/voice`의 `createAudioResource`에 `inlineVolume: true` 파이프라인 바인딩.
+     - 슬래시 명령어 `/volume` (수치 미입력 시 현재 볼륨 확인, 수치 입력 시 실시간 반영 및 이후 곡 영속 적용) 구현.
+     - `/nowplaying` (현재곡) 임베드에 현재 볼륨 상태 표시 연동.
+  2. **재생 시간 3시간 제한 완전 해제 (무제한화)**:
+     - `DEFAULT_MAX_TRACK_SECONDS` 및 `MUSIC_MAX_TRACK_SECONDS` 기본값을 `Infinity`로 전환.
+     - 10시간 이상 수면 음악, 장시간 로파이 플레이리스트, 콘서트 실황 등 모든 음원을 끊김 없이 무제한 재생 가능.
+  3. **Opus 인코더 엔진 누락 오류(`Cannot find module '@discordjs/opus'`) 해결**:
+     - 볼륨 변환 시 필요한 `@discordjs/opus` 및 `opusscript` 패키지 설치 완료.
+     - 볼륨 조절 시 재생이 튕기던 현상 완전 해결 및 오디오 스트림 생성 100% 검증.
+  4. **명령어 응답 전체 공개(Public) 일원화**:
+     - 잔여 `ephemeral: true`를 전면 소거하여 모든 서버 멤버가 봇 응답을 함께 확인하도록 일원화.
+  5. **인프라 제어 절대 규칙 수립 및 PROJECT_MEMORY.md 영구 반영**:
+     - Windows PowerShell 로컬 SSH/SCP 직접 실행 전면 금지.
+     - 미니PC의 모든 명령어 실행 및 파일 I/O를 `easy-scraping` MCP 도구로 100% 수행하도록 프로젝트 메모리 0번에 영구 반영.
+- **품질 검증 및 서비스 상태**:
+  - 단위 테스트: `npm test` -> 2/2 PASS (100% 통과).
+  - 미니PC 데몬 서비스: `moneyverse-discord-bot.service` 정상 가동 (PID: 1717614, Active).
+  - 음성 채널 상주: `🔊│음성` (`1536572442422550538`) 채널 24/7 불사 상주 정상 가동 확인.
+
+## v2026.09.22.343 — 주간 경제 브리프 & 실시간 월드 펄스 신문 허브(/newspaper) 완결 및 듀얼 무중단 배포
 
 - 적용 브랜치: `main`
 - **주간 경제 브리프 신문 허브(`/newspaper`) 완결**:
@@ -116,7 +140,6 @@
   - 에스크로에 보관 중인 내 판매 등록 물품 목록 확인 및 등록 취소 시 원자적 보관함 반환 인터랙션 구현.
 - **단위 테스트 검증**:
   - `src/app/marketplace/crafting-recipes.test.ts` 신설을 통해 등록 수수료/판매 수수료/순수령액 계산 공식 및 레시피 무결성 100% 검증.
-
 
 ## v2026.09.20.312 — 전역 SEO 최적화, Schema.org 구조화 데이터(JSON-LD) 스위트, Hreflang 및 검색엔진 디렉티브 완비
 

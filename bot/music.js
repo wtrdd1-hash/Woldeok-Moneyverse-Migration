@@ -10,7 +10,7 @@ import {
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 
 const MAX_QUEUE_LENGTH = 50;
-const DEFAULT_MAX_TRACK_SECONDS = 3 * 60 * 60;
+const DEFAULT_MAX_TRACK_SECONDS = Infinity;
 const YOUTUBE_HOSTS = new Set([
   'youtube.com',
   'www.youtube.com',
@@ -27,6 +27,7 @@ export const MUSIC_COMMAND_NAMES = new Set([
   'resume',
   'queue',
   'nowplaying',
+  'volume',
 ]);
 
 export const MUSIC_COMMANDS = [
@@ -74,6 +75,21 @@ export const MUSIC_COMMANDS = [
     .setNameLocalizations({ ko: '현재곡' })
     .setDescription('Show the currently playing track')
     .setDescriptionLocalizations({ ko: '현재 재생 중인 곡을 표시합니다' }),
+  new SlashCommandBuilder()
+    .setName('volume')
+    .setNameLocalizations({ ko: '볼륨' })
+    .setDescription('Adjust or view playback volume (0-200%)')
+    .setDescriptionLocalizations({ ko: '재생 볼륨을 조절하거나 확인합니다 (0-200%)' })
+    .addIntegerOption((option) =>
+      option
+        .setName('level')
+        .setNameLocalizations({ ko: '수치' })
+        .setDescription('Volume level (0 to 200)')
+        .setDescriptionLocalizations({ ko: '볼륨 수치 (0 ~ 200)' })
+        .setRequired(false)
+        .setMinValue(0)
+        .setMaxValue(200),
+    ),
 ].map((command) => command.toJSON());
 
 export function formatDuration(totalSeconds) {
@@ -101,7 +117,7 @@ function toSafeTrack(result, requestedBy, fallbackUrl, maxTrackSeconds) {
   if (result.is_live || result.live_status === 'is_live') {
     throw new Error('실시간 방송은 현재 음악 봇에서 지원하지 않습니다.');
   }
-  if (Number.isFinite(duration) && duration > maxTrackSeconds) {
+  if (Number.isFinite(duration) && Number.isFinite(maxTrackSeconds) && maxTrackSeconds > 0 && duration > maxTrackSeconds) {
     throw new Error(`최대 재생 길이(${formatDuration(maxTrackSeconds)})를 초과한 곡입니다.`);
   }
 
@@ -123,12 +139,14 @@ export class MusicManager {
     this.guildId = guildId;
     this.voiceChannelId = voiceChannelId;
     this.logger = logger;
-    this.maxTrackSeconds = Number.isFinite(maxTrackSeconds)
+    this.maxTrackSeconds = Number.isFinite(maxTrackSeconds) && maxTrackSeconds > 0
       ? maxTrackSeconds
       : DEFAULT_MAX_TRACK_SECONDS;
     this.queue = [];
     this.current = null;
     this.currentProcess = null;
+    this.currentResource = null;
+    this.volume = 100;
     this.starting = false;
     this.disposed = false;
     this.player = createAudioPlayer({
@@ -138,6 +156,7 @@ export class MusicManager {
     this.player.on(AudioPlayerStatus.Idle, () => {
       this.#killCurrentProcess();
       this.current = null;
+      this.currentResource = null;
       void this.#playNext();
     });
 
@@ -145,6 +164,7 @@ export class MusicManager {
       this.logger.error?.('[Music] Audio player error:', error.message);
       this.#killCurrentProcess();
       this.current = null;
+      this.currentResource = null;
       void this.#playNext();
     });
   }
@@ -164,11 +184,11 @@ export class MusicManager {
     if (interaction.guildId !== this.guildId || !MUSIC_COMMAND_NAMES.has(interaction.commandName)) return false;
 
     if (interaction.commandName === 'queue') {
-      await interaction.reply({ embeds: [this.#queueEmbed()], ephemeral: true });
+      await interaction.reply({ embeds: [this.#queueEmbed()] });
       return true;
     }
     if (interaction.commandName === 'nowplaying') {
-      await interaction.reply({ embeds: [this.#nowPlayingEmbed()], ephemeral: true });
+      await interaction.reply({ embeds: [this.#nowPlayingEmbed()] });
       return true;
     }
 
@@ -176,7 +196,6 @@ export class MusicManager {
     if (member.voice.channelId !== this.voiceChannelId) {
       await interaction.reply({
         content: `음악 제어는 <#${this.voiceChannelId}> 음성 채널에 들어온 상태에서만 사용할 수 있습니다.`,
-        ephemeral: true,
       });
       return true;
     }
@@ -197,6 +216,9 @@ export class MusicManager {
       case 'resume':
         await this.#handleResume(interaction);
         break;
+      case 'volume':
+        await this.#handleVolume(interaction);
+        break;
       default:
         break;
     }
@@ -204,7 +226,7 @@ export class MusicManager {
   }
 
   async #handlePlay(interaction) {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
     if (this.queue.length >= MAX_QUEUE_LENGTH) {
       await interaction.editReply('대기열이 가득 찼습니다. 잠시 후 다시 시도해 주세요.');
       return;
@@ -231,13 +253,13 @@ export class MusicManager {
 
   async #handleSkip(interaction) {
     if (!this.current) {
-      await interaction.reply({ content: '현재 재생 중인 곡이 없습니다.', ephemeral: true });
+      await interaction.reply({ content: '현재 재생 중인 곡이 없습니다.' });
       return;
     }
     const skipped = this.current.title;
     this.#killCurrentProcess();
     this.player.stop(true);
-    await interaction.reply({ content: `⏭️ **${skipped}** 곡을 건너뛰었습니다.`, ephemeral: true });
+    await interaction.reply({ content: `⏭️ **${skipped}** 곡을 건너뛰었습니다.` });
   }
 
   async #handleStop(interaction) {
@@ -245,27 +267,46 @@ export class MusicManager {
     this.queue.length = 0;
     this.#killCurrentProcess();
     this.current = null;
+    this.currentResource = null;
     this.player.stop(true);
     await interaction.reply({
       content: hadPlayback ? '⏹️ 재생을 멈추고 대기열을 비웠습니다.' : '현재 재생 중인 곡이 없습니다.',
-      ephemeral: true,
     });
   }
 
   async #handlePause(interaction) {
     if (!this.current || !this.player.pause()) {
-      await interaction.reply({ content: '일시정지할 재생 중인 곡이 없습니다.', ephemeral: true });
+      await interaction.reply({ content: '일시정지할 재생 중인 곡이 없습니다.' });
       return;
     }
-    await interaction.reply({ content: '⏸️ 음악을 일시정지했습니다.', ephemeral: true });
+    await interaction.reply({ content: '⏸️ 음악을 일시정지했습니다.' });
   }
 
   async #handleResume(interaction) {
     if (!this.current || !this.player.unpause()) {
-      await interaction.reply({ content: '계속 재생할 일시정지된 곡이 없습니다.', ephemeral: true });
+      await interaction.reply({ content: '계속 재생할 일시정지된 곡이 없습니다.' });
       return;
     }
-    await interaction.reply({ content: '▶️ 음악을 다시 재생합니다.', ephemeral: true });
+    await interaction.reply({ content: '▶️ 음악을 다시 재생합니다.' });
+  }
+
+  async #handleVolume(interaction) {
+    const level = interaction.options.getInteger('level');
+    if (level === null) {
+      await interaction.reply({
+        content: `🔊 현재 볼륨은 **${this.volume}%** 입니다.`,
+      });
+      return;
+    }
+
+    this.volume = Math.max(0, Math.min(200, level));
+    if (this.currentResource?.volume) {
+      this.currentResource.volume.setVolume(this.volume / 100);
+    }
+    const icon = this.volume === 0 ? '🔇' : this.volume < 50 ? '🔉' : '🔊';
+    await interaction.reply({
+      content: `${icon} 볼륨을 **${this.volume}%** 로 설정했습니다.`,
+    });
   }
 
   async #resolveTrack(query, requestedBy) {
@@ -281,8 +322,8 @@ export class MusicManager {
       dumpSingleJson: true,
       skipDownload: true,
       noWarnings: true,
-      noPlaylist: isUrl,
-      playlistEnd: isUrl ? undefined : 1,
+      noPlaylist: true,
+      jsRuntimes: 'node',
     });
     const entry = Array.isArray(result.entries) ? result.entries[0] : result;
     if (!entry) throw new Error('검색 결과가 없습니다.');
@@ -301,10 +342,11 @@ export class MusicManager {
 
       const process = youtubedl.exec(track.url, {
         output: '-',
-        format: 'bestaudio[ext=webm][acodec=opus]/bestaudio[ext=webm]/bestaudio',
+        format: 'bestaudio[ext=webm][acodec=opus]/bestaudio[ext=webm]/bestaudio/best',
         noPlaylist: true,
         quiet: true,
         noWarnings: true,
+        jsRuntimes: 'node',
       });
       this.currentProcess = process;
       process.catch((error) => {
@@ -312,22 +354,25 @@ export class MusicManager {
         this.logger.error?.('[Music] yt-dlp stream error:', error.message);
       });
 
-      const probe = await demuxProbe(process.stdout, 10);
-      if (probe.type !== 'webm/opus' && probe.type !== 'ogg/opus') {
-        throw new Error(`지원되지 않는 오디오 형식입니다 (${probe.type}).`);
-      }
+      const probe = await demuxProbe(process.stdout, 15);
 
       this.current = track;
       const resource = createAudioResource(probe.stream, {
         inputType: probe.type,
         metadata: track,
+        inlineVolume: true,
       });
+      if (resource.volume) {
+        resource.volume.setVolume(this.volume / 100);
+      }
+      this.currentResource = resource;
       this.player.play(resource);
-      this.logger.log?.(`[Music] Playing ${track.title} (${track.url})`);
+      this.logger.log?.(`[Music] Playing ${track.title} (${track.url}) [Volume: ${this.volume}%]`);
     } catch (error) {
       this.logger.error?.('[Music] Failed to start track:', error.message);
       this.#killCurrentProcess();
       this.current = null;
+      this.currentResource = null;
       setImmediate(() => void this.#playNext());
     } finally {
       this.starting = false;
@@ -354,6 +399,7 @@ export class MusicManager {
       .addFields(
         { name: '길이', value: formatDuration(this.current.duration), inline: true },
         { name: '신청자', value: `<@${this.current.requestedBy}>`, inline: true },
+        { name: '볼륨', value: `${this.volume}%`, inline: true },
       )
       .setColor(0x8b5cf6);
     if (this.current.thumbnail) embed.setThumbnail(this.current.thumbnail);
@@ -376,6 +422,7 @@ export class MusicManager {
     this.disposed = true;
     this.queue.length = 0;
     this.current = null;
+    this.currentResource = null;
     this.#killCurrentProcess();
     this.player.stop(true);
   }

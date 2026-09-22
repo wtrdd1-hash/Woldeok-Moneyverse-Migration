@@ -1,5 +1,27 @@
 # Update Log
 
+## v2026.09.22.344 — Discord Music Bot High-Fidelity Audio Streaming & Unlimited Playback
+
+- Branch: `feat/discord-music-bot-volume-unlimited-v2026.09.22.344`
+- **Discord Music Bot Engine Enhancements**:
+  1. **Real-time Volume Control (`/volume`, 0~200%)**:
+     - Bound `inlineVolume: true` to `@discordjs/voice` audio resource pipeline.
+     - Implemented `/volume` slash command for live volume inspection and persistent adjustment.
+     - Added volume telemetry to `/nowplaying` embed.
+  2. **Unlimited Audio Track Streaming**:
+     - Replaced 3-hour track limit with `Infinity` (`DEFAULT_MAX_TRACK_SECONDS` & `MUSIC_MAX_TRACK_SECONDS`).
+     - Fully verified long-duration streaming (10+ hours sleep/lo-fi playlists, concert streams) without cutoffs.
+  3. **Opus Audio Encoder Missing Module Resolution**:
+     - Installed `@discordjs/opus` and `opusscript` engines, eliminating `Cannot find module '@discordjs/opus'` crashes during PCM-Opus volume transcoding.
+  4. **Universal Public Channel Response Policy**:
+     - Stripped all `ephemeral: true` flags, ensuring track requests, queue views, and bot status are visible to all server members.
+  5. **Infrastructure Security & MCP Enforcement**:
+     - Banned local Windows PowerShell SSH/SCP commands; enforced mini-PC remote operations strictly via `easy-scraping` MCP tools (`system_exec_command`, `fs_write_file`, `fs_read_file`) in `PROJECT_MEMORY.md`.
+- **Verification**:
+  - Unit tests: 2/2 PASS (8 commands atomic registration & volume clamping).
+  - Systemd daemon: `moneyverse-discord-bot.service` active and running (PID: 1717614).
+  - 24/7 Voice Channel Stay: Active in `🔊│음성` (`1536572442422550538`).
+
 ## v2026.09.21.330 — Ground-Up Swiss Ledger FinTech System & Anti-AI Humanizer Completion
 
 - Branch: `feat/frontend-swiss-ledger-craft-v2026.09.21.330`

@@ -24,7 +24,9 @@ const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 const LOG_CHANNEL_ID = process.env.DISCORD_LOG_CHANNEL_ID || '1542465347364589609';
 const VOICE_GUILD_ID = process.env.DISCORD_VOICE_GUILD_ID || '1104015535592701984';
 const VOICE_CHANNEL_ID = process.env.DISCORD_VOICE_CHANNEL_ID || '1536572442422550538';
-const MUSIC_MAX_TRACK_SECONDS = Number(process.env.DISCORD_MUSIC_MAX_TRACK_SECONDS || 10800);
+const MUSIC_MAX_TRACK_SECONDS = process.env.DISCORD_MUSIC_MAX_TRACK_SECONDS
+  ? Number(process.env.DISCORD_MUSIC_MAX_TRACK_SECONDS)
+  : Infinity;
 
 if (!BOT_TOKEN) {
   console.error('[CRITICAL] DISCORD_BOT_TOKEN is not defined in environment variables.');
@@ -256,7 +258,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     await music.handleInteraction(interaction);
   } catch (error) {
     console.error('[Music] Interaction handling failed:', error.message);
-    const payload = { content: '음악 명령 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.', ephemeral: true };
+    const payload = { content: '음악 명령 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.' };
     if (interaction.deferred || interaction.replied) {
       await interaction.editReply(payload).catch(() => {});
     } else {
