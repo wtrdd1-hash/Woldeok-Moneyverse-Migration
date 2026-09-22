@@ -1,3 +1,8 @@
+## v2026.09.23.383 — Caller-owned idempotency for asset overrides
+- Admin cash/bank asset overrides now require a caller-owned UUID idempotency key instead of minting a replacement key inside the API.
+- This makes timeout/retry behavior replay-safe at the HTTP contract while preserving the existing PostgreSQL ledger function and step-up authorization boundary.
+- Added DTO regression coverage for missing and malformed keys.
+
 ## v2026.09.21.322 — Migration authority fail-closed gate
 - Production migration execution now rejects database-applied migration filenames absent from the exact repository checkout.
 - This prevents database-ahead/untracked schema drift from silently passing deploy migration gates while preserving checksum immutability.
