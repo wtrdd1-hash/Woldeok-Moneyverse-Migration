@@ -307,7 +307,6 @@ export default async function StockHubPage({
             </CardContent>
           </Card>
         </div>
-      </div>
 
       <Card>
         <CardHeader className="flex-row items-start justify-between gap-3">
