@@ -101,6 +101,7 @@ export interface AppConfig {
   readonly databaseUrl: string | undefined;
   readonly databasePool: DatabasePoolConfig;
   readonly production: boolean;
+  readonly localAuthTestVerificationTokenEnabled: boolean;
   readonly cookieSecure: boolean;
   readonly adsEnabled: boolean;
   readonly seoIndexingEnabled: boolean;
@@ -378,6 +379,10 @@ function databasePool(env: NodeJS.ProcessEnv): DatabasePoolConfig {
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const production = env.NODE_ENV === 'production';
   const baseUrl = parseUrl(env.APP_BASE_URL ?? 'http://127.0.0.1:3000', 'APP_BASE_URL').toString();
+  const baseHostname = new URL(baseUrl).hostname;
+  const localAuthTestVerificationTokenEnabled =
+    env.LOCAL_AUTH_TEST_VERIFICATION_TOKEN_ENABLED === 'true' &&
+    baseHostname === 'test.easy-scraping.com';
   const allowedOrigins = allowedRedirectOrigins(env);
 
   const internalToken = env.INTERNAL_API_TOKEN ?? '';
@@ -391,6 +396,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     databaseUrl: env.DATABASE_URL,
     databasePool: databasePool(env),
     production,
+    localAuthTestVerificationTokenEnabled,
     cookieSecure: env.COOKIE_SECURE === undefined ? production : env.COOKIE_SECURE === 'true',
     adsEnabled: env.ADS_ENABLED === 'true',
     // Public indexing stays opt-in. A test URL or a newly connected domain

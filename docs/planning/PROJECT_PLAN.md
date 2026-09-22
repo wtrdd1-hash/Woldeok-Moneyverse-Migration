@@ -2112,3 +2112,11 @@ Before any new AI feature implementation, the next AI work unit must complete th
 Required sequence: full AI inventory -> latest-plan/main/user-instruction recheck -> implementation/runtime contract audit -> reconstruction of changed/weak areas -> cross-system regression -> exact-SHA Test runtime proof including fail-closed and rollback -> final plan re-read -> zero-downtime Production promotion only after all evidence passes. New AI feature work is blocked until this gate is completed or remaining exclusions are explicitly documented and approved.
 
 [executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]
+### v2026.09.23.387 — Isolated Test local-auth E2E unblock
+
+- Android staging QA proved that `test.easy-scraping.com` local registration returned HTTP 503 because the production-like Test backend had no SMTP delivery path.
+- Add an explicit `LOCAL_AUTH_TEST_VERIFICATION_TOKEN_ENABLED` escape hatch guarded by the exact Test hostname `test.easy-scraping.com`; the flag is forced off on Production hostnames.
+- Production keeps fail-closed verification-email delivery and never returns the registration verification token.
+- Required proof before release: focused auth/config tests, typecheck/build, exact-SHA Test deployment, and real Android emulator signup -> verify -> authenticated-shell E2E.
+- Worklog: `docs/worklog/2026-09-23-staging-local-auth-e2e-v2026.09.23.387.md` (Korean pair alongside it).
+- Branch: `fix/staging-local-auth-token-v2026.09.23.387`.
