@@ -34,8 +34,9 @@ describe('computeMarketSentiment', () => {
     expect(sentiment.totalPositive).toBe(1);
     expect(sentiment.totalNegative).toBe(0);
     expect(sentiment.stockSentiments).toHaveLength(1);
-    expect(sentiment.stockSentiments[0].symbol).toBe('WDT');
-    expect(sentiment.stockSentiments[0].direction).toBe('up');
+    const firstStock = sentiment.stockSentiments[0];
+    expect(firstStock?.symbol).toBe('WDT');
+    expect(firstStock?.direction).toBe('up');
   });
 
   it('computes bearish sentiment when negative events dominate', () => {
@@ -60,7 +61,8 @@ describe('computeMarketSentiment', () => {
     expect(sentiment.totalPositive).toBe(0);
     expect(sentiment.totalNegative).toBe(1);
     expect(sentiment.stockSentiments).toHaveLength(1);
-    expect(sentiment.stockSentiments[0].symbol).toBe('WDM');
-    expect(sentiment.stockSentiments[0].direction).toBe('down');
+    const firstStock = sentiment.stockSentiments[0];
+    expect(firstStock?.symbol).toBe('WDM');
+    expect(firstStock?.direction).toBe('down');
   });
 });
