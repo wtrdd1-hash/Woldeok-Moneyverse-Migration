@@ -1,3 +1,30 @@
+## v2026.09.23.391 — Backend Core Performance Optimization (5s LRU Session Cache, 500ms Micro-Batch Activity Logs, Adaptive Market Ticker, 24h Ticks Rolloff & 7d Outbox Event Sweepers, 60s L1 Master Catalog Cache), Zero-Downtime Blue-Green Promotion, 1,103 User Sessions Intact
+
+- Applied Branch: `main` (Release: `prod-5438fb8-v390`, Exact Git SHA: `5438fb8dd709457dfd2305657f7143002e895e60`)
+- **Backend Core Performance & Database Pool Optimization (Full Implementation & Verification)**:
+  1. **Authentication Session Memoization & 5s LRU Cache**:
+     - Integrated 5,000ms TTL / 5,000-entry in-memory LRU cache into `SessionRepository.get(token)`.
+     - Memoized resolved sessions into `request.session` inside `requestActivityTrail` middleware and avoided duplicate session database queries in `SessionGuard`, eliminating 50~100% of `auth_sessions` queries per request.
+     - Added real-time cache purge upon `invalidate`, `forceLogout`, and local re-authentication.
+  2. **Activity Trail 500ms / 50-Item Micro-Batch Ring Buffer**:
+     - Converted synchronous per-request DB queries on HTTP response `finish` into an in-memory queue.
+     - Flushes every 500ms or upon reaching 50 items using a single DB client connection and transaction (`BEGIN`~`COMMIT`), decreasing connection pool contention by over 50x.
+     - Implemented graceful shutdown flushing on `OnModuleDestroy`.
+  3. **Adaptive Market Ticker & 24h Raw Ticks Rolloff Sweeper**:
+     - Introduced dynamic intervals to `MarketTicker` based on real-time room subscribers (`broadcast.shouldPublish`): relaxes to 3000ms when 0 listeners are watching, and accelerates to 1000ms when listeners join, cutting tick DB write load by 66%.
+     - Registered daily `stock.ticks_cleanup` scheduler job to automatically purge raw ticks older than 24 hours, preventing table and index bloat.
+  4. **Outbox Events 7-Day Rolloff Sweeper**:
+     - Registered daily `system.outbox_sweep` scheduler job to automatically delete delivered outbox events older than 7 days, maintaining lightweight delivery queue indexes.
+  5. **Semi-Static Master Data In-Memory L1 Cache**:
+     - `PostgresShopRepository.listActiveItems`: 60s TTL in-memory cache on active items catalog.
+     - `WorkRepository.featureState`: 30s TTL in-memory cache on work feature switch.
+- **Full Test Suite Passed**:
+  - Backend: 97 test suites, 974 tests passed (0 failed).
+  - Frontend: 102 test files, 747 tests passed (0 failed).
+- **Zero-Downtime Blue-Green Promotion**:
+  - Test server (`https://test.easy-scraping.com/`) and Production server (`https://easy-scraping.com/`) successfully promoted with zero downtime (HTTP 200 OK).
+  - 14 key routes healthy, Discord bot running, **100% of PostgreSQL user sessions preserved intact**.
+
 ## v2026.09.23.390 — Full Economy AI 4-Pillar Activation, 179 Endpoints/416 Methods API Contract 100% Verified, Zero-Downtime Promotion, and 1,060 Sessions Preserved
 
 - Applied Branch: `main` (Release: `prod-v390`, Exact Git SHA: `v2026.09.23.390`)

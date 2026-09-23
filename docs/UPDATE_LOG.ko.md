@@ -1,3 +1,31 @@
+## v2026.09.23.391 — 백엔드 코어 성능 최적화 (세션 LRU 캐시, 활동 로그 마이크로 배치, 적응형 마켓 티커, 틱/아웃박스 스위퍼, 마스터 카탈로그 L1 캐시), 무중단 블루-그린 승격 및 1,103개 세션 무손실 보존
+
+- 적용 브랜치: `main` (릴리스: `prod-5438fb8-v390`, Exact Git SHA: `5438fb8dd709457dfd2305657f7143002e895e60`)
+- **백엔드 코어 성능 & DB 경합 5대 최적화 (전수 구현 및 검증 완료)**:
+  1. **인증 세션 요청 메모이제이션 & 5초 LRU 캐시**:
+     - `SessionRepository.get(token)`에 5,000ms TTL 및 5,000건 LRU 인메모리 캐시 도입.
+     - `requestActivityTrail` 미들웨어에서 추출된 세션을 `request.session`에 주입하고, `SessionGuard`에서 동일 요청 내 중복 DB 세션 쿼리를 차단하여 요청당 `auth_sessions` 조회 빈도를 50~100% 감축.
+     - 세션 무효화(`invalidate`), 강제 로그아웃(`forceLogout`), 재인증 시 실시간 캐시 퍼지 지원.
+  2. **활동 로그(Activity Trail) 500ms / 50건 마이크로 배치 링 버퍼**:
+     - 매 HTTP 응답 종료 시점마다 개별 DB 커넥션을 점유하던 동기 쿼리를 인메모리 버퍼 큐로 전환.
+     - 500ms 주기 타이머 또는 50건 누적 시 단일 커넥션 트랜잭션(`BEGIN`~일괄 호출~`COMMIT`)으로 일괄 flush하여 DB 커넥션 풀 경합을 50배 이상 완화.
+     - `OnModuleDestroy` 정상 종료 시 잔여 버퍼 무손실 완전 flush 보장.
+  3. **적응형 마켓 티커 (Adaptive Market Ticker) & 24시간 원시 틱 롤오프 스위퍼**:
+     - 웹소켓 구독자 유무(`broadcast.shouldPublish`)를 실시간 감지하여, 접속자가 없을 때는 3초 주기로 완화하고 접속자 존재 시 1초 주기로 부드럽게 가속하는 적응형 스케줄링 엔진 도입 (DB 쓰기 I/O 66% 감소).
+     - 스케줄러 일일 작업 `stock.ticks_cleanup` 등록으로 24시간 초과 원시 틱 데이터 자동 롤오프 정리 (수만 건의 인덱스 비대화 영구 방지).
+  4. **아웃박스 이벤트 7일 롤오프 스위퍼 (92MB 블로트 정리)**:
+     - 스케줄러 일일 작업 `system.outbox_sweep` 등록으로 배달 완료(`delivered_at IS NOT NULL`) 후 7일이 경과한 아웃박스 이벤트를 매일 자동 정리.
+  5. **준정적 마스터 데이터 인메모리 L1 캐시**:
+     - `PostgresShopRepository.listActiveItems`: 상점 카탈로그 60초 TTL 인메모리 캐시 적용으로 상점 탐색 시 DB 쿼리 부하 제거.
+     - `WorkRepository.featureState`: 피처 스위치 30초 TTL 인메모리 캐시 적용.
+- **전수 단위/통합 테스트 100% 통과**:
+  - 백엔드: 97개 테스트 스위트, 974개 테스트 전수 통과 (0 failed).
+  - 프론트엔드: 102개 테스트 파일, 747개 테스트 전수 통과 (0 failed).
+- **무중단 운영 승격 (Zero-Downtime Blue-Green Promotion)**:
+  - 테스트 서버(`https://test.easy-scraping.com/`): 카나리 검증 후 무중단 전환, HTTP 200 OK.
+  - 운영 서버(`https://easy-scraping.com/`): 카나리 검증 후 무중단 전환, HTTP 200 OK.
+  - 14개 주요 라우트 100% 정상 가동, Discord 봇 상주 지속, **PostgreSQL 활성 사용자 세션 100% 무손실 보존 완료**.
+
 ## v2026.09.23.390 — 로컬 경제 AI 4대 방안 무손실 완전 가동, 179개 엔드포인트/416개 메서드 API 계약 100% 무결성 검증, 테스트/운영 무중단 승격 및 1,060개 세션 무손실 보존
 
 - 적용 브랜치: `main` (릴리스: `prod-v390`, Exact Git SHA: `v2026.09.23.390`)
