@@ -19,7 +19,9 @@ export function extractYouTubeVideoId(url) {
     if (parsed.searchParams.has('v')) return parsed.searchParams.get('v');
     const match = parsed.pathname.match(/\/(?:shorts|embed|v)\/([a-zA-Z0-9_-]{11})/);
     if (match) return match[1];
-  } catch {}
+  } catch {
+    /* ignore */
+  }
   return null;
 }
 
@@ -462,14 +464,18 @@ export class MusicManager {
       process.catch(() => {});
       try {
         process.kill('SIGKILL');
-      } catch {}
+      } catch {
+        /* ignore */
+      }
     }
     const ffmpeg = this.currentFfmpegProcess;
     this.currentFfmpegProcess = null;
     if (ffmpeg && !ffmpeg.killed) {
       try {
         ffmpeg.kill('SIGKILL');
-      } catch {}
+      } catch {
+        /* ignore */
+      }
     }
   }
 

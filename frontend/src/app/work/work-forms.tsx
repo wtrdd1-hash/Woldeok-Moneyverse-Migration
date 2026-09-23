@@ -25,7 +25,6 @@ import {
 import {
   difficultyLabel,
   jobLabel,
-  jobMeta,
   type JobMeta,
   type WorkTask,
   type WorkTaskBlock,

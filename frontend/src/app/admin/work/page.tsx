@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
-import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader, SectionHeader } from '@/components/page-header';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
@@ -32,8 +30,14 @@ export const metadata: Metadata = {
 };
 
 const JOB_LABELS: Readonly<Record<string, string>> = {
-  farmer: '농부',
-  miner: '광부',
+  developer: '소프트웨어 개발자',
+  trader: '전문 트레이더',
+  entertainer: '엔터테이너',
+  detective: '경제 탐정',
+  miner: '자원 채굴사',
+  farmer: '스마트 농부',
+  artisan: '명품 장인',
+  civil_servant: '행정 공무원',
   carrier: '운반원',
   technician: '기술자',
   merchant: '상인',

@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useLocale } from '@/components/locale-provider';
+import type { appApiContract } from '@/lib/app-gateway';
 
 export interface EndpointDef {
   id: string;
@@ -226,7 +227,7 @@ export const ENDPOINTS_DATA: EndpointDef[] = [
   },
 ];
 
-export function DeveloperPortalView({ contract }: { contract: ReturnType<typeof import('@/lib/app-gateway').appApiContract> }) {
+export function DeveloperPortalView({ contract }: { contract: ReturnType<typeof appApiContract> }) {
   const { locale } = useLocale();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedEndpoint, setSelectedEndpoint] = useState<EndpointDef>(ENDPOINTS_DATA[0]!);

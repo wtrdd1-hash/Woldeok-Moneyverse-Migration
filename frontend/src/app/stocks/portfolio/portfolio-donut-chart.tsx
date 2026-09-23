@@ -27,22 +27,29 @@ export function PortfolioDonutChart({
   const isProfit = Number(totalGainLossBps) > 0;
   const isLoss = Number(totalGainLossBps) < 0;
 
-  // 세그먼트 오프셋 누적 계산
-  let accumulatedPercent = 0;
-  const segments = holdings.map((holding) => {
+  // 세그먼트 오프셋 누적 계산 (순수 reduce 패턴)
+  const segments = holdings.reduce<
+    Array<{
+      holding: (typeof holdings)[number];
+      percent: number;
+      strokeDasharray: string;
+      strokeDashoffset: number;
+      accumulated: number;
+    }>
+  >((acc, holding) => {
     const value = Number(holding.market_value) || 0;
-    const percent = totalValueNum > 0 ? (value / totalValueNum) : 0;
-    const strokeDasharray = `${percent * circumference} ${circumference}`;
-    const strokeDashoffset = -accumulatedPercent * circumference;
-    accumulatedPercent += percent;
-
-    return {
+    const percent = totalValueNum > 0 ? value / totalValueNum : 0;
+    const prevOffset = acc.length > 0 ? acc[acc.length - 1].accumulated : 0;
+    const accumulated = prevOffset + percent;
+    acc.push({
       holding,
       percent,
-      strokeDasharray,
-      strokeDashoffset,
-    };
-  });
+      strokeDasharray: `${percent * circumference} ${circumference}`,
+      strokeDashoffset: -prevOffset * circumference,
+      accumulated,
+    });
+    return acc;
+  }, []);
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-around gap-6 p-2 sm:p-4">

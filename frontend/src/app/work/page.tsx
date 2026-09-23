@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { PageHeader } from '@/components/page-header';
-import { Briefcase, Target, Award, Sparkles, CheckCircle2, Landmark, ClipboardList } from 'lucide-react';
+import { Target, Landmark, ClipboardList } from 'lucide-react';
 import { TruncatedList } from '@/components/truncated-list';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';

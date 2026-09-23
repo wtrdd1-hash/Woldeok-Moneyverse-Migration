@@ -1,13 +1,15 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 
-(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+const globalRecord = globalThis as unknown as Record<string, unknown>;
+globalRecord.IS_REACT_ACT_ENVIRONMENT = true;
 
-const actFn = (callback: any) => {
-  if (ReactDOM && typeof (ReactDOM as any).flushSync === 'function') {
-    let result: any;
+const actFn = (callback?: () => unknown) => {
+  const rDom = ReactDOM as unknown as { flushSync?: (fn: () => void) => void };
+  if (rDom && typeof rDom.flushSync === 'function') {
+    let result: unknown;
     try {
-      (ReactDOM as any).flushSync(() => {
+      rDom.flushSync(() => {
         if (callback) result = callback();
       });
       return result;
@@ -19,20 +21,27 @@ const actFn = (callback: any) => {
 };
 
 try {
-  (React as any).act = actFn;
-} catch {}
+  (React as unknown as Record<string, unknown>).act = actFn;
+} catch {
+  /* ignore */
+}
 try {
-  (ReactDOM as any).act = actFn;
-} catch {}
+  (ReactDOM as unknown as Record<string, unknown>).act = actFn;
+} catch {
+  /* ignore */
+}
 try {
-  (globalThis as any).act = actFn;
-} catch {}
+  globalRecord.act = actFn;
+} catch {
+  /* ignore */
+}
 
 if (typeof window !== 'undefined') {
-  if (!window.CSS) {
-    (window as any).CSS = {};
+  const win = window as unknown as Record<string, unknown>;
+  if (!win.CSS) {
+    win.CSS = {};
   }
-  if (!window.CSS.supports) {
-    window.CSS.supports = () => true;
+  if (!window.CSS?.supports) {
+    (win.CSS as Record<string, unknown>).supports = () => true;
   }
 }

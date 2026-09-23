@@ -363,7 +363,7 @@ export function SavingPocketsCard({
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-rose-600 dark:text-rose-400">
                 <Archive className="size-5" />
-                <span>'{archiveTarget.name}' 저축 포켓 해지</span>
+                <span>&apos;{archiveTarget.name}&apos; 저축 포켓 해지</span>
               </DialogTitle>
               <DialogDescription className="text-xs">
                 포켓을 해지하면 보관 중인 잔액 <strong className="font-mono text-foreground">{groupDigits(archiveTarget.balance)} WLD</strong>가 메인 현금 계좌로 즉시 안전하게 반환됩니다.

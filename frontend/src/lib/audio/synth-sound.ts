@@ -41,7 +41,9 @@ class SynthSoundEngine {
 
       osc.start();
       osc.stop(ctx.currentTime + 0.04);
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }
 
   /** 카지노 베팅 승리 팡파르 (C5 -> E5 -> G5 -> C6 아르페지오) */
@@ -69,7 +71,9 @@ class SynthSoundEngine {
         osc.start(start);
         osc.stop(start + dur);
       });
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }
 
   /** 카지노 패배 또는 실패 둔탁음 */
@@ -93,7 +97,9 @@ class SynthSoundEngine {
 
       osc.start();
       osc.stop(ctx.currentTime + 0.25);
-    } catch {}
+    } catch {
+      /* ignore */
+    }
   }
 }
 

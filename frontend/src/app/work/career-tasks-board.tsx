@@ -3,7 +3,7 @@
 import { useState, useActionState } from 'react';
 import { useLocale } from '@/components/locale-provider';
 import { Badge } from '@/components/ui/badge';
-import { Briefcase, Compass, Sparkles, Star, CheckCircle2, Clock, Zap, ArrowRight } from 'lucide-react';
+import { Briefcase, Compass, Sparkles, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -25,7 +25,6 @@ import {
   difficultyLabel,
   durationLabel,
   jobLabel,
-  jobMeta,
   type WorkQuotaBlock,
   type WorkTask,
   workTaskBlock,
@@ -70,7 +69,6 @@ export function CareerTasksBoard({
   const [filter, setFilter] = useState<'my_job' | 'all'>(activeJobType ? 'my_job' : 'all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const activeMeta = activeJobType ? jobMeta(activeJobType, locale) : undefined;
   const activeJobName = activeJobType ? jobLabel(activeJobType, locale) : '';
 
   const myTasks = activeJobType ? tasks.filter((t) => t.job_type === activeJobType) : [];
@@ -161,7 +159,6 @@ export function CareerTasksBoard({
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 w-full min-w-0">
           {displayTasks.map((task) => {
             const isActiveJob = activeJobType === task.job_type;
-            const meta = jobMeta(task.job_type, locale);
             const blockedReason = workTaskBlock(task, quotaBlock ?? null);
 
             return (

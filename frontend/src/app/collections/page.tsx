@@ -28,7 +28,7 @@ export default async function CollectionsPage() {
     <div className="container mx-auto px-4 py-8 max-w-6xl space-y-6">
       <PageHeader eyebrow="COLLECTION & CURATION" title="컬렉션 소유권 & 큐레이션 아카이브">
         <p>
-          단순한 보상 수령이나 스트릭 리셋 공포가 아닌, "내 것"이라는 애착과 유래(Provenance)를 체감하는 지속 가능한 수집품 전시 공간입니다.
+          단순한 보상 수령이나 스트릭 리셋 공포가 아닌, &quot;내 것&quot;이라는 애착과 유래(Provenance)를 체감하는 지속 가능한 수집품 전시 공간입니다.
         </p>
       </PageHeader>
 

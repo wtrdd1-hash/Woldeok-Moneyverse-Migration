@@ -178,7 +178,7 @@ export function StockDiscussionSection({
                     </label>
                     <select
                       value={positionDisclosure}
-                      onChange={(e) => setPositionDisclosure(e.target.value as any)}
+                      onChange={(e) => setPositionDisclosure(e.target.value as 'holder' | 'no_position')}
                       className="h-10 rounded-md border bg-background px-3 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
                     >
                       <option value="holder">{isEn ? 'Currently holding' : '종목 보유 중'}</option>
@@ -192,7 +192,7 @@ export function StockDiscussionSection({
                     </label>
                     <select
                       value={category}
-                      onChange={(e) => setCategory(e.target.value as any)}
+                      onChange={(e) => setCategory(e.target.value as 'analysis' | 'question' | 'journal' | 'business')}
                       className="h-10 rounded-md border bg-background px-3 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
                     >
                       <option value="analysis">{isEn ? 'Stock Analysis' : '종목 분석'}</option>

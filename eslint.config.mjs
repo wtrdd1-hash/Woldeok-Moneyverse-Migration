@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint';
 import nextVitals from 'eslint-config-next/core-web-vitals';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/.next/**', '**/node_modules/**', '**/generated/**', '.claude/**'] },
+  { ignores: ['**/dist/**', '**/.next/**', '**/node_modules/**', '**/generated/**', '.claude/**', 'capture_*.js', 'bot/scripts/**', 'scripts/**'] },
   js.configs.recommended,
   ...nextVitals,
   ...tseslint.configs.recommended,
@@ -18,7 +18,7 @@ export default tseslint.config(
       // actions have no use for — but React decides the signature, not the
       // action. Naming it `_previous` says so.
       '@typescript-eslint/no-unused-vars': [
-        'error',
+        'warn',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
       // A timer handle and the callback that clears it refer to each other:

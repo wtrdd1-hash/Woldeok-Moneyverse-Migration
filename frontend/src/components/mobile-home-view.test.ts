@@ -8,7 +8,7 @@ beforeAll(() => {
     observe() {}
     unobserve() {}
     disconnect() {}
-  } as any;
+  } as unknown as typeof ResizeObserver;
 });
 
 describe('MobileHomeView', () => {

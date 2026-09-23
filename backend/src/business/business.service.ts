@@ -130,9 +130,9 @@ export interface BusinessRepository {
   settleV2(input: BusinessSettleInput): Promise<BusinessSettleRow>;
   activateFromLicense(input: BusinessActivateInput): Promise<BusinessActivateRow>;
   applyBoost(input: BusinessApplyBoostInput): Promise<Record<string, unknown>>;
-  supplyChainOverview?(userId: string, ownershipId: string): Promise<any>;
-  procureMaterials?(input: { userId: string; ownershipId: string; materialCode: string; quantity: number; idempotencyKey?: string | undefined }): Promise<any>;
-  upgradeStorage?(input: { userId: string; ownershipId: string; idempotencyKey?: string | undefined }): Promise<any>;
+  supplyChainOverview?(userId: string, ownershipId: string): Promise<unknown>;
+  procureMaterials?(input: { userId: string; ownershipId: string; materialCode: string; quantity: number; idempotencyKey?: string | undefined }): Promise<unknown>;
+  upgradeStorage?(input: { userId: string; ownershipId: string; idempotencyKey?: string | undefined }): Promise<unknown>;
 }
 
 function businessType(row: BusinessCatalogRow): BusinessType {

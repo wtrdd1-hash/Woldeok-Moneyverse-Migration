@@ -141,7 +141,9 @@ export function CurationRetentionFlow({
               setNoteInput(parsed[0].userNote || '');
             }
           }
-        } catch {}
+        } catch {
+        /* ignore */
+      }
       }
     }
     loadData();
@@ -165,7 +167,9 @@ export function CurationRetentionFlow({
       );
       try {
         localStorage.setItem('moneyverse_curation_pieces', JSON.stringify(next));
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       return next;
     });
 
@@ -175,7 +179,9 @@ export function CurationRetentionFlow({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isFavorite: nextFav }),
       });
-    } catch {}
+    } catch {
+        /* ignore */
+      }
   };
 
   const handleSaveNote = async (e: React.FormEvent) => {
@@ -187,7 +193,9 @@ export function CurationRetentionFlow({
       );
       try {
         localStorage.setItem('moneyverse_curation_pieces', JSON.stringify(next));
-      } catch {}
+      } catch {
+        /* ignore */
+      }
       return next;
     });
 
@@ -197,7 +205,9 @@ export function CurationRetentionFlow({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userNote: trimmed }),
       });
-    } catch {}
+    } catch {
+        /* ignore */
+      }
     alert('소장품 큐레이션 메모가 서버에 안전하게 영속 저장되었습니다.');
   };
 
@@ -209,7 +219,9 @@ export function CurationRetentionFlow({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ timelineDay: day }),
       });
-    } catch {}
+    } catch {
+        /* ignore */
+      }
   };
 
 
