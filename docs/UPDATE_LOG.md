@@ -1,3 +1,31 @@
+## v2026.09.23.392 — Virtual Businesses Supply Chain Procurement Loop (2% Hard Sink), 5 Domain Innovation Widgets, Zero-Downtime Blue-Green Promotion, 1,063 Active Sessions 100% Preserved
+
+- Applied Branch: `main` (Release: `prod-2c854d47-v392`, Exact Git SHA: `2c854d47903294ef4ad48006a1b9cd57a70f5590`)
+- **Virtual Businesses Supply Chain & B2B Procurement Loop**:
+  1. **Raw Material Procurement API & 2% Hard Sink Burn Engine**:
+     - `POST /api/v1/businesses/:id/procure`: Procurement of packaging (`RAW_PACKAGED`, 50 WLD) and operating energy (`RAW_ENERGY`, 120 WLD).
+     - 2% permanent system burn (`SINK_BUSINESS_PROCUREMENT`) on all procurement volumes.
+     - Idempotency key protection against double-spends.
+  2. **Storage Capacity Upgrades & 40% Compounding Cost Model**:
+     - `POST /api/v1/businesses/:id/storage/upgrade`: Expands base capacity (500 units) by +250 per level.
+     - Upgrade sink cost: `50,000 * 1.40^(n-1)` WLD (`SINK_BUSINESS_STORAGE_UPGRADE`).
+  3. **City/Season Demand Multipliers & Perishables Depletion**:
+     - Effective demand calculated from city project completion and season weights.
+     - 2%/hr freshness decay applied to perishable businesses (CVS, Farm) after 72 hours.
+- **5 Domain Innovation Interactive Widgets (Mounted & Integrated)**:
+  1. `SupplyChainStatusWidget` (`/businesses`): Real-time inventory gauge, SVG demand sparkline, procurement modal & slide-up receipt.
+  2. `SavingsGoalProgressRing` (`/bank`): Circular SVG savings goal ring, real-time progress ratio, virtual bond compound yield calculator.
+  3. `SpaceCanvasEditor` (`/spaces`): 8x8 interactive room tile canvas, 8 furniture items palette, vibe score, day/night lighting toggle, layout JSON export.
+  4. `SeasonHallOfFameTicker` (`/seasons`): Season 1 First Capital marquee ticker, top 5 governor & contributor rankings, hall of fame modal.
+  5. `NotificationTabsBar` (`/account/notifications`): 7-category notification filter tabs and one-click mark-all-read bar.
+- **Test Suite 100% Passed**:
+  - Backend supply chain unit tests: 3 passed (`vitest src/business/business-supply-chain.test.ts`).
+  - Frontend test suites: 102 test files, 747 tests passed (0 failed).
+- **Zero-Downtime Blue-Green Promotion**:
+  - Test server (`https://test.easy-scraping.com/`): 16 core routes 200 OK.
+  - Production server (`https://easy-scraping.com/`): 16 core routes 200 OK.
+  - **PostgreSQL active user sessions: 1,063 preserved 100%**.
+
 ## v2026.09.23.391 — Backend Core Performance Optimization (5s LRU Session Cache, 500ms Micro-Batch Activity Logs, Adaptive Market Ticker, 24h Ticks Rolloff & 7d Outbox Event Sweepers, 60s L1 Master Catalog Cache), Zero-Downtime Blue-Green Promotion, 1,103 User Sessions Intact
 
 - Applied Branch: `main` (Release: `prod-5438fb8-v390`, Exact Git SHA: `5438fb8dd709457dfd2305657f7143002e895e60`)

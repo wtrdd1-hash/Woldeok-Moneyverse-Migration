@@ -158,10 +158,21 @@
     "commitSha": "cdf028e244f7b572f4e40e2c3726b4da14cdec45",
     "shortSha": "cdf028e",
     "releasePath": "/srv/moneyverse-data/releases/prod-cdf028e-v390",
-    "status": "promoted",
+    "status": "archived",
     "activeSessions": 1103,
     "timestamp": "2026-09-23T09:40:00Z",
     "author": "System Engineer",
     "notes": "Backend Core Performance Optimization (5s LRU Session Cache, 500ms Micro-Batch Activity Logs, Adaptive Market Ticker, 24h Ticks Rolloff & 7d Outbox Event Sweepers, 60s L1 Master Catalog Cache), Zero-Downtime Blue-Green Promotion, 1103 User Sessions Intact"
+  },
+  {
+    "version": "v2026.09.23.392",
+    "commitSha": "2c854d47903294ef4ad48006a1b9cd57a70f5590",
+    "shortSha": "2c854d4",
+    "releasePath": "/srv/moneyverse-data/releases/prod-2c854d47-v392",
+    "status": "promoted",
+    "activeSessions": 1063,
+    "timestamp": "2026-09-23T10:13:00Z",
+    "author": "System Engineer",
+    "notes": "Virtual Businesses Supply Chain Procurement Loop (2% Hard Sink), 5 Domain Innovation Widgets (SupplyChainWidget, SavingsGoalProgressRing, SpaceCanvasEditor, SeasonHallOfFameTicker, NotificationTabsBar), Blue-Green Zero-Downtime Promotion to Test & Production, 1063 Active Sessions 100% Preserved"
   }
 ]

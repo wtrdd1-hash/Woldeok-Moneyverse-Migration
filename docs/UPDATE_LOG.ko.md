@@ -1,3 +1,31 @@
+## v2026.09.23.392 — 가상 사업체 서플라이 체인 원자재 조달 루프(2% 하드 싱크), 5대 도메인 혁신 위젯 마운트, 무중단 블루-그린 승격 및 1,063개 활성 세션 100% 보존
+
+- 적용 브랜치: `main` (릴리스: `prod-2c854d47-v392`, Exact Git SHA: `2c854d47903294ef4ad48006a1b9cd57a70f5590`)
+- **가상 사업체 (Businesses) 서플라이 체인 & B2B 원자재 조달 루프 (완전 가동)**:
+  1. **원자재 조달 API & 2% 하드 싱크 소각 엔진**:
+     - `POST /api/v1/businesses/:id/procure`: 부자재(`RAW_PACKAGED`, 50 WLD) 및 운영 에너지(`RAW_ENERGY`, 120 WLD) NPC 도매 조달 지원.
+     - 거래 대금의 2% 시스템 영구 소각(`SINK_BUSINESS_PROCUREMENT`)으로 인플레이션 원천 억제.
+     - 멱등 키(`idempotencyKey`) 기반 중복 결제 및 이중 차감 원천 방지.
+  2. **창고 용량 레벨업 & 40% 복리 비용 모델**:
+     - `POST /api/v1/businesses/:id/storage/upgrade`: 기본 500개에서 레벨당 +250개씩 저장소 확장.
+     - 업그레이드 비용: `50,000 * 1.40^(n-1)` WLD 시스템 소각(`SINK_BUSINESS_STORAGE_UPGRADE`).
+  3. **도시/시즌 수요 계수 & 신선도 감가 정산**:
+     - 도시 프로젝트 완료율 및 시즌 테마 가중치를 반영한 실효 수요율 계산 (`effectiveDemand`).
+     - 유통기한 사업체(편의점/농장) 72시간 경과 후 시간당 2% 신선도 감가 적용.
+- **5대 도메인 혁신 인터랙티브 위젯 (마운트 및 실서비스 연동)**:
+  1. `SupplyChainStatusWidget` (`/businesses`): 실시간 원자재 보유고, 용량 바, 일일 수요 추세 SVG 스파크라인, 발주 모달 및 영수증 슬라이드업.
+  2. `SavingsGoalProgressRing` (`/bank`): 가상 은행 목표 자산 SVG 원형 프로그레스 링, 실시간 달성률, 가상 채권 만기 수익률 복리 계산기.
+  3. `SpaceCanvasEditor` (`/spaces`): 8x8 타일 룸 인터랙티브 에디터, 8종 가구 팔레트 배치/회수, VIBE 점수 계산, 나이트/데이라이트 조명 토글, 배치 JSON 복사.
+  4. `SeasonHallOfFameTicker` (`/seasons`): 시즌 1 First Capital 초대 총독 및 상위 5인 헌액자 롤링 마키 티커, 명예의 전당 아카이브 모달.
+  5. `NotificationTabsBar` (`/account/notifications`): 7대 카테고리 탭(전체, 사업·공급망, 금융·이자, 시즌·순위, 공간·도시, 보안·인증, 시스템), 원클릭 전체 읽음 처리 바.
+- **전수 단위/통합 테스트 100% 통과**:
+  - 백엔드 공급망 단위 테스트: 3개 테스트 100% 통과 (`vitest src/business/business-supply-chain.test.ts`).
+  - 프론트엔드 전체 테스트: 102개 테스트 파일, 747개 테스트 전수 통과 (0 failed).
+- **무중단 운영 승격 (Zero-Downtime Blue-Green Promotion)**:
+  - 테스트 서버(`https://test.easy-scraping.com/`): 16개 핵심 라우트 전수 200 OK.
+  - 운영 서버(`https://easy-scraping.com/`): 16개 핵심 라우트 전수 200 OK.
+  - **PostgreSQL 활성 사용자 세션 1,063건 100% 무손실 보존 실측 완료**.
+
 ## v2026.09.23.391 — 백엔드 코어 성능 최적화 (세션 LRU 캐시, 활동 로그 마이크로 배치, 적응형 마켓 티커, 틱/아웃박스 스위퍼, 마스터 카탈로그 L1 캐시), 무중단 블루-그린 승격 및 1,103개 세션 무손실 보존
 
 - 적용 브랜치: `main` (릴리스: `prod-5438fb8-v390`, Exact Git SHA: `5438fb8dd709457dfd2305657f7143002e895e60`)
