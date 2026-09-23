@@ -3,6 +3,7 @@ import { PUBLIC_NAV } from '@/lib/navigation';
 import {
   BEGINNER_TIPS,
   ECONOMY_PILLARS,
+  CURRENT_IMPLEMENTED_FEATURES,
   FIRST_DAY_ORDER,
   GROWTH_STAGES,
   GUIDE_FAQS,
@@ -35,6 +36,9 @@ const ROUTES = new Set([
   '/stocks',
   '/businesses',
   '/casino',
+  '/marketplace',
+  '/chat',
+  '/newspaper',
   '/account',
 ]);
 
@@ -97,6 +101,16 @@ describe('the getting-started guide', () => {
     for (const faq of GUIDE_FAQS) {
       expect(faq.question.trim()).not.toBe('');
       expect(faq.answer.trim()).not.toBe('');
+    }
+  });
+
+  it('documents current implemented feature groups with valid routes', () => {
+    expect(CURRENT_IMPLEMENTED_FEATURES.length).toBeGreaterThanOrEqual(5);
+    for (const group of CURRENT_IMPLEMENTED_FEATURES) {
+      expect(ROUTES.has(group.link.href)).toBe(true);
+      expect(group.itemsKo.length).toBe(group.itemsEn.length);
+      expect(group.summaryKo.trim()).not.toBe('');
+      expect(group.summaryEn.trim()).not.toBe('');
     }
   });
 

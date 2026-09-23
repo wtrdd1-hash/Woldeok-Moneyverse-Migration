@@ -20,6 +20,7 @@ import { TranslatedText as T } from '@/components/translated-text';
 import {
   BEGINNER_TIPS,
   ECONOMY_PILLARS,
+  CURRENT_IMPLEMENTED_FEATURES,
   FIRST_DAY_ORDER,
   FIRST_DAY_ORDER_EN,
   GROWTH_STAGES,
@@ -34,7 +35,7 @@ import { jsonLd } from '@/lib/json-ld';
 export const metadata: Metadata = {
   title: '시작 가이드 (Getting Started Guide)',
   description:
-    '월덕 머니버스를 처음 이용하는 분을 위한 가상경제 입문서. 5개 전문 직업, 일일 퀘스트, 은행 복리 예금과 국채, 가상 사업체 창업 및 주식 거래소, 아이템 상점과 카지노 이용 방법을 안내합니다.',
+    '월덕 머니버스를 처음 이용하는 분을 위한 현재 기능 안내. 8대 전문 직업, 퀘스트, 은행, 주식·사업체, 마켓플레이스, 커뮤니티와 콘텐츠 기능을 안내합니다.',
   alternates: { canonical: canonicalUrl('/guide') },
 };
 
@@ -86,8 +87,8 @@ export default function GuidePage() {
           </h1>
           <p className="text-sm leading-[1.8] text-muted-foreground sm:text-base [word-break:keep-all]">
             <T
-              korean="월덕 머니버스는 Discord 커뮤니티와 긴밀하게 이어지는 차세대 가상경제 포털입니다. 5개 전문 직업, 일일 퀘스트, 은행 복리 예금과 국채, 가상 기업 창업 및 주식 거래소, 상점과 카지노까지 하나의 완성된 경제 생태계를 자유롭게 누려보세요."
-              english="Woldeok Moneyverse is an interconnected virtual economy portal linked with Discord. Explore 5 professions, daily quests, compound bank savings, virtual enterprise founding, stock exchange, item shop, and casino entertainment."
+              korean="월덕 머니버스는 Discord 커뮤니티와 연결된 가상경제·커뮤니티 포털입니다. 현재 운영 코드에는 8대 직업, 퀘스트, 은행, 주식·사업체, 상점·마켓플레이스, 채팅·클럽, 신문·컬렉션 등 여러 기능이 연결되어 있습니다."
+              english="Woldeok Moneyverse is a virtual economy and community portal connected with Discord. The current product includes eight careers, quests, banking, stocks and businesses, shop and marketplace flows, chat and clubs, newspaper, collections, and more."
             />
           </p>
 
@@ -111,6 +112,59 @@ export default function GuidePage() {
               ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="implemented-features-title" className="space-y-6">
+        <div className="space-y-2">
+          <p className="eyebrow text-primary">CURRENTLY IMPLEMENTED</p>
+          <h2 id="implemented-features-title" className="text-2xl font-extrabold sm:text-3xl">
+            <T korean="현재 구현된 주요 기능" english="Currently Implemented Features" />
+          </h2>
+          <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground [word-break:keep-all]">
+            <T
+              korean="현재 서비스 코드와 서버 기능에 연결된 사용자 기능을 기준으로 정리했습니다. 기획 중이거나 운영 검증이 끝나지 않은 기능을 완료된 기능처럼 표시하지 않습니다."
+              english="This summary reflects user-facing capabilities connected to the current service code and server behavior. Planned or not-yet-verified work is not presented as completed."
+            />
+          </p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {CURRENT_IMPLEMENTED_FEATURES.map((group) => (
+            <Card key={group.id} className="border bg-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg">
+                  <T korean={group.titleKo} english={group.titleEn} />
+                </CardTitle>
+                <CardDescription className="leading-relaxed [word-break:keep-all]">
+                  <T korean={group.summaryKo} english={group.summaryEn} />
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  {group.itemsKo.map((item, index) => (
+                    <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-500" aria-hidden />
+                      <span>
+                        <T korean={item} english={group.itemsEn[index] ?? item} />
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <Button asChild variant="outline" className="w-full justify-between">
+                  <Link href={group.link.href}>
+                    <span>
+                      <T
+                        korean={group.link.label}
+                        english={group.link.labelEn ?? group.link.label}
+                      />
+                    </span>
+                    <ChevronRight className="size-4" aria-hidden />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </section>
 
@@ -223,9 +277,9 @@ export default function GuidePage() {
               {
                 step: '1. 생산 및 활동',
                 stepEn: '1. Production',
-                titleKo: '퀘스트 & 5개 직업',
+                titleKo: '퀘스트 & 8대 직업',
                 titleEn: 'Quests & Careers',
-                descKo: '출석 퀘스트 및 5개 전문 직업 활동을 통해 초기 시드 WLD를 채굴합니다.',
+                descKo: '출석 퀘스트 및 8대 전문 직업 활동을 통해 초기 시드 WLD를 획득합니다.',
                 descEn: 'Mint initial seed WLD through check-in quests and career assignments.',
                 icon: Briefcase,
               },

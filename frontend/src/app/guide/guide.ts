@@ -43,6 +43,17 @@ export interface EconomyPillar {
   readonly link: GuideLink;
 }
 
+export interface ImplementedFeatureGroup {
+  readonly id: string;
+  readonly titleKo: string;
+  readonly titleEn: string;
+  readonly summaryKo: string;
+  readonly summaryEn: string;
+  readonly itemsKo: readonly string[];
+  readonly itemsEn: readonly string[];
+  readonly link: GuideLink;
+}
+
 export interface GrowthStage {
   readonly step: number;
   readonly stageKo: string;
@@ -248,12 +259,12 @@ export const ECONOMY_PILLARS: readonly EconomyPillar[] = [
     featuresKo: [
       '8가지 특화 직업군 선택 및 자유로운 전직',
       '작업 완수 시 경험치(EXP) 및 레벨 승급 보너스',
-      '일일 피로도(에너지) 및 쿨다운 전략적 운영',
+      '작업별 최소 수행 시간 및 서버 일일 배정 한도',
     ],
     featuresEn: [
       '8 distinct professions with flexible career paths',
       'EXP and level progression with higher payout multipliers',
-      'Strategic daily energy and task cooldown management',
+      'Minimum task durations and server-enforced daily assignment limits',
     ],
     link: { href: '/work', label: '8대 직업 작업판 가기', labelEn: 'Go to Work Board' },
   },
@@ -322,6 +333,119 @@ export const ECONOMY_PILLARS: readonly EconomyPillar[] = [
       'Optional member-controlled daily stake and loss limits',
     ],
     link: { href: '/casino', label: '카지노 게임장 가기', labelEn: 'Visit Casino' },
+  },
+];
+
+export const CURRENT_IMPLEMENTED_FEATURES: readonly ImplementedFeatureGroup[] = [
+  {
+    id: 'core-economy',
+    titleKo: '지갑 · 직업 · 퀘스트 · 은행',
+    titleEn: 'Wallet, Careers, Quests & Banking',
+    summaryKo:
+      'WLD 원장과 지갑을 중심으로 실제 수행 시간이 있는 직업 작업, 일일 배정 한도, 퀘스트, 복리 예금과 국채를 연결해 운영합니다.',
+    summaryEn:
+      'The live economy connects the WLD ledger and wallet with timed career tasks, server-enforced daily assignment limits, quests, compound savings, and virtual bonds.',
+    itemsKo: [
+      '복식부기 원장 기반 지갑·거래 내역',
+      '8대 직업, 최소 수행 시간, 작업별 일일 배정 한도',
+      '일일·주간 퀘스트와 성장/숙련도 진행',
+      '복리 예금, 가상 국채, 신용 기반 대출',
+    ],
+    itemsEn: [
+      'Double-entry wallet and transaction history',
+      'Eight careers with minimum task duration and per-task daily assignment limits',
+      'Daily and weekly quests with progression and mastery',
+      'Compound savings, virtual bonds, and credit-based loans',
+    ],
+    link: { href: '/wallet', label: '지갑과 경제 확인하기', labelEn: 'Open Wallet & Economy' },
+  },
+  {
+    id: 'markets',
+    titleKo: '주식 · 사업체 · 상점 · 마켓플레이스',
+    titleEn: 'Stocks, Businesses, Shop & Marketplace',
+    summaryKo:
+      '가상 주식 거래와 포트폴리오, 사업체 운영, 상점 구매, 사용자 간 마켓플레이스 거래가 서버 권위 데이터와 정산 흐름으로 연결되어 있습니다.',
+    summaryEn:
+      'Virtual stock trading, portfolios, business operations, shop purchases, and player marketplace flows are connected to server-authoritative state and settlement.',
+    itemsKo: [
+      '가상 주식 주문·포트폴리오·관심종목·알림',
+      '사업체 운영과 공급망/정산 기능',
+      '아이템 상점·인벤토리',
+      '경매·직거래·감정 기능을 포함한 마켓플레이스',
+    ],
+    itemsEn: [
+      'Virtual stock orders, portfolio, watchlist, and alerts',
+      'Business operations with supply-chain and settlement flows',
+      'Item shop and inventory',
+      'Marketplace with auctions, direct trades, and appraisal',
+    ],
+    link: { href: '/marketplace', label: '마켓플레이스 둘러보기', labelEn: 'Explore Marketplace' },
+  },
+  {
+    id: 'community',
+    titleKo: '게시판 · 1:1 채팅 · 클럽 · 스페이스',
+    titleEn: 'Boards, Direct Chat, Clubs & Spaces',
+    summaryKo:
+      '공개 게시판부터 개인 대화, 클럽과 개인 공간까지 커뮤니티 기능을 제공하며 계정·권한·차단 등 서버 정책을 따릅니다.',
+    summaryEn:
+      'Community features span public boards, direct conversations, clubs, and personal spaces while following server-side account, authorization, and blocking rules.',
+    itemsKo: [
+      '공개 게시판과 주식 종목 커뮤니티',
+      '1:1 채팅과 읽음/알림 상태',
+      '클럽 생성·운영 및 클럽 캔버스',
+      '개인 스페이스와 공간 관련 기능',
+    ],
+    itemsEn: [
+      'Public boards and stock-specific community discussions',
+      'Direct chat with read and notification state',
+      'Club creation, management, and clubhouse canvas',
+      'Personal spaces and space-related features',
+    ],
+    link: { href: '/chat', label: '채팅 열기', labelEn: 'Open Chat' },
+  },
+  {
+    id: 'world-content',
+    titleKo: '신문 · 컬렉션 · 갤러리 · 캘린더 · 시즌',
+    titleEn: 'Newspaper, Collections, Gallery, Calendar & Seasons',
+    summaryKo:
+      '가상경제와 커뮤니티에서 발생하는 흐름을 신문·컬렉션·갤러리·캘린더·시즌 화면으로 이어서 볼 수 있습니다.',
+    summaryEn:
+      'Economy and community activity extends into newspaper, collections, gallery, calendar, and seasonal experiences.',
+    itemsKo: [
+      '시장/세계 이벤트를 보여주는 신문',
+      '보유 기록과 큐레이션을 연결하는 컬렉션',
+      '운영 검토형 갤러리',
+      '일정 캘린더와 시즌 진행/정산',
+    ],
+    itemsEn: [
+      'Newspaper for market and world events',
+      'Collections linking ownership records with curation',
+      'Moderated gallery',
+      'Calendar plus seasonal progression and settlement',
+    ],
+    link: { href: '/newspaper', label: '신문 보기', labelEn: 'Open Newspaper' },
+  },
+  {
+    id: 'account-safety',
+    titleKo: '계정 · 프로필 · 보안 · 알림',
+    titleEn: 'Account, Profile, Security & Notifications',
+    summaryKo:
+      '프로필과 계정 설정, 세션·보안 상태, 개인정보 설정과 알림을 한 계정 흐름에서 관리합니다.',
+    summaryEn:
+      'Profiles, account settings, session and security state, privacy controls, and notifications are managed as one account experience.',
+    itemsKo: [
+      '프로필과 공개 범위 관리',
+      '계정·개인정보·알림 설정',
+      '활성 세션과 계정 보안 화면',
+      '서비스 상태와 지원 요청',
+    ],
+    itemsEn: [
+      'Profile and visibility controls',
+      'Account, privacy, and notification preferences',
+      'Active sessions and account security views',
+      'Service status and support requests',
+    ],
+    link: { href: '/account', label: '계정 설정 열기', labelEn: 'Open Account Settings' },
   },
 ];
 
@@ -495,6 +619,7 @@ export function guideDestinations(): readonly string[] {
   const paths = [
     ...GUIDE_STEPS.flatMap((step) => (step.link ? [step.link.href] : [])),
     ...ECONOMY_PILLARS.flatMap((pillar) => (pillar.link ? [pillar.link.href] : [])),
+    ...CURRENT_IMPLEMENTED_FEATURES.flatMap((group) => (group.link ? [group.link.href] : [])),
   ];
   return [...new Set(paths)];
 }
