@@ -2,11 +2,24 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.23.396
+> **현재 통합 버전:** v2026.09.23.397
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 기능/API 동시 구현 강제 계약 — v2026.09.23.397 (2026-09-23)
+
+- **P0 구현 불변조건 — 모든 구현 기능은 필요한 API를 함께 구현:** 신규 또는 실질적으로 변경되는 사용자/관리자/시스템 기능이 서버 상태, 영속화, 권한판단, 다중 클라이언트 사용, 자동화, 백엔드 비즈니스 로직을 필요로 하면 같은 작업 단위에서 해당 API도 반드시 구현한다. 의도적으로 순수 클라이언트 기능이라고 명시하지 않은 UI-only 구현은 미완성으로 판정한다.
+- **API 계약 완결성:** 각 기능 API는 method/path, 인증·인가, request/response schema, validation bounds, 안정적인 error model, 필요한 pagination/filtering, retry 가능한 mutation의 idempotency, rate/resource limit, concurrency 의미, audit/telemetry, version/deprecation 정책을 정의해야 한다.
+- **프론트/모바일 정합성:** 가능한 범위에서 웹과 모바일은 동일한 권위 비즈니스 계약을 사용한다. 서버에서 강제해야 할 비즈니스 규칙을 클라이언트에 중복 구현해 권위가 갈라지게 해서는 안 된다.
+- **보안 정합성:** API authorization, object-level access control, 브라우저 mutation의 CSRF, 필요한 recent reauthentication/step-up, 입력 allowlist, abuse/resource control, append-only audit는 후속 보강이 아니라 기능 완료 조건이다.
+- **영속화/실패 의미:** 서버 기반 기능은 durable state, transaction boundary, rollback/compensation, duplicate/retry 처리, partial failure, recovery 의미를 정의해야 완료로 수용한다.
+- **문서 동기화:** 권위 기획서, OpenAPI/mobile API 계약, 개발자용 API 문서, 영문/한국어 문서를 구현과 같은 작업 흐름에서 함께 갱신한다.
+- **QA 게이트:** 기능 수용에는 API positive/negative test, authorization test, contract/schema check, 필요한 idempotency/concurrency test, exact candidate SHA에서의 client-to-API end-to-end 검증이 필요하다.
+- **릴리스 게이트:** UI에는 보이지만 필요한 backend/API 계약·테스트·문서가 없는 기능은 **미완성이며 Production 승격 금지**다.
+- **예외 규칙:** 서버 상태, 권한 결정, 공유 영속화, 기기간 동기화, 보안 민감 비즈니스 규칙이 전혀 없는 기능만 client-only로 명시할 수 있다. 예외는 기획 기록에 명시해야 한다.
+- **범위 사실:** v397은 기획/계약 문서 변경이며, 이 문서만으로 과거 모든 기능의 API 보강이 이미 완료됐다고 주장하지 않는다.
 
 ## 인증/세션 연속성 강제 계약 — v2026.09.23.396 (2026-09-23)
 
