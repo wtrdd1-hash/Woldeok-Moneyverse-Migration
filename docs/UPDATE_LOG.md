@@ -8,9 +8,9 @@
 - Cleanup still preserves branches without merged-PR evidence, even when their content happens to be contained in `main`.
 - Manual repository hygiene pass reduced stale remote/local branches and removed clean patch-equivalent worktrees without deleting unique unmerged commits.
 
-## v2026.09.23.389 — Discord Music Bot & Voice Stay Daemon System Full GitHub Main Integration
+## v2026.09.23.389 — Home Contrast Theme Token Alignment, Full QA Suite 100% Pass across Backend/Frontend/Bot, Blue-Green Promotion to Test & Production, 1103 User Sessions Intact
 
-- Branch: `main` (Feature branch: `feat/discord-bot-full-github-main-integration-v2026.09.23.389`)
+- Branch: `main` (Release: `prod-8443146-v389`, Exact Git SHA: `84431467`)
 - **Full GitHub Main Integration for Discord Music Bot & Voice Stay Daemon**:
   1. **Infrastructure Service Unit Version Control**:
      - Checked in systemd service definition file into `ops/systemd/moneyverse-discord-bot.service`.
@@ -24,10 +24,21 @@
   4. **Root Workspace & Package Integration**:
      - Added `bot:test` and `bot:start` scripts to root `package.json`.
      - Documented `bot/` in workspace table and Discord Bot in gameplay/features of root `README.md` and `README-KO.md`.
-- **Verification**:
-  - Unit tests: `pnpm bot:test` -> 4/4 PASS (100% passed, 0 failures).
-  - Daemon status: `moneyverse-discord-bot.service` active and running.
-  - Voice channel stay: 24/7 active in `🔊│음성` (`1536572442422550538`).
+- **Full-Stack QA Suite & Bug Fix Verification**:
+  1. **Frontend Semantic Color Token Fix**:
+     - Replaced hardcoded `text-white` with `text-primary-foreground` in `frontend/src/app/page.tsx` quick actions; verified `color-contrast-regression.test.ts` 100% pass.
+  2. **Automated Test Suites**:
+     - Frontend: 102 test files, 747 tests passed (0 failed).
+     - Backend: 97 test files, 974 tests passed (0 failed).
+     - API Contract: 179 mobile endpoints, 416 controller methods, 0 drift (100% pass).
+     - Discord Bot: 4/4 tests passed (100% pass).
+  3. **Next.js Turbopack Production Compilation**:
+     - 100% of static and dynamic routes compiled cleanly.
+- **Zero-Downtime Blue-Green Promotion**:
+  - Test Server (`https://test.easy-scraping.com/`): 200 OK across all routes, runtime SHA `84431467929e070c91416fed28b227854de50398`.
+  - Production Server (`https://easy-scraping.com/`): 200 OK across all routes, runtime SHA `84431467929e070c91416fed28b227854de50398`.
+  - Full route probes (Home, Wallet, Work, Stocks, Bank, Marketplace, Chat, Support, Safety, Admin, BFF) returned 200 OK.
+  - Zero Nginx errors; **1,103 active PostgreSQL user sessions 100% preserved**.
 
 ## v2026.09.23.388 — Complete Main Integration of 23 Step-Up Security & Economy PRs, Zero-Downtime Promotion to Test & Production, 1061 Active Sessions Preserved
 

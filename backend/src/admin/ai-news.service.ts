@@ -251,10 +251,13 @@ Answer with one JSON object and nothing else -- no prose, no code fence -- of th
 
 export function userPrompt(context: Record<string, unknown>, operatorPrompt: string): string {
   const wish = operatorPrompt.trim();
+  const listed = registeredStockSymbols(context);
+  const symbolsList = [...listed].join(', ');
   return [
     'Market state (JSON):',
     JSON.stringify(context, null, 1),
     '',
+    `Available stock symbols: ${symbolsList || 'none'} (or null for the whole market). Each scenario MUST target one of these symbols or null.`,
     wish === ''
       ? 'Operator wish: none. Continue the story as it stands.'
       : `Operator wish: ${wish}`,
@@ -960,9 +963,22 @@ export function normalise(batch: ScenarioBatch, context: Record<string, unknown>
     const effects: ScenarioEffectProposal[] = [];
     let strongSeen = false;
     for (const leg of legs) {
-      const symbol = leg.stock_symbol?.trim().toUpperCase() || null;
-      if (symbol !== null && !listed.has(symbol)) {
-        unknown.push(symbol);
+      const rawSymbol = leg.stock_symbol?.trim().toUpperCase() || null;
+      let symbol: string | null = null;
+      if (rawSymbol !== null) {
+        if (listed.has(rawSymbol)) {
+          symbol = rawSymbol;
+        } else {
+          for (const candidate of listed) {
+            if (rawSymbol.includes(candidate)) {
+              symbol = candidate;
+              break;
+            }
+          }
+        }
+      }
+      if (rawSymbol !== null && symbol === null) {
+        unknown.push(rawSymbol);
         continue;
       }
       // One leg per stock: a story cannot lean a stock two ways.
