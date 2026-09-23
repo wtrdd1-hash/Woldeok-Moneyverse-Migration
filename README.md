@@ -74,6 +74,7 @@ See [docs/images/README.md](docs/images/README.md) for screenshot provenance and
 | 🏢 **Businesses** | Virtual business ownership, operating economics and distributions | [Businesses](docs/features/businesses.md) |
 | 🏦 **Banking** | Deposits, interest, credit-grade loans and virtual bonds | [Banking](docs/features/banking.md) |
 | 🎰 **Casino** | Server-authoritative virtual minigames, limits and history | [Casino](docs/features/casino.md) |
+| 🤖 **Discord Music Bot** | 24/7 immortal voice stay, live volume control, SponsorBlock ad-slicing music playback | [Discord Bot](bot/README.md) |
 | 🛡️ **Admin Control Center** | Operations read models and policy controls behind admin boundaries | [Admin Control Center](docs/features/admin-control-center.md) |
 
 ### UI Navigation Map
@@ -210,6 +211,7 @@ See [Banking](docs/features/banking.md).
 - [Businesses](docs/features/businesses.md)
 - [Shop](docs/features/shop.md)
 - [Admin Control Center](docs/features/admin-control-center.md)
+- [Discord Music & Voice Bot](bot/README.md)
 
 ### Integrations
 - [Mobile / External App API](docs/mobile-api.md)
@@ -239,6 +241,7 @@ See [Banking](docs/features/banking.md).
 | `backend/` | NestJS internal API |
 | `packages/database/` | PostgreSQL init files, ordered migrations and DB policy |
 | `packages/contract/` | Shared contracts and route map |
+| `bot/` | Discord Music & Voice Stay Bot daemon, SponsorBlock FFmpeg slicing engine |
 | `deploy/` | Docker Compose, nginx and host deployment scripts |
 | `ops/` | Infrastructure helper scripts |
 | `README/` | Localized project guides |

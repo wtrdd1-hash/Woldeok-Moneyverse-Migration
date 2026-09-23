@@ -1,3 +1,26 @@
+# Update Log
+
+## v2026.09.23.389 — Discord Music Bot & Voice Stay Daemon System Full GitHub Main Integration
+
+- Branch: `main` (Feature branch: `feat/discord-bot-full-github-main-integration-v2026.09.23.389`)
+- **Full GitHub Main Integration for Discord Music Bot & Voice Stay Daemon**:
+  1. **Infrastructure Service Unit Version Control**:
+     - Checked in systemd service definition file into `ops/systemd/moneyverse-discord-bot.service`.
+     - Standardized auto-restart policies (`Restart=always`, `RestartSec=5s`), working directory bindings, and limits (`LimitNOFILE=65535`).
+  2. **Audio Waveform & Ad-Slicing Automated QA Audit Suite**:
+     - Integrated `bot/scripts/qa_ads_sponsorblock_verification.py` and `qa_ads_sponsorblock_verification.mjs`.
+     - Standard YouTube ad bypass audit, SponsorBlock API segment resolution on 4 real-world tracks, and +22.3 dB volume elevation proof.
+  3. **Official Discord Bot Documentation (`bot/README-KO.md`, `bot/README.md`)**:
+     - Comprehensive guide for 8 slash commands (`/play`, `/volume`, `/skip`, `/pause`, `/resume`, `/stop`, `/queue`, `/nowplaying`).
+     - Documented `Infinity` duration playback, 24/7 immortal voice stay, and SponsorBlock FFmpeg aselect slicing pipeline.
+  4. **Root Workspace & Package Integration**:
+     - Added `bot:test` and `bot:start` scripts to root `package.json`.
+     - Documented `bot/` in workspace table and Discord Bot in gameplay/features of root `README.md` and `README-KO.md`.
+- **Verification**:
+  - Unit tests: `pnpm bot:test` -> 4/4 PASS (100% passed, 0 failures).
+  - Daemon status: `moneyverse-discord-bot.service` active and running.
+  - Voice channel stay: 24/7 active in `🔊│음성` (`1536572442422550538`).
+
 ## v2026.09.23.388 — Complete Main Integration of 23 Step-Up Security & Economy PRs, Zero-Downtime Promotion to Test & Production, 1061 Active Sessions Preserved
 
 - Target Branch: `main` (Release: `prod-bc2f820-v388`, Exact Git SHA: `bc2f8207`)
