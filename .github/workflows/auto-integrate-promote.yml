@@ -49,6 +49,7 @@ jobs:
           conflict_count=0
           failed_validation_reconcile_count=0
           work_in_progress_skipped_count=0
+          isolated_test_blocked_count=0
 
           reconcile_current_branch() {
             local reason="$1"
@@ -176,6 +177,28 @@ jobs:
             fi
             validated_count=$((validated_count + 1))
 
+            # A successful candidate build is necessary but not sufficient for merge.
+            # Require the exact branch SHA to have a successful isolated-Test deployment.
+            deployment_id="$(
+              gh api --method GET "repos/${REPO}/deployments" \
+                -f sha="${branch_sha}" -f environment=isolated-test -f per_page=100 \
+                --jq '.[0].id // empty'
+            )"
+
+            isolated_test_state=""
+            if [[ -n "$deployment_id" ]]; then
+              isolated_test_state="$(
+                gh api --method GET "repos/${REPO}/deployments/${deployment_id}/statuses" \
+                  -f per_page=100 --jq '.[0].state // empty'
+              )"
+            fi
+
+            if [[ "$isolated_test_state" != "success" ]]; then
+              isolated_test_blocked_count=$((isolated_test_blocked_count + 1))
+              echo "skip PR #${pr}: exact head ${branch_sha} isolated-Test deployment is ${isolated_test_state:-missing}"
+              continue
+            fi
+
             mergeable="unknown"
             merge_state="unknown"
             for _ in $(seq 1 12); do
@@ -224,6 +247,7 @@ jobs:
             echo "- contained/redundant branches deleted: ${contained_deleted_count}"
             echo "- conflicted PRs encountered: ${conflict_count}"
             echo "- work-in-progress branches/PRs skipped: ${work_in_progress_skipped_count}"
+            echo "- exact-SHA isolated-Test blocked branches: ${isolated_test_blocked_count}"
             echo
             echo 'Every reconciled branch head is explicitly revalidated by workflow_dispatch before merge; no reconciled SHA bypasses Build Test Candidate.'
           } >> "$GITHUB_STEP_SUMMARY"
