@@ -2,11 +2,24 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.406
-> Implementation/evidence sync: 2026-09-23
+> Current integrated version: v2026.09.24.409
+> Implementation/evidence sync: 2026-09-24
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## API Contract Authority Recovery & Implementation Reprioritization — v2026.09.24.409 (2026-09-24)
+
+- **Promote API inventory drift to a P0 governance defect:** the machine-readable mobile contract contains 179 endpoints; the complete mobile spec records 57 backend controllers / 335 backend endpoints / 179 mobile endpoints; the older endpoint catalog still records 139 mobile endpoints; and v402 source discovery separately recorded 58 controller files / 361 HTTP decorators. These are not treated as equivalent counting methods. Only a generated method+path semantic inventory may establish current authority.
+- **G409-01 / P0 — exact-SHA contract gate is not yet proven:** the immediately preceding required runtime-check on latest main failed before API contract verification completed because of ESLint errors. Current-main API contract health therefore MUST NOT be claimed as end-to-end passing. Production promotion is blocked until required gates are restored.
+- **G409-02 / P0 — generated contract is the sole inventory authority:** generate method+path+operationId from backend source/OpenAPI, separate duplicates/aliases/BFF mappings, and calculate backend-total, mobile-public/BFF, admin and internal scopes independently. Manual endpoint counts must be derived from generated artifacts.
+- **G409-03 / P1 — documentation must reconcile automatically:** `mobile-api-contract.json`, complete spec, endpoint catalog, schema reference and runtime contract must validate version, endpoint count and method/path in one pipeline. Historical figures such as 139/179/335/361 must not coexist as current authority without explicit scope metadata.
+- **G409-04 / P0 — verify high-risk mutations first:** wallet transfer, bank movement/loan/bond, stock order, work reward/claim, marketplace purchase/tax/sink, casino play/limit and treasury/admin economy mutations require priority coverage for authn/authz, CSRF, recent reauth, DTO validation, idempotency, concurrency, ledger atomicity and negative tests.
+- **G409-05 / P0 — client/API parity acceptance:** every server-backed action visible in web/mobile must map to a real API method/path. Dead buttons, 404 routes, mock failover and direct private-backend calls are prohibited. Native mobile keeps `/app-api/v1` BFF as the authoritative route family.
+- **Reassigned implementation order:** (0) restore required CI gates → (1) generate/verify exact-SHA contract → (2) reconcile inventory/docs → (3) common authn/authz/CSRF/reauth → (4) money/ledger mutations → (5) stocks/realtime/chat reliability → (6) mobile/web BFF parity → (7) admin APIs → (8) automated doc/version drift prevention → (9) exact-SHA Test E2E → (10) zero-downtime Production promotion with session continuity.
+- **Release gate:** any open blocker in stages 0–9 blocks Production. Endpoint-count equality alone is insufficient; method/path/schema/auth/error/idempotency/concurrency and real Test E2E evidence are required.
+- **Detailed delta:** [deltas/v2026.09.24.409.md](deltas/v2026.09.24.409.md).
+- **Scope truth:** v409 is planning/documentation only. It does not claim API code changes, Test verification or Production deployment.
 
 ## 6-Domain Defect Mitigation & Real-Time/Fintech/Security Architecture Spec — v2026.09.23.406 (2026-09-23)
 
