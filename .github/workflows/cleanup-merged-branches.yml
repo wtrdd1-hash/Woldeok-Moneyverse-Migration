@@ -60,25 +60,40 @@ jobs:
             esac
 
             encoded="$(jq -rn --arg v "$branch" '$v|@uri')"
+            branch_sha="$(gh api "repos/${GITHUB_REPOSITORY}/branches/${encoded}" --jq '.commit.sha' 2>/dev/null || true)"
+            [[ -n "$branch_sha" ]] || continue
+
             cmp="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${encoded}...${main_sha}" 2>/dev/null || true)"
             [[ -n "$cmp" ]] || continue
             behind="$(jq -r '.behind_by // -1' <<<"$cmp")"
 
-            if [[ "$behind" == "0" ]]; then
-              merged_pr="$(
-                gh api --method GET "repos/${GITHUB_REPOSITORY}/pulls" \
-                  -f state=closed -f base=main -f head="${GITHUB_REPOSITORY_OWNER}:${branch}" -f per_page=100 \
-                  --jq '[.[] | select(.merged_at != null)][0].number // empty'
-              )"
-              if [[ -z "$merged_pr" ]]; then
-                echo "retain contained branch without merged PR evidence (may still be active work): $branch"
-                continue
-              fi
+            merged_pr_json="$(
+              gh api --method GET "repos/${GITHUB_REPOSITORY}/pulls" \
+                -f state=closed -f base=main -f head="${GITHUB_REPOSITORY_OWNER}:${branch}" -f per_page=100 \
+                --jq '[.[] | select(.merged_at != null)] | sort_by(.merged_at) | reverse | .[0] // empty'
+            )"
 
-              echo "deleting branch fully contained in main with merged PR #${merged_pr}: $branch"
-              if gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${encoded}" >/dev/null 2>&1; then
-                deleted=$((deleted + 1))
+            if [[ -z "$merged_pr_json" ]]; then
+              if [[ "$behind" == "0" ]]; then
+                echo "retain contained branch without merged PR evidence (may still be active work): $branch"
               fi
+              continue
+            fi
+
+            merged_pr="$(jq -r '.number' <<<"$merged_pr_json")"
+            merged_head_sha="$(jq -r '.head.sha // empty' <<<"$merged_pr_json")"
+
+            if [[ "$branch_sha" == "$merged_head_sha" ]]; then
+              echo "deleting source branch whose current head exactly matches merged PR #${merged_pr}: $branch"
+            elif [[ "$behind" == "0" ]]; then
+              echo "deleting branch fully contained in main with merged PR #${merged_pr}: $branch"
+            else
+              echo "retain branch advanced after merged PR #${merged_pr}: $branch (${merged_head_sha} -> ${branch_sha})"
+              continue
+            fi
+
+            if gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${encoded}" >/dev/null 2>&1; then
+              deleted=$((deleted + 1))
             fi
           done
 
@@ -88,5 +103,3 @@ jobs:
             echo "- stale PRs closed: ${closed}"
             echo "- contained branches deleted: ${deleted}"
           } >> "$GITHUB_STEP_SUMMARY"
-
-[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]
