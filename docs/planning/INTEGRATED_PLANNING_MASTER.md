@@ -1,11 +1,21 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.23.401
+> Current ledger version: v2026.09.23.402
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.23.402 — 2026-09-23
+- Started a full planning re-review against current repository evidence, runtime-facing contracts, standards, and recent planning decisions.
+- Mechanical inventory: 166 top-level planning files = 83 EN + 83 KO, missing EN/KO counterparts 0, broken relative links 0.
+- G402-01 / P0: corrected authority drift where PROJECT_PLAN still declared v397 while this master had advanced to v401. v402 is now the shared current authority marker.
+- G402-02 / P1: mobile API documentation remains at 57 controllers / 335 endpoints / 179 mobile endpoints while current source discovery finds 58 controller files and 361 HTTP decorators. These counts are not declared equivalent; generated contract diff is required. Local `pnpm api:contract:check` is BLOCKED because dependencies/tsc are absent.
+- G402-03 / P1: created a current active-status ledger so historical incident narratives no longer silently define current status.
+- G402-04 / P1: explicit TODOs such as AUTH-105-02 and OPS-CACHE-156-01 require current-main revalidation.
+- Current standards rechecked: OWASP ASVS 5.0.0, NIST SP 800-63-4/63B-4 final, OpenAPI 3.2.1, WCAG 2.2 / ISO 40500:2025, W3C ACT Rules Format 1.1.
+- Canonical review: `INTEGRATED_FULL_REVIEW_V402.md` / `.ko.md`. Phase 1 normalizes authority and establishes the 12-lane full review; it does not claim the domain audit is complete.
 
 ## v2026.09.23.401 — 2026-09-23
 - Added explicit research-paper-to-policy mapping to the economy plan. The 31,289-record discovery corpus remains broad coverage; selected high-confidence papers now map to adopted insight, non-adopted assumptions, and validation KPIs.

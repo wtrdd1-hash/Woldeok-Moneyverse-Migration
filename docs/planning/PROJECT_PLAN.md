@@ -2,11 +2,21 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.397
+> Current integrated version: v2026.09.23.402
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Full planning re-review authority — v2026.09.23.402 (2026-09-23)
+
+- `INTEGRATED_FULL_REVIEW_V402.md` is the current superseding full-review record. It starts a 12-lane re-audit of identity/security, economy, market/casino, inventory/marketplace, community/social, public content/SEO, native API, UI/accessibility, AI governance, data/DR, release lineage and analytics/monetization/compliance.
+- Authority drift is corrected: this PROJECT_PLAN and INTEGRATED_PLANNING_MASTER now share v2026.09.23.402. v398-v401 decisions are current unless later v402+ evidence explicitly supersedes them.
+- Historical P0/HIGH/P1 incident text is evidence, not automatically current status. The v402 active-status ledger is the current status entry point and each older ID must be revalidated before being treated as open or closed.
+- API inventory drift is explicitly unresolved: mobile API documentation records 57 controllers/335 endpoints/179 mobile endpoints while source discovery finds 58 controller files and 361 HTTP decorators. Only a generated semantic contract diff may establish the new authoritative count.
+- The local v402 contract check is BLOCKED because the worktree lacks installed TypeScript tooling (`tsc: not found` / node_modules absent); it is not accepted as a passing QA result.
+- Current standards refresh remains OWASP ASVS 5.0.0, NIST SP 800-63-4/63B-4 final, OpenAPI 3.2.1, WCAG 2.2/ISO 40500:2025 and W3C ACT Rules Format 1.1.
+- Scope truth: v402 phase 1 normalizes planning authority and establishes the audit ledger. It does not claim all 12 domain lanes, runtime QA, Test or Production are complete.
 
 ## Mandatory feature/API implementation parity — v2026.09.23.397 (2026-09-23)
 
