@@ -1,6 +1,6 @@
 # Woldeok Moneyverse — Jobs & Profession Mastery Specification
 
-> Version: v2026.09.23.398
+> Version: v2026.09.23.399
 > Status: Living implementation-oriented product specification
 > Date: 2026-09-23
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `SEASON_SYSTEM_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `LIMIT_CONSISTENCY_IMPLEMENTATION_SPEC.md`, `BUSINESS_OPERATIONS_SUPPLY_CHAIN_SPEC.md`
@@ -504,3 +504,111 @@ The displayed explanatory sentence, daily reset timestamp, weekly reset timestam
 - correct rendering after restart/deploy without logging users out;
 - correct EN/KO copy;
 - responsive desktop/mobile layout without truncating the remaining amount or reset context.
+
+
+## 24. Time-backed job payout and inflation-control model
+
+> Supersedes any interpretation that ordinary paid work should settle immediately without meaningful elapsed work time.
+
+### 24.1 Core economic rule
+A paid job is a server-authoritative time-backed assignment. WLD issuance is tied to verified elapsed work time and job value, not to button-click frequency.
+
+Planning formula:
+
+`net_wld = hourly_emission_band × eligible_minutes / 60 × difficulty × quality × demand × repeat_factor`
+
+All multipliers are bounded. The final reward is quoted at acceptance as a range or deterministic amount and is revalidated at settlement.
+
+### 24.2 Duration bands
+Initial tuning bands, subject to simulation and telemetry:
+- Micro assignment: 3–5 real minutes
+- Standard assignment: 10–20 real minutes
+- Advanced assignment: 30–60 real minutes
+- Project assignment: 2–8 real hours, asynchronous/offline-capable
+
+The minimum duration is persisted on assignment acceptance. Client timers are display-only. Server time is authoritative and clock manipulation cannot accelerate completion.
+
+### 24.3 One paid faucet slot
+Each account has one ordinary WLD-paying job slot by default. A user may browse, prepare, chat, trade, craft, learn, or perform non-WLD progression while a paid job is running, but cannot stack many simultaneous system-funded job faucets.
+
+This is an issuance-concurrency invariant, not a daily play ban. It bounds maximum currency creation per real-time hour while preserving continuous participation.
+
+### 24.4 No instant repeat minting
+- Same-template instant reaccept/complete loops are prohibited.
+- Completion requires elapsed time plus task-specific deterministic or server-verifiable completion state.
+- Repeated low-complexity work receives a diminishing `repeat_factor`; mastery/collection may continue at a higher floor than WLD.
+- Switching jobs must not reset abuse/repeat history if the behavior is economically equivalent.
+
+### 24.5 Emission budget, not arbitrary wealth cap
+The Economy Controller manages system-wide job issuance using measured economy health rather than a fixed per-user wealth ceiling.
+
+Required control metrics:
+- job WLD faucet per DAU and per active hour;
+- total faucet / total hard-sink ratio;
+- net money-supply change;
+- median/P90/P99 liquid WLD;
+- days-of-currency-on-hand;
+- currency velocity;
+- market basket / CPI-like price index where a tradable market exists;
+- top 1% / 10% wealth concentration;
+- bot/automation concentration and job-template concentration.
+
+Controller actions, in preferred order:
+1. adjust demand mix and task availability;
+2. adjust repeat decay;
+3. adjust sink prices/availability;
+4. adjust bounded hourly emission bands;
+5. apply temporary finite protection windows only for demonstrated integrity/economic risk.
+
+A global or cohort-specific change must be versioned, auditable, reversible and must not use protected/sensitive traits or hidden willingness-to-pay.
+
+### 24.6 Initial calibration target
+Do not choose a permanent WLD/hour target from intuition alone. Before Production, run economy simulation against actual sink prices and current wallet distribution.
+
+Seed for Test simulation only:
+- baseline ordinary work: 300–600 WLD per verified real hour;
+- advanced/high-quality work: up to 1.5× the baseline band;
+- low-complexity repeat floor: 25–40% of baseline WLD rate;
+- mastery XP floor may remain 70–100%.
+
+These values are not Production constants. Acceptance requires projected faucet/sink balance and wallet-growth curves over 7/30/90 days.
+
+### 24.7 Sink architecture
+Time-based throttling alone is insufficient. Recurring voluntary or utility-linked hard sinks should absorb currency without making core play punitive:
+- certification/respecialization;
+- crafting/service fees;
+- marketplace transaction fees;
+- property/business maintenance;
+- cosmetic/workspace customization;
+- prestige/archive/endowment systems;
+- optional expedited convenience that does not bypass verification or create pay-to-win.
+
+Principal player-to-player transfers are not sinks. Only the fee/burn component reduces money supply.
+
+### 24.8 UX contract
+Before acceptance, show:
+- expected duration;
+- expected WLD range/amount;
+- WLD-per-hour equivalent for transparency where appropriate;
+- difficulty/quality/repeat modifiers;
+- whether offline elapsed time counts;
+- exact earliest completion time.
+
+During work, show remaining server-authoritative time. When elapsed time is complete, the user still completes any required verification/claim step. The UI must not create a fake progress timer that can be skipped by refresh, local clock changes or client tampering.
+
+### 24.9 QA and anti-abuse
+Required cases:
+- accept → immediate complete attempt = rejected/no WLD;
+- client clock forward/backward manipulation = no effect;
+- server restart/deploy = timer continuity preserved;
+- multiple devices/concurrent complete = one settlement;
+- idempotent retry = same canonical result;
+- one paid slot enforced atomically;
+- duration boundary -1s/at/+1s;
+- repeat-factor continuity across logout/device/job switching;
+- offline project completion;
+- Economy Controller policy-version transition;
+- ledger reconciliation and no double faucet.
+
+### 24.10 Success criteria
+The system is healthy when normal users can make visible progress without instant currency flooding, while 7/30/90-day money-supply growth, sink coverage, market prices and wealth concentration remain inside approved bands. If users become rich primarily through rapid button repetition, the model is considered failed even if a daily cap eventually stops them.
