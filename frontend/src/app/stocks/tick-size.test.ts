@@ -70,8 +70,8 @@ describe('KRX 7단계 호가 틱 사이즈 엔진 (tick-size)', () => {
     expect(ladder5.askPrices[4]).toBe(10_050); // +1틱
     expect(ladder5.askPrices[0]).toBe(10_250); // +5틱
 
-    // Bids는 최우선 매수호가가 첫 번째(+1틱 아래: 10,000원에서 50원 틱인 9,950원), 이후 10원 틱 적용
-    expect(ladder5.bidPrices[0]).toBe(9_950);
-    expect(ladder5.bidPrices[4]).toBe(9_910);
+    // Bids는 최우선 매수호가가 첫 번째(-1틱 아래: 10,000원 미만 구간은 10원 틱이므로 9,990원), 이후 10원 틱 적용
+    expect(ladder5.bidPrices[0]).toBe(9_990);
+    expect(ladder5.bidPrices[4]).toBe(9_950);
   });
 });

@@ -34,15 +34,15 @@ describe('computeOrderbook', () => {
       expect(Number.parseInt(bid.price, 10)).toBeLessThan(priceNum);
     }
 
-    // Best ask is the lowest ask (step 1, last element in asks array)
-    expect(data.bestAsk).toBe(50250);
-    // Best bid is the highest bid (step 1, first element in bids array)
-    expect(data.bestBid).toBe(49750);
+    // Best ask is the lowest ask (step 1: +1틱 100원 -> 50,100)
+    expect(data.bestAsk).toBe(50100);
+    // Best bid is the highest bid (step 1: -1틱 50원 -> 49,950)
+    expect(data.bestBid).toBe(49950);
 
-    // Spread = 50250 - 49750 = 500
-    expect(data.spread).toBe(500);
-    // Spread Bps = (500 / 50000) * 100 = 1.00%
-    expect(data.spreadBps).toBe('1.00');
+    // Spread = 50100 - 49950 = 150
+    expect(data.spread).toBe(150);
+    // Spread Bps = (150 / 50000) * 100 = 0.30%
+    expect(data.spreadBps).toBe('0.30');
   });
 
   it('handles comma-formatted price strings cleanly', () => {

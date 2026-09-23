@@ -41,7 +41,8 @@ export function stepKrxTick(basePrice: number, steps: number): number {
   const count = Math.abs(steps);
 
   for (let i = 0; i < count; i++) {
-    const tick = getKrxTickSize(current);
+    // 하향 이동 시에는 현재 가격 직전 가격이 속한 구간의 틱 크기를 적용
+    const tick = dir > 0 ? getKrxTickSize(current) : getKrxTickSize(Math.max(1, current - 1));
     const next = current + (dir * tick);
     if (next <= 1) {
       current = 1;
