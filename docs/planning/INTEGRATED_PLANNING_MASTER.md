@@ -1,11 +1,21 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.23.404
+> Current ledger version: v2026.09.23.405
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.23.405 — 2026-09-23
+- Continued Debian 13 runtime hygiene work after merging PR #702 (main `67e34d8df182403532e1541d16391f76edfafc57`).
+- Protected current DB authorities were re-proven from backend configuration and active TCP connections: Production `127.0.0.1:5433/woldeok_moneyverse_dev`, Test `127.0.0.1:5585/woldeok_moneyverse_ci`.
+- Safely removed four stale container objects only: `mv-b280-pg`, `mv-ci315`, `mv-ci315b`, `wdmv-v127-fulltest-db`. Their Docker volumes were preserved.
+- Added `operations/RUNTIME_HYGIENE_INVENTORY.md` / `.ko.md` and classified remaining QA/recovery DB containers as retain-until-owner/data/rollback confirmation.
+- G405-01 / P1: observed wildcard host bindings for Production PostgreSQL 5433 and QA PostgreSQL ports 55432/55433/55555/56555. Firewall/network reachability was not independently verified, so this is a bind-exposure review item, not an Internet-exposure claim.
+- Production 5433 remains untouched because the live backend is connected to it. QA bind tightening requires owner/workstream confirmation before stop/recreate.
+- Explicit rule: container deletion and volume deletion are separate decisions; never use broad volume prune on this host.
+- Runtime hygiene + documentation update only; no Production service restart, DB migration or release promotion performed.
 
 ## v2026.09.23.404 — 2026-09-23
 - Re-baselined current infrastructure documentation from observed runtime facts on the authorized Debian host.

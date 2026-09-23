@@ -3,7 +3,7 @@
 [English canonical](INDEX.md) | **한국어**
 
 > 문서 거버넌스: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)
-> 현재 기획 권위: v2026.09.23.404
+> 현재 기획 권위: v2026.09.23.405
 
 ## 먼저 볼 문서
 
