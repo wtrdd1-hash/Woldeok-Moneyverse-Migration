@@ -169,10 +169,21 @@
     "commitSha": "2c854d47903294ef4ad48006a1b9cd57a70f5590",
     "shortSha": "2c854d4",
     "releasePath": "/srv/moneyverse-data/releases/prod-2c854d47-v392",
-    "status": "promoted",
+    "status": "archived",
     "activeSessions": 1063,
     "timestamp": "2026-09-23T10:13:00Z",
     "author": "System Engineer",
     "notes": "Virtual Businesses Supply Chain Procurement Loop (2% Hard Sink), 5 Domain Innovation Widgets (SupplyChainWidget, SavingsGoalProgressRing, SpaceCanvasEditor, SeasonHallOfFameTicker, NotificationTabsBar), Blue-Green Zero-Downtime Promotion to Test & Production, 1063 Active Sessions 100% Preserved"
+  },
+  {
+    "version": "v2026.09.23.393",
+    "commitSha": "b8d41b2670bf86083d6e4944d264a082d09b7b1c",
+    "shortSha": "b8d41b26",
+    "releasePath": "/srv/moneyverse-data/releases/prod-b8d41b26-v393",
+    "status": "promoted",
+    "activeSessions": 1062,
+    "timestamp": "2026-09-23T10:37:00Z",
+    "author": "System Engineer",
+    "notes": "Club Cooperative Economy (12x12 Clubhouse Shared Canvas, Hard Sink Funding Projects), Collection Ownership & D1~D7 Retention Curation Showcase (/collections), Navigation Mega Menu Integration, Zero-Downtime Blue-Green Promotion to Test & Production, 1062 Active User Sessions 100% Preserved"
   }
 ]

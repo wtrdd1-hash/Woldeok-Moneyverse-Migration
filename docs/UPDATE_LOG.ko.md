@@ -1,3 +1,32 @@
+## v2026.09.23.393 — 클럽 협동 경제 12x12 공유 캔버스, 컬렉션 소유권 & D1~D7 리텐션 큐레이션 쇼케이스, 무중단 블루-그린 승격 및 1,062개 활성 세션 100% 보존
+
+- 적용 브랜치: `main` (릴리스: `prod-b8d41b26-v393`, Exact Git SHA: `b8d41b2670bf86083d6e4944d264a082d09b7b1c`)
+- **클럽·협동 경제 고도화 (Clubhouse Shared 12x12 Canvas & Cooperative Economy)**:
+  1. **클럽하우스 공유 캔버스 (12x12 협동 그리드)**:
+     - `frontend/src/app/clubs/[clubId]/clubhouse-canvas.tsx`: 12x12 타일 기반 협동 클럽하우스 룸 에디터.
+     - 직책 기반 단계적 편집 권한 (`LEADER`/`MANAGER`는 전체 144타일 편집, 일반 회원은 가구 슬롯 기부 배치)으로 트롤링/도배 원천 차단.
+     - 8종 협동 가구 팔레트 (중앙 회의 테이블, 길드 깃발, 트로피 진열장, 협동 랜드마크, 공동 금고 등), 클럽 VIBE 점수 실시간 집계, 나이트/데이라이트 조명 토글, 배치 JSON 클립보드 복사.
+  2. **클럽하우스 뷰 연동**:
+     - `frontend/src/app/clubs/[clubId]/clubhouse-view.tsx`: 상단 탭에 `공유 캔버스 (12x12)` 기본 탭 추가 및 실시간 마운트.
+- **컬렉션 소유권 & 큐레이션 쇼케이스 (Collection Ownership & D1~D7 Retention Showcase)**:
+  1. **소유감 7단계 사다리 & D1~D7 리텐션 플로우**:
+     - `frontend/src/app/collections/curation-retention-flow.tsx`: 신규 유저부터 코어 홀더까지 단계별 소유감 증진 (`Have` → `Keep` → `Sort` → `Curate` → `Display` → `Narrate` → `Reinterpret`).
+     - D1~D7 소유감 타임라인 (`그때 → 지금 → 다음`), 보유 아이템 목록 및 유래(Provenance) 뷰어, 대표 조각(Favorite) 토글.
+  2. **비공개 큐레이션 메모 & 하이브리드 동기화**:
+     - 브라우저 로컬 스토리지 실시간 자동 저장 및 서버 영구 백업 하이브리드 아키텍처.
+  3. **선택적 읽기 전용 전시 쇼케이스 모달**:
+     - 민감 자산 자동 마스킹 후 `/collections?showcase=:id` 형태의 공유 카드 모달 및 링크 복사 지원.
+  4. **신규 전용 라우트 & 메가 네비게이션 연동**:
+     - `frontend/src/app/collections/page.tsx`: `/collections` 라우트 신설 (`requireMember()` 보호).
+     - `frontend/src/lib/navigation.ts`: `CATEGORY_NAV`(플레이·시즌 그룹), `MEMBER_NAV`, `HEADER_MEMBER`에 `컬렉션 전시관` 라우트 반영 및 3개 국어(한국어, 일본어, 중국어, 영어) 라벨 동기화.
+- **전수 단위/통합 테스트 100% 통과**:
+  - 프론트엔드: 102개 테스트 파일, 747개 테스트 전수 통과 (0 failed).
+  - 백엔드: 98개 테스트 파일, 977개 테스트 전수 통과 (0 failed).
+- **무중단 운영 승격 (Zero-Downtime Blue-Green Promotion)**:
+  - 테스트 서버(`https://test.easy-scraping.com/`): 전수 200 OK.
+  - 운영 서버(`https://easy-scraping.com/`): 메인 200 OK, BFF `/api/notifications/unread-count` 200 OK, 신규 라우트 `/clubs` 307 정상 인증 리다이렉트, `/collections` 307 정상 인증 리다이렉트, `/frontend-version` 빌드 ID 일치 (`b8d41b2670bf86083d6e4944d264a082d09b7b1c`).
+  - **PostgreSQL 활성 사용자 세션 1,062건 100% 무손실 보존 완료**.
+
 ## v2026.09.23.392 — 가상 사업체 서플라이 체인 원자재 조달 루프(2% 하드 싱크), 5대 도메인 혁신 위젯 마운트, 무중단 블루-그린 승격 및 1,063개 활성 세션 100% 보존
 
 - 적용 브랜치: `main` (릴리스: `prod-2c854d47-v392`, Exact Git SHA: `2c854d47903294ef4ad48006a1b9cd57a70f5590`)

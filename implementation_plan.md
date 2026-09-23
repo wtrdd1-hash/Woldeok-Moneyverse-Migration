@@ -1,6 +1,7 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v68)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v69)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v69**: 클럽하우스 12x12 협동 캔버스, 컬렉션 D1~D7 소유감 큐레이션 허브(/collections) 구현, 네비게이션 연동, 테스트 100% 통과, 미니 PC 무중단 블루-그린 승격(v2026.09.23.393) 및 1,062개 세션 무손실 보존 완료 (+110, -0)
 - **v68**: 클럽·협동 경제 및 컬렉션 큐레이션 허브 1차 심화 문답 최종 확정 사양(직책 기반 캔버스 권한, SINK_CLUB_PROJECT 100% 영구 소각, 로컬+서버 하이브리드 동기화, 비공개 기본 스냅샷 카드, 자율 실행 모드) 누적 수록 및 구현 착수 (+130, -0)
 - **v67**: 클럽·협동 경제 고도화(공동 펀딩 프로젝트 100% 영구 소각, 12x12 클럽하우스 공유 캔버스, 트로피 전시관) 및 컬렉션 소유권 & D1~D7 큐레이션 리텐션 허브(/collections) 아키텍처 수립 (+160, -0)
 - **v66**: 3차 심화 문답 최종 확정 사양(선택적 72시간 신선도 감가, B2B 2% Hard Sink 소각, 용량 초과 Fail-Closed 차단, 메인 상단 히어로 위젯 배치, 토스풍 파티클 & 슬라이드업 영수증 모달) 누적 수록 및 자율 구현 착수 (+145, -0)
@@ -2748,4 +2749,41 @@ flowchart TD
    - Vitest 테스트 작성 및 100% 통과 확인.
 6. **빌드, 프로모션 및 검증**:
    - Next.js Turbopack 프로덕션 빌드, 미니 PC 무중단 블루-그린 승격 (v393), 1,063+ 활성 세션 보존 확인.
+
+---
+
+## 🏁 [v69 Execution & Verification Summary] 구현 및 프로덕션 승격 완료 보고 (누적 추가)
+
+### 1. 완료된 작업 항목
+1. **클럽하우스 12x12 공유 캔버스 (`ClubhouseCanvas`)**:
+   - `frontend/src/app/clubs/[clubId]/clubhouse-canvas.tsx` 신설.
+   - 12x12 타일 협동 룸 에디터, 직책별 권한 제어(`LEADER`/`MANAGER` 전체 편집, 일반 회원 기부 슬롯 배치).
+   - 8종 협동 가구 팔레트, VIBE 점수 계산, 데이/나이트 조명 토글, 배치 JSON 내보내기 지원.
+   - `frontend/src/app/clubs/[clubId]/clubhouse-view.tsx`에 '공유 캔버스' 기본 탭 마운트 완료.
+2. **컬렉션 소유권 & 큐레이션 쇼케이스 (`CurationRetentionFlow`)**:
+   - `frontend/src/app/collections/curation-retention-flow.tsx` 신설.
+   - D1~D7 소유감 타임라인(`그때 → 지금 → 다음`), 소유감 7단계 사다리(`Have`~`Reinterpret`), 대표 수집품 토글.
+   - 브라우저 로컬 스토리지 실시간 자동 저장 및 서버 영구 백업 하이브리드 아키텍처.
+   - 민감 잔액 마스킹 및 읽기 전용 전시 쇼케이스 카드 모달/링크 복사 지원.
+   - `frontend/src/app/collections/page.tsx` 전용 라우트 신설 (`requireMember()` 보호).
+3. **네비게이션 다국어 매핑**:
+   - `frontend/src/lib/navigation.ts`: `CATEGORY_NAV`(플레이·시즌 그룹), `MEMBER_NAV`, `HEADER_MEMBER`에 `/collections` 라우트 반영.
+   - 한국어, 일본어, 중국어, 영어 4개 국어 번역 레이블 완비.
+
+### 2. 테스트 및 빌드 검증 결과
+- **프론트엔드 테스트**: 102개 테스트 파일, 747개 테스트 전수 통과 (`102 passed, 747 passed`, 0 failed).
+- **백엔드 테스트**: 98개 테스트 파일, 977개 테스트 전수 통과 (`98 passed, 977 passed`, 0 failed).
+- **Next.js Turbopack 빌드**: 26개 정적 페이지 및 `/clubs`, `/collections` 전 라우트 정상 컴파일 완료.
+
+### 3. 무중단 블루-그린 승격 (v393) 검증
+- **테스트 서버 (`https://test.easy-scraping.com/`)**: 메인 200 OK, 개발자 포털 200 OK.
+- **운영 서버 (`https://easy-scraping.com/`)**:
+  - 메인 포털: 200 OK.
+  - 알림 BFF (`/api/notifications/unread-count`): 200 OK.
+  - 1:1 채팅 카운트 (`/app-api/v1/chat/unread-count`): 401 (정상 인증 가드).
+  - 클럽하우스 (`/clubs`): 307 (정상 로그인 리다이렉트).
+  - 컬렉션 전시관 (`/collections`): 307 (정상 로그인 리다이렉트).
+  - 프론트엔드 버전 (`/frontend-version`): `{"id":"b8d41b2670bf86083d6e4944d264a082d09b7b1c"}`.
+  - **PostgreSQL 활성 사용자 세션: 1,062건 100% 무손실 보존 완료**.
+
 

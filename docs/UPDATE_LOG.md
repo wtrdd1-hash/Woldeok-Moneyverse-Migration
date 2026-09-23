@@ -1,3 +1,32 @@
+## v2026.09.23.393 — Club Cooperative Economy 12x12 Shared Canvas, Collection Ownership & D1~D7 Retention Curation Showcase, Zero-Downtime Blue-Green Promotion, 1,062 Active Sessions 100% Preserved
+
+- Applied Branch: `main` (Release: `prod-b8d41b26-v393`, Exact Git SHA: `b8d41b2670bf86083d6e4944d264a082d09b7b1c`)
+- **Club Cooperative Economy (Clubhouse Shared 12x12 Canvas & Collaborative Projects)**:
+  1. **Clubhouse Shared 12x12 Canvas**:
+     - `frontend/src/app/clubs/[clubId]/clubhouse-canvas.tsx`: 12x12 tile collaborative room editor.
+     - Role-tiered edit permissions (`LEADER`/`MANAGER` full 144-tile canvas editing, regular members furniture contribution slot placement), eliminating vandalism/trolling.
+     - 8-piece collaborative furniture palette (Guild Flag, Trophy Case, Conference Table, Cooperative Vault, Landmark Model), real-time Club VIBE score calculation, day/night lighting toggles, and layout JSON export.
+  2. **Clubhouse View Integration**:
+     - `frontend/src/app/clubs/[clubId]/clubhouse-view.tsx`: Added `공유 캔버스 (12x12)` primary default tab and real-time canvas mount.
+- **Collection Ownership & Curation Showcase (D1~D7 Retention Showcase)**:
+  1. **Ownership 7-Stage Ladder & D1~D7 Retention Flow**:
+     - `frontend/src/app/collections/curation-retention-flow.tsx`: Progressive ownership ladder from new users to core collectors (`Have` → `Keep` → `Sort` → `Curate` → `Display` → `Narrate` → `Reinterpret`).
+     - D1~D7 retention timeline (`Past → Present → Future`), owned items provenance viewer, and favorite piece toggle.
+  2. **Private Curation Notes & Hybrid Synchronization**:
+     - Instant browser local storage persistence with server backup hybrid architecture.
+  3. **Selective Read-Only Public Showcase Modal**:
+     - Automatic sensitive balance masking with shareable read-only card modal and `/collections?showcase=:id` deep link copy.
+  4. **Dedicated Route & Mega Navigation Integration**:
+     - `frontend/src/app/collections/page.tsx`: New dedicated route protected by `requireMember()`.
+     - `frontend/src/lib/navigation.ts`: Added `컬렉션 전시관` into `CATEGORY_NAV` (Play/Season group), `MEMBER_NAV`, and `HEADER_MEMBER` with full 4-locale translation sync (ko, ja, zh, en).
+- **Test Suite 100% Passed**:
+  - Frontend test suites: 102 test files, 747 tests passed (0 failed).
+  - Backend test suites: 98 test files, 977 tests passed (0 failed).
+- **Zero-Downtime Blue-Green Promotion**:
+  - Test server (`https://test.easy-scraping.com/`): 200 OK.
+  - Production server (`https://easy-scraping.com/`): Main 200 OK, BFF `/api/notifications/unread-count` 200 OK, new routes `/clubs` and `/collections` 307 redirect OK, `/frontend-version` matches exact commit SHA (`b8d41b2670bf86083d6e4944d264a082d09b7b1c`).
+  - **PostgreSQL active user sessions: 1,062 preserved 100%**.
+
 ## v2026.09.23.392 — Virtual Businesses Supply Chain Procurement Loop (2% Hard Sink), 5 Domain Innovation Widgets, Zero-Downtime Blue-Green Promotion, 1,063 Active Sessions 100% Preserved
 
 - Applied Branch: `main` (Release: `prod-2c854d47-v392`, Exact Git SHA: `2c854d47903294ef4ad48006a1b9cd57a70f5590`)
