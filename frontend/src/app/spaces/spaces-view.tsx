@@ -461,6 +461,8 @@ export function SpacesView({
             })}
           </div>
         </div>
+      )}
+
       {/* 3. 가상 세무 구청 탭 */}
       {activeTab === 'tax' && (
         <div className="space-y-8">
