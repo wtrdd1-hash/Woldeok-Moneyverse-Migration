@@ -2,8 +2,8 @@
 set -e
 
 SRC=/home/debian/Woldeok-Moneyverse-Migration
-TEST_DST=/srv/moneyverse-data/releases/test-1767bed1-v395
-PROD_DST=/srv/moneyverse-data/releases/prod-1767bed1-v395
+TEST_DST=/srv/moneyverse-data/releases/test-26f1cef4-v395
+PROD_DST=/srv/moneyverse-data/releases/prod-26f1cef4-v395
 PREV_PROD=/srv/moneyverse-data/releases/prod-57eeaacc-v394
 
 echo "=== [1/5] Creating release directories ==="

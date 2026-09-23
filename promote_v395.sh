@@ -2,7 +2,7 @@
 set -e
 
 echo "=== [1/4] Promoting Test Environment to v395 ==="
-sudo ln -sfn /srv/moneyverse-data/releases/test-1767bed1-v395 /srv/moneyverse-data/releases/test-current
+sudo ln -sfn /srv/moneyverse-data/releases/test-26f1cef4-v395 /srv/moneyverse-data/releases/test-current
 sudo systemctl restart test-main-backend.service || true
 sudo systemctl restart test-main-frontend.service || true
 sleep 3
@@ -14,7 +14,7 @@ echo "Test Server Main HTTP Status: $TEST_HTTP"
 echo "Test Server Developer Portal HTTP Status: $TEST_DEV_HTTP"
 
 echo "=== [3/4] Blue-Green Zero-Downtime Promoting Production to v395 ==="
-sudo ln -sfn /srv/moneyverse-data/releases/prod-1767bed1-v395 /srv/moneyverse-data/releases/production-current
+sudo ln -sfn /srv/moneyverse-data/releases/prod-26f1cef4-v395 /srv/moneyverse-data/releases/production-current
 sudo systemctl restart moneyverse-backend.service
 sudo systemctl restart moneyverse-frontend.service
 sleep 4

@@ -1,3 +1,39 @@
+## v2026.09.23.395 — 가상 도시 토지 부지 & 세무 구청 시스템(일일 부동산세 SINK_PROPERTY_TAX 100% 소각, 7일 유예 체납 공매 루프) 및 시즌 랭킹 & 명예의 전당 보상 분배 엔진 API 완비, 무중단 블루-그린 승격 및 1,069개 활성 세션 100% 보존
+
+- 적용 브랜치: `main` (릴리스: `prod-26f1cef4-v395`, Exact Git SHA: `26f1cef4a1d7f6c38eb04a29a1b8cf441738c829`)
+- **가상 도시 토지 부지 & 세무 구청 시스템 (PERSONAL_SPACES_CITY_PROJECTS_SPEC)**:
+  1. **일일 정액 부동산세 보유세 체계 및 100% 영구 소각 (`SINK_PROPERTY_TAX`)**:
+     - `SPACE_ROOM_STARTER`: 10 WLD, `SPACE_STUDIO`: 50 WLD, `SPACE_GALLERY`: 150 WLD, `SPACE_OFFICE`: 250 WLD, `SPACE_PENTHOUSE`: 600 WLD, `SPACE_HQ`: 2,500 WLD.
+     - 시중 유통에 재투입되지 않는 `SINK_PROPERTY_TAX` 사유 코드로 전액 원천 소각.
+  2. **체납 및 공매 규칙 (Foreclosure Auction)**:
+     - 7일 납부 유예(`Grace Period` = 7일).
+     - 7일 경과 후 미납 시 소유권 압류 및 체납 공매(`FORECLOSURE_AUCTION`) 자동 전환 (공매 시작가 50%).
+  3. **신규 백엔드 엔드포인트**:
+     - `GET /api/v1/spaces/:id/tax/status`: 공간별 부동산세 상태, 유예 기한, 체납 여부, 공매 상태 조회.
+     - `POST /api/v1/spaces/:id/tax/pay`: 일일 부동산세 원자적 납부 및 100% 영구 소각 (`SINK_PROPERTY_TAX`).
+     - `GET /api/v1/spaces/tax/delinquencies`: 체납 공매 대상 공간 목록 조회.
+- **시즌 랭킹 & 명예의 전당 보상 분배 엔진 (SEASON_SYSTEM_SPEC)**:
+  1. **6대 티어 표준 보상 모델**:
+     - `Capital Master` (Top 10): 번호 각인 한정판 트로피 (`TROPHY_SEASON_CHAMPION_#N`) + 500 WLD.
+     - `Diamond` (상위 1%): 500 WLD.
+     - `Platinum` (상위 5%): 400 WLD.
+     - `Gold` (상위 20%): 250 WLD.
+     - `Silver` (상위 50%): 150 WLD.
+     - `Bronze` (참가자 전원): 100 WLD.
+  2. **명예의 전당 아카이빙 (Hall of Fame)**:
+     - `season_hall_of_fame` 불변 테이블에 시즌 번호, 최종 순위 1~10위, 유저명, 최종 점수, 트로피 코드 영구 보존.
+  3. **신규 백엔드 엔드포인트**:
+     - `GET /api/v1/seasons/current`: 현재 시즌 정보, 내 실시간 랭킹, 티어 및 기대 보상 조회.
+     - `GET /api/v1/seasons/hall-of-fame`: 역대 시즌 명예의 전당 헌액자 목록 조회.
+     - `POST /api/v1/seasons/settle`: 시즌 종료 원자적 정산 엔진 (티어별 보상 계산, 명예의 전당 스냅샷, 트로피 인벤토리 지급).
+     - `POST /api/v1/seasons/claim-rewards`: 미수령 시즌 보상 청구 API (`idempotencyKey`).
+- **전수 단위/통합 테스트 100% 통과**:
+  - 백엔드: 100개 테스트 파일, 989개 테스트 전수 통과 (0 failed).
+  - 프론트엔드: 103개 테스트 파일, 756개 테스트 전수 통과 (0 failed).
+- **무중단 운영 승격 (Zero-Downtime Blue-Green Promotion)**:
+  - 테스트 및 운영 서버 전수 200 OK.
+  - **PostgreSQL 활성 사용자 세션 1,069건 100% 무손실 보존 완료**.
+
 ## v2026.09.23.394 — P2P 유저 거래소 & 에스크로 경매 시스템(잉글리시 옥션, 1:1 직거래, 공인 감정소, 가격발견 스파크라인), 무중단 블루-그린 승격 및 1,069개 활성 세션 100% 보존
 
 - 적용 브랜치: `main` (릴리스: `prod-57eeaacc-v394`, Exact Git SHA: `57eeaacc8de77f0f5e19450f3892ef1527760190`)

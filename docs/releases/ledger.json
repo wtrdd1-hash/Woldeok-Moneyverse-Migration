@@ -191,10 +191,21 @@
     "commitSha": "57eeaacc8de77f0f5e19450f3892ef1527760190",
     "shortSha": "57eeaacc",
     "releasePath": "/srv/moneyverse-data/releases/prod-57eeaacc-v394",
-    "status": "promoted",
+    "status": "archived",
     "activeSessions": 1069,
     "timestamp": "2026-09-23T11:30:00Z",
     "author": "System Engineer",
     "notes": "Player Marketplace & Escrow Auction Suite (English Auction with Anti-Sniping, P2P 1:1 Direct Escrow Dual Sign-Off, Certified Appraisal Service with Provenance Badges, Price Discovery Rolling Median & Anomaly Detection), Zero-Downtime Blue-Green Promotion, 1069 Active Sessions 100% Preserved"
+  },
+  {
+    "version": "v2026.09.23.395",
+    "commitSha": "26f1cef4a1d7f6c38eb04a29a1b8cf441738c829",
+    "shortSha": "26f1cef4",
+    "releasePath": "/srv/moneyverse-data/releases/prod-26f1cef4-v395",
+    "status": "promoted",
+    "activeSessions": 1069,
+    "timestamp": "2026-09-23T11:50:00Z",
+    "author": "System Engineer",
+    "notes": "Space Property Tax & Delinquency Foreclosure Auction Loop (SINK_PROPERTY_TAX 100% Burn), Season Ranking & Hall of Fame Reward Settlement Engine (6-Tier Rewards, Top 10 Serialized Trophies, Immutable season_hall_of_fame Snapshots), Zero-Downtime Blue-Green Promotion, 1069+ Active Sessions 100% Preserved"
   }
 ]

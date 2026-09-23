@@ -1,3 +1,39 @@
+## v2026.09.23.395 — Space Property Tax & Foreclosure Auction Suite, Season Ranking & Hall of Fame Reward Settlement Engine APIs, Zero-Downtime Blue-Green Promotion, 1,069 Active Sessions 100% Preserved
+
+- Applied Branch: `main` (Release: `prod-26f1cef4-v395`, Exact Git SHA: `26f1cef4a1d7f6c38eb04a29a1b8cf441738c829`)
+- **Virtual City Spaces & Property Tax Municipal System (PERSONAL_SPACES_CITY_PROJECTS_SPEC)**:
+  1. **Daily Fixed Property Tax & 100% Permanent Burn (`SINK_PROPERTY_TAX`)**:
+     - `SPACE_ROOM_STARTER`: 10 WLD, `SPACE_STUDIO`: 50 WLD, `SPACE_GALLERY`: 150 WLD, `SPACE_OFFICE`: 250 WLD, `SPACE_PENTHOUSE`: 600 WLD, `SPACE_HQ`: 2,500 WLD.
+     - 100% permanently destroyed under reason code `SINK_PROPERTY_TAX` with zero economic recirculation.
+  2. **Delinquency & Foreclosure Auction Rule**:
+     - 7-day grace period (`Grace Period` = 7 days).
+     - Overdue exceeding 7 days converts property into `FORECLOSURE_AUCTION` (opening bid at 50% fair valuation).
+  3. **New Backend Endpoints**:
+     - `GET /api/v1/spaces/:id/tax/status`: Inspect property tax schedule, overdue days, grace period expiration, foreclosure readiness.
+     - `POST /api/v1/spaces/:id/tax/pay`: Pay daily property tax atomically with 100% permanent burn (`SINK_PROPERTY_TAX`).
+     - `GET /api/v1/spaces/tax/delinquencies`: List spaces under delinquency grace or ready for foreclosure auction.
+- **Season Ranking & Hall of Fame Reward Settlement Engine (SEASON_SYSTEM_SPEC)**:
+  1. **6-Tier Standard Reward Distribution**:
+     - `Capital Master` (Top 10): Serialized champion trophy (`TROPHY_SEASON_CHAMPION_#N`) + 500 WLD.
+     - `Diamond` (Top 1%): 500 WLD.
+     - `Platinum` (Top 5%): 400 WLD.
+     - `Gold` (Top 20%): 250 WLD.
+     - `Silver` (Top 50%): 150 WLD.
+     - `Bronze` (All participants): 100 WLD.
+  2. **Hall of Fame Permanent Archiving**:
+     - Immutable `season_hall_of_fame` table snapshot permanently records season number, top 1~10 rankers, display name, score, trophy code, settlement timestamp.
+  3. **New Backend Endpoints**:
+     - `GET /api/v1/seasons/current`: Active season metadata, user live ranking, tier status, and expected reward.
+     - `GET /api/v1/seasons/hall-of-fame`: Historical Hall of Fame honorees grouped by season.
+     - `POST /api/v1/seasons/settle`: Authoritative season settlement procedure (tier computations, Hall of Fame archiving, trophy distribution).
+     - `POST /api/v1/seasons/claim-rewards`: Idempotent season reward claim API (`idempotencyKey`).
+- **Comprehensive Unit & Integration Test Suites 100% Passed**:
+  - Backend test suites: 100 test files, 989 tests passed (0 failed).
+  - Frontend test suites: 103 test files, 756 tests passed (0 failed).
+- **Zero-Downtime Blue-Green Promotion**:
+  - Test and Production server endpoints verified healthy (200 OK).
+  - **PostgreSQL active user sessions: 1,069 preserved 100% without session loss**.
+
 ## v2026.09.23.394 — Player Marketplace & Escrow Auction Suite (English Auction, 1:1 Direct Trade, Certified Appraisal, Price Discovery), Zero-Downtime Blue-Green Promotion, 1,069 Active Sessions 100% Preserved
 
 - Applied Branch: `main` (Release: `prod-57eeaacc-v394`, Exact Git SHA: `57eeaacc8de77f0f5e19450f3892ef1527760190`)
