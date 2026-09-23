@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import { Package, Zap, TrendingUp, Warehouse, ArrowUpRight, CheckCircle2, AlertCircle } from 'lucide-react';
 
 interface SupplyChainWidgetProps {
-  businessId?: string;
-  businessName?: string;
-  businessSymbol?: string;
+  businessId?: string | undefined;
+  businessName?: string | undefined;
+  businessSymbol?: string | undefined;
 }
 
 export function SupplyChainWidget({

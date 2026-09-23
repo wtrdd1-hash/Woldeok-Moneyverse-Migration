@@ -35,6 +35,22 @@ const PALETTE: FurnitureItem[] = [
 
 const GRID_SIZE = 8;
 
+function createStarterGrid(): (string | null)[][] {
+  const initial: (string | null)[][] = Array.from({ length: GRID_SIZE }, () =>
+    Array<string | null>(GRID_SIZE).fill(null),
+  );
+  const place = (r: number, c: number, id: string) => {
+    const row = initial[r];
+    if (row) row[c] = id;
+  };
+  place(2, 3, 'desk');
+  place(3, 3, 'chair');
+  place(1, 1, 'trophy');
+  place(1, 6, 'safe');
+  place(6, 1, 'plant');
+  return initial;
+}
+
 export function SpaceCanvasEditor({
   spaceName = '스타터 룸',
   spaceType = 'SPACE_ROOM_STARTER',
@@ -43,20 +59,9 @@ export function SpaceCanvasEditor({
   readonly spaceType?: string;
 }) {
   // 8x8 grid state (null or FurnitureItem id)
-  const [grid, setGrid] = useState<(string | null)[][]>(() => {
-    const initial = Array(GRID_SIZE)
-      .fill(null)
-      .map(() => Array(GRID_SIZE).fill(null));
-    // Default starter room setup
-    initial[2][3] = 'desk';
-    initial[3][3] = 'chair';
-    initial[1][1] = 'trophy';
-    initial[1][6] = 'safe';
-    initial[6][1] = 'plant';
-    return initial;
-  });
+  const [grid, setGrid] = useState<(string | null)[][]>(createStarterGrid);
 
-  const [selectedFurniture, setSelectedFurniture] = useState<FurnitureItem | null>(PALETTE[0]);
+  const [selectedFurniture, setSelectedFurniture] = useState<FurnitureItem | null>(PALETTE[0] ?? null);
   const [isNightMode, setIsNightMode] = useState<boolean>(false);
   const [copiedNotification, setCopiedNotification] = useState<boolean>(false);
 
@@ -72,12 +77,14 @@ export function SpaceCanvasEditor({
   const handleCellClick = (r: number, c: number) => {
     setGrid((prev) => {
       const next = prev.map((row) => [...row]);
-      if (next[r][c] !== null) {
+      const row = next[r];
+      if (!row) return next;
+      if (row[c] !== null && row[c] !== undefined) {
         // If clicked on occupied cell, remove it
-        next[r][c] = null;
+        row[c] = null;
       } else if (selectedFurniture) {
         // Place selected furniture
-        next[r][c] = selectedFurniture.id;
+        row[c] = selectedFurniture.id;
       }
       return next;
     });
@@ -85,15 +92,7 @@ export function SpaceCanvasEditor({
 
   const handleReset = () => {
     if (window.confirm('룸 배치를 초기 기본 상태로 되돌리시겠습니까?')) {
-      const initial = Array(GRID_SIZE)
-        .fill(null)
-        .map(() => Array(GRID_SIZE).fill(null));
-      initial[2][3] = 'desk';
-      initial[3][3] = 'chair';
-      initial[1][1] = 'trophy';
-      initial[1][6] = 'safe';
-      initial[6][1] = 'plant';
-      setGrid(initial);
+      setGrid(createStarterGrid());
     }
   };
 
