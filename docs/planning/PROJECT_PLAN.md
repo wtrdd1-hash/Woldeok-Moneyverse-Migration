@@ -2,11 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.412
+> Current integrated version: v2026.09.23.413
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Hourly planning cycle — v2026.09.23.413 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Improvement. **Previous Cycle Type:** Feature Addition. **Next Cycle Type:** Feature Addition.
+- **Exact baseline:** start and mid-work rechecks both resolved authoritative `origin/main=e447b11f1d27ee7da2a46c64fcd96e0058c8da6d`. This cycle is based on the still-unmerged v412 planning lineage so the integrated EN/KO planning record is not fragmented or silently discarded.
+- **Improvement target — CI-413-01 / P1 release-quality blocker:** repository-wide required CI remains unable to reach typecheck, build, migrations, full tests, Prisma-schema mutation rejection, or production dependency audit because `pnpm lint` fails first. PR #710 exact head `83a9ac52fecdbe6adb985f34b35013003bd01699` CI run 1809 reproduced **198 problems (184 errors, 14 warnings)**. This is a repeated cross-workstream gate failure, not evidence that #710's focused idempotency change itself failed.
+- **Concrete defect inventory from run 1809:** failures span marketplace controller tests (`no-explicit-any`), Discord music empty blocks, legacy `capture_v326.js` CommonJS import, widespread unused frontend imports/state, collections empty blocks/unescaped entities, developer-portal type-import style, marketplace UI dead imports/state, stock discussion `any`, stock portfolio render-time mutation (`react-hooks/immutability`), mobile-home/test typing, audio/test setup empty blocks and `any`. Warnings include unoptimized `<img>`, missing hook dependency, and internal navigation via `window.location.href`.
+- **Improvement objective:** restore the required CI path without weakening lint policy or excluding product/runtime directories merely to obtain green status. Partition remediation into behavior-neutral dead-code/import cleanup, type-safety fixes, React correctness fixes, test-harness typing, and warnings that may affect performance/accessibility/navigation. Any fix that changes behavior must receive domain-focused regression tests rather than being bundled as cosmetic lint cleanup.
+- **Implementation surfaces:** frontend, backend tests, Discord bot, QA/test harness, repository lint configuration, CI workflow and app-api-facing UI components are affected. DB/API contracts are not to be changed solely for lint compliance; if a lint repair exposes a runtime/API defect, that defect becomes a separately testable backlog item with its own authority and migration implications.
+- **QA acceptance (provisional):** on one exact candidate SHA, `pnpm lint` must finish with zero errors; then the previously skipped required stages must actually execute and pass rather than remain skipped. Preserve classifier/policy success, run typecheck/build/migrations/full tests/Prisma-mutation rejection/dependency audit, and attach the exact-SHA workflow evidence. Changed-file/focused lint alone is insufficient.
+- **Test / Production gate (provisional):** Test promotion requires the exact candidate SHA to pass repository-required CI plus representative domain regressions for behavior-affecting fixes. Production eligibility requires merged-main lineage to that tested SHA (or an explicitly proven promotion descendant), existing session-continuity/zero-downtime gates, and no release based on a workflow where downstream checks were skipped.
+- **Reference gate:** `0 / 10,000` new CI/lint/remediation-specific, deduplicated independent external references were acquired and analyzed in this cycle. Existing generic UI corpora are not reclassified. Therefore CI-413-01 remains **IN PROGRESS / REFERENCE VALIDATION BLOCKED**; the remediation/acceptance items above are evidence-backed provisional closure criteria, not research-complete product requirements. Future corpus must cover large-monorepo CI quality gates, ESLint/TypeScript/React correctness, staged-vs-repository lint strategies, false-positive policy, release gating, accessibility/performance lint, failure case studies and rollback/branch-protection operations.
+- **Open-PR reconciliation:** #704/#709/#711 are planning-only blocked records; #705 marketplace integrity, #706 AI-news idempotency, #707 consent fail-closed, #708 QA parser recovery, and #710 business supply idempotency are runtime/tooling candidates. None may be treated as implemented or Production-ready solely from focused local PASS evidence while required exact-SHA CI is red.
+- **Scope truth:** this cycle updates only the integrated planning record. It does not relax CI, merge runtime code, mutate DB/Test/Production, deploy, or claim CI-413-01 research-complete.
 
 ## Hourly planning cycle — v2026.09.23.412 (2026-09-23)
 

@@ -2,11 +2,25 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.23.412
+> **현재 통합 버전:** v2026.09.23.413
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 시간별 기획 회차 — v2026.09.23.413 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Improvement. **Previous Cycle Type:** Feature Addition. **Next Cycle Type:** Feature Addition.
+- **정확한 기준:** 시작 및 작업 중간 재확인 모두 authoritative `origin/main=e447b11f1d27ee7da2a46c64fcd96e0058c8da6d`였다. 통합 EN/KO 기획 기록을 분산시키거나 버리지 않기 위해 아직 미병합인 v412 기획 계보를 기반으로 이번 회차를 작성한다.
+- **보완 대상 — CI-413-01 / P1 릴리스 품질 차단:** repository-wide required CI가 `pnpm lint` 선행 실패 때문에 typecheck, build, migration, 전체 test, Prisma schema mutation rejection, production dependency audit까지 도달하지 못한다. PR #710 exact head `83a9ac52fecdbe6adb985f34b35013003bd01699`의 CI run 1809에서 **198 problems (184 errors, 14 warnings)**가 재현됐다. 이는 반복되는 cross-workstream gate 실패이며 #710의 focused idempotency 변경 자체가 실패했다는 증거는 아니다.
+- **run 1809 구체 결함군:** marketplace controller test의 `no-explicit-any`, Discord music empty block, legacy `capture_v326.js` CommonJS import, 광범위한 frontend unused import/state, collections empty block/unescaped entity, developer portal type-import style, marketplace UI dead import/state, stock discussion `any`, stock portfolio render-time mutation(`react-hooks/immutability`), mobile-home/test typing, audio/test setup의 empty block/`any`가 포함된다. warning에는 최적화되지 않은 `<img>`, hook dependency 누락, `window.location.href` 내부 탐색이 포함된다.
+- **개선 목표:** green을 만들기 위해 lint 정책을 약화하거나 product/runtime directory를 임의 제외하지 않는다. 수정은 behavior-neutral dead-code/import 정리, type-safety, React correctness, test-harness typing, performance/accessibility/navigation warning으로 분리한다. 동작이 바뀌는 수정은 cosmetic lint cleanup에 묻지 않고 domain-focused regression test를 동반한다.
+- **영향 구현면:** frontend, backend test, Discord bot, QA/test harness, repository lint configuration, CI workflow, app-api-facing UI component다. lint 통과만을 위해 DB/API 계약을 바꾸지 않는다. lint 수정 중 runtime/API 결함이 드러나면 별도 권위·migration 영향을 가진 독립 backlog로 분리한다.
+- **QA 수용조건(임시):** 하나의 exact candidate SHA에서 `pnpm lint` zero error를 달성하고, 이전에 skip된 required stage가 실제 실행·통과해야 한다. classifier/policy 성공을 보존하면서 typecheck/build/migrations/full tests/Prisma mutation rejection/dependency audit까지 수행하고 exact-SHA workflow evidence를 남긴다. changed-file/focused lint만으로는 부족하다.
+- **Test / Production 게이트(임시):** Test 승격은 동일 exact candidate SHA의 repository-required CI와 behavior-affecting 수정에 대한 대표 domain regression 통과가 필요하다. Production은 tested SHA로 이어지는 merged-main lineage(또는 명시적으로 증명된 promotion descendant), 기존 session-continuity/zero-downtime gate가 필요하며 downstream check가 skip된 workflow를 근거로 릴리스하지 않는다.
+- **레퍼런스 게이트:** 이번 회차에서 CI/lint/remediation에 직접 관련된 신규 중복 제거 독립 외부 레퍼런스의 실제 수집·분석은 `0 / 10,000`건이다. 기존 일반 UI corpus를 재분류하지 않는다. 따라서 CI-413-01은 **IN PROGRESS / REFERENCE VALIDATION BLOCKED**이며 위 항목은 증거 기반 provisional closure criteria일 뿐 research-complete 요구사항이 아니다. 향후 corpus는 대규모 monorepo CI quality gate, ESLint/TypeScript/React correctness, staged-vs-repository lint, false-positive policy, release gating, 접근성/성능 lint, 실패 사례, rollback/branch-protection 운영을 포함해야 한다.
+- **열린 PR 정합:** #704/#709/#711은 planning-only blocked 기록이고 #705 marketplace integrity, #706 AI-news idempotency, #707 consent fail-closed, #708 QA parser recovery, #710 business supply idempotency는 runtime/tooling 후보다. required exact-SHA CI가 red인 동안 focused local PASS만으로 구현완료/Production-ready로 취급하지 않는다.
+- **범위 사실:** 이번 회차는 통합 기획서만 갱신한다. CI 정책 완화, runtime merge, DB/Test/Production 변경, 배포 또는 CI-413-01 research 완료를 주장하지 않는다.
 
 ## 시간별 기획 회차 — v2026.09.23.412 (2026-09-23)
 
