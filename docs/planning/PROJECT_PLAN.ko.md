@@ -2,11 +2,25 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.23.406
+> **현재 통합 버전:** v2026.09.23.418
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 시간별 기획 회차 — v2026.09.23.418 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Addition. **Previous Cycle Type:** Feature Improvement. **Next Cycle Type:** Feature Improvement.
+- **정확한 기준선:** 시작 및 작업 중간 재확인 모두 보호된 `main`이 `e7de92493388c9f70d2b2e4a49c2ddc3fa56ddff`임을 확인했다. 열린 PR은 없으며, 남아 있는 원격 작업 브랜치는 rebase/재검증 전까지 증거일 뿐 현재 권위가 아니다.
+- **최신 QA:** main CI run `35870971757`에서 `classify`, `policy`는 성공했고 최신 CI/tooling-only 변경이 non-runtime으로 분류되어 `runtime-check`는 skip됐다. Build Test Candidate와 Build Production Release 오케스트레이션은 성공했지만 skip된 runtime job을 애플리케이션 runtime 검증으로 세지 않는다. auto-integrate/cleanup workflow의 별도 실패는 운영 후속조치 대상으로 남긴다.
+- **최근 runtime/code 변경:** main에는 v406 릴리스 기록 이후 주식 MA5/MA20/Bollinger overlay와 release classifier/tooling 변경이 들어왔다. 이번 기획 회차는 새 Production 배포를 주장하지 않는다.
+- **신규 후보 — SEC-418-01 / P1 계정 보안 동결 및 복구 잠금:** 저장소 전체 source 검색에서 사용자용 account-freeze/temporary recovery-lock 권위 계약을 찾지 못했다. 후보 목적은 인증된 사용자 또는 더 강한 증명을 거친 복구 흐름이 고위험 경제 mutation을 긴급 차단하면서 안전한 조회·복구 접근은 유지하게 하는 것이다. 일반 로그아웃, 관리자 정지, 세션 폐기와 구분한다.
+- **레퍼런스 게이트 이후 구현 backlog:** actor/권한 매트릭스, Security 진입점과 긴급 CTA, `ACTIVE/FROZEN/RECOVERY_PENDING/RESTORING` 상태 머신, banking/stocks/marketplace/casino/inventory transfer/business/subscriptions/app-api별 차단·허용 작업표, 서버 권위 policy middleware, freeze event/reason/effective/expiry/recovery 영속화, transaction/race semantics, session/token 처리, dual-control·audit 기반 관리자 지원, 알림·악용/rate control, 모바일·접근성, 분석/KPI, rollback·break-glass 절차를 정의한다. freeze authority가 불명확하거나 unavailable이면 경제 mutation은 fail-closed한다.
+- **API/DB 완료조건:** idempotent freeze/unfreeze/recovery command, recent-reauth/step-up, object-level authorization, 안정적 error code, DB constraint/index, append-only audit, 진행 중 mutation과 freeze의 경쟁 조건, settlement와 freeze가 경합할 때 reconciliation, web/mobile/app-api parity를 정의한다. client-only freeze flag는 허용하지 않는다.
+- **QA/릴리스 완료조건:** 하나의 exact candidate SHA에서 권한 positive/negative, stale/replay command, freeze-vs-transfer/order/bid/purchase 동시성, session continuity, 알림, admin override, recovery, 접근성·모바일 테스트를 수행한다. Test에서 권위 DB state와 대표 경제 write 차단을 입증해야 하며 Production은 tested-SHA→merged-main lineage, immutable evidence, rollback 증거, 배포로 인한 logout 없음까지 요구한다.
+- **레퍼런스 게이트:** 이번 회차에 실제 신규 수집·분석한 후보 전용 중복 제거 독립 외부 레퍼런스는 `0 / 10,000`이다. 기존 일반 보안/UI 연구를 재분류하지 않는다. 따라서 SEC-418-01은 **IN PROGRESS / REFERENCE VALIDATION BLOCKED**이며 위 구현 내용은 저장소 증거 기반 provisional scope이지 research-complete 명세가 아니다. 향후 corpus는 은행/카드 freeze, 계정 복구, fraud lockout, fintech 보안 UX, 악용 사례, 접근성/모바일, API/DB 동시성, audit/reconciliation, 규제 지침, 장애·사고 postmortem을 포함한다.
+- **기획파일 통합:** 이 파일은 영문 canonical의 구조적 parity를 유지한다. 기존 `planning/deltas` 및 기타 과거 분산 기획은 증거/정리 후보일 뿐이며 이번 회차에서 새 분산 기획파일을 만들지 않는다.
+
 
 ## 6대 도메인 기획 결함 보완 및 실시간/금융/보안 아키텍처 강제 계약 — v2026.09.23.406 (2026-09-23)
 

@@ -2,11 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.406
+> Current integrated version: v2026.09.23.418
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Hourly planning cycle — v2026.09.23.418 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Addition. **Previous Cycle Type:** Feature Improvement. **Next Cycle Type:** Feature Improvement.
+- **Exact baseline:** start and mid-work re-read both resolve protected `main` to `e7de92493388c9f70d2b2e4a49c2ddc3fa56ddff`. There are no open PRs; stale remote work branches remain and are evidence only until rebased/revalidated.
+- **Latest QA:** main CI run `35870971757` is green for `classify` and `policy`; `runtime-check` is skipped because the classifier treats the latest CI/tooling-only change as non-runtime. Build Test Candidate and Build Production Release orchestration runs completed successfully, but skipped runtime jobs are not application-runtime verification. Auto-integrate/cleanup workflows also emitted separate failures and require operational follow-up rather than being counted as feature QA.
+- **Recent runtime/code change:** main now includes stock MA5/MA20/Bollinger overlays plus release-classifier/tooling changes after the v406 release record. No planning statement in this cycle claims a new Production deployment.
+- **New candidate — SEC-418-01 / P1 Account Security Freeze & Recovery Lock:** repository-wide source search found no authoritative user-facing account-freeze/temporary recovery-lock contract. Candidate intent is a distinct emergency control allowing an authenticated user, or a recovery flow with stronger proof, to block high-risk economic mutations while preserving safe read/recovery access. It is not ordinary logout, admin suspension, or session revocation.
+- **Required implementation backlog after research gate:** define actor/permission matrix; Security entry point and emergency CTA; `ACTIVE/FROZEN/RECOVERY_PENDING/RESTORING` state machine; exact blocked-vs-allowed operation matrix across banking, stocks, marketplace, casino, inventory transfer, business, subscriptions and app-api; server-authoritative policy middleware; durable freeze event/reason/effective/expiry/recovery state; transactional enforcement and race semantics; session/token handling; admin support with dual-control/audit; notification and abuse/rate controls; mobile/accessibility; analytics/KPI; rollback and break-glass procedures. Every economic mutation must fail closed when freeze authority is unavailable or ambiguous.
+- **API/DB closure criteria after research gate:** specify idempotent freeze/unfreeze/recovery commands, recent-reauth/step-up requirements, object-level authorization, stable error codes, DB constraints/indexes, append-only audit, concurrent in-flight mutation behavior, reconciliation for a freeze racing a settlement, and web/mobile/app-api parity. No client-only freeze flag is acceptable.
+- **QA/release closure criteria after research gate:** positive/negative authorization, stale/replayed command, concurrent freeze-vs-transfer/order/bid/purchase, session continuity, notification, admin override, recovery, accessibility and mobile tests on one exact candidate SHA; Test must prove authoritative DB state plus representative blocked economic writes before Production. Production promotion requires tested-SHA→merged-main lineage, immutable evidence, rollback proof and no deployment-caused logout.
+- **Reference gate:** candidate-specific deduplicated independent external references actually collected/analyzed this cycle: `0 / 10,000`. Existing generic security/UI research is not reclassified. SEC-418-01 is therefore **IN PROGRESS / REFERENCE VALIDATION BLOCKED**; the implementation text above is repository-evidence-based provisional scope, not a research-complete specification. Required corpus spans bank/card freeze controls, account recovery, fraud lockouts, fintech security UX, abuse cases, accessibility/mobile, API/DB concurrency, audit/reconciliation, regulatory guidance and incident postmortems.
+- **Planning-file consolidation:** this file remains canonical and `PROJECT_PLAN.ko.md` remains structural parity. Existing `planning/deltas` and other historical planning fragments are evidence/cleanup candidates only; no new distributed planning file is created by this cycle.
+
 
 ## 6-Domain Defect Mitigation & Real-Time/Fintech/Security Architecture Spec — v2026.09.23.406 (2026-09-23)
 
