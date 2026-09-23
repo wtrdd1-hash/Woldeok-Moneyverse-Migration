@@ -1,11 +1,19 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.23.400
+> Current ledger version: v2026.09.23.401
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.23.401 — 2026-09-23
+- Added explicit research-paper-to-policy mapping to the economy plan. The 31,289-record discovery corpus remains broad coverage; selected high-confidence papers now map to adopted insight, non-adopted assumptions, and validation KPIs.
+- Core evidence: Axtell & Farmer (2025) ABM; Kaplan, Moll & Violante (2018) HANK; Kaplan & Violante (2018) heterogeneity; Zheng et al. AI Economist (2020/2021); Atashbar & Shi IMF RL work (2022/2023); Atashbar (2024); Hogan-Hennessy et al. virtual-market intervention (2022); Calvano et al. algorithmic pricing (2020); Meylahn & Schinkel (2026).
+- Linked cohort affordability, ABM stress testing, RL shadow gates, sink causal evaluation, and algorithmic pricing ceilings/synchronization telemetry/human approval directly to the literature.
+- New canonical document: `ECONOMY_RESEARCH_PAPER_MAP.md` / `ECONOMY_RESEARCH_PAPER_MAP.ko.md`.
+- Literature cannot authorize Production parameters by itself; Moneyverse replay, telemetry, acceptance thresholds and rollback evidence remain mandatory.
+- Planning/docs only; no runtime/Test/Production claim. EN/KO parity complete.
 
 ## v2026.09.23.400 — 2026-09-23
 - Rechecked `origin/main=7b705e1d37e97ccd05ba12042c3fd8d582e396d0` and expanded the v399 monetary-velocity evidence base.

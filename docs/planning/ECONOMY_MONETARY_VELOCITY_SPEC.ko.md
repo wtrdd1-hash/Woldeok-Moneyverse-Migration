@@ -1,6 +1,6 @@
 # 월덕 머니버스 — 통화 유통속도·보상 페이싱 기획 명세서
 
-> 버전: v2026.09.23.400
+> 버전: v2026.09.23.401
 > 상태: 구현 지향형 Living 제품 기획 명세
 > 기준: v2026.09.23.398 직업 보상 초기화 기획
 > 영문 기준 문서: [ECONOMY_MONETARY_VELOCITY_SPEC.md](ECONOMY_MONETARY_VELOCITY_SPEC.md)
@@ -93,3 +93,16 @@ sink 평가는 품목군별로 한다. 아이템 제거, 거래세, 명예 소�
 계절성과 활동주기 효과를 구조적 인플레이션과 분리한다. 경제 데이터·대시보드는 source version, 추출시각, 정정/개정 marker, policy version을 보존해 사후 데이터 수정이 과거 운영판단을 조용히 덮어쓰지 않게 한다.
 
 가능한 정책변경은 단순 전후 상관관계 대신 causal 또는 quasi-experimental 평가를 사용한다. 기본 비교 패키지는 전후 비교 + 비노출/대조 코호트 + policy-version 노출 + 불확실성 metadata다.
+
+## 12. 핵심 논문 근거 제어 계약
+
+상세 연구-기획 연결은 `ECONOMY_RESEARCH_PAPER_MAP.ko.md`를 권위 문서로 사용한다. 다음 제어는 이제 논문 근거를 명시적으로 가진다.
+
+- 코호트 구매력·자산분포 텔레메트리: Kaplan, Moll & Violante (2018), Kaplan & Violante (2018)
+- 결정론 원장 권위를 유지한 ABM stress test: Axtell & Farmer (2025)
+- 이중/적대 정책시뮬레이션과 제한형 출력: Zheng et al. AI Economist (2020/2021)
+- RL shadow 운영, action bound, reward sensitivity, 결정론 검증: Atashbar & Shi (2022, 2023), Atashbar (2024)
+- sink 품목별 부작용과 causal evaluation: Hogan-Hennessy, Xenopoulos & Silva (2022)
+- 알고리즘 가격 상한·구매력 constraint·동조 telemetry·사람 승인: Calvano et al. (2020), 그리고 Meylahn & Schinkel (2026)의 메커니즘/false-positive 주의
+
+중요 경제정책 변경은 근거 논문, 채택한 시사점, 채택하지 않은 가정, 필요한 telemetry, 수용임계값, rollback 조건을 반드시 기록한다. 논문은 정책가설의 근거일 뿐 Moneyverse replay와 exact-version 런타임 증거를 대체하지 않는다.

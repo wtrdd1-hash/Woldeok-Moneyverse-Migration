@@ -1,6 +1,6 @@
 # Moneyverse — Monetary Velocity & Reward Pacing Specification
 
-> Version: v2026.09.23.400
+> Version: v2026.09.23.401
 > Status: implementation-oriented living product specification
 > Baseline: v2026.09.23.398 work-reward reset plan
 > Korean companion: [ECONOMY_MONETARY_VELOCITY_SPEC.ko.md](ECONOMY_MONETARY_VELOCITY_SPEC.ko.md)
@@ -93,3 +93,16 @@ Sink evaluation is category-specific. Item removal, transaction taxes, prestige 
 Seasonality and activity-cycle effects must be separated from structural inflation signals. Economy datasets and dashboards carry source version, extraction timestamp, correction/revision marker, and policy version so retroactive data fixes do not silently rewrite prior operational conclusions.
 
 Where feasible, policy changes use causal or quasi-experimental evaluation rather than post-change correlation alone. The default comparison package is pre/post plus untreated/control cohort, policy-version exposure, and confidence/uncertainty metadata.
+
+## 12. Canonical paper-backed controls
+
+The detailed research-to-design mapping is canonical in `ECONOMY_RESEARCH_PAPER_MAP.md`. The following controls are now explicitly paper-backed:
+
+- cohort affordability and balance-distribution telemetry: Kaplan, Moll & Violante (2018), Kaplan & Violante (2018);
+- ABM stress testing with deterministic ledger authority: Axtell & Farmer (2025);
+- two-level/adversarial policy simulation with bounded outputs: Zheng et al. (AI Economist, 2020/2021);
+- RL shadow operation, bounded action spaces, reward-sensitivity tests, and deterministic validation: Atashbar & Shi (2022, 2023) and Atashbar (2024);
+- category-specific sink side-effect measurement and causal evaluation: Hogan-Hennessy, Xenopoulos & Silva (2022);
+- algorithmic pricing ceilings, affordability constraints, synchronization telemetry and human approval: Calvano et al. (2020), with false-positive/mechanism caution informed by Meylahn & Schinkel (2026).
+
+Every material economy-policy change must name the supporting paper(s), adopted insight, non-adopted assumptions, telemetry, acceptance threshold, and rollback condition. Literature can motivate the policy hypothesis but cannot substitute for Moneyverse replay and exact-version runtime evidence.
