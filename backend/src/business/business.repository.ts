@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 import type { BusinessRepository } from './business.service';
@@ -70,19 +69,19 @@ export interface BusinessActivateRow {
 interface PurchaseInput {
   readonly userId: string;
   readonly businessTypeId: string;
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey: string;
 }
 
 interface SettleInput {
   readonly userId: string;
   readonly ownershipId: string;
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey: string;
 }
 
 interface ActivateLicenseInput {
   readonly userId: string;
   readonly catalogCode: string;
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey: string;
 }
 
 interface ApplyBoostInput {
@@ -139,7 +138,7 @@ export class PostgresBusinessRepository implements BusinessRepository {
   async purchase({
     userId,
     businessTypeId,
-    idempotencyKey = randomUUID(),
+    idempotencyKey,
   }: PurchaseInput): Promise<BusinessPurchaseRow> {
     const row = await queryOne<BusinessPurchaseRow>(
       this.pool,
@@ -157,7 +156,7 @@ export class PostgresBusinessRepository implements BusinessRepository {
   async settle({
     userId,
     ownershipId,
-    idempotencyKey = randomUUID(),
+    idempotencyKey,
   }: SettleInput): Promise<BusinessSettleRow> {
     const row = await queryOne<BusinessSettleRow>(
       this.pool,
@@ -176,7 +175,7 @@ export class PostgresBusinessRepository implements BusinessRepository {
   async settleV2({
     userId,
     ownershipId,
-    idempotencyKey = randomUUID(),
+    idempotencyKey,
   }: SettleInput): Promise<BusinessSettleRow> {
     const row = await queryOne<BusinessSettleRow>(
       this.pool,
@@ -197,7 +196,7 @@ export class PostgresBusinessRepository implements BusinessRepository {
   async activateFromLicense({
     userId,
     catalogCode,
-    idempotencyKey = randomUUID(),
+    idempotencyKey,
   }: ActivateLicenseInput): Promise<BusinessActivateRow> {
     const row = await queryOne<BusinessActivateRow>(
       this.pool,
@@ -291,17 +290,17 @@ export class PostgresBusinessRepository implements BusinessRepository {
     ownershipId,
     materialCode,
     quantity,
-    idempotencyKey = randomUUID(),
+    idempotencyKey,
   }: {
     userId: string;
     ownershipId: string;
     materialCode: string;
     quantity: number;
-    idempotencyKey?: string | undefined;
+    idempotencyKey: string;
   }): Promise<BusinessProcureResult> {
     const actor = uuid(userId, 'user id');
     const owned = uuid(ownershipId, 'ownership id');
-    const key = uuid(idempotencyKey ?? randomUUID(), 'idempotency key');
+    const key = uuid(idempotencyKey, 'idempotency key');
 
     if (!Number.isSafeInteger(quantity) || quantity <= 0 || quantity > 500) {
       throw new BusinessInputError('procurement quantity must be between 1 and 500');
@@ -338,11 +337,11 @@ export class PostgresBusinessRepository implements BusinessRepository {
   }: {
     userId: string;
     ownershipId: string;
-    idempotencyKey?: string | undefined;
+    idempotencyKey: string;
   }): Promise<BusinessStorageUpgradeResult> {
     const actor = uuid(userId, 'user id');
     const owned = uuid(ownershipId, 'ownership id');
-    const key = uuid(idempotencyKey ?? randomUUID(), 'idempotency key');
+    const key = uuid(idempotencyKey, 'idempotency key');
 
     const biz = await queryOne<{ symbol: string }>(
       this.pool,
