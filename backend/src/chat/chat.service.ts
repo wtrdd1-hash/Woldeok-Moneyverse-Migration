@@ -111,6 +111,22 @@ export class ChatService {
     }
   }
 
+  async syncMessages(
+    actorUserId: string,
+    conversationId: string,
+    sinceSequence = 0,
+    limit = 100,
+  ): Promise<MessageRow[]> {
+    try {
+      return await this.repo.syncMessages(actorUserId, conversationId, sinceSequence, limit);
+    } catch (error) {
+      if (error instanceof ChatInputError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
+  }
+
   async archiveConversation(actorUserId: string, conversationId: string, archived: boolean): Promise<boolean> {
     try {
       return await this.repo.archiveConversation(actorUserId, conversationId, archived);

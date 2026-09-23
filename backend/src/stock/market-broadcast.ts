@@ -40,11 +40,26 @@ export interface LivePriceRow {
 export class MarketBroadcast {
   private emit: MarketEmit | null = null;
   private listening: () => boolean = () => false;
+  private currentSequence = 0;
 
   /** Called once, from the bootstrap that owns the socket server. */
   attach(emit: MarketEmit, hasListeners: () => boolean): void {
     this.emit = emit;
     this.listening = hasListeners;
+  }
+
+  /**
+   * Current monotonic broadcast sequence number.
+   */
+  get sequence(): number {
+    return this.currentSequence;
+  }
+
+  /**
+   * Reset sequence (for testing purpose).
+   */
+  resetSequence(): void {
+    this.currentSequence = 0;
   }
 
   /**
@@ -59,7 +74,9 @@ export class MarketBroadcast {
 
   publish(prices: readonly LivePriceRow[]): void {
     if (!this.emit || prices.length === 0) return;
+    this.currentSequence += 1;
     this.emit(MARKET_PRICES_EVENT, {
+      sequence: this.currentSequence,
       prices: prices.map((row) => ({
         id: row.id,
         price: row.current_price,

@@ -171,6 +171,37 @@ export class PostgresChatRepository {
     );
   }
 
+  async syncMessages(
+    actorUserId: string,
+    conversationId: string,
+    sinceSequence = 0,
+    limit = 100,
+  ): Promise<MessageRow[]> {
+    if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
+    if (!UUID_REGEX.test(conversationId)) throw new ChatInputError('conversationId must be a valid UUID');
+    const safeLimit = Math.min(Math.max(1, limit), 200);
+
+    return queryRows<MessageRow>(
+      this.client,
+      `SELECT
+         m.id,
+         m.conversation_id,
+         m.sender_id,
+         m.sequence::text,
+         m.body,
+         m.created_at,
+         (m.sender_id = $1::uuid) AS is_mine
+       FROM public.private_chat_messages m
+       JOIN public.private_chat_conversations c ON c.id = m.conversation_id
+       WHERE m.conversation_id = $2::uuid
+         AND ($1::uuid IN (c.participant_a_id, c.participant_b_id))
+         AND m.sequence > $3::bigint
+       ORDER BY m.sequence ASC
+       LIMIT $4;`,
+      [actorUserId, conversationId, sinceSequence, safeLimit],
+    );
+  }
+
   async archiveConversation(actorUserId: string, conversationId: string, archived: boolean): Promise<boolean> {
     if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
     if (!UUID_REGEX.test(conversationId)) throw new ChatInputError('conversationId must be a valid UUID');

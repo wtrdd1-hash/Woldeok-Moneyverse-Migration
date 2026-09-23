@@ -2682,3 +2682,41 @@ pm test).
 2. 타입체크 및 린트 검증: pnpm run check (0 errors)
 3. 빌드 검증: pnpm run build
 4. 원격 서버 배포 및 무손실 세션 검증 (1,020+ 세션 무중단 유지)
+
+---
+
+## 🚀 [v69 Specification] 남은 3대 핵심 도메인 전수 자율 완결 구현 (주식 WS 시퀀스 갭 복구 + OSRS형 2% 거래세 및 아이템 자동 소각 + 1:1 채팅 커서 페이징 & 동기화) (v2026.09.24.426)
+
+### 1. 📌 요구사항 분석 및 자율 확정 사양
+사용자의 전권 자율 실행 지시에 따라, 남은 3대 결함 도메인을 전수 완결 구현:
+1. **주식 WebSocket 단조 시퀀스 갭 복구 (Monotonic Sequence Gap Recovery)**:
+   - 서버는 모든 호가/체결 브로드캐스트 이벤트에 단조 증가 정수 `sequence_id` 부여.
+   - 클라이언트는 시퀀스 갭(`incoming_seq > last_seq + 1`) 감지 시 로컬 호가 무효화 후 REST Full Snapshot 자동 재동기화(Auto Re-sync).
+2. **가상 경제 2% 마켓 거래세 & OSRS형 자동 아이템 매입 소각 (Automated Item Sink)**:
+   - 2% 마켓 거래세(상한 50만 WLD) 원천징수 엔진 구축.
+   - 징수액 50% 영구 소각(Coin Sink) + 50% 국고(Treasury) 적립 분배 계산.
+   - 관리자 경제 대시보드(`/admin/economy`)에 누적 통화 소각 및 아이템 파괴 지표 카드 연동.
+3. **1:1 개인 채팅 커서 기반 무한 스크롤 & 재연결 델타 동기화**:
+   - `beforeSequence` 커서 기반 상단 스크롤 시 이전 대화 50개씩 점진적 페이징 로드.
+   - 재연결 시 `sinceSequence` 이후 미수신 메시지 REST `/api/v1/chat/conversations/:id/sync` 일괄 복원.
+
+### 2. 📁 대상 파일 목록
+- [MODIFY] backend/src/stock/market-broadcast.ts: 단조 증가 sequence_id 탑재
+- [MODIFY] backend/src/stock/market-broadcast.test.ts: sequence_id 단조 증가 검증
+- [NEW] backend/src/marketplace/marketplace-tax.ts: 2% 마켓 거래세 및 50/50 소각/국고 분배 엔진
+- [NEW] backend/src/marketplace/marketplace-tax.test.ts: 거래세 및 소각 엔진 단위 테스트
+- [NEW] frontend/src/app/marketplace/market-tax.ts: 프론트엔드 거래세 및 소각 계산 헬퍼
+- [NEW] frontend/src/app/marketplace/market-tax.test.ts: 프론트엔드 거래세 단위 테스트
+- [NEW] frontend/src/app/admin/economy/economy-sink-card.tsx: 관리자 경제 대시보드 소각 현황 카드
+- [MODIFY] frontend/src/app/admin/economy/page.tsx: 경제 대시보드에 소각 카드 렌더링
+- [MODIFY] backend/src/chat/chat.repository.ts: sinceSequence 기준 델타 동기화 쿼리 구현
+- [MODIFY] backend/src/chat/chat.service.ts: syncMessages 서비스 메서드 구현
+- [MODIFY] backend/src/chat/chat.controller.ts: GET /api/v1/chat/conversations/:id/sync 엔드포인트 구현
+- [MODIFY] backend/src/chat/chat.service.test.ts: 동기화 테스트 추가
+- [MODIFY] frontend/src/app/chat/chat-room.tsx: 커서 기반 과거 메시지 페이징 및 재연결 동기화
+
+### 3. 🔍 검증 계획
+1. 단위 테스트 전수 검증: 백엔드/프론트엔드 테스트 pass
+2. 전체 빌드 및 타입체크 검증: 0 errors
+3. Git commit & push 및 GitHub Actions CI All-Green 검증
+4. 운영 서버(easy-scraping.com) 무중단 배포 및 활성 세션(1,200+) 보존 검증

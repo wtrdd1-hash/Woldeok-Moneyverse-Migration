@@ -71,10 +71,60 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const [hasMore, setHasMore] = useState(initialMessages.length >= 50);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   // Auto-scroll to bottom on messages change
   const scrollToBottom = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  };
+
+  const loadPreviousMessages = async () => {
+    if (isLoadingMore || !hasMore || messages.length === 0) return;
+    const oldestSeq = Number.parseInt(messages[0]?.sequence ?? '0', 10);
+    if (!oldestSeq || oldestSeq <= 1) {
+      setHasMore(false);
+      return;
+    }
+
+    setIsLoadingMore(true);
+    try {
+      const res = await fetch(
+        `/app-api/v1/chat/conversations/${encodeURIComponent(conversation.conversation_id)}/messages?limit=50&beforeSequence=${oldestSeq}`,
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.messages) && data.messages.length > 0) {
+          const prevScrollHeight = scrollRef.current?.scrollHeight ?? 0;
+          setMessages((prev) => {
+            const existingIds = new Set(prev.map((m) => m.id));
+            const newMsgs = data.messages.filter((m: ChatMessage) => !existingIds.has(m.id));
+            return [...newMsgs, ...prev];
+          });
+          if (data.messages.length < 50) {
+            setHasMore(false);
+          }
+          requestAnimationFrame(() => {
+            if (scrollRef.current) {
+              scrollRef.current.scrollTop = scrollRef.current.scrollHeight - prevScrollHeight;
+            }
+          });
+        } else {
+          setHasMore(false);
+        }
+      }
+    } catch {
+      // silent background failure
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  const handleScroll = () => {
+    if (scrollRef.current && scrollRef.current.scrollTop === 0 && hasMore && !isLoadingMore) {
+      loadPreviousMessages();
     }
   };
 
@@ -97,10 +147,33 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
     }
   }, [conversation.conversation_id, conversation.latest_sequence, conversation.last_read_sequence, messages.length]);
 
-  // Smart Polling every 4 seconds for fresh messages
+  // Smart Polling & Delta Sync for fresh messages
   useEffect(() => {
-    const fetchLatest = async () => {
+    const fetchLatestOrSync = async () => {
       try {
+        const latestLocalSeq = messages.length > 0
+          ? Math.max(...messages.map((m) => Number.parseInt(m.sequence, 10) || 0))
+          : 0;
+
+        if (latestLocalSeq > 0) {
+          const res = await fetch(
+            `/app-api/v1/chat/conversations/${encodeURIComponent(conversation.conversation_id)}/sync?sinceSequence=${latestLocalSeq}`,
+          );
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.messages) && data.messages.length > 0) {
+              setMessages((prev) => {
+                const existingIds = new Set(prev.map((m) => m.id));
+                const newMsgs = data.messages.filter((m: ChatMessage) => !existingIds.has(m.id));
+                if (newMsgs.length === 0) return prev;
+                return [...prev, ...newMsgs];
+              });
+              setTimeout(scrollToBottom, 50);
+            }
+            return;
+          }
+        }
+
         const res = await fetch(`/app-api/v1/chat/conversations/${encodeURIComponent(conversation.conversation_id)}/messages?limit=50`);
         if (res.ok) {
           const data = await res.json();
@@ -113,9 +186,9 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
       }
     };
 
-    const interval = setInterval(fetchLatest, 4000);
+    const interval = setInterval(fetchLatestOrSync, 4000);
     return () => clearInterval(interval);
-  }, [conversation.conversation_id]);
+  }, [conversation.conversation_id, messages]);
 
   const handleSend = () => {
     const trimmed = inputBody.trim();
@@ -347,7 +420,20 @@ export function ChatRoom({ conversation, initialMessages, onBack, onMessageSent 
       )}
 
       {/* Message List */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div ref={scrollRef} onScroll={handleScroll} className="flex-1 overflow-y-auto p-4 space-y-3">
+        {hasMore && (
+          <div className="flex justify-center py-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={loadPreviousMessages}
+              disabled={isLoadingMore}
+              className="text-xs h-7 text-muted-foreground hover:text-foreground"
+            >
+              {isLoadingMore ? '이전 대화 불러오는 중...' : '이전 대화 더보기'}
+            </Button>
+          </div>
+        )}
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center p-6 text-muted-foreground">
             <p className="text-sm font-medium">대화 내용이 아직 없어요.</p>

@@ -1,5 +1,6 @@
 import { AdminControlCenterV2 } from './admin-control-center-v2';
 import { EconomyAiStatusCard, type EconomyAiStatus } from './ai-status-card';
+import { EconomySinkCard } from './economy-sink-card';
 import type { MacroEconomyV2 } from './macro-v2-types';
 import { FaucetSinkGauge, type FaucetSinkStats } from './faucet-sink-gauge';
 import { CasinoEconomyDashboard } from './casino-economy-dashboard';
@@ -185,6 +186,7 @@ export default async function AdminEconomyPage({
 
       <section aria-labelledby="economy-figures" className="grid gap-3">
         <FaucetSinkGauge stats={faucetSinkStats} />
+        <EconomySinkCard />
         <CasinoEconomyDashboard />
       <SectionHeader eyebrow="MONEY SUPPLY" title="통화량과 발행" id="economy-figures" />
 

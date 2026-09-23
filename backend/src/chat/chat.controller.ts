@@ -123,6 +123,21 @@ export class ChatController {
     return { messages };
   }
 
+  @ApiOperation({ summary: '네트워크 재연결 시 누락 메시지 델타 동기화' })
+  @Get('conversations/:id/sync')
+  async syncMessages(
+    @Req() req: RequestWithSession,
+    @Param('id', ParseUUIDPipe) conversationId: string,
+    @Query('sinceSequence') sinceSequence?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const actorUserId = requireUserId(req);
+    const parsedSince = sinceSequence ? Number.parseInt(sinceSequence, 10) : 0;
+    const parsedLimit = limit ? Number.parseInt(limit, 10) : 100;
+    const messages = await this.chat.syncMessages(actorUserId, conversationId, parsedSince, parsedLimit);
+    return { messages };
+  }
+
   @ApiOperation({ summary: '대화방에 1:1 쪽지 메시지 전송' })
   @Post('conversations/:id/messages')
   async sendMessage(

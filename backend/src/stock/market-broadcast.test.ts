@@ -35,11 +35,31 @@ describe('MarketBroadcast', () => {
 
     expect(emit).toHaveBeenCalledTimes(1);
     expect(emit).toHaveBeenCalledWith(MARKET_PRICES_EVENT, {
+      sequence: 1,
       prices: [
         { id: 's-1', price: '141711', open: '143000' },
         { id: 's-2', price: '900', open: '880' },
       ],
     });
+  });
+
+  it('increments sequence monotonically on each broadcast', () => {
+    const broadcast = new MarketBroadcast();
+    const emit = vi.fn();
+    broadcast.attach(emit, () => true);
+
+    broadcast.publish([price('s-1', '100', '100')]);
+    broadcast.publish([price('s-1', '105', '100')]);
+    broadcast.publish([price('s-1', '110', '100')]);
+
+    expect(broadcast.sequence).toBe(3);
+    const firstCall = emit.mock.calls[0]?.[1] as { sequence: number };
+    const secondCall = emit.mock.calls[1]?.[1] as { sequence: number };
+    const thirdCall = emit.mock.calls[2]?.[1] as { sequence: number };
+
+    expect(firstCall.sequence).toBe(1);
+    expect(secondCall.sequence).toBe(2);
+    expect(thirdCall.sequence).toBe(3);
   });
 
   it('keeps prices as strings', () => {

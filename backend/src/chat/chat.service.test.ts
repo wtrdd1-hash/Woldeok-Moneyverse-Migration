@@ -10,6 +10,7 @@ describe('ChatService', () => {
     markAsRead: vi.fn(),
     listConversations: vi.fn(),
     listMessages: vi.fn(),
+    syncMessages: vi.fn(),
     archiveConversation: vi.fn(),
     totalUnreadCount: vi.fn(),
   } as unknown as PostgresChatRepository;
@@ -71,5 +72,19 @@ describe('ChatService', () => {
     const result = await service.markAsRead(actorId, convId, 5);
     expect(result.lastReadSequence).toBe('5');
     expect(mockRepo.markAsRead).toHaveBeenCalledWith(actorId, convId, 5);
+  });
+
+  it('delegates syncMessages to repository', async () => {
+    const actorId = '11111111-1111-1111-1111-111111111111';
+    const convId = '22222222-2222-2222-2222-222222222222';
+
+    vi.mocked(mockRepo.syncMessages).mockResolvedValueOnce([
+      { id: '3', conversation_id: convId, sender_id: actorId, sequence: '3', body: '동기화 메시지', created_at: new Date(), is_mine: true },
+    ]);
+
+    const messages = await service.syncMessages(actorId, convId, 2, 50);
+    expect(mockRepo.syncMessages).toHaveBeenCalledWith(actorId, convId, 2, 50);
+    expect(messages).toHaveLength(1);
+    expect(messages[0].sequence).toBe('3');
   });
 });
