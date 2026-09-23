@@ -107,7 +107,42 @@ export function TreasuryView({ overview, ledger }: Props) {
         </Card>
       </div>
 
-      {/* 2. 24시간 자금 흐름 관제 */}
+      {/* 2. 국고 원장 및 금고 잔액 대사 무결성 상태 (Reconciliation Banner) */}
+      {overview.reconciliation && (
+        <Card className="border shadow-sm bg-muted/20">
+          <CardHeader className="p-4 sm:p-5 pb-2">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-sm font-semibold">국고 회계 대사 무결성 상태 (Authoritative Reconciliation)</CardTitle>
+                <Badge className={overview.reconciliation.status === 'RECONCILED' ? 'bg-emerald-600 text-white text-[11px]' : 'bg-destructive text-white text-[11px]'}>
+                  {overview.reconciliation.status === 'RECONCILED' ? '대사 완료 (일치)' : '불일치 감지 (주의)'}
+                </Badge>
+              </div>
+              <span className="text-[11px] text-muted-foreground font-mono">
+                최종 대사: {new Date(overview.reconciliation.last_reconciled_at).toLocaleTimeString('ko-KR')}
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-5 pt-0">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+              <div className="rounded border bg-background p-2.5">
+                <span className="text-muted-foreground block text-[11px]">금고 총 잔액</span>
+                <span className="font-bold text-foreground font-mono text-sm">{groupDigits(overview.reconciliation.total_vaults_balance_wld)} WLD</span>
+              </div>
+              <div className="rounded border bg-background p-2.5">
+                <span className="text-muted-foreground block text-[11px]">원장 누적 순흐름</span>
+                <span className="font-bold text-foreground font-mono text-sm">{groupDigits(overview.reconciliation.total_ledger_net_flow_wld)} WLD</span>
+              </div>
+              <div className="rounded border bg-background p-2.5">
+                <span className="text-muted-foreground block text-[11px]">회계 대사 오차 (Discrepancy)</span>
+                <span className="font-bold text-emerald-600 font-mono text-sm">{groupDigits(overview.reconciliation.discrepancy_amount_wld)} WLD (정상 0)</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 3. 24시간 자금 흐름 관제 */}
       <Card className="border shadow-sm">
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="text-base font-semibold">최근 24시간 국고 흐름 관제 (24h Flow Dynamics)</CardTitle>
@@ -145,7 +180,7 @@ export function TreasuryView({ overview, ledger }: Props) {
         </CardContent>
       </Card>
 
-      {/* 3. 국고 법정 과세표준 및 세율 스케줄 */}
+      {/* 4. 국고 법정 과세표준 및 세율 스케줄 */}
       {overview.tax_rates && overview.tax_rates.length > 0 && (
         <Card className="border shadow-sm">
           <CardHeader className="p-4 sm:p-6">
@@ -204,7 +239,7 @@ export function TreasuryView({ overview, ledger }: Props) {
         </Card>
       )}
 
-      {/* 4. 국고 목적별 예산 배정 체계 (Budget Envelopes) */}
+      {/* 5. 국고 목적별 예산 배정 체계 (Budget Envelopes) */}
       {overview.budgets && overview.budgets.length > 0 && (
         <Card className="border shadow-sm">
           <CardHeader className="p-4 sm:p-6">
@@ -276,7 +311,7 @@ export function TreasuryView({ overview, ledger }: Props) {
         </Card>
       )}
 
-      {/* 5. 금고별 상세 현황 */}
+      {/* 6. 금고별 상세 현황 */}
       <div className="grid gap-4 sm:grid-cols-2">
         {overview.vaults.map((vault) => (
           <Card key={vault.code} className="border shadow-sm">
@@ -298,10 +333,10 @@ export function TreasuryView({ overview, ledger }: Props) {
         ))}
       </div>
 
-      {/* 6. 자금 긴급 제어 (Step-Up Guard) */}
+      {/* 7. 자금 긴급 제어 (Step-Up Guard) */}
       <TreasuryOperationsDialog vaults={overview.vaults} />
 
-      {/* 7. 실시간 국고 회계 감사 원장 (Ledger Table) */}
+      {/* 8. 실시간 국고 회계 감사 원장 (Ledger Table) */}
       <Card className="border shadow-sm">
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="text-base font-semibold">국고 회계 감사 원장 (Authoritative Audit Ledger)</CardTitle>

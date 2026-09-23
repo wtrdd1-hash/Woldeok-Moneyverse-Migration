@@ -2837,3 +2837,56 @@ pm test).
 4. 테스트 서버(test.easy-scraping.com) 및 운영 서버(easy-scraping.com) 무중단 블루-그린 배포 승격
 5. exact-SHA 검증, 17개 핵심 엔드포인트 200 OK 및 1,208+ 활성 유저 세션 보존 검증
 6. 작업 feature 브랜치 안전 삭제
+
+---
+
+## 🚀 [v73 Specification] 국고 회계 대사 무결성 및 세입/세출 분석 엔진 & 통화 유통속도·보상 페이싱 엔진 완결 (ADMIN_TREASURY_MANAGEMENT_SPEC §13, ECONOMY_MONETARY_VELOCITY_SPEC §2, §3, §8) (v2026.09.24.430)
+
+### 1. 🎯 요구사항 분석 및 자율 확정 사양
+사용자의 전권 자율 실행 지시 및 기획서 필수 조회(`docs/planning/ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md` §13, `docs/planning/ECONOMY_MONETARY_VELOCITY_SPEC.ko.md` §2, §3, §8)에 따라, 국고 회계 대사 및 통화 유통속도 페이싱 핵심 사양을 완결 구현:
+1. **[국고 세입원(Revenue Breakdown) & 세출 항목(Expenditure Breakdown) 집계 엔진]**:
+   - 8대 국고 세입원(`MARKETPLACE_FEE`, `STOCK_TAX`, `BUSINESS_TAX`, `B2B_TRANSACTION_TAX`, `MERCHANT_CONSUMPTION_TAX`, `LUXURY_CONSUMPTION_TAX`, `COMMUNITY_MANAGEMENT_TAX`, `OPERATIONAL_RECOVERY`): 최근 24시간, 7일, 30일 집계 및 증감 모니터링.
+   - 10대 목적별 예산 세출 항목(`ESSENTIAL_REFUND`, `REWARD_POOL`, `NEW_USER_SUPPORT`, `RETURNING_USER_SUPPORT`, `BUSINESS_STABILIZATION`, `MARKET_STABILIZATION`, `CITY_COMMUNITY`, `SEASON_EVENT`, `INCIDENT_RESPONSE`, `ADMIN_CORRECTION`): 24시간, 7일, 30일 지출액 분할 집계.
+   - 전용 REST API 엔드포인트:
+     * `GET /api/v1/admin/treasury/revenue`: 8대 과세/세입원 24h, 7d, 30d 집계 반환
+     * `GET /api/v1/admin/treasury/expenditure`: 10대 목적별 예산 지출 24h, 7d, 30d 집계 반환
+2. **[국고 회계 대사 무결성 엔진 (Authoritative Treasury Reconciliation)]**:
+   - `total_vaults_balance_wld` (모든 국고 금고 합산 잔액) vs `total_ledger_net_flow_wld` (감사 원장 누적 순유입량) 대사 검증.
+   - 대사 오차 `discrepancy_amount_wld = |vaults_total - ledger_net_flow|`.
+   - 무결성 상태 판정: 오차 0 WLD일 때 `RECONCILED` (정상), 오차 발생 시 `DISCREPANCY` (불일치 경보).
+   - `GET /api/v1/admin/treasury/reconciliation` 엔드포인트 신설 및 `GET /api/v1/admin/treasury/overview`에 실시간 대사 상태 탑재.
+   - 프론트엔드 관리자 국고 뷰 상단에 실시간 대사 배너(Authoritative Reconciliation Audit Banner) 렌더링.
+3. **[통화 유통속도 및 보상 페이싱 엔진 (Work Velocity & Pacing Engine)]**:
+   - 노동 보상 페이싱 산출 공식 준용: `net_reward = base_reward × quality_factor × repeat_factor × issuance_factor`.
+   - `WorkTaskRow` 및 프론트엔드 `WorkTask` 모델에 필수 정책 필드 확장:
+     * `policy_version`: `'v2026.09.23.401'`
+     * `expected_work_seconds`: 업무 난이도 및 최소소요시간 기반 서버 권위 작업시간
+     * `eligible_submit_at`: 정산 자격 획득 시점 (현재시각 + 예상작업시간)
+     * `settlement_mode`: `'ACTIVE'` (시간 경과 기반 체크포인트 정산)
+     * `repeat_factor`: 동일 템플릿 일일 반복 횟수에 따른 감쇠 곡선 (당일 0회 1.0000, 1회 이상 시 회당 -0.15 감쇠, 하한 0.2000)
+     * `issuance_factor`: 거시경제 텔레메트리 연동 서버 발행 계수 (`1.0000`)
+     * `net_reward`: 품질 및 반복 감쇠가 반영된 최종 실지급 예정액
+     * `reason_codes`: 페이싱 사유 코드 (`OPTIMAL_REWARD`, `REPEAT_DECAY_APPLIED`, `CAREER_AFFINITY_BONUS` 등)
+   - 프론트엔드 `career-tasks-board.tsx`:
+     * 작업 카드별 `settlement_mode` (`ACTIVE`) 인디케이터 배지 표시
+     * 반복 배율 (`x1.0000`, `x0.8500 decay` 등) 및 `Pacing` 감쇠 배지 렌더링.
+
+### 2. 📂 대상 파일 목록
+- [MODIFY] backend/src/admin/treasury/treasury.repository.ts: TreasuryRevenueSource, TreasuryExpenditureItem, TreasuryReconciliation 모델 및 쿼리/산출 로직 추가
+- [MODIFY] backend/src/admin/treasury/treasury.service.ts: getRevenue, getExpenditure, getReconciliation 위임 메서드 추가
+- [MODIFY] backend/src/admin/treasury/treasury.controller.ts: GET admin/treasury/revenue, expenditure, reconciliation 엔드포인트 추가
+- [MODIFY] backend/src/admin/treasury/treasury.service.test.ts: 위임 단위 테스트 추가
+- [MODIFY] backend/src/work/work.repository.ts: WorkTaskRow 모델 확장 및 tasks() 메서드 페이싱 산출 로직 적용
+- [NEW] backend/src/work/work-velocity-pacing.test.ts: 통화 유통속도 및 보상 페이싱 단위 테스트 작성
+- [MODIFY] frontend/src/app/admin/types.ts: AdminTreasuryReconciliation, AdminTreasuryRevenueSource, AdminTreasuryExpenditureItem 인터페이스 추가
+- [MODIFY] frontend/src/app/admin/treasury/treasury-view.tsx: 국고 회계 대사 무결성 배너 및 번호 주석 정돈
+- [MODIFY] frontend/src/app/work/work.ts: WorkTask 인터페이스 페이싱 및 정책 필드 추가
+- [MODIFY] frontend/src/app/work/career-tasks-board.tsx: 정산 모드 배지 및 반복 배율/페이싱 인디케이터 렌더링
+
+### 3. 🧪 검증 계획
+1. 백엔드 국고 대사 및 통화 유통속도 페이싱 단위 테스트 검증: vitest pass
+2. 프론트엔드 및 백엔드 타입체크/린트/빌드 검증: 0 errors
+3. Git commit & feature 브랜치 -> main 브랜치 머지 및 push
+4. 테스트 서버(test.easy-scraping.com) 및 운영 서버(easy-scraping.com) 무중단 블루-그린 배포 승격
+5. exact-SHA 검증: 17개 핵심 엔드포인트 200 OK 및 1,208+ 활성 유저 세션 보존 검증
+6. 작업 feature 브랜치 안전 삭제

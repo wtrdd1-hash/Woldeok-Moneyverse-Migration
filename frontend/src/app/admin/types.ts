@@ -676,6 +676,30 @@ export interface AdminTreasuryBudgetEnvelope {
   readonly status: 'ACTIVE' | 'DEPLETED' | 'PAUSED';
 }
 
+export interface AdminTreasuryReconciliation {
+  readonly status: 'RECONCILED' | 'DISCREPANCY';
+  readonly total_vaults_balance_wld: string;
+  readonly total_ledger_net_flow_wld: string;
+  readonly discrepancy_amount_wld: string;
+  readonly last_reconciled_at: string;
+}
+
+export interface AdminTreasuryRevenueSource {
+  readonly category: string;
+  readonly category_ko: string;
+  readonly amount_24h_wld: string;
+  readonly amount_7d_wld: string;
+  readonly amount_30d_wld: string;
+}
+
+export interface AdminTreasuryExpenditureItem {
+  readonly envelope_code: string;
+  readonly envelope_name: string;
+  readonly amount_24h_wld: string;
+  readonly amount_7d_wld: string;
+  readonly amount_30d_wld: string;
+}
+
 export interface AdminTreasuryOverview {
   readonly vaults: readonly AdminTreasuryVault[];
   readonly total_treasury_wld: string;
@@ -686,6 +710,7 @@ export interface AdminTreasuryOverview {
   readonly coverage_days?: number;
   readonly tax_rates?: readonly AdminTreasuryTaxRate[];
   readonly budgets?: readonly AdminTreasuryBudgetEnvelope[];
+  readonly reconciliation?: AdminTreasuryReconciliation;
   readonly stats_24h: {
     readonly injected_wld: string;
     readonly absorbed_wld: string;

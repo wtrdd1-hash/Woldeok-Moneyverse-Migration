@@ -67,6 +67,24 @@ export class AdminTreasuryController {
     return this.service.getBudgets();
   }
 
+  @Get('revenue')
+  @ApiOperation({ summary: '국고 세목별 수입 흐름 집계 조회' })
+  async getRevenue() {
+    return this.service.getRevenue();
+  }
+
+  @Get('expenditure')
+  @ApiOperation({ summary: '국고 예산 목적별 지출 흐름 집계 조회' })
+  async getExpenditure() {
+    return this.service.getExpenditure();
+  }
+
+  @Get('reconciliation')
+  @ApiOperation({ summary: '국고 금고 잔액 및 원장 대사 무결성 상태 조회' })
+  async getReconciliation() {
+    return this.service.getReconciliation();
+  }
+
   @Get('transactions')
   @ApiOperation({ summary: '국고 원장 입출금 및 순환 감사 내역 조회' })
   async listTransactions(@Query() query: TreasuryListQueryDto) {

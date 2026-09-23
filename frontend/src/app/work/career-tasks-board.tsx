@@ -225,6 +225,27 @@ export function CareerTasksBoard({
                       </span>
                     </div>
                   </div>
+
+                  {/* 통화 유통속도 및 보상 페이싱 인디케이터 (Velocity & Pacing) */}
+                  <div className="flex items-center justify-between gap-1 text-[11px] px-2 py-1 rounded bg-background/60 border border-border/40 font-mono">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      {task.settlement_mode ?? 'ACTIVE'}
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {task.repeat_factor && (
+                        <span className={task.taken_today > 0 ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-muted-foreground'}>
+                          x{task.repeat_factor} {task.taken_today > 0 ? (isEn ? 'decay' : '감쇠') : (isEn ? 'rate' : '배율')}
+                        </span>
+                      )}
+                      {task.reason_codes?.includes('REPEAT_DECAY_APPLIED') && (
+                        <Badge variant="outline" className="text-[9px] py-0 px-1 border-amber-500/40 text-amber-600 dark:text-amber-400">
+                          {isEn ? 'Pacing' : '페이싱'}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
                   <div className="flex justify-between text-muted-foreground text-[11px] px-1 min-w-0">
                     <span className="truncate">
                       {isEn

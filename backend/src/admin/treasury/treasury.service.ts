@@ -19,6 +19,18 @@ export class TreasuryService {
     return this.repository.getBudgets();
   }
 
+  getRevenue() {
+    return this.repository.getRevenue();
+  }
+
+  getExpenditure() {
+    return this.repository.getExpenditure();
+  }
+
+  getReconciliation() {
+    return this.repository.getReconciliation();
+  }
+
   async listTransactions(limit = 30, cursor?: string) {
     return this.repository.listTransactions(limit, cursor);
   }
