@@ -1,5 +1,17 @@
 import { SYSTEM_PROMPT, userPrompt, normalise } from '../backend/src/admin/ai-news.service';
 
+type ChatCompletionResponse = {
+  choices?: Array<{ message?: { content?: string } }>;
+};
+
+async function readChatCompletion(response: Response): Promise<ChatCompletionResponse> {
+  const payload: unknown = await response.json();
+  if (typeof payload !== 'object' || payload === null) {
+    throw new Error('AI response payload must be a JSON object');
+  }
+  return payload as ChatCompletionResponse;
+}
+
 async function testOllama() {
   console.log('=== [1] Testing Local Ollama AI Newsroom (llama3.2:3b) ===');
   const start = Date.now();
@@ -35,14 +47,17 @@ async function testOllama() {
     throw new Error(`Ollama HTTP Error: ${response.status} ${await response.text()}`);
   }
 
-  const result = await response.json() as any;
+  const result = await readChatCompletion(response);
   const elapsed = ((Date.now() - start) / 1000).toFixed(2);
   console.log(`Ollama Response Received in ${elapsed}s!`);
 
   const content = result.choices?.[0]?.message?.content;
+  if (typeof content !== 'string' || content.trim() === '') {
+    throw new Error('Ollama response is missing message content');
+  }
   console.log('Raw AI Output:', content);
 
-  const parsed = JSON.parse(content);
+  const parsed: unknown = JSON.parse(content);
   const normalised = normalise(parsed, context);
 
   console.log('\n=== [2] Normalised Scenarios ===');
@@ -71,7 +86,7 @@ async function testGemmaCouncil() {
     throw new Error(`Gemma HTTP Error: ${response.status} ${await response.text()}`);
   }
 
-  const result = await response.json() as any;
+  const result = await readChatCompletion(response);
   const elapsed = ((Date.now() - start) / 1000).toFixed(2);
   console.log(`Gemma Response Received in ${elapsed}s!`);
   console.log('Gemma Output:', result.choices?.[0]?.message?.content);
