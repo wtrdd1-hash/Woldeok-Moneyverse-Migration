@@ -3,7 +3,7 @@
 - **최종 갱신일:** 2026-09-23
 - **관리 주체:** Woldeok Moneyverse Core Development & Operations
 - **문서 상태:** 활성 (Active Memory)
-- **현재 프로덕션 릴리스:** `v2026.09.23.397` (`prod-v397` / SHA `a65d4d41`)
+- **현재 프로덕션 릴리스:** `v2026.09.23.406` (`prod-v406` / SHA `b7c1323d`)
 - **PostgreSQL 활성 세션 상태:** **1,071개 (100% 무손실 보존)**
 
 ---
@@ -41,23 +41,19 @@
 
 ---
 
-## 3. 📜 최신 릴리스 내역 (v2026.09.23.397)
+## 3. 📜 최신 릴리스 내역 (v2026.09.23.406)
 
-- **최종 갱신일시**: 2026-09-23 22:31:00 KST
-- **프로덕션 릴리스 버전**: `v2026.09.23.397` (릴리스 경로: `/srv/moneyverse-data/releases/prod-v397`)
-- **Exact Git SHA**: `a65d4d41`
+- **최종 갱신일시**: 2026-09-23 22:49:00 KST
+- **프로덕션 릴리스 버전**: `v2026.09.23.406` (릴리스 경로: `/srv/moneyverse-data/releases/prod-v406`)
+- **Exact Git SHA**: `b7c1323d`
 - **PostgreSQL 활성 사용자 세션**: **1,071개 (100% 무손실 보존 실측 확인)**
 - **완료 작업 요약**:
-  1. **실시간 호가 틱 웹소켓 스트리밍 & 순간 플래시 펄스 애니메이션 (`stock-orderbook.tsx`)**:
-     - `useQuote(stockId, ...)` 훅을 결합하여 소켓 브로드캐스트 도착 시 호가창 체결가 즉시 갱신.
-     - 체결가 상승 시 에메랄드(`bg-emerald-500/25`), 하락 시 로즈(`bg-rose-500/25`)로 600ms 동안 순간 플래시 펄스 발광 애니메이션 탑재.
-     - 5D/10D 호가 단계 및 매수/매도 압력 비율 바 실시간 유기적 재계산.
-  2. **AI 뉴스 기반 시장 감성 지수 위젯 (`market-sentiment-gauge.tsx`)**:
-     - 0~100점 시장 탐욕/공포(Greed & Fear) 핀테크 게이지 (Extreme Fear ~ Extreme Greed 5단계 레인지) 구현.
-     - 활성 AI 뉴스 이벤트의 `direction`('up' | 'down')과 `strength`(1~3)를 합산하여 실시간 감성 지수 산출.
-     - 10대 종목별 호재/악재 감성 태그 및 뉴스 요약 스트립 렌더링.
-  3. **거래소 메인 및 상세 화면 통합 연동**:
-     - `stock-trading-console.tsx`에 `stockId` prop 전달 및 `page.tsx`에 `MarketSentimentGauge` 렌더링 통합.
-  4. **전체 단위 테스트 1,783개 100% PASS 및 무중단 블루-그린 승격**:
-     - `@moneyverse/contract` (23 tests), `@moneyverse/database` (7 tests), `@moneyverse/backend` (996 tests), `@moneyverse/frontend` (757 tests) 전수 통과.
-     - 1,071개 활성 세션 100% 무손실 보존 상태로 무중단 승격 완료.
+  1. **깃허브 문서 전면 재검토 및 6대 도메인 결함 보완 명세화 (`v2026.09.23.406`)**:
+     - 학술/핀테크 고신뢰 레퍼런스 기반 LOB 시퀀스 갭 복구, KRX 7단계 틱 사이즈, 2% 거래세 & 자동 아이템 소각(Item Sink), 1:1 채팅 UUID 멱등키 & 커서 페이지네이션, Aave Kink 이자율 & 20% 지급준비금, 7일 듀얼 키 롤링, 44px 모바일 터치 타겟 계약 공식 채택.
+     - `INTEGRATED_PLANNING_MASTER.ko.md`, `PROJECT_PLAN.ko.md`, `docs/INDEX.ko.md`, `deltas/v2026.09.23.406.ko.md` 전수 동기화.
+  2. **프론트엔드 기능 통합 및 빌드/타입스크립트 정합성 완비**:
+     - 은행 목적별 저축 포켓(`saving-pockets-card.tsx`), 마켓플레이스 제작 액션(`crafting-actions.ts`), 시즌 보상 수령 배너(`season-reward-claim-banner.tsx`) 통합.
+     - Next.js 16.3.4 Turbopack 프로덕션 빌드 100+ 라우트 100% 성공.
+  3. **전체 단위 테스트 1,790개 100% PASS 및 무중단 블루-그린 승격**:
+     - `@moneyverse/contract` (23 tests), `@moneyverse/database` (7 tests), `@moneyverse/backend` (996 tests), `@moneyverse/frontend` (764 tests) 전수 통과.
+     - 1,071개 활성 세션 100% 무손실 보존 상태로 프로덕션(`v406`) 무중단 승격 완료.
