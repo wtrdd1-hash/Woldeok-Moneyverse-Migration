@@ -65,4 +65,33 @@ export class SpaceService {
       throw err;
     }
   }
+
+  async getSpaceTaxStatus(spaceId: string) {
+    try {
+      return await this.repo.getSpaceTaxStatus(spaceId);
+    } catch (err: unknown) {
+      if (err instanceof SpaceInputError) {
+        if (err.message.includes('not found')) throw new NotFoundException('공간을 찾을 수 없습니다.');
+        throw new BadRequestException(err.message);
+      }
+      throw err;
+    }
+  }
+
+  async payPropertyTax(actorUserId: string, spaceId: string, days: number, idempotencyKey: string) {
+    try {
+      return await this.repo.payPropertyTax(actorUserId, spaceId, days, idempotencyKey);
+    } catch (err: unknown) {
+      if (err instanceof SpaceInputError) throw new BadRequestException(err.message);
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('insufficient')) throw new BadRequestException('WLD 잔액이 부족합니다.');
+      if (msg.includes('not owner')) throw new ForbiddenException('본인 소유의 공간만 부동산세를 납부할 수 있습니다.');
+      if (msg.includes('not found')) throw new NotFoundException('공간을 찾을 수 없습니다.');
+      throw err;
+    }
+  }
+
+  async listDelinquencies() {
+    return this.repo.listDelinquencies();
+  }
 }

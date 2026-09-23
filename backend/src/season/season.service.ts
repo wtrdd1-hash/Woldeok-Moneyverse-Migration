@@ -31,6 +31,54 @@ export interface SeasonLeaderboardRow {
   readonly display_name: string;
 }
 
+export interface CurrentSeasonStatus {
+  readonly seasonId: string;
+  readonly seasonName: string;
+  readonly startsAt: unknown;
+  readonly endsAt: unknown;
+  readonly lifecycleState: string;
+  readonly totalParticipants: number;
+  readonly myRank: number | null;
+  readonly myScore: number;
+  readonly myTier: string;
+  readonly tierRewardWld: number;
+  readonly tierTrophy: string | null;
+}
+
+export interface HallOfFameHonoree {
+  readonly rank: number;
+  readonly userId: string;
+  readonly displayName: string;
+  readonly score: number;
+  readonly trophyCode: string;
+  readonly trophyName: string;
+}
+
+export interface HallOfFameSeason {
+  readonly seasonId: string;
+  readonly seasonName: string;
+  readonly settledAt: unknown;
+  readonly honorees: readonly HallOfFameHonoree[];
+}
+
+export interface SettleSeasonResult {
+  readonly seasonId: string;
+  readonly seasonName: string;
+  readonly settledCount: number;
+  readonly hallOfFameCount: number;
+}
+
+export interface ClaimSeasonRewardResult {
+  readonly claimId: string;
+  readonly seasonId: string;
+  readonly seasonName: string;
+  readonly tier: string;
+  readonly rank: number | null;
+  readonly rewardWld: number;
+  readonly trophyCode: string | null;
+  readonly claimedAt: unknown;
+}
+
 // consume()'s row, by contrast, is re-validated field by field below
 // (id()/String()/===true), so its fields are kept `unknown` to match that
 // defensive intent rather than asserting the database is already trusted.
@@ -52,6 +100,10 @@ export interface SeasonRepository {
   events(): Promise<readonly SeasonEventRow[]>;
   leaderboard(eventId: string): Promise<readonly SeasonLeaderboardRow[]>;
   consume(input: SeasonConsumeRepositoryInput): Promise<SeasonConsumeRow>;
+  current(userId: string): Promise<CurrentSeasonStatus>;
+  hallOfFame(): Promise<readonly HallOfFameSeason[]>;
+  settle(seasonId?: string): Promise<SettleSeasonResult>;
+  claimReward(userId: string, seasonId: string, idempotencyKey: string): Promise<ClaimSeasonRewardResult>;
 }
 
 export interface SeasonConsumeInput {
@@ -96,5 +148,26 @@ export class SeasonService {
       transactionId: id(row.transaction_id, 'transaction id'),
       replayed: row.replayed === true,
     };
+  }
+
+  current(userId: unknown): Promise<CurrentSeasonStatus> {
+    return this.repository.current(id(userId, 'user id'));
+  }
+
+  hallOfFame(): Promise<readonly HallOfFameSeason[]> {
+    return this.repository.hallOfFame();
+  }
+
+  settle(seasonId?: unknown): Promise<SettleSeasonResult> {
+    const sId = seasonId ? id(seasonId, 'season id') : undefined;
+    return this.repository.settle(sId);
+  }
+
+  claimReward(userId: unknown, seasonId: unknown, idempotencyKey: unknown): Promise<ClaimSeasonRewardResult> {
+    return this.repository.claimReward(
+      id(userId, 'user id'),
+      id(seasonId, 'season id'),
+      id(idempotencyKey, 'idempotency key'),
+    );
   }
 }

@@ -1,6 +1,7 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v70)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v71)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v71**: 가상 도시 토지 부지 & 세무 구청 시스템(일일 정액 부동산세 SINK_PROPERTY_TAX 소각, 7일 유예 체납 공매 루프) 및 시즌 랭킹 & 명예의 전당 보상 분배 엔진(6대 티어 트로피·WLD 정산, season_hall_of_fame 불변 아카이빙) API 사양 수록 및 자율 구현 착수 (+145, -0)
 - **v70**: P2P 플레이어 마켓플레이스 & 에스크로 경매장 심화 문답 최종 확정 사양(최고가 공개 잉글리시 옥션, 상위 입찰 즉시 에스크로 반환/스나이핑 방지 연장, 양방향 2단계 확인 P2P 직거래, 공인 감정소 온체인형 인증서 발급, 토스/로빈후드형 롤링 중앙값 SVG 스파크라인, 자율 실행 모드) 누적 수록 및 구현 착수 (+140, -0)
 - **v69**: 클럽하우스 12x12 협동 캔버스, 컬렉션 D1~D7 소유감 큐레이션 허브(/collections) 구현, 네비게이션 연동, 테스트 100% 통과, 미니 PC 무중단 블루-그린 승격(v2026.09.23.393) 및 1,062개 세션 무손실 보존 완료 (+110, -0)
 - **v68**: 클럽·협동 경제 및 컬렉션 큐레이션 허브 1차 심화 문답 최종 확정 사양(직책 기반 캔버스 권한, SINK_CLUB_PROJECT 100% 영구 소각, 로컬+서버 하이브리드 동기화, 비공개 기본 스냅샷 카드, 자율 실행 모드) 누적 수록 및 구현 착수 (+130, -0)
@@ -2869,6 +2870,59 @@ flowchart TD
   - 마켓플레이스 (`/marketplace`): 307 (정상 로그인 리다이렉트).
   - 프론트엔드 버전 (`/frontend-version`): `{"id":"57eeaacc8de77f0f5e19450f3892ef1527760190"}`.
   - **PostgreSQL 활성 사용자 세션: 1,069건 100% 무손실 보존 완료 (배포 중 7건 순증)**.
+
+---
+
+## 🚀 [v71 Specification] 가상 도시 토지 부지 & 세무 구청 시스템 및 시즌 명예의 전당 정산 엔진 API 사양 (누적 추가)
+
+### 1. 조율 완료된 주요 의사결정 사항 (Interactive Alignment)
+1. **[세무 구청 부동산세 산정 및 소각 원칙]**:
+   - 일일 정액 보유세 부과 및 100% 영구 소각 (`SINK_PROPERTY_TAX`):
+     - `SPACE_ROOM_STARTER`: 일일 10 WLD
+     - `SPACE_STUDIO`: 일일 50 WLD
+     - `SPACE_GALLERY`: 일일 150 WLD
+     - `SPACE_OFFICE`: 일일 250 WLD
+     - `SPACE_PENTHOUSE`: 일일 600 WLD
+     - `SPACE_HQ`: 일일 2,500 WLD
+   - 수납된 부동산세는 시중 유통에 재투입되지 않고 `SINK_PROPERTY_TAX` 사유 코드로 전액 원천 소각 처리.
+2. **[체납 및 공매 규칙 (Foreclosure Auction)]**:
+   - 7일 납부 유예(`Grace Period` = 7일) 제공.
+   - 7일 경과 후에도 미납 상태 유지 시 소유권 압류 및 체납 공매(`FORECLOSURE_AUCTION`) 상태로 자동 전환.
+   - 체납 공매 시작가는 감정가의 50% 또는 직전 거래가의 50%로 개시.
+3. **[시즌 종료 보상 분배 엔진 (Season Settlement)]**:
+   - 6대 티어 표준 보상 모델:
+     - **Capital Master** (Top 10): 번호 각인 한정판 트로피 (`TROPHY_SEASON_CHAMPION_#N`) + 500 WLD
+     - **Diamond** (상위 1%): 500 WLD
+     - **Platinum** (상위 5%): 400 WLD
+     - **Gold** (상위 20%): 250 WLD
+     - **Silver** (상위 50%): 150 WLD
+     - **Bronze** (참가자 전체): 100 WLD
+   - 멱등키(`idempotencyKey`) 기반 원자적 정산 및 중복 수령 방지.
+4. **[명예의 전당 아카이빙 (Hall of Fame)]**:
+   - 불변 스냅샷 테이블(`season_hall_of_fame`)에 시즌 번호, 최종 순위 1~10위, 유저 ID, 유저명, 최종 점수, 수여 트로피 코드, 정산 타임스탬프를 영구 보존.
+   - 누구나 조회 가능한 공개 읽기 API 제공.
+5. **[작업 진행 방식]**:
+   - 자율 실행 모드: 백엔드 API 신설, 비즈니스 로직 연동, 단위 테스트, 프로덕션 빌드, 미니 PC 무중단 블루-그린 승격(v395)까지 원스톱 완결.
+
+### 2. 세부 백엔드 API 및 컴포넌트 명세
+1. **공간 세무 구청 모듈 (`backend/src/space/`)**:
+   - `GET /api/v1/spaces/:id/tax/status`: 공간 부동산세 상태 조회 (일일세, 체납액, 유예 기한, 체납 여부).
+   - `POST /api/v1/spaces/:id/tax/pay`: 일일 부동산세 납부 및 100% 영구 소각 (`SINK_PROPERTY_TAX`).
+   - `GET /api/v1/spaces/tax/delinquencies`: 체납 공매 대상 목록 조회.
+2. **시즌 정산 및 명예의 전당 모듈 (`backend/src/season/`)**:
+   - `GET /api/v1/seasons/current`: 현재 시즌 정보, 내 티어 및 랭킹 조회.
+   - `GET /api/v1/seasons/hall-of-fame`: 역대 시즌 명예의 전당 헌액자 목록 조회.
+   - `POST /api/v1/seasons/settle`: 시즌 종료 원자적 정산 엔진 (티어별 보상 계산, 명예의 전당 스냅샷, 트로피 인벤토리 지급).
+   - `POST /api/v1/seasons/claim-rewards`: 미수령 시즌 보상 청구 API (`idempotencyKey`).
+3. **단위 테스트 및 안전성 검증**:
+   - `backend/src/space/space-property-tax.test.ts`
+   - `backend/src/season/season-settlement.test.ts`
+
+### 3. 검증 및 프로모션 계획
+- 백엔드 단위 테스트 100% 통과 (`pnpm --filter @moneyverse/backend test`).
+- 프론트엔드 및 백엔드 프로덕션 컴파일 빌드 통과.
+- 미니 PC 원격 테스트 배포 및 운영 무중단 블루-그린 승격 (v395, 1,069+ 세션 무손실 보존).
+
 
 
 

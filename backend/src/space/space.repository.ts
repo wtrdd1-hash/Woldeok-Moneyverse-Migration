@@ -4,6 +4,24 @@ import { queryOne, queryRows } from '../core/db';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+export const DAILY_TAX_MAP: Record<string, number> = {
+  SPACE_ROOM_STARTER: 10,
+  SPACE_STUDIO: 50,
+  SPACE_GALLERY: 150,
+  SPACE_OFFICE: 250,
+  SPACE_PENTHOUSE: 600,
+  SPACE_HQ: 2500,
+};
+
+export const BASE_PRICE_MAP: Record<string, number> = {
+  SPACE_ROOM_STARTER: 5000,
+  SPACE_STUDIO: 25000,
+  SPACE_GALLERY: 75000,
+  SPACE_OFFICE: 100000,
+  SPACE_PENTHOUSE: 250000,
+  SPACE_HQ: 1500000,
+};
+
 export class SpaceInputError extends Error {
   constructor(message: string) {
     super(message);
@@ -48,6 +66,43 @@ export interface ContributeCityProjectResult {
   readonly accepted_amount: string;
   readonly project_current_wld: string;
   readonly project_status: string;
+}
+
+export interface SpaceTaxStatusResult {
+  readonly spaceId: string;
+  readonly spaceType: string;
+  readonly spaceName: string;
+  readonly dailyTaxWld: number;
+  readonly taxPaidUntil: Date;
+  readonly isDelinquent: boolean;
+  readonly overdueDays: number;
+  readonly delinquentWld: number;
+  readonly gracePeriodEnd: Date;
+  readonly isForeclosureReady: boolean;
+  readonly estimatedForeclosurePrice: number;
+}
+
+export interface PayPropertyTaxResult {
+  readonly receiptId: string;
+  readonly spaceId: string;
+  readonly daysPaid: number;
+  readonly totalWld: number;
+  readonly newPaidUntil: Date;
+  readonly paidAt: Date;
+  readonly burnCode: string;
+}
+
+export interface DelinquentSpaceRow {
+  readonly spaceId: string;
+  readonly ownerUserId: string;
+  readonly ownerDisplayName: string;
+  readonly spaceType: string;
+  readonly spaceName: string;
+  readonly dailyTaxWld: number;
+  readonly overdueDays: number;
+  readonly delinquentWld: number;
+  readonly foreclosureStartPrice: number;
+  readonly status: 'DELINQUENT_GRACE' | 'FORECLOSURE_AUCTION';
 }
 
 @Injectable()
@@ -163,5 +218,149 @@ export class PostgresSpaceRepository {
     );
     if (!row) throw new Error('failed to contribute to city project');
     return row;
+  }
+
+  async getSpaceTaxStatus(spaceId: string): Promise<SpaceTaxStatusResult> {
+    if (!UUID_REGEX.test(spaceId)) throw new SpaceInputError('spaceId must be a valid UUID');
+
+    const row = await queryOne<{
+      id: string;
+      space_type: string;
+      name: string;
+      tax_paid_until: Date | null;
+      created_at: Date;
+    }>(
+      this.client,
+      `SELECT id, space_type, name, tax_paid_until, created_at
+       FROM public.user_spaces
+       WHERE id = $1::uuid;`,
+      [spaceId],
+    );
+
+    if (!row) throw new SpaceInputError('space not found');
+
+    const dailyTaxWld = DAILY_TAX_MAP[row.space_type] ?? 50;
+    const basePrice = BASE_PRICE_MAP[row.space_type] ?? 25000;
+    const estimatedForeclosurePrice = Math.floor(basePrice * 0.5);
+
+    const now = new Date();
+    const paidUntil = row.tax_paid_until ? new Date(row.tax_paid_until) : new Date(row.created_at.getTime() + 86400000);
+    const overdueMs = now.getTime() - paidUntil.getTime();
+    const isDelinquent = overdueMs > 0;
+    const overdueDays = isDelinquent ? Math.ceil(overdueMs / 86400000) : 0;
+    const delinquentWld = overdueDays * dailyTaxWld;
+    const gracePeriodEnd = new Date(paidUntil.getTime() + 7 * 86400000);
+    const isForeclosureReady = overdueDays > 7;
+
+    return {
+      spaceId: row.id,
+      spaceType: row.space_type,
+      spaceName: row.name,
+      dailyTaxWld,
+      taxPaidUntil: paidUntil,
+      isDelinquent,
+      overdueDays,
+      delinquentWld,
+      gracePeriodEnd,
+      isForeclosureReady,
+      estimatedForeclosurePrice,
+    };
+  }
+
+  async payPropertyTax(
+    actorUserId: string,
+    spaceId: string,
+    days: number,
+    idempotencyKey: string,
+  ): Promise<PayPropertyTaxResult> {
+    if (!UUID_REGEX.test(actorUserId)) throw new SpaceInputError('actorUserId must be a valid UUID');
+    if (!UUID_REGEX.test(spaceId)) throw new SpaceInputError('spaceId must be a valid UUID');
+    if (!UUID_REGEX.test(idempotencyKey)) throw new SpaceInputError('idempotencyKey must be a valid UUID');
+    if (!Number.isSafeInteger(days) || days < 1 || days > 30) {
+      throw new SpaceInputError('days must be an integer between 1 and 30');
+    }
+
+    const row = await queryOne<{
+      receipt_id: string;
+      space_id: string;
+      days_paid: number;
+      total_wld: string;
+      new_paid_until: Date;
+      paid_at: Date;
+    }>(
+      this.client,
+      `SELECT receipt_id, space_id, days_paid, total_wld, new_paid_until, paid_at
+       FROM public.space_pay_property_tax($1::uuid, $2::uuid, $3::integer, $4::uuid);`,
+      [actorUserId, spaceId, days, idempotencyKey],
+    );
+
+    if (!row) throw new Error('failed to pay property tax');
+
+    return {
+      receiptId: row.receipt_id,
+      spaceId: row.space_id,
+      daysPaid: row.days_paid,
+      totalWld: Number(row.total_wld),
+      newPaidUntil: row.new_paid_until,
+      paidAt: row.paid_at,
+      burnCode: 'SINK_PROPERTY_TAX',
+    };
+  }
+
+  async listDelinquencies(): Promise<DelinquentSpaceRow[]> {
+    const rows = await queryRows<{
+      space_id: string;
+      owner_user_id: string;
+      owner_display_name: string;
+      space_type: string;
+      space_name: string;
+      tax_paid_until: Date | null;
+      created_at: Date;
+    }>(
+      this.client,
+      `SELECT
+         s.id AS space_id,
+         s.user_id AS owner_user_id,
+         COALESCE(i.display_name, '시민') AS owner_display_name,
+         s.space_type,
+         s.name AS space_name,
+         s.tax_paid_until,
+         s.created_at
+       FROM public.user_spaces s
+       LEFT JOIN LATERAL (
+         SELECT display_name FROM public.identities WHERE user_id = s.user_id ORDER BY linked_at LIMIT 1
+       ) i ON true
+       WHERE (COALESCE(s.tax_paid_until, s.created_at + interval '1 day') < pg_catalog.clock_timestamp())
+       ORDER BY s.tax_paid_until ASC
+       LIMIT 100;`,
+      [],
+    );
+
+    const now = new Date();
+    return rows.map((r) => {
+      const dailyTaxWld = DAILY_TAX_MAP[r.space_type] ?? 50;
+      const basePrice = BASE_PRICE_MAP[r.space_type] ?? 25000;
+      const foreclosureStartPrice = Math.floor(basePrice * 0.5);
+
+      const paidUntil = r.tax_paid_until ? new Date(r.tax_paid_until) : new Date(r.created_at.getTime() + 86400000);
+      const overdueMs = now.getTime() - paidUntil.getTime();
+      const overdueDays = Math.max(1, Math.ceil(overdueMs / 86400000));
+      const delinquentWld = overdueDays * dailyTaxWld;
+      const status: 'DELINQUENT_GRACE' | 'FORECLOSURE_AUCTION' =
+        overdueDays > 7 ? 'FORECLOSURE_AUCTION' : 'DELINQUENT_GRACE';
+
+      return {
+        spaceId: r.space_id,
+        ownerUserId: r.owner_user_id,
+        ownerDisplayName: r.owner_display_name,
+        spaceType: r.space_type,
+        spaceName: r.space_name,
+        dailyTaxWld,
+        overdueDays,
+        delinquentWld,
+        foreclosureStartPrice,
+        status,
+      };
+    });
   }
 }
