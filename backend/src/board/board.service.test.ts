@@ -193,6 +193,24 @@ describe('BoardService', () => {
     ).rejects.toThrow('comment is invalid');
   });
 
+  it('requires caller-owned idempotency keys for post writes', async () => {
+    const board = new BoardService(repository());
+
+    await expect(board.create(ACTOR, { title: 'A title', body: 'A body' })).rejects.toThrow(
+      'idempotency key is invalid',
+    );
+    await expect(board.update(ACTOR, POST, { title: 'A title', body: 'A body' })).rejects.toThrow(
+      'idempotency key is invalid',
+    );
+  });
+
+  it('requires a caller-owned idempotency key for replies', async () => {
+    const board = new BoardService(repository());
+    await expect(board.createComment(ACTOR, POST, { body: 'reply' })).rejects.toThrow(
+      'idempotency key is invalid',
+    );
+  });
+
   it('rejects a row whose reply count is not a whole number', async () => {
     const board = new BoardService(
       repository({

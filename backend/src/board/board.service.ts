@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const STORAGE_KEY = /^[0-9a-f-]{36}\.(png|jpg|webp)$/;
@@ -284,7 +283,7 @@ export class BoardService {
         uuid(userId, 'user id'),
         boardText(input?.title, 'title', 120),
         boardText(input?.body, 'body', 5000, true),
-        uuid(input?.idempotencyKey ?? randomUUID(), 'idempotency key'),
+        uuid(input?.idempotencyKey, 'idempotency key'),
         image.storageKey,
         image.altText,
       ),
@@ -302,7 +301,7 @@ export class BoardService {
       uuid(postId, 'post id'),
       boardText(input?.title, 'title', 120),
       boardText(input?.body, 'body', 5000, true),
-      uuid(input?.idempotencyKey ?? randomUUID(), 'idempotency key'),
+      uuid(input?.idempotencyKey, 'idempotency key'),
     );
     return row ? post(row) : null;
   }
@@ -334,7 +333,7 @@ export class BoardService {
         // newline typed into the reply box is folded to a space here rather
         // than refused by the database as an unexplained bad request.
         boardText(input?.body, 'comment', 1000),
-        uuid(input?.idempotencyKey ?? randomUUID(), 'idempotency key'),
+        uuid(input?.idempotencyKey, 'idempotency key'),
       ),
     );
   }
