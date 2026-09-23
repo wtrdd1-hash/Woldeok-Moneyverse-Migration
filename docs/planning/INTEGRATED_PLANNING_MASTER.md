@@ -1,11 +1,21 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.23.397
+> Current ledger version: v2026.09.23.398
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.23.398 — 2026-09-23
+- Start/mid-work baseline: `origin/main=4812a99b0a78da736e477d0a3a2f02ed4ea66283`.
+- P0 decision: detailed API documentation is removed from intentional public Moneyverse web exposure and remains maintained in GitHub documentation.
+- Public Developer Portal/API Center must not expose endpoint catalogs, OpenAPI/Swagger downloads, request/response schemas, code examples, live testers, or privileged/economic/admin API details.
+- This is disclosure reduction, not a substitute for authorization; all APIs remain protected as if method/path/schema are known.
+- Added public-build scanning and promotion gates for API documentation artifacts, route inventories, source-map operational leakage, and secrets.
+- Added detailed EN/KO authority: `API_DISCLOSURE_SECURITY_SPEC`.
+- Important boundary: a public GitHub repository is still publicly readable; stronger confidentiality requires private/access-controlled documentation storage.
+- Planning/docs only; runtime portal removal is not yet claimed.
 
 ## v2026.09.23.397 — 2026-09-23
 - Baseline: `origin/main=0e46f1eac272c42aa929947b79c0b0d2ccbd5454`.
