@@ -2,11 +2,22 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.23.405
+> **현재 통합 버전:** v2026.09.23.406
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 기능 추가 회차 — v2026.09.23.406 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Addition. **Previous Cycle Type:** Feature Improvement. **Next Cycle Type:** Feature Improvement.
+- **정확한 기준:** 시작 및 작업 중간 재확인 모두 `origin/main=e447b11f1d27ee7da2a46c64fcd96e0058c8da6d`였고, 검토 시점에 열린 PR이나 main 외 원격 브랜치는 없었다.
+- **후보 BANK-406-01 — 예약/반복 WLD 송금:** 저장소 전수 검색에서 banking/transfer 기능은 확인됐지만 standing-order/recurring-transfer의 권위 사용자 계약은 확인되지 않았다. 일회성 송금, 구독, 직업 보상, 가격 알림의 이름 변경이 아닌 별도 신규 기능 후보다.
+- **레퍼런스 게이트:** 이번 회차에 이 후보를 위해 새로 수집·중복 제거·독립 분석 가능한 레퍼런스는 `0 / 10,000`건이다. 기존 일반 UI corpus를 예약송금 연구로 재분류하지 않는다.
+- **상태:** `IN PROGRESS / REFERENCE VALIDATION BLOCKED`. 후보 전용 10,000건 corpus를 실제 수집·중복 제거·분류·분석하기 전에는 제품 요구사항, UI 흐름, 스키마, API, 스케줄러 의미, 악용 방지, 알림 정책, KPI, QA 수용조건, Test exact-SHA 게이트, Production 승격 계약을 확정하지 않는다.
+- **채택 전 필수 조사 범위:** 실제 은행 standing order/autopay 제품, 결제 예약 의미, retry/idempotency, 잔액 부족 처리, 취소·수정 cutoff, timezone/DST, 반복 작업 구현, DB locking/concurrency, fraud/abuse control, 접근성/모바일 패턴, 알림, 운영 장애, 규제 지침, audit/reconciliation 사례.
+- **QA/runtime 관찰:** 현재 `main`은 문서 전용 v405이며 해당 non-runtime commit에서는 required runtime check가 의도적으로 skip되고 classify/policy는 통과한다. 이번 회차는 runtime 구현이나 Production 승격을 주장하지 않는다.
+- **통합 규칙:** 이 blocked discovery는 이 파일과 영문 canonical에만 기록하며 신규 기능별 기획 문서를 만들지 않는다.
 
 ## 기능/API 동시 구현 강제 계약 — v2026.09.23.397 (2026-09-23)
 

@@ -2,11 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.405
+> Current integrated version: v2026.09.23.406
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Feature Addition cycle — v2026.09.23.406 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Addition. **Previous Cycle Type:** Feature Improvement. **Next Cycle Type:** Feature Improvement.
+- **Exact baseline:** start and mid-work re-read both resolved `origin/main=e447b11f1d27ee7da2a46c64fcd96e0058c8da6d`; no open pull requests or non-main remote branches were present at review time.
+- **Candidate BANK-406-01 — scheduled / recurring WLD transfers:** repository-wide discovery found banking/transfer capabilities but no authoritative standing-order/recurring-transfer user contract. This is a distinct candidate, not a rename of one-time transfer, subscription, job payout or price-alert behavior.
+- **Research gate:** `0 / 10,000` newly collected, deduplicated, independently analyzable references were available for this candidate in this cycle. Existing generic UI corpora are not reclassified as scheduled-transfer research.
+- **Status:** `IN PROGRESS / REFERENCE VALIDATION BLOCKED`. No product requirements, UI flow, schema, API, scheduler semantics, abuse controls, notification policy, KPI, QA acceptance, Test exact-SHA gate or Production promotion contract is adopted until the candidate-specific 10,000-reference corpus is actually collected, deduplicated, classified and analyzed.
+- **Research scope required before adoption:** real banking standing-order/autopay products, payment scheduling semantics, retry/idempotency, insufficient-funds handling, cancellation/edit cutoffs, timezone/DST behavior, recurring-job implementations, database locking/concurrency, fraud/abuse controls, accessibility/mobile patterns, notifications, operational incidents, regulatory guidance and audit/reconciliation patterns.
+- **QA/runtime observation:** current `main` is documentation-only v405; required runtime checks are intentionally skipped for this non-runtime commit while classify/policy checks pass. No runtime implementation or Production promotion is claimed by this cycle.
+- **Canonicalization rule:** this blocked discovery is recorded only here and in the Korean parity file; no new feature-specific planning document is created.
 
 ## Runtime hygiene inventory — v2026.09.23.405 (2026-09-23)
 
