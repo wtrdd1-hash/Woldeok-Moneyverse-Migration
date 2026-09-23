@@ -2,11 +2,21 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.23.397
+> **현재 통합 버전:** v2026.09.23.400
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 시간별 기획 회차 — v2026.09.23.400 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Addition. **Previous Cycle Type:** Feature Improvement. **Next Cycle Type:** Feature Improvement.
+- **정확한 기준선:** 시작 및 작업 중간 권위 재확인 결과 `origin/main=f0efc448a30a5b67071956b0faa6742a8427d2ea`였다. 최근 runtime에는 거래소 경매/직거래/감정, 클럽 캔버스, 컬렉션 큐레이션, 재산세 연동이 추가됐고 후속 club DTO hoisting 수정이 현재 main tip이다.
+- **발굴 후보 — BANK-400-01 예약/반복 송금:** 저장소 전체 코드 검색에서 banking transfer 개념은 확인했지만 standing-order/recurring-transfer 사용자 기능이나 권위 API 계약은 확인되지 않았다. 구독, jobs, 주식 알림, 일회성 계좌 송금과 명확히 구분되는 후보이다.
+- **레퍼런스 게이트:** 이번 회차에서 이 후보에 대해 새로 확보·중복 제거·검증한 독립 외부 레퍼런스는 `0 / 10,000`건이다. 기존 일반 UI corpus와 무관한 banking/marketplace 명세를 증거로 재분류하지 않는다. 따라서 BANK-400-01은 **IN PROGRESS / REFERENCE VALIDATION BLOCKED**이며 아직 제품 요구사항, 구현 backlog, Test 대상 또는 Production 대상으로 수용하지 않는다.
+- **성급한 상세기획 금지:** 화면 상태, 권한, 일정 의미, 데이터 모델, API/DB/app-api 계약, 악용 방지, 알림, analytics/KPI, 접근성, QA matrix, rollback, exact-SHA 승격조건은 후보 전용 10,000건 corpus를 실제 수집·중복 제거·분류·분석하기 전까지 확정하지 않는다.
+- **기존 차단조건 유지:** 열린 runtime/security/idempotency PR은 required CI와 exact-SHA evidence를 계속 요구하며, 이번 회차가 기존 P0/P1, DB, DR, CI, Production gate를 완화하지 않는다.
+- **문서 권위:** 이 기록은 `PROJECT_PLAN.md`와 한국어 대응본에만 유지한다. 과거 분산 planning 파일은 신규 권위 문서가 아니라 보조/이력 증거다. 이번 회차는 runtime 코드나 Production 배포를 수행하지 않는다.
 
 ## 기능/API 동시 구현 강제 계약 — v2026.09.23.397 (2026-09-23)
 

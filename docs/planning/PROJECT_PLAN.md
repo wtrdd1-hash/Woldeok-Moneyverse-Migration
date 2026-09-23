@@ -2,11 +2,21 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.397
+> Current integrated version: v2026.09.23.400
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Hourly planning cycle — v2026.09.23.400 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Addition. **Previous Cycle Type:** Feature Improvement. **Next Cycle Type:** Feature Improvement.
+- **Exact baseline:** start and mid-cycle authority check resolved `origin/main=f0efc448a30a5b67071956b0faa6742a8427d2ea`. Recent runtime work added marketplace auction/direct-trade/appraisal, club canvas, collections curation and property-tax integration; the follow-up club DTO hoisting fix is the current main tip.
+- **Candidate discovered — BANK-400-01 Scheduled / Recurring Transfers:** repository-wide code search found banking transfer concepts but no authoritative standing-order/recurring-transfer user feature or API contract. This is distinct from subscriptions, jobs, stock alerts and one-shot account transfers.
+- **Research gate:** `0 / 10,000` newly collected, deduplicated independent external references were verified for this candidate in this cycle. Existing generic UI corpora and unrelated banking/marketplace specifications are not reclassified as evidence. Therefore BANK-400-01 is **IN PROGRESS / REFERENCE VALIDATION BLOCKED** and is not accepted as a product requirement, implementation backlog, Test target or Production target yet.
+- **No premature design:** screen states, permissions, schedule semantics, data model, API/DB/app-api contract, abuse controls, notifications, analytics/KPI, accessibility, QA matrix, rollback and exact-SHA promotion criteria remain intentionally uncommitted until the required candidate-specific corpus is actually collected, deduplicated, classified and analyzed.
+- **Current blockers retained:** open runtime/security/idempotency PRs remain subject to required CI and exact-SHA evidence; this planning cycle does not waive existing P0/P1, DB, DR, CI or Production gates.
+- **Document authority:** this record lives only in `PROJECT_PLAN.md` and its Korean parity file; older distributed planning files remain supporting/history evidence rather than a new source of truth. No runtime code or Production deployment is performed by this cycle.
 
 ## Mandatory feature/API implementation parity — v2026.09.23.397 (2026-09-23)
 
