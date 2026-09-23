@@ -11,9 +11,8 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min, MinLength } from 'class-validator';
-import { randomUUID } from 'node:crypto';
+import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { IsBoolean, IsIn, IsInt, IsString, IsUUID, MaxLength, Min, MinLength } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
@@ -34,10 +33,9 @@ export class SendMessageDto {
   @MaxLength(2000)
   readonly body!: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: '클라이언트 멱등성 키 (미제공시 서버 자동생성)' })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid', description: '클라이언트 소유 멱등성 키' })
   @IsUUID()
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey!: string;
 }
 
 export class MarkReadDto {
@@ -131,8 +129,7 @@ export class ChatController {
     @Body() dto: SendMessageDto,
   ) {
     const actorUserId = requireUserId(req);
-    const key = dto.idempotencyKey || randomUUID();
-    return this.chat.sendMessage(actorUserId, conversationId, key, dto.body);
+    return this.chat.sendMessage(actorUserId, conversationId, dto.idempotencyKey, dto.body);
   }
 
   @ApiOperation({ summary: '대화방 메시지 읽음 처리' })
