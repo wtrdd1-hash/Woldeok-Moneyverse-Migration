@@ -5,4 +5,4 @@
 - Corrected stale “5 professions” copy to the current eight-career model.
 - Replaced the obsolete career energy/cooldown claim with the server-enforced minimum task duration and per-task daily assignment limit.
 - Added guide regression coverage for implemented-feature groups and route validity.
-- Fixed a missing conditional-render closure in `spaces-view.tsx` that already existed on latest main and blocked typecheck/build.
+- Test validation exposed a pre-existing `spaces-view.tsx` conditional-render syntax break and a `CollectionModule` `SessionGuard` dependency-injection failure. Both fixes landed independently on `main`; this branch was rebased onto those fixes so the guide change no longer duplicates them.

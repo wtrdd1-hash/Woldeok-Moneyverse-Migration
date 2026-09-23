@@ -13,3 +13,5 @@
 ## 검증 경계
 - 집중 가이드 회귀시험, 프론트 typecheck/build, exact-SHA 테스트 서버 검증, 백엔드 health/version 확인 후 운영 승격합니다.
 - 첫 전체 프론트 테스트 시도에서 기존 `app-gateway` 호환성 불일치 1건이 확인됐지만 가이드 회귀시험 자체는 통과했습니다.
+- 첫 exact-SHA Test canary는 `CollectionModule`이 `AuthModule`을 import하지 않아 `SessionGuard -> SessionRepository` 주입에 실패했고 기존 Test 런타임을 유지한 채 안전 중단됐습니다. 로컬 원인 수정 후 컬렉션 테스트 3/3이 통과했습니다.
+- 작업 중 `origin/main`이 `f0efc448...`에서 `c5235c351...`로 이동하며 동일 Collection DI 수정, App Gateway collections 허용 목록, spaces JSX 닫힘 수정이 별도 반영됐습니다. 브랜치를 `c5235c351...` 위로 재배치했고 현재 브랜치 델타는 가이드와 v399 문서만 남았습니다.

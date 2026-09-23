@@ -13,3 +13,5 @@
 ## Verification boundary
 - Focused guide regression, frontend typecheck/build, exact-SHA Test runtime verification, and backend health/version checks are required before production promotion.
 - The first broad frontend test attempt exposed an unrelated pre-existing `app-gateway` compatibility mismatch; the guide regression itself passed.
+- The first exact-SHA Test canary safely aborted while preserving the previous Test runtime because `CollectionModule` did not import `AuthModule`, so `SessionGuard -> SessionRepository` injection failed. Collection tests passed 3/3 after the local diagnosis.
+- During implementation, `origin/main` advanced from `f0efc448...` to `c5235c351...` with independent fixes for the same Collection DI issue, the App Gateway collections allow-list, and the spaces JSX closure. The branch was rebased onto `c5235c351...`; only the guide and v399 documentation remain as branch deltas.
