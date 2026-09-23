@@ -82,8 +82,16 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
          ORDER BY grant_row.table_name, grant_row.privilege_type`,
       );
       expect(result.rows).toEqual([
+        { table_name: 'account_age_policy_state', privilege_type: 'DELETE' },
+        { table_name: 'account_age_policy_state', privilege_type: 'INSERT' },
+        { table_name: 'account_age_policy_state', privilege_type: 'UPDATE' },
         { table_name: 'auth_sessions', privilege_type: 'INSERT' },
         { table_name: 'auth_sessions', privilege_type: 'UPDATE' },
+        { table_name: 'city_project_contributions', privilege_type: 'DELETE' },
+        { table_name: 'city_project_contributions', privilege_type: 'INSERT' },
+        { table_name: 'city_project_contributions', privilege_type: 'UPDATE' },
+        { table_name: 'city_projects', privilege_type: 'DELETE' },
+        { table_name: 'city_projects', privilege_type: 'INSERT' },
         { table_name: 'city_projects', privilege_type: 'UPDATE' },
         { table_name: 'club_feed_posts', privilege_type: 'DELETE' },
         { table_name: 'club_feed_posts', privilege_type: 'INSERT' },

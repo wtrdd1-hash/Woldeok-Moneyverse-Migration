@@ -539,13 +539,13 @@ export class PostgresStockRepository {
     if ((side !== 'buy' && side !== 'sell') || !positive(quantity))
       throw new StockInputError('invalid stock trade');
 
-    const stockRow = await queryOne<{ halt_status: string; active: boolean }>(
+    const stockRow = await queryOne<{ halt_status: string }>(
       this.pool,
-      'SELECT coalesce(halt_status, \'ACTIVE\') AS halt_status, active FROM public.virtual_stocks WHERE id = $1',
+      'SELECT coalesce(halt_status, \'ACTIVE\') AS halt_status FROM public.stock_market_overview() WHERE id = $1',
       [stockId],
     );
-    if (!stockRow || !stockRow.active || stockRow.halt_status !== 'ACTIVE') {
-      throw new StockInputError('stock is currently halted or inactive');
+    if (stockRow && stockRow.halt_status !== 'ACTIVE') {
+      throw new StockInputError('stock is currently halted');
     }
 
     const row = await queryOne<StockTradeResultRow>(

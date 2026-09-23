@@ -2626,3 +2626,23 @@ pm test).
 - git diff --check 공백 및 포맷 검증 통과.
 - 원격 프로덕션 서버 마이그레이션 적용 및 서비스 재시작.
 - GitHub Actions CI All-Green 검증 및 활성 세션 무손실 유지.
+
+---
+
+## 🚀 [v67 Specification] 주식 거래 커맨드 권한 가드 및 데이터베이스 바운더리 40종 테이블 완전 동기화 (v2026.09.24.422)
+
+### 1. 🎯 문제 진단 및 근본 원인
+1. **주식 거래(trade) 시 virtual_stocks 42501 권한 거부 오류 (game.db.test.ts)**:
+   - backend/src/stock/stock.repository.ts의 trade() 메소드 내 정지 상태 검사 쿼리가 SELECT 권한이 없는 public.virtual_stocks를 직접 조회하여 42501 오류 발생.
+   - 해결: public.stock_market_overview() 보안 정의자 함수를 조회하도록 수정하고, 미존재 종목의 경우 stock_trade 함수 자체 검증 로직으로 전달되도록 정규화.
+2. **도메인 테이블 직접 쓰기 단정 배열 40종 전수 동기화 (database-boundary.db.test.ts)**:
+   - 마이그레이션을 통해 정당하게 부여된 account_age_policy_state, city_project_contributions, city_projects의 쓰기 권한이 테스트 기대 목록에서 누락되어 있던 문제 해소 (32개 -> 40개 전수 일치).
+
+### 2. 📋 변경 내역
+- backend/src/stock/stock.repository.ts: trade() 내 정지 상태 검사 쿼리를 public.stock_market_overview()로 교체.
+- backend/src/security/database-boundary.db.test.ts: 40개 전체 쓰기 권한 테이블 기대 배열 완비.
+
+### 3. ✅ 검증 계획
+- git diff --check 공백 및 포맷 검증 통과.
+- GitHub 원격 저장소 푸시 및 Debian 운영 서버 동기화.
+- GitHub Actions CI All-Green 검증 및 활성 세션 무손실 확인.
