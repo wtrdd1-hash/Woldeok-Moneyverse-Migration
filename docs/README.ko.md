@@ -10,6 +10,7 @@ GitHub 문서는 여기서 시작합니다. 파일명이 가장 최신처럼 보
 - [통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md) / [English](planning/INTEGRATED_PLANNING_MASTER.md)
 - [전면 기획 재검토 v402](planning/INTEGRATED_FULL_REVIEW_V402.ko.md) / [English](planning/INTEGRATED_FULL_REVIEW_V402.md)
 - [문서 거버넌스](DOCUMENTATION_POLICY.ko.md) / [English](DOCUMENTATION_POLICY.md)
+- [현재 런타임 / OS 기준선](CURRENT_RUNTIME_BASELINE.ko.md) / [English](CURRENT_RUNTIME_BASELINE.md)
 - [전체 문서 색인](INDEX.ko.md) / [English](INDEX.md)
 
 ## 주요 문서군

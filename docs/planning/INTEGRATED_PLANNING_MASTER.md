@@ -1,11 +1,22 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.23.403
+> Current ledger version: v2026.09.23.404
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.23.404 — 2026-09-23
+- Re-baselined current infrastructure documentation from observed runtime facts on the authorized Debian host.
+- Current observed OS/runtime: Debian GNU/Linux 13.6 (trixie), Linux 6.12.94, systemd 257, Node 24.21.0, pnpm 10.0.0, Python 3.13.5, Nginx 1.26.3, Docker 29.8.0, Production PostgreSQL 17.11.
+- Current public authority is Debian 13 systemd release directories behind host Nginx, with Docker-hosted PostgreSQL. Production backend/frontend use 3000/3001; Test uses 3100/3101.
+- Added canonical `CURRENT_RUNTIME_BASELINE.md` / `.ko.md` and linked it from docs README/index.
+- Rewrote deployment-flow and release-guide EN/KO to distinguish OBSERVED CURRENT from TARGET/RECOVERY Kubernetes/Flux architecture.
+- Corrected operations/production-deployment wording so GitOps desired state is not treated as current public-runtime proof.
+- Kubernetes/Flux remains target/recovery architecture until access, DB reconciliation, exact runtime identity and public routing are explicitly reverified.
+- Multiple QA PostgreSQL containers were observed; no destructive cleanup was performed. Container cleanup requires owner/use/data/rollback classification.
+- Planning/docs/runtime-observation update only; no runtime mutation or Production promotion performed.
 
 ## v2026.09.23.403 — 2026-09-23
 - Reorganized GitHub documentation without deleting historical evidence or breaking existing paths.

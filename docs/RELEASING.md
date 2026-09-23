@@ -1,132 +1,135 @@
 # Release Guide
 
-This document is the authoritative release procedure for Woldeok Moneyverse. The Korean translation is `RELEASING.ko.md`.
+**English canonical** | [한국어](RELEASING.ko.md)
+
+> Version: v2026.09.23.404
+> Current runtime baseline: [CURRENT_RUNTIME_BASELINE.md](CURRENT_RUNTIME_BASELINE.md)
 
 ## Runtime contract
 
-| Environment | Public URL | Namespace | Runtime source of truth |
-| --- | --- | --- | --- |
-| Production | `https://easy-scraping.com` | `wdmvp` | `wtrdd1-hash/kuber-infrastructure` |
-| Isolated Test | `https://test.easy-scraping.com` | `wdmv-test` | independent Flux Kustomization in `wtrdd1-hash/kuber-infrastructure` |
+| Environment | Public origin | Current runtime | Backend / frontend |
+|---|---|---|---|
+| Production | `https://easy-scraping.com` | Debian 13 host systemd + Nginx | 3000 / 3001 |
+| Isolated Test | `https://test.easy-scraping.com` | Debian 13 host systemd + Nginx | 3100 / 3101 |
 
-The host runs Kubernetes/containerd and is reconciled by Flux. Docker Compose is not the Production release control plane. Test is isolated from Production and must not mutate Production state.
+Current Production data authority is PostgreSQL on the Debian host. The observed Production PostgreSQL runtime is Docker PostgreSQL 17.11.
 
-## 1. Development and exact-SHA CI gate
+Kubernetes/Flux is a recovery/target architecture, not current public-runtime proof. Docker Compose is also not the current Production deployment control plane.
 
-Development branches eligible for automated integration are limited to these prefixes:
+## 1. Development branch gate
 
-```text
-feat/*
-feature/*
-fix/*
-bugfix/*
-integrate/*
-ops/*
-auto/*
-test-candidate/*
-```
+Runtime changes use a dedicated branch and must pass the applicable exact-HEAD checks before integration. Candidate evidence must bind to the exact source SHA that was tested.
 
-`.github/workflows/test-candidate.yml` runs the reusable full CI gate and then builds immutable Test images for the exact branch HEAD:
+Expected checks include, as applicable:
+- lint/typecheck/build;
+- unit/integration tests;
+- PostgreSQL migrations and real-DB tests;
+- API contract/schema checks;
+- authorization/security negatives;
+- idempotency/concurrency tests for economic mutations;
+- committed-secret and supply-chain checks.
 
-```text
-ghcr.io/wtrdd1-hash/wdmv/backend:<sha>-test
-ghcr.io/wtrdd1-hash/wdmv/frontend:<sha>-test
-```
+A skipped required DB/security/contract test is not a pass.
 
-The gate includes lint, typecheck, build, tests, PostgreSQL migrations and DB-backed tests, control-byte and committed-secret checks, Prisma mutation protection, and Production dependency audit. A skipped DB test is not treated as a pass.
+Documentation-only branches do not constitute application candidates and must not trigger a runtime release merely because repository `main` advances.
 
-## 2. Automatic branch → main integration
+## 2. Isolated Test verification
 
-`.github/workflows/auto-integrate-promote.yml` runs hourly and can also be dispatched manually. It integrates at most one branch per run.
+The approved candidate is materialized in the Test release directories and run by:
+- `test-main-backend.service`;
+- `test-main-frontend.service`.
 
-A branch is eligible only when all of the following are true:
+Before Production promotion verify:
+1. public Test reports the intended application version;
+2. backend readiness succeeds;
+3. representative API and authoritative Test DB paths succeed;
+4. changed user flows pass;
+5. relevant authz/security negative tests pass;
+6. server restart/update preserves a pre-existing signed-in session;
+7. frontend cache/runtime write permissions are healthy;
+8. Test remains non-indexable where required;
+9. no new fatal/critical logs are introduced.
 
-- its current HEAD is ahead of `main`;
-- a successful `Build Test Candidate` run exists for that exact HEAD SHA;
-- the branch matches an allowed development prefix;
-- GitHub reports the PR as mergeable without conflicts;
-- the PR HEAD still equals the SHA that passed the Test Candidate gate.
+If Test does not serve the exact intended application candidate, promotion is BLOCKED.
 
-The workflow opens an integration PR when needed, squash-merges the validated exact HEAD to `main`, requests deletion of the merged source branch, and explicitly dispatches `Build Test Candidate` on `main`.
+## 3. Main integration and re-verification
 
-The explicit dispatch is required because follow-on workflow events created with `GITHUB_TOKEN` are not relied on as a release trigger.
+After candidate approval, integrate the validated change to `main` without overwriting concurrent work. Re-read current planning and re-resolve the application source identity.
 
-## 3. Automatic isolated Test verification
+If `main` changed during the work, rebase/reconcile and rerun the required exact-main checks. A prior branch SHA is not proof for a different merged SHA.
 
-A successful `main` Test Candidate is consumed by the GitOps reconciler and deployed only to the isolated Test namespace.
+## 4. Production preparation
 
-The Production release workflow waits for `https://test.easy-scraping.com/api/version` to report the exact `main` SHA and then verifies a real backend/database path through `/app-api/v1/shop/public-catalog`. It also verifies the Test `noindex` boundary.
+Production uses immutable/reviewable release directories under `/srv/moneyverse-data/releases` with stable external environment/secret files. Keep secrets and database credentials outside application release directories.
 
-If Test never serves the exact SHA or the backend/database smoke check fails, Production promotion stops closed.
+The current service pointers are:
+- `/srv/moneyverse-data/releases/production-current/backend`;
+- `/srv/moneyverse-data/releases/production-current/frontend`.
 
-## 4. Automatic Production artifact and GitOps promotion
+Prepare only the mutable frontend runtime cache subtree required by Next.js. Do not recursively mutate ownership of an immutable release and do not clear member sessions as a cache strategy.
 
-After the exact main SHA passes the isolated Test gate, `.github/workflows/deploy.yml` builds immutable Production backend/frontend images for that same SHA and emits a `production-ready` deployment signal.
+## 5. Zero-downtime promotion
 
-The GitOps reconciler is the only Production cluster mutation path. It consumes the exact-SHA `production-ready` signal, updates the infrastructure repository, and lets Flux reconcile the Production namespace.
+Promotion must preserve service continuity and login continuity.
 
-Application GitHub Actions do not receive Production kubeconfig or Production database credentials.
+Required sequence:
+1. retain the last-known-good generation;
+2. start/prepare the replacement generation or approved canary path;
+3. verify readiness and version identity;
+4. verify a session created before restart/cutover remains authenticated;
+5. switch traffic using the approved Nginx/systemd release mechanism;
+6. perform public smoke and changed-flow checks;
+7. retain rollback capability through the observation window.
 
-Release identity is the immutable SHA tag, never `latest-production`.
+Do not intentionally stop the only healthy Production process before the replacement is ready.
 
-## 5. Branch cleanup
+## 6. Production acceptance
 
-Merged source branches are deleted by the automatic integration workflow. `.github/workflows/cleanup-merged-branches.yml` remains as a second safety net: it deletes a merged PR source branch and periodically removes branches that are already fully contained in `main`.
+Production is accepted only after all relevant evidence agrees:
+- application source/release identity;
+- backend/frontend readiness;
+- public version freshness;
+- authoritative Production DB connection and migration state;
+- changed-flow smoke;
+- session continuity;
+- no new critical/fatal errors;
+- required ledger/economy reconciliation;
+- backup/recovery gate when data/schema risk applies.
 
-Protected branches and `main`, `production`, `staging`, `develop`, and `release/*` are excluded from pruning.
+Minimum public checks normally include `/`, `/status`, version/health endpoints, and applicable `robots.txt`, `sitemap.xml`, `ads.txt`.
 
-## 6. Mandatory continuity and cache-freshness gate
+## 7. Data and migration gate
 
-Every frontend or backend runtime change must be promoted without an intentional public outage. The host mirror or cluster rollout must keep the old instance available until the replacement is healthy, then switch traffic through the normal readiness/rolling mechanism. Do not stop the only healthy Production process before its replacement is serving.
+Migrations are forward-only, numbered, immutable and checksummed.
 
-Member login state must survive frontend/backend rollout and restart. Production backend instances must keep using the same Production PostgreSQL session store and cookie signing/encryption contract; deployment must not revoke, truncate, recreate, rotate, or re-key active member sessions. Test must prove that a member session created before restart is accepted after restart without issuing a replacement login session.
+A destructive or schema-changing release is blocked unless the required backup/restore evidence is current. Never delete Production databases, ledger rows, audit data, sessions or volumes to make an application release succeed.
 
-Frontend delivery must force users onto the newly deployed application shell while preserving safe immutable caching. HTML/document and version-sensitive bootstrap responses must use revalidation/no-cache semantics; content-hashed Next.js static assets remain long-cacheable. A release must not rely on users manually clearing browser cache. After promotion, verify the public document/version endpoint identifies the intended SHA and that a fresh request cannot receive the previous application shell from an intermediate cache.
-
-For the host systemd mirror, prepare only `frontend/.next/cache` with `ops/systemd/prepare-frontend-runtime-cache.sh`; never delete member session rows as a cache-clearing technique. Backend and frontend restart/rollout steps are considered complete only after readiness, session-continuity, version-freshness, and smoke probes all pass.
-
-## 6. Production verification
-
-Production is not considered successfully released until the intended Flux revision is Ready, changed workloads complete rollout, their running images match the intended SHA-qualified Production images, and the public smoke checks pass.
-
-Minimum public smoke endpoints are:
-
-```text
-/
-/status
-/robots.txt
-/sitemap.xml
-/ads.txt
-```
-
-Advertising and SEO checks must match the reviewed Production configuration.
-
-## 7. Data and recovery gate
-
-Production data is PostgreSQL-backed. The ledger is the source of truth for balances and Production migrations are immutable/checksummed.
-
-A schema-changing or destructive release must not proceed while the required verified separate-media recovery path is unhealthy. Re-check aggregate integrity after rollout and never print member-level values or credentials in release logs.
-
-The 2026-09-09 recovery audit recorded a temporary same-host PostgreSQL dump because the designated separate backup SSD required repair. That dump is not a substitute for separate-media recovery. Track current recovery status in issue #139.
+The Production DB must be identified from actual application/service connection evidence, not only a Docker container name.
 
 ## 8. Rollback
 
-For application/configuration failures, revert the GitOps image/config commit to the previously verified SHA and let Flux reconcile.
+Rollback targets the last verified application generation compatible with the current DB, configuration and session contract.
 
-Do not delete Production PVCs, databases, ledgers, or audit data as part of an application rollback. Migrations are forward-only in normal operation; use the verified recovery procedure if a data restore is required.
+Application/config failure: switch code/runtime pointers back and repeat readiness/version/session/smoke checks.
+
+Data/schema failure: prefer a corrective forward migration. Restore only through the verified recovery process with explicit backup identity, checksums, source/target identity and operator record.
+
+## 9. Kubernetes/Flux status
+
+GitOps/Kubernetes records may continue to be maintained for provenance and recovery/target architecture. They do not prove current public deployment while Debian systemd/Nginx is serving the public origins.
+
+A future cutover to Kubernetes/Flux requires an explicit migration plan and same-workstream updates to:
+- `CURRENT_RUNTIME_BASELINE.md`;
+- `INFRASTRUCTURE.md`;
+- `architecture/deployment-flow.md`;
+- this release guide;
+- current planning authority.
 
 ## References
 
-- `.github/workflows/auto-integrate-promote.yml`
-- `.github/workflows/test-candidate.yml`
-- `.github/workflows/deploy.yml`
-- `.github/workflows/cleanup-merged-branches.yml`
-- `docs/architecture/deployment-flow.md`
-- `docs/BACKUP.md`
-- `AGENTS.md`
-
-### Ready-only automatic main integration
-
-A development branch is treated as **work in progress** and is never automatically merged, reconciled, or deleted when it has no open PR, when its PR is Draft, or when it carries a WIP/hold/do-not-merge style blocking label. Automatic integration requires an open non-Draft PR to `main`, no blocking marker, a successful exact-HEAD `Build Test Candidate`, and a mergeable PR. Repeated candidate failures retain the branch/PR for repair; the automation does not discard failed work.
-
-[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]
+- [Current runtime baseline](CURRENT_RUNTIME_BASELINE.md)
+- [Infrastructure](INFRASTRUCTURE.md)
+- [Deployment flow](architecture/deployment-flow.md)
+- [Production deployment](operations/production-deployment.md)
+- [Backup and recovery](operations/backup-and-recovery.md)
+- [Project plan](planning/PROJECT_PLAN.md)

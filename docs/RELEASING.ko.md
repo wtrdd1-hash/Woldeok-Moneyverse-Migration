@@ -1,118 +1,135 @@
-# 배포 지침서
+# 릴리스 가이드
 
-이 문서는 월덕 머니버스의 공식 배포 절차 한국어 번역본입니다. 영문 정본은 `RELEASING.md`입니다.
+[English canonical](RELEASING.md) | **한국어**
 
-## 운영 구조
+> 버전: v2026.09.23.404
+> 현재 런타임 기준: [CURRENT_RUNTIME_BASELINE.ko.md](CURRENT_RUNTIME_BASELINE.ko.md)
 
-| 환경 | 공개 주소 | 네임스페이스 | 실행 정본 |
-| --- | --- | --- | --- |
-| Production | `https://easy-scraping.com` | `wdmvp` | `wtrdd1-hash/kuber-infrastructure` |
-| 격리 테스트 | `https://test.easy-scraping.com` | `wdmv-test` | `wtrdd1-hash/kuber-infrastructure`의 독립 Flux Kustomization |
+## 런타임 계약
 
-호스트는 Kubernetes/containerd를 사용하고 Flux가 Git 선언을 반영합니다. Docker Compose는 Production 배포 제어면이 아닙니다. 테스트 namespace는 공용 Production `apps` Kustomization과 독립적으로 reconciliation되어 테스트 장애가 Production reconciliation을 막지 않습니다.
+| 환경 | 공개 주소 | 현재 런타임 | Backend / frontend |
+|---|---|---|---|
+| Production | `https://easy-scraping.com` | Debian 13 host systemd + Nginx | 3000 / 3001 |
+| Isolated Test | `https://test.easy-scraping.com` | Debian 13 host systemd + Nginx | 3100 / 3101 |
 
-## 1. 개발 및 CI 게이트
+현재 Production 데이터 권위는 Debian 호스트의 PostgreSQL이다. 관측된 Production PostgreSQL runtime은 Docker PostgreSQL 17.11이다.
 
-배포 후보의 정확한 커밋에서 다음 검증이 모두 통과해야 합니다.
+Kubernetes/Flux는 복구/목표 아키텍처이며 현재 공개 runtime 증거가 아니다. Docker Compose도 현재 Production 배포 제어면이 아니다.
 
-```bash
-pnpm lint
-pnpm typecheck
-pnpm build
-pnpm test
-scripts/check-control-bytes.sh
-scripts/check-secrets.sh
-pnpm audit --prod --audit-level=high
-```
+## 1. 개발 브랜치 게이트
 
-CI는 PostgreSQL을 띄워 번호 migration을 적용하고 DB 연동 테스트, Prisma schema 변조 방지, Production dependency 보안 감사를 수행합니다. DB 테스트가 skip된 것은 통과로 보지 않습니다.
+런타임 변경은 전용 브랜치를 사용하고 통합 전 해당 exact-HEAD 검증을 통과해야 한다. Candidate evidence는 실제 시험한 exact source SHA에 결합한다.
 
-## 2. exact-SHA 테스트 이미지 생성
+필요한 검증에는 상황에 따라 다음을 포함한다.
+- lint/typecheck/build;
+- unit/integration test;
+- PostgreSQL migration과 real-DB test;
+- API contract/schema check;
+- authorization/security negative;
+- 경제 mutation의 idempotency/concurrency;
+- committed-secret와 supply-chain 검사.
 
-Runtime 후보를 `auto/hourly-*` 또는 `test-candidate/*` 브랜치로 push합니다. `.github/workflows/test-candidate.yml`은 전체 CI를 먼저 실행한 후에만 다음 불변 이미지를 생성합니다.
+필수 DB/security/contract test가 skip된 상태는 PASS가 아니다.
 
-```text
-ghcr.io/wtrdd1-hash/wdmv/backend:<sha>-test
-ghcr.io/wtrdd1-hash/wdmv/frontend:<sha>-test
-```
+문서 전용 브랜치는 application candidate가 아니며 repository `main`이 전진했다는 이유만으로 runtime release를 시작하면 안 된다.
 
-외부 GitHub Action은 immutable commit SHA로 고정하고 SBOM/provenance를 생성합니다. frontend는 테스트 origin을 사용하며 검색 색인과 광고를 끕니다. 이 workflow는 Kubernetes 환경을 직접 수정하지 않습니다.
+## 2. Isolated Test 검증
 
-정확한 이미지는 격리된 `wdmv-test`에만 배포합니다. backend image, frontend image, migration source, candidate label이 같은 commit이어야 하며 migration/data integrity, health, 사용자 flow, authorization/security, responsive/accessibility, SEO/noindex, 필요한 direct-play QA를 검증합니다. 오래된 staging SHA는 PASS가 아닙니다.
+승인 candidate는 Test release 디렉터리에 materialize하고 다음 서비스로 실행한다.
+- `test-main-backend.service`
+- `test-main-frontend.service`
 
-## 3. Production 이미지 생성
+Production 승격 전 다음을 검증한다.
+1. 공개 Test가 의도한 application version을 보고;
+2. backend readiness 성공;
+3. 대표 API와 권위 Test DB 경로 성공;
+4. 변경 user flow 통과;
+5. 관련 authz/security negative 통과;
+6. server restart/update 후 기존 로그인 세션 유지;
+7. frontend cache/runtime write permission 정상;
+8. 필요한 Test noindex 유지;
+9. 신규 fatal/critical log 없음.
 
-정확한 후보가 staging을 통과한 뒤 최신 `main`에 안전하게 통합하고 필요한 검증을 다시 수행한 다음 그 정확한 main SHA에서 Production 이미지를 생성합니다.
+Test가 exact intended candidate를 제공하지 않으면 승격은 BLOCKED다.
 
-```bash
-gh workflow run deploy.yml -f enable_ads=true
-gh run watch
-```
+## 3. Main 통합·재검증
 
-파일명은 과거 호환 때문에 `deploy.yml`이지만 workflow 이름은 **Build Production Release**입니다. 이 workflow는 Production cluster를 직접 변경하지 않습니다. 전체 CI를 다시 실행하고 exact-SHA backend/frontend 이미지를 만들어 GHCR에 push하며 SBOM/provenance와 GitOps 승격 대상을 출력합니다.
+Candidate 승인 후 동시작업을 덮지 않고 검증 변경을 `main`에 통합한다. 현재 기획을 다시 읽고 application source identity를 재계산한다.
 
-릴리스 식별자는 `latest-production`이 아니라 불변 SHA 태그입니다.
+작업 중 `main`이 변경됐다면 rebase/reconcile 후 필요한 exact-main 검증을 다시 한다. 과거 branch SHA의 PASS는 다른 merged SHA 증거가 아니다.
 
-## 4. GitOps Production 승격
+## 4. Production 준비
 
-`wtrdd1-hash/kuber-infrastructure`에서 새 브랜치와 PR을 만들고 다음 파일의 이미지 SHA를 바꿉니다.
+Production은 `/srv/moneyverse-data/releases` 아래 immutable/reviewable release 디렉터리를 사용하고 secret/DB credential은 application release 디렉터리 밖의 안정 설정으로 유지한다.
 
-```text
-apps/wdmvp/backend.yaml
-apps/wdmvp/frontend.yaml
-```
+현재 service pointer:
+- `/srv/moneyverse-data/releases/production-current/backend`
+- `/srv/moneyverse-data/releases/production-current/frontend`
 
-정상 배포에서 `kubectl set image`로 Production을 직접 바꾸지 않습니다. Git 선언이 정본이어야 합니다.
+Next.js에 필요한 mutable frontend runtime cache 하위만 준비한다. immutable release 전체 ownership을 재귀 변경하거나 cache 정리를 위해 회원 session을 삭제하지 않는다.
 
-Production GitOps PR 병합 전에는 exact candidate의 CI/staging 성공, exact main SHA Production image 존재, 이전 image SHA 기록, 복구 경로, migration checksum 정합성을 확인합니다.
+## 5. 무중단 승격
 
-## 5. Flux 및 롤아웃 확인
+승격은 서비스 연속성과 로그인 연속성을 보존해야 한다.
 
-```bash
-flux get sources git -A
-flux get kustomizations -A
-kubectl -n wdmvp rollout status deployment/wdmvp-backend --timeout=5m
-kubectl -n wdmvp rollout status deployment/wdmvp-frontend --timeout=5m
-kubectl -n wdmvp get pods
-```
+필수 순서:
+1. last-known-good generation 유지;
+2. replacement generation 또는 승인 canary 경로 준비;
+3. readiness와 version identity 검증;
+4. restart/cutover 전에 만든 session이 이후에도 인증되는지 검증;
+5. 승인된 Nginx/systemd release mechanism으로 traffic 전환;
+6. public smoke와 changed-flow 확인;
+7. observation window 동안 rollback 가능상태 유지.
 
-의도한 Flux revision이 Ready이고 변경된 workload rollout이 끝났으며 실제 image가 의도한 SHA-qualified Production image와 일치하기 전에는 배포 성공으로 보고하지 않습니다.
+Replacement가 준비되기 전에 유일한 healthy Production process를 의도적으로 중지하지 않는다.
 
-## 6. 필수 무중단·세션·캐시 최신화 게이트
+## 6. Production 수용
 
-모든 프론트엔드/백엔드 런타임 변경은 의도적인 공개 중단 없이 승격합니다. host mirror 또는 cluster rollout은 새 인스턴스가 healthy가 될 때까지 기존 인스턴스를 유지하고 readiness/rolling 절차로 트래픽을 전환합니다. 대체 인스턴스가 준비되기 전에 유일한 정상 Production 프로세스를 먼저 중지하면 안 됩니다.
+관련 증거가 모두 일치해야 Production을 수용한다.
+- application source/release identity;
+- backend/frontend readiness;
+- public version freshness;
+- 권위 Production DB 연결·migration state;
+- changed-flow smoke;
+- session continuity;
+- 신규 critical/fatal 오류 없음;
+- 필요한 ledger/economy reconciliation;
+- data/schema 위험이 있으면 backup/recovery gate.
 
-회원 로그인 상태는 프론트엔드/백엔드 rollout과 재시작을 지나도 유지되어야 합니다. Production backend는 동일한 Production PostgreSQL 세션 저장소와 쿠키 서명/암호화 계약을 계속 사용해야 하며, 배포 과정에서 활성 회원 세션을 revoke/truncate/recreate/rotate/re-key 하면 안 됩니다. Test에서는 재시작 전에 만들어진 회원 세션이 재시작 뒤에도 새 로그인 세션 발급 없이 그대로 승인되는지 증명합니다.
+일반적인 최소 공개 검사는 `/`, `/status`, version/health endpoint와 필요한 `robots.txt`, `sitemap.xml`, `ads.txt`다.
 
-프론트엔드는 사용자가 수동으로 브라우저 캐시를 지우지 않아도 최신 애플리케이션 shell을 강제로 받도록 구성합니다. HTML/document와 버전에 민감한 bootstrap 응답은 재검증/no-cache 의미를 사용하고, content-hash가 붙은 Next.js 정적 자산만 장기 캐시합니다. 승격 뒤 공개 document/version endpoint가 의도한 SHA를 식별하는지, 새 요청이 중간 캐시에서 이전 application shell을 받지 않는지 확인합니다.
+## 7. 데이터·migration 게이트
 
-host systemd mirror에서는 `ops/systemd/prepare-frontend-runtime-cache.sh`로 `frontend/.next/cache`만 준비합니다. 캐시 초기화를 이유로 회원 세션 행을 삭제하면 안 됩니다. backend/frontend 재시작·rollout은 readiness, 로그인 세션 연속성, 버전 최신성, 공개 smoke가 모두 통과한 뒤에만 완료로 판단합니다.
+Migration은 forward-only, 번호/내용/checksum 불변으로 유지한다.
 
-## 6. 공개 스모크체크
+Destructive/schema-changing release는 요구되는 backup/restore evidence가 최신이 아니면 차단한다. Application release 성공을 위해 Production DB, ledger row, audit, session, volume을 삭제하지 않는다.
 
-최소 확인 대상은 `/`, `/status`, `/robots.txt`, `/sitemap.xml`, `/ads.txt`입니다. 광고가 켜져 있으면 `ads.txt`와 승인된 AdSense 설정을 확인하고 검색 노출이 켜져 있으면 `robots.txt`와 sitemap의 Production origin을 확인합니다.
+Production DB는 Docker container 이름만이 아니라 실제 application/service connection evidence로 식별한다.
 
-## 7. 데이터·복구 게이트
+## 8. Rollback
 
-Production DB는 PostgreSQL이며 원장이 잔액의 정본입니다. Production migration은 불변·checksum 방식입니다.
+Rollback 대상은 현재 DB/config/session 계약과 호환되는 마지막 검증 application generation이다.
 
-데이터를 바꾸는 릴리스는 검증된 별도 매체 복구 경로가 건강하지 않으면 진행하지 않습니다. 2026-09-09 복구 감사에서는 별도 백업 SSD 문제 때문에 같은 호스트의 임시 PostgreSQL dump만 만들었으며 이것은 별도 매체 백업의 대체가 아닙니다. 현재 복구 상태는 이슈 #139를 기준으로 확인합니다.
+Application/config 실패는 code/runtime pointer를 되돌린 뒤 readiness/version/session/smoke를 반복한다.
 
-## 8. 롤백
+Data/schema 실패는 corrective forward migration을 우선한다. Restore는 backup identity/checksum/source-target/operator record가 있는 검증 복구절차만 사용한다.
 
-애플리케이션/설정 장애는 GitOps에서 이전에 검증된 SHA로 되돌린 뒤 Flux가 반영하도록 합니다. 애플리케이션 rollback 때문에 Production PVC, DB, 원장, 감사 데이터를 삭제하지 않습니다. 데이터 복구가 필요한 경우에는 검증된 복구 절차를 사용합니다.
+## 9. Kubernetes/Flux 상태
+
+GitOps/Kubernetes 기록은 provenance와 복구/목표 아키텍처로 유지할 수 있다. Debian systemd/Nginx가 공개 origin을 제공하는 현재에는 public deployment 증거가 아니다.
+
+향후 Kubernetes/Flux로 cutover하면 다음을 같은 작업 단위에서 갱신한다.
+- `CURRENT_RUNTIME_BASELINE.ko.md`
+- `INFRASTRUCTURE.ko.md`
+- `architecture/deployment-flow.ko.md`
+- 이 release guide
+- 현재 기획 권위
 
 ## 참고
 
-- `docs/architecture/deployment-flow.md`
-- `docs/BACKUP.md`
-- `AGENTS.md`
-- Kubernetes Deployment 문서
-- Kubernetes Service Account 문서
-- Flux 문서
-
-### 완료된 작업만 자동 main 통합
-
-개발 브랜치에 열린 PR이 없거나 PR이 Draft이거나 WIP/hold/do-not-merge 계열 차단 표시가 있으면 **작업 중**으로 취급하여 자동 병합·충돌조정·삭제를 하지 않는다. 자동 통합은 `main` 대상의 열린 non-Draft PR, 차단 표시 없음, 정확한 현재 HEAD의 `Build Test Candidate` 성공, mergeable 상태를 모두 만족해야 한다. 후보 검증이 반복 실패해도 브랜치/PR을 삭제하지 않고 수정 대상으로 보존하며, 수정 및 재검증 후 자동 통합한다.
-
-[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]
+- [현재 런타임 기준](CURRENT_RUNTIME_BASELINE.ko.md)
+- [인프라](INFRASTRUCTURE.ko.md)
+- [배포 흐름](architecture/deployment-flow.ko.md)
+- [Production 배포](operations/production-deployment.ko.md)
+- [백업·복구](operations/backup-and-recovery.ko.md)
+- [프로젝트 기획](planning/PROJECT_PLAN.ko.md)

@@ -10,6 +10,7 @@ Start here. Do not infer current product truth from the newest-looking filename 
 - [Integrated planning master](planning/INTEGRATED_PLANNING_MASTER.md) / [한국어](planning/INTEGRATED_PLANNING_MASTER.ko.md)
 - [Full planning re-review v402](planning/INTEGRATED_FULL_REVIEW_V402.md) / [한국어](planning/INTEGRATED_FULL_REVIEW_V402.ko.md)
 - [Documentation governance](DOCUMENTATION_POLICY.md) / [한국어](DOCUMENTATION_POLICY.ko.md)
+- [Current runtime / OS baseline](CURRENT_RUNTIME_BASELINE.md) / [한국어](CURRENT_RUNTIME_BASELINE.ko.md)
 - [Full documentation index](INDEX.md) / [한국어](INDEX.ko.md)
 
 ## Main collections

@@ -2,11 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.403
+> Current integrated version: v2026.09.23.404
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Current runtime / OS baseline — v2026.09.23.404 (2026-09-23)
+
+- Current observed public runtime is Debian GNU/Linux 13.6 (trixie), systemd-managed Production/Test release directories, host Nginx and Docker-hosted PostgreSQL 17.11.
+- Runtime/tooling snapshot: Linux 6.12.94, systemd 257, Node 24.21.0, pnpm 10.0.0, Python 3.13.5, Nginx 1.26.3, Docker 29.8.0.
+- Production backend/frontend currently use systemd services on 3000/3001; isolated Test uses 3100/3101. Exact runtime identity must be proven from the active release directories, public version evidence and DB connection evidence.
+- Kubernetes/Flux is TARGET/RECOVERY architecture, not current public-runtime authority. GitOps desired state alone must not be treated as proof of a public Production change.
+- Canonical current-runtime document: `docs/CURRENT_RUNTIME_BASELINE.md` / `.ko.md`.
+- Deployment and release documentation must distinguish OBSERVED CURRENT / CONFIGURED CURRENT / TARGET-RECOVERY / HISTORICAL.
+- Multiple QA PostgreSQL containers exist on the host; cleanup is not authorized by age/name alone and requires owner/use/data/rollback classification.
+- Scope truth: v404 updates current runtime documentation from observed evidence and does not itself mutate runtime, DB, Test or Production.
 
 ## GitHub documentation governance cleanup — v2026.09.23.403 (2026-09-23)
 
