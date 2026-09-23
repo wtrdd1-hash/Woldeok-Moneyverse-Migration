@@ -1,6 +1,8 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v66)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v68)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v68**: 클럽·협동 경제 및 컬렉션 큐레이션 허브 1차 심화 문답 최종 확정 사양(직책 기반 캔버스 권한, SINK_CLUB_PROJECT 100% 영구 소각, 로컬+서버 하이브리드 동기화, 비공개 기본 스냅샷 카드, 자율 실행 모드) 누적 수록 및 구현 착수 (+130, -0)
+- **v67**: 클럽·협동 경제 고도화(공동 펀딩 프로젝트 100% 영구 소각, 12x12 클럽하우스 공유 캔버스, 트로피 전시관) 및 컬렉션 소유권 & D1~D7 큐레이션 리텐션 허브(/collections) 아키텍처 수립 (+160, -0)
 - **v66**: 3차 심화 문답 최종 확정 사양(선택적 72시간 신선도 감가, B2B 2% Hard Sink 소각, 용량 초과 Fail-Closed 차단, 메인 상단 히어로 위젯 배치, 토스풍 파티클 & 슬라이드업 영수증 모달) 누적 수록 및 자율 구현 착수 (+145, -0)
 - **v65**: 가상 사업체 공급망 2차 심화 문답(하이브리드 조달, 지수형 저장비용 base_cost*1.40^(n-1), 일일 04:00 KST 리셋/1시간 완만 갱신 수요 모델, 30일 유지비 캡/자동 PAUSED 복귀자 보호, 토스·Stripe 핀테크 스타일) 사양 누적 수록 (+125, -0)
 - **v64**: 가상 사업체(Businesses) 공급망 & B2B 재고 조달 루프 심화, 원재료 조달/재고 보관 용량 확장/수요 모델 연동 및 5대 도메인 혁신 위젯(공급망 변동 차트, 채권 계산기, 하우징 캔버스, 시즌 명예의 전당, 알림 실시간 탭) 아키텍처 수립 (+180, -0)
@@ -2651,8 +2653,99 @@ stateDiagram-v2
 - **프로덕션 빌드**: `nest build`, `next build` 성공.
 - **무중단 승격**: `host-blue-green-promote.sh` (Test -> Production), 활성 세션(916+개) 무손실 보존.
 
+---
 
+## 🏛️ [v67 Specification] 클럽 협동 경제 고도화 & 컬렉션 큐레이션 리텐션 허브 아키텍처 (누적 추가)
 
+### 1. 배경 및 기획 분석 (Planning Alignment)
+- **`CLUBS_COOPERATIVE_ECONOMY_SPEC.ko.md`**:
+  - 클럽은 비(非) Pay-to-Win 기반의 소셜 협동 조직으로, 임의의 인원수 하드캡 없이(`unlimited`) 확장 가능한 구조.
+  - 공동 프로젝트 펀딩 기여금은 100% 영구 소각(`SINK_CLUB_PROJECT`)되어 게임 경제 인플레이션을 억제하고 공동 명예 랜드마크를 해금.
+  - 클럽하우스는 회원들이 함께 가꾸는 공유 공간으로 12x12 타일 캔버스(`ClubhouseCanvasEditor`)를 통해 인테리어 VIBE 점수를 올리고 결속력을 강화.
+- **`COLLECTION_OWNERSHIP_TO_CURATION_RETENTION_SPEC.ko.md`**:
+  - 강제 출석 체크나 스트릭(Streak) 리셋 공포 없이 사용자가 스스로 "내 것"임을 체감하도록 돕는 7단계 소유감 사다리 (`Have → Understand → Connect → Curate → Express → Remember → Reinterpret`).
+  - D1 인식(진행도 보존) → D3 심화(관련 이야기 탐색) → D7 진전 증명(`그때 → 지금 → 다음`) 큐레이션 타임라인.
+  - 대표 수집품(Featured Piece) 지정, 안전한 개인 노트, 선택적 읽기 전용 쇼케이스 카드 생성.
+- **`COMMUNITY_MARKET_INTEGRITY_SPEC.ko.md`**:
+  - 유저 간 P2P 아이템 직거래 시 사기 방지 및 신뢰 보장을 위한 에스크로 상태 머신(`PENDING_ESCROW` → `INSPECTION` → `RELEASED` / `DISPUTED`).
+  - 거래 수수료 1% 영구 소각(`SINK_P2P_ESCROW_FEE`) 및 평판 스코어 반영.
 
+### 2. 아키텍처 다이어그램 및 데이터 흐름
 
+```mermaid
+flowchart TD
+    subgraph Clubs ["클럽·협동 경제 2.0"]
+        C1["클럽 생성 (10,000 WLD 소각 헌장)"] --> C2["클럽하우스 12x12 공유 캔버스"]
+        C2 --> C3["공동 프로젝트 펀딩 (SINK_CLUB_PROJECT)"]
+        C3 --> C4["클럽 트로피장 & 공유 아카이브 해금"]
+    end
+
+    subgraph Collections ["컬렉션 소유권 & 큐레이션 허브 (/collections)"]
+        CL1["보유 수집품 인식 (D1)"] --> CL2["스토리/배경 탐색 (D3)"]
+        CL2 --> CL3["그때 → 지금 → 다음 진전 타임라인 (D7)"]
+        CL3 --> CL4["대표 수집품 선정 & 큐레이션 전시"]
+        CL4 --> CL5["선택적 읽기 전용 쇼케이스 카드 공유"]
+    end
+
+    subgraph MarketEscrow ["P2P 마켓 신뢰 에스크로"]
+        M1["주문 생성 (WLD 에스크로 입금)"] --> M2["물품 검수 (INSPECTION)"]
+        M2 --> M3["구매 확정 & 대금 지급 (1% 소각 SINK_P2P_ESCROW_FEE)"]
+    end
+
+    C4 -.-> CL4
+    CL5 -.-> M1
+```
+
+### 3. 세부 파일 변경 계획 (Proposed Changes)
+1. **클럽 협동 경제 컴포넌트**:
+   - `frontend/src/app/clubs/[clubId]/clubhouse-canvas.tsx` [NEW]: 12x12 인터랙티브 공유 캔버스, 가구 기부 및 VIBE 점수.
+   - `frontend/src/app/clubs/[clubId]/clubhouse-view.tsx` [MODIFY]: '공유 캔버스' 및 '트로피 쇼케이스' 탭 추가.
+   - `backend/src/club/club.controller.ts` & `club.service.ts` [MODIFY]: 클럽 캔버스 저장 및 프로젝트 펀딩 소각 API.
+2. **컬렉션 큐레이션 리텐션 허브**:
+   - `frontend/src/app/collections/page.tsx` [NEW]: 컬렉션 허브 메인 페이지.
+   - `frontend/src/app/collections/curation-retention-flow.tsx` [NEW]: D1~D7 타임라인, 소유감 사다리 7단계, 대표 수집품 쇼케이스.
+   - `backend/src/inventory/` 또는 `backend/src/collection/` [NEW/MODIFY]: 큐레이션 데이터 저장 및 쇼케이스 스냅샷 생성.
+3. **P2P 마켓 에스크로 원장**:
+   - `backend/src/marketplace/` [MODIFY]: 에스크로 상태 전이 및 1% 소각 로직 연동.
+
+### 4. 검증 계획 (Verification Plan)
+- **백엔드 테스트**: 클럽 캔버스 및 큐레이션 단위 테스트 100% 통과.
+- **프론트엔드 테스트**: 102개 테스트 파일 747+개 테스트 100% 통과 유지.
+- **프로덕션 빌드 & 승격**: Next.js Turbopack 빌드 후 미니 PC 무중단 블루-그린 승격 및 1,063개 활성 세션 보존.
+
+---
+
+## 🚀 [v68 Specification] 클럽·컬렉션 1차 심화 확정 사양 및 즉시 구현 액션 플랜 (누적 추가)
+
+### 1. 1차 조율 최종 확정 사양 (Final Confirmed Decisions)
+1. **[클럽하우스 공유 캔버스 편집 권한] 직책 기반 단계적 편집 권한 (Role-Tiered Permission)**:
+   - 클럽 소유자(Owner) 및 운영진(Manager)은 12x12 전체 타일 자유 배치/편집/초기화 권한 보유.
+   - 일반 회원(Member)은 가구 기부 슬롯 배치 및 허용된 장식 타일 편집 권한으로 제한하여 트롤링 및 도배 방지.
+2. **[클럽 공동 펀딩 프로젝트] 100% 영구 소각 (Hard Sink: `SINK_CLUB_PROJECT`)**:
+   - 공동 프로젝트 펀딩 기여금은 전액 시스템 계정으로 영구 소각 처리되어 게임 경제 통화량 수축에 기여.
+   - 목표 WLD 달성 시 클럽 공유 명예 랜드마크 및 트로피가 자동 해금되며, 기여자 전원에게 영구 기여 기록 부여.
+3. **[컬렉션 D1~D7 큐레이션 진행도 저장] 로컬 스토리지 + 서버 영구 백업 하이브리드 동기화**:
+   - 오프라인/비로그인 상태에서도 브라우저 로컬 스토리지로 D1~D7 타임라인 즉시 체감 및 메모.
+   - 계정 로그인 및 저장 시 백엔드 DB와 원자적 동기화(`user_collections`).
+4. **[컬렉션 쇼케이스 바이럴 공유] 비공개 기본 + 선택적 읽기 전용 스냅샷 카드 공유**:
+   - 기본은 회원 본인만 볼 수 있는 프라이빗 큐레이션 갤러리.
+   - '쇼케이스 생성' 클릭 시 민감 잔액/자산 정보는 마스킹된 고유 읽기 전용 스냅샷 카드 링크 생성 (`/collections?showcase=:id`).
+5. **[작업 진행 방식] 자율 실행 모드**:
+   - 백엔드 API, 프론트엔드 컴포넌트, 단위 테스트, 프로덕션 빌드 및 미니 PC 무중단 블루-그린 승격까지 한 번에 완결.
+
+---
+
+## 📋 [Action Plan] 세부 구현 작업 단위
+1. **클럽 협동 캔버스 (`frontend/src/app/clubs/[clubId]/clubhouse-canvas.tsx`)**:
+   - 12x12 타일 그리드, 직책 기반 가구 팔레트(데스크, 회의 테이블, 길드 깃발, 트로피 진열대, 화분 등), VIBE 점수 계산, 레이아웃 저장/복원.
+2. **클럽하우스 뷰 연동 (`frontend/src/app/clubs/[clubId]/clubhouse-view.tsx`)**:
+   - '공유 캔버스' 탭 추가 및 `ClubhouseCanvas` 마운트.
+3. **컬렉션 허브 & D1~D7 큐레이션 플로우 (`frontend/src/app/collections/curation-retention-flow.tsx` & `page.tsx`)**:
+   - D1~D7 소유감 사다리 7단계, `그때 → 지금 → 다음` 타임라인, 대표 수집품 셀렉터, 읽기 전용 쇼케이스 카드 모달.
+4. **네비게이션 연동**:
+   - 글로벌 네비게이션 및 메뉴에 `/collections` 허브 라우트 추가.
+5. **백엔드 클럽/컬렉션 서비스 보강 및 단위 테스트 작성**:
+   - Vitest 테스트 작성 및 100% 통과 확인.
+6. **빌드, 프로모션 및 검증**:
+   - Next.js Turbopack 프로덕션 빌드, 미니 PC 무중단 블루-그린 승격 (v393), 1,063+ 활성 세션 보존 확인.
 

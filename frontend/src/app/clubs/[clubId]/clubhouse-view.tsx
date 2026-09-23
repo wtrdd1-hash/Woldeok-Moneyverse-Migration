@@ -44,6 +44,8 @@ export interface ClubFeedPost {
   readonly created_at: string;
 }
 
+import { ClubhouseCanvas } from './clubhouse-canvas';
+
 export function ClubhouseView({
   club,
   projects,
@@ -54,7 +56,7 @@ export function ClubhouseView({
   readonly feed: ClubFeedPost[];
 }) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'projects' | 'feed' | 'charter'>('projects');
+  const [activeTab, setActiveTab] = useState<'projects' | 'feed' | 'canvas' | 'charter'>('canvas');
 
   // 프로젝트 펀딩 상태
   const [selectedProject, setSelectedProject] = useState<ClubProject | null>(null);
@@ -233,6 +235,17 @@ export function ClubhouseView({
       <div className="flex border-b border-border gap-2">
         <button
           type="button"
+          onClick={() => setActiveTab('canvas')}
+          className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
+            activeTab === 'canvas'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          공유 캔버스 (12x12)
+        </button>
+        <button
+          type="button"
           onClick={() => setActiveTab('projects')}
           className={`px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
             activeTab === 'projects'
@@ -265,6 +278,15 @@ export function ClubhouseView({
           클럽 헌장
         </button>
       </div>
+
+      {/* 0. 클럽하우스 공유 캔버스 12x12 탭 */}
+      {activeTab === 'canvas' && (
+        <ClubhouseCanvas
+          clubId={club.id}
+          clubName={club.name}
+          userRole={club.my_role}
+        />
+      )}
 
       {/* 1. 협동 프로젝트 탭 */}
       {activeTab === 'projects' && (
