@@ -1,3 +1,11 @@
+## v2026.09.23.390 — QA branch lifecycle cleanup hardening
+
+- Branch: `fix/qa-branch-cleanup-v2026.09.23.390`.
+- Fixed the merged-branch cleanup workflow so squash-merged PR source branches are deleted when the current branch head still exactly matches the merged PR head SHA.
+- Branches that advanced after merge are retained, preventing deletion of new post-merge work.
+- Cleanup still preserves branches without merged-PR evidence, even when their content happens to be contained in `main`.
+- Manual repository hygiene pass reduced stale remote/local branches and removed clean patch-equivalent worktrees without deleting unique unmerged commits.
+
 ## v2026.09.23.383 — Caller-owned idempotency for asset overrides
 - Admin cash/bank asset overrides now require a caller-owned UUID idempotency key instead of minting a replacement key inside the API.
 - This makes timeout/retry behavior replay-safe at the HTTP contract while preserving the existing PostgreSQL ledger function and step-up authorization boundary.

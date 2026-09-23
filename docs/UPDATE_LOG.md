@@ -18,6 +18,14 @@
 
 # Update Log
 
+## v2026.09.23.390 — QA branch lifecycle cleanup hardening
+
+- Branch: `fix/qa-branch-cleanup-v2026.09.23.390`.
+- Fixed the merged-branch cleanup workflow so squash-merged PR source branches are deleted when the current branch head still exactly matches the merged PR head SHA.
+- Branches that advanced after merge are retained, preventing deletion of new post-merge work.
+- Cleanup still preserves branches without merged-PR evidence, even when their content happens to be contained in `main`.
+- Manual repository hygiene pass reduced stale remote/local branches and removed clean patch-equivalent worktrees without deleting unique unmerged commits.
+
 ## v2026.09.23.389 — Home Contrast Theme Token Alignment, Full QA Suite 100% Pass across Backend/Frontend/Bot, Blue-Green Promotion to Test & Production, 1103 User Sessions Intact
 
 - Branch: `main` (Release: `prod-8443146-v389`, Exact Git SHA: `84431467`)

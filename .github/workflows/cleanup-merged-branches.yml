@@ -27,22 +27,31 @@ jobs:
       github.event.pull_request.head.ref != 'main'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
       - name: Delete merged source branch
         env:
-          GH_TOKEN: ${{ github.token }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         shell: bash
         run: |
           set -euo pipefail
-          encoded="$(jq -rn --arg v "$HEAD_REF" '$v|@uri')"
-          gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${encoded}" || {
-            echo "branch already absent or protected: $HEAD_REF"
+          git push --force-with-lease="refs/heads/${HEAD_REF}:${HEAD_SHA}" origin ":refs/heads/${HEAD_REF}" || {
+            echo "branch moved after merge, is already absent, or is protected: $HEAD_REF"
           }
 
   prune-contained-branches:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
       - name: Close stale PRs and delete branches fully contained in main
         env:
           GH_TOKEN: ${{ github.token }}
@@ -60,25 +69,42 @@ jobs:
             esac
 
             encoded="$(jq -rn --arg v "$branch" '$v|@uri')"
+            branch_sha="$(gh api "repos/${GITHUB_REPOSITORY}/branches/${encoded}" --jq '.commit.sha' 2>/dev/null || true)"
+            [[ -n "$branch_sha" ]] || continue
+
             cmp="$(gh api "repos/${GITHUB_REPOSITORY}/compare/${encoded}...${main_sha}" 2>/dev/null || true)"
             [[ -n "$cmp" ]] || continue
             behind="$(jq -r '.behind_by // -1' <<<"$cmp")"
 
-            if [[ "$behind" == "0" ]]; then
-              merged_pr="$(
-                gh api --method GET "repos/${GITHUB_REPOSITORY}/pulls" \
-                  -f state=closed -f base=main -f head="${GITHUB_REPOSITORY_OWNER}:${branch}" -f per_page=100 \
-                  --jq '[.[] | select(.merged_at != null)][0].number // empty'
-              )"
-              if [[ -z "$merged_pr" ]]; then
-                echo "retain contained branch without merged PR evidence (may still be active work): $branch"
-                continue
-              fi
+            merged_pr_json="$(
+              gh api --method GET "repos/${GITHUB_REPOSITORY}/pulls" \
+                -f state=closed -f base=main -f head="${GITHUB_REPOSITORY_OWNER}:${branch}" -f per_page=100 \
+                --jq '[.[] | select(.merged_at != null)] | sort_by(.merged_at) | reverse | .[0] // empty'
+            )"
 
-              echo "deleting branch fully contained in main with merged PR #${merged_pr}: $branch"
-              if gh api --method DELETE "repos/${GITHUB_REPOSITORY}/git/refs/heads/${encoded}" >/dev/null 2>&1; then
-                deleted=$((deleted + 1))
+            if [[ -z "$merged_pr_json" ]]; then
+              if [[ "$behind" == "0" ]]; then
+                echo "retain contained branch without merged PR evidence (may still be active work): $branch"
               fi
+              continue
+            fi
+
+            merged_pr="$(jq -r '.number' <<<"$merged_pr_json")"
+            merged_head_sha="$(jq -r '.head.sha // empty' <<<"$merged_pr_json")"
+
+            if [[ "$branch_sha" == "$merged_head_sha" ]]; then
+              echo "deleting source branch whose current head exactly matches merged PR #${merged_pr}: $branch"
+            elif [[ "$behind" == "0" ]]; then
+              echo "deleting branch fully contained in main with merged PR #${merged_pr}: $branch"
+            else
+              echo "retain branch advanced after merged PR #${merged_pr}: $branch (${merged_head_sha} -> ${branch_sha})"
+              continue
+            fi
+
+            if git push --force-with-lease="refs/heads/${branch}:${branch_sha}" origin ":refs/heads/${branch}" >/dev/null 2>&1; then
+              deleted=$((deleted + 1))
+            else
+              echo "retain branch because its head moved, it is already absent, or deletion is protected: $branch"
             fi
           done
 
@@ -88,5 +114,3 @@ jobs:
             echo "- stale PRs closed: ${closed}"
             echo "- contained branches deleted: ${deleted}"
           } >> "$GITHUB_STEP_SUMMARY"
-
-[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]
