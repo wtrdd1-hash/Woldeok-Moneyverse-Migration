@@ -2,11 +2,26 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.23.414
+> **현재 통합 버전:** v2026.09.23.416
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 시간별 기획 회차 — v2026.09.23.416 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Improvement. **Previous Cycle Type:** Feature Addition. **Next Cycle Type:** Feature Addition.
+- **정확한 기준선:** 회차 시작과 이번 편집 직전에 authoritative `origin/main=e447b11f1d27ee7da2a46c64fcd96e0058c8da6d`를 재확인했다. 아직 미병합인 v414 통합 EN/KO 기획 계보를 이어가며 새 분산 기획 파일은 만들지 않는다.
+- **주 보완 대상 — CI-416-01 / P1 릴리스 게이트 수렴:** PR #715 exact head `aaece3dc6ffc0ee76c3945d43b4c15a6f38ce386`는 business supply caller-owned idempotency 복구와 해당 UI lint blocker 3건 제거를 포함한다. GitHub CI run 1814는 `classify`/`policy` PASS지만 required `runtime-check`가 repository-wide `pnpm lint`에서 계속 실패한다.
+- **신규 QA 증거:** run 1814는 **191 problems (177 errors, 14 warnings)**를 기록한다. lint가 먼저 실패하여 typecheck, build, DB migrations, 전체 tests, Prisma schema mutation rejection, production dependency audit가 모두 skip된다. v413의 198 / 184 / 14보다 감소했지만 여전히 릴리스 차단이며 focused/changed-file PASS는 required repository gate를 대체하지 않는다.
+- **우선 결함군:** Discord music empty block, legacy CommonJS capture script import, 광범위한 frontend unused import/state, collections empty block/unescaped entity, developer portal type-import style, marketplace dead import/state, stock discussion `any`, stock portfolio render-time mutation(`react-hooks/immutability`), mobile/test typing, audio/test harness empty block/`any`가 남아 있다. warning은 최적화되지 않은 `<img>`, hook dependency, 내부 `window.location.href` 탐색을 포함한다.
+- **개선 목표 / 구현면(임시):** ESLint 규칙을 약화하거나 runtime/product directory를 제외하지 않고 required gate를 수렴시킨다. behavior-neutral dead-code/import 정리와 type-safety, React correctness, test-harness typing, performance/accessibility/navigation 수정을 분리한다. 동작에 영향을 주는 수정은 독립 domain regression evidence가 필요하다. frontend, bot, tests/QA harness, CI가 직접 대상이며 lint를 잠재우기 위해 backend/API/DB/app-api 계약을 바꾸지 않는다.
+- **예외·보안 처리(임시):** typed failure를 `any`로 대체하거나 empty catch로 오류를 삼키거나 React immutability 경고를 억제하거나 규칙을 전역 비활성화하지 않는다. 의도적으로 실패를 무시하는 경로는 이유를 문서화하고 사용자/경제 상태에 영향이 있으면 관측·재시도 의미를 보존한다.
+- **QA / Test 수용조건(임시):** 하나의 exact candidate SHA에서 `pnpm lint` zero error 후 현재 skip되는 typecheck → build → migrations → full tests → Prisma mutation rejection → production dependency audit가 실제 실행·통과해야 한다. 동작 영향 수정은 positive/negative focused regression test도 필요하다. Test 승격은 같은 exact SHA와 영향 범위의 대표 PostgreSQL/integration/security/app-api/E2E 증거를 요구한다.
+- **Production 승격(임시):** exact tested candidate에서 이어지는 merged-main lineage, 승격 identity의 required gate 재실행, 기존 session-continuity/zero-downtime invariant, rollback evidence가 필요하다. downstream stage가 skip된 workflow는 Production 증거가 아니다.
+- **레퍼런스 게이트:** 이번 회차에서 새로 실제 수집·분석한 후보 전용 중복 제거 독립 외부 레퍼런스는 `0 / 10,000`건이다. 기존 일반 UI 연구를 재분류하지 않는다. 따라서 CI-416-01은 **IN PROGRESS / REFERENCE VALIDATION BLOCKED**이며 위 remediation/acceptance 내용은 repository evidence 기반 임시 종료조건이지 research-complete 명세가 아니다. 향후 corpus는 대규모 monorepo CI/lint governance, ESLint/TypeScript/React correctness, release gating, false-positive/suppression 정책, 접근성/성능 lint, 실패/rollback 사례, branch-protection 운영을 포함해야 한다.
+- **열린 PR 정합:** #704/#709/#711/#712/#713은 겹치는 blocked planning-history PR이며 #705/#706/#707/#708/#710/#714/#715는 runtime/tooling 후보다. 이번 회차의 최신 runtime QA authority는 #715지만 required gate가 red이므로 구현완료/Production-ready로 취급하지 않는다.
+- **범위 사실:** 이번 회차는 통합 기획서 두 파일만 갱신한다. CI 정책 완화, runtime merge, DB/Test/Production 변경, 배포 또는 10,000-reference gate 완료를 주장하지 않는다.
 
 ## 시간별 기획 회차 — v2026.09.23.414 (2026-09-23)
 

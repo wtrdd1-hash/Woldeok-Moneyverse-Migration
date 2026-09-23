@@ -2,11 +2,26 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.414
+> Current integrated version: v2026.09.23.416
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Hourly planning cycle — v2026.09.23.416 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Improvement. **Previous Cycle Type:** Feature Addition. **Next Cycle Type:** Feature Addition.
+- **Exact baseline:** authoritative `origin/main=e447b11f1d27ee7da2a46c64fcd96e0058c8da6d` was rechecked at cycle start and again before this edit. The still-unmerged v414 integrated EN/KO planning lineage is carried forward; no new distributed planning file is created.
+- **Primary improvement target — CI-416-01 / P1 release-gate convergence:** PR #715 exact head `aaece3dc6ffc0ee76c3945d43b4c15a6f38ce386` carries the business supply caller-owned idempotency repair and removes three matching UI lint blockers. GitHub CI run 1814 still fails required `runtime-check` at repository-wide `pnpm lint`; `classify` and `policy` pass.
+- **Fresh QA evidence:** run 1814 reports **191 problems (177 errors, 14 warnings)**. Because lint fails first, typecheck, build, database migrations, full tests, Prisma-schema mutation rejection and production dependency audit are all skipped. This is improved from the prior v413 evidence (198 / 184 / 14) but remains a release blocker; focused or changed-file PASS is not a substitute for the required repository gate.
+- **Defect clusters to prioritize:** remaining blockers include Discord music empty blocks, legacy CommonJS capture script import, broad frontend unused imports/state, collections empty blocks/unescaped entities, developer portal type-import style, marketplace dead imports/state, stock discussion `any`, stock portfolio render-time mutation (`react-hooks/immutability`), mobile/test typing, audio/test harness empty blocks/`any`; warnings continue to include unoptimized `<img>`, a hook dependency and internal `window.location.href` navigation.
+- **Improvement objective / implementation surfaces (provisional):** converge the required gate without weakening ESLint rules or excluding runtime/product directories. Split behavior-neutral dead-code/import cleanup from type-safety, React correctness, test-harness typing and performance/accessibility/navigation fixes. Any behavior-affecting change requires its own domain regression evidence. Frontend, bot, tests/QA harness and CI are directly affected; backend/API/DB/app-api contracts must not be changed merely to silence lint.
+- **Exception and security handling (provisional):** do not replace typed failures with `any`, swallow errors with empty catches, suppress React immutability findings, or globally disable rules. Error paths that intentionally ignore a failure must document why and preserve observable/retry behavior where user or economic state is affected.
+- **QA / Test acceptance (provisional):** on one exact candidate SHA, `pnpm lint` must reach zero errors and the currently skipped typecheck → build → migrations → full tests → Prisma mutation rejection → production dependency audit stages must actually execute and pass. Behavior-affecting repairs additionally need focused positive/negative regression tests. Test promotion requires the same exact SHA plus representative PostgreSQL/integration/security/app-api/E2E evidence where affected.
+- **Production promotion (provisional):** require merged-main lineage from the exact tested candidate, rerun required gates on the promoted identity, preserve the existing session-continuity/zero-downtime invariant, and retain rollback evidence. A workflow with downstream stages skipped is never Production evidence.
+- **Reference gate:** new candidate-specific deduplicated independent external references actually collected/analyzed in this cycle: `0 / 10,000`. Existing generic UI research is not reclassified. Therefore CI-416-01 remains **IN PROGRESS / REFERENCE VALIDATION BLOCKED**; all remediation and acceptance text above is repository-evidence-based provisional closure criteria, not research-complete specification. Required corpus remains large-monorepo CI/lint governance, ESLint/TypeScript/React correctness, release gating, false-positive/suppression policy, accessibility/performance lint, failure/rollback cases and branch-protection operations.
+- **Open-PR reconciliation:** #704/#709/#711/#712/#713 are overlapping blocked planning-history PRs; #705/#706/#707/#708/#710/#714/#715 are runtime/tooling candidates. #715 is the freshest runtime QA authority for this cycle, but its red required gate prevents implementation-complete or Production-ready status.
+- **Scope truth:** this cycle updates only the two integrated planning documents. It does not weaken CI policy, merge runtime code, mutate DB/Test/Production, deploy, or claim the 10,000-reference gate complete.
 
 ## Hourly planning cycle — v2026.09.23.414 (2026-09-23)
 
