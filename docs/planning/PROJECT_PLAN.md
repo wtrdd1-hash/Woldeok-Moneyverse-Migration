@@ -2,11 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.402
+> Current integrated version: v2026.09.23.403
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## GitHub documentation governance cleanup — v2026.09.23.403 (2026-09-23)
+
+- Documentation navigation is normalized around `docs/README.md`, `docs/INDEX.md`, `docs/DOCUMENTATION_POLICY.md` and `docs/DOCUMENT_CATALOG.md`.
+- English remains canonical and Korean is the required second language for maintained planning/product/operations documentation.
+- Meaningful documentation changes use a dedicated branch; the superseded direct-to-main documentation exception is removed.
+- Documentation-only commits are repository-history changes, not application-source identity, and must not trigger runtime release/promotion.
+- Root-level dated documents are legacy placements. New dated records use planning/findings/updates/changelog/worklog/releases according to document type.
+- Existing exact duplicate historical paths are preserved until inbound links are audited; future dedup uses one canonical file plus compatibility stubs.
+- Current authority order: PROJECT_PLAN → INTEGRATED_PLANNING_MASTER → explicitly adopted detailed specs → generated/runtime contracts → historical evidence.
+- Scope truth: v403 reorganizes documentation governance/navigation only and does not claim runtime implementation, Test verification or Production deployment.
 
 ## Full planning re-review authority — v2026.09.23.402 (2026-09-23)
 

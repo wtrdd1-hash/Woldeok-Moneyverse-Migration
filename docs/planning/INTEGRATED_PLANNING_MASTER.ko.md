@@ -1,11 +1,21 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.09.23.402
+> 현재 원장 버전: v2026.09.23.403
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.09.23.403 — 2026-09-23
+- GitHub 문서를 역사 증거 삭제나 기존 경로 파손 없이 정리했다.
+- 권위 `docs/README.md`, 간결한 `INDEX.md`, `DOCUMENTATION_POLICY.md`, `DOCUMENT_CATALOG.md`와 한국어 쌍 문서를 추가했다.
+- planning, architecture, features, operations, findings, updates, changelog, worklog, releases에 문서군별 README 거버넌스를 추가했다.
+- 문서 전용이면 `main`에 직접 반영하도록 했던 구형 한국어 단독 정책을 폐기했다. 의미 있는 문서 변경도 브랜치, latest-main 재확인, 영/한 정합, 버전 기록을 요구한다.
+- 전수 인벤토리에서 docs 루트 날짜형 legacy Markdown 18개와 내용이 완전히 같은 그룹 31개를 찾았다. 이번 회차는 링크/이력 보호를 위해 경로를 유지하고 신규 루트 날짜형 기록을 금지한다.
+- 역사 문서는 근거로 유지하되 현재 권위는 PROJECT_PLAN / INTEGRATED_PLANNING_MASTER / 채택 상세명세가 가진다.
+- 문서 전용 커밋을 application release identity로 취급하거나 runtime 승격을 시작하면 안 된다.
+- 기획/문서 전용이며 런타임·Test·Production 완료 주장은 없다.
 
 ## v2026.09.23.402 — 2026-09-23
 - 현재 저장소 증거, 런타임 계약, 최신 표준, 최근 기획결정을 기준으로 기획 전면 재검토를 시작했다.

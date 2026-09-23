@@ -1,8 +1,9 @@
-# Work logs
+# Worklogs
 
-Current 2026-09-08 work:
+**English canonical** | [한국어](README.ko.md)
 
-- [Operations / observability remediation](2026-09-08-ops-observability-gap.md)
-- [Public board / search discoverability](2026-09-08-public-board-seo.md)
+Worklogs record execution chronology, evidence, commands/results at a useful level, blockers, exact SHAs and handoff context.
 
-These records describe candidate changes and their release gates. A candidate is not complete until its listed CI and test-server checks have passed.
+A worklog is evidence, not proof that Test or Production succeeded. Runtime claims require the corresponding exact runtime evidence.
+
+Current planning authority lives under `../planning/`.

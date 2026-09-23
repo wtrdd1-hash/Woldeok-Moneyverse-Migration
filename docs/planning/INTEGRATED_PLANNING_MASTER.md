@@ -1,11 +1,21 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.23.402
+> Current ledger version: v2026.09.23.403
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.23.403 — 2026-09-23
+- Reorganized GitHub documentation without deleting historical evidence or breaking existing paths.
+- Added canonical `docs/README.md`, concise `INDEX.md`, `DOCUMENTATION_POLICY.md`, and `DOCUMENT_CATALOG.md` with required Korean companions.
+- Added README governance files for planning, architecture, features, operations, findings, updates, changelog, worklog and releases.
+- Superseded the old Korean-only policy that allowed documentation-only direct commits to `main`; meaningful documentation changes now require a branch, current-main recheck, EN/KO parity and versioned records.
+- Inventory found 18 legacy root-level dated Markdown files and 31 exact duplicate-content groups, mainly historical changelog/worklog/release copies. This cycle preserves paths for link/history compatibility and prohibits new root-level dated records.
+- Historical documents remain evidence, while PROJECT_PLAN / INTEGRATED_PLANNING_MASTER / adopted detailed specs define current authority.
+- Documentation-only commits must not be treated as application release identity or trigger runtime promotion.
+- Planning/docs only; no runtime/Test/Production claim.
 
 ## v2026.09.23.402 — 2026-09-23
 - Started a full planning re-review against current repository evidence, runtime-facing contracts, standards, and recent planning decisions.
