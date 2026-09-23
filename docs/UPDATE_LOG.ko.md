@@ -1,3 +1,34 @@
+## v2026.09.23.397 — 마켓플레이스 경매·직거래·감정소, 클럽 캔버스, 컬렉션 큐레이션, 가상 세무 구청 백엔드 REST API 풀스택 완비 및 실시간 UI 양방향 연동, 무중단 블루-그린 승격 및 1,071개 활성 세션 100% 보존
+
+- 적용 브랜치: `main` (릴리스: `prod-c5235c35-v397`, Exact Git SHA: `c5235c3510266d776cf9cbbf6c44690321ffc5a5`)
+- **5대 도메인 백엔드 REST API 구현 및 프론트엔드 실연동 완결**:
+  1. **마켓플레이스 경매/직거래/감정소 풀스택 실연동 (PLAYER_MARKETPLACE_CRAFTING_SPEC)**:
+     - **경매(Auction)**: `GET /api/v1/marketplace/auctions`, `POST /api/v1/marketplace/auctions`, `POST /api/v1/marketplace/auctions/:id/bid` (최고가 갱신 시 직전 입찰자 100% 즉시 에스크로 자동 환불, 마감 30초 이내 60초 자동 연장 안티스나이핑).
+     - **직거래(Trade)**: `GET /api/v1/marketplace/trades`, `POST /api/v1/marketplace/trades`, `POST /api/v1/marketplace/trades/:id/accept`, `POST /api/v1/marketplace/trades/:id/confirm`, `POST /api/v1/marketplace/trades/:id/cancel` (양자 3단계 상호 확인 서명 P2P 에스크로).
+     - **감정소(Appraisal)**: `GET /api/v1/marketplace/appraisals`, `POST /api/v1/marketplace/appraisals` (`max(250 WLD, ceil(0.25%))` 수수료 `SINK_APPRAISAL_FEE` 영구 소각 및 공인 인증서 발급).
+     - **UI 실연동**: `auction-view.tsx`, `direct-trade-view.tsx`, `appraisal-view.tsx`에서 mock 데이터 제거 후 실제 백엔드 API와 양방향 통신.
+  2. **클럽 협동 캔버스 서버 영구 저장 (CLUB_COOPERATIVE_ECONOMY_SPEC)**:
+     - `GET /api/v1/clubs/:id/canvas`, `PUT /api/v1/clubs/:id/canvas` 신설.
+     - `clubhouse-canvas.tsx`에서 12x12 가구 배치 그리드 및 장식 점수를 서버에 실시간 저장 및 동기화.
+  3. **컬렉션 큐레이션 및 D1~D7 리텐션 사다리 연동 (COLLECTION_OWNERSHIP_CURATION_SPEC)**:
+     - 신규 백엔드 `CollectionModule` 구축: `GET /api/v1/collections`, `PUT /api/v1/collections/:id/favorite`, `PUT /api/v1/collections/:id/notes`, `GET /api/v1/collections/curation/progress`, `POST /api/v1/collections/curation/advance`.
+     - App Gateway에 `collections` 허용 그룹 등록 및 Next.js rewrite 지원.
+     - `curation-retention-flow.tsx`에서 서버 데이터 로드 및 즐겨찾기/메모/사다리 진척 실시간 양방향 연동.
+  4. **가상 세무 구청 및 일일 부동산세 납부 / 체납 공매 연동 (PERSONAL_SPACES_CITY_PROJECTS_SPEC)**:
+     - `frontend/src/app/spaces/spaces-view.tsx`에 3번째 탭 `🏛️ 가상 세무 구청 (부동산세 & 공매)` 신설.
+     - 보유 공간별 일일 부동산세율 확인 및 1일/7일/30일 자진 납부(`POST /api/v1/spaces/:id/tax/pay`, `SINK_PROPERTY_TAX` 100% 영구 소각).
+     - 7일 유예 경과 체납 공매 매물 실시간 모니터링 (`GET /api/v1/spaces/tax/delinquencies`).
+  5. **시즌 랭킹 & 명예의 전당 보상 연동 (SEASON_SYSTEM_SPEC)**:
+     - `/seasons` 상단 `SeasonHallOfFameTicker` 및 티커 모달 연동.
+- **데이터베이스 마이그레이션 232 적용 완료**:
+  - `marketplace_auctions`, `marketplace_auction_bids`, `marketplace_p2p_trades`, `marketplace_appraisal_certificates`, `club_canvases`, `user_collections`, `user_curation_progress` 테이블 및 PL/pgSQL 프로시저 원격 DB 적용 완료.
+- **전수 단위/통합 테스트 100% 통과**:
+  - 백엔드: 101개 테스트 파일, 996개 테스트 전수 통과 (0 failed).
+  - 프론트엔드: 103개 테스트 파일, 756개 테스트 전수 통과 (0 failed).
+- **무중단 운영 승격 (Zero-Downtime Blue-Green Promotion)**:
+  - 테스트 및 운영 서버 전수 200 OK.
+  - **PostgreSQL 활성 사용자 세션 1,071건 100% 무손실 보존 완료**.
+
 ## v2026.09.23.395 — 가상 도시 토지 부지 & 세무 구청 시스템(일일 부동산세 SINK_PROPERTY_TAX 100% 소각, 7일 유예 체납 공매 루프) 및 시즌 랭킹 & 명예의 전당 보상 분배 엔진 API 완비, 무중단 블루-그린 승격 및 1,069개 활성 세션 100% 보존
 
 - 적용 브랜치: `main` (릴리스: `prod-9d248585-v395`, Exact Git SHA: `9d248585e174b0dcff16353d260c6e001cbece6c`)

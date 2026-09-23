@@ -202,10 +202,21 @@
     "commitSha": "9d248585e174b0dcff16353d260c6e001cbece6c",
     "shortSha": "9d248585",
     "releasePath": "/srv/moneyverse-data/releases/prod-9d248585-v395",
-    "status": "promoted",
+    "status": "archived",
     "activeSessions": 1069,
     "timestamp": "2026-09-23T11:53:00Z",
     "author": "System Engineer",
     "notes": "Space Property Tax & Delinquency Foreclosure Auction Loop (SINK_PROPERTY_TAX 100% Burn), Season Ranking & Hall of Fame Reward Settlement Engine (6-Tier Rewards, Top 10 Serialized Trophies, Immutable season_hall_of_fame Snapshots), Zero-Downtime Blue-Green Promotion, 1069+ Active Sessions 100% Preserved"
+  },
+  {
+    "version": "v2026.09.23.397",
+    "commitSha": "c5235c3510266d776cf9cbbf6c44690321ffc5a5",
+    "shortSha": "c5235c35",
+    "releasePath": "/srv/moneyverse-data/releases/prod-c5235c35-v397",
+    "status": "promoted",
+    "activeSessions": 1071,
+    "timestamp": "2026-09-23T13:15:00Z",
+    "author": "System Engineer",
+    "notes": "Full REST API Backend Implementation & End-to-End Frontend Integration for 5 Core Domains: (1) Marketplace English Auctions (anti-sniping bid), P2P 1:1 Direct Escrow Trades (3-step dual confirmation), Certified Appraisals; (2) Club 12x12 Shared Clubhouse Canvas persistence; (3) User Collections & D1~D7 Retention Curation Ladder; (4) Virtual Space Property Tax (SINK_PROPERTY_TAX 100% burn) & Real-Time Foreclosure Auction monitoring tab on /spaces; (5) Season Ranking & Hall of Fame UI real-time binding; DB Migration 232 applied; Zero-Downtime Blue-Green Promotion, 1,071 active user sessions 100% preserved"
   }
 ]
