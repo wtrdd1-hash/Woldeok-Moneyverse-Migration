@@ -2,11 +2,21 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.23.397
+> **현재 통합 버전:** v2026.09.23.398
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 공개 웹사이트 API 정보 비노출 필수 — v2026.09.23.398 (2026-09-23)
+
+- **P0 정보노출 정책:** 상세 API endpoint 목록, schema, OpenAPI/Swagger 다운로드, 코드 예제, live API tester를 머니버스 공개 웹사이트에 의도적으로 노출하지 않는다.
+- **문서 권위:** 상세 API 설명은 GitHub 문서에서만 유지한다. 단 저장소 공개 설정이 실제 기밀성을 결정하므로 public GitHub 저장소의 문서는 여전히 공개 정보다.
+- **개발자 포털 전환:** 현재 공개 Developer Portal/API Center는 P0 보완 대상이다. Test/Production 공개 웹에서 endpoint catalog, OpenAPI 다운로드, live tester/"Try it out", 관리자·경제·권한 API 상세설명을 제거한다.
+- **은닉에 의존하지 않음:** 문서를 숨겨도 API는 인증·인가, object-level authorization, validation, rate/resource limit, audit, idempotency/concurrency, CSRF, step-up 등 필요한 서버 보안통제를 그대로 유지한다.
+- **빌드/승격 gate:** 공개 route/static asset/browser bundle의 API 문서 artifact와 secret 노출을 검사하고 의도치 않은 공개가 있으면 Production 승격을 차단한다.
+- **권위 상세기획:** [API_DISCLOSURE_SECURITY_SPEC.ko.md](API_DISCLOSURE_SECURITY_SPEC.ko.md).
+- **현재 상태:** v398은 기획/문서 변경이며 운영 developer portal 제거 완료를 주장하지 않는다.
 
 ## 기능/API 동시 구현 강제 계약 — v2026.09.23.397 (2026-09-23)
 
