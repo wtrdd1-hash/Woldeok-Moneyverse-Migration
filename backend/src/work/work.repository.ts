@@ -90,14 +90,26 @@ export interface WorkCompleteV2Row {
 }
 
 export class WorkRepository {
+  private cachedFeatureState: { readonly state: WorkFeatureState; readonly cachedUntil: number } | null = null;
+
   constructor(private readonly pool: Queryable) {}
 
+  invalidateFeatureStateCache(): void {
+    this.cachedFeatureState = null;
+  }
+
   async featureState(): Promise<WorkFeatureState> {
+    const now = Date.now();
+    if (this.cachedFeatureState && this.cachedFeatureState.cachedUntil > now) {
+      return this.cachedFeatureState.state;
+    }
     const row = await queryOne<{ state: WorkFeatureState }>(
       this.pool,
       `SELECT public.feature_switch_state('work')::text AS state`,
     );
-    return row?.state ?? 'disabled';
+    const state = row?.state ?? 'disabled';
+    this.cachedFeatureState = { state, cachedUntil: now + 30_000 };
+    return state;
   }
 
   private async requireEnabled(): Promise<void> {

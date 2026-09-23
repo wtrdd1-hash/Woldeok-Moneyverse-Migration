@@ -22,8 +22,9 @@ export class SessionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    if (!this.sessions) throw new ServiceUnavailableException('session store unavailable');
     const request = context.switchToHttp().getRequest<RequestWithSession>();
+    if (request.session) return true;
+    if (!this.sessions) throw new ServiceUnavailableException('session store unavailable');
     const session = await this.sessions.get(sessionToken(request.headers, this.config));
     if (!session) throw new UnauthorizedException('login required');
     request.session = session;

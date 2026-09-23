@@ -40,7 +40,12 @@ export function requestActivityTrail({
       token && sessions
         ? sessions
             .get(token)
-            .then((session) => session?.user_id ?? null)
+            .then((session) => {
+              if (session && !(request as { session?: unknown }).session) {
+                (request as { session?: unknown }).session = session;
+              }
+              return session?.user_id ?? null;
+            })
             .catch(() => null)
         : Promise.resolve(null);
 

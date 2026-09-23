@@ -64,6 +64,7 @@ export interface ShopPurchaseInput {
 @Injectable()
 export class PostgresShopRepository {
   readonly pool: Queryable;
+  private catalogCache: { readonly rows: ShopCatalogRow[]; readonly cachedUntil: number } | null = null;
 
   constructor(pool: Queryable) {
     if (!pool || typeof pool.query !== 'function')
@@ -71,14 +72,24 @@ export class PostgresShopRepository {
     this.pool = pool;
   }
 
+  invalidateCatalogCache(): void {
+    this.catalogCache = null;
+  }
+
   async listActiveItems({ limit = 60 }: { limit?: number } = {}): Promise<ShopCatalogRow[]> {
     const itemLimit = requireShopLimit(limit, 'catalog limit');
-    return queryRows<ShopCatalogRow>(
+    const now = Date.now();
+    if (this.catalogCache && this.catalogCache.cachedUntil > now && itemLimit >= this.catalogCache.rows.length) {
+      return this.catalogCache.rows.slice(0, itemLimit);
+    }
+    const rows = await queryRows<ShopCatalogRow>(
       this.pool,
       `SELECT item_id::text AS item_id, name, description, price::text AS price, created_at
        FROM public.shop_list_active_items($1)`,
       [itemLimit],
     );
+    this.catalogCache = { rows, cachedUntil: now + 60_000 };
+    return rows;
   }
 
   async purchasesForUser(

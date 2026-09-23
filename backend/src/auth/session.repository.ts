@@ -143,14 +143,34 @@ export interface CompletedOAuthLogin extends CompletedOAuthLoginRow {
   readonly csrfToken: string;
 }
 
+interface CachedSessionEntry {
+  readonly row: AuthSessionRow | null;
+  readonly cachedUntil: number;
+}
+
 @Injectable()
 export class SessionRepository {
   readonly pool: Queryable;
   readonly encryptionService: EncryptionService;
+  private readonly sessionCache = new Map<string, CachedSessionEntry>();
+  private readonly idToTokenHash = new Map<string, string>();
 
   constructor(pool: Queryable, encryptionService?: EncryptionService) {
     this.pool = pool;
     this.encryptionService = encryptionService ?? new EncryptionService();
+  }
+
+  invalidate(sessionId: string): void {
+    const tokenHash = this.idToTokenHash.get(sessionId);
+    if (tokenHash) {
+      this.sessionCache.delete(tokenHash);
+      this.idToTokenHash.delete(sessionId);
+    }
+  }
+
+  clearCache(): void {
+    this.sessionCache.clear();
+    this.idToTokenHash.clear();
   }
 
   async create(): Promise<CreatedSession> {
@@ -169,12 +189,27 @@ export class SessionRepository {
 
   async get(token: unknown): Promise<AuthSessionRow | null> {
     if (typeof token !== 'string' || token.length < 32 || token.length > 512) return null;
-    return queryOne<AuthSessionRow>(
+    const tokenHash = sha256(token);
+    const now = Date.now();
+    const cached = this.sessionCache.get(tokenHash);
+    if (cached && cached.cachedUntil > now) {
+      return cached.row;
+    }
+    const row = await queryOne<AuthSessionRow>(
       this.pool,
       `SELECT * FROM auth_sessions
        WHERE token_hash=$1 AND revoked_at IS NULL AND expires_at>now()`,
-      [sha256(token)],
+      [tokenHash],
     );
+    if (this.sessionCache.size >= 5000) {
+      const oldest = this.sessionCache.keys().next().value;
+      if (oldest) this.sessionCache.delete(oldest);
+    }
+    this.sessionCache.set(tokenHash, { row, cachedUntil: now + 5000 });
+    if (row) {
+      this.idToTokenHash.set(row.id, tokenHash);
+    }
+    return row;
   }
 
   /**
@@ -201,6 +236,7 @@ export class SessionRepository {
       [sessionId, sha256(csrfToken)],
     );
     if (!session) throw new Error('active session not found');
+    this.invalidate(sessionId);
     return csrfToken;
   }
 
@@ -452,6 +488,7 @@ export class SessionRepository {
       'UPDATE auth_sessions SET reauthenticated_at=now() WHERE id=$1 AND user_id=$2 AND revoked_at IS NULL AND expires_at>now() RETURNING id',
       [sessionId, userId],
     );
+    if (row?.id) this.invalidate(sessionId);
     return Boolean(row?.id);
   }
 
@@ -465,6 +502,7 @@ export class SessionRepository {
   }
 
   async revoke(sessionId: string): Promise<void> {
+    this.invalidate(sessionId);
     await this.pool.query(
       `UPDATE auth_sessions SET revoked_at=coalesce(revoked_at, now()) WHERE id=$1`,
       [sessionId],
@@ -571,6 +609,7 @@ export class SessionRepository {
       'SELECT revoked_sessions FROM public.admin_force_logout($1, $2, $3, $4)',
       [input.idempotencyKey, input.actorUserId, input.targetUserId, input.reason],
     );
+    this.clearCache();
     return { revokedSessions: row?.revoked_sessions ?? 0 };
   }
 }

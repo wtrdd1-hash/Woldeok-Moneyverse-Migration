@@ -133,6 +133,24 @@ export const SCHEDULER_JOBS: readonly SchedulerJob[] = [
     statement: 'SELECT public.economy_run_dual_auto_policy() AS result',
   },
   {
+    // Prunes virtual stock price ticks older than 24 hours to prevent table/index bloat.
+    job: 'stock.ticks_cleanup',
+    cadence: 'daily',
+    notBefore: 10,
+    connection: 'app',
+    statement:
+      "WITH deleted AS (DELETE FROM public.virtual_stock_price_ticks WHERE recorded_at < now() - interval '24 hours' RETURNING 1) SELECT count(*)::text AS pruned_ticks FROM deleted",
+  },
+  {
+    // Cleans up delivered outbox events older than 7 days, maintaining lightweight delivery queue indexes.
+    job: 'system.outbox_sweep',
+    cadence: 'daily',
+    notBefore: 5,
+    connection: 'app',
+    statement:
+      "WITH deleted AS (DELETE FROM public.outbox_events WHERE delivered_at IS NOT NULL AND delivered_at < now() - interval '7 days' RETURNING 1) SELECT count(*)::text AS pruned_events FROM deleted",
+  },
+  {
     job: 'economy.reconciliation',
     cadence: 'daily',
     notBefore: 0,
