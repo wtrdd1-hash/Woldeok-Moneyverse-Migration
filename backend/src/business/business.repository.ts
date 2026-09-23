@@ -89,6 +89,7 @@ interface ApplyBoostInput {
   readonly userId: string;
   readonly ownershipId: string;
   readonly boostCode: string;
+  readonly idempotencyKey: string;
 }
 
 export class PostgresBusinessRepository implements BusinessRepository {
@@ -181,9 +182,9 @@ export class PostgresBusinessRepository implements BusinessRepository {
     const row = await queryOne<BusinessSettleRow>(
       this.pool,
       `SELECT ownership_id::text, settlement_date, gross_revenue::text,
-              operating_cost::text, net_amount::text, transaction_id::text, replayed
        FROM public.business_settle_daily_v2($1, $2, $3)`,
       [
+        uuid(idempotencyKey, 'idempotency key'),
         uuid(userId, 'user id'),
         uuid(ownershipId, 'ownership id'),
         uuid(idempotencyKey, 'idempotency key'),
@@ -202,9 +203,9 @@ export class PostgresBusinessRepository implements BusinessRepository {
     const row = await queryOne<BusinessActivateRow>(
       this.pool,
       `SELECT ownership_id::text, business_symbol, business_name,
-              daily_revenue::text, daily_operating_cost::text
        FROM public.business_activate_from_license($1, $2, $3)`,
       [
+        uuid(idempotencyKey, 'idempotency key'),
         uuid(userId, 'user id'),
         catalogCode,
         uuid(idempotencyKey, 'idempotency key'),
@@ -219,11 +220,13 @@ export class PostgresBusinessRepository implements BusinessRepository {
     userId,
     ownershipId,
     boostCode,
+    idempotencyKey,
   }: ApplyBoostInput): Promise<Record<string, unknown>> {
     const row = await queryOne<{ boost_active: Record<string, unknown> }>(
       this.pool,
-      `SELECT public.business_apply_boost($1, $2, $3) AS boost_active`,
+      `SELECT public.business_apply_boost($1, $2, $3, $4) AS boost_active`,
       [
+        uuid(idempotencyKey, 'idempotency key'),
         uuid(userId, 'user id'),
         uuid(ownershipId, 'ownership id'),
         boostCode,

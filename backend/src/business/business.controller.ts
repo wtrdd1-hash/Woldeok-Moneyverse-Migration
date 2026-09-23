@@ -41,7 +41,7 @@ export class ActivateLicenseDto {
   readonly idempotencyKey!: string;
 }
 
-export class ApplyBoostDto {
+export class ApplyBoostDto extends IdempotentDto {
   @ApiProperty({ example: 'biz_cvs_boost_7d' })
   @IsString()
   @IsNotEmpty()
@@ -189,7 +189,7 @@ export class BusinessController {
     @Body() body: ApplyBoostDto,
   ) {
     return this.guarded(
-      () => this.service().applyBoost(requireUserId(request), { ownershipId, boostCode: body.boostCode }),
+      () => this.service().applyBoost(requireUserId(request), { ownershipId, boostCode: body.boostCode, idempotencyKey: body.idempotencyKey }),
       'failed to apply boost item',
     );
   }

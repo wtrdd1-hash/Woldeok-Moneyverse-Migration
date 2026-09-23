@@ -118,6 +118,7 @@ export interface BusinessApplyBoostInput {
   readonly userId: string;
   readonly ownershipId: string;
   readonly boostCode: string;
+  readonly idempotencyKey: string;
 }
 
 export interface BusinessRepository {
@@ -162,6 +163,7 @@ export interface CreateBusinessActivateInput {
 export interface CreateBusinessApplyBoostInput {
   readonly ownershipId?: unknown;
   readonly boostCode?: unknown;
+  readonly idempotencyKey?: unknown;
 }
 
 @Injectable()
@@ -312,6 +314,7 @@ export class BusinessService {
       userId: validId(userId, 'user id'),
       ownershipId: validId(input.ownershipId, 'ownership id'),
       boostCode: String(input.boostCode ?? ''),
+      idempotencyKey: validId(input.idempotencyKey, 'idempotency key'),
     });
   }
 }
