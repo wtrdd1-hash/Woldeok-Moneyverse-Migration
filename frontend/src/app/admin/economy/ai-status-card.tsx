@@ -68,34 +68,50 @@ const stateLabel: Record<string, string> = {
 const domainLabel: Record<string, string> = {
   jobs: '직업',
   macro: '거시경제',
+  welfare: '복지/소비',
+  integrity: '데이터 무결성',
   casino: '카지노',
   bank: '은행',
   market: '시장',
+  stock: '주식',
+  shop: '상점',
 };
 
 function number(value: string | number | null | undefined, digits = 0): string {
   if (value === null || value === undefined || value === '') return '—';
   const parsed = Number(value);
-  return Number.isFinite(parsed)
-    ? parsed.toLocaleString('ko-KR', { maximumFractionDigits: digits })
-    : '—';
+  if (!Number.isFinite(parsed)) return '—';
+  return parsed.toLocaleString('ko-KR', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  });
 }
 
-function runTimestamp(run: SchedulerRun | null | undefined): string {
-  const raw = run?.finished_at ?? run?.started_at;
-  if (!raw) return '실행 시각 없음';
-  const value = new Date(raw);
-  if (Number.isNaN(value.getTime())) return '실행 시각 오류';
-  return value.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', hour12: false });
+function runTimestamp(run?: SchedulerRun | null): string {
+  const ts = run?.finished_at || run?.started_at;
+  if (!ts) return '실행 시각 없음';
+  const date = new Date(ts);
+  if (Number.isNaN(date.getTime())) return '실행 시각 없음';
+  
+  const utcMs = date.getTime();
+  const kstMs = utcMs + 9 * 60 * 60 * 1000;
+  const kstDate = new Date(kstMs);
+  const year = kstDate.getUTCFullYear();
+  const month = kstDate.getUTCMonth() + 1;
+  const day = kstDate.getUTCDate();
+  const hour = kstDate.getUTCHours();
+  const minute = kstDate.getUTCMinutes();
+  const second = kstDate.getUTCSeconds();
+  return `${year}. ${month}. ${day}. ${hour}시 ${minute}분 ${second}초`;
 }
 
-function RunState({ title, run }: { readonly title: string; readonly run: SchedulerRun | null | undefined }) {
+function RunItem({ label, run }: { readonly label: string; readonly run?: SchedulerRun | null | undefined }) {
   return (
-    <div className="rounded-xl border border-border/60 bg-muted/20 p-3 min-w-0 shadow-sm flex flex-col justify-between gap-1.5">
-      <div className="flex items-center justify-between gap-2 min-w-0">
-        <span className="text-xs font-semibold text-muted-foreground truncate">{title}</span>
-        <Badge variant={run?.status === 'failed' ? 'destructive' : 'outline'} className="shrink-0 text-[11px] px-2 py-0.5">
-          {run?.status ?? '기록 없음'}
+    <div className="rounded-lg border border-border/50 bg-background/60 p-2.5 min-w-0">
+      <div className="flex items-center justify-between gap-1">
+        <span className="text-xs text-muted-foreground truncate">{label}</span>
+        <Badge variant={run?.status === 'completed' || run?.status === 'succeeded' || run?.status === 'success' ? 'outline' : 'secondary'} className="text-[10px] px-1.5 py-0 h-4">
+          {run?.status ?? '미실행'}
         </Badge>
       </div>
       <p className="font-mono text-xs font-medium truncate text-foreground/90">{run?.period_key ?? '—'}</p>
@@ -119,81 +135,168 @@ function AgentCard({ agent, source }: { readonly agent: AgentStatus; readonly so
         <div className="min-w-0"><dt className="text-muted-foreground truncate">동의/거부/보류</dt><dd className="font-semibold truncate">{number(agent.agree_count)} / {number(agent.veto_count)} / {number(agent.abstain_count)}</dd></div>
         <div className="min-w-0"><dt className="text-muted-foreground truncate">평균 신뢰</dt><dd className="font-semibold">{agent.avg_confidence == null ? '—' : `${number(Number(agent.avg_confidence) * 100, 1)}%`}</dd></div>
         <div className="min-w-0"><dt className="text-muted-foreground truncate">지연</dt><dd className="font-semibold">{number(agent.avg_latency_ms, 1)} ms</dd></div>
+        <div className="min-w-0"><dt className="text-muted-foreground truncate">토큰</dt><dd className="font-semibold">{number(agent.avg_total_tokens, 1)}</dd></div>
+        <div className="min-w-0"><dt className="text-muted-foreground truncate">근거</dt><dd className="font-semibold">{source}</dd></div>
       </dl>
     </div>
   );
 }
 
-export function EconomyAiStatusCard({ status }: { readonly status: EconomyAiStatus }) {
-  const latest = status.latestReview ?? status.latestShadowReview;
-  const decision = latest?.decision ?? 'none';
-  const authorityAgents = status.agents ?? [];
-  const shadowAgents = status.shadowAgents ?? [];
-  const displayedAgents = authorityAgents.length > 0 ? authorityAgents : shadowAgents;
-  const agentSource = authorityAgents.length > 0 ? '권위' : 'SHADOW';
-  const proposal = status.proposalState;
-  const blockedBy = proposal?.blockedBy ?? [];
-  const operationalState = status.operationalState ?? (
-    status.switchState === 'enabled' ? 'configured_not_exercised' : 'disabled'
-  );
-  const modelReachability = status.modelReachability ?? 'unknown';
+function CouncilRationaleBanner({ rationale }: { readonly rationale: string }) {
+  const isStructured = rationale.includes('council decision=');
+  if (!isStructured) {
+    return (
+      <p className="rounded-xl border border-border/60 bg-muted/30 p-3.5 text-xs sm:text-sm leading-relaxed [overflow-wrap:anywhere] [word-break:keep-all] shadow-sm">
+        {rationale}
+      </p>
+    );
+  }
+
+  const decisionMatch = rationale.match(/council decision=([^;]+)/);
+  const agreeMatch = rationale.match(/agree=([^;]+)/);
+  const vetoMatch = rationale.match(/veto=([^;]+)/);
+  const disputedMatch = rationale.match(/disputed=([^;]+)/);
+
+  const decision = decisionMatch?.[1]?.trim() ?? 'abstain';
+  const agreeList = agreeMatch?.[1]?.trim() === 'none' ? [] : (agreeMatch?.[1]?.split(',') ?? []);
+  const vetoList = vetoMatch?.[1]?.trim() === 'none' ? [] : (vetoMatch?.[1]?.split(',') ?? []);
+  const disputedList = disputedMatch?.[1]?.trim() === 'none' ? [] : (disputedMatch?.[1]?.split(',') ?? []);
+
+  const decisionBadgeVariant = decision === 'agree' ? 'default' : decision === 'veto' ? 'destructive' : 'secondary';
+  const decisionText = decision === 'agree' ? '만장일치 합의 (적용 승인)' : decision === 'veto' ? '거부 (위험 감지 - VETO)' : '보류 (위원 간 의견 조율 중)';
 
   return (
-    <Card className="w-full max-w-full min-w-0 overflow-hidden rounded-2xl border-border/80 shadow-sm">
-      <CardHeader className="p-4 sm:p-6 pb-3">
-        <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
-          <CardTitle className="text-base sm:text-lg font-black tracking-tight">Economy AI Council 상태</CardTitle>
-          <div className="flex flex-wrap items-center gap-1.5">
-            <Badge variant={operationalState === 'failed' ? 'destructive' : 'secondary'} className="text-xs px-2.5 py-0.5">
-              {stateLabel[operationalState] ?? operationalState}
-            </Badge>
-            <Badge variant={modelReachability === 'degraded' ? 'destructive' : 'outline'} className="text-xs px-2.5 py-0.5">
-              모델 {modelReachability === 'healthy' ? '도달 정상' : modelReachability === 'degraded' ? '일부 실패' : '미확인'}
-            </Badge>
-            <Badge variant={decision === 'veto' ? 'destructive' : 'outline'} className="text-xs px-2.5 py-0.5">{decision.toUpperCase()}</Badge>
-          </div>
+    <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-xs sm:text-sm shadow-sm space-y-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-primary/10 pb-2.5">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-foreground">🏛️ 위원회 최종 의결 판정:</span>
+          <Badge variant={decisionBadgeVariant} className="font-semibold text-xs">
+            {decisionText}
+          </Badge>
         </div>
-        <CardDescription className="text-xs sm:text-sm text-muted-foreground leading-relaxed [overflow-wrap:anywhere] [word-break:keep-all] mt-1">
-          모델 연결, SHADOW 검증, 권위 정책 검토와 실제 자동 적용은 서로 다른 상태로 표시합니다.
+        <span className="text-[11px] text-muted-foreground font-mono">
+          Bicameral Dual-AI Verification
+        </span>
+      </div>
+
+      <div className="grid gap-1.5 sm:grid-cols-3 text-xs">
+        <div className="flex items-center gap-1.5">
+          <span className="text-muted-foreground shrink-0">✅ 합의 분야:</span>
+          <span className="font-medium text-foreground">
+            {agreeList.length > 0 ? agreeList.map((d) => domainLabel[d] ?? d).join(', ') : '없음'}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-muted-foreground shrink-0">🛑 거부(VETO):</span>
+          <span className="font-medium text-destructive">
+            {vetoList.length > 0 ? vetoList.map((d) => domainLabel[d] ?? d).join(', ') : '없음'}
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className="text-muted-foreground shrink-0">⚖️ 이견/조율:</span>
+          <span className="font-medium text-foreground">
+            {disputedList.length > 0 ? disputedList.map((d) => domainLabel[d] ?? d).join(', ') : '없음'}
+          </span>
+        </div>
+      </div>
+
+      <p className="text-[11px] text-muted-foreground pt-1 border-t border-primary/10 font-mono truncate" title={rationale}>
+        원문: {rationale}
+      </p>
+    </div>
+  );
+}
+
+export function EconomyAiStatusCard({ status }: { readonly status: EconomyAiStatus | null }) {
+  const op = status?.operationalState ?? 'unknown';
+  const label = stateLabel[op] ?? op;
+  const proposal = status?.proposalState;
+  const days = proposal?.sampleSufficientDays ?? proposal?.days ?? null;
+  const activeMembers = proposal?.activeMemberCount ?? null;
+  const minActive = proposal?.minimumActiveSample ?? null;
+  const hasShadow = (status?.shadowAgents?.length ?? 0) > 0;
+  const displayedAgents = hasShadow ? (status?.shadowAgents ?? []) : (status?.agents ?? []);
+  const agentSource = hasShadow ? 'SHADOW' : 'AUTHORITATIVE';
+  const latest = hasShadow ? status?.latestShadowReview : status?.latestReview;
+
+  return (
+    <Card className="shadow-sm">
+      <CardHeader>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-base font-bold">🏛️ AI 경제 정책 위원회 (AI Council)</CardTitle>
+            <Badge variant={status?.modelReachability === 'healthy' ? 'default' : 'outline'} className="text-[11px]">
+              {status?.modelReachability === 'healthy' ? '모델 도달 정상' : '모델 상태 확인'}
+            </Badge>
+          </div>
+          <Badge variant={op === 'active_authoritative' ? 'default' : 'secondary'} className="text-xs font-semibold">
+            {label}
+          </Badge>
+        </div>
+        <CardDescription className="[word-break:keep-all]">
+          결정론적 규칙 엔진의 정책 조정안을 듀얼 로컬 AI(Llama 3.2 3B &amp; Gemma 3 1B) 위원회가 4대 도메인(무결성·직업·거시경제·복지)별로 교차 심의합니다.
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-4 p-4 sm:p-6 pt-0">
-        <dl className="grid grid-cols-2 gap-2 text-xs sm:text-sm sm:grid-cols-2 xl:grid-cols-4 min-w-0 rounded-xl bg-muted/20 p-3 border border-border/40">
-          <div className="min-w-0"><dt className="text-muted-foreground text-xs truncate">권위 council review</dt><dd className="font-bold text-sm sm:text-base mt-0.5">{number(status.reviewCount)}</dd></div>
-          <div className="min-w-0"><dt className="text-muted-foreground text-xs truncate">SHADOW review</dt><dd className="font-bold text-sm sm:text-base mt-0.5">{number(status.shadowReviewCount)}</dd></div>
-          <div className="min-w-0"><dt className="text-muted-foreground text-xs truncate">활성 사용자 / 최소 표본</dt><dd className="font-bold text-sm sm:text-base mt-0.5">{number(proposal?.activeMemberCount)} / {number(proposal?.minimumActiveSample)}</dd></div>
-          <div className="min-w-0"><dt className="text-muted-foreground text-xs truncate">충분 표본 일수</dt><dd className="font-bold text-sm sm:text-base mt-0.5">{number(proposal?.sampleSufficientDays)} / {number(proposal?.days)}</dd></div>
-        </dl>
-
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 min-w-0">
-          <RunState title="권위 AI 주간 검토" run={status.lastRuns?.authoritativeReview} />
-          <RunState title="AI SHADOW 일일 검증" run={status.lastRuns?.shadowHealth} />
-          <RunState title="자동 정책 적용" run={status.lastRuns?.autoPolicy} />
+      <CardContent className="space-y-4">
+        <div className="grid gap-2 sm:grid-cols-3">
+          <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-xs shadow-xs min-w-0">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-muted-foreground truncate">경제 데이터 표본 충족</span>
+              <Badge variant={days != null && days >= 7 ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0 h-4">
+                {days != null && days >= 7 ? '충족' : '수집 중'}
+              </Badge>
+            </div>
+            <p className="mt-1 font-mono text-sm font-bold truncate text-foreground">
+              {days != null ? `${number(days)} / 7` : '—'}
+            </p>
+            <p className="text-[11px] text-muted-foreground truncate">최근 7일 지표 연속 수집 기준</p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-xs shadow-xs min-w-0">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-muted-foreground truncate">활성 유저 활동 표본</span>
+              <Badge variant={activeMembers != null && minActive != null && activeMembers >= minActive ? 'default' : 'secondary'} className="text-[10px] px-1.5 py-0 h-4">
+                {activeMembers != null && minActive != null && activeMembers >= minActive ? '표본 정상' : '누적 필요'}
+              </Badge>
+            </div>
+            <p className="mt-1 font-mono text-sm font-bold truncate text-foreground">
+              {activeMembers != null && minActive != null ? `${number(activeMembers)} / ${number(minActive)}` : number(activeMembers)}
+            </p>
+            <p className="text-[11px] text-muted-foreground truncate">최근 24시간 활동 회원 수</p>
+          </div>
+          <div className="rounded-xl border border-border/60 bg-muted/20 p-3 text-xs shadow-xs min-w-0">
+            <div className="flex items-center justify-between gap-1">
+              <span className="text-muted-foreground truncate">정책 조정 후보 안건</span>
+              <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                {proposal?.eligible === true ? '적용 검토 가능' : '규칙 분석'}
+              </Badge>
+            </div>
+            <p className="mt-1 font-mono text-sm font-bold truncate text-foreground">{proposal?.adjustmentCount ?? 0} 건</p>
+            <p className="text-[11px] text-muted-foreground truncate">결정론적 후보 수치</p>
+          </div>
         </div>
 
-        <div className="rounded-xl border border-border/60 bg-muted/20 p-3.5 text-xs sm:text-sm min-w-0 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
-            <strong className="font-bold truncate">현재 결정론 proposal</strong>
-            <Badge variant={proposal?.eligible ? 'secondary' : 'outline'} className="text-xs shrink-0">
-              {proposal?.eligible ? '적용 검토 가능' : '정책 적용 차단'}
-            </Badge>
-          </div>
-          <p className="mt-2 text-xs sm:text-sm text-muted-foreground [overflow-wrap:anywhere] [word-break:keep-all]">
-            후보 조정 {number(proposal?.adjustmentCount)}건 · 직업 제한 강화 switch {status.jobLimitTighteningSwitchState ?? 'unknown'}
-          </p>
-          {blockedBy.length > 0 ? (
-            <div className="mt-2 grid gap-1 min-w-0">
-              {blockedBy.map((reason, index) => (
-                <p key={`${reason}-${index}`} className="rounded-lg bg-destructive/10 text-destructive dark:bg-destructive/20 border border-destructive/20 px-2.5 py-1 text-xs [overflow-wrap:anywhere] [word-break:keep-all]">{reason}</p>
+        {proposal?.blockedBy && proposal.blockedBy.length > 0 ? (
+          <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-2.5 text-xs text-destructive">
+            <p className="font-semibold">정책 적용 차단 요인:</p>
+            <ul className="list-disc list-inside mt-1 space-y-0.5">
+              {proposal.blockedBy.map((reason, idx) => (
+                <li key={idx}>{reason}</li>
               ))}
-            </div>
-          ) : null}
+            </ul>
+          </div>
+        ) : null}
+
+        <div className="space-y-2">
+          <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">주기적 데몬 실행 이력</h4>
+          <div className="grid gap-2 sm:grid-cols-3">
+            <RunItem label="권위 정책 심의" run={status?.lastRuns?.authoritativeReview} />
+            <RunItem label="SHADOW 건전성 검증" run={status?.lastRuns?.shadowHealth} />
+            <RunItem label="자동 정책 튜닝" run={status?.lastRuns?.autoPolicy} />
+          </div>
         </div>
 
         {latest?.rationale ? (
-          <p className="rounded-xl border border-border/60 bg-muted/30 p-3.5 text-xs sm:text-sm leading-relaxed [overflow-wrap:anywhere] [word-break:keep-all] shadow-sm">
-            {latest.rationale}
-          </p>
+          <CouncilRationaleBanner rationale={latest.rationale} />
         ) : null}
 
         <div className="grid gap-2 sm:hidden">
@@ -203,8 +306,34 @@ export function EconomyAiStatusCard({ status }: { readonly status: EconomyAiStat
         </div>
         <div className="hidden overflow-x-auto sm:block">
           <table className="w-full text-sm">
-            <thead><tr className="border-b text-left text-xs text-muted-foreground"><th className="py-2">분야</th><th>좌석</th><th>모델</th><th>검토</th><th>동의/거부/보류</th><th>평균 신뢰</th><th>지연 ms</th><th>토큰</th><th>근거</th></tr></thead>
-            <tbody>{displayedAgents.map((agent, index) => <tr className="border-b" key={`${agent.domain}-${agent.seat}-${agent.model}-${index}`}><td className="py-2">{domainLabel[agent.domain ?? ''] ?? agent.domain ?? '—'}</td><td>{agent.seat ?? '—'}</td><td className="max-w-48 truncate font-mono text-xs" title={agent.model ?? undefined}>{agent.model ?? '—'}</td><td>{number(agent.review_count)}</td><td>{number(agent.agree_count)} / {number(agent.veto_count)} / {number(agent.abstain_count)}</td><td>{agent.avg_confidence == null ? '—' : `${number(Number(agent.avg_confidence) * 100, 1)}%`}</td><td>{number(agent.avg_latency_ms, 1)}</td><td>{number(agent.avg_total_tokens, 1)}</td><td>{agentSource}</td></tr>)}</tbody>
+            <thead>
+              <tr className="border-b text-left text-xs text-muted-foreground">
+                <th className="py-2">분야</th>
+                <th>좌석</th>
+                <th>모델</th>
+                <th>검토</th>
+                <th>동의/거부/보류</th>
+                <th>평균 신뢰</th>
+                <th>지연 ms</th>
+                <th>토큰</th>
+                <th>근거</th>
+              </tr>
+            </thead>
+            <tbody>
+              {displayedAgents.map((agent, index) => (
+                <tr className="border-b hover:bg-muted/10 transition-colors" key={`${agent.domain}-${agent.seat}-${agent.model}-${index}`}>
+                  <td className="py-2 font-medium">{domainLabel[agent.domain ?? ''] ?? agent.domain ?? '—'}</td>
+                  <td className="font-mono text-xs">{agent.seat ?? '—'}</td>
+                  <td className="max-w-48 truncate font-mono text-xs text-muted-foreground" title={agent.model ?? undefined}>{agent.model ?? '—'}</td>
+                  <td>{number(agent.review_count)}</td>
+                  <td className="font-mono text-xs font-semibold">{number(agent.agree_count)} / {number(agent.veto_count)} / {number(agent.abstain_count)}</td>
+                  <td className="font-mono text-xs">{agent.avg_confidence == null ? '—' : `${number(Number(agent.avg_confidence) * 100, 1)}%`}</td>
+                  <td className="font-mono text-xs">{number(agent.avg_latency_ms, 1)}</td>
+                  <td className="font-mono text-xs">{number(agent.avg_total_tokens, 1)}</td>
+                  <td><Badge variant="outline" className="text-[10px]">{agentSource}</Badge></td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
         {displayedAgents.length === 0 ? (

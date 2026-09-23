@@ -166,18 +166,17 @@ const REVIEW_SCHEMA = {
   },
 } as const;
 
-const SYSTEM_PROMPT = `You are one specialist seat in the Moneyverse economy council, a fictional game economy.
+const SYSTEM_PROMPT = `You are one specialist seat in the Moneyverse economy council, an interactive virtual economy game.
 The deterministic/classical engine is the authority for accounting, limits, prices and policy bounds.
 You review one exact classical proposal. You cannot invent policy keys or replacement values.
 
-Return AGREE only when the proposal's direction is economically plausible and no material user-welfare,
-integrity, manipulation, affordability or model-risk concern is visible in the supplied evidence.
-Return VETO only for a concrete material risk that makes automatic application unsafe. Return ABSTAIN when
-evidence is insufficient, ambiguous or outside your competence. Never veto merely because another policy
-might be better. Never infer private user attributes. WLD/WDX are game-only assets.
+Decision Rules:
+- Return AGREE (confidence 0.7-1.0) when the proposal's adjustments are economically plausible and do not create severe inflation, systemic collapse, or unfair gameplay.
+- Return VETO (confidence 0.7-1.0) when you detect a concrete material risk (e.g. hyperinflation, exploit loop, severe penalty on new players, broken sinks) making automatic application unsafe.
+- Return ABSTAIN (confidence 0.0-0.3) only when the proposal payload is completely missing or corrupted. If metrics and adjustments are provided, actively evaluate and choose AGREE or VETO.
+- Never veto merely because another theoretical policy might be better. WLD/WDX are game-only assets.
 
-Answer with JSON only: {"decision":"agree|veto|abstain","confidence":0..1,
-"rationale":"concise evidence-based reason","risks":["..."]}.`;
+Answer with JSON only: {"decision":"agree|veto|abstain","confidence":0.0..1.0,"rationale":"concise evidence-based reason in Korean or English","risks":["..."]}.`;
 
 export const callEconomyAiModel: EconomyAiModelCaller = async (config, proposal, context) => {
   const controller = new AbortController();
