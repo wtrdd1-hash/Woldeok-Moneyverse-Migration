@@ -27,7 +27,8 @@ import {
   VirtualBondsCard,
 } from './bank-forms';
 import { SavingsGoalProgressRing } from './savings-progress-ring';
-import type { BankStanding } from './types';
+import { SavingPocketsCard } from './saving-pockets-card';
+import type { BankStanding, SavingPocket } from './types';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,7 +43,10 @@ export default async function BankPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const standing = await apiOrNull<BankStanding>('/api/v1/banking/standing');
+  const [standing, pockets] = await Promise.all([
+    apiOrNull<BankStanding>('/api/v1/banking/standing'),
+    apiOrNull<SavingPocket[]>('/api/v1/banking/pockets'),
+  ]);
 
   if (!standing) {
     return (
@@ -199,6 +203,13 @@ export default async function BankPage() {
         bankBalance={bank}
         cashBalance={cash}
         bondsTotal={bondTotalPrincipal.toString()}
+      />
+
+      {/* 목적별 저축 포켓 (Saving Pockets) 관리 카드 */}
+      <SavingPocketsCard
+        pockets={pockets ?? []}
+        cashBalance={cash}
+        bankBalance={bank}
       />
 
       <Card className={activeLoan ? 'border-amber-500/30 bg-amber-500/5' : 'border-emerald-500/30 bg-emerald-500/5'}>

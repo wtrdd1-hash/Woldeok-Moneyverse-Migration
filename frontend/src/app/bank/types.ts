@@ -23,6 +23,19 @@ export interface BankBond {
   readonly status: 'holding' | 'redeemed' | string;
 }
 
+export interface SavingPocket {
+  readonly pocket_id: string;
+  readonly name: string;
+  readonly balance: string;
+  readonly target_amount: string | null;
+  readonly target_date: string | null;
+  readonly theme_color: string;
+  readonly icon_code: string;
+  readonly is_archived: boolean;
+  readonly created_at: string;
+  readonly updated_at: string;
+}
+
 export interface BankStanding {
   readonly cash_balance: string;
   readonly bank_balance: string;

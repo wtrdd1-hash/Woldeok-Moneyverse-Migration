@@ -34,3 +34,42 @@ export async function enterEvent(_previous: ActionState, formData: FormData): Pr
     return failure(error, '지금은 참가를 처리할 수 없어요.');
   }
 }
+
+export async function claimSeasonRewardAction(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const seasonId = String(formData.get('seasonId') ?? '').trim();
+  if (!seasonId) {
+    return { status: 'error', message: '수령할 시즌 식별자가 올바르지 않습니다.' };
+  }
+
+  try {
+    const result = await mutate<{
+      claimId: string;
+      seasonId: string;
+      seasonName: string;
+      tier: string;
+      rank: number | null;
+      rewardWld: number;
+      trophyCode: string | null;
+      claimedAt: unknown;
+    }>('/api/v1/seasons/claim-rewards', {
+      body: {
+        seasonId,
+        idempotencyKey: idempotencyKey(),
+      },
+    });
+
+    revalidatePath('/seasons');
+    revalidatePath('/wallet');
+
+    const rankText = result.rank ? `${result.rank}위 (${result.tier})` : result.tier;
+    return {
+      status: 'ok',
+      message: `${result.seasonName} ${rankText} 시즌 보상 ${groupDigits(result.rewardWld)} WLD와 명예 트로피를 성공적으로 수령했습니다!`,
+    };
+  } catch (error) {
+    return failure(error, '시즌 보상 수령에 실패했습니다. 이미 수령했거나 수령 대상이 아닐 수 있습니다.');
+  }
+}

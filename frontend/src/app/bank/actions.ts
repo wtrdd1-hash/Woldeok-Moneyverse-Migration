@@ -141,3 +141,79 @@ export async function redeemBondAction(_previous: ActionState, formData: FormDat
     return failure(error, '국채 상환 수령에 실패했습니다. 만기 도래 여부를 확인해 주세요.');
   }
 }
+
+export async function createPocketAction(_previous: ActionState, formData: FormData): Promise<ActionState> {
+  const name = String(formData.get('name') ?? '').trim();
+  const targetAmountRaw = formData.get('targetAmount');
+  const targetAmount = targetAmountRaw ? wholeAmount(targetAmountRaw) : null;
+  const targetDate = String(formData.get('targetDate') ?? '').trim() || null;
+  const themeColor = String(formData.get('themeColor') ?? 'sky').trim();
+  const iconCode = String(formData.get('iconCode') ?? 'piggy-bank').trim();
+
+  if (!name) {
+    return { status: 'error', message: '포켓 통장 이름을 입력해 주세요.' };
+  }
+
+  try {
+    await mutate('/api/v1/banking/pockets', {
+      body: {
+        name,
+        targetAmount: targetAmount ? String(targetAmount) : undefined,
+        targetDate: targetDate || undefined,
+        themeColor,
+        iconCode,
+      },
+    });
+    revalidatePath('/bank');
+    return { status: 'ok', message: `'${name}' 저축 포켓이 성공적으로 개설되었습니다.` };
+  } catch (error) {
+    return failure(error, '저축 포켓 개설에 실패했습니다.');
+  }
+}
+
+export async function transferPocketAction(_previous: ActionState, formData: FormData): Promise<ActionState> {
+  const pocketId = String(formData.get('pocketId') ?? '').trim();
+  const direction = String(formData.get('direction') ?? 'IN').trim() as 'IN' | 'OUT';
+  const amount = wholeAmount(formData.get('amount'));
+
+  if (!UUID.test(pocketId)) {
+    return { status: 'error', message: '포켓 통장 식별자가 올바르지 않습니다.' };
+  }
+  if (amount === null || BigInt(amount) < 1n) {
+    return { status: 'error', message: '1 WLD 이상의 이체 금액을 입력해 주세요.' };
+  }
+
+  try {
+    await mutate(`/api/v1/banking/pockets/${pocketId}/transfer`, {
+      body: {
+        direction,
+        amount: String(amount),
+        idempotencyKey: idempotencyKey(),
+      },
+    });
+    revalidatePath('/bank');
+    revalidatePath('/wallet');
+    const dirLabel = direction === 'IN' ? '포켓으로 입금' : '메인 계좌로 출금';
+    return { status: 'ok', message: `${groupDigits(amount)} WLD를 성공적으로 ${dirLabel}했습니다.` };
+  } catch (error) {
+    return failure(error, '포켓 자금 이체에 실패했습니다. 잔액을 확인해 주세요.');
+  }
+}
+
+export async function archivePocketAction(_previous: ActionState, formData: FormData): Promise<ActionState> {
+  const pocketId = String(formData.get('pocketId') ?? '').trim();
+  if (!UUID.test(pocketId)) {
+    return { status: 'error', message: '포켓 통장 식별자가 올바르지 않습니다.' };
+  }
+
+  try {
+    await mutate(`/api/v1/banking/pockets/${pocketId}/archive`, {
+      body: { idempotencyKey: idempotencyKey() },
+    });
+    revalidatePath('/bank');
+    revalidatePath('/wallet');
+    return { status: 'ok', message: '저축 포켓이 해지되었으며, 잔여 잔액이 메인 현금 계좌로 안전하게 복구되었습니다.' };
+  } catch (error) {
+    return failure(error, '저축 포켓 해지 처리에 실패했습니다.');
+  }
+}

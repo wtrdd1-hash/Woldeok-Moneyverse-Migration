@@ -11,6 +11,7 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { EnterButton } from './enter-button';
 import { SeasonHallOfFameTicker } from './hall-of-fame-ticker';
+import { SeasonRewardClaimBanner } from './season-reward-claim-banner';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,20 @@ interface SeasonEvent {
   readonly cost_wld: string;
   readonly points_per_entry: number;
   readonly ends_at: string | null;
+}
+
+interface CurrentSeasonStatus {
+  readonly seasonId: string;
+  readonly seasonName: string;
+  readonly startsAt: unknown;
+  readonly endsAt: unknown;
+  readonly lifecycleState: string;
+  readonly totalParticipants: number;
+  readonly myRank: number | null;
+  readonly myScore: number;
+  readonly myTier: string;
+  readonly tierRewardWld: number;
+  readonly tierTrophy: string | null;
 }
 
 interface LeaderboardEntry {
@@ -74,7 +89,11 @@ export default async function SeasonsPage({
   await requireMember();
   const { event: requested } = await searchParams;
 
-  const data = await apiOrNull<{ events: SeasonEvent[] }>('/api/v1/seasons/events');
+  const [data, currentStatus] = await Promise.all([
+    apiOrNull<{ events: SeasonEvent[] }>('/api/v1/seasons/events'),
+    apiOrNull<CurrentSeasonStatus>('/api/v1/seasons/current'),
+  ]);
+
   const events = data?.events ?? [];
   const selected = events.find((event) => event.event_id === requested) ?? events[0];
   const board = selected
@@ -88,6 +107,18 @@ export default async function SeasonsPage({
       <PageHeader eyebrow="COMMUNITY SEASON" title="시즌 소비 이벤트">
         WLD 소비와 점수는 게임 안에서만 사용됩니다. 기간 한정 시즌 이벤트에 참여하여 명예 순위와 보상을 쟁취하세요.
       </PageHeader>
+
+      {/* 시즌 랭킹 최종 보상 수령 배너 (정산된 보상이 있는 경우 상단 노출) */}
+      {currentStatus && (
+        <SeasonRewardClaimBanner
+          seasonId={currentStatus.seasonId}
+          seasonName={currentStatus.seasonName}
+          tierRewardWld={currentStatus.tierRewardWld}
+          tierTrophy={currentStatus.tierTrophy}
+          myTier={currentStatus.myTier}
+          myRank={currentStatus.myRank}
+        />
+      )}
 
       {/* 시즌 1: First Capital 명예의 전당 티커 & 아카이브 */}
       <SeasonHallOfFameTicker />

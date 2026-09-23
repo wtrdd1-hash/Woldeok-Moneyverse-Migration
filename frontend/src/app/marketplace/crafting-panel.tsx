@@ -16,6 +16,7 @@ import {
 import { groupDigits } from '@/lib/money';
 import { P0_CRAFTING_RECIPES, type CraftingRecipe } from './crafting-recipes';
 import type { MarketplaceHolding } from './marketplace';
+import { executeCraftingAction } from './crafting-actions';
 
 interface CraftingPanelProps {
   readonly holdings: readonly MarketplaceHolding[];
@@ -27,6 +28,7 @@ export function CraftingPanel({ holdings, userBalanceWld, onCraftSuccess }: Craf
   const [activeRecipe, setActiveRecipe] = useState<CraftingRecipe | null>(null);
   const [isCrafting, setIsCrafting] = useState(false);
   const [craftResult, setCraftResult] = useState<CraftingRecipe | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Helper to check user holding quantity of a material
   const getHeldQuantity = (code: string): number => {
@@ -48,20 +50,29 @@ export function CraftingPanel({ holdings, userBalanceWld, onCraftSuccess }: Craf
   const handleStartCrafting = (recipe: CraftingRecipe) => {
     setActiveRecipe(recipe);
     setCraftResult(null);
+    setErrorMessage(null);
   };
 
-  const handleExecuteCraft = () => {
+  const handleExecuteCraft = async () => {
     if (!activeRecipe) return;
     setIsCrafting(true);
+    setErrorMessage(null);
 
-    // Simulate crafting transaction with atomic progress
-    setTimeout(() => {
-      setIsCrafting(false);
-      setCraftResult(activeRecipe);
-      if (onCraftSuccess) {
-        onCraftSuccess(activeRecipe);
+    try {
+      const res = await executeCraftingAction(activeRecipe.id);
+      if (res.status === 'ok') {
+        setCraftResult(activeRecipe);
+        if (onCraftSuccess) {
+          onCraftSuccess(activeRecipe);
+        }
+      } else {
+        setErrorMessage(res.message ?? '제작 요청에 실패했습니다.');
       }
-    }, 1200);
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : '제작 요청 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsCrafting(false);
+    }
   };
 
   return (
@@ -102,8 +113,7 @@ export function CraftingPanel({ holdings, userBalanceWld, onCraftSuccess }: Craf
                   >
                     {recipe.kind} · {recipe.resultItem.rarity}
                   </Badge>
-                  {canCraft ? (
-                    <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  {canCraft ? (                    <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                       <Sparkles className="size-3.5" /> 제작 가능
                     </span>
                   ) : (
@@ -174,6 +184,7 @@ export function CraftingPanel({ holdings, userBalanceWld, onCraftSuccess }: Craf
           if (!open && !isCrafting) {
             setActiveRecipe(null);
             setCraftResult(null);
+            setErrorMessage(null);
           }
         }}
       >
@@ -189,6 +200,13 @@ export function CraftingPanel({ holdings, userBalanceWld, onCraftSuccess }: Craf
                 : '아래 재료와 수수료를 투입하여 제작을 진행합니다.'}
             </DialogDescription>
           </DialogHeader>
+
+          {errorMessage && (
+            <div className="rounded-lg bg-rose-500/10 border border-rose-500/30 p-3 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-2">
+              <AlertCircle className="size-4 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
 
           {craftResult ? (
             <div className="grid gap-4 py-4">
