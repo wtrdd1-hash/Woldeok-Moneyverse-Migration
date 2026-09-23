@@ -1,6 +1,6 @@
 ## v2026.09.23.395 — Space Property Tax & Foreclosure Auction Suite, Season Ranking & Hall of Fame Reward Settlement Engine APIs, Zero-Downtime Blue-Green Promotion, 1,069 Active Sessions 100% Preserved
 
-- Applied Branch: `main` (Release: `prod-26f1cef4-v395`, Exact Git SHA: `26f1cef4a1d7f6c38eb04a29a1b8cf441738c829`)
+- Applied Branch: `main` (Release: `prod-9d248585-v395`, Exact Git SHA: `9d248585e174b0dcff16353d260c6e001cbece6c`)
 - **Virtual City Spaces & Property Tax Municipal System (PERSONAL_SPACES_CITY_PROJECTS_SPEC)**:
   1. **Daily Fixed Property Tax & 100% Permanent Burn (`SINK_PROPERTY_TAX`)**:
      - `SPACE_ROOM_STARTER`: 10 WLD, `SPACE_STUDIO`: 50 WLD, `SPACE_GALLERY`: 150 WLD, `SPACE_OFFICE`: 250 WLD, `SPACE_PENTHOUSE`: 600 WLD, `SPACE_HQ`: 2,500 WLD.

@@ -1,6 +1,6 @@
 ## v2026.09.23.395 — 가상 도시 토지 부지 & 세무 구청 시스템(일일 부동산세 SINK_PROPERTY_TAX 100% 소각, 7일 유예 체납 공매 루프) 및 시즌 랭킹 & 명예의 전당 보상 분배 엔진 API 완비, 무중단 블루-그린 승격 및 1,069개 활성 세션 100% 보존
 
-- 적용 브랜치: `main` (릴리스: `prod-26f1cef4-v395`, Exact Git SHA: `26f1cef4a1d7f6c38eb04a29a1b8cf441738c829`)
+- 적용 브랜치: `main` (릴리스: `prod-9d248585-v395`, Exact Git SHA: `9d248585e174b0dcff16353d260c6e001cbece6c`)
 - **가상 도시 토지 부지 & 세무 구청 시스템 (PERSONAL_SPACES_CITY_PROJECTS_SPEC)**:
   1. **일일 정액 부동산세 보유세 체계 및 100% 영구 소각 (`SINK_PROPERTY_TAX`)**:
      - `SPACE_ROOM_STARTER`: 10 WLD, `SPACE_STUDIO`: 50 WLD, `SPACE_GALLERY`: 150 WLD, `SPACE_OFFICE`: 250 WLD, `SPACE_PENTHOUSE`: 600 WLD, `SPACE_HQ`: 2,500 WLD.
