@@ -3,8 +3,8 @@
 - **최종 갱신일:** 2026-09-23
 - **관리 주체:** Woldeok Moneyverse Core Development & Operations
 - **문서 상태:** 활성 (Active Memory)
-- **현재 프로덕션 릴리스:** `v2026.09.23.395` (`prod-1767bed1-v395`)
-- **PostgreSQL 활성 세션 상태:** **1,069개 (100% 무손실 보존)**
+- **현재 프로덕션 릴리스:** `v2026.09.23.396` (`prod-b7d4a78e-v396`)
+- **PostgreSQL 활성 세션 상태:** **1,068개 (100% 무손실 보존)**
 
 ---
 
@@ -41,23 +41,21 @@
 
 ---
 
-## 3. 📜 최신 릴리스 내역 (v2026.09.23.395)
+## 3. 📜 최신 릴리스 내역 (v2026.09.23.396)
 
-- **최종 갱신일시**: 2026-09-23 11:41:00 KST
-- **프로덕션 릴리스 버전**: `v2026.09.23.395` (릴리스 경로: `/srv/moneyverse-data/releases/prod-1767bed1-v395`)
-- **Exact Git SHA**: `1767bed1`
-- **PostgreSQL 활성 사용자 세션**: **1,069개 (100% 무손실 보존 실측 확인)**
+- **최종 갱신일시**: 2026-09-23 11:58:00 KST
+- **프로덕션 릴리스 버전**: `v2026.09.23.396` (릴리스 경로: `/srv/moneyverse-data/releases/prod-b7d4a78e-v396`)
+- **Exact Git SHA**: `b7d4a78e`
+- **PostgreSQL 활성 사용자 세션**: **1,068개 (100% 무손실 보존 실측 확인)**
 - **완료 작업 요약**:
-  1. **AI 위원회 (AI Council) 스코어보드 UI 한글화 및 Rationale 시각화**:
-     - `ai-status-card.tsx` 내 영문 도메인(`integrity`, `welfare`)을 한국어(`데이터 무결성`, `복지/소비`)로 100% 매핑.
-     - 원시 문자열 형태의 의결 로그(`council decision=agree;agree=jobs,welfare;...`)를 직관적인 판정 배지(만장일치 합의, 거부-VETO, 보류) 및 합의/거부/이견 도메인 태그 카드로 시각화하는 `CouncilRationaleBanner` 탑재.
-     - `exactOptionalPropertyTypes` 및 환경 독립적 KST 명시적 타임스탬프 포맷터 완비.
-  2. **AI Council Decision Rules 및 프롬프트 개선**:
-     - `backend/src/economy/economy-ai-review.ts`의 `SYSTEM_PROMPT` 보강으로 불필요한 `abstain`(보류) 남발 방지 및 명확한 `AGREE` / `VETO` 의결 판정 유도.
-  3. **가상 주식 10개 종목 확장 및 10원~1,000만 원 랜덤 가격 시딩**:
-     - `CHIPS`(53원), `WDG`(481원), `WDT`(2,169원), `WDM`(8,605원), `WDB`(69,994원), `MYUY`(266,654원), `WFIN`(667,623원), `DUCK`(1,613,562원), `CHIMU314`(5,221,236원), `SPACE`(8,991,585원) 확장 및 실시간 틱 연동 완료.
-  4. **AI 뉴스 5분 주기 무인 백그라운드 스케줄러 상시 가동**:
-     - 로컬 Ollama AI(`llama3.2:3b`)와 연동된 완전 자동 기사 발행 파이프라인 데몬 가동.
-  5. **전체 단위 테스트 1,760개 전수 100% PASS 및 무중단 블루-그린 승격**:
-     - `@moneyverse/contract` (23 tests), `@moneyverse/database` (7 tests), `@moneyverse/backend` (977 tests), `@moneyverse/frontend` (756 tests) 전수 통과.
-     - 1,069개 활성 세션 100% 보존 상태로 무중단 승격 완료.
+  1. **주식 포트폴리오 분석 UI 고도화 & 반응형 SVG 도넛 차트 탑재**:
+     - `PortfolioDonutChart` 신설: 10개 종목 자산 구성 비중을 원형 도넛 차트로 실시간 렌더링.
+     - 다중 세그먼트 스택 바 및 종목별 비중/평가액/원터치 리밸런싱 주문 연동 완비.
+  2. **10-Depth 실시간 호가창 뎁스 뷰 고도화 (`stock-orderbook.tsx`)**:
+     - 누적 볼륨(Cumulative Depth) 계산 및 매수/매도 호가 압력 게이지(Order Pressure Ratio) 시각화.
+     - 1원~1,000만 원 가격대 종목(CHIPS 53원 ~ SPACE 8,991,585원)의 틱 사이즈 단위 보정 및 정밀 WLD 포맷팅 적용.
+  3. **관리자 AI Council 가상 심의 시뮬레이터 (`scenario-lab/page.tsx`)**:
+     - 발행/소각/통화량 충격 파라미터 입력 시 듀얼 로컬 AI(Llama 3.2 3B & Gemma 3 1B)의 4대 도메인(무결성·거시·직업·복지) 관점 교차 의결 판정(Agree/Veto/Abstain) 및 권고안을 실시간 산출하는 시뮬레이터 카드 탑재.
+  4. **전체 단위 테스트 1,775개 100% PASS 및 무중단 블루-그린 승격**:
+     - `@moneyverse/contract` (23 tests), `@moneyverse/database` (7 tests), `@moneyverse/backend` (989 tests), `@moneyverse/frontend` (756 tests) 전수 통과.
+     - 1,068개 활성 세션 100% 보존 상태로 무중단 승격 완료.
