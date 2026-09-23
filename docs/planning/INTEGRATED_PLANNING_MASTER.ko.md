@@ -1,10 +1,21 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.09.23.406
+> 현재 원장 버전: v2026.09.24.409
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
+
+## v2026.09.24.409 — 2026-09-24
+- 시작/중간 `origin/main`은 모두 `b8bfc22ddff09f5ccd7632024deac447ff159ff6`로 동일했다. 동시 main 변경 없음.
+- API 점검 결과를 기획 권위에 반영했다. 현재 기계 계약은 mobile 179 endpoint이며, complete spec은 backend 57 controller / 335 endpoint / mobile 179, 구형 endpoint catalog는 mobile 139를 기록한다. v402의 58 controller file / 361 HTTP decorator도 별도 탐색 수치로 존재한다.
+- **G409-01 / P0:** 최신 main의 exact-SHA API contract check가 아직 수용 가능한 완료 증거를 갖지 못했다. 직전 required runtime-check가 API 검증 완료 전에 ESLint 오류로 실패했으므로 Production blocker로 유지한다.
+- **G409-02 / P0:** backend 전체·mobile BFF·admin·internal API 인벤토리는 generated method+path+operationId semantic inventory에서만 권위를 얻는다. 수동 집계 수치를 권위로 사용하지 않는다.
+- **G409-03 / P1:** mobile contract, complete spec, endpoint catalog, schema/runtime reference가 동일 generated source/version/count를 사용하도록 자동 drift gate를 요구한다.
+- **G409-04 / P0:** 돈/원장을 바꾸는 mutation(wallet/bank/stocks/work/market/casino/treasury)을 인증·인가·CSRF·recent reauth·validation·idempotency·concurrency·atomicity·negative test 우선순위 1군으로 재지정했다.
+- **G409-05 / P0:** 웹/모바일 UI 액션과 실제 API method/path의 1:1 정합, 죽은 버튼/404/mock 장애은폐/private backend 직접호출 금지를 수용조건으로 추가했다.
+- 구현 순서를 CI gate 복구 → generated contract → 문서/인벤토리 정합 → 공통 보안 → 고위험 mutation → realtime/chat → mobile/web BFF → admin → 자동 drift 방지 → Test exact-SHA E2E → 무중단 Production으로 재배치했다.
+- 영/한 권위 문서, delta, worklog, update를 같은 v409 회차로 동기화했다. 이번 회차는 PLANNING이며 API 런타임 수정/Test/Production 완료를 주장하지 않는다.
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
 
 ## v2026.09.23.406 — 2026-09-23
