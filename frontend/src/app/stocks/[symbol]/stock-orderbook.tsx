@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Scale, Layers, Check } from 'lucide-react';
+import { Scale, Layers, TrendingUp, TrendingDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
@@ -18,11 +18,16 @@ export interface OrderbookRow {
   readonly price: string;
   readonly volume: number;
   readonly percent: number;
+  readonly cumulativeVolume: number;
 }
 
 export interface OrderbookData {
   readonly asks: OrderbookRow[];
   readonly bids: OrderbookRow[];
+  readonly totalAskVolume: number;
+  readonly totalBidVolume: number;
+  readonly bidRatio: number;
+  readonly askRatio: number;
   readonly bestAsk: number;
   readonly bestBid: number;
   readonly spread: number;
@@ -36,29 +41,46 @@ export function computeOrderbook(currentPriceStr: string, depth: 5 | 10 = 5): Or
   const askSteps = depth === 5 ? [5, 4, 3, 2, 1] : [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
   const bidSteps = depth === 5 ? [1, 2, 3, 4, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-  // 매도호가 (Asks: 현재가보다 높은 호가, 위에서 아래로 내림차순 정렬)
-  const asks: OrderbookRow[] = askSteps.map((step) => {
-    const askPrice = Math.round(priceNum * (1 + (step * 0.005)));
-    const volume = Math.round(50 + (step * 35) + (Math.sin(step) * 20));
+  // 종목 가격대에 따른 호가 단위(틱 사이즈) 가중치 보정
+  const tickStepPct = priceNum > 1_000_000 ? 0.002 : priceNum > 100_000 ? 0.003 : 0.005;
+
+  let cumAsk = 0;
+  const rawAsks = askSteps.map((step) => {
+    const askPrice = Math.max(1, Math.round(priceNum * (1 + (step * tickStepPct))));
+    const volume = Math.round(50 + (step * 35) + (Math.sin(step * 1.5) * 20));
+    return { step, price: askPrice.toString(), volume };
+  });
+
+  const asks: OrderbookRow[] = rawAsks.map((item) => {
+    cumAsk += item.volume;
     return {
-      step,
-      price: askPrice.toString(),
-      volume,
-      percent: Math.min(100, Math.round((volume / 350) * 100)),
+      ...item,
+      percent: Math.min(100, Math.round((item.volume / 350) * 100)),
+      cumulativeVolume: cumAsk,
     };
   });
 
-  // 매수호가 (Bids: 현재가보다 낮은 호가, 위에서 아래로 내림차순 정렬)
-  const bids: OrderbookRow[] = bidSteps.map((step) => {
-    const bidPrice = Math.max(1, Math.round(priceNum * (1 - (step * 0.005))));
-    const volume = Math.round(45 + (step * 38) + (Math.cos(step) * 25));
+  let cumBid = 0;
+  const rawBids = bidSteps.map((step) => {
+    const bidPrice = Math.max(1, Math.round(priceNum * (1 - (step * tickStepPct))));
+    const volume = Math.round(45 + (step * 38) + (Math.cos(step * 1.5) * 25));
+    return { step, price: bidPrice.toString(), volume };
+  });
+
+  const bids: OrderbookRow[] = rawBids.map((item) => {
+    cumBid += item.volume;
     return {
-      step,
-      price: bidPrice.toString(),
-      volume,
-      percent: Math.min(100, Math.round((volume / 350) * 100)),
+      ...item,
+      percent: Math.min(100, Math.round((item.volume / 350) * 100)),
+      cumulativeVolume: cumBid,
     };
   });
+
+  const totalAskVolume = asks.reduce((sum, a) => sum + a.volume, 0);
+  const totalBidVolume = bids.reduce((sum, b) => sum + b.volume, 0);
+  const grandTotal = totalAskVolume + totalBidVolume || 1;
+  const bidRatio = Math.round((totalBidVolume / grandTotal) * 100);
+  const askRatio = 100 - bidRatio;
 
   const bestAsk = Number.parseInt(asks[asks.length - 1]?.price ?? currentPriceStr, 10);
   const bestBid = Number.parseInt(bids[0]?.price ?? currentPriceStr, 10);
@@ -68,6 +90,10 @@ export function computeOrderbook(currentPriceStr: string, depth: 5 | 10 = 5): Or
   return {
     asks,
     bids,
+    totalAskVolume,
+    totalBidVolume,
+    bidRatio,
+    askRatio,
     bestAsk,
     bestBid,
     spread,
@@ -81,7 +107,7 @@ export function StockOrderbook({
   onSelectPrice,
 }: StockOrderbookProps) {
   const [depth, setDepth] = useState<5 | 10>(5);
-  const { asks, bids, spread, spreadBps } = computeOrderbook(currentPrice, depth);
+  const { asks, bids, spread, spreadBps, totalAskVolume, totalBidVolume, bidRatio, askRatio } = computeOrderbook(currentPrice, depth);
 
   return (
     <Card className="border-border/80 bg-card/60 shadow-sm overflow-hidden">
@@ -120,7 +146,7 @@ export function StockOrderbook({
         </div>
       </CardHeader>
 
-      <CardContent className="p-2 space-y-1 text-xs font-mono select-none">
+      <CardContent className="p-2 space-y-1.5 text-xs font-mono select-none">
         {/* 매도호가 리스트 (Asks, Rose 계열) */}
         <div className="space-y-0.5">
           {asks.map((ask) => (
@@ -140,15 +166,16 @@ export function StockOrderbook({
                 <span className="text-[10px] opacity-70">+{ask.step * 0.5}%</span>
                 <span>{groupDigits(ask.price)}</span>
               </span>
-              <span className="relative z-10 text-muted-foreground group-hover:text-foreground font-normal">
-                {groupDigits(ask.volume.toString())} {isEn ? 'sh' : '주'}
+              <span className="relative z-10 text-muted-foreground group-hover:text-foreground font-normal flex items-center gap-1">
+                <span>{groupDigits(ask.volume.toString())}</span>
+                <span className="text-[10px] opacity-70">{isEn ? 'sh' : '주'}</span>
               </span>
             </button>
           ))}
         </div>
 
         {/* 현재 체결가 중앙 바 */}
-        <div className="flex items-center justify-between px-3 py-2 my-1 rounded-lg bg-primary/10 border border-primary/30 font-bold">
+        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-primary/10 border border-primary/30 font-bold">
           <span className="text-primary flex items-center gap-1">
             <span>{isEn ? 'Current Price' : '현재 체결가'}</span>
           </span>
@@ -176,11 +203,34 @@ export function StockOrderbook({
                 <span className="text-[10px] opacity-70">-{bid.step * 0.5}%</span>
                 <span>{groupDigits(bid.price)}</span>
               </span>
-              <span className="relative z-10 text-muted-foreground group-hover:text-foreground font-normal">
-                {groupDigits(bid.volume.toString())} {isEn ? 'sh' : '주'}
+              <span className="relative z-10 text-muted-foreground group-hover:text-foreground font-normal flex items-center gap-1">
+                <span>{groupDigits(bid.volume.toString())}</span>
+                <span className="text-[10px] opacity-70">{isEn ? 'sh' : '주'}</span>
               </span>
             </button>
           ))}
+        </div>
+
+        {/* 호가 잔량 매수/매도 압력 비율 바 (Order Pressure Ratio) */}
+        <div className="pt-2 px-1 space-y-1">
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+            <span className="text-rose-600 dark:text-rose-400 font-semibold">
+              {isEn ? 'Ask' : '매도'} {askRatio}% ({groupDigits(totalAskVolume.toString())})
+            </span>
+            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+              {isEn ? 'Bid' : '매수'} {bidRatio}% ({groupDigits(totalBidVolume.toString())})
+            </span>
+          </div>
+          <div className="h-1.5 w-full rounded-full bg-muted/60 overflow-hidden flex">
+            <div
+              className="h-full bg-rose-500 transition-all duration-500"
+              style={{ width: `${askRatio}%` }}
+            />
+            <div
+              className="h-full bg-emerald-500 transition-all duration-500"
+              style={{ width: `${bidRatio}%` }}
+            />
+          </div>
         </div>
       </CardContent>
     </Card>

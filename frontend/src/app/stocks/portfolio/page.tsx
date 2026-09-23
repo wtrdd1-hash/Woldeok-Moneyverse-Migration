@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, PieChart, ExternalLink, ShieldCheck } from 'lucide-react';
+import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, PieChart, ExternalLink, ShieldCheck, Activity } from 'lucide-react';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
@@ -13,6 +13,7 @@ import { formatMoment, groupDigits } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
 import { analyzePortfolio, type PortfolioHoldingInput } from './analysis';
+import { PortfolioDonutChart } from './portfolio-donut-chart';
 import { TradeDialog } from '../trade-dialog';
 
 export const dynamic = 'force-dynamic';
@@ -76,7 +77,7 @@ export default async function PortfolioAnalysisPage() {
             <p className="text-xs sm:text-sm text-muted-foreground">
               {isEn
                 ? 'Review valuation, allocation and unrealized gain/loss for your game-only virtual-stock holdings.'
-                : '게임 전용 가상 주식 보유량의 평가금액, 자산 구성 비중과 실시간 미실현 손익을 정밀 분석합니다.'}
+                : '게임 전용 가상 주식 10개 종목의 보유량, 자산 구성 비중과 실시간 미실현 손익을 정밀 분석합니다.'}
             </p>
             <Button asChild variant="outline" size="sm" className="min-h-9 text-xs font-semibold">
               <Link href="/stocks">
@@ -101,7 +102,7 @@ export default async function PortfolioAnalysisPage() {
           </div>
         ) : (
           <>
-            {/* 1. 핀테크 헤어로 요약 메트릭 카드 3종 */}
+            {/* 1. 핀테크 요약 메트릭 카드 3종 */}
             <section className="grid gap-3.5 sm:grid-cols-3" aria-label={isEn ? 'Portfolio summary' : '포트폴리오 요약'}>
               <Card className="border-border/80 bg-card/70 shadow-xs">
                 <CardHeader className="p-4 sm:p-5 pb-2">
@@ -113,7 +114,7 @@ export default async function PortfolioAnalysisPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="px-4 sm:px-5 pb-4 pt-0 text-xs text-muted-foreground font-mono">
-                  {isEn ? 'Based on latest execution prices' : '최근 체결가 기준 실시간 평가'}
+                  {isEn ? 'Based on latest execution prices' : '10개 가상 종목 실시간 평가 합계'}
                 </CardContent>
               </Card>
 
@@ -169,14 +170,14 @@ export default async function PortfolioAnalysisPage() {
               </Card>
             </section>
 
-            {/* 2. 자산 배분 비주얼 스택 바 (Asset Allocation Multi-Segment Stack Bar) */}
+            {/* 2. 자산 배분 비주얼 도넛 차트 & 스택 바 */}
             <Card className="border-border/80 bg-card/60 shadow-xs overflow-hidden">
               <CardHeader className="p-4 sm:p-5 pb-3 border-b border-border/60 bg-muted/15">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <PieChart className="size-4 text-primary" />
                     <CardTitle className="text-sm font-bold">
-                      {isEn ? 'Asset Allocation' : '포트폴리오 자산 배분 비중'}
+                      {isEn ? 'Asset Allocation & Portfolio Weight' : '자산 배분 도넛 차트 및 종목별 비중'}
                     </CardTitle>
                   </div>
                   <Badge variant="outline" className="font-mono text-[11px]">
@@ -185,8 +186,15 @@ export default async function PortfolioAnalysisPage() {
                 </div>
               </CardHeader>
               <CardContent className="p-4 sm:p-5 space-y-4">
+                <PortfolioDonutChart
+                  holdings={analysis.holdings}
+                  totalMarketValue={analysis.total_market_value}
+                  totalGainLossBps={analysis.total_gain_loss_bps}
+                  isEn={isEn}
+                />
+
                 {/* 다중 세그먼트 가로 스택 프로그레스 바 */}
-                <div className="h-3.5 w-full rounded-full bg-muted/60 overflow-hidden flex shadow-inner">
+                <div className="h-3 w-full rounded-full bg-muted/60 overflow-hidden flex shadow-inner">
                   {analysis.holdings.map((holding) => {
                     const widthPct = Math.min(100, Math.max(0, Number(holding.allocation_bps) / 100));
                     if (widthPct <= 0) return null;
@@ -200,20 +208,6 @@ export default async function PortfolioAnalysisPage() {
                     );
                   })}
                 </div>
-
-                {/* 범례 칩 목록 (Legend Chips) */}
-                <div className="flex flex-wrap gap-2.5 pt-1">
-                  {analysis.holdings.map((holding) => (
-                    <div
-                      key={`legend-${holding.stock_id}`}
-                      className="inline-flex items-center gap-1.5 rounded-lg border border-border/60 bg-card px-2.5 py-1 text-xs font-mono"
-                    >
-                      <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: holding.color }} />
-                      <span className="font-bold text-foreground">{holding.symbol}</span>
-                      <span className="text-muted-foreground">{signedPercent(holding.allocation_bps)}</span>
-                    </div>
-                  ))}
-                </div>
               </CardContent>
             </Card>
 
@@ -221,7 +215,7 @@ export default async function PortfolioAnalysisPage() {
             <Card className="border-border/80 bg-card/60 shadow-xs">
               <CardHeader className="p-4 sm:p-5 pb-3 border-b border-border/60 bg-muted/15">
                 <CardTitle className="text-sm font-bold">
-                  {isEn ? 'Holding Positions & Quick Rebalancing' : '보유 종목 상세 및 원터치 리밸런싱'}
+                  {isEn ? 'Holding Positions & Quick Rebalancing' : '10대 가상 종목 보유 상세 및 원터치 리밸런싱'}
                 </CardTitle>
                 <CardDescription className="text-xs text-muted-foreground">
                   {isEn
@@ -444,4 +438,3 @@ function HaltReceiptsCard({
     </Card>
   );
 }
-
