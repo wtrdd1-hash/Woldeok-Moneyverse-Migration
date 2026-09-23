@@ -2,11 +2,24 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.396
+> Current integrated version: v2026.09.23.397
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Mandatory feature/API implementation parity — v2026.09.23.397 (2026-09-23)
+
+- **P0 implementation invariant — every implemented feature ships with its API surface:** any new or materially changed user/admin/system feature that requires server state, persistence, authorization, cross-client use, automation, or backend business logic MUST implement the corresponding API in the same workstream. A UI-only implementation is incomplete unless the feature is intentionally and explicitly client-only.
+- **API contract completeness:** each feature API must define method/path, authentication and authorization, request/response schema, validation bounds, stable error model, pagination/filtering where relevant, idempotency for retryable mutations, rate/resource limits, concurrency semantics, audit/telemetry requirements, and version/deprecation behavior.
+- **Frontend/mobile parity:** web and mobile clients must consume the same authoritative business contract where practical. Client code must not duplicate server business rules that should be enforced centrally.
+- **Security parity:** API authorization, object-level access control, CSRF requirements for browser mutations, recent reauthentication/step-up where required, input allowlists, abuse/resource controls, and append-only audit requirements are part of feature completion, not follow-up hardening.
+- **Persistence and failure semantics:** any server-backed feature must specify durable state, transaction boundaries, rollback/compensation behavior, duplicate/retry handling, partial-failure behavior, and recovery semantics before it is accepted as complete.
+- **Documentation parity:** the authoritative planning spec, OpenAPI/mobile API contracts, developer-facing API documentation, and EN/KO documentation must be updated together with implementation.
+- **QA gate:** feature acceptance requires positive and negative API tests, authorization tests, contract/schema checks, idempotency/concurrency tests where applicable, and end-to-end client-to-API verification on the exact candidate SHA.
+- **Release gate:** a feature that is visible in UI but lacks its required backend/API contract, tests, or documentation is **not complete and not eligible for Production promotion**.
+- **Exception rule:** a feature may be marked client-only only when it has no server state, no privileged decision, no shared persistence, no cross-device synchronization requirement, and no security-sensitive business rule. The exception must be explicit in the planning record.
+- **Scope truth:** v397 is a planning/contract update. It does not by itself claim that every historical feature has already been retrofitted with complete API coverage.
 
 ## Mandatory authentication/session continuity — v2026.09.23.396 (2026-09-23)
 
