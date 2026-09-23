@@ -1,11 +1,20 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.23.398
+> Current ledger version: v2026.09.23.399
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.23.399 — 2026-09-23
+- Start baseline: `origin/main=4812a99b0a78da736e477d0a3a2f02ed4ea66283`; mid-work recheck: `origin/main=f0efc448a30a5b67071956b0faa6742a8427d2ea`. The two new main commits do not overlap the economy planning files, so this branch is rebased onto the latest main.
+- Revalidated the existing 11,749-record deduplicated economy research corpus and added current 2026 EVE Monthly Economic Reports plus AI Economist/IMF policy-simulation literature to the review.
+- G399-01 / P0: instant-complete/instant-settle work can create excessive WLD issuance per unit time even with repeat decay. Unlimited ordinary participation remains the product default, but every paid job requires a server-authoritative duration or verification boundary.
+- G399-02 / P1: economy control must not rely on one faucet/sink ratio; money supply, price indices, wealth concentration, income distribution, and new-user core-basket affordability are co-equal signals.
+- G399-03 / P1: automatic controls follow exploit stop → concentrated-source decay → job diversification → high-wealth prestige sinks → bounded issuance factor → temporary reward window, with versioning, reversibility, and auditability.
+- New canonical detailed spec: `ECONOMY_MONETARY_VELOCITY_SPEC` EN/KO. This cycle does not claim runtime implementation, Test completion, or Production deployment.
+- EN/KO parity complete.
 
 ## v2026.09.23.398 — 2026-09-23
 - Start/mid-work baseline: `origin/main=4812a99b0a78da736e477d0a3a2f02ed4ea66283`.

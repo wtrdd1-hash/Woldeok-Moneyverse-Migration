@@ -1,6 +1,6 @@
 # Woldeok Moneyverse — Jobs & Profession Mastery Specification
 
-> Version: v2026.09.23.398
+> Version: v2026.09.23.399
 > Status: Living implementation-oriented product specification
 > Date: 2026-09-23
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `SEASON_SYSTEM_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `LIMIT_CONSISTENCY_IMPLEMENTATION_SPEC.md`, `BUSINESS_OPERATIONS_SUPPLY_CHAIN_SPEC.md`
@@ -504,3 +504,11 @@ The displayed explanatory sentence, daily reset timestamp, weekly reset timestam
 - correct rendering after restart/deploy without logging users out;
 - correct EN/KO copy;
 - responsive desktop/mobile layout without truncating the remaining amount or reset context.
+
+## 24. WLD issuance-rate contract
+
+Unlimited job participation remains the default, but a paid assignment may not mint unbounded WLD through instant click repetition. Every paid template has server-authoritative `expected_work_seconds` and `settlement_mode`, and cannot settle before `eligible_submit_at`.
+
+Settlement uses one of `ACTIVE`, `ASYNC`, `VERIFY`, or `BATCH`. Client timers are display-only. The assignment captures its policy version and reward parameters at acceptance, and retries or server restarts must never produce a second payout.
+
+When issuance pressure rises, prefer repeat decay, source diversification, high-wealth hard sinks, and a bounded issuance factor over globally disabling jobs. Validate money supply, price indices, wealth concentration, and new-user core-basket affordability together. See `ECONOMY_MONETARY_VELOCITY_SPEC.md` for the canonical detailed contract.

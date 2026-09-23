@@ -1,6 +1,6 @@
 # 월덕 머니버스 — 작업·직업 숙련도 기획 명세서
 
-> 버전: v2026.09.23.398
+> 버전: v2026.09.23.399
 > 상태: 구현 지향형 Living 제품 기획 명세
 > 기준일: 2026-09-23
 > 상위 문서: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `SEASON_SYSTEM_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `LIMIT_CONSISTENCY_IMPLEMENTATION_SPEC.md`, `BUSINESS_OPERATIONS_SUPPLY_CHAIN_SPEC.md`
@@ -201,3 +201,11 @@ QA는 무제한 -> 유한 -> 완화 -> 무제한 전환, 자정/reset 경계, �
 - 재시작/배포 뒤 로그인 유지 상태에서 올바른 표시
 - 영/한 문구 정합
 - 데스크톱/모바일 반응형에서 남은 금액·초기화 문맥 잘림 없음
+
+## 24. 단위시간당 WLD 발행속도 계약
+
+직업 참여 무제한 원칙은 유지하지만, 유상 작업은 즉시 클릭 반복으로 무한 WLD를 발행할 수 없다. 각 템플릿은 서버 권위 `expected_work_seconds`와 `settlement_mode`를 가지며, `eligible_submit_at` 이전에는 정산하지 않는다.
+
+정산 모드는 `ACTIVE`, `ASYNC`, `VERIFY`, `BATCH` 중 하나를 사용한다. 클라이언트 타이머는 표시용이며 정산 권한이 없다. 작업 수락 시 정책버전과 보상 파라미터를 캡처하고, 재시도·서버 재시작 뒤에도 같은 과제는 한 번만 지급한다.
+
+경제 압력이 높을 때는 전역 작업금지보다 반복감쇠, 발행원 분산, 고자산 hard sink, 제한형 issuance factor를 먼저 사용한다. 통화량·가격지수·자산집중·신규유저 핵심바스켓 구매력까지 함께 검증한다. 상세 계약은 `ECONOMY_MONETARY_VELOCITY_SPEC.ko.md`를 따른다.
