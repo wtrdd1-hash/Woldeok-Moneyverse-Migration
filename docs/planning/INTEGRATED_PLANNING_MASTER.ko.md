@@ -1,11 +1,21 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.09.23.397
+> 현재 원장 버전: v2026.09.23.398
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.09.23.398 — 2026-09-23
+- 시작/작업 중간 기준: `origin/main=4812a99b0a78da736e477d0a3a2f02ed4ea66283`.
+- P0 결정: 상세 API 문서는 머니버스 공개 웹에서 의도적으로 노출하지 않고 GitHub 문서에서만 관리한다.
+- 공개 Developer Portal/API Center에서 endpoint catalog, OpenAPI/Swagger 다운로드, request/response schema, 코드 예제, live tester, 관리자·경제·권한 API 상세를 제거해야 한다.
+- 정보노출 축소는 인증·인가를 대체하지 않는다. 모든 API는 method/path/schema가 알려졌다고 가정하고 기존 서버 보안통제를 유지한다.
+- 공개 build에서 API 문서 artifact, route inventory, source-map 운영정보, secret을 검사하고 승격을 차단하는 gate를 추가했다.
+- 상세 영/한 권위 문서: `API_DISCLOSURE_SECURITY_SPEC`.
+- 경계 명시: public GitHub 저장소는 여전히 공개 정보이며 더 강한 기밀성은 private/access-controlled 저장소가 필요하다.
+- 기획/문서 전용이며 운영 portal 제거 완료를 주장하지 않는다.
 
 ## v2026.09.23.397 — 2026-09-23
 - 기준: `origin/main=0e46f1eac272c42aa929947b79c0b0d2ccbd5454`.
