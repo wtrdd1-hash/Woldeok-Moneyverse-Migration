@@ -8,6 +8,19 @@
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
 
+## API 계약 권위 복구 및 구현 우선순위 재지정 — v2026.09.24.409 (2026-09-24)
+
+- **현재 API 인벤토리 드리프트를 P0 거버넌스 결함으로 승격:** 기계 판독 모바일 계약은 179개 endpoint를 포함하지만, 모바일 전체 명세는 backend 57 controller / 335 endpoint / mobile 179 endpoint를 기록하고, 구형 endpoint catalog는 mobile 139개를 기록한다. v402 소스 탐색의 58 controller file / 361 HTTP decorator 수치도 별도 기준으로 존재한다. 이 수치들을 동일 계산으로 간주하지 않으며 generated method+path semantic inventory만 현재 권위를 확정할 수 있다.
+- **G409-01 / P0 — exact-SHA contract gate 미확정:** 최신 main 기준 직전 required runtime-check는 API 계약 검증 완료 전에 ESLint 오류로 실패했다. 따라서 현재 main API 계약이 end-to-end로 통과했다고 주장하지 않는다. 필수 게이트 복구 전 Production 승격 금지다.
+- **G409-02 / P0 — generated contract를 유일한 인벤토리 기준으로 강제:** backend source/OpenAPI에서 method+path+operationId를 생성하고, 중복·alias·BFF mapping을 분리한 뒤 backend 전체/모바일 공개/BFF/admin/internal 범주를 각각 계산한다. 수동 endpoint 숫자는 generated artifact에서 파생되어야 한다.
+- **G409-03 / P1 — 문서 자동 정합:** `mobile-api-contract.json`, complete spec, endpoint catalog, schema reference, runtime contract의 버전·endpoint 수·method/path를 같은 생성 파이프라인에서 검증한다. 139/179/335/361처럼 서로 다른 역사 숫자가 현재 권위 문서에 혼재하면 contract check 실패로 처리한다.
+- **G409-04 / P0 — 고위험 mutation 우선 검증:** wallet transfer, bank movement/loan/bond, stock order, work reward/claim, marketplace purchase/tax/sink, casino play/limit, treasury/admin 경제 변경을 최우선으로 인증·인가·CSRF·recent reauth·DTO validation·멱등성·동시성·원장 원자성·negative test까지 검증한다.
+- **G409-05 / P0 — 클라이언트/API 정합 완료 조건:** 웹과 모바일에서 노출되는 모든 서버 기반 액션은 실제 API method/path와 연결되어야 하며 죽은 버튼, 404 route, mock fallback, private backend 직접호출을 금지한다. 모바일은 `/app-api/v1` BFF를 권위 경로로 유지한다.
+- **재지정 구현 순서:** (0) CI required gate 복구 → (1) exact-SHA generated contract 생성/검증 → (2) API 인벤토리·문서 정합 → (3) 인증/인가/CSRF/reauth 공통 보안 → (4) 돈·원장 mutation → (5) 주식/실시간/채팅 신뢰성 → (6) 모바일·웹 BFF parity → (7) 관리자 API → (8) 자동 문서/버전 drift 방지 → (9) Test exact-SHA E2E → (10) 세션 연속성 포함 무중단 Production 승격.
+- **릴리스 게이트:** 단계 0~9의 blocker가 하나라도 열려 있으면 Production 승격 금지. endpoint 개수 일치만으로 수용하지 않고 method/path/schema/auth/error/idempotency/concurrency와 실제 Test E2E 증거가 필요하다.
+- **상세 델타:** [deltas/v2026.09.24.409.ko.md](deltas/v2026.09.24.409.ko.md).
+- **범위 사실:** v409는 기획/문서 변경이다. API 코드 수정, Test 검증, Production 배포 완료를 주장하지 않는다.
+
 ## 6대 도메인 기획 결함 보완 및 실시간/금융/보안 아키텍처 강제 계약 — v2026.09.23.406 (2026-09-23)
 
 - **P0 LOB 웹소켓 단조 시퀀스 갭 복구 (주식):** 모든 호가 및 체결 틱 브로드캐스트 이벤트는 단조 증가 `sequence_id`를 포함해야 하며, 클라이언트는 `incoming_seq > last_seq + 1` 갭 감지 시 로컬 호가창을 즉시 파기하고 REST Full Snapshot으로 자동 재동기화(Auto Re-sync)한다.
