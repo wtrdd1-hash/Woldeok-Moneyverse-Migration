@@ -61,10 +61,9 @@ export class SaveAiNewsSettingsDto {
   @MaxLength(512)
   readonly apiKey?: string;
 
-  @ApiProperty({ required: false, format: 'uuid' })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid', description: 'Caller-owned retry key; reuse it for the same command after a timeout' })
   @IsUUID()
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey!: string;
 }
 
 export class GenerateAiNewsDto {
@@ -74,10 +73,9 @@ export class GenerateAiNewsDto {
   @MaxLength(2000)
   readonly prompt?: string;
 
-  @ApiProperty({ required: false, format: 'uuid' })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid', description: 'Caller-owned retry key; reuse it for the same command after a timeout' })
   @IsUUID()
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey!: string;
 }
 
 export class AiNewsScenarioEffectDto {
@@ -124,17 +122,15 @@ export class PublishAiNewsScenarioDto {
   @MaxLength(2000)
   readonly body?: string;
 
-  @ApiProperty({ required: false, format: 'uuid' })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid', description: 'Caller-owned retry key; reuse it for the same command after a timeout' })
   @IsUUID()
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey!: string;
 }
 
 export class DiscardAiNewsScenarioDto {
-  @ApiProperty({ required: false, format: 'uuid' })
-  @IsOptional()
+  @ApiProperty({ format: 'uuid', description: 'Caller-owned retry key; reuse it for the same command after a timeout' })
   @IsUUID()
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey!: string;
 }
 
 @ApiTags('admin')

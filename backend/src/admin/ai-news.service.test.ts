@@ -276,14 +276,14 @@ describe('AiNewsService.begin', () => {
     } as Partial<AiNewsRepository>);
     const caller = vi.fn();
     const service = new AiNewsService(repository, SEALING, caller);
-    await expect(service.begin({ actorUserId: ACTOR })).rejects.toMatchObject({ code: 'ai_news_key_missing' });
+    await expect(service.begin({ actorUserId: ACTOR, idempotencyKey: '22222222-2222-4222-8222-222222222222' })).rejects.toMatchObject({ code: 'ai_news_key_missing' });
     expect(repository.beginRun).not.toHaveBeenCalled();
     expect(caller).not.toHaveBeenCalled();
   });
 
   it('refuses when the stored key was sealed under a key this deployment does not hold', async () => {
     const service = new AiNewsService(fakeRepository(), { keyId: 'other', key: Buffer.alloc(32, 1) }, vi.fn());
-    await expect(service.begin({ actorUserId: ACTOR })).rejects.toMatchObject({ code: 'ai_news_sealing_unavailable' });
+    await expect(service.begin({ actorUserId: ACTOR, idempotencyKey: '22222222-2222-4222-8222-222222222222' })).rejects.toMatchObject({ code: 'ai_news_sealing_unavailable' });
   });
 
   it('answers with the run and calls the model after, so no gateway is waiting on it', async () => {
@@ -326,7 +326,7 @@ describe('AiNewsService.begin', () => {
     };
     const repository = fakeRepository();
     const service = new AiNewsService(repository, SEALING, caller);
-    await service.begin({ actorUserId: ACTOR });
+    await service.begin({ actorUserId: ACTOR, idempotencyKey: '22222222-2222-4222-8222-222222222222' });
     await settled(repository);
 
     expect(repository.createBatch).not.toHaveBeenCalled();
@@ -342,7 +342,7 @@ describe('AiNewsService.begin', () => {
     } as Partial<AiNewsRepository>);
     const caller = vi.fn();
     const service = new AiNewsService(repository, SEALING, caller);
-    await service.begin({ actorUserId: ACTOR });
+    await service.begin({ actorUserId: ACTOR, idempotencyKey: '22222222-2222-4222-8222-222222222222' });
     expect(caller).not.toHaveBeenCalled();
     expect(repository.latestRun).toHaveBeenCalledWith(ACTOR);
   });
@@ -352,7 +352,7 @@ describe('AiNewsService.saveSettings', () => {
   it('seals the key and keeps only its last four characters in the clear', async () => {
     const repository = fakeRepository();
     const service = new AiNewsService(repository, SEALING, vi.fn());
-    await service.saveSettings({ actorUserId: ACTOR, apiBaseUrl: 'https://api.example', model: 'm', apiKey: 'sk-ant-secret-9876' });
+    await service.saveSettings({ actorUserId: ACTOR, apiBaseUrl: 'https://api.example', model: 'm', apiKey: 'sk-ant-secret-9876', idempotencyKey: '22222222-2222-4222-8222-222222222222' });
     const saved = (repository.saveSettings as ReturnType<typeof vi.fn>).mock.calls[0]?.[0] as {
       apiKeySealed: string | null; apiKeyKeyId: string | null; apiKeyHint: string | null;
     };
@@ -364,7 +364,7 @@ describe('AiNewsService.saveSettings', () => {
   it('sends no key at all when the field was left empty, so the stored one stays', async () => {
     const repository = fakeRepository();
     const service = new AiNewsService(repository, SEALING, vi.fn());
-    await service.saveSettings({ actorUserId: ACTOR, apiBaseUrl: 'https://api.example', model: 'm', apiKey: '' });
+    await service.saveSettings({ actorUserId: ACTOR, apiBaseUrl: 'https://api.example', model: 'm', apiKey: '', idempotencyKey: '22222222-2222-4222-8222-222222222222' });
     const saved = (repository.saveSettings as ReturnType<typeof vi.fn>).mock.calls[0]?.[0] as { apiKeySealed: string | null };
     expect(saved.apiKeySealed).toBeNull();
   });
@@ -372,7 +372,7 @@ describe('AiNewsService.saveSettings', () => {
   it('refuses to store a key without a sealing key rather than storing it in the clear', async () => {
     const service = new AiNewsService(fakeRepository(), null, vi.fn());
     await expect(
-      service.saveSettings({ actorUserId: ACTOR, apiBaseUrl: 'https://api.example', model: 'm', apiKey: 'sk-ant-secret-9876' }),
+      service.saveSettings({ actorUserId: ACTOR, apiBaseUrl: 'https://api.example', model: 'm', apiKey: 'sk-ant-secret-9876', idempotencyKey: '22222222-2222-4222-8222-222222222222' }),
     ).rejects.toMatchObject({ code: 'ai_news_sealing_unavailable' });
   });
 });

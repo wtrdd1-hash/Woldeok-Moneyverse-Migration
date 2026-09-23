@@ -657,7 +657,7 @@ export class AiNewsService {
     readonly model: string;
     /** Absent or empty keeps the stored key. */
     readonly apiKey?: string | undefined;
-    readonly idempotencyKey?: string | undefined;
+    readonly idempotencyKey: string;
   }): Promise<boolean> {
     const apiKey = input.apiKey?.trim() ?? '';
     let sealed: string | null = null;
@@ -673,7 +673,7 @@ export class AiNewsService {
       hint = apiKey.slice(-4);
     }
     return this.repository.saveSettings({
-      idempotencyKey: input.idempotencyKey ?? randomUUID(),
+      idempotencyKey: input.idempotencyKey,
       actorUserId: input.actorUserId,
       apiBaseUrl: input.apiBaseUrl,
       model: input.model,
@@ -728,7 +728,7 @@ export class AiNewsService {
   async begin(input: {
     readonly actorUserId: string;
     readonly prompt?: string | undefined;
-    readonly idempotencyKey?: string | undefined;
+    readonly idempotencyKey: string;
   }): Promise<AiNewsRunRow | null> {
     const prompt = (input.prompt ?? '').trim();
     if (prompt.length > 2000) throw new AiNewsInputError('the wish must be at most 2000 characters');
@@ -737,7 +737,7 @@ export class AiNewsService {
     const credential = await this.open(input.actorUserId);
 
     const run = await this.repository.beginRun({
-      idempotencyKey: input.idempotencyKey ?? randomUUID(),
+      idempotencyKey: input.idempotencyKey,
       actorUserId: input.actorUserId,
       prompt,
     });
@@ -845,6 +845,7 @@ export class AiNewsService {
     const receipt = await this.publish({
       actorUserId,
       scenarioId: selected.id,
+      idempotencyKey: randomUUID(),
       hours: Math.min(24, selected.hours),
       headline: selected.headline,
       body: selected.body,
@@ -866,17 +867,17 @@ export class AiNewsService {
     readonly headline: unknown;
     readonly body?: unknown;
     readonly effects: unknown;
-    readonly idempotencyKey?: string | undefined;
+    readonly idempotencyKey: string;
   }) {
     return this.repository.publish({
       ...input,
       body: input.body ?? '',
-      idempotencyKey: input.idempotencyKey ?? randomUUID(),
+      idempotencyKey: input.idempotencyKey,
     });
   }
 
-  discard(input: { readonly actorUserId: string; readonly scenarioId: string; readonly idempotencyKey?: string | undefined }) {
-    return this.repository.discard({ ...input, idempotencyKey: input.idempotencyKey ?? randomUUID() });
+  discard(input: { readonly actorUserId: string; readonly scenarioId: string; readonly idempotencyKey: string }) {
+    return this.repository.discard(input);
   }
 
   /** The stored address, model and key, opened for the seconds a call takes. */
