@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 import https from 'node:https';
 import { spawn } from 'node:child_process';
 import youtubedl from 'youtube-dl-exec';

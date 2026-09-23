@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Award, ShieldCheck, CheckCircle2, Search, Sparkles, RefreshCw, FileText, AlertCircle } from 'lucide-react';
+import { Award, ShieldCheck, Sparkles, RefreshCw, FileText } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,8 +9,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { groupDigits } from '@/lib/money';
@@ -35,39 +33,14 @@ interface AppraisalViewProps {
   readonly userBalanceWld: string;
 }
 
-export function AppraisalView({ holdings, userBalanceWld }: AppraisalViewProps) {
-  const [certificates, setCertificates] = useState<AppraisalCertificate[]>([
-    {
-      certId: 'CERT-2026-89A4',
-      itemId: 'item_trophy_01',
-      itemName: '제1회 First Capital 기념 골드 메달',
-      rarity: 'LEGENDARY',
-      appraisedValueWld: '8500',
-      fairBandP25: '7800',
-      fairBandP75: '9500',
-      provenanceAuthor: '초대총독_알렉스 (공식 발행)',
-      craftedAt: '2026-09-01T12:00:00Z',
-      appraisedAt: '2026-09-22T08:30:00Z',
-      certHash: '0x8f2a4bc8910d52e67a03fb21884e1b',
-    },
-    {
-      certId: 'CERT-2026-31F7',
-      itemId: 'item_decor_02',
-      itemName: '도시 전시장 아카이브 디스플레이 #01',
-      rarity: 'EPIC',
-      appraisedValueWld: '3200',
-      fairBandP25: '2900',
-      fairBandP75: '3600',
-      provenanceAuthor: '장인_마스터킴 (CRAFT_CITY_DISPLAY_01)',
-      craftedAt: '2026-09-15T09:20:00Z',
-      appraisedAt: '2026-09-23T04:10:00Z',
-      certHash: '0x31f79a02ce51d8b67f10ac8872019c',
-    },
-  ]);
+export function AppraisalView({ holdings, userBalanceWld: _userBalanceWld }: AppraisalViewProps) {
+  const [certificates, setCertificates] = useState<AppraisalCertificate[]>([]);
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
 
   const [selectedHoldingId, setSelectedHoldingId] = useState<string>('');
   const [isAppraising, setIsAppraising] = useState(false);
   const [newCert, setNewCert] = useState<AppraisalCertificate | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   // 실제 백엔드 공인 감정서 목록 로드
   React.useEffect(() => {
@@ -75,14 +48,17 @@ export function AppraisalView({ holdings, userBalanceWld }: AppraisalViewProps) 
     async function loadAppraisals() {
       try {
         const res = await fetch('/api/v1/marketplace/appraisals');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0 && !cancelled) {
-            setCertificates(data);
-          }
+        if (!res.ok) throw new Error('appraisal list request failed');
+        const data = await res.json();
+        if (!cancelled) {
+          setCertificates(Array.isArray(data) ? data : []);
+          setLoadState('ready');
         }
       } catch {
-        // Fallback
+        if (!cancelled) {
+          setCertificates([]);
+          setLoadState('error');
+        }
       }
     }
     loadAppraisals();
@@ -99,6 +75,7 @@ export function AppraisalView({ holdings, userBalanceWld }: AppraisalViewProps) 
   const handleRequestAppraisal = async () => {
     if (!selectedItem) return;
     setIsAppraising(true);
+    setActionError(null);
 
     try {
       const res = await fetch('/api/v1/marketplace/appraisals', {
@@ -111,29 +88,14 @@ export function AppraisalView({ holdings, userBalanceWld }: AppraisalViewProps) 
         }),
       });
 
-      if (res.ok) {
-        const serverCert: AppraisalCertificate = await res.json();
-        setCertificates((prev) => [serverCert, ...prev]);
-        setNewCert(serverCert);
-      } else {
-        const generatedCert: AppraisalCertificate = {
-          certId: `CERT-2026-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
-          itemId: selectedItem.catalog_id,
-          itemName: selectedItem.name,
-          rarity: selectedItem.rarity,
-          appraisedValueWld: refValue.toString(),
-          fairBandP25: Math.round(refValue * 0.9).toString(),
-          fairBandP75: Math.round(refValue * 1.15).toString(),
-          provenanceAuthor: `${selectedItem.name} 원작자 (시스템 검증 완료)`,
-          craftedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
-          appraisedAt: new Date().toISOString(),
-          certHash: `0x${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
-        };
-        setCertificates((prev) => [generatedCert, ...prev]);
-        setNewCert(generatedCert);
-      }
+      if (!res.ok) throw new Error('appraisal request failed');
+      const serverCert: AppraisalCertificate = await res.json();
+      setCertificates((prev) => [serverCert, ...prev]);
+      setNewCert(serverCert);
     } catch {
-      // Local fallback
+      setActionError(
+        '감정서 발급은 소유권·출처 검증과 원장 수수료 정산이 완료될 때까지 사용할 수 없습니다.',
+      );
     } finally {
       setIsAppraising(false);
       setSelectedHoldingId('');
@@ -143,6 +105,11 @@ export function AppraisalView({ holdings, userBalanceWld }: AppraisalViewProps) 
 
   return (
     <div className="grid gap-6">
+      {actionError && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+          {actionError}
+        </div>
+      )}
       {/* 공인 감정소 안내 배너 */}
       <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
@@ -158,7 +125,7 @@ export function AppraisalView({ holdings, userBalanceWld }: AppraisalViewProps) 
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            보유 중인 고가 수집품과 장식품의 정품 여부, 최초 제작자 출처(Provenance), 최근 20건 공정 거래 가격 밴드(P25~P75)를 시스템 공인 인증서로 영구 발급합니다. 감정 수수료는 시스템 계정으로 전액 영구 소각(SINK_APPRAISAL_FEE)됩니다.
+            기존 서버 감정서는 조회할 수 있습니다. 소유권·출처 검증과 원장 기반 수수료 정산이 완성될 때까지 신규 공인 감정서 발급은 일시 중지되어 있습니다.
           </p>
         </div>
 
@@ -216,7 +183,7 @@ export function AppraisalView({ holdings, userBalanceWld }: AppraisalViewProps) 
         <CardFooter className="pt-0 pb-4 px-4 sm:px-5 flex justify-end">
           <Button
             onClick={handleRequestAppraisal}
-            disabled={!selectedItem || isAppraising}
+            disabled
             className="h-10 min-h-[40px] text-xs font-semibold bg-amber-600 hover:bg-amber-700 text-white"
           >
             {isAppraising ? (
@@ -225,11 +192,27 @@ export function AppraisalView({ holdings, userBalanceWld }: AppraisalViewProps) 
                 출처 원장 무결성 검증 중...
               </>
             ) : (
-              '공인 감정서 발급하기'
+              '감정서 신규 발급 일시 중지'
             )}
           </Button>
         </CardFooter>
       </Card>
+
+      {loadState === 'loading' && (
+        <div className="rounded-xl border border-border/70 bg-muted/30 p-4 text-sm text-muted-foreground">
+          서버 감정서 목록을 불러오는 중입니다.
+        </div>
+      )}
+      {loadState === 'error' && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+          감정서 목록을 불러오지 못했습니다. 임시·예시 인증서는 표시하지 않습니다.
+        </div>
+      )}
+      {loadState === 'ready' && certificates.length === 0 && (
+        <div className="rounded-xl border border-border/70 bg-muted/30 p-4 text-sm text-muted-foreground">
+          현재 서버에 발급된 감정서가 없습니다.
+        </div>
+      )}
 
       {/* 발급된 공인 감정서 인증 카드 목록 */}
       <div className="space-y-3">

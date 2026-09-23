@@ -6,12 +6,8 @@ import {
   Sun,
   Moon,
   RotateCcw,
-  Sparkles,
-  ShieldCheck,
-  Award,
   Layers,
   Info,
-  Maximize2,
 } from 'lucide-react';
 
 interface FurnitureItem {

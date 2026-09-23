@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Eye, ShieldAlert, MessageSquare, Clock, User } from 'lucide-react';
+import { Eye, ShieldAlert, Clock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {

@@ -3,12 +3,9 @@ import Link from 'next/link';
 import {
   Bell,
   ChevronRight,
-  ExternalLink,
   KeyRound,
   Lock,
-  Mail,
   Plus,
-  QrCode,
   Shield,
   ShieldAlert,
   ShieldCheck,
@@ -16,7 +13,6 @@ import {
   Sparkles,
   User,
   UserCheck,
-  UserX,
 } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { RefreshOnReturn } from '@/components/refresh-on-return';

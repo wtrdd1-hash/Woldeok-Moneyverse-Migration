@@ -69,6 +69,11 @@ export default tseslint.config(
     },
   },
   {
+    // Legacy Playwright capture utility kept as CommonJS for direct Node execution.
+    files: ['capture_v326.js'],
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
+  },
+  {
     // The backend compiles with emitDecoratorMetadata, and Nest resolves
     // constructor dependencies from the design:paramtypes that metadata
     // emits. A class named only in a constructor parameter position therefore

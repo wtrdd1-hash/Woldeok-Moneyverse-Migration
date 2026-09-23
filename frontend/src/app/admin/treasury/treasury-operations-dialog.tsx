@@ -3,10 +3,8 @@
 import { useState } from 'react';
 import {
   ShieldAlert,
-  ShieldCheck,
   KeyRound,
   Coins,
-  FileCheck2,
   AlertTriangle,
   RotateCw,
 } from 'lucide-react';

@@ -112,6 +112,15 @@ describe('the getting-started guide', () => {
       expect(group.summaryKo.trim()).not.toBe('');
       expect(group.summaryEn.trim()).not.toBe('');
     }
+
+    const markets = CURRENT_IMPLEMENTED_FEATURES.find((group) => group.id === 'markets');
+    const advertised = [...(markets?.itemsKo ?? []), ...(markets?.itemsEn ?? [])].join(' ');
+    expect(advertised).not.toContain('경매');
+    expect(advertised).not.toContain('직거래');
+    expect(advertised).not.toContain('감정');
+    expect(advertised.toLowerCase()).not.toContain('auction');
+    expect(advertised.toLowerCase()).not.toContain('direct trade');
+    expect(advertised.toLowerCase()).not.toContain('appraisal');
   });
 
   it('defines the 5 core virtual economy pillars with valid routes', () => {

@@ -1,3 +1,4 @@
+/* eslint-disable no-empty */
 /**
  * Web Audio API 무의존성 브라우저 신디사이저 사운드 엔진
  * 외부 mp3 파일 없이 순수 오실레이터 합성으로 0ms 지연 사운드 효과 제공

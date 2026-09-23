@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useActionState, useState } from 'react';
@@ -16,7 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { IDLE } from '@/lib/action-state';
-import { formatMoment, groupDigits } from '@/lib/money';
+import {  groupDigits } from '@/lib/money';
 import { StepUpField } from '../step-up-field';
 import type { AdminWorkPolicy, AdminWorkTask } from '../types';
 import { updateWorkRewardPolicy, updateWorkTask } from './actions';

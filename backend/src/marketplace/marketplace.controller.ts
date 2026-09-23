@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Req,
+  ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -129,25 +130,23 @@ export class MarketplaceController {
 
   @Post('auctions')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Create a new live English auction' })
-  createAuction(@Req() request: RequestWithSession, @Body() body: CreateAuctionDto) {
-    return this.guarded(
-      () => this.marketplaceService.createAuction(requireUserId(request), body),
-      'failed to create auction',
+  @ApiOperation({ summary: 'Auction creation is disabled until item escrow and settlement are ledger-backed' })
+  createAuction(@Req() _request: RequestWithSession, @Body() _body: CreateAuctionDto) {
+    throw new ServiceUnavailableException(
+      'auction writes are unavailable until item escrow, winner settlement, and ledger posting are implemented',
     );
   }
 
   @Post('auctions/:id/bid')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Bid on a live English auction with escrow and anti-sniping extension' })
+  @ApiOperation({ summary: 'Auction bidding is disabled until item escrow and settlement are ledger-backed' })
   bidAuction(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) auctionId: string,
-    @Body() body: BidAuctionDto,
+    @Req() _request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) _auctionId: string,
+    @Body() _body: BidAuctionDto,
   ) {
-    return this.guarded(
-      () => this.marketplaceService.bidAuction(requireUserId(request), auctionId, body.bidAmountWld),
-      'failed to bid on auction',
+    throw new ServiceUnavailableException(
+      'auction writes are unavailable until item escrow, winner settlement, and ledger posting are implemented',
     );
   }
 
@@ -163,31 +162,28 @@ export class MarketplaceController {
 
   @Post('trades')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Propose a new P2P 1:1 direct trade' })
-  createTrade(@Req() request: RequestWithSession, @Body() body: CreateTradeDto) {
-    return this.guarded(
-      () => this.marketplaceService.createTrade(requireUserId(request), body),
-      'failed to create trade proposal',
+  @ApiOperation({ summary: 'Direct trade creation is disabled until atomic asset settlement is implemented' })
+  createTrade(@Req() _request: RequestWithSession, @Body() _body: CreateTradeDto) {
+    throw new ServiceUnavailableException(
+      'direct trade settlement is unavailable until atomic WLD and item transfer is implemented',
     );
   }
 
   @Post('trades/:id/accept')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Accept a P2P 1:1 direct trade proposal (first step)' })
-  acceptTrade(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) tradeId: string) {
-    return this.guarded(
-      () => this.marketplaceService.acceptTrade(requireUserId(request), tradeId),
-      'failed to accept trade proposal',
+  @ApiOperation({ summary: 'Direct trade acceptance is disabled until atomic asset settlement is implemented' })
+  acceptTrade(@Req() _request: RequestWithSession, @Param('id', ParseUUIDPipe) _tradeId: string) {
+    throw new ServiceUnavailableException(
+      'direct trade settlement is unavailable until atomic WLD and item transfer is implemented',
     );
   }
 
   @Post('trades/:id/confirm')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Sign-off and execute dual atomic swap for P2P 1:1 trade' })
-  confirmTrade(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) tradeId: string) {
-    return this.guarded(
-      () => this.marketplaceService.confirmTrade(requireUserId(request), tradeId),
-      'failed to confirm trade',
+  @ApiOperation({ summary: 'Direct trade confirmation is disabled until atomic asset settlement is implemented' })
+  confirmTrade(@Req() _request: RequestWithSession, @Param('id', ParseUUIDPipe) _tradeId: string) {
+    throw new ServiceUnavailableException(
+      'direct trade settlement is unavailable until atomic WLD and item transfer is implemented',
     );
   }
 
@@ -213,11 +209,10 @@ export class MarketplaceController {
 
   @Post('appraisals')
   @UseGuards(CsrfGuard)
-  @ApiOperation({ summary: 'Request system provenance appraisal for collectible with fee burn' })
-  requestAppraisal(@Req() request: RequestWithSession, @Body() body: RequestAppraisalDto) {
-    return this.guarded(
-      () => this.marketplaceService.requestAppraisal(requireUserId(request), body),
-      'failed to request appraisal',
+  @ApiOperation({ summary: 'Appraisal issuance is disabled until ownership, provenance, and fee ledger checks are implemented' })
+  requestAppraisal(@Req() _request: RequestWithSession, @Body() _body: RequestAppraisalDto) {
+    throw new ServiceUnavailableException(
+      'appraisal issuance is unavailable until ownership, provenance, and ledger-backed fee settlement are implemented',
     );
   }
 }

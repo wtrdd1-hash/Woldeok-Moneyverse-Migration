@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, PieChart, ExternalLink, ShieldCheck, Activity } from 'lucide-react';
+import {     PieChart, ExternalLink, ShieldCheck } from 'lucide-react';
 import { Amount } from '@/components/amount';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';

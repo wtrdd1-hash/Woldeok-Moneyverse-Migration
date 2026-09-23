@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { TrendingUp, Activity, AlertTriangle, ShieldCheck, BarChart3, HelpCircle } from 'lucide-react';
+import { TrendingUp, Activity, AlertTriangle, ShieldCheck, HelpCircle } from 'lucide-react';
 import { groupDigits } from '@/lib/money';
 
 export interface PricePoint {

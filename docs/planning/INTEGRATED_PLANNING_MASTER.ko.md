@@ -1,11 +1,24 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.09.23.405
+> 현재 원장 버전: v2026.09.23.406
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.09.23.406 — 2026-09-23
+- 공개적으로 구현 완료라고 설명된 기능을 코드, focused test, Test runtime identity, Production runtime identity, 최신 기획과 다시 대조했다.
+- 완료 상태를 CODE_PRESENT / TEST_COVERED / TEST_RUNTIME_VERIFIED / PRODUCTION_VERIFIED / PLAN_DRIFT / BLOCKED_INTEGRITY / COVERAGE_GAP으로 분리한다.
+- 런타임 lineage: Test는 `7b705e1...` application source를 서비스하며 v406 전 current main과 Test 사이 비문서 application delta는 0건이다. Production은 더 오래된 `2c854d4...`이며 Test보다 비문서 파일 55개 뒤에 있다.
+- G406-01 / P1: main/Test 구현과 Production 검증 완료를 같은 상태로 보지 않는다. exact v406 Test와 merge 후 Production lineage gate가 필요하다.
+- G406-02 / P1: 일반 직업 기본 무제한 기획은 아직 구현되지 않았다. 현재 DB/test는 작업별 daily completion quota를 강제한다.
+- G406-03 / P0: 고급 marketplace 완료 주장을 취소했다. Auction의 item escrow/end settlement/ledger posting, P2P atomic WLD/item settlement, appraisal ownership/provenance/ledger fee settlement가 미완성이다. v406에서 unsafe write API를 fail-closed하고 fake/sample authority fallback을 제거했다.
+- Club canvas는 authoritative server state load 성공 전 edit/save를 차단한다.
+- G406-04 / P1: calendar는 실제 server-backed 집계 화면이지만 focused regression coverage가 부족하다.
+- G406-05 / P1: 공개 구현기능 검증을 기능군 대표 link 수준에서 각 sub-feature의 route/API/test/Test/Production evidence 수준으로 강화한다.
+- 권위 감사 문서: `COMPLETED_DEVELOPMENT_REVIEW_V406.md` / `.ko.md`.
+- v406은 runtime code 변경이 있으므로 merge 전 exact-SHA Test, merge 후 exact-main 재검증과 무중단 Production 승격이 필요하다.
 
 ## v2026.09.23.405 — 2026-09-23
 - PR #702를 병합한 뒤(main `67e34d8df182403532e1541d16391f76edfafc57`) Debian 13 런타임 정리를 계속했다.

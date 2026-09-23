@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShieldCheck, Zap, Sparkles, Scale, Info } from 'lucide-react';
+import {   Sparkles, Scale, Info } from 'lucide-react';
 
 interface LimitPolicyItem {
   readonly title: string;

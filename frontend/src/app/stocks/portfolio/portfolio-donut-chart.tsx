@@ -28,19 +28,17 @@ export function PortfolioDonutChart({
   const isLoss = Number(totalGainLossBps) < 0;
 
   // 세그먼트 오프셋 누적 계산
-  let accumulatedPercent = 0;
-  const segments = holdings.map((holding) => {
+  const segments = holdings.map((holding, index) => {
     const value = Number(holding.market_value) || 0;
-    const percent = totalValueNum > 0 ? (value / totalValueNum) : 0;
-    const strokeDasharray = `${percent * circumference} ${circumference}`;
-    const strokeDashoffset = -accumulatedPercent * circumference;
-    accumulatedPercent += percent;
-
+    const percent = totalValueNum > 0 ? value / totalValueNum : 0;
+    const accumulatedPercent = holdings
+      .slice(0, index)
+      .reduce((sum, previous) => sum + (totalValueNum > 0 ? (Number(previous.market_value) || 0) / totalValueNum : 0), 0);
     return {
       holding,
       percent,
-      strokeDasharray,
-      strokeDashoffset,
+      strokeDasharray: `${percent * circumference} ${circumference}`,
+      strokeDashoffset: -accumulatedPercent * circumference,
     };
   });
 

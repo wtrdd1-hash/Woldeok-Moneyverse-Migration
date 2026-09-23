@@ -1,11 +1,24 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.23.405
+> Current ledger version: v2026.09.23.406
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.23.406 — 2026-09-23
+- Re-audited all capabilities publicly described as implemented against code, focused tests, Test runtime identity, Production runtime identity and current planning.
+- Completion states are now separated into CODE_PRESENT / TEST_COVERED / TEST_RUNTIME_VERIFIED / PRODUCTION_VERIFIED / PLAN_DRIFT / BLOCKED_INTEGRITY / COVERAGE_GAP.
+- Runtime lineage: Test serves application source `7b705e1...`, current main has zero non-doc application delta from that Test source before v406, while Production serves older `2c854d4...` and is 55 non-document files behind Test.
+- G406-01 / P1: implemented-on-main/Test is not equivalent to Production verified; exact v406 Test and post-merge Production lineage gates are required.
+- G406-02 / P1: ordinary work unlimited-default planning is not implemented; current DB/tests still enforce per-task daily completion quotas.
+- G406-03 / P0: advanced marketplace completion claims were revoked. Auction lacks complete item escrow/end settlement/ledger posting; P2P confirm lacked atomic WLD/item settlement; appraisal lacked authoritative ownership/provenance/ledger fee settlement. v406 fail-closes unsafe write APIs and removes fake/sample authority fallbacks.
+- Club canvas now blocks edit/save until authoritative server state loads successfully.
+- G406-04 / P1: calendar is a real server-backed aggregation page but lacks focused regression coverage.
+- G406-05 / P1: public implemented-feature validation must evolve from group-level representative links to per-subfeature route/API/test/Test/Production evidence.
+- Canonical audit: `COMPLETED_DEVELOPMENT_REVIEW_V406.md` / `.ko.md`.
+- v406 contains runtime code changes and therefore requires exact-SHA Test before merge and zero-downtime Production promotion after merged-main revalidation.
 
 ## v2026.09.23.405 — 2026-09-23
 - Continued Debian 13 runtime hygiene work after merging PR #702 (main `67e34d8df182403532e1541d16391f76edfafc57`).

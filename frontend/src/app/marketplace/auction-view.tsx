@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Gavel, Clock, ShieldCheck, Flame, ArrowUpRight, AlertCircle, CheckCircle2, User, RefreshCw } from 'lucide-react';
+import { Gavel, Clock, ShieldCheck, Flame, CheckCircle2, User, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -41,59 +41,8 @@ interface AuctionViewProps {
 }
 
 export function AuctionView({ userBalanceWld, currentUserId = 'usr_me' }: AuctionViewProps) {
-  // 모의 실시간 경매 매물 목록
-  const [auctions, setAuctions] = useState<AuctionListing[]>([
-    {
-      id: 'auc_01',
-      itemName: '제1회 First Capital 기념 골드 메달',
-      itemCode: 'ITEM_TROPHY_FIRST_CAPITAL_GOLD',
-      category: 'display',
-      rarity: 'LEGENDARY',
-      sellerId: 'usr_governor',
-      sellerName: '초대총독_알렉스',
-      startPriceWld: '5000',
-      currentBidWld: '8500',
-      highestBidderId: 'usr_investor',
-      highestBidderName: '월덕헤지펀드',
-      bidCount: 7,
-      buyNowPriceWld: '15000',
-      endsAt: new Date(Date.now() + 1000 * 60 * 45).toISOString(), // 45분 후
-      description: '시즌 1 설립자에게만 단 1개 한정 지급된 영구 보존용 골드 명예 트로피 메달입니다.',
-    },
-    {
-      id: 'auc_02',
-      itemName: '네온 사이버 하우징 네임플레이트',
-      itemCode: 'ITEM_FRAME_NEON_CYBER',
-      category: 'nameplate',
-      rarity: 'EPIC',
-      sellerId: 'usr_crafter',
-      sellerName: '장인_마스터킴',
-      startPriceWld: '2000',
-      currentBidWld: '3400',
-      highestBidderId: 'usr_collector',
-      highestBidderName: '희귀템사냥꾼',
-      bidCount: 5,
-      endsAt: new Date(Date.now() + 1000 * 60 * 18).toISOString(), // 18분 후
-      description: '클럽하우스 및 개인 룸 출입문에 장착 가능한 네온 애니메이션 특수 네임플레이트.',
-    },
-    {
-      id: 'auc_03',
-      itemName: '사업체 고효율 물류 부스트 키트 (대형)',
-      itemCode: 'ITEM_BIZ_LOGISTICS_KIT',
-      category: 'business',
-      rarity: 'RARE',
-      sellerId: 'usr_merchant',
-      sellerName: '무역상인_박',
-      startPriceWld: '1500',
-      currentBidWld: '2100',
-      highestBidderId: 'usr_me',
-      highestBidderName: '나 (현재 최고 입찰자)',
-      bidCount: 4,
-      buyNowPriceWld: '4000',
-      endsAt: new Date(Date.now() + 1000 * 60 * 4).toISOString(), // 4분 후 (스나이핑 연장 가능 구간)
-      description: '가상 사업체 원자재 조달 시 운송비 10%를 영구 감면해 주는 고효율 물류 부스트 모듈.',
-    },
-  ]);
+  const [auctions, setAuctions] = useState<AuctionListing[]>([]);
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
 
   const [selectedAuction, setSelectedAuction] = useState<AuctionListing | null>(null);
   const [bidAmount, setBidAmount] = useState('');
@@ -107,14 +56,17 @@ export function AuctionView({ userBalanceWld, currentUserId = 'usr_me' }: Auctio
     async function loadAuctions() {
       try {
         const res = await fetch('/api/v1/marketplace/auctions');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0 && !cancelled) {
-            setAuctions(data);
-          }
+        if (!res.ok) throw new Error('auction list request failed');
+        const data = await res.json();
+        if (!cancelled) {
+          setAuctions(Array.isArray(data) ? data : []);
+          setLoadState('ready');
         }
       } catch {
-        // Fallback to starter auctions if network error
+        if (!cancelled) {
+          setAuctions([]);
+          setLoadState('error');
+        }
       }
     }
     loadAuctions();
@@ -177,39 +129,22 @@ export function AuctionView({ userBalanceWld, currentUserId = 'usr_me' }: Auctio
         ? new Date(endsAtDate + 60 * 1000).toISOString()
         : selectedAuction.endsAt;
 
-      if (res.ok) {
-        const result = await res.json();
-        setAuctions((prev) =>
-          prev.map((auc) => {
-            if (auc.id !== selectedAuction.id) return auc;
-            return {
-              ...auc,
-              currentBidWld: result.currentBidWld ?? bidAmount,
-              highestBidderId: currentUserId,
-              highestBidderName: '나 (현재 최고 입찰자)',
-              bidCount: result.bidCount ?? auc.bidCount + 1,
-              endsAt: result.endsAt ?? newEndsAt,
-              isExtended: result.isExtended ?? isAntiSnipingTriggered,
-            };
-          }),
-        );
-      } else {
-        // Fallback for optimistic UI if mock / offline
-        setAuctions((prev) =>
-          prev.map((auc) => {
-            if (auc.id !== selectedAuction.id) return auc;
-            return {
-              ...auc,
-              currentBidWld: bidAmount,
-              highestBidderId: currentUserId,
-              highestBidderName: '나 (현재 최고 입찰자)',
-              bidCount: auc.bidCount + 1,
-              endsAt: newEndsAt,
-              isExtended: isAntiSnipingTriggered || Boolean(auc.isExtended),
-            };
-          }),
-        );
-      }
+      if (!res.ok) throw new Error('auction bid request failed');
+      const result = await res.json();
+      setAuctions((prev) =>
+        prev.map((auc) => {
+          if (auc.id !== selectedAuction.id) return auc;
+          return {
+            ...auc,
+            currentBidWld: result.currentBidWld ?? bidAmount,
+            highestBidderId: currentUserId,
+            highestBidderName: '나 (현재 최고 입찰자)',
+            bidCount: result.bidCount ?? auc.bidCount + 1,
+            endsAt: result.endsAt ?? newEndsAt,
+            isExtended: result.isExtended ?? isAntiSnipingTriggered,
+          };
+        }),
+      );
 
       setSuccessNotice(
         `${groupDigits(bidAmount)} WLD 입찰이 안전 에스크로에 잠금되었습니다.${
@@ -217,18 +152,14 @@ export function AuctionView({ userBalanceWld, currentUserId = 'usr_me' }: Auctio
         }`,
       );
     } catch {
-      // Local fallback
-      setSuccessNotice(`${groupDigits(bidAmount)} WLD 입찰이 안전 에스크로에 보관되었습니다.`);
+      setSuccessNotice('입찰이 서버에 반영되지 않았습니다. 잔액과 경매 상태를 새로고침한 뒤 다시 시도해 주세요.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
 
-  const userBalanceBig = BigInt(userBalanceWld || '0');
-  const bidAmountBig = bidAmount ? BigInt(bidAmount) : 0n;
   const currentBidBig = selectedAuction ? BigInt(selectedAuction.currentBidWld) : 0n;
-  const isValidBid = bidAmountBig > currentBidBig && bidAmountBig <= userBalanceBig;
 
   return (
     <div className="grid gap-6">
@@ -247,7 +178,7 @@ export function AuctionView({ userBalanceWld, currentUserId = 'usr_me' }: Auctio
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            최고가 공개 호가 입찰 방식으로 진행됩니다. 다른 유저가 상위 입찰 시 이전 입찰자의 WLD는 에스크로에서 즉시 100% 자동 환불되며, 마감 직전 30초 내 신규 입찰 시 60초간 자동 연장됩니다. 낙찰 시 2%의 수수료는 영구 소각(HARD_SINK)됩니다.
+            현재 경매 목록은 조회만 제공합니다. 아이템 에스크로·낙찰 정산·원장 기록이 완성될 때까지 신규 경매 및 입찰은 일시 중지되어 있습니다.
           </p>
         </div>
 
@@ -258,6 +189,22 @@ export function AuctionView({ userBalanceWld, currentUserId = 'usr_me' }: Auctio
           </div>
         </div>
       </div>
+
+      {loadState === 'loading' && (
+        <div className="rounded-xl border border-border/70 bg-muted/30 p-4 text-sm text-muted-foreground">
+          서버 경매 목록을 불러오는 중입니다.
+        </div>
+      )}
+      {loadState === 'error' && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+          경매 목록을 불러오지 못했습니다. 임시·예시 매물은 표시하지 않습니다.
+        </div>
+      )}
+      {loadState === 'ready' && auctions.length === 0 && (
+        <div className="rounded-xl border border-border/70 bg-muted/30 p-4 text-sm text-muted-foreground">
+          현재 진행 중인 서버 경매가 없습니다.
+        </div>
+      )}
 
       {/* 실시간 경매 매물 목록 그리드 */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -346,6 +293,7 @@ export function AuctionView({ userBalanceWld, currentUserId = 'usr_me' }: Auctio
 
               <CardFooter className="pt-2 pb-4 px-4 sm:px-5 shrink-0 flex flex-col gap-2">
                 <Button
+                  disabled
                   onClick={() => handleOpenBidModal(auc)}
                   className={`w-full h-10 min-h-[40px] text-xs font-semibold ${
                     isMyBidHighest
@@ -353,7 +301,7 @@ export function AuctionView({ userBalanceWld, currentUserId = 'usr_me' }: Auctio
                       : 'bg-primary hover:bg-primary/90 text-primary-foreground'
                   }`}
                 >
-                  {isMyBidHighest ? '내가 최고 입찰 중 (추가 입찰)' : '호가 입찰 참여하기'}
+                  {isMyBidHighest ? '입찰 정산 재검증 중' : '입찰 일시 중지'}
                 </Button>
 
                 {auc.buyNowPriceWld && (
@@ -469,7 +417,7 @@ export function AuctionView({ userBalanceWld, currentUserId = 'usr_me' }: Auctio
                 </Button>
                 <Button
                   onClick={handleExecuteBid}
-                  disabled={!isValidBid || isSubmitting}
+                  disabled
                   className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold"
                 >
                   {isSubmitting ? (

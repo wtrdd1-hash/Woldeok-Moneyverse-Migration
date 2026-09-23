@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Scale, Layers, TrendingUp, TrendingDown } from 'lucide-react';
+import { Scale } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';

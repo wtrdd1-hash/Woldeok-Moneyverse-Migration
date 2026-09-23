@@ -2,12 +2,9 @@
 
 import React, { useState, useActionState, useEffect } from 'react';
 import {
-  TrendingUp,
-  TrendingDown,
+
+
   ShieldCheck,
-  AlertCircle,
-  CheckCircle2,
-  HelpCircle,
   Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';

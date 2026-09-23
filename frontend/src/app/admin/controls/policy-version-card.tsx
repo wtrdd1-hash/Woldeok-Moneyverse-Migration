@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useActionState } from 'react';
-import { ShieldCheck, AlertCircle, FileText, CheckCircle2, ArrowUpRight } from 'lucide-react';
+import { ShieldCheck, AlertCircle, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,

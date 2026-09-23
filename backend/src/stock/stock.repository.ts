@@ -492,7 +492,7 @@ export class PostgresStockRepository {
     uuid(userId, 'user id');
     return queryRows<StockPortfolioRow>(
       this.pool,
-      'SELECT p.stock_id::text, p.symbol, p.name, p.quantity::text, p.average_cost::text, p.market_value::text, p.current_price::text, coalesce(v.halt_status, \'ACTIVE\') AS halt_status FROM public.stock_my_positions($1) p LEFT JOIN public.virtual_stocks v ON v.id = p.stock_id',
+      'SELECT stock_id::text, symbol, name, quantity::text, average_cost::text, market_value::text, current_price::text, halt_status FROM public.stock_my_positions_v2($1)',
       [userId],
     );
   }
@@ -541,7 +541,7 @@ export class PostgresStockRepository {
 
     const stockRow = await queryOne<{ halt_status: string; active: boolean }>(
       this.pool,
-      'SELECT coalesce(halt_status, \'ACTIVE\') AS halt_status, active FROM public.virtual_stocks WHERE id = $1',
+      'SELECT halt_status, active FROM public.stock_trade_state($1)',
       [stockId],
     );
     if (!stockRow || !stockRow.active || stockRow.halt_status !== 'ACTIVE') {

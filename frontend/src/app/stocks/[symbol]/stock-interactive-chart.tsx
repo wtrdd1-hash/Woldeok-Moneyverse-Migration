@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { TrendingUp, TrendingDown, Clock } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
 

@@ -6,9 +6,7 @@ import {
   Clock,
   Lock,
   Sliders,
-  CheckCircle2,
   ShieldCheck,
-  Sparkles,
   AlertTriangle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';

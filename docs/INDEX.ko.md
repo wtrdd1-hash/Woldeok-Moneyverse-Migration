@@ -3,16 +3,17 @@
 [English canonical](INDEX.md) | **한국어**
 
 > 문서 거버넌스: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)
-> 현재 기획 권위: v2026.09.23.405
+> 현재 기획 권위: v2026.09.23.406
 
 ## 먼저 볼 문서
 
 1. [PROJECT_PLAN](planning/PROJECT_PLAN.ko.md) — 구현 대면 권위 기획.
 2. [INTEGRATED_PLANNING_MASTER](planning/INTEGRATED_PLANNING_MASTER.ko.md) — 통합 기획 원장.
-3. [INTEGRATED_FULL_REVIEW_V402](planning/INTEGRATED_FULL_REVIEW_V402.ko.md) — 현재 전면 재검토.
-4. [문서 정책](DOCUMENTATION_POLICY.ko.md) — 문서 권위, 언어, 브랜치, 보존 규칙.
-5. [현재 런타임 / OS 기준선](CURRENT_RUNTIME_BASELINE.ko.md) — 관측된 Debian/systemd/Nginx/Docker/PostgreSQL 기준.
-6. [앱/API 전체 명세](mobile-api-complete-spec.ko.md) — 네이티브 통합 계약. endpoint 수치는 v402 generated 재검증 필요.
+3. [COMPLETED_DEVELOPMENT_REVIEW_V406](planning/COMPLETED_DEVELOPMENT_REVIEW_V406.ko.md) — 현재 개발 완료 기능 재감사.
+4. [INTEGRATED_FULL_REVIEW_V402](planning/INTEGRATED_FULL_REVIEW_V402.ko.md) — 전면 재검토 기준선과 12개 감사 lane.
+5. [문서 정책](DOCUMENTATION_POLICY.ko.md) — 문서 권위, 언어, 브랜치, 보존 규칙.
+6. [현재 런타임 / OS 기준선](CURRENT_RUNTIME_BASELINE.ko.md) — 관측된 Debian/systemd/Nginx/Docker/PostgreSQL 기준.
+7. [앱/API 전체 명세](mobile-api-complete-spec.ko.md) — 네이티브 통합 계약. endpoint 수치는 v402 generated 재검증 필요.
 
 ## 기획·제품
 

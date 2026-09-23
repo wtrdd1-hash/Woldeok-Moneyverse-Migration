@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-empty */
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 

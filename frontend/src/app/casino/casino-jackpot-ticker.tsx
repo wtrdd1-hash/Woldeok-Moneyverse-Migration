@@ -1,6 +1,6 @@
 'use client';
 
-import { Sparkles, Trophy, ShieldCheck, Flame, TrendingUp } from 'lucide-react';
+import { Sparkles, Trophy, ShieldCheck } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { groupDigits } from '@/lib/money';
 

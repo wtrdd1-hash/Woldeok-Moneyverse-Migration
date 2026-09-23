@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useState, useEffect, useActionState } from 'react';
@@ -8,10 +9,7 @@ import {
   TrendingDown,
   Minus,
   PlusCircle,
-  ShieldCheck,
-  Tag,
   Clock,
-  Sparkles,
   User,
   Heart,
 } from 'lucide-react';

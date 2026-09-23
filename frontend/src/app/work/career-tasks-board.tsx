@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import { useState, useActionState } from 'react';
 import { useLocale } from '@/components/locale-provider';
 import { Badge } from '@/components/ui/badge';
-import { Briefcase, Compass, Sparkles, Star, CheckCircle2, Clock, Zap, ArrowRight } from 'lucide-react';
+import { Briefcase, Compass, Sparkles, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Card,

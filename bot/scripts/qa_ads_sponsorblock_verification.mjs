@@ -1,11 +1,9 @@
 import https from 'node:https';
 import { spawn } from 'node:child_process';
-import { createAudioResource, StreamType } from '@discordjs/voice';
 
 console.log('====================================================');
 console.log('  QA Discord Music Bot Ads & SponsorBlock Audit     ');
-console.log('====================================================
-');
+console.log('====================================================\n');
 
 async function fetchSponsorBlockSegments(videoId) {
   return new Promise((resolve) => {
@@ -15,7 +13,7 @@ async function fetchSponsorBlockSegments(videoId) {
       res.on('data', c => body += c);
       res.on('end', () => {
         if (res.statusCode === 200) {
-          try { resolve(JSON.parse(body)); } catch (e) { resolve([]); }
+          try { resolve(JSON.parse(body)); } catch { resolve([]); }
         } else {
           resolve([]);
         }
@@ -67,8 +65,7 @@ async function runQA() {
   }
 
   // 2. SponsorBlock Community API Real-Time Interception
-  console.log('
-[QA 2] Verifying SponsorBlock Community API Interception...');
+  console.log('\n[QA 2] Verifying SponsorBlock Community API Interception...');
   const testVideos = [
     { id: '09R8_2nJtjg', title: 'Maroon 5 - Sugar' },
     { id: 'YQHsXMglC9A', title: 'Adele - Hello' },
@@ -87,8 +84,7 @@ async function runQA() {
   }
 
   // 3. Audio Stream Slicing & Waveform Comparison Test
-  console.log('
-[QA 3] Live Audio Stream Segment Slicing Test (Maroon 5 - Sugar)...');
+  console.log('\n[QA 3] Live Audio Stream Segment Slicing Test (Maroon 5 - Sugar)...');
   console.log('  -> Measuring 5 seconds of UNCUT stream (0s ~ 5s: Car conversation)...');
   const uncutVol = await measureVolume(
     'python3 /home/debian/Woldeok-Moneyverse-Migration/bot/node_modules/youtube-dl-exec/bin/yt-dlp --format "bestaudio[ext=webm][acodec=opus]/bestaudio" --no-playlist --js-runtimes node -o - "https://www.youtube.com/watch?v=09R8_2nJtjg" | ffmpeg -i - -t 5 -af volumedetect -f null /dev/null'
@@ -97,7 +93,7 @@ async function runQA() {
 
   console.log('  -> Measuring 5 seconds of CUT stream (Skipping 0s ~ 26.4s intro talking)...');
   const cutVol = await measureVolume(
-    'python3 /home/debian/Woldeok-Moneyverse-Migration/bot/node_modules/youtube-dl-exec/bin/yt-dlp --format "bestaudio[ext=webm][acodec=opus]/bestaudio" --no-playlist --js-runtimes node -o - "https://www.youtube.com/watch?v=09R8_2nJtjg" | ffmpeg -i - -af "aselect='not(between(t,0,26.444))',asetpts=N/SR/TB" -t 5 -af volumedetect -f null /dev/null'
+    `python3 /home/debian/Woldeok-Moneyverse-Migration/bot/node_modules/youtube-dl-exec/bin/yt-dlp --format "bestaudio[ext=webm][acodec=opus]/bestaudio" --no-playlist --js-runtimes node -o - "https://www.youtube.com/watch?v=09R8_2nJtjg" | ffmpeg -i - -af "aselect='not(between(t,0,26.444))',asetpts=N/SR/TB" -t 5 -af volumedetect -f null /dev/null`
   );
   console.log('     Cut Mean Volume: ' + cutVol.mean + ' dB (Punchy Pop Music Beat)');
 
@@ -109,8 +105,7 @@ async function runQA() {
   }
 
   // 4. Live Bot Daemon Health Check
-  console.log('
-[QA 4] Live Bot Daemon & Voice Channel Inspection...');
+  console.log('\n[QA 4] Live Bot Daemon & Voice Channel Inspection...');
   const systemctl = spawn('systemctl', ['is-active', 'moneyverse-discord-bot.service']);
   let statusText = '';
   systemctl.stdout.on('data', d => statusText += d);
@@ -119,15 +114,13 @@ async function runQA() {
   console.log('  -> Systemd service state:', statusText);
   results.push({ name: 'Daemon Service State', status: statusText === 'active' ? 'PASS' : 'FAIL', detail: 'moneyverse-discord-bot.service: ' + statusText });
 
-  console.log('
-====================================================');
+  console.log('\n====================================================');
   console.log('               QA SUMMARY REPORT                    ');
   console.log('====================================================');
   for (const r of results) {
     console.log(' [' + r.status + '] ' + r.name.padEnd(38) + ': ' + r.detail);
   }
-  console.log('====================================================
-');
+  console.log('====================================================\n');
 }
 
 runQA();

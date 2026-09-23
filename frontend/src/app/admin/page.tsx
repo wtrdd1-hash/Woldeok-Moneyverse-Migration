@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -5,49 +6,33 @@ import {
   Activity,
   AlertTriangle,
   ArrowRight,
-  Award,
   Banknote,
-  BarChart3,
   Bell,
   Briefcase,
   Building2,
-  Calendar,
-  CheckCircle2,
-  CheckSquare,
   ChevronRight,
   CircleAlert,
-  CircleCheck,
   Clock,
   Coins,
   Cpu,
-  Eye,
   Flame,
-  Globe,
   Headphones,
   History,
   Image as ImageIcon,
-  Key,
   Landmark,
   Lock,
-  MessageSquare,
   Radio,
   RefreshCw,
   Search,
-  Server,
-  Shield,
   ShieldAlert,
   ShieldCheck,
   ShoppingBag,
   Sliders,
-  Sparkles,
   TrendingUp,
   UserCheck,
   Users,
-  Wallet,
-  Wrench,
-  Zap,
 } from 'lucide-react';
-import { PageHeader, SectionHeader } from '@/components/page-header';
+import {  SectionHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

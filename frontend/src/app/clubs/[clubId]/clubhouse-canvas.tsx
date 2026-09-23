@@ -6,13 +6,9 @@ import {
   Sun,
   Moon,
   RotateCcw,
-  Sparkles,
-  ShieldCheck,
-  Award,
   Users,
   Info,
   Lock,
-  PlusCircle,
 } from 'lucide-react';
 
 interface FurnitureItem {
@@ -78,6 +74,7 @@ export function ClubhouseCanvas({
   readonly userRole?: string | null;
 }) {
   const [grid, setGrid] = useState<(string | null)[][]>(createStarterClubGrid);
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [selectedFurniture, setSelectedFurniture] = useState<FurnitureItem | null>(CLUB_PALETTE[4] ?? null);
   const [isNightMode, setIsNightMode] = useState<boolean>(false);
   const [copiedNotification, setCopiedNotification] = useState<boolean>(false);
@@ -92,14 +89,16 @@ export function ClubhouseCanvas({
     async function loadCanvas() {
       try {
         const res = await fetch(`/api/v1/clubs/${clubId}/canvas`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.canvas?.grid && Array.isArray(data.canvas.grid) && !cancelled) {
+        if (!res.ok) throw new Error('club canvas request failed');
+        const data = await res.json();
+        if (!cancelled) {
+          if (data.canvas?.grid && Array.isArray(data.canvas.grid)) {
             setGrid(data.canvas.grid);
           }
+          setLoadState('ready');
         }
       } catch {
-        // Fallback to starter grid
+        if (!cancelled) setLoadState('error');
       }
     }
     loadCanvas();
@@ -118,6 +117,7 @@ export function ClubhouseCanvas({
   const placedCount = grid.flat().filter(Boolean).length;
 
   const handleCellClick = (r: number, c: number) => {
+    if (loadState !== 'ready') return;
     setGrid((prev) => {
       const next = prev.map((row) => [...row]);
       const row = next[r];
@@ -167,6 +167,10 @@ export function ClubhouseCanvas({
   };
 
   const handleSaveServer = async () => {
+    if (loadState !== 'ready') {
+      setSaveMessage('서버 배치를 확인하기 전에는 저장할 수 없습니다.');
+      return;
+    }
     setIsSaving(true);
     setSaveMessage(null);
     try {
@@ -258,7 +262,7 @@ export function ClubhouseCanvas({
           <button
             type="button"
             onClick={handleSaveServer}
-            disabled={isSaving}
+            disabled={isSaving || loadState !== 'ready'}
             className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 text-xs font-bold shadow-sm active:scale-95 transition-all"
           >
             <span>{isSaving ? '저장 중...' : '서버에 배치 저장'}</span>
@@ -274,6 +278,16 @@ export function ClubhouseCanvas({
         </div>
       </div>
 
+      {loadState === 'loading' && (
+        <div className="mt-3 rounded-xl border border-border/70 bg-muted/30 px-4 py-2 text-xs font-semibold text-muted-foreground">
+          서버의 저장된 클럽 배치를 확인하는 중입니다.
+        </div>
+      )}
+      {loadState === 'error' && (
+        <div className="mt-3 rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-2 text-xs font-semibold text-destructive">
+          서버 배치를 불러오지 못했습니다. 기존 배치를 보호하기 위해 편집 저장을 차단했습니다.
+        </div>
+      )}
       {saveMessage && (
         <div className="mt-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
           {saveMessage}

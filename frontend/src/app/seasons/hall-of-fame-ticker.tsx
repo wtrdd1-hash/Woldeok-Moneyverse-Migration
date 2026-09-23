@@ -3,14 +3,11 @@
 import React, { useState } from 'react';
 import {
   Trophy,
-  Flame,
   Crown,
   Sparkles,
   ChevronRight,
   X,
-  Medal,
   History,
-  ShieldAlert,
 } from 'lucide-react';
 import { groupDigits } from '@/lib/money';
 

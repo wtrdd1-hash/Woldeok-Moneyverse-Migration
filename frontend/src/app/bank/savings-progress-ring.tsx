@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import React, { useState, useId } from 'react';
-import { Target, TrendingUp, Sparkles, ChevronRight, Award, Calculator, Info } from 'lucide-react';
+import { Target, TrendingUp, Sparkles, ChevronRight, Award, Calculator } from 'lucide-react';
 import { groupDigits } from '@/lib/money';
 
 interface SavingsGoalProgressRingProps {

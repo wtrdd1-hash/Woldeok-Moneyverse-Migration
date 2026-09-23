@@ -2,11 +2,24 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.405
+> Current integrated version: v2026.09.23.406
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Completed-development re-review — v2026.09.23.406 (2026-09-23)
+
+- Completion claims are split into CODE_PRESENT, TEST_COVERED, TEST_RUNTIME_VERIFIED, PRODUCTION_VERIFIED, PLAN_DRIFT, BLOCKED_INTEGRITY and COVERAGE_GAP.
+- G406-01 / P1: Production serves older application source `2c854d4...`; Test/current pre-v406 application source is `7b705e1...`. Production is 55 non-document files behind Test, so newer features are not PRODUCTION_VERIFIED.
+- G406-02 / P1: current work DB/test still enforces per-task daily quotas. This conflicts with the newer unlimited-default ordinary-work/mastery planning and requires a separate implementation cycle.
+- G406-03 / P0: English auction, P2P direct trade and appraisal issuance were overclaimed as complete. Missing ledger/escrow/ownership/atomic-settlement invariants require fail-closed writes. v406 blocks unsafe write routes and removes fake/sample frontend authority data.
+- Basic marketplace listing purchase/cancel remains CODE_PRESENT and is not disabled by this safety fix.
+- Club canvas edit/save now requires successful authoritative server-state load.
+- G406-04 / P1: calendar is server-backed aggregation but needs focused regression coverage.
+- G406-05 / P1: implemented-feature status must eventually become a per-subfeature manifest containing frontend route, backend/API evidence, focused test, Test status and Production status.
+- Canonical audit: `COMPLETED_DEVELOPMENT_REVIEW_V406.md` / `.ko.md`.
+- v406 changes runtime code. Exact-SHA Test verification is mandatory before integration; merged-main revalidation and zero-downtime Production promotion are required before PRODUCTION_VERIFIED.
 
 ## Runtime hygiene inventory — v2026.09.23.405 (2026-09-23)
 

@@ -1,3 +1,4 @@
+import { ServiceUnavailableException } from '@nestjs/common';
 import { describe, expect, it, vi } from 'vitest';
 import { MarketplaceController } from './marketplace.controller';
 import { MarketplaceService } from './marketplace.service';
@@ -63,40 +64,61 @@ describe('MarketplaceController', () => {
     expect(result).toBe('l1');
   });
 
-  it('listAuctions and bidAuction work properly', async () => {
+  it('keeps auction reads available but blocks unsafe auction mutations', async () => {
     const list = await controller.listAuctions();
     expect(list).toHaveLength(1);
 
-    const bidRes = await controller.bidAuction(mockReq, 'auc-1' as any, { bidAmountWld: '9000' });
-    expect(bidRes).toEqual(expect.objectContaining({ currentBidWld: '9000' }));
+    expect(() =>
+      controller.createAuction(mockReq, {
+        itemCode: 'ITEM_TEST',
+        itemName: '테스트',
+        category: 'display',
+        rarity: 'RARE',
+        startPriceWld: '100',
+      }),
+    ).toThrow(ServiceUnavailableException);
+
+    expect(() =>
+      controller.bidAuction(mockReq, '11111111-1111-4111-8111-111111111111', {
+        bidAmountWld: '9000',
+      }),
+    ).toThrow(ServiceUnavailableException);
   });
 
-  it('createTrade, acceptTrade, confirmTrade, cancelTrade work properly', async () => {
-    const createRes = await controller.createTrade(mockReq, {
-      recipientName: '무역상인_박',
-      offeredWld: '1000',
-    });
-    expect(createRes).toBe('trade-new');
+  it('keeps direct-trade reads/cancellation available but blocks unsafe settlement mutations', async () => {
+    const list = await controller.listTrades(mockReq);
+    expect(list).toHaveLength(1);
 
-    const acceptRes = await controller.acceptTrade(mockReq, 'trade-1' as any);
-    expect(acceptRes).toBe(true);
+    expect(() =>
+      controller.createTrade(mockReq, {
+        recipientName: '무역상인_박',
+        offeredWld: '1000',
+      }),
+    ).toThrow(ServiceUnavailableException);
+    expect(() =>
+      controller.acceptTrade(mockReq, '11111111-1111-4111-8111-111111111111'),
+    ).toThrow(ServiceUnavailableException);
+    expect(() =>
+      controller.confirmTrade(mockReq, '11111111-1111-4111-8111-111111111111'),
+    ).toThrow(ServiceUnavailableException);
 
-    const confirmRes = await controller.confirmTrade(mockReq, 'trade-1' as any);
-    expect(confirmRes).toBe(true);
-
-    const cancelRes = await controller.cancelTrade(mockReq, 'trade-1' as any);
+    const cancelRes = await controller.cancelTrade(
+      mockReq,
+      '11111111-1111-4111-8111-111111111111',
+    );
     expect(cancelRes).toBe(true);
   });
 
-  it('listAppraisals and requestAppraisal work properly', async () => {
+  it('keeps appraisal reads available but blocks unverified certificate issuance', async () => {
     const list = await controller.listAppraisals(mockReq);
     expect(list).toHaveLength(1);
 
-    const cert = await controller.requestAppraisal(mockReq, {
-      itemId: 'item_1',
-      itemName: '골드 메달',
-      rarity: 'LEGENDARY',
-    });
-    expect(cert).toEqual(expect.objectContaining({ certId: 'CERT-2026-NEW1' }));
+    expect(() =>
+      controller.requestAppraisal(mockReq, {
+        itemId: 'item_1',
+        itemName: '골드 메달',
+        rarity: 'LEGENDARY',
+      }),
+    ).toThrow(ServiceUnavailableException);
   });
 });

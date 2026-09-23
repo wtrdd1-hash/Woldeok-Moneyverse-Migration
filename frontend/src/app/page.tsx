@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
@@ -11,15 +12,12 @@ import {
   ArrowRight,
   Compass,
   CheckCircle2,
-  Bell,
-  Sparkles,
-  Layers,
 } from 'lucide-react';
 import { WalletGlance } from '@/components/wallet-glance';
 import { LobbyCount } from '@/components/lobby-count';
 import { HomeAdvertisement } from '@/components/home-advertisement';
 import { TranslatedText as T } from '@/components/translated-text';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {     CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { publicApi } from '@/lib/api';

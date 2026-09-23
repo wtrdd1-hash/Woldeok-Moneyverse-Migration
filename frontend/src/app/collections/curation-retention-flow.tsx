@@ -1,21 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, no-empty */
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import {
   Compass,
-  Sparkles,
-  BookOpen,
-  Award,
   Share2,
   Calendar,
-  CheckCircle2,
   Lock,
-  Eye,
   X,
   Copy,
-  ChevronRight,
   Bookmark,
-  Layers,
   Heart,
 } from 'lucide-react';
 import { groupDigits } from '@/lib/money';

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ArrowLeftRight, ShieldCheck, CheckCircle2, User, Clock, AlertCircle, Plus, Send, XCircle } from 'lucide-react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ArrowLeftRight, CheckCircle2, User, Plus } from 'lucide-react';
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,39 +40,12 @@ interface DirectTradeViewProps {
 
 export function DirectTradeView({
   holdings,
-  userBalanceWld,
+  userBalanceWld: _userBalanceWld,
   currentUserId = 'usr_me',
   currentUserName = '나',
 }: DirectTradeViewProps) {
-  // 모의 1:1 직거래 제안 목록
-  const [trades, setTrades] = useState<DirectTradeOffer[]>([
-    {
-      id: 'trade_01',
-      senderId: 'usr_investor',
-      senderName: '월덕헤지펀드',
-      recipientId: currentUserId,
-      recipientName: currentUserName,
-      offeredItems: [{ name: '고급 크래프팅 목재', quantity: 5, rarity: 'UNCOMMON' }],
-      offeredWld: '1200',
-      requestedItems: [{ name: '희귀 합금 판재', quantity: 2 }],
-      requestedWld: '0',
-      status: 'PROPOSED',
-      createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-    },
-    {
-      id: 'trade_02',
-      senderId: currentUserId,
-      senderName: currentUserName,
-      recipientId: 'usr_merchant',
-      recipientName: '무역상인_박',
-      offeredItems: [{ name: '네임플레이트 프레임 조각', quantity: 1, rarity: 'RARE' }],
-      offeredWld: '0',
-      requestedItems: [{ name: '사업체 운영 연료 팩', quantity: 10 }],
-      requestedWld: '500',
-      status: 'ACCEPTED_BY_PEER', // 상대방이 1차 수락하여 내 최종 서명 대기 상태
-      createdAt: new Date(Date.now() - 1000 * 60 * 40).toISOString(),
-    },
-  ]);
+  const [trades, setTrades] = useState<DirectTradeOffer[]>([]);
+  const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [recipientInput, setRecipientInput] = useState('');
@@ -81,8 +54,7 @@ export function DirectTradeView({
   const [requestItemNameInput, setRequestItemNameInput] = useState('');
   const [requestWldInput, setRequestWldInput] = useState('0');
 
-  const [activeSignTrade, setActiveSignTrade] = useState<DirectTradeOffer | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [, setIsProcessing] = useState(false);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
   // 실제 백엔드 1:1 직거래 목록 로드
@@ -91,14 +63,17 @@ export function DirectTradeView({
     async function loadTrades() {
       try {
         const res = await fetch('/api/v1/marketplace/trades');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0 && !cancelled) {
-            setTrades(data);
-          }
+        if (!res.ok) throw new Error('trade list request failed');
+        const data = await res.json();
+        if (!cancelled) {
+          setTrades(Array.isArray(data) ? data : []);
+          setLoadState('ready');
         }
       } catch {
-        // Fallback to starter trades
+        if (!cancelled) {
+          setTrades([]);
+          setLoadState('error');
+        }
       }
     }
     loadTrades();
@@ -133,12 +108,18 @@ export function DirectTradeView({
         }),
       });
 
-      const tradeId = res.ok ? await res.json() : `trade_${Date.now().toString(36)}`;
+      if (!res.ok) {
+        throw new Error('direct trade creation is unavailable');
+      }
+      const tradeId = await res.json();
+      if (typeof tradeId !== 'string' || !tradeId) {
+        throw new Error('invalid direct trade response');
+      }
       const newOffer: DirectTradeOffer = {
-        id: typeof tradeId === 'string' ? tradeId : `trade_${Date.now().toString(36)}`,
+        id: tradeId,
         senderId: currentUserId,
         senderName: currentUserName,
-        recipientId: 'usr_target',
+        recipientId: 'server-confirmed',
         recipientName: recipientInput.trim(),
         offeredItems,
         offeredWld: offerWldInput || '0',
@@ -150,11 +131,13 @@ export function DirectTradeView({
 
       setTrades((prev) => [newOffer, ...prev]);
       setActionNotice(`[${recipientInput.trim()}] 님에게 1:1 직거래 제안이 전송되었습니다.`);
+      setIsCreateModalOpen(false);
     } catch {
-      // Fallback
+      setActionNotice('직거래 생성은 안전한 원자적 자산 정산이 완료될 때까지 사용할 수 없습니다.');
+      return;
     }
 
-    setIsCreateModalOpen(false);
+
     setRecipientInput('');
     setSelectedOfferItemId('');
     setOfferWldInput('0');
@@ -166,9 +149,10 @@ export function DirectTradeView({
   const handleFinalSignOff = async (trade: DirectTradeOffer) => {
     setIsProcessing(true);
     try {
-      await fetch(`/api/v1/marketplace/trades/${trade.id}/confirm`, {
+      const res = await fetch(`/api/v1/marketplace/trades/${trade.id}/confirm`, {
         method: 'POST',
       });
+      if (!res.ok) throw new Error('trade confirmation failed');
       setTrades((prev) =>
         prev.map((t) => (t.id === trade.id ? { ...t, status: 'COMPLETED' } : t)),
       );
@@ -186,9 +170,10 @@ export function DirectTradeView({
   const handleAcceptProposal = async (trade: DirectTradeOffer) => {
     setIsProcessing(true);
     try {
-      await fetch(`/api/v1/marketplace/trades/${trade.id}/accept`, {
+      const res = await fetch(`/api/v1/marketplace/trades/${trade.id}/accept`, {
         method: 'POST',
       });
+      if (!res.ok) throw new Error('trade acceptance failed');
       setTrades((prev) =>
         prev.map((t) => (t.id === trade.id ? { ...t, status: 'ACCEPTED_BY_PEER' } : t)),
       );
@@ -205,16 +190,15 @@ export function DirectTradeView({
   // 거래 취소 (서버 API 연동)
   const handleCancelTrade = async (tradeId: string) => {
     try {
-      await fetch(`/api/v1/marketplace/trades/${tradeId}/cancel`, {
+      const res = await fetch(`/api/v1/marketplace/trades/${tradeId}/cancel`, {
         method: 'POST',
       });
+      if (!res.ok) throw new Error('trade cancellation failed');
       setTrades((prev) =>
         prev.map((t) => (t.id === tradeId ? { ...t, status: 'CANCELLED' } : t)),
       );
     } catch {
-      setTrades((prev) =>
-        prev.map((t) => (t.id === tradeId ? { ...t, status: 'CANCELLED' } : t)),
-      );
+      setActionNotice('거래 취소가 서버에 반영되지 않았습니다. 상태를 새로고침한 뒤 다시 시도해 주세요.');
     }
   };
 
@@ -236,12 +220,13 @@ export function DirectTradeView({
             </Badge>
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            두 유저 간에 원하는 물품과 WLD를 직접 교환할 수 있습니다. 한쪽이 일방적으로 물건만 가로채는 사고를 방지하기 위해, 양측 모두가 제안 내용을 확인하고 최종 서명(Sign-Off)을 누르는 순간 시스템 에스크로에서 원자적(Atomic) 동시 스왑이 일어납니다.
+            기존 직거래 기록은 조회·취소할 수 있습니다. 실제 WLD·아이템의 원자적 동시 정산이 완성될 때까지 신규 제안·수락·최종 체결은 일시 중지되어 있습니다.
           </p>
         </div>
 
         <div className="flex items-center gap-3 shrink-0">
           <Button
+            disabled
             onClick={() => {
               setIsCreateModalOpen(true);
               setActionNotice(null);
@@ -250,7 +235,7 @@ export function DirectTradeView({
             className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-semibold gap-1.5"
           >
             <Plus className="size-3.5" />
-            새 1:1 직거래 제안
+            직거래 신규 제안 일시 중지
           </Button>
         </div>
       </div>
@@ -268,6 +253,22 @@ export function DirectTradeView({
           >
             닫기
           </button>
+        </div>
+      )}
+
+      {loadState === 'loading' && (
+        <div className="rounded-xl border border-border/70 bg-muted/30 p-4 text-sm text-muted-foreground">
+          서버 직거래 제안을 불러오는 중입니다.
+        </div>
+      )}
+      {loadState === 'error' && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+          직거래 목록을 불러오지 못했습니다. 임시·예시 거래는 표시하지 않습니다.
+        </div>
+      )}
+      {loadState === 'ready' && trades.length === 0 && (
+        <div className="rounded-xl border border-border/70 bg-muted/30 p-4 text-sm text-muted-foreground">
+          현재 진행 중인 서버 직거래 제안이 없습니다.
         </div>
       )}
 
@@ -395,7 +396,7 @@ export function DirectTradeView({
                     </Button>
                     <Button
                       size="sm"
-                      disabled={isProcessing}
+                      disabled
                       onClick={() => handleAcceptProposal(trade)}
                       className="flex-1 text-xs bg-primary text-primary-foreground font-semibold"
                     >
@@ -407,7 +408,7 @@ export function DirectTradeView({
                 {canFinalSign && (
                   <Button
                     size="sm"
-                    disabled={isProcessing}
+                    disabled
                     onClick={() => handleFinalSignOff(trade)}
                     className="w-full text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold"
                   >
