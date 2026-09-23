@@ -1,3 +1,8 @@
+## v2026.09.23.402 — Repair bot QA parser CI blocker
+
+- Repaired invalid JavaScript string literals in the Discord music bot ads/SponsorBlock QA script so repository lint can parse the file and continue reporting downstream checks.
+- Preserved QA behavior while removing unused bindings. No database, ledger, auth, or runtime application contract changed.
+
 ## v2026.09.23.390 — QA branch lifecycle cleanup hardening
 
 - Branch: `fix/qa-branch-cleanup-v2026.09.23.390`.
