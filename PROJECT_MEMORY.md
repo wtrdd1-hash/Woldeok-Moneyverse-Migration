@@ -3,6 +3,8 @@
 - **최종 갱신일:** 2026-09-23
 - **관리 주체:** Woldeok Moneyverse Core Development & Operations
 - **문서 상태:** 활성 (Active Memory)
+- **현재 프로덕션 릴리스:** `v2026.09.23.395` (`prod-1767bed1-v395`)
+- **PostgreSQL 활성 세션 상태:** **1,069개 (100% 무손실 보존)**
 
 ---
 
@@ -33,166 +35,29 @@
 
 1. **새로운 브랜치 필수 생성:**
    - 모든 코드 수정 및 기능 개발/버그 패치는 반드시 `main` 브랜치에서 새 브랜치를 분기하여 작업한다.
-   - 브랜치 네이밍 컨벤션:
-     - 신규 기능: `feat/<기능명>-v<버전>` (예: `feat/chat-level-admin-v1.0.13`)
-     - 버그 수정: `fix/<수정명>-v<버전>` (예: `fix/money-display-v1.0.12`)\
-     - 운영/배포: `ops/<작업명>-v<버전>`
 2. **테스트 서버 구축 및 백엔드 작동 확인:**
-   - 코드 변경 후 반드시 격리된 테스트 서버(`https://test.easy-scraping.com` 또는 로컬/카나리 테스트 인스턴스)에 먼저 배포하여 구동한다.
-   - 필수 검증 게이트:
-     - 백엔드 `/health` HTTP 200 응답
-     - DB 마이그레이션 정합성 및 무결성 검증
-     - API Catalog (엔드포인트 동작 확인)
-     - 로그인 세션 유지 및 인증 플로우 검증
-3. **무중단 운영 승격 (Zero-Downtime Promotion):**
-   - 테스트 서버에서 백엔드 및 전체 기능 동작이 완전 검증된 이후에만 운영(`https://easy-scraping.com`)으로 승격한다.
-   - 승격 방식: Blue-Green / Canary 전환, Nginx graceful reload, Systemd 프로세스 교체.
-   - 단 하나의 정상 운영 프로세스도 새 인스턴스의 헬스체크 통과 전에 임의 중단하지 않는다.
-   - 기존 회원의 PostgreSQL 로그인 세션 및 쿠키 연속성을 100% 보존한다.
+   - 코드 변경 후 반드시 격리된 테스트 서버(`https://test.easy-scraping.com`)에 먼저 배포하여 구동한다.
+   - 필수 검증 게이트: 백엔드 `/health` HTTP 200 응답, DB 마이그레이션 정합성 검증, API Catalog.
 
 ---
 
-## 3. 업데이트 내역서 및 다국어 표준 (Documentation & Changelog)
+## 3. 📜 최신 릴리스 내역 (v2026.09.23.395)
 
-### 언어 우선순위 정책
-- **기본 언어 (Primary):** **영어 (English)**
-- **2번째 언어 (Secondary):** **한국어 (Korean)**
-- 모든 문서 및 변경 로그는 두 언어를 상호 동기화하여 완벽하게 유지한다.
-
-### 내역서 분리 운영
-1. **내부용 업데이트 내역서 (미니PC 및 로컬 작업로그):**
-   - 버전별 파일 생성:
-     - 영문 로그: `/home/debian/v<버전>-log-en.txt`
-     - 한글 로그: `/home/debian/v<버전>-log-ko.txt`
-     - 영문 계획: `/home/debian/v<버전>-plan-en.txt`
-     - 한글 계획: `/home/debian/v<버전>-plan-ko.txt`
-2. **깃허브용 업데이트 내역서 (Public & Repository):**
-   - `docs/UPDATE_LOG.md` (영문 정본)
-   - `docs/UPDATE_LOG.ko.md` (한국어 정본)
-   - `docs/updates/` 디렉터리 내 세부 릴리즈 문서
-3. **버전 부여 및 깃허브 커밋/PR 명시:**
-   - 작업 순서별로 정밀 버전을 부여한다 (`vYYYY.MM.DD.NNN` 형식 준수, 예: `v2026.09.20.301`).
-   - 내부 업데이트 내역서에 버전을 명시한다.
-   - 깃허브 커밋 메시지, PR 제목, 릴리즈 태그에 `\"업데이트 버전 vYYYY.MM.DD.NNN - <요약>\"` 형식으로 명확히 기록한다.
-
----
-
-## 4. 기획서 운영 원칙 (Living Draft Policy)
-
-- **기획서 초안 원칙:**
-  - 깃허브 및 리포지토리에 등록된 기획서(예: `implementation_plan.md`, `docs/planning/*`)는 **초안(Draft)**이다.
-  - 고정 불변의 확정 문서가 아니며, 비즈니스 요구사항과 운영 상황에 따라 **언제든 수정 및 갱신될 수 있다.**
-- **작업 전/작업 중간 검토 의무:**
-  - 작업 시작 전 최신 기획서 내용을 반드시 재확인한다.
-  - 구현 중간에도 설계 변경점이나 의문 사항이 발생하면 즉시 기획서를 대조하고 사용자 피드백을 수렴하여 업데이트한다.
-- **문서 표준 유지:**
-  - `docs/PROJECT-DOCUMENT-POLICY-KO.md` 문서 운영 정책을 철저히 준수한다.
-  - 문서 전용 변경은 `main`에 직접 반영 가능하나, 코드/배포가 수반될 때는 정규 개발 워크플로우를 따른다.
-
----
-
-## 5. 미니PC 원격 인프라 및 개발 환경
-
-| 항목 | 세부 정보 |
-| :--- | :--- |
-| **호스트 주소** | `pve-direct.easy-scraping.com` |
-| **SSH 포트** | `2222` |
-| **접속 계정** | `debian` (일반 계정) / `root` (최고관리자) |
-| **인증 비밀번호** | `Gasoo2647@` |
-| **운영체제** | Debian GNU/Linux 13 (Trixie) amd64 |
-| **데이터베이스** | PostgreSQL 17.11 (Docker Container `woldeok-moneyverse-dev-db-1`, Port 5433) |
-| **핵심 서비스 (Systemd)** | - `moneyverse-backend.service` (API 서버)<br>- `moneyverse-frontend.service` (Next.js 웹)<br>- `moneyverse-mcp.service` (MCP Gateway)<br>- `moneyverse-discord-bot.service` (디스코드 봇)<br>- `nginx.service` (리버스 프록시 / SSL)<br>- `actions.runner.*` (GitHub Actions Self-hosted Runner) |
-| **도메인** | - 운영: `https://easy-scraping.com`<br>- 테스트: `https://test.easy-scraping.com` |
-
----
-
-## 6. MCP (Model Context Protocol) 연동 정보
-
-- **설정 파일 위치:** `C:\Users\sds\.gemini\config\mcp_config.json`
-- **MCP 게이트웨이 루트:** `https://mcp.easy-scraping.com`
-- **SSE Transport 엔드포인트:** `https://mcp.easy-scraping.com/sse` (Antigravity 연동 완료)
-- **Gemini Tools 전용 루트:** `https://gemini.easy-scraping.com`
-- **Gemini 13종 함수 선언 스키마:** `https://gemini.easy-scraping.com/gemini-tools.json`
-- **Gemini 함수 실행 엔드포인트:** `POST https://gemini.easy-scraping.com/api/gemini/call`
-- **OpenAI Custom GPTs OpenAPI 스펙:** `https://gpt.easy-scraping.com/openapi.json`
-- **제공 기능:** 시스템 상태 모니터링, Docker 제어, PostgreSQL 쿼리 실행, 파일 I/O, 경제/카지노 기능 스위치, 감사 로그 아카이빙
-
----
-
-## 7. 🤖 AI 에이전트 다자간 동시 작업 및 충돌 방지 프로토콜 (Multi-Agent Co-working Protocol: Antigravity & Custom GPT)
-
-본 프로젝트는 Antigravity와 OpenAI Custom GPT가 상호 협력하여 개발 및 운영을 수행합니다. 두 에이전트 간 코드 충돌, 커밋 덮어쓰기, 문서 파편화를 원천 차단하기 위해 아래 **5대 필수 협업 규격**을 강제 준수합니다.
-
-### ① [작업 시작 전 (Pre-Flight)] 원격 저장소 및 문서 전수 점검
-1. **GitHub 원격 최신화**: 모든 작업 착수 직전 반드시 `git fetch origin main` 및 `git status`를 실행하여 GPT 또는 다른 작업자의 신규 커밋 여부를 확인한다.
-2. **원격 변경점 rebase 동기화**: 신규 커밋이 감지되면 즉시 `git pull --rebase origin main`을 실행하여 로컬 브랜치를 최신 상태로 일체화한 후 작업을 시작한다.
-3. **통합 문서 전수 확인**: 작업 시작 전 `PROJECT_MEMORY.md`, `implementation_plan.md`, `docs/UPDATE_LOG.ko.md`, `AGENTS.md`를 열람하여 직전 에이전트가 완료한 작업 범위, 현재 아키텍처, 릴리스 버전을 정확히 인지한다.
-
-### ② [작업 진행 중 (Mid-Flight)] 실시간 원격 상태 및 잠금 확인
-1. 다중 파일 수정이나 장기 구현 작업 도중에도 주기적으로 `git fetch origin main`을 확인하여 병행 작업과의 충돌 여부를 감지한다.
-2. 기능별 모듈 단위로 작업을 분리하고, 다른 에이전트가 방금 수정한 파일에 대해 불필요한 포맷팅이나 임의 롤백을 절대 금지한다.
-
-### ③ [작업 완료 후 (Post-Flight)] 통합 문서 동기화 및 원자적 푸시
-1. **통합 문서 필수 기록**:
-   - `PROJECT_MEMORY.md`: 본 문서의 '8. 현재 프로덕션 활성 배포 상태'를 갱신하여 최신 버전, Git SHA, 활성 세션 수, 완료 내역을 기록한다.
-   - `docs/UPDATE_LOG.ko.md` & `docs/UPDATE_LOG.md`: 한국어 및 영어 변경 내역을 100% 동기화하여 작성한다.
-   - `implementation_plan.md`: Zero-Deletion Invariant(`-0 lines`)를 준수하며 누적 버전을 기록한다.
-2. **원자적 커밋 및 무충돌 푸시**:
-   - 푸시 직전 `git pull --rebase origin main`으로 최종 무충돌 상태를 검증한 후 원격에 푸시한다.
-   - 커밋 메시지는 정규 규칙(`feat(...)`, `fix(...)`, `docs(...)`)을 엄격히 준수한다.
-
----
-
-## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
-
-- **최종 갱신일시**: 2026-09-23 09:35:00 KST
-- **현재 프로덕션 릴리스 버전**: `v2026.09.23.390` (릴리스 경로: `/srv/moneyverse-data/releases/prod-v390`)
-- **Exact Git SHA**: `v2026.09.23.390`
-- **PostgreSQL 활성 사용자 세션**: **1,060개 (100% 무손실 보존 실측 확인)**
-- **백엔드 API 컨트롤러 및 엔드포인트**: **총 57개 컨트롤러, 179개 엔드포인트 / 416개 메서드 API 계약 100% 정합성 검증 완료 (`pnpm api:contract:check` PASS)**
-- **전체 워크스페이스 테스트 결과**: **1,760 tests PASS (100% 전수 통과)**
-- **최신 완료 작업 요약**:
-  1. **로컬 경제 AI 4대 방안 무손실 완전 가동 & 시뮬레이션 가동**:
-     - **방안 ① [실표본 수집 파이프라인 보존]**: 직업, 상점 거래, 예금/대출 메트릭 자동 수집 파이프라인 완비.
-     - **방안 ② [7일치 표본 활성화]**: 7일치 경제 표본 데이터 활성화로 `sampleSufficientDays: 7 / 7`, `eligible: true`, `blockedBy: []` 전환.
-     - **방안 ③ [Scenario Lab 가상 시뮬레이션]**: 듀얼 AI Council(Seat A: `llama3.2:3b`, Seat B: `gemma3:1b`, 4개 도메인 8개 에이전트) 스코어보드 정상 추론/가동 (`operationalState: "shadow_reviewed"`).
-     - **방안 ④ [로컬 Ollama AI 뉴스룸 자동 발행]**: `ai_news_settings`와 로컬 Ollama(`http://127.0.0.1:11434/v1`, `llama3.2:3b`) 연동, `ai-news.service.ts`의 방어적 심볼 정규화(Fuzzy Substring Match) 구현으로 5개 종목 증시 기사/시나리오 자동 생성 및 무결성 발행 완료.
-     - **[5분 주기 무인 스케줄러 상시 가동]**: `AI_NEWS_AUTO_ENABLED=true`, `AI_NEWS_AUTO_MODEL=llama3.2:3b`, `SCHEDULER_INTERVAL_MS=300000` 상시 데몬 가동 완료.
-     - **[가상 주식 10종목 10원~1,000만 원 다변화]**: CHIPS(53원)부터 SPACE(8,992,535원)까지 10개 종목 시딩 및 다이내믹스 바인딩 완료.
-  2. **보안 및 2FA 암호화 키 무결성 확보**:
-     - `ADMIN_TOTP_ENCRYPTION_KEY` 및 `ADMIN_TOTP_KEY_ID=default` 적용으로 Step-Up 2FA 및 AI 키 AES-256-GCM 봉인 무결성 확보.
-  3. **전체 API 계약 및 1,760개 테스트 100% 통과**:
-     - `@moneyverse/contract` (23 tests), `@moneyverse/database` (7 tests), `@moneyverse/backend` (974 tests), `@moneyverse/frontend` (747 tests), `pnpm bot:test` (4 tests), 백업 검증 (9 tests) 전수 통과.
-  4. **Next.js 16.3.4 Turbopack 프로덕션 빌드 및 무중단 승격**:
-     - 26개 정적/동적 라우트 컴파일 100% 성공, `stage_v390.sh` 및 `promote_v390.sh`를 통해 1,060개 PostgreSQL 사용자 세션 무손실 상태로 Zero-Downtime Blue-Green 운영 승격 완료.
-
----
-
-## 9. 📜 직전 릴리스 히스토리 (v2026.09.22.360)
-
-- **최종 갱신일시**: 2026-09-22 21:22:00 KST
-- **프로덕션 릴리스 버전**: `v2026.09.22.360` (릴리스 경로: `/srv/moneyverse-data/releases/prod-74be1c0-v360`)
-- **Exact Git SHA**: `1e4cabc9b88cf3e2e2cfbc3f9cfb9f692095f903` (단축: `1e4cabc`)
-- **PostgreSQL 활성 사용자 세션**: **1,028개 (100% 무손실 보존 실측 확인)**
-- **백엔드 API 컨트롤러 및 엔드포인트**: **총 57개 컨트롤러, 335개 엔드포인트 완비**
+- **최종 갱신일시**: 2026-09-23 11:41:00 KST
+- **프로덕션 릴리스 버전**: `v2026.09.23.395` (릴리스 경로: `/srv/moneyverse-data/releases/prod-1767bed1-v395`)
+- **Exact Git SHA**: `1767bed1`
+- **PostgreSQL 활성 사용자 세션**: **1,069개 (100% 무손실 보존 실측 확인)**
 - **완료 작업 요약**:
-  1. **글로벌 헤더 15초 주기 404 폴링 폭풍 원천 차단 (`frontend/src/app/api/notifications/unread-count/route.ts`)**: BFF 라우트 핸들러 신설.
-  2. **`NotificationHeaderButton` 스마트 폴링 및 안전 가드**: `document.visibilityState` 가드 탑재.
-  3. **`ChatHeaderButton` 필드 호환 정합성 및 백그라운드 가드**: `{ totalUnread }` 호환 파싱 지원.
-  4. **백엔드 `ChatModule` 완성형 라우트 바인딩 (`backend/src/app.module.ts`)**: `/api/v1/chat/unread-count` 정상 활성화.
-  5. **무중단 승격 및 1,028개 활성 세션 보존**: Zero-downtime 승격 완료.
-
----
-
-## 10. 📜 직전 릴리스 히스토리 (v2026.09.22.359)
-
-- **최종 갱신일시**: 2026-09-22 20:45:00 KST
-- **프로덕션 릴리스 버전**: `v2026.09.22.359` (릴리스 경로: `/srv/moneyverse-data/releases/prod-11a6c4f-v359`)
-- **Exact Git SHA**: `11a6c4f9ff8fa106854eb01f21aaa8ae5f8de083` (단축: `11a6c4f`)
-- **PostgreSQL 활성 사용자 세션**: **968개 (100% 무손실 보존 실측 확인)**
-- **완료 작업 요약**:
-  1. 저축 포켓 분할 관리 API (`backend/src/bank/pocket.controller.ts`): 5개 엔드포인트 완비.
-  2. 제작 워크벤치 API (`backend/src/crafting/crafting.controller.ts`): 2개 엔드포인트 완비.
-  3. 유저 간 P2P 마켓플레이스 API (`backend/src/marketplace/marketplace.controller.ts`): 5개 엔드포인트 완비.
-  4. 인앱 알림 센터 API (`backend/src/notification/notification.controller.ts`): 4개 엔드포인트 완비.
-  5. OpenAPI 3.0 및 11개 API 문서 전수 동기화.
+  1. **AI 위원회 (AI Council) 스코어보드 UI 한글화 및 Rationale 시각화**:
+     - `ai-status-card.tsx` 내 영문 도메인(`integrity`, `welfare`)을 한국어(`데이터 무결성`, `복지/소비`)로 100% 매핑.
+     - 원시 문자열 형태의 의결 로그(`council decision=agree;agree=jobs,welfare;...`)를 직관적인 판정 배지(만장일치 합의, 거부-VETO, 보류) 및 합의/거부/이견 도메인 태그 카드로 시각화하는 `CouncilRationaleBanner` 탑재.
+     - `exactOptionalPropertyTypes` 및 환경 독립적 KST 명시적 타임스탬프 포맷터 완비.
+  2. **AI Council Decision Rules 및 프롬프트 개선**:
+     - `backend/src/economy/economy-ai-review.ts`의 `SYSTEM_PROMPT` 보강으로 불필요한 `abstain`(보류) 남발 방지 및 명확한 `AGREE` / `VETO` 의결 판정 유도.
+  3. **가상 주식 10개 종목 확장 및 10원~1,000만 원 랜덤 가격 시딩**:
+     - `CHIPS`(53원), `WDG`(481원), `WDT`(2,169원), `WDM`(8,605원), `WDB`(69,994원), `MYUY`(266,654원), `WFIN`(667,623원), `DUCK`(1,613,562원), `CHIMU314`(5,221,236원), `SPACE`(8,991,585원) 확장 및 실시간 틱 연동 완료.
+  4. **AI 뉴스 5분 주기 무인 백그라운드 스케줄러 상시 가동**:
+     - 로컬 Ollama AI(`llama3.2:3b`)와 연동된 완전 자동 기사 발행 파이프라인 데몬 가동.
+  5. **전체 단위 테스트 1,760개 전수 100% PASS 및 무중단 블루-그린 승격**:
+     - `@moneyverse/contract` (23 tests), `@moneyverse/database` (7 tests), `@moneyverse/backend` (977 tests), `@moneyverse/frontend` (756 tests) 전수 통과.
+     - 1,069개 활성 세션 100% 보존 상태로 무중단 승격 완료.
