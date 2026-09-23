@@ -72,10 +72,9 @@ export function ConsentStepUpModal({
         router.refresh();
       }
     } catch {
-      toast.success('동의가 처리되었습니다.');
-      setOpen(false);
-      onSuccess?.();
-      router.refresh();
+      setErrorMsg('동의 처리 상태를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      setIsSubmitting(false);
+      toast.error('동의 처리에 실패했습니다. 다시 시도해 주세요.');
     }
   };
 
