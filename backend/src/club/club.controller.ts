@@ -93,6 +93,17 @@ export class CreateFeedPostDto {
   readonly isAnnouncement?: boolean;
 }
 
+export class UpdateClubCanvasDto {
+  @ApiProperty({ description: '12x12 가구 배치 그리드 배열' })
+  @IsArray()
+  readonly grid!: unknown[];
+
+  @ApiProperty({ description: '장식 점수', example: 450 })
+  @IsInt()
+  @Min(0)
+  readonly totalScore!: number;
+}
+
 @ApiTags('clubs')
 @Controller('clubs')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard)
@@ -247,16 +258,5 @@ export class ClubController {
     const ok = await this.clubService.updateClubCanvas(actorUserId, clubId, dto.grid, dto.totalScore);
     return { ok };
   }
-}
-
-export class UpdateClubCanvasDto {
-  @ApiProperty({ description: '12x12 가구 배치 그리드 배열' })
-  @IsArray()
-  readonly grid!: unknown[];
-
-  @ApiProperty({ description: '장식 점수', example: 450 })
-  @IsInt()
-  @Min(0)
-  readonly totalScore!: number;
 }
 
