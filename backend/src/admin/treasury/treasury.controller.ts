@@ -55,6 +55,12 @@ export class AdminTreasuryController {
     return this.service.getOverview();
   }
 
+  @Get('tax-rates')
+  @ApiOperation({ summary: '권위 국고 세율 및 과세표준 표 조회' })
+  async getTaxRates() {
+    return this.service.getTaxRates();
+  }
+
   @Get('transactions')
   @ApiOperation({ summary: '국고 원장 입출금 및 순환 감사 내역 조회' })
   async listTransactions(@Query() query: TreasuryListQueryDto) {

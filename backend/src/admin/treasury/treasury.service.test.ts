@@ -5,12 +5,44 @@ import type { TreasuryRepository } from './treasury.repository';
 describe('TreasuryService', () => {
   const mockRepo = {
     getOverview: vi.fn(),
+    getTaxRates: vi.fn(),
     listTransactions: vi.fn(),
     injectFunds: vi.fn(),
     absorbFunds: vi.fn(),
   } as unknown as TreasuryRepository;
 
   const service = new TreasuryService(mockRepo);
+
+  it('delegates getTaxRates to repository', () => {
+    const mockRates = [
+      { id: 'tax_user_transfer', category: 'User Transfers', current_rate_pct: 0 }
+    ];
+    vi.mocked(mockRepo.getTaxRates).mockReturnValueOnce(mockRates as any);
+
+    const rates = service.getTaxRates();
+    expect(rates).toEqual(mockRates);
+    expect(mockRepo.getTaxRates).toHaveBeenCalled();
+  });
+
+  it('delegates getOverview to repository and returns liquidity and tax schedule fields', async () => {
+    const mockOverview = {
+      vaults: [],
+      total_treasury_wld: '1000000',
+      total_circulating_wld: '500000',
+      reserve_ratio_pct: 200,
+      available_wld: '800000',
+      reserve_wld: '200000',
+      coverage_days: 80,
+      tax_rates: [],
+      stats_24h: { injected_wld: '0', absorbed_wld: '0', recirculated_fees_wld: '0' },
+    };
+    vi.mocked(mockRepo.getOverview).mockResolvedValueOnce(mockOverview as any);
+
+    const result = await service.getOverview();
+    expect(result).toEqual(mockOverview);
+    expect(result.coverage_days).toBe(80);
+    expect(result.available_wld).toBe('800000');
+  });
 
   it('rejects injection if reason is shorter than 10 characters', async () => {
     await expect(

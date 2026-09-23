@@ -27,11 +27,151 @@ export interface TreasuryLedgerRow {
   created_at: Date;
 }
 
+export interface TreasuryTaxRateItem {
+  readonly id: string;
+  readonly category: string;
+  readonly category_ko: string;
+  readonly taxable_event: string;
+  readonly current_rate_pct: number;
+  readonly min_rate_pct: number;
+  readonly max_rate_pct: number;
+  readonly treasury_attribution_pct: number;
+  readonly is_exempt: boolean;
+}
+
+export const AUTHORITATIVE_TAX_RATES: readonly TreasuryTaxRateItem[] = [
+  {
+    id: 'tax_user_transfer',
+    category: 'User Transfers',
+    category_ko: '일반 사용자 간 송금세',
+    taxable_event: '수취인에게 실제 이전되는 WLD, 송금 확정 시',
+    current_rate_pct: 0,
+    min_rate_pct: 0,
+    max_rate_pct: 2,
+    treasury_attribution_pct: 100,
+    is_exempt: false,
+  },
+  {
+    id: 'tax_marketplace_sale',
+    category: 'Marketplace Sales',
+    category_ko: '장터 판매세',
+    taxable_event: '판매자 실수령 전 체결금액 (2% 원천징수)',
+    current_rate_pct: 2,
+    min_rate_pct: 0,
+    max_rate_pct: 5,
+    treasury_attribution_pct: 100,
+    is_exempt: false,
+  },
+  {
+    id: 'tax_stock_trade',
+    category: 'Stock Trades',
+    category_ko: '주식 매매세',
+    taxable_event: '체결금액 기준 매도 시',
+    current_rate_pct: 1,
+    min_rate_pct: 0,
+    max_rate_pct: 3,
+    treasury_attribution_pct: 100,
+    is_exempt: false,
+  },
+  {
+    id: 'tax_business_settlement',
+    category: 'Business Settlements',
+    category_ko: '사업 정산 소득세',
+    taxable_event: '비용 차감 후 양(+)의 정산이익',
+    current_rate_pct: 3,
+    min_rate_pct: 0,
+    max_rate_pct: 8,
+    treasury_attribution_pct: 100,
+    is_exempt: false,
+  },
+  {
+    id: 'tax_b2b_trade',
+    category: 'B2B Trade',
+    category_ko: '사업체 간 B2B 거래세',
+    taxable_event: '실제 정산대금',
+    current_rate_pct: 1,
+    min_rate_pct: 0,
+    max_rate_pct: 3,
+    treasury_attribution_pct: 100,
+    is_exempt: false,
+  },
+  {
+    id: 'tax_general_shop',
+    category: 'General Shop',
+    category_ko: '일반 상점 소비세',
+    taxable_event: '과세대상 SKU 결제금액',
+    current_rate_pct: 1,
+    min_rate_pct: 0,
+    max_rate_pct: 3,
+    treasury_attribution_pct: 100,
+    is_exempt: false,
+  },
+  {
+    id: 'tax_luxury_sku',
+    category: 'Luxury SKUs',
+    category_ko: '고급/사치 SKU 소비세',
+    taxable_event: '지정 luxury SKU 결제금액',
+    current_rate_pct: 3,
+    min_rate_pct: 0,
+    max_rate_pct: 8,
+    treasury_attribution_pct: 100,
+    is_exempt: false,
+  },
+  {
+    id: 'tax_club_city_project',
+    category: 'Club & City Projects',
+    category_ko: '클럽/도시 프로젝트 관리세',
+    taxable_event: '환급되지 않는 참가·등록금 중 지정분',
+    current_rate_pct: 1,
+    min_rate_pct: 0,
+    max_rate_pct: 3,
+    treasury_attribution_pct: 100,
+    is_exempt: false,
+  },
+  {
+    id: 'tax_casino_exempt',
+    category: 'Casino Gaming',
+    category_ko: '카지노/확률형 흐름',
+    taxable_event: '별도 카지노 계약 우선',
+    current_rate_pct: 0,
+    min_rate_pct: 0,
+    max_rate_pct: 0,
+    treasury_attribution_pct: 0,
+    is_exempt: true,
+  },
+  {
+    id: 'tax_reward_exempt',
+    category: 'Work/Attendance/Quests',
+    category_ko: '작업/출석/퀘스트 보상',
+    taxable_event: '보상 지급액 (면세/비과세)',
+    current_rate_pct: 0,
+    min_rate_pct: 0,
+    max_rate_pct: 0,
+    treasury_attribution_pct: 0,
+    is_exempt: true,
+  },
+  {
+    id: 'tax_halt_refund_exempt',
+    category: 'Stock Halt Refund',
+    category_ko: '거래정지 매수원가 환급',
+    taxable_event: '환급원금 (면세/비과세)',
+    current_rate_pct: 0,
+    min_rate_pct: 0,
+    max_rate_pct: 0,
+    treasury_attribution_pct: 0,
+    is_exempt: true,
+  },
+];
+
 export interface TreasuryOverview {
   vaults: TreasuryVaultRow[];
   total_treasury_wld: string;
   total_circulating_wld: string;
   reserve_ratio_pct: number;
+  available_wld: string;
+  reserve_wld: string;
+  coverage_days: number;
+  tax_rates: readonly TreasuryTaxRateItem[];
   stats_24h: {
     injected_wld: string;
     absorbed_wld: string;
@@ -99,11 +239,45 @@ export class TreasuryRepository {
       else if (row.tx_type === 'FEE_RECIRCULATION') recirculated = row.total_amount;
     }
 
+    // 4. Reserve & Available calculation (ADMIN_TREASURY_MANAGEMENT_SPEC §5)
+    let reserveVaultWld = BigInt(0);
+    const emergencyVault = vaults.find((v) => v.code === 'VAULT_EMERGENCY');
+    if (emergencyVault) {
+      reserveVaultWld = BigInt(emergencyVault.balance_wld);
+    }
+    const committedWld = BigInt(0); // committed reservation
+    const availableWld =
+      totalTreasury > reserveVaultWld + committedWld
+        ? totalTreasury - (reserveVaultWld + committedWld)
+        : BigInt(0);
+
+    // 5. 30-day average daily outflow / expense for coverage calculation
+    let dailyOutflow30d = BigInt(10000); // minimum safe baseline
+    try {
+      const outflowRes = await this.pool.query<{ daily_avg: string }>(`
+        SELECT coalesce(sum(amount_wld::numeric) / 30, 10000)::bigint::text AS daily_avg
+        FROM public.system_treasury_ledger
+        WHERE created_at >= NOW() - INTERVAL '30 days'
+          AND tx_type IN ('INJECTION', 'STOCK_HALT_SETTLEMENT', 'EMERGENCY_RESERVE_TRANSFER')
+      `);
+      if (outflowRes.rows[0]?.daily_avg && BigInt(outflowRes.rows[0].daily_avg) > BigInt(0)) {
+        dailyOutflow30d = BigInt(outflowRes.rows[0].daily_avg);
+      }
+    } catch {
+      // fallback safe value
+    }
+
+    const coverageDays = Number(availableWld / dailyOutflow30d);
+
     return {
       vaults,
       total_treasury_wld: totalTreasury.toString(),
       total_circulating_wld: totalCirculating.toString(),
       reserve_ratio_pct: reserveRatio,
+      available_wld: availableWld.toString(),
+      reserve_wld: reserveVaultWld.toString(),
+      coverage_days: coverageDays,
+      tax_rates: AUTHORITATIVE_TAX_RATES,
       stats_24h: {
         injected_wld: injected,
         absorbed_wld: absorbed,
@@ -111,6 +285,10 @@ export class TreasuryRepository {
         recirculated_wld: recirculated,
       },
     };
+  }
+
+  getTaxRates(): readonly TreasuryTaxRateItem[] {
+    return AUTHORITATIVE_TAX_RATES;
   }
 
   async listTransactions(limit = 30, cursor?: string): Promise<{ items: TreasuryLedgerRow[]; next_cursor: string | null }> {

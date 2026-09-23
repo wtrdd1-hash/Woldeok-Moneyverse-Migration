@@ -635,6 +635,18 @@ export interface AdminTreasuryVault {
   readonly updated_at: string;
 }
 
+export interface AdminTreasuryTaxRate {
+  readonly id: string;
+  readonly category: string;
+  readonly category_ko: string;
+  readonly taxable_event: string;
+  readonly current_rate_pct: number;
+  readonly min_rate_pct: number;
+  readonly max_rate_pct: number;
+  readonly treasury_attribution_pct: number;
+  readonly is_exempt: boolean;
+}
+
 export interface AdminTreasuryLedger {
   readonly id: string;
   readonly vault_id: string;
@@ -655,6 +667,10 @@ export interface AdminTreasuryOverview {
   readonly total_treasury_wld: string;
   readonly total_circulating_wld: string;
   readonly reserve_ratio_pct: number;
+  readonly available_wld?: string;
+  readonly reserve_wld?: string;
+  readonly coverage_days?: number;
+  readonly tax_rates?: readonly AdminTreasuryTaxRate[];
   readonly stats_24h: {
     readonly injected_wld: string;
     readonly absorbed_wld: string;

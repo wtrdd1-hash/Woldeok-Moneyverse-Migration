@@ -34,11 +34,24 @@ function txTypeBadge(type: string) {
   }
 }
 
+function coverageBadge(days: number) {
+  if (days >= 14) {
+    return <Badge className="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px]">안전 (14일+)</Badge>;
+  }
+  if (days >= 7) {
+    return <Badge className="bg-amber-600 hover:bg-amber-700 text-white text-[11px]">경고 (14일 미만)</Badge>;
+  }
+  if (days >= 3) {
+    return <Badge className="bg-orange-600 hover:bg-orange-700 text-white text-[11px]">위험 (7일 미만)</Badge>;
+  }
+  return <Badge className="bg-destructive hover:bg-destructive/90 text-white text-[11px]">비상 (3일 미만)</Badge>;
+}
+
 export function TreasuryView({ overview, ledger }: Props) {
   return (
     <div className="grid gap-6">
       {/* 1. 국고 총 잔액 및 비축률 지표 */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="border shadow-sm">
           <CardHeader className="p-4 pb-2">
             <CardDescription className="text-xs">중앙 국고 총 비축 자금 (Vaults Balance)</CardDescription>
@@ -60,6 +73,21 @@ export function TreasuryView({ overview, ledger }: Props) {
           </CardHeader>
           <CardContent className="p-4 pt-0 text-xs text-muted-foreground">
             유저 유통 통화량 {groupDigits(overview.total_circulating_wld)} WLD 대비 비축 비율
+          </CardContent>
+        </Card>
+
+        <Card className="border shadow-sm">
+          <CardHeader className="p-4 pb-2">
+            <div className="flex items-center justify-between gap-1">
+              <CardDescription className="text-xs">가용 유동성 & 지출 방어 일수</CardDescription>
+              {overview.coverage_days !== undefined && coverageBadge(overview.coverage_days)}
+            </div>
+            <CardTitle className="text-2xl font-bold tracking-tight text-blue-600">
+              {overview.coverage_days !== undefined ? `${overview.coverage_days}일` : '-'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0 text-xs text-muted-foreground">
+            가용 유동성 {groupDigits(overview.available_wld ?? '0')} WLD (최근 30일 일평균 필수지출 기준)
           </CardContent>
         </Card>
 
@@ -117,7 +145,66 @@ export function TreasuryView({ overview, ledger }: Props) {
         </CardContent>
       </Card>
 
-      {/* 3. 금고별 상세 현황 */}
+      {/* 3. 국고 법정 과세표준 및 세율 스케줄 */}
+      {overview.tax_rates && overview.tax_rates.length > 0 && (
+        <Card className="border shadow-sm">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base font-semibold">국고 법정 과세표준 및 세율 체계 (Authoritative Tax Schedule)</CardTitle>
+            <CardDescription className="text-xs text-muted-foreground">
+              서버 권위 국고 정책 스케줄에 따른 11대 과세 범주, 과세 기준 사건 및 국고 귀속 비율 명세
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6 pt-0">
+            <div className="overflow-x-auto">
+              <Table className="min-w-[640px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[180px]">과세 범주</TableHead>
+                    <TableHead>과세 기준 사건 및 발생 시점</TableHead>
+                    <TableHead className="text-right w-[110px]">현재 법정 세율</TableHead>
+                    <TableHead className="text-right w-[110px]">허용 범위</TableHead>
+                    <TableHead className="text-right w-[110px]">국고 귀속</TableHead>
+                    <TableHead className="text-center w-[90px]">과세 구분</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {overview.tax_rates.map((tax) => (
+                    <TableRow key={tax.id}>
+                      <TableCell className="font-medium text-xs">
+                        <div>{tax.category_ko}</div>
+                        <div className="text-[10px] text-muted-foreground font-mono">{tax.category}</div>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{tax.taxable_event}</TableCell>
+                      <TableCell className="text-right font-mono font-semibold text-xs text-primary">
+                        {tax.current_rate_pct}%
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-xs text-muted-foreground">
+                        {tax.min_rate_pct}% ~ {tax.max_rate_pct}%
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-xs text-emerald-600">
+                        {tax.treasury_attribution_pct}%
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {tax.is_exempt ? (
+                          <Badge variant="outline" className="text-[10px] bg-muted/40">
+                            비과세
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-primary/80 hover:bg-primary text-[10px]">
+                            과세대상
+                          </Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 4. 금고별 상세 현황 */}
       <div className="grid gap-4 sm:grid-cols-2">
         {overview.vaults.map((vault) => (
           <Card key={vault.code} className="border shadow-sm">
@@ -139,10 +226,10 @@ export function TreasuryView({ overview, ledger }: Props) {
         ))}
       </div>
 
-      {/* 4. 자금 긴급 제어 (Step-Up Guard) */}
+      {/* 5. 자금 긴급 제어 (Step-Up Guard) */}
       <TreasuryOperationsDialog vaults={overview.vaults} />
 
-      {/* 5. 실시간 국고 회계 감사 원장 (Ledger Table) */}
+      {/* 6. 실시간 국고 회계 감사 원장 (Ledger Table) */}
       <Card className="border shadow-sm">
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="text-base font-semibold">국고 회계 감사 원장 (Authoritative Audit Ledger)</CardTitle>

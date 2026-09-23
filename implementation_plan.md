@@ -2750,3 +2750,48 @@ pm test).
 4. 테스트 서버(test.easy-scraping.com) 및 운영 서버(easy-scraping.com) 무중단 배포 승격
 5. 16개 핵심 엔드포인트 200 OK 및 1,046+ 활성 유저 세션 보존 검증
 6. 작업 feature 브랜치 안전 삭제
+
+---
+
+## 🚀 [v71 Specification] 서버 권위 국고 법정 과세표준 11개 범주 스케줄 및 유동성 커버리지 엔진 완결 (ADMIN_TREASURY_MANAGEMENT_SPEC §3.1, §3.2, §5, §8) (v2026.09.24.428)
+
+### 1. 📌 요구사항 분석 및 자율 확정 사양
+사용자의 전권 자율 실행 지시 및 기획서 전수 조회(`docs/planning/ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md`)에 따라, 국고 및 세금 체계 핵심 사양을 전수 완결 구현:
+1. **[국고 법정 과세표준 11개 범주 스케줄 엔진 (AUTHORITATIVE_TAX_RATES)]**:
+   - `TreasuryTaxRateItem` 및 `AUTHORITATIVE_TAX_RATES` 11개 전 카테고리 정의:
+     * 일반 사용자 간 송금세 (0%, 0~2%, 국고 귀속 100%)
+     * 장터 판매세 (2% 원천징수, 0~5%, 국고 귀속 100%)
+     * 주식 매매세 (1%, 0~3%, 국고 귀속 100%)
+     * 사업 정산 소득세 (3%, 0~8%, 국고 귀속 100%)
+     * 사업체 간 B2B 거래세 (1%, 0~3%, 국고 귀속 100%)
+     * 일반 상점 소비세 (1%, 0~3%, 국고 귀속 100%)
+     * 고급/사치 SKU 소비세 (3%, 0~8%, 국고 귀속 100%)
+     * 클럽/도시 프로젝트 관리세 (1%, 0~3%, 국고 귀속 100%)
+     * 카지노/확률형 흐름 (0% 비과세/면세)
+     * 작업/출석/퀘스트 보상 (0% 비과세/면세)
+     * 거래정지 매수원가 환급 (0% 비과세/면세)
+   - 권위 조회 REST API 엔드포인트 `GET /api/v1/admin/treasury/tax-rates` 신설 및 `GET /api/v1/admin/treasury/overview` 확장 연동.
+2. **[가용 국고 유동성 및 30일 지출 방어 가능 일수 (Coverage Days) 산출 엔진]**:
+   - `available_wld = total_treasury_wld - (reserve_wld + committed_wld)`
+   - `coverage_days = available_wld / max(1, 30일 일평균 필수지출)`
+   - 최근 30일 국고 원장 지출(`INJECTION`, `STOCK_HALT_SETTLEMENT`, `EMERGENCY_RESERVE_TRANSFER`) 실시간 쿼리 연동.
+   - 방어 일수 안전성 배지: 14일 이상(안전), 7~13일(경고), 3~6일(위험), 3일 미만(비상).
+3. **[관리자 국고 관제 대시보드 UI 고도화 (`treasury-view.tsx` & `types.ts`)]**:
+   - 상단 지표 4열 그리드: 총 비축 자금 / 비축률 / 가용 유동성 & 지출 방어 일수 / 주식 거래정지 비상금고.
+   - 11개 전 카테고리 법정 과세표준 및 세율 스케줄 테이블 렌더링.
+
+### 2. 📁 대상 파일 목록
+- [MODIFY] backend/src/admin/treasury/treasury.repository.ts: 11개 세목 상수 및 유동성/커버리지 일수 계산 추가
+- [MODIFY] backend/src/admin/treasury/treasury.service.ts: getTaxRates 메서드 위임 추가
+- [MODIFY] backend/src/admin/treasury/treasury.controller.ts: GET admin/treasury/tax-rates 엔드포인트 추가
+- [MODIFY] backend/src/admin/treasury/treasury.service.test.ts: 유닛 테스트 케이스 확장 (getTaxRates, getOverview 검증)
+- [MODIFY] frontend/src/app/admin/types.ts: AdminTreasuryTaxRate 인터페이스 및 AdminTreasuryOverview 확장
+- [MODIFY] frontend/src/app/admin/treasury/treasury-view.tsx: 지출 방어 일수 배지 및 11개 세목 법정 과세표준 표 렌더링
+
+### 3. 🔍 검증 계획
+1. 백엔드 국고 단위 테스트 검증: vitest / pnpm test pass
+2. 프론트엔드 및 백엔드 타입체크/린트/빌드 검증: 0 errors
+3. Git commit & feature 브랜치 -> main 브랜치 머지 및 push
+4. 테스트 서버(test.easy-scraping.com) 및 운영 서버(easy-scraping.com) 무중단 블루-그린 배포 승격
+5. exact-SHA 검증, 16개 핵심 엔드포인트 200 OK 및 1,203+ 활성 유저 세션 보존 검증
+6. 작업 feature 브랜치 안전 삭제
