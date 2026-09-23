@@ -1,0 +1,18 @@
+[Unit]
+Description=Woldeok Moneyverse Discord Bot & Voice Stay Daemon
+After=network.target moneyverse-backend.service
+
+[Service]
+Type=simple
+User=debian
+WorkingDirectory=/home/debian/Woldeok-Moneyverse-Migration/bot
+ExecStart=/usr/bin/node index.js
+Restart=always
+RestartSec=5s
+Environment=NODE_ENV=production
+
+# Security & limits
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

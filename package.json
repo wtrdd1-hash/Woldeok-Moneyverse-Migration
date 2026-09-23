@@ -13,7 +13,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "api:contract:generate": "pnpm --filter @moneyverse/contract build && node scripts/enrich-mobile-api-contract.mjs && node scripts/generate-mobile-api-schema-reference.mjs",
-    "api:contract:check": "pnpm api:contract:generate && node scripts/check-mobile-api-contract.mjs"
+    "api:contract:check": "pnpm api:contract:generate && node scripts/check-mobile-api-contract.mjs",
+    "bot:test": "npm --prefix bot test",
+    "bot:start": "node bot/index.js"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",

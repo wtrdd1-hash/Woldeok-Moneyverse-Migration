@@ -1,3 +1,24 @@
+## v2026.09.23.389 — 디스코드 음악 봇 & 음성 상주 데몬 시스템 전면 깃허브 메인 통합 및 배포 표준화
+
+- 적용 브랜치: `main` (기능 브랜치: `feat/discord-bot-full-github-main-integration-v2026.09.23.389`)
+- **디스코드 음악 봇 & 음성 상주 데몬 시스템 전면 깃허브 메인 통합**:
+  1. **인프라 데몬 서비스 유닛 버전 관리 편입**:
+     - 미니PC 로컬에만 존재하던 systemd 서비스 정의 파일을 `ops/systemd/moneyverse-discord-bot.service`로 정식 리포지토리에 편입.
+     - 봇 데몬의 자동 재기동 정책(`Restart=always`, `RestartSec=5s`), 작업 디렉토리 바인딩, 리소스 제한(`LimitNOFILE=65535`) 표준화.
+  2. **오디오 파형 & 광고/스폰서 절단 QA 자동화 스크립트 편입**:
+     - `bot/scripts/qa_ads_sponsorblock_verification.py` 및 `qa_ads_sponsorblock_verification.mjs` 리포지토리 편입.
+     - YouTube 표준 광고 0건 검증, SponsorBlock 4개 대표 트랙 실시간 쿼리, Maroon 5 Sugar +22.3 dB 음향 에너지 상승 실측 스위트 포함.
+  3. **디스코드 봇 전용 공식 문서화 (`bot/README-KO.md`, `bot/README.md`)**:
+     - 8대 음악 슬래시 명령어(`/play`, `/volume`, `/skip`, `/pause`, `/resume`, `/stop`, `/queue`, `/nowplaying`) 명세.
+     - 무제한 재생(`Infinity`), 24/7 불사 음성 상주 엔진, SponsorBlock + FFmpeg aselect 오디오 필터 절단 엔진 가이드 및 환경변수 설정 규격 문서화.
+  4. **루트 package.json & README 전역 연동**:
+     - 루트 `package.json`에 `bot:test` (`npm --prefix bot test`) 및 `bot:start` 스크립트 바인딩.
+     - 루트 `README-KO.md` 및 `README.md`에 디스코드 봇 기능 및 워크스페이스 구조(`bot/`) 전면 등재.
+- **품질 검증 및 헬스체크**:
+  - 단위 테스트: `pnpm bot:test` -> 4/4 PASS (100% 통과, 0 failed).
+  - 데몬 상태: `moneyverse-discord-bot.service` 정상 가동 (Active).
+  - 음성 상주: `🔊│음성` (`1536572442422550538`) 채널 24/7 불사 상주 확인.
+
 ## v2026.09.23.388 — 23개 보안·경제 Step-Up PR 통합, 테스트/운영 무중단 승격 및 1,061개 세션 무손실 보존
 
 - 적용 브랜치: `main` (릴리스: `prod-bc2f820-v388`, Exact Git SHA: `bc2f8207`)
