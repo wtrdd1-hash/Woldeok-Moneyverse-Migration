@@ -3,8 +3,8 @@
 - **최종 갱신일:** 2026-09-23
 - **관리 주체:** Woldeok Moneyverse Core Development & Operations
 - **문서 상태:** 활성 (Active Memory)
-- **현재 프로덕션 릴리스:** `v2026.09.23.396` (`prod-b7d4a78e-v396`)
-- **PostgreSQL 활성 세션 상태:** **1,068개 (100% 무손실 보존)**
+- **현재 프로덕션 릴리스:** `v2026.09.23.397` (`prod-v397` / SHA `a65d4d41`)
+- **PostgreSQL 활성 세션 상태:** **1,071개 (100% 무손실 보존)**
 
 ---
 
@@ -41,21 +41,23 @@
 
 ---
 
-## 3. 📜 최신 릴리스 내역 (v2026.09.23.396)
+## 3. 📜 최신 릴리스 내역 (v2026.09.23.397)
 
-- **최종 갱신일시**: 2026-09-23 11:58:00 KST
-- **프로덕션 릴리스 버전**: `v2026.09.23.396` (릴리스 경로: `/srv/moneyverse-data/releases/prod-b7d4a78e-v396`)
-- **Exact Git SHA**: `b7d4a78e`
-- **PostgreSQL 활성 사용자 세션**: **1,068개 (100% 무손실 보존 실측 확인)**
+- **최종 갱신일시**: 2026-09-23 22:31:00 KST
+- **프로덕션 릴리스 버전**: `v2026.09.23.397` (릴리스 경로: `/srv/moneyverse-data/releases/prod-v397`)
+- **Exact Git SHA**: `a65d4d41`
+- **PostgreSQL 활성 사용자 세션**: **1,071개 (100% 무손실 보존 실측 확인)**
 - **완료 작업 요약**:
-  1. **주식 포트폴리오 분석 UI 고도화 & 반응형 SVG 도넛 차트 탑재**:
-     - `PortfolioDonutChart` 신설: 10개 종목 자산 구성 비중을 원형 도넛 차트로 실시간 렌더링.
-     - 다중 세그먼트 스택 바 및 종목별 비중/평가액/원터치 리밸런싱 주문 연동 완비.
-  2. **10-Depth 실시간 호가창 뎁스 뷰 고도화 (`stock-orderbook.tsx`)**:
-     - 누적 볼륨(Cumulative Depth) 계산 및 매수/매도 호가 압력 게이지(Order Pressure Ratio) 시각화.
-     - 1원~1,000만 원 가격대 종목(CHIPS 53원 ~ SPACE 8,991,585원)의 틱 사이즈 단위 보정 및 정밀 WLD 포맷팅 적용.
-  3. **관리자 AI Council 가상 심의 시뮬레이터 (`scenario-lab/page.tsx`)**:
-     - 발행/소각/통화량 충격 파라미터 입력 시 듀얼 로컬 AI(Llama 3.2 3B & Gemma 3 1B)의 4대 도메인(무결성·거시·직업·복지) 관점 교차 의결 판정(Agree/Veto/Abstain) 및 권고안을 실시간 산출하는 시뮬레이터 카드 탑재.
-  4. **전체 단위 테스트 1,775개 100% PASS 및 무중단 블루-그린 승격**:
-     - `@moneyverse/contract` (23 tests), `@moneyverse/database` (7 tests), `@moneyverse/backend` (989 tests), `@moneyverse/frontend` (756 tests) 전수 통과.
-     - 1,068개 활성 세션 100% 보존 상태로 무중단 승격 완료.
+  1. **실시간 호가 틱 웹소켓 스트리밍 & 순간 플래시 펄스 애니메이션 (`stock-orderbook.tsx`)**:
+     - `useQuote(stockId, ...)` 훅을 결합하여 소켓 브로드캐스트 도착 시 호가창 체결가 즉시 갱신.
+     - 체결가 상승 시 에메랄드(`bg-emerald-500/25`), 하락 시 로즈(`bg-rose-500/25`)로 600ms 동안 순간 플래시 펄스 발광 애니메이션 탑재.
+     - 5D/10D 호가 단계 및 매수/매도 압력 비율 바 실시간 유기적 재계산.
+  2. **AI 뉴스 기반 시장 감성 지수 위젯 (`market-sentiment-gauge.tsx`)**:
+     - 0~100점 시장 탐욕/공포(Greed & Fear) 핀테크 게이지 (Extreme Fear ~ Extreme Greed 5단계 레인지) 구현.
+     - 활성 AI 뉴스 이벤트의 `direction`('up' | 'down')과 `strength`(1~3)를 합산하여 실시간 감성 지수 산출.
+     - 10대 종목별 호재/악재 감성 태그 및 뉴스 요약 스트립 렌더링.
+  3. **거래소 메인 및 상세 화면 통합 연동**:
+     - `stock-trading-console.tsx`에 `stockId` prop 전달 및 `page.tsx`에 `MarketSentimentGauge` 렌더링 통합.
+  4. **전체 단위 테스트 1,783개 100% PASS 및 무중단 블루-그린 승격**:
+     - `@moneyverse/contract` (23 tests), `@moneyverse/database` (7 tests), `@moneyverse/backend` (996 tests), `@moneyverse/frontend` (757 tests) 전수 통과.
+     - 1,071개 활성 세션 100% 무손실 보존 상태로 무중단 승격 완료.
