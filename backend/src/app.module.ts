@@ -40,6 +40,8 @@ import { GameClockModule } from './game-clock/game-clock.module';
 import { SupportModule } from './support/support.module';
 import { ChatModule } from './chat/chat.module';
 import { SafetyModule } from './safety/safety.module';
+import { SpaceModule } from './space/space.module';
+import { ClubModule } from './club/club.module';
 
 const ONE_MINUTE_MS = 60_000;
 
@@ -60,6 +62,8 @@ const ONE_MINUTE_MS = 60_000;
     MarketTickerModule,
     BusinessModule,
     SeasonModule,
+    SpaceModule,
+    ClubModule,
     BoardModule,
     SupportModule,
     ChatModule,
