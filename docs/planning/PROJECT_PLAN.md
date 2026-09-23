@@ -2,11 +2,21 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.397
+> Current integrated version: v2026.09.23.398
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Mandatory API non-disclosure on public web surfaces — v2026.09.23.398 (2026-09-23)
+
+- **P0 disclosure policy:** detailed API endpoint inventories, schemas, OpenAPI/Swagger downloads, code examples, and live API testers MUST NOT be intentionally published on the Moneyverse public website.
+- **Documentation authority:** detailed API descriptions remain in GitHub documentation only. Repository visibility still determines actual confidentiality; a public GitHub repository remains publicly readable.
+- **Developer portal migration:** the current public Developer Portal/API Center is a P0 hardening target. Remove endpoint catalogs, OpenAPI downloads, live tester/"Try it out" functions, and privileged/economic/admin API descriptions from public Test/Production web surfaces.
+- **No security-by-obscurity:** APIs remain fully authenticated/authorized, object-authorized, validated, rate/resource-limited, audited, and protected for idempotency/concurrency/CSRF/step-up as applicable even when documentation is hidden.
+- **Build/release gate:** scan public routes/static assets/bundles for API-documentation artifacts and secrets. Unintended publication blocks Production promotion.
+- **Detailed authority:** [API_DISCLOSURE_SECURITY_SPEC.md](API_DISCLOSURE_SECURITY_SPEC.md).
+- **Scope truth:** v398 is planning/docs only; it does not claim the runtime developer portal is already removed.
 
 ## Mandatory feature/API implementation parity — v2026.09.23.397 (2026-09-23)
 
