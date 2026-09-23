@@ -1,3 +1,8 @@
+## v2026.09.23.415 — 비즈니스 공급망 lint 복구
+
+- 비즈니스 공급망 UI의 사용되지 않는 아이콘 import를 제거해 런타임 동작 변경 없이 required-lint 오류 3개를 해소했습니다.
+- 공급 명령 idempotency 복구를 이어가며 DB migration, 권한, ledger, 인증 의미는 변경하지 않았습니다.
+
 ## v2026.09.23.402 — 봇 QA parser CI 차단 복구
 
 - Discord 음악 봇 광고/SponsorBlock QA 스크립트의 잘못된 JavaScript 문자열을 복구해 저장소 lint가 파일을 파싱하고 후속 검사를 계속할 수 있게 했습니다.

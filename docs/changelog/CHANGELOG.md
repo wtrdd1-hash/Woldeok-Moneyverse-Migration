@@ -1,3 +1,8 @@
+## v2026.09.23.415 — Business supply lint recovery
+
+- Removed stale unused icon imports from the business supply-chain UI, eliminating three required-lint errors without changing runtime behavior.
+- This follows the supply-command idempotency recovery and preserves DB migrations, privileges, ledger, and auth semantics.
+
 ## v2026.09.23.402 — Repair bot QA parser CI blocker
 
 - Repaired invalid JavaScript string literals in the Discord music bot ads/SponsorBlock QA script so repository lint can parse the file and continue reporting downstream checks.
