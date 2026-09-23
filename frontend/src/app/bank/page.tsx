@@ -28,6 +28,7 @@ import {
 } from './bank-forms';
 import { SavingsGoalProgressRing } from './savings-progress-ring';
 import { SavingPocketsCard } from './saving-pockets-card';
+import { BankLiquidityCard } from './bank-liquidity-card';
 import type { BankStanding, SavingPocket } from './types';
 
 export const dynamic = 'force-dynamic';
@@ -210,6 +211,14 @@ export default async function BankPage() {
         pockets={pockets ?? []}
         cashBalance={cash}
         bankBalance={bank}
+      />
+
+      {/* Aave Kinked 점프 이자율 곡선 및 바젤 III 20% 지급준비금 버퍼 건전성 카드 */}
+      <BankLiquidityCard
+        bankBalance={bank}
+        loanDebt={loanDebt.toString()}
+        creditLimit={creditLimit}
+        isEn={isEn}
       />
 
       <Card className={activeLoan ? 'border-amber-500/30 bg-amber-500/5' : 'border-emerald-500/30 bg-emerald-500/5'}>

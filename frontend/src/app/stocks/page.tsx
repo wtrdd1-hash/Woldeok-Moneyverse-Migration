@@ -137,6 +137,20 @@ export default async function StocksPage({
 
   const events = news?.events ?? [];
 
+  const avgPriceChange24h = allStocks.length > 0
+    ? allStocks.reduce((sum, s) => {
+        const cur = Number.parseInt(s.current_price, 10) || 0;
+        const open = Number.parseInt(s.day_open_price ?? s.current_price, 10) || 1;
+        return sum + (((cur - open) / open) * 100);
+      }, 0) / allStocks.length
+    : 0;
+
+  const marketFactors = {
+    priceChange24hPct: Math.round(avgPriceChange24h * 10) / 10,
+    volumeScore: allStocks.length > 0 ? 65 : 50,
+    orderPressureBidRatio: 55,
+  };
+
   return (
     <MarketPricesProvider>
     <div data-page="stocks" className="mv-page mv-page--finance grid gap-6">
@@ -149,8 +163,8 @@ export default async function StocksPage({
           : '경제 상황에 따라 가격이 바뀌는 10대 종목 전용 가상 시장입니다. 실제 주식·현금·투자 상품이 아닙니다.'}
       </PageHeader>
 
-      {/* AI 뉴스 기반 시장 감성 지수 & 펄스 게이지 위젯 */}
-      <MarketSentimentGauge events={events} isEn={isEn} />
+      {/* AI 뉴스 및 다요소 가중 시장 감성 지수 & 펄스 게이지 위젯 */}
+      <MarketSentimentGauge events={events} marketFactors={marketFactors} isEn={isEn} />
 
       {/* 시장 소식 & 월드 펄스 뉴스 목록 */}
       <MarketNews events={events} />

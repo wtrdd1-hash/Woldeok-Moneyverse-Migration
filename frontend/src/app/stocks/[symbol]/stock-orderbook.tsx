@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
 import { useQuote } from '@/lib/use-market-prices';
+import { generateKrxLadder, getKrxTickSize } from '../tick-size';
 
 interface StockOrderbookProps {
   readonly stockId?: string | undefined;
@@ -38,17 +39,15 @@ export interface OrderbookData {
 
 export function computeOrderbook(currentPriceStr: string, depth: 5 | 10 = 5): OrderbookData {
   const priceNum = Number.parseInt(currentPriceStr.replaceAll(',', '') || '1000', 10);
+  const { askPrices, bidPrices } = generateKrxLadder(priceNum, depth);
 
   // 단계별 스텝 목록 생성 (5-Depth 또는 10-Depth)
   const askSteps = depth === 5 ? [5, 4, 3, 2, 1] : [10, 9, 8, 7, 6, 5, 4, 3, 2, 1];
   const bidSteps = depth === 5 ? [1, 2, 3, 4, 5] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-  // 종목 가격대에 따른 호가 단위(틱 사이즈) 가중치 보정
-  const tickStepPct = priceNum > 1_000_000 ? 0.002 : priceNum > 100_000 ? 0.003 : 0.005;
-
   let cumAsk = 0;
-  const rawAsks = askSteps.map((step) => {
-    const askPrice = Math.max(1, Math.round(priceNum * (1 + (step * tickStepPct))));
+  const rawAsks = askSteps.map((step, idx) => {
+    const askPrice = askPrices[idx] ?? Math.max(1, priceNum + step);
     const volume = Math.round(50 + (step * 35) + (Math.sin(step * 1.5) * 20));
     return { step, price: askPrice.toString(), volume };
   });
@@ -63,8 +62,8 @@ export function computeOrderbook(currentPriceStr: string, depth: 5 | 10 = 5): Or
   });
 
   let cumBid = 0;
-  const rawBids = bidSteps.map((step) => {
-    const bidPrice = Math.max(1, Math.round(priceNum * (1 - (step * tickStepPct))));
+  const rawBids = bidSteps.map((step, idx) => {
+    const bidPrice = bidPrices[idx] ?? Math.max(1, priceNum - step);
     const volume = Math.round(45 + (step * 38) + (Math.cos(step * 1.5) * 25));
     return { step, price: bidPrice.toString(), volume };
   });
@@ -142,6 +141,8 @@ export function StockOrderbook({
     prevPriceRef.current = livePrice;
   }, [livePrice]);
 
+  const livePriceNum = Number.parseInt(livePrice.replaceAll(',', '') || '1000', 10);
+  const currentTick = getKrxTickSize(livePriceNum);
   const { asks, bids, spread, spreadBps, totalAskVolume, totalBidVolume, bidRatio, askRatio } = computeOrderbook(livePrice, depth);
 
   return (
@@ -163,6 +164,9 @@ export function StockOrderbook({
             )}
           </CardTitle>
           <div className="flex items-center gap-2">
+            <Badge variant="outline" className="font-mono text-[10px] text-primary/80 hidden sm:inline-flex border-primary/30 bg-primary/5">
+              {isEn ? `1 Tick = ${groupDigits(currentTick.toString())} WLD` : `1틱 = ${groupDigits(currentTick.toString())} WLD`}
+            </Badge>
             <Badge variant="outline" className="font-mono text-[10px] text-muted-foreground hidden sm:inline-flex">
               {isEn ? `Spread ${spread} WLD (${spreadBps}%)` : `스프레드 ${groupDigits(spread.toString())} WLD (${spreadBps}%)`}
             </Badge>
@@ -194,29 +198,33 @@ export function StockOrderbook({
       <CardContent className="p-2 space-y-1.5 text-xs font-mono select-none">
         {/* 매도호가 리스트 (Asks, Rose 계열) */}
         <div className="space-y-0.5">
-          {asks.map((ask) => (
-            <button
-              key={`ask-${ask.step}`}
-              type="button"
-              onClick={() => onSelectPrice?.(ask.price, 'buy')}
-              className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-rose-500/15 active:scale-[0.99] transition-all text-left"
-              title={isEn ? `Click to buy at ${groupDigits(ask.price)} WLD` : `${groupDigits(ask.price)} WLD에 매수 주문 입력`}
-            >
-              {/* 잔량 비례 배경 게이지 바 */}
-              <div
-                className="absolute inset-y-0 right-0 bg-rose-500/10 rounded-r-md pointer-events-none transition-all duration-300"
-                style={{ width: `${ask.percent}%` }}
-              />
-              <span className="relative z-10 font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                <span className="text-[10px] opacity-70">+{ask.step * 0.5}%</span>
-                <span>{groupDigits(ask.price)}</span>
-              </span>
-              <span className="relative z-10 text-muted-foreground group-hover:text-foreground font-normal flex items-center gap-1">
-                <span>{groupDigits(ask.volume.toString())}</span>
-                <span className="text-[10px] opacity-70">{isEn ? 'sh' : '주'}</span>
-              </span>
-            </button>
-          ))}
+          {asks.map((ask) => {
+            const askNum = Number.parseInt(ask.price, 10);
+            const deltaPct = livePriceNum > 0 ? (((askNum - livePriceNum) / livePriceNum) * 100).toFixed(1) : (ask.step * 0.5).toFixed(1);
+            return (
+              <button
+                key={`ask-${ask.step}`}
+                type="button"
+                onClick={() => onSelectPrice?.(ask.price, 'buy')}
+                className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-rose-500/15 active:scale-[0.99] transition-all text-left"
+                title={isEn ? `Click to buy at ${groupDigits(ask.price)} WLD` : `${groupDigits(ask.price)} WLD에 매수 주문 입력`}
+              >
+                {/* 잔량 비례 배경 게이지 바 */}
+                <div
+                  className="absolute inset-y-0 right-0 bg-rose-500/10 rounded-r-md pointer-events-none transition-all duration-300"
+                  style={{ width: `${ask.percent}%` }}
+                />
+                <span className="relative z-10 font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                  <span className="text-[10px] opacity-70">+{deltaPct}%</span>
+                  <span>{groupDigits(ask.price)}</span>
+                </span>
+                <span className="relative z-10 text-muted-foreground group-hover:text-foreground font-normal flex items-center gap-1">
+                  <span>{groupDigits(ask.volume.toString())}</span>
+                  <span className="text-[10px] opacity-70">{isEn ? 'sh' : '주'}</span>
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* 현재 체결가 중앙 바 (순간 플래시 펄스 애니메이션 탑재) */}
@@ -240,29 +248,33 @@ export function StockOrderbook({
 
         {/* 매수호가 리스트 (Bids, Emerald 계열) */}
         <div className="space-y-0.5">
-          {bids.map((bid) => (
-            <button
-              key={`bid-${bid.step}`}
-              type="button"
-              onClick={() => onSelectPrice?.(bid.price, 'sell')}
-              className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-emerald-500/15 active:scale-[0.99] transition-all text-left"
-              title={isEn ? `Click to sell at ${groupDigits(bid.price)} WLD` : `${groupDigits(bid.price)} WLD에 매도 주문 입력`}
-            >
-              {/* 잔량 비례 배경 게이지 바 */}
-              <div
-                className="absolute inset-y-0 right-0 bg-emerald-500/10 rounded-r-md pointer-events-none transition-all duration-300"
-                style={{ width: `${bid.percent}%` }}
-              />
-              <span className="relative z-10 font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                <span className="text-[10px] opacity-70">-{bid.step * 0.5}%</span>
-                <span>{groupDigits(bid.price)}</span>
-              </span>
-              <span className="relative z-10 text-muted-foreground group-hover:text-foreground font-normal flex items-center gap-1">
-                <span>{groupDigits(bid.volume.toString())}</span>
-                <span className="text-[10px] opacity-70">{isEn ? 'sh' : '주'}</span>
-              </span>
-            </button>
-          ))}
+          {bids.map((bid) => {
+            const bidNum = Number.parseInt(bid.price, 10);
+            const deltaPct = livePriceNum > 0 ? (((bidNum - livePriceNum) / livePriceNum) * 100).toFixed(1) : (-bid.step * 0.5).toFixed(1);
+            return (
+              <button
+                key={`bid-${bid.step}`}
+                type="button"
+                onClick={() => onSelectPrice?.(bid.price, 'sell')}
+                className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-emerald-500/15 active:scale-[0.99] transition-all text-left"
+                title={isEn ? `Click to sell at ${groupDigits(bid.price)} WLD` : `${groupDigits(bid.price)} WLD에 매도 주문 입력`}
+              >
+                {/* 잔량 비례 배경 게이지 바 */}
+                <div
+                  className="absolute inset-y-0 right-0 bg-emerald-500/10 rounded-r-md pointer-events-none transition-all duration-300"
+                  style={{ width: `${bid.percent}%` }}
+                />
+                <span className="relative z-10 font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                  <span className="text-[10px] opacity-70">{deltaPct}%</span>
+                  <span>{groupDigits(bid.price)}</span>
+                </span>
+                <span className="relative z-10 text-muted-foreground group-hover:text-foreground font-normal flex items-center gap-1">
+                  <span>{groupDigits(bid.volume.toString())}</span>
+                  <span className="text-[10px] opacity-70">{isEn ? 'sh' : '주'}</span>
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* 호가 잔량 매수/매도 압력 비율 바 (Order Pressure Ratio) */}

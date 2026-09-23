@@ -1,14 +1,22 @@
 'use client';
 
 import React from 'react';
-import { Gauge, TrendingUp, TrendingDown, Newspaper, Sparkles, ShieldAlert } from 'lucide-react';
+import { Gauge, TrendingUp, TrendingDown, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import type { MarketEvent } from './market-news';
 
-interface MarketSentimentGaugeProps {
-  readonly events: readonly MarketEvent[];
-  readonly isEn?: boolean;
+export interface MarketSentimentFactors {
+  readonly priceChange24hPct?: number;
+  readonly volumeScore?: number;
+  readonly orderPressureBidRatio?: number;
+}
+
+export interface FactorBreakdown {
+  readonly newsScore: number;
+  readonly momentumScore: number;
+  readonly volumeScore: number;
+  readonly orderPressureScore: number;
 }
 
 export interface SentimentAnalysis {
@@ -23,20 +31,26 @@ export interface SentimentAnalysis {
     readonly direction: 'up' | 'down';
     readonly strength: number;
   }>;
+  readonly factorScores: FactorBreakdown;
 }
 
-export function computeMarketSentiment(events: readonly MarketEvent[]): SentimentAnalysis {
-  if (events.length === 0) {
-    return {
-      score: 50,
-      label: '중립 (Neutral)',
-      color: '#71717a',
-      totalPositive: 0,
-      totalNegative: 0,
-      stockSentiments: [],
-    };
-  }
+interface MarketSentimentGaugeProps {
+  readonly events: readonly MarketEvent[];
+  readonly marketFactors?: MarketSentimentFactors;
+  readonly isEn?: boolean;
+}
 
+/**
+ * CNN Fear & Greed / Alternative.me 다요소 가중 모델 기반 시장 감성 지수 산출
+ * - AI 뉴스 감성 (40%)
+ * - 24시간 가격 변동성/모멘텀 (30%)
+ * - 거래량 활성도 (20%)
+ * - 호가창 매수/매도 잔량 압력비 (10%)
+ */
+export function computeMarketSentiment(
+  events: readonly MarketEvent[],
+  factors?: MarketSentimentFactors,
+): SentimentAnalysis {
   let totalBullWeight = 0;
   let totalBearWeight = 0;
   let totalPositive = 0;
@@ -65,10 +79,40 @@ export function computeMarketSentiment(events: readonly MarketEvent[]): Sentimen
   }
 
   const grandTotal = totalBullWeight + totalBearWeight;
-  // 0 ~ 100 점 정규화 (50점이 중립)
-  const score = grandTotal > 0
+  // Factor 1: AI 뉴스 스코어 (0 ~ 100, 뉴스가 없으면 50점 중립)
+  const newsScore = grandTotal > 0
     ? Math.round((totalBullWeight / grandTotal) * 100)
     : 50;
+
+  // Factor 2: 24시간 가격 모멘텀 (30% 가중치, -15%~+15% 등락률을 0~100으로 정규화)
+  const priceChange = factors?.priceChange24hPct ?? 0;
+  const momentumScore = Math.min(100, Math.max(0, Math.round(50 + (priceChange * 3.33))));
+
+  // Factor 3: 거래량 서지/모멘텀 (20% 가중치, 기본 50)
+  const volumeScore = factors?.volumeScore !== undefined
+    ? Math.min(100, Math.max(0, Math.round(factors.volumeScore)))
+    : 50;
+
+  // Factor 4: 호가창 매수/매도 잔량 압력비 (10% 가중치, 기본 50)
+  const orderPressureScore = factors?.orderPressureBidRatio !== undefined
+    ? Math.min(100, Math.max(0, Math.round(factors.orderPressureBidRatio)))
+    : 50;
+
+  const hasExternalFactors = factors !== undefined && (
+    factors.priceChange24hPct !== undefined ||
+    factors.volumeScore !== undefined ||
+    factors.orderPressureBidRatio !== undefined
+  );
+
+  // 종합 스코어 계산 (외부 팩터가 전달되면 40:30:20:10 결합, 없으면 뉴스 기준)
+  const score = hasExternalFactors
+    ? Math.min(100, Math.max(0, Math.round(
+        (newsScore * 0.40) +
+        (momentumScore * 0.30) +
+        (volumeScore * 0.20) +
+        (orderPressureScore * 0.10)
+      )))
+    : newsScore;
 
   let label = '중립 (Neutral)';
   let color = '#71717a';
@@ -94,14 +138,21 @@ export function computeMarketSentiment(events: readonly MarketEvent[]): Sentimen
     totalPositive,
     totalNegative,
     stockSentiments: Array.from(stockMap.values()),
+    factorScores: {
+      newsScore,
+      momentumScore,
+      volumeScore,
+      orderPressureScore,
+    },
   };
 }
 
 export function MarketSentimentGauge({
   events,
+  marketFactors,
   isEn = false,
 }: MarketSentimentGaugeProps) {
-  const analysis = computeMarketSentiment(events);
+  const analysis = computeMarketSentiment(events, marketFactors);
 
   return (
     <Card className="border-border/80 bg-card/60 shadow-xs overflow-hidden">
@@ -110,18 +161,18 @@ export function MarketSentimentGauge({
           <div className="flex items-center gap-2">
             <Gauge className="size-4 text-primary" />
             <CardTitle className="text-sm font-bold">
-              {isEn ? 'AI Market Sentiment & Pulse' : 'AI 뉴스 기반 시장 감성 지수'}
+              {isEn ? 'AI Market Sentiment & Pulse' : 'AI 뉴스 & 다요소 시장 감성 지수'}
             </CardTitle>
           </div>
           <Badge variant="outline" className="font-mono text-[11px] gap-1">
             <Sparkles className="size-3 text-amber-500" />
-            <span>{isEn ? 'Llama 3.2 Newsroom' : '로컬 AI 뉴스룸 분석'}</span>
+            <span>{isEn ? 'Multi-Factor Engine' : '다요소 복합 분석'}</span>
           </Badge>
         </div>
         <CardDescription className="text-xs text-muted-foreground pt-0.5">
           {isEn
-            ? 'Real-time greed & fear sentiment derived from automated AI news broadcasts.'
-            : '5분 주기로 발행되는 AI 시장 기사를 바탕으로 실시간 탐욕/공포 심리를 정밀 측정합니다.'}
+            ? 'Derived from AI news (40%), price momentum (30%), volume surge (20%), and order pressure (10%).'
+            : 'AI 뉴스(40%), 24h 가격 모멘텀(30%), 거래량(20%), 호가 잔량 압력(10%)을 결합하여 실시간 탐욕/공포 심리를 정밀 측정합니다.'}
         </CardDescription>
       </CardHeader>
 
@@ -181,6 +232,32 @@ export function MarketSentimentGauge({
           </div>
         </div>
 
+        {/* 4대 다요소 기여도 브레이크다운 */}
+        <div className="pt-2 border-t border-border/50 space-y-1.5">
+          <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
+            <span>{isEn ? 'Multi-Factor Breakdown' : '다요소 복합 가중치 분석 (4대 팩터)'}</span>
+            <span className="font-mono text-[10px] opacity-75">CNN &amp; Alternative.me 모델</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="rounded-lg border border-border/60 bg-muted/20 p-2 text-center">
+              <div className="text-[10px] text-muted-foreground">{isEn ? 'AI News (40%)' : 'AI 뉴스 (40%)'}</div>
+              <div className="font-mono font-bold text-xs text-foreground mt-0.5">{analysis.factorScores.newsScore}점</div>
+            </div>
+            <div className="rounded-lg border border-border/60 bg-muted/20 p-2 text-center">
+              <div className="text-[10px] text-muted-foreground">{isEn ? 'Momentum (30%)' : '가격 모멘텀 (30%)'}</div>
+              <div className="font-mono font-bold text-xs text-foreground mt-0.5">{analysis.factorScores.momentumScore}점</div>
+            </div>
+            <div className="rounded-lg border border-border/60 bg-muted/20 p-2 text-center">
+              <div className="text-[10px] text-muted-foreground">{isEn ? 'Volume (20%)' : '거래량 모멘텀 (20%)'}</div>
+              <div className="font-mono font-bold text-xs text-foreground mt-0.5">{analysis.factorScores.volumeScore}점</div>
+            </div>
+            <div className="rounded-lg border border-border/60 bg-muted/20 p-2 text-center">
+              <div className="text-[10px] text-muted-foreground">{isEn ? 'Order Pressure (10%)' : '호가 잔량압력 (10%)'}</div>
+              <div className="font-mono font-bold text-xs text-foreground mt-0.5">{analysis.factorScores.orderPressureScore}점</div>
+            </div>
+          </div>
+        </div>
+
         {/* 종목별 영향 뉴스 태그 리스트 */}
         {analysis.stockSentiments.length > 0 && (
           <div className="space-y-2 pt-1 border-t border-border/60">
@@ -199,7 +276,7 @@ export function MarketSentimentGauge({
                 >
                   <span className="font-bold">{st.symbol}</span>
                   <span>{st.direction === 'up' ? '▲ 호재' : '▼ 악재'}</span>
-                  <span className="text-[10px] opacity-75">
+                  <span className="text-[10px] opacity-70">
                     ({st.strength === 3 ? '강력' : st.strength === 2 ? '보통' : '소폭'})
                   </span>
                 </div>

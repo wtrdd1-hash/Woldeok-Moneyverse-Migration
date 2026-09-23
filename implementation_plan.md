@@ -2646,3 +2646,39 @@ pm test).
 - git diff --check 공백 및 포맷 검증 통과.
 - GitHub 원격 저장소 푸시 및 Debian 운영 서버 동기화.
 - GitHub Actions CI All-Green 검증 및 활성 세션 무손실 확인.
+
+---
+
+## 🚀 [v68 Specification] 3대 핵심 도메인 전수 통합 구현 (KRX 7단계 틱 사이즈 + 다요소 시장 감성 지수 + Aave Kinked 점프 금리 & 바젤 III 20% 준비금 버퍼) (v2026.09.24.423)
+
+### 1. 📌 요구사항 분석 및 조율 확정 사양
+사용자 조율 문답(A1~A6)을 통해 다음 3대 핵심 도메인을 전수 통합 구현하기로 확정함:
+1. **주식 KRX 7단계 틱 사이즈 (Tick Size) 규칙 엔진 구축**:
+   - 1원~1000만 원 전 가격대 7단계 호가 틱 사이즈(1원/5원/10원/50원/100원/500원/1,000원) 정밀 함수 구현.
+   - 호가창(Orderbook)의 5D/10D 사다리가 항상 정규 틱 배수로 생성되도록 연동.
+   - 주문 패널(OrderPanel) 지정가 입력 시 틱 단위 자동 반올림 스냅(Snap) 및 1틱 단위 증감 버튼(+/-) 제공.
+2. **다요소 가중 실시간 시장 감성 지수 (Multi-Factor Market Sentiment Index)**:
+   - CNN Fear & Greed / Alternative.me 글로벌 표준 다요소 가중 모델 탑재: AI 뉴스(40%) + 24시간 가격 모멘텀(30%) + 거래량(20%) + 호가창 매수/매도 잔량 압력비(10%).
+   - 뉴스가 없을 때도 24시간 가격 변동과 호가 압력으로 실시간 시장 심리를 정밀 측정하고, 팩터별 미니 브레이크다운 UI 제공.
+3. **은행 Aave식 Kinked 점프 이자율 곡선 & 바젤 III 20% 지급준비금 버퍼**:
+   - 유동성 이용률 U = Total Borrows / Total Deposits.
+   - U <= 80%: Borrow Rate = 3% + (U / 0.8) * 5% (완만한 3~8%).
+   - U > 80%: Borrow Rate = 8% + ((U - 0.8) / 0.2) * 40% (최대 48% 점프 페널티).
+   - 은행 총 예금의 20%는 법정 지급준비금으로 동결하여 뱅크런 방지 및 즉시 인출 100% 보장.
+
+### 2. 📁 대상 파일 목록
+- [NEW] rontend/src/app/stocks/tick-size.ts: KRX 7단계 틱 사이즈 및 스냅 헬퍼
+- [NEW] rontend/src/app/stocks/tick-size.test.ts: 7단계 틱 사이즈 단위 테스트
+- [MODIFY] rontend/src/app/stocks/[symbol]/stock-orderbook.tsx: KRX 7단계 호가 사다리 연동
+- [MODIFY] rontend/src/app/stocks/[symbol]/stock-order-panel.tsx: 지정가 틱 스냅 및 1틱 증감 버튼 연동
+- [MODIFY] rontend/src/app/stocks/market-sentiment-gauge.tsx: 다요소 가중 모델 및 팩터 칩 연동
+- [MODIFY] rontend/src/app/stocks/market-sentiment-gauge.test.ts: 다요소 가중 종합 테스트 추가
+- [NEW] ackend/src/bank/kinked-interest.ts: Kinked 점프 금리 계산 모듈
+- [NEW] ackend/src/bank/kinked-interest.test.ts: Kinked 점프 금리 단위 테스트
+- [NEW] rontend/src/lib/kinked-interest.ts: 프론트엔드 Kinked 점프 금리 연동
+
+### 3. 🔍 검증 계획
+1. 단위 테스트 실행: pnpm test (신규 틱 사이즈, 감성 지수, Kinked 금리 테스트 전수 검증)
+2. 타입체크 및 린트 검증: pnpm run check (0 errors)
+3. 빌드 검증: pnpm run build
+4. 원격 서버 배포 및 무손실 세션 검증 (1,020+ 세션 무중단 유지)

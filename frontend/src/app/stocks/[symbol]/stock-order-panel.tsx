@@ -20,11 +20,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
 import { placeOrder } from '../actions';
+import { snapToKrxTick, getKrxTickSize, stepKrxTick } from '../tick-size';
 
 interface StockOrderPanelProps {
   readonly stockId: string;
@@ -185,24 +185,58 @@ export function StockOrderPanel({
                 {isEn ? 'Reset to Current' : '현재가로 맞춤'}
               </button>
             </div>
-            <div className="relative">
-              <input
-                id="limit-price"
-                type="number"
-                min={1}
-                value={limitPrice}
-                onChange={(e) => setLimitPrice(e.target.value)}
-                disabled={isHalted}
-                className="w-full h-10 rounded-lg border border-input bg-background px-3 font-mono text-sm font-bold pr-12 shadow-xs focus:ring-1 focus:ring-ring"
-              />
-              <span className="absolute right-3 top-2.5 text-xs font-bold text-muted-foreground">
-                WLD
-              </span>
+            <div className="flex items-center gap-1.5">
+              <div className="relative flex-1">
+                <input
+                  id="limit-price"
+                  type="number"
+                  min={1}
+                  value={limitPrice}
+                  onChange={(e) => setLimitPrice(e.target.value)}
+                  onBlur={() => setLimitPrice((prev) => snapToKrxTick(Number.parseInt(prev, 10) || 1).toString())}
+                  disabled={isHalted}
+                  className="w-full h-10 rounded-lg border border-input bg-background px-3 font-mono text-sm font-bold pr-12 shadow-xs focus:ring-1 focus:ring-ring"
+                />
+                <span className="absolute right-3 top-2.5 text-xs font-bold text-muted-foreground">
+                  WLD
+                </span>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const current = Number.parseInt(limitPrice, 10) || 1;
+                    setLimitPrice(stepKrxTick(current, -1).toString());
+                  }}
+                  disabled={isHalted || (Number.parseInt(limitPrice, 10) || 1) <= 1}
+                  className="h-10 w-9 rounded-lg border border-border bg-muted/40 hover:bg-muted active:scale-95 text-xs font-bold font-mono transition-all disabled:opacity-50"
+                  title={isEn ? 'Step 1 tick down' : '1틱 내림'}
+                >
+                  -
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const current = Number.parseInt(limitPrice, 10) || 1;
+                    setLimitPrice(stepKrxTick(current, 1).toString());
+                  }}
+                  disabled={isHalted}
+                  className="h-10 w-9 rounded-lg border border-border bg-muted/40 hover:bg-muted active:scale-95 text-xs font-bold font-mono transition-all disabled:opacity-50"
+                  title={isEn ? 'Step 1 tick up' : '1틱 올림'}
+                >
+                  +
+                </button>
+              </div>
             </div>
-            <p className="text-[11px] text-muted-foreground pt-0.5">
-              {isEn
-                ? 'Tip: Click any price row on the left orderbook to instantly bind.'
-                : '💡 좌측 호가창의 원하는 가격을 클릭하면 단가가 자동 바인딩됩니다.'}
+            <p className="text-[11px] text-muted-foreground pt-0.5 flex items-center justify-between">
+              <span>
+                {isEn
+                  ? '💡 Click orderbook row to bind'
+                  : '💡 좌측 호가창 클릭 시 단가 자동 바인딩'}
+              </span>
+              <span className="font-mono font-semibold text-primary">
+                {isEn ? `1 Tick = ${groupDigits(getKrxTickSize(effectivePriceNum).toString())} WLD` : `1틱 = ${groupDigits(getKrxTickSize(effectivePriceNum).toString())} WLD`}
+              </span>
             </p>
           </div>
         ) : (
@@ -282,9 +316,9 @@ export function StockOrderPanel({
                 type="button"
                 onClick={() => handlePercent(pct)}
                 disabled={isHalted || maxLimit <= 0}
-                className="h-9 px-2 text-xs font-semibold rounded-lg border border-border bg-muted/40 hover:bg-muted active:scale-95 text-foreground transition-all"
+                className="h-11 min-h-[44px] px-2 text-xs font-semibold rounded-lg border border-border bg-muted/40 hover:bg-muted active:scale-95 text-foreground transition-all"
               >
-                {pct === 100 ? '최대' : `${pct}%`}
+                {pct === 100 ? (isEn ? 'MAX' : '최대') : `${pct}%`}
               </button>
             ))}
           </div>
