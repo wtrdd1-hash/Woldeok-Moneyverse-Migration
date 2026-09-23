@@ -297,11 +297,11 @@ export class PostgresBusinessRepository implements BusinessRepository {
     ownershipId: string;
     materialCode: string;
     quantity: number;
-    idempotencyKey?: string;
+    idempotencyKey?: string | undefined;
   }): Promise<BusinessProcureResult> {
     const actor = uuid(userId, 'user id');
     const owned = uuid(ownershipId, 'ownership id');
-    const key = uuid(idempotencyKey, 'idempotency key');
+    const key = uuid(idempotencyKey ?? randomUUID(), 'idempotency key');
 
     if (!Number.isSafeInteger(quantity) || quantity <= 0 || quantity > 500) {
       throw new BusinessInputError('procurement quantity must be between 1 and 500');
@@ -334,15 +334,15 @@ export class PostgresBusinessRepository implements BusinessRepository {
   async upgradeStorage({
     userId,
     ownershipId,
-    idempotencyKey = randomUUID(),
+    idempotencyKey,
   }: {
     userId: string;
     ownershipId: string;
-    idempotencyKey?: string;
+    idempotencyKey?: string | undefined;
   }): Promise<BusinessStorageUpgradeResult> {
     const actor = uuid(userId, 'user id');
     const owned = uuid(ownershipId, 'ownership id');
-    const key = uuid(idempotencyKey, 'idempotency key');
+    const key = uuid(idempotencyKey ?? randomUUID(), 'idempotency key');
 
     const biz = await queryOne<{ symbol: string }>(
       this.pool,

@@ -131,8 +131,8 @@ export interface BusinessRepository {
   activateFromLicense(input: BusinessActivateInput): Promise<BusinessActivateRow>;
   applyBoost(input: BusinessApplyBoostInput): Promise<Record<string, unknown>>;
   supplyChainOverview?(userId: string, ownershipId: string): Promise<any>;
-  procureMaterials?(input: { userId: string; ownershipId: string; materialCode: string; quantity: number; idempotencyKey?: string }): Promise<any>;
-  upgradeStorage?(input: { userId: string; ownershipId: string; idempotencyKey?: string }): Promise<any>;
+  procureMaterials?(input: { userId: string; ownershipId: string; materialCode: string; quantity: number; idempotencyKey?: string | undefined }): Promise<any>;
+  upgradeStorage?(input: { userId: string; ownershipId: string; idempotencyKey?: string | undefined }): Promise<any>;
 }
 
 function businessType(row: BusinessCatalogRow): BusinessType {
