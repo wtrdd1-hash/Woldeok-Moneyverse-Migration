@@ -2,11 +2,12 @@
 
 **English canonical** | [한국어](mobile-api-complete-spec.ko.md)
 
-> Version: v2026.09.14.2
-> Date: 2026-09-14
+> Version: v2026.09.23.388
+> Date: 2026-09-23
 > Production origin: `https://easy-scraping.com`
 > App API prefix: `/app-api/v1`
-> Audience: Android/iOS clients, code-generation tools such as Gemini, QA and store-review preparation
+> Backend controllers: 57 controllers / 335 total endpoints (179 mobile contract endpoints verified)
+> Audience: Android/iOS clients, frontend/backend engineers, QA and store-review preparation
 
 ## 0. Contract authority
 
@@ -461,3 +462,21 @@ All new endpoints enforce class-validator DTO validation, user session boundary 
 | `GET` | `/app-api/v1/notifications/unread-count` | Get unread notification badge count | Auth required | None | `{"success":true,"data":{"unreadCount":3}}` |
 | `POST` | `/app-api/v1/notifications/:notificationId/read` | Mark single notification as read | Auth + CSRF | None | `{"success":true,"data":{"id":"...","read":true}}` |
 | `POST` | `/app-api/v1/notifications/read-all` | Batch mark all notifications as read | Auth + CSRF | None | `{"success":true,"data":{"updatedCount":5}}` |
+
+---
+
+## 40. v2026.09.23.388 Contract Reconciliation & Step-Up 2FA / Idempotency Specification
+
+### 40.1 Full Endpoint Status & Verification Contract
+- **Backend controllers:** 57 controllers, 335 total endpoints implemented and verified.
+- **Mobile BFF contract:** 179 endpoints mapped and verified (`pnpm api:contract:check` passing).
+- **Recent domains (16 endpoints):**
+  - Saving Pockets (5 endpoints): `/banking/pockets`, `/banking/pockets/transfer`, `/banking/pockets/:id`, `/banking/pockets/:id/archive`
+  - Crafting Workbench (2 endpoints): `/crafting/recipes`, `/crafting/execute`
+  - P2P Marketplace (5 endpoints): `/marketplace/listings`, `/marketplace/my-listings`, `/marketplace/listings/:id/buy`, `/marketplace/listings/:id/cancel`
+  - Notification Center (4 endpoints): `/notifications`, `/notifications/unread-count`, `/notifications/:id/read`, `/notifications/read-all`
+
+### 40.2 Step-Up 2FA (ReauthGuard) & Security Invariants
+- High-risk operations require Step-Up 2FA via `ReauthGuard` (recent password/session re-authentication) rather than obsolete TOTP credentials.
+- Browser state mutations strictly enforce `x-csrf-token`.
+- Economy and asset transfers mandate `idempotencyKey` headers or payload fields to prevent duplicate execution.

@@ -334,7 +334,7 @@ Required views:
 - appeal queue;
 - integrity dashboard.
 
-High-risk actions require the project's existing admin session, reauthentication, TOTP and database actor validation contract.
+High-risk actions require the project's existing admin session, reauthentication (Step-Up 2FA ReauthGuard), CSRF and database actor validation contract. (Legacy admin TOTP was retired in Migration 197 and reconciled with ReauthGuard.)
 
 ## 18. Suggested database tables
 

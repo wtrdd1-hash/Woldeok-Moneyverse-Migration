@@ -1,11 +1,20 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.22.368
+> Current ledger version: v2026.09.23.388
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.23.388 — 2026-09-23
+- Start/Integrated SHA: `bb832b69ee56b9ab247eda24b7b20f76ea44ffb4` (23 unmerged Step-Up PRs and PR #685 fully integrated into main).
+- Reviewed: `PROJECT_PLAN` EN/KO, `docs/mobile-api-complete-spec` EN/KO, `AUTHENTICATION_SECURITY_PRIORITY_SPEC` EN/KO, `COMMUNITY_MARKET_INTEGRITY_SPEC` EN/KO, runtime migration 197 proof, backend tests (974 pass), frontend tests (3 pass), promotion and production session (1,061 active sessions) continuity empirical proof.
+- G368-02 P0 closed: legacy admin TOTP wording completely reconciled with migration 197 and actual deployed runtime controls (`AdminSessionGuard`, `ReauthGuard` Step-Up 2FA, browser CSRF guards, DB role/actor checks, idempotency, append-only audit).
+- G368-03 P1 closed: `docs/mobile-api-complete-spec.md` and KO spec updated to v2026.09.23.388, covering 4 new domains (16 endpoints) for a total of 57 controllers and 335 endpoints (179 mobile contract endpoints verified via `pnpm api:contract:check`).
+- G368-04 P1 closed: shop Step-Up and 23 unmerged PRs cleanly integrated into `main`, verified via test/build suites, and promoted to Test and Production with zero downtime.
+- G368-05 P1 closed: 1,061 active PostgreSQL user sessions 100% preserved through promotion, with zero Nginx errors and verified 200 OK responses on the notification BFF route and 401 on the protected chat API.
+- EN/KO parity: complete.
 
 ## v2026.09.22.368 — 2026-09-22
 - Start SHA: `3f42ad8c6b12c8e13693ff246935eebceab951e1`.

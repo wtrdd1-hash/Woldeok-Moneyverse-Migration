@@ -2355,3 +2355,39 @@ flowchart TD
    - `systemctl status moneyverse-discord-bot.service`: PID `1739183` Active (running), `🔊│음성` (`1536572442422550538`) 채널 정상 상주 중.
 4. **호스트 릴리스 로그 기록**:
    - `/home/debian/v2026.09.23.389-plan-ko.txt`, `/home/debian/v2026.09.23.389-plan-en.txt`, `/home/debian/v2026.09.23.389-log-ko.txt`, `/home/debian/v2026.09.23.389-log-en.txt` 4종 원격 서버 저장 완료.
+
+---
+
+## 🚀 [v61 Specification] G368-02 관리자 통제 정합화(TOTP 폐기 반영) 및 G368-03 API 335개 엔드포인트 계약 동기화 (누적 추가)
+
+### 1. 개요 및 배경 (Context & Scope)
+- **사용자 요청**: 선택지 1 (기획 정합화) 수행 — G368-02 및 G368-03에 따라 기획서 내 구형 TOTP 문구를 최신 Step-Up 2FA 체계로 정합화하고 335개 API 계약 문서를 최신화.
+- **배경 및 원인 분석**:
+  1. **G368-02 (P0 보안 계약 Gap)**: 백엔드 마이그레이션 197에서 관리자 전용 구형 TOTP 자격증명 및 DB 함수가 공식 폐기되었으나, `PROJECT_PLAN.ko.md`, `PROJECT_PLAN.md`, `AUTHENTICATION_SECURITY_PRIORITY_SPEC`, `COMMUNITY_MARKET_INTEGRITY_SPEC` 등 권위 기획 문서에 여전히 민감 관리자 조치에 TOTP/SecondFactorGuard가 필요한 것으로 기재되어 있던 실증 통제와의 불일치(Drift) 해소.
+  2. **G368-03 (P1 계약 Gap)**: 모바일 API 명세서(`docs/mobile-api-complete-spec.ko.md`, `docs/mobile-api-complete-spec.md`)의 버전 헤더가 `v2026.09.14.2`에 머물러 있고 구형 52개 컨트롤러/163개 엔드포인트 수치가 잔존하던 문제를, 최신 57개 컨트롤러, 335개 엔드포인트(모바일 BFF 계약 179개)로 최신화하고 Step-Up 2FA/멱등성 사양을 정합 반영.
+  3. **통합 원장 동기화**: `docs/planning/INTEGRATED_PLANNING_MASTER.ko.md` 및 영문 문서에 v2026.09.23.388 회차를 기록하여 G368-02, G368-03, G368-04, G368-05의 종결(Closed) 상태를 공식 영구 확정.
+
+### 2. 세부 정합화 내역 (Reconciliation Specifications)
+1. **G368-02 관리자 보안 통제 정합화**:
+   - `docs/planning/PROJECT_PLAN.ko.md` & `PROJECT_PLAN.md`:
+     - 문서 버전을 `v2026.09.23.388` (2026-09-23)로 갱신.
+     - 섹션 1.3 (관리자 경계): 구형 TOTP 표기를 `AdminSessionGuard`, 필수 `ReauthGuard`(Step-Up 2FA 재인증), 브라우저 CSRF 가드, 서버 role/actor 검사, 멱등성 및 append-only audit로 대체 명시.
+     - 섹션 5 (도메인 아키텍처) 및 섹션 8 (보안 위협 레지스터): `admin/audit` 및 `admin abuse` 행의 TOTP 요구사항을 `reauth(Step-Up 2FA)+CSRF+DB actor`로 정합화.
+   - `docs/planning/AUTHENTICATION_SECURITY_PRIORITY_SPEC.ko.md` & `.md`:
+     - 섹션 0 (핵심 결정): 관리자 전용 TOTP가 Migration 197에서 공식 폐기되고 ReauthGuard 및 AdminSessionGuard로 실증 정합화되었음을 명시.
+   - `docs/planning/COMMUNITY_MARKET_INTEGRITY_SPEC.ko.md` & `.md`:
+     - 고위험 관리자 조치 요구사항에서 TOTP를 제거하고 Step-Up 2FA ReauthGuard 및 CSRF 계약으로 정합화.
+2. **G368-03 모바일/API 계약 최신화**:
+   - `docs/mobile-api-complete-spec.ko.md` & `docs/mobile-api-complete-spec.md`:
+     - 버전 헤더를 `v2026.09.23.388`로 갱신.
+     - 대상 설명에서 AI 도구 명칭 워터마크 원천 제거.
+     - 섹션 40 신설: 전체 57개 백엔드 컨트롤러, 335개 엔드포인트(모바일 BFF 계약 179개) 전수 현황, 신규 4대 도메인 16개 엔드포인트(저축 포켓 5개, 제작 2개, 마켓플레이스 5개, 알림 센터 4개), Step-Up 2FA ReauthGuard 및 멱등성 보장 사양 공식 명문화.
+3. **통합 원장 종결 기록**:
+   - `docs/planning/INTEGRATED_PLANNING_MASTER.ko.md` & `INTEGRATED_PLANNING_MASTER.md`:
+     - `## v2026.09.23.388 — 2026-09-23` 섹션 신설을 통해 G368-02, G368-03, G368-04, G368-05의 실증 증거 기반 공식 종결(Closed) 기록.
+
+### 3. 검증 결과 (Verification Results)
+- `git diff`: 변경 대상 문서 전수 정합성 검증 완료.
+- 영/한 문서 간 의미적 100% 패리티 유지.
+- 규정 위반 AI 워터마크 0건 준수.
+

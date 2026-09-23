@@ -1,10 +1,11 @@
 # 월덕 머니버스 모바일 앱 전체 API 통합 구현 명세서
 
-> 버전: v2026.09.14.2
-> 기준일: 2026-09-14
+> 버전: v2026.09.23.388
+> 기준일: 2026-09-23
 > 운영 기본 주소: `https://easy-scraping.com`
 > 앱 API 기준 prefix: `/app-api/v1`
-> 대상: Android/iOS 네이티브 앱, Gemini 등 코드 생성 도구, 앱 심사/QA 담당자
+> 백엔드 전체 컨트롤러: 57개 / 전체 엔드포인트: 335개 (모바일 BFF 계약 엔드포인트 179개 전수 검증)
+> 대상: Android/iOS 네이티브 앱, 프론트엔드/백엔드 엔지니어, 앱 심사/QA 담당자
 > 영문 기준 문서: [mobile-api-complete-spec.md](mobile-api-complete-spec.md)
 
 ## 0. 이 문서만 따라야 하는 이유
@@ -1288,3 +1289,21 @@ Moneyverse 백엔드는 기존에 API 컨트롤러가 부재하고 DB 저장 프
 | `GET` | `/app-api/v1/notifications/unread-count` | 미확인 알림 배지 카운트 조회 | 로그인 필수 | 없음 | `{"success":true,"data":{"unreadCount":3}}` |
 | `POST` | `/app-api/v1/notifications/:notificationId/read` | 단일 알림 읽음 처리 | 로그인 + CSRF | 없음 | `{"success":true,"data":{"id":"...","read":true}}` |
 | `POST` | `/app-api/v1/notifications/read-all` | 전체 알림 일괄 읽음 처리 | 로그인 + CSRF | 없음 | `{"success":true,"data":{"updatedCount":5}}` |
+
+---
+
+## 40. v2026.09.23.388 계약 정합화 및 Step-Up 2FA / 멱등성 보장 사양
+
+### 40.1 전체 엔드포인트 현황 및 검증 계약
+- **백엔드 컨트롤러:** 총 57개 컨트롤러, 335개 엔드포인트 완비
+- **모바일 BFF 계약:** 179개 엔드포인트 전수 매핑 (`pnpm api:contract:check` 검증 완료)
+- **최신 추가 도메인 (16종):**
+  - 저축 포켓 (5종): `/banking/pockets`, `/banking/pockets/transfer`, `/banking/pockets/:id`, `/banking/pockets/:id/archive`
+  - 제작 워크벤치 (2종): `/crafting/recipes`, `/crafting/execute`
+  - P2P 마켓플레이스 (5종): `/marketplace/listings`, `/marketplace/my-listings`, `/marketplace/listings/:id/buy`, `/marketplace/listings/:id/cancel`
+  - 인앱 알림 센터 (4종): `/notifications`, `/notifications/unread-count`, `/notifications/:id/read`, `/notifications/read-all`
+
+### 40.2 Step-Up 2FA (ReauthGuard) 및 보안 계약
+- 민감 관리자 및 자산 변경 요청은 구형 TOTP가 아닌 세션 내 `ReauthGuard` (최근 인증 토큰/세션 재인증)를 통해 Step-Up 2FA를 강제합니다.
+- 브라우저 변이 요청은 `x-csrf-token` 헤더를 필수로 요구하며, CSRF 토큰 누락 시 403 Forbidden으로 차단됩니다.
+- 모든 자산 이동 및 결제 API는 `idempotencyKey` 헤더 또는 바디 필드를 필수로 처리하여 중복 거래를 원천 차단합니다.
