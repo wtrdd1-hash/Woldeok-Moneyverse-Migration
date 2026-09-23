@@ -1,14 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
-import { BusinessRepository } from './business.repository';
-import type { DatabasePool } from '../database/pool';
+import { PostgresBusinessRepository } from './business.repository';
+import type { Queryable } from '../core/db';
 
-describe('BusinessRepository - Supply Chain & Procurement', () => {
+describe('PostgresBusinessRepository - Supply Chain & Procurement', () => {
   const mockPool = {
-    connect: vi.fn(),
     query: vi.fn(),
-  } as unknown as DatabasePool;
+  } as unknown as Queryable;
 
-  const repo = new BusinessRepository(mockPool);
+  const repo = new PostgresBusinessRepository(mockPool);
 
   it('calculates storage upgrade cost correctly with exponential factor', () => {
     // base_cost = 50,000, factor = 1.40^(n-1)
@@ -33,9 +32,10 @@ describe('BusinessRepository - Supply Chain & Procurement', () => {
     expect(fee / totalCost).toBe(0.02);
   });
 
-  it('defines material types and valid limits', () => {
-    const validMaterials = ['RAW_PACKAGED', 'RAW_ENERGY'];
-    expect(validMaterials).toContain('RAW_PACKAGED');
-    expect(validMaterials).toContain('RAW_ENERGY');
+  it('instantiates repository correctly and exposes supply chain methods', () => {
+    expect(repo).toBeDefined();
+    expect(typeof repo.supplyChainOverview).toBe('function');
+    expect(typeof repo.procureMaterials).toBe('function');
+    expect(typeof repo.upgradeStorage).toBe('function');
   });
 });
