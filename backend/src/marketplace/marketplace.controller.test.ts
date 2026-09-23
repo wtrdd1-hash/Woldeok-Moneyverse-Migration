@@ -67,7 +67,7 @@ describe('MarketplaceController', () => {
     const list = await controller.listAuctions();
     expect(list).toHaveLength(1);
 
-    const bidRes = await controller.bidAuction(mockReq, 'auc-1' as any, { bidAmountWld: '9000' });
+    const bidRes = await controller.bidAuction(mockReq, '11111111-1111-4111-8111-111111111111', { bidAmountWld: '9000' });
     expect(bidRes).toEqual(expect.objectContaining({ currentBidWld: '9000' }));
   });
 
@@ -78,13 +78,13 @@ describe('MarketplaceController', () => {
     });
     expect(createRes).toBe('trade-new');
 
-    const acceptRes = await controller.acceptTrade(mockReq, 'trade-1' as any);
+    const acceptRes = await controller.acceptTrade(mockReq, '22222222-2222-4222-8222-222222222222');
     expect(acceptRes).toBe(true);
 
-    const confirmRes = await controller.confirmTrade(mockReq, 'trade-1' as any);
+    const confirmRes = await controller.confirmTrade(mockReq, '22222222-2222-4222-8222-222222222222');
     expect(confirmRes).toBe(true);
 
-    const cancelRes = await controller.cancelTrade(mockReq, 'trade-1' as any);
+    const cancelRes = await controller.cancelTrade(mockReq, '22222222-2222-4222-8222-222222222222');
     expect(cancelRes).toBe(true);
   });
 
