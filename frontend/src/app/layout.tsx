@@ -170,8 +170,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ConsentGuard
           signedIn={viewer.signedIn}
           consentCurrent={viewer.consentCurrent}
-          termsVersion={policy.termsVersion}
-          privacyVersion={policy.privacyVersion}
+          termsVersion={policy?.termsVersion}
+          privacyVersion={policy?.privacyVersion}
         />
         <script
           type="application/ld+json"

@@ -220,15 +220,15 @@ export interface PolicyResponse {
   readonly privacyVersion: string;
 }
 
-const DEFAULT_POLICY: PolicyResponse = {
-  termsVersion: '2026-09-02',
-  privacyVersion: '2026-09-02',
-};
-
-/** Fetches latest legal policy version from the backend with 60s SWR cache and graceful fallback. */
-export async function fetchLatestPolicy(): Promise<PolicyResponse> {
-  const policy = await publicApi<PolicyResponse>('/api/v1/auth/policy', 60);
-  return policy ?? DEFAULT_POLICY;
+/**
+ * Fetch the authoritative published policy versions.
+ *
+ * A missing backend response is deliberately represented as `null`: callers
+ * must fail closed instead of manufacturing a consent version from display
+ * defaults. Existing audited consent remains server-authoritative.
+ */
+export async function fetchLatestPolicy(): Promise<PolicyResponse | null> {
+  return publicApi<PolicyResponse>('/api/v1/auth/policy', 60);
 }
 
 /**
