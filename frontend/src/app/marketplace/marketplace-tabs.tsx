@@ -1,7 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShoppingBag, Hammer, PackageOpen, Boxes, PlusCircle, Coins, Flame, ArrowUpRight as _ArrowUpRight } from 'lucide-react';
+import {
+  ShoppingBag,
+  Hammer,
+  PackageOpen,
+  Boxes,
+  PlusCircle,
+  Coins,
+  Flame,
+  Gavel,
+  ArrowLeftRight,
+  Award,
+} from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +22,10 @@ import { CraftingPanel } from './crafting-panel';
 import { MarketListingsView } from './market-listings-view';
 import { MyListingsView } from './my-listings-view';
 import { SellListingModal } from './sell-listing-modal';
+import { PriceDiscoveryChart } from './price-discovery-chart';
+import { AuctionView } from './auction-view';
+import { DirectTradeView } from './direct-trade-view';
+import { AppraisalView } from './appraisal-view';
 import {
   INITIAL_MARKET_LISTINGS,
   P0_CRAFTING_RECIPES,
@@ -207,17 +222,26 @@ export function MarketplaceTabs({
       {/* Main Tabs */}
       <Tabs defaultValue="market" className="w-full">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b pb-3">
-          <TabsList className="grid grid-cols-4 w-full sm:w-auto h-11 bg-muted/60 p-1">
-            <TabsTrigger value="market" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5">
-              <ShoppingBag className="size-4" /> 거래소
+          <TabsList className="flex flex-wrap w-full sm:w-auto h-auto min-h-[44px] bg-muted/60 p-1 gap-1">
+            <TabsTrigger value="market" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5">
+              <ShoppingBag className="size-4" /> 고정가 거래소
             </TabsTrigger>
-            <TabsTrigger value="crafting" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5">
-              <Hammer className="size-4" /> 제작대
+            <TabsTrigger value="auction" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5">
+              <Gavel className="size-4 text-amber-500" /> 실시간 경매장
             </TabsTrigger>
-            <TabsTrigger value="my-listings" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5">
+            <TabsTrigger value="direct-trade" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5">
+              <ArrowLeftRight className="size-4 text-blue-500" /> 1:1 직거래
+            </TabsTrigger>
+            <TabsTrigger value="appraisal" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5">
+              <Award className="size-4 text-purple-500" /> 공인 감정소
+            </TabsTrigger>
+            <TabsTrigger value="crafting" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5">
+              <Hammer className="size-4 text-emerald-500" /> 제작대
+            </TabsTrigger>
+            <TabsTrigger value="my-listings" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5">
               <PackageOpen className="size-4" /> 내 등록
             </TabsTrigger>
-            <TabsTrigger value="holdings" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5">
+            <TabsTrigger value="holdings" className="text-xs sm:text-sm font-semibold flex items-center gap-1.5 px-3 py-1.5">
               <Boxes className="size-4" /> 보관함
             </TabsTrigger>
           </TabsList>
@@ -231,13 +255,32 @@ export function MarketplaceTabs({
           </Button>
         </div>
 
-        <TabsContent value="market" className="pt-4">
+        <TabsContent value="market" className="pt-4 space-y-6">
+          <PriceDiscoveryChart
+            rollingMedianWld="1320"
+            p25Wld="1180"
+            p75Wld="1450"
+            volume7dWld="28500"
+            volume30dWld="124000"
+          />
           <MarketListingsView
             listings={listings}
             userBalanceWld={currentBalance}
             onBuyListing={handleBuyListing}
             onOpenSellModal={() => setIsSellModalOpen(true)}
           />
+        </TabsContent>
+
+        <TabsContent value="auction" className="pt-4">
+          <AuctionView userBalanceWld={currentBalance} />
+        </TabsContent>
+
+        <TabsContent value="direct-trade" className="pt-4">
+          <DirectTradeView holdings={holdings} userBalanceWld={currentBalance} />
+        </TabsContent>
+
+        <TabsContent value="appraisal" className="pt-4">
+          <AppraisalView holdings={holdings} userBalanceWld={currentBalance} />
         </TabsContent>
 
         <TabsContent value="crafting" className="pt-4">
