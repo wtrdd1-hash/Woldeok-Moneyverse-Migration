@@ -2,11 +2,25 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.23.413
+> **현재 통합 버전:** v2026.09.23.414
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 시간별 기획 회차 — v2026.09.23.414 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Addition. **Previous Cycle Type:** Feature Improvement. **Next Cycle Type:** Feature Improvement.
+- **정확한 기준선:** 이번 회차 전 authoritative `origin/main=e447b11f1d27ee7da2a46c64fcd96e0058c8da6d`를 재확인했다. 새 분산 기획 파일을 만들지 않고 아직 병합되지 않은 v413 통합 EN/KO 계보를 의도적으로 이어간다.
+- **신규 기능 후보 — BANK-414-01 / 저축 목표 및 가상 봉투:** 저장소 코드 검색에서 authoritative savings-goal, envelope/bucket/pot, sinking-fund, target-amount/target-date 계약을 찾지 못했다. 이 후보는 일회성 송금, 예약·반복 송금, 신뢰 수취인 관리와 구분되며, 기존 WLD 잔액을 목적별로 배정·예약하고 명시적 저축 목표 진행률을 제공하는 기능이다.
+- **레퍼런스 확보:** 이번 회차에서 후보 전용 독립 웹 레퍼런스 18건을 신규 수집했다. 은행/신협의 목표·가상봉투 기능, fintech pot/vault/jar, privacy-first/open-source envelope budgeting, 자동 적립 패턴, 목표 진행 UX를 포함한다. BECU Envelopes, FNB Goal Builder, Monzo Pots, Citizens Savings Tracker, Huntington Savings Goal Getter, Thrivent Savings Pockets, CBNA StashUp, Moniqo, Envelopes, Pocket Envelopes, Buckets 등 현재 서비스/구현을 포함하며, 동일 URL·동일 제품의 명백한 중복은 중복 집계하지 않았다.
+- **관찰 패턴/반례(연구 미완료):** 여러 개의 이름 있는 목표, 목표 금액/날짜, 진행률 시각화, 수동+자동 적립, 기존 잔액 내부의 가상 배정, 수정/일시정지/종료, 명시적 활동 이력이 반복된다. 반면 실제 자금을 이동·잠그는지 단순 earmark인지, 입금 자동배정 방식, 가용잔액에 미치는 영향은 제품마다 크게 다르다. 이 차이는 특정 제품을 복제하지 말고 Moneyverse의 명시적 authority semantics로 결정해야 한다.
+- **레퍼런스 게이트:** 현재 후보 전용 중복 제거 독립 외부 레퍼런스는 `18 / 10,000`건이다. 필수 10,000건 기준을 충족하지 못했으므로 BANK-414-01은 **IN PROGRESS / REFERENCE VALIDATION BLOCKED**이며 기획 완료로 세지 않는다. 과거 일반 UI corpus를 이 수치에 재분류하지 않는다.
+- **실질 명세 전 연구 backlog:** 은행/fintech/open-source 제품, goal/envelope UX, ledger 대 virtual allocation 회계, PostgreSQL 제약/locking, 적립 스케줄, 잔액 부족, 인출/unlock, fraud/abuse, 접근성/모바일, 알림/검색/분석/KPI, 수익화, 운영 장애, reconciliation/DR, 관련 규제·보안 지침으로 corpus를 확대한다. dedup key, 출처 범주, 최신성, 채택/보류/제외 패턴과 이유를 기록한다.
+- **성급한 계약 확정 금지:** 권한, 진입경로, 화면/상태/CTA, authoritative balance semantics, 데이터 모델, API/app-api, DB 제약/인덱스/트랜잭션, 관리자 기능, 악용 방지, 알림, SEO/검색, KPI, 접근성, exact-SHA Test 수용조건, rollout/rollback, Production 승격조건은 reference gate 충족 전까지 의도적으로 미확정 상태로 둔다.
+- **QA/runtime 이월:** PR #710 exact head `83a9ac52fecdbe6adb985f34b35013003bd01699`의 CI run 1809는 `classify`/`policy` PASS지만 required `runtime-check`가 `pnpm lint`에서 FAILURE이며 typecheck, build, migrations, full tests, Prisma mutation rejection, production dependency audit가 skip된다. #705/#706/#707/#708/#710은 이 exact-SHA gate가 red인 동안 Production 증거가 아니다.
+- **기획 정리:** #704/#709/#711/#712는 서로 겹치는 미병합 planning-history PR이다. 증거/정리 후보로 유지하며, 통합 v414 계보는 review/merge 이후에만 해당 기획 내용을 supersede하고 과거 내용을 임의 삭제하지 않는다.
+- **범위 사실:** 이번 회차는 차단된 신규 기능 발굴과 부분 레퍼런스 확보만 기록한다. BANK-414-01 구현, runtime 병합, DB/Test/Production 변경, 배포 또는 10,000건 연구 완료를 주장하지 않는다.
 
 ## 시간별 기획 회차 — v2026.09.23.413 (2026-09-23)
 

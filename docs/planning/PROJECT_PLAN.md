@@ -2,11 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.413
+> Current integrated version: v2026.09.23.414
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Hourly planning cycle — v2026.09.23.414 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Addition. **Previous Cycle Type:** Feature Improvement. **Next Cycle Type:** Feature Improvement.
+- **Exact baseline:** authoritative `origin/main=e447b11f1d27ee7da2a46c64fcd96e0058c8da6d` was rechecked before this cycle. This branch intentionally continues the still-unmerged v413 integrated EN/KO lineage rather than creating a disconnected planning file.
+- **New-feature candidate — BANK-414-01 / Savings Goals & Virtual Envelopes:** repository code search found no authoritative savings-goal, envelope/bucket/pot, sinking-fund, target-amount or target-date contract. This candidate is distinct from one-off transfers, scheduled/recurring transfers and trusted-recipient management: it allocates or reserves a user's existing WLD balance by purpose and exposes progress toward explicit savings targets.
+- **Reference acquisition:** 18 candidate-specific independent web references were newly collected in this cycle, spanning bank/credit-union goal tools and virtual envelopes, fintech pots/vaults/jars, privacy-first/open-source envelope budgeting, automated contribution patterns and goal-progress UX. Examples include BECU Envelopes, FNB Goal Builder, Monzo Pots, Citizens Savings Tracker, Huntington Savings Goal Getter, Thrivent Savings Pockets, CBNA StashUp, Moniqo, Envelopes, Pocket Envelopes, Buckets and other current goal/pot implementations. Results were treated as independent pages/products; obvious duplicate URLs/products were not double-counted.
+- **Observed patterns / counter-patterns (research-incomplete):** common patterns are multiple named goals, target amount/date, progress visualization, manual plus automated funding, virtual allocation inside an existing balance, flexible edit/pause/close, and explicit activity history. Important design divergence is whether money is actually transferred/locked versus only virtually earmarked; automatic allocation on deposits and spendable-balance effects also vary materially. These differences must be resolved as explicit Moneyverse authority semantics rather than copied from one product.
+- **Reference gate:** `18 / 10,000` candidate-specific, deduplicated independent external references are currently acquired/analyzed. The required 10,000-reference threshold is therefore not met. BANK-414-01 remains **IN PROGRESS / REFERENCE VALIDATION BLOCKED** and is not counted as planned-complete. No generic historical UI corpus is reclassified into this count.
+- **Research backlog before substantive specification:** expand the corpus across bank/fintech/open-source products, goal/envelope UX, ledger-vs-virtual-allocation accounting, PostgreSQL constraints/locking, contribution scheduling, insufficient-funds semantics, withdrawal/unlock behavior, fraud/abuse, accessibility/mobile, notification/search/analytics/KPI, monetization, operational incidents, reconciliation/DR and applicable regulatory/security guidance. Record deduplication keys, source category, publication/update recency, adopted/rejected patterns and reasons.
+- **No premature contract:** permission model, entry points, screens/states/CTA, authoritative balance semantics, data model, API/app-api shapes, DB constraints/indexes/transactions, admin controls, abuse prevention, notifications, SEO/search, KPI targets, accessibility, exact-SHA Test acceptance, rollout/rollback and Production promotion remain intentionally unfinalized until the reference gate is satisfied.
+- **QA/runtime carry-forward:** PR #710 exact head `83a9ac52fecdbe6adb985f34b35013003bd01699` CI run 1809 still has `classify`/`policy` PASS and required `runtime-check` FAILURE at `pnpm lint`; typecheck, build, migrations, full tests, Prisma mutation rejection and production dependency audit are skipped. Runtime/tooling PRs #705/#706/#707/#708/#710 remain non-Production evidence while that exact-SHA gate is red.
+- **Planning cleanup:** #704/#709/#711/#712 are overlapping unmerged planning-history PRs. They remain evidence/cleanup candidates; the integrated v414 lineage supersedes their planning content only after review/merge and does not silently delete historical material.
+- **Scope truth:** this cycle records a blocked new-feature discovery and partial reference acquisition only. It does not implement BANK-414-01, merge runtime code, mutate DB/Test/Production, deploy, or claim the 10,000-reference requirement complete.
 
 ## Hourly planning cycle — v2026.09.23.413 (2026-09-23)
 
