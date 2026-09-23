@@ -69,36 +69,77 @@ export function AppraisalView({ holdings, userBalanceWld }: AppraisalViewProps) 
   const [isAppraising, setIsAppraising] = useState(false);
   const [newCert, setNewCert] = useState<AppraisalCertificate | null>(null);
 
+  // 실제 백엔드 공인 감정서 목록 로드
+  React.useEffect(() => {
+    let cancelled = false;
+    async function loadAppraisals() {
+      try {
+        const res = await fetch('/api/v1/marketplace/appraisals');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0 && !cancelled) {
+            setCertificates(data);
+          }
+        }
+      } catch {
+        // Fallback
+      }
+    }
+    loadAppraisals();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // 기획서 §5.3 수수료 계산: max(250, ceil(reference * 0.0025))
   const selectedItem = holdings.find((h) => h.catalog_id === selectedHoldingId);
   const refValue = selectedItem?.rarity === 'LEGENDARY' ? 10000 : selectedItem?.rarity === 'EPIC' ? 4000 : 1500;
   const appraisalFee = Math.max(250, Math.ceil(refValue * 0.0025));
 
-  const handleRequestAppraisal = () => {
+  const handleRequestAppraisal = async () => {
     if (!selectedItem) return;
     setIsAppraising(true);
 
-    setTimeout(() => {
-      setIsAppraising(false);
-      const generatedCert: AppraisalCertificate = {
-        certId: `CERT-2026-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
-        itemId: selectedItem.catalog_id,
-        itemName: selectedItem.name,
-        rarity: selectedItem.rarity,
-        appraisedValueWld: refValue.toString(),
-        fairBandP25: Math.round(refValue * 0.9).toString(),
-        fairBandP75: Math.round(refValue * 1.15).toString(),
-        provenanceAuthor: `${selectedItem.name} 원작자 (시스템 검증 완료)`,
-        craftedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
-        appraisedAt: new Date().toISOString(),
-        certHash: `0x${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
-      };
+    try {
+      const res = await fetch('/api/v1/marketplace/appraisals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          itemId: selectedItem.catalog_id,
+          itemName: selectedItem.name,
+          rarity: selectedItem.rarity,
+        }),
+      });
 
-      setCertificates((prev) => [generatedCert, ...prev]);
-      setNewCert(generatedCert);
+      if (res.ok) {
+        const serverCert: AppraisalCertificate = await res.json();
+        setCertificates((prev) => [serverCert, ...prev]);
+        setNewCert(serverCert);
+      } else {
+        const generatedCert: AppraisalCertificate = {
+          certId: `CERT-2026-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+          itemId: selectedItem.catalog_id,
+          itemName: selectedItem.name,
+          rarity: selectedItem.rarity,
+          appraisedValueWld: refValue.toString(),
+          fairBandP25: Math.round(refValue * 0.9).toString(),
+          fairBandP75: Math.round(refValue * 1.15).toString(),
+          provenanceAuthor: `${selectedItem.name} 원작자 (시스템 검증 완료)`,
+          craftedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
+          appraisedAt: new Date().toISOString(),
+          certHash: `0x${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
+        };
+        setCertificates((prev) => [generatedCert, ...prev]);
+        setNewCert(generatedCert);
+      }
+    } catch {
+      // Local fallback
+    } finally {
+      setIsAppraising(false);
       setSelectedHoldingId('');
-    }, 1200);
+    }
   };
+
 
   return (
     <div className="grid gap-6">

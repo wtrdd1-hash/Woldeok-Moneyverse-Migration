@@ -145,6 +145,16 @@ const config: NextConfig = {
 
     return [{ source: '/:path*', headers: security }];
   },
+
+  async rewrites() {
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: '/app-api/v1/:path*',
+      },
+    ];
+  },
 };
 
 export default config;
+

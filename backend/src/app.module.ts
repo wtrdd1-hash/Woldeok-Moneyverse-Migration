@@ -42,6 +42,7 @@ import { ChatModule } from './chat/chat.module';
 import { SafetyModule } from './safety/safety.module';
 import { SpaceModule } from './space/space.module';
 import { ClubModule } from './club/club.module';
+import { CollectionModule } from './collection/collection.module';
 
 const ONE_MINUTE_MS = 60_000;
 
@@ -64,6 +65,7 @@ const ONE_MINUTE_MS = 60_000;
     SeasonModule,
     SpaceModule,
     ClubModule,
+    CollectionModule,
     BoardModule,
     SupportModule,
     ChatModule,

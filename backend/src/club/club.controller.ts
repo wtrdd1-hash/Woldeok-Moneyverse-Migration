@@ -7,12 +7,13 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Put,
   Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiPropertyOptional, ApiTags } from '@nestjs/swagger';
-import { IsBoolean, IsIn, IsInt, IsOptional, IsPositive, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsArray, IsBoolean, IsIn, IsInt, IsOptional, IsPositive, IsString, IsUUID, Matches, MaxLength, Min, MinLength } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
@@ -227,4 +228,35 @@ export class ClubController {
     const actorUserId = requireUserId(req);
     return this.clubService.createClubFeedPost(actorUserId, clubId, dto);
   }
+
+  @ApiOperation({ summary: '클럽하우스 12x12 공유 캔버스 조회' })
+  @Get(':id/canvas')
+  async getClubCanvas(@Param('id', ParseUUIDPipe) clubId: string) {
+    const canvas = await this.clubService.getClubCanvas(clubId);
+    return { canvas };
+  }
+
+  @ApiOperation({ summary: '클럽하우스 12x12 공유 캔버스 저장' })
+  @Put(':id/canvas')
+  async updateClubCanvas(
+    @Req() req: RequestWithSession,
+    @Param('id', ParseUUIDPipe) clubId: string,
+    @Body() dto: UpdateClubCanvasDto,
+  ) {
+    const actorUserId = requireUserId(req);
+    const ok = await this.clubService.updateClubCanvas(actorUserId, clubId, dto.grid, dto.totalScore);
+    return { ok };
+  }
 }
+
+export class UpdateClubCanvasDto {
+  @ApiProperty({ description: '12x12 가구 배치 그리드 배열' })
+  @IsArray()
+  readonly grid!: unknown[];
+
+  @ApiProperty({ description: '장식 점수', example: 450 })
+  @IsInt()
+  @Min(0)
+  readonly totalScore!: number;
+}
+

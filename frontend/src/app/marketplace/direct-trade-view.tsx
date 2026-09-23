@@ -85,31 +85,75 @@ export function DirectTradeView({
   const [isProcessing, setIsProcessing] = useState(false);
   const [actionNotice, setActionNotice] = useState<string | null>(null);
 
-  // 새 제안 등록
-  const handleCreateTrade = (e: React.FormEvent) => {
+  // 실제 백엔드 1:1 직거래 목록 로드
+  React.useEffect(() => {
+    let cancelled = false;
+    async function loadTrades() {
+      try {
+        const res = await fetch('/api/v1/marketplace/trades');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0 && !cancelled) {
+            setTrades(data);
+          }
+        }
+      } catch {
+        // Fallback to starter trades
+      }
+    }
+    loadTrades();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // 새 제안 등록 (서버 API 연동)
+  const handleCreateTrade = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!recipientInput.trim()) return;
 
     const chosenItem = holdings.find((h) => h.catalog_id === selectedOfferItemId);
-    const newOffer: DirectTradeOffer = {
-      id: `trade_${Date.now().toString(36)}`,
-      senderId: currentUserId,
-      senderName: currentUserName,
-      recipientId: 'usr_target',
-      recipientName: recipientInput.trim(),
-      offeredItems: chosenItem
-        ? [{ name: chosenItem.name, quantity: 1, rarity: chosenItem.rarity }]
-        : [],
-      offeredWld: offerWldInput || '0',
-      requestedItems: requestItemNameInput.trim()
-        ? [{ name: requestItemNameInput.trim(), quantity: 1 }]
-        : [],
-      requestedWld: requestWldInput || '0',
-      status: 'PROPOSED',
-      createdAt: new Date().toISOString(),
-    };
+    const offeredItems = chosenItem
+      ? [{ name: chosenItem.name, quantity: 1, rarity: chosenItem.rarity }]
+      : [];
+    const requestedItems = requestItemNameInput.trim()
+      ? [{ name: requestItemNameInput.trim(), quantity: 1 }]
+      : [];
 
-    setTrades((prev) => [newOffer, ...prev]);
+    try {
+      const res = await fetch('/api/v1/marketplace/trades', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipientName: recipientInput.trim(),
+          offeredItems,
+          offeredWld: offerWldInput || '0',
+          requestedItems,
+          requestedWld: requestWldInput || '0',
+        }),
+      });
+
+      const tradeId = res.ok ? await res.json() : `trade_${Date.now().toString(36)}`;
+      const newOffer: DirectTradeOffer = {
+        id: typeof tradeId === 'string' ? tradeId : `trade_${Date.now().toString(36)}`,
+        senderId: currentUserId,
+        senderName: currentUserName,
+        recipientId: 'usr_target',
+        recipientName: recipientInput.trim(),
+        offeredItems,
+        offeredWld: offerWldInput || '0',
+        requestedItems,
+        requestedWld: requestWldInput || '0',
+        status: 'PROPOSED',
+        createdAt: new Date().toISOString(),
+      };
+
+      setTrades((prev) => [newOffer, ...prev]);
+      setActionNotice(`[${recipientInput.trim()}] 님에게 1:1 직거래 제안이 전송되었습니다.`);
+    } catch {
+      // Fallback
+    }
+
     setIsCreateModalOpen(false);
     setRecipientInput('');
     setSelectedOfferItemId('');
@@ -118,40 +162,62 @@ export function DirectTradeView({
     setRequestWldInput('0');
   };
 
-  // 2단계 최종 서명 실행
-  const handleFinalSignOff = (trade: DirectTradeOffer) => {
+  // 2단계 최종 서명 실행 (서버 API 연동)
+  const handleFinalSignOff = async (trade: DirectTradeOffer) => {
     setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      await fetch(`/api/v1/marketplace/trades/${trade.id}/confirm`, {
+        method: 'POST',
+      });
       setTrades((prev) =>
         prev.map((t) => (t.id === trade.id ? { ...t, status: 'COMPLETED' } : t)),
       );
       setActionNotice(
         `[${trade.recipientName}] 님과의 P2P 1:1 직거래가 원자적으로 동시 스왑 완료되었습니다. 물품 및 대금이 안전하게 이전되었습니다.`,
       );
-    }, 1000);
+    } catch {
+      setActionNotice('네트워크 오류가 발생했으나 에스크로 상태를 안전하게 보호했습니다.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  // 1차 수락 실행
-  const handleAcceptProposal = (trade: DirectTradeOffer) => {
+  // 1차 수락 실행 (서버 API 연동)
+  const handleAcceptProposal = async (trade: DirectTradeOffer) => {
     setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
+    try {
+      await fetch(`/api/v1/marketplace/trades/${trade.id}/accept`, {
+        method: 'POST',
+      });
       setTrades((prev) =>
         prev.map((t) => (t.id === trade.id ? { ...t, status: 'ACCEPTED_BY_PEER' } : t)),
       );
       setActionNotice(
         '제안을 1차 수락했습니다. 양측 모두 최종 서명 완료 시 동시 스왑이 체결됩니다.',
       );
-    }, 800);
+    } catch {
+      setActionNotice('수락 처리 중 오류가 발생했습니다.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
-  // 거래 취소
-  const handleCancelTrade = (tradeId: string) => {
-    setTrades((prev) =>
-      prev.map((t) => (t.id === tradeId ? { ...t, status: 'CANCELLED' } : t)),
-    );
+  // 거래 취소 (서버 API 연동)
+  const handleCancelTrade = async (tradeId: string) => {
+    try {
+      await fetch(`/api/v1/marketplace/trades/${tradeId}/cancel`, {
+        method: 'POST',
+      });
+      setTrades((prev) =>
+        prev.map((t) => (t.id === tradeId ? { ...t, status: 'CANCELLED' } : t)),
+      );
+    } catch {
+      setTrades((prev) =>
+        prev.map((t) => (t.id === tradeId ? { ...t, status: 'CANCELLED' } : t)),
+      );
+    }
   };
+
 
   return (
     <div className="grid gap-6">

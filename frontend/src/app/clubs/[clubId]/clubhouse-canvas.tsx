@@ -81,8 +81,32 @@ export function ClubhouseCanvas({
   const [selectedFurniture, setSelectedFurniture] = useState<FurnitureItem | null>(CLUB_PALETTE[4] ?? null);
   const [isNightMode, setIsNightMode] = useState<boolean>(false);
   const [copiedNotification, setCopiedNotification] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const isOfficer = userRole === 'OWNER' || userRole === 'MANAGER';
+
+  // 서버에서 저장된 클럽 캔버스 레이아웃 로드
+  React.useEffect(() => {
+    let cancelled = false;
+    async function loadCanvas() {
+      try {
+        const res = await fetch(`/api/v1/clubs/${clubId}/canvas`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.canvas?.grid && Array.isArray(data.canvas.grid) && !cancelled) {
+            setGrid(data.canvas.grid);
+          }
+        }
+      } catch {
+        // Fallback to starter grid
+      }
+    }
+    loadCanvas();
+    return () => {
+      cancelled = true;
+    };
+  }, [clubId]);
 
   // Compute total aesthetic vibe score
   const totalScore = grid.flat().reduce((acc, cellId) => {
@@ -141,6 +165,30 @@ export function ClubhouseCanvas({
     setCopiedNotification(true);
     setTimeout(() => setCopiedNotification(false), 2500);
   };
+
+  const handleSaveServer = async () => {
+    setIsSaving(true);
+    setSaveMessage(null);
+    try {
+      const res = await fetch(`/api/v1/clubs/${clubId}/canvas`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ grid, totalScore }),
+      });
+      if (res.ok) {
+        setSaveMessage('✓ 서버에 안전하게 영속 저장되었습니다.');
+      } else {
+        const err = await res.json();
+        setSaveMessage(err.message || '저장에 실패했습니다.');
+      }
+    } catch {
+      setSaveMessage('네트워크 저장 오류가 발생했습니다.');
+    } finally {
+      setIsSaving(false);
+      setTimeout(() => setSaveMessage(null), 3000);
+    }
+  };
+
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-gradient-to-br from-card/95 via-card/85 to-card/60 p-4 sm:p-6 shadow-md backdrop-blur-md">
@@ -209,6 +257,15 @@ export function ClubhouseCanvas({
 
           <button
             type="button"
+            onClick={handleSaveServer}
+            disabled={isSaving}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 text-xs font-bold shadow-sm active:scale-95 transition-all"
+          >
+            <span>{isSaving ? '저장 중...' : '서버에 배치 저장'}</span>
+          </button>
+
+          <button
+            type="button"
             onClick={handleExportJson}
             className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-600 dark:text-amber-300 hover:bg-amber-500/20 active:scale-95"
           >
@@ -216,6 +273,13 @@ export function ClubhouseCanvas({
           </button>
         </div>
       </div>
+
+      {saveMessage && (
+        <div className="mt-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+          {saveMessage}
+        </div>
+      )}
+
 
       {/* 에디터 메인: 좌측 팔레트 + 우측 12x12 그리드 */}
       <div className="grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-6 pt-6">

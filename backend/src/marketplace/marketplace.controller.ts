@@ -20,9 +20,13 @@ import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
 import {
+  BidAuctionDto,
   BuyListingDto,
+  CreateAuctionDto,
   CreateListingDto,
+  CreateTradeDto,
   MarketplaceQueryDto,
+  RequestAppraisalDto,
 } from './marketplace.dto';
 import { MarketplaceService } from './marketplace.service';
 
@@ -112,4 +116,109 @@ export class MarketplaceController {
       'failed to cancel marketplace listing',
     );
   }
+
+  // --- Auctions ---
+  @Get('auctions')
+  @ApiOperation({ summary: 'List active live English auctions' })
+  listAuctions() {
+    return this.guarded(
+      () => this.marketplaceService.listAuctions(),
+      'failed to load auctions',
+    );
+  }
+
+  @Post('auctions')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Create a new live English auction' })
+  createAuction(@Req() request: RequestWithSession, @Body() body: CreateAuctionDto) {
+    return this.guarded(
+      () => this.marketplaceService.createAuction(requireUserId(request), body),
+      'failed to create auction',
+    );
+  }
+
+  @Post('auctions/:id/bid')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Bid on a live English auction with escrow and anti-sniping extension' })
+  bidAuction(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) auctionId: string,
+    @Body() body: BidAuctionDto,
+  ) {
+    return this.guarded(
+      () => this.marketplaceService.bidAuction(requireUserId(request), auctionId, body.bidAmountWld),
+      'failed to bid on auction',
+    );
+  }
+
+  // --- P2P Direct Trades ---
+  @Get('trades')
+  @ApiOperation({ summary: 'List my P2P direct trades' })
+  listTrades(@Req() request: RequestWithSession) {
+    return this.guarded(
+      () => this.marketplaceService.listTrades(requireUserId(request)),
+      'failed to load trades',
+    );
+  }
+
+  @Post('trades')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Propose a new P2P 1:1 direct trade' })
+  createTrade(@Req() request: RequestWithSession, @Body() body: CreateTradeDto) {
+    return this.guarded(
+      () => this.marketplaceService.createTrade(requireUserId(request), body),
+      'failed to create trade proposal',
+    );
+  }
+
+  @Post('trades/:id/accept')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Accept a P2P 1:1 direct trade proposal (first step)' })
+  acceptTrade(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) tradeId: string) {
+    return this.guarded(
+      () => this.marketplaceService.acceptTrade(requireUserId(request), tradeId),
+      'failed to accept trade proposal',
+    );
+  }
+
+  @Post('trades/:id/confirm')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Sign-off and execute dual atomic swap for P2P 1:1 trade' })
+  confirmTrade(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) tradeId: string) {
+    return this.guarded(
+      () => this.marketplaceService.confirmTrade(requireUserId(request), tradeId),
+      'failed to confirm trade',
+    );
+  }
+
+  @Post('trades/:id/cancel')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Cancel a P2P 1:1 direct trade' })
+  cancelTrade(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) tradeId: string) {
+    return this.guarded(
+      () => this.marketplaceService.cancelTrade(requireUserId(request), tradeId),
+      'failed to cancel trade',
+    );
+  }
+
+  // --- Appraisals ---
+  @Get('appraisals')
+  @ApiOperation({ summary: 'List my issued provenance appraisal certificates' })
+  listAppraisals(@Req() request: RequestWithSession) {
+    return this.guarded(
+      () => this.marketplaceService.listAppraisals(requireUserId(request)),
+      'failed to load appraisals',
+    );
+  }
+
+  @Post('appraisals')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Request system provenance appraisal for collectible with fee burn' })
+  requestAppraisal(@Req() request: RequestWithSession, @Body() body: RequestAppraisalDto) {
+    return this.guarded(
+      () => this.marketplaceService.requestAppraisal(requireUserId(request), body),
+      'failed to request appraisal',
+    );
+  }
 }
+

@@ -76,4 +76,26 @@ describe('ClubService', () => {
     expect(result.accepted_amount).toBe('1000');
     expect(result.project_status).toBe('active');
   });
+
+  it('successfully retrieves and updates club canvas layout', async () => {
+    const clubId = '22222222-2222-2222-2222-222222222222';
+    const actorUserId = '11111111-1111-1111-1111-111111111111';
+    const sampleGrid = [['conf_table', null], [null, 'member_seat']];
+
+    mockRepo.getClubCanvas = vi.fn().mockResolvedValueOnce({
+      grid: sampleGrid,
+      totalScore: 105,
+      updatedAt: '2026-09-23T12:00:00Z',
+    });
+
+    const canvas = await service.getClubCanvas(clubId);
+    expect(canvas).toBeDefined();
+    expect(canvas?.totalScore).toBe(105);
+
+    mockRepo.updateClubCanvas = vi.fn().mockResolvedValueOnce(true);
+    const updated = await service.updateClubCanvas(actorUserId, clubId, sampleGrid, 105);
+    expect(updated).toBe(true);
+    expect(mockRepo.updateClubCanvas).toHaveBeenCalledWith(actorUserId, clubId, sampleGrid, 105);
+  });
 });
+

@@ -153,4 +153,26 @@ export class ClubService {
       throw err;
     }
   }
+
+  async getClubCanvas(clubId: string) {
+    try {
+      return await this.repo.getClubCanvas(clubId);
+    } catch (err: unknown) {
+      if (err instanceof ClubInputError) throw new BadRequestException(err.message);
+      throw err;
+    }
+  }
+
+  async updateClubCanvas(actorUserId: string, clubId: string, grid: unknown, totalScore: number) {
+    try {
+      return await this.repo.updateClubCanvas(actorUserId, clubId, grid, totalScore);
+    } catch (err: unknown) {
+      if (err instanceof ClubInputError) {
+        if (err.message.includes('permission denied')) throw new ForbiddenException(err.message);
+        throw new BadRequestException(err.message);
+      }
+      throw err;
+    }
+  }
 }
+

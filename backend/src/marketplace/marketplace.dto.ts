@@ -73,3 +73,100 @@ export class MarketplaceQueryDto {
   @Min(0)
   offset?: number;
 }
+
+export class CreateAuctionDto {
+  @ApiProperty({ description: '아이템 코드', example: 'ITEM_TROPHY_GOLD' })
+  @IsString()
+  @IsNotEmpty()
+  itemCode!: string;
+
+  @ApiProperty({ description: '아이템 이름', example: '골드 메달' })
+  @IsString()
+  @IsNotEmpty()
+  itemName!: string;
+
+  @ApiProperty({ description: '카테고리', example: 'display' })
+  @IsString()
+  @IsNotEmpty()
+  category!: string;
+
+  @ApiProperty({ description: '희귀도', example: 'LEGENDARY' })
+  @IsString()
+  @IsNotEmpty()
+  rarity!: string;
+
+  @ApiProperty({ description: '시작 호가 (WLD)', example: '5000' })
+  @IsString()
+  @Matches(/^[1-9][0-9]*$/, { message: 'startPriceWld must be a positive integer string' })
+  startPriceWld!: string;
+
+  @ApiPropertyOptional({ description: '즉시 낙찰가 (WLD)', example: '15000' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[1-9][0-9]*$/, { message: 'buyNowPriceWld must be a positive integer string' })
+  buyNowPriceWld?: string;
+
+  @ApiPropertyOptional({ description: '경매 진행 시간(분)', example: 45, default: 45 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(10080)
+  durationMinutes?: number;
+
+  @ApiPropertyOptional({ description: '설명' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  description?: string;
+}
+
+export class BidAuctionDto {
+  @ApiProperty({ description: '입찰 호가 (WLD)', example: '8500' })
+  @IsString()
+  @Matches(/^[1-9][0-9]*$/, { message: 'bidAmountWld must be a positive integer string' })
+  bidAmountWld!: string;
+}
+
+export class CreateTradeDto {
+  @ApiProperty({ description: '상대방 닉네임', example: '무역상인_박' })
+  @IsString()
+  @IsNotEmpty()
+  recipientName!: string;
+
+  @ApiPropertyOptional({ description: '제공할 물품 목록', example: [] })
+  @IsOptional()
+  offeredItems?: Array<{ name: string; quantity: number; rarity?: string }>;
+
+  @ApiPropertyOptional({ description: '제공할 WLD', example: '1000', default: '0' })
+  @IsOptional()
+  @IsString()
+  offeredWld?: string;
+
+  @ApiPropertyOptional({ description: '요청할 물품 목록', example: [] })
+  @IsOptional()
+  requestedItems?: Array<{ name: string; quantity: number }>;
+
+  @ApiPropertyOptional({ description: '요청할 WLD', example: '500', default: '0' })
+  @IsOptional()
+  @IsString()
+  requestedWld?: string;
+}
+
+export class RequestAppraisalDto {
+  @ApiProperty({ description: '소장품 아이템 ID', example: 'item_trophy_01' })
+  @IsString()
+  @IsNotEmpty()
+  itemId!: string;
+
+  @ApiProperty({ description: '소장품 아이템명', example: '골드 메달' })
+  @IsString()
+  @IsNotEmpty()
+  itemName!: string;
+
+  @ApiProperty({ description: '희귀도', example: 'EPIC' })
+  @IsString()
+  @IsNotEmpty()
+  rarity!: string;
+}
+

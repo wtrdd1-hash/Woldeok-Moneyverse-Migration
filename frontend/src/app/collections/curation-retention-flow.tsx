@@ -105,21 +105,49 @@ export function CurationRetentionFlow({
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
   const [timelineDay, setTimelineDay] = useState<'D1' | 'D3' | 'D7'>('D7');
 
-  // Load from local storage hybrid cache if present
+  // Load from backend API on mount, with local storage fallback
   useEffect(() => {
-    try {
-      const cached = localStorage.getItem('moneyverse_curation_pieces');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setPieces(parsed);
-          setSelectedPiece(parsed[0]);
-          setNoteInput(parsed[0].userNote || '');
+    let cancelled = false;
+    async function loadData() {
+      try {
+        const [piecesRes, statusRes] = await Promise.all([
+          fetch('/api/v1/collections'),
+          fetch('/api/v1/collections/curation/status'),
+        ]);
+
+        if (piecesRes.ok) {
+          const data = await piecesRes.json();
+          if (Array.isArray(data.pieces) && data.pieces.length > 0 && !cancelled) {
+            setPieces(data.pieces);
+            setSelectedPiece(data.pieces[0]);
+            setNoteInput(data.pieces[0].userNote || '');
+          }
         }
+        if (statusRes.ok) {
+          const statusData = await statusRes.json();
+          if (statusData.status?.timelineDay && !cancelled) {
+            setTimelineDay(statusData.status.timelineDay);
+          }
+        }
+      } catch {
+        // Fallback to local storage
+        try {
+          const cached = localStorage.getItem('moneyverse_curation_pieces');
+          if (cached && !cancelled) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setPieces(parsed);
+              setSelectedPiece(parsed[0]);
+              setNoteInput(parsed[0].userNote || '');
+            }
+          }
+        } catch {}
       }
-    } catch {
-      // Ignore storage error
     }
+    loadData();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleSelectPiece = (piece: CollectionPiece) => {
@@ -127,31 +155,63 @@ export function CurationRetentionFlow({
     setNoteInput(piece.userNote || '');
   };
 
-  const handleToggleFavorite = (id: string) => {
+  const handleToggleFavorite = async (id: string) => {
+    const target = pieces.find((p) => p.id === id);
+    const nextFav = !target?.isFavorite;
+
     setPieces((prev) => {
       const next = prev.map((p) =>
-        p.id === id ? { ...p, isFavorite: !p.isFavorite } : p,
+        p.id === id ? { ...p, isFavorite: nextFav } : p,
       );
       try {
         localStorage.setItem('moneyverse_curation_pieces', JSON.stringify(next));
       } catch {}
       return next;
     });
+
+    try {
+      await fetch(`/api/v1/collections/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFavorite: nextFav }),
+      });
+    } catch {}
   };
 
-  const handleSaveNote = (e: React.FormEvent) => {
+  const handleSaveNote = async (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmed = noteInput.trim();
     setPieces((prev) => {
       const next = prev.map((p) =>
-        p.id === selectedPiece.id ? { ...p, userNote: noteInput.trim() } : p,
+        p.id === selectedPiece.id ? { ...p, userNote: trimmed } : p,
       );
       try {
         localStorage.setItem('moneyverse_curation_pieces', JSON.stringify(next));
       } catch {}
       return next;
     });
-    alert('소장품 큐레이션 메모가 안전하게 저장되었습니다.');
+
+    try {
+      await fetch(`/api/v1/collections/${selectedPiece.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userNote: trimmed }),
+      });
+    } catch {}
+    alert('소장품 큐레이션 메모가 서버에 안전하게 영속 저장되었습니다.');
   };
+
+  const handleTimelineDayChange = async (day: 'D1' | 'D3' | 'D7') => {
+    setTimelineDay(day);
+    try {
+      await fetch('/api/v1/collections/curation/advance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timelineDay: day }),
+      });
+    } catch {}
+  };
+
 
   const favoritesCount = pieces.filter((p) => p.isFavorite).length;
 
@@ -202,7 +262,7 @@ export function CurationRetentionFlow({
             <div className="inline-flex rounded-xl border border-border p-1 bg-muted/30 text-xs">
               <button
                 type="button"
-                onClick={() => setTimelineDay('D1')}
+                onClick={() => handleTimelineDayChange('D1')}
                 className={`px-3 py-1 rounded-lg font-bold transition-all ${
                   timelineDay === 'D1' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground'
                 }`}
@@ -211,7 +271,7 @@ export function CurationRetentionFlow({
               </button>
               <button
                 type="button"
-                onClick={() => setTimelineDay('D3')}
+                onClick={() => handleTimelineDayChange('D3')}
                 className={`px-3 py-1 rounded-lg font-bold transition-all ${
                   timelineDay === 'D3' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground'
                 }`}
@@ -220,7 +280,7 @@ export function CurationRetentionFlow({
               </button>
               <button
                 type="button"
-                onClick={() => setTimelineDay('D7')}
+                onClick={() => handleTimelineDayChange('D7')}
                 className={`px-3 py-1 rounded-lg font-bold transition-all ${
                   timelineDay === 'D7' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground'
                 }`}

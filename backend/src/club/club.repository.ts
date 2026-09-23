@@ -400,4 +400,40 @@ export class PostgresClubRepository {
     if (!row) throw new Error('failed to create feed post');
     return row;
   }
+
+  async getClubCanvas(clubId: string) {
+    return queryOne<{ grid: unknown; totalScore: number; updatedAt: string }>(
+      this.client,
+      `SELECT grid, total_score AS "totalScore", updated_at::text AS "updatedAt"
+       FROM public.club_canvases
+       WHERE club_id = $1::uuid;`,
+      [clubId],
+    );
+  }
+
+  async updateClubCanvas(actorUserId: string, clubId: string, grid: unknown, totalScore: number): Promise<boolean> {
+    const member = await queryOne<{ role: string }>(
+      this.client,
+      `SELECT role FROM public.club_members WHERE club_id = $1::uuid AND user_id = $2::uuid;`,
+      [clubId, actorUserId],
+    );
+    if (!member) {
+      throw new ClubInputError('permission denied: only club members can modify canvas');
+    }
+
+    await queryOne(
+      this.client,
+      `INSERT INTO public.club_canvases (club_id, grid, total_score, updated_by, updated_at)
+       VALUES ($1::uuid, $2::jsonb, $3, $4::uuid, clock_timestamp())
+       ON CONFLICT (club_id)
+       DO UPDATE SET
+         grid = EXCLUDED.grid,
+         total_score = EXCLUDED.total_score,
+         updated_by = EXCLUDED.updated_by,
+         updated_at = clock_timestamp();`,
+      [clubId, JSON.stringify(grid), totalScore, actorUserId],
+    );
+    return true;
+  }
 }
+
