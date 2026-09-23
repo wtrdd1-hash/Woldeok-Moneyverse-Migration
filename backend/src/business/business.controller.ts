@@ -13,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString, IsUUID, Max, Min } from 'class-validator';
 import { AuthenticatedGuard } from '../auth/guards/authenticated.guard';
 import { ConsentGuard } from '../auth/guards/consent.guard';
 import { CsrfGuard } from '../auth/guards/csrf.guard';
@@ -39,6 +39,19 @@ export class ActivateLicenseDto {
   @ApiProperty({ format: 'uuid' })
   @IsUUID()
   readonly idempotencyKey!: string;
+}
+
+export class ProcureMaterialsDto extends IdempotentDto {
+  @ApiProperty({ example: 'RAW_PACKAGED' })
+  @IsString()
+  @IsNotEmpty()
+  readonly materialCode!: string;
+
+  @ApiProperty({ minimum: 1, maximum: 500, example: 20 })
+  @IsInt()
+  @Min(1)
+  @Max(500)
+  readonly quantity!: number;
 }
 
 export class ApplyBoostDto {
@@ -212,7 +225,7 @@ export class BusinessController {
   procureMaterials(
     @Req() request: RequestWithSession,
     @Param('id', ParseUUIDPipe) ownershipId: string,
-    @Body() body: { materialCode: string; quantity: number; idempotencyKey: string },
+    @Body() body: ProcureMaterialsDto,
   ) {
     return this.guarded(
       () => this.service().procureMaterials(requireUserId(request), {

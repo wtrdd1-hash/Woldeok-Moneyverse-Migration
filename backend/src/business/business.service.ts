@@ -111,7 +111,7 @@ export interface BusinessSettleInput {
 export interface BusinessActivateInput {
   readonly userId: string;
   readonly catalogCode: string;
-  readonly idempotencyKey?: string;
+  readonly idempotencyKey: string;
 }
 
 export interface BusinessApplyBoostInput {
@@ -130,9 +130,9 @@ export interface BusinessRepository {
   settleV2(input: BusinessSettleInput): Promise<BusinessSettleRow>;
   activateFromLicense(input: BusinessActivateInput): Promise<BusinessActivateRow>;
   applyBoost(input: BusinessApplyBoostInput): Promise<Record<string, unknown>>;
-  supplyChainOverview?(userId: string, ownershipId: string): Promise<any>;
-  procureMaterials?(input: { userId: string; ownershipId: string; materialCode: string; quantity: number; idempotencyKey?: string | undefined }): Promise<any>;
-  upgradeStorage?(input: { userId: string; ownershipId: string; idempotencyKey?: string | undefined }): Promise<any>;
+  supplyChainOverview?(userId: string, ownershipId: string): Promise<unknown>;
+  procureMaterials?(input: { userId: string; ownershipId: string; materialCode: string; quantity: number; idempotencyKey: string }): Promise<unknown>;
+  upgradeStorage?(input: { userId: string; ownershipId: string; idempotencyKey: string }): Promise<unknown>;
 }
 
 function businessType(row: BusinessCatalogRow): BusinessType {
@@ -330,7 +330,7 @@ export class BusinessService {
       ownershipId: validId(input.ownershipId, 'ownership id'),
       materialCode: String(input.materialCode ?? ''),
       quantity: Number(input.quantity ?? 1),
-      idempotencyKey: input.idempotencyKey ? validId(input.idempotencyKey, 'idempotency key') : undefined,
+      idempotencyKey: validId(input.idempotencyKey, 'idempotency key'),
     });
   }
 
@@ -339,7 +339,7 @@ export class BusinessService {
     return this.repository.upgradeStorage({
       userId: validId(userId, 'user id'),
       ownershipId: validId(input.ownershipId, 'ownership id'),
-      idempotencyKey: input.idempotencyKey ? validId(input.idempotencyKey, 'idempotency key') : undefined,
+      idempotencyKey: validId(input.idempotencyKey, 'idempotency key'),
     });
   }
 }
