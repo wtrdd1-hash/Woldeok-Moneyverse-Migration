@@ -2602,3 +2602,27 @@ pm test).
    - git diff --check 공백 검사 100% 통과.
    - 원격 프로덕션 호스트 변경 사항 반영 및 백엔드/프론트엔드 서비스 무중단 유지.
    - PostgreSQL 활성 사용자 세션 1,138개 100% 무손실 유지.
+
+---
+
+## 🚀 [v66 Specification] 데이터베이스 보안 경계 및 CI 테스트 정합성 완비 (v2026.09.23.421)
+
+### 1. 🎯 문제 진단 및 근본 원인
+1. **주식 포트폴리오 조회 시 virtual_stocks 42501 권한 거부 오류 (game.db.test.ts)**:
+   - backend/src/stock/stock.repository.ts의 portfolio() 메소드에서 moneyverse_app 역할이 SELECT 권한을 가지지 않은 public.virtual_stocks를 직접 LEFT JOIN하여 42501 permission denied 발생.
+   - 해결: moneyverse_app이 EXECUTE 권한을 가진 SECURITY DEFINER 함수인 public.stock_market_overview()와 LEFT JOIN하도록 쿼리 교체.
+2. **신규 도메인 SECURITY DEFINER 함수의 PUBLIC 실행 권한 누출 (database-boundary.db.test.ts)**:
+   - 최근 마이그레이션(221~232)에서 신설된 21개 함수(city_project_contribute, club_create, marketplace_bid_auction, space_purchase, treasury_inject 등)가 PUBLIC 실행 권한을 명시적으로 revoke하지 않아 테스트 실패.
+   - 해결: packages/database/migrations/233-revoke-public-function-execute.sql 신설하여 public 스키마 내 모든 SECURITY DEFINER 함수의 PUBLIC EXECUTE 권한 일괄 회수 및 디폴트 권한 안전화.
+3. **허용된 도메인 테이블의 직접 쓰기 권한 테스트 정합화 (database-boundary.db.test.ts)**:
+   - 클럽, 공간, 시즌 보상, 긴급 조치 등 신규 도메인 테이블에 부여된 합법적 INSERT/UPDATE/DELETE 권한을 단정 배열에 정확히 동기화.
+
+### 2. 📋 변경 내역
+- backend/src/stock/stock.repository.ts: portfolio() 쿼리를 public.stock_market_overview() 조인으로 변경.
+- packages/database/migrations/233-revoke-public-function-execute.sql: 보안 정의자 함수 PUBLIC 실행 권한 일괄 취소.
+- backend/src/security/database-boundary.db.test.ts: 허용된 도메인 쓰기 테이블 단정 배열 갱신.
+
+### 3. ✅ 검증 계획
+- git diff --check 공백 및 포맷 검증 통과.
+- 원격 프로덕션 서버 마이그레이션 적용 및 서비스 재시작.
+- GitHub Actions CI All-Green 검증 및 활성 세션 무손실 유지.

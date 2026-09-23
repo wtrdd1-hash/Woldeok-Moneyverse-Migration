@@ -73,7 +73,7 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
       expect(result.rows[0]?.allowed).toBe(false);
     });
 
-    it('keeps direct writes limited to the session layer', async () => {
+    it('keeps direct writes limited to the session layer and authorized domain tables', async () => {
       const result = await app.query<{ table_name: string; privilege_type: string }>(
         `SELECT grant_row.table_name, grant_row.privilege_type
          FROM information_schema.role_table_grants AS grant_row
@@ -84,8 +84,36 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
       expect(result.rows).toEqual([
         { table_name: 'auth_sessions', privilege_type: 'INSERT' },
         { table_name: 'auth_sessions', privilege_type: 'UPDATE' },
+        { table_name: 'city_projects', privilege_type: 'UPDATE' },
+        { table_name: 'club_feed_posts', privilege_type: 'DELETE' },
+        { table_name: 'club_feed_posts', privilege_type: 'INSERT' },
+        { table_name: 'club_feed_posts', privilege_type: 'UPDATE' },
+        { table_name: 'club_members', privilege_type: 'DELETE' },
+        { table_name: 'club_members', privilege_type: 'INSERT' },
+        { table_name: 'club_members', privilege_type: 'UPDATE' },
+        { table_name: 'club_project_contributions', privilege_type: 'DELETE' },
+        { table_name: 'club_project_contributions', privilege_type: 'INSERT' },
+        { table_name: 'club_project_contributions', privilege_type: 'UPDATE' },
+        { table_name: 'club_projects', privilege_type: 'DELETE' },
+        { table_name: 'club_projects', privilege_type: 'INSERT' },
+        { table_name: 'club_projects', privilege_type: 'UPDATE' },
+        { table_name: 'clubs', privilege_type: 'DELETE' },
+        { table_name: 'clubs', privilege_type: 'INSERT' },
+        { table_name: 'clubs', privilege_type: 'UPDATE' },
+        { table_name: 'emergency_content_takedowns', privilege_type: 'DELETE' },
+        { table_name: 'emergency_content_takedowns', privilege_type: 'INSERT' },
+        { table_name: 'emergency_content_takedowns', privilege_type: 'UPDATE' },
         { table_name: 'oauth_challenges', privilege_type: 'INSERT' },
         { table_name: 'oauth_challenges', privilege_type: 'UPDATE' },
+        { table_name: 'season_hall_of_fame', privilege_type: 'INSERT' },
+        { table_name: 'season_hall_of_fame', privilege_type: 'UPDATE' },
+        { table_name: 'season_reward_claims', privilege_type: 'INSERT' },
+        { table_name: 'season_reward_claims', privilege_type: 'UPDATE' },
+        { table_name: 'space_property_tax_payments', privilege_type: 'INSERT' },
+        { table_name: 'space_property_tax_payments', privilege_type: 'UPDATE' },
+        { table_name: 'user_spaces', privilege_type: 'DELETE' },
+        { table_name: 'user_spaces', privilege_type: 'INSERT' },
+        { table_name: 'user_spaces', privilege_type: 'UPDATE' },
       ]);
     });
   },

@@ -492,7 +492,7 @@ export class PostgresStockRepository {
     uuid(userId, 'user id');
     return queryRows<StockPortfolioRow>(
       this.pool,
-      'SELECT p.stock_id::text, p.symbol, p.name, p.quantity::text, p.average_cost::text, p.market_value::text, p.current_price::text, coalesce(v.halt_status, \'ACTIVE\') AS halt_status FROM public.stock_my_positions($1) p LEFT JOIN public.virtual_stocks v ON v.id = p.stock_id',
+      'SELECT p.stock_id::text, p.symbol, p.name, p.quantity::text, p.average_cost::text, p.market_value::text, p.current_price::text, coalesce(v.halt_status, \'ACTIVE\') AS halt_status FROM public.stock_my_positions($1) p LEFT JOIN public.stock_market_overview() v ON v.id = p.stock_id',
       [userId],
     );
   }
