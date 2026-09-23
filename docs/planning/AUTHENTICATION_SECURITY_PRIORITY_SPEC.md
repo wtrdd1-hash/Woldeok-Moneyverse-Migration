@@ -1,8 +1,8 @@
 # Woldeok Moneyverse — Authentication Security & Implementation Priority Specification
 
-> Version: v2026.09.12.31
+> Version: v2026.09.23.388
 > Status: implementation-oriented security/product specification
-> Date: 2026-09-12
+> Date: 2026-09-23
 > Korean counterpart: [AUTHENTICATION_SECURITY_PRIORITY_SPEC.ko.md](AUTHENTICATION_SECURITY_PRIORITY_SPEC.ko.md)
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `SEASON_SYSTEM_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`
 
@@ -10,7 +10,7 @@
 
 Moneyverse is a real public service with economy, community and account data. Therefore unfinished work is not prioritized by visual novelty. The first release priority is account integrity, privacy, database isolation and recoverability; only after those gates pass should broad acquisition, monetization and additional high-risk gameplay expand.
 
-The existing OAuth/OIDC, secure cookie sessions, reauthentication, TOTP/admin controls, PostgreSQL security boundaries, append-only audit, and staging-first deployment model remain authoritative. First-party email/password authentication is an additional identity provider (`local_email`) layered onto the existing authentication core, not a second parallel session/security system.
+The existing OAuth/OIDC, secure cookie sessions, reauthentication (Step-Up 2FA), PostgreSQL security boundaries, append-only audit, and staging-first deployment model remain authoritative. (Legacy admin-only TOTP was retired in Migration 197 and reconciled with ReauthGuard and AdminSessionGuard.) First-party email/password authentication is an additional identity provider (`local_email`) layered onto the existing authentication core, not a second parallel session/security system.
 
 ## 1. Current implementation reality and unfinished-work priority
 

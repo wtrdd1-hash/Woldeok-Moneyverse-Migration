@@ -1,15 +1,15 @@
 # 월덕 머니버스 — 인증 보안 및 구현 우선순위 명세
 
-> 버전: v2026.09.12.31
+> 버전: v2026.09.23.388
 > 상태: 구현 지향형 보안·제품 기획서
-> 기준일: 2026-09-12
+> 기준일: 2026-09-23
 > 영문 기준 문서: [AUTHENTICATION_SECURITY_PRIORITY_SPEC.md](AUTHENTICATION_SECURITY_PRIORITY_SPEC.md)
 
 ## 0. 핵심 결정
 
 Moneyverse는 계정·경제·커뮤니티 데이터를 다루는 실제 공개 서비스다. 따라서 미구현 기능은 화면의 화려함보다 **계정 무결성 → 개인정보 보호 → DB 최소권한 → 복구 가능성 → 핵심 제품 → 성장/수익화** 순서로 개발한다.
 
-기존 OAuth/OIDC, 서버측 세션, 재인증, TOTP/관리자 2차 인증, PostgreSQL 보안 경계, append-only audit, Test 우선 배포 구조는 유지한다. 자체 이메일/비밀번호 로그인은 기존 인증 코어에 `local_email` provider를 추가하는 방식이며 별도의 세션 체계를 만들지 않는다.
+기존 OAuth/OIDC, 서버측 세션, 재인증(Step-Up 2FA), PostgreSQL 보안 경계, append-only audit, Test 우선 배포 구조는 유지한다. (과거 관리자 전용 TOTP는 Migration 197에서 공식 폐기되어 ReauthGuard 및 AdminSessionGuard로 정합화됨) 자체 이메일/비밀번호 로그인은 기존 인증 코어에 `local_email` provider를 추가하는 방식이며 별도의 세션 체계를 만들지 않는다.
 
 ## 1. 미구현 우선순위
 

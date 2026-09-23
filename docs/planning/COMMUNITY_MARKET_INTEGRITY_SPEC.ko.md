@@ -290,7 +290,7 @@ P0/P1에서 다음은 WDX 가격엔진의 직접 입력이 될 수 없다.
 - 이의제기 큐
 - 무결성 대시보드
 
-고위험 조치는 기존 관리자 세션·재인증·TOTP·DB actor validation 계약을 따른다.
+고위험 조치는 기존 관리자 세션·재인증(Step-Up 2FA ReauthGuard)·CSRF·DB actor validation 계약을 따른다. (과거 관리자 TOTP는 Migration 197에서 공식 폐기되어 ReauthGuard로 정합화됨)
 
 ## 18. 권장 DB
 

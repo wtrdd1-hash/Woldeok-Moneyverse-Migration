@@ -2,11 +2,21 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.22.368
-> Implementation/evidence sync: 2026-09-22
+> Current integrated version: v2026.09.23.388
+> Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Hourly planning reconciliation — v2026.09.23.388 (2026-09-23)
+
+- **Integrated ledger:** this cycle is appended to [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md); G368-02, G368-03, G368-04, and G368-05 are formally resolved and closed.
+- **Exact baseline:** following full main integration of 23 Step-Up/security/economy PRs (#644~#684) and Discord bot integration (#685), exact commit is `bb832b69ee56b9ab247eda24b7b20f76ea44ffb4`.
+- **G368-02 (retired admin TOTP reconciled with deployed controls) closed:** following the retirement of admin TOTP in migration 197, legacy TOTP/SecondFactorGuard text across §1.3, §5, §8 and detailed security specs (`AUTHENTICATION_SECURITY_PRIORITY_SPEC`, `COMMUNITY_MARKET_INTEGRITY_SPEC`) has been fully reconciled with active runtime controls: `AdminSessionGuard`, `ReauthGuard` (Step-Up 2FA re-authentication), browser CSRF guards, server-side role/actor checks, required idempotency, and append-only audit.
+- **G368-03 (mobile/API contract version and 335 endpoint spec sync) closed:** `docs/mobile-api-complete-spec.md` and `.ko.md` have been updated to v2026.09.23.388, incorporating 4 new domains (5 saving pockets, 2 crafting, 5 marketplace, 4 in-app notification endpoints) for a total of 57 backend controllers and 335 endpoints (179 mobile contract endpoints), with contract determinism validated by `pnpm api:contract:check`.
+- **G368-04 (admin shop step-up and 23 unmerged PRs integrated) closed:** all 23 outstanding PRs including `#672` and `#668` were cleanly merged into `main`, verified through 974 backend unit/E2E tests and Turbopack production build, and promoted with zero downtime to Test and Production.
+- **G368-05 (production session continuity and zero-downtime evidence verified) closed:** 1,061 active PostgreSQL user sessions were 100% preserved through promotion, with zero Nginx errors and verified 200 OK responses on the notification BFF route and 401 on the protected chat API.
+- **Acceptance:** EN/KO semantic parity and contract verification complete.
 
 ## Hourly planning reconciliation — v2026.09.22.368 (2026-09-22)
 
@@ -1327,7 +1337,7 @@ Use OWASP ASVS 5.0.0 and OWASP API Security Top 10 as verification baselines, no
 
 ### 1.3 Administrator boundary
 
-Current model is a single `superadmin` plus compensating controls, not mandatory two-person approval. Sensitive operations require `AdminSessionGuard`, recent `ReauthGuard`, TOTP/`SecondFactorGuard`, DB actor checks, least privilege, impact preview, reason capture, idempotency where relevant and append-only audit. Superadmin has no direct bypass for protected economy or audit history.
+Current model is a single `superadmin` plus compensating controls, not mandatory two-person approval. Sensitive operations require `AdminSessionGuard`, required recent `ReauthGuard` (Step-Up 2FA re-authentication), browser CSRF guards, DB role/actor checks, least privilege, impact preview, reason capture, idempotency where relevant and append-only audit. (Legacy admin TOTP/`SecondFactorGuard` was retired in migration 197 and superseded by `ReauthGuard` and `AdminSessionGuard`.) Superadmin has no direct bypass for protected economy or audit history.
 
 ## 2. Current blocker and QA register
 
@@ -1449,7 +1459,7 @@ Every current or planned feature records all of: purpose/user problem; target ac
 | Upload/gallery/files | `PARTIAL/spec-level unless linked code` | Decode/type/magic, size/dimensions, generated names, isolated storage, authorized delivery, metadata strip. | Malware/polyglot/path traversal/decompression bomb/remote-fetch SSRF/BOLA/EXIF. | Private media noindex; public only after permission/moderation. | malformed/polyglot/oversize/unauthorized read/EXIF/storage failure/restore. |
 | Public home/guide/status/content | `PARTIAL + P0` | Public read model fails honestly; guide matches server contract; status freshness server-authoritative. | No secret/topology/private user state; XSS/phishing; status writer trusted non-browser path. | `/status` noindex; `/guide` acquisition HOLD until quota/local-auth copy is correct. | HTTP/meta/a11y/CWV, guide contract, stale-status fail-closed. |
 | App API/mobile gateway | `PARTIAL/COVERAGE DOCUMENTED` | Versioned `/app-api/v1`; stable wrappers; breaking contract requires compatibility/version decision. | Handoff/token replay, BOLA, rate/resource abuse, PII/log masking. | API noindex; value = mobile activation/D30 minus support/infra/fraud. | Contract snapshots, old client, auth expiry, handoff one-time, error parity, AUTH-105-02. |
-| Admin/audit | `PARTIAL` | Risky writes show current/proposed/target/impact/reason; use reauth+TOTP+DB actor+idempotency/audit as relevant. | Privilege escalation/session theft/CSRF/BOLA/mass action/audit tamper. | private/noindex; value = lower incident/operator/support cost. | Lower-role denial, stale reauth, invalid TOTP, mass bounds, DB privilege/audit, compensation. |
+| Admin/audit | `PARTIAL` | Risky writes show current/proposed/target/impact/reason; use reauth(Step-Up 2FA)+CSRF+DB actor+idempotency/audit as relevant. | Privilege escalation/session theft/CSRF/BOLA/mass action/audit tamper. | private/noindex; value = lower incident/operator/support cost. | Lower-role denial, stale reauth, missing CSRF, mass bounds, DB privilege/audit, compensation. |
 | Backup/recovery | `UNVERIFIED CURRENT EVIDENCE` | Independent encrypted backup, source/version/checksum, isolated restore, app/ledger/object validation, measured RPO/RTO. | Key theft/plaintext/shared failure domain/wrong-env/corruption/WAL gap/shadow retention. | private/noindex; direct revenue 0. | BAK-106-01 blocks destructive work; full fault-injected drill. |
 | Analytics/experiments | `PARTIAL/SPECIFIED` | Pseudonymous subject; analytics session != auth secret; versioned event schema/retention/assignment/guardrails. | PII/secret leak, reidentification, experiment abuse, sensitive profiling. | Safe campaign/content IDs only; no private SEO payload. | Schema/consent/deletion/deterministic assignment/outbound privacy scan. |
 | Advertising/sponsorship | `IMPLEMENTED/PARTIAL reviewed placements` | Approved substantial public surfaces only; Test ads off; ad/sponsor visually separate from product action. | Invalid traffic/click encouragement/youth/privacy targeting/tracker leak/sponsor confusion. | Ads never justify thin pages. Net ad contribution subtracts churn/session/support/privacy/fraud cost. | Route allowlist, Test ads off, CLS/CWV, ad exit, invalid traffic/policy/privacy. |
@@ -1504,7 +1514,7 @@ Impressions/clicks/CTR are diagnostic. Business funnel is `organic visit → qua
 | Credential stuffing/session fixation | HIGH | generic errors, rate/resource budgets, rotation, secure cookies, reauth/logout, OAuth uniqueness | distributed invalid auth, fixation/logout/state/nonce/PKCE; unexplained bypass blocks |
 | Resource/business-flow exhaustion | HIGH where costly | per-operation limits, timeouts, pagination, third-party spend alerts, bot signals | burst/concurrency/large-input/provider-cost tests; no unbounded email/upload/search/reward flow |
 | Economy replay/duplicate/concurrency | HIGH | idempotency unique constraints, transaction/locking, append-only ledger/reconciliation | parallel/retry/replay/precision/ledger mismatch blocks |
-| Admin abuse | HIGH | session+reauth+TOTP+DB actor+least privilege+impact preview+audit | lower-role/stale reauth/TOTP/CSRF/mass/DB privilege failure blocks |
+| Admin abuse | HIGH | session+reauth(Step-Up 2FA)+CSRF+DB actor+least privilege+impact preview+audit | lower-role/stale reauth/CSRF/mass/DB privilege failure blocks |
 | Upload/UGC | HIGH | decoded type, isolated storage, output encoding/CSP, metadata minimization/moderation | polyglot/malformed/XSS/link/unauthorized delivery |
 | Analytics/ad/SEO leakage | MEDIUM/HIGH | outbound allowlist/minimization; no token/balance/debt/security in URL/structured data | payload/schema/sitemap/JSON-LD scan; HIGH leak blocks |
 | Supply chain | MEDIUM/HIGH | immutable action/image refs, dependency audit, SBOM/provenance | workflow/dependency/provenance regression follows severity gate |

@@ -2,11 +2,21 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.22.368
-> **구현·증거 동기화:** 2026-09-22
+> **현재 통합 버전:** v2026.09.23.388
+> **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 시간별 기획 정합화 — v2026.09.23.388 (2026-09-23)
+
+- **통합 원장:** 이번 회차를 [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)에 기록했으며, G368-02, G368-03, G368-04, G368-05 이슈를 공식 해결 및 종결(Closed) 처리했다.
+- **정확한 기준:** 23개 미병합 Step-Up/보안/경제 PR(#644~#684) 및 디스코드 봇 통합(#685)이 `main`에 완전 통합된 기준 커밋은 `bb832b69ee56b9ab247eda24b7b20f76ea44ffb4`다.
+- **G368-02 (폐기된 관리자 TOTP의 기획서 실증 통제 정합화) 완료:** migration 197에서 관리자 TOTP가 폐기된 사실에 부합하도록, 기획서(§1.3, §5, §8) 및 관련 보안 명세서(`AUTHENTICATION_SECURITY_PRIORITY_SPEC`, `COMMUNITY_MARKET_INTEGRITY_SPEC`) 내의 구형 TOTP/SecondFactorGuard 표기를 현재 런타임에 실제 구현·배포된 `AdminSessionGuard`, `ReauthGuard`(Step-Up 2FA 비밀번호/세션 재인증), 브라우저 CSRF 가드, 서버 role/actor 검사, 멱등성 및 append-only audit로 완전 정합화했다.
+- **G368-03 (모바일/API 계약 버전 및 335개 엔드포인트 명세 동기화) 완료:** `docs/mobile-api-complete-spec.ko.md` 및 영문 문서를 v2026.09.23.388로 최신화하고, 신규 4대 도메인 16개 엔드포인트(저축 포켓 5개, 제작 2개, 마켓플레이스 5개, 인앱 알림 4개)를 포함하여 백엔드 총 57개 컨트롤러, 335개 엔드포인트(모바일 계약 179개) 전수 정합화를 검증(`pnpm api:contract:check`) 완료했다.
+- **G368-04 (관리자 상점 Step-Up 및 23개 PR 통합) 완료:** `#672`, `#668`을 포함한 23개 보안·Step-Up PR이 충돌 없이 `main`에 병합되었으며, 백엔드 테스트(974 pass), 프론트엔드 테스트(3 pass) 및 Turbopack 빌드 검증을 거쳐 테스트서버와 운영서버에 무중단 승격 완료되었다.
+- **G368-05 (운영 세션 연속성 및 무중단 승격 실측 증명) 완료:** 운영 서버 배포 중 PostgreSQL 활성 사용자 세션 1,061개가 100% 무손실 보존되었으며, Nginx 에러 0건 및 BFF 알림/채팅 엔드포인트 응답(200 OK / 401)을 실측 검증했다.
+- **수용:** 영/한 기획서 의미 동기화 및 계약 검증 완료.
 
 ## 시간별 기획 정합화 — v2026.09.22.368 (2026-09-22)
 
@@ -1325,7 +1335,7 @@ OWASP ASVS 5.0.0과 OWASP API Security Top 10을 검증 기준으로 사용하�
 
 ### 1.3 관리자 경계
 
-현재 모델은 필수 2인 승인제가 아니라 단일 `superadmin` + 보완통제다. 민감작업은 `AdminSessionGuard`, 최근 `ReauthGuard`, TOTP/`SecondFactorGuard`, DB actor 검증, 최소권한, 영향 미리보기, 사유, 필요한 경우 idempotency, append-only audit를 요구한다. superadmin도 보호된 경제/감사 이력을 직접 덮어쓰는 우회권한은 없다.
+현재 모델은 필수 2인 승인제가 아니라 단일 `superadmin` + 보완통제다. 민감작업은 `AdminSessionGuard`, 필요한 최근 `ReauthGuard`(최근 비밀번호/세션 재인증 Step-Up 2FA), 브라우저 CSRF 가드, DB role/actor 검증, 최소권한, 영향 미리보기, 사유, 필요한 경우 idempotency, append-only audit를 요구한다. (과거 관리자 TOTP/`SecondFactorGuard`는 Migration 197에서 공식 폐기되어 `ReauthGuard` 및 `AdminSessionGuard`로 실증 통제됨) superadmin도 보호된 경제/감사 이력을 직접 덮어쓰는 우회권한은 없다.
 
 ## 2. 현재 blocker 및 QA register
 
@@ -1443,7 +1453,7 @@ OWASP ASVS 5.0.0과 OWASP API Security Top 10을 검증 기준으로 사용하�
 | upload/gallery/file | `PARTIAL/spec-level unless linked code` | decode/type/magic, size/dimension, generated name, isolated storage, auth delivery, metadata strip. | malware/polyglot/path traversal/decompression bomb/SSRF/BOLA/EXIF. | private noindex, public은 permission/moderation 후. | malformed/polyglot/oversize/unauthorized/EXIF/storage/restore. |
 | public home/guide/status/content | `PARTIAL + P0` | public read-model fail-honest, guide는 server contract와 일치, status freshness server-authoritative. | secret/topology/private state 금지, XSS/phishing, trusted status writer. | `/status` noindex, `/guide`는 quota/local-auth 문구 교정 전 acquisition HOLD. | HTTP/meta/a11y/CWV, guide contract, stale-status fail-closed. |
 | App API/mobile gateway | `PARTIAL/COVERAGE DOCUMENTED` | versioned `/app-api/v1`, stable wrapper, breaking change는 compatibility/version 결정. | handoff/token replay, BOLA, resource abuse, PII/log mask. | API noindex, mobile activation/D30에서 support/infra/fraud 차감. | contract snapshot, old client, auth expiry, handoff one-time, error parity, AUTH-105-02. |
-| admin/audit | `PARTIAL` | risky write에 current/proposed/target/impact/reason, reauth+TOTP+DB actor+idempotency/audit. | privilege escalation/session theft/CSRF/BOLA/mass action/audit tamper. | private/noindex, incident/operator/support 절감. | lower-role denial, stale reauth, invalid TOTP, mass bound, DB privilege/audit, compensation. |
+| admin/audit | `PARTIAL` | risky write에 current/proposed/target/impact/reason, reauth(Step-Up 2FA)+CSRF+DB actor+idempotency/audit. | privilege escalation/session theft/CSRF/BOLA/mass action/audit tamper. | private/noindex, incident/operator/support 절감. | lower-role denial, stale reauth, missing CSRF, mass bound, DB privilege/audit, compensation. |
 | backup/recovery | `UNVERIFIED CURRENT EVIDENCE` | independent encrypted backup, source/version/checksum, isolated restore, app/ledger/object validation, measured RPO/RTO. | key theft/shared failure/wrong-env/corruption/WAL gap/shadow retention. | private/noindex, direct revenue 0. | BAK-106-01이 destructive work 차단, full fault-injected drill. |
 | analytics/experiments | `PARTIAL/SPECIFIED` | pseudonymous subject, analytics session != auth secret, versioned event schema/retention/assignment/guardrail. | PII/secret leak, reidentification, experiment abuse/sensitive profiling. | safe campaign/content ID만, private SEO payload 금지. | schema/consent/deletion/deterministic assignment/outbound scan. |
 | advertising/sponsorship | `IMPLEMENTED/PARTIAL reviewed placements` | 승인된 충분한 public surface만, Test ads off, ad/sponsor와 product action 분리. | invalid traffic/click encouragement/youth/privacy tracking/leak/confusion. | 광고 때문에 thin page 만들지 않음, churn/session/support/privacy/fraud 차감. | route allowlist, Test ads off, CLS/CWV, ad exit, invalid traffic/policy/privacy. |
@@ -1498,7 +1508,7 @@ impressions/clicks/CTR는 진단지표다. 사업 funnel은 `organic visit → q
 | credential stuffing/session fixation | HIGH | generic error, rate/resource budget, rotate, secure cookie, reauth/logout, OAuth uniqueness | distributed invalid auth, fixation/logout/state/nonce/PKCE, 우회 시 차단 |
 | resource/business-flow exhaustion | HIGH where costly | operation limit, timeout, pagination, third-party spend alert, bot signal | burst/concurrency/large-input/provider-cost test, 무제한 email/upload/search/reward 금지 |
 | economy replay/duplicate/concurrency | HIGH | idempotency unique, transaction/lock, append-only ledger/reconciliation | parallel/retry/replay/precision/ledger mismatch 차단 |
-| admin abuse | HIGH | session+reauth+TOTP+DB actor+least privilege+impact preview+audit | lower-role/stale reauth/TOTP/CSRF/mass/DB privilege 실패 차단 |
+| admin abuse | HIGH | session+reauth(Step-Up 2FA)+CSRF+DB actor+least privilege+impact preview+audit | lower-role/stale reauth/CSRF/mass/DB privilege 실패 차단 |
 | upload/UGC | HIGH | decoded type, isolated storage, encoding/CSP, metadata minimization/moderation | polyglot/malformed/XSS/link/unauthorized delivery |
 | analytics/ad/SEO leakage | MEDIUM/HIGH | outbound allowlist/minimization, URL/structured data에 token/balance/debt/security 금지 | payload/schema/sitemap/JSON-LD scan, HIGH leak 차단 |
 | supply chain | MEDIUM/HIGH | immutable action/image ref, dependency audit, SBOM/provenance | workflow/dependency/provenance regression severity gate |

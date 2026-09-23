@@ -1,6 +1,7 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v58)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v60)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v60**: 디스코드 음악 봇 및 음성 상주 데몬 시스템 전면 GitHub 메인 통합 (v2026.09.23.389) — systemd 서비스 유닛, 광고/스폰서 실시간 절단 QA 검증 스크립트, 다국어 봇 운영 명세서, 루트 스크립트 바인딩(bot:test, bot:start) 완비, PR #685 생성 및 origin/main 병합 완료 (+135, -0)
 - **v59**: GitHub 활성 23개 Step-Up 보안/경제 PR (#644~#684) main 완전 병합 및 충돌 해소, 백엔드 Vitest 97개 파일 974개 테스트 & 프론트엔드 전 라우트 빌드 완벽 통과, 테스트 서버(https://test.easy-scraping.com) 및 운영 서버(https://easy-scraping.com) 무중단 Blue-Green 승격(v2026.09.23.388) 및 1,061개 PostgreSQL 활성 세션 100% 무손실 보존 완료 (+180, -0)
 - **v58**: 상단 글로벌 헤더 15초 주기 404 폴링 폭풍 원천 차단(Next.js BFF /api/notifications/unread-count 신설) 및 채팅/알림 document.visibilityState 가드·지수 백오프 적용 사양 (v2026.09.22.359) (+140, -0)
 - **v57**: 전 도메인 REST API 완전 통합(4대 미연동 DB 도메인 컨트롤러 신설: 저금통, 제작대, 마켓플레이스, 인앱알림) 및 OpenAPI 3.0 명세서 & 11종 API 문서 전수 갱신 사양 수록 (+160, -0)
@@ -2315,3 +2316,42 @@ flowchart TD
      - 운영 앱 API 쪽지 미확인(`https://easy-scraping.com/app-api/v1/chat/unread-count`): HTTP 401 Unauthorized (정상 인증 가드 작동).
      - Nginx 에러 로그: 0건.
      - **PostgreSQL 활성 사용자 세션**: **1,061개 세션 100% 무손실 보존 완료**.
+
+---
+
+## 🚀 [v60 Specification] 디스코드 음악 봇 및 음성 상주 데몬 시스템 전면 GitHub 메인 통합 및 배포 표준화 사양 (누적 추가)
+
+### 1. 개요 및 배경 (Incident Analysis & Root Causes)
+- **사용자 요청**: "봇부분도 깃허브에 올려줘 메인통합시켜"
+- **통합 배경**:
+  1. 이전 세션에서 개발 및 검증 완료된 디스코드 음악 봇(무제한 스트리밍, 인라인 볼륨 제어, SponsorBlock/FFmpeg 실시간 광고/잡담 세그먼트 도려내기, 24/7 보이스 채널 상주)의 운영 인프라 파일 및 테스트 자산이 Git 원격 추적에 누락되어 있던 상태를 완전 해소.
+  2. 로컬 및 미니PC 호스트 환경에 분산되어 있던 `systemd` 서비스 유닛 파일, SponsorBlock/오디오 파형 QA 검증 스크립트 2종(Python/Node.js), 다국어 봇 운영 가이드(`bot/README-KO.md`, `bot/README.md`)를 저장소 공식 자산으로 편입.
+  3. 루트 `package.json`에 `bot:test` 및 `bot:start` 워크스페이스 스크립트를 신설 바인딩하여 모노레포 표준 라이프사이클에 완전 편입.
+  4. GitHub 원격에 전용 기능 브랜치(`feat/discord-bot-full-github-main-integration-v2026.09.23.389`)를 발행하고 Pull Request [#685](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/685)를 생성한 뒤, 관리자 권한으로 충돌 없이 원자적(Atomic) `main` 병합 완료.
+
+### 2. 세부 편입 및 통합 자산 (Integrated Assets)
+1. **인프라 서비스 데몬 유닛**:
+   - `ops/systemd/moneyverse-discord-bot.service`:
+     - `LimitNOFILE=65535`, `Restart=always`, `RestartSec=5s`, `WorkingDirectory=/home/debian/Woldeok-Moneyverse-Migration/bot` 완비.
+     - 미니PC 부팅 시 자동 기동 및 데몬 이상 시 5초 내 무손실 자동 재기동 보장.
+2. **광고 차단 & 음향 에너지 QA 검증 슈트**:
+   - `bot/scripts/qa_ads_sponsorblock_verification.py`: SponsorBlock REST API 4개 트랙 세그먼트 검출 및 인트로 0~5초 음향 에너지(dB) 실측 파이프라인.
+   - `bot/scripts/qa_ads_sponsorblock_verification.mjs`: Node.js ES 모듈 기반 독립 실행 QA 러너.
+3. **다국어 공식 운영 매뉴얼**:
+   - `bot/README-KO.md`: 8대 슬래시 명령어, 24시간 음성 상주 메커니즘, 유튜브 광고 차단 및 SponsorBlock 실시간 필터링 아키텍처 한국어 상세 가이드.
+   - `bot/README.md`: 동일 아키텍처 및 명령어 체계 영문 표준 문서.
+4. **루트 패키지 매니페스트 및 문서 연동**:
+   - `package.json`: `"bot:test": "npm --prefix bot test"`, `"bot:start": "node bot/index.js"` 등록.
+   - `README-KO.md` / `README.md`: 디스코드 봇 아키텍처 및 실행 커맨드 섹션 전격 추가.
+   - `docs/UPDATE_LOG.ko.md` / `docs/UPDATE_LOG.md`: `v2026.09.23.389` 릴리스 변경점 영구 원장 기록.
+
+### 3. 검증 결과 및 운영 상태 (Verification & Promotion)
+1. **봇 단위 테스트 검증**:
+   - `pnpm bot:test`: 4/4 테스트 100% 통과 (8개 슬래시 커맨드 등록 무결성, SponsorBlock API Fallback 검증, 1037ms).
+2. **GitHub Pull Request & Main 병합**:
+   - PR [#685](https://github.com/wtrdd1-hash/Woldeok-Moneyverse-Migration/pull/685) 오픈 -> `gh pr merge 685 --merge --admin` 실행 -> Merge commit `bb832b69` 생성 완료.
+   - 미니PC 원격 저장소(`origin/main`) 및 로컬 작업 공간(`c:\Users\sds\Desktop\tset\Woldeok-Moneyverse-Migration`) 최신 커밋 `bb832b69` 패스트포워드 동기화 완료.
+3. **미니PC 봇 데몬 실시간 상주 검증**:
+   - `systemctl status moneyverse-discord-bot.service`: PID `1739183` Active (running), `🔊│음성` (`1536572442422550538`) 채널 정상 상주 중.
+4. **호스트 릴리스 로그 기록**:
+   - `/home/debian/v2026.09.23.389-plan-ko.txt`, `/home/debian/v2026.09.23.389-plan-en.txt`, `/home/debian/v2026.09.23.389-log-ko.txt`, `/home/debian/v2026.09.23.389-log-en.txt` 4종 원격 서버 저장 완료.
