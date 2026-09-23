@@ -1,10 +1,21 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.23.406
+> Current ledger version: v2026.09.24.409
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
+
+## v2026.09.24.409 — 2026-09-24
+- Start and mid-work `origin/main` both remained `b8bfc22ddff09f5ccd7632024deac447ff159ff6`; no concurrent main movement was observed.
+- Incorporated the API audit into planning authority. The machine contract currently contains 179 mobile endpoints; the complete spec states 57 backend controllers / 335 backend endpoints / 179 mobile endpoints; the older endpoint catalog states 139 mobile endpoints; and v402 separately recorded 58 controller files / 361 HTTP decorators.
+- **G409-01 / P0:** exact-SHA current-main API contract acceptance evidence is not yet complete. The preceding required runtime-check failed on ESLint before API verification completed, so this remains a Production blocker.
+- **G409-02 / P0:** backend-total, mobile-BFF, admin and internal API inventory authority must come only from a generated method+path+operationId semantic inventory. Manual counts are non-authoritative.
+- **G409-03 / P1:** mobile contract, complete spec, endpoint catalog and schema/runtime references must share one generated source/version/count with an automated drift gate.
+- **G409-04 / P0:** money/ledger mutations (wallet/bank/stocks/work/market/casino/treasury) are moved into the first risk-verification tier for authn/authz, CSRF, recent reauth, validation, idempotency, concurrency, atomicity and negative tests.
+- **G409-05 / P0:** acceptance now requires 1:1 web/mobile UI action to real API method/path parity and prohibits dead buttons, 404 routes, mock failure masking and direct private-backend calls.
+- Reordered delivery as CI gate restoration → generated contract → inventory/docs reconciliation → common security → high-risk mutations → realtime/chat → mobile/web BFF → admin → automated drift prevention → exact-SHA Test E2E → zero-downtime Production.
+- EN/KO authority docs, delta, worklog and update are synchronized in v409. This cycle is PLANNING only and claims no API runtime change, Test verification or Production promotion.
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
 
 ## v2026.09.23.406 — 2026-09-23
