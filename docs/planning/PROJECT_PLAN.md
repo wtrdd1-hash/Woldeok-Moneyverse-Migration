@@ -2,11 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.410
+> Current integrated version: v2026.09.23.412
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Hourly planning cycle — v2026.09.23.412 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Addition. **Previous Cycle Type:** Feature Improvement. **Next Cycle Type:** Feature Improvement.
+- **Exact baseline:** start and mid-work rechecks both resolved authoritative `origin/main` to `e447b11f1d27ee7da2a46c64fcd96e0058c8da6d`; the prior v410 planning delta remains unmerged evidence carried in this branch lineage.
+- **BANK-412-01 — Trusted Transfer Recipients / Recipient Address Book (new-feature candidate):** repository-wide search found no authoritative saved/trusted/favorite beneficiary or recipient-address-book contract. This is distinct from one-off transfers and the separately blocked scheduled/recurring-transfer candidate because its user problem is durable recipient selection and verification rather than execution scheduling.
+- **Reference gate:** `0 / 10,000` candidate-specific, deduplicated, independently analyzable external references were collected and analyzed in this cycle. Existing general UI corpora are not reclassified as beneficiary/address-book research. Therefore BANK-412-01 is **IN PROGRESS / REFERENCE VALIDATION BLOCKED** and is not counted as planned-complete.
+- **Research scope before substantive specification:** banking beneficiary/address-book UX; recipient verification and misdirected-payment prevention; alias/search/masking; add/edit/delete authorization and step-up; transfer-time revalidation; compromised-account recovery; DB ownership/uniqueness/indexing; API/app-api contracts; idempotency/concurrency; abuse/rate controls; notifications; accessibility/mobile patterns; audit/reconciliation; operational failures; regulatory guidance; analytics/KPI and rollback.
+- **No premature contract:** UI states/CTA, schema, endpoint shapes, transaction semantics, security controls, KPI targets, Test exact-SHA acceptance and Production promotion criteria remain intentionally unfinalized until the 10,000-reference gate is actually satisfied.
+- **QA/release carry-forward:** PR #710 exact head `85d1219fa64d78f986301ab017852f5d4f5a1144` has focused validation but CI run 1807 fails required `runtime-check` at repository-wide `pnpm lint`; typecheck/build/migrations/tests/Prisma mutation rejection/dependency audit are skipped. Treat #710 and other runtime candidates as merge/release blocked until exact-SHA required gates are green.
+- **Scope truth:** this cycle adds only a blocked discovery record and preserves prior planning evidence; it does not implement the feature, mutate runtime/DB/Test/Production, or claim research completion.
 
 ## Hourly planning cycle — v2026.09.23.410 (2026-09-23)
 

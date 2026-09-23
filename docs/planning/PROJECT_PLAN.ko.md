@@ -2,11 +2,22 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.23.410
+> **현재 통합 버전:** v2026.09.23.412
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 시간별 기획 회차 — v2026.09.23.412 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Addition. **Previous Cycle Type:** Feature Improvement. **Next Cycle Type:** Feature Improvement.
+- **정확한 기준:** 시작 및 작업 중간 재확인 모두 authoritative `origin/main`은 `e447b11f1d27ee7da2a46c64fcd96e0058c8da6d`였으며, 직전 v410 기획 delta는 아직 미병합 증거로 이 브랜치 계보에 포함한다.
+- **BANK-412-01 — 신뢰 수취인 / 수취인 주소록(신규 기능 후보):** 저장소 전수 검색에서 saved/trusted/favorite beneficiary 또는 recipient address-book에 해당하는 권위 계약을 찾지 못했다. 일회성 송금 및 별도로 차단된 예약·반복 송금 후보와 구분되며, 핵심 사용자 문제는 실행 예약이 아니라 수취인의 영속 저장·선택·검증이다.
+- **레퍼런스 게이트:** 이번 회차에서 후보에 직접 관련된 중복 제거 독립 외부 레퍼런스의 실제 수집·분석 수는 `0 / 10,000`건이다. 기존 일반 UI corpus를 수취인 주소록 연구로 재분류하지 않는다. 따라서 BANK-412-01은 **IN PROGRESS / REFERENCE VALIDATION BLOCKED**이며 기획 완료로 계산하지 않는다.
+- **실질 명세 전 필수 조사 범위:** 은행 beneficiary/address-book UX, 수취인 검증과 오송금 방지, 별칭·검색·마스킹, 추가·수정·삭제 권한 및 step-up, 송금 시점 재검증, 계정 탈취 복구, DB 소유권·유일성·인덱스, API/app-api 계약, 멱등성·동시성, abuse/rate control, 알림, 접근성·모바일 패턴, 감사·reconciliation, 운영 실패사례, 규제 지침, 분석/KPI와 롤백.
+- **성급한 계약 확정 금지:** UI 상태/CTA, schema, endpoint shape, transaction 의미, 보안 통제, KPI 목표, Test exact-SHA 수용조건과 Production 승격조건은 실제 10,000-reference gate 충족 전까지 의도적으로 미확정 상태로 둔다.
+- **QA/릴리스 이월:** PR #710 exact head `85d1219fa64d78f986301ab017852f5d4f5a1144`는 focused 검증은 있으나 CI run 1807의 required `runtime-check`가 repository-wide `pnpm lint`에서 실패했고 typecheck/build/migrations/tests/Prisma mutation rejection/dependency audit가 skip됐다. #710 및 다른 runtime 후보는 exact-SHA required gate가 green이 될 때까지 merge/release blocked로 취급한다.
+- **범위 사실:** 이번 회차는 차단된 신규 기능 발굴 기록만 추가하고 이전 기획 증거를 보존한다. 기능 구현, runtime/DB/Test/Production 변경 또는 research 완료를 주장하지 않는다.
 
 ## 시간별 기획 회차 — v2026.09.23.410 (2026-09-23)
 
