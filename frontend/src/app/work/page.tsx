@@ -101,8 +101,12 @@ export default async function WorkPage() {
         <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-card via-card/80 to-primary/5 p-4 sm:p-6 shadow-xl relative overflow-hidden backdrop-blur-sm w-full min-w-0">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 min-w-0">
             <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-              <div className="w-13 h-13 sm:w-16 sm:h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-2xl sm:text-3xl shadow-inner shrink-0">
-                
+              <div
+                className={`w-13 h-13 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shadow-inner shrink-0 border ${
+                  activeMeta?.colorClass ?? 'bg-primary/10 border-primary/20'
+                }`}
+              >
+                {activeMeta?.icon ?? '💼'}
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">

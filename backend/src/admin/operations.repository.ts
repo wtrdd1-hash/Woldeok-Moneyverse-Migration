@@ -474,8 +474,12 @@ export class OperationsRepository {
 
     const reason = `AI 경제 밸런싱 엔진 자동 조절 (${stats.economy_health_status.toUpperCase()} 상태, 캡도달자: ${stats.capped_users_count}명, 평균소모: ${stats.average_cap_usage_percent}%)`;
 
+    // 1 게임주 = 7 게임일: 주간 한도가 일간 한도보다 적어지는 역전 현상을 원천 방지하기 위해 7배로 비례 산정
+    const recommended_weekly_cap = stats.recommended_daily_cap * 7;
+
     await this.updateWorkRewardPolicy(actorUserId, {
       dailyCap: stats.recommended_daily_cap,
+      weeklyCap: recommended_weekly_cap,
       repeatDecayPercent: stats.recommended_decay_percent,
       enabled: true,
       reason,

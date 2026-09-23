@@ -31,8 +31,8 @@ export function WorkQuotaDashboard({ summary, isEn }: WorkQuotaDashboardProps) {
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
             {isEn
-              ? 'These counters use the authoritative Moneyverse game clock. The API and payout engine use the same day/week window.'
-              : '게임 시계를 기준으로 하며, 매일 자정(00:00)에 보상 한도가 새롭게 충전돼요.'}
+              ? 'These counters use the authoritative Moneyverse game clock (1 game day = 10 min, 1 game week = 70 min). Limits recharge automatically at every game reset.'
+              : '머니버스 게임 시계(1게임일 = 10분, 1게임주 = 70분)를 기준으로 하며, 게임일 및 게임주 리셋 시마다 보상 한도가 새롭게 충전돼요.'}
           </p>
         </div>
       </div>
@@ -48,8 +48,8 @@ export function WorkQuotaDashboard({ summary, isEn }: WorkQuotaDashboardProps) {
               </p>
               <p className="text-[11px] sm:text-xs text-amber-700/80 dark:text-amber-400/80 mt-0.5 line-clamp-2">
                 {isEn
-                  ? 'Additional work completions today will not yield WLD rewards. Resets at UTC 00:00.'
-                  : '오늘 보상 한도를 100% 달성했어요. 내일 자정에 한도가 리셋되면 다시 보상을 받을 수 있어요.'}
+                  ? 'Additional work completions will not yield WLD rewards until the next game day window resets.'
+                  : '오늘 게임일 보상 한도를 100% 달성했어요. 다음 게임일 리셋 시각에 한도가 초기화되면 다시 보상을 받을 수 있어요.'}
               </p>
             </div>
           </div>
@@ -80,7 +80,7 @@ export function WorkQuotaDashboard({ summary, isEn }: WorkQuotaDashboardProps) {
                 {groupDigits(summary.daily_paid)} / {summary.daily_cap === '0' || summary.daily_cap === null ? '∞' : `${groupDigits(summary.daily_cap)} WLD`}
               </span>
               <span className={`text-xs font-semibold shrink-0 ${isDailyCapped ? 'text-amber-600' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                {isEn ? `${dailyRemaining} WLD left` : `${dailyRemaining} WLD 남음`}
+                {isEn ? `${groupDigits(dailyRemaining)} WLD left` : `${groupDigits(dailyRemaining)} WLD 남음`}
               </span>
             </div>
 
@@ -116,7 +116,7 @@ export function WorkQuotaDashboard({ summary, isEn }: WorkQuotaDashboardProps) {
                 {groupDigits(summary.weekly_paid)} / {summary.weekly_cap === '0' || summary.weekly_cap === null ? '∞' : `${groupDigits(summary.weekly_cap)} WLD`}
               </span>
               <span className={`text-xs font-semibold shrink-0 ${isWeeklyCapped ? 'text-rose-600' : 'text-blue-600 dark:text-blue-400'}`}>
-                {isEn ? `${weeklyRemaining} WLD left` : `${weeklyRemaining} WLD 남음`}
+                {isEn ? `${groupDigits(weeklyRemaining)} WLD left` : `${groupDigits(weeklyRemaining)} WLD 남음`}
               </span>
             </div>
 
