@@ -1,3 +1,34 @@
+## v2026.09.23.394 — P2P 유저 거래소 & 에스크로 경매 시스템(잉글리시 옥션, 1:1 직거래, 공인 감정소, 가격발견 스파크라인), 무중단 블루-그린 승격 및 1,069개 활성 세션 100% 보존
+
+- 적용 브랜치: `main` (릴리스: `prod-57eeaacc-v394`, Exact Git SHA: `57eeaacc8de77f0f5e19450f3892ef1527760190`)
+- **P2P 유저 거래소 & 에스크로 경매 고도화 (PLAYER_MARKETPLACE_CRAFTING_SPEC)**:
+  1. **에스크로 실시간 잉글리시 경매 (`AuctionView`)**:
+     - `frontend/src/app/marketplace/auction-view.tsx` 신설.
+     - 최고가 공개 호가 입찰 방식, 상위 입찰 시 직전 입찰자 100% 즉시 에스크로 자동 환불(`ESCROW_REFUND`).
+     - 스나이핑 방지 (Anti-Sniping): 마감 30초 이내 입찰 시 60초 자동 연장 타이머 가동.
+     - 낙찰 시 출품자 순액 정산 및 2% 경매 수수료 영구 소각(`SINK_AUCTION_FEE`).
+  2. **P2P 1:1 안전 직거래 (`DirectTradeView`)**:
+     - `frontend/src/app/marketplace/direct-trade-view.tsx` 신설.
+     - 양방향 2단계 확인 서명 (Two-Way Dual Sign-Off): `PROPOSED` → `ACCEPTED_BY_PEER` → `COMPLETED` 원자적 동시 스왑.
+     - 상대방 유저명 지정, 교환 물품 및 제안 WLD 실시간 확인, 사기/탈취 원천 차단.
+  3. **공인 시스템 감정소 (`AppraisalView`)**:
+     - `frontend/src/app/marketplace/appraisal-view.tsx` 신설.
+     - 기획서 §5.3 기준: `max(250 WLD, ceil(0.25%))` 수수료 영구 소각(`SINK_APPRAISAL_FEE`).
+     - 온체인형 디지털 공인 인증서(시리얼 번호, 원작자 출처 체인, P25~P75 시세 밴드, CERTIFIED 배지) 영구 발급.
+  4. **시세 및 가격 발견 대시보드 (`PriceDiscoveryChart`)**:
+     - `frontend/src/app/marketplace/price-discovery-chart.tsx` 신설.
+     - 최근 20건 정상 체결 기준 롤링 중앙값(Rolling Median) 및 7일/30일 체결가 SVG 스파크라인.
+     - 비정상 고가/저가 탐지 시 '시세 대비 과도'/'급매' 실시간 경고 칩.
+  5. **종합 6대 탭 통합 마운트 (`MarketplaceTabs`)**:
+     - `frontend/src/app/marketplace/marketplace-tabs.tsx`: [고정가 거래소 | 실시간 경매장 | 1:1 직거래 | 공인 감정소 | 제작대 | 내 등록 | 보관함] 통합 탭 개편.
+- **전수 단위/통합 테스트 100% 통과**:
+  - 프론트엔드: 103개 테스트 파일, 756개 테스트 전수 통과 (0 failed).
+  - 백엔드: 98개 테스트 파일, 977개 테스트 전수 통과 (0 failed).
+- **무중단 운영 승격 (Zero-Downtime Blue-Green Promotion)**:
+  - 테스트 서버(`https://test.easy-scraping.com/`): 전수 200 OK.
+  - 운영 서버(`https://easy-scraping.com/`): 메인 200 OK, BFF `/api/notifications/unread-count` 200 OK, `/marketplace` 307 정상 인증 리다이렉트, `/frontend-version` 빌드 ID 일치 (`57eeaacc8de77f0f5e19450f3892ef1527760190`).
+  - **PostgreSQL 활성 사용자 세션 1,069건 100% 무손실 보존 완료 (배포 중 7건 순증)**.
+
 ## v2026.09.23.393 — 클럽 협동 경제 12x12 공유 캔버스, 컬렉션 소유권 & D1~D7 리텐션 큐레이션 쇼케이스, 무중단 블루-그린 승격 및 1,062개 활성 세션 100% 보존
 
 - 적용 브랜치: `main` (릴리스: `prod-b8d41b26-v393`, Exact Git SHA: `b8d41b2670bf86083d6e4944d264a082d09b7b1c`)

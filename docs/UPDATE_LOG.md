@@ -1,3 +1,30 @@
+## v2026.09.23.394 — Player Marketplace & Escrow Auction Suite (English Auction, 1:1 Direct Trade, Certified Appraisal, Price Discovery), Zero-Downtime Blue-Green Promotion, 1,069 Active Sessions 100% Preserved
+
+- Applied Branch: `main` (Release: `prod-57eeaacc-v394`, Exact Git SHA: `57eeaacc8de77f0f5e19450f3892ef1527760190`)
+- **Player Marketplace & Escrow Auction Suite (PLAYER_MARKETPLACE_CRAFTING_SPEC)**:
+  1. **Escrow English Auction System (`AuctionView`)**:
+     - `frontend/src/app/marketplace/auction-view.tsx`: Real-time highest-bid public auction.
+     - Outbid protection: Previous bidder's locked WLD refunded immediately 100% (`ESCROW_REFUND`).
+     - Anti-sniping protection: 60-second auto-extension triggered when bids land within 30 seconds of closing.
+     - 2% permanent auction settlement sink (`SINK_AUCTION_FEE`) on winner final settlement.
+  2. **Direct P2P Escrow Trade (`DirectTradeView`)**:
+     - `frontend/src/app/marketplace/direct-trade-view.tsx`: Two-Way Dual Sign-Off state machine (`PROPOSED` → `ACCEPTED_BY_PEER` → `COMPLETED`).
+     - Safe peer targeting, reciprocal item & WLD presentation, fraud-proof atomic escrow swap.
+  3. **Certified System Appraisal Service (`AppraisalView`)**:
+     - `frontend/src/app/marketplace/appraisal-view.tsx`: Specification §5.3 fee calculation `max(250 WLD, ceil(0.25%))` permanent sink (`SINK_APPRAISAL_FEE`).
+     - Issues on-chain style digital provenance certificates (Serial ID, author genesis chain, P25~P75 fair valuation band, CERTIFIED badge).
+  4. **Price Discovery & Anomaly Detection Dashboard (`PriceDiscoveryChart`)**:
+     - `frontend/src/app/marketplace/price-discovery-chart.tsx`: 20-trade rolling median, 7d/30d SVG volume sparkline, real-time excessive price/bargain alert chips.
+  5. **Integrated 6-Tab Mega Hub (`MarketplaceTabs`)**:
+     - `frontend/src/app/marketplace/marketplace-tabs.tsx`: [Fixed Marketplace | Live Auctions | 1:1 Direct Trades | Certified Appraisal | Crafting Workbench | My Listings | Storage Holdings].
+- **Test Suite 100% Passed**:
+  - Frontend test suites: 103 test files, 756 tests passed (0 failed).
+  - Backend test suites: 98 test files, 977 tests passed (0 failed).
+- **Zero-Downtime Blue-Green Promotion**:
+  - Test server (`https://test.easy-scraping.com/`): 200 OK.
+  - Production server (`https://easy-scraping.com/`): Main 200 OK, BFF `/api/notifications/unread-count` 200 OK, `/marketplace` 307 redirect OK, `/frontend-version` matches exact commit SHA (`57eeaacc8de77f0f5e19450f3892ef1527760190`).
+  - **PostgreSQL active user sessions: 1,069 preserved 100% (+7 net active sessions during deployment)**.
+
 ## v2026.09.23.393 — Club Cooperative Economy 12x12 Shared Canvas, Collection Ownership & D1~D7 Retention Curation Showcase, Zero-Downtime Blue-Green Promotion, 1,062 Active Sessions 100% Preserved
 
 - Applied Branch: `main` (Release: `prod-b8d41b26-v393`, Exact Git SHA: `b8d41b2670bf86083d6e4944d264a082d09b7b1c`)

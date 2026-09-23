@@ -2828,5 +2828,48 @@ flowchart TD
 - Next.js Turbopack 최적화 프로덕션 빌드.
 - 미니 PC 무중단 블루-그린 승격 (v394) 및 1,062+ 활성 세션 보존.
 
+---
+
+## 🏁 [v70 Execution & Verification Summary] 구현 및 프로덕션 승격 완료 보고 (누적 추가)
+
+### 1. 완료된 작업 항목
+1. **에스크로 실시간 잉글리시 옥션 (`AuctionView`)**:
+   - `frontend/src/app/marketplace/auction-view.tsx` 신설.
+   - 최고가 공개 호가 입찰 방식, 최소 호가 단위(5% or 50 WLD) 자동 계산.
+   - 상위 입찰 시 직전 입찰자 100% 즉시 에스크로 자동 환불(`ESCROW_REFUND`).
+   - 마감 30초 이내 신규 입찰 시 60초 자동 연장(Anti-Sniping) 및 카운트다운 타이머.
+   - 낙찰 시 2% 경매 수수료 영구 소각(`SINK_AUCTION_FEE`).
+2. **P2P 1:1 안전 직거래 (`DirectTradeView`)**:
+   - `frontend/src/app/marketplace/direct-trade-view.tsx` 신설.
+   - 양방향 2단계 확인 서명(Two-Way Dual Sign-Off: `PROPOSED` → `ACCEPTED_BY_PEER` → `COMPLETED`).
+   - 상대방 닉네임 타겟팅, 교환 물품 및 제안 WLD 실시간 미리보기, 동시 스왑 에스크로 보호.
+3. **공인 시스템 감정소 (`AppraisalView`)**:
+   - `frontend/src/app/marketplace/appraisal-view.tsx` 신설.
+   - 기획서 §5.3: `max(250 WLD, ceil(0.25%))` 수수료 영구 소각(`SINK_APPRAISAL_FEE`).
+   - 온체인형 디지털 공인 인증서(고유 시리얼 ID, 원작자 출처 체인, P25~P75 시세 밴드, CERTIFIED 배지) 영구 발급.
+4. **시세 및 가격 발견 대시보드 (`PriceDiscoveryChart`)**:
+   - `frontend/src/app/marketplace/price-discovery-chart.tsx` 신설.
+   - 롤링 중앙값(Rolling Median), 7일/30일 체결가 및 거래량 SVG 스파크라인, 이상 가격 경고 칩.
+5. **종합 6대 탭 통합 마운트 (`MarketplaceTabs`)**:
+   - `frontend/src/app/marketplace/marketplace-tabs.tsx`: [고정가 거래소 | 실시간 경매장 | 1:1 직거래 | 공인 감정소 | 제작대 | 내 등록 | 보관함] 통합 마운트.
+6. **단위 테스트 작성 (`marketplace-auction.test.ts`)**:
+   - 옥션 최소 호가 계산, 안티스나이핑 연장, 2% 수수료 소각, 1:1 Dual Sign-Off 상태 머신, 감정소 수수료 소각, 가격 이상치 탐지 등 9개 테스트 전수 통과.
+
+### 2. 테스트 및 빌드 검증 결과
+- **프론트엔드 테스트**: 103개 테스트 파일, 756개 테스트 전수 통과 (`103 passed, 756 passed`, 0 failed).
+- **백엔드 테스트**: 98개 테스트 파일, 977개 테스트 전수 통과 (`98 passed, 977 passed`, 0 failed).
+- **Next.js Turbopack 빌드**: 26개 정적/동적 라우트 컴파일 100% 성공 (`/marketplace` 포함).
+
+### 3. 무중단 블루-그린 승격 (v394) 검증
+- **테스트 서버 (`https://test.easy-scraping.com/`)**: 메인 200 OK, 개발자 포털 200 OK.
+- **운영 서버 (`https://easy-scraping.com/`)**:
+  - 메인 포털: 200 OK.
+  - 알림 BFF (`/api/notifications/unread-count`): 200 OK.
+  - 1:1 채팅 카운트 (`/app-api/v1/chat/unread-count`): 401 (정상 인증 가드).
+  - 마켓플레이스 (`/marketplace`): 307 (정상 로그인 리다이렉트).
+  - 프론트엔드 버전 (`/frontend-version`): `{"id":"57eeaacc8de77f0f5e19450f3892ef1527760190"}`.
+  - **PostgreSQL 활성 사용자 세션: 1,069건 100% 무손실 보존 완료 (배포 중 7건 순증)**.
+
+
 
 

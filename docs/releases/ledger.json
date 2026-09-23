@@ -180,10 +180,21 @@
     "commitSha": "b8d41b2670bf86083d6e4944d264a082d09b7b1c",
     "shortSha": "b8d41b26",
     "releasePath": "/srv/moneyverse-data/releases/prod-b8d41b26-v393",
-    "status": "promoted",
+    "status": "archived",
     "activeSessions": 1062,
     "timestamp": "2026-09-23T10:37:00Z",
     "author": "System Engineer",
     "notes": "Club Cooperative Economy (12x12 Clubhouse Shared Canvas, Hard Sink Funding Projects), Collection Ownership & D1~D7 Retention Curation Showcase (/collections), Navigation Mega Menu Integration, Zero-Downtime Blue-Green Promotion to Test & Production, 1062 Active User Sessions 100% Preserved"
+  },
+  {
+    "version": "v2026.09.23.394",
+    "commitSha": "57eeaacc8de77f0f5e19450f3892ef1527760190",
+    "shortSha": "57eeaacc",
+    "releasePath": "/srv/moneyverse-data/releases/prod-57eeaacc-v394",
+    "status": "promoted",
+    "activeSessions": 1069,
+    "timestamp": "2026-09-23T11:30:00Z",
+    "author": "System Engineer",
+    "notes": "Player Marketplace & Escrow Auction Suite (English Auction with Anti-Sniping, P2P 1:1 Direct Escrow Dual Sign-Off, Certified Appraisal Service with Provenance Badges, Price Discovery Rolling Median & Anomaly Detection), Zero-Downtime Blue-Green Promotion, 1069 Active Sessions 100% Preserved"
   }
 ]
