@@ -16,10 +16,10 @@ describe('Season Settlement & Hall of Fame Engine', () => {
   const service = new SeasonService(mockRepo);
 
   it('evaluates current season status with tier calculations for Top 10 Capital Master', async () => {
-    const userId = '11111111-1111-1111-1111-111111111111';
+    const userId = '11111111-1111-4111-8111-111111111111';
 
     vi.mocked(mockRepo.current).mockResolvedValueOnce({
-      seasonId: '22222222-2222-2222-2222-222222222222',
+      seasonId: '22222222-2222-4222-8222-222222222222',
       seasonName: '2026 가을 그랜드 시즌',
       startsAt: new Date('2026-09-01T00:00:00Z'),
       endsAt: new Date('2026-09-30T23:59:59Z'),
@@ -40,10 +40,10 @@ describe('Season Settlement & Hall of Fame Engine', () => {
   });
 
   it('evaluates current season status for Gold tier participant', async () => {
-    const userId = '33333333-3333-3333-3333-333333333333';
+    const userId = '33333333-3333-4333-8333-333333333333';
 
     vi.mocked(mockRepo.current).mockResolvedValueOnce({
-      seasonId: '22222222-2222-2222-2222-222222222222',
+      seasonId: '22222222-2222-4222-8222-222222222222',
       seasonName: '2026 가을 그랜드 시즌',
       startsAt: new Date('2026-09-01T00:00:00Z'),
       endsAt: new Date('2026-09-30T23:59:59Z'),
@@ -97,7 +97,7 @@ describe('Season Settlement & Hall of Fame Engine', () => {
   });
 
   it('successfully triggers season settlement engine and generates hall of fame snapshots', async () => {
-    const seasonId = '22222222-2222-2222-2222-222222222222';
+    const seasonId = '22222222-2222-4222-8222-222222222222';
 
     vi.mocked(mockRepo.settle).mockResolvedValueOnce({
       seasonId,
@@ -114,9 +114,9 @@ describe('Season Settlement & Hall of Fame Engine', () => {
   });
 
   it('successfully claims season reward idempotently', async () => {
-    const userId = '11111111-1111-1111-1111-111111111111';
-    const seasonId = '22222222-2222-2222-2222-222222222222';
-    const key = '44444444-4444-4444-4444-444444444444';
+    const userId = '11111111-1111-4111-8111-111111111111';
+    const seasonId = '22222222-2222-4222-8222-222222222222';
+    const key = '44444444-4444-4444-8444-444444444444';
     const now = new Date();
 
     vi.mocked(mockRepo.claimReward).mockResolvedValueOnce({
