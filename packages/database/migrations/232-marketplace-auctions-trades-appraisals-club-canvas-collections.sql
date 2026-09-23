@@ -142,6 +142,13 @@ CREATE TABLE IF NOT EXISTS public.user_curation_progress (
 -- Helper Functions & Procedures
 -- =========================================================================
 
+DROP FUNCTION IF EXISTS public.marketplace_create_listing(uuid, text, integer, numeric, uuid, text);
+DROP FUNCTION IF EXISTS public.marketplace_create_listing(uuid, text, integer, text, text, text);
+DROP FUNCTION IF EXISTS public.marketplace_buy_listing(uuid, uuid, uuid);
+DROP FUNCTION IF EXISTS public.marketplace_buy_listing(uuid, uuid, text);
+DROP FUNCTION IF EXISTS public.marketplace_cancel_listing(uuid, uuid);
+DROP FUNCTION IF EXISTS public.marketplace_bid_auction(uuid, text, uuid, text);
+
 -- Helper 1: marketplace_create_listing
 CREATE OR REPLACE FUNCTION public.marketplace_create_listing(
   p_actor uuid,
@@ -444,7 +451,7 @@ BEGIN
   RETURN jsonb_build_object(
     'auctionId', p_auction_id,
     'currentBidWld', v_bid_numeric::text,
-    'bidCount', v_auc.bidCount + 1,
+    'bidCount', v_auc.bid_count + 1,
     'endsAt', v_new_ends_at,
     'isExtended', (v_auc.is_extended OR v_is_extended)
   );
