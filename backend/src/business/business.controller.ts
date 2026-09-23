@@ -193,4 +193,53 @@ export class BusinessController {
       'failed to apply boost item',
     );
   }
+
+  @Get('businesses/:id/supply-chain')
+  @ApiOperation({ summary: 'Get supply chain inventory, storage capacity and demand factors' })
+  supplyChainOverview(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) ownershipId: string,
+  ) {
+    return this.guarded(
+      () => this.service().supplyChainOverview(requireUserId(request), ownershipId),
+      'failed to load supply chain metrics',
+    );
+  }
+
+  @Post('businesses/:id/procure')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Procure raw materials for business with WLD payment' })
+  procureMaterials(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) ownershipId: string,
+    @Body() body: { materialCode: string; quantity: number; idempotencyKey: string },
+  ) {
+    return this.guarded(
+      () => this.service().procureMaterials(requireUserId(request), {
+        ownershipId,
+        materialCode: body.materialCode,
+        quantity: body.quantity,
+        idempotencyKey: body.idempotencyKey,
+      }),
+      'failed to procure raw materials',
+    );
+  }
+
+  @Post('businesses/:id/storage/upgrade')
+  @UseGuards(CsrfGuard)
+  @ApiOperation({ summary: 'Upgrade business storage capacity' })
+  upgradeStorage(
+    @Req() request: RequestWithSession,
+    @Param('id', ParseUUIDPipe) ownershipId: string,
+    @Body() body: IdempotentDto,
+  ) {
+    return this.guarded(
+      () => this.service().upgradeStorage(requireUserId(request), {
+        ownershipId,
+        idempotencyKey: body.idempotencyKey,
+      }),
+      'failed to upgrade storage capacity',
+    );
+  }
 }
+

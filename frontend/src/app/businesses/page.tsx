@@ -15,6 +15,7 @@ import {
   PurchaseButton,
   SettleV2Button,
 } from './business-forms';
+import { SupplyChainWidget } from './supply-chain-widget';
 import type { EquityStanding } from './equity';
 import { equityGateNote, equitySummary, meetsEquityRequirement } from './equity';
 import { canonicalUrl } from '@/lib/seo';
@@ -187,6 +188,13 @@ export default async function BusinessesPage() {
           </div>
         </div>
       )}
+
+      {/* 서플라이 체인 및 원자재 B2B 조달 루프 위젯 */}
+      <SupplyChainWidget
+        businessId={businesses[0]?.ownershipId}
+        businessName={businesses[0]?.name ?? '스마트 편의점'}
+        businessSymbol={businesses[0]?.symbol ?? 'CVS'}
+      />
 
       {/* 1. 인벤토리 내 보유 사업 라이선스 (설립 대기) */}
       {licenseItems.length > 0 && (

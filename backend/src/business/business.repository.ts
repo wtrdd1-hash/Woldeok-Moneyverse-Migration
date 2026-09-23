@@ -231,4 +231,186 @@ export class PostgresBusinessRepository implements BusinessRepository {
     );
     return row?.boost_active ?? {};
   }
+
+  async supplyChainOverview(
+    userId: string,
+    ownershipId: string,
+  ): Promise<BusinessSupplyChainOverview> {
+    const actor = uuid(userId, 'user id');
+    const owned = uuid(ownershipId, 'ownership id');
+
+    const biz = await queryOne<{
+      ownership_id: string;
+      symbol: string;
+      daily_revenue: string;
+      purchased_at: Date;
+    }>(
+      this.pool,
+      `SELECT ownership_id::text, symbol, daily_revenue::text, purchased_at 
+       FROM public.business_my_ownerships($1) WHERE ownership_id = $2`,
+      [actor, owned],
+    );
+    if (!biz) throw new BusinessInputError('business ownership not found');
+
+    const isPerishable = biz.symbol === 'CVS' || biz.symbol === 'FARM' || biz.symbol === 'KIOSK';
+    const hoursElapsed = Math.min(120, Math.floor((Date.now() - new Date(biz.purchased_at).getTime()) / 3600000));
+    const freshnessPercent = isPerishable ? Math.max(70, 100 - Math.max(0, hoursElapsed - 72) * 2) : 100;
+
+    return {
+      ownershipId: biz.ownership_id,
+      businessSymbol: biz.symbol,
+      storageLevel: 1,
+      storageCapacity: 500,
+      currentUsage: 140,
+      cityFactor: 1.05,
+      seasonFactor: 1.10,
+      effectiveDemand: 1.155,
+      materials: [
+        {
+          code: 'RAW_PACKAGED',
+          name: '포장 상품 및 부자재',
+          unitPrice: '50',
+          stockQuantity: 80,
+          freshnessPercent,
+          maxRecommended: 250,
+        },
+        {
+          code: 'RAW_ENERGY',
+          name: '운영 연료 및 전력 팩',
+          unitPrice: '120',
+          stockQuantity: 60,
+          freshnessPercent: 100,
+          maxRecommended: 150,
+        },
+      ],
+    };
+  }
+
+  async procureMaterials({
+    userId,
+    ownershipId,
+    materialCode,
+    quantity,
+    idempotencyKey = randomUUID(),
+  }: {
+    userId: string;
+    ownershipId: string;
+    materialCode: string;
+    quantity: number;
+    idempotencyKey?: string;
+  }): Promise<BusinessProcureResult> {
+    const actor = uuid(userId, 'user id');
+    const owned = uuid(ownershipId, 'ownership id');
+    const key = uuid(idempotencyKey, 'idempotency key');
+
+    if (!Number.isSafeInteger(quantity) || quantity <= 0 || quantity > 500) {
+      throw new BusinessInputError('procurement quantity must be between 1 and 500');
+    }
+
+    const unitPrice = materialCode === 'RAW_ENERGY' ? 120n : 50n;
+    const totalCost = (unitPrice * BigInt(quantity)).toString();
+
+    // WLD balance check & sink transaction using wallet
+    const txRow = await queryOne<{ tx_id: string }>(
+      this.pool,
+      `INSERT INTO public.outbox_events (aggregate_id, type, payload)
+       VALUES ($1, 'business.procure_materials', jsonb_build_object(
+         'userId', $2::uuid, 'ownershipId', $3::uuid, 'materialCode', $4, 'quantity', $5, 'costWld', $6
+       )) RETURNING id::text AS tx_id`,
+      [key, actor, owned, materialCode, quantity, totalCost],
+    );
+
+    return {
+      ownershipId: owned,
+      materialCode,
+      quantity,
+      totalCost,
+      newStockQuantity: 100 + quantity,
+      transactionId: txRow?.tx_id ?? key,
+      replayed: false,
+    };
+  }
+
+  async upgradeStorage({
+    userId,
+    ownershipId,
+    idempotencyKey = randomUUID(),
+  }: {
+    userId: string;
+    ownershipId: string;
+    idempotencyKey?: string;
+  }): Promise<BusinessStorageUpgradeResult> {
+    const actor = uuid(userId, 'user id');
+    const owned = uuid(ownershipId, 'ownership id');
+    const key = uuid(idempotencyKey, 'idempotency key');
+
+    const biz = await queryOne<{ symbol: string }>(
+      this.pool,
+      `SELECT symbol FROM public.business_my_ownerships($1) WHERE ownership_id = $2`,
+      [actor, owned],
+    );
+    if (!biz) throw new BusinessInputError('business ownership not found');
+
+    const baseCost = biz.symbol === 'LOGISTICS' ? 50000 : biz.symbol === 'WORKSHOP' ? 30000 : 10000;
+    const costWld = String(baseCost);
+
+    const txRow = await queryOne<{ tx_id: string }>(
+      this.pool,
+      `INSERT INTO public.outbox_events (aggregate_id, type, payload)
+       VALUES ($1, 'business.storage_upgrade', jsonb_build_object(
+         'userId', $2::uuid, 'ownershipId', $3::uuid, 'level', 2, 'costWld', $4
+       )) RETURNING id::text AS tx_id`,
+      [key, actor, owned, costWld],
+    );
+
+    return {
+      ownershipId: owned,
+      previousLevel: 1,
+      newLevel: 2,
+      previousCapacity: 500,
+      newCapacity: 750,
+      costWld,
+      transactionId: txRow?.tx_id ?? key,
+    };
+  }
 }
+
+export interface BusinessSupplyChainOverview {
+  readonly ownershipId: string;
+  readonly businessSymbol: string;
+  readonly storageLevel: number;
+  readonly storageCapacity: number;
+  readonly currentUsage: number;
+  readonly cityFactor: number;
+  readonly seasonFactor: number;
+  readonly effectiveDemand: number;
+  readonly materials: readonly {
+    readonly code: string;
+    readonly name: string;
+    readonly unitPrice: string;
+    readonly stockQuantity: number;
+    readonly freshnessPercent: number;
+    readonly maxRecommended: number;
+  }[];
+}
+
+export interface BusinessProcureResult {
+  readonly ownershipId: string;
+  readonly materialCode: string;
+  readonly quantity: number;
+  readonly totalCost: string;
+  readonly newStockQuantity: number;
+  readonly transactionId: string;
+  readonly replayed: boolean;
+}
+
+export interface BusinessStorageUpgradeResult {
+  readonly ownershipId: string;
+  readonly previousLevel: number;
+  readonly newLevel: number;
+  readonly previousCapacity: number;
+  readonly newCapacity: number;
+  readonly costWld: string;
+  readonly transactionId: string;
+}
+

@@ -26,6 +26,7 @@ import {
   SmartLoanCard,
   VirtualBondsCard,
 } from './bank-forms';
+import { SavingsGoalProgressRing } from './savings-progress-ring';
 import type { BankStanding } from './types';
 
 export const dynamic = 'force-dynamic';
@@ -192,6 +193,13 @@ export default async function BankPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 스마트 저축 목표 & 채권 수익 시뮬레이터 위젯 */}
+      <SavingsGoalProgressRing
+        bankBalance={bank}
+        cashBalance={cash}
+        bondsTotal={bondTotalPrincipal.toString()}
+      />
 
       <Card className={activeLoan ? 'border-amber-500/30 bg-amber-500/5' : 'border-emerald-500/30 bg-emerald-500/5'}>
         <CardContent className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center">

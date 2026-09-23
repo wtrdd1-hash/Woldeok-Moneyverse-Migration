@@ -3,6 +3,7 @@ import { PageHeader } from '@/components/page-header';
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import { SpacesView } from './spaces-view';
+import { SpaceCanvasEditor } from './space-canvas-editor';
 import type { CityProject, UserSpace } from './spaces-view';
 
 export const dynamic = 'force-dynamic';
@@ -31,6 +32,12 @@ export default async function SpacesPage() {
           Pay-to-Win을 배제한 나만의 프라이빗 거점과 시민 협동으로 완성하는 머니버스 공공 도시 랜드마크입니다.
         </p>
       </PageHeader>
+
+      {/* 8x8 인터랙티브 가구 배치 캔버스 에디터 */}
+      <SpaceCanvasEditor
+        spaceName={spaces[0]?.name ?? '스타터 룸'}
+        spaceType={spaces[0]?.space_type ?? 'SPACE_ROOM_STARTER'}
+      />
 
       <SpacesView spaces={spaces} cityProjects={cityProjects} />
     </div>

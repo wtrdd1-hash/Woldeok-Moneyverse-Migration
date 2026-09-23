@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { apiOrNull } from '@/lib/api';
 import { requireMember } from '@/lib/session';
 import { saveGoalNotifications } from './actions';
+import { NotificationTabsBar } from './notification-tabs-bar';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: '알림 설정', robots: { index: false, follow: false } };
@@ -18,9 +19,12 @@ export default async function NotificationSettingsPage({ searchParams }: { reado
   const board = await apiOrNull<{ notifications_enabled: boolean }>('/api/v1/engagement');
   const enabled = board?.notifications_enabled === true;
   return <div data-page="account-notifications" className="mv-page mv-page--member grid gap-6">
-    <PageHeader eyebrow="ACCOUNT · NOTIFICATIONS" title="알림 설정">중요한 목표와 주문 소식만 받을지 직접 정할 수 있습니다.</PageHeader>
+    <PageHeader eyebrow="ACCOUNT · NOTIFICATIONS" title="알림 센터 & 설정">중요한 비즈니스 수급, 금융 이자, 목표와 소식을 확인하고 수신 여부를 직접 정할 수 있습니다.</PageHeader>
     {params.saved === '1' ? <Alert><CheckCircle2 className="size-4"/><AlertDescription>알림 설정을 저장했습니다. 퀘스트 화면에도 바로 적용됩니다.</AlertDescription></Alert> : null}
     {params.error ? <Alert variant="destructive"><AlertDescription>알림 설정을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.</AlertDescription></Alert> : null}
+
+    {/* 7대 카테고리 알림 탭 바 & 전체 읽음 처리 */}
+    <NotificationTabsBar />
 
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
       <Card className="overflow-hidden">

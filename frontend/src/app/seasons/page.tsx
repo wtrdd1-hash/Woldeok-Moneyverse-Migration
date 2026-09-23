@@ -10,6 +10,7 @@ import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { EnterButton } from './enter-button';
+import { SeasonHallOfFameTicker } from './hall-of-fame-ticker';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,6 +88,9 @@ export default async function SeasonsPage({
       <PageHeader eyebrow="COMMUNITY SEASON" title="시즌 소비 이벤트">
         WLD 소비와 점수는 게임 안에서만 사용됩니다. 기간 한정 시즌 이벤트에 참여하여 명예 순위와 보상을 쟁취하세요.
       </PageHeader>
+
+      {/* 시즌 1: First Capital 명예의 전당 티커 & 아카이브 */}
+      <SeasonHallOfFameTicker />
 
       <section aria-labelledby="events-title" className="grid gap-4">
         <h2 id="events-title" className="text-xl font-bold flex items-center gap-2">

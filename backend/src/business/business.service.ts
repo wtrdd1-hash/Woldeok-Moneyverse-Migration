@@ -130,6 +130,9 @@ export interface BusinessRepository {
   settleV2(input: BusinessSettleInput): Promise<BusinessSettleRow>;
   activateFromLicense(input: BusinessActivateInput): Promise<BusinessActivateRow>;
   applyBoost(input: BusinessApplyBoostInput): Promise<Record<string, unknown>>;
+  supplyChainOverview?(userId: string, ownershipId: string): Promise<any>;
+  procureMaterials?(input: { userId: string; ownershipId: string; materialCode: string; quantity: number; idempotencyKey?: string }): Promise<any>;
+  upgradeStorage?(input: { userId: string; ownershipId: string; idempotencyKey?: string }): Promise<any>;
 }
 
 function businessType(row: BusinessCatalogRow): BusinessType {
@@ -314,4 +317,30 @@ export class BusinessService {
       boostCode: String(input.boostCode ?? ''),
     });
   }
+
+  async supplyChainOverview(userId: unknown, ownershipId: unknown) {
+    if (!this.repository.supplyChainOverview) throw new BusinessInputError('supply chain not implemented on repository');
+    return this.repository.supplyChainOverview(validId(userId, 'user id'), validId(ownershipId, 'ownership id'));
+  }
+
+  async procureMaterials(userId: unknown, input: { ownershipId?: unknown; materialCode?: unknown; quantity?: unknown; idempotencyKey?: unknown }) {
+    if (!this.repository.procureMaterials) throw new BusinessInputError('procurement not implemented on repository');
+    return this.repository.procureMaterials({
+      userId: validId(userId, 'user id'),
+      ownershipId: validId(input.ownershipId, 'ownership id'),
+      materialCode: String(input.materialCode ?? ''),
+      quantity: Number(input.quantity ?? 1),
+      idempotencyKey: input.idempotencyKey ? validId(input.idempotencyKey, 'idempotency key') : undefined,
+    });
+  }
+
+  async upgradeStorage(userId: unknown, input: { ownershipId?: unknown; idempotencyKey?: unknown }) {
+    if (!this.repository.upgradeStorage) throw new BusinessInputError('storage upgrade not implemented on repository');
+    return this.repository.upgradeStorage({
+      userId: validId(userId, 'user id'),
+      ownershipId: validId(input.ownershipId, 'ownership id'),
+      idempotencyKey: input.idempotencyKey ? validId(input.idempotencyKey, 'idempotency key') : undefined,
+    });
+  }
 }
+

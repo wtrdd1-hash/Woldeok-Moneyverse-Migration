@@ -1,6 +1,9 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v63)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v66)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v66**: 3차 심화 문답 최종 확정 사양(선택적 72시간 신선도 감가, B2B 2% Hard Sink 소각, 용량 초과 Fail-Closed 차단, 메인 상단 히어로 위젯 배치, 토스풍 파티클 & 슬라이드업 영수증 모달) 누적 수록 및 자율 구현 착수 (+145, -0)
+- **v65**: 가상 사업체 공급망 2차 심화 문답(하이브리드 조달, 지수형 저장비용 base_cost*1.40^(n-1), 일일 04:00 KST 리셋/1시간 완만 갱신 수요 모델, 30일 유지비 캡/자동 PAUSED 복귀자 보호, 토스·Stripe 핀테크 스타일) 사양 누적 수록 (+125, -0)
+- **v64**: 가상 사업체(Businesses) 공급망 & B2B 재고 조달 루프 심화, 원재료 조달/재고 보관 용량 확장/수요 모델 연동 및 5대 도메인 혁신 위젯(공급망 변동 차트, 채권 계산기, 하우징 캔버스, 시즌 명예의 전당, 알림 실시간 탭) 아키텍처 수립 (+180, -0)
 - **v63**: 백엔드 코어 성능 최적화 심화 분석(세션 쿼리 중복 제거, 활동 로그 마이크로 배치, 주식 티커 적응형 가변 틱, 아웃박스 92MB 정리, L1 마스터 캐시) 및 아키텍처 조율안 수립 (+150, -0)
 - **v62**: 전 도메인 풀스택 QA(백엔드/프론트엔드/봇) 검증, 프론트엔드 테마 회귀 결함 해소(text-primary-foreground), Next.js Turbopack 최적화 빌드, 테스트 및 운영 서버 무중단 블루-그린 승격(v2026.09.23.389) 및 1,103개 활성 세션 100% 무손실 보존 (+140, -0)
 - **v61**: G368-02 관리자 통제 정합화(TOTP 폐기 반영) 및 G368-03 API 335개 엔드포인트 계약 동기화 (+60, -0)
@@ -2468,6 +2471,188 @@ flowchart TD
    - `delivered_at IS NOT NULL`이며 생성된 지 7일이 지난 처리 완료 이벤트를 일별 단위로 정리하여 테이블 크기를 92MB -> 수백 KB 수준으로 대폭 축소.
 5. **[Core 5] 정적 마스터 데이터(상점/직업/약관) 인메모리 L1 캐시**:
    - 30초~60초 TTL 인메모리 캐시 계층을 두고, 관리자가 수정(Mutation)할 때만 이벤트 기반으로 캐시를 즉시 Flush/Invalidate하는 CQRS 캐시 도입.
+
+---
+
+## 🚀 [v64 Specification] 가상 사업체 공급망 심화 및 5대 도메인 혁신 위젯 구현 명세 (누적 추가)
+
+### 1. 개요 및 배경 (Context & Planning Analysis)
+- **기획서 심층 분석**:
+  - `docs/planning/BUSINESS_OPERATIONS_SUPPLY_CHAIN_SPEC.ko.md` (사업체 운영·공급망 명세)
+  - `docs/planning/BANKING_FINANCIAL_SERVICES_SPEC.ko.md` (은행·가상 채권·저축 포켓 명세)
+  - `docs/planning/PERSONAL_SPACES_CITY_PROJECTS_SPEC.ko.md` (개인 공간·하우징·가구 명세)
+  - `docs/planning/SEASON_SYSTEM_SPEC.ko.md` (시즌 시스템·명예의 전당 명세)
+  - `docs/planning/NOTIFICATION_REACTIVATION_GOVERNANCE_SPEC.ko.md` (알림 거버넌스·Quiet Hours 명세)
+  - `docs/planning/PROJECT_PLAN.ko.md` (Living Project Plan v2026.09.23.388 권위 계약)
+- **사용자 조율 확정 사항 (Interactive Alignment)**:
+  1. **최우선 추진 도메인**: 가상 사업체(Businesses) 공급망 & B2B 재고 조달 루프 심화 (원재료 조달, 재고 보관 용량 업그레이드, 도시/시즌 수요 계수 정산).
+  2. **5대 혁신 위젯 전수 탑재**:
+     - **[공급망]**: 원재료 가격 변동 스파크라인 차트 및 실시간 재고 보관 용량 게이지 위젯 (`SupplyChainStatusWidget`).
+     - **[은행]**: 가상 채권 만기 수익률 인터랙티브 계산기 및 저축 목표 프로그레스 링 (`SavingsGoalProgressRing`).
+     - **[하우징]**: 룸 타일 프리뷰 및 드래그 앤 드롭 인터랙티브 캔버스 에디터 (`SpaceCanvasEditor`).
+     - **[시즌]**: 시즌 1(First Capital) 명예의 전당 및 실시간 랭킹 티커 (`SeasonHallOfFameTicker`).
+     - **[알림]**: 7대 분류 탭형 인앱 알림함 및 원클릭 읽음 정리 바 (`NotificationInboxTabs`).
+  3. **실행 모드**: 자율 실행 모드 (기획서 사양 준수, 테스트 검증, 빌드, 무중단 승격 완결).
+
+---
+
+### 2. 가상 사업체 공급망 심화 아키텍처 다이어그램 (Supply Chain Architecture)
+
+```mermaid
+flowchart TD
+    subgraph Supply_Chain["사업체 공급망 핵심 루프 (BUSINESS_OPERATIONS_SUPPLY_CHAIN_SPEC)"]
+        A[사업체 선택\nKIOSK, CONVENIENCE, WORKSHOP 등] --> B[원재료 조달\nProcurement System]
+        B --> C[재고 보관\nInventory Storage]
+        C --> D[수요 모델 평가\nCity x Season x Category Factor]
+        D --> E[운영 정산\nSettlement & Revenue]
+        E --> F[WLD 원장 소각/순환\nHARD_SINK / TRANSFER / CONVERTER]
+        F --> G[저장 용량 업그레이드\nbase_cost * 1.40^(n-1)]
+        G --> C
+    end
+
+    subgraph Front_Visual["프론트엔드 5대 혁신 위젯"]
+        V1[공급망 변동 차트 & 재고 게이지]
+        V2[은행 가상 채권 계산기 & 저축 링]
+        V3[하우징 캔버스 타일 에디터]
+        V4[시즌 명예의 전당 티커 바]
+        V5[알림 분류 탭 & 원클릭 정리]
+    end
+
+    Supply_Chain -.-> V1
+```
+
+---
+
+### 3. 세부 파일별 변경 및 구현 계획 (Proposed Changes)
+
+#### 1) 백엔드 공급망 & 사업체 심화 (Backend Supply Chain)
+- **`backend/src/business/business.repository.ts`**:
+  - `upgradeStorage(actor, businessId, key)`: 저장 용량 기하급수 업그레이드 로직 및 `SINK_BUSINESS_STORAGE_UPGRADE` 원장 연동.
+  - `procureRawMaterials(actor, businessId, materialCode, quantity, key)`: 원자재 조달 및 재고 할당 트랜잭션.
+  - `getSupplyChainMetrics(actor, businessId)`: 도시/시즌 수요 계수 및 현재 재고 소진율 조회.
+- **`backend/src/business/business.controller.ts`**:
+  - `POST /api/v1/businesses/:id/storage/upgrade`: 저장 용량 업그레이드 API 엔드포인트.
+  - `POST /api/v1/businesses/:id/procure`: 원자재 조달 API 엔드포인트.
+  - `GET /api/v1/businesses/:id/supply-chain`: 공급망 및 원자재 메트릭 엔드포인트.
+
+#### 2) 프론트엔드 공급망 대시보드 & 5대 혁신 위젯 (Frontend Innovation Widgets)
+- **`frontend/src/app/businesses/supply-chain-widget.tsx` [NEW]**:
+  - 원재료 가격 변동 SVG 스파크라인 차트, 품목별 재고 현황 바, 저장 용량 확장 슬라이더 컴포넌트.
+- **`frontend/src/app/bank/savings-progress-ring.tsx` [NEW]**:
+  - SVG 원형 프로그레스 링, 목표 금액 대비 달성률, 만기 수익률 계산 프리셋 칩.
+- **`frontend/src/app/spaces/space-canvas-editor.tsx` [NEW]**:
+  - 8x8 타일 그리드 룸 뷰어, 가구/장식 배치 인터랙티브 시각화, 테마 앰비언트 글로우.
+- **`frontend/src/app/seasons/hall-of-fame-ticker.tsx` [NEW]**:
+  - 시즌 1 개척자 명예의 전당, 티커 애니메이션, 랭킹 변동 실시간 시각화.
+- **`frontend/src/app/account/notifications/notification-tabs-bar.tsx` [NEW]**:
+  - 7대 분류(보안, 거래, 운영, 활동, 시즌, 복귀, 마케팅) 필터링 탭, 원클릭 일괄 읽음 처리.
+
+---
+
+### 4. 검증 계획 (Verification Plan)
+1. **단위 및 통합 테스트**:
+   - `pnpm --filter @moneyverse/backend test src/business/`
+   - `pnpm --filter @moneyverse/frontend test`
+2. **풀스택 빌드 무결성**:
+   - `nest build`
+   - `next build` (Turbopack, `BUILD_ID` 전달)
+3. **무중단 블루-그린 승격**:
+   - 테스트 서버 (`https://test.easy-scraping.com/`) 배포 및 14개 라우트 검증
+   - 운영 서버 (`https://easy-scraping.com/`) 무중단 배포 및 활성 사용자 세션 100% 보존 실측
+
+---
+
+## 🚀 [v65 Specification] 가상 사업체 공급망 2차 심화 결정 사양 및 정밀 아키텍처 (누적 추가)
+
+### 1. 2차 조율 확정 사항 요약 (Confirmed Architecture Decisions)
+1. **[원자재 조달] 하이브리드 조달 모델 (Hybrid Procurement)**:
+   - **Phase 1 (시스템 조달)**: 시스템 도매처(NPC/도매상)에서 WLD 결제 시 전액 영구 소각(`SINK_BUSINESS_PROCUREMENT` 원장 분류, Hard Sink).
+   - **Phase 2 (플레이어 마켓)**: 유저 거래소(`marketplace`)에 등록된 제작 재료를 직접 B2B 납품받는 계약(Transfer) 병행 지원.
+2. **[저장 용량 업그레이드] 기획서 표준 지수형 비용 모델**:
+   - 공식: `storage_upgrade_cost(n) = base_cost * 1.40^(n-1)`
+   - 원장 분류: `SINK_BUSINESS_STORAGE_UPGRADE` (Hard Sink).
+   - 초기 기본 비용: 키오스크(6,000 WLD), 편의점(20,000 WLD), 작업장(30,000 WLD), 운송회사(50,000 WLD).
+3. **[수요 모델] 일일 04:00 KST 리셋 & 1시간 완만 갱신**:
+   - 공식: `effective_demand = base_demand * city_factor * season_factor * category_factor * service_factor`
+   - 매일 새벽 4시 도시/시즌 거시 지표 재계산, 매시간 잔여 수요 및 판매 회전율 완만 갱신.
+4. **[복귀자 보호] 최대 30일 유지비 상한 캡 & 자동 휴업(PAUSED)**:
+   - 미접속 7일 경과 시 사업체 자동 `PAUSED` 전환, 누적 유지비는 최대 30일치로 캡핑하여 파산 방지.
+5. **[비주얼 스타일] 토스·Stripe 핀테크 디자인**:
+   - 다크/라이트 적응형 서피스, 앰비언트 글로우, 부드러운 SVG 곡선 차트, 44px 모바일 터치 타깃.
+
+---
+
+### 2. 사업체 생명주기 및 복귀자 보호 상태머신 (State Machine Diagram)
+
+```mermaid
+stateDiagram-v2
+    [*] --> REGISTERED: 창설/구매
+    REGISTERED --> ACTIVE: 원자재 조달 & 운영 개시
+    ACTIVE --> ACTIVE: 일일 수요 정산 & 재투자
+    ACTIVE --> PAUSED: 사용자 수동 일시정지
+    ACTIVE --> PAUSED: 7일 미접속 시 자동 휴업 (유지비 30일 캡)
+    PAUSED --> ACTIVE: 복귀자 원클릭 재개 (체납 유지비 납부)
+    ACTIVE --> RENOVATING: 저장공간 확장 / 지점 증설
+    RENOVATING --> ACTIVE: 업그레이드 완료
+    PAUSED --> CLOSED: 폐업 신청
+    ACTIVE --> CLOSED: 사업체 매각/폐업
+    CLOSED --> [*]
+```
+
+---
+
+### 3. 세부 DB 스키마 및 마이그레이션 확장 설계
+- **`business_inventory`**:
+  - `business_id` (UUID), `material_code` (text), `quantity` (bigint), `reserved_quantity` (bigint), `avg_acquisition_cost` (numeric), `storage_capacity` (bigint), `storage_level` (integer).
+- **`business_supply_demand_snapshots`**:
+  - `business_type` (text), `city_factor` (numeric), `season_factor` (numeric), `effective_demand` (numeric), `snapshot_date` (date), `hour` (integer).
+
+---
+
+## 🚀 [v66 Specification] 3차 심화 최종 확정 사양 및 즉시 구현 액션 플랜 (누적 추가)
+
+### 1. 3차 조율 최종 확정 사양 요약 (Final Decisions)
+1. **[신선도 감가상각] 선택적 72시간 신선도 감가 (Selective Decay)**:
+   - 신선도 민감 품목(편의점 `CONVENIENCE`, 농장 `ORGANIC_FARM`)에 한해 72시간 경과 시 신선도 10~20% 감가상각 적용하여 재고 회전 촉진.
+   - 공산품 및 부품(키오스크, 수리점, 작업장, 스튜디오 등)은 무기한 영구 보관.
+2. **[B2B 거래소 수수료] 기획서 표준 2% WLD Hard Sink 소각**:
+   - 플레이어 간 원자재 B2B 납품 거래 성사 시 판매자 수령액에서 2% WLD를 영구 소각(`SINK_B2B_TRADE_FEE`).
+3. **[용량 초과 정책] 엄격 차단 (Fail-Closed Enforcement)**:
+   - 창고 저장 용량 도달 시 신규 조달을 즉시 차단하여 안전한 창고 확장 유도 (`STORAGE_CAPACITY_EXCEEDED`).
+4. **[화면 배치 레이아웃] 메인 상단 앰비언트 히어로 카드 (Hero Ambient Placement)**:
+   - 5대 도메인 메인 페이지 최상단에 앰비언트 글로우가 적용된 비주얼 헤어로 위젯 배치.
+5. **[정산 피드백] 토스풍 샴페인 골드 축하 파티클 & 영수증 슬라이드업**:
+   - 일괄 정산 및 조달 완료 시 화려하고 절제된 파티클 연출과 함께 세후 실수령액/소각세 명시 영수증 모달 슬라이드업.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan] 최종 통합 구현 명세
+
+### Proposed Changes (파일별 상세 변경점)
+1. **`backend/src/business/business.service.ts` & `business.repository.ts`**:
+   - 저장 용량 업그레이드 (`upgradeStorage`): `base_cost * 1.40^(n-1)` 공식 계산 및 소각.
+   - 원자재 조달 (`procureMaterials`): 시스템 NPC 조달 트랜잭션, Fail-Closed 용량 검사.
+   - 공급망 지표 조회 (`getSupplyChainOverview`): 도시 계수, 시즌 계수, 실시간 재고율 산출.
+2. **`frontend/src/app/businesses/supply-chain-widget.tsx` [NEW]**:
+   - 토스풍 핀테크 카드, 원재료 가격 변동 SVG 스파크라인 차트, 품목별 재고 바, 저장 용량 확장 모달.
+3. **`frontend/src/app/bank/savings-progress-ring.tsx` [NEW]**:
+   - SVG 원형 프로그레스 링, 저축 목표 달성률 시각화, 만기 채권 계산 인터랙션.
+4. **`frontend/src/app/spaces/space-canvas-editor.tsx` [NEW]**:
+   - 8x8 타일 그리드 룸 뷰어, 가구 드래그 앤 프리뷰 캔버스.
+5. **`frontend/src/app/seasons/hall-of-fame-ticker.tsx` [NEW]**:
+   - 시즌 1 개척자 명예의 전당, 실시간 랭킹 티커 바.
+6. **`frontend/src/app/account/notifications/notification-tabs-bar.tsx` [NEW]**:
+   - 7대 알림 분류 탭, 원클릭 일괄 읽음 처리.
+7. **각 도메인 메인 페이지 연동**:
+   - `/businesses/page.tsx`, `/bank/page.tsx`, `/spaces/page.tsx`, `/seasons/page.tsx`, `/account/notifications/page.tsx` 상단 배치.
+
+### Verification Plan (검증 및 승격 계획)
+- **백엔드/프론트엔드 테스트**: `pnpm --filter @moneyverse/backend test`, `pnpm --filter @moneyverse/frontend test` 100% 통과.
+- **프로덕션 빌드**: `nest build`, `next build` 성공.
+- **무중단 승격**: `host-blue-green-promote.sh` (Test -> Production), 활성 세션(916+개) 무손실 보존.
+
+
+
 
 
 
