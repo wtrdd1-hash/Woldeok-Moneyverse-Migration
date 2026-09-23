@@ -3,7 +3,7 @@
 **English canonical** | [한국어](INDEX.ko.md)
 
 > Documentation governance: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)
-> Current planning authority: v2026.09.23.404
+> Current planning authority: v2026.09.23.405
 
 ## Start here
 

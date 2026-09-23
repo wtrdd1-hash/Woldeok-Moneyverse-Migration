@@ -2,11 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.404
+> Current integrated version: v2026.09.23.405
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Runtime hygiene inventory — v2026.09.23.405 (2026-09-23)
+
+- Protected current DB authorities are Production `127.0.0.1:5433/woldeok_moneyverse_dev` and Test `127.0.0.1:5585/woldeok_moneyverse_ci`, proven from backend environment plus active TCP connections.
+- Four stale container objects were removed after reference/state checks: `mv-b280-pg`, `mv-ci315`, `mv-ci315b`, `wdmv-v127-fulltest-db`. Volumes were preserved.
+- Remaining QA/recovery database containers are retain-until-classified. Age/name/no-current-connection alone is insufficient deletion proof.
+- G405-01 / P1: wildcard DB host binds were observed on Production 5433 and QA 55432/55433/55555/56555. Treat this as bind-exposure review until firewall/network reachability is independently verified.
+- Do not change Production 5433 without session/backend continuity, backup and rollback evidence. QA bind tightening requires owner/workstream confirmation.
+- Container removal and volume deletion are separate operations; broad volume pruning is prohibited on the current host.
+- Canonical inventory: `docs/operations/RUNTIME_HYGIENE_INVENTORY.md` / `.ko.md`.
+- Scope truth: v405 performed limited safe container-object cleanup and documentation only; no Production restart, migration or promotion.
 
 ## Current runtime / OS baseline — v2026.09.23.404 (2026-09-23)
 
