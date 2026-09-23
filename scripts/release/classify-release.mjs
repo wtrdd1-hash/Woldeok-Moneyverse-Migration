@@ -5,18 +5,30 @@ import { execFileSync } from 'node:child_process';
 import { appendFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import process from 'node:process';
+import { pathToFileURL } from 'node:url';
 
 export const CLASSIFIER_VERSION = 'release-path-v1';
 
-const DOC_PATHS = [/^docs\//, /^README(?:-KO)?\.md$/, /^README\//, /^AGENTS\.md$/, /^LICENSE$/];
+const DOC_PATHS = [
+  /^docs\//,
+  /^README(?:-KO)?\.md$/,
+  /^README\//,
+  /^AGENTS\.md$/,
+  /^LICENSE$/,
+  /^PROJECT_MEMORY\.md$/,
+  /^implementation_plan\.md$/,
+  /^walkthrough\.md$/,
+  /^API_DOCUMENTATION\.md$/,
+  /^[^/]+\.md$/,
+];
 
 const CONTROL_PATHS = [
   /^\.github\//,
   /^ops\//,
   /^deploy\//,
-  /^scripts\/release\//,
-  /^scripts\/backup\//,
-  /^scripts\/audit-[^/]+\.mjs$/,
+  /^scripts\//,
+  /^(?:promote|stage)_[^/]+\.sh$/,
+  /^capture_[^/]+\.js$/,
   /^\.editorconfig$/,
   /^\.gitignore$/,
   /^\.prettierrc\.json$/,
@@ -54,9 +66,9 @@ const CONTROL_GIT_PATHS = [
   '.github',
   'ops',
   'deploy',
-  'scripts/release',
-  'scripts/backup',
-  'scripts/audit-backend-api-completeness.mjs',
+  'scripts',
+  'promote_*.sh',
+  'stage_*.sh',
   '.editorconfig',
   '.gitignore',
   '.prettierrc.json',
@@ -174,7 +186,12 @@ function emitGitHubOutputs(input, outputPath) {
   appendFileSync(outputPath, `${lines.join('\n')}\n`, 'utf8');
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+const isMain =
+  Boolean(process.argv[1]) &&
+  (import.meta.url === `file://${process.argv[1]}` ||
+    import.meta.url === pathToFileURL(resolve(process.argv[1])).href);
+
+if (isMain) {
   try {
     const args = parseArgs(process.argv.slice(2));
     if (!args.base || !args.head) {

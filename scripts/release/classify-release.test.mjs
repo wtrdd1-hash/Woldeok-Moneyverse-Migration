@@ -45,9 +45,31 @@ test('application paths are runtime relevant even with documentation', () => {
   );
 });
 
+test('root markdown documents are classified as documentation only', () => {
+  assert.equal(
+    classifyPaths(['PROJECT_MEMORY.md', 'walkthrough.md', 'implementation_plan.md']),
+    'DOCS_ONLY',
+  );
+});
+
+test('staging and promotion scripts are release control plane', () => {
+  assert.equal(
+    classifyPaths(['promote_v406.sh', 'stage_v406.sh', 'scripts/qa-live-ai-news.ts']),
+    'CONTROL_PLANE_ONLY',
+  );
+});
+
 test('application plus release-control changes are mixed', () => {
   assert.equal(
     classifyPaths(['frontend/src/app/page.tsx', '.github/workflows/test-candidate.yml']),
+    'MIXED',
+  );
+  assert.equal(
+    classifyPaths([
+      'PROJECT_MEMORY.md',
+      'frontend/src/app/stocks/market-sentiment-gauge.test.ts',
+      'promote_v406.sh',
+    ]),
     'MIXED',
   );
 });
