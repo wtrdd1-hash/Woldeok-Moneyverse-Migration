@@ -662,6 +662,20 @@ export interface AdminTreasuryLedger {
   readonly created_at: string;
 }
 
+export interface AdminTreasuryBudgetEnvelope {
+  readonly budget_id: string;
+  readonly category: string;
+  readonly category_ko: string;
+  readonly description: string;
+  readonly allocated_wld: string;
+  readonly committed_wld: string;
+  readonly settled_wld: string;
+  readonly remaining_wld: string;
+  readonly priority: number;
+  readonly auto_spend_allowed: boolean;
+  readonly status: 'ACTIVE' | 'DEPLETED' | 'PAUSED';
+}
+
 export interface AdminTreasuryOverview {
   readonly vaults: readonly AdminTreasuryVault[];
   readonly total_treasury_wld: string;
@@ -671,6 +685,7 @@ export interface AdminTreasuryOverview {
   readonly reserve_wld?: string;
   readonly coverage_days?: number;
   readonly tax_rates?: readonly AdminTreasuryTaxRate[];
+  readonly budgets?: readonly AdminTreasuryBudgetEnvelope[];
   readonly stats_24h: {
     readonly injected_wld: string;
     readonly absorbed_wld: string;

@@ -204,7 +204,79 @@ export function TreasuryView({ overview, ledger }: Props) {
         </Card>
       )}
 
-      {/* 4. 금고별 상세 현황 */}
+      {/* 4. 국고 목적별 예산 배정 체계 (Budget Envelopes) */}
+      {overview.budgets && overview.budgets.length > 0 && (
+        <Card className="border shadow-sm">
+          <CardHeader className="p-4 sm:p-6">
+            <CardTitle className="text-base font-semibold">국고 목적별 예산 배정 체계 (Treasury Budget Envelopes)</CardTitle>
+            <CardDescription className="text-xs text-muted-foreground">
+              국고 지출은 반드시 목적별 예산과 연결되며, 예산 부족 시 하위 우선순위부터 차단됩니다 (기획서 §7 준용).
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6 pt-0">
+            <div className="overflow-x-auto">
+              <Table className="min-w-[640px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[80px]">우선순위</TableHead>
+                    <TableHead className="w-[180px]">예산 분류</TableHead>
+                    <TableHead>사용 목적 및 감사 가이드</TableHead>
+                    <TableHead className="text-right w-[110px]">총 배정액</TableHead>
+                    <TableHead className="text-right w-[110px]">예약액</TableHead>
+                    <TableHead className="text-right w-[110px]">집행액</TableHead>
+                    <TableHead className="text-right w-[110px]">잔여액</TableHead>
+                    <TableHead className="text-center w-[90px]">자동 지출</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {overview.budgets.map((b) => (
+                    <TableRow key={b.budget_id}>
+                      <TableCell>
+                        <Badge
+                          variant={b.priority <= 2 ? 'default' : 'outline'}
+                          className={`text-[10px] ${b.priority <= 2 ? 'bg-primary' : ''}`}
+                        >
+                          P{b.priority}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium text-xs">
+                        <div>{b.category_ko}</div>
+                        <div className="text-[10px] text-muted-foreground font-mono">{b.category}</div>
+                      </TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{b.description}</TableCell>
+                      <TableCell className="text-right font-mono text-xs">
+                        {groupDigits(b.allocated_wld)} WLD
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-xs text-muted-foreground">
+                        {groupDigits(b.committed_wld)} WLD
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-xs text-amber-600">
+                        {groupDigits(b.settled_wld)} WLD
+                      </TableCell>
+                      <TableCell className="text-right font-mono font-semibold text-xs text-emerald-600">
+                        {groupDigits(b.remaining_wld)} WLD
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {b.auto_spend_allowed ? (
+                          <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-600/30">
+                            허용
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-[10px] text-muted-foreground">
+                            수동승인
+                          </Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 5. 금고별 상세 현황 */}
       <div className="grid gap-4 sm:grid-cols-2">
         {overview.vaults.map((vault) => (
           <Card key={vault.code} className="border shadow-sm">
@@ -226,10 +298,10 @@ export function TreasuryView({ overview, ledger }: Props) {
         ))}
       </div>
 
-      {/* 5. 자금 긴급 제어 (Step-Up Guard) */}
+      {/* 6. 자금 긴급 제어 (Step-Up Guard) */}
       <TreasuryOperationsDialog vaults={overview.vaults} />
 
-      {/* 6. 실시간 국고 회계 감사 원장 (Ledger Table) */}
+      {/* 7. 실시간 국고 회계 감사 원장 (Ledger Table) */}
       <Card className="border shadow-sm">
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="text-base font-semibold">국고 회계 감사 원장 (Authoritative Audit Ledger)</CardTitle>

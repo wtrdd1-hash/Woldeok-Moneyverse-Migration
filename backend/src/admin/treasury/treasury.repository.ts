@@ -163,6 +163,153 @@ export const AUTHORITATIVE_TAX_RATES: readonly TreasuryTaxRateItem[] = [
   },
 ];
 
+export interface TreasuryBudgetEnvelope {
+  readonly budget_id: string;
+  readonly category: string;
+  readonly category_ko: string;
+  readonly description: string;
+  readonly allocated_wld: string;
+  readonly committed_wld: string;
+  readonly settled_wld: string;
+  readonly remaining_wld: string;
+  readonly priority: number;
+  readonly auto_spend_allowed: boolean;
+  readonly status: 'ACTIVE' | 'DEPLETED' | 'PAUSED';
+}
+
+export const AUTHORITATIVE_BUDGET_ENVELOPES: readonly TreasuryBudgetEnvelope[] = [
+  {
+    budget_id: 'BUDGET_ESSENTIAL_REFUND',
+    category: 'ESSENTIAL_REFUND',
+    category_ko: '필수 정산·환불·복구',
+    description: '시스템 오류, 이중결제, 잘못된 차감 복구 및 법적 의무 정산',
+    allocated_wld: '20000000',
+    committed_wld: '0',
+    settled_wld: '0',
+    remaining_wld: '20000000',
+    priority: 1,
+    auto_spend_allowed: true,
+    status: 'ACTIVE',
+  },
+  {
+    budget_id: 'BUDGET_REWARD_POOL',
+    category: 'REWARD_POOL',
+    category_ko: '보상 재원 풀',
+    description: '이벤트·퀘스트 중 국고 재원으로 명시된 보상 집행 풀',
+    allocated_wld: '15000000',
+    committed_wld: '0',
+    settled_wld: '0',
+    remaining_wld: '15000000',
+    priority: 2,
+    auto_spend_allowed: true,
+    status: 'ACTIVE',
+  },
+  {
+    budget_id: 'BUDGET_NEW_USER_SUPPORT',
+    category: 'NEW_USER_SUPPORT',
+    category_ko: '신규 유저 지원 완충',
+    description: '신규 가입자 초기 온보딩 및 스타터 정착 완충 보조',
+    allocated_wld: '10000000',
+    committed_wld: '0',
+    settled_wld: '0',
+    remaining_wld: '10000000',
+    priority: 3,
+    auto_spend_allowed: true,
+    status: 'ACTIVE',
+  },
+  {
+    budget_id: 'BUDGET_RETURNING_USER_SUPPORT',
+    category: 'RETURNING_USER_SUPPORT',
+    category_ko: '복귀 유저 지원 완충',
+    description: '휴면 및 장기 미접속 복귀자 인플레이션 캐치업 보조',
+    allocated_wld: '10000000',
+    committed_wld: '0',
+    settled_wld: '0',
+    remaining_wld: '10000000',
+    priority: 4,
+    auto_spend_allowed: true,
+    status: 'ACTIVE',
+  },
+  {
+    budget_id: 'BUDGET_BUSINESS_STABILIZATION',
+    category: 'BUSINESS_STABILIZATION',
+    category_ko: '사업체 운영 안정화',
+    description: '경기 침체 시 플레이어 사업체 한시적 운영비 지원',
+    allocated_wld: '10000000',
+    committed_wld: '0',
+    settled_wld: '0',
+    remaining_wld: '10000000',
+    priority: 5,
+    auto_spend_allowed: false,
+    status: 'ACTIVE',
+  },
+  {
+    budget_id: 'BUDGET_MARKET_STABILIZATION',
+    category: 'MARKET_STABILIZATION',
+    category_ko: '시장 거래 안정화',
+    description: '거래소 유동성 경색 및 극단적 공급 불균형 시장 개입',
+    allocated_wld: '10000000',
+    committed_wld: '0',
+    settled_wld: '0',
+    remaining_wld: '10000000',
+    priority: 6,
+    auto_spend_allowed: false,
+    status: 'ACTIVE',
+  },
+  {
+    budget_id: 'BUDGET_CITY_COMMUNITY',
+    category: 'CITY_COMMUNITY',
+    category_ko: '도시·커뮤니티 프로젝트',
+    description: '공공성 콘텐츠 및 협동 프로젝트 목표 달성 국고 보조',
+    allocated_wld: '8000000',
+    committed_wld: '0',
+    settled_wld: '0',
+    remaining_wld: '8000000',
+    priority: 7,
+    auto_spend_allowed: false,
+    status: 'ACTIVE',
+  },
+  {
+    budget_id: 'BUDGET_SEASON_EVENT',
+    category: 'SEASON_EVENT',
+    category_ko: '시즌·라이브옵스 이벤트',
+    description: '정기 시즌 보상 및 분기별 라이브옵스 사전 배정 예산',
+    allocated_wld: '7000000',
+    committed_wld: '0',
+    settled_wld: '0',
+    remaining_wld: '7000000',
+    priority: 8,
+    auto_spend_allowed: false,
+    status: 'ACTIVE',
+  },
+  {
+    budget_id: 'BUDGET_INCIDENT_RESPONSE',
+    category: 'INCIDENT_RESPONSE',
+    category_ko: '인시던트 긴급 대응',
+    description: '서버 장애, 데이터 롤백 및 외부 요인 긴급 보상',
+    allocated_wld: '5000000',
+    committed_wld: '0',
+    settled_wld: '0',
+    remaining_wld: '5000000',
+    priority: 9,
+    auto_spend_allowed: false,
+    status: 'ACTIVE',
+  },
+  {
+    budget_id: 'BUDGET_ADMIN_CORRECTION',
+    category: 'ADMIN_CORRECTION',
+    category_ko: '관리자 최종 회계 보정',
+    description: '원장 대사 오차 및 회계오류 조정을 위한 최후 수단',
+    allocated_wld: '5000000',
+    committed_wld: '0',
+    settled_wld: '0',
+    remaining_wld: '5000000',
+    priority: 10,
+    auto_spend_allowed: false,
+    status: 'ACTIVE',
+  },
+];
+
 export interface TreasuryOverview {
   vaults: TreasuryVaultRow[];
   total_treasury_wld: string;
@@ -172,6 +319,7 @@ export interface TreasuryOverview {
   reserve_wld: string;
   coverage_days: number;
   tax_rates: readonly TreasuryTaxRateItem[];
+  budgets: readonly TreasuryBudgetEnvelope[];
   stats_24h: {
     injected_wld: string;
     absorbed_wld: string;
@@ -278,6 +426,7 @@ export class TreasuryRepository {
       reserve_wld: reserveVaultWld.toString(),
       coverage_days: coverageDays,
       tax_rates: AUTHORITATIVE_TAX_RATES,
+      budgets: AUTHORITATIVE_BUDGET_ENVELOPES,
       stats_24h: {
         injected_wld: injected,
         absorbed_wld: absorbed,
@@ -289,6 +438,10 @@ export class TreasuryRepository {
 
   getTaxRates(): readonly TreasuryTaxRateItem[] {
     return AUTHORITATIVE_TAX_RATES;
+  }
+
+  getBudgets(): readonly TreasuryBudgetEnvelope[] {
+    return AUTHORITATIVE_BUDGET_ENVELOPES;
   }
 
   async listTransactions(limit = 30, cursor?: string): Promise<{ items: TreasuryLedgerRow[]; next_cursor: string | null }> {

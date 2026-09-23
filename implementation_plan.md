@@ -2795,3 +2795,45 @@ pm test).
 4. 테스트 서버(test.easy-scraping.com) 및 운영 서버(easy-scraping.com) 무중단 블루-그린 배포 승격
 5. exact-SHA 검증, 16개 핵심 엔드포인트 200 OK 및 1,203+ 활성 유저 세션 보존 검증
 6. 작업 feature 브랜치 안전 삭제
+
+---
+
+## 🚀 [v72 Specification] 국고 목적별 10대 예산 배정 체계 (Budget Envelopes) 및 우선순위 지출 거버넌스 완결 (ADMIN_TREASURY_MANAGEMENT_SPEC §6, §7, §13) (v2026.09.24.429)
+
+### 1. 📌 요구사항 분석 및 자율 확정 사양
+사용자의 전권 자율 실행 지시 및 기획서 전수 조회(`docs/planning/ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md` §6, §7, §13)에 따라, 국고 10대 목적별 예산 배정 체계 및 지출 거버넌스 엔진을 전수 완결 구현:
+1. **[국고 목적별 10대 예산 분류 체계 (AUTHORITATIVE_BUDGET_ENVELOPES)]**:
+   - `TreasuryBudgetEnvelope` 및 `AUTHORITATIVE_BUDGET_ENVELOPES` 10대 전 예산 분류 정의:
+     * `ESSENTIAL_REFUND` (우선순위 P1, 필수 정산·환불·복구, 자동지출 허용)
+     * `REWARD_POOL` (우선순위 P2, 보상 재원 풀, 자동지출 허용)
+     * `NEW_USER_SUPPORT` (우선순위 P3, 신규 유저 지원 완충, 자동지출 허용)
+     * `RETURNING_USER_SUPPORT` (우선순위 P4, 복귀 유저 지원 완충, 자동지출 허용)
+     * `BUSINESS_STABILIZATION` (우선순위 P5, 사업체 운영 안정화, 수동 승인)
+     * `MARKET_STABILIZATION` (우선순위 P6, 시장 거래 유동성 안정화, 수동 승인)
+     * `CITY_COMMUNITY` (우선순위 P7, 도시·커뮤니티 프로젝트 보조, 수동 승인)
+     * `SEASON_EVENT` (우선순위 P8, 시즌·라이브옵스 이벤트 사전 배정, 수동 승인)
+     * `INCIDENT_RESPONSE` (우선순위 P9, 인시던트 및 장애 긴급 대응, 수동 승인)
+     * `ADMIN_CORRECTION` (우선순위 P10, 관리자 최종 회계 보정 최후 수단, 수동 승인)
+   - 전용 REST API 엔드포인트 `GET /api/v1/admin/treasury/budgets` 신설 및 `GET /api/v1/admin/treasury/overview` 확장 연동.
+2. **[우선순위 기반 지출 보호 및 잠식 방지 거버넌스 규칙]**:
+   - 예산 부족 시 하위 우선순위 지출(이벤트, 보조금 등)부터 순차 차단.
+   - 필수 환불/복구 예산(`ESSENTIAL_REFUND`)을 하위 이벤트 예산이 절대 잠식할 수 없도록 격리.
+3. **[관리자 국고 관제 대시보드 UI 고도화 (`treasury-view.tsx` & `types.ts`)]**:
+   - 국고 목적별 예산 배정 체계 (Treasury Budget Envelopes) 전용 테이블 렌더링.
+   - 우선순위 배지 (P1~P10), 총 배정액, 예약액, 집행액, 잔여액 및 자동 지출 허용 여부 시각화.
+
+### 2. 📁 대상 파일 목록
+- [MODIFY] backend/src/admin/treasury/treasury.repository.ts: TreasuryBudgetEnvelope 인터페이스 및 10대 예산 상수/getBudgets 구현
+- [MODIFY] backend/src/admin/treasury/treasury.service.ts: getBudgets 메서드 위임 추가
+- [MODIFY] backend/src/admin/treasury/treasury.controller.ts: GET admin/treasury/budgets 엔드포인트 추가
+- [MODIFY] backend/src/admin/treasury/treasury.service.test.ts: getBudgets 위임 단위 테스트 추가
+- [MODIFY] frontend/src/app/admin/types.ts: AdminTreasuryBudgetEnvelope 인터페이스 및 AdminTreasuryOverview 확장
+- [MODIFY] frontend/src/app/admin/treasury/treasury-view.tsx: 목적별 예산 배정 체계 테이블 렌더링
+
+### 3. 🔍 검증 계획
+1. 백엔드 국고 단위 테스트 검증: vitest / pnpm test pass
+2. 프론트엔드 및 백엔드 타입체크/린트/빌드 검증: 0 errors
+3. Git commit & feature 브랜치 -> main 브랜치 머지 및 push
+4. 테스트 서버(test.easy-scraping.com) 및 운영 서버(easy-scraping.com) 무중단 블루-그린 배포 승격
+5. exact-SHA 검증, 17개 핵심 엔드포인트 200 OK 및 1,208+ 활성 유저 세션 보존 검증
+6. 작업 feature 브랜치 안전 삭제

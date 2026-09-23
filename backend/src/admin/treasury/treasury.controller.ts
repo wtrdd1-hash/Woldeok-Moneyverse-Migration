@@ -61,6 +61,12 @@ export class AdminTreasuryController {
     return this.service.getTaxRates();
   }
 
+  @Get('budgets')
+  @ApiOperation({ summary: '국고 목적별 예산 배정 체계 및 소진 현황 조회' })
+  async getBudgets() {
+    return this.service.getBudgets();
+  }
+
   @Get('transactions')
   @ApiOperation({ summary: '국고 원장 입출금 및 순환 감사 내역 조회' })
   async listTransactions(@Query() query: TreasuryListQueryDto) {

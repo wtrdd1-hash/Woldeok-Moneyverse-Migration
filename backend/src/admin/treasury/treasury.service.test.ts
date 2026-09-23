@@ -6,6 +6,7 @@ describe('TreasuryService', () => {
   const mockRepo = {
     getOverview: vi.fn(),
     getTaxRates: vi.fn(),
+    getBudgets: vi.fn(),
     listTransactions: vi.fn(),
     injectFunds: vi.fn(),
     absorbFunds: vi.fn(),
@@ -22,6 +23,17 @@ describe('TreasuryService', () => {
     const rates = service.getTaxRates();
     expect(rates).toEqual(mockRates);
     expect(mockRepo.getTaxRates).toHaveBeenCalled();
+  });
+
+  it('delegates getBudgets to repository', () => {
+    const mockBudgets = [
+      { budget_id: 'BUDGET_ESSENTIAL_REFUND', category: 'ESSENTIAL_REFUND', priority: 1 }
+    ];
+    vi.mocked(mockRepo.getBudgets).mockReturnValueOnce(mockBudgets as any);
+
+    const budgets = service.getBudgets();
+    expect(budgets).toEqual(mockBudgets);
+    expect(mockRepo.getBudgets).toHaveBeenCalled();
   });
 
   it('delegates getOverview to repository and returns liquidity and tax schedule fields', async () => {

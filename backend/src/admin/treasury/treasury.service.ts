@@ -15,6 +15,10 @@ export class TreasuryService {
     return this.repository.getTaxRates();
   }
 
+  getBudgets() {
+    return this.repository.getBudgets();
+  }
+
   async listTransactions(limit = 30, cursor?: string) {
     return this.repository.listTransactions(limit, cursor);
   }
