@@ -45,6 +45,13 @@
 
 # Update Log
 
+## v2026.09.23.392 — Global search catalogue integration
+
+- Branch: `auto/hourly-c-global-search-v2026.09.23.392`.
+- English canonical: Global search now queries the authoritative public shop catalogue in addition to navigation destinations, limits catalogue matches to six, preserves noindex, and exposes mobile-sized result actions with an ARIA live result region.
+- Korean secondary: 통합 검색이 화면 경로뿐 아니라 authoritative 공개 상점 카탈로그도 조회하며, 결과를 6개로 제한하고 noindex·모바일 터치 영역·ARIA live 결과 영역을 유지합니다.
+- Validation: focused search tests 7/7, frontend suite 103 files / 750 tests, frontend typecheck, changed-file ESLint, contract build, Next.js production build, and `git diff --check`. Repository-wide lint has unrelated pre-existing failures on the current main baseline and is not claimed green.
+
 ## v2026.09.23.390 — QA branch lifecycle cleanup hardening
 
 - Branch: `fix/qa-branch-cleanup-v2026.09.23.390`.
