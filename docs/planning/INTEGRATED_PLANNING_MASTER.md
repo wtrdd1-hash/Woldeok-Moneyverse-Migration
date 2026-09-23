@@ -1,11 +1,19 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.23.388
+> Current ledger version: v2026.09.23.396
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.23.396 — 2026-09-23
+- Baseline: `origin/main=5762e7bc685dc8d75ce6e672a6cef1dcc9b03ee4`; latest merged release record on main is v393 while authoritative planning had remained v388, so this cycle restores planning authority without claiming runtime deployment.
+- Added P0 authentication/session-continuity invariant: server/service restart, application update, blue-green cutover, proxy reload, or rollback must not log out otherwise-valid users merely because runtime generation changes.
+- Required deployment-independent session authority, stable/overlapped signing/encryption keys, cookie/schema compatibility, pre/post authenticated continuity sampling, 401/403/session-store telemetry, and stop/rollback on deployment-caused logout.
+- Explicitly prohibited blanket session-store truncation/global invalidation/key replacement without overlap as deployment mechanics; security/user/admin/expiry-driven revocation remains allowed.
+- Acceptance requires automated restart/cutover regression evidence on Test before Production eligibility.
+- EN/KO parity: complete. Planning/docs only; no new runtime deployment claim.
 
 ## v2026.09.23.388 — 2026-09-23
 - Start/Integrated SHA: `bb832b69ee56b9ab247eda24b7b20f76ea44ffb4` (23 unmerged Step-Up PRs and PR #685 fully integrated into main).
