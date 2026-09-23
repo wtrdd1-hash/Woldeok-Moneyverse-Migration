@@ -2,11 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.405
+> Current integrated version: v2026.09.23.406
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## 6-Domain Defect Mitigation & Real-Time/Fintech/Security Architecture Spec — v2026.09.23.406 (2026-09-23)
+
+- **P0 LOB WebSocket Monotonic Sequence Gap Recovery (Stocks):** All tick/orderbook broadcasts must carry a monotonic `sequence_id`. On detecting `incoming_seq > last_seq + 1`, clients must discard local state and trigger automatic REST full snapshot resynchronization.
+- **P1 KRX 7-Tier Discrete Tick Size (Stocks):** Discrete price steps (1 WLD to 1,000 WLD) are enforced across extreme price ranges (53 WLD to 8.99M WLD).
+- **P0 2% Market Transaction Tax & Automated GE Item Sink (Economy):** Combats hyperinflation and item devaluation via a 2% transaction tax (500k WLD cap); 50% is permanently burnt and 50% funds Treasury buybacks of floor-price items for permanent destruction.
+- **P0 Client UUID Idempotency & Cursor-Based Pagination (1-on-1 Chat):** Eliminates double-send issues via `(conversation_id, client_message_id)` and prevents message skipping during active conversations via strict `id < cursor` queries.
+- **P0 Aave Kinked Jump Rate Model & 20% Statutory Reserve Buffer (Banking):** Prevents bank runs via steep penalty rates (up to 48%) when loan utilization $U > 80\%$, freezing a mandatory 20% reserve buffer for guaranteed withdrawals.
+- **P1 7-Day Grace Period Dual-Key Overlap Rotation (Auth):** Guarantees zero session invalidation during secret rotation and zero-downtime blue-green promotions.
+- **P1 44px Minimum Touch Target & Safe Area Bottom Insets (UX):** Enforces Apple HIG / WCAG 2.2 AA compliance across 320px to 1280px+ viewports.
+- **Authoritative Spec:** [deltas/v2026.09.23.406.md](deltas/v2026.09.23.406.md).
 
 ## Runtime hygiene inventory — v2026.09.23.405 (2026-09-23)
 

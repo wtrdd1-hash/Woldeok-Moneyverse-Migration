@@ -1,11 +1,24 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.23.405
+> Current ledger version: v2026.09.23.406
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.23.406 — 2026-09-23
+- Conducted exhaustive cross-reference research across academic papers, fintech architectures, and virtual economy mechanisms to formalize mitigation specs for 6 core planning domains and 8 critical gaps.
+- **Key References**: Aave/Compound Kinked Jump Rate Model, LOB WebSocket Monotonic Sequence Gap Recovery (Binance/Coinbase), OSRS Grand Exchange 2% Tax & Automated Item Sink, RFC 6455 / Signal Protocol Idempotency & Cursor Pagination, CNN Multi-Factor Market Sentiment, OWASP ASVS 5.0 / NIST SP 800-63B-4 Dual-Key Rotation, Apple HIG 44px Minimum Touch Target.
+- **G406-01 / P0 (Stocks)**: Monotonic sequence ID & snapshot + buffered delta resync contract for tick loss prevention.
+- **G406-02 / P1 (Stocks)**: KRX standard 7-tier discrete tick size table spanning 1 WLD to 10M WLD.
+- **G406-03 / P1 (Stocks)**: Multi-factor market sentiment index combining AI news (40%), price momentum (30%), volume surge (20%), and order pressure (10%).
+- **G406-04 / P0 (Economy)**: 2% market transaction tax and Treasury-backed automated floor-price item buyback & permanent destruction (GE Item Sink).
+- **G406-05 / P0 (Social)**: 1-on-1 direct messaging client-side UUID idempotency key `(conversation_id, client_message_id)` and mandatory cursor-based pagination.
+- **G406-06 / P0 (Banking)**: Aave-style $U_{\text{optimal}}=80\%$ kinked interest rate curve and Basel III 20% statutory reserve buffer.
+- **G406-07 / P1 (Auth)**: 7-day grace period dual-key overlap rotation ensuring zero session invalidation.
+- **G406-08 / P1 (UX)**: 44px minimum touch target and `pb-[calc(env(safe-area-inset-bottom)+5rem)]` anti-clipping responsive layout contract.
+- Authoritative spec: `docs/planning/deltas/v2026.09.23.406.ko.md` / `v2026.09.23.406.md`. English/Korean synced.
 
 ## v2026.09.23.405 — 2026-09-23
 - Continued Debian 13 runtime hygiene work after merging PR #702 (main `67e34d8df182403532e1541d16391f76edfafc57`).
