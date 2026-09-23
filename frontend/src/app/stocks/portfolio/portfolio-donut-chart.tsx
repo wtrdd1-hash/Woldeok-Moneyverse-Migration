@@ -39,7 +39,7 @@ export function PortfolioDonutChart({
   >((acc, holding) => {
     const value = Number(holding.market_value) || 0;
     const percent = totalValueNum > 0 ? value / totalValueNum : 0;
-    const prevOffset = acc.length > 0 ? acc[acc.length - 1].accumulated : 0;
+    const prevOffset = acc[acc.length - 1]?.accumulated ?? 0;
     const accumulated = prevOffset + percent;
     acc.push({
       holding,
