@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic';
 
 export function GET() {
   return NextResponse.json(
-    { id: process.env.NEXT_PUBLIC_BUILD_ID ?? 'unknown' },
+    { id: process.env.NEXT_PUBLIC_BUILD_ID ?? process.env.BUILD_ID ?? 'unknown' },
     { headers: { 'cache-control': 'no-store' } },
   );
 }

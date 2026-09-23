@@ -147,10 +147,21 @@
     "commitSha": "84431467929e070c91416fed28b227854de50398",
     "shortSha": "8443146",
     "releasePath": "/srv/moneyverse-data/releases/prod-8443146-v389",
-    "status": "promoted",
+    "status": "archived",
     "activeSessions": 1103,
     "timestamp": "2026-09-23T09:24:00Z",
     "author": "System Engineer",
     "notes": "Home Quick Action Contrast Theme Token Alignment, Full QA Suite 100% Pass across Backend/Frontend/Bot, Blue-Green Promotion to Test & Production, 1103 User Sessions Intact"
+  },
+  {
+    "version": "v2026.09.23.390",
+    "commitSha": "cdf028e244f7b572f4e40e2c3726b4da14cdec45",
+    "shortSha": "cdf028e",
+    "releasePath": "/srv/moneyverse-data/releases/prod-cdf028e-v390",
+    "status": "promoted",
+    "activeSessions": 1103,
+    "timestamp": "2026-09-23T09:40:00Z",
+    "author": "System Engineer",
+    "notes": "Backend Core Performance Optimization (5s LRU Session Cache, 500ms Micro-Batch Activity Logs, Adaptive Market Ticker, 24h Ticks Rolloff & 7d Outbox Event Sweepers, 60s L1 Master Catalog Cache), Zero-Downtime Blue-Green Promotion, 1103 User Sessions Intact"
   }
 ]
