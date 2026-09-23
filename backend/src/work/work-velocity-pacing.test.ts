@@ -6,7 +6,7 @@ import { WorkRepository } from './work.repository';
 describe('Work Monetary Velocity & Reward Pacing Engine', () => {
   const mockPool = {} as Queryable;
   const repository = new WorkRepository(mockPool);
-  const testUserId = '11111111-2222-3333-4444-555555555555';
+  const testUserId = '11111111-2222-4333-8444-555555555555';
 
   it('computes monetary velocity and pacing attributes for fresh tasks', async () => {
     const mockTasks = [
