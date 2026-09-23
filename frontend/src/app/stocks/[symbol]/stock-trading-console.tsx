@@ -55,9 +55,10 @@ export function StockTradingConsole({
     <div className="space-y-6">
       {/* 본문 2열 트레이딩 그리드 (좌측: 호가창, 우측: 주문패널) */}
       <div className="grid gap-6 lg:grid-cols-[1.05fr_.95fr]">
-        {/* 좌측 호가창 */}
+        {/* 좌측 호가창 (웹소켓 실시간 틱 & 플래시 펄스 애니메이션 연동) */}
         <div>
           <StockOrderbook
+            stockId={stockId}
             currentPrice={currentPrice}
             dayOpenPrice={dayOpenPrice}
             isEn={isEn}

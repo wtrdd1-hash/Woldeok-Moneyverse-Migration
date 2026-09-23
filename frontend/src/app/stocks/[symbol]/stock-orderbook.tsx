@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Scale, Layers, TrendingUp, TrendingDown } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Scale, Layers, TrendingUp, TrendingDown, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { groupDigits } from '@/lib/money';
+import { useQuote } from '@/lib/use-market-prices';
 
 interface StockOrderbookProps {
+  readonly stockId?: string | undefined;
   readonly currentPrice: string;
   readonly dayOpenPrice?: string | undefined;
   readonly isEn?: boolean | undefined;
@@ -102,12 +104,45 @@ export function computeOrderbook(currentPriceStr: string, depth: 5 | 10 = 5): Or
 }
 
 export function StockOrderbook({
+  stockId,
   currentPrice,
+  dayOpenPrice,
   isEn = false,
   onSelectPrice,
 }: StockOrderbookProps) {
   const [depth, setDepth] = useState<5 | 10>(5);
-  const { asks, bids, spread, spreadBps, totalAskVolume, totalBidVolume, bidRatio, askRatio } = computeOrderbook(currentPrice, depth);
+  
+  // 웹소켓 실시간 틱 구독 (stockId가 있을 경우 실시간 반영, 없을 경우 fallback)
+  const initialOpen = dayOpenPrice || currentPrice;
+  const quote = useQuote(stockId ?? '', { price: currentPrice, open: initialOpen });
+  const livePrice = quote.price || currentPrice;
+
+  // 플래시 펄스 애니메이션 상태 ('rise' | 'fall' | null)
+  const [flash, setFlash] = useState<'rise' | 'fall' | null>(null);
+  const prevPriceRef = useRef<string>(livePrice);
+
+  useEffect(() => {
+    if (prevPriceRef.current && prevPriceRef.current !== livePrice) {
+      const prevNum = Number.parseInt(prevPriceRef.current.replaceAll(',', ''), 10);
+      const currNum = Number.parseInt(livePrice.replaceAll(',', ''), 10);
+
+      if (currNum > prevNum) {
+        setFlash('rise');
+      } else if (currNum < prevNum) {
+        setFlash('fall');
+      }
+
+      const timer = setTimeout(() => {
+        setFlash(null);
+      }, 650);
+
+      prevPriceRef.current = livePrice;
+      return () => clearTimeout(timer);
+    }
+    prevPriceRef.current = livePrice;
+  }, [livePrice]);
+
+  const { asks, bids, spread, spreadBps, totalAskVolume, totalBidVolume, bidRatio, askRatio } = computeOrderbook(livePrice, depth);
 
   return (
     <Card className="border-border/80 bg-card/60 shadow-sm overflow-hidden">
@@ -116,6 +151,16 @@ export function StockOrderbook({
           <CardTitle className="text-sm font-bold flex items-center gap-1.5">
             <Scale className="size-4 text-primary" />
             <span>{isEn ? `Orderbook (${depth}-Depth)` : `${depth}단계 실시간 호가`}</span>
+            {flash && (
+              <span className="flex size-2 relative ml-1">
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
+                  flash === 'rise' ? 'bg-emerald-400' : 'bg-rose-400'
+                }`} />
+                <span className={`relative inline-flex rounded-full size-2 ${
+                  flash === 'rise' ? 'bg-emerald-500' : 'bg-rose-500'
+                }`} />
+              </span>
+            )}
           </CardTitle>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="font-mono text-[10px] text-muted-foreground hidden sm:inline-flex">
@@ -174,13 +219,22 @@ export function StockOrderbook({
           ))}
         </div>
 
-        {/* 현재 체결가 중앙 바 */}
-        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-primary/10 border border-primary/30 font-bold">
-          <span className="text-primary flex items-center gap-1">
+        {/* 현재 체결가 중앙 바 (순간 플래시 펄스 애니메이션 탑재) */}
+        <div className={`flex items-center justify-between px-3 py-2 rounded-lg border font-bold transition-all duration-300 ${
+          flash === 'rise'
+            ? 'bg-emerald-500/25 border-emerald-500/50 shadow-xs shadow-emerald-500/20'
+            : flash === 'fall'
+            ? 'bg-rose-500/25 border-rose-500/50 shadow-xs shadow-rose-500/20'
+            : 'bg-primary/10 border-primary/30'
+        }`}>
+          <span className="text-primary flex items-center gap-1.5">
+            <Zap className={`size-3.5 transition-transform duration-300 ${flash ? 'scale-125 text-amber-500' : ''}`} />
             <span>{isEn ? 'Current Price' : '현재 체결가'}</span>
           </span>
-          <span className="text-sm font-extrabold text-foreground">
-            {groupDigits(currentPrice)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+          <span className={`text-sm font-extrabold transition-colors duration-300 ${
+            flash === 'rise' ? 'text-emerald-600 dark:text-emerald-400' : flash === 'fall' ? 'text-rose-600 dark:text-rose-400' : 'text-foreground'
+          }`}>
+            {groupDigits(livePrice)} <span className="text-xs font-normal text-muted-foreground">WLD</span>
           </span>
         </div>
 

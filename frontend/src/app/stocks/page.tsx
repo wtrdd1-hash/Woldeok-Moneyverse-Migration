@@ -23,6 +23,7 @@ import { requireMember } from '@/lib/session';
 import { LiveBadge, LiveHoldingValue, LiveQuote, LiveSparkline } from './live';
 import { MarketNews } from './market-news';
 import type { MarketEvent } from './market-news';
+import { MarketSentimentGauge } from './market-sentiment-gauge';
 import { StockDetailDialog } from './stock-detail-dialog';
 import { normalizeStockSort, sortMarketStocks } from './stock-market-sort';
 import { TradeDialog } from './trade-dialog';
@@ -113,18 +114,11 @@ export default async function StocksPage({
   const query = normalizeStockQuery(rawQuery);
   const sort = normalizeStockSort(Array.isArray(rawSort) ? rawSort[0] : rawSort);
 
-// Four calls, not three plus one per listed stock. The preview lines used
-  // to be fetched a card at a time, after the list came back, so the page
-  // cost grew with the catalogue and paid that cost again on every
-  // thirty-second refresh. They now arrive together and in the same round as
-  // everything else.
   const [market, portfolio, history, sparks, news, watchlist] = await Promise.all([
     apiOrNull<{ stocks: StockRow[] }>('/api/v1/stocks'),
     apiOrNull<{ holdings: HoldingRow[] }>('/api/v1/stocks/portfolio'),
     apiOrNull<{ trades: TradeRow[] }>('/api/v1/stocks/history'),
     apiOrNull<{ series: SparkSeries[] }>(`/api/v1/stocks/sparklines?limit=${SPARK_POINTS}`),
-    // The news leaning the market (124). Absent rather than empty when the
-    // call fails: a market with no news is a normal state, not an error.
     apiOrNull<{ events: MarketEvent[] }>('/api/v1/stocks/market-events'),
     apiOrNull<{ stocks: WatchlistRow[] }>('/api/v1/stocks/watchlist'),
   ]);
@@ -141,6 +135,8 @@ export default async function StocksPage({
     ]),
   );
 
+  const events = news?.events ?? [];
+
   return (
     <MarketPricesProvider>
     <div data-page="stocks" className="mv-page mv-page--finance grid gap-6">
@@ -150,10 +146,14 @@ export default async function StocksPage({
       >
         {isEn
           ? 'A community market where virtual prices fluctuate based on the game economy. Not real stocks or financial products.'
-          : '경제 상황에 따라 가격이 바뀌는 게임 전용 시장입니다. 실제 주식·현금·투자 상품이 아닙니다.'}
+          : '경제 상황에 따라 가격이 바뀌는 10대 종목 전용 가상 시장입니다. 실제 주식·현금·투자 상품이 아닙니다.'}
       </PageHeader>
 
-      <MarketNews events={news?.events ?? []} />
+      {/* AI 뉴스 기반 시장 감성 지수 & 펄스 게이지 위젯 */}
+      <MarketSentimentGauge events={events} isEn={isEn} />
+
+      {/* 시장 소식 & 월드 펄스 뉴스 목록 */}
+      <MarketNews events={events} />
 
       <section aria-labelledby="market-title" className="grid gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
