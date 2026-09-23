@@ -2,11 +2,23 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.23.388
+> **현재 통합 버전:** v2026.09.23.396
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 인증/세션 연속성 강제 계약 — v2026.09.23.396 (2026-09-23)
+
+- **P0 릴리스 불변조건 — 배포 때문에 로그아웃 금지:** 애플리케이션 업데이트, 프론트/백엔드 프로세스 교체, 호스트·서비스 재시작, 블루-그린 전환, 리버스 프록시 reload, 롤백만을 이유로 아직 유효한 로그인 세션을 무효화해서는 안 된다.
+- **세션 권위:** 인증 상태는 영속·공유 세션 저장소 또는 배포 인스턴스와 독립된 동등 권위에 저장해야 한다. 프로세스 메모리만을 로그인 연속성의 유일한 근거로 사용해서는 안 된다.
+- **키/시크릿 연속성:** 세션 서명·암호화 키, 쿠키 이름/domain/path/SameSite/Secure/HttpOnly 의미, issuer/audience 규칙, 호환 가능한 세션 스키마 버전은 구/신 세대가 겹치는 동안 안정적으로 유지한다. 키 회전은 아직 유효한 세션을 수용하는 overlap 기간과 명시적 migration/retirement 시점을 가져야 한다.
+- **재시작/업데이트 수용시험:** 승격 전 exact candidate에서 로그인된 연속성 표본을 확보한다. Test 재시작·업데이트 후와 Production cutover 후 동일 세션이 재로그인 없이 인증 상태를 유지하고 대표 authenticated read를 통과해야 한다. 필요한 CSRF/reauth 상태도 의미적으로 유지하거나 일반 배포를 강제 로그아웃으로 바꾸지 않는 안전한 방식으로 복구해야 한다.
+- **일괄 세션 폐기 금지:** 배포/restart hook에서 global session invalidation, session store truncate, overlap 없는 전체 signing material 교체, 쿠키 일괄 삭제를 릴리스 수단으로 사용해서는 안 된다. 보안상 명시적 폐기, 사용자 로그아웃, credential compromise 대응, 만료, 관리자 강제 로그아웃은 배포와 독립된 정당한 종료 사유로 유지한다.
+- **무중단 승격 게이트:** 배포로 인한 예상치 못한 로그아웃, 릴리스에 기인한 대량 401/403 증가, session-store 손실, cookie 비호환, auth-key 불일치는 모두 **릴리스 실패**다. 승격을 중단하거나 frontend/backend/config/session 호환성이 검증된 last-known-good 세대로 자동 롤백한다.
+- **관측성/증거:** candidate exact SHA, 구/신 runtime identity, 배포 전후 active-session 수, 표본 연속성 결과, auth 401/403 변화, session-store health, rollback 판단, cutover 후 검증을 기록한다. 세션 개수만으로는 증명이 아니며, 배포 전부터 존재한 authenticated session을 최소 1개 이상 end-to-end로 실제 사용 검증해야 한다.
+- **구현 요구사항:** 앞으로 runtime/deployment 작업에는 restart/cutover 세션 연속성 자동 회귀시험을 포함한다. Test에서 이 불변조건을 증명하지 못한 변경은 Production 승격 대상이 아니다.
+- **범위 사실:** v396은 기획/계약 문서 변경이며 이 문서 변경만으로 새 Test/Production 배포 완료를 주장하지 않는다.
 
 ## 시간별 기획 정합화 — v2026.09.23.388 (2026-09-23)
 

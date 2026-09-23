@@ -2,11 +2,23 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.388
+> Current integrated version: v2026.09.23.396
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Mandatory authentication/session continuity — v2026.09.23.396 (2026-09-23)
+
+- **P0 release invariant — no deployment-caused logout:** application updates, backend/frontend process replacement, host/service restart, blue-green cutover, reverse-proxy reload, and rollback MUST NOT invalidate an otherwise-valid signed-in user session solely because runtime instances changed.
+- **Session authority:** authentication state must live in durable/shared session storage or an equivalently deployment-independent authority. In-memory process-local session state MUST NOT be the sole source of login continuity.
+- **Key/secret continuity:** session-signing/encryption keys, cookie names/domains/paths/SameSite/Secure/HttpOnly semantics, issuer/audience rules, and compatible session-schema versions must remain stable across old/new generations. Key rotation requires an overlap window that accepts still-valid sessions and a documented migration/retirement point.
+- **Restart/update acceptance:** before promotion, capture an authenticated continuity cohort on the exact candidate. After Test restart/update and after Production cutover, the same sessions must remain authenticated without an interactive login and must pass representative authenticated reads. Required CSRF/reauth state must remain semantically valid or be safely re-established without converting ordinary deployment into forced logout.
+- **No blanket revocation:** deployment/restart hooks MUST NOT call global session invalidation, truncate the session store, rotate all signing material without overlap, or clear cookies as a release mechanism. Explicit security revocation, user-requested logout, credential compromise response, expiry, and administrator-forced logout remain valid independent reasons to end a session.
+- **Zero-downtime gate:** any deployment-caused unexpected logout, mass 401/403 spike attributable to the release, session-store loss, cookie incompatibility, or auth-key mismatch is a **release failure**. Stop promotion or automatically roll back to the last-known-good frontend/backend/config/session-compatible generation.
+- **Observability/evidence:** record candidate exact SHA, old/new runtime identity, pre/post active-session counts, sampled continuity results, auth 401/403 deltas, session-store health, rollback decision, and post-cutover verification. Session count alone is not proof; at least one pre-existing authenticated session must be exercised end-to-end.
+- **Implementation requirement:** new runtime or deployment work must include automated restart/cutover session-continuity regression coverage. A change that cannot demonstrate this invariant on Test is not eligible for Production.
+- **Scope truth:** v396 is a planning/contract update only. It does not by itself claim a new Test or Production deployment.
 
 ## Hourly planning reconciliation — v2026.09.23.388 (2026-09-23)
 
