@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import type { Pool } from 'pg';
 import { PG_POOL } from '../core/pool.provider';
 import type { ActivityEventItemDto } from './activity.dto';
@@ -31,9 +31,42 @@ export interface TrafficAnalyticsDashboard {
   readonly countries: readonly { readonly country: string; readonly entries: number }[];
 }
 
+export interface LogRequestInput {
+  readonly actor: string | null;
+  readonly path: string;
+  readonly method: string;
+  readonly status: number;
+  readonly durationMs: number;
+  readonly requestId: string | null;
+  readonly ip: string | null;
+  readonly userAgent: string | null;
+  readonly country: string | null;
+  readonly context: Record<string, unknown>;
+}
+
 @Injectable()
-export class ActivityRepository {
-  constructor(@Inject(PG_POOL) private readonly pool: Pool) {}
+export class ActivityRepository implements OnModuleDestroy {
+  private readonly logger = new Logger(ActivityRepository.name);
+  private readonly requestBuffer: LogRequestInput[] = [];
+  private flushTimer: NodeJS.Timeout | null = null;
+  private isFlushing = false;
+
+  constructor(@Inject(PG_POOL) private readonly pool: Pool) {
+    this.flushTimer = setInterval(() => {
+      if (this.requestBuffer.length > 0 && !this.isFlushing) {
+        void this.flushRequestLogs();
+      }
+    }, 500);
+    this.flushTimer.unref?.();
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    if (this.flushTimer) {
+      clearInterval(this.flushTimer);
+      this.flushTimer = null;
+    }
+    await this.flushRequestLogs();
+  }
 
   async logEvents(
     events: ActivityEventItemDto[],
@@ -88,32 +121,58 @@ export class ActivityRepository {
     return dashboard;
   }
 
-  async logRequest(input: {
-    readonly actor: string | null;
-    readonly path: string;
-    readonly method: string;
-    readonly status: number;
-    readonly durationMs: number;
-    readonly requestId: string | null;
-    readonly ip: string | null;
-    readonly userAgent: string | null;
-    readonly country: string | null;
-    readonly context: Record<string, unknown>;
-  }): Promise<void> {
-    await this.pool.query(
-      'SELECT public.activity_log_request_v2($1::uuid,$2,$3,$4,$5,$6::uuid,$7::inet,$8,$9,$10::jsonb)',
-      [
-        input.actor,
-        input.path,
-        input.method,
-        input.status,
-        input.durationMs,
-        input.requestId,
-        input.ip,
-        input.userAgent,
-        input.country,
-        JSON.stringify(input.context),
-      ],
-    );
+  async logRequest(input: LogRequestInput): Promise<void> {
+    this.requestBuffer.push(input);
+    if (this.requestBuffer.length >= 50 && !this.isFlushing) {
+      void this.flushRequestLogs();
+    }
+  }
+
+  async flushRequestLogs(): Promise<void> {
+    if (this.isFlushing || this.requestBuffer.length === 0) return;
+    this.isFlushing = true;
+    const batch = this.requestBuffer.splice(0, 100);
+    if (batch.length === 0) {
+      this.isFlushing = false;
+      return;
+    }
+
+    try {
+      const client = await this.pool.connect();
+      try {
+        await client.query('BEGIN');
+        for (const item of batch) {
+          await client.query(
+            'SELECT public.activity_log_request_v2($1::uuid,$2,$3,$4,$5,$6::uuid,$7::inet,$8,$9,$10::jsonb)',
+            [
+              item.actor,
+              item.path,
+              item.method,
+              item.status,
+              item.durationMs,
+              item.requestId,
+              item.ip,
+              item.userAgent,
+              item.country,
+              JSON.stringify(item.context),
+            ],
+          );
+        }
+        await client.query('COMMIT');
+      } catch (err) {
+        await client.query('ROLLBACK').catch(() => {});
+        this.logger.error('Failed to flush activity log request batch', err);
+      } finally {
+        client.release();
+      }
+    } catch (poolErr) {
+      this.logger.error('Database connection error while flushing activity batch', poolErr);
+    } finally {
+      this.isFlushing = false;
+      if (this.requestBuffer.length >= 50) {
+        void this.flushRequestLogs();
+      }
+    }
   }
 }
+

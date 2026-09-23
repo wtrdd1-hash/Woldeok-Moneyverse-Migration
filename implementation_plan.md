@@ -1,6 +1,7 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v62)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v63)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v63**: 백엔드 코어 성능 최적화 심화 분석(세션 쿼리 중복 제거, 활동 로그 마이크로 배치, 주식 티커 적응형 가변 틱, 아웃박스 92MB 정리, L1 마스터 캐시) 및 아키텍처 조율안 수립 (+150, -0)
 - **v62**: 전 도메인 풀스택 QA(백엔드/프론트엔드/봇) 검증, 프론트엔드 테마 회귀 결함 해소(text-primary-foreground), Next.js Turbopack 최적화 빌드, 테스트 및 운영 서버 무중단 블루-그린 승격(v2026.09.23.389) 및 1,103개 활성 세션 100% 무손실 보존 (+140, -0)
 - **v61**: G368-02 관리자 통제 정합화(TOTP 폐기 반영) 및 G368-03 API 335개 엔드포인트 계약 동기화 (+60, -0)
 - **v60**: 디스코드 음악 봇 및 음성 상주 데몬 시스템 전면 GitHub 메인 통합 (v2026.09.23.389) — systemd 서비스 유닛, 광고/스폰서 실시간 절단 QA 검증 스크립트, 다국어 봇 운영 명세서, 루트 스크립트 바인딩(bot:test, bot:start) 완비, PR #685 생성 및 origin/main 병합 완료 (+135, -0)
@@ -2434,5 +2435,39 @@ flowchart TD
    - `moneyverse-backend.service`: Active (running, PID 정상).
    - `moneyverse-frontend.service`: Active (running, Next.js 16.3.4).
    - `moneyverse-discord-bot.service`: Active (running, PID 1739183, 24/7 음성 채널 상주 중).
+
+---
+
+## 🚀 [v63 Specification] 백엔드 코어 성능·스토리지·커넥션 최적화 아키텍처 명세 (누적 추가)
+
+### 1. 개요 및 배경 (Context & Scope)
+- **사용자 요청**: 백엔드 코어 및 전반 시스템 최적화 방안 수립 및 검토.
+- **현장 실측 기반 병목 지점 분석**:
+  1. **세션 중복 쿼리 (Session Query Contention)**:
+     - 매 인바운드 HTTP 요청마다 `requestActivityTrail` 미들웨어에서 `sessions.get(token)`을 실행하고, 뒤이어 라우트의 `SessionGuard`에서 동일한 세션을 또 다시 `SELECT`함 (요청당 동일 쿼리 2회 중복 발생).
+  2. **활동 로그 동기 쓰기 오버헤드 (Activity Logging Contention)**:
+     - 모든 요청 완료 시 `response.on('finish')`에서 `activity_log_request_v2` 단건 INSERT를 동기 실행하여 10개 커넥션 풀을 상시 점유함. 현재 `user_activity_logs`에 127,675건(69MB) 누적.
+  3. **주식 티커 고정 주기 DB 부하 및 틱 데이터 비대화 (Market Ticker & Raw Ticks)**:
+     - 주식 방(Socket.io `market` 룸)에 접속자가 0명이어도 매초마다 `stocks.liveTick()`이 실행되어 DB 락과 INSERT를 발생시킴. 현재 `virtual_stock_price_ticks`에 163,856건(53MB, 인덱스 34MB) 누적.
+  4. **아웃박스 이벤트 누적 (Outbox Bloat)**:
+     - `outbox_events` 테이블에 디스코드/웹훅 배달 완료(delivered)된 과거 이벤트(128,216건)가 삭제되거나 분리되지 않고 상시 잔존하여 92MB 차지.
+  5. **준정적 마스터 데이터 캐시 부재 (Missing L1 Master Cache)**:
+     - 상점 카탈로그, 직업 목록, 활성 약관 등 변경 빈도가 매우 낮은 데이터도 매번 DB `SELECT`를 실행하여 불필요한 I/O 발생.
+
+### 2. 세부 최적화 방안 (Core Optimization Proposals)
+1. **[Core 1] 세션 Request-Scoped 메모이제이션 및 단기 LRU 캐시**:
+   - `req.session`에 세션 조회 결과를 캐싱하여 `SessionGuard` 및 하위 가드들이 캐싱된 `req.session`을 재사용하게 함.
+   - `SessionRepository.get(token)`에 5~10초의 초단기 인메모리 LRU 캐시를 적용하여 초당 다중 API 요청 시 DB I/O 50% 절감.
+2. **[Core 2] 활동 로깅 마이크로 배치(Micro-Batching) 링 버퍼 엔진**:
+   - 500ms 주기 또는 50건 단위 인메모리 링 버퍼를 두고 백그라운드에서 `UNNEST` 다중 행 벌크 INSERT로 일괄 처리.
+   - 메인 API 핸들러의 DB 커넥션 획득 대기 시간을 완전히 제거하여 응답 지연(Latency) 단축.
+3. **[Core 3] 주식 티커 적응형 가변 틱(Adaptive Ticking) 및 초단위 Raw Ticks 롤오프**:
+   - 리스너(방 접속자)가 0명일 때는 틱 주기를 3~5초로 지연시키고, 사용자가 호가창을 조회할 때만 1초 주기로 자동 전환.
+   - 1분봉으로 이미 롤업된 과거 24시간 이전의 초단위 Raw Ticks를 일괄 정리하는 일일 스위퍼 스케줄러 등록.
+4. **[Core 4] 아웃박스(Outbox) 완료 이벤트 자동 아카이빙 스위퍼**:
+   - `delivered_at IS NOT NULL`이며 생성된 지 7일이 지난 처리 완료 이벤트를 일별 단위로 정리하여 테이블 크기를 92MB -> 수백 KB 수준으로 대폭 축소.
+5. **[Core 5] 정적 마스터 데이터(상점/직업/약관) 인메모리 L1 캐시**:
+   - 30초~60초 TTL 인메모리 캐시 계층을 두고, 관리자가 수정(Mutation)할 때만 이벤트 기반으로 캐시를 즉시 Flush/Invalidate하는 CQRS 캐시 도입.
+
 
 

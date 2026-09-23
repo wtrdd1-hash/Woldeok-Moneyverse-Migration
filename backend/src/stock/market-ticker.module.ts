@@ -60,6 +60,10 @@ export class MarketTickerRunner implements OnApplicationBootstrap, OnApplication
             return moved;
           },
           intervalMs: Number.isFinite(configured) && configured >= 200 ? configured : 1000,
+          getIntervalMs: () => {
+            const baseInterval = Number.isFinite(configured) && configured >= 200 ? configured : 1000;
+            return broadcast.shouldPublish ? baseInterval : Math.max(baseInterval, 3000);
+          },
           onError: (error) =>
             logger.warn(error instanceof Error ? error.message : String(error)),
         });

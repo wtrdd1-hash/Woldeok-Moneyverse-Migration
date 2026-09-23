@@ -14,19 +14,22 @@
 export interface MarketTickerOptions {
   /** Returns how many stocks moved. Zero when another process holds the lock. */
   readonly tick: () => Promise<number>;
-  readonly intervalMs: number;
+  readonly intervalMs?: number;
+  readonly getIntervalMs?: () => number;
   readonly onError?: (error: unknown) => void;
 }
 
 export class MarketTicker {
   private readonly options: MarketTickerOptions;
-  private timer: ReturnType<typeof setInterval> | null = null;
+  private timer: NodeJS.Timeout | null = null;
   private running = false;
   private skipped = 0;
 
   constructor(options: MarketTickerOptions) {
     if (typeof options.tick !== 'function') throw new TypeError('a tick function is required');
-    if (options.intervalMs < 200) throw new TypeError('interval must be at least 200ms');
+    if (options.intervalMs !== undefined && options.intervalMs < 200) {
+      throw new TypeError('interval must be at least 200ms');
+    }
     this.options = options;
   }
 
@@ -55,13 +58,24 @@ export class MarketTicker {
 
   start(): void {
     if (this.timer) return;
-    this.timer = setInterval(() => void this.tickOnce(), this.options.intervalMs);
-    this.timer.unref?.();
+    const schedule = (): void => {
+      const ms = this.options.getIntervalMs
+        ? this.options.getIntervalMs()
+        : (this.options.intervalMs ?? 1000);
+      const safeMs = Math.max(200, ms);
+      this.timer = setTimeout(async () => {
+        await this.tickOnce();
+        if (this.timer) schedule();
+      }, safeMs);
+      this.timer.unref?.();
+    };
+    schedule();
   }
 
   stop(): void {
     if (!this.timer) return;
-    clearInterval(this.timer);
+    clearTimeout(this.timer);
     this.timer = null;
   }
 }
+
