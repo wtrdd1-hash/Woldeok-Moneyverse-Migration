@@ -1,6 +1,6 @@
 # Moneyverse — Monetary Velocity & Reward Pacing Specification
 
-> Version: v2026.09.23.399
+> Version: v2026.09.23.400
 > Status: implementation-oriented living product specification
 > Baseline: v2026.09.23.398 work-reward reset plan
 > Korean companion: [ECONOMY_MONETARY_VELOCITY_SPEC.ko.md](ECONOMY_MONETARY_VELOCITY_SPEC.ko.md)
@@ -81,3 +81,15 @@ The existing research corpus contains 11,749 deduplicated candidate records coll
 P0 requires: no instant-repeat job can mint unlimited WLD per unit time; every paid job has a server-authoritative duration or verification boundary; retries are idempotent; faucet/sink/money-supply/wealth telemetry is queryable; controls are reversible and versioned; affordability and median income are release metrics; web/mobile share canonical timing fields; English/Korean parity; and exact-SHA Test evidence before runtime promotion.
 
 This specification does not authorize production deployment by itself.
+
+## 11. Distribution, sink side-effects, and data-quality controls
+
+Economy telemetry must expose cohort-specific affordability and price pressure for new, median, high-income, and high-wealth users. A single global price index is insufficient when consumption baskets and liquidity differ.
+
+Scenario replay must include dormant-balance reactivation, returning high-wealth users, large event payouts, and synchronized reactivation campaigns because existing balances can create demand shocks without a contemporaneous faucet increase.
+
+Sink evaluation is category-specific. Item removal, transaction taxes, prestige purchases, and service fees can have different effects on price, scarcity, and volume. A sink is not considered successful solely because nominal currency destruction increased.
+
+Seasonality and activity-cycle effects must be separated from structural inflation signals. Economy datasets and dashboards carry source version, extraction timestamp, correction/revision marker, and policy version so retroactive data fixes do not silently rewrite prior operational conclusions.
+
+Where feasible, policy changes use causal or quasi-experimental evaluation rather than post-change correlation alone. The default comparison package is pre/post plus untreated/control cohort, policy-version exposure, and confidence/uncertainty metadata.

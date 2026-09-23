@@ -1,11 +1,21 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.23.399
+> Current ledger version: v2026.09.23.400
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.23.400 — 2026-09-23
+- Rechecked `origin/main=7b705e1d37e97ccd05ba12042c3fd8d582e396d0` and expanded the v399 monetary-velocity evidence base.
+- Added 6,879 Crossref and 17,291 OpenAlex candidates to the prior 11,749-record corpus; DOI-first and normalized-title fallback deduplication produces **31,289 unique candidates**, a net increase of 19,540.
+- Re-reviewed high-confidence evidence from 2026 EVE Monthly Economic Reports, the Old School RuneScape market-intervention study, Fed/IMF/ECB/BIS heterogeneous-agent and HANK research, and the 2025 AEA/JEL ABM review.
+- G400-01 / P1: aggregate averages can hide cohort affordability and distributional effects. Added new/median/high-income/high-wealth cohort price and purchasing-power telemetry.
+- G400-02 / P1: nominal sink growth does not guarantee healthy prices; category-level price, volume, scarcity and substitution effects are required.
+- G400-03 / P1: added dormant-balance/reactivation shocks, seasonality separation, and data revision/source-version metadata to the economy simulation/dashboard contract.
+- Added `MONEYVERSE_ECONOMY_REFERENCE_CORPUS_v2026.09.23.400.csv`, EN/KO research reviews, and v400 monetary-velocity specification updates. Planning/docs only; no runtime/Test/Production claim.
+- EN/KO parity complete.
 
 ## v2026.09.23.399 — 2026-09-23
 - Start baseline: `origin/main=4812a99b0a78da736e477d0a3a2f02ed4ea66283`; mid-work recheck: `origin/main=f0efc448a30a5b67071956b0faa6742a8427d2ea`. The two new main commits do not overlap the economy planning files, so this branch is rebased onto the latest main.
