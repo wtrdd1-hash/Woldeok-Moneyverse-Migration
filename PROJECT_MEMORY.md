@@ -157,6 +157,7 @@
      - **방안 ② [7일치 표본 활성화]**: 7일치 경제 표본 데이터 활성화로 `sampleSufficientDays: 7 / 7`, `eligible: true`, `blockedBy: []` 전환.
      - **방안 ③ [Scenario Lab 가상 시뮬레이션]**: 듀얼 AI Council(Seat A: `llama3.2:3b`, Seat B: `gemma3:1b`, 4개 도메인 8개 에이전트) 스코어보드 정상 추론/가동 (`operationalState: "shadow_reviewed"`).
      - **방안 ④ [로컬 Ollama AI 뉴스룸 자동 발행]**: `ai_news_settings`와 로컬 Ollama(`http://127.0.0.1:11434/v1`, `llama3.2:3b`) 연동, `ai-news.service.ts`의 방어적 심볼 정규화(Fuzzy Substring Match) 구현으로 5개 종목 증시 기사/시나리오 자동 생성 및 무결성 발행 완료.
+     - **[5분 주기 무인 스케줄러 상시 가동]**: `AI_NEWS_AUTO_ENABLED=true`, `AI_NEWS_AUTO_MODEL=llama3.2:3b`, `SCHEDULER_INTERVAL_MS=300000` 상시 데몬 가동 완료.
   2. **보안 및 2FA 암호화 키 무결성 확보**:
      - `ADMIN_TOTP_ENCRYPTION_KEY` 및 `ADMIN_TOTP_KEY_ID=default` 적용으로 Step-Up 2FA 및 AI 키 AES-256-GCM 봉인 무결성 확보.
   3. **전체 API 계약 및 1,760개 테스트 100% 통과**:
