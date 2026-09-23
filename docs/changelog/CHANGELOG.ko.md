@@ -1,3 +1,8 @@
+## v2026.09.23.402 — 봇 QA parser CI 차단 복구
+
+- Discord 음악 봇 광고/SponsorBlock QA 스크립트의 잘못된 JavaScript 문자열을 복구해 저장소 lint가 파일을 파싱하고 후속 검사를 계속할 수 있게 했습니다.
+- QA 동작은 유지하고 미사용 binding만 정리했습니다. DB, ledger, 인증, 런타임 앱 계약 변경은 없습니다.
+
 ## v2026.09.23.390 — QA 브랜치 생명주기 정리 강화
 
 - 작업 브랜치: `fix/qa-branch-cleanup-v2026.09.23.390`.
