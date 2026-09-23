@@ -2,11 +2,22 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.23.388
+> **현재 통합 버전:** v2026.09.23.393
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 시간별 기획 회차 — v2026.09.23.393 (2026-09-23)
+
+- **Planning Cycle Type:** 기능 보완(Feature Improvement). **Previous Cycle Type:** 새 교대 원장 도입 전 회차 유형을 확정할 수 없어 규칙에 따라 unknown으로 처리하고 기능 보완부터 시작한다. **Next Cycle Type:** 기능 추가(Feature Addition).
+- **정확한 기준:** 회차 시작 `origin/main=ffcbb333297f90cd464866be7359ca16efbbf85d`; 최신 런타임 변경은 가상주식을 10종목으로 확장하고 초기 가격을 무작위화한 migration 230이다. main은 `classify`, `policy`, `runtime-check` required check로 보호된다.
+- **P0/P1 보완 후보 — migration 230 주식 상태 재실행 안전성 (`STOCK-393-01`, IN PROGRESS / REFERENCE VALIDATION BLOCKED):** migration 230은 PostgreSQL `random()`으로 가격을 만들면서 `ON CONFLICT (symbol) DO UPDATE`에서 기존 종목의 `initial_price`, `current_price`, `day_open_price`, `shares_outstanding`, `active=true`, `halt_status='ACTIVE'`를 다시 쓴다. 따라서 기존 symbol에 재실행되면 결정론적 카탈로그 migration이 아니라 실제 경제 상태를 바꾸거나 거래정지 종목을 재활성화할 수 있다. 이는 코드에서 도출한 위험이며 Test/Production에서 실제 재실행 사고가 발생했다는 주장은 아니다.
+- **임시 구현 backlog(레퍼런스 조사 완료 전 최종 계약 아님):** 불변 카탈로그/bootstrap 메타데이터와 가변 시장 상태를 분리하고, migration replay를 결정론적·비재활성화 방식으로 만든다. 기존 종목의 실시간 가격/시가/거래정지 상태는 명시적이고 감사 가능한 운영자 명령 없이는 덮어쓰지 않는다. 보유수량·대기주문·거래정지 정산·원장 불변식을 보존하고, 데이터가 존재하는 PostgreSQL에서 migration 재실행 테스트를 추가하며 거래정지 종목과 ticker 동시 동작도 포함한다. 실행 전후 row snapshot과 invariant reconciliation을 남긴다. frontend/app-api는 고정 종목 수나 가격대를 가정하지 않고 확장된 카탈로그를 처리하고, backend/API는 기존 authoritative stock lookup을 통해 unknown/inactive symbol을 거부한다. DB 수용조건은 migration 두 번째 적용(또는 동등 replay harness)에서 기존 row의 경제 상태 delta가 0이어야 한다.
+- **QA / 승격 게이트:** migration 230 의미에 의존하는 후속 destructive/economic migration에는 **P1 release blocker**로 둔다. Test/Production에서 기존 보유·halt·quote·ledger 상태가 실제 변경된 증거가 나오면 P0로 승격한다. 재현 증거에는 정확한 DB snapshot, migration set, candidate SHA, 영향 symbol ID와 before/after 값을 기록한다. Test 수용조건은 real PostgreSQL, 이전 schema부터 migration 적용+replay, stock trade/halt/settlement regression, exact candidate SHA다. Production 승격은 동일 reviewed SHA 또는 추적 가능한 promoted artifact, backup/restore 증거, migration identity, cutover 후 stock/ledger reconciliation, settled history를 다시 쓰지 않는 rollback을 요구한다. 이번 기획 회차는 runtime 코드를 직접 배포하지 않는다.
+- **레퍼런스 조사 게이트:** 이번 회차에 **새로 수집·중복 제거·분석 완료했다고 주장하는 독립 외부 레퍼런스는 0건**이다. v348의 기존 117,970+ UI artifact corpus를 주식 migration 근거로 임의 재분류하지 않는다. 금융시장 UX, migration/replay 관행, PostgreSQL transaction/data-migration 공식 지침, 거래시스템 장애/실패 사례, API/DB 계약, 보안/악용, 접근성/모바일, 운영/DR, 규제·공식기관 자료를 포함한 관련 독립 레퍼런스 최소 10,000건을 실제 수집·중복 제거·분류·분석해야 한다. 그 전까지 `STOCK-393-01`은 **IN PROGRESS / REFERENCE VALIDATION BLOCKED**이며 위 임시 backlog를 research-complete로 표시하지 않는다.
+- **열린 PR / QA 정합화:** PR #689(global catalogue search, exact head `739be258651ee6ab7445eab6dcd044aa3852302d`)는 현재 main보다 stale이며 CI #1745가 required `runtime-check`의 repository-wide `pnpm lint`에서 실패했다. typecheck/build/migrations/tests는 skip됐다. 따라서 **MERGE BLOCKED / RETEST REQUIRED**이고 exact-SHA 승격 증거로 사용할 수 없다.
+- **통합 원칙:** 이 섹션의 권위 원장은 `PROJECT_PLAN.md`이며 한국어 대응본은 `PROJECT_PLAN.ko.md`로 동일 구조를 유지한다. 신규 기능별 기획 문서를 만들지 않는다. 기존 분산 spec/worklog는 보조·역사 증거일 뿐 이 통합기획서를 우선할 수 없다.
 
 ## 시간별 기획 정합화 — v2026.09.23.388 (2026-09-23)
 
