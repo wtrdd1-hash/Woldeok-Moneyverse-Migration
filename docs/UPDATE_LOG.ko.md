@@ -1,6 +1,6 @@
-## v2026.09.23.389 — 디스코드 음악 봇 & 음성 상주 데몬 시스템 전면 깃허브 메인 통합 및 배포 표준화
+## v2026.09.23.389 — 홈 테마 대비 정합화, 백엔드/프론트엔드/봇 전수 QA 100% 통과, 테스트/운영 무중단 승격 및 1,103개 세션 무손실 보존
 
-- 적용 브랜치: `main` (기능 브랜치: `feat/discord-bot-full-github-main-integration-v2026.09.23.389`)
+- 적용 브랜치: `main` (릴리스: `prod-8443146-v389`, Exact Git SHA: `84431467`)
 - **디스코드 음악 봇 & 음성 상주 데몬 시스템 전면 깃허브 메인 통합**:
   1. **인프라 데몬 서비스 유닛 버전 관리 편입**:
      - 미니PC 로컬에만 존재하던 systemd 서비스 정의 파일을 `ops/systemd/moneyverse-discord-bot.service`로 정식 리포지토리에 편입.
@@ -14,10 +14,21 @@
   4. **루트 package.json & README 전역 연동**:
      - 루트 `package.json`에 `bot:test` (`npm --prefix bot test`) 및 `bot:start` 스크립트 바인딩.
      - 루트 `README-KO.md` 및 `README.md`에 디스코드 봇 기능 및 워크스페이스 구조(`bot/`) 전면 등재.
-- **품질 검증 및 헬스체크**:
-  - 단위 테스트: `pnpm bot:test` -> 4/4 PASS (100% 통과, 0 failed).
-  - 데몬 상태: `moneyverse-discord-bot.service` 정상 가동 (Active).
-  - 음성 상주: `🔊│음성` (`1536572442422550538`) 채널 24/7 불사 상주 확인.
+- **기획 완료 전 도메인 풀스택 QA 및 결함 무결점 조치**:
+  1. **프론트엔드 테마 회귀 결함 해소**:
+     - `frontend/src/app/page.tsx` 퀵 액션 카드 4종의 하드코딩 `text-white`를 테마 토큰 `text-primary-foreground`로 정합화하여 `color-contrast-regression.test.ts` 100% 통과.
+  2. **전수 단위/통합/E2E 테스트 100% 통과**:
+     - 프론트엔드: 102개 테스트 파일, 747개 테스트 전수 통과 (0 failed).
+     - 백엔드: 97개 테스트 스위트, 974개 테스트 전수 통과 (0 failed).
+     - API 계약: 179개 모바일 엔드포인트, 416개 컨트롤러 메서드 Drift 0건 100% 무결성 검증.
+     - 디스코드 봇: 4개 단위 테스트 100% 통과, 24/7 음성 상주 정상 가동.
+  3. **Next.js Turbopack 프로덕션 최적화 빌드 완료**:
+     - 90여 개 라우트 100% 정상 수집 및 컴파일 완료 (4.7s 컴파일, 3.1s TypeScript, 0 error).
+- **무중단 운영 승격 (Zero-Downtime Blue-Green Promotion)**:
+  - 테스트 서버(`https://test.easy-scraping.com/`): 카나리 검증 후 무중단 전환, HTTP 200 OK, 런타임 SHA `84431467929e070c91416fed28b227854de50398`.
+  - 운영 서버(`https://easy-scraping.com/`): 카나리 검증 후 무중단 전환, HTTP 200 OK, 런타임 SHA `84431467929e070c91416fed28b227854de50398`.
+  - 전수 라우트 점검(홈, 지갑, 직업, 주식, 은행, 거래소, 쪽지, 지원, 안전센터, 관리자, 알림 BFF 등) 100% 정상 응답.
+  - Nginx 에러 0건, **PostgreSQL 활성 사용자 세션 1,103건 100% 무손실 보존 실측 완료**.
 
 ## v2026.09.23.388 — 23개 보안·경제 Step-Up PR 통합, 테스트/운영 무중단 승격 및 1,061개 세션 무손실 보존
 

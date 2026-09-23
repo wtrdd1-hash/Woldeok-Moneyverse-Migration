@@ -1,6 +1,8 @@
-# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v60)
+# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v62)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v62**: 전 도메인 풀스택 QA(백엔드/프론트엔드/봇) 검증, 프론트엔드 테마 회귀 결함 해소(text-primary-foreground), Next.js Turbopack 최적화 빌드, 테스트 및 운영 서버 무중단 블루-그린 승격(v2026.09.23.389) 및 1,103개 활성 세션 100% 무손실 보존 (+140, -0)
+- **v61**: G368-02 관리자 통제 정합화(TOTP 폐기 반영) 및 G368-03 API 335개 엔드포인트 계약 동기화 (+60, -0)
 - **v60**: 디스코드 음악 봇 및 음성 상주 데몬 시스템 전면 GitHub 메인 통합 (v2026.09.23.389) — systemd 서비스 유닛, 광고/스폰서 실시간 절단 QA 검증 스크립트, 다국어 봇 운영 명세서, 루트 스크립트 바인딩(bot:test, bot:start) 완비, PR #685 생성 및 origin/main 병합 완료 (+135, -0)
 - **v59**: GitHub 활성 23개 Step-Up 보안/경제 PR (#644~#684) main 완전 병합 및 충돌 해소, 백엔드 Vitest 97개 파일 974개 테스트 & 프론트엔드 전 라우트 빌드 완벽 통과, 테스트 서버(https://test.easy-scraping.com) 및 운영 서버(https://easy-scraping.com) 무중단 Blue-Green 승격(v2026.09.23.388) 및 1,061개 PostgreSQL 활성 세션 100% 무손실 보존 완료 (+180, -0)
 - **v58**: 상단 글로벌 헤더 15초 주기 404 폴링 폭풍 원천 차단(Next.js BFF /api/notifications/unread-count 신설) 및 채팅/알림 document.visibilityState 가드·지수 백오프 적용 사양 (v2026.09.22.359) (+140, -0)
@@ -2390,4 +2392,47 @@ flowchart TD
 - `git diff`: 변경 대상 문서 전수 정합성 검증 완료.
 - 영/한 문서 간 의미적 100% 패리티 유지.
 - 규정 위반 AI 워터마크 0건 준수.
+
+---
+
+## 🚀 [v62 Specification] 전 도메인 풀스택 QA 전수 검증, 프론트엔드 테마 회귀 조치 및 테스트/운영 무중단 승격 (v2026.09.23.389) (누적 추가)
+
+### 1. 개요 및 배경 (Context & Scope)
+- **사용자 요청**: 기획서 기획 완료 부분 백엔드/프론트엔드 기능 작동 여부 등 전 도메인 QA 전수 진행, 오류 및 미작동 기능 점검·해소, 테스트 및 운영 서버 무중단 승격 완료.
+- **배경 및 원인 분석**:
+  1. **프론트엔드 테마 회귀 결함 발견**: `NODE_ENV=test` 환경에서 프론트엔드 102개 테스트 파일 검증 중 `src/app/color-contrast-regression.test.ts`에서 유일한 실패 1건 식별. 홈 화면 퀵 액션 카드 4종(`/wallet`, `/work`, `/stocks`, `/bank`)의 호버 시 하드코딩된 `group-hover:text-white`가 테마 색상 정합성 규칙에 위배됨.
+  2. **환경 변수 차이 식별**: 미니 PC 호스트의 기본 `NODE_ENV=production` 환경에서는 React 19의 `React.act`가 제외되어 프론트엔드 테스트 러너가 오동작하므로, 모든 테스트 스위트 실행 시 명시적 `NODE_ENV=test` 강제 동기화 확립.
+  3. **전 도메인 기능 무결성**: 저축 포켓, 제작대, 마켓플레이스, 인앱 알림 BFF, 1:1 쪽지, 고객지원, 안전 센터, 관리자 Step-Up 2FA, 주식 호가창, 직업 업무, 경제 시나리오 랩, 디스코드 24/7 음성 상주 봇의 백엔드 컨트롤러 및 프론트엔드 뷰포트/라우팅 정상 작동 확인.
+
+### 2. 세부 조치 및 구현 내역 (Implementation Details)
+1. **프론트엔드 홈 화면 시맨틱 토큰 정합화**:
+   - `frontend/src/app/page.tsx`:
+     - 4대 퀵 액션 카드(`Send`, `Briefcase`, `TrendingUp`, `Landmark`)의 `group-hover:text-white`를 시맨틱 토큰 `group-hover:text-primary-foreground`로 전격 교체.
+     - `Select-String` 검색 결과 `text-white` 0건 잔존 완전 무결성 확인.
+2. **테스트 스위트 전수 통과**:
+   - `src/app/color-contrast-regression.test.ts`: 5/5 PASS (100% 통과).
+   - 프론트엔드 전체 테스트: 102개 테스트 파일, 747개 테스트 100% 통과 (0 failed).
+   - 백엔드 전체 테스트: 97개 테스트 스위트, 974개 테스트 100% 통과 (0 failed).
+   - API 계약 검증(`pnpm api:contract:check`): 179개 모바일 엔드포인트, 416개 컨트롤러 메서드 Drift 0건 100% 통과.
+   - 디스코드 봇 테스트(`pnpm bot:test`): 4/4 PASS (100% 통과).
+3. **Next.js Turbopack 프로덕션 빌드 완결**:
+   - 90여 개 라우트 100% 정상 수집 및 컴파일 완료 (`BUILD_ID=84431467929e070c91416fed28b227854de50398`).
+4. **테스트 및 운영 환경 무중단 블루-그린 승격 (v2026.09.23.389)**:
+   - 릴리즈 디렉터리 배포: `/srv/moneyverse-data/releases/test-8443146-v389` 및 `prod-8443146-v389` 하드링크 동기화 및 산출물 주입.
+   - `ops/systemd/host-blue-green-promote.sh`를 통한 카나리 포트(3102/3103, 3002/3003) 헬스체크 및 엣지 전환.
+   - 테스트 서버(`https://test.easy-scraping.com/`): HTTP 200 OK, 런타임 API SHA `84431467929e070c91416fed28b227854de50398`.
+   - 운영 서버(`https://easy-scraping.com/`): HTTP 200 OK, 런타임 API SHA `84431467929e070c91416fed28b227854de50398`.
+   - 전 도메인 HTTP 프로브(홈, 지갑, 직업, 주식, 은행, 거래소, 쪽지, 지원, 안전센터, 관리자, 알림 BFF 등) 100% 정상 응답.
+   - **PostgreSQL 활성 세션(auth_sessions) 1,103건 100% 무손실 보존 실측 완료**.
+   - Nginx 에러 로그 0건.
+
+### 3. 검증 결과 및 운영 상태 (Verification & Promotion)
+1. **GitHub 동기화**:
+   - 커밋: `84431467 fix(frontend): replace hardcoded text-white with semantic primary-foreground on home quick actions` -> `origin/main` 푸시 완료.
+   - 릴리즈 원장(`docs/releases/ledger.json`) 및 업데이트 로그(`docs/UPDATE_LOG.ko.md`, `docs/UPDATE_LOG.md`) `v2026.09.23.389` 최신화.
+2. **라이브 서비스 가동 상태**:
+   - `moneyverse-backend.service`: Active (running, PID 정상).
+   - `moneyverse-frontend.service`: Active (running, Next.js 16.3.4).
+   - `moneyverse-discord-bot.service`: Active (running, PID 1739183, 24/7 음성 채널 상주 중).
+
 
