@@ -3,7 +3,7 @@
 **English canonical** | [한국어](INDEX.ko.md)
 
 > Documentation governance: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)
-> Current planning authority: v2026.09.23.405
+> Current planning authority: v2026.09.23.406
 
 ## Start here
 
@@ -22,6 +22,7 @@
 - [Security assurance](planning/SECURITY_ASSURANCE_MASTER_PLAN.md)
 - [Economy monetary velocity](planning/ECONOMY_MONETARY_VELOCITY_SPEC.md)
 - [Economy research paper map](planning/ECONOMY_RESEARCH_PAPER_MAP.md)
+- [6-Domain Defect Mitigation Spec v406](planning/deltas/v2026.09.23.406.md)
 - [Jobs/profession mastery](planning/JOBS_PROFESSION_MASTERY_SPEC.md)
 - [Private chat](planning/ONE_TO_ONE_PRIVATE_CHAT_SPEC.md)
 ## Architecture, operations and features

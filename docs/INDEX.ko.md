@@ -3,7 +3,7 @@
 [English canonical](INDEX.md) | **한국어**
 
 > 문서 거버넌스: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)
-> 현재 기획 권위: v2026.09.23.405
+> 현재 기획 권위: v2026.09.23.406
 
 ## 먼저 볼 문서
 
@@ -22,6 +22,7 @@
 - [보안 보증](planning/SECURITY_ASSURANCE_MASTER_PLAN.ko.md)
 - [경제 통화속도](planning/ECONOMY_MONETARY_VELOCITY_SPEC.ko.md)
 - [경제 핵심 논문 매핑](planning/ECONOMY_RESEARCH_PAPER_MAP.ko.md)
+- [기획 6대 도메인 결함 보완 v406](planning/deltas/v2026.09.23.406.ko.md)
 - [직업/숙련도](planning/JOBS_PROFESSION_MASTERY_SPEC.ko.md)
 - [1대1 채팅](planning/ONE_TO_ONE_PRIVATE_CHAT_SPEC.ko.md)
 ## 아키텍처·운영·기능
