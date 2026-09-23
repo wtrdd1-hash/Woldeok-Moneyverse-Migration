@@ -7,6 +7,9 @@ describe('TreasuryService', () => {
     getOverview: vi.fn(),
     getTaxRates: vi.fn(),
     getBudgets: vi.fn(),
+    getRevenue: vi.fn(),
+    getExpenditure: vi.fn(),
+    getReconciliation: vi.fn(),
     listTransactions: vi.fn(),
     injectFunds: vi.fn(),
     absorbFunds: vi.fn(),
@@ -34,6 +37,39 @@ describe('TreasuryService', () => {
     const budgets = service.getBudgets();
     expect(budgets).toEqual(mockBudgets);
     expect(mockRepo.getBudgets).toHaveBeenCalled();
+  });
+
+  it('delegates getRevenue to repository', async () => {
+    const mockRevenue = { items: [], total_24h_wld: '0', total_7d_wld: '0', total_30d_wld: '0' };
+    vi.mocked(mockRepo.getRevenue).mockResolvedValueOnce(mockRevenue);
+
+    const res = await service.getRevenue();
+    expect(res).toEqual(mockRevenue);
+    expect(mockRepo.getRevenue).toHaveBeenCalled();
+  });
+
+  it('delegates getExpenditure to repository', async () => {
+    const mockExpenditure = { items: [], total_24h_wld: '0', total_7d_wld: '0', total_30d_wld: '0' };
+    vi.mocked(mockRepo.getExpenditure).mockResolvedValueOnce(mockExpenditure);
+
+    const res = await service.getExpenditure();
+    expect(res).toEqual(mockExpenditure);
+    expect(mockRepo.getExpenditure).toHaveBeenCalled();
+  });
+
+  it('delegates getReconciliation to repository', async () => {
+    const mockRecon = {
+      status: 'RECONCILED' as const,
+      total_vaults_balance_wld: '100',
+      total_ledger_net_flow_wld: '100',
+      discrepancy_amount_wld: '0',
+      last_reconciled_at: '2026-09-24T00:00:00.000Z',
+    };
+    vi.mocked(mockRepo.getReconciliation).mockResolvedValueOnce(mockRecon);
+
+    const res = await service.getReconciliation();
+    expect(res).toEqual(mockRecon);
+    expect(mockRepo.getReconciliation).toHaveBeenCalled();
   });
 
   it('delegates getOverview to repository and returns liquidity and tax schedule fields', async () => {

@@ -15,6 +15,14 @@ export interface WorkTask {
   readonly reward_preview: string | null;
   readonly experience_preview: string | null;
   readonly recommended: boolean;
+  readonly policy_version?: string;
+  readonly expected_work_seconds?: number;
+  readonly eligible_submit_at?: string;
+  readonly settlement_mode?: 'ACTIVE' | 'ASYNC' | 'VERIFY' | 'BATCH';
+  readonly repeat_factor?: string;
+  readonly issuance_factor?: string;
+  readonly net_reward?: string;
+  readonly reason_codes?: readonly string[];
 }
 export interface WorkAssignment {
   readonly assignment_id: string;

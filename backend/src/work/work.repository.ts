@@ -55,6 +55,14 @@ export interface WorkTaskRow {
   reward_preview: string | null;
   experience_preview: string | null;
   recommended: boolean;
+  policy_version?: string;
+  expected_work_seconds?: number;
+  eligible_submit_at?: string;
+  settlement_mode?: 'ACTIVE' | 'ASYNC' | 'VERIFY' | 'BATCH';
+  repeat_factor?: string;
+  issuance_factor?: string;
+  net_reward?: string;
+  reason_codes?: string[];
 }
 
 export interface WorkReceiptRow {
@@ -182,9 +190,9 @@ export class WorkRepository {
     );
   }
 
-  tasks(actor: unknown): Promise<WorkTaskRow[]> {
+  async tasks(actor: unknown): Promise<WorkTaskRow[]> {
     assertUuid(actor, 'actor');
-    return queryRows<WorkTaskRow>(
+    const rows = await queryRows<WorkTaskRow>(
       this.pool,
       `SELECT task.task_id::text, task.code, task.name, task.description,
               task.job_type::text, task.difficulty, task.base_reward::text,
@@ -195,6 +203,40 @@ export class WorkRepository {
        FROM public.work_task_board($1) AS task`,
       [actor],
     );
+    const now = Date.now();
+    return rows.map((task) => {
+      const expectedSeconds =
+        task.minimum_duration_seconds > 0
+          ? task.minimum_duration_seconds
+          : Math.max(30, (task.difficulty || 1) * 30);
+      const eligibleSubmitAt = new Date(now + expectedSeconds * 1000).toISOString();
+      const takenToday = Number(task.taken_today) || 0;
+      const repeatFactorNum = Math.max(0.2, 1.0 - takenToday * 0.15);
+      const repeatFactor = repeatFactorNum.toFixed(4);
+      const issuanceFactor = '1.0000';
+      const effectiveBase = parseFloat(task.reward_preview || task.base_reward) || 0;
+      const netReward = String(Math.round(effectiveBase * repeatFactorNum * parseFloat(issuanceFactor)));
+      const reasonCodes: string[] = [];
+      if (takenToday > 0) {
+        reasonCodes.push('REPEAT_DECAY_APPLIED');
+      } else {
+        reasonCodes.push('OPTIMAL_REWARD');
+      }
+      if (task.recommended) {
+        reasonCodes.push('CAREER_AFFINITY_BONUS');
+      }
+      return {
+        ...task,
+        policy_version: 'v2026.09.23.401',
+        expected_work_seconds: expectedSeconds,
+        eligible_submit_at: eligibleSubmitAt,
+        settlement_mode: 'ACTIVE' as const,
+        repeat_factor: repeatFactor,
+        issuance_factor: issuanceFactor,
+        net_reward: netReward,
+        reason_codes: reasonCodes,
+      };
+    });
   }
 
   receipts(actor: unknown): Promise<WorkReceiptRow[]> {
