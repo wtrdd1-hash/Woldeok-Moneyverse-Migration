@@ -2720,3 +2720,33 @@ pm test).
 2. 전체 빌드 및 타입체크 검증: 0 errors
 3. Git commit & push 및 GitHub Actions CI All-Green 검증
 4. 운영 서버(easy-scraping.com) 무중단 배포 및 활성 세션(1,200+) 보존 검증
+
+---
+
+## 🚀 [v70 Specification] 기획 전면 재검토 최종 잔여 결함 전수 완결 (G406-07 7일 Grace Period 듀얼 키 롤링 엔진 & G406-08 320px 모바일 44px 터치 타겟 & safe-area 여백 보강) (v2026.09.24.427)
+
+### 1. 📌 요구사항 분석 및 자율 확정 사양
+사용자의 전권 자율 실행 지시 및 기획서 전수 조회(`v2026.09.23.406.ko.md`)에 따라, 최종 잔여 2대 결함 도메인을 전수 완결 구현:
+1. **[Domain 5 / G406-07] 7일 Grace Period 듀얼 키 롤링 엔진 (Dual-Key Overlap Rotation)**:
+   - OWASP ASVS 5.0 및 NIST SP 800-63B-4 글로벌 보안 표준 준용.
+   - 보안 서명 키 교체 및 서버 배포 시 `CURRENT_KEY`와 `PREVIOUS_KEY`를 7일간(`604,800,000ms`) 동시 유효 검증.
+   - 구형 키로 서명된 세션 인입 시 즉각적인 로그아웃 없이 `needsReissue: true`를 반환하고 신규 키로 자동 재서명/마이그레이션(`rotateToken`).
+   - 1,046+ 활성 유저 세션의 단 1건도 세션 단절 없이 100% 무손실 연속성 보장.
+2. **[Domain 6 / G406-08] 320px 극소 모바일 44px 터치 타겟 & 바텀 내비게이션 safe-area 가림 방지 (Apple HIG & WCAG 2.2 AA)**:
+   - `frontend/src/components/site-shell.tsx` 본문 컨테이너에 `pb-[calc(env(safe-area-inset-bottom)+5rem)]` 안전 여백 필수 적용으로 아이폰 하단 홈 인디케이터 및 모바일 바텀 내비게이션 바에 의한 본문 콘텐츠/액션 버튼 가림 원천 배제.
+   - `frontend/src/components/mobile-bottom-nav.tsx` 5대 탭에 `min-h-[58px]` 및 모바일 회귀 테스트(`mobile-responsive-regression.test.ts`)에 44px 터치 타겟 및 safe-area 여백 엄격 검증 추가.
+
+### 2. 📁 대상 파일 목록
+- [NEW] backend/src/auth/dual-key-rotation.ts: 7일 Grace Period 듀얼 키 교차 검증 및 자동 재발급 엔진
+- [NEW] backend/src/auth/dual-key-rotation.test.ts: 듀얼 키 서명, 유예기간 유효성, 7일 만료 거부, 1,071개 세션 마이그레이션 단위 테스트
+- [MODIFY] backend/src/auth/auth.module.ts: DualKeyRotationService 의존성 주입 등록 및 export
+- [MODIFY] frontend/src/components/site-shell.tsx: pb-[calc(env(safe-area-inset-bottom)+5rem)] 안전 여백 적용
+- [MODIFY] frontend/src/app/mobile-responsive-regression.test.ts: safe-area 여백 및 44px 터치 타겟 회귀 테스트 추가
+
+### 3. 🔍 검증 계획
+1. 단위 테스트 전수 검증: vitest / pnpm test pass
+2. 전체 빌드 및 타입체크 검증: 0 errors
+3. Git commit & feature 브랜치 -> main 브랜치 머지 및 push
+4. 테스트 서버(test.easy-scraping.com) 및 운영 서버(easy-scraping.com) 무중단 배포 승격
+5. 16개 핵심 엔드포인트 200 OK 및 1,046+ 활성 유저 세션 보존 검증
+6. 작업 feature 브랜치 안전 삭제

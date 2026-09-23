@@ -19,6 +19,7 @@ import { LocalAuthRepository } from './local-auth.repository';
 import { OAuthClient } from './oauth-client';
 import { SessionRepository } from './session.repository';
 import { VerificationEmailSender } from './verification-email.sender';
+import { DualKeyRotationService } from './dual-key-rotation';
 
 const GUARDS = [
   SessionGuard,
@@ -51,6 +52,7 @@ const GUARDS = [
       useFactory: (pool: Queryable | null) => (pool ? new LocalAuthRepository(pool) : null),
     },
     VerificationEmailSender,
+    DualKeyRotationService,
     AdminRolesRepository,
     ...GUARDS,
   ],
@@ -60,6 +62,7 @@ const GUARDS = [
     AdminRolesRepository,
     OAuthClient,
     VerificationEmailSender,
+    DualKeyRotationService,
     ...GUARDS,
   ],
 })

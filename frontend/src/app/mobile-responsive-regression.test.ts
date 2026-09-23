@@ -61,4 +61,13 @@ describe('ultra-narrow responsive guards', () => {
     expect(shop).toContain('flex min-w-0 w-full max-w-2xl gap-2');
     expect(shop).toContain('text-base outline-none focus:border-amber-500 md:text-sm');
   });
+
+  it('enforces G406-08 safe-area bottom padding and 44px minimum touch targets', () => {
+    const shell = source('../components/site-shell.tsx');
+    const bottomNav = source('../components/mobile-bottom-nav.tsx');
+
+    expect(shell).toContain('pb-[calc(env(safe-area-inset-bottom)+5rem)]');
+    expect(bottomNav).toContain('min-h-[58px]');
+  });
 });
+
