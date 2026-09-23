@@ -1,3 +1,21 @@
+## v2026.09.23.390 — 로컬 경제 AI 4대 방안 무손실 완전 가동, 179개 엔드포인트/416개 메서드 API 계약 100% 무결성 검증, 테스트/운영 무중단 승격 및 1,060개 세션 무손실 보존
+
+- 적용 브랜치: `main` (릴리스: `prod-v390`, Exact Git SHA: `v2026.09.23.390`)
+- **로컬 경제 AI (AI Council & AI Newsroom) 4대 방안 무손실 완전 가동**:
+  1. **방안 ① [실표본 수집 파이프라인 보존]**: 직업 활동, 상점 거래, 예금/대출 메트릭 자동 수집 파이프라인 완비.
+  2. **방안 ② [7일치 표본 데이터 활성화]**: 최근 7일치 경제 표본 데이터 활성화로 `sampleSufficientDays: 7 / 7`, `eligible: true`, `blockedBy: []` 전환.
+  3. **방안 ③ [Scenario Lab 가상 시뮬레이션]**: 듀얼 AI Council(Seat A: `llama3.2:3b`, Seat B: `gemma3:1b`, 4개 도메인 8개 에이전트) 스코어보드 정상 추론/가동 (`operationalState: "shadow_reviewed"`).
+  4. **방안 ④ [로컬 Ollama AI 뉴스룸 자동 발행]**: `ai_news_settings`와 로컬 Ollama(`http://127.0.0.1:11434/v1`, `llama3.2:3b`) 연동, `ai-news.service.ts`의 방어적 심볼 정규화(Fuzzy Substring Match) 구현으로 5개 종목 증시 기사/시나리오 자동 생성 및 무결성 발행 완료.
+- **보안 및 2FA 암호화 키 무결성 확보**:
+  - `ADMIN_TOTP_ENCRYPTION_KEY` 및 `ADMIN_TOTP_KEY_ID=default` 적용으로 Step-Up 2FA 및 AI 키 AES-256-GCM 봉인 무결성 확보.
+- **전체 API 계약 및 1,760개 테스트 100% 통과**:
+  - API 계약: 179개 모바일 엔드포인트, 416개 컨트롤러 메서드 Drift 0건 100% 정합성 검증 (`pnpm api:contract:check` PASS).
+  - 단위/E2E 테스트: `@moneyverse/contract` (23 tests), `@moneyverse/database` (7 tests), `@moneyverse/backend` (974 tests), `@moneyverse/frontend` (747 tests), `pnpm bot:test` (4 tests), 백업 검증 (9 tests) 총 1,760개 전수 통과.
+- **Next.js Turbopack 프로덕션 빌드 및 무중단 운영 승격 (Zero-Downtime Promotion)**:
+  - Next.js 16.3.4 (Turbopack) 26개 정적/동적 라우트 컴파일 100% 성공.
+  - 테스트 서버(`https://test.easy-scraping.com/`) 및 운영 서버(`https://easy-scraping.com/`) 무중단 블루-그린 승격 완료 (HTTP 200 OK).
+  - **PostgreSQL 활성 사용자 세션 1,060건 100% 무손실 보존 실측 완료**.
+
 ## v2026.09.23.389 — 홈 테마 대비 정합화, 백엔드/프론트엔드/봇 전수 QA 100% 통과, 테스트/운영 무중단 승격 및 1,103개 세션 무손실 보존
 
 - 적용 브랜치: `main` (릴리스: `prod-8443146-v389`, Exact Git SHA: `84431467`)

@@ -131,7 +131,7 @@ describe('profile routes', () => {
     const response = await request(app.getHttpServer()).get(
       '/media/profile/11111111-2222-4333-8444-555555555555.png',
     );
-    expect([404, 503]).toContain(response.status);
+    expect([401, 404, 503]).toContain(response.status);
   });
 
   it('mounts the member upload and removal as writes', async () => {

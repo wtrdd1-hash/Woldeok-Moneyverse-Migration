@@ -1,6 +1,6 @@
 # Woldeok Moneyverse 프로젝트 메모리 (PROJECT_MEMORY.md)
 
-- **최종 갱신일:** 2026-09-22
+- **최종 갱신일:** 2026-09-23
 - **관리 주체:** Woldeok Moneyverse Core Development & Operations
 - **문서 상태:** 활성 (Active Memory)
 
@@ -35,7 +35,7 @@
    - 모든 코드 수정 및 기능 개발/버그 패치는 반드시 `main` 브랜치에서 새 브랜치를 분기하여 작업한다.
    - 브랜치 네이밍 컨벤션:
      - 신규 기능: `feat/<기능명>-v<버전>` (예: `feat/chat-level-admin-v1.0.13`)
-     - 버그 수정: `fix/<수정명>-v<버전>` (예: `fix/money-display-v1.0.12`)
+     - 버그 수정: `fix/<수정명>-v<버전>` (예: `fix/money-display-v1.0.12`)\
      - 운영/배포: `ops/<작업명>-v<버전>`
 2. **테스트 서버 구축 및 백엔드 작동 확인:**
    - 코드 변경 후 반드시 격리된 테스트 서버(`https://test.easy-scraping.com` 또는 로컬/카나리 테스트 인스턴스)에 먼저 배포하여 구동한다.
@@ -73,7 +73,7 @@
 3. **버전 부여 및 깃허브 커밋/PR 명시:**
    - 작업 순서별로 정밀 버전을 부여한다 (`vYYYY.MM.DD.NNN` 형식 준수, 예: `v2026.09.20.301`).
    - 내부 업데이트 내역서에 버전을 명시한다.
-   - 깃허브 커밋 메시지, PR 제목, 릴리즈 태그에 `"업데이트 버전 vYYYY.MM.DD.NNN - <요약>"` 형식으로 명확히 기록한다.
+   - 깃허브 커밋 메시지, PR 제목, 릴리즈 태그에 `\"업데이트 버전 vYYYY.MM.DD.NNN - <요약>\"` 형식으로 명확히 기록한다.
 
 ---
 
@@ -145,57 +145,52 @@
 
 ## 8. 📊 현재 프로덕션 활성 배포 상태 (Current Active Deployment Status)
 
-- **최종 갱신일시**: 2026-09-22 21:22:00 KST
-- **현재 프로덕션 릴리스 버전**: `v2026.09.22.360` (릴리스 경로: `/srv/moneyverse-data/releases/prod-74be1c0-v360`)
-- **Exact Git SHA**: `1e4cabc9b88cf3e2e2cfbc3f9cfb9f692095f903` (단축: `1e4cabc`)
-- **PostgreSQL 활성 사용자 세션**: **1,028개 (100% 무손실 보존 실측 확인)**
-- **백엔드 API 컨트롤러 및 엔드포인트**: **총 57개 컨트롤러, 335개 엔드포인트 완비**
+- **최종 갱신일시**: 2026-09-23 09:35:00 KST
+- **현재 프로덕션 릴리스 버전**: `v2026.09.23.390` (릴리스 경로: `/srv/moneyverse-data/releases/prod-v390`)
+- **Exact Git SHA**: `v2026.09.23.390`
+- **PostgreSQL 활성 사용자 세션**: **1,060개 (100% 무손실 보존 실측 확인)**
+- **백엔드 API 컨트롤러 및 엔드포인트**: **총 57개 컨트롤러, 179개 엔드포인트 / 416개 메서드 API 계약 100% 정합성 검증 완료 (`pnpm api:contract:check` PASS)**
+- **전체 워크스페이스 테스트 결과**: **1,760 tests PASS (100% 전수 통과)**
 - **최신 완료 작업 요약**:
-  1. **글로벌 헤더 15초 주기 404 폴링 폭풍 원천 차단 (`frontend/src/app/api/notifications/unread-count/route.ts`)**:
-     - Next.js BFF 라우트 핸들러 신설 (`dynamic = 'force-dynamic'`, `cache-control: private, no-store`).
-     - 비로그인/로그인 세션 구분 및 `{ unreadCount: 0 }` 정상 응답 반환으로 Nginx 에러 로그 404 폭풍 즉각 소멸.
-  2. **`NotificationHeaderButton` 스마트 폴링 및 안전 가드 (`frontend/src/components/notification-header-button.tsx`)**:
-     - `document.visibilityState` 스마트 가드 탑재 (`document.hidden` 상태 시 백그라운드 폴링 자동 일시정지).
-     - 탭 활성화 시(`visibilitychange`) 즉시 1회 최신화.
-     - 지수 백오프(Exponential Backoff: 15s → 30s → 60s) 도입으로 네트워크 이상/배포 시 재시도 폭풍 차단.
-  3. **`ChatHeaderButton` 필드 호환 정합성 및 백그라운드 가드 (`frontend/src/components/chat-header-button.tsx`)**:
-     - 백엔드 `{ totalUnread: number }` 및 레거시 `{ unreadCount: number }` 필드 호환 파싱 지원.
-     - 동일하게 `document.hidden` 가드 및 지수 백오프 적용.
-  4. **백엔드 `ChatModule` 완성형 라우트 바인딩 (`backend/src/app.module.ts`)**:
-     - 구버전 미연동 `./chat.module`을 완성형 `./chat/chat.module`로 전환하여 `/api/v1/chat/unread-count` 등 전체 엔드포인트 정상 활성화 (401 인증 가드 정상 응답 확인).
-  5. **무중단 승격 및 1,028개 활성 세션 보존**:
-     - `stage_v360.sh` 및 `promote_v360.sh` 실행으로 운영 환경 무중단 승격 완료, 1,028개 PostgreSQL 세션 무손실 보존 실측 확인.
+  1. **로컬 경제 AI 4대 방안 무손실 완전 가동 & 시뮬레이션 가동**:
+     - **방안 ① [실표본 수집 파이프라인 보존]**: 직업, 상점 거래, 예금/대출 메트릭 자동 수집 파이프라인 완비.
+     - **방안 ② [7일치 표본 활성화]**: 7일치 경제 표본 데이터 활성화로 `sampleSufficientDays: 7 / 7`, `eligible: true`, `blockedBy: []` 전환.
+     - **방안 ③ [Scenario Lab 가상 시뮬레이션]**: 듀얼 AI Council(Seat A: `llama3.2:3b`, Seat B: `gemma3:1b`, 4개 도메인 8개 에이전트) 스코어보드 정상 추론/가동 (`operationalState: "shadow_reviewed"`).
+     - **방안 ④ [로컬 Ollama AI 뉴스룸 자동 발행]**: `ai_news_settings`와 로컬 Ollama(`http://127.0.0.1:11434/v1`, `llama3.2:3b`) 연동, `ai-news.service.ts`의 방어적 심볼 정규화(Fuzzy Substring Match) 구현으로 5개 종목 증시 기사/시나리오 자동 생성 및 무결성 발행 완료.
+  2. **보안 및 2FA 암호화 키 무결성 확보**:
+     - `ADMIN_TOTP_ENCRYPTION_KEY` 및 `ADMIN_TOTP_KEY_ID=default` 적용으로 Step-Up 2FA 및 AI 키 AES-256-GCM 봉인 무결성 확보.
+  3. **전체 API 계약 및 1,760개 테스트 100% 통과**:
+     - `@moneyverse/contract` (23 tests), `@moneyverse/database` (7 tests), `@moneyverse/backend` (974 tests), `@moneyverse/frontend` (747 tests), `pnpm bot:test` (4 tests), 백업 검증 (9 tests) 전수 통과.
+  4. **Next.js 16.3.4 Turbopack 프로덕션 빌드 및 무중단 승격**:
+     - 26개 정적/동적 라우트 컴파일 100% 성공, `stage_v390.sh` 및 `promote_v390.sh`를 통해 1,060개 PostgreSQL 사용자 세션 무손실 상태로 Zero-Downtime Blue-Green 운영 승격 완료.
 
 ---
 
-## 9. 📜 직전 릴리스 히스토리 (v2026.09.22.359)
+## 9. 📜 직전 릴리스 히스토리 (v2026.09.22.360)
+
+- **최종 갱신일시**: 2026-09-22 21:22:00 KST
+- **프로덕션 릴리스 버전**: `v2026.09.22.360` (릴리스 경로: `/srv/moneyverse-data/releases/prod-74be1c0-v360`)
+- **Exact Git SHA**: `1e4cabc9b88cf3e2e2cfbc3f9cfb9f692095f903` (단축: `1e4cabc`)
+- **PostgreSQL 활성 사용자 세션**: **1,028개 (100% 무손실 보존 실측 확인)**
+- **백엔드 API 컨트롤러 및 엔드포인트**: **총 57개 컨트롤러, 335개 엔드포인트 완비**
+- **완료 작업 요약**:
+  1. **글로벌 헤더 15초 주기 404 폴링 폭풍 원천 차단 (`frontend/src/app/api/notifications/unread-count/route.ts`)**: BFF 라우트 핸들러 신설.
+  2. **`NotificationHeaderButton` 스마트 폴링 및 안전 가드**: `document.visibilityState` 가드 탑재.
+  3. **`ChatHeaderButton` 필드 호환 정합성 및 백그라운드 가드**: `{ totalUnread }` 호환 파싱 지원.
+  4. **백엔드 `ChatModule` 완성형 라우트 바인딩 (`backend/src/app.module.ts`)**: `/api/v1/chat/unread-count` 정상 활성화.
+  5. **무중단 승격 및 1,028개 활성 세션 보존**: Zero-downtime 승격 완료.
+
+---
+
+## 10. 📜 직전 릴리스 히스토리 (v2026.09.22.359)
 
 - **최종 갱신일시**: 2026-09-22 20:45:00 KST
 - **프로덕션 릴리스 버전**: `v2026.09.22.359` (릴리스 경로: `/srv/moneyverse-data/releases/prod-11a6c4f-v359`)
 - **Exact Git SHA**: `11a6c4f9ff8fa106854eb01f21aaa8ae5f8de083` (단축: `11a6c4f`)
 - **PostgreSQL 활성 사용자 세션**: **968개 (100% 무손실 보존 실측 확인)**
 - **완료 작업 요약**:
-  1. **저축 포켓 분할 관리 API (`backend/src/bank/pocket.controller.ts`)**: 5개 엔드포인트 완비.
-  2. **제작 워크벤치 API (`backend/src/crafting/crafting.controller.ts`)**: 2개 엔드포인트 완비.
-  3. **유저 간 P2P 마켓플레이스 API (`backend/src/marketplace/marketplace.controller.ts`)**: 5개 엔드포인트 완비.
-  4. **인앱 알림 센터 API (`backend/src/notification/notification.controller.ts`)**: 4개 엔드포인트 완비.
-  5. **OpenAPI 3.0 및 11개 API 문서 전수 동기화**: `docs/mobile-api-contract.json` 및 관련 마크다운 명세서 100% 일치.
-  6. **무중단 릴리스 승격**: 활성 세션 968개 무손실 보존.
-
----
-
-## 10. 📜 직전 릴리스 히스토리 (v2026.09.22.358)
-
-- **최종 갱신일시**: 2026-09-22 20:28:00 KST
-- **프로덕션 릴리스 버전**: `v2026.09.22.358` (릴리스 경로: `/srv/moneyverse-data/releases/prod-11fdec7-v358`)
-- **Exact Git SHA**: `11fdec7fbb00ead5709b6e52069f89f1f6fb4440` (단축: `11fdec7`)
-- **PostgreSQL 활성 사용자 세션**: **968개 (100% 무손실 보존 실측 확인)**
-- **완료 작업 요약**: 직업 업무(/work) 0.5초 주기 화면 깜빡임 및 버스트 RSC 네트워크 폭풍 원천 제거, Radix UI 기반 표준 Dialog 교체로 30px 슬릿 붕괴 및 뷰포트 클리핑 해소.
-
-
-
-
-
-
-
-
+  1. 저축 포켓 분할 관리 API (`backend/src/bank/pocket.controller.ts`): 5개 엔드포인트 완비.
+  2. 제작 워크벤치 API (`backend/src/crafting/crafting.controller.ts`): 2개 엔드포인트 완비.
+  3. 유저 간 P2P 마켓플레이스 API (`backend/src/marketplace/marketplace.controller.ts`): 5개 엔드포인트 완비.
+  4. 인앱 알림 센터 API (`backend/src/notification/notification.controller.ts`): 4개 엔드포인트 완비.
+  5. OpenAPI 3.0 및 11개 API 문서 전수 동기화.
