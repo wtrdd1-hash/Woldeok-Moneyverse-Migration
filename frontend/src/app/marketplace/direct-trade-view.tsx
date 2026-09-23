@@ -90,7 +90,7 @@ export function DirectTradeView({
     e.preventDefault();
     if (!recipientInput.trim()) return;
 
-    const chosenItem = holdings.find((h) => h.id === selectedOfferItemId);
+    const chosenItem = holdings.find((h) => h.catalog_id === selectedOfferItemId);
     const newOffer: DirectTradeOffer = {
       id: `trade_${Date.now().toString(36)}`,
       senderId: currentUserId,
@@ -398,7 +398,7 @@ export function DirectTradeView({
               >
                 <option value="">보유 아이템 선택 안함 (WLD만 제공 시)</option>
                 {holdings.map((h) => (
-                  <option key={h.id} value={h.id}>
+                  <option key={h.catalog_id} value={h.catalog_id}>
                     {h.name} ({h.rarity}) - {h.quantity}개 보유
                   </option>
                 ))}

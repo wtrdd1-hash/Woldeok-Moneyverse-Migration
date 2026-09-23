@@ -70,7 +70,7 @@ export function AppraisalView({ holdings, userBalanceWld }: AppraisalViewProps) 
   const [newCert, setNewCert] = useState<AppraisalCertificate | null>(null);
 
   // 기획서 §5.3 수수료 계산: max(250, ceil(reference * 0.0025))
-  const selectedItem = holdings.find((h) => h.id === selectedHoldingId);
+  const selectedItem = holdings.find((h) => h.catalog_id === selectedHoldingId);
   const refValue = selectedItem?.rarity === 'LEGENDARY' ? 10000 : selectedItem?.rarity === 'EPIC' ? 4000 : 1500;
   const appraisalFee = Math.max(250, Math.ceil(refValue * 0.0025));
 
@@ -82,7 +82,7 @@ export function AppraisalView({ holdings, userBalanceWld }: AppraisalViewProps) 
       setIsAppraising(false);
       const generatedCert: AppraisalCertificate = {
         certId: `CERT-2026-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
-        itemId: selectedItem.id,
+        itemId: selectedItem.catalog_id,
         itemName: selectedItem.name,
         rarity: selectedItem.rarity,
         appraisedValueWld: refValue.toString(),
@@ -155,7 +155,7 @@ export function AppraisalView({ holdings, userBalanceWld }: AppraisalViewProps) 
               >
                 <option value="">감정 의뢰할 수집품/장식품 선택...</option>
                 {holdings.map((h) => (
-                  <option key={h.id} value={h.id}>
+                  <option key={h.catalog_id} value={h.catalog_id}>
                     {h.name} ({h.rarity}) - {h.category}
                   </option>
                 ))}

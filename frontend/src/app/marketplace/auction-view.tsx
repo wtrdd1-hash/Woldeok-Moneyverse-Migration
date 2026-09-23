@@ -29,9 +29,9 @@ export interface AuctionListing {
   readonly highestBidderId: string | null;
   readonly highestBidderName: string | null;
   readonly bidCount: number;
-  readonly buyNowPriceWld?: string;
+  readonly buyNowPriceWld?: string | undefined;
   readonly endsAt: string; // ISO string
-  readonly isExtended?: boolean;
+  readonly isExtended?: boolean | undefined;
   readonly description: string;
 }
 
@@ -153,19 +153,19 @@ export function AuctionView({ userBalanceWld, currentUserId = 'usr_me' }: Auctio
 
       // 경매 상태 갱신
       setAuctions((prev) =>
-        prev.map((auc) =>
-          auc.id === selectedAuction.id
-            ? {
-                ...auc,
-                currentBidWld: newBidStr,
-                highestBidderId: currentUserId,
-                highestBidderName: '나 (현재 최고 입찰자)',
-                bidCount: auc.bidCount + 1,
-                endsAt: newEndsAt,
-                isExtended: isAntiSnipingTriggered ? true : auc.isExtended,
-              }
-            : auc,
-        ),
+        prev.map((auc) => {
+          if (auc.id !== selectedAuction.id) return auc;
+          const updated: AuctionListing = {
+            ...auc,
+            currentBidWld: newBidStr,
+            highestBidderId: currentUserId,
+            highestBidderName: '나 (현재 최고 입찰자)',
+            bidCount: auc.bidCount + 1,
+            endsAt: newEndsAt,
+            isExtended: isAntiSnipingTriggered || Boolean(auc.isExtended),
+          };
+          return updated;
+        }),
       );
 
       setSuccessNotice(

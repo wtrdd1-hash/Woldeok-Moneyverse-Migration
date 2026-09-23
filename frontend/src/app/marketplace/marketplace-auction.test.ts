@@ -56,9 +56,9 @@ describe('Marketplace Auction & Escrow Business Logic (PLAYER_MARKETPLACE_CRAFTI
     });
 
     it('prevents completion if state is not ACCEPTED_BY_PEER', () => {
-      const status: 'PROPOSED' | 'ACCEPTED_BY_PEER' = 'PROPOSED';
-      const canFinalSign = status === 'ACCEPTED_BY_PEER';
-      expect(canFinalSign).toBe(false);
+      const canSign = (s: 'PROPOSED' | 'ACCEPTED_BY_PEER') => s === 'ACCEPTED_BY_PEER';
+      expect(canSign('PROPOSED')).toBe(false);
+      expect(canSign('ACCEPTED_BY_PEER')).toBe(true);
     });
   });
 
