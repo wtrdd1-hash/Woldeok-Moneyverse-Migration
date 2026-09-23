@@ -4,34 +4,36 @@
 
 ## 📋 목차 (Table of Contents)
 
-- [POST /crafting/execute](#post--crafting-execute) - Execute crafting recipe: consume materials and WLD fee to mint crafted item (`crafting`)
-- [GET /crafting/recipes](#get--crafting-recipes) - List all official crafting recipes with required materials and fees (`crafting`)
-- [GET /marketplace/appraisals](#get--marketplace-appraisals) - List my issued provenance appraisal certificates (`marketplace`)
-- [POST /marketplace/appraisals](#post--marketplace-appraisals) - Request system provenance appraisal for collectible with fee burn (`marketplace`)
-- [GET /marketplace/auctions](#get--marketplace-auctions) - List active live English auctions (`marketplace`)
-- [POST /marketplace/auctions](#post--marketplace-auctions) - Create a new live English auction (`marketplace`)
-- [POST /marketplace/auctions/{id}/bid](#post--marketplace-auctions--id--bid) - Bid on a live English auction with escrow and anti-sniping extension (`marketplace`)
-- [GET /marketplace/listings](#get--marketplace-listings) - List active player marketplace listings with filter and search (`marketplace`)
-- [POST /marketplace/listings](#post--marketplace-listings) - List an item for sale in player marketplace with escrow lock (`marketplace`)
-- [POST /marketplace/listings/{id}/buy](#post--marketplace-listings--id--buy) - Buy a marketplace listing item with 1% burn fee and 99% seller settlement (`marketplace`)
-- [POST /marketplace/listings/{id}/cancel](#post--marketplace-listings--id--cancel) - Cancel active marketplace listing and recover item to inventory (`marketplace`)
-- [GET /marketplace/my-listings](#get--marketplace-my-listings) - List current user marketplace listings and trade history (`marketplace`)
-- [GET /marketplace/trades](#get--marketplace-trades) - List my P2P direct trades (`marketplace`)
-- [POST /marketplace/trades](#post--marketplace-trades) - Propose a new P2P 1:1 direct trade (`marketplace`)
-- [POST /marketplace/trades/{id}/accept](#post--marketplace-trades--id--accept) - Accept a P2P 1:1 direct trade proposal (first step) (`marketplace`)
-- [POST /marketplace/trades/{id}/cancel](#post--marketplace-trades--id--cancel) - Cancel a P2P 1:1 direct trade (`marketplace`)
-- [POST /marketplace/trades/{id}/confirm](#post--marketplace-trades--id--confirm) - Sign-off and execute dual atomic swap for P2P 1:1 trade (`marketplace`)
+- [POST `/api/v1/crafting/execute`](#post--api-v1-crafting-execute) - Execute crafting recipe: consume materials and WLD fee to mint crafted item | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/crafting/recipes`](#get--api-v1-crafting-recipes) - List all official crafting recipes with required materials and fees | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/marketplace/appraisals`](#get--api-v1-marketplace-appraisals) - List my issued provenance appraisal certificates | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/marketplace/appraisals`](#post--api-v1-marketplace-appraisals) - Request system provenance appraisal for collectible with fee burn | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/marketplace/auctions`](#get--api-v1-marketplace-auctions) - List active live English auctions | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/marketplace/auctions`](#post--api-v1-marketplace-auctions) - Create a new live English auction | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/marketplace/auctions/{id}/bid`](#post--api-v1-marketplace-auctions--id--bid) - Bid on a live English auction with escrow and anti-sniping extension | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/marketplace/listings`](#get--api-v1-marketplace-listings) - List active player marketplace listings with filter and search | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/marketplace/listings`](#post--api-v1-marketplace-listings) - List an item for sale in player marketplace with escrow lock | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/marketplace/listings/{id}/buy`](#post--api-v1-marketplace-listings--id--buy) - Buy a marketplace listing item with 1% burn fee and 99% seller settlement | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/marketplace/listings/{id}/cancel`](#post--api-v1-marketplace-listings--id--cancel) - Cancel active marketplace listing and recover item to inventory | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/marketplace/my-listings`](#get--api-v1-marketplace-my-listings) - List current user marketplace listings and trade history | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/marketplace/trades`](#get--api-v1-marketplace-trades) - List my P2P direct trades | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/marketplace/trades`](#post--api-v1-marketplace-trades) - Propose a new P2P 1:1 direct trade | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/marketplace/trades/{id}/accept`](#post--api-v1-marketplace-trades--id--accept) - Accept a P2P 1:1 direct trade proposal (first step) | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/marketplace/trades/{id}/cancel`](#post--api-v1-marketplace-trades--id--cancel) - Cancel a P2P 1:1 direct trade | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/marketplace/trades/{id}/confirm`](#post--api-v1-marketplace-trades--id--confirm) - Sign-off and execute dual atomic swap for P2P 1:1 trade | `🔓 공개 (게스트 허용)`
 
 ---
 
 ## 🛠️ 엔드포인트 상세 규격
 
-### POST `/crafting/execute`
+<a id="post--api-v1-crafting-execute"></a>
+### POST `/api/v1/crafting/execute`
 
 **설명:** Execute crafting recipe: consume materials and WLD fee to mint crafted item
 
-- **분류 태그 (Tag):** `crafting`
-- **엔드포인트 ID:** `CraftingController_executeCrafting`
+- **분류 도메인 (Tag):** `crafting`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `CraftingController_executeCrafting`
 #### 📦 요청 본문 (Request Body)
 
   - `recipeId` (`string`) **(필수)** - 제작 레시피 ID
@@ -41,12 +43,12 @@
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/crafting/execute" \
+curl -X POST "https://easy-scraping.com/api/v1/crafting/execute" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -57,56 +59,66 @@ curl -X POST "https://easy-scraping.com/crafting/execute" \
 
 ---
 
-### GET `/crafting/recipes`
+<a id="get--api-v1-crafting-recipes"></a>
+### GET `/api/v1/crafting/recipes`
 
 **설명:** List all official crafting recipes with required materials and fees
 
-- **분류 태그 (Tag):** `crafting`
-- **엔드포인트 ID:** `CraftingController_listRecipes`
+- **분류 도메인 (Tag):** `crafting`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `CraftingController_listRecipes`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/crafting/recipes" \
+curl -X GET "https://easy-scraping.com/api/v1/crafting/recipes" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/marketplace/appraisals`
+<a id="get--api-v1-marketplace-appraisals"></a>
+### GET `/api/v1/marketplace/appraisals`
 
 **설명:** List my issued provenance appraisal certificates
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_listAppraisals`
+💡 **감정 수수료 소각 룰**: 감정 시 `max(250 WLD, ceil(0.25%))` WLD가 `SINK_APPRAISAL_FEE`로 영구 소각되고 디지털 공인 인증서가 영구 발급됩니다.
+
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_listAppraisals`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/marketplace/appraisals" \
+curl -X GET "https://easy-scraping.com/api/v1/marketplace/appraisals" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/marketplace/appraisals`
+<a id="post--api-v1-marketplace-appraisals"></a>
+### POST `/api/v1/marketplace/appraisals`
 
 **설명:** Request system provenance appraisal for collectible with fee burn
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_requestAppraisal`
+💡 **감정 수수료 소각 룰**: 감정 시 `max(250 WLD, ceil(0.25%))` WLD가 `SINK_APPRAISAL_FEE`로 영구 소각되고 디지털 공인 인증서가 영구 발급됩니다.
+
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_requestAppraisal`
 #### 📦 요청 본문 (Request Body)
 
   - `itemId` (`string`) **(필수)** - 소장품 아이템 ID
@@ -117,12 +129,12 @@ curl -X GET "https://easy-scraping.com/marketplace/appraisals" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/marketplace/appraisals" \
+curl -X POST "https://easy-scraping.com/api/v1/marketplace/appraisals" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -133,34 +145,38 @@ curl -X POST "https://easy-scraping.com/marketplace/appraisals" \
 
 ---
 
-### GET `/marketplace/auctions`
+<a id="get--api-v1-marketplace-auctions"></a>
+### GET `/api/v1/marketplace/auctions`
 
 **설명:** List active live English auctions
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_listAuctions`
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_listAuctions`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/marketplace/auctions" \
+curl -X GET "https://easy-scraping.com/api/v1/marketplace/auctions" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/marketplace/auctions`
+<a id="post--api-v1-marketplace-auctions"></a>
+### POST `/api/v1/marketplace/auctions`
 
 **설명:** Create a new live English auction
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_createAuction`
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_createAuction`
 #### 📦 요청 본문 (Request Body)
 
   - `itemCode` (`string`) **(필수)** - 아이템 코드
@@ -176,12 +192,12 @@ curl -X GET "https://easy-scraping.com/marketplace/auctions" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/marketplace/auctions" \
+curl -X POST "https://easy-scraping.com/api/v1/marketplace/auctions" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -192,12 +208,16 @@ curl -X POST "https://easy-scraping.com/marketplace/auctions" \
 
 ---
 
-### POST `/marketplace/auctions/{id}/bid`
+<a id="post--api-v1-marketplace-auctions--id--bid"></a>
+### POST `/api/v1/marketplace/auctions/{id}/bid`
 
 **설명:** Bid on a live English auction with escrow and anti-sniping extension
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_bidAuction`
+💡 **에스크로 & 안티스나이핑 룰**: 신규 입찰 시 기존 최고 입찰자에게 100% 즉시 에스크로 환불(`ESCROW_REFUND`)되며, 마감 30초 이내 입찰 시 60초 자동 연장됩니다. 낙찰 시 2% `SINK_AUCTION_FEE` 영구 소각.
+
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_bidAuction`
 
 #### 📌 매개변수 (Parameters)
 
@@ -213,12 +233,12 @@ curl -X POST "https://easy-scraping.com/marketplace/auctions" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/marketplace/auctions/{id}/bid" \
+curl -X POST "https://easy-scraping.com/api/v1/marketplace/auctions/{id}/bid" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -229,12 +249,14 @@ curl -X POST "https://easy-scraping.com/marketplace/auctions/{id}/bid" \
 
 ---
 
-### GET `/marketplace/listings`
+<a id="get--api-v1-marketplace-listings"></a>
+### GET `/api/v1/marketplace/listings`
 
 **설명:** List active player marketplace listings with filter and search
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_listListings`
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_listListings`
 
 #### 📌 매개변수 (Parameters)
 
@@ -249,24 +271,26 @@ curl -X POST "https://easy-scraping.com/marketplace/auctions/{id}/bid" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/marketplace/listings" \
+curl -X GET "https://easy-scraping.com/api/v1/marketplace/listings" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/marketplace/listings`
+<a id="post--api-v1-marketplace-listings"></a>
+### POST `/api/v1/marketplace/listings`
 
 **설명:** List an item for sale in player marketplace with escrow lock
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_createListing`
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_createListing`
 #### 📦 요청 본문 (Request Body)
 
   - `itemCode` (`string`) **(필수)** - 판매할 아이템 코드
@@ -279,12 +303,12 @@ curl -X GET "https://easy-scraping.com/marketplace/listings" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/marketplace/listings" \
+curl -X POST "https://easy-scraping.com/api/v1/marketplace/listings" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -295,12 +319,14 @@ curl -X POST "https://easy-scraping.com/marketplace/listings" \
 
 ---
 
-### POST `/marketplace/listings/{id}/buy`
+<a id="post--api-v1-marketplace-listings--id--buy"></a>
+### POST `/api/v1/marketplace/listings/{id}/buy`
 
 **설명:** Buy a marketplace listing item with 1% burn fee and 99% seller settlement
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_buyListing`
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_buyListing`
 
 #### 📌 매개변수 (Parameters)
 
@@ -316,12 +342,12 @@ curl -X POST "https://easy-scraping.com/marketplace/listings" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/marketplace/listings/{id}/buy" \
+curl -X POST "https://easy-scraping.com/api/v1/marketplace/listings/{id}/buy" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -332,12 +358,14 @@ curl -X POST "https://easy-scraping.com/marketplace/listings/{id}/buy" \
 
 ---
 
-### POST `/marketplace/listings/{id}/cancel`
+<a id="post--api-v1-marketplace-listings--id--cancel"></a>
+### POST `/api/v1/marketplace/listings/{id}/cancel`
 
 **설명:** Cancel active marketplace listing and recover item to inventory
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_cancelListing`
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_cancelListing`
 
 #### 📌 매개변수 (Parameters)
 
@@ -349,72 +377,75 @@ curl -X POST "https://easy-scraping.com/marketplace/listings/{id}/buy" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/marketplace/listings/{id}/cancel" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/marketplace/listings/{id}/cancel" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/marketplace/my-listings`
+<a id="get--api-v1-marketplace-my-listings"></a>
+### GET `/api/v1/marketplace/my-listings`
 
 **설명:** List current user marketplace listings and trade history
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_listMyListings`
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_listMyListings`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/marketplace/my-listings" \
+curl -X GET "https://easy-scraping.com/api/v1/marketplace/my-listings" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/marketplace/trades`
+<a id="get--api-v1-marketplace-trades"></a>
+### GET `/api/v1/marketplace/trades`
 
 **설명:** List my P2P direct trades
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_listTrades`
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_listTrades`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/marketplace/trades" \
+curl -X GET "https://easy-scraping.com/api/v1/marketplace/trades" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/marketplace/trades`
+<a id="post--api-v1-marketplace-trades"></a>
+### POST `/api/v1/marketplace/trades`
 
 **설명:** Propose a new P2P 1:1 direct trade
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_createTrade`
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_createTrade`
 #### 📦 요청 본문 (Request Body)
 
   - `recipientName` (`string`) **(필수)** - 상대방 닉네임
@@ -427,12 +458,12 @@ curl -X GET "https://easy-scraping.com/marketplace/trades" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/marketplace/trades" \
+curl -X POST "https://easy-scraping.com/api/v1/marketplace/trades" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -443,12 +474,14 @@ curl -X POST "https://easy-scraping.com/marketplace/trades" \
 
 ---
 
-### POST `/marketplace/trades/{id}/accept`
+<a id="post--api-v1-marketplace-trades--id--accept"></a>
+### POST `/api/v1/marketplace/trades/{id}/accept`
 
 **설명:** Accept a P2P 1:1 direct trade proposal (first step)
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_acceptTrade`
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_acceptTrade`
 
 #### 📌 매개변수 (Parameters)
 
@@ -460,28 +493,27 @@ curl -X POST "https://easy-scraping.com/marketplace/trades" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/marketplace/trades/{id}/accept" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/marketplace/trades/{id}/accept" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/marketplace/trades/{id}/cancel`
+<a id="post--api-v1-marketplace-trades--id--cancel"></a>
+### POST `/api/v1/marketplace/trades/{id}/cancel`
 
 **설명:** Cancel a P2P 1:1 direct trade
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_cancelTrade`
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_cancelTrade`
 
 #### 📌 매개변수 (Parameters)
 
@@ -493,28 +525,27 @@ curl -X POST "https://easy-scraping.com/marketplace/trades/{id}/accept" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/marketplace/trades/{id}/cancel" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/marketplace/trades/{id}/cancel" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/marketplace/trades/{id}/confirm`
+<a id="post--api-v1-marketplace-trades--id--confirm"></a>
+### POST `/api/v1/marketplace/trades/{id}/confirm`
 
 **설명:** Sign-off and execute dual atomic swap for P2P 1:1 trade
 
-- **분류 태그 (Tag):** `marketplace`
-- **엔드포인트 ID:** `MarketplaceController_confirmTrade`
+- **분류 도메인 (Tag):** `marketplace`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `MarketplaceController_confirmTrade`
 
 #### 📌 매개변수 (Parameters)
 
@@ -526,18 +557,15 @@ curl -X POST "https://easy-scraping.com/marketplace/trades/{id}/cancel" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/marketplace/trades/{id}/confirm" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/marketplace/trades/{id}/confirm" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---

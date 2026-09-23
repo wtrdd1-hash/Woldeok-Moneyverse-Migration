@@ -4,50 +4,52 @@
 
 ## 📋 목차 (Table of Contents)
 
-- [GET /clubs](#get--clubs) - 클럽 목록 탐색 및 검색 (`clubs`)
-- [POST /clubs](#post--clubs) - 신규 클럽 창설 (10,000 WLD 소각) (`clubs`)
-- [GET /clubs/{id}](#get--clubs--id-) - 클럽 상세 정보 조회 (`clubs`)
-- [GET /clubs/{id}/canvas](#get--clubs--id--canvas) - 클럽하우스 12x12 공유 캔버스 조회 (`clubs`)
-- [PUT /clubs/{id}/canvas](#put--clubs--id--canvas) - 클럽하우스 12x12 공유 캔버스 저장 (`clubs`)
-- [GET /clubs/{id}/feed](#get--clubs--id--feed) - 클럽 피드 글 목록 조회 (`clubs`)
-- [POST /clubs/{id}/feed](#post--clubs--id--feed) - 클럽 피드 또는 공지사항 작성 (`clubs`)
-- [POST /clubs/{id}/join](#post--clubs--id--join) - 클럽 공개 가입 (`clubs`)
-- [POST /clubs/{id}/leave](#post--clubs--id--leave) - 클럽 탈퇴 (`clubs`)
-- [GET /clubs/{id}/members](#get--clubs--id--members) - 클럽 회원 명부 조회 (`clubs`)
-- [PATCH /clubs/{id}/members/{userId}/role](#patch--clubs--id--members--userid--role) - 클럽 회원 역할 변경 (`clubs`)
-- [GET /clubs/{id}/projects](#get--clubs--id--projects) - 협동 프로젝트 목록 조회 (`clubs`)
-- [POST /clubs/{id}/projects/{projectId}/contributions](#post--clubs--id--projects--projectid--contributions) - 협동 프로젝트 WLD 펀딩 기여 (영구 소각) (`clubs`)
-- [GET /collections](#get--collections) - 내 수집품 조각 목록 조회 (`collections`)
-- [PUT /collections/{id}](#put--collections--id-) - 수집품 유저 메모 및 즐겨찾기 수정 (`collections`)
-- [POST /collections/curation/advance](#post--collections-curation-advance) - 소유권 큐레이션 사다리 단계 진척 (`collections`)
-- [GET /collections/curation/status](#get--collections-curation-status) - D1~D7 소유권 큐레이션 사다리 상태 조회 (`collections`)
-- [POST /seasons/claim-rewards](#post--seasons-claim-rewards) - 시즌 보상 청구 및 수령 (`seasons`)
-- [GET /seasons/current](#get--seasons-current) - 현재 시즌 정보 및 내 티어/랭킹 조회 (`seasons`)
-- [GET /seasons/events](#get--seasons-events) - Active season events (`seasons`)
-- [POST /seasons/events/{id}/consumptions](#post--seasons-events--id--consumptions) - Spend on a season event (`seasons`)
-- [GET /seasons/events/{id}/leaderboard](#get--seasons-events--id--leaderboard) - Leaderboard for one event (`seasons`)
-- [GET /seasons/hall-of-fame](#get--seasons-hall-of-fame) - 역대 시즌 명예의 전당 헌액자 목록 (`seasons`)
-- [POST /seasons/settle](#post--seasons-settle) - 시즌 종료 정산 엔진 (명예의 전당 및 6대 티어 보상 분배) (`seasons`)
-- [GET /spaces](#get--spaces) - 내 개인 공간 목록 조회 (`spaces`)
-- [GET /spaces/{id}](#get--spaces--id-) - 개인 공간 상세 조회 (`spaces`)
-- [PUT /spaces/{id}/layout](#put--spaces--id--layout) - 개인 공간 인테리어/레이아웃 저장 (`spaces`)
-- [POST /spaces/{id}/tax/pay](#post--spaces--id--tax-pay) - 개인 공간 일일 부동산세 납부 (100% 영구 소각) (`spaces`)
-- [GET /spaces/{id}/tax/status](#get--spaces--id--tax-status) - 개인 공간 부동산세 상태 조회 (`spaces`)
-- [GET /spaces/city/projects](#get--spaces-city-projects) - 공공 도시 프로젝트 목록 조회 (`spaces`)
-- [POST /spaces/city/projects/{id}/contributions](#post--spaces-city-projects--id--contributions) - 공공 도시 프로젝트 펀딩 기여 (WLD 영구 소각) (`spaces`)
-- [POST /spaces/purchase](#post--spaces-purchase) - 개인 공간 구매 (WLD 소각) (`spaces`)
-- [GET /spaces/tax/delinquencies](#get--spaces-tax-delinquencies) - 체납 공매 대상 공간 목록 조회 (`spaces`)
+- [GET `/api/v1/clubs`](#get--api-v1-clubs) - 클럽 목록 탐색 및 검색 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [POST `/api/v1/clubs`](#post--api-v1-clubs) - 신규 클럽 창설 (10,000 WLD 소각) | `🔒 로그인 필수` `📜 약관동의 필수`
+- [GET `/api/v1/clubs/{id}`](#get--api-v1-clubs--id-) - 클럽 상세 정보 조회 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [GET `/api/v1/clubs/{id}/canvas`](#get--api-v1-clubs--id--canvas) - 소속 클럽하우스 12x12 가구 배치 그리드 및 장식 점수 조회 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [PUT `/api/v1/clubs/{id}/canvas`](#put--api-v1-clubs--id--canvas) - 클럽하우스 12x12 공유 캔버스 레이아웃 및 장식 점수 서버 영구 저장 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [GET `/api/v1/clubs/{id}/feed`](#get--api-v1-clubs--id--feed) - 클럽 피드 글 목록 조회 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [POST `/api/v1/clubs/{id}/feed`](#post--api-v1-clubs--id--feed) - 클럽 피드 또는 공지사항 작성 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [POST `/api/v1/clubs/{id}/join`](#post--api-v1-clubs--id--join) - 클럽 공개 가입 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [POST `/api/v1/clubs/{id}/leave`](#post--api-v1-clubs--id--leave) - 클럽 탈퇴 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [GET `/api/v1/clubs/{id}/members`](#get--api-v1-clubs--id--members) - 클럽 회원 명부 조회 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [PATCH `/api/v1/clubs/{id}/members/{userId}/role`](#patch--api-v1-clubs--id--members--userid--role) - 클럽 회원 역할 변경 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [GET `/api/v1/clubs/{id}/projects`](#get--api-v1-clubs--id--projects) - 협동 프로젝트 목록 조회 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [POST `/api/v1/clubs/{id}/projects/{projectId}/contributions`](#post--api-v1-clubs--id--projects--projectid--contributions) - 협동 프로젝트 WLD 펀딩 기여 (영구 소각) | `🔒 로그인 필수` `📜 약관동의 필수`
+- [GET `/api/v1/collections`](#get--api-v1-collections) - 내 수집품 조각 목록 조회 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [PUT `/api/v1/collections/{id}`](#put--api-v1-collections--id-) - 수집품 유저 메모 및 즐겨찾기 수정 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [POST `/api/v1/collections/curation/advance`](#post--api-v1-collections-curation-advance) - 소유권 큐레이션 사다리 단계 진척 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [GET `/api/v1/collections/curation/status`](#get--api-v1-collections-curation-status) - D1~D7 소유권 큐레이션 사다리 상태 조회 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [POST `/api/v1/seasons/claim-rewards`](#post--api-v1-seasons-claim-rewards) - 시즌 보상 청구 및 수령 | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ CSRF 검증`
+- [GET `/api/v1/seasons/current`](#get--api-v1-seasons-current) - 현재 시즌 정보 및 내 티어/랭킹 조회 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [GET `/api/v1/seasons/events`](#get--api-v1-seasons-events) - Active season events | `🔒 로그인 필수` `📜 약관동의 필수`
+- [POST `/api/v1/seasons/events/{id}/consumptions`](#post--api-v1-seasons-events--id--consumptions) - Spend on a season event | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ CSRF 검증`
+- [GET `/api/v1/seasons/events/{id}/leaderboard`](#get--api-v1-seasons-events--id--leaderboard) - Leaderboard for one event | `🔒 로그인 필수` `📜 약관동의 필수`
+- [GET `/api/v1/seasons/hall-of-fame`](#get--api-v1-seasons-hall-of-fame) - 역대 시즌 명예의 전당 헌액자 목록 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [POST `/api/v1/seasons/settle`](#post--api-v1-seasons-settle) - 시즌 종료 정산 엔진 (명예의 전당 및 6대 티어 보상 분배) | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ CSRF 검증`
+- [GET `/api/v1/spaces`](#get--api-v1-spaces) - 사용자가 분양받아 보유 중인 나만의 개인 공간 목록 조회 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [GET `/api/v1/spaces/{id}`](#get--api-v1-spaces--id-) - 지정한 개인 공간의 상세 스펙 및 소유권 정보 조회 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [PUT `/api/v1/spaces/{id}/layout`](#put--api-v1-spaces--id--layout) - 개인 공간 8x8 인터랙티브 가구 배치 및 인테리어 레이아웃 저장 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [POST `/api/v1/spaces/{id}/tax/pay`](#post--api-v1-spaces--id--tax-pay) - 개인 공간 일일 부동산세 자진 납부 (100% 영구 소각 SINK_PROPERTY_TAX) | `🔒 로그인 필수` `📜 약관동의 필수`
+- [GET `/api/v1/spaces/{id}/tax/status`](#get--api-v1-spaces--id--tax-status) - 공간별 일일 보유세율, 완납 기한, 체납 일수 및 공매 상태 조회 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [GET `/api/v1/spaces/city/projects`](#get--api-v1-spaces-city-projects) - 머니버스 시민 공동 출자 공공 인프라 크라우드펀딩 프로젝트 목록 조회 | `🔒 로그인 필수` `📜 약관동의 필수`
+- [POST `/api/v1/spaces/city/projects/{id}/contributions`](#post--api-v1-spaces-city-projects--id--contributions) - 공공 도시 인프라 크라우드펀딩 WLD 출자 기여 (100% 소각 SINK_PROJECT_DONATION) | `🔒 로그인 필수` `📜 약관동의 필수`
+- [POST `/api/v1/spaces/purchase`](#post--api-v1-spaces-purchase) - 신규 개인 공간 분양 신청 (대금 100% 영구 소각 SINK_HOUSING_PURCHASE) | `🔒 로그인 필수` `📜 약관동의 필수`
+- [GET `/api/v1/spaces/tax/delinquencies`](#get--api-v1-spaces-tax-delinquencies) - 부동산세 7일 이상 체납으로 법정 유예 경과한 시청 강제 공매 매물 목록 조회 | `🔒 로그인 필수` `📜 약관동의 필수`
 
 ---
 
 ## 🛠️ 엔드포인트 상세 규격
 
-### GET `/clubs`
+<a id="get--api-v1-clubs"></a>
+### GET `/api/v1/clubs`
 
 **설명:** 클럽 목록 탐색 및 검색
 
-- **분류 태그 (Tag):** `clubs`
-- **엔드포인트 ID:** `ClubController_listClubs`
+- **분류 도메인 (Tag):** `clubs`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `ClubController_listClubs`
 
 #### 📌 매개변수 (Parameters)
 
@@ -61,24 +63,26 @@
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/clubs" \
+curl -X GET "https://easy-scraping.com/api/v1/clubs" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/clubs`
+<a id="post--api-v1-clubs"></a>
+### POST `/api/v1/clubs`
 
 **설명:** 신규 클럽 창설 (10,000 WLD 소각)
 
-- **분류 태그 (Tag):** `clubs`
-- **엔드포인트 ID:** `ClubController_createClub`
+- **분류 도메인 (Tag):** `clubs`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `ClubController_createClub`
 #### 📦 요청 본문 (Request Body)
 
   - `tag` (`string`) **(필수)** - 클럽 태그 (2-8자 대문자 영문/숫자)
@@ -92,12 +96,12 @@ curl -X GET "https://easy-scraping.com/clubs" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/clubs" \
+curl -X POST "https://easy-scraping.com/api/v1/clubs" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -108,12 +112,14 @@ curl -X POST "https://easy-scraping.com/clubs" \
 
 ---
 
-### GET `/clubs/{id}`
+<a id="get--api-v1-clubs--id-"></a>
+### GET `/api/v1/clubs/{id}`
 
 **설명:** 클럽 상세 정보 조회
 
-- **분류 태그 (Tag):** `clubs`
-- **엔드포인트 ID:** `ClubController_getClubById`
+- **분류 도메인 (Tag):** `clubs`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `ClubController_getClubById`
 
 #### 📌 매개변수 (Parameters)
 
@@ -125,24 +131,26 @@ curl -X POST "https://easy-scraping.com/clubs" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/clubs/{id}" \
+curl -X GET "https://easy-scraping.com/api/v1/clubs/{id}" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/clubs/{id}/canvas`
+<a id="get--api-v1-clubs--id--canvas"></a>
+### GET `/api/v1/clubs/{id}/canvas`
 
-**설명:** 클럽하우스 12x12 공유 캔버스 조회
+**설명:** 소속 클럽하우스 12x12 가구 배치 그리드 및 장식 점수 조회
 
-- **분류 태그 (Tag):** `clubs`
-- **엔드포인트 ID:** `ClubController_getClubCanvas`
+- **분류 도메인 (Tag):** `clubs`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `ClubController_getClubCanvas`
 
 #### 📌 매개변수 (Parameters)
 
@@ -154,24 +162,26 @@ curl -X GET "https://easy-scraping.com/clubs/{id}" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/clubs/{id}/canvas" \
+curl -X GET "https://easy-scraping.com/api/v1/clubs/{id}/canvas" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### PUT `/clubs/{id}/canvas`
+<a id="put--api-v1-clubs--id--canvas"></a>
+### PUT `/api/v1/clubs/{id}/canvas`
 
-**설명:** 클럽하우스 12x12 공유 캔버스 저장
+**설명:** 클럽하우스 12x12 공유 캔버스 레이아웃 및 장식 점수 서버 영구 저장
 
-- **분류 태그 (Tag):** `clubs`
-- **엔드포인트 ID:** `ClubController_updateClubCanvas`
+- **분류 도메인 (Tag):** `clubs`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `ClubController_updateClubCanvas`
 
 #### 📌 매개변수 (Parameters)
 
@@ -188,12 +198,12 @@ curl -X GET "https://easy-scraping.com/clubs/{id}/canvas" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PUT "https://easy-scraping.com/clubs/{id}/canvas" \
+curl -X PUT "https://easy-scraping.com/api/v1/clubs/{id}/canvas" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -204,12 +214,14 @@ curl -X PUT "https://easy-scraping.com/clubs/{id}/canvas" \
 
 ---
 
-### GET `/clubs/{id}/feed`
+<a id="get--api-v1-clubs--id--feed"></a>
+### GET `/api/v1/clubs/{id}/feed`
 
 **설명:** 클럽 피드 글 목록 조회
 
-- **분류 태그 (Tag):** `clubs`
-- **엔드포인트 ID:** `ClubController_listClubFeed`
+- **분류 도메인 (Tag):** `clubs`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `ClubController_listClubFeed`
 
 #### 📌 매개변수 (Parameters)
 
@@ -222,24 +234,26 @@ curl -X PUT "https://easy-scraping.com/clubs/{id}/canvas" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/clubs/{id}/feed" \
+curl -X GET "https://easy-scraping.com/api/v1/clubs/{id}/feed" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/clubs/{id}/feed`
+<a id="post--api-v1-clubs--id--feed"></a>
+### POST `/api/v1/clubs/{id}/feed`
 
 **설명:** 클럽 피드 또는 공지사항 작성
 
-- **분류 태그 (Tag):** `clubs`
-- **엔드포인트 ID:** `ClubController_createClubFeedPost`
+- **분류 도메인 (Tag):** `clubs`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `ClubController_createClubFeedPost`
 
 #### 📌 매개변수 (Parameters)
 
@@ -257,12 +271,12 @@ curl -X GET "https://easy-scraping.com/clubs/{id}/feed" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/clubs/{id}/feed" \
+curl -X POST "https://easy-scraping.com/api/v1/clubs/{id}/feed" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -273,12 +287,14 @@ curl -X POST "https://easy-scraping.com/clubs/{id}/feed" \
 
 ---
 
-### POST `/clubs/{id}/join`
+<a id="post--api-v1-clubs--id--join"></a>
+### POST `/api/v1/clubs/{id}/join`
 
 **설명:** 클럽 공개 가입
 
-- **분류 태그 (Tag):** `clubs`
-- **엔드포인트 ID:** `ClubController_joinClub`
+- **분류 도메인 (Tag):** `clubs`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `ClubController_joinClub`
 
 #### 📌 매개변수 (Parameters)
 
@@ -290,28 +306,27 @@ curl -X POST "https://easy-scraping.com/clubs/{id}/feed" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/clubs/{id}/join" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/clubs/{id}/join" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/clubs/{id}/leave`
+<a id="post--api-v1-clubs--id--leave"></a>
+### POST `/api/v1/clubs/{id}/leave`
 
 **설명:** 클럽 탈퇴
 
-- **분류 태그 (Tag):** `clubs`
-- **엔드포인트 ID:** `ClubController_leaveClub`
+- **분류 도메인 (Tag):** `clubs`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `ClubController_leaveClub`
 
 #### 📌 매개변수 (Parameters)
 
@@ -323,28 +338,27 @@ curl -X POST "https://easy-scraping.com/clubs/{id}/join" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/clubs/{id}/leave" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/clubs/{id}/leave" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/clubs/{id}/members`
+<a id="get--api-v1-clubs--id--members"></a>
+### GET `/api/v1/clubs/{id}/members`
 
 **설명:** 클럽 회원 명부 조회
 
-- **분류 태그 (Tag):** `clubs`
-- **엔드포인트 ID:** `ClubController_listClubMembers`
+- **분류 도메인 (Tag):** `clubs`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `ClubController_listClubMembers`
 
 #### 📌 매개변수 (Parameters)
 
@@ -358,24 +372,26 @@ curl -X POST "https://easy-scraping.com/clubs/{id}/leave" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/clubs/{id}/members" \
+curl -X GET "https://easy-scraping.com/api/v1/clubs/{id}/members" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### PATCH `/clubs/{id}/members/{userId}/role`
+<a id="patch--api-v1-clubs--id--members--userid--role"></a>
+### PATCH `/api/v1/clubs/{id}/members/{userId}/role`
 
 **설명:** 클럽 회원 역할 변경
 
-- **분류 태그 (Tag):** `clubs`
-- **엔드포인트 ID:** `ClubController_updateMemberRole`
+- **분류 도메인 (Tag):** `clubs`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `ClubController_updateMemberRole`
 
 #### 📌 매개변수 (Parameters)
 
@@ -392,12 +408,12 @@ curl -X GET "https://easy-scraping.com/clubs/{id}/members" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PATCH "https://easy-scraping.com/clubs/{id}/members/{userId}/role" \
+curl -X PATCH "https://easy-scraping.com/api/v1/clubs/{id}/members/{userId}/role" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -408,12 +424,14 @@ curl -X PATCH "https://easy-scraping.com/clubs/{id}/members/{userId}/role" \
 
 ---
 
-### GET `/clubs/{id}/projects`
+<a id="get--api-v1-clubs--id--projects"></a>
+### GET `/api/v1/clubs/{id}/projects`
 
 **설명:** 협동 프로젝트 목록 조회
 
-- **분류 태그 (Tag):** `clubs`
-- **엔드포인트 ID:** `ClubController_listClubProjects`
+- **분류 도메인 (Tag):** `clubs`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `ClubController_listClubProjects`
 
 #### 📌 매개변수 (Parameters)
 
@@ -425,24 +443,26 @@ curl -X PATCH "https://easy-scraping.com/clubs/{id}/members/{userId}/role" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/clubs/{id}/projects" \
+curl -X GET "https://easy-scraping.com/api/v1/clubs/{id}/projects" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/clubs/{id}/projects/{projectId}/contributions`
+<a id="post--api-v1-clubs--id--projects--projectid--contributions"></a>
+### POST `/api/v1/clubs/{id}/projects/{projectId}/contributions`
 
 **설명:** 협동 프로젝트 WLD 펀딩 기여 (영구 소각)
 
-- **분류 태그 (Tag):** `clubs`
-- **엔드포인트 ID:** `ClubController_contributeToProject`
+- **분류 도메인 (Tag):** `clubs`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `ClubController_contributeToProject`
 
 #### 📌 매개변수 (Parameters)
 
@@ -460,12 +480,12 @@ curl -X GET "https://easy-scraping.com/clubs/{id}/projects" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/clubs/{id}/projects/{projectId}/contributions" \
+curl -X POST "https://easy-scraping.com/api/v1/clubs/{id}/projects/{projectId}/contributions" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -476,34 +496,38 @@ curl -X POST "https://easy-scraping.com/clubs/{id}/projects/{projectId}/contribu
 
 ---
 
-### GET `/collections`
+<a id="get--api-v1-collections"></a>
+### GET `/api/v1/collections`
 
 **설명:** 내 수집품 조각 목록 조회
 
-- **분류 태그 (Tag):** `collections`
-- **엔드포인트 ID:** `CollectionController_listCollections`
+- **분류 도메인 (Tag):** `collections`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `CollectionController_listCollections`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/collections" \
+curl -X GET "https://easy-scraping.com/api/v1/collections" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### PUT `/collections/{id}`
+<a id="put--api-v1-collections--id-"></a>
+### PUT `/api/v1/collections/{id}`
 
 **설명:** 수집품 유저 메모 및 즐겨찾기 수정
 
-- **분류 태그 (Tag):** `collections`
-- **엔드포인트 ID:** `CollectionController_updatePiece`
+- **분류 도메인 (Tag):** `collections`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `CollectionController_updatePiece`
 
 #### 📌 매개변수 (Parameters)
 
@@ -520,12 +544,12 @@ curl -X GET "https://easy-scraping.com/collections" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PUT "https://easy-scraping.com/collections/{id}" \
+curl -X PUT "https://easy-scraping.com/api/v1/collections/{id}" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -536,12 +560,14 @@ curl -X PUT "https://easy-scraping.com/collections/{id}" \
 
 ---
 
-### POST `/collections/curation/advance`
+<a id="post--api-v1-collections-curation-advance"></a>
+### POST `/api/v1/collections/curation/advance`
 
 **설명:** 소유권 큐레이션 사다리 단계 진척
 
-- **분류 태그 (Tag):** `collections`
-- **엔드포인트 ID:** `CollectionController_advanceCuration`
+- **분류 도메인 (Tag):** `collections`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `CollectionController_advanceCuration`
 #### 📦 요청 본문 (Request Body)
 
   - `targetStep` (`number`) *(선택)* - 소유권 7단계 사다리 목표 단계 (1-7)
@@ -551,12 +577,12 @@ curl -X PUT "https://easy-scraping.com/collections/{id}" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/collections/curation/advance" \
+curl -X POST "https://easy-scraping.com/api/v1/collections/curation/advance" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -567,34 +593,38 @@ curl -X POST "https://easy-scraping.com/collections/curation/advance" \
 
 ---
 
-### GET `/collections/curation/status`
+<a id="get--api-v1-collections-curation-status"></a>
+### GET `/api/v1/collections/curation/status`
 
 **설명:** D1~D7 소유권 큐레이션 사다리 상태 조회
 
-- **분류 태그 (Tag):** `collections`
-- **엔드포인트 ID:** `CollectionController_getCurationStatus`
+- **분류 도메인 (Tag):** `collections`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `CollectionController_getCurationStatus`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/collections/curation/status" \
+curl -X GET "https://easy-scraping.com/api/v1/collections/curation/status" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/seasons/claim-rewards`
+<a id="post--api-v1-seasons-claim-rewards"></a>
+### POST `/api/v1/seasons/claim-rewards`
 
 **설명:** 시즌 보상 청구 및 수령
 
-- **분류 태그 (Tag):** `seasons`
-- **엔드포인트 ID:** `SeasonController_claimReward`
+- **분류 도메인 (Tag):** `seasons`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `SeasonController_claimReward`
 #### 📦 요청 본문 (Request Body)
 
   - `seasonId` (`string`) **(필수)** - 시즌 ID
@@ -604,12 +634,12 @@ curl -X GET "https://easy-scraping.com/collections/curation/status" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/seasons/claim-rewards" \
+curl -X POST "https://easy-scraping.com/api/v1/seasons/claim-rewards" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -620,56 +650,62 @@ curl -X POST "https://easy-scraping.com/seasons/claim-rewards" \
 
 ---
 
-### GET `/seasons/current`
+<a id="get--api-v1-seasons-current"></a>
+### GET `/api/v1/seasons/current`
 
 **설명:** 현재 시즌 정보 및 내 티어/랭킹 조회
 
-- **분류 태그 (Tag):** `seasons`
-- **엔드포인트 ID:** `SeasonController_current`
+- **분류 도메인 (Tag):** `seasons`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `SeasonController_current`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/seasons/current" \
+curl -X GET "https://easy-scraping.com/api/v1/seasons/current" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/seasons/events`
+<a id="get--api-v1-seasons-events"></a>
+### GET `/api/v1/seasons/events`
 
 **설명:** Active season events
 
-- **분류 태그 (Tag):** `seasons`
-- **엔드포인트 ID:** `SeasonController_events`
+- **분류 도메인 (Tag):** `seasons`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `SeasonController_events`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/seasons/events" \
+curl -X GET "https://easy-scraping.com/api/v1/seasons/events" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/seasons/events/{id}/consumptions`
+<a id="post--api-v1-seasons-events--id--consumptions"></a>
+### POST `/api/v1/seasons/events/{id}/consumptions`
 
 **설명:** Spend on a season event
 
-- **분류 태그 (Tag):** `seasons`
-- **엔드포인트 ID:** `SeasonController_consume`
+- **분류 도메인 (Tag):** `seasons`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `SeasonController_consume`
 
 #### 📌 매개변수 (Parameters)
 
@@ -686,12 +722,12 @@ curl -X GET "https://easy-scraping.com/seasons/events" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/seasons/events/{id}/consumptions" \
+curl -X POST "https://easy-scraping.com/api/v1/seasons/events/{id}/consumptions" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -702,12 +738,14 @@ curl -X POST "https://easy-scraping.com/seasons/events/{id}/consumptions" \
 
 ---
 
-### GET `/seasons/events/{id}/leaderboard`
+<a id="get--api-v1-seasons-events--id--leaderboard"></a>
+### GET `/api/v1/seasons/events/{id}/leaderboard`
 
 **설명:** Leaderboard for one event
 
-- **분류 태그 (Tag):** `seasons`
-- **엔드포인트 ID:** `SeasonController_leaderboard`
+- **분류 도메인 (Tag):** `seasons`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `SeasonController_leaderboard`
 
 #### 📌 매개변수 (Parameters)
 
@@ -719,46 +757,50 @@ curl -X POST "https://easy-scraping.com/seasons/events/{id}/consumptions" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/seasons/events/{id}/leaderboard" \
+curl -X GET "https://easy-scraping.com/api/v1/seasons/events/{id}/leaderboard" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/seasons/hall-of-fame`
+<a id="get--api-v1-seasons-hall-of-fame"></a>
+### GET `/api/v1/seasons/hall-of-fame`
 
 **설명:** 역대 시즌 명예의 전당 헌액자 목록
 
-- **분류 태그 (Tag):** `seasons`
-- **엔드포인트 ID:** `SeasonController_hallOfFame`
+- **분류 도메인 (Tag):** `seasons`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `SeasonController_hallOfFame`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/seasons/hall-of-fame" \
+curl -X GET "https://easy-scraping.com/api/v1/seasons/hall-of-fame" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/seasons/settle`
+<a id="post--api-v1-seasons-settle"></a>
+### POST `/api/v1/seasons/settle`
 
 **설명:** 시즌 종료 정산 엔진 (명예의 전당 및 6대 티어 보상 분배)
 
-- **분류 태그 (Tag):** `seasons`
-- **엔드포인트 ID:** `SeasonController_settle`
+- **분류 도메인 (Tag):** `seasons`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `SeasonController_settle`
 #### 📦 요청 본문 (Request Body)
 
   - `seasonId` (`string`) *(선택)* - 정산 대상 시즌 ID (생략 시 현재 활성 시즌)
@@ -767,12 +809,12 @@ curl -X GET "https://easy-scraping.com/seasons/hall-of-fame" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/seasons/settle" \
+curl -X POST "https://easy-scraping.com/api/v1/seasons/settle" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -783,34 +825,38 @@ curl -X POST "https://easy-scraping.com/seasons/settle" \
 
 ---
 
-### GET `/spaces`
+<a id="get--api-v1-spaces"></a>
+### GET `/api/v1/spaces`
 
-**설명:** 내 개인 공간 목록 조회
+**설명:** 사용자가 분양받아 보유 중인 나만의 개인 공간 목록 조회
 
-- **분류 태그 (Tag):** `spaces`
-- **엔드포인트 ID:** `SpaceController_listMySpaces`
+- **분류 도메인 (Tag):** `spaces`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `SpaceController_listMySpaces`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/spaces" \
+curl -X GET "https://easy-scraping.com/api/v1/spaces" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/spaces/{id}`
+<a id="get--api-v1-spaces--id-"></a>
+### GET `/api/v1/spaces/{id}`
 
-**설명:** 개인 공간 상세 조회
+**설명:** 지정한 개인 공간의 상세 스펙 및 소유권 정보 조회
 
-- **분류 태그 (Tag):** `spaces`
-- **엔드포인트 ID:** `SpaceController_getSpaceById`
+- **분류 도메인 (Tag):** `spaces`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `SpaceController_getSpaceById`
 
 #### 📌 매개변수 (Parameters)
 
@@ -822,24 +868,26 @@ curl -X GET "https://easy-scraping.com/spaces" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/spaces/{id}" \
+curl -X GET "https://easy-scraping.com/api/v1/spaces/{id}" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### PUT `/spaces/{id}/layout`
+<a id="put--api-v1-spaces--id--layout"></a>
+### PUT `/api/v1/spaces/{id}/layout`
 
-**설명:** 개인 공간 인테리어/레이아웃 저장
+**설명:** 개인 공간 8x8 인터랙티브 가구 배치 및 인테리어 레이아웃 저장
 
-- **분류 태그 (Tag):** `spaces`
-- **엔드포인트 ID:** `SpaceController_updateLayout`
+- **분류 도메인 (Tag):** `spaces`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `SpaceController_updateLayout`
 
 #### 📌 매개변수 (Parameters)
 
@@ -855,12 +903,12 @@ curl -X GET "https://easy-scraping.com/spaces/{id}" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PUT "https://easy-scraping.com/spaces/{id}/layout" \
+curl -X PUT "https://easy-scraping.com/api/v1/spaces/{id}/layout" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -871,12 +919,16 @@ curl -X PUT "https://easy-scraping.com/spaces/{id}/layout" \
 
 ---
 
-### POST `/spaces/{id}/tax/pay`
+<a id="post--api-v1-spaces--id--tax-pay"></a>
+### POST `/api/v1/spaces/{id}/tax/pay`
 
-**설명:** 개인 공간 일일 부동산세 납부 (100% 영구 소각)
+**설명:** 개인 공간 일일 부동산세 자진 납부 (100% 영구 소각 SINK_PROPERTY_TAX)
 
-- **분류 태그 (Tag):** `spaces`
-- **엔드포인트 ID:** `SpaceController_payPropertyTax`
+💡 **통화 소각 룰**: 납부된 부동산세는 `SINK_PROPERTY_TAX` 사유로 100% 전액 원천 소각됩니다. 미납 시 7일 유예 후 강제 공매 회부됩니다.
+
+- **분류 도메인 (Tag):** `spaces`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `SpaceController_payPropertyTax`
 
 #### 📌 매개변수 (Parameters)
 
@@ -893,12 +945,12 @@ curl -X PUT "https://easy-scraping.com/spaces/{id}/layout" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/spaces/{id}/tax/pay" \
+curl -X POST "https://easy-scraping.com/api/v1/spaces/{id}/tax/pay" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -909,12 +961,14 @@ curl -X POST "https://easy-scraping.com/spaces/{id}/tax/pay" \
 
 ---
 
-### GET `/spaces/{id}/tax/status`
+<a id="get--api-v1-spaces--id--tax-status"></a>
+### GET `/api/v1/spaces/{id}/tax/status`
 
-**설명:** 개인 공간 부동산세 상태 조회
+**설명:** 공간별 일일 보유세율, 완납 기한, 체납 일수 및 공매 상태 조회
 
-- **분류 태그 (Tag):** `spaces`
-- **엔드포인트 ID:** `SpaceController_getSpaceTaxStatus`
+- **분류 도메인 (Tag):** `spaces`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `SpaceController_getSpaceTaxStatus`
 
 #### 📌 매개변수 (Parameters)
 
@@ -926,46 +980,54 @@ curl -X POST "https://easy-scraping.com/spaces/{id}/tax/pay" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/spaces/{id}/tax/status" \
+curl -X GET "https://easy-scraping.com/api/v1/spaces/{id}/tax/status" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/spaces/city/projects`
+<a id="get--api-v1-spaces-city-projects"></a>
+### GET `/api/v1/spaces/city/projects`
 
-**설명:** 공공 도시 프로젝트 목록 조회
+**설명:** 머니버스 시민 공동 출자 공공 인프라 크라우드펀딩 프로젝트 목록 조회
 
-- **분류 태그 (Tag):** `spaces`
-- **엔드포인트 ID:** `SpaceController_listCityProjects`
+💡 **통화 소각 룰**: 출자된 WLD는 `SINK_PROJECT_DONATION` 사유로 100% 영구 소각되며, 공공 랜드마크 건립 기여도로 영구 아카이빙됩니다.
+
+- **분류 도메인 (Tag):** `spaces`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `SpaceController_listCityProjects`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/spaces/city/projects" \
+curl -X GET "https://easy-scraping.com/api/v1/spaces/city/projects" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/spaces/city/projects/{id}/contributions`
+<a id="post--api-v1-spaces-city-projects--id--contributions"></a>
+### POST `/api/v1/spaces/city/projects/{id}/contributions`
 
-**설명:** 공공 도시 프로젝트 펀딩 기여 (WLD 영구 소각)
+**설명:** 공공 도시 인프라 크라우드펀딩 WLD 출자 기여 (100% 소각 SINK_PROJECT_DONATION)
 
-- **분류 태그 (Tag):** `spaces`
-- **엔드포인트 ID:** `SpaceController_contributeCityProject`
+💡 **통화 소각 룰**: 출자된 WLD는 `SINK_PROJECT_DONATION` 사유로 100% 영구 소각되며, 공공 랜드마크 건립 기여도로 영구 아카이빙됩니다.
+
+- **분류 도메인 (Tag):** `spaces`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `SpaceController_contributeCityProject`
 
 #### 📌 매개변수 (Parameters)
 
@@ -982,12 +1044,12 @@ curl -X GET "https://easy-scraping.com/spaces/city/projects" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/spaces/city/projects/{id}/contributions" \
+curl -X POST "https://easy-scraping.com/api/v1/spaces/city/projects/{id}/contributions" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -998,12 +1060,16 @@ curl -X POST "https://easy-scraping.com/spaces/city/projects/{id}/contributions"
 
 ---
 
-### POST `/spaces/purchase`
+<a id="post--api-v1-spaces-purchase"></a>
+### POST `/api/v1/spaces/purchase`
 
-**설명:** 개인 공간 구매 (WLD 소각)
+**설명:** 신규 개인 공간 분양 신청 (대금 100% 영구 소각 SINK_HOUSING_PURCHASE)
 
-- **분류 태그 (Tag):** `spaces`
-- **엔드포인트 ID:** `SpaceController_purchaseSpace`
+💡 **통화 소각 룰**: 분양 대금은 `SINK_HOUSING_PURCHASE` 사유로 100% 영구 소각 처리되어 게임 밸런스에 인플레이션을 유발하지 않습니다.
+
+- **분류 도메인 (Tag):** `spaces`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `SpaceController_purchaseSpace`
 #### 📦 요청 본문 (Request Body)
 
   - `spaceType` (`string`) **(필수)** - 공간 유형
@@ -1014,12 +1080,12 @@ curl -X POST "https://easy-scraping.com/spaces/city/projects/{id}/contributions"
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/spaces/purchase" \
+curl -X POST "https://easy-scraping.com/api/v1/spaces/purchase" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1030,22 +1096,24 @@ curl -X POST "https://easy-scraping.com/spaces/purchase" \
 
 ---
 
-### GET `/spaces/tax/delinquencies`
+<a id="get--api-v1-spaces-tax-delinquencies"></a>
+### GET `/api/v1/spaces/tax/delinquencies`
 
-**설명:** 체납 공매 대상 공간 목록 조회
+**설명:** 부동산세 7일 이상 체납으로 법정 유예 경과한 시청 강제 공매 매물 목록 조회
 
-- **분류 태그 (Tag):** `spaces`
-- **엔드포인트 ID:** `SpaceController_listTaxDelinquencies`
+- **분류 도메인 (Tag):** `spaces`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `SpaceController_listTaxDelinquencies`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/spaces/tax/delinquencies" \
+curl -X GET "https://easy-scraping.com/api/v1/spaces/tax/delinquencies" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```

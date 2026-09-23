@@ -4,62 +4,66 @@
 
 ## 📋 목차 (Table of Contents)
 
-- [GET /bank/loans](#get--bank-loans) - Outstanding loans for the caller (`wallet`)
-- [POST /bank/loans](#post--bank-loans) - Borrow from the virtual bank (`wallet`)
-- [POST /bank/loans/{id}/repayments](#post--bank-loans--id--repayments) - Repay part or all of a loan (`wallet`)
-- [POST /bank/movements](#post--bank-movements) - Move balance between cash and bank (`wallet`)
-- [POST /banking/bonds/{id}/redeem](#post--banking-bonds--id--redeem) - Redeem matured virtual bond and payout principal with yield (`banking`)
-- [POST /banking/bonds/purchase](#post--banking-bonds-purchase) - Purchase 7-day or 30-day virtual government bonds (`banking`)
-- [POST /banking/borrow](#post--banking-borrow) - Borrow smart credit loan evaluated by job level and business value (`banking`)
-- [POST /banking/claim-interest](#post--banking-claim-interest) - Claim accrued compound deposit interest into bank balance (`banking`)
-- [POST /banking/deposit](#post--banking-deposit) - Deposit WLD cash into bank compound interest deposit account (`banking`)
-- [GET /banking/pockets](#get--banking-pockets) - List all saving pockets for current user (`banking`)
-- [POST /banking/pockets](#post--banking-pockets) - Create a new saving pocket (`banking`)
-- [PUT /banking/pockets/{id}](#put--banking-pockets--id-) - Customize saving pocket appearance and theme (`banking`)
-- [POST /banking/pockets/{id}/archive](#post--banking-pockets--id--archive) - Archive saving pocket and recover all funds to cash balance (`banking`)
-- [POST /banking/pockets/{id}/transfer](#post--banking-pockets--id--transfer) - Transfer funds between main bank balance and saving pocket (`banking`)
-- [POST /banking/repay](#post--banking-repay) - Repay active bank loan (`banking`)
-- [GET /banking/standing](#get--banking-standing) - Bank overview: cash, deposit balance, compound interest, loans, bonds (`banking`)
-- [POST /banking/withdraw](#post--banking-withdraw) - Withdraw WLD from bank deposit account to cash (`banking`)
-- [GET /game-clock](#get--game-clock) - Read the authoritative accelerated Moneyverse server day/week (`game-clock`)
-- [GET /rewards/availability](#get--rewards-availability) - Next eligible times for the caller reward controls (`wallet`)
-- [POST /rewards/daily/claims](#post--rewards-daily-claims) - Claim the daily reward (`wallet`)
-- [POST /rewards/work/claims](#post--rewards-work-claims) - Retired legacy work faucet; use professional work tasks (`wallet`)
-- [GET /wallet](#get--wallet) - Balances and recent ledger entries for the caller (`wallet`)
-- [POST /wallet/transfers](#post--wallet-transfers) - Send WLD to another member (`wallet`)
+- [GET `/api/v1/bank/loans`](#get--api-v1-bank-loans) - Outstanding loans for the caller | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/bank/loans`](#post--api-v1-bank-loans) - Borrow from the virtual bank | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/bank/loans/{id}/repayments`](#post--api-v1-bank-loans--id--repayments) - Repay part or all of a loan | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/bank/movements`](#post--api-v1-bank-movements) - Move balance between cash and bank | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/banking/bonds/{id}/redeem`](#post--api-v1-banking-bonds--id--redeem) - Redeem matured virtual bond and payout principal with yield | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/banking/bonds/purchase`](#post--api-v1-banking-bonds-purchase) - Purchase 7-day or 30-day virtual government bonds | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/banking/borrow`](#post--api-v1-banking-borrow) - Borrow smart credit loan evaluated by job level and business value | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/banking/claim-interest`](#post--api-v1-banking-claim-interest) - Claim accrued compound deposit interest into bank balance | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/banking/deposit`](#post--api-v1-banking-deposit) - Deposit WLD cash into bank compound interest deposit account | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/banking/pockets`](#get--api-v1-banking-pockets) - List all saving pockets for current user | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/banking/pockets`](#post--api-v1-banking-pockets) - Create a new saving pocket | `🔓 공개 (게스트 허용)`
+- [PUT `/api/v1/banking/pockets/{id}`](#put--api-v1-banking-pockets--id-) - Customize saving pocket appearance and theme | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/banking/pockets/{id}/archive`](#post--api-v1-banking-pockets--id--archive) - Archive saving pocket and recover all funds to cash balance | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/banking/pockets/{id}/transfer`](#post--api-v1-banking-pockets--id--transfer) - Transfer funds between main bank balance and saving pocket | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/banking/repay`](#post--api-v1-banking-repay) - Repay active bank loan | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/banking/standing`](#get--api-v1-banking-standing) - Bank overview: cash, deposit balance, compound interest, loans, bonds | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/banking/withdraw`](#post--api-v1-banking-withdraw) - Withdraw WLD from bank deposit account to cash | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/game-clock`](#get--api-v1-game-clock) - Read the authoritative accelerated Moneyverse server day/week | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/rewards/availability`](#get--api-v1-rewards-availability) - Next eligible times for the caller reward controls | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/rewards/daily/claims`](#post--api-v1-rewards-daily-claims) - Claim the daily reward | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/rewards/work/claims`](#post--api-v1-rewards-work-claims) - Retired legacy work faucet; use professional work tasks | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/wallet`](#get--api-v1-wallet) - Balances and recent ledger entries for the caller | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ CSRF 검증`
+- [POST `/api/v1/wallet/transfers`](#post--api-v1-wallet-transfers) - Send WLD to another member | `🔓 공개 (게스트 허용)`
 
 ---
 
 ## 🛠️ 엔드포인트 상세 규격
 
-### GET `/bank/loans`
+<a id="get--api-v1-bank-loans"></a>
+### GET `/api/v1/bank/loans`
 
 **설명:** Outstanding loans for the caller
 
-- **분류 태그 (Tag):** `wallet`
-- **엔드포인트 ID:** `WalletController_loans`
+- **분류 도메인 (Tag):** `wallet`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `WalletController_loans`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/bank/loans" \
+curl -X GET "https://easy-scraping.com/api/v1/bank/loans" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/bank/loans`
+<a id="post--api-v1-bank-loans"></a>
+### POST `/api/v1/bank/loans`
 
 **설명:** Borrow from the virtual bank
 
-- **분류 태그 (Tag):** `wallet`
-- **엔드포인트 ID:** `WalletController_borrow`
+- **분류 도메인 (Tag):** `wallet`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `WalletController_borrow`
 #### 📦 요청 본문 (Request Body)
 
   - `principalAmount` (`any`) **(필수)**
@@ -69,12 +73,12 @@ curl -X GET "https://easy-scraping.com/bank/loans" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/bank/loans" \
+curl -X POST "https://easy-scraping.com/api/v1/bank/loans" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -85,12 +89,14 @@ curl -X POST "https://easy-scraping.com/bank/loans" \
 
 ---
 
-### POST `/bank/loans/{id}/repayments`
+<a id="post--api-v1-bank-loans--id--repayments"></a>
+### POST `/api/v1/bank/loans/{id}/repayments`
 
 **설명:** Repay part or all of a loan
 
-- **분류 태그 (Tag):** `wallet`
-- **엔드포인트 ID:** `WalletController_repay`
+- **분류 도메인 (Tag):** `wallet`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `WalletController_repay`
 
 #### 📌 매개변수 (Parameters)
 
@@ -107,12 +113,12 @@ curl -X POST "https://easy-scraping.com/bank/loans" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/bank/loans/{id}/repayments" \
+curl -X POST "https://easy-scraping.com/api/v1/bank/loans/{id}/repayments" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -123,12 +129,14 @@ curl -X POST "https://easy-scraping.com/bank/loans/{id}/repayments" \
 
 ---
 
-### POST `/bank/movements`
+<a id="post--api-v1-bank-movements"></a>
+### POST `/api/v1/bank/movements`
 
 **설명:** Move balance between cash and bank
 
-- **분류 태그 (Tag):** `wallet`
-- **엔드포인트 ID:** `WalletController_bankMovement`
+- **분류 도메인 (Tag):** `wallet`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `WalletController_bankMovement`
 #### 📦 요청 본문 (Request Body)
 
   - `direction` (`string`) **(필수)**
@@ -139,12 +147,12 @@ curl -X POST "https://easy-scraping.com/bank/loans/{id}/repayments" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/bank/movements" \
+curl -X POST "https://easy-scraping.com/api/v1/bank/movements" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -155,12 +163,14 @@ curl -X POST "https://easy-scraping.com/bank/movements" \
 
 ---
 
-### POST `/banking/bonds/{id}/redeem`
+<a id="post--api-v1-banking-bonds--id--redeem"></a>
+### POST `/api/v1/banking/bonds/{id}/redeem`
 
 **설명:** Redeem matured virtual bond and payout principal with yield
 
-- **분류 태그 (Tag):** `banking`
-- **엔드포인트 ID:** `BankController_redeemBond`
+- **분류 도메인 (Tag):** `banking`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `BankController_redeemBond`
 
 #### 📌 매개변수 (Parameters)
 
@@ -176,12 +186,12 @@ curl -X POST "https://easy-scraping.com/bank/movements" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/banking/bonds/{id}/redeem" \
+curl -X POST "https://easy-scraping.com/api/v1/banking/bonds/{id}/redeem" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -192,12 +202,14 @@ curl -X POST "https://easy-scraping.com/banking/bonds/{id}/redeem" \
 
 ---
 
-### POST `/banking/bonds/purchase`
+<a id="post--api-v1-banking-bonds-purchase"></a>
+### POST `/api/v1/banking/bonds/purchase`
 
 **설명:** Purchase 7-day or 30-day virtual government bonds
 
-- **분류 태그 (Tag):** `banking`
-- **엔드포인트 ID:** `BankController_purchaseBond`
+- **분류 도메인 (Tag):** `banking`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `BankController_purchaseBond`
 #### 📦 요청 본문 (Request Body)
 
   - `bondCode` (`string`) **(필수)**
@@ -208,12 +220,12 @@ curl -X POST "https://easy-scraping.com/banking/bonds/{id}/redeem" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/banking/bonds/purchase" \
+curl -X POST "https://easy-scraping.com/api/v1/banking/bonds/purchase" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -224,12 +236,14 @@ curl -X POST "https://easy-scraping.com/banking/bonds/purchase" \
 
 ---
 
-### POST `/banking/borrow`
+<a id="post--api-v1-banking-borrow"></a>
+### POST `/api/v1/banking/borrow`
 
 **설명:** Borrow smart credit loan evaluated by job level and business value
 
-- **분류 태그 (Tag):** `banking`
-- **엔드포인트 ID:** `BankController_borrow`
+- **분류 도메인 (Tag):** `banking`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `BankController_borrow`
 #### 📦 요청 본문 (Request Body)
 
   - `amount` (`string`) **(필수)**
@@ -239,12 +253,12 @@ curl -X POST "https://easy-scraping.com/banking/bonds/purchase" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/banking/borrow" \
+curl -X POST "https://easy-scraping.com/api/v1/banking/borrow" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -255,12 +269,14 @@ curl -X POST "https://easy-scraping.com/banking/borrow" \
 
 ---
 
-### POST `/banking/claim-interest`
+<a id="post--api-v1-banking-claim-interest"></a>
+### POST `/api/v1/banking/claim-interest`
 
 **설명:** Claim accrued compound deposit interest into bank balance
 
-- **분류 태그 (Tag):** `banking`
-- **엔드포인트 ID:** `BankController_claimInterest`
+- **분류 도메인 (Tag):** `banking`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `BankController_claimInterest`
 #### 📦 요청 본문 (Request Body)
 
   - `idempotencyKey` (`string`) **(필수)**
@@ -269,12 +285,12 @@ curl -X POST "https://easy-scraping.com/banking/borrow" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/banking/claim-interest" \
+curl -X POST "https://easy-scraping.com/api/v1/banking/claim-interest" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -285,12 +301,14 @@ curl -X POST "https://easy-scraping.com/banking/claim-interest" \
 
 ---
 
-### POST `/banking/deposit`
+<a id="post--api-v1-banking-deposit"></a>
+### POST `/api/v1/banking/deposit`
 
 **설명:** Deposit WLD cash into bank compound interest deposit account
 
-- **분류 태그 (Tag):** `banking`
-- **엔드포인트 ID:** `BankController_deposit`
+- **분류 도메인 (Tag):** `banking`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `BankController_deposit`
 #### 📦 요청 본문 (Request Body)
 
   - `amount` (`string`) **(필수)**
@@ -300,12 +318,12 @@ curl -X POST "https://easy-scraping.com/banking/claim-interest" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/banking/deposit" \
+curl -X POST "https://easy-scraping.com/api/v1/banking/deposit" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -316,34 +334,38 @@ curl -X POST "https://easy-scraping.com/banking/deposit" \
 
 ---
 
-### GET `/banking/pockets`
+<a id="get--api-v1-banking-pockets"></a>
+### GET `/api/v1/banking/pockets`
 
 **설명:** List all saving pockets for current user
 
-- **분류 태그 (Tag):** `banking`
-- **엔드포인트 ID:** `PocketController_listPockets`
+- **분류 도메인 (Tag):** `banking`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `PocketController_listPockets`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/banking/pockets" \
+curl -X GET "https://easy-scraping.com/api/v1/banking/pockets" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/banking/pockets`
+<a id="post--api-v1-banking-pockets"></a>
+### POST `/api/v1/banking/pockets`
 
 **설명:** Create a new saving pocket
 
-- **분류 태그 (Tag):** `banking`
-- **엔드포인트 ID:** `PocketController_createPocket`
+- **분류 도메인 (Tag):** `banking`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `PocketController_createPocket`
 #### 📦 요청 본문 (Request Body)
 
   - `name` (`string`) **(필수)** - 저금통 이름
@@ -357,12 +379,12 @@ curl -X GET "https://easy-scraping.com/banking/pockets" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/banking/pockets" \
+curl -X POST "https://easy-scraping.com/api/v1/banking/pockets" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -373,12 +395,14 @@ curl -X POST "https://easy-scraping.com/banking/pockets" \
 
 ---
 
-### PUT `/banking/pockets/{id}`
+<a id="put--api-v1-banking-pockets--id-"></a>
+### PUT `/api/v1/banking/pockets/{id}`
 
 **설명:** Customize saving pocket appearance and theme
 
-- **분류 태그 (Tag):** `banking`
-- **엔드포인트 ID:** `PocketController_customizePocket`
+- **분류 도메인 (Tag):** `banking`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `PocketController_customizePocket`
 
 #### 📌 매개변수 (Parameters)
 
@@ -398,12 +422,12 @@ curl -X POST "https://easy-scraping.com/banking/pockets" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PUT "https://easy-scraping.com/banking/pockets/{id}" \
+curl -X PUT "https://easy-scraping.com/api/v1/banking/pockets/{id}" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -414,12 +438,14 @@ curl -X PUT "https://easy-scraping.com/banking/pockets/{id}" \
 
 ---
 
-### POST `/banking/pockets/{id}/archive`
+<a id="post--api-v1-banking-pockets--id--archive"></a>
+### POST `/api/v1/banking/pockets/{id}/archive`
 
 **설명:** Archive saving pocket and recover all funds to cash balance
 
-- **분류 태그 (Tag):** `banking`
-- **엔드포인트 ID:** `PocketController_archivePocket`
+- **분류 도메인 (Tag):** `banking`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `PocketController_archivePocket`
 
 #### 📌 매개변수 (Parameters)
 
@@ -435,12 +461,12 @@ curl -X PUT "https://easy-scraping.com/banking/pockets/{id}" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/banking/pockets/{id}/archive" \
+curl -X POST "https://easy-scraping.com/api/v1/banking/pockets/{id}/archive" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -451,12 +477,14 @@ curl -X POST "https://easy-scraping.com/banking/pockets/{id}/archive" \
 
 ---
 
-### POST `/banking/pockets/{id}/transfer`
+<a id="post--api-v1-banking-pockets--id--transfer"></a>
+### POST `/api/v1/banking/pockets/{id}/transfer`
 
 **설명:** Transfer funds between main bank balance and saving pocket
 
-- **분류 태그 (Tag):** `banking`
-- **엔드포인트 ID:** `PocketController_transferPocket`
+- **분류 도메인 (Tag):** `banking`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `PocketController_transferPocket`
 
 #### 📌 매개변수 (Parameters)
 
@@ -474,12 +502,12 @@ curl -X POST "https://easy-scraping.com/banking/pockets/{id}/archive" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/banking/pockets/{id}/transfer" \
+curl -X POST "https://easy-scraping.com/api/v1/banking/pockets/{id}/transfer" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -490,12 +518,14 @@ curl -X POST "https://easy-scraping.com/banking/pockets/{id}/transfer" \
 
 ---
 
-### POST `/banking/repay`
+<a id="post--api-v1-banking-repay"></a>
+### POST `/api/v1/banking/repay`
 
 **설명:** Repay active bank loan
 
-- **분류 태그 (Tag):** `banking`
-- **엔드포인트 ID:** `BankController_repay`
+- **분류 도메인 (Tag):** `banking`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `BankController_repay`
 #### 📦 요청 본문 (Request Body)
 
   - `loanId` (`string`) **(필수)**
@@ -506,12 +536,12 @@ curl -X POST "https://easy-scraping.com/banking/pockets/{id}/transfer" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/banking/repay" \
+curl -X POST "https://easy-scraping.com/api/v1/banking/repay" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -522,34 +552,38 @@ curl -X POST "https://easy-scraping.com/banking/repay" \
 
 ---
 
-### GET `/banking/standing`
+<a id="get--api-v1-banking-standing"></a>
+### GET `/api/v1/banking/standing`
 
 **설명:** Bank overview: cash, deposit balance, compound interest, loans, bonds
 
-- **분류 태그 (Tag):** `banking`
-- **엔드포인트 ID:** `BankController_standing`
+- **분류 도메인 (Tag):** `banking`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `BankController_standing`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/banking/standing" \
+curl -X GET "https://easy-scraping.com/api/v1/banking/standing" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/banking/withdraw`
+<a id="post--api-v1-banking-withdraw"></a>
+### POST `/api/v1/banking/withdraw`
 
 **설명:** Withdraw WLD from bank deposit account to cash
 
-- **분류 태그 (Tag):** `banking`
-- **엔드포인트 ID:** `BankController_withdraw`
+- **분류 도메인 (Tag):** `banking`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `BankController_withdraw`
 #### 📦 요청 본문 (Request Body)
 
   - `amount` (`string`) **(필수)**
@@ -559,12 +593,12 @@ curl -X GET "https://easy-scraping.com/banking/standing" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/banking/withdraw" \
+curl -X POST "https://easy-scraping.com/api/v1/banking/withdraw" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -575,56 +609,62 @@ curl -X POST "https://easy-scraping.com/banking/withdraw" \
 
 ---
 
-### GET `/game-clock`
+<a id="get--api-v1-game-clock"></a>
+### GET `/api/v1/game-clock`
 
 **설명:** Read the authoritative accelerated Moneyverse server day/week
 
-- **분류 태그 (Tag):** `game-clock`
-- **엔드포인트 ID:** `GameClockController_current`
+- **분류 도메인 (Tag):** `game-clock`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `GameClockController_current`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/game-clock" \
+curl -X GET "https://easy-scraping.com/api/v1/game-clock" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/rewards/availability`
+<a id="get--api-v1-rewards-availability"></a>
+### GET `/api/v1/rewards/availability`
 
 **설명:** Next eligible times for the caller reward controls
 
-- **분류 태그 (Tag):** `wallet`
-- **엔드포인트 ID:** `WalletController_rewardAvailability`
+- **분류 도메인 (Tag):** `wallet`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `WalletController_rewardAvailability`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/rewards/availability" \
+curl -X GET "https://easy-scraping.com/api/v1/rewards/availability" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/rewards/daily/claims`
+<a id="post--api-v1-rewards-daily-claims"></a>
+### POST `/api/v1/rewards/daily/claims`
 
 **설명:** Claim the daily reward
 
-- **분류 태그 (Tag):** `wallet`
-- **엔드포인트 ID:** `WalletController_claimDaily`
+- **분류 도메인 (Tag):** `wallet`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `WalletController_claimDaily`
 #### 📦 요청 본문 (Request Body)
 
   - `idempotencyKey` (`string`) **(필수)**
@@ -633,12 +673,12 @@ curl -X GET "https://easy-scraping.com/rewards/availability" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/rewards/daily/claims" \
+curl -X POST "https://easy-scraping.com/api/v1/rewards/daily/claims" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -649,38 +689,39 @@ curl -X POST "https://easy-scraping.com/rewards/daily/claims" \
 
 ---
 
-### POST `/rewards/work/claims`
+<a id="post--api-v1-rewards-work-claims"></a>
+### POST `/api/v1/rewards/work/claims`
 
 **설명:** Retired legacy work faucet; use professional work tasks
 
-- **분류 태그 (Tag):** `wallet`
-- **엔드포인트 ID:** `WalletController_claimWork`
+- **분류 도메인 (Tag):** `wallet`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `WalletController_claimWork`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/rewards/work/claims" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/rewards/work/claims" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/wallet`
+<a id="get--api-v1-wallet"></a>
+### GET `/api/v1/wallet`
 
 **설명:** Balances and recent ledger entries for the caller
 
-- **분류 태그 (Tag):** `wallet`
-- **엔드포인트 ID:** `WalletController_overview`
+- **분류 도메인 (Tag):** `wallet`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `WalletController_overview`
 
 #### 📌 매개변수 (Parameters)
 
@@ -692,24 +733,26 @@ curl -X POST "https://easy-scraping.com/rewards/work/claims" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/wallet" \
+curl -X GET "https://easy-scraping.com/api/v1/wallet" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/wallet/transfers`
+<a id="post--api-v1-wallet-transfers"></a>
+### POST `/api/v1/wallet/transfers`
 
 **설명:** Send WLD to another member
 
-- **분류 태그 (Tag):** `wallet`
-- **엔드포인트 ID:** `WalletController_transfer`
+- **분류 도메인 (Tag):** `wallet`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `WalletController_transfer`
 #### 📦 요청 본문 (Request Body)
 
   - `recipientUserId` (`string`) **(필수)** - Recipient user id
@@ -720,12 +763,12 @@ curl -X GET "https://easy-scraping.com/wallet" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/wallet/transfers" \
+curl -X POST "https://easy-scraping.com/api/v1/wallet/transfers" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \

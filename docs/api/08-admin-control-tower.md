@@ -4,155 +4,156 @@
 
 ## 📋 목차 (Table of Contents)
 
-- [POST /admin/ai-news/auto-generate](#post--admin-ai-news-auto-generate) - Auto-generate and optionally publish market news based on currently registered active stocks (`admin`)
-- [POST /admin/ai-news/batches](#post--admin-ai-news-batches) - Start a run that asks the model for five scenarios (`admin`)
-- [GET /admin/ai-news/batches/latest](#get--admin-ai-news-batches-latest) - The current batch of proposed scenarios, and the last run that asked for one (`admin`)
-- [GET /admin/ai-news/models](#get--admin-ai-news-models) - What the stored key can reach, as GET {base}/models lists it (`admin`)
-- [POST /admin/ai-news/scenarios/{id}/discard](#post--admin-ai-news-scenarios--id--discard) - Set a scenario aside (`admin`)
-- [POST /admin/ai-news/scenarios/{id}/publish](#post--admin-ai-news-scenarios--id--publish) - Publish a scenario as a market event, with the values the operator settled on (`admin`)
-- [GET /admin/ai-news/settings](#get--admin-ai-news-settings) - API address, model name and whether a key is stored (`admin`)
-- [PUT /admin/ai-news/settings](#put--admin-ai-news-settings) - Store the model address, model name and, optionally, a new key (`admin`)
-- [GET /admin/approvals](#get--admin-approvals) - Withdrawn: two-person approval was retired (`admin`)
-- [POST /admin/approvals](#post--admin-approvals) - Withdrawn: two-person approval was retired (`admin`)
-- [POST /admin/approvals/{id}/decisions](#post--admin-approvals--id--decisions) - Withdrawn: two-person approval was retired (`admin`)
-- [GET /admin/audit-events](#get--admin-audit-events) - Recent audit trail entries (`admin`)
-- [GET /admin/audit/dispositions](#get--admin-audit-dispositions) - What was archived, destroyed or held (`admin`)
-- [POST /admin/audit/dispositions](#post--admin-audit-dispositions) - Record what was decided about a range past its retention period (`admin`)
-- [GET /admin/audit/events](#get--admin-audit-events) - Search the audit trail; addresses and session hashes are masked (`admin`)
-- [POST /admin/audit/events/{id}/reveal](#post--admin-audit-events--id--reveal) - Unmask one entry; the reveal is itself recorded (`admin`)
-- [GET /admin/audit/retention](#get--admin-audit-retention) - Retention periods, what is past them, and the last disposition (`admin`)
-- [PUT /admin/audit/retention/{category}](#put--admin-audit-retention--category-) - Append a retention policy version for one category (`admin`)
-- [GET /admin/audit/verifications](#get--admin-audit-verifications) - Past chain verifications (`admin`)
-- [POST /admin/audit/verify](#post--admin-audit-verify) - Recompute the hash chain over a window and record the result (`admin`)
-- [GET /admin/bank](#get--admin-bank) - Deposits and the loan book, with the credit ladder behind it (`admin`)
-- [GET /admin/business-types](#get--admin-business-types) - Every business type, including inactive ones (`admin`)
-- [PATCH /admin/business-types/{id}](#patch--admin-business-types--id-) - Rename, redescribe or deactivate a business type (`admin`)
-- [GET /admin/controls](#get--admin-controls) - Feature switches, economy policy versions and role assignments (`admin`)
-- [GET /admin/controls/auto-policy](#get--admin-controls-auto-policy) - Policy knobs plus classical proposal and matching AI review evidence (`admin`)
-- [PUT /admin/controls/auto-policy/knobs/{knobKey}](#put--admin-controls-auto-policy-knobs--knobkey-) - Take one knob off automatic, or move its approved range (`admin`)
-- [POST /admin/controls/auto-policy/runs](#post--admin-controls-auto-policy-runs) - Run the dual-lane automatic adjustment now instead of waiting for Monday (`admin`)
-- [POST /admin/controls/consent-versions](#post--admin-controls-consent-versions) - Publish a new terms and privacy policy version (Superadmin only) (`admin`)
-- [GET /admin/controls/consent-versions](#get--admin-controls-consent-versions) - List recent terms and privacy policy versions (`admin`)
-- [PUT /admin/controls/feature-switches/{featureKey}](#put--admin-controls-feature-switches--featurekey-) - Enable, pause, put into safe mode or disable a feature (`admin`)
-- [PUT /admin/controls/feature-switches/economy_auto_policy](#put--admin-controls-feature-switches-economy-auto-policy) - Enable or pause the automatic economy policy without step-up (`admin`)
-- [POST /admin/controls/policies](#post--admin-controls-policies) - Create an economy policy version, immediate or scheduled (`admin`)
-- [POST /admin/controls/policies/activations](#post--admin-controls-policies-activations) - Activate every policy version whose effective time has passed (`admin`)
-- [POST /admin/controls/policies/rollbacks](#post--admin-controls-policies-rollbacks) - Return the economy to the previous policy version (`admin`)
-- [POST /admin/controls/role-revocations](#post--admin-controls-role-revocations) - Take back an administrative role (`admin`)
-- [POST /admin/controls/roles](#post--admin-controls-roles) - Grant an administrative role, or move the superadmin designation (`admin`)
-- [GET /admin/discord](#get--admin-discord) - Discord delivery: which types are routed, and what is stuck (`admin`)
-- [GET /admin/discord-outbox-events](#get--admin-discord-outbox-events) - Recent Discord outbox deliveries (`admin`)
-- [GET /admin/economy](#get--admin-economy) - Money supply, issuance and burn, concentration and operational health (`admin`)
-- [GET /admin/economy/ai-status](#get--admin-economy-ai-status) - Economy AI feature switch, latest council review and agent scoreboard (`admin`)
-- [GET /admin/economy/alerts](#get--admin-economy-alerts) - Alerts, unacknowledged first (`admin`)
-- [POST /admin/economy/alerts/{id}/acknowledgements](#post--admin-economy-alerts--id--acknowledgements) - Acknowledge an alert (`admin`)
-- [POST /admin/economy/bulk-payouts](#post--admin-economy-bulk-payouts) - Pay every member the filter matches (`admin`)
-- [GET /admin/economy/bulk-payouts/{id}/report](#get--admin-economy-bulk-payouts--id--report) - Who was paid, who was skipped and who failed, one row each (`admin`)
-- [POST /admin/economy/bulk-payouts/previews](#post--admin-economy-bulk-payouts-previews) - Count the members a payout would reach, and what it would cost (`admin`)
-- [POST /admin/economy/killswitch](#post--admin-economy-killswitch) - Toggle master killswitch or module circuit breaker (`admin`)
-- [POST /admin/economy/knobs-v2](#post--admin-economy-knobs-v2) - Update economic knobs (interest, bond yields, loan rates) (`admin`)
-- [GET /admin/economy/macro-v2](#get--admin-economy-macro-v2) - Admin Control Center 2.0 Macro Economy statistics (`admin`)
-- [GET /admin/economy/reconciliations/latest](#get--admin-economy-reconciliations-latest) - Most recent economy reconciliation health snapshot (`admin`)
-- [GET /admin/economy/scenario-lab/preview](#get--admin-economy-scenario-lab-preview) - Read-only deterministic economy scenario projection (`admin`)
-- [GET /admin/economy/stats](#get--admin-economy-stats) - Realtime Faucet vs Sink stats and circulation summary (`admin`)
-- [POST /admin/economy/transactions/{id}/reversal](#post--admin-economy-transactions--id--reversal) - Reverse one transaction, posting its opposite back to the ledger (`admin`)
-- [GET /admin/economy/users/{id}/inspect-v2](#get--admin-economy-users--id--inspect-v2) - Inspect user wallet, deposits, loans, jobs, businesses (`admin`)
-- [POST /admin/economy/users/{id}/override-v2](#post--admin-economy-users--id--override-v2) - Override user cash or bank balance (grant or confiscate WLD) (`admin`)
-- [GET /admin/me](#get--admin-me) - Roles held by the caller (`admin`)
-- [POST /admin/photos](#post--admin-photos) - Upload image bytes to the private store (`admin`)
-- [GET /admin/safety/chat-reports](#get--admin-safety-chat-reports) - 관리자 1:1 개인 채팅 신고 큐 목록 조회 (`safety`)
-- [GET /admin/safety/chat-reports/{id}](#get--admin-safety-chat-reports--id-) - 관리자 1:1 개인 채팅 신고 상세 및 증거 스냅샷 열람 (`safety`)
-- [POST /admin/safety/chat-reports/{id}/action](#post--admin-safety-chat-reports--id--action) - 관리자 1:1 개인 채팅 신고 조치 실행 (`safety`)
-- [GET /admin/safety/takedowns](#get--admin-safety-takedowns) - 관리자 긴급 콘텐츠 삭제 큐 조회 (`safety`)
-- [POST /admin/safety/takedowns/{caseId}/action](#post--admin-safety-takedowns--caseid--action) - 관리자 긴급 콘텐츠 삭제 조치 (`safety`)
-- [GET /admin/season-events](#get--admin-season-events) - Every season event, including inactive ones (`admin`)
-- [POST /admin/season-events](#post--admin-season-events) - Create a season event in the active season (`admin`)
-- [PATCH /admin/season-events/{id}](#patch--admin-season-events--id-) - Retitle, redescribe or deactivate a season event (`admin`)
-- [GET /admin/security](#get--admin-security) - Console session state and login policy (`admin`)
-- [POST /admin/security/forced-logouts](#post--admin-security-forced-logouts) - End every live session a member holds (`admin`)
-- [GET /admin/security/ip-blocks](#get--admin-security-ip-blocks) - List current and historical service IP blocks (`admin-security`)
-- [POST /admin/security/ip-blocks](#post--admin-security-ip-blocks) - Block an IP address or CIDR until manually lifted (`admin-security`)
-- [DELETE /admin/security/ip-blocks/{id}](#delete--admin-security-ip-blocks--id-) - Lift a service IP block (`admin-security`)
-- [PUT /admin/security/login-policies/{userId}](#put--admin-security-login-policies--userid-) - Replace the address allowlist for an administrator (`admin`)
-- [POST /admin/security/sessions](#post--admin-security-sessions) - Enter the operations console, rotating the session (`admin`)
-- [DELETE /admin/security/sessions](#delete--admin-security-sessions) - Leave the operations console (`admin`)
-- [POST /admin/security/users/{id}/permanent-suspension](#post--admin-security-users--id--permanent-suspension) - Permanently restrict a member and revoke all live sessions (`admin-security`)
-- [GET /admin/shop/items](#get--admin-shop-items) - List all items in the catalog for admin inspection (`admin`)
-- [PATCH /admin/shop/items/{id}](#patch--admin-shop-items--id-) - Update price, active status, or stock of a catalog item (`admin`)
-- [GET /admin/stocks](#get--admin-stocks) - Every stock, including inactive ones (`admin`)
-- [POST /admin/stocks](#post--admin-stocks) - List a new stock (`admin`)
-- [PATCH /admin/stocks/{id}](#patch--admin-stocks--id-) - Rename, redescribe or deactivate a stock (`admin`)
-- [DELETE /admin/stocks/{id}](#delete--admin-stocks--id-) - Delete a stock that has no history (`admin`)
-- [POST /admin/stocks/{id}/corporate-actions](#post--admin-stocks--id--corporate-actions) - Apply a split or reverse split (`admin`)
-- [POST /admin/stocks/{id}/halt](#post--admin-stocks--id--halt) - Halt stock trading and auto-settle all holdings into cost-basis WLD (`admin`)
-- [GET /admin/stocks/{id}/halt-settlement](#get--admin-stocks--id--halt-settlement) - Get stock halt settlement progress and statistics (`admin`)
-- [POST /admin/stocks/{id}/halt-settlement/retry](#post--admin-stocks--id--halt-settlement-retry) - Retry failed or quarantined stock halt settlements (`admin`)
-- [POST /admin/stocks/{id}/price](#post--admin-stocks--id--price) - Set a stock price by hand (`admin`)
-- [GET /admin/stocks/dynamics](#get--admin-stocks-dynamics) - Trend, volatility and fair value per stock (`admin`)
-- [GET /admin/stocks/market-events](#get--admin-stocks-market-events) - Recent market events, ended and cancelled included (`admin`)
-- [POST /admin/stocks/market-events](#post--admin-stocks-market-events) - Publish a market event: news that leans the market (`admin`)
-- [DELETE /admin/stocks/market-events/{id}](#delete--admin-stocks-market-events--id-) - End a market event now (`admin`)
-- [GET /admin/support/threads](#get--admin-support-threads) - Administrator support inbox (`admin`)
-- [GET /admin/support/threads/{id}/messages](#get--admin-support-threads--id--messages) - Read a support conversation as administrator (`admin`)
-- [POST /admin/support/threads/{id}/messages](#post--admin-support-threads--id--messages) - Reply to a member support conversation (`admin`)
-- [PUT /admin/support/threads/{id}/status](#put--admin-support-threads--id--status) - Change support conversation status (`admin`)
-- [POST /admin/treasury/drain](#post--admin-treasury-drain) - 국고 잉여 자금 영구 소각 (Step-Up/Admin) (`Admin Treasury`)
-- [POST /admin/treasury/inject](#post--admin-treasury-inject) - 국고 자금 긴급 주입 (Step-Up/Admin) (`Admin Treasury`)
-- [GET /admin/treasury/overview](#get--admin-treasury-overview) - 중앙 국고 및 비축금 현황 대시보드 조회 (`Admin Treasury`)
-- [GET /admin/treasury/transactions](#get--admin-treasury-transactions) - 국고 원장 입출금 및 순환 감사 내역 조회 (`Admin Treasury`)
-- [GET /admin/users](#get--admin-users) - Members and their status (`admin`)
-- [GET /admin/users/{id}/portfolio](#get--admin-users--id--portfolio) - Detailed user asset portfolio (`admin`)
-- [PUT /admin/users/{id}/restriction](#put--admin-users--id--restriction) - Restrict or unrestrict a member (`admin`)
-- [GET /admin/work](#get--admin-work) - The work catalogue, the reward policy in force, and job levels (`admin`)
-- [POST /admin/work/auto-tune](#post--admin-work-auto-tune) - Automatically calculate and tune daily reward cap based on economy health (`admin`)
-- [PUT /admin/work/policy](#put--admin-work-policy) - Update work reward policy daily cap, weekly cap, and repeat decay (`admin`)
-- [GET /admin/work/stats](#get--admin-work-stats) - Real-time 24h work ranking, daily cap usage buckets, and 7-day trend (`admin`)
-- [PATCH /admin/work/tasks/{id}](#patch--admin-work-tasks--id-) - Update base reward, duration, daily limit, and active state of a work task (`admin`)
-- [GET /health](#get--health) - Liveness probe (`Health`)
-- [GET /privacy/requests](#get--privacy-requests) - Data subject requests the caller has made (`privacy`)
-- [POST /privacy/requests](#post--privacy-requests) - Raise a data subject request (`privacy`)
-- [POST /safety/takedown](#post--safety-takedown) - 비회원 공개 긴급 콘텐츠 삭제 접수 (`safety`)
-- [POST /safety/takedown/status](#post--safety-takedown-status) - 비회원 접수 상태 조회 (`safety`)
-- [GET /version](#get--version) - Backend runtime identity (`Version`)
+- [POST `/api/v1/admin/ai-news/auto-generate`](#post--api-v1-admin-ai-news-auto-generate) - Auto-generate and optionally publish market news based on currently registered active stocks | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/ai-news/batches`](#post--api-v1-admin-ai-news-batches) - Start a run that asks the model for five scenarios | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/ai-news/batches/latest`](#get--api-v1-admin-ai-news-batches-latest) - The current batch of proposed scenarios, and the last run that asked for one | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [GET `/api/v1/admin/ai-news/models`](#get--api-v1-admin-ai-news-models) - What the stored key can reach, as GET {base}/models lists it | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/ai-news/scenarios/{id}/discard`](#post--api-v1-admin-ai-news-scenarios--id--discard) - Set a scenario aside | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/ai-news/scenarios/{id}/publish`](#post--api-v1-admin-ai-news-scenarios--id--publish) - Publish a scenario as a market event, with the values the operator settled on | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/ai-news/settings`](#get--api-v1-admin-ai-news-settings) - API address, model name and whether a key is stored | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [PUT `/api/v1/admin/ai-news/settings`](#put--api-v1-admin-ai-news-settings) - Store the model address, model name and, optionally, a new key | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [GET `/api/v1/admin/approvals`](#get--api-v1-admin-approvals) - Withdrawn: two-person approval was retired | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [POST `/api/v1/admin/approvals`](#post--api-v1-admin-approvals) - Withdrawn: two-person approval was retired | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/approvals/{id}/decisions`](#post--api-v1-admin-approvals--id--decisions) - Withdrawn: two-person approval was retired | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/audit-events`](#get--api-v1-admin-audit-events) - Recent audit trail entries | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/audit/dispositions`](#get--api-v1-admin-audit-dispositions) - What was archived, destroyed or held | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/audit/dispositions`](#post--api-v1-admin-audit-dispositions) - Record what was decided about a range past its retention period | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/audit/events`](#get--api-v1-admin-audit-events) - Search the audit trail; addresses and session hashes are masked | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [POST `/api/v1/admin/audit/events/{id}/reveal`](#post--api-v1-admin-audit-events--id--reveal) - Unmask one entry; the reveal is itself recorded | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [GET `/api/v1/admin/audit/retention`](#get--api-v1-admin-audit-retention) - Retention periods, what is past them, and the last disposition | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [PUT `/api/v1/admin/audit/retention/{category}`](#put--api-v1-admin-audit-retention--category-) - Append a retention policy version for one category | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [GET `/api/v1/admin/audit/verifications`](#get--api-v1-admin-audit-verifications) - Past chain verifications | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/audit/verify`](#post--api-v1-admin-audit-verify) - Recompute the hash chain over a window and record the result | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/bank`](#get--api-v1-admin-bank) - Deposits and the loan book, with the credit ladder behind it | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/business-types`](#get--api-v1-admin-business-types) - Every business type, including inactive ones | `🔓 공개 (게스트 허용)`
+- [PATCH `/api/v1/admin/business-types/{id}`](#patch--api-v1-admin-business-types--id-) - Rename, redescribe or deactivate a business type | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [GET `/api/v1/admin/controls`](#get--api-v1-admin-controls) - Feature switches, economy policy versions and role assignments | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [GET `/api/v1/admin/controls/auto-policy`](#get--api-v1-admin-controls-auto-policy) - Policy knobs plus classical proposal and matching AI review evidence | `🔓 공개 (게스트 허용)`
+- [PUT `/api/v1/admin/controls/auto-policy/knobs/{knobKey}`](#put--api-v1-admin-controls-auto-policy-knobs--knobkey-) - Take one knob off automatic, or move its approved range | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/controls/auto-policy/runs`](#post--api-v1-admin-controls-auto-policy-runs) - Run the dual-lane automatic adjustment now instead of waiting for Monday | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [POST `/api/v1/admin/controls/consent-versions`](#post--api-v1-admin-controls-consent-versions) - Publish a new terms and privacy policy version (Superadmin only) | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/controls/consent-versions`](#get--api-v1-admin-controls-consent-versions) - List recent terms and privacy policy versions | `🔓 공개 (게스트 허용)`
+- [PUT `/api/v1/admin/controls/feature-switches/{featureKey}`](#put--api-v1-admin-controls-feature-switches--featurekey-) - Enable, pause, put into safe mode or disable a feature | `🔓 공개 (게스트 허용)`
+- [PUT `/api/v1/admin/controls/feature-switches/economy_auto_policy`](#put--api-v1-admin-controls-feature-switches-economy-auto-policy) - Enable or pause the automatic economy policy without step-up | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [POST `/api/v1/admin/controls/policies`](#post--api-v1-admin-controls-policies) - Create an economy policy version, immediate or scheduled | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/controls/policies/activations`](#post--api-v1-admin-controls-policies-activations) - Activate every policy version whose effective time has passed | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/controls/policies/rollbacks`](#post--api-v1-admin-controls-policies-rollbacks) - Return the economy to the previous policy version | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/controls/role-revocations`](#post--api-v1-admin-controls-role-revocations) - Take back an administrative role | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/controls/roles`](#post--api-v1-admin-controls-roles) - Grant an administrative role, or move the superadmin designation | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/discord`](#get--api-v1-admin-discord) - Discord delivery: which types are routed, and what is stuck | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/discord-outbox-events`](#get--api-v1-admin-discord-outbox-events) - Recent Discord outbox deliveries | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [GET `/api/v1/admin/economy`](#get--api-v1-admin-economy) - Money supply, issuance and burn, concentration and operational health | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [GET `/api/v1/admin/economy/ai-status`](#get--api-v1-admin-economy-ai-status) - Economy AI feature switch, latest council review and agent scoreboard | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [GET `/api/v1/admin/economy/alerts`](#get--api-v1-admin-economy-alerts) - Alerts, unacknowledged first | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [POST `/api/v1/admin/economy/alerts/{id}/acknowledgements`](#post--api-v1-admin-economy-alerts--id--acknowledgements) - Acknowledge an alert | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [POST `/api/v1/admin/economy/bulk-payouts`](#post--api-v1-admin-economy-bulk-payouts) - Pay every member the filter matches | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/economy/bulk-payouts/{id}/report`](#get--api-v1-admin-economy-bulk-payouts--id--report) - Who was paid, who was skipped and who failed, one row each | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/economy/bulk-payouts/previews`](#post--api-v1-admin-economy-bulk-payouts-previews) - Count the members a payout would reach, and what it would cost | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/economy/killswitch`](#post--api-v1-admin-economy-killswitch) - Toggle master killswitch or module circuit breaker | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/economy/knobs-v2`](#post--api-v1-admin-economy-knobs-v2) - Update economic knobs (interest, bond yields, loan rates) | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/economy/macro-v2`](#get--api-v1-admin-economy-macro-v2) - Admin Control Center 2.0 Macro Economy statistics | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/economy/reconciliations/latest`](#get--api-v1-admin-economy-reconciliations-latest) - Most recent economy reconciliation health snapshot | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [GET `/api/v1/admin/economy/scenario-lab/preview`](#get--api-v1-admin-economy-scenario-lab-preview) - Read-only deterministic economy scenario projection | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/economy/stats`](#get--api-v1-admin-economy-stats) - Realtime Faucet vs Sink stats and circulation summary | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [POST `/api/v1/admin/economy/transactions/{id}/reversal`](#post--api-v1-admin-economy-transactions--id--reversal) - Reverse one transaction, posting its opposite back to the ledger | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/economy/users/{id}/inspect-v2`](#get--api-v1-admin-economy-users--id--inspect-v2) - Inspect user wallet, deposits, loans, jobs, businesses | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/economy/users/{id}/override-v2`](#post--api-v1-admin-economy-users--id--override-v2) - Override user cash or bank balance (grant or confiscate WLD) | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/me`](#get--api-v1-admin-me) - Roles held by the caller | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [POST `/api/v1/admin/photos`](#post--api-v1-admin-photos) - Upload image bytes to the private store | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [GET `/api/v1/admin/safety/chat-reports`](#get--api-v1-admin-safety-chat-reports) - 관리자 1:1 개인 채팅 신고 큐 목록 조회 | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [GET `/api/v1/admin/safety/chat-reports/{id}`](#get--api-v1-admin-safety-chat-reports--id-) - 관리자 1:1 개인 채팅 신고 상세 및 증거 스냅샷 열람 | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [POST `/api/v1/admin/safety/chat-reports/{id}/action`](#post--api-v1-admin-safety-chat-reports--id--action) - 관리자 1:1 개인 채팅 신고 조치 실행 | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [GET `/api/v1/admin/safety/takedowns`](#get--api-v1-admin-safety-takedowns) - 관리자 긴급 콘텐츠 삭제 큐 조회 | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [POST `/api/v1/admin/safety/takedowns/{caseId}/action`](#post--api-v1-admin-safety-takedowns--caseid--action) - 관리자 긴급 콘텐츠 삭제 조치 | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [GET `/api/v1/admin/season-events`](#get--api-v1-admin-season-events) - Every season event, including inactive ones | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/season-events`](#post--api-v1-admin-season-events) - Create a season event in the active season | `🔓 공개 (게스트 허용)`
+- [PATCH `/api/v1/admin/season-events/{id}`](#patch--api-v1-admin-season-events--id-) - Retitle, redescribe or deactivate a season event | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/security`](#get--api-v1-admin-security) - Console session state and login policy | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [POST `/api/v1/admin/security/forced-logouts`](#post--api-v1-admin-security-forced-logouts) - End every live session a member holds | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/security/ip-blocks`](#get--api-v1-admin-security-ip-blocks) - List current and historical service IP blocks | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [POST `/api/v1/admin/security/ip-blocks`](#post--api-v1-admin-security-ip-blocks) - Block an IP address or CIDR until manually lifted | `🔓 공개 (게스트 허용)`
+- [DELETE `/api/v1/admin/security/ip-blocks/{id}`](#delete--api-v1-admin-security-ip-blocks--id-) - Lift a service IP block | `🔓 공개 (게스트 허용)`
+- [PUT `/api/v1/admin/security/login-policies/{userId}`](#put--api-v1-admin-security-login-policies--userid-) - Replace the address allowlist for an administrator | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/security/sessions`](#post--api-v1-admin-security-sessions) - Enter the operations console, rotating the session | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [DELETE `/api/v1/admin/security/sessions`](#delete--api-v1-admin-security-sessions) - Leave the operations console | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [POST `/api/v1/admin/security/users/{id}/permanent-suspension`](#post--api-v1-admin-security-users--id--permanent-suspension) - Permanently restrict a member and revoke all live sessions | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/shop/items`](#get--api-v1-admin-shop-items) - List all items in the catalog for admin inspection | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [PATCH `/api/v1/admin/shop/items/{id}`](#patch--api-v1-admin-shop-items--id-) - Update price, active status, or stock of a catalog item | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [GET `/api/v1/admin/stocks`](#get--api-v1-admin-stocks) - Every stock, including inactive ones | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [POST `/api/v1/admin/stocks`](#post--api-v1-admin-stocks) - List a new stock | `🔓 공개 (게스트 허용)`
+- [PATCH `/api/v1/admin/stocks/{id}`](#patch--api-v1-admin-stocks--id-) - Rename, redescribe or deactivate a stock | `🔓 공개 (게스트 허용)`
+- [DELETE `/api/v1/admin/stocks/{id}`](#delete--api-v1-admin-stocks--id-) - Delete a stock that has no history | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/stocks/{id}/corporate-actions`](#post--api-v1-admin-stocks--id--corporate-actions) - Apply a split or reverse split | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/stocks/{id}/halt`](#post--api-v1-admin-stocks--id--halt) - Halt stock trading and auto-settle all holdings into cost-basis WLD | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/stocks/{id}/halt-settlement`](#get--api-v1-admin-stocks--id--halt-settlement) - Get stock halt settlement progress and statistics | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/stocks/{id}/halt-settlement/retry`](#post--api-v1-admin-stocks--id--halt-settlement-retry) - Retry failed or quarantined stock halt settlements | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/stocks/{id}/price`](#post--api-v1-admin-stocks--id--price) - Set a stock price by hand | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/stocks/dynamics`](#get--api-v1-admin-stocks-dynamics) - Trend, volatility and fair value per stock | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [GET `/api/v1/admin/stocks/market-events`](#get--api-v1-admin-stocks-market-events) - Recent market events, ended and cancelled included | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [POST `/api/v1/admin/stocks/market-events`](#post--api-v1-admin-stocks-market-events) - Publish a market event: news that leans the market | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [DELETE `/api/v1/admin/stocks/market-events/{id}`](#delete--api-v1-admin-stocks-market-events--id-) - End a market event now | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/support/threads`](#get--api-v1-admin-support-threads) - Administrator support inbox | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/support/threads/{id}/messages`](#get--api-v1-admin-support-threads--id--messages) - Read a support conversation as administrator | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/support/threads/{id}/messages`](#post--api-v1-admin-support-threads--id--messages) - Reply to a member support conversation | `🔓 공개 (게스트 허용)`
+- [PUT `/api/v1/admin/support/threads/{id}/status`](#put--api-v1-admin-support-threads--id--status) - Change support conversation status | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/admin/treasury/drain`](#post--api-v1-admin-treasury-drain) - 국고 잉여 자금 영구 소각 (Step-Up/Admin) | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [POST `/api/v1/admin/treasury/inject`](#post--api-v1-admin-treasury-inject) - 국고 자금 긴급 주입 (Step-Up/Admin) | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [GET `/api/v1/admin/treasury/overview`](#get--api-v1-admin-treasury-overview) - 중앙 국고 및 비축금 현황 대시보드 조회 | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [GET `/api/v1/admin/treasury/transactions`](#get--api-v1-admin-treasury-transactions) - 국고 원장 입출금 및 순환 감사 내역 조회 | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [GET `/api/v1/admin/users`](#get--api-v1-admin-users) - Members and their status | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [GET `/api/v1/admin/users/{id}/portfolio`](#get--api-v1-admin-users--id--portfolio) - Detailed user asset portfolio | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [PUT `/api/v1/admin/users/{id}/restriction`](#put--api-v1-admin-users--id--restriction) - Restrict or unrestrict a member | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/admin/work`](#get--api-v1-admin-work) - The work catalogue, the reward policy in force, and job levels | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [POST `/api/v1/admin/work/auto-tune`](#post--api-v1-admin-work-auto-tune) - Automatically calculate and tune daily reward cap based on economy health | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [PUT `/api/v1/admin/work/policy`](#put--api-v1-admin-work-policy) - Update work reward policy daily cap, weekly cap, and repeat decay | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [GET `/api/v1/admin/work/stats`](#get--api-v1-admin-work-stats) - Real-time 24h work ranking, daily cap usage buckets, and 7-day trend | `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- [PATCH `/api/v1/admin/work/tasks/{id}`](#patch--api-v1-admin-work-tasks--id-) - Update base reward, duration, daily limit, and active state of a work task | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- [GET `/api/v1/privacy/requests`](#get--api-v1-privacy-requests) - Data subject requests the caller has made | `🔒 로그인 필수` `📜 약관동의 필수`
+- [POST `/api/v1/privacy/requests`](#post--api-v1-privacy-requests) - Raise a data subject request | `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ CSRF 검증`
+- [POST `/api/v1/safety/takedown`](#post--api-v1-safety-takedown) - 비회원 공개 긴급 콘텐츠 삭제 접수 | `🔓 공개 (게스트 허용)`
+- [POST `/api/v1/safety/takedown/status`](#post--api-v1-safety-takedown-status) - 비회원 접수 상태 조회 | `🔓 공개 (게스트 허용)`
+- [GET `/api/v1/version`](#get--api-v1-version) - Backend runtime identity | `🔓 공개 (게스트 허용)`
+- [GET `/health`](#get--health) - Liveness probe | `🔓 공개 (게스트 허용)`
 
 ---
 
 ## 🛠️ 엔드포인트 상세 규격
 
-### POST `/admin/ai-news/auto-generate`
+<a id="post--api-v1-admin-ai-news-auto-generate"></a>
+### POST `/api/v1/admin/ai-news/auto-generate`
 
 **설명:** Auto-generate and optionally publish market news based on currently registered active stocks
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AiNewsController_autoGenerate`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AiNewsController_autoGenerate`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/ai-news/auto-generate" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/ai-news/auto-generate" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/ai-news/batches`
+<a id="post--api-v1-admin-ai-news-batches"></a>
+### POST `/api/v1/admin/ai-news/batches`
 
 **설명:** Start a run that asks the model for five scenarios
 
-**상세:** Answers with the run, not with the batch: the model takes longer than any gateway in front of this will wait.
+> Answers with the run, not with the batch: the model takes longer than any gateway in front of this will wait.
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AiNewsController_generate`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AiNewsController_generate`
 #### 📦 요청 본문 (Request Body)
 
   - `prompt` (`string`) *(선택)* - The operator's wish for this batch
@@ -162,12 +163,12 @@ curl -X POST "https://easy-scraping.com/admin/ai-news/auto-generate" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/ai-news/batches" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/ai-news/batches" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -178,56 +179,62 @@ curl -X POST "https://easy-scraping.com/admin/ai-news/batches" \
 
 ---
 
-### GET `/admin/ai-news/batches/latest`
+<a id="get--api-v1-admin-ai-news-batches-latest"></a>
+### GET `/api/v1/admin/ai-news/batches/latest`
 
 **설명:** The current batch of proposed scenarios, and the last run that asked for one
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AiNewsController_latest`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AiNewsController_latest`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/ai-news/batches/latest" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/ai-news/batches/latest" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/ai-news/models`
+<a id="get--api-v1-admin-ai-news-models"></a>
+### GET `/api/v1/admin/ai-news/models`
 
 **설명:** What the stored key can reach, as GET {base}/models lists it
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AiNewsController_models`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AiNewsController_models`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/ai-news/models" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/ai-news/models" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/ai-news/scenarios/{id}/discard`
+<a id="post--api-v1-admin-ai-news-scenarios--id--discard"></a>
+### POST `/api/v1/admin/ai-news/scenarios/{id}/discard`
 
 **설명:** Set a scenario aside
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AiNewsController_discard`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AiNewsController_discard`
 
 #### 📌 매개변수 (Parameters)
 
@@ -243,12 +250,12 @@ curl -X GET "https://easy-scraping.com/admin/ai-news/models" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/ai-news/scenarios/{id}/discard" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/ai-news/scenarios/{id}/discard" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -259,12 +266,14 @@ curl -X POST "https://easy-scraping.com/admin/ai-news/scenarios/{id}/discard" \
 
 ---
 
-### POST `/admin/ai-news/scenarios/{id}/publish`
+<a id="post--api-v1-admin-ai-news-scenarios--id--publish"></a>
+### POST `/api/v1/admin/ai-news/scenarios/{id}/publish`
 
 **설명:** Publish a scenario as a market event, with the values the operator settled on
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AiNewsController_publish`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AiNewsController_publish`
 
 #### 📌 매개변수 (Parameters)
 
@@ -284,12 +293,12 @@ curl -X POST "https://easy-scraping.com/admin/ai-news/scenarios/{id}/discard" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/ai-news/scenarios/{id}/publish" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/ai-news/scenarios/{id}/publish" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -300,34 +309,38 @@ curl -X POST "https://easy-scraping.com/admin/ai-news/scenarios/{id}/publish" \
 
 ---
 
-### GET `/admin/ai-news/settings`
+<a id="get--api-v1-admin-ai-news-settings"></a>
+### GET `/api/v1/admin/ai-news/settings`
 
 **설명:** API address, model name and whether a key is stored
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AiNewsController_settings`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AiNewsController_settings`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/ai-news/settings" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/ai-news/settings" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### PUT `/admin/ai-news/settings`
+<a id="put--api-v1-admin-ai-news-settings"></a>
+### PUT `/api/v1/admin/ai-news/settings`
 
 **설명:** Store the model address, model name and, optionally, a new key
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AiNewsController_saveSettings`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `AiNewsController_saveSettings`
 #### 📦 요청 본문 (Request Body)
 
   - `apiBaseUrl` (`string`) **(필수)** - The OpenAI-standard base: /chat/completions and /models hang off it
@@ -339,12 +352,12 @@ curl -X GET "https://easy-scraping.com/admin/ai-news/settings" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PUT "https://easy-scraping.com/admin/ai-news/settings" \
+curl -X PUT "https://easy-scraping.com/api/v1/admin/ai-news/settings" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -355,60 +368,63 @@ curl -X PUT "https://easy-scraping.com/admin/ai-news/settings" \
 
 ---
 
-### GET `/admin/approvals`
+<a id="get--api-v1-admin-approvals"></a>
+### GET `/api/v1/admin/approvals`
 
 **설명:** Withdrawn: two-person approval was retired
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminController_approvals`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminController_approvals`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/approvals" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/approvals" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/approvals`
+<a id="post--api-v1-admin-approvals"></a>
+### POST `/api/v1/admin/approvals`
 
 **설명:** Withdrawn: two-person approval was retired
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminController_approve`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminController_approve`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/approvals" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/approvals" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/approvals/{id}/decisions`
+<a id="post--api-v1-admin-approvals--id--decisions"></a>
+### POST `/api/v1/admin/approvals/{id}/decisions`
 
 **설명:** Withdrawn: two-person approval was retired
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminController_decide`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminController_decide`
 
 #### 📌 매개변수 (Parameters)
 
@@ -420,72 +436,75 @@ curl -X POST "https://easy-scraping.com/admin/approvals" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/approvals/{id}/decisions" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/approvals/{id}/decisions" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/audit-events`
+<a id="get--api-v1-admin-audit-events"></a>
+### GET `/api/v1/admin/audit-events`
 
 **설명:** Recent audit trail entries
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminController_auditEvents`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminController_auditEvents`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/audit-events" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/audit-events" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/audit/dispositions`
+<a id="get--api-v1-admin-audit-dispositions"></a>
+### GET `/api/v1/admin/audit/dispositions`
 
 **설명:** What was archived, destroyed or held
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminAuditController_dispositions`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminAuditController_dispositions`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/audit/dispositions" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/audit/dispositions" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/audit/dispositions`
+<a id="post--api-v1-admin-audit-dispositions"></a>
+### POST `/api/v1/admin/audit/dispositions`
 
 **설명:** Record what was decided about a range past its retention period
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminAuditController_recordDisposition`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminAuditController_recordDisposition`
 #### 📦 요청 본문 (Request Body)
 
   - `category` (`string`) **(필수)**
@@ -500,12 +519,12 @@ curl -X GET "https://easy-scraping.com/admin/audit/dispositions" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/audit/dispositions" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/audit/dispositions" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -516,34 +535,38 @@ curl -X POST "https://easy-scraping.com/admin/audit/dispositions" \
 
 ---
 
-### GET `/admin/audit/events`
+<a id="get--api-v1-admin-audit-events"></a>
+### GET `/api/v1/admin/audit/events`
 
 **설명:** Search the audit trail; addresses and session hashes are masked
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminAuditController_events`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminAuditController_events`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/audit/events" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/audit/events" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/audit/events/{id}/reveal`
+<a id="post--api-v1-admin-audit-events--id--reveal"></a>
+### POST `/api/v1/admin/audit/events/{id}/reveal`
 
 **설명:** Unmask one entry; the reveal is itself recorded
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminAuditController_reveal`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `AdminAuditController_reveal`
 
 #### 📌 매개변수 (Parameters)
 
@@ -559,12 +582,12 @@ curl -X GET "https://easy-scraping.com/admin/audit/events" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/audit/events/{id}/reveal" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/audit/events/{id}/reveal" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -575,34 +598,38 @@ curl -X POST "https://easy-scraping.com/admin/audit/events/{id}/reveal" \
 
 ---
 
-### GET `/admin/audit/retention`
+<a id="get--api-v1-admin-audit-retention"></a>
+### GET `/api/v1/admin/audit/retention`
 
 **설명:** Retention periods, what is past them, and the last disposition
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminAuditController_retention`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminAuditController_retention`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/audit/retention" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/audit/retention" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### PUT `/admin/audit/retention/{category}`
+<a id="put--api-v1-admin-audit-retention--category-"></a>
+### PUT `/api/v1/admin/audit/retention/{category}`
 
 **설명:** Append a retention policy version for one category
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminAuditController_setRetention`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `AdminAuditController_setRetention`
 
 #### 📌 매개변수 (Parameters)
 
@@ -623,12 +650,12 @@ curl -X GET "https://easy-scraping.com/admin/audit/retention" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PUT "https://easy-scraping.com/admin/audit/retention/{category}" \
+curl -X PUT "https://easy-scraping.com/api/v1/admin/audit/retention/{category}" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -639,34 +666,38 @@ curl -X PUT "https://easy-scraping.com/admin/audit/retention/{category}" \
 
 ---
 
-### GET `/admin/audit/verifications`
+<a id="get--api-v1-admin-audit-verifications"></a>
+### GET `/api/v1/admin/audit/verifications`
 
 **설명:** Past chain verifications
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminAuditController_verifications`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminAuditController_verifications`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/audit/verifications" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/audit/verifications" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/audit/verify`
+<a id="post--api-v1-admin-audit-verify"></a>
+### POST `/api/v1/admin/audit/verify`
 
 **설명:** Recompute the hash chain over a window and record the result
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminAuditController_verify`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminAuditController_verify`
 #### 📦 요청 본문 (Request Body)
 
   - `fromSequence` (`string`) *(선택)*
@@ -676,12 +707,12 @@ curl -X GET "https://easy-scraping.com/admin/audit/verifications" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/audit/verify" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/audit/verify" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -692,12 +723,14 @@ curl -X POST "https://easy-scraping.com/admin/audit/verify" \
 
 ---
 
-### GET `/admin/bank`
+<a id="get--api-v1-admin-bank"></a>
+### GET `/api/v1/admin/bank`
 
 **설명:** Deposits and the loan book, with the credit ladder behind it
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminBankOperationsController_overview`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminBankOperationsController_overview`
 
 #### 📌 매개변수 (Parameters)
 
@@ -709,46 +742,50 @@ curl -X POST "https://easy-scraping.com/admin/audit/verify" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/bank" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/bank" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/business-types`
+<a id="get--api-v1-admin-business-types"></a>
+### GET `/api/v1/admin/business-types`
 
 **설명:** Every business type, including inactive ones
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_businessTypes`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_businessTypes`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/business-types" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/business-types" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### PATCH `/admin/business-types/{id}`
+<a id="patch--api-v1-admin-business-types--id-"></a>
+### PATCH `/api/v1/admin/business-types/{id}`
 
 **설명:** Rename, redescribe or deactivate a business type
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_updateBusinessType`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_updateBusinessType`
 
 #### 📌 매개변수 (Parameters)
 
@@ -766,12 +803,12 @@ curl -X GET "https://easy-scraping.com/admin/business-types" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PATCH "https://easy-scraping.com/admin/business-types/{id}" \
+curl -X PATCH "https://easy-scraping.com/api/v1/admin/business-types/{id}" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -782,56 +819,62 @@ curl -X PATCH "https://easy-scraping.com/admin/business-types/{id}" \
 
 ---
 
-### GET `/admin/controls`
+<a id="get--api-v1-admin-controls"></a>
+### GET `/api/v1/admin/controls`
 
 **설명:** Feature switches, economy policy versions and role assignments
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminControlsController_overview`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminControlsController_overview`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/controls" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/controls" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/controls/auto-policy`
+<a id="get--api-v1-admin-controls-auto-policy"></a>
+### GET `/api/v1/admin/controls/auto-policy`
 
 **설명:** Policy knobs plus classical proposal and matching AI review evidence
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminControlsController_autoPolicy`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminControlsController_autoPolicy`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/controls/auto-policy" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/controls/auto-policy" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### PUT `/admin/controls/auto-policy/knobs/{knobKey}`
+<a id="put--api-v1-admin-controls-auto-policy-knobs--knobkey-"></a>
+### PUT `/api/v1/admin/controls/auto-policy/knobs/{knobKey}`
 
 **설명:** Take one knob off automatic, or move its approved range
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminControlsController_setPolicyKnob`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminControlsController_setPolicyKnob`
 
 #### 📌 매개변수 (Parameters)
 
@@ -851,12 +894,12 @@ curl -X GET "https://easy-scraping.com/admin/controls/auto-policy" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PUT "https://easy-scraping.com/admin/controls/auto-policy/knobs/{knobKey}" \
+curl -X PUT "https://easy-scraping.com/api/v1/admin/controls/auto-policy/knobs/{knobKey}" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -867,12 +910,14 @@ curl -X PUT "https://easy-scraping.com/admin/controls/auto-policy/knobs/{knobKey
 
 ---
 
-### POST `/admin/controls/auto-policy/runs`
+<a id="post--api-v1-admin-controls-auto-policy-runs"></a>
+### POST `/api/v1/admin/controls/auto-policy/runs`
 
 **설명:** Run the dual-lane automatic adjustment now instead of waiting for Monday
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminControlsController_runAutoPolicy`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `AdminControlsController_runAutoPolicy`
 #### 📦 요청 본문 (Request Body)
 
   - `reason` (`string`) **(필수)**
@@ -882,12 +927,12 @@ curl -X PUT "https://easy-scraping.com/admin/controls/auto-policy/knobs/{knobKey
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/controls/auto-policy/runs" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/controls/auto-policy/runs" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -898,12 +943,14 @@ curl -X POST "https://easy-scraping.com/admin/controls/auto-policy/runs" \
 
 ---
 
-### POST `/admin/controls/consent-versions`
+<a id="post--api-v1-admin-controls-consent-versions"></a>
+### POST `/api/v1/admin/controls/consent-versions`
 
 **설명:** Publish a new terms and privacy policy version (Superadmin only)
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminControlsController_publishConsentVersion`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminControlsController_publishConsentVersion`
 #### 📦 요청 본문 (Request Body)
 
   - `termsVersion` (`string`) **(필수)**
@@ -916,12 +963,12 @@ curl -X POST "https://easy-scraping.com/admin/controls/auto-policy/runs" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/controls/consent-versions" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/controls/consent-versions" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -932,34 +979,38 @@ curl -X POST "https://easy-scraping.com/admin/controls/consent-versions" \
 
 ---
 
-### GET `/admin/controls/consent-versions`
+<a id="get--api-v1-admin-controls-consent-versions"></a>
+### GET `/api/v1/admin/controls/consent-versions`
 
 **설명:** List recent terms and privacy policy versions
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminControlsController_listConsentVersions`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminControlsController_listConsentVersions`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/controls/consent-versions" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/controls/consent-versions" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### PUT `/admin/controls/feature-switches/{featureKey}`
+<a id="put--api-v1-admin-controls-feature-switches--featurekey-"></a>
+### PUT `/api/v1/admin/controls/feature-switches/{featureKey}`
 
 **설명:** Enable, pause, put into safe mode or disable a feature
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminControlsController_setFeatureSwitch`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminControlsController_setFeatureSwitch`
 
 #### 📌 매개변수 (Parameters)
 
@@ -977,12 +1028,12 @@ curl -X GET "https://easy-scraping.com/admin/controls/consent-versions" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PUT "https://easy-scraping.com/admin/controls/feature-switches/{featureKey}" \
+curl -X PUT "https://easy-scraping.com/api/v1/admin/controls/feature-switches/{featureKey}" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -993,12 +1044,14 @@ curl -X PUT "https://easy-scraping.com/admin/controls/feature-switches/{featureK
 
 ---
 
-### PUT `/admin/controls/feature-switches/economy_auto_policy`
+<a id="put--api-v1-admin-controls-feature-switches-economy-auto-policy"></a>
+### PUT `/api/v1/admin/controls/feature-switches/economy_auto_policy`
 
 **설명:** Enable or pause the automatic economy policy without step-up
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminControlsController_setAutoPolicyFeatureSwitch`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `AdminControlsController_setAutoPolicyFeatureSwitch`
 #### 📦 요청 본문 (Request Body)
 
   - `state` (`string`) **(필수)**
@@ -1009,12 +1062,12 @@ curl -X PUT "https://easy-scraping.com/admin/controls/feature-switches/{featureK
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PUT "https://easy-scraping.com/admin/controls/feature-switches/economy_auto_policy" \
+curl -X PUT "https://easy-scraping.com/api/v1/admin/controls/feature-switches/economy_auto_policy" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1025,12 +1078,14 @@ curl -X PUT "https://easy-scraping.com/admin/controls/feature-switches/economy_a
 
 ---
 
-### POST `/admin/controls/policies`
+<a id="post--api-v1-admin-controls-policies"></a>
+### POST `/api/v1/admin/controls/policies`
 
 **설명:** Create an economy policy version, immediate or scheduled
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminControlsController_createPolicyVersion`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminControlsController_createPolicyVersion`
 #### 📦 요청 본문 (Request Body)
 
   - `version` (`string`) **(필수)**
@@ -1043,12 +1098,12 @@ curl -X PUT "https://easy-scraping.com/admin/controls/feature-switches/economy_a
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/controls/policies" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/controls/policies" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1059,38 +1114,39 @@ curl -X POST "https://easy-scraping.com/admin/controls/policies" \
 
 ---
 
-### POST `/admin/controls/policies/activations`
+<a id="post--api-v1-admin-controls-policies-activations"></a>
+### POST `/api/v1/admin/controls/policies/activations`
 
 **설명:** Activate every policy version whose effective time has passed
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminControlsController_activateDuePolicies`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminControlsController_activateDuePolicies`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/controls/policies/activations" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/controls/policies/activations" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/controls/policies/rollbacks`
+<a id="post--api-v1-admin-controls-policies-rollbacks"></a>
+### POST `/api/v1/admin/controls/policies/rollbacks`
 
 **설명:** Return the economy to the previous policy version
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminControlsController_rollbackPolicy`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminControlsController_rollbackPolicy`
 #### 📦 요청 본문 (Request Body)
 
   - `reason` (`string`) **(필수)**
@@ -1100,12 +1156,12 @@ curl -X POST "https://easy-scraping.com/admin/controls/policies/activations" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/controls/policies/rollbacks" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/controls/policies/rollbacks" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1116,12 +1172,14 @@ curl -X POST "https://easy-scraping.com/admin/controls/policies/rollbacks" \
 
 ---
 
-### POST `/admin/controls/role-revocations`
+<a id="post--api-v1-admin-controls-role-revocations"></a>
+### POST `/api/v1/admin/controls/role-revocations`
 
 **설명:** Take back an administrative role
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminControlsController_revokeRole`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminControlsController_revokeRole`
 #### 📦 요청 본문 (Request Body)
 
   - `reason` (`string`) **(필수)**
@@ -1133,12 +1191,12 @@ curl -X POST "https://easy-scraping.com/admin/controls/policies/rollbacks" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/controls/role-revocations" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/controls/role-revocations" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1149,12 +1207,14 @@ curl -X POST "https://easy-scraping.com/admin/controls/role-revocations" \
 
 ---
 
-### POST `/admin/controls/roles`
+<a id="post--api-v1-admin-controls-roles"></a>
+### POST `/api/v1/admin/controls/roles`
 
 **설명:** Grant an administrative role, or move the superadmin designation
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminControlsController_grantRole`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminControlsController_grantRole`
 #### 📦 요청 본문 (Request Body)
 
   - `reason` (`string`) **(필수)**
@@ -1166,12 +1226,12 @@ curl -X POST "https://easy-scraping.com/admin/controls/role-revocations" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/controls/roles" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/controls/roles" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1182,100 +1242,110 @@ curl -X POST "https://easy-scraping.com/admin/controls/roles" \
 
 ---
 
-### GET `/admin/discord`
+<a id="get--api-v1-admin-discord"></a>
+### GET `/api/v1/admin/discord`
 
 **설명:** Discord delivery: which types are routed, and what is stuck
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminDiscordOperationsController_overview`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminDiscordOperationsController_overview`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/discord" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/discord" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/discord-outbox-events`
+<a id="get--api-v1-admin-discord-outbox-events"></a>
+### GET `/api/v1/admin/discord-outbox-events`
 
 **설명:** Recent Discord outbox deliveries
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminController_discordOutboxEvents`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminController_discordOutboxEvents`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/discord-outbox-events" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/discord-outbox-events" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/economy`
+<a id="get--api-v1-admin-economy"></a>
+### GET `/api/v1/admin/economy`
 
 **설명:** Money supply, issuance and burn, concentration and operational health
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_dashboard`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_dashboard`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/economy" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/economy" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/economy/ai-status`
+<a id="get--api-v1-admin-economy-ai-status"></a>
+### GET `/api/v1/admin/economy/ai-status`
 
 **설명:** Economy AI feature switch, latest council review and agent scoreboard
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_aiStatus`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_aiStatus`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/economy/ai-status" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/economy/ai-status" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/economy/alerts`
+<a id="get--api-v1-admin-economy-alerts"></a>
+### GET `/api/v1/admin/economy/alerts`
 
 **설명:** Alerts, unacknowledged first
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_alerts`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_alerts`
 
 #### 📌 매개변수 (Parameters)
 
@@ -1287,24 +1357,26 @@ curl -X GET "https://easy-scraping.com/admin/economy/ai-status" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/economy/alerts" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/economy/alerts" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/economy/alerts/{id}/acknowledgements`
+<a id="post--api-v1-admin-economy-alerts--id--acknowledgements"></a>
+### POST `/api/v1/admin/economy/alerts/{id}/acknowledgements`
 
 **설명:** Acknowledge an alert
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_acknowledgeAlert`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_acknowledgeAlert`
 
 #### 📌 매개변수 (Parameters)
 
@@ -1320,12 +1392,12 @@ curl -X GET "https://easy-scraping.com/admin/economy/alerts" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/economy/alerts/{id}/acknowledgements" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/economy/alerts/{id}/acknowledgements" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1336,12 +1408,14 @@ curl -X POST "https://easy-scraping.com/admin/economy/alerts/{id}/acknowledgemen
 
 ---
 
-### POST `/admin/economy/bulk-payouts`
+<a id="post--api-v1-admin-economy-bulk-payouts"></a>
+### POST `/api/v1/admin/economy/bulk-payouts`
 
 **설명:** Pay every member the filter matches
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_executeBulkPayout`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_executeBulkPayout`
 #### 📦 요청 본문 (Request Body)
 
   - `userIds` (`array`) *(선택)*
@@ -1355,12 +1429,12 @@ curl -X POST "https://easy-scraping.com/admin/economy/alerts/{id}/acknowledgemen
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/economy/bulk-payouts" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/economy/bulk-payouts" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1371,12 +1445,14 @@ curl -X POST "https://easy-scraping.com/admin/economy/bulk-payouts" \
 
 ---
 
-### GET `/admin/economy/bulk-payouts/{id}/report`
+<a id="get--api-v1-admin-economy-bulk-payouts--id--report"></a>
+### GET `/api/v1/admin/economy/bulk-payouts/{id}/report`
 
 **설명:** Who was paid, who was skipped and who failed, one row each
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_payoutReport`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_payoutReport`
 
 #### 📌 매개변수 (Parameters)
 
@@ -1388,24 +1464,26 @@ curl -X POST "https://easy-scraping.com/admin/economy/bulk-payouts" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/economy/bulk-payouts/{id}/report" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/economy/bulk-payouts/{id}/report" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/economy/bulk-payouts/previews`
+<a id="post--api-v1-admin-economy-bulk-payouts-previews"></a>
+### POST `/api/v1/admin/economy/bulk-payouts/previews`
 
 **설명:** Count the members a payout would reach, and what it would cost
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_previewBulkPayout`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_previewBulkPayout`
 #### 📦 요청 본문 (Request Body)
 
   - `userIds` (`array`) *(선택)*
@@ -1417,12 +1495,12 @@ curl -X GET "https://easy-scraping.com/admin/economy/bulk-payouts/{id}/report" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/economy/bulk-payouts/previews" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/economy/bulk-payouts/previews" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1433,12 +1511,14 @@ curl -X POST "https://easy-scraping.com/admin/economy/bulk-payouts/previews" \
 
 ---
 
-### POST `/admin/economy/killswitch`
+<a id="post--api-v1-admin-economy-killswitch"></a>
+### POST `/api/v1/admin/economy/killswitch`
 
 **설명:** Toggle master killswitch or module circuit breaker
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_toggleKillswitch`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_toggleKillswitch`
 #### 📦 요청 본문 (Request Body)
 
   - `scope` (`string`) **(필수)**
@@ -1448,12 +1528,12 @@ curl -X POST "https://easy-scraping.com/admin/economy/bulk-payouts/previews" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/economy/killswitch" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/economy/killswitch" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1464,12 +1544,14 @@ curl -X POST "https://easy-scraping.com/admin/economy/killswitch" \
 
 ---
 
-### POST `/admin/economy/knobs-v2`
+<a id="post--api-v1-admin-economy-knobs-v2"></a>
+### POST `/api/v1/admin/economy/knobs-v2`
 
 **설명:** Update economic knobs (interest, bond yields, loan rates)
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_updateKnobsV2`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_updateKnobsV2`
 #### 📦 요청 본문 (Request Body)
 
   - `depositRateBps` (`number`) **(필수)** - 일일 복리 이자율 bps (예: 5 = 0.05%)
@@ -1481,12 +1563,12 @@ curl -X POST "https://easy-scraping.com/admin/economy/killswitch" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/economy/knobs-v2" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/economy/knobs-v2" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1497,100 +1579,110 @@ curl -X POST "https://easy-scraping.com/admin/economy/knobs-v2" \
 
 ---
 
-### GET `/admin/economy/macro-v2`
+<a id="get--api-v1-admin-economy-macro-v2"></a>
+### GET `/api/v1/admin/economy/macro-v2`
 
 **설명:** Admin Control Center 2.0 Macro Economy statistics
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_macroV2`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_macroV2`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/economy/macro-v2" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/economy/macro-v2" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/economy/reconciliations/latest`
+<a id="get--api-v1-admin-economy-reconciliations-latest"></a>
+### GET `/api/v1/admin/economy/reconciliations/latest`
 
 **설명:** Most recent economy reconciliation health snapshot
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `ReconciliationController_latest`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `ReconciliationController_latest`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/economy/reconciliations/latest" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/economy/reconciliations/latest" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/economy/scenario-lab/preview`
+<a id="get--api-v1-admin-economy-scenario-lab-preview"></a>
+### GET `/api/v1/admin/economy/scenario-lab/preview`
 
 **설명:** Read-only deterministic economy scenario projection
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_scenarioLabPreview`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_scenarioLabPreview`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/economy/scenario-lab/preview" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/economy/scenario-lab/preview" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/economy/stats`
+<a id="get--api-v1-admin-economy-stats"></a>
+### GET `/api/v1/admin/economy/stats`
 
 **설명:** Realtime Faucet vs Sink stats and circulation summary
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_stats`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_stats`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/economy/stats" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/economy/stats" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/economy/transactions/{id}/reversal`
+<a id="post--api-v1-admin-economy-transactions--id--reversal"></a>
+### POST `/api/v1/admin/economy/transactions/{id}/reversal`
 
 **설명:** Reverse one transaction, posting its opposite back to the ledger
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_reverseTransaction`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_reverseTransaction`
 
 #### 📌 매개변수 (Parameters)
 
@@ -1602,28 +1694,27 @@ curl -X GET "https://easy-scraping.com/admin/economy/stats" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/economy/transactions/{id}/reversal" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/economy/transactions/{id}/reversal" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/economy/users/{id}/inspect-v2`
+<a id="get--api-v1-admin-economy-users--id--inspect-v2"></a>
+### GET `/api/v1/admin/economy/users/{id}/inspect-v2`
 
 **설명:** Inspect user wallet, deposits, loans, jobs, businesses
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_inspectUserV2`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_inspectUserV2`
 
 #### 📌 매개변수 (Parameters)
 
@@ -1635,24 +1726,26 @@ curl -X POST "https://easy-scraping.com/admin/economy/transactions/{id}/reversal
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/economy/users/{id}/inspect-v2" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/economy/users/{id}/inspect-v2" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/economy/users/{id}/override-v2`
+<a id="post--api-v1-admin-economy-users--id--override-v2"></a>
+### POST `/api/v1/admin/economy/users/{id}/override-v2`
 
 **설명:** Override user cash or bank balance (grant or confiscate WLD)
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminEconomyController_overrideUserV2`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminEconomyController_overrideUserV2`
 
 #### 📌 매개변수 (Parameters)
 
@@ -1672,12 +1765,12 @@ curl -X GET "https://easy-scraping.com/admin/economy/users/{id}/inspect-v2" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/economy/users/{id}/override-v2" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/economy/users/{id}/override-v2" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1688,34 +1781,38 @@ curl -X POST "https://easy-scraping.com/admin/economy/users/{id}/override-v2" \
 
 ---
 
-### GET `/admin/me`
+<a id="get--api-v1-admin-me"></a>
+### GET `/api/v1/admin/me`
 
 **설명:** Roles held by the caller
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminController_me`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminController_me`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/me" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/me" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/photos`
+<a id="post--api-v1-admin-photos"></a>
+### POST `/api/v1/admin/photos`
 
 **설명:** Upload image bytes to the private store
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `PhotoUploadController_upload`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `PhotoUploadController_upload`
 #### 📦 요청 본문 (Request Body)
 
 *(빈 객체)*
@@ -1724,12 +1821,12 @@ curl -X GET "https://easy-scraping.com/admin/me" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/photos" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/photos" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1740,12 +1837,14 @@ curl -X POST "https://easy-scraping.com/admin/photos" \
 
 ---
 
-### GET `/admin/safety/chat-reports`
+<a id="get--api-v1-admin-safety-chat-reports"></a>
+### GET `/api/v1/admin/safety/chat-reports`
 
 **설명:** 관리자 1:1 개인 채팅 신고 큐 목록 조회
 
-- **분류 태그 (Tag):** `safety`
-- **엔드포인트 ID:** `SafetyController_adminListChatReports`
+- **분류 도메인 (Tag):** `safety`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `SafetyController_adminListChatReports`
 
 #### 📌 매개변수 (Parameters)
 
@@ -1757,24 +1856,26 @@ curl -X POST "https://easy-scraping.com/admin/photos" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/safety/chat-reports" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/safety/chat-reports" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/safety/chat-reports/{id}`
+<a id="get--api-v1-admin-safety-chat-reports--id-"></a>
+### GET `/api/v1/admin/safety/chat-reports/{id}`
 
 **설명:** 관리자 1:1 개인 채팅 신고 상세 및 증거 스냅샷 열람
 
-- **분류 태그 (Tag):** `safety`
-- **엔드포인트 ID:** `SafetyController_adminGetChatReport`
+- **분류 도메인 (Tag):** `safety`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `SafetyController_adminGetChatReport`
 
 #### 📌 매개변수 (Parameters)
 
@@ -1786,24 +1887,26 @@ curl -X GET "https://easy-scraping.com/admin/safety/chat-reports" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/safety/chat-reports/{id}" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/safety/chat-reports/{id}" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/safety/chat-reports/{id}/action`
+<a id="post--api-v1-admin-safety-chat-reports--id--action"></a>
+### POST `/api/v1/admin/safety/chat-reports/{id}/action`
 
 **설명:** 관리자 1:1 개인 채팅 신고 조치 실행
 
-- **분류 태그 (Tag):** `safety`
-- **엔드포인트 ID:** `SafetyController_adminActionChatReport`
+- **분류 도메인 (Tag):** `safety`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `SafetyController_adminActionChatReport`
 
 #### 📌 매개변수 (Parameters)
 
@@ -1815,28 +1918,27 @@ curl -X GET "https://easy-scraping.com/admin/safety/chat-reports/{id}" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/safety/chat-reports/{id}/action" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/safety/chat-reports/{id}/action" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/safety/takedowns`
+<a id="get--api-v1-admin-safety-takedowns"></a>
+### GET `/api/v1/admin/safety/takedowns`
 
 **설명:** 관리자 긴급 콘텐츠 삭제 큐 조회
 
-- **분류 태그 (Tag):** `safety`
-- **엔드포인트 ID:** `SafetyController_adminListTakedowns`
+- **분류 도메인 (Tag):** `safety`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `SafetyController_adminListTakedowns`
 
 #### 📌 매개변수 (Parameters)
 
@@ -1848,24 +1950,26 @@ curl -X POST "https://easy-scraping.com/admin/safety/chat-reports/{id}/action" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/safety/takedowns" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/safety/takedowns" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/safety/takedowns/{caseId}/action`
+<a id="post--api-v1-admin-safety-takedowns--caseid--action"></a>
+### POST `/api/v1/admin/safety/takedowns/{caseId}/action`
 
 **설명:** 관리자 긴급 콘텐츠 삭제 조치
 
-- **분류 태그 (Tag):** `safety`
-- **엔드포인트 ID:** `SafetyController_adminActionTakedown`
+- **분류 도메인 (Tag):** `safety`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `SafetyController_adminActionTakedown`
 
 #### 📌 매개변수 (Parameters)
 
@@ -1877,50 +1981,51 @@ curl -X GET "https://easy-scraping.com/admin/safety/takedowns" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/safety/takedowns/{caseId}/action" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/safety/takedowns/{caseId}/action" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/season-events`
+<a id="get--api-v1-admin-season-events"></a>
+### GET `/api/v1/admin/season-events`
 
 **설명:** Every season event, including inactive ones
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_seasonEvents`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_seasonEvents`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/season-events" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/season-events" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/season-events`
+<a id="post--api-v1-admin-season-events"></a>
+### POST `/api/v1/admin/season-events`
 
 **설명:** Create a season event in the active season
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_createSeasonEvent`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_createSeasonEvent`
 #### 📦 요청 본문 (Request Body)
 
   - `title` (`string`) **(필수)**
@@ -1932,12 +2037,12 @@ curl -X GET "https://easy-scraping.com/admin/season-events" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/season-events" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/season-events" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1948,12 +2053,14 @@ curl -X POST "https://easy-scraping.com/admin/season-events" \
 
 ---
 
-### PATCH `/admin/season-events/{id}`
+<a id="patch--api-v1-admin-season-events--id-"></a>
+### PATCH `/api/v1/admin/season-events/{id}`
 
 **설명:** Retitle, redescribe or deactivate a season event
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_updateSeasonEvent`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_updateSeasonEvent`
 
 #### 📌 매개변수 (Parameters)
 
@@ -1971,12 +2078,12 @@ curl -X POST "https://easy-scraping.com/admin/season-events" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PATCH "https://easy-scraping.com/admin/season-events/{id}" \
+curl -X PATCH "https://easy-scraping.com/api/v1/admin/season-events/{id}" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -1987,34 +2094,38 @@ curl -X PATCH "https://easy-scraping.com/admin/season-events/{id}" \
 
 ---
 
-### GET `/admin/security`
+<a id="get--api-v1-admin-security"></a>
+### GET `/api/v1/admin/security`
 
 **설명:** Console session state and login policy
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminSecurityController_overview`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminSecurityController_overview`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/security" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/security" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/security/forced-logouts`
+<a id="post--api-v1-admin-security-forced-logouts"></a>
+### POST `/api/v1/admin/security/forced-logouts`
 
 **설명:** End every live session a member holds
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminSecurityController_forceLogout`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminSecurityController_forceLogout`
 #### 📦 요청 본문 (Request Body)
 
   - `userId` (`string`) **(필수)**
@@ -2025,12 +2136,12 @@ curl -X GET "https://easy-scraping.com/admin/security" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/security/forced-logouts" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/security/forced-logouts" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -2041,34 +2152,38 @@ curl -X POST "https://easy-scraping.com/admin/security/forced-logouts" \
 
 ---
 
-### GET `/admin/security/ip-blocks`
+<a id="get--api-v1-admin-security-ip-blocks"></a>
+### GET `/api/v1/admin/security/ip-blocks`
 
 **설명:** List current and historical service IP blocks
 
-- **분류 태그 (Tag):** `admin-security`
-- **엔드포인트 ID:** `AbuseSecurityController_ipBlocks`
+- **분류 도메인 (Tag):** `admin-security`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AbuseSecurityController_ipBlocks`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/security/ip-blocks" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/security/ip-blocks" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/security/ip-blocks`
+<a id="post--api-v1-admin-security-ip-blocks"></a>
+### POST `/api/v1/admin/security/ip-blocks`
 
 **설명:** Block an IP address or CIDR until manually lifted
 
-- **분류 태그 (Tag):** `admin-security`
-- **엔드포인트 ID:** `AbuseSecurityController_blockAddress`
+- **분류 도메인 (Tag):** `admin-security`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AbuseSecurityController_blockAddress`
 #### 📦 요청 본문 (Request Body)
 
   - `idempotencyKey` (`string`) **(필수)**
@@ -2079,12 +2194,12 @@ curl -X GET "https://easy-scraping.com/admin/security/ip-blocks" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/security/ip-blocks" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/security/ip-blocks" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -2095,12 +2210,14 @@ curl -X POST "https://easy-scraping.com/admin/security/ip-blocks" \
 
 ---
 
-### DELETE `/admin/security/ip-blocks/{id}`
+<a id="delete--api-v1-admin-security-ip-blocks--id-"></a>
+### DELETE `/api/v1/admin/security/ip-blocks/{id}`
 
 **설명:** Lift a service IP block
 
-- **분류 태그 (Tag):** `admin-security`
-- **엔드포인트 ID:** `AbuseSecurityController_liftAddress`
+- **분류 도메인 (Tag):** `admin-security`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AbuseSecurityController_liftAddress`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2108,37 +2225,31 @@ curl -X POST "https://easy-scraping.com/admin/security/ip-blocks" \
 | :--- | :--- | :--- | :---: | :--- |
 | `path` | `id` | `string` | **필수** | - |
 
-#### 📦 요청 본문 (Request Body)
-
-  - `idempotencyKey` (`string`) **(필수)**
-  - `reason` (`string`) **(필수)**
-
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X DELETE "https://easy-scraping.com/admin/security/ip-blocks/{id}" \
-  -H "Content-Type: application/json" \
+curl -X DELETE "https://easy-scraping.com/api/v1/admin/security/ip-blocks/{id}" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### PUT `/admin/security/login-policies/{userId}`
+<a id="put--api-v1-admin-security-login-policies--userid-"></a>
+### PUT `/api/v1/admin/security/login-policies/{userId}`
 
 **설명:** Replace the address allowlist for an administrator
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminSecurityController_setIpAllowlist`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminSecurityController_setIpAllowlist`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2156,12 +2267,12 @@ curl -X DELETE "https://easy-scraping.com/admin/security/ip-blocks/{id}" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PUT "https://easy-scraping.com/admin/security/login-policies/{userId}" \
+curl -X PUT "https://easy-scraping.com/api/v1/admin/security/login-policies/{userId}" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -2172,64 +2283,64 @@ curl -X PUT "https://easy-scraping.com/admin/security/login-policies/{userId}" \
 
 ---
 
-### POST `/admin/security/sessions`
+<a id="post--api-v1-admin-security-sessions"></a>
+### POST `/api/v1/admin/security/sessions`
 
 **설명:** Enter the operations console, rotating the session
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminSecurityController_openConsole`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `AdminSecurityController_openConsole`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/security/sessions" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/security/sessions" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### DELETE `/admin/security/sessions`
+<a id="delete--api-v1-admin-security-sessions"></a>
+### DELETE `/api/v1/admin/security/sessions`
 
 **설명:** Leave the operations console
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminSecurityController_closeConsole`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `AdminSecurityController_closeConsole`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **204** | - | None |
+| **204** | - | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X DELETE "https://easy-scraping.com/admin/security/sessions" \
-  -H "Content-Type: application/json" \
+curl -X DELETE "https://easy-scraping.com/api/v1/admin/security/sessions" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/security/users/{id}/permanent-suspension`
+<a id="post--api-v1-admin-security-users--id--permanent-suspension"></a>
+### POST `/api/v1/admin/security/users/{id}/permanent-suspension`
 
 **설명:** Permanently restrict a member and revoke all live sessions
 
-- **분류 태그 (Tag):** `admin-security`
-- **엔드포인트 ID:** `AbuseSecurityController_suspendMember`
+- **분류 도메인 (Tag):** `admin-security`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AbuseSecurityController_suspendMember`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2245,12 +2356,12 @@ curl -X DELETE "https://easy-scraping.com/admin/security/sessions" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/security/users/{id}/permanent-suspension" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/security/users/{id}/permanent-suspension" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -2261,34 +2372,38 @@ curl -X POST "https://easy-scraping.com/admin/security/users/{id}/permanent-susp
 
 ---
 
-### GET `/admin/shop/items`
+<a id="get--api-v1-admin-shop-items"></a>
+### GET `/api/v1/admin/shop/items`
 
 **설명:** List all items in the catalog for admin inspection
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminShopController_listItems`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminShopController_listItems`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/shop/items" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/shop/items" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### PATCH `/admin/shop/items/{id}`
+<a id="patch--api-v1-admin-shop-items--id-"></a>
+### PATCH `/api/v1/admin/shop/items/{id}`
 
 **설명:** Update price, active status, or stock of a catalog item
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminShopController_updateItem`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `AdminShopController_updateItem`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2300,50 +2415,51 @@ curl -X GET "https://easy-scraping.com/admin/shop/items" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PATCH "https://easy-scraping.com/admin/shop/items/{id}" \
-  -H "Content-Type: application/json" \
+curl -X PATCH "https://easy-scraping.com/api/v1/admin/shop/items/{id}" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/stocks`
+<a id="get--api-v1-admin-stocks"></a>
+### GET `/api/v1/admin/stocks`
 
 **설명:** Every stock, including inactive ones
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_stockList`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_stockList`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/stocks" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/stocks" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/stocks`
+<a id="post--api-v1-admin-stocks"></a>
+### POST `/api/v1/admin/stocks`
 
 **설명:** List a new stock
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_createStock`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_createStock`
 #### 📦 요청 본문 (Request Body)
 
   - `symbol` (`string`) **(필수)**
@@ -2356,12 +2472,12 @@ curl -X GET "https://easy-scraping.com/admin/stocks" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/stocks" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/stocks" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -2372,12 +2488,14 @@ curl -X POST "https://easy-scraping.com/admin/stocks" \
 
 ---
 
-### PATCH `/admin/stocks/{id}`
+<a id="patch--api-v1-admin-stocks--id-"></a>
+### PATCH `/api/v1/admin/stocks/{id}`
 
 **설명:** Rename, redescribe or deactivate a stock
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_updateStock`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_updateStock`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2395,12 +2513,12 @@ curl -X POST "https://easy-scraping.com/admin/stocks" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PATCH "https://easy-scraping.com/admin/stocks/{id}" \
+curl -X PATCH "https://easy-scraping.com/api/v1/admin/stocks/{id}" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -2411,12 +2529,14 @@ curl -X PATCH "https://easy-scraping.com/admin/stocks/{id}" \
 
 ---
 
-### DELETE `/admin/stocks/{id}`
+<a id="delete--api-v1-admin-stocks--id-"></a>
+### DELETE `/api/v1/admin/stocks/{id}`
 
 **설명:** Delete a stock that has no history
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_deleteStock`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_deleteStock`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2428,28 +2548,27 @@ curl -X PATCH "https://easy-scraping.com/admin/stocks/{id}" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X DELETE "https://easy-scraping.com/admin/stocks/{id}" \
-  -H "Content-Type: application/json" \
+curl -X DELETE "https://easy-scraping.com/api/v1/admin/stocks/{id}" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/stocks/{id}/corporate-actions`
+<a id="post--api-v1-admin-stocks--id--corporate-actions"></a>
+### POST `/api/v1/admin/stocks/{id}/corporate-actions`
 
 **설명:** Apply a split or reverse split
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_corporateAction`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_corporateAction`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2467,12 +2586,12 @@ curl -X DELETE "https://easy-scraping.com/admin/stocks/{id}" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/stocks/{id}/corporate-actions" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/stocks/{id}/corporate-actions" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -2483,12 +2602,14 @@ curl -X POST "https://easy-scraping.com/admin/stocks/{id}/corporate-actions" \
 
 ---
 
-### POST `/admin/stocks/{id}/halt`
+<a id="post--api-v1-admin-stocks--id--halt"></a>
+### POST `/api/v1/admin/stocks/{id}/halt`
 
 **설명:** Halt stock trading and auto-settle all holdings into cost-basis WLD
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_haltStock`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_haltStock`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2500,28 +2621,27 @@ curl -X POST "https://easy-scraping.com/admin/stocks/{id}/corporate-actions" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/stocks/{id}/halt" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/stocks/{id}/halt" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/stocks/{id}/halt-settlement`
+<a id="get--api-v1-admin-stocks--id--halt-settlement"></a>
+### GET `/api/v1/admin/stocks/{id}/halt-settlement`
 
 **설명:** Get stock halt settlement progress and statistics
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_getHaltSettlement`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_getHaltSettlement`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2533,24 +2653,26 @@ curl -X POST "https://easy-scraping.com/admin/stocks/{id}/halt" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/stocks/{id}/halt-settlement" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/stocks/{id}/halt-settlement" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/stocks/{id}/halt-settlement/retry`
+<a id="post--api-v1-admin-stocks--id--halt-settlement-retry"></a>
+### POST `/api/v1/admin/stocks/{id}/halt-settlement/retry`
 
 **설명:** Retry failed or quarantined stock halt settlements
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_retryHaltSettlement`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_retryHaltSettlement`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2562,28 +2684,27 @@ curl -X GET "https://easy-scraping.com/admin/stocks/{id}/halt-settlement" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/stocks/{id}/halt-settlement/retry" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/stocks/{id}/halt-settlement/retry" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/stocks/{id}/price`
+<a id="post--api-v1-admin-stocks--id--price"></a>
+### POST `/api/v1/admin/stocks/{id}/price`
 
 **설명:** Set a stock price by hand
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_setStockPrice`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_setStockPrice`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2600,12 +2721,12 @@ curl -X POST "https://easy-scraping.com/admin/stocks/{id}/halt-settlement/retry"
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/stocks/{id}/price" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/stocks/{id}/price" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -2616,56 +2737,62 @@ curl -X POST "https://easy-scraping.com/admin/stocks/{id}/price" \
 
 ---
 
-### GET `/admin/stocks/dynamics`
+<a id="get--api-v1-admin-stocks-dynamics"></a>
+### GET `/api/v1/admin/stocks/dynamics`
 
 **설명:** Trend, volatility and fair value per stock
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_stockDynamics`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_stockDynamics`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/stocks/dynamics" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/stocks/dynamics" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/stocks/market-events`
+<a id="get--api-v1-admin-stocks-market-events"></a>
+### GET `/api/v1/admin/stocks/market-events`
 
 **설명:** Recent market events, ended and cancelled included
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_marketEvents`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_marketEvents`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/stocks/market-events" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/stocks/market-events" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/stocks/market-events`
+<a id="post--api-v1-admin-stocks-market-events"></a>
+### POST `/api/v1/admin/stocks/market-events`
 
 **설명:** Publish a market event: news that leans the market
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_publishMarketEvent`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_publishMarketEvent`
 #### 📦 요청 본문 (Request Body)
 
   - `stockId` (`string`) *(선택)* - Absent for the whole market
@@ -2681,12 +2808,12 @@ curl -X GET "https://easy-scraping.com/admin/stocks/market-events" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/stocks/market-events" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/stocks/market-events" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -2697,12 +2824,14 @@ curl -X POST "https://easy-scraping.com/admin/stocks/market-events" \
 
 ---
 
-### DELETE `/admin/stocks/market-events/{id}`
+<a id="delete--api-v1-admin-stocks-market-events--id-"></a>
+### DELETE `/api/v1/admin/stocks/market-events/{id}`
 
 **설명:** End a market event now
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `GameCatalogController_cancelMarketEvent`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `GameCatalogController_cancelMarketEvent`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2714,28 +2843,27 @@ curl -X POST "https://easy-scraping.com/admin/stocks/market-events" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X DELETE "https://easy-scraping.com/admin/stocks/market-events/{id}" \
-  -H "Content-Type: application/json" \
+curl -X DELETE "https://easy-scraping.com/api/v1/admin/stocks/market-events/{id}" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/support/threads`
+<a id="get--api-v1-admin-support-threads"></a>
+### GET `/api/v1/admin/support/threads`
 
 **설명:** Administrator support inbox
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminSupportController_threads`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminSupportController_threads`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2747,24 +2875,26 @@ curl -X DELETE "https://easy-scraping.com/admin/stocks/market-events/{id}" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/support/threads" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/support/threads" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/support/threads/{id}/messages`
+<a id="get--api-v1-admin-support-threads--id--messages"></a>
+### GET `/api/v1/admin/support/threads/{id}/messages`
 
 **설명:** Read a support conversation as administrator
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminSupportController_messages`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminSupportController_messages`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2776,24 +2906,26 @@ curl -X GET "https://easy-scraping.com/admin/support/threads" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/support/threads/{id}/messages" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/support/threads/{id}/messages" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/support/threads/{id}/messages`
+<a id="post--api-v1-admin-support-threads--id--messages"></a>
+### POST `/api/v1/admin/support/threads/{id}/messages`
 
 **설명:** Reply to a member support conversation
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminSupportController_reply`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminSupportController_reply`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2810,12 +2942,12 @@ curl -X GET "https://easy-scraping.com/admin/support/threads/{id}/messages" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/support/threads/{id}/messages" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/support/threads/{id}/messages" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -2826,12 +2958,14 @@ curl -X POST "https://easy-scraping.com/admin/support/threads/{id}/messages" \
 
 ---
 
-### PUT `/admin/support/threads/{id}/status`
+<a id="put--api-v1-admin-support-threads--id--status"></a>
+### PUT `/api/v1/admin/support/threads/{id}/status`
 
 **설명:** Change support conversation status
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminSupportController_status`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminSupportController_status`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2847,12 +2981,12 @@ curl -X POST "https://easy-scraping.com/admin/support/threads/{id}/messages" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PUT "https://easy-scraping.com/admin/support/threads/{id}/status" \
+curl -X PUT "https://easy-scraping.com/api/v1/admin/support/threads/{id}/status" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -2863,12 +2997,14 @@ curl -X PUT "https://easy-scraping.com/admin/support/threads/{id}/status" \
 
 ---
 
-### POST `/admin/treasury/drain`
+<a id="post--api-v1-admin-treasury-drain"></a>
+### POST `/api/v1/admin/treasury/drain`
 
 **설명:** 국고 잉여 자금 영구 소각 (Step-Up/Admin)
 
-- **분류 태그 (Tag):** `Admin Treasury`
-- **엔드포인트 ID:** `AdminTreasuryController_absorbFunds`
+- **분류 도메인 (Tag):** `Admin Treasury`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminTreasuryController_absorbFunds`
 #### 📦 요청 본문 (Request Body)
 
   - `vaultCode` (`string`) **(필수)** - 금고 코드
@@ -2879,12 +3015,12 @@ curl -X PUT "https://easy-scraping.com/admin/support/threads/{id}/status" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/treasury/drain" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/treasury/drain" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -2895,12 +3031,14 @@ curl -X POST "https://easy-scraping.com/admin/treasury/drain" \
 
 ---
 
-### POST `/admin/treasury/inject`
+<a id="post--api-v1-admin-treasury-inject"></a>
+### POST `/api/v1/admin/treasury/inject`
 
 **설명:** 국고 자금 긴급 주입 (Step-Up/Admin)
 
-- **분류 태그 (Tag):** `Admin Treasury`
-- **엔드포인트 ID:** `AdminTreasuryController_injectFunds`
+- **분류 도메인 (Tag):** `Admin Treasury`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminTreasuryController_injectFunds`
 #### 📦 요청 본문 (Request Body)
 
   - `vaultCode` (`string`) **(필수)** - 금고 코드
@@ -2911,12 +3049,12 @@ curl -X POST "https://easy-scraping.com/admin/treasury/drain" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/treasury/inject" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/treasury/inject" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -2927,34 +3065,38 @@ curl -X POST "https://easy-scraping.com/admin/treasury/inject" \
 
 ---
 
-### GET `/admin/treasury/overview`
+<a id="get--api-v1-admin-treasury-overview"></a>
+### GET `/api/v1/admin/treasury/overview`
 
 **설명:** 중앙 국고 및 비축금 현황 대시보드 조회
 
-- **분류 태그 (Tag):** `Admin Treasury`
-- **엔드포인트 ID:** `AdminTreasuryController_getOverview`
+- **분류 도메인 (Tag):** `Admin Treasury`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminTreasuryController_getOverview`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/treasury/overview" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/treasury/overview" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/treasury/transactions`
+<a id="get--api-v1-admin-treasury-transactions"></a>
+### GET `/api/v1/admin/treasury/transactions`
 
 **설명:** 국고 원장 입출금 및 순환 감사 내역 조회
 
-- **분류 태그 (Tag):** `Admin Treasury`
-- **엔드포인트 ID:** `AdminTreasuryController_listTransactions`
+- **분류 도메인 (Tag):** `Admin Treasury`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminTreasuryController_listTransactions`
 
 #### 📌 매개변수 (Parameters)
 
@@ -2967,46 +3109,50 @@ curl -X GET "https://easy-scraping.com/admin/treasury/overview" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/treasury/transactions" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/treasury/transactions" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/users`
+<a id="get--api-v1-admin-users"></a>
+### GET `/api/v1/admin/users`
 
 **설명:** Members and their status
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminController_users`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminController_users`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/users" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/users" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/admin/users/{id}/portfolio`
+<a id="get--api-v1-admin-users--id--portfolio"></a>
+### GET `/api/v1/admin/users/{id}/portfolio`
 
 **설명:** Detailed user asset portfolio
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminController_userPortfolio`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminController_userPortfolio`
 
 #### 📌 매개변수 (Parameters)
 
@@ -3018,24 +3164,26 @@ curl -X GET "https://easy-scraping.com/admin/users" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/users/{id}/portfolio" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/users/{id}/portfolio" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### PUT `/admin/users/{id}/restriction`
+<a id="put--api-v1-admin-users--id--restriction"></a>
+### PUT `/api/v1/admin/users/{id}/restriction`
 
 **설명:** Restrict or unrestrict a member
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminController_restrict`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `AdminController_restrict`
 
 #### 📌 매개변수 (Parameters)
 
@@ -3052,12 +3200,12 @@ curl -X GET "https://easy-scraping.com/admin/users/{id}/portfolio" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PUT "https://easy-scraping.com/admin/users/{id}/restriction" \
+curl -X PUT "https://easy-scraping.com/api/v1/admin/users/{id}/restriction" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -3068,60 +3216,63 @@ curl -X PUT "https://easy-scraping.com/admin/users/{id}/restriction" \
 
 ---
 
-### GET `/admin/work`
+<a id="get--api-v1-admin-work"></a>
+### GET `/api/v1/admin/work`
 
 **설명:** The work catalogue, the reward policy in force, and job levels
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminWorkOperationsController_overview`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminWorkOperationsController_overview`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/work" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/work" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/admin/work/auto-tune`
+<a id="post--api-v1-admin-work-auto-tune"></a>
+### POST `/api/v1/admin/work/auto-tune`
 
 **설명:** Automatically calculate and tune daily reward cap based on economy health
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminWorkOperationsController_autoTune`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `AdminWorkOperationsController_autoTune`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/admin/work/auto-tune" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/admin/work/auto-tune" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### PUT `/admin/work/policy`
+<a id="put--api-v1-admin-work-policy"></a>
+### PUT `/api/v1/admin/work/policy`
 
 **설명:** Update work reward policy daily cap, weekly cap, and repeat decay
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminWorkOperationsController_updatePolicy`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `AdminWorkOperationsController_updatePolicy`
 #### 📦 요청 본문 (Request Body)
 
   - `dailyCap` (`number`) *(선택)*
@@ -3134,12 +3285,12 @@ curl -X POST "https://easy-scraping.com/admin/work/auto-tune" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PUT "https://easy-scraping.com/admin/work/policy" \
+curl -X PUT "https://easy-scraping.com/api/v1/admin/work/policy" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -3150,34 +3301,38 @@ curl -X PUT "https://easy-scraping.com/admin/work/policy" \
 
 ---
 
-### GET `/admin/work/stats`
+<a id="get--api-v1-admin-work-stats"></a>
+### GET `/api/v1/admin/work/stats`
 
 **설명:** Real-time 24h work ranking, daily cap usage buckets, and 7-day trend
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminWorkOperationsController_stats`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `👑 운영진 전용`
+- **엔드포인트 핸들러 ID:** `AdminWorkOperationsController_stats`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/admin/work/stats" \
+curl -X GET "https://easy-scraping.com/api/v1/admin/work/stats" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### PATCH `/admin/work/tasks/{id}`
+<a id="patch--api-v1-admin-work-tasks--id-"></a>
+### PATCH `/api/v1/admin/work/tasks/{id}`
 
 **설명:** Update base reward, duration, daily limit, and active state of a work task
 
-- **분류 태그 (Tag):** `admin`
-- **엔드포인트 ID:** `AdminWorkOperationsController_updateTask`
+- **분류 도메인 (Tag):** `admin`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ 최근재인증 필수 (15분)` `👑 운영진 전용` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `AdminWorkOperationsController_updateTask`
 
 #### 📌 매개변수 (Parameters)
 
@@ -3197,12 +3352,12 @@ curl -X GET "https://easy-scraping.com/admin/work/stats" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X PATCH "https://easy-scraping.com/admin/work/tasks/{id}" \
+curl -X PATCH "https://easy-scraping.com/api/v1/admin/work/tasks/{id}" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -3213,56 +3368,38 @@ curl -X PATCH "https://easy-scraping.com/admin/work/tasks/{id}" \
 
 ---
 
-### GET `/health`
-
-**설명:** Liveness probe
-
-- **분류 태그 (Tag):** `Health`
-- **엔드포인트 ID:** `HealthController_check`
-#### 📤 응답 스키마 (Responses)
-
-| HTTP 상태 코드 | 의미 | 응답 형식 |
-| :---: | :--- | :--- |
-| **200** | - | None |
-
-#### 💻 호출 예시 (Example cURL)
-
-```bash
-curl -X GET "https://easy-scraping.com/health" \
-  -H "Accept: application/json" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
-```
-
----
-
-### GET `/privacy/requests`
+<a id="get--api-v1-privacy-requests"></a>
+### GET `/api/v1/privacy/requests`
 
 **설명:** Data subject requests the caller has made
 
-- **분류 태그 (Tag):** `privacy`
-- **엔드포인트 ID:** `PrivacyController_list`
+- **분류 도메인 (Tag):** `privacy`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수`
+- **엔드포인트 핸들러 ID:** `PrivacyController_list`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/privacy/requests" \
+curl -X GET "https://easy-scraping.com/api/v1/privacy/requests" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/privacy/requests`
+<a id="post--api-v1-privacy-requests"></a>
+### POST `/api/v1/privacy/requests`
 
 **설명:** Raise a data subject request
 
-- **분류 태그 (Tag):** `privacy`
-- **엔드포인트 ID:** `PrivacyController_create`
+- **분류 도메인 (Tag):** `privacy`
+- **보안 및 권한 계층 (Guards):** `🔒 로그인 필수` `📜 약관동의 필수` `🛡️ CSRF 검증`
+- **엔드포인트 핸들러 ID:** `PrivacyController_create`
 #### 📦 요청 본문 (Request Body)
 
   - `requestType` (`string`) **(필수)**
@@ -3273,12 +3410,12 @@ curl -X GET "https://easy-scraping.com/privacy/requests" \
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/privacy/requests" \
+curl -X POST "https://easy-scraping.com/api/v1/privacy/requests" \
   -H "Content-Type: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
@@ -3289,74 +3426,98 @@ curl -X POST "https://easy-scraping.com/privacy/requests" \
 
 ---
 
-### POST `/safety/takedown`
+<a id="post--api-v1-safety-takedown"></a>
+### POST `/api/v1/safety/takedown`
 
 **설명:** 비회원 공개 긴급 콘텐츠 삭제 접수
 
-- **분류 태그 (Tag):** `safety`
-- **엔드포인트 ID:** `SafetyController_submitEmergencyTakedown`
+- **분류 도메인 (Tag):** `safety`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `SafetyController_submitEmergencyTakedown`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **201** | - | None |
+| **201** | 생성 완료 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/safety/takedown" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/safety/takedown" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### POST `/safety/takedown/status`
+<a id="post--api-v1-safety-takedown-status"></a>
+### POST `/api/v1/safety/takedown/status`
 
 **설명:** 비회원 접수 상태 조회
 
-- **분류 태그 (Tag):** `safety`
-- **엔드포인트 ID:** `SafetyController_getTakedownStatus`
+- **분류 도메인 (Tag):** `safety`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `SafetyController_getTakedownStatus`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X POST "https://easy-scraping.com/safety/takedown/status" \
-  -H "Content-Type: application/json" \
+curl -X POST "https://easy-scraping.com/api/v1/safety/takedown/status" \
+  -H "Accept: application/json" \
   -H "x-csrf-token: YOUR_CSRF_TOKEN" \
-  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN" \
-  -d '{
-    "idempotencyKey": "00000000-0000-4000-8000-000000000000"
-  }'
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
 
 ---
 
-### GET `/version`
+<a id="get--api-v1-version"></a>
+### GET `/api/v1/version`
 
 **설명:** Backend runtime identity
 
-- **분류 태그 (Tag):** `Version`
-- **엔드포인트 ID:** `VersionController_check`
+- **분류 도메인 (Tag):** `Version`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `VersionController_check`
 #### 📤 응답 스키마 (Responses)
 
 | HTTP 상태 코드 | 의미 | 응답 형식 |
 | :---: | :--- | :--- |
-| **200** | - | None |
+| **200** | 성공 | JSON Object |
 
-#### 💻 호출 예시 (Example cURL)
+#### 💻 실제 호출 예시 (Example cURL)
 
 ```bash
-curl -X GET "https://easy-scraping.com/version" \
+curl -X GET "https://easy-scraping.com/api/v1/version" \
+  -H "Accept: application/json" \
+  -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
+```
+
+---
+
+<a id="get--health"></a>
+### GET `/health`
+
+**설명:** Liveness probe
+
+- **분류 도메인 (Tag):** `Health`
+- **보안 및 권한 계층 (Guards):** `🔓 공개 (게스트 허용)`
+- **엔드포인트 핸들러 ID:** `HealthController_check`
+#### 📤 응답 스키마 (Responses)
+
+| HTTP 상태 코드 | 의미 | 응답 형식 |
+| :---: | :--- | :--- |
+| **200** | 성공 | JSON Object |
+
+#### 💻 실제 호출 예시 (Example cURL)
+
+```bash
+curl -X GET "https://easy-scraping.com/health" \
   -H "Accept: application/json" \
   -H "Cookie: __Host-session=YOUR_SESSION_TOKEN"
 ```
