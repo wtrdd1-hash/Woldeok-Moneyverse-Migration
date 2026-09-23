@@ -1,8 +1,8 @@
 # Woldeok Moneyverse — Default Limit Policy
 
-> Version: v2026.09.16.138
+> Version: v2026.09.23.398
 > Status: Living product-policy specification
-> Date: 2026-09-12
+> Date: 2026-09-23
 > Applies to: product, season, shop, jobs, businesses, quests, collections, progression, social systems, and virtual-market UX
 > Korean counterpart: [DEFAULT_LIMIT_POLICY.ko.md](DEFAULT_LIMIT_POLICY.ko.md)
 
@@ -126,3 +126,41 @@ For Jobs/Professions, ordinary daily completion and rewarded-completion limits r
 Primary-profession identity rules are separate from daily play limits. Slot-count policy may be tuned prospectively, but existing selections and earned mastery are grandfathered unless a separately approved migration says otherwise.
 
 Any AI-adjusted user-facing limit must expose a reason category and reevaluation/reset semantics. It must never be personalized using sensitive attributes, hidden willingness-to-pay, advertising value or paid status.
+
+
+## 10. Work reward-window semantics and reset disclosure
+
+This section supersedes any UI or implementation assumption that a finite daily/weekly WLD counter is automatically a normal gameplay rule.
+
+### 10.1 Policy classification
+- Ordinary job participation/completion remains unlimited by default.
+- A finite `daily_cap` or `weekly_cap` is valid only when it is an explicitly versioned reward-issuance protection policy with a documented reason class, effective period, reevaluation rule, and rollback/relaxation path.
+- A finite reward cap must not be described as a generic "daily work limit" or imply that the player cannot continue working, earning mastery, or completing non-WLD progression.
+- `null` is the canonical unlimited value. `0` must not ambiguously mean both unlimited and disabled.
+
+### 10.2 Canonical game-clock windows
+- Daily and weekly counters must use the same server-authoritative Moneyverse game clock as reward settlement.
+- The daily window ends at `day_ends_at`; the weekly window ends at `week_ends_at`. These timestamps come from the canonical server clock and are not independently calculated by the client.
+- UI copy must not hard-code "UTC 00:00", "local midnight", or "every midnight" unless that is exactly the active game-clock policy.
+- The weekly card must explain the week boundary separately from the daily boundary; it must never inherit daily-reset wording.
+- Policy/timezone changes must preserve one authoritative boundary per window and must not create double-refill, skipped-refill, or overlapping issuance windows.
+
+### 10.3 Required read model/API contract
+The work summary read model/API must expose at minimum:
+`daily_paid`, `daily_cap|null`, `weekly_paid`, `weekly_cap|null`, `game_day_key`, `game_week_key`, `day_ends_at`, `week_ends_at`, `clock_policy_version`, and reward-policy version/reason metadata when a finite protection cap is active.
+
+Clients render those authoritative fields. They may calculate display percentages, but must not infer or invent reset timestamps or cap reasons.
+
+### 10.4 UX requirements
+- Show "Daily reward window" / "Weekly reward window" rather than implying a job-play ban.
+- Show consumed amount, remaining reward headroom, and the exact next reset boundary from the server.
+- If the cap is unlimited, render an unlimited state and no fake percentage/progress bar.
+- If a finite protection cap is active, show a concise reason label and whether work/mastery can continue after WLD headroom is exhausted.
+- Reset timestamps must include enough timezone/clock context to avoid contradictory displays.
+- If server clock data is stale/unavailable, render an explicit unavailable/retrying state rather than a fabricated reset time.
+
+### 10.5 Settlement and concurrency invariants
+The authoritative settlement transaction must re-check the same day/week keys and caps used by the read model. Concurrent last-slot completions, retries and idempotent replays must not exceed the cap or double-pay. A reset boundary crossing during a request must resolve against one canonical server timestamp/policy version and be auditable.
+
+### 10.6 QA gate
+Required tests include day/week boundary -1s/at/+1s, accelerated-game-clock scenarios, timezone/display conversion, policy version change, server restart, stale client state, concurrent final-headroom claims, retry/idempotency, unlimited/null rendering, finite-cap reason rendering, and EN/KO copy parity. Any mismatch between settlement boundaries and displayed reset boundaries blocks Production promotion.

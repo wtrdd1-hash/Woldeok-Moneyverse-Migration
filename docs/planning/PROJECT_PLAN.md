@@ -2,11 +2,43 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.397
+> Current integrated version: v2026.09.23.404
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Current runtime / OS baseline — v2026.09.23.404 (2026-09-23)
+
+- Current observed public runtime is Debian GNU/Linux 13.6 (trixie), systemd-managed Production/Test release directories, host Nginx and Docker-hosted PostgreSQL 17.11.
+- Runtime/tooling snapshot: Linux 6.12.94, systemd 257, Node 24.21.0, pnpm 10.0.0, Python 3.13.5, Nginx 1.26.3, Docker 29.8.0.
+- Production backend/frontend currently use systemd services on 3000/3001; isolated Test uses 3100/3101. Exact runtime identity must be proven from the active release directories, public version evidence and DB connection evidence.
+- Kubernetes/Flux is TARGET/RECOVERY architecture, not current public-runtime authority. GitOps desired state alone must not be treated as proof of a public Production change.
+- Canonical current-runtime document: `docs/CURRENT_RUNTIME_BASELINE.md` / `.ko.md`.
+- Deployment and release documentation must distinguish OBSERVED CURRENT / CONFIGURED CURRENT / TARGET-RECOVERY / HISTORICAL.
+- Multiple QA PostgreSQL containers exist on the host; cleanup is not authorized by age/name alone and requires owner/use/data/rollback classification.
+- Scope truth: v404 updates current runtime documentation from observed evidence and does not itself mutate runtime, DB, Test or Production.
+
+## GitHub documentation governance cleanup — v2026.09.23.403 (2026-09-23)
+
+- Documentation navigation is normalized around `docs/README.md`, `docs/INDEX.md`, `docs/DOCUMENTATION_POLICY.md` and `docs/DOCUMENT_CATALOG.md`.
+- English remains canonical and Korean is the required second language for maintained planning/product/operations documentation.
+- Meaningful documentation changes use a dedicated branch; the superseded direct-to-main documentation exception is removed.
+- Documentation-only commits are repository-history changes, not application-source identity, and must not trigger runtime release/promotion.
+- Root-level dated documents are legacy placements. New dated records use planning/findings/updates/changelog/worklog/releases according to document type.
+- Existing exact duplicate historical paths are preserved until inbound links are audited; future dedup uses one canonical file plus compatibility stubs.
+- Current authority order: PROJECT_PLAN → INTEGRATED_PLANNING_MASTER → explicitly adopted detailed specs → generated/runtime contracts → historical evidence.
+- Scope truth: v403 reorganizes documentation governance/navigation only and does not claim runtime implementation, Test verification or Production deployment.
+
+## Full planning re-review authority — v2026.09.23.402 (2026-09-23)
+
+- `INTEGRATED_FULL_REVIEW_V402.md` is the current superseding full-review record. It starts a 12-lane re-audit of identity/security, economy, market/casino, inventory/marketplace, community/social, public content/SEO, native API, UI/accessibility, AI governance, data/DR, release lineage and analytics/monetization/compliance.
+- Authority drift is corrected: this PROJECT_PLAN and INTEGRATED_PLANNING_MASTER now share v2026.09.23.402. v398-v401 decisions are current unless later v402+ evidence explicitly supersedes them.
+- Historical P0/HIGH/P1 incident text is evidence, not automatically current status. The v402 active-status ledger is the current status entry point and each older ID must be revalidated before being treated as open or closed.
+- API inventory drift is explicitly unresolved: mobile API documentation records 57 controllers/335 endpoints/179 mobile endpoints while source discovery finds 58 controller files and 361 HTTP decorators. Only a generated semantic contract diff may establish the new authoritative count.
+- The local v402 contract check is BLOCKED because the worktree lacks installed TypeScript tooling (`tsc: not found` / node_modules absent); it is not accepted as a passing QA result.
+- Current standards refresh remains OWASP ASVS 5.0.0, NIST SP 800-63-4/63B-4 final, OpenAPI 3.2.1, WCAG 2.2/ISO 40500:2025 and W3C ACT Rules Format 1.1.
+- Scope truth: v402 phase 1 normalizes planning authority and establishes the audit ledger. It does not claim all 12 domain lanes, runtime QA, Test or Production are complete.
 
 ## Mandatory feature/API implementation parity — v2026.09.23.397 (2026-09-23)
 

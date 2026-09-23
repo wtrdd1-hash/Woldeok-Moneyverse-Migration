@@ -2,26 +2,25 @@
 
 > [!IMPORTANT]
 >
-> **Current runtime authority — 2026-09-16 / v2026.09.16.151**
+> **Current runtime authority — 2026-09-23 / v2026.09.23.404**
 >
-> The public Production and Test origins are currently served by the authorized
-> Debian 13 runtime at `192.168.100.190`, using systemd-managed release
-> directories and local PostgreSQL containers. Both public origins, the
-> application repository `main`, and the GitOps desired image/source references
-> are converged on exact application SHA
-> `3d87165f83bcb60903e85d4f3600fdf40074ef40`.
+> The current observed public runtime is the authorized **Debian GNU/Linux 13.6
+> (trixie)** host using systemd-managed Production/Test release directories,
+> host Nginx, and Docker-hosted PostgreSQL. The observed Production PostgreSQL
+> runtime is PostgreSQL 17.11. See [CURRENT_RUNTIME_BASELINE.md](CURRENT_RUNTIME_BASELINE.md)
+> for the measured OS/runtime/service versions and current port/service topology.
 >
-> The NixOS/Kubernetes node at `192.168.100.186` is **not the current public
-> authority**: administrative SSH authorization could not be re-established with
-> the configured deploy credential. The Production Flux `apps` Kustomization is
-> therefore intentionally `suspend: true`. **Do not resume it or route Production
-> traffic to the Kubernetes database** until cluster administrative access is
-> restored and its database is reconciled against the current public Production
-> PostgreSQL authority.
+> Production currently runs through `moneyverse-backend.service` and
+> `moneyverse-frontend.service`; isolated Test runs through
+> `test-main-backend.service` and `test-main-frontend.service`. Public runtime
+> identity must be verified from the active release directories, public version
+> evidence and authoritative DB connection—not from repository head or GitOps
+> desired state alone.
 >
-> The Kubernetes sections below describe the intended/previous GitOps target
-> architecture. Where they conflict with this incident-state notice, this notice
-> is authoritative until a later versioned runtime-convergence record supersedes it.
+> NixOS/Kubernetes/Flux remains a **TARGET/RECOVERY** architecture, not current
+> public-runtime authority. Do not route Production traffic or database authority
+> to that environment until access, database reconciliation, exact-runtime identity
+> and public routing are explicitly re-verified and this baseline is versioned again.
 
 Read this before touching anything under `deploy/`, `.github/workflows/`, or any
 document that describes releasing. It exists because the repository spent a week

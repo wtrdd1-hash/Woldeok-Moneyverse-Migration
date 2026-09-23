@@ -4,24 +4,26 @@
 
 > [!IMPORTANT]
 >
-> **현재 런타임 권위 상태 — 2026-09-16 / v2026.09.16.151**
+> **현재 런타임 권위 상태 — 2026-09-23 / v2026.09.23.404**
 >
-> 현재 공개 Production과 Test는 `192.168.100.190`의 승인된 Debian 13
-> 런타임에서 systemd 릴리스 디렉터리와 로컬 PostgreSQL 컨테이너로
-> 서비스됩니다. 공개 Production/Test, 애플리케이션 저장소 `main`, GitOps의
-> desired 이미지/소스 참조는 모두 정확한 애플리케이션 SHA
-> `3d87165f83bcb60903e85d4f3600fdf40074ef40`로 수렴했습니다.
+> 현재 관측된 공개 런타임은 승인된 **Debian GNU/Linux 13.6 (trixie)**
+> 호스트이며 systemd Production/Test release 디렉터리, 호스트 Nginx,
+> Docker PostgreSQL을 사용합니다. 관측된 Production PostgreSQL runtime은
+> PostgreSQL 17.11입니다. 측정한 OS/runtime/service 버전과 현재 port/service
+> topology는 [CURRENT_RUNTIME_BASELINE.ko.md](CURRENT_RUNTIME_BASELINE.ko.md)를
+> 권위 스냅샷으로 사용합니다.
 >
-> `192.168.100.186`의 NixOS/Kubernetes 노드는 **현재 공개 서비스의 권위
-> 런타임이 아닙니다**. 설정된 배포 자격증명으로 관리자 SSH 권한을 복구하지
-> 못했으므로 Production Flux `apps` Kustomization은 의도적으로
-> `suspend: true`를 유지합니다. 클러스터 관리자 접근을 복구하고 현재 공개
-> Production PostgreSQL 권위 DB와 클러스터 DB를 대사하기 전에는 **Flux를
-> 재개하거나 Production 트래픽을 Kubernetes DB로 전환하지 마십시오.**
+> Production은 현재 `moneyverse-backend.service`,
+> `moneyverse-frontend.service`, isolated Test는
+> `test-main-backend.service`, `test-main-frontend.service`를 통해
+> 실행됩니다. 공개 runtime identity는 active release directory, public
+> version evidence, authoritative DB connection으로 확인하며 repository head나
+> GitOps desired state만으로 판단하지 않습니다.
 >
-> 아래 Kubernetes 설명은 목표/이전 GitOps 아키텍처를 설명합니다. 이 사고
-> 상태 공지와 충돌하는 부분은 이후 버전의 런타임 수렴 기록이 이를 대체하기
-> 전까지 이 공지를 우선합니다.
+> NixOS/Kubernetes/Flux는 현재 **TARGET/RECOVERY** 아키텍처이며 공개 runtime
+> 권위가 아닙니다. 접근·DB 대사·exact runtime identity·public routing을
+> 명시적으로 재검증하고 기준문서를 새 버전으로 갱신하기 전에는 Production
+> traffic이나 DB 권위를 해당 환경으로 전환하지 않습니다.
 
 `deploy/`, `.github/workflows/` 또는 릴리스 관련 문서를 수정하기 전에 이 문서를 먼저 확인합니다. 과거 저장소에는 이미 사라진 장비 구조를 설명하는 문서가 남아 있었고, 그 설명을 기준으로 잘못된 변경이 수행된 적이 있습니다.
 

@@ -12,7 +12,7 @@ Docker Compose is not the Production deployment control plane.
 
 ## Current public-edge runtime
 
-GitOps remains the declarative release authority, but the current public Nginx edge on the mini PC still proxies to host systemd services: Production backend/frontend on ports `3000/3001`, and Test backend/frontend on `3100/3101`. Until ingress is fully moved onto the reconciled cluster runtime, every promotion must mirror the approved exact SHA into these host services and verify the public `/api/version`. A GitOps manifest update by itself is not evidence that the public site changed.
+GitOps remains target/provenance state for the recovery architecture, but the **current observed public release authority is the Debian 13 host systemd runtime behind Nginx**: Production backend/frontend on ports `3000/3001`, and Test backend/frontend on `3100/3101`. Every promotion must place the approved exact application source into these host release services and verify the public version/runtime evidence. A GitOps manifest update by itself is not evidence that the public site changed.
 
 The host mirror must use the same approved SHA, preserve the previous unit configuration for rollback, and pass the same catalog/status/SEO probes before a release is reported complete.
 

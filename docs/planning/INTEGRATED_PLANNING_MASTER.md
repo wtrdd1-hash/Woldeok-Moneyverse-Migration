@@ -1,11 +1,78 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.23.397
+> Current ledger version: v2026.09.23.404
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.23.404 — 2026-09-23
+- Re-baselined current infrastructure documentation from observed runtime facts on the authorized Debian host.
+- Current observed OS/runtime: Debian GNU/Linux 13.6 (trixie), Linux 6.12.94, systemd 257, Node 24.21.0, pnpm 10.0.0, Python 3.13.5, Nginx 1.26.3, Docker 29.8.0, Production PostgreSQL 17.11.
+- Current public authority is Debian 13 systemd release directories behind host Nginx, with Docker-hosted PostgreSQL. Production backend/frontend use 3000/3001; Test uses 3100/3101.
+- Added canonical `CURRENT_RUNTIME_BASELINE.md` / `.ko.md` and linked it from docs README/index.
+- Rewrote deployment-flow and release-guide EN/KO to distinguish OBSERVED CURRENT from TARGET/RECOVERY Kubernetes/Flux architecture.
+- Corrected operations/production-deployment wording so GitOps desired state is not treated as current public-runtime proof.
+- Kubernetes/Flux remains target/recovery architecture until access, DB reconciliation, exact runtime identity and public routing are explicitly reverified.
+- Multiple QA PostgreSQL containers were observed; no destructive cleanup was performed. Container cleanup requires owner/use/data/rollback classification.
+- Planning/docs/runtime-observation update only; no runtime mutation or Production promotion performed.
+
+## v2026.09.23.403 — 2026-09-23
+- Reorganized GitHub documentation without deleting historical evidence or breaking existing paths.
+- Added canonical `docs/README.md`, concise `INDEX.md`, `DOCUMENTATION_POLICY.md`, and `DOCUMENT_CATALOG.md` with required Korean companions.
+- Added README governance files for planning, architecture, features, operations, findings, updates, changelog, worklog and releases.
+- Superseded the old Korean-only policy that allowed documentation-only direct commits to `main`; meaningful documentation changes now require a branch, current-main recheck, EN/KO parity and versioned records.
+- Inventory found 18 legacy root-level dated Markdown files and 31 exact duplicate-content groups, mainly historical changelog/worklog/release copies. This cycle preserves paths for link/history compatibility and prohibits new root-level dated records.
+- Historical documents remain evidence, while PROJECT_PLAN / INTEGRATED_PLANNING_MASTER / adopted detailed specs define current authority.
+- Documentation-only commits must not be treated as application release identity or trigger runtime promotion.
+- Planning/docs only; no runtime/Test/Production claim.
+
+## v2026.09.23.402 — 2026-09-23
+- Started a full planning re-review against current repository evidence, runtime-facing contracts, standards, and recent planning decisions.
+- Mechanical inventory: 166 top-level planning files = 83 EN + 83 KO, missing EN/KO counterparts 0, broken relative links 0.
+- G402-01 / P0: corrected authority drift where PROJECT_PLAN still declared v397 while this master had advanced to v401. v402 is now the shared current authority marker.
+- G402-02 / P1: mobile API documentation remains at 57 controllers / 335 endpoints / 179 mobile endpoints while current source discovery finds 58 controller files and 361 HTTP decorators. These counts are not declared equivalent; generated contract diff is required. Local `pnpm api:contract:check` is BLOCKED because dependencies/tsc are absent.
+- G402-03 / P1: created a current active-status ledger so historical incident narratives no longer silently define current status.
+- G402-04 / P1: explicit TODOs such as AUTH-105-02 and OPS-CACHE-156-01 require current-main revalidation.
+- Current standards rechecked: OWASP ASVS 5.0.0, NIST SP 800-63-4/63B-4 final, OpenAPI 3.2.1, WCAG 2.2 / ISO 40500:2025, W3C ACT Rules Format 1.1.
+- Canonical review: `INTEGRATED_FULL_REVIEW_V402.md` / `.ko.md`. Phase 1 normalizes authority and establishes the 12-lane full review; it does not claim the domain audit is complete.
+
+## v2026.09.23.401 — 2026-09-23
+- Added explicit research-paper-to-policy mapping to the economy plan. The 31,289-record discovery corpus remains broad coverage; selected high-confidence papers now map to adopted insight, non-adopted assumptions, and validation KPIs.
+- Core evidence: Axtell & Farmer (2025) ABM; Kaplan, Moll & Violante (2018) HANK; Kaplan & Violante (2018) heterogeneity; Zheng et al. AI Economist (2020/2021); Atashbar & Shi IMF RL work (2022/2023); Atashbar (2024); Hogan-Hennessy et al. virtual-market intervention (2022); Calvano et al. algorithmic pricing (2020); Meylahn & Schinkel (2026).
+- Linked cohort affordability, ABM stress testing, RL shadow gates, sink causal evaluation, and algorithmic pricing ceilings/synchronization telemetry/human approval directly to the literature.
+- New canonical document: `ECONOMY_RESEARCH_PAPER_MAP.md` / `ECONOMY_RESEARCH_PAPER_MAP.ko.md`.
+- Literature cannot authorize Production parameters by itself; Moneyverse replay, telemetry, acceptance thresholds and rollback evidence remain mandatory.
+- Planning/docs only; no runtime/Test/Production claim. EN/KO parity complete.
+
+## v2026.09.23.400 — 2026-09-23
+- Rechecked `origin/main=7b705e1d37e97ccd05ba12042c3fd8d582e396d0` and expanded the v399 monetary-velocity evidence base.
+- Added 6,879 Crossref and 17,291 OpenAlex candidates to the prior 11,749-record corpus; DOI-first and normalized-title fallback deduplication produces **31,289 unique candidates**, a net increase of 19,540.
+- Re-reviewed high-confidence evidence from 2026 EVE Monthly Economic Reports, the Old School RuneScape market-intervention study, Fed/IMF/ECB/BIS heterogeneous-agent and HANK research, and the 2025 AEA/JEL ABM review.
+- G400-01 / P1: aggregate averages can hide cohort affordability and distributional effects. Added new/median/high-income/high-wealth cohort price and purchasing-power telemetry.
+- G400-02 / P1: nominal sink growth does not guarantee healthy prices; category-level price, volume, scarcity and substitution effects are required.
+- G400-03 / P1: added dormant-balance/reactivation shocks, seasonality separation, and data revision/source-version metadata to the economy simulation/dashboard contract.
+- Added `MONEYVERSE_ECONOMY_REFERENCE_CORPUS_v2026.09.23.400.csv`, EN/KO research reviews, and v400 monetary-velocity specification updates. Planning/docs only; no runtime/Test/Production claim.
+- EN/KO parity complete.
+
+## v2026.09.23.399 — 2026-09-23
+- Start baseline: `origin/main=4812a99b0a78da736e477d0a3a2f02ed4ea66283`; mid-work recheck: `origin/main=f0efc448a30a5b67071956b0faa6742a8427d2ea`. The two new main commits do not overlap the economy planning files, so this branch is rebased onto the latest main.
+- Revalidated the existing 11,749-record deduplicated economy research corpus and added current 2026 EVE Monthly Economic Reports plus AI Economist/IMF policy-simulation literature to the review.
+- G399-01 / P0: instant-complete/instant-settle work can create excessive WLD issuance per unit time even with repeat decay. Unlimited ordinary participation remains the product default, but every paid job requires a server-authoritative duration or verification boundary.
+- G399-02 / P1: economy control must not rely on one faucet/sink ratio; money supply, price indices, wealth concentration, income distribution, and new-user core-basket affordability are co-equal signals.
+- G399-03 / P1: automatic controls follow exploit stop → concentrated-source decay → job diversification → high-wealth prestige sinks → bounded issuance factor → temporary reward window, with versioning, reversibility, and auditability.
+- New canonical detailed spec: `ECONOMY_MONETARY_VELOCITY_SPEC` EN/KO. This cycle does not claim runtime implementation, Test completion, or Production deployment.
+- EN/KO parity complete.
+
+## v2026.09.23.398 — 2026-09-23
+- Start/mid-work baseline: `origin/main=4812a99b0a78da736e477d0a3a2f02ed4ea66283`.
+- Reviewed current Jobs reward UI, `work_my_dashboard_v2`, game-clock repository, migration 203, `DEFAULT_LIMIT_POLICY`, `JOBS_PROFESSION_MASTERY_SPEC`, and prior WORK-128 quota contract.
+- G398-01 / P1: current UI copy can claim midnight/UTC 00:00 while the authoritative accelerated Moneyverse game clock returns different `day_ends_at`/`week_ends_at`; this creates a user-visible contract contradiction even when settlement itself uses the server clock.
+- G398-02 / P1: finite daily/weekly WLD caps are visible, while planning says ordinary Jobs participation is unlimited by default. Clarified that any finite cap is a versioned reward-issuance protection window, not a generic work/play ban, and requires policy reason/reevaluation metadata.
+- Required canonical summary/API fields, unlimited=`null` semantics, server-authoritative boundary display, separate daily/weekly copy, concurrency/idempotency boundary tests, web/mobile parity and exact-SHA Test gating.
+- Planning/docs only. No runtime fix, Test completion or Production deployment is claimed in this cycle.
+- EN/KO parity complete.
 
 ## v2026.09.23.397 — 2026-09-23
 - Baseline: `origin/main=0e46f1eac272c42aa929947b79c0b0d2ccbd5454`.

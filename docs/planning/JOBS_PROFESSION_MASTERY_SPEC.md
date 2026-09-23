@@ -1,8 +1,8 @@
 # Woldeok Moneyverse — Jobs & Profession Mastery Specification
 
-> Version: v2026.09.17.184
+> Version: v2026.09.23.399
 > Status: Living implementation-oriented product specification
-> Date: 2026-09-17
+> Date: 2026-09-23
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `SEASON_SYSTEM_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `LIMIT_CONSISTENCY_IMPLEMENTATION_SPEC.md`, `BUSINESS_OPERATIONS_SUPPLY_CHAIN_SPEC.md`
 > Korean counterpart: [JOBS_PROFESSION_MASTERY_SPEC.ko.md](JOBS_PROFESSION_MASTERY_SPEC.ko.md)
 
@@ -482,3 +482,33 @@ config_hash
 ```
 
 QA must cover unlimited -> finite -> relaxed -> unlimited transitions, midnight/reset boundaries, game-day clock changes, concurrent completions, duplicate settlement, stale policy reads, server restart, grandfathered primary professions, abuse-shock tightening, false-positive recovery and exact-SHA Test verification.
+
+
+## 23. Reward-window dashboard contract
+
+The Jobs dashboard may expose daily/weekly **WLD issuance windows** for the currently deployed compatibility policy, but those windows do not override the unlimited-by-default participation model in sections 1, 4 and 22.
+
+1. The dashboard is a server read-model of settlement policy, not a client-side limiter.
+2. Daily and weekly usage must be calculated from the same authoritative game-day/game-week keys used by reward settlement.
+3. `day_ends_at` and `week_ends_at` are canonical reset boundaries. Client copy must not hard-code UTC/local midnight when the active game clock is accelerated or otherwise different.
+4. A finite `daily_cap`/`weekly_cap` requires reward-policy version, reason class and reevaluation metadata. Absence of such metadata is a planning/runtime gap.
+5. Reaching WLD headroom must not erase assignment history or mastery. The UI must distinguish "WLD reward headroom exhausted" from "work unavailable".
+6. Unlimited policy is represented as `null`, not a magic numeric ceiling. The client must render unlimited without a misleading percentage bar.
+7. API parity is mandatory: web and mobile must consume the same work-summary contract and server clock semantics.
+8. Required summary fields: `daily_paid`, `daily_cap|null`, `weekly_paid`, `weekly_cap|null`, `game_day_key`, `game_week_key`, `day_ends_at`, `week_ends_at`, `clock_policy_version`, `reward_policy_version`, and finite-cap reason/reevaluation metadata.
+
+### 23.1 Acceptance criteria for the current dashboard discrepancy
+The displayed explanatory sentence, daily reset timestamp, weekly reset timestamp and settlement engine must describe the same active clock policy. A state where copy says "midnight/UTC 00:00" while the server supplies a different `day_ends_at` or `week_ends_at` is a P1 UX/contract defect. Production acceptance requires exact-SHA tests proving:
+- daily and weekly boundary parity between database settlement, backend API and UI;
+- no double reward around a reset;
+- correct rendering after restart/deploy without logging users out;
+- correct EN/KO copy;
+- responsive desktop/mobile layout without truncating the remaining amount or reset context.
+
+## 24. WLD issuance-rate contract
+
+Unlimited job participation remains the default, but a paid assignment may not mint unbounded WLD through instant click repetition. Every paid template has server-authoritative `expected_work_seconds` and `settlement_mode`, and cannot settle before `eligible_submit_at`.
+
+Settlement uses one of `ACTIVE`, `ASYNC`, `VERIFY`, or `BATCH`. Client timers are display-only. The assignment captures its policy version and reward parameters at acceptance, and retries or server restarts must never produce a second payout.
+
+When issuance pressure rises, prefer repeat decay, source diversification, high-wealth hard sinks, and a bounded issuance factor over globally disabling jobs. Validate money supply, price indices, wealth concentration, and new-user core-basket affordability together. See `ECONOMY_MONETARY_VELOCITY_SPEC.md` for the canonical detailed contract.

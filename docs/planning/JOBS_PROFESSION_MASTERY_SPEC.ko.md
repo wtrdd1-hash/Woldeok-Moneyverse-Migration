@@ -1,8 +1,8 @@
 # 월덕 머니버스 — 작업·직업 숙련도 기획 명세서
 
-> 버전: v2026.09.17.184
+> 버전: v2026.09.23.399
 > 상태: 구현 지향형 Living 제품 기획 명세
-> 기준일: 2026-09-12
+> 기준일: 2026-09-23
 > 상위 문서: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `SEASON_SYSTEM_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `LIMIT_CONSISTENCY_IMPLEMENTATION_SPEC.md`, `BUSINESS_OPERATIONS_SUPPLY_CHAIN_SPEC.md`
 > 영문 기준 문서: [JOBS_PROFESSION_MASTERY_SPEC.md](JOBS_PROFESSION_MASTERY_SPEC.md)
 
@@ -179,3 +179,33 @@ config_hash
 ```
 
 QA는 무제한 -> 유한 -> 완화 -> 무제한 전환, 자정/reset 경계, 게임 day clock 변경, 동시 완료, 중복정산, stale policy read, 서버 재시작, grandfathered 주직업, abuse shock 제한강화, false-positive 복구, exact-SHA Test 검증을 포함한다.
+
+
+## 23. 보상 윈도우 대시보드 계약
+
+직업 대시보드는 현재 배포된 호환 정책에 따라 일일/주간 **WLD 발행 윈도우**를 표시할 수 있지만, 이는 1·4·22절의 기본 무제한 참여 원칙을 덮어쓰지 않는다.
+
+1. 대시보드는 정산 정책의 서버 read model이며 클라이언트 제한기가 아니다.
+2. 일일·주간 사용량은 보상 정산과 동일한 권위 game-day/game-week key로 계산한다.
+3. `day_ends_at`, `week_ends_at`이 canonical 초기화 경계다. 활성 게임 시계가 가속되었거나 다르면 클라이언트 문구에 UTC/현지 자정을 하드코딩하지 않는다.
+4. 유한 `daily_cap`/`weekly_cap`에는 reward-policy 버전, 사유 분류, 재평가 metadata가 필요하다. 없으면 기획/런타임 gap으로 판정한다.
+5. WLD 잔여 발행량이 0이 되어도 작업 이력이나 숙련도를 지우지 않는다. UI는 "WLD 보상 여유 소진"과 "작업 불가"를 구분한다.
+6. 무제한 정책은 임의의 거대 숫자가 아니라 `null`로 표현하며, 클라이언트는 오해를 주는 퍼센트 바 없이 무제한으로 표시한다.
+7. API 정합은 필수다. 웹/모바일은 같은 work-summary 계약과 서버 시계 의미를 사용한다.
+8. 필수 요약 필드: `daily_paid`, `daily_cap|null`, `weekly_paid`, `weekly_cap|null`, `game_day_key`, `game_week_key`, `day_ends_at`, `week_ends_at`, `clock_policy_version`, `reward_policy_version`, 유한 한도 사유/재평가 metadata.
+
+### 23.1 현재 대시보드 불일치 수용조건
+화면 설명문, 일일 초기화 시각, 주간 초기화 시각, 정산 엔진이 동일한 활성 시계 정책을 설명해야 한다. 문구는 "자정/UTC 00:00"이라고 하면서 서버의 `day_ends_at` 또는 `week_ends_at`이 다른 상태는 P1 UX/계약 결함이다. Production 수용 전 exact-SHA에서 다음을 증명한다.
+- DB 정산·backend API·UI의 일일/주간 경계 정합
+- reset 전후 중복 보상 0
+- 재시작/배포 뒤 로그인 유지 상태에서 올바른 표시
+- 영/한 문구 정합
+- 데스크톱/모바일 반응형에서 남은 금액·초기화 문맥 잘림 없음
+
+## 24. 단위시간당 WLD 발행속도 계약
+
+직업 참여 무제한 원칙은 유지하지만, 유상 작업은 즉시 클릭 반복으로 무한 WLD를 발행할 수 없다. 각 템플릿은 서버 권위 `expected_work_seconds`와 `settlement_mode`를 가지며, `eligible_submit_at` 이전에는 정산하지 않는다.
+
+정산 모드는 `ACTIVE`, `ASYNC`, `VERIFY`, `BATCH` 중 하나를 사용한다. 클라이언트 타이머는 표시용이며 정산 권한이 없다. 작업 수락 시 정책버전과 보상 파라미터를 캡처하고, 재시도·서버 재시작 뒤에도 같은 과제는 한 번만 지급한다.
+
+경제 압력이 높을 때는 전역 작업금지보다 반복감쇠, 발행원 분산, 고자산 hard sink, 제한형 issuance factor를 먼저 사용한다. 통화량·가격지수·자산집중·신규유저 핵심바스켓 구매력까지 함께 검증한다. 상세 계약은 `ECONOMY_MONETARY_VELOCITY_SPEC.ko.md`를 따른다.
