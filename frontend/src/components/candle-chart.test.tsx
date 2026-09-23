@@ -246,3 +246,16 @@ describe('CandleChart axis', () => {
     expect(drawing?.contains(axis ?? null)).toBe(false);
   });
 });
+
+describe('CandleChart technical indicators', () => {
+  it('renders MA5 and MA20 polyline indicators and toggle buttons', () => {
+    const { container } = render(<CandleChart candles={series(25)} />);
+    const polylines = container.querySelectorAll('polyline');
+    expect(polylines.length).toBeGreaterThanOrEqual(2);
+
+    const buttons = [...container.querySelectorAll('button')].map((b) => b.textContent?.trim());
+    expect(buttons).toContain('MA5');
+    expect(buttons).toContain('MA20');
+    expect(buttons).toContain('볼린저 밴드');
+  });
+});

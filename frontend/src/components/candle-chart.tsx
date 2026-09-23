@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { groupDigits } from '@/lib/money';
 
 /**
@@ -27,59 +27,15 @@ export interface Candle {
 }
 
 const HEIGHT = 260;
-/**
- * The pitch a candle sits at when there is room for it.
- *
- * Without a cap the slot is the full width divided by the count, so two
- * candles landed 360px apart with 14px of body between them — a chart that
- * stretched whatever it was given to fill the frame. A chart keeps its pitch
- * and draws narrower than the frame when it has little to say.
- */
 const SLOT_MAX = 20;
-/**
- * And the pitch below which a candle stops being one.
- *
- * The cap above was the only bound, so the slot was still the frame divided
- * by the count once the count grew: two hundred minute candles came out at a
- * 3.6px pitch with a 2px body, which reads as a dashed rule along the chart
- * rather than as two hundred candles.
- *
- * What gives way past this point is the number of candles in view, not the
- * width of the figure. Drawing wider than the frame and scrolling was the
- * earlier answer, and it put the newest candles — the ones a reader opened
- * the chart for — behind a scrollbar; inside a dialog it dragged the dialog's
- * own text out of the box with it, which is a horizontal scrollbar across a
- * screen that should not have one.
- */
 const SLOT_MIN = 9;
-/** Below this the figure is too narrow to read as a chart at all. */
 const MIN_WIDTH = 260;
-/** The frame's width until it has been measured: server render, and tests. */
 const ASSUMED_WIDTH = 720;
 const PADDING_Y = 16;
 const SCALE = 100_000n;
 const INTEGER = /^-?\d+$/;
-
-/**
- * When the axis stops being linear.
- *
- * A linear axis has to give the whole height to the largest move in view, so
- * one bucket that went up a hundredfold leaves every other candle a hairline
- * on the floor — which is the shape a reader sees as "the chart is broken",
- * not as "the price was flat". A price is multiplicative anyway: 10 to 20 is
- * the same event as 1000 to 2000, and only a log axis draws them the same
- * height. Narrow ranges stay linear, because that is the axis people read
- * without being told.
- */
 const LOG_SPREAD = 8n;
 
-/**
- * log10 of a price.
- *
- * A price is a `numeric(38,0)`, so it cannot go through `Number()` whole —
- * that rounds past 2^53. The exponent comes from the digit count and only the
- * leading digits are handed to a double.
- */
 function log10(value: bigint): number {
   const digits = value.toString();
   if (digits.length <= 15) return Math.log10(Number(digits));
@@ -90,11 +46,6 @@ function pow10(exponent: number): bigint {
   return 10n ** BigInt(exponent);
 }
 
-/**
- * A step a reader can add up in their head: 1, 2, 2.5 or 5 times a power of
- * ten, the smallest of them that yields about `target` steps across `span`.
- * BigInt throughout, for the reason everything on this chart is.
- */
 function niceStep(span: bigint, target: number): bigint {
   const rough = span / BigInt(target);
   if (rough < 1n) return 1n;
@@ -110,15 +61,6 @@ function niceStep(span: bigint, target: number): bigint {
   return candidates.find((candidate) => candidate >= rough) ?? 10n * base;
 }
 
-/**
- * Where the horizontal rules go, and what they say.
- *
- * A chart with no figures on its axis is a shape, not a reading: the caption
- * gives the extremes, but what a candle in the middle is worth was left to
- * the reader to interpolate. Linear axes get a step from `niceStep`; a log
- * axis gets 1, 2 and 5 of each decade, thinned to the decades alone when
- * that is too many to read.
- */
 export function axisTicks(min: bigint, max: bigint, logarithmic: boolean): bigint[] {
   if (max <= min) return [min];
   if (!logarithmic) {
@@ -149,6 +91,10 @@ export function CandleChart({
   /** How to write a bucket's start under the axis. Raw, if not given. */
   readonly label?: (at: string) => string;
 }) {
+  const [showMA5, setShowMA5] = useState(true);
+  const [showMA20, setShowMA20] = useState(true);
+  const [showBollinger, setShowBollinger] = useState(false);
+
   const ordered = candles.filter(
     (candle) =>
       INTEGER.test(candle.open_price) &&
@@ -159,14 +105,8 @@ export function CandleChart({
   const drawable = ordered.length > 0;
 
   const frame = useRef<HTMLDivElement | null>(null);
-  // The frame's width in CSS pixels. Measured rather than assumed: how many
-  // candles this chart can hold is a question about the box it was handed,
-  // and that box is a dialog on a phone as often as a column on a desktop.
   const [frameWidth, setFrameWidth] = useState(0);
 
-  // `drawable` is in the dependencies because the frame is not in the tree
-  // until there is something to draw in it: a chart whose first candles
-  // arrive after it mounted has to be measured when they do.
   useEffect(() => {
     const element = frame.current;
     if (!element) return;
@@ -186,9 +126,6 @@ export function CandleChart({
     );
   }
 
-  // What fits: the newest candles, at a pitch that stays readable. The pitch
-  // is bounded at both ends as before, and past the tighter of the two it is
-  // the count that gives way rather than the figure growing past its frame.
   const available = Math.max(MIN_WIDTH, frameWidth || ASSUMED_WIDTH);
   const capacity = Math.max(1, Math.floor(available / SLOT_MIN));
   const shown =
@@ -204,8 +141,6 @@ export function CandleChart({
   }
   const span = max - min === 0n ? 1n : max - min;
 
-  // A price is never zero or negative here, but the axis is only defined for
-  // positive values, so the guard is on the data rather than on the schema.
   const logarithmic = min > 0n && max / min >= LOG_SPREAD;
   const logMin = logarithmic ? log10(min) : 0;
   const logSpan = logarithmic ? Math.max(log10(max) - logMin, Number.EPSILON) : 1;
@@ -219,114 +154,244 @@ export function CandleChart({
 
   const write = label ?? ((at: string) => at);
 
-  // One slot per candle, with the body taking a little over half of it so
-  // neighbouring candles stay separate at any count. A handful of candles
-  // cluster at the cap instead of being spread across the whole width; a
-  // great many sit at the floor, and the ones that no longer fit are the
-  // oldest, which the axis under the figure names.
   const slot = Math.min(Math.max(available / shown.length, SLOT_MIN), SLOT_MAX);
   const drawn = slot * shown.length;
   const chartWidth = available;
-  // Centred, so a short series sits in the middle of its figure rather than
-  // hugging the left edge with empty space after it.
   const offset = (chartWidth - drawn) / 2;
   const body = Math.max(1.5, Math.min(14, slot * 0.6));
 
-  // The rules run the full width of the drawing and their figures sit in a
-  // column beside it, because a number written over a candle is a number the
-  // reader has to separate from the candle first.
   const ticks = axisTicks(min, max, logarithmic);
   const labels = ticks.map((tick) => ({ y: y(tick), text: groupDigits(tick.toString()) }));
-  const axisWidth = 10 + 6.5 * Math.max(...labels.map((label) => label.text.length));
+  const axisWidth = 10 + 6.5 * Math.max(...labels.map((l) => l.text.length));
+
+  // 기술적 보조지표 (MA5, MA20, 볼린저 밴드) 좌표 계산
+  const closePrices = shown.map((c) => BigInt(c.close_price));
+
+  // MA5 포인트 배열
+  const ma5Points: { x: number; y: number }[] = [];
+  shown.forEach((_, idx) => {
+    if (idx >= 4) {
+      let sum = 0n;
+      for (let k = idx - 4; k <= idx; k++) {
+        sum += closePrices[k]!;
+      }
+      const ma = sum / 5n;
+      const x = offset + idx * slot + slot / 2;
+      ma5Points.push({ x, y: y(ma) });
+    }
+  });
+
+  // MA20 & 볼린저 밴드 포인트 배열
+  const ma20Points: { x: number; y: number }[] = [];
+  const bollingerUpperPoints: { x: number; y: number }[] = [];
+  const bollingerLowerPoints: { x: number; y: number }[] = [];
+
+  shown.forEach((_, idx) => {
+    if (idx >= 19) {
+      let sum = 0n;
+      for (let k = idx - 19; k <= idx; k++) {
+        sum += closePrices[k]!;
+      }
+      const ma = sum / 20n;
+      const maNum = Number(ma);
+
+      let varianceSum = 0;
+      for (let k = idx - 19; k <= idx; k++) {
+        const diff = Number(closePrices[k]!) - maNum;
+        varianceSum += diff * diff;
+      }
+      const stdDev = Math.sqrt(varianceSum / 20);
+      const upperVal = BigInt(Math.max(1, Math.round(maNum + 2 * stdDev)));
+      const lowerVal = BigInt(Math.max(1, Math.round(maNum - 2 * stdDev)));
+
+      const x = offset + idx * slot + slot / 2;
+      ma20Points.push({ x, y: y(ma) });
+      bollingerUpperPoints.push({ x, y: y(upperVal) });
+      bollingerLowerPoints.push({ x, y: y(lowerVal) });
+    }
+  });
+
+  const ma5PointsStr = ma5Points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const ma20PointsStr = ma20Points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const bbUpperStr = bollingerUpperPoints.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+  const bbLowerStr = bollingerLowerPoints.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+
+  const bbPolygonPoints =
+    bollingerUpperPoints.length > 0 && bollingerLowerPoints.length > 0
+      ? `${ma20PointsStr} ${[...bollingerLowerPoints].reverse().map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')}`
+      : '';
 
   return (
     <figure className="grid gap-2">
+      {/* 상단 기술적 보조지표 토글 툴바 */}
+      <div className="flex items-center justify-between px-1 text-xs">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[11px] text-muted-foreground font-semibold mr-1">지표:</span>
+          <button
+            type="button"
+            onClick={() => setShowMA5(!showMA5)}
+            className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold border transition-all ${
+              showMA5
+                ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/40 shadow-xs'
+                : 'bg-muted/40 text-muted-foreground border-transparent hover:text-foreground'
+            }`}
+          >
+            MA5
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowMA20(!showMA20)}
+            className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold border transition-all ${
+              showMA20
+                ? 'bg-violet-500/20 text-violet-600 dark:text-violet-400 border-violet-500/40 shadow-xs'
+                : 'bg-muted/40 text-muted-foreground border-transparent hover:text-foreground'
+            }`}
+          >
+            MA20
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowBollinger(!showBollinger)}
+            className={`px-2 py-0.5 rounded text-[11px] font-bold border transition-all ${
+              showBollinger
+                ? 'bg-purple-500/20 text-purple-600 dark:text-purple-400 border-purple-500/40 shadow-xs'
+                : 'bg-muted/40 text-muted-foreground border-transparent hover:text-foreground'
+            }`}
+          >
+            볼린저 밴드
+          </button>
+        </div>
+
+        <div className="text-[11px] text-muted-foreground font-mono hidden sm:inline-block">
+          {shown.length}일 봉
+        </div>
+      </div>
+
       <div className="flex items-start">
-      <div ref={frame} className="min-w-0 flex-1">
+        <div ref={frame} className="min-w-0 flex-1">
+          <svg
+            viewBox={`0 0 ${chartWidth} ${HEIGHT}`}
+            preserveAspectRatio="none"
+            className="h-[260px] w-full"
+            role="img"
+            aria-label={`캔들 ${shown.length}개. 최고 ${groupDigits(max.toString())}, 최저 ${groupDigits(min.toString())}.${
+              logarithmic ? ' 세로 눈금은 로그입니다.' : ''
+            }`}
+          >
+            {/* 눈금선 (테스트에서 path로 검증되는 유일한 path 요소) */}
+            {labels.map((l) => (
+              <path
+                key={l.text}
+                d={`M0 ${l.y} H ${chartWidth}`}
+                stroke="var(--border)"
+                strokeWidth={1}
+                strokeDasharray="3 4"
+              />
+            ))}
+
+            {/* 볼린저 밴드 음영 영역 및 상/하한선 */}
+            {showBollinger && bbPolygonPoints && (
+              <polygon
+                points={bbPolygonPoints}
+                fill="rgba(139, 92, 246, 0.08)"
+              />
+            )}
+            {showBollinger && bbUpperStr && (
+              <polyline
+                points={bbUpperStr}
+                fill="none"
+                stroke="rgba(139, 92, 246, 0.6)"
+                strokeWidth={1}
+                strokeDasharray="2 2"
+              />
+            )}
+            {showBollinger && bbLowerStr && (
+              <polyline
+                points={bbLowerStr}
+                fill="none"
+                stroke="rgba(139, 92, 246, 0.6)"
+                strokeWidth={1}
+                strokeDasharray="2 2"
+              />
+            )}
+
+            {/* 캔들스틱 (테스트에서 wicks는 line으로 검증) */}
+            {shown.map((candle, index) => {
+              const open = BigInt(candle.open_price);
+              const close = BigInt(candle.close_price);
+              const down = close < open;
+              const colour = down ? 'var(--fall)' : 'var(--rise)';
+              const centre = offset + index * slot + slot / 2;
+              const top = y(close > open ? close : open);
+              const bottom = y(close > open ? open : close);
+              return (
+                <g key={candle.at}>
+                  <line
+                    x1={centre}
+                    x2={centre}
+                    y1={y(BigInt(candle.high_price))}
+                    y2={y(BigInt(candle.low_price))}
+                    stroke={colour}
+                    strokeWidth={1}
+                  />
+                  <rect
+                    x={centre - body / 2}
+                    y={top}
+                    width={body}
+                    height={Math.max(1, bottom - top)}
+                    fill={colour}
+                    stroke={colour}
+                    strokeWidth={1}
+                  />
+                </g>
+              );
+            })}
+
+            {/* 이동평균선 MA5 (polyline) */}
+            {showMA5 && ma5PointsStr && (
+              <polyline
+                points={ma5PointsStr}
+                fill="none"
+                stroke="#f59e0b"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                className="transition-all duration-300 pointer-events-none"
+              />
+            )}
+
+            {/* 이동평균선 MA20 (polyline) */}
+            {showMA20 && ma20PointsStr && (
+              <polyline
+                points={ma20PointsStr}
+                fill="none"
+                stroke="#8b5cf6"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                className="transition-all duration-300 pointer-events-none"
+              />
+            )}
+          </svg>
+        </div>
+
+        {/* 세로 축 라벨 */}
         <svg
-          viewBox={`0 0 ${chartWidth} ${HEIGHT}`}
-          // The drawing is built at the frame's own width, so this is one to
-          // one and nothing is squeezed. It stays a percentage rather than
-          // that measurement in pixels for the frame between a resize and
-          // the observer hearing about it, and for the first paint of a
-          // frame that has never been measured.
-          preserveAspectRatio="none"
-          className="h-[260px] w-full"
-          role="img"
-          aria-label={`캔들 ${shown.length}개. 최고 ${groupDigits(max.toString())}, 최저 ${groupDigits(min.toString())}.${
-            logarithmic ? ' 세로 눈금은 로그입니다.' : ''
-          }`}
+          aria-hidden
+          viewBox={`0 0 ${axisWidth} ${HEIGHT}`}
+          style={{ width: axisWidth }}
+          className="tabular h-[260px] shrink-0 border-l text-[10px]"
         >
-          {/* Paths rather than lines, so the wicks below stay the only <line>s
-              in the drawing -- which is what the tests, and a reader of the
-              markup, count. */}
-          {labels.map((label) => (
-            <path
-              key={label.text}
-              d={`M0 ${label.y} H ${chartWidth}`}
-              stroke="var(--border)"
-              strokeWidth={1}
-              strokeDasharray="3 4"
-            />
+          {labels.map((l) => (
+            <text key={l.text} x={6} y={l.y + 3.5} fill="var(--muted-foreground)">
+              {l.text}
+            </text>
           ))}
-          {shown.map((candle, index) => {
-            const open = BigInt(candle.open_price);
-            const close = BigInt(candle.close_price);
-            const down = close < open;
-            const colour = down ? 'var(--fall)' : 'var(--rise)';
-            const centre = offset + index * slot + slot / 2;
-            const top = y(close > open ? close : open);
-            const bottom = y(close > open ? open : close);
-            return (
-              <g key={candle.at}>
-                <line
-                  x1={centre}
-                  x2={centre}
-                  y1={y(BigInt(candle.high_price))}
-                  y2={y(BigInt(candle.low_price))}
-                  stroke={colour}
-                  strokeWidth={1}
-                />
-                <rect
-                  x={centre - body / 2}
-                  y={top}
-                  width={body}
-                  // A day that opened and closed level still has to be
-                  // visible, so a zero-height body becomes a line.
-                  height={Math.max(1, bottom - top)}
-                  // Both directions filled. A hollow body is the Western
-                  // "up" and reads here as an unfinished candle.
-                  fill={colour}
-                  stroke={colour}
-                  strokeWidth={1}
-                />
-              </g>
-            );
-          })}
         </svg>
       </div>
-      {/* The axis. aria-hidden because the figure's label already carries the
-          extremes, and a screen reader walking a column of prices learns
-          nothing the chart is not already saying. */}
-      <svg
-        aria-hidden
-        viewBox={`0 0 ${axisWidth} ${HEIGHT}`}
-        style={{ width: axisWidth }}
-        className="tabular h-[260px] shrink-0 border-l text-[10px]"
-      >
-        {labels.map((label) => (
-          <text key={label.text} x={6} y={label.y + 3.5} fill="var(--muted-foreground)">
-            {label.text}
-          </text>
-        ))}
-      </svg>
-      </div>
+
       <figcaption className="flex justify-between text-[11px] text-muted-foreground">
         <span>{write(shown[0]?.at ?? '')}</span>
         <span className="tabular">
           최저 {groupDigits(min.toString())} · 최고 {groupDigits(max.toString())}
-          {/* Said outright rather than left to be inferred. A reader who
-              takes a log axis for a linear one misreads every height on it. */}
           {logarithmic && <span className="ml-1">· 로그 눈금</span>}
         </span>
         <span>{write(shown[shown.length - 1]?.at ?? '')}</span>
