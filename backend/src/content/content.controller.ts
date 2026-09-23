@@ -14,7 +14,6 @@ import {
   ServiceUnavailableException,
   UseGuards,
 } from '@nestjs/common';
-import { randomUUID } from 'node:crypto';
 import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { IsBoolean, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { DiscordAlertService } from '../discord/discord-alert.service';
@@ -134,6 +133,12 @@ export class PublicationDto {
   readonly idempotencyKey!: string;
 }
 
+export class PhotoApprovalDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  readonly idempotencyKey!: string;
+}
+
 /**
  * Announcements, the gallery and the server status board.
  *
@@ -168,274 +173,99 @@ export class ContentController {
 
   @Get('announcements')
   @ApiOperation({ summary: 'Published announcements' })
-  async announcements() {
-    return { announcements: await this.service().publicAnnouncements() };
-  }
+  async announcements() { return { announcements: await this.service().publicAnnouncements() }; }
 
   @Get('photos')
   @ApiOperation({ summary: 'Published gallery photos' })
-  async photos() {
-    return { photos: await this.service().publicPhotos() };
-  }
+  async photos() { return { photos: await this.service().publicPhotos() }; }
 
   @Get('status')
   @ApiOperation({ summary: 'Server status board' })
-  async status() {
-    return { status: await this.service().serviceStatus() };
-  }
+  async status() { return { status: await this.service().serviceStatus() }; }
 
   @Post('admin/announcements')
-  @UseGuards(
-    SessionGuard,
-    AuthenticatedGuard,
-    ConsentGuard,
-    AdminGuard,
-    AdminSessionGuard,
-    CsrfGuard,
-  )
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Create or edit an announcement' })
   async saveAnnouncement(@Req() request: RequestWithSession, @Body() body: SaveAnnouncementDto) {
-    const res = await this.guarded(
-      () => this.service().saveAnnouncement(requireUserId(request), { ...body }),
-      'invalid announcement',
-    );
-    this.discordAlert
-      ?.notifyAnnouncementEvent({
-        action: 'created',
-        announcementId: res.announcementId,
-        title: body.title,
-        actorUserId: requireUserId(request),
-      })
-      .catch(() => {});
+    const res = await this.guarded(() => this.service().saveAnnouncement(requireUserId(request), { ...body }), 'invalid announcement');
+    this.discordAlert?.notifyAnnouncementEvent({ action: 'created', announcementId: res.announcementId, title: body.title, actorUserId: requireUserId(request) }).catch(() => {});
     return res;
   }
 
   @Put('admin/announcements/:id/image')
-  @UseGuards(
-    SessionGuard,
-    AuthenticatedGuard,
-    ConsentGuard,
-    AdminGuard,
-    AdminSessionGuard,
-    CsrfGuard,
-  )
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Attach an uploaded image to a draft announcement' })
-  setAnnouncementImage(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) announcementId: string,
-    @Body() body: SetAnnouncementImageDto,
-  ) {
-    return this.guarded(
-      () =>
-        this.service().setAnnouncementImage(requireUserId(request), { announcementId, ...body }),
-      'invalid announcement image',
-    );
+  setAnnouncementImage(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) announcementId: string, @Body() body: SetAnnouncementImageDto) {
+    return this.guarded(() => this.service().setAnnouncementImage(requireUserId(request), { announcementId, ...body }), 'invalid announcement image');
   }
 
   @Put('admin/announcements/:id/publication')
-  @UseGuards(
-    SessionGuard,
-    AuthenticatedGuard,
-    ConsentGuard,
-    AdminGuard,
-    AdminSessionGuard,
-    CsrfGuard,
-    ReauthGuard,
-  )
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Publish or unpublish an announcement' })
-  publishAnnouncement(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) announcementId: string,
-    @Body() body: PublicationDto,
-  ) {
-    return this.guarded(
-      () =>
-        this.service().setAnnouncementPublication(requireUserId(request), {
-          announcementId,
-          ...body,
-        }),
-      'invalid publication change',
-    );
+  publishAnnouncement(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) announcementId: string, @Body() body: PublicationDto) {
+    return this.guarded(() => this.service().setAnnouncementPublication(requireUserId(request), { announcementId, ...body }), 'invalid publication change');
   }
 
   @Post('admin/photos/metadata')
-  @UseGuards(
-    SessionGuard,
-    AuthenticatedGuard,
-    ConsentGuard,
-    AdminGuard,
-    AdminSessionGuard,
-    CsrfGuard,
-  )
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Create or edit a photo record' })
   savePhoto(@Req() request: RequestWithSession, @Body() body: SavePhotoDto) {
-    return this.guarded(
-      () => this.service().savePhoto(requireUserId(request), { ...body }),
-      'invalid photo',
-    );
+    return this.guarded(() => this.service().savePhoto(requireUserId(request), { ...body }), 'invalid photo');
   }
 
   @Put('admin/photos/:id/publication')
-  @UseGuards(
-    SessionGuard,
-    AuthenticatedGuard,
-    ConsentGuard,
-    AdminGuard,
-    AdminSessionGuard,
-    CsrfGuard,
-    ReauthGuard,
-  )
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Publish or unpublish a photo' })
-  publishPhoto(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) photoId: string,
-    @Body() body: PublicationDto,
-  ) {
-    return this.guarded(
-      () => this.service().setPhotoPublication(requireUserId(request), { photoId, ...body }),
-      'invalid publication change',
-    );
+  publishPhoto(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) photoId: string, @Body() body: PublicationDto) {
+    return this.guarded(() => this.service().setPhotoPublication(requireUserId(request), { photoId, ...body }), 'invalid publication change');
   }
 
   @Post('admin/photos/:id/approval')
-  @UseGuards(
-    SessionGuard,
-    AuthenticatedGuard,
-    ConsentGuard,
-    AdminGuard,
-    AdminSessionGuard,
-    CsrfGuard,
-    ReauthGuard,
-  )
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard, ReauthGuard)
   @ApiOperation({ summary: 'Approve and publish a pending member photo' })
-  approveMemberPhoto(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) photoId: string,
-  ) {
-    return this.guarded(
-      () =>
-        this.service().setPhotoPublication(requireUserId(request), {
-          photoId,
-          publish: true,
-          idempotencyKey: randomUUID(),
-          requestId: contextOf(request)?.requestId ?? null,
-        }),
-      'invalid photo approval',
-    );
+  approveMemberPhoto(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) photoId: string, @Body() body: PhotoApprovalDto) {
+    return this.guarded(() => this.service().setPhotoPublication(requireUserId(request), { photoId, publish: true, idempotencyKey: body.idempotencyKey, requestId: contextOf(request)?.requestId ?? null }), 'invalid photo approval');
   }
 
   @Get('admin/announcements')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
   @ApiOperation({ summary: 'List all announcements for administrators' })
-  adminAnnouncements(@Req() request: RequestWithSession) {
-    return this.guarded(
-      () => this.service().adminListAllAnnouncements(requireUserId(request)),
-      'could not list announcements',
-    );
-  }
+  adminAnnouncements(@Req() request: RequestWithSession) { return this.guarded(() => this.service().adminListAllAnnouncements(requireUserId(request)), 'could not list announcements'); }
 
   @Put('admin/announcements/:id')
-  @UseGuards(
-    SessionGuard,
-    AuthenticatedGuard,
-    ConsentGuard,
-    AdminGuard,
-    AdminSessionGuard,
-    CsrfGuard,
-  )
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Update an announcement' })
-  async updateAnnouncement(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) announcementId: string,
-    @Body() body: UpdateAnnouncementDto,
-  ) {
-    const res = await this.guarded(
-      () =>
-        this.service().adminUpdateAnnouncement(requireUserId(request), announcementId, {
-          ...body,
-        }),
-      'could not update announcement',
-    );
-    this.discordAlert
-      ?.notifyAnnouncementEvent({
-        action: body.isPinned ? 'pinned' : 'updated',
-        announcementId: res.announcementId,
-        title: res.title,
-        actorUserId: requireUserId(request),
-      })
-      .catch(() => {});
+  async updateAnnouncement(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) announcementId: string, @Body() body: UpdateAnnouncementDto) {
+    const res = await this.guarded(() => this.service().adminUpdateAnnouncement(requireUserId(request), announcementId, { ...body }), 'could not update announcement');
+    this.discordAlert?.notifyAnnouncementEvent({ action: body.isPinned ? 'pinned' : 'updated', announcementId: res.announcementId, title: res.title, actorUserId: requireUserId(request) }).catch(() => {});
     return res;
   }
 
   @Delete('admin/announcements/:id')
-  @UseGuards(
-    SessionGuard,
-    AuthenticatedGuard,
-    ConsentGuard,
-    AdminGuard,
-    AdminSessionGuard,
-    CsrfGuard,
-  )
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Delete an announcement' })
-  async deleteAnnouncement(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) announcementId: string,
-  ) {
-    const res = await this.guarded(
-      () => this.service().adminDeleteAnnouncement(requireUserId(request), announcementId),
-      'could not delete announcement',
-    );
-    this.discordAlert
-      ?.notifyAnnouncementEvent({
-        action: 'deleted',
-        announcementId,
-        title: '공지사항 ID ' + announcementId,
-        actorUserId: requireUserId(request),
-      })
-      .catch(() => {});
+  async deleteAnnouncement(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) announcementId: string) {
+    const res = await this.guarded(() => this.service().adminDeleteAnnouncement(requireUserId(request), announcementId), 'could not delete announcement');
+    this.discordAlert?.notifyAnnouncementEvent({ action: 'deleted', announcementId, title: '공지사항 ID ' + announcementId, actorUserId: requireUserId(request) }).catch(() => {});
     return res;
   }
 
   @Get('admin/photos/submissions')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
   @ApiOperation({ summary: 'List pending photo submissions awaiting review' })
-  listPendingPhotos(@Req() request: RequestWithSession) {
-    return this.guarded(
-      () => this.service().listPendingPhotos(requireUserId(request)),
-      'could not list pending photos',
-    );
-  }
+  listPendingPhotos(@Req() request: RequestWithSession) { return this.guarded(() => this.service().listPendingPhotos(requireUserId(request)), 'could not list pending photos'); }
 
   @Get('admin/photos')
   @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard)
   @ApiOperation({ summary: 'List all gallery photos for administrators' })
-  listAllPhotos(@Req() request: RequestWithSession) {
-    return this.guarded(
-      () => this.service().listAllPhotos(requireUserId(request)),
-      'could not list photos',
-    );
-  }
+  listAllPhotos(@Req() request: RequestWithSession) { return this.guarded(() => this.service().listAllPhotos(requireUserId(request)), 'could not list photos'); }
 
   @Delete('admin/photos/:id')
-  @UseGuards(
-    SessionGuard,
-    AuthenticatedGuard,
-    ConsentGuard,
-    AdminGuard,
-    AdminSessionGuard,
-    CsrfGuard,
-  )
+  @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, AdminGuard, AdminSessionGuard, CsrfGuard)
   @ApiOperation({ summary: 'Delete a draft or published photo' })
-  async rejectPhoto(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) photoId: string,
-    @Body('reason') reason?: string,
-  ) {
+  async rejectPhoto(@Req() request: RequestWithSession, @Param('id', ParseUUIDPipe) photoId: string, @Body('reason') reason?: string) {
     void reason;
-    const deleted = await this.guarded(
-      () => this.service().deletePhoto(requireUserId(request), photoId),
-      'could not delete photo',
-    );
+    const deleted = await this.guarded(() => this.service().deletePhoto(requireUserId(request), photoId), 'could not delete photo');
     if (deleted.storageKey) await this.imageStorage?.remove(deleted.storageKey);
     return { rejected: false, deleted: deleted.storageKey !== null };
   }
