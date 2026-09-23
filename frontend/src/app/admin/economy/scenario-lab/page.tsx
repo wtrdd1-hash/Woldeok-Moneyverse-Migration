@@ -61,7 +61,6 @@ function simulateAiCouncil(
 } {
   const isHighInflation = issuanceChangeBps > 2000;
   const isSevereDrain = sinkChangeBps > 3000 || supplyFloorReached;
-  const isModerate = Math.abs(issuanceChangeBps) <= 1000 && Math.abs(sinkChangeBps) <= 1000;
 
   const domains: DomainSimulation[] = [
     {

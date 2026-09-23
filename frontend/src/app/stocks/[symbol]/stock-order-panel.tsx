@@ -1,15 +1,7 @@
 'use client';
 
 import React, { useState, useActionState, useEffect } from 'react';
-import {
-  TrendingUp,
-  TrendingDown,
-  ShieldCheck,
-  AlertCircle,
-  CheckCircle2,
-  HelpCircle,
-  Sparkles,
-} from 'lucide-react';
+import { ShieldCheck, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+} from '@/components/ui/dialog';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
