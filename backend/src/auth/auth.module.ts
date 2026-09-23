@@ -52,7 +52,10 @@ const GUARDS = [
       useFactory: (pool: Queryable | null) => (pool ? new LocalAuthRepository(pool) : null),
     },
     VerificationEmailSender,
-    DualKeyRotationService,
+    {
+      provide: DualKeyRotationService,
+      useFactory: () => new DualKeyRotationService(),
+    },
     AdminRolesRepository,
     ...GUARDS,
   ],

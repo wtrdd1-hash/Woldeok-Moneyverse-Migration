@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
 export const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000; // 604,800,000 ms (7 days)
@@ -49,7 +49,7 @@ export class DualKeyRotationService {
   private readonly rotationTimestamp: number;
   private readonly gracePeriodMs: number;
 
-  constructor(options?: DualKeyRotationOptions) {
+  constructor(@Optional() options?: DualKeyRotationOptions) {
     this.currentKey =
       options?.currentKey ??
       process.env.SESSION_CURRENT_KEY ??
