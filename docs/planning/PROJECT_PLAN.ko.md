@@ -2,11 +2,60 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.23.405
+> **현재 통합 버전:** v2026.09.23.410
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 시간별 기획 회차 — v2026.09.23.410 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Improvement. **Previous Cycle Type:** Feature Addition. **Next Cycle Type:** Feature Addition.
+- **정확한 기준:** 시작 및 작업 중간 재확인 모두 `origin/main=e447b11f1d27ee7da2a46c64fcd96e0058c8da6d`였으며 이번 검토 중 main 이동은 관측되지 않았다.
+- **보완 대상 — MARKET-410-01 / P0 후보:** 고급 marketplace의 경매·직거래·감정 write는 무결성에 민감한 부분구현 상태다. PR #705의 코드 근거상 경매 판매자 아이템 escrow/종료 정산/ledger posting, WLD+아이템 원자적 직거래 정산, 수취인 identity 검증, 감정 ownership/provenance/ledger-backed fee settlement가 아직 완성되지 않았다. 권위 정산이 구현·검증되기 전에는 위험 write를 fail-closed하고 클라이언트가 권위 성공이나 sample record를 임의 생성하지 않아야 한다.
+- **영향 구현면:** frontend marketplace 경매/직거래/감정 상태, backend marketplace controller/service, marketplace API 및 app-api parity, inventory/ownership 영속화, WLD ledger, escrow/settlement DB transaction, audit/telemetry, mobile 상태다. 이는 증거 기반 임시 범위이며 research-complete 설계가 아니다.
+- **임시 QA/종료 증거:** exact candidate에서 read 실패/불가 시 fake authority 금지, mutation authorization/CSRF, retry 가능한 write의 caller-owned idempotency, 중복·동시 bid/trade/appraisal, 부분 정산 실패의 atomic rollback, ownership/recipient mismatch, auction-close race, ledger/asset reconciliation, 대표 web/mobile E2E를 검증해야 한다. Test 수용은 required CI와 real-PostgreSQL settlement/reconciliation 증거가 같은 exact candidate SHA에 연결돼야 한다. Production은 merged-main lineage, Test 증거, 무중단/session-continuity, cutover 후 reconciliation과 rollback 증거가 필요하다. 아래 reference gate 충족 전에는 모두 provisional이다.
+- **레퍼런스 게이트:** 이번 실행에서 이 후보에 직접 관련된 신규 중복 제거 독립 외부 레퍼런스는 `0 / 10,000`건이다. 기존 일반 UI corpus를 marketplace settlement 연구로 재분류하지 않는다. 따라서 MARKET-410-01은 **IN PROGRESS / REFERENCE VALIDATION BLOCKED**이며 이번 회차에서 research-complete로 표시하지 않는다. 향후 corpus는 marketplace/auction 제품, escrow/atomic-settlement 구현, payment/ledger API, PostgreSQL locking/concurrency, fraud/abuse 사례, 접근성/mobile pattern, 운영/장애, 보안표준, 규제지침, observability, rollback/reconciliation을 포함해야 한다.
+- **QA blocker — CI-410-01 / P1:** PR #708 (`fbf468becd94e8fda074f71302db5c816978e23e`)은 깨진 SponsorBlock/광고 QA parser 한 건을 복구하지만 exact-head CI run 1804는 repository-wide `pnpm lint`에서 계속 실패한다. 이후 typecheck, build, migration, tests, Prisma mutation rejection, production dependency audit가 skip됐다. PR #708은 focused repair 전 current-main 재현값을 188 errors / 14 warnings로 기록한다. #705/#706/#707/#708 및 의존 runtime candidate는 required CI가 green이 되기 전 승격 금지다.
+- **열린 PR 정합:** #704는 blocked Feature Addition 기록, #705는 advanced marketplace/runtime 재검토, #706은 AI-news idempotency, #707은 consent fail-closed, #708은 CI parser 복구다. 모두 동일 current main 기반이며 미병합 상태다. runtime 변경 PR은 exact-SHA gate 통과 전 구현완료/Production 증거로 취급하지 않는다.
+- **기획 거버넌스:** 이번 회차는 새로운 분산 planning/spec 파일을 만들지 않는다. `PROJECT_PLAN.md`가 영문 canonical이고 `PROJECT_PLAN.ko.md`가 동일 구조를 유지한다. 기존 보조 planning 파일은 증거/역사 자료일 뿐 이 기획서를 supersede하지 않는다.
+- **범위 사실:** 이번 회차는 기획만 갱신한다. runtime PR 병합, Test/Production 변경·배포, MARKET-410-01 완료 주장을 하지 않는다.
+
+## 런타임 정리 인벤토리 — v2026.09.23.405 (2026-09-23)
+
+- 현재 보호 DB 권위는 Production `127.0.0.1:5433/woldeok_moneyverse_dev`, Test `127.0.0.1:5585/woldeok_moneyverse_ci`이며 backend 환경과 활성 TCP 연결로 확인됐다.
+- 참조/상태 확인 후 stale container object 4개(`mv-b280-pg`, `mv-ci315`, `mv-ci315b`, `wdmv-v127-fulltest-db`)를 제거했고 volume은 보존했다.
+- 남은 QA/recovery DB container는 분류 전까지 유지하며 age/name/no-current-connection만으로 삭제하지 않는다.
+- G405-01 / P1: Production 5433 및 QA 55432/55433/55555/56555에서 wildcard DB host bind가 관측됐다. firewall/network reachability를 독립 검증할 때까지 bind-exposure review로 유지한다.
+- Production 5433 변경은 session/backend continuity, backup, rollback 증거 없이는 금지한다. QA bind tightening도 owner/workstream 확인이 필요하다.
+- container 제거와 volume 삭제는 별개이며 현재 host에서 broad volume prune은 금지한다.
+- v405는 제한적 안전 container-object 정리와 문서화만 수행했고 Production restart, migration, promotion은 하지 않았다.
+
+## 현재 runtime / OS 기준선 — v2026.09.23.404 (2026-09-23)
+
+- 관측 public runtime은 Debian GNU/Linux 13.6(trixie), systemd-managed Production/Test release directory, host Nginx, Docker PostgreSQL 17.11이다.
+- runtime/tooling snapshot은 Linux 6.12.94, systemd 257, Node 24.21.0, pnpm 10.0.0, Python 3.13.5, Nginx 1.26.3, Docker 29.8.0이다.
+- Production backend/frontend는 3000/3001, isolated Test는 3100/3101의 systemd service를 사용한다. runtime identity는 active release directory, public version, DB connection 증거로 확인한다.
+- Kubernetes/Flux는 TARGET/RECOVERY architecture이며 현재 public-runtime authority가 아니다. GitOps desired state만으로 Production 변경을 증명하지 않는다.
+- 문서는 OBSERVED CURRENT / CONFIGURED CURRENT / TARGET-RECOVERY / HISTORICAL을 구분한다.
+- v404 자체는 runtime, DB, Test, Production을 변경하지 않는다.
+
+## GitHub 문서 거버넌스 정리 — v2026.09.23.403 (2026-09-23)
+
+- 문서 탐색은 `docs/README.md`, `docs/INDEX.md`, `docs/DOCUMENTATION_POLICY.md`, `docs/DOCUMENT_CATALOG.md` 중심으로 정규화한다.
+- English canonical / Korean second 원칙을 유지하고 의미 있는 문서 변경도 dedicated branch를 사용한다.
+- documentation-only commit은 repository history 변경이며 application-source identity나 runtime promotion 근거가 아니다.
+- 현재 권위 순서는 PROJECT_PLAN → 통합 원장/명시 채택 보조명세 → generated/runtime contract → historical evidence다. 단, 이 자동기획 규칙에서는 PROJECT_PLAN이 최종 canonical source of truth다.
+- v403은 문서 거버넌스/탐색만 변경하며 runtime 구현, Test, Production 완료를 주장하지 않는다.
+
+## 전체 기획 재검토 권위 — v2026.09.23.402 (2026-09-23)
+
+- v402는 identity/security, economy, market/casino, inventory/marketplace, community/social, public content/SEO, native API, UI/accessibility, AI governance, data/DR, release lineage, analytics/monetization/compliance의 12개 lane 재감사를 시작했다.
+- 과거 P0/HIGH/P1 문구는 역사 증거이며 현재 상태로 자동 간주하지 않는다. 각 항목은 현재 코드/runtime 증거로 재검증해야 한다.
+- API inventory drift는 미해결이다. mobile 문서는 57 controllers/335 backend endpoints/179 mobile endpoints를 기록하지만 source discovery는 58 controller files/361 HTTP decorators를 찾았다. generated semantic contract diff로만 authoritative count를 확정한다.
+- 당시 local contract check는 TypeScript tooling 부재로 BLOCKED였으며 PASS로 간주하지 않는다.
+- 기준 표준은 OWASP ASVS 5.0.0, NIST SP 800-63-4/63B-4 final, OpenAPI 3.2.1, WCAG 2.2/ISO 40500:2025, W3C ACT Rules Format 1.1이다.
+- v402 phase 1은 planning authority와 audit ledger를 정규화한 것이며 12개 lane/runtime QA/Test/Production 전체 완료를 주장하지 않는다.
 
 ## 기능/API 동시 구현 강제 계약 — v2026.09.23.397 (2026-09-23)
 

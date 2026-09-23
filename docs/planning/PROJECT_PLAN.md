@@ -2,11 +2,24 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.405
+> Current integrated version: v2026.09.23.410
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Hourly planning cycle — v2026.09.23.410 (2026-09-23)
+
+- **Planning Cycle Type:** Feature Improvement. **Previous Cycle Type:** Feature Addition. **Next Cycle Type:** Feature Addition.
+- **Exact baseline:** start and mid-work re-check both resolved `origin/main=e447b11f1d27ee7da2a46c64fcd96e0058c8da6d`; no main movement was observed during this planning pass.
+- **Improvement target — MARKET-410-01 / P0 candidate:** advanced marketplace auction, direct-trade and appraisal writes remain an integrity-sensitive partial implementation. PR #705 provides code evidence that auction seller-item escrow/end settlement/ledger posting, atomic WLD+item direct-trade settlement, recipient identity validation, and appraisal ownership/provenance/ledger-backed fee settlement are not yet complete. Until authoritative settlement is implemented and verified, unsafe writes must remain fail-closed and clients must not synthesize authoritative success/sample records.
+- **Affected implementation surfaces:** frontend marketplace auction/direct-trade/appraisal states; backend marketplace controller/service; marketplace API and app-api parity; inventory/ownership persistence; WLD ledger; escrow/settlement DB transactions; audit/telemetry; mobile states. This is an evidence-backed provisional scope, not a research-complete design.
+- **Provisional QA/closure evidence:** exact candidate must cover failed/unavailable reads without fake authority, mutation authorization/CSRF, caller-owned idempotency for retryable writes, duplicate/concurrent bid/trade/appraisal attempts, atomic rollback on partial settlement failure, ownership/recipient mismatch, auction-close races, ledger/asset reconciliation, and representative web/mobile E2E. Test acceptance requires one exact candidate SHA with required CI plus real-PostgreSQL settlement/reconciliation evidence. Production eligibility requires merged-main lineage, Test evidence, zero-downtime/session-continuity evidence, post-cutover reconciliation and rollback proof. These items remain provisional until the reference gate below is met.
+- **Reference gate:** `0 / 10,000` new candidate-specific, deduplicated independent external references were acquired and analyzed in this run. Existing generic UI corpora are not reclassified as marketplace-settlement research. Therefore MARKET-410-01 is **IN PROGRESS / REFERENCE VALIDATION BLOCKED** and this cycle does not mark the improvement research-complete. Required future corpus categories include marketplace/auction products, escrow/atomic-settlement implementations, payment/ledger APIs, PostgreSQL locking/concurrency, fraud/abuse cases, accessibility/mobile patterns, operations/incidents, security standards, regulatory guidance, observability and rollback/reconciliation practices.
+- **QA blocker — CI-410-01 / P1:** PR #708 (`fbf468becd94e8fda074f71302db5c816978e23e`) restores one malformed SponsorBlock/ads QA parser fix, but exact-head CI run 1804 still fails at repository-wide `pnpm lint`; typecheck, build, migrations, tests, Prisma mutation rejection and production dependency audit are skipped. PR #708 reports current-main reproduction at 188 errors / 14 warnings before its focused repair. Required CI must be green before #705/#706/#707/#708 or any dependent runtime candidate is promoted.
+- **Open-PR reconciliation:** #704 is a blocked Feature Addition planning record; #705 is advanced marketplace/runtime re-review; #706 is AI-news idempotency; #707 is consent fail-closed; #708 is CI parser recovery. All are based on the same current main and remain unmerged. Runtime-affecting PRs must not be treated as implemented/Production evidence before exact-SHA gates pass.
+- **Planning governance:** no new distributed planning/spec file is created by this cycle. `PROJECT_PLAN.md` remains English canonical and `PROJECT_PLAN.ko.md` must carry the same structure. Existing auxiliary planning files are supporting/history only and must not supersede this plan.
+- **Scope truth:** this cycle updates planning only. It does not merge a runtime PR, mutate Test/Production, deploy code, or claim MARKET-410-01 complete.
 
 ## Runtime hygiene inventory — v2026.09.23.405 (2026-09-23)
 
