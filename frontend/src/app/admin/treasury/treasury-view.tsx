@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { groupDigits } from '@/lib/money';
+import { formatMoment, groupDigits } from '@/lib/money';
 import type {
   AdminTreasuryExpenditureItem,
   AdminTreasuryLedger,
@@ -503,8 +503,36 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
             국고의 모든 자금 변동은 원장에 영구 보존되며 역분개 및 변조가 엄격히 차단됩니다.
           </CardDescription>
         </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0">
-          <div className="overflow-x-auto">
+        <CardContent className="p-0 sm:p-6 sm:pt-0">
+          {/* 모바일 뷰: 카드 스택 (md:hidden) */}
+          <div className="grid gap-3 p-4 md:hidden divide-y divide-border/40">
+            {ledger.map((entry) => (
+              <div key={entry.id} className="pt-3 first:pt-0 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">{formatMoment(entry.created_at)}</span>
+                  {txTypeBadge(entry.tx_type)}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-foreground">{entry.reason || '국고 원장 거래'}</span>
+                  <span className={`text-sm font-bold font-mono tracking-tight ${entry.tx_type === 'ABSORPTION_SINK' || entry.tx_type === 'STOCK_HALT_SETTLEMENT' ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                    {entry.tx_type === 'ABSORPTION_SINK' || entry.tx_type === 'STOCK_HALT_SETTLEMENT' ? '-' : '+'}{groupDigits(entry.amount_wld)} WLD
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                  <span>변동 후 잔액: <span className="font-mono font-semibold text-foreground">{groupDigits(entry.balance_after)} WLD</span></span>
+                  <span>{entry.actor_name || '시스템'}</span>
+                </div>
+              </div>
+            ))}
+            {ledger.length === 0 && (
+              <div className="py-8 text-center text-xs text-muted-foreground">
+                원장 거래 내역이 없습니다.
+              </div>
+            )}
+          </div>
+
+          {/* 데스크톱 뷰: 테이블 (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto">
             <Table className="min-w-[640px]">
               <TableHeader>
                 <TableRow>

@@ -214,75 +214,153 @@ export default async function AdminMarketPage() {
             ) : stocks.stocks.length === 0 ? (
               <EmptyState title="등록된 종목이 없습니다." />
             ) : (
-              <div className="overflow-x-auto">
-                <Table className="min-w-[720px]">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>코드</TableHead>
-                      <TableHead>이름</TableHead>
-                      <TableHead className="text-right">현재가</TableHead>
-                      <TableHead className="text-right">유통 / 발행</TableHead>
-                      <TableHead>상태</TableHead>
-                      <TableHead />
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {stocks.stocks.map((stock) => (
-                      <TableRow key={stock.id}>
-                        <TableCell className="font-mono text-xs">{stock.symbol}</TableCell>
-                        <TableCell>{stock.name}</TableCell>
-                        <TableCell className="text-right">
-                          <Amount value={stock.current_price} />
-                        </TableCell>
-                        <TableCell className="tabular whitespace-nowrap text-right text-xs">
-                          {groupDigits(stock.shares_available)} /{' '}
-                          {groupDigits(stock.shares_outstanding)}
-                          <span className="block text-muted-foreground">
-                            보유자 {stock.holders}명 · 거래 {stock.trades}건
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          {stock.halt_status === 'HALTED_SETTLED' ? (
-                            <Badge variant="destructive" className="font-semibold text-xs">
-                              거래정지 (정산완료)
-                            </Badge>
-                          ) : stock.halt_status === 'HALTED_SETTLING' || stock.halt_status === 'HALTING' ? (
-                            <Badge variant="outline" className="border-amber-500 text-amber-600 dark:text-amber-400 font-semibold text-xs animate-pulse">
-                              정산 진행 중
-                            </Badge>
-                          ) : (
-                            <Badge variant={stock.active ? 'secondary' : 'outline'}>
-                              {stock.active ? '거래 중' : '비활성'}
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap justify-end gap-2">
-                            {stock.halt_status === 'HALTED_SETTLED' || stock.halt_status === 'HALTED_SETTLING' ? (
-                              <HaltSettlementStatusDialog stock={stock} />
-                            ) : (
-                              <HaltStockDialog stock={stock} />
-                            )}
-                            <ToggleActive id={stock.id} active={stock.active} kind="stock" />
-                            <SetPriceDialog
-                              stockId={stock.id}
-                              symbol={stock.symbol}
-                              currentPrice={stock.current_price}
-                            />
-                            <CorporateActionDialog stockId={stock.id} symbol={stock.symbol} />
-                            <DeleteStockDialog
-                              stockId={stock.id}
-                              symbol={stock.symbol}
-                              holders={stock.holders}
-                              trades={stock.trades}
-                            />
+              <>
+                {/* 모바일 뷰: 종목 카드 스택 (md:hidden) */}
+                <div className="grid gap-3 p-4 md:hidden divide-y divide-border/40">
+                  {stocks.stocks.map((stock) => {
+                    const dyn = dynamics?.stocks.find((d) => d.symbol === stock.symbol);
+                    const gap = dyn ? gapPercent(stock.current_price, dyn.fair_value) : '—';
+
+                    return (
+                      <div key={stock.symbol} className="pt-3 first:pt-0 space-y-2.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-bold text-sm text-foreground">{stock.name}</span>
+                              <span className="font-mono text-xs text-muted-foreground">({stock.symbol})</span>
+                            </div>
+                            <div className="text-[11px] text-muted-foreground mt-0.5">
+                              발행 주식수: <span className="font-mono">{groupDigits(stock.shares_outstanding)}주</span>
+                            </div>
                           </div>
-                        </TableCell>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {stock.halt_status === 'HALTED_SETTLED' ? (
+                              <Badge variant="destructive" className="text-[10px] font-bold">
+                                거래정지
+                              </Badge>
+                            ) : (
+                              <Badge variant={stock.active ? 'default' : 'secondary'} className="text-[10px] font-bold">
+                                {stock.active ? '거래 중' : '비활성'}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2 text-xs bg-surface/50 p-2.5 rounded-xl border border-border/50">
+                          <div>
+                            <span className="text-[10px] text-muted-foreground block">현재가</span>
+                            <span className="font-mono font-bold text-foreground text-sm">
+                              {groupDigits(stock.current_price)} <span className="text-[10px] text-muted-foreground font-normal">WLD</span>
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-muted-foreground block">적정가 (괴리율)</span>
+                            <span className="font-mono font-semibold text-xs text-foreground">
+                              {dyn ? `${groupDigits(dyn.fair_value)} WLD` : '—'} <span className={`text-[10px] ${gap.startsWith('+') ? 'text-emerald-600' : gap.startsWith('-') ? 'text-rose-600' : 'text-muted-foreground'}`}>({gap})</span>
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* 모바일 액션 버튼 그룹 */}
+                        <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                          <SetPriceDialog
+                            stockId={stock.id}
+                            symbol={stock.symbol}
+                            currentPrice={stock.current_price}
+                          />
+                          <ToggleActive id={stock.id} active={stock.active} kind="stock" />
+                          {stock.halt_status === 'HALTED_SETTLED' || stock.halt_status === 'HALTED_SETTLING' ? (
+                            <HaltSettlementStatusDialog stock={stock} />
+                          ) : (
+                            <HaltStockDialog stock={stock} />
+                          )}
+                          <CorporateActionDialog
+                            stockId={stock.id}
+                            symbol={stock.symbol}
+                          />
+                          <DeleteStockDialog
+                            stockId={stock.id}
+                            symbol={stock.symbol}
+                            holders={stock.holders}
+                            trades={stock.trades}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="hidden md:block overflow-x-auto">
+                  <Table className="min-w-[720px]">
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>코드</TableHead>
+                        <TableHead>이름</TableHead>
+                        <TableHead className="text-right">현재가</TableHead>
+                        <TableHead className="text-right">유통 / 발행</TableHead>
+                        <TableHead>상태</TableHead>
+                        <TableHead />
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {stocks.stocks.map((stock) => (
+                        <TableRow key={stock.id}>
+                          <TableCell className="font-mono text-xs">{stock.symbol}</TableCell>
+                          <TableCell>{stock.name}</TableCell>
+                          <TableCell className="text-right">
+                            <Amount value={stock.current_price} />
+                          </TableCell>
+                          <TableCell className="tabular whitespace-nowrap text-right text-xs">
+                            {groupDigits(stock.shares_available)} /{' '}
+                            {groupDigits(stock.shares_outstanding)}
+                            <span className="block text-muted-foreground">
+                              보유자 {stock.holders}명 · 거래 {stock.trades}건
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            {stock.halt_status === 'HALTED_SETTLED' ? (
+                              <Badge variant="destructive" className="font-semibold text-xs">
+                                거래정지 (정산완료)
+                              </Badge>
+                            ) : stock.halt_status === 'HALTED_SETTLING' || stock.halt_status === 'HALTING' ? (
+                              <Badge variant="outline" className="border-amber-500 text-amber-600 dark:text-amber-400 font-semibold text-xs animate-pulse">
+                                정산 진행 중
+                              </Badge>
+                            ) : (
+                              <Badge variant={stock.active ? 'secondary' : 'outline'}>
+                                {stock.active ? '거래 중' : '비활성'}
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-wrap justify-end gap-2">
+                              {stock.halt_status === 'HALTED_SETTLED' || stock.halt_status === 'HALTED_SETTLING' ? (
+                                <HaltSettlementStatusDialog stock={stock} />
+                              ) : (
+                                <HaltStockDialog stock={stock} />
+                              )}
+                              <ToggleActive id={stock.id} active={stock.active} kind="stock" />
+                              <SetPriceDialog
+                                stockId={stock.id}
+                                symbol={stock.symbol}
+                                currentPrice={stock.current_price}
+                              />
+                              <CorporateActionDialog stockId={stock.id} symbol={stock.symbol} />
+                              <DeleteStockDialog
+                                stockId={stock.id}
+                                symbol={stock.symbol}
+                                holders={stock.holders}
+                                trades={stock.trades}
+                              />
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>

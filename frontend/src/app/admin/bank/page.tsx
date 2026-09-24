@@ -210,12 +210,58 @@ export default async function AdminBankPage() {
                   남습니다.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                {console_.loans.length === 0 ? (
-                  <EmptyState title="남아 있는 대출이 없습니다." />
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
+              <CardContent className="p-0 sm:p-6">
+                {/* 모바일 뷰: 카드 스택 (md:hidden) */}
+                <div className="grid gap-3 p-4 md:hidden divide-y divide-border/40">
+                  {console_.loans.map((loan) => (
+                    <div key={loan.loan_id} className="pt-3 first:pt-0 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-sm text-foreground">{loan.display_name}</span>
+                        <Badge
+                          variant={
+                            loan.status === 'overdue'
+                              ? 'destructive'
+                              : loan.status === 'active'
+                              ? 'default'
+                              : 'secondary'
+                          }
+                          className="text-[11px] font-bold"
+                        >
+                          {statusLabel(loan.status)}
+                        </Badge>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <span className="text-[11px] text-muted-foreground block mb-0.5">대출 원금</span>
+                          <span className="font-mono font-bold text-foreground">
+                            {groupDigits(loan.principal_amount)} WLD
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-[11px] text-muted-foreground block mb-0.5">누적 이자</span>
+                          <span className="font-mono font-semibold text-rose-600 dark:text-rose-400">
+                            {groupDigits(loan.interest_amount)} WLD
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-1 border-t border-border/30">
+                        <span>등급: <span className="font-mono font-semibold text-foreground">{loan.credit_grade}</span></span>
+                        <span>만기일: <span className="font-mono">{formatMoment(loan.maturity_at, '만기 없음')}</span></span>
+                      </div>
+                    </div>
+                  ))}
+                  {console_.loans.length === 0 && (
+                    <div className="py-8 text-center text-xs text-muted-foreground">
+                      실행 중인 대출이 없습니다.
+                    </div>
+                  )}
+                </div>
+
+                {/* 데스크톱 뷰: 테이블 (hidden md:block) */}
+                <div className="hidden md:block overflow-x-auto">
+                  <Table>
                       <TableHeader>
                         <TableRow>
                           <TableHead>회원</TableHead>
