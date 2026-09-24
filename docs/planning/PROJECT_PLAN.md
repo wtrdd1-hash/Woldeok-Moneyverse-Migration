@@ -2,11 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.23.406
+> Current integrated version: v2026.09.24.433
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Deduplicated evidence expansion and economy safety contract — v2026.09.24.433 (2026-09-24)
+
+- **Evidence identity:** preserve the v400 31,289-candidate deduplicated discovery corpus; do not re-count mirrors, translations, tracking-parameter URL variants or already-adopted standards. DOI/canonical URL/title+issuer+version are the dedup keys.
+- **P0 paid-work pacing:** unlimited ordinary participation does not mean instant issuance. Every paid work unit has a server-authoritative `eligible_at` or independently verifiable completion boundary. A client click alone cannot create immediately spendable WLD.
+- **P0 atomic ledger:** job payout, transfer, tax, market settlement, treasury payment and refund are durable atomic balance mutations with unique business idempotency keys. Use Serializable retry, row locking or an equivalently strong invariant-preserving concurrency design; retry the complete transaction after serialization/deadlock failure.
+- **P1 economic control bundle:** observe gross/net issuance, sinks, active money supply, dormant balances, velocity, category price indices, new/median-user purchasing power, concentration and trade volume. Automatic parameter changes are bounded, versioned, reversible and auditable.
+- **P1 intervention validation:** transaction taxes and item sinks are hypotheses, not guaranteed stabilizers. Validate price/volume/scarcity/substitution/affordability/distribution/abuse effects before permanent adoption.
+- **P1 settlement/liquidity:** treasury, bank and market settlement cadence accounts for liquidity cost, netting benefit, counterparty/operational risk and recovery behavior; lower latency alone is not the optimization target.
+- **P1 observability:** correlate economic traces/metrics/logs and expose policy-versioned issuance/sink/velocity/tax/treasury/retry/duplicate-block/rollback telemetry.
+- **Accessibility correction:** WCAG 2.2 SC 2.5.8 AA normative target-size floor is 24x24 CSS px with defined exceptions. Moneyverse continues to target >=44x44 CSS px for primary touch controls as a stronger product rule. This supersedes any wording that called 44px the WCAG AA minimum.
+- **Operations:** Test and Production deployment environments are separated and serialized; observed Debian 13.6 remains runtime truth until host evidence proves an update to 13.7 or later.
+- **Mobile commerce:** if real-money IAP purchases Moneyverse virtual currency, platform policy becomes part of the release contract; Apple-purchased game currency must not expire and purchased randomized virtual items require pre-purchase odds disclosure.
+- Detailed authority: [deltas/v2026.09.24.433.md](deltas/v2026.09.24.433.md). This is planning/documentation only and does not claim runtime implementation, Test verification or Production deployment.
 
 ## 6-Domain Defect Mitigation & Real-Time/Fintech/Security Architecture Spec — v2026.09.23.406 (2026-09-23)
 
