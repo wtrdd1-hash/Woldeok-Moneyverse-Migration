@@ -28,6 +28,7 @@ CREATE OR REPLACE FUNCTION public.job_certify_qualification(
 ) RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
   v_job_type public.work_job_type;
