@@ -282,7 +282,7 @@ export class WorkRepository {
 
   async jobProfile(actor: unknown): Promise<unknown> {
     assertUuid(actor, 'actor');
-    const row = await queryOne<{ profile: any }>(
+    const row = await queryOne<{ profile: JobProfilePayload }>(
       this.pool,
       `SELECT public.job_get_my_profile($1) AS profile`,
       [actor],
@@ -294,7 +294,7 @@ export class WorkRepository {
       profile.active_job.mastery_tier = computeMasteryTier(profile.active_job.level);
     }
     if (Array.isArray(profile.all_jobs)) {
-      profile.all_jobs = profile.all_jobs.map((j: any) => ({
+      profile.all_jobs = profile.all_jobs.map((j: JobProfileItem) => ({
         ...j,
         mastery_tier: computeMasteryTier(j.level ?? 1),
       }));
@@ -366,7 +366,7 @@ export class WorkRepository {
     assertUuid(actor, 'actor');
     await this.requireEnabled();
     try {
-      const res = await queryOne<{ result: any }>(
+      const res = await queryOne<{ result: Record<string, unknown> | null }>(
         this.pool,
         `SELECT public.job_certify_qualification($1, $2, $3) AS result`,
         [actor, jobType, qualificationCode],

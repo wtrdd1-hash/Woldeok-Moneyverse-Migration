@@ -64,11 +64,11 @@ export function AdminSubNav() {
   const pathname = usePathname();
   const navRef = useRef<HTMLElement>(null);
   const activeItemRef = useRef<HTMLLIElement>(null);
+  const isAdminPath = pathname.startsWith('/admin');
+  const active = isAdminPath ? activeAdminTab(pathname) : null;
 
-  if (!pathname.startsWith('/admin')) return null;
-  const active = activeAdminTab(pathname);
-
-  // Auto-scroll the active tab into view smoothly on mobile/narrow viewports
+  // Auto-scroll the active tab into view smoothly on mobile/narrow viewports.
+  // Keep the hook unconditional so route changes never alter hook ordering.
   useEffect(() => {
     if (activeItemRef.current && navRef.current) {
       activeItemRef.current.scrollIntoView({
@@ -78,6 +78,8 @@ export function AdminSubNav() {
       });
     }
   }, [active]);
+
+  if (!isAdminPath) return null;
 
   return (
     <nav

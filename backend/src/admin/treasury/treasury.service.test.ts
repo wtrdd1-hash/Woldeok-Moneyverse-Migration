@@ -21,7 +21,9 @@ describe('TreasuryService', () => {
     const mockRates = [
       { id: 'tax_user_transfer', category: 'User Transfers', current_rate_pct: 0 }
     ];
-    vi.mocked(mockRepo.getTaxRates).mockReturnValueOnce(mockRates as any);
+    vi.mocked(mockRepo.getTaxRates).mockReturnValueOnce(
+      mockRates as unknown as ReturnType<TreasuryRepository['getTaxRates']>,
+    );
 
     const rates = service.getTaxRates();
     expect(rates).toEqual(mockRates);
@@ -32,7 +34,9 @@ describe('TreasuryService', () => {
     const mockBudgets = [
       { budget_id: 'BUDGET_ESSENTIAL_REFUND', category: 'ESSENTIAL_REFUND', priority: 1 }
     ];
-    vi.mocked(mockRepo.getBudgets).mockReturnValueOnce(mockBudgets as any);
+    vi.mocked(mockRepo.getBudgets).mockReturnValueOnce(
+      mockBudgets as unknown as ReturnType<TreasuryRepository['getBudgets']>,
+    );
 
     const budgets = service.getBudgets();
     expect(budgets).toEqual(mockBudgets);
@@ -84,7 +88,9 @@ describe('TreasuryService', () => {
       tax_rates: [],
       stats_24h: { injected_wld: '0', absorbed_wld: '0', recirculated_fees_wld: '0' },
     };
-    vi.mocked(mockRepo.getOverview).mockResolvedValueOnce(mockOverview as any);
+    vi.mocked(mockRepo.getOverview).mockResolvedValueOnce(
+      mockOverview as unknown as Awaited<ReturnType<TreasuryRepository['getOverview']>>,
+    );
 
     const result = await service.getOverview();
     expect(result).toEqual(mockOverview);
