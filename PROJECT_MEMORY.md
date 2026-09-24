@@ -1,10 +1,10 @@
 # Woldeok Moneyverse 프로젝트 메모리 (PROJECT_MEMORY.md)
 
-- **최종 갱신일:** 2026-09-23
+- **최종 갱신일:** 2026-09-24
 - **관리 주체:** Woldeok Moneyverse Core Development & Operations
 - **문서 상태:** 활성 (Active Memory)
-- **현재 프로덕션 릴리스:** `v2026.09.23.408` (SHA `e7de9249`)
-- **PostgreSQL 활성 세션 상태:** **1,117개 (100% 무손실 보존 실측 확인)**
+- **현재 프로덕션 릴리스:** `v2026.09.24.409` (`prod-v408` / SHA `ad25aafd`)
+- **PostgreSQL 활성 세션 상태:** **1,211개 (100% 무손실 보존 실측 확인)**
 
 ---
 
@@ -41,7 +41,25 @@
 
 ---
 
-## 3. 📜 최신 릴리스 내역 (v2026.09.23.408)
+## 3. 📜 최신 릴리스 내역 (v2026.09.24.409)
+
+- **최종 갱신일시**: 2026-09-24 09:20:00 KST
+- **프로덕션 릴리스 버전**: `v2026.09.24.409` (릴리스 경로: `/srv/moneyverse-data/releases/prod-v408`)
+- **Exact Git SHA**: `ad25aafd`
+- **PostgreSQL 활성 사용자 세션**: **1,211개 (100% 무손실 보존 실측 확인)**
+- **완료 작업 요약**:
+  1. **관리자 페이지 전수 접속 & UI 디자인 전면 재검토 및 고도화**:
+     - 상점 관리(`AdminShopView`), 은행 관리(`AdminBankPage`, `BankRiskDashboard`), 국고 관리(`TreasuryView`), 가상 시장(`AdminMarketPage`)에 모바일 전용 반응형 카드 스택(`md:hidden`) 탑재.
+     - 금융 수치 및 잔고/금액/이자율에 `font-mono tracking-tight` 고대비 타이포그래피 전수 적용.
+     - 관리자 서브내비게이션(`AdminSubNav`) 활성 탭 자동 스크롤(Auto-scroll into view) 및 44px 터치 타겟 규격화.
+  2. **단위 테스트 및 프로덕션 검증**:
+     - `admin-mobile-responsive.test.ts` (7/7 passed), 프론트엔드 782개 테스트 100% PASS.
+     - 22개 관리자 엔드포인트 전수 HTTP 200 정상 확인.
+     - 무중단 블루-그린 배포(`prod-v408`) 완료.
+
+---
+
+### 이전 릴리스 (v2026.09.23.408)
 
 - **최종 갱신일시**: 2026-09-23 23:05:00 KST
 - **프로덕션 릴리스 버전**: `v2026.09.23.408`
