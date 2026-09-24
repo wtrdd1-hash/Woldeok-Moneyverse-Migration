@@ -359,12 +359,12 @@ export function rewardSentence(task: WorkTask, locale?: Locale | unknown): strin
     task.reward_preview !== task.base_reward || task.experience_preview !== task.base_experience;
   if (locale === 'en') {
     return levelBonus
-      ? `Complete now to earn ${task.reward_preview} WLD and ${task.experience_preview} EXP, including your career-level bonus.`
-      : `Complete now to earn ${task.reward_preview} WLD and ${task.experience_preview} EXP.`;
+      ? `After the required work duration and server verification, this assignment can pay ${task.reward_preview} WLD and ${task.experience_preview} EXP, including your career-level bonus.`
+      : `After the required work duration and server verification, this assignment can pay ${task.reward_preview} WLD and ${task.experience_preview} EXP.`;
   }
   return levelBonus
-    ? `지금 마치면 직업 레벨 보너스를 포함해 ${task.reward_preview} WLD와 ${task.experience_preview} EXP를 받아요.`
-    : `지금 마치면 ${task.reward_preview} WLD와 ${task.experience_preview} EXP를 받아요.`;
+    ? `필수 수행시간과 서버 검증을 마치면 직업 레벨 보너스를 포함해 ${task.reward_preview} WLD와 ${task.experience_preview} EXP를 받을 수 있어요.`
+    : `필수 수행시간과 서버 검증을 마치면 ${task.reward_preview} WLD와 ${task.experience_preview} EXP를 받을 수 있어요.`;
 }
 
 export function isSpent(_task: WorkTask): boolean {

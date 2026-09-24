@@ -27,7 +27,6 @@ import {
   JobSwitchDto,
   WorkAssignmentDto,
   WorkCompletionDto,
-  WorkCompleteTaskDto,
   WorkDashboardResponseDto,
 } from './work.dto';
 import { WorkInputError, WorkRepository } from './work.repository';
@@ -114,17 +113,15 @@ export class WorkController {
 
   @Post('tasks/:id/complete')
   @ApiOperation({
-    summary: 'Directly complete a career task with EXP and instant WLD faucet payout',
+    summary: 'Deprecated direct completion route; use assignment-based settlement',
+    deprecated: true,
   })
-  completeTask(
-    @Req() request: RequestWithSession,
-    @Param('id', ParseUUIDPipe) taskId: string,
-    @Body() body: WorkCompleteTaskDto,
-  ) {
-    return this.guarded(
-      () => this.repository().completeTaskV2(body.idempotencyKey, requireUserId(request), taskId),
-      'failed to complete task',
-    );
+  completeTask(@Param('id', ParseUUIDPipe) _taskId: string): never {
+    throw new ConflictException({
+      code: 'work_assignment_required',
+      message:
+        'Direct paid completion is disabled. Create an assignment, wait for the server-authoritative minimum duration, submit it, then verify the reward.',
+    });
   }
 
   @Get('receipts')

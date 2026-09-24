@@ -17,7 +17,7 @@ import { EmptyState } from '@/components/empty-state';
 import { SubmitButton } from '@/components/action-form';
 import { IDLE } from '@/lib/action-state';
 import { switchJobAction } from './actions';
-import { TaskCompleteModalButton } from './work-forms';
+import { TakeButton } from './work-forms';
 import { dailyQuotaLabel } from './work-quota';
 import { filterWorkTasks } from './work-search';
 import {
@@ -260,10 +260,18 @@ export function CareerTasksBoard({
 
                 <CardFooter className="pt-2.5 pb-4 px-5 shrink-0">
                   {isActiveJob ? (
-                    <TaskCompleteModalButton
-                      task={task}
-                      isActiveJob
-                      blockedReason={blockedReason}
+                    <TakeButton
+                      taskId={task.task_id}
+                      disabled={
+                        Boolean(blockedReason) ||
+                        task.reward_preview === null ||
+                        task.experience_preview === null
+                      }
+                      label={
+                        isEn
+                          ? `Start task · minimum ${durationLabel(task.minimum_duration_seconds, locale)}`
+                          : `업무 맡기 · 최소 ${durationLabel(task.minimum_duration_seconds, locale)}`
+                      }
                     />
                   ) : (
                     <QuickCareerSwitchButton
