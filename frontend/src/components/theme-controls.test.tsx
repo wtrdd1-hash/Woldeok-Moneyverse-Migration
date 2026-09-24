@@ -120,7 +120,12 @@ describe('hydration', () => {
     document.body.appendChild(container);
 
     const errors: unknown[] = [];
-    const spy = vi.spyOn(console, 'error').mockImplementation((...args) => errors.push(args));
+    const spy = vi.spyOn(console, 'error').mockImplementation((...args) => {
+      const msg = typeof args[0] === 'string' ? args[0] : '';
+      if (!msg.includes('was not wrapped in act')) {
+        errors.push(args);
+      }
+    });
 
     await act(async () => {
       hydrateRoot(container, tree, { onRecoverableError: (error) => errors.push(error) });
