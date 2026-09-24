@@ -5034,6 +5034,14 @@ _No request body._
 | tasks[].reward_preview | true | null \| string |  |
 | tasks[].experience_preview | true | null \| string |  |
 | tasks[].recommended | true | boolean |  |
+| tasks[].policy_version | false | string |  |
+| tasks[].expected_work_seconds | false | number |  |
+| tasks[].eligible_submit_at | false | string |  |
+| tasks[].settlement_mode | false | string="ACTIVE" \| string="ASYNC" \| string="VERIFY" \| string="BATCH" |  |
+| tasks[].repeat_factor | false | string |  |
+| tasks[].issuance_factor | false | string |  |
+| tasks[].net_reward | false | string |  |
+| tasks[].reason_codes[] | false | string[] |  |
 
 > Prefer camelCase keys in native code. Legacy snake_case keys remain, and the gateway recursively adds non-conflicting camelCase aliases.
 

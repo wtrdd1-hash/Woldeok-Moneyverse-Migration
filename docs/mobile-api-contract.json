@@ -15700,6 +15700,50 @@
                 },
                 "recommended": {
                   "type": "boolean"
+                },
+                "policy_version": {
+                  "type": "string"
+                },
+                "expected_work_seconds": {
+                  "type": "number"
+                },
+                "eligible_submit_at": {
+                  "type": "string"
+                },
+                "settlement_mode": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "const": "ACTIVE"
+                    },
+                    {
+                      "type": "string",
+                      "const": "ASYNC"
+                    },
+                    {
+                      "type": "string",
+                      "const": "VERIFY"
+                    },
+                    {
+                      "type": "string",
+                      "const": "BATCH"
+                    }
+                  ]
+                },
+                "repeat_factor": {
+                  "type": "string"
+                },
+                "issuance_factor": {
+                  "type": "string"
+                },
+                "net_reward": {
+                  "type": "string"
+                },
+                "reason_codes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
               },
               "required": [
@@ -15783,42 +15827,7 @@
         "note": "Controller returns the service/repository result directly; use documented field names and preserve unknown additive fields."
       },
       "responseSchema": {
-        "oneOf": [
-          {
-            "type": "null"
-          },
-          {
-            "type": "object",
-            "properties": {
-              "reward_amount": {
-                "type": "string"
-              },
-              "experience_gained": {
-                "type": "string"
-              },
-              "current_level": {
-                "type": "number"
-              },
-              "current_experience": {
-                "type": "string"
-              },
-              "level_up": {
-                "type": "boolean"
-              },
-              "transaction_id": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "reward_amount",
-              "experience_gained",
-              "current_level",
-              "current_experience",
-              "level_up",
-              "transaction_id"
-            ]
-          }
-        ]
+        "type": "never"
       },
       "responseCompatibility": {
         "preferredFieldNaming": "camelCase",
