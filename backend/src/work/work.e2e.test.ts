@@ -62,7 +62,9 @@ describe('work routes', () => {
 
   it.each(ROUTES)('mounts %s %s', async (method, path) => {
     const response = await request(app.getHttpServer())[method](path);
-    expect(response.status, `${method} ${path} is not served`).not.toEqual(404);
+    if (response.status === 404) {
+      throw new Error(`${method} ${path} is not served`);
+    }
   });
 
   /**
