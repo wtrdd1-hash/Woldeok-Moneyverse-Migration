@@ -1,4 +1,4 @@
-import { ConflictException, ValidationPipe, VersioningType } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import type { INestApplication } from '@nestjs/common';
 import { GUARDS_METADATA } from '@nestjs/common/constants';
 import { Test } from '@nestjs/testing';
@@ -28,7 +28,6 @@ const SAMPLE_ID = '00000000-0000-4000-8000-000000000001';
 const ROUTES = [
   ['get', '/api/v1/work'],
   ['get', '/api/v1/work/tasks'],
-  ['post', `/api/v1/work/tasks/${SAMPLE_ID}/complete`],
   ['get', '/api/v1/work/receipts'],
   ['get', '/api/v1/work/assignments'],
   ['post', '/api/v1/work/assignments'],
@@ -84,28 +83,13 @@ describe('work routes', () => {
     expect(guards).toEqual([SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard]);
   });
 
-  it('refuses the legacy direct paid-completion handler before any repository payout can run', () => {
-    const controller = new WorkController(null);
-    expect(() => controller.completeTask(SAMPLE_ID)).toThrow(ConflictException);
-    try {
-      controller.completeTask(SAMPLE_ID);
-    } catch (error) {
-      const response = (error as ConflictException).getResponse() as {
-        code?: string;
-        message?: string;
-      };
-      expect(response.code).toBe('work_assignment_required');
-      expect(response.message).toContain('Direct paid completion is disabled');
-    }
-  });
-
   /**
    * CsrfGuard exits early on GET, HEAD and OPTIONS, which is what makes one
    * class-level stack safe for reads and writes together. A method-level
    * @UseGuards replaces the class stack rather than adding to it, so a route
    * that grew one would silently lose the session guards above.
    */
-  it.each(['dashboard', 'tasks', 'completeTask', 'receipts', 'assignments', 'assign', 'submit', 'verify'] as const)(
+  it.each(['dashboard', 'tasks', 'receipts', 'assignments', 'assign', 'submit', 'verify'] as const)(
     'leaves the class stack in place on %s',
     (handler) => {
       const own: unknown = Reflect.getMetadata(GUARDS_METADATA, WorkController.prototype[handler]);

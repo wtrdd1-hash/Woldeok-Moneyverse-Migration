@@ -2,7 +2,10 @@
 
 import { revalidatePath } from 'next/cache';
 import type { ActionState } from '@/lib/action-state';
+import { ApiError } from '@/lib/api';
 import { failure, idempotencyKey, mutate } from '@/lib/mutate';
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function id(formData: FormData, field: string): string {
   const value = formData.get(field);
@@ -33,13 +36,52 @@ export async function switchJobAction(
 
 export async function completeTaskV2Action(
   _previous: ActionState,
-  _formData: FormData,
+  formData: FormData,
 ): Promise<ActionState> {
-  return {
-    status: 'error',
-    message:
-      '즉시 보상 지급 경로는 비활성화되었습니다. 작업을 먼저 맡고 서버가 정한 최소 수행시간이 지난 뒤 제출·검증 절차로 보상을 받아 주세요.',
-  };
+  const taskId = id(formData, 'taskId');
+  if (!taskId) return { status: 'error', message: '작업 정보를 확인할 수 없습니다.' };
+
+  // The browser keeps one key for the lifetime of this modal. If a response is
+  // lost, retrying the same form replays the same receipt instead of paying twice.
+  const key = id(formData, 'idempotencyKey');
+  if (!UUID.test(key)) return { status: 'error', message: '요청 식별자를 새로고침해 주세요.' };
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const result = await mutate<{
+        reward_amount: string;
+        experience_gained: string;
+        current_level: number;
+        level_up: boolean;
+      }>(`/api/v1/work/tasks/${encodeURIComponent(taskId)}/complete`, {
+        body: { idempotencyKey: key },
+        timeoutMs: 8_000,
+      });
+      revalidatePath('/work');
+      revalidatePath('/wallet');
+      revalidatePath('/profile');
+
+      const levelMsg = result.level_up ? ` 축하합니다! 레벨 ${result.current_level}로 올랐습니다!` : '';
+      return {
+        status: 'ok',
+        message: `업무를 완수했습니다! ${result.reward_amount} WLD 지급 + 숙련도 ${result.experience_gained} EXP 획득!${levelMsg}`,
+      };
+    } catch (error) {
+      lastError = error;
+      // 4xx client refusals are final. Network/timeout failures are retried once
+      // with the exact same idempotency key, so a late success cannot double-pay.
+      if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
+        break;
+      }
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+  }
+
+  return failure(
+    lastError,
+    '응답이 지연되어 요청 상태를 확정하지 못했습니다. 같은 버튼을 다시 누르면 동일 요청 키로 안전하게 상태를 확인합니다.',
+  );
 }
 
 export async function takeTask(_previous: ActionState, formData: FormData): Promise<ActionState> {

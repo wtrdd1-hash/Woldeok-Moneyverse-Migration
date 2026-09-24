@@ -283,8 +283,8 @@ export default async function WorkPage() {
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
             {isEn
-              ? 'Only work for your active career can be performed. Start an assignment first; after the server-authoritative minimum duration, submit and verify it to receive WLD and proficiency EXP.'
-              : '현재 활성 직업의 업무만 수행할 수 있습니다. 먼저 업무를 맡고 서버 권위 최소 수행시간이 지난 뒤 제출·검증해야 WLD와 숙련도 EXP를 받을 수 있습니다.'}
+              ? 'Only work for your active career can be performed. Tasks may be repeated, and each completion pays the server-validated WLD and proficiency EXP shown below.'
+              : '현재 활성 직업의 업무만 수행할 수 있습니다. 같은 업무는 반복 가능하며, 아래에 표시된 WLD와 숙련도 EXP가 서버 검증 후 매회 즉시 지급됩니다.'}
           </p>
         </div>
 
