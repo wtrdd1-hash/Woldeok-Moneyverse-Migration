@@ -52,7 +52,7 @@ describe.skipIf(!DATABASE_URL)('the work loop against a real database', () => {
   it('does not grant the runtime application role direct paid-completion execution', async () => {
     const { rows } = await pool.query<{ allowed: boolean }>(
       `SELECT pg_catalog.has_function_privilege(
-         pg_catalog.current_user,
+         current_user,
          'public.work_complete_task_v2(uuid,uuid,uuid)',
          'EXECUTE'
        ) AS allowed`,
