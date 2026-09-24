@@ -1,11 +1,20 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.09.24.433
+> 현재 원장 버전: v2026.09.24.434
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.09.24.434 — 2026-09-24
+- 저장소 전체 공통 반응형 UI QA 게이트를 추가했다. 신규/변경 프론트 화면은 완료 또는 Production 승격 대상이 되기 전에 **서로 구분되는 반응형 QA를 최소 5회 이상** 통과해야 한다.
+- 5회는 기본 잘림/overflow, breakpoint/레이아웃 위치, 상태·상호작용, 콘텐츠·접근성 스트레스, 수정 후 exact-SHA 최종 회귀로 구분한다.
+- 적용 가능한 최소 viewport matrix는 280/320/360/390/768/1024/1280/1440 CSS px이며, 관련 가로모드/회전 및 zoom/reflow와 릴리스 중요 흐름의 실제 기기 증거를 추가한다.
+- 화면 잘림, 요소 겹침, 접근 불가 control, 잘못된 위치, safe-area 파손, 레이아웃 원인의 가로 스크롤, keyboard/focus 흐름 파손은 릴리스 차단 결함이다.
+- 후속 수정이 반응형/레이아웃에 영향을 주면 해당 route/component는 5회 증거를 다시 시작하며 수정 전 회차를 최종 증거로 세지 않는다.
+- 증거에는 candidate SHA, route/screen, viewport/device/browser, 1~5+ 회차, 발견/수정/재검증, 미해결 제약을 남긴다.
+- 시작 기준 main: `d058df3d29191e48c5ab9b12ec10014d015b5812`. 기획/문서 변경만 수행하며 기존 전체 route의 5회 QA 완료나 Test/Production 배포 완료를 주장하지 않는다.
 
 ## v2026.09.24.433 — 2026-09-24
 - v400/v401 경제 연구 권위를 다시 검증하면서 미러·번역본·추적 URL 변형·이미 채택된 표준을 다시 세지 않았다. 중복 제거된 31,289건 탐색 corpus는 광범위 기반으로 유지하고, v433은 건수 부풀리기 대신 품질/provenance 매핑을 강화한다.

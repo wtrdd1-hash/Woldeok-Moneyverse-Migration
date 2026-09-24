@@ -2,11 +2,25 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.24.433
+> Current integrated version: v2026.09.24.434
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Mandatory responsive UI five-pass QA gate — v2026.09.24.434 (2026-09-24)
+
+- **Applies to every frontend development cycle:** any new or changed user-facing UI, route, modal, table, form, navigation, admin screen, mobile screen, or responsive layout must complete **at least five distinct responsive QA passes** before the work can be marked complete or become eligible for Production promotion.
+- **Required viewport coverage:** use 280/320/360/390 CSS px for narrow mobile where applicable, plus 768/1024/1280/1440 CSS px for tablet/laptop/desktop coverage. Also exercise at least one relevant landscape/orientation case and browser zoom/reflow where the screen class can be affected. Product-specific extra widths may be added; these are minimum planning targets, not a substitute for real-device checks.
+- **Pass 1 — baseline clipping/overflow:** verify document and component-level horizontal/vertical overflow, clipped text/content, viewport-bound drawers/sheets/modals, safe-area insets, fixed/sticky elements, browser chrome interaction, and that no primary action becomes unreachable.
+- **Pass 2 — breakpoint/layout positioning:** verify header/sidebar/bottom navigation, grids, cards, tables, charts, action groups and content hierarchy at every breakpoint. Detect overlap, unintended wrapping, excessive gaps, off-screen controls, unstable alignment and elements whose visual order differs from the intended task order.
+- **Pass 3 — state and interaction QA:** re-run responsive checks across loading, empty, error, offline/timeout, validation, permission/403, reauth, modal/dialog, dropdown, tooltip, keyboard-open, focus-visible and long-scroll states where applicable. Functional placement must remain usable, not merely visually present.
+- **Pass 4 — content/accessibility stress:** test long Korean and English labels, large values, 200% zoom/reflow where applicable, >=44px product touch-target goal, keyboard/focus order, reduced-motion behavior, text resizing and safe-area behavior. WCAG 2.2 normative minimums remain distinct from the stronger Moneyverse 44px product target.
+- **Pass 5 — post-fix regression on the exact candidate SHA:** after all fixes from earlier passes, repeat the representative viewport/state matrix on the final candidate. If a responsive defect is found and code/layout changes again, the affected route/component must restart the five-pass evidence sequence rather than counting pre-fix passes as final proof.
+- **Evidence requirement:** record exact candidate SHA, routes/screens, viewport sizes, browser/device, pass number 1-5+, defects found, fixes, rerun result, screenshots or automated visual evidence where available, and unresolved limitations. A simple “responsive checked” checkbox is not sufficient evidence.
+- **Release gate:** clipping, overlap, unreachable controls, materially incorrect positioning, broken safe-area behavior, horizontal scroll caused by layout defects, inaccessible keyboard/focus flow, or unresolved responsive regressions block Test acceptance and Production promotion. Five passes are a minimum; high-risk finance/admin/economy flows may require additional repetitions.
+- **Concurrency with other work:** developers and AI agents must re-read the latest integrated plan before implementation, at the mid-work checkpoint, and before PR/merge. If main changes relevant responsive/UI authority, rebase/reconcile and rerun the affected QA passes instead of overwriting concurrent work.
+- **Scope truth:** this planning change establishes the mandatory development/QA contract only; it does not claim that every existing route has newly completed five passes, nor does it claim a Test or Production deployment.
 
 ## Deduplicated evidence expansion and economy safety contract — v2026.09.24.433 (2026-09-24)
 

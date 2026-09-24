@@ -2,11 +2,25 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.24.433
+> **현재 통합 버전:** v2026.09.24.434
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 반응형 UI 최소 5회 반복 QA 강제 게이트 — v2026.09.24.434 (2026-09-24)
+
+- **모든 프론트엔드 개발 회차에 적용:** 신규 또는 변경되는 사용자 UI, 라우트, 모달, 표, 폼, 내비게이션, 관리자 화면, 모바일 화면, 반응형 레이아웃은 **서로 구분되는 반응형 QA를 최소 5회 이상** 완료하기 전에는 작업 완료 또는 Production 승격 가능 상태로 처리하지 않는다.
+- **필수 viewport 범위:** 적용 가능한 초소형/모바일은 280/320/360/390 CSS px를 기본으로 확인하고, 태블릿/노트북/데스크톱은 768/1024/1280/1440 CSS px를 확인한다. 화면군에 영향을 주는 경우 최소 1개의 가로모드/회전 상태와 browser zoom/reflow도 확인한다. 기능 특성상 필요한 추가 폭은 더한다. 이 값은 최소 기획 기준이며 실제 기기 검증을 대체하지 않는다.
+- **1차 — 기본 잘림/overflow 검사:** document 및 component 단위의 가로·세로 overflow, 글자/콘텐츠 잘림, drawer/sheet/modal의 viewport 이탈, safe-area inset, fixed/sticky 요소, 브라우저 UI와의 충돌, 주요 CTA 접근 불가 여부를 확인한다.
+- **2차 — breakpoint/배치 위치 검사:** header/sidebar/bottom navigation, grid, card, table, chart, action group, 정보 계층을 breakpoint별로 확인한다. 겹침, 의도치 않은 줄바꿈, 과도한 여백, 화면 밖 control, 흔들리는 정렬, 실제 작업 순서와 다른 시각 순서를 결함으로 기록한다.
+- **3차 — 상태·상호작용 검사:** 적용 가능한 loading, empty, error, offline/timeout, validation, permission/403, reauth, modal/dialog, dropdown, tooltip, keyboard-open, focus-visible, long-scroll 상태에서 다시 반응형을 확인한다. 기능 요소는 단순히 보이기만 해서는 안 되고 실제 조작 가능한 위치여야 한다.
+- **4차 — 콘텐츠/접근성 스트레스 검사:** 긴 한국어·영어 label, 큰 숫자/금액, 적용 가능한 200% zoom/reflow, 제품 기준 >=44px touch target, keyboard/focus order, reduced-motion, text resize, safe-area를 확인한다. WCAG 2.2의 규범상 최소 기준과 Moneyverse의 더 강한 44px 제품 목표를 혼동하지 않는다.
+- **5차 — 수정 후 exact candidate SHA 최종 회귀:** 앞선 검사에서 발견한 문제를 모두 수정한 뒤 최종 candidate SHA에서 대표 viewport/state matrix를 다시 수행한다. 이후 다시 반응형 코드/레이아웃을 수정했다면 영향을 받은 route/component는 수정 전 QA 횟수를 최종 증거로 재사용하지 않고 5회 증거 순서를 다시 시작한다.
+- **증거 의무:** exact candidate SHA, route/screen, viewport, browser/device, 1~5+ 회차 번호, 발견 결함, 수정 내용, 재검증 결과, 가능한 screenshot/자동 시각회귀 증거, 미해결 제약을 기록한다. 단순한 “반응형 확인” 체크 한 줄은 증거로 인정하지 않는다.
+- **릴리스 차단 조건:** 화면/텍스트 잘림, 요소 겹침, 주요 control 접근 불가, 잘못된 위치, safe-area 파손, 레이아웃 결함에 의한 가로 스크롤, keyboard/focus 흐름 파손, 미해결 반응형 회귀가 있으면 Test 수용 및 Production 승격을 차단한다. 5회는 최소치이며 금융/관리자/경제 등 고위험 화면은 더 반복할 수 있다.
+- **동시 작업 정합성:** 개발자와 AI agent는 구현 전, 작업 중간, PR/병합 직전에 최신 통합기획서를 다시 읽는다. main의 반응형/UI 권위가 관련 있게 바뀌면 동시 작업을 덮어쓰지 말고 rebase/reconcile 후 영향을 받은 QA 회차를 다시 수행한다.
+- **범위 사실:** 이번 변경은 필수 개발/QA 계약을 추가하는 문서 작업이다. 기존 모든 route가 새로 5회 QA를 끝냈다고 주장하지 않으며 Test 또는 Production 배포 완료도 주장하지 않는다.
 
 ## 중복 제거 근거 확장 및 경제 안전 계약 — v2026.09.24.433 (2026-09-24)
 

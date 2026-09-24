@@ -1,11 +1,20 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.24.433
+> Current ledger version: v2026.09.24.434
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.24.434 — 2026-09-24
+- Added a repository-wide mandatory responsive UI QA gate: every new or changed frontend surface must complete at least **five distinct responsive QA passes** before completion or Production eligibility.
+- The five passes cover baseline clipping/overflow, breakpoint/layout positioning, state/interaction behavior, content/accessibility stress, and post-fix exact-SHA regression.
+- Minimum viewport matrix is 280/320/360/390/768/1024/1280/1440 CSS px where applicable, with relevant landscape/orientation and zoom/reflow checks plus real-device evidence for release-critical flows.
+- Defects such as clipping, overlap, unreachable controls, wrong positioning, safe-area failures, layout-induced horizontal scrolling, or broken keyboard/focus flow are release blockers.
+- If a later fix changes responsive/layout behavior, affected routes/components restart the five-pass evidence sequence; pre-fix passes cannot be counted as final proof.
+- Evidence must identify candidate SHA, route/screen, viewport/device/browser, pass 1-5+, findings/fixes/reruns, and unresolved limitations.
+- Start baseline: `d058df3d29191e48c5ab9b12ec10014d015b5812`. Planning/docs only; no claim of five-pass completion for all existing routes and no Test/Production deployment claim.
 
 ## v2026.09.24.433 — 2026-09-24
 - Revalidated the existing v400/v401 economy research authority without re-counting mirrors, translations, tracking-URL variants, or already-adopted standards. The 31,289-candidate deduplicated discovery corpus remains the broad base; v433 adds quality/provenance mapping rather than an inflated corpus claim.
