@@ -97,6 +97,23 @@ export interface WorkCompleteV2Row {
   transaction_id: string;
 }
 
+interface JobProfileItem {
+  readonly job_type?: string;
+  readonly level?: number;
+  readonly experience?: number;
+  readonly next_level_exp?: number;
+  readonly is_active?: boolean;
+  mastery_tier?: ReturnType<typeof computeMasteryTier>;
+  readonly [key: string]: unknown;
+}
+
+interface JobProfilePayload {
+  active_job?: JobProfileItem | null;
+  all_jobs?: JobProfileItem[];
+  qualifications?: unknown[];
+  readonly [key: string]: unknown;
+}
+
 export class WorkRepository {
   private cachedFeatureState: { readonly state: WorkFeatureState; readonly cachedUntil: number } | null = null;
 
