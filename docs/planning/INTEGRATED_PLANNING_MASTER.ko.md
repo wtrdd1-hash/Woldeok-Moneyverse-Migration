@@ -1,11 +1,21 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.09.24.433
+> 현재 원장 버전: v2026.09.24.435
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.09.24.435 — 2026-09-24
+- 시작/중간 main: `d058df3d29191e48c5ab9b12ec10014d015b5812`; 기록된 중간 체크포인트에서 drift 없음.
+- 저장소 전체 스캔: Markdown 1,525개, planning 영/한 누락 0개.
+- 현재 전면 재검토 권위는 `INTEGRATED_FULL_REVIEW_V435.ko.md`; v402는 역사 증거로 보존한다.
+- **G435-01 / P0:** v434가 revert되어 즉시 유료 작업 완료 경로가 main에 남아 있고 v433 페이싱은 구현 완료가 아니다.
+- **G435-02 / P0/P1:** 무제한은 참여/성장 가능성이며 즉시 WLD 무제한 발행이 아니다.
+- **G435-03 / P1:** controller 58개 / raw HTTP decorator 370개를 관측했으며 fixed count 대신 generated semantic API inventory를 권위로 사용한다.
+- **G435-04..08 / P1:** 전면 재검토 index drift, 구형 제어 문구 분리, 웹/백엔드/앱 exact-SHA 정합, runtime identity 최신성, 사용자 공개 API 경계를 명시적 gate로 둔다.
+- 상세 권위: `docs/planning/deltas/v2026.09.24.435.ko.md` / 영문 대응본. 기획/문서 전용이며 런타임/Test/Production 완료를 주장하지 않는다.
 
 ## v2026.09.24.433 — 2026-09-24
 - v400/v401 경제 연구 권위를 다시 검증하면서 미러·번역본·추적 URL 변형·이미 채택된 표준을 다시 세지 않았다. 중복 제거된 31,289건 탐색 corpus는 광범위 기반으로 유지하고, v433은 건수 부풀리기 대신 품질/provenance 매핑을 강화한다.

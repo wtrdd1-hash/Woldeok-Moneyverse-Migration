@@ -3,16 +3,16 @@
 **English canonical** | [한국어](INDEX.ko.md)
 
 > Documentation governance: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)
-> Current planning authority: v2026.09.23.406
+> Current planning authority: v2026.09.24.435
 
 ## Start here
 
 1. [PROJECT_PLAN](planning/PROJECT_PLAN.md) — implementation-facing authoritative plan.
 2. [INTEGRATED_PLANNING_MASTER](planning/INTEGRATED_PLANNING_MASTER.md) — integrated planning ledger.
-3. [INTEGRATED_FULL_REVIEW_V402](planning/INTEGRATED_FULL_REVIEW_V402.md) — current full re-review.
+3. [INTEGRATED_FULL_REVIEW_V435](planning/INTEGRATED_FULL_REVIEW_V435.md) — current full re-review; v402 remains historical evidence.
 4. [Documentation policy](DOCUMENTATION_POLICY.md) — document authority, language, branching and archive rules.
 5. [Current runtime / OS baseline](CURRENT_RUNTIME_BASELINE.md) — observed Debian/systemd/Nginx/Docker/PostgreSQL runtime.
-6. [App/API complete specification](mobile-api-complete-spec.md) — native integration contract; counts require v402 generated revalidation.
+6. [App/API complete specification](mobile-api-complete-spec.md) — native integration contract; endpoint counts require v435 generated semantic revalidation.
 
 ## Planning and product
 

@@ -2,11 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.24.433
+> Current integrated version: v2026.09.24.435
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Full planning re-review authority — v2026.09.24.435 (2026-09-24)
+
+- `INTEGRATED_FULL_REVIEW_V435.md` supersedes v402 as the current full-review entry point while preserving v402 history.
+- **P0 paid-work gap:** current `main` still exposes immediate paid task completion because v434 enforcement was reverted. Do not claim v433 pacing implemented until assignment -> server-authoritative minimum duration -> submit -> verify is the only reward-bearing path on the exact candidate and passes Test.
+- **Unlimited semantics:** unlimited means participation/progression availability, not unlimited instantaneous WLD issuance. Reward issuance remains server-time-gated, policy-bounded, idempotent, concurrency-safe and observable.
+- **API inventory:** this review observed 58 controller files and 370 raw HTTP decorators; neither old 335/361 counts nor raw 370 is authoritative. Generated semantic OpenAPI/route inventory is required.
+- **Cross-repo parity:** web/backend/app completeness requires an exact-SHA parity matrix rather than inferred compatibility.
+- **Runtime truth:** documentation/release history does not prove current Production identity; current claims require exact active runtime evidence.
+- **Public disclosure:** public user-facing pages explain capabilities, not privileged endpoint inventories or attack-enabling operational internals.
+- Detailed authority: [INTEGRATED_FULL_REVIEW_V435.md](INTEGRATED_FULL_REVIEW_V435.md) and [deltas/v2026.09.24.435.md](deltas/v2026.09.24.435.md). Planning/docs only; no Test or Production completion claim.
 
 ## Deduplicated evidence expansion and economy safety contract — v2026.09.24.433 (2026-09-24)
 

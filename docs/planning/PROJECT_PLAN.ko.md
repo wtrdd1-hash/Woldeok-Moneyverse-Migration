@@ -2,11 +2,22 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.24.433
+> **현재 통합 버전:** v2026.09.24.435
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 기획 전면 재검토 권위 — v2026.09.24.435 (2026-09-24)
+
+- `INTEGRATED_FULL_REVIEW_V435.ko.md`가 v402 역사 기록을 보존한 채 현재 전면 재검토 진입점을 대체한다.
+- **P0 유료 작업 격차:** v434 강제가 revert되어 현재 `main`에는 즉시 유료 작업 완료 경로가 남아 있다. exact candidate에서 assignment -> 서버 권위 최소시간 -> submit -> verify만 보상 경로가 되고 Test를 통과하기 전까지 v433 페이싱 구현 완료를 주장하지 않는다.
+- **무제한 의미:** 무제한은 참여/성장 가능성이며 즉시 WLD 무제한 발행이 아니다. 보상 발행은 서버 시간 게이트, 정책 한도, 멱등성, 동시성 안전, 관측성을 가져야 한다.
+- **API 인벤토리:** 이번 검토에서 controller 58개, raw HTTP decorator 370개를 관측했다. 과거 335/361도 raw 370도 권위 수량이 아니며 generated semantic OpenAPI/route inventory가 필요하다.
+- **교차 저장소 정합:** 웹/백엔드/앱 완료는 추정 호환이 아니라 exact-SHA 정합 표로 증명한다.
+- **런타임 진실:** 문서/릴리스 이력은 현재 Production identity 증거가 아니며 exact active runtime 근거가 필요하다.
+- **공개 경계:** 사용자 공개 페이지는 기능을 설명하되 권한 endpoint inventory나 공격에 도움이 되는 운영 내부정보를 노출하지 않는다.
+- 상세 권위: [INTEGRATED_FULL_REVIEW_V435.ko.md](INTEGRATED_FULL_REVIEW_V435.ko.md), [deltas/v2026.09.24.435.ko.md](deltas/v2026.09.24.435.ko.md). 기획/문서 전용이며 Test/Production 완료를 주장하지 않는다.
 
 ## 중복 제거 근거 확장 및 경제 안전 계약 — v2026.09.24.433 (2026-09-24)
 

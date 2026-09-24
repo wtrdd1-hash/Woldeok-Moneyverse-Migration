@@ -9,7 +9,7 @@
 
 - [Project plan](planning/PROJECT_PLAN.md)
 - [Integrated planning master](planning/INTEGRATED_PLANNING_MASTER.md)
-- [Full planning re-review v402](planning/INTEGRATED_FULL_REVIEW_V402.md)
+- [Full planning re-review v435](planning/INTEGRATED_FULL_REVIEW_V435.md)
 - [Documentation policy](DOCUMENTATION_POLICY.md)
 
 ## Inventory snapshot

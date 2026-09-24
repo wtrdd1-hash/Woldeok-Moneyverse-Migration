@@ -9,7 +9,7 @@
 
 - [프로젝트 기획](planning/PROJECT_PLAN.ko.md)
 - [통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md)
-- [전면 기획 재검토 v402](planning/INTEGRATED_FULL_REVIEW_V402.ko.md)
+- [전면 기획 재검토 v435](planning/INTEGRATED_FULL_REVIEW_V435.ko.md)
 - [문서 정책](DOCUMENTATION_POLICY.ko.md)
 
 ## 인벤토리 스냅샷
