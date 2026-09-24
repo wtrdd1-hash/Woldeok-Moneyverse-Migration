@@ -317,7 +317,6 @@ export default async function AdminBankPage() {
                       </TableBody>
                     </Table>
                   </div>
-                )}
               </CardContent>
             </Card>
           </section>
