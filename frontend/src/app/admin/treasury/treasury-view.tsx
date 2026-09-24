@@ -11,12 +11,29 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { groupDigits } from '@/lib/money';
-import type { AdminTreasuryLedger, AdminTreasuryOverview } from '../types';
+import type {
+  AdminTreasuryExpenditureItem,
+  AdminTreasuryLedger,
+  AdminTreasuryOverview,
+  AdminTreasuryRevenueSource,
+} from '../types';
 import { TreasuryOperationsDialog } from './treasury-operations-dialog';
 
 interface Props {
   readonly overview: AdminTreasuryOverview;
   readonly ledger: readonly AdminTreasuryLedger[];
+  readonly revenue?: {
+    readonly items: readonly AdminTreasuryRevenueSource[];
+    readonly total_24h_wld: string;
+    readonly total_7d_wld: string;
+    readonly total_30d_wld: string;
+  } | null;
+  readonly expenditure?: {
+    readonly items: readonly AdminTreasuryExpenditureItem[];
+    readonly total_24h_wld: string;
+    readonly total_7d_wld: string;
+    readonly total_30d_wld: string;
+  } | null;
 }
 
 function txTypeBadge(type: string) {
@@ -47,7 +64,7 @@ function coverageBadge(days: number) {
   return <Badge className="bg-destructive hover:bg-destructive/90 text-white text-[11px]">비상 (3일 미만)</Badge>;
 }
 
-export function TreasuryView({ overview, ledger }: Props) {
+export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) {
   return (
     <div className="grid gap-6">
       {/* 1. 국고 총 잔액 및 비축률 지표 */}
@@ -239,6 +256,77 @@ export function TreasuryView({ overview, ledger }: Props) {
         </Card>
       )}
 
+      {/* 4.5. 국고 세목별 수입 흐름 집계 (Treasury Revenue Breakdowns) */}
+      {revenue && (
+        <Card className="border shadow-sm">
+          <CardHeader className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <CardTitle className="text-base font-semibold">국고 세목별 수입 실적 집계 (Treasury Revenue Breakdowns)</CardTitle>
+                <CardDescription className="text-xs text-muted-foreground">
+                  8대 법정 과세원으로부터 국고에 징수 귀속된 기간별(24h / 7d / 30d) 수입 흐름 명세
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-3 text-xs flex-wrap">
+                <div className="rounded border bg-muted/20 px-2.5 py-1">
+                  <span className="text-muted-foreground mr-1.5">24h 총수입:</span>
+                  <span className="font-mono font-semibold text-emerald-600">+{groupDigits(revenue.total_24h_wld)} WLD</span>
+                </div>
+                <div className="rounded border bg-muted/20 px-2.5 py-1">
+                  <span className="text-muted-foreground mr-1.5">7d 총수입:</span>
+                  <span className="font-mono font-semibold text-emerald-600">+{groupDigits(revenue.total_7d_wld)} WLD</span>
+                </div>
+                <div className="rounded border bg-muted/20 px-2.5 py-1">
+                  <span className="text-muted-foreground mr-1.5">30d 총수입:</span>
+                  <span className="font-mono font-semibold text-emerald-600">+{groupDigits(revenue.total_30d_wld)} WLD</span>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6 pt-0">
+            <div className="overflow-x-auto">
+              <Table className="min-w-[640px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[200px]">과세 세목</TableHead>
+                    <TableHead className="text-right w-[140px]">최근 24시간 수입</TableHead>
+                    <TableHead className="text-right w-[140px]">최근 7일 수입</TableHead>
+                    <TableHead className="text-right w-[140px]">최근 30일 수입</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {revenue.items.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-6 text-xs text-muted-foreground">
+                        집계된 세입 데이터가 없습니다.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    revenue.items.map((item) => (
+                      <TableRow key={item.category}>
+                        <TableCell className="font-medium text-xs">
+                          <div>{item.category_ko}</div>
+                          <div className="text-[10px] text-muted-foreground font-mono">{item.category}</div>
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-xs text-emerald-600">
+                          +{groupDigits(item.amount_24h_wld)} WLD
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-xs text-emerald-600">
+                          +{groupDigits(item.amount_7d_wld)} WLD
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-xs font-semibold text-emerald-600">
+                          +{groupDigits(item.amount_30d_wld)} WLD
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* 5. 국고 목적별 예산 배정 체계 (Budget Envelopes) */}
       {overview.budgets && overview.budgets.length > 0 && (
         <Card className="border shadow-sm">
@@ -304,6 +392,77 @@ export function TreasuryView({ overview, ledger }: Props) {
                       </TableCell>
                     </TableRow>
                   ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* 5.5. 국고 목적별 지출 흐름 집계 (Treasury Expenditure Breakdowns) */}
+      {expenditure && (
+        <Card className="border shadow-sm">
+          <CardHeader className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <CardTitle className="text-base font-semibold">국고 목적별 지출 실적 집계 (Treasury Expenditure Breakdowns)</CardTitle>
+                <CardDescription className="text-xs text-muted-foreground">
+                  10대 목적별 예산 봉투에서 실제 집행된 기간별(24h / 7d / 30d) 국고 지출 실적 명세
+                </CardDescription>
+              </div>
+              <div className="flex items-center gap-3 text-xs flex-wrap">
+                <div className="rounded border bg-muted/20 px-2.5 py-1">
+                  <span className="text-muted-foreground mr-1.5">24h 총지출:</span>
+                  <span className="font-mono font-semibold text-destructive">-{groupDigits(expenditure.total_24h_wld)} WLD</span>
+                </div>
+                <div className="rounded border bg-muted/20 px-2.5 py-1">
+                  <span className="text-muted-foreground mr-1.5">7d 총지출:</span>
+                  <span className="font-mono font-semibold text-destructive">-{groupDigits(expenditure.total_7d_wld)} WLD</span>
+                </div>
+                <div className="rounded border bg-muted/20 px-2.5 py-1">
+                  <span className="text-muted-foreground mr-1.5">30d 총지출:</span>
+                  <span className="font-mono font-semibold text-destructive">-{groupDigits(expenditure.total_30d_wld)} WLD</span>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6 pt-0">
+            <div className="overflow-x-auto">
+              <Table className="min-w-[640px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[200px]">예산 목적 봉투</TableHead>
+                    <TableHead className="text-right w-[140px]">최근 24시간 지출</TableHead>
+                    <TableHead className="text-right w-[140px]">최근 7일 지출</TableHead>
+                    <TableHead className="text-right w-[140px]">최근 30일 지출</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {expenditure.items.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-6 text-xs text-muted-foreground">
+                        집계된 세출 데이터가 없습니다.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    expenditure.items.map((item) => (
+                      <TableRow key={item.envelope_code}>
+                        <TableCell className="font-medium text-xs">
+                          <div>{item.envelope_name}</div>
+                          <div className="text-[10px] text-muted-foreground font-mono">{item.envelope_code}</div>
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-xs text-destructive">
+                          -{groupDigits(item.amount_24h_wld)} WLD
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-xs text-destructive">
+                          -{groupDigits(item.amount_7d_wld)} WLD
+                        </TableCell>
+                        <TableCell className="text-right font-mono text-xs font-semibold text-destructive">
+                          -{groupDigits(item.amount_30d_wld)} WLD
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>

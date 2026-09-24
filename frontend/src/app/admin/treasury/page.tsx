@@ -5,7 +5,12 @@ import { apiOrNull } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../admin-back';
 import { adminArea } from '../areas';
-import type { AdminTreasuryLedger, AdminTreasuryOverview } from '../types';
+import type {
+  AdminTreasuryExpenditureItem,
+  AdminTreasuryLedger,
+  AdminTreasuryOverview,
+  AdminTreasuryRevenueSource,
+} from '../types';
 import { TreasuryView } from './treasury-view';
 
 export const dynamic = 'force-dynamic';
@@ -20,9 +25,21 @@ export const metadata: Metadata = {
 export default async function AdminTreasuryPage() {
   await requireAdminConsole(AREA.href);
 
-  const [overview, transactionsRes] = await Promise.all([
+  const [overview, transactionsRes, revenueRes, expenditureRes] = await Promise.all([
     apiOrNull<AdminTreasuryOverview>('/api/v1/admin/treasury/overview'),
     apiOrNull<{ items: AdminTreasuryLedger[]; next_cursor: string | null }>('/api/v1/admin/treasury/transactions'),
+    apiOrNull<{
+      items: AdminTreasuryRevenueSource[];
+      total_24h_wld: string;
+      total_7d_wld: string;
+      total_30d_wld: string;
+    }>('/api/v1/admin/treasury/revenue'),
+    apiOrNull<{
+      items: AdminTreasuryExpenditureItem[];
+      total_24h_wld: string;
+      total_7d_wld: string;
+      total_30d_wld: string;
+    }>('/api/v1/admin/treasury/expenditure'),
   ]);
 
   return (
@@ -41,6 +58,8 @@ export default async function AdminTreasuryPage() {
         <TreasuryView
           overview={overview}
           ledger={transactionsRes?.items ?? []}
+          revenue={revenueRes}
+          expenditure={expenditureRes}
         />
       )}
     </div>

@@ -1,8 +1,9 @@
 import { AdminControlCenterV2 } from './admin-control-center-v2';
 import { EconomyAiStatusCard, type EconomyAiStatus } from './ai-status-card';
 import { EconomySinkCard } from './economy-sink-card';
-import type { MacroEconomyV2 } from './macro-v2-types';
+import type { MacroEconomyV2, MonetaryVelocityTelemetry } from './macro-v2-types';
 import { FaucetSinkGauge, type FaucetSinkStats } from './faucet-sink-gauge';
+import { MonetaryVelocityCard } from './monetary-velocity-card';
 import { CasinoEconomyDashboard } from './casino-economy-dashboard';
 import type { Metadata } from 'next';
 import Link from 'next/link';
@@ -132,7 +133,10 @@ export default async function AdminEconomyPage({
   const alertList = alerts.ok ? alerts.data.alerts : null;
   const alertProblem = problem(alerts, '알림을 불러오지 못했어요.');
   const engine = autoPolicy.ok ? autoPolicy.data : null;
-  const faucetSinkStats = await apiOrNull<FaucetSinkStats>('/api/v1/admin/economy/stats');
+  const [faucetSinkStats, velocityTelemetry] = await Promise.all([
+    apiOrNull<FaucetSinkStats>('/api/v1/admin/economy/stats'),
+    apiOrNull<MonetaryVelocityTelemetry>('/api/v1/admin/economy/velocity'),
+  ]);
   const engineProblem = problem(autoPolicy, '자동 조정 엔진 상태를 불러오지 못했어요.');
 
   // Three answers, and the middle one only exists once a payout id is in the
@@ -185,6 +189,7 @@ export default async function AdminEconomyPage({
       )}
 
       <section aria-labelledby="economy-figures" className="grid gap-3">
+        <MonetaryVelocityCard telemetry={velocityTelemetry} />
         <FaucetSinkGauge stats={faucetSinkStats} />
         <EconomySinkCard />
         <CasinoEconomyDashboard />
