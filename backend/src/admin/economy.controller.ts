@@ -217,6 +217,15 @@ export class AdminEconomyController {
     return await this.repository().faucetSinkStats();
   }
 
+  @Get('velocity')
+  @ApiOperation({
+    summary:
+      'Monetary velocity (24h/7d/30d), money distribution percentiles, and cohort purchasing power telemetry',
+  })
+  async velocity() {
+    return await this.repository().monetaryVelocityTelemetry();
+  }
+
   constructor(
     @Inject(EconomyConsoleRepository)
     private readonly economy: EconomyConsoleRepository | null,

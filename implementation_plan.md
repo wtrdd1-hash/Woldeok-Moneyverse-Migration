@@ -2890,3 +2890,48 @@ pm test).
 4. 테스트 서버(test.easy-scraping.com) 및 운영 서버(easy-scraping.com) 무중단 블루-그린 배포 승격
 5. exact-SHA 검증: 17개 핵심 엔드포인트 200 OK 및 1,208+ 활성 유저 세션 보존 검증
 6. 작업 feature 브랜치 안전 삭제
+
+
+---
+
+## 🚀 [v74 Specification] 통화 유통속도·코호트 구매력 다구간 텔레메트리 엔진 & 국고 세입/세출 상세 분석 뷰 완결 (ECONOMY_MONETARY_VELOCITY_SPEC §4, §5, §6, §8, ADMIN_TREASURY_MANAGEMENT_SPEC §13) (v2026.09.24.431)
+
+### 1. 🎯 요구사항 분석 및 자율 확정 사양
+기획서 전면 검토 및 경제 거시 관제·국고 재정 명세에 따라, 통화 유통속도 다구간 텔레메트리 및 국고 세입/세출 상세 분석 UI를 풀스택으로 완결 구현:
+1. **[통화 유통속도 및 다구간(24h/7d/30d) 경제 텔레메트리 엔진 (`ECONOMY_MONETARY_VELOCITY_SPEC` §4)]**:
+   - `MonetaryVelocityTelemetry` 데이터 모델 구축:
+     * 다구간 창(`24h`, `7d`, `30d`): 총 발행량(`gross_faucet_wld`), 총 소각량(`hard_sink_wld`), 순통화 팽창/수축량(`net_expansion_wld`), 유통속도 지표(`velocity_proxy = transaction_volume / circulating_supply`).
+     * 통화 및 부의 자산 분포: M2 총 통화량(`m2_total_wld`), 활성 유통량(`active_circulating_wld`), 장기 휴면 잔액(`dormant_balances_wld`), 유동 잔액 백분위수(`p50`, `p90`, `p95`, `p99`), 상위 부유층 집중도(`top_1_percent_share_pct`, `top_10_percent_share_pct`).
+     * 코호트별 실질 구매력 지수(`cohort_purchasing_power`): 신규 유저 핵심 바스켓 구매력(`new_user_core_basket_index`), 중간 소득층 구매력(`middle_income_purchasing_index`), 고자산 명예/싱크 흡수 지수(`high_wealth_sink_absorption_index`).
+     * 권위 메타데이터: 정책 버전 `v2026.09.23.401`, 텔레메트리 추출 시각.
+   - 전용 REST API 엔드포인트:
+     * `GET /api/v1/admin/economy/velocity`: 통화 유통속도 및 코호트 구매력 다구간 텔레메트리 반환.
+2. **[관리자 경제 관제 타워 UI 고도화 (`monetary-velocity-card.tsx`)]**:
+   - `admin-control-tower-craft` 및 `anti-ai-frontend-craftsmanship` 표준 적용.
+   - 24h, 7d, 30d 탭 전환 기반 유통속도 프록시(Velocity Proxy) 및 순통화 증감률 시각화.
+   - 유동성 잔액 분위수(P50, P90, P95, P99) 및 부의 집중도 바.
+   - 코호트별 구매력 건전성(신규/중간층/고자산층) 레이더 배지 렌더링.
+   - `/admin/economy` 메인 페이지 상단에 원터치 통합.
+3. **[국고 8대 세입원 및 10대 목적별 세출 분석 테이블 UI 완결 (`ADMIN_TREASURY_MANAGEMENT_SPEC` §13)]**:
+   - `/admin/treasury` 페이지에서 기 구현된 `/api/v1/admin/treasury/revenue` 및 `/api/v1/admin/treasury/expenditure`를 병렬 페칭.
+   - `treasury-view.tsx`에 8대 과세/세입원 테이블(24h, 7d, 30d 세입액 및 범주별 안내) 렌더링.
+   - 10대 목적별 예산 봉투의 기간별 세출 내역 및 집행률 테이블 렌더링.
+
+### 2. 📂 대상 파일 목록
+- [MODIFY] backend/src/admin/economy.repository.ts: MonetaryVelocityTelemetry 모델 및 monetaryVelocityTelemetry() 쿼리/산출 로직 추가
+- [MODIFY] backend/src/admin/economy.controller.ts: GET admin/economy/velocity 엔드포인트 및 Swagger 문서화 추가
+- [NEW] backend/src/admin/economy-velocity-telemetry.test.ts: 통화 유통속도 텔레메트리 단위 테스트 작성
+- [MODIFY] frontend/src/app/admin/economy/macro-v2-types.ts: MonetaryVelocityTelemetry 인터페이스 정의 추가
+- [NEW] frontend/src/app/admin/economy/monetary-velocity-card.tsx: 통화 유통속도 및 코호트 구매력 관제 컴포넌트 신설
+- [MODIFY] frontend/src/app/admin/economy/page.tsx: 통화 유통속도 텔레메트리 페칭 및 MonetaryVelocityCard 렌더링
+- [MODIFY] frontend/src/app/admin/treasury/page.tsx: revenue 및 expenditure 데이터 페칭 추가
+- [MODIFY] frontend/src/app/admin/treasury/treasury-view.tsx: 8대 세입원 및 10대 예산 세출 테이블 렌더링
+- [MODIFY] implementation_plan.md: v74 누적 사양 추가 (Zero-Deletion Invariant `-0 lines`)
+
+### 3. 🧪 검증 계획
+1. 백엔드 경제 텔레메트리 단위 테스트 검증: vitest pass
+2. 프론트엔드 및 백엔드 컴파일/빌드 검증: 0 errors
+3. Git commit & feature 브랜치 -> main 브랜치 머지 및 push
+4. 테스트 서버(test.easy-scraping.com) 및 운영 서버(easy-scraping.com) 무중단 블루-그린 배포 승격 (stage_v431.sh)
+5. exact-SHA 검증, 17개 핵심 엔드포인트 200 OK 및 1,208+ 활성 유저 세션 보존 검증
+6. 작업 feature 브랜치 안전 삭제

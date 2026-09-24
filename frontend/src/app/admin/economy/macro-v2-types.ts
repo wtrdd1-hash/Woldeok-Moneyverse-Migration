@@ -95,3 +95,40 @@ export interface UserAssetInspectV2 {
     status: string;
   }>;
 }
+
+export interface MonetaryVelocityWindow {
+  readonly gross_faucet_wld: string;
+  readonly hard_sink_wld: string;
+  readonly net_expansion_wld: string;
+  readonly velocity_proxy: number;
+}
+
+export interface MonetaryVelocityTelemetry {
+  readonly policy_version: string;
+  readonly observed_at: string;
+  readonly windows: {
+    readonly '24h': MonetaryVelocityWindow;
+    readonly '7d': MonetaryVelocityWindow;
+    readonly '30d': MonetaryVelocityWindow;
+  };
+  readonly supply_distribution: {
+    readonly m2_total_wld: string;
+    readonly active_circulating_wld: string;
+    readonly dormant_balances_wld: string;
+    readonly percentiles: {
+      readonly p50_wld: string;
+      readonly p90_wld: string;
+      readonly p95_wld: string;
+      readonly p99_wld: string;
+    };
+    readonly concentration: {
+      readonly top_1_percent_share_pct: number;
+      readonly top_10_percent_share_pct: number;
+    };
+  };
+  readonly cohort_purchasing_power: {
+    readonly new_user_core_basket_index: number;
+    readonly middle_income_purchasing_index: number;
+    readonly high_wealth_sink_absorption_index: number;
+  };
+}
