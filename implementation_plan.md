@@ -2935,3 +2935,60 @@ pm test).
 4. 테스트 서버(test.easy-scraping.com) 및 운영 서버(easy-scraping.com) 무중단 블루-그린 배포 승격 (stage_v431.sh)
 5. exact-SHA 검증, 17개 핵심 엔드포인트 200 OK 및 1,208+ 활성 유저 세션 보존 검증
 6. 작업 feature 브랜치 안전 삭제
+
+---
+
+## 🚀 [v75 Specification] 직업 숙련도 7대 티어 체계 및 전문 자격시험·하드싱크 인증 센터 구축 (JOBS_PROFESSION_MASTERY_SPEC §6, §7) (v2026.09.24.432)
+
+### 1. 🎯 요구사항 분석 및 자율 확정 사양
+기획서(`JOBS_PROFESSION_MASTERY_SPEC.ko.md` §6, §7)에 명시된 장기 성장 숙련도 체계 및 자격/꾸미기/명예 국고 하드싱크 시스템을 풀스택으로 구축:
+1. **[직업 숙련도 7대 티어 모델 (Mastery Tiers, §6)]**:
+   - 숙련도 레벨에 따른 서버 권위 7대 티어 표준화:
+     * `APPRENTICE` (견습): Lv. 1 ~ 4
+     * `JOURNEYMAN` (숙련): Lv. 5 ~ 9
+     * `PROFESSIONAL` (프로): Lv. 10 ~ 19
+     * `SPECIALIST` (전문가): Lv. 20 ~ 29
+     * `EXPERT` (엑스퍼트): Lv. 30 ~ 39
+     * `MASTER` (마스터): Lv. 40 ~ 49
+     * `LEGACY` (레거시/그랜드마스터): Lv. 50 (하드캡 해제 상위 명예)
+   - `jobProfile` 응답에 `mastery_tier` 및 단계별 명칭/칭호 데이터 탑재.
+2. **[전문 자격시험 및 자격증 발급 엔진 (Qualifications & Hard Sinks, §7)]**:
+   - `public.user_job_qualifications` 영구 원장 테이블 구축.
+   - 5대 공식 자격증 사양:
+     * `BASIC_LICENSE` (기본 전문 자격증): 요구 Lv. 3, 응시료 750 WLD (작업 기본 자격 획득)
+     * `BADGE_ENGRAVING` (직업배지 각인): 요구 Lv. 5, 각인료 1,500 WLD (프로필 전시 및 명예 각인)
+     * `SPECIALIST_CERTIFICATE` (전문 자격시험): 요구 Lv. 10, 시험료 5,000 WLD (상위 정체성 전문 칭호)
+     * `MASTER_PORTFOLIO` (마스터 포트폴리오 심사): 요구 Lv. 25, 심사료 25,000 WLD (최고 명예 아카이빙)
+     * `UNIFORM_STYLING` (유니폼 커스텀 스타일링): 요구 Lv. 1, 스타일링비 500 WLD (직업별 외형 커스텀)
+   - 응시 수수료 정산 무결성:
+     * 유저 계좌 잔액 원자적 차감.
+     * 중앙 국고(`system_treasury_vaults.VAULT_MAIN` 또는 `VAULT_OPERATING`)로 `HARD_SINK` 귀속 입금.
+     * `system_treasury_ledger`에 영구 트랜잭션 기록 (`QUALIFICATION_FEE_SINK`).
+   - REST API:
+     * `GET /api/v1/work/qualifications`: 보유 자격증 목록 및 응시 자격 조회
+     * `POST /api/v1/work/qualifications/certify`: 자격시험 응시 및 자격증 발급
+3. **[프론트엔드 전문 자격증 센터 UI (`career-qualifications-card.tsx`)]**:
+   - `/work` 페이지에 전문 자격증 센터(Professional Certification Center) 카드 섹션 신설.
+   - 활성 직업 카드에 7대 숙련도 티어 배지(견습/숙련/프로/전문가/엑스퍼트/마스터/레거시) 시각화.
+   - 5대 자격증 목록, 요구 레벨, 국고 수수료(WLD), 취득 상태(미충족/응시 가능/취득 완료) 카드 그리드.
+   - 즉시 응시/심사 모달 다이얼로그 및 자격증 취득 시 골드 실(Gold Seal) 렌더링.
+
+### 2. 📂 대상 파일 목록
+- [NEW] ops/migrations/20260924_user_job_qualifications.sql: 자격증 테이블 및 DB 인덱스 마이그레이션
+- [MODIFY] backend/src/work/work.dto.ts: 자격시험 Dto 및 응답 타입 정의
+- [MODIFY] backend/src/work/work.repository.ts: 7대 티어 계산, 자격 취득 및 국고 하드싱크 트랜잭션 구현
+- [MODIFY] backend/src/work/work.controller.ts: GET/POST /api/v1/work/qualifications 엔드포인트 추가
+- [NEW] backend/src/work/work-qualifications.test.ts: 자격시험 및 티어 판정 단위 테스트 작성
+- [MODIFY] frontend/src/app/work/work.ts: 7대 티어 유틸리티 및 자격증 인터페이스 정의
+- [NEW] frontend/src/app/work/career-qualifications-card.tsx: 전문 자격증 및 심사 센터 컴포넌트 신설
+- [MODIFY] frontend/src/app/work/page.tsx: 숙련도 티어 배지 및 자격증 센터 섹션 배치
+- [MODIFY] implementation_plan.md: v75 누적 사양 추가 (Zero-Deletion Invariant `-0 lines`)
+
+### 3. 🧪 검증 계획
+1. 백엔드 자격증 단위 테스트 실행: vitest pass
+2. 프론트엔드 및 백엔드 프로덕션 빌드 검증: 0 errors
+3. Git commit & feature 브랜치 -> main 브랜치 머지 및 push
+4. 테스트 서버(test.easy-scraping.com) 및 운영 서버(easy-scraping.com) 무중단 블루-그린 배포 승격 (stage_v432.sh)
+5. exact-SHA 검증, 17개 핵심 엔드포인트 200 OK 및 1,211+ 활성 유저 세션 보존 검증
+6. 작업 feature 브랜치 안전 삭제
+

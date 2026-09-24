@@ -157,3 +157,34 @@ export async function claimReward(
     return failure(error, '보상을 받지 못했어요. 제출한 작업인지 확인해 주세요.');
   }
 }
+
+export async function certifyQualificationAction(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const jobType = id(formData, 'jobType');
+  const qualificationCode = id(formData, 'qualificationCode');
+  if (!jobType || !qualificationCode) {
+    return { status: 'error', message: '자격시험 정보가 올바르지 않습니다.' };
+  }
+
+  try {
+    const result = await mutate<{
+      title: string;
+      tier: string;
+      fee_wld: string;
+    }>('/api/v1/work/qualifications/certify', {
+      body: { jobType, qualificationCode },
+    });
+    revalidatePath('/work');
+    revalidatePath('/wallet');
+    revalidatePath('/profile');
+    return {
+      status: 'ok',
+      message: `축하합니다! [${result.title}] 자격증을 성공적으로 취득하였습니다. (수수료 ${result.fee_wld} WLD 국고 귀속)`,
+    };
+  } catch (error) {
+    return failure(error, '자격시험 응시에 실패했습니다. 레벨 요건 및 WLD 잔액을 확인해 주세요.');
+  }
+}
+
