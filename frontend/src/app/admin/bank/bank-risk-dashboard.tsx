@@ -6,110 +6,80 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { groupDigits } from '@/lib/money';
 import type { AdminBankOverview, AdminCreditGrade, AdminLoan } from '../types';
 
-interface BankRiskDashboardProps {
+interface Props {
   readonly overview: AdminBankOverview;
   readonly grades: readonly AdminCreditGrade[];
   readonly loans: readonly AdminLoan[];
 }
 
-export function BankRiskDashboard({ overview, grades, loans: _loans }: BankRiskDashboardProps) {
-  const _deposit = BigInt(overview.deposit_amount || '0');
-  const outstanding = BigInt(overview.outstanding_amount || '0');
-  const overdue = BigInt(overview.overdue_amount || '0');
-  const issued24h = BigInt(overview.issued_24h_amount || '0');
-  const repaid24h = BigInt(overview.repaid_24h_amount || '0');
+export function BankRiskDashboard({ overview, grades, loans }: Props) {
+  const activeLoans = loans.filter((l) => l.status === 'active');
+  const overdueLoans = loans.filter((l) => l.status === 'overdue');
+  const totalPrincipal = loans.reduce((acc, l) => acc + BigInt(l.principal_amount || '0'), 0n);
+  const overduePrincipal = overdueLoans.reduce((acc, l) => acc + BigInt(l.principal_amount || '0'), 0n);
 
   const overdueRatioPercent =
-    outstanding > 0n ? Number((overdue * 1000n) / outstanding) / 10 : 0;
-
-  const riskStatus = (() => {
-    if (overdueRatioPercent > 30) {
-      return {
-        label: '🚨 고위험 (ALERT)',
-        badgeClass: 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border-rose-500/30',
-        desc: '연체율이 30%를 초과하여 대손 위험이 높습니다. 신규 대출 한도 축소 및 회수 조치가 필요합니다.',
-      };
-    }
-    if (overdueRatioPercent > 15) {
-      return {
-        label: '⚠️ 주의 (WARNING)',
-        badgeClass: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
-        desc: '연체율이 15% 이상입니다. 만기 도래 대출의 모니터링이 권장됩니다.',
-      };
-    }
-    if (overdueRatioPercent > 5) {
-      return {
-        label: 'ℹ️ 보통 (MODERATE)',
-        badgeClass: 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border-blue-500/30',
-        desc: '연체율이 적정 관리 범위(5~15%) 내에 있습니다.',
-      };
-    }
-    return {
-      label: '✅ 정상 건전 (HEALTHY)',
-      badgeClass: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
-      desc: '연체율이 5% 미만으로 매우 건전한 여신 포트폴리오를 유지하고 있습니다.',
-    };
-  })();
+    totalPrincipal > 0n ? Number((overduePrincipal * 1000n) / totalPrincipal) / 10 : 0;
 
   const totalGradeOutstanding = grades.reduce(
-    (sum, g) => sum + BigInt(g.outstanding_amount || '0'),
+    (acc, g) => acc + BigInt(g.outstanding_amount || '0'),
     0n,
   );
 
+  const getRiskStatus = (ratio: number) => {
+    if (ratio >= 30) return { label: '심각 (High Risk)', variant: 'destructive' as const, desc: '연체율이 30%를 초과하여 대손 충당금 확충 및 긴급 회수 조치가 시급합니다.' };
+    if (ratio >= 15) return { label: '경고 (Warning)', variant: 'outline' as const, desc: '연체율이 15% 이상입니다. 신규 여신 승인 한도 축소를 권고합니다.' };
+    if (ratio >= 5) return { label: '주의 (Caution)', variant: 'secondary' as const, desc: '일부 연체 대출이 식별되었습니다. 모니터링 주기를 단축하세요.' };
+    return { label: '건전 (Healthy)', variant: 'default' as const, desc: '전체 연체율이 5% 미만으로 은행 여신 건전성이 우수하게 유지되고 있습니다.' };
+  };
+
+  const riskStatus = getRiskStatus(overdueRatioPercent);
+
   return (
-    <div className="grid gap-6">
-      {/* 1. 은행 여신 건전성 및 리스크 요약 카드 */}
-      <Card className="border-primary/20 bg-card/60 backdrop-blur-sm">
+    <div className="grid gap-6 lg:grid-cols-2">
+      {/* 1. 여신 리스크 종합 게이지 */}
+      <Card className="border border-border/80 shadow-sm bg-card">
         <CardHeader>
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <CardTitle className="text-base flex items-center gap-2">
-                <span>🏦</span> 은행 여신 건전성 & 연체 리스크 모니터링
-              </CardTitle>
-              <CardDescription>
-                전체 대출 장부 대비 연체 잔액 비율 및 24시간 자금 흐름을 실시간 분석합니다.
-              </CardDescription>
-            </div>
-            <Badge className={riskStatus.badgeClass}>{riskStatus.label}</Badge>
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <CardTitle className="text-base">은행 여신 리스크 & 건전성 모니터링</CardTitle>
+            <Badge variant={riskStatus.variant} className="text-xs font-bold">
+              {riskStatus.label}
+            </Badge>
           </div>
+          <CardDescription className="text-xs">
+            전체 대출 자산 대비 연체 원금 비율과 부실채권(NPL) 위험도를 평가합니다.
+          </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-5">
-          {/* 주요 4대 지표 그리드 */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 rounded-lg bg-muted/40 p-3.5 text-sm">
-            <div>
-              <span className="text-xs text-muted-foreground block">총 대출 잔액</span>
-              <span className="font-semibold tabular text-primary">
-                <Amount value={overview.outstanding_amount} />
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <div className="rounded-xl border border-border/60 bg-surface/50 p-3">
+              <span className="text-[11px] text-muted-foreground block mb-0.5">총 대출 건수</span>
+              <span className="text-lg font-bold font-mono tracking-tight text-foreground">
+                {loans.length} <span className="text-xs font-normal text-muted-foreground font-sans">건</span>
               </span>
             </div>
-            <div>
-              <span className="text-xs text-muted-foreground block">연체 잔액 (Overdue)</span>
-              <span className="font-semibold tabular text-rose-600 dark:text-rose-400">
-                <Amount value={overview.overdue_amount} />
+            <div className="rounded-xl border border-border/60 bg-surface/50 p-3">
+              <span className="text-[11px] text-muted-foreground block mb-0.5">정상 상환 중</span>
+              <span className="text-lg font-bold font-mono tracking-tight text-emerald-600 dark:text-emerald-400">
+                {activeLoans.length} <span className="text-xs font-normal text-muted-foreground font-sans">건</span>
               </span>
             </div>
-            <div>
-              <span className="text-xs text-muted-foreground block">장부 연체율 (Ratio)</span>
-              <span className="font-bold tabular text-base">
-                {overdueRatioPercent.toFixed(1)}%
-              </span>
-            </div>
-            <div>
-              <span className="text-xs text-muted-foreground block">24h 넷 자금 흐름 (대출-상환)</span>
-              <span className="font-semibold tabular">
-                {issued24h >= repaid24h ? '+' : '-'}
-                {groupDigits((issued24h >= repaid24h ? issued24h - repaid24h : repaid24h - issued24h).toString())} WLD
+            <div className="rounded-xl border border-border/60 bg-surface/50 p-3 col-span-2 sm:col-span-1">
+              <span className="text-[11px] text-muted-foreground block mb-0.5">연체 대출 건수</span>
+              <span className="text-lg font-bold font-mono tracking-tight text-rose-600 dark:text-rose-400">
+                {overdueLoans.length} <span className="text-xs font-normal text-muted-foreground font-sans">건</span>
               </span>
             </div>
           </div>
 
-          {/* 연체율 시각 게이지 */}
-          <div className="grid gap-2">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>연체율 지수 게이지</span>
-              <span className="font-semibold text-foreground">{overdueRatioPercent.toFixed(1)}% (연체 {groupDigits(overview.overdue_loan_count)}건)</span>
+          <div className="space-y-2 pt-1">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground font-medium">연체 원금 비율 (NPL Ratio)</span>
+              <span className="font-mono font-bold text-foreground">
+                {overdueRatioPercent.toFixed(1)}% <span className="text-[11px] font-normal text-muted-foreground">({groupDigits(overduePrincipal.toString())} / {groupDigits(totalPrincipal.toString())} WLD)</span>
+              </span>
             </div>
-            <div className="h-3 w-full overflow-hidden rounded-full bg-muted">
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
               <div
                 className={`h-full transition-all duration-500 ${
                   overdueRatioPercent > 30
@@ -125,26 +95,26 @@ export function BankRiskDashboard({ overview, grades, loans: _loans }: BankRiskD
             </div>
           </div>
 
-          <p className="text-xs text-muted-foreground bg-background/50 border rounded-md p-2.5">
-            💡 <strong>리스크 진단</strong>: {riskStatus.desc}
+          <p className="text-xs text-muted-foreground bg-surface/80 border border-border/60 rounded-xl p-3">
+            💡 <strong className="text-foreground">리스크 진단</strong>: {riskStatus.desc}
           </p>
         </CardContent>
       </Card>
 
       {/* 2. 신용등급별 대출 잔액 및 점유율 수평 바 차트 */}
-      <Card>
+      <Card className="border border-border/80 shadow-sm bg-card">
         <CardHeader>
           <CardTitle className="text-base flex items-center justify-between">
-            <span>📊 신용등급별 대출 잔액 점유율</span>
-            <span className="text-xs font-normal text-muted-foreground tabular">
+            <span>신용등급별 대출 잔액 점유율</span>
+            <span className="text-xs font-normal text-muted-foreground font-mono">
               총 {grades.length}개 등급
             </span>
           </CardTitle>
-          <CardDescription>
-            신용등급(A~F / 등급 1~5)별 대출 잔액 비중과 이자율, 대출 건수 현황입니다.
+          <CardDescription className="text-xs">
+            신용등급(1~5)별 대출 잔액 비중과 이자율, 대출 건수 현황입니다.
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-3.5">
+        <CardContent className="grid gap-3">
           {grades.map((grade) => {
             const gradeAmt = BigInt(grade.outstanding_amount || '0');
             const sharePercent =
@@ -153,32 +123,34 @@ export function BankRiskDashboard({ overview, grades, loans: _loans }: BankRiskD
                 : 0;
 
             return (
-              <div key={grade.grade} className="grid gap-1.5 rounded-md border p-3 bg-muted/20">
-                <div className="flex items-center justify-between text-xs">
+              <div key={grade.grade} className="grid gap-1.5 rounded-xl border border-border/60 p-3 bg-surface/40">
+                <div className="flex items-center justify-between text-xs flex-wrap gap-1">
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="font-mono font-bold text-xs px-2">
                       등급 {grade.grade}
                     </Badge>
-                    <span className="text-muted-foreground">
-                      이자율: {(grade.interest_bps / 100).toFixed(1)}% | 한도: {groupDigits(grade.credit_limit)} WLD
+                    <span className="text-muted-foreground text-[11px]">
+                      이자율: <span className="font-mono font-semibold">{(grade.interest_bps / 100).toFixed(1)}%</span> | 한도: <span className="font-mono">{groupDigits(grade.credit_limit)}</span> WLD
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 tabular font-medium">
-                    <span>{groupDigits(grade.open_loan_count)}건 대출 중</span>
-                    <span className="text-primary font-semibold">({sharePercent.toFixed(1)}%)</span>
+                  <div className="flex items-center gap-1.5 font-mono text-xs font-medium">
+                    <span>{groupDigits(grade.open_loan_count)}건</span>
+                    <span className="text-primary font-bold">({sharePercent.toFixed(1)}%)</span>
                   </div>
                 </div>
 
                 <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full bg-indigo-500 transition-all duration-500"
+                    className="h-full bg-primary transition-all duration-500"
                     style={{ width: `${Math.min(100, Math.max(0, sharePercent))}%` }}
                   />
                 </div>
 
                 <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-0.5">
                   <span>대출 잔액</span>
-                  <Amount value={grade.outstanding_amount} className="font-medium text-foreground" />
+                  <span className="font-mono font-bold text-foreground">
+                    {groupDigits(grade.outstanding_amount)} WLD
+                  </span>
                 </div>
               </div>
             );

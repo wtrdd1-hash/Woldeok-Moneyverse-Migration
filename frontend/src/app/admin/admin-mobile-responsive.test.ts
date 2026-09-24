@@ -10,6 +10,9 @@ const userDirectory = readFileSync('src/app/admin/users/user-directory.tsx', 'ut
 const market = readFileSync('src/app/admin/market/page.tsx', 'utf8');
 const support = readFileSync('src/app/admin/support/page.tsx', 'utf8');
 const workForms = readFileSync('src/app/admin/work/admin-work-forms.tsx', 'utf8');
+const shopView = readFileSync('src/app/admin/shop/admin-shop-view.tsx', 'utf8');
+const treasuryView = readFileSync('src/app/admin/treasury/treasury-view.tsx', 'utf8');
+const bankPage = readFileSync('src/app/admin/bank/page.tsx', 'utf8');
 
 describe('administrator mobile responsive guards', () => {
   it('uses stacked AI agent cards below the small breakpoint and keeps the desktop table', () => {
@@ -29,14 +32,16 @@ describe('administrator mobile responsive guards', () => {
     expect(activity).toContain('className="w-full sm:w-28"');
   });
 
-  it('uses safe negative margin and hidden scrollbars for admin sub nav on mobile', () => {
+  it('uses safe negative margin and auto scroll into view for admin sub nav on mobile', () => {
     expect(subNav).toContain('-mx-3 mb-4 overflow-x-auto');
     expect(subNav).toContain('scrollbar-none touch-pan-x overscroll-x-contain');
+    expect(subNav).toContain('scrollIntoView');
   });
 
-  it('preserves horizontal scrolling with minimum widths for market and work console tables', () => {
+  it('preserves horizontal scrolling with minimum widths for market and work console tables and adds mobile stock cards', () => {
     expect(market).toContain('min-w-[580px]');
     expect(market).toContain('min-w-[720px]');
+    expect(market).toContain('className="grid gap-3 p-4 md:hidden divide-y divide-border/40"');
     expect(workForms).toContain('min-w-[720px]');
   });
 
@@ -44,5 +49,14 @@ describe('administrator mobile responsive guards', () => {
     expect(userDirectory).toContain('flex-nowrap overflow-x-auto no-scrollbar');
     expect(support).toContain('flex flex-nowrap overflow-x-auto no-scrollbar');
     expect(support).toContain('max-h-72 lg:max-h-none overflow-y-auto');
+  });
+
+  it('provides mobile card stack views for shop, treasury, and bank consoles', () => {
+    expect(shopView).toContain('className="grid gap-3 md:hidden"');
+    expect(shopView).toContain('className="hidden md:block');
+    expect(treasuryView).toContain('className="grid gap-3 p-4 md:hidden divide-y divide-border/40"');
+    expect(treasuryView).toContain('className="hidden md:block overflow-x-auto"');
+    expect(bankPage).toContain('className="grid gap-3 p-4 md:hidden divide-y divide-border/40"');
+    expect(bankPage).toContain('className="hidden md:block overflow-x-auto"');
   });
 });

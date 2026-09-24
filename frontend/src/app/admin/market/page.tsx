@@ -76,219 +76,274 @@ export default async function AdminMarketPage() {
         {AREA.summary}
       </PageHeader>
 
-      {/* Which way the market leans, and how hard each stock is moving.
-          Percent a day rather than basis points, because that is the unit
-          an operator decides in; the console does the division. */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">시장 방향</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            시장 전체 추세{' '}
-            <b className="tabular text-foreground">
-              {marketTrend === null ? '—' : percentPerDay(marketTrend)}
-            </b>
-            . 종목 추세는 몇 시간에 걸쳐 바뀌고, 변동성은 하루 3 % 근처로 돌아오며 오르내려요.
-            적정가는 소식과 매매가 쌓여 움직이는 기준점입니다.
-          </p>
-        </CardHeader>
-        <CardContent>
-          {dynamics === null ? (
-            <EmptyState title="시장 상태를 불러오지 못했어요." />
-          ) : dynamics.stocks.length === 0 ? (
-            <EmptyState title="거래 중인 종목이 없습니다." />
-          ) : (
-            <Table className="table-fixed min-w-[580px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[28%]">종목</TableHead>
-                  <TableHead className="text-right">현재가 / 적정가</TableHead>
-                  <TableHead className="text-right">추세</TableHead>
-                  <TableHead className="text-right">변동성</TableHead>
-                  <TableHead className="w-[12%] text-right">소식</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {dynamics.stocks.map((row) => (
-                  <TableRow key={row.stock_id}>
-                    <TableCell className="truncate">
-                      <span className="font-mono text-xs text-muted-foreground">{row.symbol}</span>{' '}
-                      {row.name}
-                    </TableCell>
-                    <TableCell className="tabular text-right text-xs">
-                      {groupDigits(row.current_price)} / {groupDigits(row.fair_value)}
-                      <span className="block text-muted-foreground">
-                        적정가 대비 {gapPercent(row.current_price, row.fair_value)}
-                      </span>
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        'tabular text-right text-xs font-bold',
-                        Number(row.trend_bps) > 0 ? 'text-rise' : Number(row.trend_bps) < 0 ? 'text-fall' : '',
-                      )}
-                    >
-                      {percentPerDay(row.trend_bps)}
-                    </TableCell>
-                    <TableCell className="tabular text-right text-xs">
-                      {(Number(row.vol_bps) / 100).toFixed(1)} %/일
-                    </TableCell>
-                    <TableCell className="tabular text-right text-xs">{row.live_events}건</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
-          <div className="grid gap-1">
-            <CardTitle className="text-base">시장 소식</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              호재와 악재. 낸 순간부터 기간이 끝날 때까지 대상의 적정가가 기울고 변동성이 커져요.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button asChild variant="outline" className="min-h-11">
-              <Link href="/admin/market/ai-news">AI 시나리오 →</Link>
-            </Button>
-            <PublishMarketEventDialog stocks={stocks?.stocks ?? []} />
-          </div>
-        </CardHeader>
-        <CardContent>
-          {events === null ? (
-            <EmptyState title="소식을 불러오지 못했어요." />
-          ) : events.events.length === 0 ? (
-            <EmptyState title="아직 낸 소식이 없어요." />
-          ) : (
-            <ul className="grid gap-3">
-              {events.events.map((event) => (
-                <li
-                  key={event.id}
-                  className={cn(
-                    'grid gap-2 rounded-[12px] border p-3 sm:grid-cols-[1fr_auto] sm:items-start',
-                    !event.live && 'opacity-60',
-                  )}
-                >
-                  <div className="grid gap-1">
-                    <div className="flex flex-wrap items-center gap-2 text-xs">
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          'font-bold',
-                          event.direction === 'up' ? 'border-rise text-rise' : 'border-fall text-fall',
-                        )}
-                      >
-                        {event.direction === 'up' ? '▲ 호재' : '▼ 악재'} · {strengthLabel(event.strength)}
-                      </Badge>
-                      <span className="font-mono text-muted-foreground">{eventScope(event)}</span>
-                      <Badge variant="secondary">{event.source}</Badge>
-                      <span className="text-muted-foreground">
-                        {event.cancelled_at
-                          ? `${formatMoment(event.cancelled_at)}에 끝냄`
-                          : event.live
-                            ? `${formatMoment(event.ends_at)}까지`
-                            : `${formatMoment(event.ends_at)}에 끝남`}
-                      </span>
-                    </div>
-                    <b className="text-sm">{event.headline}</b>
-                    {event.body && (
-                      <p className="text-sm text-muted-foreground [word-break:keep-all]">{event.body}</p>
-                    )}
-                  </div>
-                  {event.live && <CancelMarketEventButton eventId={event.id} />}
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">가상 주식 종목 관리</CardTitle>
+      {/* 시장 거시 지표 및 AI 뉴스 센터 바로가기 */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Card className="border border-border/80 shadow-sm bg-card">
+          <CardHeader className="p-4 pb-2">
+            <span className="text-xs text-muted-foreground font-medium">시장 전체 기조</span>
+            <CardTitle className="text-2xl font-bold font-mono tracking-tight text-foreground">
+              {marketTrend !== null ? percentPerDay(marketTrend) : '—'}
+            </CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-6">
-            <NewStockForm />
-            {stocks === null ? (
-              <EmptyState title="등록된 종목을 불러오지 못했어요." />
-            ) : stocks.stocks.length === 0 ? (
-              <EmptyState title="등록된 종목이 없습니다." />
-            ) : (
-              <div className="overflow-x-auto">
-                <Table className="min-w-[720px]">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>코드</TableHead>
-                      <TableHead>이름</TableHead>
-                      <TableHead className="text-right">현재가</TableHead>
-                      <TableHead className="text-right">유통 / 발행</TableHead>
-                      <TableHead>상태</TableHead>
-                      <TableHead />
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {stocks.stocks.map((stock) => (
-                      <TableRow key={stock.id}>
-                        <TableCell className="font-mono text-xs">{stock.symbol}</TableCell>
-                        <TableCell>{stock.name}</TableCell>
-                        <TableCell className="text-right">
-                          <Amount value={stock.current_price} />
-                        </TableCell>
-                        <TableCell className="tabular whitespace-nowrap text-right text-xs">
-                          {groupDigits(stock.shares_available)} /{' '}
-                          {groupDigits(stock.shares_outstanding)}
-                          <span className="block text-muted-foreground">
-                            보유자 {stock.holders}명 · 거래 {stock.trades}건
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          {stock.halt_status === 'HALTED_SETTLED' ? (
-                            <Badge variant="destructive" className="font-semibold text-xs">
-                              거래정지 (정산완료)
-                            </Badge>
-                          ) : stock.halt_status === 'HALTED_SETTLING' || stock.halt_status === 'HALTING' ? (
-                            <Badge variant="outline" className="border-amber-500 text-amber-600 dark:text-amber-400 font-semibold text-xs animate-pulse">
-                              정산 진행 중
-                            </Badge>
-                          ) : (
-                            <Badge variant={stock.active ? 'secondary' : 'outline'}>
-                              {stock.active ? '거래 중' : '비활성'}
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap justify-end gap-2">
-                            {stock.halt_status === 'HALTED_SETTLED' || stock.halt_status === 'HALTED_SETTLING' ? (
-                              <HaltSettlementStatusDialog stock={stock} />
-                            ) : (
-                              <HaltStockDialog stock={stock} />
-                            )}
-                            <ToggleActive id={stock.id} active={stock.active} kind="stock" />
-                            <SetPriceDialog
-                              stockId={stock.id}
-                              symbol={stock.symbol}
-                              currentPrice={stock.current_price}
-                            />
-                            <CorporateActionDialog stockId={stock.id} symbol={stock.symbol} />
-                            <DeleteStockDialog
-                              stockId={stock.id}
-                              symbol={stock.symbol}
-                              holders={stock.holders}
-                              trades={stock.trades}
-                            />
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+          <CardContent className="p-4 pt-0 text-xs text-muted-foreground">
+            개별 종목 동역학이 공유하는 시장 전체 추세 지수
           </CardContent>
         </Card>
 
-      {/* 기본 무제한 정책 정합성 및 시장 무결성 보호 가드 (LIMIT_CONSISTENCY_IMPLEMENTATION_SPEC) */}
+        <Card className="border border-border/80 shadow-sm bg-card">
+          <CardHeader className="p-4 pb-2">
+            <span className="text-xs text-muted-foreground font-medium">상장 종목 수</span>
+            <CardTitle className="text-2xl font-bold font-mono tracking-tight text-foreground">
+              {stocks?.stocks.length ?? 0} <span className="text-xs font-normal text-muted-foreground font-sans">개 종목</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0 text-xs text-muted-foreground">
+            정상 거래 및 서킷브레이커 상태 포함
+          </CardContent>
+        </Card>
+
+        <Card className="border border-border/80 shadow-sm bg-card flex flex-col justify-between sm:col-span-2 lg:col-span-1">
+          <CardHeader className="p-4 pb-2">
+            <span className="text-xs text-muted-foreground font-medium">AI 시장 뉴스룸</span>
+            <CardTitle className="text-base font-bold text-foreground">
+              AI 뉴스 자동 발행 센터
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <Link
+              href="/admin/market/ai-news"
+              className="inline-flex w-full items-center justify-center h-9 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold transition-colors"
+            >
+              뉴스룸 콘솔 바로가기 →
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+
       <LimitPolicyGuardCard />
+
+      {/* 상장 주식 종목 관리 */}
+      <Card className="border border-border/80 shadow-sm bg-card">
+        <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
+          <CardTitle className="text-base">상장 주식 종목 관리 ({stocks?.stocks.length ?? 0})</CardTitle>
+          <NewStockForm />
+        </CardHeader>
+        <CardContent className="p-0">
+          {/* 모바일 뷰: 종목 카드 스택 (md:hidden) */}
+          <div className="grid gap-3 p-4 md:hidden divide-y divide-border/40">
+            {stocks?.stocks.map((stock) => {
+              const dyn = dynamics?.stocks.find((d) => d.symbol === stock.symbol);
+              const gap = dyn ? gapPercent(stock.current_price, dyn.fair_value) : '—';
+              const isHalted = stock.circuit_breaker_active;
+
+              return (
+                <div key={stock.symbol} className="pt-3 first:pt-0 space-y-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-bold text-sm text-foreground">{stock.name}</span>
+                        <span className="font-mono text-xs text-muted-foreground">({stock.symbol})</span>
+                      </div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5">
+                        발행 주식수: <span className="font-mono">{groupDigits(stock.total_shares)}주</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      {isHalted ? (
+                        <Badge variant="destructive" className="text-[10px] font-bold">
+                          거래정지
+                        </Badge>
+                      ) : (
+                        <Badge variant={stock.active ? 'default' : 'secondary'} className="text-[10px] font-bold">
+                          {stock.active ? '거래 중' : '비활성'}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-surface/50 p-2.5 rounded-xl border border-border/50">
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">현재가</span>
+                      <span className="font-mono font-bold text-foreground text-sm">
+                        {groupDigits(stock.current_price)} <span className="text-[10px] text-muted-foreground font-normal">WLD</span>
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">적정가 (괴리율)</span>
+                      <span className="font-mono font-semibold text-xs text-foreground">
+                        {dyn ? `${groupDigits(dyn.fair_value)} WLD` : '—'} <span className={`text-[10px] ${gap.startsWith('+') ? 'text-emerald-600' : gap.startsWith('-') ? 'text-rose-600' : 'text-muted-foreground'}`}>({gap})</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 모바일 액션 버튼 그룹 (40px 터치 타겟 대응) */}
+                  <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                    <SetPriceDialog
+                      symbol={stock.symbol}
+                      name={stock.name}
+                      currentPrice={stock.current_price}
+                    />
+                    <ToggleActive symbol={stock.symbol} active={stock.active} />
+                    <HaltStockDialog
+                      symbol={stock.symbol}
+                      stockName={stock.name}
+                      isHalted={isHalted}
+                    />
+                    <CorporateActionDialog
+                      symbol={stock.symbol}
+                      stockName={stock.name}
+                      currentShares={stock.total_shares}
+                    />
+                    <DeleteStockDialog symbol={stock.symbol} name={stock.name} />
+                  </div>
+                </div>
+              );
+            })}
+            {(!stocks || stocks.stocks.length === 0) && (
+              <div className="py-8 text-center text-xs text-muted-foreground">
+                등록된 주식 종목이 없습니다.
+              </div>
+            )}
+          </div>
+
+          {/* 데스크톱 뷰: 테이블 (hidden md:block) */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table className="min-w-[720px]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs">심볼 / 종목명</TableHead>
+                  <TableHead className="text-right text-xs">현재가</TableHead>
+                  <TableHead className="text-right text-xs">적정가</TableHead>
+                  <TableHead className="text-right text-xs">괴리율</TableHead>
+                  <TableHead className="text-right text-xs">발행주식수</TableHead>
+                  <TableHead className="text-center text-xs">상태</TableHead>
+                  <TableHead className="text-right text-xs">관리 액션</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {stocks?.stocks.map((stock) => {
+                  const dyn = dynamics?.stocks.find((d) => d.symbol === stock.symbol);
+                  const gap = dyn ? gapPercent(stock.current_price, dyn.fair_value) : '—';
+                  const isHalted = stock.circuit_breaker_active;
+
+                  return (
+                    <TableRow key={stock.symbol} className="hover:bg-surface/50">
+                      <TableCell className="text-xs">
+                        <div className="font-bold text-foreground">{stock.name}</div>
+                        <div className="font-mono text-[11px] text-muted-foreground">{stock.symbol}</div>
+                      </TableCell>
+                      <TableCell className="text-right font-mono font-bold text-xs">
+                        {groupDigits(stock.current_price)} WLD
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-xs text-muted-foreground">
+                        {dyn ? `${groupDigits(dyn.fair_value)} WLD` : '—'}
+                      </TableCell>
+                      <TableCell className={`text-right font-mono text-xs font-semibold ${gap.startsWith('+') ? 'text-emerald-600 dark:text-emerald-400' : gap.startsWith('-') ? 'text-rose-600 dark:text-rose-400' : 'text-muted-foreground'}`}>
+                        {gap}
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-xs text-muted-foreground">
+                        {groupDigits(stock.total_shares)}주
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {isHalted ? (
+                          <Badge variant="destructive" className="text-[10px] font-bold">
+                            거래정지
+                          </Badge>
+                        ) : (
+                          <Badge variant={stock.active ? 'default' : 'secondary'} className="text-[10px] font-bold">
+                            {stock.active ? '거래 중' : '비활성'}
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                          <SetPriceDialog
+                            symbol={stock.symbol}
+                            name={stock.name}
+                            currentPrice={stock.current_price}
+                          />
+                          <ToggleActive symbol={stock.symbol} active={stock.active} />
+                          <HaltStockDialog
+                            symbol={stock.symbol}
+                            stockName={stock.name}
+                            isHalted={isHalted}
+                          />
+                          <CorporateActionDialog
+                            symbol={stock.symbol}
+                            stockName={stock.name}
+                            currentShares={stock.total_shares}
+                          />
+                          <DeleteStockDialog symbol={stock.symbol} name={stock.name} />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* 시장 이벤트 관리 */}
+      <Card className="border border-border/80 shadow-sm bg-card">
+        <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
+          <div>
+            <CardTitle className="text-base">시장 이벤트 & 충격 시나리오</CardTitle>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              특정 종목 또는 시장 전체에 호재/악재 이벤트를 발효합니다.
+            </p>
+          </div>
+          <PublishMarketEventDialog stocks={stocks?.stocks ?? []} />
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <Table className="min-w-[580px]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs">적용 대상</TableHead>
+                  <TableHead className="text-xs">이벤트명 / 설명</TableHead>
+                  <TableHead className="text-xs">강도</TableHead>
+                  <TableHead className="text-xs">종료 일시</TableHead>
+                  <TableHead className="text-right text-xs">액션</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {events?.events.map((evt) => (
+                  <TableRow key={evt.id} className="hover:bg-surface/50">
+                    <TableCell className="text-xs font-bold font-mono">
+                      {eventScope(evt)}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      <div className="font-medium text-foreground">{evt.headline}</div>
+                      {evt.body && <div className="text-muted-foreground text-[11px] truncate max-w-sm">{evt.body}</div>}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      <Badge variant="outline" className="text-[10px]">
+                        {strengthLabel(evt.strength)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs font-mono text-muted-foreground whitespace-nowrap">
+                      {formatMoment(evt.expires_at)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <CancelMarketEventButton eventId={evt.id} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {(!events || events.events.length === 0) && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-xs text-muted-foreground py-8">
+                      현재 진행 중인 시장 이벤트가 없습니다.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

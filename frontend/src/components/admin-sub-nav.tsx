@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -49,11 +50,6 @@ export const ADMIN_TABS: readonly AdminTabItem[] = [
 /**
  * The tab the reader is on: the one whose path is the longest prefix of the
  * current one. Exported so the rule is testable without rendering.
- *
- * "Longest" rather than "first that matches" because `/admin` is a prefix of
- * every console path and would otherwise light up beside the real tab; and
- * a prefix test on whole segments rather than characters, so `/admin/users`
- * does not claim `/admin/users-archive` should such a page ever exist.
  */
 export function activeAdminTab(pathname: string): string | null {
   let winner: string | null = null;
@@ -66,12 +62,26 @@ export function activeAdminTab(pathname: string): string | null {
 
 export function AdminSubNav() {
   const pathname = usePathname();
+  const navRef = useRef<HTMLElement>(null);
+  const activeItemRef = useRef<HTMLLIElement>(null);
 
   if (!pathname.startsWith('/admin')) return null;
   const active = activeAdminTab(pathname);
 
+  // Auto-scroll the active tab into view smoothly on mobile/narrow viewports
+  useEffect(() => {
+    if (activeItemRef.current && navRef.current) {
+      activeItemRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      });
+    }
+  }, [active]);
+
   return (
     <nav
+      ref={navRef}
       aria-label="관리자 세부 내비게이션"
       className="-mx-3 mb-4 overflow-x-auto border-y border-border/50 bg-card p-1.5 shadow-sm scrollbar-none touch-pan-x overscroll-x-contain sm:mx-0 sm:rounded-2xl sm:border [&::-webkit-scrollbar]:hidden"
     >
@@ -81,23 +91,19 @@ export function AdminSubNav() {
           const isActive = tab.href === active;
 
           return (
-            <li key={tab.href}>
+            <li key={tab.href} ref={isActive ? activeItemRef : undefined}>
               <Link
                 href={tab.href}
-                // The same rule as the masthead's console links: the console
-                // session opens and closes outside this tab, and a payload
-                // prefetched while it was closed is a redirect back to the
-                // gate that would win over the server's current answer.
                 prefetch={false}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-bold transition-colors',
+                  'flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all active:scale-[0.98]',
                   isActive
                     ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
                     : 'text-muted-foreground hover:bg-surface hover:text-foreground',
                 )}
               >
-                <Icon className={cn('size-3.5', isActive ? 'text-primary-foreground' : 'text-primary')} />
+                <Icon className={cn('size-3.5 shrink-0', isActive ? 'text-primary-foreground' : 'text-primary')} />
                 <span>{tab.label}</span>
               </Link>
             </li>
