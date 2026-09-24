@@ -265,12 +265,100 @@ export class WorkRepository {
 
   async jobProfile(actor: unknown): Promise<unknown> {
     assertUuid(actor, 'actor');
-    const row = await queryOne<{ profile: unknown }>(
+    const row = await queryOne<{ profile: any }>(
       this.pool,
       `SELECT public.job_get_my_profile($1) AS profile`,
       [actor],
     );
-    return row?.profile ?? null;
+    if (!row?.profile) return null;
+
+    const profile = row.profile;
+    if (profile.active_job && profile.active_job.level) {
+      profile.active_job.mastery_tier = computeMasteryTier(profile.active_job.level);
+    }
+    if (Array.isArray(profile.all_jobs)) {
+      profile.all_jobs = profile.all_jobs.map((j: any) => ({
+        ...j,
+        mastery_tier: computeMasteryTier(j.level ?? 1),
+      }));
+    }
+
+    // Attach acquired qualifications
+    const quals = await queryRows<{
+      id: string;
+      job_type: string;
+      qualification_code: string;
+      title: string;
+      tier: string;
+      fee_wld: string;
+      acquired_at: string;
+    }>(
+      this.pool,
+      `SELECT id::text, job_type::text, qualification_code, title, tier,
+              fee_wld::text, acquired_at::text
+       FROM public.user_job_qualifications
+       WHERE user_id = $1
+       ORDER BY acquired_at ASC`,
+      [actor],
+    );
+    profile.qualifications = quals;
+
+    return profile;
+  }
+
+  async listQualifications(actor: unknown, jobType?: string) {
+    assertUuid(actor, 'actor');
+    let sql = `
+      SELECT id::text, job_type::text, qualification_code, title, tier,
+             fee_wld::text, acquired_at::text
+      FROM public.user_job_qualifications
+      WHERE user_id = $1
+    `;
+    const params: unknown[] = [actor];
+    if (jobType) {
+      sql += ` AND job_type = $2::public.work_job_type`;
+      params.push(jobType);
+    }
+    sql += ` ORDER BY acquired_at ASC`;
+    const acquired = await queryRows<{
+      id: string;
+      job_type: string;
+      qualification_code: string;
+      title: string;
+      tier: string;
+      fee_wld: string;
+      acquired_at: string;
+    }>(this.pool, sql, params);
+
+    return {
+      authoritative_catalog: AUTHORITATIVE_QUALIFICATIONS.map((q) => ({
+        code: q.code,
+        title: q.title,
+        title_ko: q.titleKo,
+        tier: q.tier,
+        tier_ko: q.tierKo,
+        min_level: q.minLevel,
+        fee_wld: q.feeWld.toString(),
+        description_ko: q.descriptionKo,
+      })),
+      acquired,
+    };
+  }
+
+  async certifyQualification(actor: unknown, jobType: string, qualificationCode: string) {
+    assertUuid(actor, 'actor');
+    await this.requireEnabled();
+    try {
+      const res = await queryOne<{ result: any }>(
+        this.pool,
+        `SELECT public.job_certify_qualification($1, $2, $3) AS result`,
+        [actor, jobType, qualificationCode],
+      );
+      return res?.result;
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new WorkInputError(msg);
+    }
   }
 
   async switchActiveJob(actor: unknown, jobType: string): Promise<unknown> {
@@ -302,3 +390,82 @@ export class WorkRepository {
     );
   }
 }
+
+export interface QualificationSpec {
+  readonly code: string;
+  readonly title: string;
+  readonly titleKo: string;
+  readonly tier: string;
+  readonly tierKo: string;
+  readonly minLevel: number;
+  readonly feeWld: bigint;
+  readonly descriptionKo: string;
+}
+
+export const AUTHORITATIVE_QUALIFICATIONS: readonly QualificationSpec[] = [
+  {
+    code: 'UNIFORM_STYLING',
+    title: 'Uniform Styling Certification',
+    titleKo: '공식 유니폼 커스텀 스타일링 자격',
+    tier: 'APPRENTICE',
+    tierKo: '견습',
+    minLevel: 1,
+    feeWld: BigInt(500),
+    descriptionKo: '직업별 고유 유니폼 및 작업복 외형 커스텀 스타일링 자격',
+  },
+  {
+    code: 'BASIC_LICENSE',
+    title: 'Standard Career License',
+    titleKo: '공인 기본 직업 면허',
+    tier: 'JOURNEYMAN',
+    tierKo: '숙련',
+    minLevel: 3,
+    feeWld: BigInt(750),
+    descriptionKo: '기본 직무 능력을 공식 인증받아 공공 및 상위 작업 참여 자격을 획득',
+  },
+  {
+    code: 'BADGE_ENGRAVING',
+    title: 'Mastery Badge Engraving',
+    titleKo: '숙련 직업배지 각인 권한',
+    tier: 'JOURNEYMAN',
+    tierKo: '숙련',
+    minLevel: 5,
+    feeWld: BigInt(1500),
+    descriptionKo: '회원 프로필 및 작업 보드에 골드 각인 직업 배지를 영구 전시',
+  },
+  {
+    code: 'SPECIALIST_CERTIFICATE',
+    title: 'Specialist Professional Certificate',
+    titleKo: '전문가 공인 자격증서',
+    tier: 'PROFESSIONAL',
+    tierKo: '프로',
+    minLevel: 10,
+    feeWld: BigInt(5000),
+    descriptionKo: '상위 정체성 전문 칭호를 부여받고 고난도 전문 과제 우선 배정 자격 획득',
+  },
+  {
+    code: 'MASTER_PORTFOLIO',
+    title: 'Master Portfolio Archive',
+    titleKo: '마스터 명예 포트폴리오 심사',
+    tier: 'SPECIALIST',
+    tierKo: '전문가',
+    minLevel: 25,
+    feeWld: BigInt(25000),
+    descriptionKo: '중앙 국고 및 명예의 전당에 커리어 기록을 영구 아카이빙하는 최고 명예',
+  },
+];
+
+export function computeMasteryTier(level: number): {
+  readonly code: 'APPRENTICE' | 'JOURNEYMAN' | 'PROFESSIONAL' | 'SPECIALIST' | 'EXPERT' | 'MASTER' | 'LEGACY';
+  readonly nameKo: string;
+  readonly nameEn: string;
+} {
+  if (level >= 50) return { code: 'LEGACY', nameKo: '레거시 명예', nameEn: 'Legacy Grandmaster' };
+  if (level >= 40) return { code: 'MASTER', nameKo: '마스터', nameEn: 'Master' };
+  if (level >= 30) return { code: 'EXPERT', nameKo: '엑스퍼트', nameEn: 'Expert' };
+  if (level >= 20) return { code: 'SPECIALIST', nameKo: '전문가', nameEn: 'Specialist' };
+  if (level >= 10) return { code: 'PROFESSIONAL', nameKo: '프로', nameEn: 'Professional' };
+  if (level >= 5) return { code: 'JOURNEYMAN', nameKo: '숙련', nameEn: 'Journeyman' };
+  return { code: 'APPRENTICE', nameKo: '견습', nameEn: 'Apprentice' };
+}
+

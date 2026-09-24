@@ -22,6 +22,7 @@ import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
 import { isAuthorizationFailure, isExpectedCommandFailure } from '../core/pg-error';
 import {
+  CertifyQualificationDto,
   JobSwitchDto,
   WorkAssignmentDto,
   WorkCompletionDto,
@@ -185,6 +186,30 @@ export class WorkController {
     return this.guarded(
       () => this.repository().verify(body.idempotencyKey, requireUserId(request), assignmentId),
       'the task was not verified',
+    );
+  }
+
+  @Get('qualifications')
+  @ApiOperation({ summary: 'List acquired career qualifications and available exam catalog' })
+  qualifications(
+    @Req() request: RequestWithSession,
+    @Query('jobType') jobType?: string,
+  ) {
+    return this.guarded(
+      () => this.repository().listQualifications(requireUserId(request), jobType),
+      'qualifications are unavailable',
+    );
+  }
+
+  @Post('qualifications/certify')
+  @ApiOperation({ summary: 'Certify a career qualification with level validation and treasury sink' })
+  certify(
+    @Req() request: RequestWithSession,
+    @Body() body: CertifyQualificationDto,
+  ) {
+    return this.guarded(
+      () => this.repository().certifyQualification(requireUserId(request), body.jobType, body.qualificationCode),
+      'failed to certify qualification',
     );
   }
 }

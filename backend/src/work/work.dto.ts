@@ -90,3 +90,58 @@ export class WorkDashboardResponseDto {
   })
   readonly week_ends_at!: string;
 }
+
+export class CertifyQualificationDto {
+  @ApiProperty({
+    enum: [
+      'developer',
+      'trader',
+      'entertainer',
+      'detective',
+      'miner',
+      'farmer',
+      'artisan',
+      'civil_servant',
+    ],
+  })
+  @IsIn([
+    'developer',
+    'trader',
+    'entertainer',
+    'detective',
+    'miner',
+    'farmer',
+    'artisan',
+    'civil_servant',
+  ])
+  readonly jobType!: string;
+
+  @ApiProperty({
+    enum: [
+      'BASIC_LICENSE',
+      'BADGE_ENGRAVING',
+      'SPECIALIST_CERTIFICATE',
+      'MASTER_PORTFOLIO',
+      'UNIFORM_STYLING',
+    ],
+  })
+  @IsIn([
+    'BASIC_LICENSE',
+    'BADGE_ENGRAVING',
+    'SPECIALIST_CERTIFICATE',
+    'MASTER_PORTFOLIO',
+    'UNIFORM_STYLING',
+  ])
+  readonly qualificationCode!: string;
+}
+
+export interface QualificationItem {
+  readonly id: string;
+  readonly job_type: string;
+  readonly qualification_code: string;
+  readonly title: string;
+  readonly tier: string;
+  readonly fee_wld: string;
+  readonly acquired_at: string;
+}
+

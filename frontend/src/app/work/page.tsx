@@ -18,10 +18,13 @@ import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { ClaimButton, JobSwitchButton, SubmitTaskButton } from './work-forms';
 import { CareerTasksBoard } from './career-tasks-board';
+import { CareerQualificationsCard } from './career-qualifications-card';
 import { WorkQuotaDashboard } from './work-quota-card';
 
 import type {
   JobProfileResponse,
+  JobQualificationItem,
+  QualificationCatalogItem,
   WorkAssignment,
   WorkReceipt,
   WorkSummary,
@@ -29,6 +32,7 @@ import type {
 } from './work';
 import {
   CAREER_JOBS,
+  computeMasteryTier,
   durationLabel,
   hasExpired,
   isOpen,
@@ -56,12 +60,16 @@ export default async function WorkPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const [board, assignments, receipts, profile, summary] = await Promise.all([
+  const [board, assignments, receipts, profile, summary, qualificationsRes] = await Promise.all([
     apiOrNull<{ tasks: readonly WorkTask[] }>('/api/v1/work/tasks'),
     apiOrNull<{ assignments: readonly WorkAssignment[] }>('/api/v1/work/assignments'),
     apiOrNull<{ receipts: readonly WorkReceipt[] }>('/api/v1/work/receipts'),
     apiOrNull<JobProfileResponse>('/api/v1/work/profile'),
     apiOrNull<WorkSummary>('/api/v1/work'),
+    apiOrNull<{
+      authoritative_catalog: readonly QualificationCatalogItem[];
+      acquired: readonly JobQualificationItem[];
+    }>('/api/v1/work/qualifications'),
   ]);
 
   const tasks = board?.tasks ?? [];
@@ -71,6 +79,8 @@ export default async function WorkPage() {
   const durations = new Map(tasks.map((task) => [task.task_id, task.minimum_duration_seconds]));
 
   const activeJob = profile?.active_job;
+  const activeLevel = activeJob?.level ?? 1;
+  const activeTier = activeJob?.mastery_tier ?? computeMasteryTier(activeLevel);
   const allJobsMap = new Map((profile?.all_jobs ?? []).map((j) => [j.job_type, j]));
   const activeMeta = activeJob?.job_type ? jobMeta(activeJob.job_type, locale) : undefined;
 
@@ -115,7 +125,10 @@ export default async function WorkPage() {
                       (isEn ? 'None selected (Choose a career)' : '미선택 (전직을 선택하세요)')}
                   </span>
                   <Badge className="bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/50 dark:text-emerald-200 dark:border-emerald-800 text-xs sm:text-sm font-semibold shrink-0">
-                    Lv.{activeJob?.level ?? 1}
+                    Lv.{activeLevel}
+                  </Badge>
+                  <Badge variant="outline" className="border-primary/50 text-primary bg-primary/10 text-xs sm:text-sm font-bold shrink-0">
+                    {isEn ? activeTier.nameEn : activeTier.nameKo}
                   </Badge>
                 </div>
                 <p className="text-xs sm:text-sm text-muted-foreground mt-1 line-clamp-2">
@@ -251,6 +264,16 @@ export default async function WorkPage() {
           })}
         </div>
       </section>
+
+      {/* 2.5. 전문 자격시험 및 자격증 센터 */}
+      {qualificationsRes && (
+        <CareerQualificationsCard
+          activeJob={activeJob}
+          catalog={qualificationsRes.authoritative_catalog}
+          acquired={qualificationsRes.acquired}
+          isEn={isEn}
+        />
+      )}
 
       {/* 3. Repeatable career task list */}
       <section aria-labelledby="tasks-title" className="grid w-full max-w-full min-w-0 gap-3 sm:gap-4 overflow-hidden">

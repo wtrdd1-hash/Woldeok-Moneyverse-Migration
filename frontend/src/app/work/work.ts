@@ -60,12 +60,50 @@ export interface WorkSummary {
   readonly week_ends_at: string;
 }
 
+export interface MasteryTier {
+  readonly code: 'APPRENTICE' | 'JOURNEYMAN' | 'PROFESSIONAL' | 'SPECIALIST' | 'EXPERT' | 'MASTER' | 'LEGACY';
+  readonly nameKo: string;
+  readonly nameEn: string;
+}
+
+export interface JobQualificationItem {
+  readonly id: string;
+  readonly job_type: string;
+  readonly qualification_code: string;
+  readonly title: string;
+  readonly tier: string;
+  readonly fee_wld: string;
+  readonly acquired_at: string;
+}
+
+export interface QualificationCatalogItem {
+  readonly code: string;
+  readonly title: string;
+  readonly title_ko: string;
+  readonly tier: string;
+  readonly tier_ko: string;
+  readonly min_level: number;
+  readonly fee_wld: string;
+  readonly description_ko: string;
+}
+
+export function computeMasteryTier(level: number): MasteryTier {
+  if (level >= 50) return { code: 'LEGACY', nameKo: '레거시 명예', nameEn: 'Legacy Grandmaster' };
+  if (level >= 40) return { code: 'MASTER', nameKo: '마스터', nameEn: 'Master' };
+  if (level >= 30) return { code: 'EXPERT', nameKo: '엑스퍼트', nameEn: 'Expert' };
+  if (level >= 20) return { code: 'SPECIALIST', nameKo: '전문가', nameEn: 'Specialist' };
+  if (level >= 10) return { code: 'PROFESSIONAL', nameKo: '프로', nameEn: 'Professional' };
+  if (level >= 5) return { code: 'JOURNEYMAN', nameKo: '숙련', nameEn: 'Journeyman' };
+  return { code: 'APPRENTICE', nameKo: '견습', nameEn: 'Apprentice' };
+}
+
 export interface ActiveJobProgress {
   readonly job_type: string | null;
   readonly level: number;
   readonly experience: number;
   readonly next_level_exp: number;
   readonly selected_at: string | null;
+  readonly mastery_tier?: MasteryTier;
 }
 
 export interface JobMasteryItem {
@@ -74,11 +112,13 @@ export interface JobMasteryItem {
   readonly experience: number;
   readonly next_level_exp: number;
   readonly is_active: boolean;
+  readonly mastery_tier?: MasteryTier;
 }
 
 export interface JobProfileResponse {
   readonly active_job: ActiveJobProgress;
   readonly all_jobs: readonly JobMasteryItem[];
+  readonly qualifications?: readonly JobQualificationItem[];
 }
 
 export interface JobMeta {
