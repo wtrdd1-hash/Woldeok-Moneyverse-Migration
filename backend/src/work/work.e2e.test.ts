@@ -17,14 +17,6 @@ import { WorkController } from './work.controller';
 const ORIGINAL_ENV = { ...process.env };
 const SAMPLE_ID = '00000000-0000-4000-8000-000000000001';
 
-/**
- * Every route this module serves.
- *
- * `tasks` and `receipts` are the two 095 adds, and they are the reason the
- * rest of this module was unreachable: without a way to read the catalogue, a
- * member had no task id to send to `POST /assignments`, so the four routes
- * below it could not be entered from a browser at all.
- */
 const ROUTES = [
   ['get', '/api/v1/work'],
   ['get', '/api/v1/work/tasks'],
@@ -67,14 +59,6 @@ describe('work routes', () => {
     }
   });
 
-  /**
-   * With no DATABASE_URL every provider in the graph is null, including the
-   * session repository. SessionGuard answers that with its own 503 -- "session
-   * store unavailable" -- while the work handlers' 503 says "work is
-   * unavailable". Reading the first means a guard ran and the handler did not.
-   * A route that had lost its guards would answer with the second sentence and
-   * still pass a status-only assertion.
-   */
   it.each(ROUTES)('runs a guard before the handler on %s %s', async (method, path) => {
     const response = await request(app.getHttpServer())[method](path);
     expect([401, 503]).toContain(response.status);
@@ -101,33 +85,25 @@ describe('work routes', () => {
     }
   });
 
-  /**
-   * CsrfGuard exits early on GET, HEAD and OPTIONS, which is what makes one
-   * class-level stack safe for reads and writes together. A method-level
-   * @UseGuards replaces the class stack rather than adding to it, so a route
-   * that grew one would silently lose the session guards above.
-   */
   it.each(['dashboard', 'tasks', 'completeTask', 'receipts', 'assignments', 'assign', 'submit', 'verify'] as const)(
     'leaves the class stack in place on %s',
     (handler) => {
       const own: unknown = Reflect.getMetadata(GUARDS_METADATA, WorkController.prototype[handler]);
-      expect(own, `${handler} overrides the class guard stack`).toBeUndefined();
+      if (own !== undefined) {
+        throw new Error(`${handler} overrides the class guard stack`);
+      }
     },
   );
 
-  /**
-   * The three writes are unsafe methods, so CsrfGuard actually runs on them.
-   * A write mounted as a GET would sail past it and be forgeable from another
-   * origin -- and `POST /work/assignments` shares its path with a read, which
-   * is exactly the shape that makes the mistake easy to miss.
-   */
   it('does not answer the two per-assignment writes on a safe method', async () => {
     for (const path of [
       `/api/v1/work/assignments/${SAMPLE_ID}/completions`,
       `/api/v1/work/assignments/${SAMPLE_ID}/verify`,
     ]) {
       const response = await request(app.getHttpServer()).get(path);
-      expect(response.status, `${path} answers GET`).toBe(404);
+      if (response.status !== 404) {
+        throw new Error(`${path} answers GET with status ${response.status}`);
+      }
     }
   });
 });
