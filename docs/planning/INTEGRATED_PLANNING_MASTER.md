@@ -1,11 +1,22 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.25.440
+> Current ledger version: v2026.09.25.441
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.25.441 — 2026-09-25
+- Latest-main recheck detected concurrent v440 integration; work was rebased onto `origin/main=5547e5b0c2eb76c60450e089cb415bd65c81026f` rather than overwriting it.
+- v440 already covers mobile overflow/navigation/card reflow/slider mismatch and five-pass responsive QA. v441 adds the missing semantic control-state contract.
+- **G441-01 / P0:** policy controls must use one server-derived canonical value envelope; frontend numeric fallback defaults are prohibited.
+- **G441-02 / P0:** missing/loading policy data cannot masquerade as authoritative `0.0%`; it must be loading/unknown/blocked.
+- **G441-03 / P0:** slider thumb, visible number, accessible value and API payload must derive from the same value and reconcile to the server response after mutations.
+- **G441-04 / P0:** AUTO-owned policy controls are visibly read-only; manual override is an explicit authorized/reasoned/versioned workflow.
+- **G441-05 / P1/P0 gate:** AI health, confidence/calibration, evidence sufficiency, council agreement and policy eligibility are distinct. Undefined “trust %” labels are not acceptable operator evidence.
+- **QA:** real API hydration, auto/manual transition, save/reread, refresh, rollback and error states are required in addition to v440 viewport/five-pass coverage.
+- Planning/documentation only; no runtime/Test/Production remediation is claimed.
 
 ## v2026.09.25.440 — 2026-09-25
 - Start `origin/main=5394dd266e68c0a3ebfee616cdf7f0d906116b48`; dedicated branch `docs/admin-mobile-responsive-v2026.09.25.440`.
