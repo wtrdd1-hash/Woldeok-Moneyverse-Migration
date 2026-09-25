@@ -70,14 +70,14 @@ export function AdminSubNav() {
   // Auto-scroll the active tab into view smoothly on mobile/narrow viewports.
   // Keep the hook unconditional so route changes never alter hook ordering.
   useEffect(() => {
-    if (activeItemRef.current && navRef.current) {
+    if (isAdminPath && activeItemRef.current && navRef.current) {
       activeItemRef.current.scrollIntoView({
         behavior: 'smooth',
         block: 'nearest',
         inline: 'center',
       });
     }
-  }, [active]);
+  }, [active, isAdminPath]);
 
   if (!isAdminPath) return null;
 

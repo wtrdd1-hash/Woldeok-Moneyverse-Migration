@@ -52,6 +52,9 @@ describe('EconomyAiStatusCard', () => {
     expect(screen.getByText('0 / 7')).toBeDefined();
     expect(screen.getByText('at least one day had too few active members to read')).toBeDefined();
     expect(screen.getAllByText('SHADOW').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('평균 모델 confidence').length).toBeGreaterThan(0);
+    expect(screen.getByText(/confidence는 각 모델 리뷰가 반환한 0~1 confidence의 산술 평균/)).toBeDefined();
+    expect(screen.getAllByText('91.0%').length).toBeGreaterThan(0);
     expect(screen.getByText(/최근 실행 2026\. 9\. 19\. 12시 10분 0초/)).toBeDefined();
     expect(screen.getByText(/최근 실행 2026\. 9\. 19\. 12시 20분 0초/)).toBeDefined();
     expect(screen.getByText(/최근 실행 2026\. 9\. 19\. 12시 30분 0초/)).toBeDefined();

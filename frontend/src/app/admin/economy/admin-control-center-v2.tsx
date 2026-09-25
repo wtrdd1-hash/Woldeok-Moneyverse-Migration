@@ -25,6 +25,15 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
   const [bond7dBps, setBond7dBps] = useState(policy.bond_7d_yield_bps);
   const [bond30dBps, setBond30dBps] = useState(policy.bond_30d_yield_bps);
   const [loanRateBps, setLoanRateBps] = useState(policy.loan_daily_interest_bps);
+  const [manualPolicyOverride, setManualPolicyOverride] = useState(false);
+  const policyControlsLocked = policy.auto_balancing_active && !manualPolicyOverride;
+
+  const resetPolicyDraft = () => {
+    setDepositRateBps(policy.daily_deposit_interest_bps);
+    setBond7dBps(policy.bond_7d_yield_bps);
+    setBond30dBps(policy.bond_30d_yield_bps);
+    setLoanRateBps(policy.loan_daily_interest_bps);
+  };
 
   // User inspector state
   const [searchUserId, setSearchUserId] = useState('');
@@ -77,6 +86,9 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
       const res = await toggleKillswitchAction(scope, next, stepUpCode);
       if (res.status === 'ok') {
         setStatusMessage({ type: 'ok', text: res.message || '성공적으로 처리되었습니다.' });
+        if (scope === 'auto_balancing' && next) {
+          setManualPolicyOverride(false);
+        }
         setData(prev => {
           const nextPolicy = { ...prev.policy };
           if (scope === 'master') nextPolicy.master_killswitch_active = next;
@@ -94,6 +106,13 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
 
   const handleUpdateKnobs = (e: React.FormEvent) => {
     e.preventDefault();
+    if (policyControlsLocked) {
+      setStatusMessage({
+        type: 'error',
+        text: '자동 제어 중에는 정책값을 직접 변경할 수 없습니다. 먼저 수동 오버라이드 편집을 명시적으로 시작해 주세요.',
+      });
+      return;
+    }
     startTransition(async () => {
       const res = await updateKnobsV2Action(depositRateBps, bond7dBps, bond30dBps, loanRateBps, stepUpCode);
       if (res.status === 'ok') {
@@ -108,6 +127,7 @@ export function AdminControlCenterV2({ initialData }: AdminControlCenterV2Props)
             loan_daily_interest_bps: loanRateBps,
           },
         }));
+        setManualPolicyOverride(false);
       } else {
         setStatusMessage({ type: 'error', text: res.message || '오류가 발생했습니다.' });
       }
@@ -400,124 +420,174 @@ className="h-full bg-gradient-to-r from-primary to-clay rounded-full transition-
       </div>
 
       {/* 3. Smart Auto-Balancing & Economic Knobs Tuning (A4) */}
-      <div className="p-6 rounded-2xl bg-card backdrop-blur-md border border-border shadow-xl space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+      <div className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-xl backdrop-blur-md sm:p-6">
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <h3 className="flex flex-wrap items-center gap-2 text-base font-bold text-foreground [overflow-wrap:anywhere]">
               ⚙️ 스마트 자동 밸런싱 & 경제 정책 금리 튜닝 (A4)
             </h3>
-            <p className="text-xs text-muted-foreground mt-1">
-              자동 모드가 켜져 있으면 인플레이션 발생 시 시스템이 자율적으로 금리를 인상합니다. 관리자가 즉시 수동 오버라이드할 수도 있습니다.
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground [word-break:keep-all]">
+              자동 모드에서는 서버에 적용된 정책값을 읽기 전용으로 표시합니다. 직접 변경하려면 수동 오버라이드 편집을 명시적으로 시작해야 합니다.
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">자동 제어 모드:</span>
-            <span className={`px-2.5 py-1 text-xs font-bold rounded-lg ${
-              policy.auto_balancing_active ? 'bg-cyan-50 text-cyan-800 border border-cyan-300 dark:bg-cyan-950/50 dark:text-cyan-200 dark:border-cyan-800' : 'bg-muted text-muted-foreground'
+          <div className="flex min-w-0 flex-wrap items-center gap-2 sm:justify-end">
+            <span className="text-xs text-muted-foreground">제어 소유권:</span>
+            <span className={`rounded-lg px-2.5 py-1 text-xs font-bold ${
+              policy.auto_balancing_active ? 'border border-cyan-300 bg-cyan-50 text-cyan-800 dark:border-cyan-800 dark:bg-cyan-950/50 dark:text-cyan-200' : 'bg-muted text-muted-foreground'
             }`}>
-              {policy.auto_balancing_active ? '자율 조절 ON' : '수동 조절만 허용'}
+              {policy.auto_balancing_active ? 'AUTO · 자동 제어' : 'MANUAL · 수동 제어'}
             </span>
           </div>
         </div>
 
-        <form onSubmit={handleUpdateKnobs} className="space-y-6">
+        <div className="mt-4 flex min-w-0 flex-col gap-3 rounded-xl border border-border/70 bg-muted/30 p-3 text-xs sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="font-semibold text-foreground">
+              현재 적용 정책 #{policy.id} · {policy.auto_balancing_active ? '자동 제어 중' : '수동 제어 중'}
+            </p>
+            <p className="mt-1 text-muted-foreground [overflow-wrap:anywhere]">
+              마지막 갱신 {policy.updated_at ? new Date(policy.updated_at).toLocaleString('ko-KR') : '확인 불가'}
+              {policy.last_auto_balanced_at ? ` · 최근 자동 조정 ${new Date(policy.last_auto_balanced_at).toLocaleString('ko-KR')}` : ''}
+            </p>
+          </div>
+          {policy.auto_balancing_active ? (
+            <button
+              type="button"
+              disabled={isPending}
+              onClick={() => {
+                if (manualPolicyOverride) resetPolicyDraft();
+                setManualPolicyOverride(current => !current);
+              }}
+              className="min-h-11 shrink-0 rounded-lg border border-border bg-background px-3 py-2 font-semibold text-foreground hover:bg-muted disabled:opacity-50"
+            >
+              {manualPolicyOverride ? '오버라이드 취소' : '수동 오버라이드 편집'}
+            </button>
+          ) : null}
+        </div>
+
+        {policyControlsLocked ? (
+          <p className="mt-3 rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3 text-xs leading-relaxed text-muted-foreground">
+            AUTO가 현재 값을 소유합니다. 아래 슬라이더는 서버 적용값을 보여 주는 읽기 전용 표시이며 드래그할 수 없습니다.
+          </p>
+        ) : manualPolicyOverride ? (
+          <p className="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs font-medium leading-relaxed text-amber-800 dark:text-amber-200">
+            수동 오버라이드 편집 중입니다. 저장하면 현재 자동 정책값을 즉시 덮어씁니다. 취소하면 서버 적용값으로 복원됩니다.
+          </p>
+        ) : null}
+
+        <form onSubmit={handleUpdateKnobs} className="mt-6 space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Daily Deposit Interest */}
-            <div className="p-4 rounded-xl bg-muted/60 border border-border space-y-2">
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-foreground/80">일일 복리 예금 금리</span>
-                <span className="font-mono text-cyan-700 dark:text-cyan-300 font-bold">{(depositRateBps / 100).toFixed(2)}% / 일</span>
+            <div className="min-w-0 space-y-3 rounded-xl border border-border bg-muted/60 p-4">
+              <div className="flex min-w-0 flex-col gap-1 text-xs sm:flex-row sm:items-start sm:justify-between">
+                <span className="font-semibold text-foreground/80 [word-break:keep-all]">일일 복리 예금 금리</span>
+                <span className="font-mono font-bold text-cyan-700 dark:text-cyan-300">{(depositRateBps / 100).toFixed(2)}% / 일</span>
               </div>
               <input
+                aria-label="일일 복리 예금 금리"
+                aria-valuetext={`${(depositRateBps / 100).toFixed(2)}% / 일`}
                 type="range"
                 min="0"
                 max="500"
                 step="1"
                 value={depositRateBps}
+                disabled={policyControlsLocked || isPending}
                 onChange={e => setDepositRateBps(Number(e.target.value))}
-                className="w-full accent-cyan-500"
+                className="w-full accent-cyan-500 disabled:cursor-not-allowed disabled:opacity-55"
               />
-              <div className="flex justify-between text-[11px] text-muted-foreground/70">
-                <span>0.0%</span>
-                <span>{depositRateBps} bps</span>
-                <span>5.0%</span>
+              <div className="grid grid-cols-3 gap-2 text-[11px] text-muted-foreground">
+                <span>최소 0.00%</span>
+                <span className="text-center font-medium text-foreground/80">현재 {depositRateBps} bps</span>
+                <span className="text-right">최대 5.00%</span>
               </div>
             </div>
 
             {/* 7-day Bond Yield */}
-            <div className="p-4 rounded-xl bg-muted/60 border border-border space-y-2">
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-foreground/80">7일 국채 만기 수익률</span>
-                <span className="font-mono text-sky-700 dark:text-sky-300 font-bold">{(bond7dBps / 100).toFixed(1)}%</span>
+            <div className="min-w-0 space-y-3 rounded-xl border border-border bg-muted/60 p-4">
+              <div className="flex min-w-0 flex-col gap-1 text-xs sm:flex-row sm:items-start sm:justify-between">
+                <span className="font-semibold text-foreground/80 [word-break:keep-all]">7일 국채 만기 수익률</span>
+                <span className="font-mono font-bold text-sky-700 dark:text-sky-300">{(bond7dBps / 100).toFixed(1)}%</span>
               </div>
               <input
+                aria-label="7일 국채 만기 수익률"
+                aria-valuetext={`${(bond7dBps / 100).toFixed(1)}%`}
                 type="range"
                 min="0"
                 max="1000"
                 step="10"
                 value={bond7dBps}
+                disabled={policyControlsLocked || isPending}
                 onChange={e => setBond7dBps(Number(e.target.value))}
-                className="w-full accent-sky-500"
+                className="w-full accent-sky-500 disabled:cursor-not-allowed disabled:opacity-55"
               />
-              <div className="flex justify-between text-[11px] text-muted-foreground/70">
-                <span>0.0%</span>
-                <span>{bond7dBps} bps</span>
-                <span>10.0%</span>
+              <div className="grid grid-cols-3 gap-2 text-[11px] text-muted-foreground">
+                <span>최소 0.0%</span>
+                <span className="text-center font-medium text-foreground/80">현재 {bond7dBps} bps</span>
+                <span className="text-right">최대 10.0%</span>
               </div>
             </div>
 
             {/* 30-day Bond Yield */}
-            <div className="p-4 rounded-xl bg-muted/60 border border-border space-y-2">
-              <div className="flex justify-between items-center text-xs">
-                <span className="font-semibold text-foreground/80">30일 국채 만기 수익률</span>
-                <span className="font-mono text-indigo-700 dark:text-indigo-300 font-bold">{(bond30dBps / 100).toFixed(1)}%</span>
+            <div className="min-w-0 space-y-3 rounded-xl border border-border bg-muted/60 p-4">
+              <div className="flex min-w-0 flex-col gap-1 text-xs sm:flex-row sm:items-start sm:justify-between">
+                <span className="font-semibold text-foreground/80 [word-break:keep-all]">30일 국채 만기 수익률</span>
+                <span className="font-mono font-bold text-indigo-700 dark:text-indigo-300">{(bond30dBps / 100).toFixed(1)}%</span>
               </div>
               <input
+                aria-label="30일 국채 만기 수익률"
+                aria-valuetext={`${(bond30dBps / 100).toFixed(1)}%`}
                 type="range"
                 min="0"
                 max="2000"
                 step="10"
                 value={bond30dBps}
+                disabled={policyControlsLocked || isPending}
                 onChange={e => setBond30dBps(Number(e.target.value))}
-                className="w-full accent-indigo-500"
+                className="w-full accent-indigo-500 disabled:cursor-not-allowed disabled:opacity-55"
               />
-              <div className="flex justify-between text-[11px] text-muted-foreground/70">
-                <span>0.0%</span>
-                <span>{bond30dBps} bps</span>
-                <span>20.0%</span>
+              <div className="grid grid-cols-3 gap-2 text-[11px] text-muted-foreground">
+                <span>최소 0.0%</span>
+                <span className="text-center font-medium text-foreground/80">현재 {bond30dBps} bps</span>
+                <span className="text-right">최대 20.0%</span>
               </div>
             </div>
 
             {/* Loan Daily Rate */}
-            <div className="p-4 rounded-xl bg-muted/60 border border-border space-y-2">
-              <div className="flex justify-between items-center text-xs">
-<span className="font-semibold text-foreground/80">대출 일일 이자율</span>
-                <span className="font-mono text-primary font-bold">{(loanRateBps / 100).toFixed(2)}% / 일</span>
+            <div className="min-w-0 space-y-3 rounded-xl border border-border bg-muted/60 p-4">
+              <div className="flex min-w-0 flex-col gap-1 text-xs sm:flex-row sm:items-start sm:justify-between">
+                <span className="font-semibold text-foreground/80 [word-break:keep-all]">대출 일일 이자율</span>
+                <span className="font-mono font-bold text-primary">{(loanRateBps / 100).toFixed(2)}% / 일</span>
               </div>
               <input
+                aria-label="대출 일일 이자율"
+                aria-valuetext={`${(loanRateBps / 100).toFixed(2)}% / 일`}
                 type="range"
                 min="0"
                 max="1000"
                 step="5"
                 value={loanRateBps}
+                disabled={policyControlsLocked || isPending}
                 onChange={e => setLoanRateBps(Number(e.target.value))}
-                className="w-full accent-primary"
+                className="w-full accent-primary disabled:cursor-not-allowed disabled:opacity-55"
               />
-              <div className="flex justify-between text-[11px] text-muted-foreground/70">
-                <span>0.0%</span>
-                <span>{loanRateBps} bps</span>
-                <span>10.0%</span>
+              <div className="grid grid-cols-3 gap-2 text-[11px] text-muted-foreground">
+                <span>최소 0.00%</span>
+                <span className="text-center font-medium text-foreground/80">현재 {loanRateBps} bps</span>
+                <span className="text-right">최대 10.00%</span>
               </div>
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+            {policyControlsLocked ? (
+              <span className="text-xs text-muted-foreground">AUTO 소유 상태에서는 직접 저장할 수 없습니다.</span>
+            ) : null}
             <button
               type="submit"
-              disabled={isPending || !codeReady}
-              className="px-6 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white font-semibold text-sm transition-all shadow-lg shadow-cyan-950/50 active:scale-95 disabled:opacity-50"
+              disabled={isPending || !codeReady || policyControlsLocked}
+              className="min-h-11 rounded-xl bg-cyan-700 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-950/50 transition-all hover:bg-cyan-800 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {isPending ? '정책 파라미터 적용 중...' : '경제 정책 파라미터 즉시 적용'}
+              {isPending ? '정책 파라미터 적용 중...' : manualPolicyOverride ? '수동 오버라이드 값 적용' : '경제 정책 파라미터 적용'}
             </button>
           </div>
         </form>
