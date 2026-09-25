@@ -1,3 +1,15 @@
+## v2026.09.25.436 — Exact-main Production identity convergence with zero-downtime Test→Production promotion
+
+- Runtime source promoted: `d058df3d29191e48c5ab9b12ec10014d015b5812`.
+- Previous public Test/Production source identity: `20985765d6316718ceb4b9e61b131475e6df9e96`.
+- `20985765..d058df3` contains two commits with an empty final file diff because the later commit reverts the earlier runtime change. This release therefore converges runtime identity to current `main` without introducing a net application-content change.
+- Rebuilt the exact SHA for Test, verified backend/frontend identity, `/health`, noindex boundary, representative routes and clean critical-error logs, then performed a canary-first blue/green Test handoff.
+- Rebuilt the Production frontend with Production origin/indexing/ads build settings and performed the same canary-first blue/green Production handoff.
+- Production now resolves through `/srv/moneyverse-data/releases/prod-d058df3-v436`; public backend and frontend version endpoints both report the target SHA.
+- Production smoke checks passed for `/`, `/status`, `/login`, `/work`, `/quests`, `/casino`, `/wallet`, `/shop/catalog`, `/progression`, `/terms`, `/privacy`, `/announcements`, `/robots.txt`, `/sitemap.xml`, and `/ads.txt`.
+- Active non-revoked Production session rows were `1,054` before and `1,054` after promotion. No session cleanup, revocation, database recreation, or cryptographic-key rotation was performed.
+- The first Test canary attempt correctly failed closed when a copied frontend artifact retained the previous build-time version identity. Existing Test availability was preserved; the candidate was rebuilt from the exact target SHA before retrying.
+
 ## v2026.09.23.397 — Full REST API Backend Implementation & Real-Time Frontend Integration Across 5 Core Domains (Marketplace, Clubs, Collections, Spaces Tax, Seasons), Zero-Downtime Blue-Green Promotion, 1,071 Active Sessions 100% Preserved
 
 - Applied Branch: `main` (Release: `prod-c5235c35-v397`, Exact Git SHA: `c5235c3510266d776cf9cbbf6c44690321ffc5a5`)

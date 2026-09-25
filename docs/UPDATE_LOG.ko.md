@@ -1,3 +1,15 @@
+## v2026.09.25.436 — 최신 main 정확한 SHA 운영 정합화 및 무중단 Test→Production 승격
+
+- 운영 승격 소스: `d058df3d29191e48c5ab9b12ec10014d015b5812`.
+- 승격 전 공개 Test/Production 소스 식별자: `20985765d6316718ceb4b9e61b131475e6df9e96`.
+- `20985765..d058df3` 구간은 앞선 런타임 변경을 다음 커밋이 되돌린 2개 커밋으로 구성되어 최종 파일 diff가 0이다. 따라서 이번 릴리스는 기능 내용 변경이 아니라 실제 런타임의 소스 식별자를 현재 `main`과 일치시키는 정합화 릴리스다.
+- 정확한 대상 SHA로 Test 빌드를 생성하고 백엔드/프론트엔드 버전, `/health`, noindex 경계, 대표 경로, 치명 오류 로그를 검증한 뒤 canary 우선 블루그린 방식으로 Test를 무중단 전환했다.
+- 동일한 소스 SHA에서 운영용 origin/indexing/ads 설정으로 프론트엔드를 재빌드한 뒤 같은 canary 우선 방식으로 Production을 무중단 전환했다.
+- 현재 Production은 `/srv/moneyverse-data/releases/prod-d058df3-v436`을 가리키며 공개 백엔드/프론트엔드 버전 엔드포인트 모두 대상 SHA를 반환한다.
+- 운영 스모크 검사에서 `/`, `/status`, `/login`, `/work`, `/quests`, `/casino`, `/wallet`, `/shop/catalog`, `/progression`, `/terms`, `/privacy`, `/announcements`, `/robots.txt`, `/sitemap.xml`, `/ads.txt`가 모두 HTTP 200을 반환했다.
+- 운영의 미폐기 활성 세션 행은 승격 전 `1,054`, 승격 후 `1,054`로 동일했다. 세션 정리·폐기, DB 재생성, 암호화 키 회전은 수행하지 않았다.
+- 첫 Test canary 시도에서는 복제한 기존 프론트엔드 산출물의 빌드 시점 버전 값이 이전 SHA로 남아 있어 배포 도구가 fail-closed로 중단했다. 기존 Test 서비스는 유지됐으며 정확한 대상 SHA에서 재빌드한 후에만 재시도했다.
+
 ## v2026.09.23.397 — 마켓플레이스 경매·직거래·감정소, 클럽 캔버스, 컬렉션 큐레이션, 가상 세무 구청 백엔드 REST API 풀스택 완비 및 실시간 UI 양방향 연동, 무중단 블루-그린 승격 및 1,071개 활성 세션 100% 보존
 
 - 적용 브랜치: `main` (릴리스: `prod-c5235c35-v397`, Exact Git SHA: `c5235c3510266d776cf9cbbf6c44690321ffc5a5`)
