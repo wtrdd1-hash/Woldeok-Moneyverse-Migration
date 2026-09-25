@@ -2,11 +2,23 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.25.442
+> Current integrated version: v2026.09.25.443
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## P0 native app complete API parity and administrator surface — v2026.09.25.443 (2026-09-25)
+
+- **Approved app surface is exhaustive:** every endpoint in the generated mobile/app contract must be reachable from the Android product through either a dedicated task UI or the contract-driven feature center. A backend feature that is approved for the app but has no app interaction is incomplete.
+- **Current audit snapshot:** the bundled canonical contract currently contains 179 approved app endpoints, including 11 administrator endpoints. These are snapshot counts, not permanent limits; generated contract drift must be rechecked on every relevant backend change.
+- **Administrator functions are included but privilege-gated:** administrator UI is shown only after authenticated viewer state and a server-side administrator-role recheck. Backend authorization, console-session, step-up/reauthentication, CSRF, audit and per-action policy remain mandatory; hiding a button is never authorization.
+- **No user-visible API addressing:** customer/admin UI, ordinary error messages, analytics and diagnostic logs must not display API route strings, private backend hosts/ports, internal tokens, cookies, CSRF values, OAuth handoff codes or secrets. Security must still rely on authentication/authorization and server policy rather than obscurity.
+- **Intentional non-app boundaries stay excluded:** health probes, worker/scheduler controls, direct database access, private backend-only interfaces and third-party webhook ingress are not made into native-app actions merely to raise an endpoint count.
+- **Contract-driven fallback is not a raw developer console:** generic app coverage must render product-purpose labels, typed/validated inputs, mutation confirmation and secret/address-redacted results. Administrator mutations require an explicit administrator confirmation path.
+- **Drift/release gate:** exact candidate SHA must pass contract coverage checks, Android compile/unit tests, debug assembly and release bundle generation. Test must verify the public app gateway and backend before merge/promotion; unresolved contract drift, exposed route/address data, or role bypass blocks release.
+- **Evidence status:** Android implementation is being developed in `woldeok-moneyverse-app` PR #24 (`feat/all-api-integration-v1.0.18`). v443 planning records requirements and does not itself claim Test or Production completion.
+
 
 ## P0 full-site all-page UI/functional QA gate — v2026.09.25.442 (2026-09-25)
 
