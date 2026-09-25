@@ -2,11 +2,23 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.25.442
+> **현재 통합 버전:** v2026.09.25.443
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## P0 네이티브 앱 전체 API 정합 및 관리자 기능 계약 — v2026.09.25.443 (2026-09-25)
+
+- **승인된 앱 표면은 전수 대상:** generated 모바일/앱 계약에 포함된 모든 endpoint는 Android 제품에서 전용 업무 UI 또는 계약 기반 전체 기능센터 중 하나를 통해 도달 가능해야 한다. 앱 사용 승인을 받은 backend 기능인데 앱 상호작용이 없으면 미완성이다.
+- **현재 감사 스냅샷:** 번들 기준 공식 계약은 현재 앱 승인 endpoint 179개이며 그중 관리자 endpoint 11개다. 이 숫자는 고정 한도가 아니라 현재 스냅샷이며 관련 backend 변경마다 generated contract drift를 다시 확인한다.
+- **관리자 기능 포함 + 권한 게이트:** 인증 viewer 상태와 서버 관리자 역할 재검증을 모두 통과한 경우에만 관리자 UI를 노출한다. backend 권한검사, console session, 필요한 step-up/재인증, CSRF, 감사기록, action별 정책은 그대로 필수이며 버튼 숨김은 인가가 아니다.
+- **사용자 화면 API 주소 비노출:** 일반/관리자 UI, 일반 오류문구, analytics, 진단 로그에 API route 문자열, private backend host/port, internal token, cookie, CSRF, OAuth handoff code, secret을 표시하지 않는다. 단 보안은 주소 은폐가 아니라 인증·인가·서버 정책으로 보장한다.
+- **의도적 비앱 경계는 제외 유지:** health probe, worker/scheduler control, DB 직접 접근, private backend-only interface, 외부 webhook ingress는 endpoint 수를 늘리기 위해 네이티브 앱 action으로 노출하지 않는다.
+- **계약 기반 fallback은 raw 개발자 콘솔이 아님:** 범용 기능센터는 제품 목적명, 타입/필수값 검증 입력, mutation 확인, secret/address가 제거된 결과를 제공한다. 관리자 mutation은 별도 관리자 확인 흐름을 요구한다.
+- **drift/릴리스 게이트:** exact candidate SHA에서 contract coverage, Android compile/unit test, debug assemble, release bundle 생성이 모두 통과해야 한다. merge/승격 전 Test에서 public app gateway와 backend를 확인하며 contract drift, route/address 노출, 역할 우회가 남으면 릴리스를 차단한다.
+- **증거 상태:** Android 구현은 `woldeok-moneyverse-app` PR #24 (`feat/all-api-integration-v1.0.18`)에서 진행 중이다. v443은 요구사항을 권위화하며 Test 또는 Production 완료를 주장하지 않는다.
+
 
 ## P0 전 사이트 모든 페이지 UI/기능 QA 하드 게이트 — v2026.09.25.442 (2026-09-25)
 
