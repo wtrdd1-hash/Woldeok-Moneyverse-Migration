@@ -27,3 +27,11 @@
 
 ## 근거 품질 규칙
 대규모 탐색은 폭을 증명할 뿐이다. Moneyverse 요구사항은 PostgreSQL 1차 문서, 표준, 서비스 제공자 공식 운영 지침 또는 고신뢰 연구로 아키텍처 시사점을 추적할 수 있고, 이를 명시적 스키마/마이그레이션/QA/운영 수용조건으로 변환할 수 있을 때만 채택한다.
+
+## 작업 중간 기록
+- Crossref 수집 완료: 10개 lane x 8,000건 = 원시 80,000 record.
+- CSV parser 기준 중복 제거 결과 **66,858건 고유 후보**가 남았다. quoted CSV field에 embedded newline이 있을 수 있으므로 물리 line count는 record count 근거로 사용하지 않는다.
+- broad query 표본에서 recovery/isolation/replication 같은 모호한 용어의 예상 false positive를 확인했으므로 corpus를 Tier C 탐색 근거로만 분류했다.
+- 직접 1차 검토는 PostgreSQL 17 constraint, index, partitioning, ALTER/CREATE INDEX, serialization retry, locking, vacuum/statistics, backup/PITR, replication 문서를 사용했다.
+- 통합 전 현재 저장소 DB authority/security/migration/backup 문서를 다시 확인했다.
+- 작업 중간 remote main은 `99b0eaa04bbd0b28005861c624690c56744e8a14`로 동일해 해당 checkpoint에서 겹치는 main 변경 정합화가 필요하지 않았다.
