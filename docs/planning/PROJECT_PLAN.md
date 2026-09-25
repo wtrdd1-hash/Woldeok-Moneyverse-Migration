@@ -2,11 +2,28 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.25.441
+> Current integrated version: v2026.09.25.442
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## P0 full-site all-page UI/functional QA gate — v2026.09.25.442 (2026-09-25)
+
+- **All pages, not a sample:** every frontend page present in the exact release candidate MUST be included in QA. Public, guest/auth, account, gameplay, economy, market, banking, community, content, safety, support, developer/internal-visible, and **all administrator pages are baseline coverage**. Administrator routes are never optional or sampled.
+- **Source-derived inventory:** before QA, generate the authoritative page inventory from the exact candidate source (currently `frontend/src/app/**/page.tsx`) and reconcile it 1:1 with the QA ledger. The 2026-09-25 snapshot contains **86 pages, including 22 `/admin/**` pages and 8 dynamic pages**; these counts are evidence for this snapshot, not a fixed future limit. Any newly added page is automatically in scope.
+- **No silent exclusions:** every discovered route must have PASS/FAIL/BLOCKED evidence. A missing ledger row, skipped page, “not changed”, “looks similar”, or historical pass is not acceptance evidence. Any intentional non-release surface still requires an explicit classification and direct rendering check.
+- **Dynamic pages:** every dynamic route requires deterministic valid fixtures plus invalid/not-found/permission cases where applicable. QA may not satisfy `[id]`, `[symbol]`, `[clubId]` or equivalent routes by checking only their parent list page.
+- **Authentication/role matrix:** exercise each page in every materially distinct state it supports: guest, signed-in member, restricted/permission-denied, owner/non-owner where relevant, and administrator/privileged roles. Redirects and access-denied behavior count as page behavior and must be verified.
+- **All sections and controls:** opening a route is not enough. Scroll header-to-footer, visit every tab/accordion/section, open relevant dialogs/drawers, exercise primary and secondary controls, and verify navigation back/forward and refresh persistence where stateful.
+- **Responsive full-site matrix:** the v440 viewport contract applies to **every page**, not only modified/admin pages: 320/360/375/390/412/430 portrait, representative landscape, 768/1024 tablet, desktop, plus 200% and applicable 400% zoom/reflow. Body overflow, clipping, overlap, hidden CTA, inaccessible control, or lost decision-critical content is a failure.
+- **Five complete full-site QA cycles:** every release candidate receives at least **five complete passes over the entire discovered page inventory**. Every pass must include every page; the combined five-pass evidence must cover the required viewport/state matrix, long/short content, loading/empty/partial/error states and real API-populated data. Fixes found during a pass require rerunning the affected page and all dependent shared-layout/component coverage.
+- **Administrator baseline:** all `/admin/**` routes are verified in each full-site pass with authenticated administrator runtime data, including navigation, forms, tables/cards, dialogs, destructive/sensitive actions in safe Test mode, role/step-up behavior, audit evidence and responsive layout. “Admin checked separately later” is prohibited.
+- **State surfaces:** route QA includes loading/skeleton, empty, long-content, partial/stale, validation failure, network/server error, offline/maintenance where supported, permission denied, success and mutation pending/retry states. A page that only passes with happy-path seeded data is not accepted.
+- **Runtime truth:** Test QA runs against the exact candidate SHA and real backend/API/database contracts. Mock-only, screenshot-only, source inspection, unit tests, or a previous release’s browser run cannot replace route-by-route runtime evidence.
+- **Coverage gate:** discovered-page count = QA-ledger distinct-page count = pages with final accepted evidence. Any count mismatch, unresolved FAIL/BLOCKED, console/runtime error attributable to the candidate, or administrator-page gap blocks Production promotion.
+- **Evidence:** retain exact SHA, generated route inventory hash/count, route, role/state, fixture ID, browser/engine, viewport/orientation/zoom, pass number, API/runtime identity, result and defect linkage. This evidence is required for Test acceptance and Production promotion.
+- Detailed authority: [FULL_ROUTE_UI_QA_SPEC.md](FULL_ROUTE_UI_QA_SPEC.md) and [ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md](ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md). v442 is planning/documentation only; it does not claim that all current pages have already passed this new gate.
 
 ## P0 economy-admin canonical control-state contract — v2026.09.25.441 (2026-09-25)
 

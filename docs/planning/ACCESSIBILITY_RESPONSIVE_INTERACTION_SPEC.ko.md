@@ -1,6 +1,6 @@
 # 월덕 머니버스 — 접근성·반응형 상호작용·UI 상태 명세
 
-> 버전: v2026.09.25.440
+> 버전: v2026.09.25.442
 > 상태: 구현 지향형 Living 제품 기획서
 > 기준일: 2026-09-25
 > 상위 문서: `PROJECT_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `MONETIZATION_COMPLIANCE_SEO_SPEC.md`, `BILLING_SUBSCRIPTION_CONSUMER_PROTECTION_SPEC.md`, `ANALYTICS_EXPERIMENTATION_GOVERNANCE_SPEC.md`
@@ -164,6 +164,19 @@ icon-only 버튼은 accessible name을 가져야 한다.
 - 자동검사와 수동검사 범위
 
 ## 15. QA
+
+### 15.0 전 라우트 기본선 — v2026.09.25.442
+
+- 전 사이트 QA 범위는 exact candidate의 frontend page source에서 생성하며 사람이 골라 만든 샘플 목록을 권위로 사용하지 않는다.
+- 발견된 모든 page를 포함하고 모든 `/admin/**` page를 기본 포함한다. 관리자 QA는 선택 가능한 별도 캠페인이 아니라 기본선이다.
+- 현재 소스 스냅샷은 page route 86개, 관리자 route 22개, dynamic route 8개다. 매 candidate마다 다시 계산하며 이 숫자를 미래 고정 총수로 하드코딩하지 않는다.
+- 모든 release candidate는 전 사이트 완전 QA를 최소 5회 수행한다. 매 pass에서 발견된 모든 page를 방문하고 5회 누적으로 필수 viewport·role·content·UI-state matrix를 커버한다.
+- dynamic route는 재현 가능한 valid fixture와 적용 가능한 invalid/not-found/permission fixture를 사용한다.
+- 각 route는 최초 render만 보고 통과시키지 않고 page 전체와 local tab/section/dialog/primary control을 직접 확인한다.
+- route inventory와 QA ledger의 distinct route count는 동일해야 하며 누락된 PASS/FAIL/BLOCKED row가 없어야 한다. 불일치하면 승격 차단이다.
+- shared layout/component를 이유로 page를 건너뛰지 않는다. 공통 component 근거는 root-cause 분석 중복을 줄일 수 있지만 이를 사용하는 모든 page의 직접 render/runtime 검증은 유지한다.
+- 최종 수용은 실제 Test backend/API data가 필요하며 mock-only/screenshot-only 검증은 보조 증거다.
+- 상세 증거 schema와 실행 규칙은 `FULL_ROUTE_UI_QA_SPEC.ko.md`를 따른다.
 
 자동검사는 semantic/name 문제, 명백한 contrast, invalid ARIA, 알려진 dialog keyboard trap, 대표 viewport smoke를 확인한다.
 
