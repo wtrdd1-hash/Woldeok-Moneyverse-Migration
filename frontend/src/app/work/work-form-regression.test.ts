@@ -15,10 +15,9 @@ describe('repeatable work completion feedback', () => {
     expect(source).toContain('requestKey={requestKey}');
   });
 
-  it('bounds a slow request and lets the same key be retried instead of spinning forever', () => {
-    expect(actionSource).toContain("const key = id(formData, 'idempotencyKey');");
-    expect(actionSource).toContain('timeoutMs: 8_000');
-    expect(actionSource).not.toContain('const key = idempotencyKey();');
+  it('keeps the legacy direct-completion action fail-closed', () => {
+    expect(actionSource).toContain('즉시 보상 지급 경로는 비활성화되었습니다.');
+    expect(actionSource).not.toContain("mutate(`/api/v1/work/tasks/${encodeURIComponent(taskId)}/complete`");
     expect(source).toContain('const [state, action, pending] = useActionState');
     expect(source).toContain('setSlow(true)');
     expect(source).toContain('disabled={pending}');

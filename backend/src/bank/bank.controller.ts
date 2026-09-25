@@ -170,4 +170,45 @@ export class BankController {
       'failed to redeem virtual bond',
     );
   }
+
+  @Get('credit-rating')
+  @ApiOperation({ summary: 'Get game-only personal credit score (Tiers 1-10) and borrowing limit' })
+  creditRating(@Req() request: RequestWithSession) {
+    return this.guarded(
+      async () => {
+        const userId = requireUserId(request);
+        const standing = (await this.repository().getStanding(userId)) as Record<string, unknown>;
+        const { evaluateUserCreditRating } = await import('./credit-rating.service');
+        const profile = {
+          userId,
+          accountAgeDays: 30, // Default active play horizon
+          jobLevel: 5,
+          totalCashWld: Number(standing['cash_balance'] ?? standing['cashWld'] ?? 0),
+          depositBalanceWld: Number(standing['bank_balance'] ?? standing['depositBalanceWld'] ?? 0),
+          historicalRepaymentsCount: 3,
+          overdueRepaymentsCount: 0,
+        };
+        return evaluateUserCreditRating(profile);
+      },
+      'failed to evaluate credit rating',
+    );
+  }
+
+  @Post('credit-rating/schedule')
+  @ApiOperation({ summary: 'Calculate equal-principal installment schedule without hidden fees' })
+  creditSchedule(
+    @Body() body: { principalAmountWld: number; installmentCount: number; interestRateBps: number },
+  ) {
+    return this.guarded(
+      async () => {
+        const { generateLoanSchedule } = await import('./credit-rating.service');
+        return generateLoanSchedule(
+          body.principalAmountWld,
+          body.installmentCount,
+          body.interestRateBps,
+        );
+      },
+      'failed to generate loan schedule',
+    );
+  }
 }

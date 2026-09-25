@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { TreasuryInputError, TreasuryService } from './treasury.service';
+import {
+  AUTHORITATIVE_BUDGET_ENVELOPES,
+  AUTHORITATIVE_TAX_RATES,
+} from './treasury.repository';
 import type { TreasuryRepository } from './treasury.repository';
 
 describe('TreasuryService', () => {
@@ -18,10 +22,8 @@ describe('TreasuryService', () => {
   const service = new TreasuryService(mockRepo);
 
   it('delegates getTaxRates to repository', () => {
-    const mockRates = [
-      { id: 'tax_user_transfer', category: 'User Transfers', current_rate_pct: 0 }
-    ];
-    vi.mocked(mockRepo.getTaxRates).mockReturnValueOnce(mockRates as any);
+    const mockRates = AUTHORITATIVE_TAX_RATES.slice(0, 1);
+    vi.mocked(mockRepo.getTaxRates).mockReturnValueOnce(mockRates);
 
     const rates = service.getTaxRates();
     expect(rates).toEqual(mockRates);
@@ -29,10 +31,8 @@ describe('TreasuryService', () => {
   });
 
   it('delegates getBudgets to repository', () => {
-    const mockBudgets = [
-      { budget_id: 'BUDGET_ESSENTIAL_REFUND', category: 'ESSENTIAL_REFUND', priority: 1 }
-    ];
-    vi.mocked(mockRepo.getBudgets).mockReturnValueOnce(mockBudgets as any);
+    const mockBudgets = AUTHORITATIVE_BUDGET_ENVELOPES.slice(0, 1);
+    vi.mocked(mockRepo.getBudgets).mockReturnValueOnce(mockBudgets);
 
     const budgets = service.getBudgets();
     expect(budgets).toEqual(mockBudgets);
@@ -73,7 +73,7 @@ describe('TreasuryService', () => {
   });
 
   it('delegates getOverview to repository and returns liquidity and tax schedule fields', async () => {
-    const mockOverview = {
+    const mockOverview: Awaited<ReturnType<TreasuryRepository['getOverview']>> = {
       vaults: [],
       total_treasury_wld: '1000000',
       total_circulating_wld: '500000',
@@ -82,9 +82,22 @@ describe('TreasuryService', () => {
       reserve_wld: '200000',
       coverage_days: 80,
       tax_rates: [],
-      stats_24h: { injected_wld: '0', absorbed_wld: '0', recirculated_fees_wld: '0' },
+      budgets: [],
+      reconciliation: {
+        status: 'RECONCILED',
+        total_vaults_balance_wld: '1000000',
+        total_ledger_net_flow_wld: '1000000',
+        discrepancy_amount_wld: '0',
+        last_reconciled_at: '2026-09-25T00:00:00.000Z',
+      },
+      stats_24h: {
+        injected_wld: '0',
+        absorbed_wld: '0',
+        stock_halt_funded_wld: '0',
+        recirculated_wld: '0',
+      },
     };
-    vi.mocked(mockRepo.getOverview).mockResolvedValueOnce(mockOverview as any);
+    vi.mocked(mockRepo.getOverview).mockResolvedValueOnce(mockOverview);
 
     const result = await service.getOverview();
     expect(result).toEqual(mockOverview);

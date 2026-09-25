@@ -29,6 +29,7 @@ import {
 import { SavingsGoalProgressRing } from './savings-progress-ring';
 import { SavingPocketsCard } from './saving-pockets-card';
 import { BankLiquidityCard } from './bank-liquidity-card';
+import { CreditScoreCard, type CreditRatingData } from './credit-score-card';
 import type { BankStanding, SavingPocket } from './types';
 
 export const dynamic = 'force-dynamic';
@@ -44,9 +45,10 @@ export default async function BankPage() {
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
-  const [standing, pockets] = await Promise.all([
+  const [standing, pockets, creditRating] = await Promise.all([
     apiOrNull<BankStanding>('/api/v1/banking/standing'),
     apiOrNull<SavingPocket[]>('/api/v1/banking/pockets'),
+    apiOrNull<CreditRatingData>('/api/v1/banking/credit-rating'),
   ]);
 
   if (!standing) {
@@ -220,6 +222,9 @@ export default async function BankPage() {
         creditLimit={creditLimit}
         isEn={isEn}
       />
+
+      {/* 개인 신용 평가 리포트 및 분할 상환 스케줄러 카드 */}
+      <CreditScoreCard initialRating={creditRating ?? undefined} />
 
       <Card className={activeLoan ? 'border-amber-500/30 bg-amber-500/5' : 'border-emerald-500/30 bg-emerald-500/5'}>
         <CardContent className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center">

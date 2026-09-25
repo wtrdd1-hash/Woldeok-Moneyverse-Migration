@@ -97,6 +97,17 @@ export interface WorkCompleteV2Row {
   transaction_id: string;
 }
 
+interface JobProfileEntry extends Record<string, unknown> {
+  level?: number;
+  mastery_tier?: ReturnType<typeof computeMasteryTier>;
+}
+
+interface JobProfile extends Record<string, unknown> {
+  active_job?: JobProfileEntry | null;
+  all_jobs?: JobProfileEntry[];
+  qualifications?: unknown[];
+}
+
 export class WorkRepository {
   private cachedFeatureState: { readonly state: WorkFeatureState; readonly cachedUntil: number } | null = null;
 
@@ -265,7 +276,7 @@ export class WorkRepository {
 
   async jobProfile(actor: unknown): Promise<unknown> {
     assertUuid(actor, 'actor');
-    const row = await queryOne<{ profile: any }>(
+    const row = await queryOne<{ profile: JobProfile | null }>(
       this.pool,
       `SELECT public.job_get_my_profile($1) AS profile`,
       [actor],
@@ -273,13 +284,13 @@ export class WorkRepository {
     if (!row?.profile) return null;
 
     const profile = row.profile;
-    if (profile.active_job && profile.active_job.level) {
+    if (profile.active_job?.level) {
       profile.active_job.mastery_tier = computeMasteryTier(profile.active_job.level);
     }
     if (Array.isArray(profile.all_jobs)) {
-      profile.all_jobs = profile.all_jobs.map((j: any) => ({
-        ...j,
-        mastery_tier: computeMasteryTier(j.level ?? 1),
+      profile.all_jobs = profile.all_jobs.map((job) => ({
+        ...job,
+        mastery_tier: computeMasteryTier(job.level ?? 1),
       }));
     }
 
@@ -349,7 +360,7 @@ export class WorkRepository {
     assertUuid(actor, 'actor');
     await this.requireEnabled();
     try {
-      const res = await queryOne<{ result: any }>(
+      const res = await queryOne<{ result: unknown }>(
         this.pool,
         `SELECT public.job_certify_qualification($1, $2, $3) AS result`,
         [actor, jobType, qualificationCode],

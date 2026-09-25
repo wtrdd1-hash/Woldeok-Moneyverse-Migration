@@ -1,5 +1,6 @@
 import { AdminControlCenterV2 } from './admin-control-center-v2';
 import { EconomyAiStatusCard, type EconomyAiStatus } from './ai-status-card';
+import { CouncilDebateCard, type CouncilDebateData } from './council-debate-card';
 import { EconomySinkCard } from './economy-sink-card';
 import type { MacroEconomyV2, MonetaryVelocityTelemetry } from './macro-v2-types';
 import { FaucetSinkGauge, type FaucetSinkStats } from './faucet-sink-gauge';
@@ -133,9 +134,10 @@ export default async function AdminEconomyPage({
   const alertList = alerts.ok ? alerts.data.alerts : null;
   const alertProblem = problem(alerts, '알림을 불러오지 못했어요.');
   const engine = autoPolicy.ok ? autoPolicy.data : null;
-  const [faucetSinkStats, velocityTelemetry] = await Promise.all([
+  const [faucetSinkStats, velocityTelemetry, councilDebate] = await Promise.all([
     apiOrNull<FaucetSinkStats>('/api/v1/admin/economy/stats'),
     apiOrNull<MonetaryVelocityTelemetry>('/api/v1/admin/economy/velocity'),
+    apiOrNull<{ debate: CouncilDebateData }>('/api/v1/admin/economy/council-debate'),
   ]);
   const engineProblem = problem(autoPolicy, '자동 조정 엔진 상태를 불러오지 못했어요.');
 
@@ -167,6 +169,8 @@ export default async function AdminEconomyPage({
       ) : (
         <Card><CardContent className="pt-6"><EmptyState title={problem(aiStatus, 'AI 상태를 불러오지 못했어요.') ?? 'AI 상태를 불러오지 못했어요.'} /></CardContent></Card>
       )}
+
+      <CouncilDebateCard initialData={councilDebate?.debate} />
 
       <Card>
         <CardHeader>
