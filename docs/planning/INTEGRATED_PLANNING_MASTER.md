@@ -1,11 +1,23 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.25.442
+> Current ledger version: v2026.09.25.444
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.25.444 — 2026-09-25
+- Start and mid-work `origin/main=99b0eaa04bbd0b28005861c624690c56744e8a14`; no main drift at the recorded checkpoint.
+- Re-read documentation authority, current monetization/billing/international/growth plans and current update/work records before adopting changes.
+- Built a traceable monetization discovery corpus: 35,429 collected OpenAlex/Crossref records -> **33,341 unique candidates** after DOI-first/title-fallback deduplication. This is not represented as 33,341 manual full-text reviews.
+- **M444-01 / P1:** diversified portfolio = free core + contextual public ads + ad-free/convenience/presentation subscription + direct non-P2W cosmetics + disclosed sponsorship; later creator/B2B/API lanes are separately gated.
+- **M444-02 / P1:** free core is not intentionally degraded to coerce conversion; premium value must be incremental and experienced.
+- **M444-03 / P1:** advertising remains outside sensitive economy/action surfaces and requires retention/trust/task-completion experiment guardrails.
+- **M444-04 / P1:** paid cosmetics are direct entitlements separated from WLD; paid WLD is not an intermediary.
+- **M444-05 / P0:** paid WLD, paid randomized items, paid casino value, P2W power and paid superior WDX information remain blocked.
+- **M444-06..08 / P1:** store/payment unit economics are effective-date/channel aware; subscription cancellation remains straightforward; contribution margin after full variable/operating costs is the profitability authority.
+- Evidence: `docs/findings/MONEYVERSE_MONETIZATION_REVENUE_RESEARCH_REVIEW_v2026.09.25.444.md` and `docs/planning/deltas/v2026.09.25.444.md`. Planning/docs only; no runtime/Test/Production/revenue/legal-clearance claim.
 
 ## v2026.09.25.442 — 2026-09-25
 - Start `origin/main=a7fac4f4db2c4db3b9f8a4e159ad6ea5267540ec`; dedicated branch `docs/all-page-qa-v2026.09.25.442` created from latest main.

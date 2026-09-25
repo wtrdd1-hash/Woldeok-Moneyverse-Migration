@@ -2,11 +2,24 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.25.442
+> Current integrated version: v2026.09.25.444
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Monetization/revenue portfolio and evidence refresh — v2026.09.25.444 (2026-09-25)
+
+- **Evidence scope:** 35,429 OpenAlex/Crossref candidates were collected and DOI-first/title-fallback deduplicated to **33,341 unique discovery candidates**. This is a discovery corpus, not a claim of 33,341 manual full-text reviews; adopted decisions use focused official/peer-reviewed evidence.
+- **Diversified portfolio:** launch monetization is free core + contextual public ads + `Moneyverse Plus` ad-free/convenience/presentation value + direct non-P2W cosmetic entitlements + clearly disclosed sponsorship. Creator/B2B/API monetization remains later-stage and separately gated.
+- **Free-core invariant:** essential economy, game and community participation cannot be intentionally degraded to coerce payment. Premium value must be incremental and experienced rather than manufactured by breaking the free tier.
+- **Ad boundary:** ads remain outside wallet, transfer, lending, WDX order/decision, casino, account-security, payment-failure and administrator action surfaces. Experiments require holdout D1/D7/D30, task completion, complaint/accidental-click, latency and trust guardrails.
+- **Direct paid goods:** paid cosmetics/presentation goods are direct real-money entitlements separated from the WLD ledger. Paid WLD is not a required intermediary.
+- **P0 prohibited monetization:** `WLD_CASH_PURCHASE`, `PAID_RANDOM_ITEM`, paid casino value/stake, P2W economic power, paid superior WDX information and pay-for-faster moderation remain blocked.
+- **Effective-date economics:** unit economics are keyed by market, channel, effective date, install cohort where applicable, transaction type, billing path and programme. Future store rates MUST NOT be applied before their effective date.
+- **Profitability authority:** optimize contribution margin after store/platform/PSP fees, tax, refunds/chargebacks, revenue share, incremental infrastructure, support/moderation, localization/content and compliance/legal operating cost—not gross revenue alone.
+- **Experiment truth:** price, conversion, eCPM, churn, CAC, LTV and revenue projections remain `HYPOTHESIS/TEST TARGET` until Moneyverse telemetry measures them. Guardrail regression stops or rolls back the experiment.
+- Detailed evidence: `docs/findings/MONEYVERSE_MONETIZATION_REVENUE_RESEARCH_REVIEW_v2026.09.25.444.md`; delta: `docs/planning/deltas/v2026.09.25.444.md`. Planning/docs only; no billing implementation, Test or Production claim.
 
 ## P0 full-site all-page UI/functional QA gate — v2026.09.25.442 (2026-09-25)
 
