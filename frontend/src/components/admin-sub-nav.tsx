@@ -65,19 +65,21 @@ export function AdminSubNav() {
   const navRef = useRef<HTMLElement>(null);
   const activeItemRef = useRef<HTMLLIElement>(null);
 
-  if (!pathname.startsWith('/admin')) return null;
-  const active = activeAdminTab(pathname);
+  const isAdminRoute = pathname.startsWith('/admin');
+  const active = isAdminRoute ? activeAdminTab(pathname) : null;
 
-  // Auto-scroll the active tab into view smoothly on mobile/narrow viewports
+  // Keep hook order stable even if this shared layout is ever rendered outside /admin.
   useEffect(() => {
-    if (activeItemRef.current && navRef.current) {
+    if (isAdminRoute && activeItemRef.current && navRef.current) {
       activeItemRef.current.scrollIntoView({
         behavior: 'smooth',
         block: 'nearest',
         inline: 'center',
       });
     }
-  }, [active]);
+  }, [active, isAdminRoute]);
+
+  if (!isAdminRoute) return null;
 
   return (
     <nav

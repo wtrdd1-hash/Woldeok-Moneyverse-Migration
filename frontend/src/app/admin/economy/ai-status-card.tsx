@@ -123,20 +123,25 @@ function RunItem({ label, run }: { readonly label: string; readonly run?: Schedu
 function AgentCard({ agent, source }: { readonly agent: AgentStatus; readonly source: string }) {
   return (
     <div className="rounded-xl border border-border/60 bg-muted/20 p-3.5 text-sm min-w-0 shadow-sm">
-      <div className="flex items-center justify-between gap-2 min-w-0">
-        <strong className="truncate font-bold">{domainLabel[agent.domain ?? ''] ?? agent.domain ?? '—'} · {agent.seat ?? '—'}</strong>
+      <div className="flex min-w-0 items-start justify-between gap-2">
+        <strong className="min-w-0 font-bold [overflow-wrap:anywhere]">
+          {domainLabel[agent.domain ?? ''] ?? agent.domain ?? '—'} · {agent.seat ?? '—'}
+        </strong>
         <Badge variant="outline" className="shrink-0">{source}</Badge>
       </div>
-      <p className="mt-1 truncate font-mono text-xs text-muted-foreground" title={agent.model ?? undefined}>
+      <p className="mt-1 font-mono text-xs text-muted-foreground [overflow-wrap:anywhere]" title={agent.model ?? undefined}>
         {agent.model ?? '—'}
       </p>
-      <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
-        <div className="min-w-0"><dt className="text-muted-foreground truncate">검토</dt><dd className="font-semibold">{number(agent.review_count)}</dd></div>
-        <div className="min-w-0"><dt className="text-muted-foreground truncate">동의/거부/보류</dt><dd className="font-semibold truncate">{number(agent.agree_count)} / {number(agent.veto_count)} / {number(agent.abstain_count)}</dd></div>
-        <div className="min-w-0"><dt className="text-muted-foreground truncate">평균 신뢰</dt><dd className="font-semibold">{agent.avg_confidence == null ? '—' : `${number(Number(agent.avg_confidence) * 100, 1)}%`}</dd></div>
-        <div className="min-w-0"><dt className="text-muted-foreground truncate">지연</dt><dd className="font-semibold">{number(agent.avg_latency_ms, 1)} ms</dd></div>
-        <div className="min-w-0"><dt className="text-muted-foreground truncate">토큰</dt><dd className="font-semibold">{number(agent.avg_total_tokens, 1)}</dd></div>
-        <div className="min-w-0"><dt className="text-muted-foreground truncate">근거</dt><dd className="font-semibold">{source}</dd></div>
+      <dl className="mt-3 grid grid-cols-1 gap-2 text-xs min-[360px]:grid-cols-2">
+        <div className="min-w-0"><dt className="text-muted-foreground">검토 표본</dt><dd className="font-semibold">{number(agent.review_count)}건</dd></div>
+        <div className="min-w-0"><dt className="text-muted-foreground">동의/거부/보류</dt><dd className="font-semibold [overflow-wrap:anywhere]">{number(agent.agree_count)} / {number(agent.veto_count)} / {number(agent.abstain_count)}</dd></div>
+        <div className="min-w-0">
+          <dt className="text-muted-foreground" title="각 모델 리뷰가 반환한 confidence(0~1)의 산술 평균이며 정책 적용 가능 여부와는 별개입니다.">평균 모델 confidence</dt>
+          <dd className="font-semibold">{agent.avg_confidence == null ? '—' : `${number(Number(agent.avg_confidence) * 100, 1)}%`}</dd>
+        </div>
+        <div className="min-w-0"><dt className="text-muted-foreground">평균 지연</dt><dd className="font-semibold">{number(agent.avg_latency_ms, 1)} ms</dd></div>
+        <div className="min-w-0"><dt className="text-muted-foreground">평균 토큰</dt><dd className="font-semibold">{number(agent.avg_total_tokens, 1)}</dd></div>
+        <div className="min-w-0"><dt className="text-muted-foreground">근거 모드</dt><dd className="font-semibold">{source}</dd></div>
       </dl>
     </div>
   );
@@ -221,19 +226,19 @@ export function EconomyAiStatusCard({ status }: { readonly status: EconomyAiStat
 
   return (
     <Card className="shadow-sm">
-      <CardHeader>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-base font-bold">🏛️ AI 경제 정책 위원회 (AI Council)</CardTitle>
-            <Badge variant={status?.modelReachability === 'healthy' ? 'default' : 'outline'} className="text-[11px]">
+      <CardHeader className="min-w-0">
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <CardTitle className="min-w-0 text-base font-bold [overflow-wrap:anywhere]">🏛️ AI 경제 정책 위원회 (AI Council)</CardTitle>
+            <Badge variant={status?.modelReachability === 'healthy' ? 'default' : 'outline'} className="shrink-0 text-[11px]">
               {status?.modelReachability === 'healthy' ? '모델 도달 정상' : '모델 상태 확인'}
             </Badge>
           </div>
-          <Badge variant={op === 'active_authoritative' ? 'default' : 'secondary'} className="text-xs font-semibold">
+          <Badge variant={op === 'active_authoritative' ? 'default' : 'secondary'} className="w-fit shrink-0 text-xs font-semibold">
             {label}
           </Badge>
         </div>
-        <CardDescription className="[word-break:keep-all]">
+        <CardDescription className="leading-relaxed [overflow-wrap:anywhere] [word-break:keep-all]">
           결정론적 규칙 엔진의 정책 조정안을 듀얼 로컬 AI(Llama 3.2 3B &amp; Gemma 3 1B) 위원회가 4대 도메인(무결성·직업·거시경제·복지)별로 교차 심의합니다.
         </CardDescription>
       </CardHeader>
@@ -299,6 +304,13 @@ export function EconomyAiStatusCard({ status }: { readonly status: EconomyAiStat
           <CouncilRationaleBanner rationale={latest.rationale} />
         ) : null}
 
+        {displayedAgents.length > 0 ? (
+          <p className="rounded-lg border border-border/60 bg-muted/20 p-2.5 text-[11px] leading-relaxed text-muted-foreground [word-break:keep-all]">
+            평균 모델 confidence는 각 모델 리뷰가 반환한 0~1 confidence의 산술 평균입니다. 검토 표본 수와 함께 해석하며,
+            정책 적용 가능 여부·데이터 충분성·위원회 합의 여부를 뜻하지 않습니다.
+          </p>
+        ) : null}
+
         <div className="grid gap-2 sm:hidden">
           {displayedAgents.map((agent, index) => (
             <AgentCard key={`${agent.domain}-${agent.seat}-${agent.model}-${index}`} agent={agent} source={agentSource} />
@@ -311,12 +323,12 @@ export function EconomyAiStatusCard({ status }: { readonly status: EconomyAiStat
                 <th className="py-2">분야</th>
                 <th>좌석</th>
                 <th>모델</th>
-                <th>검토</th>
+                <th>검토 표본</th>
                 <th>동의/거부/보류</th>
-                <th>평균 신뢰</th>
-                <th>지연 ms</th>
-                <th>토큰</th>
-                <th>근거</th>
+                <th title="각 모델 리뷰가 반환한 confidence(0~1)의 산술 평균">평균 모델 confidence</th>
+                <th>평균 지연 ms</th>
+                <th>평균 토큰</th>
+                <th>근거 모드</th>
               </tr>
             </thead>
             <tbody>
