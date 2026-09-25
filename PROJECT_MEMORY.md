@@ -1,10 +1,10 @@
 # Woldeok Moneyverse 프로젝트 메모리 (PROJECT_MEMORY.md)
 
-- **최종 갱신일:** 2026-09-24
+- **최종 갱신일:** 2026-09-25
 - **관리 주체:** Woldeok Moneyverse Core Development & Operations
 - **문서 상태:** 활성 (Active Memory)
-- **현재 프로덕션 릴리스:** `v2026.09.24.409` (`prod-v408` / SHA `ad25aafd`)
-- **PostgreSQL 활성 세션 상태:** **1,211개 (100% 무손실 보존 실측 확인)**
+- **현재 프로덕션 릴리스:** `v2026.09.25.447` (`prod-2c77d4e-v446` / SHA `583778ae`)
+- **PostgreSQL 활성 세션 상태:** **1,227개 (100% 무손실 보존 실측 확인)**
 
 ---
 
@@ -41,7 +41,24 @@
 
 ---
 
-## 3. 📜 최신 릴리스 내역 (v2026.09.24.409)
+## 3. 📜 최신 릴리스 내역 (v2026.09.25.447)
+
+- **최종 갱신일시**: 2026-09-25 19:18:00 KST
+- **프로덕션 릴리스 버전**: `v2026.09.25.447` (릴리스 경로: `/srv/moneyverse-data/releases/prod-2c77d4e-v446`)
+- **Exact Git SHA**: `583778ae`
+- **PostgreSQL 활성 사용자 세션**: **1,227개 (100% 무손실 보존 실측 확인)**
+- **완료 작업 요약**:
+  1. **개발자 포털(/developer) 및 API 센터 관리자 외 접근 전면 차단 (보안 강화)**:
+     - `requireAdministrator()` 서버 사이드 세션 가드 강제 적용 (비로그인/일반 유저 307 리다이렉트 차단).
+     - 검색엔진 크롤링 차단 `robots: { index: false, follow: false }` 메타데이터 적용.
+     - 일반 공개 메뉴(`PUBLIC_NAV`, `COMMUNITY_DROPDOWN`, `HEADER_PUBLIC`, `HEADER_MEMBER`)에서 `/developer` 링크 전면 제거 및 관리자 전용 '운영' 메뉴(`HEADER_ADMIN`, `ADMIN_NAV`)로 완전 격리.
+  2. **단위 테스트 & 프로덕션 무중단 배포**:
+     - `developer-access.test.ts` (3/3 passed), `navigation.test.ts` (4/4 passed), 전체 787개 테스트 100% PASS.
+     - 비인가 접근 차단(HTTP 307 Redirect) 및 1,227개 세션 무손실 상태로 프로덕션 승격 완료.
+
+---
+
+### 이전 릴리스 (v2026.09.24.409)
 
 - **최종 갱신일시**: 2026-09-24 09:20:00 KST
 - **프로덕션 릴리스 버전**: `v2026.09.24.409` (릴리스 경로: `/srv/moneyverse-data/releases/prod-v408`)
