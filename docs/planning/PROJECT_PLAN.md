@@ -2,11 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.25.440
+> Current integrated version: v2026.09.25.441
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## P0 economy-admin canonical control-state contract — v2026.09.25.441 (2026-09-25)
+
+- **One canonical value envelope:** each tunable economy control is rendered from one server-derived object containing current persisted value, unit, min/max/step, policy/source version, ownership mode (`AUTO`/`MANUAL_OVERRIDE`), proposed value if any, updated-at and loading/error state. Independent frontend defaults are prohibited.
+- **Zero is data, not fallback:** missing/loading/failed policy data must render `loading`, `unknown` or `blocked`; the client must never substitute `0`, `0.0%` or another numeric default and present it as authoritative.
+- **Four-way equality:** range thumb position, visible numeric value, accessibility value (`aria-valuenow` or equivalent) and mutation/API payload must derive from the same canonical value. After save/refresh/rollback, the returned server value becomes the only displayed authority.
+- **Auto mode is visibly read-only:** when automatic balancing owns a parameter, controls cannot appear freely editable. Show applied current value and AI/controller candidate separately. Manual change requires an explicit override/edit action, authorization, reason, reauthentication where required, optimistic version check and rollback metadata.
+- **No ambiguous AI trust labels:** model availability/health, review count, calibrated confidence/uncertainty, evidence sufficiency, council agreement and policy eligibility are separate fields. A label such as `average trust 22.5%` is forbidden unless the metric formula, evidence window/sample and operational meaning are visible or directly linked.
+- **Real-data hydration QA:** acceptance must exercise initial skeleton -> API hydration -> auto/manual transition -> edit/save -> server reread -> refresh -> rollback/error paths. A visually correct mocked/default state does not prove the control contract.
+- **P0 failure:** any stale/default `0.0%`, slider/value disagreement, auto-owned control presented as editable, or undefined confidence/trust percentage blocks Test acceptance and Production promotion.
+- This supplements v440 responsive correctness. Detailed authority is `AI_ECONOMY_CONTROLLER_SPEC`. Planning/documentation only; runtime remediation is not claimed.
 
 ## P0 administrator mobile/responsive correctness hard gate — v2026.09.25.440 (2026-09-25)
 
