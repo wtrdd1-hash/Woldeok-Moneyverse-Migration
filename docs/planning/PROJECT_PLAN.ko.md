@@ -2,11 +2,28 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.25.441
+> **현재 통합 버전:** v2026.09.25.442
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## P0 전 사이트 모든 페이지 UI/기능 QA 하드 게이트 — v2026.09.25.442 (2026-09-25)
+
+- **샘플이 아니라 모든 페이지:** exact release candidate에 존재하는 모든 frontend page를 QA 대상에 포함한다. 공개, guest/auth, 계정, 게임, 경제, 시장, 은행, 커뮤니티, 콘텐츠, 안전, 지원, developer/internal-visible, 그리고 **모든 관리자 페이지는 기본 범위**다. 관리자 route를 선택적으로 샘플링하거나 생략할 수 없다.
+- **소스 기반 인벤토리:** QA 시작 전 exact candidate 소스(현재 `frontend/src/app/**/page.tsx`)에서 권위 page inventory를 생성하고 QA ledger와 1:1 대조한다. 2026-09-25 현재 스냅샷은 **86개 페이지, 그중 `/admin/**` 22개, 동적 페이지 8개**다. 이 숫자는 현재 증거일 뿐 미래 고정 상한이 아니며 신규 page는 자동으로 범위에 들어간다.
+- **조용한 제외 금지:** 발견된 모든 route는 PASS/FAIL/BLOCKED 증거를 가져야 한다. ledger row 누락, skip, “이번에 안 바뀜”, “비슷한 페이지 확인함”, 과거 release PASS는 수용 증거가 아니다. 비공개/internal surface도 명시적으로 분류하고 직접 렌더링 확인해야 한다.
+- **동적 페이지:** 모든 dynamic route는 재현 가능한 valid fixture와 적용 가능한 invalid/not-found/permission case를 가진다. `[id]`, `[symbol]`, `[clubId]` 등은 부모 목록 page만 확인해서 통과 처리할 수 없다.
+- **인증/역할 매트릭스:** 각 페이지가 지원하는 실질적으로 다른 상태를 검증한다. guest, 로그인 member, restricted/permission-denied, owner/non-owner, administrator/privileged role 등을 포함하고 redirect/access-denied도 page 동작으로 간주해 확인한다.
+- **모든 섹션/컨트롤:** URL을 한 번 여는 것으로 끝내지 않는다. header부터 footer까지 scroll하고 모든 tab/accordion/section을 방문하며 관련 dialog/drawer를 열고 primary/secondary control을 조작하고 stateful 화면은 back/forward와 refresh persistence도 확인한다.
+- **전 페이지 반응형 매트릭스:** v440 viewport 계약을 변경 page나 admin에만 적용하지 않고 **모든 페이지에 적용**한다. 320/360/375/390/412/430 portrait, 대표 landscape, 768/1024 tablet, desktop, 200% 및 적용 가능한 400% zoom/reflow를 포함한다. body overflow, 잘림, overlap, 숨은 CTA, 접근 불가 control, 의사결정 핵심 정보 소실은 실패다.
+- **전 사이트 QA 최소 5회 완주:** 모든 release candidate는 발견된 전체 page inventory를 대상으로 **최소 5회의 완전한 QA pass**를 수행한다. 매 pass마다 모든 page를 방문하고, 5회 누적 증거로 필수 viewport/state matrix, 긴/짧은 콘텐츠, loading/empty/partial/error, 실제 API 데이터 상태를 모두 커버한다. pass 중 결함을 수정하면 해당 page와 영향을 받는 shared layout/component 범위를 다시 수행한다.
+- **관리자 기본 포함:** 모든 `/admin/**` route는 매 full-site pass마다 authenticated administrator runtime data로 확인한다. navigation, form, table/card, dialog, Test 안전모드의 민감/파괴 action, role/step-up, audit evidence, responsive layout을 포함한다. “관리자는 나중에 별도 확인”을 금지한다.
+- **상태 화면:** loading/skeleton, empty, long-content, partial/stale, validation failure, network/server error, 지원되는 offline/maintenance, permission denied, success, mutation pending/retry를 포함한다. happy path seed data만으로 통과한 페이지는 수용하지 않는다.
+- **런타임 진실:** Test QA는 exact candidate SHA와 실제 backend/API/database contract를 사용한다. mock-only, screenshot-only, source inspection, unit test, 과거 release browser 결과는 route-by-route runtime 증거를 대체하지 못한다.
+- **coverage gate:** discovered-page count = QA-ledger distinct-page count = 최종 수용 증거가 있는 page count가 반드시 같아야 한다. count 불일치, 미해결 FAIL/BLOCKED, candidate 기인 console/runtime error, 관리자 page 누락이 하나라도 있으면 Production 승격을 차단한다.
+- **증거:** exact SHA, generated route inventory hash/count, route, role/state, fixture ID, browser/engine, viewport/orientation/zoom, pass number, API/runtime identity, 결과, defect linkage를 보존한다.
+- 상세 권위: [FULL_ROUTE_UI_QA_SPEC.ko.md](FULL_ROUTE_UI_QA_SPEC.ko.md), [ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.ko.md](ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.ko.md). v442는 기획/문서 변경이며 현재 모든 페이지가 이미 새 게이트를 통과했다고 주장하지 않는다.
 
 ## P0 경제 관리자 canonical control-state 계약 — v2026.09.25.441 (2026-09-25)
 

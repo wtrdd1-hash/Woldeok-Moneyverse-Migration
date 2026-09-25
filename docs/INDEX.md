@@ -3,7 +3,7 @@
 **English canonical** | [한국어](INDEX.ko.md)
 
 > Documentation governance: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)
-> Current planning authority: v2026.09.23.406
+> Current planning authority: v2026.09.25.442
 
 ## Start here
 
@@ -25,6 +25,7 @@
 - [6-Domain Defect Mitigation Spec v406](planning/deltas/v2026.09.23.406.md)
 - [Jobs/profession mastery](planning/JOBS_PROFESSION_MASTERY_SPEC.md)
 - [Private chat](planning/ONE_TO_ONE_PRIVATE_CHAT_SPEC.md)
+- [Full-route UI & functional QA](planning/FULL_ROUTE_UI_QA_SPEC.md) — all pages, including all admin routes, five full-site passes per release candidate.
 ## Architecture, operations and features
 
 - [Architecture index](architecture/README.md)

@@ -1,11 +1,25 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.25.441
+> Current ledger version: v2026.09.25.442
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.25.442 — 2026-09-25
+- Start `origin/main=a7fac4f4db2c4db3b9f8a4e159ad6ea5267540ec`; dedicated branch `docs/all-page-qa-v2026.09.25.442` created from latest main.
+- Mid-work `origin/main=a7fac4f4db2c4db3b9f8a4e159ad6ea5267540ec`; no drift. `git diff --check` passed at the recorded checkpoint.
+- Re-reviewed documentation authority, v440/v441 responsive/admin contracts, current frontend route source, historical full-UI QA records and administrator runtime-QA records.
+- Current exact-source snapshot contains **86 frontend pages**, including **22 `/admin/**` pages** and **8 dynamic pages**; 25 loading components and 3 error components were also observed. Historical 60-route sweeps therefore cannot prove current full-route completion.
+- **G442-01 / P0:** every page in the exact release candidate is mandatory QA scope. Sampling or 'changed routes only' acceptance is superseded.
+- **G442-02 / P0:** all administrator pages are baseline coverage in every full-site pass; administrator verification is not a separate optional or deferred phase.
+- **G442-03 / P0:** source-generated route inventory must reconcile 1:1 with the QA ledger and final accepted evidence. Any missing/skipped route or count mismatch blocks Production.
+- **G442-04 / P0:** every candidate requires at least five complete full-site QA passes; every pass visits every page and cumulative evidence covers viewport, role, dynamic fixture, content-length and UI-state matrices.
+- **G442-05 / P0:** dynamic pages require direct valid/invalid/not-found/permission fixtures; parent-list coverage cannot substitute for detail-route checks.
+- **G442-06 / P0:** route acceptance requires full-page traversal and local tabs/sections/dialogs/controls with real Test API/runtime data, not screenshot-only, mock-only, source-only or historical evidence.
+- **G442-07 / P0:** v440 responsive matrix now applies to all pages, not only modified/admin pages. Any clipping, body overflow, overlap, inaccessible control, hidden critical content or task-completion loss blocks promotion.
+- Detailed authority: `FULL_ROUTE_UI_QA_SPEC.md` / `.ko.md` plus `ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md` / `.ko.md`. Planning/docs only; no claim that current runtime already passed v442.
 
 ## v2026.09.25.441 — 2026-09-25
 - Latest-main recheck detected concurrent v440 integration; work was rebased onto `origin/main=5547e5b0c2eb76c60450e089cb415bd65c81026f` rather than overwriting it.

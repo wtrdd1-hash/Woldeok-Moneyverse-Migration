@@ -1,6 +1,6 @@
 # Woldeok Moneyverse — Accessibility, Responsive Interaction & UI State Specification
 
-> Version: v2026.09.25.440
+> Version: v2026.09.25.442
 > Status: Living implementation-oriented product specification
 > Date: 2026-09-25
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `MONETIZATION_COMPLIANCE_SEO_SPEC.md`, `BILLING_SUBSCRIPTION_CONSUMER_PROTECTION_SPEC.md`, `ANALYTICS_EXPERIMENTATION_GOVERNANCE_SPEC.md`
@@ -252,6 +252,19 @@ Every new or materially changed user-facing feature should document:
 - automated checks plus manual checks required before release.
 
 ## 15. Automated and manual QA
+
+### 15.0 Full-route baseline — v2026.09.25.442
+
+- Full-site QA scope is generated from the exact candidate's frontend page source; it is never maintained as a hand-picked sample list.
+- Every discovered page is included, including every `/admin/**` page by default. Administrator coverage is part of the baseline, not a separate optional campaign.
+- Current source snapshot: 86 page routes, 22 administrator routes, 8 dynamic routes. Recalculate on every candidate; never hard-code these counts as the future expected total.
+- Each release candidate requires five complete full-site passes. Every pass visits every discovered page; the combined pass set covers the required viewport, role, content and UI-state matrix.
+- Dynamic routes use deterministic valid fixtures and applicable invalid/not-found/permission fixtures.
+- Each route check traverses the entire page and all local tabs/sections/dialogs/primary controls rather than treating a successful initial render as a pass.
+- The route inventory and QA ledger must have equal distinct-route counts, with no missing PASS/FAIL/BLOCKED row. Any mismatch blocks promotion.
+- Shared layouts/components do not justify skipping routes. Shared-component evidence may reduce duplicate root-cause analysis, but every consuming page still receives direct render/runtime verification.
+- Real Test backend/API data is required for final acceptance. Mock-only or screenshot-only verification is supplemental.
+- Detailed evidence schema and execution rules are defined in `FULL_ROUTE_UI_QA_SPEC.md`.
 
 Automation is necessary but not sufficient.
 
