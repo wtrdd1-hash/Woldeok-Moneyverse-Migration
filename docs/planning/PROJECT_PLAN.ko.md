@@ -11,7 +11,7 @@
 ## P0 네이티브 앱 전체 API 정합 및 관리자 기능 계약 — v2026.09.25.443 (2026-09-25)
 
 - **승인된 앱 표면은 전수 대상:** generated 모바일/앱 계약에 포함된 모든 endpoint는 Android 제품에서 전용 업무 UI 또는 계약 기반 전체 기능센터 중 하나를 통해 도달 가능해야 한다. 앱 사용 승인을 받은 backend 기능인데 앱 상호작용이 없으면 미완성이다.
-- **현재 감사 스냅샷:** 번들 기준 공식 계약은 현재 앱 승인 endpoint 179개이며 그중 관리자 endpoint 11개다. 이 숫자는 고정 한도가 아니라 현재 스냅샷이며 관련 backend 변경마다 generated contract drift를 다시 확인한다.
+- **현재 감사 스냅샷:** 번들 기준 공식 계약은 현재 app-safe endpoint 337개이며 그중 관리자 endpoint 118개다. 이 숫자는 고정 한도가 아니라 현재 스냅샷이며 관련 backend 변경마다 generated contract drift를 다시 확인한다.
 - **관리자 기능 포함 + 권한 게이트:** 인증 viewer 상태와 서버 관리자 역할 재검증을 모두 통과한 경우에만 관리자 UI를 노출한다. backend 권한검사, console session, 필요한 step-up/재인증, CSRF, 감사기록, action별 정책은 그대로 필수이며 버튼 숨김은 인가가 아니다.
 - **사용자 화면 API 주소 비노출:** 일반/관리자 UI, 일반 오류문구, analytics, 진단 로그에 API route 문자열, private backend host/port, internal token, cookie, CSRF, OAuth handoff code, secret을 표시하지 않는다. 단 보안은 주소 은폐가 아니라 인증·인가·서버 정책으로 보장한다.
 - **의도적 비앱 경계는 제외 유지:** health probe, worker/scheduler control, DB 직접 접근, private backend-only interface, 외부 webhook ingress는 endpoint 수를 늘리기 위해 네이티브 앱 action으로 노출하지 않는다.
