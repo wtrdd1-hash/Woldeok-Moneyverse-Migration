@@ -79,8 +79,8 @@ export function AdminShopView({ items }: AdminShopViewProps) {
       setEditingId(null);
       setStatusMsg('성공적으로 저장되었습니다.');
       setTimeout(() => setStatusMsg(null), 3000);
-    } catch (e: any) {
-      setStatusMsg(e.message || '오류가 발생했습니다.');
+    } catch (error: unknown) {
+      setStatusMsg(error instanceof Error ? error.message : '오류가 발생했습니다.');
       setTimeout(() => setStatusMsg(null), 3000);
     }
   };
