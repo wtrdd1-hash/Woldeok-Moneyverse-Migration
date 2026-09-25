@@ -1,11 +1,23 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.25.442
+> Current ledger version: v2026.09.25.443
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.25.443 — 2026-09-25
+- Start/mid baseline: `origin/main=99b0eaa04bbd0b28005861c624690c56744e8a14` after detecting and preserving concurrent v442 work; Android app main remained `dfe24bac1886e2b63b9b736005e4d9884074ac5d`.
+- Reviewed PROJECT_PLAN, mobile API reference/contract, app operating instructions, Android API declarations, current administrator app surface, and the v442 full-site QA gate before implementation.
+- **G443-01 / P0:** every endpoint approved by the generated mobile contract must map to Android functionality through dedicated UI or the contract-driven feature center; approved-but-unreachable app functionality blocks parity.
+- **G443-02 / P0:** administrator functions are in native-app scope for verified administrator accounts, with viewer claim plus server role recheck and all backend step-up/CSRF/audit controls preserved.
+- **G443-03 / P0:** user-visible UI/errors/telemetry must not expose API routes, backend hosts/ports, cookies, CSRF, OAuth handoff codes, internal tokens or secrets; security still cannot depend on obscurity.
+- **G443-04 / P0:** private backend-only routes, webhooks, health and worker/scheduler controls remain intentionally outside app actions unless separately approved.
+- **G443-05 / P1:** current contract snapshot is 179 approved app endpoints including 11 admin endpoints; counts are regenerated evidence, not a permanent target.
+- **G443-06 / P0 release gate:** Android CI compile/tests/assemble/bundle plus Test gateway/backend verification are required before main merge/promotion. App PR #24 is implementation evidence in progress, not Production evidence.
+- English/Korean authority is synchronized in PROJECT_PLAN and the v443 delta/worklog/update/changelog records.
+
 
 ## v2026.09.25.442 — 2026-09-25
 - Start `origin/main=a7fac4f4db2c4db3b9f8a4e159ad6ea5267540ec`; dedicated branch `docs/all-page-qa-v2026.09.25.442` created from latest main.
