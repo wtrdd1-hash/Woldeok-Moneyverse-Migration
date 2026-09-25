@@ -65,8 +65,8 @@ export function AdminSubNav() {
   const navRef = useRef<HTMLElement>(null);
   const activeItemRef = useRef<HTMLLIElement>(null);
 
-  if (!pathname.startsWith('/admin')) return null;
-  const active = activeAdminTab(pathname);
+  const isAdminPath = pathname.startsWith('/admin');
+  const active = isAdminPath ? activeAdminTab(pathname) : null;
 
   // Auto-scroll the active tab into view smoothly on mobile/narrow viewports
   useEffect(() => {
@@ -78,6 +78,8 @@ export function AdminSubNav() {
       });
     }
   }, [active]);
+
+  if (!isAdminPath) return null;
 
   return (
     <nav
