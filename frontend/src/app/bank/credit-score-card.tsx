@@ -27,7 +27,7 @@ export interface CreditRatingData {
   readonly simulatedNotice?: string;
 }
 
-export function CreditScoreCard({ initialRating }: { readonly initialRating?: CreditRatingData }) {
+export function CreditScoreCard({ initialRating }: { readonly initialRating?: CreditRatingData | undefined }) {
   const rating = initialRating ?? fallbackRating;
   const [selectedInstallments, setSelectedInstallments] = useState<number>(6);
   const [simulatedLoanAmount, setSimulatedLoanAmount] = useState<number>(
@@ -83,7 +83,7 @@ export function CreditScoreCard({ initialRating }: { readonly initialRating?: Cr
             <p className="mt-1 font-mono text-sm font-bold text-foreground truncate">
               {rating.creditLimitWld > 0 ? (
                 <>
-                  <Amount value={rating.creditLimitWld} /> WLD
+                  <Amount value={rating.creditLimitWld.toString()} /> WLD
                 </>
               ) : (
                 '대출 일시 유예'

@@ -72,7 +72,7 @@ const categoryBadges: Record<string, { label: string; color: string }> = {
   JUDGE_AGENT: { label: '판정', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30' },
 };
 
-export function CouncilDebateCard({ initialData }: { readonly initialData?: CouncilDebateData }) {
+export function CouncilDebateCard({ initialData }: { readonly initialData?: CouncilDebateData | undefined }) {
   const [selectedRound, setSelectedRound] = useState<1 | 2 | 3>(3);
   const data = initialData ?? fallbackData;
 
