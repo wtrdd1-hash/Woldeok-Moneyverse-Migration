@@ -1,8 +1,8 @@
 # Moneyverse 데이터베이스 아키텍처 연구 검토 — v2026.09.25.443
 
-> 날짜: 2026-09-25  
-> 상태: 기획/조사 근거  
-> 기준 언어: English  
+> 날짜: 2026-09-25
+> 상태: 기획/조사 근거
+> 기준 언어: English
 > 탐색 corpus: `MONEYVERSE_DATABASE_REFERENCE_CORPUS_v2026.09.25.443.csv`
 
 ## 1. 범위와 근거 진실성

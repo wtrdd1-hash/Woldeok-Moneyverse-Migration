@@ -1,8 +1,8 @@
 # 데이터베이스 아키텍처 명세 — v2026.09.25.443
 
-> 상태: 채택된 상세 기획 명세  
-> 기준 언어: English  
-> 런타임 기준: 별도 승인된 upgrade가 없는 한 PostgreSQL 17.x  
+> 상태: 채택된 상세 기획 명세
+> 기준 언어: English
+> 런타임 기준: 별도 승인된 upgrade가 없는 한 PostgreSQL 17.x
 > 조사 근거: [MONEYVERSE_DATABASE_ARCHITECTURE_RESEARCH_REVIEW_v2026.09.25.443.ko.md](../findings/MONEYVERSE_DATABASE_ARCHITECTURE_RESEARCH_REVIEW_v2026.09.25.443.ko.md)
 
 ## 1. 권위

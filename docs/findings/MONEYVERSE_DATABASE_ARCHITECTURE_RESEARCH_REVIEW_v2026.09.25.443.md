@@ -1,8 +1,8 @@
 # Moneyverse Database Architecture Research Review — v2026.09.25.443
 
-> Date: 2026-09-25  
-> Status: planning/research evidence  
-> Canonical language: English  
+> Date: 2026-09-25
+> Status: planning/research evidence
+> Canonical language: English
 > Discovery corpus: `MONEYVERSE_DATABASE_REFERENCE_CORPUS_v2026.09.25.443.csv`
 
 ## 1. Scope and evidence truth

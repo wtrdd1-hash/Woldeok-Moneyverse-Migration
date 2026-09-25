@@ -1,8 +1,8 @@
 # Database Architecture Specification — v2026.09.25.443
 
-> Status: adopted detailed planning specification  
-> Canonical language: English  
-> Runtime baseline: PostgreSQL 17.x unless a separately approved upgrade changes it  
+> Status: adopted detailed planning specification
+> Canonical language: English
+> Runtime baseline: PostgreSQL 17.x unless a separately approved upgrade changes it
 > Research evidence: [MONEYVERSE_DATABASE_ARCHITECTURE_RESEARCH_REVIEW_v2026.09.25.443.md](../findings/MONEYVERSE_DATABASE_ARCHITECTURE_RESEARCH_REVIEW_v2026.09.25.443.md)
 
 ## 1. Authority
