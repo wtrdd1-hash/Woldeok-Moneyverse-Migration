@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { TreasuryInputError, TreasuryService } from './treasury.service';
-import type { TreasuryRepository } from './treasury.repository';
+import { AUTHORITATIVE_BUDGET_ENVELOPES, AUTHORITATIVE_TAX_RATES } from './treasury.repository';
+import type { TreasuryOverview, TreasuryRepository } from './treasury.repository';
 
 describe('TreasuryService', () => {
   const mockRepo = {
