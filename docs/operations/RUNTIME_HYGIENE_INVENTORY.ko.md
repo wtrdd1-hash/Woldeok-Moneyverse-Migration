@@ -2,9 +2,19 @@
 
 [English canonical](RUNTIME_HYGIENE_INVENTORY.md) | **한국어**
 
-> 버전: v2026.09.23.405
+> 버전: v2026.09.25.438
 > 관측일: 2026-09-23
 > 호스트 기준선: [../CURRENT_RUNTIME_BASELINE.ko.md](../CURRENT_RUNTIME_BASELINE.ko.md)
+
+## 릴리스 저장공간 정리 — v2026.09.25.438
+
+정리 전 관측값은 root 59%, Moneyverse data disk 72%, data disk 사용 inode 약 490만 개였다. 삭제 전 Production/Test symlink target과 4개 backend/frontend 프로세스 CWD가 모두 v436임을 재입증했다.
+
+오래된 불변 릴리스 디렉터리 207개를 제거하고 Production 10개, Test 10개만 남겼다. 최종 data disk는 41G/197G(22%), 사용 inode 392,186개(3%)이며 약 94G와 inode 약 450만 개를 회수했다. root는 55G/99G(59%)로 유지됐다.
+
+Production/Test systemd 애플리케이션 서비스 4개가 모두 active를 유지했고 Production/Test backend health가 OK를 반환했다. PostgreSQL, upload, backup, 보호 QA data, 24G disk swapfile은 삭제하지 않았다.
+
+향후 정리는 `../planning/STORAGE_RELEASE_RETENTION_SPEC.ko.md`의 active target/CWD 보호 및 보존 정책을 따른다. 광범위 volume prune은 계속 금지한다.
 
 ## 보호 대상 현재 런타임
 
