@@ -1,7 +1,7 @@
 # v2026.09.25.443 — Database Architecture Research Worklog
 
 > Date: 2026-09-25
-> Status: IN_PROGRESS
+> Status: READY_FOR_MERGE
 > Branch: `docs/db-architecture-research-v2026.09.25.443`
 > Start main: `99b0eaa04bbd0b28005861c624690c56744e8a14`
 > Scope: research/planning/documentation only unless a later explicitly recorded implementation task is created.
@@ -35,3 +35,11 @@ Large-scale discovery establishes breadth only. Moneyverse requirements are adop
 - Direct primary review used PostgreSQL 17 constraints, indexes, partitioning, ALTER/CREATE INDEX, serialization retry, locking, vacuum/statistics, backup/PITR and replication documentation.
 - Current repository DB authority and security/migration/backup docs were re-read before integration.
 - Mid-work remote main remained `99b0eaa04bbd0b28005861c624690c56744e8a14`; no overlapping main change required reconciliation at this checkpoint.
+
+## Final checkpoint
+- Final remote-main recheck remained `99b0eaa04bbd0b28005861c624690c56744e8a14`; no concurrent main drift required reconciliation.
+- The committed discovery corpus parses to **66,858 CSV records** after whitespace/newline normalization; SHA-256 is `4fe368c0d59fa5ace6b679feeb12452dc7fe0af965489ac7108287d7daad89a0`.
+- PROJECT_PLAN and INTEGRATED_PLANNING_MASTER now declare v2026.09.25.443 in both English and Korean.
+- Added paired research review, detailed architecture spec, planning delta, changelog and internal update records.
+- `git diff --check origin/main...HEAD` passed; EN/KO counterpart existence and v443 authority markers were validated.
+- Research/planning/docs only: no SQL migration, database data mutation, Test deployment or Production promotion was performed.
