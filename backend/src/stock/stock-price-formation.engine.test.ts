@@ -60,7 +60,7 @@ describe('StockPriceFormationEngine', () => {
   it('should clamp price to minPriceWdx (1 WDX) and never allow zero or negative prices', () => {
     const pennyStockCrash = calculateNextStockPrice({
       symbol: 'WDX_PENNY',
-      basePrice: 2,
+      basePrice: 1,
       fundamentalAnchorReturn: -0.05,
       eventShockContribution: -0.10,
       volatilityRegime: 2.0,
@@ -68,5 +68,6 @@ describe('StockPriceFormationEngine', () => {
 
     expect(pennyStockCrash.newPrice).toBeGreaterThanOrEqual(DEFAULT_PRICE_ENGINE_CONFIG.minPriceWdx);
     expect(pennyStockCrash.newPrice).toBe(1);
+    expect(pennyStockCrash.isMinPriceClamped).toBe(true);
   });
 });
