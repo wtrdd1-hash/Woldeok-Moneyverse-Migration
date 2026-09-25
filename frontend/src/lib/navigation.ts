@@ -451,3 +451,14 @@ export function activeNavItem(items: readonly NavItem[], pathname: string): NavI
   }
   return null;
 }
+
+export function isGroupCurrent(pathname: string, group: NavGroup): boolean {
+  return group.entries.some(
+    (entry) => pathname === entry.href || (entry.href !== '/' && pathname.startsWith(`${entry.href}/`)),
+  );
+}
+
+export function isCurrent(pathname: string, href: string): boolean {
+  if (href === '/') return pathname === '/';
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
