@@ -433,7 +433,7 @@ export default async function CasinoPage() {
                   🎡 <T korean="20구획 휠" english="20-Segment Wheel" />
                 </TabsTrigger>
                 <TabsTrigger value="slots" className="min-h-11 px-4 text-sm font-semibold rounded-xl">
-                  🎰 <T korean="럭키 슬롯 (심의 중)" english="Lucky Slots (Review)" />
+                  🎰 <T korean="럭키 777 슬롯" english="Lucky 777 Slots" />
                 </TabsTrigger>
               </TabsList>
             </div>

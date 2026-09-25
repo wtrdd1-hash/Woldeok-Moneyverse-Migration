@@ -404,3 +404,72 @@ export async function playWheel20(
     },
   );
 }
+
+const SLOT_FACE_DESCRIPTIONS: Record<number, string> = {
+  1: '🍒 럭키 체리 믹스',
+  2: '🍋 스위트 레몬 믹스',
+  3: '🔔 리버티 벨 믹스',
+  4: '💎 다이아몬드 믹스',
+  5: '⭐ 골든 스타 믹스',
+  6: '🎰 777 대박 잭팟!',
+};
+
+export async function playSlots(
+  _previous: CasinoPlayState,
+  formData: FormData,
+): Promise<CasinoPlayState> {
+  const choice = String(formData.get('choice') ?? '6');
+  const stake = wholeNumber(formData.get('stake'));
+
+  if (!isDieFace(choice)) {
+    return { status: 'error', message: '슬롯 잭팟 기호를 선택해 주세요.' };
+  }
+  if (stake === null) {
+    return { status: 'error', message: '1 WLD 이상 정수만 걸 수 있어요.' };
+  }
+
+  try {
+    const receipt = await mutate<DiceReceipt>('/api/v1/casino/dice/plays', {
+      body: { game: 'dice_number', choice, stake, idempotencyKey: idempotencyKey() },
+    });
+    revalidatePath('/casino');
+
+    const outcomeFace =
+      Number.isInteger(receipt.outcome_face) &&
+      receipt.outcome_face >= 1 &&
+      receipt.outcome_face <= 6
+        ? receipt.outcome_face
+        : null;
+
+    const netAmount = canonicalIntegerString(receipt.net_amount);
+    if (netAmount === null)
+      throw new TypeError('casino slots receipt returned an invalid net amount');
+    const amount = groupDigits(absAmount(netAmount));
+    const result = resultOf(netAmount);
+
+    const symDesc = outcomeFace ? (SLOT_FACE_DESCRIPTIONS[outcomeFace] ?? `릴 ${outcomeFace}`) : '슬롯 릴';
+
+    const outcome =
+      result === 'win'
+        ? `슬롯 릴 정지: [${symDesc}] 적중! ${amount} WLD를 획득했어요!`
+        : result === 'loss'
+          ? `슬롯 릴 정지: [${symDesc}] 불일치. ${amount} WLD를 잃었어요.`
+          : `슬롯 릴 정지: [${symDesc}]`;
+
+    return {
+      status: 'ok',
+      message: receipt.replayed ? `이미 처리된 스핀이에요. ${outcome}` : outcome,
+      tone: resultTone(result),
+      result,
+      netAmount,
+      replayed: receipt.replayed,
+      ...(outcomeFace === null ? {} : { outcomeFace }),
+    };
+  } catch (error) {
+    return closedOr(
+      error,
+      '이번 스핀은 처리되지 않았어요. 잔액과 오늘 남은 한도, 내가 건 잠금을 다시 확인해 주세요.',
+    );
+  }
+}
+
