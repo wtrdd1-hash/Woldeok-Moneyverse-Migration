@@ -2,11 +2,24 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.25.439
+> **현재 통합 버전:** v2026.09.25.440
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## P0 관리자 모바일/반응형 정합성 하드 게이트 — v2026.09.25.440 (2026-09-25)
+
+- **관측 결함군:** 경제 운영 관리자 화면에서 모바일 viewport를 넘는 폭, 내비게이션/문구 잘림, AI Council 카드의 과밀 배치, 좁은 화면에서 읽기 어려운 제어값 배치가 발생할 수 있다. 이는 미관 문제가 아니라 기능 결함이다.
+- **페이지 전체 가로 넘침 금지:** 지원 모바일 폭에서 document/body가 viewport 안에 들어와야 한다. 카드·제목·badge·모델명·설명·tab·control은 줄바꿈/재배치하되 화면 밖으로 잘리면 안 된다. 데이터 table처럼 명시한 로컬 영역만 가로스크롤을 허용하며 overflow 표시와 문맥을 유지한다.
+- **관리자 내비게이션 계약:** 상단/섹션 내비게이션의 중요 항목을 화면 밖 숨은 글자에 의존시키지 않는다. 좁은 화면에서는 reflow, overflow affordance가 있는 접근 가능한 scrollable tab, 또는 label이 있는 menu로 전환하고 현재 위치와 모든 핵심 목적지를 찾을 수 있어야 한다.
+- **경제/AI 카드:** AI Council 요약과 specialist seat 카드는 모바일에서 1열 흐름으로 전환한다. desktop 고정 min-width 때문에 body overflow가 생기면 안 된다. 긴 한/영 문구와 model identifier는 action/status와 겹치지 않고 안전하게 줄바꿈한다.
+- **금융 제어값 정합성:** slider thumb 위치, 표시 텍스트 값, input state, pending 값, 서버 권위 저장값은 동일한 숫자와 단위를 나타내야 한다. 예를 들어 thumb는 0이 아닌 위치인데 `0.0%`를 표시하는 상태는 **P0 제어 무결성 결함**이며 정합화 전 apply/save를 비활성화한다.
+- **슬라이더 모바일 조작성:** 각 금리 slider는 정확한 현재값, min/max/step/unit를 control 인접 위치에 표시하고 keyboard/button 또는 동등한 정밀입력 수단을 제공하며 저장 후 서버 권위값을 다시 표시한다. drag-only 조작은 금지한다.
+- **필수 viewport matrix:** 최소 320, 360, 375, 390, 412, 430 CSS px portrait, 대표 landscape, 768/1024 tablet, desktop을 검증한다. 200% 및 적용 가능한 400% zoom/reflow도 포함한다.
+- **5회 반복 회귀 QA:** 반응형/관리자 route를 실질 수정할 때마다 위 viewport matrix로 **최소 5회 반복 QA**한다. header부터 page end까지 전체 scroll, 모든 tab/section, 긴/짧은 콘텐츠, loading/error/empty, interactive control을 포함한다. 단일 screenshot 또는 단일 viewport 확인은 수용 증거가 아니다.
+- **승격 차단:** 중요 문구/control 잘림, 도달 불가능한 navigation, body overflow, overlap, 숨은 CTA, 표시값/state 불일치, touch target 실패, 필수 화면에서 task completion 불가가 하나라도 있으면 Test 수용 및 Production 승격을 차단한다.
+- 상세 권위: [ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.ko.md](ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.ko.md). v440은 기획/문서 변경이며 첨부 화면의 runtime 결함이 이미 수정됐다고 주장하지 않는다.
 
 ## P0 로그인/세션 영속성 하드 게이트 — v2026.09.25.439 (2026-09-25)
 

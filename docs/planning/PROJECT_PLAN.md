@@ -2,11 +2,24 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.25.439
+> Current integrated version: v2026.09.25.440
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## P0 administrator mobile/responsive correctness hard gate — v2026.09.25.440 (2026-09-25)
+
+- **Observed defect class:** the Economy Operations administrator surface can exceed the mobile viewport, clip navigation/labels, over-densify AI Council cards, and present control/value layouts that are not reliably readable at narrow widths. These are functional defects, not cosmetic exceptions.
+- **No page-level horizontal overflow:** at supported mobile widths the document/body MUST fit the viewport. Cards, headings, badges, model names, descriptions, tabs and controls may wrap/reflow but must not be clipped off-screen. Only explicitly designed local regions such as a data table may horizontally scroll, with a visible affordance and preserved context.
+- **Admin navigation contract:** top-level and section navigation must never depend on hidden off-screen labels. On narrow screens it must reflow, become an accessible scrollable tab strip with visible overflow affordance, or collapse into a labelled menu. Current destination and all critical destinations remain discoverable.
+- **Economy/AI cards:** AI Council summary and specialist-seat cards become a single-column mobile flow; no fixed desktop minimum width may force page overflow. Long Korean/English text and model identifiers wrap safely without overlapping status/action controls.
+- **Financial control correctness:** slider thumb position, text value, input state, pending value and server-authoritative saved value MUST represent the same number and unit. A UI that shows e.g. `0.0%` while the slider position represents a non-zero value is a **P0 control-integrity failure** and must disable apply/save until reconciled.
+- **Slider/mobile ergonomics:** every rate slider exposes its exact numeric value adjacent to the control, min/max/step/unit, keyboard buttons or equivalent precise input, and a post-save authoritative value. Dragging alone is never required.
+- **Viewport matrix:** mandatory QA covers at least 320, 360, 375, 390, 412 and 430 CSS px portrait widths, representative landscape, 768/1024 tablet widths, and desktop. Browser zoom/reflow at 200% and applicable 400% is included.
+- **Five-pass regression requirement:** every materially changed responsive/admin route must complete **at least five repeated QA passes** over the viewport matrix, including scroll from header to page end, every tab/section, long/short content, loading/error/empty states, and interactive controls. One screenshot or one viewport is not acceptance evidence.
+- **Release blocker:** any clipped critical text/control, unreachable navigation, body overflow, overlap, hidden CTA, value/state mismatch, touch-target failure, or loss of task completion on the required matrix blocks Test acceptance and Production promotion.
+- Detailed authority: [ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md](ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md). v440 is planning/documentation only; it does not claim the pictured runtime defect is already fixed.
 
 ## P0 login/session persistence hard gate — v2026.09.25.439 (2026-09-25)
 

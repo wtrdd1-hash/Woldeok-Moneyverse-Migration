@@ -1,11 +1,23 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.25.439
+> Current ledger version: v2026.09.25.440
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.25.440 — 2026-09-25
+- Start `origin/main=5394dd266e68c0a3ebfee616cdf7f0d906116b48`; dedicated branch `docs/admin-mobile-responsive-v2026.09.25.440`.
+- Reviewed PROJECT_PLAN, integrated master, responsive/accessibility spec, product-design/admin/economy planning and the reported Economy Operations mobile screenshots.
+- **G440-01 / P0:** page-level horizontal overflow or clipped administrator navigation/content is a functional release blocker.
+- **G440-02 / P0:** AI Council and economy metric/control cards must reflow to a one-column mobile layout without fixed-width overflow.
+- **G440-03 / P0:** rate slider thumb, displayed numeric value, form state, submitted payload and server-authoritative saved value must agree. Mismatch blocks save/apply.
+- **G440-04 / P0:** administrator navigation must preserve discoverability; hidden off-screen labels without overflow affordance are prohibited.
+- **G440-05 / P0 QA:** required viewport matrix is 320/360/375/390/412/430 portrait + representative landscape + 768/1024 + desktop, with 200% and applicable 400% zoom/reflow.
+- **G440-06 / P0 QA:** every materially changed responsive/admin route requires at least five complete repeated QA passes across the matrix, full-page scroll, every tab/section, long-content states and all interactive controls.
+- Any clipping, overlap, unreachable control, hidden CTA, body overflow, touch-target failure, accidental reset or control/value mismatch blocks Test acceptance and Production promotion.
+- Detailed authority: `ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md` / `.ko.md`. Planning/documentation only; no runtime fix is claimed.
 
 ## v2026.09.25.439 — 2026-09-25
 - Start `origin/main=118a58ddc289839957caacd14650863e614f8fad`; dedicated branch `docs/session-continuity-v2026.09.25.439` created from latest main.
