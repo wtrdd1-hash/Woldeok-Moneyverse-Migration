@@ -2,11 +2,24 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.25.438
+> Current integrated version: v2026.09.25.439
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## P0 login/session persistence hard gate — v2026.09.25.439 (2026-09-25)
+
+- **User-visible invariant:** an authenticated user whose session is still valid MUST remain signed in across backend/frontend restart, systemd service restart, host reboot, reverse-proxy reload, blue-green/canary cutover, rollback, and routine application deployment. Runtime replacement alone is never a logout reason.
+- **Allowed logout reasons are explicit and narrow:** user-requested logout, administrator/security revocation, credential-compromise response, account disable/delete, or normal server-authoritative expiry. Deploy/restart/config reload/key rotation without a security revocation decision is not an allowed reason.
+- **Durable authority:** session records and all material needed to validate them must be deployment-independent and durable. Process-local memory may cache auth state but cannot be its sole authority. Restart procedures must not truncate/replace the shared session authority.
+- **Key continuity:** signing/encryption key rotation must support overlapping validation of still-valid sessions. Cookie name/domain/path/SameSite/Secure/HttpOnly, issuer/audience and compatible session schema must remain migration-safe across old/new generations.
+- **No silent fallback to guest:** a session-validation fault caused by release/config/key/session-store mismatch must surface as a release failure and rollback signal; clients must not quietly treat a valid pre-release user as a guest and ask them to log in again.
+- **Mandatory continuity QA:** before restart/cutover capture at least three authenticated sessions covering browser web, API/mobile-compatible auth, and a representative privileged/re-auth flow where applicable. After Test restart and after Production cutover, exercise the same pre-existing sessions without interactive login and verify authenticated viewer/read plus one safe mutation/CSRF flow.
+- **Promotion blocker:** any deployment-caused logout, unexpected session loss, auth-key mismatch, cookie incompatibility, or release-attributable 401/403 spike blocks Production promotion or triggers automatic rollback. Passing health checks without session continuity is insufficient.
+- **Evidence:** record exact candidate SHA, pre/post runtime identity, session-store health, pre-existing session IDs or privacy-safe hashes, continuity results, auth error deltas, and rollback decision. Session-count equality by itself does not prove continuity.
+- **Regression requirement:** restart/cutover continuity tests are mandatory in release automation. A candidate without exact-SHA Test evidence is not Production-eligible.
+- This strengthens and supersedes any weaker interpretation of v396 while preserving its legitimate security revocation cases. Planning/documentation only; no new runtime deployment is claimed by v439.
 
 ## Disk capacity and release-retention contract — v2026.09.25.438 (2026-09-25)
 

@@ -2,11 +2,24 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.25.438
+> **현재 통합 버전:** v2026.09.25.439
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## P0 로그인/세션 영속성 하드 게이트 — v2026.09.25.439 (2026-09-25)
+
+- **사용자 체감 불변조건:** 아직 유효한 로그인 세션은 backend/frontend 재시작, systemd service 재시작, host reboot, reverse-proxy reload, blue-green/canary 전환, rollback, 일반 애플리케이션 배포를 지나도 로그인 상태를 유지해야 한다. 런타임 교체 자체는 절대 로그아웃 사유가 아니다.
+- **허용 로그아웃 사유를 좁게 고정:** 사용자 직접 로그아웃, 관리자/보안상 명시적 세션 폐기, credential compromise 대응, 계정 비활성화/삭제, 서버 권위 정상 만료만 허용한다. 보안 폐기 판단이 없는 deploy/restart/config reload/key rotation은 허용 사유가 아니다.
+- **영속 권위:** 세션 레코드와 검증에 필요한 핵심 상태는 배포 인스턴스와 독립된 durable/shared authority에 저장한다. 프로세스 메모리는 캐시로만 사용할 수 있고 유일한 인증 권위가 될 수 없다. 재시작 절차가 공유 세션 저장소를 truncate/replace해서는 안 된다.
+- **키 연속성:** 서명/암호화 키 회전은 아직 유효한 기존 세션을 겹쳐 검증해야 한다. cookie name/domain/path/SameSite/Secure/HttpOnly, issuer/audience, 호환 session schema는 구/신 세대 전환 중 migration-safe해야 한다.
+- **guest로 조용히 강등 금지:** release/config/key/session-store 불일치로 발생한 세션 검증 오류를 정상 guest 상태로 숨기고 재로그인을 요구해서는 안 된다. 이는 release failure 및 rollback 신호다.
+- **연속성 QA 의무:** restart/cutover 전 browser web, API/mobile-compatible auth, 적용 가능한 대표 privileged/re-auth flow를 포함해 최소 3개 pre-existing authenticated session을 확보한다. Test restart 후와 Production cutover 후 동일 세션으로 재로그인 없이 authenticated viewer/read와 안전한 mutation/CSRF 흐름 1개 이상을 검증한다.
+- **승격 차단:** 배포 유발 로그아웃, 예상치 못한 session loss, auth-key mismatch, cookie incompatibility, release 기인 401/403 급증이 1건이라도 확인되면 Production 승격을 차단하거나 자동 rollback한다. health check 통과만으로는 승격할 수 없다.
+- **증거:** exact candidate SHA, 전후 runtime identity, session-store health, privacy-safe session 식별자/해시, continuity 결과, auth error 변화, rollback 판단을 기록한다. 단순 session-count 동일성만으로 연속성을 증명할 수 없다.
+- **회귀시험:** restart/cutover session continuity test를 release automation의 필수 항목으로 둔다. exact-SHA Test 증거가 없는 candidate는 Production 승격 자격이 없다.
+- 본 절은 v396의 정당한 보안성 세션 폐기 사유는 유지하면서 더 약한 해석을 supersede한다. v439는 기획/문서 변경이며 새 runtime 배포를 주장하지 않는다.
 
 ## 디스크 용량 및 릴리스 보존 계약 — v2026.09.25.438 (2026-09-25)
 

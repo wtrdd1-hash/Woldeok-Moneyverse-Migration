@@ -1,11 +1,22 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.25.438
+> Current ledger version: v2026.09.25.439
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.25.439 — 2026-09-25
+- Start `origin/main=118a58ddc289839957caacd14650863e614f8fad`; dedicated branch `docs/session-continuity-v2026.09.25.439` created from latest main.
+- Re-reviewed current authority order, PROJECT_PLAN, integrated master, authentication/API references, and existing v396 session-continuity contract.
+- **G439-01 / P0:** valid users must not be logged out by application/service/host restart, deploy, proxy reload, cutover, rollback, or key rotation alone.
+- **G439-02 / P0:** logout causes are restricted to user logout, explicit admin/security revocation, compromise response, account disable/delete, or normal server-authoritative expiry.
+- **G439-03 / P0:** session validation authority and key material must survive runtime replacement; process memory cannot be the sole authority and deployment hooks may not truncate the shared store.
+- **G439-04 / P0:** silent fallback from a valid authenticated session to guest because of release/config/key mismatch is a release failure, not a normal UX path.
+- **G439-05 / P0 release gate:** exact pre-existing authenticated sessions must survive Test restart and Production cutover. Any deployment-caused logout or release-attributable auth error spike blocks promotion or requires rollback.
+- Acceptance evidence requires exact candidate SHA, runtime identities, shared-session health, privacy-safe continuity identifiers, pre/post authenticated requests including safe CSRF mutation, and auth-error deltas. Session counts alone are insufficient.
+- EN/KO parity required. Planning/documentation only; v439 does not claim Test or Production runtime changes.
 
 ## v2026.09.25.438 — 2026-09-25
 - Start/mid-work `origin/main=328b4623f2f063eaaade74e38cb4d8f4f14561c2`; no main drift at the recorded mid-work checkpoint.
