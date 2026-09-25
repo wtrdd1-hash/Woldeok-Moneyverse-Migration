@@ -524,7 +524,7 @@ export class AdminEconomyController {
   councilDebate() {
     return this.guarded(
       async () => {
-        const status = await this.repository().status();
+        const dashboard = await this.repository().dashboard();
         const proposal = {
           id: `prop_live_${Date.now()}`,
           category: 'macro_stability_review',
@@ -551,7 +551,7 @@ export class AdminEconomyController {
         const { executeCouncilDebate } = await import('../economy/multi-agent-council.service');
         const debate = executeCouncilDebate(proposal);
         return {
-          systemStatus: status,
+          dashboard,
           debate,
         };
       },

@@ -176,7 +176,7 @@ export interface AgentRoundVote {
   readonly confidence: number;
   readonly rationale: string;
   readonly risks: readonly string[];
-  readonly targetCritiqueRole?: CouncilAgentRole;
+  readonly targetCritiqueRole?: CouncilAgentRole | undefined;
 }
 
 export interface DebateRoundResult {

@@ -177,14 +177,14 @@ export class BankController {
     return this.guarded(
       async () => {
         const userId = requireUserId(request);
-        const standing = await this.repository().getStanding(userId);
+        const standing = (await this.repository().getStanding(userId)) as Record<string, unknown>;
         const { evaluateUserCreditRating } = await import('./credit-rating.service');
         const profile = {
           userId,
           accountAgeDays: 30, // Default active play horizon
           jobLevel: 5,
-          totalCashWld: Number(standing.cashWld ?? 0),
-          depositBalanceWld: Number(standing.depositBalanceWld ?? 0),
+          totalCashWld: Number(standing['cash_balance'] ?? standing['cashWld'] ?? 0),
+          depositBalanceWld: Number(standing['bank_balance'] ?? standing['depositBalanceWld'] ?? 0),
           historicalRepaymentsCount: 3,
           overdueRepaymentsCount: 0,
         };

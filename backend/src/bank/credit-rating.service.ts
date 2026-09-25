@@ -38,7 +38,7 @@ export interface CreditRatingResult {
     readonly overduePenalty: number;
     readonly riskSpendPenalty: number;
   };
-  readonly recoveryGuidance?: string;
+  readonly recoveryGuidance?: string | undefined;
   readonly simulatedNotice: string;
 }
 
