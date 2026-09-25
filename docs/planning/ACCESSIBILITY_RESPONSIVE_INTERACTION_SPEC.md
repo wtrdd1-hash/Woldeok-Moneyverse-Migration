@@ -1,8 +1,8 @@
 # Woldeok Moneyverse — Accessibility, Responsive Interaction & UI State Specification
 
-> Version: v2026.09.13.11
+> Version: v2026.09.25.440
 > Status: Living implementation-oriented product specification
-> Date: 2026-09-13
+> Date: 2026-09-25
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `MONETIZATION_COMPLIANCE_SEO_SPEC.md`, `BILLING_SUBSCRIPTION_CONSUMER_PROTECTION_SPEC.md`, `ANALYTICS_EXPERIMENTATION_GOVERNANCE_SPEC.md`
 > Korean counterpart: [ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.ko.md](ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.ko.md)
 
@@ -166,6 +166,24 @@ Editing forms must not auto-refresh and erase input. Background updates should u
 ### Navigation
 
 Navigation collapse must preserve all critical destinations, current-location indication, keyboard operation and screen-reader names.
+
+### Administrator economy/mobile hard requirements — v2026.09.25.440
+
+These requirements apply to all administrator routes, with the Economy Operations / AI Council / macro-rate tuning surfaces treated as P0 examples.
+
+1. **Viewport containment:** `html`, `body` and the page shell must not exceed the viewport width at 320/360/375/390/412/430 CSS px. Fixed/min widths inherited from desktop are prohibited unless contained inside an intentional local scroller.
+2. **Content reflow:** headings, descriptions, badges, model identifiers, status chips and action buttons must wrap or stack without clipping, overlap or forcing the page wider than the viewport. Korean and English long strings must both be tested.
+3. **Navigation:** administrator section tabs may use a locally scrollable tablist only when the overflow is visibly discoverable and keyboard/touch operable; otherwise convert to wrap/menu. A partially clipped label with no affordance is a failure.
+4. **Card/grid:** desktop multi-column Council/metric layouts collapse to one column on mobile. Child cards use `min-width: 0`/equivalent semantics so long content can shrink and wrap. Status/action controls move below text when needed.
+5. **Control/value integrity:** range thumb position, rendered number, form model, dirty/pending state, submitted payload and server response must be semantically identical. Any mismatch disables submit and shows a clear reconciliation/error state.
+6. **Financial rates:** interest/yield/tax/limit controls must show current authoritative value, draft value when editing, unit, allowed min/max/step, and post-save confirmed value. Never present an unlabeled visual position as the only value.
+7. **Touch/precision:** primary controls target >=44×44 CSS px where practical. Range controls must have a precise non-drag alternative such as numeric input or increment/decrement buttons.
+8. **Sticky/fixed UI:** headers, bottom bars and CTAs must not cover focused controls, values, confirmation text or the final page content. Safe-area insets are applied where relevant.
+9. **No hidden critical data:** responsive simplification may reorder or collapse detail, but may not remove the model/status/value/reason/audit information required to make an administrator decision.
+10. **State coverage:** default, loading, stale, empty, long-content, error, permission-denied, disabled, dirty/pending, save-success and save-failure states are tested at mobile widths.
+11. **Five-pass rule:** after each material UI change, run at least five complete responsive QA passes. Each pass covers the full page from top to bottom, every tab/section, all interactive controls and the required viewport matrix; defects found in a pass are fixed and the affected coverage is rerun.
+12. **Acceptance evidence:** retain exact candidate SHA, route, browser/engine, viewport, DPR/zoom, pass number, screenshot or trace for failures, and final pass result. A single developer screenshot does not satisfy the gate.
+13. **Release block:** page-level horizontal overflow, clipped/unreachable controls, overlapping text, hidden navigation, mismatched slider/value state, accidental value reset, or inability to finish the admin task is P0 for high-risk economy/security administration and blocks promotion.
 
 ## 11. Required UI states
 

@@ -1,8 +1,8 @@
 # 월덕 머니버스 — 접근성·반응형 상호작용·UI 상태 명세
 
-> 버전: v2026.09.13.11
+> 버전: v2026.09.25.440
 > 상태: 구현 지향형 Living 제품 기획서
-> 기준일: 2026-09-13
+> 기준일: 2026-09-25
 > 상위 문서: `PROJECT_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `MONETIZATION_COMPLIANCE_SEO_SPEC.md`, `BILLING_SUBSCRIPTION_CONSUMER_PROTECTION_SPEC.md`, `ANALYTICS_EXPERIMENTATION_GOVERNANCE_SPEC.md`
 > 영문 기준 문서: [ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md](ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md)
 
@@ -110,6 +110,24 @@ Moneyverse에는 이미 일부 `aria-live`, 로딩 상태 등 개별 접근성 �
 
 ### 내비게이션
 collapse 후에도 핵심 목적지, 현재 위치, 키보드 접근, screen-reader 이름을 유지한다.
+
+### 관리자 경제 화면 모바일 하드 요구조건 — v2026.09.25.440
+
+모든 관리자 route에 적용하며 경제 운영 / AI Council / 거시 금리 튜닝 화면을 P0 대표 사례로 취급한다.
+
+1. **viewport containment:** 320/360/375/390/412/430 CSS px에서 `html`, `body`, page shell이 viewport 폭을 넘지 않는다. desktop fixed/min-width는 명시적 로컬 scroller 내부가 아니면 금지한다.
+2. **content reflow:** 제목·설명·badge·model identifier·status chip·action button은 잘림/겹침/page 폭 증가 없이 줄바꿈 또는 stack한다. 긴 한국어/영어 문자열을 모두 시험한다.
+3. **navigation:** 관리자 section tab은 overflow가 눈에 보이고 keyboard/touch로 조작 가능한 경우에만 로컬 horizontal tablist를 허용한다. 그렇지 않으면 wrap/menu로 전환한다. affordance 없이 label 일부가 잘리면 실패다.
+4. **card/grid:** desktop 다열 Council/metric layout은 모바일에서 1열로 전환한다. child card는 `min-width: 0` 또는 동등한 축소 의미를 가져 긴 콘텐츠가 줄바꿈되어야 한다. 필요하면 status/action은 본문 아래로 이동한다.
+5. **control/value integrity:** range thumb 위치, 화면 숫자, form model, dirty/pending state, submit payload, server response가 의미상 동일해야 한다. 하나라도 다르면 submit을 막고 명확한 정합화/error 상태를 표시한다.
+6. **금융 rate:** 금리/yield/tax/limit control은 서버 권위 현재값, 편집 중 draft 값, unit, 허용 min/max/step, 저장 후 확인값을 표시한다. 시각적 thumb 위치만 값으로 사용하지 않는다.
+7. **touch/정밀입력:** 주요 control은 가능한 한 44×44 CSS px 이상을 목표로 한다. range는 숫자입력 또는 증감 버튼 등 drag가 아닌 정밀 조작 대안을 제공한다.
+8. **sticky/fixed UI:** header/bottom bar/CTA가 focus control, 값, 확인문구, 페이지 마지막 내용을 가리면 안 된다. 필요한 safe-area inset을 반영한다.
+9. **핵심정보 숨김 금지:** 반응형 단순화는 순서변경/collapse는 가능하지만 관리자 판단에 필요한 model/status/value/reason/audit 정보를 제거하면 안 된다.
+10. **상태 검증:** default, loading, stale, empty, long-content, error, permission-denied, disabled, dirty/pending, save-success, save-failure를 모바일 폭에서 검증한다.
+11. **5회 규칙:** 실질 UI 변경 후 최소 5회의 완전한 반응형 QA를 수행한다. 각 회차마다 페이지 상단부터 끝까지, 모든 tab/section, 모든 interactive control, 필수 viewport matrix를 확인한다. 결함을 고친 후 영향 범위를 다시 반복 검증한다.
+12. **수용 증거:** exact candidate SHA, route, browser/engine, viewport, DPR/zoom, pass 번호, 실패 screenshot/trace, 최종 결과를 남긴다. 개발자 screenshot 1장만으로 통과 처리하지 않는다.
+13. **승격 차단:** page-level horizontal overflow, 잘리거나 도달할 수 없는 control, text overlap, hidden navigation, slider/value 불일치, 의도하지 않은 값 reset, 관리자 task 완료 불가는 고위험 경제/보안 관리자 화면에서 P0이며 승격을 차단한다.
 
 ## 11. 필수 UI 상태
 
