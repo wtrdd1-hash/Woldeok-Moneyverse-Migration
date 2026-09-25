@@ -1,6 +1,6 @@
 # Woldeok Moneyverse — AI Economy Controller Specification
 
-> Version: v2026.09.20.292
+> Version: v2026.09.25.441
 > Status: Living implementation-oriented planning specification
 > Date: 2026-09-20
 > Parent specs: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -411,6 +411,18 @@ Minimum operator surface:
 - immutable decision history.
 
 Admin forms must not auto-refresh while an operator is editing. If a new baseline arrives, show a non-destructive “new baseline available” notice.
+
+### 16.1 Responsive and value-integrity contract — v2026.09.25.441
+
+The admin economy console is an operational instrument. A visually plausible but semantically inconsistent control is unsafe.
+
+- AI Council seat/domain cards must reflow on narrow screens; model identifiers, review counts, confidence/calibration and token/cost evidence must not force overflow.
+- “Confidence”, “trust”, “verified”, “balanced” and similar labels must map to documented metrics. A percentage must identify its denominator/evidence window or link to the definition.
+- Economy policy sliders render from one canonical value object: persisted/current value, unit, min/max/step, source policy version, ownership mode and updated-at.
+- Slider thumb position, text value, `aria-valuenow`/equivalent and API payload derive from that same canonical value. Independent defaults are prohibited.
+- In auto mode, current applied value and candidate/proposed value are separate. Manual manipulation requires explicit override/edit state with authorization, reason, reauthentication where required, optimistic version and rollback metadata.
+- Loading or missing policy data shows loading/unknown/blocked; it never silently renders `0.0%` as authoritative.
+- Any mismatch between UI control state and server policy is a release-blocking correctness failure and must emit client/API diagnostic evidence.
 
 ## 17. AI-ready sink metadata
 

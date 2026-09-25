@@ -2,11 +2,22 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.25.440
+> **현재 통합 버전:** v2026.09.25.441
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## P0 경제 관리자 canonical control-state 계약 — v2026.09.25.441 (2026-09-25)
+
+- **하나의 canonical value envelope:** 조정 가능한 모든 경제 컨트롤은 서버에서 온 current persisted value, unit, min/max/step, policy/source version, ownership mode(`AUTO`/`MANUAL_OVERRIDE`), proposed value, updated-at, loading/error state를 가진 하나의 객체에서 렌더링한다. 프론트 독립 default를 금지한다.
+- **0은 데이터이지 fallback이 아니다:** policy data가 missing/loading/failed이면 `loading`, `unknown`, `blocked`로 보여야 하며 클라이언트가 `0`, `0.0%` 같은 숫자 기본값을 권위값처럼 표시하면 안 된다.
+- **4자 일치:** range thumb 위치, 화면 숫자, 접근성 값(`aria-valuenow` 동등 값), mutation/API payload는 같은 canonical value에서 파생한다. 저장/refresh/rollback 후에는 서버가 반환한 값만 화면 권위로 사용한다.
+- **자동모드는 명확한 read-only:** 자동 밸런싱이 파라미터를 소유하면 자유 편집 가능한 UI처럼 보여서는 안 된다. applied current value와 AI/controller candidate를 분리한다. 수동 변경은 명시적 override/edit 진입, 권한, 사유, 필요한 재인증, optimistic version, rollback metadata를 요구한다.
+- **모호한 AI 신뢰 라벨 금지:** model health, review count, calibrated confidence/uncertainty, evidence sufficiency, council agreement, policy eligibility는 서로 다른 필드다. `평균 신뢰 22.5%` 같은 표현은 계산식·근거 window/표본·운영상 의미를 화면에 제공하거나 바로 연결하지 않으면 금지한다.
+- **실데이터 hydration QA:** skeleton -> API hydration -> auto/manual 전환 -> edit/save -> server reread -> refresh -> rollback/error 경로를 실제로 검증한다. mocked/default 화면이 맞아 보이는 것만으로는 control contract 증거가 아니다.
+- **P0 실패:** stale/default `0.0%`, slider/value 불일치, auto-owned control의 편집 가능 오인, 정의되지 않은 confidence/trust 백분율 중 하나라도 있으면 Test 수용과 Production 승격을 차단한다.
+- 본 절은 v440 반응형 정확성 계약을 보강한다. 상세 권위는 `AI_ECONOMY_CONTROLLER_SPEC`이다. 기획/문서 전용이며 런타임 수정 완료를 주장하지 않는다.
 
 ## P0 관리자 모바일/반응형 정합성 하드 게이트 — v2026.09.25.440 (2026-09-25)
 
