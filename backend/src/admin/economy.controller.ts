@@ -521,10 +521,10 @@ export class AdminEconomyController {
 
   @Get('council-debate')
   @ApiOperation({ summary: 'Get multi-agent economy council debate status across 14 specialist agents' })
-  councilDebate() {
+  councilDebate(@Req() request: RequestWithSession) {
     return this.guarded(
       async () => {
-        const dashboard = await this.repository().dashboard();
+        const dashboard = await this.repository().dashboard(requireUserId(request));
         const proposal = {
           id: `prop_live_${Date.now()}`,
           category: 'macro_stability_review',
