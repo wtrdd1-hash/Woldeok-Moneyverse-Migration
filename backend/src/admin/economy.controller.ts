@@ -519,4 +519,43 @@ export class AdminEconomyController {
     );
   }
 
+  @Get('council-debate')
+  @ApiOperation({ summary: 'Get multi-agent economy council debate status across 14 specialist agents' })
+  councilDebate() {
+    return this.guarded(
+      async () => {
+        const status = await this.repository().status();
+        const proposal = {
+          id: `prop_live_${Date.now()}`,
+          category: 'macro_stability_review',
+          description: '정기 거시경제 안정성 및 14개 분과 정책 정합성 감사',
+          knobs: [
+            {
+              key: 'macro.deposit_rate_bps',
+              currentValue: 350,
+              proposedValue: 350,
+              deltaPct: 0,
+            },
+            {
+              key: 'macro.loan_rate_bps',
+              currentValue: 700,
+              proposedValue: 700,
+              deltaPct: 0,
+            },
+          ],
+          metricsSnapshot: {
+            faucet_ratio: 1.0,
+            sink_burn: 0.95,
+          },
+        };
+        const { executeCouncilDebate } = await import('../economy/multi-agent-council.service');
+        const debate = executeCouncilDebate(proposal);
+        return {
+          systemStatus: status,
+          debate,
+        };
+      },
+      'failed to load council debate status',
+    );
+  }
 }
