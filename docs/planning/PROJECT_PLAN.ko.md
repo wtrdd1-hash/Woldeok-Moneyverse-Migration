@@ -2,11 +2,23 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.24.433
+> **현재 통합 버전:** v2026.09.25.437
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 인프라 stall 복원력 및 VM crash-continuity 계약 — v2026.09.25.437 (2026-09-25)
+
+- **P0 하이퍼바이저/guest 메모리 격리:** Production은 보장 guest memory floor와 host reserve를 가진다. ballooning/overcommit이 실측 안전 하한 아래로 메모리를 회수해서는 안 되며 host memory pressure, PSI, swap, QEMU RSS, guest free/available memory를 운영·릴리스 신호로 사용한다.
+- **P0 다층 health:** 외부 public probe + Nginx/edge + backend + 경량 DB transaction + guest heartbeat/guest-agent + virtualization-host QEMU state를 조합해 health를 판단한다. 애플리케이션 내부 health 하나만으로 VM 정상 상태를 인증하지 않는다.
+- **P0 stall 탐지:** 반복 `kvm_async_pf`, kernel hung-task/D-state, QEMU pause/reset, guest-agent loss, host OOM, 비정상 steal/scheduling delay, 지속 storage I/O latency를 경보한다. 조치 전 app failure와 VM/hypervisor failure를 구분한다.
+- **P0 안전한 자동조치:** 외부 watchdog은 지속시간 임계치, cooldown, 최대 재시도, fencing을 명시한다. 가능한 경우 진단 증거를 먼저 확보하고 가장 작은 실패 계층부터 재시작하며 VM-level 증거가 있을 때만 VM restart/failover를 허용한다. reboot storm은 금지한다.
+- **P0 DB 복구 순서:** data filesystem -> PostgreSQL recovery/readiness -> backend -> frontend -> edge traffic 수용 순서를 강제한다. WAL/filesystem recovery 중 dependent service는 빠른 restart loop 대신 backoff한다. durable WAL/fsync, 검증된 backup/restore, 복구 후 무결성 검사가 필수다.
+- **P1 자원경합 제어:** Production용 자원을 예약한다. Test build, browser QA, backup, 로컬 AI inference는 CPU/memory/I/O 제한 또는 schedule window를 적용해 Production을 starvation시키지 못하게 한다.
+- **P1 증거보존:** Proxmox/QEMU task event, host kernel/OOM/PSI/storage telemetry, guest/system/application/DB log를 동기화된 timestamp와 release SHA로 보존하고 pre-crash 구간도 포함한다.
+- **QA/릴리스 게이트:** Test에서 memory pressure, guest pause/stall, DB crash recovery fault injection을 수행한다. ledger corruption 0, bounded automatic recovery, 올바른 dependency ordering, 외부 alert 증거, durable session authority 생존 시 session continuity를 확인해야 수용한다. host-level telemetry/watchdog가 없으면 Production 승격 자격을 차단한다.
+- 상세 권위: [INFRASTRUCTURE_STALL_RESILIENCE_SPEC.ko.md](INFRASTRUCTURE_STALL_RESILIENCE_SPEC.ko.md). 이 버전은 기획만 변경하며 runtime 변경을 주장하지 않는다.
 
 ## 중복 제거 근거 확장 및 경제 안전 계약 — v2026.09.24.433 (2026-09-24)
 

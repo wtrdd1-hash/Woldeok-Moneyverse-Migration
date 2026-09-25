@@ -2,11 +2,23 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.24.433
+> Current integrated version: v2026.09.25.437
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Infrastructure stall resilience and VM crash-continuity contract — v2026.09.25.437 (2026-09-25)
+
+- **P0 hypervisor/guest memory isolation:** Production must have a guaranteed guest memory floor and host reserve. Ballooning/overcommit may not reclaim memory below the empirically safe floor; host memory pressure, PSI, swap, QEMU RSS and guest free/available memory are release/operations signals.
+- **P0 multi-layer health:** health authority is composed from external public probe + Nginx/edge + backend + a lightweight DB transaction + guest heartbeat/guest-agent + virtualization-host QEMU state. Application-local health alone cannot certify VM health.
+- **P0 stall detection:** alert on repeated `kvm_async_pf`, kernel hung-task/D-state, QEMU pause/reset, guest-agent loss, host OOM, abnormal steal/scheduling delay and sustained storage I/O latency. The response distinguishes app failure from VM/hypervisor failure before remediation.
+- **P0 safe remediation:** external watchdog remediation uses explicit duration thresholds, cooldown, maximum retries and fencing. Capture diagnostics first where possible; restart the smallest failing layer first, and only restart/fail over the VM when VM-level evidence justifies it. Reboot storms are prohibited.
+- **P0 database recovery ordering:** data filesystem -> PostgreSQL recovery/readiness -> backend -> frontend -> edge acceptance. During WAL/filesystem recovery, dependents back off instead of rapid restart loops. Durable WAL/fsync, verified backup/restore and post-recovery integrity checks are mandatory.
+- **P1 resource contention control:** Production has reserved resource capacity. Test builds, browser QA, backups and local AI inference are constrained by CPU/memory/I/O limits or scheduling windows so they cannot starve Production.
+- **P1 evidence retention:** retain Proxmox/QEMU task events, host kernel/OOM/PSI/storage telemetry and guest/system/application/DB logs with synchronized timestamps and release SHA, including pre-crash windows.
+- **QA/release gate:** fault-inject memory pressure, guest pause/stall and DB crash recovery on Test. Accept only with zero ledger corruption, bounded automatic recovery, correct dependency ordering, external alert evidence, and session continuity when durable session authority survives. Missing host-level telemetry/watchdog blocks Production eligibility.
+- Canonical detail: [INFRASTRUCTURE_STALL_RESILIENCE_SPEC.md](INFRASTRUCTURE_STALL_RESILIENCE_SPEC.md). Planning only; no runtime change is claimed by this version.
 
 ## Deduplicated evidence expansion and economy safety contract — v2026.09.24.433 (2026-09-24)
 

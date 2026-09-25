@@ -1,11 +1,22 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.24.433
+> Current ledger version: v2026.09.25.437
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.25.437 — 2026-09-25
+- Incident evidence from the Debian 13 Production VM showed PostgreSQL entering uninterruptible `D` state with repeated `kvm_async_pf_task_wait_schedule` stacks from 03:31 KST, increasing from 120s to 1,087s blocked time; the prior boot then ended without a clean shutdown and the 10:46 boot recovered system journal, the Moneyverse data filesystem journal, and PostgreSQL WAL.
+- **G437-01 / P0 (Hypervisor memory continuity):** Production VM memory must not depend on aggressive host overcommit/balloon reclamation. Define and monitor a minimum guaranteed guest RAM floor, host reserve, balloon floor, swap/PSI thresholds, and forbid automatic balloon-down below the measured steady-state safety envelope.
+- **G437-02 / P0 (KVM async-PF/hung-task detection):** detect `kvm_async_pf`, hung task, guest scheduling stalls, QEMU pause/reset, host OOM, storage latency and guest-agent loss at the virtualization host as well as inside the guest. A local application `/health` alone is not sufficient.
+- **G437-03 / P0 (External watchdog and recovery):** an out-of-guest watchdog must probe public edge, backend, DB transaction health and guest heartbeat. On sustained VM-level failure it escalates through alert -> evidence capture -> controlled restart/failover according to a cooldown and fencing policy; it must never reboot merely because one application endpoint fails.
+- **G437-04 / P0 (Database crash safety):** PostgreSQL remains on durable storage with `fsync`/WAL crash recovery intact, backups and restore evidence current, and restart automation waits for filesystem and database recovery before accepting application traffic. No auto-healer may repeatedly restart DB-dependent services while the DB is in recovery or D-state.
+- **G437-05 / P1 (Host observability/evidence):** retain and correlate Proxmox/QEMU task logs, host kernel/OOM/PSI/I/O metrics, VM guest journal, PostgreSQL logs, Nginx/API availability and release identity across incidents. Preserve pre-crash evidence before automated remediation where possible.
+- **G437-06 / P1 (Capacity gate):** Production/Test/AI workloads require explicit CPU/RAM/storage-I/O budgets and concurrency ceilings. Heavy local inference, builds, backups and QA must be serialized or resource-limited when they could contend with Production.
+- **Acceptance gate:** Test fault-injection must cover memory pressure, guest pause/stall, database crash recovery and host/guest health disagreement; verify no ledger corruption, session continuity where the DB/session authority survives, deterministic recovery ordering, bounded restart loops and external alerting. Production promotion is blocked when host-level observability or watchdog ownership is absent.
+- Start baseline `origin/main=4a4549f644972af972c47fb8f56bd9500766aa61`. Detailed authority: `docs/planning/INFRASTRUCTURE_STALL_RESILIENCE_SPEC.md` / `.ko.md` and delta `docs/planning/deltas/v2026.09.25.437.md` / `.ko.md`. Planning/docs only; no runtime mitigation, Test fault-injection or Production change is claimed.
 
 ## v2026.09.24.433 — 2026-09-24
 - Revalidated the existing v400/v401 economy research authority without re-counting mirrors, translations, tracking-URL variants, or already-adopted standards. The 31,289-candidate deduplicated discovery corpus remains the broad base; v433 adds quality/provenance mapping rather than an inflated corpus claim.
