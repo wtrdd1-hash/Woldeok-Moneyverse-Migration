@@ -27,3 +27,11 @@ Expand the database-architecture evidence base beyond 50,000 deduplicated discov
 
 ## Evidence quality rule
 Large-scale discovery establishes breadth only. Moneyverse requirements are adopted only when the architectural implication can be traced to primary PostgreSQL documentation, standards, first-party operational guidance, or high-confidence research and translated into an explicit schema/migration/QA/operations acceptance condition.
+
+## Mid-work record
+- Crossref retrieval completed: 10 lanes x 8,000 records = 80,000 raw records.
+- CSV-parser deduplication produced **66,858 unique candidates**. Physical line counts are not used because quoted CSV fields can contain embedded newlines.
+- Broad-query samples exposed expected false positives for ambiguous terms such as recovery/isolation/replication; the corpus is therefore Tier C discovery only.
+- Direct primary review used PostgreSQL 17 constraints, indexes, partitioning, ALTER/CREATE INDEX, serialization retry, locking, vacuum/statistics, backup/PITR and replication documentation.
+- Current repository DB authority and security/migration/backup docs were re-read before integration.
+- Mid-work remote main remained `99b0eaa04bbd0b28005861c624690c56744e8a14`; no overlapping main change required reconciliation at this checkpoint.
