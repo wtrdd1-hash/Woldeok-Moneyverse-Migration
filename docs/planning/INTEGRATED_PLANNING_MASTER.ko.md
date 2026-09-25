@@ -1,11 +1,23 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.09.25.442
+> 현재 원장 버전: v2026.09.25.443
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.09.25.443 — 2026-09-25
+- 동시 v442 작업을 보존한 뒤 시작/중간 기준을 `origin/main=99b0eaa04bbd0b28005861c624690c56744e8a14`로 재기준화했다. Android 앱 main은 `dfe24bac1886e2b63b9b736005e4d9884074ac5d`로 유지됐다.
+- 구현 전 PROJECT_PLAN, 모바일 API reference/contract, 앱 운영지침, Android API 선언, 현재 관리자 앱 표면, v442 전 사이트 QA 게이트를 재검토했다.
+- **G443-01 / P0:** generated 모바일 계약에 승인된 모든 endpoint는 전용 UI 또는 계약 기반 전체 기능센터를 통해 Android 기능으로 연결돼야 하며 승인됐지만 도달 불가한 앱 기능은 parity 실패다.
+- **G443-02 / P0:** 관리자 기능은 검증된 관리자 계정의 네이티브 앱 범위에 포함한다. viewer claim과 서버 role 재검증을 함께 사용하고 backend step-up/CSRF/audit 제어를 그대로 유지한다.
+- **G443-03 / P0:** 사용자 UI/오류/telemetry에 API route, backend host/port, cookie, CSRF, OAuth handoff code, internal token, secret을 노출하지 않는다. 보안은 주소 은폐에 의존하지 않는다.
+- **G443-04 / P0:** private backend-only route, webhook, health, worker/scheduler control은 별도 승인 없이는 앱 action으로 만들지 않는 의도적 제외다.
+- **G443-05 / P1:** 현재 contract 스냅샷은 앱 승인 179개 endpoint, 그중 관리자 11개다. 숫자는 영구 목표가 아니라 generated evidence다.
+- **G443-06 / P0 릴리스 게이트:** Android CI compile/test/assemble/bundle과 Test gateway/backend 검증이 main merge/승격 전에 필요하다. 앱 PR #24는 진행 중 구현 증거이며 Production 증거가 아니다.
+- PROJECT_PLAN 및 v443 delta/worklog/update/changelog에서 영/한 권위를 동기화한다.
+
 
 ## v2026.09.25.442 — 2026-09-25
 - 시작 `origin/main=a7fac4f4db2c4db3b9f8a4e159ad6ea5267540ec`; 최신 main에서 전용 브랜치 `docs/all-page-qa-v2026.09.25.442`를 생성했다.
