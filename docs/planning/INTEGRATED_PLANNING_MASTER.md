@@ -1,11 +1,22 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.25.437
+> Current ledger version: v2026.09.25.438
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.25.438 — 2026-09-25
+- Start/mid-work `origin/main=328b4623f2f063eaaade74e38cb4d8f4f14561c2`; no main drift at the recorded mid-work checkpoint.
+- Observed storage baseline before this cleanup: root 99G/55G used (59%); data disk 197G/135G used (72%); data disk had about 4.9M used inodes.
+- Active runtime identity was re-proven before deletion: Production backend/frontend CWD and `production-current` all resolved to `prod-d058df3-v436`; Test equivalents resolved to `test-d058df3-v436`.
+- **G438-01 / P0:** active symlink targets and running process CWD release roots are deletion-protected.
+- **G438-02 / P1:** retain active + at least 10 recent rollback-capable immutable releases per environment and require explicit reason for longer retention.
+- **G438-03 / P1:** capacity thresholds are 70% warn, 80% stop nonessential artifact growth, >=90% incident; record bytes/inodes reclaimed.
+- **G438-04 / P1:** generic cleanup excludes PostgreSQL, uploads, backups, active releases and retain-until-classified QA data; broad `docker system prune --volumes` remains prohibited.
+- **G438-05 / P1:** disk swap is governed by the v437 memory-continuity contract and is not reduced solely to free space.
+- Detailed authority: `STORAGE_RELEASE_RETENTION_SPEC.md` / `.ko.md`. This cycle includes runtime storage hygiene evidence but no application code release, DB migration, Test promotion or Production promotion.
 
 ## v2026.09.25.437 — 2026-09-25
 - Incident evidence from the Debian 13 Production VM showed PostgreSQL entering uninterruptible `D` state with repeated `kvm_async_pf_task_wait_schedule` stacks from 03:31 KST, increasing from 120s to 1,087s blocked time; the prior boot then ended without a clean shutdown and the 10:46 boot recovered system journal, the Moneyverse data filesystem journal, and PostgreSQL WAL.

@@ -2,11 +2,21 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.25.437
+> Current integrated version: v2026.09.25.438
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Disk capacity and release-retention contract — v2026.09.25.438 (2026-09-25)
+
+- **P0 active-release protection:** never delete a release referenced by `production-current`, `test-current`, or any running Production/Test backend/frontend process CWD.
+- **P1 bounded retention:** immutable host releases must not grow without limit. Keep the active release plus at least 10 recent rollback-capable releases per environment; additional retention requires an explicit incident/audit/rollback reason.
+- **P1 capacity thresholds:** record root/data filesystem bytes and inode usage before/after cleanup. Warn at 70%, block nonessential build/QA artifact growth at 80%, and treat >=90% as an operations incident requiring immediate capacity action.
+- **P1 cleanup scope:** stale release copies, package/build caches and explicitly unreferenced container artifacts may be reclaimed; PostgreSQL data, user uploads, backups, active release roots and retain-until-classified QA data are excluded from generic cleanup.
+- **P1 swap safety:** disk swap sizing is part of the v437 VM memory-continuity contract. Do not shrink/remove swap solely to free disk without guest/host memory evidence and a rollback plan.
+- **Automation:** every successful promotion runs a fail-closed retention job after health/version/session checks. The job protects active CWD/symlink targets, retains the policy window, emits bytes/inodes reclaimed, and aborts on identity ambiguity.
+- Detailed authority: [STORAGE_RELEASE_RETENTION_SPEC.md](STORAGE_RELEASE_RETENTION_SPEC.md). Runtime cleanup evidence is recorded separately; this planning version does not redefine application release identity.
 
 ## Infrastructure stall resilience and VM crash-continuity contract — v2026.09.25.437 (2026-09-25)
 

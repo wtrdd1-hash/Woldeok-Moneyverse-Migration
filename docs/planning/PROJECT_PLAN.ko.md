@@ -2,11 +2,21 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.25.437
+> **현재 통합 버전:** v2026.09.25.438
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 디스크 용량 및 릴리스 보존 계약 — v2026.09.25.438 (2026-09-25)
+
+- **P0 활성 릴리스 보호:** `production-current`, `test-current` 또는 실행 중인 Production/Test backend/frontend 프로세스 CWD가 참조하는 릴리스는 절대 삭제하지 않는다.
+- **P1 제한형 보존:** 호스트 불변 릴리스를 무제한 누적하지 않는다. 환경별 활성 릴리스와 최근 롤백 가능 릴리스 최소 10개를 보존하며 추가 보존은 사고/감사/롤백 사유를 명시한다.
+- **P1 용량 임계치:** 정리 전후 root/data filesystem byte와 inode 사용률을 기록한다. 70%에서 경고, 80%에서 비필수 build/QA artifact 증가를 차단하고, 90% 이상은 즉시 용량 조치가 필요한 운영 사고로 취급한다.
+- **P1 정리 범위:** 오래된 release 사본, package/build cache, 명시적으로 미참조인 container artifact는 회수할 수 있다. PostgreSQL 데이터, 사용자 업로드, 백업, 활성 release root, retain-until-classified QA 데이터는 일반 정리 대상에서 제외한다.
+- **P1 swap 안전:** disk swap 크기는 v437 VM 메모리 연속성 계약의 일부다. host/guest 메모리 근거와 롤백 계획 없이 디스크 확보만을 위해 swap을 축소/삭제하지 않는다.
+- **자동화:** 정상 승격 후 health/version/session 검증이 끝나면 fail-closed retention job을 실행한다. active CWD/symlink target을 보호하고 보존 창을 유지하며 회수 byte/inode를 기록하고 identity가 모호하면 중단한다.
+- 상세 권위: [STORAGE_RELEASE_RETENTION_SPEC.ko.md](STORAGE_RELEASE_RETENTION_SPEC.ko.md). 런타임 정리 증거는 별도 기록하며 이 기획 버전이 애플리케이션 release identity를 재정의하지 않는다.
 
 ## 인프라 stall 복원력 및 VM crash-continuity 계약 — v2026.09.25.437 (2026-09-25)
 
