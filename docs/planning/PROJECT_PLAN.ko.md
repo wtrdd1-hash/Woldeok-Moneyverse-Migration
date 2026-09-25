@@ -2,11 +2,87 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.24.433
+> **현재 통합 버전:** v2026.09.25.442
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## P0 전 사이트 모든 페이지 UI/기능 QA 하드 게이트 — v2026.09.25.442 (2026-09-25)
+
+- **샘플이 아니라 모든 페이지:** exact release candidate에 존재하는 모든 frontend page를 QA 대상에 포함한다. 공개, guest/auth, 계정, 게임, 경제, 시장, 은행, 커뮤니티, 콘텐츠, 안전, 지원, developer/internal-visible, 그리고 **모든 관리자 페이지는 기본 범위**다. 관리자 route를 선택적으로 샘플링하거나 생략할 수 없다.
+- **소스 기반 인벤토리:** QA 시작 전 exact candidate 소스(현재 `frontend/src/app/**/page.tsx`)에서 권위 page inventory를 생성하고 QA ledger와 1:1 대조한다. 2026-09-25 현재 스냅샷은 **86개 페이지, 그중 `/admin/**` 22개, 동적 페이지 8개**다. 이 숫자는 현재 증거일 뿐 미래 고정 상한이 아니며 신규 page는 자동으로 범위에 들어간다.
+- **조용한 제외 금지:** 발견된 모든 route는 PASS/FAIL/BLOCKED 증거를 가져야 한다. ledger row 누락, skip, “이번에 안 바뀜”, “비슷한 페이지 확인함”, 과거 release PASS는 수용 증거가 아니다. 비공개/internal surface도 명시적으로 분류하고 직접 렌더링 확인해야 한다.
+- **동적 페이지:** 모든 dynamic route는 재현 가능한 valid fixture와 적용 가능한 invalid/not-found/permission case를 가진다. `[id]`, `[symbol]`, `[clubId]` 등은 부모 목록 page만 확인해서 통과 처리할 수 없다.
+- **인증/역할 매트릭스:** 각 페이지가 지원하는 실질적으로 다른 상태를 검증한다. guest, 로그인 member, restricted/permission-denied, owner/non-owner, administrator/privileged role 등을 포함하고 redirect/access-denied도 page 동작으로 간주해 확인한다.
+- **모든 섹션/컨트롤:** URL을 한 번 여는 것으로 끝내지 않는다. header부터 footer까지 scroll하고 모든 tab/accordion/section을 방문하며 관련 dialog/drawer를 열고 primary/secondary control을 조작하고 stateful 화면은 back/forward와 refresh persistence도 확인한다.
+- **전 페이지 반응형 매트릭스:** v440 viewport 계약을 변경 page나 admin에만 적용하지 않고 **모든 페이지에 적용**한다. 320/360/375/390/412/430 portrait, 대표 landscape, 768/1024 tablet, desktop, 200% 및 적용 가능한 400% zoom/reflow를 포함한다. body overflow, 잘림, overlap, 숨은 CTA, 접근 불가 control, 의사결정 핵심 정보 소실은 실패다.
+- **전 사이트 QA 최소 5회 완주:** 모든 release candidate는 발견된 전체 page inventory를 대상으로 **최소 5회의 완전한 QA pass**를 수행한다. 매 pass마다 모든 page를 방문하고, 5회 누적 증거로 필수 viewport/state matrix, 긴/짧은 콘텐츠, loading/empty/partial/error, 실제 API 데이터 상태를 모두 커버한다. pass 중 결함을 수정하면 해당 page와 영향을 받는 shared layout/component 범위를 다시 수행한다.
+- **관리자 기본 포함:** 모든 `/admin/**` route는 매 full-site pass마다 authenticated administrator runtime data로 확인한다. navigation, form, table/card, dialog, Test 안전모드의 민감/파괴 action, role/step-up, audit evidence, responsive layout을 포함한다. “관리자는 나중에 별도 확인”을 금지한다.
+- **상태 화면:** loading/skeleton, empty, long-content, partial/stale, validation failure, network/server error, 지원되는 offline/maintenance, permission denied, success, mutation pending/retry를 포함한다. happy path seed data만으로 통과한 페이지는 수용하지 않는다.
+- **런타임 진실:** Test QA는 exact candidate SHA와 실제 backend/API/database contract를 사용한다. mock-only, screenshot-only, source inspection, unit test, 과거 release browser 결과는 route-by-route runtime 증거를 대체하지 못한다.
+- **coverage gate:** discovered-page count = QA-ledger distinct-page count = 최종 수용 증거가 있는 page count가 반드시 같아야 한다. count 불일치, 미해결 FAIL/BLOCKED, candidate 기인 console/runtime error, 관리자 page 누락이 하나라도 있으면 Production 승격을 차단한다.
+- **증거:** exact SHA, generated route inventory hash/count, route, role/state, fixture ID, browser/engine, viewport/orientation/zoom, pass number, API/runtime identity, 결과, defect linkage를 보존한다.
+- 상세 권위: [FULL_ROUTE_UI_QA_SPEC.ko.md](FULL_ROUTE_UI_QA_SPEC.ko.md), [ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.ko.md](ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.ko.md). v442는 기획/문서 변경이며 현재 모든 페이지가 이미 새 게이트를 통과했다고 주장하지 않는다.
+
+## P0 경제 관리자 canonical control-state 계약 — v2026.09.25.441 (2026-09-25)
+
+- **하나의 canonical value envelope:** 조정 가능한 모든 경제 컨트롤은 서버에서 온 current persisted value, unit, min/max/step, policy/source version, ownership mode(`AUTO`/`MANUAL_OVERRIDE`), proposed value, updated-at, loading/error state를 가진 하나의 객체에서 렌더링한다. 프론트 독립 default를 금지한다.
+- **0은 데이터이지 fallback이 아니다:** policy data가 missing/loading/failed이면 `loading`, `unknown`, `blocked`로 보여야 하며 클라이언트가 `0`, `0.0%` 같은 숫자 기본값을 권위값처럼 표시하면 안 된다.
+- **4자 일치:** range thumb 위치, 화면 숫자, 접근성 값(`aria-valuenow` 동등 값), mutation/API payload는 같은 canonical value에서 파생한다. 저장/refresh/rollback 후에는 서버가 반환한 값만 화면 권위로 사용한다.
+- **자동모드는 명확한 read-only:** 자동 밸런싱이 파라미터를 소유하면 자유 편집 가능한 UI처럼 보여서는 안 된다. applied current value와 AI/controller candidate를 분리한다. 수동 변경은 명시적 override/edit 진입, 권한, 사유, 필요한 재인증, optimistic version, rollback metadata를 요구한다.
+- **모호한 AI 신뢰 라벨 금지:** model health, review count, calibrated confidence/uncertainty, evidence sufficiency, council agreement, policy eligibility는 서로 다른 필드다. `평균 신뢰 22.5%` 같은 표현은 계산식·근거 window/표본·운영상 의미를 화면에 제공하거나 바로 연결하지 않으면 금지한다.
+- **실데이터 hydration QA:** skeleton -> API hydration -> auto/manual 전환 -> edit/save -> server reread -> refresh -> rollback/error 경로를 실제로 검증한다. mocked/default 화면이 맞아 보이는 것만으로는 control contract 증거가 아니다.
+- **P0 실패:** stale/default `0.0%`, slider/value 불일치, auto-owned control의 편집 가능 오인, 정의되지 않은 confidence/trust 백분율 중 하나라도 있으면 Test 수용과 Production 승격을 차단한다.
+- 본 절은 v440 반응형 정확성 계약을 보강한다. 상세 권위는 `AI_ECONOMY_CONTROLLER_SPEC`이다. 기획/문서 전용이며 런타임 수정 완료를 주장하지 않는다.
+
+## P0 관리자 모바일/반응형 정합성 하드 게이트 — v2026.09.25.440 (2026-09-25)
+
+- **관측 결함군:** 경제 운영 관리자 화면에서 모바일 viewport를 넘는 폭, 내비게이션/문구 잘림, AI Council 카드의 과밀 배치, 좁은 화면에서 읽기 어려운 제어값 배치가 발생할 수 있다. 이는 미관 문제가 아니라 기능 결함이다.
+- **페이지 전체 가로 넘침 금지:** 지원 모바일 폭에서 document/body가 viewport 안에 들어와야 한다. 카드·제목·badge·모델명·설명·tab·control은 줄바꿈/재배치하되 화면 밖으로 잘리면 안 된다. 데이터 table처럼 명시한 로컬 영역만 가로스크롤을 허용하며 overflow 표시와 문맥을 유지한다.
+- **관리자 내비게이션 계약:** 상단/섹션 내비게이션의 중요 항목을 화면 밖 숨은 글자에 의존시키지 않는다. 좁은 화면에서는 reflow, overflow affordance가 있는 접근 가능한 scrollable tab, 또는 label이 있는 menu로 전환하고 현재 위치와 모든 핵심 목적지를 찾을 수 있어야 한다.
+- **경제/AI 카드:** AI Council 요약과 specialist seat 카드는 모바일에서 1열 흐름으로 전환한다. desktop 고정 min-width 때문에 body overflow가 생기면 안 된다. 긴 한/영 문구와 model identifier는 action/status와 겹치지 않고 안전하게 줄바꿈한다.
+- **금융 제어값 정합성:** slider thumb 위치, 표시 텍스트 값, input state, pending 값, 서버 권위 저장값은 동일한 숫자와 단위를 나타내야 한다. 예를 들어 thumb는 0이 아닌 위치인데 `0.0%`를 표시하는 상태는 **P0 제어 무결성 결함**이며 정합화 전 apply/save를 비활성화한다.
+- **슬라이더 모바일 조작성:** 각 금리 slider는 정확한 현재값, min/max/step/unit를 control 인접 위치에 표시하고 keyboard/button 또는 동등한 정밀입력 수단을 제공하며 저장 후 서버 권위값을 다시 표시한다. drag-only 조작은 금지한다.
+- **필수 viewport matrix:** 최소 320, 360, 375, 390, 412, 430 CSS px portrait, 대표 landscape, 768/1024 tablet, desktop을 검증한다. 200% 및 적용 가능한 400% zoom/reflow도 포함한다.
+- **5회 반복 회귀 QA:** 반응형/관리자 route를 실질 수정할 때마다 위 viewport matrix로 **최소 5회 반복 QA**한다. header부터 page end까지 전체 scroll, 모든 tab/section, 긴/짧은 콘텐츠, loading/error/empty, interactive control을 포함한다. 단일 screenshot 또는 단일 viewport 확인은 수용 증거가 아니다.
+- **승격 차단:** 중요 문구/control 잘림, 도달 불가능한 navigation, body overflow, overlap, 숨은 CTA, 표시값/state 불일치, touch target 실패, 필수 화면에서 task completion 불가가 하나라도 있으면 Test 수용 및 Production 승격을 차단한다.
+- 상세 권위: [ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.ko.md](ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.ko.md). v440은 기획/문서 변경이며 첨부 화면의 runtime 결함이 이미 수정됐다고 주장하지 않는다.
+
+## P0 로그인/세션 영속성 하드 게이트 — v2026.09.25.439 (2026-09-25)
+
+- **사용자 체감 불변조건:** 아직 유효한 로그인 세션은 backend/frontend 재시작, systemd service 재시작, host reboot, reverse-proxy reload, blue-green/canary 전환, rollback, 일반 애플리케이션 배포를 지나도 로그인 상태를 유지해야 한다. 런타임 교체 자체는 절대 로그아웃 사유가 아니다.
+- **허용 로그아웃 사유를 좁게 고정:** 사용자 직접 로그아웃, 관리자/보안상 명시적 세션 폐기, credential compromise 대응, 계정 비활성화/삭제, 서버 권위 정상 만료만 허용한다. 보안 폐기 판단이 없는 deploy/restart/config reload/key rotation은 허용 사유가 아니다.
+- **영속 권위:** 세션 레코드와 검증에 필요한 핵심 상태는 배포 인스턴스와 독립된 durable/shared authority에 저장한다. 프로세스 메모리는 캐시로만 사용할 수 있고 유일한 인증 권위가 될 수 없다. 재시작 절차가 공유 세션 저장소를 truncate/replace해서는 안 된다.
+- **키 연속성:** 서명/암호화 키 회전은 아직 유효한 기존 세션을 겹쳐 검증해야 한다. cookie name/domain/path/SameSite/Secure/HttpOnly, issuer/audience, 호환 session schema는 구/신 세대 전환 중 migration-safe해야 한다.
+- **guest로 조용히 강등 금지:** release/config/key/session-store 불일치로 발생한 세션 검증 오류를 정상 guest 상태로 숨기고 재로그인을 요구해서는 안 된다. 이는 release failure 및 rollback 신호다.
+- **연속성 QA 의무:** restart/cutover 전 browser web, API/mobile-compatible auth, 적용 가능한 대표 privileged/re-auth flow를 포함해 최소 3개 pre-existing authenticated session을 확보한다. Test restart 후와 Production cutover 후 동일 세션으로 재로그인 없이 authenticated viewer/read와 안전한 mutation/CSRF 흐름 1개 이상을 검증한다.
+- **승격 차단:** 배포 유발 로그아웃, 예상치 못한 session loss, auth-key mismatch, cookie incompatibility, release 기인 401/403 급증이 1건이라도 확인되면 Production 승격을 차단하거나 자동 rollback한다. health check 통과만으로는 승격할 수 없다.
+- **증거:** exact candidate SHA, 전후 runtime identity, session-store health, privacy-safe session 식별자/해시, continuity 결과, auth error 변화, rollback 판단을 기록한다. 단순 session-count 동일성만으로 연속성을 증명할 수 없다.
+- **회귀시험:** restart/cutover session continuity test를 release automation의 필수 항목으로 둔다. exact-SHA Test 증거가 없는 candidate는 Production 승격 자격이 없다.
+- 본 절은 v396의 정당한 보안성 세션 폐기 사유는 유지하면서 더 약한 해석을 supersede한다. v439는 기획/문서 변경이며 새 runtime 배포를 주장하지 않는다.
+
+## 디스크 용량 및 릴리스 보존 계약 — v2026.09.25.438 (2026-09-25)
+
+- **P0 활성 릴리스 보호:** `production-current`, `test-current` 또는 실행 중인 Production/Test backend/frontend 프로세스 CWD가 참조하는 릴리스는 절대 삭제하지 않는다.
+- **P1 제한형 보존:** 호스트 불변 릴리스를 무제한 누적하지 않는다. 환경별 활성 릴리스와 최근 롤백 가능 릴리스 최소 10개를 보존하며 추가 보존은 사고/감사/롤백 사유를 명시한다.
+- **P1 용량 임계치:** 정리 전후 root/data filesystem byte와 inode 사용률을 기록한다. 70%에서 경고, 80%에서 비필수 build/QA artifact 증가를 차단하고, 90% 이상은 즉시 용량 조치가 필요한 운영 사고로 취급한다.
+- **P1 정리 범위:** 오래된 release 사본, package/build cache, 명시적으로 미참조인 container artifact는 회수할 수 있다. PostgreSQL 데이터, 사용자 업로드, 백업, 활성 release root, retain-until-classified QA 데이터는 일반 정리 대상에서 제외한다.
+- **P1 swap 안전:** disk swap 크기는 v437 VM 메모리 연속성 계약의 일부다. host/guest 메모리 근거와 롤백 계획 없이 디스크 확보만을 위해 swap을 축소/삭제하지 않는다.
+- **자동화:** 정상 승격 후 health/version/session 검증이 끝나면 fail-closed retention job을 실행한다. active CWD/symlink target을 보호하고 보존 창을 유지하며 회수 byte/inode를 기록하고 identity가 모호하면 중단한다.
+- 상세 권위: [STORAGE_RELEASE_RETENTION_SPEC.ko.md](STORAGE_RELEASE_RETENTION_SPEC.ko.md). 런타임 정리 증거는 별도 기록하며 이 기획 버전이 애플리케이션 release identity를 재정의하지 않는다.
+
+## 인프라 stall 복원력 및 VM crash-continuity 계약 — v2026.09.25.437 (2026-09-25)
+
+- **P0 하이퍼바이저/guest 메모리 격리:** Production은 보장 guest memory floor와 host reserve를 가진다. ballooning/overcommit이 실측 안전 하한 아래로 메모리를 회수해서는 안 되며 host memory pressure, PSI, swap, QEMU RSS, guest free/available memory를 운영·릴리스 신호로 사용한다.
+- **P0 다층 health:** 외부 public probe + Nginx/edge + backend + 경량 DB transaction + guest heartbeat/guest-agent + virtualization-host QEMU state를 조합해 health를 판단한다. 애플리케이션 내부 health 하나만으로 VM 정상 상태를 인증하지 않는다.
+- **P0 stall 탐지:** 반복 `kvm_async_pf`, kernel hung-task/D-state, QEMU pause/reset, guest-agent loss, host OOM, 비정상 steal/scheduling delay, 지속 storage I/O latency를 경보한다. 조치 전 app failure와 VM/hypervisor failure를 구분한다.
+- **P0 안전한 자동조치:** 외부 watchdog은 지속시간 임계치, cooldown, 최대 재시도, fencing을 명시한다. 가능한 경우 진단 증거를 먼저 확보하고 가장 작은 실패 계층부터 재시작하며 VM-level 증거가 있을 때만 VM restart/failover를 허용한다. reboot storm은 금지한다.
+- **P0 DB 복구 순서:** data filesystem -> PostgreSQL recovery/readiness -> backend -> frontend -> edge traffic 수용 순서를 강제한다. WAL/filesystem recovery 중 dependent service는 빠른 restart loop 대신 backoff한다. durable WAL/fsync, 검증된 backup/restore, 복구 후 무결성 검사가 필수다.
+- **P1 자원경합 제어:** Production용 자원을 예약한다. Test build, browser QA, backup, 로컬 AI inference는 CPU/memory/I/O 제한 또는 schedule window를 적용해 Production을 starvation시키지 못하게 한다.
+- **P1 증거보존:** Proxmox/QEMU task event, host kernel/OOM/PSI/storage telemetry, guest/system/application/DB log를 동기화된 timestamp와 release SHA로 보존하고 pre-crash 구간도 포함한다.
+- **QA/릴리스 게이트:** Test에서 memory pressure, guest pause/stall, DB crash recovery fault injection을 수행한다. ledger corruption 0, bounded automatic recovery, 올바른 dependency ordering, 외부 alert 증거, durable session authority 생존 시 session continuity를 확인해야 수용한다. host-level telemetry/watchdog가 없으면 Production 승격 자격을 차단한다.
+- 상세 권위: [INFRASTRUCTURE_STALL_RESILIENCE_SPEC.ko.md](INFRASTRUCTURE_STALL_RESILIENCE_SPEC.ko.md). 이 버전은 기획만 변경하며 runtime 변경을 주장하지 않는다.
 
 ## 중복 제거 근거 확장 및 경제 안전 계약 — v2026.09.24.433 (2026-09-24)
 

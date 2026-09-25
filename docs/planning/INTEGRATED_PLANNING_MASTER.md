@@ -1,11 +1,81 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.24.433
+> Current ledger version: v2026.09.25.442
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.25.442 — 2026-09-25
+- Start `origin/main=a7fac4f4db2c4db3b9f8a4e159ad6ea5267540ec`; dedicated branch `docs/all-page-qa-v2026.09.25.442` created from latest main.
+- Mid-work `origin/main=a7fac4f4db2c4db3b9f8a4e159ad6ea5267540ec`; no drift. `git diff --check` passed at the recorded checkpoint.
+- Re-reviewed documentation authority, v440/v441 responsive/admin contracts, current frontend route source, historical full-UI QA records and administrator runtime-QA records.
+- Current exact-source snapshot contains **86 frontend pages**, including **22 `/admin/**` pages** and **8 dynamic pages**; 25 loading components and 3 error components were also observed. Historical 60-route sweeps therefore cannot prove current full-route completion.
+- **G442-01 / P0:** every page in the exact release candidate is mandatory QA scope. Sampling or 'changed routes only' acceptance is superseded.
+- **G442-02 / P0:** all administrator pages are baseline coverage in every full-site pass; administrator verification is not a separate optional or deferred phase.
+- **G442-03 / P0:** source-generated route inventory must reconcile 1:1 with the QA ledger and final accepted evidence. Any missing/skipped route or count mismatch blocks Production.
+- **G442-04 / P0:** every candidate requires at least five complete full-site QA passes; every pass visits every page and cumulative evidence covers viewport, role, dynamic fixture, content-length and UI-state matrices.
+- **G442-05 / P0:** dynamic pages require direct valid/invalid/not-found/permission fixtures; parent-list coverage cannot substitute for detail-route checks.
+- **G442-06 / P0:** route acceptance requires full-page traversal and local tabs/sections/dialogs/controls with real Test API/runtime data, not screenshot-only, mock-only, source-only or historical evidence.
+- **G442-07 / P0:** v440 responsive matrix now applies to all pages, not only modified/admin pages. Any clipping, body overflow, overlap, inaccessible control, hidden critical content or task-completion loss blocks promotion.
+- Detailed authority: `FULL_ROUTE_UI_QA_SPEC.md` / `.ko.md` plus `ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md` / `.ko.md`. Planning/docs only; no claim that current runtime already passed v442.
+
+## v2026.09.25.441 — 2026-09-25
+- Latest-main recheck detected concurrent v440 integration; work was rebased onto `origin/main=5547e5b0c2eb76c60450e089cb415bd65c81026f` rather than overwriting it.
+- v440 already covers mobile overflow/navigation/card reflow/slider mismatch and five-pass responsive QA. v441 adds the missing semantic control-state contract.
+- **G441-01 / P0:** policy controls must use one server-derived canonical value envelope; frontend numeric fallback defaults are prohibited.
+- **G441-02 / P0:** missing/loading policy data cannot masquerade as authoritative `0.0%`; it must be loading/unknown/blocked.
+- **G441-03 / P0:** slider thumb, visible number, accessible value and API payload must derive from the same value and reconcile to the server response after mutations.
+- **G441-04 / P0:** AUTO-owned policy controls are visibly read-only; manual override is an explicit authorized/reasoned/versioned workflow.
+- **G441-05 / P1/P0 gate:** AI health, confidence/calibration, evidence sufficiency, council agreement and policy eligibility are distinct. Undefined “trust %” labels are not acceptable operator evidence.
+- **QA:** real API hydration, auto/manual transition, save/reread, refresh, rollback and error states are required in addition to v440 viewport/five-pass coverage.
+- Planning/documentation only; no runtime/Test/Production remediation is claimed.
+
+## v2026.09.25.440 — 2026-09-25
+- Start `origin/main=5394dd266e68c0a3ebfee616cdf7f0d906116b48`; dedicated branch `docs/admin-mobile-responsive-v2026.09.25.440`.
+- Reviewed PROJECT_PLAN, integrated master, responsive/accessibility spec, product-design/admin/economy planning and the reported Economy Operations mobile screenshots.
+- **G440-01 / P0:** page-level horizontal overflow or clipped administrator navigation/content is a functional release blocker.
+- **G440-02 / P0:** AI Council and economy metric/control cards must reflow to a one-column mobile layout without fixed-width overflow.
+- **G440-03 / P0:** rate slider thumb, displayed numeric value, form state, submitted payload and server-authoritative saved value must agree. Mismatch blocks save/apply.
+- **G440-04 / P0:** administrator navigation must preserve discoverability; hidden off-screen labels without overflow affordance are prohibited.
+- **G440-05 / P0 QA:** required viewport matrix is 320/360/375/390/412/430 portrait + representative landscape + 768/1024 + desktop, with 200% and applicable 400% zoom/reflow.
+- **G440-06 / P0 QA:** every materially changed responsive/admin route requires at least five complete repeated QA passes across the matrix, full-page scroll, every tab/section, long-content states and all interactive controls.
+- Any clipping, overlap, unreachable control, hidden CTA, body overflow, touch-target failure, accidental reset or control/value mismatch blocks Test acceptance and Production promotion.
+- Detailed authority: `ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md` / `.ko.md`. Planning/documentation only; no runtime fix is claimed.
+
+## v2026.09.25.439 — 2026-09-25
+- Start `origin/main=118a58ddc289839957caacd14650863e614f8fad`; dedicated branch `docs/session-continuity-v2026.09.25.439` created from latest main.
+- Re-reviewed current authority order, PROJECT_PLAN, integrated master, authentication/API references, and existing v396 session-continuity contract.
+- **G439-01 / P0:** valid users must not be logged out by application/service/host restart, deploy, proxy reload, cutover, rollback, or key rotation alone.
+- **G439-02 / P0:** logout causes are restricted to user logout, explicit admin/security revocation, compromise response, account disable/delete, or normal server-authoritative expiry.
+- **G439-03 / P0:** session validation authority and key material must survive runtime replacement; process memory cannot be the sole authority and deployment hooks may not truncate the shared store.
+- **G439-04 / P0:** silent fallback from a valid authenticated session to guest because of release/config/key mismatch is a release failure, not a normal UX path.
+- **G439-05 / P0 release gate:** exact pre-existing authenticated sessions must survive Test restart and Production cutover. Any deployment-caused logout or release-attributable auth error spike blocks promotion or requires rollback.
+- Acceptance evidence requires exact candidate SHA, runtime identities, shared-session health, privacy-safe continuity identifiers, pre/post authenticated requests including safe CSRF mutation, and auth-error deltas. Session counts alone are insufficient.
+- EN/KO parity required. Planning/documentation only; v439 does not claim Test or Production runtime changes.
+
+## v2026.09.25.438 — 2026-09-25
+- Start/mid-work `origin/main=328b4623f2f063eaaade74e38cb4d8f4f14561c2`; no main drift at the recorded mid-work checkpoint.
+- Observed storage baseline before this cleanup: root 99G/55G used (59%); data disk 197G/135G used (72%); data disk had about 4.9M used inodes.
+- Active runtime identity was re-proven before deletion: Production backend/frontend CWD and `production-current` all resolved to `prod-d058df3-v436`; Test equivalents resolved to `test-d058df3-v436`.
+- **G438-01 / P0:** active symlink targets and running process CWD release roots are deletion-protected.
+- **G438-02 / P1:** retain active + at least 10 recent rollback-capable immutable releases per environment and require explicit reason for longer retention.
+- **G438-03 / P1:** capacity thresholds are 70% warn, 80% stop nonessential artifact growth, >=90% incident; record bytes/inodes reclaimed.
+- **G438-04 / P1:** generic cleanup excludes PostgreSQL, uploads, backups, active releases and retain-until-classified QA data; broad `docker system prune --volumes` remains prohibited.
+- **G438-05 / P1:** disk swap is governed by the v437 memory-continuity contract and is not reduced solely to free space.
+- Detailed authority: `STORAGE_RELEASE_RETENTION_SPEC.md` / `.ko.md`. This cycle includes runtime storage hygiene evidence but no application code release, DB migration, Test promotion or Production promotion.
+
+## v2026.09.25.437 — 2026-09-25
+- Incident evidence from the Debian 13 Production VM showed PostgreSQL entering uninterruptible `D` state with repeated `kvm_async_pf_task_wait_schedule` stacks from 03:31 KST, increasing from 120s to 1,087s blocked time; the prior boot then ended without a clean shutdown and the 10:46 boot recovered system journal, the Moneyverse data filesystem journal, and PostgreSQL WAL.
+- **G437-01 / P0 (Hypervisor memory continuity):** Production VM memory must not depend on aggressive host overcommit/balloon reclamation. Define and monitor a minimum guaranteed guest RAM floor, host reserve, balloon floor, swap/PSI thresholds, and forbid automatic balloon-down below the measured steady-state safety envelope.
+- **G437-02 / P0 (KVM async-PF/hung-task detection):** detect `kvm_async_pf`, hung task, guest scheduling stalls, QEMU pause/reset, host OOM, storage latency and guest-agent loss at the virtualization host as well as inside the guest. A local application `/health` alone is not sufficient.
+- **G437-03 / P0 (External watchdog and recovery):** an out-of-guest watchdog must probe public edge, backend, DB transaction health and guest heartbeat. On sustained VM-level failure it escalates through alert -> evidence capture -> controlled restart/failover according to a cooldown and fencing policy; it must never reboot merely because one application endpoint fails.
+- **G437-04 / P0 (Database crash safety):** PostgreSQL remains on durable storage with `fsync`/WAL crash recovery intact, backups and restore evidence current, and restart automation waits for filesystem and database recovery before accepting application traffic. No auto-healer may repeatedly restart DB-dependent services while the DB is in recovery or D-state.
+- **G437-05 / P1 (Host observability/evidence):** retain and correlate Proxmox/QEMU task logs, host kernel/OOM/PSI/I/O metrics, VM guest journal, PostgreSQL logs, Nginx/API availability and release identity across incidents. Preserve pre-crash evidence before automated remediation where possible.
+- **G437-06 / P1 (Capacity gate):** Production/Test/AI workloads require explicit CPU/RAM/storage-I/O budgets and concurrency ceilings. Heavy local inference, builds, backups and QA must be serialized or resource-limited when they could contend with Production.
+- **Acceptance gate:** Test fault-injection must cover memory pressure, guest pause/stall, database crash recovery and host/guest health disagreement; verify no ledger corruption, session continuity where the DB/session authority survives, deterministic recovery ordering, bounded restart loops and external alerting. Production promotion is blocked when host-level observability or watchdog ownership is absent.
+- Start baseline `origin/main=4a4549f644972af972c47fb8f56bd9500766aa61`. Detailed authority: `docs/planning/INFRASTRUCTURE_STALL_RESILIENCE_SPEC.md` / `.ko.md` and delta `docs/planning/deltas/v2026.09.25.437.md` / `.ko.md`. Planning/docs only; no runtime mitigation, Test fault-injection or Production change is claimed.
 
 ## v2026.09.24.433 — 2026-09-24
 - Revalidated the existing v400/v401 economy research authority without re-counting mirrors, translations, tracking-URL variants, or already-adopted standards. The 31,289-candidate deduplicated discovery corpus remains the broad base; v433 adds quality/provenance mapping rather than an inflated corpus claim.

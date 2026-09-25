@@ -30,3 +30,8 @@
 
 수동 보정은 최근 재인증, 명시적 사유/증거, BigInt-safe 정수 문자열 금액, 멱등성, DB 행위자 검증, 트랜잭션 원자성, 불변 감사로그를 요구한다. 대사 결과는 차이와 근거를 보여주되 잔액을 조용히 재작성하지 않는다.
 
+
+
+## 모바일/반응형 수용 기준 — v2026.09.25.440
+
+경제 운영과 AI Council을 포함한 모든 관리자 workspace는 `ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.ko.md`의 P0 반응형 계약을 따른다. 모바일에서 page-level horizontal overflow, navigation 잘림, card 겹침, 도달할 수 없는 control을 허용하지 않는다. 경제 slider의 thumb 위치, 표시 숫자, draft state, submit payload, 서버 권위 저장값은 항상 동기화되어야 하며 하나라도 다르면 apply/save를 차단한다. 관리자 UI를 실질 수정하면 필수 mobile/tablet/desktop viewport matrix로 최소 5회의 완전 QA를 통과해야 승격할 수 있다.

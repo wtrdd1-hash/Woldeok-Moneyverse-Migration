@@ -33,3 +33,8 @@ Treasury balance, available/reserved funds, revenue, expenditure, budgets, corre
 
 Manual corrections require recent re-authentication, explicit reason/evidence, BigInt-safe integer-string amounts, idempotency, database-side actor verification, transaction atomicity and immutable audit. Reconciliation findings expose variance and source evidence; they never silently rewrite balances.
 
+
+
+## Mobile/responsive acceptance — v2026.09.25.440
+
+All administrator workspaces, including Economy Operations and AI Council, follow the P0 responsive contract in `ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md`. Mobile layouts must not create page-level horizontal overflow, clipped navigation, overlapping cards or unreachable controls. Economy sliders must keep thumb position, displayed number, draft state, submitted payload and server-authoritative saved value synchronized; any mismatch disables apply/save. Material admin UI changes require at least five complete QA passes across the required mobile/tablet/desktop viewport matrix before promotion.

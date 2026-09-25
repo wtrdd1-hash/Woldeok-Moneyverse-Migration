@@ -3,7 +3,7 @@
 [English canonical](INDEX.md) | **한국어**
 
 > 문서 거버넌스: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)
-> 현재 기획 권위: v2026.09.23.406
+> 현재 기획 권위: v2026.09.25.442
 
 ## 먼저 볼 문서
 
@@ -25,6 +25,7 @@
 - [기획 6대 도메인 결함 보완 v406](planning/deltas/v2026.09.23.406.ko.md)
 - [직업/숙련도](planning/JOBS_PROFESSION_MASTERY_SPEC.ko.md)
 - [1대1 채팅](planning/ONE_TO_ONE_PRIVATE_CHAT_SPEC.ko.md)
+- [전 라우트 UI·기능 QA](planning/FULL_ROUTE_UI_QA_SPEC.ko.md) — 관리자 포함 모든 페이지, release candidate별 전 사이트 5회 완주.
 ## 아키텍처·운영·기능
 
 - [아키텍처 색인](architecture/README.ko.md)

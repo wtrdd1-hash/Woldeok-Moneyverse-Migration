@@ -2,9 +2,19 @@
 
 **English canonical** | [한국어](RUNTIME_HYGIENE_INVENTORY.ko.md)
 
-> Version: v2026.09.23.405
+> Version: v2026.09.25.438
 > Observed: 2026-09-23
 > Host baseline: [../CURRENT_RUNTIME_BASELINE.md](../CURRENT_RUNTIME_BASELINE.md)
+
+## Release-storage cleanup — v2026.09.25.438
+
+Observed before cleanup: root 59% used and Moneyverse data disk 72% used with about 4.9M used inodes. Active Production/Test symlink targets and all four backend/frontend process CWDs were re-proven as v436 before deletion.
+
+207 stale immutable release directories were removed. Exactly 10 Production and 10 Test release roots remain. Final data-disk usage is 41G/197G (22%) with 392,186 used inodes (3%); about 94G and 4.50M inodes were reclaimed. Root remains 55G/99G (59%).
+
+All four Production/Test systemd application services remained active and Production/Test backend health endpoints returned OK. PostgreSQL, uploads, backups, protected QA data and the 24G disk swapfile were not deleted.
+
+Future cleanup follows the active-target/CWD protection and retention rules in `../planning/STORAGE_RELEASE_RETENTION_SPEC.md`. Generic broad volume pruning remains prohibited.
 
 ## Protected current runtime
 

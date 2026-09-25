@@ -2,11 +2,87 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.24.433
+> Current integrated version: v2026.09.25.442
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## P0 full-site all-page UI/functional QA gate — v2026.09.25.442 (2026-09-25)
+
+- **All pages, not a sample:** every frontend page present in the exact release candidate MUST be included in QA. Public, guest/auth, account, gameplay, economy, market, banking, community, content, safety, support, developer/internal-visible, and **all administrator pages are baseline coverage**. Administrator routes are never optional or sampled.
+- **Source-derived inventory:** before QA, generate the authoritative page inventory from the exact candidate source (currently `frontend/src/app/**/page.tsx`) and reconcile it 1:1 with the QA ledger. The 2026-09-25 snapshot contains **86 pages, including 22 `/admin/**` pages and 8 dynamic pages**; these counts are evidence for this snapshot, not a fixed future limit. Any newly added page is automatically in scope.
+- **No silent exclusions:** every discovered route must have PASS/FAIL/BLOCKED evidence. A missing ledger row, skipped page, “not changed”, “looks similar”, or historical pass is not acceptance evidence. Any intentional non-release surface still requires an explicit classification and direct rendering check.
+- **Dynamic pages:** every dynamic route requires deterministic valid fixtures plus invalid/not-found/permission cases where applicable. QA may not satisfy `[id]`, `[symbol]`, `[clubId]` or equivalent routes by checking only their parent list page.
+- **Authentication/role matrix:** exercise each page in every materially distinct state it supports: guest, signed-in member, restricted/permission-denied, owner/non-owner where relevant, and administrator/privileged roles. Redirects and access-denied behavior count as page behavior and must be verified.
+- **All sections and controls:** opening a route is not enough. Scroll header-to-footer, visit every tab/accordion/section, open relevant dialogs/drawers, exercise primary and secondary controls, and verify navigation back/forward and refresh persistence where stateful.
+- **Responsive full-site matrix:** the v440 viewport contract applies to **every page**, not only modified/admin pages: 320/360/375/390/412/430 portrait, representative landscape, 768/1024 tablet, desktop, plus 200% and applicable 400% zoom/reflow. Body overflow, clipping, overlap, hidden CTA, inaccessible control, or lost decision-critical content is a failure.
+- **Five complete full-site QA cycles:** every release candidate receives at least **five complete passes over the entire discovered page inventory**. Every pass must include every page; the combined five-pass evidence must cover the required viewport/state matrix, long/short content, loading/empty/partial/error states and real API-populated data. Fixes found during a pass require rerunning the affected page and all dependent shared-layout/component coverage.
+- **Administrator baseline:** all `/admin/**` routes are verified in each full-site pass with authenticated administrator runtime data, including navigation, forms, tables/cards, dialogs, destructive/sensitive actions in safe Test mode, role/step-up behavior, audit evidence and responsive layout. “Admin checked separately later” is prohibited.
+- **State surfaces:** route QA includes loading/skeleton, empty, long-content, partial/stale, validation failure, network/server error, offline/maintenance where supported, permission denied, success and mutation pending/retry states. A page that only passes with happy-path seeded data is not accepted.
+- **Runtime truth:** Test QA runs against the exact candidate SHA and real backend/API/database contracts. Mock-only, screenshot-only, source inspection, unit tests, or a previous release’s browser run cannot replace route-by-route runtime evidence.
+- **Coverage gate:** discovered-page count = QA-ledger distinct-page count = pages with final accepted evidence. Any count mismatch, unresolved FAIL/BLOCKED, console/runtime error attributable to the candidate, or administrator-page gap blocks Production promotion.
+- **Evidence:** retain exact SHA, generated route inventory hash/count, route, role/state, fixture ID, browser/engine, viewport/orientation/zoom, pass number, API/runtime identity, result and defect linkage. This evidence is required for Test acceptance and Production promotion.
+- Detailed authority: [FULL_ROUTE_UI_QA_SPEC.md](FULL_ROUTE_UI_QA_SPEC.md) and [ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md](ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md). v442 is planning/documentation only; it does not claim that all current pages have already passed this new gate.
+
+## P0 economy-admin canonical control-state contract — v2026.09.25.441 (2026-09-25)
+
+- **One canonical value envelope:** each tunable economy control is rendered from one server-derived object containing current persisted value, unit, min/max/step, policy/source version, ownership mode (`AUTO`/`MANUAL_OVERRIDE`), proposed value if any, updated-at and loading/error state. Independent frontend defaults are prohibited.
+- **Zero is data, not fallback:** missing/loading/failed policy data must render `loading`, `unknown` or `blocked`; the client must never substitute `0`, `0.0%` or another numeric default and present it as authoritative.
+- **Four-way equality:** range thumb position, visible numeric value, accessibility value (`aria-valuenow` or equivalent) and mutation/API payload must derive from the same canonical value. After save/refresh/rollback, the returned server value becomes the only displayed authority.
+- **Auto mode is visibly read-only:** when automatic balancing owns a parameter, controls cannot appear freely editable. Show applied current value and AI/controller candidate separately. Manual change requires an explicit override/edit action, authorization, reason, reauthentication where required, optimistic version check and rollback metadata.
+- **No ambiguous AI trust labels:** model availability/health, review count, calibrated confidence/uncertainty, evidence sufficiency, council agreement and policy eligibility are separate fields. A label such as `average trust 22.5%` is forbidden unless the metric formula, evidence window/sample and operational meaning are visible or directly linked.
+- **Real-data hydration QA:** acceptance must exercise initial skeleton -> API hydration -> auto/manual transition -> edit/save -> server reread -> refresh -> rollback/error paths. A visually correct mocked/default state does not prove the control contract.
+- **P0 failure:** any stale/default `0.0%`, slider/value disagreement, auto-owned control presented as editable, or undefined confidence/trust percentage blocks Test acceptance and Production promotion.
+- This supplements v440 responsive correctness. Detailed authority is `AI_ECONOMY_CONTROLLER_SPEC`. Planning/documentation only; runtime remediation is not claimed.
+
+## P0 administrator mobile/responsive correctness hard gate — v2026.09.25.440 (2026-09-25)
+
+- **Observed defect class:** the Economy Operations administrator surface can exceed the mobile viewport, clip navigation/labels, over-densify AI Council cards, and present control/value layouts that are not reliably readable at narrow widths. These are functional defects, not cosmetic exceptions.
+- **No page-level horizontal overflow:** at supported mobile widths the document/body MUST fit the viewport. Cards, headings, badges, model names, descriptions, tabs and controls may wrap/reflow but must not be clipped off-screen. Only explicitly designed local regions such as a data table may horizontally scroll, with a visible affordance and preserved context.
+- **Admin navigation contract:** top-level and section navigation must never depend on hidden off-screen labels. On narrow screens it must reflow, become an accessible scrollable tab strip with visible overflow affordance, or collapse into a labelled menu. Current destination and all critical destinations remain discoverable.
+- **Economy/AI cards:** AI Council summary and specialist-seat cards become a single-column mobile flow; no fixed desktop minimum width may force page overflow. Long Korean/English text and model identifiers wrap safely without overlapping status/action controls.
+- **Financial control correctness:** slider thumb position, text value, input state, pending value and server-authoritative saved value MUST represent the same number and unit. A UI that shows e.g. `0.0%` while the slider position represents a non-zero value is a **P0 control-integrity failure** and must disable apply/save until reconciled.
+- **Slider/mobile ergonomics:** every rate slider exposes its exact numeric value adjacent to the control, min/max/step/unit, keyboard buttons or equivalent precise input, and a post-save authoritative value. Dragging alone is never required.
+- **Viewport matrix:** mandatory QA covers at least 320, 360, 375, 390, 412 and 430 CSS px portrait widths, representative landscape, 768/1024 tablet widths, and desktop. Browser zoom/reflow at 200% and applicable 400% is included.
+- **Five-pass regression requirement:** every materially changed responsive/admin route must complete **at least five repeated QA passes** over the viewport matrix, including scroll from header to page end, every tab/section, long/short content, loading/error/empty states, and interactive controls. One screenshot or one viewport is not acceptance evidence.
+- **Release blocker:** any clipped critical text/control, unreachable navigation, body overflow, overlap, hidden CTA, value/state mismatch, touch-target failure, or loss of task completion on the required matrix blocks Test acceptance and Production promotion.
+- Detailed authority: [ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md](ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md). v440 is planning/documentation only; it does not claim the pictured runtime defect is already fixed.
+
+## P0 login/session persistence hard gate — v2026.09.25.439 (2026-09-25)
+
+- **User-visible invariant:** an authenticated user whose session is still valid MUST remain signed in across backend/frontend restart, systemd service restart, host reboot, reverse-proxy reload, blue-green/canary cutover, rollback, and routine application deployment. Runtime replacement alone is never a logout reason.
+- **Allowed logout reasons are explicit and narrow:** user-requested logout, administrator/security revocation, credential-compromise response, account disable/delete, or normal server-authoritative expiry. Deploy/restart/config reload/key rotation without a security revocation decision is not an allowed reason.
+- **Durable authority:** session records and all material needed to validate them must be deployment-independent and durable. Process-local memory may cache auth state but cannot be its sole authority. Restart procedures must not truncate/replace the shared session authority.
+- **Key continuity:** signing/encryption key rotation must support overlapping validation of still-valid sessions. Cookie name/domain/path/SameSite/Secure/HttpOnly, issuer/audience and compatible session schema must remain migration-safe across old/new generations.
+- **No silent fallback to guest:** a session-validation fault caused by release/config/key/session-store mismatch must surface as a release failure and rollback signal; clients must not quietly treat a valid pre-release user as a guest and ask them to log in again.
+- **Mandatory continuity QA:** before restart/cutover capture at least three authenticated sessions covering browser web, API/mobile-compatible auth, and a representative privileged/re-auth flow where applicable. After Test restart and after Production cutover, exercise the same pre-existing sessions without interactive login and verify authenticated viewer/read plus one safe mutation/CSRF flow.
+- **Promotion blocker:** any deployment-caused logout, unexpected session loss, auth-key mismatch, cookie incompatibility, or release-attributable 401/403 spike blocks Production promotion or triggers automatic rollback. Passing health checks without session continuity is insufficient.
+- **Evidence:** record exact candidate SHA, pre/post runtime identity, session-store health, pre-existing session IDs or privacy-safe hashes, continuity results, auth error deltas, and rollback decision. Session-count equality by itself does not prove continuity.
+- **Regression requirement:** restart/cutover continuity tests are mandatory in release automation. A candidate without exact-SHA Test evidence is not Production-eligible.
+- This strengthens and supersedes any weaker interpretation of v396 while preserving its legitimate security revocation cases. Planning/documentation only; no new runtime deployment is claimed by v439.
+
+## Disk capacity and release-retention contract — v2026.09.25.438 (2026-09-25)
+
+- **P0 active-release protection:** never delete a release referenced by `production-current`, `test-current`, or any running Production/Test backend/frontend process CWD.
+- **P1 bounded retention:** immutable host releases must not grow without limit. Keep the active release plus at least 10 recent rollback-capable releases per environment; additional retention requires an explicit incident/audit/rollback reason.
+- **P1 capacity thresholds:** record root/data filesystem bytes and inode usage before/after cleanup. Warn at 70%, block nonessential build/QA artifact growth at 80%, and treat >=90% as an operations incident requiring immediate capacity action.
+- **P1 cleanup scope:** stale release copies, package/build caches and explicitly unreferenced container artifacts may be reclaimed; PostgreSQL data, user uploads, backups, active release roots and retain-until-classified QA data are excluded from generic cleanup.
+- **P1 swap safety:** disk swap sizing is part of the v437 VM memory-continuity contract. Do not shrink/remove swap solely to free disk without guest/host memory evidence and a rollback plan.
+- **Automation:** every successful promotion runs a fail-closed retention job after health/version/session checks. The job protects active CWD/symlink targets, retains the policy window, emits bytes/inodes reclaimed, and aborts on identity ambiguity.
+- Detailed authority: [STORAGE_RELEASE_RETENTION_SPEC.md](STORAGE_RELEASE_RETENTION_SPEC.md). Runtime cleanup evidence is recorded separately; this planning version does not redefine application release identity.
+
+## Infrastructure stall resilience and VM crash-continuity contract — v2026.09.25.437 (2026-09-25)
+
+- **P0 hypervisor/guest memory isolation:** Production must have a guaranteed guest memory floor and host reserve. Ballooning/overcommit may not reclaim memory below the empirically safe floor; host memory pressure, PSI, swap, QEMU RSS and guest free/available memory are release/operations signals.
+- **P0 multi-layer health:** health authority is composed from external public probe + Nginx/edge + backend + a lightweight DB transaction + guest heartbeat/guest-agent + virtualization-host QEMU state. Application-local health alone cannot certify VM health.
+- **P0 stall detection:** alert on repeated `kvm_async_pf`, kernel hung-task/D-state, QEMU pause/reset, guest-agent loss, host OOM, abnormal steal/scheduling delay and sustained storage I/O latency. The response distinguishes app failure from VM/hypervisor failure before remediation.
+- **P0 safe remediation:** external watchdog remediation uses explicit duration thresholds, cooldown, maximum retries and fencing. Capture diagnostics first where possible; restart the smallest failing layer first, and only restart/fail over the VM when VM-level evidence justifies it. Reboot storms are prohibited.
+- **P0 database recovery ordering:** data filesystem -> PostgreSQL recovery/readiness -> backend -> frontend -> edge acceptance. During WAL/filesystem recovery, dependents back off instead of rapid restart loops. Durable WAL/fsync, verified backup/restore and post-recovery integrity checks are mandatory.
+- **P1 resource contention control:** Production has reserved resource capacity. Test builds, browser QA, backups and local AI inference are constrained by CPU/memory/I/O limits or scheduling windows so they cannot starve Production.
+- **P1 evidence retention:** retain Proxmox/QEMU task events, host kernel/OOM/PSI/storage telemetry and guest/system/application/DB logs with synchronized timestamps and release SHA, including pre-crash windows.
+- **QA/release gate:** fault-inject memory pressure, guest pause/stall and DB crash recovery on Test. Accept only with zero ledger corruption, bounded automatic recovery, correct dependency ordering, external alert evidence, and session continuity when durable session authority survives. Missing host-level telemetry/watchdog blocks Production eligibility.
+- Canonical detail: [INFRASTRUCTURE_STALL_RESILIENCE_SPEC.md](INFRASTRUCTURE_STALL_RESILIENCE_SPEC.md). Planning only; no runtime change is claimed by this version.
 
 ## Deduplicated evidence expansion and economy safety contract — v2026.09.24.433 (2026-09-24)
 

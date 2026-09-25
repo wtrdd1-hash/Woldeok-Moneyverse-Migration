@@ -1,6 +1,6 @@
 # 월덕 머니버스 — AI 경제 컨트롤러 명세
 
-> 버전: v2026.09.20.292
+> 버전: v2026.09.25.441
 > 상태: Living 구현 지향 기획 명세
 > 날짜: 2026-09-20
 > 상위 명세: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -409,6 +409,18 @@ decision/audit/rollback 근거는 가능한 append-only로 유지한다.
 - immutable decision history
 
 운영자가 입력 중일 때 관리자 화면이 자동 새로고침되어 입력내용을 잃으면 안 된다. 새 baseline이 들어오면 비파괴적인 “새 기준 데이터 사용 가능” 알림을 표시한다.
+
+### 16.1 반응형 및 값 무결성 계약 — v2026.09.25.441
+
+관리자 경제 콘솔은 운영 계기판이다. 겉보기에는 그럴듯하지만 의미가 불일치하는 컨트롤은 안전하지 않다.
+
+- AI Council seat/domain 카드는 좁은 화면에서 재배치하며 model identifier, review count, confidence/calibration, token/cost 근거가 overflow를 만들면 안 된다.
+- “신뢰”, “confidence”, “Verified”, “Balanced” 같은 라벨은 문서화된 metric과 연결한다. 백분율은 분모/근거 window를 표시하거나 정의로 연결한다.
+- 경제 policy slider는 persisted/current value, unit, min/max/step, source policy version, ownership mode, updated-at을 가진 하나의 canonical value object에서 렌더링한다.
+- slider thumb 위치, 화면 숫자, `aria-valuenow` 동등 값, API payload는 같은 canonical value에서 파생한다. 서로 다른 default를 금지한다.
+- auto mode에서는 적용된 현재값과 candidate/proposed value를 분리 표시한다. 수동 조작은 명시적 override/edit 상태와 권한·사유·필요한 재인증·optimistic version·rollback metadata를 요구한다.
+- policy data가 loading/missing이면 loading/unknown/blocked로 표시하며 권위값처럼 `0.0%`를 조용히 렌더링하면 안 된다.
+- UI control state와 서버 정책값의 불일치는 release-blocking correctness failure이며 client/API 진단 근거를 남긴다.
 
 ## 17. AI 조정 가능 소비처 metadata
 

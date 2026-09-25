@@ -1,8 +1,8 @@
 # 월덕 머니버스 — 접근성·반응형 상호작용·UI 상태 명세
 
-> 버전: v2026.09.13.11
+> 버전: v2026.09.25.442
 > 상태: 구현 지향형 Living 제품 기획서
-> 기준일: 2026-09-13
+> 기준일: 2026-09-25
 > 상위 문서: `PROJECT_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `MONETIZATION_COMPLIANCE_SEO_SPEC.md`, `BILLING_SUBSCRIPTION_CONSUMER_PROTECTION_SPEC.md`, `ANALYTICS_EXPERIMENTATION_GOVERNANCE_SPEC.md`
 > 영문 기준 문서: [ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md](ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md)
 
@@ -111,6 +111,24 @@ Moneyverse에는 이미 일부 `aria-live`, 로딩 상태 등 개별 접근성 �
 ### 내비게이션
 collapse 후에도 핵심 목적지, 현재 위치, 키보드 접근, screen-reader 이름을 유지한다.
 
+### 관리자 경제 화면 모바일 하드 요구조건 — v2026.09.25.440
+
+모든 관리자 route에 적용하며 경제 운영 / AI Council / 거시 금리 튜닝 화면을 P0 대표 사례로 취급한다.
+
+1. **viewport containment:** 320/360/375/390/412/430 CSS px에서 `html`, `body`, page shell이 viewport 폭을 넘지 않는다. desktop fixed/min-width는 명시적 로컬 scroller 내부가 아니면 금지한다.
+2. **content reflow:** 제목·설명·badge·model identifier·status chip·action button은 잘림/겹침/page 폭 증가 없이 줄바꿈 또는 stack한다. 긴 한국어/영어 문자열을 모두 시험한다.
+3. **navigation:** 관리자 section tab은 overflow가 눈에 보이고 keyboard/touch로 조작 가능한 경우에만 로컬 horizontal tablist를 허용한다. 그렇지 않으면 wrap/menu로 전환한다. affordance 없이 label 일부가 잘리면 실패다.
+4. **card/grid:** desktop 다열 Council/metric layout은 모바일에서 1열로 전환한다. child card는 `min-width: 0` 또는 동등한 축소 의미를 가져 긴 콘텐츠가 줄바꿈되어야 한다. 필요하면 status/action은 본문 아래로 이동한다.
+5. **control/value integrity:** range thumb 위치, 화면 숫자, form model, dirty/pending state, submit payload, server response가 의미상 동일해야 한다. 하나라도 다르면 submit을 막고 명확한 정합화/error 상태를 표시한다.
+6. **금융 rate:** 금리/yield/tax/limit control은 서버 권위 현재값, 편집 중 draft 값, unit, 허용 min/max/step, 저장 후 확인값을 표시한다. 시각적 thumb 위치만 값으로 사용하지 않는다.
+7. **touch/정밀입력:** 주요 control은 가능한 한 44×44 CSS px 이상을 목표로 한다. range는 숫자입력 또는 증감 버튼 등 drag가 아닌 정밀 조작 대안을 제공한다.
+8. **sticky/fixed UI:** header/bottom bar/CTA가 focus control, 값, 확인문구, 페이지 마지막 내용을 가리면 안 된다. 필요한 safe-area inset을 반영한다.
+9. **핵심정보 숨김 금지:** 반응형 단순화는 순서변경/collapse는 가능하지만 관리자 판단에 필요한 model/status/value/reason/audit 정보를 제거하면 안 된다.
+10. **상태 검증:** default, loading, stale, empty, long-content, error, permission-denied, disabled, dirty/pending, save-success, save-failure를 모바일 폭에서 검증한다.
+11. **5회 규칙:** 실질 UI 변경 후 최소 5회의 완전한 반응형 QA를 수행한다. 각 회차마다 페이지 상단부터 끝까지, 모든 tab/section, 모든 interactive control, 필수 viewport matrix를 확인한다. 결함을 고친 후 영향 범위를 다시 반복 검증한다.
+12. **수용 증거:** exact candidate SHA, route, browser/engine, viewport, DPR/zoom, pass 번호, 실패 screenshot/trace, 최종 결과를 남긴다. 개발자 screenshot 1장만으로 통과 처리하지 않는다.
+13. **승격 차단:** page-level horizontal overflow, 잘리거나 도달할 수 없는 control, text overlap, hidden navigation, slider/value 불일치, 의도하지 않은 값 reset, 관리자 task 완료 불가는 고위험 경제/보안 관리자 화면에서 P0이며 승격을 차단한다.
+
 ## 11. 필수 UI 상태
 
 주요 화면은 최소한 default, hover(해당 시), focus, active/selected, disabled+사유, loading/skeleton, empty, partial/degraded, validation error, server/network error, offline, maintenance, permission denied, success, stale-data/refresh-available 상태를 정의한다.
@@ -146,6 +164,19 @@ icon-only 버튼은 accessible name을 가져야 한다.
 - 자동검사와 수동검사 범위
 
 ## 15. QA
+
+### 15.0 전 라우트 기본선 — v2026.09.25.442
+
+- 전 사이트 QA 범위는 exact candidate의 frontend page source에서 생성하며 사람이 골라 만든 샘플 목록을 권위로 사용하지 않는다.
+- 발견된 모든 page를 포함하고 모든 `/admin/**` page를 기본 포함한다. 관리자 QA는 선택 가능한 별도 캠페인이 아니라 기본선이다.
+- 현재 소스 스냅샷은 page route 86개, 관리자 route 22개, dynamic route 8개다. 매 candidate마다 다시 계산하며 이 숫자를 미래 고정 총수로 하드코딩하지 않는다.
+- 모든 release candidate는 전 사이트 완전 QA를 최소 5회 수행한다. 매 pass에서 발견된 모든 page를 방문하고 5회 누적으로 필수 viewport·role·content·UI-state matrix를 커버한다.
+- dynamic route는 재현 가능한 valid fixture와 적용 가능한 invalid/not-found/permission fixture를 사용한다.
+- 각 route는 최초 render만 보고 통과시키지 않고 page 전체와 local tab/section/dialog/primary control을 직접 확인한다.
+- route inventory와 QA ledger의 distinct route count는 동일해야 하며 누락된 PASS/FAIL/BLOCKED row가 없어야 한다. 불일치하면 승격 차단이다.
+- shared layout/component를 이유로 page를 건너뛰지 않는다. 공통 component 근거는 root-cause 분석 중복을 줄일 수 있지만 이를 사용하는 모든 page의 직접 render/runtime 검증은 유지한다.
+- 최종 수용은 실제 Test backend/API data가 필요하며 mock-only/screenshot-only 검증은 보조 증거다.
+- 상세 증거 schema와 실행 규칙은 `FULL_ROUTE_UI_QA_SPEC.ko.md`를 따른다.
 
 자동검사는 semantic/name 문제, 명백한 contrast, invalid ARIA, 알려진 dialog keyboard trap, 대표 viewport smoke를 확인한다.
 
