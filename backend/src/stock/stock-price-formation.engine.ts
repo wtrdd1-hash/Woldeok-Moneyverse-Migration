@@ -103,7 +103,7 @@ export function calculateNextStockPrice(
 
   // 6. Hard Price Boundaries (Min 1 WDX, Max Cap)
   let isMinPriceClamped = false;
-  if (newPrice < config.minPriceWdx) {
+  if (newPrice < config.minPriceWdx || (basePrice <= config.minPriceWdx && clampedReturnPct < 0)) {
     newPrice = config.minPriceWdx;
     isMinPriceClamped = true;
   } else if (newPrice > config.maxPriceWdx) {
