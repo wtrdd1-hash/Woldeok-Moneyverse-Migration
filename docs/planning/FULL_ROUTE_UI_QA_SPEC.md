@@ -97,3 +97,19 @@ A Production promotion may reuse no previous release's page-pass claim without r
 Historical evidence includes a 60-route browser sweep and later administrator audits.
 The current source contains 86 pages, so those historical passes remain useful evidence but cannot establish current full-route completion.
 v442 changes planning/QA authority only and does not claim current Test or Production has passed the new gate.
+
+## 11. Ledger validation automation
+
+`scripts/qa/generate-full-route-inventory.mjs` generates the inventory from candidate source.
+`scripts/qa/verify-full-route-qa-ledger.mjs` fail-closes on a mismatched inventory hash or candidate SHA,
+missing passes 1–5, missing `qa_admin_v1` evidence for an administrator route, missing
+`valid`/`not_found`/`permission_denied` dynamic-route scenarios, or missing evidence metadata.
+
+The baseline fixture catalog is `scripts/qa/fixtures/full-route-fixtures.v1.json`.
+
+```bash
+node scripts/qa/generate-full-route-inventory.mjs --output artifacts/qa/route-inventory.json
+pnpm qa:route-ledger:check -- --inventory artifacts/qa/route-inventory.json --ledger artifacts/qa/full-route-ledger.json
+```
+
+This automation does not replace Test browser execution or acceptance evidence.

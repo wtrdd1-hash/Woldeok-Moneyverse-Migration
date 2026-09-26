@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "fixtures": [
+    { "id": "qa_guest_v1", "roles": ["guest"] },
+    { "id": "qa_member_v1", "roles": ["member"] },
+    { "id": "qa_restricted_v1", "roles": ["restricted"] },
+    { "id": "qa_owner_v1", "roles": ["owner"] },
+    { "id": "qa_nonowner_v1", "roles": ["nonowner"] },
+    { "id": "qa_admin_v1", "roles": ["administrator"] },
+    { "id": "qa_fault_v1", "roles": ["fault"] }
+  ]
+}

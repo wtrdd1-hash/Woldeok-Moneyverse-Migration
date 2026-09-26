@@ -40,6 +40,7 @@
 - [모바일 API 전체 명세](mobile-api-complete-spec.ko.md)
 - [모바일 API endpoint catalog](mobile-api-endpoint-catalog.ko.md)
 - [모바일 API schema reference](mobile-api-schema-reference.ko.md)
+- [기획 공백 해소 및 수용증거 명세](planning/PLANNING_GAP_CLOSURE_SPEC.ko.md)
 - [모바일 API runtime contract](mobile-api-runtime-contract.ko.md)
 - [앱 인증 API 가이드](app-auth-api-guide.ko.md)
 - [앱 명세·사용자 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)

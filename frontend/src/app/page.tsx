@@ -18,6 +18,7 @@ import {
 import { WalletGlance } from '@/components/wallet-glance';
 import { LobbyCount } from '@/components/lobby-count';
 import { HomeAdvertisement } from '@/components/home-advertisement';
+import { CasualDopamineStation } from '@/components/casual-dopamine-station';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -180,6 +181,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 1.5. CASUAL DOPAMINE STATION: 일반 유저 무료 도파민 (피버, 덕이 펫, 여론 잭팟, 1:1 결투) */}
+      <CasualDopamineStation />
 
       {/* 2. DUAL-COLUMN LIVE DASHBOARD: 주식 시장 핫 종목 & 직업 업무 스테이션 */}
       <div className="grid gap-6 lg:grid-cols-2">

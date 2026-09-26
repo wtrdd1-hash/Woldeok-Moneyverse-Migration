@@ -98,3 +98,19 @@ Production 승격 시 과거 release의 page-pass 주장을 재사용하지 않�
 과거에는 60-route browser sweep와 후속 관리자 audit 증거가 있다.
 현재 소스는 86개 page를 가지므로 과거 pass는 유용한 이력이지만 현재 full-route 완료를 증명하지 못한다.
 v442는 기획/QA 권위만 변경하며 현재 Test/Production이 새 gate를 이미 통과했다고 주장하지 않는다.
+
+## 11. Ledger 검증 자동화
+
+`scripts/qa/generate-full-route-inventory.mjs`는 candidate source에서 inventory를 생성한다.
+`scripts/qa/verify-full-route-qa-ledger.mjs`는 inventory, fixture catalog, QA ledger를 대조해
+inventory hash와 candidate SHA, 모든 route의 1~5 pass, 관리자 route의 `qa_admin_v1` evidence,
+dynamic route의 `valid`/`not_found`/`permission_denied` scenario, evidence metadata를 fail-closed로 검증한다.
+
+기본 fixture catalog는 `scripts/qa/fixtures/full-route-fixtures.v1.json`이다.
+
+```bash
+node scripts/qa/generate-full-route-inventory.mjs --output artifacts/qa/route-inventory.json
+pnpm qa:route-ledger:check -- --inventory artifacts/qa/route-inventory.json --ledger artifacts/qa/full-route-ledger.json
+```
+
+이 자동화는 Test 브라우저 실행이나 실제 acceptance evidence를 대신하지 않는다.

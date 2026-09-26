@@ -1,6 +1,8 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v2)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v7)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v7**: 일반 유저 전용 4대 도파민 패키지(황금 오리 피버·덕이 펫/포춘쿠키·호가창 여론 잭팟·1:1 즉석 미니 배틀) 및 홈 메인 스테이션 전면 배치 (+155, -0)
+- **v6**: Phase 3 도파민 3대 패키지(스타 드롭·프레스티지 환생·4인 공동 저축 팟) & 무료/유료 차등화 & SEO 검색 유입 & 법령 준수 아키텍처 (+165, -0)
 - **v88**: 다국어(i18n) 15만+ 어휘 코퍼스/용어사전 구축 & P0 SEO SSOT(routes.config.ts, sitemap 실제 일자, 비공개 라우트 완전 분리, 4개 국어 generateMetadata) 통합 구현 (+240, -0)
 - **v87**: 2차 심화 문답(비공개 라우트 sitemap 즉시 분리, `generateMetadata` 동적 4개 국어 메타데이터, ISR 3600s sitemap 캐싱, 1단계 P0 핫픽스 선착수, SEO/i18n 리그레션 가드 CI 자동화) 반영 누적 (+160, -0)
 - **v86**: 글로벌 SEO 쇄신 & 다국어(i18n) 아키텍처 개편 — 영어 기본/한국어 2순위, `/[locale]` 독립 라우팅, 단일 진실 공급원(`routes.config.ts`), sitemap `lastModified` 실제 일자 반영 1차 조율 수립 (+180, -0)
@@ -3716,4 +3718,48 @@ pm test).
 - Next.js Turbopack 최적화 프로덕션 빌드 성공
 - Debian 미니PC `stage_v458.sh` 및 `promote_v458.sh` 무중단 승격 배포
 - PostgreSQL 활성 세션(1,433+) 100% 무손실 검증
+
+---
+
+## 🚀 [v7 Specification] 일반 유저 전용 4대 도파민 패키지 & 홈 대시보드 전면 배치 사양 (누적 추가)
+
+### 1. 사용자 조율 결과 확정 (A1 ~ A5)
+1. **[A1: 황금 오리 광클 피버 타임 (`GoldenDuckFever`)]**:
+   - 화면 랜덤 위치(좌표)에 15~30초 주기로 황금 오리(`Golden Duck`) 아이콘이 3초간 깜빡이며 출현.
+   - 클릭 즉시 10초 카운트다운 피버 타임 돌입 ➡️ 화면 중앙에 대형 골드 코인 버튼과 콤보 카운터(`x1.0` ~ `x3.0`) 활성화.
+   - 탭할 때마다 황금 코인 파티클 샤워 및 타격 이펙트, 10초 종료 시 누적 탭 수에 비례한 무료 WLD (최대 5,000 WLD) 즉시 지갑 지급.
+2. **[A2: 가상 컴패니언 '덕이' 쓰다듬기 & 일일 행운 포춘쿠키 (`DeokiPetStation`)]**:
+   - 홈 대시보드에 귀여운 인터랙티브 오리 펫 '덕이' 상주.
+   - 마우스 호버 및 클릭 시 반응 애니메이션(하트 파티클, 꽥꽥 말풍선 멘트, 친밀도 게이지 상승).
+   - 1일 1회 '포춘쿠키 쪼개기' 버튼 제공: 쿠키를 쪼개면 오늘의 투자 명언, 추천 주식/미니게임 점괘, 100~1,000 WLD 보너스 즉시 지급.
+3. **[A3: 호가창 1클릭 실시간 상승/하락 여론 잭팟 (`BullBearPoll`)]**:
+   - 주식 호가창 및 홈 피드에 '오늘의 매수 vs 매도 여론' 1클릭 투표 위젯 제공 (`🚀 떡상 가자` vs `🐻 숏이 정배`).
+   - 투표 시 별도 비용 없이 실시간 게이지 변화(50:50 ➡️ 실시간 투표율) 및 매일 자정 적중 유저들에게 총 10,000 WLD 풀 무료 n빵 에어드랍.
+4. **[A4: 1:1 초소액/무료 즉석 주사위 결투 (`MiniShowdownModal`)]**:
+   - 무료 칩 또는 100 WLD 초소액으로 즐기는 3판 2선승제 가상 AI와의 1:1 주사위 롤 결투.
+   - 실시간 주사위 굴림 3D 텐션 연출, 승리 시 트로피 뱃지 및 승리 골드 획득.
+5. **[A5: 홈 대시보드 및 서비스 전면 연동]**:
+   - 홈 메인 화면(`frontend/src/app/page.tsx`) 상단에 '일반 유저 도파민 스테이션' 전면 배치.
+   - 법적 고지 준수: 100% 무료/가상 리워드 시뮬레이터 명시.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `frontend/src/components/golden-duck-fever.tsx`: 황금 오리 랜덤 출현 & 10초 광클 피버 타임 컴포넌트
+- `frontend/src/components/golden-duck-fever.test.tsx`: 피버 타임 트리거 및 광클 콤보/WLD 지급 단위 테스트
+- `frontend/src/components/deoki-pet-station.tsx`: 덕이 펫 쓰다듬기 인터랙션 & 1일 1포춘쿠키 컴포넌트
+- `frontend/src/components/deoki-pet-station.test.tsx`: 펫 친밀도 상승 및 포춘쿠키 보상 단위 테스트
+- `frontend/src/components/bull-bear-poll.tsx`: 1클릭 상승/하락 여론 잭팟 위젯
+- `frontend/src/components/bull-bear-poll.test.tsx`: 여론 투표 및 실시간 비율 계산 단위 테스트
+- `frontend/src/components/mini-showdown-modal.tsx`: 100 WLD 초소액 3판 2선승 주사위 결투 모달
+- `frontend/src/components/mini-showdown.test.tsx`: 3판 2선승제 결투 룰 및 승패 판정 단위 테스트
+- `frontend/src/app/page.tsx`: 홈 대시보드 도파민 스테이션 통합 배치
+
+### Verification Plan
+- 프론트엔드 전체 Vitest 단위 테스트 100% PASS (138+개 파일)
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v459.sh` 및 `promote_v459.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,433+) 100% 무손실 검증
+
 
