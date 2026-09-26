@@ -68,6 +68,7 @@ export function CasualDopamineStation() {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
+            aria-label="황금 피버 타임 열기"
             onClick={() => setIsFeverOpen(true)}
             className="flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-400 hover:bg-amber-500/20 active:scale-95 transition-all"
           >
@@ -77,6 +78,7 @@ export function CasualDopamineStation() {
 
           <button
             type="button"
+            aria-label="1:1 주사위 결투 열기"
             onClick={() => setIsShowdownOpen(true)}
             className="flex items-center gap-1.5 rounded-xl border border-indigo-500/40 bg-indigo-500/10 px-3 py-1.5 text-xs font-bold text-indigo-400 hover:bg-indigo-500/20 active:scale-95 transition-all"
           >
@@ -86,6 +88,7 @@ export function CasualDopamineStation() {
 
           <button
             type="button"
+            aria-label="스타 드롭 탭 열기"
             onClick={() => setIsStarDropOpen(true)}
             className="flex items-center gap-1.5 rounded-xl border border-cyan-500/40 bg-cyan-500/10 px-3 py-1.5 text-xs font-bold text-cyan-400 hover:bg-cyan-500/20 active:scale-95 transition-all"
           >
@@ -95,6 +98,7 @@ export function CasualDopamineStation() {
 
           <button
             type="button"
+            aria-label="스트릭 내기 열기"
             onClick={() => setIsStreakWagerOpen(true)}
             className="flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 active:scale-95 transition-all"
           >

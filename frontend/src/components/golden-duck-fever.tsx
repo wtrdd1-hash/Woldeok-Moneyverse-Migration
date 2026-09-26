@@ -36,8 +36,11 @@ export function GoldenDuckFever({
 
   // Sync external isOpen prop
   useEffect(() => {
-    if (isOpen && !isFeverActive) {
+    if (isOpen) {
       startFever();
+    } else {
+      setIsFeverActive(false);
+      if (timerRef.current) clearInterval(timerRef.current);
     }
   }, [isOpen]);
 

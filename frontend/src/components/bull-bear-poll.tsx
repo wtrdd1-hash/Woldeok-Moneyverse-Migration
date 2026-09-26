@@ -96,6 +96,7 @@ export function BullBearPoll({
       <div className="mt-4 grid grid-cols-2 gap-3">
         <button
           type="button"
+          aria-label="상승 투표 떡상 가자"
           onClick={() => handleVote('bull')}
           disabled={voted !== null}
           className={`flex items-center justify-center gap-2 rounded-2xl py-3 text-xs font-bold transition-all duration-200 ${
@@ -112,6 +113,7 @@ export function BullBearPoll({
 
         <button
           type="button"
+          aria-label="하락 투표 숏이 정배"
           onClick={() => handleVote('bear')}
           disabled={voted !== null}
           className={`flex items-center justify-center gap-2 rounded-2xl py-3 text-xs font-bold transition-all duration-200 ${

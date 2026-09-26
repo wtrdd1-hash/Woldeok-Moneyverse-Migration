@@ -176,6 +176,7 @@ export function DeokiPetStation({
               <p className="text-xs text-slate-300 font-medium">쿠키를 쪼개 오늘의 투자 점괘와 보너스 WLD를 받으세요!</p>
               <button
                 type="button"
+                aria-label="포춘쿠키 쪼개기"
                 onClick={handleCrackCookie}
                 disabled={cookieClaimed}
                 className="mt-3 w-full rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 py-2.5 text-xs font-bold text-slate-950 shadow-md hover:from-amber-400 hover:to-amber-500 disabled:opacity-50 transition-all active:scale-95"

@@ -9,7 +9,7 @@ describe('DeokiPetStation Component', () => {
 
     expect(screen.getByText(/20 pts/)).toBeDefined();
 
-    const petBox = screen.getByRole('button', { name: /덕이 펫 쓰다듬기/ });
+    const petBox = screen.getByRole('button', { name: '덕이 펫 쓰다듬기' });
     fireEvent.click(petBox);
 
     expect(screen.getByText(/22 pts/)).toBeDefined();
@@ -19,7 +19,7 @@ describe('DeokiPetStation Component', () => {
     const onClaimFortuneMock = vi.fn();
     render(<DeokiPetStation onClaimFortune={onClaimFortuneMock} />);
 
-    const cookieButton = screen.getByRole('button', { name: /포춘쿠키 쪼개기/ });
+    const cookieButton = screen.getByRole('button', { name: '포춘쿠키 쪼개기' });
     fireEvent.click(cookieButton);
 
     expect(onClaimFortuneMock).toHaveBeenCalledTimes(1);

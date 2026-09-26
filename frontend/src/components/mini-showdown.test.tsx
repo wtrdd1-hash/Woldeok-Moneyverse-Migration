@@ -17,7 +17,7 @@ describe('MiniShowdownModal Component', () => {
   it('triggers dice roll when roll button is clicked', () => {
     render(<MiniShowdownModal isOpen={true} onClose={() => {}} />);
 
-    const rollBtn = screen.getByRole('button', { name: /주사위 굴리기/ });
+    const rollBtn = screen.getByRole('button', { name: '주사위 굴리기' });
     expect(rollBtn).toBeDefined();
 
     fireEvent.click(rollBtn);

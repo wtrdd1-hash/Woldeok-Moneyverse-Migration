@@ -254,6 +254,7 @@ export function MiniShowdownModal({
           /* Roll Action Button */
           <button
             type="button"
+            aria-label="주사위 굴리기"
             onClick={handleRoll}
             disabled={isRolling}
             className="w-full rounded-2xl bg-gradient-to-r from-indigo-500 to-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-500/30 hover:from-indigo-400 hover:to-indigo-500 disabled:opacity-50 active:scale-95 transition-all"
