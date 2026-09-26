@@ -2,11 +2,27 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.25.442
+> Current integrated version: v2026.09.25.443
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## P0/P1 database architecture integrity and scale contract — v2026.09.25.443 (2026-09-25)
+
+- **Evidence breadth without false certainty:** a Crossref discovery run collected 80,000 raw records across ten database-architecture lanes and produced **66,858 deduplicated candidates** using DOI first and normalized-title fallback. This is a discovery corpus, not a claim that every candidate was manually reviewed or database-specific. Production requirements below use directly checked PostgreSQL 17 primary documentation and current repository evidence.
+- **Preserve the current authority boundary:** numbered SQL migrations remain schema authority; applied migrations remain immutable/checksummed; the runtime application role remains non-owner/no-DDL; protected economic writes continue through reviewed PostgreSQL transaction/function boundaries with exact integer money and business idempotency.
+- **P0 schema fingerprint/drift gate:** every exact candidate must be able to rebuild an empty PostgreSQL 17 database and generate a normalized manifest of columns/types/defaults/nullability, PK/UNIQUE/FK/CHECK constraints, indexes, triggers, routines/security-definer search paths, ownership/grants and migration checksums. Test/Production catalog drift that cannot be explained by migration history blocks acceptance.
+- **P0 key/constraint/FK-index audit:** canonical tables require a PK or explicit reviewed keyless exception. Domain invariants belong in DB constraints where safely expressible. Because PostgreSQL does not automatically index referencing FK columns, every child FK requires a suitable supporting left-prefix index or a measured/documented exception.
+- **P0 zero-downtime schema evolution:** nontrivial migrations use expand -> optional compatible dual period -> bounded resumable backfill -> low-blocking index/constraint build/validation -> switch -> old-runtime retirement -> later contract. Each migration records lock/scan/rewrite class and forward-fix/rollback semantics; destructive/table-rewrite work is first exercised on representative isolated Test data.
+- **P0 concurrency correctness:** retryable serialization/deadlock failures retry the **whole transaction logic** with bounded backoff while preserving the business idempotency identity. Deterministic lock ordering remains mandatory for multi-account/entity mutations.
+- **P0 ledger reconciliation:** append-only balanced postings remain the economic audit authority. Mutable balance projections must update atomically and provide sampled/full reconciliation plus a controlled rebuild/repair path; historical postings are corrected by new reversal/correction transactions, not mutation/deletion.
+- **P1 measured index/partition lifecycle:** index creation/removal is tied to real query predicates, PostgreSQL statistics and representative `EXPLAIN (ANALYZE, BUFFERS)`. Partitioning is allowed only for measured large/growing/retention-heavy tables with a decision record; audit/outbox/chat/price/telemetry history are candidates, not automatically partitioned.
+- **P1 typed core and lifecycle semantics:** authoritative identity, money, ownership, lifecycle state, idempotency and timestamps stay typed/constrained columns. JSONB is bounded to versioned flexible payloads. Every FK intentionally selects delete behavior so ledger/audit/financial history cannot disappear through accidental cascade.
+- **P1 maintenance/observability:** monitor autovacuum/analyze freshness, dead tuples/XID pressure, long transactions, blocking/deadlocks/serialization retries, relation/index growth, temp spill, invalid/duplicate/unused-index candidates and approved `pg_stat_statements` query evidence. Routine `VACUUM FULL` is not normal maintenance.
+- **P0/P1 recovery evolution:** keep the verified encrypted logical-backup path; it is not PITR. Stronger RPO/RTO requires independently stored base backups/WAL archives, immutable off-host failure domain and a disposable restore drill proving timestamp recovery, lineage and application integrity before acceptance.
+- **No architecture-by-corpus:** v443 does not authorize an ORM migration takeover, blanket partitioning, generic sharding/distributed SQL, or a PostgreSQL major upgrade. Current runtime remains PostgreSQL 17-compatible unless a separate upgrade is planned and validated.
+- Detailed authority: [DATABASE_ARCHITECTURE_SPEC.md](DATABASE_ARCHITECTURE_SPEC.md) and [database architecture research review](../findings/MONEYVERSE_DATABASE_ARCHITECTURE_RESEARCH_REVIEW_v2026.09.25.443.md). This cycle is planning/research/docs only; no schema/Test/Production change is claimed.
 
 ## P0 full-site all-page UI/functional QA gate — v2026.09.25.442 (2026-09-25)
 
