@@ -3642,3 +3642,35 @@ pm test).
 - `pnpm --filter frontend build` (Next.js 빌드 성공 검증).
 - 원격 미니PC `stage_v456.sh` 및 `promote_v456.sh` 실행을 통한 무중단 승격.
 - 활성 세션(1,376개) 무손실 보존 실측.
+---
+
+## 🚀 [v5 Specification] 2차 확정 사양(스트릭 내기·활동 드롭/경매장 5% 소각·호가창 슈퍼챗) 상세 명세 (신규 누적)
+
+### 1. 사용자 조율 결과 확정 (A1 ~ A5)
+1. **[패키지 구성] Duolingo 스트릭 내기 + Steam 활동 드롭/경매장 2대 패키지 우선 구현**:
+   - 일일 리텐션(D1~D7) 락인과 P2P 유료 수수료 소각 메커니즘을 동시 확보.
+2. **[스트릭 내기 규칙] 2배(200%) 환급 + 스트릭 프리즈 3회 기본 지급 후 유료화**:
+   - 7일 연속 출석 및 일일 미션 달성 시 배팅한 WLD의 200% 지급.
+   - 연속 일수가 끊길 위기 시 방어하는 '스트릭 프리즈'는 계정당 기본 3회 무료 제공 후 상점에서 유료 WLD 구매.
+3. **[P2P 경매장 BM] WLD 단일 통화 + 거래 대금 5% 전액 소각**:
+   - 경매 낙찰 시 매도자 수령 대금에서 5%가 플랫폼에 의해 즉시 소각되어 가상 경제 통화량 조절 및 디플레이션 유도.
+4. **[Twitch형 슈퍼챗 노출] 호가창 상단 + 메인 대시보드 롤링 티커 동시 노출**:
+   - 주식 거래소 호가창 상단과 메인 홈 대시보드 양쪽에 골드 폭죽 애니메이션과 함께 실시간 슈퍼챗 메시지 송출.
+5. **[자율 실행 권한] AI가 기획서 갱신 후 테스트 100% PASS 및 프로덕션 승격까지 완수**.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `frontend/src/components/streak-wager-modal.tsx`: Duolingo형 7일 스트릭 내기 & 리그 카드
+- `frontend/src/components/streak-wager.test.tsx`: 스트릭 내기 200% 환급 및 프리즈 단위 테스트
+- `frontend/src/components/orderbook-superchat.tsx`: Twitch형 호가창 슈퍼챗 & 골드 폭죽 티커
+- `frontend/src/components/orderbook-superchat.test.tsx`: 슈퍼챗 발송 및 롤링 티커 렌더링 테스트
+- `frontend/src/app/marketplace/auction/page.tsx`: Steam형 P2P 아티팩트 경매장 & 5% 소각 콘솔
+- `frontend/src/app/marketplace/auction/auction.test.tsx`: 경매 입찰 및 5% 수수료 소각 단위 테스트
+
+### Verification Plan
+- 프론트엔드 전체 Vitest 단위 테스트 100% PASS (131+개 파일)
+- Next.js 프로덕션 최적화 빌드 무결성 확인
+- `stage_v457.sh` & `promote_v457.sh` 무중단 블루-그린 승격 배포
+- PostgreSQL 활성 세션(1,377+) 100% 무손실 검증
