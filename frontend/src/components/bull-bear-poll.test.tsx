@@ -1,9 +1,13 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import React from 'react';
 import { BullBearPoll } from './bull-bear-poll';
 
 describe('BullBearPoll Component', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it('renders poll and calculates percentages properly', () => {
     render(
       <BullBearPoll
@@ -30,7 +34,7 @@ describe('BullBearPoll Component', () => {
       />
     );
 
-    const bullBtn = screen.getAllByRole('button', { name: '상승 투표 떡상 가자' })[0]!;
+    const bullBtn = screen.getByRole('button', { name: '상승 투표 떡상 가자' });
     fireEvent.click(bullBtn);
 
     expect(onVoteMock).toHaveBeenCalledWith('bull');

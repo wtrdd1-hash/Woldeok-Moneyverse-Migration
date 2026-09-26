@@ -1,9 +1,13 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import React from 'react';
 import { MiniShowdownModal } from './mini-showdown-modal';
 
 describe('MiniShowdownModal Component', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it('renders showdown arena and round counters', () => {
     const onCloseMock = vi.fn();
     render(<MiniShowdownModal isOpen={true} onClose={onCloseMock} stake={100} />);
