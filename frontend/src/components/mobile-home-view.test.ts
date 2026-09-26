@@ -1,7 +1,11 @@
 import React from 'react';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MobileHomeView } from './mobile-home-view';
+
+vi.mock('@/components/locale-provider', () => ({
+  useLocale: () => ({ locale: 'ko', setLocale: () => {} }),
+}));
 
 beforeAll(() => {
   global.ResizeObserver = class {

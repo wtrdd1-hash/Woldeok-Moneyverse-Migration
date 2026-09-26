@@ -1,8 +1,12 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { SavingPocketsCard } from './saving-pockets-card';
 import type { SavingPocket } from './types';
+
+vi.mock('@/components/locale-provider', () => ({
+  useLocale: () => ({ locale: 'ko', setLocale: () => {} }),
+}));
 
 describe('SavingPocketsCard', () => {
   it('renders empty state when no active pockets exist', () => {

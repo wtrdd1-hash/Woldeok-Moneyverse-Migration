@@ -1,7 +1,11 @@
 import { cleanup, render, fireEvent } from '@testing-library/react';
-import { afterEach, describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { NewspaperView } from './newspaper-view';
 import type { MarketEvent, StockTickerItem } from './newspaper-view';
+
+vi.mock('@/components/locale-provider', () => ({
+  useLocale: () => ({ locale: 'ko', setLocale: () => {} }),
+}));
 
 afterEach(cleanup);
 

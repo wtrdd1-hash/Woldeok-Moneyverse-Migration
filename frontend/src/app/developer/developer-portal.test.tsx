@@ -1,8 +1,12 @@
 import React from 'react';
 import { cleanup, render, fireEvent } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DeveloperPortalView } from './developer-portal-view';
 import { appApiContract } from '@/lib/app-gateway';
+
+vi.mock('@/components/locale-provider', () => ({
+  useLocale: () => ({ locale: 'ko', setLocale: () => {} }),
+}));
 
 afterEach(cleanup);
 

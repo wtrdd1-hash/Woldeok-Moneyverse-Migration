@@ -11,17 +11,27 @@ export default function robots(): MetadataRoute.Robots {
     return { rules: { userAgent: '*', disallow: '/' } };
   }
 
+  const disallowedRoutes = getDisallowedCrawlerRoutes();
+  const disallowSet = new Set([
+    ...disallowedRoutes,
+    '/admin',
+    '/developer',
+    '/account',
+    '/wallet',
+    '/status',
+    '/gallery/submit',
+    '/login',
+    '/api/',
+    '/auth/',
+  ]);
+
   return {
     rules: {
       userAgent: '*',
       allow: '/',
-      // Strictly disallow all member-only screens and internal API/auth routes from SSOT
-      disallow: getDisallowedCrawlerRoutes(),
+      disallow: Array.from(disallowSet),
     },
-    sitemap: [
-      `${base}/sitemap.xml`,
-      `${base}/sitemap-index.xml`,
-    ],
+    sitemap: `${base}/sitemap.xml`,
     host: base,
   };
 }
