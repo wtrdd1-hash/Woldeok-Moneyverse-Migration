@@ -206,12 +206,12 @@ export function StockOrderbook({
                 key={`ask-${ask.step}`}
                 type="button"
                 onClick={() => onSelectPrice?.(ask.price, 'buy')}
-                className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-rose-500/15 active:scale-[0.99] transition-all text-left"
+                className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-rose-500/15 active:scale-[0.99] transition-all text-left touch-manipulation select-none"
                 title={isEn ? `Click to buy at ${groupDigits(ask.price)} WLD` : `${groupDigits(ask.price)} WLD에 매수 주문 입력`}
               >
                 {/* 잔량 비례 배경 게이지 바 */}
                 <div
-                  className="absolute inset-y-0 right-0 bg-rose-500/10 rounded-r-md pointer-events-none transition-all duration-300"
+                  className="absolute inset-y-0 right-0 bg-rose-500/10 rounded-r-md pointer-events-none transition-all duration-300 will-change-[width] transform-gpu"
                   style={{ width: `${ask.percent}%` }}
                 />
                 <span className="relative z-10 font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
@@ -256,12 +256,12 @@ export function StockOrderbook({
                 key={`bid-${bid.step}`}
                 type="button"
                 onClick={() => onSelectPrice?.(bid.price, 'sell')}
-                className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-emerald-500/15 active:scale-[0.99] transition-all text-left"
+                className="group relative flex w-full items-center justify-between px-3 py-1.5 rounded-md hover:bg-emerald-500/15 active:scale-[0.99] transition-all text-left touch-manipulation select-none"
                 title={isEn ? `Click to sell at ${groupDigits(bid.price)} WLD` : `${groupDigits(bid.price)} WLD에 매도 주문 입력`}
               >
                 {/* 잔량 비례 배경 게이지 바 */}
                 <div
-                  className="absolute inset-y-0 right-0 bg-emerald-500/10 rounded-r-md pointer-events-none transition-all duration-300"
+                  className="absolute inset-y-0 right-0 bg-emerald-500/10 rounded-r-md pointer-events-none transition-all duration-300 will-change-[width] transform-gpu"
                   style={{ width: `${bid.percent}%` }}
                 />
                 <span className="relative z-10 font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">

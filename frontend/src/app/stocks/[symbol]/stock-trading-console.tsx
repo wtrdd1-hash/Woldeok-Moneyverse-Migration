@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { StockOrderbook } from './stock-orderbook';
 import { StockOrderPanel } from './stock-order-panel';
+import type { StockHaltReceiptData } from './stock-halt-receipt-dialog';
 import { groupDigits } from '@/lib/money';
 
 interface StockTradingConsoleProps {
@@ -23,6 +24,7 @@ interface StockTradingConsoleProps {
   readonly holdingQuantity?: string | undefined;
   readonly isHalted?: boolean | undefined;
   readonly isEn?: boolean | undefined;
+  readonly receipt?: StockHaltReceiptData | null | undefined;
 }
 
 export function StockTradingConsole({
@@ -35,6 +37,7 @@ export function StockTradingConsole({
   holdingQuantity,
   isHalted = false,
   isEn = false,
+  receipt,
 }: StockTradingConsoleProps) {
   const [selectedPrice, setSelectedPrice] = useState<string>(currentPrice);
   const [side, setSide] = useState<'buy' | 'sell'>('buy');
@@ -80,6 +83,7 @@ export function StockTradingConsole({
             selectedPrice={selectedPrice}
             activeSide={side}
             onSideChange={setSide}
+            receipt={receipt}
           />
         </div>
 
@@ -97,20 +101,21 @@ export function StockTradingConsole({
             selectedPrice={selectedPrice}
             activeSide={side}
             onSideChange={setSide}
+            receipt={receipt}
           />
         </div>
       </div>
 
       {/* 모바일 320px~768px 하단 고정 원터치 액션 바 (Floating Bottom Action Bar) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border/80 p-3 px-4 shadow-2xl flex items-center justify-between gap-3">
-        <div className="flex flex-col">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border/80 p-2.5 px-3 min-[400px]:p-3 min-[400px]:px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-2xl flex items-center justify-between gap-2 min-[400px]:gap-3">
+        <div className="flex flex-col min-w-0 shrink-0">
           <span className="text-[10px] text-muted-foreground font-semibold">{symbol} 현재가</span>
-          <span className="font-mono text-sm font-extrabold text-foreground">
+          <span className="font-mono text-sm font-extrabold text-foreground truncate">
             {groupDigits(currentPrice)} <span className="text-[10px] font-normal text-muted-foreground">WLD</span>
           </span>
         </div>
 
-        <div className="flex items-center gap-2 flex-1 max-w-[260px]">
+        <div className="flex items-center gap-1.5 min-[400px]:gap-2 flex-1 min-w-0 max-w-[260px]">
           <Button
             type="button"
             onClick={() => handleOpenMobileOrder('buy')}
@@ -154,6 +159,7 @@ export function StockTradingConsole({
             selectedPrice={selectedPrice}
             activeSide={side}
             onSideChange={setSide}
+            receipt={receipt}
           />
         </DialogContent>
       </Dialog>

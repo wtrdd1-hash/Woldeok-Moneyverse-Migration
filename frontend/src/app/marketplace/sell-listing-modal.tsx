@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { PlusCircle, ShieldAlert, CheckCircle2, ArrowRight, Loader2, Sparkles as _Sparkles } from 'lucide-react';
+import { PlusCircle, ShieldAlert, CheckCircle2, ArrowRight, Loader2, Flame, Sparkles as _Sparkles } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -180,6 +180,16 @@ export function SellListingModal({
                   </span>
                 </li>
               </ul>
+
+              <div className="rounded-lg bg-primary/5 border border-primary/20 p-2 text-[11px] text-muted-foreground space-y-1">
+                <div className="flex items-center gap-1 font-semibold text-primary">
+                  <Flame className="size-3.5" />
+                  <span>국고 자동 매입·소각 시스템 (GE Item Sink)</span>
+                </div>
+                <p>
+                  거래세의 50%는 국고(Treasury)로 귀속되어 최저가 매물을 자동 매입·영구 소각함으로써 통화 가치를 안정화합니다.
+                </p>
+              </div>
             </div>
 
             {!canPayListingFee && (

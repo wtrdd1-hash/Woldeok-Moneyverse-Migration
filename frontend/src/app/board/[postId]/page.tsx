@@ -10,6 +10,7 @@ import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { canonicalUrl, breadcrumbJsonLd, forumPostingJsonLd, buildOgImageUrl } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
+import { DirectMessageButton } from '@/components/direct-message-button';
 import { CommentForm, DeleteCommentButton, PostControls } from './post-forms';
 
 export const dynamic = 'force-dynamic';
@@ -19,6 +20,7 @@ interface Post {
   readonly title: string;
   readonly body: string;
   readonly authorName: string;
+  readonly authorUserId?: string | null | undefined;
   readonly createdAt: string;
   readonly updatedAt: string | null;
   readonly mine: boolean;
@@ -30,6 +32,7 @@ interface Comment {
   readonly commentId: string;
   readonly body: string;
   readonly authorName: string;
+  readonly authorUserId?: string | null | undefined;
   readonly createdAt: string;
   readonly mine: boolean;
 }
@@ -145,20 +148,26 @@ export default async function PostPage({
 
       <article className="grid gap-5">
         <header className="grid gap-3">
-          <h1 className="text-[clamp(1.6rem,3vw,2.25rem)] leading-[1.25]">{post.title}</h1>
-          <p className="text-sm text-muted-foreground">
-            {post.authorName}
-            {' · '}
+          <h1 className="text-[clamp(1.6rem,3vw,2.25rem)] leading-[1.25] break-words [overflow-wrap:anywhere]">{post.title}</h1>
+          <div className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+            <span className="font-medium text-foreground">{post.authorName}</span>
+            <DirectMessageButton
+              authorName={post.authorName}
+              targetUserId={post.authorUserId}
+              mine={post.mine}
+              size="sm"
+            />
+            <span>·</span>
             <time dateTime={post.createdAt}>
               {formatMoment(post.createdAt, '작성 시간 확인 중')}
             </time>
             {post.updatedAt && (
               <>
-                {' · '}
+                <span>·</span>
                 <time dateTime={post.updatedAt}>{formatMoment(post.updatedAt)} 수정됨</time>
               </>
             )}
-          </p>
+          </div>
         </header>
 
         <Separator />
@@ -178,7 +187,7 @@ export default async function PostPage({
           </figure>
         )}
 
-        <p className="whitespace-pre-wrap leading-[1.9] [word-break:keep-all]">{post.body}</p>
+        <p className="whitespace-pre-wrap leading-[1.9] break-words [overflow-wrap:anywhere] [word-break:keep-all]">{post.body}</p>
 
         {member && post.mine && (
           <PostControls postId={post.postId} title={post.title} body={post.body} />
@@ -206,14 +215,20 @@ export default async function PostPage({
                   className="flex items-start gap-3 border-b px-4 py-3 last:border-b-0"
                 >
                   <div className="min-w-0 flex-1 grid gap-1">
-                    <p className="text-xs text-muted-foreground">
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                       <b className="font-bold text-foreground">{comment.authorName}</b>
-                      {' · '}
+                      <DirectMessageButton
+                        authorName={comment.authorName}
+                        targetUserId={comment.authorUserId}
+                        mine={comment.mine}
+                        size="sm"
+                      />
+                      <span>·</span>
                       <time dateTime={comment.createdAt}>
                         {formatMoment(comment.createdAt, '작성 시간 확인 중')}
                       </time>
-                    </p>
-                    <p className="text-sm leading-[1.8] [word-break:keep-all]">{comment.body}</p>
+                    </div>
+                    <p className="text-sm leading-[1.8] break-words [overflow-wrap:anywhere] [word-break:keep-all]">{comment.body}</p>
                   </div>
                   {member && comment.mine && (
                     <DeleteCommentButton postId={post.postId} commentId={comment.commentId} />

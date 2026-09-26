@@ -44,6 +44,7 @@ interface BoardPostRow {
   readonly title?: unknown;
   readonly body?: unknown;
   readonly author_name?: unknown;
+  readonly author_user_id?: unknown;
   readonly created_at?: unknown;
   readonly updated_at?: unknown;
   readonly mine?: unknown;
@@ -55,6 +56,7 @@ interface BoardCommentRow {
   readonly comment_id?: unknown;
   readonly body?: unknown;
   readonly author_name?: unknown;
+  readonly author_user_id?: unknown;
   readonly created_at?: unknown;
   readonly mine?: unknown;
 }
@@ -76,6 +78,7 @@ export interface BoardPost {
   readonly title: string;
   readonly body: string;
   readonly authorName: string;
+  readonly authorUserId?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string | null;
   readonly mine: boolean;
@@ -87,6 +90,7 @@ export interface BoardComment {
   readonly commentId: string;
   readonly body: string;
   readonly authorName: string;
+  readonly authorUserId?: string | null;
   readonly createdAt: string;
   readonly mine: boolean;
 }
@@ -178,6 +182,7 @@ function post(row: BoardPostRow): BoardPost {
     title: boardText(row?.title, 'title', 120),
     body: boardText(row?.body, 'body', 5000, true),
     authorName: boardText(row?.author_name, 'author name', 120),
+    authorUserId: row?.author_user_id ? String(row.author_user_id) : null,
     createdAt: moment(row?.created_at),
     updatedAt: optionalMoment(row?.updated_at),
     mine: row?.mine === true,
@@ -190,6 +195,7 @@ function comment(row: BoardCommentRow): BoardComment {
     commentId: uuid(row?.comment_id, 'comment id'),
     body: boardText(row?.body, 'comment', 1000),
     authorName: boardText(row?.author_name, 'author name', 120),
+    authorUserId: row?.author_user_id ? String(row.author_user_id) : null,
     createdAt: moment(row?.created_at),
     mine: row?.mine === true,
   };

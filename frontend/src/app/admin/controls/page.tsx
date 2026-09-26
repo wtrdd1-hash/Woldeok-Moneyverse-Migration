@@ -96,7 +96,7 @@ export default async function AdminControlsPage() {
               >
                 <div className="flex flex-wrap items-center gap-2">
                   <b>{feature.title}</b>
-                  <code className="font-mono text-[0.7rem] text-muted-foreground">
+                  <code className="font-mono text-[0.7rem] text-muted-foreground break-all">
                     {feature.feature_key}
                   </code>
                   <SwitchStateBadge state={feature.state} />
@@ -175,7 +175,7 @@ export default async function AdminControlsPage() {
               <EmptyState title="아직 만든 정책 버전이 없습니다." />
             ) : (
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[480px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead>버전</TableHead>
@@ -235,7 +235,7 @@ export default async function AdminControlsPage() {
               <EmptyState title="표시할 역할이 없습니다." />
             ) : (
               <div className="overflow-x-auto">
-                <Table>
+                <Table className="min-w-[480px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead>사용자</TableHead>
@@ -249,7 +249,7 @@ export default async function AdminControlsPage() {
                         <TableCell>
                           <span className="grid gap-0.5">
                             <span>{row.display_name}</span>
-                            <code className="font-mono text-[0.7rem] text-muted-foreground">
+                            <code className="font-mono text-[0.7rem] text-muted-foreground break-all">
                               {row.user_id}
                             </code>
                           </span>

@@ -15,9 +15,10 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      // Only purely private member screens, admin console, and internal APIs are kept off search engines
+      // Private member screens, admin console, developer portal, and internal APIs are kept off search engines
       disallow: [
         '/admin',
+        '/developer',
         '/account',
         '/wallet',
         '/status',
@@ -31,5 +32,3 @@ export default function robots(): MetadataRoute.Robots {
     host: base,
   };
 }
-
-

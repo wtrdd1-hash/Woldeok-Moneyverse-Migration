@@ -54,27 +54,21 @@ import { isAdministrator } from '@/lib/viewer-state';
  * control — the original used a `<details>` for that, and this uses the
  * registry's Sheet, which traps focus and closes on Escape without this file
  * re-implementing either.
- *
- * It lives in the root layout, so moving between pages never remounts it.
- * That, and the prefetch `<Link>` does on its own, is most of what makes
- * navigation feel immediate.
- *
- * The viewer arrives after hydration rather than during render: asking here
- * would read a cookie in the root layout and opt every page in the
- * application out of static generation, including the ones that exist to be
- * crawled. Until the answer lands, the session control is a placeholder of
- * its final size, so nothing on the page moves when it does.
  */
 export function SiteHeader() {
   const pathname = usePathname();
-  const viewer = useViewer();
+  const rawViewer = useViewer();
+  const viewer = (rawViewer && typeof rawViewer === 'object' && 'viewer' in rawViewer ? (rawViewer as { viewer: Viewer | null }).viewer : rawViewer) as Viewer | null;
   const { locale } = useLocale();
 
-  const isAdmin = Boolean(viewer && viewer.consentCurrent && viewer.adminRoles.length > 0);
+  const isAdmin = Boolean(
+    viewer &&
+    viewer.signedIn &&
+    viewer.consentCurrent &&
+    Array.isArray(viewer.adminRoles) &&
+    viewer.adminRoles.length > 0,
+  );
 
-  // The wide bar, grouped. Thirteen flat links wrapped onto a second row and
-  // pushed the wordmark out of line. When signed in, the member version of
-  // '경제' replaces the public version to avoid duplicate menus.
   const publicItems = viewer?.signedIn
     ? HEADER_PUBLIC.filter((item) => !isGroup(item) || item.label !== '경제')
     : HEADER_PUBLIC;
@@ -82,8 +76,6 @@ export function SiteHeader() {
   if (viewer?.signedIn) items.push(...HEADER_MEMBER);
   if (isAdmin) items.push(...HEADER_ADMIN);
 
-  // The sheet stays flat: a drawer has the room, and a menu inside a menu is
-  // worse than a long list.
   const mobileAdmin = mobileAdminEntries(viewer);
 
   return (
@@ -148,16 +140,20 @@ export function SiteHeader() {
   );
 }
 
-export function mobileAdminEntries(viewer: Viewer | null): readonly NavEntry[] {
-  return viewer && isAdministrator(viewer) ? ADMIN_NAV : [];
+export function mobileAdminEntries(viewer: Viewer | { signedIn?: boolean; consentCurrent?: boolean; adminRoles?: readonly string[] } | null): readonly NavEntry[] {
+  if (!viewer) return [];
+  if (viewer.signedIn && viewer.consentCurrent && Array.isArray(viewer.adminRoles) && viewer.adminRoles.length > 0) {
+    return ADMIN_NAV;
+  }
+  return [];
 }
 
 export function MobileSessionAction({
   viewer,
-  locale,
+  locale = 'ko',
 }: {
-  readonly viewer: Viewer | null;
-  readonly locale: Locale;
+  readonly viewer: Viewer | { signedIn?: boolean; consentCurrent?: boolean; adminRoles?: readonly string[] } | null;
+  readonly locale?: Locale;
 }) {
   if (!viewer) return <Skeleton className="h-11 w-full rounded-[10px]" />;
   if (!viewer.signedIn) {
@@ -165,7 +161,7 @@ export function MobileSessionAction({
       <Button asChild className="min-h-11 w-full font-bold">
         <Link href="/login">
           <LogIn />
-          {locale === 'en' ? 'Sign in' : '로그인'}
+          <span>{locale === 'en' ? 'Sign in' : '로그인'}</span>
         </Link>
       </Button>
     );
@@ -174,7 +170,7 @@ export function MobileSessionAction({
     <form action={logout}>
       <Button type="submit" variant="outline" className="min-h-11 w-full font-bold">
         <LogOut />
-        {locale === 'en' ? 'Sign out' : '로그아웃'}
+        <span>{locale === 'en' ? 'Sign out' : '로그아웃'}</span>
       </Button>
     </form>
   );
@@ -193,31 +189,20 @@ function HeaderLink({
   return (
     <Link
       href={entry.href}
-      // The console state changes outside this tab during OAuth. Do not let a
-      // speculative payload from before that redirect win over the server's
-      // current session decision when the operator returns.
       prefetch={!entry.href.startsWith('/admin')}
       aria-current={current ? 'page' : undefined}
-      // The underline grows from nothing on hover and stays for the current
-      // page — the original's one piece of navigation motion, kept.
       className={cn(
-        'relative min-h-10 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold transition-colors',
+        'relative min-h-10 whitespace-nowrap rounded-xl px-2.5 xl:px-3 py-1.5 xl:py-2 text-xs xl:text-sm font-bold transition-colors',
         current
           ? 'bg-primary/12 text-primary'
           : 'text-muted-foreground hover:bg-muted hover:text-foreground',
       )}
     >
-      {navLabel(entry.label, locale)}
+      <span>{navLabel(entry.label, locale)}</span>
     </Link>
   );
 }
 
-/**
- * A group of links behind one label.
- *
- * The label underlines while the reader is anywhere inside the group, so the
- * bar still answers "where am I" without the destination being visible.
- */
 function HeaderGroup({
   group,
   pathname,
@@ -232,13 +217,13 @@ function HeaderGroup({
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          'relative flex min-h-10 items-center gap-1 whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-bold transition-colors outline-none',
+          'relative flex min-h-10 items-center gap-1 whitespace-nowrap rounded-xl px-2.5 xl:px-3 py-1.5 xl:py-2 text-xs xl:text-sm font-bold transition-colors outline-none',
           current
             ? 'bg-primary/12 text-primary'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground',
         )}
       >
-        {navLabel(group.label, locale)}
+        <span>{navLabel(group.label, locale)}</span>
         <ChevronDown className="size-3.5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-44">
@@ -253,7 +238,7 @@ function HeaderGroup({
                 isCurrent(pathname, entry.href) && 'text-primary',
               )}
             >
-              {navLabel(entry.label, locale)}
+              <span>{navLabel(entry.label, locale)}</span>
             </Link>
           </DropdownMenuItem>
         ))}
@@ -284,13 +269,12 @@ function Group({
             href={entry.href}
             prefetch={!entry.href.startsWith('/admin')}
             aria-current={current ? 'page' : undefined}
-            // 44px is the minimum comfortable tap target.
             className={cn(
               'flex min-h-11 items-center rounded-[8px] px-3 text-sm font-bold',
               current ? 'bg-secondary text-secondary-foreground' : 'hover:bg-paper-dark',
             )}
           >
-            {navLabel(entry.label, locale)}
+            <span>{navLabel(entry.label, locale)}</span>
           </Link>
         );
       })}
@@ -310,7 +294,7 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
     );
   }
 
-  const isAdmin = Boolean(viewer.consentCurrent && viewer.adminRoles.length > 0);
+  const isAdmin = Boolean(viewer.consentCurrent && Array.isArray(viewer.adminRoles) && viewer.adminRoles.length > 0);
 
   return (
     <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -319,11 +303,11 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
       <Button
         asChild
         size="sm"
-        className="h-10 sm:h-11 rounded-xl px-3 sm:px-4 text-xs sm:text-sm font-extrabold shadow-plate shrink-0"
+        className="hidden min-[480px]:inline-flex h-10 sm:h-11 rounded-xl px-3 sm:px-4 text-xs sm:text-sm font-extrabold shadow-plate shrink-0"
       >
         <Link href="/wallet" className="flex items-center gap-1.5">
           <Wallet className="size-4" />
-          <span>{locale === 'en' ? 'Wallet' : '내 지갑'}</span>
+          <span className="hidden xl:inline">{locale === 'en' ? 'Wallet' : '내 지갑'}</span>
         </Link>
       </Button>
 
@@ -337,7 +321,7 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
             <span className="flex size-7 items-center justify-center rounded-lg bg-primary/15 text-xs font-black text-primary">
               <User className="size-4" />
             </span>
-            <span className="hidden sm:inline-block text-xs font-bold text-muted-foreground">
+            <span className="hidden xl:inline-block text-xs font-bold text-muted-foreground">
               {locale === 'en' ? 'Account' : '내 계정'}
             </span>
             <ChevronDown className="size-3 text-muted-foreground" />

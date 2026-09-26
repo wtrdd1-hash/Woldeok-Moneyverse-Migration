@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useActionState, useEffect } from 'react';
-import { ShieldCheck, Sparkles } from 'lucide-react';
+import { ShieldCheck, Sparkles, AlertTriangle, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,7 @@ import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
 import { placeOrder } from '../actions';
+import { StockHaltReceiptDialog, type StockHaltReceiptData } from './stock-halt-receipt-dialog';
 import { snapToKrxTick, getKrxTickSize, stepKrxTick } from '../tick-size';
 
 interface StockOrderPanelProps {
@@ -31,6 +32,7 @@ interface StockOrderPanelProps {
   readonly selectedPrice?: string | undefined;
   readonly activeSide?: 'buy' | 'sell' | undefined;
   readonly onSideChange?: ((side: 'buy' | 'sell') => void) | undefined;
+  readonly receipt?: StockHaltReceiptData | null | undefined;
 }
 
 export function StockOrderPanel({
@@ -45,6 +47,7 @@ export function StockOrderPanel({
   selectedPrice,
   activeSide,
   onSideChange,
+  receipt,
 }: StockOrderPanelProps) {
   const [internalSide, setInternalSide] = useState<'buy' | 'sell'>('buy');
   const [orderType, setOrderType] = useState<'market' | 'limit'>('limit');
@@ -133,6 +136,35 @@ export function StockOrderPanel({
       </CardHeader>
 
       <CardContent className="p-4 sm:p-5 pt-2 space-y-4">
+        {isHalted && (
+          <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3.5 space-y-2 text-xs">
+            <div className="flex items-center gap-2 font-bold text-destructive">
+              <AlertTriangle className="size-4 shrink-0" />
+              <span>{isEn ? 'Trading is currently halted for this stock.' : '현재 이 종목은 거래정지 상태입니다.'}</span>
+            </div>
+            <p className="text-muted-foreground leading-relaxed">
+              {isEn
+                ? 'New buy and sell orders are disabled by system regulation.'
+                : '거래정지 규정에 따라 신규 매수 및 매도 주문이 전면 차단되었습니다.'}
+            </p>
+            {receipt && (
+              <div className="pt-1">
+                <StockHaltReceiptDialog receipt={receipt} isEn={isEn}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="w-full text-xs font-semibold h-8 border-destructive/30 hover:bg-destructive/10 text-destructive hover:text-destructive"
+                  >
+                    <FileText className="size-3.5 mr-1" />
+                    {isEn ? 'View Settlement Receipt' : '원가환급 영수증 확인'}
+                  </Button>
+                </StockHaltReceiptDialog>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* 시장가 / 지정가 탭 */}
         <div className="flex items-center gap-2 pt-1 border-b border-border/40 pb-2.5">
           <span className="text-xs text-muted-foreground font-medium">{isEn ? 'Type:' : '주문 유형:'}</span>

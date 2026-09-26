@@ -12,6 +12,7 @@ import { requireMember } from '@/lib/session';
 import { EnterButton } from './enter-button';
 import { SeasonHallOfFameTicker } from './hall-of-fame-ticker';
 import { SeasonRewardClaimBanner } from './season-reward-claim-banner';
+import { SeasonPassTrack } from './season-pass-track';
 
 export const dynamic = 'force-dynamic';
 
@@ -122,6 +123,9 @@ export default async function SeasonsPage({
 
       {/* 시즌 1: First Capital 명예의 전당 티커 & 아카이브 */}
       <SeasonHallOfFameTicker />
+
+      {/* 시즌 1 패스 50레벨 로드맵 & 마일스톤 보상 트랙 */}
+      <SeasonPassTrack />
 
       <section aria-labelledby="events-title" className="grid gap-4">
         <h2 id="events-title" className="text-xl font-bold flex items-center gap-2">

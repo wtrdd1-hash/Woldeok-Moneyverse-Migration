@@ -12,6 +12,10 @@ import {
   FolderLock,
   Calendar,
   AlertCircle,
+  Palette,
+  Wallet,
+  ShieldCheck,
+  Heart,
 } from 'lucide-react';
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { AmountInput } from '@/components/amount-input';
@@ -38,6 +42,8 @@ import {
   createPocketAction,
   transferPocketAction,
 } from './actions';
+import { SavingGoalCertificateDialog } from './saving-goal-certificate-dialog';
+import { SavingPocketCustomizeDialog } from './saving-pocket-customize-dialog';
 
 interface SavingPocketsCardProps {
   readonly pockets: readonly SavingPocket[];
@@ -51,7 +57,20 @@ const COLOR_MAP: Record<string, { bg: string; border: string; text: string; bar:
   amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-600 dark:text-amber-400', bar: 'bg-amber-500' },
   violet: { bg: 'bg-violet-500/10', border: 'border-violet-500/30', text: 'text-violet-600 dark:text-violet-400', bar: 'bg-violet-500' },
   rose: { bg: 'bg-rose-500/10', border: 'border-rose-500/30', text: 'text-rose-600 dark:text-rose-400', bar: 'bg-rose-500' },
+  slate: { bg: 'bg-slate-500/10', border: 'border-slate-500/30', text: 'text-slate-600 dark:text-slate-400', bar: 'bg-slate-500' },
 };
+
+function getPocketIcon(iconCode?: string) {
+  switch (iconCode) {
+    case 'wallet': return Wallet;
+    case 'sparkles': return Sparkles;
+    case 'trending-up': return TrendingUp;
+    case 'shield-check': return ShieldCheck;
+    case 'heart': return Heart;
+    default: return PiggyBank;
+  }
+}
+
 
 export function SavingPocketsCard({
   pockets,
@@ -61,6 +80,8 @@ export function SavingPocketsCard({
   const [createOpen, setCreateOpen] = useState(false);
   const [transferPocket, setTransferPocket] = useState<SavingPocket | null>(null);
   const [archiveTarget, setArchiveTarget] = useState<SavingPocket | null>(null);
+  const [certPocket, setCertPocket] = useState<SavingPocket | null>(null);
+  const [customizePocket, setCustomizePocket] = useState<SavingPocket | null>(null);
 
   const [createState, handleCreate] = useActionState(createPocketAction, IDLE);
   const [transferState, handleTransfer] = useActionState(transferPocketAction, IDLE);
@@ -127,6 +148,7 @@ export function SavingPocketsCard({
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {activePockets.map((pocket) => {
               const theme = (COLOR_MAP[pocket.theme_color] ?? COLOR_MAP.sky)!;
+              const IconComponent = getPocketIcon(pocket.icon_code);
               const hasTarget = Boolean(pocket.target_amount && BigInt(pocket.target_amount) > 0n);
               const balanceBig = BigInt(pocket.balance || '0');
               const targetBig = hasTarget ? BigInt(pocket.target_amount!) : 1n;
@@ -141,32 +163,47 @@ export function SavingPocketsCard({
                 >
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <div className={`p-2 rounded-lg bg-background/80 shadow-xs ${theme.text}`}>
-                          <PiggyBank className="size-4" />
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className={`p-2 rounded-lg bg-background/80 shadow-xs ${theme.text} shrink-0`}>
+                          <IconComponent className="size-4" />
                         </div>
-                        <div>
-                          <h4 className="font-bold text-sm text-foreground truncate max-w-[130px]">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-bold text-sm text-foreground truncate">
                             {pocket.name}
                           </h4>
                           {pocket.target_date && (
                             <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                              <Calendar className="size-2.5" />
-                              {pocket.target_date} 목표
+                              <Calendar className="size-2.5 shrink-0" />
+                              <span className="truncate">{pocket.target_date} 목표</span>
                             </span>
                           )}
                         </div>
                       </div>
                       {hasTarget && (
-                        <Badge variant="outline" className={`font-mono text-[10px] ${theme.text} border-current/30`}>
-                          {progressPct}% 달성
-                        </Badge>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {progressPct >= 100 ? (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setCertPocket(pocket)}
+                              className="h-6 px-2 text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/15 hover:bg-amber-500/25 rounded-md gap-1"
+                            >
+                              <Sparkles className="size-3 text-amber-500" />
+                              <span>명예 증서</span>
+                            </Button>
+                          ) : (
+                            <Badge variant="outline" className={`font-mono text-[10px] ${theme.text} border-current/30`}>
+                              {progressPct}% 달성
+                            </Badge>
+                          )}
+                        </div>
                       )}
                     </div>
 
                     <div className="space-y-1">
                       <span className="text-[11px] text-muted-foreground block">현재 모은 금액</span>
-                      <div className="flex items-baseline justify-between">
+                      <div className="flex flex-wrap items-baseline justify-between gap-1">
                         <span className="text-lg font-extrabold font-mono text-foreground">
                           {groupDigits(pocket.balance)}
                           <span className="text-xs font-normal text-muted-foreground ml-1">WLD</span>
@@ -197,6 +234,16 @@ export function SavingPocketsCard({
                     >
                       <ArrowRightLeft className="size-3 mr-1" />
                       <span>입출금</span>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 px-2.5 text-xs font-semibold bg-background/80 hover:bg-background text-muted-foreground hover:text-foreground"
+                      onClick={() => setCustomizePocket(pocket)}
+                      title="포켓 테마 커스텀 (색상/아이콘)"
+                    >
+                      <Palette className="size-3 mr-1 text-primary" />
+                      <span>테마</span>
                     </Button>
                     <Button
                       size="sm"
@@ -392,6 +439,25 @@ export function SavingPocketsCard({
           </DialogContent>
         </Dialog>
       )}
+
+      {/* 목표 달성 명예 증서 다이얼로그 */}
+      <SavingGoalCertificateDialog
+        pocket={certPocket}
+        open={Boolean(certPocket)}
+        onOpenChange={(open) => {
+          if (!open) setCertPocket(null);
+        }}
+      />
+
+      {/* 포켓 테마 및 아이콘 커스텀 다이얼로그 */}
+      <SavingPocketCustomizeDialog
+        pocket={customizePocket}
+        cashBalance={cashBalance}
+        open={Boolean(customizePocket)}
+        onOpenChange={(open) => {
+          if (!open) setCustomizePocket(null);
+        }}
+      />
     </Card>
   );
 }

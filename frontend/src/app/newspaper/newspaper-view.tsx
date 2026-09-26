@@ -19,6 +19,7 @@ import {
   Share2,
   Activity,
 } from 'lucide-react';
+import { WeeklyWorldBrief } from './weekly-world-brief';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,6 +54,7 @@ export interface StockTickerItem {
 interface NewspaperViewProps {
   readonly events: readonly MarketEvent[];
   readonly stocks: readonly StockTickerItem[];
+  readonly initialTab?: 'brief' | 'live';
 }
 
 const STRENGTH_LABEL: Readonly<Record<number, { ko: string; en: string; ja: string; zh: string }>> = {
@@ -178,8 +180,9 @@ function StockTickerPopover({
   );
 }
 
-export function NewspaperView({ events, stocks = [] }: NewspaperViewProps) {
+export function NewspaperView({ events, stocks = [], initialTab = 'live' }: NewspaperViewProps) {
   const { locale } = useLocale();
+  const [activeTab, setActiveTab] = useState<'brief' | 'live'>(initialTab);
   const [selectedPoll, setSelectedPoll] = useState<number | null>(null);
   const [hasVoted, setHasVoted] = useState<boolean>(false);
   const [pollCounts, setPollCounts] = useState<number[]>([142, 98, 45, 31]);
@@ -339,6 +342,33 @@ export function NewspaperView({ events, stocks = [] }: NewspaperViewProps) {
           </p>
         </div>
       </header>
+
+      {/* 주간 경제 브리프 vs 실시간 속보 탭 네비게이션 */}
+      <div className="flex items-center gap-2 border-b border-border/80 pb-3">
+        <Button
+          variant={activeTab === 'brief' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setActiveTab('brief')}
+          className="h-10 px-4 rounded-xl text-xs sm:text-sm font-bold gap-2"
+        >
+          <BookOpen className="size-4" />
+          <span>주간 경제 브리프 (Weekly Brief)</span>
+        </Button>
+        <Button
+          variant={activeTab === 'live' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setActiveTab('live')}
+          className="h-10 px-4 rounded-xl text-xs sm:text-sm font-bold gap-2"
+        >
+          <Activity className="size-4 text-emerald-500" />
+          <span>실시간 시장 속보 & 심리 지수 (Live News)</span>
+        </Button>
+      </div>
+
+      {activeTab === 'brief' ? (
+        <WeeklyWorldBrief />
+      ) : (
+        <>
 
       {/* 2. Realtime Market Sentiment Bar */}
       <section aria-labelledby="sentiment-heading" className="space-y-3">
@@ -709,6 +739,8 @@ export function NewspaperView({ events, stocks = [] }: NewspaperViewProps) {
           </Button>
         </div>
       </footer>
+        </>
+      )}
     </div>
   );
 }

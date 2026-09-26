@@ -54,6 +54,7 @@ export interface PublicBoardPost {
   readonly title: string;
   readonly body: string;
   readonly authorName: string;
+  readonly authorUserId?: string | null;
   readonly createdAt: string;
   readonly updatedAt: string | null;
   readonly mine: false;
@@ -65,6 +66,7 @@ export interface PublicBoardComment {
   readonly commentId: string;
   readonly body: string;
   readonly authorName: string;
+  readonly authorUserId?: string | null;
   readonly createdAt: string;
   readonly mine: false;
 }

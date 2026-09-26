@@ -217,3 +217,29 @@ export async function archivePocketAction(_previous: ActionState, formData: Form
     return failure(error, '저축 포켓 해지 처리에 실패했습니다.');
   }
 }
+
+export async function customizePocketAction(_previous: ActionState, formData: FormData): Promise<ActionState> {
+  const pocketId = String(formData.get('pocketId') ?? '').trim();
+  const themeColor = String(formData.get('themeColor') ?? '').trim();
+  const iconCode = String(formData.get('iconCode') ?? '').trim();
+
+  if (!UUID.test(pocketId)) {
+    return { status: 'error', message: '포켓 통장 식별자가 올바르지 않습니다.' };
+  }
+
+  try {
+    const res = await mutate<{ cost_wld?: string; theme_color?: string; icon_code?: string }>(`/api/v1/banking/pockets/${pocketId}`, {
+      method: 'PUT',
+      body: {
+        themeColor: themeColor || undefined,
+        iconCode: iconCode || undefined,
+      },
+    });
+    revalidatePath('/bank');
+    revalidatePath('/wallet');
+    const cost = res?.cost_wld ? `${groupDigits(res.cost_wld)} WLD가 차감되어 ` : '';
+    return { status: 'ok', message: `${cost}포켓 테마 커스텀이 성공적으로 적용되었습니다.` };
+  } catch (error) {
+    return failure(error, '포켓 테마 커스텀에 실패했습니다. 보유 현금(WLD) 잔액을 확인해 주세요.');
+  }
+}

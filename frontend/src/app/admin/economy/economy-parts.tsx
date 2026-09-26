@@ -357,7 +357,7 @@ export function ProposalPanel({ proposal }: { readonly proposal: AutoPolicyPropo
               <div key={adjustment.knob} className="grid gap-1">
                 <div className="flex flex-wrap items-baseline gap-2">
                   <b className="text-sm">{adjustment.title}</b>
-                  <code className="font-mono text-[0.7rem] text-muted-foreground">
+                  <code className="font-mono text-[0.7rem] text-muted-foreground break-all">
                     {adjustment.knob}
                   </code>
                 </div>
@@ -436,7 +436,7 @@ export function PreviewPanel({ preview }: { readonly preview: BulkPayoutPreview 
 export function PayoutReportTable({ items }: { readonly items: readonly BulkPayoutItem[] }) {
   return (
     <div className="overflow-x-auto">
-      <Table>
+      <Table className="min-w-[480px]">
         <TableHeader>
           <TableRow>
             <TableHead>회원</TableHead>
@@ -448,7 +448,7 @@ export function PayoutReportTable({ items }: { readonly items: readonly BulkPayo
           {items.map((item) => (
             <TableRow key={item.user_id}>
               <TableCell>
-                <code className="font-mono text-[0.7rem]">{item.user_id}</code>
+                <code className="font-mono text-[0.7rem] break-all">{item.user_id}</code>
               </TableCell>
               <TableCell>
                 <Badge
@@ -467,7 +467,7 @@ export function PayoutReportTable({ items }: { readonly items: readonly BulkPayo
                 {item.transaction_id === null ? (
                   payoutDetailLabel(item)
                 ) : (
-                  <code className="font-mono text-[0.7rem]">{item.transaction_id}</code>
+                  <code className="font-mono text-[0.7rem] break-all">{item.transaction_id}</code>
                 )}
               </TableCell>
             </TableRow>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { CityProjectsView } from './city-projects-view';
 
 export interface UserSpace {
   readonly id: string;
@@ -385,82 +386,9 @@ export function SpacesView({
         </div>
       )}
 
-      {/* 2. 공공 도시 프로젝트 탭 */}
+            {/* 2. 공공 도시 프로젝트 탭 */}
       {activeTab === 'city' && (
-        <div className="space-y-6">
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-xs text-muted-foreground leading-relaxed">
-            <strong>공공 도시 프로젝트 크라우드펀딩:</strong> 머니버스 시민들이 WLD를 공동 출자하여 도시 공공 시설과 랜드마크를 완성합니다. 기여된 WLD는 즉시 전액 소각(SINK_PROJECT_DONATION)되며, 도시 역사와 공공 명예로 영구 보존됩니다.
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {cityProjects.map((p) => {
-              const current = Number.parseInt(p.current_wld, 10);
-              const target = Number.parseInt(p.target_wld, 10);
-              const isCompleted = p.status === 'completed';
-
-              return (
-                <div
-                  key={p.id}
-                  className={`bg-card border rounded-xl p-5 space-y-4 shadow-sm flex flex-col justify-between ${
-                    isCompleted ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-border'
-                  }`}
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <span className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                          {p.code}
-                        </span>
-                        <h4 className="font-bold text-base mt-1">{p.title}</h4>
-                      </div>
-                      <span
-                        className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${
-                          isCompleted ? 'bg-emerald-500/20 text-emerald-500' : 'bg-primary/20 text-primary'
-                        }`}
-                      >
-                        {isCompleted ? '건립 완공' : '모금 진행 중'}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{p.description}</p>
-                  </div>
-
-                  <div className="space-y-3 pt-2">
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs font-semibold">
-                        <span>진행도: {p.progress_percent}%</span>
-                        <span>
-                          {current.toLocaleString()} / {target.toLocaleString()} WLD
-                        </span>
-                      </div>
-                      <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-500 ${
-                            isCompleted ? 'bg-emerald-500' : 'bg-primary'
-                          }`}
-                          style={{ width: `${p.progress_percent}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {!isCompleted ? (
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCityProj(p)}
-                        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-medium py-2 rounded-lg text-xs transition-colors shadow-sm"
-                      >
-                        도시 프로젝트 WLD 기여 (소각)
-                      </button>
-                    ) : (
-                      <div className="text-center text-xs text-emerald-500 font-semibold py-1">
-                        시민 협동으로 완공된 자랑스러운 도시 랜드마크입니다.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <CityProjectsView projects={cityProjects} />
       )}
 
       {/* 3. 가상 세무 구청 탭 */}

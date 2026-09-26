@@ -19,6 +19,7 @@ import { StockAlertDeleteButton } from './stock-alert-delete-button';
 import { StockDiscussionSection } from './stock-discussion-section';
 import { StockInteractiveChart } from './stock-interactive-chart';
 import { StockTradingConsole } from './stock-trading-console';
+import { StockHaltBanner } from './stock-halt-banner';
 import {
   findHoldingForStock,
   findStockBySymbol,
@@ -156,19 +157,13 @@ export default async function StockHubPage({
       </Button>
 
       {isHalted && (
-        <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-4 text-destructive flex items-start gap-3 shadow-sm">
-          <AlertTriangle className="size-5 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <h4 className="font-bold text-sm">
-              {isEn ? 'Trading Halted & Authoritative Settlement' : '종목 거래정지 및 권위 매수원가 자동정산 안내'}
-            </h4>
-            <p className="text-xs text-destructive/90 leading-relaxed [word-break:keep-all]">
-              {isEn
-                ? 'Trading for this stock is currently halted by operator policy. All user holdings are automatically settled into WLD based on authoritative cost basis with zero trading fees.'
-                : '해당 종목은 현재 운영 정책에 의해 거래정지(HALTED) 상태입니다. 기획 명세(STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC)에 따라 모든 사용자 보유분은 시장가가 아닌 서버 권위 매수원가(Cost Basis) WLD로 1회 원자적 자동환급되었으며 신규 매매 주문은 안전하게 차단됩니다.'}
-            </p>
-          </div>
-        </div>
+        <StockHaltBanner
+          symbol={stock.symbol}
+          name={stock.name}
+          haltStatus={stock.halt_status}
+          receipt={stockReceipt}
+          isEn={isEn}
+        />
       )}
 
       <PageHeader eyebrow="VIRTUAL STOCK HUB" title={`${stock.symbol} · ${stock.name}`}>
@@ -204,6 +199,7 @@ export default async function StockHubPage({
         holdingQuantity={holding?.quantity}
         isHalted={isHalted}
         isEn={isEn}
+        receipt={stockReceipt}
       />
 
       {/* 3. 보조 2열 정보 그리드 (좌측: 시장 시세 요약, 우측: 내 보유 현황) */}
@@ -243,70 +239,70 @@ export default async function StockHubPage({
           </CardContent>
         </Card>
 
-          <Card className="border-border/80 bg-card/60 shadow-sm">
-            <CardHeader className="p-4 sm:p-5 pb-2">
-              <CardTitle className="text-sm font-bold">{isEn ? 'My Position' : '내 보유 현황'}</CardTitle>
-              <CardDescription className="text-xs text-muted-foreground">
-                {isEn ? 'Authoritative server-side holding values.' : '서버 기준 보유 수량 및 실시간 평가액입니다.'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {portfolio === null ? (
-                <EmptyState
-                  title={isEn ? 'Unable to load holdings.' : '보유 현황을 불러오지 못했어요.'}
+        <Card className="border-border/80 bg-card/60 shadow-sm">
+          <CardHeader className="p-4 sm:p-5 pb-2">
+            <CardTitle className="text-sm font-bold">{isEn ? 'My Position' : '내 보유 현황'}</CardTitle>
+            <CardDescription className="text-xs text-muted-foreground">
+              {isEn ? 'Authoritative server-side holding values.' : '서버 기준 보유 수량 및 실시간 평가액입니다.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {portfolio === null ? (
+              <EmptyState
+                title={isEn ? 'Unable to load holdings.' : '보유 현황을 불러오지 못했어요.'}
+              />
+            ) : holding && Number(holding.quantity) > 0 ? (
+              <dl className="grid gap-3">
+                <Position
+                  label={isEn ? 'Quantity' : '보유 수량'}
+                  value={`${groupDigits(holding.quantity)}${isEn ? ' shares' : '주'}`}
                 />
-              ) : holding && Number(holding.quantity) > 0 ? (
-                <dl className="grid gap-3">
-                  <Position
-                    label={isEn ? 'Quantity' : '보유 수량'}
-                    value={`${groupDigits(holding.quantity)}${isEn ? ' shares' : '주'}`}
-                  />
-                  <Position
-                    label={isEn ? 'Average cost' : '평균 매입가'}
-                    value={<Amount value={holding.average_cost} />}
-                  />
-                  <Position
-                    label={isEn ? 'Market value' : '평가액'}
-                    value={<Amount value={holding.market_value} />}
-                  />
-                </dl>
-              ) : stockReceipt ? (
-                <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-emerald-700 dark:text-emerald-300">
-                      {isEn ? 'Cost-Basis Settlement Receipt' : '거래정지 원가환급 영수증'}
-                    </span>
-                    <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-500/40">
-                      {stockReceipt.status}
-                    </Badge>
+                <Position
+                  label={isEn ? 'Average cost' : '평균 매입가'}
+                  value={<Amount value={holding.average_cost} />}
+                />
+                <Position
+                  label={isEn ? 'Market value' : '평가액'}
+                  value={<Amount value={holding.market_value} />}
+                />
+              </dl>
+            ) : stockReceipt ? (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-emerald-700 dark:text-emerald-300">
+                    {isEn ? 'Cost-Basis Settlement Receipt' : '거래정지 원가환급 영수증'}
+                  </span>
+                  <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-500/40">
+                    {stockReceipt.status}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-muted-foreground pt-1">
+                  <div>
+                    <span>정산 수량: </span>
+                    <span className="font-mono font-medium text-foreground">{groupDigits(stockReceipt.quantity)}주</span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-muted-foreground pt-1">
-                    <div>
-                      <span>정산 수량: </span>
-                      <span className="font-mono font-medium text-foreground">{groupDigits(stockReceipt.quantity)}주</span>
-                    </div>
-                    <div>
-                      <span>취득 단가: </span>
-                      <span className="font-mono font-medium text-foreground">{groupDigits(stockReceipt.basis_unit_amount)} WLD</span>
-                    </div>
-                    <div className="col-span-2 text-foreground font-semibold text-xs pt-1 border-t border-emerald-500/20">
-                      <span>총 환급 WLD: </span>
-                      <span className="font-mono font-bold text-primary text-sm">{groupDigits(stockReceipt.refund_amount)} WLD</span>
-                    </div>
+                  <div>
+                    <span>취득 단가: </span>
+                    <span className="font-mono font-medium text-foreground">{groupDigits(stockReceipt.basis_unit_amount)} WLD</span>
+                  </div>
+                  <div className="col-span-2 text-foreground font-semibold text-xs pt-1 border-t border-emerald-500/20">
+                    <span>총 환급 WLD: </span>
+                    <span className="font-mono font-bold text-primary text-sm">{groupDigits(stockReceipt.refund_amount)} WLD</span>
                   </div>
                 </div>
-              ) : (
-                <EmptyState
-                  title={
-                    isEn
-                      ? 'You do not hold this virtual stock.'
-                      : '이 가상 종목을 아직 보유하지 않았어요.'
-                  }
-                />
-              )}
-            </CardContent>
-          </Card>
-        </div>
+              </div>
+            ) : (
+              <EmptyState
+                title={
+                  isEn
+                    ? 'You do not hold this virtual stock.'
+                    : '이 가상 종목을 아직 보유하지 않았어요.'
+                }
+              />
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       <Card>
         <CardHeader className="flex-row items-start justify-between gap-3">

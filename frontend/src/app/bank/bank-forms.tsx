@@ -29,6 +29,7 @@ import {
   repayAction,
   withdrawAction,
 } from './actions';
+import { VirtualBondSimulatorDialog } from './virtual-bond-simulator-dialog';
 
 function minAmount(left: string, right: string): string {
   return compareAmounts(left, right) <= 0 ? left : right;
@@ -523,9 +524,17 @@ export function VirtualBondsCard({
               </CardDescription>
             </div>
           </div>
-          <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold">
-            <T korean={`보유 현금 ${groupDigits(cash)} WLD`} english={`Cash ${groupDigits(cash)} WLD`} />
-          </Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            <VirtualBondSimulatorDialog
+              onApply={(code, amount) => {
+                setSelectedBond(code);
+                setAmountStr(amount);
+              }}
+            />
+            <Badge variant="outline" className="border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold">
+              <T korean={`보유 현금 ${groupDigits(cash)} WLD`} english={`Cash ${groupDigits(cash)} WLD`} />
+            </Badge>
+          </div>
         </div>
       </CardHeader>
       <CardContent className="grid gap-5">

@@ -21,7 +21,7 @@ describe('casino server-action module boundary', () => {
   it('serializes casino stakes as JSON numbers required by the backend DTO', () => {
     expect(
       ACTIONS_SOURCE.match(/const stake = wholeNumber\(formData\.get\('stake'\)\);/g),
-    ).toHaveLength(2);
+    ).toHaveLength(3);
     expect(ACTIONS_SOURCE).not.toContain("wholeAmount(formData.get('stake'))");
   });
 

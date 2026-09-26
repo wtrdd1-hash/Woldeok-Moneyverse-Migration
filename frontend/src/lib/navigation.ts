@@ -46,14 +46,19 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '운영': 'Operations',
   '마스터 콘솔': 'Master Console',
 
-  // Sub-items
+  // Mega Navigation 4 Main Categories
+  '금융·투자': 'Finance & Investment',
+  '경제·활동': 'Economy & Careers',
+  '플레이·시즌': 'Games & Seasons',
+
+  // Sub-items & Detail Links
   '월덕거래소 (주식)': 'Woldeok Exchange (Stocks)',
   '가상 주식': 'Virtual Stocks',
   '가상 금융': 'Virtual Banking',
   '가상 은행': 'Virtual Bank',
   '가상 금융 (은행)': 'Virtual Banking (Bank)',
   '자산 활동 내역': 'Asset Activity',
-  '잡보드 (직업)': 'Job Board (Work)',
+  '잡보드 (직업)': 'Job Board (Careers)',
   '잡보드 (작업)': 'Job Board (Work)',
   '직업 업무': 'Career Work',
   '마이비즈 (사업)': 'MyBiz (Enterprise)',
@@ -98,6 +103,7 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
 };
 
 const JAPANESE_LABELS: Readonly<Record<string, string>> = {
+  // Top-level categories & Masthead
   '홈': 'ホーム',
   '거래소': '取引所',
   '월덕거래소': 'ウォルドク取引所',
@@ -112,6 +118,13 @@ const JAPANESE_LABELS: Readonly<Record<string, string>> = {
   '소식': 'お知らせ',
   '운영': '運営',
   '마스터 콘솔': 'マスターコンソール',
+
+  // Mega Navigation 4 Main Categories
+  '금융·투자': '金融・投資',
+  '경제·활동': '経済・活動',
+  '플레이·시즌': 'ゲーム・シーズン',
+
+  // Sub-items & Detail Links
   '월덕거래소 (주식)': 'ウォルドク取引所（株式）',
   '가상 주식': '仮想株式',
   '가상 금융': '仮想金融',
@@ -123,7 +136,7 @@ const JAPANESE_LABELS: Readonly<Record<string, string>> = {
   '직업 업무': '職業業務',
   '마이비즈 (사업)': 'マイビズ（事業）',
   '게임 사업': 'ゲーム事業',
-  '덕마켓 (상점)': 'ショップ',
+  '덕마켓 (상점)': 'アイテムショップ',
   '아이템 상점': 'アイテムショップ',
   '커리어패스 (성장)': 'キャリアパス',
   '장기 성장 단계': '長期成長ステージ',
@@ -161,6 +174,7 @@ const JAPANESE_LABELS: Readonly<Record<string, string>> = {
 };
 
 const CHINESE_LABELS: Readonly<Record<string, string>> = {
+  // Top-level categories & Masthead
   '홈': '首页',
   '거래소': '交易所',
   '월덕거래소': '月德交易所',
@@ -175,6 +189,13 @@ const CHINESE_LABELS: Readonly<Record<string, string>> = {
   '소식': '消息',
   '운영': '管理运营',
   '마스터 콘솔': '主控制台',
+
+  // Mega Navigation 4 Main Categories
+  '금융·투자': '金融·投资',
+  '경제·활동': '经济·活动',
+  '플레이·시즌': '游戏·赛季',
+
+  // Sub-items & Detail Links
   '월덕거래소 (주식)': '月德交易所（股票）',
   '가상 주식': '虚拟股票',
   '가상 금융': '虚拟金融',
@@ -186,7 +207,7 @@ const CHINESE_LABELS: Readonly<Record<string, string>> = {
   '직업 업무': '职业工作',
   '마이비즈 (사업)': '我的企业（商业）',
   '게임 사업': '游戏事业',
-  '덕마켓 (상점)': '商城',
+  '덕마켓 (상점)': '道具商城',
   '아이템 상점': '道具商城',
   '커리어패스 (성장)': '职业进阶',
   '장기 성장 단계': '成长历程',
@@ -440,6 +461,17 @@ export function isGroupActive(group: NavGroup, pathname: string): boolean {
   );
 }
 
+export function isGroupCurrent(pathname: string, group: NavGroup): boolean {
+  return group.entries.some(
+    (entry) => pathname === entry.href || (entry.href !== '/' && pathname.startsWith(`${entry.href}/`)),
+  );
+}
+
+export function isCurrent(pathname: string, href: string): boolean {
+  if (href === '/') return pathname === '/';
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 /** The nav item the reader is looking at, or null when off-menu. */
 export function activeNavItem(items: readonly NavItem[], pathname: string): NavItem | null {
   for (const item of items) {
@@ -450,15 +482,4 @@ export function activeNavItem(items: readonly NavItem[], pathname: string): NavI
     }
   }
   return null;
-}
-
-export function isGroupCurrent(pathname: string, group: NavGroup): boolean {
-  return group.entries.some(
-    (entry) => pathname === entry.href || (entry.href !== '/' && pathname.startsWith(`${entry.href}/`)),
-  );
-}
-
-export function isCurrent(pathname: string, href: string): boolean {
-  if (href === '/') return pathname === '/';
-  return pathname === href || pathname.startsWith(`${href}/`);
 }

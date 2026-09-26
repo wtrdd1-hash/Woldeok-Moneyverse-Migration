@@ -19,6 +19,7 @@ import { requireMember } from '@/lib/session';
 import { ClaimButton, JobSwitchButton, SubmitTaskButton } from './work-forms';
 import { CareerTasksBoard } from './career-tasks-board';
 import { CareerQualificationsCard } from './career-qualifications-card';
+import { CareerMasteryCard } from './career-mastery-card';
 import { WorkQuotaDashboard } from './work-quota-card';
 
 import type {
@@ -164,6 +165,13 @@ export default async function WorkPage() {
           </div>
         </div>
       </section>
+
+      {/* 1.5 직업 숙련도 XP 및 7대 직급 자격시험 모달 */}
+      <CareerMasteryCard
+        jobTitle={activeMeta?.name ?? (isEn ? 'Professional Career' : '전문 직업')}
+        currentLevel={activeLevel}
+        currentXp={currentExp}
+      />
 
       {summary ? (
         <WorkQuotaDashboard summary={summary} isEn={isEn} />
