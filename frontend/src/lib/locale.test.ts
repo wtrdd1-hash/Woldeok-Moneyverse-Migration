@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { detectLocale, isLocale, parseAcceptLanguage } from './locale';
 
 describe('locale detection', () => {
-  it('enforces English as primary default and detects Korean for Korean traffic', () => {
+  it('enforces Korean as primary default and detects Korean for Korean traffic', () => {
     expect(detectLocale('KR', 'en-US,en;q=0.9')).toBe('ko');
-    expect(detectLocale(null, null)).toBe('en');
+    expect(detectLocale(null, null)).toBe('ko');
   });
 
   it('uses English for visitors outside Korea by default', () => {
