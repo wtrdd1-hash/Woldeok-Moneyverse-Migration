@@ -1,3 +1,13 @@
+## v2026.09.25.444 — Monetization/revenue evidence refresh and diversified profitability contract
+
+- Built a traceable monetization discovery corpus from 35,429 OpenAlex/Crossref candidates and deduplicated it to **33,341 unique candidates** using DOI-first/title-fallback identity.
+- Re-reviewed advertising, subscription/freemium, direct digital goods, platform/marketplace fees, sponsorship/creator models, mobile IAP, pricing and recurring revenue.
+- Adopted free core + contextual public ads + Moneyverse Plus/ad-free convenience + direct non-P2W cosmetics + disclosed sponsorship as the current portfolio; later creator/B2B/API lanes are separately gated.
+- Kept paid WLD, paid random items, paid casino value, P2W power and paid superior WDX information blocked.
+- Profitability is measured by contribution margin after store/payment/tax/refund/support/moderation/content/compliance costs, with retention/trust/safety experiment guardrails.
+- Updated `PROJECT_PLAN`, `INTEGRATED_PLANNING_MASTER`, `MONETIZATION_COMPLIANCE_SEO_SPEC`, research review/corpus, delta, worklog and GitHub-facing update note in EN/KO.
+- Documentation/research only; no runtime, Test, Production, realized-revenue or legal-clearance claim.
+
 ## v2026.09.25.436 — Exact-main Production identity convergence with zero-downtime Test→Production promotion
 
 - Runtime source promoted: `d058df3d29191e48c5ab9b12ec10014d015b5812`.

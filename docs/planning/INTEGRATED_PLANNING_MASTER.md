@@ -1,11 +1,18 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.25.443
+> Current ledger version: v2026.09.25.444
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.25.444 — 2026-09-25
+- Traced 35,429 OpenAlex/Crossref records to **33,341 unique discovery candidates** with DOI-first/title-fallback deduplication; this is not a claim of manual full-text review.
+- **M444-01..04 / P1:** the planned portfolio is free core, contextual public ads, ad-free/convenience/presentation subscriptions, direct non-P2W cosmetic entitlements, and disclosed sponsorship; premium value is incremental and ads remain outside sensitive surfaces.
+- **M444-05 / P0:** paid WLD, paid randomized items, paid casino value, P2W economic power, and paid superior WDX information remain prohibited.
+- **M444-06..08 / P1:** unit economics are effective-date/channel aware; cancellation remains straightforward; contribution margin after all variable and operating cost is the profitability authority.
+- Evidence is in `MONEYVERSE_MONETIZATION_REVENUE_RESEARCH_REVIEW_v2026.09.25.444.md` and its planning delta. This is planning/docs only; no runtime, Test, Production, revenue, or legal-clearance claim is made.
 
 ## v2026.09.25.443 — 2026-09-25
 - Start and recorded mid-work `origin/main=99b0eaa04bbd0b28005861c624690c56744e8a14`; dedicated isolated worktree/branch `docs/db-architecture-research-v2026.09.25.443` avoids overlap with concurrent agents.

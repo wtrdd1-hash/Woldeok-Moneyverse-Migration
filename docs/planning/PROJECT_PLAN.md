@@ -2,11 +2,19 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.25.443
+> Current integrated version: v2026.09.25.444
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Monetization/revenue portfolio and evidence refresh — v2026.09.25.444 (2026-09-25)
+
+- **Evidence scope:** 35,429 OpenAlex/Crossref candidates were DOI-first/title-fallback deduplicated to **33,341 unique discovery candidates**; this does not claim manual full-text review.
+- **Portfolio and free-core invariant:** monetization may use contextual public ads, ad-free/convenience/presentation subscriptions, direct non-P2W cosmetic entitlements, and disclosed sponsorship without degrading essential economy, gameplay, or community participation to coerce payment.
+- **Hard boundaries:** ads remain outside wallet, transfer, lending, WDX, casino, account-security, payment-failure, and administrator-action surfaces. Paid WLD, paid randomized items, paid casino value/stake, P2W power, paid superior WDX information, and pay-for-faster moderation remain prohibited.
+- **Economic truth:** use effective-date/channel-aware unit economics and optimize contribution margin after platform/PSP fees, taxes, refunds, chargebacks, revenue share, infrastructure, support, moderation, localization, content, and compliance/legal costs. Unmeasured price, conversion, eCPM, churn, CAC, LTV, and revenue values remain `HYPOTHESIS/TEST TARGET`.
+- Detailed evidence: [monetization research review](../findings/MONEYVERSE_MONETIZATION_REVENUE_RESEARCH_REVIEW_v2026.09.25.444.md) and its planning delta. This is planning/docs only; it claims no billing implementation, Test, or Production completion.
 
 ## P0/P1 database architecture integrity and scale contract — v2026.09.25.443 (2026-09-25)
 
