@@ -82,6 +82,7 @@ describe('SEO & i18n SSOT Route Integrity', () => {
     expect(isPathIndexable('/guide')).toBe(true);
     expect(isPathIndexable('/terms')).toBe(true);
     expect(isPathIndexable('/stocks')).toBe(true);
+    expect(isPathIndexable('/prediction')).toBe(true);
     expect(isPathIndexable('/casino')).toBe(false);
     expect(isPathIndexable('/bank')).toBe(false);
     expect(isPathIndexable('/work')).toBe(false);

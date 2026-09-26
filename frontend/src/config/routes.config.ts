@@ -154,6 +154,16 @@ export const APP_ROUTES: readonly RouteDefinition[] = [
     group: 'finance',
   },
   {
+    path: '/prediction',
+    label: { ko: '예측 마켓', en: 'Prediction Market', ja: '予測市場', zh: '预测市场' },
+    isPublic: true,
+    authRequired: false,
+    indexable: true,
+    sitemapPriority: 0.85,
+    changeFrequency: 'daily',
+    group: 'finance',
+  },
+  {
     path: '/stocks/[symbol]',
     label: { ko: '종목 상세 거래', en: 'Stock Detail Trading', ja: '銘柄詳細取引', zh: '个股详情交易' },
     isPublic: false,
