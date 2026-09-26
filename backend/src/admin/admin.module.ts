@@ -49,10 +49,12 @@ function devicePepper(config: AppConfig): string {
 import { AdminTreasuryController } from './treasury/treasury.controller';
 import { TreasuryRepository } from './treasury/treasury.repository';
 import { TreasuryService } from './treasury/treasury.service';
+import { ApiHealthController } from './api-health.controller';
 
 @Module({
   imports: [AuthModule, StockModule],
   controllers: [
+    ApiHealthController,
     AdminTreasuryController,
     AdminShopController,
     AdminController,

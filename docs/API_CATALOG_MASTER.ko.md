@@ -121,7 +121,12 @@
 | `POST` | `/shop/purchases` | 상점 아이템 구매 및 인벤토리 지급 | ✅ | ✅ |
 | `GET` | `/inventory` | 내 보유 인벤토리 아이템 및 장착 상태 조회 | ✅ | ❌ |
 | `POST` | `/early-game/starter-pack` | 신규 가입자 1회 한정 스타터팩 무료 수령 | ✅ | ✅ |
-| `POST` | `/engagement/dopamine/claim` | 황금 오리 광클 피버 / 포춘쿠키 보상 정산 | ✅ | ✅ |
+| `GET` | `/engagement/dopamine/status` | 일일 도파민 활동 잔여 횟수 및 쿨다운 조회 | ✅ | ❌ |
+| `POST` | `/engagement/dopamine/golden-duck` | 황금 오리 광클 피버 보상 수령 (최대 5,000 WLD) | ✅ | ✅ |
+| `POST` | `/engagement/dopamine/pet-fortune` | 덕이 펫 쓰다듬기 및 일일 포춘쿠키 보너스 (500~1,000 WLD) | ✅ | ✅ |
+| `POST` | `/engagement/dopamine/bull-bear-vote` | 호가창 상승/하락 여론 투표 및 자정 10,000 WLD 에어드랍 참여 | ✅ | ❌ |
+| `POST` | `/engagement/dopamine/mini-showdown` | 100 WLD 1:1 AI 즉석 주사위 결투 정산 (1.90x 배당) | ✅ | ✅ |
+| `POST` | `/engagement/dopamine/star-drop` | 스타 드롭 5연속 탭 승급 및 마일스톤 보상 수령 (최대 10,000 WLD) | ✅ | ✅ |
 
 ### 10. 성장 및 시즌 패스 (Progression & Seasons)
 | 메서드 | 엔드포인트 | 설명 | 인증 필요 | 멱등성 |
@@ -160,6 +165,7 @@
 ### 14. 관리자 관제 타워 및 국고 (Admin Control Tower & Treasury)
 | 메서드 | 엔드포인트 | 설명 | 인증 필요 | 멱등성 |
 | :--- | :--- | :--- | :---: | :---: |
+| `GET` | `/admin/api-health/status` | 14대 도메인 300+개 API의 실시간 지연시간, 성공률, 가동률 관제 | ✅ (Admin) | ❌ |
 | `GET` | `/admin/economy/overview` | 전역 M0 통화량, 인플레이션/디플레이션, 국고 비축률 | ✅ (Admin) | ❌ |
 | `GET` | `/admin/treasury/vaults` | 3대 시스템 금고(안정화, 정지환급, 소각) 잔액 | ✅ (Admin) | ❌ |
 | `POST` | `/admin/treasury/inject` | 시스템 금고 자금 주입 (Step-Up 2단계 인증) | ✅ (Admin) | ✅ |

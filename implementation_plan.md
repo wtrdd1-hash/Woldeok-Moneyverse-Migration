@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v9)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v10)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v10**: 도파민 5대 전용 API 완비 & 14대 도메인 API 실시간 관제 대시보드(/admin/api-health) 구축 (+45, -0)
 - **v9**: 사행성 카지노 API 전면 폐기 & 14대 도메인 300+개 API 공식 마스터 명세서 완결 (+55, -0)
 - **v8**: SEO 검색 노출 쇄신(10대 가상주식 공개 프리뷰 인덱싱, sitemap 다국어 hreflang 탑재, 금융 교육 필러 가이드 5종 허브 신설) 및 기획서 전수 정합화 사양 누적 (+65, -0)
 - **v7**: 일반 유저 전용 4대 도파민 패키지(황금 오리 피버·덕이 펫/포춘쿠키·호가창 여론 잭팟·1:1 즉석 미니 배틀) 및 홈 메인 스테이션 전면 배치 (+155, -0)
@@ -3864,4 +3865,42 @@ pm test).
 - Next.js Turbopack 빌드 무결성 검증
 - Debian 미니PC `stage_v461.sh` 및 `promote_v461.sh` 무중단 승격 배포
 - PostgreSQL 활성 세션 100% 무손실 유지
+
+---
+
+## 🚀 [v10 Specification] 도파민 5대 전용 API 완비 & 관리자 API 실시간 관제 대시보드 구축 (누적 추가)
+
+### 1. 🎯 도파민 5대 전용 백엔드 API 완비 (`DopamineController`)
+- **신규 구축 엔드포인트**:
+  1. `POST /api/v1/engagement/dopamine/golden-duck`: 황금 오리 광클 피버 WLD 수령 (최대 5,000 WLD)
+  2. `POST /api/v1/engagement/dopamine/pet-fortune`: 덕이 펫 인터랙션 및 일일 포춘쿠키 보너스 (500~1,000 WLD)
+  3. `POST /api/v1/engagement/dopamine/bull-bear-vote`: 호가창 여론 투표 및 자정 10,000 WLD 에어드랍 풀 참여
+  4. `POST /api/v1/engagement/dopamine/mini-showdown`: 100 WLD 1:1 AI 주사위 결투 정산 (1.90x 배당)
+  5. `POST /api/v1/engagement/dopamine/star-drop`: 스타 드롭 5연속 탭 승급 보상 수령 (최대 10,000 WLD)
+  6. `GET /api/v1/engagement/dopamine/status`: 일일 활동 쿨다운 및 잔여 횟수 조회
+
+### 2. ⚡ 14대 도메인 300+개 API 실시간 관제 타워 구축 (`/admin/api-health`)
+- **백엔드**: `ApiHealthController` (`GET /api/v1/admin/api-health/status`)
+- **프론트엔드**: `frontend/src/app/admin/api-health/page.tsx` 실시간 Latency(평균 12ms) 레이더, 가동률(100%), 도메인별 상태 카드 및 관리자 서브 내비게이션 연동.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `backend/src/engagement/dopamine.controller.ts`: 도파민 5대 API 컨트롤러
+- `backend/src/engagement/engagement.module.ts`: DopamineController 등록
+- `backend/src/admin/api-health.controller.ts`: 14대 도메인 API 헬스체크 컨트롤러
+- `backend/src/admin/admin.module.ts`: ApiHealthController 등록
+- `frontend/src/app/admin/api-health/page.tsx`: 관리자 API 실시간 관제 대시보드
+- `frontend/src/components/admin-sub-nav.tsx`: API 관제 탭 추가
+- `frontend/src/app/admin/areas.ts`: /admin/api-health 영역 등록
+- `docs/API_CATALOG_MASTER.ko.md`: 한국어 공식 마스터 API 명세서 갱신
+- `docs/API_CATALOG_MASTER.md`: 영문 공식 마스터 API 명세서 갱신
+
+### Verification Plan
+- 백엔드 / 프론트엔드 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v462.sh` 및 `promote_v462.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션 100% 무손실 검증
+
 

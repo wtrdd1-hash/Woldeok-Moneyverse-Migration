@@ -22,6 +22,13 @@ export interface AdminArea {
 
 export const ADMIN_AREAS: readonly AdminArea[] = [
   {
+    href: '/admin/api-health',
+    eyebrow: 'API TELEMETRY & HEALTH',
+    title: '14대 도메인 API 실시간 관제',
+    summary: '전 도메인 300+개 REST API의 실시간 지연시간, 가동률, 에러율을 관제합니다.',
+    group: 'records',
+  },
+  {
     href: '/admin/controls',
     eyebrow: 'FEATURE CONTROL',
     title: '기능 스위치 · 정책 버전',

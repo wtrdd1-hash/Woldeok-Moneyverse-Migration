@@ -96,7 +96,12 @@
 - `POST /shop/purchases`: Purchase shop items
 - `GET /inventory`: User inventory & equipped slots
 - `POST /early-game/starter-pack`: Claim beginner starter pack
-- `POST /engagement/dopamine/claim`: Claim fever / fortune cookie rewards
+- `GET /engagement/dopamine/status`: Get daily dopamine activity status & cooldowns
+- `POST /engagement/dopamine/golden-duck`: Claim Golden Duck Fever clicking reward (up to 5,000 WLD)
+- `POST /engagement/dopamine/pet-fortune`: Interact with Deoki Pet and claim daily fortune cookie reward (500~1,000 WLD)
+- `POST /engagement/dopamine/bull-bear-vote`: Vote on market sentiment and participate in midnight 10,000 WLD pool
+- `POST /engagement/dopamine/mini-showdown`: Resolve 1:1 Instant Dice Showdown against AI (1.90x payout)
+- `POST /engagement/dopamine/star-drop`: Claim Star Drop 5-tap upgrade tier reward (up to 10,000 WLD)
 
 ### 10. Progression & Seasons
 - `GET /progression/summary`: Player credit rating & achievements
@@ -125,6 +130,7 @@
 - `GET /space/my-space`: Personal office customization status
 
 ### 14. Admin Control Tower & Treasury
+- `GET /admin/api-health/status`: 14-domain real-time latency, success rate & telemetry
 - `GET /admin/economy/overview`: Macro M0, inflation, reserve ratio
 - `GET /admin/treasury/vaults`: 3 system reserve vaults status
 - `POST /admin/treasury/inject`: Step-Up treasury injection
