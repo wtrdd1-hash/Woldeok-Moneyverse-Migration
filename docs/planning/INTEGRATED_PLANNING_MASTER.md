@@ -218,3 +218,13 @@ Every planning review records start/mid-work `origin/main` exact SHA, authority-
 - G368-05 P1: v360 session-count/zero-downtime evidence is release-specific and does not by itself prove all auth/CSRF/reauth/critical-mutation continuity.
 - External refresh: OWASP ASVS 5.0.0 latest stable; NIST SP 800-63B-4 final July 2025, with periodic reauthentication/session-timeout requirements.
 - Decision: planning/docs only. No new implementation, Test or Production completion is claimed.
+
+## v2026.09.26.444 — Moneyverse Arcade / non-gambling high-feedback game layer
+- New authority: `MONEYVERSE_ARCADE_GAME_SPEC.md` / `.ko.md`.
+- Add permanent `ARCADE_SKILL` entertainment independently from `CASINO`: 10 zero-WLD starter games + 20 core/season/community games, with 16 fictional company workstreams.
+- Engagement contract is short round -> skill/choice -> combo/Fever -> score/mastery/collection -> voluntary stop/continue. Tension comes from execution difficulty, not financial loss.
+- P0 boundaries: no stake->chance->prize economic loop, paid random reward, cash-out, purchasable score/Fever/Boss power, punitive absence reset, loss chasing or casino-reskin presentation.
+- Economy/API: important material reward preview, server-authoritative run/reward validation, idempotent atomic ledger mutation, anti-replay, diminishing low-value farming rewards and no arbitrary gameplay lockout.
+- Jurisdiction: Korea casino remains separately fail-closed pending required evidence; Australia/UK/Germany/EU/Japan/US overlays remain governed by international authority. Arcade availability is not casino approval or a rating exemption.
+- Research target is broad discovery (including the requested 50k+ candidate breadth), but only deduplicated/validated references become evidence; no false claim of 50,000 individually reviewed sources.
+- Release requires affected user/admin API parity and five complete responsive QA passes. Planning/docs only; no runtime/Test/Production claim.

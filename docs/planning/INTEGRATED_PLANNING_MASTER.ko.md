@@ -218,3 +218,13 @@
 - G368-05 P1: v360 session 수/무중단 증거는 해당 release 범위이며 모든 auth/CSRF/reauth/중요 mutation 연속성을 단독으로 증명하지 않는다.
 - 외부 재확인: OWASP ASVS 5.0.0 latest stable, NIST SP 800-63B-4 2025-07 final 및 주기적 재인증/session-timeout 요구.
 - 판단: 기획/문서 전용. 새 구현·Test·Production 완료를 주장하지 않는다.
+
+## v2026.09.26.444 — Moneyverse Arcade / 비도박 고피드백 게임 계층
+- 신규 기준문서: `MONEYVERSE_ARCADE_GAME_SPEC.md` / `.ko.md`.
+- `CASINO`와 독립된 상시 `ARCADE_SKILL`을 추가한다. 0 WLD 신규유저용 10종 + 본게임/시즌/공동목표 20종 + 세계관 회사 16개를 기획한다.
+- 짧은 판 -> 실력/선택 -> 콤보/FEVER -> 기록/숙련/수집 -> 자유 종료/계속 구조이며 긴장감은 재산손실이 아니라 난도에서 만든다.
+- P0 금지: stake->chance->prize, 유료랜덤, 환전, 구매형 점수/FEVER/Boss 파워, 결석 초기화, loss chasing, 카지노 외형 우회.
+- 보상은 사전공개하고 서버권위·멱등·원장·anti-replay를 적용한다. 반복 저가치 파밍은 diminishing reward와 abuse 방어로 제어한다.
+- 한국 Casino fail-closed와 국제 국가별 gate는 그대로 유지한다. Arcade 허용은 Casino 승인이나 등급 면제를 뜻하지 않는다.
+- 5만+ 요구는 광범위 후보 탐색 목표로 관리하되 실제 개별 검증 5만 건이라고 허위표시하지 않는다. 중복제거·검증된 근거만 기준에 승격한다.
+- 구현 완료는 API parity + 영향 사용자/관리자 전체 5회 반응형 QA가 필요하다. 이번 사이클은 문서기획만 수행한다.

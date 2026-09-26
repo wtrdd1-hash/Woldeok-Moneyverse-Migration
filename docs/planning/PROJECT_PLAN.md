@@ -2311,3 +2311,13 @@ Required sequence: full AI inventory -> latest-plan/main/user-instruction rechec
 - Required proof before release: focused auth/config tests, typecheck/build, exact-SHA Test deployment, and real Android emulator signup -> verify -> authenticated-shell E2E.
 - Worklog: `docs/worklog/2026-09-23-staging-local-auth-e2e-v2026.09.23.387.md` (Korean pair alongside it).
 - Branch: `fix/staging-local-auth-token-v2026.09.23.387`.
+
+## v2026.09.26.444 — Moneyverse Arcade / non-gambling high-feedback game layer
+- New authority: `MONEYVERSE_ARCADE_GAME_SPEC.md` / `.ko.md`.
+- Add permanent `ARCADE_SKILL` entertainment independently from `CASINO`: 10 zero-WLD starter games + 20 core/season/community games, with 16 fictional company workstreams.
+- Engagement contract is short round -> skill/choice -> combo/Fever -> score/mastery/collection -> voluntary stop/continue. Tension comes from execution difficulty, not financial loss.
+- P0 boundaries: no stake->chance->prize economic loop, paid random reward, cash-out, purchasable score/Fever/Boss power, punitive absence reset, loss chasing or casino-reskin presentation.
+- Economy/API: important material reward preview, server-authoritative run/reward validation, idempotent atomic ledger mutation, anti-replay, diminishing low-value farming rewards and no arbitrary gameplay lockout.
+- Jurisdiction: Korea casino remains separately fail-closed pending required evidence; Australia/UK/Germany/EU/Japan/US overlays remain governed by international authority. Arcade availability is not casino approval or a rating exemption.
+- Research target is broad discovery (including the requested 50k+ candidate breadth), but only deduplicated/validated references become evidence; no false claim of 50,000 individually reviewed sources.
+- Release requires affected user/admin API parity and five complete responsive QA passes. Planning/docs only; no runtime/Test/Production claim.

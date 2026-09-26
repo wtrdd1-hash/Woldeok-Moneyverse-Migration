@@ -2251,3 +2251,12 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 강제 순서: AI 전체 인벤토리 -> 최신 기획/main/사용자 지시 재확인 -> 구현·런타임 계약 감사 -> 변경·취약 영역 재구축 -> 시스템 전체 회귀 -> 정확한 SHA로 Test 런타임·fail-closed·rollback 입증 -> 최종 기획 재확인 -> 모든 증거 통과 시에만 무중단 Production 승격. 이 게이트가 끝나거나 남은 제외범위가 명시적으로 승인되기 전에는 신규 AI 기능 작업을 시작하지 않는다.
 
 [executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]
+## v2026.09.26.444 — Moneyverse Arcade / 비도박 고피드백 게임 계층
+- 신규 기준문서: `MONEYVERSE_ARCADE_GAME_SPEC.md` / `.ko.md`.
+- `CASINO`와 독립된 상시 `ARCADE_SKILL`을 추가한다. 0 WLD 신규유저용 10종 + 본게임/시즌/공동목표 20종 + 세계관 회사 16개를 기획한다.
+- 짧은 판 -> 실력/선택 -> 콤보/FEVER -> 기록/숙련/수집 -> 자유 종료/계속 구조이며 긴장감은 재산손실이 아니라 난도에서 만든다.
+- P0 금지: stake->chance->prize, 유료랜덤, 환전, 구매형 점수/FEVER/Boss 파워, 결석 초기화, loss chasing, 카지노 외형 우회.
+- 보상은 사전공개하고 서버권위·멱등·원장·anti-replay를 적용한다. 반복 저가치 파밍은 diminishing reward와 abuse 방어로 제어한다.
+- 한국 Casino fail-closed와 국제 국가별 gate는 그대로 유지한다. Arcade 허용은 Casino 승인이나 등급 면제를 뜻하지 않는다.
+- 5만+ 요구는 광범위 후보 탐색 목표로 관리하되 실제 개별 검증 5만 건이라고 허위표시하지 않는다. 중복제거·검증된 근거만 기준에 승격한다.
+- 구현 완료는 API parity + 영향 사용자/관리자 전체 5회 반응형 QA가 필요하다. 이번 사이클은 문서기획만 수행한다.
