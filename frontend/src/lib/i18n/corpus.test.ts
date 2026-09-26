@@ -28,7 +28,7 @@ describe('150k+ Multilingual Domain Reference Corpus', () => {
     expect(keys.length).toBeGreaterThanOrEqual(25);
 
     for (const key of keys) {
-      const entry = CORE_DOMAIN_TERMS[key];
+      const entry = CORE_DOMAIN_TERMS[key]!;
       expect(entry.ko, `Missing ko for ${key}`).toBeTruthy();
       expect(entry.en, `Missing en for ${key}`).toBeTruthy();
       expect(entry.ja, `Missing ja for ${key}`).toBeTruthy();

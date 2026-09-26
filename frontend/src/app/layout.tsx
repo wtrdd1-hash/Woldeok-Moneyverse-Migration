@@ -18,6 +18,7 @@ import {
   DEFAULT_LOCALE,
   DETECTED_LOCALE_COOKIE,
   LOCALE_COOKIE,
+  type Locale,
   isLocale,
 } from '@/lib/locale';
 import { canonicalUrl as _canonicalUrl, webApplicationJsonLd } from '@/lib/seo';
