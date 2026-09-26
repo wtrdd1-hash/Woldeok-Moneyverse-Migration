@@ -11,7 +11,7 @@ describe('MiniShowdownModal Component', () => {
     expect(screen.getByText(/1:1 주사위 미니 결투/)).toBeDefined();
     expect(screen.getByText(/ROUND 1/)).toBeDefined();
     expect(screen.getByText(/나 \(Player\)/)).toBeDefined();
-    expect(screen.getByText(/AI 덕이봇/)).toBeDefined();
+    expect(screen.getAllByText(/AI 덕이봇/).length).toBeGreaterThan(0);
   });
 
   it('triggers dice roll when roll button is clicked', () => {

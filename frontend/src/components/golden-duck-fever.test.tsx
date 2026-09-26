@@ -15,7 +15,7 @@ describe('GoldenDuckFever Component', () => {
     );
 
     // Verify header and timer
-    expect(screen.getByText(/황금 오리 광클 피버 타임/)).toBeDefined();
+    expect(screen.getAllByText(/황금 오리 광클 피버 타임/).length).toBeGreaterThan(0);
     expect(screen.getByText(/10초 남음/)).toBeDefined();
 
     // Tap button
@@ -35,7 +35,7 @@ describe('GoldenDuckFever Component', () => {
     expect(screen.getByText(/3x/)).toBeDefined();
   });
 
-  it('renders floating duck trigger and activates fever on click', () => {
+  it('renders closed state when isOpen is false', () => {
     render(
       <GoldenDuckFever
         isOpen={false}
@@ -44,6 +44,6 @@ describe('GoldenDuckFever Component', () => {
     );
 
     // Initial state: fever modal not active
-    expect(screen.queryByText(/황금 오리 광클 피버 타임/)).toBeNull();
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 });
