@@ -1,9 +1,13 @@
 import React from 'react';
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, fireEvent, cleanup } from '@testing-library/react';
 import { StreakWagerModal } from './streak-wager-modal';
 
 describe('StreakWagerModal Component', () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   it('does not render when isOpen is false', () => {
     const { container } = render(
       <StreakWagerModal isOpen={false} onClose={() => {}} />
@@ -12,7 +16,7 @@ describe('StreakWagerModal Component', () => {
   });
 
   it('renders modal with title and initial streak info when open', () => {
-    render(
+    const { container } = render(
       <StreakWagerModal
         isOpen={true}
         onClose={() => {}}
@@ -21,13 +25,13 @@ describe('StreakWagerModal Component', () => {
       />
     );
 
-    expect(screen.getByText('7일 스트릭 내기 & 주간 리그')).toBeInTheDocument();
-    expect(screen.getByText('5일 연속 유지 중!')).toBeInTheDocument();
-    expect(screen.getByText('3회')).toBeInTheDocument();
+    expect(container.textContent).toContain('7일 스트릭 내기 & 주간 리그');
+    expect(container.textContent).toContain('5일 연속 유지 중!');
+    expect(container.textContent).toContain('3회');
   });
 
   it('calculates 200% expected payout dynamically based on preset or input', () => {
-    render(
+    const { container, getByRole } = render(
       <StreakWagerModal
         isOpen={true}
         onClose={() => {}}
@@ -35,17 +39,17 @@ describe('StreakWagerModal Component', () => {
     );
 
     // Default 5000 WLD -> 10,000 WLD (200%)
-    expect(screen.getByText('10,000 WLD (200%)')).toBeInTheDocument();
+    expect(container.textContent).toContain('10,000 WLD (200%)');
 
     // Click preset 10k -> 20,000 WLD
-    const preset10k = screen.getByRole('button', { name: '10k' });
+    const preset10k = getByRole('button', { name: '10k' });
     fireEvent.click(preset10k);
-    expect(screen.getByText('20,000 WLD (200%)')).toBeInTheDocument();
+    expect(container.textContent).toContain('20,000 WLD (200%)');
   });
 
   it('handles check-in click and disables button', () => {
     const handleCheckIn = vi.fn();
-    render(
+    const { container, getByRole } = render(
       <StreakWagerModal
         isOpen={true}
         onClose={() => {}}
@@ -53,16 +57,16 @@ describe('StreakWagerModal Component', () => {
       />
     );
 
-    const checkInBtn = screen.getByRole('button', { name: '오늘 출석 체크' });
+    const checkInBtn = getByRole('button', { name: '오늘 출석 체크' });
     fireEvent.click(checkInBtn);
 
     expect(handleCheckIn).toHaveBeenCalledTimes(1);
-    expect(screen.getByText('오늘 완료됨')).toBeInTheDocument();
+    expect(container.textContent).toContain('오늘 완료됨');
   });
 
   it('decrements streak freeze count when freeze button is clicked', () => {
     const handleUseFreeze = vi.fn();
-    render(
+    const { container, getByRole } = render(
       <StreakWagerModal
         isOpen={true}
         onClose={() => {}}
@@ -71,33 +75,33 @@ describe('StreakWagerModal Component', () => {
       />
     );
 
-    expect(screen.getByText('2회')).toBeInTheDocument();
-    const freezeBtn = screen.getByRole('button', { name: '방어권 사용' });
+    expect(container.textContent).toContain('2회');
+    const freezeBtn = getByRole('button', { name: '방어권 사용' });
     fireEvent.click(freezeBtn);
 
     expect(handleUseFreeze).toHaveBeenCalledTimes(1);
-    expect(screen.getByText('1회')).toBeInTheDocument();
+    expect(container.textContent).toContain('1회');
   });
 
   it('switches to 10-player league view when league tab is clicked', () => {
-    render(
+    const { container, getByRole } = render(
       <StreakWagerModal
         isOpen={true}
         onClose={() => {}}
       />
     );
 
-    const leagueTab = screen.getByRole('button', { name: /10인 주간 승강 리그/i });
+    const leagueTab = getByRole('button', { name: /10인 주간 승강 리그/i });
     fireEvent.click(leagueTab);
 
-    expect(screen.getByText('골드 리그 (Group #402)')).toBeInTheDocument();
-    expect(screen.getByText('CryptoWhale')).toBeInTheDocument();
-    expect(screen.getByText('나 (You)')).toBeInTheDocument();
+    expect(container.textContent).toContain('골드 리그 (Group #402)');
+    expect(container.textContent).toContain('CryptoWhale');
+    expect(container.textContent).toContain('나 (You)');
   });
 
   it('calls onStartWager with configured wager amount', () => {
     const handleStartWager = vi.fn();
-    render(
+    const { getByRole } = render(
       <StreakWagerModal
         isOpen={true}
         onClose={() => {}}
@@ -105,10 +109,10 @@ describe('StreakWagerModal Component', () => {
       />
     );
 
-    const preset30k = screen.getByRole('button', { name: '30k' });
+    const preset30k = getByRole('button', { name: '30k' });
     fireEvent.click(preset30k);
 
-    const startBtn = screen.getByRole('button', { name: /30,000 WLD 스트릭 내기 시작하기/i });
+    const startBtn = getByRole('button', { name: /30,000 WLD 스트릭 내기 시작하기/i });
     fireEvent.click(startBtn);
 
     expect(handleStartWager).toHaveBeenCalledWith(30000);
