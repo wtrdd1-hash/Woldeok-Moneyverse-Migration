@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v8)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v9)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v9**: 사행성 카지노 API 전면 폐기 & 14대 도메인 300+개 API 공식 마스터 명세서 완결 (+55, -0)
 - **v8**: SEO 검색 노출 쇄신(10대 가상주식 공개 프리뷰 인덱싱, sitemap 다국어 hreflang 탑재, 금융 교육 필러 가이드 5종 허브 신설) 및 기획서 전수 정합화 사양 누적 (+65, -0)
 - **v7**: 일반 유저 전용 4대 도파민 패키지(황금 오리 피버·덕이 펫/포춘쿠키·호가창 여론 잭팟·1:1 즉석 미니 배틀) 및 홈 메인 스테이션 전면 배치 (+155, -0)
 - **v6**: Phase 3 도파민 3대 패키지(스타 드롭·프레스티지 환생·4인 공동 저축 팟) & 무료/유료 차등화 & SEO 검색 유입 & 법령 준수 아키텍처 (+165, -0)
@@ -3815,3 +3816,52 @@ pm test).
 - Next.js Turbopack 빌드 무결성 검증
 - Debian 미니PC `stage_v460.sh` 및 `promote_v460.sh` 무중단 승격 배포
 - PostgreSQL 활성 세션(1,433+) 100% 무손실 검증
+
+---
+
+## 🚀 [v9 Specification] 사행성 카지노 API 전면 폐기 & 14대 도메인 300+개 API 마스터 명세화 (누적 추가)
+
+### 1. 🛑 사행성 카지노 API 전면 폐기 및 컴플라이언스 완결
+- **폐기 대상**:
+  - 백엔드 NestJS `CasinoModule` 및 `CasinoController`(`/api/v1/casino/*`) 등록 완전 해제.
+  - 프론트엔드 SSOT `routes.config.ts` 및 라우트 맵에서 `/casino` 경로 완전 제거.
+- **사유**:
+  - 게임물 규제 및 금융 법령 컴플라이언스 준수, 도박성/사행성 소지 원천 배제 및 100% 투명하고 공정한 가상경제 시뮬레이터 체계 확립.
+
+### 2. 📋 14대 핵심 도메인 전 도메인 API 정상 작동 전수 감사 및 문서화
+- **공식 마스터 문서 구축**:
+  - `docs/API_CATALOG_MASTER.ko.md` (한국어 마스터 API 명세서)
+  - `docs/API_CATALOG_MASTER.md` (영문 마스터 API 명세서)
+- **14대 도메인 300+개 엔드포인트 완비**:
+  1. 인증 및 세션 (`auth`, `local-auth`, `bootstrap`)
+  2. 계정 및 보안 센터 (`account`, `account-security`, `privacy`)
+  3. 지갑 및 자산 원장 (`wallet`, `activity`)
+  4. 가상 중앙은행 및 채권 (`bank`, `pocket`)
+  5. 직업 및 일일 커리어 (`work`, `game-clock`)
+  6. 가상 주식 거래소 (`stock`, `stock-alert`, `newspaper`)
+  7. 사업체 및 상업 운영 (`business`)
+  8. P2P 마켓플레이스 및 제작 (`marketplace`, `crafting`)
+  9. 상점 및 도파민 보상 (`shop`, `early-game`, `engagement`)
+  10. 성장 및 시즌 패스 (`progression`, `season`)
+  11. 커뮤니티 게시판 및 미디어 (`board`, `content`, `media`)
+  12. 1:1 비공개 쪽지 및 안전 제어 (`chat`, `safety`, `support`)
+  13. 클럽 및 개인 공간 (`club`, `space`)
+  14. 관리자 관제 타워 및 국고 (`admin`, `treasury`, `economy`, `audit`, `controls`)
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `backend/src/app.module.ts`: CasinoModule 제거
+- `frontend/src/config/routes.config.ts`: /casino 라우트 제거
+- `frontend/src/lib/seo-routes.test.ts`: /casino 테스트 단정문 정리
+- `frontend/src/app/search-indexing.test.ts`: /casino 단정문 정리
+- `docs/API_CATALOG_MASTER.ko.md`: 한국어 공식 마스터 API 명세서
+- `docs/API_CATALOG_MASTER.md`: 영문 공식 마스터 API 명세서
+
+### Verification Plan
+- 백엔드 / 프론트엔드 전체 단위 테스트 100% PASS
+- Next.js Turbopack 빌드 무결성 검증
+- Debian 미니PC `stage_v461.sh` 및 `promote_v461.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션 100% 무손실 유지
+

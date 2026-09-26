@@ -58,7 +58,6 @@ describe('SEO & i18n SSOT Route Integrity', () => {
     expect(sitemapPaths).toContain('/guide/glossary');
 
     // Strictly member-protected routes must be excluded
-    expect(sitemapPaths).not.toContain('/casino');
     expect(sitemapPaths).not.toContain('/quests');
     expect(sitemapPaths).not.toContain('/businesses');
     expect(sitemapPaths).not.toContain('/bank');
@@ -72,7 +71,6 @@ describe('SEO & i18n SSOT Route Integrity', () => {
   it('ensures all member-protected and sensitive routes are disallowed in robots.txt', () => {
     const disallowed = getDisallowedCrawlerRoutes();
 
-    expect(disallowed).toContain('/casino');
     expect(disallowed).toContain('/quests');
     expect(disallowed).toContain('/businesses');
     expect(disallowed).toContain('/bank');
@@ -90,7 +88,6 @@ describe('SEO & i18n SSOT Route Integrity', () => {
     expect(isPathIndexable('/terms')).toBe(true);
     expect(isPathIndexable('/stocks')).toBe(true);
     expect(isPathIndexable('/prediction')).toBe(true);
-    expect(isPathIndexable('/casino')).toBe(false);
     expect(isPathIndexable('/bank')).toBe(false);
     expect(isPathIndexable('/work')).toBe(false);
   });

@@ -256,14 +256,6 @@ export const APP_ROUTES: readonly RouteDefinition[] = [
     group: 'play',
   },
   {
-    path: '/casino',
-    label: { ko: '카지노 7대 게임', en: 'Casino Games', ja: 'カジノゲーム', zh: '娱乐城7大游戏' },
-    isPublic: false,
-    authRequired: true,
-    indexable: false,
-    group: 'play',
-  },
-  {
     path: '/quests',
     label: { ko: '퀘스트 센터', en: 'Quest Center', ja: 'クエストセンター', zh: '任务中心' },
     isPublic: false,

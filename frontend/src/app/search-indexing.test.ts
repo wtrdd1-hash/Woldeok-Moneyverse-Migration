@@ -62,7 +62,6 @@ describe('public search surface', () => {
     }
 
     // Member-only and private pages must never appear in sitemap
-    expect(urls).not.toContain('https://easy-scraping.com/casino');
     expect(urls).not.toContain('https://easy-scraping.com/quests');
     expect(urls).not.toContain('https://easy-scraping.com/businesses');
     expect(urls).not.toContain('https://easy-scraping.com/shop/catalog');
