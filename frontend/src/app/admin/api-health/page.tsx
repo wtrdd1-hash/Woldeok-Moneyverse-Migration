@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getServerLocale } from '@/lib/locale-server';
-import { requireAdmin } from '@/lib/session';
+import { requireAdminConsole } from '@/lib/session';
 
 export const metadata: Metadata = {
   title: '14대 도메인 API 헬스체크 & 실시간 관제 — 관리자',
@@ -169,7 +169,7 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
 ];
 
 export default async function AdminApiHealthPage() {
-  await requireAdmin();
+  await requireAdminConsole('/admin/api-health');
   const locale = await getServerLocale();
   const isEn = locale === 'en';
 
