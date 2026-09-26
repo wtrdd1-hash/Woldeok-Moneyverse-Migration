@@ -1,11 +1,38 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.25.442
+> Current ledger version: v2026.09.25.444
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.25.444 — 2026-09-25
+- Traced 35,429 OpenAlex/Crossref records to **33,341 unique discovery candidates** with DOI-first/title-fallback deduplication; this is not a claim of manual full-text review.
+- **M444-01..04 / P1:** the planned portfolio is free core, contextual public ads, ad-free/convenience/presentation subscriptions, direct non-P2W cosmetic entitlements, and disclosed sponsorship; premium value is incremental and ads remain outside sensitive surfaces.
+- **M444-05 / P0:** paid WLD, paid randomized items, paid casino value, P2W economic power, and paid superior WDX information remain prohibited.
+- **M444-06..08 / P1:** unit economics are effective-date/channel aware; cancellation remains straightforward; contribution margin after all variable and operating cost is the profitability authority.
+- Evidence is in `MONEYVERSE_MONETIZATION_REVENUE_RESEARCH_REVIEW_v2026.09.25.444.md` and its planning delta. This is planning/docs only; no runtime, Test, Production, revenue, or legal-clearance claim is made.
+
+## Moneyverse Arcade planning record — v2026.09.26.444
+- A 100,000-record arcade discovery corpus produced 18,578 verified candidate records; it is research evidence, not a claim of implementation, Test, or Production approval.
+- The proposed Arcade is bounded to non-gambling, non-cashable, non-transferable entertainment: no paid entry, cashout, random paid reward, wagering, WLD purchase, or economic advantage.
+- Detailed scope, safety boundaries, age/consent, accessibility, telemetry, and release gates live in `MONEYVERSE_ARCADE_GAME_SPEC.md` and its Korean counterpart.
+
+## v2026.09.25.443 — 2026-09-25
+- Start and recorded mid-work `origin/main=99b0eaa04bbd0b28005861c624690c56744e8a14`; dedicated isolated worktree/branch `docs/db-architecture-research-v2026.09.25.443` avoids overlap with concurrent agents.
+- Discovery evidence: 80,000 raw Crossref records across ten DB architecture lanes, deduplicated by DOI then normalized title to **66,858 candidate records**. Broad search false positives are explicitly Tier C discovery only, never automatic design authority.
+- Revalidated existing DB strengths: numbered SQL migration authority, immutable checksum/reverse parity, restricted application role, security-definer mutation boundaries, exact integer money, idempotency, transactional outbox/ledger and deterministic locking patterns.
+- **G443-01 / P0:** generated exact-SHA schema fingerprint plus Test/Production catalog-drift verification.
+- **G443-02 / P0:** canonical-table PK/constraint audit and deliberate typed-domain invariants.
+- **G443-03 / P0:** referencing-FK index coverage gate with measured exceptions because PostgreSQL does not auto-create child-side FK indexes.
+- **G443-04 / P0:** expand/backfill/validate/switch/contract zero-downtime migration protocol with lock/scan/rewrite classification and old/new-runtime compatibility.
+- **G443-05 / P0:** bounded whole-transaction retry for retryable serialization/deadlock failures while preserving business idempotency and deterministic lock ordering.
+- **G443-06 / P0:** append-only ledger authority plus atomic balance projection and sampled/full reconciliation/rebuild evidence.
+- **G443-07 / P0:** runtime app role remains non-owner/no-DDL; migration ownership is separated; security-definer search-path/grant checks are mandatory.
+- **G443-08..13 / P1:** measured index lifecycle, conditional partitioning, typed-core/JSONB boundary, explicit delete semantics, DB maintenance/observability SLO and heavy-read separation.
+- **G443-14 / P0/P1:** verified logical backup remains, while stronger RPO/RTO requires tested WAL/PITR and immutable off-host recovery rather than a documentation claim.
+- Detailed authority: `DATABASE_ARCHITECTURE_SPEC.md` / `.ko.md` and research review/corpus under `docs/findings/`. Planning/research/docs only; no runtime DB/Test/Production completion claim.
 
 ## v2026.09.25.442 — 2026-09-25
 - Start `origin/main=a7fac4f4db2c4db3b9f8a4e159ad6ea5267540ec`; dedicated branch `docs/all-page-qa-v2026.09.25.442` created from latest main.
@@ -218,3 +245,12 @@ Every planning review records start/mid-work `origin/main` exact SHA, authority-
 - G368-05 P1: v360 session-count/zero-downtime evidence is release-specific and does not by itself prove all auth/CSRF/reauth/critical-mutation continuity.
 - External refresh: OWASP ASVS 5.0.0 latest stable; NIST SP 800-63B-4 final July 2025, with periodic reauthentication/session-timeout requirements.
 - Decision: planning/docs only. No new implementation, Test or Production completion is claimed.
+
+## v2026.09.26.443 — Korea legal/compliance audit
+- Start/mid-work `origin/main=6f025ced5239fc6bc8b365c31ad0fd59acf84dbc`; no drift at checkpoint.
+- Added `KR_LEGAL_COMPLIANCE_AUDIT.md` / `.ko.md`. Production backend/frontend were active and `production-current=prod-v453`; selected public pages rendered AdSense.
+- **KR-LGL-443-01 / P0:** KR casino remains BLOCK without authentic GRAC/rating + 19+ + legal/channel evidence. Current source/Production bundle contains unsupported approval/regular-operation wording, so release policy and runtime claims conflict.
+- **KR-LGL-443-02 / P0:** existing ad monetization requires documented business commencement, business-registration/tax status before expansion.
+- **KR-LGL-443-03 / P0 before paid sales:** paid digital goods/subscription remain blocked until KR seller identity/reporting, transaction disclosure, withdrawal/refund/cancellation and minor-contract controls are complete.
+- **KR-LGL-443-04..08 / P1:** age-assurance wording, AdSense/overseas-transfer governance, commercial-message consent, game-classification applicability and no-cash-exchange invariants require explicit evidence/gates.
+- Planning/audit only: no Production mutation, deployment, DB migration, GRAC approval, business registration or tax status is claimed.

@@ -1,10 +1,25 @@
 # Woldeok Moneyverse — Monetization, Korea/US Compliance & Search Growth Specification
 
-> Version: v2026.09.17.177
+> Version: v2026.09.25.444
 > Status: Living implementation-oriented product specification
-> Date: 2026-09-17
+> Date: 2026-09-25
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`
 > Korean counterpart: [MONETIZATION_COMPLIANCE_SEO_SPEC.ko.md](MONETIZATION_COMPLIANCE_SEO_SPEC.ko.md)
+
+## v2026.09.25.444 monetization/revenue evidence refresh
+
+- Research discovery expanded to 35,429 collected OpenAlex/Crossref candidates and **33,341 unique candidates** after DOI-first/title-fallback deduplication. Corpus size is discovery breadth, not a manual-read count.
+- Adopt the diversified default portfolio: free core, contextual public ads, `Moneyverse Plus` ad-free/convenience/presentation value, direct non-P2W cosmetic entitlements, and clearly disclosed sponsorship.
+- Free core functionality is not intentionally degraded to manufacture premium demand. Paid value must be incremental rather than relief from deliberately created friction.
+- Paid cosmetic/presentation goods are purchased directly as billing entitlements; buying WLD with cash is not an intermediary purchase step.
+- Ads remain prohibited on wallet, transfer, loan, WDX decision/order, casino, account-security, payment-failure and administrator-action surfaces.
+- Ad experiments require holdouts and pre-registered retention, task-completion, latency, complaint/accidental-click and trust guardrails; gross ad revenue cannot override those gates.
+- `WLD_CASH_PURCHASE`, `PAID_RANDOM_ITEM`, paid casino value/stake, P2W economic advantage and paid superior WDX information remain BLOCKED.
+- Store/payment economics must be keyed by market/channel/effective date/install cohort where applicable/transaction type/billing route/programme. Never apply an announced future fee schedule before its effective date.
+- Subscription UX keeps straightforward online self-service cancellation, explicit recurring terms and durable consent/price-version evidence independent of the weakest jurisdictional minimum.
+- Profitability uses contribution margin after store/platform/PSP fees, taxes, refunds/chargebacks, revenue share, incremental infrastructure, support/moderation, localization/content and compliance/legal operating cost.
+- Price, conversion, eCPM, churn, CAC, LTV and revenue projections remain `HYPOTHESIS/TEST TARGET` until measured with Moneyverse telemetry.
+- Evidence: `../findings/MONEYVERSE_MONETIZATION_REVENUE_RESEARCH_REVIEW_v2026.09.25.444.md`; planning delta: `deltas/v2026.09.25.444.md`.
 
 ## v2026.09.17.177 international monetization integration delta
 

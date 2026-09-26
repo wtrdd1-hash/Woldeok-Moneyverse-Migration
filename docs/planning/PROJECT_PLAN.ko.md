@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.25.442
+> **현재 통합 버전:** v2026.09.25.444
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -14,6 +14,35 @@
 권위 register를 제공한다.
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 수익화·수익 포트폴리오 및 근거 재검토 — v2026.09.25.444 (2026-09-25)
+
+- **근거 범위:** OpenAlex/Crossref 후보 35,429건을 DOI 우선/제목 보조 중복 제거해 **고유 탐색 후보 33,341건**으로 만들었으며, 이는 전수 원문 수작업 검토 주장이 아니다.
+- **포트폴리오와 무료 핵심:** 맥락형 공개광고, 광고제거/편의/표현 구독, 비P2W 코스메틱 직접 entitlement, 명확한 스폰서십을 사용할 수 있으나 결제를 강요하려고 필수 경제·게임·커뮤니티 참여를 악화하지 않는다.
+- **하드 경계:** 지갑, 송금, 대출, WDX, 카지노, 계정보안, 결제실패, 관리자 action 화면에는 광고를 넣지 않는다. 유료 WLD, 유료 확률형 아이템, 유료 카지노 가치/베팅, P2W 경제력, 유료 우월 WDX 정보, 돈을 내면 빨라지는 모더레이션은 금지한다.
+- **경제적 진실성:** 시행일/채널별 단위경제를 쓰고 수수료, 세금, 환불, 차지백, 수익배분, 인프라, 지원, 모더레이션, 현지화, 콘텐츠, 컴플라이언스/법무 비용 차감 후 기여이익을 최적화한다. 실측 전 가격·전환율·eCPM·churn·CAC·LTV·매출은 `HYPOTHESIS/TEST TARGET`다.
+- 상세 근거: [수익화 조사 검토](../findings/MONEYVERSE_MONETIZATION_REVENUE_RESEARCH_REVIEW_v2026.09.25.444.ko.md)와 기획 델타. 기획/문서 전용이며 결제 구현, Test, Production 완료를 주장하지 않는다.
+
+## Moneyverse Arcade 조사 경계 — v2026.09.26.444
+
+- 계획된 Arcade는 선택적 비도박 오락 화면이며 보상은 현금화·양도할 수 없다. 유료 입장, 현금화, 베팅, 유료 랜덤 보상, WLD 구매, 경제적 우위를 도입하면 안 된다.
+- 18,578건 검증 탐색 corpus와 상세 구현/릴리스 제약은 [Arcade 명세](MONEYVERSE_ARCADE_GAME_SPEC.ko.md)에 기록했다. 기획/조사 전용이며 구현에는 별도 exact-SHA Test 증거가 필요하다.
+
+## P0/P1 데이터베이스 아키텍처 무결성·확장 계약 — v2026.09.25.443 (2026-09-25)
+
+- **대규모 근거와 과장 분리:** DB 아키텍처 10개 탐색 lane에서 Crossref 원시 80,000건을 수집하고 DOI 우선/정규화 제목 fallback으로 **66,858건 고유 후보**를 만들었다. 이는 탐색 corpus이며 모든 후보를 수동 검토했거나 DB 전용이라고 주장하지 않는다. 아래 운영 요구사항은 직접 확인한 PostgreSQL 17 1차 문서와 현재 저장소 증거를 사용한다.
+- **현재 권위 경계 유지:** numbered SQL migration이 schema authority이고 적용 migration은 immutable/checksum 상태를 유지한다. runtime app role은 non-owner/no-DDL이며 보호 경제 write는 exact integer money, business idempotency와 함께 검토된 PostgreSQL transaction/function 경계를 사용한다.
+- **P0 schema fingerprint/drift gate:** exact candidate마다 빈 PostgreSQL 17을 재구축하고 column/type/default/nullability, PK/UNIQUE/FK/CHECK, index, trigger, routine/security-definer search path, ownership/grant, migration checksum normalized manifest를 생성한다. migration history로 설명되지 않는 Test/Production catalog drift는 수용 차단이다.
+- **P0 key/constraint/FK-index audit:** canonical table은 PK 또는 명시적 keyless 예외를 가진다. 안전하게 표현 가능한 domain invariant는 DB constraint에 둔다. PostgreSQL은 referencing FK column을 자동 index하지 않으므로 child FK마다 적절한 left-prefix index 또는 측정·문서화한 예외를 요구한다.
+- **P0 무중단 schema evolution:** 비단순 migration은 expand -> 필요 시 구/신 호환 구간 -> bounded resumable backfill -> low-blocking index/constraint build·validate -> switch -> old-runtime retirement -> 후속 contract 순서를 사용한다. migration마다 lock/scan/rewrite class와 forward-fix/rollback 의미를 기록하고 destructive/table-rewrite는 대표 isolated Test 데이터에서 먼저 실행한다.
+- **P0 concurrency correctness:** retry 가능한 serialization/deadlock은 business idempotency identity를 유지하면서 bounded backoff로 **transaction 전체 로직**을 재실행한다. multi-account/entity mutation의 결정적 lock order를 계속 강제한다.
+- **P0 ledger reconciliation:** append-only balanced posting을 경제 감사 권위로 유지한다. mutable balance projection은 원장과 atomic하게 갱신하고 sampled/full reconciliation 및 통제된 rebuild/repair를 제공한다. 과거 posting 수정/삭제 대신 새 reversal/correction transaction을 사용한다.
+- **P1 측정 기반 index/partition lifecycle:** index 추가/삭제는 실제 query predicate, PostgreSQL statistics, 대표 `EXPLAIN (ANALYZE, BUFFERS)`에 연결한다. partitioning은 크기/growth/retention 근거가 있는 table과 decision record에만 허용한다. audit/outbox/chat/price/telemetry history는 후보일 뿐 자동 partition 대상이 아니다.
+- **P1 typed core와 lifecycle semantics:** authoritative identity, money, ownership, lifecycle state, idempotency, timestamp는 typed/constrained column으로 유지한다. JSONB는 versioned flexible payload에 제한한다. 모든 FK delete behavior를 의도적으로 선택해 ledger/audit/financial history가 우발 cascade로 사라지지 않게 한다.
+- **P1 maintenance/observability:** autovacuum/analyze freshness, dead tuple/XID pressure, long transaction, blocking/deadlock/serialization retry, relation/index growth, temp spill, invalid/duplicate/unused-index candidate, 승인된 `pg_stat_statements` query evidence를 관측한다. routine `VACUUM FULL`을 일반 유지보수로 쓰지 않는다.
+- **P0/P1 복구 확장:** 검증된 encrypted logical backup을 유지하지만 이를 PITR로 간주하지 않는다. 더 강한 RPO/RTO는 독립 저장된 base backup/WAL archive, immutable off-host failure domain, disposable restore drill로 timestamp recovery·lineage·application integrity를 증명한 뒤 수용한다.
+- **corpus 규모로 아키텍처를 결정하지 않음:** v443은 ORM migration 전환, 전면 partitioning, generic sharding/distributed SQL, PostgreSQL major upgrade를 승인하지 않는다. 별도 upgrade 계획·검증 전까지 현재 PostgreSQL 17 호환 기준을 유지한다.
+- 상세 권위: [DATABASE_ARCHITECTURE_SPEC.ko.md](DATABASE_ARCHITECTURE_SPEC.ko.md), [DB 아키텍처 조사 검토](../findings/MONEYVERSE_DATABASE_ARCHITECTURE_RESEARCH_REVIEW_v2026.09.25.443.ko.md). 이번 회차는 조사/기획/문서 전용이며 schema/Test/Production 변경 완료를 주장하지 않는다.
 
 ## P0 전 사이트 모든 페이지 UI/기능 QA 하드 게이트 — v2026.09.25.442 (2026-09-25)
 
@@ -2258,3 +2287,9 @@ P0/HIGH는 문서 반영만으로 `DONE`이 아니다. 실제 흐름은 branch �
 강제 순서: AI 전체 인벤토리 -> 최신 기획/main/사용자 지시 재확인 -> 구현·런타임 계약 감사 -> 변경·취약 영역 재구축 -> 시스템 전체 회귀 -> 정확한 SHA로 Test 런타임·fail-closed·rollback 입증 -> 최종 기획 재확인 -> 모든 증거 통과 시에만 무중단 Production 승격. 이 게이트가 끝나거나 남은 제외범위가 명시적으로 승인되기 전에는 신규 AI 기능 작업을 시작하지 않는다.
 
 [executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]
+
+### v2026.09.26.443 — 대한민국 법률 출시 게이트
+- 상세 권위: `KR_LEGAL_COMPLIANCE_AUDIT.ko.md`. 실제 등급/GRAC + 19+ + 법률/채널 증거 전 대한민국 카지노/확률 기능은 fail-closed하며 근거 없는 승인/인증 문구는 P0 결함이다.
+- 운영 광고가 이미 존재하므로 사업자/세무 상태와 광고·개인정보·국외이전 증거는 미래 과제가 아니라 현재 운영 게이트다.
+- 실결제 디지털상품/구독/광고제거는 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약, 결제사업자 대사 통과 전 BLOCK.
+- `ageConfirmed` 자기확인을 검증된 연령으로 표현하지 않는다. 광고성 메시지는 국내 동의/suppression/야간 통제 전 BLOCK. WLD/게임결과 현금환전은 새 법률검토 전 금지한다.
