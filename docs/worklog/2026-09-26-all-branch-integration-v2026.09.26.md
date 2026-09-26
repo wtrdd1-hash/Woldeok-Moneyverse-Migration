@@ -21,6 +21,15 @@
   `origin/main`.
 - Classifying every remote branch by ancestry, unique commits, changed paths,
   migration sequence impact, and available evidence before any merge.
+- The first current-main simulation found seven branches already contained;
+  twelve candidates with a clean tree merge; and thirteen candidates that
+  conflict with current main. Several old automatic branches are nested
+  supersets of earlier branches and must be integrated at most once.
+- Re-read documentation governance and branch-drain records. A clean Git tree
+  merge is not validation evidence: stale code and planning changes still need
+  current-main reconciliation and exact-head checks.
+- Confirmed the approved Debian SSH path is reachable with key-based,
+  read-only access (`hostname` only). No runtime or Production action occurred.
 
 ## Finished
 
