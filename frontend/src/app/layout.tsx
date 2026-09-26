@@ -62,93 +62,173 @@ const plexMono = IBM_Plex_Mono({
 const indexingEnabled = process.env.SEO_INDEXING_ENABLED !== 'false';
 const siteUrl = (process.env.APP_BASE_URL ?? 'https://easy-scraping.com').replace(/\/$/, '');
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: '월덕 머니버스',
-    template: '%s · 월덕 머니버스',
-  },
-  description:
-    '월덕 머니버스는 Discord 커뮤니티와 연결된 가상경제·커뮤니티 게임 서비스입니다. 활동 기록과 WLD 게임 보상, 상점, 주식, 퀘스트, 시즌 이벤트를 한곳에서 살펴보고 커뮤니티와 함께 성장하는 게임 경제를 경험하세요.',
-  applicationName: '월덕 머니버스',
-  category: '커뮤니티 게임',
-  keywords: [
-    '월덕 머니버스',
-    '가상경제',
-    '디스코드 봇',
-    '커뮤니티 게임',
-    'WLD',
-    '덕',
-    'Discord Economy',
-    'Woldeok Moneyverse',
-    '게임 경제',
-    '출석 보상',
-  ],
-  alternates: {
-    canonical: siteUrl,
-    languages: {
-      'ko-KR': siteUrl,
-      'en-US': siteUrl,
-      'x-default': siteUrl,
-    },
-  },
-  verification: {
-    google: process.env.SEARCH_CONSOLE_VERIFICATION || process.env.GOOGLE_SITE_VERIFICATION || undefined,
-    other: {
-      'naver-site-verification':
-        process.env.NAVER_SITE_VERIFICATION || 'f77f52636d9465715f5d6f1dfc2ad65b68df9f2e',
-    },
-  },
-  robots: {
-    index: indexingEnabled,
-    follow: indexingEnabled,
-    googleBot: {
-      index: indexingEnabled,
-      follow: indexingEnabled,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-      'max-video-preview': -1,
-    },
-  },
-  openGraph: {
-    type: 'website',
-    siteName: '월덕 머니버스',
-    locale: 'ko_KR',
-    title: '월덕 머니버스 — Discord 커뮤니티 가상경제',
+const META_BY_LOCALE = {
+  en: {
+    titleDefault: 'Woldeok Moneyverse',
+    titleTemplate: '%s · Woldeok Moneyverse',
     description:
-      'Discord 커뮤니티 활동을 기록하고 WLD 보상과 게임 상점을 함께 이용하는 월덕 머니버스입니다.',
-    url: siteUrl,
-    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: '월덕 머니버스 — Discord 커뮤니티 가상경제' }],
+      'Woldeok Moneyverse is a virtual economy and community gaming platform linked to Discord. Explore activity logs, WLD rewards, virtual stock exchange, central bank, quests, and seasonal events.',
+    applicationName: 'Woldeok Moneyverse',
+    category: 'Community Gaming & Virtual Economy',
+    keywords: [
+      'Woldeok Moneyverse',
+      'Virtual Economy',
+      'Discord Bot',
+      'Community Game',
+      'WLD',
+      'Virtual Stock Exchange',
+      'Virtual Central Bank',
+      'Seasonal Events',
+    ],
+    ogLocale: 'en_US',
+    ogTitle: 'Woldeok Moneyverse — Discord Virtual Economy & Game',
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: '월덕 머니버스 — Discord 커뮤니티 가상경제',
+  ko: {
+    titleDefault: '월덕 머니버스',
+    titleTemplate: '%s · 월덕 머니버스',
     description:
-      'Discord 커뮤니티 활동을 기록하고 WLD 보상과 게임 상점을 함께 이용하는 월덕 머니버스입니다.',
-    images: ['/opengraph-image'],
+      '월덕 머니버스는 Discord 커뮤니티와 연결된 가상경제·커뮤니티 게임 서비스입니다. 활동 기록과 WLD 게임 보상, 가상 주식 거래소, 중앙은행, 퀘스트, 시즌 이벤트를 한곳에서 경험하세요.',
+    applicationName: '월덕 머니버스',
+    category: '커뮤니티 게임',
+    keywords: [
+      '월덕 머니버스',
+      '가상경제',
+      '디스코드 봇',
+      '커뮤니티 게임',
+      'WLD',
+      '덕',
+      'Discord Economy',
+      'Woldeok Moneyverse',
+      '게임 경제',
+      '가상 주식',
+    ],
+    ogLocale: 'ko_KR',
+    ogTitle: '월덕 머니버스 — Discord 커뮤니티 가상경제',
+  },
+  ja: {
+    titleDefault: 'ウォルドク・マネーバース',
+    titleTemplate: '%s · ウォルドク・マネーバース',
+    description:
+      'ウォルドク・マネーバースはDiscordコミュニティと連携した仮想経済・コミュニティゲームプラットフォームです。WLD報酬、仮想株式取引所、中央銀行、クエスト、シーズンイベントを体験できます。',
+    applicationName: 'ウォルドク・マネーバース',
+    category: 'コミュニティゲーム',
+    keywords: [
+      'ウォルドク・マネーバース',
+      '仮想経済',
+      'Discordゲーム',
+      'Discord Bot',
+      'WLD',
+      'コミュニティゲーム',
+      '仮想株式取引所',
+      '中央銀行',
+    ],
+    ogLocale: 'ja_JP',
+    ogTitle: 'ウォルドク・マネーバース — Discordコミュニティ仮想経済',
+  },
+  zh: {
+    titleDefault: '月德 Moneyverse',
+    titleTemplate: '%s · 月德 Moneyverse',
+    description:
+      '月德 Moneyverse 是与 Discord 社区联动的虚拟经济与社区游戏平台。在此体验活动记录、WLD游戏奖励、虚拟股票交易所、中央银行、任务与赛季活动。',
+    applicationName: '月德 Moneyverse',
+    category: '社区游戏',
+    keywords: [
+      '月德 Moneyverse',
+      '虚拟经济',
+      'Discord经济',
+      'Discord机器人',
+      'WLD',
+      '社区游戏',
+      '虚拟股票交易所',
+      '中央银行',
+    ],
+    ogLocale: 'zh_CN',
+    ogTitle: '月德 Moneyverse — Discord社区虚拟经济',
   },
 };
 
-const siteStructuredData = {
-  '@context': 'https://schema.org',
-  '@graph': [
-    {
-      '@type': 'WebSite',
-      '@id': `${siteUrl}/#website`,
-      url: siteUrl,
-      name: '월덕 머니버스',
-      inLanguage: 'ko-KR',
-      description: 'Discord로 이어지는 월덕 커뮤니티의 가상 경제 서비스',
+export async function generateMetadata(): Promise<Metadata> {
+  const cookieStore = await cookies();
+  const rawLocale =
+    cookieStore.get(LOCALE_COOKIE)?.value ||
+    cookieStore.get(DETECTED_LOCALE_COOKIE)?.value;
+  const locale = isLocale(rawLocale) ? rawLocale : DEFAULT_LOCALE;
+  const meta = META_BY_LOCALE[locale];
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: meta.titleDefault,
+      template: meta.titleTemplate,
     },
-    {
-      '@type': 'Organization',
-      '@id': `${siteUrl}/#organization`,
-      name: '월덕 머니버스',
-      url: siteUrl,
+    description: meta.description,
+    applicationName: meta.applicationName,
+    category: meta.category,
+    keywords: meta.keywords,
+    alternates: {
+      canonical: siteUrl,
     },
-    webApplicationJsonLd(),
-  ],
-};
+    verification: {
+      google: process.env.SEARCH_CONSOLE_VERIFICATION || process.env.GOOGLE_SITE_VERIFICATION || undefined,
+      other: {
+        'naver-site-verification':
+          process.env.NAVER_SITE_VERIFICATION || 'f77f52636d9465715f5d6f1dfc2ad65b68df9f2e',
+      },
+    },
+    robots: {
+      index: indexingEnabled,
+      follow: indexingEnabled,
+      googleBot: {
+        index: indexingEnabled,
+        follow: indexingEnabled,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+        'max-video-preview': -1,
+      },
+    },
+    openGraph: {
+      type: 'website',
+      siteName: meta.titleDefault,
+      locale: meta.ogLocale,
+      title: meta.ogTitle,
+      description: meta.description,
+      url: siteUrl,
+      images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: meta.ogTitle }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: meta.ogTitle,
+      description: meta.description,
+      images: ['/opengraph-image'],
+    },
+  };
+}
+
+function getSiteStructuredData(locale: Locale) {
+  const meta = META_BY_LOCALE[locale];
+  const langTag = locale === 'ko' ? 'ko-KR' : locale === 'ja' ? 'ja-JP' : locale === 'zh' ? 'zh-CN' : 'en-US';
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebSite',
+        '@id': `${siteUrl}/#website`,
+        url: siteUrl,
+        name: meta.titleDefault,
+        inLanguage: langTag,
+        description: meta.description,
+      },
+      {
+        '@type': 'Organization',
+        '@id': `${siteUrl}/#organization`,
+        name: meta.titleDefault,
+        url: siteUrl,
+      },
+      webApplicationJsonLd(),
+    ],
+  };
+}
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
@@ -156,6 +236,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const detected = cookieStore.get(DETECTED_LOCALE_COOKIE)?.value;
   const locale = isLocale(explicit) ? explicit : isLocale(detected) ? detected : DEFAULT_LOCALE;
   const [viewer, policy] = await Promise.all([currentViewer(), fetchLatestPolicy()]);
+  const siteStructuredData = getSiteStructuredData(locale);
 
   return (
     <html

@@ -58,3 +58,6 @@ backend/**/*.jsonl
 backend/**/*.ndjson
 backend/**/*.log
 backend/**/*.bak
+
+# Large generated datasets
+frontend/src/lib/i18n/references/corpus-150k.json

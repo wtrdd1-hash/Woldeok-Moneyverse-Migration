@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "qa:route-inventory": "node scripts/qa/generate-full-route-inventory.mjs",
+    "i18n:corpus": "node scripts/generate-i18n-corpus-150k.mjs",
     "api:contract:generate": "pnpm --filter @moneyverse/contract build && node scripts/enrich-mobile-api-contract.mjs && node scripts/generate-mobile-api-schema-reference.mjs",
     "api:contract:check": "pnpm api:contract:generate && node scripts/check-mobile-api-contract.mjs",
     "bot:test": "npm --prefix bot test",

@@ -37,9 +37,13 @@ DECLARE
   v_title text;
   v_tier text;
   v_user_level int;
-  v_user_balance bigint;
+  v_user_account_id uuid;
+  v_available numeric;
+  v_sink_account_id uuid;
   v_existing uuid;
-  v_vault_balance text;
+  v_vault_id uuid;
+  v_current_vault_bal bigint;
+  v_new_vault_bal bigint;
   v_new_qual record;
 BEGIN
   -- Validate job_type enum
@@ -101,33 +105,59 @@ BEGIN
     RAISE EXCEPTION '이미 취득한 자격증입니다: %', v_title;
   END IF;
 
-  -- 3. Check user balance and deduct
-  SELECT balance INTO v_user_balance
-  FROM public.users
-  WHERE id = p_actor
+  -- 3. Check user cash balance and deduct
+  SELECT a.id, b.available_amount::numeric INTO v_user_account_id, v_available
+  FROM public.accounts a
+  JOIN public.account_balances b ON b.account_id = a.id
+  WHERE a.owner_user_id = p_actor 
+    AND a.account_type = 'USER_CASH'::public.account_type 
+    AND a.status = 'active'::public.account_status
   FOR UPDATE;
 
-  IF v_user_balance < v_fee_wld THEN
-    RAISE EXCEPTION 'WLD 잔액이 부족합니다. (보유: % WLD / 수수료: % WLD)', v_user_balance, v_fee_wld;
+  IF v_user_account_id IS NULL OR v_available < v_fee_wld THEN
+    RAISE EXCEPTION 'WLD 잔액이 부족합니다. (보유: % WLD / 수수료: % WLD)', COALESCE(v_available, 0), v_fee_wld;
   END IF;
 
-  UPDATE public.users
-  SET balance = balance - v_fee_wld
-  WHERE id = p_actor;
+  -- Find SINK account
+  SELECT a.id INTO v_sink_account_id
+  FROM public.accounts a
+  WHERE a.account_type = 'SINK'::public.account_type AND a.status = 'active'::public.account_status
+  LIMIT 1;
+
+  -- Deduct user cash balance
+  UPDATE public.account_balances
+  SET available_amount = (available_amount::numeric - v_fee_wld), updated_at = pg_catalog.clock_timestamp()
+  WHERE account_id = v_user_account_id;
+
+  -- Credit SINK balance
+  IF v_sink_account_id IS NOT NULL THEN
+    UPDATE public.account_balances
+    SET available_amount = (available_amount::numeric + v_fee_wld), updated_at = pg_catalog.clock_timestamp()
+    WHERE account_id = v_sink_account_id;
+  END IF;
 
   -- 4. Treasury Deposit & Ledger Hard Sink
-  UPDATE public.system_treasury_vaults
-  SET balance_wld = (balance_wld::bigint + v_fee_wld)::text, updated_at = clock_timestamp()
+  SELECT id, balance_wld::bigint INTO v_vault_id, v_current_vault_bal
+  FROM public.system_treasury_vaults
   WHERE code = 'VAULT_MAIN'
-  RETURNING balance_wld INTO v_vault_balance;
+  FOR UPDATE;
 
-  INSERT INTO public.system_treasury_ledger (
-    tx_type, vault_name, amount_wld, balance_after, reason, actor_id, actor_name
-  ) VALUES (
-    'ABSORPTION_SINK', 'VAULT_MAIN', v_fee_wld::text, v_vault_balance,
-    '직업 자격심사 응시료 국고 귀속 (' || v_title || ' - ' || p_job_type || ')',
-    p_actor, 'WORK_QUALIFICATION_SINK'
-  );
+  IF v_vault_id IS NOT NULL THEN
+    v_new_vault_bal := COALESCE(v_current_vault_bal, 0) + v_fee_wld;
+
+    UPDATE public.system_treasury_vaults
+    SET balance_wld = v_new_vault_bal::text,
+        updated_at = pg_catalog.clock_timestamp()
+    WHERE id = v_vault_id;
+
+    INSERT INTO public.system_treasury_ledger (
+      vault_id, tx_type, amount_wld, actor_id, reason, balance_before, balance_after
+    ) VALUES (
+      v_vault_id, 'ABSORPTION_SINK', v_fee_wld::text, p_actor,
+      '직업 자격심사 응시료 국고 귀속 (' || v_title || ' - ' || p_job_type || ')',
+      COALESCE(v_current_vault_bal, 0)::text, v_new_vault_bal::text
+    );
+  END IF;
 
   -- 5. Record Qualification
   INSERT INTO public.user_job_qualifications (

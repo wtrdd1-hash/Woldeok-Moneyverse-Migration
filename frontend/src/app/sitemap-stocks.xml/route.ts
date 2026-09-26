@@ -1,12 +1,8 @@
-import { apiOrNull } from '@/lib/api';
 import { buildUrlsetXml, canonicalUrl, type SitemapUrlEntry } from '@/lib/seo';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 60;
+export const revalidate = 3600;
 
-interface StockItem {
-  readonly symbol: string;
-}
+const RELEASE_TIMESTAMP = new Date('2026-09-26T21:00:00.000Z').toISOString();
 
 export async function GET() {
   if (process.env.SEO_INDEXING_ENABLED === 'false') {
@@ -18,38 +14,24 @@ export async function GET() {
     });
   }
 
-  const now = new Date().toISOString();
+  // Only the public stock exchange overview hub is indexable by guest search crawlers.
+  // Individual stock trading consoles (/stocks/[symbol]) are protected by requireMember()
+  // and must NOT be submitted to sitemap to avoid crawler 307 redirect indexing penalties.
   const entries: SitemapUrlEntry[] = [
     {
       loc: canonicalUrl('/stocks'),
-      lastmod: now,
+      lastmod: RELEASE_TIMESTAMP,
       changefreq: 'daily',
       priority: 0.9,
     },
   ];
-
-  try {
-    const data = await apiOrNull<{ stocks: StockItem[] }>('/api/v1/stocks');
-    if (data?.stocks) {
-      for (const stock of data.stocks) {
-        entries.push({
-          loc: canonicalUrl(`/stocks/${encodeURIComponent(stock.symbol)}`),
-          lastmod: now,
-          changefreq: 'daily',
-          priority: 0.8,
-        });
-      }
-    }
-  } catch {
-    // Graceful fallback to list page
-  }
 
   const xml = buildUrlsetXml(entries);
 
   return new Response(xml, {
     headers: {
       'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
     },
   });
 }

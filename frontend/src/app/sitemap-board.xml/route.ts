@@ -1,8 +1,9 @@
 import { publicApi } from '@/lib/api';
 import { buildUrlsetXml, canonicalUrl, type SitemapUrlEntry } from '@/lib/seo';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 60;
+export const revalidate = 3600;
+
+const RELEASE_TIMESTAMP = new Date('2026-09-26T21:00:00.000Z').toISOString();
 
 interface PostItem {
   readonly postId: string;
@@ -20,23 +21,22 @@ export async function GET() {
     });
   }
 
-  const now = new Date().toISOString();
   const entries: SitemapUrlEntry[] = [
     {
       loc: canonicalUrl('/board'),
-      lastmod: now,
+      lastmod: RELEASE_TIMESTAMP,
       changefreq: 'daily',
       priority: 0.8,
     },
   ];
 
   try {
-    const data = await publicApi<{ posts: PostItem[] }>('/api/v1/board/public/stock-posts', 60);
+    const data = await publicApi<{ posts: PostItem[] }>('/api/v1/board/public/stock-posts', 3600);
     if (data?.posts) {
       for (const post of data.posts) {
         entries.push({
           loc: canonicalUrl(`/board/${post.postId}`),
-          lastmod: post.updatedAt || post.createdAt || now,
+          lastmod: post.updatedAt || post.createdAt || RELEASE_TIMESTAMP,
           changefreq: 'weekly',
           priority: 0.7,
         });
@@ -51,7 +51,7 @@ export async function GET() {
   return new Response(xml, {
     headers: {
       'Content-Type': 'application/xml; charset=utf-8',
-      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
     },
   });
 }

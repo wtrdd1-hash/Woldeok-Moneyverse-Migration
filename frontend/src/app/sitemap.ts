@@ -1,36 +1,28 @@
 import type { MetadataRoute } from 'next';
-
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+import { getPublicSitemapRoutes } from '@/config/routes.config';
 
 /**
- * Public routes indexed by search crawlers.
+ * 1-Hour ISR Caching for Sitemap.
+ * Prevents unnecessary re-computation and shields backend from crawler storms.
  */
-const PUBLIC_PATHS = [
-  '',
-  '/guide',
-  '/announcements',
-  '/gallery',
-  '/shop',
-  '/casino',
-  '/stocks',
-  '/quests',
-  '/businesses',
-  '/board',
-  '/terms',
-  '/privacy',
-  '/account-deletion',
-  '/data-deletion',
-];
+export const revalidate = 3600;
+
+/**
+ * Authoritative release timestamp for static public routes.
+ * Using a fixed release timestamp instead of request-time new Date() ensures
+ * search engines receive honest, cacheable modification dates.
+ */
+const RELEASE_TIMESTAMP = new Date('2026-09-26T21:00:00.000Z');
 
 export default function sitemap(): MetadataRoute.Sitemap {
   if (process.env.SEO_INDEXING_ENABLED === 'false') return [];
   const base = (process.env.APP_BASE_URL || 'https://easy-scraping.com').replace(/\/$/, '');
-  const now = new Date();
-  return PUBLIC_PATHS.map((path) => ({
-    url: `${base}${path}`,
-    lastModified: now,
-    changeFrequency: path === '' ? ('daily' as const) : ('weekly' as const),
-    priority: path === '' ? 1 : path === '/casino' || path === '/stocks' ? 0.9 : 0.7,
+  const publicRoutes = getPublicSitemapRoutes();
+
+  return publicRoutes.map((route) => ({
+    url: `${base}${route.path}`,
+    lastModified: RELEASE_TIMESTAMP,
+    changeFrequency: route.changeFrequency || 'weekly',
+    priority: route.sitemapPriority || 0.7,
   }));
 }

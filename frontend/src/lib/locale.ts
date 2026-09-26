@@ -1,6 +1,6 @@
 export type Locale = 'ko' | 'en' | 'ja' | 'zh';
 
-export const DEFAULT_LOCALE: Locale = 'ko';
+export const DEFAULT_LOCALE: Locale = 'en';
 export const SUPPORTED_LOCALES: readonly Locale[] = ['ko', 'en', 'ja', 'zh'] as const;
 export const LOCALE_COOKIE = 'wdmv_locale';
 export const DETECTED_LOCALE_COOKIE = 'wdmv_detected_locale';

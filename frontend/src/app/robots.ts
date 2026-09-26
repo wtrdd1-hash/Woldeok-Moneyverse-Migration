@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
+import { getDisallowedCrawlerRoutes } from '@/config/routes.config';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+export const revalidate = 3600;
 
 export default function robots(): MetadataRoute.Robots {
   const enabled = process.env.SEO_INDEXING_ENABLED !== 'false';
@@ -15,20 +15,13 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      // Private member screens, admin console, developer portal, and internal APIs are kept off search engines
-      disallow: [
-        '/admin',
-        '/developer',
-        '/account',
-        '/wallet',
-        '/status',
-        '/gallery/submit',
-        '/login',
-        '/api/',
-        '/auth/',
-      ],
+      // Strictly disallow all member-only screens and internal API/auth routes from SSOT
+      disallow: getDisallowedCrawlerRoutes(),
     },
-    sitemap: `${base}/sitemap.xml`,
+    sitemap: [
+      `${base}/sitemap.xml`,
+      `${base}/sitemap-index.xml`,
+    ],
     host: base,
   };
 }

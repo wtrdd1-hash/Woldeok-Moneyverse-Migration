@@ -98,7 +98,7 @@ export async function generateMetadata({
     title: `${stock.symbol} ${stock.name} — 가상 주식 상세`,
     description: `${stock.name}의 월덕 머니버스 가상 시세, 보유 현황, 차트와 관련 커뮤니티 토론을 한곳에서 확인하세요. 실제 금융상품이 아닙니다.`,
     alternates: { canonical: stockUrl },
-    robots: { index: true, follow: true },
+    robots: { index: false, follow: true },
     openGraph: {
       title: `${stock.name} (${stock.symbol}) — 가상 주식 시세`,
       description: `${stock.name}의 실시간 가상 주식 호가 및 차트`,
