@@ -196,21 +196,44 @@ export class MusicManager {
     this.volume = 100;
     this.starting = false;
     this.disposed = false;
+    this.currentConnection = null;
+    this.currentSubscription = null;
+    this.startTimeout = null;
     this.player = createAudioPlayer({
       behaviors: { noSubscriber: NoSubscriberBehavior.Play },
     });
 
-    this.player.on(AudioPlayerStatus.Idle, () => {
-      if (this.starting) return;
-      this.#killCurrentProcess();
-      this.current = null;
-      this.currentResource = null;
-      void this.#playNext();
+    this.player.on('stateChange', (oldState, newState) => {
+      this.logger.log?.(`[Music Player] State: ${oldState.status} -> ${newState.status}`);
+      if (newState.status === AudioPlayerStatus.Playing) {
+        this.starting = false;
+        if (this.startTimeout) {
+          clearTimeout(this.startTimeout);
+          this.startTimeout = null;
+        }
+      }
+      if (newState.status === AudioPlayerStatus.Idle) {
+        if (oldState.status === AudioPlayerStatus.Playing) {
+          this.logger.log?.('[Music Player] Track finished naturally.');
+          this.#killCurrentProcess();
+          this.current = null;
+          this.currentResource = null;
+          void this.#playNext();
+        } else if (this.starting) {
+          this.logger.log?.('[Music Player] Idle ignored during track buffering/startup.');
+        } else {
+          this.logger.log?.(`[Music Player] Idle reached from ${oldState.status}.`);
+        }
+      }
     });
 
     this.player.on('error', (error) => {
       this.logger.error?.('[Music] Audio player error:', error.message);
-      if (this.starting) return;
+      if (this.startTimeout) {
+        clearTimeout(this.startTimeout);
+        this.startTimeout = null;
+      }
+      this.starting = false;
       this.#killCurrentProcess();
       this.current = null;
       this.currentResource = null;
@@ -220,7 +243,12 @@ export class MusicManager {
 
   attachConnection(connection) {
     if (!connection || this.disposed) return;
-    connection.subscribe(this.player);
+    if (this.currentConnection === connection && this.currentSubscription) {
+      return;
+    }
+    this.currentConnection = connection;
+    this.currentSubscription = connection.subscribe(this.player);
+    this.logger.log?.('[Music] Player subscribed to voice connection.');
   }
 
   async registerCommands(guild) {
@@ -384,6 +412,20 @@ export class MusicManager {
     this.starting = true;
     const track = this.queue.shift();
 
+    if (this.startTimeout) {
+      clearTimeout(this.startTimeout);
+    }
+    this.startTimeout = setTimeout(() => {
+      if (this.starting) {
+        this.logger.warn?.(`[Music] Track startup timed out after 15s for: ${track.title}`);
+        this.starting = false;
+        this.#killCurrentProcess();
+        this.current = null;
+        this.currentResource = null;
+        setImmediate(() => void this.#playNext());
+      }
+    }, 15000);
+
     try {
       let connection = getVoiceConnection(this.guildId);
       if ((!connection || connection.state.status !== VoiceConnectionStatus.Ready) && typeof this.ensureVoiceConnection === 'function') {
@@ -412,7 +454,10 @@ export class MusicManager {
         this.logger.error?.('[Music] yt-dlp stream error:', msg);
       });
 
-      const ffmpegArgs = ['-i', 'pipe:0'];
+      const ffmpegArgs = [
+        '-loglevel', 'warning',
+        '-i', 'pipe:0',
+      ];
 
       if (sponsorSegments.length > 0) {
         const ranges = sponsorSegments.map((s) => `not(between(t,${s.segment[0]},${s.segment[1]}))`).join('*');
@@ -430,12 +475,26 @@ export class MusicManager {
 
       const ffmpeg = spawn('ffmpeg', ffmpegArgs);
       this.currentFfmpegProcess = ffmpeg;
+
+      let ffmpegStderr = '';
+      ffmpeg.stderr.on('data', (d) => {
+        ffmpegStderr += d.toString();
+        if (ffmpegStderr.length > 2000) ffmpegStderr = ffmpegStderr.slice(-2000);
+      });
+
+      ffmpeg.on('exit', (code, signal) => {
+        if (this.disposed || ffmpeg.killed) return;
+        if (code !== 0 && code !== null) {
+          this.logger.error?.(`[Music] FFmpeg exited with code ${code}, signal: ${signal}. Details: ${ffmpegStderr.trim()}`);
+        }
+      });
+
       process.stdout.pipe(ffmpeg.stdin);
       process.stdout.on('error', () => {});
       ffmpeg.stdin.on('error', () => {});
       ffmpeg.on('error', (err) => {
         if (this.disposed || ffmpeg.killed) return;
-        this.logger.error?.('[Music] FFmpeg audio filter error:', err.message);
+        this.logger.error?.('[Music] FFmpeg process error:', err.message);
       });
 
       const resource = createAudioResource(ffmpeg.stdout, {
@@ -453,16 +512,23 @@ export class MusicManager {
       this.logger.log?.(`[Music] Playing ${track.title} (${track.url}) [Volume: ${this.volume}%]`);
     } catch (error) {
       this.logger.error?.('[Music] Failed to start track:', error.message);
+      if (this.startTimeout) {
+        clearTimeout(this.startTimeout);
+        this.startTimeout = null;
+      }
+      this.starting = false;
       this.#killCurrentProcess();
       this.current = null;
       this.currentResource = null;
       setImmediate(() => void this.#playNext());
-    } finally {
-      this.starting = false;
     }
   }
 
   #killCurrentProcess() {
+    if (this.startTimeout) {
+      clearTimeout(this.startTimeout);
+      this.startTimeout = null;
+    }
     const process = this.currentProcess;
     this.currentProcess = null;
     if (process && !process.killed) {
