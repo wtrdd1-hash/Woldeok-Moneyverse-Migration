@@ -324,6 +324,10 @@ export default async function HomePage() {
               <span><T korean="가상 주식 거래소" english="Stock Exchange" /></span>
               <ChevronRight className="size-3 text-muted-foreground" />
             </Link>
+            <Link href="/prediction" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-amber-500 transition-colors">
+              <span><T korean="실시간 예측 마켓" english="Prediction Market" /></span>
+              <ChevronRight className="size-3 text-muted-foreground" />
+            </Link>
             <Link href="/bank" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-amber-500 transition-colors">
               <span><T korean="가상 중앙은행" english="Virtual Bank" /></span>
               <ChevronRight className="size-3 text-muted-foreground" />
@@ -341,6 +345,10 @@ export default async function HomePage() {
             </span>
             <Link href="/work" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-blue-500 transition-colors">
               <span><T korean="직업 & 승급" english="Career & Work" /></span>
+              <ChevronRight className="size-3 text-muted-foreground" />
+            </Link>
+            <Link href="/marketplace/auction" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-blue-500 transition-colors">
+              <span><T korean="P2P 아티팩트 경매장" english="Artifact Auction" /></span>
               <ChevronRight className="size-3 text-muted-foreground" />
             </Link>
             <Link href="/businesses" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-blue-500 transition-colors">

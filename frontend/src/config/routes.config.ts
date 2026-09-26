@@ -252,6 +252,16 @@ export const APP_ROUTES: readonly RouteDefinition[] = [
     group: 'economy',
   },
   {
+    path: '/marketplace/auction',
+    label: { ko: 'P2P 아티팩트 경매장', en: 'P2P Artifact Auction', ja: 'P2Pオークション', zh: 'P2P拍卖行' },
+    isPublic: true,
+    authRequired: false,
+    indexable: true,
+    sitemapPriority: 0.8,
+    changeFrequency: 'daily',
+    group: 'economy',
+  },
+  {
     path: '/chat',
     label: { ko: '1:1 쪽지함', en: 'Direct Messages', ja: '1:1メッセージ', zh: '私信箱' },
     isPublic: false,
