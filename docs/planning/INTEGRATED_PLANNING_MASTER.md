@@ -14,6 +14,11 @@ Every planning review records start/mid-work `origin/main` exact SHA, authority-
 - **M444-06..08 / P1:** unit economics are effective-date/channel aware; cancellation remains straightforward; contribution margin after all variable and operating cost is the profitability authority.
 - Evidence is in `MONEYVERSE_MONETIZATION_REVENUE_RESEARCH_REVIEW_v2026.09.25.444.md` and its planning delta. This is planning/docs only; no runtime, Test, Production, revenue, or legal-clearance claim is made.
 
+## Moneyverse Arcade planning record — v2026.09.26.444
+- A 100,000-record arcade discovery corpus produced 18,578 verified candidate records; it is research evidence, not a claim of implementation, Test, or Production approval.
+- The proposed Arcade is bounded to non-gambling, non-cashable, non-transferable entertainment: no paid entry, cashout, random paid reward, wagering, WLD purchase, or economic advantage.
+- Detailed scope, safety boundaries, age/consent, accessibility, telemetry, and release gates live in `MONEYVERSE_ARCADE_GAME_SPEC.md` and its Korean counterpart.
+
 ## v2026.09.25.443 — 2026-09-25
 - Start and recorded mid-work `origin/main=99b0eaa04bbd0b28005861c624690c56744e8a14`; dedicated isolated worktree/branch `docs/db-architecture-research-v2026.09.25.443` avoids overlap with concurrent agents.
 - Discovery evidence: 80,000 raw Crossref records across ten DB architecture lanes, deduplicated by DOI then normalized title to **66,858 candidate records**. Broad search false positives are explicitly Tier C discovery only, never automatic design authority.

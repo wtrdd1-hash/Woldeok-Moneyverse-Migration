@@ -16,6 +16,11 @@ This is the current implementation-facing contract. Historical details remain re
 - **Economic truth:** use effective-date/channel-aware unit economics and optimize contribution margin after platform/PSP fees, taxes, refunds, chargebacks, revenue share, infrastructure, support, moderation, localization, content, and compliance/legal costs. Unmeasured price, conversion, eCPM, churn, CAC, LTV, and revenue values remain `HYPOTHESIS/TEST TARGET`.
 - Detailed evidence: [monetization research review](../findings/MONEYVERSE_MONETIZATION_REVENUE_RESEARCH_REVIEW_v2026.09.25.444.md) and its planning delta. This is planning/docs only; it claims no billing implementation, Test, or Production completion.
 
+## Moneyverse Arcade research boundary — v2026.09.26.444
+
+- The planned Arcade is an optional, non-gambling entertainment surface with non-cashable and non-transferable rewards. It must not introduce paid entry, cashout, wagering, paid random rewards, WLD purchase, or economic advantage.
+- The 18,578-record verified discovery corpus and detailed implementation/release constraints are recorded in [the Arcade specification](MONEYVERSE_ARCADE_GAME_SPEC.md). This is planning/research only; implementation requires separate exact-SHA Test evidence.
+
 ## P0/P1 database architecture integrity and scale contract — v2026.09.25.443 (2026-09-25)
 
 - **Evidence breadth without false certainty:** a Crossref discovery run collected 80,000 raw records across ten database-architecture lanes and produced **66,858 deduplicated candidates** using DOI first and normalized-title fallback. This is a discovery corpus, not a claim that every candidate was manually reviewed or database-specific. Production requirements below use directly checked PostgreSQL 17 primary documentation and current repository evidence.
