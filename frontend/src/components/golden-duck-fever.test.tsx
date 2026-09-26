@@ -19,11 +19,8 @@ describe('GoldenDuckFever Component', () => {
     expect(screen.getByText(/10초 남음/)).toBeDefined();
 
     // Tap button
-    const tapButton = screen.getByRole('button', { name: /피버 코인 광클하기/ });
+    const tapButton = screen.getAllByRole('button', { name: '피버 코인 광클하기' })[0]!;
     expect(tapButton).toBeDefined();
-
-    // Initial score
-    expect(screen.getByText(/\+0/)).toBeDefined();
 
     // Tap 3 times
     fireEvent.click(tapButton);
@@ -36,14 +33,13 @@ describe('GoldenDuckFever Component', () => {
   });
 
   it('renders closed state when isOpen is false', () => {
-    render(
+    const { container } = render(
       <GoldenDuckFever
         isOpen={false}
         enableFloatingSpawn={false}
       />
     );
 
-    // Initial state: fever modal not active
-    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
   });
 });

@@ -8,16 +8,16 @@ describe('CasualDopamineStation Component', () => {
     render(<CasualDopamineStation />);
 
     expect(screen.getByText(/일반 유저 무료 도파민 스테이션/)).toBeDefined();
-    expect(screen.getByRole('button', { name: '황금 피버 타임 열기' })).toBeDefined();
-    expect(screen.getByRole('button', { name: '1:1 주사위 결투 열기' })).toBeDefined();
-    expect(screen.getByRole('button', { name: '스타 드롭 탭 열기' })).toBeDefined();
-    expect(screen.getByRole('button', { name: '스트릭 내기 열기' })).toBeDefined();
+    expect(screen.getAllByRole('button', { name: '황금 피버 타임 열기' }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: '1:1 주사위 결투 열기' }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: '스타 드롭 탭 열기' }).length).toBeGreaterThan(0);
+    expect(screen.getAllByRole('button', { name: '스트릭 내기 열기' }).length).toBeGreaterThan(0);
   });
 
   it('opens fever modal when quick action button is clicked', () => {
     render(<CasualDopamineStation />);
 
-    const feverBtn = screen.getByRole('button', { name: '황금 피버 타임 열기' });
+    const feverBtn = screen.getAllByRole('button', { name: '황금 피버 타임 열기' })[0]!;
     fireEvent.click(feverBtn);
 
     expect(screen.getAllByText(/황금 오리 광클 피버 타임/).length).toBeGreaterThan(0);
@@ -26,7 +26,7 @@ describe('CasualDopamineStation Component', () => {
   it('opens showdown modal when showdown button is clicked', () => {
     render(<CasualDopamineStation />);
 
-    const showdownBtn = screen.getByRole('button', { name: '1:1 주사위 결투 열기' });
+    const showdownBtn = screen.getAllByRole('button', { name: '1:1 주사위 결투 열기' })[0]!;
     fireEvent.click(showdownBtn);
 
     expect(screen.getAllByText(/1:1 주사위 미니 결투/).length).toBeGreaterThan(0);

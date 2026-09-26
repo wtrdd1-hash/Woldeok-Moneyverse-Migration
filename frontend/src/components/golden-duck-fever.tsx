@@ -19,7 +19,9 @@ export function GoldenDuckFever({
   onClaimReward,
   enableFloatingSpawn = true,
 }: GoldenDuckFeverProps) {
-  const [isFeverActive, setIsFeverActive] = useState<boolean>(isOpen);
+  const [internalOpen, setInternalOpen] = useState<boolean>(false);
+  const isFeverActive = isOpen || internalOpen;
+
   const [floatingVisible, setFloatingVisible] = useState<boolean>(false);
   const [floatingPos, setFloatingPos] = useState<{ x: number; y: number }>({ x: 20, y: 70 });
   
@@ -34,28 +36,48 @@ export function GoldenDuckFever({
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync external isOpen prop
+  // When fever becomes active, start the 10-second timer
   useEffect(() => {
-    if (isOpen) {
-      startFever();
+    if (isFeverActive) {
+      setTimeLeft(10);
+      setTapCount(0);
+      setEarnedWld(0);
+      setCombo(0);
+      setMaxCombo(0);
+      setIsFinished(false);
+      setClickParticles([]);
+
+      if (timerRef.current) clearInterval(timerRef.current);
+
+      timerRef.current = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            if (timerRef.current) clearInterval(timerRef.current);
+            setIsFinished(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     } else {
-      setIsFeverActive(false);
       if (timerRef.current) clearInterval(timerRef.current);
     }
-  }, [isOpen]);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isFeverActive]);
 
   // Floating duck spawn cycle (every 25s if enabled and not currently in fever)
   useEffect(() => {
     if (!enableFloatingSpawn || isFeverActive) return;
 
     const spawnInterval = setInterval(() => {
-      // Random coordinates (15% ~ 80% of viewport)
       const randomX = Math.floor(Math.random() * 65) + 15;
       const randomY = Math.floor(Math.random() * 60) + 20;
       setFloatingPos({ x: randomX, y: randomY });
       setFloatingVisible(true);
 
-      // Disappear after 5 seconds if not clicked
       setTimeout(() => {
         setFloatingVisible(false);
       }, 5000);
@@ -64,29 +86,9 @@ export function GoldenDuckFever({
     return () => clearInterval(spawnInterval);
   }, [enableFloatingSpawn, isFeverActive]);
 
-  const startFever = () => {
+  const startFeverFromFloating = () => {
     setFloatingVisible(false);
-    setIsFeverActive(true);
-    setTimeLeft(10);
-    setTapCount(0);
-    setEarnedWld(0);
-    setCombo(0);
-    setMaxCombo(0);
-    setIsFinished(false);
-    setClickParticles([]);
-
-    if (timerRef.current) clearInterval(timerRef.current);
-
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          setIsFinished(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    setInternalOpen(true);
   };
 
   const handleTap = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -124,13 +126,13 @@ export function GoldenDuckFever({
     if (onClaimReward) {
       onClaimReward(earnedWld, maxCombo);
     }
-    setIsFeverActive(false);
+    setInternalOpen(false);
     if (onClose) onClose();
   };
 
   const handleCloseModal = () => {
     if (timerRef.current) clearInterval(timerRef.current);
-    setIsFeverActive(false);
+    setInternalOpen(false);
     if (onClose) onClose();
   };
 
@@ -144,7 +146,7 @@ export function GoldenDuckFever({
         >
           <button
             type="button"
-            onClick={startFever}
+            onClick={startFeverFromFloating}
             className="group relative flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-amber-300 bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 p-2 shadow-2xl shadow-amber-500/50 hover:scale-110 active:scale-95"
             aria-label="황금 오리 피버 타임 잡기"
           >

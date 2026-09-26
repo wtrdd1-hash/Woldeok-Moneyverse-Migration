@@ -30,7 +30,7 @@ describe('BullBearPoll Component', () => {
       />
     );
 
-    const bullBtn = screen.getByRole('button', { name: '상승 투표 떡상 가자' });
+    const bullBtn = screen.getAllByRole('button', { name: '상승 투표 떡상 가자' })[0]!;
     fireEvent.click(bullBtn);
 
     expect(onVoteMock).toHaveBeenCalledWith('bull');
