@@ -17,12 +17,17 @@ describe('public search surface', () => {
     process.env.SEO_INDEXING_ENABLED = 'true';
     process.env.APP_BASE_URL = 'https://easy-scraping.com';
 
-    const urls = sitemap().map((entry) => entry.url);
+    const entries = sitemap();
+    const urls = entries.map((entry) => entry.url);
     // Verified public indexable pages from SSOT routes.config.ts
     expect(urls).toEqual([
       'https://easy-scraping.com',
       'https://easy-scraping.com/guide',
       'https://easy-scraping.com/guide/dopamine-system',
+      'https://easy-scraping.com/guide/stock-trading',
+      'https://easy-scraping.com/guide/virtual-banking',
+      'https://easy-scraping.com/guide/career-mastery',
+      'https://easy-scraping.com/guide/glossary',
       'https://easy-scraping.com/announcements',
       'https://easy-scraping.com/gallery',
       'https://easy-scraping.com/shop',
@@ -34,7 +39,27 @@ describe('public search surface', () => {
       'https://easy-scraping.com/stocks',
       'https://easy-scraping.com/prediction',
       'https://easy-scraping.com/marketplace/auction',
+      // 10 Individual Virtual Stock Pages
+      'https://easy-scraping.com/stocks/CHIPS',
+      'https://easy-scraping.com/stocks/DUCKS',
+      'https://easy-scraping.com/stocks/COIN',
+      'https://easy-scraping.com/stocks/SPACE',
+      'https://easy-scraping.com/stocks/CYBER',
+      'https://easy-scraping.com/stocks/ROBOT',
+      'https://easy-scraping.com/stocks/GOLD',
+      'https://easy-scraping.com/stocks/ENERGY',
+      'https://easy-scraping.com/stocks/BIO',
+      'https://easy-scraping.com/stocks/GAME',
     ]);
+
+    // Check multilingual alternates (hreflang)
+    for (const entry of entries) {
+      expect(entry.alternates?.languages).toBeDefined();
+      expect(entry.alternates?.languages?.ko).toBe(entry.url);
+      expect(entry.alternates?.languages?.en).toBe(entry.url);
+      expect(entry.alternates?.languages?.ja).toBe(entry.url);
+      expect(entry.alternates?.languages?.zh).toBe(entry.url);
+    }
 
     // Member-only and private pages must never appear in sitemap
     expect(urls).not.toContain('https://easy-scraping.com/casino');

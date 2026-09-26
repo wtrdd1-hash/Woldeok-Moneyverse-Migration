@@ -95,12 +95,30 @@ export async function generateMetadata({
   });
 
   return {
-    title: `${stock.symbol} ${stock.name} — 가상 주식 상세`,
-    description: `${stock.name}의 월덕 머니버스 가상 시세, 보유 현황, 차트와 관련 커뮤니티 토론을 한곳에서 확인하세요. 실제 금융상품이 아닙니다.`,
-    alternates: { canonical: stockUrl },
-    robots: { index: false, follow: true },
+    title: `${stock.symbol} ${stock.name} — 가상 주식 실시간 시세 & 호가`,
+    description: `${stock.name}(${stock.symbol})의 월덕 머니버스 실시간 가상 주식 시세, 10-Depth 호가창, 캔들 차트 및 커뮤니티 토론. 실제 금융상품이 아닌 게임 가상재화입니다.`,
+    keywords: [
+      `${stock.name}`,
+      `${stock.symbol}`,
+      `${stock.name} 주가`,
+      `${stock.name} 시세`,
+      '가상 주식',
+      '호가창',
+      '모의투자',
+      '월덕 머니버스',
+    ],
+    alternates: {
+      canonical: stockUrl,
+      languages: {
+        ko: stockUrl,
+        en: stockUrl,
+        ja: stockUrl,
+        zh: stockUrl,
+      },
+    },
+    robots: { index: true, follow: true },
     openGraph: {
-      title: `${stock.name} (${stock.symbol}) — 가상 주식 시세`,
+      title: `${stock.name} (${stock.symbol}) — 가상 주식 시세 & 차트`,
       description: `${stock.name}의 실시간 가상 주식 호가 및 차트`,
       url: stockUrl,
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
@@ -119,7 +137,6 @@ export default async function StockHubPage({
 }: {
   readonly params: Promise<{ readonly symbol: string }>;
 }) {
-  await requireMember();
   const { symbol } = await params;
   const locale = await getServerLocale();
   const isEn = locale === 'en';
@@ -147,8 +164,54 @@ export default async function StockHubPage({
     holding?.halt_status === 'HALTED_SETTLED' ||
     !stock.active;
 
+  const jsonLdData = {
+    '@context': 'https://schema.org',
+    '@type': 'FinancialProduct',
+    name: `${stock.name} (${stock.symbol})`,
+    description: stock.description || `${stock.name} 가상 주식 시세 및 호가창`,
+    category: 'Virtual Stock',
+    offers: {
+      '@type': 'Offer',
+      price: stock.current_price,
+      priceCurrency: 'WLD',
+    },
+  };
+
+  const breadcrumbData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: isEn ? 'Home' : '홈',
+        item: canonicalUrl(''),
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: isEn ? 'Stocks' : '가상 주식',
+        item: canonicalUrl('/stocks'),
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: `${stock.symbol} ${stock.name}`,
+        item: canonicalUrl(`/stocks/${encodedSymbol}`),
+      },
+    ],
+  };
+
   return (
     <div data-page="stocks-symbol" className="mv-page mv-page--finance grid gap-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }}
+      />
       <Button asChild variant="ghost" className="w-fit -ml-3 text-muted-foreground">
         <Link href="/stocks">
           <ArrowLeft />

@@ -113,7 +113,7 @@ export default function GuidePage() {
             </div>
           </div>
 
-          <div className="mt-4 pt-2">
+          <div className="mt-4 space-y-3">
             <Link
               href="/guide/dopamine-system"
               className="flex items-center justify-between rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 transition-all hover:bg-amber-500/15"
@@ -133,6 +133,73 @@ export default function GuidePage() {
               </div>
               <ChevronRight className="h-4 w-4 text-amber-400" />
             </Link>
+
+            {/* 4대 심화 전략 & 금융 교육 가이드 허브 (SEO Pillar Hub) */}
+            <div className="grid sm:grid-cols-2 gap-2.5 pt-1">
+              <Link
+                href="/guide/stock-trading"
+                className="flex items-center justify-between rounded-xl border border-border/80 bg-background/80 p-3 text-xs transition-all hover:border-primary/40 hover:bg-card"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500">
+                    <TrendingUp className="size-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-foreground">가상 주식 실전 매매 가이드</div>
+                    <div className="text-[10px] text-muted-foreground">10-Depth 호가창 & AI 감성 매매법</div>
+                  </div>
+                </div>
+                <ChevronRight className="size-3.5 text-muted-foreground" />
+              </Link>
+
+              <Link
+                href="/guide/virtual-banking"
+                className="flex items-center justify-between rounded-xl border border-border/80 bg-background/80 p-3 text-xs transition-all hover:border-primary/40 hover:bg-card"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
+                    <Landmark className="size-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-foreground">가상 금융 & 복리 예금 가이드</div>
+                    <div className="text-[10px] text-muted-foreground">일일 복리 이자 & 가상 국채 전략</div>
+                  </div>
+                </div>
+                <ChevronRight className="size-3.5 text-muted-foreground" />
+              </Link>
+
+              <Link
+                href="/guide/career-mastery"
+                className="flex items-center justify-between rounded-xl border border-border/80 bg-background/80 p-3 text-xs transition-all hover:border-primary/40 hover:bg-card"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-500">
+                    <Briefcase className="size-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-foreground">직업 & 일일 파밍 루틴 가이드</div>
+                    <div className="text-[10px] text-muted-foreground">5대 직업 숙련도 2.5배 배수 공략</div>
+                  </div>
+                </div>
+                <ChevronRight className="size-3.5 text-muted-foreground" />
+              </Link>
+
+              <Link
+                href="/guide/glossary"
+                className="flex items-center justify-between rounded-xl border border-border/80 bg-background/80 p-3 text-xs transition-all hover:border-primary/40 hover:bg-card"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500">
+                    <Compass className="size-4" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-foreground">핀테크 핵심 금융 용어사전</div>
+                    <div className="text-[10px] text-muted-foreground">스프레드, M0 통화량, 멱등성 해설</div>
+                  </div>
+                </div>
+                <ChevronRight className="size-3.5 text-muted-foreground" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>

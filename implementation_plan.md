@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v7)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v8)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v8**: SEO 검색 노출 쇄신(10대 가상주식 공개 프리뷰 인덱싱, sitemap 다국어 hreflang 탑재, 금융 교육 필러 가이드 5종 허브 신설) 및 기획서 전수 정합화 사양 누적 (+65, -0)
 - **v7**: 일반 유저 전용 4대 도파민 패키지(황금 오리 피버·덕이 펫/포춘쿠키·호가창 여론 잭팟·1:1 즉석 미니 배틀) 및 홈 메인 스테이션 전면 배치 (+155, -0)
 - **v6**: Phase 3 도파민 3대 패키지(스타 드롭·프레스티지 환생·4인 공동 저축 팟) & 무료/유료 차등화 & SEO 검색 유입 & 법령 준수 아키텍처 (+165, -0)
 - **v88**: 다국어(i18n) 15만+ 어휘 코퍼스/용어사전 구축 & P0 SEO SSOT(routes.config.ts, sitemap 실제 일자, 비공개 라우트 완전 분리, 4개 국어 generateMetadata) 통합 구현 (+240, -0)
@@ -3763,3 +3764,54 @@ pm test).
 - PostgreSQL 활성 세션(1,433+) 100% 무손실 검증
 
 
+---
+
+## 🚀 [v8 Specification] SEO 검색 노출 쇄신 및 기획서 정합화 명세 (누적 추가)
+
+### 1. 🔍 기획서(`docs/planning/`) 재검토 및 코드베이스 정합성 분석 결과
+- **기획서 체계 완결성 확인**:
+  - `MONETIZATION_COMPLIANCE_SEO_SPEC.ko.md`, `SEARCH_DISCOVERY_OPERATIONS_SPEC.ko.md`, `SEO_INTENT_TO_PLAY_ACTIVATION_GROWTH_SPEC.ko.md` 등 90여 개 기획서에 금융 컴플라이언스 준수, 비P2W 수익화 모델, 다국어 정적 라우팅, 가상 주식 종목별 인덱싱 체계가 매우 정밀하게 정의되어 있음을 확인.
+- **기획서 ↔ 실제 코드 간 핵심 간극(Gap)**:
+  - 기획서 제11절 색인 후보로 명시된 10대 가상 주식 종목(`/stocks/[symbol]`) 및 금융 교육 허브(`/guide/*`)가 실제 `routes.config.ts` 및 `robots.ts`에서 `authRequired: true, indexable: false, Disallow: /stocks/*`로 잠겨 있어 검색엔진 크롤러가 접근 불가능한 상태임.
+
+### 2. 📉 검색 유입률(Search Traffic / Impressions)이 낮은 5대 근본 원인
+1. **[원인 1: 크롤러 색인 가능 공개 URL의 절대적 부족 (Indexable Surface Bottleneck)]**:
+   - 회원 보호 및 금융 시뮬레이터 특성상 전체 20여 개 메인 경로 중 10개 미만 페이지만 sitemap에 등록됨.
+2. **[원인 2: 유저들이 검색하는 10대 주식 종목 롱테일 키워드의 크롤러 차단]**:
+   - '월덕게임즈 시세', '침팬지 반도체 주가', '가상 주식 호가창' 등 실시간 검색 수요가 높은 개별 종목 페이지가 `Disallow` 처리됨.
+3. **[원인 3: 검색엔진 평가용 텍스트 콘텐츠(SEO Content Pillar) 부재]**:
+   - 구글 2026 Helpful Content 알고리즘 기준 1,000자 이상의 양질의 금융/게임 정보성 아티클이 부족하여 도메인 권위도가 낮음.
+4. **[원인 4: 다국어 Sitemap 내 `hreflang` 태그 누락]**:
+   - 4개 국어(KO, EN, JA, ZH) 번역 코퍼스는 구축되었으나 `sitemap.xml`에 언어별 alternate 링크가 없어 해외 검색엔진(구글 US, 야후 재팬 등)이 단일 언어로 오인.
+5. **[원인 5: 외부 인바운드 링크(Backlinks) 및 바이럴 카드(OG Image) 부족]**:
+   - 커뮤니티, 블로그 등 외부 플랫폼에서 유입되는 백링크 연결 고리가 약함.
+
+### 3. 🎯 단계별 해결 및 고도화 명세 (Actionable Solutions)
+1. **[주식 종목 공개 프리뷰 인덱싱 개방 (`/stocks/[symbol]`)]**:
+   - `routes.config.ts`의 SSOT 설정을 `isPublic: true, indexable: true`로 개방.
+   - 비로그인 유저도 실시간 시세 차트와 호가창을 확인할 수 있는 SSR 읽기 전용 뷰 제공 (주문 버튼 클릭 시에만 로그인 모달 호출).
+2. **[정보성 SEO 필러 가이드 허브 신설 (`/guide/*`)]**:
+   - `/guide/stock-trading`: 가상 주식 호가창 및 캔들 매매 기초 가이드.
+   - `/guide/virtual-banking`: 복리 예적금 및 가상 국채 투자 전략.
+   - `/guide/career-mastery`: 직업 전직 및 일일 WLD 파밍 가이드.
+   - `/guide/glossary`: 핀테크 & 가상경제 핵심 용어사전.
+3. **[Sitemap 다국어 `hreflang` 및 JSON-LD 구조화 데이터 전면 강화]**:
+   - `sitemap.ts`에 4개 국어 `alternates.languages` 태그 자동 생성.
+   - 개별 주식 페이지에 Schema.org `FinancialProduct` / `Stock` 구조화 데이터 연동.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `frontend/src/config/routes.config.ts`: 주식 종목 공개 인덱싱 허용 및 robots Disallow 규칙 정밀화
+- `frontend/src/app/sitemap.ts`: 4개 국어 `alternates` hreflang 메타데이터 탑재
+- `frontend/src/app/stocks/[symbol]/page.tsx`: 비로그인 방문자 대상 SSR 시세 프리뷰 지원
+- `frontend/src/app/guide/stock-trading/page.tsx`: SEO 타깃 가상 주식 매매 가이드 페이지
+- `frontend/src/app/guide/virtual-banking/page.tsx`: 복리 예금 및 가상 국채 전략 가이드 페이지
+- `frontend/src/app/search-indexing.test.ts`: 갱신된 sitemap 및 robots 인덱싱 검증 테스트
+
+### Verification Plan
+- 전체 Vitest 단위 테스트 100% PASS
+- Next.js Turbopack 빌드 무결성 검증
+- Debian 미니PC `stage_v460.sh` 및 `promote_v460.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,433+) 100% 무손실 검증
