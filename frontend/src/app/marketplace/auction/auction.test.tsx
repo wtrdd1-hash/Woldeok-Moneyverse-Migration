@@ -33,7 +33,9 @@ describe('AuctionMarketplacePage Component', () => {
 
     // Click first item bid button
     const bidButtons = getAllByRole('button', { name: '입찰하기 (Bid)' });
-    fireEvent.click(bidButtons[0]);
+    const firstBidBtn = bidButtons[0];
+    if (!firstBidBtn) throw new Error('Bid button not found');
+    fireEvent.click(firstBidBtn);
 
     expect(container.textContent).toContain('아티팩트 경매 입찰하기');
     expect(container.textContent).toContain('5% 거래 수수료 소각');
