@@ -394,6 +394,34 @@ numbered migration can correct one that has landed.
 
 ## 8. Conventions
 
+### Project operating directive
+
+Apply this workflow to every task unless the user explicitly narrows it for a
+particular task:
+
+1. Work through the approved SSH access path. Do not put connection details,
+   passwords, private keys, tokens, or other credentials in this repository,
+   its work logs, commits, or GitHub.
+2. Keep the task state both on the working host and on GitHub. Create a task
+   branch whose name matches the task name, and use that branch for the task.
+3. Read the relevant project documentation before work begins and revisit it at
+   meaningful points during work. Every task work log must visibly identify
+   **before work**, **in progress**, and **finished** states.
+4. Before starting and again during longer-running work, fetch `origin/main`
+   and confirm whether it advanced. Start from the current main branch and
+   bring the task branch up to date with the current main before final
+   integration; record conflicts or blockers in the work log.
+5. After main integration, follow `docs/RELEASING.md`: run the required
+   integration and test-environment validation, then promote to production
+   only through the documented release process. If the required test
+   environment does not exist or cannot be reached, record that as a blocker;
+   never bypass it by promoting directly to production.
+
+This directive complements the repository safety rules above. In particular,
+the current infrastructure has no `wdmv-test` namespace and production release
+is a human-dispatched workflow from `main`; verify the live release procedure
+before treating a test or production step as available.
+
 ### Work-detail log is mandatory
 
 Every update or modification must have a task-detail page under `docs/worklog/`. Create it before substantive implementation, keep an explicit checklist of planned/in-progress/completed work, and update it at meaningful checkpoints. Commit and push those checkpoints to the task branch so the current state is inspectable both on the working host and on GitHub while work is still in progress. The final entry must record validation results and deployment state.
