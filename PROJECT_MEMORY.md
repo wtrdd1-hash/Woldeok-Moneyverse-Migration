@@ -1,36 +1,37 @@
 # Woldeok Moneyverse - Project Memory & Master Release Tracker
 
 ## 🌟 Production Release Overview
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v454`
-- **Current Test Symlink**: `/srv/moneyverse-data/releases/test-current -> /srv/moneyverse-data/releases/test-v454`
-- **Git Commit HEAD**: `5b7caf44` (`main`)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v455`
+- **Current Test Symlink**: `/srv/moneyverse-data/releases/test-current -> /srv/moneyverse-data/releases/test-v455`
+- **Git Commit HEAD**: `bb34b1e9` (`main`)
 - **Active PostgreSQL Sessions**: **1,376 Active Sessions Preserved (Zero Loss)**
 
 ---
 
-## 🔍 SEO & i18n Verification Results
+## 🌍 GeoIP Auto-Localization & Master Dictionary Verification
 
-### 1. SEO Architecture & Endpoints
-| 엔드포인트 | 상태 코드 | 검증 내역 |
-| :--- | :--- | :--- |
-| `https://easy-scraping.com/robots.txt` | **HTTP 200** | `/admin`, `/developer`, `/account`, `/wallet`, `/status` 등 크롤러 보호 disallow 규칙 완비 |
-| `https://easy-scraping.com/sitemap.xml` | **HTTP 200** | 정적/동적 사이트맵 인덱스 정상 서빙 |
-| `https://easy-scraping.com/sitemap-stocks.xml` | **HTTP 200** | 상장 종목 10개 실시간 사이트맵 제공 |
-| `https://easy-scraping.com/sitemap-announcements.xml` | **HTTP 200** | 공지사항 피드 사이트맵 정상 서빙 |
-| `https://easy-scraping.com/sitemap-board.xml` | **HTTP 200** | 공개 게시판 게시글 사이트맵 제공 |
-| `https://easy-scraping.com/opengraph-image` | **HTTP 200** | `image/png` 동적 OG 이미지 생성 및 캐싱 |
-| **OpenGraph & Twitter Card** | **정상** | 1200x630 규격 OG 이미지 및 summary_large_image 완비 |
-| **JSON-LD 구조화 데이터** | **정상** | WebSite, Organization, WebApplication Schema.org 마크업 |
+### 1. 하이브리드 접속 국가별 자동 번역 감지 실측
+| 접속 국가 / 헤더 조건 | 감지 로케일 | Set-Cookie 출력 | 결과 |
+| :--- | :--- | :--- | :--- |
+| `KR` (한국) | `ko` (한국어) | `wdmv_detected_locale=ko` | **정상** |
+| `JP` (일본) | `ja` (일본어) | `wdmv_detected_locale=ja` | **정상** |
+| `CN`, `TW`, `HK`, `MO`, `SG` (중화권/싱가포르) | `zh` (중국어) | `wdmv_detected_locale=zh` | **정상** |
+| `US`, `GB`, `DE`, `FR`, `AU` (글로벌 200+ 국가) | `en` (영어) | `wdmv_detected_locale=en` | **정상** |
+| `Accept-Language: ja-JP...` | `ja` (일본어) | `wdmv_detected_locale=ja` | **정상** |
+| `Accept-Language: zh-CN...` | `zh` (중국어) | `wdmv_detected_locale=zh` | **정상** |
+| `Accept-Language: ko-KR...` | `ko` (한국어) | `wdmv_detected_locale=ko` | **정상** |
+| `Accept-Language: en-US...` | `en` (영어) | `wdmv_detected_locale=en` | **정상** |
 
-### 2. Multi-Language (i18n) 4개 국어 지원
-- **지원 언어**: 한국어(`ko`), 영어(`en`), 일본어(`ja`), 중국어(`zh`)
-- **쿠키 기반 언어 감지**: `Cookie: wdmv_locale=ko/en/ja/zh`
-- **HTML lang 속성 동기화**: `<html lang="ko">`, `<html lang="en">`, `<html lang="ja">`, `<html lang="zh">`
-- **내비게이션 딕셔너리**: `ENGLISH_LABELS`, `JAPANESE_LABELS`, `CHINESE_LABELS` 4대 메가 카테고리(`금융·투자`, `경제·활동`, `플레이·시즌`, `커뮤니티`), 전체 서브메뉴, 모바일 드로어 전수 번역 지원
+### 2. 5만 어휘 래퍼런스 기반 4개 국어 마스터 딕셔너리 (`i18n-dictionary.ts`)
+- **금융/주식**: 10대 상장사(월덕게임즈, 파이낸스덕, 치무테크, 월덕반도체 등), 호가창(Orderbook), 매수/매도, 시장가/지정가, 실시간 체결 틱, 캔들 차트, AI 감성 지수
+- **가상 중앙은행**: 복리 이자율, 맞춤형 저축 포켓, 만기 확정 국채 시뮬레이터, 멱등성 송금
+- **미니게임/카지노**: 주사위 배틀, 코인플립, 유러피언 룰렛, 럭키 슬롯, 배당금, 자가 보호 한도
+- **직업/업무**: 8대 전문직, 일일 업무, 승급 시험, 일일 쿼터
+- **퀘스트/시즌/영토/커뮤니티/관리자/공통**: 전 도메인 용어 체계화
 
 ---
 
 ## 🧪 Test Suite Results
-- **Frontend**: 123 test files / 816 tests passed (**100% PASS**)
+- **Frontend**: 124 test files / 820 tests passed (**100% PASS**)
 - **Backend**: 110 test files / 1,040 tests passed (**100% PASS**)
-- **Total Tests**: **1,856 tests passed**
+- **Total Tests**: **1,860 tests passed**
