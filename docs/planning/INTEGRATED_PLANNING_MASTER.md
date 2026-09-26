@@ -218,3 +218,12 @@ Every planning review records start/mid-work `origin/main` exact SHA, authority-
 - G368-05 P1: v360 session-count/zero-downtime evidence is release-specific and does not by itself prove all auth/CSRF/reauth/critical-mutation continuity.
 - External refresh: OWASP ASVS 5.0.0 latest stable; NIST SP 800-63B-4 final July 2025, with periodic reauthentication/session-timeout requirements.
 - Decision: planning/docs only. No new implementation, Test or Production completion is claimed.
+
+## v2026.09.26.443 — Korea legal/compliance audit
+- Start/mid-work `origin/main=6f025ced5239fc6bc8b365c31ad0fd59acf84dbc`; no drift at checkpoint.
+- Added `KR_LEGAL_COMPLIANCE_AUDIT.md` / `.ko.md`. Production backend/frontend were active and `production-current=prod-v453`; selected public pages rendered AdSense.
+- **KR-LGL-443-01 / P0:** KR casino remains BLOCK without authentic GRAC/rating + 19+ + legal/channel evidence. Current source/Production bundle contains unsupported approval/regular-operation wording, so release policy and runtime claims conflict.
+- **KR-LGL-443-02 / P0:** existing ad monetization requires documented business commencement, business-registration/tax status before expansion.
+- **KR-LGL-443-03 / P0 before paid sales:** paid digital goods/subscription remain blocked until KR seller identity/reporting, transaction disclosure, withdrawal/refund/cancellation and minor-contract controls are complete.
+- **KR-LGL-443-04..08 / P1:** age-assurance wording, AdSense/overseas-transfer governance, commercial-message consent, game-classification applicability and no-cash-exchange invariants require explicit evidence/gates.
+- Planning/audit only: no Production mutation, deployment, DB migration, GRAC approval, business registration or tax status is claimed.
