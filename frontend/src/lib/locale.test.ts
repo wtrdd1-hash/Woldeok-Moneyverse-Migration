@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { detectLocale, isLocale } from './locale';
+import { detectLocale, isLocale, parseAcceptLanguage } from './locale';
 
 describe('locale detection', () => {
   it('keeps Korean as the default and for Korean traffic', () => {
@@ -7,21 +7,35 @@ describe('locale detection', () => {
     expect(detectLocale(null, null)).toBe('ko');
   });
 
-  it('uses English for visitors outside Korea', () => {
-    expect(detectLocale('US', 'ko-KR,ko;q=0.9')).toBe('en');
+  it('uses English for visitors outside Korea by default', () => {
+    expect(detectLocale('US', 'en-US,en;q=0.9')).toBe('en');
     expect(detectLocale('GB', null)).toBe('en');
+    expect(detectLocale('DE', null)).toBe('en');
+    expect(detectLocale('FR', null)).toBe('en');
+    expect(detectLocale('AU', null)).toBe('en');
   });
 
-  it('supports Japanese and Chinese locales accurately', () => {
+  it('supports Japanese and Chinese locales accurately from country codes', () => {
     expect(detectLocale('JP', 'en-US,en;q=0.9')).toBe('ja');
     expect(detectLocale('CN', 'en-US,en;q=0.9')).toBe('zh');
-    expect(detectLocale(null, 'ja-JP,ja;q=0.9')).toBe('ja');
-    expect(detectLocale(null, 'zh-CN,zh;q=0.9')).toBe('zh');
+    expect(detectLocale('TW', 'en-US,en;q=0.9')).toBe('zh');
+    expect(detectLocale('HK', 'en-US,en;q=0.9')).toBe('zh');
+    expect(detectLocale('MO', 'en-US,en;q=0.9')).toBe('zh');
+    expect(detectLocale('SG', 'en-US,en;q=0.9')).toBe('zh');
   });
 
-  it('uses browser English when country data is unavailable', () => {
+  it('parses complex Accept-Language headers with q-factors correctly', () => {
+    expect(parseAcceptLanguage('en-US,en;q=0.9,ko-KR;q=0.8')).toBe('en');
+    expect(parseAcceptLanguage('ja-JP,ja;q=0.9,en-US;q=0.8')).toBe('ja');
+    expect(parseAcceptLanguage('zh-CN,zh;q=0.9,en;q=0.8')).toBe('zh');
+    expect(parseAcceptLanguage('fr-FR,fr;q=0.9,ko-KR;q=0.8')).toBe('ko');
+  });
+
+  it('uses browser language when country data is unavailable or anonymized', () => {
     expect(detectLocale('XX', 'en-GB,en;q=0.8')).toBe('en');
+    expect(detectLocale('T1', 'ja-JP,ja;q=0.9')).toBe('ja');
     expect(detectLocale(null, 'ko-KR,ko;q=0.8')).toBe('ko');
+    expect(detectLocale(null, 'zh-CN,zh;q=0.9')).toBe('zh');
   });
 
   it('only accepts supported explicit choices', () => {

@@ -65,7 +65,10 @@ export function proxy(request: NextRequest) {
   const response = NextResponse.next();
   const explicit = request.cookies.get(LOCALE_COOKIE)?.value;
   if (!isLocale(explicit)) {
-    const country = request.headers.get('cf-ipcountry') ?? request.headers.get('x-vercel-ip-country');
+    const country =
+      request.headers.get('cf-ipcountry') ??
+      request.headers.get('x-vercel-ip-country') ??
+      request.headers.get('x-country-code');
     const detected = detectLocale(country, request.headers.get('accept-language'));
     response.cookies.set(DETECTED_LOCALE_COOKIE, detected, {
       path: '/',
