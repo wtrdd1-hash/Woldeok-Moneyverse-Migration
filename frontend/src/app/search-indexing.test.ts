@@ -32,6 +32,7 @@ describe('public search surface', () => {
       'https://easy-scraping.com/data-deletion',
       'https://easy-scraping.com/stocks',
       'https://easy-scraping.com/prediction',
+      'https://easy-scraping.com/marketplace/auction',
     ]);
 
     // Member-only and private pages must never appear in sitemap
