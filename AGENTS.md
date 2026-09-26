@@ -11,6 +11,21 @@ mistakes it prevents are expensive, and every one of them has been made.
 
 ---
 
+## ⚡ 0. Superpowers Engineering Framework (Mandatory Global Discipline)
+
+All agents and contributors operating on this repository **MUST strictly follow the [Superpowers software development methodology](https://github.com/obra/superpowers)**.
+
+### 🌟 Core Workflow & Stage Discipline:
+1. **Brainstorming (`skills/brainstorming`)**: Refine requirements through Socratic questioning, explore trade-offs, and present chunked specifications for explicit confirmation *before writing any code*.
+2. **Worktree & Isolation (`skills/using-git-worktrees`)**: Create isolated workspaces for features and verify a clean test baseline.
+3. **Structured Planning (`skills/writing-plans`)**: Break work into bite-sized tasks (2-5 minutes each) with exact file paths, complete code, and explicit verification steps.
+4. **Subagent / Plan Execution (`skills/subagent-driven-development`, `skills/executing-plans`)**: Implement tasks systematically with continuous inspection and two-stage review (spec compliance, then code quality).
+5. **Test-Driven Development (`skills/test-driven-development`)**: Enforce the **RED-GREEN-REFACTOR** cycle strictly. Write failing tests first, watch them fail, implement minimal code to pass, and refactor.
+6. **Systematic Debugging (`skills/systematic-debugging`)**: 4-phase root cause investigation over trial-and-error patching.
+7. **Verification Before Completion (`skills/verification-before-completion`)**: Execute authoritative project tests and build gates before declaring task completion.
+
+---
+
 ## 1. Orientation, and the one rule
 
 Woldeok Moneyverse (월덕 머니버스) is a Korean community's virtual economy: a double-entry ledger, a wallet, a shop, a stock market, a bank, businesses, a casino, a member board, and a Minecraft server status feed. This repository is that application rebuilt on Next.js, NestJS and PostgreSQL.

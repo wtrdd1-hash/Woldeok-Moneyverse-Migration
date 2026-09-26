@@ -1,21 +1,30 @@
 # Woldeok Moneyverse - Project Memory & Master Release Tracker
 
-## 🌟 Production Release Overview (v458)
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v458`
-- **Current Test Symlink**: `/srv/moneyverse-data/releases/test-current -> /srv/moneyverse-data/releases/test-v458`
-- **Git Commit HEAD**: `3d7c302c` (`main`)
+## ⚡ Global Framework Standard: Superpowers (`obra/superpowers`)
+- **Framework Origin**: `https://github.com/obra/superpowers`
+- **Scope**: All project tasks, coding workflows, refactors, feature additions, and debugging.
+- **Enforced Disciplines**:
+  1. `skills/using-superpowers`: Automatic skill invocation before all tasks/responses.
+  2. `skills/brainstorming`: Socratic requirement probing & design specification before code changes.
+  3. `skills/writing-plans`: Step-by-step TDD-driven task decomposition.
+  4. `skills/test-driven-development`: Red-Green-Refactor invariant.
+  5. `skills/systematic-debugging`: 4-phase root cause analysis over speculative patching.
+  6. `skills/verification-before-completion`: Authoritative verification before completion.
+
+---
+
+## 🌟 Production Release Overview (v462 - Latest)
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v462`
+- **Current Test Symlink**: `/srv/moneyverse-data/releases/test-current -> /srv/moneyverse-data/releases/test-v462`
+- **Git Commit HEAD**: `b8a5f9d8` (`main`)
 - **Active PostgreSQL Sessions**: **1,433 Active Sessions Preserved (Zero Loss)**
-- **Frontend Test Suite**: **134 test files / 857 tests passed (100% PASS)**
-- **Deployed Dopamine & Monetization BM Package**:
-  1. Brawl Stars-style Star Drop 5-Tap Upgrade & 2024 Compliance Probability Modal (`StarDropModal`)
-  2. Cookie Clicker-style Prestige Rebirth & Permanent Multiplier Dashboard (`/progression/prestige`)
-  3. Toss-style 4-Player Co-Savings Challenge Pot & Anonymous Friend Nudge (`/bank/savings-pot`)
-  4. Public SEO Indexable Dopamine & Compliance Master Guide (`/guide/dopamine-system`)
-  5. Duolingo-style 7-Day Streak Wager & 10-Player Weekly League (`StreakWagerModal`)
-  6. Twitch-style Real-time Orderbook Superchat & Gold Firework Ticker (`OrderbookSuperchat`)
-  7. Steam-style P2P Artifact Auction & 5% Platform Fee Auto-Burn Console (`/marketplace/auction`)
-  8. Polymarket-style Real-time Prediction Market (`/prediction`, 2% Fee Burn)
-  9. Robinhood-style Interactive Canvas 2D Stock Lucky Scratchcard (`ScratchCardModal`)
+- **Frontend Test Suite**: **139 test files / 868 tests passed (100% PASS)**
+- **Key Deliverables**:
+  1. Complete removal of Casino gambling APIs for full Korean legal compliance
+  2. 5 dedicated Dopamine backend engagement APIs (`/api/v1/engagement/dopamine/*`)
+  3. Real-time 14-domain API health control tower (`/admin/api-health`)
+  4. Authoritative master API catalog (`docs/API_CATALOG_MASTER.ko.md`)
+  5. Full integration of all historical branches into single authority `main`
 
 ---
 
