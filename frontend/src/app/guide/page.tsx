@@ -111,6 +111,26 @@ export default function GuidePage() {
                 </div>
               ))}
             </div>
+          <div className="mt-4 pt-2">
+            <Link
+              href="/guide/dopamine-system"
+              className="flex items-center justify-between rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 transition-all hover:bg-amber-500/15"
+            >
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/20 text-amber-400">
+                  <Sparkles className="h-5 w-5 animate-pulse" />
+                </span>
+                <div>
+                  <div className="text-xs font-bold text-white sm:text-sm">
+                    <T korean="10대 글로벌 레퍼런스 도파민 시스템 & 공정 확률 가이드" english="10 Global References Dopamine & Probability Guide" />
+                  </div>
+                  <div className="text-[11px] text-amber-300/80">
+                    <T korean="스타 드롭 5연속 탭, 예측 마켓, 스트릭 내기, 환생 시스템 상세 안내" english="Star Drop 5-tap, Prediction, Streak Wagers, Prestige Guide" />
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 text-amber-400" />
+            </Link>
           </div>
         </div>
       </section>

@@ -117,6 +117,6 @@ flowchart TD
 | Phase | Core Features | References | Status |
 | :--- | :--- | :--- | :--- |
 | **Phase 1** | Prediction Market (`/prediction`), Stock Scratchcard | Polymarket, Robinhood | **Completed (`prod-v456`)** |
-| **Phase 2** | 7-Day Streak Wager & Weekly Leagues, Activity Crates & P2P Auction 5% Fee | Duolingo, Steam | **Under Interactive Alignment** |
-| **Phase 3** | Orderbook Superchats, Social Savings Pockets, Star Drop Animations | Twitch, Toss, Brawl Stars | Queued |
-| **Phase 4** | Prestige Rebirth, Guild IPOs, Companion Duck Dispatch | Cookie Clicker, EVE Online, Neopets | Queued |
+| **Phase 2** | 7-Day Streak Wager, P2P Auction 5% Fee Burn, Orderbook Superchat | Duolingo, Steam, Twitch | **Completed (`prod-v457`)** |
+| **Phase 3** | Star Drop 5-Tap Upgrade, Prestige Rebirth, 4-Player Savings Pot, SEO Guide | Brawl Stars, Cookie Clicker, Toss | **Completed (`prod-v458`)** |
+| **Phase 4** | Guild IPOs & Territory Dividends, Companion Duck Dispatch | EVE Online, Neopets | Queued |

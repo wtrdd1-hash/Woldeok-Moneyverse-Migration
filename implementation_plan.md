@@ -3674,3 +3674,46 @@ pm test).
 - Next.js 프로덕션 최적화 빌드 무결성 확인
 - `stage_v457.sh` & `promote_v457.sh` 무중단 블루-그린 승격 배포
 - PostgreSQL 활성 세션(1,377+) 100% 무손실 검증
+
+---
+
+## 🚀 [v6 Specification] Phase 3 도파민 3대 패키지(스타 드롭·프레스티지 환생·4인 공동 저축 팟) & 무료/유료 차등화 & SEO 검색 유입 & 법령 준수 아키텍처
+
+### 1. 사용자 조율 결과 확정 (A1 ~ A5)
+1. **[무료/유료 하이브리드 프리미엄 BM]**:
+   - **무료 유저(Free)**: 일일 스타 드롭 3회 무료 탭, 기본 프레스티지(환생) 배수 해금, 일반 4인 저축 팟 참여 가능.
+   - **유료/VIP 유저(Premium)**: 스타 드롭 확정 업그레이드 럭키 참(Lucky Charm), 환생 시 자산 30% 보존 보험 티켓, 고수익 프리미엄 저축 팟 개설권.
+2. **[Brawl Stars형 '스타 드롭 (Star Drop)' 5연속 탭 연출 & 투명 확률 공개]**:
+   - 상자를 탭할 때마다 60% 확률로 희귀 ➡️ 슈퍼희귀 ➡️ 에픽 ➡️ 신화 ➡️ 전설로 단계별 승급 애니메이션 연출.
+   - 2024년 개정 게임산업진흥법 확률형 아이템 정보공개 의무를 준수하여 실시간 확률표 모달 탑재.
+3. **[Cookie Clicker형 프레스티지(환생) 시스템 & 대규모 통화량 소각]**:
+   - 누적 자산 100% 영구 소각(Reset)의 대가로 영구 패시브 생산력 배수(x2~x50) 및 고대 유물(Ancient Relic) 3슬롯 해금.
+   - 유료 자산 보존 보험 사용 시 30%의 WLD를 다음 생으로 이월.
+4. **[Toss형 4인 소셜 공동 저축 챌린지 팟 & 친구 찌르기]**:
+   - 4인이 모여 7일간 매일 저축 미션 수행 시 +5% 보너스 이자 및 황금 상자 잭팟 분배.
+   - 중도 포기/탈퇴 시 10% 페널티 풀 원천 소각. 익명 가상 닉네임 친구 찌르기(Nudge)로 100% PII/GDPR 보호.
+5. **[SEO 검색 최적화 & 사행성/현금환전 법령 위반 원천 차단]**:
+   - `/guide/dopamine-system`: 도파민 보상 시스템 및 공정 확률 안내 SSOT 공개 인덱싱 가이드 페이지 신설 (`isPublic: true, indexable: true`).
+   - 모든 화면에 '100% 가상 머니 시뮬레이터 · 현금 환전 및 재화 매매 불가' 법적 고지 뱃지 상시 부착.
+   - 실제 게임 실행/인터랙션 라우트는 `robots.txt Disallow` 및 `noindex` 유지.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `frontend/src/components/star-drop-modal.tsx`: Brawl Stars형 스타 드롭 5연속 탭 & 투명 확률 공개 모달
+- `frontend/src/components/star-drop.test.tsx`: 스타 드롭 5단계 탭 승급 및 무료/유료 부스터 단위 테스트
+- `frontend/src/app/progression/prestige/page.tsx`: Cookie Clicker형 프레스티지(환생) 대시보드 및 자산 100% 소각/30% 보험 콘솔
+- `frontend/src/app/progression/prestige/prestige.test.tsx`: 프레스티지 환생 배수 및 자산 소각/보존 단위 테스트
+- `frontend/src/app/bank/savings-pot/page.tsx`: Toss형 4인 공동 저축 챌린지 팟 & 친구 찌르기 대시보드
+- `frontend/src/app/bank/savings-pot/savings-pot.test.tsx`: 공동 저축 팟 +5% 보너스 및 10% 페널티 소각 단위 테스트
+- `frontend/src/app/guide/dopamine-system/page.tsx`: SEO 검색 최적화 & 법적 컴플라이언스 SSOT 공개 가이드 페이지
+- `frontend/src/config/routes.config.ts`: 신규 라우트 SSOT 등록 및 sitemap/robots 분기 처리
+- `frontend/src/app/search-indexing.test.ts`: 신규 공개 가이드 sitemap 자동 색인 검증 테스트 갱신
+
+### Verification Plan
+- 프론트엔드 전체 Vitest 단위 테스트 100% PASS (134+개 파일)
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v458.sh` 및 `promote_v458.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,433+) 100% 무손실 검증
+

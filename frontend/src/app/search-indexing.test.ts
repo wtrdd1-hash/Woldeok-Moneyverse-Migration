@@ -22,6 +22,7 @@ describe('public search surface', () => {
     expect(urls).toEqual([
       'https://easy-scraping.com',
       'https://easy-scraping.com/guide',
+      'https://easy-scraping.com/guide/dopamine-system',
       'https://easy-scraping.com/announcements',
       'https://easy-scraping.com/gallery',
       'https://easy-scraping.com/shop',

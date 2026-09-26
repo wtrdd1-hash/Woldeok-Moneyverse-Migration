@@ -117,6 +117,6 @@ flowchart TD
 | 단계 | 주요 기능 및 패키지 | 포함 레퍼런스 | 상태 |
 | :--- | :--- | :--- | :--- |
 | **Phase 1** | 실시간 경제 예측 마켓 (`/prediction`), 주식 스크래치 복권 | Polymarket, Robinhood | **완료 (v456)** |
-| **Phase 2** | 7일 스트릭 내기 & 10인 주간 리그, 활동 드롭 보물상자 & P2P 경매장 수수료 소각 | Duolingo, Steam | **설계 및 사용자 조율 중** |
-| **Phase 3** | 호가창 슈퍼챗 & 전 서버 골드 메가폰, 소셜 공동 저축 팟, 스타 드롭 연출 | Twitch, Toss, Brawl Stars | 대기 |
-| **Phase 4** | 프레스티지 환생 엔드게임, 클럽 기업 상장 배당, 컴패니언 '덕이' 알바 파견 | Cookie Clicker, EVE Online, Neopets | 대기 |
+| **Phase 2** | 7일 스트릭 내기 & 10인 주간 리그, P2P 경매장 5% 수수료 소각, 호가창 슈퍼챗 | Duolingo, Steam, Twitch | **완료 (v457)** |
+| **Phase 3** | 스타 드롭 5연속 탭 승급, 프레스티지 환생 시스템, 4인 공동 저축 팟, SEO 공개 가이드 | Brawl Stars, Cookie Clicker, Toss | **완료 (v458)** |
+| **Phase 4** | 클럽 기업 상장 배당, 가상 컴패니언 '덕이' 알바 파견 | EVE Online, Neopets | 차기 예정 |
