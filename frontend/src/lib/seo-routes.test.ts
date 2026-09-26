@@ -46,14 +46,21 @@ describe('SEO & i18n SSOT Route Integrity', () => {
     }
   });
 
-  it('strictly excludes member-protected routes from sitemap', () => {
+  it('strictly excludes member-protected routes from sitemap while allowing public routes', () => {
     const sitemapRoutes = getPublicSitemapRoutes();
     const sitemapPaths = sitemapRoutes.map((r) => r.path);
 
+    // Public indexable routes
+    expect(sitemapPaths).toContain('/stocks/[symbol]');
+    expect(sitemapPaths).toContain('/guide/stock-trading');
+    expect(sitemapPaths).toContain('/guide/virtual-banking');
+    expect(sitemapPaths).toContain('/guide/career-mastery');
+    expect(sitemapPaths).toContain('/guide/glossary');
+
+    // Strictly member-protected routes must be excluded
     expect(sitemapPaths).not.toContain('/casino');
     expect(sitemapPaths).not.toContain('/quests');
     expect(sitemapPaths).not.toContain('/businesses');
-    expect(sitemapPaths).not.toContain('/stocks/[symbol]');
     expect(sitemapPaths).not.toContain('/bank');
     expect(sitemapPaths).not.toContain('/wallet');
     expect(sitemapPaths).not.toContain('/work');
@@ -74,7 +81,7 @@ describe('SEO & i18n SSOT Route Integrity', () => {
     expect(disallowed).toContain('/seasons');
     expect(disallowed).toContain('/admin/');
     expect(disallowed).toContain('/api/');
-    expect(disallowed).toContain('/stocks/*');
+    expect(disallowed).not.toContain('/stocks/*');
   });
 
   it('accurately evaluates path indexability', () => {
