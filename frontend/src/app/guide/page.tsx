@@ -111,6 +111,8 @@ export default function GuidePage() {
                 </div>
               ))}
             </div>
+          </div>
+
           <div className="mt-4 pt-2">
             <Link
               href="/guide/dopamine-system"
