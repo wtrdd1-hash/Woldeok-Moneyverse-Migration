@@ -1,7 +1,11 @@
 import React from 'react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, fireEvent, cleanup } from '@testing-library/react';
+import { render, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { StarDropModal } from './star-drop-modal';
+
+vi.mock('@/lib/dopamine-api', () => ({
+  claimStarDrop: vi.fn().mockResolvedValue({ success: true, rewardAmount: 2500 }),
+}));
 
 describe('StarDropModal Component', () => {
   afterEach(() => {
@@ -43,7 +47,7 @@ describe('StarDropModal Component', () => {
     expect(container.textContent).not.toContain('공정 확률표 (2024 게임산업진흥법 준수)');
   });
 
-  it('progresses tap count on click and cracks open on 5th tap to reveal reward', () => {
+  it('progresses tap count on click and cracks open on 5th tap to reveal reward', async () => {
     const handleClaim = vi.fn();
     const { container, getByRole } = render(
       <StarDropModal isOpen={true} onClose={() => {}} onClaimReward={handleClaim} hasLuckyCharm={true} />
@@ -66,6 +70,8 @@ describe('StarDropModal Component', () => {
     const claimBtn = getByRole('button', { name: '보상 수령하고 인벤토리에 넣기' });
     fireEvent.click(claimBtn);
 
-    expect(handleClaim).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(handleClaim).toHaveBeenCalledTimes(1);
+    });
   });
 });

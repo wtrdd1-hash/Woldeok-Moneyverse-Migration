@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { TrendingUp, TrendingDown, Users, Shield, Gift, CheckCircle2 } from 'lucide-react';
 
+import { voteBullBear } from '@/lib/dopamine-api';
+
 interface BullBearPollProps {
   symbol?: string;
   stockName?: string;
@@ -26,7 +28,7 @@ export function BullBearPoll({
   const bullPercentage = totalVotes > 0 ? Math.round((bullVotes / totalVotes) * 100) : 50;
   const bearPercentage = 100 - bullPercentage;
 
-  const handleVote = (direction: 'bull' | 'bear') => {
+  const handleVote = async (direction: 'bull' | 'bear') => {
     if (voted) return;
 
     if (direction === 'bull') {
@@ -35,6 +37,12 @@ export function BullBearPoll({
       setBearVotes((prev) => prev + 1);
     }
     setVoted(direction);
+
+    try {
+      await voteBullBear(direction, symbol);
+    } catch {
+      // Offline fallback
+    }
 
     if (onVote) {
       onVote(direction);

@@ -3,6 +3,10 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { GoldenDuckFever } from './golden-duck-fever';
 
+vi.mock('@/lib/dopamine-api', () => ({
+  claimGoldenDuckFever: vi.fn().mockResolvedValue({ success: true, rewardAmount: 1000 }),
+}));
+
 describe('GoldenDuckFever Component', () => {
   it('opens fever modal and increases earned WLD and combo when tapped', () => {
     const onClaimMock = vi.fn();

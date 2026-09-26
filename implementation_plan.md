@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v10)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v11)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v11**: SEO 검색 노출 쇄신(10대 주식 종목 공개 프리뷰 인덱싱 & 5대 금융 가이드 & hreflang) + 도파민 5대 API 프론트-백엔드 실시간 원장 연동 + Moneyverse Plus 유료/무료 멤버십 티어 풀스택 개발 (+180, -0)
 - **v10**: 도파민 5대 전용 API 완비 & 14대 도메인 API 실시간 관제 대시보드(/admin/api-health) 구축 (+45, -0)
 - **v9**: 사행성 카지노 API 전면 폐기 & 14대 도메인 300+개 API 공식 마스터 명세서 완결 (+55, -0)
 - **v8**: SEO 검색 노출 쇄신(10대 가상주식 공개 프리뷰 인덱싱, sitemap 다국어 hreflang 탑재, 금융 교육 필러 가이드 5종 허브 신설) 및 기획서 전수 정합화 사양 누적 (+65, -0)
@@ -3902,5 +3903,64 @@ pm test).
 - Next.js Turbopack 최적화 프로덕션 빌드 성공
 - Debian 미니PC `stage_v462.sh` 및 `promote_v462.sh` 무중단 승격 배포
 - PostgreSQL 활성 세션 100% 무손실 검증
+
+---
+
+## 🚀 [v11 Specification] 3대 추천 과제(SEO 검색 노출 쇄신 + 도파민 실시간 연동 + Moneyverse Plus 유료/무료 티어) 풀스택 통합 명세 (누적 추가)
+
+### 1. 🔍 [과제 1] SEO 검색 노출 쇄신 완결
+- **10대 가상 주식 종목(`/stocks/[symbol]`) 공개 프리뷰 인덱싱**:
+  - `routes.config.ts`: `isPublic: true, indexable: true` SSOT 확정.
+  - 비로그인 유저 대상 SSR 시세/호가/차트 렌더링 및 Schema.org `FinancialProduct` & `BreadcrumbList` JSON-LD 탑재.
+- **5대 금융/게임 필러 가이드 허브(`/guide/*`)**:
+  - `/guide/stock-trading`: 가상 주식 실전 매매 & 호가창 가이드.
+  - `/guide/virtual-banking`: 복리 예적금 및 가상 국채 투자 전략.
+  - `/guide/career-mastery`: 직업 전직 및 일일 파밍 루틴 가이드.
+  - `/guide/glossary`: 핀테크 & 가상경제 핵심 용어사전.
+  - `/guide/dopamine-system`: 도파민 보상 & 확률 투명 공개 가이드.
+- **Sitemap 4개 국어 `hreflang` & ISR 3600s 캐싱**:
+  - `sitemap.ts`에 KO, EN, JA, ZH 언어별 alternate 링크 자동 생성.
+
+### 2. ⚡ [과제 2] 도파민 5대 전용 시스템 프론트-백엔드 실시간 연동
+- **프론트엔드 컴포넌트 ↔ 백엔드 REST API 연동**:
+  1. `GoldenDuckFever` ➡️ `POST /app-api/v1/engagement/dopamine/golden-duck` (피버 보상 실시간 원장 지급)
+  2. `DeokiPetStation` ➡️ `POST /app-api/v1/engagement/dopamine/pet-fortune` (포춘쿠키 보너스 실시간 수령)
+  3. `BullBearPoll` ➡️ `POST /app-api/v1/engagement/dopamine/bull-bear-vote` (여론 투표 및 에어드랍 풀 등록)
+  4. `MiniShowdownModal` ➡️ `POST /app-api/v1/engagement/dopamine/mini-showdown` (AI 주사위 결투 실시간 정산)
+  5. `StarDropModal` ➡️ `POST /app-api/v1/engagement/dopamine/star-drop` (5연속 탭 승급 보상 실시간 수령)
+- **실시간 지갑 잔액 갱신 및 토스트 피드백**:
+  - SWR 뮤테이션(`/api/v1/wallet/balance`, `/api/v1/wallet/summary`) 자동 트리거로 WLD 실시간 반영.
+
+### 3. 👑 [과제 3] 유료/무료 멤버십 티어 (`Moneyverse Plus` / VIP) 시스템 구축
+- **무료 코어 티어 (Free Core)**:
+  - 14대 핵심 도메인 100% 무료 접근, 일일 무료 스타 드롭 3회, 일일 1포춘쿠키, 일반 광고 노출.
+- **`Moneyverse Plus` 유료/VIP 티어**:
+  - **광고 완전 제거 (`isAdFree: true`)**: 전면/배너 광고 0건 완전 클린 UI.
+  - **VIP 골드 뱃지 & 프로필 테마**: 프로필 화면 및 커뮤니티 게시판/슈퍼챗 골드 하이라이트.
+  - **도파민 확장 편의**: 스타 드롭 일일 5회 무료 탭, VIP 럭키 참(확정 승급 연출) 토글 기본 제공.
+  - **자산 보존 보험**: 환생(프레스티지) 시 자산의 30%를 다음 생으로 자동 이월.
+- **상점 패키지 및 클라이언트 컴포넌트 연동**:
+  - `frontend/src/components/membership-tier-card.tsx` 및 `/shop` 상점 카탈로그 패키지 연동.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `frontend/src/components/casual-dopamine-station.tsx`: 도파민 5대 API 실시간 호출 및 SWR 캐시 갱신
+- `frontend/src/components/golden-duck-fever.tsx`: 피버 보상 API 연동
+- `frontend/src/components/deoki-pet-station.tsx`: 포춘쿠키 보상 API 연동
+- `frontend/src/components/bull-bear-poll.tsx`: 여론 투표 API 연동
+- `frontend/src/components/mini-showdown-modal.tsx`: 1:1 결투 API 연동
+- `frontend/src/components/star-drop-modal.tsx`: 스타 드롭 승급 API 연동
+- `frontend/src/components/membership-tier-card.tsx`: Moneyverse Plus 멤버십 카드 컴포넌트
+- `frontend/src/app/shop/page.tsx`: Moneyverse Plus 패키지 섹션 통합
+- `frontend/src/components/membership-tier-card.test.tsx`: 멤버십 티어 단위 테스트
+
+### Verification Plan
+- 프론트엔드/백엔드 Vitest 단위 테스트 100% PASS
+- Next.js Turbopack 빌드 무결성 검증
+- Debian 미니PC `stage_v463.sh` 및 `promote_v463.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,433+) 100% 무손실 검증
+
 
 

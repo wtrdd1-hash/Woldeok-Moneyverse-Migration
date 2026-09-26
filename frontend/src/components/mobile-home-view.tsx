@@ -28,6 +28,7 @@ import { TranslatedText as T } from '@/components/translated-text';
 import { WalletGlance } from '@/components/wallet-glance';
 import { LobbyCount } from '@/components/lobby-count';
 import { HomeAdvertisement } from '@/components/home-advertisement';
+import { CasualDopamineStation } from '@/components/casual-dopamine-station';
 import { formatDay } from '@/lib/money';
 
 interface Announcement {
@@ -147,6 +148,11 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
             </Link>
           </div>
         </div>
+      </section>
+
+      {/* 1.5 CASUAL DOPAMINE ARCADE STATION */}
+      <section aria-labelledby="dopamine-station-heading">
+        <CasualDopamineStation />
       </section>
 
       {/* 2. DUAL-COLUMN LIVE DASHBOARD */}

@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sparkles, Flame, Trophy, Coins, Shield, X, Zap } from 'lucide-react';
 
+import { claimGoldenDuckFever } from '@/lib/dopamine-api';
+
 interface GoldenDuckFeverProps {
   isOpen?: boolean;
   onClose?: () => void;
@@ -32,6 +34,7 @@ export function GoldenDuckFever({
   const [combo, setCombo] = useState<number>(0);
   const [maxCombo, setMaxCombo] = useState<number>(0);
   const [isFinished, setIsFinished] = useState<boolean>(false);
+  const [isClaiming, setIsClaiming] = useState<boolean>(false);
   const [clickParticles, setClickParticles] = useState<{ id: number; x: number; y: number; text: string }[]>([]);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -45,6 +48,7 @@ export function GoldenDuckFever({
       setCombo(0);
       setMaxCombo(0);
       setIsFinished(false);
+      setIsClaiming(false);
       setClickParticles([]);
 
       if (timerRef.current) clearInterval(timerRef.current);
@@ -122,11 +126,22 @@ export function GoldenDuckFever({
     setClickParticles((prev) => [...prev.slice(-8), newParticle]);
   };
 
-  const handleClaim = () => {
+  const handleClaim = async () => {
+    if (isClaiming) return;
+    setIsClaiming(true);
+
+    const multiplier = Math.min(3.0, 1.0 + Math.floor(maxCombo / 10) * 0.5);
+    try {
+      await claimGoldenDuckFever(tapCount, multiplier);
+    } catch {
+      // Offline fallback
+    }
+
     if (onClaimReward) {
       onClaimReward(earnedWld, maxCombo);
     }
     setInternalOpen(false);
+    setIsClaiming(false);
     if (onClose) onClose();
   };
 

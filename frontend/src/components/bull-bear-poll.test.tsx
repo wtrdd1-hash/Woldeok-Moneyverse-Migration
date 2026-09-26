@@ -1,7 +1,11 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BullBearPoll } from './bull-bear-poll';
+
+vi.mock('@/lib/dopamine-api', () => ({
+  voteBullBear: vi.fn().mockResolvedValue({ success: true, poolEligible: true }),
+}));
 
 describe('BullBearPoll Component', () => {
   afterEach(() => {
@@ -23,7 +27,7 @@ describe('BullBearPoll Component', () => {
     expect(screen.getByText(/하락 \(Bear\) 50%/)).toBeDefined();
   });
 
-  it('handles user vote and increments selected option', () => {
+  it('handles user vote and increments selected option', async () => {
     const onVoteMock = vi.fn();
     render(
       <BullBearPoll
@@ -37,7 +41,9 @@ describe('BullBearPoll Component', () => {
     const bullBtn = screen.getByRole('button', { name: '상승 투표 떡상 가자' });
     fireEvent.click(bullBtn);
 
-    expect(onVoteMock).toHaveBeenCalledWith('bull');
-    expect(screen.getByText(/101표/)).toBeDefined();
+    await waitFor(() => {
+      expect(onVoteMock).toHaveBeenCalledWith('bull');
+      expect(screen.getByText(/101표/)).toBeDefined();
+    });
   });
 });

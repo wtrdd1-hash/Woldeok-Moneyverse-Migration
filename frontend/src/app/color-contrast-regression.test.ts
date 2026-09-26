@@ -1,8 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-const APP = path.dirname(new URL(import.meta.url).pathname);
+const APP = path.dirname(fileURLToPath(import.meta.url));
 const redesign = fs.readFileSync(path.join(APP, 'redesign.css'), 'utf8');
 
 function block(selector: string) {

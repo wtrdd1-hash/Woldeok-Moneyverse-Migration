@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { Heart, Sparkles, Gift, Shield, CheckCircle2, MessageCircle, RefreshCw } from 'lucide-react';
 
+import { claimPetFortune } from '@/lib/dopamine-api';
+
 interface DeokiPetStationProps {
   initialAffection?: number;
   onClaimFortune?: (wldBonus: number, quote: string) => void;
@@ -32,9 +34,12 @@ export function DeokiPetStation({
   const level = Math.min(5, Math.floor(affection / 25) + 1);
   const progressToNext = (affection % 25) * 4;
 
-  const handlePet = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handlePet = async (e: React.MouseEvent<HTMLDivElement>) => {
     const nextAffection = affection + 2;
     setAffection(nextAffection);
+
+    // Call backend API for pet interaction
+    void claimPetFortune('pet');
 
     // Dynamic dialogue
     const dialogues = [
@@ -58,7 +63,7 @@ export function DeokiPetStation({
     setHearts((prev) => [...prev.slice(-5), newHeart]);
   };
 
-  const handleCrackCookie = () => {
+  const handleCrackCookie = async () => {
     if (cookieClaimed) return;
 
     const randomFortune = QUOTES[Math.floor(Math.random() * QUOTES.length)]!;
@@ -71,6 +76,12 @@ export function DeokiPetStation({
     });
     setIsCookieCracked(true);
     setCookieClaimed(true);
+
+    try {
+      await claimPetFortune('fortune');
+    } catch {
+      // Offline fallback
+    }
 
     if (onClaimFortune) {
       onClaimFortune(bonusWld, randomFortune.text);

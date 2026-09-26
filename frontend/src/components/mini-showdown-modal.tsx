@@ -10,6 +10,8 @@ interface MiniShowdownModalProps {
   onGameFinish?: (won: boolean, netPayout: number) => void;
 }
 
+import { resolveMiniShowdown } from '@/lib/dopamine-api';
+
 export function MiniShowdownModal({
   isOpen,
   onClose,
@@ -34,7 +36,7 @@ export function MiniShowdownModal({
     setRoundWinner(null);
 
     // Roll animation delay
-    setTimeout(() => {
+    setTimeout(async () => {
       const pRoll = Math.floor(Math.random() * 6) + 1;
       const aRoll = Math.floor(Math.random() * 6) + 1;
 
@@ -49,6 +51,11 @@ export function MiniShowdownModal({
 
         if (nextPScore >= 2) {
           setFinalWinner('player');
+          try {
+            await resolveMiniShowdown('win', [pRoll], [aRoll], stake);
+          } catch {
+            // Offline fallback
+          }
           if (onGameFinish) onGameFinish(true, Math.round(stake * 1.9));
         } else {
           setRound((r) => r + 1);
@@ -60,6 +67,11 @@ export function MiniShowdownModal({
 
         if (nextAScore >= 2) {
           setFinalWinner('ai');
+          try {
+            await resolveMiniShowdown('loss', [pRoll], [aRoll], stake);
+          } catch {
+            // Offline fallback
+          }
           if (onGameFinish) onGameFinish(false, 0);
         } else {
           setRound((r) => r + 1);

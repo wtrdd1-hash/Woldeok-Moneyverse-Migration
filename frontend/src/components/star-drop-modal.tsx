@@ -65,6 +65,8 @@ const RARITY_CONFIG = {
 
 const RARITY_ORDER: StarDropRarity[] = ['rare', 'super_rare', 'epic', 'mythic', 'legendary'];
 
+import { claimStarDrop } from '@/lib/dopamine-api';
+
 export function StarDropModal({
   isOpen,
   onClose,
@@ -115,8 +117,21 @@ export function StarDropModal({
     }
   };
 
-  const handleClaim = () => {
+  const handleClaim = async () => {
     const reward = getFinalReward();
+    const tierMap: Record<StarDropRarity, 'rare' | 'epic' | 'legendary' | 'mythic'> = {
+      rare: 'rare',
+      super_rare: 'rare',
+      epic: 'epic',
+      mythic: 'mythic',
+      legendary: 'legendary',
+    };
+    try {
+      await claimStarDrop(tierMap[currentRarity]);
+    } catch {
+      // Offline fallback
+    }
+
     if (onClaimReward) onClaimReward(reward);
     onClose();
   };

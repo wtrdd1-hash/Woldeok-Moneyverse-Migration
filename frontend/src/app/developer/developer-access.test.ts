@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-const pageSource = readFileSync('src/app/developer/page.tsx', 'utf8');
-const navSource = readFileSync('src/lib/navigation.ts', 'utf8');
+const pageSource = readFileSync('src/app/developer/page.tsx', 'utf8').replace(/\r\n/g, '\n');
+const navSource = readFileSync('src/lib/navigation.ts', 'utf8').replace(/\r\n/g, '\n');
 
 describe('developer portal administrator access guard', () => {
   it('strictly enforces requireAdministrator before rendering developer portal', () => {

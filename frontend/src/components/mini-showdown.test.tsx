@@ -3,6 +3,10 @@ import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import React from 'react';
 import { MiniShowdownModal } from './mini-showdown-modal';
 
+vi.mock('@/lib/dopamine-api', () => ({
+  resolveMiniShowdown: vi.fn().mockResolvedValue({ success: true, payout: 190 }),
+}));
+
 describe('MiniShowdownModal Component', () => {
   afterEach(() => {
     cleanup();
