@@ -51,6 +51,7 @@ const music = new MusicManager({
   maxTrackSeconds: Number.isFinite(MUSIC_MAX_TRACK_SECONDS) && MUSIC_MAX_TRACK_SECONDS > 0
     ? MUSIC_MAX_TRACK_SECONDS
     : undefined,
+  ensureVoiceConnection,
 });
 
 /**

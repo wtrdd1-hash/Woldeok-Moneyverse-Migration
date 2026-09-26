@@ -5,9 +5,9 @@ import {
   AudioPlayerStatus,
   NoSubscriberBehavior,
   StreamType,
+  VoiceConnectionStatus,
   createAudioPlayer,
   createAudioResource,
-  demuxProbe,
   getVoiceConnection,
 } from '@discordjs/voice';
 import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
@@ -180,10 +180,11 @@ function toSafeTrack(result, requestedBy, fallbackUrl, maxTrackSeconds) {
 }
 
 export class MusicManager {
-  constructor({ guildId, voiceChannelId, logger = console, maxTrackSeconds }) {
+  constructor({ guildId, voiceChannelId, logger = console, maxTrackSeconds, ensureVoiceConnection }) {
     this.guildId = guildId;
     this.voiceChannelId = voiceChannelId;
     this.logger = logger;
+    this.ensureVoiceConnection = ensureVoiceConnection;
     this.maxTrackSeconds = Number.isFinite(maxTrackSeconds) && maxTrackSeconds > 0
       ? maxTrackSeconds
       : DEFAULT_MAX_TRACK_SECONDS;
@@ -200,6 +201,7 @@ export class MusicManager {
     });
 
     this.player.on(AudioPlayerStatus.Idle, () => {
+      if (this.starting) return;
       this.#killCurrentProcess();
       this.current = null;
       this.currentResource = null;
@@ -208,6 +210,7 @@ export class MusicManager {
 
     this.player.on('error', (error) => {
       this.logger.error?.('[Music] Audio player error:', error.message);
+      if (this.starting) return;
       this.#killCurrentProcess();
       this.current = null;
       this.currentResource = null;
@@ -382,7 +385,11 @@ export class MusicManager {
     const track = this.queue.shift();
 
     try {
-      const connection = getVoiceConnection(this.guildId);
+      let connection = getVoiceConnection(this.guildId);
+      if ((!connection || connection.state.status !== VoiceConnectionStatus.Ready) && typeof this.ensureVoiceConnection === 'function') {
+        await this.ensureVoiceConnection('Playback request');
+        connection = getVoiceConnection(this.guildId);
+      }
       if (!connection) throw new Error('음성 채널 연결이 준비되지 않았습니다.');
       this.attachConnection(connection);
 
@@ -400,44 +407,42 @@ export class MusicManager {
       this.currentProcess = process;
       process.catch((error) => {
         if (process.killed || this.disposed) return;
-        this.logger.error?.('[Music] yt-dlp stream error:', error.message);
+        const msg = String(error?.message || '');
+        if (msg.includes('SIGKILL') || msg.includes('Broken pipe')) return;
+        this.logger.error?.('[Music] yt-dlp stream error:', msg);
       });
 
-      let resource;
+      const ffmpegArgs = ['-i', 'pipe:0'];
+
       if (sponsorSegments.length > 0) {
         const ranges = sponsorSegments.map((s) => `not(between(t,${s.segment[0]},${s.segment[1]}))`).join('*');
         const filter = `aselect='${ranges}',asetpts=N/SR/TB`;
         this.logger.log?.(`[Music] Slicing out ${sponsorSegments.length} SponsorBlock segment(s) via FFmpeg filter: ${filter}`);
-
-        const ffmpeg = spawn('ffmpeg', [
-          '-i', 'pipe:0',
-          '-af', filter,
-          '-f', 's16le',
-          '-ar', '48000',
-          '-ac', '2',
-          'pipe:1',
-        ]);
-        this.currentFfmpegProcess = ffmpeg;
-        process.stdout.pipe(ffmpeg.stdin);
-        process.stdout.on('error', () => {});
-        ffmpeg.stdin.on('error', () => {});
-        ffmpeg.on('error', (err) => {
-          this.logger.error?.('[Music] FFmpeg sponsor filter error:', err.message);
-        });
-
-        resource = createAudioResource(ffmpeg.stdout, {
-          inputType: StreamType.Raw,
-          metadata: track,
-          inlineVolume: true,
-        });
-      } else {
-        const probe = await demuxProbe(process.stdout, 15);
-        resource = createAudioResource(probe.stream, {
-          inputType: probe.type,
-          metadata: track,
-          inlineVolume: true,
-        });
+        ffmpegArgs.push('-af', filter);
       }
+
+      ffmpegArgs.push(
+        '-f', 's16le',
+        '-ar', '48000',
+        '-ac', '2',
+        'pipe:1',
+      );
+
+      const ffmpeg = spawn('ffmpeg', ffmpegArgs);
+      this.currentFfmpegProcess = ffmpeg;
+      process.stdout.pipe(ffmpeg.stdin);
+      process.stdout.on('error', () => {});
+      ffmpeg.stdin.on('error', () => {});
+      ffmpeg.on('error', (err) => {
+        if (this.disposed || ffmpeg.killed) return;
+        this.logger.error?.('[Music] FFmpeg audio filter error:', err.message);
+      });
+
+      const resource = createAudioResource(ffmpeg.stdout, {
+        inputType: StreamType.Raw,
+        metadata: track,
+        inlineVolume: true,
+      });
 
       this.current = track;
       if (resource.volume) {
