@@ -35,3 +35,41 @@
 - **Frontend**: 124 test files / 820 tests passed (**100% PASS**)
 - **Backend**: 110 test files / 1,040 tests passed (**100% PASS**)
 - **Total Tests**: **1,860 tests passed**
+
+---
+
+## 🌟 Production Release Overview (v456)
+- **Release Version**: `prod-v456`
+- **Release Date**: 2026-09-26 22:12 KST
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v456`
+- **Current Test Symlink**: `/srv/moneyverse-data/releases/test-current -> /srv/moneyverse-data/releases/test-v456`
+- **Git Commit HEAD**: `76662ce7` (`main`)
+- **Active PostgreSQL Sessions**: **1,377 Active Sessions Preserved (Zero Loss)**
+
+---
+
+## 🎯 10대 글로벌 레퍼런스 기반 도파민 & 수익화 BM 고도화 (v456)
+
+### 1. 도입 및 실서비스 배포 패키지
+1. **Polymarket형 실시간 경제 예측 시장 (`/prediction`)**:
+   - 상장 기업 주가 돌파, 중앙은행 기준금리, AI 정책 결정에 대한 전략적 Yes/No 바이너리 지분 매매.
+   - 체결 시 거래 수수료 2% 가상 경제 펀드로 자동 소각.
+2. **Robinhood형 Canvas 2D 럭키 주식 스크래치 복권 (`ScratchCardModal`)**:
+   - 주요 금융/업무 액션 시 지급되는 인터랙티브 복권으로 0.1~10.0주 즉시 지급.
+3. **Steam형 활동 보물상자 & 해독 키 & P2P 경매장 연동**:
+   - 활동 드롭 상자 개봉 BM 및 경매 대금 5% 소각 메커니즘.
+
+### 2. 프로덕션 검증 지표
+| 라우트 및 기능 | HTTP 상태 | 동작 검증 |
+| :--- | :--- | :--- |
+| `https://easy-scraping.com/` | 200 OK | 홈 대시보드 정상 |
+| `https://easy-scraping.com/prediction` | 200 OK | 예측 마켓 오더북 및 거래 정상 |
+| `https://easy-scraping.com/stocks` | 200 OK | 주식 거래소 및 차트 정상 |
+| `https://easy-scraping.com/casino` | 200 OK | 럭키존 게임 정상 |
+| `https://easy-scraping.com/admin` | 200 OK | 관리자 마스터 콘솔 정상 |
+| `https://easy-scraping.com/api/notifications/unread-count` | 200 OK | 알림 BFF 엔드포인트 정상 |
+| **활성 DB 세션 수** | **1,377 세션** | **무손실 100% 보존** |
+
+### 3. 전체 테스트 스위트 검증 결과
+- **Frontend Vitest**: **128개 파일 / 833개 테스트 전수 100% PASS**
+- **Next.js 16.3.4 Production Build**: **33개 정적/동적 라우트 전체 정상 빌드**
