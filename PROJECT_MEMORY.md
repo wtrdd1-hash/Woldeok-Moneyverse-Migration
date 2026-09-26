@@ -1,10 +1,10 @@
 # Woldeok Moneyverse - Project Memory & Master Release Tracker
 
 ## 🌟 Production Release Overview
-- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v455`
-- **Current Test Symlink**: `/srv/moneyverse-data/releases/test-current -> /srv/moneyverse-data/releases/test-v455`
-- **Git Commit HEAD**: `bb34b1e9` (`main`)
-- **Active PostgreSQL Sessions**: **1,376 Active Sessions Preserved (Zero Loss)**
+- **Current Production Symlink**: `/srv/moneyverse-data/releases/production-current -> /srv/moneyverse-data/releases/prod-v456`
+- **Current Test Symlink**: `/srv/moneyverse-data/releases/test-current -> /srv/moneyverse-data/releases/test-v456`
+- **Git Commit HEAD**: `a76b0f70` (`feat/seo-i18n-overhaul-v456`)
+- **Active PostgreSQL Sessions**: **1,377 Active Sessions Preserved (Zero Loss)**
 
 ---
 
@@ -48,28 +48,37 @@
 
 ---
 
-## 🎯 10대 글로벌 레퍼런스 기반 도파민 & 수익화 BM 고도화 (v456)
+## 🎯 SEO 전면 개편 & 15만 어휘 다국어 코퍼스 아키텍처 (v456)
 
 ### 1. 도입 및 실서비스 배포 패키지
-1. **Polymarket형 실시간 경제 예측 시장 (`/prediction`)**:
-   - 상장 기업 주가 돌파, 중앙은행 기준금리, AI 정책 결정에 대한 전략적 Yes/No 바이너리 지분 매매.
-   - 체결 시 거래 수수료 2% 가상 경제 펀드로 자동 소각.
-2. **Robinhood형 Canvas 2D 럭키 주식 스크래치 복권 (`ScratchCardModal`)**:
-   - 주요 금융/업무 액션 시 지급되는 인터랙티브 복권으로 0.1~10.0주 즉시 지급.
-3. **Steam형 활동 보물상자 & 해독 키 & P2P 경매장 연동**:
-   - 활동 드롭 상자 개봉 BM 및 경매 대금 5% 소각 메커니즘.
+1. **SEO 단일 진실 공급원 (`routes.config.ts`) & robots.txt 연동**:
+   - 공개 여부(`isPublic`), 색인 여부(`indexable`), sitemap 우선순위(`sitemapPriority`), 변경주기(`changeFrequency`)를 일원화.
+   - 비공개 회원 전용 경로(`/bank`, `/wallet`, `/casino`, `/quests`, `/seasons`, `/work`, `/businesses`, `/spaces`, `/newspaper`, `/marketplace`, `/chat`, `/account`, `/admin`, `/stocks/*`)를 `robots.txt`에서 자동 Disallow 처리.
+2. **Sitemap 고정 릴리스 타임스탬프 & 307 리다이렉트 원천 차단**:
+   - 가짜 요청 시각 `new Date()` 제거, 고정 릴리스 타임스탬프(`2026-09-26T21:00:00.000Z`) 및 실제 DB 발행일 적용.
+   - 회원 전용 라우트를 sitemap에서 완전 배제하여 307 크롤링 충돌 방지.
+   - `sitemap-static.xml`, `sitemap-stocks.xml`, `sitemap-announcements.xml`, `sitemap-board.xml` 전수 정합성 확보.
+3. **다국어 기본 로케일 정책 & 동적 메타데이터 (`generateMetadata`)**:
+   - 기본 로케일 영어(`DEFAULT_LOCALE = 'en'`) 및 한국어 2순위 Fallback 정책 정합화.
+   - 동일 URL `hreflang` 중복 선언(ko-KR / en-US) 문제 완전 해소.
+   - 동적 4개 국어(ko/en/ja/zh) 메타데이터 및 Schema.org JSON-LD 구축.
+4. **15만 개 전문 어휘 다국어 코퍼스 (69.22MB)**:
+   - 9대 도메인 150,000개 유니크 어휘 엔트리 생성기(`scripts/generate-i18n-corpus-150k.mjs`) 및 빠른 O(1) 룩업 헬퍼(`corpus-lookup.ts`) 구축.
 
 ### 2. 프로덕션 검증 지표
 | 라우트 및 기능 | HTTP 상태 | 동작 검증 |
 | :--- | :--- | :--- |
-| `https://easy-scraping.com/` | 200 OK | 홈 대시보드 정상 |
-| `https://easy-scraping.com/prediction` | 200 OK | 예측 마켓 오더북 및 거래 정상 |
-| `https://easy-scraping.com/stocks` | 200 OK | 주식 거래소 및 차트 정상 |
-| `https://easy-scraping.com/casino` | 200 OK | 럭키존 게임 정상 |
-| `https://easy-scraping.com/admin` | 200 OK | 관리자 마스터 콘솔 정상 |
-| `https://easy-scraping.com/api/notifications/unread-count` | 200 OK | 알림 BFF 엔드포인트 정상 |
+| `https://easy-scraping.com/` | 200 OK | 홈 대시보드 정상 (기본 로케일 및 메타데이터 정상) |
+| `https://easy-scraping.com/robots.txt` | 200 OK | Disallow 비공개 목록 및 단일 Sitemap 정상 |
+| `https://easy-scraping.com/sitemap.xml` | 200 OK | 고정 릴리스 타임스탬프 및 비공개 경로 제외 정상 |
+| `https://easy-scraping.com/sitemap-stocks.xml` | 200 OK | 공개 주식 허브만 등록 확인 |
+| `https://easy-scraping.com/sitemap-static.xml` | 200 OK | 정적 공개 경로 및 고정 타임스탬프 정상 |
+| `https://easy-scraping.com/sitemap-board.xml` | 200 OK | 실제 DB 게시글 작성일 lastmod 반영 확인 |
+| `https://test.easy-scraping.com/` | 200 OK | 테스트 환경 정상 (x-robots-tag: noindex, nofollow) |
 | **활성 DB 세션 수** | **1,377 세션** | **무손실 100% 보존** |
 
 ### 3. 전체 테스트 스위트 검증 결과
 - **Frontend Vitest**: **128개 파일 / 833개 테스트 전수 100% PASS**
 - **Next.js 16.3.4 Production Build**: **33개 정적/동적 라우트 전체 정상 빌드**
+- **150k Multilingual Corpus**: **150,000개 유니크 엔트리 무결성 검증 100% PASS**
+
