@@ -2311,3 +2311,9 @@ Required sequence: full AI inventory -> latest-plan/main/user-instruction rechec
 - Required proof before release: focused auth/config tests, typecheck/build, exact-SHA Test deployment, and real Android emulator signup -> verify -> authenticated-shell E2E.
 - Worklog: `docs/worklog/2026-09-23-staging-local-auth-e2e-v2026.09.23.387.md` (Korean pair alongside it).
 - Branch: `fix/staging-local-auth-token-v2026.09.23.387`.
+
+### v2026.09.26.443 — Korea legal launch gates
+- Detailed authority: `KR_LEGAL_COMPLIANCE_AUDIT.md`. KR casino/chance is fail-closed until authentic classification/rating + 19+ + legal/channel evidence; unsupported approval/certificate wording is a P0 defect.
+- Existing Production advertising makes business/tax status and advertising/privacy/overseas-transfer evidence a current operating gate, not a future-only task.
+- Real-money digital goods/subscription/ad-removal remain BLOCKED until seller identity/reporting, transaction disclosure, withdrawal/refund/cancellation, minor-contract and provider reconciliation controls pass.
+- User `ageConfirmed` assertion must not be described as verified age. Commercial messaging remains blocked until Korea consent/suppression/nighttime controls exist. WLD/game-result cash redemption remains prohibited pending new legal review.
