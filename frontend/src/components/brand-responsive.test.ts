@@ -17,7 +17,7 @@ describe('responsive brand visibility', () => {
   it('progressively hides secondary controls on narrow screens and restores them by CSS', () => {
     expect(header).toContain('hidden min-[420px]:block');
     expect(header).toContain('lg:hidden');
-    expect(header).toContain('hidden items-center gap-4 xl:gap-5 lg:flex');
+    expect(header).toContain('hidden items-center gap-1.5 xl:gap-2.5 2xl:gap-4 lg:flex');
     expect(header).toContain('whitespace-nowrap');
   });
 });

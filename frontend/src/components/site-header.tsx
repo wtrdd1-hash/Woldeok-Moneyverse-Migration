@@ -80,10 +80,10 @@ export function SiteHeader() {
 
   return (
     <header className="moneyverse-site-header sticky top-0 z-30 border-b backdrop-blur-xl w-full max-w-full overflow-hidden">
-      <div className="mx-auto flex h-[60px] min-[400px]:h-[64px] sm:h-[68px] lg:h-[76px] w-full max-w-[1440px] items-center justify-between gap-1.5 px-2.5 min-[400px]:gap-2 min-[400px]:px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:gap-6 lg:px-8">
+      <div className="mx-auto flex h-[60px] min-[400px]:h-[64px] sm:h-[68px] lg:h-[76px] w-full max-w-[1440px] items-center justify-between gap-1.5 px-2.5 min-[400px]:gap-2 min-[400px]:px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:gap-3 xl:gap-4 2xl:gap-6 lg:px-5 xl:px-8">
         <Brand />
 
-        <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="ml-auto hidden items-center gap-4 xl:gap-5 lg:flex">
+        <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="ml-auto hidden items-center gap-1.5 xl:gap-2.5 2xl:gap-4 lg:flex">
           {items.map((item) =>
             isGroup(item) ? (
               <HeaderGroup key={item.label} group={item} pathname={pathname} locale={locale} />
@@ -93,7 +93,7 @@ export function SiteHeader() {
           )}
         </nav>
 
-        <div className={cn('flex min-w-0 items-center gap-1 min-[400px]:gap-1.5 sm:gap-2 lg:gap-3 shrink-0', 'ml-auto lg:ml-4')}>
+        <div className={cn('flex min-w-0 items-center gap-1 min-[400px]:gap-1.5 sm:gap-2 lg:gap-2 2xl:gap-3 shrink-0', 'ml-auto lg:ml-2.5 xl:ml-4')}>
           <div className="hidden min-[420px]:block">
             <ServerClockPill className="hidden md:inline-flex lg:hidden 2xl:inline-flex" />
             <LanguageSwitcher />
@@ -192,7 +192,7 @@ function HeaderLink({
       prefetch={!entry.href.startsWith('/admin')}
       aria-current={current ? 'page' : undefined}
       className={cn(
-        'relative min-h-10 whitespace-nowrap rounded-xl px-2.5 xl:px-3 py-1.5 xl:py-2 text-xs xl:text-sm font-bold transition-colors',
+        'relative min-h-10 whitespace-nowrap rounded-xl px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs 2xl:text-sm font-bold transition-colors',
         current
           ? 'bg-primary/12 text-primary'
           : 'text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -217,7 +217,7 @@ function HeaderGroup({
     <DropdownMenu>
       <DropdownMenuTrigger
         className={cn(
-          'relative flex min-h-10 items-center gap-1 whitespace-nowrap rounded-xl px-2.5 xl:px-3 py-1.5 xl:py-2 text-xs xl:text-sm font-bold transition-colors outline-none',
+          'relative flex min-h-10 items-center gap-1 whitespace-nowrap rounded-xl px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs 2xl:text-sm font-bold transition-colors outline-none',
           current
             ? 'bg-primary/12 text-primary'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground',
@@ -303,11 +303,11 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
       <Button
         asChild
         size="sm"
-        className="hidden min-[480px]:inline-flex h-10 sm:h-11 rounded-xl px-3 sm:px-4 text-xs sm:text-sm font-extrabold shadow-plate shrink-0"
+        className="hidden min-[480px]:inline-flex h-10 sm:h-11 rounded-xl px-2.5 sm:px-3 2xl:px-4 text-xs sm:text-sm font-extrabold shadow-plate shrink-0"
       >
         <Link href="/wallet" className="flex items-center gap-1.5">
           <Wallet className="size-4" />
-          <span className="hidden xl:inline">{locale === 'en' ? 'Wallet' : '내 지갑'}</span>
+          <span className="hidden 2xl:inline">{locale === 'en' ? 'Wallet' : '내 지갑'}</span>
         </Link>
       </Button>
 
@@ -315,13 +315,13 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="flex h-10 sm:h-11 items-center gap-1.5 rounded-xl px-2.5 sm:px-3 text-xs sm:text-sm font-bold text-foreground hover:bg-secondary shrink-0 outline-none"
+            className="flex h-10 sm:h-11 items-center gap-1.5 rounded-xl px-2 sm:px-2.5 2xl:px-3 text-xs sm:text-sm font-bold text-foreground hover:bg-secondary shrink-0 outline-none"
             aria-label={locale === 'en' ? 'Account menu' : '내 계정 메뉴'}
           >
             <span className="flex size-7 items-center justify-center rounded-lg bg-primary/15 text-xs font-black text-primary">
               <User className="size-4" />
             </span>
-            <span className="hidden xl:inline-block text-xs font-bold text-muted-foreground">
+            <span className="hidden 2xl:inline-block text-xs font-bold text-muted-foreground">
               {locale === 'en' ? 'Account' : '내 계정'}
             </span>
             <ChevronDown className="size-3 text-muted-foreground" />
