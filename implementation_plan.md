@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v22)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v23)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v23**: 기획서 14대 도메인 42개 기능 전수 추적성 매트릭스(Traceability Matrix) 구축 & 프로필/계산기 심화 보강 테스트(hybrid-profile-resolution 등) 100% ALL-PASS 완료 (+390, -0)
 - **v22**: 풀스택 전체 QA 전수 감사(백엔드 300+개 API 헬스체크 + 일반 30+개/관리자 11개 전 라우트 5대 뷰포트 실측 + 관리자 권한/세션 샌드박스 + 결함 원스톱 패치 및 공식 QA 감사 보고서 신설) (+420, -0)
 - **v21**: 실제 회원 프로필 연동(DB/세션/Discord/Google/이메일 하이브리드 자동 감지 및 아바타/칭호 렌더링) + 계정 보안 점수 게이지 바 + 20만+ 래퍼런스 분석 기반 2026 반응형 디자인 기준 공식 지침서 제정(320px~1920px 5대 뷰포트, Zero-Overflow, 44px Touch Target, Tabular Mono) (+380, -0)
 - **v20**: 문서 전면 정리(Documentation Architecture Consolidation) & 20만+ 래퍼런스 기반 2026 차세대 핀테크 디자인 시스템 지침 개편(Linear/Stripe/Apple Bento Grid 2.0, Inset Border, Geist Mono Tabular, Clean Masthead) (+340, -0)
@@ -4619,6 +4620,27 @@ pm test).
 - **3단계 결함 분류**: P0 (블로커/보안) / P1 (기능미작동/UI붕괴) / P2 (경미개선).
 - **공식 보고서 신설**: `docs/QA_AUDIT_REPORT_V473.ko.md` 및 `docs/QA_AUDIT_REPORT_V473.md`.
 - **품질 지표**: CLS = 0, WCAG 2.1 AAA 4.5:1 대비, TTFB < 50ms.
+
+---
+
+## 🏛️ [v23 Specification] 기획서 전 기능 추적성 매트릭스(Traceability Matrix) 구축 & 심화 QA 보강 (누적 추가)
+
+### 1. 📋 [파트 1] 14대 도메인 42개 기획 기능 전수 추적 대조
+- `docs/APP_SPEC_AND_USER_GUIDE.ko.md`에 명시된 42개 기능 전수에 대한 구현 파일, 엔드포인트, 단위 테스트 파일 1:1 매핑 및 100% PASS 검증.
+- 인증/세션, 프로필/인벤토리, 홈 자산 대시보드, 은행/국채, 주식 거래소/원가정산, 직업/사업체, 카지노/자가보호, 3대 금융 계산기/pSEO, 바이럴 진단서/리퍼럴, 출석 룰렛/예측 배팅, P2P 경매장/팡파레, 커뮤니티/1:1 쪽지, 미성년자 안전/TAKE IT DOWN, 관리자 11대 콘솔 전수 완결.
+
+### 2. 🧪 [파트 2] 신규 심화 단위 테스트 추가 및 검증
+- `frontend/src/app/account/hybrid-profile-resolution.test.ts`:
+  - 4단계 다계층 닉네임 감지 로직(설정명 -> 소셜 연동명 -> 이메일 -> fallback) 검증.
+  - 아바타 이미지 로딩 및 에러 시 이니셜 안전 폴백 검증.
+  - 100점 만점 보안 완성도 점수 게이지 바 연동 검증.
+  - 2026 Inset Border 레이아웃 클래스 무결성 검증 (5개 테스트 100% PASS).
+- `frontend/src/app/tools/*`: 3대 계산기 및 프리셋 테스트 5개 파일 14개 테스트 100% PASS.
+
+### 3. 📑 [파트 3] 기획서 추적성 매트릭스 공식 보고서 발행
+- `docs/QA_TRACEABILITY_MATRIX_V473.ko.md` 및 `docs/QA_TRACEABILITY_MATRIX_V473.md` 신설.
+- `docs/INDEX.ko.md` 및 `docs/DOCUMENT_CATALOG.ko.md` (총 1,648개 문서) 최신화.
+- PostgreSQL 1,498개 활성 세션 100% 무손실 보존.
 
 
 

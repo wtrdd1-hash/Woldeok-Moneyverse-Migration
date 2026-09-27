@@ -12,9 +12,10 @@
 
 ### 01. 📱 Master Specs & User Guide
 1. **[Integrated Application Specification & User Guide](APP_SPEC_AND_USER_GUIDE.md)**
-2. **[Current Runtime Baseline](CURRENT_RUNTIME_BASELINE.md)**
-3. **[Documentation Governance Policy](DOCUMENTATION_POLICY.md)**
-4. **[Master Document Catalog](DOCUMENT_CATALOG.md)**
+2. **[Specification Traceability Matrix & Deep QA Report (v473)](QA_TRACEABILITY_MATRIX_V473.md)**
+3. **[Current Runtime Baseline](CURRENT_RUNTIME_BASELINE.md)**
+4. **[Documentation Governance Policy](DOCUMENTATION_POLICY.md)**
+5. **[Master Document Catalog](DOCUMENT_CATALOG.md)**
 
 ### 02. 🎨 2026 Next-Gen Design System & UI/UX Guidelines
 1. **[2026 Next-Gen FinTech Design System Guidelines](DESIGN_SYSTEM_GUIDELINES.md)**

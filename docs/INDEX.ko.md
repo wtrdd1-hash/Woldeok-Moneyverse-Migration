@@ -12,9 +12,10 @@
 
 ### 01. 📱 마스터 스펙 & 유저 가이드
 1. **[통합 앱 명세서 및 상세 유저 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)**: 3대 금융 계산기, 30대 프리셋, pSEO 2만+ 엔진, 바이럴 진단서, 출석 룰렛, 주가 예측 배팅 전 도메인 엔드투엔드 가이드
-2. **[현재 런타임 베이스라인](CURRENT_RUNTIME_BASELINE.ko.md)**: Debian 13, PostgreSQL 16, NestJS, Next.js 16 Turbopack 인프라 환경
-3. **[문서 거버넌스 정책](DOCUMENTATION_POLICY.ko.md)**: Single Source of Truth(SSOT), 버전 관리 및 보존 규칙
-4. **[문서 카탈로그 원장](DOCUMENT_CATALOG.ko.md)**: 전체 문서 인벤토리 및 최신성 검증표
+2. **[기획서 전 기능 추적 매트릭스 & 심화 QA 보고서 (v473)](QA_TRACEABILITY_MATRIX_V473.ko.md)**: 14대 도메인 42개 기획 기능 전수 대조 및 100% 검증 원장
+3. **[현재 런타임 베이스라인](CURRENT_RUNTIME_BASELINE.ko.md)**: Debian 13, PostgreSQL 16, NestJS, Next.js 16 Turbopack 인프라 환경
+4. **[문서 거버넌스 정책](DOCUMENTATION_POLICY.ko.md)**: Single Source of Truth(SSOT), 버전 관리 및 보존 규칙
+5. **[문서 카탈로그 원장](DOCUMENT_CATALOG.ko.md)**: 전체 문서 인벤토리 및 최신성 검증표
 
 ### 02. 🎨 2026 차세대 디자인 시스템 & UI/UX 가이드
 1. **[2026 차세대 핀테크 디자인 시스템 공식 지침서](DESIGN_SYSTEM_GUIDELINES.ko.md)**: Linear/Stripe/Apple 20만+ 래퍼런스 분석 기반 표면 Inset Border, 비대칭 벤토 그리드 2.0, Geist Mono Tabular 규격
