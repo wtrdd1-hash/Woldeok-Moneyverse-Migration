@@ -1,3 +1,21 @@
+## v2026.09.28.475 — Virtual Derivatives & 10x Leverage Futures Exchange (/stocks/derivatives) Full-Stack Engine, Liquidation Heatmap, Isolated Margin Calculator, and PnL Share Card Generator Release with 1,498 Sessions Preserved
+
+- **Release Version**: `prod-v475`
+- **Infrastructure**: Debian Mini-PC Zero-Downtime Blue-Green Rolling Promotion
+- **PostgreSQL Active Sessions**: **1,498 Active Sessions 100% Preserved (Zero Loss)**
+- **Key Feature Implementations**:
+  1. **10 Premier Virtual Stocks Isolated 1x~10x Long/Short Order Console (`/stocks/derivatives`)**:
+     - 1x to 10x leverage Long and Short position entries across 10 top stocks (WDG, FNAK, CHIMU, NEXUS, BIO, SOLAR, etc.).
+     - Real-time Isolated Margin liquidation price calculation with automated TP/SL orders.
+  2. **8-Hour Funding Rate Settlement Engine**:
+     - Global standard 8-hour funding rate mechanism (00:00, 08:00, 16:00 KST) mitigating spot-futures divergence.
+  3. **Real-time Liquidation Heatmap Visualization**:
+     - Visual cluster bar displaying potential Long/Short liquidation zones and squeeze risk metrics.
+  4. **Dual Settlement Liquidation Ledger (50% Insurance + 50% Hard Burn)**:
+     - 50% of liquidated margin allocated to Central Bank Insurance Fund and 50% permanently burned (Hard Sink).
+  5. **Dark FinTech PnL Share Card Modal**:
+     - One-click graphic PnL card generator and clipboard copy for Instagram, X, and Discord sharing.
+
 ## v2026.09.28.474 — 5 Next-Gen Expansion Domains (Virtual Real Estate, 10x Leverage Derivatives, Startup VC Angel Investment, Discord Club Warfare, No-Code Quant Studio) Integrated Master Specification Release
 
 - **Release Version**: `prod-v474` (Official Specification & Architecture Approved)

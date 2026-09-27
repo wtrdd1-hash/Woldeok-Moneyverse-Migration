@@ -2,7 +2,7 @@
 
 **English canonical** | [한국어](DOCUMENT_CATALOG.ko.md)
 
-> **Snapshot Version**: `v2026.09.28.474`  
+> **Snapshot Version**: `v2026.09.28.475`  
 > **Target Branch**: `main`  
 > **Purpose**: Official master inventory certifying documentation organization status.
 

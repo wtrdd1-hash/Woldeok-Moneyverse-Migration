@@ -90,8 +90,11 @@ flowchart TD
 - Automated 15% passive fee distribution to land owners and 0.5%/wk property tax deflationary sink.
 
 ### 3.9 Virtual Derivatives & 10x Leverage Futures Exchange (`/stocks/derivatives`)
-- 1x ~ 10x Isolated/Cross margin Long and Short leverage trading on 10 virtual stocks.
-- 8-hour funding rate mechanism, 80% margin call notifications, and Central Bank liquidation insurance fund.
+- 1x ~ 10x Isolated margin Long and Short leverage trading across 10 virtual premier stocks (WDG, FNAK, CHIMU, etc.).
+- Global standard 8-hour funding rate mechanism (00:00, 08:00, 16:00 KST) and real-time Liquidation Heatmap visualization.
+- Automated Take-Profit (TP) and Stop-Loss (SL) trigger orders.
+- Dual-settlement liquidation ledger: 50% allocated to Central Bank Insurance Fund and 50% permanently burned (Hard Sink) to eliminate inflation.
+- One-click dark FinTech PnL share card generator for Instagram and Discord.
 
 ### 3.10 Virtual Startup VC Angel Investment & Crowdfunding (`/businesses/ventures`)
 - User-founded virtual enterprises across 5 tech domains with 30% equity public crowdfunding IPOs.

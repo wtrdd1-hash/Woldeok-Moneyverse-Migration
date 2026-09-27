@@ -4741,7 +4741,7 @@ flowchart TD
 
 ---
 
-## 📋 [Integrated Final Spec & Action Plan] 최종 통합 구현 명세
+## 📋 [v25 Action Plan] v25 통합 구현 명세
 ### User Review Required
 - 신규 5대 도메인(가상 부동산, 10x 레버리지 파생상품, 스타트업 VC, 클럽 공성전, 퀀트 봇 스튜디오) 중 최우선 순위로 구현할 모듈 선정 및 파라미터 조율.
 
@@ -4756,6 +4756,82 @@ flowchart TD
 - 프론트엔드/백엔드 Vitest 단위/통합 테스트 스위트 확장 및 100% 통과 검증.
 - Playwright E2E 인터랙션 검증.
 - 운영 서버 무중단 블루-그린 배포 및 1,498개 세션 무손실 확인.
+
+---
+
+## 🏛️ [v26 Specification] 가상 파생상품 & 10x 레버리지 선물 거래소 (`/stocks/derivatives`) 풀스택 구축 (누적 추가)
+
+### 1. 🎯 확정 사양 및 아키텍처 개요
+사용자 조율 문답(A1~A5) 확정 사항에 따라 2단계인 **가상 파생상품 & 10x 레버리지 선물 거래소 (`/stocks/derivatives`)**를 풀스택으로 완성합니다.
+
+```mermaid
+flowchart TD
+    subgraph Client_Derivatives["가상 파생상품 거래소 UI (/stocks/derivatives)"]
+        A["10대 종목 롱/숏 주문 콘솔 (1x~10x 레버리지)"] --> B["격리 마진(Isolated) 증거금 계산 & 예상 청산가 실시간 산출"]
+        A --> C["목표가/손절가(TP/SL) 자동 예약 엔진"]
+        D["활성 포지션 콘솔 & 실시간 미실현 PnL 게이지"] --> E["인스타그램/디스코드 자랑용 PnL 수익률 카드 생성기"]
+        F["10대 가상 주식 실시간 청산 히트맵 (Liquidation Heatmap)"]
+        G["8시간 주기 펀딩비 카운트다운 (00/08/16시 괴리율 연동)"]
+    end
+
+    subgraph Contract_Engine["계약 & 정산 엔진 (packages/contract)"]
+        B --> H["calculateLiquidationPrice()"]
+        B --> I["calculateDerivativesPnL()"]
+        G --> J["calculateFundingFee()"]
+        K["강제 청산 & 소각 엔진"] --> L["50% 중앙은행 보험펀드 적립 + 50% WLD 영구 소각 (Hard Sink)"]
+    end
+```
+
+### 2. 📦 [파트 1] 공유 계약 패키지 (`packages/contract/src/derivatives.ts`)
+- **파생상품 DTO 및 타입 정의**:
+  - `PositionSide`: `'LONG' | 'SHORT'`
+  - `MarginMode`: `'ISOLATED'`
+  - `DerivativesPosition`: 포지션 ID, 심볼, 사이드, 레버리지(1~10x), 진입가, 수량, 증거금, 청산가, TP/SL, 미실현 PnL
+  - `FundingRateInfo`: 심볼, 현재 펀딩비율(%), 다음 펀딩 시각(KST), 예상 펀딩 수수료
+  - `LiquidationHeatmapItem`: 심볼, 현재가, 롱 청산 위험가, 숏 청산 위험가, 청산 볼륨
+- **핵심 금융 수학 함수**:
+  - `calculateLiquidationPrice(entryPrice, leverage, side, maintenanceMarginRate = 0.05)`:
+    - 롱 청산가 = entryPrice * (1 - (1 / leverage) + maintenanceMarginRate)
+    - 숏 청산가 = entryPrice * (1 + (1 / leverage) - maintenanceMarginRate)
+  - `calculateDerivativesPnL(entryPrice, currentPrice, quantity, leverage, side)`:
+    - 롱 PnL = (currentPrice - entryPrice) * quantity * leverage
+    - 숏 PnL = (entryPrice - currentPrice) * quantity * leverage
+    - ROI(%) = (PnL / margin) * 100
+  - `calculateFundingFee(positionValue, fundingRate)`: 포지션 가치 * 펀딩비율
+  - `calculateLiquidationSettlement(margin)`: `{ insuranceFundDeposit: margin * 0.5, hardBurnWld: margin * 0.5 }`
+
+### 3. 📱 [파트 2] 프론트엔드 인터랙티브 화면 (`frontend/src/app/stocks/derivatives/page.tsx`)
+- **10대 가상 주식 롱/숏 주문 콘솔**:
+  - 종목 선택기 (WDG, FNAK, CHIMU, NEXUS, BIO, SOLAR 등)
+  - 1x ~ 10x 레버리지 인터랙티브 슬라이더 및 프리셋 (1x, 2x, 5x, 10x)
+  - 증거금 입력 및 WLD 지갑 잔고 연동 (25%, 50%, 75%, 100% 퀵 버튼)
+  - 진입가, 수량, 예상 청산가, 청산 방어 마진율 실시간 계산기
+  - TP (익절가) / SL (손절가) 토글 및 자동 예약 필드
+- **활성 포지션 모니터링 & PnL 실시간 게이지**:
+  - 보유 중인 격리 마진 포지션 카드 (실시간 변동 시세에 따른 PnL 및 ROI 색상 점멸)
+  - [시장가 포지션 종료], [TP/SL 수정] 원터치 액션 버튼
+  - 8시간 주기 펀딩비 카운트다운 타이머 (00:00, 08:00, 16:00 기준)
+- **인스타그램/디스코드 자랑용 PnL 수익률 카드 모달**:
+  - 깔끔한 다크 핀테크 스타일의 PnL 그래픽 카드 (종목명, 레버리지, 롱/숏 배지, 수익률 %, WLD 손익, 월덕 워터마크)
+  - [이미지 다운로드], [클립보드 복사] 원클릭 지원
+- **10대 가상 주식 실시간 청산 히트맵 (Liquidation Heatmap)**:
+  - 현재가 기준 롱/숏 청산 클러스터 가격대 시각화 게이지 바
+  - 시장 전반의 레버리지 쏠림(Long/Short Ratio) 및 잠재적 스퀴즈 위험도 표시
+
+### 4. 🧪 [파트 3] 단위 테스트 및 정적 검증
+- `frontend/src/app/stocks/derivatives/derivatives.test.tsx` 작성.
+- 청산가 계산, PnL/ROI 연산, 펀딩비 정산, 50% 소각 원장 분기 검증.
+
+### 5. 📑 [파트 4] 기획서 및 문서 카탈로그 동기화
+- `docs/APP_SPEC_AND_USER_GUIDE.ko.md` / `docs/APP_SPEC_AND_USER_GUIDE.md`
+- `docs/INDEX.ko.md` / `docs/INDEX.md`
+- `docs/DOCUMENT_CATALOG.ko.md` / `docs/DOCUMENT_CATALOG.md`
+- `docs/UPDATE_LOG.ko.md` / `docs/UPDATE_LOG.md`
+
+### 6. 🚀 [파트 5] 무중단 프로덕션 배포 (`prod-v475`)
+- 미니 PC 원격 서버 풀, 빌드, 무중단 승격 배포.
+- 1,498개 활성 세션 100% 무손실 상태 확인.
+
 
 
 
