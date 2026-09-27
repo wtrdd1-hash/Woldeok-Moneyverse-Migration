@@ -520,6 +520,8 @@ export default function AuctionMarketplacePage() {
               </div>
             </div>
           </div>
+        )}
+
         {/* Auction Win Celebration Modal */}
         {winningCelebration && (
           <AuctionWinCelebrationModal

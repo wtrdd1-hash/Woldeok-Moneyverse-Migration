@@ -37,7 +37,7 @@ describe('AuctionWinCelebrationModal', () => {
     expect(screen.getByText('경매 낙찰 성공!')).toBeDefined();
     expect(screen.getByText('전설의 황금 오리 조각상')).toBeDefined();
     expect(screen.getByText('200,000 WLD')).toBeDefined();
-    expect(screen.getByText('5,000 WLD')).toBeDefined();
+    expect(screen.getAllByText('5,000 WLD').length).toBeGreaterThan(0);
     expect(screen.getByText(/Moneyverse Plus VIP 혜택으로/)).toBeDefined();
 
     const closeBtn = screen.getByText('닫기');

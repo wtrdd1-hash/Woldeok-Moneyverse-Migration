@@ -73,10 +73,9 @@ export function VipThemeSelector({
   selectedTheme,
   onSelectTheme,
 }: VipThemeSelectorProps) {
-  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(true);
 
   useEffect(() => {
-    setMounted(true);
     const saved = localStorage.getItem('moneyverse_vip_neon_theme') as VipNeonTheme | null;
     if (saved && VIP_THEME_OPTIONS.some((t) => t.id === saved)) {
       onSelectTheme(saved);
