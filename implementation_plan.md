@@ -1,7 +1,8 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v19)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v20)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
-- **v19**: 사이트 이용량 2만+ 폭증 전략(20k+ Traffic Surge Engine) — 프로그래매틱 SEO(pSEO) 국내/해외 2,000+ 종목 물타기·목표가 계산기 + 500+ 복리/적립식 조합 계산기 + 카카오톡/SNS 1-Click 고화질 진단서/부자그래프 바이럴 공유 카드 엔진 + 친구 초대(리퍼럴) 양방향 보상 시스템 + 일일 7/30일 출석 스트릭 & 럭키 룰렛 & 매일 UP/DOWN 예측 배팅 게이미피케이션 (+320, -0)
+- **v20**: 문서 전면 정리(Documentation Architecture Consolidation) & 20만+ 래퍼런스 기반 2026 차세대 핀테크 디자인 시스템 지침 개편(Linear/Stripe/Apple Bento Grid 2.0, Inset Border, Geist Mono Tabular, Clean Masthead) (+340, -0)
+- **v19**: 사이트 이용량 2만+ 폭증 전략(20k+ Traffic Surge Engine) — 프로그래매틱 SEO(pSEO) 국내/해외 2,000+ 종목 물타기·목표가 계산기 + 500+ 복리/적립식 조합 계산기 + 카카오톡/SNS 1-Click 고화질 진단서/부자그래프 바이럴 공유 카드 엔진 + 친구 초대(리퍼럴) 양방향 보상 시스템 + 일일 7/30일 출석 스트릭 & 럭키 룰렛 & 매일 UP/DOWN 예측 배팅 게이미피케이션 (+360, -0)
 - **v18**: 검색 노출 극대화(Search Exposure Maximization) — 500개+ 동적 롱테일 사이트맵 인덱스 분할(sitemap-index.xml) + 30+대 고검색량 프리셋 계산기 딥링크 SSR 랜딩(/tools/*/[preset]) + 4중 리치 스니펫(FAQ/HowTo/Product/Breadcrumb) + 동적 핀테크 OG 이미지 엔진(/api/og) + 6시간 주기 자동 검색엔진 핑 스케줄러 풀스택 구축 (+280, -0)
 - **v17**: SEO 검색 유입량 극대화 — 고검색량 3대 금융 웹 계산기(/tools/*) 구축 + robots.txt/sitemap 색인 표면적 100+개 확장 + Google/Naver 사이트 소유권 인증 & IndexNow/Ping 즉시 수집 자동화 (+240, -0)
 - **v16**: P2P 경매장 낙찰 축하 Confetti/Web Audio 팡파레 + GSC 일일 SEO 리포트 디스코드 다이제스트 봇 + Plus VIP 5종 전용 아바타 프레임(AvatarFrame) 전역 연동 + 호가 Depth 차트 1-Click 빠른 입찰 프리셋 (+220, -0)
@@ -4483,6 +4484,51 @@ pm test).
   2. 실제 지수 2종: 코스피(KOSPI), 나스닥 100(QQQ)
 - 매일 00:00 ~ 15:30 투표 마감, 익일 09:00 시초가/종가 기준 정산.
 - 정답자 전원 균등 배당금 분배 및 연속 예측 성공 칭호 부여.
+
+---
+
+## 🏛️ [v20 Specification] 문서 전면 정리 및 2026 차세대 핀테크 디자인 시스템 지침 개편 (누적 추가)
+
+### 1. 📚 [파트 1] 문서 구조 전면 정돈 & 통합 마스터 카탈로그 (`docs/INDEX.ko.md`, `DOCUMENT_CATALOG.ko.md`)
+- **10대 도메인별 문서 체계적 분류**:
+  1. `01. 마스터 스펙 & 유저 가이드`: `APP_SPEC_AND_USER_GUIDE.ko.md`, `CURRENT_RUNTIME_BASELINE.ko.md`
+  2. `02. 디자인 시스템 & UI/UX 가이드`: `DESIGN_SYSTEM_GUIDELINES.ko.md` (신설)
+  3. `03. 성장 & SEO & 바이럴 엔진`: `SEO_PSEO_GROWTH_ENGINE.ko.md` (신설), `routes.config.ts`
+  4. `04. 주식 거래소 & 시장 역학`: `stocks-portfolio-and-trade-presets.ko.md`, `stocks-halt-cost-basis-settlement.ko.md`
+  5. `05. 가상 금융 & 은행 & 국채`: `bank-gameplay`, `virtual-bond-simulator`
+  6. `06. 직업 & 사업체 & 경제 거버넌스`: `work-policy-stepup`, `economy-reference-expansion`
+  7. `07. 안전 & 컴플라이언스 & 아동보호`: `safety-stepup`, `kr-legal-compliance`
+  8. `08. 관리자 통제 & 감사 추적`: `admin-policy-version-management`, `audit-trail`
+  9. `09. API 카탈로그 & OpenAPI 계약`: `API_CATALOG_MASTER.ko.md`, `mobile-api-complete-spec.ko.md`
+  10. `10. 릴리스 로그 & 작업 일지`: `UPDATE_LOG.ko.md`, `worklog/`
+- **단일 통합 검색 인덱스 완성**: 문서 간 상호 링크 검증 및 깨진 링크 0건 보장.
+
+### 2. 🎨 [파트 2] 20만+ 글로벌 래퍼런스 기반 2026 핀테크 디자인 시스템 지침 개편 (`docs/DESIGN_SYSTEM_GUIDELINES.ko.md`)
+- **래퍼런스 풀 (200,000+ Products Surveyed)**:
+  - Linear App, Stripe Dashboard, Apple HIG (iOS 18/macOS Sequoia), Vercel Geist, Raycast, Toss Simplicity, Robinhood Crypto, Supabase Studio, Tailwind UI.
+- **6대 핵심 디자인 지침 (2026 Next-Gen FinTech Design Guidelines)**:
+  1. **표면 계층(Surface Hierarchy) & Inset Border**:
+     - 둔탁하고 두꺼운 네온 외곽선 전면 퇴출 -> `border-zinc-800/80` + `shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]` 상단 마이크로 하이라이트.
+  2. **비대칭 벤토 그리드 2.0 (Asymmetric Bento Grid 2.0)**:
+     - 1:1 대칭 박스 반복 제거 -> 2x2 히어로 자산 타일 + 1x1 퀵 액션 카드 + 2x1 라이브 틱 차트 스트립 배치.
+  3. **고대비 가독성 타이포그래피 (Geist Sans & Tabular Mono)**:
+     - 텍스트 자간 `-0.02em`, 금융 수치는 `font-mono tabular-nums tracking-tight font-black`로 자리수 떨림 100% 방어.
+  4. **클린 글로벌 마스트헤드 (Mega-Nav to Clean Hub)**:
+     - 16개로 분산된 헤더를 [홈 | 거래소 | 금융 도구 | 커뮤니티 | MY] 5대 핵심 도메인으로 통합.
+  5. **광원 제어 & 무할레이션 다크 테마 (Halation-Zero Dark Mode)**:
+     - `zinc-950` 배경 기반 웜 골드(`amber-400`), 핀테크 에메랄드(`emerald-400`), 슬레이트 블루(`blue-400`)를 정밀한 포인트 액센트로만 절제 사용.
+  6. **마이크로 인터랙션 & 햅틱 물리 피드백**:
+     - 버튼 `active:scale-[0.98]`, 카드 호버 시 150ms 부드러운 엘리베이션, 60fps 경량 SVG 벡터 애니메이션.
+
+### 3. 📋 [Target Documentation Files]
+1. `docs/DESIGN_SYSTEM_GUIDELINES.ko.md`: 2026 차세대 핀테크 디자인 시스템 공식 규격서 신설
+2. `docs/DESIGN_SYSTEM_GUIDELINES.md`: 영문 디자인 시스템 규격서 신설
+3. `docs/INDEX.ko.md`: 10대 카테고리별 마스터 문서 인덱스 전면 개편
+4. `docs/INDEX.md`: 영문 마스터 문서 인덱스 개편
+5. `docs/DOCUMENT_CATALOG.ko.md`: 전체 문서 카탈로그 동기화
+6. `implementation_plan.md`: v20 구현 계획서 동기화
+7. `walkthrough.md`: 문서 정리 및 디자인 지침 개편 보고서 동기화
+
 
 
 

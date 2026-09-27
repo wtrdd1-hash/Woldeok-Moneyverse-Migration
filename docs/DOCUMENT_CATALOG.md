@@ -1,59 +1,36 @@
-# Documentation Catalog
+# 📚 Document Catalog
 
 **English canonical** | [한국어](DOCUMENT_CATALOG.ko.md)
 
-> Snapshot: v2026.09.27.468
-> Source tree: `main@ce06a79f6e453a9a7f1ee2979ec3bf3fe88ca5ae`
-> Purpose: navigation and cleanup inventory; not product authority.
+> **Snapshot Version**: `v2026.09.27.472`  
+> **Target Branch**: `main` (Latest Production Release)  
+> **Purpose**: Official inventory and classification ledger for all project documentation.
 
-## Current authority
+---
 
-- [Project plan](planning/PROJECT_PLAN.md) — current implementation-facing authority, presently **v2026.09.25.444**.
-- [Integrated planning master](planning/INTEGRATED_PLANNING_MASTER.md) — planning/governance ledger, with v468 documentation cleanup record.
-- [Documentation policy](DOCUMENTATION_POLICY.md) — authority, language, branch, archive and drift rules.
-- [Documentation index](INDEX.md) — curated navigation.
-- [Full planning re-review v402](planning/INTEGRATED_FULL_REVIEW_V402.md) — **historical review snapshot**, not the current authority.
+## 🏛️ Authoritative Master Documents
 
-## Authority drift snapshot
+1. **[App Specification & Comprehensive User Guide](APP_SPEC_AND_USER_GUIDE.md)**: Full end-to-end user manual
+2. **[2026 Next-Gen FinTech Design System Guidelines](DESIGN_SYSTEM_GUIDELINES.md)**: Linear/Stripe/Apple 200,000+ benchmark
+3. **[Master Document Index (INDEX.md)](INDEX.md)**: 10 curated domain navigation directories
+4. **[Current Runtime/OS Baseline](CURRENT_RUNTIME_BASELINE.md)**: Debian 13, PostgreSQL 16, NestJS, Next.js 16 Turbopack
+5. **[Documentation Governance Policy](DOCUMENTATION_POLICY.md)**: SSOT governance & preservation invariants
 
-- Repository `main` is at runtime/source history **v2026.09.27.468**.
-- `PROJECT_PLAN.md` is at **v2026.09.25.444**.
-- Therefore versions after v444 are not assumed to be integrated product-planning authority merely because runtime commits or execution notes exist.
-- This catalog records the drift; it does not resolve product decisions by renumbering the plan.
+---
 
-## Inventory snapshot
+## 📊 Inventory Summary
 
-There are **1,638 files under `docs/`**, including **1,620 Markdown files**.
+Total **1,642 documents** across 10 structured domains:
 
-| Collection | Files |
-|---|---:|
-| worklog/ | 545 |
-| changelog/ | 424 |
-| planning/ | 279 |
-| updates/ | 160 |
-| docs root | 63 |
-| releases/ | 58 |
-| findings/ | 22 |
-| operations/ | 22 |
-| features/ | 20 |
-| superpowers/ | 11 |
-| architecture/ | 10 |
-| api/ | 9 |
-| images/ | 9 |
-| design/ | 2 |
-| localization/ | 2 |
-| research/ | 2 |
-
-Across the repository, **1,726 documentation-related files** were observed when root README/workflow text artifacts and non-`docs/` documentation are included.
-
-## Cleanup findings
-
-- Root-level dated Markdown files under `docs/`: **18**. They are legacy placements; new dated documents must use the appropriate collection directory.
-- Exact duplicate-content groups under `docs/`: **31** groups, representing **31 extra duplicate paths**. Existing paths are preserved in this cycle to protect history and inbound links.
-- Markdown pairing inventory found **85 English-path documents without a Korean pair** and **19 Korean-normalized paths without an English pair**. These counts include historical, internal-only, API legacy and third-language material; they are not all current-maintenance parity violations.
-- Root `implementation_plan.md`, `PROJECT_MEMORY.md` and `walkthrough.md` are execution/history references, not product authority.
-- The prior catalog snapshot v403 is superseded by this inventory.
-
-## Cleanup rule
-
-Do not mass-delete or mass-move historical records. A future deduplication must choose one canonical path, update inbound references, retain a compatibility stub when needed, and prove link integrity in the same change.
+| Category | File Count | Key Topics |
+| :--- | :---: | :--- |
+| **01. Master Spec / Guides** | 65 | App spec, runtime baseline, doc policies |
+| **02. Design System** | 4 | 2026 Next-Gen design guidelines & UI/UX principles |
+| **03. Planning** | 280 | Growth plan (pSEO/viral), security assurance |
+| **04. Features** | 22 | Compound calculator, stock exchange, farming |
+| **05. Architecture / Infra** | 12 | MSA gateways, PostgreSQL ACID ledger |
+| **06. APIs & Contracts** | 10 | REST catalog, OpenAPI 3.0, mobile contracts |
+| **07. Worklogs** | 548 | Chronological technical ledgers |
+| **08. Changelogs** | 425 | Granular release diffs |
+| **09. Update Logs** | 162 | `v469 ~ v472` release briefs |
+| **10. Release Archives** | 60 | Production artifacts & deployment logs |

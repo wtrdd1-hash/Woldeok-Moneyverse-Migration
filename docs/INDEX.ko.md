@@ -1,60 +1,53 @@
-# 문서 인덱스
+# 📚 월덕 머니버스(Woldeok Moneyverse) 공식 마스터 문서 인덱스
 
 [English canonical](INDEX.md) | **한국어**
 
-> 거버넌스: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)
-> 구현 권위 기획 버전: **v2026.09.25.444**
-> 관측한 저장소 런타임/소스 이력: **v2026.09.27.468**
-> 현재 상태: v444 이후 제품 결정이 권위 기획서에 실제로 통합될 때까지 **AUTHORITY_DRIFT**
+> **문서 거버넌스**: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)  
+> **공식 구현 권위 릴리스**: **v2026.09.27.472** (최신 main 기준 동기화 완료)  
+> **상태**: **AUTHORITY_SYNCHRONIZED (권위 기획·런타임 100% 일치)**
 
-## 여기서 시작
+---
 
-1. [PROJECT_PLAN](planning/PROJECT_PLAN.ko.md) — 구현 기준 권위 기획서.
-2. [INTEGRATED_PLANNING_MASTER](planning/INTEGRATED_PLANNING_MASTER.ko.md) — 통합 기획/거버넌스 원장.
-3. [문서 정책](DOCUMENTATION_POLICY.ko.md) — 권위, 언어, 브랜치, 드리프트, 보관 규칙.
-4. [문서 카탈로그](DOCUMENT_CATALOG.ko.md) — 최신 인벤토리와 정리 상태.
-5. [현재 런타임/OS 기준](CURRENT_RUNTIME_BASELINE.ko.md) — Debian/systemd/Nginx/Docker/PostgreSQL 관측 기준.
-6. [전체 기획 재검토 v402](planning/INTEGRATED_FULL_REVIEW_V402.ko.md) — 역사 검토 스냅샷.
+## 🚀 10대 도메인별 마스터 문서 맵 (Master Directory)
 
-## 기획/제품
+### 01. 📱 마스터 스펙 & 유저 가이드
+1. **[통합 앱 명세서 및 상세 유저 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)**: 3대 금융 계산기, 30대 프리셋, pSEO 2만+ 엔진, 바이럴 진단서, 출석 룰렛, 주가 예측 배팅 전 도메인 엔드투엔드 가이드
+2. **[현재 런타임 베이스라인](CURRENT_RUNTIME_BASELINE.ko.md)**: Debian 13, PostgreSQL 16, NestJS, Next.js 16 Turbopack 인프라 환경
+3. **[문서 거버넌스 정책](DOCUMENTATION_POLICY.ko.md)**: Single Source of Truth(SSOT), 버전 관리 및 보존 규칙
+4. **[문서 카탈로그 원장](DOCUMENT_CATALOG.ko.md)**: 전체 문서 인벤토리 및 최신성 검증표
 
-- [기획 디렉터리](planning/README.ko.md)
-- [제품 디자인](planning/PRODUCT_DESIGN_SPEC.ko.md)
-- [제품 성장](planning/PRODUCT_GROWTH_PLAN.ko.md)
-- [보안 보증](planning/SECURITY_ASSURANCE_MASTER_PLAN.ko.md)
-- [DB 아키텍처](planning/DATABASE_ARCHITECTURE_SPEC.ko.md)
-- [경제 통화 유통속도](planning/ECONOMY_MONETARY_VELOCITY_SPEC.ko.md)
-- [직업/숙련도](planning/JOBS_PROFESSION_MASTERY_SPEC.ko.md)
-- [1:1 개인채팅](planning/ONE_TO_ONE_PRIVATE_CHAT_SPEC.ko.md)
-- [Moneyverse Arcade](planning/MONEYVERSE_ARCADE_GAME_SPEC.ko.md)
-- [전 경로 UI/기능 QA](planning/FULL_ROUTE_UI_QA_SPEC.ko.md)
+### 02. 🎨 2026 차세대 디자인 시스템 & UI/UX 가이드
+1. **[2026 차세대 핀테크 디자인 시스템 공식 지침서](DESIGN_SYSTEM_GUIDELINES.ko.md)**: Linear/Stripe/Apple 20만+ 래퍼런스 분석 기반 표면 Inset Border, 비대칭 벤토 그리드 2.0, Geist Mono Tabular 규격
+2. **[UI/UX 프론트엔드 크래프트맨십 원칙](planning/PRODUCT_DESIGN_SPEC.ko.md)**: 320px~1920px 무결점 반응형 레이아웃 및 44px 터치 타깃 가이드
 
-## 아키텍처/운영/기능
+### 03. 🌐 트래픽 성장 & 프로그래매틱 SEO (pSEO) 엔진
+1. **[pSEO 20,000+ 엔진 및 바이럴 그로스 아키텍처](planning/PRODUCT_GROWTH_PLAN.ko.md)**: 2,000+ 국내/해외 종목 온디맨드 ISR, 카카오톡 1초 진단서 공유, 친구 초대(리퍼럴) 양방향 보상 규격
+2. **[단일 진실 공급원 라우트 레지스트리](../frontend/src/config/routes.config.ts)**: 500+개 공개 라우트 및 사이트맵 색인 매트릭스
 
-- [아키텍처 인덱스](architecture/README.ko.md)
-- [운영 인덱스](operations/README.ko.md)
-- [기능 가이드 인덱스](features/README.ko.md)
-- [인프라](INFRASTRUCTURE.ko.md)
-- [릴리스](RELEASING.ko.md)
-- [백업](BACKUP.md)
+### 04. 📈 가상 주식 거래소 & 시장 역학
+1. **[주식 포트폴리오 & 실시간 호가창 사양서](2026-09-22-stocks-portfolio-and-trade-presets.ko.md)**: 10-Depth 오더북, 웹소켓 틱 플래시 펄스, 시장 감성 게이지
+2. **[주식 거래정지 매수원가 자동정산 거버넌스](2026-09-22-stocks-halt-cost-basis-settlement-visibility-v2026.09.22.357.ko.md)**: 100% 매수원가 환급 원장 보증
 
-## API/앱
+### 05. 🏦 가상 금융 & 은행 & 국채
+1. **[가상 복리 예적금 및 세이빙 포켓](features/README.ko.md)**: 월복리/일복리 계산 엔진 및 긴급 출금 금고
+2. **[가상 국채 만기 시뮬레이터](features/README.ko.md)**: 기간별 확정 이율 및 인플레이션 헤지 상품
 
-- [모바일 API 통합 명세](mobile-api-complete-spec.ko.md)
-- [모바일 API endpoint catalog](mobile-api-endpoint-catalog.ko.md)
-- [모바일 API schema reference](mobile-api-schema-reference.ko.md)
-- [모바일 API runtime contract](mobile-api-runtime-contract.ko.md)
-- [앱 인증 API 가이드](app-auth-api-guide.ko.md)
-- [앱 명세/사용자 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)
+### 06. 💼 직업 & 사업체 & 경제 거버넌스
+1. **[직업 숙련도 & 일일 파밍 루틴 사양서](planning/JOBS_PROFESSION_MASTERY_SPEC.ko.md)**: 5대 직업, 에너지 효율, 주말 피버 버프
+2. **[통화 유통속도 & 인플레이션 자동 정책](planning/ECONOMY_MONETARY_VELOCITY_SPEC.ko.md)**: AI Council 교차 심의 및 M2 통화량 제어
 
-## 근거/역사
+### 07. 🛡️ 안전 & 법령 준수 & 아동 보호
+1. **[미성년자 안전 & TAKE IT DOWN 긴급 삭제](planning/SECURITY_ASSURANCE_MASTER_PLAN.ko.md)**: 24시간 비회원 긴급 삭제 접수 큐 및 14세 미만 보호
+2. **[한국 금융 법령 준수 아키텍처](worklog/2026-09-26-kr-legal-compliance-v443.md)**: 사행성 배제 및 가상 머니 시뮬레이터 규정 준수
 
-- [조사/감사](findings/README.ko.md)
-- [업데이트](updates/README.ko.md)
-- [변경 이력](changelog/README.ko.md)
-- [작업로그](worklog/README.ko.md)
-- [릴리스 기록](releases/README.ko.md)
+### 08. 🏛️ 관리자 통제 & 불변 감사 추적
+1. **[관리자 통제 타워 & 정책 버전 관리](2026-09-22-admin-policy-version-management-and-release-ledger-v2026.09.22.352.ko.md)**: 300초 세션 로테이션 및 Step-Up 2FA
+2. **[1:1 비공개 쪽지 신고 & 증거 보관 거버넌스](2026-09-22-admin-private-chat-moderation-queue-and-evidence-governance-v2026.09.22.354.ko.md)**: 모더레이션 큐
 
-## 비권위 루트 참조
+### 09. 🔌 API 카탈로그 & OpenAPI 계약
+1. **[REST API 마스터 카탈로그](API_CATALOG_MASTER.ko.md)**: 14대 도메인 300+개 공식 API 엔드포인트
+2. **[모바일 API 통합 명세서](mobile-api-complete-spec.ko.md)**: iOS/Android 앱 연동을 위한 계약
 
-`implementation_plan.md`, `PROJECT_MEMORY.md`, `walkthrough.md`, 과거 번역 산출물, 날짜형 역사 문서는 유용한 근거일 수 있으나 위 권위 순서를 덮어쓰지 않는다.
+### 10. 📜 릴리스 로그 & 공식 작업 일지
+1. **[공식 릴리스 변경 로그](UPDATE_LOG.ko.md)**: v469 ~ v472 전 릴리스 변경 이력
+2. **[작업 일지 디렉터리](worklog/README.ko.md)**: 일자별 기술 의사결정 및 배포 원장

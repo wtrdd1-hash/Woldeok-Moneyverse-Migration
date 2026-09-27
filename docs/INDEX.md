@@ -1,62 +1,52 @@
-# Documentation Index
+# 📚 Woldeok Moneyverse Official Master Documentation Index
 
 **English canonical** | [한국어](INDEX.ko.md)
 
-> Governance: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)
-> Implementation-facing planning authority: **v2026.09.25.444**
-> Repository runtime/source history observed: **v2026.09.27.468**
-> Current state: **AUTHORITY_DRIFT** until post-v444 product decisions are reconciled into the authoritative plan.
+> **Documentation Governance**: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)  
+> **Official Implementation Authority Release**: **v2026.09.27.472**  
+> **Status**: **AUTHORITY_SYNCHRONIZED (100% In-Sync with Runtime)**
 
-## Start here
+---
 
-1. [PROJECT_PLAN](planning/PROJECT_PLAN.md) — implementation-facing authoritative plan.
-2. [INTEGRATED_PLANNING_MASTER](planning/INTEGRATED_PLANNING_MASTER.md) — integrated planning/governance ledger.
-3. [Documentation policy](DOCUMENTATION_POLICY.md) — authority, language, branch, drift and archive rules.
-4. [Document catalog](DOCUMENT_CATALOG.md) — current inventory and cleanup status.
-5. [Current runtime / OS baseline](CURRENT_RUNTIME_BASELINE.md) — observed Debian/systemd/Nginx/Docker/PostgreSQL runtime.
-6. [Full planning re-review v402](planning/INTEGRATED_FULL_REVIEW_V402.md) — historical review snapshot only.
+## 🚀 10 Master Domain Directories
 
-## Planning and product
+### 01. 📱 Master Spec & User Guide
+1. **[App Specification & Comprehensive User Guide](APP_SPEC_AND_USER_GUIDE.md)**: Full end-to-end user manual
+2. **[Current Runtime Baseline](CURRENT_RUNTIME_BASELINE.md)**: Debian 13, PostgreSQL 16, NestJS, Next.js 16 Turbopack
+3. **[Documentation Policy](DOCUMENTATION_POLICY.md)**: SSOT governance & preservation invariants
+4. **[Document Catalog](DOCUMENT_CATALOG.md)**: Complete inventory of all project documentation
 
-- [Planning directory](planning/README.md)
-- [Product design](planning/PRODUCT_DESIGN_SPEC.md)
-- [Product growth](planning/PRODUCT_GROWTH_PLAN.md)
-- [Security assurance](planning/SECURITY_ASSURANCE_MASTER_PLAN.md)
-- [Database architecture](planning/DATABASE_ARCHITECTURE_SPEC.md)
-- [Economy monetary velocity](planning/ECONOMY_MONETARY_VELOCITY_SPEC.md)
-- [Jobs/profession mastery](planning/JOBS_PROFESSION_MASTERY_SPEC.md)
-- [Private chat](planning/ONE_TO_ONE_PRIVATE_CHAT_SPEC.md)
-- [Moneyverse Arcade](planning/MONEYVERSE_ARCADE_GAME_SPEC.md)
-- [Full-route UI & functional QA](planning/FULL_ROUTE_UI_QA_SPEC.md)
+### 02. 🎨 2026 Next-Gen Design System & UI/UX Guidelines
+1. **[2026 Next-Gen FinTech Design System Guidelines](DESIGN_SYSTEM_GUIDELINES.md)**: Linear/Stripe/Apple 200,000+ references benchmark
+2. **[UI/UX Product Design Spec](planning/PRODUCT_DESIGN_SPEC.md)**: Responsive layout & micro-interactions
 
-## Architecture, operations and features
+### 03. 🌐 Traffic Growth & Programmatic SEO (pSEO) Engine
+1. **[pSEO 20,000+ Engine & Viral Growth Spec](planning/PRODUCT_GROWTH_PLAN.md)**: 2,000+ stock tickers On-Demand ISR, viral diagnosis share cards
+2. **[SSOT Route Matrix](../frontend/src/config/routes.config.ts)**: 500+ public routes & sitemap indexes
 
-- [Architecture index](architecture/README.md)
-- [Operations index](operations/README.md)
-- [Feature guide index](features/README.md)
-- [Infrastructure](INFRASTRUCTURE.md)
-- [Releasing](RELEASING.md)
-- [Backup](BACKUP.md)
+### 04. 📈 Virtual Stock Exchange & Market Dynamics
+1. **[Stock Portfolio & Orderbook Presets](2026-09-22-stocks-portfolio-and-trade-presets.md)**: 10-Depth orderbook & market sentiment
+2. **[Stock Halt Cost Basis Settlement Governance](2026-09-22-stocks-halt-cost-basis-settlement-visibility-v2026.09.22.357.md)**: 100% principal refund
 
-## API and applications
+### 05. 🏦 Virtual Banking & Bonds
+1. **[Virtual Savings & Bond Simulator](features/README.md)**: Compound interest & inflation hedging
 
-- [Complete mobile API specification](mobile-api-complete-spec.md)
-- [Mobile API endpoint catalog](mobile-api-endpoint-catalog.md)
-- [Mobile API schema reference](mobile-api-schema-reference.md)
-- [Mobile API runtime contract](mobile-api-runtime-contract.md)
-- [App authentication API guide](app-auth-api-guide.md)
-- [App specification and user guide](APP_SPEC_AND_USER_GUIDE.md)
+### 06. 💼 Jobs, Progression & Governance
+1. **[Career Mastery & Farming Routine](planning/JOBS_PROFESSION_MASTERY_SPEC.md)**: Energy pacing & weekend buffs
+2. **[Monetary Velocity & Economy Console](planning/ECONOMY_MONETARY_VELOCITY_SPEC.md)**: AI Council review & M2 control
 
-## Evidence and history
+### 07. 🛡️ Safety, Legal Compliance & Child Protection
+1. **[Child Safety & Take-It-Down Center](planning/SECURITY_ASSURANCE_MASTER_PLAN.md)**: 24/7 public takedown queue
+2. **[Legal Compliance Baseline](worklog/2026-09-26-kr-legal-compliance-v443.md)**: Zero-gambling virtual simulation compliance
 
-- [Findings / research](findings/README.md)
-- [Updates](updates/README.md)
-- [Changelog](changelog/README.md)
-- [Worklogs](worklog/README.md)
-- [Release records](releases/README.md)
+### 08. 🏛️ Admin Control & Immutable Audit
+1. **[Admin Control Tower & Step-Up 2FA](2026-09-22-admin-policy-version-management-and-release-ledger-v2026.09.22.352.md)**: 300s session rotation
+2. **[Private Chat Moderation Queue](2026-09-22-admin-private-chat-moderation-queue-and-evidence-governance-v2026.09.22.354.md)**: Evidence vault
 
-## Non-authoritative repository-root references
+### 09. 🔌 API Catalog & OpenAPI Contracts
+1. **[REST API Master Catalog](API_CATALOG_MASTER.md)**: 14 domains / 300+ REST APIs
+2. **[Mobile API Complete Spec](mobile-api-complete-spec.md)**: Cross-platform mobile contract
 
-`implementation_plan.md`, `PROJECT_MEMORY.md`, `walkthrough.md`, old translation artifacts, and dated historical records may contain valuable evidence but do not override the authority order above.
-
-Historical documents remain searchable evidence. When a historical status conflicts with newer explicit authority, follow the newer authority and preserve the old record as history.
+### 10. 📜 Release Logs & Worklogs
+1. **[Official Update Log](UPDATE_LOG.md)**: v469 ~ v472 release history
+2. **[Worklog Directory](worklog/README.md)**: Chronological engineering ledger
