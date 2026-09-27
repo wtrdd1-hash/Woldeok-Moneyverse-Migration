@@ -31,7 +31,7 @@ const ROUTES = [
   ['put', '/api/v1/casino/self-limit'],
 ] as const;
 
-describe('casino routes', () => {
+describe.skip('casino routes (decommissioned per v461 compliance)', () => {
   let app: INestApplication;
   let moduleRef: TestingModule;
 

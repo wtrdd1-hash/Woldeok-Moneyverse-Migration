@@ -107,6 +107,12 @@ export const MONITORED_TARGET_URLS: readonly {
   { path: '/', category: 'hub', name: '월덕 머니버스 메인 포털' },
   { path: '/stocks', category: 'hub', name: '가상 주식 거래소 종합 허브' },
   { path: '/announcements', category: 'hub', name: '공식 공지사항 허브' },
+  { path: '/tools', category: 'hub', name: '금융 & 시뮬레이터 도구 허브' },
+  { path: '/tools/compound-calculator', category: 'guide', name: '복리 예금·적금 이자 계산기' },
+  { path: '/tools/stock-calculator', category: 'guide', name: '주식 물타기·평단가 계산기' },
+  { path: '/tools/farming-calculator', category: 'guide', name: '직업 파밍 수익 시뮬레이터' },
+  { path: '/newspaper', category: 'hub', name: 'AI 경제 브리프 & 시황 뉴스' },
+  { path: '/marketplace/auction', category: 'hub', name: 'P2P 실시간 경매장' },
 ];
 
 @Injectable()

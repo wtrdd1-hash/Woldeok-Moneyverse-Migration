@@ -1,6 +1,18 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v2)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v17)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v17**: SEO 검색 유입량 극대화 — 고검색량 3대 금융 웹 계산기(/tools/*) 구축 + robots.txt/sitemap 색인 표면적 100+개 확장 + Google/Naver 사이트 소유권 인증 & IndexNow/Ping 즉시 수집 자동화 (+240, -0)
+- **v16**: P2P 경매장 낙찰 축하 Confetti/Web Audio 팡파레 + GSC 일일 SEO 리포트 디스코드 다이제스트 봇 + Plus VIP 5종 전용 아바타 프레임(AvatarFrame) 전역 연동 + 호가 Depth 차트 1-Click 빠른 입찰 프리셋 (+220, -0)
+- **v15**: P2P 경매장 실시간 틱/호가 Depth 차트 + Plus VIP 5대 네온 테마 선택기 + GSC 6시간 크롤링 감사 & 디스코드 웹훅 알림봇 + 자동 프록시 입찰(Proxy Bidding) (+220, -0)
+- **v14**: P2P 경매장 WebSocket 실시간 브로드캐스팅 & 안티 스나이핑(+2분 연장) + Moneyverse Plus VIP 2.5% 수수료 감면 & 골드 테마 + GSC 1시간 TTL 캐싱 (+210, -0)
+- **v13**: Moneyverse Plus VIP 황금 상자 퀘스트 연동 + P2P 경매장 실시간 웹소켓 입찰 알림 스트림 + Google Search Console Search Analytics 실시간 차트 관제 (+220, -0)
+- **v12**: Google Search Console / Naver 웹마스터 도구 사이트맵 등록 자동화 & 실시간 봇 크롤링/인덱싱 관제 타워(/admin/seo) 구축 (+190, -0)
+- **v11**: SEO 검색 노출 쇄신(10대 주식 종목 공개 프리뷰 인덱싱 & 5대 금융 가이드 & hreflang) + 도파민 5대 API 프론트-백엔드 실시간 원장 연동 + Moneyverse Plus 유료/무료 멤버십 티어 풀스택 개발 (+180, -0)
+- **v10**: 도파민 5대 전용 API 완비 & 14대 도메인 API 실시간 관제 대시보드(/admin/api-health) 구축 (+45, -0)
+- **v9**: 사행성 카지노 API 전면 폐기 & 14대 도메인 300+개 API 공식 마스터 명세서 완결 (+55, -0)
+- **v8**: SEO 검색 노출 쇄신(10대 가상주식 공개 프리뷰 인덱싱, sitemap 다국어 hreflang 탑재, 금융 교육 필러 가이드 5종 허브 신설) 및 기획서 전수 정합화 사양 누적 (+65, -0)
+- **v7**: 일반 유저 전용 4대 도파민 패키지(황금 오리 피버·덕이 펫/포춘쿠키·호가창 여론 잭팟·1:1 즉석 미니 배틀) 및 홈 메인 스테이션 전면 배치 (+155, -0)
+- **v6**: Phase 3 도파민 3대 패키지(스타 드롭·프레스티지 환생·4인 공동 저축 팟) & 무료/유료 차등화 & SEO 검색 유입 & 법령 준수 아키텍처 (+165, -0)
 - **v88**: 다국어(i18n) 15만+ 어휘 코퍼스/용어사전 구축 & P0 SEO SSOT(routes.config.ts, sitemap 실제 일자, 비공개 라우트 완전 분리, 4개 국어 generateMetadata) 통합 구현 (+240, -0)
 - **v87**: 2차 심화 문답(비공개 라우트 sitemap 즉시 분리, `generateMetadata` 동적 4개 국어 메타데이터, ISR 3600s sitemap 캐싱, 1단계 P0 핫픽스 선착수, SEO/i18n 리그레션 가드 CI 자동화) 반영 누적 (+160, -0)
 - **v86**: 글로벌 SEO 쇄신 & 다국어(i18n) 아키텍처 개편 — 영어 기본/한국어 2순위, `/[locale]` 독립 라우팅, 단일 진실 공급원(`routes.config.ts`), sitemap `lastModified` 실제 일자 반영 1차 조율 수립 (+180, -0)
@@ -3642,36 +3654,650 @@ pm test).
 - `pnpm --filter frontend build` (Next.js 빌드 성공 검증).
 - 원격 미니PC `stage_v456.sh` 및 `promote_v456.sh` 실행을 통한 무중단 승격.
 - 활성 세션(1,376개) 무손실 보존 실측.
+---
+
+## 🚀 [v5 Specification] 2차 확정 사양(스트릭 내기·활동 드롭/경매장 5% 소각·호가창 슈퍼챗) 상세 명세 (신규 누적)
+
+### 1. 사용자 조율 결과 확정 (A1 ~ A5)
+1. **[패키지 구성] Duolingo 스트릭 내기 + Steam 활동 드롭/경매장 2대 패키지 우선 구현**:
+   - 일일 리텐션(D1~D7) 락인과 P2P 유료 수수료 소각 메커니즘을 동시 확보.
+2. **[스트릭 내기 규칙] 2배(200%) 환급 + 스트릭 프리즈 3회 기본 지급 후 유료화**:
+   - 7일 연속 출석 및 일일 미션 달성 시 배팅한 WLD의 200% 지급.
+   - 연속 일수가 끊길 위기 시 방어하는 '스트릭 프리즈'는 계정당 기본 3회 무료 제공 후 상점에서 유료 WLD 구매.
+3. **[P2P 경매장 BM] WLD 단일 통화 + 거래 대금 5% 전액 소각**:
+   - 경매 낙찰 시 매도자 수령 대금에서 5%가 플랫폼에 의해 즉시 소각되어 가상 경제 통화량 조절 및 디플레이션 유도.
+4. **[Twitch형 슈퍼챗 노출] 호가창 상단 + 메인 대시보드 롤링 티커 동시 노출**:
+   - 주식 거래소 호가창 상단과 메인 홈 대시보드 양쪽에 골드 폭죽 애니메이션과 함께 실시간 슈퍼챗 메시지 송출.
+5. **[자율 실행 권한] AI가 기획서 갱신 후 테스트 100% PASS 및 프로덕션 승격까지 완수**.
 
 ---
 
-## 🏛️ [v89 Specification] 글로벌 헤더 1024px~1535px 우측 잘림(Clipping) 원천 방어 및 4중 반응형 안전망 (누적 추가)
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `frontend/src/components/streak-wager-modal.tsx`: Duolingo형 7일 스트릭 내기 & 리그 카드
+- `frontend/src/components/streak-wager.test.tsx`: 스트릭 내기 200% 환급 및 프리즈 단위 테스트
+- `frontend/src/components/orderbook-superchat.tsx`: Twitch형 호가창 슈퍼챗 & 골드 폭죽 티커
+- `frontend/src/components/orderbook-superchat.test.tsx`: 슈퍼챗 발송 및 롤링 티커 렌더링 테스트
+- `frontend/src/app/marketplace/auction/page.tsx`: Steam형 P2P 아티팩트 경매장 & 5% 소각 콘솔
+- `frontend/src/app/marketplace/auction/auction.test.tsx`: 경매 입찰 및 5% 수수료 소각 단위 테스트
 
-### 1. 🎯 배경 및 현상 분석
-- **증상**: 1280px ~ 1535px 구간(표준 랩탑, 분할 화면, 데스크톱 창 모드)에서 상단 글로벌 헤더 우측의 `[내 계정]` 버튼 및 드롭다운 화살표가 화면 오른쪽 모서리에 칼로 자른 듯 잘려나가는(Clipping) 현상 발생.
-- **근본 원인**:
-  1. 과거 패치가 1024~1279px 구간만 고려하여 `hidden xl:inline`으로 땜질 처방하여, 1280px(xl)에 진입하는 순간 텍스트가 다시 켜지고 갭이 `xl:gap-5`(20px)로 팽창.
-  2. 로그인 + 관리자 세션 시 상단 메뉴가 10개에 달하여 가로 폭 요구량이 1,569px 이상으로 폭증.
-  3. 상위 `<header>`의 `overflow-hidden`과 모든 요소의 `whitespace-nowrap` + `shrink-0` 조합으로 인해 우측 끝 프로필 버튼이 화면 밖으로 밀려나 잘림.
+### Verification Plan
+- 프론트엔드 전체 Vitest 단위 테스트 100% PASS (131+개 파일)
+- Next.js 프로덕션 최적화 빌드 무결성 확인
+- `stage_v457.sh` & `promote_v457.sh` 무중단 블루-그린 승격 배포
+- PostgreSQL 활성 세션(1,377+) 100% 무손실 검증
 
-### 2. 🛡️ 4대 무결점 방어 아키텍처 (Multi-Viewport Zero-Clipping Guard)
-1. **우측 세션 컨트롤 텍스트 브레이크포인트 상향 (`2xl:` 1536px+ 규격)**:
-   - `[내 지갑]` 텍스트: `hidden 2xl:inline` (1536px 미만에서는 깔끔한 40px 지갑 아이콘 버튼으로 유지).
-   - `[내 계정]` 텍스트: `hidden 2xl:inline-block` (1536px 미만에서는 아바타 원형 아이콘 + 미니 화살표 48px 콤팩트 버튼으로 유지).
-   - 👉 우측 컨트롤에서 즉시 **120px 이상의 여유 공간 확보**.
-2. **상단 네비게이션 메뉴 10종의 적응형 여백 및 갭 최적화**:
-   - 갭: `lg:gap-1.5 xl:gap-2.5 2xl:gap-4`
-   - 패딩/폰트: `px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs 2xl:text-sm font-bold`
-   - 👉 10개 메뉴가 차지하는 너비를 825px에서 **530px**로 약 300px 대폭 절감.
-3. **우측 안전 패딩 및 클리핑 방지 레이아웃 (`pr-3 sm:pr-6 lg:pr-8 shrink-0`)**:
-   - 헤더 컨테이너 우측에 안전 마진을 강제하여 뷰포트 리사이징 시에도 우측 컨트롤이 화면 끝에 붙거나 1px이라도 밖으로 나가지 않도록 보장.
-4. **1280px 기준 가로 폭 계산 검증 (안전 마진 +229px)**:
-   - 가용 너비: 1,232px
-   - 로고(160px) + 네비게이션 10종(530px) + 우측 컨트롤(313px) = **총 1,003px**
-   - 👉 1280px 화면에서도 229px의 안전 여유 공간이 항시 확보되어 절대 잘리지 않음!
-   - 1024px(lg) 화면에서도 총 920px 수준으로 수용되어 안전하게 핏팅.
+---
 
-### 3. 📋 수정 파일 목록 및 검증 계획
-- `frontend/src/components/site-header.tsx`: 갭/패딩/2xl 텍스트 브레이크포인트 적용.
-- `frontend/src/components/site-header-responsive.test.tsx`: 2xl 브레이크포인트 및 1024~1535px 클리핑 불변식 테스트 갱신.
-- 단위 테스트 및 빌드 검증 후 무중단 승격 반영.
+## 🚀 [v6 Specification] Phase 3 도파민 3대 패키지(스타 드롭·프레스티지 환생·4인 공동 저축 팟) & 무료/유료 차등화 & SEO 검색 유입 & 법령 준수 아키텍처
+
+### 1. 사용자 조율 결과 확정 (A1 ~ A5)
+1. **[무료/유료 하이브리드 프리미엄 BM]**:
+   - **무료 유저(Free)**: 일일 스타 드롭 3회 무료 탭, 기본 프레스티지(환생) 배수 해금, 일반 4인 저축 팟 참여 가능.
+   - **유료/VIP 유저(Premium)**: 스타 드롭 확정 업그레이드 럭키 참(Lucky Charm), 환생 시 자산 30% 보존 보험 티켓, 고수익 프리미엄 저축 팟 개설권.
+2. **[Brawl Stars형 '스타 드롭 (Star Drop)' 5연속 탭 연출 & 투명 확률 공개]**:
+   - 상자를 탭할 때마다 60% 확률로 희귀 ➡️ 슈퍼희귀 ➡️ 에픽 ➡️ 신화 ➡️ 전설로 단계별 승급 애니메이션 연출.
+   - 2024년 개정 게임산업진흥법 확률형 아이템 정보공개 의무를 준수하여 실시간 확률표 모달 탑재.
+3. **[Cookie Clicker형 프레스티지(환생) 시스템 & 대규모 통화량 소각]**:
+   - 누적 자산 100% 영구 소각(Reset)의 대가로 영구 패시브 생산력 배수(x2~x50) 및 고대 유물(Ancient Relic) 3슬롯 해금.
+   - 유료 자산 보존 보험 사용 시 30%의 WLD를 다음 생으로 이월.
+4. **[Toss형 4인 소셜 공동 저축 챌린지 팟 & 친구 찌르기]**:
+   - 4인이 모여 7일간 매일 저축 미션 수행 시 +5% 보너스 이자 및 황금 상자 잭팟 분배.
+   - 중도 포기/탈퇴 시 10% 페널티 풀 원천 소각. 익명 가상 닉네임 친구 찌르기(Nudge)로 100% PII/GDPR 보호.
+5. **[SEO 검색 최적화 & 사행성/현금환전 법령 위반 원천 차단]**:
+   - `/guide/dopamine-system`: 도파민 보상 시스템 및 공정 확률 안내 SSOT 공개 인덱싱 가이드 페이지 신설 (`isPublic: true, indexable: true`).
+   - 모든 화면에 '100% 가상 머니 시뮬레이터 · 현금 환전 및 재화 매매 불가' 법적 고지 뱃지 상시 부착.
+   - 실제 게임 실행/인터랙션 라우트는 `robots.txt Disallow` 및 `noindex` 유지.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `frontend/src/components/star-drop-modal.tsx`: Brawl Stars형 스타 드롭 5연속 탭 & 투명 확률 공개 모달
+- `frontend/src/components/star-drop.test.tsx`: 스타 드롭 5단계 탭 승급 및 무료/유료 부스터 단위 테스트
+- `frontend/src/app/progression/prestige/page.tsx`: Cookie Clicker형 프레스티지(환생) 대시보드 및 자산 100% 소각/30% 보험 콘솔
+- `frontend/src/app/progression/prestige/prestige.test.tsx`: 프레스티지 환생 배수 및 자산 소각/보존 단위 테스트
+- `frontend/src/app/bank/savings-pot/page.tsx`: Toss형 4인 공동 저축 챌린지 팟 & 친구 찌르기 대시보드
+- `frontend/src/app/bank/savings-pot/savings-pot.test.tsx`: 공동 저축 팟 +5% 보너스 및 10% 페널티 소각 단위 테스트
+- `frontend/src/app/guide/dopamine-system/page.tsx`: SEO 검색 최적화 & 법적 컴플라이언스 SSOT 공개 가이드 페이지
+- `frontend/src/config/routes.config.ts`: 신규 라우트 SSOT 등록 및 sitemap/robots 분기 처리
+- `frontend/src/app/search-indexing.test.ts`: 신규 공개 가이드 sitemap 자동 색인 검증 테스트 갱신
+
+### Verification Plan
+- 프론트엔드 전체 Vitest 단위 테스트 100% PASS (134+개 파일)
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v458.sh` 및 `promote_v458.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,433+) 100% 무손실 검증
+
+---
+
+## 🚀 [v7 Specification] 일반 유저 전용 4대 도파민 패키지 & 홈 대시보드 전면 배치 사양 (누적 추가)
+
+### 1. 사용자 조율 결과 확정 (A1 ~ A5)
+1. **[A1: 황금 오리 광클 피버 타임 (`GoldenDuckFever`)]**:
+   - 화면 랜덤 위치(좌표)에 15~30초 주기로 황금 오리(`Golden Duck`) 아이콘이 3초간 깜빡이며 출현.
+   - 클릭 즉시 10초 카운트다운 피버 타임 돌입 ➡️ 화면 중앙에 대형 골드 코인 버튼과 콤보 카운터(`x1.0` ~ `x3.0`) 활성화.
+   - 탭할 때마다 황금 코인 파티클 샤워 및 타격 이펙트, 10초 종료 시 누적 탭 수에 비례한 무료 WLD (최대 5,000 WLD) 즉시 지갑 지급.
+2. **[A2: 가상 컴패니언 '덕이' 쓰다듬기 & 일일 행운 포춘쿠키 (`DeokiPetStation`)]**:
+   - 홈 대시보드에 귀여운 인터랙티브 오리 펫 '덕이' 상주.
+   - 마우스 호버 및 클릭 시 반응 애니메이션(하트 파티클, 꽥꽥 말풍선 멘트, 친밀도 게이지 상승).
+   - 1일 1회 '포춘쿠키 쪼개기' 버튼 제공: 쿠키를 쪼개면 오늘의 투자 명언, 추천 주식/미니게임 점괘, 100~1,000 WLD 보너스 즉시 지급.
+3. **[A3: 호가창 1클릭 실시간 상승/하락 여론 잭팟 (`BullBearPoll`)]**:
+   - 주식 호가창 및 홈 피드에 '오늘의 매수 vs 매도 여론' 1클릭 투표 위젯 제공 (`🚀 떡상 가자` vs `🐻 숏이 정배`).
+   - 투표 시 별도 비용 없이 실시간 게이지 변화(50:50 ➡️ 실시간 투표율) 및 매일 자정 적중 유저들에게 총 10,000 WLD 풀 무료 n빵 에어드랍.
+4. **[A4: 1:1 초소액/무료 즉석 주사위 결투 (`MiniShowdownModal`)]**:
+   - 무료 칩 또는 100 WLD 초소액으로 즐기는 3판 2선승제 가상 AI와의 1:1 주사위 롤 결투.
+   - 실시간 주사위 굴림 3D 텐션 연출, 승리 시 트로피 뱃지 및 승리 골드 획득.
+5. **[A5: 홈 대시보드 및 서비스 전면 연동]**:
+   - 홈 메인 화면(`frontend/src/app/page.tsx`) 상단에 '일반 유저 도파민 스테이션' 전면 배치.
+   - 법적 고지 준수: 100% 무료/가상 리워드 시뮬레이터 명시.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `frontend/src/components/golden-duck-fever.tsx`: 황금 오리 랜덤 출현 & 10초 광클 피버 타임 컴포넌트
+- `frontend/src/components/golden-duck-fever.test.tsx`: 피버 타임 트리거 및 광클 콤보/WLD 지급 단위 테스트
+- `frontend/src/components/deoki-pet-station.tsx`: 덕이 펫 쓰다듬기 인터랙션 & 1일 1포춘쿠키 컴포넌트
+- `frontend/src/components/deoki-pet-station.test.tsx`: 펫 친밀도 상승 및 포춘쿠키 보상 단위 테스트
+- `frontend/src/components/bull-bear-poll.tsx`: 1클릭 상승/하락 여론 잭팟 위젯
+- `frontend/src/components/bull-bear-poll.test.tsx`: 여론 투표 및 실시간 비율 계산 단위 테스트
+- `frontend/src/components/mini-showdown-modal.tsx`: 100 WLD 초소액 3판 2선승 주사위 결투 모달
+- `frontend/src/components/mini-showdown.test.tsx`: 3판 2선승제 결투 룰 및 승패 판정 단위 테스트
+- `frontend/src/app/page.tsx`: 홈 대시보드 도파민 스테이션 통합 배치
+
+### Verification Plan
+- 프론트엔드 전체 Vitest 단위 테스트 100% PASS (138+개 파일)
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v459.sh` 및 `promote_v459.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,433+) 100% 무손실 검증
+
+
+---
+
+## 🚀 [v8 Specification] SEO 검색 노출 쇄신 및 기획서 정합화 명세 (누적 추가)
+
+### 1. 🔍 기획서(`docs/planning/`) 재검토 및 코드베이스 정합성 분석 결과
+- **기획서 체계 완결성 확인**:
+  - `MONETIZATION_COMPLIANCE_SEO_SPEC.ko.md`, `SEARCH_DISCOVERY_OPERATIONS_SPEC.ko.md`, `SEO_INTENT_TO_PLAY_ACTIVATION_GROWTH_SPEC.ko.md` 등 90여 개 기획서에 금융 컴플라이언스 준수, 비P2W 수익화 모델, 다국어 정적 라우팅, 가상 주식 종목별 인덱싱 체계가 매우 정밀하게 정의되어 있음을 확인.
+- **기획서 ↔ 실제 코드 간 핵심 간극(Gap)**:
+  - 기획서 제11절 색인 후보로 명시된 10대 가상 주식 종목(`/stocks/[symbol]`) 및 금융 교육 허브(`/guide/*`)가 실제 `routes.config.ts` 및 `robots.ts`에서 `authRequired: true, indexable: false, Disallow: /stocks/*`로 잠겨 있어 검색엔진 크롤러가 접근 불가능한 상태임.
+
+### 2. 📉 검색 유입률(Search Traffic / Impressions)이 낮은 5대 근본 원인
+1. **[원인 1: 크롤러 색인 가능 공개 URL의 절대적 부족 (Indexable Surface Bottleneck)]**:
+   - 회원 보호 및 금융 시뮬레이터 특성상 전체 20여 개 메인 경로 중 10개 미만 페이지만 sitemap에 등록됨.
+2. **[원인 2: 유저들이 검색하는 10대 주식 종목 롱테일 키워드의 크롤러 차단]**:
+   - '월덕게임즈 시세', '침팬지 반도체 주가', '가상 주식 호가창' 등 실시간 검색 수요가 높은 개별 종목 페이지가 `Disallow` 처리됨.
+3. **[원인 3: 검색엔진 평가용 텍스트 콘텐츠(SEO Content Pillar) 부재]**:
+   - 구글 2026 Helpful Content 알고리즘 기준 1,000자 이상의 양질의 금융/게임 정보성 아티클이 부족하여 도메인 권위도가 낮음.
+4. **[원인 4: 다국어 Sitemap 내 `hreflang` 태그 누락]**:
+   - 4개 국어(KO, EN, JA, ZH) 번역 코퍼스는 구축되었으나 `sitemap.xml`에 언어별 alternate 링크가 없어 해외 검색엔진(구글 US, 야후 재팬 등)이 단일 언어로 오인.
+5. **[원인 5: 외부 인바운드 링크(Backlinks) 및 바이럴 카드(OG Image) 부족]**:
+   - 커뮤니티, 블로그 등 외부 플랫폼에서 유입되는 백링크 연결 고리가 약함.
+
+### 3. 🎯 단계별 해결 및 고도화 명세 (Actionable Solutions)
+1. **[주식 종목 공개 프리뷰 인덱싱 개방 (`/stocks/[symbol]`)]**:
+   - `routes.config.ts`의 SSOT 설정을 `isPublic: true, indexable: true`로 개방.
+   - 비로그인 유저도 실시간 시세 차트와 호가창을 확인할 수 있는 SSR 읽기 전용 뷰 제공 (주문 버튼 클릭 시에만 로그인 모달 호출).
+2. **[정보성 SEO 필러 가이드 허브 신설 (`/guide/*`)]**:
+   - `/guide/stock-trading`: 가상 주식 호가창 및 캔들 매매 기초 가이드.
+   - `/guide/virtual-banking`: 복리 예적금 및 가상 국채 투자 전략.
+   - `/guide/career-mastery`: 직업 전직 및 일일 WLD 파밍 가이드.
+   - `/guide/glossary`: 핀테크 & 가상경제 핵심 용어사전.
+3. **[Sitemap 다국어 `hreflang` 및 JSON-LD 구조화 데이터 전면 강화]**:
+   - `sitemap.ts`에 4개 국어 `alternates.languages` 태그 자동 생성.
+   - 개별 주식 페이지에 Schema.org `FinancialProduct` / `Stock` 구조화 데이터 연동.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `frontend/src/config/routes.config.ts`: 주식 종목 공개 인덱싱 허용 및 robots Disallow 규칙 정밀화
+- `frontend/src/app/sitemap.ts`: 4개 국어 `alternates` hreflang 메타데이터 탑재
+- `frontend/src/app/stocks/[symbol]/page.tsx`: 비로그인 방문자 대상 SSR 시세 프리뷰 지원
+- `frontend/src/app/guide/stock-trading/page.tsx`: SEO 타깃 가상 주식 매매 가이드 페이지
+- `frontend/src/app/guide/virtual-banking/page.tsx`: 복리 예금 및 가상 국채 전략 가이드 페이지
+- `frontend/src/app/search-indexing.test.ts`: 갱신된 sitemap 및 robots 인덱싱 검증 테스트
+
+### Verification Plan
+- 전체 Vitest 단위 테스트 100% PASS
+- Next.js Turbopack 빌드 무결성 검증
+- Debian 미니PC `stage_v460.sh` 및 `promote_v460.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,433+) 100% 무손실 검증
+
+---
+
+## 🚀 [v9 Specification] 사행성 카지노 API 전면 폐기 & 14대 도메인 300+개 API 마스터 명세화 (누적 추가)
+
+### 1. 🛑 사행성 카지노 API 전면 폐기 및 컴플라이언스 완결
+- **폐기 대상**:
+  - 백엔드 NestJS `CasinoModule` 및 `CasinoController`(`/api/v1/casino/*`) 등록 완전 해제.
+  - 프론트엔드 SSOT `routes.config.ts` 및 라우트 맵에서 `/casino` 경로 완전 제거.
+- **사유**:
+  - 게임물 규제 및 금융 법령 컴플라이언스 준수, 도박성/사행성 소지 원천 배제 및 100% 투명하고 공정한 가상경제 시뮬레이터 체계 확립.
+
+### 2. 📋 14대 핵심 도메인 전 도메인 API 정상 작동 전수 감사 및 문서화
+- **공식 마스터 문서 구축**:
+  - `docs/API_CATALOG_MASTER.ko.md` (한국어 마스터 API 명세서)
+  - `docs/API_CATALOG_MASTER.md` (영문 마스터 API 명세서)
+- **14대 도메인 300+개 엔드포인트 완비**:
+  1. 인증 및 세션 (`auth`, `local-auth`, `bootstrap`)
+  2. 계정 및 보안 센터 (`account`, `account-security`, `privacy`)
+  3. 지갑 및 자산 원장 (`wallet`, `activity`)
+  4. 가상 중앙은행 및 채권 (`bank`, `pocket`)
+  5. 직업 및 일일 커리어 (`work`, `game-clock`)
+  6. 가상 주식 거래소 (`stock`, `stock-alert`, `newspaper`)
+  7. 사업체 및 상업 운영 (`business`)
+  8. P2P 마켓플레이스 및 제작 (`marketplace`, `crafting`)
+  9. 상점 및 도파민 보상 (`shop`, `early-game`, `engagement`)
+  10. 성장 및 시즌 패스 (`progression`, `season`)
+  11. 커뮤니티 게시판 및 미디어 (`board`, `content`, `media`)
+  12. 1:1 비공개 쪽지 및 안전 제어 (`chat`, `safety`, `support`)
+  13. 클럽 및 개인 공간 (`club`, `space`)
+  14. 관리자 관제 타워 및 국고 (`admin`, `treasury`, `economy`, `audit`, `controls`)
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `backend/src/app.module.ts`: CasinoModule 제거
+- `frontend/src/config/routes.config.ts`: /casino 라우트 제거
+- `frontend/src/lib/seo-routes.test.ts`: /casino 테스트 단정문 정리
+- `frontend/src/app/search-indexing.test.ts`: /casino 단정문 정리
+- `docs/API_CATALOG_MASTER.ko.md`: 한국어 공식 마스터 API 명세서
+- `docs/API_CATALOG_MASTER.md`: 영문 공식 마스터 API 명세서
+
+### Verification Plan
+- 백엔드 / 프론트엔드 전체 단위 테스트 100% PASS
+- Next.js Turbopack 빌드 무결성 검증
+- Debian 미니PC `stage_v461.sh` 및 `promote_v461.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션 100% 무손실 유지
+
+---
+
+## 🚀 [v10 Specification] 도파민 5대 전용 API 완비 & 관리자 API 실시간 관제 대시보드 구축 (누적 추가)
+
+### 1. 🎯 도파민 5대 전용 백엔드 API 완비 (`DopamineController`)
+- **신규 구축 엔드포인트**:
+  1. `POST /api/v1/engagement/dopamine/golden-duck`: 황금 오리 광클 피버 WLD 수령 (최대 5,000 WLD)
+  2. `POST /api/v1/engagement/dopamine/pet-fortune`: 덕이 펫 인터랙션 및 일일 포춘쿠키 보너스 (500~1,000 WLD)
+  3. `POST /api/v1/engagement/dopamine/bull-bear-vote`: 호가창 여론 투표 및 자정 10,000 WLD 에어드랍 풀 참여
+  4. `POST /api/v1/engagement/dopamine/mini-showdown`: 100 WLD 1:1 AI 주사위 결투 정산 (1.90x 배당)
+  5. `POST /api/v1/engagement/dopamine/star-drop`: 스타 드롭 5연속 탭 승급 보상 수령 (최대 10,000 WLD)
+  6. `GET /api/v1/engagement/dopamine/status`: 일일 활동 쿨다운 및 잔여 횟수 조회
+
+### 2. ⚡ 14대 도메인 300+개 API 실시간 관제 타워 구축 (`/admin/api-health`)
+- **백엔드**: `ApiHealthController` (`GET /api/v1/admin/api-health/status`)
+- **프론트엔드**: `frontend/src/app/admin/api-health/page.tsx` 실시간 Latency(평균 12ms) 레이더, 가동률(100%), 도메인별 상태 카드 및 관리자 서브 내비게이션 연동.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `backend/src/engagement/dopamine.controller.ts`: 도파민 5대 API 컨트롤러
+- `backend/src/engagement/engagement.module.ts`: DopamineController 등록
+- `backend/src/admin/api-health.controller.ts`: 14대 도메인 API 헬스체크 컨트롤러
+- `backend/src/admin/admin.module.ts`: ApiHealthController 등록
+- `frontend/src/app/admin/api-health/page.tsx`: 관리자 API 실시간 관제 대시보드
+- `frontend/src/components/admin-sub-nav.tsx`: API 관제 탭 추가
+- `frontend/src/app/admin/areas.ts`: /admin/api-health 영역 등록
+- `docs/API_CATALOG_MASTER.ko.md`: 한국어 공식 마스터 API 명세서 갱신
+- `docs/API_CATALOG_MASTER.md`: 영문 공식 마스터 API 명세서 갱신
+
+### Verification Plan
+- 백엔드 / 프론트엔드 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v462.sh` 및 `promote_v462.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션 100% 무손실 검증
+
+---
+
+## 🚀 [v11 Specification] 3대 추천 과제(SEO 검색 노출 쇄신 + 도파민 실시간 연동 + Moneyverse Plus 유료/무료 티어) 풀스택 통합 명세 (누적 추가)
+
+### 1. 🔍 [과제 1] SEO 검색 노출 쇄신 완결
+- **10대 가상 주식 종목(`/stocks/[symbol]`) 공개 프리뷰 인덱싱**:
+  - `routes.config.ts`: `isPublic: true, indexable: true` SSOT 확정.
+  - 비로그인 유저 대상 SSR 시세/호가/차트 렌더링 및 Schema.org `FinancialProduct` & `BreadcrumbList` JSON-LD 탑재.
+- **5대 금융/게임 필러 가이드 허브(`/guide/*`)**:
+  - `/guide/stock-trading`: 가상 주식 실전 매매 & 호가창 가이드.
+  - `/guide/virtual-banking`: 복리 예적금 및 가상 국채 투자 전략.
+  - `/guide/career-mastery`: 직업 전직 및 일일 파밍 루틴 가이드.
+  - `/guide/glossary`: 핀테크 & 가상경제 핵심 용어사전.
+  - `/guide/dopamine-system`: 도파민 보상 & 확률 투명 공개 가이드.
+- **Sitemap 4개 국어 `hreflang` & ISR 3600s 캐싱**:
+  - `sitemap.ts`에 KO, EN, JA, ZH 언어별 alternate 링크 자동 생성.
+
+### 2. ⚡ [과제 2] 도파민 5대 전용 시스템 프론트-백엔드 실시간 연동
+- **프론트엔드 컴포넌트 ↔ 백엔드 REST API 연동**:
+  1. `GoldenDuckFever` ➡️ `POST /app-api/v1/engagement/dopamine/golden-duck` (피버 보상 실시간 원장 지급)
+  2. `DeokiPetStation` ➡️ `POST /app-api/v1/engagement/dopamine/pet-fortune` (포춘쿠키 보너스 실시간 수령)
+  3. `BullBearPoll` ➡️ `POST /app-api/v1/engagement/dopamine/bull-bear-vote` (여론 투표 및 에어드랍 풀 등록)
+  4. `MiniShowdownModal` ➡️ `POST /app-api/v1/engagement/dopamine/mini-showdown` (AI 주사위 결투 실시간 정산)
+  5. `StarDropModal` ➡️ `POST /app-api/v1/engagement/dopamine/star-drop` (5연속 탭 승급 보상 실시간 수령)
+- **실시간 지갑 잔액 갱신 및 토스트 피드백**:
+  - SWR 뮤테이션(`/api/v1/wallet/balance`, `/api/v1/wallet/summary`) 자동 트리거로 WLD 실시간 반영.
+
+### 3. 👑 [과제 3] 유료/무료 멤버십 티어 (`Moneyverse Plus` / VIP) 시스템 구축
+- **무료 코어 티어 (Free Core)**:
+  - 14대 핵심 도메인 100% 무료 접근, 일일 무료 스타 드롭 3회, 일일 1포춘쿠키, 일반 광고 노출.
+- **`Moneyverse Plus` 유료/VIP 티어**:
+  - **광고 완전 제거 (`isAdFree: true`)**: 전면/배너 광고 0건 완전 클린 UI.
+  - **VIP 골드 뱃지 & 프로필 테마**: 프로필 화면 및 커뮤니티 게시판/슈퍼챗 골드 하이라이트.
+  - **도파민 확장 편의**: 스타 드롭 일일 5회 무료 탭, VIP 럭키 참(확정 승급 연출) 토글 기본 제공.
+  - **자산 보존 보험**: 환생(프레스티지) 시 자산의 30%를 다음 생으로 자동 이월.
+- **상점 패키지 및 클라이언트 컴포넌트 연동**:
+  - `frontend/src/components/membership-tier-card.tsx` 및 `/shop` 상점 카탈로그 패키지 연동.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `frontend/src/components/casual-dopamine-station.tsx`: 도파민 5대 API 실시간 호출 및 SWR 캐시 갱신
+- `frontend/src/components/golden-duck-fever.tsx`: 피버 보상 API 연동
+- `frontend/src/components/deoki-pet-station.tsx`: 포춘쿠키 보상 API 연동
+- `frontend/src/components/bull-bear-poll.tsx`: 여론 투표 API 연동
+- `frontend/src/components/mini-showdown-modal.tsx`: 1:1 결투 API 연동
+- `frontend/src/components/star-drop-modal.tsx`: 스타 드롭 승급 API 연동
+- `frontend/src/components/membership-tier-card.tsx`: Moneyverse Plus 멤버십 카드 컴포넌트
+- `frontend/src/app/shop/page.tsx`: Moneyverse Plus 패키지 섹션 통합
+- `frontend/src/components/membership-tier-card.test.tsx`: 멤버십 티어 단위 테스트
+
+### Verification Plan
+- 프론트엔드/백엔드 Vitest 단위 테스트 100% PASS
+- Next.js Turbopack 빌드 무결성 검증
+- Debian 미니PC `stage_v463.sh` 및 `promote_v463.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,433+) 100% 무손실 검증
+
+---
+
+## 🚀 [v12 Specification] Google Search Console / Naver 웹마스터 도구 사이트맵 등록 자동화 & 실시간 크롤링/인덱싱 관제 타워 (누적 추가)
+
+### 1. 🔍 [아키텍처 1] 검색엔진 사이트맵/URL 제출 및 핑(Ping) 자동화 엔진
+- **IndexNow 프로토콜(Naver Search Advisor / Bing / Yandex) 일괄 통보 엔진**:
+  - `https://api.indexnow.org/indexnow` 및 `https://searchadvisor.naver.com/indexnow` 규격 엔드포인트 연동.
+  - 호스트 인증 키 자동 생성 및 서빙: `/.well-known/indexnow.key` 및 `/[key].txt`.
+  - 10대 가상 주식 종목(`/stocks/[symbol]`) 및 5대 금융 가이드(`/guide/*`) URL 일괄 자동 제출.
+- **Google / Naver Sitemap Ping 자동화**:
+  - `https://www.google.com/ping?sitemap={sitemapUrl}` 핑 디스패치.
+  - 관리자가 원클릭으로 전체 검색엔진에 사이트맵 갱신을 즉시 통보하는 통합 액션 API (`POST /api/v1/seo/submit`).
+
+### 2. 📊 [아키텍처 2] PostgreSQL 기반 실시간 검색 봇 크롤링 로깅 및 집계
+- **DB 원장 테이블 (`seo_crawler_logs`, `seo_bot_metrics`)**:
+  - 봇 식별: `Googlebot`, `Naver Yeti (Yeti)`, `Bingbot`, `Daumoa`, `DuckDuckBot`, `Baiduspider`, `YandexBot` 등.
+  - 기록 항목: 타임스탬프, 봇 종류, 요청 경로(Path), HTTP 상태 코드(200, 304, 404, 500), 응답 시간(durationMs), IP 주소.
+  - 24시간/7일 롤링 집계: 총 크롤링 건수, 봇별 점유율, 상태 코드 분포, 최다 크롤링 상위 URL.
+
+### 3. 🛡️ [아키텍처 3] 관리자 SEO 및 인덱싱 실시간 관제 타워 (`/admin/seo`)
+- **4대 핵심 KPI 위젯**:
+  1. **24시간 총 봇 크롤링 건수**: 전일 대비 변동률 및 실시간 펄스.
+  2. **가상 주식 색인 커버리지 (10/10)**: 10대 주식 종목별 24시간 내 봇 방문 현황.
+  3. **금융 가이드 색인 커버리지 (5/5)**: 5대 가이드 허브별 24시간 내 봇 방문 현황.
+  4. **평균 봇 응답 속도 (TTFB / SSR latency)**: 봇 대상 서버 응답 지연 모니터링 (ms).
+- **10대 주식 & 5대 가이드 실시간 색인 건강도 카드 그리드**:
+  - 각 URL별 최근 방문 크롤러 이름(Googlebot, Yeti 등), 최종 방문 시점(상대 시간), HTTP 응답 코드, 3단계 색인 건전성 배지(정상: 녹색 / 주의: 황색 / 미방문: 회색).
+- **원클릭 검색엔진 제출 콘솔**:
+  - Google Sitemap Ping, Naver IndexNow, Bing IndexNow 즉시 전송 버튼 및 실시간 실행 결과 피드백.
+- **실시간 봇 접근 로그 피드 테이블**:
+  - 최근 100건 크롤러 요청 목록, 검색 및 봇 필터, 상태 코드 배지, 응답 시간 표시.
+
+### 4. 🧭 [아키텍처 4] 내비게이션 및 라우트 SSOT 연동
+- `frontend/src/config/routes.config.ts`: `/admin/seo` 라우트 등록.
+- `frontend/src/components/admin-sub-nav.tsx`: 'SEO / 색인 관제' 탭 추가.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `backend/src/seo/seo.service.ts`: IndexNow / Ping 전송 및 크롤러 로그 기록/집계
+- `backend/src/seo/seo.controller.ts`: `/api/v1/seo/status`, `/api/v1/seo/submit`, `/api/v1/seo/log`, IndexNow key
+- `backend/src/seo/seo.module.ts`: NestJS SEO 모듈
+- `backend/src/app.module.ts`: SeoModule 등록
+- `frontend/src/lib/bot-detector.ts`: 검색 봇 User-Agent 감지 및 로깅 유틸리티
+- `frontend/src/app/api/seo/submit/route.ts` & `/api/seo/status/route.ts`: Next.js BFF 라우트
+- `frontend/src/app/admin/seo/page.tsx`: SEO / 실시간 인덱싱 관제 대시보드
+- `frontend/src/components/admin-sub-nav.tsx`: SEO 관제 탭 추가
+- `frontend/src/config/routes.config.ts`: `/admin/seo` 라우트 등록
+- `frontend/src/app/admin/seo/admin-seo.test.tsx`: 단위 테스트
+
+### Verification Plan
+- 백엔드 / 프론트엔드 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v464.sh` 및 `promote_v464.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,546+) 100% 무손실 검증
+
+---
+
+## 🚀 [v13 Specification] Moneyverse Plus VIP 퀘스트 + P2P 경매장 실시간 웹소켓 알림 + Google Search Console Search Analytics 실시간 관제 (누적 추가)
+
+### 1. 🎁 [아키텍처 1] Moneyverse Plus VIP 일일 황금 상자 퀘스트 연동
+- **백엔드 REST API 계약**:
+  - `GET /api/v1/quests/vip-chest/status`: 현재 로그인 유저의 Plus 구독 여부(`isPlusUser`), 오늘 황금 상자 수령 여부(`claimedToday`), 다음 수령 가능 시각(`nextAvailableAt`) 반환.
+  - `POST /api/v1/quests/vip-chest`: Plus 구독 유효성 검증 후 2,000 WLD 즉시 원장 입금 + VIP 럭키 다이스 1개 자동 지급, 자정 갱신 쿨다운 원자적 기록.
+- **프론트엔드 VIP 전용 인터랙션**:
+  - `frontend/src/components/vip-golden-chest-card.tsx`:
+    - Plus 구독자: 찬란한 황금빛 앰비언트 글로우, 황금 상자 3D 셰이프, 1클릭 즉시 수령 버튼 및 획득 애니메이션.
+    - 무료 유저: VIP 혜택 안내 프리뷰 및 Plus 상점(`/shop`) 원터치 업그레이드 링크 버튼 제공.
+  - `frontend/src/app/quests/page.tsx`: 퀘스트 센터 최상단에 VIP 황금 상자 카드 전면 배치.
+
+### 2. ⚡ [아키텍처 2] P2P 경매장 실시간 웹소켓 입찰 알림 스트림 및 티커 구축
+- **실시간 웹소켓 이벤트 디스패치 (`auction:bid-placed`)**:
+  - P2P 경매장(`marketplace/auction`)에서 누군가 신규 최고가 입찰 시 전체 접속 클라이언트에 실시간 브로드캐스트.
+  - 페이로드: `auctionId`, `itemTitle`, `itemRarity`, `bidAmount`, `bidderName`, `timestamp`, `isPlusUser`.
+- **프론트엔드 전역 토스트 및 라이브 티커 스트립**:
+  - `frontend/src/components/auction-live-toast-stream.tsx`:
+    - 우측 상단 4초 자동 소멸 핀테크 토스트 알림 (경매 아이템명, 신규 입찰가, 입찰자 닉네임, VIP 골드 배지 표시).
+    - 사용자가 참여 중인 경매에서 상위 입찰 발생 시 강조 앰버/로즈 컬러 경보.
+  - `frontend/src/app/marketplace/auction/page.tsx`:
+    - 경매장 상단 60fps 라이브 입찰 티커 롤링 바 탑재.
+    - 지수 백오프(Exponential Backoff) 기반 웹소켓 연결 상태 인디케이터(🟢 연결됨 / 🟡 재연결 중 / 🔴 오프라인).
+
+### 3. 📈 [아키텍처 3] Google Search Console API Search Analytics 실시간 관제 및 키 등록 UI
+- **백엔드 GSC Analytics 프록시 및 암호화 관리 (`backend/src/seo/`)**:
+  - `POST /api/v1/seo/gsc/credentials`: Google Cloud 서비스 계정 JSON 키 등록 및 안전한 암호화 저장.
+  - `GET /api/v1/seo/gsc/analytics`: 최근 30일 시계열 데이터(클릭수, 노출수, 평균 CTR, 평균 게재순위) 및 상위 10대 검색어(Query) 랭킹/클릭률 집계 (1시간 TTL 캐싱).
+  - `DELETE /api/v1/seo/gsc/credentials`: 등록된 서비스 계정 키 안전 파기.
+- **프론트엔드 관리자 SEO 관제 확장 (`frontend/src/app/admin/seo/gsc-analytics-card.tsx`)**:
+  - 30일 검색 성과 시계열 멀티 SVG 트렌드 차트 (클릭수/노출수 이중 축).
+  - 상위 10대 유입 검색어(Query), 클릭수, 노출수, CTR, 평균 게재순위 데이터 테이블.
+  - 서비스 계정 키 등록/관리 다이얼로그 모달.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `backend/src/engagement/quest.service.ts` & `quest.controller.ts`: VIP 황금 상자 수령 API
+- `backend/src/seo/seo.service.ts` & `seo.controller.ts`: GSC Search Analytics API 및 서비스 계정 관리
+- `frontend/src/components/vip-golden-chest-card.tsx`: VIP 황금 상자 퀘스트 UI 컴포넌트
+- `frontend/src/app/quests/page.tsx`: 퀘스트 메인 허브에 VIP 황금 상자 연동
+- `frontend/src/components/auction-live-toast-stream.tsx`: 실시간 경매 입찰 토스트 스트림 & 웹소켓 상태 인디케이터
+- `frontend/src/app/marketplace/auction/page.tsx`: 경매장 라이브 티커 바 연동
+- `frontend/src/app/admin/seo/gsc-analytics-card.tsx`: GSC 검색 성과 분석 차트 및 10대 쿼리 테이블
+- `frontend/src/app/admin/seo/seo-client-view.tsx`: GSC Analytics 카드 통합 렌더링
+- `frontend/src/app/admin/seo/admin-seo.test.tsx`: 신규 SEO & GSC 테스트 확장
+
+### Verification Plan
+- 백엔드 / 프론트엔드 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v465.sh` 및 `promote_v465.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,548+) 100% 무손실 검증
+
+---
+
+## 🚀 [v14 Specification] P2P 경매장 WebSocket Gateway & 안티 스나이핑 + Moneyverse Plus VIP 2.5% 감면 혜택 + GSC 1시간 TTL 캐싱 (누적 추가)
+
+### 1. ⚡ [아키텍처 1] P2P 경매장 WebSocket Gateway 및 안티 스나이핑(Anti-Sniping) 엔진
+- **실시간 소켓 게이트웨이 (`backend/src/marketplace/auction.gateway.ts`)**:
+  - `@WebSocketGateway({ namespace: '/auctions', cors: true })`:
+  - 신규 최고가 입찰 시 접속된 모든 클라이언트에 `auction:bid-placed` 및 `auction:anti-sniping-extended` 이벤트 브로드캐스팅.
+  - 지연시간 <20ms 극소화.
+- **안티 스나이핑 (Soft Close) 비즈니스 룰**:
+  - 경매 마감 1분(`60초`) 이내에 신규 최고가 입찰이 발생할 경우, 경매 마감 시각(`ends_at`)을 자동으로 **2분 연장** (`ends_at = clock_timestamp() + interval '2 minutes'`).
+  - DB 필드 `is_extended = true`로 마킹 및 연장 횟수/남은 시간 실시간 브로드캐스트.
+  - 스나이핑 봇에 의한 마지막 1초 낙찰 가로채기를 원천 방어하고 공정한 입찰 경쟁 유도.
+
+### 2. 👑 [아키텍처 2] Moneyverse Plus VIP 경매 수수료 50% 감면 & 골드 호가창/경매장 전용 테마
+- **VIP 수수료율 차등 계산 (2.5% vs 5.0%)**:
+  - 일반 유저 낙찰 수수료: 5.0% 영구 소각.
+  - Moneyverse Plus VIP 구독자 낙찰 수수료: **2.5% (50% 감면)** 적용 및 잔여 2.5% 영구 소각.
+  - 원장 정산 시 `burn_fee_rate`를 유저 티어에 따라 동적 산정하여 절감 혜택 즉시 반영.
+- **VIP 전용 테마 및 엠블럼**:
+  - 경매장 상세 및 호가창에 'VIP 골드 네온 테마' 자동 해금 및 골드 닉네임 하이라이트 발광.
+  - 입찰 시 'PLUS VIP 50% 수수료 할인' 뱃지 실시간 표시.
+
+### 3. 📈 [아키텍처 3] Google Search Console Search Analytics 1시간 TTL 캐싱 및 배치 안정화
+- **Google Cloud Auth 및 1시간 TTL 캐시 엔진 (`backend/src/seo/seo.service.ts`)**:
+  - 서비스 계정 키 등록 시 Google Search Console API 직접 연동.
+  - 최근 30일 시계열 데이터 및 상위 10대 검색어 랭킹을 1시간(3,600초) 동안 메모리/캐시에 보존하여 API 할당량(Quota) 소진 방지 및 0초 즉시 응답 보장.
+  - 백오프 재시도 및 페일세이프 기본값 fallback 체계 완비.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `backend/src/marketplace/auction.gateway.ts`: NestJS WebSocketGateway 구현
+- `backend/src/marketplace/marketplace.module.ts`: AuctionGateway 등록
+- `backend/src/marketplace/marketplace.service.ts`: 2.5% VIP 수수료 감면 및 1분 안티 스나이핑 2분 연장 로직
+- `backend/src/seo/seo.service.ts`: GSC 1시간 TTL 캐시 및 Auth 연동
+- `frontend/src/app/marketplace/auction/page.tsx`: VIP 2.5% 감면 및 안티 스나이핑 연장 타이머 UI 연동
+- `frontend/src/components/auction-live-toast-stream.tsx`: 안티 스나이핑 연장 알림 토스트 및 VIP 2.5% 소각 뱃지
+- `backend/src/marketplace/marketplace.controller.test.ts`: 안티 스나이핑 및 VIP 수수료 단위 테스트
+
+### Verification Plan
+- 백엔드 / 프론트엔드 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v466.sh` 및 `promote_v466.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,548+) 100% 무손실 검증
+
+---
+
+## 🚀 [v15 Specification] P2P 경매장 실시간 틱/Depth 차트 + Plus VIP 5대 네온 테마 + GSC 크롤링 감사 디스코드 봇 + 자동 프록시 입찰 (누적 추가)
+
+### 1. 📊 [아키텍처 1] P2P 경매장 실시간 입찰 틱 & 호가 깊이(Depth) 차트 (`frontend/src/components/auction-depth-chart.tsx`)
+- **실시간 입찰 틱 차트**: 경매 상세 화면에서 WebSocket으로 수신되는 입찰 히스토리(`bids[]`)를 경량 SVG 라인/영역 차트로 시각화.
+  - 시간 경과에 따른 최고 입찰가 상승 곡선 및 일반/VIP 입찰자 구분을 마커로 렌더링.
+- **인터랙티브 호가 깊이 (Depth Chart)**:
+  - 현재 최고가 대비 호가 계단별 누적 매수 입찰 풀 시각화.
+  - 마우스 호버 시 해당 구간의 입찰가 및 입찰자 수치 툴팁 제공.
+- **시각 위계 보존 (Zero Jittering)**:
+  - 모든 금액 수치에 `tabular-nums font-mono` 적용 및 320px~1280px 반응형 뷰포트 완벽 대응.
+
+### 2. 🎨 [아키텍처 2] Moneyverse Plus VIP 5대 프리미엄 네온 테마 선택기
+- **5대 프리미엄 네온 테마 팔레트**:
+  - `royal-gold`: 클래식 로얄 골드 글로우 (`amber-500/emerald-400` 그라데이션)
+  - `cyber-pink`: 네온 사이버펑크 핑크 (`fuchsia-500/cyan-400` 하이퍼 레이저)
+  - `emerald-vault`: 에메랄드 볼트 (`emerald-400/teal-300` 퀀텀 볼트)
+  - `sapphire-deep`: 사파이어 딥 (`indigo-400/sky-400` 심해 사파이어)
+  - `obsidian-dark`: 옵시디언 다크 (`zinc-100/zinc-400` 매트 옵시디언 엣지)
+- **프론트엔드/백엔드 테마 상태 동기화**:
+  - 유저 프로필 설정 및 계정 관리(`/account`)에서 즉시 테마 선택 및 로컬/서버 저장.
+  - 호가창, 경매장, 프로필 아바타 림(Rim)에 선택된 네온 오라 효과 실시간 주입.
+
+### 3. 🤖 [아키텍처 3] Google Search Console 크롤링 감사 크론 & 관리자 디스코드 웹훅 알림봇
+- **백엔드 크롤링 상태 감사 크론 (`backend/src/seo/seo-crawler-audit.service.ts`)**:
+  - 6시간 주기(`0 */6 * * *`)로 사이트맵 URL 43개 라우트 및 주식/가이드 프리뷰 페이지의 HTTP 상태 검사.
+  - 404/500 에러 및 GSC 인덱싱 누락 감지 시 `DiscordOutboxService`를 통해 관리자 관제 채널로 풍부한 Embed 알림 발송.
+- **관리자 수동 트리거 API (`POST /api/v1/seo/crawl-audit`)**:
+  - `/admin/seo` 관리자 콘솔에서 즉시 1-Click 크롤링 전수 감사 실행 및 결과 실시간 렌더링.
+
+### 4. ⚡ [아키텍처 4] P2P 경매장 최대 한도 예약 자동 입찰 (Proxy Bidding)
+- **서버 권위 프록시 비딩 엔진 (`backend/src/marketplace/marketplace.service.ts`)**:
+  - 유저가 입찰 시 `max_proxy_bid` (본인의 최대 지불 한도)를 설정 가능.
+  - 다른 유저의 수동/자동 입찰 시, 시스템이 최소 증액 단위(예: +100 WLD 또는 현재가의 1%)로 해당 유저의 프록시 한도 내에서 자동으로 즉시 재응찰(`proxy:auto-bid`).
+  - 최고가 유지 실패 시(상대의 프록시가 더 높거나 초과 입찰된 경우) 즉각 아웃비드 토스트 알림 발송.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+1. `backend/src/marketplace/marketplace.service.ts`: Proxy Bidding 자동 응찰 로직 및 WebSocket 연동
+2. `backend/src/marketplace/auction.gateway.ts`: 프록시 입찰 이벤트 및 틱 브로드캐스팅
+3. `backend/src/seo/seo-crawler-audit.service.ts` & `seo.controller.ts`: 6시간 크롤링 감사 및 디스코드 웹훅 발송
+4. `frontend/src/components/auction-depth-chart.tsx`: 경매장 실시간 틱 & 호가 Depth SVG 차트
+5. `frontend/src/components/vip-theme-selector.tsx`: Plus VIP 5대 네온 테마 선택 컴포넌트
+6. `frontend/src/app/marketplace/auction/page.tsx`: 프록시 입찰 모달, Depth 차트, VIP 네온 테마 연동
+7. `frontend/src/app/admin/seo/seo-client-view.tsx`: 크롤링 감사 상태 및 즉시 실행 버튼
+8. `backend/src/marketplace/marketplace.controller.test.ts`: 프록시 입찰 단위 테스트
+9. `backend/src/seo/seo.service.test.ts`: 크롤링 감사 서비스 단위 테스트
+
+### Verification Plan
+- 백엔드 / 프론트엔드 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v467.sh` 및 `promote_v467.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,308+) 100% 무손실 검증
+
+---
+
+## 🚀 [v16 Specification] P2P 경매장 낙찰 축하 Confetti/팡파레 + GSC 일일 SEO 리포트 디스코드 다이제스트 봇 + Plus VIP 5종 전용 아바타 프레임 전역 연동 + 호가 Depth 퀵 프리셋 (누적 추가)
+
+### 1. 🎉 [아키텍처 1] P2P 경매장 낙찰 축하 Confetti & Web Audio API 팡파레 시스템 (`AuctionWinCelebrationModal`)
+- **Web Audio API 신디사이저 팡파레 엔진**:
+  - 외부 오디오 파일 다운로드 없이 브라우저 내장 `AudioContext`의 `OscillatorNode`와 `GainNode`를 활용하여 C5-E5-G5-C6 화음의 승리 아르페지오 팡파레 멜로디를 실시간 합성 재생.
+  - 무음 환경/모바일 배려를 위해 볼륨 슬라이더 및 사운드 Mute/Unmute 원터치 토글 지원.
+- **Canvas Confetti 골드 파티클 애니메이션**:
+  - 경매 낙찰 즉시 전면에 골드/앰버/에메랄드 3색 마이크로 파티클 팡파레 분사.
+- **낙찰자 승리 모달 (`AuctionWinCelebrationModal`)**:
+  - 낙찰된 아이템 이미지, 희귀도 배지, 최종 낙찰가(WLD), WLD 소각액, VIP 수수료 감면액 요약 카드 렌더링.
+  - '내 인벤토리로 이동' 및 '경매장 둘러보기' 액션 버튼 제공.
+
+### 2. 🤖 [아키텍처 2] Google Search Console 일일 SEO 요약 리포트 디스코드 다이제스트 봇 (`SeoDailyDigestService`)
+- **매일 09:00 데일리 스케줄러 (`backend/src/seo/seo-daily-digest.service.ts`)**:
+  - 매일 09:00 KST (`0 9 * * *`) Cron 스케줄러로 전일자 Google Search Console 검색 실적(총 클릭수, 총 노출수, 평균 CTR, 평균 게재순위) 및 상위 5대 검색 키워드 랭킹을 집계.
+  - `DiscordOutboxService`를 통해 관리자 관제 채널로 정밀 Embed 브리핑 자동 발송.
+- **관리자 1-Click 수동 리포트 발송 API**:
+  - `POST /api/v1/seo/gsc/digest-report` 엔드포인트 제공.
+  - 관리자 SEO 대시보드([`seo-client-view.tsx`](file:///frontend/src/app/admin/seo/seo-client-view.tsx))에 `[즉시 디스코드 리포트 발송]` 수동 트리거 버튼 연동.
+
+### 3. 👑 [아키텍처 3] Moneyverse Plus VIP 5종 전용 아바타 프레임 (`VipAvatarFrame`) 전역 연동
+- **5대 전용 네온 아바타 프레임 컴포넌트 (`frontend/src/components/vip-avatar-frame.tsx`)**:
+  - `royal-gold`: 황금빛 회전 오라 보더 (`shadow-amber-500/30 border-amber-400`)
+  - `cyber-pink`: 네온 사이버펑크 핑크 림 (`shadow-fuchsia-500/30 border-fuchsia-400`)
+  - `emerald-vault`: 퀀텀 에메랄드 볼트 림 (`shadow-emerald-500/30 border-emerald-400`)
+  - `sapphire-deep`: 심해 사파이어 블루 림 (`shadow-indigo-500/30 border-sky-400`)
+  - `obsidian-dark`: 매트 옵시디언 엣지 림 (`shadow-zinc-500/30 border-zinc-300`)
+- **전역 서피스 일괄 적용**:
+  - 유저 프로필(`/profile`), 게시판 댓글/작성자(`/board`), 실시간 채팅(`/chat`), 리더보드 순위표 전역에 유저 VIP 테마에 맞추어 아바타 프레임 일괄 연동.
+
+### 4. ⚡ [아키텍처 4] P2P 경매장 호가 Depth 인터랙티브 툴팁 & 1-Click 빠른 입찰 프리셋 Bar
+- **호가 차트 인터랙티브 툴팁 (`AuctionDepthChart`)**:
+  - 호가 Depth 차트 마우스 호버 시 가격(WLD), 누적 매수량, 해당 호가 입찰자 수치 플로팅 툴팁 렌더링.
+- **1-Click 빠른 입찰 프리셋 Bar**:
+  - 입찰 모달 하단에 `+1,000 WLD`, `+5,000 WLD`, `+10,000 WLD`, `+50,000 WLD` 원터치 빠른 호가 증액 칩 버튼 바 추가.
+  - 클릭 즉시 현재 최고가 대비 증액 계산 및 입력창 자동 반영.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+1. `backend/src/seo/seo-daily-digest.service.ts`: 매일 09:00 GSC SEO 다이제스트 스케줄러 & Discord Webhook 발송 서비스 신설
+2. `backend/src/seo/seo.controller.ts` & `seo.module.ts`: `POST /api/v1/seo/gsc/digest-report` 엔드포인트 및 모듈 등록
+3. `frontend/src/lib/web-audio-fanfare.ts`: Web Audio API 기반 무음 친화적 아르페지오 팡파레 신디사이저 엔진 신설
+4. `frontend/src/components/auction-win-celebration-modal.tsx`: Confetti & 팡파레 & VIP 혜택 요약 승리 축하 모달 신설
+5. `frontend/src/components/vip-avatar-frame.tsx`: 5종 VIP 네온 아바타 프레임 컴포넌트 신설
+6. `frontend/src/components/auction-depth-chart.tsx`: 호가 Depth 차트 인터랙티브 툴팁 & 퀵 프리셋 증액 바 고도화
+7. `frontend/src/app/marketplace/auction/page.tsx`: 낙찰 축하 모달, 퀵 프리셋 바, VIP 아바타 프레임 연동
+8. `frontend/src/app/admin/seo/seo-client-view.tsx`: GSC 일일 리포트 디스코드 즉시 발송 버튼 연동
+9. `backend/src/seo/seo.service.test.ts`: GSC 일일 다이제스트 단위 테스트 확장
+10. `frontend/src/components/auction-win-celebration-modal.test.tsx`: 승리 축하 모달 단위 테스트 신설
+
+### Verification Plan
+- 백엔드 / 프론트엔드 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v468.sh` 및 `promote_v468.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,548+) 100% 무손실 검증
+
+---
+
+## 🚀 [v17 Specification] SEO 검색 유입 극대화 & 고검색량 금융 3대 웹 계산기 허브 + IndexNow/Ping 자동화 사양 (누적 추가)
+
+### 1. 📐 [아키텍처 1] 고검색량 3대 금융 웹 계산기 & 시뮬레이터 허브 (`/tools/*`)
+- **[1] 복리 예금·적금 이자 시뮬레이터 (`frontend/src/app/tools/compound-calculator/page.tsx`)**:
+  - 일 복리, 월 복리, 단리 비교 시뮬레이션 및 목표 자산 도달 기간 역산기.
+  - 가상 은행 복리(연 5~15%) 및 현실 시중 금리 비교 프리셋 제공.
+  - Google 검색 결과 상단 노출용 `FAQPage` 및 `SoftwareApplication` JSON-LD 구조화 데이터 내장.
+- **[2] 주식 물타기/평단가 및 목표 수익률 계산기 (`frontend/src/app/tools/stock-calculator/page.tsx`)**:
+  - 보유 주식 매수가/수량과 추가 매수가/수량을 입력하여 실시간 변경 평단가 계산.
+  - 목표 수익률 도달을 위한 매도가 산출 및 수수료/세금 공제 후 순수익 시뮬레이션.
+  - 10대 가상 주식 종목 즉시 불러오기 연동.
+- **[3] 직업별 일일/월간 파밍 수익 최적화 계산기 (`frontend/src/app/tools/farming-calculator/page.tsx`)**:
+  - 직업 5종(개발자, 트레이더, 광부, 요리사, 보안관) 숙련도 레벨별 일일 WLD 기대 수익 및 은행 복리 결합 자산 성장 곡선 그래프 렌더링.
+- **[4] 핀테크 웹 도구 허브 랜딩 (`frontend/src/app/tools/page.tsx`)**:
+  - 3대 계산기 원클릭 진입 허브 및 인기 금융 도구 카드 그리드.
+
+### 2. 🤖 [아키텍처 2] robots.txt & Sitemap 색인 표면적 대폭 확장
+- **robots.txt 색인 허용 완화 (`frontend/src/app/robots.ts`)**:
+  - `/newspaper` (AI 경제 뉴스 브리프), `/marketplace/auction` (실시간 경매장), `/tools/*` (3대 웹 계산기)의 크롤링을 전면 `Allow`하여 색인 가능 페이지 수를 100개 이상으로 확장.
+- **Sitemap 100% 포괄 (`frontend/src/app/sitemap.ts`)**:
+  - 신규 `/tools`, `/tools/compound-calculator`, `/tools/stock-calculator`, `/tools/farming-calculator`, `/newspaper`, `/marketplace/auction` 경로를 우선순위 0.9로 사이트맵에 등록.
+
+### 3. 🌐 [아키텍처 3] Google Search Console 인증 메타태그 & IndexNow 즉각 수집 핑 자동화
+- **Google 소유권 인증 메타태그 연동 (`frontend/src/app/layout.tsx`)**:
+  - `process.env.GOOGLE_SITE_VERIFICATION || process.env.SEARCH_CONSOLE_VERIFICATION` 환경변수 또는 표준 fallback 태그를 HTML 헤더에 명시하여 Google Search Console 도메인 소유권 승인 보장.
+- **IndexNow & Google Ping 원터치 즉시 수집 전송 (`backend/src/seo/seo.service.ts`)**:
+  - 신규 개설된 도구/가이드/뉴스 URL을 IndexNow(네이버 서치어드바이저, Bing) 및 Google Sitemap Ping으로 즉시 전송하여 수집 지연 최소화.
+
+### 4. 📋 [Target Implementation Files]
+1. `frontend/src/app/tools/page.tsx`: 핀테크 웹 도구 허브 랜딩 페이지
+2. `frontend/src/app/tools/compound-calculator/page.tsx`: 가상 복리 예적금 이자 시뮬레이터 & FAQ Schema
+3. `frontend/src/app/tools/stock-calculator/page.tsx`: 주식 물타기/평단가 및 수익률 계산기 & FAQ Schema
+4. `frontend/src/app/tools/farming-calculator/page.tsx`: 일일 파밍 수익 최적화 계산기 & FAQ Schema
+5. `frontend/src/config/routes.config.ts`: 신규 `/tools/*`, `/newspaper`, `/marketplace/auction` 공개 색인 등록
+6. `frontend/src/app/sitemap.ts`: 신규 도구 및 뉴스/경매장 사이트맵 URL 엔트리 추가
+7. `frontend/src/app/robots.ts`: 허용 경로 확대 및 disallow 정합화
+8. `frontend/src/app/layout.tsx`: Google 소유권 확인 태그 및 메타데이터 보강
+9. `backend/src/seo/seo.service.ts`: 신규 타겟 URL 모니터링 목록 확장 (`MONITORED_TARGET_URLS`)
+10. `frontend/src/app/tools/compound-calculator/compound-calculator.test.tsx`: 계산기 단위 테스트
+
+### 5. 🧪 [Verification & Deployment Plan]
+- 프론트엔드 Vitest 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 검증
+- Debian 미니PC 블루-그린 승격 배포 (`prod-v469`)
+- PostgreSQL 1,552개 활성 세션 100% 무손실 보존 확인
+- 실서버 `sitemap.xml`, `robots.txt`, HTML 메타태그 및 IndexNow Ping 실행 검증
+
+
+
+
+
+
+
+

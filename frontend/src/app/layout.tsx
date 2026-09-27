@@ -170,7 +170,10 @@ export async function generateMetadata(): Promise<Metadata> {
       canonical: siteUrl,
     },
     verification: {
-      google: process.env.SEARCH_CONSOLE_VERIFICATION || process.env.GOOGLE_SITE_VERIFICATION || undefined,
+      google:
+        process.env.SEARCH_CONSOLE_VERIFICATION ||
+        process.env.GOOGLE_SITE_VERIFICATION ||
+        'google-site-verification-moneyverse-auth-2026',
       other: {
         'naver-site-verification':
           process.env.NAVER_SITE_VERIFICATION || 'f77f52636d9465715f5d6f1dfc2ad65b68df9f2e',
