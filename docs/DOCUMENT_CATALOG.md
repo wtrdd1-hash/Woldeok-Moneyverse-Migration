@@ -9,7 +9,7 @@
 ## Current authority
 
 - [Project plan](planning/PROJECT_PLAN.md) — current implementation-facing authority, presently **v2026.09.25.444**.
-- [Integrated planning master](planning/INTEGRATED_PLANNING_MASTER.md) — planning/governance ledger, with v466 documentation cleanup record.
+- [Integrated planning master](planning/INTEGRATED_PLANNING_MASTER.md) — planning/governance ledger, with v467 documentation cleanup record.
 - [Documentation policy](DOCUMENTATION_POLICY.md) — authority, language, branch, archive and drift rules.
 - [Documentation index](INDEX.md) — curated navigation.
 - [Full planning re-review v402](planning/INTEGRATED_FULL_REVIEW_V402.md) — **historical review snapshot**, not the current authority.
