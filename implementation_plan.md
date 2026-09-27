@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v14)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v16)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v16**: P2P 경매장 낙찰 축하 Confetti/Web Audio 팡파레 + GSC 일일 SEO 리포트 디스코드 다이제스트 봇 + Plus VIP 5종 전용 아바타 프레임(AvatarFrame) 전역 연동 + 호가 Depth 차트 1-Click 빠른 입찰 프리셋 (+220, -0)
 - **v15**: P2P 경매장 실시간 틱/호가 Depth 차트 + Plus VIP 5대 네온 테마 선택기 + GSC 6시간 크롤링 감사 & 디스코드 웹훅 알림봇 + 자동 프록시 입찰(Proxy Bidding) (+220, -0)
 - **v14**: P2P 경매장 WebSocket 실시간 브로드캐스팅 & 안티 스나이핑(+2분 연장) + Moneyverse Plus VIP 2.5% 수수료 감면 & 골드 테마 + GSC 1시간 TTL 캐싱 (+210, -0)
 - **v13**: Moneyverse Plus VIP 황금 상자 퀘스트 연동 + P2P 경매장 실시간 웹소켓 입찰 알림 스트림 + Google Search Console Search Analytics 실시간 차트 관제 (+220, -0)
@@ -4182,6 +4183,67 @@ pm test).
 - Next.js Turbopack 최적화 프로덕션 빌드 성공
 - Debian 미니PC `stage_v467.sh` 및 `promote_v467.sh` 무중단 승격 배포
 - PostgreSQL 활성 세션(1,308+) 100% 무손실 검증
+
+---
+
+## 🚀 [v16 Specification] P2P 경매장 낙찰 축하 Confetti/팡파레 + GSC 일일 SEO 리포트 디스코드 다이제스트 봇 + Plus VIP 5종 전용 아바타 프레임 전역 연동 + 호가 Depth 퀵 프리셋 (누적 추가)
+
+### 1. 🎉 [아키텍처 1] P2P 경매장 낙찰 축하 Confetti & Web Audio API 팡파레 시스템 (`AuctionWinCelebrationModal`)
+- **Web Audio API 신디사이저 팡파레 엔진**:
+  - 외부 오디오 파일 다운로드 없이 브라우저 내장 `AudioContext`의 `OscillatorNode`와 `GainNode`를 활용하여 C5-E5-G5-C6 화음의 승리 아르페지오 팡파레 멜로디를 실시간 합성 재생.
+  - 무음 환경/모바일 배려를 위해 볼륨 슬라이더 및 사운드 Mute/Unmute 원터치 토글 지원.
+- **Canvas Confetti 골드 파티클 애니메이션**:
+  - 경매 낙찰 즉시 전면에 골드/앰버/에메랄드 3색 마이크로 파티클 팡파레 분사.
+- **낙찰자 승리 모달 (`AuctionWinCelebrationModal`)**:
+  - 낙찰된 아이템 이미지, 희귀도 배지, 최종 낙찰가(WLD), WLD 소각액, VIP 수수료 감면액 요약 카드 렌더링.
+  - '내 인벤토리로 이동' 및 '경매장 둘러보기' 액션 버튼 제공.
+
+### 2. 🤖 [아키텍처 2] Google Search Console 일일 SEO 요약 리포트 디스코드 다이제스트 봇 (`SeoDailyDigestService`)
+- **매일 09:00 데일리 스케줄러 (`backend/src/seo/seo-daily-digest.service.ts`)**:
+  - 매일 09:00 KST (`0 9 * * *`) Cron 스케줄러로 전일자 Google Search Console 검색 실적(총 클릭수, 총 노출수, 평균 CTR, 평균 게재순위) 및 상위 5대 검색 키워드 랭킹을 집계.
+  - `DiscordOutboxService`를 통해 관리자 관제 채널로 정밀 Embed 브리핑 자동 발송.
+- **관리자 1-Click 수동 리포트 발송 API**:
+  - `POST /api/v1/seo/gsc/digest-report` 엔드포인트 제공.
+  - 관리자 SEO 대시보드([`seo-client-view.tsx`](file:///frontend/src/app/admin/seo/seo-client-view.tsx))에 `[즉시 디스코드 리포트 발송]` 수동 트리거 버튼 연동.
+
+### 3. 👑 [아키텍처 3] Moneyverse Plus VIP 5종 전용 아바타 프레임 (`VipAvatarFrame`) 전역 연동
+- **5대 전용 네온 아바타 프레임 컴포넌트 (`frontend/src/components/vip-avatar-frame.tsx`)**:
+  - `royal-gold`: 황금빛 회전 오라 보더 (`shadow-amber-500/30 border-amber-400`)
+  - `cyber-pink`: 네온 사이버펑크 핑크 림 (`shadow-fuchsia-500/30 border-fuchsia-400`)
+  - `emerald-vault`: 퀀텀 에메랄드 볼트 림 (`shadow-emerald-500/30 border-emerald-400`)
+  - `sapphire-deep`: 심해 사파이어 블루 림 (`shadow-indigo-500/30 border-sky-400`)
+  - `obsidian-dark`: 매트 옵시디언 엣지 림 (`shadow-zinc-500/30 border-zinc-300`)
+- **전역 서피스 일괄 적용**:
+  - 유저 프로필(`/profile`), 게시판 댓글/작성자(`/board`), 실시간 채팅(`/chat`), 리더보드 순위표 전역에 유저 VIP 테마에 맞추어 아바타 프레임 일괄 연동.
+
+### 4. ⚡ [아키텍처 4] P2P 경매장 호가 Depth 인터랙티브 툴팁 & 1-Click 빠른 입찰 프리셋 Bar
+- **호가 차트 인터랙티브 툴팁 (`AuctionDepthChart`)**:
+  - 호가 Depth 차트 마우스 호버 시 가격(WLD), 누적 매수량, 해당 호가 입찰자 수치 플로팅 툴팁 렌더링.
+- **1-Click 빠른 입찰 프리셋 Bar**:
+  - 입찰 모달 하단에 `+1,000 WLD`, `+5,000 WLD`, `+10,000 WLD`, `+50,000 WLD` 원터치 빠른 호가 증액 칩 버튼 바 추가.
+  - 클릭 즉시 현재 최고가 대비 증액 계산 및 입력창 자동 반영.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+1. `backend/src/seo/seo-daily-digest.service.ts`: 매일 09:00 GSC SEO 다이제스트 스케줄러 & Discord Webhook 발송 서비스 신설
+2. `backend/src/seo/seo.controller.ts` & `seo.module.ts`: `POST /api/v1/seo/gsc/digest-report` 엔드포인트 및 모듈 등록
+3. `frontend/src/lib/web-audio-fanfare.ts`: Web Audio API 기반 무음 친화적 아르페지오 팡파레 신디사이저 엔진 신설
+4. `frontend/src/components/auction-win-celebration-modal.tsx`: Confetti & 팡파레 & VIP 혜택 요약 승리 축하 모달 신설
+5. `frontend/src/components/vip-avatar-frame.tsx`: 5종 VIP 네온 아바타 프레임 컴포넌트 신설
+6. `frontend/src/components/auction-depth-chart.tsx`: 호가 Depth 차트 인터랙티브 툴팁 & 퀵 프리셋 증액 바 고도화
+7. `frontend/src/app/marketplace/auction/page.tsx`: 낙찰 축하 모달, 퀵 프리셋 바, VIP 아바타 프레임 연동
+8. `frontend/src/app/admin/seo/seo-client-view.tsx`: GSC 일일 리포트 디스코드 즉시 발송 버튼 연동
+9. `backend/src/seo/seo.service.test.ts`: GSC 일일 다이제스트 단위 테스트 확장
+10. `frontend/src/components/auction-win-celebration-modal.test.tsx`: 승리 축하 모달 단위 테스트 신설
+
+### Verification Plan
+- 백엔드 / 프론트엔드 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v468.sh` 및 `promote_v468.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,548+) 100% 무손실 검증
+
 
 
 

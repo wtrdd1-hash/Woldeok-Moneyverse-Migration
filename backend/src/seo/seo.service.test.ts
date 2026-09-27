@@ -95,6 +95,7 @@ describe('SeoService', () => {
 });
 
 import { SeoCrawlerAuditService } from './seo-crawler-audit.service';
+import { SeoDailyDigestService } from './seo-daily-digest.service';
 import { vi } from 'vitest';
 
 describe('SeoCrawlerAuditService', () => {
@@ -121,4 +122,31 @@ describe('SeoCrawlerAuditService', () => {
     }
   });
 });
+
+describe('SeoDailyDigestService', () => {
+  it('should generate and dispatch daily SEO digest report', async () => {
+    const seoService = new SeoService();
+    const mockDiscordAlertService = {
+      sendDiscordEmbed: vi.fn().mockResolvedValue(true),
+    };
+
+    const digestService = new SeoDailyDigestService(
+      seoService,
+      mockDiscordAlertService as unknown as any,
+    );
+
+    const result = await digestService.sendDailyDigest();
+    expect(result).toBeDefined();
+    expect(result.totalClicks30d).toBeGreaterThan(0);
+    expect(result.totalImpressions30d).toBeGreaterThan(0);
+    expect(result.topQueriesCount).toBe(5);
+    expect(result.discordNotified).toBe(true);
+    expect(result.message).toContain('성공적으로 전송');
+    expect(mockDiscordAlertService.sendDiscordEmbed).toHaveBeenCalledTimes(1);
+
+    const lastResult = digestService.getLastDigestResult();
+    expect(lastResult).toEqual(result);
+  });
+});
+
 

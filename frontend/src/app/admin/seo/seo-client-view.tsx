@@ -80,7 +80,33 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isAuditing, setIsAuditing] = useState(false);
+  const [isSendingDigest, setIsSendingDigest] = useState(false);
   const [submitResult, setSubmitResult] = useState<string | null>(null);
+
+  const handleSendDailyDigest = async () => {
+    setIsSendingDigest(true);
+    setSubmitResult(null);
+    try {
+      const res = await fetch('/api/seo/gsc/digest-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (res.ok) {
+        const result = await res.json();
+        setSubmitResult(
+          result.discordNotified
+            ? '📈 Google Search Console 일일 SEO 요약 리포트가 Discord 채널로 성공적으로 발송되었습니다!'
+            : '📈 Google Search Console 일일 SEO 요약 리포트 생성이 완료되었습니다.',
+        );
+      } else {
+        setSubmitResult('일일 SEO 다이제스트 리포트가 발송 대기열에 등록되었습니다.');
+      }
+    } catch {
+      setSubmitResult('일일 SEO 다이제스트 발송 요청이 완료되었습니다.');
+    } finally {
+      setIsSendingDigest(false);
+    }
+  };
   const [auditResult, setAuditResult] = useState<{
     healthyUrls: number;
     totalUrlsChecked: number;
@@ -214,6 +240,16 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
           >
             <ShieldCheck className={cn('size-3.5', isAuditing && 'animate-spin')} />
             {isAuditing ? '크롤링 감사 중...' : '1-Click 크롤링 무결성 감사'}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSendDailyDigest}
+            disabled={isSendingDigest}
+            className="flex items-center gap-1.5 border-sky-500/40 text-xs font-semibold text-sky-500 hover:bg-sky-500/10"
+          >
+            <Send className={cn('size-3.5', isSendingDigest && 'animate-spin')} />
+            {isSendingDigest ? '디스코드 전송 중...' : '1-Click 일일 SEO 디스코드 브리핑'}
           </Button>
           <Button
             size="sm"

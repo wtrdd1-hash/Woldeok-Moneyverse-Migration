@@ -14,6 +14,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator';
 import { SeoCrawlerAuditService } from './seo-crawler-audit.service';
+import { SeoDailyDigestService } from './seo-daily-digest.service';
 import { SeoService } from './seo.service';
 
 export interface CrawlerLogDto {
@@ -39,6 +40,7 @@ export class SeoController {
   constructor(
     private readonly seoService: SeoService,
     private readonly auditService: SeoCrawlerAuditService,
+    private readonly digestService: SeoDailyDigestService,
   ) {}
 
   @Get('crawl-audit')
@@ -85,6 +87,28 @@ export class SeoController {
   @ApiOperation({ summary: 'Delete registered Google Search Console service account key' })
   async deleteGscCredentials() {
     return this.seoService.deleteGscCredentials();
+  }
+
+  @Get('gsc/digest-report')
+  @ApiOperation({ summary: 'Get latest daily SEO digest report result' })
+  async getDigestReport() {
+    return this.digestService.getLastDigestResult() || {
+      timestamp: new Date().toISOString(),
+      totalClicks30d: 0,
+      totalImpressions30d: 0,
+      avgCtr30d: 0,
+      avgPosition30d: 0,
+      topQueriesCount: 0,
+      discordNotified: false,
+      message: '일일 SEO 다이제스트가 아직 생성되지 않았습니다.',
+    };
+  }
+
+  @Post('gsc/digest-report')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Trigger immediate daily SEO digest report to Discord' })
+  async triggerDigestReport() {
+    return this.digestService.sendDailyDigest();
   }
 
   @Post('submit')

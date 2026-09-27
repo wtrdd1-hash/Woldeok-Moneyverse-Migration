@@ -9,6 +9,8 @@ import {
 } from '@/components/auction-live-toast-stream';
 import { AuctionDepthChart } from '@/components/auction-depth-chart';
 import { VipThemeSelector, type VipNeonTheme, VIP_THEME_OPTIONS } from '@/components/vip-theme-selector';
+import { AuctionWinCelebrationModal } from '@/components/auction-win-celebration-modal';
+import { VipAvatarFrame } from '@/components/vip-avatar-frame';
 
 export interface AuctionItem {
   id: string;
@@ -86,6 +88,13 @@ export default function AuctionMarketplacePage() {
   const [maxProxyBidInput, setMaxProxyBidInput] = useState<number>(0);
   const [selectedTheme, setSelectedTheme] = useState<VipNeonTheme>('royal-gold');
   const [notification, setNotification] = useState<string | null>(null);
+  const [winningCelebration, setWinningCelebration] = useState<{
+    itemTitle: string;
+    itemRarity: string;
+    finalBidWld: number;
+    burnFeeWld: number;
+    vipSavedWld: number;
+  } | null>(null);
 
   const activeThemeMeta = VIP_THEME_OPTIONS.find((t) => t.id === selectedTheme) ?? {
     id: 'royal-gold' as const,
@@ -306,17 +315,27 @@ export default function AuctionMarketplacePage() {
 
                   <div>
                     <h3 className="text-base font-bold text-white">{item.title}</h3>
-                    <div className="mt-1 text-xs text-slate-400">
-                      판매자: <span className="font-semibold text-slate-300">{item.seller}</span>
+                    <div className="mt-1 flex items-center gap-2 text-xs text-slate-400">
+                      <VipAvatarFrame theme={selectedTheme} isPlusUser={true} size="xs" showBadge={false}>
+                        <span className="text-[9px] font-bold text-amber-300">VIP</span>
+                      </VipAvatarFrame>
+                      <span>
+                        판매자: <span className="font-semibold text-slate-300">{item.seller}</span>
+                      </span>
                     </div>
                   </div>
 
-                  {/* Real-Time Depth Chart Component */}
+                  {/* Real-Time Depth Chart Component with 1-Click Quick Preset */}
                   <AuctionDepthChart
                     currentBid={item.currentBid}
                     startPrice={Math.round(item.currentBid * 0.7)}
                     buyNowPrice={item.buyoutPrice}
                     itemName={item.title}
+                    onQuickBid={(val) => {
+                      setBidModalItem(item);
+                      setBidAmountInput(val);
+                      setMaxProxyBidInput(Math.round(val * 1.5));
+                    }}
                   />
 
                   {/* Bidding Stats Box */}
@@ -355,7 +374,22 @@ export default function AuctionMarketplacePage() {
                   <button
                     type="button"
                     onClick={() => {
-                      alert(`즉시 구매가 ${item.buyoutPrice.toLocaleString()} WLD로 결제됩니다.`);
+                      if (item.buyoutPrice > userBalance) {
+                        alert('보유 WLD 잔액이 부족합니다.');
+                        return;
+                      }
+                      const fee = Math.floor(item.buyoutPrice * 0.025);
+                      const saved = Math.floor(item.buyoutPrice * 0.025);
+                      setUserBalance((prev) => prev - item.buyoutPrice);
+                      setTotalBurnedWld((prev) => prev + fee);
+                      setItems((prev) => prev.filter((it) => it.id !== item.id));
+                      setWinningCelebration({
+                        itemTitle: item.title,
+                        itemRarity: item.rarity,
+                        finalBidWld: item.buyoutPrice,
+                        burnFeeWld: fee,
+                        vipSavedWld: saved,
+                      });
                     }}
                     className="flex-1 rounded-xl border border-slate-700 bg-slate-800 py-2.5 text-xs font-bold text-slate-200 hover:bg-slate-700"
                   >
@@ -486,6 +520,19 @@ export default function AuctionMarketplacePage() {
               </div>
             </div>
           </div>
+        {/* Auction Win Celebration Modal */}
+        {winningCelebration && (
+          <AuctionWinCelebrationModal
+            isOpen={!!winningCelebration}
+            onClose={() => setWinningCelebration(null)}
+            itemTitle={winningCelebration.itemTitle}
+            itemRarity={winningCelebration.itemRarity}
+            finalBidWld={winningCelebration.finalBidWld}
+            burnFeeWld={winningCelebration.burnFeeWld}
+            vipSavedWld={winningCelebration.vipSavedWld}
+            isPlusUser={true}
+            theme={selectedTheme}
+          />
         )}
       </div>
     </div>

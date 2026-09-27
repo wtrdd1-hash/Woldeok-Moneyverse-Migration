@@ -24,6 +24,7 @@ interface AuctionDepthChartProps {
   readonly bids?: readonly BidHistoryPoint[];
   readonly itemName?: string;
   readonly themeClass?: string;
+  readonly onQuickBid?: (amount: number) => void;
 }
 
 export function AuctionDepthChart({
@@ -33,6 +34,7 @@ export function AuctionDepthChart({
   bids = [],
   itemName = '경매 아티팩트',
   themeClass = '',
+  onQuickBid,
 }: AuctionDepthChartProps) {
   const [activeTab, setActiveTab] = useState<'ticks' | 'depth'>('ticks');
   const [hoveredPoint, setHoveredPoint] = useState<BidHistoryPoint | null>(null);
@@ -292,6 +294,28 @@ export function AuctionDepthChart({
               </span>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Quick Bid Preset Increments */}
+      {onQuickBid && (
+        <div className="pt-2 border-t border-border/50 space-y-1.5">
+          <div className="text-[11px] font-semibold text-muted-foreground flex items-center justify-between">
+            <span>⚡ 1-Click 호가 빠른 증액</span>
+            <span className="text-[10px] text-zinc-400">클릭 즉시 입찰가 반영</span>
+          </div>
+          <div className="grid grid-cols-4 gap-1.5">
+            {[1000, 5000, 10000, 50000].map((inc) => (
+              <button
+                key={inc}
+                type="button"
+                onClick={() => onQuickBid(currentBid + inc)}
+                className="py-1 px-1.5 rounded-lg bg-muted/70 hover:bg-emerald-500/20 hover:text-emerald-400 border border-border/60 hover:border-emerald-500/40 text-[11px] font-mono tabular-nums font-semibold transition-all active:scale-[0.97]"
+              >
+                +{inc >= 10000 ? `${inc / 10000}만` : `${inc.toLocaleString()}`}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
