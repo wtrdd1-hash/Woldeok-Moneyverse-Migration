@@ -43,6 +43,26 @@ describe('AuctionLiveToastStream', () => {
     expect(screen.getByText('⚡ 실시간 신규 입찰')).toBeTruthy();
     expect(screen.getByText('테스트 네온 테마')).toBeTruthy();
     expect(screen.getByText('99,000 WLD')).toBeTruthy();
-    expect(screen.getByText('PLUS VIP')).toBeTruthy();
+    expect(screen.getByText(/PLUS VIP/i)).toBeTruthy();
+  });
+
+  it('renders anti-sniping extension toast on event dispatch', () => {
+    render(<AuctionLiveToastStream />);
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent('auction:anti-sniping-extended', {
+          detail: {
+            auctionId: 'auc-1',
+            itemTitle: '황금 호가창 네온 테마',
+            extendedMinutes: 2,
+          },
+        }),
+      );
+    });
+
+    expect(screen.getByText('🛡️ 안티 스나이핑 2분 연장')).toBeTruthy();
+    expect(screen.getByText(/마감 1분 전 최고가 입찰로 마감 시간이 2분 자동 연장되었습니다/i)).toBeTruthy();
   });
 });
+

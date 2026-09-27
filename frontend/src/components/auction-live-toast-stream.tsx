@@ -22,6 +22,8 @@ export interface LiveBidEvent {
   readonly bidAmount: number;
   readonly bidderName: string;
   readonly isPlusUser?: boolean;
+  readonly burnFeePercent?: number;
+  readonly isAntiSniping?: boolean;
   readonly timestamp: string;
 }
 
@@ -34,6 +36,7 @@ const SAMPLE_INITIAL_BIDS: readonly LiveBidEvent[] = [
     bidAmount: 76000,
     bidderName: 'CryptoWhale',
     isPlusUser: true,
+    burnFeePercent: 2.5,
     timestamp: '방금 전',
   },
   {
@@ -44,6 +47,7 @@ const SAMPLE_INITIAL_BIDS: readonly LiveBidEvent[] = [
     bidAmount: 33000,
     bidderName: '여의도마스터',
     isPlusUser: false,
+    burnFeePercent: 5.0,
     timestamp: '1분 전',
   },
   {
@@ -54,6 +58,7 @@ const SAMPLE_INITIAL_BIDS: readonly LiveBidEvent[] = [
     bidAmount: 19000,
     bidderName: '골드핸즈',
     isPlusUser: true,
+    burnFeePercent: 2.5,
     timestamp: '2분 전',
   },
 ];
@@ -82,7 +87,24 @@ export function AuctionLiveToastStream() {
       }
     };
 
+    const handleAntiSniping = (event: Event) => {
+      const custom = event as CustomEvent<{ auctionId: string; itemTitle: string; extendedMinutes: number }>;
+      if (custom.detail) {
+        addBidToast({
+          id: `ext-${Date.now()}`,
+          auctionId: custom.detail.auctionId,
+          itemTitle: custom.detail.itemTitle,
+          itemRarity: 'legendary',
+          bidAmount: 0,
+          bidderName: '안티 스나이핑 시스템',
+          isAntiSniping: true,
+          timestamp: '방금 전',
+        });
+      }
+    };
+
     window.addEventListener('auction:bid-placed', handleCustomBid);
+    window.addEventListener('auction:anti-sniping-extended', handleAntiSniping);
 
     // Periodic simulation pulse for lively live feeling (every 18-28 seconds)
     const interval = setInterval(() => {
@@ -110,6 +132,7 @@ export function AuctionLiveToastStream() {
         bidAmount: selected.base + increment,
         bidderName: bidder,
         isPlusUser: isPlus,
+        burnFeePercent: isPlus ? 2.5 : 5.0,
         timestamp: '방금 전',
       };
 
@@ -118,6 +141,7 @@ export function AuctionLiveToastStream() {
 
     return () => {
       window.removeEventListener('auction:bid-placed', handleCustomBid);
+      window.removeEventListener('auction:anti-sniping-extended', handleAntiSniping);
       clearInterval(interval);
     };
   }, [addBidToast]);
@@ -128,45 +152,73 @@ export function AuctionLiveToastStream() {
       className="pointer-events-none fixed right-4 top-20 z-50 flex w-full max-w-sm flex-col gap-2.5 sm:right-6"
     >
       {toasts.map((toast) => {
-        const burnAmount = Math.floor(toast.bidAmount * 0.05);
+        const feePercent = toast.burnFeePercent ?? (toast.isPlusUser ? 2.5 : 5.0);
+        const burnAmount = Math.floor(toast.bidAmount * (feePercent / 100));
 
         return (
           <div
             key={toast.id}
-            className="pointer-events-auto flex items-start justify-between gap-3 rounded-2xl border border-amber-500/40 bg-slate-900/95 p-3.5 text-slate-100 shadow-2xl shadow-amber-500/10 backdrop-blur-md transition-all duration-300 animate-in fade-in-50 slide-in-from-top-4"
+            className={cn(
+              'pointer-events-auto flex items-start justify-between gap-3 rounded-2xl border p-3.5 text-slate-100 shadow-2xl backdrop-blur-md transition-all duration-300 animate-in fade-in-50 slide-in-from-top-4',
+              toast.isAntiSniping
+                ? 'border-purple-500/60 bg-purple-950/90 shadow-purple-500/20'
+                : 'border-amber-500/40 bg-slate-900/95 shadow-amber-500/10',
+            )}
           >
             <div className="flex items-start gap-3">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-amber-500/50 bg-amber-500/20 text-amber-400 shadow-sm">
+              <div
+                className={cn(
+                  'flex size-9 shrink-0 items-center justify-center rounded-xl border shadow-sm',
+                  toast.isAntiSniping
+                    ? 'border-purple-400 bg-purple-500/30 text-purple-300'
+                    : 'border-amber-500/50 bg-amber-500/20 text-amber-400',
+                )}
+              >
                 <Gavel className="size-4.5 animate-bounce" />
               </div>
 
               <div className="space-y-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-bold text-amber-400">⚡ 실시간 신규 입찰</span>
+                  <span
+                    className={cn(
+                      'text-[11px] font-bold',
+                      toast.isAntiSniping ? 'text-purple-300' : 'text-amber-400',
+                    )}
+                  >
+                    {toast.isAntiSniping ? '🛡️ 안티 스나이핑 2분 연장' : '⚡ 실시간 신규 입찰'}
+                  </span>
                   {toast.isPlusUser && (
                     <Badge
                       variant="outline"
                       className="border-amber-500/50 bg-amber-500/20 px-1.5 py-0 text-[10px] font-extrabold text-amber-300"
                     >
                       <Crown className="mr-0.5 size-2.5" />
-                      PLUS VIP
+                      PLUS VIP (2.5% 소각)
                     </Badge>
                   )}
                 </div>
 
                 <p className="line-clamp-1 text-xs font-bold text-white">{toast.itemTitle}</p>
 
-                <div className="flex flex-wrap items-center gap-2 text-xs">
-                  <span className="font-mono font-black text-amber-400">
-                    {toast.bidAmount.toLocaleString()} WLD
-                  </span>
-                  <span className="text-[11px] text-slate-400 font-medium">by {toast.bidderName}</span>
-                </div>
+                {toast.isAntiSniping ? (
+                  <p className="text-[11px] text-purple-200">
+                    마감 1분 전 최고가 입찰로 마감 시간이 2분 자동 연장되었습니다.
+                  </p>
+                ) : (
+                  <>
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      <span className="font-mono font-black text-amber-400">
+                        {toast.bidAmount.toLocaleString()} WLD
+                      </span>
+                      <span className="text-[11px] text-slate-400 font-medium">by {toast.bidderName}</span>
+                    </div>
 
-                <div className="flex items-center gap-1 text-[10px] text-rose-400 font-semibold">
-                  <Flame className="size-3" />
-                  <span>5% 소각: -{burnAmount.toLocaleString()} WLD</span>
-                </div>
+                    <div className="flex items-center gap-1 text-[10px] text-rose-400 font-semibold">
+                      <Flame className="size-3" />
+                      <span>{feePercent}% 소각: -{burnAmount.toLocaleString()} WLD</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 

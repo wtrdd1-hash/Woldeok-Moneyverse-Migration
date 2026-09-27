@@ -359,21 +359,28 @@ export class SeoService {
 
   // --- Google Search Console API & Analytics ---
   private gscCredentialsState: { clientEmail: string; keyJson: string; updatedAt: string } | null = null;
+  private cachedGscAnalytics: { data: GscAnalyticsData; cachedAt: number } | null = null;
 
   async getGscAnalytics(): Promise<GscAnalyticsData> {
+    const now = Date.now();
+    // Return from 1-hour TTL cache if still fresh (< 3600s)
+    if (this.cachedGscAnalytics && now - this.cachedGscAnalytics.cachedAt < 3600 * 1000) {
+      return this.cachedGscAnalytics.data;
+    }
+
     const hasCreds = !!this.gscCredentialsState || !!process.env.GSC_SERVICE_ACCOUNT_KEY;
     const clientEmail = this.gscCredentialsState?.clientEmail || process.env.GSC_CLIENT_EMAIL || (hasCreds ? 'seo-service-account@moneyverse-gsc.iam.gserviceaccount.com' : null);
     const updatedAt = this.gscCredentialsState?.updatedAt || (hasCreds ? new Date(Date.now() - 3600000).toISOString() : null);
 
     // Generate 30-day realistic time series for canonical routes
     const timeSeries: GscTimeSeriesEntry[] = [];
-    const now = new Date();
+    const nowDate = new Date();
     let totalClicks = 0;
     let totalImpressions = 0;
     let weightedPositionSum = 0;
 
     for (let i = 29; i >= 0; i--) {
-      const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      const d = new Date(nowDate.getTime() - i * 24 * 60 * 60 * 1000);
       const dateStr = d.toISOString().slice(0, 10);
       // Realistic weekday/weekend wave pattern
       const dayOfWeek = d.getDay();
@@ -415,7 +422,7 @@ export class SeoService {
       { query: '일일 파밍 퀘스트 루틴', clicks: Math.round(totalClicks * 0.02), impressions: Math.round(totalImpressions * 0.03), ctr: 4.2, position: 6.4 },
     ];
 
-    return {
+    const result: GscAnalyticsData = {
       hasCredentials: hasCreds,
       clientEmail,
       updatedAt,
@@ -426,6 +433,9 @@ export class SeoService {
       timeSeries,
       topQueries,
     };
+
+    this.cachedGscAnalytics = { data: result, cachedAt: Date.now() };
+    return result;
   }
 
   async saveGscCredentials(rawJson: string): Promise<{ success: boolean; clientEmail: string; message: string }> {
@@ -441,6 +451,7 @@ export class SeoService {
         keyJson: rawJson,
         updatedAt: new Date().toISOString(),
       };
+      this.cachedGscAnalytics = null; // Invalidate cache
 
       return {
         success: true,
@@ -454,6 +465,7 @@ export class SeoService {
 
   async deleteGscCredentials(): Promise<{ success: boolean; message: string }> {
     this.gscCredentialsState = null;
+    this.cachedGscAnalytics = null; // Invalidate cache
     return {
       success: true,
       message: 'Google Search Console 서비스 계정 키가 삭제되었습니다.',

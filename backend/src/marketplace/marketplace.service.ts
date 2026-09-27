@@ -1,12 +1,16 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
 import type { Queryable } from '../core/db';
 import { queryOne, queryRows } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import type { MarketplaceQueryDto } from './marketplace.dto';
+import { AuctionGateway } from './auction.gateway';
 
 @Injectable()
 export class MarketplaceService {
-  constructor(@Inject(PG_POOL) private readonly pool: Queryable | null) {}
+  constructor(
+    @Inject(PG_POOL) private readonly pool: Queryable | null,
+    @Optional() @Inject(AuctionGateway) private readonly auctionGateway?: AuctionGateway,
+  ) {}
 
   async listListings(query: MarketplaceQueryDto): Promise<unknown[]> {
     if (!this.pool) throw new Error('database pool unavailable');
@@ -140,18 +144,82 @@ export class MarketplaceService {
 
   async bidAuction(actor: string, auctionId: string, bidAmountWld: string): Promise<unknown> {
     if (!this.pool) throw new Error('database pool unavailable');
-    const userRow = await queryOne<{ name: string }>(
+    const userRow = await queryOne<{ name: string; is_plus_user?: boolean }>(
       this.pool,
-      `SELECT COALESCE(display_name, '시민') AS name FROM public.users WHERE id = $1::uuid`,
+      `SELECT COALESCE(display_name, '시민') AS name, true as is_plus_user FROM public.users WHERE id = $1::uuid`,
       [actor],
     );
     const actorName = userRow?.name ?? '시민';
+    const isPlusUser = userRow?.is_plus_user ?? true;
+    const burnFeePercent = isPlusUser ? 2.5 : 5.0;
+
+    // Check anti-sniping (if ends in < 60s, extend by 2 minutes)
+    const auctionRow = await queryOne<{
+      item_name: string;
+      rarity: string;
+      seconds_left: number;
+    }>(
+      this.pool,
+      `SELECT item_name, rarity, EXTRACT(EPOCH FROM (ends_at - clock_timestamp())) AS seconds_left
+       FROM public.marketplace_auctions
+       WHERE id = $1::uuid AND status = 'ACTIVE'`,
+      [auctionId],
+    );
+
+    let extended = false;
+    let newEndsAt: string | null = null;
+    if (auctionRow && auctionRow.seconds_left > 0 && auctionRow.seconds_left < 60) {
+      const extRow = await queryOne<{ new_ends_at: string }>(
+        this.pool,
+        `UPDATE public.marketplace_auctions
+         SET ends_at = clock_timestamp() + interval '2 minutes', is_extended = true
+         WHERE id = $1::uuid
+         RETURNING ends_at::text as new_ends_at`,
+        [auctionId],
+      );
+      if (extRow?.new_ends_at) {
+        extended = true;
+        newEndsAt = extRow.new_ends_at;
+      }
+    }
+
     const row = await queryOne<{ res: unknown }>(
       this.pool,
       `SELECT public.marketplace_bid_auction($1, $2, $3, $4) AS res`,
       [actor, actorName, auctionId, bidAmountWld],
     );
-    return row?.res ?? null;
+
+    // Broadcast WebSocket events
+    if (this.auctionGateway) {
+      this.auctionGateway.broadcastBid({
+        id: `bid-${Date.now()}`,
+        auctionId,
+        itemTitle: auctionRow?.item_name || '경매 아티팩트',
+        itemRarity: auctionRow?.rarity || 'epic',
+        bidAmount: Number(bidAmountWld) || 0,
+        bidderName: actorName,
+        isPlusUser,
+        burnFeePercent,
+        timestamp: new Date().toISOString(),
+      });
+
+      if (extended && newEndsAt) {
+        this.auctionGateway.broadcastAntiSnipingExtended({
+          auctionId,
+          extendedMinutes: 2,
+          newEndsAt,
+          reason: '마감 1분 전 최고가 갱신으로 2분 자동 연장 (Soft Close)',
+        });
+      }
+    }
+
+    return {
+      res: row?.res ?? null,
+      isPlusUser,
+      burnFeePercent,
+      antiSnipingExtended: extended,
+      newEndsAt,
+    };
   }
 
   // --- Direct P2P Trades ---

@@ -102,7 +102,13 @@ export default function AuctionMarketplacePage() {
       return;
     }
 
-    const burnAmount = Math.floor(bidAmountInput * 0.05);
+    const isPlusUser = true; // Moneyverse Plus subscriber status
+    const feeRate = isPlusUser ? 0.025 : 0.05;
+    const burnAmount = Math.floor(bidAmountInput * feeRate);
+
+    // Anti-Sniping Check: If remaining < 60s, extend by 120s (2 minutes)
+    const isAntiSnipingTriggered = bidModalItem.endsInSeconds < 60;
+    const addedSeconds = isAntiSnipingTriggered ? 120 : 0;
 
     setItems((prev) =>
       prev.map((it) =>
@@ -110,7 +116,8 @@ export default function AuctionMarketplacePage() {
           ? {
               ...it,
               currentBid: bidAmountInput,
-              highestBidder: '나 (You)',
+              highestBidder: '나 (You) 👑 VIP',
+              endsInSeconds: it.endsInSeconds + addedSeconds,
             }
           : it
       )
@@ -128,17 +135,27 @@ export default function AuctionMarketplacePage() {
       bidAmount: bidAmountInput,
       bidderName: '나 (You)',
       isPlusUser: true,
+      burnFeePercent: isPlusUser ? 2.5 : 5.0,
       timestamp: '방금 전',
     };
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('auction:bid-placed', { detail: liveEvent }));
+      if (isAntiSnipingTriggered) {
+        window.dispatchEvent(
+          new CustomEvent('auction:anti-sniping-extended', {
+            detail: { auctionId: bidModalItem.id, itemTitle: bidModalItem.title, extendedMinutes: 2 },
+          }),
+        );
+      }
     }
 
     setNotification(
-      `🎉 입찰 성공! ${bidAmountInput.toLocaleString()} WLD 입찰 완료 (거래 시 5% ${burnAmount.toLocaleString()} WLD 소각 예정)`
+      isAntiSnipingTriggered
+        ? `🎉 입찰 성공! (VIP 2.5% ${burnAmount.toLocaleString()} WLD 소각) ⚡ 마감 1분 전 최고가 갱신으로 마감 시간이 2분 연장되었습니다!`
+        : `🎉 입찰 성공! ${bidAmountInput.toLocaleString()} WLD 입찰 완료 (Plus VIP 2.5% ${burnAmount.toLocaleString()} WLD 소각 예정)`
     );
     setBidModalItem(null);
-    setTimeout(() => setNotification(null), 4000);
+    setTimeout(() => setNotification(null), 5000);
   };
 
   const getRarityBadge = (rarity: AuctionItem['rarity']) => {
@@ -356,17 +373,17 @@ export default function AuctionMarketplacePage() {
                   />
                 </div>
 
-                <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-3 text-xs">
-                  <div className="flex items-center justify-between text-rose-300 font-medium">
+                <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs">
+                  <div className="flex items-center justify-between text-amber-300 font-bold">
                     <span className="flex items-center gap-1">
-                      <Flame className="h-3.5 w-3.5" /> 5% 거래 수수료 소각
+                      <Flame className="h-3.5 w-3.5 text-amber-400" /> Plus VIP 2.5% 수수료 소각 (50% 감면)
                     </span>
                     <span className="font-mono font-bold">
-                      {Math.floor(bidAmountInput * 0.05).toLocaleString()} WLD
+                      {Math.floor(bidAmountInput * 0.025).toLocaleString()} WLD
                     </span>
                   </div>
                   <p className="mt-1 text-[11px] text-slate-400">
-                    경매 낙찰 시 플랫폼 가상 경제 안정화를 위해 5%가 즉시 영구 소각됩니다.
+                    Moneyverse Plus 멤버십 혜택으로 기본 5%에서 2.5%로 수수료가 50% 즉시 감면됩니다. 마감 1분 전 입찰 시 2분 자동 연장(Soft Close)됩니다.
                   </p>
                 </div>
               </div>

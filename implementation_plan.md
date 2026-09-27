@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v13)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v14)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v14**: P2P 경매장 WebSocket 실시간 브로드캐스팅 & 안티 스나이핑(+2분 연장) + Moneyverse Plus VIP 2.5% 수수료 감면 & 골드 테마 + GSC 1시간 TTL 캐싱 (+210, -0)
 - **v13**: Moneyverse Plus VIP 황금 상자 퀘스트 연동 + P2P 경매장 실시간 웹소켓 입찰 알림 스트림 + Google Search Console Search Analytics 실시간 차트 관제 (+220, -0)
 - **v12**: Google Search Console / Naver 웹마스터 도구 사이트맵 등록 자동화 & 실시간 봇 크롤링/인덱싱 관제 타워(/admin/seo) 구축 (+190, -0)
 - **v11**: SEO 검색 노출 쇄신(10대 주식 종목 공개 프리뷰 인덱싱 & 5대 금융 가이드 & hreflang) + 도파민 5대 API 프론트-백엔드 실시간 원장 연동 + Moneyverse Plus 유료/무료 멤버십 티어 풀스택 개발 (+180, -0)
@@ -4076,6 +4077,54 @@ pm test).
 - Next.js Turbopack 최적화 프로덕션 빌드 성공
 - Debian 미니PC `stage_v465.sh` 및 `promote_v465.sh` 무중단 승격 배포
 - PostgreSQL 활성 세션(1,548+) 100% 무손실 검증
+
+---
+
+## 🚀 [v14 Specification] P2P 경매장 WebSocket Gateway & 안티 스나이핑 + Moneyverse Plus VIP 2.5% 감면 혜택 + GSC 1시간 TTL 캐싱 (누적 추가)
+
+### 1. ⚡ [아키텍처 1] P2P 경매장 WebSocket Gateway 및 안티 스나이핑(Anti-Sniping) 엔진
+- **실시간 소켓 게이트웨이 (`backend/src/marketplace/auction.gateway.ts`)**:
+  - `@WebSocketGateway({ namespace: '/auctions', cors: true })`:
+  - 신규 최고가 입찰 시 접속된 모든 클라이언트에 `auction:bid-placed` 및 `auction:anti-sniping-extended` 이벤트 브로드캐스팅.
+  - 지연시간 <20ms 극소화.
+- **안티 스나이핑 (Soft Close) 비즈니스 룰**:
+  - 경매 마감 1분(`60초`) 이내에 신규 최고가 입찰이 발생할 경우, 경매 마감 시각(`ends_at`)을 자동으로 **2분 연장** (`ends_at = clock_timestamp() + interval '2 minutes'`).
+  - DB 필드 `is_extended = true`로 마킹 및 연장 횟수/남은 시간 실시간 브로드캐스트.
+  - 스나이핑 봇에 의한 마지막 1초 낙찰 가로채기를 원천 방어하고 공정한 입찰 경쟁 유도.
+
+### 2. 👑 [아키텍처 2] Moneyverse Plus VIP 경매 수수료 50% 감면 & 골드 호가창/경매장 전용 테마
+- **VIP 수수료율 차등 계산 (2.5% vs 5.0%)**:
+  - 일반 유저 낙찰 수수료: 5.0% 영구 소각.
+  - Moneyverse Plus VIP 구독자 낙찰 수수료: **2.5% (50% 감면)** 적용 및 잔여 2.5% 영구 소각.
+  - 원장 정산 시 `burn_fee_rate`를 유저 티어에 따라 동적 산정하여 절감 혜택 즉시 반영.
+- **VIP 전용 테마 및 엠블럼**:
+  - 경매장 상세 및 호가창에 'VIP 골드 네온 테마' 자동 해금 및 골드 닉네임 하이라이트 발광.
+  - 입찰 시 'PLUS VIP 50% 수수료 할인' 뱃지 실시간 표시.
+
+### 3. 📈 [아키텍처 3] Google Search Console Search Analytics 1시간 TTL 캐싱 및 배치 안정화
+- **Google Cloud Auth 및 1시간 TTL 캐시 엔진 (`backend/src/seo/seo.service.ts`)**:
+  - 서비스 계정 키 등록 시 Google Search Console API 직접 연동.
+  - 최근 30일 시계열 데이터 및 상위 10대 검색어 랭킹을 1시간(3,600초) 동안 메모리/캐시에 보존하여 API 할당량(Quota) 소진 방지 및 0초 즉시 응답 보장.
+  - 백오프 재시도 및 페일세이프 기본값 fallback 체계 완비.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `backend/src/marketplace/auction.gateway.ts`: NestJS WebSocketGateway 구현
+- `backend/src/marketplace/marketplace.module.ts`: AuctionGateway 등록
+- `backend/src/marketplace/marketplace.service.ts`: 2.5% VIP 수수료 감면 및 1분 안티 스나이핑 2분 연장 로직
+- `backend/src/seo/seo.service.ts`: GSC 1시간 TTL 캐시 및 Auth 연동
+- `frontend/src/app/marketplace/auction/page.tsx`: VIP 2.5% 감면 및 안티 스나이핑 연장 타이머 UI 연동
+- `frontend/src/components/auction-live-toast-stream.tsx`: 안티 스나이핑 연장 알림 토스트 및 VIP 2.5% 소각 뱃지
+- `backend/src/marketplace/marketplace.controller.test.ts`: 안티 스나이핑 및 VIP 수수료 단위 테스트
+
+### Verification Plan
+- 백엔드 / 프론트엔드 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v466.sh` 및 `promote_v466.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,548+) 100% 무손실 검증
+
 
 
 
