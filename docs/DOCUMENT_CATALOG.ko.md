@@ -9,7 +9,7 @@
 ## 현재 권위
 
 - [프로젝트 기획](planning/PROJECT_PLAN.ko.md) — 현재 구현 권위, **v2026.09.25.444**.
-- [통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md) — 기획/거버넌스 원장, v466 문서 정리 기록 포함.
+- [통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md) — 기획/거버넌스 원장, v467 문서 정리 기록 포함.
 - [문서 정책](DOCUMENTATION_POLICY.ko.md) — 권위/언어/브랜치/보관/드리프트 규칙.
 - [문서 인덱스](INDEX.ko.md) — 선별 탐색 경로.
 - [전체 기획 재검토 v402](planning/INTEGRATED_FULL_REVIEW_V402.ko.md) — **역사 검토 스냅샷**이며 현재 권위가 아니다.
