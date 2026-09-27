@@ -2,7 +2,7 @@
 
 **English canonical** | [한국어](DOCUMENT_CATALOG.ko.md)
 
-> **Snapshot Version**: `v2026.09.27.473`  
+> **Snapshot Version**: `v2026.09.28.474`  
 > **Target Branch**: `main`  
 > **Purpose**: Official master inventory certifying documentation organization status.
 
@@ -23,7 +23,7 @@
 
 ## 📊 Inventory Summary
 
-Total documents in `docs/`: **1,648 files**, categorized into 10 domains.
+Total documents in `docs/`: **1,650 files**, categorized into 15 domains.
 
 | Classification | Files | Highlights |
 | :--- | :---: | :--- |

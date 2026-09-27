@@ -81,6 +81,30 @@ flowchart TD
 - **Public Takedown Intake (`/safety/takedown`)**: Victims and legal guardians can request emergency takedowns of non-consensual imagery or illicit content without an account.
 - **Private Status Lookup (`/safety/takedown/status`)**: Track resolution using the Case ID and private passcode.
 
+### 3.7 Programmatic SEO & Viral Growth Suite (`/tools/*`, `/invite/*`)
+- 20,000+ pSEO dynamic long-tail landing pages for stock dollar-cost averaging, compound interest, and profession simulators.
+- Viral diagnosis share cards and 2-way referral reward system (+10M WLD bonus).
+
+### 3.8 Virtual Real Estate & Metaverse Land Leasing (`/spaces/real-estate`)
+- 10 premier virtual land parcels (Gangnam, Yeouido, Wall St, Silicon Valley) with commercial building construction.
+- Automated 15% passive fee distribution to land owners and 0.5%/wk property tax deflationary sink.
+
+### 3.9 Virtual Derivatives & 10x Leverage Futures Exchange (`/stocks/derivatives`)
+- 1x ~ 10x Isolated/Cross margin Long and Short leverage trading on 10 virtual stocks.
+- 8-hour funding rate mechanism, 80% margin call notifications, and Central Bank liquidation insurance fund.
+
+### 3.10 Virtual Startup VC Angel Investment & Crowdfunding (`/businesses/ventures`)
+- User-founded virtual enterprises across 5 tech domains with 30% equity public crowdfunding IPOs.
+- Automated WLD dividend distributions (10%~50% payout ratio) based on daily corporate revenue.
+
+### 3.11 Discord Club Warfare & Territory Domination (`/clubs/warfare`)
+- Weekly 1-hour capital siege battles between Discord servers/clubs for financial territory control.
+- 10% trading fee tax revenue redistribution to conquering club vaults and Hall of Fame emblems.
+
+### 3.12 No-Code Quant Bot Builder & Backtesting Studio (`/tools/quant-studio`)
+- Visual drag-and-drop rule assembly for technical indicators (RSI, MA Cross, Bollinger Bands).
+- Instant 30-day historical tick backtesting and Strategy Marketplace with recurring WLD subscriptions.
+
 ---
 
 ## 4. Operator Control Tower Guide (`/admin`)

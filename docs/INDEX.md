@@ -53,5 +53,20 @@
 2. **[Mobile API Specification](mobile-api-complete-spec.md)**
 
 ### 10. 📜 Release Logs & Worklogs
-1. **[Official Release Changelog](UPDATE_LOG.md)**
-2. **[Worklog Directory](worklog/README.md)**
+1. **[Official Release Changelog](UPDATE_LOG.md)**: Full release history v469 ~ v474
+2. **[Worklog Directory](worklog/README.md)**: Daily architecture records
+
+### 11. 🏢 Virtual Real Estate & Metaverse Land
+1. **[Virtual Real Estate & Land Leasing Spec](APP_SPEC_AND_USER_GUIDE.md#38-virtual-real-estate--metaverse-land-leasing-spacesreal-estate)**: 10 premier land parcels, commercial building construction, and 15% passive WLD fee distribution
+
+### 12. 📈 Virtual Derivatives & 10x Leverage Futures
+1. **[10x Leverage Futures & Funding Rate Spec](APP_SPEC_AND_USER_GUIDE.md#39-virtual-derivatives--10x-leverage-futures-exchange-stocksderivatives)**: Long/Short margin, 8-hour funding rates, and liquidation insurance fund
+
+### 13. 🚀 Virtual Startup VC & Crowdfunding
+1. **[Startup Corporate Formation & Angel IPO Spec](APP_SPEC_AND_USER_GUIDE.md#310-virtual-startup-vc-angel-investment--crowdfunding-businessesventures)**: 5 tech verticals, public share subscription, and corporate revenue dividends
+
+### 14. ⚔️ Discord Club Warfare & Siege Battles
+1. **[Club Capital Siege & Territory Domination Spec](APP_SPEC_AND_USER_GUIDE.md#311-discord-club-warfare--territory-domination-clubswarfare)**: Sunday 1-hour capital battles and 10% tax redistribution
+
+### 15. 🤖 No-Code Quant Bot Builder & Studio
+1. **[No-Code Quant Studio & Backtesting Marketplace Spec](APP_SPEC_AND_USER_GUIDE.md#312-no-code-quant-bot-builder--backtesting-studio-toolsquant-studio)**: Visual indicator assembly, 30-day historical backtesting, and strategy marketplace
