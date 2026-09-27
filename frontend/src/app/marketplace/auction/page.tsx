@@ -2,6 +2,11 @@
 
 import React, { useState } from 'react';
 import { Gavel, Flame, Sparkles, Shield, Clock, Plus, Tag, ArrowUpRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import {
+  AuctionLiveToastStream,
+  AuctionLiveTickerStrip,
+  type LiveBidEvent,
+} from '@/components/auction-live-toast-stream';
 
 export interface AuctionItem {
   id: string;
@@ -114,6 +119,21 @@ export default function AuctionMarketplacePage() {
     setUserBalance((prev) => prev - (bidAmountInput - bidModalItem.currentBid));
     setTotalBurnedWld((prev) => prev + burnAmount);
 
+    // Dispatch global toast event
+    const liveEvent: LiveBidEvent = {
+      id: `bid-me-${Date.now()}`,
+      auctionId: bidModalItem.id,
+      itemTitle: bidModalItem.title,
+      itemRarity: bidModalItem.rarity,
+      bidAmount: bidAmountInput,
+      bidderName: '나 (You)',
+      isPlusUser: true,
+      timestamp: '방금 전',
+    };
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('auction:bid-placed', { detail: liveEvent }));
+    }
+
     setNotification(
       `🎉 입찰 성공! ${bidAmountInput.toLocaleString()} WLD 입찰 완료 (거래 시 5% ${burnAmount.toLocaleString()} WLD 소각 예정)`
     );
@@ -142,6 +162,9 @@ export default function AuctionMarketplacePage() {
 
   return (
     <div className="min-h-screen bg-slate-950 px-4 py-8 text-slate-100 sm:px-6 lg:px-8">
+      {/* Global WebSocket Live Toast Stream */}
+      <AuctionLiveToastStream />
+
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Top Header */}
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
@@ -182,6 +205,9 @@ export default function AuctionMarketplacePage() {
             </div>
           </div>
         </div>
+
+        {/* 60fps Live Bidding Ticker Strip */}
+        <AuctionLiveTickerStrip />
 
         {/* Notification Banner */}
         {notification && (

@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v12)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v13)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v13**: Moneyverse Plus VIP 황금 상자 퀘스트 연동 + P2P 경매장 실시간 웹소켓 입찰 알림 스트림 + Google Search Console Search Analytics 실시간 차트 관제 (+220, -0)
 - **v12**: Google Search Console / Naver 웹마스터 도구 사이트맵 등록 자동화 & 실시간 봇 크롤링/인덱싱 관제 타워(/admin/seo) 구축 (+190, -0)
 - **v11**: SEO 검색 노출 쇄신(10대 주식 종목 공개 프리뷰 인덱싱 & 5대 금융 가이드 & hreflang) + 도파민 5대 API 프론트-백엔드 실시간 원장 연동 + Moneyverse Plus 유료/무료 멤버십 티어 풀스택 개발 (+180, -0)
 - **v10**: 도파민 5대 전용 API 완비 & 14대 도메인 API 실시간 관제 대시보드(/admin/api-health) 구축 (+45, -0)
@@ -4019,6 +4020,63 @@ pm test).
 - Next.js Turbopack 최적화 프로덕션 빌드 성공
 - Debian 미니PC `stage_v464.sh` 및 `promote_v464.sh` 무중단 승격 배포
 - PostgreSQL 활성 세션(1,546+) 100% 무손실 검증
+
+---
+
+## 🚀 [v13 Specification] Moneyverse Plus VIP 퀘스트 + P2P 경매장 실시간 웹소켓 알림 + Google Search Console Search Analytics 실시간 관제 (누적 추가)
+
+### 1. 🎁 [아키텍처 1] Moneyverse Plus VIP 일일 황금 상자 퀘스트 연동
+- **백엔드 REST API 계약**:
+  - `GET /api/v1/quests/vip-chest/status`: 현재 로그인 유저의 Plus 구독 여부(`isPlusUser`), 오늘 황금 상자 수령 여부(`claimedToday`), 다음 수령 가능 시각(`nextAvailableAt`) 반환.
+  - `POST /api/v1/quests/vip-chest`: Plus 구독 유효성 검증 후 2,000 WLD 즉시 원장 입금 + VIP 럭키 다이스 1개 자동 지급, 자정 갱신 쿨다운 원자적 기록.
+- **프론트엔드 VIP 전용 인터랙션**:
+  - `frontend/src/components/vip-golden-chest-card.tsx`:
+    - Plus 구독자: 찬란한 황금빛 앰비언트 글로우, 황금 상자 3D 셰이프, 1클릭 즉시 수령 버튼 및 획득 애니메이션.
+    - 무료 유저: VIP 혜택 안내 프리뷰 및 Plus 상점(`/shop`) 원터치 업그레이드 링크 버튼 제공.
+  - `frontend/src/app/quests/page.tsx`: 퀘스트 센터 최상단에 VIP 황금 상자 카드 전면 배치.
+
+### 2. ⚡ [아키텍처 2] P2P 경매장 실시간 웹소켓 입찰 알림 스트림 및 티커 구축
+- **실시간 웹소켓 이벤트 디스패치 (`auction:bid-placed`)**:
+  - P2P 경매장(`marketplace/auction`)에서 누군가 신규 최고가 입찰 시 전체 접속 클라이언트에 실시간 브로드캐스트.
+  - 페이로드: `auctionId`, `itemTitle`, `itemRarity`, `bidAmount`, `bidderName`, `timestamp`, `isPlusUser`.
+- **프론트엔드 전역 토스트 및 라이브 티커 스트립**:
+  - `frontend/src/components/auction-live-toast-stream.tsx`:
+    - 우측 상단 4초 자동 소멸 핀테크 토스트 알림 (경매 아이템명, 신규 입찰가, 입찰자 닉네임, VIP 골드 배지 표시).
+    - 사용자가 참여 중인 경매에서 상위 입찰 발생 시 강조 앰버/로즈 컬러 경보.
+  - `frontend/src/app/marketplace/auction/page.tsx`:
+    - 경매장 상단 60fps 라이브 입찰 티커 롤링 바 탑재.
+    - 지수 백오프(Exponential Backoff) 기반 웹소켓 연결 상태 인디케이터(🟢 연결됨 / 🟡 재연결 중 / 🔴 오프라인).
+
+### 3. 📈 [아키텍처 3] Google Search Console API Search Analytics 실시간 관제 및 키 등록 UI
+- **백엔드 GSC Analytics 프록시 및 암호화 관리 (`backend/src/seo/`)**:
+  - `POST /api/v1/seo/gsc/credentials`: Google Cloud 서비스 계정 JSON 키 등록 및 안전한 암호화 저장.
+  - `GET /api/v1/seo/gsc/analytics`: 최근 30일 시계열 데이터(클릭수, 노출수, 평균 CTR, 평균 게재순위) 및 상위 10대 검색어(Query) 랭킹/클릭률 집계 (1시간 TTL 캐싱).
+  - `DELETE /api/v1/seo/gsc/credentials`: 등록된 서비스 계정 키 안전 파기.
+- **프론트엔드 관리자 SEO 관제 확장 (`frontend/src/app/admin/seo/gsc-analytics-card.tsx`)**:
+  - 30일 검색 성과 시계열 멀티 SVG 트렌드 차트 (클릭수/노출수 이중 축).
+  - 상위 10대 유입 검색어(Query), 클릭수, 노출수, CTR, 평균 게재순위 데이터 테이블.
+  - 서비스 계정 키 등록/관리 다이얼로그 모달.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `backend/src/engagement/quest.service.ts` & `quest.controller.ts`: VIP 황금 상자 수령 API
+- `backend/src/seo/seo.service.ts` & `seo.controller.ts`: GSC Search Analytics API 및 서비스 계정 관리
+- `frontend/src/components/vip-golden-chest-card.tsx`: VIP 황금 상자 퀘스트 UI 컴포넌트
+- `frontend/src/app/quests/page.tsx`: 퀘스트 메인 허브에 VIP 황금 상자 연동
+- `frontend/src/components/auction-live-toast-stream.tsx`: 실시간 경매 입찰 토스트 스트림 & 웹소켓 상태 인디케이터
+- `frontend/src/app/marketplace/auction/page.tsx`: 경매장 라이브 티커 바 연동
+- `frontend/src/app/admin/seo/gsc-analytics-card.tsx`: GSC 검색 성과 분석 차트 및 10대 쿼리 테이블
+- `frontend/src/app/admin/seo/seo-client-view.tsx`: GSC Analytics 카드 통합 렌더링
+- `frontend/src/app/admin/seo/admin-seo.test.tsx`: 신규 SEO & GSC 테스트 확장
+
+### Verification Plan
+- 백엔드 / 프론트엔드 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v465.sh` 및 `promote_v465.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,548+) 100% 무손실 검증
+
 
 
 

@@ -57,4 +57,40 @@ describe('SeoService', () => {
     expect(result.indexNowResponses.length).toBe(3);
     expect(result.googlePingStatus).toBeDefined();
   });
+
+  it('should compute GSC Search Analytics 30-day time series and top queries', async () => {
+    const service = new SeoService();
+    const analytics = await service.getGscAnalytics();
+
+    expect(analytics).toBeDefined();
+    expect(analytics.timeSeries.length).toBe(30);
+    expect(analytics.totalClicks30d).toBeGreaterThan(0);
+    expect(analytics.totalImpressions30d).toBeGreaterThan(0);
+    expect(analytics.avgCtr30d).toBeGreaterThan(0);
+    expect(analytics.avgPosition30d).toBeGreaterThan(0);
+    expect(analytics.topQueries.length).toBe(10);
+    expect(analytics.topQueries[0].query).toBe('가상 주식 모의투자');
+  });
+
+  it('should save and delete GSC service account credentials', async () => {
+    const service = new SeoService();
+    const sampleKey = JSON.stringify({
+      type: 'service_account',
+      project_id: 'moneyverse-gsc',
+      client_email: 'test-sa@moneyverse-gsc.iam.gserviceaccount.com',
+      private_key: '-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQD...==\n-----END PRIVATE KEY-----\n',
+    });
+
+    const saveResult = await service.saveGscCredentials(sampleKey);
+    expect(saveResult.success).toBe(true);
+    expect(saveResult.clientEmail).toBe('test-sa@moneyverse-gsc.iam.gserviceaccount.com');
+
+    const analytics = await service.getGscAnalytics();
+    expect(analytics.hasCredentials).toBe(true);
+    expect(analytics.clientEmail).toBe('test-sa@moneyverse-gsc.iam.gserviceaccount.com');
+
+    const deleteResult = await service.deleteGscCredentials();
+    expect(deleteResult.success).toBe(true);
+  });
 });
+

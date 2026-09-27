@@ -109,4 +109,14 @@ describe('SeoClientView', () => {
     const feedback = await screen.findByText(/전송 완료!/i);
     expect(feedback).toBeTruthy();
   });
+
+  it('renders Google Search Console Search Analytics card with metrics', () => {
+    render(<SeoClientView initialData={mockInitialData} />);
+
+    expect(screen.getByText(/Google Search Console 검색 성과 분석/i)).toBeTruthy();
+    expect(screen.getByText('30일간 검색 트렌드 추이')).toBeTruthy();
+    expect(screen.getByText('상위 10대 유입 검색어 (Top Search Queries)')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /서비스 계정 키 설정/i })).toBeTruthy();
+  });
 });
+

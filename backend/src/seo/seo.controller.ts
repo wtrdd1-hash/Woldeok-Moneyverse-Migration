@@ -28,6 +28,10 @@ export interface SubmitUrlsDto {
   readonly urls?: readonly string[];
 }
 
+export interface SaveGscCredentialsDto {
+  readonly keyJson: string;
+}
+
 @ApiTags('seo')
 @Controller('seo')
 export class SeoController {
@@ -37,6 +41,26 @@ export class SeoController {
   @ApiOperation({ summary: 'Get SEO crawler metrics, index health, and recent bot logs' })
   async getStatus() {
     return this.seoService.getSeoMetrics();
+  }
+
+  @Get('gsc/analytics')
+  @ApiOperation({ summary: 'Get Google Search Console Search Analytics 30-day time series and top queries' })
+  async getGscAnalytics() {
+    return this.seoService.getGscAnalytics();
+  }
+
+  @Post('gsc/credentials')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Register and validate Google Cloud service account key JSON' })
+  async saveGscCredentials(@Body() body: SaveGscCredentialsDto) {
+    return this.seoService.saveGscCredentials(body.keyJson);
+  }
+
+  @Post('gsc/credentials/delete')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete registered Google Search Console service account key' })
+  async deleteGscCredentials() {
+    return this.seoService.deleteGscCredentials();
   }
 
   @Post('submit')

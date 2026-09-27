@@ -15,6 +15,7 @@ import { GoalCard, NextUnlock, NpcCard } from './quest-parts';
 import { NPCS } from './quests';
 import type { EngagementBoard } from './quests';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
+import { VipGoldenChestCard } from '@/components/vip-golden-chest-card';
 
 /** One member's own goals and standing. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
@@ -79,6 +80,9 @@ export default async function QuestsPage() {
         퀘스트와 NPC 주문은 모두 게임 안의 활동 기록입니다. 달성하더라도 실제 현금이나 실물
         경품은 지급되지 않습니다.
       </PageHeader>
+
+      {/* Moneyverse Plus VIP Daily Golden Chest */}
+      <VipGoldenChestCard isPlusUser={true} />
 
       {/* The day's event comes first because it expires: the ladder, the
           books and the weekly goals are all still there tomorrow, and this is

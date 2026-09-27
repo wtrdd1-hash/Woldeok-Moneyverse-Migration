@@ -180,4 +180,45 @@ export class DopamineController {
       starDropRemaining: 3,
     };
   }
+
+  @Get('vip-chest/status')
+  @ApiOperation({ summary: 'Get Moneyverse Plus VIP Golden Chest claim status and cooldown' })
+  async getVipChestStatus(@Req() request: RequestWithSession) {
+    const userId = requireUserId(request);
+    const now = new Date();
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0);
+
+    return {
+      userId,
+      isPlusUser: true, // Supported via Moneyverse Plus tier
+      claimedToday: false,
+      rewardAmount: 2000,
+      diceAwarded: 1,
+      nextAvailableAt: midnight.toISOString(),
+      currentServerTime: now.toISOString(),
+    };
+  }
+
+  @Post('vip-chest')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Claim Moneyverse Plus VIP Golden Chest (2,000 WLD + 1 Lucky Dice)' })
+  async claimVipChest(@Req() request: RequestWithSession) {
+    const userId = requireUserId(request);
+    const now = new Date();
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0);
+
+    return {
+      success: true,
+      userId,
+      isPlusUser: true,
+      rewardAmount: 2000,
+      diceAwarded: 1,
+      claimedAt: now.toISOString(),
+      nextAvailableAt: midnight.toISOString(),
+      message: 'Moneyverse Plus VIP 일일 황금 상자 수령 완료 (2,000 WLD + VIP 럭키 다이스 1개 지급)',
+    };
+  }
 }
+

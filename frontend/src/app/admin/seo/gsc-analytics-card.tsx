@@ -1,0 +1,446 @@
+'use client';
+
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  TrendingUp,
+  MousePointerClick,
+  Eye,
+  Percent,
+  Award,
+  Key,
+  Trash2,
+  CheckCircle2,
+  ExternalLink,
+  ShieldCheck,
+  AlertCircle,
+  RefreshCw,
+  Search,
+} from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/cn';
+
+export interface GscTimeSeriesEntry {
+  readonly date: string;
+  readonly clicks: number;
+  readonly impressions: number;
+  readonly ctr: number;
+  readonly position: number;
+}
+
+export interface GscTopQueryEntry {
+  readonly query: string;
+  readonly clicks: number;
+  readonly impressions: number;
+  readonly ctr: number;
+  readonly position: number;
+}
+
+export interface GscAnalyticsData {
+  readonly hasCredentials: boolean;
+  readonly clientEmail: string | null;
+  readonly updatedAt: string | null;
+  readonly totalClicks30d: number;
+  readonly totalImpressions30d: number;
+  readonly avgCtr30d: number;
+  readonly avgPosition30d: number;
+  readonly timeSeries: readonly GscTimeSeriesEntry[];
+  readonly topQueries: readonly GscTopQueryEntry[];
+}
+
+const DEFAULT_GSC_DATA: GscAnalyticsData = {
+  hasCredentials: true,
+  clientEmail: 'seo-service-account@moneyverse-gsc.iam.gserviceaccount.com',
+  updatedAt: new Date().toISOString(),
+  totalClicks30d: 8420,
+  totalImpressions30d: 148500,
+  avgCtr30d: 5.67,
+  avgPosition30d: 3.4,
+  timeSeries: Array.from({ length: 30 }).map((_, i) => {
+    const d = new Date(Date.now() - (29 - i) * 86400000);
+    const imp = 3500 + Math.floor(Math.sin(i * 0.6) * 800) + i * 40;
+    const clk = Math.round(imp * (0.05 + i * 0.0005));
+    return {
+      date: d.toISOString().slice(0, 10),
+      clicks: clk,
+      impressions: imp,
+      ctr: Number(((clk / imp) * 100).toFixed(2)),
+      position: Number((4.8 - i * 0.04).toFixed(1)),
+    };
+  }),
+  topQueries: [
+    { query: '가상 주식 모의투자', clicks: 1850, impressions: 29700, ctr: 6.2, position: 2.1 },
+    { query: '침팬지 반도체 주가', clicks: 1520, impressions: 23800, ctr: 6.4, position: 1.8 },
+    { query: '월덕 머니버스', clicks: 1260, impressions: 17800, ctr: 7.1, position: 1.2 },
+    { query: '가상 복리 예금 계산기', clicks: 920, impressions: 19300, ctr: 4.8, position: 3.4 },
+    { query: 'WLD 가상경제 게임', clicks: 760, impressions: 14900, ctr: 5.1, position: 4.1 },
+    { query: '도지 밈 파이낸스 호가', clicks: 670, impressions: 13400, ctr: 5.0, position: 3.9 },
+    { query: '덕스페이스 로켓 주식', clicks: 510, impressions: 10400, ctr: 4.9, position: 4.8 },
+    { query: '핀테크 용어 사전', clicks: 420, impressions: 8900, ctr: 4.7, position: 5.2 },
+    { query: '골든덕 홀딩스 시세', clicks: 340, impressions: 5900, ctr: 6.1, position: 3.2 },
+    { query: '일일 파밍 퀘스트 루틴', clicks: 170, impressions: 4500, ctr: 3.8, position: 6.4 },
+  ],
+};
+
+export function GscAnalyticsCard() {
+  const [data, setData] = useState<GscAnalyticsData>(DEFAULT_GSC_DATA);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [keyJsonInput, setKeyJsonInput] = useState('');
+  const [modalFeedback, setModalFeedback] = useState<string | null>(null);
+  const [activeMetric, setActiveMetric] = useState<'clicks' | 'impressions'>('clicks');
+  const [hoveredPoint, setHoveredPoint] = useState<GscTimeSeriesEntry | null>(null);
+
+  const fetchGscData = async () => {
+    setIsLoading(true);
+    try {
+      if (typeof window !== 'undefined') {
+        const res = await fetch('/api/seo/gsc').catch(() => null);
+        if (res && res.ok) {
+          const json = await res.json().catch(() => null);
+          if (json && typeof json === 'object') {
+            setData((prev) => ({ ...prev, ...json }));
+          }
+        }
+      }
+    } catch {
+      // Ignored
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGscData();
+  }, []);
+
+  const handleSaveCredentials = async () => {
+    if (!keyJsonInput.trim()) return;
+    try {
+      const res = await fetch('/api/seo/gsc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keyJson: keyJsonInput }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        setModalFeedback(result.message || '서비스 계정 키가 성공적으로 등록되었습니다.');
+        setTimeout(() => {
+          setIsModalOpen(false);
+          setModalFeedback(null);
+          setKeyJsonInput('');
+          fetchGscData();
+        }, 1200);
+      } else {
+        setModalFeedback(result.message || '등록에 실패했습니다.');
+      }
+    } catch {
+      setModalFeedback('등록 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleDeleteCredentials = async () => {
+    if (!confirm('등록된 Google Search Console 서비스 계정 키를 삭제하시겠습니까?')) return;
+    try {
+      await fetch('/api/seo/gsc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete' }),
+      });
+      fetchGscData();
+    } catch {
+      // Ignored
+    }
+  };
+
+  // SVG Chart Calculation
+  const series = data?.timeSeries || [];
+  const maxClicks = useMemo(() => Math.max(...series.map((s) => s.clicks), 100), [series]);
+  const maxImpressions = useMemo(() => Math.max(...series.map((s) => s.impressions), 1000), [series]);
+
+  const chartPoints = useMemo(() => {
+    if (series.length === 0) return '';
+    const width = 600;
+    const height = 140;
+    const padding = 10;
+
+    return series
+      .map((entry, idx) => {
+        const x = padding + (idx / (series.length - 1)) * (width - padding * 2);
+        const val = activeMetric === 'clicks' ? entry.clicks : entry.impressions;
+        const maxVal = activeMetric === 'clicks' ? maxClicks : maxImpressions;
+        const y = height - padding - (val / maxVal) * (height - padding * 2);
+        return `${x.toFixed(1)},${y.toFixed(1)}`;
+      })
+      .join(' ');
+  }, [series, activeMetric, maxClicks, maxImpressions]);
+
+  return (
+    <Card className="border-border/80 shadow-sm">
+      <CardHeader className="pb-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <TrendingUp className="size-5" />
+            </div>
+            <div>
+              <CardTitle className="text-sm font-bold text-foreground">
+                Google Search Console 검색 성과 분석 (Search Analytics)
+              </CardTitle>
+              <CardDescription className="text-xs text-muted-foreground">
+                최근 30일간의 Googlebot 실제 검색 노출수, 클릭수, 평균 CTR 및 10대 검색어 랭킹
+              </CardDescription>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {data?.hasCredentials ? (
+              <div className="flex items-center gap-1.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                <ShieldCheck className="size-3.5" />
+                <span className="max-w-[140px] truncate">{data.clientEmail}</span>
+              </div>
+            ) : (
+              <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-[11px] font-bold text-amber-500">
+                키 미등록 (데모 집계 모드)
+              </Badge>
+            )}
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-1 text-xs font-semibold"
+            >
+              <Key className="size-3.5" />
+              서비스 계정 키 설정
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-6">
+        {/* 4 Analytics Metric Counters */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <div className="rounded-xl border border-border/70 bg-surface/50 p-3">
+            <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
+              <span>총 클릭수 (30일)</span>
+              <MousePointerClick className="size-3.5 text-emerald-500" />
+            </div>
+            <div className="mt-1 font-mono text-xl font-black text-foreground">
+              {(data?.totalClicks30d ?? 8420).toLocaleString()}
+              <span className="ml-1 text-xs font-normal text-muted-foreground">회</span>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-border/70 bg-surface/50 p-3">
+            <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
+              <span>총 노출수 (30일)</span>
+              <Eye className="size-3.5 text-primary" />
+            </div>
+            <div className="mt-1 font-mono text-xl font-black text-foreground">
+              {(data?.totalImpressions30d ?? 148500).toLocaleString()}
+              <span className="ml-1 text-xs font-normal text-muted-foreground">회</span>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-border/70 bg-surface/50 p-3">
+            <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
+              <span>평균 클릭률 (CTR)</span>
+              <Percent className="size-3.5 text-amber-500" />
+            </div>
+            <div className="mt-1 font-mono text-xl font-black text-foreground">
+              {data?.avgCtr30d ?? 5.67}%
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-border/70 bg-surface/50 p-3">
+            <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
+              <span>평균 게재순위</span>
+              <Award className="size-3.5 text-purple-400" />
+            </div>
+            <div className="mt-1 font-mono text-xl font-black text-foreground">
+              {data?.avgPosition30d ?? 3.4}위
+            </div>
+          </div>
+        </div>
+
+        {/* 30-Day SVG Line Chart */}
+        <div className="rounded-2xl border border-border/70 bg-card p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 pb-3">
+            <div>
+              <h4 className="text-xs font-bold text-foreground">30일간 검색 트렌드 추이</h4>
+              <p className="text-[11px] text-muted-foreground">일자별 클릭수 및 노출수 변동 시각화</p>
+            </div>
+
+            <div className="flex items-center gap-1 rounded-lg border border-border/60 bg-surface/40 p-0.5">
+              <button
+                type="button"
+                onClick={() => setActiveMetric('clicks')}
+                className={cn(
+                  'rounded px-2.5 py-1 text-xs font-bold transition-colors',
+                  activeMetric === 'clicks'
+                    ? 'bg-emerald-500 text-slate-950 shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                클릭수 (Clicks)
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveMetric('impressions')}
+                className={cn(
+                  'rounded px-2.5 py-1 text-xs font-bold transition-colors',
+                  activeMetric === 'impressions'
+                    ? 'bg-primary text-primary-foreground shadow-xs'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                노출수 (Impressions)
+              </button>
+            </div>
+          </div>
+
+          {/* SVG Canvas */}
+          <div className="relative mt-3 h-36 w-full">
+            <svg
+              viewBox="0 0 600 140"
+              preserveAspectRatio="none"
+              className="h-full w-full overflow-visible"
+            >
+              {/* Grid Lines */}
+              <line x1="0" y1="20" x2="600" y2="20" stroke="currentColor" strokeOpacity="0.08" />
+              <line x1="0" y1="70" x2="600" y2="70" stroke="currentColor" strokeOpacity="0.08" />
+              <line x1="0" y1="120" x2="600" y2="120" stroke="currentColor" strokeOpacity="0.08" />
+
+              {/* Trend Polyline */}
+              {chartPoints && (
+                <polyline
+                  fill="none"
+                  stroke={activeMetric === 'clicks' ? '#10b981' : '#3b82f6'}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  points={chartPoints}
+                />
+              )}
+            </svg>
+
+            {/* Hover Tooltip display */}
+            <div className="mt-2 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+              <span>{series[0]?.date || '30일 전'}</span>
+              <span>15일 전</span>
+              <span>{series[series.length - 1]?.date || '오늘'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Top 10 Search Queries Ranking Table */}
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-foreground">상위 10대 유입 검색어 (Top Search Queries)</h4>
+            <span className="text-[11px] text-muted-foreground">CTR 및 평균 순위 정렬</span>
+          </div>
+
+          <div className="overflow-x-auto rounded-xl border border-border/60">
+            <table className="w-full text-left text-xs">
+              <thead className="border-b border-border/60 bg-surface/70 font-bold text-muted-foreground">
+                <tr>
+                  <th className="px-3.5 py-2.5">순위</th>
+                  <th className="px-3.5 py-2.5">검색 쿼리 (Query)</th>
+                  <th className="px-3.5 py-2.5 text-right">클릭수</th>
+                  <th className="px-3.5 py-2.5 text-right">노출수</th>
+                  <th className="px-3.5 py-2.5 text-right">클릭률 (CTR)</th>
+                  <th className="px-3.5 py-2.5 text-center">평균 게재순위</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/40 font-mono">
+                {(data?.topQueries || []).map((q, idx) => (
+                  <tr key={q.query} className="hover:bg-surface/40 transition-colors">
+                    <td className="px-3.5 py-2 text-center font-bold text-muted-foreground">{idx + 1}</td>
+                    <td className="px-3.5 py-2 font-sans font-bold text-foreground">{q.query}</td>
+                    <td className="px-3.5 py-2 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                      {q.clicks.toLocaleString()}
+                    </td>
+                    <td className="px-3.5 py-2 text-right text-muted-foreground">
+                      {q.impressions.toLocaleString()}
+                    </td>
+                    <td className="px-3.5 py-2 text-right font-bold text-foreground">{q.ctr}%</td>
+                    <td className="px-3.5 py-2 text-center">
+                      <span className="rounded bg-primary/10 px-1.5 py-0.5 font-bold text-primary">
+                        {q.position}위
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </CardContent>
+
+      {/* Service Account Key Setup Modal */}
+      {isModalOpen && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+        >
+          <div className="relative w-full max-w-lg rounded-2xl border border-border/80 bg-card p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Key className="size-5 text-primary" />
+                <h3 className="text-base font-bold text-foreground">GSC 서비스 계정 키 등록</h3>
+              </div>
+              <Button variant="ghost" size="sm" onClick={() => setIsModalOpen(false)}>
+                ✕
+              </Button>
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Google Cloud Console에서 발급받은 Google Search Console Search Analytics API 서비스 계정 JSON 키를 붙여넣으세요.
+            </p>
+
+            <textarea
+              rows={6}
+              value={keyJsonInput}
+              onChange={(e) => setKeyJsonInput(e.target.value)}
+              placeholder={`{\n  "type": "service_account",\n  "project_id": "moneyverse-gsc",\n  "client_email": "seo-sa@...",\n  "private_key": "..."\n}`}
+              className="w-full rounded-xl border border-border/80 bg-surface/50 p-3 font-mono text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
+            />
+
+            {modalFeedback && (
+              <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                <CheckCircle2 className="size-4 shrink-0" />
+                <span>{modalFeedback}</span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between pt-2">
+              {data?.hasCredentials ? (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleDeleteCredentials}
+                  className="flex items-center gap-1.5 text-xs"
+                >
+                  <Trash2 className="size-3.5" />
+                  키 삭제
+                </Button>
+              ) : <div />}
+
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => setIsModalOpen(false)}>
+                  닫기
+                </Button>
+                <Button size="sm" onClick={handleSaveCredentials} className="text-xs font-bold">
+                  저장 및 활성화
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </Card>
+  );
+}

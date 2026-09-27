@@ -22,6 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
+import { GscAnalyticsCard } from './gsc-analytics-card';
 
 export interface CrawlerLog {
   readonly id: string;
@@ -271,6 +272,9 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
           </CardContent>
         </Card>
       </div>
+
+      {/* Google Search Console Search Analytics 30-Day Trend & Top Queries */}
+      <GscAnalyticsCard />
 
       {/* Bot Market Share Distribution */}
       <Card className="border-border/80 shadow-sm">
