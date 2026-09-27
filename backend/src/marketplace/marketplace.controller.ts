@@ -146,7 +146,7 @@ export class MarketplaceController {
     @Body() body: BidAuctionDto,
   ) {
     return this.guarded(
-      () => this.marketplaceService.bidAuction(requireUserId(request), auctionId, body.bidAmountWld),
+      () => this.marketplaceService.bidAuction(requireUserId(request), auctionId, body.bidAmountWld, body.maxProxyBidWld),
       'failed to bid on auction',
     );
   }

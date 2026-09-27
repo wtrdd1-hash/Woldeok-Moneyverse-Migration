@@ -1,6 +1,7 @@
 # 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v14)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v15**: P2P 경매장 실시간 틱/호가 Depth 차트 + Plus VIP 5대 네온 테마 선택기 + GSC 6시간 크롤링 감사 & 디스코드 웹훅 알림봇 + 자동 프록시 입찰(Proxy Bidding) (+220, -0)
 - **v14**: P2P 경매장 WebSocket 실시간 브로드캐스팅 & 안티 스나이핑(+2분 연장) + Moneyverse Plus VIP 2.5% 수수료 감면 & 골드 테마 + GSC 1시간 TTL 캐싱 (+210, -0)
 - **v13**: Moneyverse Plus VIP 황금 상자 퀘스트 연동 + P2P 경매장 실시간 웹소켓 입찰 알림 스트림 + Google Search Console Search Analytics 실시간 차트 관제 (+220, -0)
 - **v12**: Google Search Console / Naver 웹마스터 도구 사이트맵 등록 자동화 & 실시간 봇 크롤링/인덱싱 관제 타워(/admin/seo) 구축 (+190, -0)
@@ -4124,6 +4125,64 @@ pm test).
 - Next.js Turbopack 최적화 프로덕션 빌드 성공
 - Debian 미니PC `stage_v466.sh` 및 `promote_v466.sh` 무중단 승격 배포
 - PostgreSQL 활성 세션(1,548+) 100% 무손실 검증
+
+---
+
+## 🚀 [v15 Specification] P2P 경매장 실시간 틱/Depth 차트 + Plus VIP 5대 네온 테마 + GSC 크롤링 감사 디스코드 봇 + 자동 프록시 입찰 (누적 추가)
+
+### 1. 📊 [아키텍처 1] P2P 경매장 실시간 입찰 틱 & 호가 깊이(Depth) 차트 (`frontend/src/components/auction-depth-chart.tsx`)
+- **실시간 입찰 틱 차트**: 경매 상세 화면에서 WebSocket으로 수신되는 입찰 히스토리(`bids[]`)를 경량 SVG 라인/영역 차트로 시각화.
+  - 시간 경과에 따른 최고 입찰가 상승 곡선 및 일반/VIP 입찰자 구분을 마커로 렌더링.
+- **인터랙티브 호가 깊이 (Depth Chart)**:
+  - 현재 최고가 대비 호가 계단별 누적 매수 입찰 풀 시각화.
+  - 마우스 호버 시 해당 구간의 입찰가 및 입찰자 수치 툴팁 제공.
+- **시각 위계 보존 (Zero Jittering)**:
+  - 모든 금액 수치에 `tabular-nums font-mono` 적용 및 320px~1280px 반응형 뷰포트 완벽 대응.
+
+### 2. 🎨 [아키텍처 2] Moneyverse Plus VIP 5대 프리미엄 네온 테마 선택기
+- **5대 프리미엄 네온 테마 팔레트**:
+  - `royal-gold`: 클래식 로얄 골드 글로우 (`amber-500/emerald-400` 그라데이션)
+  - `cyber-pink`: 네온 사이버펑크 핑크 (`fuchsia-500/cyan-400` 하이퍼 레이저)
+  - `emerald-vault`: 에메랄드 볼트 (`emerald-400/teal-300` 퀀텀 볼트)
+  - `sapphire-deep`: 사파이어 딥 (`indigo-400/sky-400` 심해 사파이어)
+  - `obsidian-dark`: 옵시디언 다크 (`zinc-100/zinc-400` 매트 옵시디언 엣지)
+- **프론트엔드/백엔드 테마 상태 동기화**:
+  - 유저 프로필 설정 및 계정 관리(`/account`)에서 즉시 테마 선택 및 로컬/서버 저장.
+  - 호가창, 경매장, 프로필 아바타 림(Rim)에 선택된 네온 오라 효과 실시간 주입.
+
+### 3. 🤖 [아키텍처 3] Google Search Console 크롤링 감사 크론 & 관리자 디스코드 웹훅 알림봇
+- **백엔드 크롤링 상태 감사 크론 (`backend/src/seo/seo-crawler-audit.service.ts`)**:
+  - 6시간 주기(`0 */6 * * *`)로 사이트맵 URL 43개 라우트 및 주식/가이드 프리뷰 페이지의 HTTP 상태 검사.
+  - 404/500 에러 및 GSC 인덱싱 누락 감지 시 `DiscordOutboxService`를 통해 관리자 관제 채널로 풍부한 Embed 알림 발송.
+- **관리자 수동 트리거 API (`POST /api/v1/seo/crawl-audit`)**:
+  - `/admin/seo` 관리자 콘솔에서 즉시 1-Click 크롤링 전수 감사 실행 및 결과 실시간 렌더링.
+
+### 4. ⚡ [아키텍처 4] P2P 경매장 최대 한도 예약 자동 입찰 (Proxy Bidding)
+- **서버 권위 프록시 비딩 엔진 (`backend/src/marketplace/marketplace.service.ts`)**:
+  - 유저가 입찰 시 `max_proxy_bid` (본인의 최대 지불 한도)를 설정 가능.
+  - 다른 유저의 수동/자동 입찰 시, 시스템이 최소 증액 단위(예: +100 WLD 또는 현재가의 1%)로 해당 유저의 프록시 한도 내에서 자동으로 즉시 재응찰(`proxy:auto-bid`).
+  - 최고가 유지 실패 시(상대의 프록시가 더 높거나 초과 입찰된 경우) 즉각 아웃비드 토스트 알림 발송.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+1. `backend/src/marketplace/marketplace.service.ts`: Proxy Bidding 자동 응찰 로직 및 WebSocket 연동
+2. `backend/src/marketplace/auction.gateway.ts`: 프록시 입찰 이벤트 및 틱 브로드캐스팅
+3. `backend/src/seo/seo-crawler-audit.service.ts` & `seo.controller.ts`: 6시간 크롤링 감사 및 디스코드 웹훅 발송
+4. `frontend/src/components/auction-depth-chart.tsx`: 경매장 실시간 틱 & 호가 Depth SVG 차트
+5. `frontend/src/components/vip-theme-selector.tsx`: Plus VIP 5대 네온 테마 선택 컴포넌트
+6. `frontend/src/app/marketplace/auction/page.tsx`: 프록시 입찰 모달, Depth 차트, VIP 네온 테마 연동
+7. `frontend/src/app/admin/seo/seo-client-view.tsx`: 크롤링 감사 상태 및 즉시 실행 버튼
+8. `backend/src/marketplace/marketplace.controller.test.ts`: 프록시 입찰 단위 테스트
+9. `backend/src/seo/seo.service.test.ts`: 크롤링 감사 서비스 단위 테스트
+
+### Verification Plan
+- 백엔드 / 프론트엔드 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v467.sh` 및 `promote_v467.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,308+) 100% 무손실 검증
+
 
 
 

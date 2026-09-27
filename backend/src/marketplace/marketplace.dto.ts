@@ -126,6 +126,12 @@ export class BidAuctionDto {
   @IsString()
   @Matches(/^[1-9][0-9]*$/, { message: 'bidAmountWld must be a positive integer string' })
   bidAmountWld!: string;
+
+  @ApiPropertyOptional({ description: '최대 자동 프록시 입찰 한도 (WLD)', example: '12000' })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[1-9][0-9]*$/, { message: 'maxProxyBidWld must be a positive integer string' })
+  maxProxyBidWld?: string;
 }
 
 export class CreateTradeDto {

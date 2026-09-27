@@ -142,7 +142,12 @@ export class MarketplaceService {
     return row?.id ?? null;
   }
 
-  async bidAuction(actor: string, auctionId: string, bidAmountWld: string): Promise<unknown> {
+  private readonly proxyBids = new Map<
+    string,
+    { userId: string; userName: string; maxBid: number; isPlusUser: boolean }
+  >();
+
+  async bidAuction(actor: string, auctionId: string, bidAmountWld: string, maxProxyBidWld?: string): Promise<unknown> {
     if (!this.pool) throw new Error('database pool unavailable');
     const userRow = await queryOne<{ name: string; is_plus_user?: boolean }>(
       this.pool,
@@ -158,9 +163,13 @@ export class MarketplaceService {
       item_name: string;
       rarity: string;
       seconds_left: number;
+      highest_bidder_id: string | null;
+      highest_bidder_name: string | null;
+      current_bid_wld: string;
     }>(
       this.pool,
-      `SELECT item_name, rarity, EXTRACT(EPOCH FROM (ends_at - clock_timestamp())) AS seconds_left
+      `SELECT item_name, rarity, EXTRACT(EPOCH FROM (ends_at - clock_timestamp())) AS seconds_left,
+              highest_bidder_id::text, highest_bidder_name, current_bid_wld::text
        FROM public.marketplace_auctions
        WHERE id = $1::uuid AND status = 'ACTIVE'`,
       [auctionId],
@@ -183,25 +192,49 @@ export class MarketplaceService {
       }
     }
 
+    const previousHighestBidderId = auctionRow?.highest_bidder_id;
+    const previousHighestBidderName = auctionRow?.highest_bidder_name;
+
     const row = await queryOne<{ res: unknown }>(
       this.pool,
       `SELECT public.marketplace_bid_auction($1, $2, $3, $4) AS res`,
       [actor, actorName, auctionId, bidAmountWld],
     );
 
-    // Broadcast WebSocket events
+    // Save or update caller's proxy bid if provided
+    const requestedAmount = Number(bidAmountWld) || 0;
+    if (maxProxyBidWld && Number(maxProxyBidWld) > requestedAmount) {
+      this.proxyBids.set(auctionId, {
+        userId: actor,
+        userName: actorName,
+        maxBid: Number(maxProxyBidWld),
+        isPlusUser,
+      });
+    }
+
+    // Broadcast primary WebSocket events
     if (this.auctionGateway) {
       this.auctionGateway.broadcastBid({
         id: `bid-${Date.now()}`,
         auctionId,
         itemTitle: auctionRow?.item_name || '경매 아티팩트',
         itemRarity: auctionRow?.rarity || 'epic',
-        bidAmount: Number(bidAmountWld) || 0,
+        bidAmount: requestedAmount,
         bidderName: actorName,
         isPlusUser,
         burnFeePercent,
         timestamp: new Date().toISOString(),
       });
+
+      if (previousHighestBidderId && previousHighestBidderId !== actor) {
+        this.auctionGateway.broadcastOutbid({
+          auctionId,
+          previousBidderId: previousHighestBidderId,
+          previousBidderName: previousHighestBidderName || '이전 입찰자',
+          newHighestBid: requestedAmount,
+          newHighestBidderName: actorName,
+        });
+      }
 
       if (extended && newEndsAt) {
         this.auctionGateway.broadcastAntiSnipingExtended({
@@ -213,12 +246,57 @@ export class MarketplaceService {
       }
     }
 
+    // Auto-Counter Proxy Bidding: check if there's an existing higher proxy from another user
+    const existingProxy = this.proxyBids.get(auctionId);
+    let autoCounterExecuted = false;
+    let autoCounterAmount = 0;
+
+    if (existingProxy && existingProxy.userId !== actor && existingProxy.maxBid > requestedAmount) {
+      const increment = Math.max(100, Math.ceil(requestedAmount * 0.02)); // +2% or 100 WLD
+      autoCounterAmount = Math.min(existingProxy.maxBid, requestedAmount + increment);
+
+      try {
+        await queryOne<{ res: unknown }>(
+          this.pool,
+          `SELECT public.marketplace_bid_auction($1, $2, $3, $4) AS res`,
+          [existingProxy.userId, existingProxy.userName, auctionId, String(autoCounterAmount)],
+        );
+
+        autoCounterExecuted = true;
+        if (this.auctionGateway) {
+          this.auctionGateway.broadcastProxyBid({
+            id: `proxy-bid-${Date.now()}`,
+            auctionId,
+            itemTitle: auctionRow?.item_name || '경매 아티팩트',
+            autoBidAmount: autoCounterAmount,
+            bidderName: existingProxy.userName,
+            isProxy: true,
+            isPlusUser: existingProxy.isPlusUser,
+            timestamp: new Date().toISOString(),
+          });
+
+          this.auctionGateway.broadcastOutbid({
+            auctionId,
+            previousBidderId: actor,
+            previousBidderName: actorName,
+            newHighestBid: autoCounterAmount,
+            newHighestBidderName: `${existingProxy.userName} (자동 프록시)`,
+          });
+        }
+      } catch (err) {
+        // Silently handle proxy error without breaking caller's bid
+      }
+    }
+
     return {
       res: row?.res ?? null,
       isPlusUser,
       burnFeePercent,
       antiSnipingExtended: extended,
       newEndsAt,
+      proxyBiddingActive: !!maxProxyBidWld,
+      autoCounterExecuted,
+      finalHighestBid: autoCounterExecuted ? autoCounterAmount : requestedAmount,
     };
   }
 

@@ -63,12 +63,21 @@ describe('MarketplaceController', () => {
     expect(result).toBe('l1');
   });
 
-  it('listAuctions and bidAuction work properly', async () => {
+  it('listAuctions and bidAuction work properly with proxy bid', async () => {
     const list = await controller.listAuctions();
     expect(list).toHaveLength(1);
 
-    const bidRes = await controller.bidAuction(mockReq, 'auc-1', { bidAmountWld: '9000' });
+    const bidRes = await controller.bidAuction(mockReq, 'auc-1', {
+      bidAmountWld: '9000',
+      maxProxyBidWld: '15000',
+    });
     expect(bidRes).toEqual(expect.objectContaining({ currentBidWld: '9000' }));
+    expect(mockService.bidAuction).toHaveBeenCalledWith(
+      '11111111-1111-4111-8111-111111111111',
+      'auc-1',
+      '9000',
+      '15000',
+    );
   });
 
   it('createTrade, acceptTrade, confirmTrade, cancelTrade work properly', async () => {

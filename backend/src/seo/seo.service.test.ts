@@ -94,3 +94,31 @@ describe('SeoService', () => {
   });
 });
 
+import { SeoCrawlerAuditService } from './seo-crawler-audit.service';
+import { vi } from 'vitest';
+
+describe('SeoCrawlerAuditService', () => {
+  it('should run crawl audit and generate comprehensive health summary', async () => {
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+    } as unknown as Response);
+
+    try {
+      const seoService = new SeoService();
+      const auditService = new SeoCrawlerAuditService(seoService);
+
+      const result = await auditService.runCrawlAudit();
+      expect(result).toBeDefined();
+      expect(result.totalUrlsChecked).toBeGreaterThan(10);
+      expect(result.healthyUrls).toBe(result.totalUrlsChecked);
+      expect(result.errorUrls).toBe(0);
+      expect(result.timestamp).toBeDefined();
+      expect(auditService.getLastAuditResult()).toEqual(result);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+});
+

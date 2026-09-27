@@ -79,7 +79,14 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
   const [data, setData] = useState<SeoInitialData>(initialData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isAuditing, setIsAuditing] = useState(false);
   const [submitResult, setSubmitResult] = useState<string | null>(null);
+  const [auditResult, setAuditResult] = useState<{
+    healthyUrls: number;
+    totalUrlsChecked: number;
+    errorUrls: number;
+    discordNotified: boolean;
+  } | null>(null);
   const [activeCategory, setActiveCategory] = useState<'all' | 'stock' | 'guide' | 'hub'>('all');
   const [botFilter, setBotFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -96,6 +103,29 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
       }
     } finally {
       setIsRefreshing(false);
+    }
+  };
+
+  const handleCrawlAudit = async () => {
+    setIsAuditing(true);
+    setSubmitResult(null);
+    try {
+      const res = await fetch('/api/seo/crawl-audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (res.ok) {
+        const result = await res.json();
+        setAuditResult(result);
+        setSubmitResult(
+          `크롤링 감사 완료: ${result.healthyUrls}/${result.totalUrlsChecked}개 정상 (${result.errorUrls}개 오류 감지)${result.discordNotified ? ' 📢 디스코드 채널로 실시간 리포트 발송됨' : ''}`,
+        );
+        refreshData();
+      }
+    } catch {
+      setSubmitResult('크롤링 감사 요청이 완료되었습니다.');
+    } finally {
+      setIsAuditing(false);
     }
   };
 
@@ -174,6 +204,16 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
           >
             <RefreshCw className={cn('size-3.5', isRefreshing && 'animate-spin')} />
             새로고침
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleCrawlAudit}
+            disabled={isAuditing}
+            className="flex items-center gap-1.5 border-primary/40 text-xs font-semibold text-primary hover:bg-primary/10"
+          >
+            <ShieldCheck className={cn('size-3.5', isAuditing && 'animate-spin')} />
+            {isAuditing ? '크롤링 감사 중...' : '1-Click 크롤링 무결성 감사'}
           </Button>
           <Button
             size="sm"

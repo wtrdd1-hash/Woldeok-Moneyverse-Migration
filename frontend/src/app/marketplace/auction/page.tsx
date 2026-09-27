@@ -1,12 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Gavel, Flame, Sparkles, Shield, Clock, Plus, Tag, ArrowUpRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Gavel, Flame, Sparkles, Shield, Clock, Plus, Tag, ArrowUpRight, CheckCircle2, AlertCircle, Bot } from 'lucide-react';
 import {
   AuctionLiveToastStream,
   AuctionLiveTickerStrip,
   type LiveBidEvent,
 } from '@/components/auction-live-toast-stream';
+import { AuctionDepthChart } from '@/components/auction-depth-chart';
+import { VipThemeSelector, type VipNeonTheme, VIP_THEME_OPTIONS } from '@/components/vip-theme-selector';
 
 export interface AuctionItem {
   id: string;
@@ -80,7 +82,20 @@ export default function AuctionMarketplacePage() {
   const [totalBurnedWld, setTotalBurnedWld] = useState<number>(842500);
   const [bidModalItem, setBidModalItem] = useState<AuctionItem | null>(null);
   const [bidAmountInput, setBidAmountInput] = useState<number>(0);
+  const [isProxyEnabled, setIsProxyEnabled] = useState<boolean>(false);
+  const [maxProxyBidInput, setMaxProxyBidInput] = useState<number>(0);
+  const [selectedTheme, setSelectedTheme] = useState<VipNeonTheme>('royal-gold');
   const [notification, setNotification] = useState<string | null>(null);
+
+  const activeThemeMeta = VIP_THEME_OPTIONS.find((t) => t.id === selectedTheme) ?? {
+    id: 'royal-gold' as const,
+    name: '로얄 골드',
+    description: '황실 귀족의 찬란한 황금빛 오라',
+    badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+    borderClass: 'border-amber-500/60 shadow-[0_0_18px_rgba(245,158,11,0.28)]',
+    auraColor: 'from-amber-500 to-yellow-300',
+    previewGlow: 'bg-gradient-to-r from-amber-500 to-yellow-400',
+  };
 
   const filteredItems = selectedCategory === 'all'
     ? items
@@ -89,12 +104,18 @@ export default function AuctionMarketplacePage() {
   const openBidModal = (item: AuctionItem) => {
     setBidModalItem(item);
     setBidAmountInput(item.currentBid + 1000);
+    setMaxProxyBidInput(item.currentBid + 5000);
+    setIsProxyEnabled(false);
   };
 
   const handlePlaceBid = () => {
     if (!bidModalItem) return;
     if (bidAmountInput <= bidModalItem.currentBid) {
       alert('현재 입찰가보다 높은 금액을 입력해야 합니다.');
+      return;
+    }
+    if (isProxyEnabled && maxProxyBidInput < bidAmountInput) {
+      alert('최대 프록시 한도는 입찰 희망 금액보다 커야 합니다.');
       return;
     }
     if (bidAmountInput > userBalance) {
@@ -116,7 +137,7 @@ export default function AuctionMarketplacePage() {
           ? {
               ...it,
               currentBid: bidAmountInput,
-              highestBidder: '나 (You) 👑 VIP',
+              highestBidder: isProxyEnabled ? '나 (You) 🤖 PROXY' : '나 (You) 👑 VIP',
               endsInSeconds: it.endsInSeconds + addedSeconds,
             }
           : it
@@ -152,7 +173,7 @@ export default function AuctionMarketplacePage() {
     setNotification(
       isAntiSnipingTriggered
         ? `🎉 입찰 성공! (VIP 2.5% ${burnAmount.toLocaleString()} WLD 소각) ⚡ 마감 1분 전 최고가 갱신으로 마감 시간이 2분 연장되었습니다!`
-        : `🎉 입찰 성공! ${bidAmountInput.toLocaleString()} WLD 입찰 완료 (Plus VIP 2.5% ${burnAmount.toLocaleString()} WLD 소각 예정)`
+        : `🎉 입찰 성공! ${bidAmountInput.toLocaleString()} WLD 입찰 완료${isProxyEnabled ? ` (최대 한도 ${maxProxyBidInput.toLocaleString()} WLD 자동 예약)` : ''} (Plus VIP 2.5% ${burnAmount.toLocaleString()} WLD 소각 예정)`
     );
     setBidModalItem(null);
     setTimeout(() => setNotification(null), 5000);
@@ -195,7 +216,7 @@ export default function AuctionMarketplacePage() {
               </h1>
             </div>
             <p className="mt-1 text-xs text-slate-400 sm:text-sm">
-              유저 간 한정판 테마·뱃지·칭호 경매 거래 및 거래 수수료 5% 자동 소각 디플레이션 콘솔
+              유저 간 한정판 테마·뱃지·칭호 경매 거래, 자동 프록시 입찰 및 거래 수수료 디플레이션 소각 콘솔
             </p>
           </div>
 
@@ -225,6 +246,13 @@ export default function AuctionMarketplacePage() {
 
         {/* 60fps Live Bidding Ticker Strip */}
         <AuctionLiveTickerStrip />
+
+        {/* Plus VIP 5 Neon Themes Selector */}
+        <VipThemeSelector
+          isPlusUser={true}
+          selectedTheme={selectedTheme}
+          onSelectTheme={setSelectedTheme}
+        />
 
         {/* Notification Banner */}
         {notification && (
@@ -259,15 +287,15 @@ export default function AuctionMarketplacePage() {
         </div>
 
         {/* Auction Cards Grid */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
           {filteredItems.map((item) => {
-            const burnAmount = Math.floor(item.currentBid * 0.05);
+            const burnAmount = Math.floor(item.currentBid * 0.025); // VIP 2.5% rate
             return (
               <div
                 key={item.id}
-                className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900/60 p-5 shadow-lg transition-all hover:border-slate-700"
+                className={`flex flex-col justify-between rounded-2xl border bg-slate-900/80 p-5 shadow-lg transition-all ${activeThemeMeta.borderClass}`}
               >
-                <div>
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     {getRarityBadge(item.rarity)}
                     <div className="flex items-center gap-1 text-xs text-slate-400">
@@ -276,13 +304,23 @@ export default function AuctionMarketplacePage() {
                     </div>
                   </div>
 
-                  <h3 className="mt-3 text-base font-bold text-white">{item.title}</h3>
-                  <div className="mt-1 text-xs text-slate-400">
-                    판매자: <span className="font-semibold text-slate-300">{item.seller}</span>
+                  <div>
+                    <h3 className="text-base font-bold text-white">{item.title}</h3>
+                    <div className="mt-1 text-xs text-slate-400">
+                      판매자: <span className="font-semibold text-slate-300">{item.seller}</span>
+                    </div>
                   </div>
 
+                  {/* Real-Time Depth Chart Component */}
+                  <AuctionDepthChart
+                    currentBid={item.currentBid}
+                    startPrice={Math.round(item.currentBid * 0.7)}
+                    buyNowPrice={item.buyoutPrice}
+                    itemName={item.title}
+                  />
+
                   {/* Bidding Stats Box */}
-                  <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/70 p-3.5">
+                  <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-3.5">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-slate-400">현재 최고 입찰가</span>
                       <span className="font-mono font-bold text-amber-400 text-sm">
@@ -294,10 +332,10 @@ export default function AuctionMarketplacePage() {
                       <span className="font-semibold text-slate-300">{item.highestBidder}</span>
                     </div>
                     <div className="mt-2.5 flex items-center justify-between border-t border-slate-800/80 pt-2 text-[11px]">
-                      <span className="flex items-center gap-1 text-rose-400 font-medium">
-                        <Flame className="h-3 w-3" /> 플랫폼 5% 소각 예정액
+                      <span className="flex items-center gap-1 text-amber-400 font-medium">
+                        <Flame className="h-3 w-3" /> Plus VIP 2.5% 소각 예정액
                       </span>
-                      <span className="font-mono font-bold text-rose-300">
+                      <span className="font-mono font-bold text-amber-300">
                         -{burnAmount.toLocaleString()} WLD
                       </span>
                     </div>
@@ -309,8 +347,9 @@ export default function AuctionMarketplacePage() {
                   <button
                     type="button"
                     onClick={() => openBidModal(item)}
-                    className="flex-1 rounded-xl bg-amber-500 py-2.5 text-xs font-bold text-slate-950 shadow hover:bg-amber-400 active:scale-95"
+                    className="flex-1 rounded-xl bg-amber-500 py-2.5 text-xs font-bold text-slate-950 shadow hover:bg-amber-400 active:scale-95 flex items-center justify-center gap-1"
                   >
+                    <Gavel className="h-3.5 w-3.5" />
                     입찰하기 (Bid)
                   </button>
                   <button
@@ -328,7 +367,7 @@ export default function AuctionMarketplacePage() {
           })}
         </div>
 
-        {/* Bid Modal */}
+        {/* Bid & Proxy Modal */}
         {bidModalItem && (
           <div
             role="dialog"
@@ -336,23 +375,24 @@ export default function AuctionMarketplacePage() {
             aria-labelledby="auction-bid-modal-title"
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
           >
-            <div className="relative w-full max-w-md rounded-2xl border border-amber-500/40 bg-slate-900 p-6 text-slate-100 shadow-2xl">
-              <h3 id="auction-bid-modal-title" className="text-base font-bold text-white">
-                아티팩트 경매 입찰하기
+            <div className={`relative w-full max-w-md rounded-2xl border bg-slate-900 p-6 text-slate-100 shadow-2xl ${activeThemeMeta.borderClass}`}>
+              <h3 id="auction-bid-modal-title" className="text-base font-bold text-white flex items-center gap-1.5">
+                <Gavel className="h-4 w-4 text-amber-400" />
+                아티팩트 경매 입찰하기 (자동 프록시 지원)
               </h3>
               <p className="mt-1 text-xs text-slate-400">{bidModalItem.title}</p>
 
-              <div className="mt-4 space-y-3">
-                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 text-xs space-y-1.5">
+              <div className="mt-4 space-y-3.5">
+                <div className="rounded-xl border border-slate-800 bg-slate-950 p-3 text-xs space-y-1.5 font-mono tabular-nums">
                   <div className="flex justify-between">
                     <span className="text-slate-400">현재 최고가:</span>
-                    <span className="font-mono font-bold text-amber-400">
+                    <span className="font-bold text-amber-400">
                       {bidModalItem.currentBid.toLocaleString()} WLD
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">내 보유 잔액:</span>
-                    <span className="font-mono text-slate-200">
+                    <span className="text-slate-200">
                       {userBalance.toLocaleString()} WLD
                     </span>
                   </div>
@@ -360,7 +400,7 @@ export default function AuctionMarketplacePage() {
 
                 <div>
                   <label htmlFor="bid-input" className="block text-xs font-semibold text-slate-300">
-                    내 입찰 희망 금액 (WLD)
+                    현재 입찰 희망 금액 (WLD)
                   </label>
                   <input
                     id="bid-input"
@@ -373,17 +413,57 @@ export default function AuctionMarketplacePage() {
                   />
                 </div>
 
+                {/* Proxy Bidding Toggle Box */}
+                <div className="rounded-xl border border-sky-500/30 bg-sky-500/10 p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-sky-300">
+                      <Bot className="h-4 w-4 text-sky-400" />
+                      <span>최대 한도 예약 자동 입찰 (Proxy Bidding)</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      id="proxy-toggle"
+                      checked={isProxyEnabled}
+                      onChange={(e) => setIsProxyEnabled(e.target.checked)}
+                      className="h-4 w-4 rounded accent-sky-500 cursor-pointer"
+                    />
+                  </div>
+                  {isProxyEnabled ? (
+                    <div>
+                      <label htmlFor="proxy-input" className="block text-[11px] text-sky-200 mb-1">
+                        내가 지불 가능한 최대 상한가 (WLD)
+                      </label>
+                      <input
+                        id="proxy-input"
+                        type="number"
+                        min={bidAmountInput + 1000}
+                        step={1000}
+                        value={maxProxyBidInput}
+                        onChange={(e) => setMaxProxyBidInput(Number(e.target.value))}
+                        className="w-full rounded-lg border border-sky-500/40 bg-slate-950 px-3 py-1.5 font-mono text-xs text-white focus:border-sky-400 focus:outline-none"
+                      />
+                      <p className="mt-1 text-[10px] text-sky-300/80">
+                        다른 유저 입찰 시 최소 단위(+100 WLD)로 상한가 내에서 자동 재응찰합니다.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-[10px] text-muted-foreground">
+                      자리비움 중에도 상한가 내에서 최고가를 자동 방어합니다.
+                    </p>
+                  )}
+                </div>
+
                 <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs">
                   <div className="flex items-center justify-between text-amber-300 font-bold">
                     <span className="flex items-center gap-1">
-                      <Flame className="h-3.5 w-3.5 text-amber-400" /> Plus VIP 2.5% 수수료 소각 (50% 감면)
+                      <Flame className="h-3.5 w-3.5 text-amber-400" /> Plus VIP 2.5% 수수료 소각 (5% 거래 수수료 소각 50% 감면)
                     </span>
                     <span className="font-mono font-bold">
                       {Math.floor(bidAmountInput * 0.025).toLocaleString()} WLD
                     </span>
                   </div>
                   <p className="mt-1 text-[11px] text-slate-400">
-                    Moneyverse Plus 멤버십 혜택으로 기본 5%에서 2.5%로 수수료가 50% 즉시 감면됩니다. 마감 1분 전 입찰 시 2분 자동 연장(Soft Close)됩니다.
+                    Moneyverse Plus 멤버십 혜택으로 기본 5% 거래 수수료 소각에서 2.5%로 50% 감면 적용되며, 마감 1분 전 입찰 시 2분 자동 연장(Soft Close)됩니다.
                   </p>
                 </div>
               </div>
@@ -401,7 +481,7 @@ export default function AuctionMarketplacePage() {
                   onClick={handlePlaceBid}
                   className="flex-1 rounded-xl bg-amber-500 py-2.5 text-xs font-bold text-slate-950 shadow hover:bg-amber-400"
                 >
-                  입찰 확정
+                  {isProxyEnabled ? '프록시 자동 입찰 가동' : '입찰 확정'}
                 </button>
               </div>
             </div>
@@ -411,3 +491,4 @@ export default function AuctionMarketplacePage() {
     </div>
   );
 }
+

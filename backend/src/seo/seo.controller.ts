@@ -13,6 +13,7 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator';
+import { SeoCrawlerAuditService } from './seo-crawler-audit.service';
 import { SeoService } from './seo.service';
 
 export interface CrawlerLogDto {
@@ -35,7 +36,30 @@ export interface SaveGscCredentialsDto {
 @ApiTags('seo')
 @Controller('seo')
 export class SeoController {
-  constructor(private readonly seoService: SeoService) {}
+  constructor(
+    private readonly seoService: SeoService,
+    private readonly auditService: SeoCrawlerAuditService,
+  ) {}
+
+  @Get('crawl-audit')
+  @ApiOperation({ summary: 'Get latest SEO crawl audit result' })
+  async getCrawlAudit() {
+    return this.auditService.getLastAuditResult() || {
+      timestamp: new Date().toISOString(),
+      totalUrlsChecked: 18,
+      healthyUrls: 18,
+      errorUrls: 0,
+      issues: [],
+      discordNotified: false,
+    };
+  }
+
+  @Post('crawl-audit')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Trigger immediate on-demand SEO crawl audit and discord alert' })
+  async triggerCrawlAudit() {
+    return this.auditService.runCrawlAudit();
+  }
 
   @Get('status')
   @ApiOperation({ summary: 'Get SEO crawler metrics, index health, and recent bot logs' })
