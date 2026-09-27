@@ -2,42 +2,58 @@
 
 [English canonical](DOCUMENT_CATALOG.md) | **한국어**
 
-> 스냅샷: v2026.09.23.403
-> 용도: 탐색·정리 인벤토리. 제품 권위 문서가 아닙니다.
+> 스냅샷: v2026.09.27.467
+> 기준 트리: `main@d64eaedccb7c094063b36fb5f46590ce19f51ab1`
+> 용도: 탐색·정리 인벤토리. 제품 권위 문서가 아니다.
 
 ## 현재 권위
 
-- [프로젝트 기획](planning/PROJECT_PLAN.ko.md)
-- [통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md)
-- [전면 기획 재검토 v402](planning/INTEGRATED_FULL_REVIEW_V402.ko.md)
-- [문서 정책](DOCUMENTATION_POLICY.ko.md)
+- [프로젝트 기획](planning/PROJECT_PLAN.ko.md) — 현재 구현 권위, **v2026.09.25.444**.
+- [통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md) — 기획/거버넌스 원장, v466 문서 정리 기록 포함.
+- [문서 정책](DOCUMENTATION_POLICY.ko.md) — 권위/언어/브랜치/보관/드리프트 규칙.
+- [문서 인덱스](INDEX.ko.md) — 선별 탐색 경로.
+- [전체 기획 재검토 v402](planning/INTEGRATED_FULL_REVIEW_V402.ko.md) — **역사 검토 스냅샷**이며 현재 권위가 아니다.
 
-## 인벤토리 스냅샷
+## 권위 드리프트 스냅샷
 
-이번 정리 기준 `docs/` 아래에는 **1,497개 파일**이 있습니다.
+- 저장소 `main` 런타임/소스 이력은 **v2026.09.27.466**.
+- `PROJECT_PLAN.md`은 **v2026.09.25.444**.
+- v444 이후 런타임 커밋이나 실행 메모가 존재한다는 이유만으로 제품 기획 권위에 통합됐다고 간주하지 않는다.
+- 이 카탈로그는 드리프트를 기록하지만 제품 결정을 버전 숫자만 올려 해결하지 않는다.
+
+## 인벤토리
+
+`docs/` 아래 파일은 **1,638개**, 그중 Markdown은 **1,620개**다.
 
 | 문서군 | 파일 수 |
 |---|---:|
-| worklog/ | 515 |
-| changelog/ | 410 |
-| planning/ | 234 |
-| updates/ | 130 |
+| worklog/ | 545 |
+| changelog/ | 424 |
+| planning/ | 279 |
+| updates/ | 160 |
+| docs 루트 | 63 |
 | releases/ | 58 |
-| docs root | 59 |
-| operations/ | 20 |
+| findings/ | 22 |
+| operations/ | 22 |
 | features/ | 20 |
-| findings/ | 15 |
+| superpowers/ | 11 |
 | architecture/ | 10 |
+| api/ | 9 |
+| images/ | 9 |
+| design/ | 2 |
+| localization/ | 2 |
+| research/ | 2 |
+
+루트 README/텍스트 산출물과 `docs/` 밖 문서성 파일까지 포함하면 저장소에서 **1,726개 문서 관련 파일**을 확인했다.
+
 ## 정리 결과
 
-- docs 루트 날짜형 Markdown은 **18개**입니다. legacy 배치로 분류하며 새 날짜형 문서는 적합한 하위 디렉터리에 둡니다.
-- 내용이 완전히 같은 그룹은 **31개**입니다. 주로 과거 changelog/worklog/release 중복입니다.
-- 이번 회차에서는 Git 이력과 inbound link 보호를 위해 기존 중복 경로를 삭제하지 않습니다.
-- 향후 dedup은 canonical 경로 선정 → 이전 경로 compatibility stub → inbound reference 동시수정 순서로 수행합니다.
-- 역사 파일 수는 품질지표가 아닙니다. 현재 권위, 명시적 status, evidence 품질을 우선합니다.
+- `docs/` 루트 날짜형 Markdown: **18개**. 레거시 배치이며 신규 날짜형 문서는 맞는 하위 디렉터리에 둔다.
+- `docs/` exact duplicate-content: **31개 그룹 / 추가 중복 경로 31개**. 이번 회차에서는 Git 이력과 inbound link 보호를 위해 삭제하지 않는다.
+- Markdown 언어쌍 인벤토리: **영문 경로 기준 한국어 쌍 없음 85개**, **한국어 정규화 경로 기준 영문 쌍 없음 19개**. 과거/내부/API 레거시/제3언어가 포함되므로 전부 현행 유지 문서 위반은 아니다.
+- 루트 `implementation_plan.md`, `PROJECT_MEMORY.md`, `walkthrough.md`는 실행/역사 참조이며 제품 권위가 아니다.
+- 기존 v403 카탈로그 스냅샷은 이 인벤토리로 대체한다.
 
-## 디렉터리 규칙
+## 정리 규칙
 
-docs 루트는 index, governance, cross-cutting integration reference만 둡니다. planning/evidence/update/worklog/changelog/release 기록은 각 전용 디렉터리에 둡니다.
-
-각 디렉터리 README의 문서군별 규칙을 따릅니다.
+역사 기록을 대량 삭제·이동하지 않는다. 향후 중복제거 시 canonical 경로 선택, inbound reference 갱신, 필요 시 호환 stub 유지, 링크 무결성 검증을 같은 변경에서 수행한다.
