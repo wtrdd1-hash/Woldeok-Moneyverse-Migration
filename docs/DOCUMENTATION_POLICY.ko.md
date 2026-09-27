@@ -2,71 +2,88 @@
 
 [English canonical](DOCUMENTATION_POLICY.md) | **한국어**
 
-> 버전: v2026.09.23.403
-> 상태: 현재 문서 운영 권위
+> 버전: v2026.09.27.467
+> 상태: 현행 문서 거버넌스
 > 저장소: `wtrdd1-hash/Woldeok-Moneyverse-Migration`
 
 ## 1. 권위 순서
 
-1. `docs/planning/PROJECT_PLAN.ko.md` — 구현 대면 권위 기획.
-2. `docs/planning/INTEGRATED_PLANNING_MASTER.ko.md` — 통합 기획 회차 원장.
-3. `docs/planning/`의 현재 상세 명세.
-4. 생성 API 계약과 런타임 대면 reference.
-5. `updates/`, `changelog/`, `releases/`, `worklog/` — 변경·역사 증거이며 최신 기획보다 높은 권위가 아니다.
+1. `docs/planning/PROJECT_PLAN.md` — 구현 기준 제품/엔지니어링 권위 기획서.
+2. `docs/planning/INTEGRATED_PLANNING_MASTER.md` — 통합 기획 회차 원장과 권위 드리프트 기록.
+3. 위 두 문서에서 명시적으로 채택한 `docs/planning/` 최신 상세 명세.
+4. exact source/runtime identity에 연결된 생성 API 계약과 런타임 참조 문서.
+5. `docs/updates/`, `docs/changelog/`, `docs/releases/`, `docs/worklog/` — 역사/변경 증거이며 최신 기획 권위를 덮어쓰지 않음.
 6. findings/research는 기획 문서가 명시적으로 채택하기 전까지 근거 입력이다.
 
-문서가 충돌하면 가장 최근의 명시적 superseding 권위가 우선한다. 과거 기록은 현재 사실로 다시 쓰지 않고 보존한다.
+문서가 충돌하면 가장 최신의 명시적 superseding authority를 따른다. 과거 기록은 현재 진실처럼 다시 쓰지 않고 보존한다.
 
-## 2. 언어
+## 2. 런타임/기획 드리프트 규칙
 
-영어가 기준 문서이고 한국어를 필수 두 번째 언어로 유지한다. 쌍 문서는 `NAME.md` / `NAME.ko.md` 형식을 사용하고 같은 작업 단위에서 동기화한다.
+더 최신 런타임 커밋, 릴리스 노트, 루트 실행 계획, 작업로그가 자동으로 제품 권위가 되지 않는다. 런타임/소스 이력이 구현 권위 기획보다 앞서면 관련 결정이 `PROJECT_PLAN.md`와 필요한 상세 명세에 실제로 통합될 때까지 **AUTHORITY_DRIFT** 상태를 명시한다.
 
-## 3. 변경 절차
+런타임 버전에 숫자를 맞추기 위해 제품 기획 버전만 올리는 행위를 금지한다. 실제 결정 통합 없이 버전만 올리면 안 된다.
 
-의미 있는 문서 변경도 전용 브랜치를 사용한다. 명시적으로 승인된 긴급 저장소 복구가 아닌 한 문서를 `main`에 직접 커밋하지 않는다.
+## 3. 언어
 
-작업 전 최신 `origin/main`, 통합 마스터, PROJECT_PLAN, 관련 상세 명세, 현재 work/update 기록을 확인한다. 통합 전 `origin/main`을 다시 확인하고 동시 작업을 덮어쓰지 않는다.
+영문이 canonical이고 한국어가 새로 유지관리하는 제품/기획/운영/거버넌스 문서의 필수 2차 언어다. 유지 문서는 `NAME.md` / `NAME.ko.md` 쌍으로 같은 작업 단위에서 갱신한다.
 
-문서 전용 변경은 런타임 릴리스를 시작하지 않는다. 문서 커밋은 repository history를 바꾸지만 application source identity는 바꾸지 않는다.
+과거 기록, 내부 전용, 제3언어, 호환성 문서를 단순 쌍 수 맞추기 위해 현행 권위 문서로 승격하지 않는다. 유지 문서의 미쌍 상태는 명시적 정리 gap으로 추적한다.
 
-## 4. 필수 기록
+## 4. 변경 워크플로
 
-의미 있는 문서 회차는 다음을 가진다.
-- 버전;
-- 영/한 권위 변경;
-- delta 또는 changelog;
-- worklog;
-- GitHub용 update;
-- 기획 권위 변경 시 시작/중간 `origin/main` SHA;
-- 런타임/Test/Production 증거 존재 여부의 명시적 구분.
+의미 있는 문서 변경은 전용 브랜치를 사용한다. 명시적으로 승인된 긴급 저장소 복구 외에는 문서도 `main` 직접 커밋을 금지한다.
 
-## 5. 디렉터리 규칙
+편집 전 최신 `origin/main`, 이 정책, 문서 카탈로그, 통합 마스터, 프로젝트 기획, 관련 상세 명세, 최신 work/update 기록을 읽는다. 작업 중간과 통합 직전에 `origin/main`을 재확인하며 동시 작업을 덮어쓰지 않는다.
 
-- `planning/`: 현재 living plan, 상세명세, planning delta/worklog.
-- `features/`: 구현·사용자 기능의 간결한 가이드. 기획 최고 권위가 아니다.
-- `architecture/`: 안정적 아키텍처 설명.
-- `operations/`: 운영 절차와 runtime contract.
-- `findings/`: 감사, 근거 corpus, 연구검토.
-- `updates/`: 버전별 짧은 업데이트 공지.
-- `changelog/`: 변경이력.
-- `worklog/`: 작업·증거 이력.
-- `releases/`: 실제 release evidence가 있는 릴리스 기록.
-- docs 루트: 색인·거버넌스·통합 reference만 둔다.
+문서 전용 변경은 런타임 릴리스를 유발하지 않는다.
 
-기존 분류 디렉터리가 있는데 날짜형 일회성 문서를 docs 루트에 새로 만들지 않는다.
+## 5. 필수 기록
 
-## 6. 상태 용어
+중요 문서 회차는 다음을 남긴다.
+- 버전
+- 적용 가능한 영/한 유지 문서 동기화
+- delta/changelog
+- worklog
+- GitHub 공개용 업데이트 내역
+- 프로젝트 운영상 필요한 내부 업데이트 내역
+- 권위 변경 시 시작/중간 `origin/main` SHA
+- runtime/Test/Production 증거 유무
 
-`DRAFT`, `PLANNING`, `BLOCKED`, `IMPLEMENTED`, `TEST_VERIFIED`, `PRODUCTION_VERIFIED`, `SUPERSEDED`, `HISTORICAL`을 명시적으로 사용한다.
+## 6. 디렉터리 규칙
 
-exact candidate/runtime version과 수용 결과 증거 없이 “완료”, “배포”, “Production 완료”라고 쓰지 않는다.
+- `planning/`: 현재 기획, 상세 명세, planning delta/worklog
+- `features/`: 간결한 사용자 기능 가이드
+- `architecture/`: 안정적 아키텍처 설명
+- `operations/`: 운영 절차/런타임 계약
+- `findings/`: 감사/조사/근거 corpus
+- `updates/`: 버전 업데이트 공지
+- `changelog/`: 변경 이력
+- `worklog/`: 실행/증거 이력
+- `releases/`: 실제 릴리스 증거가 있는 릴리스 기록
+- `docs/` 루트: 인덱스, 거버넌스, 범분야 통합 참조
 
-## 7. 링크·보존
+맞는 하위 디렉터리가 있으면 새 날짜형 단발 문서를 docs 루트에 만들지 않는다.
 
-폴더를 깔끔하게 보이게 하려고 기존 링크를 깨뜨리지 않는다. 먼저 index/status metadata로 정리한다. 파일 이동이 필요하면 이전 경로에 compatibility stub을 남기거나 모든 inbound link를 같은 변경에서 수정한다.
+## 7. 비권위 루트/호환 문서
 
-historical은 삭제가 아니라 “현재 권위 아님”을 의미한다.
+저장소 루트 `implementation_plan.md`, `PROJECT_MEMORY.md`, `walkthrough.md`, 과거 `README/` 번역 산출물 등은 현재 프로젝트 기획이 명시적으로 채택하지 않는 한 제품 권위가 아니다.
 
-## 8. 폐기 정책
+`docs/PROJECT-DOCUMENT-POLICY-KO.md`는 호환/역사 문서이며 이 정책이 supersede한다.
 
-`PROJECT-DOCUMENT-POLICY-KO.md` v1.0.0의 문서 main 직접반영 규칙은 현재 브랜치·릴리스 거버넌스와 충돌하므로 이 정책이 supersede한다.
+## 8. 상태 용어
+
+`DRAFT`, `PLANNING`, `BLOCKED`, `IMPLEMENTED`, `TEST_VERIFIED`, `PRODUCTION_VERIFIED`, `SUPERSEDED`, `HISTORICAL`, `AUTHORITY_DRIFT`를 사용한다.
+
+exact candidate/runtime 버전과 수용 결과 증거 없이 완료/배포/Production이라고 쓰지 않는다.
+
+## 9. 링크/보관 정책
+
+폴더를 깔끔하게 보이게 하려고 기존 링크를 깨지 않는다. 우선 인덱스/상태 메타데이터/호환 stub을 사용한다. 파일 이동이 필요하면 기존 경로 stub을 남기거나 같은 변경에서 모든 inbound reference를 갱신한다.
+
+역사 문서는 검색 가능하게 보존한다. archive는 삭제가 아니라 현재 권위가 아니라는 뜻이다.
+
+## 10. 인벤토리/정리 정책
+
+카탈로그 파일 수는 품질 지표가 아닌 스냅샷이다. exact duplicate, docs 루트 날짜형 기록, 언어쌍 gap, 오래된 권위 참조를 추적하되 삭제보다 정확성과 링크 안정성을 우선한다.
+
+대량 이동/중복제거 전 inbound-link 범위를 증명하고 호환 경로를 보존한다.

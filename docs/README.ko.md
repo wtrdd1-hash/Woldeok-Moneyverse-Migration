@@ -2,29 +2,35 @@
 
 [English canonical](README.md) | **한국어**
 
-GitHub 문서는 여기서 시작합니다. 파일명이 가장 최신처럼 보인다는 이유만으로 현재 제품 권위라고 판단하지 않습니다.
+여기서 시작한다. 가장 최신처럼 보이는 파일명, 최신 런타임 커밋, 루트 실행 계획만 보고 현재 제품 진실을 추론하지 않는다.
 
 ## 현재 권위
 
-- [구현 대면 프로젝트 기획](planning/PROJECT_PLAN.ko.md) / [English](planning/PROJECT_PLAN.md)
+- [구현 기준 프로젝트 기획](planning/PROJECT_PLAN.ko.md) / [English](planning/PROJECT_PLAN.md) — **v2026.09.25.444**
 - [통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md) / [English](planning/INTEGRATED_PLANNING_MASTER.md)
-- [전면 기획 재검토 v402](planning/INTEGRATED_FULL_REVIEW_V402.ko.md) / [English](planning/INTEGRATED_FULL_REVIEW_V402.md)
 - [문서 거버넌스](DOCUMENTATION_POLICY.ko.md) / [English](DOCUMENTATION_POLICY.md)
-- [현재 런타임 / OS 기준선](CURRENT_RUNTIME_BASELINE.ko.md) / [English](CURRENT_RUNTIME_BASELINE.md)
-- [전체 문서 색인](INDEX.ko.md) / [English](INDEX.md)
+- [문서 카탈로그](DOCUMENT_CATALOG.ko.md) / [English](DOCUMENT_CATALOG.md)
+- [현재 런타임/OS 기준](CURRENT_RUNTIME_BASELINE.ko.md) / [English](CURRENT_RUNTIME_BASELINE.md)
+- [전체 문서 인덱스](INDEX.ko.md) / [English](INDEX.md)
+
+## 현재 문서 상태
+
+저장소 `main`은 **v2026.09.27.466**까지 관측됐지만 구현 기준 제품 기획은 **v2026.09.25.444**다. 따라서 현재는 명시적인 **AUTHORITY_DRIFT** 상태다. v444 이후 런타임/소스 작업의 제품 결정은 권위 기획서에 실제로 정합화되기 전까지 “통합 완료”로 간주하지 않는다.
+
+v402 전체 재검토 문서는 역사 근거로 보존하며 더 이상 현재 전체 검토 권위로 표시하지 않는다.
 
 ## 주요 문서군
 
-| 디렉터리 | 용도 |
+| 디렉터리 | 목적 |
 |---|---|
 | `planning/` | 현재 기획, 상세 명세, planning delta |
 | `features/` | 간결한 기능 가이드 |
 | `architecture/` | 안정적 아키텍처 설명 |
-| `operations/` | 운영/runtime 절차 |
-| `findings/` | 감사, 연구, 근거 corpus |
-| `updates/` | 버전별 짧은 업데이트 |
+| `operations/` | 운영/런타임 절차 |
+| `findings/` | 감사/조사/근거 corpus |
+| `updates/` | 버전 업데이트 공지 |
 | `changelog/` | 변경 이력 |
-| `worklog/` | 작업/증거 이력 |
-| `releases/` | 실제 릴리스 증거가 있는 기록 |
+| `worklog/` | 실행/증거 이력 |
+| `releases/` | 릴리스 증거가 있는 릴리스 기록 |
 
-과거 기록은 근거로 보존하지만 최신 명시적 기획 권위를 덮어쓰지 않습니다.
+저장소 루트 `implementation_plan.md`, `PROJECT_MEMORY.md`, `walkthrough.md`는 실행/역사 참조이며 프로젝트 기획이 명시적으로 채택하지 않는 한 현재 제품 권위가 아니다.
