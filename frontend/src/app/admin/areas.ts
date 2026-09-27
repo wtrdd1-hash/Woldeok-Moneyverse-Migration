@@ -29,6 +29,13 @@ export const ADMIN_AREAS: readonly AdminArea[] = [
     group: 'records',
   },
   {
+    href: '/admin/seo',
+    eyebrow: 'SEARCH ENGINE CRAWLER & INDEXING',
+    title: 'SEO 및 검색엔진 색인 관제',
+    summary: 'Googlebot, Naver Yeti, Bingbot의 실시간 크롤링 현황 및 IndexNow 사이트맵 제출을 관제합니다.',
+    group: 'records',
+  },
+  {
     href: '/admin/controls',
     eyebrow: 'FEATURE CONTROL',
     title: '기능 스위치 · 정책 버전',

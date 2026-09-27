@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v11)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v12)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v12**: Google Search Console / Naver 웹마스터 도구 사이트맵 등록 자동화 & 실시간 봇 크롤링/인덱싱 관제 타워(/admin/seo) 구축 (+190, -0)
 - **v11**: SEO 검색 노출 쇄신(10대 주식 종목 공개 프리뷰 인덱싱 & 5대 금융 가이드 & hreflang) + 도파민 5대 API 프론트-백엔드 실시간 원장 연동 + Moneyverse Plus 유료/무료 멤버십 티어 풀스택 개발 (+180, -0)
 - **v10**: 도파민 5대 전용 API 완비 & 14대 도메인 API 실시간 관제 대시보드(/admin/api-health) 구축 (+45, -0)
 - **v9**: 사행성 카지노 API 전면 폐기 & 14대 도메인 300+개 API 공식 마스터 명세서 완결 (+55, -0)
@@ -3961,6 +3962,64 @@ pm test).
 - Next.js Turbopack 빌드 무결성 검증
 - Debian 미니PC `stage_v463.sh` 및 `promote_v463.sh` 무중단 승격 배포
 - PostgreSQL 활성 세션(1,433+) 100% 무손실 검증
+
+---
+
+## 🚀 [v12 Specification] Google Search Console / Naver 웹마스터 도구 사이트맵 등록 자동화 & 실시간 크롤링/인덱싱 관제 타워 (누적 추가)
+
+### 1. 🔍 [아키텍처 1] 검색엔진 사이트맵/URL 제출 및 핑(Ping) 자동화 엔진
+- **IndexNow 프로토콜(Naver Search Advisor / Bing / Yandex) 일괄 통보 엔진**:
+  - `https://api.indexnow.org/indexnow` 및 `https://searchadvisor.naver.com/indexnow` 규격 엔드포인트 연동.
+  - 호스트 인증 키 자동 생성 및 서빙: `/.well-known/indexnow.key` 및 `/[key].txt`.
+  - 10대 가상 주식 종목(`/stocks/[symbol]`) 및 5대 금융 가이드(`/guide/*`) URL 일괄 자동 제출.
+- **Google / Naver Sitemap Ping 자동화**:
+  - `https://www.google.com/ping?sitemap={sitemapUrl}` 핑 디스패치.
+  - 관리자가 원클릭으로 전체 검색엔진에 사이트맵 갱신을 즉시 통보하는 통합 액션 API (`POST /api/v1/seo/submit`).
+
+### 2. 📊 [아키텍처 2] PostgreSQL 기반 실시간 검색 봇 크롤링 로깅 및 집계
+- **DB 원장 테이블 (`seo_crawler_logs`, `seo_bot_metrics`)**:
+  - 봇 식별: `Googlebot`, `Naver Yeti (Yeti)`, `Bingbot`, `Daumoa`, `DuckDuckBot`, `Baiduspider`, `YandexBot` 등.
+  - 기록 항목: 타임스탬프, 봇 종류, 요청 경로(Path), HTTP 상태 코드(200, 304, 404, 500), 응답 시간(durationMs), IP 주소.
+  - 24시간/7일 롤링 집계: 총 크롤링 건수, 봇별 점유율, 상태 코드 분포, 최다 크롤링 상위 URL.
+
+### 3. 🛡️ [아키텍처 3] 관리자 SEO 및 인덱싱 실시간 관제 타워 (`/admin/seo`)
+- **4대 핵심 KPI 위젯**:
+  1. **24시간 총 봇 크롤링 건수**: 전일 대비 변동률 및 실시간 펄스.
+  2. **가상 주식 색인 커버리지 (10/10)**: 10대 주식 종목별 24시간 내 봇 방문 현황.
+  3. **금융 가이드 색인 커버리지 (5/5)**: 5대 가이드 허브별 24시간 내 봇 방문 현황.
+  4. **평균 봇 응답 속도 (TTFB / SSR latency)**: 봇 대상 서버 응답 지연 모니터링 (ms).
+- **10대 주식 & 5대 가이드 실시간 색인 건강도 카드 그리드**:
+  - 각 URL별 최근 방문 크롤러 이름(Googlebot, Yeti 등), 최종 방문 시점(상대 시간), HTTP 응답 코드, 3단계 색인 건전성 배지(정상: 녹색 / 주의: 황색 / 미방문: 회색).
+- **원클릭 검색엔진 제출 콘솔**:
+  - Google Sitemap Ping, Naver IndexNow, Bing IndexNow 즉시 전송 버튼 및 실시간 실행 결과 피드백.
+- **실시간 봇 접근 로그 피드 테이블**:
+  - 최근 100건 크롤러 요청 목록, 검색 및 봇 필터, 상태 코드 배지, 응답 시간 표시.
+
+### 4. 🧭 [아키텍처 4] 내비게이션 및 라우트 SSOT 연동
+- `frontend/src/config/routes.config.ts`: `/admin/seo` 라우트 등록.
+- `frontend/src/components/admin-sub-nav.tsx`: 'SEO / 색인 관제' 탭 추가.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan]
+### Target Implementation Files
+- `backend/src/seo/seo.service.ts`: IndexNow / Ping 전송 및 크롤러 로그 기록/집계
+- `backend/src/seo/seo.controller.ts`: `/api/v1/seo/status`, `/api/v1/seo/submit`, `/api/v1/seo/log`, IndexNow key
+- `backend/src/seo/seo.module.ts`: NestJS SEO 모듈
+- `backend/src/app.module.ts`: SeoModule 등록
+- `frontend/src/lib/bot-detector.ts`: 검색 봇 User-Agent 감지 및 로깅 유틸리티
+- `frontend/src/app/api/seo/submit/route.ts` & `/api/seo/status/route.ts`: Next.js BFF 라우트
+- `frontend/src/app/admin/seo/page.tsx`: SEO / 실시간 인덱싱 관제 대시보드
+- `frontend/src/components/admin-sub-nav.tsx`: SEO 관제 탭 추가
+- `frontend/src/config/routes.config.ts`: `/admin/seo` 라우트 등록
+- `frontend/src/app/admin/seo/admin-seo.test.tsx`: 단위 테스트
+
+### Verification Plan
+- 백엔드 / 프론트엔드 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 성공
+- Debian 미니PC `stage_v464.sh` 및 `promote_v464.sh` 무중단 승격 배포
+- PostgreSQL 활성 세션(1,546+) 100% 무손실 검증
+
 
 
 

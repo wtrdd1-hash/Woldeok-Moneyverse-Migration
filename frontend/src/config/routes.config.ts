@@ -345,6 +345,14 @@ export const APP_ROUTES: readonly RouteDefinition[] = [
     indexable: false,
     group: 'admin',
   },
+  {
+    path: '/admin/seo',
+    label: { ko: 'SEO 및 인덱싱 관제', en: 'SEO & Indexing Console', ja: 'SEO＆インデックス監視', zh: 'SEO与索引控制台' },
+    isPublic: false,
+    authRequired: true,
+    indexable: false,
+    group: 'admin',
+  },
 ] as const;
 
 /**

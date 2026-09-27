@@ -42,6 +42,7 @@ import { SafetyModule } from './safety/safety.module';
 import { SpaceModule } from './space/space.module';
 import { ClubModule } from './club/club.module';
 import { CollectionModule } from './collection/collection.module';
+import { SeoModule } from './seo/seo.module';
 
 const ONE_MINUTE_MS = 60_000;
 
@@ -51,6 +52,7 @@ const ONE_MINUTE_MS = 60_000;
     GameClockModule,
     AuthModule,
     HealthModule,
+    SeoModule,
     WalletModule,
     WorkModule,
     BankModule,

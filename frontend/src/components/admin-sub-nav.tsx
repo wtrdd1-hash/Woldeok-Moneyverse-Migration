@@ -20,6 +20,7 @@ import {
   Radio,
   Vault,
   Activity,
+  Globe,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
@@ -32,6 +33,7 @@ interface AdminTabItem {
 export const ADMIN_TABS: readonly AdminTabItem[] = [
   { href: '/admin', label: '대시보드', icon: LayoutDashboard },
   { href: '/admin/api-health', label: 'API 관제', icon: Activity },
+  { href: '/admin/seo', label: 'SEO·색인', icon: Globe },
   { href: '/admin/users', label: '회원 관리', icon: Users },
   { href: '/admin/security', label: '보안·차단', icon: ShieldAlert },
   { href: '/admin/support', label: '문의 채팅', icon: MessageCircle },
