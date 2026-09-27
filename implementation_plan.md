@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v17)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v18)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v18**: 검색 노출 극대화(Search Exposure Maximization) — 500개+ 동적 롱테일 사이트맵 인덱스 분할(sitemap-index.xml) + 30+대 고검색량 프리셋 계산기 딥링크 SSR 랜딩(/tools/*/[preset]) + 4중 리치 스니펫(FAQ/HowTo/Product/Breadcrumb) + 동적 핀테크 OG 이미지 엔진(/api/og) + 6시간 주기 자동 검색엔진 핑 스케줄러 풀스택 구축 (+280, -0)
 - **v17**: SEO 검색 유입량 극대화 — 고검색량 3대 금융 웹 계산기(/tools/*) 구축 + robots.txt/sitemap 색인 표면적 100+개 확장 + Google/Naver 사이트 소유권 인증 & IndexNow/Ping 즉시 수집 자동화 (+240, -0)
 - **v16**: P2P 경매장 낙찰 축하 Confetti/Web Audio 팡파레 + GSC 일일 SEO 리포트 디스코드 다이제스트 봇 + Plus VIP 5종 전용 아바타 프레임(AvatarFrame) 전역 연동 + 호가 Depth 차트 1-Click 빠른 입찰 프리셋 (+220, -0)
 - **v15**: P2P 경매장 실시간 틱/호가 Depth 차트 + Plus VIP 5대 네온 테마 선택기 + GSC 6시간 크롤링 감사 & 디스코드 웹훅 알림봇 + 자동 프록시 입찰(Proxy Bidding) (+220, -0)
@@ -4293,6 +4294,94 @@ pm test).
 - Debian 미니PC 블루-그린 승격 배포 (`prod-v469`)
 - PostgreSQL 1,552개 활성 세션 100% 무손실 보존 확인
 - 실서버 `sitemap.xml`, `robots.txt`, HTML 메타태그 및 IndexNow Ping 실행 검증
+
+---
+
+## 🚀 [v18 Specification] 검색 노출 극대화(Search Exposure Maximization) — 500개+ 롱테일 사이트맵 & 30+대 프리셋 SSR 랜딩 & 4중 리치 스니펫 & 동적 OG 이미지 엔진 (누적 추가)
+
+### 1. 🌐 [아키텍처 1] 500개+ 동적 롱테일 사이트맵 인덱스 분할 (`sitemap-index.xml`)
+- **Sitemap Index 구조화 (`frontend/src/app/sitemap.ts` & `sitemap-index.xml`)**:
+  - 기존 28개 단일 사이트맵에서 검색 포털 권장 5대 서브 사이트맵 분할 체계 구축:
+    1. `sitemap-static.xml`: 메인, 소개, 공지, 이용약관, 개인정보처리방침 등 핵심 정적 URL (15개)
+    2. `sitemap-tools.xml`: 3대 계산기 허브 + 30개 고검색량 프리셋 딥링크 URL (34개)
+    3. `sitemap-stocks.xml`: 10대 가상 주식 종목별 메인, 호가, 차트 히스토리, 토론, 알림 (50개)
+    4. `sitemap-guides.xml`: 5대 마스터 가이드 + 50개 핀테크/경제 용어사전 세부 항목 (55개)
+    5. `sitemap-newspaper.xml`: 일자별 AI 경제 브리프 & 상장사 시황 분석 아카이브 (100개+)
+    6. `sitemap-board.xml`: 공개 팁/노하우 및 인기 게시판 아카이브 (100개+)
+- **총 색인 규모**: **500개 이상의 유효 롱테일 URL 자동 집계 및 구글/네이버/빙에 실시간 공급**.
+
+### 2. 🧮 [아키텍처 2] 30+대 고검색량 프리셋 계산기 딥링크 SSR 랜딩 시스템 (`/tools/*/[preset]`)
+- **[1] 복리 예적금 계산기 10대 롱테일 프리셋 (`/tools/compound-calculator/[preset]`)**:
+  - `10m-3y-5p`: 1천만원 3년 연 5% 복리 이자 계산기
+  - `10m-5y-10p`: 1천만원 5년 연 10% 복리 시뮬레이터 (목돈 굴리기)
+  - `50m-1y-7p`: 5천만원 1년 정기예금 만기 수령액 (세후 이자율 계산)
+  - `100m-10y-15p`: 1억원 10년 15% 가상 복리 투자 수익 예측
+  - `monthly-500k-3y`: 월 50만원 3년 자유적금 만기 총액
+  - `monthly-1m-5y`: 월 100만원 5년 1억 모으기 적금 계산기
+  - `retire-300m-target`: 3억원 은퇴 자금 모으기 월 필요 저축액
+  - `daily-compound-1y`: 일 복리 0.1% 365일 기하급수 수익 계산기
+  - `crypto-staking-compound`: 가상자산 스테이킹 연 12% 월복리 계산
+  - `inflation-hedge-compound`: 물가상승률 3.5% 반영 실질 수익률 계산
+- **[2] 주식 물타기/평단가 계산기 10대 롱테일 프리셋 (`/tools/stock-calculator/[preset]`)**:
+  - `chips-minus-20`: 침팬지 반도체(CHIPS) -20% 물타기 평단가 희석 계산기
+  - `ducks-minus-50`: 월덕 인더스트리(DUCKS) 반토막 -50% 2배수 물타기 탈출 공식
+  - `coin-minus-30`: 도지 밈 파이낸스(COIN) -30% 손익분기점 매도가 계산기
+  - `half-price-double-buy`: 주가 반토막 시 2배 추가 매수 평단가 역산기
+  - `break-even-target-10p`: 물타기 후 목표 수익률 +10% 필요 매도가격
+  - `fee-tax-deduction`: 증권 거래세 0.18% 및 수수료 공제 후 실질 평단가
+  - `dollar-cost-averaging`: 월정액 분할매수(DCA) 12회차 평균 단가 시뮬레이터
+  - `scale-in-3-steps`: 3단계 분할 매수 시 최종 포트폴리오 평단가
+  - `leverage-rebound-calc`: 2배 레버리지 ETF 손실 복구 필요 상승률
+  - `target-exit-price`: 목표가 도달 시 분할 매도 익절 시뮬레이터
+- **[3] 직업 파밍 수익 최적화 계산기 10대 롱테일 프리셋 (`/tools/farming-calculator/[preset]`)**:
+  - `intern-vs-executive`: 인턴 vs 임원 일일 WLD 수익 및 에너지 효율 비교
+  - `daily-100k-farming-route`: 하루 10만 WLD 최단 시간 파밍 루트 가이드
+  - `energy-recovery-opt`: 에너지 100% 회복 주기별 최적 접속 타이밍
+  - `weekend-fever-yield`: 주말 2배 피버 이벤트 시간당 최대 채굴량
+  - `developer-routine-guide`: 개발자 직급별 코딩 과업 일일 수익표
+  - `trader-arbitrage-yield`: 트레이더 시세 차익 파밍 기대 수익
+  - `miner-high-yield-calc`: 광부 고위험 자원 채굴 손익분기점
+  - `job-prestige-multiplier`: 프레스티지 환생 후 직업 보너스 배율
+  - `compound-farming-combo`: 일일 파밍 수익 100% 복리 예금 재투자 시뮬레이션
+  - `starter-growth-1week`: 무자본 뉴비 1주일 50만 WLD 달성 플랜
+- **서버 사이드 렌더링(SSR) & 텍스트/데이터 완비**:
+  - 각 프리셋 페이지는 고유의 Canonical URL, 메타 Title/Description, H1/H2 헤딩, 계산 결과 요약표, 사전 렌더링 수치 데이터를 포함하여 구글봇이 100% 즉시 수집 가능.
+
+### 3. 📑 [아키텍처 3] 4중 리치 스니펫 (Schema.org JSON-LD) 전면 구축
+- **1. FAQPage Schema**: 검색 결과에 접히는 아코디언 질의응답 4~6개 노출
+- **2. HowTo Schema**: 계산기 사용법 및 목표치 달성 단계별 스텝 가이드 노출
+- **3. FinancialProduct Schema**: 가상 복리 예금 상품 및 연이율, 조건 노출
+- **4. BreadcrumbList Schema**: 홈 > 금융 도구 > 복리 계산기 > 1천만원 3년 복리 빵부스러기 경로 표시
+
+### 4. 🖼️ [아키텍처 4] 동적 핀테크 오픈그래프(OG) 이미지 엔진 (`/api/og`)
+- **Next.js Edge OG Image Generation (`frontend/src/app/api/og/route.tsx`)**:
+  - URL 파라미터(`title`, `type`, `amount`, `yield`, `symbol`, `rate`)에 따라 실시간 1200x630 고화질 핀테크 카드 이미지 생성.
+  - 카카오톡, X/Twitter, 디스코드, 페이스북 공유 시 즉시 맞춤형 그래픽 렌더링.
+
+### 5. ⏰ [아키텍처 5] 6시간 주기 자동 IndexNow & Google/Naver Sitemap Ping 스케줄러
+- **`backend/src/seo/seo-cron-ping.service.ts`**:
+  - 6시간 주기(`0 */6 * * *`)로 500개+ 활성 URL 목록을 IndexNow(IndexNow.org, Naver Search Advisor, Bing) 및 Google Sitemap Ping으로 자동 발송.
+  - 관리자 패널(`/admin/seo`)에 1-Click 수동 전체 핑 발송 연동.
+
+### 6. 📋 [Target Implementation Files]
+1. `frontend/src/config/seo-presets.config.ts`: 30개 고검색량 롱테일 프리셋 데이터 및 메타데이터 SSOT 신설
+2. `frontend/src/app/tools/compound-calculator/[preset]/page.tsx`: 복리 계산기 10대 롱테일 프리셋 SSR 페이지
+3. `frontend/src/app/tools/stock-calculator/[preset]/page.tsx`: 주식 평단가 10대 롱테일 프리셋 SSR 페이지
+4. `frontend/src/app/tools/farming-calculator/[preset]/page.tsx`: 직업 파밍 10대 롱테일 프리셋 SSR 페이지
+5. `frontend/src/app/sitemap.ts`: 500개+ 동적 롱테일 사이트맵(프리셋 30종, 종목 10종 서브, 가이드 5종, 뉴스) 자동 생성 엔진
+6. `frontend/src/app/api/og/route.tsx`: Next.js 1200x630 동적 핀테크 OG 이미지 생성 라우트
+7. `backend/src/seo/seo-cron-ping.service.ts`: 6시간 주기 자동 IndexNow & Sitemap Ping 백그라운드 스케줄러 신설
+8. `backend/src/seo/seo.module.ts`: 신규 스케줄러 등록
+9. `frontend/src/config/routes.config.ts`: 30개 프리셋 라우트 공개 색인 매트릭스 동기화
+10. `frontend/src/app/tools/compound-calculator/compound-calculator-presets.test.tsx`: 프리셋 라우트 단위 테스트 신설
+
+### 7. 🧪 [Verification & Deployment Plan]
+- 프론트엔드/백엔드 Vitest 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 (500개+ 정적/동적 라우트 컴파일)
+- Debian 미니PC 블루-그린 승격 배포 (`prod-v470`)
+- PostgreSQL 활성 세션(1,495+) 100% 무손실 보존 확인
+- 실서버 `https://easy-scraping.com/sitemap.xml`, `/tools/compound-calculator/10m-3y-5p`, `/api/og` 헬스체크 및 IndexNow 500개 전송 검증
+
 
 
 

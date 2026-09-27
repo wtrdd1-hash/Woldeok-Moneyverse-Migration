@@ -103,14 +103,24 @@ export const MONITORED_TARGET_URLS: readonly {
   { path: '/guide/glossary', category: 'guide', name: '핀테크 & 가상경제 핵심 용어사전' },
   { path: '/guide/dopamine-system', category: 'guide', name: '도파민 보상 & 확률 가이드' },
 
-  // 3 Key Hubs
+  // 3 Key Hubs & Calculators
   { path: '/', category: 'hub', name: '월덕 머니버스 메인 포털' },
   { path: '/stocks', category: 'hub', name: '가상 주식 거래소 종합 허브' },
   { path: '/announcements', category: 'hub', name: '공식 공지사항 허브' },
   { path: '/tools', category: 'hub', name: '금융 & 시뮬레이터 도구 허브' },
   { path: '/tools/compound-calculator', category: 'guide', name: '복리 예금·적금 이자 계산기' },
+  { path: '/tools/compound-calculator/10m-3y-5p', category: 'guide', name: '1천만원 3년 연 5% 복리 계산기' },
+  { path: '/tools/compound-calculator/10m-5y-10p', category: 'guide', name: '1천만원 5년 연 10% 복리 시뮬레이터' },
+  { path: '/tools/compound-calculator/monthly-1m-5y', category: 'guide', name: '월 100만원 5년 1억 모으기 적금' },
+  { path: '/tools/compound-calculator/50m-1y-7p', category: 'guide', name: '5천만원 1년 연 7% 정기예금 이자' },
+  { path: '/tools/compound-calculator/100m-10y-15p', category: 'guide', name: '1억원 10년 15% 가상 복리 투자' },
   { path: '/tools/stock-calculator', category: 'guide', name: '주식 물타기·평단가 계산기' },
+  { path: '/tools/stock-calculator/chips-minus-20', category: 'guide', name: 'CHIPS -20% 물타기 계산기' },
+  { path: '/tools/stock-calculator/ducks-minus-50', category: 'guide', name: 'DUCKS -50% 반토막 2배수 탈출' },
+  { path: '/tools/stock-calculator/coin-minus-30', category: 'guide', name: 'COIN -30% 손익분기점 매도가' },
   { path: '/tools/farming-calculator', category: 'guide', name: '직업 파밍 수익 시뮬레이터' },
+  { path: '/tools/farming-calculator/intern-vs-executive', category: 'guide', name: '인턴 vs 임원 17배 수익 비교' },
+  { path: '/tools/farming-calculator/daily-100k-farming-route', category: 'guide', name: '하루 10만 WLD 4시간 파밍 루트' },
   { path: '/newspaper', category: 'hub', name: 'AI 경제 브리프 & 시황 뉴스' },
   { path: '/marketplace/auction', category: 'hub', name: 'P2P 실시간 경매장' },
 ];

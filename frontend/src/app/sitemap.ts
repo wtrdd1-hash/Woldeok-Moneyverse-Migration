@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { getPublicSitemapRoutes } from '@/config/routes.config';
+import { ALL_SEO_PRESETS } from '@/config/seo-presets.config';
 
 /**
  * 1-Hour ISR Caching for Sitemap.
@@ -12,7 +13,7 @@ export const revalidate = 3600;
  * Using a fixed release timestamp instead of request-time new Date() ensures
  * search engines receive honest, cacheable modification dates.
  */
-const RELEASE_TIMESTAMP = new Date('2026-09-26T22:00:00.000Z');
+const RELEASE_TIMESTAMP = new Date('2026-09-27T12:00:00.000Z');
 
 /**
  * 10 Canonical Virtual Stock Symbols for SEO Long-tail Indexing.
@@ -36,17 +37,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const publicRoutes = getPublicSitemapRoutes();
 
   const entries: MetadataRoute.Sitemap = [];
+  const registeredUrls = new Set<string>();
 
-  // 1. Static Public Routes & Hubs (excluding dynamic parameter templates)
-  for (const route of publicRoutes) {
-    if (route.path.includes('[')) continue; // Dynamic routes handled below
+  const addEntry = (
+    path: string,
+    priority = 0.7,
+    changeFrequency: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' = 'daily',
+  ) => {
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    const url = `${base}${cleanPath === '/' ? '' : cleanPath}`;
+    if (registeredUrls.has(url)) return;
+    registeredUrls.add(url);
 
-    const url = `${base}${route.path}`;
     entries.push({
       url,
       lastModified: RELEASE_TIMESTAMP,
-      changeFrequency: route.changeFrequency || 'weekly',
-      priority: route.sitemapPriority || 0.7,
+      changeFrequency,
+      priority,
       alternates: {
         languages: {
           ko: url,
@@ -56,25 +63,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
         },
       },
     });
+  };
+
+  // 1. Static Public Routes from SSOT
+  for (const route of publicRoutes) {
+    if (route.path.includes('[')) continue; // Dynamic route templates skipped
+    addEntry(route.path, route.sitemapPriority || 0.7, route.changeFrequency || 'weekly');
   }
 
-  // 2. 10 Individual Virtual Stock Pages (/stocks/[symbol]) for Long-tail SEO
+  // 2. 30+ Longtail Financial Calculator Presets
+  for (const preset of ALL_SEO_PRESETS) {
+    if (preset.category === 'compound') {
+      addEntry(`/tools/compound-calculator/${preset.slug}`, 0.9, 'daily');
+    } else if (preset.category === 'stock') {
+      addEntry(`/tools/stock-calculator/${preset.slug}`, 0.9, 'daily');
+    } else if (preset.category === 'farming') {
+      addEntry(`/tools/farming-calculator/${preset.slug}`, 0.85, 'daily');
+    }
+  }
+
+  // 3. 10 Virtual Stocks & Deep Sub-pages (Main, History, Alerts)
   for (const symbol of STOCK_SYMBOLS) {
-    const url = `${base}/stocks/${symbol}`;
-    entries.push({
-      url,
-      lastModified: RELEASE_TIMESTAMP,
-      changeFrequency: 'daily',
-      priority: 0.9,
-      alternates: {
-        languages: {
-          ko: url,
-          en: url,
-          ja: url,
-          zh: url,
-        },
-      },
-    });
+    addEntry(`/stocks/${symbol}`, 0.9, 'daily');
+    addEntry(`/stocks/${symbol}?tab=orderbook`, 0.85, 'daily');
+    addEntry(`/stocks/${symbol}?tab=discussions`, 0.85, 'daily');
   }
 
   return entries;

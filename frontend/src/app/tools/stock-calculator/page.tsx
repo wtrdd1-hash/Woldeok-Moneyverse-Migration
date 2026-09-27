@@ -135,6 +135,29 @@ export default function StockCalculatorPage() {
         ))}
       </div>
 
+      {/* 롱테일 물타기 탈출 공식 프리셋 링크 */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-semibold text-muted-foreground">인기 물타기 전략:</span>
+        <Link
+          href="/tools/stock-calculator/chips-minus-20"
+          className="px-2.5 py-1 text-xs rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-colors font-medium"
+        >
+          CHIPS -20% 물타기
+        </Link>
+        <Link
+          href="/tools/stock-calculator/ducks-minus-50"
+          className="px-2.5 py-1 text-xs rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-colors font-medium"
+        >
+          DUCKS -50% 반토막 2배수 탈출
+        </Link>
+        <Link
+          href="/tools/stock-calculator/coin-minus-30"
+          className="px-2.5 py-1 text-xs rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-colors font-medium"
+        >
+          COIN -30% 손익분기점 매도가
+        </Link>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Input Panel */}
         <div className="lg:col-span-6 space-y-6">

@@ -114,6 +114,23 @@ export default function FarmingCalculatorPage() {
         <p className="text-sm text-muted-foreground leading-relaxed">
           5대 직업과 숙련도 레벨별 업무 보상, 일일 퀘스트 보너스 및 중앙은행 복리 결합 기대 자산을 시뮬레이션하세요.
         </p>
+
+        {/* 롱테일 파밍 공략 프리셋 링크 */}
+        <div className="pt-2 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-muted-foreground">인기 파밍 루틴:</span>
+          <Link
+            href="/tools/farming-calculator/intern-vs-executive"
+            className="px-2.5 py-1 text-xs rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 transition-colors font-medium"
+          >
+            인턴 vs 임원 17배 수익 비교
+          </Link>
+          <Link
+            href="/tools/farming-calculator/daily-100k-farming-route"
+            className="px-2.5 py-1 text-xs rounded-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/30 transition-colors font-medium"
+          >
+            하루 10만 WLD 4시간 파밍 루트
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
