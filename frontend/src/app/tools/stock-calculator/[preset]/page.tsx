@@ -3,18 +3,25 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChevronRight, ArrowLeft, TrendingUp, Sparkles, HelpCircle, CheckCircle2, ShieldCheck, DollarSign } from 'lucide-react';
 import { STOCK_PRESETS, getPresetBySlug } from '@/config/seo-presets.config';
+import { getPseoStockPreset, ALL_PSEO_POPULAR_SLUGS } from '@/config/pseo-stocks.config';
+import { ShareDiagnosisCard } from '@/components/viral/share-diagnosis-card';
+import { ReferralSystem } from '@/components/viral/referral-system';
 
 interface PresetPageProps {
   readonly params: Promise<{ readonly preset: string }>;
 }
 
+export const revalidate = 86400; // 24시간 On-Demand ISR 캐싱
+
 export async function generateStaticParams() {
-  return STOCK_PRESETS.map((p) => ({ preset: p.slug }));
+  const stockPresets = STOCK_PRESETS.map((p) => ({ preset: p.slug }));
+  const popularPseo = ALL_PSEO_POPULAR_SLUGS.slice(0, 60).map((slug) => ({ preset: slug }));
+  return [...stockPresets, ...popularPseo];
 }
 
 export async function generateMetadata({ params }: PresetPageProps): Promise<Metadata> {
   const { preset } = await params;
-  const data = getPresetBySlug('stock', preset);
+  const data = getPresetBySlug('stock', preset) || getPseoStockPreset(preset);
   if (!data) return { title: '주식 물타기 계산기 프리셋' };
 
   return {
@@ -44,7 +51,7 @@ export async function generateMetadata({ params }: PresetPageProps): Promise<Met
 
 export default async function StockPresetPage({ params }: PresetPageProps) {
   const { preset } = await params;
-  const data = getPresetBySlug('stock', preset);
+  const data = getPresetBySlug('stock', preset) || getPseoStockPreset(preset);
   if (!data) notFound();
 
   // 4중 리치 스니펫 (Schema.org JSON-LD)
@@ -186,8 +193,24 @@ export default async function StockPresetPage({ params }: PresetPageProps) {
             </div>
           </div>
 
-          <div className="p-3.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-xs text-muted-foreground leading-relaxed">
-            💡 {data.calculatedResult.detailText}
+          <div className="p-3.5 rounded-lg bg-emerald-500/5 border border-emerald-500/10 text-xs text-muted-foreground leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <span>💡 {data.calculatedResult.detailText}</span>
+            <div className="shrink-0">
+              <ShareDiagnosisCard
+                title={data.title}
+                type="stock"
+                primaryMetric={{
+                  label: data.calculatedResult.primaryLabel,
+                  value: data.calculatedResult.primaryValue,
+                }}
+                secondaryMetric={{
+                  label: data.calculatedResult.secondaryLabel,
+                  value: data.calculatedResult.secondaryValue,
+                }}
+                badge={data.badge}
+                summary={data.summary}
+              />
+            </div>
           </div>
         </div>
 
@@ -225,6 +248,11 @@ export default async function StockPresetPage({ params }: PresetPageProps) {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* 바이럴 리퍼럴 배너 */}
+        <div className="border-t border-border pt-6">
+          <ReferralSystem />
         </div>
 
         {/* 타 프리셋 바로가기 추천 */}

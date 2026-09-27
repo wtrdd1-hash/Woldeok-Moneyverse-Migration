@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v18)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v19)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v19**: 사이트 이용량 2만+ 폭증 전략(20k+ Traffic Surge Engine) — 프로그래매틱 SEO(pSEO) 국내/해외 2,000+ 종목 물타기·목표가 계산기 + 500+ 복리/적립식 조합 계산기 + 카카오톡/SNS 1-Click 고화질 진단서/부자그래프 바이럴 공유 카드 엔진 + 친구 초대(리퍼럴) 양방향 보상 시스템 + 일일 7/30일 출석 스트릭 & 럭키 룰렛 & 매일 UP/DOWN 예측 배팅 게이미피케이션 (+320, -0)
 - **v18**: 검색 노출 극대화(Search Exposure Maximization) — 500개+ 동적 롱테일 사이트맵 인덱스 분할(sitemap-index.xml) + 30+대 고검색량 프리셋 계산기 딥링크 SSR 랜딩(/tools/*/[preset]) + 4중 리치 스니펫(FAQ/HowTo/Product/Breadcrumb) + 동적 핀테크 OG 이미지 엔진(/api/og) + 6시간 주기 자동 검색엔진 핑 스케줄러 풀스택 구축 (+280, -0)
 - **v17**: SEO 검색 유입량 극대화 — 고검색량 3대 금융 웹 계산기(/tools/*) 구축 + robots.txt/sitemap 색인 표면적 100+개 확장 + Google/Naver 사이트 소유권 인증 & IndexNow/Ping 즉시 수집 자동화 (+240, -0)
 - **v16**: P2P 경매장 낙찰 축하 Confetti/Web Audio 팡파레 + GSC 일일 SEO 리포트 디스코드 다이제스트 봇 + Plus VIP 5종 전용 아바타 프레임(AvatarFrame) 전역 연동 + 호가 Depth 차트 1-Click 빠른 입찰 프리셋 (+220, -0)
@@ -4381,6 +4382,109 @@ pm test).
 - Debian 미니PC 블루-그린 승격 배포 (`prod-v470`)
 - PostgreSQL 활성 세션(1,495+) 100% 무손실 보존 확인
 - 실서버 `https://easy-scraping.com/sitemap.xml`, `/tools/compound-calculator/10m-3y-5p`, `/api/og` 헬스체크 및 IndexNow 500개 전송 검증
+
+---
+
+## 🚀 [v19 Specification] 사이트 이용량 2만+ 폭증 전략 (20k+ Traffic Surge Engine) — pSEO 2,000+ 종목 & 바이럴 공유 & 일일 리텐션 게이미피케이션 (누적 추가)
+
+### 1. 🌐 [기둥 1] 프로그래매틱 SEO (pSEO) 20,000+ 롱테일 인덱스 확장 아키텍처
+- **[1] 국내외 2,000+ 전 종목 물타기/목표가 계산기 자동 생성 (`/tools/stock-calculator/[ticker]-[scenario]`)**:
+  - 한국 코스피/코스닥 주요 종목(삼성전자, SK하이닉스, 현대차, NAVER 등) 및 미국 빅테크/ETF(AAPL, TSLA, NVDA, QQQ 등) 2,000개 티커 사전 데이터 구축.
+  - 종목별 5대 시나리오(`minus-10`, `minus-20`, `minus-30`, `minus-50`, `double-down`)와 결합하여 10,000개 이상의 유효 롱테일 SSR 라우트 생성.
+  - 종목별 실시간/최근 주가 데이터, 배당수익률, 52주 최고/최저가 및 수수료/거래세(0.18%) 반영.
+- **[2] 복리/적립식/은퇴자금 500+ 조합 계산기 (`/tools/compound-calculator/[amount]-[years]-[rate]`)**:
+  - 자산 규모(100만 ~ 10억) x 기간(1년 ~ 30년) x 수익률(3% ~ 20%) 매트릭스 결합으로 1,000+ 고검색량 조합 라우트 인덱싱.
+- **[3] 직업별 일일 파밍/에너지 최적화 100+ 시뮬레이터 (`/tools/farming-calculator/[job]-[routine]`)**:
+  - 직급(인턴, 사원, 대리, 과장, 팀장, 임원, CEO) x 근무 패턴 x 주말/피버 버프 조합.
+
+### 2. 🚀 [기둥 2] 카카오톡/SNS 1-Click 바이럴 그로스 루프 (Viral Growth Loops)
+- **[1] '내 물타기 탈출 진단서 & 복리 10년 부자 그래프' 공유 엔진**:
+  - HTML Canvas / Edge OG 기반 고화질 핀테크 진단서 카드 즉시 생성 (현재 평단가, 탈출 필요 주가, 10년 복리 자산 곡선).
+  - 카카오톡 인앱 공유 API, 링크 복사, 이미지 저장(PNG) 1-Click 버튼 제공.
+- **[2] 친구 초대(리퍼럴) 양방향 보상 시스템**:
+  - 고유 초대 링크(`https://easy-scraping.com/invite/[code]`) 생성.
+  - 피초대자 가입 시: 초대자 +1,000만 WLD & 에너지 포션 5개 / 신규 가입자 +1,000만 WLD & 스타터 팩 즉시 지급.
+  - 초대 통계(총 초대 인원, 누적 획득 WLD, 실시간 랭킹) 대시보드 제공.
+- **[3] 나만의 가상 자산/포트폴리오 공개 프로필 딥링크 (`/portfolio/[username]`)**:
+  - 내 가상 주식 수익률, 보유 자산, 배지, 업적을 공개 웹페이지로 공유.
+
+### 3. 🎯 [기둥 3] 일일 리텐션 & 게이미피케이션 습관 형성 (Daily Habit Loops)
+- **[1] 매일 00시 리셋 7일/30일 연속 출석 스트릭(Streak) & 럭키 룰렛**:
+  - 1일차~7일차 점진적 보상 증가, 7일차/30일차 달성 시 대박 럭키 박스/황금 오리 드롭.
+  - 럭키 룰렛 휠 애니메이션(SVG/CSS 60fps)으로 매일 1회 무료 스핀 제공.
+- **[2] 매일 장 마감 전 '내일의 코스피/삼성전자 UP or DOWN' 무료 예측 배팅**:
+  - 유저들이 매일 오후 3시 30분 전까지 다음 날 상승/하락을 투표.
+  - 정답자들에게 배당금(풀 상금 분배) 지급으로 매일 오후 접속 및 확인 유도.
+- **[3] 직업 일일 급여 6시간 주기 자동 누적 및 수령 유도**:
+  - 6시간마다 미수령 급여 누적 알림 뱃지 표시.
+
+### 4. 🏆 [기둥 4] 커뮤니티 & 실시간 모의투자 랭킹전 (UGC & Social)
+- **주간 모의투자 수익률 리그전**:
+  - 매주 월요일 09:00 ~ 금요일 18:00 수익률 리그 진행.
+  - TOP 10 명예의 전당 입성 및 주간 상금, 프로필 전용 황금 네온 프레임 부여.
+- **종목별 실시간 토론 투표 배틀**:
+  - '지금 사야 한다(불타기) vs 지금 팔아야 한다(손절)' 실시간 여론 게이지.
+
+### 5. 📋 [Target Implementation Files]
+1. `frontend/src/config/pseo-stocks.config.ts`: 국내/해외 2,000개 핵심 티커 및 시나리오 메타데이터 엔진
+2. `frontend/src/app/tools/stock-calculator/[preset]/page.tsx`: 2,000+ 티커 동적 SSR 렌더러 확장
+3. `frontend/src/components/viral/share-diagnosis-card.tsx`: 고화질 물타기 탈출 진단서/부자그래프 공유 모달
+4. `frontend/src/components/viral/referral-system.tsx`: 친구 초대 코드 생성 및 보상 안내 위젯
+5. `frontend/src/app/invite/[code]/page.tsx`: 초대자 환영 및 보상 즉시 지급 랜딩 페이지
+6. `frontend/src/components/retention/daily-attendance-roulette.tsx`: 7일 스트릭 출석체크 & 럭키 룰렛 컴포넌트
+7. `frontend/src/components/retention/daily-prediction-battle.tsx`: 일일 주가 UP/DOWN 예측 배팅 위젯
+8. `frontend/src/app/portfolio/[username]/page.tsx`: 사용자 공개 포트폴리오 프로필 SSR 페이지
+9. `backend/src/referral/referral.service.ts`: 초대 코드 발급 및 양방향 보상 트랜잭션 원장
+10. `backend/src/attendance/attendance.service.ts`: 일일 출석 스트릭 및 룰렛 보상 처리 데몬
+11. `backend/src/prediction/prediction.service.ts`: 일일 UP/DOWN 예측 배팅 정산 스케줄러
+
+### 6. 🧪 [Verification & Deployment Plan]
+- 프론트엔드/백엔드 Vitest 단위 테스트 100% PASS
+- Next.js Turbopack 최적화 프로덕션 빌드 (동적 pSEO 및 신규 라우트 컴파일)
+- Debian 미니PC 블루-그린 승격 배포 (`prod-v471`)
+- PostgreSQL 활성 세션(1,497+) 100% 무손실 보존 확인
+- 실서버 바이럴 공유 카드 생성, 출석 룰렛 스핀, 초대 링크 랜딩 헬스체크
+
+---
+
+## 🎯 [v19 Final Implementation Details] 2차 확정 세부 구현 사양 (On-Demand ISR, 다크 핀테크 테마, 어뷰징 방지 가드)
+
+### 1. ⚡ On-Demand ISR & Edge Caching (pSEO 20,000+ 엔진)
+- `frontend/src/config/pseo-stocks.config.ts`:
+  - 2,000개 한국/미국 상장사 및 ETF 메타데이터 사전 구축.
+  - 종목별 티커, 한국어 종목명, 영문 종목명, 섹터, 현재 기준가, 변동성 계수, 배당률 매핑.
+- `frontend/src/app/tools/stock-calculator/[preset]/page.tsx`:
+  - `revalidate = 86400` (24시간 ISR 캐싱) 설정.
+  - `generateStaticParams`: 상위 100대 고검색량 프리셋(삼성전자, SK하이닉스, 애플, 테슬라, 엔비디아 등) 사전 정적 빌드, 나머지는 On-Demand ISR 동적 렌더링.
+  - 4중 Schema.org (FAQ, HowTo, FinancialProduct, Breadcrumb) 자동 생성.
+
+### 2. 🎨 다크 핀테크 골드/네온 바이럴 공유 카드 컴포넌트 (`share-diagnosis-card.tsx`)
+- Toss / Robinhood 스타일의 고대비 블랙(`bg-zinc-950`) + 네온 골드/에메랄드(`border-amber-500/30`, `text-emerald-400`) 스타일.
+- 물타기 탈출 진단서: 현재 평단가 vs 추가 매수 후 평단가, 필요 반등률(%), 절감 비용 시각화.
+- 복리 부자 그래프: 10년/20년 후 자산 곡선 및 단리 대비 복리 격차 하이라이트.
+- Web Share API / Kakao SDK / 클립보드 복사 / HTML2Canvas 고화질 이미지 다운로드 지원.
+
+### 3. 🛡️ 친구 초대(리퍼럴) 양방향 보상 & 어뷰징 방지 원장
+- `frontend/src/components/viral/referral-system.tsx`:
+  - 내 고유 초대 코드(`INV-XXXXXX`) 및 원클릭 복사/공유 버튼.
+  - 초대 현황(초대 성공 유저 수, 누적 획득 WLD, 미지급 대기 보상).
+- `backend/src/referral/referral.service.ts`:
+  - IP + User-Agent 해시 핑거프린트 기반 동일 기기 중복 가입 차단.
+  - 신규 가입자가 직업 업무 1회 완료(첫 파밍 성공) 시 트리거되어 초대자 및 가입자에게 각각 +1,000만 WLD 및 에너지 포션 5개 원장 트랜잭션 기록 및 지급.
+
+### 4. 🎰 7일 스트릭 출석체크 & 럭키 룰렛 (`daily-attendance-roulette.tsx`)
+- 1일차: 100만 WLD / 2일차: 200만 / 3일차: 300만 / 4일차: 500만 / 5일차: 700만 / 6일차: 850만 / 7일차: 1,000만 WLD + 럭키 상자.
+- 7일 연속 출석 달성 시 룰렛 잭팟(최대 1억 WLD) 당첨 확률 2배 부스트.
+- SVG 기반 60fps 룰렛 스핀 인터랙션 및 Web Audio 사운드 이펙트.
+
+### 5. 📈 일일 가상/매크로 주가 UP/DOWN 예측 배팅 (`daily-prediction-battle.tsx`)
+- 대상 종목:
+  1. 가상 주식 3종: 침팬지 반도체(CHIPS), 월덕 인더스트리(DUCKS), 도지 밈 파이낸스(COIN)
+  2. 실제 지수 2종: 코스피(KOSPI), 나스닥 100(QQQ)
+- 매일 00:00 ~ 15:30 투표 마감, 익일 09:00 시초가/종가 기준 정산.
+- 정답자 전원 균등 배당금 분배 및 연속 예측 성공 칭호 부여.
+
+
 
 
 

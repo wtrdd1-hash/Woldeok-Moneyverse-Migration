@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { getPublicSitemapRoutes } from '@/config/routes.config';
 import { ALL_SEO_PRESETS } from '@/config/seo-presets.config';
+import { ALL_PSEO_POPULAR_SLUGS } from '@/config/pseo-stocks.config';
 
 /**
  * 1-Hour ISR Caching for Sitemap.
@@ -81,6 +82,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     } else if (preset.category === 'farming') {
       addEntry(`/tools/farming-calculator/${preset.slug}`, 0.85, 'daily');
     }
+  }
+
+  // 2.5. 200+ pSEO Popular Stock Calculator Presets (삼성전자, 테슬라, 엔비디아 등)
+  for (const slug of ALL_PSEO_POPULAR_SLUGS) {
+    addEntry(`/tools/stock-calculator/${slug}`, 0.85, 'daily');
   }
 
   // 3. 10 Virtual Stocks & Deep Sub-pages (Main, History, Alerts)

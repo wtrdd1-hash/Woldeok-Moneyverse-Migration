@@ -3,10 +3,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChevronRight, ArrowLeft, TrendingUp, Sparkles, HelpCircle, CheckCircle2, ShieldCheck, Share2 } from 'lucide-react';
 import { COMPOUND_PRESETS, getPresetBySlug } from '@/config/seo-presets.config';
+import { ShareDiagnosisCard } from '@/components/viral/share-diagnosis-card';
+import { ReferralSystem } from '@/components/viral/referral-system';
 
 interface PresetPageProps {
   readonly params: Promise<{ readonly preset: string }>;
 }
+
+export const revalidate = 86400; // 24시간 On-Demand ISR 캐싱
 
 export async function generateStaticParams() {
   return COMPOUND_PRESETS.map((p) => ({ preset: p.slug }));
@@ -199,8 +203,24 @@ export default async function CompoundPresetPage({ params }: PresetPageProps) {
             </div>
           </div>
 
-          <div className="p-3.5 rounded-lg bg-blue-500/5 border border-blue-500/10 text-xs text-muted-foreground leading-relaxed">
-            💡 {data.calculatedResult.detailText}
+          <div className="p-3.5 rounded-lg bg-blue-500/5 border border-blue-500/10 text-xs text-muted-foreground leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <span>💡 {data.calculatedResult.detailText}</span>
+            <div className="shrink-0">
+              <ShareDiagnosisCard
+                title={data.title}
+                type="compound"
+                primaryMetric={{
+                  label: data.calculatedResult.primaryLabel,
+                  value: data.calculatedResult.primaryValue,
+                }}
+                secondaryMetric={{
+                  label: data.calculatedResult.secondaryLabel,
+                  value: data.calculatedResult.secondaryValue,
+                }}
+                badge={data.badge}
+                summary={data.summary}
+              />
+            </div>
           </div>
         </div>
 
@@ -238,6 +258,11 @@ export default async function CompoundPresetPage({ params }: PresetPageProps) {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* 바이럴 리퍼럴 배너 */}
+        <div className="border-t border-border pt-6">
+          <ReferralSystem />
         </div>
 
         {/* 타 프리셋 바로가기 추천 */}

@@ -140,6 +140,16 @@ export const APP_ROUTES: readonly RouteDefinition[] = [
     group: 'public',
   },
   {
+    path: '/invite/[code]',
+    label: { ko: '친구 초대 웰컴 랜딩', en: 'Friend Invite Welcome Landing', ja: '友達招待ウェルカムランディング', zh: '好友邀请专属迎新落地页' },
+    isPublic: true,
+    authRequired: false,
+    indexable: true,
+    sitemapPriority: 0.8,
+    changeFrequency: 'daily',
+    group: 'public',
+  },
+  {
     path: '/tools',
     label: { ko: '금융 & 시뮬레이터 도구 허브', en: 'Financial Tools Hub', ja: '金融ツールハブ', zh: '金融工具导航' },
     isPublic: true,

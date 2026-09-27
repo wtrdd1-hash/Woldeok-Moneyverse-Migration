@@ -3,6 +3,10 @@ import Link from 'next/link';
 import { Calculator, TrendingUp, Landmark, Sparkles, ArrowRight, ShieldCheck, HelpCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
+import { DailyAttendanceRoulette } from '@/components/retention/daily-attendance-roulette';
+import { DailyPredictionBattle } from '@/components/retention/daily-prediction-battle';
+import { ReferralSystem } from '@/components/viral/referral-system';
+
 export const metadata: Metadata = {
   title: '금융 & 시뮬레이터 웹 도구 허브 | 월덕 머니버스',
   description:
@@ -137,6 +141,21 @@ export default function ToolsHubPage() {
             </Card>
           );
         })}
+      </div>
+
+      {/* Daily Retention: Attendance & Lucky Roulette */}
+      <div className="space-y-6">
+        <DailyAttendanceRoulette />
+      </div>
+
+      {/* Daily Retention: UP / DOWN Prediction Battle */}
+      <div className="space-y-6">
+        <DailyPredictionBattle />
+      </div>
+
+      {/* Viral Referral System */}
+      <div className="space-y-6">
+        <ReferralSystem />
       </div>
 
       {/* FAQ & Guide Section for SEO Richness */}
