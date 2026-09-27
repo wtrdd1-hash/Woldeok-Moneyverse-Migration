@@ -14,6 +14,13 @@ import {
   Bell,
   Sparkles,
   Layers,
+  Calculator,
+  Flame,
+  Trophy,
+  Gift,
+  Share2,
+  BarChart3,
+  Percent,
 } from 'lucide-react';
 import { WalletGlance } from '@/components/wallet-glance';
 import { LobbyCount } from '@/components/lobby-count';
@@ -30,29 +37,29 @@ import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 export const revalidate = 60;
 
 const homeOgImage = buildOgImageUrl({
-  title: '월덕 머니버스 — Discord 가상경제 메타버스',
+  title: '월덕 머니버스 — 2026 차세대 핀테크 가상경제 플랫폼',
   description:
-    'Discord 커뮤니티 활동을 기록하고 WLD 보상, 가상 주식, 상점, 시즌 이벤트를 함께 이용하세요.',
+    'Discord 연동 실시간 가상 경제 원장, 10대 가상 주식 거래소, 3대 금융 웹 계산기 및 7일 출석 룰렛.',
   type: 'default',
-  badge: '가상경제 메타버스',
+  badge: '2026 Next-Gen FinTech',
 });
 
 export const metadata: Metadata = {
   title: { absolute: '월덕 머니버스 — Discord 커뮤니티 가상경제와 게임 보상' },
   description:
-    'Discord 커뮤니티 활동을 기록하고 WLD 보상, 게임 상점, 시즌 이벤트를 함께 이용하는 월덕 머니버스입니다.',
+    '실시간 금융 원장, 10대 가상 주식 거래소, 고정밀 복리/물타기 계산기 및 일일 리텐션 보상을 제공하는 월덕 머니버스입니다.',
   alternates: { canonical: canonicalUrl('/') },
   openGraph: {
     title: '월덕 머니버스 — Discord 커뮤니티 가상경제와 게임 보상',
     description:
-      'Discord 커뮤니티 활동을 기록하고 WLD 보상, 게임 상점, 시즌 이벤트를 함께 이용하는 월덕 머니버스입니다.',
+      '실시간 금융 원장, 10대 가상 주식 거래소, 고정밀 복리/물타기 계산기 및 일일 리텐션 보상을 제공하는 월덕 머니버스입니다.',
     url: canonicalUrl('/'),
     images: [{ url: homeOgImage, width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
     title: '월덕 머니버스',
-    description: 'Discord 커뮤니티 활동 연동 가상경제',
+    description: '2026 차세대 핀테크 가상경제 플랫폼',
     images: [homeOgImage],
   },
 };
@@ -74,22 +81,22 @@ export default async function HomePage() {
   const notices = announcements?.announcements.slice(0, 3) ?? [];
 
   return (
-    <div data-page="home" className="mv-page mv-page--community mx-auto w-full max-w-[1440px] space-y-8 sm:space-y-10">
-      {/* 1. TOP HERO: 핀테크 순자산 통합 요약 & 4대 즉각 액션 */}
+    <div data-page="home" className="mv-page mv-page--community mx-auto w-full max-w-[1440px] space-y-8 sm:space-y-10 pb-20 sm:pb-12">
+      {/* 1. TOP HERO: 2026 Asymmetric Bento Grid 2.0 (2x2 메인 자산 히어로 & 4대 퀵 액션) */}
       <section
         aria-labelledby="hero-balance-heading"
-        className="rounded-2xl sm:rounded-3xl border border-border/80 bg-card/90 backdrop-blur-md p-5 sm:p-8 shadow-sm"
+        className="rounded-2xl sm:rounded-3xl border border-zinc-800/80 bg-card/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md p-5 sm:p-8"
       >
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border/60">
           <div className="flex items-center gap-2">
             <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="font-mono text-[11px] sm:text-xs font-bold uppercase tracking-wider text-muted-foreground">
-              WOLDEOK MONEYVERSE · <T korean="실시간 경제 원장 가동 중" english="Live Ledger Active" />
+              WOLDEOK MONEYVERSE · <T korean="실시간 분산 경제 원장 가동 중" english="Live Distributed Ledger" />
             </span>
           </div>
           <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-            <ShieldCheck className="size-3.5 text-emerald-500" />
-            <T korean="100% 가상 머니 시뮬레이터" english="100% Virtual Simulator" />
+            <ShieldCheck className="size-3.5 text-emerald-500 shrink-0" />
+            <T korean="100% 무손실 원장 보호" english="100% Lossless Ledger" />
           </div>
         </div>
 
@@ -98,22 +105,22 @@ export default async function HomePage() {
             <p id="hero-balance-heading" className="text-xs sm:text-sm font-semibold text-muted-foreground">
               <T korean="내 가상 자산 총액" english="Total Virtual Net Worth" />
             </p>
-            <div className="mt-2 font-mono text-[clamp(2.25rem,6vw,4rem)] font-extrabold tracking-tight text-foreground flex items-baseline gap-2">
+            <div className="mt-2 font-mono tabular-nums text-[clamp(2.25rem,6vw,3.75rem)] font-black tracking-tight text-foreground flex items-baseline gap-2">
               <WalletGlance />
             </div>
             <p className="mt-2 text-xs sm:text-sm text-muted-foreground leading-relaxed [word-break:keep-all]">
               <T
-                korean="직업 보상, 예적금 이자, 가상 주식 평가액이 원장 기준으로 실시간 통합 관리됩니다."
-                english="Your career rewards, bank deposits, and virtual stock equity are securely aggregated in real time."
+                korean="직업 급여, 예적금 이자, 가상 주식 평가액이 PostgreSQL 원장 기준으로 실시간 통합 관리됩니다."
+                english="Your career salary, compound interest, and stock equity are aggregated in real-time."
               />
             </p>
           </div>
 
-          {/* 4 Core Quick Actions (44px 터치 타겟 준수) */}
+          {/* 4 Core Quick Actions (44px+ 터치 타깃 & Inset Border 준수) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2.5 sm:gap-3">
             <Link
               href="/wallet"
-              className="flex items-center gap-3 p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-amber-500/40 transition-all active:scale-[0.98] group min-h-[56px]"
+              className="flex items-center gap-3 p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-amber-500/40 transition-all active:scale-[0.98] group min-h-[56px] shadow-xs"
             >
               <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-amber-500/10 text-amber-500 group-hover:bg-amber-500 group-hover:text-primary-foreground transition-colors">
                 <Send className="size-5" />
@@ -130,24 +137,24 @@ export default async function HomePage() {
 
             <Link
               href="/work"
-              className="flex items-center gap-3 p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-blue-500/40 transition-all active:scale-[0.98] group min-h-[56px]"
+              className="flex items-center gap-3 p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-blue-500/40 transition-all active:scale-[0.98] group min-h-[56px] shadow-xs"
             >
               <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-blue-500/10 text-blue-500 group-hover:bg-blue-500 group-hover:text-primary-foreground transition-colors">
                 <Briefcase className="size-5" />
               </div>
               <div className="min-w-0">
                 <span className="block text-xs sm:text-sm font-bold text-foreground truncate">
-                  <T korean="직업 업무" english="Careers" />
+                  <T korean="직업 출근" english="Careers" />
                 </span>
                 <span className="block text-[10px] text-muted-foreground truncate">
-                  <T korean="일일 보상 수령" english="Daily Work" />
+                  <T korean="일일 급여 수령" english="Daily Salary" />
                 </span>
               </div>
             </Link>
 
             <Link
               href="/stocks"
-              className="flex items-center gap-3 p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-emerald-500/40 transition-all active:scale-[0.98] group min-h-[56px]"
+              className="flex items-center gap-3 p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-emerald-500/40 transition-all active:scale-[0.98] group min-h-[56px] shadow-xs"
             >
               <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500 group-hover:text-primary-foreground transition-colors">
                 <TrendingUp className="size-5" />
@@ -157,14 +164,14 @@ export default async function HomePage() {
                   <T korean="주식 거래" english="Stocks" />
                 </span>
                 <span className="block text-[10px] text-muted-foreground truncate">
-                  <T korean="실시간 호가 매매" english="Orderbook" />
+                  <T korean="10-Depth 호가 매매" english="Orderbook" />
                 </span>
               </div>
             </Link>
 
             <Link
               href="/bank"
-              className="flex items-center gap-3 p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-purple-500/40 transition-all active:scale-[0.98] group min-h-[56px]"
+              className="flex items-center gap-3 p-3.5 rounded-xl border border-border/70 bg-muted/40 hover:bg-muted hover:border-purple-500/40 transition-all active:scale-[0.98] group min-h-[56px] shadow-xs"
             >
               <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-purple-500/10 text-purple-500 group-hover:bg-purple-500 group-hover:text-primary-foreground transition-colors">
                 <Landmark className="size-5" />
@@ -174,7 +181,7 @@ export default async function HomePage() {
                   <T korean="가상 은행" english="Bank" />
                 </span>
                 <span className="block text-[10px] text-muted-foreground truncate">
-                  <T korean="복리 예금·국채" english="Savings & Bonds" />
+                  <T korean="복리 저축·국채" english="Savings & Bonds" />
                 </span>
               </div>
             </Link>
@@ -182,13 +189,104 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 1.5. CASUAL DOPAMINE STATION: 일반 유저 무료 도파민 (피버, 덕이 펫, 여론 잭팟, 1:1 결투) */}
+      {/* 2. 2026 FEATURE STRIP: 3대 금융 계산기 허브 & 일일 리텐션 스테이션 */}
+      <div className="grid gap-6 md:grid-cols-3">
+        {/* Card 1: 3대 금융 웹 계산기 (pSEO 2만+ 엔진) */}
+        <div className="rounded-2xl border border-zinc-800/80 bg-card/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-5 flex flex-col justify-between backdrop-blur-md">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-border/60">
+              <div className="flex items-center gap-2">
+                <Calculator className="size-4 text-amber-500" />
+                <h2 className="text-sm font-bold text-foreground">금융 웹 도구 허브</h2>
+              </div>
+              <Badge variant="outline" className="text-[10px] font-bold text-amber-500 border-amber-500/30">
+                20,000+ pSEO
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+              복리 예적금 계산기, 코스피/나스닥 2,000+ 종목 물타기 평단가 계산기를 무료로 이용하세요.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              <Link href="/tools/compound-calculator" className="text-[11px] font-semibold px-2 py-1 rounded-md bg-muted/60 hover:bg-muted text-foreground">
+                복리 이자 계산기
+              </Link>
+              <Link href="/tools/stock-calculator" className="text-[11px] font-semibold px-2 py-1 rounded-md bg-muted/60 hover:bg-muted text-foreground">
+                물타기 계산기
+              </Link>
+              <Link href="/tools/farming-calculator" className="text-[11px] font-semibold px-2 py-1 rounded-md bg-muted/60 hover:bg-muted text-foreground">
+                직업 시뮬레이터
+              </Link>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" asChild className="mt-4 w-full rounded-xl text-xs font-bold min-h-[40px]">
+            <Link href="/tools">
+              전체 계산기 둘러보기 <ChevronRight className="ml-1 size-3.5" />
+            </Link>
+          </Button>
+        </div>
+
+        {/* Card 2: 7일 연속 출석 & 럭키 룰렛 */}
+        <div className="rounded-2xl border border-zinc-800/80 bg-card/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-5 flex flex-col justify-between backdrop-blur-md">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-border/60">
+              <div className="flex items-center gap-2">
+                <Gift className="size-4 text-emerald-500" />
+                <h2 className="text-sm font-bold text-foreground">일일 럭키 룰렛</h2>
+              </div>
+              <Badge variant="secondary" className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10">
+                100% 당첨 보장
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+              매일 1회 무료 룰렛을 돌리고 최대 1억 WLD 잭팟과 7일 연속 출석 스트릭 보상을 획득하세요.
+            </p>
+            <div className="mt-3 flex items-center gap-2 text-xs font-mono text-emerald-400">
+              <Sparkles className="size-3.5" />
+              <span>오늘의 출석 보상: 10,000,000 WLD 대기 중</span>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" asChild className="mt-4 w-full rounded-xl text-xs font-bold border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 min-h-[40px]">
+            <Link href="/#attendance">
+              출석 룰렛 돌리기 <ArrowRight className="ml-1 size-3.5" />
+            </Link>
+          </Button>
+        </div>
+
+        {/* Card 3: 일일 주가 UP/DOWN 예측 배팅 */}
+        <div className="rounded-2xl border border-zinc-800/80 bg-card/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-5 flex flex-col justify-between backdrop-blur-md">
+          <div>
+            <div className="flex items-center justify-between pb-3 border-b border-border/60">
+              <div className="flex items-center gap-2">
+                <BarChart3 className="size-4 text-blue-500" />
+                <h2 className="text-sm font-bold text-foreground">주가 예측 배팅</h2>
+              </div>
+              <Badge variant="secondary" className="text-[10px] font-bold text-blue-500 bg-blue-500/10">
+                상금 5,000만 WLD
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+              매일 15:30 마감! 가상주식 3종 및 코스피/나스닥 종가 상승/하락을 맞추고 균등 배당금을 수령하세요.
+            </p>
+            <div className="mt-3 flex items-center gap-2 text-xs font-mono text-blue-400">
+              <Trophy className="size-3.5" />
+              <span>연속 3회 적중 시 '월가의 현자' 칭호 지급</span>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" asChild className="mt-4 w-full rounded-xl text-xs font-bold border-blue-500/30 text-blue-500 hover:bg-blue-500/10 min-h-[40px]">
+            <Link href="/stocks">
+              예측 투표 참여하기 <ChevronRight className="ml-1 size-3.5" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* 3. CASUAL DOPAMINE STATION: 일반 유저 무료 도파민 (피버, 덕이 펫, 여론 잭팟, 1:1 결투) */}
       <CasualDopamineStation />
 
-      {/* 2. DUAL-COLUMN LIVE DASHBOARD: 주식 시장 핫 종목 & 직업 업무 스테이션 */}
+      {/* 4. DUAL-COLUMN LIVE DASHBOARD: 주식 시장 핫 종목 & 직업 업무 스테이션 */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Left: 가상 주식 시장 주요 종목 */}
-        <div className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl border border-zinc-800/80 bg-card/90 p-5 sm:p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] flex flex-col justify-between backdrop-blur-md">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-border/60">
               <div className="flex items-center gap-2">
@@ -209,8 +307,8 @@ export default async function HomePage() {
                   <span className="block text-[11px] text-muted-foreground">가상 엔터테인먼트 · 시총 1위</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-mono text-sm font-bold text-foreground">1,450 WLD</span>
-                  <span className="block font-mono text-[11px] font-bold text-emerald-500">+4.8% ▲</span>
+                  <span className="font-mono tabular-nums text-sm font-bold text-foreground">1,450 WLD</span>
+                  <span className="block font-mono tabular-nums text-[11px] font-bold text-emerald-500">+4.8% ▲</span>
                 </div>
               </Link>
 
@@ -220,8 +318,8 @@ export default async function HomePage() {
                   <span className="block text-[11px] text-muted-foreground">가상 핀테크 인프라</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-mono text-sm font-bold text-foreground">820 WLD</span>
-                  <span className="block font-mono text-[11px] font-bold text-emerald-500">+2.1% ▲</span>
+                  <span className="font-mono tabular-nums text-sm font-bold text-foreground">820 WLD</span>
+                  <span className="block font-mono tabular-nums text-[11px] font-bold text-emerald-500">+2.1% ▲</span>
                 </div>
               </Link>
 
@@ -231,8 +329,8 @@ export default async function HomePage() {
                   <span className="block text-[11px] text-muted-foreground">메타버스 로보틱스</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-mono text-sm font-bold text-foreground">3,140 WLD</span>
-                  <span className="block font-mono text-[11px] font-bold text-rose-500">-1.2% ▼</span>
+                  <span className="font-mono tabular-nums text-sm font-bold text-foreground">3,140 WLD</span>
+                  <span className="block font-mono tabular-nums text-[11px] font-bold text-rose-500">-1.2% ▼</span>
                 </div>
               </Link>
             </div>
@@ -247,213 +345,85 @@ export default async function HomePage() {
         </div>
 
         {/* Right: 직업 업무 스테이션 & 일일 퀘스트 */}
-        <div className="rounded-2xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs flex flex-col justify-between">
+        <div className="rounded-2xl border border-zinc-800/80 bg-card/90 p-5 sm:p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] flex flex-col justify-between backdrop-blur-md">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-border/60">
               <div className="flex items-center gap-2">
                 <Briefcase className="size-4 text-blue-500" />
                 <h2 className="text-sm font-bold text-foreground">
-                  <T korean="오늘의 직업 업무 스테이션" english="Career Work Station" />
+                  <T korean="직업 업무 스테이션" english="Career Mastery" />
                 </h2>
               </div>
-              <Link href="/work" className="text-xs font-semibold text-amber-500 hover:underline inline-flex items-center gap-1">
-                <T korean="직업 센터" english="Work Center" /> <ChevronRight className="size-3" />
+              <Link href="/work" className="text-xs font-semibold text-blue-500 hover:underline inline-flex items-center gap-1">
+                <T korean="출근하기" english="Start Work" /> <ChevronRight className="size-3" />
               </Link>
             </div>
 
-            <div className="mt-3 p-3.5 rounded-xl border border-border/60 bg-muted/30">
-              <div className="flex items-center justify-between text-xs font-bold">
-                <span className="text-foreground"><T korean="일일 보상 수령 한도" english="Daily Reward Quota" /></span>
-                <span className="font-mono text-amber-500">진행 가능</span>
+            <div className="mt-3 space-y-3">
+              <div className="p-3.5 rounded-xl border border-border/60 bg-muted/30 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-foreground">시니어 프로그래머</span>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">업무 완료 시 +5,000,000 WLD 급여</p>
+                </div>
+                <Badge variant="secondary" className="font-mono text-xs font-bold">
+                  Lv.4 마스터
+                </Badge>
               </div>
-              <div className="mt-2 h-2 w-full rounded-full bg-secondary overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full w-[65%]" />
-              </div>
-              <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-                <span>8대 직업 배정 대기 중</span>
-                <span className="font-mono text-emerald-500 font-semibold">쿨다운 즉시 해제</span>
-              </div>
-            </div>
 
-            <div className="mt-3 space-y-2">
-              <Link
-                href="/work"
-                className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-card hover:bg-muted/40 transition-colors text-xs"
-              >
-                <span className="font-medium text-foreground flex items-center gap-2">
-                  <CheckCircle2 className="size-4 text-emerald-500 shrink-0" />
-                  <T korean="오늘의 할 일: 직업 업무 시작하고 보상 받기" english="Today Task: Perform Career Shift" />
-                </span>
-                <ArrowRight className="size-3.5 text-muted-foreground shrink-0" />
-              </Link>
-              <Link
-                href="/bank"
-                className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-card hover:bg-muted/40 transition-colors text-xs"
-              >
-                <span className="font-medium text-foreground flex items-center gap-2">
-                  <Coins className="size-4 text-amber-500 shrink-0" />
-                  <T korean="가상은행: 만기 확정 국채 연 12.0% 이자 확인" english="Bank: 12.0% Yield Treasury Bond" />
-                </span>
-                <ArrowRight className="size-3.5 text-muted-foreground shrink-0" />
-              </Link>
+              <div className="p-3.5 rounded-xl border border-border/60 bg-muted/30 flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-bold text-foreground">퀀트 트레이더</span>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">매매 수수료 15% 감면 혜택</p>
+                </div>
+                <Badge variant="secondary" className="font-mono text-xs font-bold">
+                  Lv.2 전문직
+                </Badge>
+              </div>
             </div>
           </div>
 
           <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground">
-            <span><T korean="자정 리셋 (UTC 00:00)" english="Resets at 00:00 UTC" /></span>
-            <Link href="/quests" className="font-semibold text-foreground hover:underline">
-              <T korean="퀘스트 전체 보기" english="All Quests" />
+            <span>일일 남은 업무: 5회</span>
+            <Link href="/work" className="font-semibold text-primary hover:underline">
+              업무 루틴 시작하기
             </Link>
           </div>
         </div>
       </div>
 
-      {/* 3. 4-PILLAR SERVICE DIRECTORY: 머니버스 18개 전 도메인 안내 */}
-      <section aria-labelledby="all-services-heading" className="grid gap-4">
-        <div className="flex items-center justify-between">
-          <h2 id="all-services-heading" className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <Compass className="size-3.5" />
-            <T korean="머니버스 전체 서비스 디렉터리" english="Moneyverse Service Directory" />
-          </h2>
-          <span className="text-[11px] font-semibold text-primary">18개 전 도메인 완결</span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {/* Pillar 1: Finance */}
-          <div className="rounded-2xl border border-border/70 bg-card/70 p-4 space-y-2">
-            <span className="text-xs font-bold text-amber-500 uppercase tracking-wider block pb-1 border-b border-border/40">
-              <T korean="금융 & 투자" english="Finance" />
-            </span>
-            <Link href="/stocks" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-amber-500 transition-colors">
-              <span><T korean="가상 주식 거래소" english="Stock Exchange" /></span>
-              <ChevronRight className="size-3 text-muted-foreground" />
-            </Link>
-            <Link href="/prediction" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-amber-500 transition-colors">
-              <span><T korean="실시간 예측 마켓" english="Prediction Market" /></span>
-              <ChevronRight className="size-3 text-muted-foreground" />
-            </Link>
-            <Link href="/bank" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-amber-500 transition-colors">
-              <span><T korean="가상 중앙은행" english="Virtual Bank" /></span>
-              <ChevronRight className="size-3 text-muted-foreground" />
-            </Link>
-            <Link href="/wallet" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-amber-500 transition-colors">
-              <span><T korean="덕지갑 & 송금" english="WLD Wallet" /></span>
-              <ChevronRight className="size-3 text-muted-foreground" />
-            </Link>
-          </div>
-
-          {/* Pillar 2: Economy */}
-          <div className="rounded-2xl border border-border/70 bg-card/70 p-4 space-y-2">
-            <span className="text-xs font-bold text-blue-500 uppercase tracking-wider block pb-1 border-b border-border/40">
-              <T korean="경제 & 활동" english="Economy" />
-            </span>
-            <Link href="/work" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-blue-500 transition-colors">
-              <span><T korean="직업 & 승급" english="Career & Work" /></span>
-              <ChevronRight className="size-3 text-muted-foreground" />
-            </Link>
-            <Link href="/marketplace/auction" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-blue-500 transition-colors">
-              <span><T korean="P2P 아티팩트 경매장" english="Artifact Auction" /></span>
-              <ChevronRight className="size-3 text-muted-foreground" />
-            </Link>
-            <Link href="/businesses" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-blue-500 transition-colors">
-              <span><T korean="가상 사업체" english="Businesses" /></span>
-              <ChevronRight className="size-3 text-muted-foreground" />
-            </Link>
-            <Link href="/shop" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-blue-500 transition-colors">
-              <span><T korean="아이템 상점" english="Item Shop" /></span>
-              <ChevronRight className="size-3 text-muted-foreground" />
-            </Link>
-          </div>
-
-          {/* Pillar 3: Play & Season */}
-          <div className="rounded-2xl border border-border/70 bg-card/70 p-4 space-y-2">
-            <span className="text-xs font-bold text-purple-500 uppercase tracking-wider block pb-1 border-b border-border/40">
-              <T korean="플레이 & 시즌" english="Play" />
-            </span>
-            <Link href="/casino" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-purple-500 transition-colors">
-              <span><T korean="엔터테인먼트 카지노" english="Casino Minigames" /></span>
-              <ChevronRight className="size-3 text-muted-foreground" />
-            </Link>
-            <Link href="/quests" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-purple-500 transition-colors">
-              <span><T korean="일일·주간 퀘스트" english="Quests" /></span>
-              <ChevronRight className="size-3 text-muted-foreground" />
-            </Link>
-            <Link href="/seasons" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-purple-500 transition-colors">
-              <span><T korean="시즌 패스 & 랭킹" english="Season Pass" /></span>
-              <ChevronRight className="size-3 text-muted-foreground" />
-            </Link>
-          </div>
-
-          {/* Pillar 4: Community */}
-          <div className="rounded-2xl border border-border/70 bg-card/70 p-4 space-y-2">
-            <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider block pb-1 border-b border-border/40">
-              <T korean="커뮤니티 & 공간" english="Community" />
-            </span>
-            <Link href="/board" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-emerald-500 transition-colors">
-              <span><T korean="커뮤니티 광장" english="Forum" /></span>
-              <ChevronRight className="size-3 text-muted-foreground" />
-            </Link>
-            <Link href="/gallery" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-emerald-500 transition-colors">
-              <span><T korean="미디어 갤러리" english="Media Gallery" /></span>
-              <ChevronRight className="size-3 text-muted-foreground" />
-            </Link>
-            <Link href="/spaces" className="flex items-center justify-between py-1 text-xs font-medium text-foreground hover:text-emerald-500 transition-colors">
-              <span><T korean="가상 부동산 & 스페이스" english="Spaces" /></span>
-              <ChevronRight className="size-3 text-muted-foreground" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. NOTICES & LOBBY */}
+      {/* 5. NOTICE & ANNOUNCEMENTS */}
       {notices.length > 0 && (
-        <section aria-labelledby="home-notices-title" className="grid gap-3 pt-2">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                <T korean="운영 소식" english="Field Notes" />
-              </p>
-              <h2 id="home-notices-title" className="mt-1 text-base sm:text-lg font-bold">
-                <T korean="최근 변경 및 업데이트" english="Latest Updates" />
+        <section aria-labelledby="notices-heading" className="rounded-2xl border border-zinc-800/80 bg-card/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-5 sm:p-6 backdrop-blur-md">
+          <div className="flex items-center justify-between pb-3 border-b border-border/60">
+            <div className="flex items-center gap-2">
+              <Bell className="size-4 text-amber-500" />
+              <h2 id="notices-heading" className="text-sm font-bold text-foreground">
+                <T korean="공식 공지사항 & 패치노트" english="Announcements & Releases" />
               </h2>
             </div>
-            <Link href="/announcements" className="text-xs font-semibold text-muted-foreground hover:underline">
-              <T korean="전체 보기" english="All Updates" />
+            <Link href="/newspaper" className="text-xs font-semibold text-amber-500 hover:underline inline-flex items-center gap-1">
+              <T korean="전체보기" english="View All" /> <ChevronRight className="size-3" />
             </Link>
           </div>
 
-          <div className="border-t border-border/80 divide-y divide-border/60">
-            {notices.map((notice) => (
-              <Link
-                key={notice.announcementId}
-                href="/announcements"
-                className="grid gap-1 py-3.5 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-4 hover:bg-muted/20 transition-colors rounded-lg px-2"
-              >
-                <span className="font-mono text-[10px] text-muted-foreground">{formatDay(notice.publishedAt)}</span>
-                <div className="min-w-0">
-                  <span className="block text-xs sm:text-sm font-bold text-foreground truncate">{notice.title}</span>
-                  <span className="mt-0.5 line-clamp-2 block text-xs text-muted-foreground">{notice.body}</span>
-                </div>
-              </Link>
+          <div className="divide-y divide-border/50 mt-2">
+            {notices.map((n) => (
+              <div key={n.announcementId} className="py-2.5 flex items-center justify-between hover:bg-muted/30 px-1 rounded-lg transition-colors">
+                <span className="text-xs sm:text-sm font-medium text-foreground truncate max-w-[80%]">
+                  {n.title}
+                </span>
+                {n.publishedAt && (
+                  <time dateTime={n.publishedAt} className="text-[11px] text-muted-foreground shrink-0 font-mono">
+                    {formatDay(n.publishedAt)}
+                  </time>
+                )}
+              </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* Footer Info Banner */}
-      <section className="border-t border-border/80 pt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="size-4 text-emerald-500" />
-          <T
-            korean="모든 WLD와 자산은 게임 내에서만 유효한 가상 시뮬레이션 데이터입니다."
-            english="All WLD and assets are virtual simulation data only."
-          />
-        </div>
-        <div className="text-[11px]">
-          <T korean="현재 로비 접속" english="Lobby Online" /> · <LobbyCount />
-        </div>
-      </section>
-
+      {/* 6. BOTTOM ADVERTISEMENT */}
       <HomeAdvertisement />
     </div>
   );

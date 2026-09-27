@@ -31,8 +31,9 @@
 2. **[Stock Trading Halt & Cost-Basis Settlement Governance](2026-09-22-stocks-halt-cost-basis-settlement-visibility-v2026.09.22.357.md)**
 
 ### 05. 🏦 Virtual Banking & Bonds
-1. **[Virtual Compound Interest & Saving Pockets](features/README.md)**
-2. **[Virtual Treasury Bond Simulator](features/README.md)**
+1. **[Economic Balance & 6-Profitability Audit Report (v473)](ECONOMIC_PROFITABILITY_AUDIT.md)**
+2. **[Virtual Compound Interest & Saving Pockets](features/README.md)**
+3. **[Virtual Treasury Bond Simulator](features/README.md)**
 
 ### 06. 💼 Jobs, Businesses & Economy Governance
 1. **[Job Mastery & Daily Farming Routine Spec](planning/JOBS_PROFESSION_MASTERY_SPEC.md)**
