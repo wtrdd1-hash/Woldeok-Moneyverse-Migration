@@ -13,15 +13,16 @@
 1. **[Integrated Application Specification & User Guide](APP_SPEC_AND_USER_GUIDE.md)**
 2. **[2026 Next-Gen FinTech Design System Guidelines](DESIGN_SYSTEM_GUIDELINES.md)**
 3. **[2026 Official Responsive Design Guidelines](RESPONSIVE_DESIGN_GUIDELINES.md)**
-4. **[Master Index](INDEX.md)**
-5. **[Current Runtime Baseline](CURRENT_RUNTIME_BASELINE.md)**
-6. **[Documentation Governance Policy](DOCUMENTATION_POLICY.md)**
+4. **[Full-Stack Comprehensive QA Audit Report (v473)](QA_AUDIT_REPORT_V473.md)**
+5. **[Master Index](INDEX.md)**
+6. **[Current Runtime Baseline](CURRENT_RUNTIME_BASELINE.md)**
+7. **[Documentation Governance Policy](DOCUMENTATION_POLICY.md)**
 
 ---
 
 ## 📊 Inventory Summary
 
-Total documents in `docs/`: **1,644 files**, categorized into 10 domains.
+Total documents in `docs/`: **1,646 files**, categorized into 10 domains.
 
 | Classification | Files | Highlights |
 | :--- | :---: | :--- |
@@ -34,4 +35,4 @@ Total documents in `docs/`: **1,644 files**, categorized into 10 domains.
 | **07. Worklogs** | 548 | Historical technical implementation logs |
 | **08. Changelogs** | 425 | Release changelogs & bug fixes |
 | **09. Update Logs** | 162 | `v469 ~ v473` release announcements |
-| **10. Release Archive** | 60 | Release artifacts and promotion proofs |
+| **10. Release Archive & QA** | 62 | `v473 Full QA Audit Report`, release artifacts |

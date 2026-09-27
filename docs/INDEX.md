@@ -42,8 +42,9 @@
 2. **[Korean Legal Compliance Architecture](worklog/2026-09-26-kr-legal-compliance-v443.md)**
 
 ### 08. 🏛️ Admin Control & Immutable Audit Trail
-1. **[Admin Control Tower & Policy Versioning](2026-09-22-admin-policy-version-management-and-release-ledger-v2026.09.22.352.md)**
-2. **[1:1 Private Message Moderation Queue](2026-09-22-admin-private-chat-moderation-queue-and-evidence-governance-v2026.09.22.354.md)**
+1. **[Full-Stack QA Audit Report (v473)](QA_AUDIT_REPORT_V473.md)**
+2. **[Admin Control Tower & Policy Versioning](2026-09-22-admin-policy-version-management-and-release-ledger-v2026.09.22.352.md)**
+3. **[1:1 Private Message Moderation Queue](2026-09-22-admin-private-chat-moderation-queue-and-evidence-governance-v2026.09.22.354.md)**
 
 ### 09. 🔌 API Catalog & OpenAPI Contract
 1. **[REST API Master Catalog](API_CATALOG_MASTER.md)**

@@ -42,8 +42,9 @@
 2. **[한국 금융 법령 준수 아키텍처](worklog/2026-09-26-kr-legal-compliance-v443.md)**: 사행성 배제 및 가상 머니 시뮬레이터 규정 준수
 
 ### 08. 🏛️ 관리자 통제 & 불변 감사 추적
-1. **[관리자 통제 타워 & 정책 버전 관리](2026-09-22-admin-policy-version-management-and-release-ledger-v2026.09.22.352.ko.md)**: 300초 세션 로테이션 및 Step-Up 2FA
-2. **[1:1 비공개 쪽지 신고 & 증거 보관 거버넌스](2026-09-22-admin-private-chat-moderation-queue-and-evidence-governance-v2026.09.22.354.ko.md)**: 모더레이션 큐
+1. **[풀스택 전체 QA 전수 감사 보고서 (v473)](QA_AUDIT_REPORT_V473.ko.md)**: 300+개 API, 11대 관리자 화면, 5대 뷰포트 ALL_GREEN_PASS 검증 원장
+2. **[관리자 통제 타워 & 정책 버전 관리](2026-09-22-admin-policy-version-management-and-release-ledger-v2026.09.22.352.ko.md)**: 300초 세션 로테이션 및 Step-Up 2FA
+3. **[1:1 비공개 쪽지 신고 & 증거 보관 거버넌스](2026-09-22-admin-private-chat-moderation-queue-and-evidence-governance-v2026.09.22.354.ko.md)**: 모더레이션 큐
 
 ### 09. 🔌 API 카탈로그 & OpenAPI 계약
 1. **[REST API 마스터 카탈로그](API_CATALOG_MASTER.ko.md)**: 14대 도메인 300+개 공식 API 엔드포인트

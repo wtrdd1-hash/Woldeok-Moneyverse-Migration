@@ -13,15 +13,16 @@
 1. **[통합 앱 명세서 및 유저 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)**: 전 도메인 공식 구현 스펙 및 사용자 안내
 2. **[2026 차세대 핀테크 디자인 시스템 공식 지침서](DESIGN_SYSTEM_GUIDELINES.ko.md)**: Linear/Stripe/Apple 20만+ 래퍼런스 기반 디자인 규격
 3. **[2026 반응형 디자인 기준 공식 지침서](RESPONSIVE_DESIGN_GUIDELINES.ko.md)**: 320px~1920px 5대 뷰포트 매트릭스 및 Zero-Overflow 방어 지침
-4. **[문서 인덱스 (INDEX.ko.md)](INDEX.ko.md)**: 10대 도메인별 선별 탐색 경로
-5. **[현재 런타임/OS 기준](CURRENT_RUNTIME_BASELINE.ko.md)**: Debian/systemd/Nginx/Docker/PostgreSQL 인프라 베이스라인
-6. **[문서 거버넌스 정책](DOCUMENTATION_POLICY.ko.md)**: Single Source of Truth(SSOT) 및 버전 관리 불변식
+4. **[풀스택 전체 QA 전수 감사 보고서 (v473)](QA_AUDIT_REPORT_V473.ko.md)**: 300+ API, 11대 관리자 화면, 5대 뷰포트 ALL_GREEN_PASS 검증 원장
+5. **[문서 인덱스 (INDEX.ko.md)](INDEX.ko.md)**: 10대 도메인별 선별 탐색 경로
+6. **[현재 런타임/OS 기준](CURRENT_RUNTIME_BASELINE.ko.md)**: Debian/systemd/Nginx/Docker/PostgreSQL 인프라 베이스라인
+7. **[문서 거버넌스 정책](DOCUMENTATION_POLICY.ko.md)**: Single Source of Truth(SSOT) 및 버전 관리 불변식
 
 ---
 
 ## 📊 인벤토리 요약
 
-`docs/` 디렉토리 내 문서는 총 **1,644개**이며, 10대 도메인별로 완벽하게 분류 및 색인화되었습니다.
+`docs/` 디렉토리 내 문서는 총 **1,646개**이며, 10대 도메인별로 완벽하게 분류 및 색인화되었습니다.
 
 | 문서 분류군 | 파일 수 | 주요 내용 |
 | :--- | :---: | :--- |
@@ -34,12 +35,12 @@
 | **07. 작업 일지 (Worklog)** | 548 | 일자별 상세 기술 구현 내역 및 배포 기록 |
 | **08. 변경 이력 (Changelog)** | 425 | 릴리스별 변경점 및 버그 픽스 히스토리 |
 | **09. 업데이트 로그** | 162 | `v469 ~ v473` 릴리스 공지 및 변경 사항 요약 |
-| **10. 릴리스 아카이브** | 60 | 릴리스별 산출물 및 인프라 승격 증거 |
+| **10. 릴리스 아카이브 & QA 보고서** | 62 | `v473 QA 전수 감사 보고서`, 릴리스별 산출물 |
 
 ---
 
 ## 🧹 문서 정리 및 보존 규칙 (Preservation Invariants)
 
 1. **역사 기록 영구 보존**: 기존의 일자별 작업 일지와 릴리스 변경 로그를 임의로 삭제하거나 덮어쓰지 않고 최신 버전을 순수 추가(`-0 lines`) 형태로 누적 관리합니다.
-2. **단일 진실 공급원 (SSOT)**: 라우트 목록은 `routes.config.ts`, API는 `API_CATALOG_MASTER.ko.md`, 디자인 규격은 `DESIGN_SYSTEM_GUIDELINES.ko.md`, 반응형 규격은 `RESPONSIVE_DESIGN_GUIDELINES.ko.md`로 일원화하여 문서 간 드리프트(Drift)를 원천 차단합니다.
+2. **단일 진실 공급원 (SSOT)**: 라우트 목록은 `routes.config.ts`, API는 `API_CATALOG_MASTER.ko.md`, 디자인 규격은 `DESIGN_SYSTEM_GUIDELINES.ko.md`, 반응형 규격은 `RESPONSIVE_DESIGN_GUIDELINES.ko.md`, QA 검증은 `QA_AUDIT_REPORT_V473.ko.md`로 일원화합니다.
 3. **다국어 무결성**: 핵심 거버넌스 문서는 한국어/영문 페어로 상호 링크를 유지합니다.
