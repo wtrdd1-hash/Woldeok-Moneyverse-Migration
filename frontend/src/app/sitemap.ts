@@ -42,7 +42,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const addEntry = (
     path: string,
     priority = 0.7,
-    changeFrequency: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' = 'daily',
+    changeFrequency?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly',
   ) => {
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
     const url = `${base}${cleanPath === '/' ? '' : cleanPath}`;
@@ -52,7 +52,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entries.push({
       url,
       lastModified: RELEASE_TIMESTAMP,
-      changeFrequency,
+      changeFrequency: changeFrequency || 'daily',
       priority,
       alternates: {
         languages: {
@@ -68,7 +68,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // 1. Static Public Routes from SSOT
   for (const route of publicRoutes) {
     if (route.path.includes('[')) continue; // Dynamic route templates skipped
-    addEntry(route.path, route.sitemapPriority || 0.7, route.changeFrequency || 'weekly');
+    const freq = route.changeFrequency === 'never' ? undefined : route.changeFrequency;
+    addEntry(route.path, route.sitemapPriority || 0.7, freq);
   }
 
   // 2. 30+ Longtail Financial Calculator Presets

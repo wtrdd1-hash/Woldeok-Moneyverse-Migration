@@ -7,7 +7,7 @@ export interface SeoPresetData {
   readonly heading: string;
   readonly badge: string;
   readonly summary: string;
-  readonly params: Record<string, number | string>;
+  readonly params: Record<string, number | string | boolean>;
   readonly calculatedResult: {
     readonly primaryLabel: string;
     readonly primaryValue: string;
