@@ -3,7 +3,7 @@
 [English canonical](INDEX.md) | **한국어**
 
 > **문서 거버넌스**: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)  
-> **공식 구현 권위 릴리스**: **v2026.09.27.472** (최신 main 기준 동기화 완료)  
+> **공식 구현 권위 릴리스**: **v2026.09.27.473** (최신 main 기준 동기화 완료)  
 > **상태**: **AUTHORITY_SYNCHRONIZED (권위 기획·런타임 100% 일치)**
 
 ---
@@ -18,7 +18,8 @@
 
 ### 02. 🎨 2026 차세대 디자인 시스템 & UI/UX 가이드
 1. **[2026 차세대 핀테크 디자인 시스템 공식 지침서](DESIGN_SYSTEM_GUIDELINES.ko.md)**: Linear/Stripe/Apple 20만+ 래퍼런스 분석 기반 표면 Inset Border, 비대칭 벤토 그리드 2.0, Geist Mono Tabular 규격
-2. **[UI/UX 프론트엔드 크래프트맨십 원칙](planning/PRODUCT_DESIGN_SPEC.ko.md)**: 320px~1920px 무결점 반응형 레이아웃 및 44px 터치 타깃 가이드
+2. **[2026 반응형 디자인 기준 공식 지침서](RESPONSIVE_DESIGN_GUIDELINES.ko.md)**: 320px~1920px 5대 뷰포트 매트릭스, 횡스크롤 0건(Zero Overflow), 44px 터치 타깃 보장 지침서
+3. **[UI/UX 프론트엔드 크래프트맨십 원칙](planning/PRODUCT_DESIGN_SPEC.ko.md)**: 320px~1920px 무결점 반응형 레이아웃 및 44px 터치 타깃 가이드
 
 ### 03. 🌐 트래픽 성장 & 프로그래매틱 SEO (pSEO) 엔진
 1. **[pSEO 20,000+ 엔진 및 바이럴 그로스 아키텍처](planning/PRODUCT_GROWTH_PLAN.ko.md)**: 2,000+ 국내/해외 종목 온디맨드 ISR, 카카오톡 1초 진단서 공유, 친구 초대(리퍼럴) 양방향 보상 규격
@@ -49,5 +50,5 @@
 2. **[모바일 API 통합 명세서](mobile-api-complete-spec.ko.md)**: iOS/Android 앱 연동을 위한 계약
 
 ### 10. 📜 릴리스 로그 & 공식 작업 일지
-1. **[공식 릴리스 변경 로그](UPDATE_LOG.ko.md)**: v469 ~ v472 전 릴리스 변경 이력
+1. **[공식 릴리스 변경 로그](UPDATE_LOG.ko.md)**: v469 ~ v473 전 릴리스 변경 이력
 2. **[작업 일지 디렉터리](worklog/README.ko.md)**: 일자별 기술 의사결정 및 배포 원장

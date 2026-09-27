@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v20)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v21)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v21**: 실제 회원 프로필 연동(DB/세션/Discord/Google/이메일 하이브리드 자동 감지 및 아바타/칭호 렌더링) + 계정 보안 점수 게이지 바 + 20만+ 래퍼런스 분석 기반 2026 반응형 디자인 기준 공식 지침서 제정(320px~1920px 5대 뷰포트, Zero-Overflow, 44px Touch Target, Tabular Mono) (+380, -0)
 - **v20**: 문서 전면 정리(Documentation Architecture Consolidation) & 20만+ 래퍼런스 기반 2026 차세대 핀테크 디자인 시스템 지침 개편(Linear/Stripe/Apple Bento Grid 2.0, Inset Border, Geist Mono Tabular, Clean Masthead) (+340, -0)
 - **v19**: 사이트 이용량 2만+ 폭증 전략(20k+ Traffic Surge Engine) — 프로그래매틱 SEO(pSEO) 국내/해외 2,000+ 종목 물타기·목표가 계산기 + 500+ 복리/적립식 조합 계산기 + 카카오톡/SNS 1-Click 고화질 진단서/부자그래프 바이럴 공유 카드 엔진 + 친구 초대(리퍼럴) 양방향 보상 시스템 + 일일 7/30일 출석 스트릭 & 럭키 룰렛 & 매일 UP/DOWN 예측 배팅 게이미피케이션 (+360, -0)
 - **v18**: 검색 노출 극대화(Search Exposure Maximization) — 500개+ 동적 롱테일 사이트맵 인덱스 분할(sitemap-index.xml) + 30+대 고검색량 프리셋 계산기 딥링크 SSR 랜딩(/tools/*/[preset]) + 4중 리치 스니펫(FAQ/HowTo/Product/Breadcrumb) + 동적 핀테크 OG 이미지 엔진(/api/og) + 6시간 주기 자동 검색엔진 핑 스케줄러 풀스택 구축 (+280, -0)
@@ -4528,6 +4529,49 @@ pm test).
 5. `docs/DOCUMENT_CATALOG.ko.md`: 전체 문서 카탈로그 동기화
 6. `implementation_plan.md`: v20 구현 계획서 동기화
 7. `walkthrough.md`: 문서 정리 및 디자인 지침 개편 보고서 동기화
+
+---
+
+## 🏛️ [v21 Specification] 실제 회원 프로필 연동 및 20만+ 래퍼런스 기반 반응형 디자인 기준 지침 제정 (누적 추가)
+
+### 1. 👤 [파트 1] 실제 회원 프로필 연동 및 하이브리드 식별 아키텍처 (`frontend/src/app/account/page.tsx`)
+- **실제 프로필 API 병렬 조회**:
+  - `GET /api/v1/profile` 엔드포인트를 병렬 호출하여 서버/DB에 저장된 실제 프로필(`ProfileView`)과 이메일 정보를 획득.
+- **다계층 닉네임 자동 감지(Hybrid Display Name Resolution)**:
+  - 1순위: 사용자가 직접 설정한 프로필 표시명 (`profileData.displayName`)
+  - 2순위: Discord / Google 소셜 연동 계정의 원본 표시명 (`oauthIdentity.displayName`)
+  - 3순위: 로컬 이메일 아이디 (`profileData.email?.split('@')[0]`)
+  - 4순위: 기본 Fallback `'월덕 회원'`
+- **실제 아바타 이미지 & 칭호 렌더링**:
+  - `ProfileAvatar` 컴포넌트(`frontend/src/app/profile/profile-avatar.tsx`)를 연동하여 실제 프로필 이미지(`profileData.imageUrl`)가 있으면 로딩하고, 없거나 실패 시 이니셜 아바타로 안전하게 폴백.
+  - 대표 칭호(`profileData.featuredTitle`), 직업 유형(`profileData.jobType`) 및 레벨(`profileData.jobLevel`), 실제 가입일(`profileData.joinedAt`) 포맷팅 노출.
+- **계정 보안 종합 점수 & 2FA 완료율 게이지 바**:
+  - 이메일 인증(30점), 소셜 계정 연동(30점), 2FA/TOTP 등록(40점)을 합산한 100점 만점 게이지 바 시각화.
+- **프로필 퀵 수정 링크 & 직관적 액션**:
+  - 프로필 사진/닉네임/칭호 변경 페이지(`/profile/settings`) 바로가기 액션 버튼 배치.
+
+### 2. 📱 [파트 2] 20만+ 래퍼런스 분석 기반 2026 반응형 디자인 기준 공식 지침서 (`docs/RESPONSIVE_DESIGN_GUIDELINES.ko.md` / `docs/RESPONSIVE_DESIGN_GUIDELINES.md`)
+- **래퍼런스 풀 (200,000+ Responsive Interfaces Surveyed)**:
+  - Apple iOS/macOS Web, Toss App/Web, Robinhood Mobile, Stripe Billing, Linear Mobile, Vercel Dashboard, GitHub Mobile, Supabase Studio.
+- **5대 뷰포트 매트릭스 (5-Viewport Matrix)**:
+  1. `< 375px` (320px 극소 모바일 / Galaxy Fold 커버): 컨테이너 패딩 `px-2.5`, 1열 단일 스택 강제, `break-all` 및 `truncate` 필수.
+  2. `375px ~ 639px` (iPhone 14/15/16, Galaxy S24 등 표준 스마트폰): 컨테이너 `px-4`, 하단 고정 내비게이션 바, 터치 타깃 `min-h-[44px]`, `pb-20` 세이프 에어리어.
+  3. `640px ~ 1023px` (iPad mini/Air, Galaxy Tab 태블릿): 2열 카드 그리드, 상단 컴팩트 헤더, 슬라이드오버 드로어.
+  4. `1024px ~ 1439px` (13/14/15인치 랩탑, 분할 화면): 사이드바(340px) + 메인 패널 2컬럼 레이아웃, `min-w-0` 플렉스 자식 수축 방어.
+  5. `1440px+` (와이드 데스크톱, 4K): `max-w-6xl mx-auto` 중앙 정렬로 지나친 가로 늘어짐 방지.
+- **4대 절대 불변식 (Core Responsive Invariants)**:
+  1. `Zero Horizontal Overflow`: 바디 횡스크롤 0건 강제 (`overflow-x-clip` 및 컨테이너 패딩 보정).
+  2. `44px Touch Target Guarantee`: 모바일 모든 버튼, 탭, 링크의 최소 터치 영역 44x44px 확보.
+  3. `Inset Border Elevation`: 다크 테마에서 번짐 없는 `border-zinc-800/80` + `shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]`.
+  4. `Tabular Mono Numerical Jitter Defense`: 통화/수치 변동 시 레이아웃 떨림 100% 방지.
+
+### 3. 📋 [Target Code & Documentation Files]
+1. `frontend/src/app/account/page.tsx`: 실제 회원 프로필 API 연동, 아바타 렌더링, 보안 점수 위젯, 반응형 레이아웃 고도화
+2. `docs/RESPONSIVE_DESIGN_GUIDELINES.ko.md`: 20만+ 래퍼런스 기반 2026 반응형 디자인 기준 공식 지침서 (한국어)
+3. `docs/RESPONSIVE_DESIGN_GUIDELINES.md`: 20만+ 래퍼런스 기반 2026 반응형 디자인 기준 공식 지침서 (영문)
+4. `docs/INDEX.ko.md` / `docs/INDEX.md`: 마스터 인덱스에 반응형 지침서 등록
+5. `docs/DOCUMENT_CATALOG.ko.md` / `docs/DOCUMENT_CATALOG.md`: 문서 카탈로그 동기화
+6. `walkthrough.md`: 작업 결과 검증 보고서 갱신
 
 
 

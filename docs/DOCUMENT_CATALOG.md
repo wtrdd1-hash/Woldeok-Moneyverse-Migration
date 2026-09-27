@@ -2,35 +2,36 @@
 
 **English canonical** | [한국어](DOCUMENT_CATALOG.ko.md)
 
-> **Snapshot Version**: `v2026.09.27.472`  
-> **Target Branch**: `main` (Latest Production Release)  
-> **Purpose**: Official inventory and classification ledger for all project documentation.
+> **Snapshot Version**: `v2026.09.27.473`  
+> **Target Branch**: `main`  
+> **Purpose**: Official master inventory certifying documentation organization status.
 
 ---
 
 ## 🏛️ Authoritative Master Documents
 
-1. **[App Specification & Comprehensive User Guide](APP_SPEC_AND_USER_GUIDE.md)**: Full end-to-end user manual
-2. **[2026 Next-Gen FinTech Design System Guidelines](DESIGN_SYSTEM_GUIDELINES.md)**: Linear/Stripe/Apple 200,000+ benchmark
-3. **[Master Document Index (INDEX.md)](INDEX.md)**: 10 curated domain navigation directories
-4. **[Current Runtime/OS Baseline](CURRENT_RUNTIME_BASELINE.md)**: Debian 13, PostgreSQL 16, NestJS, Next.js 16 Turbopack
-5. **[Documentation Governance Policy](DOCUMENTATION_POLICY.md)**: SSOT governance & preservation invariants
+1. **[Integrated Application Specification & User Guide](APP_SPEC_AND_USER_GUIDE.md)**
+2. **[2026 Next-Gen FinTech Design System Guidelines](DESIGN_SYSTEM_GUIDELINES.md)**
+3. **[2026 Official Responsive Design Guidelines](RESPONSIVE_DESIGN_GUIDELINES.md)**
+4. **[Master Index](INDEX.md)**
+5. **[Current Runtime Baseline](CURRENT_RUNTIME_BASELINE.md)**
+6. **[Documentation Governance Policy](DOCUMENTATION_POLICY.md)**
 
 ---
 
 ## 📊 Inventory Summary
 
-Total **1,642 documents** across 10 structured domains:
+Total documents in `docs/`: **1,644 files**, categorized into 10 domains.
 
-| Category | File Count | Key Topics |
+| Classification | Files | Highlights |
 | :--- | :---: | :--- |
-| **01. Master Spec / Guides** | 65 | App spec, runtime baseline, doc policies |
-| **02. Design System** | 4 | 2026 Next-Gen design guidelines & UI/UX principles |
-| **03. Planning** | 280 | Growth plan (pSEO/viral), security assurance |
-| **04. Features** | 22 | Compound calculator, stock exchange, farming |
-| **05. Architecture / Infra** | 12 | MSA gateways, PostgreSQL ACID ledger |
-| **06. APIs & Contracts** | 10 | REST catalog, OpenAPI 3.0, mobile contracts |
-| **07. Worklogs** | 548 | Chronological technical ledgers |
-| **08. Changelogs** | 425 | Granular release diffs |
-| **09. Update Logs** | 162 | `v469 ~ v472` release briefs |
-| **10. Release Archives** | 60 | Production artifacts & deployment logs |
+| **01. Master Specs / Guides** | 65 | App spec, runtime baseline, documentation policy |
+| **02. Design System** | 6 | 2026 FinTech design guidelines, 2026 Responsive guidelines, UI/UX |
+| **03. Planning** | 280 | Growth plan (pSEO/viral), security assurance, monetary velocity |
+| **04. Features** | 22 | Compound interest, stocks, jobs, attendance roulette |
+| **05. Architecture / Infra** | 12 | MSA gateway, PostgreSQL ACID, Nginx reverse proxy |
+| **06. API / Contracts** | 10 | REST API master catalog, OpenAPI 3.0, mobile contract |
+| **07. Worklogs** | 548 | Historical technical implementation logs |
+| **08. Changelogs** | 425 | Release changelogs & bug fixes |
+| **09. Update Logs** | 162 | `v469 ~ v473` release announcements |
+| **10. Release Archive** | 60 | Release artifacts and promotion proofs |
