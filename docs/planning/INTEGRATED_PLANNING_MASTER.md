@@ -1,11 +1,21 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.25.444
+> Current ledger version: v2026.09.27.467
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.27.467 — 2026-09-27 — Documentation authority and inventory organization
+- Documentation-only cycle. Start and first mid-work `origin/main=b0c8f1e25dc15b28d44fd033fca510bce70f6960`. Final pre-integration recheck detected concurrent runtime v2026.09.27.466 at `origin/main=d64eaedccb7c094063b36fb5f46590ce19f51ab1`; changed files were runtime/root execution-plan only, so the documentation branch was recreated from that exact latest main rather than overwriting concurrent work. No runtime, Test, or Production mutation is claimed by this cycle.
+- **DOC-466-01 / P0 / AUTHORITY_DRIFT:** the implementation-facing `PROJECT_PLAN.md` header remains v2026.09.25.444 while repository runtime/source history has advanced through v465. Product decisions from v445-v465 are not treated as integrated planning authority until they are actually reconciled; version-only renumbering is prohibited.
+- **DOC-466-02 / P1:** refreshed `docs/INDEX*`, `docs/README*`, `DOCUMENT_CATALOG*` and `DOCUMENTATION_POLICY*` so navigation matches the authority order. The former v402 full re-review is explicitly historical rather than current authority.
+- **DOC-466-03 / P1:** exact main-tree inventory found 1,638 files under `docs/`, including 1,620 Markdown files, 18 root-level dated Markdown files and 31 exact duplicate-content groups. This cycle preserves paths and Git history instead of mass deleting or moving evidence.
+- **DOC-466-04 / P1:** raw Markdown pairing inventory found 85 English paths without Korean pairs and 19 Korean-normalized paths without English pairs. These include historical/internal/API legacy/third-language material, so they are triaged rather than all treated as maintained-parity defects. New maintained documentation remains English canonical with Korean second language.
+- **DOC-466-05 / P1:** root `implementation_plan.md`, `PROJECT_MEMORY.md` and `walkthrough.md` are execution/history references and do not become product authority unless explicitly adopted by `PROJECT_PLAN.md`.
+- **DOC-466-06 / P1:** the Android app repository receives its own docs landing/governance pair that defers product authority to this repository; stale casino/runtime assumptions in old app snapshots remain historical rather than silently current.
+- Detailed audit: `docs/findings/DOCUMENTATION_AUDIT_v2026.09.27.467.md`. `PROJECT_PLAN.md` deliberately remains v444 until post-v444 product decisions are actually reconciled in a separate planning review.
 
 ## v2026.09.25.444 — 2026-09-25
 - Traced 35,429 OpenAlex/Crossref records to **33,341 unique discovery candidates** with DOI-first/title-fallback deduplication; this is not a claim of manual full-text review.
