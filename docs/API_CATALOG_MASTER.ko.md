@@ -1,8 +1,8 @@
 # 월덕 머니버스 전 도메인 API 공식 마스터 명세서 (API Catalog Master Specification)
 
-> **버전**: v2026.09.26.460  
+> **버전**: v2026.09.27.468  
 > **상태**: Production Authoritative API Specification (100% 실연동 검증 완료)  
-> **기준일**: 2026-09-26  
+> **기준일**: 2026-09-27  
 > **기반 인프라**: NestJS 10.x REST API BFF / Next.js 16.3.4 BFF Proxy (`/app-api/v1/*`)  
 > **컴플라이언스**: 사행성/도박성 카지노 API 완전 폐기 및 100% 공정 가상경제 게이미피케이션 확립
 
@@ -104,13 +104,20 @@
 | `POST` | `/businesses/:id/settle` | 사업체 일일 누적 매출금 원터치 일괄 정산/수령 | ✅ | ✅ |
 | `POST` | `/businesses/:id/boost` | 사업체 생산성 부스트 라이선스 적용 | ✅ | ✅ |
 
-### 8. P2P 마켓플레이스 및 제작 (Marketplace & Crafting)
+### 8. P2P 마켓플레이스·경매 및 제작 (Marketplace, Auctions & Crafting)
 | 메서드 | 엔드포인트 | 설명 | 인증 필요 | 멱등성 |
 | :--- | :--- | :--- | :---: | :---: |
 | `GET` | `/marketplace/listings` | 유저 등록 P2P 아이템 및 아티팩트 매물 목록 조회 | ❌ | ❌ |
 | `POST` | `/marketplace/listings` | 내 아티팩트/아이템을 P2P 마켓에 판매 등록 | ✅ | ✅ |
 | `POST` | `/marketplace/listings/:id/buy` | 매물 즉시 구매 (구매자 수령, 2% 거래세 국고 소각) | ✅ | ✅ |
 | `POST` | `/marketplace/listings/:id/cancel` | 판매 등록한 매물 취소 및 인벤토리 회수 | ✅ | ✅ |
+| `GET` | `/marketplace/auctions` | 현재 진행 중인 P2P 경매 목록 조회 및 필터링 | ❌ | ❌ |
+| `GET` | `/marketplace/auctions/:id` | 경매 상세 정보, 현재 입찰가, 마감 타이머 조회 | ❌ | ❌ |
+| `POST` | `/marketplace/auctions` | 한정판 아이템/테마 신규 경매 출품 등록 | ✅ | ✅ |
+| `POST` | `/marketplace/auctions/:id/bid` | 경매 수동 입찰 (호가 프리셋 연동, 30초 내 입찰 시 60초 자동 연장) | ✅ | ✅ |
+| `POST` | `/marketplace/auctions/:id/proxy-bid` | 최대 상한가 자동 증액 프록시 입찰(Proxy Bidding) 설정 | ✅ | ✅ |
+| `GET` | `/marketplace/auctions/:id/depth` | 실시간 호가 Depth 차트 데이터 (매수/매도 잔량) | ❌ | ❌ |
+| `GET` | `/marketplace/auctions/:id/ticks` | 경매 최근 체결 및 입찰 틱 타임라인 | ❌ | ❌ |
 | `GET` | `/crafting/recipes` | 전체 제작대 아티팩트 합성 레시피 목록 | ✅ | ❌ |
 | `POST` | `/crafting/craft` | 원자재 소각을 통한 상위 도구/아티팩트 멱등 제작 | ✅ | ✅ |
 
@@ -171,6 +178,37 @@
 | `POST` | `/admin/treasury/inject` | 시스템 금고 자금 주입 (Step-Up 2단계 인증) | ✅ (Admin) | ✅ |
 | `POST` | `/admin/stocks/:symbol/halt` | 주식 거래정지 및 보유자 매수원가 100% 자동 환급 | ✅ (Admin) | ✅ |
 | `GET` | `/admin/audit/logs` | 전역 시스템 관리자 감사 원장(Audit Trail) 스트림 | ✅ (Admin) | ❌ |
+
+### 15. SEO 및 검색엔진 인텔리전스 (SEO & Search Engine Intelligence)
+| 메서드 | 엔드포인트 | 설명 | 인증 필요 | 멱등성 |
+| :--- | :--- | :--- | :---: | :---: |
+| `GET` | `/seo/status` | 전체 사이트맵 및 SEO 관제 상태 요약 | ❌ | ❌ |
+| `POST` | `/seo/sitemaps/ping` | Google / Naver 검색엔진 사이트맵 크롤러 즉시 핑(Ping) 전송 | ✅ (Admin) | ✅ |
+| `POST` | `/seo/gsc/sync` | Google Search Console 실시간 수동 데이터 동기화 | ✅ (Admin) | ✅ |
+| `GET` | `/seo/gsc/analytics` | GSC 일일 클릭수, 노출수, CTR, 평균 게재순위 시계열 분석 | ✅ (Admin) | ❌ |
+| `GET` | `/seo/gsc/credentials` | Google Cloud 서비스 계정 JSON 키 등록 상태 및 이메일 조회 | ✅ (Admin) | ❌ |
+| `POST` | `/seo/gsc/credentials` | Google Cloud 서비스 계정 JSON 키 안전 업로드 및 암호화 저장 | ✅ (Admin) | ✅ |
+| `DELETE` | `/seo/gsc/credentials` | 등록된 Google Search Console 인증 자격증명 영구 소거 | ✅ (Admin) | ✅ |
+| `GET` | `/seo/crawl-audit` | 6시간 주기 백그라운드 크롤링 감사 및 URL 헬스체크 진단 결과 | ✅ (Admin) | ❌ |
+| `POST` | `/seo/crawl-audit` | 온디맨드 즉시 크롤링 감사 실행 및 결과 반환 | ✅ (Admin) | ✅ |
+| `GET` | `/seo/gsc/digest-report` | 일일 SEO 성과 요약 리포트 데이터 조회 | ✅ (Admin) | ❌ |
+| `POST` | `/seo/gsc/digest-report` | Discord 웹훅 채널로 일일 SEO 다이제스트 브리핑 즉시 발송 | ✅ (Admin) | ✅ |
+
+### 16. Moneyverse Plus VIP 멤버십 (VIP Membership & Privileges)
+| 메서드 | 엔드포인트 | 설명 | 인증 필요 | 멱등성 |
+| :--- | :--- | :--- | :---: | :---: |
+| `GET` | `/vip/status` | 현재 VIP 구독 여부, 만료일, 잔여 일수 및 활성 테마 조회 | ✅ | ❌ |
+| `POST` | `/vip/subscribe` | WLD 결제를 통한 Moneyverse Plus VIP 30일 구독 활성화 | ✅ | ✅ |
+| `POST` | `/vip/daily-bonus` | VIP 전용 일일 황금 상자 퀘스트 보너스 즉시 수령 (10,000 WLD) | ✅ | ✅ |
+| `PUT` | `/vip/theme` | VIP 5종 전용 네온 아바타 프레임 테마 선택 및 저장 | ✅ | ✅ |
+
+### 17. 실시간 WebSocket 게이트웨이 (Real-Time WebSocket Gateway)
+| 프로토콜 | 네임스페이스 / 경로 | 이벤트명 | 설명 |
+| :--- | :--- | :--- | :--- |
+| `WS` | `/ws/marketplace/auctions` | `auction:bid` | 실시간 경매 입찰 발생 시 신규 호가 및 입찰자 정보 브로드캐스팅 |
+| `WS` | `/ws/marketplace/auctions` | `auction:extended` | 마감 30초 내 입찰로 인한 60초 안티스나이핑 연장 이벤트 |
+| `WS` | `/ws/marketplace/auctions` | `auction:settled` | 경매 최종 마감 및 낙찰자 결정/소각 완료 이벤트 |
+| `WS` | `/ws/activity` | `activity:global` | 실시간 글로벌 대규모 경제 트랜잭션 및 알림 스트림 |
 
 ---
 

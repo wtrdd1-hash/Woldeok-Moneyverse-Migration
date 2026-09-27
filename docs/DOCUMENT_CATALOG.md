@@ -2,21 +2,21 @@
 
 **English canonical** | [한국어](DOCUMENT_CATALOG.ko.md)
 
-> Snapshot: v2026.09.27.467
-> Source tree: `main@d64eaedccb7c094063b36fb5f46590ce19f51ab1`
+> Snapshot: v2026.09.27.468
+> Source tree: `main@ce06a79f6e453a9a7f1ee2979ec3bf3fe88ca5ae`
 > Purpose: navigation and cleanup inventory; not product authority.
 
 ## Current authority
 
 - [Project plan](planning/PROJECT_PLAN.md) — current implementation-facing authority, presently **v2026.09.25.444**.
-- [Integrated planning master](planning/INTEGRATED_PLANNING_MASTER.md) — planning/governance ledger, with v467 documentation cleanup record.
+- [Integrated planning master](planning/INTEGRATED_PLANNING_MASTER.md) — planning/governance ledger, with v468 documentation cleanup record.
 - [Documentation policy](DOCUMENTATION_POLICY.md) — authority, language, branch, archive and drift rules.
 - [Documentation index](INDEX.md) — curated navigation.
 - [Full planning re-review v402](planning/INTEGRATED_FULL_REVIEW_V402.md) — **historical review snapshot**, not the current authority.
 
 ## Authority drift snapshot
 
-- Repository `main` is at runtime/source history **v2026.09.27.466**.
+- Repository `main` is at runtime/source history **v2026.09.27.468**.
 - `PROJECT_PLAN.md` is at **v2026.09.25.444**.
 - Therefore versions after v444 are not assumed to be integrated product-planning authority merely because runtime commits or execution notes exist.
 - This catalog records the drift; it does not resolve product decisions by renumbering the plan.

@@ -4,7 +4,7 @@
 
 > Governance: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)
 > Implementation-facing planning authority: **v2026.09.25.444**
-> Repository runtime/source history observed: **v2026.09.27.466**
+> Repository runtime/source history observed: **v2026.09.27.468**
 > Current state: **AUTHORITY_DRIFT** until post-v444 product decisions are reconciled into the authoritative plan.
 
 ## Start here

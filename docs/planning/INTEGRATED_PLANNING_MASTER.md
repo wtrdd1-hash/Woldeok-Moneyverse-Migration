@@ -1,11 +1,17 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.27.467
+> Current ledger version: v2026.09.27.468
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.27.468 — 2026-09-27 — Full-Domain API Catalog & Release Logs v459~v468 Synchronization
+- Documentation synchronization cycle. Base `origin/main=ce06a79f6e453a9a7f1ee2979ec3bf3fe88ca5ae`.
+- **DOC-468-01 / P1:** Synchronized cumulative release logs from `v459` through `v468` into `docs/UPDATE_LOG.ko.md` and `docs/UPDATE_LOG.md` (dedicated dopamine APIs, casino decommissioning, stock preview SSR, GSC integration, P2P auction proxy bidding, VIP 5 neon avatar frames, orderbook depth fast increment presets).
+- **DOC-468-02 / P1:** Expanded authoritative API catalogs `docs/API_CATALOG_MASTER.ko.md` and `docs/API_CATALOG_MASTER.md` with Domain 15 (SEO & Search Console Intelligence), Domain 16 (Moneyverse Plus VIP), Domain 17 (Real-Time WebSocket Gateway) and Domain 8 (Auction Proxy Bidding & Depth Chart).
+- **DOC-468-03 / P1:** Aligned observed runtime/source repository history in `docs/INDEX*` and `docs/DOCUMENT_CATALOG*` with production release `v2026.09.27.468` (`prod-v468`, 1,552 active sessions preserved).
 
 ## v2026.09.27.467 — 2026-09-27 — Documentation authority and inventory organization
 - Documentation-only cycle. Start and first mid-work `origin/main=b0c8f1e25dc15b28d44fd033fca510bce70f6960`. Final pre-integration recheck detected concurrent runtime v2026.09.27.466 at `origin/main=d64eaedccb7c094063b36fb5f46590ce19f51ab1`; changed files were runtime/root execution-plan only, so the documentation branch was recreated from that exact latest main rather than overwriting concurrent work. No runtime, Test, or Production mutation is claimed by this cycle.

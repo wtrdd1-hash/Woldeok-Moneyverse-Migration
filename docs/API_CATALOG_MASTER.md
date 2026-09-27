@@ -1,8 +1,8 @@
 # Woldeok Moneyverse Authoritative API Catalog Master Specification
 
-> **Version**: v2026.09.26.460  
+> **Version**: v2026.09.27.468  
 > **Status**: Production Authoritative API Specification (100% Verified)  
-> **Effective Date**: 2026-09-26  
+> **Effective Date**: 2026-09-27  
 > **Base Runtime**: NestJS 10.x REST API BFF / Next.js 16.3.4 BFF Proxy (`/app-api/v1/*`)  
 > **Compliance**: Full Decommissioning of Casino APIs & 100% Fair Virtual Economy Gamification
 
@@ -83,11 +83,18 @@
 - `POST /businesses/:id/settle`: Settle daily enterprise revenues
 - `POST /businesses/:id/boost`: Apply productivity boost license
 
-### 8. P2P Marketplace & Crafting
+### 8. P2P Marketplace, Auctions & Crafting
 - `GET /marketplace/listings`: Active P2P marketplace listings
 - `POST /marketplace/listings`: List item for sale
 - `POST /marketplace/listings/:id/buy`: Instant buy (2% tax burned)
 - `POST /marketplace/listings/:id/cancel`: Cancel active listing
+- `GET /marketplace/auctions`: Active P2P auction listings & filters
+- `GET /marketplace/auctions/:id`: Auction details, highest bid, and expiry timer
+- `POST /marketplace/auctions`: Create new auction listing
+- `POST /marketplace/auctions/:id/bid`: Manual bid placement (auto-extends by 60s if placed within final 30s)
+- `POST /marketplace/auctions/:id/proxy-bid`: Set maximum proxy auto-bidding threshold
+- `GET /marketplace/auctions/:id/depth`: Real-time orderbook depth chart data (bid/ask volume)
+- `GET /marketplace/auctions/:id/ticks`: Recent trade and bid tick timeline
 - `GET /crafting/recipes`: Crafting table recipes
 - `POST /crafting/craft`: Craft higher-tier artifacts
 
@@ -136,6 +143,31 @@
 - `POST /admin/treasury/inject`: Step-Up treasury injection
 - `POST /admin/stocks/:symbol/halt`: Stock halt & 100% cost-basis settlement
 - `GET /admin/audit/logs`: Real-time system audit logs
+
+### 15. SEO & Search Engine Intelligence
+- `GET /seo/status`: Overall sitemaps and SEO crawler health summary
+- `POST /seo/sitemaps/ping`: Automated ping to Google and Naver search engines
+- `POST /seo/gsc/sync`: Manual on-demand sync with Google Search Console
+- `GET /seo/gsc/analytics`: GSC daily clicks, impressions, CTR, and average position timeseries
+- `GET /seo/gsc/credentials`: Google Cloud service account JSON key status and client email
+- `POST /seo/gsc/credentials`: Upload and encrypt Google Cloud service account JSON credentials
+- `DELETE /seo/gsc/credentials`: Permanently delete stored GSC credentials
+- `GET /seo/crawl-audit`: 6-hour background crawl audit and URL health report
+- `POST /seo/crawl-audit`: Run immediate crawl audit on-demand
+- `GET /seo/gsc/digest-report`: Get daily SEO performance summary report data
+- `POST /seo/gsc/digest-report`: Dispatch daily SEO digest briefing to Discord webhook channel
+
+### 16. Moneyverse Plus VIP Membership & Privileges
+- `GET /vip/status`: Active VIP subscription status, expiration date, and theme
+- `POST /vip/subscribe`: Activate 30-day Moneyverse Plus VIP subscription
+- `POST /vip/daily-bonus`: Claim VIP-exclusive daily Golden Chest bonus (10,000 WLD)
+- `PUT /vip/theme`: Select and save one of 5 custom VIP neon avatar frames
+
+### 17. Real-Time WebSocket Gateway
+- `WS /ws/marketplace/auctions` (`auction:bid`): Real-time broadcast of new bids and highest bid updates
+- `WS /ws/marketplace/auctions` (`auction:extended`): Anti-sniping 60-second auto-extension notification
+- `WS /ws/marketplace/auctions` (`auction:settled`): Final auction resolution and winner declaration
+- `WS /ws/activity` (`activity:global`): Global macro-economic transaction feed
 
 ---
 
