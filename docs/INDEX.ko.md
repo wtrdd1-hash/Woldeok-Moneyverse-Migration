@@ -3,9 +3,9 @@
 [English canonical](INDEX.md) | **한국어**
 
 > 거버넌스: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)
-> 구현 권위 기획 버전: **v2026.09.25.444**
-> 관측한 저장소 런타임/소스 이력: **v2026.09.27.466**
-> 현재 상태: v444 이후 제품 결정이 권위 기획서에 실제로 통합될 때까지 **AUTHORITY_DRIFT**
+> 구현 권위 기획 버전: **v2026.09.27.468**
+> v468 시작 시 관측한 저장소 런타임/소스 이력: **v2026.09.27.467**
+> 현재 상태: v468 API 관측성 지시는 권위 **PLANNING**이며 runtime 보완은 아직 Test/Production 검증 전이다. 중간 runtime 결정을 자동으로 모두 채택한 것으로 간주하지 않는다.
 
 ## 여기서 시작
 
@@ -27,6 +27,7 @@
 - [직업/숙련도](planning/JOBS_PROFESSION_MASTERY_SPEC.ko.md)
 - [1:1 개인채팅](planning/ONE_TO_ONE_PRIVATE_CHAT_SPEC.ko.md)
 - [Moneyverse Arcade](planning/MONEYVERSE_ARCADE_GAME_SPEC.ko.md)
+- [API 관측성 관제 타워](planning/API_OBSERVABILITY_CONTROL_TOWER_SPEC.ko.md)
 - [전 경로 UI/기능 QA](planning/FULL_ROUTE_UI_QA_SPEC.ko.md)
 
 ## 아키텍처/운영/기능

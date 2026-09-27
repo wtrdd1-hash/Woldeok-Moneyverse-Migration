@@ -2,38 +2,40 @@
 
 **English canonical** | [한국어](DOCUMENT_CATALOG.ko.md)
 
-> Snapshot: v2026.09.27.467
-> Source tree: `main@d64eaedccb7c094063b36fb5f46590ce19f51ab1`
+> Snapshot: v2026.09.27.468
+> Source base: main@8493d69e2283bf6526b52752ea2242b707160830 plus this v468 planning delta
 > Purpose: navigation and cleanup inventory; not product authority.
 
 ## Current authority
 
-- [Project plan](planning/PROJECT_PLAN.md) — current implementation-facing authority, presently **v2026.09.25.444**.
-- [Integrated planning master](planning/INTEGRATED_PLANNING_MASTER.md) — planning/governance ledger, with v467 documentation cleanup record.
+- [Project plan](planning/PROJECT_PLAN.md) — current implementation-facing authority, **v2026.09.27.468**.
+- [Integrated planning master](planning/INTEGRATED_PLANNING_MASTER.md) — planning/governance ledger, **v2026.09.27.468**.
+- [API observability control tower](planning/API_OBSERVABILITY_CONTROL_TOWER_SPEC.md) — P0 exact-source API inventory, telemetry truth and false-green release gate.
 - [Documentation policy](DOCUMENTATION_POLICY.md) — authority, language, branch, archive and drift rules.
 - [Documentation index](INDEX.md) — curated navigation.
-- [Full planning re-review v402](planning/INTEGRATED_FULL_REVIEW_V402.md) — **historical review snapshot**, not the current authority.
+- [Full planning re-review v402](planning/INTEGRATED_FULL_REVIEW_V402.md) — historical review snapshot, not current authority.
 
-## Authority drift snapshot
+## Authority/runtime state
 
-- Repository `main` is at runtime/source history **v2026.09.27.466**.
-- `PROJECT_PLAN.md` is at **v2026.09.25.444**.
-- Therefore versions after v444 are not assumed to be integrated product-planning authority merely because runtime commits or execution notes exist.
-- This catalog records the drift; it does not resolve product decisions by renumbering the plan.
+- Repository source history observed at v468 start is runtime/source **v2026.09.27.467** on main@8493d69.
+- PROJECT_PLAN is now planning authority **v2026.09.27.468** because this cycle integrates the API-observability directive.
+- This planning version does not claim the v468 runtime exists; API observability remains PLANNING until exact-SHA Test and Production evidence is created.
+- Unrelated intervening runtime/product decisions are not silently adopted merely because their version numbers fall between v444 and v468.
+- API_CATALOG_MASTER is explicitly AUTHORITY_DRIFT as an exhaustive-runtime claim until the v468 generated-manifest reconciliation is implemented.
 
 ## Inventory snapshot
 
-There are **1,638 files under `docs/`**, including **1,620 Markdown files**.
+There are **1,659 files under docs/**, including **1,641 Markdown files**.
 
 | Collection | Files |
 |---|---:|
-| worklog/ | 545 |
-| changelog/ | 424 |
-| planning/ | 279 |
-| updates/ | 160 |
+| worklog/ | 549 |
+| changelog/ | 428 |
+| planning/ | 283 |
+| updates/ | 167 |
 | docs root | 63 |
 | releases/ | 58 |
-| findings/ | 22 |
+| findings/ | 24 |
 | operations/ | 22 |
 | features/ | 20 |
 | superpowers/ | 11 |
@@ -44,15 +46,12 @@ There are **1,638 files under `docs/`**, including **1,620 Markdown files**.
 | localization/ | 2 |
 | research/ | 2 |
 
-Across the repository, **1,726 documentation-related files** were observed when root README/workflow text artifacts and non-`docs/` documentation are included.
-
 ## Cleanup findings
 
-- Root-level dated Markdown files under `docs/`: **18**. They are legacy placements; new dated documents must use the appropriate collection directory.
-- Exact duplicate-content groups under `docs/`: **31** groups, representing **31 extra duplicate paths**. Existing paths are preserved in this cycle to protect history and inbound links.
-- Markdown pairing inventory found **85 English-path documents without a Korean pair** and **19 Korean-normalized paths without an English pair**. These counts include historical, internal-only, API legacy and third-language material; they are not all current-maintenance parity violations.
-- Root `implementation_plan.md`, `PROJECT_MEMORY.md` and `walkthrough.md` are execution/history references, not product authority.
-- The prior catalog snapshot v403 is superseded by this inventory.
+- Root-level dated Markdown files and historical duplicate groups remain preserved unless a separate link-safe cleanup cycle supersedes them.
+- The v468 additions are maintained EN/KO pairs: detailed specification, planning delta, worklog, changelog, public update and internal update.
+- Root implementation_plan.md, PROJECT_MEMORY.md and walkthrough.md remain execution/history references, not product authority.
+- Inventory counts are a snapshot, not a quality score.
 
 ## Cleanup rule
 

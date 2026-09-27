@@ -6,6 +6,8 @@
 
 권위는 [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md) → [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md) → 명시적으로 채택된 최신 상세명세 순서입니다.
 
+현재 P0 API 관측성 권위: [API_OBSERVABILITY_CONTROL_TOWER_SPEC.ko.md](API_OBSERVABILITY_CONTROL_TOWER_SPEC.ko.md). exact-source 전수 route inventory, 실제 telemetry, false-green 방지, release 증거를 요구합니다.
+
 현재 전 사이트 UI/기능 QA 권위: [FULL_ROUTE_UI_QA_SPEC.ko.md](FULL_ROUTE_UI_QA_SPEC.ko.md). 모든 관리자 page를 포함한 모든 page를 release candidate마다 5회 완주합니다.
 
 `deltas/`, `worklog/`는 기획 이력이며 현재 권위를 묵시적으로 덮어쓰지 않습니다.

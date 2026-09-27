@@ -1,11 +1,23 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.09.27.467
+> 현재 원장 버전: v2026.09.27.468
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.09.27.468 — 2026-09-27 — API 전수 관측성 / 관제 타워 권위
+- 기획/문서 전용 회차. 시작 및 기록된 중간 origin/main은 모두 8493d69e2283bf6526b52752ea2242b707160830이며 중간 checkpoint drift는 없었다. runtime code, Test 승격, Production 배포 완료를 주장하지 않는다.
+- **OBS-468-01 / P0:** 현재 관리자 API-health UI는 합계 89개인 14-domain 로컬 상수를 쓰면서 300+를 표시하고 backend도 고정 count/latency/100% health를 반복한다. 이는 runtime evidence가 아니라 presentation constant다.
+- **OBS-468-02 / P0:** 진단 source scan은 HTTP decorator 333개, 고유 method/path 328개, 최상위 prefix 30개를 관측해 curated dashboard denominator가 전수가 아님을 확인했다. 구현에서는 이 진단 숫자를 hard-code하지 않고 exact-SHA source/build manifest를 생성한다.
+- **OBS-468-03 / P0:** 현재 source에 casino route decorator가 남아 있는데 catalog/dashboard는 완전 제거를 주장한다. source-present, disabled, decommissioned lifecycle을 명시적으로 대사한다.
+- **OBS-468-04 / P0:** 관측한 API-health controller에는 명시적 관리자 guard가 없다. 운영 텔레메트리는 관리자 control-plane으로 제한하고 authorization negative coverage를 요구한다.
+- **OBS-468-05 / P0:** telemetry-pulse에 고정 경제값과 3초 random latency가 존재한다. Production 가짜 telemetry를 금지하고 stale/no-data/partial을 false green으로 바꾸지 않는다.
+- **OBS-468-06 / P0:** exact-candidate discovered manifest, classification, telemetry registry, QA ledger를 1:1 대사하며 설명되지 않는 gap은 release를 차단한다.
+- **OBS-468-07 / P1:** passive traffic, active probe, dependency health, versioned SLO/error budget, freshness, sanitize drill-down, incident alert, bounded-cardinality retention, release comparison을 필수 관제 capability로 추가한다.
+- **OBS-468-08 / P0:** API catalog의 network/proxy 문구가 CURRENT_RUNTIME_BASELINE(Production backend/frontend 3000/3001, Test 3100/3101)과 충돌한다. runtime/edge identity는 stale catalog 복사가 아니라 exact config에서 생성해야 한다.
+- 상세 권위: API_OBSERVABILITY_CONTROL_TOWER_SPEC.ko.md. 사용자 요구를 primary implementation plan v468에 통합했으며, 이 작업만으로 중간 runtime 이력 전체를 재기획했다고 주장하지 않는다.
 
 ## v2026.09.27.467 — 2026-09-27 — 문서 권위/인벤토리 정리
 - 문서 전용 회차. 시작 및 1차 중간 `origin/main=b0c8f1e25dc15b28d44fd033fca510bce70f6960`. 최종 통합 전 재확인에서 동시 런타임 v2026.09.27.466 `origin/main=d64eaedccb7c094063b36fb5f46590ce19f51ab1`을 감지했고 변경 파일은 런타임/루트 실행계획에 한정되어, 동시 작업을 덮어쓰지 않도록 해당 최신 main에서 문서 브랜치를 다시 생성했다. 이번 회차에서 runtime, Test, Production 변경은 수행하지 않았다.

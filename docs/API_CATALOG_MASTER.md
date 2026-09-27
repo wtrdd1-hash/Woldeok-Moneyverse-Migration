@@ -1,18 +1,21 @@
 # Woldeok Moneyverse Authoritative API Catalog Master Specification
 
-> **Version**: v2026.09.26.460  
-> **Status**: Production Authoritative API Specification (100% Verified)  
-> **Effective Date**: 2026-09-26  
-> **Base Runtime**: NestJS 10.x REST API BFF / Next.js 16.3.4 BFF Proxy (`/app-api/v1/*`)  
-> **Compliance**: Full Decommissioning of Casino APIs & 100% Fair Virtual Economy Gamification
+> **Version**: v2026.09.27.468
+> **Status**: AUTHORITY_DRIFT / curated 14-domain contract pending exact-source reconciliation
+> **Effective Date**: 2026-09-27
+> **Runtime identity**: follow exact candidate configuration and CURRENT_RUNTIME_BASELINE; this curated file is not runtime-port authority (`/app-api/v1/*`)
+> **Compliance**: casino/decommissioning lifecycle claims require exact-source reconciliation under planning v2026.09.27.468
 
 ---
 
+> **v468 scope warning:** this curated domain catalog is not an exhaustive runtime endpoint manifest and must not be used as the denominator for “all APIs” or as health evidence. The v468 start-SHA review found source routes outside this catalog and source-present casino routes. Until an exact-SHA generated manifest is reconciled against source, BFF, integrations and lifecycle state, prior “100% verified” or “completely removed” wording is historical assertion rather than current acceptance evidence.
+
 ## 🏛️ 1. Architecture & Security Standards
 
-1. **Base URLs**:
-   - Internal Backend Service: `http://127.0.0.1:3001/api/v1`
-   - Frontend BFF Proxy: `/app-api/v1/*` or `/api/v1/*`
+1. **Runtime / edge boundary**:
+   - Current observed baseline maps Production backend/frontend to ports 3000/3001 and Test backend/frontend to 3100/3101.
+   - Member/native application traffic uses the reviewed app-api BFF boundary where applicable; website server calls remain server-side.
+   - Do not infer a blanket public /api/v1 backend proxy from this catalog. Exact public exposure is determined by generated route/edge inventory and runtime configuration.
 2. **Session & Security Invariants**:
    - Authenticated endpoints enforce `HttpOnly; SameSite=Lax; Secure` cookie (`session_id`).
    - Guard chain: `SessionGuard` -> `AuthenticatedGuard` -> `ConsentGuard` -> `CsrfGuard`.
@@ -139,6 +142,8 @@
 
 ---
 
-## 🚫 3. Decommissioned APIs
-- **All Casino Endpoints (`/api/v1/casino/*`) Permanently Removed**:
-  - Removed to comply with legal compliance, eliminating all gambling elements in favor of transparent gamified rewards.
+## 🚫 3. Lifecycle reconciliation required
+
+The previous catalog asserted that all casino API endpoints were permanently removed. The v468 exact-source review found casino route decorators still present, so that assertion is **not current acceptance evidence**.
+
+Until generated-manifest reconciliation is implemented, each such route must be classified as ACTIVE, FEATURE_DISABLED, SOURCE_PRESENT_BLOCKED, DEPRECATED or DECOMMISSIONED according to exact source and reachability. DECOMMISSIONED is allowed only after executable route removal and edge/compatibility reachability checks prove it is absent.

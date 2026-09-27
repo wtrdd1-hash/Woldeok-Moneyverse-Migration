@@ -1,18 +1,21 @@
 # 월덕 머니버스 전 도메인 API 공식 마스터 명세서 (API Catalog Master Specification)
 
-> **버전**: v2026.09.26.460  
-> **상태**: Production Authoritative API Specification (100% 실연동 검증 완료)  
-> **기준일**: 2026-09-26  
-> **기반 인프라**: NestJS 10.x REST API BFF / Next.js 16.3.4 BFF Proxy (`/app-api/v1/*`)  
-> **컴플라이언스**: 사행성/도박성 카지노 API 완전 폐기 및 100% 공정 가상경제 게이미피케이션 확립
+> **버전**: v2026.09.27.468
+> **상태**: AUTHORITY_DRIFT / exact-source 대사 대기 중인 14대 도메인 curated contract
+> **기준일**: 2026-09-27
+> **Runtime identity**: exact candidate config와 CURRENT_RUNTIME_BASELINE을 따른다. 이 curated 문서는 runtime port 권위가 아니다 (`/app-api/v1/*`)
+> **컴플라이언스**: casino/decommissioning lifecycle 주장은 planning v2026.09.27.468의 exact-source 대사가 필요함
 
 ---
 
+> **v468 범위 경고:** 이 curated domain catalog는 runtime 전체 endpoint manifest가 아니며 “모든 API”의 denominator 또는 health 증거로 사용할 수 없다. v468 시작 SHA 감사에서 이 catalog 밖의 source route와 source-present casino route가 확인됐다. source/BFF/integration/lifecycle을 exact-SHA generated manifest와 대사하기 전에는 기존 “100% 검증” 또는 “완전 폐기” 문구를 현재 수용증거로 인정하지 않는다.
+
 ## 🏛️ 1. 아키텍처 및 보안 공통 규격
 
-1. **기본 베이스 URL**:
-   - 내부 백엔드: `http://127.0.0.1:3001/api/v1`
-   - 프론트엔드 BFF Proxy: `/app-api/v1/*` 또는 `/api/v1/*`
+1. **Runtime / edge 경계**:
+   - 현재 관측 baseline은 Production backend/frontend를 3000/3001, Test backend/frontend를 3100/3101에 매핑한다.
+   - 일반 회원/native app traffic은 적용 가능한 reviewed app-api BFF 경계를 사용하며 website server call은 server-side로 유지한다.
+   - 이 catalog만 보고 blanket public /api/v1 backend proxy를 가정하지 않는다. 실제 public exposure는 generated route/edge inventory와 runtime config로 결정한다.
 2. **인증 및 세션 관리 (Session Invariants)**:
    - 모든 회원 전용 엔드포인트는 `HttpOnly; SameSite=Lax; Secure` 세션 쿠키(`session_id`)를 통해 인증됩니다.
    - 변조 방지를 위해 `SessionGuard`, `AuthenticatedGuard`, `ConsentGuard`, `CsrfGuard`가 체인으로 적용됩니다.
@@ -174,12 +177,8 @@
 
 ---
 
-## 🚫 3. 폐기 및 비활성화된 API (Decommissioned APIs)
-- **카지노 7대 게임 엔드포인트 (`/api/v1/casino/*`) 전면 제거 완료**:
-  - `POST /api/v1/casino/coin/plays` (폐기)
-  - `POST /api/v1/casino/dice/plays` (폐기)
-  - `POST /api/v1/casino/theme/plays` (폐기)
-  - `PUT /api/v1/casino/self-limit` (폐기)
-  - `GET /api/v1/casino/history` (폐기)
-  - `GET /api/v1/casino/jackpot` (폐기)
-- **사유**: 게임물 규제 및 금융 법령 컴플라이언스 준수, 도박성 배제 및 건전한 가상경제 시뮬레이터 전환.
+## 🚫 3. Lifecycle 재대사 필요
+
+기존 catalog는 casino API 전면 제거 완료를 주장했지만 v468 exact-source 감사에서 casino route decorator가 아직 존재함을 확인했다. 따라서 그 문구는 **현재 수용증거가 아니다**.
+
+Generated-manifest 대사가 구현되기 전까지 각 route를 exact source와 reachability에 따라 ACTIVE, FEATURE_DISABLED, SOURCE_PRESENT_BLOCKED, DEPRECATED, DECOMMISSIONED 중 하나로 분류한다. DECOMMISSIONED는 실행 route 제거와 edge/compatibility 도달 불가를 실제로 증명한 뒤에만 허용한다.

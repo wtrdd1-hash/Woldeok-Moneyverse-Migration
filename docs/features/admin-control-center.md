@@ -38,3 +38,7 @@ Manual corrections require recent re-authentication, explicit reason/evidence, B
 ## Mobile/responsive acceptance — v2026.09.25.440
 
 All administrator workspaces, including Economy Operations and AI Council, follow the P0 responsive contract in `ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.md`. Mobile layouts must not create page-level horizontal overflow, clipped navigation, overlapping cards or unreachable controls. Economy sliders must keep thumb position, displayed number, draft state, submitted payload and server-authoritative saved value synchronized; any mismatch disables apply/save. Material admin UI changes require at least five complete QA passes across the required mobile/tablet/desktop viewport matrix before promotion.
+
+## API observability control tower — v2026.09.27.468
+
+The administrator API-health surface follows the P0 [API Observability Control Tower Specification](../planning/API_OBSERVABILITY_CONTROL_TOWER_SPEC.md). Counts, latency, health, success rate and decommissioning labels must come from the exact-SHA generated inventory and fresh runtime evidence; hard-coded/random Production telemetry and false-green fallback are prohibited. Operational telemetry requires explicit administrator authorization and full-route responsive/security acceptance.

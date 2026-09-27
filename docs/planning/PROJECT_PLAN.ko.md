@@ -2,8 +2,8 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.25.444
-> **구현·증거 동기화:** 2026-09-23
+> **현재 통합 버전:** v2026.09.27.468
+> **구현·증거 동기화:** 2026-09-27
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
 ## 현재 수용증거 및 공백 해소
@@ -14,6 +14,23 @@
 권위 register를 제공한다.
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## P0 API 전수 관측성 및 false-green 방지 — v2026.09.27.468 (2026-09-27)
+
+- **표본이 아니라 모든 endpoint:** release 수용은 exact candidate에서 생성한 machine-readable manifest를 사용한다. NestJS HTTP route, Next/BFF route, 외부 integration, infrastructure probe, 별도 realtime transport inventory까지 포함하며 제품 도메인 묶음은 full manifest의 view일 뿐 전체 API denominator가 아니다.
+- **시작점 P0 진실성 공백:** 시작 SHA 8493d69e2283bf6526b52752ea2242b707160830에서 관리자 API-health UI는 89개 hard-coded endpoint를 합산하면서 300+라고 표현하고 backend도 고정 latency, 100% success, HEALTHY를 반환한다. 진단 source scan은 HTTP decorator 333개 / 고유 method-path 328개 / 최상위 prefix 30개를 관측했다. 이 숫자는 drift 증거이지 새 상수가 아니다.
+- **가짜 텔레메트리 금지:** Production의 고정/랜덤 latency, success, 경제/health 값을 금지한다. 데이터 없음은 UNKNOWN/NO_DATA, stale은 STALE, 부분 관측은 PARTIAL이며 이를 100%, 0 ms, OPERATIONAL로 바꾸면 안 된다.
+- **1:1 coverage 게이트:** discovered manifest route = classified route = telemetry registry route = QA ledger route를 강제한다. 설명되지 않는 count 불일치, duplicate identity, 미분류, active-but-uninstrumented, undocumented alias는 P0 승격 차단이다.
+- **lifecycle 진실성:** ACTIVE, FEATURE_DISABLED, DEPRECATED, SOURCE_PRESENT_BLOCKED, DECOMMISSIONED를 구분한다. 실행 소스에 route가 남아 있으면 catalog 누락이나 feature flag만으로 decommissioned라고 할 수 없다.
+- **실측 endpoint 증거:** active route는 request/response, response class/error/timeout, p50/p95/p99, freshness, last success/failure, release/environment identity, dependency attribution을 제공한다. 업무상 4xx와 서버 5xx/timeout availability를 분리한다.
+- **passive/synthetic 분리:** 실제 traffic과 active probe를 별도 채널로 표시한다. Production probe는 read-only/side-effect-free이며 금융·계정·모더레이션·국고·주문 mutation은 isolated Test deterministic fixture로 검증한다.
+- **Edge/BFF 경계 진실성:** runtime port, public exposure, proxy path는 exact deployment/edge config와 generated manifest에서 파생한다. CURRENT_RUNTIME_BASELINE은 Production backend/frontend 3000/3001, Test 3100/3101을 기록하므로 stale catalog port나 generic /api/v1 proxy 문구를 운영 진실로 사용할 수 없다.
+- **versioned SLO/error budget:** release-critical route마다 service tier, availability/latency objective, measurement window를 지정한다. threshold는 TEST_TARGET -> BASELINED -> APPROVED_SLO로 승격하며 UI 상수가 아니라 정책/config다.
+- **관리자 control-plane 보호:** API-health 운영 정보는 명시적 관리자 권한과 적용 가능한 admin-console session 경계를 요구한다. guest/member/expired-admin/role denial 음성시험을 수행하고 secret, raw body, high-cardinality user identifier를 telemetry에 남기지 않는다.
+- **운영자 drill-down:** exact manifest/release identity, coverage/freshness, worst error budget, p50/p95/p99, 5xx/timeout, dependency, release regression, sanitize exemplar, filter와 alert/incident evidence를 제공한다.
+- **false-green failure injection:** Test에서 dependency failure, stale/no-data, controlled server error를 의도적으로 발생시켜 화면이 green이 아니라 degraded/unknown이 되는지 증명한다.
+- **release gate:** exact-SHA Test 증거, authorization negative, manifest/registry 대사, v440/v442 반응형/전 경로 QA, 최신 main/plan 재확인을 merge 전 강제한다. 향후 Production 구현은 exact merged SHA 무중단 승격과 session/telemetry/error-rate 후검증을 따른다.
+- 상세 권위: [API_OBSERVABILITY_CONTROL_TOWER_SPEC.ko.md](API_OBSERVABILITY_CONTROL_TOWER_SPEC.ko.md). 이번 v468은 기획/문서 전용이며 현재 hard-coded runtime이 이미 수정됐다고 주장하지 않는다.
 
 ## 수익화·수익 포트폴리오 및 근거 재검토 — v2026.09.25.444 (2026-09-25)
 

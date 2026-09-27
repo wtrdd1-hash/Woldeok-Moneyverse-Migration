@@ -6,7 +6,7 @@ Start here. Do not infer current product truth from the newest-looking filename,
 
 ## Current authority
 
-- [Implementation-facing project plan](planning/PROJECT_PLAN.md) / [한국어](planning/PROJECT_PLAN.ko.md) — **v2026.09.25.444**
+- [Implementation-facing project plan](planning/PROJECT_PLAN.md) / [한국어](planning/PROJECT_PLAN.ko.md) — **v2026.09.27.468**
 - [Integrated planning master](planning/INTEGRATED_PLANNING_MASTER.md) / [한국어](planning/INTEGRATED_PLANNING_MASTER.ko.md)
 - [Documentation governance](DOCUMENTATION_POLICY.md) / [한국어](DOCUMENTATION_POLICY.ko.md)
 - [Document catalog](DOCUMENT_CATALOG.md) / [한국어](DOCUMENT_CATALOG.ko.md)
@@ -15,7 +15,7 @@ Start here. Do not infer current product truth from the newest-looking filename,
 
 ## Current documentation state
 
-Repository `main` was observed at **v2026.09.27.466**, while the implementation-facing product plan remains **v2026.09.25.444**. This is an explicit **AUTHORITY_DRIFT** condition. Runtime/source work after v444 must be reconciled into the authoritative plan before documentation may claim that those product decisions are fully integrated.
+At v468 start, repository `main` was observed at runtime/source **v2026.09.27.467**. The implementation-facing plan is now **v2026.09.27.468** because the API-observability directive was integrated as PLANNING. This does not claim a v468 runtime implementation or silently adopt every intervening runtime decision; exact-SHA Test/Production evidence remains required.
 
 The v402 full-review document remains historical evidence and is no longer presented as the current full-review authority.
 

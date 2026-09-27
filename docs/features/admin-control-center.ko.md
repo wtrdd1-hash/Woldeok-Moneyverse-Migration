@@ -35,3 +35,7 @@
 ## 모바일/반응형 수용 기준 — v2026.09.25.440
 
 경제 운영과 AI Council을 포함한 모든 관리자 workspace는 `ACCESSIBILITY_RESPONSIVE_INTERACTION_SPEC.ko.md`의 P0 반응형 계약을 따른다. 모바일에서 page-level horizontal overflow, navigation 잘림, card 겹침, 도달할 수 없는 control을 허용하지 않는다. 경제 slider의 thumb 위치, 표시 숫자, draft state, submit payload, 서버 권위 저장값은 항상 동기화되어야 하며 하나라도 다르면 apply/save를 차단한다. 관리자 UI를 실질 수정하면 필수 mobile/tablet/desktop viewport matrix로 최소 5회의 완전 QA를 통과해야 승격할 수 있다.
+
+## API 관측성 관제 타워 — v2026.09.27.468
+
+관리자 API-health 화면은 P0 [API 관측성 관제 타워 상세 명세](../planning/API_OBSERVABILITY_CONTROL_TOWER_SPEC.ko.md)를 따른다. endpoint 수, latency, health, success rate, decommissioning 표시는 exact-SHA generated inventory와 신선한 runtime evidence에서 파생해야 하며 hard-coded/random Production telemetry와 false-green fallback을 금지한다. 운영 telemetry는 명시적 관리자 권한과 전 경로 반응형/보안 수용증거를 요구한다.

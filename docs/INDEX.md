@@ -3,9 +3,9 @@
 **English canonical** | [한국어](INDEX.ko.md)
 
 > Governance: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)
-> Implementation-facing planning authority: **v2026.09.25.444**
-> Repository runtime/source history observed: **v2026.09.27.466**
-> Current state: **AUTHORITY_DRIFT** until post-v444 product decisions are reconciled into the authoritative plan.
+> Implementation-facing planning authority: **v2026.09.27.468**
+> Repository runtime/source history observed at v468 start: **v2026.09.27.467**
+> Current state: the v468 API-observability directive is authoritative **PLANNING**; its runtime remediation is not yet Test/Production verified, and unrelated intervening runtime decisions are not implicitly adopted.
 
 ## Start here
 
@@ -27,6 +27,7 @@
 - [Jobs/profession mastery](planning/JOBS_PROFESSION_MASTERY_SPEC.md)
 - [Private chat](planning/ONE_TO_ONE_PRIVATE_CHAT_SPEC.md)
 - [Moneyverse Arcade](planning/MONEYVERSE_ARCADE_GAME_SPEC.md)
+- [API observability control tower](planning/API_OBSERVABILITY_CONTROL_TOWER_SPEC.md)
 - [Full-route UI & functional QA](planning/FULL_ROUTE_UI_QA_SPEC.md)
 
 ## Architecture, operations and features

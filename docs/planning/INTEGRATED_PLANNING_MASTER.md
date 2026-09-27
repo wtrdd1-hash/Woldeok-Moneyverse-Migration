@@ -1,11 +1,23 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.27.467
+> Current ledger version: v2026.09.27.468
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.27.468 — 2026-09-27 — Exhaustive API observability / control-tower authority
+- Planning/documentation cycle. Start and recorded mid-work origin/main are both 8493d69e2283bf6526b52752ea2242b707160830; no drift was observed at the mid-work checkpoint. Runtime code, Test promotion and Production deployment are not claimed.
+- **OBS-468-01 / P0:** current admin API-health UI uses a 14-domain local constant totalling 89 endpoints while copy claims 300+; the backend health controller duplicates fixed counts/latencies/100% health. These are presentation constants, not runtime evidence.
+- **OBS-468-02 / P0:** diagnostic source scan observed 333 HTTP decorators, 328 unique method/path pairs and 30 top-level prefixes, proving the curated dashboard denominator is not exhaustive. Final implementation must generate an exact-SHA source/build manifest rather than hard-code these diagnostic counts.
+- **OBS-468-03 / P0:** current source contains casino route decorators while current catalog/dashboard language says casino endpoints are completely removed. Source-present, disabled and decommissioned states must be reconciled explicitly.
+- **OBS-468-04 / P0:** current API-health controller lacks an explicit administrator guard in the observed source. Operational telemetry must be an administrator control-plane surface with negative authorization coverage.
+- **OBS-468-05 / P0:** current telemetry-pulse contains fixed economic values and randomized 3-second latency. Fabricated Production telemetry is prohibited; stale/no-data/partial states must remain visible rather than false green.
+- **OBS-468-06 / P0:** exact-candidate discovered manifest routes, classifications, telemetry registry and QA ledger must reconcile 1:1. Any unexplained gap blocks release.
+- **OBS-468-07 / P1:** passive traffic, active probes, dependency health, versioned SLO/error budget, freshness, sanitized drill-down, incident alerts, bounded-cardinality retention and release comparison are now required control-tower capabilities.
+- **OBS-468-08 / P0:** API catalog network/proxy wording conflicts with CURRENT_RUNTIME_BASELINE (Production backend/frontend 3000/3001; Test 3100/3101). Runtime/edge identity must be generated from exact configuration, not copied from a stale catalog.
+- Detailed authority: API_OBSERVABILITY_CONTROL_TOWER_SPEC.md. This integrates the user-requested requirement into the primary implementation plan as v468 without claiming that unrelated intervening runtime history has been fully re-planned.
 
 ## v2026.09.27.467 — 2026-09-27 — Documentation authority and inventory organization
 - Documentation-only cycle. Start and first mid-work `origin/main=b0c8f1e25dc15b28d44fd033fca510bce70f6960`. Final pre-integration recheck detected concurrent runtime v2026.09.27.466 at `origin/main=d64eaedccb7c094063b36fb5f46590ce19f51ab1`; changed files were runtime/root execution-plan only, so the documentation branch was recreated from that exact latest main rather than overwriting concurrent work. No runtime, Test, or Production mutation is claimed by this cycle.

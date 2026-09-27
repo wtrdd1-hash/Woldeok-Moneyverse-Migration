@@ -2,11 +2,28 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.25.444
-> Implementation/evidence sync: 2026-09-23
+> Current integrated version: v2026.09.27.468
+> Implementation/evidence sync: 2026-09-27
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## P0 exhaustive API observability and false-green prevention — v2026.09.27.468 (2026-09-27)
+
+- **Every endpoint, not a curated sample:** release acceptance uses an exact-candidate machine-generated manifest covering NestJS HTTP routes, Next/BFF routes, external integrations, infrastructure probes and separately inventoried realtime transports. Product-domain groupings are views over that manifest, not the denominator for “all APIs”.
+- **Observed P0 truth gap:** at start SHA 8493d69e2283bf6526b52752ea2242b707160830, the administrator API-health UI totals 89 hard-coded endpoints while claiming 300+, and the backend health controller repeats fixed latencies, fixed 100% success and global HEALTHY. A diagnostic source scan found 333 HTTP decorators / 328 unique method-path pairs / 30 top-level prefixes; those diagnostic counts are evidence of drift, not a new permanent constant.
+- **No fabricated telemetry:** fixed/random Production latency, success, economic or health values are prohibited. Missing data is UNKNOWN/NO_DATA, stale data is STALE, partial coverage is PARTIAL; none may be rendered as 100%, 0 ms or OPERATIONAL.
+- **One-to-one coverage gate:** discovered manifest routes = classified routes = telemetry-registry routes = QA-ledger routes. Any unexplained mismatch, duplicate identity, unclassified route, active-but-uninstrumented route or undocumented alias is a P0 release blocker.
+- **Lifecycle truth:** ACTIVE, FEATURE_DISABLED, DEPRECATED, SOURCE_PRESENT_BLOCKED and DECOMMISSIONED are distinct. A route still present in executable source cannot be called decommissioned merely because a catalog omits it or a feature flag blocks it.
+- **Measured endpoint evidence:** active routes expose request/response counts, response-class/error/timeout data, p50/p95/p99 latency, freshness, last success/failure, release/environment identity and dependency attribution. Business 4xx is separated from server 5xx/timeout availability.
+- **Passive vs synthetic separation:** real traffic telemetry and active probes are distinct channels. Production probes are read-only/side-effect-free; financial/account/moderation/treasury/order mutations are exercised with deterministic fixtures in isolated Test, not against real Production state for a green light.
+- **Edge/BFF boundary truth:** runtime ports, public exposure and proxy paths come from exact deployment/edge configuration and generated manifest. CURRENT_RUNTIME_BASELINE records Production backend/frontend 3000/3001 and Test 3100/3101; a stale catalog port or generic /api/v1 proxy statement cannot become operational truth.
+- **Versioned SLO/error budget:** every release-critical route receives a service tier, availability/latency objective and measurement window. Thresholds progress TEST_TARGET -> BASELINED -> APPROVED_SLO and are policy/config, never UI constants.
+- **Privileged control plane:** API-health operational data requires explicit administrator authorization and the existing admin-console session boundary where applicable. Guest/member/expired-admin/role-denial tests are mandatory; telemetry cannot log secrets, raw request bodies or high-cardinality user identifiers.
+- **Operator drill-down:** the control tower must show exact manifest/release identity, coverage/freshness, worst error budget, p50/p95/p99, 5xx/timeout rates, dependencies, release regression and sanitized exemplars, with filters and alert/incident evidence.
+- **False-green failure injection:** Test must deliberately create dependency failure, stale/no-data telemetry and controlled server error and prove the UI becomes degraded/unknown rather than green.
+- **Release gate:** exact-SHA Test evidence, authorization negatives, manifest/registry reconciliation, v440/v442 responsive/full-route QA and latest-main/plan re-read are mandatory before merge. Production implementation, when it exists, uses zero-downtime promotion of the exact merged SHA and post-promotion session/telemetry/error-rate verification.
+- Detailed authority: [API_OBSERVABILITY_CONTROL_TOWER_SPEC.md](API_OBSERVABILITY_CONTROL_TOWER_SPEC.md). This v468 cycle is planning/documentation only and does not claim the current hard-coded runtime is already remediated.
 
 ## Monetization/revenue portfolio and evidence refresh — v2026.09.25.444 (2026-09-25)
 
