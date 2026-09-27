@@ -67,6 +67,14 @@ const THEME_FRAME_STYLES: Record<
   },
 };
 
+const DEFAULT_FRAME_STYLE = {
+  border: 'border-amber-400 ring-2 ring-amber-400/50',
+  glow: 'shadow-[0_0_10px_rgba(245,158,11,0.45)]',
+  badgeBg: 'bg-amber-500 text-black',
+  badgeText: 'GOLD',
+  label: '로얄 골드',
+};
+
 export function VipAvatarFrame({
   theme,
   isPlusUser = false,
@@ -76,9 +84,9 @@ export function VipAvatarFrame({
   showBadge = false,
 }: VipAvatarFrameProps) {
   // If not plus user and no theme specified, render standard container
-  const activeThemeId = (theme as VipThemeId) || 'royal-gold';
-  const themeStyle = THEME_FRAME_STYLES[activeThemeId] || THEME_FRAME_STYLES['royal-gold'];
-  const sizeClass = SIZE_STYLES[size] || SIZE_STYLES.md;
+  const activeThemeId = ((theme as VipThemeId) || 'royal-gold') as VipThemeId;
+  const themeStyle = THEME_FRAME_STYLES[activeThemeId] ?? DEFAULT_FRAME_STYLE;
+  const sizeClass = (size && size in SIZE_STYLES ? SIZE_STYLES[size] : null) ?? SIZE_STYLES.md;
 
   if (!isPlusUser && !theme) {
     return (

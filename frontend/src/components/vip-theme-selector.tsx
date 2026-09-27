@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 
 export type VipNeonTheme = 'royal-gold' | 'cyber-pink' | 'emerald-vault' | 'sapphire-deep' | 'obsidian-dark';
+export type VipThemeId = VipNeonTheme;
 
 export interface VipThemeOption {
   readonly id: VipNeonTheme;
