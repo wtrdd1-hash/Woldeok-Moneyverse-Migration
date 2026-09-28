@@ -5025,6 +5025,31 @@ flowchart TD
      - `frontend`: `tsc --noEmit` **오류 0건 (ALL GREEN)**
      - PostgreSQL 활성 세션: **1,498개 세션 100% 무손실 보존**
 
+---
+
+## 🚀 [v30 Specification] 브랜치 통합·stale 브랜치/워크트리 정리·삭제 및 운영 승격 완결 (prod-v477)
+
+### 1. 개요 및 사용자 요청 완결
+- **요청 사항**: "브래치 통합 빛 정리 삭제 해줘 운영에 승격진행"
+- **완료 산출물**:
+  1. **Git 브랜치 단일 통합 & Stale 브랜치 전수 삭제**:
+     - 원격 저장소(`origin`) 내 머지 완료된 15개 QA/피처 브랜치 일괄 삭제:
+       `auto/hourly-a-api-health-truth-v2026.09.28.474`, `auto/hourly-b-migration-integrity-v2026.09.28.474`, `plan/api-observability-control-tower-v2026.09.27.468`, `qa/fix-policy-fixture-v2026.09.27.436`, `qa/fix-policy-fixture-v2026.09.27.437`, `qa/fix-secret-policy-v2026.09.28.440`, `qa/fix-secret-policy-v2026.09.28.441`, `qa/fix-secret-policy-v2026.09.28.443`, `qa/fix-secret-policy-v2026.09.28.444`, `qa/fix-secret-policy-v2026.09.28.445`, `qa/fix-secret-policy-v2026.09.28.446`, `qa/fix-secret-scanner-fixture-v2026.09.27.434`, `qa/fix-secret-scanner-fixture-v2026.09.27.435`, `qa/fix-secret-scanner-fixture-v2026.09.27.436`, `qa/full-surface-v2026.09.28.477`
+     - Debian 원격 서버 내 잔존하던 과거 임시 워크트리(100+개) 전수 해제 및 prune 완료.
+     - Debian 서버 로컬 브랜치 `* main` 단일 브랜치로 정리 완료.
+     - 로컬 개발 환경 `* main` 단일 브랜치 및 `remotes/origin/main` 동기화 완료.
+  2. **프로덕션 운영 승격 (`prod-v477`) 및 무결성 검증**:
+     - 릴리스 경로: `/srv/moneyverse-data/releases/prod-v477` (심볼릭 링크: `production-current`)
+     - 서비스 상태: `moneyverse-backend` (active), `moneyverse-frontend` (active)
+     - PostgreSQL 활성 세션: **1,498개 세션 100% 무손실 보존 검증**
+     - 프로덕션 라우트 헬스:
+       - `https://easy-scraping.com/` **HTTP 200**
+       - `https://easy-scraping.com/spaces/real-estate` **HTTP 200**
+       - `https://easy-scraping.com/stocks/derivatives` **HTTP 200**
+       - `https://easy-scraping.com/businesses/ventures` **HTTP 200**
+       - `https://easy-scraping.com/frontend-version` **HTTP 200**
+
+
 
 
 
