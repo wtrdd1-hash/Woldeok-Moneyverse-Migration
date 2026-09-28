@@ -1,4 +1,4 @@
-import { SeoPresetData } from './seo-presets.config';
+import type { SeoPresetData } from './seo-presets.config';
 
 export interface PseoStockInfo {
   readonly ticker: string;

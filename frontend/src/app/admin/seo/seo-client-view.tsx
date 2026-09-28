@@ -63,6 +63,13 @@ interface SeoClientViewProps {
   readonly initialData: SeoInitialData;
 }
 
+const categoryTabs = [
+  { id: 'all', label: '전체 (18)' },
+  { id: 'stock', label: '가상 주식 (10)' },
+  { id: 'guide', label: '가이드 (5)' },
+  { id: 'hub', label: '공통 허브 (3)' },
+] as const;
+
 function formatRelativeTime(dateString: string | null): string {
   if (!dateString) return '미방문 (Unindexed)';
   const diff = Date.now() - new Date(dateString).getTime();
@@ -180,8 +187,11 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
     }
   };
 
+  const targetUrls = data.targetUrls;
+  const recentLogs = data.recentLogs;
+
   const filteredTargetUrls = useMemo(() => {
-    const list = data?.targetUrls || [];
+    const list = targetUrls;
     return list.filter((item) => {
       if (activeCategory !== 'all' && item.category !== activeCategory) return false;
       if (searchQuery && !item.name.toLowerCase().includes(searchQuery.toLowerCase()) && !item.path.toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -189,10 +199,10 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
       }
       return true;
     });
-  }, [data?.targetUrls, activeCategory, searchQuery]);
+  }, [targetUrls, activeCategory, searchQuery]);
 
   const filteredLogs = useMemo(() => {
-    const list = data?.recentLogs || [];
+    const list = recentLogs;
     return list.filter((log) => {
       if (botFilter !== 'ALL' && !log.botName.toLowerCase().includes(botFilter.toLowerCase())) {
         return false;
@@ -202,7 +212,7 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
       }
       return true;
     });
-  }, [data?.recentLogs, botFilter, searchQuery]);
+  }, [recentLogs, botFilter, searchQuery]);
 
   return (
     <div className="space-y-6">
@@ -422,15 +432,10 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
 
             {/* Category Filter Tabs */}
             <div className="flex items-center gap-1 rounded-xl border border-border/60 bg-surface/40 p-1">
-              {[
-                { id: 'all', label: '전체 (18)' },
-                { id: 'stock', label: '가상 주식 (10)' },
-                { id: 'guide', label: '가이드 (5)' },
-                { id: 'hub', label: '공통 허브 (3)' },
-              ].map((tab) => (
+              {categoryTabs.map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveCategory(tab.id as any)}
+                  onClick={() => setActiveCategory(tab.id)}
                   className={cn(
                     'rounded-lg px-2.5 py-1 text-xs font-bold transition-colors',
                     activeCategory === tab.id
