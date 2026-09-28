@@ -1,32 +1,42 @@
 # 전체 기능·페이지·화면 QA 작업일지 — v2026.09.28.477
 
-> 상태: IN_PROGRESS
-> 시작일: 2026-09-28
+> 상태: COMPLETE / BLOCKED
+> 날짜: 2026-09-28
 > 브랜치: `qa/full-surface-v2026.09.28.477`
-> 시작 `origin/main`: `44933fd7abe83284e067c85115bf7ac1033cc895`
-> 중간 `origin/main`: `44933fd7abe83284e067c85115bf7ac1033cc895` (drift 없음)
-> Android 앱 기준: `wtrdd1-hash/woldeok-moneyverse-app@44288fccb321b5df889ca099989cb9afd350979c`
+> 시작·중간·종료 `origin/main`: `44933fd7abe83284e067c85115bf7ac1033cc895`
+> Android 앱 시작/종료 main: `44288fccb321b5df889ca099989cb9afd350979c`
+> 최종 보고서: `docs/QA_AUDIT_REPORT_V477.ko.md`
 
-## 실행 전 확인한 권위 문서
+## 확인한 권위 문서
 - `docs/DOCUMENTATION_POLICY.md`
 - `docs/planning/INTEGRATED_PLANNING_MASTER.md`
 - `docs/CURRENT_RUNTIME_BASELINE.md`
 - `docs/QA_AUDIT_REPORT_V473.md`
 - `docs/planning/FULL_ROUTE_UI_QA_SPEC.md` 및 한국어 대응본
-- 현재 root/frontend package 스크립트와 최신 main 릴리스 이력
+- 현재 root/frontend script와 최신 main release 이력
 
 ## 범위
-현재 웹 사용자 route 전체, 관리자 route 전체, dynamic-route fixture, 반응형/브라우저 화면, frontend/backend/static 검사, API contract, runtime health, 세션 연속성 민감 동작, Android 앱 compile/test/API surface를 QA한다. v473 증거는 이력으로만 취급하고 v474~v476 추가 기능은 재검증한다.
+현재 web 사용자/admin/dynamic route, browser/반응형 surface, frontend/backend/static 검사, API contract, runtime health, Android compile/test/API/UI evidence.
 
 ## 시작 기록
-코드나 런타임은 변경하지 않았다. 운영 승격을 의미하지 않는다. 코드 수정이 필요한 결함은 최신 main 재확인 후 별도 브랜치에서 수정하고 Test 검증을 거친 뒤 무중단 운영 승격 대상으로만 판단한다.
+제품/runtime은 변경하지 않았다. 기존 local main 및 다른 작업자와 충돌하지 않도록 격리 worktree를 사용했다.
 
 ## 중간 기록
-- exact source inventory는 현재 **108 pages / 관리자 24 pages / dynamic 12 pages**, inventory SHA `922ce3006e61ec6c9f81e473e457594901b881418a522755663eaad4ec1cea01`이다. 과거 v442 86/22/8 snapshot 및 v473 30+ route / 관리자 11개 보고서는 현재 전체 coverage 증거가 될 수 없다.
-- exact main에서 typecheck와 Production build는 통과했다.
-- root lint는 **89 errors / 364 warnings**로 실패했다.
-- root test gate는 생성된 mobile API contract가 유지 문서 3개에서 **84 insertions drift**하여 실패했다. 생성 schema에는 nullable `authorUserId` 필드가 추가된다.
-- package 직접 테스트는 contract 23/23, database 7/7 통과, backend 1,018 통과 / DB 의존 391 skip이다. Frontend는 927 pass / 1 fail 및 teardown 후 unhandled error 6건이며, 실패는 `references/corpus-150k.json` 실파일 부재 assertion이다.
-- Production/Test 주요 서비스는 active이고 backend health는 양쪽 200이다. active symlink는 `prod-v476`, `test-v476`으로 해석된다.
-- Test 대상 browser guest 5-pass sweep를 진행 중이다. 중간 pass에서 horizontal overflow는 0이지만 간헐 route 실패와 console/request 오류가 다수 관측되었다. 실제 `qa_admin_v1`/member fixture가 없으므로 관리자/회원 acceptance 통과를 주장하지 않는다.
-- Android exact-main unit test와 lint는 SDK 경로를 격리 worktree에 복원한 뒤 통과했다. 로컬 APK assemble은 signing keystore가 격리 환경에 없어 BLOCKED이고, 현재 online emulator/device가 없어 instrumentation/UI acceptance도 BLOCKED다.
+- Candidate inventory: **108 pages / 관리자 24 / dynamic 12**, SHA `922ce3006e61ec6c9f81e473e457594901b881418a522755663eaad4ec1cea01`.
+- Typecheck/build 통과.
+- Root lint 실패: **89 errors / 364 warnings**.
+- Root test gate는 mobile API contract drift로 실패: 유지 문서 3개에 **생성 diff 84 insertions**.
+- Package test: contract 23 pass; database 7 pass; backend 1,018 pass + DB 의존 391 skip; frontend 927 pass / 1 fail + unhandled error 6건.
+- Production/Test 주요 서비스 active, health 200, release symlink `prod-v476` / `test-v476`.
+- Android exact-main unit test/lint는 격리 SDK 경로 복원 후 통과했고 assemble/UI는 환경 조건 때문에 BLOCKED.
+
+## 최종 실행 기록
+- Guest/browser 5-pass: 320, 390, 768, 1024, 1440 CSS px에서 **총 540 row**.
+- Horizontal overflow: **0**.
+- 최초 29 `ERR_ABORTED` navigation row는 harness redirect/prefetch 경합으로 격리됐다. 새 browser context 재실행 결과 **29/29 PASS**, overflow 0, page error 0.
+- 이번 browser sweep만으로 privileged/member/restricted/owner acceptance, 모든 dynamic scenario, 모든 local interaction, 360/375/412/430/landscape/zoom 요구, Android device UI acceptance를 충족했다고 볼 수 없다.
+- Online Android device/emulator가 없었고, `assembleDebug`는 격리 worktree의 signing keystore 부재로 BLOCKED였다.
+- 종료 시 main을 재확인했으며 변경되지 않아 rebase/retest는 필요 없었다.
+
+## 종료
+최종 상태는 **운영 승격 BLOCKED**다. 코드 수정, Test runtime 변경 배포, Production 배포, 무중단 승격은 수행하지 않았다. 상세 blocker 및 해제 조건은 `docs/QA_AUDIT_REPORT_V477.ko.md`를 따른다.
