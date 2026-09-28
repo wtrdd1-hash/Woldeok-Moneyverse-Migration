@@ -4120,6 +4120,16 @@
               "authorName": {
                 "type": "string"
               },
+              "authorUserId": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -4288,6 +4298,16 @@
               "authorName": {
                 "type": "string"
               },
+              "authorUserId": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -4435,6 +4455,16 @@
               "authorName": {
                 "type": "string"
               },
+              "authorUserId": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -4544,6 +4574,16 @@
                 "authorName": {
                   "type": "string"
                 },
+                "authorUserId": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
                 "createdAt": {
                   "type": "string"
                 },
@@ -4641,6 +4681,16 @@
               },
               "authorName": {
                 "type": "string"
+              },
+              "authorUserId": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
               },
               "createdAt": {
                 "type": "string"
@@ -4910,6 +4960,16 @@
               "authorName": {
                 "type": "string"
               },
+              "authorUserId": {
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
               "createdAt": {
                 "type": "string"
               },
@@ -5019,6 +5079,16 @@
                 },
                 "authorName": {
                   "type": "string"
+                },
+                "authorUserId": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
                 },
                 "createdAt": {
                   "type": "string"

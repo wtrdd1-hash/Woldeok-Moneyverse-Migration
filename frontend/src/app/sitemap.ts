@@ -14,7 +14,7 @@ export const revalidate = 3600;
  * Using a fixed release timestamp instead of request-time new Date() ensures
  * search engines receive honest, cacheable modification dates.
  */
-const RELEASE_TIMESTAMP = new Date('2026-09-27T12:00:00.000Z');
+const RELEASE_TIMESTAMP = new Date('2026-09-28T12:00:00.000Z');
 
 /**
  * 10 Canonical Virtual Stock Symbols for SEO Long-tail Indexing.
@@ -89,11 +89,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     addEntry(`/tools/stock-calculator/${slug}`, 0.85, 'daily');
   }
 
-  // 3. 10 Virtual Stocks & Deep Sub-pages (Main, History, Alerts)
+  // 3. 10 Virtual Stocks Clean Canonical URLs
   for (const symbol of STOCK_SYMBOLS) {
     addEntry(`/stocks/${symbol}`, 0.9, 'daily');
-    addEntry(`/stocks/${symbol}?tab=orderbook`, 0.85, 'daily');
-    addEntry(`/stocks/${symbol}?tab=discussions`, 0.85, 'daily');
   }
 
   return entries;

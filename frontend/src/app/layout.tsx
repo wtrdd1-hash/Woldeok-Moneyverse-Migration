@@ -167,7 +167,7 @@ export async function generateMetadata(): Promise<Metadata> {
     category: meta.category,
     keywords: meta.keywords,
     alternates: {
-      canonical: siteUrl,
+      canonical: '/',
     },
     verification: {
       google:

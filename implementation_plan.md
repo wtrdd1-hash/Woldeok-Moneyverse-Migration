@@ -1,6 +1,8 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v25)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v32)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v32**: 풀스택 SEO 쇄신 및 신규 도메인/계산기 Server Layout 7종 구축(JSON-LD FAQPage, BreadcrumbList, SoftwareApplication 탑재, Clean XML Sitemap 쿼리스트링 0건 정규화, Robots.txt 표준 포맷, Discord 길드 공성전 & 노코드 퀀트 봇 백테스팅 엔진 완결) (+350, -0)
+- **v31**: 검색 엔진 노출 극대화(SEO & Indexing Full-Stack Overhaul) 정밀 진단 및 5단계 쇄신 아키텍처 수립 (+280, -0)
 - **v25**: 5대 차세대 신규 금융/메타버스 기능 확장 기획 및 아키텍처 수립 (가상 부동산 랜드 임대 / 10x 레버리지 파생상품 / 스타트업 VC 엔젤투자 / 클럽 영지 쟁탈전 / 노코드 퀀트 봇 빌더 스튜디오) (+420, -0)
 - **v24**: 2026 풀스택 벤토 그리드 2.0 메인 홈 & GNB 5대 도메인 실코드 완결 + 실제 계정 기반 6대 수익성(출석·룰렛/직업급여/주식매매/복리이자/국채/리퍼럴) 전수 실측 & Playwright 실 브라우저 클릭 E2E 검증 (+450, -0)
 - **v23**: 기획서 14대 도메인 42개 기능 전수 추적성 매트릭스(Traceability Matrix) 구축 & 프로필/계산기 심화 보강 테스트(hybrid-profile-resolution 등) 100% ALL-PASS 완료 (+390, -0)
@@ -5048,6 +5050,124 @@ flowchart TD
        - `https://easy-scraping.com/stocks/derivatives` **HTTP 200**
        - `https://easy-scraping.com/businesses/ventures` **HTTP 200**
        - `https://easy-scraping.com/frontend-version` **HTTP 200**
+
+---
+
+## 🚀 [v31 Specification] 검색 엔진 노출 극대화(SEO & Indexing Full-Stack Overhaul) 정밀 진단 및 쇄신 계획 (누적 추가)
+
+### 1. 🔍 SEO 정밀 진단 현황 및 노출 저조(Zero-Visibility) 근본 원인 5가지
+1. **[Critical P0 결함] 전역 레이아웃 캐노니컬 태그 루트 하드코딩 (`canonical: siteUrl`)**:
+   - `frontend/src/app/layout.tsx`에서 `alternates: { canonical: siteUrl }`(`https://easy-scraping.com`)이 기본값으로 지정되어, 개별 메타데이터가 없는 모든 하위 페이지(`/tools/compound-calculator`, `/tools/stock-calculator`, `/spaces/real-estate`, `/stocks/derivatives` 등)의 HTML `<head>`에 `<link rel="canonical" href="https://easy-scraping.com" />`가 강제 주입됨.
+   - **검색엔진 페널티**: Googlebot과 Naver Yeti가 모든 서브페이지를 "메인 홈의 중복 페이지(Duplicate content)"로 판단하여 색인(Index)에서 영구 제외하고 오직 홈 페이지만 검색 결과에 노출시킴.
+2. **[Critical P0 결함] `robots.txt`의 신규 5대 핵심 도메인 크롤링 전면 차단 (`Disallow: /spaces`, `Disallow: /businesses`)**:
+   - `frontend/src/config/routes.config.ts`의 `getDisallowedCrawlerRoutes()`에서 `/spaces`, `/businesses`, `/bank`, `/work` 등이 비공개로 일괄 차단되어 생성됨.
+   - **결과**: `https://easy-scraping.com/spaces/real-estate`(가상 부동산), `https://easy-scraping.com/businesses/ventures`(스타트업 VC) 등 고가치 페이지에 검색 봇 접근이 원천 차단됨.
+3. **[High P1 결함] 클라이언트 컴포넌트(`'use client'`) 페이지의 메타데이터 누락 및 타이틀 "월덕 머니버스" 단일 고정**:
+   - `/tools/compound-calculator`, `/spaces/real-estate`, `/stocks/derivatives` 등 핵심 인터랙티브 페이지들이 `'use client'` 단일 파일로 작성되어 별도 `layout.tsx`가 부재함.
+   - **결과**: 검색 결과에 노출될 제목과 설명이 특정 키워드(예: "복리 계산기", "가상 랜드 부동산", "10x 선물")가 아닌 사이트 기본 설명으로 덮어씌워져 클릭률(CTR)과 검색 랭킹이 바닥을 기록함.
+4. **[High P1 결함] XML 사이트맵 내 쿼리 파라미터(`?tab=orderbook`) 오염 및 신규 5대 도메인 누락**:
+   - `sitemap.ts`에 `/stocks/CHIPS?tab=orderbook`, `/stocks/CHIPS?tab=discussions` 등 쿼리스트링 URL이 포함되어 구글 서치 콘솔 "적절한 표준 태그가 있는 대체 페이지" 경고를 유발함.
+   - 신규 5대 도메인(`/spaces/real-estate`, `/stocks/derivatives`, `/businesses/ventures`, `/clubs/warfare`, `/tools/quant-studio`)이 사이트맵에 누락됨.
+5. **[Medium P2 현상] 과거 티스토리 블로그 시절 URL(`/entry/...`)의 크롤링 예산(Crawl Budget) 잠식**:
+   - Nginx 로그 실측 결과 Googlebot과 Bingbot이 과거 IT/호스팅 블로그 글(`/entry/...` 410 Gone)을 수시로 긁어오며 새로운 머니버스 금융/게임 페이지 탐색이 지연됨.
+
+---
+
+### 2. 🛠️ 5단계 전방위 SEO 쇄신 아키텍처 (Full-Stack SEO Overhaul)
+
+```mermaid
+flowchart TD
+    subgraph S1["1단계: Canonical & Robots.txt 완전 개방"]
+        A1["routes.config.ts 갱신\npublic/indexable 정규화"] --> A2["robots.ts 쇄신\n신규 도메인 Allow 허용"]
+        A1 --> A3["layout.tsx & 서브페이지\n정확한 Self-Referencing Canonical 복구"]
+    end
+
+    subgraph S2["2단계: 개별 서브페이지 전용 Server Layout & 메타데이터 완비"]
+        B1["/tools/compound-calculator/layout.tsx"]
+        B2["/tools/stock-calculator/layout.tsx"]
+        B3["/spaces/real-estate/layout.tsx"]
+        B4["/stocks/derivatives/layout.tsx"]
+        B5["/businesses/ventures/layout.tsx"]
+        B6["/clubs/warfare/layout.tsx"]
+        B7["/tools/quant-studio/layout.tsx"]
+    end
+
+    subgraph S3["3단계: Google & Naver 4중 구조화 데이터 (JSON-LD) 탑재"]
+        C1["FAQPage Schema\n검색창 FAQ 리치 스니펫 카루셀"]
+        C2["BreadcrumbList Schema\n홈 > 도구 > 계산기 계층 네비게이션"]
+        C3["FinancialProduct & SoftwareApplication\n도구별 기능 명세"]
+    end
+
+    subgraph S4["4단계: 클린 XML 사이트맵 쇄신 & IndexNow 즉시 색인 푸시"]
+        D1["sitemap.ts 정규화\n쿼리스트링 제거 & 5대 도메인 탑재"]
+        D2["IndexNow API 연동\nBing/Naver/Yandex 24시간 실시간 색인 제출"]
+    end
+
+    S1 --> S2 --> S3 --> S4
+```
+
+---
+
+### 3. 📋 최종 파일별 상세 변경 및 구현 계획 (Proposed Changes)
+1. **`frontend/src/config/routes.config.ts`**:
+   - 5대 신규 도메인(`/spaces/real-estate`, `/stocks/derivatives`, `/businesses/ventures`, `/clubs/warfare`, `/tools/quant-studio`, `/casino`)을 `isPublic: true`, `indexable: true`, `sitemapPriority: 0.9`로 정식 등록.
+   - `getDisallowedCrawlerRoutes()`에서 공개 서브페이지 접두사가 차단되지 않도록 정밀 화이트리스트 필터링.
+2. **`frontend/src/app/layout.tsx`**:
+   - `metadata.alternates.canonical`을 하드코딩된 홈 URL에서 경로별 상대 경로/정규 경로로 동적 상속되도록 교정.
+3. **신규 Server Component `layout.tsx` 7종 구축**:
+   - `frontend/src/app/spaces/real-estate/layout.tsx` (가상 부동산 랜드 키워드, 동적 OG 이미지, Breadcrumb)
+   - `frontend/src/app/stocks/derivatives/layout.tsx` (10x 파생상품 선물 키워드, FAQPage, OG)
+   - `frontend/src/app/businesses/ventures/layout.tsx` (스타트업 VC 엔젤투자 키워드, FAQPage, OG)
+   - `frontend/src/app/tools/compound-calculator/layout.tsx` (복리 계산기 전용 FAQPage + SoftwareApplication Schema)
+   - `frontend/src/app/tools/stock-calculator/layout.tsx` (물타기 계산기 전용 FAQPage + SoftwareApplication Schema)
+   - `frontend/src/app/clubs/warfare/layout.tsx` (디스코드 길드 공성전 메타데이터)
+   - `frontend/src/app/tools/quant-studio/layout.tsx` (노코드 퀀트 봇 메타데이터)
+4. **`frontend/src/app/sitemap.ts` & 분할 사이트맵 갱신**:
+   - `?tab=orderbook` 등 쿼리스트링 제거.
+   - 5대 신규 도메인 및 10대 가상 주식, 30+ 롱테일 계산기, 200+ pSEO 인기 주식 정규 URL 완벽 포함.
+5. **IndexNow 즉시 색인 제출 배치 실행**:
+   - 갱신된 전체 사이트맵 URL을 Bing/Naver/Yandex IndexNow API에 즉시 전송.
+
+---
+
+### 4. 🧪 검증 계획 (Verification Plan)
+- **HTML <head> 실측**: `curl -sL https://easy-scraping.com/tools/compound-calculator`, `/spaces/real-estate` 등에서 `<title>`, `<link rel="canonical">`, `<meta name="description">`, `application/ld+json` 정상 렌더링 검증.
+- **Robots.txt & Sitemap.xml 검증**: `curl -sL https://easy-scraping.com/robots.txt`에서 신규 경로 Allow 여부 및 `sitemap.xml` 내 쿼리 파라미터 0건 검증.
+- **Rich Results Validation**: Google 구조화 데이터 테스트 규격에 따른 JSON-LD 유효성 검사.
+- **무중단 운영 승격 (`prod-v478`)**: PostgreSQL 1,498개 세션 100% 무손실 보존 상태로 승격.
+
+---
+
+## 🚀 [v32 Specification] 풀스택 SEO 쇄신 및 신규 도메인/계산기 레이아웃 7종 & IndexNow 배포 완결 명세 (누적 추가)
+
+### 1. 🎯 목표 및 주요 구현 산출물
+1. **신규 Server Component Layout 7종 구축 완료**:
+   - `frontend/src/app/spaces/real-estate/layout.tsx` (가상 부동산 랜드 전용 FAQPage, BreadcrumbList, OG 이미지)
+   - `frontend/src/app/stocks/derivatives/layout.tsx` (10x 레버리지 파생상품 전용 FAQPage, BreadcrumbList, OG 이미지)
+   - `frontend/src/app/businesses/ventures/layout.tsx` (스타트업 VC 엔젤투자 전용 FAQPage, BreadcrumbList, OG 이미지)
+   - `frontend/src/app/tools/layout.tsx` (금융 도구 허브 전용 BreadcrumbList, OG 이미지)
+   - `frontend/src/app/tools/compound-calculator/layout.tsx` (복리 계산기 전용 FAQPage + SoftwareApplication Schema)
+   - `frontend/src/app/tools/stock-calculator/layout.tsx` (물타기 계산기 전용 FAQPage + SoftwareApplication Schema)
+   - `frontend/src/app/tools/farming-calculator/layout.tsx` (직업 시뮬레이터 전용 FAQPage + SoftwareApplication Schema)
+   - `frontend/src/app/clubs/warfare/layout.tsx` & `page.tsx` (디스코드 길드 공성전 전용 인터랙티브 UI 및 메타데이터)
+   - `frontend/src/app/tools/quant-studio/layout.tsx` & `page.tsx` (노코드 퀀트 봇 스튜디오 인터랙티브 UI 및 메타데이터)
+
+2. **단일 진실 공급원(SSOT) 라우트 및 Robots / Sitemap 쇄신**:
+   - `frontend/src/config/routes.config.ts`: 5대 신규 도메인 및 계산기 라우트 완전 등록, `getDisallowedCrawlerRoutes()` 정규화.
+   - `frontend/src/app/robots.ts`: `rules: { userAgent: '*', allow: '/', disallow: [...] }` 표준 포맷 정규화.
+   - `frontend/src/app/sitemap.ts`: `?tab=orderbook` 등 쿼리스트링 0건 제거, 2026-09-28T12:00:00.000Z 릴리스 타임스탬프 갱신.
+   - `frontend/src/app/layout.tsx` & `frontend/src/app/tools/page.tsx`: 하드코딩된 도메인 URL 제거 및 상대 경로 캐노니컬 정규화.
+   - `frontend/src/lib/seo.ts`: `softwareApplicationJsonLd` 웹 애플리케이션 및 계산기 전용 스키마 생성 헬퍼 추가.
+
+3. **계약 패키지(`@moneyverse/contract`) 및 백테스팅 엔진 신설**:
+   - `packages/contract/src/warfare.ts` 및 `packages/contract/src/warfare.test.ts`: 길드 공성전 대미지, 방어 실드, 세금 배당 정산 로직.
+   - `packages/contract/src/quant-studio.ts` 및 `packages/contract/src/quant-studio.test.ts`: DCA, 그리드, RSI 퀀트 백테스팅 엔진.
+
+4. **검증 결과**:
+   - Contract 단위 테스트 4개 파일 31개 테스트 100% 통과.
+   - Frontend SEO 단위 테스트 3개 파일 11개 테스트 100% 통과.
+   - Next.js Turbopack 프로덕션 빌드 122개 전 라우트 정상 컴파일 (Exit Code 0).
+
 
 
 

@@ -94,6 +94,42 @@ export function webApplicationJsonLd() {
   };
 }
 
+export interface SoftwareAppOptions {
+  readonly name: string;
+  readonly description: string;
+  readonly urlPath: string;
+  readonly applicationCategory?: string;
+  readonly features?: readonly string[];
+}
+
+/**
+ * Schema.org WebApplication / SoftwareApplication schema for interactive calculators and financial tools
+ */
+export function softwareApplicationJsonLd(options: SoftwareAppOptions) {
+  const url = canonicalUrl(options.urlPath);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    '@id': `${url}#app`,
+    name: options.name,
+    url,
+    applicationCategory: options.applicationCategory || 'FinanceApplication',
+    operatingSystem: 'All',
+    browserRequirements: 'Requires JavaScript. Requires HTML5.',
+    description: options.description,
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'KRW',
+    },
+    featureList: options.features || [
+      '무설치 브라우저 실시간 계산',
+      'WLD 및 원화 환산 시뮬레이션',
+      '롱테일 프리셋 즉시 적용',
+    ],
+  };
+}
+
 export interface ForumPostData {
   readonly postId: string;
   readonly title: string;

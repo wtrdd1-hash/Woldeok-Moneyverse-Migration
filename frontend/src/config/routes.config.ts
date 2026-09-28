@@ -362,6 +362,68 @@ export const APP_ROUTES: readonly RouteDefinition[] = [
     group: 'legal',
   },
 
+  // === 5대 차세대 신규 가상경제 & 금융 도메인 (Public SEO Landing Hubs) ===
+  {
+    path: '/spaces/real-estate',
+    label: { ko: '가상 부동산 랜드 임대 거래소', en: 'Virtual Real Estate & Land', ja: '仮想不動産ランド取引所', zh: '虚拟房地产与土地交易所' },
+    isPublic: true,
+    authRequired: false,
+    indexable: true,
+    sitemapPriority: 0.95,
+    changeFrequency: 'daily',
+    group: 'economy',
+  },
+  {
+    path: '/stocks/derivatives',
+    label: { ko: '10X 레버리지 가상 파생상품 선물', en: '10X Leverage Virtual Derivatives', ja: '10倍レバレッジ仮想先物', zh: '10倍杠杆虚拟衍生品期货' },
+    isPublic: true,
+    authRequired: false,
+    indexable: true,
+    sitemapPriority: 0.95,
+    changeFrequency: 'daily',
+    group: 'finance',
+  },
+  {
+    path: '/businesses/ventures',
+    label: { ko: '스타트업 VC 엔젤투자 & 펀딩', en: 'Startup VC Angel Investment', ja: 'スタートアップVCエンジェル投資', zh: '初创企业VC天使投资与众筹' },
+    isPublic: true,
+    authRequired: false,
+    indexable: true,
+    sitemapPriority: 0.9,
+    changeFrequency: 'daily',
+    group: 'economy',
+  },
+  {
+    path: '/clubs/warfare',
+    label: { ko: '디스코드 길드 영지 공성전', en: 'Discord Guild Territory Warfare', ja: 'Discordギルド領地攻城戦', zh: 'Discord公会领地攻城战' },
+    isPublic: true,
+    authRequired: false,
+    indexable: true,
+    sitemapPriority: 0.9,
+    changeFrequency: 'daily',
+    group: 'community',
+  },
+  {
+    path: '/tools/quant-studio',
+    label: { ko: '노코드 퀀트 봇 스튜디오', en: 'No-Code Quant Bot Studio', ja: 'ノーコードクオンツBotスタジオ', zh: '无代码量化策略Bot工作室' },
+    isPublic: true,
+    authRequired: false,
+    indexable: true,
+    sitemapPriority: 0.9,
+    changeFrequency: 'daily',
+    group: 'finance',
+  },
+  {
+    path: '/casino',
+    label: { ko: '럭키 룰렛 & 엔터테인먼트 허브', en: 'Lucky Roulette & Casino Hub', ja: 'ラッキールーレット＆カジノ', zh: '幸运轮盘与游戏中心' },
+    isPublic: true,
+    authRequired: false,
+    indexable: true,
+    sitemapPriority: 0.85,
+    changeFrequency: 'daily',
+    group: 'play',
+  },
+
   // === Member-Protected Core Screens (Excluded from Sitemap, Disallowed in robots.txt) ===
   {
     path: '/stocks',
@@ -516,17 +578,28 @@ export function getPublicSitemapRoutes(): readonly RouteDefinition[] {
 
 /**
  * Filter all member-only / non-indexable routes for robots.txt Disallow directives.
+ * Strictly prevents blocking public sub-routes (e.g. /spaces/real-estate).
  */
 export function getDisallowedCrawlerRoutes(): string[] {
-  const disallowed = APP_ROUTES.filter((r) => !r.isPublic || !r.indexable)
-    .map((r) => r.path)
-    .filter((p) => p !== '' && !p.includes('[')); // Exclude dynamic patterns which are handled separately
-
   return [
-    ...disallowed,
-    '/api/',
+    '/admin',
     '/admin/',
+    '/api/',
+    '/auth/',
+    '/developer',
+    '/account',
     '/account/',
+    '/chat',
+    '/gallery/submit',
+    '/status',
+    '/quests',
+    '/businesses',
+    '/bank',
+    '/wallet',
+    '/work',
+    '/seasons',
+    '/bank/savings-pot',
+    '/progression/prestige',
   ];
 }
 
@@ -538,3 +611,4 @@ export function isPathIndexable(pathname: string): boolean {
   const match = APP_ROUTES.find((r) => r.path === clean);
   return match ? match.indexable : false;
 }
+

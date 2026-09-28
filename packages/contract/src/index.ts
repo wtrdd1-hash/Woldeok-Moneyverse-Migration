@@ -46,3 +46,27 @@ export type {
   ShareholderHolding,
   IpoAllocationResult,
 } from './ventures';
+
+export {
+  INITIAL_TERRITORIES,
+  calculateSiegeDamage,
+  calculateGuildTaxDividend,
+  calculateShieldRepairCost,
+} from './warfare';
+export type {
+  TerritoryId,
+  SiegeStatus,
+  TerritoryZone,
+} from './warfare';
+
+export {
+  INITIAL_QUANT_PRESETS,
+  simulateQuantStrategy,
+  calculateGridLevels,
+} from './quant-studio';
+export type {
+  QuantStrategyType,
+  QuantBotConfig,
+  BacktestResult,
+} from './quant-studio';
+

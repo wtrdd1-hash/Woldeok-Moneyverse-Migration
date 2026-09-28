@@ -12,26 +12,16 @@ export default function robots(): MetadataRoute.Robots {
   }
 
   const disallowedRoutes = getDisallowedCrawlerRoutes();
-  const disallowSet = new Set([
-    ...disallowedRoutes,
-    '/admin',
-    '/developer',
-    '/account',
-    '/wallet',
-    '/status',
-    '/gallery/submit',
-    '/login',
-    '/api/',
-    '/auth/',
-  ]);
+  const disallowList = Array.from(new Set(disallowedRoutes));
 
   return {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: Array.from(disallowSet),
+      disallow: disallowList,
     },
     sitemap: `${base}/sitemap.xml`,
     host: base,
   };
 }
+

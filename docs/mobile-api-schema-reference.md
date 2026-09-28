@@ -1554,6 +1554,7 @@ _None._
 | post.title | true | string |  |
 | post.body | true | string |  |
 | post.authorName | true | string |  |
+| post.authorUserId | false | null \| string |  |
 | post.createdAt | true | string |  |
 | post.updatedAt | true | null \| string |  |
 | post.mine | true | boolean |  |
@@ -1619,6 +1620,7 @@ _No request body._
 | post.title | true | string |  |
 | post.body | true | string |  |
 | post.authorName | true | string |  |
+| post.authorUserId | false | null \| string |  |
 | post.createdAt | true | string |  |
 | post.updatedAt | true | null \| string |  |
 | post.mine | true | boolean |  |
@@ -1664,6 +1666,7 @@ _No request body._
 | post.title | true | string |  |
 | post.body | true | string |  |
 | post.authorName | true | string |  |
+| post.authorUserId | false | null \| string |  |
 | post.createdAt | true | string |  |
 | post.updatedAt | true | null \| string |  |
 | post.mine | true | boolean |  |
@@ -1699,6 +1702,7 @@ _No request body._
 | comments[].commentId | true | string |  |
 | comments[].body | true | string |  |
 | comments[].authorName | true | string |  |
+| comments[].authorUserId | false | null \| string |  |
 | comments[].createdAt | true | string |  |
 | comments[].mine | true | boolean |  |
 
@@ -1737,6 +1741,7 @@ _No request body._
 | comment.commentId | true | string |  |
 | comment.body | true | string |  |
 | comment.authorName | true | string |  |
+| comment.authorUserId | false | null \| string |  |
 | comment.createdAt | true | string |  |
 | comment.mine | true | boolean |  |
 
@@ -1855,6 +1860,7 @@ _No request body._
 | post.title | true | string |  |
 | post.body | true | string |  |
 | post.authorName | true | string |  |
+| post.authorUserId | false | null \| string |  |
 | post.createdAt | true | string |  |
 | post.updatedAt | true | null \| string |  |
 | post.mine | true | boolean=false | const=false |
@@ -1890,6 +1896,7 @@ _No request body._
 | comments[].commentId | true | string |  |
 | comments[].body | true | string |  |
 | comments[].authorName | true | string |  |
+| comments[].authorUserId | false | null \| string |  |
 | comments[].createdAt | true | string |  |
 | comments[].mine | true | boolean=false | const=false |
 

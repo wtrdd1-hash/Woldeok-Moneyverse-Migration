@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     '앱테크 파밍 계산기',
   ],
   alternates: {
-    canonical: 'https://easy-scraping.com/tools',
+    canonical: '/tools',
   },
 };
 

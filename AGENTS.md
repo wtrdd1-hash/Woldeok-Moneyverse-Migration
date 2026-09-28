@@ -13,7 +13,9 @@ mistakes it prevents are expensive, and every one of them has been made.
 
 ## ⚡ 0. Superpowers Engineering Framework (Mandatory Global Discipline)
 
-All agents and contributors operating on this repository **MUST strictly follow the [Superpowers software development methodology](https://github.com/obra/superpowers)**.
+All agents and contributors operating on this repository **MUST strictly follow the [Superpowers software development methodology](https://github.com/obra/superpowers)**. Before any investigation, question, code or documentation change, identify and read the applicable Superpowers skill; do not bypass a relevant skill because a task appears small or urgent.
+
+The Superpowers workflow is a release requirement, not advisory guidance. A change may be reported as complete, committed, merged, or deployed only after its applicable planning, implementation, debugging, review, and verification stages have been followed and their evidence is recorded in the task or pull request.
 
 ### 🌟 Core Workflow & Stage Discipline:
 1. **Brainstorming (`skills/brainstorming`)**: Refine requirements through Socratic questioning, explore trade-offs, and present chunked specifications for explicit confirmation *before writing any code*.
