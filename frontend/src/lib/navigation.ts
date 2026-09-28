@@ -285,10 +285,9 @@ export const CATEGORY_NAV: readonly NavCategory[] = [
     id: 'entertainment',
     label: '플레이·시즌',
     icon: 'Sparkles',
-    description: '카지노 미니게임, 월드 시즌 패스, 경제 일정 및 소셜 클럽',
+    description: '월드 시즌 패스, 경제 일정 및 소셜 클럽',
     entries: [
-      { href: '/casino', label: '럭키존 (카지노)', description: '룰렛, 다이스 등 4대 미니게임', badge: 'HOT' },
-      { href: '/seasons', label: '월드사이클 (시즌)', description: '시즌 랭킹, 미션 패스 및 한정 보상' },
+      { href: '/seasons', label: '월드사이클 (시즌)', description: '시즌 랭킹, 미션 패스 및 한정 보상', badge: 'HOT' },
       { href: '/calendar', label: '이벤트 일정', description: '경제 이벤트 및 시장 일정 캘린더' },
       { href: '/clubs', label: '클럽·협동조합', description: '유저 길드 창설, 가입 및 협동 펀딩' },
       { href: '/collections', label: '컬렉션 전시관', description: '소장품 전시관 및 D1~D7 리텐션 큐레이션', badge: 'NEW' },
@@ -351,7 +350,6 @@ export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/seasons', label: '월드사이클 (시즌)' },
   { href: '/quests', label: '퀘스트' },
   { href: '/calendar', label: '이벤트 일정' },
-  { href: '/casino', label: '럭키존 (카지노)' },
   { href: '/progression', label: '장기 성장 단계' },
   { href: '/clubs', label: '클럽·협동조합' },
   { href: '/collections', label: '컬렉션 전시관' },
@@ -412,7 +410,6 @@ export const HEADER_PUBLIC: readonly NavItem[] = [
   {
     label: '플레이·시즌',
     entries: [
-      { href: '/casino', label: '럭키존 (카지노)' },
       { href: '/seasons', label: '월드사이클 (시즌)' },
       { href: '/calendar', label: '이벤트 일정' },
       { href: '/clubs', label: '클럽·협동조합' },
