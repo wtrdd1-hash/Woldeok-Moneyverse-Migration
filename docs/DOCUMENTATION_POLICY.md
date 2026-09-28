@@ -2,7 +2,7 @@
 
 **English canonical** | [한국어](DOCUMENTATION_POLICY.ko.md)
 
-> Version: v2026.09.27.467
+> Version: v2026.09.28.478
 > Status: current documentation governance
 > Repository: `wtrdd1-hash/Woldeok-Moneyverse-Migration`
 
@@ -32,6 +32,8 @@ Historical, internal-only, third-language, or compatibility files are not retroa
 ## 4. Change workflow
 
 All meaningful documentation changes use a dedicated branch. Direct documentation commits to `main` are prohibited except an explicitly authorized emergency repository repair.
+
+Repository-affecting scheduled automations are contributors for this policy. Before any response or repository action they must apply the Superpowers task-entry discipline in `AGENTS.md` (`skills/using-superpowers` first, then every applicable skill before its matching step), and their saved prompts must carry that requirement explicitly. Interactive user-directed Moneyverse tasks follow the same rule.
 
 Before editing: fetch latest `origin/main`, read this policy, the document catalog, integrated master, project plan, relevant detailed specs, and current work/update records. Recheck `origin/main` mid-work and before integration. Concurrent work must not be overwritten.
 

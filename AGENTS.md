@@ -15,6 +15,8 @@ mistakes it prevents are expensive, and every one of them has been made.
 
 All agents and contributors operating on this repository **MUST strictly follow the [Superpowers software development methodology](https://github.com/obra/superpowers)**.
 
+This is a task-entry rule, not only a coding convention. It applies to every user-directed Moneyverse task and every Moneyverse scheduled/automation run, including planning, QA, documentation, audits, monitoring, deployment, and read-only checks. Before any response or action, invoke the installed `skills/using-superpowers` skill and then invoke every other applicable Superpowers skill before the matching step. Saved scheduled-task prompts must carry this requirement explicitly. Do not silently bypass an applicable skill; if a required skill is unavailable, record the run as blocked at that step rather than proceeding as though the discipline was satisfied.
+
 ### 🌟 Core Workflow & Stage Discipline:
 1. **Brainstorming (`skills/brainstorming`)**: Refine requirements through Socratic questioning, explore trade-offs, and present chunked specifications for explicit confirmation *before writing any code*.
 2. **Worktree & Isolation (`skills/using-git-worktrees`)**: Create isolated workspaces for features and verify a clean test baseline.

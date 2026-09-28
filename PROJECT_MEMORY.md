@@ -2,7 +2,7 @@
 
 ## ⚡ Global Framework Standard: Superpowers (`obra/superpowers`)
 - **Framework Origin**: `https://github.com/obra/superpowers`
-- **Scope**: All project tasks, coding workflows, refactors, feature additions, and debugging.
+- **Scope**: Every interactive user-directed Moneyverse task and every Moneyverse scheduled/automation run, including planning, QA, documentation, audits, monitoring, coding, refactors, feature work, debugging, release, and read-only verification.
 - **Enforced Disciplines**:
   1. `skills/using-superpowers`: Automatic skill invocation before all tasks/responses.
   2. `skills/brainstorming`: Socratic requirement probing & design specification before code changes.
@@ -10,6 +10,7 @@
   4. `skills/test-driven-development`: Red-Green-Refactor invariant.
   5. `skills/systematic-debugging`: 4-phase root cause analysis over speculative patching.
   6. `skills/verification-before-completion`: Authoritative verification before completion.
+- **Scheduled task enforcement**: Every Moneyverse automation prompt must invoke `skills/using-superpowers` before any response/action and then invoke all other applicable Superpowers skills before the corresponding step. If a required skill cannot be invoked, the task records the step as blocked instead of silently bypassing it.
 
 ---
 

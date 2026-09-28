@@ -1,11 +1,18 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.27.468
+> Current ledger version: v2026.09.28.478
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.28.478 — 2026-09-28 — Superpowers project-command and scheduled-automation enforcement
+- Governance/automation-only cycle. Start and mid-work `origin/main=b6af50519fa460f26199899c441f2b4918eefe28`; no drift was detected. No application runtime mutation, Test promotion, or Production deployment is claimed.
+- **OPS-478-01 / P0:** `AGENTS.md` task-entry scope explicitly covers every interactive user-directed Moneyverse task and every Moneyverse scheduled/automation run. `skills/using-superpowers` is invoked before any response/action, with each other applicable Superpowers skill invoked before its matching step.
+- **OPS-478-02 / P1:** saved active Moneyverse scheduled-task prompts are aligned to the same explicit entry rule so automation does not rely on implicit repository knowledge.
+- **OPS-478-03 / P1:** the documentation governance policy and project execution memory mirror the enforcement rule in English canonical/Korean parity form.
+- **OPS-478-04 / AUTHORITY:** this is operational governance, not product-plan reconciliation. `PROJECT_PLAN.md` remains at v2026.09.25.444 and existing product authority drift is not hidden by a version-only bump.
 
 ## v2026.09.27.468 — 2026-09-27 — Full-Domain API Catalog & Release Logs v459~v468 Synchronization
 - Documentation synchronization cycle. Base `origin/main=ce06a79f6e453a9a7f1ee2979ec3bf3fe88ca5ae`.

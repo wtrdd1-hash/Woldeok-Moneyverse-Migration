@@ -1,3 +1,12 @@
+## v2026.09.28.478 — Superpowers Project Command & Scheduled Automation Enforcement
+
+- **Change type**: Governance/automation policy only; no application runtime release, Test promotion, or Production deployment.
+- Expanded the mandatory `obra/superpowers` discipline from repository contributors to every user-directed Moneyverse task and every Moneyverse scheduled/automation run.
+- Required `skills/using-superpowers` before any response/action and every other applicable Superpowers skill before its matching step.
+- Mirrored the rule in `AGENTS.md`, project execution memory, documentation governance, and the integrated planning ledger.
+- Updated the saved prompts for currently active Moneyverse scheduled work so the rule is explicit at automation entry.
+- Kept `PROJECT_PLAN.md` at v2026.09.25.444 because this cycle changes operating governance, not product requirements.
+
 ## v2026.09.28.477 — Full-Stack 15-Domain REST API Endpoints, 5 Expansion Domain Controllers (Real Estate/Derivatives/Ventures/Warfare/Quant), Master API Catalog Release with 1,498 Sessions Preserved
 
 - **Release Version**: `prod-v477`

@@ -1,11 +1,18 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.09.27.468
+> 현재 원장 버전: v2026.09.28.478
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.09.28.478 — 2026-09-28 — Superpowers 프로젝트 명령 및 예약 자동화 강제
+- 거버넌스/자동화 전용 회차다. 시작 및 중간 `origin/main=b6af50519fa460f26199899c441f2b4918eefe28`이며 drift가 없었다. 애플리케이션 런타임 변경, Test 승격, Production 배포를 주장하지 않는다.
+- **OPS-478-01 / P0:** `AGENTS.md` 작업 진입 범위를 사용자가 직접 지시하는 모든 Moneyverse 작업과 모든 Moneyverse 예약/자동화 실행으로 명시했다. 응답/행동 전에 `skills/using-superpowers`를 호출하고, 이후 적용 가능한 각 Superpowers skill을 해당 단계 전에 호출한다.
+- **OPS-478-02 / P1:** 현재 활성 Moneyverse 예약 작업의 저장 프롬프트에도 같은 진입 규칙을 직접 반영해 암묵적인 저장소 지침 의존을 제거한다.
+- **OPS-478-03 / P1:** 문서 거버넌스 정책과 프로젝트 실행 메모도 English canonical/Korean parity 형태로 같은 강제 규칙을 반영한다.
+- **OPS-478-04 / AUTHORITY:** 이번 변경은 운영 거버넌스이며 제품 기획 정합화가 아니다. `PROJECT_PLAN.md`는 v2026.09.25.444를 유지하고 단순 버전 상승으로 기존 제품 권위 drift를 숨기지 않는다.
 
 ## v2026.09.27.468 — 2026-09-27 — 전 도메인 API 카탈로그 및 릴리스 로그 v459~v468 정합화
 - 문서 전용 동기화 회차. 기준 `origin/main=ce06a79f6e453a9a7f1ee2979ec3bf3fe88ca5ae`.
