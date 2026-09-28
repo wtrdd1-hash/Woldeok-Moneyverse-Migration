@@ -2,8 +2,8 @@
 
 **English canonical** | [한국어](DOCUMENT_CATALOG.ko.md)
 
-> **Snapshot Version**: `v2026.09.28.477`  
-> **Target Branch**: `main` (Full-Stack 15-Domain REST API & Master Catalog Release)  
+> **Snapshot Version**: `v2026.09.28.478`  
+> **Target Branch**: `main` (Full-Stack SEO Overhaul, 7 Dedicated Layouts, Clean Sitemap & IndexNow Push)  
 > **Purpose**: Official master inventory certifying documentation organization status.
 
 ---

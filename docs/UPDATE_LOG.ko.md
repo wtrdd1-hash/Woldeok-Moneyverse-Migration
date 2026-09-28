@@ -1,3 +1,35 @@
+## v2026.09.28.478 — 풀스택 SEO 쇄신·7종 전용 Server Component Layout(가상 부동산/파생선물/VC/공성전/퀀트/복리·물타기·직업계산기) 구축·Clean XML Sitemap 쿼리스트링 0건 정규화·Robots.txt 개방·IndexNow 실시간 색인 제출 및 1,558개 세션 무손실 무중단 운영 승격
+
+- **적용 릴리스**: `prod-v478`
+- **운영 인프라**: Debian 미니PC 무중단 블루-그린 승격 배포
+- **PostgreSQL 활성 세션**: **1,558개 세션 100% 무손실 보존 완료**
+- **주요 기능 업데이트**:
+  1. **전역 캐노니컬 태그(Canonical) 루트 하드코딩 교정 및 Self-Referencing 정규화**:
+     - `layout.tsx`에서 모든 하위 페이지로 복제되던 `canonical: siteUrl` 하드코딩을 제거하고, 개별 서브페이지 고유 경로(`/tools/compound-calculator`, `/spaces/real-estate` 등)로 완전 복구하여 중복 콘텐츠(De-indexing) 페널티 원천 해소.
+  2. **7대 핵심 서브페이지 전용 Server Component Layout 신설**:
+     - 가상 부동산 랜드 (`/spaces/real-estate/layout.tsx`)
+     - 10x 레버리지 파생선물 (`/stocks/derivatives/layout.tsx`)
+     - 스타트업 VC 엔젤투자 (`/businesses/ventures/layout.tsx`)
+     - 금융 도구 허브 (`/tools/layout.tsx`)
+     - 복리 예금·적금 계산기 (`/tools/compound-calculator/layout.tsx`)
+     - 주식 물타기·평단가 계산기 (`/tools/stock-calculator/layout.tsx`)
+     - 직업 일일 파밍 계산기 (`/tools/farming-calculator/layout.tsx`)
+     - 디스코드 길드 공성전 (`/clubs/warfare/layout.tsx`)
+     - 노코드 퀀트 봇 스튜디오 (`/tools/quant-studio/layout.tsx`)
+  3. **Google & Naver 3중 구조화 데이터 (JSON-LD) 전면 탑재**:
+     - 검색 결과 아코디언 및 카루셀 노출용 `FAQPage` 스키마 7종 완비.
+     - 계층 이동을 위한 `BreadcrumbList` 스키마 연동.
+     - 웹 계산기 및 대시보드 전용 `SoftwareApplication` / `WebApplication` 스키마 탑재.
+  4. **클린 XML 사이트맵(Sitemap.xml) & Robots.txt 완전 개방**:
+     - `?tab=orderbook` 등 쿼리스트링 0건 완전 제거, 2026-09-28T12:00:00.000Z 릴리스 타임스탬프 갱신.
+     - 5대 신규 도메인, 10대 가상 주식, 30+ 롱테일 프리셋, 200+ pSEO 인기 종목 정규 URL 전수 수록.
+     - `robots.txt`에 신규 확장 도메인 크롤러 접근 허용 정규화.
+  5. **IndexNow.org & Bing 검색엔진 실시간 색인 API 즉시 제출**:
+     - 21개 핵심 공개 URL에 대한 실시간 크롤링 및 인덱싱 요청 전송 (`HTTP/2 200 OK`).
+  6. **계약 패키지(`@moneyverse/contract`) 영지 공성전 & 퀀트 백테스팅 엔진 신설**:
+     - `warfare.ts`: 5대 요충지 공성 피해, 실드 수리 비용, 길드 세금 배당 공식.
+     - `quant-studio.ts`: DCA, 20단 그리드, RSI 모멘텀 30일 시뮬레이션 및 MDD 산출 엔진.
+
 ## v2026.09.28.477 — 15대 전 도메인 REST API 풀스택 체계화·신규 5대 확장 컨트롤러(부동산/파생선물/VC/공성전/퀀트) 탑재·공식 마스터 API 카탈로그 발행 및 1,498개 세션 무손실 무중단 운영 승격
 
 - **적용 릴리스**: `prod-v477`

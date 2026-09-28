@@ -1,3 +1,35 @@
+## v2026.09.28.478 — Full-Stack SEO Overhaul, 7 Dedicated Server Component Layouts (Real Estate/Derivatives/Ventures/Warfare/Quant/Calculators), Clean XML Sitemap Query Normalization, Open Robots.txt, IndexNow Real-Time Push with 1,558 Sessions Preserved
+
+- **Release Version**: `prod-v478`
+- **Infrastructure**: Debian Mini-PC Zero-Downtime Blue-Green Rolling Promotion
+- **PostgreSQL Active Sessions**: **1,558 Active Sessions 100% Preserved (Zero Loss)**
+- **Key Feature Implementations**:
+  1. **Root Canonical Tag Override Remediation & Self-Referencing Normalization**:
+     - Removed root hardcoded `canonical: siteUrl` in `layout.tsx` that duplicated across subpages, restoring proper self-referencing canonical URLs (`/tools/compound-calculator`, `/spaces/real-estate`, etc.) and completely eliminating de-indexing penalties.
+  2. **7 Dedicated Server Component Layouts Created**:
+     - Virtual Real Estate & Land (`/spaces/real-estate/layout.tsx`)
+     - 10x Leverage Derivatives Futures (`/stocks/derivatives/layout.tsx`)
+     - Startup VC Angel Investment (`/businesses/ventures/layout.tsx`)
+     - Financial Tools Hub (`/tools/layout.tsx`)
+     - Compound Interest Calculator (`/tools/compound-calculator/layout.tsx`)
+     - Stock Average Down Calculator (`/tools/stock-calculator/layout.tsx`)
+     - Career Farming Simulator (`/tools/farming-calculator/layout.tsx`)
+     - Discord Guild Territory Siege (`/clubs/warfare/layout.tsx`)
+     - No-Code Quant Bot Studio (`/tools/quant-studio/layout.tsx`)
+  3. **Triple Schema.org (JSON-LD) Rich Snippets Integration**:
+     - 7 dedicated `FAQPage` schemas for Google & Naver rich result accordions.
+     - `BreadcrumbList` schemas across hierarchical navigation surfaces.
+     - `SoftwareApplication` / `WebApplication` schemas for web calculators and dashboards.
+  4. **Clean XML Sitemap & Robots.txt Open Crawling**:
+     - Completely removed query strings (`?tab=orderbook`) from sitemap.xml with updated `2026-09-28T12:00:00.000Z` timestamp.
+     - Included 5 new expansion domains, 10 virtual stocks, 30+ longtail presets, and 200+ pSEO stock calculator URLs.
+     - Fully normalized `robots.txt` rules allowing crawler access to all expansion domains.
+  5. **Instant IndexNow.org & Bing Real-Time Search Engine Submission**:
+     - Submitted 21 core public URLs to Bing and IndexNow.org APIs with immediate confirmation (`HTTP/2 200 OK`).
+  6. **Contract Package (`@moneyverse/contract`) Warfare & Quant Engines**:
+     - `warfare.ts`: Stronghold siege damage, defense shield maintenance, and guild tax dividend formulas.
+     - `quant-studio.ts`: DCA, 20-step Grid, and RSI momentum backtesting engines with max drawdown computation.
+
 ## v2026.09.28.477 — Full-Stack 15-Domain REST API Endpoints, 5 Expansion Domain Controllers (Real Estate/Derivatives/Ventures/Warfare/Quant), Master API Catalog Release with 1,498 Sessions Preserved
 
 - **Release Version**: `prod-v477`
