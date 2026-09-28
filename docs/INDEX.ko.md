@@ -3,12 +3,12 @@
 [English canonical](INDEX.md) | **한국어**
 
 > **문서 거버넌스**: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)  
-> **공식 구현 권위 릴리스**: **v2026.09.28.476** (최신 main 기준 동기화 완료)  
+> **공식 구현 권위 릴리스**: **v2026.09.28.477** (최신 main 기준 동기화 완료)  
 > **상태**: **AUTHORITY_SYNCHRONIZED (권위 기획·런타임 100% 일치)**
 
 ---
 
-## 🚀 10대 도메인별 마스터 문서 맵 (Master Directory)
+## 🚀 15대 도메인별 마스터 문서 맵 (Master Directory)
 
 ### 01. 📱 마스터 스펙 & 유저 가이드
 1. **[통합 앱 명세서 및 상세 유저 가이드](APP_SPEC_AND_USER_GUIDE.ko.md)**: 3대 금융 계산기, 30대 프리셋, pSEO 2만+ 엔진, 바이럴 진단서, 출석 룰렛, 주가 예측 배팅 전 도메인 엔드투엔드 가이드

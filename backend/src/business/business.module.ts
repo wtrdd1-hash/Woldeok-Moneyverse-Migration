@@ -5,10 +5,11 @@ import { PG_POOL } from '../core/pool.provider';
 import { BusinessController } from './business.controller';
 import { PostgresBusinessRepository } from './business.repository';
 import { BusinessService } from './business.service';
+import { VenturesController } from './ventures.controller';
 
 @Module({
   imports: [AuthModule],
-  controllers: [BusinessController],
+  controllers: [BusinessController, VenturesController],
   providers: [
     {
       provide: BusinessService,

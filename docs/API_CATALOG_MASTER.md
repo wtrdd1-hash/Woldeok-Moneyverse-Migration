@@ -1,176 +1,274 @@
-# Woldeok Moneyverse Authoritative API Catalog Master Specification
+# 🔌 Woldeok Moneyverse Official Master REST API Catalog (v2026.09.28.477)
 
-> **Version**: v2026.09.27.468  
-> **Status**: Production Authoritative API Specification (100% Verified)  
-> **Effective Date**: 2026-09-27  
-> **Base Runtime**: NestJS 10.x REST API BFF / Next.js 16.3.4 BFF Proxy (`/app-api/v1/*`)  
-> **Compliance**: Full Decommissioning of Casino APIs & 100% Fair Virtual Economy Gamification
+**English canonical** | [한국어](API_CATALOG_MASTER.ko.md)
 
----
-
-## 🏛️ 1. Architecture & Security Standards
-
-1. **Base URLs**:
-   - Internal Backend Service: `http://127.0.0.1:3001/api/v1`
-   - Frontend BFF Proxy: `/app-api/v1/*` or `/api/v1/*`
-2. **Session & Security Invariants**:
-   - Authenticated endpoints enforce `HttpOnly; SameSite=Lax; Secure` cookie (`session_id`).
-   - Guard chain: `SessionGuard` -> `AuthenticatedGuard` -> `ConsentGuard` -> `CsrfGuard`.
-3. **Idempotency Invariants**:
-   - Financial and ledger mutations require UUID v4 in `X-Idempotency-Key` or body payload.
+> **Version**: `v2026.09.28.477`  
+> **Base URL**: `https://easy-scraping.com/api/v1` (Production) / `http://127.0.0.1:3000/api/v1` (Local)  
+> **Protocols**: HTTP/2, TLS 1.3, JSON (UTF-8)  
+> **Error Standard**: RFC 7807 Problem Details for HTTP APIs  
+> **Multi-Layer Security Headers**: `x-session-id`, `x-csrf-token`, `x-internal-token`, `x-totp-code` (Step-Up 2FA)
 
 ---
 
-## 📋 2. Core API Catalog Across 14 Domains
-
-### 1. Authentication & Sessions
-- `GET /auth/bootstrap`: Global bootstrap configuration
-- `POST /auth/local/register`: Local email/password registration
-- `POST /auth/local/login`: Local login & session issuance
-- `POST /auth/logout`: Session termination
-- `POST /auth/signout-all`: Remote global signout across all devices
-- `GET /auth/session`: Active session status
-- `PUT /auth/consent`: Terms of service Step-Up consent
-- `GET /auth/discord/authorize`: Discord OAuth2 entrypoint
-- `GET /auth/discord/callback`: Discord OAuth2 callback
-
-### 2. Account & Security Center
-- `GET /account`: Profile & consolidated net worth summary
-- `PUT /account/password`: Password modification
-- `GET /account/security/sessions`: Active device sessions
-- `DELETE /account/security/sessions/:id`: Revoke specific device session
-- `GET /account/identities`: Connected social identities
-- `DELETE /account`: Account deletion & GDPR data erasure
-- `GET /privacy/data-export`: GDPR data export
-
-### 3. Wallet & Ledger
-- `GET /wallet/balance`: Real-time WLD balance & lockups
-- `POST /wallet/transfer`: P2P idempotent WLD transfer (0 WLD fee)
-- `GET /wallet/transactions`: 24-hour transaction ledger
-- `GET /activity/stream`: Real-time economic event stream
-
-### 4. Virtual Banking & Treasury Bonds
-- `GET /bank/summary`: Central bank deposits & compound interest accrued
-- `POST /bank/deposit`: Deposit WLD into compounding account
-- `POST /bank/withdraw`: Withdraw WLD principal and interest
-- `POST /bank/claim-interest`: Claim accrued daily compound interest
-- `GET /bank/bonds`: Virtual treasury bond catalog
-- `POST /bank/bonds/purchase`: Purchase fixed-maturity bonds
-- `POST /bank/bonds/redeem`: Redeem matured treasury bonds
-- `GET /bank/pockets`: Multi-pocket savings goals
-- `POST /bank/pockets`: Create new custom savings pocket
-
-### 5. Work & Career Mastery
-- `GET /work/status`: Current profession, mastery EXP, daily cap
-- `GET /work/careers`: 5 core profession catalogs
-- `POST /work/change-career`: Career switch
-- `POST /work/tasks/complete`: Complete work assignment & claim WLD
-- `GET /game-clock`: 10-min day / 70-min week server clock
-
-### 6. Virtual Stock Exchange
-- `GET /stocks`: 10 listed stocks market overview
-- `GET /stocks/:symbol`: 10-Depth orderbook & live candle chart
-- `POST /stocks/orders`: Limit / Market buy & sell orders
-- `GET /stocks/portfolio`: User stock portfolio & profit/loss
-- `GET /stocks/alerts`: Target price alert rules
-- `POST /stocks/alerts`: Create price alert rule
-- `DELETE /stocks/alerts/:id`: Remove alert rule
-- `GET /newspaper/daily`: AI Council daily economic briefing
-
-### 7. Businesses & Commercial Units
-- `GET /businesses`: Business catalog & user enterprises
-- `POST /businesses/acquire`: Acquire commercial enterprise
-- `POST /businesses/:id/settle`: Settle daily enterprise revenues
-- `POST /businesses/:id/boost`: Apply productivity boost license
-
-### 8. P2P Marketplace, Auctions & Crafting
-- `GET /marketplace/listings`: Active P2P marketplace listings
-- `POST /marketplace/listings`: List item for sale
-- `POST /marketplace/listings/:id/buy`: Instant buy (2% tax burned)
-- `POST /marketplace/listings/:id/cancel`: Cancel active listing
-- `GET /marketplace/auctions`: Active P2P auction listings & filters
-- `GET /marketplace/auctions/:id`: Auction details, highest bid, and expiry timer
-- `POST /marketplace/auctions`: Create new auction listing
-- `POST /marketplace/auctions/:id/bid`: Manual bid placement (auto-extends by 60s if placed within final 30s)
-- `POST /marketplace/auctions/:id/proxy-bid`: Set maximum proxy auto-bidding threshold
-- `GET /marketplace/auctions/:id/depth`: Real-time orderbook depth chart data (bid/ask volume)
-- `GET /marketplace/auctions/:id/ticks`: Recent trade and bid tick timeline
-- `GET /crafting/recipes`: Crafting table recipes
-- `POST /crafting/craft`: Craft higher-tier artifacts
-
-### 9. Shop & Engagement
-- `GET /shop/items`: Item shop catalog & cosmetic skins
-- `POST /shop/purchases`: Purchase shop items
-- `GET /inventory`: User inventory & equipped slots
-- `POST /early-game/starter-pack`: Claim beginner starter pack
-- `GET /engagement/dopamine/status`: Get daily dopamine activity status & cooldowns
-- `POST /engagement/dopamine/golden-duck`: Claim Golden Duck Fever clicking reward (up to 5,000 WLD)
-- `POST /engagement/dopamine/pet-fortune`: Interact with Deoki Pet and claim daily fortune cookie reward (500~1,000 WLD)
-- `POST /engagement/dopamine/bull-bear-vote`: Vote on market sentiment and participate in midnight 10,000 WLD pool
-- `POST /engagement/dopamine/mini-showdown`: Resolve 1:1 Instant Dice Showdown against AI (1.90x payout)
-- `POST /engagement/dopamine/star-drop`: Claim Star Drop 5-tap upgrade tier reward (up to 10,000 WLD)
-
-### 10. Progression & Seasons
-- `GET /progression/summary`: Player credit rating & achievements
-- `POST /progression/prestige`: Prestige asset sacrifice & permanent multiplier
-- `GET /season/current`: Active season pass level & milestones
-- `POST /season/claim-reward`: Claim season pass level-up rewards
-
-### 11. Community & Media
-- `GET /board/posts`: Community board post feed
-- `POST /board/posts`: Create new board post
-- `GET /board/posts/:id`: Post details & comment thread
-- `POST /board/posts/:id/comments`: Post comment / reply
-- `POST /content/photos/upload`: Secure image upload
-
-### 12. Direct Messaging & Safety
-- `GET /chat/threads`: 1:1 conversation inbox & unread counts
-- `GET /chat/threads/:id/messages`: Message history
-- `POST /chat/threads/:id/messages`: Send 1:1 message
-- `POST /chat/block`: Block / unblock abusive user
-- `POST /safety/takedown/request`: Emergency takedown request
-
-### 13. Clubs & Personal Spaces
-- `GET /club`: Clubs directory & weekly rankings
-- `POST /club/create`: Create club (10,000 WLD burn)
-- `POST /club/:id/join`: Join or leave club
-- `GET /space/my-space`: Personal office customization status
-
-### 14. Admin Control Tower & Treasury
-- `GET /admin/api-health/status`: 14-domain real-time latency, success rate & telemetry
-- `GET /admin/economy/overview`: Macro M0, inflation, reserve ratio
-- `GET /admin/treasury/vaults`: 3 system reserve vaults status
-- `POST /admin/treasury/inject`: Step-Up treasury injection
-- `POST /admin/stocks/:symbol/halt`: Stock halt & 100% cost-basis settlement
-- `GET /admin/audit/logs`: Real-time system audit logs
-
-### 15. SEO & Search Engine Intelligence
-- `GET /seo/status`: Overall sitemaps and SEO crawler health summary
-- `POST /seo/sitemaps/ping`: Automated ping to Google and Naver search engines
-- `POST /seo/gsc/sync`: Manual on-demand sync with Google Search Console
-- `GET /seo/gsc/analytics`: GSC daily clicks, impressions, CTR, and average position timeseries
-- `GET /seo/gsc/credentials`: Google Cloud service account JSON key status and client email
-- `POST /seo/gsc/credentials`: Upload and encrypt Google Cloud service account JSON credentials
-- `DELETE /seo/gsc/credentials`: Permanently delete stored GSC credentials
-- `GET /seo/crawl-audit`: 6-hour background crawl audit and URL health report
-- `POST /seo/crawl-audit`: Run immediate crawl audit on-demand
-- `GET /seo/gsc/digest-report`: Get daily SEO performance summary report data
-- `POST /seo/gsc/digest-report`: Dispatch daily SEO digest briefing to Discord webhook channel
-
-### 16. Moneyverse Plus VIP Membership & Privileges
-- `GET /vip/status`: Active VIP subscription status, expiration date, and theme
-- `POST /vip/subscribe`: Activate 30-day Moneyverse Plus VIP subscription
-- `POST /vip/daily-bonus`: Claim VIP-exclusive daily Golden Chest bonus (10,000 WLD)
-- `PUT /vip/theme`: Select and save one of 5 custom VIP neon avatar frames
-
-### 17. Real-Time WebSocket Gateway
-- `WS /ws/marketplace/auctions` (`auction:bid`): Real-time broadcast of new bids and highest bid updates
-- `WS /ws/marketplace/auctions` (`auction:extended`): Anti-sniping 60-second auto-extension notification
-- `WS /ws/marketplace/auctions` (`auction:settled`): Final auction resolution and winner declaration
-- `WS /ws/activity` (`activity:global`): Global macro-economic transaction feed
+## 📑 Table of Contents
+1. [Architecture & Security Standards](#1-architecture--security-standards)
+2. [Domain 01: Auth, Sessions & Accounts](#domain-01-auth-sessions--accounts)
+3. [Domain 02: Wallet & Ledger](#domain-02-wallet--ledger)
+4. [Domain 03: Virtual Banking, Deposits & Loans](#domain-03-virtual-banking-deposits--loans)
+5. [Domain 04: Work, Jobs & Certifications](#domain-04-work-jobs--certifications)
+6. [Domain 05: Virtual Stocks & Market Orderbook](#domain-05-virtual-stocks--market-orderbook)
+7. [Domain 06: Virtual Derivatives & 10x Leverage Futures](#domain-06-virtual-derivatives--10x-leverage-futures)
+8. [Domain 07: Shop, Inventory & Economic Privileges](#domain-07-shop-inventory--economic-privileges)
+9. [Domain 08: Web Casino, Minigames & Self-Exclusion](#domain-08-web-casino-minigames--self-exclusion)
+10. [Domain 09: Virtual Businesses & Management](#domain-09-virtual-businesses--management)
+11. [Domain 10: Virtual Startup VC Angel Investment & Crowdfunding](#domain-10-virtual-startup-vc-angel-investment--crowdfunding)
+12. [Domain 11: Virtual Real Estate & Metaverse Lands](#domain-11-virtual-real-estate--metaverse-lands)
+13. [Domain 12: Discord Clubs & Guild Territory Siege Warfare](#domain-12-discord-clubs--guild-territory-siege-warfare)
+14. [Domain 13: No-Code Quant Bot Studio & Backtesting](#domain-13-no-code-quant-bot-studio--backtesting)
+15. [Domain 14: Customer Support, Privacy & Safety](#domain-14-customer-support-privacy--safety)
+16. [Domain 15: Admin Control Tower & Macroeconomy Governance](#domain-15-admin-control-tower--macroeconomy-governance)
+17. [RFC 7807 Problem Details Standard](#17-rfc-7807-problem-details-standard)
+18. [Client SDK & cURL Integration Examples](#18-client-sdk--curl-integration-examples)
 
 ---
 
-## 🚫 3. Decommissioned APIs
-- **All Casino Endpoints (`/api/v1/casino/*`) Permanently Removed**:
-  - Removed to comply with legal compliance, eliminating all gambling elements in favor of transparent gamified rewards.
+## 1. Architecture & Security Standards
+
+### Multi-Layer Security Headers
+
+| Header | Required | Description | Example |
+| :--- | :---: | :--- | :--- |
+| `x-session-id` | Conditional | User session cookie or token | `sess_9f8a7c6b5d4e...` |
+| `x-csrf-token` | State-changing | Anti-CSRF protection token | `csrf_3a1b2c...` |
+| `x-internal-token` | Internal | Next.js Server Actions to NestJS hop token | `sec_internal_token_32bytes...` |
+| `x-totp-code` | High-risk admin | 6-digit TOTP Step-Up 2FA token | `582910` |
+
+---
+
+## Domain 01: Auth, Sessions & Accounts
+
+### `POST /api/v1/auth/login`
+- **Summary**: User login via email/password or OAuth
+- **Auth**: Public
+
+### `POST /api/v1/auth/logout`
+- **Summary**: Invalidate active session
+- **Auth**: Authenticated User
+
+### `GET /api/v1/accounts/me`
+- **Summary**: Get account profile, assets, and level progression
+- **Auth**: Authenticated User
+
+---
+
+## Domain 02: Wallet & Ledger
+
+### `GET /api/v1/wallet/balance`
+- **Summary**: Fetch available WLD balance, locked collaterals, and net worth
+- **Auth**: Authenticated User
+
+### `POST /api/v1/wallet/transfer`
+- **Summary**: P2P WLD transfer with 1% burn fee
+- **Auth**: Authenticated User
+
+---
+
+## Domain 03: Virtual Banking, Deposits & Loans
+
+### `GET /api/v1/bank/products`
+- **Summary**: List savings/deposit products with compounding yields
+
+### `POST /api/v1/bank/deposits/subscribe`
+- **Summary**: Subscribe to compounding deposit product
+
+---
+
+## Domain 04: Work, Jobs & Certifications
+
+### `GET /api/v1/work/jobs`
+- **Summary**: List 5 career professions and daily quota limits
+
+### `POST /api/v1/work/execute`
+- **Summary**: Perform labor action and earn WLD wages
+
+---
+
+## Domain 05: Virtual Stocks & Market Orderbook
+
+### `GET /api/v1/stocks`
+- **Summary**: Real-time ticker prices, 24h volume, and percentage changes
+
+### `GET /api/v1/stocks/:ticker/orderbook`
+- **Summary**: 10-Depth bid/ask orderbook
+
+### `POST /api/v1/stocks/orders`
+- **Summary**: Place limit/market order
+
+---
+
+## Domain 06: Virtual Derivatives & 10x Leverage Futures
+
+### `GET /api/v1/stocks/derivatives/markets`
+- **Summary**: List futures markets (Samsung 10x, NAVER 5x, Index100 10x) & 8h funding rates
+
+### `GET /api/v1/stocks/derivatives/positions`
+- **Summary**: List active long/short leveraged positions with real-time unrealized PnL
+
+### `POST /api/v1/stocks/derivatives/open`
+- **Summary**: Open leveraged futures position with collateral lock
+
+### `POST /api/v1/stocks/derivatives/:id/close`
+- **Summary**: Market settlement and payout of collateral + realized PnL
+
+---
+
+## Domain 07: Shop, Inventory & Economic Privileges
+
+### `GET /api/v1/shop/items`
+- **Summary**: List consumable buffs, titles, and interior items
+
+### `POST /api/v1/shop/purchase`
+- **Summary**: Purchase item with 100% WLD burn
+
+---
+
+## Domain 08: Web Casino, Minigames & Self-Exclusion
+
+### `POST /api/v1/casino/roulette/spin`
+- **Summary**: Spin daily attendance or WLD roulette wheel
+
+### `POST /api/v1/safety/self-exclusion`
+- **Summary**: Activate 24h~30d anti-gambling cooling off self-exclusion
+
+---
+
+## Domain 09: Virtual Businesses & Management
+
+### `GET /api/v1/businesses/my`
+- **Summary**: Get corporate revenue, employees, and dividend payouts
+
+---
+
+## Domain 10: Virtual Startup VC Angel Investment & Crowdfunding
+
+### `GET /api/v1/businesses/ventures/pitches`
+- **Summary**: List active startup pitches open for angel round
+
+### `POST /api/v1/businesses/ventures/invest`
+- **Summary**: Execute angel investment and obtain SAFE equity shares
+
+### `POST /api/v1/businesses/ventures/claim-dividend`
+- **Summary**: Claim quarterly profit dividend
+
+---
+
+## Domain 11: Virtual Real Estate & Metaverse Lands
+
+### `GET /api/v1/spaces/real-estate/districts`
+- **Summary**: List special prime districts (Teheran, Yeouido, Seongsu, Pangyo, Hannam)
+
+### `GET /api/v1/spaces/real-estate/lands`
+- **Summary**: List metaverse land plots, floor prices, and occupancy rates
+
+### `POST /api/v1/spaces/real-estate/purchase`
+- **Summary**: Buy land plot with 100% WLD burn
+
+### `POST /api/v1/spaces/real-estate/:id/settle-rent`
+- **Summary**: Settle and withdraw accumulated daily rent yields
+
+---
+
+## Domain 12: Discord Clubs & Guild Territory Siege Warfare
+
+### `GET /api/v1/clubs/warfare/strongholds`
+- **Summary**: List key fortresses (Central Bank, KRX Exchange, Pangyo Datacenter)
+
+### `POST /api/v1/clubs/warfare/declare`
+- **Summary**: Declare siege war on territory
+
+### `POST /api/v1/clubs/warfare/:id/attack`
+- **Summary**: Attack fortress defenses and earn guild contribution points
+
+---
+
+## Domain 13: No-Code Quant Bot Studio & Backtesting
+
+### `GET /api/v1/quant/strategies`
+- **Summary**: List algorithmic automated trading bots
+
+### `POST /api/v1/quant/backtest`
+- **Summary**: Run 30-day historical tick data backtest simulation
+
+### `POST /api/v1/quant/strategies/:id/toggle`
+- **Summary**: Toggle real-time automated order execution
+
+---
+
+## Domain 14: Customer Support, Privacy & Safety
+
+### `POST /api/v1/support/tickets`
+- **Summary**: Submit 1:1 customer support inquiry
+
+### `POST /api/v1/safety/take-it-down`
+- **Summary**: 24-hour non-member emergency illicit content takedown queue
+
+---
+
+## Domain 15: Admin Control Tower & Macroeconomy Governance
+
+### `GET /api/v1/admin/dashboard/stats`
+- **Summary**: Real-time M2 supply, 1,498 active sessions, and burn rate telemetry
+
+### `POST /api/v1/admin/switches/toggle`
+- **Summary**: Toggle kill switches & feature flags (**Step-Up 2FA TOTP Required**)
+
+---
+
+## 17. RFC 7807 Problem Details Standard
+
+| Status Code | RFC 7807 `type` | Description |
+| :--- | :--- | :--- |
+| `400 Bad Request` | `https://easy-scraping.com/errors/validation-error` | DTO schema validation failed |
+| `401 Unauthorized` | `https://easy-scraping.com/errors/unauthorized` | Session expired or invalid |
+| `403 Forbidden` | `https://easy-scraping.com/errors/forbidden` | Insufficient role privilege |
+| `409 Conflict` | `https://easy-scraping.com/errors/idempotency-conflict` | Duplicate idempotency key |
+| `429 Too Many Requests` | `https://easy-scraping.com/errors/rate-limited` | Rate limit exceeded |
+
+---
+
+## 18. Client SDK & cURL Integration Examples
+
+### TypeScript Next.js 16 Server Action
+```typescript
+export async function openDerivativePosition(params: {
+  ticker: string;
+  side: 'LONG' | 'SHORT';
+  leverage: number;
+  collateralWld: number;
+  sessionId: string;
+  csrfToken: string;
+}) {
+  const response = await fetch('https://easy-scraping.com/api/v1/stocks/derivatives/open', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-session-id': params.sessionId,
+      'x-csrf-token': params.csrfToken,
+    },
+    body: JSON.stringify({
+      ticker: params.ticker,
+      side: params.side,
+      leverage: params.leverage,
+      collateralWld: params.collateralWld,
+      idempotencyKey: crypto.randomUUID(),
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json();
+    throw new Error(`[API Error ${response.status}] ${err.title}: ${err.detail}`);
+  }
+
+  return response.json();
+}
+```

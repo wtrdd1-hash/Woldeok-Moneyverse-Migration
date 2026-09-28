@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [swc.vite({ module: { type: 'es6' } })],
   test: {
     include: ['src/**/*.test.ts'],
+    setupFiles: ['./vitest.setup.ts'],
     globals: false,
     maxWorkers: 2,
     minWorkers: 1,

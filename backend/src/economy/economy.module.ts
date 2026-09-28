@@ -2,13 +2,14 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
+import { QuantController } from './quant.controller';
 import { PostgresEconomyReconciliationRepository } from './reconciliation.repository';
 import { ReconciliationController } from './reconciliation.controller';
 import { EconomyReconciliationService } from './reconciliation.service';
 
 @Module({
   imports: [AuthModule],
-  controllers: [ReconciliationController],
+  controllers: [ReconciliationController, QuantController],
   providers: [
     {
       provide: EconomyReconciliationService,

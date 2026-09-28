@@ -3,12 +3,12 @@
 **English canonical** | [한국어](INDEX.ko.md)
 
 > **Documentation Governance**: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)  
-> **Official Implementation Authority Release**: **v2026.09.28.476** (Synchronized with main)  
+> **Official Implementation Authority Release**: **v2026.09.28.477** (Synchronized with main)  
 > **Status**: **AUTHORITY_SYNCHRONIZED**
 
 ---
 
-## 🚀 10-Domain Master Documentation Map
+## 🚀 15-Domain Master Documentation Map
 
 ### 01. 📱 Master Specs & User Guide
 1. **[Integrated Application Specification & User Guide](APP_SPEC_AND_USER_GUIDE.md)**

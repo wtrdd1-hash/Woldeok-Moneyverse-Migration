@@ -1,4 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import { EncryptionService } from '../security/encryption.service';
@@ -57,6 +58,7 @@ const GUARDS = [
       useFactory: () => new DualKeyRotationService(),
     },
     AdminRolesRepository,
+    Reflector,
     ...GUARDS,
   ],
   exports: [
@@ -66,6 +68,7 @@ const GUARDS = [
     OAuthClient,
     VerificationEmailSender,
     DualKeyRotationService,
+    Reflector,
     ...GUARDS,
   ],
 })

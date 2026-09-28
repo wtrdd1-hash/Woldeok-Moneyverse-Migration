@@ -5,10 +5,11 @@ import { PG_POOL } from '../core/pool.provider';
 import { ClubController } from './club.controller';
 import { PostgresClubRepository } from './club.repository';
 import { ClubService } from './club.service';
+import { WarfareController } from './warfare.controller';
 
 @Module({
   imports: [AuthModule],
-  controllers: [ClubController],
+  controllers: [ClubController, WarfareController],
   providers: [
     {
       provide: PostgresClubRepository,

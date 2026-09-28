@@ -1,4 +1,5 @@
-import { Controller, Get, Header, VERSION_NEUTRAL, Version } from '@nestjs/common';
+import { Controller, Get, Header } from '@nestjs/common';
+import { VERSION_NEUTRAL } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator';
 
@@ -13,7 +14,6 @@ import { SkipInternalToken } from '../auth/guards/skip-internal-token.decorator'
 @SkipInternalToken()
 export class HealthController {
   @Get()
-  @Version(VERSION_NEUTRAL)
   @ApiOperation({ summary: 'Liveness probe' })
   check(): { status: 'ok' } {
     return { status: 'ok' };
@@ -22,13 +22,13 @@ export class HealthController {
 
 /**
  * Backend-owned immutable runtime identity. URI versioning is neutral while
- * the global /api prefix remains, so operators can verify the backend process * without trusting the frontend build or repository head as runtime evidence.
+ * the global /api prefix remains, so operators can verify the backend process
+ * without trusting the frontend build or repository head as runtime evidence.
  */
 @Controller({ path: 'version', version: VERSION_NEUTRAL })
 @SkipInternalToken()
 export class VersionController {
   @Get()
-  @Version(VERSION_NEUTRAL)
   @Header('Cache-Control', 'no-store')
   @ApiOperation({ summary: 'Backend runtime identity' })
   check(): { id: string } {

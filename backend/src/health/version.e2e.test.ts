@@ -14,6 +14,7 @@ describe('backend runtime identity', () => {
     process.env.BUILD_ID = 'runtime-identity-test-sha';
     const moduleRef = await Test.createTestingModule({ imports: [HealthModule] }).compile();
     app = moduleRef.createNestApplication();
+    app.useLogger(false);
     app.setGlobalPrefix('api', { exclude: ['health'] });
     app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
     await app.init();
