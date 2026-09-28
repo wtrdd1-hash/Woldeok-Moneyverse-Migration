@@ -290,8 +290,8 @@ export function executeCouncilDebate(
     const profile = COUNCIL_AGENT_PROFILES[v1.role];
     let targetCritiqueRole: CouncilAgentRole | undefined;
     let rationale = v1.rationale;
-    let decision = v1.decision;
-    let confidence = v1.confidence;
+    const decision = v1.decision;
+    const confidence = v1.confidence;
     const risks = [...v1.risks];
 
     // Pairing critique
@@ -328,8 +328,8 @@ export function executeCouncilDebate(
 
   // --- ROUND 3: Rebuttal & Final Revision ---
   const round3Votes: AgentRoundVote[] = round2Votes.map((v2) => {
-    let decision = v2.decision;
-    let confidence = v2.confidence;
+    const decision = v2.decision;
+    const confidence = v2.confidence;
     let rationale = v2.rationale;
     const risks = [...v2.risks];
 

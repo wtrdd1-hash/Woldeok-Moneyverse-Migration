@@ -96,6 +96,7 @@ describe('SeoService', () => {
 
 import { SeoCrawlerAuditService } from './seo-crawler-audit.service';
 import { SeoDailyDigestService } from './seo-daily-digest.service';
+import type { DiscordAlertService } from '../discord/discord-alert.service';
 import { vi } from 'vitest';
 
 describe('SeoCrawlerAuditService', () => {
@@ -132,7 +133,7 @@ describe('SeoDailyDigestService', () => {
 
     const digestService = new SeoDailyDigestService(
       seoService,
-      mockDiscordAlertService as unknown as any,
+      mockDiscordAlertService as unknown as DiscordAlertService,
     );
 
     const result = await digestService.sendDailyDigest();

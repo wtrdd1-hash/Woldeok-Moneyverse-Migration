@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SpaceController } from './space/space.controller';
+import type { SpaceService } from './space/space.service';
 import { DerivativesController } from './stock/derivatives.controller';
 import { VenturesController } from './business/ventures.controller';
 import { WarfareController } from './club/warfare.controller';
@@ -25,7 +26,7 @@ describe('15대 전 도메인 신규 REST API 엔드포인트 컨트롤러 검�
       payPropertyTax: async () => ({}),
       getSpaceById: async () => ({}),
       updateSpaceLayout: async () => true,
-    } as any;
+    } as unknown as SpaceService;
 
     const controller = new SpaceController(spaceServiceMock);
     const districts = await controller.listDistricts();
