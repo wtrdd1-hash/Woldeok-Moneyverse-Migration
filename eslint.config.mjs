@@ -3,7 +3,7 @@ import tseslint from 'typescript-eslint';
 import nextVitals from 'eslint-config-next/core-web-vitals';
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/.next/**', '**/node_modules/**', '**/generated/**', '.claude/**', 'capture_*.js', 'bot/scripts/**', 'scripts/**'] },
+  { ignores: ['**/dist/**', '**/.next/**', '**/node_modules/**', '**/generated/**', '.claude/**', 'capture_*.js', 'bot/scripts/**', 'scripts/**', 'skills/**'] },
   js.configs.recommended,
   ...nextVitals,
   ...tseslint.configs.recommended,
