@@ -270,3 +270,19 @@ Every planning review records start/mid-work `origin/main` exact SHA, authority-
 - **KR-LGL-443-03 / P0 before paid sales:** paid digital goods/subscription remain blocked until KR seller identity/reporting, transaction disclosure, withdrawal/refund/cancellation and minor-contract controls are complete.
 - **KR-LGL-443-04..08 / P1:** age-assurance wording, AdSense/overseas-transfer governance, commercial-message consent, game-classification applicability and no-cash-exchange invariants require explicit evidence/gates.
 - Planning/audit only: no Production mutation, deployment, DB migration, GRAC approval, business registration or tax status is claimed.
+
+## v2026.09.28.477 — Full-surface QA evidence delta
+
+> Evidence status: **BLOCKED FOR PROMOTION**
+> Candidate: `44933fd7abe83284e067c85115bf7ac1033cc895`
+> Detailed report: `docs/QA_AUDIT_REPORT_V477.md`
+> Worklog: `docs/worklog/2026-09-28-full-surface-qa-v2026.09.28.477.md`
+
+- Exact candidate inventory is now **108 page routes / 24 administrator routes / 12 dynamic page routes**. Older 86/22/8 and v473 route-count evidence is historical only.
+- Five Test guest browser passes produced 540 route/view rows at 320/390/768/1024/1440 CSS px. No page-level horizontal overflow was reproduced. The 29 initial navigation aborts were confirmed as harness redirect/prefetch collisions by isolated rerun (**29/29 pass**).
+- Release gates are not green: root lint has **89 errors / 364 warnings**; root test fails on mobile API contract drift; frontend tests have **927 pass / 1 fail** plus six unhandled teardown errors; 391 backend DB-dependent tests remain skipped.
+- Full authoritative route acceptance remains incomplete because deterministic member/restricted/owner/admin fixtures, complete dynamic scenarios, the full responsive/zoom matrix, and Android device instrumentation are unavailable.
+- Production/Test runtime health is up and release symlinks resolve to v476, but exact runtime-to-Git-SHA binding remains an evidence gap.
+- Android exact-main unit tests (25) and lint pass; assemble/device UI acceptance remains blocked by signing/device environment.
+- No Product or Production mutation was performed. This delta does not authorize promotion.
+
