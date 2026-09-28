@@ -1,3 +1,12 @@
+## v2026.09.28.479 — CI Secret-like Test Fixture Repair
+
+- **Change type**: test/CI policy repair; no production runtime behavior change.
+- Replaced a PEM-shaped fake private-key value in `backend/src/seo/seo.service.test.ts` with the explicit non-secret placeholder `TEST_PRIVATE_KEY_PLACEHOLDER`.
+- `scripts/check-secrets.sh` changed from reproducible FAIL to PASS without weakening the scanner.
+- Backend Vitest suite: 111 files / 1,023 tests passed; environment-dependent DB suites remained skipped.
+- Root `pnpm test` reached the pre-existing mobile API generated-document drift gate and stopped on `docs/mobile-api-contract.json` plus EN/KO schema references; those unrelated generated changes were not included in this fix.
+- No Test/Production deployment is required because runtime source is unchanged.
+
 ## v2026.09.28.477 — Full-Stack 15-Domain REST API Endpoints, 5 Expansion Domain Controllers (Real Estate/Derivatives/Ventures/Warfare/Quant), Master API Catalog Release with 1,498 Sessions Preserved
 
 - **Release Version**: `prod-v477`

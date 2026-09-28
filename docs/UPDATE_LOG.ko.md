@@ -1,3 +1,12 @@
+## v2026.09.28.479 — CI 비밀값 유사 테스트 픽스처 복구
+
+- **변경 유형**: test/CI policy 복구. 운영 런타임 동작 변경 없음.
+- `backend/src/seo/seo.service.test.ts`의 PEM 형태 가짜 private-key 값을 명시적 비밀 아님 placeholder `TEST_PRIVATE_KEY_PLACEHOLDER`로 교체했다.
+- scanner를 약화하지 않고 `scripts/check-secrets.sh`를 재현 가능한 FAIL에서 PASS로 전환했다.
+- Backend Vitest: 111 files / 1,023 tests PASS. 환경 의존 DB suite는 기존대로 skip됐다.
+- 루트 `pnpm test`는 기존 mobile API 생성 문서 drift gate에서 중단됐고 `docs/mobile-api-contract.json` 및 영/한 schema reference가 대상이었다. 관련 없는 생성 변경은 이 fix에 포함하지 않았다.
+- 런타임 소스가 바뀌지 않아 Test/Production 배포는 필요하지 않다.
+
 ## v2026.09.28.477 — 15대 전 도메인 REST API 풀스택 체계화·신규 5대 확장 컨트롤러(부동산/파생선물/VC/공성전/퀀트) 탑재·공식 마스터 API 카탈로그 발행 및 1,498개 세션 무손실 무중단 운영 승격
 
 - **적용 릴리스**: `prod-v477`
