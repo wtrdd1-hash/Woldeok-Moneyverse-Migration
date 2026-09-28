@@ -97,8 +97,11 @@ flowchart TD
 - One-click dark FinTech PnL share card generator for Instagram and Discord.
 
 ### 3.10 Virtual Startup VC Angel Investment & Crowdfunding (`/businesses/ventures`)
-- User-founded virtual enterprises across 5 tech domains with 30% equity public crowdfunding IPOs.
-- Automated WLD dividend distributions (10%~50% payout ratio) based on daily corporate revenue.
+- User-founded virtual enterprises across 5 tech verticals (AI FinTech, Quantum Computing, Space Robotics, Bio Healthcare, Green Grid) with real-time valuation metrics.
+- 30% equity public crowdfunding IPOs with oversubscription proportional allocation (`calculateIpoAllocation`).
+- Daily corporate revenue dividend distributions (10%~50% founder-set payout ratio) with one-click "Claim All" dashboard.
+- Governance voting rights and Golden Angel Investor badge for 5%+ shareholders.
+- 3% corporate revenue hard burn (Hard Sink) deflationary ledger.
 
 ### 3.11 Discord Club Warfare & Territory Domination (`/clubs/warfare`)
 - Weekly 1-hour capital siege battles between Discord servers/clubs for financial territory control.

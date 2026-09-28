@@ -3,7 +3,7 @@
 **English canonical** | [한국어](INDEX.ko.md)
 
 > **Documentation Governance**: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)  
-> **Official Implementation Authority Release**: **v2026.09.28.475** (Synchronized with main)  
+> **Official Implementation Authority Release**: **v2026.09.28.476** (Synchronized with main)  
 > **Status**: **AUTHORITY_SYNCHRONIZED**
 
 ---

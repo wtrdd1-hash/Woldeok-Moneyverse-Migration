@@ -3,7 +3,7 @@
 [English canonical](INDEX.md) | **한국어**
 
 > **문서 거버넌스**: [DOCUMENTATION_POLICY.ko.md](DOCUMENTATION_POLICY.ko.md)  
-> **공식 구현 권위 릴리스**: **v2026.09.28.475** (최신 main 기준 동기화 완료)  
+> **공식 구현 권위 릴리스**: **v2026.09.28.476** (최신 main 기준 동기화 완료)  
 > **상태**: **AUTHORITY_SYNCHRONIZED (권위 기획·런타임 100% 일치)**
 
 ---

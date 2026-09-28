@@ -1,3 +1,20 @@
+## v2026.09.28.476 — Virtual Startup VC Angel Investment & Crowdfunding (/businesses/ventures) Full-Stack Engine, 30% IPO Crowdfunding Proportional Allocation, Revenue Dividends, and Governance Voting Release with 1,498 Sessions Preserved
+
+- **Release Version**: `prod-v476`
+- **Infrastructure**: Debian Mini-PC Zero-Downtime Blue-Green Rolling Promotion
+- **PostgreSQL Active Sessions**: **1,498 Active Sessions 100% Preserved (Zero Loss)**
+- **Key Feature Implementations**:
+  1. **5 Tech Vertical Virtual Enterprises & Real-Time Valuation Rankings (`/businesses/ventures`)**:
+     - Foundation of AI FinTech, Quantum Computing, Space Robotics, Bio Healthcare, and Green Grid enterprises (min 10M WLD capital).
+  2. **30% Equity Crowdfunding IPO Proportional Allocation Engine**:
+     - Oversubscription handling with algorithmic proportional shares distribution (`calculateIpoAllocation`) and refund calculation.
+  3. **Revenue-Based Shareholder Daily Dividends & "Claim All" Dashboard**:
+     - 10%~50% corporate revenue distributed to shareholders with one-click bulk claiming.
+  4. **5%+ Angel Investor Governance Voting & Golden Badge**:
+     - Governance proposal voting on R&D and marketing campaigns for major shareholders.
+  5. **3% Corporate Tax Hard Sink**:
+     - Permanent 3% revenue burn preventing monetary inflation.
+
 ## v2026.09.28.475 — Virtual Derivatives & 10x Leverage Futures Exchange (/stocks/derivatives) Full-Stack Engine, Liquidation Heatmap, Isolated Margin Calculator, and PnL Share Card Generator Release with 1,498 Sessions Preserved
 
 - **Release Version**: `prod-v475`

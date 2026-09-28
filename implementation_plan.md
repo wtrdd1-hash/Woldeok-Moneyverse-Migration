@@ -4832,6 +4832,74 @@ flowchart TD
 - 미니 PC 원격 서버 풀, 빌드, 무중단 승격 배포.
 - 1,498개 활성 세션 100% 무손실 상태 확인.
 
+---
+
+## 🏛️ [v27 Specification] 가상 스타트업 VC 엔젤투자 & 크라우드펀딩 (`/businesses/ventures`) 풀스택 구축 (누적 추가)
+
+### 1. 🎯 확정 사양 및 아키텍처 개요
+사용자 조율 문답(A1~A5) 확정 사항에 따라 3단계인 **가상 스타트업 VC 엔젤투자 & 크라우드펀딩 (`/businesses/ventures`)**를 풀스택으로 완성합니다.
+
+```mermaid
+flowchart TD
+    subgraph Client_Ventures["가상 스타트업 VC UI (/businesses/ventures)"]
+        A["5대 테크 산업군 스타트업 디렉토리 & 유니콘 밸류에이션 랭킹"] --> B["공모주 청약(IPO) 크라우드펀딩 (30% 공모 & 경쟁률 실시간 배분)"]
+        A --> C["신규 가상 스타트업 설립 모달 (자본금 1,000만 WLD + 10%~50% 배당 설정)"]
+        D["내 보유 지분 & 실시간 배당금 콘솔"] --> E["원스톱 일괄 수령 (Claim All) 엔진"]
+        D --> F["5% 이상 엔젤 주주 전용 경영 안건 투표 거버넌스"]
+    end
+
+    subgraph Contract_Engine["계약 & 배당 엔진 (packages/contract)"]
+        B --> G["calculateIpoAllocation()"]
+        C --> H["calculateCompanyValuation()"]
+        D --> I["calculateShareholderDividend()"]
+        E --> J["원장 배당금 실시간 지갑 입고 및 법인세 3% 소각 (Hard Sink)"]
+    end
+```
+
+### 2. 📦 [파트 1] 공유 계약 패키지 (`packages/contract/src/ventures.ts`)
+- **스타트업 VC DTO 및 타입 정의**:
+  - `VentureSector`: `'AI_FINTECH' | 'QUANTUM_COMPUTING' | 'SPACE_ROBOTICS' | 'BIO_HEALTHCARE' | 'GREEN_GRID'`
+  - `IpoStatus`: `'UPCOMING' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED'`
+  - `StartupCompany`: 회사 ID, 사명, 설립자, 산업군, 설립 자본금, 총 발행 주식수, 주당 공모가, 현재 기업가치(Valuation), 일일 매출, 배당 성향(10~50%), 지분 구조(설립자 70%, 공모 30%), 거버넌스 안건
+  - `IpoCampaign`: 캠페인 ID, 대상 회사, 목표 모금액(WLD), 현재 모금액, 청약 경쟁률, 마감 시각, 최소 청약 단위
+  - `ShareholderHolding`: 보유자 ID, 회사 ID, 보유 주식수, 지분율(%), 누적 수령 배당금, 미수령 배당금, 엔젤 주주 여부(지분 5% 이상)
+  - `GovernanceProposal`: 안건 ID, 제목, 설명, 찬성표, 반대표, 마감일, 상태
+- **핵심 금융 수학 함수**:
+  - `calculateCompanyValuation(capital, dailyRevenue, growthMultiplier)`: 기업 가치 산출
+  - `calculateIpoAllocation(subscriptionAmount, totalTargetAmount, totalSubscribedAmount)`: 공모주 배분 및 환불금 계산
+  - `calculateShareholderDividend(dailyRevenue, dividendPayoutRatio, shareRatio)`: 주주 일일 배당금 산출
+  - `calculateCorporateTaxAndBurn(dailyRevenue)`: 법인 매출의 3% 하드 소각 (Hard Sink)
+
+### 3. 📱 [파트 2] 프론트엔드 인터랙티브 화면 (`frontend/src/app/businesses/ventures/page.tsx`)
+- **5대 테크 산업군 탭 & 유니콘 밸류에이션 랭킹 보드**:
+  - AI 핀테크, 양자 컴퓨팅, 우주 로보틱스, 바이오 헬스케어, 친환경 그리드 5대 카테고리 필터
+  - 실시간 기업가치 TOP 10 랭킹 및 24시간 매출 성장률 지표
+- **공모주 청약(IPO) 크라우드펀딩 콘솔**:
+  - 활성 IPO 캠페인 카드 (실시간 모집률 프로그레스 바, 청약 경쟁률 배지, 잔여 시간 카운트다운)
+  - [공모주 청약 신청] 모달 (청약 수량 입력, 예상 배정 주식수 실시간 산출, 청약 증거금 결제)
+- **신규 가상 스타트업 설립 모달**:
+  - 사명, 산업군 선택, 초기 자본금(1,000만 WLD 이상), 배당 성향(10%~50%), 사업 비전 입력
+- **내 보유 지분 & 배당금 관리 대시보드**:
+  - 보유 중인 스타트업 지분 목록, 지분율 %, 누적/미수령 배당금 WLD
+  - **원스톱 일괄 수령 [Claim All]** 버튼으로 미수령 배당금을 내 WLD 지갑으로 즉시 정산 입고
+  - 지분율 5% 이상 달성 시 **[황금 엔젤 투자자(Angel Investor)]** 배지 활성화
+- **주주 거버넌스 경영 안건 투표 모달**:
+  - 엔젤 주주 전용 신제품 R&D 투자, 마케팅 부스트 집행 안건 찬반 투표
+
+### 4. 🧪 [파트 3] 단위 테스트 및 정적 검증
+- `frontend/src/app/businesses/ventures/ventures.test.tsx` 작성.
+- 기업가치 연산, IPO 공모주 비례 배분 계산, 일일 배당금 산출, 법인세 3% 소각 원장 및 프론트엔드 렌더링 100% 검증.
+
+### 5. 📑 [파트 4] 기획서 및 문서 카탈로그 동기화
+- `docs/APP_SPEC_AND_USER_GUIDE.ko.md` / `docs/APP_SPEC_AND_USER_GUIDE.md` (섹션 3.15 갱신)
+- `docs/INDEX.ko.md` / `docs/INDEX.md` (v476 동기화)
+- `docs/DOCUMENT_CATALOG.ko.md` / `docs/DOCUMENT_CATALOG.md` (v476 동기화)
+- `docs/UPDATE_LOG.ko.md` / `docs/UPDATE_LOG.md` (v476 릴리스 탑재)
+
+### 6. 🚀 [파트 5] 무중단 프로덕션 배포 (`prod-v476`)
+- 미니 PC 원격 서버 풀, 빌드, 무중단 승격 배포.
+- 1,498개 활성 세션 100% 무손실 상태 확인.
+
 
 
 

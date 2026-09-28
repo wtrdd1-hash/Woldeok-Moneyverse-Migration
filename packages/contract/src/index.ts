@@ -23,3 +23,26 @@ export type {
   DerivativesOrderPayload,
   LiquidationSettlementResult,
 } from './derivatives';
+export {
+  VENTURE_SECTOR_INFO,
+  INITIAL_VENTURE_COMPANIES,
+  INITIAL_IPO_CAMPAIGNS,
+  MIN_STARTUP_CAPITAL,
+  IPO_PUBLIC_SHARE_RATIO,
+  CORPORATE_TAX_RATE,
+  ANGEL_INVESTOR_THRESHOLD_PCT,
+  calculateCompanyValuation,
+  calculateIpoAllocation,
+  calculateShareholderDividend,
+  calculateCorporateTaxAndBurn,
+} from './ventures';
+export type {
+  VentureSector,
+  IpoStatus,
+  GovernanceProposalStatus,
+  GovernanceProposal,
+  StartupCompany,
+  IpoCampaign,
+  ShareholderHolding,
+  IpoAllocationResult,
+} from './ventures';
