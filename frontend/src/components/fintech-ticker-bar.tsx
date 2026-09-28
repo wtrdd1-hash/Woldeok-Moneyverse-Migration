@@ -41,8 +41,8 @@ export function FintechTickerBar() {
   ];
 
   return (
-    <div className="w-full border-b border-border/40 bg-muted/20 backdrop-blur-sm overflow-hidden py-1 px-3 select-none">
-      <div className="mx-auto max-w-[1440px] flex items-center justify-between gap-4 text-[11px] sm:text-xs">
+    <div className="w-full border-b border-border/40 bg-muted/20 backdrop-blur-sm overflow-hidden py-1.5 select-none">
+      <div className="mx-auto max-w-[1440px] flex items-center justify-between gap-4 text-[11px] sm:text-xs px-2.5 min-[400px]:px-3 min-[480px]:px-4 sm:px-6 lg:px-5 xl:px-8">
         <div className="flex items-center gap-1.5 shrink-0">
           <span className="relative flex size-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />

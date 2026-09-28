@@ -21,16 +21,16 @@ export async function ServiceImpactBanner() {
     <aside
       aria-live="polite"
       aria-label="서비스 상태 알림"
-      className="border-b border-amber-300/70 bg-amber-50 px-4 py-2 text-amber-950 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-100"
+      className="border-b border-amber-500/30 bg-amber-500/10 text-amber-950 dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-200 px-2.5 min-[400px]:px-3 min-[480px]:px-4 sm:px-6 lg:px-5 xl:px-8 py-2 text-xs select-none backdrop-blur-sm"
     >
-      <div className="mx-auto flex w-full max-w-[1240px] flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-        <strong>{MESSAGE[impact.state]}</strong>
+      <div className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center gap-x-3 gap-y-1">
+        <strong className="font-bold">{MESSAGE[impact.state]}</strong>
         {impact.staleCount > 0 ? (
-          <span className="text-xs opacity-80">{impact.staleCount}개 항목 최신 확인 필요</span>
+          <span className="text-[11px] opacity-80">{impact.staleCount}개 항목 최신 확인 필요</span>
         ) : null}
         <Link
           href="/status"
-          className="ml-auto min-h-11 content-center font-bold underline underline-offset-4 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          className="ml-auto min-h-8 content-center font-bold underline underline-offset-2 hover:opacity-80 transition-opacity"
         >
           상태 자세히 보기
         </Link>

@@ -389,55 +389,51 @@ export const ADMIN_NAV: readonly NavEntry[] = [
 
 export const HEADER_PUBLIC: readonly NavItem[] = [
   { href: '/', label: '홈' },
-  { href: '/stocks', label: '거래소' },
-  { href: '/newspaper', label: '경제 브리프' },
-  { href: '/wallet', label: '자산' },
-  { href: '/board', label: '커뮤니티' },
   {
-    label: '안내',
+    label: '금융·투자',
     entries: [
-      { href: '/guide', label: '이용 방법' },
-      { href: '/announcements', label: '운영 소식' },
-      { href: '/gallery', label: '사진' },
-      { href: '/status', label: '서비스 상태' },
-      { href: '/terms', label: '이용약관' },
-      { href: '/privacy', label: '개인정보처리방침' },
+      { href: '/stocks', label: '월덕거래소' },
+      { href: '/newspaper', label: '주간 경제 브리프' },
+      { href: '/wallet', label: '덕지갑' },
+      { href: '/bank', label: '가상 은행' },
+      { href: '/wallet/activity', label: '자산 활동 내역' },
     ],
   },
   {
-    label: '경제',
+    label: '경제·활동',
     entries: [
-      { href: '/bank', label: '가상 금융' },
-      { href: '/businesses', label: '게임 사업' },
-      { href: '/shop', label: '아이템 상점' },
+      { href: '/work', label: '잡보드 (직업)' },
+      { href: '/businesses', label: '마이비즈 (사업)' },
+      { href: '/shop', label: '덕마켓 (상점)' },
+      { href: '/progression', label: '커리어패스 (성장)' },
+      { href: '/quests', label: '퀘스트' },
+    ],
+  },
+  {
+    label: '플레이·시즌',
+    entries: [
+      { href: '/casino', label: '럭키존 (카지노)' },
+      { href: '/seasons', label: '월드사이클 (시즌)' },
+      { href: '/calendar', label: '이벤트 일정' },
+      { href: '/clubs', label: '클럽·협동조합' },
+      { href: '/collections', label: '컬렉션 전시관' },
+      { href: '/spaces', label: '개인 공간 & 도시' },
+    ],
+  },
+  {
+    label: '커뮤니티',
+    entries: [
+      { href: '/board', label: '커뮤니티 게시판' },
+      { href: '/gallery', label: '사진 갤러리' },
+      { href: '/announcements', label: '운영 소식' },
+      { href: '/guide', label: '이용 가이드' },
+      { href: '/support', label: '1:1 관리자 문의' },
     ],
   },
 ];
 
 export const HEADER_MEMBER: readonly NavItem[] = [
   { href: '/dashboard', label: '내 대시보드' },
-  {
-    label: '활동',
-    entries: [
-      { href: '/work', label: '직업 업무' },
-      { href: '/quests', label: '일일·주간 퀘스트' },
-      { href: '/calendar', label: '일정' },
-      { href: '/casino', label: '카지노' },
-      { href: '/progression', label: '장기 성장 단계' },
-    ],
-  },
-  {
-    label: '소식',
-    entries: [
-      { href: '/newspaper', label: '경제 브리프' },
-      { href: '/seasons', label: '시즌' },
-      { href: '/profile', label: '내 프로필' },
-      { href: '/chat', label: '쪽지함' },
-      { href: '/clubs', label: '클럽·협동조합' },
-      { href: '/collections', label: '컬렉션 전시관' },
-      { href: '/support', label: '관리자 문의' },
-    ],
-  },
 ];
 
 export const HEADER_ADMIN: readonly NavItem[] = [

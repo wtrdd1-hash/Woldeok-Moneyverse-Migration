@@ -7,31 +7,35 @@ import { dismissNotice } from '@/lib/notice-preference';
 
 export function NoticeBar() {
   return (
-    <div data-notice-bar className="bg-forest-deep text-[13px] text-[#e6eee9]">
-      <div className="mx-auto flex min-h-10 w-full max-w-[1180px] items-center gap-3 px-4 py-1.5 sm:px-6">
-        <span className="hidden shrink-0 rounded-full bg-white/90 px-2 py-[3px] text-[10px] font-extrabold tracking-[0.06em] text-[#1a2b22] sm:inline-block">
-          <T korean="커뮤니티 가상경제" english="Community Economy" />
-        </span>
-        <p className="min-w-0 flex-1 text-[12px] leading-[1.5] opacity-90 sm:text-[13px]">
-          <T
-            korean="모든 WLD와 보상은 게임 안에서만 쓰는 가상 데이터입니다."
-            english="All WLD and rewards are virtual in-game data used solely inside the community."
-          />
-        </p>
-        <Link
-          href="/terms"
-          className="hidden shrink-0 border-b border-white/40 pb-px font-bold hover:border-white sm:inline"
-        >
-          <T korean="이용 기준" english="Terms" />
-        </Link>
-        <button
-          type="button"
-          onClick={dismissNotice}
-          aria-label="공지 닫기"
-          className="-my-2 -mr-2 grid size-11 shrink-0 place-items-center rounded-full text-[#e6eee9]/70 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        >
-          <X className="size-4" />
-        </button>
+    <div data-notice-bar className="border-b border-border/40 bg-zinc-950/90 text-zinc-300 dark:bg-zinc-950/90 dark:text-zinc-300 text-xs backdrop-blur-md select-none">
+      <div className="mx-auto flex h-8 min-h-8 w-full max-w-[1440px] items-center justify-between gap-3 px-2.5 min-[400px]:px-3 min-[480px]:px-4 sm:px-6 lg:px-5 xl:px-8">
+        <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+          <span className="hidden shrink-0 rounded-full bg-amber-400/15 border border-amber-400/30 px-2 py-0.5 text-[10px] font-extrabold tracking-tight text-amber-400 sm:inline-block">
+            <T korean="가상경제 플랫폼" english="Virtual Economy" />
+          </span>
+          <p className="truncate text-[11px] sm:text-xs font-medium text-zinc-300/90">
+            <T
+              korean="모든 WLD와 보상은 게임 안에서만 쓰는 가상 데이터입니다."
+              english="All WLD and rewards are virtual in-game data used solely inside the community."
+            />
+          </p>
+        </div>
+        <div className="flex items-center gap-2.5 shrink-0">
+          <Link
+            href="/terms"
+            className="hidden text-[11px] font-semibold text-zinc-400 hover:text-zinc-100 underline underline-offset-2 transition-colors sm:inline"
+          >
+            <T korean="이용 기준" english="Terms" />
+          </Link>
+          <button
+            type="button"
+            onClick={dismissNotice}
+            aria-label="공지 닫기"
+            className="grid size-6 place-items-center rounded-full text-zinc-400 transition-colors hover:bg-white/10 hover:text-zinc-100 outline-none"
+          >
+            <X className="size-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -24,8 +24,8 @@ export function MobileBottomNav() {
 
   const tabs: readonly TabItem[] = [
     { href: '/', labelKo: '홈', labelEn: 'Home', icon: Home, matchPrefix: false },
-    { href: '/work', labelKo: '작업', labelEn: 'Work', icon: Briefcase, matchPrefix: true },
     { href: '/stocks', labelKo: '거래소', labelEn: 'Stocks', icon: TrendingUp, matchPrefix: true },
+    { href: '/work', labelKo: '직업', labelEn: 'Careers', icon: Briefcase, matchPrefix: true },
     { href: '/wallet', labelKo: '지갑', labelEn: 'Wallet', icon: Wallet, matchPrefix: true },
     {
       href: viewer?.signedIn ? '/account' : '/login',
@@ -39,13 +39,13 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label={locale === 'en' ? 'Mobile bottom navigation' : '모바일 하단 내비게이션'}
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl transition-all lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl transition-all lg:hidden select-none"
     >
       <div className="mx-auto grid w-full max-w-lg grid-cols-5">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = tab.matchPrefix
-            ? pathname === tab.href || pathname.startsWith(`${tab.href}/`)
+            ? pathname === tab.href || (tab.href !== '/' && pathname.startsWith(`${tab.href}/`))
             : pathname === tab.href;
 
           return (
@@ -55,22 +55,22 @@ export function MobileBottomNav() {
               prefetch={false}
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'group relative flex min-h-[58px] min-w-0 flex-col items-center justify-center gap-1 px-1 py-1.5 transition-colors active:scale-95',
+                'group relative flex min-h-[60px] min-w-0 flex-col items-center justify-center gap-1 px-1 py-1.5 transition-all active:scale-95 outline-none',
                 isActive
-                  ? 'text-primary font-semibold'
+                  ? 'text-primary font-bold'
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >
               {isActive && (
-                <span className="absolute top-0 h-[2.5px] w-7 rounded-full bg-primary" />
+                <span className="absolute top-0 h-[2.5px] w-8 rounded-full bg-gradient-to-r from-amber-400 via-primary to-amber-300 shadow-[0_1px_6px_rgba(248,198,92,0.8)]" />
               )}
               <Icon
                 className={cn(
-                  'size-[20px] transition-transform duration-150',
-                  isActive ? 'scale-110 stroke-[2.25]' : 'stroke-[1.75] group-hover:scale-105',
+                  'size-5 transition-transform duration-150',
+                  isActive ? 'scale-110 stroke-[2.25] text-primary' : 'stroke-[1.75] group-hover:scale-105',
                 )}
               />
-              <span className="text-[10px] tracking-tight min-[360px]:text-[11px]">
+              <span className="text-[10px] tracking-tight font-medium min-[360px]:text-[11px]">
                 {locale === 'en' ? tab.labelEn : tab.labelKo}
               </span>
             </Link>
