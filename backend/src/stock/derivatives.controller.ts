@@ -167,7 +167,7 @@ export class DerivativesController {
     @Body() dto: OpenDerivativePositionDto,
   ) {
     const actorUserId = requireUserId(req);
-    const market = this.mockMarkets.find((m) => m.ticker === dto.ticker) || this.mockMarkets[0];
+    const market = this.mockMarkets.find((m) => m.ticker === dto.ticker) ?? this.mockMarkets[0]!;
     const markPrice = market.currentPrice;
     const positionSize = dto.collateralWld * dto.leverage;
     const liqPrice =

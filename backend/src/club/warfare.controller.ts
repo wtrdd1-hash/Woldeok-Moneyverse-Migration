@@ -149,7 +149,7 @@ export class WarfareController {
     @Body() dto: DeclareWarDto,
   ) {
     const actorUserId = requireUserId(req);
-    const stronghold = this.mockStrongholds.find((s) => s.id === dto.strongholdId) || this.mockStrongholds[0];
+    const stronghold = this.mockStrongholds.find((s) => s.id === dto.strongholdId) ?? this.mockStrongholds[0]!;
 
     return {
       success: true,

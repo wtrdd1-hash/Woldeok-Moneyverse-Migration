@@ -190,7 +190,7 @@ export class VenturesController {
     @Body() dto: InvestVentureDto,
   ) {
     const actorUserId = requireUserId(req);
-    const pitch = this.mockPitches.find((p) => p.id === dto.pitchId) || this.mockPitches[0];
+    const pitch = this.mockPitches.find((p) => p.id === dto.pitchId) ?? this.mockPitches[0]!;
     const equityPct = Number(((dto.amountWld / pitch.targetFundingWld) * pitch.equitySharePercent).toFixed(4));
 
     const receipt = {
