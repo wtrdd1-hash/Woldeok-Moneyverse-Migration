@@ -78,7 +78,7 @@ describe('SeoService', () => {
       type: 'service_account',
       project_id: 'moneyverse-gsc',
       client_email: 'test-sa@moneyverse-gsc.iam.gserviceaccount.com',
-      private_key: '-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQD...==\n-----END PRIVATE KEY-----\n',
+      private_key: 'test-private-key',
     });
 
     const saveResult = await service.saveGscCredentials(sampleKey);
