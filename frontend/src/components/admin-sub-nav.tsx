@@ -89,7 +89,7 @@ export function AdminSubNav() {
     <nav
       ref={navRef}
       aria-label="관리자 세부 내비게이션"
-      className="-mx-3 mb-4 overflow-x-auto border-y border-border/50 bg-card p-1.5 shadow-sm scrollbar-none touch-pan-x overscroll-x-contain sm:mx-0 sm:rounded-2xl sm:border [&::-webkit-scrollbar]:hidden"
+      className="-mx-3 mb-6 overflow-x-auto border-y border-border/60 bg-card/60 backdrop-blur-xl p-1.5 shadow-sm scrollbar-none touch-pan-x overscroll-x-contain sm:mx-0 sm:rounded-2xl sm:border select-none [&::-webkit-scrollbar]:hidden"
     >
       <ul className="flex w-max items-center gap-1 px-2 sm:w-auto sm:flex-wrap sm:px-0">
         {ADMIN_TABS.map((tab) => {
@@ -103,13 +103,18 @@ export function AdminSubNav() {
                 prefetch={false}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'flex min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all active:scale-[0.98]',
+                  'group flex min-h-10 sm:min-h-9 shrink-0 items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all active:scale-[0.98] outline-none',
                   isActive
-                    ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
-                    : 'text-muted-foreground hover:bg-surface hover:text-foreground',
+                    ? 'bg-primary/15 text-primary font-black ring-1 ring-primary/40 shadow-xs'
+                    : 'text-muted-foreground hover:bg-secondary/70 hover:text-foreground',
                 )}
               >
-                <Icon className={cn('size-3.5 shrink-0', isActive ? 'text-primary-foreground' : 'text-primary')} />
+                <Icon
+                  className={cn(
+                    'size-3.5 shrink-0 transition-colors',
+                    isActive ? 'text-primary' : 'text-muted-foreground/70 group-hover:text-foreground',
+                  )}
+                />
                 <span>{tab.label}</span>
               </Link>
             </li>

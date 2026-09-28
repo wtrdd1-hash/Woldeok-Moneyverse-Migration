@@ -1,6 +1,7 @@
-﻿# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v33)
+﻿# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v34)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v34**: 관리자 콘솔(/admin/shop) 서브내비게이션 중복 렌더링 결함 원천 해소 및 AdminSubNav 고대비 핀테크 인셋 서피스 UI 쇄신 (+75, -0)
 - **v33**: 2026 차세대 핀테크 디자인 시스템 & 상단 GNB 4대 메가 카테고리 슬림화·2px 글로우 언더라인·지갑/프로필 위계 통일·상단 배너 일체화 풀스택 쇄신 (+260, -0)
 - **v32**: 풀스택 SEO 쇄신 및 신규 도메인/계산기 Server Layout 7종 구축(JSON-LD FAQPage, BreadcrumbList, SoftwareApplication 탑재, Clean XML Sitemap 쿼리스트링 0건 정규화, Robots.txt 표준 포맷, Discord 길드 공성전 & 노코드 퀀트 봇 백테스팅 엔진 완결) (+350, -0)
 - **v31**: 검색 엔진 노출 극대화(SEO & Indexing Full-Stack Overhaul) 정밀 진단 및 5단계 쇄신 아키텍처 수립 (+280, -0)
@@ -95,6 +96,7 @@
 ﻿# Woldeok Moneyverse 통합 개발·운영·배포 파이프라인 구현 계획서 (현재: v64)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v34**: 관리자 콘솔(/admin/shop) 서브내비게이션 중복 렌더링 결함 원천 해소 및 AdminSubNav 고대비 핀테크 인셋 서피스 UI 쇄신 (+75, -0)
 - **v33**: 2026 차세대 핀테크 디자인 시스템 & 상단 GNB 4대 메가 카테고리 슬림화·2px 글로우 언더라인·지갑/프로필 위계 통일·상단 배너 일체화 풀스택 쇄신 (+260, -0)
 - **v78**: Playwright 실 브라우저 시각적 QA 파이프라인 의무화(데스크톱 1280x850, 모바일 390x844 뷰포트 스크린샷 캡처 및 콘솔 에러 0 검증), 백엔드 WEB_HEALTH_URL 로컬 루프백(127.0.0.1:3001) 교정을 통한 서비스 상태 수집 안정화 및 상단 경고 배너 간헐 노출 결함 원천 해결 완료 (+55, -0)
 - **v77**: 럭키 777 클래식 슬롯머신 "연령등급 심의 준비 중(실베팅 차단)" 및 "실제 WLD 베팅 잠금" 상태 해제, WLD 실베팅 모드 및 0 WLD 무료 체험 듀얼 모드 구현, 퀵 베팅 프리셋(+1,000, +5,000, +10,000, +50,000, MAX), 서버 권위적 분산 원장 연동(`playSlots` 서버 액션), 릴 순차 정지 애니메이션 및 사운드(synthSound.playWin/playLoss) 연동, 카지노 메인 탭 명칭 쇄신("럭키 777 슬롯"), 회귀 테스트 100% 통과, v447 무중단 블루-그린 배포 승격 및 1,226개 세션 100% 무손실 보존 완료 (+120, -0)
@@ -5238,3 +5240,28 @@ flowchart TD
 - Turbopack 프로덕션 빌드 (`pnpm build`).
 - 미니PC 원격 호스트 스테이징 배포 및 실 브라우저 5대 뷰포트(320px, 390px, 768px, 1100px, 1280px) 실측 검증.
 - 1,558개 세션 무손실 상태로 무중단 블루-그린 운영 승격 (`prod-v479`).
+
+---
+
+## 🏛️ [v34 Specification] 관리자 콘솔 서브내비게이션 중복 결함 해소 및 UI 고도화
+
+### 1. 🎯 배경 및 현상 분석
+- **현상**: 관리자 상점 관리 페이지(`/admin/shop`) 접속 시 상단 서브내비게이션 바(`AdminSubNav`)가 상하로 2번 연속 중복 렌더링되는 시각적 결함 발생.
+- **원인 분석**:
+  - 전역 관리자 레이아웃(`frontend/src/app/admin/layout.tsx`)에서 이미 `<AdminSubNav />`를 렌더링하고 있음에도 불구하고, `frontend/src/app/admin/shop/page.tsx` 내부에서 불필요하게 `<AdminSubNav />`를 중복 호출함.
+  - 기존 `AdminSubNav`의 활성 탭이 투박한 솔리드 옐로우 박스(`bg-primary text-primary-foreground`)로 채워져 현대적 핀테크 디자인 시스템 대비 과도한 시각적 튐 발생.
+- **해결 내역**:
+  1. `frontend/src/app/admin/shop/page.tsx` 내부의 중복 `<AdminSubNav />` 호출 완전 제거.
+  2. `frontend/src/components/admin-sub-nav.tsx`의 활성 탭을 세련된 반투명 인셋 서피스(`bg-primary/15 text-primary ring-1 ring-primary/40 shadow-xs`)로 쇄신하고 백드롭 블러 컨테이너 적용.
+  3. 전체 단위 테스트 및 Turbopack 빌드 검증 후 무중단 블루-그린 승격 (`prod-v480`).
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan (v34)] 최종 통합 구현 명세
+### Proposed Changes
+1. **`frontend/src/app/admin/shop/page.tsx`**: 중복 호출 제거.
+2. **`frontend/src/components/admin-sub-nav.tsx`**: 핀테크 인셋 서피스 및 백드롭 블러 스타일링 쇄신.
+
+### Verification Plan
+- 프론트엔드 단위 테스트 및 Next.js Turbopack 빌드 검증.
+- 1,565개 세션 무손실 상태로 `prod-v480` 무중단 승격.

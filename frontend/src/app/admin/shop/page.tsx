@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { PageHeader } from '@/components/page-header';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Accent } from '@/components/page-header';
-import { AdminSubNav } from '@/components/admin-sub-nav';
 import { apiOrNull } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminShopView, type AdminShopItem } from './admin-shop-view';
@@ -22,8 +21,6 @@ export default async function AdminShopPage() {
 
   return (
     <div data-page="admin-shop" className="mv-page mv-page--admin grid gap-8 pb-16">
-      <AdminSubNav />
-
       <PageHeader
         eyebrow="OPERATIONS · STORE 2.0"
         title={
