@@ -312,14 +312,14 @@ export default async function HomePage() {
                 </div>
               </Link>
 
-              <Link href="/stocks/FNAK" className="py-3 flex items-center justify-between hover:bg-muted/30 px-1 rounded-lg transition-colors">
+              <Link href="/stocks/WDT" className="py-3 flex items-center justify-between hover:bg-muted/30 px-1 rounded-lg transition-colors">
                 <div>
-                  <b className="text-sm font-bold text-foreground">파이낸스덕 (FNAK)</b>
-                  <span className="block text-[11px] text-muted-foreground">가상 핀테크 인프라</span>
+                  <b className="text-sm font-bold text-foreground">월덱테크 (WDT)</b>
+                  <span className="block text-[11px] text-muted-foreground">가상 AI &amp; 클라우드 기술주</span>
                 </div>
                 <div className="text-right">
-                  <span className="font-mono tabular-nums text-sm font-bold text-foreground">820 WLD</span>
-                  <span className="block font-mono tabular-nums text-[11px] font-bold text-emerald-500">+2.1% ▲</span>
+                  <span className="font-mono tabular-nums text-sm font-bold text-foreground">1,714 WLD</span>
+                  <span className="block font-mono tabular-nums text-[11px] font-bold text-emerald-500">+3.2% ▲</span>
                 </div>
               </Link>
 

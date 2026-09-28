@@ -1,9 +1,12 @@
+import { randomUUID } from 'node:crypto';
 import {
   Body,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
+  InternalServerErrorException,
   Post,
   Req,
   UseGuards,
@@ -15,11 +18,12 @@ import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
+import { DopamineRepository } from './dopamine.repository';
 
 export interface GoldenDuckClaimDto {
   readonly clickCount: number;
   readonly comboMultiplier: number;
-  readonly idempotencyKey: string;
+  readonly idempotencyKey?: string;
 }
 
 export interface PetFortuneDto {
@@ -44,10 +48,16 @@ export interface StarDropClaimDto {
   readonly idempotencyKey: string;
 }
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 @ApiTags('dopamine')
 @Controller('engagement/dopamine')
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
 export class DopamineController {
+  constructor(
+    @Inject(DopamineRepository) private readonly repository: DopamineRepository | null,
+  ) {}
+
   @Post('golden-duck')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Claim Golden Duck Fever clicking reward (up to 5,000 WLD)' })
@@ -58,12 +68,32 @@ export class DopamineController {
     const userId = requireUserId(request);
     const validClicks = Math.min(Math.max(1, body.clickCount || 1), 200);
     const validMultiplier = Math.min(Math.max(1.0, body.comboMultiplier || 1.0), 3.0);
-    const rewardAmount = Math.min(5000, Math.floor(validClicks * 25 * validMultiplier));
+    const key = body.idempotencyKey && UUID_RE.test(body.idempotencyKey)
+      ? body.idempotencyKey
+      : randomUUID();
 
+    if (this.repository) {
+      try {
+        return await this.repository.claimGoldenDuck({
+          actorUserId: userId,
+          idempotencyKey: key,
+          clickCount: validClicks,
+          comboMultiplier: validMultiplier,
+        });
+      } catch (error: unknown) {
+        const msg = error instanceof Error ? error.message : String(error);
+        throw new InternalServerErrorException(msg);
+      }
+    }
+
+    // 저장소 미주입 환경 (테스트 등) 폴백
+    const rewardAmount = Math.min(5000, Math.floor(validClicks * 25 * validMultiplier));
     return {
       success: true,
       userId,
+      transactionId: key,
       rewardAmount,
+      newBalance: '0',
       clicks: validClicks,
       multiplier: validMultiplier,
       claimedAt: new Date().toISOString(),

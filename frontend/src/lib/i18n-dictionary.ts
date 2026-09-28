@@ -234,11 +234,17 @@ export const I18N_DICTIONARY: TranslationDictionary = {
     ja: 'ウォルドクゲームズ (WDG)',
     zh: '月德游戏 (WDG)',
   },
-  'company.FNAK': {
-    ko: '파이낸스덕 (FNAK)',
-    en: 'Finance Duck (FNAK)',
-    ja: 'ファイナンスダック (FNAK)',
-    zh: '财务鸭金融 (FNAK)',
+  'company.WFIN': {
+    ko: '월덱 파이낸셜 (WFIN)',
+    en: 'Woldeok Financial (WFIN)',
+    ja: 'ウォルドクファイナンシャル (WFIN)',
+    zh: '月德金融 (WFIN)',
+  },
+  'company.WDT': {
+    ko: '월덱테크 (WDT)',
+    en: 'Woldeok Tech (WDT)',
+    ja: 'ウォルドクテック (WDT)',
+    zh: '月德科技 (WDT)',
   },
   'company.CHIMU': {
     ko: '치무테크 (CHIMU)',

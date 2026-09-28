@@ -12,13 +12,13 @@ afterEach(cleanup);
 const MOCK_EVENTS: readonly MarketEvent[] = [
   {
     id: 'evt-1',
-    stock_id: 'stock-fnak',
-    symbol: 'FNAK',
-    name: '프낙반도체',
+    stock_id: 'stock-wdt',
+    symbol: 'WDT',
+    name: '월덱테크',
     direction: 'up',
     strength: 3,
-    headline: '프낙반도체 차세대 고대역폭 메모리 공급 계약 체결',
-    body: '대규모 수출 계약으로 향후 실적 개선 기대감이 시장 전반에 확산되고 있습니다.',
+    headline: '월덱테크 차세대 AI 가속 클라우드 서비스 계약 체결',
+    body: '대규모 엔터프라이즈 공급 계약으로 향후 실적 개선 기대감이 시장 전반에 확산되고 있습니다.',
     source: '월덕경제일보',
     starts_at: '2026-09-22T00:00:00.000Z',
     ends_at: '2026-09-22T23:59:59.000Z',
@@ -40,9 +40,9 @@ const MOCK_EVENTS: readonly MarketEvent[] = [
 
 const MOCK_STOCKS: readonly StockTickerItem[] = [
   {
-    id: 'stock-fnak',
-    symbol: 'FNAK',
-    name: '프낙반도체',
+    id: 'stock-wdt',
+    symbol: 'WDT',
+    name: '월덱테크',
     current_price: '54200',
     day_open_price: '50000',
   },
@@ -62,7 +62,7 @@ describe('NewspaperView', () => {
     const { container } = render(<NewspaperView events={MOCK_EVENTS} stocks={MOCK_STOCKS} />);
     const text = container.textContent ?? '';
 
-    expect(text).toContain('프낙반도체 차세대 고대역폭 메모리 공급 계약 체결');
+    expect(text).toContain('월덱테크 차세대 AI 가속 클라우드 서비스 계약 체결');
     expect(text).toContain('월덕바이오 신약 임상 일정 일시적 조정 발표');
     expect(text).toContain('진행 중인 사건: 2건');
   });

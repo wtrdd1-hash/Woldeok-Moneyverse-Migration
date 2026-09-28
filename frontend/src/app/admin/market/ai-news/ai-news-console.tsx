@@ -150,7 +150,7 @@ export function AiNewsAutoGenerateCard({
           </Badge>
         </div>
         <CardDescription>
-          현재 DB에 상장 및 활성화된 가상 주식(WDT, WDM, WDB, CHIMU314, FNAK 등)의 최근 시세·변동률을 자동으로 조회하고,
+          현재 DB에 상장 및 활성화된 가상 주식(WDT, WDM, WDB, CHIMU314, WFIN, SPACE 등)의 최근 시세·변동률을 자동으로 조회하고,
           AI 모델이 시장 상황에 맞는 시나리오를 자동 구성하여 즉시 시장에 발행합니다.
         </CardDescription>
       </CardHeader>

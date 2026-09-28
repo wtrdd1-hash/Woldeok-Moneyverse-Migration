@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, Flame, Trophy, Coins, Shield, X, Zap } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Sparkles, Flame, Trophy, Coins, Shield, X, Zap, Loader2, CheckCircle2, LogIn } from 'lucide-react';
+import Link from 'next/link';
 
-import { claimGoldenDuckFever } from '@/lib/dopamine-api';
+import { claimGoldenDuckAction } from '@/app/actions/dopamine';
 
 interface GoldenDuckFeverProps {
   isOpen?: boolean;
@@ -35,6 +36,9 @@ export function GoldenDuckFever({
   const [maxCombo, setMaxCombo] = useState<number>(0);
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isClaiming, setIsClaiming] = useState<boolean>(false);
+  const [claimSuccess, setClaimSuccess] = useState<boolean>(false);
+  const [claimMessage, setClaimMessage] = useState<string>('');
+  const [requiresLogin, setRequiresLogin] = useState<boolean>(false);
   const [clickParticles, setClickParticles] = useState<{ id: number; x: number; y: number; text: string }[]>([]);
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -49,6 +53,9 @@ export function GoldenDuckFever({
       setMaxCombo(0);
       setIsFinished(false);
       setIsClaiming(false);
+      setClaimSuccess(false);
+      setClaimMessage('');
+      setRequiresLogin(false);
       setClickParticles([]);
 
       if (timerRef.current) clearInterval(timerRef.current);
@@ -57,7 +64,6 @@ export function GoldenDuckFever({
         setTimeLeft((prev) => {
           if (prev <= 1) {
             if (timerRef.current) clearInterval(timerRef.current);
-            setIsFinished(true);
             return 0;
           }
           return prev - 1;
@@ -71,6 +77,13 @@ export function GoldenDuckFever({
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [isFeverActive]);
+
+  // Clean timer finish effect (pure state transition without updater side-effects)
+  useEffect(() => {
+    if (timeLeft === 0 && !isFinished) {
+      setIsFinished(true);
+    }
+  }, [timeLeft, isFinished]);
 
   // Floating duck spawn cycle (every 25s if enabled and not currently in fever)
   useEffect(() => {
@@ -95,54 +108,79 @@ export function GoldenDuckFever({
     setInternalOpen(true);
   };
 
-  const handleTap = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleTap = useCallback((e: React.PointerEvent<HTMLButtonElement> | React.MouseEvent<HTMLButtonElement>) => {
     if (isFinished || timeLeft <= 0) return;
 
-    const nextTap = tapCount + 1;
-    const nextCombo = combo + 1;
-    setTapCount(nextTap);
-    setCombo(nextCombo);
-    if (nextCombo > maxCombo) setMaxCombo(nextCombo);
+    // Extract client coordinates safely before state updaters
+    const target = e.currentTarget;
+    const rect = target?.getBoundingClientRect?.() ?? { left: 0, top: 0, width: 100, height: 100 };
+    const clientX = e.clientX ?? (rect.left + rect.width / 2);
+    const clientY = e.clientY ?? (rect.top + rect.height / 2);
+    const particleX = clientX - rect.left;
+    const particleY = clientY - rect.top;
 
-    // Multiplier calculation (1.0x to 3.0x based on combo)
-    const multiplier = Math.min(3.0, 1.0 + Math.floor(nextCombo / 10) * 0.5);
-    const baseWld = 50;
-    const addedWld = Math.round(baseWld * multiplier);
-    
-    // Cap at 5,000 WLD per fever session
-    setEarnedWld((prev) => Math.min(5000, prev + addedWld));
+    setTapCount((prevTap) => prevTap + 1);
 
-    // Particle effect
-    const rect = e.currentTarget.getBoundingClientRect();
-    const particleX = e.clientX - rect.left;
-    const particleY = e.clientY - rect.top;
-    const newParticle = {
-      id: Date.now() + Math.random(),
-      x: particleX,
-      y: particleY,
-      text: `+${addedWld} WLD`,
-    };
+    setCombo((prevCombo) => {
+      const nextCombo = prevCombo + 1;
+      setMaxCombo((currentMax) => (nextCombo > currentMax ? nextCombo : currentMax));
 
-    setClickParticles((prev) => [...prev.slice(-8), newParticle]);
-  };
+      // Multiplier calculation (1.0x to 3.0x based on combo)
+      const multiplier = Math.min(3.0, 1.0 + Math.floor(nextCombo / 10) * 0.5);
+      const baseWld = 25;
+      const addedWld = Math.round(baseWld * multiplier);
+      
+      // Cap at 5,000 WLD per fever session
+      setEarnedWld((currentWld) => Math.min(5000, currentWld + addedWld));
+
+      // Particle effect
+      const newParticle = {
+        id: Date.now() + Math.random(),
+        x: particleX,
+        y: particleY,
+        text: `+${addedWld} WLD`,
+      };
+
+      setClickParticles((prev) => [...prev.slice(-8), newParticle]);
+
+      return nextCombo;
+    });
+  }, [isFinished, timeLeft]);
 
   const handleClaim = async () => {
-    if (isClaiming) return;
+    if (isClaiming || claimSuccess) return;
     setIsClaiming(true);
+    setRequiresLogin(false);
 
     const multiplier = Math.min(3.0, 1.0 + Math.floor(maxCombo / 10) * 0.5);
     try {
-      await claimGoldenDuckFever(tapCount, multiplier);
-    } catch {
-      // Offline fallback
-    }
+      const res = await claimGoldenDuckAction(tapCount, multiplier);
+      if (res.requiresLogin) {
+        setRequiresLogin(true);
+        setIsClaiming(false);
+        return;
+      }
 
-    if (onClaimReward) {
-      onClaimReward(earnedWld, maxCombo);
+      if (res.success) {
+        setClaimSuccess(true);
+        setClaimMessage(res.message || `${earnedWld.toLocaleString()} WLD가 지갑에 입금되었습니다!`);
+        
+        // 브라우저 지갑 잔고 갱신 이벤트 전파
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('moneyverse:wallet-updated', { detail: res }));
+        }
+
+        if (onClaimReward) {
+          onClaimReward(res.rewardAmount ?? earnedWld, maxCombo);
+        }
+      } else {
+        setClaimMessage(res.message || '보상 수령 처리에 실패했습니다.');
+      }
+    } catch {
+      setClaimMessage('네트워크 상태를 확인해 주세요.');
+    } finally {
+      setIsClaiming(false);
     }
-    setInternalOpen(false);
-    setIsClaiming(false);
-    if (onClose) onClose();
   };
 
   const handleCloseModal = () => {
@@ -162,7 +200,7 @@ export function GoldenDuckFever({
           <button
             type="button"
             onClick={startFeverFromFloating}
-            className="group relative flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-amber-300 bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 p-2 shadow-2xl shadow-amber-500/50 hover:scale-110 active:scale-95"
+            className="group relative flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-amber-300 bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 p-2 shadow-2xl shadow-amber-500/50 hover:scale-110 active:scale-95 touch-manipulation"
             aria-label="황금 오리 피버 타임 잡기"
           >
             <Sparkles className="h-7 w-7 text-slate-950 animate-spin" />
@@ -213,7 +251,7 @@ export function GoldenDuckFever({
 
             {/* Main Interactive Fever Area */}
             {!isFinished ? (
-              <div className="mt-4 flex flex-col items-center justify-center py-3">
+              <div className="mt-4 flex flex-col items-center justify-center py-3 select-none">
                 {/* Timer & Combo Header */}
                 <div className="flex w-full items-center justify-between px-2">
                   <div className="flex items-center gap-1.5">
@@ -237,13 +275,14 @@ export function GoldenDuckFever({
                   </div>
                 </div>
 
-                {/* Big Clickable Fever Coin Button */}
+                {/* Big Clickable Fever Coin Button (with instant PointerDown for zero touch delay) */}
                 <div className="relative my-2">
                   <button
                     type="button"
-                    onClick={handleTap}
+                    onPointerDown={handleTap}
                     aria-label="피버 코인 광클하기"
-                    className="relative flex h-40 w-40 cursor-pointer items-center justify-center rounded-full border-4 border-amber-300 bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 shadow-2xl shadow-amber-500/50 transition-transform duration-75 active:scale-90 select-none"
+                    className="relative flex h-40 w-40 cursor-pointer items-center justify-center rounded-full border-4 border-amber-300 bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-600 shadow-2xl shadow-amber-500/50 transition-transform duration-75 active:scale-90 select-none touch-manipulation"
+                    style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
                   >
                     <Coins className="h-20 w-20 text-slate-950 drop-shadow-md animate-bounce" />
                     <span className="absolute bottom-3 rounded-full bg-slate-950/80 px-2.5 py-0.5 text-[11px] font-black text-amber-300 border border-amber-500/40">
@@ -286,13 +325,52 @@ export function GoldenDuckFever({
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={handleClaim}
-                  className="mt-5 w-full rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/30 hover:from-amber-400 hover:to-amber-500 active:scale-95 transition-all"
-                >
-                  지갑에 WLD 보상 수령하기
-                </button>
+                {/* Claim Status or Feedback */}
+                {claimSuccess ? (
+                  <div className="mt-5 w-full rounded-2xl bg-emerald-950/80 border border-emerald-500/50 p-4 text-emerald-300 animate-fadeIn">
+                    <div className="flex items-center justify-center gap-2 font-bold text-sm">
+                      <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                      <span>{claimMessage}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleCloseModal}
+                      className="mt-3 w-full rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-slate-950 hover:bg-emerald-500 active:scale-95 transition-all"
+                    >
+                      확인 완료
+                    </button>
+                  </div>
+                ) : requiresLogin ? (
+                  <div className="mt-5 w-full rounded-2xl bg-slate-950/90 border border-amber-500/40 p-4 text-slate-200 animate-fadeIn">
+                    <p className="text-xs text-amber-300 font-semibold mb-3">
+                      획득한 WLD를 지갑에 적립하려면 로그인이 필요합니다.
+                    </p>
+                    <Link
+                      href="/lobby"
+                      onClick={handleCloseModal}
+                      className="flex items-center justify-center gap-2 w-full rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 py-3 text-xs font-bold text-slate-950 shadow-md hover:from-amber-400 hover:to-amber-500 active:scale-95 transition-all"
+                    >
+                      <LogIn className="h-4 w-4" />
+                      로그인하고 WLD 수령하기
+                    </Link>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleClaim}
+                    disabled={isClaiming}
+                    className="mt-5 flex items-center justify-center gap-2 w-full rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 py-3.5 text-sm font-bold text-slate-950 shadow-lg shadow-amber-500/30 hover:from-amber-400 hover:to-amber-500 active:scale-95 transition-all disabled:opacity-50"
+                  >
+                    {isClaiming ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin text-slate-950" />
+                        <span>지갑 입금 처리 중...</span>
+                      </>
+                    ) : (
+                      <span>지갑에 WLD 보상 수령하기</span>
+                    )}
+                  </button>
+                )}
               </div>
             )}
           </div>

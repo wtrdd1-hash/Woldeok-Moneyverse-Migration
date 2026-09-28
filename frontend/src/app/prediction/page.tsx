@@ -54,7 +54,7 @@ const INITIAL_MARKETS: PredictionMarket[] = [
   },
   {
     id: 'pred-3',
-    title: '파이낸스덕 (FNAK) 24시간 거래량 전 종목 1위 달성?',
+    title: '월덱테크 (WDT) 24시간 거래량 전 종목 1위 달성?',
     category: 'stocks',
     endDate: 'D-1 (09.27 24:00)',
     totalPoolWld: 2100000,

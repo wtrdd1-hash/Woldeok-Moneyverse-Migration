@@ -4,6 +4,7 @@ import type { Queryable } from '../core/db';
 import { PG_POOL } from '../core/pool.provider';
 import { EARLY_GAME_REPOSITORY_PROVIDER } from '../early-game/early-game.provider';
 import { DopamineController } from './dopamine.controller';
+import { DopamineRepository } from './dopamine.repository';
 import { EngagementController } from './engagement.controller';
 import { EngagementRepository } from './engagement.repository';
 
@@ -15,6 +16,11 @@ import { EngagementRepository } from './engagement.repository';
       provide: EngagementRepository,
       inject: [PG_POOL],
       useFactory: (pool: Queryable | null) => (pool ? new EngagementRepository(pool) : null),
+    },
+    {
+      provide: DopamineRepository,
+      inject: [PG_POOL],
+      useFactory: (pool: Queryable | null) => (pool ? new DopamineRepository(pool) : null),
     },
     EARLY_GAME_REPOSITORY_PROVIDER,
   ],

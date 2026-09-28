@@ -1,49 +1,117 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
 import React from 'react';
 import { GoldenDuckFever } from './golden-duck-fever';
+import * as dopamineActions from '@/app/actions/dopamine';
 
-vi.mock('@/lib/dopamine-api', () => ({
-  claimGoldenDuckFever: vi.fn().mockResolvedValue({ success: true, rewardAmount: 1000 }),
+// Mock dopamine server actions
+vi.mock('@/app/actions/dopamine', () => ({
+  claimGoldenDuckAction: vi.fn(),
 }));
 
 describe('GoldenDuckFever Component', () => {
-  it('opens fever modal and increases earned WLD and combo when tapped', () => {
-    const onClaimMock = vi.fn();
-    render(
-      <GoldenDuckFever
-        isOpen={true}
-        onClaimReward={onClaimMock}
-        enableFloatingSpawn={false}
-      />
-    );
-
-    // Verify header and timer
-    expect(screen.getAllByText(/황금 오리 광클 피버 타임/).length).toBeGreaterThan(0);
-    expect(screen.getByText(/10초 남음/)).toBeDefined();
-
-    // Tap button
-    const tapButton = screen.getAllByRole('button', { name: '피버 코인 광클하기' })[0]!;
-    expect(tapButton).toBeDefined();
-
-    // Tap 3 times
-    fireEvent.click(tapButton);
-    fireEvent.click(tapButton);
-    fireEvent.click(tapButton);
-
-    // Score and combo should increase
-    expect(screen.getByText(/콤보/)).toBeDefined();
-    expect(screen.getByText(/3x/)).toBeDefined();
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.clearAllMocks();
   });
 
-  it('renders closed state when isOpen is false', () => {
-    const { container } = render(
-      <GoldenDuckFever
-        isOpen={false}
-        enableFloatingSpawn={false}
-      />
-    );
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+  });
 
-    expect(container.querySelector('[role="dialog"]')).toBeNull();
+  it('renders modal with timer and interactive elements when isOpen is true', () => {
+    render(<GoldenDuckFever isOpen={true} />);
+
+    expect(screen.getByText(/황금 오리 광클 피버 타임/)).toBeDefined();
+    expect(screen.getByText(/10초 남음/)).toBeDefined();
+    expect(screen.getByRole('button', { name: /피버 코인 광클하기/ })).toBeDefined();
+  });
+
+  it('increments taps, combo and earned WLD on coin click', () => {
+    render(<GoldenDuckFever isOpen={true} />);
+
+    const coinButton = screen.getByRole('button', { name: /피버 코인 광클하기/ });
+
+    // 1st click
+    act(() => {
+      fireEvent.pointerDown(coinButton);
+    });
+
+    expect(screen.getByText(/콤보/)).toBeDefined();
+    expect(screen.getByText('+25')).toBeDefined();
+
+    // 2nd click
+    act(() => {
+      fireEvent.pointerDown(coinButton);
+    });
+
+    expect(screen.getByText('+50')).toBeDefined();
+  });
+
+  it('transitions to finished screen when 10 seconds elapse', () => {
+    render(<GoldenDuckFever isOpen={true} />);
+
+    // Fast-forward 10 seconds
+    act(() => {
+      vi.advanceTimersByTime(10000);
+    });
+
+    expect(screen.getByText(/🎉 피버 타임 종료!/)).toBeDefined();
+    expect(screen.getByRole('button', { name: /지갑에 WLD 보상 수령하기/ })).toBeDefined();
+  });
+
+  it('calls claimGoldenDuckAction and displays success feedback upon claim', async () => {
+    vi.mocked(dopamineActions.claimGoldenDuckAction).mockResolvedValue({
+      success: true,
+      rewardAmount: 1250,
+      newBalance: '15000',
+      message: '1,250 WLD가 지갑에 성공적으로 입금되었습니다!',
+    });
+
+    const onClaimReward = vi.fn();
+    render(<GoldenDuckFever isOpen={true} onClaimReward={onClaimReward} />);
+
+    const coinButton = screen.getByRole('button', { name: /피버 코인 광클하기/ });
+    act(() => {
+      fireEvent.pointerDown(coinButton);
+      fireEvent.pointerDown(coinButton);
+    });
+
+    // Finish 10s
+    act(() => {
+      vi.advanceTimersByTime(10000);
+    });
+
+    const claimButton = screen.getByRole('button', { name: /지갑에 WLD 보상 수령하기/ });
+    await act(async () => {
+      fireEvent.click(claimButton);
+    });
+
+    expect(dopamineActions.claimGoldenDuckAction).toHaveBeenCalled();
+    expect(screen.getByText(/1,250 WLD가 지갑에 성공적으로 입금되었습니다!/)).toBeDefined();
+    expect(onClaimReward).toHaveBeenCalledWith(1250, 2);
+  });
+
+  it('prompts user to log in if requiresLogin is returned from server action', async () => {
+    vi.mocked(dopamineActions.claimGoldenDuckAction).mockResolvedValue({
+      success: false,
+      requiresLogin: true,
+      message: '로그인 후 WLD 보상을 지갑에 수령할 수 있습니다.',
+    });
+
+    render(<GoldenDuckFever isOpen={true} />);
+
+    act(() => {
+      vi.advanceTimersByTime(10000);
+    });
+
+    const claimButton = screen.getByRole('button', { name: /지갑에 WLD 보상 수령하기/ });
+    await act(async () => {
+      fireEvent.click(claimButton);
+    });
+
+    expect(screen.getByText(/획득한 WLD를 지갑에 적립하려면 로그인이 필요합니다/)).toBeDefined();
+    expect(screen.getByRole('link', { name: /로그인하고 WLD 수령하기/ })).toBeDefined();
   });
 });
