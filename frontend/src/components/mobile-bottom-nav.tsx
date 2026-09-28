@@ -55,7 +55,7 @@ export function MobileBottomNav() {
               prefetch={false}
               aria-current={isActive ? 'page' : undefined}
               className={cn(
-                'group relative flex min-h-[60px] min-w-0 flex-col items-center justify-center gap-1 px-1 py-1.5 transition-all active:scale-95 outline-none',
+                'group relative flex min-h-[58px] min-w-0 flex-col items-center justify-center gap-1 px-1 py-1.5 transition-all active:scale-95 outline-none',
                 isActive
                   ? 'text-primary font-bold'
                   : 'text-muted-foreground hover:text-foreground',

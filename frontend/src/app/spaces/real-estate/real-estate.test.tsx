@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { PREMIER_LAND_PARCELS, calculateRealEstateTax } from '@moneyverse/contract';
