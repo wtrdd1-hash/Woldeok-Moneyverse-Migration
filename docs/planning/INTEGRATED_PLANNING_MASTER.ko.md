@@ -270,3 +270,19 @@
 - **KR-LGL-443-03 / 실결제 전 P0:** 판매자 신원/신고, 거래조건, 청약철회/환불/해지, 미성년자 계약 통제 전 유료상품/구독 BLOCK.
 - **KR-LGL-443-04..08 / P1:** 연령확인 표현, AdSense/국외이전, 광고성 메시지 동의, 게임 등급 적용성, 비환전 경계를 증거 기반 게이트로 관리.
 - 기획/감사만 수행. 운영 변경·배포·DB migration·GRAC 승인·사업자등록·세무상태 완료를 주장하지 않는다.
+
+## v2026.09.28.477 — 전체 화면 QA 증거 델타
+
+> 증거 상태: **운영 승격 BLOCKED**
+> Candidate: `44933fd7abe83284e067c85115bf7ac1033cc895`
+> 상세 보고서: `docs/QA_AUDIT_REPORT_V477.ko.md`
+> 작업일지: `docs/worklog/2026-09-28-full-surface-qa-v2026.09.28.477.ko.md`
+
+- exact candidate inventory는 현재 **페이지 route 108개 / 관리자 24개 / dynamic 12개**다. 과거 86/22/8 및 v473 route-count 증거는 이력으로만 취급한다.
+- Test guest browser 5-pass에서 320/390/768/1024/1440 CSS px 기준 540 route/view row를 확인했다. 페이지 단위 horizontal overflow는 재현되지 않았다. 최초 navigation abort 29건은 격리 재실행 **29/29 통과**로 harness redirect/prefetch 경합임을 확인했다.
+- Release gate는 green이 아니다. root lint **89 errors / 364 warnings**, root test의 mobile API contract drift, frontend **927 pass / 1 fail** 및 teardown unhandled error 6건, backend DB 의존 391 skip이 남아 있다.
+- deterministic member/restricted/owner/admin fixture, complete dynamic scenario, 전체 responsive/zoom matrix, Android device instrumentation이 없어 권위 full-route acceptance는 미완료다.
+- Production/Test runtime health와 v476 release symlink는 정상이나 runtime과 exact Git SHA를 결합하는 증거가 부족하다.
+- Android exact-main unit test 25건과 lint는 통과했으나 signing/device 환경 때문에 assemble/device UI acceptance는 BLOCKED다.
+- Product/Production 변경은 수행하지 않았다. 이 델타는 운영 승격을 승인하지 않는다.
+
