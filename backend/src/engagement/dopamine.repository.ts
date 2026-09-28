@@ -88,7 +88,7 @@ export class DopamineRepository {
          $1::uuid,
          'MINT_TO_USER',
          $2::uuid,
-         'dopamine-fever-v1',
+         NULL,
          jsonb_build_array(
            jsonb_build_object('accountId', $3::uuid, 'amount', $4::numeric, 'direction', 'credit'),
            jsonb_build_object('accountId', $5::uuid, 'amount', $4::numeric, 'direction', 'debit')

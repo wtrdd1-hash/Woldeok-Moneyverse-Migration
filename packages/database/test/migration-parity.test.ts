@@ -33,7 +33,8 @@ function portedDigests(directory: string): Map<string, string> {
   const digests = new Map<string, string>();
   for (const name of readdirSync(directory).sort()) {
     if (!name.endsWith('.sql') && !name.endsWith('.sh')) continue;
-    digests.set(name, createHash('sha256').update(readFileSync(join(directory, name))).digest('hex'));
+    const content = readFileSync(join(directory, name), 'utf8').replace(/\r\n/g, '\n');
+    digests.set(name, createHash('sha256').update(content, 'utf8').digest('hex'));
   }
   return digests;
 }
