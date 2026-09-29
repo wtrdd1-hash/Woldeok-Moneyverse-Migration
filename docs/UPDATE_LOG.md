@@ -1,3 +1,12 @@
+## v2026.09.29.486 — Strict 145,579-Record Database Reference Corpus & PostgreSQL 17 Evidence Hardening
+
+- **Documentation Version:** `v2026.09.29.486`
+- **Scope:** research/planning/docs only; no Test/Production/database mutation
+- **Evidence:** Crossref 145,898 raw -> 145,579 strict title-qualified -> 145,579 unique records; SHA-256 `d61e825f8f699ccfca9e1bc5ee13dd070d123440c680a8aa9d90c5a4d6a80216`
+- **Quality:** rejected the earlier broad v486 108,216-candidate pass after false-positive sampling; every accepted title contains `database` or `data base`.
+- **Planning:** adopted DB486-01..07 covering concurrent-index validity, nullable uniqueness, extended statistics, replication-slot WAL budgets, base-backup verification + restore drills, staged constraints, and conditional RLS.
+- **Authority:** `INTEGRATED_PLANNING_MASTER` and `DATABASE_ARCHITECTURE_SPEC` updated; global `PROJECT_PLAN` remains v444 per existing authority-drift rule.
+
 ## v2026.09.28.478 — Full-Stack SEO Overhaul, 7 Dedicated Server Component Layouts (Real Estate/Derivatives/Ventures/Warfare/Quant/Calculators), Clean XML Sitemap Query Normalization, Open Robots.txt, IndexNow Real-Time Push with 1,558 Sessions Preserved
 
 - **Release Version**: `prod-v478`

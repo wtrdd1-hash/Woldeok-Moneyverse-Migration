@@ -1,4 +1,4 @@
-# Database Architecture Specification — v2026.09.25.443
+# Database Architecture Specification — v2026.09.29.486
 
 > Status: adopted detailed planning specification
 > Canonical language: English
@@ -234,3 +234,16 @@ Database-backed checks that are skipped because a database is unavailable are re
 Runtime schema changes use a dedicated development branch and the standard exact-SHA isolated Test path. Production promotion remains zero-downtime and requires migration completion, schema fingerprint match, backend health, critical DB mutation/read checks, session continuity, logs/metrics and a compatible rollback/forward-fix target.
 
 This specification does not itself change the runtime schema.
+
+## v2026.09.29.486 evidence and operational refinements
+
+This section adopts the directly verified v486 requirements without changing the existing core ledger/security architecture. Discovery evidence is in `MONEYVERSE_DATABASE_ARCHITECTURE_RESEARCH_REVIEW_v2026.09.29.486.md`; the strict corpus contains **145,579 unique records** with SHA-256 `d61e825f8f699ccfca9e1bc5ee13dd070d123440c680a8aa9d90c5a4d6a80216`.
+
+1. **Concurrent-index gate (P0):** after `CREATE INDEX CONCURRENTLY` or `REINDEX ... CONCURRENTLY`, acceptance checks must reject unexpected `pg_index.indisvalid = false` indexes. Long builds are observed through `pg_stat_progress_create_index`.
+2. **Nullable uniqueness semantics (P0):** each nullable business key documents and tests whether nulls are distinct; use `NULLS NOT DISTINCT` when one logical null is required.
+3. **Planner-statistics discipline (P1):** extended statistics require measured correlated-column estimation error plus before/after plan evidence.
+4. **Replication-slot boundedness (P0 when enabled):** every physical/logical slot has an owner/consumer, lag and retained-WAL monitoring, a storage budget, and `max_slot_wal_keep_size` policy or explicit capacity-backed exception.
+5. **Physical backup proof (P0 when enabled):** `pg_verifybackup` is required for base backups but never replaces a disposable restore and application/data verification.
+6. **Constraint rollout (P0):** large-table FK/check additions use `NOT VALID` then `VALIDATE CONSTRAINT` where appropriate; unique constraints may use a concurrently built unique index before attachment. Lock/scan/rewrite classification remains mandatory.
+7. **Conditional RLS (P1):** if row-level security is added, tests cover owner and `BYPASSRLS` bypass semantics and `FORCE ROW LEVEL SECURITY` where owner enforcement is intended. RLS is defense-in-depth, not a replacement for restricted runtime roles and security-definer boundaries.
+8. **Evidence truth (P0):** corpus size is never represented as manual review or implementation proof. Only adopted requirements backed by primary sources and repository evidence may become release gates.
