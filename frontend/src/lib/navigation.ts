@@ -303,7 +303,7 @@ export const CATEGORY_NAV: readonly NavCategory[] = [
       { href: '/board', label: '커뮤니티 게시판', description: '종목 토론, 자유 소통 및 정보 공유' },
       { href: '/gallery', label: '사진 갤러리', description: '유저 인증샷 및 미디어 갤러리' },
       { href: '/announcements', label: '운영 소식', description: '시스템 패치 노트 및 공식 공지사항' },
-      { href: '/guide', label: '이용 가이드', description: '신규 유저 가이드 및 게임 플레이 팁' },
+      { href: '/guide', label: '이용 가이드', description: '3분 입문 로드맵, 모의 자산 시뮬레이터 & 온보딩 퀘스트', badge: '인기' },
       { href: '/support', label: '1:1 관리자 문의', description: '고객 지원 및 문의사항 접수' },
     ],
   },

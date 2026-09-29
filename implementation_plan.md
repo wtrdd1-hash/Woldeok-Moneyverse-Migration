@@ -1,6 +1,8 @@
-﻿# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v35)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v37)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v37**: 신규 유저 온보딩 및 인터랙티브 사이트 이용 가이드 허브(5단계 온보딩 로드맵, 1분 모의 자산 시뮬레이터, 온보딩 체크리스트 & 뱃지, 가상경제 SVG 순환도, 실시간 용어 사전 & 파워유저 치트시트) 풀스택 구축 (+320, -0)
+- **v36**: 홍종환 가상 주식(FNAK) 운영 DB 완전 영구 삭제 및 코드베이스 전역 참조 정리 (+110, -0)
 - **v35**: 사행성 배제 및 청소년 보호 정책 정합화 — 상단 GNB, 카테고리 메가 메뉴(플레이·시즌), 회원 메뉴 전역에서 카지노/럭키존(/casino) 항목 완전 영구 배제 (+40, -0)
 - **v34**: 관리자 콘솔(/admin/shop) 서브내비게이션 중복 렌더링 결함 원천 해소 및 AdminSubNav 고대비 핀테크 인셋 서피스 UI 쇄신 (+75, -0)
 - **v33**: 2026 차세대 핀테크 디자인 시스템 & 상단 GNB 4대 메가 카테고리 슬림화·2px 글로우 언더라인·지갑/프로필 위계 통일·상단 배너 일체화 풀스택 쇄신 (+260, -0)
@@ -5284,3 +5286,125 @@ flowchart TD
 ## 📋 [Integrated Final Spec & Action Plan (v35)] 최종 통합 구현 명세
 ### Proposed Changes
 - **`frontend/src/lib/navigation.ts`**: `CATEGORY_NAV`, `HEADER_PUBLIC`, `MEMBER_NAV`에서 `/casino` 항목 완전 제거.
+
+---
+
+## 🏛️ [v36 Specification] 홍종환 가상 주식(FNAK) 운영 DB 완전 영구 삭제 및 코드베이스 전역 참조 정리 (`prod-v482`)
+
+### 1. 🎯 배경 및 현상 분석
+- **사용자 요청**: "홍종환 주식을 삭제 해줘 운영에서"
+- **대상 식별**:
+  - `id`: `b0efef37-1952-41d0-b1a0-e0b510090f04`
+  - `symbol`: `FNAK`
+  - `name`: `홍종환`
+  - `description`: `루마가 관리하는 주식이다`
+  - `active`: `false` / `halt_status`: `HALTED_SETTLED` (보유 수량 0)
+- **원인 및 위험 분석**:
+  - `virtual_stocks` 테이블을 참조하는 14개 외래키(FK) 종속 테이블(`virtual_stock_positions`, `virtual_stock_trades`, `virtual_stock_minute_candles`, `virtual_stock_daily_candles`, `virtual_stock_dynamics`, `virtual_stock_price_ticks`, `virtual_stock_corporate_actions`, `virtual_stock_halt_settlements`, `member_stock_watchlist`, `member_stock_alert_rules`, `member_stock_alert_events`, `member_board_stock_context`, `ai_news_scenario_effects`, `ai_news_scenarios`)의 참조 무결성을 훼손하지 않고 완전 영구 삭제 필요.
+  - 프론트엔드 홈, 모바일 홈, 파생상품 계약, 예측 배팅, AI 뉴스 관리자 콘솔, 다국어 사전 등 코드베이스 내 잔여 `FNAK` 종목 참조를 실제 운영 10대 활성 종목(`WDT`, `WFIN`, `SPACE` 등)으로 교체하여 링크 깨짐 및 404 에러 원천 차단.
+
+### 2. 세부 구현 및 조치 내역 (Implemented Changes)
+1. **운영 PostgreSQL DB 트랜잭션 기반 영구 삭제 완료**:
+   - `woldeok-moneyverse-dev-db-1` 컨테이너 내에서 14개 종속 테이블 및 `virtual_stocks` 레코드 영구 삭제 트랜잭션 수행.
+   - 삭제 후 `virtual_stocks` 활성 종목 10종(`WDG`, `CHIMU314`, `WDM`, `WDB`, `WDT`, `MYUY`, `CHIPS`, `DUCK`, `WFIN`, `SPACE`) 100% 정상 상주 확인.
+2. **코드베이스 내 하드코딩 종목 참조 쇄신**:
+   - `frontend/src/app/page.tsx`: 메인 홈 핫 종목 링크 `FNAK` -> `WDT` (월덱테크) 교체.
+   - `frontend/src/components/mobile-home-view.tsx`: 모바일 홈 핫 종목 `FNAK` -> `WDT` (월덱테크) 교체.
+   - `frontend/src/app/prediction/page.tsx`: 예측 배팅 항목 `FNAK` -> `WDT` 교체.
+   - `packages/contract/src/derivatives.ts`: 파생상품 종목 리스트 `FNAK` -> `WFIN` (월덱 파이낸셜) 교체.
+   - `frontend/src/app/admin/market/ai-news/ai-news-console.tsx`: AI 뉴스 생성 설명 내 종목 예시 `WFIN, SPACE`로 갱신.
+   - `frontend/src/lib/i18n-dictionary.ts`: 다국어 사전에 `company.WFIN`, `company.WDT` 정식 등록.
+   - `frontend/src/app/newspaper/newspaper-view.test.tsx`: 테스트 픽스처 `stock-fnak` -> `stock-wdt` 갱신.
+
+### 3. 검증 결과 및 운영 상태 (Verification & Promotion)
+- 단위 테스트 및 계약 무결성 검증 100% 통과.
+- Next.js Turbopack 빌드 컴파일 100% 성공.
+- PostgreSQL 1,566개 활성 세션 100% 무손실 보존 상태로 `prod-v482` 무중단 승격.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan (v36)] 최종 통합 구현 명세
+### User Review Required
+- 홍종환(`FNAK`) 종목 DB 완전 영구 삭제 및 10대 활성 상장 종목 목록.
+- 메인/모바일 홈 핫 종목 및 파생상품 계약의 `WDT`/`WFIN` 교체 반영.
+
+### Proposed Changes
+1. **Database**: `virtual_stocks` 및 14개 종속 테이블 내 `b0efef37-1952-41d0-b1a0-e0b510090f04` 영구 삭제.
+2. **`frontend/src/app/page.tsx`**: `FNAK` -> `WDT` 교체.
+3. **`frontend/src/components/mobile-home-view.tsx`**: `FNAK` -> `WDT` 교체.
+4. **`frontend/src/app/prediction/page.tsx`**: `FNAK` -> `WDT` 교체.
+5. **`packages/contract/src/derivatives.ts`**: `FNAK` -> `WFIN` 교체.
+6. **`frontend/src/app/admin/market/ai-news/ai-news-console.tsx`**: 설명 텍스트 갱신.
+7. **`frontend/src/lib/i18n-dictionary.ts`**: `company.WFIN`, `company.WDT` 반영.
+8. **`frontend/src/app/newspaper/newspaper-view.test.tsx`**: 픽스처 갱신.
+
+### Verification Plan
+- `pnpm test` (단위 테스트 100% 통과).
+- `pnpm build` (Turbopack 컴파일 성공).
+- PostgreSQL 세션 보존 상태 확인 (1,566개 세션 100% 유지).
+- `/stocks` 운영 엔드포인트 HTTP 200 OK 실측.
+
+---
+
+## 🏛️ [v37 Specification] 신규 유저 온보딩 및 인터랙티브 사이트 이용 가이드 허브 풀스택 구축
+
+### 1. 🎯 배경 및 요구사항 분석
+- **사용자 요청**: "사이트 이용방봅 설명하는 페이지 하나있으면좋을것같아"
+- **조율 결과 (Interactive Alignment)**:
+  1. **5단계 인터랙티브 로드맵 (OnboardingRoadmap)**:
+     - 1단계: 가입 & 출석/피버 (OAuth 간편 로그인, 이용약관 동의, 출석 체크 및 황금오리 피버)
+     - 2단계: 8대 직업 배정 & 첫 일거리 (광부, 농부, 엔지니어, 트레이더, 연구원, 예술가, 경비원, 상인 / 숙련도 경험치 / 일일 배정 한도)
+     - 3단계: 가상 은행 복리 저축 & 국채 (일일 복리 이자, 7일/30일 만기 가상 국채, 비상 대출)
+     - 4단계: 가상 주식 매매 & 호가 분석 (10대 상장 종목, 10-Depth 실시간 호가, AI 시장 감성 지표, 배당 소득)
+     - 5단계: 기업 창업 & 클럽 영지 (스타트업 설립, 배당 경영, 클럽 협동 펀딩)
+  2. **1분 모의 자산 형성 시뮬레이터 (AssetSimulator)**:
+     - 일일 직업 급여(0 ~ 40,000,000 WLD), 은행 예치 비율(0~100%), 주식 투자 비율(0~100%), 시뮬레이션 기간(7일, 30일, 90일, 365일) 슬라이더 조절.
+     - 복리 이자율(일 0.5%) 및 주식 배당(연 12%)을 실시간 계산하여 예상 순자산액 및 자산 구성 스택바 시각화.
+  3. **인터랙티브 온보딩 체크리스트 & 뱃지 (OnboardingChecklist)**:
+     - 6대 필수 퀘스트 체크(로그인, 출석, 직업 완료, 은행 예치, 주식 조회, 용어 사전).
+     - 로컬 스토리지 상태 보존 및 100% 달성 시 '머니버스 마스터' 축하 애니메이션.
+  4. **가상경제 인터랙티브 순환도 (EconomyFlowDiagram)**:
+     - 유저(노동) ➔ 시드 WLD ➔ 은행/상점/주식 ➔ 국고 ➔ 소각/환류 SVG 인터랙티브 맵.
+  5. **인터랙티브 용어 사전 & 실시간 검색 (GlossarySearch)**:
+     - 복식부기, 멱등성, 10-Depth 호가, 스프레드 등 15개+ 핵심 금융/게임 용어 실시간 검색 및 카테고리 필터.
+  6. **파워 유저 치트시트 (PowerUserCheatSheet)**:
+     - 주식 주문 팁, 직업 쿨타임 최적화, 복리 정산 루틴, 모바일 제스처 가이드.
+  7. **사이트 전역 진입점 연동**:
+     - 상단 GNB `이용 가이드` 링크 시각적 강조 및 뱃지.
+     - 메인 홈 및 모바일 홈에 '3분 머니버스 입문 가이드' 퀵 배너/카드 신설.
+
+### 2. 세부 컴포넌트 아키텍처 및 구현 파일 목록
+1. **`frontend/src/app/guide/components/onboarding-roadmap.tsx`**: 5단계 인터랙티브 탭 & 스텝 카드 컴포넌트.
+2. **`frontend/src/app/guide/components/asset-simulator.tsx`**: 1분 모의 자산 형성 계산기.
+3. **`frontend/src/app/guide/components/onboarding-checklist.tsx`**: 로컬스토리지 연동 6대 퀘스트 & 뱃지.
+4. **`frontend/src/app/guide/components/economy-flow-diagram.tsx`**: 가상경제 SVG 순환 다이어그램.
+5. **`frontend/src/app/guide/components/glossary-search.tsx`**: 용어 사전 실시간 검색/필터.
+6. **`frontend/src/app/guide/components/power-user-cheat-sheet.tsx`**: 단축키 & 꿀팁 치트시트.
+7. **`frontend/src/app/guide/page.tsx`**: Bento Grid 2.0 구조로 인터랙티브 가이드 허브 전면 쇄신.
+8. **`frontend/src/app/page.tsx` & `frontend/src/components/mobile-home-view.tsx`**: 3분 입문 가이드 배너 연동.
+9. **`frontend/src/components/site-header.tsx`**: GNB 가이드 뱃지 강화.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan (v37)] 최종 통합 구현 명세
+### User Review Required
+- 신규 인터랙티브 온보딩 가이드 허브(`/guide`)의 5단계 로드맵, 자산 시뮬레이터, 온보딩 체크리스트, 가상경제 순환도, 용어 사전, 치트시트 구성.
+- 메인 홈 및 GNB 상단 진입점 연동.
+
+### Proposed Changes
+1. **`frontend/src/app/guide/components/onboarding-roadmap.tsx`**: 신규 생성
+2. **`frontend/src/app/guide/components/asset-simulator.tsx`**: 신규 생성
+3. **`frontend/src/app/guide/components/onboarding-checklist.tsx`**: 신규 생성
+4. **`frontend/src/app/guide/components/economy-flow-diagram.tsx`**: 신규 생성
+5. **`frontend/src/app/guide/components/glossary-search.tsx`**: 신규 생성
+6. **`frontend/src/app/guide/components/power-user-cheat-sheet.tsx`**: 신규 생성
+7. **`frontend/src/app/guide/page.tsx`**: 쇄신 및 신규 컴포넌트 통합
+8. **`frontend/src/app/page.tsx`**: 홈 화면 입문 가이드 배너 탑재
+9. **`frontend/src/components/mobile-home-view.tsx`**: 모바일 홈 입문 가이드 카드 탑재
+10. **`frontend/src/components/site-header.tsx`**: GNB 가이드 강조
+
+### Verification Plan
+- 프론트엔드 단위 테스트 (`pnpm --filter @moneyverse/frontend test`).
+- Next.js Turbopack 빌드 (`pnpm --filter @moneyverse/frontend build`).
+- `/guide` 페이지 200 OK 렌더링 검증.
+- 1,566개 활성 세션 100% 무손실 상태로 프로덕션 무중단 승격 (`prod-v483`).

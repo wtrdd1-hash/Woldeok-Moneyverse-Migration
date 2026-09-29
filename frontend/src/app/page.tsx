@@ -189,7 +189,42 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 2. 2026 FEATURE STRIP: 3대 금융 계산기 허브 & 일일 리텐션 스테이션 */}
+      {/* 2. ONBOARDING QUICK BANNER: 3분 머니버스 입문 가이드 & 인터랙티브 허브 */}
+      <section aria-labelledby="onboarding-guide-heading">
+        <Link
+          href="/guide"
+          className="group relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/15 via-card to-background p-4 sm:p-5 shadow-sm transition-all hover:border-primary/60 hover:shadow-md active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-xs group-hover:scale-105 transition-transform">
+              <Sparkles className="size-5" />
+            </div>
+            <div className="min-w-0 space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-sm sm:text-base text-foreground group-hover:text-primary transition-colors">
+                  <T korean="3분 만에 마스터하는 머니버스 시작 가이드" english="3-Minute Moneyverse Interactive Guide" />
+                </span>
+                <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] font-bold">
+                  NEW
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground truncate [word-break:keep-all]">
+                <T
+                  korean="5단계 인터랙티브 로드맵 · 1분 자산 시뮬레이터 · 온보딩 퀘스트 & 뱃지 획득하기"
+                  english="5-Step Interactive Roadmap · Asset Simulator · Onboarding Quests & Badges"
+                />
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-bold text-primary shrink-0 self-end sm:self-auto">
+            <span><T korean="가이드 열기" english="Explore Guide" /></span>
+            <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+      </section>
+
+      {/* 3. 2026 FEATURE STRIP: 3대 금융 계산기 허브 & 일일 리텐션 스테이션 */}
       <div className="grid gap-6 md:grid-cols-3">
         {/* Card 1: 3대 금융 웹 계산기 (pSEO 2만+ 엔진) */}
         <div className="rounded-2xl border border-zinc-800/80 bg-card/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] p-5 flex flex-col justify-between backdrop-blur-md">

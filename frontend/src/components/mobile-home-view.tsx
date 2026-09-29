@@ -150,6 +150,38 @@ export function MobileHomeView({ notices }: MobileHomeViewProps) {
         </div>
       </section>
 
+      {/* 1.2 ONBOARDING QUICK BANNER: 3분 머니버스 입문 가이드 & 인터랙티브 허브 */}
+      <section aria-labelledby="mobile-onboarding-guide-heading">
+        <Link
+          href="/guide"
+          className="group relative flex items-center justify-between gap-3 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/15 via-card to-background p-4 shadow-sm transition-all hover:border-primary/60 hover:shadow-md active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-xs">
+              <Sparkles className="size-5" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-sm text-foreground truncate">
+                  <T korean="3분 머니버스 시작 가이드" english="3-Min Moneyverse Guide" />
+                </span>
+                <span className="rounded-md bg-primary/20 px-1.5 py-0.5 text-[9px] font-black text-primary border border-primary/30">
+                  NEW
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground truncate">
+                <T
+                  korean="5단계 로드맵 · 1분 자산 시뮬레이터 · 온보딩 퀘스트"
+                  english="5-Step Roadmap · Asset Simulator · Quests"
+                />
+              </p>
+            </div>
+          </div>
+
+          <ChevronRight className="size-4 text-primary shrink-0 group-hover:translate-x-1 transition-transform" />
+        </Link>
+      </section>
+
       {/* 1.5 CASUAL DOPAMINE ARCADE STATION */}
       <section aria-labelledby="dopamine-station-heading">
         <CasualDopamineStation />
