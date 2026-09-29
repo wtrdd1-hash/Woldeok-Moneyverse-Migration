@@ -12,5 +12,3 @@
 
 ## 목표 상태
 완료된 ready PR은 자동으로 main에 통합되고, 작업 중인 브랜치는 자동화가 main으로 끌어오거나 삭제하지 않는다.
-
-[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]

@@ -227,5 +227,3 @@ jobs:
             echo
             echo 'Every reconciled branch head is explicitly revalidated by workflow_dispatch before merge; no reconciled SHA bypasses Build Test Candidate.'
           } >> "$GITHUB_STEP_SUMMARY"
-
-[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]

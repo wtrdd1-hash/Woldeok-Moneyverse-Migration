@@ -93,5 +93,3 @@ jobs:
             echo "- work-in-progress branches/PRs skipped: ${wip_skipped}"
             echo '- no repeatedly failing branch is automatically deleted; repair and revalidation must precede main integration'
           } >> "$GITHUB_STEP_SUMMARY"
-
-[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]

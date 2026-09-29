@@ -12,5 +12,3 @@ Scope: GitHub branch integration/cleanup automation and documentation
 
 ## Intended state
 Completed ready PRs drain automatically to main; active work is never pulled into main or deleted by the automation.
-
-[executed on device: debian13 (d2f8c9a2-2e5a-4e57-a99d-1a9389e70b4c)]
