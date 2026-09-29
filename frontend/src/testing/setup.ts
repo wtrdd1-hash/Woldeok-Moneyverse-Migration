@@ -1,8 +1,14 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
 
 const globalRecord = globalThis as unknown as Record<string, unknown>;
 globalRecord.IS_REACT_ACT_ENVIRONMENT = true;
+
+afterEach(() => {
+  cleanup();
+});
 
 const actFn = (callback?: () => unknown) => {
   const rDom = ReactDOM as unknown as { flushSync?: (fn: () => void) => void };
