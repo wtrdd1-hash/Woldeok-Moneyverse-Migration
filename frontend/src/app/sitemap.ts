@@ -14,22 +14,22 @@ export const revalidate = 3600;
  * Using a fixed release timestamp instead of request-time new Date() ensures
  * search engines receive honest, cacheable modification dates.
  */
-const RELEASE_TIMESTAMP = new Date('2026-09-28T12:00:00.000Z');
+const RELEASE_TIMESTAMP = new Date('2026-09-29T00:00:00.000Z');
 
 /**
  * 10 Canonical Virtual Stock Symbols for SEO Long-tail Indexing.
  */
 export const STOCK_SYMBOLS = [
+  'WDG',
+  'CHIMU314',
+  'WDM',
+  'WDB',
+  'WDT',
+  'MYUY',
   'CHIPS',
-  'DUCKS',
-  'COIN',
+  'DUCK',
+  'WFIN',
   'SPACE',
-  'CYBER',
-  'ROBOT',
-  'GOLD',
-  'ENERGY',
-  'BIO',
-  'GAME',
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
