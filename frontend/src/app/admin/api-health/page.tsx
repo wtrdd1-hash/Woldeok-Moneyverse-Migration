@@ -19,9 +19,9 @@ interface DomainHealthData {
   readonly name: string;
   readonly nameEn: string;
   readonly endpointCount: number;
-  readonly status: 'OPERATIONAL' | 'DEGRADED';
-  readonly latencyMs: number;
-  readonly successRate: number;
+  readonly status: 'UNVERIFIED' | 'DEGRADED';
+  readonly latencyMs: number | null;
+  readonly successRate: number | null;
   readonly sampleEndpoints: readonly string[];
 }
 
@@ -31,9 +31,9 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
     name: '인증 및 세션',
     nameEn: 'Authentication & Sessions',
     endpointCount: 9,
-    status: 'OPERATIONAL',
-    latencyMs: 12,
-    successRate: 100.0,
+    status: 'UNVERIFIED',
+    latencyMs: null,
+    successRate: null,
     sampleEndpoints: ['/api/v1/auth/session', '/api/v1/auth/local/login', '/api/v1/auth/bootstrap'],
   },
   {
@@ -41,9 +41,9 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
     name: '계정 및 보안 센터',
     nameEn: 'Account & Security Center',
     endpointCount: 7,
-    status: 'OPERATIONAL',
-    latencyMs: 14,
-    successRate: 100.0,
+    status: 'UNVERIFIED',
+    latencyMs: null,
+    successRate: null,
     sampleEndpoints: ['/api/v1/account', '/api/v1/account/security/sessions', '/api/v1/privacy/data-export'],
   },
   {
@@ -51,9 +51,9 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
     name: '지갑 및 자산 원장',
     nameEn: 'Wallet & Ledger',
     endpointCount: 4,
-    status: 'OPERATIONAL',
-    latencyMs: 8,
-    successRate: 100.0,
+    status: 'UNVERIFIED',
+    latencyMs: null,
+    successRate: null,
     sampleEndpoints: ['/api/v1/wallet/balance', '/api/v1/wallet/transfer', '/api/v1/wallet/transactions'],
   },
   {
@@ -61,9 +61,9 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
     name: '가상 중앙은행 및 채권',
     nameEn: 'Virtual Banking & Bonds',
     endpointCount: 9,
-    status: 'OPERATIONAL',
-    latencyMs: 15,
-    successRate: 100.0,
+    status: 'UNVERIFIED',
+    latencyMs: null,
+    successRate: null,
     sampleEndpoints: ['/api/v1/bank/summary', '/api/v1/bank/deposit', '/api/v1/bank/bonds'],
   },
   {
@@ -71,9 +71,9 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
     name: '직업 및 일일 커리어',
     nameEn: 'Work & Career Mastery',
     endpointCount: 5,
-    status: 'OPERATIONAL',
-    latencyMs: 11,
-    successRate: 100.0,
+    status: 'UNVERIFIED',
+    latencyMs: null,
+    successRate: null,
     sampleEndpoints: ['/api/v1/work/status', '/api/v1/work/careers', '/api/v1/work/tasks/complete'],
   },
   {
@@ -81,9 +81,9 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
     name: '가상 주식 거래소',
     nameEn: 'Virtual Stock Exchange',
     endpointCount: 8,
-    status: 'OPERATIONAL',
-    latencyMs: 9,
-    successRate: 100.0,
+    status: 'UNVERIFIED',
+    latencyMs: null,
+    successRate: null,
     sampleEndpoints: ['/api/v1/stocks', '/api/v1/stocks/CHIPS', '/api/v1/stocks/orders'],
   },
   {
@@ -91,9 +91,9 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
     name: '사업체 운영 및 상업',
     nameEn: 'Businesses & Operations',
     endpointCount: 4,
-    status: 'OPERATIONAL',
-    latencyMs: 16,
-    successRate: 100.0,
+    status: 'UNVERIFIED',
+    latencyMs: null,
+    successRate: null,
     sampleEndpoints: ['/api/v1/businesses', '/api/v1/businesses/acquire', '/api/v1/businesses/:id/settle'],
   },
   {
@@ -101,9 +101,9 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
     name: 'P2P 마켓플레이스 및 제작',
     nameEn: 'Marketplace & Crafting',
     endpointCount: 6,
-    status: 'OPERATIONAL',
-    latencyMs: 13,
-    successRate: 100.0,
+    status: 'UNVERIFIED',
+    latencyMs: null,
+    successRate: null,
     sampleEndpoints: ['/api/v1/marketplace/listings', '/api/v1/crafting/recipes', '/api/v1/crafting/craft'],
   },
   {
@@ -111,9 +111,9 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
     name: '상점 및 도파민 보상',
     nameEn: 'Shop & Dopamine Engagement',
     endpointCount: 11,
-    status: 'OPERATIONAL',
-    latencyMs: 10,
-    successRate: 100.0,
+    status: 'UNVERIFIED',
+    latencyMs: null,
+    successRate: null,
     sampleEndpoints: ['/api/v1/shop/items', '/api/v1/engagement/dopamine/golden-duck', '/api/v1/engagement/dopamine/star-drop'],
   },
   {
@@ -121,9 +121,9 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
     name: '성장 및 시즌 패스',
     nameEn: 'Progression & Seasons',
     endpointCount: 4,
-    status: 'OPERATIONAL',
-    latencyMs: 12,
-    successRate: 100.0,
+    status: 'UNVERIFIED',
+    latencyMs: null,
+    successRate: null,
     sampleEndpoints: ['/api/v1/progression/summary', '/api/v1/progression/prestige', '/api/v1/season/current'],
   },
   {
@@ -131,9 +131,9 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
     name: '커뮤니티 게시판 및 미디어',
     nameEn: 'Community Board & Media',
     endpointCount: 5,
-    status: 'OPERATIONAL',
-    latencyMs: 18,
-    successRate: 100.0,
+    status: 'UNVERIFIED',
+    latencyMs: null,
+    successRate: null,
     sampleEndpoints: ['/api/v1/board/posts', '/api/v1/content/photos/upload'],
   },
   {
@@ -141,9 +141,9 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
     name: '1:1 비공개 쪽지 및 안전',
     nameEn: 'Direct Messages & Safety',
     endpointCount: 5,
-    status: 'OPERATIONAL',
-    latencyMs: 7,
-    successRate: 100.0,
+    status: 'UNVERIFIED',
+    latencyMs: null,
+    successRate: null,
     sampleEndpoints: ['/api/v1/chat/threads', '/api/v1/chat/threads/:id/messages', '/api/v1/safety/takedown/request'],
   },
   {
@@ -151,9 +151,9 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
     name: '클럽 및 개인 공간',
     nameEn: 'Clubs & Spaces',
     endpointCount: 4,
-    status: 'OPERATIONAL',
-    latencyMs: 14,
-    successRate: 100.0,
+    status: 'UNVERIFIED',
+    latencyMs: null,
+    successRate: null,
     sampleEndpoints: ['/api/v1/club', '/api/v1/club/create', '/api/v1/space/my-space'],
   },
   {
@@ -161,9 +161,9 @@ const HEALTH_DOMAINS: readonly DomainHealthData[] = [
     name: '관리자 관제 타워 및 국고',
     nameEn: 'Admin Control Tower & Treasury',
     endpointCount: 8,
-    status: 'OPERATIONAL',
-    latencyMs: 11,
-    successRate: 100.0,
+    status: 'UNVERIFIED',
+    latencyMs: null,
+    successRate: null,
     sampleEndpoints: ['/api/v1/admin/economy/overview', '/api/v1/admin/treasury/vaults', '/api/v1/admin/audit/logs'],
   },
 ];
@@ -174,7 +174,6 @@ export default async function AdminApiHealthPage() {
   const isEn = locale === 'en';
 
   const totalEndpoints = HEALTH_DOMAINS.reduce((acc, d) => acc + d.endpointCount, 0);
-  const avgLatency = Math.round(HEALTH_DOMAINS.reduce((acc, d) => acc + d.latencyMs, 0) / HEALTH_DOMAINS.length);
 
   return (
     <div data-page="admin-api-health" className="mv-page mv-page--admin grid gap-6 max-w-6xl mx-auto">
@@ -232,7 +231,7 @@ export default async function AdminApiHealthPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-1">
-            <div className="text-2xl font-bold font-mono text-emerald-500">{avgLatency}ms</div>
+            <div className="text-2xl font-bold font-mono text-emerald-500">—</div>
             <div className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-0.5">초고속 최적화</div>
           </CardContent>
         </Card>
@@ -245,7 +244,7 @@ export default async function AdminApiHealthPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-1">
-            <div className="text-2xl font-bold font-mono text-cyan-500">100.0%</div>
+            <div className="text-2xl font-bold font-mono text-cyan-500">—</div>
             <div className="text-[11px] text-cyan-600 dark:text-cyan-400 mt-0.5">Zero Error Rate</div>
           </CardContent>
         </Card>
@@ -271,8 +270,8 @@ export default async function AdminApiHealthPage() {
             </CardHeader>
             <CardContent className="p-4 pt-1 space-y-2 text-xs">
               <div className="flex items-center justify-between border-t border-border/50 pt-2 text-muted-foreground">
-                <span>응답 지연: <b className="font-mono text-foreground">{domain.latencyMs}ms</b></span>
-                <span>성공률: <b className="font-mono text-emerald-500">{domain.successRate.toFixed(1)}%</b></span>
+                <span>응답 지연: <b className="font-mono text-foreground">{domain.latencyMs === null ? '—' : `${domain.latencyMs}ms`}</b></span>
+                <span>성공률: <b className="font-mono text-emerald-500">{domain.successRate === null ? '—' : `${domain.successRate.toFixed(1)}%`}</b></span>
               </div>
               <div className="rounded-md bg-muted/40 p-2 text-[11px] font-mono text-muted-foreground truncate space-y-0.5">
                 {domain.sampleEndpoints.map((ep) => (
