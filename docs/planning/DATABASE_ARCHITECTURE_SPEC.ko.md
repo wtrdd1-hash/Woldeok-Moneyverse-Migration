@@ -1,4 +1,4 @@
-# 데이터베이스 아키텍처 명세 — v2026.09.25.443
+# 데이터베이스 아키텍처 명세 — v2026.09.29.486
 
 > 상태: 채택된 상세 기획 명세
 > 기준 언어: English
@@ -230,3 +230,16 @@ DB를 사용할 수 없어 skip된 database-backed check는 PASS가 아니라 **
 runtime schema 변경은 별도 개발 branch와 exact-SHA isolated Test를 거친다. Production은 계속 무중단 승격하며 migration 완료, schema fingerprint, backend health, 중요 DB mutation/read, session continuity, logs/metrics, 호환 rollback/forward-fix target을 증명해야 한다.
 
 이 명세 자체는 runtime DB schema를 변경하지 않는다.
+
+## v2026.09.29.486 증거 및 운영 보강
+
+본 절은 기존 원장/보안 핵심 아키텍처를 바꾸지 않고 v486에서 직접 검증한 요구사항을 채택한다. 탐색 근거는 `MONEYVERSE_DATABASE_ARCHITECTURE_RESEARCH_REVIEW_v2026.09.29.486.md`에 있으며 엄격 코퍼스는 **고유 145,579건**, SHA-256 `d61e825f8f699ccfca9e1bc5ee13dd070d123440c680a8aa9d90c5a4d6a80216`이다.
+
+1. **동시 인덱스 게이트(P0):** `CREATE INDEX CONCURRENTLY` 또는 `REINDEX ... CONCURRENTLY` 후 예상하지 않은 `pg_index.indisvalid = false` 인덱스가 있으면 승인 실패. 장시간 작업은 `pg_stat_progress_create_index`로 관측.
+2. **nullable 고유성 의미(P0):** nullable 비즈니스 키마다 NULL distinct 여부를 문서화·테스트하고 논리적 NULL 하나가 필요하면 `NULLS NOT DISTINCT` 사용.
+3. **플래너 통계 규율(P1):** extended statistics는 상관 컬럼 추정 오류 측정과 전/후 실행계획 근거가 있을 때만 채택.
+4. **복제 슬롯 상한(P0, 활성화 시):** 모든 physical/logical slot에 소유자/소비자, 지연·보존 WAL 관측, 저장공간 예산, `max_slot_wal_keep_size` 정책 또는 용량 근거가 있는 명시적 예외 필요.
+5. **물리 백업 증명(P0, 활성화 시):** base backup에는 `pg_verifybackup`을 실행하지만 격리 복구와 애플리케이션/데이터 검증을 대체할 수 없음.
+6. **제약 배포(P0):** 대형 테이블 FK/check는 적합한 경우 `NOT VALID` 후 `VALIDATE CONSTRAINT`; unique는 동시 unique index 생성 후 연결 가능. 락/스캔/재작성 분류는 계속 필수.
+7. **조건부 RLS(P1):** RLS 추가 시 owner/`BYPASSRLS` 우회 의미와 필요 시 `FORCE ROW LEVEL SECURITY`를 테스트. RLS는 제한 런타임 역할과 security-definer 경계를 대체하지 않는 추가 방어층.
+8. **증거 진실성(P0):** 코퍼스 건수를 전수 정독 또는 구현 증명으로 표현하지 않는다. 1차 자료와 저장소 근거로 채택된 요구사항만 릴리스 게이트가 될 수 있다.

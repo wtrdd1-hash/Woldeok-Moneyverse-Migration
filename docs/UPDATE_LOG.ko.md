@@ -1,3 +1,12 @@
+## v2026.09.29.486 — 엄격 145,579건 데이터베이스 레퍼런스 코퍼스 및 PostgreSQL 17 근거 보강
+
+- **문서 버전:** `v2026.09.29.486`
+- **범위:** 조사/기획/문서 전용, Test/Production/DB 변경 없음
+- **근거:** Crossref 원시 145,898 -> 엄격 제목 적합 145,579 -> 고유 145,579건; SHA-256 `d61e825f8f699ccfca9e1bc5ee13dd070d123440c680a8aa9d90c5a4d6a80216`
+- **품질:** 초기 v486 광역 108,216 후보는 표본 오탐으로 폐기. 승인된 모든 제목은 `database` 또는 `data base` 포함.
+- **기획:** concurrent index 유효성, nullable 고유성, extended statistics, 복제 슬롯 WAL 예산, base backup 검증+복구 리허설, 단계적 제약, 조건부 RLS를 DB486-01..07로 채택.
+- **권위:** `INTEGRATED_PLANNING_MASTER`와 `DATABASE_ARCHITECTURE_SPEC` 갱신. 전역 `PROJECT_PLAN`은 기존 authority-drift 규칙에 따라 v444 유지.
+
 ## v2026.09.28.478 — 풀스택 SEO 쇄신·7종 전용 Server Component Layout(가상 부동산/파생선물/VC/공성전/퀀트/복리·물타기·직업계산기) 구축·Clean XML Sitemap 쿼리스트링 0건 정규화·Robots.txt 개방·IndexNow 실시간 색인 제출 및 1,558개 세션 무손실 무중단 운영 승격
 
 - **적용 릴리스**: `prod-v478`

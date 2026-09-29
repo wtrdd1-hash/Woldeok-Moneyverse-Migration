@@ -1,11 +1,25 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.27.468
+> Current ledger version: v2026.09.29.486
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.09.29.486 — 2026-09-29 — Strict 145k Database Reference Corpus & PostgreSQL 17 Revalidation
+- Research/planning/docs-only cycle. Start, mid-work, and final `origin/main=64201629c5cdf931d49e48e8808fc0f882318b3b`; isolated branch `docs/db-reference-expansion-v2026.09.29.486`.
+- Crossref strict-title discovery: **145,898 raw -> 145,579 title-qualified -> 145,579 unique** records; DOI-first/title-fallback deduplication; corpus SHA-256 `d61e825f8f699ccfca9e1bc5ee13dd070d123440c680a8aa9d90c5a4d6a80216`. Every retained title contains whole-word `database` or `data base`.
+- The earlier broad v486 exploratory corpus was rejected after sampling exposed generic-term false positives; the strict corpus is the accepted v486 discovery evidence.
+- **DB486-01 / P0:** unexpected invalid indexes after concurrent index/reindex work block DB acceptance.
+- **DB486-02 / P0:** nullable business-key uniqueness explicitly chooses NULL-distinct behavior.
+- **DB486-03 / P1:** extended statistics require measured correlated-column estimator error and before/after plan evidence.
+- **DB486-04 / P0 when enabled:** replication/CDC slots require ownership, consumer, lag/retained-WAL telemetry, capacity budget and bounded retention policy.
+- **DB486-05 / P0:** physical/base backups require `pg_verifybackup` plus an actual disposable restore; verification alone is insufficient.
+- **DB486-06 / P0:** low-impact constraint validation remains staged and lock/scan classified.
+- **DB486-07 / P1:** RLS is conditional defense-in-depth with explicit owner/BYPASSRLS/FORCE-RLS testing, not a replacement for current restricted-role mutation boundaries.
+- Detailed authority/evidence: `DATABASE_ARCHITECTURE_SPEC.md`, `planning/deltas/v2026.09.29.486.md`, and `findings/MONEYVERSE_DATABASE_ARCHITECTURE_RESEARCH_REVIEW_v2026.09.29.486.md`.
+- Global `PROJECT_PLAN.md` intentionally remains v444 under the documented authority-drift rule; this cycle does not claim reconciliation of unrelated post-v444 product decisions. No runtime, Test, Production, migration, or user-data mutation is claimed.
 
 ## v2026.09.27.468 — 2026-09-27 — Full-Domain API Catalog & Release Logs v459~v468 Synchronization
 - Documentation synchronization cycle. Base `origin/main=ce06a79f6e453a9a7f1ee2979ec3bf3fe88ca5ae`.
