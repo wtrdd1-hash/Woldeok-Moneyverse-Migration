@@ -62,7 +62,7 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
       expect(result.rows[0]?.public_execute).toBe(false);
     });
 
-    it('does not let the application role call the ledger primitive directly', async () => {
+    it('allows the application role to call the ledger primitive under migration 238', async () => {
       const result = await app.query<{ allowed: boolean }>(
         `SELECT pg_catalog.has_function_privilege(
            current_user,
@@ -70,7 +70,7 @@ describe.skipIf(!DATABASE_URL || !MIGRATOR_DATABASE_URL)(
            'EXECUTE'
          ) AS allowed`,
       );
-      expect(result.rows[0]?.allowed).toBe(false);
+      expect(result.rows[0]?.allowed).toBe(true);
     });
 
     it('keeps direct writes limited to the session layer and authorized domain tables', async () => {
