@@ -78,7 +78,7 @@ describe('SeoService', () => {
       type: 'service_account',
       project_id: 'moneyverse-gsc',
       client_email: 'test-sa@moneyverse-gsc.iam.gserviceaccount.com',
-      private_key: '-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQD...==\n-----END PRIVATE KEY-----\n',
+      private_key: 'test-private-key',
     });
 
     const saveResult = await service.saveGscCredentials(sampleKey);
@@ -96,6 +96,7 @@ describe('SeoService', () => {
 
 import { SeoCrawlerAuditService } from './seo-crawler-audit.service';
 import { SeoDailyDigestService } from './seo-daily-digest.service';
+import type { DiscordAlertService } from '../discord/discord-alert.service';
 import { vi } from 'vitest';
 
 describe('SeoCrawlerAuditService', () => {
@@ -132,7 +133,7 @@ describe('SeoDailyDigestService', () => {
 
     const digestService = new SeoDailyDigestService(
       seoService,
-      mockDiscordAlertService as unknown as any,
+      mockDiscordAlertService as unknown as DiscordAlertService,
     );
 
     const result = await digestService.sendDailyDigest();

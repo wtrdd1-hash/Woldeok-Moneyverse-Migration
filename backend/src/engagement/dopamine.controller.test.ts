@@ -7,7 +7,7 @@ describe('DopamineController - Golden Duck Fever', () => {
   const mockUserId = '11111111-2222-4333-8444-555555555555';
   const mockRequest = {
     session: {
-      userId: mockUserId,
+      user_id: mockUserId,
     },
   } as unknown as RequestWithSession;
 

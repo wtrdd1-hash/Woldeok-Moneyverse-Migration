@@ -304,7 +304,7 @@ export default async function HomePage() {
             </p>
             <div className="mt-3 flex items-center gap-2 text-xs font-mono text-blue-400">
               <Trophy className="size-3.5" />
-              <span>연속 3회 적중 시 '월가의 현자' 칭호 지급</span>
+              <span>연속 3회 적중 시 &apos;월가의 현자&apos; 칭호 지급</span>
             </div>
           </div>
           <Button variant="outline" size="sm" asChild className="mt-4 w-full rounded-xl text-xs font-bold border-blue-500/30 text-blue-500 hover:bg-blue-500/10 min-h-[40px]">

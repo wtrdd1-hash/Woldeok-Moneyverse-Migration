@@ -251,7 +251,7 @@ export default function CompoundCalculatorPage() {
                   <button
                     key={f.id}
                     type="button"
-                    onClick={() => setCompoundFrequency(f.id as any)}
+                    onClick={() => setCompoundFrequency(f.id as 'daily' | 'monthly' | 'annually')}
                     className={`py-2 px-1 text-xs font-bold rounded-lg border transition-all ${
                       compoundFrequency === f.id
                         ? 'bg-amber-500 text-primary-foreground border-amber-500 shadow-sm'

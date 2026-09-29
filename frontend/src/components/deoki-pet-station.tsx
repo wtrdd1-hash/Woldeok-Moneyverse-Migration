@@ -98,7 +98,7 @@ export function DeokiPetStation({
           </span>
           <div>
             <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-              컴패니언 오리 '덕이' 펫 스테이션
+              컴패니언 오리 &apos;덕이&apos; 펫 스테이션
               <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-black text-amber-300 border border-amber-500/30">
                 Lv.{level}
               </span>
@@ -202,7 +202,7 @@ export function DeokiPetStation({
                 +{fortuneData?.wld.toLocaleString()} WLD 즉시 지급!
               </div>
               <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-2.5 text-xs text-slate-200 leading-relaxed">
-                "{fortuneData?.quote}"
+                &quot;{fortuneData?.quote}&quot;
               </div>
               <div className="mt-2 flex items-center gap-1 text-[11px] text-amber-400 font-medium">
                 <span>추천 점괘:</span>
