@@ -64,6 +64,7 @@ export function GoldenDuckFever({
         setTimeLeft((prev) => {
           if (prev <= 1) {
             if (timerRef.current) clearInterval(timerRef.current);
+            setIsFinished(true);
             return 0;
           }
           return prev - 1;

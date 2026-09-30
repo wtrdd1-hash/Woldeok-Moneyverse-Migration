@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
+import { CitizenTaxReceiptCard } from '@/components/citizen-tax-receipt-card';
 import { sides } from './sides';
 import type { Overview } from './sides';
 import { ExportLedgerCsvButton } from './export-ledger-csv';
@@ -122,6 +123,8 @@ export default async function WalletPage() {
         </CardContent>
       </Card>
 
+      <CitizenTaxReceiptCard />
+
       <BankPanel />
 
       <Card>
@@ -224,6 +227,10 @@ export default async function WalletPage() {
             <Guide
               title={<T korean="원장 기록" english="Ledger History" />}
               detail={<T korean="모든 변동은 내 지갑 기록에서 확인할 수 있어요." english="Every balance change is permanently verified." />}
+            />
+            <Guide
+              title={<T korean="🏛️ 국고 세금 환원 & 시민 배당" english="🏛️ Treasury Tax Redistribution" />}
+              detail={<T korean="거래세(2%) 및 송금세 등으로 걷힌 국고는 시민 기본소득 배당과 공공 프로젝트로 전액 재순환됩니다." english="Taxes collected into the national treasury are redistributed back to active citizens as dividends and public grants." />}
             />
             <Guide
               title={<T korean="이용 기준" english="Terms of Use" />}

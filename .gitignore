@@ -61,3 +61,26 @@ backend/**/*.bak
 
 # Large generated datasets
 frontend/src/lib/i18n/references/corpus-150k.json
+
+# Sensitive scripts, certificates, and operational tools (NEVER in Git)
+*.sh
+*.bash
+stage_*.sh
+promote_*.sh
+smoke_*.sh
+deploy/
+ops/backup/*.sh
+ops/nginx/*.sh
+ops/recovery/
+ops/release/*.sh
+ops/systemd/*.sh
+scripts/qa/*.sh
+
+# Certificates, private keys, secrets
+*.pem
+*.key
+*.crt
+*.cer
+*.pfx
+*.p12
+*.id_rsa

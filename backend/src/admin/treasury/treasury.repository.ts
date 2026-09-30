@@ -497,20 +497,118 @@ export class TreasuryRepository {
   }
 
   async getExpenditure(): Promise<{ items: TreasuryExpenditureItem[]; total_24h_wld: string; total_7d_wld: string; total_30d_wld: string }> {
-    const items: TreasuryExpenditureItem[] = AUTHORITATIVE_BUDGET_ENVELOPES.map((b) => ({
-      envelope_code: b.category,
-      envelope_name: b.category_ko,
-      amount_24h_wld: '0',
-      amount_7d_wld: '0',
-      amount_30d_wld: '0',
-    }));
+    const statsRes = await this.pool.query<{
+      disbursement_type: string;
+      wld_24h: string;
+      wld_7d: string;
+      wld_30d: string;
+    }>(`
+      SELECT
+        disbursement_type,
+        coalesce(sum(CASE WHEN created_at >= clock_timestamp() - interval '24 hours' THEN total_amount_wld::numeric ELSE 0 END), 0)::bigint::text AS wld_24h,
+        coalesce(sum(CASE WHEN created_at >= clock_timestamp() - interval '7 days' THEN total_amount_wld::numeric ELSE 0 END), 0)::bigint::text AS wld_7d,
+        coalesce(sum(CASE WHEN created_at >= clock_timestamp() - interval '30 days' THEN total_amount_wld::numeric ELSE 0 END), 0)::bigint::text AS wld_30d
+      FROM public.treasury_disbursements
+      GROUP BY disbursement_type
+    `);
+
+    const typeMap = new Map<string, { wld_24h: string; wld_7d: string; wld_30d: string }>();
+    let total24 = BigInt(0);
+    let total7 = BigInt(0);
+    let total30 = BigInt(0);
+
+    for (const r of statsRes.rows) {
+      typeMap.set(r.disbursement_type, r);
+      total24 += BigInt(r.wld_24h);
+      total7 += BigInt(r.wld_7d);
+      total30 += BigInt(r.wld_30d);
+    }
+
+    const items: TreasuryExpenditureItem[] = AUTHORITATIVE_BUDGET_ENVELOPES.map((b) => {
+      let wld24 = '0';
+      let wld7 = '0';
+      let wld30 = '0';
+      if (b.category === 'REWARD_POOL' && typeMap.has('CITIZEN_DIVIDEND')) {
+        const d = typeMap.get('CITIZEN_DIVIDEND')!;
+        wld24 = d.wld_24h;
+        wld7 = d.wld_7d;
+        wld30 = d.wld_30d;
+      } else if (b.category === 'CITY_COMMUNITY' && typeMap.has('COMMUNITY_FUNDING')) {
+        const d = typeMap.get('COMMUNITY_FUNDING')!;
+        wld24 = d.wld_24h;
+        wld7 = d.wld_7d;
+        wld30 = d.wld_30d;
+      } else if (b.category === 'NEW_USER_SUPPORT' && typeMap.has('WELFARE_SUBSIDY')) {
+        const d = typeMap.get('WELFARE_SUBSIDY')!;
+        wld24 = d.wld_24h;
+        wld7 = d.wld_7d;
+        wld30 = d.wld_30d;
+      } else if (b.category === 'MARKET_STABILIZATION' && typeMap.has('MARKET_STIMULUS')) {
+        const d = typeMap.get('MARKET_STIMULUS')!;
+        wld24 = d.wld_24h;
+        wld7 = d.wld_7d;
+        wld30 = d.wld_30d;
+      }
+      return {
+        envelope_code: b.category,
+        envelope_name: b.category_ko,
+        amount_24h_wld: wld24,
+        amount_7d_wld: wld7,
+        amount_30d_wld: wld30,
+      };
+    });
 
     return {
       items,
-      total_24h_wld: '0',
-      total_7d_wld: '0',
-      total_30d_wld: '0',
+      total_24h_wld: total24.toString(),
+      total_7d_wld: total7.toString(),
+      total_30d_wld: total30.toString(),
     };
+  }
+
+  async disburseCitizenDividend(
+    adminId: string,
+    amountPerUserWld: string,
+    reason: string,
+  ): Promise<{
+    success: boolean;
+    disbursement_id: string;
+    ledger_id: string;
+    beneficiary_count: number;
+    amount_per_beneficiary_wld: string;
+    total_amount_wld: string;
+    balance_before: string;
+    balance_after: string;
+    safe_reserve_wld: string;
+  }> {
+    const res = await this.pool.query<{ result: any }>(
+      `SELECT public.treasury_disburse_citizen_dividend($1::uuid, $2::text, $3::text) AS result`,
+      [adminId, amountPerUserWld, reason],
+    );
+    return res.rows[0]?.result;
+  }
+
+  async disburseGrant(
+    adminId: string,
+    targetUserId: string | null,
+    amountWld: string,
+    disbursementType: string,
+    reason: string,
+  ): Promise<{
+    success: boolean;
+    disbursement_id: string;
+    ledger_id: string;
+    disbursement_type: string;
+    target_user_id: string | null;
+    amount_wld: string;
+    balance_before: string;
+    balance_after: string;
+  }> {
+    const res = await this.pool.query<{ result: any }>(
+      `SELECT public.treasury_disburse_grant($1::uuid, $2::uuid, $3::text, $4::text, $5::text) AS result`,
+      [adminId, targetUserId, amountWld, disbursementType, reason],
+    );
+    return res.rows[0]?.result;
   }
 
   async getReconciliation(): Promise<TreasuryReconciliation> {
@@ -588,5 +686,147 @@ export class TreasuryRepository {
       [adminId, vaultCode, amountWld, reason],
     );
     return res.rows[0]?.treasury_absorb ?? {};
+  }
+
+  async distributeBudgetRule(
+    adminId: string,
+    amountWld: string,
+    reason: string,
+  ): Promise<{
+    success: boolean;
+    ledger_id: string;
+    total_allocated_wld: string;
+    welfare_wld: string;
+    infra_wld: string;
+    emergency_wld: string;
+    burn_wld: string;
+    remaining_main_wld: string;
+  }> {
+    const res = await this.pool.query<{ result: any }>(
+      `SELECT public.treasury_distribute_budget_rule($1::uuid, $2::text, $3::text) AS result`,
+      [adminId, amountWld, reason],
+    );
+    return res.rows[0]?.result;
+  }
+
+  async executeMarketBuybackBurn(
+    adminId: string,
+    listingId: string,
+    reason: string,
+  ): Promise<{
+    success: boolean;
+    ledger_id: string;
+    listing_id: string;
+    item_name: string;
+    price_wld: string;
+    source_vault: string;
+    action: string;
+  }> {
+    const res = await this.pool.query<{ result: any }>(
+      `SELECT public.treasury_execute_market_buyback_burn($1::uuid, $2::uuid, $3::text) AS result`,
+      [adminId, listingId, reason],
+    );
+    return res.rows[0]?.result;
+  }
+
+  async getCitizenTaxReceipt(userId: string): Promise<Record<string, unknown>> {
+    const res = await this.pool.query<{ result: any }>(
+      `SELECT public.get_citizen_tax_transparency_receipt($1::uuid) AS result`,
+      [userId],
+    );
+    return res.rows[0]?.result ?? {};
+  }
+
+  async getGovernanceVotes(quarter = '2026-Q4'): Promise<{
+    quarter: string;
+    total_votes: number;
+    results: { choice: string; count: number; percentage: number }[];
+  }> {
+    const res = await this.pool.query<{ priority_choice: string; vote_count: string }>(`
+      SELECT priority_choice, count(*)::text as vote_count
+      FROM public.treasury_citizen_budget_votes
+      WHERE quarter = $1
+      GROUP BY priority_choice
+    `, [quarter]);
+
+    let total = 0;
+    for (const r of res.rows) {
+      total += parseInt(r.vote_count, 10);
+    }
+
+    const defaultChoices = ['WELFARE', 'INFRASTRUCTURE', 'CITIZEN_DIVIDEND', 'CURRENCY_STABILIZATION'];
+    const countMap = new Map<string, number>();
+    for (const r of res.rows) {
+      countMap.set(r.priority_choice, parseInt(r.vote_count, 10));
+    }
+
+    const results = defaultChoices.map((choice) => {
+      const cnt = countMap.get(choice) ?? 0;
+      return {
+        choice,
+        count: cnt,
+        percentage: total > 0 ? Math.round((cnt / total) * 100) : 25,
+      };
+    });
+
+    return {
+      quarter,
+      total_votes: total,
+      results,
+    };
+  }
+
+  async voteCitizenBudget(
+    userId: string,
+    quarter: string,
+    priorityChoice: string,
+  ): Promise<{ success: boolean; quarter: string; choice: string }> {
+    await this.pool.query(`
+      INSERT INTO public.treasury_citizen_budget_votes (user_id, quarter, priority_choice, updated_at)
+      VALUES ($1, $2, $3, clock_timestamp())
+      ON CONFLICT (user_id, quarter)
+      DO UPDATE SET priority_choice = EXCLUDED.priority_choice, updated_at = clock_timestamp()
+    `, [userId, quarter, priorityChoice]);
+
+    return { success: true, quarter, choice: priorityChoice };
+  }
+
+  async exportLedgerCsv(): Promise<string> {
+    const res = await this.pool.query<{
+      created_at: Date;
+      vault_code: string;
+      tx_type: string;
+      amount_wld: string;
+      actor_name: string;
+      reason: string;
+      balance_after: string;
+    }>(`
+      SELECT
+        l.created_at,
+        v.code AS vault_code,
+        l.tx_type,
+        l.amount_wld,
+        coalesce(u.username, 'SYSTEM') AS actor_name,
+        l.reason,
+        l.balance_after
+      FROM public.system_treasury_ledger l
+      JOIN public.system_treasury_vaults v ON v.id = l.vault_id
+      LEFT JOIN public.users u ON u.id = l.actor_id
+      ORDER BY l.created_at DESC
+      LIMIT 1000
+    `);
+
+    const headers = ['Timestamp', 'Vault', 'TxType', 'AmountWLD', 'Actor', 'BalanceAfterWLD', 'Reason'];
+    const rows = res.rows.map((r) => [
+      r.created_at.toISOString(),
+      r.vault_code,
+      r.tx_type,
+      r.amount_wld,
+      r.actor_name,
+      r.balance_after,
+      `"${(r.reason || '').replace(/"/g, '""')}"`,
+    ].join(','));
+
+    return [headers.join(','), ...rows].join('\n');
   }
 }

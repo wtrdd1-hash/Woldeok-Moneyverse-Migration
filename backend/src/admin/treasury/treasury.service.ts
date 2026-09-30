@@ -55,6 +55,42 @@ export class TreasuryService {
     }
   }
 
+  async disburseCitizenDividend(adminId: string, amountPerUserWld: string, reason: string) {
+    if (!amountPerUserWld || !/^\d+$/.test(amountPerUserWld) || BigInt(amountPerUserWld) <= BigInt(0)) {
+      throw new TreasuryInputError('1인당 배당금은 1 WLD 이상의 정수여야 합니다.');
+    }
+    if (!reason || typeof reason !== 'string' || reason.trim().length < 10) {
+      throw new TreasuryInputError('지출 감사 사유는 최소 10자 이상 입력해야 합니다.');
+    }
+    try {
+      return await this.repository.disburseCitizenDividend(adminId, amountPerUserWld, reason);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new TreasuryInputError(msg);
+    }
+  }
+
+  async disburseGrant(
+    adminId: string,
+    targetUserId: string | null,
+    amountWld: string,
+    disbursementType: string,
+    reason: string,
+  ) {
+    if (!amountWld || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
+      throw new TreasuryInputError('지원금 금액은 1 WLD 이상의 정수여야 합니다.');
+    }
+    if (!reason || typeof reason !== 'string' || reason.trim().length < 10) {
+      throw new TreasuryInputError('지출 감사 사유는 최소 10자 이상 입력해야 합니다.');
+    }
+    try {
+      return await this.repository.disburseGrant(adminId, targetUserId, amountWld, disbursementType, reason);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new TreasuryInputError(msg);
+    }
+  }
+
   private validateInputs(vaultCode: string, amountWld: string, reason: string) {
     if (!vaultCode || typeof vaultCode !== 'string' || vaultCode.trim().length === 0) {
       throw new TreasuryInputError('금고 코드(vaultCode)를 올바르게 지정해 주세요.');
@@ -65,5 +101,58 @@ export class TreasuryService {
     if (!reason || typeof reason !== 'string' || reason.trim().length < 10) {
       throw new TreasuryInputError('국고 회계 감사 사유는 최소 10자 이상 입력해야 합니다.');
     }
+  }
+
+  async distributeBudgetRule(adminId: string, amountWld: string, reason: string) {
+    if (!amountWld || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
+      throw new TreasuryInputError('예산 배정 금액은 1 WLD 이상의 정수여야 합니다.');
+    }
+    if (!reason || typeof reason !== 'string' || reason.trim().length < 10) {
+      throw new TreasuryInputError('예산 배정 감사 사유는 최소 10자 이상 입력해야 합니다.');
+    }
+    try {
+      return await this.repository.distributeBudgetRule(adminId, amountWld, reason);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new TreasuryInputError(msg);
+    }
+  }
+
+  async executeMarketBuybackBurn(adminId: string, listingId: string, reason: string) {
+    if (!listingId || typeof listingId !== 'string') {
+      throw new TreasuryInputError('매물 ID(listingId)를 올바르게 지정해 주세요.');
+    }
+    if (!reason || typeof reason !== 'string' || reason.trim().length < 10) {
+      throw new TreasuryInputError('역매수 소각 감사 사유는 최소 10자 이상 입력해야 합니다.');
+    }
+    try {
+      return await this.repository.executeMarketBuybackBurn(adminId, listingId, reason);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new TreasuryInputError(msg);
+    }
+  }
+
+  async getCitizenTaxReceipt(userId: string) {
+    if (!userId || typeof userId !== 'string') {
+      throw new TreasuryInputError('유효한 유저 ID가 필요합니다.');
+    }
+    return this.repository.getCitizenTaxReceipt(userId);
+  }
+
+  async getGovernanceVotes(quarter = '2026-Q4') {
+    return this.repository.getGovernanceVotes(quarter);
+  }
+
+  async voteCitizenBudget(userId: string, quarter: string, priorityChoice: string) {
+    const validChoices = ['WELFARE', 'INFRASTRUCTURE', 'CITIZEN_DIVIDEND', 'CURRENCY_STABILIZATION'];
+    if (!validChoices.includes(priorityChoice)) {
+      throw new TreasuryInputError('유효하지 않은 예산 우선순위 선택입니다.');
+    }
+    return this.repository.voteCitizenBudget(userId, quarter, priorityChoice);
+  }
+
+  async exportLedgerCsv() {
+    return this.repository.exportLedgerCsv();
   }
 }

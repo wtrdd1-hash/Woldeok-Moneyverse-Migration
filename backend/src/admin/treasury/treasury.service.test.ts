@@ -17,6 +17,10 @@ describe('TreasuryService', () => {
     listTransactions: vi.fn(),
     injectFunds: vi.fn(),
     absorbFunds: vi.fn(),
+    distributeBudgetRule: vi.fn(),
+    executeMarketBuybackBurn: vi.fn(),
+    getCitizenTaxReceipt: vi.fn(),
+    exportLedgerCsv: vi.fn(),
   } as unknown as TreasuryRepository;
 
   const service = new TreasuryService(mockRepo);
@@ -144,5 +148,51 @@ describe('TreasuryService', () => {
       '1000000',
       '충분히 긴 감사 사유를 입력합니다 (10자 이상).',
     );
+  });
+
+  it('delegates distributeBudgetRule to repository when inputs are valid', async () => {
+    vi.mocked((mockRepo as any).distributeBudgetRule).mockResolvedValueOnce({ success: true, total_allocated_wld: '1000000' });
+
+    const res = await service.distributeBudgetRule(
+      '00000000-0000-0000-0000-000000000001',
+      '1000000',
+      '2026년 4분기 4분할 헌법적 예산 배정 (복지/인프라/비축/소각)',
+    );
+
+    expect(res).toEqual({ success: true, total_allocated_wld: '1000000' });
+    expect((mockRepo as any).distributeBudgetRule).toHaveBeenCalled();
+  });
+
+  it('rejects distributeBudgetRule with invalid amount or short reason', async () => {
+    await expect(
+      service.distributeBudgetRule('00000000-0000-0000-0000-000000000001', '0', '10자 이상의 정상 사유입니다'),
+    ).rejects.toThrow(TreasuryInputError);
+
+    await expect(
+      service.distributeBudgetRule('00000000-0000-0000-0000-000000000001', '1000', 'short'),
+    ).rejects.toThrow(TreasuryInputError);
+  });
+
+  it('delegates executeMarketBuybackBurn to repository', async () => {
+    vi.mocked((mockRepo as any).executeMarketBuybackBurn).mockResolvedValueOnce({
+      success: true,
+      item_name: '고대 드래곤 투구',
+      price_wld: '50000',
+    });
+
+    const res = await service.executeMarketBuybackBurn(
+      '00000000-0000-0000-0000-000000000001',
+      '00000000-0000-0000-0000-000000000002',
+      '장터 덤핑 매물 공개시장 역매수 영구소각 집행',
+    );
+
+    expect(res).toEqual({ success: true, item_name: '고대 드래곤 투구', price_wld: '50000' });
+  });
+
+  it('delegates exportLedgerCsv to repository', async () => {
+    vi.mocked((mockRepo as any).exportLedgerCsv).mockResolvedValueOnce('Timestamp,Vault,TxType\n2026,MAIN,INJECTION');
+
+    const csv = await service.exportLedgerCsv();
+    expect(csv).toContain('Timestamp,Vault,TxType');
   });
 });

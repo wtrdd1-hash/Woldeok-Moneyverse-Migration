@@ -257,7 +257,7 @@ export class OperationsRepository {
               level_row.top_level,
               level_row.total_experience::text AS total_experience,
               level_row.active_7d_count::text AS active_7d_count
-       FROM public.admin_job_levels($1) AS level_row`,
+       FROM public.admin_work_job_levels($1) AS level_row`,
       [actorUserId],
     );
   }

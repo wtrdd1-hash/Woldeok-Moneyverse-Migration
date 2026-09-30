@@ -537,3 +537,167 @@ export async function absorbTreasuryFunds(
   }
 }
 
+export async function disburseCitizenDividendAction(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const amountPerUserWld = formData.get('amountPerUserWld');
+  const reason = formData.get('reason');
+
+  if (typeof amountPerUserWld !== 'string' || !/^\d+$/.test(amountPerUserWld) || BigInt(amountPerUserWld) <= BigInt(0)) {
+    return { status: 'error', message: '1인당 배당금은 1 WLD 이상의 정수여야 합니다.' };
+  }
+  if (typeof reason !== 'string' || reason.trim().length < 10) {
+    return { status: 'error', message: '감사 사유를 10자 이상 구체적으로 적어 주세요.' };
+  }
+
+  try {
+    const res = await mutate<{
+      success: boolean;
+      beneficiary_count: number;
+      total_amount_wld: string;
+      amount_per_beneficiary_wld: string;
+    }>('/api/v1/admin/treasury/disburse/dividend', {
+      method: 'POST',
+      body: {
+        amountPerUserWld: amountPerUserWld.trim(),
+        reason: reason.trim(),
+      },
+    });
+
+    revalidatePath('/admin/treasury');
+    revalidatePath('/wallet');
+    return {
+      status: 'ok',
+      message: `시민 ${groupDigits(res.beneficiary_count)}명에게 1인당 ${groupDigits(res.amount_per_beneficiary_wld)} WLD (총 ${groupDigits(res.total_amount_wld)} WLD) 국고 환원금 배당이 성공적으로 지급되었습니다.`,
+    };
+  } catch (error) {
+    return failure(error, '국고 시민 배당금 집행에 실패했습니다. 최소 30% 안전 비축금 한도 및 관리자 권한을 확인해 주세요.');
+  }
+}
+
+export async function disburseGrantAction(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const targetUserId = formData.get('targetUserId');
+  const amountWld = formData.get('amountWld');
+  const disbursementType = formData.get('disbursementType');
+  const reason = formData.get('reason');
+
+  if (typeof amountWld !== 'string' || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
+    return { status: 'error', message: '지원금 금액은 1 WLD 이상의 정수여야 합니다.' };
+  }
+  if (typeof disbursementType !== 'string' || !disbursementType.trim()) {
+    return { status: 'error', message: '지출 유형을 선택해 주세요.' };
+  }
+  if (typeof reason !== 'string' || reason.trim().length < 10) {
+    return { status: 'error', message: '감사 사유를 10자 이상 구체적으로 적어 주세요.' };
+  }
+
+  try {
+    const res = await mutate<{
+      success: boolean;
+      amount_wld: string;
+      disbursement_type: string;
+    }>('/api/v1/admin/treasury/disburse/grant', {
+      method: 'POST',
+      body: {
+        targetUserId: typeof targetUserId === 'string' && targetUserId.trim() ? targetUserId.trim() : undefined,
+        amountWld: amountWld.trim(),
+        disbursementType: disbursementType.trim(),
+        reason: reason.trim(),
+      },
+    });
+
+    revalidatePath('/admin/treasury');
+    revalidatePath('/wallet');
+    return {
+      status: 'ok',
+      message: `${res.disbursement_type} 지원금 ${groupDigits(res.amount_wld)} WLD 국고 지출 집행이 성공적으로 완료되었습니다.`,
+    };
+  } catch (error) {
+    return failure(error, '국고 재정 지원금 집행에 실패했습니다. 최소 30% 안전 비축금 한도 및 관리자 권한을 확인해 주세요.');
+  }
+}
+
+
+export async function distributeBudgetRuleAction(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const amountWld = formData.get('amountWld');
+  const reason = formData.get('reason');
+
+  if (typeof amountWld !== 'string' || !/^\d+$/.test(amountWld) || BigInt(amountWld) <= BigInt(0)) {
+    return { status: 'error', message: '배정 금액은 1 WLD 이상의 정수여야 합니다.' };
+  }
+  if (typeof reason !== 'string' || reason.trim().length < 10) {
+    return { status: 'error', message: '감사 사유를 10자 이상 구체적으로 적어 주세요.' };
+  }
+
+  try {
+    const res = await mutate<{
+      success: boolean;
+      total_allocated_wld: string;
+      welfare_wld: string;
+      infra_wld: string;
+      emergency_wld: string;
+      burn_wld: string;
+    }>('/api/v1/admin/treasury/budget/distribute', {
+      method: 'POST',
+      body: {
+        amountWld: amountWld.trim(),
+        reason: reason.trim(),
+      },
+    });
+
+    revalidatePath('/admin/treasury');
+    revalidatePath('/wallet');
+    return {
+      status: 'ok',
+      message: `헌법적 4분할 예산 배정 완료: 총 ${groupDigits(res.total_allocated_wld)} WLD (복지 40%: ${groupDigits(res.welfare_wld)}, 인프라 30%: ${groupDigits(res.infra_wld)}, 비상준비 20%: ${groupDigits(res.emergency_wld)}, 영구소각 10%: ${groupDigits(res.burn_wld)} WLD)`,
+    };
+  } catch (error) {
+    return failure(error, '4분할 예산 배정 집행에 실패했습니다. 30% 안전 비축금 한도 및 관리자 권한을 확인해 주세요.');
+  }
+}
+
+export async function executeMarketBuybackBurnAction(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const listingId = formData.get('listingId');
+  const reason = formData.get('reason');
+
+  if (typeof listingId !== 'string' || !listingId.trim()) {
+    return { status: 'error', message: '매물 ID를 올바르게 선택해 주세요.' };
+  }
+  if (typeof reason !== 'string' || reason.trim().length < 10) {
+    return { status: 'error', message: '역매수 소각 감사 사유를 10자 이상 구체적으로 적어 주세요.' };
+  }
+
+  try {
+    const res = await mutate<{
+      success: boolean;
+      item_name: string;
+      price_wld: string;
+      source_vault: string;
+    }>('/api/v1/admin/treasury/buyback/burn', {
+      method: 'POST',
+      body: {
+        listingId: listingId.trim(),
+        reason: reason.trim(),
+      },
+    });
+
+    revalidatePath('/admin/treasury');
+    revalidatePath('/marketplace');
+    return {
+      status: 'ok',
+      message: `룬스케이프형 역매수 영구소각 완료: 아이템 "${res.item_name}" (${groupDigits(res.price_wld)} WLD, 금고: ${res.source_vault}) 국고 공개시장 매입 즉시 소각 완료.`,
+    };
+  } catch (error) {
+    return failure(error, '역매수 영구소각 집행에 실패했습니다. 국고 잔액 및 매물 상태를 확인해 주세요.');
+  }
+}

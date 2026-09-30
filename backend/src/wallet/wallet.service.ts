@@ -90,6 +90,8 @@ export interface WalletRepositoryLike {
   loansForUser?(userId: string): Promise<WalletLoanRow[]>;
   borrow(input: WalletBorrowInput): Promise<WalletBorrowRow>;
   repay(input: WalletRepayInput): Promise<WalletRepayRow>;
+  getCitizenTaxReceipt?(userId: string): Promise<Record<string, unknown>>;
+  voteCitizenBudget?(userId: string, quarter: string, choice: string): Promise<{ success: boolean; quarter: string; choice: string }>;
 }
 
 export interface WalletBalanceView {
@@ -520,5 +522,29 @@ export class WalletService {
       outstandingAmount: wldAmount(receipt.outstanding_amount, 'loan outstanding'),
       replayed: receipt.replayed === true,
     };
+  }
+
+  async getCitizenTaxReceipt(authenticatedUserId: string): Promise<Record<string, unknown>> {
+    const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
+    if (typeof this.repository.getCitizenTaxReceipt === 'function') {
+      return this.repository.getCitizenTaxReceipt(actorUserId);
+    }
+    return {};
+  }
+
+  async voteCitizenBudget(
+    authenticatedUserId: string,
+    quarter: string,
+    choice: string,
+  ): Promise<{ success: boolean; quarter: string; choice: string }> {
+    const actorUserId = requireUuid(authenticatedUserId, 'authenticated user id');
+    const validChoices = ['WELFARE', 'INFRASTRUCTURE', 'CITIZEN_DIVIDEND', 'CURRENCY_STABILIZATION'];
+    if (!validChoices.includes(choice)) {
+      throw new Error('유효하지 않은 예산 우선순위 선택입니다');
+    }
+    if (typeof this.repository.voteCitizenBudget === 'function') {
+      return this.repository.voteCitizenBudget(actorUserId, quarter, choice);
+    }
+    return { success: true, quarter, choice };
   }
 }

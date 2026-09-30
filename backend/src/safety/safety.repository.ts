@@ -127,7 +127,7 @@ export class SafetyRepository {
   ): Promise<boolean> {
     const row = await queryOne<{ success: boolean }>(
       this.pool,
-      `SELECT public.safety_admin_action_takedown($1, $2, $3, $4) AS success`,
+      `SELECT public.safety_admin_action_takedown($1::uuid, $2::text, $3::text, $4::text) AS success`,
       [actorUserId, caseId, dto.newStatus, dto.adminNotes ?? null],
     );
     return Boolean(row?.success);

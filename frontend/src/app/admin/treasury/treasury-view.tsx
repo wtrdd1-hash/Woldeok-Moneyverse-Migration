@@ -18,6 +18,11 @@ import type {
   AdminTreasuryRevenueSource,
 } from '../types';
 import { TreasuryOperationsDialog } from './treasury-operations-dialog';
+import { TreasuryDisburseDialog } from './treasury-disburse-dialog';
+import { TreasuryBudgetDialog } from './treasury-budget-dialog';
+import { TreasuryBuybackDialog } from './treasury-buyback-dialog';
+import { Button } from '@/components/ui/button';
+import { Download } from 'lucide-react';
 
 interface Props {
   readonly overview: AdminTreasuryOverview;
@@ -46,6 +51,24 @@ function txTypeBadge(type: string) {
       return <Badge className="bg-amber-600 hover:bg-amber-700 text-white text-[11px]">주식정산 지원</Badge>;
     case 'FEE_RECIRCULATION':
       return <Badge className="bg-blue-600 hover:bg-blue-700 text-white text-[11px]">수수료 순환</Badge>;
+    case 'CITIZEN_DIVIDEND':
+      return <Badge className="bg-purple-600 hover:bg-purple-700 text-white text-[11px]">시민 배당</Badge>;
+    case 'COMMUNITY_FUNDING':
+      return <Badge className="bg-cyan-600 hover:bg-cyan-700 text-white text-[11px]">공공 펀딩</Badge>;
+    case 'WELFARE_SUBSIDY':
+      return <Badge className="bg-indigo-600 hover:bg-indigo-700 text-white text-[11px]">복지 보조금</Badge>;
+    case 'MARKET_STIMULUS':
+      return <Badge className="bg-teal-600 hover:bg-teal-700 text-white text-[11px]">경기부양 완충</Badge>;
+    case 'PUBLIC_GRANT':
+      return <Badge className="bg-sky-600 hover:bg-sky-700 text-white text-[11px]">공공 지원금</Badge>;
+    case 'BUDGET_DISTRIBUTION':
+      return <Badge className="bg-purple-600 hover:bg-purple-700 text-white text-[11px]">4분할 예산배분</Badge>;
+    case 'MARKET_BUYBACK_BURN':
+      return <Badge className="bg-rose-700 hover:bg-rose-800 text-white text-[11px]">역매수 소각</Badge>;
+    case 'CASINO_PIGOVIAN_TAX':
+      return <Badge className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px]">카지노 피구세</Badge>;
+    case 'STOCK_SPECULATION_TAX':
+      return <Badge className="bg-amber-700 hover:bg-amber-800 text-white text-[11px]">단타 투기세</Badge>;
     default:
       return <Badge variant="outline" className="text-[11px]">{type}</Badge>;
   }
@@ -403,12 +426,18 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
       {expenditure && (
         <Card className="border shadow-sm">
           <CardHeader className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
               <div>
-                <CardTitle className="text-base font-semibold">국고 목적별 지출 실적 집계 (Treasury Expenditure Breakdowns)</CardTitle>
-                <CardDescription className="text-xs text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <CardTitle className="text-base font-semibold">국고 목적별 지출 실적 집계 (Treasury Expenditure Breakdowns)</CardTitle>
+                  <Badge variant="outline" className="text-[10px] text-purple-600 border-purple-500/30">30% 비축금 보호 가드</Badge>
+                </div>
+                <CardDescription className="text-xs text-muted-foreground mt-0.5">
                   10대 목적별 예산 봉투에서 실제 집행된 기간별(24h / 7d / 30d) 국고 지출 실적 명세
                 </CardDescription>
+              </div>
+              <div className="shrink-0">
+                <TreasuryDisburseDialog vaults={overview.vaults} />
               </div>
               <div className="flex items-center gap-3 text-xs flex-wrap">
                 <div className="rounded border bg-muted/20 px-2.5 py-1">
@@ -492,8 +521,38 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
         ))}
       </div>
 
-      {/* 7. 자금 긴급 제어 (Step-Up Guard) */}
-      <TreasuryOperationsDialog vaults={overview.vaults} />
+      {/* 7. 국고 재정 관리 및 긴급 제어 타워 (Fiscal & Safety Control Tower) */}
+      <Card className="border shadow-sm bg-muted/10">
+        <CardHeader className="p-4 sm:p-6 pb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-base font-semibold">국고 재정 환원 및 시장 안정화 관제 (Fiscal Operations)</CardTitle>
+                <Badge className="bg-primary/90 text-white text-[10px]">헌법적 재정준칙</Badge>
+              </div>
+              <CardDescription className="text-xs text-muted-foreground mt-1">
+                4분할 목적별 예산 자동 배분(복지 40%, 인프라 30%, 비상비축 20%, 소각 10%) 및 룬스케이프형 역매수 소각을 집행합니다.
+              </CardDescription>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <TreasuryBudgetDialog mainVault={overview.vaults.find((v) => v.code === 'VAULT_MAIN') ?? overview.vaults[0]} />
+              <TreasuryBuybackDialog mainVault={overview.vaults.find((v) => v.code === 'VAULT_MAIN') ?? overview.vaults[0]} />
+              <TreasuryOperationsDialog vaults={overview.vaults} />
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs h-9"
+                onClick={() => {
+                  window.open('/api/v1/admin/treasury/ledger/export', '_blank');
+                }}
+              >
+                <Download className="h-3.5 w-3.5" />
+                원장 CSV 내보내기
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
 
       {/* 8. 실시간 국고 회계 감사 원장 (Ledger Table) */}
       <Card className="border shadow-sm">

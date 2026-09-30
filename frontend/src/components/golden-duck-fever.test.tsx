@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, act, cleanup, waitFor } from '@testing-library/react';
 import React from 'react';
 import { GoldenDuckFever } from './golden-duck-fever';
 import * as dopamineActions from '@/app/actions/dopamine';
@@ -52,10 +52,12 @@ describe('GoldenDuckFever Component', () => {
   it('transitions to finished screen when 10 seconds elapse', () => {
     render(<GoldenDuckFever isOpen={true} />);
 
-    // Fast-forward 10 seconds
-    act(() => {
-      vi.advanceTimersByTime(10000);
-    });
+    // Fast-forward 10 seconds step by step
+    for (let i = 0; i < 11; i++) {
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+    }
 
     expect(screen.getByText(/🎉 피버 타임 종료!/)).toBeDefined();
     expect(screen.getByRole('button', { name: /지갑에 WLD 보상 수령하기/ })).toBeDefined();
@@ -79,17 +81,22 @@ describe('GoldenDuckFever Component', () => {
     });
 
     // Finish 10s
-    act(() => {
-      vi.advanceTimersByTime(10000);
-    });
+    for (let i = 0; i < 11; i++) {
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+    }
+    vi.useRealTimers();
 
     const claimButton = screen.getByRole('button', { name: /지갑에 WLD 보상 수령하기/ });
     await act(async () => {
       fireEvent.click(claimButton);
     });
 
-    expect(dopamineActions.claimGoldenDuckAction).toHaveBeenCalled();
-    expect(screen.getByText(/1,250 WLD가 지갑에 성공적으로 입금되었습니다!/)).toBeDefined();
+    await waitFor(() => {
+      expect(dopamineActions.claimGoldenDuckAction).toHaveBeenCalled();
+      expect(screen.getByText(/1,250 WLD가 지갑에 성공적으로 입금되었습니다!/)).toBeDefined();
+    });
     expect(onClaimReward).toHaveBeenCalledWith(1250, 2);
   });
 
@@ -102,16 +109,21 @@ describe('GoldenDuckFever Component', () => {
 
     render(<GoldenDuckFever isOpen={true} />);
 
-    act(() => {
-      vi.advanceTimersByTime(10000);
-    });
+    for (let i = 0; i < 11; i++) {
+      act(() => {
+        vi.advanceTimersByTime(1000);
+      });
+    }
+    vi.useRealTimers();
 
     const claimButton = screen.getByRole('button', { name: /지갑에 WLD 보상 수령하기/ });
     await act(async () => {
       fireEvent.click(claimButton);
     });
 
-    expect(screen.getByText(/획득한 WLD를 지갑에 적립하려면 로그인이 필요합니다/)).toBeDefined();
-    expect(screen.getByRole('link', { name: /로그인하고 WLD 수령하기/ })).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText(/획득한 WLD를 지갑에 적립하려면 로그인이 필요합니다/)).toBeDefined();
+      expect(screen.getByRole('link', { name: /로그인하고 WLD 수령하기/ })).toBeDefined();
+    });
   });
 });

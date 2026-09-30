@@ -33,6 +33,39 @@ export class TreasuryOperationDto {
   reason!: string;
 }
 
+export class TreasuryDisburseDividendDto {
+  @ApiProperty({ example: '1000', description: '1인당 지급 배당금 (정수 WLD)' })
+  @IsString()
+  @Matches(/^\d+$/, { message: 'amountPerUserWld must be an integer string' })
+  amountPerUserWld!: string;
+
+  @ApiProperty({ example: '2026년 4분기 국고 세수 잉여금 시민 보편 환원 기본소득 배당', description: '감사 사유 (최소 10자)' })
+  @IsString()
+  @MinLength(10, { message: 'reason must be at least 10 characters' })
+  reason!: string;
+}
+
+export class TreasuryDisburseGrantDto {
+  @ApiProperty({ required: false, example: '00000000-0000-0000-0000-000000000000', description: '수혜 대상 유저 ID (선택)' })
+  @IsOptional()
+  @IsString()
+  targetUserId?: string;
+
+  @ApiProperty({ example: '50000', description: '지원금 총액 (정수 WLD)' })
+  @IsString()
+  @Matches(/^\d+$/, { message: 'amountWld must be an integer string' })
+  amountWld!: string;
+
+  @ApiProperty({ example: 'COMMUNITY_FUNDING', description: '지출 유형 (COMMUNITY_FUNDING, WELFARE_SUBSIDY, MARKET_STIMULUS, PUBLIC_GRANT)' })
+  @IsString()
+  disbursementType!: string;
+
+  @ApiProperty({ example: '도시 인프라 확충 및 공공 커뮤니티 공간 구축 보조금 집행', description: '감사 사유 (최소 10자)' })
+  @IsString()
+  @MinLength(10, { message: 'reason must be at least 10 characters' })
+  reason!: string;
+}
+
 export class TreasuryListQueryDto {
   @ApiProperty({ required: false, example: 30 })
   @IsOptional()
@@ -41,6 +74,30 @@ export class TreasuryListQueryDto {
   @ApiProperty({ required: false, example: '2026-09-21T00:00:00.000Z' })
   @IsOptional()
   cursor?: string;
+}
+
+
+export class TreasuryDistributeBudgetDto {
+  @ApiProperty({ example: '1000000', description: '4분할 배정 총액 (정수 WLD)' })
+  @IsString()
+  @Matches(/^\d+$/, { message: 'amountWld must be an integer string' })
+  amountWld!: string;
+
+  @ApiProperty({ example: '2026년 4분기 목적별 금고(복지40%/인프라30%/비축20%/소각10%) 헌법적 예산 배정', description: '감사 사유 (최소 10자)' })
+  @IsString()
+  @MinLength(10, { message: 'reason must be at least 10 characters' })
+  reason!: string;
+}
+
+export class TreasuryBuybackBurnDto {
+  @ApiProperty({ example: '00000000-0000-0000-0000-000000000000', description: '장터 매물 ID (UUID)' })
+  @IsString()
+  listingId!: string;
+
+  @ApiProperty({ example: '장터 최저가 덤핑 매물 국고 공개시장운영(OMO) 매입 및 즉시 영구소각을 통한 시세 방어', description: '감사 사유 (최소 10자)' })
+  @IsString()
+  @MinLength(10, { message: 'reason must be at least 10 characters' })
+  reason!: string;
 }
 
 @ApiTags('Admin Treasury')
@@ -109,5 +166,65 @@ export class AdminTreasuryController {
   ) {
     const adminId = requireUserId(request);
     return this.service.absorbFunds(adminId, dto.vaultCode, dto.amountWld, dto.reason);
+  }
+@Post('disburse/dividend')
+  @ApiOperation({ summary: '시민 보편 배당 및 기본소득 환원금 일괄 집행 (Safe Reserve 30% Guard)' })
+  async disburseDividend(
+    @Req() request: RequestWithSession,
+    @Body() dto: TreasuryDisburseDividendDto,
+  ) {
+    const adminId = requireUserId(request);
+    return this.service.disburseCitizenDividend(adminId, dto.amountPerUserWld, dto.reason);
+  }
+
+  @Post('disburse/grant')
+  @ApiOperation({ summary: '공공 프로젝트 펀딩 및 복지 보조금 지출 집행 (Safe Reserve 30% Guard)' })
+  async disburseGrant(
+    @Req() request: RequestWithSession,
+    @Body() dto: TreasuryDisburseGrantDto,
+  ) {
+    const adminId = requireUserId(request);
+    return this.service.disburseGrant(
+      adminId,
+      dto.targetUserId ?? null,
+      dto.amountWld,
+      dto.disbursementType,
+      dto.reason,
+    );
+  }
+
+  @Post('budget/distribute')
+  @ApiOperation({ summary: '헌법적 4분할 목적별 예산 배정 집행 (복지40/인프라30/비상20/소각10)' })
+  async distributeBudget(
+    @Req() request: RequestWithSession,
+    @Body() dto: TreasuryDistributeBudgetDto,
+  ) {
+    const adminId = requireUserId(request);
+    return this.service.distributeBudgetRule(adminId, dto.amountWld, dto.reason);
+  }
+
+  @Post('buyback/burn')
+  @ApiOperation({ summary: '룬스케이프형 역매수 영구소각 집행 (장터 덤핑 매물 국고 매입/소각)' })
+  async buybackBurn(
+    @Req() request: RequestWithSession,
+    @Body() dto: TreasuryBuybackBurnDto,
+  ) {
+    const adminId = requireUserId(request);
+    return this.service.executeMarketBuybackBurn(adminId, dto.listingId, dto.reason);
+  }
+
+  @Get('governance/votes')
+  @ApiOperation({ summary: '시민 거버넌스 예산안 투표 집계 현황 조회' })
+  async getGovernanceVotes(@Query('quarter') quarter?: string) {
+    return this.service.getGovernanceVotes(quarter || '2026-Q4');
+  }
+
+  @Get('export/csv')
+  @ApiOperation({ summary: '국고 회계 원장 불변 기록 CSV 내보내기' })
+  async exportCsv() {
+    return {
+      csv: await this.service.exportLedgerCsv(),
+      exported_at: new Date().toISOString(),
+    };
   }
 }

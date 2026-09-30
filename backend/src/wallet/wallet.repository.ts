@@ -350,4 +350,26 @@ export class PostgresWalletRepository {
     if (!row?.loan_id) throw new Error('database did not return a repayment receipt');
     return row;
   }
+
+  async getCitizenTaxReceipt(userId: string): Promise<Record<string, unknown>> {
+    const actor = requireUuid(userId, 'authenticated user id');
+    const row = await queryOne<{ result: Record<string, unknown> }>(
+      this.pool,
+      `SELECT public.get_citizen_tax_transparency_receipt($1::uuid) AS result`,
+      [actor],
+    );
+    return row?.result ?? {};
+  }
+
+  async voteCitizenBudget(userId: string, quarter: string, choice: string): Promise<{ success: boolean; quarter: string; choice: string }> {
+    const actor = requireUuid(userId, 'authenticated user id');
+    await this.pool.query(
+      `INSERT INTO public.treasury_citizen_budget_votes (user_id, quarter, priority_choice, updated_at)
+       VALUES ($1, $2, $3, clock_timestamp())
+       ON CONFLICT (user_id, quarter)
+       DO UPDATE SET priority_choice = EXCLUDED.priority_choice, updated_at = clock_timestamp()`,
+      [actor, quarter, choice],
+    );
+    return { success: true, quarter, choice };
+  }
 }

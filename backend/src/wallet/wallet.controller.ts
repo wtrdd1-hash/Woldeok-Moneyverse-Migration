@@ -33,9 +33,15 @@ import { WalletRecipientError, WalletService } from './wallet.service';
  * CsrfGuard cannot verify a token without a session id. Reordering these
  * changes which failure a caller sees, and can let a write through unchecked.
  */
+export class CitizenBudgetVoteDto {
+  quarter!: string;
+  choice!: string;
+}
+
 @ApiTags('wallet')
 @Controller()
 @UseGuards(SessionGuard, AuthenticatedGuard, ConsentGuard, CsrfGuard)
+
 export class WalletController {
   constructor(@Inject(WalletService) private readonly wallet: WalletService | null) {}
 
@@ -150,5 +156,19 @@ export class WalletController {
   @ApiOperation({ summary: 'Retired legacy work faucet; use professional work tasks', deprecated: true })
   claimWork() {
     throw new GoneException('legacy work reward retired; complete a professional task on /work');
+  }
+
+  @Get('wallet/tax-receipt')
+  @ApiOperation({ summary: '시민 납세 투명성 영수증 조회 (1 WLD 단위 실시간 목적별 분배 추적)' })
+  async getTaxReceipt(@Req() request: RequestWithSession) {
+    const userId = requireUserId(request);
+    return this.service().getCitizenTaxReceipt(userId);
+  }
+
+  @Post('wallet/governance/vote')
+  @ApiOperation({ summary: '분기별 국고 예산안 우선순위 시민 거버넌스 투표 제출' })
+  async voteBudget(@Req() request: RequestWithSession, @Body() body: CitizenBudgetVoteDto) {
+    const userId = requireUserId(request);
+    return this.service().voteCitizenBudget(userId, body.quarter || '2026-Q4', body.choice);
   }
 }
