@@ -2,10 +2,10 @@
 
 **English canonical** | [한국어](SECURITY_ASSURANCE_AUDIT_v2026.10.01.489.ko.md)
 
-Status: **AUDIT / REMEDIATION_REQUIRED**  
-Date: 2026-10-01 KST  
-Server repository baseline: `34dddce057df97ca745d5cf580b5eda12b1b6a8d`  
-Android repository baseline: `e24a2f8c9390092b0ae7aeaa3286ca8d799d91b3`  
+Status: **AUDIT / REMEDIATION_REQUIRED**
+Date: 2026-10-01 KST
+Server repository baseline: `597c6029a8539d501e3c554582552cb761feab6c`
+Android repository baseline: `e24a2f8c9390092b0ae7aeaa3286ca8d799d91b3`
 Audit branch: `docs/security-audit-v2026.10.01.489`
 
 This is defensive assurance evidence. It does not claim penetration testing of the public Internet, Test verification, Production remediation, or successful deployment.
@@ -160,3 +160,7 @@ Required remediation: disable JavaScript/DOM storage when legal content does not
 ## Release posture
 
 No runtime fix was applied in v489. No isolated Test or Production promotion was performed. P1 findings should be remediated in dedicated implementation branches, tested against isolated Test, and only then promoted with the existing zero-downtime release process.
+
+## Final-main drift recheck
+
+During the audit, `origin/main` moved first to `34dddce057df97ca745d5cf580b5eda12b1b6a8d` and then to `597c6029a8539d501e3c554582552cb761feab6c`. The audit branch merged both updates before finalization. The final runtime delta added/changed the floating support-chat widget and synthesized browser audio. The reviewed support mutations still obtain CSRF state, use idempotency keys, encode thread IDs in API paths, and render message bodies as React text rather than raw HTML. No additional P1 finding was introduced by that drift review.
