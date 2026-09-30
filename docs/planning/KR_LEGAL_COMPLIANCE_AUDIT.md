@@ -2,7 +2,7 @@
 
 **English canonical** | [한국어](KR_LEGAL_COMPLIANCE_AUDIT.ko.md)
 
-> Version: v2026.09.26.443
+> Version: v2026.09.30.487
 > Status: PLANNING / LEGAL REVIEW REQUIRED
 > Start `origin/main`: `6f025ced5239fc6bc8b365c31ad0fd59acf84dbc`
 > Mid-work `origin/main`: `6f025ced5239fc6bc8b365c31ad0fd59acf84dbc`
@@ -43,7 +43,7 @@ Public Terms/Privacy exist; WLD is stated non-redeemable; consent is versioned/s
 
 ## Release gates
 1. KR ads: verified business/tax status + current privacy/overseas-transfer/ad-vendor evidence.
-2. KR paid goods/subscription: KR-LGL-443-03 + provider/store receipt/webhook/refund tests.
+2. KR paid goods/subscription: BLOCKED under the current business scope. Re-open KR-LGL-443-03 + provider/store receipt/webhook/refund tests only in a future version after verified business-scope expansion.
 3. KR casino/chance: BLOCK until authentic classification/rating + 19+ + legal/channel evidence; remove unsupported approval wording.
 4. Marketing: BLOCK until consent/suppression system exists.
 5. All gates are server-authoritative, versioned, audited and fail closed on missing/stale evidence.
