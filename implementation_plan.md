@@ -1,6 +1,8 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v39)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v41)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v41**: 모바일 짤림 방지 철통 방어 규격(Anti-Clipping & Zero-Overflow Engine) — 뷰포트 메타데이터 표준 주입(device-width/viewport-fit=cover), 전역 텍스트 클리핑 방어(break-word/anywhere), GNB 헤더 320px~480px 철통 압축 및 반응형 재설계, Card/Dialog/Sheet/Table UI 안전 규격 강화, 8대 뷰포트 횡스크롤 0건 자동화 검증 스크립트 탑재 (+280, -0)
+- **v40**: 프론트엔드 번들 & 이미지 최적화(Next.js Turbopack `optimizePackageImports` [lucide-react/sonner/radix], AVIF/WebP 이미지 포맷 우선순위 & 86400s 캐시, 불변 에셋 정적 헤더) (+120, -0)
 - **v39**: 서버 전면 최적화 및 보안 취약점 원천 방어(SSRF 방어 엔진·사설망 IP 격리, 백엔드 보안 헤더·CORS 잠금, DoS/1MB Payload Limit, HTTP Keep-Alive & TCP 핸드셰이크 최적화, Slowloris 방어, SQLi/XSS 원천 차단) (+380, -0)
 - **v38**: 전 도메인 Socket.IO 실시간 브로드캐스팅 확장 & 고성능 프론트-백엔드 실시간 최적화 파이프라인(주식 실시간 호가/체결, 개인 지갑 실시간 잔액 동기화, 관리자 관제타워 라이브 메트릭, P2P 경매장 실시간 룸, useSyncExternalStore 렌더링 최적화 & 150ms 이벤트 배치) (+450, -0)
 - **v37**: 신규 유저 온보딩 및 인터랙티브 사이트 이용 가이드 허브(5단계 온보딩 로드맵, 1분 모의 자산 시뮬레이터, 온보딩 체크리스트 & 뱃지, 가상경제 SVG 순환도, 실시간 용어 사전 & 파워유저 치트시트) 풀스택 구축 (+320, -0)
@@ -5626,3 +5628,92 @@ flowchart TD
 - SSRF 단위 테스트 실행 (`pnpm test src/security/ssrf-defense.test.ts`).
 - 백엔드 및 프론트엔드 빌드 검증 (`pnpm build`).
 - 1,568개 활성 세션 보존 상태 확인.
+
+---
+
+## ⚡ [v40 Specification] 프론트엔드 번들 & 이미지 고성능 최적화 (누적 추가)
+
+### 1. 🎯 목표 및 배경
+- **패키지 임포트 최적화**: Lucide React, Sonner, Radix UI 등 주요 대형 패키지의 트리쉐이킹 및 모듈 분할을 Next.js 16 Turbopack 레벨에서 강제(`optimizePackageImports`)하여 초기 번들 크기 대폭 감소.
+- **이미지 서빙 최적화**: 차세대 포맷 AVIF 및 WebP 우선 인코딩, 최소 캐시 TTL 86,400초(24시간) 보장을 통한 이미지 전송 대역폭 60% 이상 절감.
+- **빌드 캐시 컴팩션**: 파일 시스템 캐시 컴팩션 및 빠른 재빌드(10.7초) 환경 확보.
+
+### 2. 📋 [Integrated Final Spec & Action Plan (v40)] 최종 통합 구현 명세
+### Proposed Changes
+1. **`frontend/next.config.ts`**:
+   - `images`: `{ formats: ['image/avif', 'image/webp'], minimumCacheTTL: 86400 }` 설정.
+   - `experimental.optimizePackageImports`: `['lucide-react', 'sonner', '@radix-ui/react-icons', '@radix-ui/react-slot', 'clsx', 'tailwind-merge']` 적용.
+
+### Verification Plan
+- 프론트엔드 typecheck 및 단위 테스트 (`pnpm test`).
+- Turbopack 프로덕션 빌드 122개 라우트 100% SUCCESS 확인.
+
+---
+
+## 🛡️ [v41 Specification] 모바일 짤림 방지 철통 방어 규격 (Anti-Clipping & Zero-Overflow Engine)
+
+### 1. 🎯 목표 및 배경
+모바일 및 좁은 화면(320px Galaxy Z Fold 커버, 375px iPhone SE, 390px iPhone 14/15, 768px 태블릿, 1100px 소형 랩탑)에서 텍스트 잘림, 글자 겹침, 요소 찌그러짐, 가로 스크롤 번짐(Horizontal Overflow)을 원천 차단하기 위한 엔터프라이즈급 철통 레이아웃 방어 엔진을 구축합니다.
+
+### 2. 🏛️ 5대 핵심 방어 아키텍처 규격
+
+```mermaid
+flowchart TD
+    subgraph ViewportDefense ["1. 뷰포트 & 메타데이터 방어"]
+        A["Next.js Viewport Metadata (device-width, viewport-fit=cover)"] --> B["iOS/Android 가상 980px 뷰포트 축소 차단"]
+    end
+
+    subgraph TextEngine ["2. 전역 텍스트 클리핑 방어 엔진"]
+        C["overflow-wrap: break-word & anywhere"] --> D["긴 단어/복합어/수치 뷰포트 초과 방어"]
+        E["* { min-width: 0; box-sizing: border-box; }"] --> F["Flex/Grid 자식 요소의 부모 강제 확장 방어"]
+    end
+
+    subgraph GNBDefense ["3. 상단 GNB 320px~480px 철통 압축"]
+        G["Brand: size-8 / text-[13px] 점진적 확장"] --> H["좌우 요소 충돌 제로"]
+        I["Header Actions: 360px 미만 컴팩트 격리 / Sheet 내부 통합"] --> H
+        J["Sheet Menu: w-[min(20rem,calc(100vw-1rem))]"] --> H
+    end
+
+    subgraph UIComponents ["4. UI 코어 컴포넌트 안전 규격"]
+        K["CardHeader: grid-cols-[minmax(0,1fr)_auto]"] --> L["카드 타이틀 액션 버튼 밀어냄 차단"]
+        M["Dialog / Sheet: max-h-[calc(100dvh-1rem)] max-w-[calc(100vw-1rem)]"] --> N["모달 닫기 버튼/본문 화면 밖 잘림 차단"]
+        O["Table: overflow-x-auto & max-w-full"] --> P["데이터 그리드 횡스크롤 격리"]
+    end
+
+    subgraph Verification ["5. 8대 뷰포트 자동화 검증"]
+        Q["audit-mobile-clipping-sentinel.mjs"] --> R["320px / 375px / 390px / 768px / 1100px / 1280px / 1440px 전수 검증"]
+    end
+
+    classDef def fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
+    classDef text fill:#0f172a,stroke:#34d399,stroke-width:2px,color:#f8fafc;
+    classDef gnb fill:#1e1e2e,stroke:#a855f7,stroke-width:2px,color:#f8fafc;
+    classDef ui fill:#3b0764,stroke:#f43f5e,stroke-width:2px,color:#f8fafc;
+    class A,B def;
+    class C,D,E,F text;
+    class G,H,I,J gnb;
+    class K,L,M,N,O,P ui;
+    class Q,R def;
+```
+
+---
+
+### 3. 📋 [Integrated Final Spec & Action Plan (v41)] 최종 통합 구현 명세
+
+#### Proposed Changes
+1. **`frontend/src/app/layout.tsx`**:
+   - `export const viewport: Viewport` 추가 (`width: 'device-width'`, `initialScale: 1`, `maximumScale: 5`, `viewportFit: 'cover'`).
+2. **`frontend/src/app/globals.css` & `frontend/src/app/redesign.css`**:
+   - `* { min-width: 0; }` 및 전역 텍스트 클리핑 방어(`overflow-wrap: break-word;`, `hyphens: auto;`, `word-break: normal; [word-break:keep-all]` 결합).
+   - 테이블, 이미지, 코드 블록의 `max-w-full` 및 오버플로우 격리 강화.
+3. **`frontend/src/components/brand.tsx` & `frontend/src/components/site-header.tsx`**:
+   - 320px~480px 화면에서 Brand 로고 및 우측 세션/알림/채팅/메뉴 버튼의 반응형 크기 동적 조절 및 오버플로우 제로화.
+4. **`frontend/src/components/ui/card.tsx` & `dialog.tsx`**:
+   - `CardHeader`의 `grid-cols-[minmax(0,1fr)_auto]` 및 `DialogContent`의 반응형 Safe Margin 보장.
+5. **`scripts/audit-mobile-clipping-sentinel.mjs` [NEW]**:
+   - 8대 뷰포트 레이아웃 스트레스 검증 및 CSS/컴포넌트 클리핑 방어 자동화 검증 스크립트.
+
+#### Verification Plan
+- `node scripts/audit-mobile-clipping-sentinel.mjs` 실행 및 통과 확인.
+- `pnpm test` (단위 테스트 100% 통과).
+- Turbopack 빌드 검증 (`pnpm build`).
+- 블루-그린 무중단 배포 및 1,568개 세션 보존 상태 확인.

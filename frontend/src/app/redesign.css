@@ -99,6 +99,22 @@ body {
   box-sizing: border-box;
 }
 
+/* Zero Horizontal Overflow & Anti-Clipping Guard */
+table, pre, code {
+  max-width: 100%;
+}
+
+.no-shrink {
+  flex-shrink: 0 !important;
+}
+
+.safe-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
 .site-header-redesign {
   background: color-mix(in srgb, var(--mv-surface) 96%, transparent) !important;
 }

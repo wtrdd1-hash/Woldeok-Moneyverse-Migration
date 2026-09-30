@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { IBM_Plex_Mono, Nanum_Myeongjo, Noto_Sans_KR } from 'next/font/google';
 import { SiteShell } from '@/components/site-shell';
 import { LocaleProvider } from '@/components/locale-provider';
@@ -62,6 +62,17 @@ const plexMono = IBM_Plex_Mono({
 
 const indexingEnabled = process.env.SEO_INDEXING_ENABLED !== 'false';
 const siteUrl = (process.env.APP_BASE_URL ?? 'https://easy-scraping.com').replace(/\/$/, '');
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#faf8f2' },
+    { media: '(prefers-color-scheme: dark)', color: '#090d16' },
+  ],
+};
 
 const META_BY_LOCALE = {
   en: {

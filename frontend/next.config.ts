@@ -50,9 +50,21 @@ const config: NextConfig = {
   // Standalone puts the server and only the files it traced into .next, which
   // is what the container copies.
   output: 'standalone',
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 86400,
+  },
   experimental: {
     // The contract package ships CommonJS from a workspace path.
     externalDir: true,
+    optimizePackageImports: [
+      'lucide-react',
+      'sonner',
+      '@radix-ui/react-icons',
+      '@radix-ui/react-slot',
+      'clsx',
+      'tailwind-merge',
+    ],
   },
 
   /**

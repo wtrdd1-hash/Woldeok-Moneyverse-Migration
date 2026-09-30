@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ChevronDown, LogIn, LogOut, Menu, ShieldCheck, Sliders, User, Wallet } from 'lucide-react';
+import { Bell, ChevronDown, LogIn, LogOut, Menu, MessageSquare, ShieldCheck, Sliders, User, Wallet } from 'lucide-react';
 import { logout } from '@/app/actions';
 import { Brand } from '@/components/brand';
 import { ThemeMenu, ThemePanel } from '@/components/theme-controls';
@@ -122,6 +122,19 @@ export function SiteHeader() {
                 <SheetTitle className="text-left">{locale === 'en' ? 'Menu' : '메뉴'}</SheetTitle>
               </SheetHeader>
               <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="grid min-h-0 flex-1 gap-1 overflow-y-auto px-3 pb-4">
+                {viewer?.signedIn && (
+                  <div className="flex items-center justify-around gap-2 px-3 py-2 my-1 rounded-xl bg-muted/40 border border-border/50 min-[360px]:hidden">
+                    <Link href="/chat" className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground">
+                      <MessageSquare className="size-3.5" />
+                      <span>{locale === 'en' ? 'Chat' : '쪽지함'}</span>
+                    </Link>
+                    <Separator orientation="vertical" className="h-4" />
+                    <Link href="/account/notifications" className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground">
+                      <Bell className="size-3.5" />
+                      <span>{locale === 'en' ? 'Alerts' : '알림함'}</span>
+                    </Link>
+                  </div>
+                )}
                 <div className="px-3 pt-2"><ServerClockPill className="w-full justify-center" /></div>
                 <Group title={locale === 'en' ? 'Public' : '공개'} entries={PUBLIC_NAV} pathname={pathname} locale={locale} />
                 {viewer?.signedIn && (
@@ -352,8 +365,10 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
 
   return (
     <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-      <ChatHeaderButton />
-      <NotificationHeaderButton />
+      <div className="hidden min-[360px]:flex items-center gap-1">
+        <ChatHeaderButton />
+        <NotificationHeaderButton />
+      </div>
       <Button
         asChild
         size="sm"
