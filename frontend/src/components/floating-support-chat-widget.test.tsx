@@ -93,4 +93,34 @@ describe('FloatingSupportChatWidget', () => {
     const subjectInput = screen.getByLabelText('문의 제목') as HTMLInputElement;
     expect(subjectInput.value).toContain('[버그 제보]');
   });
+
+  it('효과음 Mute/Unmute 토글 버튼이 정상 동작한다', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ threads: [] }),
+    });
+
+    render(<FloatingSupportChatWidget />);
+    const trigger = screen.getByLabelText('관리자 1:1 문의창 열기/닫기');
+    await act(async () => {
+      fireEvent.click(trigger);
+    });
+
+    const muteBtn = screen.getByLabelText('Mute sound');
+    expect(muteBtn).toBeDefined();
+
+    // Click to mute
+    await act(async () => {
+      fireEvent.click(muteBtn);
+    });
+    expect(screen.getByLabelText('Unmute sound')).toBeDefined();
+
+    // Click to unmute
+    const unmuteBtn = screen.getByLabelText('Unmute sound');
+    await act(async () => {
+      fireEvent.click(unmuteBtn);
+    });
+    expect(screen.getByLabelText('Mute sound')).toBeDefined();
+  });
 });
+

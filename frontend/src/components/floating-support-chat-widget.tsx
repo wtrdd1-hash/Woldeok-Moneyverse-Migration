@@ -20,11 +20,14 @@ import {
   Copy,
   Check,
   RotateCw,
+  Volume2,
+  VolumeX,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useViewer } from '@/lib/use-viewer';
 import { useLocale } from '@/components/locale-provider';
+import { synthSound } from '@/lib/audio/synth-sound';
 import { cn } from '@/lib/cn';
 import { toast } from 'sonner';
 
@@ -104,10 +107,37 @@ export function FloatingSupportChatWidget() {
   const [newBody, setNewBody] = useState('');
   const [replyText, setReplyText] = useState('');
   const [copied, setCopied] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const popupRef = useRef<HTMLDivElement | null>(null);
   const prevWaitingCount = useRef<number>(0);
+  const prevMessageCount = useRef<number>(0);
+
+  // 음소거 설정 로드
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('moneyverse_support_muted');
+      if (saved === 'true') {
+        setIsMuted(true);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  // 음소거 토글
+  const toggleMute = () => {
+    setIsMuted((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('moneyverse_support_muted', String(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  };
 
   // 스레드 목록 가져오기
   const fetchThreads = useCallback(async () => {
@@ -119,9 +149,12 @@ export function FloatingSupportChatWidget() {
         const list: SupportThread[] = data.threads ?? [];
         setThreads(list);
 
-        // 관리자 새 답변(waiting_user) 감지 시 토스트 알림
+        // 관리자 새 답변(waiting_user) 감지 시 토스트 알림 및 차임벨 재생
         const waitingCount = list.filter((t) => t.status === 'waiting_user').length;
         if (prevWaitingCount.current < waitingCount) {
+          if (!isMuted) {
+            synthSound.playNotificationChime();
+          }
           toast.success(isEn ? 'New admin reply received!' : '관리자 답변이 도착했습니다!', {
             description: isEn ? 'Check your 1:1 support chat.' : '1:1 문의 대화창에서 확인해 보세요.',
             action: {
@@ -138,22 +171,35 @@ export function FloatingSupportChatWidget() {
     } catch {
       // ignore network errors
     }
-  }, [isSignedIn, isEn]);
+  }, [isSignedIn, isEn, isMuted]);
 
   // 특정 스레드 메시지 목록 가져오기
-  const fetchMessages = useCallback(async (threadId: string) => {
-    try {
-      const res = await fetch(`/app-api/v1/support/threads/${encodeURIComponent(threadId)}/messages`, {
-        cache: 'no-store',
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setMessages(data.messages ?? []);
+  const fetchMessages = useCallback(
+    async (threadId: string) => {
+      try {
+        const res = await fetch(`/app-api/v1/support/threads/${encodeURIComponent(threadId)}/messages`, {
+          cache: 'no-store',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const list: SupportMessage[] = data.messages ?? [];
+          setMessages(list);
+
+          // 새 관리자 메시지 도착 감지 시 차임벨 재생
+          if (prevMessageCount.current > 0 && list.length > prevMessageCount.current) {
+            const lastMsg = list[list.length - 1];
+            if (lastMsg?.sender_kind === 'admin' && !isMuted) {
+              synthSound.playNotificationChime();
+            }
+          }
+          prevMessageCount.current = list.length;
+        }
+      } catch {
+        // ignore network errors
       }
-    } catch {
-      // ignore network errors
-    }
-  }, []);
+    },
+    [isMuted]
+  );
 
   // 위젯 열릴 때 스레드 로드
   useEffect(() => {
@@ -189,6 +235,7 @@ export function FloatingSupportChatWidget() {
     setSelectedThread(thread);
     setView('chat');
     setIsLoading(true);
+    prevMessageCount.current = 0;
     fetchMessages(thread.thread_id).finally(() => setIsLoading(false));
   };
 
@@ -220,6 +267,9 @@ export function FloatingSupportChatWidget() {
 
       if (res.ok) {
         const data = await res.json();
+        if (!isMuted) {
+          synthSound.playMessageSent();
+        }
         toast.success(isEn ? 'Support inquiry submitted!' : '문의가 성공적으로 접수되었습니다!');
         setNewSubject('');
         setNewBody('');
@@ -267,6 +317,9 @@ export function FloatingSupportChatWidget() {
       });
 
       if (res.ok) {
+        if (!isMuted) {
+          synthSound.playMessageSent();
+        }
         await fetchMessages(selectedThread.thread_id);
       } else {
         toast.error(isEn ? 'Failed to send message.' : '메시지 전송에 실패했습니다.');
@@ -309,12 +362,17 @@ export function FloatingSupportChatWidget() {
 
         <button
           type="button"
-          onClick={() => setIsOpen((prev) => !prev)}
+          onClick={() => {
+            if (!isOpen && !isMuted) {
+              synthSound.playClick();
+            }
+            setIsOpen((prev) => !prev);
+          }}
           className={cn(
             'group relative flex size-12 sm:size-13 items-center justify-center rounded-full shadow-2xl transition-all duration-300 active:scale-95 outline-none',
             isOpen
               ? 'bg-muted border-2 border-border text-foreground'
-              : 'bg-gradient-to-br from-amber-500 via-primary to-amber-600 text-primary-foreground border-2 border-amber-400/40 hover:scale-105 hover:shadow-primary/30'
+              : 'bg-gradient-to-br from-amber-500 via-primary to-amber-600 text-primary-foreground border-2 border-amber-400/50 hover:scale-105 hover:shadow-primary/40 ring-4 ring-amber-500/20 hover:ring-amber-500/40'
           )}
           aria-label={isEn ? 'Toggle admin support chat' : '관리자 1:1 문의창 열기/닫기'}
         >
@@ -374,6 +432,18 @@ export function FloatingSupportChatWidget() {
             </div>
 
             <div className="flex items-center gap-1 shrink-0">
+              {/* 사운드 On/Off 토글 */}
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={toggleMute}
+                className="size-7 rounded-lg text-muted-foreground hover:text-foreground"
+                title={isMuted ? (isEn ? 'Unmute sound' : '효과음 켜기') : (isEn ? 'Mute sound' : '효과음 끄기')}
+                aria-label={isMuted ? 'Unmute sound' : 'Mute sound'}
+              >
+                {isMuted ? <VolumeX className="size-3.5 text-muted-foreground" /> : <Volume2 className="size-3.5 text-primary" />}
+              </Button>
               <Button
                 asChild
                 variant="ghost"
@@ -587,20 +657,30 @@ export function FloatingSupportChatWidget() {
                   <div className="space-y-1">
                     <label className="text-[11px] font-bold text-muted-foreground">빠른 카테고리 선택</label>
                     <div className="flex flex-wrap gap-1">
-                      {CATEGORY_PRESETS.map((cat) => (
-                        <button
-                          key={cat.label}
-                          type="button"
-                          onClick={() => {
-                            if (!newSubject.startsWith(cat.prefix)) {
-                              setNewSubject(`${cat.prefix}${newSubject.replace(/^\[[^\]]+\]\s*/, '')}`);
-                            }
-                          }}
-                          className="px-2 py-0.5 rounded-md border border-border/80 bg-card hover:bg-muted text-[10px] font-bold transition-all text-muted-foreground hover:text-foreground active:scale-95"
-                        >
-                          {cat.label}
-                        </button>
-                      ))}
+                      {CATEGORY_PRESETS.map((cat) => {
+                        const isSelected = newSubject.startsWith(cat.prefix);
+                        return (
+                          <button
+                            key={cat.label}
+                            type="button"
+                            onClick={() => {
+                              if (isSelected) {
+                                setNewSubject(newSubject.replace(/^\[[^\]]+\]\s*/, ''));
+                              } else {
+                                setNewSubject(`${cat.prefix}${newSubject.replace(/^\[[^\]]+\]\s*/, '')}`);
+                              }
+                            }}
+                            className={cn(
+                              'px-2 py-0.5 rounded-md border text-[10px] font-bold transition-all active:scale-95',
+                              isSelected
+                                ? 'border-primary bg-primary text-primary-foreground shadow-xs'
+                                : 'border-border/80 bg-card hover:bg-muted text-muted-foreground hover:text-foreground'
+                            )}
+                          >
+                            {cat.label}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 
@@ -673,6 +753,13 @@ export function FloatingSupportChatWidget() {
                   maxLength={2000}
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      if ((e.nativeEvent as unknown as { isComposing?: boolean })?.isComposing) return;
+                      e.preventDefault();
+                      handleSendReply();
+                    }
+                  }}
                   placeholder={isEn ? 'Type reply… (Enter to send)' : '답변 입력… (Enter 전송)'}
                   className="flex-1 h-9 px-3 rounded-xl border border-border/80 bg-background text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary shadow-inner"
                   disabled={isSending}

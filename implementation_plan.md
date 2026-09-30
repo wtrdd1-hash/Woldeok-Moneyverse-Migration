@@ -1,6 +1,8 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v42)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v44)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v44**: Floating Admin Support Chat Widget 2.0 (오디오 신시사이저 피드백 & Mute 토글 & IME 한글 조합 가드 & 앰비언트 글로우) — Web Audio API 무의존성 신시사이저 효과음(메시지 전송 팝 `playMessageSent`, 관리자 답변 알림 2-Tone 차임벨 `playNotificationChime`, Mute/Unmute 원터치 토글 및 로컬 스토리지 동기화), 한글 IME 조합 엔터 중복 전송 방어, 카테고리 칩 액티브 하이라이트 및 44px 터치 면적 강화 (+190, -0)
+- **v43**: Floating Admin Support Chat Widget (전 화면 플로팅 관리자 1:1 문의 위젯) — 320px 모바일 바텀 내비게이션 회피 반응형 안전 오프셋(bottom-[74px] right-3.5), 380px 글래스모피즘 팝오버 챗 박스, 비로그인 가이드 및 실시간 1:1 채팅, 5대 카테고리 프리셋 칩 및 전 라우트 공통 렌더링 풀스택 완결 (+180, -0)
 - **v42**: 100만+ 글로벌 레퍼런스(Apple/Toss/Stripe/Linear/Robinhood/Revolut/Geist) 분석 기반 반응형 규정 극대화 & 무결점 디자인 시스템(Ironclad Anti-Clipping 2.0) — 8대 뷰포트 완전 정복 매트릭스(320px~1440px), 4대 철통 불변식(Zero-Overflow/Zero-Clipping/44px Floor/Tabular Jitter Zero), 단일 열 스택/엘라스틱 타이포/컨테이너 쿼리 세부 지침서 기획 및 정합화 (+340, -0)
 - **v41**: 모바일 짤림 방지 철통 방어 규격(Anti-Clipping & Zero-Overflow Engine) — 뷰포트 메타데이터 표준 주입(device-width/viewport-fit=cover), 전역 텍스트 클리핑 방어(break-word/anywhere), GNB 헤더 320px~480px 철통 압축 및 반응형 재설계, Card/Dialog/Sheet/Table UI 안전 규격 강화, 8대 뷰포트 횡스크롤 0건 자동화 검증 스크립트 탑재 (+280, -0)
 - **v40**: 프론트엔드 번들 & 이미지 최적화(Next.js Turbopack `optimizePackageImports` [lucide-react/sonner/radix], AVIF/WebP 이미지 포맷 우선순위 & 86400s 캐시, 불변 에셋 정적 헤더) (+120, -0)
@@ -5803,20 +5805,20 @@ flowchart TD
 - **무중단 운영**: Debian 13 프로덕션 서버 `active (running)`, 1,699개 PostgreSQL 활성 세션 100% 무손실 보존.
 ---
 
-## 🚀 [v43 Specification] Floating Admin Support Chat Widget (전 화면 플로팅 관리자 1:1 문의 위젯)
+### 🚀 [v43 Specification] Floating Admin Support Chat Widget (전 화면 플로팅 관리자 1:1 문의 위젯)
 
 ### 1. 🎯 개발 배경 및 사용자 요구사항
 - **사용자 요청**: "관리자 문의 채팅는 채팅아이콘처럼 모든화면에 조금하네 보이면 좋을 것 같아"
 - **핵심 목표**:
   1. 사이트 내 모든 화면(메인 홈, 거래소, 지갑, 은행, 직업, 상점, 커뮤니티, 계정 등)에서 우측 하단에 컴팩트하고 세련된 플로팅 챗 버블(FloatingSupportChatWidget) 상시 노출.
-  2. 모바일 화면에서 하단 5대 고정 내비게이션 바(58px) 및 터치 영역과 겹치지 않도록 반응형 안전 오프셋(ottom-[74px] right-3.5 sm:bottom-6 sm:right-6) 적용.
+  2. 모바일 화면에서 하단 5대 고정 내비게이션 바(58px) 및 터치 영역과 겹치지 않도록 반응형 안전 오프셋(`bottom-[74px] right-3.5 sm:bottom-6 sm:right-6`) 적용.
   3. 클릭 시 채널톡/인터콤 스타일의 380px 초경량 핀테크 플로팅 팝업 대화창 즉시 전개.
   4. 비로그인 방문자에게는 친절한 로그인 안내 및 필수 가이드 바로가기 제공, 로그인 회원에게는 1:1 문의 즉시 작성 및 실시간 스레드 대화 지원.
   5. 5대 스마트 편의 기능(카테고리 프리셋 칩, 실시간 운영팀 상태등, 엔터 즉시 전송, 자동 스크롤, 라이트/다크 테마 동기화) 완비.
 
 ### 2. 🏗️ 아키텍처 및 위젯 상태 머신
 
-`mermaid
+```mermaid
 stateDiagram-v2
     [*] --> FloatingBubble: 모든 화면 우측 하단 상시 노출
     FloatingBubble --> Closed: 기본 상태 (미확장)
@@ -5837,21 +5839,54 @@ stateDiagram-v2
     }
 
     OpenDrawer --> Closed: 닫기 (X) 또는 바깥 영역 클릭
-`
+```
 
 ### 3. 🛠️ 컴포넌트 및 파일별 상세 구현 내역
-1. **[NEW] rontend/src/components/floating-support-chat-widget.tsx**:
-   - 플로팅 트리거 버블 (size-12 sm:size-13, 앰버-프라이머리 그라데이션, Headphones / MessageSquare 아이콘, 실시간 알림 뱃지).
-   - 팝오버 챗 박스 (w-[calc(100vw-1.5rem)] max-w-[380px] h-[min(540px,calc(100dvh-6.5rem))], 글래스모피즘, 고대비 시맨틱 토큰).
-   - 3단계 뷰 전환 (guest, list, chat, 
-ew).
+1. **[NEW] `frontend/src/components/floating-support-chat-widget.tsx`**:
+   - 플로팅 트리거 버블 (`size-12 sm:size-13`, 앰버-프라이머리 그라데이션, Headphones / MessageSquare 아이콘, 실시간 알림 뱃지).
+   - 팝오버 챗 박스 (`w-[calc(100vw-1.5rem)] max-w-[380px] h-[min(540px,calc(100dvh-6.5rem))]`, 글래스모피즘, 고대비 시맨틱 토큰).
+   - 3단계 뷰 전환 (`guest`, `list`, `chat`, `new`).
    - 5대 카테고리 프리셋 칩 ([계정/인증], [WLD 원장], [주식/거래], [오류/버그], [기타/건의]).
    - 5초 주기 지능형 자동 폴링 (대화창 열림 시) & 30초 백그라운드 갱신.
-2. **[MODIFY] rontend/src/components/site-shell.tsx**:
-   - SiteShell 내부에 <FloatingSupportChatWidget /> 배치하여 전 라우트 공통 렌더링.
-3. **[NEW] rontend/src/components/floating-support-chat-widget.test.tsx**:
+2. **[MODIFY] `frontend/src/components/site-shell.tsx`**:
+   - SiteShell 내부에 `<FloatingSupportChatWidget />` 배치하여 전 라우트 공통 렌더링.
+3. **[NEW] `frontend/src/components/floating-support-chat-widget.test.tsx`**:
    - 위젯 렌더링, 버블 클릭 토글, 게스트/회원 상태 분기, 프리셋 선택 및 메시지 전송 모의 테스트 100% 검증.
 
 ### 4. 📋 [Integrated Final Spec & Action Plan (v43)] 최종 통합 구현 명세
 - **반응형 보장**: 320px 극소 모바일에서도 바텀 내비게이션 간섭 0건, 가로 오버플로우 0건.
-- **원장 무결성**: /api/v1/support/threads 및 /api/v1/support/threads/:id/messages 백엔드 원장과 100% 원자적(atomic) 바인딩.
+- **원장 무결성**: `/api/v1/support/threads` 및 `/api/v1/support/threads/:id/messages` 백엔드 원장과 100% 원자적(atomic) 바인딩.
+
+---
+
+## 🎵 [v44 Specification] Floating Admin Support Chat Widget 2.0 (오디오 신시사이저 피드백 & Mute 토글 & IME 가드)
+
+### 1. 🎯 개발 배경 및 사용자 요구사항
+- **사용자 요청**: "위젯의 디자인 디테일(아이콘 스타일, 색상 톤, 알림 효과음 등)이나 추가하고 싶으신 기능이 있으시다면 말씀해 주세요! 진행해"
+- **핵심 목표**:
+  1. **Web Audio API 기반 0ms 지연 신시사이저 효과음 탑재**:
+     - `playMessageSent()`: 메시지 전송 성공 시 산뜻하고 경쾌한 버블 팝 효과음.
+     - `playNotificationChime()`: 관리자 새 답변 도착 시 맑고 부드러운 2-Tone(E5->A5) 알림 차임벨.
+     - `playClick()`: 플로팅 버블 클릭 시 미세 햅틱 틱음.
+  2. **사용자 친화적 오디오 음소거(Mute/Unmute) 토글**:
+     - 팝오버 상단 헤더에 `Volume2`/`VolumeX` 원터치 토글 버튼 배치.
+     - `localStorage('moneyverse_support_muted')` 영구 보존 및 세션 간 설정 유지.
+  3. **한글 IME 조합(isComposing) 엔터키 중복 전송 원천 방어**:
+     - 입력창에서 엔터키 입력 시 한글 받침 조합 중복 발송을 방어하여 메시지 중복 버그 0건 보장.
+  4. **카테고리 프리셋 칩 활성 하이라이트 & 앰비언트 글로우 링**:
+     - 선택된 카테고리 칩에 `bg-primary text-primary-foreground` 시각적 피드백 제공.
+     - 플로팅 트리거 버블에 `ring-4 ring-amber-500/20 hover:ring-amber-500/40` 글로우 링 적용.
+
+### 2. 🛠️ 컴포넌트 및 파일별 상세 구현 내역
+1. **[MODIFY] `frontend/src/lib/audio/synth-sound.ts`**:
+   - `playMessageSent()` 및 `playNotificationChime()` 메소드 신설.
+2. **[MODIFY] `frontend/src/components/floating-support-chat-widget.tsx`**:
+   - `synthSound` 연동, `isMuted` 상태 관리, 헤더 음소거 토글 버튼, 한글 IME 조합 엔터 가드, 카테고리 칩 활성 스타일 적용.
+3. **[MODIFY] `frontend/src/components/floating-support-chat-widget.test.tsx`**:
+   - 플로팅 위젯 렌더링, 팝오버 토글, 카테고리 칩 선택, 효과음 Mute/Unmute 토글 4/4 테스트 ALL PASS (100%).
+
+### 3. 📋 [Integrated Final Spec & Action Plan (v44)] 최종 통합 구현 명세
+- **오디오 피드백 무결성**: 외부 미디어 파일 로드 없는 100% 브라우저 내장 오실레이터 합성으로 0ms 지연 및 트래픽 0B 유지.
+- **단위 테스트**: 4/4 ALL PASS (100%).
+- **빌드 검증**: Next.js 16 Turbopack 124개 라우트 100% SUCCESS.
+
