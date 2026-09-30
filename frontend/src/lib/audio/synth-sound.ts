@@ -101,6 +101,63 @@ class SynthSoundEngine {
       /* ignore */
     }
   }
+
+  /** 메시지 발송 완료 버블 팝 효과음 (상승형 숏 톤) */
+  playMessageSent() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(440, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.08);
+
+      gain.gain.setValueAtTime(0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start();
+      osc.stop(ctx.currentTime + 0.08);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  /** 관리자 새 답변 / 알림 수신 2-Tone 차임벨 (E5 -> A5 맑은 알림음) */
+  playNotificationChime() {
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      const notes = [659.25, 880.0]; // E5, A5
+      notes.forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const start = ctx.currentTime + idx * 0.1;
+        const dur = 0.35;
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, start);
+
+        gain.gain.setValueAtTime(0.14, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(start);
+        osc.stop(start + dur);
+      });
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 export const synthSound = new SynthSoundEngine();
+
