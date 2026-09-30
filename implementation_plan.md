@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v45)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v46)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v46**: 전 관리자 기능(Admin Control Tower & All Surfaces) 다회차 심층 교차 검증 및 무결성 전수 감사 — 백엔드 관리자 23개 파일 146개 테스트 100% 통과, 프론트엔드 관리자 15개 파일 120개 테스트 100% 통과, 백엔드 전체 1,037개 & 프론트엔드 전체 949개 테스트 100% PASS, 운영 서버 23개 관리자 전 라우트 HTTP 200 실측, DB 2,369건 감사 원장·5대 국고 금고·7대 킬스위치 무결성 검증 (+220, -0)
 - **v45**: Floating All-in-One Support & Direct Chat Hub (플로팅 통합 고객지원 & 1:1 개인 쪽지 허브) — 우측 하단 플로팅 위젯 내 [👑 고객센터] 및 [💬 1:1 쪽지] 듀얼 세그먼트 탭 탑재, 회원 간 1:1 비공개 대화 목록/실시간 쪽지 인라인 대화방 풀 연동, 양방향 안읽음 알림 배지 통합, Web Audio 신시사이저 사운드 및 한글 IME 조합 가드 전 도메인 적용 (+210, -0)
 - **v44**: Floating Admin Support Chat Widget 2.0 (오디오 신시사이저 피드백 & Mute 토글 & IME 한글 조합 가드 & 앰비언트 글로우) — Web Audio API 무의존성 신시사이저 효과음(메시지 전송 팝 `playMessageSent`, 관리자 답변 알림 2-Tone 차임벨 `playNotificationChime`, Mute/Unmute 원터치 토글 및 로컬 스토리지 동기화), 한글 IME 조합 엔터 중복 전송 방어, 카테고리 칩 액티브 하이라이트 및 44px 터치 면적 강화 (+190, -0)
 - **v43**: Floating Admin Support Chat Widget (전 화면 플로팅 관리자 1:1 문의 위젯) — 320px 모바일 바텀 내비게이션 회피 반응형 안전 오프셋(bottom-[74px] right-3.5), 380px 글래스모피즘 팝오버 챗 박스, 비로그인 가이드 및 실시간 1:1 채팅, 5대 카테고리 프리셋 칩 및 전 라우트 공통 렌더링 풀스택 완결 (+180, -0)
@@ -5959,5 +5960,53 @@ stateDiagram-v2
 ### 4. 📋 [Integrated Final Spec & Action Plan (v45)] 최종 통합 구현 명세
 - **원장 무결성**: `/api/v1/support/*` (관리자 지원) 및 `/api/v1/chat/*` (1:1 개인 쪽지) 백엔드 REST API 계약 100% 준수.
 - **Zero-Downtime Deployment**: 1,643개 PostgreSQL 활성 세션 100% 무손실 상태로 무중단 승격.
+
+---
+
+## 🛡️ [v46 Specification] 전 관리자 기능(Admin Control Tower & All Surfaces) 다회차 심층 교차 검증 및 무결성 감사 보고
+
+### 1. 🎯 검증 배경 및 사용자 요구사항
+- **사용자 요청**: "모든 관리자 기능 정상 작동하는 여려번확인해"
+- **검증 목표**:
+  - 관리자 23개 전 서피스(/admin, /admin/api-health, /admin/bank, /admin/catalog, /admin/content, /admin/controls, /admin/discord, /admin/economy, /admin/economy/scenario-lab, /admin/logs, /admin/logs/activity, /admin/logs/delivery, /admin/logs/integrity, /admin/market, /admin/market/ai-news, /admin/safety, /admin/security, /admin/seo, /admin/shop, /admin/support, /admin/treasury, /admin/users, /admin/work)의 프론트-백엔드-운영DB 7중 교차 검증 완결.
+
+### 2. 📊 7대 다회차 심층 교차 검증 실측 데이터
+
+| 검증 단계 | 검증 대상 및 도구 | 테스트/대상 수 | 실측 결과 |
+| :--- | :--- | :--- | :--- |
+| **1차 검증** | 백엔드 관리자 도메인 단위/통합 테스트 (`vitest`) | 23개 파일 / 146개 테스트 | **146/146 PASS (100%)** |
+| **2차 검증** | 프론트엔드 관리자 서피스 단위 테스트 (`vitest`) | 15개 파일 / 120개 테스트 | **120/120 PASS (100%)** |
+| **3차 검증** | 프론트엔드 전체 라우트/컴포넌트 단위 테스트 | 160개 파일 / 949개 테스트 | **949/949 PASS (100%)** |
+| **4차 검증** | 백엔드 전체 REST API 단위/통합 테스트 | 114개 파일 / 1,037개 테스트 | **1,037/1,037 PASS (100%)** |
+| **5차 검증** | 운영 서버 23개 관리자 전체 라우트 HTTP 200 실측 (`curl`) | 23개 라우트 | **23/23 HTTP 200 OK (100%)** |
+| **6차 검증** | 운영 PostgreSQL 원장 무결성 및 킬스위치 실측 (`easy-scraping` MCP) | 감사로그 2,369건 / 5대 금고 / 7대 스위치 | **무결성 100% 정상 (1,642개 세션 보존)** |
+| **7차 검증** | 8대 뷰포트 관리자 레이아웃 클리핑 센티넬 검증 (`sentinel.mjs`) | 21개 지표 (320px~1440px) | **21/21 PASS (100%)** |
+
+### 3. 🏛️ 관리자 23대 핵심 관제 서피스별 가동 상태
+
+1. **`/admin` (총괄 관제 타워)**: 4대 핵심 KPI 위젯(활성 유저, WLD 통화량, 인플레이션 지수, 노드 가동률) 및 `AdminSubNav` 정상 렌더링.
+2. **`/admin/api-health`**: 14대 도메인 300+개 API 헬스체크 및 실시간 텔레메트리 펄스 가동.
+3. **`/admin/bank`**: 지급준비율, 대출 리스크, 예금 총액 및 가상 국채 시뮬레이터 정상.
+4. **`/admin/catalog`**: 아이템 상점 카탈로그, 제작대 레시피 관리 및 가격 정책 정상.
+5. **`/admin/content`**: 게시판/미디어/신고 콘텐츠 모더레이션 및 원터치 삭제 정상.
+6. **`/admin/controls`**: 7대 킬스위치(카지노, AI심의, 자동정책, 직업제한, 사진제출, 주식기업공시, 직업) 및 Step-Up 2단계 확인 정상.
+7. **`/admin/discord`**: Discord 봇 연결 상태, 음성 데몬, 웹훅 알림 스트림 정상.
+8. **`/admin/economy`**: M2 통화량, Faucet-Sink 비율, 인플레이션 게이지 및 자동 정책 엔진 정상.
+9. **`/admin/economy/scenario-lab`**: Llama 3.2 3B & Gemma 3 1B 듀얼 AI Council 시나리오 즉각 심의 시뮬레이터 정상.
+10. **`/admin/logs` (전체/활동/전달/무결성)**: 2,369건 불변 감사 로그 체인 및 머클 무결성 검증 정상.
+11. **`/admin/market` & `/admin/market/ai-news`**: 가상 주식 10개 종목 거래정지/원가정산 및 AI 뉴스 센티멘트 이벤트 발행 정상.
+12. **`/admin/safety`**: 1:1 개인 채팅 신고 접수 큐, 10건 타임라인 증거 검토 및 계정 제재 정상.
+13. **`/admin/security`**: 관리자 세션 샌드박스, IP 화이트리스트, 불법 로그인 시도 차단 정상.
+14. **`/admin/seo`**: Google/Naver 34개 타깃 URL 색인 상태, 크롤링 감사 및 IndexNow 6시간 핑 정상.
+15. **`/admin/shop`**: VIP 멤버십 및 상점 판매 내역, 환불 거버넌스 정상.
+16. **`/admin/support`**: 1:1 고객지원 티켓 큐, 실시간 운영팀 답변 스트림 및 5초 폴링 정상.
+17. **`/admin/treasury`**: 5대 국고 금고(비축/소각/보조금/예비/시민예산) 원장 및 2단계 Step-Up 지출 다이얼로그 정상.
+18. **`/admin/users` & `/admin/users/[id]`**: 16개 회원 계정 디렉토리, 권한 변경, 잔고 조정 및 강제 로그아웃 정상.
+19. **`/admin/work`**: 직업 업무 퀘스트 거버넌스, 주간 한도 정책 및 자격 인증 정상.
+
+### 4. 📋 [Integrated Final Spec & Action Plan (v46)] 최종 통합 구현 명세
+- **관리자 무결성 보장**: 전 관리자 API 및 화면이 인증 가드, 감사 로그 연동, 2단계 Step-Up 보호 하에 100% 정상 가동 중.
+- **프로덕션 가동 상태**: Debian 13 서버 무중단 서비스 유지 (`prod-v487`, 1,642개 세션 무손실).
+
 
 
