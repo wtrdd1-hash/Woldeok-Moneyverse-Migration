@@ -1,11 +1,21 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.29.486
+> Current ledger version: v2026.10.01.492
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.01.492 — 2026-10-01 — Treasury recycling, expanded taxes and participation loop
+- Planning/docs-only cycle from start/mid-work `origin/main=9740265592a60ab3811f67af02950f2e84d764d1`; isolated branch `docs/treasury-auto-spend-engagement-v2026.10.01.492`. Concurrent automation branches through v491 were observed, so this cycle moved to v492 rather than reusing a reserved sequence.
+- **TREASURY-492-01 / P1:** treasury-held tax is not burn and healthy eligible surplus must not remain indefinitely idle. Added reserve states and a capped Treasury Recycling Engine that can commit only pre-approved program budgets.
+- **TREASURY-492-02 / P1:** expanded tax/fee planning into sale tax + listing/broker + reprice fee, optional surplus-profit surcharge, luxury/property stamp, business expansion/license and temporary seasonal levy while preserving starter/core exemptions and 0% P2P baseline.
+- **TREASURY-492-03 / P1:** recyclable treasury funds visible participation loops: city/community matching, verified public contracts, seasonal public works, new/return activation, fee relief, bounded stabilization, civic weekly challenges and allowlisted item-buyback/salvage drives.
+- **TREASURY-492-04 / P0 integrity:** reserve/reconciliation/data/integrity failures disable automatic discretionary commitment; no automatic program may mint WLD, breach protected reserve, reward wash/self-transfer loops, or create a new unapproved tax/reward class.
+- **TREASURY-492-05 / P1 engagement:** measure unique participants, first-action latency, completion, D1/D7 return and cross-system breadth with payout concentration, abuse, affordability, inflation and reserve health as guardrails; raw clicks or tax amount paid are not optimization targets.
+- Rechecked EVE broker/sales-fee separation, OSRS tax/item-sink intervention research, New World tax-to-Town-Project linkage, Guild Wars 2 trading fees and guild-treasury upgrades. Exact external rates are not copied as Moneyverse defaults.
+- Detailed authority: `ADMIN_TREASURY_MANAGEMENT_SPEC.md`, `planning/deltas/v2026.10.01.492.md`, and `findings/TREASURY_TAX_ENGAGEMENT_RESEARCH_REVIEW_v2026.10.01.492.md`. No runtime, DB, API, Test or Production completion is claimed.
 
 ## v2026.09.29.486 — 2026-09-29 — Strict 145k Database Reference Corpus & PostgreSQL 17 Revalidation
 - Research/planning/docs-only cycle. Start, mid-work, and final `origin/main=64201629c5cdf931d49e48e8808fc0f882318b3b`; isolated branch `docs/db-reference-expansion-v2026.09.29.486`.

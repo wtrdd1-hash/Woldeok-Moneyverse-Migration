@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.30.487
+> **현재 통합 버전:** v2026.10.01.492
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -14,6 +14,18 @@
 권위 register를 제공한다.
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 국고 자동 재순환·참여도 계약 — v2026.10.01.492 (2026-10-01)
+
+- **유휴 국고 방치 금지:** 세금·수수료는 hard sink가 아니다. 보호준비금, 기존 commitment, pending outflow, stability buffer를 제외하고 남은 적격 잉여금은 무기한 누적하지 않고 제한형 recyclable pool로 관리한다.
+- **세금 포트폴리오 확장:** 장터 판매세와 listing/broker·상향 reprice fee를 분리하고, 대형 초과이익 추가세 후보, luxury/property 인지세, 사업 확장/license fee, 시즌 한시 luxury levy를 추가한다. P2P 송금세는 기본 0%, 기본 작업·퀘스트·출석 보상, 환불, starter 접근은 비과세 유지한다.
+- **유저 보호:** 소액 최소과세표준, starter fee waiver, 코호트별 실효부담 telemetry로 nuisance/regressive taxation을 막는다. 휴면잔액세·징벌적 부유세·임의 보유상한은 금지한다.
+- **Treasury Recycling Engine:** HEALTHY/SURPLUS 상태에서만 사전승인 프로그램에 reserve·세입·일/주·프로그램 cap 범위로 자동 commitment한다. 준비금·대사·stale data·무결성 문제가 하나라도 있으면 recommendation-only/fail-closed다.
+- **참여도 우선 지출:** 커뮤니티/도시 matching, 검증 공공계약, 시즌 공공사업, 신규·복귀 활성화, 공공 fee relief, 제한형 사업/시장 안정화, 협동 주간도전에 기존 국고 WLD를 순환한다. 신규 WLD 발행이 아니다.
+- **보이는 재미:** Treasury Today 미터, 공공 프로젝트 진행도, 다음 unlock, 공공계약 pool, pooled 세입 배분을 유저에게 보여준다. 완료 시 비P2W 도시 외형, 공개 이벤트, 커뮤니티 공간, 박물관/아카이브, fee relief, 협동 미션체인을 열 수 있다.
+- **납세액=P2W 금지:** 보상은 납세액이 아니라 검증된 참여 폭을 기준으로 한다. 최고납세자 랭킹, 세금재원 복권·잭팟·베팅, 실결제 세금할인은 금지한다. 플레이 숙련은 공개 floor 안에서 지정 서비스/listing fee만 줄일 수 있다.
+- **측정:** 주간 고유 참여자, 첫 유의미 액션 시간, 완료율, D1/D7 복귀, cross-system breadth, 프로젝트 기여자 수를 높이되 payout 집중, wash/alt 악용, 구매력·인플레이션, 준비금·대사를 guardrail로 둔다.
+- 상세 권위: [ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md](ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md), [v492 기획 델타](deltas/v2026.10.01.492.ko.md), v492 국고/세금 참여도 조사검토. 기획/문서 전용이며 구현·Test·Production 완료를 주장하지 않는다.
 
 ## 광고 전용 현금 수익화 상위 게이트 — v2026.09.30.487 (2026-09-30)
 

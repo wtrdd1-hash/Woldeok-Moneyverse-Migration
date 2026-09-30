@@ -1,11 +1,21 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.09.29.486
+> 현재 원장 버전: v2026.10.01.492
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.10.01.492 — 2026-10-01 — 국고 재순환·세금 확장·참여도 루프
+- 시작/중간 `origin/main=9740265592a60ab3811f67af02950f2e84d764d1` 기준 기획/문서 전용 회차이며 격리 브랜치는 `docs/treasury-auto-spend-engagement-v2026.10.01.492`다. 동시 자동작업이 v491까지 사용 중인 것을 확인해 예약번호와 충돌하지 않도록 v492로 이동했다.
+- **TREASURY-492-01 / P1:** 국고로 걷힌 세금은 burn이 아니며 건강한 적격잉여금을 무기한 방치하지 않는다. reserve state와 사전승인 프로그램에만 cap 내 commitment하는 Treasury Recycling Engine을 추가했다.
+- **TREASURY-492-02 / P1:** 판매세와 listing/broker/reprice fee를 분리하고 초과이익 추가세 후보, luxury/property 인지세, 사업 확장/license, 시즌 한시 levy를 확장했다. starter/core 면세와 P2P 0% 기본값은 유지한다.
+- **TREASURY-492-03 / P1:** 재순환 국고를 도시/커뮤니티 matching, 검증 공공계약, 시즌 공공사업, 신규·복귀 활성화, fee relief, 제한형 안정화, civic weekly challenge, allowlist item buyback/salvage에 연결했다.
+- **TREASURY-492-04 / P0 무결성:** reserve/reconciliation/data/integrity 문제가 있으면 자동 재량 commitment를 중단한다. 자동 프로그램은 WLD를 mint하거나 보호준비금을 침범하거나 자기거래/wash loop를 보상하거나 승인되지 않은 세금/보상 class를 만들 수 없다.
+- **TREASURY-492-05 / P1 참여도:** 고유참여자, 첫액션시간, 완료율, D1/D7 복귀, cross-system breadth를 측정하고 payout 집중, abuse, 구매력, inflation, reserve health를 guardrail로 둔다. raw click이나 납세액은 최적화 목표가 아니다.
+- EVE broker/sales fee 분리, OSRS tax/item-sink 개입 연구, New World tax-Town Project 연결, Guild Wars 2 trading fee/guild treasury upgrade 사례를 재검토했으며 외부 정확 세율을 Moneyverse 기본값으로 복제하지 않는다.
+- 상세 권위: `ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md`, `planning/deltas/v2026.10.01.492.ko.md`, `findings/TREASURY_TAX_ENGAGEMENT_RESEARCH_REVIEW_v2026.10.01.492.ko.md`. 런타임·DB·API·Test·Production 완료를 주장하지 않는다.
 
 ## v2026.09.29.486 — 2026-09-29 — 엄격 14.5만 DB 레퍼런스 코퍼스 및 PostgreSQL 17 재검증
 - 조사/기획/문서 전용 주기. 시작/중간/최종 `origin/main=64201629c5cdf931d49e48e8808fc0f882318b3b`; 격리 브랜치 `docs/db-reference-expansion-v2026.09.29.486`.

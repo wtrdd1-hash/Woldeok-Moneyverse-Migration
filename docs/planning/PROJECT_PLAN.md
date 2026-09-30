@@ -2,11 +2,23 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.30.487
+> Current integrated version: v2026.10.01.492
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Treasury automatic recycling and participation contract — v2026.10.01.492 (2026-10-01)
+
+- **No idle treasury hoarding:** tax/fee revenue is not a hard sink. After protected reserve, committed obligations, pending outflow and a stability buffer are covered, eligible surplus becomes a bounded recyclable pool instead of accumulating indefinitely.
+- **Tax portfolio expansion:** planning now separates marketplace sale tax from listing/broker and upward-reprice fees, and adds optional large-profit surcharge, luxury/property stamp duty, business expansion/license fees and a temporary seasonal luxury levy. P2P transfer stays 0% by default; baseline work/quest/check-in rewards, refunds and starter access remain non-taxable.
+- **Player protection:** micro-transaction thresholds, starter fee waivers and cohort effective-burden telemetry prevent nuisance/regressive taxation. Idle-balance tax, punitive wealth confiscation and arbitrary holding caps remain prohibited.
+- **Treasury Recycling Engine:** HEALTHY/SURPLUS states may automatically commit only pre-approved program budgets within reserve, trailing-revenue, daily/weekly and per-program caps. Any reserve, reconciliation, stale-data or integrity failure degrades to recommendation-only/fail-closed behavior.
+- **Participation-first spending:** recyclable WLD funds community/city matching, verified public contracts, seasonal public works, new/returning-user activation, temporary public fee relief, bounded business/market stabilization and cooperative weekly challenges. This redistributes existing treasury WLD; it does not mint new WLD.
+- **More visible fun:** member surfaces expose a Treasury Today meter, active public-project progress, next unlock threshold, public contract pools and where pooled tax revenue is allocated. Project completion may unlock non-P2W visual city upgrades, public events, community spaces, archive/museum exhibits, fee relief and cooperative mission chains.
+- **No tax-to-P2W:** rewards are based on verified breadth of participation, not amount of tax paid. Richest-taxpayer leaderboards, tax-funded lotteries/jackpots/wagering and paid tax discounts are prohibited. Gameplay mastery may reduce only designated service/listing fees within a public floor.
+- **Measured outcome:** optimize unique weekly participants, first-action latency, completion, D1/D7 return, cross-system breadth and community contributor count while guarding payout concentration, wash/alt abuse, affordability, inflation, reserve and reconciliation health.
+- Detailed authority: [ADMIN_TREASURY_MANAGEMENT_SPEC.md](ADMIN_TREASURY_MANAGEMENT_SPEC.md), [v492 delta](deltas/v2026.10.01.492.md) and the v492 treasury/tax engagement research review. Planning/docs only; implementation, Test and Production completion are not claimed.
 
 ## Advertising-only cash monetization superseding gate — v2026.09.30.487 (2026-09-30)
 
