@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v44)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v45)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v45**: Floating All-in-One Support & Direct Chat Hub (플로팅 통합 고객지원 & 1:1 개인 쪽지 허브) — 우측 하단 플로팅 위젯 내 [👑 고객센터] 및 [💬 1:1 쪽지] 듀얼 세그먼트 탭 탑재, 회원 간 1:1 비공개 대화 목록/실시간 쪽지 인라인 대화방 풀 연동, 양방향 안읽음 알림 배지 통합, Web Audio 신시사이저 사운드 및 한글 IME 조합 가드 전 도메인 적용 (+210, -0)
 - **v44**: Floating Admin Support Chat Widget 2.0 (오디오 신시사이저 피드백 & Mute 토글 & IME 한글 조합 가드 & 앰비언트 글로우) — Web Audio API 무의존성 신시사이저 효과음(메시지 전송 팝 `playMessageSent`, 관리자 답변 알림 2-Tone 차임벨 `playNotificationChime`, Mute/Unmute 원터치 토글 및 로컬 스토리지 동기화), 한글 IME 조합 엔터 중복 전송 방어, 카테고리 칩 액티브 하이라이트 및 44px 터치 면적 강화 (+190, -0)
 - **v43**: Floating Admin Support Chat Widget (전 화면 플로팅 관리자 1:1 문의 위젯) — 320px 모바일 바텀 내비게이션 회피 반응형 안전 오프셋(bottom-[74px] right-3.5), 380px 글래스모피즘 팝오버 챗 박스, 비로그인 가이드 및 실시간 1:1 채팅, 5대 카테고리 프리셋 칩 및 전 라우트 공통 렌더링 풀스택 완결 (+180, -0)
 - **v42**: 100만+ 글로벌 레퍼런스(Apple/Toss/Stripe/Linear/Robinhood/Revolut/Geist) 분석 기반 반응형 규정 극대화 & 무결점 디자인 시스템(Ironclad Anti-Clipping 2.0) — 8대 뷰포트 완전 정복 매트릭스(320px~1440px), 4대 철통 불변식(Zero-Overflow/Zero-Clipping/44px Floor/Tabular Jitter Zero), 단일 열 스택/엘라스틱 타이포/컨테이너 쿼리 세부 지침서 기획 및 정합화 (+340, -0)
@@ -5889,4 +5890,74 @@ stateDiagram-v2
 - **오디오 피드백 무결성**: 외부 미디어 파일 로드 없는 100% 브라우저 내장 오실레이터 합성으로 0ms 지연 및 트래픽 0B 유지.
 - **단위 테스트**: 4/4 ALL PASS (100%).
 - **빌드 검증**: Next.js 16 Turbopack 124개 라우트 100% SUCCESS.
+
+---
+
+## 💬 [v45 Specification] Floating All-in-One Support & Direct Chat Hub (플로팅 통합 고객지원 & 1:1 개인 쪽지 허브)
+
+### 1. 🎯 개발 배경 및 사용자 요구사항
+- **사용자 요청**: "1대1채팅 채팅부분도가능하게 해주면안되?"
+- **핵심 목표**:
+  1. **플로팅 위젯 내 듀얼 세그먼트 탭 (`support` ↔ `direct`) 탑재**:
+     - 상단 탭 스위처를 통해 [👑 고객센터 (관리자 1:1 문의)]와 [💬 1:1 쪽지 (회원 간 개인 채팅)]를 자유롭게 원터치 전환.
+  2. **1:1 개인 쪽지(Direct Message) 목록 및 인라인 대화방 완벽 탑재**:
+     - 내 1:1 대화방 목록 조회 (`/app-api/v1/chat/conversations`), 최근 메시지 요약, 안읽은 배지 노출.
+     - 대화방 클릭 시 위젯 내부에서 즉시 실시간 1:1 대화방 전개 및 메시지 스트림 렌더링.
+     - 실시간 메시지 송수신 (`/app-api/v1/chat/conversations/:id/messages`), 읽음 처리 (`/read`), 5초 지능형 폴링 동기화.
+     - 한글 IME 조합 엔터 가드 및 `synthSound` 효과음(발송 팝 / 수신 차임벨) 완벽 연동.
+  3. **통합 알림 배지 카운트 시스템**:
+     - 플로팅 트리거 버블에 관리자 미확인 답변 수 + 1:1 쪽지 안읽은 메시지 수의 통합 알림 배지 노출.
+  4. **반응형 320px 모바일 및 글래스모피즘 380px 핏 유지**:
+     - 모바일 바텀 내비게이션(58px) 회피 오프셋(`bottom-[74px]`) 보존 및 탭 전환 시 레이아웃 흔들림 0건 보장.
+
+### 2. 🏗️ 통합 아키텍처 및 상태 머신
+
+```mermaid
+stateDiagram-v2
+    [*] --> FloatingBubble: 모든 화면 우측 하단 상시 노출
+    FloatingBubble --> OpenHub: 클릭 시 통합 팝오버 전개
+
+    state OpenHub {
+        [*] --> CheckAuth
+        CheckAuth --> GuestView: 비로그인 상태 (로그인 유도 & 공통 가이드)
+        CheckAuth --> AuthenticatedHub: 로그인 상태
+
+        state AuthenticatedHub {
+            [*] --> SupportTab: 기본값 (또는 최근 선택 탭)
+            
+            state SupportTab {
+                [*] --> SupportThreadList
+                SupportThreadList --> NewInquiryForm: [새 문의 접수]
+                SupportThreadList --> SupportChatRoom: 문의 클릭
+                NewInquiryForm --> SupportChatRoom: 접수 완료
+                SupportChatRoom --> SupportThreadList: [← 목록으로]
+            }
+
+            state DirectChatTab {
+                [*] --> DirectConversationList
+                DirectConversationList --> DirectChatRoom: 대화방 클릭
+                DirectChatRoom --> DirectConversationList: [← 목록으로]
+            }
+
+            SupportTab --> DirectChatTab: [💬 1:1 쪽지] 탭 클릭
+            DirectChatTab --> SupportTab: [👑 고객센터] 탭 클릭
+        }
+    }
+
+    OpenHub --> FloatingBubble: 닫기 (X) 또는 바깥 영역 클릭
+```
+
+### 3. 🛠️ 컴포넌트 및 파일별 상세 구현 내역
+1. **[MODIFY] `frontend/src/components/floating-support-chat-widget.tsx`**:
+   - `activeHubTab` 상태 (`'support' | 'direct'`) 및 상단 세그먼트 탭 렌더링.
+   - 1:1 개인 쪽지 데이터 페칭(`fetchConversations`, `fetchDirectMessages`), 메시지 전송(`handleSendDirectMessage`), 읽음 처리 연동.
+   - 1:1 쪽지 대화 목록 뷰(`directList`) 및 1:1 대화방 인라인 뷰(`directChat`) 구현.
+   - 통합 알림 뱃지 수 (`waitingAdminReplies + totalDirectUnread`) 계산.
+2. **[MODIFY] `frontend/src/components/floating-support-chat-widget.test.tsx`**:
+   - 고객지원 탭 및 1:1 쪽지 탭 전환, 1:1 쪽지 목록/대화방 렌더링, 메시지 입력/전송 테스트 케이스 추가.
+
+### 4. 📋 [Integrated Final Spec & Action Plan (v45)] 최종 통합 구현 명세
+- **원장 무결성**: `/api/v1/support/*` (관리자 지원) 및 `/api/v1/chat/*` (1:1 개인 쪽지) 백엔드 REST API 계약 100% 준수.
+- **Zero-Downtime Deployment**: 1,643개 PostgreSQL 활성 세션 100% 무손실 상태로 무중단 승격.
+
 
