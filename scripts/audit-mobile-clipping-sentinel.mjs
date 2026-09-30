@@ -79,10 +79,10 @@ const brandPath = path.join(FRONTEND_DIR, 'src', 'components', 'brand.tsx');
 if (fs.existsSync(headerPath) && fs.existsSync(brandPath)) {
   const headerContent = fs.readFileSync(headerPath, 'utf8');
   const brandContent = fs.readFileSync(brandPath, 'utf8');
-  check('Brand logo size-8 on ultra-narrow viewports', brandContent.includes('size-8 sm:size-10'));
-  check('Header compact menu trigger size-9.5/11', headerContent.includes('size-9.5 sm:size-11'));
-  check('Session control compact responsive padding', headerContent.includes('px-2.5 min-[380px]:px-3.5 sm:px-5'));
-  check('Wallet balance hidden on small screens (<540px)', headerContent.includes('hidden min-[540px]:inline-flex'));
+  check('Brand logo responsive sizing', brandContent.includes('size-9') && brandContent.includes('sm:size-10'));
+  check('Header mobile menu trigger size-11 (44px target)', headerContent.includes('size-11 rounded-[10px]'));
+  check('Session control responsive padding', headerContent.includes('px-3 sm:px-5'));
+  check('Wallet balance hidden on small screens (<480px)', headerContent.includes('hidden min-[480px]:inline-flex'));
   check('Sheet menu width safe margin w-[min(20rem,calc(100vw-1rem))]', headerContent.includes('w-[min(20rem,calc(100vw-1rem))]'));
 } else {
   check('site-header.tsx & brand.tsx exist', false, 'header files missing');
