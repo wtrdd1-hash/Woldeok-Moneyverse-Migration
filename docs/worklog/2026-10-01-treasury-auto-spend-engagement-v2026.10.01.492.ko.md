@@ -38,3 +38,11 @@
 - `PROJECT_PLAN`, `INTEGRATED_PLANNING_MASTER`, `ADMIN_TREASURY_MANAGEMENT_SPEC` 영/한 권위 헤더가 모두 v2026.10.01.492를 표시한다.
 - rebase 후 검증 head `798b23454c5b676f517e261a461db0fa2794e320`에서 working tree clean 확인.
 - 런타임·DB·API·Test 서버·Production 변경은 없으며 기획/문서 전용 작업이다.
+
+## 전체 저장소 검증
+
+- 첫 `pnpm test`는 신규 worktree에 `node_modules`가 없어 `tsc`를 찾지 못하고 `spawn ENOENT`로 중단됐다. 환경/설정 실패이며 통과로 계산하지 않았다.
+- `pnpm install --frozen-lockfile`을 성공적으로 실행한 뒤 전체 `pnpm test`를 다시 수행했다.
+- 전체 결과: **exit 0**. backup/release 검사 9/9, API contract 179 endpoint 생성·정합, contract 31/31, database package 7/7, backend 1,037 pass + DB 의존 391 skip, frontend 949/949 pass.
+- frontend 테스트에서 기존 React `act(...)` 및 jsdom canvas 미구현 stderr 경고가 있었으나 Vitest 최종 결과는 160/160 test files, 949/949 tests pass였다.
+- DB 의존 항목은 pass가 아니라 skip으로 기록한다. 이번 문서-only 작업은 Test DB를 만들거나 사용하지 않았으며 DB-backed runtime 검증을 주장하지 않는다.

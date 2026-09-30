@@ -38,3 +38,11 @@
 - Authority headers: `PROJECT_PLAN`, `INTEGRATED_PLANNING_MASTER`, and `ADMIN_TREASURY_MANAGEMENT_SPEC` all identify v2026.10.01.492 in EN/KO.
 - Working tree was clean at verification head `798b23454c5b676f517e261a461db0fa2794e320` after rebase.
 - No runtime, DB, API, Test-server or Production mutation occurred; this is planning/docs-only work.
+
+## Full repository verification
+
+- The first `pnpm test` attempt stopped after the initial 9/9 checks because this newly created worktree had no `node_modules` and `tsc` was unavailable (`spawn ENOENT`); this was an environment/setup failure, not treated as a pass.
+- Ran `pnpm install --frozen-lockfile` successfully, then reran the full `pnpm test` suite.
+- Full suite result: **exit 0**. Backup/release checks 9/9; API contract generated 179 endpoints and matched; contract tests 31/31; database package tests 7/7; backend 1,037 passed with 391 DB-dependent tests skipped; frontend 949/949 passed.
+- Frontend emitted existing non-fatal React `act(...)` and jsdom canvas-not-implemented stderr during tests, but Vitest reported 160/160 test files and 949/949 tests passed.
+- DB-dependent skips are recorded as skips, not passes; this docs-only work did not create or use a Test database or claim DB-backed runtime verification.
