@@ -480,19 +480,58 @@ export class TreasuryRepository {
 
   async getRevenue(): Promise<{ items: TreasuryRevenueSource[]; total_24h_wld: string; total_7d_wld: string; total_30d_wld: string }> {
     const taxableRates = AUTHORITATIVE_TAX_RATES.filter((r) => !r.is_exempt);
-    const items: TreasuryRevenueSource[] = taxableRates.map((r) => ({
-      category: r.category,
-      category_ko: r.category_ko,
-      amount_24h_wld: '0',
-      amount_7d_wld: '0',
-      amount_30d_wld: '0',
-    }));
+
+    const stockStats = await this.pool.query<{ wld_24h: string; wld_7d: string; wld_30d: string }>(`
+      SELECT
+        coalesce(sum(CASE WHEN created_at >= clock_timestamp() - interval '24 hours' THEN tax_amount ELSE 0 END), 0)::bigint::text AS wld_24h,
+        coalesce(sum(CASE WHEN created_at >= clock_timestamp() - interval '7 days' THEN tax_amount ELSE 0 END), 0)::bigint::text AS wld_7d,
+        coalesce(sum(CASE WHEN created_at >= clock_timestamp() - interval '30 days' THEN tax_amount ELSE 0 END), 0)::bigint::text AS wld_30d
+      FROM public.virtual_stock_trades
+    `).catch(() => ({ rows: [{ wld_24h: '0', wld_7d: '0', wld_30d: '0' }] }));
+    const stockRow = stockStats.rows[0] ?? { wld_24h: '0', wld_7d: '0', wld_30d: '0' };
+
+    const marketStats = await this.pool.query<{ wld_24h: string; wld_7d: string; wld_30d: string }>(`
+      SELECT
+        coalesce(sum(CASE WHEN created_at >= clock_timestamp() - interval '24 hours' THEN listing_fee_wld ELSE 0 END), 0)::bigint::text AS wld_24h,
+        coalesce(sum(CASE WHEN created_at >= clock_timestamp() - interval '7 days' THEN listing_fee_wld ELSE 0 END), 0)::bigint::text AS wld_7d,
+        coalesce(sum(CASE WHEN created_at >= clock_timestamp() - interval '30 days' THEN listing_fee_wld ELSE 0 END), 0)::bigint::text AS wld_30d
+      FROM public.marketplace_listings
+    `).catch(() => ({ rows: [{ wld_24h: '0', wld_7d: '0', wld_30d: '0' }] }));
+    const marketRow = marketStats.rows[0] ?? { wld_24h: '0', wld_7d: '0', wld_30d: '0' };
+
+    let total24 = BigInt(stockRow.wld_24h) + BigInt(marketRow.wld_24h);
+    let total7 = BigInt(stockRow.wld_7d) + BigInt(marketRow.wld_7d);
+    let total30 = BigInt(stockRow.wld_30d) + BigInt(marketRow.wld_30d);
+
+    const items: TreasuryRevenueSource[] = taxableRates.map((r) => {
+      let amount_24h_wld = '0';
+      let amount_7d_wld = '0';
+      let amount_30d_wld = '0';
+
+      if (r.id === 'tax_stock_trade') {
+        amount_24h_wld = stockRow.wld_24h;
+        amount_7d_wld = stockRow.wld_7d;
+        amount_30d_wld = stockRow.wld_30d;
+      } else if (r.id === 'tax_marketplace_sale') {
+        amount_24h_wld = marketRow.wld_24h;
+        amount_7d_wld = marketRow.wld_7d;
+        amount_30d_wld = marketRow.wld_30d;
+      }
+
+      return {
+        category: r.category,
+        category_ko: r.category_ko,
+        amount_24h_wld,
+        amount_7d_wld,
+        amount_30d_wld,
+      };
+    });
 
     return {
       items,
-      total_24h_wld: '0',
-      total_7d_wld: '0',
-      total_30d_wld: '0',
+      total_24h_wld: total24.toString(),
+      total_7d_wld: total7.toString(),
+      total_30d_wld: total30.toString(),
     };
   }
 
