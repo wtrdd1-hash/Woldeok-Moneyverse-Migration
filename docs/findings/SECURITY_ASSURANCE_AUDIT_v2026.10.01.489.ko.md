@@ -2,10 +2,10 @@
 
 [English canonical](SECURITY_ASSURANCE_AUDIT_v2026.10.01.489.md) | **한국어**
 
-상태: **AUDIT / REMEDIATION_REQUIRED**  
-날짜: 2026-10-01 KST  
-서버 저장소 기준: `34dddce057df97ca745d5cf580b5eda12b1b6a8d`  
-Android 저장소 기준: `e24a2f8c9390092b0ae7aeaa3286ca8d799d91b3`  
+상태: **AUDIT / REMEDIATION_REQUIRED**
+날짜: 2026-10-01 KST
+서버 저장소 기준: `597c6029a8539d501e3c554582552cb761feab6c`
+Android 저장소 기준: `e24a2f8c9390092b0ae7aeaa3286ca8d799d91b3`
 감사 브랜치: `docs/security-audit-v2026.10.01.489`
 
 이 문서는 방어적 보안 보증 증거다. 공개 인터넷 대상 침투시험, Test 검증, Production 수정 또는 배포 성공을 주장하지 않는다.
@@ -110,3 +110,7 @@ Android는 `woldeok-moneyverse://oauth/callback`을 등록한다. 서버의 짧�
 ## 릴리스 상태
 
 v489에서는 런타임 수정이 없고 isolated Test/Production 승격도 수행하지 않았다. P1은 각각 전용 구현 브랜치에서 수정하고 isolated Test exact-SHA 검증 후 기존 무중단 절차로 Production에 승격해야 한다.
+
+## 최종 main 드리프트 재검토
+
+점검 중 `origin/main`이 먼저 `34dddce057df97ca745d5cf580b5eda12b1b6a8d`, 이후 `597c6029a8539d501e3c554582552cb761feab6c`로 이동했고 감사 브랜치에 두 변경을 모두 병합한 뒤 최종화했다. 마지막 런타임 변경은 플로팅 지원 채팅 위젯과 브라우저 합성 오디오였다. 검토한 지원 mutation은 CSRF 상태와 멱등키를 계속 사용하고 API path의 thread ID를 인코딩하며 message body를 raw HTML이 아닌 React 텍스트로 렌더링한다. 이 최종 드리프트 재검토에서 추가 P1은 발견되지 않았다.
