@@ -10,6 +10,14 @@
 
 This is an engineering compliance audit, not a substitute for Korean legal, tax, or GRAC advice.
 
+## v2026.09.30.487 superseding business-scope gate
+
+- Under the user's confirmed business-registration guidance, **direct product sales are not permitted in the current scope**.
+- Paid digital goods, subscriptions/ad removal, paid cosmetics, donations/memberships, paid API/B2B and user-paid fees are therefore BLOCKED regardless of whether e-commerce controls could technically be implemented.
+- Cash revenue is limited to reviewed advertising revenue. Expanding ad providers or entering direct ad-sales contracts still requires confirmation against the current registered business activity and tax treatment.
+- NTS one-person-media guidance recognizes platform-distributed advertising income and describes VAT treatment of foreign-platform consideration under stated conditions, but it is not treated as automatic classification of this website.
+- Detailed authority: `AD_ONLY_ADVERTISING_REVENUE_SPEC.md` and the v487 PROJECT_PLAN superseding gate.
+
 ## Executive decision
 Korea monetization is not ready for unrestricted activation. Advertising is already implemented and rendered on selected public Production pages. Real-money billing remains `UNVERIFIED`. Casino/chance has a P0 conflict: authoritative planning says Korea is BLOCKED until GRAC/rating + 19+ + legal/store evidence, while frontend source and the Production bundle contain affirmative compliance/regular-operation claims. No supporting certificate evidence was found.
 
