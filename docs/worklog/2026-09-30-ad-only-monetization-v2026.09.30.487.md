@@ -17,3 +17,22 @@ Scope: replace direct-sale/subscription monetization assumptions with advertisin
 2. Existing sensitive-route ad exclusions remain.
 3. Direct product sales and subscription billing remain disabled until a future business-scope/legal gate explicitly changes this decision.
 4. Revenue goals use observed Page RPM and pageviews, not assumed CPM promises.
+
+## Mid-work record
+- Mid-work `origin/main`: `85508db432cd525570e26bc1820b9e637a8140fa`; no drift from start.
+- Rechecked Google AdSense Page RPM, Auto Ads/Experiments, invalid traffic, publisher policies and NTS platform-ad-income tax guidance.
+- Added the advertising-only detailed specification and v487 delta in EN/KO.
+- Connected current authority through PROJECT_PLAN, integrated planning master, monetization/SEO spec, KR legal audit, documentation README and INDEX.
+- The v444 subscription/cosmetic-sale portfolio remains historical evidence; v487 supersedes it for current cash-revenue authority.
+
+## End verification
+- Final pre-integration `origin/main`: `85508db432cd525570e26bc1820b9e637a8140fa`; no concurrent drift.
+- Compare shows documentation-only changes; runtime/DB/frontend/backend code is unchanged.
+- Verified `subscriptions.enabled=false` and fail-closed paid-channel completion criteria in the current monetization specification.
+- Verified EN/KO pairs for PROJECT_PLAN v487, monetization spec v487, KR compliance audit v487 and the new ad-only detailed spec.
+- KRW 1,000,000/month remains an observed Page-RPM/PV target model, not a promised RPM or revenue result.
+- No Test/Production deployment is required for this docs-only scope.
+
+## End state
+READY_FOR_DOCS_PR
+
