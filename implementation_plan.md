@@ -5801,3 +5801,57 @@ flowchart TD
 - **디자인 시스템**: 100만+ 레퍼런스 기반 반응형 5대 규정 코드베이스 전역 적용.
 - **자동화 검증**: `scripts/audit-mobile-clipping-sentinel.mjs` 8대 뷰포트 21/21 ALL PASS 유지.
 - **무중단 운영**: Debian 13 프로덕션 서버 `active (running)`, 1,699개 PostgreSQL 활성 세션 100% 무손실 보존.
+---
+
+## 🚀 [v43 Specification] Floating Admin Support Chat Widget (전 화면 플로팅 관리자 1:1 문의 위젯)
+
+### 1. 🎯 개발 배경 및 사용자 요구사항
+- **사용자 요청**: "관리자 문의 채팅는 채팅아이콘처럼 모든화면에 조금하네 보이면 좋을 것 같아"
+- **핵심 목표**:
+  1. 사이트 내 모든 화면(메인 홈, 거래소, 지갑, 은행, 직업, 상점, 커뮤니티, 계정 등)에서 우측 하단에 컴팩트하고 세련된 플로팅 챗 버블(FloatingSupportChatWidget) 상시 노출.
+  2. 모바일 화면에서 하단 5대 고정 내비게이션 바(58px) 및 터치 영역과 겹치지 않도록 반응형 안전 오프셋(ottom-[74px] right-3.5 sm:bottom-6 sm:right-6) 적용.
+  3. 클릭 시 채널톡/인터콤 스타일의 380px 초경량 핀테크 플로팅 팝업 대화창 즉시 전개.
+  4. 비로그인 방문자에게는 친절한 로그인 안내 및 필수 가이드 바로가기 제공, 로그인 회원에게는 1:1 문의 즉시 작성 및 실시간 스레드 대화 지원.
+  5. 5대 스마트 편의 기능(카테고리 프리셋 칩, 실시간 운영팀 상태등, 엔터 즉시 전송, 자동 스크롤, 라이트/다크 테마 동기화) 완비.
+
+### 2. 🏗️ 아키텍처 및 위젯 상태 머신
+
+`mermaid
+stateDiagram-v2
+    [*] --> FloatingBubble: 모든 화면 우측 하단 상시 노출
+    FloatingBubble --> Closed: 기본 상태 (미확장)
+    FloatingBubble --> OpenDrawer: 클릭 시 팝오버 확장
+
+    state OpenDrawer {
+        [*] --> CheckAuth
+        CheckAuth --> GuestView: 비로그인 상태 (가이드 및 로그인 유도)
+        CheckAuth --> ThreadList: 로그인 상태 (문의 스레드 목록)
+
+        ThreadList --> NewInquiry: [새 문의하기] 버튼 클릭
+        NewInquiry --> SubmitInquiry: 제목/내용 입력 후 접수
+        SubmitInquiry --> LiveChatRoom: 접수 완료 즉시 대화방 진입
+
+        ThreadList --> LiveChatRoom: 특정 문의 클릭
+        LiveChatRoom --> ReplyMessage: 메시지 전송 및 실시간 갱신 (5초 폴링)
+        LiveChatRoom --> ThreadList: [← 목록으로] 클릭
+    }
+
+    OpenDrawer --> Closed: 닫기 (X) 또는 바깥 영역 클릭
+`
+
+### 3. 🛠️ 컴포넌트 및 파일별 상세 구현 내역
+1. **[NEW] rontend/src/components/floating-support-chat-widget.tsx**:
+   - 플로팅 트리거 버블 (size-12 sm:size-13, 앰버-프라이머리 그라데이션, Headphones / MessageSquare 아이콘, 실시간 알림 뱃지).
+   - 팝오버 챗 박스 (w-[calc(100vw-1.5rem)] max-w-[380px] h-[min(540px,calc(100dvh-6.5rem))], 글래스모피즘, 고대비 시맨틱 토큰).
+   - 3단계 뷰 전환 (guest, list, chat, 
+ew).
+   - 5대 카테고리 프리셋 칩 ([계정/인증], [WLD 원장], [주식/거래], [오류/버그], [기타/건의]).
+   - 5초 주기 지능형 자동 폴링 (대화창 열림 시) & 30초 백그라운드 갱신.
+2. **[MODIFY] rontend/src/components/site-shell.tsx**:
+   - SiteShell 내부에 <FloatingSupportChatWidget /> 배치하여 전 라우트 공통 렌더링.
+3. **[NEW] rontend/src/components/floating-support-chat-widget.test.tsx**:
+   - 위젯 렌더링, 버블 클릭 토글, 게스트/회원 상태 분기, 프리셋 선택 및 메시지 전송 모의 테스트 100% 검증.
+
+### 4. 📋 [Integrated Final Spec & Action Plan (v43)] 최종 통합 구현 명세
+- **반응형 보장**: 320px 극소 모바일에서도 바텀 내비게이션 간섭 0건, 가로 오버플로우 0건.
+- **원장 무결성**: /api/v1/support/threads 및 /api/v1/support/threads/:id/messages 백엔드 원장과 100% 원자적(atomic) 바인딩.

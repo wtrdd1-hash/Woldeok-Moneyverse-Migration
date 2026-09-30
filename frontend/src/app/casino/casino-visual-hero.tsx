@@ -27,17 +27,17 @@ export function CasinoVisualHero() {
             승패 연출은 결과를 바꾸지 않으며 실제 현금 환전은 지원하지 않습니다.
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2 min-[380px]:gap-3">
           {GAME_ART.map(({ icon: Icon, label, detail, className }) => (
             <div
               key={label}
-              className={`group rounded-3xl border border-white/10 bg-gradient-to-b ${className} p-4 text-center shadow-lg transition-transform hover:-translate-y-0.5`}
+              className={`group rounded-2xl min-[380px]:rounded-3xl border border-white/10 bg-gradient-to-b ${className} p-2 min-[380px]:p-4 text-center shadow-lg transition-transform hover:-translate-y-0.5 min-w-0`}
             >
-              <div className="mx-auto grid size-14 place-items-center rounded-2xl border border-white/10 bg-black/25 shadow-inner sm:size-16">
-                <Icon className="size-8 drop-shadow" strokeWidth={1.8} aria-hidden="true" />
+              <div className="mx-auto grid size-10 min-[380px]:size-14 place-items-center rounded-xl min-[380px]:rounded-2xl border border-white/10 bg-black/25 shadow-inner sm:size-16">
+                <Icon className="size-5 min-[380px]:size-8 drop-shadow" strokeWidth={1.8} aria-hidden="true" />
               </div>
-              <p className="mt-3 text-[11px] font-black tracking-[0.18em] text-white/65">{label}</p>
-              <p className="mt-1 text-sm font-black text-white">{detail}</p>
+              <p className="mt-2 min-[380px]:mt-3 text-[10px] min-[380px]:text-[11px] font-black tracking-[0.14em] min-[380px]:tracking-[0.18em] text-white/65 truncate">{label}</p>
+              <p className="mt-0.5 min-[380px]:mt-1 text-xs min-[380px]:text-sm font-black text-white truncate">{detail}</p>
             </div>
           ))}
         </div>

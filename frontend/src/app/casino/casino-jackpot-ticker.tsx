@@ -23,20 +23,20 @@ export function CasinoJackpotTicker({
     <Card className="rounded-2xl border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-purple-500/10 to-blue-500/15 p-1 shadow-md mb-6 overflow-hidden">
       <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:px-6">
         {/* 좌측: 잭팟 풀 메인 */}
-        <div className="flex items-center gap-3.5 w-full sm:w-auto">
-          <div className="flex size-12 sm:size-14 shrink-0 items-center justify-center rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-500 shadow-inner">
-            <Trophy className="size-6 sm:size-7 animate-bounce" />
+        <div className="flex items-center gap-2.5 min-[380px]:gap-3.5 w-full sm:w-auto min-w-0">
+          <div className="flex size-11 min-[380px]:size-12 sm:size-14 shrink-0 items-center justify-center rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-500 shadow-inner">
+            <Trophy className="size-5 sm:size-7 animate-bounce" />
           </div>
-          <div>
-            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400">
-              <Sparkles className="size-3.5" />
-              <span>실시간 카지노 잭팟 풀 (Live Jackpot Pool)</span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 dark:text-amber-400 truncate">
+              <Sparkles className="size-3.5 shrink-0" />
+              <span className="truncate">실시간 카지노 잭팟 풀 (Live Jackpot Pool)</span>
             </div>
-            <div className="flex items-baseline gap-1.5 mt-0.5">
-              <span className="text-2xl sm:text-3xl font-black font-mono tracking-tight text-foreground">
+            <div className="flex items-baseline gap-1.5 mt-0.5 min-w-0">
+              <span className="text-xl min-[360px]:text-2xl sm:text-3xl font-black font-mono tracking-tight text-foreground truncate">
                 {groupDigits(jackpot)}
               </span>
-              <span className="text-xs sm:text-sm font-black text-amber-500 font-mono">
+              <span className="text-xs sm:text-sm font-black text-amber-500 font-mono shrink-0">
                 WLD
               </span>
             </div>

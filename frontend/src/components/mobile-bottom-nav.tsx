@@ -22,6 +22,15 @@ export function MobileBottomNav() {
 
   if (pathname.startsWith('/admin')) return null;
 
+  // 개별 주식 거래 화면(/stocks/[symbol])에서는 하단 원터치 매수/매도 플로팅 액션 바에 집중하도록 전역 내비게이션 양보
+  const isStockSymbolPage =
+    pathname !== '/stocks' &&
+    pathname.startsWith('/stocks/') &&
+    !pathname.startsWith('/stocks/watchlist') &&
+    !pathname.startsWith('/stocks/alerts') &&
+    !pathname.startsWith('/stocks/compare');
+  if (isStockSymbolPage) return null;
+
   const tabs: readonly TabItem[] = [
     { href: '/', labelKo: '홈', labelEn: 'Home', icon: Home, matchPrefix: false },
     { href: '/stocks', labelKo: '거래소', labelEn: 'Stocks', icon: TrendingUp, matchPrefix: true },
