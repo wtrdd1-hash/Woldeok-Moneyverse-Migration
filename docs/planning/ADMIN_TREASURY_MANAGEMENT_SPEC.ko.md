@@ -1,6 +1,6 @@
 # 관리자 국고·세금·재정 운영 상세 기획서
 
-> 버전: v2026.10.01.488
+> 버전: v2026.10.01.492
 > 상태: 구현 지향형 Living 제품 기획서
 > 기준일: 2026-09-21
 > 갱신일: 2026-10-01
@@ -444,11 +444,11 @@ mutation:
 - New World는 territory tax를 upkeep·Town Project와 연결하여 걷힌 자원이 settlement 기능과 발전으로 보이는 구조를 사용했다.
 - Guild Wars 2는 Trading Post listing/exchange fee를 명확히 표시하고 guild treasury 기여가 눈에 보이는 upgrade/mission 해금으로 이어진다. Moneyverse는 사전고지 fee와 pooled public-project 결과를 채택한다.
 
-근거검토: [TREASURY_TAX_ENGAGEMENT_RESEARCH_REVIEW_v2026.10.01.488.ko.md](../findings/TREASURY_TAX_ENGAGEMENT_RESEARCH_REVIEW_v2026.10.01.488.ko.md).
+근거검토: [TREASURY_TAX_ENGAGEMENT_RESEARCH_REVIEW_v2026.10.01.492.ko.md](../findings/TREASURY_TAX_ENGAGEMENT_RESEARCH_REVIEW_v2026.10.01.492.ko.md).
 
 ## 23. 구현 순서
 
-- **v2026.10.01.488-01** — tax/fee event, exemption, quote, receipt 계약.
+- **v2026.10.01.492-01** — tax/fee event, exemption, quote, receipt 계약.
 - **-02** — treasury/recycling/program schema, DB actor boundary, append-only ledger path.
 - **-03** — 원자적 tax/fee settlement + duplicate/concurrency test.
 - **-04** — reserve state, recyclable surplus 계산, fail-closed Recycling Engine SHADOW.

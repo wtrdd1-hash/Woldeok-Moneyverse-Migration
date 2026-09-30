@@ -1,6 +1,6 @@
 # Administrator Treasury, Tax, and Fiscal Operations Specification
 
-> Version: v2026.10.01.488
+> Version: v2026.10.01.492
 > Status: implementation-oriented Living product specification
 > Baseline date: 2026-09-21
 > Updated: 2026-10-01
@@ -453,11 +453,11 @@ Design implications were rechecked against current/reference game-economy materi
 - New World connected territory taxes to upkeep and Town Projects, demonstrating the player-experience value of making collected funds visibly support settlement functions.
 - Guild Wars 2 uses explicit Trading Post listing/exchange fees and guild treasury contributions that unlock visible guild upgrades/missions; Moneyverse adopts transparent pre-settlement fees plus visible pooled-project outcomes.
 
-Evidence review: [TREASURY_TAX_ENGAGEMENT_RESEARCH_REVIEW_v2026.10.01.488.md](../findings/TREASURY_TAX_ENGAGEMENT_RESEARCH_REVIEW_v2026.10.01.488.md).
+Evidence review: [TREASURY_TAX_ENGAGEMENT_RESEARCH_REVIEW_v2026.10.01.492.md](../findings/TREASURY_TAX_ENGAGEMENT_RESEARCH_REVIEW_v2026.10.01.492.md).
 
 ## 23. Delivery sequence
 
-- **v2026.10.01.488-01** — tax/fee event, exemption, quote and receipt contract.
+- **v2026.10.01.492-01** — tax/fee event, exemption, quote and receipt contract.
 - **-02** — treasury/recycling/program schema, DB actor boundaries and append-only ledger paths.
 - **-03** — atomic tax/fee settlement plus duplicate/concurrency tests.
 - **-04** — reserve states, recyclable-surplus calculation and fail-closed Recycling Engine in SHADOW.

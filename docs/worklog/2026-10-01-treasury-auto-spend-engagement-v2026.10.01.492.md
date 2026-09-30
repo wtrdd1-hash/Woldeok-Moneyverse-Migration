@@ -1,8 +1,8 @@
-# v2026.10.01.488 — Treasury automatic spending & participation planning worklog
+# v2026.10.01.492 — Treasury automatic spending & participation planning worklog
 
 > Status: IN_PROGRESS
 > Date: 2026-10-01
-> Branch: `docs/treasury-auto-spend-engagement-v2026.10.01.488`
+> Branch: `docs/treasury-auto-spend-engagement-v2026.10.01.492`
 > Start `origin/main`: `9740265592a60ab3811f67af02950f2e84d764d1`
 > Scope: planning/documentation only; no runtime, DB, API, Test, or Production mutation is claimed.
 
