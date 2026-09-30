@@ -2,11 +2,20 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.25.444
+> Current integrated version: v2026.09.30.487
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Advertising-only cash monetization superseding gate — v2026.09.30.487 (2026-09-30)
+
+- **Current business constraint:** under the user's current business-registration guidance, direct product sales are not permitted. Until the registered business scope is expanded and tax/legal treatment is confirmed, **cash revenue is advertising-only**.
+- **Superseding scope:** the v444 ad-free/convenience subscription and paid-cosmetic plans below remain as historical planning evidence but are **BLOCKED under current cash-monetization authority**. Paid WLD/WDX, randomized items, casino value, user-paid marketplace fees, donations/memberships, paid API/B2B, affiliate and direct-sale revenue also remain blocked until explicitly authorized.
+- **KRW 1,000,000/month ad target:** using Google's Page RPM definition, `monthly ad revenue = pageviews / 1,000 × observed Page RPM`. Scenario examples: KRW 2,000 RPM requires about 500k PV; KRW 5,000 requires 200k; KRW 10,000 requires 100k; KRW 20,000 requires 50k. These are scenario inputs, not promised RPM.
+- **Growth method:** use qualified human traffic, Search Console index/search truth, original calculators/guides, relevant internal linking, EN/KO locale correctness, and measured AdSense Auto Ads/Experiments. Self-clicks, click encouragement, incentivized ad viewing, traffic exchanges, bot impressions and low-quality purchased traffic are prohibited.
+- **Ad safety boundary remains:** preserve existing exclusions for wallet/transfer/loan, transaction/order, casino/chance, account security, administrator action and private-data surfaces.
+- Detailed authority: [Advertising-Only Revenue Specification](AD_ONLY_ADVERTISING_REVENUE_SPEC.md) and [v487 planning delta](deltas/v2026.09.30.487.md). This is planning/docs only and claims no new ad setting, Test/Production deployment, tax classification, or KRW 1,000,000/month result.
 
 ## Monetization/revenue portfolio and evidence refresh — v2026.09.25.444 (2026-09-25)
 

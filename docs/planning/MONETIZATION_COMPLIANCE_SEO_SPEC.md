@@ -1,10 +1,21 @@
 # Woldeok Moneyverse — Monetization, Korea/US Compliance & Search Growth Specification
 
-> Version: v2026.09.25.444
+> Version: v2026.09.30.487
 > Status: Living implementation-oriented product specification
-> Date: 2026-09-25
+> Date: 2026-09-30
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`
 > Korean counterpart: [MONETIZATION_COMPLIANCE_SEO_SPEC.ko.md](MONETIZATION_COMPLIANCE_SEO_SPEC.ko.md)
+
+## v2026.09.30.487 advertising-only cash-revenue superseding gate
+
+The user's current business-registration guidance does not permit direct product sales; this constraint is now part of current monetization authority.
+
+- Cash revenue is **advertising-only** until the registered business scope and tax/legal treatment are explicitly expanded and reviewed.
+- Paid subscriptions/ad removal, digital goods/cosmetics, paid WLD/WDX, paid random items, paid casino value, user-paid marketplace fees, donations/memberships, paid API/B2B, affiliate/direct-sale revenue are BLOCKED.
+- The v444 mixed portfolio below remains research/historical evidence, not a currently permitted sales portfolio.
+- The KRW 1,000,000/month goal follows the observed-Page-RPM model in [Advertising-Only Revenue Specification](AD_ONLY_ADVERTISING_REVENUE_SPEC.md).
+- AdSense Auto Ads/Experiments may test ad load and formats, but revenue lift cannot override CWV, task completion, accidental-click, invalid-traffic and policy guardrails.
+- Direct sponsorship/ad sales are not automatically permitted merely because they are advertising; current registered-business activity and tax handling must be confirmed first.
 
 ## v2026.09.25.444 monetization/revenue evidence refresh
 
@@ -501,7 +512,7 @@ Modules:
 - contextual/personalized mode flags;
 - jurisdiction availability;
 - sponsor campaign disclosure preview;
-- subscription plan/price versions;
+- paid-channel blocked state and business-scope re-review gate;
 - privacy/consent version registry;
 - SEO page/indexability registry;
 - sitemap generation status;
@@ -523,8 +534,8 @@ ads.allowed_routes
 ads.blocked_routes
 ads.minor_personalization.enabled = false
 ads.slot.*
-subscriptions.enabled
-subscriptions.plan.*
+subscriptions.enabled = false
+subscriptions.business_scope_gate = BLOCKED
 privacy.region.KR.*
 privacy.region.US.*
 privacy.gpc.enabled
@@ -556,19 +567,16 @@ An ad feature is complete only when:
 - disable switch works;
 - test environment verification passes before runtime promotion.
 
-## 20. Definition of Done — subscription
+## 20. Definition of Done — paid-channel block
 
-A subscription is complete only when:
+Under the current business scope, subscription/product-sale completion means **remaining disabled**, not launching.
 
-- price/interval/renewal is disclosed before purchase;
-- consent evidence is stored;
-- cancellation is simple and tested;
-- refund/cancellation state is deterministic;
-- payment retries are idempotent;
-- duplicate purchase is prevented;
-- access grants/revocation reconcile with payment state;
-- EN/KO terms and help content are present;
-- jurisdiction launch gate is approved.
+- `subscriptions.enabled=false` or equivalent fail-closed policy;
+- no active paid SKU/price/checkout CTA in public UI/API;
+- no Production payment-provider/webhook path that creates a sale;
+- no cash-funded entitlement grants;
+- no admin-only toggle can bypass missing business-scope evidence;
+- any future enablement requires a new version and renewed business/tax/consumer-protection/payment Test gates.
 
 ## 21. Definition of Done — SEO
 
@@ -595,13 +603,13 @@ Before commercial launch, confirm:
 - terms identify virtual/game-only nature of WLD/WDX;
 - advertising disclosure rules are implemented;
 - creator/sponsor disclosure workflow exists;
-- paid-product price/refund/cancellation disclosures are ready;
+- paid products/subscriptions/direct sales are disabled under the current business scope;
 - age/minor handling is defined;
 - COPPA applicability is reviewed;
 - CCPA/CPRA applicability and rights handling are reviewed;
 - Korean PIPA/PIPC ad/privacy handling is reviewed;
-- Korean e-commerce/consumer rules for paid products are reviewed;
-- payment-provider terms are satisfied;
+- current advertising-only scope and future paid-channel unlock conditions are reviewed;
+- Production checkout/payment sale paths are disabled;
 - community reporting/removal obligations are reviewed;
 - accessibility risk is reviewed;
 - data retention/deletion behavior is operational, not just documented;
@@ -640,8 +648,8 @@ These sources are directional compliance/product evidence. Final launch interpre
 
 ### P1
 
-- ad-free subscription with simple cancellation;
-- sponsor campaign registry;
+- AdSense Page RPM/route/device/source dashboard;
+- Auto Ads/ad-load/format experiment registry and rollback;
 - Search Console operational dashboard/read model;
 - privacy preference center and GPC handling where applicable;
 - consent/version registry;
@@ -651,9 +659,9 @@ These sources are directional compliance/product evidence. Final launch interpre
 
 - personalized advertising only after legal/privacy approval;
 - jurisdiction-aware consent orchestration;
-- B2B sponsorship tooling;
-- advanced LTV/CAC attribution;
-- automated SEO regression checks in CI.
+- direct sponsor/ad-sales tooling only after business-scope/tax confirmation;
+- premium ad-management network eligibility/contract review;
+- ad-revenue attribution and automated SEO regression checks in CI.
 
 ## 25. Runtime/deployment note
 

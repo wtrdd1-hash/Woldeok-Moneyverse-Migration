@@ -25,6 +25,7 @@
 ### 03. 🌐 Growth & Programmatic SEO (pSEO) Engine
 1. **[pSEO 20,000+ Engine & Viral Growth Plan](planning/PRODUCT_GROWTH_PLAN.md)**
 2. **[Single Source of Truth Route Registry](../frontend/src/config/routes.config.ts)**
+3. **[Advertising-Only Revenue Specification v487](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md)** — direct-sale block, ad-only cash authority, KRW 1M Page-RPM/PV model, invalid-traffic and experiment gates
 
 ### 04. 📈 Virtual Stock Exchange & Market Dynamics
 1. **[Stock Portfolio & Real-time Orderbook Spec](2026-09-22-stocks-portfolio-and-trade-presets.md)**

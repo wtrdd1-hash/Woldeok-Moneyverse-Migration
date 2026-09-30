@@ -2,13 +2,21 @@
 
 **English canonical** | [한국어](KR_LEGAL_COMPLIANCE_AUDIT.ko.md)
 
-> Version: v2026.09.26.443
+> Version: v2026.09.30.487
 > Status: PLANNING / LEGAL REVIEW REQUIRED
 > Start `origin/main`: `6f025ced5239fc6bc8b365c31ad0fd59acf84dbc`
 > Mid-work `origin/main`: `6f025ced5239fc6bc8b365c31ad0fd59acf84dbc`
 > Runtime observed: Debian 13 Production backend/frontend active; `production-current=prod-v453`.
 
 This is an engineering compliance audit, not a substitute for Korean legal, tax, or GRAC advice.
+
+## v2026.09.30.487 superseding business-scope gate
+
+- Under the user's confirmed business-registration guidance, **direct product sales are not permitted in the current scope**.
+- Paid digital goods, subscriptions/ad removal, paid cosmetics, donations/memberships, paid API/B2B and user-paid fees are therefore BLOCKED regardless of whether e-commerce controls could technically be implemented.
+- Cash revenue is limited to reviewed advertising revenue. Expanding ad providers or entering direct ad-sales contracts still requires confirmation against the current registered business activity and tax treatment.
+- NTS one-person-media guidance recognizes platform-distributed advertising income and describes VAT treatment of foreign-platform consideration under stated conditions, but it is not treated as automatic classification of this website.
+- Detailed authority: `AD_ONLY_ADVERTISING_REVENUE_SPEC.md` and the v487 PROJECT_PLAN superseding gate.
 
 ## Executive decision
 Korea monetization is not ready for unrestricted activation. Advertising is already implemented and rendered on selected public Production pages. Real-money billing remains `UNVERIFIED`. Casino/chance has a P0 conflict: authoritative planning says Korea is BLOCKED until GRAC/rating + 19+ + legal/store evidence, while frontend source and the Production bundle contain affirmative compliance/regular-operation claims. No supporting certificate evidence was found.
@@ -43,7 +51,7 @@ Public Terms/Privacy exist; WLD is stated non-redeemable; consent is versioned/s
 
 ## Release gates
 1. KR ads: verified business/tax status + current privacy/overseas-transfer/ad-vendor evidence.
-2. KR paid goods/subscription: KR-LGL-443-03 + provider/store receipt/webhook/refund tests.
+2. KR paid goods/subscription: BLOCKED under the current business scope. Re-open KR-LGL-443-03 + provider/store receipt/webhook/refund tests only in a future version after verified business-scope expansion.
 3. KR casino/chance: BLOCK until authentic classification/rating + 19+ + legal/channel evidence; remove unsupported approval wording.
 4. Marketing: BLOCK until consent/suppression system exists.
 5. All gates are server-authoritative, versioned, audited and fail closed on missing/stale evidence.

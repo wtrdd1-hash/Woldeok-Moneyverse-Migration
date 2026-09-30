@@ -25,6 +25,7 @@
 ### 03. 🌐 트래픽 성장 & 프로그래매틱 SEO (pSEO) 엔진
 1. **[pSEO 20,000+ 엔진 및 바이럴 그로스 아키텍처](planning/PRODUCT_GROWTH_PLAN.ko.md)**: 2,000+ 국내/해외 종목 온디맨드 ISR, 카카오톡 1초 진단서 공유, 친구 초대(리퍼럴) 양방향 보상 규격
 2. **[단일 진실 공급원 라우트 레지스트리](../frontend/src/config/routes.config.ts)**: 500+개 공개 라우트 및 사이트맵 색인 매트릭스
+3. **[광고 전용 수익화 명세 v487](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md)**: 상품 직접판매 차단, 광고수익 전용 권위, 월 100만 원 Page RPM/PV 목표모델, invalid-traffic 및 광고실험 게이트
 
 ### 04. 📈 가상 주식 거래소 & 시장 역학
 1. **[주식 포트폴리오 & 실시간 호가창 사양서](2026-09-22-stocks-portfolio-and-trade-presets.ko.md)**: 10-Depth 오더북, 웹소켓 틱 플래시 펄스, 시장 감성 게이지

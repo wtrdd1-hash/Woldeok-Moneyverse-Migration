@@ -1,10 +1,21 @@
 # 월덕 머니버스 — 수익화·한국/미국 준수·검색 성장 명세
 
-> 버전: v2026.09.25.444
+> 버전: v2026.09.30.487
 > 상태: 구현 지향형 Living 제품 기획서
 > 기준일: 2026-09-25
 > 상위 문서: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`
 > 영문 기준 문서: [MONETIZATION_COMPLIANCE_SEO_SPEC.md](MONETIZATION_COMPLIANCE_SEO_SPEC.md)
+
+## v2026.09.30.487 광고 전용 현금수익 상위 게이트
+
+현재 사업자 안내 범위에서 직접 상품판매를 허용하지 않는다는 사용자 제약을 현재 수익화 권위에 반영한다.
+
+- 현금수익은 별도 사업범위 확대·세무/법률 확인 전까지 **광고수익 전용**이다.
+- 유료 구독/광고제거, 디지털 상품/코스메틱, 유료 WLD/WDX, 유료 확률형, 카지노 유료가치, 사용자 유료 마켓수수료, 후원/멤버십, 유료 API/B2B, 제휴/직접판매는 BLOCKED다.
+- 아래 v444의 혼합 포트폴리오는 연구·역사 기록으로 보존하지만 현행 허용 판매채널이 아니다.
+- 월 100만 원 목표는 [광고 전용 수익화 명세](AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md)의 실측 Page RPM 모델을 따른다.
+- AdSense Auto Ads/Experiments는 광고량·형식 최적화 후보지만 수익 상승만으로 채택하지 않고 CWV, 작업완료, 오클릭, invalid traffic, 정책상태를 함께 본다.
+- 직접 광고계약/스폰서십도 광고 성격이라 하더라도 현재 등록 사업활동·세무처리를 확인하기 전에는 자동 허용하지 않는다.
 
 ## v2026.09.25.444 수익화·수익 근거 재검토
 
@@ -353,7 +364,7 @@ SEO는 메타태그 작업이 아니라 사용자 획득 시스템이다.
 - contextual/personalized mode;
 - 지역별 허용 여부;
 - 스폰서 고지 preview;
-- 구독 플랜/가격 버전;
+- 유료채널 차단상태 및 사업범위 재검토 gate;
 - 개인정보/동의 버전;
 - SEO 색인 registry;
 - sitemap 상태;
@@ -375,8 +386,8 @@ ads.allowed_routes
 ads.blocked_routes
 ads.minor_personalization.enabled = false
 ads.slot.*
-subscriptions.enabled
-subscriptions.plan.*
+subscriptions.enabled = false
+subscriptions.business_scope_gate = BLOCKED
 privacy.region.KR.*
 privacy.region.US.*
 privacy.gpc.enabled
@@ -406,17 +417,16 @@ legal.feature_gate.*
 - disable switch 검증;
 - 런타임 구현은 테스트환경 검증 통과.
 
-## 20. 구독 완료조건
+## 20. 유료채널 차단 완료조건
 
-- 결제 전 가격/주기/갱신 공개;
-- 동의증거 저장;
-- 간단한 해지;
-- 환불/해지 상태 결정적 처리;
-- 결제 재시도 멱등성;
-- 중복구매 방지;
-- 결제상태와 권한 부여/회수 대사;
-- EN/KO 약관·도움말;
-- 국가별 출시 gate 승인.
+현행 사업자 범위에서 구독/상품판매 기능의 완료조건은 “출시”가 아니라 **비활성/차단 유지**다.
+
+- `subscriptions.enabled=false` 또는 동등한 fail-closed 정책;
+- 공개 UI/API에 활성 유료 SKU/가격/checkout CTA 없음;
+- 결제 provider/webhook이 운영에서 활성 판매경로를 만들지 않음;
+- 유료 entitlement를 현금 결제로 부여하지 않음;
+- 새 사업범위 증거 없이 관리자 토글만으로 활성화 불가;
+- 향후 해제 시 별도 버전으로 사업자/세무/소비자보호/결제 Test gate를 다시 통과.
 
 ## 21. SEO 완료조건
 
@@ -440,13 +450,13 @@ legal.feature_gate.*
 - 약관에서 WLD/WDX 가상·게임전용 성격 명확;
 - 광고/스폰서 고지 구현;
 - 크리에이터/후원 공개 절차;
-- 유료상품 가격/환불/해지 고지;
+- 유료상품/구독/직접판매가 현행 사업범위에서 비활성인지 확인;
 - 연령/미성년자 정책;
 - COPPA 적용 검토;
 - CCPA/CPRA 적용 및 권리처리 검토;
 - 한국 개인정보/맞춤광고 검토;
-- 한국 전자상거래/소비자보호 검토;
-- PG/결제사 약관 준수;
+- 현행 광고-only 범위와 향후 유료채널 해제 조건 검토;
+- 운영 결제/checkout 판매경로 비활성 확인;
 - 커뮤니티 신고/삭제 의무 검토;
 - 접근성 리스크 검토;
 - 데이터 보유/삭제가 문서가 아니라 실제 동작;
@@ -484,8 +494,8 @@ legal.feature_gate.*
 
 ### P1
 
-- 광고제거 구독 + 간단해지;
-- sponsor campaign registry;
+- AdSense Page RPM/route/device/source 대시보드;
+- Auto Ads/광고량/형식 실험 registry와 rollback;
 - Search Console 운영 read-model;
 - privacy preference center/GPC 지원(해당 시);
 - consent/version registry;
@@ -495,9 +505,9 @@ legal.feature_gate.*
 
 - 법률/개인정보 승인 후 personalized ads;
 - jurisdiction-aware consent;
-- B2B sponsorship tooling;
-- advanced LTV/CAC attribution;
-- CI SEO regression checks.
+- 현재 사업범위/세무 확인 후 직접 sponsor/ad-sales tooling;
+- premium ad-management network 자격/계약 검토;
+- 광고수익 attribution 및 CI SEO regression checks.
 
 ## 25. 배포 메모
 
