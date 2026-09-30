@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/cn';
 import { GscAnalyticsCard } from './gsc-analytics-card';
+import { AdMonetizationCard } from './ad-monetization-card';
 
 export interface CrawlerLog {
   readonly id: string;
@@ -361,6 +362,9 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
 
       {/* Google Search Console Search Analytics 30-Day Trend & Top Queries */}
       <GscAnalyticsCard />
+
+      {/* Google AdSense 광고 수익화 & 트래픽 관제 타워 */}
+      <AdMonetizationCard totalHits24h={initialData.totalHits24h} />
 
       {/* Bot Market Share Distribution */}
       <Card className="border-border/80 shadow-sm">

@@ -65,7 +65,8 @@ describe('SeoClientView', () => {
     render(<SeoClientView initialData={mockInitialData} />);
 
     expect(screen.getByText('24시간 봇 크롤링')).toBeTruthy();
-    expect(screen.getByText('124')).toBeTruthy();
+    expect(screen.getAllByText('124')[0]).toBeTruthy();
+    expect(screen.getByText('Google AdSense 광고 수익화 & 트래픽 관제 타워')).toBeTruthy();
     expect(screen.getByText('10대 가상 주식 색인율')).toBeTruthy();
     expect(screen.getByText('10 / 10')).toBeTruthy();
     expect(screen.getByText('5대 금융 가이드 색인율')).toBeTruthy();

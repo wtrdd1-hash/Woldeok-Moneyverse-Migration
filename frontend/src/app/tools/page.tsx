@@ -1,23 +1,27 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Calculator, TrendingUp, Landmark, Sparkles, ArrowRight, ShieldCheck, HelpCircle } from 'lucide-react';
+import { Calculator, TrendingUp, Landmark, Sparkles, ArrowRight, ShieldCheck, HelpCircle, Target, Coins } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { DailyAttendanceRoulette } from '@/components/retention/daily-attendance-roulette';
 import { DailyPredictionBattle } from '@/components/retention/daily-prediction-battle';
 import { ReferralSystem } from '@/components/viral/referral-system';
+import { PublicAdvertisement } from '@/components/public-advertisement';
 
 export const metadata: Metadata = {
-  title: '금융 & 시뮬레이터 웹 도구 허브 | 월덕 머니버스',
+  title: '금융 & 시뮬레이터 웹 도구 허브 (5대 계산기) | 월덕 머니버스',
   description:
-    '설치 없이 브라우저에서 바로 사용하는 3대 금융 계산기: 복리 예금·적금 이자 계산기, 주식 물타기·평단가 및 수익률 계산기, 직업별 일일 파밍 루틴 시뮬레이터를 무료로 이용하세요.',
+    '설치 없이 브라우저에서 바로 사용하는 5대 금융 계산기: 복리 예금·적금 이자, 주식 물타기·평단가, 목표 자산·FIRE 은퇴 시뮬레이터, 2026 가상자산 22% 세금 계산기, 직업 파밍 루틴을 100% 무료로 이용하세요.',
   keywords: [
     '금융 계산기',
     '복리 계산기',
     '적금 이자 계산기',
     '주식 물타기 계산기',
     '평단가 계산기',
-    '주식 수익률 계산기',
+    'FIRE 계산기',
+    '은퇴 자금 계산기',
+    '가상자산 세금 계산기',
+    '코인 양도소득세',
     '가상경제 시뮬레이터',
     '앱테크 파밍 계산기',
   ],
@@ -32,7 +36,7 @@ const TOOLS = [
     title: '복리 예금·적금 이자 계산기',
     badge: '인기 1위',
     badgeColor: 'bg-amber-500/10 text-amber-500 border-amber-500/30',
-    description: '일 복리, 월 복리, 연 복리 수익을 시뮬레이션하고 목표 자산 달성까지 걸리는 기간을 역산합니다.',
+    description: '일 복리, 월 복리, 연 복리 수익을 시뮬레이션하고 만기 수령액과 단리 대비 복리 초과분을 역산합니다.',
     href: '/tools/compound-calculator',
     icon: Landmark,
     iconColor: 'text-amber-500 bg-amber-500/10',
@@ -50,14 +54,36 @@ const TOOLS = [
     features: ['추가 매수 물타기 평단가', '목표 수익률 역산 매도가', '10대 가상 종목 실시간 연동', '수수료/세금 공제 계산'],
   },
   {
+    id: 'goal-wealth-calculator',
+    title: '목표 자산·은퇴·FIRE 달성 계산기',
+    badge: '신규 오픈',
+    badgeColor: 'bg-purple-500/10 text-purple-500 border-purple-500/30',
+    description: '월 저축액과 투자 수익률, 인플레이션을 반영하여 목표 자산 도달 시점과 4% 룰 안전 은퇴 생활비를 계산합니다.',
+    href: '/tools/goal-wealth-calculator',
+    icon: Target,
+    iconColor: 'text-purple-500 bg-purple-500/10',
+    features: ['목표 자산 도달 기간 역산', '트리니티 4% 룰 안전 인출액', '은퇴 자금 수명 시뮬레이션', '사회초년생/FIRE족 프리셋'],
+  },
+  {
+    id: 'tax-calculator',
+    title: '가상자산·금융투자 세금 계산기',
+    badge: '2026 세법',
+    badgeColor: 'bg-blue-500/10 text-blue-500 border-blue-500/30',
+    description: '가상자산 22% 양도소득세, 해외주식 기본공제 250만 원, 배당소득 15.4% 및 건보료 피부양자 영향을 정밀 계산합니다.',
+    href: '/tools/tax-calculator',
+    icon: Coins,
+    iconColor: 'text-blue-500 bg-blue-500/10',
+    features: ['가상자산 22% 단일세율', '손익 통산 및 기본공제 공제', '배당소득 2천만 원 초과 경고', '실전 합법 절세 가이드'],
+  },
+  {
     id: 'farming-calculator',
     title: '직업별 일일 파밍 수익 시뮬레이터',
     badge: '최적 루틴',
-    badgeColor: 'bg-blue-500/10 text-blue-500 border-blue-500/30',
+    badgeColor: 'bg-rose-500/10 text-rose-500 border-rose-500/30',
     description: '5대 전문 직업(개발자, 트레이더, 광부, 요리사, 보안관) 숙련도 레벨별 일일 WLD 기대 수익을 계산합니다.',
     href: '/tools/farming-calculator',
     icon: Calculator,
-    iconColor: 'text-blue-500 bg-blue-500/10',
+    iconColor: 'text-rose-500 bg-rose-500/10',
     features: ['직업별 숙련도 수익 곡선', '퀘스트/출석 복리 결합', '30일/1년 누적 자산 예측', '최적 업무 분배 가이드'],
   },
 ];
@@ -66,8 +92,8 @@ export default function ToolsHubPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: '월덕 머니버스 금융 & 시뮬레이터 도구 허브',
-    description: '설치 없이 바로 사용하는 3대 금융 웹 계산기 및 가상경제 시뮬레이터 모음',
+    name: '월덕 머니버스 금융 & 시뮬레이터 5대 도구 허브',
+    description: '설치 없이 바로 사용하는 5대 금융 웹 계산기 및 가상경제 시뮬레이터 모음',
     url: 'https://easy-scraping.com/tools',
     hasPart: TOOLS.map((t) => ({
       '@type': 'WebApplication',
@@ -91,18 +117,18 @@ export default function ToolsHubPage() {
       <div className="space-y-3 text-center sm:text-left">
         <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-500">
           <Sparkles className="size-3.5" />
-          <span>100% 무료 · 무설치 웹 툴킷</span>
+          <span>100% 무료 · 무설치 5대 금융 웹 툴킷</span>
         </div>
         <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-foreground">
           금융 & 시뮬레이터 웹 도구 허브
         </h1>
         <p className="text-sm sm:text-base text-muted-foreground max-w-2xl leading-relaxed">
-          가상 복리 예금, 주식 물타기 평단가 계산, 직업 파밍 기대 수익까지 — 복잡한 계산을 몇 번의 입력만으로 시각화하고 최적의 경제 전략을 설계하세요.
+          복리 예금, 주식 평단가, 은퇴 FIRE 목표 자산, 가상자산 22% 세금, 직업 파밍 기대 수익까지 — 복잡한 금융 수식을 브라우저에서 몇 번의 입력만으로 실시간 시각화하세요.
         </p>
       </div>
 
-      {/* Tool Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Tool Cards Grid (5-Tools Layout) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {TOOLS.map((tool) => {
           const Icon = tool.icon;
           return (
@@ -116,7 +142,7 @@ export default function ToolsHubPage() {
                     {tool.badge}
                   </span>
                 </div>
-                <CardTitle className="text-lg font-bold">{tool.title}</CardTitle>
+                <CardTitle className="text-base sm:text-lg font-bold">{tool.title}</CardTitle>
                 <CardDescription className="text-xs leading-relaxed text-muted-foreground">
                   {tool.description}
                 </CardDescription>
@@ -143,6 +169,9 @@ export default function ToolsHubPage() {
         })}
       </div>
 
+      {/* Public Advertisement Slot */}
+      <PublicAdvertisement />
+
       {/* Daily Retention: Attendance & Lucky Roulette */}
       <div className="space-y-6">
         <DailyAttendanceRoulette />
@@ -167,11 +196,11 @@ export default function ToolsHubPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-muted-foreground">
           <div className="space-y-1.5">
             <p className="font-semibold text-foreground">Q. 로그인이 필요한가요?</p>
-            <p className="leading-relaxed">아닙니다. 모든 계산 도구는 비회원 및 게스트 사용자도 제한 없이 무료로 즉시 사용할 수 있습니다.</p>
+            <p className="leading-relaxed">아닙니다. 5대 계산 도구는 비회원 및 게스트 사용자도 제한 없이 무료로 즉시 사용할 수 있습니다.</p>
           </div>
           <div className="space-y-1.5">
             <p className="font-semibold text-foreground">Q. 가상경제 WLD 수치와 현실 통화 계산이 호환되나요?</p>
-            <p className="leading-relaxed">네, 원화(KRW) 및 WLD 단위 모두 자유롭게 입력하여 이자율과 주식 수익률을 직관적으로 시뮬레이션할 수 있습니다.</p>
+            <p className="leading-relaxed">네, 원화(KRW) 및 WLD 단위 모두 자유롭게 입력하여 이자율, 목표 자산, 주식 수익률, 양도소득세를 직관적으로 시뮬레이션할 수 있습니다.</p>
           </div>
         </div>
       </div>

@@ -57,18 +57,20 @@ export function AdSenseAd({ publisherId, slot }: { readonly publisherId: string;
       frame = requestAnimationFrame(requestAdWhenSized);
     };
 
-    const sizeObserver = new ResizeObserver(scheduleRequest);
-    const statusObserver = new MutationObserver(syncStatus);
-    sizeObserver.observe(element);
-    statusObserver.observe(element, { attributes: true, attributeFilter: ['data-ad-status'] });
+    const sizeObserver = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(scheduleRequest) : null;
+    const statusObserver = typeof MutationObserver !== 'undefined' ? new MutationObserver(syncStatus) : null;
+
+    if (sizeObserver) sizeObserver.observe(element);
+    if (statusObserver) statusObserver.observe(element, { attributes: true, attributeFilter: ['data-ad-status'] });
+
     scheduleRequest();
     syncStatus();
 
     return () => {
       cancelAnimationFrame(frame);
       window.clearTimeout(timeout);
-      sizeObserver.disconnect();
-      statusObserver.disconnect();
+      if (sizeObserver) sizeObserver.disconnect();
+      if (statusObserver) statusObserver.disconnect();
     };
   }, []);
 
