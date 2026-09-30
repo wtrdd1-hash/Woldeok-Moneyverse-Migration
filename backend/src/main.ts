@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { raw } from 'express';
+import { json, raw, urlencoded } from 'express';
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
@@ -20,7 +20,9 @@ import { ActivityService } from './activity/activity.service';
 import { PG_POOL } from './core/pool.provider';
 import type { Queryable } from './core/db';
 import { ipBlockGate } from './security/ip-block.middleware';
+import { securityHeaders } from './security/security-headers.middleware';
 import { requestActivityTrail } from './activity/request-activity.middleware';
+import { AuctionGateway } from './marketplace/auction.gateway';
 
 async function bootstrap(): Promise<void> {
   const config = loadConfig(process.env);
@@ -30,6 +32,32 @@ async function bootstrap(): Promise<void> {
   // and its version tells an attacker which advisories to try first and buys
   // a legitimate client nothing.
   app.getHttpAdapter().getInstance().disable('x-powered-by');
+
+  // Enterprise Security Headers
+  app.use(securityHeaders({ isProduction: config.production }));
+
+  // Strict CORS policy
+  const allowedOrigins = [
+    new URL(config.baseUrl).origin,
+    'http://127.0.0.1:3000',
+    'http://localhost:3000',
+  ];
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'CF-Connecting-IP'],
+  });
+
+  // Global 1MB payload ceiling to prevent memory-exhaustion & ReDoS attacks
+  app.use(json({ limit: '1mb' }));
+  app.use(urlencoded({ extended: true, limit: '1mb' }));
 
   // Correlation first, so every audit row written while serving a request --
   // by the trail below or by a SECURITY DEFINER function three layers down --
@@ -126,11 +154,23 @@ async function bootstrap(): Promise<void> {
   // a second server would be a second door with none of them.
   app.get(MarketBroadcast, { strict: false })?.attach(
     (event, payload) => io.to(MARKET_ROOM).emit(event, payload),
-    // The room, not the whole server: `clientsCount` counts every visitor
-    // on every page, so the market was read once a second whenever anybody
-    // was anywhere on the site.
     () => (io.sockets.adapter.rooms.get(MARKET_ROOM)?.size ?? 0) > 0,
+    (room, event, payload) => io.to(room).emit(event, payload),
+    (room) => (io.sockets.adapter.rooms.get(room)?.size ?? 0) > 0,
   );
+
+  const auctionGateway = app.get(AuctionGateway, { strict: false });
+  if (auctionGateway) {
+    auctionGateway.onBid((payload) => {
+      io.to(`auction:${payload.auctionId}`).emit('auction:bid', payload);
+    });
+    auctionGateway.onAntiSniping((payload) => {
+      io.to(`auction:${payload.auctionId}`).emit('auction:extended', payload);
+    });
+    auctionGateway.onOutbid((payload) => {
+      io.to(`auction:${payload.auctionId}`).emit('auction:outbid', payload);
+    });
+  }
 
   // Loopback by default, not 0.0.0.0. This is an internal service; binding it
   // to every interface by default is how an "internal" service becomes

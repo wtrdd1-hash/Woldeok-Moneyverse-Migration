@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import type { Pool } from 'pg';
 import { PG_POOL } from '../core/pool.provider';
+import { safeFetch } from '../security/ssrf-defense';
 
 export interface CrawlerLogEntry {
   readonly id: string;
@@ -330,11 +331,10 @@ export class SeoService {
     const indexNowResponses = await Promise.all(
       indexNowEndpoints.map(async (endpoint) => {
         try {
-          const res = await fetch(endpoint, {
+          const res = await safeFetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json; charset=utf-8' },
             body: JSON.stringify(indexNowPayload),
-            signal: AbortSignal.timeout(5000),
           });
           return {
             endpoint,
@@ -355,9 +355,8 @@ export class SeoService {
     let googlePingStatus = 200;
     try {
       const pingUrl = `https://www.google.com/ping?sitemap=${encodeURIComponent(`${this.baseUrl}/sitemap.xml`)}`;
-      const gRes = await fetch(pingUrl, {
+      const gRes = await safeFetch(pingUrl, {
         method: 'GET',
-        signal: AbortSignal.timeout(5000),
       });
       googlePingStatus = gRes.status;
     } catch {

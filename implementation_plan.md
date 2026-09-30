@@ -1,6 +1,8 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v37)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v39)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v39**: 서버 전면 최적화 및 보안 취약점 원천 방어(SSRF 방어 엔진·사설망 IP 격리, 백엔드 보안 헤더·CORS 잠금, DoS/1MB Payload Limit, HTTP Keep-Alive & TCP 핸드셰이크 최적화, Slowloris 방어, SQLi/XSS 원천 차단) (+380, -0)
+- **v38**: 전 도메인 Socket.IO 실시간 브로드캐스팅 확장 & 고성능 프론트-백엔드 실시간 최적화 파이프라인(주식 실시간 호가/체결, 개인 지갑 실시간 잔액 동기화, 관리자 관제타워 라이브 메트릭, P2P 경매장 실시간 룸, useSyncExternalStore 렌더링 최적화 & 150ms 이벤트 배치) (+450, -0)
 - **v37**: 신규 유저 온보딩 및 인터랙티브 사이트 이용 가이드 허브(5단계 온보딩 로드맵, 1분 모의 자산 시뮬레이터, 온보딩 체크리스트 & 뱃지, 가상경제 SVG 순환도, 실시간 용어 사전 & 파워유저 치트시트) 풀스택 구축 (+320, -0)
 - **v36**: 홍종환 가상 주식(FNAK) 운영 DB 완전 영구 삭제 및 코드베이스 전역 참조 정리 (+110, -0)
 - **v35**: 사행성 배제 및 청소년 보호 정책 정합화 — 상단 GNB, 카테고리 메가 메뉴(플레이·시즌), 회원 메뉴 전역에서 카지노/럭키존(/casino) 항목 완전 영구 배제 (+40, -0)
@@ -5408,3 +5410,219 @@ flowchart TD
 - Next.js Turbopack 빌드 (`pnpm --filter @moneyverse/frontend build`).
 - `/guide` 페이지 200 OK 렌더링 검증.
 - 1,566개 활성 세션 100% 무손실 상태로 프로덕션 무중단 승격 (`prod-v483`).
+
+---
+
+## 🚀 [v38 Specification] Socket.IO 실시간 브로드캐스팅 & 고성능 프론트-백엔드 실시간 최적화 파이프라인 (누적 추가)
+
+### 1. 🎯 배경 및 아키텍처 개요
+- **사용자 요청**: "소켓 아이오 사용해서 정보 실시간 반영되게해줘 최적화도 진홰ㅐ응해"
+- **핵심 목표**:
+  - 기존 1초 주기 주식 가격 틱 및 로비 채팅 수준에 머물러 있던 Socket.IO 실시간 통신을 **주식 호가/체결, 개인 지갑 잔액, 관리자 실시간 관제 타워, P2P 경매 룸, 고객지원 1:1 채팅** 등 전 도메인으로 확장.
+  - 고빈도 패킷 전송 시 UI 프레임 드롭(Jank)과 React 19 리렌더링 폭풍을 차단하는 **5대 고성능 최적화(5-Pillar Real-Time Optimization Engine)** 탑재.
+
+```mermaid
+flowchart TD
+    subgraph Client ["Client Surfaces (Next.js 16 / React 19)"]
+        SiteSocket["acquireSiteSocket() (Tab-Shared Socket.IO Singleton)"]
+        subgraph Subscriptions ["Room Subscriptions & Stores"]
+            MStore["QuoteStore (useSyncExternalStore)<br/>room: market, stock:{ticker}"]
+            WStore["WalletStore (useSyncExternalStore)<br/>room: user:{userId}"]
+            AStore["AdminMetricStore<br/>room: admin:control-tower"]
+            PStore["AuctionStore<br/>room: auction:{id}"]
+        end
+        UI_Stock["실시간 주식 호가창 / 체결창"]
+        UI_Wallet["지갑 잔액 & 토스트 알림"]
+        UI_Admin["관리자 관제 대시보드"]
+        UI_Auction["P2P 경매 입찰창"]
+    end
+
+    subgraph Gateway ["Socket.IO Gateway & Buffer (NestJS Backend)"]
+        IOServer["Socket.IO Server (attachLobby & Gateways)"]
+        Batcher["150ms Event Throttler / Batch Buffer"]
+        RoomManager["Room Adapter & Session Authenticator"]
+    end
+
+    subgraph CoreEngine ["Backend Services & Events"]
+        StockService["Stock Price & Trade Matching Engine"]
+        WalletService["Ledger Mutation / Transfer Service"]
+        AdminService["Admin Metric Aggregator"]
+        AuctionGateway["Auction P2P Bidding Service"]
+    end
+
+    CoreEngine --> Batcher
+    Batcher --> IOServer
+    IOServer <-->|WebSocket / Polling Fallback| SiteSocket
+    SiteSocket --> Subscriptions
+    MStore --> UI_Stock
+    WStore --> UI_Wallet
+    AStore --> UI_Admin
+    PStore --> UI_Auction
+```
+
+---
+
+### 2. 5대 도메인 실시간 브로드캐스팅 확장 사양
+
+1. **주식 실시간 호가 & 체결 피드 (`stock:orderbook`, `stock:trade`)**:
+   - 룸: `stock:${symbol}` 또는 `orderbook:${symbol}`
+   - 브로드캐스트 이벤트:
+     - `stock:orderbook`: 5D/10D 호가 잔량 및 매수/매도 압력 비율 실시간 갱신 (150ms 배치).
+     - `stock:trade`: 실시간 체결 내역(체결가, 체결 수량, 매수/매도 구분, 체결 시각) 스트림.
+   - UI 피드백: 체결가 상승 시 Emerald 400ms 플래시 발광, 하락 시 Rose 400ms 플래시 발광.
+
+2. **개인 지갑 잔액 & 원장 트랜잭션 동기화 (`user:${userId}`)**:
+   - 룸: `user:${userId}` (세션 토큰 기반 자동 조인 및 인증 분리).
+   - 브로드캐스트 이벤트:
+     - `wallet:balance`: WLD 보유 잔액, 잠금 증거금, 순자산 실시간 갱신.
+     - `notification:push`: 송금 수신, 적금 만기, 주식 주문 체결, 배당금 입금 시 토스풍 인앱 토스트 즉시 렌더링.
+   - 효과: 유저가 다른 탭/디바이스에서 거래를 하거나 상대방이 송금했을 때 새로고침 없이 상단 헤더 및 지갑 화면 즉시 반영.
+
+3. **관리자 통합 관제 타워 실시간 메트릭 (`admin:control-tower`)**:
+   - 룸: `admin:control-tower` (Superadmin / Admin 권한 세션만 조인 가능).
+   - 브로드캐스트 이벤트:
+     - `admin:stats`: 실시간 활성 세션 수, M2 통화량, 24시간 거래량, 킬스위치 상태 변경 실시간 동기화.
+     - `admin:alert`: 긴급 Takedown 신고 접수, 이상 거래 감지 시 관제 타워 경고 배너 펄스.
+
+4. **P2P 경매장 실시간 룸 (`auction:${auctionId}`)**:
+   - 룸: `auction:${auctionId}`
+   - 브로드캐스트 이벤트:
+     - `auction:bid`: 신규 입찰자 및 최고 입찰가 실시간 갱신.
+     - `auction:extended`: 안티 스나이핑 발동(+2분 연장) 실시간 알림.
+     - `auction:outbid`: 이전 입찰자에게 상위 입찰 경고 알림.
+
+5. **고객지원 1:1 티켓 & 실시간 채팅 (`support:${threadId}`)**:
+   - 룸: `support:${threadId}`
+   - 브로드캐스트 이벤트: `support:message` 신규 상담 메시지 및 타이핑 인디케이터 즉시 렌더링.
+
+---
+
+### 3. 5대 고성능 최적화 아키텍처 (5-Pillar Optimization)
+
+1. **룸 기반 타겟 격리 (Room-based Targeted Subscriptions)**:
+   - 전역 브로드캐스트(`io.emit`)를 지양하고, 해당 화면/종목을 열어둔 소켓만 `socket.join(room)`하여 불필요한 네트워크 트래픽 90% 이상 절감.
+2. **`useSyncExternalStore` 기반 React 19 리렌더링 바이패스**:
+   - React State 대신 메모리 Map 기반의 독립 싱글톤 Store를 사용.
+   - 실제로 값이 변경된 컴포넌트(특정 종목의 호가 행 등)만 선별 렌더링하여 초당 60프레임 무결점 유지.
+3. **150ms 이벤트 배치 & 디바운싱 (Event Batching & Coalescing)**:
+   - 고빈도로 발생하는 호가 틱 및 거래 체결을 150ms 윈도우 단위로 묶어(Coalesce) 단일 프레임으로 전달.
+4. **델타(Delta/Diff) 압축 페이로드**:
+   - 전체 오브젝트 대신 변경된 필드(`id`, `price`, `open`, `delta`)만 경량 JSON으로 전송.
+5. **지수 백오프 자동 재연결 & 시퀀스 중복 방지 (Sequence & Auto-Reconnect)**:
+   - 네트워크 단절 시 지수 백오프(Exponential Backoff)로 점진적 재연결 시도.
+   - 단절 구간 동안은 30초 SWR 폴링으로 안전한 Fallback 제공 및 시퀀스 넘버(`sequence`)를 통한 중복 패킷 무시.
+
+---
+
+### 4. 💡 자율적 기능 개선 및 혁신 제안 (5가지 AI 제안)
+1. **실시간 연결 상태 뱃지 (Live Socket Quality Indicator)**: 상단 헤더에 핑(Latency ms) 및 실시간 녹색 펄스 뱃지 노출.
+2. **사운드 피드백 (Web Audio Micro-Haptics)**: 주식 체결 및 경매 입찰 시 미세 클릭음/차임벨 선택적 재생 (On/Off 토글).
+3. **오프라인 큐 & 낙관적 UI (Optimistic Updates)**: 주문 제출 시 서버 응답 전 UI에 먼저 회색 상태로 즉시 반영 후 소켓 이벤트 수신 시 확정.
+4. **관리자 텔레메트리 뷰어 (`/admin/sockets`)**: 현재 연결된 소켓 수, 룸별 구독자 분포, 초당 패킷 처리량(PPS) 실시간 모니터링 탭 신설.
+5. **백그라운드 탭 절전 모드 (Visibility Throttling)**: 브라우저 탭이 백그라운드로 전환(`document.hidden`)되면 소켓 주기를 5초로 완화하여 배터리 및 CPU 절약.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan (v38)] 최종 통합 구현 명세
+### User Review Required
+- 실시간 소켓 도메인 범위 및 최적화 전략 확정.
+- 프론트엔드 `useSyncExternalStore` 훅 및 백엔드 룸 브로드캐스터 구현.
+
+### Proposed Changes
+1. **`backend/src/stock/market-broadcast.ts` & `backend/src/lobby/lobby.ts`**:
+   - 호가창 룸(`orderbook:${symbol}`) 및 유저 룸(`user:${userId}`) 브로드캐스트 이벤트 확장.
+2. **`backend/src/stock/stock.service.ts`**:
+   - 주식 주문 체결 및 호가 변동 시 Socket.IO 브로드캐스터 호출 바인딩.
+3. **`frontend/src/lib/site-socket.ts`**:
+   - 룸 구독/해제 헬퍼, 지수 백오프 재연결 로직 보강.
+4. **`frontend/src/lib/use-market-prices.tsx` & `frontend/src/lib/use-wallet-realtime.ts` (신규)**:
+   - `useSyncExternalStore` 기반 실시간 지갑 잔액 훅 및 주식 호가 훅 확장.
+5. **`frontend/src/app/stocks/[symbol]/stock-orderbook.tsx` & `frontend/src/components/site-header.tsx`**:
+   - 실시간 호가/체결 애니메이션 및 지갑 잔액 실시간 플래시 렌더링.
+
+### Verification Plan
+- 백엔드/프론트엔드 단위 테스트 (`pnpm test`).
+- Next.js 빌드 및 소켓 연결 테스트.
+- 1,566개 활성 세션 무손실 상태로 프로덕션 무중단 승격.
+
+---
+
+## 🛡️ [v39 Specification] 서버 전면 최적화 및 보안 취약점 원천 방어 아키텍처 (누적 추가)
+
+### 1. 🎯 목표 및 배경
+- **서버 성능 최적화**: HTTP Keep-Alive 풀링, Slowloris 타임아웃 방어, 1MB Payload 제한을 통한 ReDoS/메모리 고갈 차단, 이벤트 루프 지연 최소화.
+- **보안 취약점 전면 방어**:
+  1. **SSRF (Server-Side Request Forgery) 원천 방어**: 외부 URL 호출 서비스에 대해 사설망 IP 대역(10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 127.0.0.0/8, 169.254.169.254 AWS IMDS, ::1, Link-Local 등) 차단, 프로토콜 화이트리스트(`http:`, `https:`), DNS 사전 검증(Anti-DNS Rebinding) 엔진 탑재.
+  2. **백엔드 보안 헤더 강화**: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Strict-Transport-Security`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` 전역 주입.
+  3. **CORS 보안 잠금**: Credentialed Cross-Origin 공격 방지를 위해 허용된 Origin만 엄격하게 화이트리스트 처리.
+  4. **DoS / Payload Abuse 방어**: 전역 JSON/urlencoded Body Parser 크기를 1MB로 명시 제한 (이미지/미디어 원시 업로드는 전용 라우트에서 격리 수신).
+  5. **인젝션 및 XSS 방어**: 파라미터화 SQL 쿼리 및 DTO 화이트리스트 검증 무결성 보장.
+
+---
+
+### 2. 🛡️ 5대 보안 방어 및 최적화 아키텍처
+
+```mermaid
+flowchart TD
+    subgraph Ingress ["1. 인그레스 보안 & DoS 방어"]
+        A["클라이언트 요청"] --> B["IP Block & Rate Limit (TieredThrottler)"]
+        B --> C["Server Timeouts (Slowloris 방어: 8s Header, 20s Request, 1000 Sockets)"]
+        C --> D["1MB JSON Body Parser Limit (DoS/ReDoS 차단)"]
+    end
+
+    subgraph SecurityHeaders ["2. HTTP 보안 헤더 & CORS"]
+        D --> E["Security Headers Middleware<br/>(nosniff, DENY, HSTS, strict-origin)"]
+        E --> F["Strict CORS Whitelist (config.baseUrl)"]
+    end
+
+    subgraph CoreEngine ["3. 애플리케이션 & SSRF 방어 엔진"]
+        F --> G["NestJS Controller & Service"]
+        G --> H["Postgres Queryable (100% Parameterized SQL)"]
+        G --> I["SSRF Defense Engine (Anti-DNS Rebinding, Private IP Filter)"]
+    end
+
+    subgraph Egress ["4. 아웃바운드 트래픽"]
+        I -->|"안전 검증된 외부 URL"| J["외부 Webhook / OAuth / SEO Ping"]
+        I --x|"사설망 IP/메타데이터 (169.254.x, 127.x, 10.x)"| K["403 Forbidden 차단 & 보안 감사 기록"]
+    end
+
+    classDef ingress fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
+    classDef sec fill:#0f172a,stroke:#34d399,stroke-width:2px,color:#f8fafc;
+    classDef core fill:#1e1e2e,stroke:#a855f7,stroke-width:2px,color:#f8fafc;
+    classDef block fill:#450a0a,stroke:#f43f5e,stroke-width:2px,color:#f8fafc;
+    class A,B,C,D ingress;
+    class E,F sec;
+    class G,H,I core;
+    class K block;
+```
+
+---
+
+### 3. 💡 자율적 보안 & 최적화 혁신 제안 (5가지 AI 제안)
+1. **SSRF Safe Fetch 유틸리티 (`safeFetch`)**: DNS 사전 해석 및 사설망 IP 즉시 필터링으로 외부 요청 시 내부 메타데이터 탈취 원천 차단.
+2. **백엔드 보안 헤더 일체화 미들웨어 (`securityHeaders`)**: 프론트엔드와 동일한 엔터프라이즈급 보안 응답 헤더 백엔드 자동 주입.
+3. **엄격한 CORS 출처 제어**: 와일드카드 CORS를 원천 배제하고 `config.baseUrl` 및 내부 프록시만 명시적 승인.
+4. **전역 JSON Body Parser 1MB 제한**: 무제한 본문 전송으로 인한 메모리 고갈 공격 방어.
+5. **Slowloris 연결 지속 감시**: 유휴 연결 타임아웃 8초 및 최대 소켓 1,000개 하드 캡 유지.
+
+---
+
+## 📋 [Integrated Final Spec & Action Plan (v39)] 최종 통합 구현 명세
+### User Review Required
+- SSRF 방어 엔진 적용 대상 및 사설 IP 차단 정책.
+- 백엔드 보안 헤더 및 CORS 정책 강화.
+
+### Proposed Changes
+1. **`backend/src/security/ssrf-defense.ts` [NEW]**:
+   - 사설망 IP 대역, AWS IMDS, 루프백 차단 및 `assertSafeOutboundUrl`, `safeFetch` 구현.
+2. **`backend/src/security/ssrf-defense.test.ts` [NEW]**:
+   - SSRF 공격 패턴(127.0.0.1, 169.254.169.254, 10.0.0.1, DNS Rebinding) 차단 단위 테스트.
+3. **`backend/src/main.ts`**:
+   - 보안 헤더 미들웨어, 1MB JSON Body Parser Limit, 엄격한 CORS 화이트리스트 적용.
+4. **`backend/src/seo/seo.service.ts` & `backend/src/seo/seo-crawler-audit.service.ts`**:
+   - 외부 URL 호출 시 `assertSafeOutboundUrl` 연동.
+
+### Verification Plan
+- SSRF 단위 테스트 실행 (`pnpm test src/security/ssrf-defense.test.ts`).
+- 백엔드 및 프론트엔드 빌드 검증 (`pnpm build`).
+- 1,568개 활성 세션 보존 상태 확인.

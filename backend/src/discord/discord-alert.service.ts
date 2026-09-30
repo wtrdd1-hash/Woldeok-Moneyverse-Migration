@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger, type OnModuleDestroy, type OnModuleInit } f
 import type { Pool } from 'pg';
 import { PG_POOL } from '../core/pool.provider';
 import { queryRows } from '../core/db';
+import { safeFetch } from '../security/ssrf-defense';
 
 const CHANNEL_ID = '1542465347364589609';
 const CHECK_INTERVAL_MS = 5 * 60_000; // 5분 주기
@@ -81,11 +82,10 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
     // 1. 웹훅 URL 발송
     if (webhookUrl && webhookUrl.startsWith('https://discord.com/api/webhooks/')) {
       try {
-        const res = await fetch(webhookUrl, {
+        const res = await safeFetch(webhookUrl, {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: JSON.stringify(payload),
-          signal: AbortSignal.timeout(10_000),
         });
         if (res.ok) {
           this.logger.log(`Discord alert delivered via webhook to channel ${CHANNEL_ID}`);
@@ -100,7 +100,7 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
     // 2. 봇 토큰 채널 메시지 발송 폴백
     if (botToken) {
       try {
-        const res = await fetch(
+        const res = await safeFetch(
           `${DISCORD_API_ORIGIN}/api/v10/channels/${CHANNEL_ID}/messages`,
           {
             method: 'POST',
@@ -109,7 +109,6 @@ export class DiscordAlertService implements OnModuleInit, OnModuleDestroy {
               'content-type': 'application/json',
             },
             body: JSON.stringify(payload),
-            signal: AbortSignal.timeout(10_000),
           },
         );
         if (res.ok) {

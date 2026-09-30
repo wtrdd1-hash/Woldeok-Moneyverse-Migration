@@ -6,19 +6,17 @@ import { WalletController } from './wallet.controller';
 import { PostgresWalletRepository } from './wallet.repository';
 import { WalletService } from './wallet.service';
 
+import { MarketBroadcast } from '../stock/market-broadcast';
+
 @Module({
   imports: [AuthModule],
   controllers: [WalletController],
   providers: [
     {
-      // Null with no DATABASE_URL, so the controller answers 503 rather than
-      // crashing. WalletService is the only application-facing path for
-      // player economy writes; its repository calls the narrowly granted
-      // database commands, never raw ledger DML.
       provide: WalletService,
-      inject: [PG_POOL],
-      useFactory: (pool: Queryable | null) =>
-        pool ? new WalletService(new PostgresWalletRepository(pool)) : null,
+      inject: [PG_POOL, { token: MarketBroadcast, optional: true }],
+      useFactory: (pool: Queryable | null, broadcast?: MarketBroadcast) =>
+        pool ? new WalletService(new PostgresWalletRepository(pool), { broadcast }) : null,
     },
   ],
   exports: [WalletService],

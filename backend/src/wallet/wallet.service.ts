@@ -296,18 +296,26 @@ function normalizeTransactions(rows: readonly WalletTransactionRow[]): WalletTra
   });
 }
 
+import { MarketBroadcast } from '../stock/market-broadcast';
+
 /**
  * Application-facing wallet use cases. The authenticated user ID is a method
  * argument supplied by the session layer; no request DTO can choose a sender.
  */
+export interface WalletServiceOptions {
+  readonly clock?: (() => Date) | undefined;
+  readonly broadcast?: MarketBroadcast | undefined;
+}
+
 @Injectable()
 export class WalletService {
   readonly repository: WalletRepositoryLike;
   readonly clock: () => Date;
+  readonly broadcast?: MarketBroadcast | undefined;
 
   constructor(
     repository: WalletRepositoryLike,
-    { clock = () => new Date() }: { clock?: () => Date } = {},
+    { clock = () => new Date(), broadcast }: WalletServiceOptions = {},
   ) {
     const requiredMethods: readonly (keyof WalletRepositoryLike)[] = [
       'balancesForUser',
@@ -325,6 +333,7 @@ export class WalletService {
     if (typeof clock !== 'function') throw new TypeError('clock must be a function');
     this.repository = repository;
     this.clock = clock;
+    this.broadcast = broadcast;
   }
 
   async overview(
@@ -365,6 +374,30 @@ export class WalletService {
       amount: transferAmount,
       idempotencyKey: key,
     });
+
+    if (this.broadcast) {
+      try {
+        // Notify recipient in real-time
+        this.broadcast.publishUserNotification(recipient, {
+          id: `notif_recv_${Date.now()}`,
+          title: 'WLD 송금 도착',
+          message: `${Number(transferAmount).toLocaleString()} WLD가 도착했습니다.`,
+          type: 'success',
+          href: '/wallet',
+        });
+        // Notify sender in real-time
+        this.broadcast.publishUserNotification(actorUserId, {
+          id: `notif_send_${Date.now()}`,
+          title: 'WLD 송금 완료',
+          message: `${Number(transferAmount).toLocaleString()} WLD 송금이 완료되었습니다.`,
+          type: 'info',
+          href: '/wallet',
+        });
+      } catch {
+        // Non-blocking broadcast
+      }
+    }
+
     return { transactionId: requireUuid(receipt.transactionId, 'database transaction id') };
   }
 

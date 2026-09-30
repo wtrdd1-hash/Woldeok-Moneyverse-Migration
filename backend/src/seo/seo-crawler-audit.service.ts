@@ -1,6 +1,7 @@
 import { Injectable, Logger, Optional, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { DiscordAlertService } from '../discord/discord-alert.service';
 import { MONITORED_TARGET_URLS, SeoService } from './seo.service';
+import { safeFetch } from '../security/ssrf-defense';
 
 export interface CrawlAuditResult {
   readonly timestamp: string;
@@ -63,10 +64,9 @@ export class SeoCrawlerAuditService implements OnModuleInit, OnModuleDestroy {
     for (const target of MONITORED_TARGET_URLS) {
       try {
         const url = `${baseUrl}${target.path}`;
-        const res = await fetch(url, {
+        const res = await safeFetch(url, {
           method: 'HEAD',
           headers: { 'User-Agent': 'Moneyverse-SEO-Sentinel/1.0 (AuditBot)' },
-          signal: AbortSignal.timeout(5000),
         });
 
         if (res.ok || res.status === 200 || res.status === 307 || res.status === 308) {

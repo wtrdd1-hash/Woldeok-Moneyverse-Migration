@@ -47,6 +47,8 @@ import {
 import { useViewer } from '@/lib/use-viewer';
 import type { Viewer } from '@/lib/viewer-state';
 import { isAdministrator } from '@/lib/viewer-state';
+import { useRealtimeWallet } from '@/lib/use-wallet-realtime';
+import { groupDigits } from '@/lib/money';
 
 /**
  * The sticky masthead, in the shape the product has always had: wordmark on
@@ -334,6 +336,7 @@ function Group({
 }
 
 function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; readonly locale: Locale }) {
+  const realtimeWallet = useRealtimeWallet();
   if (!viewer) return <Skeleton className="h-11 w-20 sm:w-24 rounded-[10px] sm:rounded-[12px]" />;
 
   if (!viewer.signedIn) {
@@ -345,6 +348,7 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
   }
 
   const isAdmin = Boolean(viewer.consentCurrent && Array.isArray(viewer.adminRoles) && viewer.adminRoles.length > 0);
+  const liveWld = realtimeWallet.availableWld;
 
   return (
     <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -357,7 +361,13 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
       >
         <Link href="/wallet" className="flex items-center gap-1.5 font-mono">
           <Wallet className="size-4 text-primary" />
-          <span className="hidden 2xl:inline">{locale === 'en' ? 'Wallet' : '내 지갑'}</span>
+          {liveWld !== undefined ? (
+            <span className="tabular-nums font-bold tracking-tight">
+              {groupDigits(liveWld.toString())} <span className="text-[10px] opacity-80">WLD</span>
+            </span>
+          ) : (
+            <span className="hidden 2xl:inline">{locale === 'en' ? 'Wallet' : '내 지갑'}</span>
+          )}
         </Link>
       </Button>
 

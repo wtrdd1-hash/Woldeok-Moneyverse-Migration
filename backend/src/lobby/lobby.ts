@@ -4,6 +4,7 @@ import { createFixedWindowLimiter } from './rate-limiter';
 import type { FixedWindowLimiter } from './rate-limiter';
 import { requestClientKey } from '../security/rate-limit';
 import {
+  ADMIN_CONTROL_TOWER_ROOM,
   MARKET_ROOM,
   MARKET_SUBSCRIBE_EVENT,
   MARKET_UNSUBSCRIBE_EVENT,
@@ -97,17 +98,61 @@ export const MAX_MESSAGE_LENGTH = 180;
  * Separate from the connection handler so it can be tested without a server.
  */
 export interface MarketRoomSocket {
-  on(event: string, listener: () => void): unknown;
+  on(event: string, listener: (...args: any[]) => void): unknown;
   join(room: string): unknown;
   leave(room: string): unknown;
 }
 
-export function attachMarketRoom(socket: MarketRoomSocket): void {
+export function attachMarketRoom(socket: MarketRoomSocket, data?: { userId?: string | null; role?: string | null }): void {
   socket.on(MARKET_SUBSCRIBE_EVENT, () => {
     socket.join(MARKET_ROOM);
   });
   socket.on(MARKET_UNSUBSCRIBE_EVENT, () => {
     socket.leave(MARKET_ROOM);
+  });
+
+  // Orderbook depth subscription per stock
+  socket.on('orderbook:subscribe', (stockId: unknown) => {
+    if (typeof stockId === 'string' && stockId.length > 0 && stockId.length < 64) {
+      socket.join(`orderbook:${stockId}`);
+    }
+  });
+  socket.on('orderbook:unsubscribe', (stockId: unknown) => {
+    if (typeof stockId === 'string' && stockId.length > 0) {
+      socket.leave(`orderbook:${stockId}`);
+    }
+  });
+
+  // Stock trade feed subscription per stock
+  socket.on('stock:subscribe', (stockId: unknown) => {
+    if (typeof stockId === 'string' && stockId.length > 0 && stockId.length < 64) {
+      socket.join(`stock:${stockId}`);
+    }
+  });
+  socket.on('stock:unsubscribe', (stockId: unknown) => {
+    if (typeof stockId === 'string' && stockId.length > 0) {
+      socket.leave(`stock:${stockId}`);
+    }
+  });
+
+  // P2P Auction room subscription
+  socket.on('auction:subscribe', (auctionId: unknown) => {
+    if (typeof auctionId === 'string' && auctionId.length > 0 && auctionId.length < 64) {
+      socket.join(`auction:${auctionId}`);
+    }
+  });
+  socket.on('auction:unsubscribe', (auctionId: unknown) => {
+    if (typeof auctionId === 'string' && auctionId.length > 0) {
+      socket.leave(`auction:${auctionId}`);
+    }
+  });
+
+  // Admin Control Tower subscription
+  socket.on('admin:subscribe', () => {
+    socket.join(ADMIN_CONTROL_TOWER_ROOM);
+  });
+  socket.on('admin:unsubscribe', () => {
+    socket.leave(ADMIN_CONTROL_TOWER_ROOM);
   });
 }
 
@@ -239,10 +284,14 @@ export function attachLobby(httpServer: HttpServer, options: LobbyOptions): Serv
       data.countedUnauthenticatedConnection = true;
     }
 
+    if (data.userId) {
+      socket.join(`user:${data.userId}`);
+    }
+
     io.emit('online', authenticatedLobbyUsers);
     socket.emit('lobby:permissions', { canChat: data.canChat });
 
-    attachMarketRoom(socket);
+    attachMarketRoom(socket, data);
 
     socket.on('message', (text: unknown) => {
       void (async () => {

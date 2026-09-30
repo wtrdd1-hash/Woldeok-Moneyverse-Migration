@@ -101,26 +101,102 @@ const MarketStore = createContext<QuoteStore | null>(null);
 // A subscribe that never fires, for the case where there is no provider above.
 const NEVER = (_listener: () => void): (() => void) => () => undefined;
 
+export interface LiveOrderbookDepth {
+  readonly price: string;
+  readonly quantity: number;
+  readonly total: string;
+}
+
+export interface LiveOrderbookData {
+  readonly stockId: string;
+  readonly bids: readonly LiveOrderbookDepth[];
+  readonly asks: readonly LiveOrderbookDepth[];
+  readonly spreadBps: number;
+  readonly buyRatio: number;
+  readonly sellRatio: number;
+  readonly updatedAt?: string;
+}
+
+export interface LiveTradeData {
+  readonly id: string;
+  readonly stockId: string;
+  readonly price: string;
+  readonly quantity: number;
+  readonly side: 'BUY' | 'SELL';
+  readonly timestamp: string;
+}
+
+class OrderbookStore {
+  private readonly books = new Map<string, LiveOrderbookData>();
+  private readonly listeners = new Set<() => void>();
+
+  readonly subscribe = (listener: () => void): (() => void) => {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  };
+
+  readonly get = (stockId: string): LiveOrderbookData | undefined => this.books.get(stockId);
+
+  apply(payload: unknown): void {
+    if (!payload || typeof payload !== 'object') return;
+    const data = payload as LiveOrderbookData;
+    if (!data.stockId || !Array.isArray(data.bids) || !Array.isArray(data.asks)) return;
+
+    this.books.set(data.stockId, {
+      ...data,
+      updatedAt: new Date().toISOString(),
+    });
+    for (const listener of this.listeners) listener();
+  }
+}
+
+class TradeFeedStore {
+  private readonly trades = new Map<string, readonly LiveTradeData[]>();
+  private readonly listeners = new Set<() => void>();
+
+  readonly subscribe = (listener: () => void): (() => void) => {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  };
+
+  readonly get = (stockId: string): readonly LiveTradeData[] => this.trades.get(stockId) ?? [];
+
+  apply(payload: unknown): void {
+    if (!payload || typeof payload !== 'object') return;
+    const trade = payload as LiveTradeData;
+    if (!trade.stockId || !trade.price) return;
+
+    const current = this.trades.get(trade.stockId) ?? [];
+    const next = [trade, ...current.slice(0, 49)];
+    this.trades.set(trade.stockId, next);
+    for (const listener of this.listeners) listener();
+  }
+}
+
+const globalOrderbookStore = new OrderbookStore();
+const globalTradeStore = new TradeFeedStore();
+
 export function MarketPricesProvider({ children }: { readonly children: React.ReactNode }) {
   const [store] = useState(() => new QuoteStore());
 
   useEffect(() => {
-    // The socket the lobby already runs, shared. The prices go to a room
-    // rather than to everybody, so this asks to be in it — and asks again
-    // after a reconnect, because a reconnect is a new socket with no rooms.
     const socket = acquireSiteSocket();
     const apply = (payload: PricePayload) => store.apply(payload);
+    const applyOrderbook = (payload: unknown) => globalOrderbookStore.apply(payload);
+    const applyTrade = (payload: unknown) => globalTradeStore.apply(payload);
     const subscribe = () => socket.emit('market:subscribe');
 
     socket.on('market:prices', apply);
+    socket.on('stock:orderbook', applyOrderbook);
+    socket.on('stock:trade', applyTrade);
     socket.on('connect', subscribe);
     if (socket.connected) subscribe();
 
     return () => {
       socket.off('market:prices', apply);
+      socket.off('stock:orderbook', applyOrderbook);
+      socket.off('stock:trade', applyTrade);
       socket.off('connect', subscribe);
-      // Only the room is left. The socket is shared, and the lobby on the
-      // same page is still using it.
       if (socket.connected) socket.emit('market:unsubscribe');
       releaseSiteSocket();
     };
@@ -128,9 +204,6 @@ export function MarketPricesProvider({ children }: { readonly children: React.Re
 
   return (
     <MarketStore.Provider value={store}>
-      {/* Everything the socket does not carry: the float, holdings, the trade
-          history. None of it is worth a message a second; all of it is worth
-          asking about every half minute. */}
       <LiveRefresh everyMs={REFRESH_MS} />
       {children}
     </MarketStore.Provider>
@@ -139,11 +212,6 @@ export function MarketPricesProvider({ children }: { readonly children: React.Re
 
 /**
  * The live quote for one stock, or the one the server rendered.
- *
- * The fallback is what makes this safe to use in a page that must render
- * before any socket exists: the first paint is the server's figure, and the
- * socket only ever replaces it with a newer one. The server snapshot is
- * always undefined, so the server and the first client render agree.
  */
 export function useQuote(stockId: string, fallback: Quote): Quote {
   const store = useContext(MarketStore);
@@ -153,6 +221,49 @@ export function useQuote(stockId: string, fallback: Quote): Quote {
     () => undefined,
   );
   return live ?? fallback;
+}
+
+/**
+ * Live 5D/10D Orderbook hook with useSyncExternalStore isolation.
+ */
+export function useOrderbook(stockId: string, fallback?: LiveOrderbookData): LiveOrderbookData | undefined {
+  useEffect(() => {
+    if (!stockId) return;
+    const socket = acquireSiteSocket();
+    socket.emit('orderbook:subscribe', stockId);
+    return () => {
+      if (socket.connected) socket.emit('orderbook:unsubscribe', stockId);
+      releaseSiteSocket();
+    };
+  }, [stockId]);
+
+  const live = useSyncExternalStore(
+    globalOrderbookStore.subscribe,
+    () => globalOrderbookStore.get(stockId),
+    () => undefined,
+  );
+  return live ?? fallback;
+}
+
+/**
+ * Live Trade execution stream for one stock.
+ */
+export function useStockTrades(stockId: string): readonly LiveTradeData[] {
+  useEffect(() => {
+    if (!stockId) return;
+    const socket = acquireSiteSocket();
+    socket.emit('stock:subscribe', stockId);
+    return () => {
+      if (socket.connected) socket.emit('stock:unsubscribe', stockId);
+      releaseSiteSocket();
+    };
+  }, [stockId]);
+
+  return useSyncExternalStore(
+    globalTradeStore.subscribe,
+    () => globalTradeStore.get(stockId),
+    () => [],
+  );
 }
 
 /** Whether a live price has arrived at all, for the "실시간" marker. */

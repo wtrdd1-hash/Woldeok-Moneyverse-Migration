@@ -85,4 +85,106 @@ describe('MarketBroadcast', () => {
 
     expect(emit).not.toHaveBeenCalled();
   });
+
+  it('publishes trades immediately to stock specific room', () => {
+    const broadcast = new MarketBroadcast();
+    const roomEmit = vi.fn();
+    broadcast.attach(vi.fn(), () => true, roomEmit, () => true);
+
+    broadcast.publishTrade({
+      id: 'trade-1',
+      stockId: 'stk-100',
+      price: '150000',
+      quantity: 10,
+      side: 'BUY',
+      timestamp: '2026-09-30T14:00:00.000Z',
+    });
+
+    expect(roomEmit).toHaveBeenCalledTimes(1);
+    expect(roomEmit).toHaveBeenCalledWith('stock:stk-100', 'stock:trade', {
+      sequence: 1,
+      id: 'trade-1',
+      stockId: 'stk-100',
+      price: '150000',
+      quantity: 10,
+      side: 'BUY',
+      timestamp: '2026-09-30T14:00:00.000Z',
+    });
+  });
+
+  it('publishes user wallet balance and push notifications to user room', () => {
+    const broadcast = new MarketBroadcast();
+    const roomEmit = vi.fn();
+    broadcast.attach(vi.fn(), () => true, roomEmit, () => true);
+
+    broadcast.publishUserWallet({
+      userId: 'usr-42',
+      wldBalance: 50000,
+      availableWld: 40000,
+      lockedInStocksWld: 10000,
+      totalNetWorthWld: 60000,
+      lastUpdated: '2026-09-30T14:00:00.000Z',
+    });
+
+    broadcast.publishUserNotification('usr-42', {
+      id: 'notif-1',
+      title: '송금 완료',
+      message: '10,000 WLD가 입금되었습니다.',
+      type: 'success',
+    });
+
+    expect(roomEmit).toHaveBeenCalledTimes(2);
+    expect(roomEmit.mock.calls[0]?.[0]).toBe('user:usr-42');
+    expect(roomEmit.mock.calls[0]?.[1]).toBe('wallet:balance');
+    expect(roomEmit.mock.calls[1]?.[0]).toBe('user:usr-42');
+    expect(roomEmit.mock.calls[1]?.[1]).toBe('notification:push');
+  });
+
+  it('coalesces orderbook updates within 150ms batch window', async () => {
+    vi.useFakeTimers();
+    const broadcast = new MarketBroadcast();
+    const roomEmit = vi.fn();
+    broadcast.attach(vi.fn(), () => true, roomEmit, (room) => room === 'orderbook:stk-100');
+
+    // 3 rapid orderbook updates in the same window
+    broadcast.publishOrderbook({
+      stockId: 'stk-100',
+      bids: [{ price: '100', quantity: 1, total: '100' }],
+      asks: [{ price: '101', quantity: 1, total: '101' }],
+      spreadBps: 100,
+      buyRatio: 0.5,
+      sellRatio: 0.5,
+    });
+    broadcast.publishOrderbook({
+      stockId: 'stk-100',
+      bids: [{ price: '100', quantity: 2, total: '200' }],
+      asks: [{ price: '101', quantity: 1, total: '101' }],
+      spreadBps: 100,
+      buyRatio: 0.66,
+      sellRatio: 0.34,
+    });
+    broadcast.publishOrderbook({
+      stockId: 'stk-100',
+      bids: [{ price: '100', quantity: 5, total: '500' }],
+      asks: [{ price: '101', quantity: 2, total: '202' }],
+      spreadBps: 100,
+      buyRatio: 0.71,
+      sellRatio: 0.29,
+    });
+
+    // Before timer fires: 0 emits
+    expect(roomEmit).not.toHaveBeenCalled();
+
+    // Advance 150ms
+    vi.advanceTimersByTime(150);
+
+    // Only the latest state is emitted once
+    expect(roomEmit).toHaveBeenCalledTimes(1);
+    expect(roomEmit).toHaveBeenCalledWith('orderbook:stk-100', 'stock:orderbook', expect.objectContaining({
+      stockId: 'stk-100',
+      buyRatio: 0.71,
+    }));
+
+    vi.useRealTimers();
+  });
 });

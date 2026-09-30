@@ -68,12 +68,16 @@ export interface StockRepository {
   haltSettlementReceipts(userId: unknown): Promise<readonly StockHaltSettlementReceiptRow[]>;
 }
 
+import { MarketBroadcast } from './market-broadcast';
+
 @Injectable()
 export class StockService {
   readonly repository: StockRepository;
+  readonly broadcast?: MarketBroadcast | undefined;
 
-  constructor(repository: StockRepository) {
+  constructor(repository: StockRepository, broadcast?: MarketBroadcast | undefined) {
     this.repository = repository;
+    this.broadcast = broadcast;
   }
 
   list(): Promise<readonly StockMarketRow[]> {
@@ -130,8 +134,36 @@ export class StockService {
     return this.repository.sparkSeries(limit);
   }
 
-  trade(input: StockTradeInput): Promise<StockTradeResultRow> {
-    return this.repository.trade(input);
+  async trade(input: StockTradeInput): Promise<StockTradeResultRow> {
+    const result = await this.repository.trade(input);
+    if (this.broadcast && result) {
+      try {
+        const side = String(input.side).toLowerCase() === 'sell' ? 'SELL' : 'BUY';
+        const quantity = Number(input.quantity) || 0;
+        this.broadcast.publishTrade({
+          id: result.trade_id || `tr_${Date.now()}`,
+          stockId: String(input.stockId),
+          price: String(result.unit_price ?? result.current_price ?? '0'),
+          quantity,
+          side,
+          timestamp: new Date().toISOString(),
+        });
+
+        if (input.userId) {
+          const actionText = side === 'SELL' ? '매도' : '매수';
+          this.broadcast.publishUserNotification(String(input.userId), {
+            id: `notif_${Date.now()}`,
+            title: '주식 주문 체결 완료',
+            message: `${actionText} 주문이 정상 체결되었습니다. (수량: ${quantity}주)`,
+            type: 'success',
+            href: `/stocks/${input.stockId}`,
+          });
+        }
+      } catch {
+        // Broadcast failure should never fail the database transaction
+      }
+    }
+    return result;
   }
 
   create(input: StockCreateInput): Promise<StockCreateResultRow> {

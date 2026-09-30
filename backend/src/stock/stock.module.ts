@@ -7,8 +7,9 @@ import { NewspaperController } from './newspaper.controller';
 import { StockAlertController } from './stock-alert.controller';
 import { StockAlertRepository } from './stock-alert.repository';
 import { StockController } from './stock.controller';
-import { PostgresStockRepository } from './stock.repository';
 import { StockService } from './stock.service';
+import { PostgresStockRepository } from './stock.repository';
+import { MarketBroadcast } from './market-broadcast';
 
 @Module({
   imports: [AuthModule],
@@ -16,9 +17,9 @@ import { StockService } from './stock.service';
   providers: [
     {
       provide: StockService,
-      inject: [PG_POOL],
-      useFactory: (pool: Queryable | null) =>
-        pool ? new StockService(new PostgresStockRepository(pool)) : null,
+      inject: [PG_POOL, { token: MarketBroadcast, optional: true }],
+      useFactory: (pool: Queryable | null, broadcast?: MarketBroadcast) =>
+        pool ? new StockService(new PostgresStockRepository(pool), broadcast) : null,
     },
     {
       provide: StockAlertRepository,
