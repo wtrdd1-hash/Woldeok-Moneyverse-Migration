@@ -8,7 +8,7 @@
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
 
 ## v2026.10.01.492 — 2026-10-01 — 국고 재순환·세금 확장·참여도 루프
-- 기획/문서 전용 회차. 시작 `origin/main=9740265592a60ab3811f67af02950f2e84d764d1`, 중간/최신 rebase `origin/main=597c6029a8539d501e3c554582552cb761feab6c`; 격리 브랜치는 `docs/treasury-auto-spend-engagement-v2026.10.01.492`다. 동시 자동작업이 v491까지 사용 중인 것을 확인해 예약번호와 충돌하지 않도록 v492로 이동했다.
+- 기획/문서 전용 회차. 시작 `origin/main=9740265592a60ab3811f67af02950f2e84d764d1`, 1차 중간 rebase `origin/main=597c6029a8539d501e3c554582552cb761feab6c`, 최종 통합 전 rebase `origin/main=17cde78fab01ce4a4ef92376b1168d3ab588e9c9`; 격리 브랜치는 `docs/treasury-auto-spend-engagement-v2026.10.01.492`다. 동시 자동작업이 v491까지 사용 중인 것을 확인해 예약번호와 충돌하지 않도록 v492로 이동했다.
 - **TREASURY-492-01 / P1:** 국고로 걷힌 세금은 burn이 아니며 건강한 적격잉여금을 무기한 방치하지 않는다. reserve state와 사전승인 프로그램에만 cap 내 commitment하는 Treasury Recycling Engine을 추가했다.
 - **TREASURY-492-02 / P1:** 판매세와 listing/broker/reprice fee를 분리하고 초과이익 추가세 후보, luxury/property 인지세, 사업 확장/license, 시즌 한시 levy를 확장했다. starter/core 면세와 P2P 0% 기본값은 유지한다.
 - **TREASURY-492-03 / P1:** 재순환 국고를 도시/커뮤니티 matching, 검증 공공계약, 시즌 공공사업, 신규·복귀 활성화, fee relief, 제한형 안정화, civic weekly challenge, allowlist item buyback/salvage에 연결했다.

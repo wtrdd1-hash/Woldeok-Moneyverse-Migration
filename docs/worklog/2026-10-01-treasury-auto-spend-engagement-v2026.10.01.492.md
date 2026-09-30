@@ -46,3 +46,4 @@
 - Full suite result: **exit 0**. Backup/release checks 9/9; API contract generated 179 endpoints and matched; contract tests 31/31; database package tests 7/7; backend 1,037 passed with 391 DB-dependent tests skipped; frontend 949/949 passed.
 - Frontend emitted existing non-fatal React `act(...)` and jsdom canvas-not-implemented stderr during tests, but Vitest reported 160/160 test files and 949/949 tests passed.
 - DB-dependent skips are recorded as skips, not passes; this docs-only work did not create or use a Test database or claim DB-backed runtime verification.
+- Final pre-integration main recheck advanced again to `17cde78fab01ce4a4ef92376b1168d3ab588e9c9` via a direct-chat/floating-support frontend commit plus root `implementation_plan.md`. These files do not overlap the v492 maintained planning set; the branch rebased cleanly onto that exact main SHA.

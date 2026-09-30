@@ -46,3 +46,4 @@
 - 전체 결과: **exit 0**. backup/release 검사 9/9, API contract 179 endpoint 생성·정합, contract 31/31, database package 7/7, backend 1,037 pass + DB 의존 391 skip, frontend 949/949 pass.
 - frontend 테스트에서 기존 React `act(...)` 및 jsdom canvas 미구현 stderr 경고가 있었으나 Vitest 최종 결과는 160/160 test files, 949/949 tests pass였다.
 - DB 의존 항목은 pass가 아니라 skip으로 기록한다. 이번 문서-only 작업은 Test DB를 만들거나 사용하지 않았으며 DB-backed runtime 검증을 주장하지 않는다.
+- 최종 통합 전 main 재확인에서 `17cde78fab01ce4a4ef92376b1168d3ab588e9c9`까지 다시 전진했다. 변경은 direct-chat/floating-support frontend와 루트 `implementation_plan.md`이며 v492 유지 기획문서와 겹치지 않았다. 해당 정확 main SHA 위로 충돌 없이 다시 rebase했다.
