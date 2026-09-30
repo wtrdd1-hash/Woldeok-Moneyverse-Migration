@@ -289,12 +289,12 @@ export default async function StocksPage({
                       ? `Available ${groupDigits(row.shares_available)} shares · Total Issued ${groupDigits(row.shares_outstanding)} shares`
                       : `거래 가능 ${groupDigits(row.shares_available)}주 · 총 발행 ${groupDigits(row.shares_outstanding)}주`}
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
                     {row.halt_status === 'HALTED_SETTLED' || row.halt_status === 'HALTED_SETTLING' || row.halt_status === 'HALTING' ? (
                       <Button
                         disabled
                         variant="outline"
-                        className="min-h-11 border-destructive/30 text-destructive bg-destructive/5 cursor-not-allowed opacity-80"
+                        className="col-span-2 min-h-10 sm:min-h-11 border-destructive/30 text-destructive bg-destructive/5 cursor-not-allowed opacity-80 text-xs sm:text-sm font-bold"
                       >
                         {isEn ? 'Trading Halted' : '거래정지 (정산완료)'}
                       </Button>
@@ -318,15 +318,17 @@ export default async function StocksPage({
                         />
                       </>
                     )}
-                    <StockDetailDialog
-                      stockId={row.id}
-                      symbol={row.symbol}
-                      name={row.name}
-                      currentPrice={row.current_price}
-                      dayOpenPrice={row.day_open_price}
-                      available={row.shares_available}
-                    />
-                    <Button asChild variant="outline" className="min-h-11">
+                    <div className="col-span-2 sm:w-auto">
+                      <StockDetailDialog
+                        stockId={row.id}
+                        symbol={row.symbol}
+                        name={row.name}
+                        currentPrice={row.current_price}
+                        dayOpenPrice={row.day_open_price}
+                        available={row.shares_available}
+                      />
+                    </div>
+                    <Button asChild variant="outline" className="col-span-2 sm:w-auto min-h-10 sm:min-h-11 text-xs sm:text-sm font-bold">
                       <Link href={`/stocks/${encodeURIComponent(row.symbol)}`}>
                         {isEn ? 'Open hub' : '종목 허브'}
                       </Link>

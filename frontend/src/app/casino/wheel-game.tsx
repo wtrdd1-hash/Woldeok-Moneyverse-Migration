@@ -184,7 +184,7 @@ export function WheelGame({
           </div>
 
           {/* 원형 SVG 휠 */}
-          <div className="relative size-64 sm:size-72 p-2 flex items-center justify-center">
+          <div className="relative size-52 min-[360px]:size-64 sm:size-72 p-1.5 sm:p-2 flex items-center justify-center">
             <svg
               viewBox="0 0 300 300"
               className="size-full filter drop-shadow-xl"
@@ -272,13 +272,13 @@ export function WheelGame({
                 {choice === 'blue' ? '10칸 (50% 확률)' : choice === 'gold' ? '5칸 (25% 확률)' : '2칸 (10% 확률)'}
               </span>
             </Label>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 min-[340px]:grid-cols-3 gap-1.5 sm:gap-2">
               <button
                 type="button"
                 onClick={() => setChoice('blue')}
                 disabled={pending || isSpinning || exhausted}
                 className={cn(
-                  'h-16 flex flex-col items-center justify-center rounded-xl border p-2 transition-all text-xs font-bold',
+                  'h-14 min-[340px]:h-16 flex flex-col items-center justify-center rounded-xl border p-1.5 min-[340px]:p-2 transition-all text-xs font-bold',
                   choice === 'blue'
                     ? 'border-blue-500 bg-blue-500/15 text-blue-600 dark:text-blue-400 ring-2 ring-blue-500/30 shadow-sm'
                     : 'border-border/70 hover:bg-muted/40 text-muted-foreground'

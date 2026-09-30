@@ -281,19 +281,19 @@ export function LuckySlotsGame({
         </div>
 
         {/* 슬롯 릴 디스플레이 스테이지 */}
-        <div className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-black/70 p-6 shadow-inner">
-          <div className="flex justify-center gap-3 sm:gap-4">
+        <div className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-black/70 p-3.5 min-[380px]:p-6 shadow-inner">
+          <div className="flex justify-center gap-2 min-[380px]:gap-3 sm:gap-4">
             {reels.map((symbol, index) => (
               <div
                 key={index}
                 className={
-                  'flex size-20 sm:size-24 select-none flex-col items-center justify-center rounded-xl border-2 font-mono shadow-lg transition-transform ' +
+                  'flex size-16 min-[380px]:size-20 sm:size-24 select-none flex-col items-center justify-center rounded-xl border-2 font-mono shadow-lg transition-transform ' +
                   symbol.color +
                   (isBusy ? ' animate-pulse scale-95' : ' scale-100')
                 }
               >
-                <span className="text-3xl sm:text-4xl font-black">{symbol.label}</span>
-                <span className="mt-1 text-[10px] font-bold tracking-tight opacity-80">{symbol.name}</span>
+                <span className="text-2xl min-[380px]:text-3xl sm:text-4xl font-black">{symbol.label}</span>
+                <span className="mt-0.5 min-[380px]:mt-1 text-[9px] min-[380px]:text-[10px] font-bold tracking-tight opacity-80">{symbol.name}</span>
               </div>
             ))}
           </div>

@@ -429,18 +429,20 @@ export default async function StockHubPage({
 
 function Figure({ label, value }: { readonly label: string; readonly value: string }) {
   return (
-    <div className="rounded-lg border bg-surface p-3">
-      <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="tabular mt-1 text-xl font-bold">{groupDigits(value)}</dd>
+    <div className="rounded-lg border bg-surface p-2.5 sm:p-3 min-w-0 overflow-hidden">
+      <dt className="text-xs text-muted-foreground truncate">{label}</dt>
+      <dd className="tabular mt-1 text-sm min-[360px]:text-base sm:text-xl font-bold truncate [overflow-wrap:anywhere]">
+        {groupDigits(value)}
+      </dd>
     </div>
   );
 }
 
 function Position({ label, value }: { readonly label: string; readonly value: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-3 border-b pb-3 last:border-b-0 last:pb-0">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="tabular font-bold">{value}</dd>
+    <div className="flex items-center justify-between gap-2 sm:gap-3 border-b pb-3 last:border-b-0 last:pb-0 min-w-0">
+      <dt className="text-xs sm:text-sm text-muted-foreground shrink-0">{label}</dt>
+      <dd className="tabular font-bold text-xs sm:text-sm truncate min-w-0 text-right">{value}</dd>
     </div>
   );
 }

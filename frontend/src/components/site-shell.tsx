@@ -4,6 +4,7 @@ import { SiteHeader } from '@/components/site-header';
 import { MobileBottomNav } from '@/components/mobile-bottom-nav';
 import { ServiceImpactBanner } from '@/components/service-impact-banner';
 import { FintechTickerBar } from '@/components/fintech-ticker-bar';
+import { FloatingSupportChatWidget } from '@/components/floating-support-chat-widget';
 
 export function SiteShell({ children }: { readonly children: React.ReactNode }) {
   return (
@@ -20,6 +21,7 @@ export function SiteShell({ children }: { readonly children: React.ReactNode }) 
       </main>
       <SiteFooter />
       <MobileBottomNav />
+      <FloatingSupportChatWidget />
     </div>
   );
 }
