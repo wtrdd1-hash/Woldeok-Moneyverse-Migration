@@ -284,3 +284,13 @@ Every planning review records start/mid-work `origin/main` exact SHA, authority-
 - **KR-LGL-443-03 / P0 before paid sales:** paid digital goods/subscription remain blocked until KR seller identity/reporting, transaction disclosure, withdrawal/refund/cancellation and minor-contract controls are complete.
 - **KR-LGL-443-04..08 / P1:** age-assurance wording, AdSense/overseas-transfer governance, commercial-message consent, game-classification applicability and no-cash-exchange invariants require explicit evidence/gates.
 - Planning/audit only: no Production mutation, deployment, DB migration, GRAC approval, business registration or tax status is claimed.
+
+## v2026.09.30.487 — Advertising-only cash monetization
+- Start/mid-work `origin/main=85508db432cd525570e26bc1820b9e637a8140fa`; no drift at the recorded checkpoint.
+- User business-registration constraint: direct product sales are not permitted under the current guidance.
+- **Current cash-revenue authority:** reviewed advertising only. Paid subscriptions/ad removal, digital goods/cosmetics, paid WLD/WDX, paid random items/casino value, user-paid marketplace fees, donations/memberships, paid API/B2B, affiliate/direct-sale revenue are BLOCKED until a future business-scope/tax/legal authority change explicitly re-opens them.
+- **KRW 1,000,000/month ad target:** use observed Page RPM, not industry promises. `PV = 1,000,000 / PageRPM × 1,000`; scenario points are 500k PV at KRW 2k RPM, 200k at KRW 5k, 100k at KRW 10k, and 50k at KRW 20k.
+- Growth authority: qualified human traffic, Search Console/index truth, audience-first calculators/guides, correct locale structure, relevant internal links and measured AdSense experiments. Self-clicks, click encouragement, incentivized ad viewing, traffic exchanges, bot impressions and low-quality purchased traffic are prohibited.
+- New detailed authority: `AD_ONLY_ADVERTISING_REVENUE_SPEC.md`; PROJECT_PLAN and monetization/KR-compliance specs were updated with superseding v487 gates.
+- Official evidence refresh used Google AdSense Page RPM/Auto Ads/Experiments/invalid-traffic/publisher-policy documentation and NTS platform-ad-income tax guidance. NTS one-person-media guidance is not treated as automatic classification of this website.
+- Planning/docs only; no runtime, billing, AdSense-setting, Test, Production, tax-classification or revenue-result claim.
