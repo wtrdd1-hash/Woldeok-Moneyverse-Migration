@@ -48,7 +48,11 @@ export function computeOrderbook(currentPriceStr: string, depth: 5 | 10 = 5): Or
   let cumAsk = 0;
   const rawAsks = askSteps.map((step, idx) => {
     const askPrice = askPrices[idx] ?? Math.max(1, priceNum + step);
-    const volume = Math.round(50 + (step * 35) + (Math.sin(step * 1.5) * 20));
+    // 비패턴적 호가 잔량 모델: 현재가와 단계 해시 기반 현실적 유동성 분포
+    const hash = ((priceNum * 31 + step * 97) ^ (step * 13)) % 100;
+    const baseVol = 40 + step * 25;
+    const irregularNoise = Math.floor((hash / 100) * 45) - 20;
+    const volume = Math.max(10, baseVol + irregularNoise);
     return { step, price: askPrice.toString(), volume };
   });
 
@@ -64,7 +68,11 @@ export function computeOrderbook(currentPriceStr: string, depth: 5 | 10 = 5): Or
   let cumBid = 0;
   const rawBids = bidSteps.map((step, idx) => {
     const bidPrice = bidPrices[idx] ?? Math.max(1, priceNum - step);
-    const volume = Math.round(45 + (step * 38) + (Math.cos(step * 1.5) * 25));
+    // 비패턴적 호가 잔량 모델: 현재가와 단계 해시 기반 현실적 유동성 분포
+    const hash = ((priceNum * 47 + step * 83) ^ (step * 29)) % 100;
+    const baseVol = 45 + step * 22;
+    const irregularNoise = Math.floor((hash / 100) * 40) - 18;
+    const volume = Math.max(10, baseVol + irregularNoise);
     return { step, price: bidPrice.toString(), volume };
   });
 

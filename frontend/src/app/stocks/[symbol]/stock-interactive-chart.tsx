@@ -34,20 +34,46 @@ export function StockInteractiveChart({
   const isUp = diff >= 0;
   const changeRate = openNum > 0 ? ((diff / openNum) * 100).toFixed(2) : '0.00';
 
-  // 타임프레임별 모의 가격 데이터 포인트 생성 (SVG 시각화용)
+  // 종목 심볼 및 타임프레임 기반 결정론적 난수 생성기 (패턴성 원천 배제)
   const chartPoints = useMemo(() => {
     const count = timeframe === '1D' ? 24 : timeframe === '1W' ? 28 : timeframe === '1M' ? 30 : 36;
     const base = openNum;
     const target = priceNum;
     const points: { price: number; label: string }[] = [];
 
+    // 종목 심볼과 타임프레임으로 고유 시드 생성 (종목별 완전히 다른 궤적)
+    let seed = 2166136261 >>> 0;
+    const seedInput = `${symbol}:${timeframe}:${base}:${target}`;
+    for (let c = 0; c < seedInput.length; c++) {
+      seed = Math.imul(seed ^ seedInput.charCodeAt(c), 16777619);
+    }
+    const rng = () => {
+      seed += 0x6d2b79f5;
+      let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+
+    // Brownian Bridge: base에서 시작하여 target으로 수렴하는 비패턴적 랜덤워크
+    const diffSpread = Math.max(base * 0.035, Math.abs(target - base) * 0.4);
+    let currentWalk = 0;
+    const rawWalks: number[] = [0];
+
+    for (let i = 1; i < count - 1; i++) {
+      // 정규분포 근사 노이즈 (-1.0 ~ +1.0)
+      const shock = (rng() + rng() + rng() - 1.5) * 0.8;
+      currentWalk += shock * diffSpread * 0.4;
+      rawWalks.push(currentWalk);
+    }
+    rawWalks.push(0);
+
     for (let i = 0; i < count; i++) {
       const progress = i / (count - 1);
-      // 자연스러운 주가 변동 곡선 생성
-      const wave = Math.sin(i * 0.8) * (base * 0.02) + Math.cos(i * 1.5) * (base * 0.015);
-      const interpolated = base + (target - base) * progress + wave;
+      // 선형 기준선 + 브라운 브리지 편차 (끝점에서 정확히 0으로 수렴)
+      const bridgeAdjustment = (rawWalks[i] ?? 0) * (4 * progress * (1 - progress));
+      const interpolated = base + (target - base) * progress + bridgeAdjustment;
       const finalPrice = Math.max(1, Math.round(i === count - 1 ? target : interpolated));
-      
+
       let label = '';
       if (timeframe === '1D') {
         const hour = 9 + Math.floor((i / count) * 6.5);
@@ -64,7 +90,7 @@ export function StockInteractiveChart({
       points.push({ price: finalPrice, label });
     }
     return points;
-  }, [timeframe, openNum, priceNum]);
+  }, [timeframe, openNum, priceNum, symbol]);
 
   // SVG 좌표 계산
   const minVal = Math.min(...chartPoints.map((p) => p.price)) * 0.99;

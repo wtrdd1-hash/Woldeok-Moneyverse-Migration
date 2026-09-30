@@ -79,7 +79,7 @@ export class StatusCollectorRunner implements OnApplicationBootstrap, OnApplicat
             // the API is fine.
             webProbe(
               retryNetworkError(fetcher),
-              process.env.WEB_HEALTH_URL ?? 'http://frontend:3000/',
+              process.env.WEB_HEALTH_URL ?? 'http://127.0.0.1:3001/api/health',
             ),
           ],
           onError: (sourceKey, error) =>

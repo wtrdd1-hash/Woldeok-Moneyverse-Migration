@@ -14,11 +14,15 @@ export function proxy(request: NextRequest) {
   // On the miniPC, opt-in routing keeps the public Test hostname attached to
   // the isolated Test frontend without granting Test any Production secret or
   // changing the host Nginx configuration. Test itself leaves this variable
-  // unset, so it cannot rewrite back to itself.
   const testOrigin = process.env.TEST_FRONTEND_ORIGIN?.trim().replace(/\/$/, '');
   const requestHost = request.headers.get('host')?.split(':', 1)[0]?.toLowerCase();
   if (testOrigin && requestHost === 'test.easy-scraping.com') {
     return NextResponse.rewrite(new URL(`${pathname}${request.nextUrl.search}`, `${testOrigin}/`));
+  }
+
+  // Local health check endpoint for internal probes (Zero latency, no redirect)
+  if (pathname === '/api/health') {
+    return NextResponse.json({ status: 'ok', timestamp: new Date().toISOString() });
   }
 
   // The matcher includes static assets so Test build assets can be routed to
