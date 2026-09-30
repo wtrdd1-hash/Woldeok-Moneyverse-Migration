@@ -17,3 +17,22 @@
 2. 기존 민감 경로 광고 차단은 유지한다.
 3. 직접 상품판매와 구독 결제는 향후 사업범위/법률 게이트가 명시적으로 변경하기 전까지 비활성 상태를 유지한다.
 4. 월 수익 목표는 임의 CPM 약속이 아니라 실측 Page RPM과 pageview로 계산한다.
+
+## 중간 기록
+- 중간 `origin/main`: `85508db432cd525570e26bc1820b9e637a8140fa`; 시작 대비 drift 없음.
+- Google AdSense Page RPM, Auto Ads/Experiments, invalid traffic, publisher policy와 국세청 플랫폼 광고수익 세무 안내를 재확인했다.
+- 광고 전용 상세명세와 v487 delta를 영/한으로 추가했다.
+- PROJECT_PLAN, 통합 기획 마스터, 수익화/SEO 명세, 대한민국 법령 준수 감사, 문서 README/INDEX에 현재 권위를 연결했다.
+- 기존 v444의 구독/코스메틱 판매 계획은 역사 기록으로 보존하되 v487이 현행 현금수익 권위에서 상위 대체한다.
+
+## 종료 검증
+- 종료 직전 `origin/main`: `85508db432cd525570e26bc1820b9e637a8140fa`; 동시작업 drift 없음.
+- 비교 결과 변경은 문서 파일에만 존재하며 런타임/DB/프론트/백엔드 코드는 변경하지 않았다.
+- 현행 수익화 명세에서 `subscriptions.enabled=false`와 유료채널 fail-closed 완료조건을 확인했다.
+- 영/한 PROJECT_PLAN v487, 수익화 명세 v487, 대한민국 준수감사 v487, 광고전용 상세명세의 쌍을 확인했다.
+- 월 100만 원은 실측 Page RPM/PV 역산 목표로만 기록했으며 특정 RPM/매출을 보장하지 않는다.
+- Test/Production 배포는 문서-only 범위이므로 수행하지 않는다.
+
+## 종료 상태
+READY_FOR_DOCS_PR
+
