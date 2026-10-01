@@ -1,9 +1,9 @@
 # v2026.10.01.494 — P0 Admin Audit Member Search Hotfix Worklog
 
-**Status:** INVESTIGATING  
+**Status:** TEST ACCEPTED / PRODUCTION PREPARATION
 **Priority:** P0 / emergency  
 **GitHub issue:** #765  
-**Branch:** `hotfix/admin-audit-member-search-v2026.10.01.494`  
+**Branch:** `fix/admin-audit-member-search-v2026.10.01.494`
 **Start origin/main:** `91efe427cccbc012cd71c082d3c9caeb246dcf98`
 
 ## Start record
@@ -32,3 +32,23 @@ Initial source inspection confirms the page sends the member filter to `GET /api
 - Root cause: the UI did not clearly separate administrator-operation audit evidence from member activity telemetry, and the activity page did not expose the backend's existing `userId` filter.
 - TDD RED: new `admin-member-log-routing.test.ts` failed all 3 intended assertions before implementation.
 - GREEN: per-member activity filter/link/empty-state semantics implemented; targeted routing + admin mobile tests now pass 10/10.
+
+## Public isolated-Test acceptance
+
+Application source `7080738e656aca099d5c871278d178d69a984fcc` was materialized as `/srv/moneyverse-data/releases/test-v494` on the Debian 13 authoritative host. The public Test pointer was switched from `test-v489` to `test-v494`.
+
+Acceptance evidence:
+- backend `/health`: `{"status":"ok"}`;
+- public `/api/version`: exact application SHA `7080738e656aca099d5c871278d178d69a984fcc`;
+- public `/frontend-version`: the same exact application SHA;
+- public `/`: HTTP 200 with `X-Robots-Tag: noindex, nofollow`;
+- public `/status`: HTTP 200;
+- public catalog backend/database path: 146 catalog items;
+- changed administrator activity route reaches the expected login gate for an unauthenticated request;
+- no new fatal/critical/uncaught/unhandled service log entries during the acceptance window.
+
+The Test database's existing `seo_crawler_logs` missing-table warning was also observed on the pre-existing Test service before v494 and is therefore not attributed to this change.
+
+## GitHub control-plane note
+
+GitHub `Build Test Candidate` run `36819176468` is intentionally not reported as passing. Its policy job fails before runtime checks because current `.github/workflows/ci.yml` invokes `scripts/check-secrets.sh` and other shell helpers that were intentionally removed by commit `58cdcafd`, while current `.gitignore` prohibits tracked `*.sh` operational tooling. This unrelated main/control-plane inconsistency is tracked as GitHub issue #768; the purged scripts were not restored in this emergency runtime branch.
