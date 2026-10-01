@@ -21,6 +21,8 @@ describe('TreasuryService', () => {
     executeMarketBuybackBurn: vi.fn(),
     getCitizenTaxReceipt: vi.fn(),
     exportLedgerCsv: vi.fn(),
+    executeWealthTax: vi.fn(),
+    getWealthTaxAssessments: vi.fn(),
   } as unknown as TreasuryRepository;
 
   const service = new TreasuryService(mockRepo);
@@ -194,5 +196,32 @@ describe('TreasuryService', () => {
 
     const csv = await service.exportLedgerCsv();
     expect(csv).toContain('Timestamp,Vault,TxType');
+  });
+
+  it('delegates executeWealthTax to repository', async () => {
+    vi.mocked((mockRepo as any).executeWealthTax).mockResolvedValueOnce({
+      success: true,
+      assessed_count: 6,
+      total_collected_wld: '6069',
+    });
+
+    const res = await service.executeWealthTax(
+      '00000000-0000-0000-0000-000000000001',
+      '고액 자산가 누진적 부유세 정기 과세 집행',
+    );
+
+    expect(res).toEqual({ success: true, assessed_count: 6, total_collected_wld: '6069' });
+    expect((mockRepo as any).executeWealthTax).toHaveBeenCalledWith(
+      '00000000-0000-0000-0000-000000000001',
+      '고액 자산가 누진적 부유세 정기 과세 집행',
+    );
+  });
+
+  it('delegates getWealthTaxAssessments to repository', async () => {
+    vi.mocked((mockRepo as any).getWealthTaxAssessments).mockResolvedValueOnce([]);
+
+    const res = await service.getWealthTaxAssessments();
+    expect(res).toEqual([]);
+    expect((mockRepo as any).getWealthTaxAssessments).toHaveBeenCalled();
   });
 });

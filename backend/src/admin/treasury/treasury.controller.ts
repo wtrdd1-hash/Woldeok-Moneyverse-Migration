@@ -77,6 +77,13 @@ export class TreasuryListQueryDto {
 }
 
 
+export class TreasuryExecuteWealthTaxDto {
+  @ApiProperty({ required: false, example: '초고액 자산가 누진적 부유세 정기 과세 집행', description: '과세 감사 사유 (선택)' })
+  @IsOptional()
+  @IsString()
+  reason?: string;
+}
+
 export class TreasuryDistributeBudgetDto {
   @ApiProperty({ example: '1000000', description: '4분할 배정 총액 (정수 WLD)' })
   @IsString()
@@ -226,5 +233,21 @@ export class AdminTreasuryController {
       csv: await this.service.exportLedgerCsv(),
       exported_at: new Date().toISOString(),
     };
+  }
+
+  @Post('tax/wealth')
+  @ApiOperation({ summary: '초고액 자산가 누진적 부유세 과세 일괄 집행 (복지기금 전액 적립)' })
+  async executeWealthTax(
+    @Req() request: RequestWithSession,
+    @Body() dto: TreasuryExecuteWealthTaxDto,
+  ) {
+    const adminId = requireUserId(request);
+    return this.service.executeWealthTax(adminId, dto.reason);
+  }
+
+  @Get('tax/wealth')
+  @ApiOperation({ summary: '누진적 부유세 과세 대상 및 이력 조회' })
+  async getWealthTaxAssessments() {
+    return this.service.getWealthTaxAssessments();
   }
 }

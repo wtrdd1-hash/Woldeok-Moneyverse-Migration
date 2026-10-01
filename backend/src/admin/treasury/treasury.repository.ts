@@ -868,4 +868,33 @@ export class TreasuryRepository {
 
     return [headers.join(','), ...rows].join('\n');
   }
+
+  async executeWealthTax(adminId: string, reason: string): Promise<Record<string, unknown>> {
+    const res = await this.pool.query<{ result: Record<string, unknown> }>(
+      `SELECT public.treasury_execute_progressive_wealth_tax($1::uuid, $2) AS result`,
+      [adminId, reason],
+    );
+    return res.rows[0]?.result ?? { success: false };
+  }
+
+  async getWealthTaxAssessments(): Promise<Record<string, unknown>[]> {
+    const res = await this.pool.query(`
+      SELECT 
+        a.id,
+        a.user_id,
+        coalesce(u.username, left(a.user_id::text, 8)) AS username,
+        a.assessed_date,
+        a.total_wealth_wld,
+        a.taxable_excess_wld,
+        a.tax_amount_wld,
+        a.effective_rate_bps,
+        a.reason,
+        a.created_at
+      FROM public.treasury_wealth_tax_assessments a
+      LEFT JOIN public.users u ON u.id = a.user_id
+      ORDER BY a.created_at DESC
+      LIMIT 100
+    `);
+    return res.rows;
+  }
 }

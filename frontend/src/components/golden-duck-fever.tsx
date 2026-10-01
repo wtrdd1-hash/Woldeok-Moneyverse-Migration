@@ -20,7 +20,7 @@ export function GoldenDuckFever({
   isOpen = false,
   onClose,
   onClaimReward,
-  enableFloatingSpawn = true,
+  enableFloatingSpawn = false,
 }: GoldenDuckFeverProps) {
   const [internalOpen, setInternalOpen] = useState<boolean>(false);
   const isFeverActive = isOpen || internalOpen;
@@ -127,12 +127,12 @@ export function GoldenDuckFever({
       setMaxCombo((currentMax) => (nextCombo > currentMax ? nextCombo : currentMax));
 
       // Multiplier calculation (1.0x to 3.0x based on combo)
-      const multiplier = Math.min(3.0, 1.0 + Math.floor(nextCombo / 10) * 0.5);
-      const baseWld = 25;
+      const multiplier = Math.min(2.0, 1.0 + Math.floor(nextCombo / 10) * 0.2);
+      const baseWld = 10;
       const addedWld = Math.round(baseWld * multiplier);
       
       // Cap at 5,000 WLD per fever session
-      setEarnedWld((currentWld) => Math.min(5000, currentWld + addedWld));
+      setEarnedWld((currentWld) => Math.min(1000, currentWld + addedWld));
 
       // Particle effect
       const newParticle = {
@@ -153,7 +153,7 @@ export function GoldenDuckFever({
     setIsClaiming(true);
     setRequiresLogin(false);
 
-    const multiplier = Math.min(3.0, 1.0 + Math.floor(maxCombo / 10) * 0.5);
+    const multiplier = Math.min(2.0, 1.0 + Math.floor(maxCombo / 10) * 0.2);
     try {
       const res = await claimGoldenDuckAction(tapCount, multiplier);
       if (res.requiresLogin) {
@@ -247,7 +247,7 @@ export function GoldenDuckFever({
                 <Shield className="h-3.5 w-3.5 text-emerald-400" />
                 100% 무료 미니 시뮬레이터 (WLD 리워드)
               </span>
-              <span className="font-mono text-amber-400 font-bold">최대 5,000 WLD</span>
+              <span className="font-mono text-amber-400 font-bold">최대 1,000 WLD (1일 1회)</span>
             </div>
 
             {/* Main Interactive Fever Area */}

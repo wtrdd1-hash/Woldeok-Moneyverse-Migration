@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -18,7 +19,7 @@ import { CsrfGuard } from '../auth/guards/csrf.guard';
 import { SessionGuard } from '../auth/guards/session.guard';
 import type { RequestWithSession } from '../auth/session.context';
 import { requireUserId } from '../auth/session.context';
-import { DopamineRepository } from './dopamine.repository';
+import { DopamineInputError, DopamineRepository } from './dopamine.repository';
 
 export interface GoldenDuckClaimDto {
   readonly clickCount: number;
@@ -60,14 +61,14 @@ export class DopamineController {
 
   @Post('golden-duck')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Claim Golden Duck Fever clicking reward (up to 5,000 WLD)' })
+  @ApiOperation({ summary: 'Claim Golden Duck Fever clicking reward (up to 1,000 WLD, daily limit: 1)' })
   async claimGoldenDuck(
     @Req() request: RequestWithSession,
     @Body() body: GoldenDuckClaimDto,
   ) {
     const userId = requireUserId(request);
     const validClicks = Math.min(Math.max(1, body.clickCount || 1), 200);
-    const validMultiplier = Math.min(Math.max(1.0, body.comboMultiplier || 1.0), 3.0);
+    const validMultiplier = Math.min(Math.max(1.0, body.comboMultiplier || 1.0), 2.0);
     const key = body.idempotencyKey && UUID_RE.test(body.idempotencyKey)
       ? body.idempotencyKey
       : randomUUID();
@@ -81,13 +82,16 @@ export class DopamineController {
           comboMultiplier: validMultiplier,
         });
       } catch (error: unknown) {
+        if (error instanceof DopamineInputError) {
+          throw new BadRequestException(error.message);
+        }
         const msg = error instanceof Error ? error.message : String(error);
         throw new InternalServerErrorException(msg);
       }
     }
 
     // 저장소 미주입 환경 (테스트 등) 폴백
-    const rewardAmount = Math.min(5000, Math.floor(validClicks * 25 * validMultiplier));
+    const rewardAmount = Math.min(1000, Math.floor(validClicks * 10 * validMultiplier));
     return {
       success: true,
       userId,
@@ -251,4 +255,3 @@ export class DopamineController {
     };
   }
 }
-

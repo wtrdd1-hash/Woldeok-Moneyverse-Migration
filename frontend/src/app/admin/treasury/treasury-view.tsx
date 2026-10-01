@@ -21,6 +21,7 @@ import { TreasuryOperationsDialog } from './treasury-operations-dialog';
 import { TreasuryDisburseDialog } from './treasury-disburse-dialog';
 import { TreasuryBudgetDialog } from './treasury-budget-dialog';
 import { TreasuryBuybackDialog } from './treasury-buyback-dialog';
+import { TreasuryWealthTaxDialog } from './treasury-wealth-tax-dialog';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 
@@ -69,6 +70,8 @@ function txTypeBadge(type: string) {
       return <Badge className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px]">카지노 피구세</Badge>;
     case 'STOCK_SPECULATION_TAX':
       return <Badge className="bg-amber-700 hover:bg-amber-800 text-white text-[11px]">단타 투기세</Badge>;
+    case 'WEALTH_TAX_COLLECTION':
+      return <Badge className="bg-amber-600 hover:bg-amber-700 text-white text-[11px]">부유세 징수</Badge>;
     default:
       return <Badge variant="outline" className="text-[11px]">{type}</Badge>;
   }
@@ -537,6 +540,7 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
             <div className="flex flex-wrap items-center gap-2 shrink-0">
               <TreasuryBudgetDialog mainVault={overview.vaults.find((v) => v.code === 'VAULT_MAIN') ?? overview.vaults[0]} />
               <TreasuryBuybackDialog mainVault={overview.vaults.find((v) => v.code === 'VAULT_MAIN') ?? overview.vaults[0]} />
+              <TreasuryWealthTaxDialog />
               <TreasuryOperationsDialog vaults={overview.vaults} />
               <Button
                 variant="outline"

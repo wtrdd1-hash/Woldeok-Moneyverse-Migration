@@ -39,14 +39,14 @@ describe('GoldenDuckFever Component', () => {
     });
 
     expect(screen.getByText(/콤보/)).toBeDefined();
-    expect(screen.getByText('+25')).toBeDefined();
+    expect(screen.getByText('+10')).toBeDefined();
 
     // 2nd click
     act(() => {
       fireEvent.pointerDown(coinButton);
     });
 
-    expect(screen.getByText('+50')).toBeDefined();
+    expect(screen.getByText('+20')).toBeDefined();
   });
 
   it('transitions to finished screen when 10 seconds elapse', () => {
