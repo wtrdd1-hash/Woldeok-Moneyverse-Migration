@@ -1,8 +1,9 @@
-﻿﻿import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import { apiOrNull } from '@/lib/api';
 import { canonicalUrl } from '@/lib/seo';
 import { NewspaperView } from './newspaper-view';
 import type { MarketEvent, StockTickerItem } from './newspaper-view';
+import type { WeeklyBriefData } from './weekly-world-brief';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,13 +15,16 @@ export const metadata: Metadata = {
 };
 
 export default async function NewspaperPage() {
-  const [eventsResult, stocksResult] = await Promise.all([
+  const [eventsResult, stocksResult, weeklyBriefResult] = await Promise.all([
     apiOrNull<{ events: MarketEvent[] }>('/api/v1/stocks/market-events'),
     apiOrNull<{ stocks: StockTickerItem[] }>('/api/v1/stocks'),
+    apiOrNull<WeeklyBriefData>('/api/v1/newspaper/weekly-brief'),
   ]);
 
   const events: readonly MarketEvent[] = eventsResult?.events ?? [];
   const stocks: readonly StockTickerItem[] = stocksResult?.stocks ?? [];
+  const weeklyBrief = weeklyBriefResult ?? undefined;
 
-  return <NewspaperView events={events} stocks={stocks} />;
+  return <NewspaperView events={events} stocks={stocks} weeklyBrief={weeklyBrief} />;
 }
+

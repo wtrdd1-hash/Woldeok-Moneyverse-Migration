@@ -15,7 +15,7 @@ export class TreasuryService {
     return this.repository.getTaxRates();
   }
 
-  getBudgets() {
+  async getBudgets() {
     return this.repository.getBudgets();
   }
 
@@ -171,5 +171,13 @@ export class TreasuryService {
 
   async getWealthTaxAssessments() {
     return this.repository.getWealthTaxAssessments();
+  }
+
+  async createBackupSnapshot(adminId: string, provider?: string) {
+    return this.repository.createImmutableBackupSnapshot(adminId, provider);
+  }
+
+  async getBackupStatus() {
+    return this.repository.getBackupStatus();
   }
 }
