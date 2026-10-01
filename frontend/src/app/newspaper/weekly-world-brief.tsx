@@ -80,7 +80,7 @@ export const DEFAULT_WEEKLY_BRIEF: WeeklyBriefData = {
 export function WeeklyWorldBrief({
   data = DEFAULT_WEEKLY_BRIEF,
 }: {
-  readonly data?: WeeklyBriefData;
+  readonly data?: WeeklyBriefData | undefined;
 }) {
   return (
     <div className="space-y-6">

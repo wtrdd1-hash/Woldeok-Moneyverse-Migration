@@ -273,11 +273,11 @@ export default async function HomePage() {
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-              매일 1회 무료 룰렛을 돌리고 최대 1억 WLD 잭팟과 7일 연속 출석 스트릭 보상을 획득하세요.
+              매일 1회 무료 룰렛을 돌리고 최대 5,000 WLD 잭팟과 7일 연속 출석 스트릭 보상을 획득하세요.
             </p>
             <div className="mt-3 flex items-center gap-2 text-xs font-mono text-emerald-400">
               <Sparkles className="size-3.5" />
-              <span>오늘의 출석 보상: 10,000,000 WLD 대기 중</span>
+              <span>오늘의 출석 보상: 100 ~ 1,000 WLD 대기 중</span>
             </div>
           </div>
           <Button variant="outline" size="sm" asChild className="mt-4 w-full rounded-xl text-xs font-bold border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 min-h-[40px]">
@@ -296,7 +296,7 @@ export default async function HomePage() {
                 <h2 className="text-sm font-bold text-foreground">주가 예측 배팅</h2>
               </div>
               <Badge variant="secondary" className="text-[10px] font-bold text-blue-500 bg-blue-500/10">
-                상금 5,000만 WLD
+                상금 5,000 WLD 풀
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
@@ -398,7 +398,7 @@ export default async function HomePage() {
               <div className="p-3.5 rounded-xl border border-border/60 bg-muted/30 flex items-center justify-between">
                 <div>
                   <span className="text-xs font-bold text-foreground">시니어 프로그래머</span>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">업무 완료 시 +5,000,000 WLD 급여</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">업무 완료 시 +2,200 WLD 급여</p>
                 </div>
                 <Badge variant="secondary" className="font-mono text-xs font-bold">
                   Lv.4 마스터

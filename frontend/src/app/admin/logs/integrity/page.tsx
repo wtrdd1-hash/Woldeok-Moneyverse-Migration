@@ -17,6 +17,7 @@ import { formatMoment } from '@/lib/money';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../../admin-back';
 import { adminArea } from '../../areas';
+import { LogsSubNav } from '../logs-sub-nav';
 import type {
   AuditDisposition,
   AuditRetentionCategory,
@@ -38,21 +39,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/**
- * The trail's own accounting: is it intact, how long is it kept, and what was
- * done with what is past that.
- *
- * A hash chain nobody recomputes proves nothing — it only proves something
- * once somebody has recomputed it and the result is on record, which is why
- * every verification is written down here rather than printed and forgotten.
- *
- * Retention and disposition sit on the same page because they are the same
- * obligation seen from two ends: the published notice promises a period, and
- * this is where an operator says what happened when one ended. Nothing here
- * deletes an audit row — the application holds no privilege to — so a
- * disposition is a person's statement about work done elsewhere, with an
- * evidence hash over the rows it names.
- */
 export default async function AdminAuditIntegrityPage() {
   await requireAdminConsole(AREA.href);
 
@@ -68,15 +54,13 @@ export default async function AdminAuditIntegrityPage() {
 
   return (
     <div data-page="admin-logs-integrity" className="mv-page mv-page--admin grid gap-5">
-      <div className="flex flex-wrap items-center gap-1">
-        <AdminBack />
-        <Button asChild variant="ghost" className="w-fit text-muted-foreground">
-          <Link href="/admin/logs">감사 로그</Link>
-        </Button>
-      </div>
+      <AdminBack href="/admin/logs" label="감사 로그로" />
       <PageHeader eyebrow={AREA.eyebrow} title={AREA.title}>
         {AREA.summary}
       </PageHeader>
+
+      {/* Navigation Sub-Tabs */}
+      <LogsSubNav current="integrity" />
 
       <Card>
         <CardHeader>

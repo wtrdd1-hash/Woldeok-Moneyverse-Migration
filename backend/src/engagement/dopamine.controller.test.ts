@@ -11,7 +11,7 @@ describe('DopamineController - Golden Duck Fever', () => {
     },
   } as unknown as RequestWithSession;
 
-  it('calculates reward within 5,000 WLD bounds without repository', async () => {
+  it('calculates reward within 1,000 WLD bounds without repository', async () => {
     const controller = new DopamineController(null);
 
     const result = await controller.claimGoldenDuck(mockRequest, {
@@ -23,20 +23,20 @@ describe('DopamineController - Golden Duck Fever', () => {
     expect(result.userId).toBe(mockUserId);
     expect(result.clicks).toBe(50);
     expect(result.multiplier).toBe(2.0);
-    expect(result.rewardAmount).toBe(2500); // 50 * 25 * 2.0 = 2500
+    expect(result.rewardAmount).toBe(1000); // 50 * 10 * 2.0 = 1000
   });
 
-  it('caps reward at 5,000 WLD maximum', async () => {
+  it('caps reward at 1,000 WLD maximum', async () => {
     const controller = new DopamineController(null);
 
     const result = await controller.claimGoldenDuck(mockRequest, {
       clickCount: 200,
-      comboMultiplier: 3.0,
+      comboMultiplier: 2.0,
     });
 
-    expect(result.rewardAmount).toBe(5000); // capped at 5000
+    expect(result.rewardAmount).toBe(1000); // capped at 1000
     expect(result.clicks).toBe(200);
-    expect(result.multiplier).toBe(3.0);
+    expect(result.multiplier).toBe(2.0);
   });
 
   it('delegates to DopamineRepository when injected', async () => {
@@ -45,10 +45,10 @@ describe('DopamineController - Golden Duck Fever', () => {
         success: true,
         userId: mockUserId,
         transactionId: 'tx-1234',
-        rewardAmount: 3750,
+        rewardAmount: 1000,
         newBalance: '50000',
         clicks: 50,
-        multiplier: 3.0,
+        multiplier: 2.0,
         claimedAt: '2026-09-28T00:00:00.000Z',
       }),
     } as unknown as DopamineRepository;
@@ -57,7 +57,7 @@ describe('DopamineController - Golden Duck Fever', () => {
 
     const result = await controller.claimGoldenDuck(mockRequest, {
       clickCount: 50,
-      comboMultiplier: 3.0,
+      comboMultiplier: 2.0,
       idempotencyKey: 'a1b2c3d4-e5f6-4a1b-8c2d-3e4f5a6b7c8d',
     });
 
@@ -65,9 +65,9 @@ describe('DopamineController - Golden Duck Fever', () => {
       actorUserId: mockUserId,
       idempotencyKey: 'a1b2c3d4-e5f6-4a1b-8c2d-3e4f5a6b7c8d',
       clickCount: 50,
-      comboMultiplier: 3.0,
+      comboMultiplier: 2.0,
     });
-    expect(result.rewardAmount).toBe(3750);
+    expect(result.rewardAmount).toBe(1000);
     expect(result.newBalance).toBe('50000');
   });
 });

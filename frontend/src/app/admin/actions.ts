@@ -701,3 +701,36 @@ export async function executeMarketBuybackBurnAction(
     return failure(error, '역매수 영구소각 집행에 실패했습니다. 국고 잔액 및 매물 상태를 확인해 주세요.');
   }
 }
+
+export async function executeWealthTaxAction(
+  _previous: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const reason = formData.get('reason');
+  if (typeof reason !== 'string' || reason.trim().length < 10) {
+    return { status: 'error', message: '부자 과세 감사 사유를 10자 이상 구체적으로 입력해 주세요.' };
+  }
+
+  try {
+    const res = await mutate<{
+      success: boolean;
+      assessed_count: number;
+      total_collected_wld: string;
+      welfare_balance_after: string;
+    }>('/api/v1/admin/treasury/tax/wealth', {
+      method: 'POST',
+      body: {
+        reason: reason.trim(),
+      },
+    });
+
+    revalidatePath('/admin/treasury');
+    revalidatePath('/wallet');
+    return {
+      status: 'ok',
+      message: `초고액 자산가 누진적 부유세 과세 집행 완료: 대상자 ${res.assessed_count}명으로부터 총 ${groupDigits(res.total_collected_wld)} WLD를 징수하여 복지기금(VAULT_WELFARE: 잔액 ${groupDigits(res.welfare_balance_after)} WLD)으로 100% 직행 적립하였습니다.`,
+    };
+  } catch (error) {
+    return failure(error, '부자 과세 집행에 실패했습니다.');
+  }
+}

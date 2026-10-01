@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Clock,
   Copy,
+  Download,
   Eye,
   FileText,
   Globe,
@@ -39,11 +40,17 @@ import type { AuditSearchRow } from '../types';
 type CategoryFilter = 'all' | 'error' | 'economy' | 'security' | 'content' | 'moderation';
 type ViewMode = 'timeline' | 'compact';
 
-interface AuditLogsViewProps {
-  readonly events: readonly AuditSearchRow[];
+export interface AuditUserInfo {
+  readonly display_name: string;
+  readonly status?: string;
 }
 
-export function AuditLogsView({ events }: AuditLogsViewProps) {
+interface AuditLogsViewProps {
+  readonly events: readonly AuditSearchRow[];
+  readonly userMap?: Readonly<Record<string, AuditUserInfo>>;
+}
+
+export function AuditLogsView({ events, userMap = {} }: AuditLogsViewProps) {
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [viewMode, setViewMode] = useState<ViewMode>('timeline');
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,6 +89,8 @@ export function AuditLogsView({ events }: AuditLogsViewProps) {
       const auditId = (event.audit_id ?? '').toLowerCase();
       const actorId = (event.actor_user_id ?? '').toLowerCase();
       const subjectId = (event.subject_user_id ?? '').toLowerCase();
+      const actorName = (event.actor_user_id ? userMap[event.actor_user_id]?.display_name ?? '' : '').toLowerCase();
+      const subjectName = (event.subject_user_id ? userMap[event.subject_user_id]?.display_name ?? '' : '').toLowerCase();
       const meta = getActionMeta(event.action, event.feature);
       const friendlyName = meta.label.toLowerCase();
 
@@ -92,10 +101,12 @@ export function AuditLogsView({ events }: AuditLogsViewProps) {
         auditId.includes(q) ||
         actorId.includes(q) ||
         subjectId.includes(q) ||
+        actorName.includes(q) ||
+        subjectName.includes(q) ||
         friendlyName.includes(q)
       );
     });
-  }, [events, category, searchQuery]);
+  }, [events, category, searchQuery, userMap]);
 
   const handleCopyJson = (event: AuditSearchRow) => {
     const payload = JSON.stringify(
@@ -120,6 +131,64 @@ export function AuditLogsView({ events }: AuditLogsViewProps) {
     navigator.clipboard.writeText(payload);
     setCopiedAuditId(event.audit_id);
     setTimeout(() => setCopiedAuditId(null), 2000);
+  };
+
+  const handleExportCsv = () => {
+    if (filteredEvents.length === 0) return;
+    const headers = [
+      'sequence',
+      'audit_id',
+      'created_at',
+      'outcome',
+      'response_status',
+      'feature',
+      'action',
+      'actor_name',
+      'actor_user_id',
+      'subject_name',
+      'subject_user_id',
+      'client_ip',
+      'transaction_id',
+      'integrity_hash',
+    ];
+    const rows = filteredEvents.map((e) => [
+      e.sequence,
+      e.audit_id,
+      e.created_at,
+      e.outcome ?? '',
+      e.response_status ?? '',
+      e.feature ?? '',
+      e.action ?? '',
+      e.actor_user_id ? userMap[e.actor_user_id]?.display_name ?? '' : '',
+      e.actor_user_id ?? '',
+      e.subject_user_id ? userMap[e.subject_user_id]?.display_name ?? '' : '',
+      e.subject_user_id ?? '',
+      e.client_ip ?? '',
+      e.transaction_id ?? '',
+      e.integrity_hash ?? '',
+    ]);
+    const csvContent = [
+      headers.join(','),
+      ...rows.map((row) => row.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(',')),
+    ].join('\n');
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `audit_logs_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportJson = () => {
+    if (filteredEvents.length === 0) return;
+    const blob = new Blob([JSON.stringify(filteredEvents, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `audit_logs_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -184,8 +253,36 @@ export function AuditLogsView({ events }: AuditLogsViewProps) {
           </Button>
         </div>
 
-        {/* 보기 모드 토글 (스마트 타임라인 vs 고밀도 테이블) */}
-        <div className="flex items-center gap-1.5 self-end lg:self-auto">
+        {/* 내보내기 & 보기 모드 토글 (CSV, JSON, 타임라인, 테이블) */}
+        <div className="flex flex-wrap items-center gap-1.5 self-end lg:self-auto">
+          {/* CSV / JSON 1-Click Export (Stripe/AWS CloudTrail 표준) */}
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              size="xs"
+              variant="outline"
+              onClick={handleExportCsv}
+              disabled={filteredEvents.length === 0}
+              className="h-7 gap-1 px-2 text-xs font-medium"
+              title="현재 필터링된 감사 로그를 CSV 파일로 내보냅니다."
+            >
+              <Download className="size-3" />
+              CSV
+            </Button>
+            <Button
+              type="button"
+              size="xs"
+              variant="outline"
+              onClick={handleExportJson}
+              disabled={filteredEvents.length === 0}
+              className="h-7 gap-1 px-2 text-xs font-medium"
+              title="현재 필터링된 감사 로그를 JSON 파일로 내보냅니다."
+            >
+              <Download className="size-3" />
+              JSON
+            </Button>
+          </div>
+
           <div className="flex rounded-lg border bg-muted/30 p-0.5">
             <Button
               type="button"
@@ -295,15 +392,30 @@ export function AuditLogsView({ events }: AuditLogsViewProps) {
                       {/* 추가 컨텍스트 요약 */}
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         {event.actor_user_id && (
-                          <span className="flex items-center gap-1 font-mono text-[0.7rem]" title="행위자">
+                          <span className="flex items-center gap-1 font-mono text-[0.7rem]" title={`행위자: ${event.actor_user_id}`}>
                             <User className="size-3 text-muted-foreground" />
-                            {event.actor_user_id.slice(0, 8)}…
+                            <span className="font-semibold text-foreground">
+                              {userMap[event.actor_user_id]?.display_name ?? `${event.actor_user_id.slice(0, 8)}…`}
+                            </span>
+                            {userMap[event.actor_user_id] && (
+                              <span className="text-muted-foreground/70 text-[0.65rem]">
+                                ({event.actor_user_id.slice(0, 6)})
+                              </span>
+                            )}
                           </span>
                         )}
                         {event.subject_user_id && (
-                          <span className="flex items-center gap-1 font-mono text-[0.7rem] text-primary" title="대상 회원">
+                          <span className="flex items-center gap-1 font-mono text-[0.7rem] text-primary" title={`대상 회원: ${event.subject_user_id}`}>
                             <ArrowIcon className="size-3" />
-                            대상: {event.subject_user_id.slice(0, 8)}…
+                            대상:
+                            <span className="font-semibold underline decoration-dotted">
+                              {userMap[event.subject_user_id]?.display_name ?? `${event.subject_user_id.slice(0, 8)}…`}
+                            </span>
+                            {userMap[event.subject_user_id] && (
+                              <span className="text-muted-foreground/70 text-[0.65rem]">
+                                ({event.subject_user_id.slice(0, 6)})
+                              </span>
+                            )}
                           </span>
                         )}
                         {event.client_ip && (
@@ -394,13 +506,23 @@ export function AuditLogsView({ events }: AuditLogsViewProps) {
                     </TableCell>
                     <TableCell className="font-mono text-xs">
                       {event.subject_user_id ? (
-                        <span className="text-primary" title={`대상: ${event.subject_user_id}`}>
-                          {event.subject_user_id.slice(0, 8)}…
-                        </span>
+                        <div className="flex flex-col" title={`대상: ${event.subject_user_id}`}>
+                          <span className="font-semibold text-primary">
+                            {userMap[event.subject_user_id]?.display_name ?? '알 수 없음'}
+                          </span>
+                          <span className="text-[0.65rem] text-muted-foreground">
+                            {event.subject_user_id.slice(0, 8)}…
+                          </span>
+                        </div>
                       ) : event.actor_user_id ? (
-                        <span className="text-muted-foreground" title={`행위자: ${event.actor_user_id}`}>
-                          {event.actor_user_id.slice(0, 8)}…
-                        </span>
+                        <div className="flex flex-col" title={`행위자: ${event.actor_user_id}`}>
+                          <span className="font-semibold text-foreground">
+                            {userMap[event.actor_user_id]?.display_name ?? '관리자'}
+                          </span>
+                          <span className="text-[0.65rem] text-muted-foreground">
+                            {event.actor_user_id.slice(0, 8)}…
+                          </span>
+                        </div>
                       ) : (
                         '—'
                       )}
@@ -485,12 +607,30 @@ export function AuditLogsView({ events }: AuditLogsViewProps) {
                   <span className="text-foreground select-all">{selectedEvent.audit_id}</span>
                 </div>
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-muted-foreground">행위자 ID:</span>
-                  <span className="text-foreground select-all">{selectedEvent.actor_user_id ?? '없음'}</span>
+                  <span className="text-muted-foreground">행위자 (관리자):</span>
+                  <div className="flex items-center gap-1">
+                    {selectedEvent.actor_user_id && userMap[selectedEvent.actor_user_id] && (
+                      <span className="font-sans font-bold text-foreground">
+                        {userMap[selectedEvent.actor_user_id]?.display_name}
+                      </span>
+                    )}
+                    <span className="text-foreground select-all">
+                      ({selectedEvent.actor_user_id ?? '없음'})
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-muted-foreground">대상 회원:</span>
-                  <span className="text-primary font-bold select-all">{selectedEvent.subject_user_id ?? '없음'}</span>
+                  <div className="flex items-center gap-1">
+                    {selectedEvent.subject_user_id && userMap[selectedEvent.subject_user_id] && (
+                      <span className="font-sans font-bold text-primary">
+                        {userMap[selectedEvent.subject_user_id]?.display_name}
+                      </span>
+                    )}
+                    <span className="text-primary font-bold select-all">
+                      ({selectedEvent.subject_user_id ?? '없음'})
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-muted-foreground">거래 ID:</span>
