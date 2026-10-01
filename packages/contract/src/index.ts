@@ -70,3 +70,12 @@ export type {
   BacktestResult,
 } from './quant-studio';
 
+export { CHANNEL_API_ROUTES, matchChannelRoute } from './channel-api';
+export type {
+  ApiChannel,
+  ApiAuthMode,
+  ApiHttpMethod,
+  ApiIntegrityPolicy,
+  ApiRouteAvailability,
+  ChannelRouteDefinition,
+} from './channel-api';
