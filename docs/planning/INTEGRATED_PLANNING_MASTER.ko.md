@@ -1,6 +1,27 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.09.29.486
+<!-- CORE-AUTHORITY-V499 -->
+## App/Site/Economy Core 상위 권위 — v2026.10.01.499 (2026-10-01)
+
+- **상위 권위:** 이 maintained-document 블록은 아래의 충돌하는 과거 기획문구를 supersede한다. 과거 문구는 당시 의사결정 증거로 보존하되 현재 제품 권위가 아니다.
+- **채널 경계:** 목표 canonical public contract는 **App Core** `/app-api/v2/**`, **Site Core** `/site-api/v1/**`다. **App API v1**은 측정된 retirement 전까지 compatibility/runtime 증거로 유지하며 이번 문서 회차는 목표 route가 Test/Production에 이미 구현됐다고 주장하지 않는다.
+- **단일 경제권위:** App/Site BFF는 잔액·세금·은행·국고·시장·직업보상·통화정책 규칙을 독립 소유하지 않는다. 하나의 **Economy Core**만 경제 command/read 권위를 가지며 최종 WLD 변경은 append-only ledger와 검토된 PostgreSQL `SECURITY DEFINER` 함수를 거친다.
+- **재정 보존:** 모든 `TAX_*`는 explicit reversal 제외 **100% TREASURY_MAIN**으로 들어간다. 세금을 burn/sink로 보내지 않는다. 국고 목적별 예산은 독립 spendable cash vault가 아니라 logical commitment/envelope다.
+- **실물경제형 재원:** 일반 직업보상과 기업수입은 v496 sector/funding model 또는 별도로 명시·측정된 발행 프로그램에 귀속되어야 한다. 출처 없는 generic system-faucet 수입은 superseded이며 App/Site/AI module이 Economy Core 밖에서 spendable WLD를 만들 수 없다.
+- **AI 경계:** 하나의 **Economy Policy Registry**와 policy executor만 수치정책 적용권한을 가진다. AI/model/work/stock module은 특정 low-risk key가 `BOUNDED_AUTO`로 등록된 경우를 제외하면 **proposal-only**다. **direct member balance write = 0 (prohibited)**, **direct absolute stock-price write = 0**, historical-ledger rewrite = 0이며 AI가 자기 limit을 넓힐 수 없다.
+- **신원 경계:** 내부 **workload identity**와 user/admin/automation actor identity는 독립 검증한다. shared `INTERNAL_API_TOKEN` / `x-internal-token`은 legacy compatibility이며 최종 multi-core service-identity 설계가 아니다.
+- **승격 사실성:** expand → shadow/observe → switch → reconcile → contract 순서로 이행한다. exact-SHA 증거 없이는 runtime/Test/Production 완료를 주장하지 않는다.
+
+## v2026.10.01.499 — 2026-10-01 — App/Site/Economy Core 권위통합
+- **C499-01 / P0:** 목표 public channel을 App Core `/app-api/v2`, Site Core `/site-api/v1`로 분리하되 Economy Core는 하나의 권위 경제도메인으로 유지한다.
+- **C499-02 / P0:** service workload identity와 member/admin/automation actor identity를 독립 권한입력으로 검증하고 shared static internal token은 transition compatibility로만 유지한다.
+- **C499-03 / P0:** 모든 `TAX_*`는 reversal 제외 `TREASURY_MAIN`에 100% 보존하며 tax-to-burn 경로는 현재 권위가 아니다.
+- **C499-04 / P0:** Economy Policy Registry + executor만 adaptive numeric apply 권위를 가지며 AI/work/stock은 명시된 low-risk `BOUNDED_AUTO` key 외 proposal-only다.
+- **C499-05 / P0:** direct member balance, absolute stock price, historical ledger, AI 자기한도 확대 write는 금지한다.
+- **증거상태:** 기획권위만 통합했으며 runtime drift는 v498 12-task 구현계획의 exact-SHA Test/Production 증거 전까지 남는다.
+
+
+> 현재 원장 버전: v2026.10.01.499
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 

@@ -1,8 +1,20 @@
 # Woldeok Moneyverse — Living Project Plan
 
+<!-- CORE-AUTHORITY-V499 -->
+## App/Site/Economy Core authority overlay — v2026.10.01.499 (2026-10-01)
+
+- **Superseding authority:** this maintained-document overlay supersedes any conflicting older planning text below. Historical passages remain evidence of prior decisions, not current product authority.
+- **Channel boundary:** the target canonical public contracts are **App Core** at `/app-api/v2/**` and **Site Core** at `/site-api/v1/**`. **App API v1** remains compatibility/runtime evidence until measured retirement; this documentation cycle does not claim those target routes are already implemented in Test or Production.
+- **Single economic authority:** App/Site BFFs never own independent balance, tax, banking, treasury, market, job-reward or monetary-policy rules. One **Economy Core** owns economic command/read authority and delegates final WLD mutation to the append-only ledger and reviewed PostgreSQL `SECURITY DEFINER` functions.
+- **Fiscal conservation:** every `TAX_*` posts **100% to TREASURY_MAIN** net of explicit reversal. Tax may not target burn/sink. Treasury purposes are logical budget commitments/envelopes, not independently spendable cash vaults.
+- **Real-economy funding:** ordinary job rewards and business revenue must resolve to the v496 sector/funding model or another explicit, measured issuance programme. Generic unclassified system-faucet income is superseded; no App/Site/AI module may invent spendable WLD outside Economy Core.
+- **AI boundary:** one **Economy Policy Registry** and one policy executor own numeric policy application. AI/model/work/stock modules are **proposal-only** unless a specific low-risk key is registered `BOUNDED_AUTO`. **direct member balance write = 0 (prohibited)**, **direct absolute stock-price write = 0**, historical-ledger rewrite = 0, and AI cannot widen its own limits.
+- **Identity boundary:** internal **workload identity** and user/admin/automation actor identity are validated independently. Shared `INTERNAL_API_TOKEN` / `x-internal-token` is legacy compatibility, not the final multi-core service-identity design.
+- **Rollout truth:** the transition is expand → shadow/observe → switch → reconcile → contract. Runtime/Test/Production completion requires exact-SHA evidence and is not implied by this planning authority update.
+
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.30.487
+> Current integrated version: v2026.10.01.499
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
@@ -140,7 +152,7 @@ This is the current implementation-facing contract. Historical details remain re
 
 - **P0 LOB WebSocket Monotonic Sequence Gap Recovery (Stocks):** All tick/orderbook broadcasts must carry a monotonic `sequence_id`. On detecting `incoming_seq > last_seq + 1`, clients must discard local state and trigger automatic REST full snapshot resynchronization.
 - **P1 KRX 7-Tier Discrete Tick Size (Stocks):** Discrete price steps (1 WLD to 1,000 WLD) are enforced across extreme price ranges (53 WLD to 8.99M WLD).
-- **P0 2% Market Transaction Tax & Automated GE Item Sink (Economy):** Combats hyperinflation and item devaluation via a 2% transaction tax (500k WLD cap); 50% is permanently burnt and 50% funds Treasury buybacks of floor-price items for permanent destruction.
+- **HISTORICAL / SUPERSEDED BY v2026.10.01.499 — P0 2% Market Transaction Tax & Automated GE Item Sink (Economy):** the former rule described a 2% transaction tax (500k WLD cap) with currency burn/buyback funding. Current authority conserves every tax receipt 100% into `TREASURY_MAIN`; any currency sink must be a separately named non-tax `FEE_*_SINK` or `BURN_*` policy. Treasury item buybacks may destroy purchased items, not the tax-funded WLD paid to sellers.
 - **P0 Client UUID Idempotency & Cursor-Based Pagination (1-on-1 Chat):** Eliminates double-send issues via `(conversation_id, client_message_id)` and prevents message skipping during active conversations via strict `id < cursor` queries.
 - **P0 Aave Kinked Jump Rate Model & 20% Statutory Reserve Buffer (Banking):** Prevents bank runs via steep penalty rates (up to 48%) when loan utilization $U > 80\%$, freezing a mandatory 20% reserve buffer for guaranteed withdrawals.
 - **P1 7-Day Grace Period Dual-Key Overlap Rotation (Auth):** Guarantees zero session invalidation during secret rotation and zero-downtime blue-green promotions.

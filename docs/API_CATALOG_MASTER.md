@@ -1,9 +1,20 @@
-# 🔌 Woldeok Moneyverse Official Master REST API Catalog (v2026.09.28.477)
+# 🔌 Woldeok Moneyverse Official Master REST API Catalog (v2026.10.01.499)
+
+<!-- CORE-AUTHORITY-V499 -->
+## App/Site/Economy Core authority overlay — v2026.10.01.499 (2026-10-01)
+
+- **Superseding authority:** this maintained-document overlay supersedes any conflicting older planning text below. Historical passages remain evidence of prior decisions, not current product authority.
+- **Channel boundary:** the target canonical public contracts are **App Core** at `/app-api/v2/**` and **Site Core** at `/site-api/v1/**`. **App API v1** remains compatibility/runtime evidence until measured retirement; this documentation cycle does not claim those target routes are already implemented in Test or Production.
+- **Single economic authority:** App/Site BFFs never own independent balance, tax, banking, treasury, market, job-reward or monetary-policy rules. One **Economy Core** owns economic command/read authority and delegates final WLD mutation to the append-only ledger and reviewed PostgreSQL `SECURITY DEFINER` functions.
+- **Fiscal conservation:** every `TAX_*` posts **100% to TREASURY_MAIN** net of explicit reversal. Tax may not target burn/sink. Treasury purposes are logical budget commitments/envelopes, not independently spendable cash vaults.
+- **AI boundary:** one **Economy Policy Registry** and one policy executor own numeric policy application. AI/model/work/stock modules are **proposal-only** unless a specific low-risk key is registered `BOUNDED_AUTO`. **direct member balance write = 0 (prohibited)**, **direct absolute stock-price write = 0**, historical-ledger rewrite = 0, and AI cannot widen its own limits.
+- **Identity boundary:** internal **workload identity** and user/admin/automation actor identity are validated independently. Shared `INTERNAL_API_TOKEN` / `x-internal-token` is legacy compatibility, not the final multi-core service-identity design.
+- **Rollout truth:** the transition is expand → shadow/observe → switch → reconcile → contract. Runtime/Test/Production completion requires exact-SHA evidence and is not implied by this planning authority update.
 
 **English canonical** | [한국어](API_CATALOG_MASTER.ko.md)
 
-> **Version**: `v2026.09.28.477`  
-> **Base URL**: `https://easy-scraping.com/api/v1` (Production) / `http://127.0.0.1:3000/api/v1` (Local)  
+> **Version**: `v2026.10.01.499`
+> **Target public contracts**: App Core `https://easy-scraping.com/app-api/v2`; Site Core `https://easy-scraping.com/site-api/v1`. The current App API v1 remains compatibility during migration. Private Nest/API `/api/v1` is an internal implementation surface, not the final public client contract.
 > **Protocols**: HTTP/2, TLS 1.3, JSON (UTF-8)  
 > **Error Standard**: RFC 7807 Problem Details for HTTP APIs  
 > **Multi-Layer Security Headers**: `x-session-id`, `x-csrf-token`, `x-internal-token`, `x-totp-code` (Step-Up 2FA)

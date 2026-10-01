@@ -1,6 +1,17 @@
 # 월덕 머니버스 — AI 경제 컨트롤러 명세
 
-> 버전: v2026.09.25.441
+<!-- CORE-AUTHORITY-V499 -->
+## App/Site/Economy Core 상위 권위 — v2026.10.01.499 (2026-10-01)
+
+- **상위 권위:** 이 maintained-document 블록은 아래의 충돌하는 과거 기획문구를 supersede한다. 과거 문구는 당시 의사결정 증거로 보존하되 현재 제품 권위가 아니다.
+- **채널 경계:** 목표 canonical public contract는 **App Core** `/app-api/v2/**`, **Site Core** `/site-api/v1/**`다. **App API v1**은 측정된 retirement 전까지 compatibility/runtime 증거로 유지하며 이번 문서 회차는 목표 route가 Test/Production에 이미 구현됐다고 주장하지 않는다.
+- **단일 경제권위:** App/Site BFF는 잔액·세금·은행·국고·시장·직업보상·통화정책 규칙을 독립 소유하지 않는다. 하나의 **Economy Core**만 경제 command/read 권위를 가지며 최종 WLD 변경은 append-only ledger와 검토된 PostgreSQL `SECURITY DEFINER` 함수를 거친다.
+- **재정 보존:** 모든 `TAX_*`는 explicit reversal 제외 **100% TREASURY_MAIN**으로 들어간다. 세금을 burn/sink로 보내지 않는다. 국고 목적별 예산은 독립 spendable cash vault가 아니라 logical commitment/envelope다.
+- **AI 경계:** 하나의 **Economy Policy Registry**와 policy executor만 수치정책 적용권한을 가진다. AI/model/work/stock module은 특정 low-risk key가 `BOUNDED_AUTO`로 등록된 경우를 제외하면 **proposal-only**다. **direct member balance write = 0 (prohibited)**, **direct absolute stock-price write = 0**, historical-ledger rewrite = 0이며 AI가 자기 limit을 넓힐 수 없다.
+- **신원 경계:** 내부 **workload identity**와 user/admin/automation actor identity는 독립 검증한다. shared `INTERNAL_API_TOKEN` / `x-internal-token`은 legacy compatibility이며 최종 multi-core service-identity 설계가 아니다.
+- **승격 사실성:** expand → shadow/observe → switch → reconcile → contract 순서로 이행한다. exact-SHA 증거 없이는 runtime/Test/Production 완료를 주장하지 않는다.
+
+> 버전: v2026.10.01.499
 > 상태: Living 구현 지향 기획 명세
 > 날짜: 2026-09-20
 > 상위 명세: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
@@ -931,7 +942,7 @@ AI lane은 `macro`, `shop`, `stock`, `jobs`, `welfare`, `integrity` 6개 분야�
 
 ### 34.2 배포 소유 자동 모델 런타임 (v2026.09.19.289)
 
-무인 주식 시나리오 생성은 배포 환경의 `AI_NEWS_AUTO_API_BASE_URL`, `AI_NEWS_AUTO_MODEL`, 선택적 `AI_NEWS_AUTO_API_KEY`를 사용할 수 있다. 이 경로는 PostgreSQL에 암호화 저장되는 수동 관리자 뉴스룸 자격정보와 분리한다. 자동 actor UUID는 계속 필수이며 operator 권한으로 resolve되어야 하므로 context 조회, batch 생성, market-event 게시의 기존 권한·감사 경계를 유지한다. Ollama 같은 로컬 OpenAI-compatible 추론은 API key를 비워둘 수 있다. HTTP(S)가 아닌 잘못된 endpoint는 모델 호출 전에 fail-closed 처리한다.
+**과거 runtime compatibility 기록 — v499 proposal-only 목표가 supersede:** 무인 주식 시나리오 생성은 배포 환경의 `AI_NEWS_AUTO_API_BASE_URL`, `AI_NEWS_AUTO_MODEL`, 선택적 `AI_NEWS_AUTO_API_KEY`를 사용할 수 있다. 이 경로는 PostgreSQL에 암호화 저장되는 수동 관리자 뉴스룸 자격정보와 분리한다. 자동 actor UUID는 계속 필수이며 operator 권한으로 resolve되어야 하므로 context 조회, batch 생성, market-event 게시의 기존 권한·감사 경계를 유지한다. Ollama 같은 로컬 OpenAI-compatible 추론은 API key를 비워둘 수 있다. HTTP(S)가 아닌 잘못된 endpoint는 모델 호출 전에 fail-closed 처리한다.
 
 
 ## 35. AI 수정 작업의 다음 작업 재확인 게이트 — v2026.09.20.290

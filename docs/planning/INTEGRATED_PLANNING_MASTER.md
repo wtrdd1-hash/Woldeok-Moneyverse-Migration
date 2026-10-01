@@ -1,6 +1,27 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.29.486
+<!-- CORE-AUTHORITY-V499 -->
+## App/Site/Economy Core authority overlay — v2026.10.01.499 (2026-10-01)
+
+- **Superseding authority:** this maintained-document overlay supersedes any conflicting older planning text below. Historical passages remain evidence of prior decisions, not current product authority.
+- **Channel boundary:** the target canonical public contracts are **App Core** at `/app-api/v2/**` and **Site Core** at `/site-api/v1/**`. **App API v1** remains compatibility/runtime evidence until measured retirement; this documentation cycle does not claim those target routes are already implemented in Test or Production.
+- **Single economic authority:** App/Site BFFs never own independent balance, tax, banking, treasury, market, job-reward or monetary-policy rules. One **Economy Core** owns economic command/read authority and delegates final WLD mutation to the append-only ledger and reviewed PostgreSQL `SECURITY DEFINER` functions.
+- **Fiscal conservation:** every `TAX_*` posts **100% to TREASURY_MAIN** net of explicit reversal. Tax may not target burn/sink. Treasury purposes are logical budget commitments/envelopes, not independently spendable cash vaults.
+- **Real-economy funding:** ordinary job rewards and business revenue must resolve to the v496 sector/funding model or another explicit, measured issuance programme. Generic unclassified system-faucet income is superseded; no App/Site/AI module may invent spendable WLD outside Economy Core.
+- **AI boundary:** one **Economy Policy Registry** and one policy executor own numeric policy application. AI/model/work/stock modules are **proposal-only** unless a specific low-risk key is registered `BOUNDED_AUTO`. **direct member balance write = 0 (prohibited)**, **direct absolute stock-price write = 0**, historical-ledger rewrite = 0, and AI cannot widen its own limits.
+- **Identity boundary:** internal **workload identity** and user/admin/automation actor identity are validated independently. Shared `INTERNAL_API_TOKEN` / `x-internal-token` is legacy compatibility, not the final multi-core service-identity design.
+- **Rollout truth:** the transition is expand → shadow/observe → switch → reconcile → contract. Runtime/Test/Production completion requires exact-SHA evidence and is not implied by this planning authority update.
+
+## v2026.10.01.499 — 2026-10-01 — App/Site/Economy Core authority integration
+- **C499-01 / P0:** target public channels split into App Core `/app-api/v2` and Site Core `/site-api/v1`, while Economy Core remains one authoritative economic domain.
+- **C499-02 / P0:** service workload identity and member/admin/automation actor identity are independent authorization inputs; shared static internal token is transition compatibility only.
+- **C499-03 / P0:** all `TAX_*` value is conserved into `TREASURY_MAIN` net reversal; no tax-to-burn path is current authority.
+- **C499-04 / P0:** Economy Policy Registry + executor is the sole adaptive numeric apply authority; AI/work/stock are proposal-only unless an explicit low-risk key is `BOUNDED_AUTO`.
+- **C499-05 / P0:** direct member-balance, absolute-stock-price, historical-ledger and self-widening AI writes are prohibited.
+- **Evidence status:** planning authority only. Runtime drift remains until the v498 12-task implementation plan supplies exact-SHA Test/Production evidence.
+
+
+> Current ledger version: v2026.10.01.499
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 

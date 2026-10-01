@@ -1,8 +1,20 @@
 # 월덕 머니버스 — Living Project Plan
 
+<!-- CORE-AUTHORITY-V499 -->
+## App/Site/Economy Core 상위 권위 — v2026.10.01.499 (2026-10-01)
+
+- **상위 권위:** 이 maintained-document 블록은 아래의 충돌하는 과거 기획문구를 supersede한다. 과거 문구는 당시 의사결정 증거로 보존하되 현재 제품 권위가 아니다.
+- **채널 경계:** 목표 canonical public contract는 **App Core** `/app-api/v2/**`, **Site Core** `/site-api/v1/**`다. **App API v1**은 측정된 retirement 전까지 compatibility/runtime 증거로 유지하며 이번 문서 회차는 목표 route가 Test/Production에 이미 구현됐다고 주장하지 않는다.
+- **단일 경제권위:** App/Site BFF는 잔액·세금·은행·국고·시장·직업보상·통화정책 규칙을 독립 소유하지 않는다. 하나의 **Economy Core**만 경제 command/read 권위를 가지며 최종 WLD 변경은 append-only ledger와 검토된 PostgreSQL `SECURITY DEFINER` 함수를 거친다.
+- **재정 보존:** 모든 `TAX_*`는 explicit reversal 제외 **100% TREASURY_MAIN**으로 들어간다. 세금을 burn/sink로 보내지 않는다. 국고 목적별 예산은 독립 spendable cash vault가 아니라 logical commitment/envelope다.
+- **실물경제형 재원:** 일반 직업보상과 기업수입은 v496 sector/funding model 또는 별도로 명시·측정된 발행 프로그램에 귀속되어야 한다. 출처 없는 generic system-faucet 수입은 superseded이며 App/Site/AI module이 Economy Core 밖에서 spendable WLD를 만들 수 없다.
+- **AI 경계:** 하나의 **Economy Policy Registry**와 policy executor만 수치정책 적용권한을 가진다. AI/model/work/stock module은 특정 low-risk key가 `BOUNDED_AUTO`로 등록된 경우를 제외하면 **proposal-only**다. **direct member balance write = 0 (prohibited)**, **direct absolute stock-price write = 0**, historical-ledger rewrite = 0이며 AI가 자기 limit을 넓힐 수 없다.
+- **신원 경계:** 내부 **workload identity**와 user/admin/automation actor identity는 독립 검증한다. shared `INTERNAL_API_TOKEN` / `x-internal-token`은 legacy compatibility이며 최종 multi-core service-identity 설계가 아니다.
+- **승격 사실성:** expand → shadow/observe → switch → reconcile → contract 순서로 이행한다. exact-SHA 증거 없이는 runtime/Test/Production 완료를 주장하지 않는다.
+
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.09.30.487
+> **현재 통합 버전:** v2026.10.01.499
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -147,7 +159,7 @@
 
 - **P0 LOB 웹소켓 단조 시퀀스 갭 복구 (주식):** 모든 호가 및 체결 틱 브로드캐스트 이벤트는 단조 증가 `sequence_id`를 포함해야 하며, 클라이언트는 `incoming_seq > last_seq + 1` 갭 감지 시 로컬 호가창을 즉시 파기하고 REST Full Snapshot으로 자동 재동기화(Auto Re-sync)한다.
 - **P1 KRX 7단계 틱 사이즈 테이블 (주식):** 1원부터 1,000만 원까지의 극단 가격대 종목(CHIPS 53원 ~ SPACE 8.99M원)에 대해 7단계 이산 틱 사이즈(1원~1,000원 단위)를 강제하여 호가 왜곡을 방지한다.
-- **P0 마켓 2% 거래세 & 자동 최저가 아이템 매입 소각 (경제):** 통화 인플레이션 및 장비 시세 하락을 방지하기 위해 거래소/마켓플레이스에 2% 거래세(상한 50만 WLD)를 부과하고, 세수의 50%는 국고(Treasury)를 통해 최저가 매물 아이템을 자동 매입하여 영구 파괴(Automated GE Item Sink)한다.
+- **과거 규칙 / v2026.10.01.499에 의해 SUPERSEDED — P0 마켓 2% 거래세 & 자동 최저가 아이템 매입 소각 (경제):** 과거에는 거래세 일부를 아이템 매입·소각과 결합했다. 현재 권위는 모든 세금 `TAX_*`를 explicit reversal 제외 100% `TREASURY_MAIN`에 보존하며 통화 sink가 필요하면 세금과 분리된 `FEE_*_SINK` 또는 `BURN_*`로 명시한다. 국고 item buyback은 매입한 item만 파괴할 수 있고 판매자에게 지급된 tax-funded WLD는 사회로 재순환한다.
 - **P0 클라이언트 UUID 멱등키 & 커서 기반 페이지네이션 (1:1 채팅):** 모바일 재전송 시 더블 샌드를 원천 차단하기 위해 `(conversation_id, client_message_id)` 멱등키를 강제하고, 대화 중 신규 메시지 인입 시 과거 기록 누락을 막기 위해 `id < cursor` 기반 커서 쿼리를 강제한다.
 - **P0 Aave 최적 이용률 점프 이자율 & 20% 법정지급준비금 (은행):** 뱅크런을 방지하기 위해 대출 이용률 $U > 80\%$ 초과 시 급격한 페널티 금리(최대 48%)를 부과하고, 은행 총 예금의 최소 20%를 법정 지급준비금으로 동결하여 예금 인출을 100% 보장한다.
 - **P1 7일 Grace Period 듀얼 키 롤링 (인증):** 보안 키 교체 및 배포 시 구/신 서명 키를 7일간 동시 수용하여 세션 일괄 단절(Logout)을 원천 차단한다.

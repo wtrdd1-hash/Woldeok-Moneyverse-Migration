@@ -1,14 +1,25 @@
 # 모바일 앱 API 런타임 계약
 
+<!-- CORE-AUTHORITY-V499 -->
+## App/Site/Economy Core 상위 권위 — v2026.10.01.499 (2026-10-01)
+
+- **상위 권위:** 이 maintained-document 블록은 아래의 충돌하는 과거 기획문구를 supersede한다. 과거 문구는 당시 의사결정 증거로 보존하되 현재 제품 권위가 아니다.
+- **채널 경계:** 목표 canonical public contract는 **App Core** `/app-api/v2/**`, **Site Core** `/site-api/v1/**`다. **App API v1**은 측정된 retirement 전까지 compatibility/runtime 증거로 유지하며 이번 문서 회차는 목표 route가 Test/Production에 이미 구현됐다고 주장하지 않는다.
+- **단일 경제권위:** App/Site BFF는 잔액·세금·은행·국고·시장·직업보상·통화정책 규칙을 독립 소유하지 않는다. 하나의 **Economy Core**만 경제 command/read 권위를 가지며 최종 WLD 변경은 append-only ledger와 검토된 PostgreSQL `SECURITY DEFINER` 함수를 거친다.
+- **재정 보존:** 모든 `TAX_*`는 explicit reversal 제외 **100% TREASURY_MAIN**으로 들어간다. 세금을 burn/sink로 보내지 않는다. 국고 목적별 예산은 독립 spendable cash vault가 아니라 logical commitment/envelope다.
+- **AI 경계:** 하나의 **Economy Policy Registry**와 policy executor만 수치정책 적용권한을 가진다. AI/model/work/stock module은 특정 low-risk key가 `BOUNDED_AUTO`로 등록된 경우를 제외하면 **proposal-only**다. **direct member balance write = 0 (prohibited)**, **direct absolute stock-price write = 0**, historical-ledger rewrite = 0이며 AI가 자기 limit을 넓힐 수 없다.
+- **신원 경계:** 내부 **workload identity**와 user/admin/automation actor identity는 독립 검증한다. shared `INTERNAL_API_TOKEN` / `x-internal-token`은 legacy compatibility이며 최종 multi-core service-identity 설계가 아니다.
+- **승격 사실성:** expand → shadow/observe → switch → reconcile → contract 순서로 이행한다. exact-SHA 증거 없이는 runtime/Test/Production 완료를 주장하지 않는다.
+
 [English](mobile-api-runtime-contract.md) | **한국어** | [모바일 API 전체 명세](mobile-api-complete-spec.ko.md)
 
-업데이트 버전: **v2026.09.14.76**
+업데이트 버전: **v2026.10.01.499**
 
 이 문서는 Android/iOS 앱이 실제 런타임에서 따라야 하는 응답 형태와 상태 처리 규칙을 고정한다. 단순 엔드포인트 목록이 아니라 쿠키, CSRF, null 처리, 프로필, 게시판, 갤러리의 요청/응답 예제를 포함한다.
 
 ## 1. 유일한 앱 API 기준점
 
-앱은 `https://easy-scraping.com/app-api/v1/*`만 호출한다. `/api/v1/*`는 앱 계약이 아니며 private backend 주소나 `INTERNAL_API_TOKEN`을 앱에 포함하지 않는다.
+목표 **target canonical native contract**는 `https://easy-scraping.com/app-api/v2/*`다. 현재 구현된 `/app-api/v1/*`은 v498 실행계획에서 App v2가 구현되고 측정된 client retirement 조건을 충족할 때까지 **App API v1 compatibility**로 유지한다. `/site-api/v1/*`은 Site Core 웹 계약이며 `/api/v1/*`은 private/internal backend 공간이다. private backend 주소나 `INTERNAL_API_TOKEN`을 앱에 포함하지 않는다.
 
 모든 로그인 이후 요청은 같은 persistent secure CookieJar를 사용한다. 서버가 `Set-Cookie`를 보내면 CookieJar에 반영해야 하며, 이후 GET/POST에도 같은 세션 쿠키가 자동으로 포함되어야 한다. 상태 변경 요청은 마지막으로 받은 `csrfToken`을 `X-CSRF-Token` 헤더로 전송한다.
 
