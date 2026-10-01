@@ -19,7 +19,7 @@ import {
   Share2,
   Activity,
 } from 'lucide-react';
-import { WeeklyWorldBrief } from './weekly-world-brief';
+import { WeeklyWorldBrief, type WeeklyBriefData } from './weekly-world-brief';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -54,7 +54,8 @@ export interface StockTickerItem {
 interface NewspaperViewProps {
   readonly events: readonly MarketEvent[];
   readonly stocks: readonly StockTickerItem[];
-  readonly initialTab?: 'brief' | 'live';
+  readonly weeklyBrief?: WeeklyBriefData | undefined;
+  readonly initialTab?: 'brief' | 'live' | undefined;
 }
 
 const STRENGTH_LABEL: Readonly<Record<number, { ko: string; en: string; ja: string; zh: string }>> = {
@@ -180,7 +181,12 @@ function StockTickerPopover({
   );
 }
 
-export function NewspaperView({ events, stocks = [], initialTab = 'live' }: NewspaperViewProps) {
+export function NewspaperView({
+  events,
+  stocks = [],
+  weeklyBrief,
+  initialTab = 'live',
+}: NewspaperViewProps) {
   const { locale } = useLocale();
   const [activeTab, setActiveTab] = useState<'brief' | 'live'>(initialTab);
   const [selectedPoll, setSelectedPoll] = useState<number | null>(null);
@@ -366,7 +372,7 @@ export function NewspaperView({ events, stocks = [], initialTab = 'live' }: News
       </div>
 
       {activeTab === 'brief' ? (
-        <WeeklyWorldBrief />
+        <WeeklyWorldBrief data={weeklyBrief} />
       ) : (
         <>
 

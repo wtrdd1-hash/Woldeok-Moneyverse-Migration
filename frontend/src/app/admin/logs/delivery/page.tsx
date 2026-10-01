@@ -19,6 +19,7 @@ import { formatMoment } from '@/lib/money';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../../admin-back';
 import type { OutboxEvent } from '../../types';
+import { LogsSubNav } from '../logs-sub-nav';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,9 @@ export default async function AdminDeliveryLogsPage() {
       <PageHeader eyebrow="DELIVERY LOG" title="Discord 전달 로그">
         감사 기록과 분리해 알림 전달 성공 여부와 재시도 상태만 빠르게 확인합니다.
       </PageHeader>
+
+      {/* Navigation Sub-Tabs */}
+      <LogsSubNav current="delivery" />
 
       <div className="grid gap-3 sm:grid-cols-3">
         <DeliverySummary icon={Send} label="최근 기록" value={`${events.length}건`} />

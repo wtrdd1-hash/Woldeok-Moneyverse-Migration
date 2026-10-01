@@ -35,6 +35,7 @@ export default async function SpacesPage() {
 
       {/* 8x8 인터랙티브 가구 배치 캔버스 에디터 */}
       <SpaceCanvasEditor
+        spaceId={spaces[0]?.id}
         spaceName={spaces[0]?.name ?? '스타터 룸'}
         spaceType={spaces[0]?.space_type ?? 'SPACE_ROOM_STARTER'}
       />

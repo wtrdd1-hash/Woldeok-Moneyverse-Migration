@@ -76,6 +76,12 @@ export class TreasuryListQueryDto {
   cursor?: string;
 }
 
+export class TreasuryExecuteWealthTaxDto {
+  @ApiProperty({ required: false, example: '초고액 자산가 누진적 부유세 정기 과세 집행', description: '과세 감사 사유 (선택)' })
+  @IsOptional()
+  @IsString()
+  reason?: string;
+}
 
 export class TreasuryDistributeBudgetDto {
   @ApiProperty({ example: '1000000', description: '4분할 배정 총액 (정수 WLD)' })
@@ -167,7 +173,8 @@ export class AdminTreasuryController {
     const adminId = requireUserId(request);
     return this.service.absorbFunds(adminId, dto.vaultCode, dto.amountWld, dto.reason);
   }
-@Post('disburse/dividend')
+
+  @Post('disburse/dividend')
   @ApiOperation({ summary: '시민 보편 배당 및 기본소득 환원금 일괄 집행 (Safe Reserve 30% Guard)' })
   async disburseDividend(
     @Req() request: RequestWithSession,
@@ -226,5 +233,37 @@ export class AdminTreasuryController {
       csv: await this.service.exportLedgerCsv(),
       exported_at: new Date().toISOString(),
     };
+  }
+
+  @Post('tax/wealth')
+  @ApiOperation({ summary: '초고액 자산가 누진적 부유세 과세 일괄 집행 (복지기금 전액 적립)' })
+  async executeWealthTax(
+    @Req() request: RequestWithSession,
+    @Body() dto: TreasuryExecuteWealthTaxDto,
+  ) {
+    const adminId = requireUserId(request);
+    return this.service.executeWealthTax(adminId, dto.reason);
+  }
+
+  @Get('tax/wealth')
+  @ApiOperation({ summary: '누진적 부유세 과세 대상 및 이력 조회' })
+  async getWealthTaxAssessments() {
+    return this.service.getWealthTaxAssessments();
+  }
+
+  @Get('backup/status')
+  @ApiOperation({ summary: '무료 클라우드 스토리지 백업 아카이빙 쿼터 및 무결성 상태 조회' })
+  async getBackupStatus() {
+    return this.service.getBackupStatus();
+  }
+
+  @Post('backup/snapshot')
+  @ApiOperation({ summary: '무료 클라우드 스토리지 불변 원장 백업 스냅샷 수동 발행' })
+  async createBackupSnapshot(
+    @Req() request: RequestWithSession,
+    @Body('provider') provider?: string,
+  ) {
+    const adminId = requireUserId(request);
+    return this.service.createBackupSnapshot(adminId, provider);
   }
 }

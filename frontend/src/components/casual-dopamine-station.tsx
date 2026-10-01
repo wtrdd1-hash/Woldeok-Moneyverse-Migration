@@ -95,7 +95,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
             </h3>
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-              10초 동안 황금 코인을 광클하여 최대 5,000 WLD 잭팟 획득!
+              10초 동안 황금 코인을 광클하여 최대 1,000 WLD 잭팟 획득! (1일 1회)
             </p>
           </div>
         </div>
@@ -209,7 +209,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
       <GoldenDuckFever
         isOpen={activeModal === 'fever'}
         onClose={() => setActiveModal(null)}
-        enableFloatingSpawn={true}
+        enableFloatingSpawn={false}
         onClaimReward={(totalWld) => {
           showRewardNotice(`황금 오리 피버 완료! +${totalWld.toLocaleString()} WLD가 지갑에 지급되었습니다.`);
         }}

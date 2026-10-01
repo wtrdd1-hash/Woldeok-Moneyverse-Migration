@@ -15,7 +15,7 @@ export class TreasuryService {
     return this.repository.getTaxRates();
   }
 
-  getBudgets() {
+  async getBudgets() {
     return this.repository.getBudgets();
   }
 
@@ -154,5 +154,30 @@ export class TreasuryService {
 
   async exportLedgerCsv() {
     return this.repository.exportLedgerCsv();
+  }
+
+  async executeWealthTax(adminId: string, reason?: string) {
+    if (!adminId || typeof adminId !== 'string') {
+      throw new TreasuryInputError('유효한 관리자 ID가 필요합니다.');
+    }
+    const cleanReason = (reason ?? '고액 자산가 누진적 부유세 정기 과세 집행').trim();
+    try {
+      return await this.repository.executeWealthTax(adminId, cleanReason);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      throw new TreasuryInputError(msg);
+    }
+  }
+
+  async getWealthTaxAssessments() {
+    return this.repository.getWealthTaxAssessments();
+  }
+
+  async createBackupSnapshot(adminId: string, provider?: string) {
+    return this.repository.createImmutableBackupSnapshot(adminId, provider);
+  }
+
+  async getBackupStatus() {
+    return this.repository.getBackupStatus();
   }
 }

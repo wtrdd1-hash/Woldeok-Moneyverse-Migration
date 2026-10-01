@@ -1,16 +1,18 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { Filter, User, X } from 'lucide-react';
 import { EmptyState } from '@/components/empty-state';
 import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { api } from '@/lib/api';
-import { ApiError } from '@/lib/api';
+import { ApiError, api, apiOrNull } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
 import { AdminBack } from '../../admin-back';
 import { adminArea } from '../../areas';
+import type { AdminUser } from '../../types';
+import { LogsSubNav } from '../logs-sub-nav';
 import { TrafficDashboard, type TrafficAnalyticsDashboard } from './traffic-dashboard';
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +23,20 @@ export const metadata: Metadata = {
   title: AREA.title,
   robots: { index: false, follow: false },
 };
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function resolveUserId(input: string, userList: readonly AdminUser[]): string | null {
+  if (!input) return null;
+  if (UUID_REGEX.test(input)) return input;
+
+  const target = input.toLowerCase();
+  const matched = userList.find((u) => u.display_name.toLowerCase() === target);
+  if (matched) return matched.user_id;
+
+  const partial = userList.find((u) => u.display_name.toLowerCase().includes(target));
+  return partial?.user_id ?? null;
+}
 
 interface ActivityLogRow {
   readonly id: string;
@@ -80,15 +96,21 @@ export default async function AdminActivityLogsPage({
   const limit = typeof params.limit === 'string' ? params.limit : '50';
   const page = typeof params.page === 'string' ? Math.max(1, parseInt(params.page, 10)) : 1;
   const offset = (page - 1) * parseInt(limit, 10);
+  const rawUser = typeof params.userId === 'string' ? params.userId : typeof params.userSearch === 'string' ? params.userSearch : '';
+
+  const [trafficRes, usersResponse] = await Promise.all([
+    apiOrNull<TrafficAnalyticsDashboard>(`/api/v1/admin/activity/traffic?granularity=${granularity}&periods=${periods}`),
+    apiOrNull<{ users: AdminUser[] }>('/api/v1/admin/users'),
+  ]);
+
+  const userList = usersResponse?.users ?? [];
+  const resolvedUserId = rawUser ? resolveUserId(rawUser, userList) : null;
+  const resolvedUser = resolvedUserId ? userList.find((u) => u.user_id === resolvedUserId) : null;
 
   let logs: ActivityLogRow[] = [];
-  let traffic: TrafficAnalyticsDashboard | null = null;
+  const traffic: TrafficAnalyticsDashboard | null = trafficRes;
   let loadProblem = '';
-  try {
-    traffic = await api<TrafficAnalyticsDashboard>(`/api/v1/admin/activity/traffic?granularity=${granularity}&periods=${periods}`);
-  } catch {
-    traffic = null;
-  }
+
   try {
     const query = new URLSearchParams({ limit, offset: String(offset) });
     if (eventType) query.set('eventType', eventType);
@@ -100,6 +122,13 @@ export default async function AdminActivityLogsPage({
       : '활동 로그를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
   }
 
+  const paginationQuery = (targetPage: number) => {
+    const q = new URLSearchParams({ page: String(targetPage), limit });
+    if (eventType) q.set('eventType', eventType);
+    if (rawUser) q.set('userId', rawUser);
+    return `?${q.toString()}`;
+  };
+
   return (
     <div data-page="admin-logs-activity" className="mv-page mv-page--admin mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
       <AdminBack />
@@ -109,20 +138,18 @@ export default async function AdminActivityLogsPage({
       </PageHeader>
 
       {/* Navigation Sub-Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-border pb-3">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/admin/logs">감사 로그</Link>
-        </Button>
-        <Button variant="secondary" size="sm" asChild>
-          <Link href="/admin/logs/activity">사용자 접속 · 체류 · 클릭 로그</Link>
-        </Button>
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/admin/logs/delivery">Discord 전달 로그</Link>
-        </Button>
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/admin/logs/integrity">무결성 검증</Link>
-        </Button>
-      </div>
+      <LogsSubNav current="activity" />
+
+      {/* 유저 자동완성 데이터리스트 */}
+      {userList.length > 0 && (
+        <datalist id="activity-user-suggestions">
+          {userList.map((u) => (
+            <option key={u.user_id} value={u.display_name}>
+              {u.user_id}
+            </option>
+          ))}
+        </datalist>
+      )}
 
       <Card>
         <CardHeader>
@@ -137,20 +164,33 @@ export default async function AdminActivityLogsPage({
       {/* Filter Card */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">필터 설정</CardTitle>
-          <CardDescription>이벤트 종류를 선택하여 활동 기록을 확인합니다.</CardDescription>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Filter className="size-4 text-primary" />
+              <CardTitle className="text-base">필터 설정</CardTitle>
+            </div>
+            {resolvedUserId && (
+              <Badge variant="default" className="text-xs px-2 py-0.5">
+                회원 필터 적용 중
+              </Badge>
+            )}
+          </div>
+          <CardDescription>이벤트 종류 및 특정 회원의 닉네임/UUID로 실시간 활동 기록을 확인합니다.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <form method="GET" className="flex flex-wrap items-center gap-4">
-            <div className="w-full sm:w-80">
-              <label htmlFor="userId" className="mb-1 block text-xs text-muted-foreground">회원 ID</label>
+            <div className="w-full sm:w-60">
+              <label htmlFor="userId" className="mb-1 block text-xs text-muted-foreground">
+                회원 검색 (닉네임 또는 UUID)
+              </label>
               <Input
                 id="userId"
                 name="userId"
-                defaultValue={userId}
-                placeholder="UUID · 비우면 전체 회원"
+                defaultValue={rawUser}
+                list="activity-user-suggestions"
+                placeholder="예: 닉네임 또는 UUID"
+                className="h-9 text-xs"
                 autoComplete="off"
-                className="min-h-10 font-mono text-xs"
               />
             </div>
 
@@ -185,10 +225,38 @@ export default async function AdminActivityLogsPage({
               </select>
             </div>
 
-            <div className="w-full sm:mt-5 sm:w-auto">
+            <div className="flex w-full items-center gap-2 sm:mt-5 sm:w-auto">
               <Button type="submit" size="sm" className="w-full sm:w-auto">조회</Button>
+              {(rawUser || eventType) && (
+                <Button asChild variant="outline" size="sm" className="w-full sm:w-auto">
+                  <Link href="/admin/logs/activity" title="필터 초기화">
+                    <X className="size-3.5 mr-1" />
+                    초기화
+                  </Link>
+                </Button>
+              )}
             </div>
           </form>
+
+          {/* 활성 회원 필터 요약 바 */}
+          {resolvedUser && (
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs">
+              <div className="flex items-center gap-2">
+                <User className="size-4 text-primary shrink-0" />
+                <span>
+                  선택된 회원: <strong className="text-foreground">{resolvedUser.display_name}</strong>
+                  <code className="ml-1.5 font-mono text-[11px] text-muted-foreground bg-muted/60 px-1 py-0.5 rounded">
+                    {resolvedUser.user_id}
+                  </code>
+                </span>
+              </div>
+              <Button asChild variant="ghost" size="xs" className="h-6 text-xs text-muted-foreground hover:text-foreground">
+                <Link href={`/admin/logs/activity${eventType ? `?eventType=${eventType}` : ''}`}>
+                  전체 회원 보기로 전환
+                </Link>
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -342,9 +410,7 @@ export default async function AdminActivityLogsPage({
               asChild={page > 1}
             >
               {page > 1 ? (
-                <Link
-                  href={`/admin/logs/activity?page=${page - 1}&limit=${limit}&eventType=${encodeURIComponent(eventType)}&userId=${encodeURIComponent(userId)}`}
-                >
+                <Link href={`/admin/logs/activity${paginationQuery(page - 1)}`}>
                   ← 이전 페이지
                 </Link>
               ) : (
@@ -359,9 +425,7 @@ export default async function AdminActivityLogsPage({
               asChild={logs.length >= parseInt(limit, 10)}
             >
               {logs.length >= parseInt(limit, 10) ? (
-                <Link
-                  href={`/admin/logs/activity?page=${page + 1}&limit=${limit}&eventType=${encodeURIComponent(eventType)}&userId=${encodeURIComponent(userId)}`}
-                >
+                <Link href={`/admin/logs/activity${paginationQuery(page + 1)}`}>
                   다음 페이지 →
                 </Link>
               ) : (

@@ -652,7 +652,20 @@ export interface AdminTreasuryLedger {
   readonly vault_id: string;
   readonly vault_code: string;
   readonly vault_name: string;
-  readonly tx_type: 'INJECTION' | 'ABSORPTION_SINK' | 'STOCK_HALT_SETTLEMENT' | 'FEE_RECIRCULATION' | 'EMERGENCY_RESERVE_TRANSFER';
+  readonly tx_type:
+    | 'INJECTION'
+    | 'ABSORPTION_SINK'
+    | 'STOCK_HALT_SETTLEMENT'
+    | 'FEE_RECIRCULATION'
+    | 'EMERGENCY_RESERVE_TRANSFER'
+    | 'CITIZEN_DIVIDEND'
+    | 'COMMUNITY_FUNDING'
+    | 'WELFARE_SUBSIDY'
+    | 'MARKET_STIMULUS'
+    | 'PUBLIC_GRANT'
+    | 'MARKET_BUYBACK_BURN'
+    | 'BUDGET_DISTRIBUTION'
+    | string;
   readonly amount_wld: string;
   readonly actor_id: string | null;
   readonly actor_name: string | null;

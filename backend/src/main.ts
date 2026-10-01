@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { json, raw, urlencoded } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
@@ -23,7 +24,8 @@ import { ipBlockGate } from './security/ip-block.middleware';
 import { securityHeaders } from './security/security-headers.middleware';
 import { requestActivityTrail } from './activity/request-activity.middleware';
 import { AuctionGateway } from './marketplace/auction.gateway';
-import { corsPolicy } from './security/cors-policy';
+import { responseCompression } from './http/compression.middleware';
+import { dynamicEtag } from './http/etag.middleware';
 
 async function bootstrap(): Promise<void> {
   const config = loadConfig(process.env);
@@ -37,11 +39,25 @@ async function bootstrap(): Promise<void> {
   // Enterprise Security Headers
   app.use(securityHeaders({ isProduction: config.production }));
 
-  // CORS is a browser boundary, not a trusted-edge identity channel. Production
-  // accepts only the configured public origin; loopback origins are a local
-  // development convenience. Proxy-owned identity headers are deliberately
-  // absent from allowedHeaders so browser JavaScript cannot author them.
-  const cors = corsPolicy({ baseUrl: config.baseUrl, production: config.production });
+  // High-performance HTTP compression (Gzip/Deflate for >1KB payloads)
+  app.use(responseCompression());
+
+  // Dynamic ETag & 304 Not Modified Caching for GET/HEAD
+  app.use(dynamicEtag());
+
+  // HTTP Keep-Alive optimization middleware
+  app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('Keep-Alive', 'timeout=60, max=1000');
+    next();
+  });
+
+  // Strict CORS policy
+  const allowedOrigins = [
+    new URL(config.baseUrl).origin,
+    'http://127.0.0.1:3000',
+    'http://localhost:3000',
+  ];
   app.enableCors({
     origin: (origin, callback) => callback(null, cors.allowsOrigin(origin)),
     credentials: true,

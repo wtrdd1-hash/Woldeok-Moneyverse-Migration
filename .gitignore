@@ -84,3 +84,4 @@ scripts/qa/*.sh
 *.pfx
 *.p12
 *.id_rsa
+.worktrees/

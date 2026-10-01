@@ -21,6 +21,10 @@ describe('TreasuryService', () => {
     executeMarketBuybackBurn: vi.fn(),
     getCitizenTaxReceipt: vi.fn(),
     exportLedgerCsv: vi.fn(),
+    executeWealthTax: vi.fn(),
+    getWealthTaxAssessments: vi.fn(),
+    createImmutableBackupSnapshot: vi.fn(),
+    getBackupStatus: vi.fn(),
   } as unknown as TreasuryRepository;
 
   const service = new TreasuryService(mockRepo);
@@ -34,11 +38,11 @@ describe('TreasuryService', () => {
     expect(mockRepo.getTaxRates).toHaveBeenCalled();
   });
 
-  it('delegates getBudgets to repository', () => {
+  it('delegates getBudgets to repository', async () => {
     const mockBudgets = AUTHORITATIVE_BUDGET_ENVELOPES.slice(0, 1);
-    vi.mocked(mockRepo.getBudgets).mockReturnValueOnce(mockBudgets);
+    vi.mocked(mockRepo.getBudgets).mockResolvedValueOnce(mockBudgets);
 
-    const budgets = service.getBudgets();
+    const budgets = await service.getBudgets();
     expect(budgets).toEqual(mockBudgets);
     expect(mockRepo.getBudgets).toHaveBeenCalled();
   });
@@ -194,5 +198,68 @@ describe('TreasuryService', () => {
 
     const csv = await service.exportLedgerCsv();
     expect(csv).toContain('Timestamp,Vault,TxType');
+  });
+
+  it('delegates executeWealthTax to repository', async () => {
+    vi.mocked((mockRepo as any).executeWealthTax).mockResolvedValueOnce({
+      success: true,
+      assessed_count: 6,
+      total_collected_wld: '6069',
+    });
+
+    const res = await service.executeWealthTax(
+      '00000000-0000-0000-0000-000000000001',
+      '고액 자산가 누진적 부유세 정기 과세 집행',
+    );
+
+    expect(res).toEqual({ success: true, assessed_count: 6, total_collected_wld: '6069' });
+    expect((mockRepo as any).executeWealthTax).toHaveBeenCalledWith(
+      '00000000-0000-0000-0000-000000000001',
+      '고액 자산가 누진적 부유세 정기 과세 집행',
+    );
+  });
+
+  it('delegates getWealthTaxAssessments to repository', async () => {
+    vi.mocked((mockRepo as any).getWealthTaxAssessments).mockResolvedValueOnce([]);
+
+    const res = await service.getWealthTaxAssessments();
+    expect(res).toEqual([]);
+    expect((mockRepo as any).getWealthTaxAssessments).toHaveBeenCalled();
+  });
+
+  it('delegates createBackupSnapshot to repository', async () => {
+    const mockSnapshot = {
+      snapshot_id: 'SNAP-20261001-ABCD1234',
+      merkle_root_hash: 'abcdef1234567890',
+      provider: 'CLOUDFLARE_R2_FREE',
+      free_tier_status: 'FREE_TIER_COMPLIANT_ZERO_COST',
+      payload_bytes: 1024,
+      vault_balances: {},
+      total_m0_wld: '1000000',
+      created_at: '2026-10-01T00:00:00.000Z',
+    };
+    vi.mocked(mockRepo.createImmutableBackupSnapshot).mockResolvedValueOnce(mockSnapshot);
+
+    const res = await service.createBackupSnapshot('00000000-0000-0000-0000-000000000001', 'CLOUDFLARE_R2_FREE');
+    expect(res).toEqual(mockSnapshot);
+    expect(mockRepo.createImmutableBackupSnapshot).toHaveBeenCalledWith(
+      '00000000-0000-0000-0000-000000000001',
+      'CLOUDFLARE_R2_FREE',
+    );
+  });
+
+  it('delegates getBackupStatus to repository', async () => {
+    const mockStatus = {
+      latest_snapshot_id: 'SNAP-20261001-IMMUTABLE-LEDGER',
+      provider: 'Cloudflare R2 & Google Drive Free Tier',
+      free_tier_quota: '10.0 GB 무료 제공 중 1.2 MB 사용',
+      stored_snapshots_count: 54,
+      last_verified_at: '2026-10-01T00:00:00.000Z',
+    };
+    vi.mocked(mockRepo.getBackupStatus).mockResolvedValueOnce(mockStatus);
+
+    const res = await service.getBackupStatus();
+    expect(res).toEqual(mockStatus);
+    expect(mockRepo.getBackupStatus).toHaveBeenCalled();
   });
 });

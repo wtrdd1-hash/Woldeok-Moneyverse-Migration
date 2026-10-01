@@ -41,14 +41,31 @@ export class DopamineRepository {
 
   /**
    * 황금 오리 광클 피버 보상 원장 기록 및 지갑(USER_CASH) 입금
+   * 1일 1회 제한 및 세션당 최대 1,000 WLD 경제 밸런스 보호
    */
   async claimGoldenDuck(input: GoldenDuckClaimInput): Promise<GoldenDuckClaimRecord> {
     assertUuid(input.actorUserId, 'actorUserId');
     assertUuid(input.idempotencyKey, 'idempotencyKey');
 
+    // 0. 1일 1회 참여 제한 (Daily Cap: 1)
+    const todayClaim = await queryOne<{ id: string }>(
+      this.pool,
+      `SELECT id::text
+       FROM public.ledger_transactions
+       WHERE actor_user_id = $1::uuid
+         AND policy_version = 'game.dopamine.golden_duck'
+         AND created_at >= CURRENT_DATE
+       LIMIT 1`,
+      [input.actorUserId],
+    );
+
+    if (todayClaim?.id) {
+      throw new DopamineInputError('오늘의 황금 오리 피버 타임 보상을 이미 수령하셨습니다. (내일 다시 참여 가능)');
+    }
+
     const validClicks = Math.min(Math.max(1, Math.floor(input.clickCount || 1)), 200);
-    const validMultiplier = Math.min(Math.max(1.0, Number(input.comboMultiplier || 1.0)), 3.0);
-    const rewardAmount = Math.min(5000, Math.floor(validClicks * 25 * validMultiplier));
+    const validMultiplier = Math.min(Math.max(1.0, Number(input.comboMultiplier || 1.0)), 2.0);
+    const rewardAmount = Math.min(1000, Math.floor(validClicks * 10 * validMultiplier));
 
     // 1. 유저 USER_CASH 계좌 조회
     const userCashRow = await queryOne<{ id: string }>(
