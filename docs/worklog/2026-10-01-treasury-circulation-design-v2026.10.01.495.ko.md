@@ -26,3 +26,9 @@
 - 커밋 전 `git diff --check`: PASS.
 - 작성된 설계를 사용자 검토하기 전에는 권위 기획서로 통합하지 않는다.
 - 런타임·DB·Test·Production 변경 없음.
+
+## 승인 후 계획 기록
+- 사용자가 작성된 v495 설계를 승인했다.
+- 권위 문서 계층에 결정을 통합하기 위한 `docs/superpowers/plans/2026-10-01-single-treasury-authority-integration.md`를 작성했다.
+- 이 계획은 SQL/런타임/Test/Production 작업 전에 의도적으로 종료하며, 런타임 마이그레이션은 문서 권위 통합 후 별도 계획으로 진행한다.
+- 계획 기준 재확인: `origin/main=2bad12eb290cba6b98d08604cd6b1274243e1a4f`.

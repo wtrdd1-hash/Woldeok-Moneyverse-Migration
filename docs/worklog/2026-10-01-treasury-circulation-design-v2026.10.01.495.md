@@ -26,3 +26,9 @@
 - `git diff --check`: PASS before commit.
 - Authority integration is intentionally deferred until user review of the written design.
 - No runtime, DB, Test or Production changes were made.
+
+## Post-approval planning record
+- User approved the written v495 design.
+- Created `docs/superpowers/plans/2026-10-01-single-treasury-authority-integration.md` to integrate the decision into the authoritative documentation hierarchy.
+- The plan intentionally stops before SQL/runtime/Test/Production work; runtime migration requires a separate plan after documentation authority integration.
+- Plan base recheck: `origin/main=2bad12eb290cba6b98d08604cd6b1274243e1a4f`.
