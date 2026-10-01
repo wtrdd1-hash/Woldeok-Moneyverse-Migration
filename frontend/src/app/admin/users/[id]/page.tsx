@@ -67,7 +67,8 @@ export default async function AdminUserDetailPage({
 
   const restricted = user.restricted_at !== null;
   const events = activity?.events ?? [];
-  const logLink = `/admin/logs?member=${encodeURIComponent(user.user_id)}&limit=50`;
+  const auditLogLink = `/admin/logs?member=${encodeURIComponent(user.user_id)}&limit=50`;
+  const activityLogLink = `/admin/logs/activity?userId=${encodeURIComponent(user.user_id)}&limit=50`;
 
   const netWorth = user.total_net_worth ?? '0';
   const cash = user.cash_balance ?? '0';
@@ -220,23 +221,37 @@ export default async function AdminUserDetailPage({
         <CardHeader>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <CardTitle className="text-base">사용자 관련 활동 로그</CardTitle>
+              <CardTitle className="text-base">관리 조치 감사 로그</CardTitle>
               <CardDescription className="mt-1">
-                이 사용자가 관리 작업의 대상이었던 최근 기록 최대 50건입니다.
+                이 회원을 대상으로 관리자 조작이 수행된 최근 감사 기록 최대 50건입니다.
               </CardDescription>
             </div>
-            <Button asChild variant="outline" size="sm" className="min-h-10">
-              <Link href={logLink}>
-                전체 감사 로그에서 보기 <ArrowUpRight className="size-4" />
-              </Link>
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="secondary" size="sm" className="min-h-10">
+                <Link href={activityLogLink}>
+                  사용자 활동 로그 보기 <ArrowUpRight className="size-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="sm" className="min-h-10">
+                <Link href={auditLogLink}>
+                  전체 감사 로그에서 보기 <ArrowUpRight className="size-4" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
           {activity === null ? (
-            <EmptyState title="사용자 활동 기록을 불러오지 못했어요." />
+            <EmptyState title="관리 조치 감사 기록을 불러오지 못했어요." />
           ) : events.length === 0 ? (
-            <EmptyState title="이 사용자를 대상으로 한 관리 기록이 없습니다." />
+            <EmptyState
+              title="이 회원을 대상으로 한 관리자 조작 감사 기록은 없습니다."
+              description="접속·체류·클릭 같은 사용자 활동은 별도 활동 로그에서 확인할 수 있습니다."
+            >
+              <Button asChild variant="outline" size="sm" className="min-h-11">
+                <Link href={activityLogLink}>사용자 활동 로그 보기</Link>
+              </Button>
+            </EmptyState>
           ) : (
             <div className="grid gap-2">
               {events.map((event) => (

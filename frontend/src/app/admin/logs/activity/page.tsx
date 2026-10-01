@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/page-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { api } from '@/lib/api';
 import { ApiError } from '@/lib/api';
 import { requireAdminConsole } from '@/lib/session';
@@ -75,6 +76,7 @@ export default async function AdminActivityLogsPage({
   const granularity = params.granularity === 'month' || params.granularity === 'year' ? params.granularity : 'day';
   const periods = granularity === 'day' ? 30 : granularity === 'month' ? 24 : 10;
   const eventType = typeof params.eventType === 'string' ? params.eventType : '';
+  const userId = typeof params.userId === 'string' ? params.userId.trim() : '';
   const limit = typeof params.limit === 'string' ? params.limit : '50';
   const page = typeof params.page === 'string' ? Math.max(1, parseInt(params.page, 10)) : 1;
   const offset = (page - 1) * parseInt(limit, 10);
@@ -90,6 +92,7 @@ export default async function AdminActivityLogsPage({
   try {
     const query = new URLSearchParams({ limit, offset: String(offset) });
     if (eventType) query.set('eventType', eventType);
+    if (userId) query.set('userId', userId);
     logs = await api<ActivityLogRow[]>(`/api/v1/admin/activity/logs?${query.toString()}`);
   } catch (error) {
     loadProblem = error instanceof ApiError && error.status === 403
@@ -139,6 +142,18 @@ export default async function AdminActivityLogsPage({
         </CardHeader>
         <CardContent>
           <form method="GET" className="flex flex-wrap items-center gap-4">
+            <div className="w-full sm:w-80">
+              <label htmlFor="userId" className="mb-1 block text-xs text-muted-foreground">회원 ID</label>
+              <Input
+                id="userId"
+                name="userId"
+                defaultValue={userId}
+                placeholder="UUID · 비우면 전체 회원"
+                autoComplete="off"
+                className="min-h-10 font-mono text-xs"
+              />
+            </div>
+
             <div className="w-full sm:w-48">
               <label htmlFor="eventType" className="mb-1 block text-xs text-muted-foreground">이벤트 종류</label>
               <select
@@ -327,7 +342,9 @@ export default async function AdminActivityLogsPage({
               asChild={page > 1}
             >
               {page > 1 ? (
-                <Link href={`/admin/logs/activity?page=${page - 1}&limit=${limit}&eventType=${eventType}`}>
+                <Link
+                  href={`/admin/logs/activity?page=${page - 1}&limit=${limit}&eventType=${encodeURIComponent(eventType)}&userId=${encodeURIComponent(userId)}`}
+                >
                   ← 이전 페이지
                 </Link>
               ) : (
@@ -342,7 +359,9 @@ export default async function AdminActivityLogsPage({
               asChild={logs.length >= parseInt(limit, 10)}
             >
               {logs.length >= parseInt(limit, 10) ? (
-                <Link href={`/admin/logs/activity?page=${page + 1}&limit=${limit}&eventType=${eventType}`}>
+                <Link
+                  href={`/admin/logs/activity?page=${page + 1}&limit=${limit}&eventType=${encodeURIComponent(eventType)}&userId=${encodeURIComponent(userId)}`}
+                >
                   다음 페이지 →
                 </Link>
               ) : (

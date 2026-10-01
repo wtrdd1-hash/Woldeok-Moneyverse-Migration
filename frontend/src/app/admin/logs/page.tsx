@@ -245,9 +245,27 @@ export default async function AdminLogsPage({
             <EmptyState title={search.problem} />
           ) : events.length === 0 ? (
             <EmptyState
-              title="조건에 맞는 기록이 없습니다."
-              {...(paged ? { description: '마지막 쪽까지 왔거나, 조건이 좁습니다.' } : {})}
-            />
+              title={
+                filters.member
+                  ? '이 회원을 대상으로 한 관리자 조작 감사 기록은 없습니다.'
+                  : '조건에 맞는 기록이 없습니다.'
+              }
+              description={
+                filters.member
+                  ? '접속·체류·클릭 같은 사용자 활동은 운영 감사 로그와 별도로 기록됩니다.'
+                  : paged
+                    ? '마지막 쪽까지 왔거나, 조건이 좁습니다.'
+                    : undefined
+              }
+            >
+              {filters.member && (
+                <Button asChild variant="outline" size="sm" className="min-h-11">
+                  <Link href={`/admin/logs/activity?userId=${encodeURIComponent(filters.member)}&limit=50`}>
+                    사용자 접속 · 체류 · 클릭 로그 보기
+                  </Link>
+                </Button>
+              )}
+            </EmptyState>
           ) : (
             <AuditLogsView events={events} />
           )}
