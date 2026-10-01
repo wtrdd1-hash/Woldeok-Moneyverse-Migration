@@ -109,6 +109,7 @@ async function proxy(request: NextRequest, parts: readonly string[]): Promise<Ne
   const outgoing = new Headers({
     accept: request.headers.get('accept') ?? 'application/json',
     'x-internal-token': internalToken(),
+    'x-moneyverse-channel': 'APP',
     'x-moneyverse-gateway': 'app-api-v1',
   });
   for (const name of APP_API_REQUEST_HEADERS) {

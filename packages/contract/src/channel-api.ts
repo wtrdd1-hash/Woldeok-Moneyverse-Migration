@@ -38,7 +38,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/account",
   },
   {
@@ -52,7 +52,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/account/identities",
   },
   {
@@ -66,7 +66,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/account/identities/:id",
   },
   {
@@ -80,7 +80,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/account/identities/:provider/link",
   },
   {
@@ -94,7 +94,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/account/security/events",
   },
   {
@@ -108,7 +108,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/account/security/sessions",
   },
   {
@@ -122,7 +122,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/account/security/sessions/:id",
   },
   {
@@ -136,7 +136,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/account/security/sessions/revoke-others",
   },
   {
@@ -150,7 +150,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/activity/events",
   },
   {
@@ -164,7 +164,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/admin/activity/logs",
   },
   {
@@ -178,7 +178,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/admin/activity/traffic",
   },
   {
@@ -192,7 +192,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/admin/economy/ai-status",
   },
   {
@@ -206,7 +206,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/admin/me",
   },
   {
@@ -220,7 +220,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/admin/security/sessions",
   },
   {
@@ -234,7 +234,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/admin/support/threads",
   },
   {
@@ -248,7 +248,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/admin/support/threads/:id/messages",
   },
   {
@@ -262,7 +262,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/admin/support/threads/:id/messages",
   },
   {
@@ -276,7 +276,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/admin/support/threads/:id/status",
   },
   {
@@ -290,7 +290,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/admin/users",
   },
   {
@@ -304,7 +304,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/admin/work",
   },
   {
@@ -318,7 +318,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/:provider/authorize",
   },
   {
@@ -332,7 +332,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/:provider/callback",
   },
   {
@@ -346,7 +346,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/:provider/reauthentication",
   },
   {
@@ -360,7 +360,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/consent",
   },
   {
@@ -374,7 +374,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/local/login",
   },
   {
@@ -388,7 +388,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/local/password-reset/complete",
   },
   {
@@ -402,7 +402,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/local/password-reset/request",
   },
   {
@@ -416,7 +416,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/local/register",
   },
   {
@@ -430,7 +430,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/local/verify-email",
   },
   {
@@ -444,7 +444,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/logout",
   },
   {
@@ -458,7 +458,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/mobile/handoff",
   },
   {
@@ -472,7 +472,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/policy",
   },
   {
@@ -486,7 +486,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/prelogin-session",
   },
   {
@@ -500,7 +500,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/providers",
   },
   {
@@ -514,7 +514,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/session",
   },
   {
@@ -528,7 +528,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/viewer",
   },
   {
@@ -542,7 +542,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/bank/loans",
   },
   {
@@ -556,7 +556,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:bank.loans",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/bank/loans",
   },
   {
@@ -570,7 +570,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:bank.loans.{id}.repayments",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/bank/loans/:id/repayments",
   },
   {
@@ -584,7 +584,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:bank.movements",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/bank/movements",
   },
   {
@@ -598,7 +598,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:banking.bonds.{id}.redeem",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/banking/bonds/:id/redeem",
   },
   {
@@ -612,7 +612,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:banking.bonds.purchase",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/banking/bonds/purchase",
   },
   {
@@ -626,7 +626,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:banking.borrow",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/banking/borrow",
   },
   {
@@ -640,7 +640,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:banking.claim-interest",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/banking/claim-interest",
   },
   {
@@ -654,7 +654,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:banking.deposit",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/banking/deposit",
   },
   {
@@ -668,7 +668,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:banking.repay",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/banking/repay",
   },
   {
@@ -682,7 +682,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/banking/standing",
   },
   {
@@ -696,7 +696,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:banking.withdraw",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/banking/withdraw",
   },
   {
@@ -710,7 +710,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/images/:key",
   },
   {
@@ -724,7 +724,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/images/uploads",
   },
   {
@@ -738,7 +738,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/posts",
   },
   {
@@ -752,7 +752,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/posts",
   },
   {
@@ -766,7 +766,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/posts/:id",
   },
   {
@@ -780,7 +780,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/posts/:id",
   },
   {
@@ -794,7 +794,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/posts/:id",
   },
   {
@@ -808,7 +808,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/posts/:id/comments",
   },
   {
@@ -822,7 +822,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/posts/:id/comments",
   },
   {
@@ -836,7 +836,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/posts/:id/comments/:commentId",
   },
   {
@@ -850,7 +850,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/public/images/:key",
   },
   {
@@ -864,7 +864,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/public/posts",
   },
   {
@@ -878,7 +878,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/public/posts/:id",
   },
   {
@@ -892,7 +892,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/public/posts/:id/comments",
   },
   {
@@ -906,7 +906,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/public/stock-posts",
   },
   {
@@ -920,7 +920,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/board/stock-posts",
   },
   {
@@ -934,7 +934,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/businesses",
   },
   {
@@ -948,7 +948,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:businesses.{id}.boost",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/businesses/:id/boost",
   },
   {
@@ -962,7 +962,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:businesses.{id}.settle-v2",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/businesses/:id/settle-v2",
   },
   {
@@ -976,7 +976,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:businesses.{id}.settlements",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/businesses/:id/settlements",
   },
   {
@@ -990,7 +990,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:businesses.activate-license",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/businesses/activate-license",
   },
   {
@@ -1004,7 +1004,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/businesses/catalog",
   },
   {
@@ -1018,7 +1018,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:businesses.catalog.{id}.purchases",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/businesses/catalog/:id/purchases",
   },
   {
@@ -1032,7 +1032,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/businesses/equity",
   },
   {
@@ -1046,7 +1046,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/businesses/my-v2",
   },
   {
@@ -1060,7 +1060,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/casino/coin/fairness",
   },
   {
@@ -1074,7 +1074,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:casino.coin.plays",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/casino/coin/plays",
   },
   {
@@ -1088,7 +1088,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/casino/coin/terms",
   },
   {
@@ -1102,7 +1102,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/casino/dice/fairness",
   },
   {
@@ -1116,7 +1116,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:casino.dice.plays",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/casino/dice/plays",
   },
   {
@@ -1130,7 +1130,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/casino/games/terms",
   },
   {
@@ -1144,7 +1144,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/casino/history",
   },
   {
@@ -1158,7 +1158,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/casino/self-limit",
   },
   {
@@ -1172,7 +1172,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "put:casino.self-limit",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/casino/self-limit",
   },
   {
@@ -1186,7 +1186,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/content/announcements",
   },
   {
@@ -1200,7 +1200,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/content/photos",
   },
   {
@@ -1214,7 +1214,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/content/status",
   },
   {
@@ -1228,7 +1228,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:early-game.claims",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/early-game/claims",
   },
   {
@@ -1242,7 +1242,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/early-game/first-day",
   },
   {
@@ -1256,7 +1256,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/early-game/today",
   },
   {
@@ -1270,7 +1270,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/engagement",
   },
   {
@@ -1284,7 +1284,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/engagement/early-game",
   },
   {
@@ -1298,7 +1298,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:engagement.npcs.{code}.orders",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/engagement/npcs/:code/orders",
   },
   {
@@ -1312,7 +1312,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "put:engagement.preferences",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/engagement/preferences",
   },
   {
@@ -1326,7 +1326,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/game-clock",
   },
   {
@@ -1340,7 +1340,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/media/:key",
   },
   {
@@ -1354,7 +1354,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/media/profile/:key",
   },
   {
@@ -1368,7 +1368,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/photos",
   },
   {
@@ -1382,7 +1382,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/photos",
   },
   {
@@ -1396,7 +1396,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/photos/mine",
   },
   {
@@ -1410,7 +1410,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/photos/uploads",
   },
   {
@@ -1424,7 +1424,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/privacy/requests",
   },
   {
@@ -1438,7 +1438,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/privacy/requests",
   },
   {
@@ -1452,7 +1452,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/profile",
   },
   {
@@ -1466,7 +1466,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/profile",
   },
   {
@@ -1480,7 +1480,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/profile/:userId",
   },
   {
@@ -1494,7 +1494,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/profile/image",
   },
   {
@@ -1508,7 +1508,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/profile/image",
   },
   {
@@ -1522,7 +1522,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/profile/settings",
   },
   {
@@ -1536,7 +1536,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/profile/titles",
   },
   {
@@ -1550,7 +1550,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/progression",
   },
   {
@@ -1564,7 +1564,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/progression/credit",
   },
   {
@@ -1578,7 +1578,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/progression/early-game",
   },
   {
@@ -1592,7 +1592,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:progression.refreshes",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/progression/refreshes",
   },
   {
@@ -1606,7 +1606,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/rewards/availability",
   },
   {
@@ -1620,7 +1620,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:rewards.daily.claims",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/rewards/daily/claims",
   },
   {
@@ -1634,7 +1634,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:rewards.work.claims",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/rewards/work/claims",
   },
   {
@@ -1648,7 +1648,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/seasons/events",
   },
   {
@@ -1662,7 +1662,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:seasons.events.{id}.consumptions",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/seasons/events/:id/consumptions",
   },
   {
@@ -1676,7 +1676,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/seasons/events/:id/leaderboard",
   },
   {
@@ -1690,7 +1690,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/shop/catalog",
   },
   {
@@ -1704,7 +1704,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:shop.catalog.{id}.purchases",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/shop/catalog/:id/purchases",
   },
   {
@@ -1718,7 +1718,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/shop/cosmetics/:userId",
   },
   {
@@ -1732,7 +1732,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/shop/holdings",
   },
   {
@@ -1746,7 +1746,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:shop.holdings.{id}.consumptions",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/shop/holdings/:id/consumptions",
   },
   {
@@ -1760,7 +1760,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:shop.holdings.{id}.equip",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/shop/holdings/:id/equip",
   },
   {
@@ -1774,7 +1774,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:shop.holdings.{id}.upkeep-settlements",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/shop/holdings/:id/upkeep-settlements",
   },
   {
@@ -1788,7 +1788,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/shop/items",
   },
   {
@@ -1802,7 +1802,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:shop.items.{id}.purchases",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/shop/items/:id/purchases",
   },
   {
@@ -1816,7 +1816,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/shop/public-catalog",
   },
   {
@@ -1830,7 +1830,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/shop/purchases",
   },
   {
@@ -1844,7 +1844,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks",
   },
   {
@@ -1858,7 +1858,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks/:id/candles",
   },
   {
@@ -1872,7 +1872,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:stocks.{id}.orders",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks/:id/orders",
   },
   {
@@ -1886,7 +1886,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks/:id/prices",
   },
   {
@@ -1900,7 +1900,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:stocks.{id}.watchlist",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks/:id/watchlist",
   },
   {
@@ -1914,7 +1914,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks/alerts",
   },
   {
@@ -1928,7 +1928,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:stocks.alerts",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks/alerts",
   },
   {
@@ -1942,7 +1942,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "delete:stocks.alerts.{id}",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks/alerts/:id",
   },
   {
@@ -1956,7 +1956,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks/alerts/events",
   },
   {
@@ -1970,7 +1970,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks/history",
   },
   {
@@ -1984,7 +1984,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks/market-events",
   },
   {
@@ -1998,7 +1998,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks/portfolio",
   },
   {
@@ -2012,7 +2012,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks/sparklines",
   },
   {
@@ -2026,7 +2026,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks/watchlist",
   },
   {
@@ -2040,7 +2040,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/support/threads",
   },
   {
@@ -2054,7 +2054,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/support/threads",
   },
   {
@@ -2068,7 +2068,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/support/threads/:id/messages",
   },
   {
@@ -2082,7 +2082,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/support/threads/:id/messages",
   },
   {
@@ -2096,7 +2096,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/wallet",
   },
   {
@@ -2110,7 +2110,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:wallet.transfers",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/wallet/transfers",
   },
   {
@@ -2124,7 +2124,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/work",
   },
   {
@@ -2138,7 +2138,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:work.active-job",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/work/active-job",
   },
   {
@@ -2152,7 +2152,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/work/assignments",
   },
   {
@@ -2166,7 +2166,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:work.assignments",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/work/assignments",
   },
   {
@@ -2180,7 +2180,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:work.assignments.{id}.completions",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/work/assignments/:id/completions",
   },
   {
@@ -2194,7 +2194,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:work.assignments.{id}.verify",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/work/assignments/:id/verify",
   },
   {
@@ -2208,7 +2208,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/work/profile",
   },
   {
@@ -2222,7 +2222,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/work/receipts",
   },
   {
@@ -2236,7 +2236,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/work/tasks",
   },
   {
@@ -2250,7 +2250,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:work.tasks.{id}.complete",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/work/tasks/:id/complete",
   },
   {
@@ -2264,7 +2264,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/newspaper/pulse",
   },
   {
@@ -2278,7 +2278,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/newspaper/poll",
   },
   {
@@ -2292,7 +2292,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/newspaper/poll/vote",
   },
   {
@@ -2306,7 +2306,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/newspaper/lore",
   },
   {
@@ -2320,7 +2320,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/banking/pockets",
   },
   {
@@ -2334,7 +2334,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:banking.pockets",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/banking/pockets",
   },
   {
@@ -2348,7 +2348,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:banking.pockets.{id}.transfer",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/banking/pockets/:id/transfer",
   },
   {
@@ -2362,7 +2362,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "put:banking.pockets.{id}",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/banking/pockets/:id",
   },
   {
@@ -2376,7 +2376,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:banking.pockets.{id}.archive",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/banking/pockets/:id/archive",
   },
   {
@@ -2390,7 +2390,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/crafting/recipes",
   },
   {
@@ -2404,7 +2404,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:crafting.execute",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/crafting/execute",
   },
   {
@@ -2418,7 +2418,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/marketplace/listings",
   },
   {
@@ -2432,7 +2432,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/marketplace/my-listings",
   },
   {
@@ -2446,7 +2446,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:marketplace.listings",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/marketplace/listings",
   },
   {
@@ -2460,7 +2460,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:marketplace.listings.{id}.buy",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/marketplace/listings/:id/buy",
   },
   {
@@ -2474,7 +2474,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "RISK_BASED",
     economyCommand: "post:marketplace.listings.{id}.cancel",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/marketplace/listings/:id/cancel",
   },
   {
@@ -2488,7 +2488,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/notifications",
   },
   {
@@ -2502,7 +2502,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/notifications/unread-count",
   },
   {
@@ -2516,7 +2516,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/notifications/:id/read",
   },
   {
@@ -2530,7 +2530,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/notifications/read-all",
   },
   {
@@ -2544,7 +2544,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/auth/session",
   },
   {
@@ -2558,7 +2558,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/support/threads",
   },
   {
@@ -2572,7 +2572,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/support/threads",
   },
   {
@@ -2586,7 +2586,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/support/threads/:id/messages",
   },
   {
@@ -2600,7 +2600,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/support/threads/:id/messages",
   },
   {
@@ -2614,7 +2614,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/chat/conversations",
   },
   {
@@ -2628,7 +2628,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/chat/conversations/:id/messages",
   },
   {
@@ -2642,7 +2642,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/chat/conversations/:id/messages",
   },
   {
@@ -2656,7 +2656,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/chat/conversations/:id/sync",
   },
   {
@@ -2670,7 +2670,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/chat/conversations/:id/read",
   },
   {
@@ -2684,7 +2684,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/chat/unread-count",
   },
   {
@@ -2698,7 +2698,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/game-clock",
   },
   {
@@ -2712,7 +2712,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/engagement/dopamine/status",
   },
   {
@@ -2726,7 +2726,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:engagement.dopamine.golden-duck",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/engagement/dopamine/golden-duck",
   },
   {
@@ -2740,7 +2740,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:engagement.dopamine.pet-fortune",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/engagement/dopamine/pet-fortune",
   },
   {
@@ -2754,7 +2754,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:engagement.dopamine.bull-bear-vote",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/engagement/dopamine/bull-bear-vote",
   },
   {
@@ -2768,7 +2768,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:engagement.dopamine.mini-showdown",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/engagement/dopamine/mini-showdown",
   },
   {
@@ -2782,7 +2782,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: "post:engagement.dopamine.star-drop",
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/engagement/dopamine/star-drop",
   },
   {
@@ -2796,7 +2796,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/newspaper/pulse",
   },
   {
@@ -2810,7 +2810,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/newspaper/poll",
   },
   {
@@ -2824,7 +2824,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: false,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/newspaper/poll/vote",
   },
   {
@@ -2838,7 +2838,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/newspaper/lore",
   },
   {
@@ -2852,7 +2852,7 @@ export const CHANNEL_API_ROUTES: readonly ChannelRouteDefinition[] = [
     integrityPolicy: "NONE",
     economyCommand: null,
     sharedReadOnly: true,
-    availability: "TARGET",
+    availability: "LIVE",
     legacyPath: "/app-api/v1/stocks",
   },
 ] as const;

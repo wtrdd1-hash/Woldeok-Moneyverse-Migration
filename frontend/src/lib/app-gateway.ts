@@ -1,3 +1,12 @@
+import {
+  CHANNEL_API_REQUEST_HEADERS,
+  CHANNEL_API_RESPONSE_HEADERS,
+  channelGatewayOrigin,
+  isJsonMediaType,
+} from './channel-gateway';
+
+export { isJsonMediaType };
+
 export const APP_API_VERSION = '1';
 export const APP_API_CONTRACT_VERSION = 'v2026.09.22.359';
 
@@ -10,40 +19,14 @@ export const APP_API_GROUPS = Object.freeze([
 const APP_API_GROUP_SET = new Set<string>(APP_API_GROUPS);
 
 export const APP_API_REQUEST_HEADERS = Object.freeze([
-  'cookie',
-  'content-type',
-  'x-csrf-token',
-  'user-agent',
-  'accept-language',
-  'range',
-  'if-none-match',
-  'if-modified-since',
-  'if-range',
-  'x-request-id',
+  ...CHANNEL_API_REQUEST_HEADERS,
   'x-moneyverse-client',
   'x-moneyverse-app-version',
   'x-moneyverse-android-sdk',
   'x-play-integrity-token',
-  'cf-connecting-ip',
-  'cf-ipcountry',
 ] as const);
 
-export const APP_API_RESPONSE_HEADERS = Object.freeze([
-  'content-type',
-  'cache-control',
-  'location',
-  'retry-after',
-  'www-authenticate',
-  'etag',
-  'last-modified',
-  'accept-ranges',
-  'content-range',
-  'content-disposition',
-  'x-request-id',
-  'x-ratelimit-limit',
-  'x-ratelimit-remaining',
-  'x-ratelimit-reset',
-] as const);
+export const APP_API_RESPONSE_HEADERS = CHANNEL_API_RESPONSE_HEADERS;
 
 export function appGatewayPath(parts: readonly string[]): string | null {
   if (parts.length === 0) return null;
@@ -66,21 +49,33 @@ export function appGatewayPath(parts: readonly string[]): string | null {
   return `/api/v1/${clean.map(encodeURIComponent).join('/')}`;
 }
 
-export function appGatewayOrigin(headers: Headers, configuredBase = process.env.APP_BASE_URL): string | null {
-  if (!configuredBase) return null;
-  try {
-    const base = new URL(configuredBase);
-    if (base.protocol !== 'https:' && base.protocol !== 'http:') return null;
+export function appGatewayOrigin(
+  headers: Headers,
+  configuredBase = process.env.APP_BASE_URL,
+): string | null {
+  return channelGatewayOrigin(headers, configuredBase);
+}
 
-    // The public origin is deployment configuration, never a client-controlled
-    // Host/X-Forwarded-Host value. Keep reading the headers only to fail closed
-    // on explicit CR/LF injection attempts before forwarding the request.
-    const suppliedHost = headers.get('x-forwarded-host') ?? headers.get('host');
-    if (suppliedHost && /[\r\n]/.test(suppliedHost)) return null;
-    return base.origin;
-  } catch {
-    return null;
+export function parseAppVersion(value: string | null): [number, number, number] | null {
+  const match = value?.trim().match(/^(\d+)\.(\d+)\.(\d+)$/);
+  if (!match) return null;
+  return [Number(match[1]), Number(match[2]), Number(match[3])];
+}
+
+export function isAppVersionBelow(
+  current: [number, number, number],
+  minimum: [number, number, number],
+): boolean {
+  for (let i = 0; i < 3; i += 1) {
+    if (current[i] !== minimum[i]) return current[i]! < minimum[i]!;
   }
+  return false;
+}
+
+export function looksLikeOfficialAndroid(headers: Headers): boolean {
+  const client = headers.get('x-moneyverse-client')?.toLowerCase();
+  const userAgent = headers.get('user-agent') ?? '';
+  return client === 'android' && /^WoldeokMoneyverse-Android\/[0-9]+\.[0-9]+\.[0-9]+(?:\s|$)/.test(userAgent);
 }
 
 function camelAlias(key: string): string | null {
@@ -126,12 +121,6 @@ export function addAppJsonCompatibility(value: unknown, depth = 0): unknown {
   return result;
 }
 
-export function isJsonMediaType(contentType: string | null): boolean {
-  if (!contentType) return false;
-  const mediaType = contentType.split(';', 1)[0]?.trim().toLowerCase();
-  return mediaType === 'application/json' || mediaType?.endsWith('+json') === true;
-}
-
 export function appendAppContractHeaders(headers: Headers): Headers {
   headers.set('x-moneyverse-api-version', APP_API_VERSION);
   headers.set('x-moneyverse-contract-version', APP_API_CONTRACT_VERSION);
@@ -167,5 +156,42 @@ export function appApiContract(origin: string) {
       neverReplaceSuccessfulStateWithNullOnTransportFailure: true,
     },
     groups: [...APP_API_GROUPS],
+  } as const;
+}
+
+export const APP_API_V2_VERSION = '2';
+export const APP_API_V2_CONTRACT_VERSION = 'v2026.10.01.501';
+
+export function appendAppV2ContractHeaders(headers: Headers): Headers {
+  headers.set('x-moneyverse-api-version', APP_API_V2_VERSION);
+  headers.set('x-moneyverse-contract-version', APP_API_V2_CONTRACT_VERSION);
+  headers.set('x-content-type-options', 'nosniff');
+  headers.set('x-moneyverse-field-naming', 'camelCase');
+  headers.set('x-moneyverse-channel', 'APP');
+  return headers;
+}
+
+export function appApiV2Contract(origin: string) {
+  return {
+    apiVersion: APP_API_V2_VERSION,
+    contractVersion: APP_API_V2_CONTRACT_VERSION,
+    baseUrl: `${origin}/app-api/v2`,
+    fieldNaming: 'camelCase',
+    legacyCompatibility: false,
+    auth: {
+      session: 'secure cookie',
+      persistentCookieJarRequired: true,
+      csrfHeader: 'x-csrf-token',
+      loginTruthEndpoint: '/auth/viewer',
+      loginTruthField: 'signedIn',
+    },
+    integrity: {
+      policySource: 'channel route manifest',
+      enforcementEnv: 'APP_API_INTEGRITY_ENFORCEMENT',
+    },
+    errors: {
+      mediaType: 'application/problem+json',
+      neverDecodeNon2xxAsSuccess: true,
+    },
   } as const;
 }
