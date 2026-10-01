@@ -29,3 +29,9 @@
 - 저장소 전체 lint: 이번 변경과 무관한 기존 treasury/lobby 오류로 차단.
 - 문서에 명시된 `scripts/check-secrets.sh`: 현재 main에 없어 통과 주장하지 않음.
 - 전체 백엔드 Vitest는 진행했으나 장시간 종료되지 않아 중단했으며 전체 통과 주장하지 않음.
+
+## CI 보안 게이트 발견 및 준비된 개선안
+- PR CI에서 삭제된 셸 스캐너/헬퍼를 계속 호출하는 오래된 security policy job을 확인했습니다. 실제 스캔 전에 실패합니다.
+- 비셸 대체 스캐너 `scripts/security/check-repository-security.mjs`와 Node 테스트를 추가했습니다. 실제 .env/런타임 데이터 및 private key/GitHub/cloud/Slack/JWT/credential URL 고신뢰 패턴을 차단합니다.
+- 로컬 스캐너 검증은 통과했지만 연결된 Git 자격증명에 GitHub `workflow` scope가 없어 `.github/workflows/ci.yml` 연결 변경 push가 차단됐습니다.
+- 따라서 CI policy job은 릴리스 차단 상태이며 이 브랜치에서 Test/운영 승격을 승인하지 않습니다.

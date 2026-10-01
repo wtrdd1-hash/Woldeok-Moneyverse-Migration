@@ -29,3 +29,9 @@
 - Repository-wide lint: blocked by pre-existing unrelated treasury/lobby errors.
 - Documented `scripts/check-secrets.sh`: absent from current main, so no pass is claimed.
 - Full backend Vitest run made sustained progress but did not terminate promptly; it was stopped and no full-suite pass is claimed.
+
+## CI security-gate finding and prepared remediation
+- PR CI exposed a stale security policy job: it still calls deleted shell scanners/helpers, so the secret gate fails before scanning.
+- Added `scripts/security/check-repository-security.mjs` plus Node tests as a non-shell replacement scanner; it rejects tracked real .env/runtime-data shapes and high-confidence private-key/GitHub/cloud/Slack/JWT/credential-URL patterns.
+- Local scanner verification passed, but wiring it into `.github/workflows/ci.yml` is blocked because the connected Git credential lacks GitHub `workflow` scope.
+- The CI policy job therefore remains a release blocker; Test/Production promotion is not authorized from this branch.
