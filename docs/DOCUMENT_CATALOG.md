@@ -2,8 +2,8 @@
 
 **English canonical** | [한국어](DOCUMENT_CATALOG.ko.md)
 
-> **Snapshot Version**: `v2026.09.28.478`  
-> **Target Branch**: `main` (Full-Stack SEO Overhaul, 7 Dedicated Layouts, Clean Sitemap & IndexNow Push)  
+> **Snapshot Version**: `v2026.10.01.495`
+> **Target Branch**: `security/public-repo-sanitization-v2026.10.01.495` (public-repository security hygiene)
 > **Purpose**: Official master inventory certifying documentation organization status.
 
 ---
@@ -23,7 +23,7 @@
 
 ## 📊 Inventory Summary
 
-Total documents in `docs/`: **1,650 files**, categorized into 15 domains.
+Total files in `docs/`: **1,635** at the v495 working-tree snapshot. Tracked internal update records: **0**. The category rows below are retained as the preceding taxonomy snapshot and are not used as exact post-cleanup counts.
 
 | Classification | Files | Highlights |
 | :--- | :---: | :--- |

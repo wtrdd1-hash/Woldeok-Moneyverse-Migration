@@ -64,6 +64,7 @@ frontend/src/lib/i18n/references/corpus-150k.json
 
 # Sensitive scripts, certificates, and operational tools (NEVER in Git)
 *.sh
+!packages/database/init/000-create-app-role.sh
 *.bash
 stage_*.sh
 promote_*.sh
@@ -84,3 +85,8 @@ scripts/qa/*.sh
 *.pfx
 *.p12
 *.id_rsa
+
+# Public-repository boundary: internal records stay in approved private storage
+docs/updates/*-internal*.md
+docs/internal/
+.internal/

@@ -1,11 +1,20 @@
 # 월덕 머니버스 — 통합 기획 마스터
 
-> 현재 원장 버전: v2026.09.29.486
+> 현재 원장 버전: v2026.10.01.495
 > 구현 권위 계약: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 > 영문 원본: [INTEGRATED_PLANNING_MASTER.md](INTEGRATED_PLANNING_MASTER.md)
 
 ## 필수 회차 기록
 모든 기획 재검토는 시작/중간 `origin/main` exact SHA, 권위 버전 드리프트, 검토한 세부명세와 release/work 기록, 심각도·근거·수용게이트가 있는 gap ID, 영/한 동기화, 구현/Test/Production 주장에 실제 증거가 있는지를 기록한다. 과거 결정은 삭제하지 않고 명시적으로 supersede한다.
+
+## v2026.10.01.495 — 2026-10-01 — 공개 저장소 보안 경계 및 정리
+- 보안/저장소 위생 회차. 시작 `origin/main=91efe427cccbc012cd71c082d3c9caeb246dcf98`; 작업 중 main이 `2bad12eb`로 이동해 구현 전에 fast-forward했다. 전용 브랜치 `security/public-repo-sanitization-v2026.10.01.495`.
+- **SEC495-01 / P0:** 공개 앱 소스에 release signing 비밀번호 fallback이 존재했다. 앱 보안 브랜치에서 공개 fallback을 제거하며, 공개 커밋 값과 실제 자격증명이 같았던 이력이 있으면 노출된 것으로 취급하고 회전해야 한다.
+- **SEC495-02 / P1:** 공개 Git이 내부 업데이트 기록을 추적하고 있었다. 현재 트리의 내부 업데이트 파일을 제거하고 재추적을 ignore하며, 문서 거버넌스는 내부 기록을 비공개 저장소에 두도록 변경한다.
+- **SEC495-03 / P1:** 보안 기획에 공개 저장소 데이터 최소화와 결과값을 노출하지 않는 Git 이력 인지형 secret scanning을 필수화한다. 현재 트리 삭제는 Git 과거 이력 소거 증거가 아니다.
+- **SEC495-04 / P1:** 과거 일괄 shell-script 정리가 migration-parity 테스트에서 요구하는 비밀값 없는 필수 DB 초기화 소스까지 삭제했다. v495는 해당 필수 소스만 복구하고 ignore 예외를 좁혀 보안 정리가 DB bootstrap 계약을 깨지 않도록 한다.
+- **SEC495-05 / P1:** 유지/호환 앱 문서에서 비공개 운영 게이트웨이의 불필요한 공개 참조를 제거한다.
+- 공유 이력 재작성, 강제 push, Test 배포, Production 변경 또는 Production 승격을 이 기획 기록으로 주장하지 않는다.
 
 ## v2026.09.29.486 — 2026-09-29 — 엄격 14.5만 DB 레퍼런스 코퍼스 및 PostgreSQL 17 재검증
 - 조사/기획/문서 전용 주기. 시작/중간/최종 `origin/main=64201629c5cdf931d49e48e8808fc0f882318b3b`; 격리 브랜치 `docs/db-reference-expansion-v2026.09.29.486`.

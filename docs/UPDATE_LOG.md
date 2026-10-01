@@ -1,3 +1,12 @@
+## v2026.10.01.495 — Public Repository Security Boundary & Sanitization
+
+- **Scope:** security/repository hygiene across the web/server repository plus coordinated Android v1.3.5 signing hardening.
+- **Public-data minimization:** tracked internal update records removed and prevented from re-entering the public tree; private operational evidence stays outside public Git.
+- **Regression repair:** restored the required non-secret DB init source removed by an earlier blanket script purge; database tests 7/7 PASS.
+- **Mobile signing:** public password fallbacks removed; debug and signed-release CI responsibilities separated.
+- **Verification:** full server test PASS, typecheck PASS; repository-wide lint remains RED on existing main debt (13 errors, 430 warnings).
+- **Release status:** no Test/Production promotion and no shared-history rewrite.
+
 ## v2026.09.29.486 — Strict 145,579-Record Database Reference Corpus & PostgreSQL 17 Evidence Hardening
 
 - **Documentation Version:** `v2026.09.29.486`

@@ -2,7 +2,7 @@
 
 [English canonical](2026-10-01-public-repository-sanitization-v2026.10.01.495.md) | **한국어**
 
-상태: IN PROGRESS
+상태: IMPLEMENTED / LOCAL_VERIFIED
 날짜: 2026-10-01 KST
 브랜치: `security/public-repo-sanitization-v2026.10.01.495`
 

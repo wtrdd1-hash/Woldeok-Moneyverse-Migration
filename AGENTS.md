@@ -3,8 +3,8 @@
 Working notes for anyone — human or agent — changing this repository.
 
 This is the rebuild of Woldeok Moneyverse, a Korean community virtual economy.
-It is private, it is deployed, and members hold real balances in the production
-stack. **A wrong migration here is not a broken build.**
+This repository is publicly readable; never treat repository privacy as a security boundary.
+The deployed production stack holds real member balances. **A wrong migration here is not a broken build.**
 
 Read this file to the end before your first change. It is long because the
 mistakes it prevents are expensive, and every one of them has been made.
@@ -34,7 +34,7 @@ Woldeok Moneyverse (월덕 머니버스) is a Korean community's virtual economy
 
 The original was not Express. It was a single Node 20 ESM application with no framework at all — raw `node:http`, sequential `if` routing, 18 EJS views, browser TypeScript compiled to global scripts, a socket.io lobby, `pg` and `jose` (`docs/superpowers/specs/2026-08-27-nextjs-nestjs-rebuild-design.md:10`). That framing governs the scope of everything you do here. The rebuild replaced the HTTP, session and view layers. It did not move the economy, because the economy was never in Node.
 
-The repository is private (`wtrdd1-hash/Woldeok-Moneyverse-Migration`). Two stacks are deployed, and members hold real balances in the production one. A wrong migration is not a broken build.
+The repository is public (`wtrdd1-hash/Woldeok-Moneyverse-Migration`). Public Git content must therefore be treated as disclosed. Deployed stacks hold real member balances, so a wrong migration is not a broken build.
 
 ### The one rule
 

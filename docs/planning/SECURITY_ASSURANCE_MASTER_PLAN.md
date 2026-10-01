@@ -20,6 +20,7 @@ Required threat classes: spoofing, tampering, repudiation, information disclosur
 - **Injection/input:** strict bounded schemas, parameterized DB access, no user-controlled shell command construction, contextual output encoding, raw HTML denied by default, bounded deserialization and constrained file/path/URL/redirect handling.
 - **Browser/API:** CSRF on state-changing cookie-authenticated requests, explicit CORS allowlists, CSP/frame/MIME/HSTS hardening, API inventory/version ownership and noindex/no-store where applicable.
 - **Secrets/crypto:** approved secret stores, rotation procedures, no secrets in Git/logs/screenshots/client bundles, adaptive password hashing, platform CSPRNG and no custom cryptographic protocols.
+- **Public repository hygiene:** public Git trees contain only information required for source, public documentation, and reproducible verification. Internal work notes, private operations endpoints, host-specific access details, credential material and sensitive security evidence stay in approved private storage. A current-tree cleanup is not treated as Git-history erasure.
 - **Availability/abuse:** operation-specific rate limits, bounded pagination/query complexity, concurrency/cost budgets for search/AI/uploads/messages/exports and fail-closed high-impact workflows.
 - **Logging/privacy:** structured security events, redaction of tokens/cookies/passwords/DM bodies/payment data, tamper-evident audit for privileged/value-moving actions and alerts for repeated authz failures/credential abuse/privilege changes.
 
@@ -45,7 +46,7 @@ Required threat classes: spoofing, tampering, repudiation, information disclosur
 Each implementation branch runs the applicable controls:
 1. typecheck/lint plus security-focused static analysis;
 2. dependency/SCA and lockfile review;
-3. secret scanning;
+3. current-tree and history-aware secret scanning with redacted findings;
 4. IaC/container/configuration policy checks;
 5. validation/authz/idempotency unit tests;
 6. real-DB integration tests for transaction/concurrency behavior;

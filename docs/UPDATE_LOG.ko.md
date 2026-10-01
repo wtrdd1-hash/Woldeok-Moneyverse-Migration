@@ -1,3 +1,12 @@
+## v2026.10.01.495 — 공개 저장소 보안 경계 및 정리
+
+- **범위:** 웹/서버 저장소 보안 위생 + Android v1.3.5 signing hardening 연계.
+- **공개 데이터 최소화:** 내부 업데이트 추적 기록 제거 및 재추적 방지, 민감 운영 증거는 공개 Git 밖에 보관.
+- **회귀 복구:** 이전 일괄 script 정리에서 삭제된 비밀값 없는 필수 DB init 소스 복구, database test 7/7 PASS.
+- **모바일 signing:** 공개 비밀번호 fallback 제거, debug CI와 signed release CI 역할 분리.
+- **검증:** 서버 전체 test PASS, typecheck PASS. 저장소 전체 lint는 최신 main의 기존 부채(13 errors, 430 warnings)로 RED.
+- **릴리스 상태:** Test/Production 승격 및 공유 Git 이력 재작성 없음.
+
 ## v2026.09.29.486 — 엄격 145,579건 데이터베이스 레퍼런스 코퍼스 및 PostgreSQL 17 근거 보강
 
 - **문서 버전:** `v2026.09.29.486`

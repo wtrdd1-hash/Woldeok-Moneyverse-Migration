@@ -1,11 +1,20 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.29.486
+> Current ledger version: v2026.10.01.495
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.01.495 — 2026-10-01 — Public repository security boundary and sanitization
+- Security/repository-hygiene cycle. Start `origin/main=91efe427cccbc012cd71c082d3c9caeb246dcf98`; mid-work main advanced to `2bad12eb` and was fast-forwarded before implementation. Dedicated branch `security/public-repo-sanitization-v2026.10.01.495`.
+- **SEC495-01 / P0:** a mobile release-signing password fallback was present in the public app source. The public fallback is removed on the app security branch; any real credential that ever reused a publicly committed value must be treated as exposed and rotated.
+- **SEC495-02 / P1:** public Git tracked internal update records. Current-tree internal update files are removed, future internal update paths are ignored, and documentation governance now requires private storage for internal records.
+- **SEC495-03 / P1:** security planning now requires public-repository data minimization plus history-aware secret scanning with redacted findings. Current-tree deletion is explicitly not evidence of Git-history erasure.
+- **SEC495-04 / P1:** a prior blanket shell-script purge removed a required non-secret database initialization source while its migration-parity test still required it. v495 restores only that required source and narrows the ignore rule so security cleanup cannot silently break the database bootstrap contract.
+- **SEC495-05 / P1:** unnecessary public references to the private operations gateway are removed from maintained/compatibility app documentation.
+- No shared-history rewrite, force push, Test deployment, Production mutation, or Production promotion is claimed by this planning record.
 
 ## v2026.09.29.486 — 2026-09-29 — Strict 145k Database Reference Corpus & PostgreSQL 17 Revalidation
 - Research/planning/docs-only cycle. Start, mid-work, and final `origin/main=64201629c5cdf931d49e48e8808fc0f882318b3b`; isolated branch `docs/db-reference-expansion-v2026.09.29.486`.

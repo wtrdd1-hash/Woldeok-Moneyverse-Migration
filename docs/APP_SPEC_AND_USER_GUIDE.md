@@ -4,7 +4,7 @@
 > **Base Commit**: `3de891b` (Latest main)  
 > **Official Production URL**: [https://easy-scraping.com](https://easy-scraping.com)  
 > **Staging URL**: [https://test.easy-scraping.com](https://test.easy-scraping.com)  
-> **Remote MCP Gateway**: [https://mcp.easy-scraping.com](https://mcp.easy-scraping.com)
+> **Internal operations gateway**: private operational detail intentionally omitted from the public repository.
 
 ---
 
@@ -19,7 +19,7 @@ flowchart TD
     BFF["⚡ Next.js 16 (Turbopack SSR / Server Actions / BFF)"]
     API["🏛️ NestJS 10 Backend API (/api/v1/*)"]
     DB[("🐘 PostgreSQL 16 (ACID Ledger & Event Sinks)")]
-    MCP["🤖 MCP Gateway (mcp.easy-scraping.com:3025)"]
+    MCP["🔒 Internal operations gateway (private)"]
 
     Client --> Nginx
     Nginx --> BFF
