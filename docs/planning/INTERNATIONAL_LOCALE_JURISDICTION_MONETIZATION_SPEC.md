@@ -1,8 +1,8 @@
 # Woldeok Moneyverse — International Locale, Jurisdiction & Monetization Specification
 
-> Version: v2026.09.17.177
+> Version: v2026.10.02.507
 > Status: Living implementation-oriented product specification
-> Date: 2026-09-17
+> Date: 2026-10-02
 > Korean counterpart: [INTERNATIONAL_LOCALE_JURISDICTION_MONETIZATION_SPEC.ko.md](INTERNATIONAL_LOCALE_JURISDICTION_MONETIZATION_SPEC.ko.md)
 > Reference matrix: [INTERNATIONAL_COMPLIANCE_REFERENCE_MATRIX.md](INTERNATIONAL_COMPLIANCE_REFERENCE_MATRIX.md)
 > Parent specs: `PROJECT_PLAN.md`, `MONETIZATION_COMPLIANCE_SEO_SPEC.md`, `BILLING_SUBSCRIPTION_CONSUMER_PROTECTION_SPEC.md`, `SEARCH_DISCOVERY_OPERATIONS_SPEC.md`, `MINOR_SAFETY_AGE_ASSURANCE_CONTENT_REMOVAL_SPEC.md`, `CASINO_GAME_SYSTEM_SPEC.md`
@@ -34,7 +34,7 @@ A Korean resident using English remains subject to the applicable Korean product
 
 Country and language selectors are therefore separate controls:
 
-- **Language:** explicit user choice, persisted independently, never forced by IP.
+- **Language:** user-owned preference persisted independently. GeoIP may recommend/preselect a published locale for first-session UX, and non-indexable app onboarding may use it as an initial default; a saved user choice is never overwritten by IP.
 - **Country/region:** explicit account/commercial setting plus trusted coarse policy signals where legally required; changes to high-risk jurisdiction state may require revalidation.
 - **Channel:** web, Google Play Android, Apple App Store iOS, and future channels resolve independently.
 
@@ -238,8 +238,8 @@ Documentation remains **English canonical, Korean second**. Product/public-site 
 P0/P1 target locales:
 
 ```text
-en       English neutral/default
-ko       Korean
+ko       Korean product default/fallback
+en       English
 ja       Japanese
 de       German
 fr       French
@@ -274,9 +274,9 @@ Use separate crawlable URLs per language, preferably subdirectories on the exist
 
 Use region-specific variants (`en-US`, `en-GB`, `en-AU`, etc.) only when the visible content materially differs by market. Do not clone identical regional pages merely to capture keywords.
 
-Every localized page is self-canonical. Equivalent localized pages emit reciprocal `hreflang`. `x-default` points to a genuinely useful neutral language/country selector.
+Every published prefixed localized page is self-canonical. Korean uses the unprefixed canonical root/path, while `/ko/*` is a redirect alias. Equivalent localized pages emit reciprocal `hreflang`. Until a genuinely useful neutral selector exists, `x-default` points to the Korean fallback URL.
 
-Do not IP-redirect crawlers or users between language URLs. A non-blocking suggestion banner may offer “View in 한국어 / 日本語 / Deutsch” while preserving the current URL until the user chooses.
+Do not IP-redirect crawlers or users who requested an explicit language URL. On locale-less public entry pages, GeoIP may preselect or recommend a published language in a non-blocking selector, but the indexed page/URL does not silently change until the user chooses. Non-indexable app onboarding may use GeoIP as an automatic first-session locale default. A saved user choice always wins.
 
 ## 9. Natural localization quality system
 
@@ -338,7 +338,7 @@ Adopt Google Search Central's current international guidance:
 2. reciprocal `hreflang` between true equivalents;
 3. `x-default` for a neutral selector/default when useful;
 4. self-canonical localized URLs;
-5. no automatic language redirect based on IP/`Accept-Language`;
+5. no automatic crawler or explicit-locale redirect based on IP/Accept-Language; GeoIP is a recommendation/chooser default for indexable public pages;
 6. visible primary content and navigation in one clear page language;
 7. locale-specific sitemaps generated only for published/indexable translations;
 8. regional variants only when actually different;
@@ -425,7 +425,7 @@ Every release that changes locale, country policy or billing runs at least:
 ## 14. Rollout order
 
 1. policy engine/schema and admin simulator;
-2. locale registry + English/Korean parity hardening;
+2. Korean-default locale registry + Korean baseline and English/Japanese parity hardening;
 3. Japanese/German/French/Spanish/Portuguese translation pipeline;
 4. public SEO locale URLs/hreflang/sitemaps;
 5. jurisdiction-specific legal/privacy/store evidence registry;
@@ -460,6 +460,12 @@ Every release that changes locale, country policy or billing runs at least:
 - Japan FSA — prepaid payment instruments: https://www.fsa.go.jp/en/news/2018/20180717.html
 
 ## 16. Version record
+
+### v2026.10.02.507
+
+Superseded the English-default product-locale wording with a Korean product/public fallback. Added SEO-safe GeoIP language recommendation, explicit-locale/user-choice precedence, `/ko/*` redirect-alias semantics, and phased overseas localization tied to `GLOBAL_GROWTH_SEO_REVENUE_SPEC.md`.
+
+Documentation-only. No Test or Production runtime behavior changes are claimed by this planning cycle.
 
 ### v2026.09.17.177
 

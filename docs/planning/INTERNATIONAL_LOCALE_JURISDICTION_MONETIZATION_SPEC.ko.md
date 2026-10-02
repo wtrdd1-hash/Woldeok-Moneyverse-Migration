@@ -1,8 +1,8 @@
 # 월덕 머니버스 — 국제 언어·국가정책·수익화 명세
 
-> 버전: v2026.09.17.177
+> 버전: v2026.10.02.507
 > 상태: 구현 지향형 Living 제품 명세
-> 기준일: 2026-09-17
+> 기준일: 2026-10-02
 > 영문 기준 문서: [INTERNATIONAL_LOCALE_JURISDICTION_MONETIZATION_SPEC.md](INTERNATIONAL_LOCALE_JURISDICTION_MONETIZATION_SPEC.md)
 > 근거 매트릭스: [INTERNATIONAL_COMPLIANCE_REFERENCE_MATRIX.ko.md](INTERNATIONAL_COMPLIANCE_REFERENCE_MATRIX.ko.md)
 > 상위 문서: `PROJECT_PLAN.md`, `MONETIZATION_COMPLIANCE_SEO_SPEC.md`, `BILLING_SUBSCRIPTION_CONSUMER_PROTECTION_SPEC.md`, `SEARCH_DISCOVERY_OPERATIONS_SPEC.md`, `MINOR_SAFETY_AGE_ASSURANCE_CONTENT_REMOVAL_SPEC.md`, `CASINO_GAME_SYSTEM_SPEC.md`
@@ -32,7 +32,7 @@ Moneyverse는 UI 언어, 사용자의 실제 국가/지역, 법적 관할, 앱�
 
 한국 이용자가 영어 UI를 써도 한국 정책을 우회하지 못한다. 일본어를 쓰는 해외 이용자에게 일본 전용 상거래 정책을 자동 적용하지 않는다. 언어 선택으로 기능 제한을 우회할 수 없어야 한다.
 
-- **언어:** 사용자가 직접 선택, 별도 저장, IP로 강제 변경 금지.
+- **언어:** 사용자 소유 선호값으로 별도 저장한다. GeoIP는 첫 세션의 게시 locale 추천/selector 기본값에 사용할 수 있고 비색인 앱 온보딩은 초기 자동 기본값을 허용하지만, 저장된 사용자 선택은 IP가 덮어쓰지 않는다.
 - **국가/지역:** 계정/상거래 설정과 법적으로 필요한 신뢰 가능한 거친 위치 신호를 사용. 고위험 기능은 변경 시 재검증 가능.
 - **채널:** 웹, Google Play Android, Apple App Store iOS를 별도 결정.
 
@@ -207,8 +207,8 @@ Play 배포 앱의 디지털 상품은 원칙적으로 Play Billing을 사용하
 1차 대상:
 
 ```text
-en      영어 기본
-ko      한국어
+ko      한국어 제품 기본/fallback
+en      영어
 ja      일본어
 de      독일어
 fr      프랑스어
@@ -234,9 +234,17 @@ pt-BR   브라질 포르투갈어
 
 실제 내용이 국가별로 달라질 때만 `en-US`, `en-GB`, `en-AU` 같은 지역형 URL을 만든다. 키워드 확보용 동일복제 페이지를 만들지 않는다.
 
-언어페이지는 self-canonical이며 진짜 대응 번역끼리 상호 `hreflang`을 낸다. 유용한 중립 언어/국가 선택기에 `x-default`를 연결한다.
+게시된 prefixed 언어 URL은 self-canonical이다. 한국어는 prefix 없는 root/path를 canonical로 사용하고 `/ko/*`는 redirect alias로 둔다. 실제 대응 번역끼리 상호 `hreflang`을 내며, 유용한 중립 selector가 생기기 전 `x-default`는 한국어 fallback URL을 가리킨다.
 
-IP/브라우저 언어로 강제 리디렉션하지 않는다. 사용자가 직접 선택하기 전에는 현재 URL을 유지하고 비차단 추천 배너만 제공할 수 있다.
+공개 색인 URL과 명시 locale URL을 IP/브라우저 언어만으로 강제 리디렉션하지 않는다. GeoIP/Accept-Language는 비차단 추천 또는 selector 기본값에 사용하고, 비색인 앱 온보딩에서만 게시 locale 자동 첫 기본값을 허용한다.
+
+### v507 제품 기본언어·GeoIP 보조 규칙
+
+- 제품/공개 fallback locale은 한국어(ko)다. 영어는 해외 확장용 게시 locale이지 제품 default가 아니다.
+- 공개 색인 URL에서는 IP만으로 다른 언어 URL로 자동 강제이동하지 않는다. GeoIP는 게시 locale 추천/selector 기본값으로 사용한다.
+- 명시 locale URL과 저장된 사용자 언어 선택이 GeoIP보다 우선한다.
+- 비색인 앱 온보딩은 게시된 locale에 한해 GeoIP를 첫 세션 자동 기본값으로 사용할 수 있다.
+- locale이 바뀌어도 jurisdiction/결제/연령/기능허용은 바뀌지 않는다.
 
 ## 9. 자연스러운 번역 품질 시스템
 
@@ -352,13 +360,19 @@ GET /casino/availability
 
 ## 14. 출시 순서
 
-`국가정책 엔진` → `locale registry/EN-KO 기준 강화` → `JA/DE/FR/ES/PT-BR 번역 파이프라인` → `다국어 SEO URL/hreflang/sitemap` → `국가별 법률·개인정보·스토어 evidence` → `국가/채널별 비-P2W 결제` → `카지노 CSP/출처격리` → `Test exact-SHA 국가×언어×결제×카지노 매트릭스` → `국가별 법률/제품 승인` → `기능 flag로 한 국가/채널씩 운영 활성화`.
+`국가정책 엔진` → `한국어 기본 locale registry + KO 기준/EN-JA parity 강화` → `DE/FR/ES/PT-BR 번역 파이프라인` → `다국어 SEO URL/hreflang/sitemap` → `국가별 법률·개인정보·스토어 evidence` → `국가/채널별 비-P2W 결제` → `카지노 CSP/출처격리` → `Test exact-SHA 국가×언어×결제×카지노 매트릭스` → `국가별 법률/제품 승인` → `기능 flag로 한 국가/채널씩 운영 활성화`.
 
 ## 15. 이번 버전의 권위 외부자료
 
 영문 기준 문서의 §15 링크목록을 권위 source index로 사용한다. 프로젝트 문서에는 법률자문 원문 대신 공개 가능한 제품 결론과 출처를 기록한다.
 
 ## 16. 버전 기록
+
+### v2026.10.02.507
+
+영어 제품 default 문구를 한국어 제품/공개 fallback으로 supersede했다. SEO 안전형 GeoIP 언어 추천, 명시 locale/사용자 선택 우선순위, `/ko/*` redirect alias, 단계별 해외 현지화를 `GLOBAL_GROWTH_SEO_REVENUE_SPEC.ko.md`와 연결했다.
+
+문서 전용이며 이번 기획 회차는 Test/Production 런타임 변경 완료를 주장하지 않는다.
 
 ### v2026.09.17.177
 
