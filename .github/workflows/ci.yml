@@ -114,7 +114,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Reject a committed secret
-        run: scripts/check-secrets.sh
+        run: |
+          node --test scripts/security/check-repository-security.test.mjs
+          node scripts/security/check-repository-security.mjs
 
       - name: Test release identity classifier and workflow contract
         run: node --test scripts/release/*.test.mjs
@@ -129,7 +131,9 @@ jobs:
           ops/nginx/check-moneyverse-host-routing.test.sh
 
       - name: Reject raw control bytes in source
-        run: scripts/check-control-bytes.sh
+        run: |
+          node --test scripts/security/check-control-bytes.test.mjs
+          node scripts/security/check-control-bytes.mjs
 
       - name: Record non-runtime CI decision
         if: >-
