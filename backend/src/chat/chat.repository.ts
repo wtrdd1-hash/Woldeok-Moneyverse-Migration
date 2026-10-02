@@ -113,7 +113,7 @@ export class PostgresChatRepository {
          c.created_at,
          CASE WHEN c.participant_a_id = $1::uuid THEN c.participant_b_id ELSE c.participant_a_id END AS peer_user_id,
          COALESCE(u.display_name, '회원') AS peer_display_name,
-         p.avatar_key AS peer_avatar_key,
+         p.image_url AS peer_avatar_key,
          ps.last_read_sequence::text,
          GREATEST(0, c.latest_sequence - ps.last_read_sequence)::text AS unread_count,
          ps.muted,
@@ -131,7 +131,7 @@ export class PostgresChatRepository {
          ON ps.conversation_id = c.id AND ps.user_id = $1::uuid
        JOIN public.users u
          ON u.id = (CASE WHEN c.participant_a_id = $1::uuid THEN c.participant_b_id ELSE c.participant_a_id END)
-       LEFT JOIN public.user_profiles p
+       LEFT JOIN public.member_profiles p
          ON p.user_id = u.id
        WHERE ps.archived = false
        ORDER BY COALESCE(c.last_message_at, c.created_at) DESC
