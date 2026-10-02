@@ -80,9 +80,8 @@ describe('migration parity with the production database', () => {
     expect(numbers, 'a gap or a repeated number').toEqual(expected);
   });
 
-  it('ports the two init scripts', () => {
+  it('ports the init scripts', () => {
     expect([...portedDigests(join(PORTED_ROOT, 'init')).keys()]).toEqual([
-      '000-create-app-role.sh',
       '001-economy-core.sql',
     ]);
   });

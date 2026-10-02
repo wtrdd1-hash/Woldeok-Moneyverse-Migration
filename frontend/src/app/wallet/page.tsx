@@ -14,6 +14,7 @@ import { apiOrNull } from '@/lib/api';
 import { formatMoment } from '@/lib/money';
 import { requireMember } from '@/lib/session';
 import { CitizenTaxReceiptCard } from '@/components/citizen-tax-receipt-card';
+import { FiatBadge } from '@/components/fiat-amount';
 import { sides } from './sides';
 import type { Overview } from './sides';
 import { ExportLedgerCsvButton } from './export-ledger-csv';
@@ -99,11 +100,12 @@ export default async function WalletPage() {
           <CardDescription>
             <T korean="보유" english="Total" /> {balances.currency}
           </CardDescription>
-          <CardTitle className="text-3xl">
+          <CardTitle className="text-3xl flex items-baseline gap-2 flex-wrap">
             <Amount value={balances.totalAvailableAmount} />{' '}
             <span className="text-base font-normal text-muted-foreground">
               {balances.currency}
             </span>
+            <FiatBadge amount={balances.totalAvailableAmount} />
           </CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4">
@@ -260,8 +262,9 @@ function Pocket({
   return (
     <div className="rounded-lg border p-3">
       <dt className="text-xs text-muted-foreground">{term}</dt>
-      <dd className="text-xl font-medium">
+      <dd className="text-xl font-medium flex items-baseline gap-2 flex-wrap">
         <Amount value={amount} />
+        <FiatBadge amount={amount} />
       </dd>
       <dd className="text-xs text-muted-foreground">{detail}</dd>
     </div>

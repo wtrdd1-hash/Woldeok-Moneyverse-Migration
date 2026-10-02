@@ -135,7 +135,7 @@ describe('SEO utility: XML Sitemap builders', () => {
     ]);
 
     expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
-    expect(xml).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+    expect(xml).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">');
     expect(xml).toContain('<loc>https://easy-scraping.com/stocks</loc>');
     expect(xml).toContain('<lastmod>2026-09-21T00:00:00.000Z</lastmod>');
     expect(xml).toContain('<changefreq>daily</changefreq>');

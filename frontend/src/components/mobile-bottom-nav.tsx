@@ -5,12 +5,15 @@ import { usePathname } from 'next/navigation';
 import { Home, Briefcase, TrendingUp, Wallet, User } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 import { useViewer } from '@/lib/use-viewer';
 
 interface TabItem {
   readonly href: string;
   readonly labelKo: string;
   readonly labelEn: string;
+  readonly labelJa: string;
+  readonly labelZh: string;
   readonly icon: React.ElementType;
   readonly matchPrefix?: boolean;
 }
@@ -32,14 +35,48 @@ export function MobileBottomNav() {
   if (isStockSymbolPage) return null;
 
   const tabs: readonly TabItem[] = [
-    { href: '/', labelKo: '홈', labelEn: 'Home', icon: Home, matchPrefix: false },
-    { href: '/stocks', labelKo: '거래소', labelEn: 'Stocks', icon: TrendingUp, matchPrefix: true },
-    { href: '/work', labelKo: '직업', labelEn: 'Careers', icon: Briefcase, matchPrefix: true },
-    { href: '/wallet', labelKo: '지갑', labelEn: 'Wallet', icon: Wallet, matchPrefix: true },
+    {
+      href: '/',
+      labelKo: '홈',
+      labelEn: 'Home',
+      labelJa: 'ホーム',
+      labelZh: '首页',
+      icon: Home,
+      matchPrefix: false,
+    },
+    {
+      href: '/stocks',
+      labelKo: '거래소',
+      labelEn: 'Stocks',
+      labelJa: '取引所',
+      labelZh: '交易所',
+      icon: TrendingUp,
+      matchPrefix: true,
+    },
+    {
+      href: '/work',
+      labelKo: '직업',
+      labelEn: 'Careers',
+      labelJa: '職業',
+      labelZh: '职业',
+      icon: Briefcase,
+      matchPrefix: true,
+    },
+    {
+      href: '/wallet',
+      labelKo: '지갑',
+      labelEn: 'Wallet',
+      labelJa: '財布',
+      labelZh: '钱包',
+      icon: Wallet,
+      matchPrefix: true,
+    },
     {
       href: viewer?.signedIn ? '/account' : '/login',
       labelKo: viewer?.signedIn ? '내 계정' : '로그인',
       labelEn: viewer?.signedIn ? 'Account' : 'Sign in',
+      labelJa: viewer?.signedIn ? 'マイアカウント' : 'ログイン',
+      labelZh: viewer?.signedIn ? '我的账户' : '登录',
       icon: User,
       matchPrefix: true,
     },
@@ -47,7 +84,7 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      aria-label={locale === 'en' ? 'Mobile bottom navigation' : '모바일 하단 내비게이션'}
+      aria-label={localeLabel(locale, '모바일 하단 내비게이션', 'Mobile bottom navigation', 'モバイル下部ナビゲーション', '移动端底部导航')}
       className="fixed inset-x-0 bottom-0 z-50 border-t border-border/80 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl transition-all lg:hidden select-none"
     >
       <div className="mx-auto grid w-full max-w-lg grid-cols-5">
@@ -80,7 +117,7 @@ export function MobileBottomNav() {
                 )}
               />
               <span className="text-[10px] tracking-tight font-medium min-[360px]:text-[11px]">
-                {locale === 'en' ? tab.labelEn : tab.labelKo}
+                {localeLabel(locale, tab.labelKo, tab.labelEn, tab.labelJa, tab.labelZh)}
               </span>
             </Link>
           );

@@ -8,27 +8,56 @@ import { DailyPredictionBattle } from '@/components/retention/daily-prediction-b
 import { ReferralSystem } from '@/components/viral/referral-system';
 import { PublicAdvertisement } from '@/components/public-advertisement';
 
-export const metadata: Metadata = {
-  title: '금융 & 시뮬레이터 웹 도구 허브 (5대 계산기) | 월덕 머니버스',
-  description:
-    '설치 없이 브라우저에서 바로 사용하는 5대 금융 계산기: 복리 예금·적금 이자, 주식 물타기·평단가, 목표 자산·FIRE 은퇴 시뮬레이터, 2026 가상자산 22% 세금 계산기, 직업 파밍 루틴을 100% 무료로 이용하세요.',
-  keywords: [
-    '금융 계산기',
-    '복리 계산기',
-    '적금 이자 계산기',
-    '주식 물타기 계산기',
-    '평단가 계산기',
-    'FIRE 계산기',
-    '은퇴 자금 계산기',
-    '가상자산 세금 계산기',
-    '코인 양도소득세',
-    '가상경제 시뮬레이터',
-    '앱테크 파밍 계산기',
-  ],
-  alternates: {
+import { getServerLocale } from '@/lib/locale-server';
+import { canonicalUrl } from '@/lib/seo';
+
+const TOOLS_META_BY_LOCALE = {
+  en: {
+    title: 'Financial & Simulator Web Tools Hub (5 Calculators) | Woldeok Moneyverse',
+    description: 'Free browser-based financial calculators: Compound interest, Stock dollar-cost averaging, FIRE retirement goal, and Virtual economy calculators.',
+    canonical: '/en/tools',
+  },
+  ko: {
+    title: '금융 & 시뮬레이터 웹 도구 허브 (5대 계산기) | 월덕 머니버스',
+    description: '설치 없이 브라우저에서 바로 사용하는 5대 금융 계산기: 복리 예금·적금 이자, 주식 물타기·평단가, 목표 자산·FIRE 은퇴 시뮬레이터, 2026 가상자산 세금 계산기를 100% 무료로 이용하세요.',
     canonical: '/tools',
   },
+  ja: {
+    title: '金融＆シミュレーター Webツールハブ (5大計算機) | ウォルドクマネーバース',
+    description: 'ブラウザで直接使える5大金融計算機：複利利息、株式ナンピン・平均単価、FIRE目標資産シミュレーターを完全無料で利用できます。',
+    canonical: '/ja/tools',
+  },
+  zh: {
+    title: '金融与模拟器 Web 工具中心 (五大计算器) | 沃尔德克金融元宇宙',
+    description: '浏览器即开即用的五大金融计算器：复利定存、股票补仓摊平成本、FIRE退休目标资产模拟器，100%免费体验。',
+    canonical: '/zh/tools',
+  },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const meta = TOOLS_META_BY_LOCALE[locale] ?? TOOLS_META_BY_LOCALE.en;
+
+  return {
+    title: meta.title,
+    description: meta.description,
+    alternates: {
+      canonical: canonicalUrl(meta.canonical),
+      languages: {
+        'ko-KR': canonicalUrl('/tools'),
+        'en-US': canonicalUrl('/en/tools'),
+        'ja-JP': canonicalUrl('/ja/tools'),
+        'zh-CN': canonicalUrl('/zh/tools'),
+        'x-default': canonicalUrl('/tools'),
+      },
+    },
+    openGraph: {
+      title: meta.title,
+      description: meta.description,
+      url: canonicalUrl(meta.canonical),
+    },
+  };
+}
 
 const TOOLS = [
   {

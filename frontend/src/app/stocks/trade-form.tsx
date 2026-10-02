@@ -9,6 +9,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/in
 import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
 import { useQuote } from '@/lib/use-market-prices';
+import { FiatBadge } from '@/components/fiat-amount';
 import { placeOrder } from './actions';
 
 /**
@@ -188,11 +189,14 @@ export function TradeForm({
             <span className="text-rose-500">-{groupDigits(estimatedTax.toString())} WLD</span>
           </div>
         )}
-        <div className="border-t border-border/50 pt-2 flex items-center justify-between font-bold text-sm">
+        <div className="border-t border-border/50 pt-2 flex items-center justify-between font-bold text-sm flex-wrap gap-2">
           <span className="text-foreground">{side === 'buy' ? (isEn ? 'Est. Payment' : '예상 결제 금액') : (isEn ? 'Est. Net Refund' : '예상 수령 금액')}</span>
-          <span className={side === 'buy' ? 'text-primary text-base' : 'text-emerald-600 dark:text-emerald-400 text-base'}>
-            {groupDigits(estimatedNet.toString())} WLD
-          </span>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className={side === 'buy' ? 'text-primary text-base' : 'text-emerald-600 dark:text-emerald-400 text-base'}>
+              {groupDigits(estimatedNet.toString())} WLD
+            </span>
+            <FiatBadge amount={estimatedNet.toString()} />
+          </div>
         </div>
       </div>
 

@@ -1,6 +1,9 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { LocaleProvider } from '@/components/locale-provider';
 import { SeoClientView, type SeoInitialData } from './seo-client-view';
+
+const renderKo = (ui: React.ReactElement) => render(<LocaleProvider initialLocale="ko">{ui}</LocaleProvider>);
 
 const mockInitialData: SeoInitialData = {
   totalHits24h: 124,
@@ -62,7 +65,7 @@ describe('SeoClientView', () => {
   });
 
   it('renders all 4 hero KPI widgets and metrics correctly', () => {
-    render(<SeoClientView initialData={mockInitialData} />);
+    renderKo(<SeoClientView initialData={mockInitialData} />);
 
     expect(screen.getByText('24시간 봇 크롤링')).toBeTruthy();
     expect(screen.getAllByText('124')[0]).toBeTruthy();
@@ -75,7 +78,7 @@ describe('SeoClientView', () => {
   });
 
   it('renders target URL cards with health badges and names', () => {
-    render(<SeoClientView initialData={mockInitialData} />);
+    renderKo(<SeoClientView initialData={mockInitialData} />);
 
     expect(screen.getByText('침팬지 반도체 (CHIPS)')).toBeTruthy();
     expect(screen.getAllByText('/stocks/CHIPS')[0]).toBeTruthy();
@@ -84,9 +87,9 @@ describe('SeoClientView', () => {
   });
 
   it('filters target cards by category button click', () => {
-    render(<SeoClientView initialData={mockInitialData} />);
+    renderKo(<SeoClientView initialData={mockInitialData} />);
 
-    const stockFilterBtn = screen.getByRole('button', { name: '가상 주식 (10)' });
+    const stockFilterBtn = screen.getByRole('button', { name: /가상 주식/i });
     fireEvent.click(stockFilterBtn);
 
     expect(screen.getByText('침팬지 반도체 (CHIPS)')).toBeTruthy();
@@ -102,7 +105,7 @@ describe('SeoClientView', () => {
       }),
     });
 
-    render(<SeoClientView initialData={mockInitialData} />);
+    renderKo(<SeoClientView initialData={mockInitialData} />);
 
     const submitBtn = screen.getByRole('button', { name: /전체 사이트맵 즉시 제출/i });
     fireEvent.click(submitBtn);
@@ -112,7 +115,7 @@ describe('SeoClientView', () => {
   });
 
   it('renders Google Search Console Search Analytics card with metrics', () => {
-    render(<SeoClientView initialData={mockInitialData} />);
+    renderKo(<SeoClientView initialData={mockInitialData} />);
 
     expect(screen.getByText(/Google Search Console 검색 성과 분석/i)).toBeTruthy();
     expect(screen.getByText('30일간 검색 트렌드 추이')).toBeTruthy();

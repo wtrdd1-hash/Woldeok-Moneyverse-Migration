@@ -26,43 +26,91 @@ import { WalletGlance } from '@/components/wallet-glance';
 import { LobbyCount } from '@/components/lobby-count';
 import { HomeAdvertisement } from '@/components/home-advertisement';
 import { CasualDopamineStation } from '@/components/casual-dopamine-station';
+import { DiscordBanner } from '@/components/discord-banner';
 import { TranslatedText as T } from '@/components/translated-text';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { publicApi } from '@/lib/api';
 import { formatDay } from '@/lib/money';
+import { getServerLocale } from '@/lib/locale-server';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 
 export const revalidate = 60;
 
-const homeOgImage = buildOgImageUrl({
-  title: '월덕 머니버스 — 2026 차세대 핀테크 가상경제 플랫폼',
-  description:
-    'Discord 연동 실시간 가상 경제 원장, 10대 가상 주식 거래소, 3대 금융 웹 계산기 및 7일 출석 룰렛.',
-  type: 'default',
-  badge: '2026 Next-Gen FinTech',
-});
-
-export const metadata: Metadata = {
-  title: { absolute: '월덕 머니버스 — Discord 커뮤니티 가상경제와 게임 보상' },
-  description:
-    '실시간 금융 원장, 10대 가상 주식 거래소, 고정밀 복리/물타기 계산기 및 일일 리텐션 보상을 제공하는 월덕 머니버스입니다.',
-  alternates: { canonical: canonicalUrl('/') },
-  openGraph: {
-    title: '월덕 머니버스 — Discord 커뮤니티 가상경제와 게임 보상',
-    description:
-      '실시간 금융 원장, 10대 가상 주식 거래소, 고정밀 복리/물타기 계산기 및 일일 리텐션 보상을 제공하는 월덕 머니버스입니다.',
-    url: canonicalUrl('/'),
-    images: [{ url: homeOgImage, width: 1200, height: 630 }],
+const HOME_META_BY_LOCALE = {
+  en: {
+    title: 'Woldeok Moneyverse — Discord Virtual Economy & Game Rewards',
+    description: 'Explore real-time virtual economy ledgers, 10 virtual stock exchanges, high-precision compound interest calculators, and daily retention rewards in Woldeok Moneyverse.',
+    badge: '2026 Next-Gen FinTech',
+    ogTitle: 'Woldeok Moneyverse — Discord Virtual Economy & Game Rewards',
+    ogDescription: 'Experience real-time virtual finance, stocks, quests, and mini-games with your Discord community.',
+    canonical: '/en',
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: '월덕 머니버스',
-    description: '2026 차세대 핀테크 가상경제 플랫폼',
-    images: [homeOgImage],
+  ko: {
+    title: '월덕 머니버스 — Discord 커뮤니티 가상경제와 게임 보상',
+    description: '실시간 금융 원장, 10대 가상 주식 거래소, 고정밀 복리/물타기 계산기 및 일일 리텐션 보상을 제공하는 월덕 머니버스입니다.',
+    badge: '2026 Next-Gen FinTech',
+    ogTitle: '월덕 머니버스 — Discord 커뮤니티 가상경제와 게임 보상',
+    ogDescription: '실시간 금융 원장, 10대 가상 주식 거래소, 고정밀 복리/물타기 계산기 및 일일 리텐션 보상을 제공하는 월덕 머니버스입니다.',
+    canonical: '/',
+  },
+  ja: {
+    title: 'ウォルドクマネーバース — Discordコミュニティ仮想経済とゲーム報酬',
+    description: 'リアルタイム金融元帳、10大仮想株式取引所、高精度複利/ナンピン計算機および毎日のリテンション報酬を提供するウォルドクマネーバースです。',
+    badge: '2026 Next-Gen FinTech',
+    ogTitle: 'ウォルドクマネーバース — Discordコミュニティ仮想経済とゲーム報酬',
+    ogDescription: 'リアルタイム金融元帳、10大仮想株式取引所、高精度複利計算機およびコミュニティゲームを体験できます。',
+    canonical: '/ja',
+  },
+  zh: {
+    title: '沃尔德克金融元宇宙 — Discord社区虚拟经济与游戏奖励',
+    description: '提供实时金融账本、十大虚拟股票交易所、高精度复利/补仓计算器及每日留存奖励的沃尔德克金融元宇宙。',
+    badge: '2026 Next-Gen FinTech',
+    ogTitle: '沃尔德克金融元宇宙 — Discord社区虚拟经济与游戏奖励',
+    ogDescription: '提供实时金融账本、十大虚拟股票交易所、高精度复利计算器及社区游戏平台。',
+    canonical: '/zh',
   },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const meta = HOME_META_BY_LOCALE[locale] ?? HOME_META_BY_LOCALE.en;
+
+  const ogImage = buildOgImageUrl({
+    title: meta.title,
+    description: meta.description,
+    type: 'default',
+    badge: meta.badge,
+  });
+
+  return {
+    title: { absolute: meta.title },
+    description: meta.description,
+    alternates: {
+      canonical: canonicalUrl(meta.canonical),
+      languages: {
+        'ko-KR': canonicalUrl('/'),
+        'en-US': canonicalUrl('/en'),
+        'ja-JP': canonicalUrl('/ja'),
+        'zh-CN': canonicalUrl('/zh'),
+        'x-default': canonicalUrl('/'),
+      },
+    },
+    openGraph: {
+      title: meta.ogTitle,
+      description: meta.ogDescription,
+      url: canonicalUrl(meta.canonical),
+      images: [{ url: ogImage, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: meta.ogTitle,
+      description: meta.ogDescription,
+      images: [ogImage],
+    },
+  };
+}
 
 interface Announcement {
   readonly announcementId: string;
@@ -232,30 +280,35 @@ export default async function HomePage() {
             <div className="flex items-center justify-between pb-3 border-b border-border/60">
               <div className="flex items-center gap-2">
                 <Calculator className="size-4 text-amber-500" />
-                <h2 className="text-sm font-bold text-foreground">금융 웹 도구 허브</h2>
+                <h2 className="text-sm font-bold text-foreground">
+                  <T korean="금융 웹 도구 허브" english="Financial Tools Hub" />
+                </h2>
               </div>
               <Badge variant="outline" className="text-[10px] font-bold text-amber-500 border-amber-500/30">
                 20,000+ pSEO
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-              복리 예적금 계산기, 코스피/나스닥 2,000+ 종목 물타기 평단가 계산기를 무료로 이용하세요.
+              <T
+                korean="복리 예적금 계산기, 코스피/나스닥 2,000+ 종목 물타기 평단가 계산기를 무료로 이용하세요."
+                english="Free access to compound interest calculators and dollar-cost averaging tools for 2,000+ stocks."
+              />
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
               <Link href="/tools/compound-calculator" className="text-[11px] font-semibold px-2 py-1 rounded-md bg-muted/60 hover:bg-muted text-foreground">
-                복리 이자 계산기
+                <T korean="복리 이자 계산기" english="Compound Calculator" />
               </Link>
               <Link href="/tools/stock-calculator" className="text-[11px] font-semibold px-2 py-1 rounded-md bg-muted/60 hover:bg-muted text-foreground">
-                물타기 계산기
+                <T korean="물타기 계산기" english="DCA Calculator" />
               </Link>
               <Link href="/tools/farming-calculator" className="text-[11px] font-semibold px-2 py-1 rounded-md bg-muted/60 hover:bg-muted text-foreground">
-                직업 시뮬레이터
+                <T korean="직업 시뮬레이터" english="Career Simulator" />
               </Link>
             </div>
           </div>
           <Button variant="outline" size="sm" asChild className="mt-4 w-full rounded-xl text-xs font-bold min-h-[40px]">
             <Link href="/tools">
-              전체 계산기 둘러보기 <ChevronRight className="ml-1 size-3.5" />
+              <T korean="전체 계산기 둘러보기" english="Explore All Calculators" /> <ChevronRight className="ml-1 size-3.5" />
             </Link>
           </Button>
         </div>
@@ -266,23 +319,28 @@ export default async function HomePage() {
             <div className="flex items-center justify-between pb-3 border-b border-border/60">
               <div className="flex items-center gap-2">
                 <Gift className="size-4 text-emerald-500" />
-                <h2 className="text-sm font-bold text-foreground">일일 럭키 룰렛</h2>
+                <h2 className="text-sm font-bold text-foreground">
+                  <T korean="일일 럭키 룰렛" english="Daily Lucky Roulette" />
+                </h2>
               </div>
               <Badge variant="secondary" className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10">
-                100% 당첨 보장
+                <T korean="100% 당첨 보장" english="100% Win" />
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-              매일 1회 무료 룰렛을 돌리고 최대 5,000 WLD 잭팟과 7일 연속 출석 스트릭 보상을 획득하세요.
+              <T
+                korean="매일 1회 무료 룰렛을 돌리고 최대 5,000 WLD 잭팟과 7일 연속 출석 스트릭 보상을 획득하세요."
+                english="Spin the free daily wheel for up to 5,000 WLD jackpot and claim 7-day streak rewards."
+              />
             </p>
             <div className="mt-3 flex items-center gap-2 text-xs font-mono text-emerald-400">
               <Sparkles className="size-3.5" />
-              <span>오늘의 출석 보상: 100 ~ 1,000 WLD 대기 중</span>
+              <span><T korean="오늘의 출석 보상: 100 ~ 1,000 WLD 대기 중" english="Daily Streak Reward: 100 ~ 1,000 WLD" /></span>
             </div>
           </div>
           <Button variant="outline" size="sm" asChild className="mt-4 w-full rounded-xl text-xs font-bold border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 min-h-[40px]">
             <Link href="/#attendance">
-              출석 룰렛 돌리기 <ArrowRight className="ml-1 size-3.5" />
+              <T korean="출석 룰렛 돌리기" english="Spin Roulette" /> <ArrowRight className="ml-1 size-3.5" />
             </Link>
           </Button>
         </div>
@@ -293,29 +351,37 @@ export default async function HomePage() {
             <div className="flex items-center justify-between pb-3 border-b border-border/60">
               <div className="flex items-center gap-2">
                 <BarChart3 className="size-4 text-blue-500" />
-                <h2 className="text-sm font-bold text-foreground">주가 예측 배팅</h2>
+                <h2 className="text-sm font-bold text-foreground">
+                  <T korean="주가 예측 배팅" english="Stock Price Prediction" />
+                </h2>
               </div>
               <Badge variant="secondary" className="text-[10px] font-bold text-blue-500 bg-blue-500/10">
-                상금 5,000 WLD 풀
+                <T korean="상금 5,000 WLD 풀" english="5,000 WLD Pool" />
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-              매일 15:30 마감! 가상주식 3종 및 코스피/나스닥 종가 상승/하락을 맞추고 균등 배당금을 수령하세요.
+              <T
+                korean="매일 15:30 마감! 가상주식 3종 및 코스피/나스닥 종가 상승/하락을 맞추고 균등 배당금을 수령하세요."
+                english="Closes 15:30 daily! Forecast up/down closes for top virtual stocks and split the dividend pool."
+              />
             </p>
             <div className="mt-3 flex items-center gap-2 text-xs font-mono text-blue-400">
               <Trophy className="size-3.5" />
-              <span>연속 3회 적중 시 &apos;월가의 현자&apos; 칭호 지급</span>
+              <span><T korean="연속 3회 적중 시 '월가의 현자' 칭호 지급" english="Hit 3 in a row to earn 'Sage of Wall Street'" /></span>
             </div>
           </div>
           <Button variant="outline" size="sm" asChild className="mt-4 w-full rounded-xl text-xs font-bold border-blue-500/30 text-blue-500 hover:bg-blue-500/10 min-h-[40px]">
             <Link href="/stocks">
-              예측 투표 참여하기 <ChevronRight className="ml-1 size-3.5" />
+              <T korean="예측 투표 참여하기" english="Join Prediction" /> <ChevronRight className="ml-1 size-3.5" />
             </Link>
           </Button>
         </div>
       </div>
 
-      {/* 3. CASUAL DOPAMINE STATION: 일반 유저 무료 도파민 (피버, 덕이 펫, 여론 잭팟, 1:1 결투) */}
+      {/* 3.5. DISCORD BOT DEEPLINK & WEB ATTENDANCE BONUS BANNER */}
+      <DiscordBanner />
+
+      {/* 4. CASUAL DOPAMINE STATION: 일반 유저 무료 도파민 (피버, 덕이 펫, 여론 잭팟, 1:1 결투) */}
       <CasualDopamineStation />
 
       {/* 4. DUAL-COLUMN LIVE DASHBOARD: 주식 시장 핫 종목 & 직업 업무 스테이션 */}
@@ -338,8 +404,12 @@ export default async function HomePage() {
             <div className="divide-y divide-border/50 mt-2">
               <Link href="/stocks/WDG" className="py-3 flex items-center justify-between hover:bg-muted/30 px-1 rounded-lg transition-colors">
                 <div>
-                  <b className="text-sm font-bold text-foreground">월덕게임즈 (WDG)</b>
-                  <span className="block text-[11px] text-muted-foreground">가상 엔터테인먼트 · 시총 1위</span>
+                  <b className="text-sm font-bold text-foreground">
+                    <T korean="월덕게임즈 (WDG)" english="Woldeok Games (WDG)" />
+                  </b>
+                  <span className="block text-[11px] text-muted-foreground">
+                    <T korean="가상 엔터테인먼트 · 시총 1위" english="Virtual Entertainment · #1 Market Cap" />
+                  </span>
                 </div>
                 <div className="text-right">
                   <span className="font-mono tabular-nums text-sm font-bold text-foreground">1,450 WLD</span>
@@ -349,8 +419,12 @@ export default async function HomePage() {
 
               <Link href="/stocks/WDT" className="py-3 flex items-center justify-between hover:bg-muted/30 px-1 rounded-lg transition-colors">
                 <div>
-                  <b className="text-sm font-bold text-foreground">월덱테크 (WDT)</b>
-                  <span className="block text-[11px] text-muted-foreground">가상 AI &amp; 클라우드 기술주</span>
+                  <b className="text-sm font-bold text-foreground">
+                    <T korean="월덱테크 (WDT)" english="Woldek Tech (WDT)" />
+                  </b>
+                  <span className="block text-[11px] text-muted-foreground">
+                    <T korean="가상 AI & 클라우드 기술주" english="Virtual AI & Cloud Tech" />
+                  </span>
                 </div>
                 <div className="text-right">
                   <span className="font-mono tabular-nums text-sm font-bold text-foreground">1,714 WLD</span>
@@ -360,8 +434,12 @@ export default async function HomePage() {
 
               <Link href="/stocks/CHIMU" className="py-3 flex items-center justify-between hover:bg-muted/30 px-1 rounded-lg transition-colors">
                 <div>
-                  <b className="text-sm font-bold text-foreground">치무테크 (CHIMU)</b>
-                  <span className="block text-[11px] text-muted-foreground">메타버스 로보틱스</span>
+                  <b className="text-sm font-bold text-foreground">
+                    <T korean="치무테크 (CHIMU)" english="Chimu Tech (CHIMU)" />
+                  </b>
+                  <span className="block text-[11px] text-muted-foreground">
+                    <T korean="메타버스 로보틱스" english="Metaverse Robotics" />
+                  </span>
                 </div>
                 <div className="text-right">
                   <span className="font-mono tabular-nums text-sm font-bold text-foreground">3,140 WLD</span>
@@ -397,30 +475,38 @@ export default async function HomePage() {
             <div className="mt-3 space-y-3">
               <div className="p-3.5 rounded-xl border border-border/60 bg-muted/30 flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-bold text-foreground">시니어 프로그래머</span>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">업무 완료 시 +2,200 WLD 급여</p>
+                  <span className="text-xs font-bold text-foreground">
+                    <T korean="시니어 프로그래머" english="Senior Programmer" />
+                  </span>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    <T korean="업무 완료 시 +2,200 WLD 급여" english="+2,200 WLD salary on completion" />
+                  </p>
                 </div>
                 <Badge variant="secondary" className="font-mono text-xs font-bold">
-                  Lv.4 마스터
+                  Lv.4 <T korean="마스터" english="Master" />
                 </Badge>
               </div>
 
               <div className="p-3.5 rounded-xl border border-border/60 bg-muted/30 flex items-center justify-between">
                 <div>
-                  <span className="text-xs font-bold text-foreground">퀀트 트레이더</span>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">매매 수수료 15% 감면 혜택</p>
+                  <span className="text-xs font-bold text-foreground">
+                    <T korean="퀀트 트레이더" english="Quant Trader" />
+                  </span>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    <T korean="매매 수수료 15% 감면 혜택" english="15% Trading Fee Discount" />
+                  </p>
                 </div>
                 <Badge variant="secondary" className="font-mono text-xs font-bold">
-                  Lv.2 전문직
+                  Lv.2 <T korean="전문직" english="Pro" />
                 </Badge>
               </div>
             </div>
           </div>
 
           <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground">
-            <span>일일 남은 업무: 5회</span>
+            <span><T korean="일일 남은 업무: 5회" english="Remaining Daily Tasks: 5" /></span>
             <Link href="/work" className="font-semibold text-primary hover:underline">
-              업무 루틴 시작하기
+              <T korean="업무 루틴 시작하기" english="Start Career Routine" />
             </Link>
           </div>
         </div>

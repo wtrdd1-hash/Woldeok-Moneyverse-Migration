@@ -33,12 +33,54 @@ import { canonicalUrl } from '@/lib/seo';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: '가상 주식 거래소 — 실시간 종목 시세 및 캔들 차트 분석',
-  description: '월덕 머니버스 게임 안의 가상 주식 시세·캔들 차트·거래 정보를 확인하는 커뮤니티 가상 거래소입니다.',
-  alternates: { canonical: canonicalUrl('/stocks') },
-  robots: { index: true, follow: true },
+const STOCKS_META_BY_LOCALE = {
+  en: {
+    title: 'Virtual Stock Exchange — Real-time Quotes & Candlestick Charts',
+    description: 'Track real-time stock quotes, candlestick charts, and trade community virtual shares in Woldeok Moneyverse.',
+    canonical: '/en/stocks',
+  },
+  ko: {
+    title: '가상 주식 거래소 — 실시간 종목 시세 및 캔들 차트 분석',
+    description: '월덕 머니버스 게임 안의 가상 주식 시세·캔들 차트·거래 정보를 확인하는 커뮤니티 가상 거래소입니다.',
+    canonical: '/stocks',
+  },
+  ja: {
+    title: '仮想株式取引所 — リアルタイム相場とローソク足チャート分析',
+    description: 'ウォルドクマネーバースの仮想株式相場、ローソク足チャート、取引情報を確認できるコミュニティ取引所です。',
+    canonical: '/ja/stocks',
+  },
+  zh: {
+    title: '虚拟股票交易所 — 实时行情与K线图表分析',
+    description: '查看沃尔德克金融元宇宙内的虚拟股票行情、K线图表与交易信息的社区交易所。',
+    canonical: '/zh/stocks',
+  },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const meta = STOCKS_META_BY_LOCALE[locale] ?? STOCKS_META_BY_LOCALE.en;
+
+  return {
+    title: meta.title,
+    description: meta.description,
+    alternates: {
+      canonical: canonicalUrl(meta.canonical),
+      languages: {
+        'ko-KR': canonicalUrl('/stocks'),
+        'en-US': canonicalUrl('/en/stocks'),
+        'ja-JP': canonicalUrl('/ja/stocks'),
+        'zh-CN': canonicalUrl('/zh/stocks'),
+        'x-default': canonicalUrl('/stocks'),
+      },
+    },
+    robots: { index: true, follow: true },
+    openGraph: {
+      title: meta.title,
+      description: meta.description,
+      url: canonicalUrl(meta.canonical),
+    },
+  };
+}
 
 /** The API returns these rows as the database shapes them. */
 interface StockRow {
