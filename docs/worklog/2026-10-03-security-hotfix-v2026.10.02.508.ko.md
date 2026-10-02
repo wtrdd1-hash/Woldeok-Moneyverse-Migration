@@ -35,3 +35,10 @@
 - 검증된 head만 PR로 main에 통합한다.
 - Main exact-SHA 후보가 격리 Test identity/health/noindex 검사를 통과해야 한다.
 - Test 근거 후에만 무중단 Production 승격을 수행한다.
+
+## GitHub 브랜치 검증 복구
+- exact-head 후보 `f92c75d87aa55d96b6d2755d8c976f88d48fe082`에서 교체한 secret scanner 성공을 확인한 뒤, public-repository sanitization에서 제거된 systemd/nginx shell helper를 policy job이 계속 참조하는 두 번째 기준선 결함이 드러났다.
+- workflow 참조를 전수 확인하여 runtime lane에도 삭제된 `packages/database/ci-apply.sh`, `scripts/reject-prisma-migrate.sh` 참조가 남아 있음을 확인했다.
+- 비-shell 대체 구현으로 fresh CI PostgreSQL migration용 `packages/database/ci-apply.mjs`, Prisma mutation guard용 `scripts/security/reject-prisma-migrate.mjs`와 각각의 Node 테스트를 추가했다.
+- 현재 추적되는 nginx blue/green port switcher에는 Python 회귀 테스트가 있으므로 삭제된 shell 테스트 대신 해당 테스트를 CI에서 실행하도록 정리한다.
+- TDD 근거: 신규 Node 테스트 2개는 구현 전 module-not-found로 실패했고 구현 후 합계 5/5 통과했다.

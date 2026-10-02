@@ -35,3 +35,10 @@
 - Open PR and integrate only the validated head.
 - Main exact-SHA candidate must pass isolated Test identity/health/noindex checks.
 - Only after Test evidence may the zero-downtime Production promotion run.
+
+## GitHub branch-validation repair
+- Exact-head candidate `f92c75d87aa55d96b6d2755d8c976f88d48fe082` proved the replacement secret scanner works, then exposed a second stale CI boundary: the policy job still referenced systemd/nginx shell helpers removed by the public-repository sanitization.
+- Audited all workflow references and found the runtime lane also referenced removed `packages/database/ci-apply.sh` and `scripts/reject-prisma-migrate.sh`.
+- Added non-shell replacements: `packages/database/ci-apply.mjs` for fresh-CI PostgreSQL migration application and `scripts/security/reject-prisma-migrate.mjs` for the Prisma mutation guard, both with Node tests.
+- The retained nginx blue/green port switcher already has a Python regression test, so CI now tests that tracked helper instead of deleted shell files.
+- TDD evidence: both new Node test files failed with module-not-found before implementation, then passed 5/5 after implementation.
