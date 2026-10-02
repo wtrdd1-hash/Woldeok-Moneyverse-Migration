@@ -1,11 +1,21 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.09.29.486
+> Current ledger version: v2026.10.02.507
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.02.507 — 2026-10-02 — Korean-default global growth, international SEO and ad-revenue design
+- Docs/planning-only cycle from start origin/main 5a7c658b38853f564983d19f961c689a494dc4b6 on isolated branch docs/global-growth-seo-v2026.10.02.507.
+- Supersedes product-locale wording that treated English as the default: Korean is product/public fallback; GeoIP is an overseas language recommendation/chooser signal on indexable public pages and may be an automatic onboarding default only on non-indexable app surfaces. Explicit locale URLs and user choice win.
+- Defines overseas utility, knowledge, onboarding, translation, timezone/event, international discovery and retention features as product value before SEO scale.
+- Separates real site search performance from market search-volume estimates and prohibits generated/fallback GSC numbers from operational decisions.
+- Replaces fixed pSEO page-count ambition with an admission gate for distinct intent, independent value, source freshness, canonical/hreflang/internal links, duplicate checks and a deindex/consolidation path.
+- Adds text/Image/video/Discover acquisition, country/locale KPI segmentation and advertising-only market contribution economics.
+- Broad Crossref discovery corpus: 150,000 raw -> 121,810 DOI/title-deduplicated candidates; manifest SHA-256 4dc89e5af460f6bbbbea4ae68a923f9cab6b6c8a274eaff5787c77a05d95b729. Discovery breadth is not manual review.
+- Detailed authority: GLOBAL_GROWTH_SEO_REVENUE_SPEC.md. No runtime/Test/Production completion is claimed.
 
 ## v2026.09.29.486 — 2026-09-29 — Strict 145k Database Reference Corpus & PostgreSQL 17 Revalidation
 - Research/planning/docs-only cycle. Start, mid-work, and final `origin/main=64201629c5cdf931d49e48e8808fc0f882318b3b`; isolated branch `docs/db-reference-expansion-v2026.09.29.486`.
