@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, expect, it, beforeEach } from 'vitest';
+import { LocaleProvider } from '@/components/locale-provider';
 import { OnboardingRoadmap } from './components/onboarding-roadmap';
 import { AssetSimulator } from './components/asset-simulator';
 import { OnboardingChecklist } from './components/onboarding-checklist';
@@ -7,10 +8,12 @@ import { EconomyFlowDiagram } from './components/economy-flow-diagram';
 import { GlossarySearch } from './components/glossary-search';
 import { PowerUserCheatSheet } from './components/power-user-cheat-sheet';
 
+const renderKo = (ui: React.ReactElement) => render(<LocaleProvider initialLocale="ko">{ui}</LocaleProvider>);
+
 describe('Interactive Guide Components Suite', () => {
   describe('OnboardingRoadmap', () => {
     it('renders all 5 steps and switches active step upon click', () => {
-      render(<OnboardingRoadmap />);
+      renderKo(<OnboardingRoadmap />);
       // 5개 단계 탭 확인
       expect(screen.getByText('STEP 1')).toBeDefined();
       expect(screen.getByText('STEP 2')).toBeDefined();
@@ -33,7 +36,7 @@ describe('Interactive Guide Components Suite', () => {
 
   describe('AssetSimulator', () => {
     it('calculates simulated net worth with default presets', () => {
-      render(<AssetSimulator />);
+      renderKo(<AssetSimulator />);
       expect(screen.getByText('1분 모의 자산 형성 시뮬레이터')).toBeDefined();
       // 기본 30일 시뮬레이션 결과 레이블 표시 확인
       expect(screen.getByText(/30일 후 예상 총 자산/)).toBeDefined();
@@ -50,7 +53,7 @@ describe('Interactive Guide Components Suite', () => {
     });
 
     it('renders 6 essential onboarding quests and allows toggling', () => {
-      render(<OnboardingChecklist />);
+      renderKo(<OnboardingChecklist />);
       expect(screen.getByText('입문 6대 온보딩 퀘스트 & 뱃지')).toBeDefined();
       expect(screen.getByText('계정 로그인 & 약관 동의')).toBeDefined();
       expect(screen.getByText('첫 출석 체크 & 일일 퀘스트')).toBeDefined();
@@ -69,7 +72,7 @@ describe('Interactive Guide Components Suite', () => {
 
   describe('EconomyFlowDiagram', () => {
     it('renders 5 flow nodes and allows node selection', () => {
-      render(<EconomyFlowDiagram />);
+      renderKo(<EconomyFlowDiagram />);
       expect(screen.getByText('가상경제 5대 선순환 아키텍처')).toBeDefined();
       expect(screen.getByText('1. 생산 및 활동')).toBeDefined();
       expect(screen.getByText('2. 가상 금융')).toBeDefined();
@@ -85,7 +88,7 @@ describe('Interactive Guide Components Suite', () => {
 
   describe('GlossarySearch', () => {
     it('filters terms based on search input and category selection', () => {
-      render(<GlossarySearch />);
+      renderKo(<GlossarySearch />);
       expect(screen.getByText('핀테크 & 게임 핵심 용어 사전')).toBeDefined();
 
       // 초기 목록에 복식부기 및 멱등성 존재 확인
@@ -102,7 +105,7 @@ describe('Interactive Guide Components Suite', () => {
 
   describe('PowerUserCheatSheet', () => {
     it('renders 4 cheat sheet domains', () => {
-      render(<PowerUserCheatSheet />);
+      renderKo(<PowerUserCheatSheet />);
       expect(screen.getByText('파워 유저를 위한 실전 꿀팁 & 치트시트')).toBeDefined();
       expect(screen.getByText('주식 거래소 쾌속 트레이딩')).toBeDefined();
       expect(screen.getByText('직업 파밍 쿨타임 최적화')).toBeDefined();

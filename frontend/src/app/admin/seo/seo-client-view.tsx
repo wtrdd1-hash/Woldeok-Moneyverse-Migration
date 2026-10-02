@@ -64,12 +64,7 @@ interface SeoClientViewProps {
   readonly initialData: SeoInitialData;
 }
 
-const categoryTabs = [
-  { id: 'all', label: '전체 (18)' },
-  { id: 'stock', label: '가상 주식 (10)' },
-  { id: 'guide', label: '가이드 (5)' },
-  { id: 'hub', label: '공통 허브 (3)' },
-] as const;
+export type SeoCategory = 'all' | 'stock' | 'guide' | 'hub' | 'static';
 
 function formatRelativeTime(dateString: string | null): string {
   if (!dateString) return '미방문 (Unindexed)';
@@ -121,7 +116,7 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
     errorUrls: number;
     discordNotified: boolean;
   } | null>(null);
-  const [activeCategory, setActiveCategory] = useState<'all' | 'stock' | 'guide' | 'hub'>('all');
+  const [activeCategory, setActiveCategory] = useState<SeoCategory>('all');
   const [botFilter, setBotFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -188,8 +183,15 @@ export function SeoClientView({ initialData }: SeoClientViewProps) {
     }
   };
 
-  const targetUrls = data.targetUrls;
-  const recentLogs = data.recentLogs;
+  const targetUrls = data.targetUrls || [];
+  const recentLogs = data.recentLogs || [];
+
+  const categoryTabs = useMemo<{ id: SeoCategory; label: string }[]>(() => [
+    { id: 'all', label: `전체 (${targetUrls.length})` },
+    { id: 'stock', label: `가상 주식 (${targetUrls.filter((t) => t.category === 'stock').length})` },
+    { id: 'guide', label: `가이드 (${targetUrls.filter((t) => t.category === 'guide').length})` },
+    { id: 'hub', label: `공통 허브 (${targetUrls.filter((t) => t.category === 'hub').length})` },
+  ], [targetUrls]);
 
   const filteredTargetUrls = useMemo(() => {
     const list = targetUrls;

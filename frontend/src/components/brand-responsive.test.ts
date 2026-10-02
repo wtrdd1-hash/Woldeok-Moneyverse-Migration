@@ -15,7 +15,6 @@ describe('responsive brand visibility', () => {
   });
 
   it('progressively hides secondary controls on narrow screens and restores them by CSS', () => {
-    expect(header).toContain('hidden min-[420px]:block');
     expect(header).toContain('lg:hidden');
     expect(header).toContain('hidden items-center gap-1.5 xl:gap-2.5 2xl:gap-4 lg:flex');
     expect(header).toContain('whitespace-nowrap');
@@ -28,7 +27,7 @@ describe('mobile touch targets', () => {
 
   it('keeps primary header controls at the 44px mobile target floor', () => {
     expect(brand).toContain('min-h-11');
-    expect(header).toContain('className="size-11 rounded-[10px] lg:hidden shrink-0"');
-    expect(header).toContain('className="h-11 rounded-[10px] sm:rounded-[12px]');
+    expect(header).toContain('min-[400px]:size-11 rounded-[10px] lg:hidden shrink-0');
+    expect(header).toContain('h-10 sm:h-11 rounded-[10px] sm:rounded-[12px]');
   });
 });

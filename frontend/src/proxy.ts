@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { DETECTED_LOCALE_COOKIE, LOCALE_COOKIE, detectLocale, isLocale } from '@/lib/locale';
+import { DETECTED_LOCALE_COOKIE, LOCALE_COOKIE, detectLocale, isLocale, type Locale } from '@/lib/locale';
 
 /**
  * Browser-facing production traffic must stay on HTTPS. TLS terminates at the
@@ -25,15 +25,18 @@ export function proxy(request: NextRequest) {
     return NextResponse.json({ status: 'ok', timestamp: new Date().toISOString() });
   }
 
-  // The matcher includes static assets so Test build assets can be routed to
-  // the isolated runtime. Production assets do not need locale/auth work.
+  // High-performance static asset routing with immutable caching
   if (
     pathname.startsWith('/_next/static/') ||
     pathname.startsWith('/_next/image') ||
     pathname === '/favicon.ico' ||
-    /\.(?:svg|png|jpg|jpeg|gif|webp)$/.test(pathname)
+    /\.(?:svg|png|jpg|jpeg|gif|webp|woff2?|ico|css|js)$/i.test(pathname)
   ) {
-    return NextResponse.next();
+    const res = NextResponse.next();
+    if (pathname.startsWith('/_next/static/') || /\.(?:woff2?|png|svg|webp)$/i.test(pathname)) {
+      res.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+    return res;
   }
 
   if (process.env.NODE_ENV === 'production') {
@@ -66,21 +69,85 @@ export function proxy(request: NextRequest) {
     });
   }
 
-  const response = NextResponse.next();
-  const explicit = request.cookies.get(LOCALE_COOKIE)?.value;
-  if (!isLocale(explicit)) {
-    const country =
-      request.headers.get('cf-ipcountry') ??
-      request.headers.get('x-vercel-ip-country') ??
-      request.headers.get('x-country-code');
-    const detected = detectLocale(country, request.headers.get('accept-language'));
-    response.cookies.set(DETECTED_LOCALE_COOKIE, detected, {
+  // Check for explicit query parameter (?lang=en or ?locale=ja)
+  const queryLang = request.nextUrl.searchParams.get('lang') || request.nextUrl.searchParams.get('locale');
+  const validQueryLocale = isLocale(queryLang) ? (queryLang as Locale) : null;
+
+  // Check for locale prefix in URL path: /en/stocks, /ja/bank, /zh/wallet, /ko/work, /en, /ja, etc.
+  const localePrefixMatch = pathname.match(/^\/([a-z]{2})($|\/.*)/i);
+  let explicitPrefixLocale: Locale | null = null;
+  let targetPath = pathname;
+
+  if (localePrefixMatch && localePrefixMatch[1]) {
+    const rawLang = localePrefixMatch[1].toLowerCase();
+    const restPath = localePrefixMatch[2] ?? '';
+    const cleanRest = restPath.startsWith('/') ? restPath : (restPath ? `/${restPath}` : '/');
+
+    if (isLocale(rawLang)) {
+      explicitPrefixLocale = rawLang;
+      targetPath = cleanRest;
+    } else {
+      // User entered an unsupported language prefix (e.g. /fr/stocks, /de/bank)
+      // Automatically redirect to English (/en/...)
+      const fallbackUrl = new URL(`/en${cleanRest === '/' ? '' : cleanRest}${request.nextUrl.search}`, request.url);
+      return NextResponse.redirect(fallbackUrl, 307);
+    }
+    if (!targetPath) targetPath = '/';
+  }
+
+  // Prepare response: If targetPath was rewritten from a prefix, perform internal rewrite
+  let response: NextResponse;
+  if (explicitPrefixLocale) {
+    const rewriteUrl = new URL(`${targetPath}${request.nextUrl.search}`, request.url);
+    response = NextResponse.rewrite(rewriteUrl);
+  } else {
+    response = NextResponse.next();
+  }
+
+  // Determine active locale with 3-tier precedence:
+  // Tier 1: Explicit URL prefix or Query param (?lang=ja)
+  // Tier 2: User's saved Cookie (wdmv_locale) - preserved 100% if manually chosen
+  // Tier 3: GeoIP Country Header (CF-IPCountry / x-vercel-ip-country) + Accept-Language detection
+  const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value;
+  const userSavedLocale = isLocale(cookieLocale) ? (cookieLocale as Locale) : null;
+
+  const country =
+    request.headers.get('cf-ipcountry') ??
+    request.headers.get('x-vercel-ip-country') ??
+    request.headers.get('x-country-code');
+  const acceptLang = request.headers.get('accept-language');
+  const detectedGeoLocale = detectLocale(country, acceptLang);
+
+  let finalLocale: Locale;
+
+  if (explicitPrefixLocale || validQueryLocale) {
+    finalLocale = (explicitPrefixLocale || validQueryLocale)!;
+    response.cookies.set(LOCALE_COOKIE, finalLocale, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: 'lax',
+      secure: true,
+    });
+  } else if (userSavedLocale) {
+    finalLocale = userSavedLocale;
+  } else {
+    // Brand new visitor: automatically apply detected GeoIP locale
+    finalLocale = detectedGeoLocale;
+    response.cookies.set(LOCALE_COOKIE, finalLocale, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: 'lax',
+      secure: true,
+    });
+    response.cookies.set(DETECTED_LOCALE_COOKIE, finalLocale, {
       path: '/',
       maxAge: 60 * 60 * 24 * 30,
       sameSite: 'lax',
       secure: true,
     });
   }
+
+  response.headers.set('x-moneyverse-locale', finalLocale);
 
   if (requestHost === 'test.easy-scraping.com' || process.env.SEO_INDEXING_ENABLED === 'false') {
     response.headers.set('x-robots-tag', 'noindex, nofollow');

@@ -60,23 +60,53 @@ export function priceDirection(current: string, open: string): 'rise' | 'fall' |
   return comparison > 0 ? 'rise' : 'fall';
 }
 
-const DATE_TIME = new Intl.DateTimeFormat('ko-KR', { dateStyle: 'short', timeStyle: 'short' });
-const DATE_ONLY = new Intl.DateTimeFormat('ko-KR', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
+import type { Locale } from './locale';
 
-export function formatMoment(value: string | null | undefined, fallback = ''): string {
-  if (!value) return fallback;
-  const date = new Date(value);
-  return Number.isNaN(date.valueOf()) ? fallback : DATE_TIME.format(date);
+const LOCALE_BCP47_MAP: Record<Locale, string> = {
+  ko: 'ko-KR',
+  en: 'en-US',
+  ja: 'ja-JP',
+  zh: 'zh-CN',
+};
+
+const FORMATTERS_MOMENT = new Map<Locale, Intl.DateTimeFormat>();
+const FORMATTERS_DAY = new Map<Locale, Intl.DateTimeFormat>();
+
+function getMomentFormatter(locale: Locale = 'ko'): Intl.DateTimeFormat {
+  let formatter = FORMATTERS_MOMENT.get(locale);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(LOCALE_BCP47_MAP[locale] || 'ko-KR', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    });
+    FORMATTERS_MOMENT.set(locale, formatter);
+  }
+  return formatter;
 }
 
-export function formatDay(value: string | null | undefined, fallback = ''): string {
+function getDayFormatter(locale: Locale = 'ko'): Intl.DateTimeFormat {
+  let formatter = FORMATTERS_DAY.get(locale);
+  if (!formatter) {
+    formatter = new Intl.DateTimeFormat(LOCALE_BCP47_MAP[locale] || 'ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    FORMATTERS_DAY.set(locale, formatter);
+  }
+  return formatter;
+}
+
+export function formatMoment(value: string | null | undefined, fallback = '', locale: Locale = 'ko'): string {
   if (!value) return fallback;
   const date = new Date(value);
-  return Number.isNaN(date.valueOf()) ? fallback : DATE_ONLY.format(date);
+  return Number.isNaN(date.valueOf()) ? fallback : getMomentFormatter(locale).format(date);
+}
+
+export function formatDay(value: string | null | undefined, fallback = '', locale: Locale = 'ko'): string {
+  if (!value) return fallback;
+  const date = new Date(value);
+  return Number.isNaN(date.valueOf()) ? fallback : getDayFormatter(locale).format(date);
 }
 
 /**

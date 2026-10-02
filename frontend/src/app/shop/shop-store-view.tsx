@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { compareAmounts, groupDigits } from '@/lib/money';
+import { FiatBadge } from '@/components/fiat-amount';
 import { AvatarWithCosmetics, NameplateWithTitle, type UserCosmetics } from '@/components/profile-cosmetics';
 
 export interface CatalogItem {
@@ -259,11 +260,12 @@ export function ShopStoreView({
 
               {/* Bottom: Price & Action */}
               <div className="pt-3 border-t border-border/40">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-3 flex-wrap gap-1">
                   <span className="text-xs text-muted-foreground">가격</span>
-                  <div className="flex items-center gap-1 font-extrabold text-sm text-amber-700 dark:text-amber-300">
+                  <div className="flex items-center gap-1.5 font-extrabold text-sm text-amber-700 dark:text-amber-300 flex-wrap">
                     <Coins className="size-4 text-amber-700 dark:text-amber-300" />
                     <span>{groupDigits(item.price)} WLD</span>
+                    <FiatBadge amount={item.price} />
                   </div>
                 </div>
 

@@ -46,21 +46,28 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency?: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly',
   ) => {
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
-    const url = `${base}${cleanPath === '/' ? '' : cleanPath}`;
-    if (registeredUrls.has(url)) return;
-    registeredUrls.add(url);
+    const canonicalUrl = `${base}${cleanPath === '/' ? '' : cleanPath}`;
+    const enUrl = `${base}/en${cleanPath === '/' ? '' : cleanPath}`;
+    const jaUrl = `${base}/ja${cleanPath === '/' ? '' : cleanPath}`;
+    const zhUrl = `${base}/zh${cleanPath === '/' ? '' : cleanPath}`;
+    const koUrl = `${base}${cleanPath === '/' ? '' : cleanPath}`;
 
     entries.push({
-      url,
+      url: canonicalUrl,
       lastModified: RELEASE_TIMESTAMP,
       changeFrequency: changeFrequency || 'daily',
       priority,
       alternates: {
         languages: {
-          ko: url,
-          en: url,
-          ja: url,
-          zh: url,
+          ko: koUrl,
+          'ko-KR': koUrl,
+          en: enUrl,
+          'en-US': enUrl,
+          ja: jaUrl,
+          'ja-JP': jaUrl,
+          zh: zhUrl,
+          'zh-CN': zhUrl,
+          'x-default': canonicalUrl,
         },
       },
     });

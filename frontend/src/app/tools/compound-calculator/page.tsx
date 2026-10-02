@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { FiatBadge } from '@/components/fiat-amount';
 
 export default function CompoundCalculatorPage() {
   const [principal, setPrincipal] = useState<number>(100000);
@@ -295,8 +296,9 @@ export default function CompoundCalculatorPage() {
             </CardHeader>
             <CardContent className="pt-4 space-y-6">
               <div>
-                <div className="font-mono text-3xl sm:text-4xl font-black text-amber-500 tracking-tight">
-                  {calculation.totalFinal.toLocaleString()} <span className="text-lg font-bold text-foreground">WLD</span>
+                <div className="font-mono text-3xl sm:text-4xl font-black text-amber-500 tracking-tight flex items-baseline gap-2 flex-wrap">
+                  <span>{calculation.totalFinal.toLocaleString()} <span className="text-lg font-bold text-foreground">WLD</span></span>
+                  <FiatBadge amount={calculation.totalFinal.toString()} />
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   원금 합계 대비 +{Math.round((calculation.totalInterest / (calculation.totalDeposited || 1)) * 100)}% 총 수익률 달성

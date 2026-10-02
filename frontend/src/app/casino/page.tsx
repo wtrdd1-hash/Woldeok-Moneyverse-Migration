@@ -32,16 +32,59 @@ import { WheelGame } from './wheel-game';
 import { CasinoJackpotTicker } from './casino-jackpot-ticker';
 import type { CasinoJackpotData } from './casino-jackpot-ticker';
 
+import { getServerLocale } from '@/lib/locale-server';
+
 /** One member's stakes and headroom. Never cached, never offered to a crawler. */
 export const dynamic = 'force-dynamic';
 
-export const metadata: Metadata = {
-  title: '럭키존 (가상 미니게임) — 동전·주사위·테마 게임',
-  description:
-    '동전·주사위·슬롯·하이로우 등 서버 판정 기반 게임을 WLD로 즐기는 게임 전용 가상 미니게임 공간입니다.',
-  alternates: { canonical: canonicalUrl('/casino') },
-  robots: { index: true, follow: true },
+const CASINO_META_BY_LOCALE = {
+  en: {
+    title: 'Lucky Zone (Virtual Mini-Games) — Coin, Dice & Slots',
+    description: 'Enjoy server-verified virtual gaming with Coin Flip, Dice, Slots, and Hi-Lo using WLD tokens in Woldeok Moneyverse.',
+    canonical: '/en/casino',
+  },
+  ko: {
+    title: '럭키존 (가상 미니게임) — 동전·주사위·테마 게임',
+    description: '동전·주사위·슬롯·하이로우 등 서버 판정 기반 게임을 WLD로 즐기는 게임 전용 가상 미니게임 공간입니다.',
+    canonical: '/casino',
+  },
+  ja: {
+    title: 'ラッキーゾーン (仮想ミニゲーム) — コイン・サイコロ・スロット',
+    description: 'コイン、サイコロ、スロット、ハイローなどサーバー判定のゲームをWLDで楽しむ仮想ミニゲーム空間です。',
+    canonical: '/ja/casino',
+  },
+  zh: {
+    title: '幸运娱乐区 (虚拟小游戏) — 硬币·骰子·老虎机',
+    description: '在沃尔德克金融元宇宙使用WLD体验抛硬币、掷骰子、老虎机和高低牌等服务器验证游戏。',
+    canonical: '/zh/casino',
+  },
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const meta = CASINO_META_BY_LOCALE[locale] ?? CASINO_META_BY_LOCALE.en;
+
+  return {
+    title: meta.title,
+    description: meta.description,
+    alternates: {
+      canonical: canonicalUrl(meta.canonical),
+      languages: {
+        'ko-KR': canonicalUrl('/casino'),
+        'en-US': canonicalUrl('/en/casino'),
+        'ja-JP': canonicalUrl('/ja/casino'),
+        'zh-CN': canonicalUrl('/zh/casino'),
+        'x-default': canonicalUrl('/casino'),
+      },
+    },
+    robots: { index: true, follow: true },
+    openGraph: {
+      title: meta.title,
+      description: meta.description,
+      url: canonicalUrl(meta.canonical),
+    },
+  };
+}
 
 interface CoinTerms {
   readonly enabled: boolean;

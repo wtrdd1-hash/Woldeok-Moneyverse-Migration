@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next';
 import { IBM_Plex_Mono, Nanum_Myeongjo, Noto_Sans_KR } from 'next/font/google';
 import { SiteShell } from '@/components/site-shell';
 import { LocaleProvider } from '@/components/locale-provider';
+import { CurrencyProvider } from '@/components/currency-context';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { Toaster } from '@/components/ui/sonner';
@@ -21,6 +22,7 @@ import {
   type Locale,
   isLocale,
 } from '@/lib/locale';
+import { CURRENCY_COOKIE, type Currency, isCurrency } from '@/lib/currency';
 import { canonicalUrl as _canonicalUrl, webApplicationJsonLd } from '@/lib/seo';
 // Keep the downloaded Bootstrap distribution quarantined in styles/vendor.
 // Global Bootstrap utilities use !important (for example .bg-primary/.text-primary)
@@ -179,6 +181,13 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords: meta.keywords,
     alternates: {
       canonical: '/',
+      languages: {
+        'ko-KR': '/',
+        'en-US': '/en',
+        'ja-JP': '/ja',
+        'zh-CN': '/zh',
+        'x-default': '/',
+      },
     },
     verification: {
       google:
@@ -205,6 +214,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
       siteName: meta.titleDefault,
       locale: meta.ogLocale,
+      alternateLocale: ['ko_KR', 'en_US', 'ja_JP', 'zh_CN'].filter((l) => l !== meta.ogLocale),
       title: meta.ogTitle,
       description: meta.description,
       url: siteUrl,
@@ -250,6 +260,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const explicit = cookieStore.get(LOCALE_COOKIE)?.value;
   const detected = cookieStore.get(DETECTED_LOCALE_COOKIE)?.value;
   const locale = isLocale(explicit) ? explicit : isLocale(detected) ? detected : DEFAULT_LOCALE;
+  const rawCurrency = cookieStore.get(CURRENCY_COOKIE)?.value;
+  const initialCurrency: Currency | undefined = isCurrency(rawCurrency) ? rawCurrency : undefined;
   const [viewer, policy] = await Promise.all([currentViewer(), fetchLatestPolicy()]);
   const siteStructuredData = getSiteStructuredData(locale);
 
@@ -295,14 +307,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           본문으로 건너뛰기
         </a>
         <LocaleProvider>
-          <Suspense fallback={null}>
-            <ActivityTracker />
-          </Suspense>
-          <ThemeProvider>
-            <SiteShell>{children}</SiteShell>
-            <Toaster />
-            <StaleTabNotice />
-          </ThemeProvider>
+          <CurrencyProvider initialCurrency={initialCurrency}>
+            <Suspense fallback={null}>
+              <ActivityTracker />
+            </Suspense>
+            <ThemeProvider>
+              <SiteShell>{children}</SiteShell>
+              <Toaster />
+              <StaleTabNotice />
+            </ThemeProvider>
+          </CurrencyProvider>
         </LocaleProvider>
       </body>
     </html>

@@ -1,40 +1,40 @@
 'use client';
 
 import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 import { TrendingUp, Coins, Briefcase, Activity, ShieldCheck } from 'lucide-react';
 
 export function FintechTickerBar() {
   const { locale } = useLocale();
-  const isEn = locale === 'en';
 
   const items = [
     {
       icon: Coins,
-      label: isEn ? 'WLD Network Ledger' : 'WLD 원장 상태',
-      value: isEn ? 'Optimal (805 Active Nodes)' : '정상 가동 (805개 노드)',
+      label: localeLabel(locale, 'WLD 원장 상태', 'WLD Network Ledger', 'WLD元帳状態', 'WLD账本状态'),
+      value: localeLabel(locale, '정상 가동 (805개 노드)', 'Optimal (805 Active Nodes)', '正常稼働 (805ノード)', '正常运行 (805个节点)'),
       color: 'text-amber-500',
     },
     {
       icon: TrendingUp,
-      label: isEn ? 'Top Mover: WDG' : '최고 상승: 월덕게임즈',
+      label: localeLabel(locale, '최고 상승: 월덕게임즈', 'Top Mover: WDG', '急上昇銘柄: ウォルドクゲームズ', '最大涨幅: 月德游戏'),
       value: '+4.8% ▲',
       color: 'text-emerald-500 font-bold',
     },
     {
       icon: Briefcase,
-      label: isEn ? 'Daily Work Window' : '일일 직업 보상창',
-      value: isEn ? 'Open · 8 Careers Active' : '진행 중 · 8대 직업 가동',
+      label: localeLabel(locale, '일일 직업 보상창', 'Daily Work Window', '日次職業報酬', '每日职业奖励窗口'),
+      value: localeLabel(locale, '진행 중 · 8대 직업 가동', 'Open · 8 Careers Active', '進行中 · 8大職業稼働', '进行中 · 8大职业运行'),
       color: 'text-blue-500',
     },
     {
       icon: ShieldCheck,
-      label: isEn ? 'System Integrity' : '금융 무결성',
+      label: localeLabel(locale, '금융 무결성', 'System Integrity', '金融の完全性', '金融完整性'),
       value: '100.0% Verified',
       color: 'text-emerald-500',
     },
     {
       icon: Activity,
-      label: isEn ? 'Live Faucet / Sink' : '통화 유동성 지수',
+      label: localeLabel(locale, '통화 유동성 지수', 'Live Faucet / Sink', '通貨流動性指数', '货币流动性指数'),
       value: 'Balanced (0.98)',
       color: 'text-purple-500',
     },
@@ -49,7 +49,7 @@ export function FintechTickerBar() {
             <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
           </span>
           <span className="font-bold text-muted-foreground uppercase tracking-wider text-[10px]">
-            {isEn ? 'LIVE METRICS' : '실시간 지표'}
+            {localeLabel(locale, '실시간 지표', 'LIVE METRICS', 'リアルタイム指標', '实时指标')}
           </span>
         </div>
 

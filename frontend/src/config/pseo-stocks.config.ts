@@ -10,7 +10,7 @@ export interface PseoStockInfo {
 }
 
 export const POPULAR_STOCKS_DATASET: readonly PseoStockInfo[] = [
-  // 국내 코스피 / 코스닥 대형주
+  // 국내 코스피 / 코스닥 대형주 & 테마주
   { ticker: 'samsung', nameKo: '삼성전자', nameEn: 'Samsung Electronics', basePrice: 75000, market: 'KOSPI', category: '반도체/IT' },
   { ticker: 'sk-hynix', nameKo: 'SK하이닉스', nameEn: 'SK Hynix', basePrice: 180000, market: 'KOSPI', category: '반도체' },
   { ticker: 'hyundai-motor', nameKo: '현대자동차', nameEn: 'Hyundai Motor', basePrice: 240000, market: 'KOSPI', category: '자동차' },
@@ -20,10 +20,12 @@ export const POPULAR_STOCKS_DATASET: readonly PseoStockInfo[] = [
   { ticker: 'posco-holdings', nameKo: 'POSCO홀딩스', nameEn: 'POSCO Holdings', basePrice: 380000, market: 'KOSPI', category: '철강/이차전지' },
   { ticker: 'lg-energy', nameKo: 'LG에너지솔루션', nameEn: 'LG Energy Solution', basePrice: 360000, market: 'KOSPI', category: '이차전지' },
   { ticker: 'ecopro-bm', nameKo: '에코프로비엠', nameEn: 'EcoPro BM', basePrice: 160000, market: 'KOSDAQ', category: '이차전지' },
+  { ticker: 'ecopro', nameKo: '에코프로', nameEn: 'EcoPro', basePrice: 82000, market: 'KOSDAQ', category: '이차전지' },
   { ticker: 'kia', nameKo: '기아', nameEn: 'Kia Corp', basePrice: 110000, market: 'KOSPI', category: '자동차' },
   { ticker: 'samsung-sdi', nameKo: '삼성SDI', nameEn: 'Samsung SDI', basePrice: 340000, market: 'KOSPI', category: '이차전지' },
   { ticker: 'hanwha-aero', nameKo: '한화에어로스페이스', nameEn: 'Hanwha Aerospace', basePrice: 320000, market: 'KOSPI', category: '방산/항공우주' },
   { ticker: 'doosan-enerbility', nameKo: '두산에너빌리티', nameEn: 'Doosan Enerbility', basePrice: 21000, market: 'KOSPI', category: '원전/에너지' },
+  { ticker: 'doosan-robotics', nameKo: '두산로보틱스', nameEn: 'Doosan Robotics', basePrice: 72000, market: 'KOSPI', category: '로봇/AI' },
   { ticker: 'krafton', nameKo: '크래프톤', nameEn: 'Krafton', basePrice: 330000, market: 'KOSPI', category: '게임' },
   { ticker: 'kb-financial', nameKo: 'KB금융', nameEn: 'KB Financial Group', basePrice: 85000, market: 'KOSPI', category: '금융/은행' },
   { ticker: 'shinhan-holdings', nameKo: '신한지주', nameEn: 'Shinhan Financial', basePrice: 56000, market: 'KOSPI', category: '금융/은행' },
@@ -31,6 +33,14 @@ export const POPULAR_STOCKS_DATASET: readonly PseoStockInfo[] = [
   { ticker: 'hlb', nameKo: 'HLB', nameEn: 'HLB Life Science', basePrice: 85000, market: 'KOSDAQ', category: '바이오' },
   { ticker: 'hyundai-rotem', nameKo: '현대로템', nameEn: 'Hyundai Rotem', basePrice: 65000, market: 'KOSPI', category: '방산/철도' },
   { ticker: 'sam-bio', nameKo: '삼성바이오로직스', nameEn: 'Samsung Biologics', basePrice: 980000, market: 'KOSPI', category: '바이오' },
+  { ticker: 'hybe', nameKo: '하이브', nameEn: 'HYBE', basePrice: 180000, market: 'KOSPI', category: '엔터/K-POP' },
+  { ticker: 'jyp-ent', nameKo: 'JYP Ent.', nameEn: 'JYP Entertainment', basePrice: 58000, market: 'KOSDAQ', category: '엔터/K-POP' },
+  { ticker: 'sm-ent', nameKo: '에스엠 (SM)', nameEn: 'SM Entertainment', basePrice: 72000, market: 'KOSDAQ', category: '엔터/K-POP' },
+  { ticker: 'kakaobank', nameKo: '카카오뱅크', nameEn: 'KakaoBank', basePrice: 22000, market: 'KOSPI', category: '인터넷전문은행' },
+  { ticker: 'lg-chem', nameKo: 'LG화학', nameEn: 'LG Chem', basePrice: 310000, market: 'KOSPI', category: '화학/이차전지' },
+  { ticker: 'samsung-elec-mech', nameKo: '삼성전기', nameEn: 'Samsung Electro-Mechanics', basePrice: 135000, market: 'KOSPI', category: '전자부품' },
+  { ticker: 'ncsoft', nameKo: '엔씨소프트', nameEn: 'NCSoft', basePrice: 210000, market: 'KOSPI', category: '게임' },
+  { ticker: 'pearlabyss', nameKo: '펄어비스', nameEn: 'Pearl Abyss', basePrice: 38000, market: 'KOSDAQ', category: '게임' },
 
   // 미국 나스닥 / S&P500 빅테크 & 고변동 ETF
   { ticker: 'nvda', nameKo: '엔비디아', nameEn: 'NVIDIA', basePrice: 125, market: 'NASDAQ', category: 'AI 반도체' },
@@ -41,20 +51,31 @@ export const POPULAR_STOCKS_DATASET: readonly PseoStockInfo[] = [
   { ticker: 'amzn', nameKo: '아마존', nameEn: 'Amazon', basePrice: 190, market: 'NASDAQ', category: '이커머스/클라우드' },
   { ticker: 'meta', nameKo: '메타 (페이스북)', nameEn: 'Meta Platforms', basePrice: 580, market: 'NASDAQ', category: 'SNS/VR' },
   { ticker: 'pltr', nameKo: '팔란티어', nameEn: 'Palantir', basePrice: 42, market: 'NYSE', category: '빅데이터/AI' },
+  { ticker: 'nflx', nameKo: '넷플릭스', nameEn: 'Netflix', basePrice: 700, market: 'NASDAQ', category: 'OTT/엔터' },
+  { ticker: 'arm', nameKo: 'ARM 홀딩스', nameEn: 'ARM Holdings', basePrice: 140, market: 'NASDAQ', category: '반도체설계' },
+  { ticker: 'tsm', nameKo: 'TSMC', nameEn: 'Taiwan Semiconductor', basePrice: 180, market: 'NYSE', category: '파운드리' },
+  { ticker: 'avgo', nameKo: '브로드컴', nameEn: 'Broadcom', basePrice: 175, market: 'NASDAQ', category: '통신반도체' },
+  { ticker: 'smci', nameKo: '슈퍼마이크로컴퓨터', nameEn: 'Super Micro Computer', basePrice: 45, market: 'NASDAQ', category: 'AI서버' },
+  { ticker: 'mstr', nameKo: '마이크로스트래티지', nameEn: 'MicroStrategy', basePrice: 190, market: 'NASDAQ', category: '비트코인 보유사' },
   { ticker: 'soxl', nameKo: 'SOXL (반도체 3배 레버리지)', nameEn: 'Direxion Semiconductor Bull 3X', basePrice: 38, market: 'NYSE', category: '레버리지 ETF' },
   { ticker: 'tqqq', nameKo: 'TQQQ (나스닥 3배 레버리지)', nameEn: 'ProShares UltraPro QQQ', basePrice: 72, market: 'NASDAQ', category: '레버리지 ETF' },
   { ticker: 'qqq', nameKo: 'QQQ (나스닥 100 ETF)', nameEn: 'Invesco QQQ Trust', basePrice: 490, market: 'NASDAQ', category: '지수 ETF' },
+  { ticker: 'spy', nameKo: 'SPY (S&P 500 ETF)', nameEn: 'SPDR S&P 500 ETF', basePrice: 570, market: 'NYSE', category: '지수 ETF' },
   { ticker: 'schd', nameKo: 'SCHD (슈드 미국 배당 ETF)', nameEn: 'Schwab US Dividend Equity', basePrice: 84, market: 'NYSE', category: '배당 ETF' },
   { ticker: 'coin', nameKo: '코인베이스', nameEn: 'Coinbase Global', basePrice: 195, market: 'NASDAQ', category: '가상자산 거래소' },
   { ticker: 'amd', nameKo: 'AMD', nameEn: 'Advanced Micro Devices', basePrice: 155, market: 'NASDAQ', category: '반도체' },
+  { ticker: 'intc', nameKo: '인텔', nameEn: 'Intel Corp', basePrice: 22, market: 'NASDAQ', category: '반도체' },
   { ticker: 'ionq', nameKo: '아이온큐', nameEn: 'IonQ', basePrice: 14, market: 'NYSE', category: '양자컴퓨팅' },
 
-  // 가상자산
+  // 가상자산 (크립토 메이저 & 밈 코인)
   { ticker: 'btc', nameKo: '비트코인', nameEn: 'Bitcoin', basePrice: 90000000, market: 'CRYPTO', category: '디지털 금' },
   { ticker: 'eth', nameKo: '이더리움', nameEn: 'Ethereum', basePrice: 3600000, market: 'CRYPTO', category: '스마트 컨트랙트' },
   { ticker: 'sol', nameKo: '솔라나', nameEn: 'Solana', basePrice: 210000, market: 'CRYPTO', category: '고속 레이어1' },
   { ticker: 'xrp', nameKo: '리플', nameEn: 'XRP', basePrice: 800, market: 'CRYPTO', category: '국제 송금' },
   { ticker: 'doge', nameKo: '도지코인', nameEn: 'Dogecoin', basePrice: 160, market: 'CRYPTO', category: '밈 코인' },
+  { ticker: 'shib', nameKo: '시바이누', nameEn: 'Shiba Inu', basePrice: 0.025, market: 'CRYPTO', category: '밈 코인' },
+  { ticker: 'sui', nameKo: '수이 (SUI)', nameEn: 'Sui Network', basePrice: 2800, market: 'CRYPTO', category: '신흥 레이어1' },
+  { ticker: 'pepe', nameKo: '페페 (PEPE)', nameEn: 'Pepe Coin', basePrice: 0.014, market: 'CRYPTO', category: '밈 코인' },
 
   // 머니버스 가상 주식 10종
   { ticker: 'chips', nameKo: '침팬지 반도체', nameEn: 'Chimpanzee Semiconductor', basePrice: 50000, market: 'MONEYVERSE', category: '가상 IT' },
