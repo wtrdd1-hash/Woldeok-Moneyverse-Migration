@@ -214,7 +214,7 @@ export default async function AdminLogsPage({
                   <div className="grid gap-2 flex-1">
                     <div className="flex flex-wrap items-center gap-2 justify-center sm:justify-start">
                       <h3 className="text-sm font-bold text-foreground">
-                        회원 '{userMap[resolvedMemberId].display_name}' 감사 원장 조회 결과
+                        회원 &apos;{userMap[resolvedMemberId].display_name}&apos; 감사 원장 조회 결과
                       </h3>
                       <Badge variant="outline" className="font-mono text-xs">
                         {resolvedMemberId}
@@ -233,7 +233,7 @@ export default async function AdminLogsPage({
                       <Button asChild variant="default" size="sm" className="gap-1.5 font-semibold">
                         <Link href={`/admin/logs/activity?userId=${resolvedMemberId}`}>
                           <User className="size-3.5" />
-                          '{userMap[resolvedMemberId].display_name}'의 실시간 활동 로그 조회하기
+                          &apos;{userMap[resolvedMemberId].display_name}&apos;의 실시간 활동 로그 조회하기
                           <ArrowRight className="size-3.5" />
                         </Link>
                       </Button>
@@ -253,7 +253,7 @@ export default async function AdminLogsPage({
                   <div className="grid gap-2 flex-1">
                     <div className="flex flex-wrap items-center gap-2 justify-center sm:justify-start">
                       <h3 className="text-sm font-bold text-foreground">
-                        관리자 '{userMap[resolvedAdminId].display_name}' 수행 감사 이력 없음
+                        관리자 &apos;{userMap[resolvedAdminId].display_name}&apos; 수행 감사 이력 없음
                       </h3>
                       <Badge variant="outline" className="font-mono text-xs">
                         {resolvedAdminId}
@@ -266,7 +266,7 @@ export default async function AdminLogsPage({
                       <Button asChild variant="default" size="sm" className="gap-1.5 font-semibold">
                         <Link href={`/admin/logs/activity?userId=${resolvedAdminId}`}>
                           <User className="size-3.5" />
-                          '{userMap[resolvedAdminId].display_name}'의 실시간 활동 로그 조회
+                          &apos;{userMap[resolvedAdminId].display_name}&apos;의 실시간 활동 로그 조회
                           <ArrowRight className="size-3.5" />
                         </Link>
                       </Button>

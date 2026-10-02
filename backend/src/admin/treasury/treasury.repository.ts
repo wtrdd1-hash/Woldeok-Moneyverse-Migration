@@ -27,6 +27,49 @@ export interface TreasuryLedgerRow {
   created_at: Date;
 }
 
+export interface TreasuryCitizenDividendResult {
+  success: boolean;
+  disbursement_id: string;
+  ledger_id: string;
+  beneficiary_count: number;
+  amount_per_beneficiary_wld: string;
+  total_amount_wld: string;
+  balance_before: string;
+  balance_after: string;
+  safe_reserve_wld: string;
+}
+
+export interface TreasuryGrantResult {
+  success: boolean;
+  disbursement_id: string;
+  ledger_id: string;
+  disbursement_type: string;
+  target_user_id: string | null;
+  amount_wld: string;
+  balance_before: string;
+  balance_after: string;
+}
+
+export interface TreasuryBudgetDistributionResult {
+  success: boolean;
+  ledger_id: string;
+  total_allocated_wld: string;
+  welfare_wld: string;
+  infra_wld: string;
+  emergency_wld: string;
+  burn_wld: string;
+  remaining_main_wld: string;
+}
+
+export interface TreasuryMarketBuybackBurnResult {
+  success: boolean;
+  ledger_id: string;
+  listing_id: string;
+  item_name: string;
+  price_wld: string;
+  source_vault: string;
+  action: string;
+}
 export interface TreasuryTaxRateItem {
   readonly id: string;
   readonly category: string;
@@ -738,22 +781,12 @@ export class TreasuryRepository {
     adminId: string,
     amountPerUserWld: string,
     reason: string,
-  ): Promise<{
-    success: boolean;
-    disbursement_id: string;
-    ledger_id: string;
-    beneficiary_count: number;
-    amount_per_beneficiary_wld: string;
-    total_amount_wld: string;
-    balance_before: string;
-    balance_after: string;
-    safe_reserve_wld: string;
-  }> {
-    const res = await this.pool.query<{ result: any }>(
+  ): Promise<TreasuryCitizenDividendResult> {
+    const res = await this.pool.query<{ result: TreasuryCitizenDividendResult }>(
       `SELECT public.treasury_disburse_citizen_dividend($1::uuid, $2::text, $3::text) AS result`,
       [adminId, amountPerUserWld, reason],
     );
-    return res.rows[0]?.result;
+    return res.rows[0]?.result as TreasuryCitizenDividendResult;
   }
 
   async disburseGrant(
@@ -762,21 +795,12 @@ export class TreasuryRepository {
     amountWld: string,
     disbursementType: string,
     reason: string,
-  ): Promise<{
-    success: boolean;
-    disbursement_id: string;
-    ledger_id: string;
-    disbursement_type: string;
-    target_user_id: string | null;
-    amount_wld: string;
-    balance_before: string;
-    balance_after: string;
-  }> {
-    const res = await this.pool.query<{ result: any }>(
+  ): Promise<TreasuryGrantResult> {
+    const res = await this.pool.query<{ result: TreasuryGrantResult }>(
       `SELECT public.treasury_disburse_grant($1::uuid, $2::uuid, $3::text, $4::text, $5::text) AS result`,
       [adminId, targetUserId, amountWld, disbursementType, reason],
     );
-    return res.rows[0]?.result;
+    return res.rows[0]?.result as TreasuryGrantResult;
   }
 
   async getReconciliation(): Promise<TreasuryReconciliation> {
@@ -861,45 +885,28 @@ export class TreasuryRepository {
     adminId: string,
     amountWld: string,
     reason: string,
-  ): Promise<{
-    success: boolean;
-    ledger_id: string;
-    total_allocated_wld: string;
-    welfare_wld: string;
-    infra_wld: string;
-    emergency_wld: string;
-    burn_wld: string;
-    remaining_main_wld: string;
-  }> {
-    const res = await this.pool.query<{ result: any }>(
+  ): Promise<TreasuryBudgetDistributionResult> {
+    const res = await this.pool.query<{ result: TreasuryBudgetDistributionResult }>(
       `SELECT public.treasury_distribute_budget_rule($1::uuid, $2::text, $3::text) AS result`,
       [adminId, amountWld, reason],
     );
-    return res.rows[0]?.result;
+    return res.rows[0]?.result as TreasuryBudgetDistributionResult;
   }
 
   async executeMarketBuybackBurn(
     adminId: string,
     listingId: string,
     reason: string,
-  ): Promise<{
-    success: boolean;
-    ledger_id: string;
-    listing_id: string;
-    item_name: string;
-    price_wld: string;
-    source_vault: string;
-    action: string;
-  }> {
-    const res = await this.pool.query<{ result: any }>(
+  ): Promise<TreasuryMarketBuybackBurnResult> {
+    const res = await this.pool.query<{ result: TreasuryMarketBuybackBurnResult }>(
       `SELECT public.treasury_execute_market_buyback_burn($1::uuid, $2::uuid, $3::text) AS result`,
       [adminId, listingId, reason],
     );
-    return res.rows[0]?.result;
+    return res.rows[0]?.result as TreasuryMarketBuybackBurnResult;
   }
 
   async getCitizenTaxReceipt(userId: string): Promise<Record<string, unknown>> {
-    const res = await this.pool.query<{ result: any }>(
+    const res = await this.pool.query<{ result: Record<string, unknown> }>(
       `SELECT public.get_citizen_tax_transparency_receipt($1::uuid) AS result`,
       [userId],
     );
