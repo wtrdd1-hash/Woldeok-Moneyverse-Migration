@@ -155,7 +155,7 @@ describe('TreasuryService', () => {
   });
 
   it('delegates distributeBudgetRule to repository when inputs are valid', async () => {
-    vi.mocked((mockRepo as any).distributeBudgetRule).mockResolvedValueOnce({ success: true, total_allocated_wld: '1000000' });
+    vi.mocked(mockRepo.distributeBudgetRule).mockResolvedValueOnce({ success: true, total_allocated_wld: '1000000' });
 
     const res = await service.distributeBudgetRule(
       '00000000-0000-0000-0000-000000000001',
@@ -164,7 +164,7 @@ describe('TreasuryService', () => {
     );
 
     expect(res).toEqual({ success: true, total_allocated_wld: '1000000' });
-    expect((mockRepo as any).distributeBudgetRule).toHaveBeenCalled();
+    expect(mockRepo.distributeBudgetRule).toHaveBeenCalled();
   });
 
   it('rejects distributeBudgetRule with invalid amount or short reason', async () => {
@@ -178,7 +178,7 @@ describe('TreasuryService', () => {
   });
 
   it('delegates executeMarketBuybackBurn to repository', async () => {
-    vi.mocked((mockRepo as any).executeMarketBuybackBurn).mockResolvedValueOnce({
+    vi.mocked(mockRepo.executeMarketBuybackBurn).mockResolvedValueOnce({
       success: true,
       item_name: '고대 드래곤 투구',
       price_wld: '50000',
@@ -194,14 +194,14 @@ describe('TreasuryService', () => {
   });
 
   it('delegates exportLedgerCsv to repository', async () => {
-    vi.mocked((mockRepo as any).exportLedgerCsv).mockResolvedValueOnce('Timestamp,Vault,TxType\n2026,MAIN,INJECTION');
+    vi.mocked(mockRepo.exportLedgerCsv).mockResolvedValueOnce('Timestamp,Vault,TxType\n2026,MAIN,INJECTION');
 
     const csv = await service.exportLedgerCsv();
     expect(csv).toContain('Timestamp,Vault,TxType');
   });
 
   it('delegates executeWealthTax to repository', async () => {
-    vi.mocked((mockRepo as any).executeWealthTax).mockResolvedValueOnce({
+    vi.mocked(mockRepo.executeWealthTax).mockResolvedValueOnce({
       success: true,
       assessed_count: 6,
       total_collected_wld: '6069',
@@ -213,18 +213,18 @@ describe('TreasuryService', () => {
     );
 
     expect(res).toEqual({ success: true, assessed_count: 6, total_collected_wld: '6069' });
-    expect((mockRepo as any).executeWealthTax).toHaveBeenCalledWith(
+    expect(mockRepo.executeWealthTax).toHaveBeenCalledWith(
       '00000000-0000-0000-0000-000000000001',
       '고액 자산가 누진적 부유세 정기 과세 집행',
     );
   });
 
   it('delegates getWealthTaxAssessments to repository', async () => {
-    vi.mocked((mockRepo as any).getWealthTaxAssessments).mockResolvedValueOnce([]);
+    vi.mocked(mockRepo.getWealthTaxAssessments).mockResolvedValueOnce([]);
 
     const res = await service.getWealthTaxAssessments();
     expect(res).toEqual([]);
-    expect((mockRepo as any).getWealthTaxAssessments).toHaveBeenCalled();
+    expect(mockRepo.getWealthTaxAssessments).toHaveBeenCalled();
   });
 
   it('delegates createBackupSnapshot to repository', async () => {

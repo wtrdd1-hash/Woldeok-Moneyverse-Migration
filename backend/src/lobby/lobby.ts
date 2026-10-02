@@ -98,7 +98,7 @@ export const MAX_MESSAGE_LENGTH = 180;
  * Separate from the connection handler so it can be tested without a server.
  */
 export interface MarketRoomSocket {
-  on(event: string, listener: (...args: any[]) => void): unknown;
+  on(event: string, listener: (...args: unknown[]) => void): unknown;
   join(room: string): unknown;
   leave(room: string): unknown;
 }

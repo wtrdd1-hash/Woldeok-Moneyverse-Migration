@@ -26,6 +26,7 @@ import { requestActivityTrail } from './activity/request-activity.middleware';
 import { AuctionGateway } from './marketplace/auction.gateway';
 import { responseCompression } from './http/compression.middleware';
 import { dynamicEtag } from './http/etag.middleware';
+import { corsPolicy } from './security/cors-policy';
 
 async function bootstrap(): Promise<void> {
   const config = loadConfig(process.env);
@@ -52,23 +53,16 @@ async function bootstrap(): Promise<void> {
     next();
   });
 
-  // Strict CORS policy
-  const allowedOrigins = [
-    new URL(config.baseUrl).origin,
-    'http://127.0.0.1:3000',
-    'http://localhost:3000',
-  ];
+  // CORS is a browser boundary, not a trusted-edge identity channel. Production
+  // accepts only the configured public origin; loopback origins are a local
+  // development convenience. Proxy-owned identity headers are deliberately
+  // absent from allowedHeaders so browser JavaScript cannot author them.
+  const cors = corsPolicy({ baseUrl: config.baseUrl, production: config.production });
   app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(null, false);
-      }
-    },
+    origin: (origin, callback) => callback(null, cors.allowsOrigin(origin)),
     credentials: true,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'X-CSRF-Token', 'X-Requested-With', 'CF-Connecting-IP'],
+    allowedHeaders: [...cors.allowedHeaders],
   });
 
   // Global 1MB payload ceiling to prevent memory-exhaustion & ReDoS attacks
