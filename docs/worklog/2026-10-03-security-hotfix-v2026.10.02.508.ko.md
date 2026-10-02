@@ -42,3 +42,10 @@
 - 비-shell 대체 구현으로 fresh CI PostgreSQL migration용 `packages/database/ci-apply.mjs`, Prisma mutation guard용 `scripts/security/reject-prisma-migrate.mjs`와 각각의 Node 테스트를 추가했다.
 - 현재 추적되는 nginx blue/green port switcher에는 Python 회귀 테스트가 있으므로 삭제된 shell 테스트 대신 해당 테스트를 CI에서 실행하도록 정리한다.
 - TDD 근거: 신규 Node 테스트 2개는 구현 전 module-not-found로 실패했고 구현 후 합계 5/5 통과했다.
+## 데이터베이스 보안 경계 복구
+- GitHub DB 연동 runtime 검증에서 기존 241개 migration 적용은 전부 성공했으며, 이후 treasury migration 240-242가 만든 실제 권한 회귀 2건이 검출됐다.
+- 신규 SECURITY DEFINER 국고 함수 6개가 PUBLIC execute 가능했고 moneyverse_app에 국고 증빙/거버넌스/부유세 테이블 direct INSERT/UPDATE 권한이 추가되어 있었다.
+- 과거 migration을 수정하지 않고 immutable 후속 migration `243-treasury-security-boundary-repair.sql`을 추가했다.
+- migration 243은 SECURITY DEFINER의 PUBLIC 실행권한을 다시 닫고 국고 지출/부유세 증빙 direct write를 제거하며 시민 예산 투표 write를 `treasury_cast_citizen_budget_vote` 전용 함수 뒤로 이동한다.
+- wallet 및 관리자 treasury repository 모두 거버넌스 테이블 직접 write 대신 좁은 DB 함수를 호출하도록 변경했다.
+- 수정 후 로컬 집중 검증: 변경 파일 lint 통과, root typecheck 통과, database 정적 suite 7/7, CI helper 테스트 5/5, repository/control-byte/Prisma scanner 통과, diff-check 통과.

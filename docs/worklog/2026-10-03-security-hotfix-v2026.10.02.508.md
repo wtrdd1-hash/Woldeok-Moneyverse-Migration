@@ -42,3 +42,10 @@
 - Added non-shell replacements: `packages/database/ci-apply.mjs` for fresh-CI PostgreSQL migration application and `scripts/security/reject-prisma-migrate.mjs` for the Prisma mutation guard, both with Node tests.
 - The retained nginx blue/green port switcher already has a Python regression test, so CI now tests that tracked helper instead of deleted shell files.
 - TDD evidence: both new Node test files failed with module-not-found before implementation, then passed 5/5 after implementation.
+## Database security boundary repair
+- GitHub DB-backed runtime validation applied all 241 existing migrations successfully, then exposed two real privilege regressions introduced by treasury migrations 240-242.
+- Six new SECURITY DEFINER treasury functions were executable by PUBLIC, and moneyverse_app had new direct INSERT/UPDATE privileges on treasury evidence/governance/tax tables.
+- Added immutable follow-up migration `243-treasury-security-boundary-repair.sql` instead of rewriting historical migrations.
+- Migration 243 re-closes PUBLIC execution for SECURITY DEFINER routines, removes direct app writes to treasury disbursement and wealth-tax evidence, and moves citizen budget vote writes behind `treasury_cast_citizen_budget_vote`.
+- Updated both wallet and administrator treasury repositories to call the narrow DB function rather than writing the governance table directly.
+- Targeted local verification after the repair: changed-file lint pass, root typecheck pass, database static suite 7/7, CI-helper tests 5/5, repository/control-byte/Prisma scanners pass, diff-check pass.
