@@ -1,8 +1,8 @@
 # 월덕 머니버스 — 검색 노출 운영 명세
 
-> 버전: v2026.09.17.177
+> 버전: v2026.10.02.507
 > 상태: 구현 지향형 Living SEO/검색 운영 명세
-> 기준일: 2026-09-17
+> 기준일: 2026-10-02
 > 상위 문서: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `MONETIZATION_COMPLIANCE_SEO_SPEC.md`
 > 영문 기준 문서: [SEARCH_DISCOVERY_OPERATIONS_SPEC.md](SEARCH_DISCOVERY_OPERATIONS_SPEC.md)
 
@@ -17,6 +17,7 @@
 모든 라우트 계열은 다음 상태 중 하나를 가져야 한다.
 
 - `INDEXABLE_PUBLIC`: 검색 노출 대상 공개 페이지
+- `REDIRECT_ONLY`: canonical URL로 영구 redirect되는 안정적 alias이며 자체 색인하지 않음
 - `PUBLIC_NOINDEX`: 공개이지만 검색 결과로는 부적합한 페이지
 - `AUTH_REQUIRED`: 인증 필요, 색인 제외
 - `OPERATOR_ONLY`: 관리자/모더레이션/운영자 전용
@@ -26,8 +27,10 @@
 
 | 라우트 계열 | 상태 | canonical 정책 |
 |---|---|---|
-| `/en/`, `/ko/` | INDEXABLE_PUBLIC | 자기 자신 |
-| `/en/guide/*`, `/ko/guide/*` | INDEXABLE_PUBLIC | 언어별 self-canonical + 상호 hreflang |
+| `/` | INDEXABLE_PUBLIC | 한국어 제품 root, self-canonical + 현재 fallback/x-default |
+| `/ko/*` | REDIRECT_ONLY | 대응하는 prefix 없는 한국어 canonical로 308 |
+| `/en/*` 및 기타 게시 locale prefix | INDEXABLE_PUBLIC | 번역 품질 게이트 통과 후 locale self-canonical |
+| `/guide/*`, `/en/guide/*` 및 기타 게시 locale guide prefix | INDEXABLE_PUBLIC | prefix 없는 한국어 또는 locale self-canonical + 상호 hreflang |
 | 가상기업/세계관 페이지 | INDEXABLE_PUBLIC | 안정적인 ticker slug |
 | 공개 시즌/아카이브 | INDEXABLE_PUBLIC | 안정적인 season slug |
 | 용어집/도움말/안전센터 | INDEXABLE_PUBLIC | 안정적인 콘텐츠 slug |
@@ -54,11 +57,11 @@
 
 ## 4. 다국어 현지화와 hreflang
 
-초기 지원 locale은 `en`, `ko`, `ja`, `de`, `fr`, `es`, `pt-BR`이다. 각 실제 번역 페이지는 자신의 URL을 canonical로 사용하고, 존재하는 대응 번역만 상호 `hreflang`으로 묶는다. 모든 locale에 동일한 가상 페이지를 만들 필요는 없다.
+목표 게시 가능 locale은 `ko`, `en`, `ja`, `de`, `fr`, `es`, `pt-BR`이며 실제 배포/소스 지원은 각 locale이 출시 게이트를 통과할 때까지 더 작은 subset일 수 있다. 한국어는 prefix 없는 canonical, 다른 게시 locale은 prefixed self-canonical을 사용하고 존재하는 대응 번역만 상호 `hreflang`으로 묶는다. 모든 locale에 가짜 페이지를 만들 필요는 없다.
 
-- `/en/...`, `/ko/...`, `/ja/...`, `/de/...`, `/fr/...`, `/es/...`, `/pt-br/...`처럼 언어별 독립 URL을 사용한다.
-- `x-default`는 실제로 유용한 중립 언어/국가 선택기 또는 기본 페이지를 가리킨다.
-- IP/브라우저 언어로 강제 redirect하지 않고 사용자가 언어를 직접 선택할 수 있는 crawlable link를 둔다.
+- 한국어는 prefix 없는 canonical path를 사용하고 `/en/...`, `/ja/...`, `/de/...`, `/fr/...`, `/es/...`, `/pt-br/...`처럼 게시 locale별 독립 URL을 사용한다. `/ko/*`는 대응 한국어 canonical로 redirect한다.
+- 유용한 중립 selector가 생기기 전 `x-default`는 한국어 fallback root/path를 가리킨다.
+- crawler나 명시 locale URL을 IP/브라우저 언어로 강제 redirect하지 않는다. GeoIP는 비차단 언어 추천/selector 기본값에 사용할 수 있다.
 - title, description, H1, 본문, 내비게이션 주 언어가 locale과 일치한다.
 - region-specific URL은 실제 지역별 내용이 다를 때만 만든다.
 - `DRAFT/STALE` 번역과 얇은 자동번역은 noindex+sitemap 제외이며 hreflang cluster에 넣지 않는다.
@@ -194,6 +197,16 @@ FAQ 리치결과를 SEO 전략의 전제로 삼지 않는다. 네이버는 2026�
 - Test/비공개 URL 발견 건수
 
 Google과 Naver 수치는 구분해서 볼 수 있어야 한다.
+
+## 12.1 검색수요·수익 기회 큐 — v507
+
+운영 검색지표는 LIVE_SEARCH_CONSOLE, LIVE_NAVER, KEYWORD_PLANNER_ESTIMATE, OTHER_PROVIDER_ESTIMATE, NO_DATA, NOT_CONNECTED, FETCH_ERROR 중 provenance 상태를 가진다. synthetic 값은 테스트 fixture에만 허용한다.
+
+고노출/저CTR, 평균순위 5~20 중 실제 가치 개선 가능 페이지, 검증된 상승 query cluster, 이미 수요가 검증된 페이지의 국가/locale gap, 같은 intent를 경쟁하는 URL, 유입은 높지만 활성화가 낮은 landing, 활성화는 높지만 노출이 낮은 landing을 우선한다.
+
+실제 사이트 Search Console 성과와 시장 키워드 검색량 추정을 분리한다. GSC impressions를 일반 검색량으로 대체하지 않는다. 수익 우선순위는 실제 자격 자연검색 세션당 수익/Page RPM과 retention/CWV/invalid-traffic/정책 가드레일을 사용한다.
+
+일반검색, Images, video, 보조 Discover를 별도 측정한다. 전체 해외 기능·시장 출시 계약은 GLOBAL_GROWTH_SEO_REVENUE_SPEC.ko.md를 따른다.
 
 ## 13. 배포 게이트
 
