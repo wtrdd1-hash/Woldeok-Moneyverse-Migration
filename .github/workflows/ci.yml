@@ -114,22 +114,22 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Reject a committed secret
-        run: scripts/check-secrets.sh
+        run: |
+          node --test scripts/security/check-repository-security.test.mjs
+          node scripts/security/check-repository-security.mjs
 
       - name: Test release identity classifier and workflow contract
         run: node --test scripts/release/*.test.mjs
 
-      - name: Test host systemd release helpers
-        shell: bash
+      - name: Test tracked deployment and CI database helpers
         run: |
-          set -euo pipefail
-          bash -n ops/systemd/*.sh
-          ops/systemd/prepare-frontend-runtime-cache.test.sh
-          ops/systemd/write-test-release-env.test.sh
-          ops/nginx/check-moneyverse-host-routing.test.sh
+          python3 ops/systemd/switch-nginx-server-ports.test.py
+          node --test packages/database/ci-apply.test.mjs scripts/security/reject-prisma-migrate.test.mjs
 
       - name: Reject raw control bytes in source
-        run: scripts/check-control-bytes.sh
+        run: |
+          node --test scripts/security/check-control-bytes.test.mjs
+          node scripts/security/check-control-bytes.mjs
 
       - name: Record non-runtime CI decision
         if: >-
@@ -192,7 +192,7 @@ jobs:
           PGPASSWORD: ci_migrator_password
           PGDATABASE: woldeok_moneyverse_ci
           APP_DB_PASSWORD: ci_app_password
-        run: packages/database/ci-apply.sh
+        run: node packages/database/ci-apply.mjs
 
       - name: Test
         env:
@@ -201,7 +201,7 @@ jobs:
         run: pnpm test
 
       - name: Reject Prisma schema mutation
-        run: scripts/reject-prisma-migrate.sh
+        run: node scripts/security/reject-prisma-migrate.mjs
 
       - name: Audit production dependencies
         run: pnpm audit --prod --audit-level=high

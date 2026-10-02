@@ -363,13 +363,12 @@ export class PostgresWalletRepository {
 
   async voteCitizenBudget(userId: string, quarter: string, choice: string): Promise<{ success: boolean; quarter: string; choice: string }> {
     const actor = requireUuid(userId, 'authenticated user id');
-    await this.pool.query(
-      `INSERT INTO public.treasury_citizen_budget_votes (user_id, quarter, priority_choice, updated_at)
-       VALUES ($1, $2, $3, clock_timestamp())
-       ON CONFLICT (user_id, quarter)
-       DO UPDATE SET priority_choice = EXCLUDED.priority_choice, updated_at = clock_timestamp()`,
+    const row = await queryOne<{ success: boolean }>(
+      this.pool,
+      `SELECT public.treasury_cast_citizen_budget_vote($1::uuid, $2::text, $3::text) AS success`,
       [actor, quarter, choice],
     );
+    if (row?.success !== true) throw new Error('database did not record treasury budget vote');
     return { success: true, quarter, choice };
   }
 }
