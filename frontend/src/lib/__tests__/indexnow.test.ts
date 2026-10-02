@@ -26,11 +26,8 @@ describe('IndexNow Protocol Client', () => {
   });
 
   it('submits URLs correctly with proper RFC payload structure and headers', async () => {
-    const mockResponse = {
-      status: 200,
-      text: vi.fn().mockResolvedValue('OK'),
-    };
-    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse as any);
+    const mockResponse = new Response('OK', { status: 200 });
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse);
 
     const urls = [
       'https://easy-scraping.com/',
@@ -59,11 +56,8 @@ describe('IndexNow Protocol Client', () => {
   });
 
   it('accepts HTTP 202 (Accepted) as success according to IndexNow RFC', async () => {
-    const mockResponse = {
-      status: 202,
-      text: vi.fn().mockResolvedValue('Accepted'),
-    };
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse as any);
+    const mockResponse = new Response('Accepted', { status: 202 });
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse);
 
     const result = await submitToIndexNow(['https://easy-scraping.com/feed.xml']);
 
@@ -72,11 +66,8 @@ describe('IndexNow Protocol Client', () => {
   });
 
   it('handles HTTP error responses accurately', async () => {
-    const mockResponse = {
-      status: 400,
-      text: vi.fn().mockResolvedValue('Bad Request: Invalid Key'),
-    };
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse as any);
+    const mockResponse = new Response('Bad Request: Invalid Key', { status: 400 });
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse);
 
     const result = await submitToIndexNow(['https://easy-scraping.com/test']);
 
