@@ -1,3 +1,12 @@
+## v2026.10.02.506 — Urgent runtime and database-boundary repair
+
+- Repair private-chat conversation/history/sync/unread/archive access through least-privilege SECURITY DEFINER contracts; direct private-chat table access remains revoked from `moneyverse_app`.
+- Fix the chat peer profile lookup to use the authoritative member profile/public-name model instead of nonexistent `user_profiles` / `users.display_name` fields.
+- Close six treasury SECURITY DEFINER functions that were accidentally executable by PUBLIC after migrations 240-242.
+- Remove direct treasury INSERT/UPDATE grants from the application role and route citizen budget voting through `treasury_cast_citizen_budget_vote`.
+- Runtime repair procedure also restores frontend generated `.next` writeability for the service user and re-aligns Test/Production frontend/backend to one exact candidate.
+- Fresh isolated Test database verification: database package 7/7 PASS; backend 170 files / 1,639 tests PASS, 29 environment-gated casino E2E tests skipped.
+
 ## v2026.09.23.390 — QA branch lifecycle cleanup hardening
 
 - Branch: `fix/qa-branch-cleanup-v2026.09.23.390`.

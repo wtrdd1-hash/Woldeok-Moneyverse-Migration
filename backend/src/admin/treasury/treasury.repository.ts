@@ -950,12 +950,14 @@ export class TreasuryRepository {
     quarter: string,
     priorityChoice: string,
   ): Promise<{ success: boolean; quarter: string; choice: string }> {
-    await this.pool.query(`
-      INSERT INTO public.treasury_citizen_budget_votes (user_id, quarter, priority_choice, updated_at)
-      VALUES ($1, $2, $3, clock_timestamp())
-      ON CONFLICT (user_id, quarter)
-      DO UPDATE SET priority_choice = EXCLUDED.priority_choice, updated_at = clock_timestamp()
-    `, [userId, quarter, priorityChoice]);
+    await this.pool.query(
+      `SELECT public.treasury_cast_citizen_budget_vote(
+         $1::uuid,
+         $2::text,
+         $3::text
+       ) AS cast`,
+      [userId, quarter, priorityChoice],
+    );
 
     return { success: true, quarter, choice: priorityChoice };
   }

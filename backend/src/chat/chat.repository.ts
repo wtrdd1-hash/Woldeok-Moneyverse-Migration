@@ -106,36 +106,21 @@ export class PostgresChatRepository {
     return queryRows<ConversationRow>(
       this.client,
       `SELECT
-         c.id AS conversation_id,
-         c.state,
-         c.latest_sequence::text,
-         c.last_message_at,
-         c.created_at,
-         CASE WHEN c.participant_a_id = $1::uuid THEN c.participant_b_id ELSE c.participant_a_id END AS peer_user_id,
-         COALESCE(u.display_name, '회원') AS peer_display_name,
-         p.image_url AS peer_avatar_key,
-         ps.last_read_sequence::text,
-         GREATEST(0, c.latest_sequence - ps.last_read_sequence)::text AS unread_count,
-         ps.muted,
-         ps.archived,
-         public.private_chat_is_blocked($1::uuid, (CASE WHEN c.participant_a_id = $1::uuid THEN c.participant_b_id ELSE c.participant_a_id END)) AS is_peer_blocked,
-         (
-           SELECT m.body
-           FROM public.private_chat_messages m
-           WHERE m.conversation_id = c.id
-           ORDER BY m.sequence DESC
-           LIMIT 1
-         ) AS last_message_body
-       FROM public.private_chat_conversations c
-       JOIN public.private_chat_participant_state ps
-         ON ps.conversation_id = c.id AND ps.user_id = $1::uuid
-       JOIN public.users u
-         ON u.id = (CASE WHEN c.participant_a_id = $1::uuid THEN c.participant_b_id ELSE c.participant_a_id END)
-       LEFT JOIN public.member_profiles p
-         ON p.user_id = u.id
-       WHERE ps.archived = false
-       ORDER BY COALESCE(c.last_message_at, c.created_at) DESC
-       LIMIT $2;`,
+         conversation_id,
+         state,
+         latest_sequence::text,
+         last_message_at,
+         created_at,
+         peer_user_id,
+         peer_display_name,
+         peer_avatar_key,
+         last_read_sequence::text,
+         unread_count::text,
+         muted,
+         archived,
+         last_message_body,
+         is_peer_blocked
+       FROM public.private_chat_list_conversations($1::uuid, $2::integer);`,
       [actorUserId, safeLimit],
     );
   }
@@ -153,21 +138,20 @@ export class PostgresChatRepository {
     return queryRows<MessageRow>(
       this.client,
       `SELECT
-         m.id,
-         m.conversation_id,
-         m.sender_id,
-         m.sequence::text,
-         m.body,
-         m.created_at,
-         (m.sender_id = $1::uuid) AS is_mine
-       FROM public.private_chat_messages m
-       JOIN public.private_chat_conversations c ON c.id = m.conversation_id
-       WHERE m.conversation_id = $2::uuid
-         AND ($1::uuid IN (c.participant_a_id, c.participant_b_id))
-         AND ($3::bigint IS NULL OR m.sequence < $3::bigint)
-       ORDER BY m.sequence DESC
-       LIMIT $4;`,
-      [actorUserId, conversationId, beforeSequence ?? null, safeLimit],
+         id,
+         conversation_id,
+         sender_id,
+         sequence::text,
+         body,
+         created_at,
+         is_mine
+       FROM public.private_chat_list_messages(
+         $1::uuid,
+         $2::uuid,
+         $3::integer,
+         $4::bigint
+       );`,
+      [actorUserId, conversationId, safeLimit, beforeSequence ?? null],
     );
   }
 
@@ -184,20 +168,19 @@ export class PostgresChatRepository {
     return queryRows<MessageRow>(
       this.client,
       `SELECT
-         m.id,
-         m.conversation_id,
-         m.sender_id,
-         m.sequence::text,
-         m.body,
-         m.created_at,
-         (m.sender_id = $1::uuid) AS is_mine
-       FROM public.private_chat_messages m
-       JOIN public.private_chat_conversations c ON c.id = m.conversation_id
-       WHERE m.conversation_id = $2::uuid
-         AND ($1::uuid IN (c.participant_a_id, c.participant_b_id))
-         AND m.sequence > $3::bigint
-       ORDER BY m.sequence ASC
-       LIMIT $4;`,
+         id,
+         conversation_id,
+         sender_id,
+         sequence::text,
+         body,
+         created_at,
+         is_mine
+       FROM public.private_chat_sync_messages(
+         $1::uuid,
+         $2::uuid,
+         $3::bigint,
+         $4::integer
+       );`,
       [actorUserId, conversationId, sinceSequence, safeLimit],
     );
   }
@@ -206,14 +189,12 @@ export class PostgresChatRepository {
     if (!UUID_REGEX.test(actorUserId)) throw new ChatInputError('actorUserId must be a valid UUID');
     if (!UUID_REGEX.test(conversationId)) throw new ChatInputError('conversationId must be a valid UUID');
 
-    await queryOne(
+    const row = await queryOne<{ private_chat_archive: boolean }>(
       this.client,
-      `UPDATE public.private_chat_participant_state
-       SET archived = $3, updated_at = now()
-       WHERE conversation_id = $2::uuid AND user_id = $1::uuid;`,
+      `SELECT public.private_chat_archive($1::uuid, $2::uuid, $3::boolean) AS private_chat_archive;`,
       [actorUserId, conversationId, archived],
     );
-    return true;
+    return row?.private_chat_archive ?? false;
   }
 
   async muteConversation(actorUserId: string, conversationId: string, muted: boolean): Promise<boolean> {
@@ -291,11 +272,7 @@ export class PostgresChatRepository {
     if (!UUID_REGEX.test(actorUserId)) return 0;
     const row = await queryOne<{ total_unread: string }>(
       this.client,
-      `SELECT COALESCE(SUM(GREATEST(0, c.latest_sequence - ps.last_read_sequence)), 0)::text AS total_unread
-       FROM public.private_chat_conversations c
-       JOIN public.private_chat_participant_state ps
-         ON ps.conversation_id = c.id AND ps.user_id = $1::uuid
-       WHERE ps.archived = false AND ps.muted = false;`,
+      `SELECT public.private_chat_total_unread($1::uuid)::text AS total_unread;`,
       [actorUserId],
     );
     return Number.parseInt(row?.total_unread ?? '0', 10) || 0;

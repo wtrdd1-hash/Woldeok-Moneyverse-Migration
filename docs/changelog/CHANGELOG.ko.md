@@ -1,3 +1,12 @@
+## v2026.10.02.506 — 긴급 런타임 및 DB 보안 경계 복구
+
+- 1:1 채팅의 conversation/history/sync/unread/archive 접근을 최소권한 SECURITY DEFINER 함수 경유로 수정하고 `moneyverse_app`의 private-chat 테이블 직접 접근 차단은 유지합니다.
+- 존재하지 않는 `user_profiles` / `users.display_name` 대신 권위 member profile/public-name 모델을 사용하도록 채팅 peer 조회를 수정합니다.
+- migration 240~242 이후 PUBLIC에 실수로 열린 treasury SECURITY DEFINER 함수 6개의 실행권을 차단합니다.
+- application role의 treasury INSERT/UPDATE 직접 권한을 제거하고 시민 예산 투표를 `treasury_cast_citizen_budget_vote` 함수 경유로 변경합니다.
+- 런타임 복구 절차에서 frontend 생성물 `.next`의 서비스 사용자 쓰기 권한을 복구하고 Test/Production frontend/backend를 하나의 exact candidate로 정렬합니다.
+- 새 격리 Test DB 검증: database package 7/7 PASS, backend 170 files / 1,639 tests PASS, 환경 조건 casino E2E 29개만 skip.
+
 ## v2026.09.23.390 — QA 브랜치 생명주기 정리 강화
 
 - 작업 브랜치: `fix/qa-branch-cleanup-v2026.09.23.390`.
