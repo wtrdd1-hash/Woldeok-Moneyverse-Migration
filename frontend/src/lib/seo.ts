@@ -204,11 +204,11 @@ export interface SitemapUrlEntry {
     | 'never'
     | undefined;
   readonly priority?: number | undefined;
+  readonly alternates?: Record<string, string> | undefined;
 }
 
-
 /**
- * Builds standard XML urlset string for sitemaps.
+ * Builds standard XML urlset string with multilingual xhtml:link hreflang for sitemaps.
  */
 export function buildUrlsetXml(entries: readonly SitemapUrlEntry[]): string {
   const urls = entries
@@ -217,11 +217,16 @@ export function buildUrlsetXml(entries: readonly SitemapUrlEntry[]): string {
       const changefreqTag = e.changefreq ? `\n    <changefreq>${e.changefreq}</changefreq>` : '';
       const priorityTag =
         typeof e.priority === 'number' ? `\n    <priority>${e.priority.toFixed(1)}</priority>` : '';
-      return `  <url>\n    <loc>${e.loc}</loc>${lastmodTag}${changefreqTag}${priorityTag}\n  </url>`;
+      const alternatesTag = e.alternates
+        ? Object.entries(e.alternates)
+            .map(([lang, href]) => `\n    <xhtml:link rel="alternate" hreflang="${lang}" href="${href}" />`)
+            .join('')
+        : '';
+      return `  <url>\n    <loc>${e.loc}</loc>${lastmodTag}${changefreqTag}${priorityTag}${alternatesTag}\n  </url>`;
     })
     .join('\n');
 
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls}\n</urlset>`;
 }
 
 /**

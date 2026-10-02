@@ -27,7 +27,7 @@ describe('metadata title composition', () => {
   });
 
   it('uses an absolute title for the branded home page and unbranded dynamic notice titles', () => {
-    expect(source('page.tsx')).toContain("title: { absolute: '월덕 머니버스 — Discord 커뮤니티 가상경제와 게임 보상' }");
+    expect(source('page.tsx')).toContain('title: { absolute: meta.title }');
     expect(source('announcements/[announcementId]/page.tsx')).toContain('title: notice.title');
   });
 });

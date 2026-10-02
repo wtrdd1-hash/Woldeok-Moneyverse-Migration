@@ -1,6 +1,6 @@
 export type Locale = 'ko' | 'en' | 'ja' | 'zh';
 
-export const DEFAULT_LOCALE: Locale = 'ko';
+export const DEFAULT_LOCALE: Locale = 'en';
 export const SUPPORTED_LOCALES: readonly Locale[] = ['ko', 'en', 'ja', 'zh'] as const;
 export const LOCALE_COOKIE = 'wdmv_locale';
 export const DETECTED_LOCALE_COOKIE = 'wdmv_detected_locale';
@@ -13,8 +13,8 @@ export function isLocale(value: string | null | undefined): value is Locale {
  * ISO 3166-1 alpha-2 country codes mapped to primary localized language.
  * Korean: KR (South Korea), KP (North Korea)
  * Japanese: JP (Japan)
- * Chinese: CN (China), TW (Taiwan), HK (Hong Kong), MO (Macau), SG (Singapore)
- * English (Default global): All other countries (US, GB, CA, AU, NZ, DE, FR, VN, TH, PH, IN, etc.)
+ * Chinese (Simplified/Regional): CN (China), TW (Taiwan), HK (Hong Kong), MO (Macau), SG (Singapore)
+ * English (Global default): All other global countries (US, GB, CA, AU, NZ, DE, FR, VN, TH, PH, IN, BR, RU, etc.)
  */
 const KOREAN_COUNTRIES = new Set(['KR', 'KP']);
 const JAPANESE_COUNTRIES = new Set(['JP']);
@@ -22,7 +22,7 @@ const CHINESE_COUNTRIES = new Set(['CN', 'TW', 'HK', 'MO', 'SG']);
 
 /**
  * Parse Accept-Language header taking quality values (q-factor) into account.
- * Example: "ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7,ja;q=0.6"
+ * Example: "ja,ja-JP;q=0.9,en-US;q=0.8,en;q=0.7"
  */
 export function parseAcceptLanguage(header: string | null | undefined): Locale | null {
   if (!header || typeof header !== 'string') return null;
@@ -52,34 +52,36 @@ export function parseAcceptLanguage(header: string | null | undefined): Locale |
     if (lang.startsWith('en')) return 'en';
   }
 
-  return null;
+  // If client sends unsupported languages (e.g. fr, de, es, vi, ru, th), fall back to English
+  return 'en';
 }
 
 /**
  * Precise hybrid locale detection:
- * 1. GeoIP country code (Cloudflare `cf-ipcountry` / Vercel `x-vercel-ip-country`)
+ * 1. GeoIP country code (Cloudflare `cf-ipcountry` / Vercel `x-vercel-ip-country` / `x-country-code`)
  * 2. Accept-Language header quality-weighted preferences
- * 3. Fallback to DEFAULT_LOCALE ('ko')
+ * 3. Default fallback to English ('en') for all unsupported countries & languages.
  */
-export function detectLocale(country: string | null, acceptLanguage: string | null): Locale {
+export function detectLocale(country: string | null | undefined, acceptLanguage: string | null | undefined): Locale {
   const normalisedCountry = country?.trim().toUpperCase();
 
-  // 1. Explicit GeoIP matching
+  // 1. Explicit GeoIP country matching
   if (normalisedCountry) {
     if (KOREAN_COUNTRIES.has(normalisedCountry)) return 'ko';
     if (JAPANESE_COUNTRIES.has(normalisedCountry)) return 'ja';
     if (CHINESE_COUNTRIES.has(normalisedCountry)) return 'zh';
-    if (!['XX', 'T1', 'A1', 'A2', 'O1'].includes(normalisedCountry)) {
-      // If recognized global country, check if user's browser specifically prefers Asian locale
-      const headerLang = parseAcceptLanguage(acceptLanguage);
-      if (headerLang && headerLang !== 'en') {
-        return headerLang;
-      }
-      return 'en';
+    
+    // Any other recognised or unrecognised country (US, GB, DE, FR, VN, BR, IN, etc.)
+    // Check if user's browser explicitly requested an Asian locale (KO/JA/ZH)
+    const headerLang = parseAcceptLanguage(acceptLanguage);
+    if (headerLang && (headerLang === 'ja' || headerLang === 'zh' || headerLang === 'ko')) {
+      return headerLang;
     }
+    // Otherwise, always automatically default to English
+    return 'en';
   }
 
-  // 2. Accept-Language header parsing
+  // 2. Accept-Language header parsing fallback
   const headerLang = parseAcceptLanguage(acceptLanguage);
   if (headerLang) return headerLang;
 

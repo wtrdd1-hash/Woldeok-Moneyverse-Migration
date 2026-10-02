@@ -28,12 +28,32 @@ function readCookie(name: string): string | null {
   return entry ? decodeURIComponent(entry.slice(prefix.length)) : null;
 }
 
-export function LocaleProvider({ children }: { readonly children: React.ReactNode }) {
-  const router = useRouter();
+function useSafeRouter() {
+  try {
+    return useRouter();
+  } catch {
+    return null;
+  }
+}
+
+export function LocaleProvider({
+  children,
+  initialLocale,
+}: {
+  readonly children: React.ReactNode;
+  readonly initialLocale?: Locale;
+}) {
+  const router = useSafeRouter();
   const [, startTransition] = useTransition();
-  const [locale, updateLocale] = useState<Locale>(DEFAULT_LOCALE);
+  const [locale, updateLocale] = useState<Locale>(initialLocale ?? DEFAULT_LOCALE);
 
   useEffect(() => {
+    if (initialLocale) {
+      updateLocale(initialLocale);
+      document.documentElement.lang = initialLocale;
+      return;
+    }
+
     const explicit = readCookie(LOCALE_COOKIE);
     const detected = readCookie(DETECTED_LOCALE_COOKIE);
     const resolved = isLocale(explicit)
@@ -44,7 +64,7 @@ export function LocaleProvider({ children }: { readonly children: React.ReactNod
 
     updateLocale(resolved);
     document.documentElement.lang = resolved;
-  }, []);
+  }, [initialLocale]);
 
   const value = useMemo<LocaleContextValue>(() => ({
     locale,
@@ -53,7 +73,7 @@ export function LocaleProvider({ children }: { readonly children: React.ReactNod
       document.documentElement.lang = nextLocale;
       updateLocale(nextLocale);
       startTransition(() => {
-        router.refresh();
+        router?.refresh();
       });
     },
   }), [locale, router]);

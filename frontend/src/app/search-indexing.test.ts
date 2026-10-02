@@ -36,10 +36,11 @@ describe('public search surface', () => {
     // Check multilingual alternates (hreflang)
     for (const entry of entries) {
       expect(entry.alternates?.languages).toBeDefined();
-      expect(entry.alternates?.languages?.ko).toBe(entry.url);
-      expect(entry.alternates?.languages?.en).toBe(entry.url);
-      expect(entry.alternates?.languages?.ja).toBe(entry.url);
-      expect(entry.alternates?.languages?.zh).toBe(entry.url);
+      expect(entry.alternates?.languages?.ko).toBeDefined();
+      expect(entry.alternates?.languages?.en).toBeDefined();
+      expect(entry.alternates?.languages?.ja).toBeDefined();
+      expect(entry.alternates?.languages?.zh).toBeDefined();
+      expect(entry.alternates?.languages?.['x-default']).toBe(entry.url);
     }
 
     // Member-only and private pages must never appear in sitemap

@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useLocale } from '@/components/locale-provider';
+import { t } from '@/lib/i18n-dictionary';
 import {
   Sparkles,
   Flame,
@@ -24,6 +26,7 @@ interface CasualDopamineStationProps {
 }
 
 export function CasualDopamineStation({ className = '' }: CasualDopamineStationProps) {
+  const { locale } = useLocale();
   const [activeModal, setActiveModal] = useState<'fever' | 'pet' | 'poll' | 'showdown' | 'stardrop' | null>(null);
   const [lastRewardNotice, setLastRewardNotice] = useState<string | null>(null);
 
@@ -45,14 +48,14 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-base font-black text-white tracking-tight">
-                도파민 아케이드 스테이션 (Daily Arcade)
+                {t('arcade.title', locale, '도파민 아케이드 스테이션')}
               </h2>
               <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-black text-amber-300 border border-amber-500/40">
-                100% 무료
+                {t('arcade.free_badge', locale, '100% 무료')}
               </span>
             </div>
             <p className="text-xs text-slate-400">
-              매일 가볍게 즐기는 5대 미니게임과 일일 퀘스트로 WLD 보상을 획득하세요.
+              {t('arcade.desc', locale, '매일 가볍게 즐기는 5대 미니게임과 일일 퀘스트로 WLD 보상을 획득하세요.')}
             </p>
           </div>
         </div>
@@ -60,7 +63,7 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
         {/* Legal & Compliance Badge */}
         <div className="flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-400">
           <Shield className="h-3.5 w-3.5" />
-          <span>사행성 제로 · 가상 시뮬레이터</span>
+          <span>{t('arcade.safe_badge', locale, '사행성 제로 · 가상 시뮬레이터')}</span>
         </div>
       </div>
 
@@ -86,16 +89,16 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <Flame className="h-5 w-5" />
             </div>
             <span className="rounded-full bg-rose-500/20 px-2 py-0.5 text-[10px] font-bold text-rose-400 border border-rose-500/30">
-              10초 광클
+              {t('arcade.fever.badge', locale, '10초 광클')}
             </span>
           </div>
           <div className="mt-3">
             <h3 className="text-sm font-bold text-slate-100 flex items-center justify-between">
-              황금 오리 피버 타임
+              {t('arcade.fever.title', locale, '황금 오리 피버 타임')}
               <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
             </h3>
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-              10초 동안 황금 코인을 광클하여 최대 1,000 WLD 잭팟 획득! (1일 1회)
+              {t('arcade.fever.desc', locale, '10초 동안 황금 코인을 광클하여 최대 1,000 WLD 잭팟 획득! (1일 1회)')}
             </p>
           </div>
         </div>
@@ -112,16 +115,16 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <Gift className="h-5 w-5" />
             </div>
             <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-bold text-amber-300 border border-amber-500/30">
-              1일 1회
+              {t('arcade.pet.badge', locale, 'WLD 먹이주기')}
             </span>
           </div>
           <div className="mt-3">
             <h3 className="text-sm font-bold text-slate-100 flex items-center justify-between">
-              덕이 펫 & 포춘쿠키
+              {t('arcade.pet.title', locale, '덕이 펫 인터랙션')}
               <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
             </h3>
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-              덕이를 쓰다듬고 포춘쿠키를 쪼개 오늘의 투자 점괘와 보너스 받기.
+              {t('arcade.pet.desc', locale, '덕이를 쓰다듬고 먹이를 주어 호감도를 높이고 매일 특별 보상을 받으세요.')}
             </p>
           </div>
         </div>
@@ -138,16 +141,16 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <Sparkles className="h-5 w-5" />
             </div>
             <span className="rounded-full bg-indigo-500/20 px-2 py-0.5 text-[10px] font-bold text-indigo-300 border border-indigo-500/30">
-              5연속 탭
+              {t('arcade.stardrop.badge', locale, '100% 당첨')}
             </span>
           </div>
           <div className="mt-3">
             <h3 className="text-sm font-bold text-slate-100 flex items-center justify-between">
-              스타 드롭 (Star Drop)
+              {t('arcade.stardrop.title', locale, '럭키 스타드롭')}
               <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-indigo-400 transition-colors" />
             </h3>
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-              탭할수록 희귀 ➡️ 전설로 승급! 최대 10만 WLD 잭팟 상자.
+              {t('arcade.stardrop.desc', locale, '하늘에서 떨어지는 별빛 상자를 열고 랜덤 WLD와 레어 뱃지를 수집하세요.')}
             </p>
           </div>
         </div>
@@ -164,42 +167,42 @@ export function CasualDopamineStation({ className = '' }: CasualDopamineStationP
               <Dices className="h-5 w-5" />
             </div>
             <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-[10px] font-bold text-purple-300 border border-purple-500/30">
-              3판 2선승
+              {t('arcade.showdown.badge', locale, '실시간 결투')}
             </span>
           </div>
           <div className="mt-3">
             <h3 className="text-sm font-bold text-slate-100 flex items-center justify-between">
-              1:1 주사위 쇼다운
+              {t('arcade.showdown.title', locale, '1:1 주사위 쇼다운')}
               <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-purple-400 transition-colors" />
             </h3>
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-              AI 덕이봇과의 즉석 주사위 승부! 1.90x 배당 WLD 획득.
+              {t('arcade.showdown.desc', locale, '다른 유저 또는 AI와 3판 2선승 주사위 결투를 펼치고 랭킹 포인트를 올리세요.')}
             </p>
           </div>
         </div>
 
-        {/* 5. 실시간 여론 잭팟 투표 */}
+        {/* 5. 주식 여론 잭팟 */}
         <div
           role="button"
           tabIndex={0}
           onClick={() => setActiveModal('poll')}
-          className="group relative flex flex-col justify-between rounded-2xl border border-cyan-500/30 bg-slate-950/60 p-4 transition-all duration-200 hover:border-cyan-500/70 hover:bg-slate-950/90 hover:scale-[1.02] cursor-pointer sm:col-span-2 lg:col-span-2"
+          className="group relative flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-950/60 p-4 transition-all duration-200 hover:border-blue-500/50 hover:bg-slate-950/90 hover:scale-[1.02] cursor-pointer"
         >
           <div className="flex items-start justify-between">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/20 text-cyan-400 group-hover:scale-110 transition-transform">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-500/20 text-blue-400 group-hover:scale-110 transition-transform">
               <TrendingUp className="h-5 w-5" />
             </div>
-            <span className="rounded-full bg-cyan-500/20 px-2 py-0.5 text-[10px] font-bold text-cyan-300 border border-cyan-500/30">
-              10,000 WLD 풀
+            <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-[10px] font-bold text-blue-300 border border-blue-500/30">
+              {t('arcade.poll.badge', locale, '일일 배팅')}
             </span>
           </div>
           <div className="mt-3">
             <h3 className="text-sm font-bold text-slate-100 flex items-center justify-between">
-              1클릭 여론 잭팟 투표 (Bull vs Bear)
-              <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-cyan-400 transition-colors" />
+              {t('arcade.poll.title', locale, '주식 여론 잭팟')}
+              <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-blue-400 transition-colors" />
             </h3>
             <p className="mt-1 text-xs text-slate-400 leading-relaxed">
-              오늘의 시장 방향(상승/하락)을 1초 만에 투표하고 자정 에어드랍에 참여하세요.
+              {t('arcade.poll.desc', locale, '내일의 코스피/나스닥 상승/하락을 투표하고 다수결/소수결 보너스를 획득하세요.')}
             </p>
           </div>
         </div>

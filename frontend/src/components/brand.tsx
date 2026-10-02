@@ -40,6 +40,14 @@ export function Brand({
           <>
             <span>Woldeok</span> <strong className="font-black text-primary drop-shadow-sm">Moneyverse</strong>
           </>
+        ) : locale === 'ja' ? (
+          <>
+            <span>ウォルドク</span> <strong className="font-black text-primary drop-shadow-sm">マネーバース</strong>
+          </>
+        ) : locale === 'zh' ? (
+          <>
+            <span>月德</span> <strong className="font-black text-primary drop-shadow-sm">Moneyverse</strong>
+          </>
         ) : (
           <>
             <span className="font-bold">월덕</span>{' '}

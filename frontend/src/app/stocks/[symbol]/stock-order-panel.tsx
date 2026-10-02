@@ -16,6 +16,7 @@ import {
 import { ActionAlert, SubmitButton } from '@/components/action-form';
 import { IDLE } from '@/lib/action-state';
 import { groupDigits } from '@/lib/money';
+import { FiatBadge } from '@/components/fiat-amount';
 import { placeOrder } from '../actions';
 import { StockHaltReceiptDialog, type StockHaltReceiptData } from './stock-halt-receipt-dialog';
 import { snapToKrxTick, getKrxTickSize, stepKrxTick } from '../tick-size';
@@ -361,11 +362,14 @@ export function StockOrderPanel({
             <span className="text-muted-foreground">{isEn ? 'Est. Tax & Fee (0%)' : '거래세 및 수수료'}</span>
             <span className="font-mono text-muted-foreground">0 WLD (면제)</span>
           </div>
-          <div className="border-t border-border/40 pt-2 flex items-center justify-between">
+          <div className="border-t border-border/40 pt-2 flex items-center justify-between flex-wrap gap-2">
             <span className="text-xs font-bold text-foreground">{isEn ? 'Total Value' : '총 주문 금액'}</span>
-            <span className="font-mono text-base font-extrabold text-primary">
-              {groupDigits(totalAmount.toString())} <span className="text-xs font-normal text-muted-foreground">WLD</span>
-            </span>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="font-mono text-base font-extrabold text-primary">
+                {groupDigits(totalAmount.toString())} <span className="text-xs font-normal text-muted-foreground">WLD</span>
+              </span>
+              <FiatBadge amount={totalAmount.toString()} />
+            </div>
           </div>
         </div>
 

@@ -2,16 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, ChevronDown, LogIn, LogOut, Menu, MessageSquare, ShieldCheck, Sliders, User, Wallet } from 'lucide-react';
+import { Bell, ChevronDown, Globe2, LogIn, LogOut, Menu, MessageSquare, ShieldCheck, Sliders, User, Wallet } from 'lucide-react';
 import { logout } from '@/app/actions';
 import { Brand } from '@/components/brand';
 import { ThemeMenu, ThemePanel } from '@/components/theme-controls';
-import { LanguageSwitcher } from '@/components/language-switcher';
+import { LanguageSwitcher, LANGUAGE_OPTIONS, DEFAULT_CURRENCY_FOR_LOCALE } from '@/components/language-switcher';
 import { ServerClockPill } from '@/components/server-clock-pill';
 import { ChatHeaderButton } from '@/components/chat-header-button';
 import { NotificationHeaderButton } from '@/components/notification-header-button';
 import { useLocale } from '@/components/locale-provider';
-import type { Locale } from '@/lib/locale';
+import { useCurrency } from '@/components/currency-context';
+import { localeLabel, type Locale } from '@/lib/locale';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -83,10 +84,10 @@ export function SiteHeader() {
 
   return (
     <header className="moneyverse-site-header sticky top-0 z-30 border-b border-border/60 bg-background/85 backdrop-blur-xl w-full max-w-full overflow-hidden transition-colors">
-      <div className="mx-auto flex h-[60px] min-[400px]:h-[64px] sm:h-[68px] lg:h-[76px] w-full max-w-[1440px] items-center justify-between gap-1.5 px-2.5 min-[400px]:gap-2 min-[400px]:px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:gap-3 xl:gap-4 2xl:gap-6 lg:px-5 xl:px-8">
+      <div className="mx-auto flex h-[60px] min-[400px]:h-[64px] sm:h-[68px] lg:h-[76px] w-full max-w-[1440px] items-center justify-between gap-1.5 px-2 min-[400px]:gap-2 min-[400px]:px-3 min-[480px]:gap-3 min-[480px]:px-4 sm:px-6 lg:gap-3 xl:gap-4 2xl:gap-6 lg:px-5 xl:px-8">
         <Brand />
 
-        <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="ml-auto hidden items-center gap-1.5 xl:gap-2.5 2xl:gap-4 lg:flex">
+        <nav aria-label={localeLabel(locale, '주요 메뉴', 'Main menu', 'メインメニュー', '主菜单')} className="ml-auto hidden items-center gap-1.5 xl:gap-2.5 2xl:gap-4 lg:flex">
           {items.map((item) =>
             isGroup(item) ? (
               <HeaderGroup key={item.label} group={item} pathname={pathname} locale={locale} />
@@ -97,10 +98,8 @@ export function SiteHeader() {
         </nav>
 
         <div className={cn('flex min-w-0 items-center gap-1 min-[400px]:gap-1.5 sm:gap-2 lg:gap-2 2xl:gap-3 shrink-0', 'ml-auto lg:ml-2.5 xl:ml-4')}>
-          <div className="hidden min-[420px]:block">
-            <ServerClockPill className="hidden md:inline-flex lg:hidden 2xl:inline-flex" />
-            <LanguageSwitcher />
-          </div>
+          <ServerClockPill className="hidden md:inline-flex lg:hidden 2xl:inline-flex" />
+          <LanguageSwitcher compact className="flex shrink-0" />
           <div className="hidden sm:block">
             <ThemeMenu />
           </div>
@@ -111,41 +110,47 @@ export function SiteHeader() {
               <Button
                 variant="outline"
                 size="icon"
-                className="size-11 rounded-[10px] lg:hidden shrink-0"
-                aria-label={locale === 'en' ? 'Open menu' : '메뉴 열기'}
+                className="size-10 min-[400px]:size-11 rounded-[10px] lg:hidden shrink-0"
+                aria-label={localeLabel(locale, '메뉴 열기', 'Open menu', 'メニューを開く', '打开菜单')}
               >
                 <Menu className="size-4.5 sm:size-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[min(20rem,calc(100vw-1rem))] max-w-full gap-0">
-              <SheetHeader>
-                <SheetTitle className="text-left">{locale === 'en' ? 'Menu' : '메뉴'}</SheetTitle>
+            <SheetContent side="right" className="w-[min(20rem,calc(100vw-1rem))] max-w-full gap-0 p-0 flex flex-col">
+              <SheetHeader className="flex flex-row items-center justify-between border-b px-4 py-3">
+                <SheetTitle className="text-left font-bold text-base">{localeLabel(locale, '메뉴', 'Menu', 'メニュー', '菜单')}</SheetTitle>
+                <div className="flex items-center gap-1.5 mr-6">
+                  <LanguageSwitcher compact />
+                </div>
               </SheetHeader>
-              <nav aria-label={locale === 'en' ? 'Main menu' : '주요 메뉴'} className="grid min-h-0 flex-1 gap-1 overflow-y-auto px-3 pb-4">
+              <nav aria-label={localeLabel(locale, '주요 메뉴', 'Main menu', 'メインメニュー', '主菜单')} className="grid min-h-0 flex-1 gap-1 overflow-y-auto px-3 py-3">
+                {/* 1. 모바일 사이드 메뉴 최상단 4개 국어 원터치 세그먼트 탭 */}
+                <MobileLanguageSegment />
+
                 {viewer?.signedIn && (
                   <div className="flex items-center justify-around gap-2 px-3 py-2 my-1 rounded-xl bg-muted/40 border border-border/50 min-[360px]:hidden">
                     <Link href="/chat" className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground">
                       <MessageSquare className="size-3.5" />
-                      <span>{locale === 'en' ? 'Chat' : '쪽지함'}</span>
+                      <span>{localeLabel(locale, '쪽지함', 'Chat', 'メッセージ', '私信')}</span>
                     </Link>
                     <Separator orientation="vertical" className="h-4" />
                     <Link href="/account/notifications" className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground">
                       <Bell className="size-3.5" />
-                      <span>{locale === 'en' ? 'Alerts' : '알림함'}</span>
+                      <span>{localeLabel(locale, '알림함', 'Alerts', '通知', '通知')}</span>
                     </Link>
                   </div>
                 )}
-                <div className="px-3 pt-2"><ServerClockPill className="w-full justify-center" /></div>
-                <Group title={locale === 'en' ? 'Public' : '공개'} entries={PUBLIC_NAV} pathname={pathname} locale={locale} />
+                <div className="px-3 pt-1"><ServerClockPill className="w-full justify-center" /></div>
+                <Group title={localeLabel(locale, '공개', 'Public', '公開', '公开')} entries={PUBLIC_NAV} pathname={pathname} locale={locale} />
                 {viewer?.signedIn && (
-                  <Group title={locale === 'en' ? 'Member' : '회원'} entries={MEMBER_NAV} pathname={pathname} locale={locale} />
+                  <Group title={localeLabel(locale, '회원', 'Member', '会員', '会员')} entries={MEMBER_NAV} pathname={pathname} locale={locale} />
                 )}
-                {mobileAdmin.length > 0 && <Group title={locale === 'en' ? 'Admin' : '운영'} entries={mobileAdmin} pathname={pathname} locale={locale} />}
+                {mobileAdmin.length > 0 && <Group title={localeLabel(locale, '운영', 'Admin', '運営', '管理')} entries={mobileAdmin} pathname={pathname} locale={locale} />}
                 <div className="px-3 py-2 sm:hidden">
                   <ThemePanel />
                 </div>
               </nav>
-              <SheetFooter className="border-t bg-background/95 pb-[max(1rem,env(safe-area-inset-bottom))] sm:hidden">
+              <SheetFooter className="border-t bg-background/95 p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:hidden">
                 <MobileSessionAction viewer={viewer} locale={locale} />
               </SheetFooter>
             </SheetContent>
@@ -153,6 +158,63 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
+  );
+}
+
+/**
+ * 모바일 사이드 메뉴(Sheet 드로어) 최상단에 배치되는 4개 국어 원터치 세그먼트 버튼
+ */
+function MobileLanguageSegment() {
+  const { locale, setLocale } = useLocale();
+  const { setCurrency } = useCurrency();
+
+  const handleSelect = (newLocale: Locale) => {
+    setLocale(newLocale);
+    const suggestedCurrency = DEFAULT_CURRENCY_FOR_LOCALE[newLocale];
+    if (suggestedCurrency) {
+      setCurrency(suggestedCurrency);
+    }
+  };
+
+  const segments: Array<{ value: Locale; label: string }> = [
+    { value: 'ko', label: '한국어' },
+    { value: 'en', label: 'English' },
+    { value: 'ja', label: '日本語' },
+    { value: 'zh', label: '中文' },
+  ];
+
+  return (
+    <div className="mb-2 p-2 rounded-2xl bg-secondary/40 border border-border/60">
+      <div className="flex items-center justify-between gap-1 mb-1.5 px-1">
+        <span className="flex items-center gap-1.5 text-[11px] font-extrabold text-muted-foreground">
+          <Globe2 className="size-3 text-amber-500" />
+          {localeLabel(locale, '언어 선택', 'Language', '言語選択', '选择语言')}
+        </span>
+        <span className="text-[10px] font-mono font-bold text-amber-500 uppercase">
+          {locale}
+        </span>
+      </div>
+      <div className="grid grid-cols-4 gap-1">
+        {segments.map((s) => {
+          const active = locale === s.value;
+          return (
+            <button
+              key={s.value}
+              type="button"
+              onClick={() => handleSelect(s.value)}
+              className={cn(
+                'min-h-[38px] rounded-xl text-xs font-black transition-all active:scale-95 flex items-center justify-center cursor-pointer select-none',
+                active
+                  ? 'bg-amber-500 text-amber-950 font-black shadow-sm'
+                  : 'bg-background/80 text-foreground/80 hover:bg-background hover:text-foreground border border-border/40',
+              )}
+            >
+              {s.label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -350,12 +412,12 @@ function Group({
 
 function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; readonly locale: Locale }) {
   const realtimeWallet = useRealtimeWallet();
-  if (!viewer) return <Skeleton className="h-11 w-20 sm:w-24 rounded-[10px] sm:rounded-[12px]" />;
+  if (!viewer) return <Skeleton className="h-10 sm:h-11 w-16 sm:w-24 rounded-[10px] sm:rounded-[12px]" />;
 
   if (!viewer.signedIn) {
     return (
-      <Button asChild className="h-11 rounded-[10px] sm:rounded-[12px] px-3 sm:px-5 text-xs sm:text-sm font-extrabold shadow-plate shrink-0">
-        <Link href="/login">{locale === 'en' ? 'Sign in' : '로그인'}</Link>
+      <Button asChild className="h-10 sm:h-11 rounded-[10px] sm:rounded-[12px] px-2.5 sm:px-5 text-xs sm:text-sm font-extrabold shadow-plate shrink-0">
+        <Link href="/login">{localeLabel(locale, '로그인', 'Sign in', 'ログイン', '登录')}</Link>
       </Button>
     );
   }
@@ -364,7 +426,7 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
   const liveWld = realtimeWallet.availableWld;
 
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+    <div className="flex items-center gap-1 sm:gap-2 shrink-0">
       <div className="hidden min-[360px]:flex items-center gap-1">
         <ChatHeaderButton />
         <NotificationHeaderButton />
@@ -381,7 +443,7 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
               {groupDigits(liveWld.toString())} <span className="text-[10px] opacity-80">WLD</span>
             </span>
           ) : (
-            <span className="hidden 2xl:inline">{locale === 'en' ? 'Wallet' : '내 지갑'}</span>
+            <span className="hidden 2xl:inline">{localeLabel(locale, '내 지갑', 'Wallet', 'ウォレット', '钱包')}</span>
           )}
         </Link>
       </Button>
@@ -390,22 +452,22 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="flex h-10 sm:h-11 items-center gap-1.5 rounded-xl px-2 sm:px-2.5 2xl:px-3 text-xs sm:text-sm font-bold text-foreground hover:bg-secondary shrink-0 outline-none"
-            aria-label={locale === 'en' ? 'Account menu' : '내 계정 메뉴'}
+            className="flex h-10 sm:h-11 items-center gap-1.5 rounded-xl px-1.5 min-[400px]:px-2 sm:px-2.5 2xl:px-3 text-xs sm:text-sm font-bold text-foreground hover:bg-secondary shrink-0 outline-none"
+            aria-label={localeLabel(locale, '내 계정 메뉴', 'Account menu', 'アカウントメニュー', '账户菜单')}
           >
             <span className="flex size-7 sm:size-8 items-center justify-center rounded-full bg-primary/20 ring-1 ring-primary/40 text-xs font-black text-primary shadow-xs">
               <User className="size-4" />
             </span>
             <span className="hidden 2xl:inline-block text-xs font-bold text-muted-foreground">
-              {locale === 'en' ? 'Account' : '내 계정'}
+              {localeLabel(locale, '내 계정', 'Account', 'アカウント', '我的账户')}
             </span>
-            <ChevronDown className="size-3 text-muted-foreground" />
+            <ChevronDown className="size-3 text-muted-foreground hidden sm:inline" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-60 p-1.5 rounded-2xl border border-border/80 bg-popover/95 backdrop-blur-xl shadow-2xl z-50">
           <div className="px-3 py-2.5 rounded-xl bg-secondary/50 mb-1">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-[11px] font-bold text-muted-foreground">{locale === 'en' ? 'Session' : '인증 상태'}</p>
+              <p className="text-[11px] font-bold text-muted-foreground">{localeLabel(locale, '인증 상태', 'Session', 'セッション状態', '认证状态')}</p>
               <span className={cn(
                 'rounded-md px-1.5 py-0.5 text-[10px] font-extrabold tracking-tight',
                 isAdmin ? 'bg-primary/20 text-primary' : 'bg-emerald-500/15 text-emerald-500 dark:text-emerald-400'
@@ -415,34 +477,34 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
             </div>
             <p className="truncate text-sm font-black text-foreground mt-0.5">
               {isAdmin
-                ? (locale === 'en' ? 'Administrator' : '운영 관리자')
-                : (locale === 'en' ? 'Active Member' : '인증된 회원')}
+                ? localeLabel(locale, '운영 관리자', 'Administrator', '運営管理者', '系统管理员')
+                : localeLabel(locale, '인증된 회원', 'Active Member', '認証済み会員', '已认证会员')}
             </p>
           </div>
           <Separator className="my-1 opacity-60" />
           <DropdownMenuItem asChild>
             <Link href="/account" className="flex min-h-10 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors">
               <User className="size-4 text-muted-foreground" />
-              <span>{locale === 'en' ? 'My account' : '내 계정'}</span>
+              <span>{localeLabel(locale, '내 계정', 'My account', 'マイアカウント', '我的账户')}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/wallet" className="flex min-h-10 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors">
               <Wallet className="size-4 text-muted-foreground" />
-              <span>{locale === 'en' ? 'My wallet' : '내 지갑'}</span>
+              <span>{localeLabel(locale, '내 지갑', 'My wallet', 'マイウォレット', '我的钱包')}</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <Link href="/account/security" className="flex min-h-10 items-center gap-2.5 font-bold cursor-pointer rounded-xl px-2.5 hover:bg-secondary transition-colors">
               <ShieldCheck className="size-4 text-muted-foreground" />
-              <span>{locale === 'en' ? 'Account security' : '계정 보안'}</span>
+              <span>{localeLabel(locale, '계정 보안', 'Account security', 'セキュリティ', '账户安全')}</span>
             </Link>
           </DropdownMenuItem>
           {isAdmin && (
             <DropdownMenuItem asChild>
               <Link href="/admin" className="flex min-h-10 items-center gap-2.5 font-bold text-primary cursor-pointer rounded-xl px-2.5 hover:bg-primary/10 transition-colors">
                 <Sliders className="size-4" />
-                <span>{locale === 'en' ? 'Admin console' : '운영 콘솔'}</span>
+                <span>{localeLabel(locale, '운영 콘솔', 'Admin console', '運営コンソール', '管理控制台')}</span>
               </Link>
             </DropdownMenuItem>
           )}
@@ -453,7 +515,7 @@ function SessionControl({ viewer, locale }: { readonly viewer: Viewer | null; re
               className="flex min-h-10 w-full items-center gap-2.5 rounded-xl px-2.5 text-sm font-bold text-destructive hover:bg-destructive/10 transition-colors text-left cursor-pointer"
             >
               <LogOut className="size-4" />
-              <span>{locale === 'en' ? 'Sign out' : '로그아웃'}</span>
+              <span>{localeLabel(locale, '로그아웃', 'Sign out', 'ログアウト', '退出登录')}</span>
             </button>
           </form>
         </DropdownMenuContent>
