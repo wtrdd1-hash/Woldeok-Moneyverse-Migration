@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { IBM_Plex_Mono, Nanum_Myeongjo, Noto_Sans_KR } from 'next/font/google';
 import { SiteShell } from '@/components/site-shell';
 import { LocaleProvider } from '@/components/locale-provider';
@@ -14,6 +15,7 @@ import { fetchLatestPolicy } from '@/lib/api';
 import { NOTICE_PREFERENCE_SCRIPT } from '@/lib/notice-preference';
 import { POINT_PREFERENCE_SCRIPT } from '@/lib/theme';
 import { jsonLd } from '@/lib/json-ld';
+import { homeAdSense } from '@/lib/adsense';
 import { cookies } from 'next/headers';
 import {
   DEFAULT_LOCALE,
@@ -275,6 +277,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       className={`${myeongjo.variable} ${notoKr.variable} ${plexMono.variable}`}
     >
       <body>
+        {homeAdSense.enabled && (
+          <Script
+            id="adsense-global-init"
+            async
+            crossOrigin="anonymous"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${homeAdSense.publisherId}`}
+            strategy="afterInteractive"
+          />
+        )}
         <ConsentGuard
           signedIn={viewer.signedIn}
           consentCurrent={viewer.consentCurrent}

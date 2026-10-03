@@ -2,11 +2,14 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { TrendingUp, ArrowLeft, RotateCcw, Sparkles, DollarSign, Calculator, HelpCircle } from 'lucide-react';
+import { TrendingUp, ArrowLeft, RotateCcw, Sparkles, DollarSign, Calculator, HelpCircle, Share2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { PublicAdvertisement } from '@/components/public-advertisement';
+import { ViralShareCardDialog } from '@/components/viral-share-card-dialog';
+import type { ViralCardPayload } from '@/lib/viral-share-card';
 
 const POPULAR_STOCKS = [
   { symbol: 'CHIPS', name: '침팬지 반도체', currentPrice: 52000 },
@@ -23,6 +26,7 @@ export default function StockCalculatorPage() {
   const [additionalQuantity, setAdditionalQuantity] = useState<number>(150);
   const [targetProfitPercent, setTargetProfitPercent] = useState<number>(15);
   const [feeRate, setFeeRate] = useState<number>(0.05); // 0.05% 수수료
+  const [shareOpen, setShareOpen] = useState(false);
 
   const calculation = useMemo(() => {
     const p1 = Math.max(0, initialPrice || 0);
@@ -260,9 +264,20 @@ export default function StockCalculatorPage() {
             <CardHeader className="pb-3 border-b border-border/50">
               <CardTitle className="text-base font-bold text-foreground flex items-center justify-between">
                 <span>물타기 후 최종 평단가</span>
-                <span className="text-xs font-semibold text-emerald-500 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
-                  총 {calculation.totalQty.toLocaleString()}주
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-emerald-500 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                    총 {calculation.totalQty.toLocaleString()}주
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShareOpen(true)}
+                    className="h-7 text-xs font-bold gap-1 text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10"
+                  >
+                    <Share2 className="size-3" />
+                    <span>카드 공유</span>
+                  </Button>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-6">
@@ -306,8 +321,31 @@ export default function StockCalculatorPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* 인라인 스폰서드 디스플레이 광고 */}
+          <PublicAdvertisement className="my-6" />
         </div>
       </div>
+
+      <ViralShareCardDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        payload={{
+          title: '주식 물타기 평단가 진단서',
+          category: '물타기 계산기',
+          keyMetricLabel: '물타기 후 최종 평단가',
+          keyMetricValue: `${calculation.avgPrice.toLocaleString()} WLD`,
+          keyMetricSubtext: `총 ${calculation.totalQty.toLocaleString()}주 보유`,
+          summaryRows: [
+            { label: '기존 매수 단가/수량', value: `${initialPrice.toLocaleString()} WLD (${initialQuantity}주)` },
+            { label: '추가 매수 단가/수량', value: `${additionalPrice.toLocaleString()} WLD (${additionalQuantity}주)` },
+            { label: '평단가 변동폭', value: `${calculation.priceDiff > 0 ? `+${calculation.priceDiff}%` : `${calculation.priceDiff}%`}` },
+            { label: `목표 익절가 (+${targetProfitPercent}%)`, value: `${calculation.targetSellingPrice.toLocaleString()} WLD` },
+          ],
+          badgeText: `평단 절감률 ${Math.abs(calculation.priceDiff)}%`,
+          accentColor: '#10b981',
+        }}
+      />
     </div>
   );
 }

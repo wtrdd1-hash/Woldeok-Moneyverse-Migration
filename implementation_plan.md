@@ -473,3 +473,37 @@
 - **GitHub 동기화**: `git push origin main`.
 - **원격 운영 서버 무중단 승격 (`v514`)**: 블루-그린 전환 및 `curl` 헬스체크 200 OK.
 
+---
+
+## 🚀 [v74 Specification] 구글 애드센스(AdSense) 수익화 극대화 및 트래픽·CTR 폭발 통합 최적화 사양
+
+### 1. 현황 및 문제점 분석 (Current Metrics & Bottlenecks)
+- **사용자 제공 AdSense 실적 진단**:
+  - 일일/주간 예상 수입: $0.01 ~ $0.06 (잔고 $0.43)
+  - 페이지뷰: 236건 (노출수 193건)
+  - 페이지 RPM: $0.26 / 페이지 CTR: **0.00%** (클릭수 0건)
+  - 광고 단위: 디스플레이 광고만 극소수 노출 중
+- **핵심 기술적 원인 분석**:
+  1. **전역 자동 광고(Auto Ads) 스크립트 부재**: `layout.tsx` 전역 `<head>`에 AdSense 스크립트가 없어 구글 AI 자동 광고(모바일 앵커 광고, 사이드 레일, 인피드, 전면 광고)가 161개 라우트에서 미동작.
+  2. **고트래픽/고단가 핵심 화면 광고 슬롯 누락**:
+     - 복리 계산기 (`/tools/compound-calculator`), 물타기 계산기 (`/tools/stock-calculator`), 가상 부동산 계산기 (`/tools/real-estate-calculator`), 김치프리미엄 계산기 (`/tools/kimchi-premium-calculator`), 양도세 계산기 (`/tools/capital-gains-tax-calculator`) 결과 카드 주변에 광고 슬롯 부재.
+     - 주식 거래소 차트/호가 화면 (`/stocks/[symbol]`), 가상 부동산 메인/경매 (`/spaces`), 커뮤니티 게시글 본문 하단 (`/board/[postId]`) 광고 슬롯 부재.
+  3. **바이럴 유입 동선 부족**: 계산기 결과를 카카오톡/디스코드/인스타그램에 1초 만에 공유할 수 있는 시각적 바이럴 카드 생성 엔진 부재로 오가닉 신규 유입 정체.
+  4. **Active View 뷰어빌리티 및 체류 시간**: 사용자가 계산기 결과를 오래 관찰하고 상호작용할 수 있는 인터랙티브 차트 및 프리셋 기능 강화 필요.
+
+### 2. 단계별 통합 구현 로드맵 (Actionable Roadmap)
+1. **[AdSense Core] 전역 자동 광고(Auto Ads) & 반응형 앵커/사이드레일 활성화**:
+   - `frontend/src/app/layout.tsx`의 `<head>`에 공식 AdSense 클라이언트 스크립트(`ca-pub-5220225531544323`) 전역 삽입.
+   - `ads.txt` 정합성 검증 (`google.com, pub-5220225531544323, DIRECT, f08c47fec0942fa0`).
+2. **[Ad Placement] 10대 핵심 고트래픽 화면 인라인 네이티브 광고 슬롯 배치**:
+   - 5대 금융 계산기 결과 카드 하단 및 입력 폼 사이 스폰서드 배너 삽입.
+   - 주식 상세(`[symbol]`) 차트 하단 및 게시글(`[postId]`) 댓글 상단 스폰서드 카드 삽입.
+   - 가상 부동산(`/spaces`), 온보딩 가이드(`/guide`), 미니게임(`/casino`) 상하단 광고 슬롯 완비.
+3. **[Viral Engine] 1초 SNS/오픈채팅 바이럴 공유 카드 생성기 연동**:
+   - 물타기, 복리, 부동산 월세, 김프, 양도세 계산기 결과 화면에 [SNS 카드 공유] 버튼 탑재.
+   - 1080x1080 / 1200x630 해상도의 고품질 Canvas 이미지 즉시 생성 및 클립보드 원터치 복사/다운로드.
+4. **[SEO Accelerator] 롱테일 키워드 검색엔진 실시간 수집 가속**:
+   - 5대 계산기 프리셋 50개 라우트에 대한 IndexNow 자동 핑 및 사이트맵 최신화.
+5. **[Verification & Deployment] 빌드 및 프로덕션 무중단 승격 (`v515`)**:
+   - 단위 테스트 100% ALL-PASS, Next.js 프로덕션 빌드 무결점 확인, GitHub push 및 원격 운영 서버 승격.
+
