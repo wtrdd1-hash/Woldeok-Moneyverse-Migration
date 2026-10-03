@@ -8,10 +8,12 @@
 
 ---
 
+> **v523 monetary/fiscal boundary:** treasury vaults, taxes and fiscal expenditure in this document move existing WLD. New WLD issuance and permanent retirement follow only the Central Bank authorization + canonical Mint execution path in `CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.md`. `VAULT_RESERVE` is a fiscal liquidity reserve, not a money-issuance reserve.
+
 ## 🏛️ 1. Fiscal Recirculation & Social Democratic Principles
 
-Woldeok Moneyverse's fiscal and taxation system operates under the inviolable principle of **fiscal democracy**:
-**"All taxes collected from citizen transactions and market activities are 100% recirculated and redistributed back into society through public infrastructure, universal citizen dividends, welfare subsidies, and market buyback burns, with zero leakage."**
+Woldeok Moneyverse's fiscal and taxation system operates under a strict fiscal-transparency principle:
+**"Every WLD collected from citizen transactions and market activity remains fully accounted for and is routed only to approved public spending, welfare, fiscal reserves, market stabilization, or an explicit permanent-retirement policy, with zero off-ledger leakage."** Treasury holding and spending do not create money; only canonical retirement reduces total supply.
 
 ```mermaid
 flowchart TD

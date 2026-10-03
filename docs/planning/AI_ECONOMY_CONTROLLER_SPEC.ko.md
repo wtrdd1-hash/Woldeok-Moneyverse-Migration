@@ -3,7 +3,7 @@
 > 버전: v2026.09.25.441
 > 상태: Living 구현 지향 기획 명세
 > 날짜: 2026-09-20
-> 상위 명세: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
+> 상위 명세: `PROJECT_PLAN.md`, `CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.ko.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
 > 영문 기준본: [AI_ECONOMY_CONTROLLER_SPEC.md](AI_ECONOMY_CONTROLLER_SPEC.md)
 
 ## 0. 목적
@@ -21,6 +21,7 @@ AI는 상태 진단, 원인 설명, 정책 후보 생성을 담당할 수 있지
 컨트롤러는 다음을 하면 안 된다.
 
 - 유저 WLD 잔액을 직접 지급·회수·몰수·재작성
+- 중앙은행 통화정책 명령 또는 조폐/폐기 인증서를 생성·승인·직접실행·우회하며 국고 부족을 자동발행 사유로 사용하는 행위
 - 유저 인벤토리, 주식, 아이템, 대출 등 계정별 경제상태 직접 변경
 - append-only 원장 기록 삭제·재작성·소급 수정
 - 사람 승인 없이 신규 화폐, SKU, 소비처 또는 유료 경제우위 생성

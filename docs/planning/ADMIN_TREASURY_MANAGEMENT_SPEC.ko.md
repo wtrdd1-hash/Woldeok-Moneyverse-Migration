@@ -6,6 +6,7 @@
 > 영어 원문: [ADMIN_TREASURY_MANAGEMENT_SPEC.md](ADMIN_TREASURY_MANAGEMENT_SPEC.md)
 > 선행 버전: v2026.09.20.306
 > 적용 성격: 기획/문서 전용. 런타임·DB·API·Production 변경 없음.
+> v523 통화 경계: 본 국고 명세는 기존 WLD의 재정 이동을 관리하며, 신규 발행·영구폐기 권한은 `CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.ko.md`를 따른다.
 
 ## 1. 목적
 
