@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v87)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v88)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v88**: 홈 화면(`/`) 및 상단 공지 바(`notice-bar.tsx`), 2열 온보딩 벤토, 4대 퀵 액션, 3대 금융 웹 도구 허브, 일일 리텐션 스테이션, 핫 종목 및 직업 마스터리 카드 전 구역 4개 국어(KO, EN, JA, ZH) 번역 무결점 전수 매핑 및 `i18n-dictionary.ts` 마스터 사전 47종 대폭 확장, 단위 테스트 & Next.js 163개 라우트 빌드 통과 및 원격 운영 서버(`prod-v521`) 무중단 승격 완결 (+145, -0)
 - **v87**: 국고 세수 자동 사회 환원(기본소득 배당, 복지 보조금, 인프라 펀딩, 역매수 소각) 전수 점검 & 10대 법정 세제율 및 5대 금고 원장 무결성 검증 & `/admin/treasury` 긴급 제어 타워 2FA 모달 리팩터링 및 반응형 헤더 찌그러짐 원천 차단 & 종합 기획서(`TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md`) 구축 완비 (+190, -0)
 - **v86**: 전 화면 4개 국어(KO, EN, JA, ZH) 번역 무결성 및 자연스러움 전수 쇄신 — 로드맵(`/roadmap`), 8대 직업 가이드(`/guide/career-mastery`), 온보딩 트래커(`interactive-onboarding-tracker.tsx`), AI 맞춤형 투자 성향 퀴즈(`investor-profile-quiz.tsx`), 6대 기능 가이드(`/features`) 글로벌 핀테크 표준 용어(Stripe, Robinhood, Bloomberg, SBI, Rakuten, Ant Financial) 전수 연동 및 단위 테스트 30종 100% ALL-PASS (+185, -0)
 - **v85**: 초반 무자본 10만 WLD 시드머니 3분 공략 최우선 전진 배치 & 12개 실전 UI 씬 인터랙티브 모션 비디오 시뮬레이터 & 디자인 전면 쇄신(`/roadmap`) 완비 (+165, -0)
@@ -989,4 +990,44 @@
 ### 3. 검증 및 배포 계획
 - 프론트엔드 단위 테스트 100% ALL-PASS.
 - Git main 브랜치 커밋 및 푸시, 원격 운영 서버(`prod-v521`) 동기화.
+
+---
+
+## 🚀 [v88 Specification] 홈 화면 및 전역 공지 바 4개 국어 번역 결함 박멸 & 마스터 사전 확장 사양 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 질의 및 요청**:
+  - "영어뮈야?" (중국어 `ZH` 및 외국어 모드에서 홈 화면 및 상단 공지 바 곳곳에 영어 또는 한국어가 혼재되어 출력되는 번역 결함 긴급 해결 요청)
+  - 첨부 이미지 4종(`media_1791041256831.png`, `media_1791041283435.png`, `media_1791041331324.png`, `media_1791041383403.png`) 분석 결과:
+    1. 최상단 공지 바: "Virtual Economy...", "Terms" 등이 영어로 노출.
+    2. 메인 히어로 & 4대 퀵 액션: "Total Virtual Net Worth", "Transfer", "Careers", "Stocks", "Bank" 등이 영어로 노출.
+    3. 온보딩 2열 벤토 배너: "Getting Started 3-Stage Master Guide", "Watch 60fps Video Simulator", "6 Core Features Guide & AI Profile Quiz", "Explore Features & AI Quiz" 등이 영어로 노출되고 내부 미니 칩 라벨("🌱 1단계: 시드 10만", "📊 주식 거래소" 등)이 한국어로 하드코딩됨.
+    4. 3대 금융 웹 도구 허브 & 일일 리텐션: "Financial Tools Hub", "Daily Lucky Roulette", "Stock Price Prediction" 등이 영어로 노출.
+    5. 주식 핫 종목 & 직업 업무 스테이션: "Hot Stock Highlights", "Career Mastery", "Senior Programmer", "Quant Trader" 등이 영어로 노출.
+- **근본 원인 규명**:
+  - `TranslatedText` 컴포넌트에서 `japanese`, `chinese` props가 생략된 경우 `i18n-dictionary.ts`의 역방향 사전(`lookupText`)을 호출하는데, 홈 화면 전용 문구들이 사전에 등록되어 있지 않아 세 번째 매개변수인 `english` fallback이 렌더링됨.
+
+### 2. 세부 컴포넌트 구현 명세
+1. **최상단 공지 바 (`frontend/src/components/notice-bar.tsx`)**:
+   - `가상경제 플랫폼` -> ja: `仮想経済プラットフォーム`, zh: `虚拟经济平台`
+   - `모든 WLD와 보상은 게임 안에서만 쓰는 가상 데이터입니다.` -> ja: `すべてのWLDと報酬はゲーム内でのみ使用される仮想データです。`, zh: `所有WLD与奖励均为仅在社区内使用的虚拟游戏数据。`
+   - `이용 기준` -> ja: `利用規約`, zh: `使用条款`
+2. **홈 화면 전면 다국어화 (`frontend/src/app/page.tsx`)**:
+   - 메인 히어로 자산 총액 및 분산 원장 배너 4개 국어 매핑 완비.
+   - 4대 퀵 액션(송금, 직업, 주식, 은행) 타이틀 및 서브텍스트 4개 국어 매핑 완비.
+   - 3단계 로드맵 벤토, 6대 기능 가이드 벤토, 3단계 미니 칩(🌱, 📈, 👑), 6대 기능 미니 뱃지(📊, 🏦, 🏢, 🎯) 전수 `<T>` 다국어화.
+   - 3대 금융 계산기 허브 및 3개 퀵 링크(복리, 물타기, 직업) 4개 국어 매핑 완비.
+   - 일일 럭키 룰렛 및 주가 예측 배팅 카드 4개 국어 매핑 완비.
+   - 가상 주식 핫 3개 종목(월덕게임즈, 월덱테크, 치무테크) 및 틱 주기, 목표가 알림 4개 국어 매핑 완비.
+   - 직업 업무 스테이션(시니어 프로그래머, 퀀트 트레이더, 티어 뱃지, 루틴 시작) 4개 국어 매핑 완비.
+   - 공식 공지사항 및 패치노트 헤더 4개 국어 매핑 완비.
+3. **마스터 다국어 사전 대폭 확장 (`frontend/src/lib/i18n-dictionary.ts`)**:
+   - Section 35 `home.*` 카테고리 47종 신규 추가 및 역방향 인덱스 자동 연동.
+
+### 3. 검증 및 배포 결과
+- **Vitest 단위 테스트**: 프론트엔드 전체 테스트 100% 통과.
+- **Next.js 16.3.8 Turbopack 빌드**: 정적 163개 페이지 전수 생성 완료, 0 TypeScript 에러.
+- **Git 커밋 & 푸시**: `origin/main` 푸시 완료 (`8d4370b4`).
+- **원격 운영 서버(`prod-v521`) 무중단 승격**: Next.js 빌드 및 `moneyverse-frontend.service` 재기동 완료, HTTP/2 200 OK 라이브 서비스 검증 완료.
+
 
