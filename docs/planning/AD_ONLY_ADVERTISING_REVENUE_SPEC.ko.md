@@ -1,9 +1,9 @@
 # 월덕 머니버스 — 광고 전용 수익화 명세
 
-> 버전: v2026.10.02.507
+> 버전: v2026.10.03.512
 > 상태: PLANNING / 현금 수익화 권위
-> 날짜: 2026-10-02
-> 권위 채택: v507 해외 광고경제 결정을 v2026.10.03.509에서 현재 기획 권위로 통합.
+> 날짜: 2026-10-03
+> 권위 채택: v507 해외 광고경제 + v512 Search Console 색인회복 선행게이트를 현재 기획 권위로 통합.
 > 영문 기준 문서: [AD_ONLY_ADVERTISING_REVENUE_SPEC.md](AD_ONLY_ADVERTISING_REVENUE_SPEC.md)
 
 ## 1. 권위와 사업자 제약
@@ -136,6 +136,22 @@ Google의 Page RPM 정의는 예상수입을 pageview로 나눈 뒤 1,000을 곱
 이는 예측이 아니라 산술 시나리오다. 실제 Page RPM과 자격 자연검색 1,000세션당 수익을 사용한다. 증분 광고수익이 번역/콘텐츠/모더레이션/인프라/개인정보·컴플라이언스/지원비용을 넘고 retention/CWV/작업완료/invalid-traffic 정책 가드레일이 건강할 때 시장을 확대한다.
 
 미국·일본·유럽의 큰 디지털광고 시장규모는 거시적 맥락일 뿐 Moneyverse publisher RPM을 보장하지 않는다.
+
+## 7.2 Search Console 색인 회복 → 광고수익 선행게이트 — v512
+
+2026-10-03 사용자 제공 관측 스냅샷은 Search Console 총 클릭 183, 색인됨 46, 색인 안 됨 103을 표시하고 최근 일 클릭이 약 0~2 수준까지 하락한 형태다. 같은 제공 자료의 AdSense 최근 7일은 페이지뷰 236(+17%), 노출 193(+10%), Page RPM US$0.26(-41%), 클릭 0, 페이지 CTR 0.00%, 예상수입 US$0.06을 표시한다. 이 값은 진단 트리거이며 장기 추세 또는 인과를 단독 증명하지 않는다.
+
+광고수익 운영 순서는 다음과 같이 고정한다.
+
+1. Search Console 제외사유를 URL 단위로 export하여 의도적 제외와 결함을 분리한다.
+2. sitemap/robots/canonical/noindex/status/redirect/soft-404/내부링크/locale 충돌을 정리한다.
+3. 검색 의도를 완결하는 고유 콘텐츠와 도구를 강화하고 orphan URL을 제거한다.
+4. 7/28/90일로 qualified organic sessions, impressions, clicks, CTR, average position, index cohort, pageviews/session을 측정한다.
+5. 그 뒤에만 광고 viewability/format/load 실험을 수행하며 Page RPM과 revenue/1,000 organic sessions를 함께 본다.
+
+**금지:** 미색인 103개를 모두 강제 색인, 검색수요와 무관한 얇은 pSEO 대량생성, 광고 inventory 확보용 duplicate 페이지, 자체/유도 클릭, 광고 클릭을 KPI로 최적화하는 행위.
+
+**운영 목표:** 올바르게 색인돼야 하는 URL의 결함률 감소와 자격 자연검색 세션 증가다. 로그인·계정·지갑·거래·관리자·비공개·민감 동의 화면 등 의도적 비색인은 성공적으로 제외된 상태로 간주한다. 광고수익 증가는 검색 품질·정책·CWV·사용자 작업완료를 훼손하지 않는 범위에서만 채택한다.
 
 ## 8. 사업자·세무 증거 게이트
 
