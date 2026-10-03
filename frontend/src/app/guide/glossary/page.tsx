@@ -1,12 +1,14 @@
+import React from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, BookOpen, Search, HelpCircle, Check, DollarSign } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 import { getServerLocale } from '@/lib/locale-server';
+import { InArticleAdvertisement } from '@/components/public-advertisement';
 
 export const revalidate = 3600;
 
@@ -153,27 +155,32 @@ export default async function GlossaryPage() {
 
       <div className="grid gap-3.5">
         {GLOSSARY_ITEMS.map((item, index) => (
-          <Card key={index} className="border-border/80 bg-card/60">
-            <CardHeader className="p-4 sm:p-5 pb-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-md bg-primary/10 text-primary">
-                    <BookOpen className="size-4" />
+          <React.Fragment key={index}>
+            <Card className="border-border/80 bg-card/60">
+              <CardHeader className="p-4 sm:p-5 pb-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-md bg-primary/10 text-primary">
+                      <BookOpen className="size-4" />
+                    </div>
+                    <CardTitle className="text-sm sm:text-base font-bold text-foreground">
+                      {item.term}
+                    </CardTitle>
                   </div>
-                  <CardTitle className="text-sm sm:text-base font-bold text-foreground">
-                    {item.term}
-                  </CardTitle>
+                  <Badge variant="outline" className="text-xs">
+                    {item.category}
+                  </Badge>
                 </div>
-                <Badge variant="outline" className="text-xs">
-                  {item.category}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-5 pt-1 space-y-1.5 text-xs sm:text-sm text-muted-foreground leading-relaxed">
-              <p className="text-foreground font-medium">{item.summary}</p>
-              <p className="text-xs text-muted-foreground/90">{item.detail}</p>
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-5 pt-1 space-y-1.5 text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                <p className="text-foreground font-medium">{item.summary}</p>
+                <p className="text-xs text-muted-foreground/90">{item.detail}</p>
+              </CardContent>
+            </Card>
+            {index === 3 && (
+              <InArticleAdvertisement className="my-2" />
+            )}
+          </React.Fragment>
         ))}
       </div>
 

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 import { getServerLocale } from '@/lib/locale-server';
+import { InArticleAdvertisement } from '@/components/public-advertisement';
 
 export const revalidate = 3600;
 
@@ -154,6 +155,9 @@ export default async function CareerMasteryGuidePage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
+        <InArticleAdvertisement className="my-3" />
 
         {/* Section 2: Mastery Leveling */}
         <Card className="border-border/80 bg-card/60">

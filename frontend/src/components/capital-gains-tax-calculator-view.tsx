@@ -11,7 +11,7 @@ import { TaxPreset, CAPITAL_GAINS_TAX_PRESETS } from '@/config/capital-gains-tax
 import { calculateCapitalGainsTax } from '@/lib/capital-gains-tax-calculator';
 import { ViralShareButton } from '@/components/viral-share-button';
 import { PopularCalculatorsHub } from '@/components/popular-calculators-hub';
-import { PublicAdvertisement } from '@/components/public-advertisement';
+import { InArticleAdvertisement } from '@/components/public-advertisement';
 
 interface CapitalGainsTaxCalculatorViewProps {
   initialPreset?: TaxPreset | undefined;
@@ -251,8 +251,8 @@ export function CapitalGainsTaxCalculatorView({ initialPreset }: CapitalGainsTax
         </Card>
       </div>
 
-      {/* 스폰서드 디스플레이 광고 */}
-      <PublicAdvertisement className="my-6" />
+      {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
+      <InArticleAdvertisement className="my-6" />
 
       {/* 상호 내부 링크 허브 */}
       <PopularCalculatorsHub currentPresetSlug={initialPreset?.slug} />

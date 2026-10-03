@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { InArticleAdvertisement } from '@/components/public-advertisement';
 import { useLocale } from '@/components/locale-provider';
 import { localeLabel } from '@/lib/locale';
 import { formatMoment, groupDigits } from '@/lib/money';
@@ -564,6 +565,9 @@ export function NewspaperView({
           </div>
         </div>
       </section>
+
+      {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
+      <InArticleAdvertisement className="my-6" />
 
       {/* 4. Weekly Financial Concept & Lore Corner */}
       <section aria-labelledby="lore-heading" className="space-y-4">

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Calendar } from 'lucide-react';
-import { PublicAdvertisement } from '@/components/public-advertisement';
+import { InArticleAdvertisement } from '@/components/public-advertisement';
 import { publicApi } from '@/lib/api';
 import { jsonLd } from '@/lib/json-ld';
 import { formatDay } from '@/lib/money';
@@ -182,8 +182,8 @@ export default async function AnnouncementDetailPage({ params }: PageProps) {
         </section>
       )}
 
-      {/* 하단 스폰서 광고 */}
-      <PublicAdvertisement />
+      {/* 본문 하단 인아티클 스폰서 광고 */}
+      <InArticleAdvertisement className="my-6" />
     </div>
   );
 }

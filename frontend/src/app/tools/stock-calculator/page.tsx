@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { PublicAdvertisement } from '@/components/public-advertisement';
+import { InArticleAdvertisement } from '@/components/public-advertisement';
 import { ViralShareCardDialog } from '@/components/viral-share-card-dialog';
 import type { ViralCardPayload } from '@/lib/viral-share-card';
 
@@ -322,8 +322,8 @@ export default function StockCalculatorPage() {
             </CardContent>
           </Card>
 
-          {/* 인라인 스폰서드 디스플레이 광고 */}
-          <PublicAdvertisement className="my-6" />
+          {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
+          <InArticleAdvertisement className="my-6" />
         </div>
       </div>
 

@@ -3,10 +3,11 @@ import Link from 'next/link';
 import { ArrowLeft, TrendingUp, BarChart3, ShieldCheck, Zap, BookOpen, Layers } from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 import { getServerLocale } from '@/lib/locale-server';
+import { InArticleAdvertisement } from '@/components/public-advertisement';
 
 export const revalidate = 3600;
 
@@ -148,6 +149,9 @@ export default async function StockTradingGuidePage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
+        <InArticleAdvertisement className="my-3" />
 
         {/* Section 2: AI Market Sentiment */}
         <Card className="border-border/80 bg-card/60">

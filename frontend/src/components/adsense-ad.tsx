@@ -13,7 +13,19 @@ const NO_FILL_TIMEOUT_MS = 6000;
 
 type AdStatus = 'pending' | 'filled' | 'optimized' | 'unfilled';
 
-export function AdSenseAd({ publisherId, slot }: { readonly publisherId: string; readonly slot: string }) {
+export function AdSenseAd({
+  publisherId,
+  slot,
+  layout,
+  format = 'auto',
+  fullWidthResponsive = true,
+}: {
+  readonly publisherId: string;
+  readonly slot: string;
+  readonly layout?: string | undefined;
+  readonly format?: string | undefined;
+  readonly fullWidthResponsive?: boolean | undefined;
+}) {
   const requested = useRef(false);
   const adRef = useRef<HTMLModElement | null>(null);
   const [status, setStatus] = useState<AdStatus>('pending');
@@ -87,14 +99,16 @@ export function AdSenseAd({ publisherId, slot }: { readonly publisherId: string;
           className="adsbygoogle"
           style={{
             display: 'block',
+            textAlign: layout === 'in-article' ? 'center' : undefined,
             minWidth: `${MIN_AD_WIDTH}px`,
             width: '100%',
             minHeight: '90px',
           }}
           data-ad-client={publisherId}
           data-ad-slot={slot}
-          data-ad-format="auto"
-          data-full-width-responsive="true"
+          {...(layout ? { 'data-ad-layout': layout } : {})}
+          data-ad-format={layout === 'in-article' ? 'fluid' : format}
+          {...(layout === 'in-article' ? {} : fullWidthResponsive ? { 'data-full-width-responsive': 'true' } : {})}
         />
       </div>
     </section>

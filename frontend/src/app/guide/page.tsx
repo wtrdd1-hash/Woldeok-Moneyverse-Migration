@@ -38,6 +38,7 @@ import { GlossarySearch } from './components/glossary-search';
 import { PowerUserCheatSheet } from './components/power-user-cheat-sheet';
 import { canonicalUrl, breadcrumbJsonLd, faqPageJsonLd } from '@/lib/seo';
 import { jsonLd } from '@/lib/json-ld';
+import { InArticleAdvertisement } from '@/components/public-advertisement';
 
 export const metadata: Metadata = {
   title: '사이트 이용 가이드 & 인터랙티브 온보딩 허브 (User Guide)',
@@ -232,6 +233,9 @@ export default function GuidePage() {
 
       {/* 7. POWER USER CHEAT SHEET (파워 유저 실전 치트시트) */}
       <PowerUserCheatSheet />
+
+      {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
+      <InArticleAdvertisement className="my-8" />
 
       {/* 8. 가상경제 5대 핵심 기둥 (5 Pillars of Virtual Economy) */}
       <section aria-labelledby="pillars-title" className="space-y-6">
