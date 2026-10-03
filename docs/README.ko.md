@@ -6,7 +6,7 @@
 
 ## 현재 권위
 
-- [구현 기준 프로젝트 기획](planning/PROJECT_PLAN.ko.md) / [English](planning/PROJECT_PLAN.md) — **v2026.09.30.487**
+- [구현 기준 프로젝트 기획](planning/PROJECT_PLAN.ko.md) / [English](planning/PROJECT_PLAN.md) — **v2026.10.03.512**
 - [통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md) / [English](planning/INTEGRATED_PLANNING_MASTER.md)
 - [광고 전용 수익화 명세](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md) / [English](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md) — **v2026.09.30.487**
 - [문서 거버넌스](DOCUMENTATION_POLICY.ko.md) / [English](DOCUMENTATION_POLICY.md)
