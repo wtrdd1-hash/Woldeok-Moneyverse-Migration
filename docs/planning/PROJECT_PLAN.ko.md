@@ -2,7 +2,7 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
-> **현재 통합 버전:** v2026.10.03.509
+> **현재 통합 버전:** v2026.10.03.510
 > **구현·증거 동기화:** 2026-09-23
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)
 
@@ -14,6 +14,15 @@
 권위 register를 제공한다.
 
 과거 상세 변경은 Git 이력과 버전별 changelog/worklog에서 복구할 수 있다. 이 문서는 현재 구현을 위한 권위 계약이다. 다른 개발자나 AI가 과거 초안을 현재 사실로 추정하지 않고 이 문서만으로 기능 범위, 권위 경계, 사용자 상태, API, 영속화, 보안, SEO, 사업성, QA, 릴리스 게이트와 롤백 조건을 이해할 수 있어야 한다.
+
+## 글로벌 성장 실행 아키텍처·심화근거 — v2026.10.03.510 (2026-10-03)
+
+- **범위:** 승인된 v507/v509 글로벌 성장 권위를 locale, SEO, 번역, pSEO, 해외기능, 시장 readiness, 광고/동의, analytics, 관리자, QA까지 구현준비형 계약으로 확장한다.
+- **exact-main 증거:** `origin/main=ac4dd484a90b266d945993d7bd8be57a74e8e1df`를 직접 대조했다. 런타임에는 영어 default/fallback, 추정 locale의 선호 cookie 오염, 가짜 GSC analytics, 폐기된 Google sitemap ping, 기계적 hreflang/sitemap locale 생성, release timestamp 기반 `lastmod`, config-only pSEO 입장 등 P0/P1 권위 공백이 남아 있다.
+- **신규 상세 권위:** [글로벌 성장 실행 명세 v510](GLOBAL_GROWTH_EXECUTION_SPEC.ko.md)에 `LocaleContext`, 번역 lifecycle, `SeoDocument`, route/indexability registry, sitemap/hreflang/lastmod, 검색증거 상태, pSEO 입장/퇴출, 시장 readiness, `AdPolicy`, analytics, 관리자도구, 릴리스 테스트를 구체화했다.
+- **레퍼런스 확장:** 신규 독립 Crossref 회차에서 30개 질의군 raw 210,000건, v510 내부 중복제거 121,320건을 수집했고 manifest SHA-256은 `f16c6deceb18fa96fdd7b1132b2fc58e13f908899d477c9ce252a897adae7704`다. 구현규칙은 최신 공식 1차자료를 별도 확인했다. v507 corpus와 교차중복을 하지 않았으므로 허위 합산 unique 수를 만들지 않는다.
+- **구현 순서:** 진실성 복구 -> 서버 SEO 권위 -> 현지화 플랫폼 -> EN/JA 해외가치 -> 검색/pSEO 운영 -> 준수 광고측정 -> 추가 locale 순차 확대.
+- **증거 경계:** v510은 조사/기획/문서 전용이며 런타임 구현·Test·Production 완료를 주장하지 않는다.
 
 ## 승인된 글로벌 성장 권위 통합 — v2026.10.03.509 (2026-10-03)
 
