@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v86)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v87)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v87**: 국고 세수 자동 사회 환원(기본소득 배당, 복지 보조금, 인프라 펀딩, 역매수 소각) 전수 점검 & 10대 법정 세제율 및 5대 금고 원장 무결성 검증 & `/admin/treasury` 긴급 제어 타워 2FA 모달 리팩터링 및 반응형 헤더 찌그러짐 원천 차단 & 종합 기획서(`TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md`) 구축 완비 (+190, -0)
 - **v86**: 전 화면 4개 국어(KO, EN, JA, ZH) 번역 무결성 및 자연스러움 전수 쇄신 — 로드맵(`/roadmap`), 8대 직업 가이드(`/guide/career-mastery`), 온보딩 트래커(`interactive-onboarding-tracker.tsx`), AI 맞춤형 투자 성향 퀴즈(`investor-profile-quiz.tsx`), 6대 기능 가이드(`/features`) 글로벌 핀테크 표준 용어(Stripe, Robinhood, Bloomberg, SBI, Rakuten, Ant Financial) 전수 연동 및 단위 테스트 30종 100% ALL-PASS (+185, -0)
 - **v85**: 초반 무자본 10만 WLD 시드머니 3분 공략 최우선 전진 배치 & 12개 실전 UI 씬 인터랙티브 모션 비디오 시뮬레이터 & 디자인 전면 쇄신(`/roadmap`) 완비 (+165, -0)
 - **v84**: 우측 하단 플로팅 위젯 충돌 박멸 및 프리미엄 다크 글래스모피즘 수직 스택 아키텍처(고객센터 + 온보딩 퀘스트 완벽 분리) 완비 (+80, -0)
@@ -949,3 +950,43 @@
 - **GitHub 원격 저장소 푸시 & 원격 운영 서버 무중단 승격 (`prod-v521`)**:
   - `git push origin main` 및 원격 호스트 빌드/재기동.
   - `curl -sI https://easy-scraping.com/en/roadmap`, `/ja/roadmap`, `/zh/roadmap` HTTP 200 OK 렌더링 검증.
+
+---
+
+## 🚀 [v87 Specification] 국고 세수 자동 사회 환원 파이프라인 & 관리자 관제 UI 모달 고도화 완결 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "그리고 세금 자동으로 사회기능에쓰이는지등 확인해줘 국가관련돈에 국고에쓰이고하고 관련기획서내영있는없으면 추가해줘"
+  - 첨부 이미지(`media_1791040788893.png`)에서 확인된 `/admin/treasury` 화면의 "국고 재정 환원 및 시장 안정화 관제" 왼쪽 헤더 세로 1글자 찌그러짐 렌더링 버그 해결.
+- **핵심 점검 및 구현 목표**:
+  1. **국고 세수 자동 징수 & 사회 환원(재순환) 파이프라인 전수 무결성 검증**:
+     - **세수 징수 (Inflow)**: 장터 판매세(2%), 주식 매매세(1%), 사업 정산세(3%), B2B 거래세(1%), 상점 소비세(1~3%), 직업 자격 응시료, 4구간 누진 부유세 등이 국고 5대 금고(`VAULT_MAIN`, `VAULT_WELFARE`)로 자동 원천징수/입고됨을 확인.
+     - **사회 환원 (Outflow & Redistribution)**:
+       - 4분할 헌법적 예산 자동 배분 (복지 40%, 인프라 30%, 비상준비 20%, 소각 10%).
+       - 보편적 시민 기본소득 배당(`CITIZEN_DIVIDEND`, 실 누적 45,000 WLD 집행 완료).
+       - 공공 커뮤니티 공간/인프라 펀딩(`COMMUNITY_FUNDING`, 실 누적 50,000 WLD 집행 완료).
+       - 가상 주식 거래정지 매수원가 자동정산(`STOCK_HALT_SETTLEMENT`, 실 누적 28,230 WLD 환급 완료).
+       - 룬스케이프형 역매수 영구소각(`MARKET_BUYBACK_BURN`, 장터 바닥가 방어 및 디플레이션 유도).
+       - 30% 불가침 안전 비축금(`Safe Reserve Invariant`) 보호로 국가 파산 방지.
+     - **회계 대사 무결성**: 16건 트랜잭션 전수 대사 오차 0 WLD (0.000000% 무오차).
+  2. **관리자 관제 타워 UI 레이아웃 쇄신 (`treasury-operations-dialog.tsx`, `treasury-view.tsx`)**:
+     - 버튼 컨테이너에 거대 Card로 끼어들어가 있던 `TreasuryOperationsDialog`를 다른 다이얼로그들과 통일된 `isOpen` 2FA Step-Up 모달 다이얼로그(버튼: `⚡ 자금 긴급 제어 (Step-Up)`)로 전격 리팩터링.
+     - 헤더 영역에 `min-w-0 flex-1` 및 `whitespace-normal`을 적용하여 어떤 해상도(320px~2560px)에서도 텍스트가 찌그러지지 않고 완벽한 고대비 타이포그래피를 유지하도록 강화.
+  3. **국가 재정 및 세금 자동 사회 환원 종합 기획서 구축**:
+     - `docs/planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md` 공식 신규 제정 및 배포.
+
+### 2. 세부 컴포넌트 및 테스트 구현 명세
+1. **관리자 자금 긴급 제어 모달 (`frontend/src/app/admin/treasury/treasury-operations-dialog.tsx`)**:
+   - `isOpen` 모달 오버레이, 2단계 인증(Step-Up) 필드, 자금 주입/소각 탭 전환, 퀵 프리셋 버튼, 10자 이상 사유 검증 탑재.
+2. **관리자 국고 뷰 헤더 레이아웃 (`frontend/src/app/admin/treasury/treasury-view.tsx`)**:
+   - `flex-col lg:flex-row` 반응형 레이아웃, `min-w-0 flex-1` flex 붕괴 차단.
+3. **단위 테스트 (`frontend/src/app/admin/treasury/treasury-view.test.tsx`)**:
+   - 3개 테스트 100% ALL-PASS.
+4. **종합 기획서 문서 (`docs/planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md`)**:
+   - 세금 징수 파이프라인, 5대 금고, 4분할 배분 수식, 30% 안전 비축금 원칙, Mermaid 아키텍처 다이어그램 완비.
+
+### 3. 검증 및 배포 계획
+- 프론트엔드 단위 테스트 100% ALL-PASS.
+- Git main 브랜치 커밋 및 푸시, 원격 운영 서버(`prod-v521`) 동기화.
+

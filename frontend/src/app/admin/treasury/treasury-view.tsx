@@ -584,12 +584,12 @@ export function TreasuryView({ overview, ledger, revenue, expenditure }: Props) 
 
       {/* 7. 국고 재정 관리 및 긴급 제어 타워 (Fiscal & Safety Control Tower) */}
       <Card className="border shadow-sm bg-muted/10">
-        <CardHeader className="p-4 sm:p-6 pb-2">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <CardTitle className="text-base font-semibold">국고 재정 환원 및 시장 안정화 관제 (Fiscal Operations)</CardTitle>
-                <Badge className="bg-primary/90 text-white text-[10px]">헌법적 재정준칙</Badge>
+        <CardHeader className="p-4 sm:p-6 pb-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <CardTitle className="text-base font-semibold whitespace-normal">국고 재정 환원 및 시장 안정화 관제 (Fiscal Operations)</CardTitle>
+                <Badge className="bg-primary/90 text-white text-[10px] shrink-0">헌법적 재정준칙</Badge>
               </div>
               <CardDescription className="text-xs text-muted-foreground mt-1">
                 4분할 목적별 예산 자동 배분(복지 40%, 인프라 30%, 비상비축 20%, 소각 10%) 및 룬스케이프형 역매수 소각을 집행합니다.
