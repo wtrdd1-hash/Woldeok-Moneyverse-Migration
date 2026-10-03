@@ -20,7 +20,7 @@
 - **v59**: 글로벌 법정화폐(USD/JPY/CNY/KRW) 환산 엔진 & 환율 시뮬레이터 구축 및 Google/Naver 검색엔진 수집 현황 실시간 관제 고도화 (+210, -0)
 - **v58**: 다국어(i18n) 번역 및 글로벌 SEO 최적화 원격 운영 서버(v496) 무중단 블루-그린 배포 승격 & 검색엔진(Google/Naver/Bing) 사이트맵 핑 전송 완결 (+180, -0)
 
----
+The former root execution scratchpad mixed historical implementation notes with host-specific operational details. It is intentionally no longer maintained in the public repository.
 
 ## 🏛️ [v61 Specification] 1차 기획 및 사양 (전수 보존)
 ### 1. 개요 및 배경 (Overview & Scope)

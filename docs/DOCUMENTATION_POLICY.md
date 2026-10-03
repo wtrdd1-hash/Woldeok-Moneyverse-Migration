@@ -27,7 +27,7 @@ Do not bump the product-plan version merely to match a runtime version. A versio
 
 English is canonical. Korean is the required second language for newly maintained product/planning/operations/governance documentation. Paired maintained files use `NAME.md` and `NAME.ko.md` and are updated in the same work unit.
 
-Historical, internal-only, third-language, or compatibility files are not retroactively promoted to maintained authority merely to satisfy pairing counts. Any unpaired maintained document must be tracked as an explicit cleanup gap.
+Historical, third-language, or compatibility files are not retroactively promoted to maintained authority merely to satisfy pairing counts. Internal-only records must not be committed to a public repository; they belong in approved private storage. Any unpaired maintained public document must be tracked as an explicit cleanup gap.
 
 ## 4. Change workflow
 
@@ -45,7 +45,7 @@ Every material documentation cycle has:
 - delta/changelog entry;
 - worklog;
 - GitHub-facing update note;
-- internal update note when requested by project operations;
+- internal update note when requested by project operations, stored outside the public repository in approved private storage;
 - start and mid-work `origin/main` SHA when planning/governance authority changes;
 - explicit statement of whether runtime/Test/Production evidence exists.
 
@@ -56,7 +56,7 @@ Every material documentation cycle has:
 - `architecture/`: stable architecture explanations.
 - `operations/`: operator procedures and runtime contracts.
 - `findings/`: audits, evidence corpora and research reviews.
-- `updates/`: compact versioned update notices.
+- `updates/`: compact public versioned update notices; internal update records are prohibited in the public tracked tree.
 - `changelog/`: change history.
 - `worklog/`: execution history and evidence.
 - `releases/`: release records only when release evidence exists.

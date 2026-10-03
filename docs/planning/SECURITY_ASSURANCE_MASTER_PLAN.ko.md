@@ -60,6 +60,7 @@
 - **입력/인젝션:** 크기 제한 schema, parameterized DB, 사용자 입력 기반 shell 조립 금지, context-aware encoding, raw HTML 기본 금지, 제한된 deserialization, file/path/URL/redirect allowlist.
 - **브라우저/API:** 상태변경 쿠키 요청 CSRF, CORS 명시 allowlist, CSP/frame/MIME/HSTS, API inventory/version owner, 민감 페이지 noindex/no-store.
 - **비밀/암호:** 승인 secret store, 회전 절차, Git/log/screenshot/client bundle에서 secret 금지, adaptive password hash, OS CSPRNG, 자체 암호프로토콜 금지.
+- **공개 저장소 위생:** 공개 Git 트리에는 소스, 공개 문서, 재현 가능한 검증에 필요한 정보만 둔다. 내부 작업기록, 비공개 운영 endpoint, 호스트별 접근 세부, 자격증명 material, 민감 보안 증거는 승인된 비공개 저장소에 둔다. 현재 트리에서 삭제한 것을 Git 과거 이력 소거로 간주하지 않는다.
 - **가용성/남용:** 행위별 rate limit, pagination/query complexity 상한, 검색·AI·upload·message·export 비용/동시성 제한, 고영향 workflow fail closed.
 - **로그/개인정보:** 구조화 보안 event, token/cookie/password/DM/payment data 제거, 권한·가치이동 append-only 또는 tamper-evident audit.
 
@@ -84,7 +85,7 @@
 ## 자동 보안 검증 파이프라인
 1. typecheck/lint + security static analysis;
 2. dependency/SCA + lockfile 검토;
-3. secret scanning;
+3. current-tree + Git 이력 인지형 secret scanning 및 결과값 redaction;
 4. IaC/container/config policy;
 5. validation/authz/idempotency unit test;
 6. 실DB transaction/concurrency integration test;
