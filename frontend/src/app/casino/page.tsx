@@ -32,6 +32,7 @@ import { WheelGame } from './wheel-game';
 import { CasinoJackpotTicker } from './casino-jackpot-ticker';
 import type { CasinoJackpotData } from './casino-jackpot-ticker';
 import { CasinoAudioControls } from '@/components/casino-audio-controls';
+import { PublicAdvertisement } from '@/components/public-advertisement';
 
 import { getServerLocale } from '@/lib/locale-server';
 
@@ -659,6 +660,9 @@ export default async function CasinoPage() {
               )}
             </TabsContent>
           </Tabs>
+
+          {/* 스폰서드 디스플레이 광고 */}
+          <PublicAdvertisement className="my-6" />
         </>
       )}
 

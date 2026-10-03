@@ -50,7 +50,29 @@ export const APP_ROUTES: readonly RouteDefinition[] = [
     group: 'public',
   },
   {
+    path: '/features',
+    label: { ko: '핵심 기능 & 사용법 가이드', en: 'Features & Visual Guide', ja: '主要機能＆使い方ガイド', zh: '核心功能与操作指南' },
+    isPublic: true,
+    authRequired: false,
+    indexable: true,
+    sitemapPriority: 0.95,
+    changeFrequency: 'weekly',
+    group: 'public',
+  },
+  {
+    path: '/roadmap',
+    label: { ko: '초반·중반·후반 실전 로드맵', en: 'Getting Started Roadmap', ja: '成長ロードマップ', zh: '新手进阶路线图' },
+    isPublic: true,
+    authRequired: false,
+    indexable: true,
+    sitemapPriority: 0.95,
+    changeFrequency: 'weekly',
+    group: 'public',
+  },
+  {
     path: '/guide',
+
+
     label: { ko: '초보자 가이드', en: 'Beginner Guide', ja: '初心者ガイド', zh: '新手指南' },
     isPublic: true,
     authRequired: false,

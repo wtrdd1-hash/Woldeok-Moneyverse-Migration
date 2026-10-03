@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { TrendingUp, Calculator, Sparkles, ChevronRight, Coins, Building2, Flame, Receipt, ArrowRightLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { MultiplexAdvertisement } from '@/components/public-advertisement';
 
 interface HubLinkItem {
   readonly title: string;
@@ -417,6 +418,10 @@ export function PopularCalculatorsHub({
           </div>
         </div>
       </div>
+
+      {/* 추천 콘텐츠 연계 일치하는 콘텐츠 (AdSense Multiplex Autorelaxed) */}
+      <MultiplexAdvertisement className="mt-8" />
     </section>
   );
 }
+

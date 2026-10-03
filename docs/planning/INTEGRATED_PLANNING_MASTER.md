@@ -1,19 +1,23 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.03.512
+> Current ledger version: v2026.10.04.523
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
 
-## v2026.10.03.512 — 2026-10-03 — Search Console index recovery and ad-revenue prerequisite gate
-- Start/mid-work origin/main=6fc3adc20bf21c7a447c4693fa07625da014f336; isolated branch docs/seo-index-recovery-v2026.10.03.512.
-- Recorded user-provided screenshot observations as the planning trigger: Search Console total clicks 183, indexed/non-indexed 46/103 and recent daily clicks around 0–2; AdSense recent-7-day pageviews 236, impressions 193, Page RPM US$0.26, clicks 0, CTR 0.00%, estimated revenue US$0.06.
-- **P0-SEO-512-01..05:** exclusion-first classification, indexability invariant, sitemap/canonical/locale consistency, thin/duplicate-content prohibition plus internal-link quality, and a URL-state ledger with 7/28/90-day acceptance measurement are adopted into current planning authority.
-- **P1-REV-512-01:** qualified organic-search recovery precedes any ad-load increase; viewability/format experiments come only afterward.
-- Success is not raw indexed count; intentional noindex/redirect/remove URLs are treated as correct exclusions when their contract says so.
-- Synchronized into PROJECT_PLAN and the advertising-only revenue specification in EN/KO. Planning/docs only; no Search Console/AdSense configuration, runtime, Test or Production change is claimed.
+## v2026.10.04.523 — 2026-10-04 — Central Bank / Mint / Treasury institutional separation
+- Start `origin/main=c10e1582ccc0c058dff5c5356ad8b1893759f72c`; mid-work recheck detected `origin/main=065ee42204a4238c5010897212c7fc2a6c848f64`, which added treasury English/architecture documentation. The isolated branch was rebased onto that latest main before authority edits, preserving concurrent work.
+- Re-read documentation governance, catalog, PROJECT_PLAN, integrated master, current treasury redistribution/fiscal specifications, AI Economy Controller, and monetary-velocity specification before integration.
+- Added `CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.md` / `.ko.md` and adopted it into PROJECT_PLAN as current economic institutional authority.
+- Separation contract: Central Bank owns monetary-policy approval; Mint is execution-only issuance/retirement; Central Treasury owns existing-WLD fiscal cash/tax/budget/expenditure; Economy Core/Settlement Ledger owns double-entry settlement, idempotency, reconciliation and supply invariants.
+- Supply invariant: ordinary transfers, taxes, treasury expenditures, fully-funded loans and bond flows do not change total WLD. Only canonical mint/retire operations can change `M_total`.
+- Existing treasury protected reserve is explicitly fiscal liquidity reserve, not authority to create money. Fiscal shortfall cannot auto-convert into currency issuance.
+- Initial bank lending remains fully funded from existing WLD; commercial-bank deposit-money creation is deliberately excluded until a separate approved monetary-layer design exists.
+- AI remains diagnostic/recommendation/bounded-auto for allowed low-risk keys only; direct mint/retire, monetary-order approval and fiscal-shortfall monetization are prohibited.
+- Primary/first-party reference set includes IMF treasury-central-bank/TSA guidance, ECB issuance/production, Federal Reserve/BEP and U.S. Mint separation, Bank of Korea, Bank of England money-creation material and EVE first-party economic reporting.
+- Planning/docs only. No runtime, DB, Test or Production implementation or promotion is claimed.
 
 ## v2026.10.03.510 — 2026-10-03 — Global-growth execution design and reference expansion
 - Start/mid-work `origin/main=ac4dd484a90b266d945993d7bd8be57a74e8e1df`; isolated docs branch `docs/global-growth-deep-plan-v2026.10.03.510`.

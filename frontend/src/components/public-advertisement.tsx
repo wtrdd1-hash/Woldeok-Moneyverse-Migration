@@ -1,20 +1,59 @@
-import Script from 'next/script';
-import { homeAdSense } from '@/lib/adsense';
+import { homeAdSense, inArticleAdSense, multiplexAdSense } from '@/lib/adsense';
 import { AdSenseAd } from './adsense-ad';
 
-export function PublicAdvertisement() {
-  if (!homeAdSense.enabled) return null;
+export function PublicAdvertisement({
+  slot,
+  variant = 'display',
+  className,
+}: {
+  readonly slot?: string | undefined;
+  readonly variant?: 'display' | 'in-article' | 'multiplex' | undefined;
+  readonly className?: string | undefined;
+}) {
+  const config =
+    variant === 'multiplex'
+      ? multiplexAdSense
+      : variant === 'in-article'
+      ? inArticleAdSense
+      : homeAdSense;
+
+  if (!config.enabled) return null;
 
   return (
-    <>
-      <Script
-        id="adsense-loader"
-        async
-        crossOrigin="anonymous"
-        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${homeAdSense.publisherId}`}
-        strategy="afterInteractive"
+    <div className={className}>
+      <AdSenseAd
+        publisherId={config.publisherId}
+        slot={slot || config.slot}
+        layout={variant === 'in-article' ? 'in-article' : undefined}
+        format={
+          variant === 'multiplex'
+            ? 'autorelaxed'
+            : variant === 'in-article'
+            ? 'fluid'
+            : 'auto'
+        }
       />
-      <AdSenseAd publisherId={homeAdSense.publisherId} slot={homeAdSense.slot} />
-    </>
+    </div>
   );
 }
+
+export function InArticleAdvertisement({
+  slot,
+  className,
+}: {
+  readonly slot?: string | undefined;
+  readonly className?: string | undefined;
+}) {
+  return <PublicAdvertisement slot={slot} variant="in-article" className={className} />;
+}
+
+export function MultiplexAdvertisement({
+  slot,
+  className,
+}: {
+  readonly slot?: string | undefined;
+  readonly className?: string | undefined;
+}) {
+  return <PublicAdvertisement slot={slot} variant="multiplex" className={className} />;
+}
+

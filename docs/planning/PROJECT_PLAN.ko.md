@@ -2,32 +2,23 @@
 
 > **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)  
 > **최초 기준:** 2026-08-26  
-> **현재 통합 버전:** v2026.10.03.512  
-> **구현·증거 동기화:** 2026-10-03 (기획 기준 main SHA: `6fc3adc20bf21c7a447c4693fa07625da014f336`)  
+> **현재 통합 버전:** v2026.10.04.523
+> **구현·증거 동기화:** 2026-10-03 (최신 main SHA: `fc9af624`)  
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)  
 > **완료도 단일 진실 공급원(SSOT):** [기획 공백 해소 및 수용증거 명세 (PLANNING_GAP_CLOSURE_SPEC.ko.md)](PLANNING_GAP_CLOSURE_SPEC.ko.md)
 
 ---
 
-## v2026.10.03.512 — 검색 색인 회복·광고수익 선행게이트
+## 중앙은행·조폐국·중앙국고·경제코어 기관 분리 — v2026.10.04.523
 
-사용자 제공 2026-10-03 Search Console/AdSense 스크린샷을 현황 트리거로 채택한다. 관측값은 Search Console 총 클릭 183회, 색인됨 46개, 색인 안 됨 103개이며, 일별 클릭 그래프는 8월 중순 약 12~18회/일에서 9월 말 약 0~2회/일 수준으로 하락한 형태다. AdSense 최근 7일 스냅샷은 페이지뷰 236(+17%), 노출 193(+10%), Page RPM US$0.26(-41%), 클릭 0, 페이지 CTR 0.00%, 예상수입 US$0.06으로 표시된다. 이 수치는 제공 스크린샷의 관측값이며 Search Console 세부 제외사유/API export 또는 확정 AdSense 지급액을 대체하지 않는다.
-
-**P0-SEO-512-01 — 제외사유 분류가 먼저다.** “색인 안 됨 103개”를 일괄 결함으로 취급하거나 모두 색인시키지 않는다. Search Console의 URL/사유 단위 export를 기준으로 의도적 비색인과 결함을 분리한다. 최소 분류는 Crawled - currently not indexed, Discovered - currently not indexed, duplicate/canonical, redirect, robots 차단, noindex, 404, soft-404, 서버 오류, 기타 Google 선택 canonical 차이다.
-
-**P0-SEO-512-02 — indexability 불변식.** 공개 검색 랜딩만 200 + index,follow + self/approved canonical + sitemap eligible이 될 수 있다. 로그인/계정/지갑/송금/대출/거래 주문/관리자/비공개 사용자 데이터/민감 정책·동의 흐름/중복 locale·파라미터 URL은 의도에 맞게 비색인하고 sitemap에서 제외한다. robots 차단과 noindex를 같은 URL에 무의미하게 중첩해 크롤러가 noindex를 읽지 못하는 상태를 만들지 않는다.
-
-**P0-SEO-512-03 — sitemap/canonical/locale 정합성.** sitemap URL은 canonical production origin, 최종 200 URL, indexable URL만 포함한다. redirect/404/noindex/중복 canonical 대상은 sitemap에서 제거한다. canonical, hreflang, OpenGraph URL, 내부링크, locale routing은 동일한 canonical URL graph를 가리켜야 하며, alternate locale은 실질 번역/현지화 품질을 통과한 경우만 공개한다.
-
-**P0-SEO-512-04 — 콘텐츠 품질과 내부링크.** 얇은/중복/템플릿 복제 페이지를 색인량 확대 목적으로 생성하지 않는다. 검색 의도를 독립적으로 완결하는 계산기·가이드·공개 데이터 설명 페이지를 우선하고, 고유입 랜딩에서 실제 관련성이 있는 다음 페이지로 내부링크를 제공한다. orphan indexable URL은 릴리스 결함으로 추적한다.
-
-**P0-SEO-512-05 — 색인회복 수용게이트.** 구현 전후 URL inventory를 동일 기준으로 비교하고 각 URL을 INDEX_EXPECTED, NOINDEX_EXPECTED, REDIRECT_EXPECTED, REMOVE_EXPECTED 중 하나로 소유한다. Test는 전체 검색면에서 robots/sitemap/canonical/noindex/status/내부링크를 자동 검사하며 실제 Google 색인 결과는 Production 배포 뒤 7/28/90일 코호트로 추적한다. 단순 “색인 페이지 수 증가”는 성공 기준이 아니다.
-
-**P1-REV-512-01 — 광고보다 검색 회복 우선.** 현재 페이지뷰가 증가했는데 Page RPM과 클릭/CTR이 낮은 관측값만으로 광고 밀도를 높이지 않는다. 우선순위는 색인 결함 제거 → 자격 자연검색 세션 증가 → 랜딩 품질/체류/다음 페이지 이동 → 광고 viewability/format 실험 순서다. 광고 실험은 기존 민감 route 차단, invalid-traffic, Core Web Vitals, task-completion 가드레일을 그대로 적용한다.
-
-**측정 계약.** 7일은 크롤링/서빙 오류와 배포회귀를, 28일은 query/landing별 impressions·clicks·CTR·average position·indexed/excluded cohort 변화를, 90일은 자격 자연검색 세션·pageviews/session·return rate·Page RPM·revenue/1,000 organic sessions를 본다. Search Console과 AdSense 수치의 기간/시간대/확정 여부를 함께 기록하며 서로 다른 기간 수치를 직접 인과로 단정하지 않는다.
-
-상세 광고수익 연결 규칙은 [AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md](AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md)에 동기화한다. 이번 v512는 기획/문서 변경이며 Search Console 설정, AdSense 설정, 런타임/Test/Production 변경을 주장하지 않는다.
+- **권위 결정:** Moneyverse 경제 권한을 중앙은행(통화정책 승인), 조폐국(승인된 발행·폐기 실행), 중앙국고(기존 WLD의 세입·예산·지출), Economy Core & Settlement Ledger(복식원장·정산·대사·불변식)로 분리한다.
+- **통화량 불변식:** 세금·송금·국고예산·국고지출·예금·출금·사전재원 대출·거래·금고이동은 총 WLD 통화량을 바꾸지 않는다. canonical 조폐 또는 폐기만 총통화량을 변경한다.
+- **국고 준비금 의미:** 기존 보호준비금은 재정 유동성 준비금이며 신규 WLD 발행 권한이나 담보가 아니다. 국고 부족을 자동조폐로 메우는 경로는 금지한다.
+- **국채·은행:** 국채는 기존 WLD 재분배형 재정부채이며 초기 은행대출은 기존 WLD 유동성 풀의 완전 사전재원 방식으로 유지한다. 현실 상업은행식 예금화폐 창출은 별도 승인 설계 전까지 제외한다.
+- **AI 경계:** AI는 현행 bounded 정책 안에서 진단·시뮬레이션·제안은 할 수 있으나 통화정책 명령 생성/최종승인, 조폐 직접실행, 국고부족의 자동 발행 전환은 금지한다.
+- **마이그레이션·승격:** 모든 WLD 증가/소각 경로를 분류하고 모호한 injection 의미를 분해하며 과거 원장은 보존한다. 통화량 대사와 국고대사를 독립적으로 0 오차로 증명하고 exact-SHA 격리 Test 통과 후 무중단 Production 승격한다.
+- **상세 권위:** [중앙은행·조폐국·중앙국고·경제코어 통합 상세 기획서 v523](CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.ko.md).
+- **증거 경계:** 본 v523은 기획/문서 전용이며 런타임·DB·Test·Production 구현을 주장하지 않는다.
 
 ## 🌟 CURRENT DOMAIN STATE (v511 최신 프로덕션 권위 및 호환성 원장)
 

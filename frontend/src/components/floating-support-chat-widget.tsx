@@ -726,10 +726,10 @@ export function FloatingSupportChatWidget() {
   return (
     <>
       {/* 1. 플로팅 챗 버블 트리거 버튼 */}
-      <div className="fixed bottom-[74px] right-3.5 sm:bottom-6 sm:right-6 z-40 select-none flex flex-col items-end">
-        {/* 데스크톱 마이크로 툴팁 배너 */}
+      <div className="fixed bottom-[74px] right-3.5 sm:bottom-6 sm:right-6 z-40 select-none flex flex-col items-end group/support">
+        {/* 데스크톱 마이크로 툴팁 배너 (호버 시 부드럽게 노출) */}
         {!isOpen && (
-          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 mb-2 rounded-full bg-card/95 border border-border/80 shadow-lg text-[11px] font-bold text-foreground backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div className="hidden md:flex items-center gap-1.5 px-3 py-1 mb-2 rounded-full bg-zinc-950/95 border border-zinc-700/80 shadow-xl text-[11px] font-bold text-zinc-100 backdrop-blur-xl opacity-0 group-hover/support:opacity-100 transition-all duration-300 transform translate-y-1 group-hover/support:translate-y-0 pointer-events-none">
             <span className="flex size-2 rounded-full bg-emerald-500 animate-pulse" />
             <span>{localeLabel(locale, '1:1 채팅 · 고객지원', '1:1 Chat & Support', '1:1チャット・サポート', '1:1聊天与客服')}</span>
           </div>

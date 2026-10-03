@@ -18,8 +18,11 @@ export interface ViralCardPayload {
   subtitle?: string | undefined;
   keyMetricLabel: string; // 예: "목표 평단가", "만기 세후 총액", "연간 순수익률(Cap Rate)"
   keyMetricValue: string; // 예: "64,200원", "108,420,000원", "7.85%"
-  metrics: MetricHighlight[]; // 보조 지표 3~4개
+  keyMetricSubtext?: string | undefined; // 보조 설명 문구
+  metrics?: MetricHighlight[] | undefined; // 보조 지표 3~4개
+  summaryRows?: MetricHighlight[] | undefined; // 요약 행 (metrics 대체 호환)
   badgeText?: string | undefined; // 예: "🔥 탈출 성공률 92%", "💎 복리의 마법 A등급", "🏆 3섹터 분산 달성"
+  accentColor?: string | undefined; // 테마 강조 색상
   recommendationNote?: string | undefined; // 한줄 총평/조언
   shareUrl?: string | undefined; // 비회원이 클릭 시 진입할 링크
 }
@@ -124,11 +127,12 @@ export function drawViralCardToCanvas(
   ctx.textAlign = 'left';
   ctx.fillText(payload.title, cardX + 40, curY);
 
-  if (payload.subtitle) {
+  const subtitleText = payload.subtitle || payload.keyMetricSubtext;
+  if (subtitleText) {
     curY += aspect === 'square' ? 42 : 32;
     ctx.fillStyle = '#94a3b8';
     ctx.font = '22px -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif';
-    ctx.fillText(payload.subtitle, cardX + 40, curY);
+    ctx.fillText(subtitleText, cardX + 40, curY);
   }
   ctx.restore();
 
@@ -176,7 +180,8 @@ export function drawViralCardToCanvas(
   curY += heroH + (aspect === 'square' ? 45 : 30);
 
   // 6. 보조 지표 3열 그리드 (Sub Metrics)
-  const cols = payload.metrics.slice(0, 3);
+  const rawList = payload.metrics ?? payload.summaryRows ?? [];
+  const cols = rawList.slice(0, 3);
   if (cols.length > 0) {
     const colW = (cardW - 80 - (cols.length - 1) * 20) / cols.length;
     const colH = aspect === 'square' ? 130 : 95;

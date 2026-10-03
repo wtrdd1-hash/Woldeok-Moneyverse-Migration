@@ -20,6 +20,7 @@ import { StockDiscussionSection } from './stock-discussion-section';
 import { StockInteractiveChart } from './stock-interactive-chart';
 import { StockTradingConsole } from './stock-trading-console';
 import { StockHaltBanner } from './stock-halt-banner';
+import { PublicAdvertisement } from '@/components/public-advertisement';
 import {
   findHoldingForStock,
   findStockBySymbol,
@@ -415,6 +416,9 @@ export default async function StockHubPage({
           )}
         </CardContent>
       </Card>
+
+      {/* 스폰서드 디스플레이 광고 */}
+      <PublicAdvertisement className="my-6" />
 
       <StockDiscussionSection
         stockId={stock.id}

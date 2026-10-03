@@ -1,34 +1,57 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft, Briefcase, Award, Flame, Clock, Sparkles, CheckCircle2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  Briefcase,
+  Award,
+  Flame,
+  Clock,
+  Sparkles,
+  CheckCircle2,
+  TrendingUp,
+  Landmark,
+  Building2,
+  Cpu,
+  Coins,
+  ShieldCheck,
+  Newspaper,
+  BookOpen,
+  ArrowRight,
+  ShieldAlert,
+  Percent,
+} from 'lucide-react';
 import { PageHeader } from '@/components/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
 import { getServerLocale } from '@/lib/locale-server';
+import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
+import { CareerStepByStepGuide } from './career-step-by-step-guide';
 
 export const revalidate = 3600;
 
 export async function generateMetadata(): Promise<Metadata> {
   const url = canonicalUrl('/guide/career-mastery');
   const ogImageUrl = buildOgImageUrl({
-    title: '직업 & 일일 WLD 파밍 루틴 마스터 가이드',
-    description: '5대 전문 직업 숙련도 레벨링, 10분/70분 가상 경제 시계 활용 및 무자본 일일 WLD 파밍 공략법.',
+    title: '8대 전문 직업 2.0 & 실전 WLD 급여 파밍 완벽 가이드',
+    description: '직업 선택부터 업무 수락, 쿨다운 타이머, 급여 수령, 7대 승진 티어 및 자격증 보너스까지 총정리.',
     type: 'default',
-    badge: '커리어 가이드',
+    badge: '전문 직업 2.0',
   });
 
   return {
-    title: '직업 & 일일 WLD 파밍 루틴 마스터 가이드 — 월덕 머니버스',
-    description: '월덕 머니버스 5대 전문 직업(개발자, 트레이더, 광부, 요리사, 보안관) 전직 조건, 숙련도 보너스 및 일일 WLD 파밍 루틴을 총정리했습니다.',
+    title: '8대 전문 직업 2.0 & 일일 WLD 급여 파밍 완벽 가이드 — 월덕 머니버스',
+    description: '월덕 머니버스 8대 전문 직업(핀테크 개발자, 퀀트 트레이더, 중앙은행가, 부동산 재벌, AI 연구원, 벤처 투자가, 보안 감사관, 언론 기자) 전직, 4단계 업무 수행법 및 3배 숙련도 승진 공략집.',
     keywords: [
       '가상 직업 가이드',
       'WLD 파밍',
       '무자본 돈버는 법',
       '직업 숙련도',
       '월덕 머니버스 직업',
-      '가상경제 게임 공략',
+      '가상경제 직업 2.0',
+      '핀테크 개발자',
+      '퀀트 트레이더',
     ],
     alternates: {
       canonical: url,
@@ -41,8 +64,8 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     robots: { index: true, follow: true },
     openGraph: {
-      title: '직업 & 일일 WLD 파밍 루틴 마스터 가이드',
-      description: '5대 전문 직업 전직 및 일일 WLD 파밍 최적화 공략',
+      title: '8대 전문 직업 2.0 & 일일 WLD 급여 파밍 완벽 가이드',
+      description: '8대 전문 직업 전직 및 실전 4단계 업무 수행, 숙련도 3배 승진 완벽 공략집',
       url,
       images: [{ url: ogImageUrl, width: 1200, height: 630 }],
     },
@@ -57,11 +80,11 @@ export default async function CareerMasteryGuidePage() {
     '@context': 'https://schema.org',
     '@type': 'Article',
     headline: isEn
-      ? 'Career Mastery & Daily WLD Farming Routine Guide'
-      : '직업 & 일일 WLD 파밍 루틴 마스터 가이드',
+      ? '8 Professional Careers 2.0 & Daily WLD Farming Master Guide'
+      : '8대 전문 직업 2.0 & 일일 WLD 급여 파밍 완벽 가이드',
     description: isEn
-      ? 'Complete breakdown of 5 core professions, mastery leveling mechanics, and daily WLD farming optimization in Woldeok Moneyverse.'
-      : '5대 직업 전직 조건, 숙련도 레벨링 공식 및 무자본 일일 WLD 파밍 최적화 가이드.',
+      ? 'Complete breakdown of 8 core professions, 4-step work lifecycle, mastery tier progression, and daily WLD farming optimization in Woldeok Moneyverse.'
+      : '8대 전문 직업 전직 조건, 4단계 업무 수행법, 7대 숙련도 승진 공식 및 무자본 일일 WLD 파밍 최적화 가이드.',
     author: {
       '@type': 'Organization',
       name: 'Woldeok Career Development Center',
@@ -73,184 +96,171 @@ export default async function CareerMasteryGuidePage() {
   };
 
   return (
-    <div data-page="guide-career-mastery" className="mv-page mv-page--economy grid gap-6 max-w-4xl mx-auto">
+    <div data-page="guide-career-mastery" className="mv-page mv-page--economy grid gap-8 max-w-4xl mx-auto pb-16">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdArticle) }}
       />
 
-      <Button asChild variant="ghost" className="w-fit -ml-3 text-muted-foreground">
-        <Link href="/guide">
-          <ArrowLeft />
-          {isEn ? 'Back to guides' : '가이드 센터로 돌아가기'}
-        </Link>
-      </Button>
+      <div className="flex items-center justify-between">
+        <Button asChild variant="ghost" className="w-fit -ml-3 text-muted-foreground hover:text-white">
+          <Link href="/guide">
+            <ArrowLeft className="w-4 h-4 mr-1.5" />
+            {isEn ? 'Back to Guide Center' : '가이드 센터로 돌아가기'}
+          </Link>
+        </Button>
+
+        <Badge variant="outline" className="border-emerald-500/40 text-emerald-400 bg-emerald-950/20 font-mono text-xs">
+          CAREER SYSTEM 2.0
+        </Badge>
+      </div>
 
       <PageHeader
-        eyebrow="CAREER STRATEGY PILLAR"
-        title={isEn ? 'Career Mastery & Daily Farming Routine' : '직업 & 일일 WLD 파밍 루틴 마스터 가이드'}
+        eyebrow="CAREER & WORKFORCE MASTERCLASS"
+        title={isEn ? '8 Professional Careers & Daily Farming Master Guide' : '8대 전문 직업 2.0 & 실전 급여 파밍 완벽 가이드'}
       >
         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
           {isEn
-            ? 'Level up across 5 specialized professions, unlock mastery multipliers up to 2.5x, and build an efficient daily zero-cost WLD earning routine.'
-            : '초보자도 무자본으로 매일 안정적인 WLD를 획득할 수 있는 5대 전문 직업(개발자, 트레이더, 광부, 요리사, 보안관) 전직과 숙련도 2.5배 배수 성장법을 안내합니다.'}
+            ? 'Start with zero capital, choose from 8 specialized careers, complete work assignments, and level up to a 3.0x Grandmaster payout multiplier.'
+            : '투자금 0원으로 시작하는 머니버스 공식 기본소득 엔진! 8대 전문 직업군으로 자유롭게 전직하고, 4단계 업무를 완수하여 매일 최대 100,000 WLD 이상의 급여와 3배 숙련도 보너스를 획득하세요.'}
         </p>
       </PageHeader>
 
+      {/* 핵심 4대 탭 인터랙티브 시뮬레이터 & 도감 */}
+      <CareerStepByStepGuide />
+
+      {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
+      <InArticleAdvertisement className="my-4" />
+
+      {/* Section: 4단계 실전 업무 수칙 & 급여 쿼터 관리 */}
       <div className="grid gap-6">
-        {/* Section 1: 5 Core Professions */}
-        <Card className="border-border/80 bg-card/60">
+        <Card className="border-border/80 bg-zinc-950/90 shadow-xl">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500">
-                <Briefcase className="size-5" />
+              <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+                <Percent className="size-5" />
               </div>
               <div>
-                <CardTitle className="text-base sm:text-lg font-bold">
-                  {isEn ? '1. The 5 Specialized Professions' : '1. 5대 전문 직업별 특화 분야와 보상 구조'}
+                <CardTitle className="text-base sm:text-lg font-bold text-white">
+                  {isEn ? 'Daily & Weekly Earnings Quota System' : '일일 및 주간 급여 상한 쿼터(Quota) 관리'}
                 </CardTitle>
-                <CardDescription>
-                  {isEn ? 'Choose the career path that aligns with your economic playstyle.' : '플레이 스타일에 맞는 최적의 직업 선택하기'}
+                <CardDescription className="text-xs text-zinc-400">
+                  {isEn ? 'Fair economy cap preventing bot inflation while rewarding active players.' : '가상 경제 인플레이션을 방어하고 모든 유저에게 공정한 기본소득을 보장하는 스마트 쿼터'}
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="grid sm:grid-cols-2 gap-3 text-xs leading-relaxed">
-            <div className="rounded-xl border border-border/70 p-3.5 space-y-1 bg-surface">
-              <div className="font-bold text-foreground text-sm flex items-center justify-between">
-                <span>💻 소프트웨어 엔지니어</span>
-                <Badge variant="outline">안정형</Badge>
+          <CardContent className="space-y-4 text-xs leading-relaxed text-zinc-300">
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="p-3.5 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-1.5">
+                <div className="font-bold text-emerald-400 flex items-center justify-between">
+                  <span>📅 일일 급여 한도 (Daily Cap)</span>
+                  <Badge variant="outline" className="border-emerald-500/40 text-emerald-300">기본 50,000 WLD</Badge>
+                </div>
+                <p className="text-zinc-400 text-[11px]">
+                  매일 자정(00:00 KST)에 초기화되며, 숙련도 레벨이 오를수록 일일 한도가 최대 150,000 WLD까지 자동 확장됩니다.
+                </p>
               </div>
-              <p className="text-muted-foreground">
-                서버 배포 및 버그 패치 업무 수행. 매일 일정한 WLD 기본급과 시스템 안정화 기여 보너스 지급.
-              </p>
-            </div>
-            <div className="rounded-xl border border-border/70 p-3.5 space-y-1 bg-surface">
-              <div className="font-bold text-foreground text-sm flex items-center justify-between">
-                <span>📈 퀀트 트레이더</span>
-                <Badge variant="outline" className="text-amber-500 border-amber-500/30">고수익형</Badge>
+
+              <div className="p-3.5 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-1.5">
+                <div className="font-bold text-cyan-400 flex items-center justify-between">
+                  <span>📊 주간 누적 한도 (Weekly Cap)</span>
+                  <Badge variant="outline" className="border-cyan-500/40 text-cyan-300">기본 300,000 WLD</Badge>
+                </div>
+                <p className="text-zinc-400 text-[11px]">
+                  매주 월요일 자정에 리셋되며, 주간 목표 쿼터를 달성하면 중앙은행에서 주간 성과급 보너스 국채가 지급됩니다.
+                </p>
               </div>
-              <p className="text-muted-foreground">
-                시장 알고리즘 주문 및 유동성 공급. 거래 수수료 할인 혜택 및 호가창 분석 숙련도 가속.
-              </p>
-            </div>
-            <div className="rounded-xl border border-border/70 p-3.5 space-y-1 bg-surface">
-              <div className="font-bold text-foreground text-sm flex items-center justify-between">
-                <span>⛏️ 암호화폐 채굴자</span>
-                <Badge variant="outline">성장형</Badge>
-              </div>
-              <p className="text-muted-foreground">
-                블록 검증 연산 태스크 수행. 장비 업그레이드 시 일일 파밍 캡이 비례하여 확장됨.
-              </p>
-            </div>
-            <div className="rounded-xl border border-border/70 p-3.5 space-y-1 bg-surface">
-              <div className="font-bold text-foreground text-sm flex items-center justify-between">
-                <span>🛡️ 커뮤니티 보안관</span>
-                <Badge variant="outline" className="text-emerald-500 border-emerald-500/30">기여형</Badge>
-              </div>
-              <p className="text-muted-foreground">
-                스팸 감시 및 신고 검토 지원. 매월 국고 지원금 및 관리자 명예 뱃지 추가 보상.
-              </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Section 2: Mastery Leveling */}
-        <Card className="border-border/80 bg-card/60">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
-                <Award className="size-5" />
-              </div>
-              <div>
-                <CardTitle className="text-base sm:text-lg font-bold">
-                  {isEn ? '2. Mastery Multiplier (Up to 2.5x)' : '2. 숙련도(Mastery) 레벨링과 최대 2.5배 보상 배수'}
-                </CardTitle>
-                <CardDescription>
-                  {isEn ? 'Consecutive daily tasks permanently boost task payouts.' : '업무를 지속적으로 완수할수록 보상과 WLD 획득 효율 급상승'}
-                </CardDescription>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm leading-relaxed text-muted-foreground">
-            <p>
-              {isEn
-                ? 'Each completed work task grants Profession EXP. As your mastery advances from Novice (1.0x) to Grandmaster (2.5x), the base WLD reward for every task increases proportionally.'
-                : '업무를 1회 완료할 때마다 직업 경험치(EXP)가 누적됩니다. 숙련도가 초보(1.0x) ➡️ 숙련(1.4x) ➡️ 장인(1.8x) ➡️ 그랜드마스터(2.5x)로 승급하면 동일한 시간 대비 2.5배의 WLD를 획득할 수 있습니다.'}
-            </p>
-            <div className="flex flex-wrap gap-2 pt-1 text-xs">
-              <Badge variant="secondary">초보: 1.0x</Badge>
-              <Badge variant="secondary">숙련: 1.4x</Badge>
-              <Badge variant="secondary">장인: 1.8x</Badge>
-              <Badge variant="default" className="bg-amber-500 text-black font-bold">그랜드마스터: 2.5x</Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Section 3: Daily Routine */}
-        <Card className="border-border/80 bg-card/60">
+        {/* Section: 무자본 유저를 위한 10분 일일 파밍 루틴 */}
+        <Card className="border-border/80 bg-zinc-950/90 shadow-xl">
           <CardHeader>
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-rose-500/10 text-rose-500">
                 <Flame className="size-5" />
               </div>
               <div>
-                <CardTitle className="text-base sm:text-lg font-bold">
-                  {isEn ? '3. Optimal 10-Minute Daily Farming Routine' : '3. 1일 10분 완성 최적의 WLD 파밍 루틴'}
+                <CardTitle className="text-base sm:text-lg font-bold text-white">
+                  {isEn ? 'Optimal 10-Minute Daily Farming Routine' : '무자본 1일 10분 완성 최적의 WLD 파밍 루틴'}
                 </CardTitle>
-                <CardDescription>
-                  {isEn ? 'Maximize WLD generation without spending real money.' : '하루 10분 접속으로 최대 15,000 WLD를 확보하는 완벽 루틴'}
+                <CardDescription className="text-xs text-zinc-400">
+                  {isEn ? 'Maximize WLD generation without spending real money.' : '하루 10분 접속으로 최대 30,000 WLD를 확보하는 실전 경제 성장 사이클'}
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="space-y-2.5 text-xs text-muted-foreground">
-            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/40">
-              <CheckCircle2 className="size-4 text-emerald-500 shrink-0 mt-0.5" />
+          <CardContent className="space-y-3 text-xs text-zinc-300">
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
+              <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-[10px]">
+                1
+              </span>
               <div>
-                <b className="text-foreground">Step 1: 덕이 펫 쓰다듬기 & 포춘쿠키 쪼개기</b> (+500 ~ +1,000 WLD)
+                <b className="text-white">접속 직후 무료 룰렛 돌리기</b> (<span className="text-emerald-400">+500 ~ +10,000 WLD</span>)
+                <p className="text-zinc-400 text-[11px] mt-0.5">카지노에서 24시간마다 1회 무료 행운 보너스를 획득합니다.</p>
               </div>
             </div>
-            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/40">
-              <CheckCircle2 className="size-4 text-emerald-500 shrink-0 mt-0.5" />
+
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
+              <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-[10px]">
+                2
+              </span>
               <div>
-                <b className="text-foreground">Step 2: 직업 일일 업무 완수 (3회)</b> (+3,000 ~ +7,500 WLD)
+                <b className="text-white">전문 직업 업무 3회 완수</b> (<span className="text-emerald-400">+4,500 ~ +15,000 WLD</span>)
+                <p className="text-zinc-400 text-[11px] mt-0.5">30초~60초 쿨다운 업무를 수락하고 완료하여 급여와 경험치를 수령합니다.</p>
               </div>
             </div>
-            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/40">
-              <CheckCircle2 className="size-4 text-emerald-500 shrink-0 mt-0.5" />
+
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
+              <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-[10px]">
+                3
+              </span>
               <div>
-                <b className="text-foreground">Step 3: 황금 오리 피버 타임 광클 & 여론 잭팟 투표</b> (+1,000 ~ +5,000 WLD)
+                <b className="text-white">AI 투자 성향 진단 & 퀘스트 보너스</b> (<span className="text-emerald-400">+20,000 WLD</span>)
+                <p className="text-zinc-400 text-[11px] mt-0.5">30초 퀴즈로 내 성향을 확인하고 포트폴리오 진단 리워드를 받습니다.</p>
               </div>
             </div>
-            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-muted/40">
-              <CheckCircle2 className="size-4 text-emerald-500 shrink-0 mt-0.5" />
+
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
+              <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0 text-[10px]">
+                4
+              </span>
               <div>
-                <b className="text-foreground">Step 4: 획득한 WLD 전액 중앙은행 예금 예치</b> (일일 복리 이자 시작)
+                <b className="text-white">수령한 급여 전액 중앙은행 스마트 복리 포켓 예치</b> (<span className="text-amber-400">일일 복리 이자 개시</span>)
+                <p className="text-zinc-400 text-[11px] mt-0.5">벌어들인 WLD를 놀리지 않고 복리 포켓에 넣어두면 매일 자정에 이자가 불어납니다.</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-2xl border border-indigo-500/20 bg-indigo-500/5 mt-4">
-        <div>
-          <h4 className="font-bold text-sm text-foreground">
-            {isEn ? 'Ready to start your profession?' : '지금 직업을 선택하고 첫 업무를 시작해보세요'}
+      {/* 멀티플렉스 추천 콘텐츠 광고 (Multiplex Matched Content Ad) */}
+      <MultiplexAdvertisement className="my-6" />
+
+      {/* CTA 하단 배너 */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-2xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-zinc-900 to-zinc-950 shadow-2xl">
+        <div className="space-y-1">
+          <h4 className="font-bold text-base text-white flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-amber-300" />
+            {isEn ? 'Ready to choose your first career?' : '지금 직업을 선택하고 첫 급여를 수령해보세요!'}
           </h4>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-xs text-zinc-400">
             {isEn
-              ? 'Zero real money required. 100% fair game economy.'
-              : '현금 결제 없이 100% 무료로 시작할 수 있습니다.'}
+              ? 'Zero real money required. 100% fair and free virtual economy.'
+              : '현금 결제 전혀 없이 100% 무료로 시작할 수 있습니다.'}
           </p>
         </div>
-        <Button asChild className="shrink-0 w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white">
+
+        <Button asChild className="shrink-0 w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs h-11 px-6 shadow-lg">
           <Link href="/work">
-            <Briefcase className="size-4 mr-1.5" />
-            {isEn ? 'Go to Career Center' : '직업 센터 바로가기'}
+            <Briefcase className="size-4 mr-2" />
+            {isEn ? 'Go to Career Center' : '전문 직업 센터 바로가기'}
           </Link>
         </Button>
       </div>
     </div>
   );
 }
+

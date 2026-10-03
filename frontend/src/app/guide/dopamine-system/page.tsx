@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Sparkles, Shield, Flame, Trophy, Crown, Gavel, Landmark, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { canonicalUrl, buildOgImageUrl } from '@/lib/seo';
+import { InArticleAdvertisement, MultiplexAdvertisement } from '@/components/public-advertisement';
 
 export const metadata: Metadata = {
   title: '도파민 보상 루프 & 지속 가능한 수익화 시스템 가이드 — 월덕 머니버스',
@@ -72,6 +73,9 @@ export default function DopamineSystemGuidePage() {
             월덕 머니버스 내에서 획득하는 모든 WLD 통화, 주식, 아이템, 유물은 가상 데이터로 현금 환전 및 외부 실제 재화와의 매매가 일체 불가합니다. 본 서비스는 2024년 개정 게임산업진흥에 관한 법률 제33조를 준수하여 확률형 아이템의 모든 획득 확률을 투명하게 공개합니다.
           </p>
         </div>
+
+        {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
+        <InArticleAdvertisement className="my-6" />
 
         {/* 6 Core Systems */}
         <div className="space-y-4">
@@ -147,6 +151,9 @@ export default function DopamineSystemGuidePage() {
             </div>
           </div>
         </div>
+
+        {/* 멀티플렉스 추천 콘텐츠 광고 (Multiplex Matched Content Ad) */}
+        <MultiplexAdvertisement className="my-6" />
 
         {/* CTA */}
         <div className="border-t border-slate-800 pt-6 flex flex-wrap gap-3">

@@ -10,6 +10,7 @@ import { KimchiPremiumPreset, KIMCHI_PREMIUM_PRESETS } from '@/config/kimchi-pre
 import { calculateKimchiPremium } from '@/lib/kimchi-premium-calculator';
 import { ViralShareButton } from '@/components/viral-share-button';
 import { PopularCalculatorsHub } from '@/components/popular-calculators-hub';
+import { InArticleAdvertisement } from '@/components/public-advertisement';
 
 interface KimchiPremiumCalculatorViewProps {
   initialPreset?: KimchiPremiumPreset | undefined;
@@ -249,6 +250,9 @@ export function KimchiPremiumCalculatorView({ initialPreset }: KimchiPremiumCalc
           </CardContent>
         </Card>
       </div>
+
+      {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
+      <InArticleAdvertisement className="my-6" />
 
       {/* 상호 내부 링크 허브 */}
       <PopularCalculatorsHub currentPresetSlug={initialPreset?.slug} />

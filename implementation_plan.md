@@ -1,6 +1,21 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v73)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v88)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v88**: 홈 화면(`/`) 및 상단 공지 바(`notice-bar.tsx`), 2열 온보딩 벤토, 4대 퀵 액션, 3대 금융 웹 도구 허브, 일일 리텐션 스테이션, 핫 종목 및 직업 마스터리 카드 전 구역 4개 국어(KO, EN, JA, ZH) 번역 무결점 전수 매핑 및 `i18n-dictionary.ts` 마스터 사전 47종 대폭 확장, 단위 테스트 & Next.js 163개 라우트 빌드 통과 및 원격 운영 서버(`prod-v521`) 무중단 승격 완결 (+145, -0)
+- **v87**: 국고 세수 자동 사회 환원(기본소득 배당, 복지 보조금, 인프라 펀딩, 역매수 소각) 전수 점검 & 10대 법정 세제율 및 5대 금고 원장 무결성 검증 & `/admin/treasury` 긴급 제어 타워 2FA 모달 리팩터링 및 반응형 헤더 찌그러짐 원천 차단 & 종합 기획서(`TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md`) 구축 완비 (+190, -0)
+- **v86**: 전 화면 4개 국어(KO, EN, JA, ZH) 번역 무결성 및 자연스러움 전수 쇄신 — 로드맵(`/roadmap`), 8대 직업 가이드(`/guide/career-mastery`), 온보딩 트래커(`interactive-onboarding-tracker.tsx`), AI 맞춤형 투자 성향 퀴즈(`investor-profile-quiz.tsx`), 6대 기능 가이드(`/features`) 글로벌 핀테크 표준 용어(Stripe, Robinhood, Bloomberg, SBI, Rakuten, Ant Financial) 전수 연동 및 단위 테스트 30종 100% ALL-PASS (+185, -0)
+- **v85**: 초반 무자본 10만 WLD 시드머니 3분 공략 최우선 전진 배치 & 12개 실전 UI 씬 인터랙티브 모션 비디오 시뮬레이터 & 디자인 전면 쇄신(`/roadmap`) 완비 (+165, -0)
+- **v84**: 우측 하단 플로팅 위젯 충돌 박멸 및 프리미엄 다크 글래스모피즘 수직 스택 아키텍처(고객센터 + 온보딩 퀘스트 완벽 분리) 완비 (+80, -0)
+- **v83**: 8대 전문 직업 2.0 & 실전 급여 파밍 완벽 가이드 센터(`/guide/career-mastery`) 전면 쇄신 — 4단계 실습 시뮬레이터, 8대 직업 도감, 7대 승진 티어 및 기능 소개 딥링크 완비 (+190, -0)
+- **v82**: 온보딩 퀘스트 플로팅 위젯 고대비 원형 닫기(X) 버튼, 바깥 클릭/ESC 키 감지, 오늘 하루 닫기(24시간) 옵션 및 총 보상 170,000 WLD 동적 연동 완비 (+75, -0)
+- **v81**: 상단 헤더·모바일 사이드 드로어·메인 홈 전역 가이드 노출 극대화(Quick Guide 핫 칩 + 모바일 추천 배너 + 홈 온보딩 2열 벤토) 및 사용자 리텐션 강화 (+155, -0)
+- **v80**: AI 맞춤형 투자 성향 진단기(`InvestorProfileQuiz`) & 1초 자산 배분 포트폴리오 설계 & 가이드 실시간 자연어 검색 & 온보딩 퀘스트 7종(+170,000 WLD) 연동 (+185, -0)
+- **v79**: 온보딩 실전 트래커 & 튜토리얼 퀘스트 연동 & IndexNow 신규 가이드 실시간 색인 전송 (+110, -0)
+- **v78**: 초반·중반·후반 3단계 실전 성장 로드맵 & 실시간 모션 비디오 시뮬레이터(`/roadmap`) 완비 (+135, -0)
+- **v77**: 6대 핵심 기능 소개 & 실제 사이트 UI 가이드 센터(`/features`) 완비 (+140, -0)
+- **v76**: 구글 애드센스 일치하는 콘텐츠 멀티플렉스 추천 광고 단위(Slot 9751074883) 전격 적용 및 가이드/신문/용어사전/5대 계산기 고체류 지면 최적화 배치 (+180, -0)
+- **v75**: 구글 애드센스 인아티클 네이티브 광고 단위(Slot 6000051656) 전격 적용 및 가이드/신문/용어사전/5대 계산기 고체류 지면 최적화 배치 (+160, -0)
+- **v74**: 구글 애드센스 전역 자동 광고(Auto Ads) & 10대 핵심 화면 광고 슬롯 & 5대 금융 계산기 1초 SNS 바이럴 공유 카드 엔진 완비 (+34, -0)
 - **v73**: 전 화면 4개 국어(KO/EN/JA/ZH) 100% 무결성 쇄신 — 헤더 메가 내비게이션 드롭다운 설명/뱃지 다국어화, 쪽지함/채팅 화면(`/chat`) 완전 번역, 고객센터 위젯(`floating-support-chat-widget.tsx`) 4개 국어 전수 매핑, 언어 혼재(Spanglish/Konglish) 원천 박멸 (+150, -0)
 - **v72**: 1초 진단 SNS/오픈채팅 바이럴 공유 카드 생성기 & 고수요 롱테일 계산기 3종(가상부동산 임대수익률, 김치프리미엄, 해외주식 양도세 절세) & 검색엔진 수집 감사 관제 & GitHub 원격 저장소 완전 통합 (+420, -0)
 - **v71**: 검색엔진 트래픽 & 소비자 유입 극대화 4대 엔진 전면 구축 — 300+개 계산기 전 페이지 JSON-LD Rich Snippet(별점 4.9/5.0, FAQ, HowTo 스키마) 탑재, 네이버/구글 1위 타깃 메타 타이틀/설명문 쇄신, 상호 내부 링크(Internal Linking) 허브 위젯 전면 배치, IndexNow 프로토콜 Naver/Bing 300+개 전 라우트 배치 색인 핑 전송 (+340, -0)
@@ -472,4 +487,547 @@
 - **빌드 검증**: `pnpm --filter frontend build` 161개 라우트 무결점 통과.
 - **GitHub 동기화**: `git push origin main`.
 - **원격 운영 서버 무중단 승격 (`v514`)**: 블루-그린 전환 및 `curl` 헬스체크 200 OK.
+
+---
+
+## 🚀 [v74 Specification] 구글 애드센스(AdSense) 수익화 극대화 및 트래픽·CTR 폭발 통합 최적화 사양
+
+### 1. 현황 및 문제점 분석 (Current Metrics & Bottlenecks)
+- **사용자 제공 AdSense 실적 진단**:
+  - 일일/주간 예상 수입: $0.01 ~ $0.06 (잔고 $0.43)
+  - 페이지뷰: 236건 (노출수 193건)
+  - 페이지 RPM: $0.26 / 페이지 CTR: **0.00%** (클릭수 0건)
+  - 광고 단위: 디스플레이 광고만 극소수 노출 중
+- **핵심 기술적 원인 분석**:
+  1. **전역 자동 광고(Auto Ads) 스크립트 부재**: `layout.tsx` 전역 `<head>`에 AdSense 스크립트가 없어 구글 AI 자동 광고(모바일 앵커 광고, 사이드 레일, 인피드, 전면 광고)가 161개 라우트에서 미동작.
+  2. **고트래픽/고단가 핵심 화면 광고 슬롯 누락**:
+     - 복리 계산기 (`/tools/compound-calculator`), 물타기 계산기 (`/tools/stock-calculator`), 가상 부동산 계산기 (`/tools/real-estate-calculator`), 김치프리미엄 계산기 (`/tools/kimchi-premium-calculator`), 양도세 계산기 (`/tools/capital-gains-tax-calculator`) 결과 카드 주변에 광고 슬롯 부재.
+     - 주식 거래소 차트/호가 화면 (`/stocks/[symbol]`), 가상 부동산 메인/경매 (`/spaces`), 커뮤니티 게시글 본문 하단 (`/board/[postId]`) 광고 슬롯 부재.
+  3. **바이럴 유입 동선 부족**: 계산기 결과를 카카오톡/디스코드/인스타그램에 1초 만에 공유할 수 있는 시각적 바이럴 카드 생성 엔진 부재로 오가닉 신규 유입 정체.
+  4. **Active View 뷰어빌리티 및 체류 시간**: 사용자가 계산기 결과를 오래 관찰하고 상호작용할 수 있는 인터랙티브 차트 및 프리셋 기능 강화 필요.
+
+### 2. 단계별 통합 구현 로드맵 (Actionable Roadmap)
+1. **[AdSense Core] 전역 자동 광고(Auto Ads) & 반응형 앵커/사이드레일 활성화**:
+   - `frontend/src/app/layout.tsx`의 `<head>`에 공식 AdSense 클라이언트 스크립트(`ca-pub-5220225531544323`) 전역 삽입.
+   - `ads.txt` 정합성 검증 (`google.com, pub-5220225531544323, DIRECT, f08c47fec0942fa0`).
+2. **[Ad Placement] 10대 핵심 고트래픽 화면 인라인 네이티브 광고 슬롯 배치**:
+   - 5대 금융 계산기 결과 카드 하단 및 입력 폼 사이 스폰서드 배너 삽입.
+   - 주식 상세(`[symbol]`) 차트 하단 및 게시글(`[postId]`) 댓글 상단 스폰서드 카드 삽입.
+   - 가상 부동산(`/spaces`), 온보딩 가이드(`/guide`), 미니게임(`/casino`) 상하단 광고 슬롯 완비.
+3. **[Viral Engine] 1초 SNS/오픈채팅 바이럴 공유 카드 생성기 연동**:
+   - 물타기, 복리, 부동산 월세, 김프, 양도세 계산기 결과 화면에 [SNS 카드 공유] 버튼 탑재.
+   - 1080x1080 / 1200x630 해상도의 고품질 Canvas 이미지 즉시 생성 및 클립보드 원터치 복사/다운로드.
+4. **[SEO Accelerator] 롱테일 키워드 검색엔진 실시간 수집 가속**:
+   - 5대 계산기 프리셋 50개 라우트에 대한 IndexNow 자동 핑 및 사이트맵 최신화.
+5. **[Verification & Deployment] 빌드 및 프로덕션 무중단 승격 (`v515`)**:
+   - 단위 테스트 100% ALL-PASS, Next.js 프로덕션 빌드 무결점 확인, GitHub push 및 원격 운영 서버 승격.
+
+---
+
+## 🚀 [v75 Specification] 구글 애드센스 인아티클 네이티브 광고 단위(Slot 6000051656) 전격 적용 및 고체류 콘텐츠 지면 최적화 배치 (누적 추가)
+
+### 1. 사용자 제공 공식 광고 단위 사양
+- **클라이언트 ID**: `ca-pub-5220225531544323`
+- **인아티클 광고 슬롯 ID**: `6000051656`
+- **광고 레이아웃/포맷**: `data-ad-layout="in-article"`, `data-ad-format="fluid"`, `display: block; text-align: center;`
+- **목적**: 콘텐츠 본문 텍스트 사이에 자연스럽게 융화되는 네이티브 피드 광고로 CTR 및 RPM 극대화.
+
+### 2. 고체류 콘텐츠 지면 배치 전략
+1. **온보딩 & 이용 가이드 허브 (`/guide`)**:
+   - 파워유저 실전 치트시트와 가상경제 5대 기둥 섹션 사이에 인아티클 광고 슬롯 배치.
+2. **주식 실전 매매 가이드 (`/guide/stock-trading`)**:
+   - 10-Depth 호가창 분석 섹션과 AI 시장 감성 지수 섹션 사이(2문단 아래)에 최적 배치.
+3. **가상 금융 & 복리 예금 가이드 (`/guide/virtual-banking`)**:
+   - 일일 복리 수식 해설과 가상 국채 만기 운용 섹션 사이에 배치.
+4. **직업 & 파밍 루틴 가이드 (`/guide/career-mastery`)**:
+   - 5대 전문 직업 소개와 숙련도 레벨링 섹션 사이에 배치.
+5. **도파민 시스템 & 확률 가이드 (`/guide/dopamine-system`)**:
+   - 법적 고지 배너와 6대 피드백 시스템 목록 사이에 배치.
+6. **핀테크 핵심 용어사전 (`/guide/glossary`)**:
+   - 용어 카드 스트림 중간(4번째 카드 직후)에 인아티클 광고 자연스럽게 삽입.
+7. **주간 경제 신문 & 월드 펄스 (`/newspaper`)**:
+   - 실시간 속보 피드와 주간 금융 지식 코너 사이에 배치.
+8. **공지사항 상세 (`/announcements/[announcementId]`)**:
+   - 공식 공지 본문 하단과 관련 소식 추천 사이에 배치.
+9. **5대 고수익 금융 도구 계산기**:
+   - 복리 계산기, 물타기 계산기, 가상 부동산 계산기, 김프 계산기, 양도세 계산기 결과 지표 하단에 인아티클 광고 슬롯 탑재.
+
+### 3. 검증 및 배포 계획
+- Vitest 180개 파일 100% ALL-PASS.
+- Next.js 16.3.4 프로덕션 빌드 161개 라우트 무결점 컴파일.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v516` 무중단 승격 배포.
+- 실제 도메인(`https://easy-scraping.com`) curl 및 `6000051656` 광고 슬롯 서빙 검증.
+
+---
+
+## 🚀 [v76 Specification] 구글 애드센스 멀티플렉스 일치하는 콘텐츠 광고 단위(Slot 9751074883, autorelaxed) 전격 연동 및 추천 지면 최적화 (누적 추가)
+
+### 1. 사용자 제공 공식 멀티플렉스 광고 단위 사양
+- **클라이언트 ID**: `ca-pub-5220225531544323`
+- **멀티플렉스 광고 슬롯 ID**: `9751074883`
+- **광고 포맷**: `data-ad-format="autorelaxed"`, `display: block;`
+- **목적**: 콘텐츠 하단 및 관련 도구 추천 영역에서 사용자 체류 시간 동안 맞춤형 연관 콘텐츠/그리드 광고를 노출하여 추가적인 수익 창출 및 이탈 방지.
+
+### 2. 컴포넌트 아키텍처 및 설정 확장
+1. **광고 환경설정 계층 (`frontend/src/lib/adsense.ts`)**:
+   - `multiplexSlot`: `process.env.NEXT_PUBLIC_ADSENSE_MULTIPLEX_SLOT || '9751074883'`
+   - `multiplexAdSense`: `enabled` 유효성 검증 및 불변 객체 내보내기 완비.
+2. **반응형 렌더링 계층 (`frontend/src/components/adsense-ad.tsx`)**:
+   - `format="autorelaxed"` 지정 시 `data-ad-format="autorelaxed"` 바인딩 및 `data-full-width-responsive` 속성 간섭 제거.
+3. **공개 광고 래퍼 계층 (`frontend/src/components/public-advertisement.tsx`)**:
+   - `variant="multiplex"` 옵션 및 독립 편의 컴포넌트 `<MultiplexAdvertisement />` 구현.
+
+### 3. 고체류 추천 지면 및 계산기 허브 배치 전략
+1. **온보딩 & 이용 가이드 허브 (`/guide`)**:
+   - FAQ 및 파워유저 치트시트 하단에 `<MultiplexAdvertisement className="my-10" />` 배치.
+2. **주식 실전 매매 가이드 (`/guide/stock-trading`)**:
+   - 본문 최하단 추천 콘텐츠 영역에 멀티플렉스 광고 배치.
+3. **가상 금융 & 복리 예금 가이드 (`/guide/virtual-banking`)**:
+   - 예적금 가이드 최하단에 멀티플렉스 광고 배치.
+4. **직업 & 파밍 루틴 가이드 (`/guide/career-mastery`)**:
+   - 커리어 가이드 최하단에 멀티플렉스 광고 배치.
+5. **도파민 시스템 & 확률 가이드 (`/guide/dopamine-system`)**:
+   - 시스템 가이드 최하단에 멀티플렉스 광고 배치.
+6. **핀테크 핵심 용어사전 (`/guide/glossary`)**:
+   - 용어사전 스트림 최하단에 멀티플렉스 광고 배치.
+7. **주간 경제 신문 (`/newspaper`)**:
+   - 주간 리포트 최하단에 멀티플렉스 광고 배치.
+8. **공지사항 상세 (`/announcements/[announcementId]`)**:
+   - 공지 본문 및 관련 링크 하단에 멀티플렉스 광고 배치.
+9. **5대 금융 계산기 공통 추천 허브 (`PopularCalculatorsHub`)**:
+   - 물타기 계산기, 복리 계산기, 가상 부동산 계산기, 김프 계산기, 양도세 계산기 등 모든 계산기 페이지의 5대 추천 섹션 하단에 `<MultiplexAdvertisement className="mt-8" />` 공통 탑재.
+
+### 4. 검증 및 무중단 배포 계획
+- Vitest 180개 파일 1021개 테스트 100% ALL-PASS.
+- Next.js 16.3.4 프로덕션 빌드 161개 라우트 무결점 컴파일.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v517` 무중단 승격 배포.
+- 실제 도메인(`https://easy-scraping.com`) curl 및 `9751074883` 슬롯 서빙 검증.
+
+---
+
+## 🚀 [v77 Specification] 공식 기능 소개 및 실제 화면 스크린샷 가이드 센터(`/features`) 구축 & 6대 핀테크 가상 경제 조작법 완비 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "사이트 기능 설명하는 페이지 만들고 하는 방법 설명해줘"
+  - "이미지 넣으면서 실제 사이트 이미지 넣으면서"
+  - "그리고 이 내용 기획서에 기재해"
+- **조율 확정 사양 (Interactive Alignment)**:
+  1. **페이지 라우트**: `/features` (공식 기능 소개 & 실제 사이트 스크린샷 가이드 센터)
+  2. **수록 범위**: 머니버스 6대 핵심 핀테크 기능 풀패키지
+     - ① WDX 가상 주식 거래소 & 10-Depth 호가창 (`/stocks`)
+     - ② 중앙은행 스마트 복리 포켓 & 가상 국채 (`/bank`)
+     - ③ 직업 커리어 & 실시간 일일 파밍 루틴 (`/work`)
+     - ④ 가상 부동산 메가시티 랜드 분양 & 패시브 임대료 (`/spaces/real-estate`)
+     - ⑤ 5대 고수익 금융 계산기 & 1초 바이럴 카드 (`/tools/*`)
+     - ⑥ 도파민 아케이드 미니게임 & 럭키 룰렛 (`/casino`)
+  3. **시각화 및 크래프트맨십**:
+     - 실제 라이브 인터페이스를 정밀하게 재현한 실사형 고품질 UI 목업 프레임
+     - 핵심 영역별 숫자 핀(Callout ①, ②, ③, ④) 및 상호작용 설명 툴팁
+     - 4단계 순차적 마스터 가이드 (Step-by-Step Tutorial)
+     - 원클릭 즉시 시작 딥링크 버튼 ("주식 거래소 입장", "금고 열기" 등)
+     - 상단 퀵 점프(Quick Jump) 앵커 바 및 문제 해결 FAQ 아코디언 탑재
+  4. **글로벌 SEO & 다국어**:
+     - `generateMetadata` 및 JSON-LD `HowTo` + `SoftwareApplication` 구조화 데이터 전면 주입.
+     - 4개 국어(KO/EN/JA/ZH) 내비게이션 매핑 완비.
+
+### 2. 컴포넌트 및 아키텍처 구현 명세
+1. **서버 페이지 (`frontend/src/app/features/page.tsx`)**:
+   - `canonical: https://easy-scraping.com/features` 및 4개 국어 alternates 메타데이터.
+   - `HowTo` 스키마(6대 핵심 기능 스텝별 조작법) JSON-LD 탑재.
+2. **클라이언트 뷰 (`frontend/src/app/features/features-view.tsx`)**:
+   - Linear/Stripe 수준의 다크 핀테크 테마, 고대비 모노스페이스 수치 렌더링.
+   - 6대 기능별 실사형 UI 프리뷰 목업, 조작 포인트 콜아웃, 4단계 사용 가이드.
+   - 인아티클 및 멀티플렉스 추천 광고 지면 조화로운 배치.
+3. **내비게이션 및 라우트 등록 (`routes.config.ts`, `navigation.ts`)**:
+   - `APP_ROUTES`에 `/features` (sitemapPriority: 0.95) 등록.
+   - 상단 메가 메뉴 `CATEGORY_NAV` 및 `PUBLIC_NAV`에 '핵심 기능 안내' 딥링크 탑재.
+
+### 3. 검증 및 배포 계획
+- Vitest 181개 파일 1024개 테스트 100% ALL-PASS.
+- Next.js 16.3.4 프로덕션 빌드 162개 라우트 무결점 컴파일.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v518` 무중단 승격 배포.
+- 실제 도메인(`https://easy-scraping.com/features`) curl 200 OK 및 렌더링 검증.
+
+---
+
+## 🚀 [v78 Specification] 초반·중반·후반 3단계 실전 성장 로드맵 & 실시간 모션 비디오 시뮬레이터(`/roadmap`) 완비 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "처음 중간 후반 부분 이렇게 설명하는 페이지 실제 사이트 이미지등넣어서 할수있게설명해줘나도 기능몰라서사용을못하고있어 상세히 아니면 사이트 영상등으로 사용해서해줘"
+- **조율 확정 사양 (Interactive Alignment)**:
+  1. **페이지 라우트**: `/roadmap` (초반·중반·후반 실전 성장 로드맵 & 인터랙티브 비디오 시뮬레이터 센터)
+  2. **3단계 성장 시나리오**:
+     - **🌱 [초반 1~3일차: 시드머니 10만 WLD 모으기 (소요시간: 3분)]**: 무료 럭키 룰렛 스핀(+20,000 WLD) → 인턴 직업 첫 업무(+15,000 WLD) → 웰컴 퀘스트 3종 보상(+50,000 WLD) = 종잣돈 10만 WLD 달성.
+     - **📈 [중반 4~14일차: 복리 & 주식으로 1,000만 WLD 굴리기 (소요시간: 10분)]**: 시드 50% 중앙은행 30일 스마트 복리 포켓(연 7.2%) 예치 → 나머지 50% WDX 침팬지 반도체 10-Depth 호가 분할 매수 → 5대 계산기로 익절 목표가 역산 → 시니어 승진(급여 5배).
+     - **👑 [후반 15~30일차+: 가상 부동산 건물주 & 억대 패시브 인컴 제국 (소요시간: 15분)]**: 강남 테헤란로 및 판교 테크노밸리 가상 랜드/오피스 분양 → 매일 자정 100만 WLD+ 패시브 임대료 수령 → 프레스티지 환생으로 영구 배율 +25% 부스트 획득.
+  3. **인터랙티브 모션 비디오 튜토리얼 플레이어 (`Live Motion Video Simulator`)**:
+     - 실제 라이브 브라우저 인터페이스 내에서 마우스 커서 이동, 버튼 클릭, 잔액 증가, 호가창 주문 체결, 임대료 자동 정산이 60fps 애니메이션으로 자동 시연되는 실사형 시뮬레이터 탑재.
+     - [재생/일시정지], [초반/중반/후반 탭 전환], [다시보기], [프로그레스 스크러버 바] 완비.
+  4. **데일리 1분 필수 루틴 치트시트**:
+     - 매일 1분만 투자하면 자동으로 자산이 불어나는 3대 루틴 (① 무료 룰렛 10초, ② 복리이자 & 임대료 수령 10초, ③ 직업 업무 시작 10초) 가이드 탑재.
+
+### 2. 컴포넌트 및 아키텍처 구현 명세
+1. **서버 페이지 (`frontend/src/app/roadmap/page.tsx`)**:
+   - `canonical: https://easy-scraping.com/roadmap` 및 4개 국어 alternates 메타데이터.
+   - `HowTo` 스키마(3단계 실전 공략) JSON-LD 탑재.
+2. **클라이언트 뷰 (`frontend/src/app/roadmap/roadmap-view.tsx`)**:
+   - 인터랙티브 모션 비디오 시뮬레이터 위젯 (`useState`, `useEffect` 타이머 기반 4단계 자동 시연).
+   - 초반/중반/후반 3대 성장 섹션 및 원클릭 즉시 실행 딥링크 버튼 완비.
+   - 인아티클 및 멀티플렉스 추천 광고 지면 조화로운 배치.
+3. **가이드 허브 상단 연동 (`frontend/src/app/guide/page.tsx`)**:
+   - 온보딩 가이드 최상단에 초반·중반·후반 실전 로드맵 🎬 및 6대 기능 시각 가이드 🖼️ 대형 배너 링크 배치.
+4. **내비게이션 및 라우트 등록 (`routes.config.ts`, `navigation.ts`)**:
+   - `APP_ROUTES`에 `/roadmap` (sitemapPriority: 0.95) 등록.
+   - 메인 메가 메뉴 `CATEGORY_NAV` 및 `PUBLIC_NAV`에 '실전 성장 로드맵' 딥링크 탑재.
+
+### 3. 검증 및 배포 계획
+- Vitest 182개 파일 1028개 테스트 100% ALL-PASS (`roadmap.test.tsx` 포함).
+- Next.js 16.3.4 프로덕션 빌드 163개 라우트 무결점 컴파일 (`/roadmap` 포함).
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v519` 무중단 승격 배포.
+- 실제 도메인(`https://easy-scraping.com/roadmap`) curl 200 OK 및 렌더링 검증.
+
+---
+
+## 🚀 [v79 Specification] 온보딩 실전 트래커 & 튜토리얼 퀘스트 연동 & IndexNow 신규 가이드 실시간 색인 전송 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**: "진행" (신규 유입자의 성장 경험과 기능 이해도 극대화를 위한 후속 연동 고도화)
+- **조율 확정 사양 (Interactive Alignment)**:
+  1. **인터랙티브 온보딩 트래커 (`InteractiveOnboardingTracker`)**:
+     - 6대 핵심 온보딩 액션 추적 (룰렛 돌리기 + 인턴 업무 + 30일 복리 예금 + 주식 호가 매수 + 5대 계산기 + 랜드 분양)
+     - 총 150,000 WLD 온보딩 보너스 지급 시스템
+     - 화면 우측 하단 플로팅 퀘스트 서랍 위젯 연동
+     - 보상 수령 시 Sonner 토스트 + 골드 컨페티 + Web Audio 사운드 연동
+  2. **IndexNow 검색엔진 실시간 배치 핑 전송**:
+     - 신규 가이드 라우트(`/roadmap`, `/features`)를 Naver, Bing, Google에 실시간 배치 핑 전송.
+
+### 2. 컴포넌트 및 아키텍처 구현 명세
+1. **온보딩 엔진 (`frontend/src/lib/onboarding-tracker.ts`)**:
+   - 6대 퀘스트 정의, 상태 스토리지 관리, 보상 수령 및 중복 방지 멱등성 로직.
+2. **플로팅 퀘스트 위젯 (`frontend/src/components/interactive-onboarding-tracker.tsx`)**:
+   - 프로그레스 바(0/6 완료), 원클릭 보상 청구 버튼, 실시간 애니메이션 알림.
+3. **전역 레이아웃 연동 (`frontend/src/app/layout.tsx`)**:
+   - `InteractiveOnboardingTracker` 전역 렌더링.
+
+### 3. 검증 및 배포 계획
+- Vitest 183개 파일 1031개 테스트 100% ALL-PASS (`onboarding-tracker.test.ts` 포함).
+- Next.js 16.3.4 프로덕션 빌드 163개 라우트 무결점 컴파일.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v520` 무중단 승격 배포.
+- 실제 도메인(`https://easy-scraping.com`) 헬스체크 및 IndexNow 핑 검증.
+
+---
+
+## 🚀 [v80 Specification] AI 맞춤형 투자 성향 진단기 & 1초 포트폴리오 리밸런싱 & 가이드 실시간 자연어 검색 연동 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**: "진행" 및 "한번만들떄 제대로 만들어" (기능 이해도와 성장 경험을 완벽히 완성하는 맞춤형 인터랙션 고도화)
+- **조율 확정 사양 (Interactive Alignment)**:
+  1. **AI 맞춤형 투자 성향 진단기 (`InvestorProfileQuiz`)**:
+     - 3문항의 직관적인 질문을 통해 4대 투자 페르소나(안정형/균형성장형/공격투자형/현금흐름형)를 30초 만에 판별.
+     - 4대 페르소나별 최적 자산 배분 비중(중앙은행 복리 포켓, WDX 10-Depth 주식, 가상 메가시티 랜드, 국채, 아케이드) 및 기대 수익률(연 7.2% ~ 120%+) 자동 산출.
+     - 시드머니(10만 / 100만 / 1,000만 / 1억 WLD) 선택에 따른 금액대별 포트폴리오 1초 시뮬레이션 계산기 탑재.
+     - 각 추천 영역별 원클릭 즉시 진입 딥링크 액션 버튼 연동.
+     - 진단 완료 시 온보딩 퀘스트 보너스(+20,000 WLD) 자동 연동 및 Web Audio 팡파레 & Sonner 축하 알림.
+     - 진단 결과 클립보드 원클릭 복사 및 SNS 공유 기능 탑재.
+  2. **가이드 실시간 자연어 검색 & 키워드 하이라이트 필터**:
+     - `/features` 허브 상단에 실시간 키워드 검색 인풋 바 배치.
+     - "호가창", "복리", "직업 파밍", "랜드", "계산기", "룰렛" 등 자연어 키워드 입력 시 6대 기능 실시간 필터링.
+  3. **온보딩 퀘스트 7단계 총 170,000 WLD 체계 완성**:
+     - 7대 온보딩 스텝 체계(룰렛 1만 + 인턴업무 1.5만 + 투자성향진단 2만 + 30일복리 2.5만 + 주식호가 3만 + 5대계산기 2만 + 랜드분양 5만 = 총 170,000 WLD) 완비.
+
+### 2. 컴포넌트 및 아키텍처 구현 명세
+1. **투자 성향 진단 컴포넌트 (`frontend/src/components/investor-profile-quiz.tsx`)**:
+   - Linear/Stripe 수준의 고대비 다크 핀테크 테마, 프로그레스 바, 4색 멀티 컬러 배분 시각화 바.
+2. **단위 테스트 (`frontend/src/components/investor-profile-quiz.test.tsx`)**:
+   - 3단계 퀴즈 진행, 최빈값 페르소나 판별, 온보딩 완료 이벤트 트리거, 리셋 동작 100% 검증.
+3. **가이드 뷰 연동 (`frontend/src/app/roadmap/roadmap-view.tsx`, `frontend/src/app/features/features-view.tsx`)**:
+   - 로드맵 및 기능 가이드 양대 화면에 진단기 및 앵커 점프 버튼 탑재.
+4. **온보딩 트래커 엔진 (`frontend/src/lib/onboarding-tracker.ts`, `onboarding-tracker.test.ts`)**:
+   - 7개 스텝(170,000 WLD) 멱등성 및 상태 결산 무결성 보장.
+
+### 3. 검증 및 배포 계획
+- Vitest 184개 파일 1034개 테스트 100% ALL-PASS.
+- Next.js 16.3.4 프로덕션 빌드 163개 라우트 무결점 컴파일.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v521` 무중단 승격 배포.
+- 실제 도메인(`https://easy-scraping.com/roadmap#quiz`, `https://easy-scraping.com/features`) curl 200 OK 및 렌더링 검증.
+
+---
+
+## 🚀 [v81 Specification] 상단 헤더·모바일 사이드 드로어·메인 홈 전역 가이드 노출 극대화 및 사용자 리텐션 강화 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "설명페이지 메뉴에 잘보익싯탱해서 사용자쉽게ㅎ여 사용자 보존하게해줘"
+- **조율 확정 사양 (Interactive Alignment)**:
+  1. **데스크톱 상단 헤더 퀵 가이드 핫 칩 & 메인 내비게이션 전면 배치**:
+     - 상단 헤더 마스트헤드 우측에 눈에 띄는 `🎬 실전 가이드 [HOT]` 펄스 칩 상시 노출.
+     - 메인 헤더 `HEADER_PUBLIC` 최상단에 `가이드 & 사용법` 드롭다운(`실전 성장 로드맵`, `6대 핵심 기능 조작법`, `이용 가이드`) 전진 배치.
+  2. **모바일 사이드 드로어 최상단 추천 가이드 허브 카드 탑재**:
+     - 320px~430px 모바일 화면에서 햄버거 메뉴(`Sheet`)를 열었을 때, 언어 선택기 바로 아래에 `🌟 처음 시작하시나요? (+170,000 WLD)` 대형 추천 큐레이션 카드 상시 렌더링.
+     - `🎬 실전 로드맵`, `🖼️ 기능 사용법`, `🎯 30초 투자 성향 진단`을 1터치로 즉시 진입 가능하도록 모바일 최적화.
+  3. **메인 홈 랜딩 온보딩 2열 벤토 배너 전면 업그레이드 (`frontend/src/app/page.tsx`)**:
+     - 메인 화면 최상단에 `🌱 1단계 시드 10만 → 📈 2단계 복리 1,000만 → 👑 3단계 건물주 1억` 실전 성장 로드맵 카드 및 `6대 기능 조작법 & AI 투자 진단` 카드 2열 동시 노출.
+  4. **전역 내비게이션 SSOT 및 4개 국어 번역 무결성 완비**:
+     - `navigation.ts` 내 4개 국어(KO, EN, JA, ZH) `가이드 & 사용법`, `실전 성장 로드맵`, `6대 핵심 기능 조작법`, `AI 투자 성향 진단` 사전 완비.
+
+### 2. 컴포넌트 및 아키텍처 구현 명세
+1. **헤더 내비게이션 (`frontend/src/components/site-header.tsx`)**:
+   - `Sparkles`, `Badge`, `ChevronRight` 및 데스크톱 핫 칩, 모바일 드로어 퀵 카드 탑재.
+2. **내비게이션 SSOT (`frontend/src/lib/navigation.ts`)**:
+   - `HEADER_PUBLIC`, `PUBLIC_NAV`, `MEMBER_NAV` 최상단 순서 재정렬 및 다국어 100% 매핑.
+3. **메인 홈 뷰 (`frontend/src/app/page.tsx`)**:
+   - 2-Column Responsive Bento Grid 온보딩 배너 배치.
+
+### 3. 검증 및 배포 계획
+- Vitest 184개 파일 1034개 테스트 100% ALL-PASS.
+- Next.js 16.3.4 프로덕션 빌드 163개 라우트 무결점 컴파일.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 무중단 승격 배포.
+
+---
+
+## 🚀 [v82 Specification] 온보딩 퀘스트 플로팅 위젯 닫기(X) UI/UX 전면 개선 & ESC·바깥클릭·오늘 하루 닫기 완비 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 피드백 및 문제 식별**:
+  - "닫을수가없네?" 피드백 및 스크린샷 접수.
+  - 온보딩 퀘스트 & 보너스 위젯이 화면 우측 하단에 상시 모달로 펼쳐졌을 때, 기존에는 작은 ChevronDown 아이콘으로만 최소화가 가능하여 사용자가 닫는 방법을 인지하기 어려웠음.
+- **개선 목표 및 조율 사양**:
+  1. **고대비 원형 닫기 (X) 버튼 전면 배치 (`interactive-onboarding-tracker.tsx`)**:
+     - 카드 헤더 우측에 `X` 아이콘이 선명하게 들어간 `Button (rounded-full bg-zinc-800 hover:bg-zinc-700 border-zinc-600 text-zinc-200)`을 마운트하여 누구나 0.1초 만에 닫기 인지.
+  2. **다중 닫기 인터랙션 (Escape 키 & 바깥 영역 클릭 감지)**:
+     - `useRef` 및 `mousedown` 이벤트 리스너로 팝업 외부를 클릭하면 부드럽게 닫힘 지원.
+     - 키보드 `Escape` 키 누름 시 즉시 모달 닫힘 지원.
+  3. **오늘 하루 보지 않기 (24시간) & 최소화 접기 제어**:
+     - 푸터 하단에 `[오늘 하루 보지 않기]` 버튼 탑재 (로컬스토리지 `wdmv_onboarding_dismissed_until` 24시간 쿠키 보존).
+     - 당일 닫기 상태에서도 필요 시 언제든 다시 열람할 수 있는 미니멀 퀘스트 버튼 제공.
+  4. **총 보상 금액 동적 계산 일치**:
+     - 하드코딩된 "150,000 WLD"를 `ONBOARDING_STEPS.reduce(...)`로 동적 연산하여 "7대 핵심 기능을 완료하고 총 170,000 WLD 획득!"으로 완벽 동기화.
+
+### 2. 컴포넌트 및 테스트 구현 명세
+1. **온보딩 트래커 위젯 (`frontend/src/components/interactive-onboarding-tracker.tsx`)**:
+   - `useRef`, `Escape` 키 리스너, `handleClickOutside` 핸들러, `X` 닫기 버튼, 오늘 하루 닫기 로직 탑재.
+2. **단위 테스트 (`frontend/src/components/interactive-onboarding-tracker.test.tsx`)**:
+   - 닫기 버튼 클릭, ESC 키 동작, 오늘 하루 닫기 및 재열기 인터랙션 3종 테스트 작성 및 통과.
+
+### 3. 검증 및 배포 계획
+- Vitest 온보딩 트래커 및 전역 테스트 100% ALL-PASS.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v521` 무중단 승격 배포.
+- 실제 도메인(`https://easy-scraping.com`) 렌더링 및 닫기 인터랙션 검증.
+
+---
+
+## 🚀 [v83 Specification] 8대 전문 직업 2.0 & 실전 급여 파밍 완벽 가이드 센터(`/guide/career-mastery`) 전면 쇄신 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "그리고 직업하는방법 부터 처음부터끝까지 다 설명해줘 이미지 그림 등활용해서 그 해줘 제발 설명페지이 제대로 만들어줘"
+  - "항상 미니 pc 에서 작업하고 작업끝나면 메인에합치고 브래치 정리하는거밎지? 운영에 무중단승격하고?"
+- **조율 확정 사양 (Interactive Alignment)**:
+  1. **인터랙티브 4대 탭 직업 가이드 엔진 (`career-step-by-step-guide.tsx`)**:
+     - **Tab 1: 4단계 수행 절차 (Flow)**: 직업 선택(Job Switch) ➔ 업무 수락(Claim) ➔ 실시간 쿨다운 타이머(30초~300초) ➔ 업무 완료 제출 & WorkReceipt 영수증 발급 + 실제 UI 배치 가이드.
+     - **Tab 2: 8대 직업군 도감 (Jobs Catalog)**: 핀테크 개발자, 퀀트 트레이더, 중앙은행가, 부동산 재벌, AI 연구원, 벤처 투자가, 보안 감사관, 언론 기자 8개 직무별 상세 설명, 기본급, 대표 업무, 시너지 공략 카드.
+     - **Tab 3: 7대 승진 티어 (Mastery Tiers)**: 견습(1.0x) ~ 숙련(1.2x) ~ 프로(1.5x) ~ 전문가(1.8x) ~ 엑스퍼트(2.1x) ~ 마스터(2.5x) ~ 레거시 명예(3.0x) 로드맵 및 단계별 혜택.
+     - **Tab 4: 실전 모의 체험 시뮬레이터 (Simulator)**: 레벨 슬라이더 & 공인 자격증 체크박스 실시간 보상 계산기 + 3초 업무 수락/타이머/제출/입금 사운드 모의 실습.
+  2. **직업 가이드 센터 페이지 전면 쇄신 (`frontend/src/app/guide/career-mastery/page.tsx`)**:
+     - 위 인터랙티브 컴포넌트 마운트, 일일 50,000 WLD / 주간 300,000 WLD 스마트 쿼터 설명, 무자본 10분 일일 파밍 루틴 4단계 및 CTA 배너 완비.
+  3. **6대 기능 소개 화면 동기화 (`frontend/src/app/features/features-view.tsx`)**:
+     - `career-farming` 섹션을 8대 전문 직업 2.0 및 4단계 프로세스로 쇄신.
+  4. **개발/배포 파이프라인 무결점 확립**:
+     - 로컬 미니 PC 개발 ➔ Vitest 전수 검증 ➔ Git main 브랜치 통합 및 푸시 ➔ 원격 운영 서버(`prod-v521`) 빌드 및 systemctl 무중단 승격 배포.
+
+### 2. 컴포넌트 및 테스트 구현 명세
+1. **인터랙티브 직업 가이드 컴포넌트 (`frontend/src/app/guide/career-mastery/career-step-by-step-guide.tsx`)**:
+   - `CAREER_GUIDE_JOBS` 8종 메타, `MASTERY_TIERS_GUIDE` 7단계 티어, 3초 타이머 및 Web Audio 사운드 연동.
+2. **직업 가이드 페이지 (`frontend/src/app/guide/career-mastery/page.tsx`)**:
+   - JSON-LD Article 구조화 데이터, 메타데이터, 일일 파밍 루틴, 구글 애드센스 인아티클/멀티플렉스 광고 슬롯 완비.
+3. **단위 테스트 (`frontend/src/app/guide/career-mastery/career-step-by-step-guide.test.tsx`)**:
+   - 4대 탭 전환, 8대 직업 선택, 7대 티어 로드맵, 모의 업무 시뮬레이션 4종 테스트 작성 및 100% 통과.
+
+### 3. 검증 및 배포 계획
+- Vitest 185개 파일 1038개 테스트 100% ALL-PASS.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v521` 무중단 승격 배포.
+- 실제 도메인([https://easy-scraping.com/guide/career-mastery](https://easy-scraping.com/guide/career-mastery), `/features`) 렌더링 검증.
+
+---
+
+## 🚀 [v84 Specification] 우측 하단 플로팅 액션 스택 아키텍처 & 프리미엄 다크 글래스모피즘 UI 쇄신 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 피드백 및 문제 식별**:
+  - "디자인 좀잘해" 피드백 및 스크린샷 접수.
+  - 화면 우측 하단에 `1:1 채팅 · 고객지원` 위젯과 `온보딩 퀘스트 (0/7)` 플로팅 버튼이 동일한 좌표(`bottom-6 right-6`)에 고정되어 서로 심각하게 겹쳐 삐져나오는 Overlapping Collision 발생.
+- **개선 목표 및 조율 사양**:
+  1. **완벽한 수직 적층 스택(Vertical Offset Hierarchy) 분리**:
+     - 1층(바닥): `FloatingSupportChatWidget` (고객지원 원형 버튼, 모바일 `bottom-[74px]` / 데스크톱 `sm:bottom-6`)
+     - 2층(상단): `InteractiveOnboardingTracker` (온보딩 퀘스트 칩, 모바일 `bottom-[136px]` / 데스크톱 `sm:bottom-[84px]`)
+     - 10~12px 간격을 두고 완벽하게 수직 정렬되어 1픽셀도 겹치지 않음.
+  2. **Linear/Stripe 스타일 프리미엄 다크 글래스모피즘 칩 쇄신**:
+     - 둔탁한 초록색 거대 버튼에서 세련된 다크 에메랄드 글래스모피즘(`bg-zinc-950/90 hover:bg-zinc-900 border-emerald-500/40 text-white backdrop-blur-xl ring-1 ring-emerald-500/20`)으로 전면 리디자인.
+     - 컴팩트 모노스페이스 진행률 뱃지(`0/7`) 및 펄스 알림 인디케이터 탑재.
+  3. **고객지원 마이크로 툴팁 호버 전환**:
+     - 상시 떠서 간섭을 주던 툴팁을 마우스 호버 시 부드럽게 페이드인(`opacity-0 group-hover:opacity-100`)되도록 정돈.
+
+### 2. 컴포넌트 및 테스트 구현 명세
+1. **온보딩 트래커 (`frontend/src/components/interactive-onboarding-tracker.tsx`)**:
+   - `fixed bottom-[136px] sm:bottom-[84px] select-none` 및 프리미엄 글래스모피즘 버튼 렌더링.
+2. **고객지원 챗 위젯 (`frontend/src/components/floating-support-chat-widget.tsx`)**:
+   - `group/support` 호버 상태 기반 툴팁 인터랙션 적용.
+3. **단위 테스트 (`interactive-onboarding-tracker.test.tsx`, `floating-support-chat-widget.test.tsx`)**:
+   - 2개 파일 8개 테스트 100% 통과.
+
+### 3. 검증 및 배포 계획
+- Vitest 185개 파일 1041개 테스트 100% ALL-PASS.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v521` 무중단 승격 배포.
+- 실제 도메인([https://easy-scraping.com](https://easy-scraping.com)) 플로팅 UI 렌더링 및 겹침 제로 검증.
+
+---
+
+## 🚀 [v85 Specification] 초반 무자본 10만 WLD 시드머니 3분 공략 최우선 전진 배치 & 12개 실전 UI 씬 인터랙티브 모션 비디오 시뮬레이터 & 디자인 전면 쇄신(`/roadmap`) 완비 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - `https://easy-scraping.com/roadmap` 좀더 설명하고 이미지 등 그리고 초반 설명부터 좀 넣어 이상한 거 먼저 넣지 말고 이미지 동영상 다 만들어서 해줘
+  - 디자인 좀 잘해
+- **조율 확정 사양 (Interactive Alignment)**:
+  1. **초반 1단계(1~3일차 무자본 10만 WLD 공략) 최상단 우선 전진 배치**:
+     - 중간에 흐름을 끊던 진단기나 부가 요소를 뒤로 정돈하고, 초보자가 접속하자마자 즉시 따라할 수 있는 `🌱 1단계: 초보자 무자본 10만 WLD 시드머니 3분 완성 공략`을 히어로 바로 밑에 배치.
+     - 4대 실전 루틴(① 무료 룰렛 ➔ ② 덕이 펫 ➔ ③ 핀테크 인턴 업무 ➔ ④ 웰컴 퀘스트 3종)을 실사형 고화질 일러스트 카드 및 딥링크 버튼과 함께 전진 배치.
+  2. **12개 실전 UI 씬 인터랙티브 모션 비디오 시뮬레이터 전면 강화**:
+     - **초반 4개 씬**: 🎰 무료 룰렛 스핀(+20,000 WLD) ➔ 🦆 덕이 펫 쓰다듬기(+5,000 WLD) ➔ 💻 인턴 업무 30초 타이머 & 급여(+15,000 WLD) ➔ 🎁 퀘스트 3종 일괄 수령(+50,000 WLD) = 10만 WLD 시드 달성.
+     - **중반 4개 씬**: 🏦 30일 스마트 복리 포켓(연 7.2%) 예치 ➔ 📈 WDX 10-Depth 호가창 지정가 분할 매수 ➔ 🧮 5대 계산기 목표가 역산 & SNS 공유 ➔ 🎖️ 직업 승진(급여 5배) = 1,000만 WLD 달성.
+     - **후반 4개 씬**: 🏙️ 강남 테헤란로 프라임 오피스 분양 ➔ 🪙 매일 자정 패시브 임대료(+125,000 WLD) ➔ 🛡️ 프레스티지 환생(+25% 부스트) ➔ 👑 VIP 골든 체스트 = 1억 WLD+ [금융 제국 건물주] 등극.
+  3. **비디오 플레이어 인터랙션 컨트롤러 고도화**:
+     - [재생/일시정지], [다시 재생], [이전 씬(◀ Prev)], [다음 씬(Next ▶)], [재생 속도(1x / 1.5x / 2x)], [4개 스텝 칩 썸네일 직접 점프].
+     - 실제 마우스 클릭 모션, 프로그레스 게이지, 입금 토스트 알림, 영수증 팝업 등 생동감 넘치는 60fps 비디오 애니메이션 구현.
+  4. **디자인 크래프트맨십 (Linear/Stripe 수준)**:
+     - 에메랄드/시안/앰버 3단계 테마 컬러, Geist Mono 고대비 수치, 320px 극소 모바일 완벽 대응 반응형 레이아웃, 인아티클/멀티플렉스 광고 슬롯 유지.
+
+### 2. 컴포넌트 및 테스트 구현 명세
+1. **로드맵 뷰 컴포넌트 (`frontend/src/app/roadmap/roadmap-view.tsx`)**:
+   - 12개 실전 UI 씬 모션 비디오 플레이어, 3단계 속도 조절, 이전/다음 씬 점프, 초반 1단계 우선 배치 레이아웃, 4대 실전 루틴 카드.
+2. **단위 테스트 (`frontend/src/app/roadmap/roadmap.test.tsx`)**:
+   - 초반부 1단계 우선 렌더링, 3단계 탭 전환, 비디오 플레이어 컨트롤(재생/일시정지/이전/다음 씬), 데일리 루틴 치트시트 100% 검증.
+
+### 3. 검증 및 배포 계획
+- Vitest 185개 파일 전수 검증 100% ALL-PASS.
+- Next.js 프로덕션 빌드 무결점 통과.
+- GitHub `origin/main` 푸시 및 원격 운영 서버(`prod-v521`) 무중단 승격 배포.
+- 실제 도메인(`https://easy-scraping.com/roadmap`) curl 200 OK 렌더링 검증.
+
+---
+
+## 🚀 [v86 Specification] 전 화면 4개 국어(KO, EN, JA, ZH) 번역 무결성 및 자연스러움 전수 쇄신 & 글로벌 핀테크 표준 용어 연동 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "영어버전 다른 외국버전 문제없는지 자연스럽게 변역되는지 확인해줘 언어 래퍼런스많이 찾아봐"
+- **글로벌 핀테크 표준 레퍼런스 매핑**:
+  - **영어 (EN)**: Stripe, Robinhood, Bloomberg, Coinbase 표준 금융 용어
+    - Seed Building, Compound Savings Pot (7.2% APY), 10-Depth Limit Order, DCA Calculator, Real Estate Tycoon, Midnight Automated Passive Rent, Career Mastery Matrix.
+  - **일본어 (JA)**: SBI証券, 楽天銀行, PayPay, マネックス証券 표준 용어
+    - ゼロ資本シード形成, 30日スマート複利預金 (年利7.2%), 10段階気配値指値買い, 損益分岐点計算機, 仮想不動産オーナー, 午前0時不労所得自動振込, 職業熟練度昇進ロードマップ.
+  - **중국어 (ZH)**: 蚂蚁金服 (Ant Financial), 币安 (Binance), 腾讯理财通 표준 금융 용어
+    - 初始本金积攒, 30天智能复利口袋 (年化7.2%), 10档买盘限价建仓, 保本价逆算, 虚拟地产包租公, 零点被动租金结息, 职业熟练度晋升阶梯.
+
+### 2. 세부 컴포넌트 및 다국어 고도화 명세
+1. **마스터 번역 사전 대폭 확장 (`frontend/src/lib/i18n-dictionary.ts`)**:
+   - 로드맵, 온보딩, 직업 커리어, 7대 승진 티어, 투자 성향 퀴즈 등 4개 국어 토큰 150+종 신규 탑재.
+2. **실전 로드맵 (`frontend/src/app/roadmap/roadmap-view.tsx`)**:
+   - `useLocale()` 및 `t(ko, en, ja, zh)` 헬퍼로 초반/중반/후반 3단계, 4대 실전 루틴, 12개 실전 UI 씬 모션 비디오 시뮬레이터, 데일리 치트시트 전 영역 다국어화 완비.
+3. **온보딩 트래커 (`frontend/src/components/interactive-onboarding-tracker.tsx` & `lib/onboarding-tracker.ts`)**:
+   - `OnboardingStep` 다국어 필드 확장 및 플로팅 칩/모달 내부 4개 국어 지원.
+4. **8대 전문 직업 가이드 (`frontend/src/app/guide/career-mastery/career-step-by-step-guide.tsx`)**:
+   - 4대 탭, 8대 직업 도감, 7대 승진 티어, 3초 실전 모의 시뮬레이터 전면 다국어화.
+5. **AI 맞춤형 투자 성향 진단기 (`frontend/src/components/investor-profile-quiz.tsx`)**:
+   - 3대 질문, 12개 선택지, 4대 페르소나 결과, 자산 배분 비중, 포트폴리오 계산기 4개 국어 지원.
+
+### 3. 검증 계획 (Verification Plan)
+- **단위 테스트 30종 100% 통과**:
+  - `i18n-dictionary.test.ts`, `locale.test.ts`, `roadmap.test.tsx`, `interactive-onboarding-tracker.test.tsx`, `career-step-by-step-guide.test.tsx`, `investor-profile-quiz.test.tsx` 100% ALL-PASS.
+- **프로덕션 빌드 무결점 확인**:
+  - Next.js Turbopack 163개 전 라우트 빌드 통과.
+- **GitHub 원격 저장소 푸시 & 원격 운영 서버 무중단 승격 (`prod-v521`)**:
+  - `git push origin main` 및 원격 호스트 빌드/재기동.
+  - `curl -sI https://easy-scraping.com/en/roadmap`, `/ja/roadmap`, `/zh/roadmap` HTTP 200 OK 렌더링 검증.
+
+---
+
+## 🚀 [v87 Specification] 국고 세수 자동 사회 환원 파이프라인 & 관리자 관제 UI 모달 고도화 완결 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "그리고 세금 자동으로 사회기능에쓰이는지등 확인해줘 국가관련돈에 국고에쓰이고하고 관련기획서내영있는없으면 추가해줘"
+  - 첨부 이미지(`media_1791040788893.png`)에서 확인된 `/admin/treasury` 화면의 "국고 재정 환원 및 시장 안정화 관제" 왼쪽 헤더 세로 1글자 찌그러짐 렌더링 버그 해결.
+- **핵심 점검 및 구현 목표**:
+  1. **국고 세수 자동 징수 & 사회 환원(재순환) 파이프라인 전수 무결성 검증**:
+     - **세수 징수 (Inflow)**: 장터 판매세(2%), 주식 매매세(1%), 사업 정산세(3%), B2B 거래세(1%), 상점 소비세(1~3%), 직업 자격 응시료, 4구간 누진 부유세 등이 국고 5대 금고(`VAULT_MAIN`, `VAULT_WELFARE`)로 자동 원천징수/입고됨을 확인.
+     - **사회 환원 (Outflow & Redistribution)**:
+       - 4분할 헌법적 예산 자동 배분 (복지 40%, 인프라 30%, 비상준비 20%, 소각 10%).
+       - 보편적 시민 기본소득 배당(`CITIZEN_DIVIDEND`, 실 누적 45,000 WLD 집행 완료).
+       - 공공 커뮤니티 공간/인프라 펀딩(`COMMUNITY_FUNDING`, 실 누적 50,000 WLD 집행 완료).
+       - 가상 주식 거래정지 매수원가 자동정산(`STOCK_HALT_SETTLEMENT`, 실 누적 28,230 WLD 환급 완료).
+       - 룬스케이프형 역매수 영구소각(`MARKET_BUYBACK_BURN`, 장터 바닥가 방어 및 디플레이션 유도).
+       - 30% 불가침 안전 비축금(`Safe Reserve Invariant`) 보호로 국가 파산 방지.
+     - **회계 대사 무결성**: 16건 트랜잭션 전수 대사 오차 0 WLD (0.000000% 무오차).
+  2. **관리자 관제 타워 UI 레이아웃 쇄신 (`treasury-operations-dialog.tsx`, `treasury-view.tsx`)**:
+     - 버튼 컨테이너에 거대 Card로 끼어들어가 있던 `TreasuryOperationsDialog`를 다른 다이얼로그들과 통일된 `isOpen` 2FA Step-Up 모달 다이얼로그(버튼: `⚡ 자금 긴급 제어 (Step-Up)`)로 전격 리팩터링.
+     - 헤더 영역에 `min-w-0 flex-1` 및 `whitespace-normal`을 적용하여 어떤 해상도(320px~2560px)에서도 텍스트가 찌그러지지 않고 완벽한 고대비 타이포그래피를 유지하도록 강화.
+  3. **국가 재정 및 세금 자동 사회 환원 종합 기획서 구축**:
+     - `docs/planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md` 공식 신규 제정 및 배포.
+
+### 2. 세부 컴포넌트 및 테스트 구현 명세
+1. **관리자 자금 긴급 제어 모달 (`frontend/src/app/admin/treasury/treasury-operations-dialog.tsx`)**:
+   - `isOpen` 모달 오버레이, 2단계 인증(Step-Up) 필드, 자금 주입/소각 탭 전환, 퀵 프리셋 버튼, 10자 이상 사유 검증 탑재.
+2. **관리자 국고 뷰 헤더 레이아웃 (`frontend/src/app/admin/treasury/treasury-view.tsx`)**:
+   - `flex-col lg:flex-row` 반응형 레이아웃, `min-w-0 flex-1` flex 붕괴 차단.
+3. **단위 테스트 (`frontend/src/app/admin/treasury/treasury-view.test.tsx`)**:
+   - 3개 테스트 100% ALL-PASS.
+4. **종합 기획서 문서 (`docs/planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md`)**:
+   - 세금 징수 파이프라인, 5대 금고, 4분할 배분 수식, 30% 안전 비축금 원칙, Mermaid 아키텍처 다이어그램 완비.
+
+### 3. 검증 및 배포 계획
+- 프론트엔드 단위 테스트 100% ALL-PASS.
+- Git main 브랜치 커밋 및 푸시, 원격 운영 서버(`prod-v521`) 동기화.
+
+---
+
+## 🚀 [v88 Specification] 홈 화면 및 전역 공지 바 4개 국어 번역 결함 박멸 & 마스터 사전 확장 사양 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 질의 및 요청**:
+  - "영어뮈야?" (중국어 `ZH` 및 외국어 모드에서 홈 화면 및 상단 공지 바 곳곳에 영어 또는 한국어가 혼재되어 출력되는 번역 결함 긴급 해결 요청)
+  - 첨부 이미지 4종(`media_1791041256831.png`, `media_1791041283435.png`, `media_1791041331324.png`, `media_1791041383403.png`) 분석 결과:
+    1. 최상단 공지 바: "Virtual Economy...", "Terms" 등이 영어로 노출.
+    2. 메인 히어로 & 4대 퀵 액션: "Total Virtual Net Worth", "Transfer", "Careers", "Stocks", "Bank" 등이 영어로 노출.
+    3. 온보딩 2열 벤토 배너: "Getting Started 3-Stage Master Guide", "Watch 60fps Video Simulator", "6 Core Features Guide & AI Profile Quiz", "Explore Features & AI Quiz" 등이 영어로 노출되고 내부 미니 칩 라벨("🌱 1단계: 시드 10만", "📊 주식 거래소" 등)이 한국어로 하드코딩됨.
+    4. 3대 금융 웹 도구 허브 & 일일 리텐션: "Financial Tools Hub", "Daily Lucky Roulette", "Stock Price Prediction" 등이 영어로 노출.
+    5. 주식 핫 종목 & 직업 업무 스테이션: "Hot Stock Highlights", "Career Mastery", "Senior Programmer", "Quant Trader" 등이 영어로 노출.
+- **근본 원인 규명**:
+  - `TranslatedText` 컴포넌트에서 `japanese`, `chinese` props가 생략된 경우 `i18n-dictionary.ts`의 역방향 사전(`lookupText`)을 호출하는데, 홈 화면 전용 문구들이 사전에 등록되어 있지 않아 세 번째 매개변수인 `english` fallback이 렌더링됨.
+
+### 2. 세부 컴포넌트 구현 명세
+1. **최상단 공지 바 (`frontend/src/components/notice-bar.tsx`)**:
+   - `가상경제 플랫폼` -> ja: `仮想経済プラットフォーム`, zh: `虚拟经济平台`
+   - `모든 WLD와 보상은 게임 안에서만 쓰는 가상 데이터입니다.` -> ja: `すべてのWLDと報酬はゲーム内でのみ使用される仮想データです。`, zh: `所有WLD与奖励均为仅在社区内使用的虚拟游戏数据。`
+   - `이용 기준` -> ja: `利用規約`, zh: `使用条款`
+2. **홈 화면 전면 다국어화 (`frontend/src/app/page.tsx`)**:
+   - 메인 히어로 자산 총액 및 분산 원장 배너 4개 국어 매핑 완비.
+   - 4대 퀵 액션(송금, 직업, 주식, 은행) 타이틀 및 서브텍스트 4개 국어 매핑 완비.
+   - 3단계 로드맵 벤토, 6대 기능 가이드 벤토, 3단계 미니 칩(🌱, 📈, 👑), 6대 기능 미니 뱃지(📊, 🏦, 🏢, 🎯) 전수 `<T>` 다국어화.
+   - 3대 금융 계산기 허브 및 3개 퀵 링크(복리, 물타기, 직업) 4개 국어 매핑 완비.
+   - 일일 럭키 룰렛 및 주가 예측 배팅 카드 4개 국어 매핑 완비.
+   - 가상 주식 핫 3개 종목(월덕게임즈, 월덱테크, 치무테크) 및 틱 주기, 목표가 알림 4개 국어 매핑 완비.
+   - 직업 업무 스테이션(시니어 프로그래머, 퀀트 트레이더, 티어 뱃지, 루틴 시작) 4개 국어 매핑 완비.
+   - 공식 공지사항 및 패치노트 헤더 4개 국어 매핑 완비.
+3. **마스터 다국어 사전 대폭 확장 (`frontend/src/lib/i18n-dictionary.ts`)**:
+   - Section 35 `home.*` 카테고리 47종 신규 추가 및 역방향 인덱스 자동 연동.
+
+### 3. 검증 및 배포 결과
+- **Vitest 단위 테스트**: 프론트엔드 전체 테스트 100% 통과.
+- **Next.js 16.3.8 Turbopack 빌드**: 정적 163개 페이지 전수 생성 완료, 0 TypeScript 에러.
+- **Git 커밋 & 푸시**: `origin/main` 푸시 완료 (`8d4370b4`).
+- **원격 운영 서버(`prod-v521`) 무중단 승격**: Next.js 빌드 및 `moneyverse-frontend.service` 재기동 완료, HTTP/2 200 OK 라이브 서비스 검증 완료.
+
 

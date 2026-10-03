@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { getServerLocale } from '@/lib/locale-server';
 import { lookupText } from '@/lib/i18n-dictionary';
 import { PersonalSpacesView } from '@/components/personal-spaces-view';
+import { PublicAdvertisement } from '@/components/public-advertisement';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getServerLocale();
@@ -49,6 +50,9 @@ export default async function PersonalSpacesPage() {
       </div>
 
       <PersonalSpacesView />
+
+      {/* 스폰서드 디스플레이 광고 */}
+      <PublicAdvertisement className="my-6" />
     </div>
   );
 }

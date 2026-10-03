@@ -2,12 +2,15 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Landmark, ArrowLeft, RotateCcw, TrendingUp, Sparkles, HelpCircle, CheckCircle2 } from 'lucide-react';
+import { Landmark, ArrowLeft, RotateCcw, TrendingUp, Sparkles, HelpCircle, CheckCircle2, Share2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { FiatBadge } from '@/components/fiat-amount';
+import { InArticleAdvertisement } from '@/components/public-advertisement';
+import { ViralShareCardDialog } from '@/components/viral-share-card-dialog';
+import type { ViralCardPayload } from '@/lib/viral-share-card';
 
 export default function CompoundCalculatorPage() {
   const [principal, setPrincipal] = useState<number>(100000);
@@ -15,6 +18,7 @@ export default function CompoundCalculatorPage() {
   const [annualRate, setAnnualRate] = useState<number>(8.5);
   const [years, setYears] = useState<number>(3);
   const [compoundFrequency, setCompoundFrequency] = useState<'daily' | 'monthly' | 'annually'>('monthly');
+  const [shareOpen, setShareOpen] = useState(false);
 
   const calculation = useMemo(() => {
     const p = Math.max(0, principal || 0);
@@ -289,9 +293,20 @@ export default function CompoundCalculatorPage() {
             <CardHeader className="pb-3 border-b border-border/50">
               <CardTitle className="text-base font-bold text-foreground flex items-center justify-between">
                 <span>예상 만기 최종 수령액</span>
-                <span className="text-xs font-semibold text-amber-500 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                  {years}년 후 ({years * 12}개월)
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-amber-500 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+                    {years}년 후 ({years * 12}개월)
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShareOpen(true)}
+                    className="h-7 text-xs font-bold gap-1 text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10"
+                  >
+                    <Share2 className="size-3" />
+                    <span>카드 공유</span>
+                  </Button>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-6">
@@ -359,8 +374,31 @@ export default function CompoundCalculatorPage() {
               </table>
             </CardContent>
           </Card>
+
+          {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
+          <InArticleAdvertisement className="my-6" />
         </div>
       </div>
+
+      <ViralShareCardDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        payload={{
+          title: '복리 마법 자산 진단서',
+          category: '복리 계산기',
+          keyMetricLabel: '예상 최종 수령액',
+          keyMetricValue: `${calculation.totalFinal.toLocaleString()} WLD`,
+          keyMetricSubtext: `${years}년 투자 · 연 ${annualRate}% 복리`,
+          summaryRows: [
+            { label: '초기 투자 원금', value: `${principal.toLocaleString()} WLD` },
+            { label: '매월 추가 적립액', value: `${monthlyDeposit.toLocaleString()} WLD` },
+            { label: '복리 순이자 수익', value: `+${calculation.totalInterest.toLocaleString()} WLD` },
+            { label: '단리 대비 초과 수익', value: `+${calculation.compoundBonus.toLocaleString()} WLD` },
+          ],
+          badgeText: `수익률 +${Math.round((calculation.totalInterest / (calculation.totalDeposited || 1)) * 100)}%`,
+          accentColor: '#f59e0b',
+        }}
+      />
     </div>
   );
 }

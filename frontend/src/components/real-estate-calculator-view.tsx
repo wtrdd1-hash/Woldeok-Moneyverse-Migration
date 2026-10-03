@@ -11,6 +11,7 @@ import { RealEstatePreset, REAL_ESTATE_PRESETS } from '@/config/real-estate-pres
 import { calculateRealEstateYield } from '@/lib/real-estate-calculator';
 import { ViralShareButton } from '@/components/viral-share-button';
 import { PopularCalculatorsHub } from '@/components/popular-calculators-hub';
+import { InArticleAdvertisement } from '@/components/public-advertisement';
 
 interface RealEstateCalculatorViewProps {
   initialPreset?: RealEstatePreset | undefined;
@@ -273,6 +274,9 @@ export function RealEstateCalculatorView({ initialPreset }: RealEstateCalculator
           </CardContent>
         </Card>
       </div>
+
+      {/* 콘텐츠 내 자동 삽입 광고 (In-Article Native Fluid Ad) */}
+      <InArticleAdvertisement className="my-6" />
 
       {/* 상호 내부 링크 허브 */}
       <PopularCalculatorsHub currentPresetSlug={initialPreset?.slug} />
