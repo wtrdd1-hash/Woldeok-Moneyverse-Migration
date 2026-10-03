@@ -17,7 +17,7 @@ export const revalidate = 3600;
 const RELEASE_TIMESTAMP = new Date('2026-09-29T00:00:00.000Z');
 
 /**
- * 10 Canonical Virtual Stock Symbols for SEO Long-tail Indexing.
+ * 18 Canonical Virtual Stock Symbols (10 Classic + 8 WDX Listed) for SEO Long-tail Indexing.
  */
 export const STOCK_SYMBOLS = [
   'WDG',
@@ -30,6 +30,14 @@ export const STOCK_SYMBOLS = [
   'DUCK',
   'WFIN',
   'SPACE',
+  'WDX-TEC',
+  'WDX-FIN',
+  'WDX-RET',
+  'WDX-LOG',
+  'WDX-BIO',
+  'WDX-ENT',
+  'WDX-ENG',
+  'WDX-DEF',
 ] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -47,6 +55,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ) => {
     const cleanPath = path.startsWith('/') ? path : `/${path}`;
     const canonicalUrl = `${base}${cleanPath === '/' ? '' : cleanPath}`;
+    if (registeredUrls.has(canonicalUrl)) return;
+    registeredUrls.add(canonicalUrl);
+
     const enUrl = `${base}/en${cleanPath === '/' ? '' : cleanPath}`;
     const jaUrl = `${base}/ja${cleanPath === '/' ? '' : cleanPath}`;
     const zhUrl = `${base}/zh${cleanPath === '/' ? '' : cleanPath}`;

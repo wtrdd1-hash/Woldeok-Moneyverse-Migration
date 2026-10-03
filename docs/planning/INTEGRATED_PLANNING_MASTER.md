@@ -1,20 +1,37 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.01.495
+> Current ledger version: v2026.10.03.510
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
 
-## v2026.10.01.495 — 2026-10-01 — Public repository security boundary and sanitization
-- Security/repository-hygiene cycle. Start `origin/main=91efe427cccbc012cd71c082d3c9caeb246dcf98`; mid-work main advanced to `2bad12eb` and was fast-forwarded before implementation. Dedicated branch `security/public-repo-sanitization-v2026.10.01.495`.
-- **SEC495-01 / P0:** a mobile release-signing password fallback was present in the public app source. The public fallback is removed on the app security branch; any real credential that ever reused a publicly committed value must be treated as exposed and rotated.
-- **SEC495-02 / P1:** public Git tracked internal update records. Current-tree internal update files are removed, future internal update paths are ignored, and documentation governance now requires private storage for internal records.
-- **SEC495-03 / P1:** security planning now requires public-repository data minimization plus history-aware secret scanning with redacted findings. Current-tree deletion is explicitly not evidence of Git-history erasure.
-- **SEC495-04 / P1:** a prior blanket shell-script purge removed a required non-secret database initialization source while its migration-parity test still required it. v495 restores only that required source and narrows the ignore rule so security cleanup cannot silently break the database bootstrap contract.
-- **SEC495-05 / P1:** unnecessary public references to the private operations gateway are removed from maintained/compatibility app documentation.
-- No shared-history rewrite, force push, Test deployment, Production mutation, or Production promotion is claimed by this planning record.
+## v2026.10.03.510 — 2026-10-03 — Global-growth execution design and reference expansion
+- Start/mid-work `origin/main=ac4dd484a90b266d945993d7bd8be57a74e8e1df`; isolated docs branch `docs/global-growth-deep-plan-v2026.10.03.510`.
+- Re-audited exact-main locale/proxy/layout/GSC/sitemap/pSEO source against the v509 authority and registered concrete P0/P1 implementation gaps instead of assuming the planning design already exists at runtime.
+- Added `GLOBAL_GROWTH_EXECUTION_SPEC.md` / `.ko.md` as implementation-ready detail for locale context, translation state, server SEO read model, pSEO admission/retirement, overseas feature epics, market readiness, ads/consent, analytics, admin and release QA.
+- New Crossref discovery cycle: 30 lanes, 210,000 raw records -> 121,320 within-v510 deduplicated candidates, 0 collection errors, SHA-256 `f16c6deceb18fa96fdd7b1132b2fc58e13f908899d477c9ce252a897adae7704`. v507 remains a separate corpus; no unverified cross-cycle unique total is claimed.
+- Current official-source constraints were refreshed separately from the corpus, including international URLs/hreflang, people-first/scaled-content policy, canonical/sitemap/lastmod, retired Google sitemap ping, JavaScript rendering, Core Web Vitals, BCP 47/CLDR, WCAG 2.2, IndexNow, consent/ad policy and minor/privacy controls.
+- Planning/docs-only cycle. No runtime, DB, Test or Production mutation/promotion is claimed.
+
+## v2026.10.03.509 — 2026-10-03 — Global-growth authority integration onto latest main
+- User approval advanced the v507 written design from review-ready isolated planning into the current planning authority chain.
+- Integration branch: `docs/global-growth-seo-integration-v2026.10.03.509`; start and mid-work `origin/main=ddec006e75ffcaf866c3c6d0a82edc2b96372917`.
+- The v507 global-growth commit applied cleanly because post-v507 v508 main changes and the v507 planning paths do not overlap; v508 security/runtime evidence remains intact.
+- PROJECT_PLAN now treats Korean-default locale, assistive GeoIP, overseas product value, multilingual SEO/search-demand provenance, quality-gated pSEO and advertising-only international economics as current planning authority.
+- The v507 detailed specifications/research keep their original version for provenance; v509 records their authority adoption rather than falsely relabeling the source research.
+- Documentation-only integration. Runtime code, DB, Test and Production were not modified or promoted. Implementation requires a separate branch and exact-SHA Test/backend-health evidence.
+
+## v2026.10.02.507 — 2026-10-02 — Korean-default global growth, international SEO and ad-revenue design
+- Docs/planning-only cycle from start origin/main 5a7c658b38853f564983d19f961c689a494dc4b6 on isolated branch docs/global-growth-seo-v2026.10.02.507.
+- Supersedes product-locale wording that treated English as the default: Korean is product/public fallback; GeoIP is an overseas language recommendation/chooser signal on indexable public pages and may be an automatic onboarding default only on non-indexable app surfaces. Explicit locale URLs and user choice win.
+- Defines overseas utility, knowledge, onboarding, translation, timezone/event, international discovery and retention features as product value before SEO scale.
+- Separates real site search performance from market search-volume estimates and prohibits generated/fallback GSC numbers from operational decisions.
+- Replaces fixed pSEO page-count ambition with an admission gate for distinct intent, independent value, source freshness, canonical/hreflang/internal links, duplicate checks and a deindex/consolidation path.
+- Adds text/Image/video/Discover acquisition, country/locale KPI segmentation and advertising-only market contribution economics.
+- Broad Crossref discovery corpus: 150,000 raw -> 121,810 DOI/title-deduplicated candidates; manifest SHA-256 4dc89e5af460f6bbbbea4ae68a923f9cab6b6c8a274eaff5787c77a05d95b729. Discovery breadth is not manual review.
+- Detailed authority: GLOBAL_GROWTH_SEO_REVENUE_SPEC.md. No runtime/Test/Production completion is claimed.
 
 ## v2026.09.29.486 — 2026-09-29 — Strict 145k Database Reference Corpus & PostgreSQL 17 Revalidation
 - Research/planning/docs-only cycle. Start, mid-work, and final `origin/main=64201629c5cdf931d49e48e8808fc0f882318b3b`; isolated branch `docs/db-reference-expansion-v2026.09.29.486`.

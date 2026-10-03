@@ -2,18 +2,48 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.09.30.487
+> Current integrated version: v2026.10.03.510
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Global-growth execution architecture and deep evidence — v2026.10.03.510 (2026-10-03)
+
+- **Scope:** expands the approved v507/v509 global-growth authority into implementation-ready locale, SEO, translation, pSEO, overseas-feature, market-readiness, advertising/consent, analytics, admin and QA contracts.
+- **Exact-main evidence:** inspected `origin/main=ac4dd484a90b266d945993d7bd8be57a74e8e1df`. Current runtime still has P0/P1 authority gaps including English default/fallback, inferred-locale preference pollution, fabricated GSC analytics, retired Google sitemap ping, mechanical hreflang/sitemap locale emission, release-timestamp `lastmod`, and config-only pSEO admission.
+- **New detailed authority:** [Global Growth Execution Specification v510](GLOBAL_GROWTH_EXECUTION_SPEC.md) defines `LocaleContext`, translation lifecycle, `SeoDocument`, route/indexability registry, sitemap/hreflang/lastmod contracts, search-evidence states, pSEO admission/retirement, market readiness, `AdPolicy`, analytics, admin tooling and release tests.
+- **Reference expansion:** new independent Crossref discovery cycle collected 210,000 raw records across 30 lanes and deduplicated 121,320 candidates within v510, manifest SHA-256 `f16c6deceb18fa96fdd7b1132b2fc58e13f908899d477c9ce252a897adae7704`; primary implementation rules are separately checked against current official sources. The v507 corpus remains independent and is not added into a false cross-cycle unique count.
+- **Implementation order:** truth repair -> server-owned SEO authority -> localization platform -> EN/JA overseas value -> search/pSEO operations -> compliant advertising measurement -> additional locales one at a time.
+- **Evidence boundary:** v510 is research/planning/docs only. Runtime implementation, Test verification and Production promotion are not claimed and require later exact-SHA evidence.
+
+## Approved global-growth authority integration — v2026.10.03.509 (2026-10-03)
+
+- **Authority action:** the user-approved v507 written design is now adopted into the latest implementation-facing planning authority rather than remaining only on its isolated planning branch.
+- **Latest-main baseline:** integration started and was rechecked mid-work against `origin/main=ddec006e75ffcaf866c3c6d0a82edc2b96372917` (v508 security remediation). The v508 security/runtime evidence is preserved; this docs-only integration does not overwrite it.
+- **Adopted scope:** Korean product/public fallback, GeoIP-assisted language recommendation, explicit-locale/user-choice precedence, locale/jurisdiction separation, overseas utility and retention features, multilingual search architecture, quality-gated pSEO, search-demand provenance, and advertising-only international unit economics.
+- **Detailed design identity:** the detailed global-growth design remains versioned as v2026.10.02.507 for provenance. v509 changes its authority status by integrating it into the current planning chain.
+- **Implementation state:** planning authority is integrated, but runtime implementation, Test verification and Production rollout remain separate evidence gates. No code, database, Test or Production change is claimed by v509.
+- **Implementation gate:** any later runtime work must use a new branch from the then-current main, retain the Korean-default/SEO-safety contracts, validate the exact candidate on Test including backend health, and only then use the project's zero-downtime Production promotion procedure.
+
+## Global growth, Korean-default locale and search/revenue architecture — v2026.10.02.507 (2026-10-02)
+
+- **Product default:** public/product fallback locale is Korean (ko). Documentation remains English canonical + Korean synchronized second language.
+- **GeoIP localization:** use coarse country signals to recommend or preselect an available language, but never force search crawlers or an explicit locale URL to another language. A saved user language always wins. Non-indexable app onboarding may use GeoIP as an automatic first-session default.
+- **International waves:** prioritize English-language markets and Japan after quality parity, then German, French, Spanish and Brazilian Portuguese one locale at a time. Locale and legal jurisdiction remain independent.
+- **Search-volume truth:** real site performance comes from Search Console/Search Advisor; market keyword demand comes from explicitly sourced estimates such as Keyword Planner. Generated/fallback metrics cannot be presented as live.
+- **Search growth:** expand only pages with independent user utility, maintained data/computation and a quality/indexability gate. No fixed URL-count target authorizes thin programmatic or translated pages.
+- **Overseas product value:** add locale-aware public calculators, virtual-economy tools, guides/glossary/lore, localized onboarding, timezone/event support, labelled UGC translation, international discovery and retention surfaces.
+- **Search surfaces:** optimize text search, Images, video and supplemental Discover traffic with self-canonical locale URLs, reciprocal hreflang, truthful lastmod, internal-link hubs and Core Web Vitals guardrails.
+- **Advertising economics:** current cash authority remains advertising-only. Market expansion uses observed Page RPM and revenue per qualified organic session, net of localization/content/compliance/operating cost; scenario math is not a revenue forecast.
+- Detailed authority: [Global Growth, International SEO & Advertising Revenue Specification](GLOBAL_GROWTH_SEO_REVENUE_SPEC.md) and [v507 planning delta](deltas/v2026.10.02.507.md). This is planning/docs only and claims no runtime, Test or Production implementation.
 
 ## Advertising-only cash monetization superseding gate — v2026.09.30.487 (2026-09-30)
 
 - **Current business constraint:** under the user's current business-registration guidance, direct product sales are not permitted. Until the registered business scope is expanded and tax/legal treatment is confirmed, **cash revenue is advertising-only**.
 - **Superseding scope:** the v444 ad-free/convenience subscription and paid-cosmetic plans below remain as historical planning evidence but are **BLOCKED under current cash-monetization authority**. Paid WLD/WDX, randomized items, casino value, user-paid marketplace fees, donations/memberships, paid API/B2B, affiliate and direct-sale revenue also remain blocked until explicitly authorized.
 - **KRW 1,000,000/month ad target:** using Google's Page RPM definition, `monthly ad revenue = pageviews / 1,000 × observed Page RPM`. Scenario examples: KRW 2,000 RPM requires about 500k PV; KRW 5,000 requires 200k; KRW 10,000 requires 100k; KRW 20,000 requires 50k. These are scenario inputs, not promised RPM.
-- **Growth method:** use qualified human traffic, Search Console index/search truth, original calculators/guides, relevant internal linking, EN/KO locale correctness, and measured AdSense Auto Ads/Experiments. Self-clicks, click encouragement, incentivized ad viewing, traffic exchanges, bot impressions and low-quality purchased traffic are prohibited.
+- **Growth method:** use qualified human traffic, Search Console index/search truth, original calculators/guides, relevant internal linking, Korean and every published-locale correctness, and measured AdSense Auto Ads/Experiments. Self-clicks, click encouragement, incentivized ad viewing, traffic exchanges, bot impressions and low-quality purchased traffic are prohibited.
 - **Ad safety boundary remains:** preserve existing exclusions for wallet/transfer/loan, transaction/order, casino/chance, account security, administrator action and private-data surfaces.
 - Detailed authority: [Advertising-Only Revenue Specification](AD_ONLY_ADVERTISING_REVENUE_SPEC.md) and [v487 planning delta](deltas/v2026.09.30.487.md). This is planning/docs only and claims no new ad setting, Test/Production deployment, tax classification, or KRW 1,000,000/month result.
 

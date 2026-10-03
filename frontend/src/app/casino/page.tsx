@@ -31,6 +31,7 @@ import { ThemeGameCard } from './theme-games';
 import { WheelGame } from './wheel-game';
 import { CasinoJackpotTicker } from './casino-jackpot-ticker';
 import type { CasinoJackpotData } from './casino-jackpot-ticker';
+import { CasinoAudioControls } from '@/components/casino-audio-controls';
 
 import { getServerLocale } from '@/lib/locale-server';
 
@@ -289,20 +290,25 @@ export default async function CasinoPage() {
 
   return (
     <div data-page="casino" className="mv-page mv-page--gameplay grid gap-6 pb-12">
-      <PageHeader
-        eyebrow="LUCKY ZONE"
-        title={
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <PageHeader
+          eyebrow="LUCKY ZONE"
+          title={
+            <TranslatedText
+              korean="럭키존 (가상 미니게임)"
+              english="Lucky Zone (Virtual Mini-games)"
+            />
+          }
+        >
           <TranslatedText
-            korean="럭키존 (가상 미니게임)"
-            english="Lucky Zone (Virtual Mini-games)"
+            korean="게임 머니(WLD)로 가볍게 즐기는 미니게임 라운지입니다. 무리한 베팅 없이 가볍게 즐겨보세요."
+            english="A virtual mini-game lounge using in-game WLD. Enjoy casually and responsibly."
           />
-        }
-      >
-        <TranslatedText
-          korean="게임 머니(WLD)로 가볍게 즐기는 미니게임 라운지입니다. 무리한 베팅 없이 가볍게 즐겨보세요."
-          english="A virtual mini-game lounge using in-game WLD. Enjoy casually and responsibly."
-        />
-      </PageHeader>
+        </PageHeader>
+        <div className="flex sm:self-start sm:pt-4">
+          <CasinoAudioControls />
+        </div>
+      </div>
 
       <CasinoVisualHero />
       <CasinoJackpotTicker data={jackpot} />

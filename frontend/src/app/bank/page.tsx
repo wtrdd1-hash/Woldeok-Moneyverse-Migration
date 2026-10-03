@@ -30,6 +30,7 @@ import { SavingsGoalProgressRing } from './savings-progress-ring';
 import { SavingPocketsCard } from './saving-pockets-card';
 import { BankLiquidityCard } from './bank-liquidity-card';
 import { CreditScoreCard, type CreditRatingData } from './credit-score-card';
+import { SavingsPotCard } from '@/components/savings-pot-card';
 import type { BankStanding, SavingPocket } from './types';
 
 export const dynamic = 'force-dynamic';
@@ -200,6 +201,9 @@ export default async function BankPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 중앙은행 스마트 복리 포켓 & 정기예금 카드 */}
+      <SavingsPotCard userBalanceWld={Number(cash) || 50000} />
 
       {/* 스마트 저축 목표 & 채권 수익 시뮬레이터 위젯 */}
       <SavingsGoalProgressRing

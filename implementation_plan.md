@@ -1,6 +1,9 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v66)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v69)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v69**: 미니게임 Web Audio API 무의존성 사운드 & CSS/SVG 하드웨어 가속 잭팟 연출 & 중앙은행 스마트 복리 포켓 정기 예적금 만기 이자 시스템 & IndexNow 백그라운드 크론 자동 배치 핑 구축 (+290, -0)
+- **v68**: 기획서 기반 글로벌 SEO 완결 & 실시간 가상 공시 토스트 알림 브로드캐스트 & 주간 금융 영수증 Canvas PNG 다운로드 및 공유 엔진 구축 — WDX 8대 신규 종목 및 공시/세계관 sitemap/robots/JSON-LD 구조화 데이터 전면 등록, 무의존성 Canvas 영수증 이미지 생성기, Sonner 실시간 공시 팝업 알림, 단위 테스트 100% ALL-PASS 및 v506 무중단 승격 (+250, -0)
+- **v67**: 기획서(PRODUCT_DESIGN_SPEC.ko.md Section 5) 기반 WDX 주식 시장 고도화 완결 — WDX 8대 종목 및 10대 가상 주식 실시간 기업 공시/속보 피드 엔진(`CorporateDisclosureTicker`) 구축, 3섹터 분산 투자 진단 및 HHI 자산 집중도 분석기(`SectorDiversificationCard`, `portfolio-diagnostics.ts`), 투자 거래일지 & 매매 복기 다이어리(`TradeDiaryDrawer`, `trade-diary.ts`), 토스/뱅크샐러드 스타일 핀테크 주간 금융 결산 영수증(`WeeklyFinancialReceipt`), 단위 테스트 100% ALL-PASS 및 v505 무중단 승격 (+280, -0)
 - **v66**: 사이트 노출(SEO/트래픽/바이럴) 극대화 5대 엔진 전면 구축 & Git 브랜치 동기화 — 프로그래매틱 SEO(pSEO) 국내외 60+개 핵심 종목 × 5개 물타기 시나리오(300+개 롱테일 페이지) 대량 확장, IndexNow 실시간 검색엔진(Bing/Naver/Yandex/Seznam) 색인 핑 전송 API/엔진 구축, RSS 2.0 / Atom XML 피드(/feed.xml) 엔드포인트 개설, 디스코드 봇 딥링크 & 웹 출석 10% 추가 보너스 유입 배너 연동, 단위 테스트 100% ALL-PASS 및 v504 무중단 승격 (+210, -0)
 - **v65**: 페이지별 다국어 동적 메타데이터(`generateMetadata`) 전면 도입 & `sitemap-static.xml` 내 4개 국어 및 `x-default` `hreflang` 전수 주입 & Vitest 167개 파일 978개 테스트 100% 통과 & v503 무중단 승격 배포 완결 (+27, -0)
 - **v64**: 전 페이지 모든 콘텐츠 100% 다국어(KO/EN/JA/ZH) 번역 전수 완비 & 미지원 언어/국가 접속 시 영어(EN) 자동 기본 접속 엔진 & 다국어 글로벌 SEO(Meta/OG/Twitter/JSON-LD/Sitemap/hreflang) 전면 감사 및 고도화 (+310, -0)
@@ -152,7 +155,6 @@ The former root execution scratchpad mixed historical implementation notes with 
 ---
 
 ## 🚀 [v66 Specification] 사이트 노출(SEO/트래픽/바이럴) 극대화 5대 엔진 구축 & Git 브랜치 동기화 & v504 무중단 승격
-
 ### 1. 개요 및 배경 (Overview & Scope)
 - **사용자 요청**:
   1. "그래 그럼 사이트 노출 늘릴 방법 찾아 그리고 브랜치 정리해줘"
@@ -174,23 +176,131 @@ The former root execution scratchpad mixed historical implementation notes with 
   6. **단위 테스트 & 프로덕션 빌드 & v504 무중단 블루-그린 승격**:
      - `indexnow.test.ts`, `feed.test.ts` 포함 100% ALL-PASS, 1,741개 PostgreSQL 세션 100% 무손실 보존.
 
-### 2. 세부 컴포넌트 설계 및 코드 명세
-#### ① pSEO 종목 확장 구조 (`config/pseo-stocks.config.ts`)
-- 60+종 인기 종목에 대해 `-water-calculator`, `-average-price`, `-recovery-plan`, `-dca-strategy`, `-target-exit` 등 5대 시나리오 슬러그 자동 생성.
-#### ② IndexNow RFC 규격 전송기 (`lib/indexnow.ts`)
-- POST `https://api.indexnow.org/indexnow`
-- Host: `easy-scraping.com`, Key: `moneyverse-indexnow-key-2026`, KeyLocation: `https://easy-scraping.com/moneyverse-indexnow-key-2026.txt`
-#### ③ RSS 2.0 XML 피드 (`app/feed.xml/route.ts`)
-- `Content-Type: application/xml; charset=utf-8`
-- `Cache-Control: public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400`
-#### ④ 디스코드 봇 연동 및 웹 출석 보너스 배너 (`components/discord-banner.tsx`)
-- 반응형 다크 핀테크 디자인 및 4개 국어 다국어(`TranslatedText as T`) 완비.
+---
+
+## 🚀 [v67 Specification] WDX 가상주식 시장 기획 고도화 & 3섹터 분산 진단기 & 거래일지 & 주간 금융 영수증 완결
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**: "기획서 보고 기능구현 마저해"
+- **조율 확정 사항 (Interactive Alignment)**:
+  1. 최우선 도메인: **WDX 주식 시장 고도화** (가상 기업 공시/뉴스 이벤트 엔진, 거래일지 Trade Diary, 3섹터 분산 투자 진단기)
+  2. 세부 확장: **실시간 가상 기업 공시 & 속보 피드** (주가 변동에 유기적으로 연결되는 가상 공시 팝업 및 속보 티커)
+  3. 시각화 스타일: **핀테크 영수증 & 카드 슬라이드 스타일** (토스/뱅크샐러드 수준의 깔끔한 모바일 최적화 영수증 및 공유 인포그래픽 카드)
+  4. 작업 모드: **AI 자율 완결 모드** (원스톱 구현, 단위 테스트, 프로덕션 빌드 및 v505 무중단 승격)
+
+### 2. 세부 구현 컴포넌트 및 아키텍처 명세
+#### ① WDX 실시간 가상 기업 공시 & 속보 피드 (`config/stock-disclosures.config.ts`, `components/stock-disclosure-ticker.tsx`)
+- 기획서 Section 5.6 기업 이벤트 명세 준수:
+  - 8대 WDX 종목(`WDX-TEC`, `WDX-FIN`, `WDX-RET`, `WDX-LOG`, `WDX-BIO` 등) 및 10대 가상 주식에 대한 공식 승인 공시 데이터셋 구축.
+  - 신제품 출시(+5~8%), AI 라이선스 계약(+4~6%), 자사주 소각(+2~4%), 임상 성공(+7~11%), 물류 지연(-2~5%) 등 실시간 공시 모달 다이얼로그 및 속보 카드 그리드 탑재.
+  - `frontend/src/app/stocks/page.tsx` 메인 화면 상단에 연동.
+
+#### ② 3섹터 분산 투자 & HHI 자산 집중도 진단기 (`lib/portfolio-diagnostics.ts`, `components/sector-diversification-card.tsx`)
+- 기획서 Section 5.7 시장 숙련도 규정 준수:
+  - 보유 종목을 7대 섹터(기술, 금융, 유통, 물류, 바이오, 엔터, 에너지)로 자동 분류 및 비중 집계.
+  - 허핀달-허쉬만 지수(HHI) 기반 자산 집중도 평가 (Grade A/B/C) 산출.
+  - 3개 섹터 이상 분산 시 "3섹터 분산 달성 (+150 XP)" 숙련도 배지 자동 획득 및 추천 리밸런싱 가이드 제공.
+  - `frontend/src/app/stocks/portfolio/page.tsx`에 연동.
+
+#### ③ 투자 거래일지 & 매매 복기 다이어리 (`lib/trade-diary.ts`, `components/trade-diary-drawer.tsx`)
+- 기획서 Section 5.7 뇌동매매 방지 및 시장 숙련도(+75 XP) 규정 준수:
+  - 체결 거래별 매매 근거(공시/호재, 기술적돌파, 물타기, 수익실현, 손절매, 섹터분산, 뇌동매매) 및 심리 상태(냉정, 자신감, 초조, 패닉) 태깅.
+  - 복기 메모(Review Notes) 작성, 수정, 삭제 및 로컬/원장 저장소 영구 연동.
+  - `frontend/src/app/stocks/page.tsx`에 연동.
+
+#### ④ 핀테크 주간 금융 결산 영수증 카드 (`components/weekly-financial-receipt.tsx`)
+- 토스/뱅크샐러드 수준의 모바일 최적화 영수증 UI:
+  - 주간 총 거래대금, 실현 손익 및 수익률, 최고 수익 효자 종목, 수수료 소각 기여액, 분산 건전성 스코어 집계.
+  - 원터치 클립보드 복사 및 인포그래픽 공유 지원.
+  - `frontend/src/app/stocks/portfolio/page.tsx` 하단에 연동.
 
 ### 3. 검증 계획 (Verification Plan)
-- **단위 테스트**: `indexnow.test.ts`, `feed.test.ts` 등 100% PASS.
-- **프로덕션 빌드**: Next.js Turbopack 124+개 전 라우트 컴파일 통과.
-- **원격 승격 (`v504`)**: 원격 파일 동기화, `stage_v504.sh` 및 `promote_v504.sh` 실행.
-- **라이브 검증**:
-  - `curl https://easy-scraping.com/feed.xml` -> RSS 2.0 XML 200 OK 확인.
-  - `curl -X POST https://easy-scraping.com/api/indexnow` -> IndexNow 배치 핑 정상 수신 확인.
-  - 1,741개 PostgreSQL 세션 무손실 상태 확인.
+- **단위 테스트**: `portfolio-diagnostics.test.ts`, `stock-disclosures.test.ts`, `trade-diary.test.ts` 100% PASS.
+- **프로덕션 빌드**: Next.js Turbopack 126개 전 라우트 컴파일 통과.
+- **원격 승격 (`v505`)**: 원격 호스트 동기화, 릴리스 전환 및 프론트엔드 서비스 재기동.
+
+---
+
+## 🚀 [v68 Specification] 기획서 기반 글로벌 SEO 완결 & 실시간 가상 공시 토스트 브로드캐스트 & 주간 금융 영수증 Canvas PNG 다운로드 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**: "기획서 보고 seo 등등 다 구현해줘 너가 추천한경로로 승인할게 알라서진행햐"
+- **핵심 목표**:
+  1. **전역 글로벌 SEO & 검색 발견성 완결 (`SEARCH_DISCOVERY_OPERATIONS_SPEC.ko.md`)**:
+     - `sitemap.ts`: WDX 8대 신규 상장 종목(`WDX-TEC`, `WDX-FIN`, `WDX-RET`, `WDX-LOG`, `WDX-BIO`, `WDX-ENT`, `WDX-ENG`, `WDX-DEF`) 및 기존 10대 가상 주식, 계산기 300+개 경로, 공시/가이드/세계관 경로의 canonical 및 4개국어(`ko`, `en`, `ja`, `zh`) `hreflang` 전수 매핑.
+     - `routes.config.ts`: 검색 허용 및 제외 라우트 SSOT 무결성 강화.
+     - `json-ld.ts`: `FinancialProduct`, `Corporation`, `ExchangeTradedFund`, `BreadcrumbList` 구조화 데이터 유틸 강화 및 주식 메인/포트폴리오 주입.
+  2. **실시간 가상 기업 공시 토스트 알림 브로드캐스트 엔진 (`components/stock-disclosure-toast-notifier.tsx`)**:
+     - 주식 메인 및 포트폴리오 화면 접속 시 및 주기적 간격으로 신규 승인 공시를 세련된 Sonner 토스트로 팝업.
+     - "공시 읽기" 액션 버튼을 누르면 해당 공시의 상세 모달을 즉시 열어주는 상호작용 제공.
+  3. **주간 금융 결산 영수증 카드 캔버스 이미지 다운로드 및 공유 기능 (`components/weekly-financial-receipt.tsx`)**:
+     - HTML5 Canvas API를 사용해 별도 무거운 외부 의존성 없이 영수증 카드를 고해상도 PNG 이미지로 즉시 렌더링/다운로드 지원.
+     - 영수증 텍스트 요약본 원터치 클립보드 복사 및 Web Share API 네이티브 공유 지원.
+  4. **단위 테스트 작성 및 무중단 배포 (`v506`)**:
+     - 신규 기능 단위 테스트 작성 및 100% ALL-PASS.
+     - Next.js Turbopack 126개 전 라우트 빌드 통과.
+     - 원격 프로덕션(`prod-v506`) 무중단 승격 배포 및 PostgreSQL 세션 무손실 검증.
+
+### 2. 세부 컴포넌트 구현 명세
+#### ① 전역 글로벌 SEO & 구조화 데이터 (`lib/json-ld.ts`, `app/sitemap.ts`)
+- WDX 8대 종목 및 10대 가상 주식의 `Corporation` 및 `FinancialProduct` JSON-LD 메타데이터 생성 유틸 완비.
+- `sitemap.ts`에 18개 전 종목 및 다국어 `alternates` 완벽 반영.
+
+#### ② 실시간 가상 기업 공시 토스트 알림 (`components/stock-disclosure-toast-notifier.tsx`)
+- 클라이언트 컴포넌트로 동작하며, 주식 화면 진입 시 최신 중요 공시(호재/악재 태그, 변동률)를 Sonner 토스트로 브로드캐스트.
+- 사용자가 "공시 확인"을 누르면 상세 팝업 오픈.
+
+#### ③ 주간 금융 영수증 캔버스 PNG 다운로드 엔진 (`components/weekly-financial-receipt.tsx`)
+- Canvas 2D 컨텍스트를 활용하여 토스/뱅크샐러드 감성의 고해상도 영수증 그래픽(종목명, 수익률, 소각액, 바코드 등)을 생성하여 `weekly-financial-receipt.png`로 원터치 다운로드.
+- 클립보드 텍스트 복사 및 모바일 공유 지원.
+
+### 3. 검증 계획 (Verification Plan)
+- **단위 테스트**: `sitemap.test.ts`, `stock-disclosures.test.ts`, `weekly-receipt-canvas.test.ts` 등 100% ALL-PASS.
+- **프로덕션 빌드**: Next.js Turbopack 126개 전 라우트 컴파일 통과.
+- **운영 릴리스 무중단 승격 (`v506`)**:
+  - 원격 호스트 동기화 및 심볼릭 링크 무중단 전환.
+  - 1,761개 PostgreSQL 활성 세션 100% 무손실 보존 검증.
+
+---
+
+## 🚀 [v69 Specification] 미니게임 Web Audio 무의존성 사운드 & CSS/SVG 잭팟 연출 & 중앙은행 스마트 복리 포켓 만기 시스템 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 질의 및 확정 사항 (Interactive Alignment)**:
+  1. 핵심 우선 도메인: **2번(미니게임 인터랙션 고도화) + 3번(중앙은행 정기 예적금 복리 만기 시스템)** 동시 진행
+  2. 미니게임/카지노 UX: **Web Audio API 무의존성 사운드 이펙트 + CSS/SVG 하드웨어 가속 60fps 잭팟 글로우/컨페티 연출**
+  3. 중앙은행 복리 정책: **스마트 복리 포켓 (7일 연 4.5% / 30일 연 7.2% / 90일 연 12.0%) 자동 만기 입금 및 실시간 일일 복리 이자 정산**
+  4. 검색엔진 색인: **백그라운드 크론 / 이벤트 기반 실시간 IndexNow 배치 핑 파이프라인 연동**
+  5. 진행 모드: **AI 원스톱 자율 구현 모드**
+
+### 2. 세부 컴포넌트 구현 명세
+#### ① Web Audio API 무의존성 오디오 합성 엔진 (`frontend/src/lib/audio-effects.ts`)
+- 외부 대용량 음원 파일 없이 브라우저 내장 `AudioContext`의 `OscillatorNode` 및 `GainNode`를 활용:
+  - `playBetChipSound()`: 칩 베팅 시 딸깍하는 메탈릭 클릭음 (1200Hz -> 800Hz decay)
+  - `playReelTickSound()`: 슬롯 릴 회전 시 기계식 래칫 틱 사운드
+  - `playCardFlipSound()`: 하이로우 카드 플립 시 스냅 사운드
+  - `playWinSound()`: 승리 시 밝은 3화음 아르페지오 (C5-E5-G5)
+  - `playJackpotSound()`: 대박 잭팟 시 팡파레 멜로디 및 비브라토 연출
+  - `playCoinCollectSound()`: 이자/보상 수령 시 경쾌한 코인 짤랑 사운드
+- 전역 음소거(Mute) 상태 토글 및 LocalStorage 영구 보존.
+
+#### ② 미니게임/카지노 CSS/SVG 잭팟 연출 (`frontend/src/components/casino-audio-controls.tsx`)
+- 모바일 60fps 보장 CSS 키프레임 글로우 및 승리 시 SVG 컨페티 파티클 분사.
+- 사운드 On/Off 토글 버튼 탑재.
+
+#### ③ 중앙은행 스마트 복리 포켓 & 정기 예적금 만기 이자 엔진 (`frontend/src/lib/savings-pot.ts`, `frontend/src/components/savings-pot-card.tsx`)
+- 7일(연 4.5%), 30일(연 7.2%), 90일(연 12.0%) 스마트 정기예금 플랜.
+- 일일 복리(Daily Compounding) 이자 실시간 계산 및 만기 도래 시 원리금 지갑 자동 입금 시뮬레이션.
+- 중앙은행 기준금리 지표 시각화 및 원클릭 일일 이자 수령 버튼.
+
+#### ④ IndexNow 자동 배치 핑 파이프라인 (`frontend/src/lib/indexnow.ts`)
+- 주요 이벤트(신규 공시, 신규 게시물) 발생 시 배치 URL 핑 전송 트리거 연동.
+
+### 3. 검증 계획 (Verification Plan)
+- **단위 테스트**: `audio-effects.test.ts`, `savings-pot.test.ts` 100% ALL-PASS.
+- **프로덕션 빌드**: Next.js Turbopack 126개 전 라우트 빌드 무결점 통과.
+- **운영 릴리스 무중단 승격 (`v507`)**:
+  - 원격 호스트 동기화 및 심볼릭 링크 무중단 전환.
+  - 1,761개 PostgreSQL 세션 100% 무손실 보존 검증.
+
+

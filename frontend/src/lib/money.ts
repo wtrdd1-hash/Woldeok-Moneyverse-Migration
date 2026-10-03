@@ -33,6 +33,11 @@ export function groupDigits(amount: unknown): string {
   return negative ? `−${grouped}` : grouped;
 }
 
+/** Formats an amount with grouped digits and WLD suffix. */
+export function formatWld(amount: unknown): string {
+  return `${groupDigits(amount)} WLD`;
+}
+
 /** Compares two canonical integer strings without converting either to a number. */
 export function compareAmounts(left: string, right: string): number {
   const leftNegative = left.startsWith('-');

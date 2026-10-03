@@ -24,6 +24,8 @@ import { LiveBadge, LiveHoldingValue, LiveQuote, LiveSparkline } from './live';
 import { MarketNews } from './market-news';
 import type { MarketEvent } from './market-news';
 import { MarketSentimentGauge } from './market-sentiment-gauge';
+import { StockDisclosureTicker } from '@/components/stock-disclosure-ticker';
+import { TradeDiaryDrawer } from '@/components/trade-diary-drawer';
 import { StockDetailDialog } from './stock-detail-dialog';
 import { normalizeStockSort, sortMarketStocks } from './stock-market-sort';
 import { TradeDialog } from './trade-dialog';
@@ -208,8 +210,14 @@ export default async function StocksPage({
       {/* AI 뉴스 및 다요소 가중 시장 감성 지수 & 펄스 게이지 위젯 */}
       <MarketSentimentGauge events={events} marketFactors={marketFactors} isEn={isEn} />
 
+      {/* WDX 실시간 가상 기업 공시 & 속보 피드 (Section 5.6) */}
+      <StockDisclosureTicker />
+
       {/* 시장 소식 & 월드 펄스 뉴스 목록 */}
       <MarketNews events={events} />
+
+      {/* 투자 거래일지 & 매매 복기 다이어리 (Section 5.7) */}
+      <TradeDiaryDrawer />
 
       <section aria-labelledby="market-title" className="grid gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
