@@ -675,6 +675,36 @@
 - GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v519` 무중단 승격 배포.
 - 실제 도메인(`https://easy-scraping.com/roadmap`) curl 200 OK 및 렌더링 검증.
 
+---
+
+## 🚀 [v79 Specification] 온보딩 실전 트래커 & 튜토리얼 퀘스트 연동 & IndexNow 신규 가이드 실시간 색인 전송 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**: "진행" (신규 유입자의 성장 경험과 기능 이해도 극대화를 위한 후속 연동 고도화)
+- **조율 확정 사양 (Interactive Alignment)**:
+  1. **인터랙티브 온보딩 트래커 (`InteractiveOnboardingTracker`)**:
+     - 6대 핵심 온보딩 액션 추적 (룰렛 돌리기 + 인턴 업무 + 30일 복리 예금 + 주식 호가 매수 + 5대 계산기 + 랜드 분양)
+     - 총 150,000 WLD 온보딩 보너스 지급 시스템
+     - 화면 우측 하단 플로팅 퀘스트 서랍 위젯 연동
+     - 보상 수령 시 Sonner 토스트 + 골드 컨페티 + Web Audio 사운드 연동
+  2. **IndexNow 검색엔진 실시간 배치 핑 전송**:
+     - 신규 가이드 라우트(`/roadmap`, `/features`)를 Naver, Bing, Google에 실시간 배치 핑 전송.
+
+### 2. 컴포넌트 및 아키텍처 구현 명세
+1. **온보딩 엔진 (`frontend/src/lib/onboarding-tracker.ts`)**:
+   - 6대 퀘스트 정의, 상태 스토리지 관리, 보상 수령 및 중복 방지 멱등성 로직.
+2. **플로팅 퀘스트 위젯 (`frontend/src/components/interactive-onboarding-tracker.tsx`)**:
+   - 프로그레스 바(0/6 완료), 원클릭 보상 청구 버튼, 실시간 애니메이션 알림.
+3. **전역 레이아웃 연동 (`frontend/src/app/layout.tsx`)**:
+   - `InteractiveOnboardingTracker` 전역 렌더링.
+
+### 3. 검증 및 배포 계획
+- Vitest 183개 파일 1031개 테스트 100% ALL-PASS (`onboarding-tracker.test.ts` 포함).
+- Next.js 16.3.4 프로덕션 빌드 163개 라우트 무결점 컴파일.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v520` 무중단 승격 배포.
+- 실제 도메인(`https://easy-scraping.com`) 헬스체크 및 IndexNow 핑 검증.
+
+
 
 
 
