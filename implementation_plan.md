@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v81)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v82)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v82**: 온보딩 퀘스트 플로팅 위젯 고대비 원형 닫기(X) 버튼, 바깥 클릭/ESC 키 감지, 오늘 하루 닫기(24시간) 옵션 및 총 보상 170,000 WLD 동적 연동 완비 (+75, -0)
 - **v81**: 상단 헤더·모바일 사이드 드로어·메인 홈 전역 가이드 노출 극대화(Quick Guide 핫 칩 + 모바일 추천 배너 + 홈 온보딩 2열 벤토) 및 사용자 리텐션 강화 (+155, -0)
 - **v80**: AI 맞춤형 투자 성향 진단기(`InvestorProfileQuiz`) & 1초 자산 배분 포트폴리오 설계 & 가이드 실시간 자연어 검색 & 온보딩 퀘스트 7종(+170,000 WLD) 연동 (+185, -0)
 - **v79**: 온보딩 실전 트래커 & 튜토리얼 퀘스트 연동 & IndexNow 신규 가이드 실시간 색인 전송 (+110, -0)
@@ -777,6 +778,38 @@
 - Vitest 184개 파일 1034개 테스트 100% ALL-PASS.
 - Next.js 16.3.4 프로덕션 빌드 163개 라우트 무결점 컴파일.
 - GitHub `origin/main` 푸시 및 원격 운영 서버 무중단 승격 배포.
+
+---
+
+## 🚀 [v82 Specification] 온보딩 퀘스트 플로팅 위젯 닫기(X) UI/UX 전면 개선 & ESC·바깥클릭·오늘 하루 닫기 완비 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 피드백 및 문제 식별**:
+  - "닫을수가없네?" 피드백 및 스크린샷 접수.
+  - 온보딩 퀘스트 & 보너스 위젯이 화면 우측 하단에 상시 모달로 펼쳐졌을 때, 기존에는 작은 ChevronDown 아이콘으로만 최소화가 가능하여 사용자가 닫는 방법을 인지하기 어려웠음.
+- **개선 목표 및 조율 사양**:
+  1. **고대비 원형 닫기 (X) 버튼 전면 배치 (`interactive-onboarding-tracker.tsx`)**:
+     - 카드 헤더 우측에 `X` 아이콘이 선명하게 들어간 `Button (rounded-full bg-zinc-800 hover:bg-zinc-700 border-zinc-600 text-zinc-200)`을 마운트하여 누구나 0.1초 만에 닫기 인지.
+  2. **다중 닫기 인터랙션 (Escape 키 & 바깥 영역 클릭 감지)**:
+     - `useRef` 및 `mousedown` 이벤트 리스너로 팝업 외부를 클릭하면 부드럽게 닫힘 지원.
+     - 키보드 `Escape` 키 누름 시 즉시 모달 닫힘 지원.
+  3. **오늘 하루 보지 않기 (24시간) & 최소화 접기 제어**:
+     - 푸터 하단에 `[오늘 하루 보지 않기]` 버튼 탑재 (로컬스토리지 `wdmv_onboarding_dismissed_until` 24시간 쿠키 보존).
+     - 당일 닫기 상태에서도 필요 시 언제든 다시 열람할 수 있는 미니멀 퀘스트 버튼 제공.
+  4. **총 보상 금액 동적 계산 일치**:
+     - 하드코딩된 "150,000 WLD"를 `ONBOARDING_STEPS.reduce(...)`로 동적 연산하여 "7대 핵심 기능을 완료하고 총 170,000 WLD 획득!"으로 완벽 동기화.
+
+### 2. 컴포넌트 및 테스트 구현 명세
+1. **온보딩 트래커 위젯 (`frontend/src/components/interactive-onboarding-tracker.tsx`)**:
+   - `useRef`, `Escape` 키 리스너, `handleClickOutside` 핸들러, `X` 닫기 버튼, 오늘 하루 닫기 로직 탑재.
+2. **단위 테스트 (`frontend/src/components/interactive-onboarding-tracker.test.tsx`)**:
+   - 닫기 버튼 클릭, ESC 키 동작, 오늘 하루 닫기 및 재열기 인터랙션 3종 테스트 작성 및 통과.
+
+### 3. 검증 및 배포 계획
+- Vitest 온보딩 트래커 및 전역 테스트 100% ALL-PASS.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v521` 무중단 승격 배포.
+- 실제 도메인(`https://easy-scraping.com`) 렌더링 및 닫기 인터랙션 검증.
+
 
 
 
