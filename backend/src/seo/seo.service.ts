@@ -351,17 +351,8 @@ export class SeoService {
       }),
     );
 
-    // Google Sitemap Ping
-    let googlePingStatus = 200;
-    try {
-      const pingUrl = `https://www.google.com/ping?sitemap=${encodeURIComponent(`${this.baseUrl}/sitemap.xml`)}`;
-      const gRes = await safeFetch(pingUrl, {
-        method: 'GET',
-      });
-      googlePingStatus = gRes.status;
-    } catch {
-      googlePingStatus = 200; // Fail-safe graceful ping
-    }
+    // Google Sitemap Ping: Deprecated by Google (2023). External HTTP ping omitted to prevent dead calls.
+    const googlePingStatus = 410; // 410 Gone (officially retired by Google)
 
     return {
       success: true,
@@ -401,7 +392,7 @@ export class SeoService {
       const dayOfWeek = d.getDay();
       const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
       const baseImp = isWeekend ? 1200 : 2100;
-      const noise = Math.floor(Math.sin(i * 0.7) * 200) + Math.floor(Math.random() * 150);
+      const noise = Math.floor(Math.sin(i * 0.7) * 200); // Deterministic pattern without Math.random() noise
       const impressions = Math.max(800, baseImp + noise + (30 - i) * 35);
       const ctr = 0.052 + (Math.sin(i * 0.4) * 0.012) + (30 - i) * 0.0008;
       const clicks = Math.max(30, Math.round(impressions * ctr));

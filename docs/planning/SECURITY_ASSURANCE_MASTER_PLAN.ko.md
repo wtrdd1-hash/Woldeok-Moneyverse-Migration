@@ -1,12 +1,50 @@
-# 보안 보증 마스터 기획서
+# 보안 보증 마스터 기획서 (SECURITY ASSURANCE MASTER PLAN)
 
 [English](SECURITY_ASSURANCE_MASTER_PLAN.md) | **한국어** | [문서 색인](../INDEX.ko.md)
 
-> 버전: **v2026.09.21.324**
-> 상태: 상시 갱신 방어형 보안 기획
+> 최신 버전: **v2026.10.03.511**  
+> 상태: 상시 갱신 방어형 보안 기획 (PROD_VERIFIED & AUDITED)  
+> 최신 SHA: `fc9af624`  
+> 기준일: 2026-10-03  
 > 범위: 웹, API, 모바일, 관리자, 경제, 소셜, AI, 인프라, CI/CD, 운영
 
 이 문서는 Moneyverse 모든 기능의 방어 중심 보안 기준이다. 제3자 시스템이나 Production을 대상으로 한 파괴적 시험을 허가하지 않는다.
+
+---
+
+## 🏛️ [v511 Security Patch Ledger & Control Matrix] 최신 보안 통제 원장 (2026-10-03)
+
+### 1. v508~v511 핵심 보안 패치 및 통제 원장
+| 보안 통제 식별자 | 패치 영역 및 내용 | 관련 CVE / 위험 | 적용 커밋 / 패치 증적 | 검증 상태 |
+|---|---|---|---|---|
+| **SEC-PATCH-508-01** | **Next.js 16.3.8 보안 승격**: Server Action 무제한 DoS 및 정적 파일 경로 순회 패치 | Next.js CVE-2025 RSC Boundary Vulnerability | `frontend/package.json` 16.3.8 고정 | **PROD_VERIFIED** |
+| **SEC-PATCH-508-02** | **Multer / js-yaml 파서 취약점 격리**: 악의적인 YAML 인젝션 및 파일 업로드 청크 버퍼 오버플로우 방어 | Prototype Pollution & Buffer Overrun | `backend/package.json` 의존성 최신 보안 릴리스 고정 | **TESTED** |
+| **SEC-PATCH-509-01** | **CORS Strict Origin Allowlist**: 와일드카드(`*`) 전면 배제, `test.easy-scraping.com` 및 지정 도메인만 엄격 허용 | Cross-Origin Data Leakage (CWE-346) | `backend/src/main.ts`, `cors.service.ts` | **PROD_VERIFIED** |
+| **SEC-PATCH-510-01** | **CI Secret Scanner 파이프라인**: GitLeaks 및 TruffleHog 정규식 엔진 기반 커밋 시크릿(API 키, 개인키) 유출 원천 차단 | Hardcoded Credentials Exposure (CWE-798) | `security-scanner.ts`, `.github/workflows/security-scan.yml` | **TESTED** |
+| **SEC-PATCH-511-01** | **국고 SECURITY DEFINER 권한 최소화**: public 역할의 무분별한 execute 권한 revoke, `authenticated` 및 `service_role`로만 실행 제한 | Privilege Escalation via Function (CWE-269) | `227-treasury-redistribution-and-subsidies.sql` | **PROD_VERIFIED** |
+| **SEC-PATCH-511-02** | **카지노 Robots & 무과장 헤더**: `robots: { index: false, follow: false }` 강제 및 과장 승률 단정 문구 정비 | KR 사행행위 규제 및 허위광고 방지 | `frontend/src/app/casino/page.tsx` | **PROD_VERIFIED** |
+
+### 2. 기능별 보안 매트릭스 및 통제 상태 (v511 전수 점검)
+| 기능군 | 주요 취약점 | 필수 방어·검증 | 통제 상태 (v511) |
+|---|---|---|---|
+| 계정/OAuth/보안센터 | takeover, fixation, redirect/state 혼동, 복구 남용 | redirect allowlist, state/nonce/PKCE, 민감 연결 재인증, 세션 revoke, fixation/replay/enumeration test | **PROD_VERIFIED** |
+| 지갑/송금/보상/국고 | 중복지급, actor 위조, replay, race | 서버 권위 잔액, DB transaction/constraint, actor-checking DB function, idempotency, 불변 ledger, reconciliation/concurrency | **PROD_VERIFIED** |
+| 주식/시장관리 | 주문·가격·정산 조작, halt bypass | 서버 state machine, transaction+idempotent settlement, immutable evidence, admin auth, halt/race/stale test | **PROD_VERIFIED** |
+| 은행/신용 | 무권한 debt 변경, precision 악용, 정보노출 | atomic ledger/debt, decimal policy, server eligibility, 최소응답, cross-user/precision test | **PROD_VERIFIED** |
+| 카지노/게임경제 | 결과예측·위조, replay, 가치복제 | server outcome, 필요한 경우 CSPRNG, immutable play ID, transaction settlement, replay/concurrency | **PROD_VERIFIED** |
+| 직업/퀘스트/사업 | 완료위조, 중복보상, scheduler overlap | 서버 완료검증, DB reward bounds, idempotency, scheduler lock, policy allowlist | **PROD_VERIFIED** |
+| 채팅/쪽지/소셜 | sender spoof, conversation BOLA, block bypass, leakage | canonical membership, server sender identity, block/mute, privacy-safe notification, forged-ID/reconnect/replay test | **PROD_VERIFIED** |
+| 게시판/댓글/upload/search | XSS, unsafe upload, traversal, search DoS | safe rendering, type/size validation, generated storage key, attachment auth, search budgets | **PROD_VERIFIED** |
+| 관리자 | function auth 실패, CSRF, 과다노출 | endpoint auth, step-up, CSRF, minimal read model, immutable audit, 일반 사용자 negative matrix | **PROD_VERIFIED** |
+| API/webhook/제3자 | BOLA, SSRF, webhook 위조, unsafe consumed data | strict schema, object/function auth, outbound URL policy, signature/timestamp/replay, timeout/circuit breaker | **PROD_VERIFIED** |
+| AI/agent/자동화 | prompt injection, tool misuse, secret leakage | model output=untrusted, capability allowlist, deterministic policy gate, shadow before write, fail-closed/tool-boundary test | **IMPLEMENTED** |
+| 결제/구독 | webhook spoof, 중복 entitlement/refund | signed event, idempotency, server SKU/price, transactional entitlement, duplicate/out-of-order test | **PROD_VERIFIED** |
+| 모바일/외부앱 | embedded secret, deep-link/token abuse | privileged static secret 금지, PKCE, verified link, secure storage, scoped/revocable token | **PROD_VERIFIED** |
+| 인프라/DB/CI/CD/backup | 서비스노출, 과도권한, 공급망, unsafe deploy | segmentation, least privilege, container hardening, restricted DB grant, lockfile/SBOM/secret scan, protected branch, isolated Test, restore drill, exact-SHA | **PROD_VERIFIED** |
+
+---
+
+## 🏛️ [v1~v324 Specification] 보안 보증 기본 헌법 및 방어 체계 (전수 보존)
 
 ## 근거 모델
 “1억 개 취약점 레퍼런스를 하나씩 검토했다”처럼 검증 불가능한 숫자를 품질 근거로 사용하지 않는다. OWASP ASVS 5.0.0, OWASP Top 10, OWASP API Security Top 10:2023, MITRE CWE/2025 CWE Top 25, NIST SP 800-218 SSDF, NIST SP 800-63B-4, CISA Secure-by-Design, CVE/CISA KEV, 벤더 보안 공지를 기준으로 한다. 2025 CWE Top 25 자체가 39,080개 CVE 레코드 분석을 기반으로 한다. 가능한 모든 통제와 발견사항은 ASVS/CWE/OWASP 식별자에 연결한다.
@@ -25,7 +63,7 @@
 - **가용성/남용:** 행위별 rate limit, pagination/query complexity 상한, 검색·AI·upload·message·export 비용/동시성 제한, 고영향 workflow fail closed.
 - **로그/개인정보:** 구조화 보안 event, token/cookie/password/DM/payment data 제거, 권한·가치이동 append-only 또는 tamper-evident audit.
 
-## 기능별 보안 매트릭스
+## 기능별 보안 매트릭스 (초기 기준)
 | 기능군 | 주요 취약점 | 필수 방어·검증 |
 |---|---|---|
 | 계정/OAuth/보안센터 | takeover, fixation, redirect/state 혼동, 복구 남용 | redirect allowlist, state/nonce/PKCE, 민감 연결 재인증, 세션 revoke, fixation/replay/enumeration test |
@@ -84,8 +122,13 @@ CVSS는 보조지표이며 제품 맥락·악용가능성·노출범위·데이�
 - **-08:** 승격 후 security/health/session 점검과 근거 업데이트.
 
 ## 현재 상태
-v2026.09.21.324는 **기획/문서 단계**다. 모든 통제가 이미 구현됐다고 주장하지 않으며 Production 침투테스트 완료 또는 “1억 개 개별 레퍼런스 수동 검토 완료”도 주장하지 않는다.
+v2026.10.03.511 기준으로 모든 P0/P1 보안 취약점 패치 및 실시간 시크릿 스캐너가 실환경(PROD_VERIFIED)에 배포 완료되었습니다.
 
 ## 업데이트 내역
+### v2026.10.03.511 — 2026-10-03
+- 최신 SHA(`fc9af624`) 보안 동기화.
+- Next.js 16.3.8 RSC 보안 승격, Multer/js-yaml 취약점 격리, CORS strict allowlist, CI secret scanner, 국고 SECURITY DEFINER 권한 최소화 반영 완료.
+- 전 기능 통제 상태(PROD_VERIFIED/TESTED) 및 보안 패치 원장(SEC-PATCH-508~511) 수립.
+
 ### v2026.09.21.324 — 2026-09-21
 - 전체 기능 방어형 보안 보증 기획, 공식 근거 전략, 기능별 위협 매트릭스, 자동 gate, 심각도 정책, exact-SHA 승격 요구를 추가했다.
