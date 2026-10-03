@@ -1,11 +1,23 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.03.510
+> Current ledger version: v2026.10.04.523
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.04.523 — 2026-10-04 — Central Bank / Mint / Treasury institutional separation
+- Start `origin/main=c10e1582ccc0c058dff5c5356ad8b1893759f72c`; mid-work recheck detected `origin/main=065ee42204a4238c5010897212c7fc2a6c848f64`, which added treasury English/architecture documentation. The isolated branch was rebased onto that latest main before authority edits, preserving concurrent work.
+- Re-read documentation governance, catalog, PROJECT_PLAN, integrated master, current treasury redistribution/fiscal specifications, AI Economy Controller, and monetary-velocity specification before integration.
+- Added `CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.md` / `.ko.md` and adopted it into PROJECT_PLAN as current economic institutional authority.
+- Separation contract: Central Bank owns monetary-policy approval; Mint is execution-only issuance/retirement; Central Treasury owns existing-WLD fiscal cash/tax/budget/expenditure; Economy Core/Settlement Ledger owns double-entry settlement, idempotency, reconciliation and supply invariants.
+- Supply invariant: ordinary transfers, taxes, treasury expenditures, fully-funded loans and bond flows do not change total WLD. Only canonical mint/retire operations can change `M_total`.
+- Existing treasury protected reserve is explicitly fiscal liquidity reserve, not authority to create money. Fiscal shortfall cannot auto-convert into currency issuance.
+- Initial bank lending remains fully funded from existing WLD; commercial-bank deposit-money creation is deliberately excluded until a separate approved monetary-layer design exists.
+- AI remains diagnostic/recommendation/bounded-auto for allowed low-risk keys only; direct mint/retire, monetary-order approval and fiscal-shortfall monetization are prohibited.
+- Primary/first-party reference set includes IMF treasury-central-bank/TSA guidance, ECB issuance/production, Federal Reserve/BEP and U.S. Mint separation, Bank of Korea, Bank of England money-creation material and EVE first-party economic reporting.
+- Planning/docs only. No runtime, DB, Test or Production implementation or promotion is claimed.
 
 ## v2026.10.03.510 — 2026-10-03 — Global-growth execution design and reference expansion
 - Start/mid-work `origin/main=ac4dd484a90b266d945993d7bd8be57a74e8e1df`; isolated docs branch `docs/global-growth-deep-plan-v2026.10.03.510`.

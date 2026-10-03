@@ -6,8 +6,10 @@
 
 ## 현재 권위
 
-- [구현 기준 프로젝트 기획](planning/PROJECT_PLAN.ko.md) / [English](planning/PROJECT_PLAN.md) — **v2026.09.30.487**
+- [구현 기준 프로젝트 기획](planning/PROJECT_PLAN.ko.md) / [English](planning/PROJECT_PLAN.md) — **v2026.10.04.523**
+- [중앙은행·조폐국·중앙국고·경제코어 통합 명세](planning/CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.ko.md) / [English](planning/CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.md) — **v2026.10.04.523**
 - [통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md) / [English](planning/INTEGRATED_PLANNING_MASTER.md)
+- [국고 세수 자동 사회 환원 및 재정 선순환 기획](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md) / [English](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md) — **v2026.10.04.522**
 - [광고 전용 수익화 명세](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md) / [English](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md) — **v2026.09.30.487**
 - [문서 거버넌스](DOCUMENTATION_POLICY.ko.md) / [English](DOCUMENTATION_POLICY.md)
 - [문서 카탈로그](DOCUMENT_CATALOG.ko.md) / [English](DOCUMENT_CATALOG.md)
@@ -16,7 +18,7 @@
 
 ## 현재 문서 상태
 
-저장소 `main`은 **v2026.09.29.486**까지 관측됐지만 구현 기준 제품 기획은 **v2026.09.30.487**이며 v487은 광고 전용 현금수익 상위 게이트를 통합했다. 따라서 현재는 명시적인 **AUTHORITY_DRIFT** 상태다. v444 이후 런타임/소스 작업의 제품 결정은 권위 기획서에 실제로 정합화되기 전까지 “통합 완료”로 간주하지 않는다.
+본 v523 기획 회차는 중간 국고 문서 변경을 감지한 뒤 `origin/main=065ee42204a4238c5010897212c7fc2a6c848f64`로 재기준화했다. 구현 기준 제품 기획은 중앙은행·조폐국·중앙국고 기관분리 결정에 대해 **v2026.10.04.523**으로 갱신된다. 이는 기획 권위 갱신이며, 명시적으로 정합화·증명되지 않은 런타임/소스 상태는 계속 문서 거버넌스의 authority-drift 규칙을 따른다.
 
 v402 전체 재검토 문서는 역사 근거로 보존하며 더 이상 현재 전체 검토 권위로 표시하지 않는다.
 

@@ -9,7 +9,9 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { ActivityTracker } from '@/components/activity-tracker';
 import { Toaster } from '@/components/ui/sonner';
 import { StaleTabNotice } from '@/components/stale-tab-notice';
+import { InteractiveOnboardingTracker } from '@/components/interactive-onboarding-tracker';
 import { ConsentGuard } from '@/components/consent-guard';
+
 import { currentViewer } from '@/lib/viewer';
 import { fetchLatestPolicy } from '@/lib/api';
 import { NOTICE_PREFERENCE_SCRIPT } from '@/lib/notice-preference';
@@ -326,7 +328,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <SiteShell>{children}</SiteShell>
               <Toaster />
               <StaleTabNotice />
+              <InteractiveOnboardingTracker />
             </ThemeProvider>
+
           </CurrencyProvider>
         </LocaleProvider>
       </body>

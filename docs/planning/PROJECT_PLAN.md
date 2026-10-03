@@ -2,11 +2,22 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.10.03.510
+> Current integrated version: v2026.10.04.523
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Central Bank / Mint / Treasury institutional separation — v2026.10.04.523 (2026-10-04)
+
+- **Authority decision:** Moneyverse economic authority is separated into Moneyverse Central Bank (monetary-policy approval), Moneyverse Mint Bureau (execution-only mint/retire), Central Treasury (tax/budget/expenditure of existing WLD), and Economy Core & Settlement Ledger (double-entry settlement/reconciliation/invariants).
+- **Supply invariant:** taxes, transfers, treasury budgets, treasury spending, deposits, withdrawals, funded loans, trades and vault movement do not change total WLD supply. Only a canonical authorized mint or retirement changes supply.
+- **Treasury reserve semantics:** existing protected treasury reserves are fiscal-liquidity reserves and do not authorize currency creation. A fiscal shortfall cannot silently become a mint.
+- **Debt/banking:** Treasury bonds redistribute existing WLD and initial bank lending stays fully funded from existing WLD pools; commercial-bank deposit-money creation is intentionally excluded until a separately approved monetary-layer design exists.
+- **AI boundary:** AI may diagnose/simulate/recommend within current bounded policy rules, but cannot create/approve monetary orders, execute Mint, or convert treasury shortage into issuance.
+- **Migration/release gate:** classify every WLD increase/burn path, split ambiguous injection semantics, preserve historical ledger records, prove independent supply and treasury reconciliation, and require exact-SHA isolated Test evidence before zero-downtime Production promotion.
+- **Detailed authority:** [Central Bank, Mint, Treasury & Economy Core Specification v523](CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.md).
+- **Evidence boundary:** v523 is planning/documentation only. It does not claim runtime, DB, Test or Production implementation.
 
 ## Global-growth execution architecture and deep evidence — v2026.10.03.510 (2026-10-03)
 

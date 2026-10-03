@@ -6,6 +6,7 @@
 > Korean counterpart: [ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md](ADMIN_TREASURY_MANAGEMENT_SPEC.ko.md)
 > Supersedes: v2026.09.20.306
 > Scope: planning/documentation only; no runtime, DB, API, or Production mutation in this revision.
+> v523 monetary boundary: this Treasury specification governs fiscal movement of existing WLD. Currency issuance/retirement authority is governed by `CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.md`.
 
 ## 1. Purpose
 

@@ -3,7 +3,7 @@
 > Version: v2026.09.25.441
 > Status: Living implementation-oriented planning specification
 > Date: 2026-09-20
-> Parent specs: `PROJECT_PLAN.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
+> Parent specs: `PROJECT_PLAN.md`, `CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.md`, `ECONOMY_SIMULATION_TUNING_SPEC.md`, `DEFAULT_LIMIT_POLICY.md`, `ECONOMY_SINKS_SPEC.md`, `ECONOMY_SINK_CATALOG.md`, `SEASON_SYSTEM_SPEC.md`
 > Korean counterpart: [AI_ECONOMY_CONTROLLER_SPEC.ko.md](AI_ECONOMY_CONTROLLER_SPEC.ko.md)
 
 ## 0. Purpose
@@ -21,6 +21,7 @@ AI may diagnose conditions, explain causes and generate candidate policy changes
 The controller SHALL NOT:
 
 - directly write, confiscate, grant or rewrite a player's WLD balance;
+- create, approve, execute, or bypass a Central Bank monetary order or Mint/retirement certificate; treasury shortfalls never authorize automatic issuance;
 - directly mutate player inventory, securities, items, loans or account-specific economic state;
 - delete, rewrite or retroactively alter append-only ledger history;
 - create a new currency, new economic mechanic, new sink family or paid economic advantage without human-approved product configuration; low-risk SKU variants may be generated only from explicitly approved templates and bounded policy metadata;

@@ -40,9 +40,12 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '덕지갑': 'Wallet',
   '커뮤니티': 'Community',
   '안내': 'Guide',
+  '가이드 & 사용법': 'Guides & Tutorials',
   '실전 성장 로드맵': 'Growth Roadmap',
+  '6대 핵심 기능 조작법': '6 Core Features Guide',
   '핵심 기능 안내': 'Visual Features Guide',
   '기능 안내': 'Features Guide',
+  'AI 투자 성향 진단': 'AI Investor Profile',
 
   '내 대시보드': 'Dashboard',
 
@@ -118,6 +121,12 @@ const JAPANESE_LABELS: Readonly<Record<string, string>> = {
   '덕지갑': 'ウォレット',
   '커뮤니티': 'コミュニティ',
   '안내': 'ガイド',
+  '가이드 & 사용법': 'ガイド＆使い方',
+  '실전 성장 로드맵': '実践ロードマップ',
+  '6대 핵심 기능 조작법': '6大機能操作ガイド',
+  '핵심 기능 안내': '機能案内',
+  '기능 안내': '機能案内',
+  'AI 투자 성향 진단': 'AI投資傾向診断',
   '내 대시보드': 'マイダッシュボード',
   '활동': 'アクティビティ',
   '소식': 'お知らせ',
@@ -189,6 +198,12 @@ const CHINESE_LABELS: Readonly<Record<string, string>> = {
   '덕지갑': '钱包',
   '커뮤니티': '社区',
   '안내': '指南',
+  '가이드 & 사용법': '指南与教程',
+  '실전 성장 로드맵': '实战成长路线图',
+  '6대 핵심 기능 조작법': '6大核心功能操作指南',
+  '핵심 기능 안내': '核心功能指南',
+  '기능 안내': '功能指南',
+  'AI 투자 성향 진단': 'AI投资偏好诊断',
   '내 대시보드': '我的仪表盘',
   '활동': '活动',
   '소식': '消息',
@@ -450,12 +465,13 @@ export const PRIMARY_NAV: readonly NavEntry[] = [
 /** Readable by anyone, indexed, and the only group a signed-out visitor sees. */
 export const PUBLIC_NAV: readonly NavEntry[] = [
   { href: '/', label: '홈' },
-  { href: '/features', label: '기능 안내' },
+  { href: '/roadmap', label: '실전 성장 로드맵' },
+  { href: '/features', label: '6대 핵심 기능 조작법' },
+  { href: '/guide', label: '이용 가이드' },
   { href: '/stocks', label: '거래소' },
   { href: '/newspaper', label: '주간 경제 브리프' },
   { href: '/wallet', label: '자산' },
   { href: '/board', label: '커뮤니티' },
-  { href: '/guide', label: '이용 방법' },
   { href: '/announcements', label: '운영 소식' },
   { href: '/gallery', label: '사진' },
   { href: '/status', label: '서비스 상태' },
@@ -469,6 +485,8 @@ export const PUBLIC_NAV: readonly NavEntry[] = [
 /** Needs a session and current consent. Every one of these is `noindex`. */
 export const MEMBER_NAV: readonly NavEntry[] = [
   { href: '/dashboard', label: '내 대시보드' },
+  { href: '/roadmap', label: '실전 성장 로드맵' },
+  { href: '/features', label: '6대 핵심 기능 조작법' },
   { href: '/newspaper', label: '주간 경제 브리프' },
   { href: '/wallet', label: '덕지갑' },
   { href: '/bank', label: '가상 금융 (은행)' },
@@ -516,6 +534,14 @@ export const ADMIN_NAV: readonly NavEntry[] = [
 
 export const HEADER_PUBLIC: readonly NavItem[] = [
   { href: '/', label: '홈' },
+  {
+    label: '가이드 & 사용법',
+    entries: [
+      { href: '/roadmap', label: '실전 성장 로드맵' },
+      { href: '/features', label: '6대 핵심 기능 조작법' },
+      { href: '/guide', label: '이용 가이드' },
+    ],
+  },
   {
     label: '금융·투자',
     entries: [
