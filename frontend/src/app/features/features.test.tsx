@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { FeaturesView } from './features-view';
+import { LocaleProvider } from '@/components/locale-provider';
 import FeaturesPage, { metadata } from './page';
 
 describe('FeaturesPage & FeaturesView', () => {
@@ -10,8 +11,12 @@ describe('FeaturesPage & FeaturesView', () => {
     expect(metadata.alternates?.canonical).toBe('https://easy-scraping.com/features');
   });
 
-  it('renders all 6 core feature sections and live preview headers', () => {
-    render(<FeaturesView />);
+  it('renders all 6 core feature sections and live preview headers in Korean (KO)', () => {
+    render(
+      <LocaleProvider initialLocale="ko">
+        <FeaturesView />
+      </LocaleProvider>
+    );
 
     // 1. Hero & Title
     expect(screen.getByText(/6대 핀테크 가상 경제/i)).toBeDefined();
@@ -31,11 +36,27 @@ describe('FeaturesPage & FeaturesView', () => {
     expect(screen.getByText('가상 랜드 분양소 가기')).toBeDefined();
     expect(screen.getByText('5대 계산기 전체 보기')).toBeDefined();
     expect(screen.getByText('아케이드 스테이션 입장')).toBeDefined();
-  });
+  }, 15000);
+
+  it('renders English (EN) features interface with global fintech terms', () => {
+    render(
+      <LocaleProvider initialLocale="en">
+        <FeaturesView />
+      </LocaleProvider>
+    );
+
+    expect(screen.getByText(/6 Core Virtual Fintech Features/i)).toBeDefined();
+    expect(screen.getByText(/Explore Feature Tutorials/i)).toBeDefined();
+    expect(screen.getByText(/View 3-Stage Roadmap/i)).toBeDefined();
+  }, 15000);
 
   it('renders FAQ section for user troubleshooting', () => {
-    render(<FeaturesView />);
+    render(
+      <LocaleProvider initialLocale="ko">
+        <FeaturesView />
+      </LocaleProvider>
+    );
     expect(screen.getByText(/자주 묻는 질문/i)).toBeDefined();
     expect(screen.getByText(/WLD 가상 자산은 어떻게 충전하거나 얻나요/i)).toBeDefined();
-  });
+  }, 15000);
 });

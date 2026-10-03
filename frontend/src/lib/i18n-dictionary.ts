@@ -1361,7 +1361,7 @@ export const I18N_DICTIONARY: TranslationDictionary = {
   },
   'home.tools.hub_title': {
     ko: '금융 웹 도구 허브',
-    en: 'Financial Tools Hub',
+    en: 'Financial Web Tools Hub',
     ja: '金融Webツールハブ',
     zh: '金融工具中心',
   },
