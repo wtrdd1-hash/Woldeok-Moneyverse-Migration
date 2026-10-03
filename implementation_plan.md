@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v68)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v69)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v69**: 미니게임 Web Audio API 무의존성 사운드 & CSS/SVG 하드웨어 가속 잭팟 연출 & 중앙은행 스마트 복리 포켓 정기 예적금 만기 이자 시스템 & IndexNow 백그라운드 크론 자동 배치 핑 구축 (+290, -0)
 - **v68**: 기획서 기반 글로벌 SEO 완결 & 실시간 가상 공시 토스트 알림 브로드캐스트 & 주간 금융 영수증 Canvas PNG 다운로드 및 공유 엔진 구축 — WDX 8대 신규 종목 및 공시/세계관 sitemap/robots/JSON-LD 구조화 데이터 전면 등록, 무의존성 Canvas 영수증 이미지 생성기, Sonner 실시간 공시 팝업 알림, 단위 테스트 100% ALL-PASS 및 v506 무중단 승격 (+250, -0)
 - **v67**: 기획서(PRODUCT_DESIGN_SPEC.ko.md Section 5) 기반 WDX 주식 시장 고도화 완결 — WDX 8대 종목 및 10대 가상 주식 실시간 기업 공시/속보 피드 엔진(`CorporateDisclosureTicker`) 구축, 3섹터 분산 투자 진단 및 HHI 자산 집중도 분석기(`SectorDiversificationCard`, `portfolio-diagnostics.ts`), 투자 거래일지 & 매매 복기 다이어리(`TradeDiaryDrawer`, `trade-diary.ts`), 토스/뱅크샐러드 스타일 핀테크 주간 금융 결산 영수증(`WeeklyFinancialReceipt`), 단위 테스트 100% ALL-PASS 및 v505 무중단 승격 (+280, -0)
 - **v66**: 사이트 노출(SEO/트래픽/바이럴) 극대화 5대 엔진 전면 구축 & Git 브랜치 동기화 — 프로그래매틱 SEO(pSEO) 국내외 60+개 핵심 종목 × 5개 물타기 시나리오(300+개 롱테일 페이지) 대량 확장, IndexNow 실시간 검색엔진(Bing/Naver/Yandex/Seznam) 색인 핑 전송 API/엔진 구축, RSS 2.0 / Atom XML 피드(/feed.xml) 엔드포인트 개설, 디스코드 봇 딥링크 & 웹 출석 10% 추가 보너스 유입 배너 연동, 단위 테스트 100% ALL-PASS 및 v504 무중단 승격 (+210, -0)
@@ -259,4 +260,47 @@
 - **운영 릴리스 무중단 승격 (`v506`)**:
   - 원격 호스트 동기화 및 심볼릭 링크 무중단 전환.
   - 1,761개 PostgreSQL 활성 세션 100% 무손실 보존 검증.
+
+---
+
+## 🚀 [v69 Specification] 미니게임 Web Audio 무의존성 사운드 & CSS/SVG 잭팟 연출 & 중앙은행 스마트 복리 포켓 만기 시스템 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 질의 및 확정 사항 (Interactive Alignment)**:
+  1. 핵심 우선 도메인: **2번(미니게임 인터랙션 고도화) + 3번(중앙은행 정기 예적금 복리 만기 시스템)** 동시 진행
+  2. 미니게임/카지노 UX: **Web Audio API 무의존성 사운드 이펙트 + CSS/SVG 하드웨어 가속 60fps 잭팟 글로우/컨페티 연출**
+  3. 중앙은행 복리 정책: **스마트 복리 포켓 (7일 연 4.5% / 30일 연 7.2% / 90일 연 12.0%) 자동 만기 입금 및 실시간 일일 복리 이자 정산**
+  4. 검색엔진 색인: **백그라운드 크론 / 이벤트 기반 실시간 IndexNow 배치 핑 파이프라인 연동**
+  5. 진행 모드: **AI 원스톱 자율 구현 모드**
+
+### 2. 세부 컴포넌트 구현 명세
+#### ① Web Audio API 무의존성 오디오 합성 엔진 (`frontend/src/lib/audio-effects.ts`)
+- 외부 대용량 음원 파일 없이 브라우저 내장 `AudioContext`의 `OscillatorNode` 및 `GainNode`를 활용:
+  - `playBetChipSound()`: 칩 베팅 시 딸깍하는 메탈릭 클릭음 (1200Hz -> 800Hz decay)
+  - `playReelTickSound()`: 슬롯 릴 회전 시 기계식 래칫 틱 사운드
+  - `playCardFlipSound()`: 하이로우 카드 플립 시 스냅 사운드
+  - `playWinSound()`: 승리 시 밝은 3화음 아르페지오 (C5-E5-G5)
+  - `playJackpotSound()`: 대박 잭팟 시 팡파레 멜로디 및 비브라토 연출
+  - `playCoinCollectSound()`: 이자/보상 수령 시 경쾌한 코인 짤랑 사운드
+- 전역 음소거(Mute) 상태 토글 및 LocalStorage 영구 보존.
+
+#### ② 미니게임/카지노 CSS/SVG 잭팟 연출 (`frontend/src/components/casino-audio-controls.tsx`)
+- 모바일 60fps 보장 CSS 키프레임 글로우 및 승리 시 SVG 컨페티 파티클 분사.
+- 사운드 On/Off 토글 버튼 탑재.
+
+#### ③ 중앙은행 스마트 복리 포켓 & 정기 예적금 만기 이자 엔진 (`frontend/src/lib/savings-pot.ts`, `frontend/src/components/savings-pot-card.tsx`)
+- 7일(연 4.5%), 30일(연 7.2%), 90일(연 12.0%) 스마트 정기예금 플랜.
+- 일일 복리(Daily Compounding) 이자 실시간 계산 및 만기 도래 시 원리금 지갑 자동 입금 시뮬레이션.
+- 중앙은행 기준금리 지표 시각화 및 원클릭 일일 이자 수령 버튼.
+
+#### ④ IndexNow 자동 배치 핑 파이프라인 (`frontend/src/lib/indexnow.ts`)
+- 주요 이벤트(신규 공시, 신규 게시물) 발생 시 배치 URL 핑 전송 트리거 연동.
+
+### 3. 검증 계획 (Verification Plan)
+- **단위 테스트**: `audio-effects.test.ts`, `savings-pot.test.ts` 100% ALL-PASS.
+- **프로덕션 빌드**: Next.js Turbopack 126개 전 라우트 빌드 무결점 통과.
+- **운영 릴리스 무중단 승격 (`v507`)**:
+  - 원격 호스트 동기화 및 심볼릭 링크 무중단 전환.
+  - 1,761개 PostgreSQL 세션 100% 무손실 보존 검증.
+
 
