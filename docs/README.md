@@ -16,7 +16,7 @@ Start here. Do not infer current product truth from the newest-looking filename,
 
 ## Current documentation state
 
-Repository `main` was observed at **v2026.09.29.486**, while the implementation-facing product plan is **v2026.09.30.487**, with the v487 advertising-only cash-revenue superseding gate integrated. This is an explicit **AUTHORITY_DRIFT** condition. Runtime/source work after v444 must be reconciled into the authoritative plan before documentation may claim that those product decisions are fully integrated.
+Repository `main` was rechecked at `6fc3adc20bf21c7a447c4693fa07625da014f336` on 2026-10-03. The implementation-facing planning authority is now v2026.10.03.512 on this planning change, adding the Search Console index-recovery prerequisite gate. Runtime/source state remains evidence-distinct from planning authority; no runtime implementation is implied until a later exact-SHA Test/Production cycle.
 
 The v402 full-review document remains historical evidence and is no longer presented as the current full-review authority.
 
