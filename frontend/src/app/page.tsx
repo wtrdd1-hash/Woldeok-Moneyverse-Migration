@@ -237,36 +237,103 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 2. ONBOARDING QUICK BANNER: 3분 머니버스 입문 가이드 & 인터랙티브 허브 */}
-      <section aria-labelledby="onboarding-guide-heading">
+      {/* 2. ONBOARDING & RETENTION HERO: 3단계 실전 로드맵 & 6대 기능 설명 센터 */}
+      <section aria-labelledby="onboarding-guide-heading" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Banner 1: 초·중·후반 3단계 실전 로드맵 */}
         <Link
-          href="/guide"
-          className="group relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/15 via-card to-background p-4 sm:p-5 shadow-sm transition-all hover:border-primary/60 hover:shadow-md active:scale-[0.99]"
+          href="/roadmap"
+          className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/40 via-card to-background p-5 shadow-sm transition-all hover:border-emerald-500/60 hover:shadow-lg hover:shadow-emerald-950/30 active:scale-[0.99]"
         >
-          <div className="flex items-center gap-3.5 min-w-0">
-            <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-xs group-hover:scale-105 transition-transform">
-              <Sparkles className="size-5" />
-            </div>
-            <div className="min-w-0 space-y-0.5">
-              <div className="flex items-center gap-2">
-                <span className="font-extrabold text-sm sm:text-base text-foreground group-hover:text-primary transition-colors">
-                  <T korean="3분 만에 마스터하는 머니버스 시작 가이드" english="3-Minute Moneyverse Interactive Guide" />
-                </span>
-                <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] font-bold">
-                  NEW
-                </Badge>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[11px] font-bold text-emerald-400">
+                <Sparkles className="size-3.5" />
+                <span><T korean="3단계 실전 로드맵" english="3-Stage Roadmap" /></span>
               </div>
-              <p className="text-xs text-muted-foreground truncate [word-break:keep-all]">
+              <Badge className="bg-emerald-500 text-black text-[10px] font-black">
+                HOT
+              </Badge>
+            </div>
+
+            <div>
+              <h2 className="text-base sm:text-lg font-extrabold text-foreground group-hover:text-emerald-400 transition-colors">
+                <T korean="초반 · 중반 · 후반 실전 플레이 가이드" english="Getting Started 3-Stage Master Guide" />
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                 <T
-                  korean="5단계 인터랙티브 로드맵 · 1분 자산 시뮬레이터 · 온보딩 퀘스트 & 뱃지 획득하기"
-                  english="5-Step Interactive Roadmap · Asset Simulator · Onboarding Quests & Badges"
+                  korean="1일차 시드 10만 WLD부터 7일차 복리·주식 1,000만, 30일차 건물주까지 60fps 비디오 시뮬레이터로 3분 만에 마스터하세요."
+                  english="From 100k WLD seed to 10M compound & stocks to mega-city real estate landlord in 3 minutes."
                 />
               </p>
             </div>
+
+            {/* 3단계 미니 칩 */}
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                🌱 1단계: 시드 10만
+              </span>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                📈 2단계: 복리/주식 1,000만
+              </span>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                👑 3단계: 건물주 1억
+              </span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-bold text-primary shrink-0 self-end sm:self-auto">
-            <span><T korean="가이드 열기" english="Explore Guide" /></span>
+          <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs font-bold text-emerald-400">
+            <span><T korean="60fps 영상 시뮬레이터로 보기" english="Watch 60fps Video Simulator" /></span>
+            <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
+        {/* Banner 2: 6대 핀테크 기능 조작법 & 30초 AI 투자성향 진단 */}
+        <Link
+          href="/features"
+          className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-card to-background p-5 shadow-sm transition-all hover:border-primary/60 hover:shadow-lg hover:shadow-primary/20 active:scale-[0.99]"
+        >
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold text-primary">
+                <Layers className="size-3.5" />
+                <span><T korean="실제 화면 6대 기능 설명서" english="Visual 6 Core Features" /></span>
+              </div>
+              <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] font-bold">
+                🎁 +170,000 WLD
+              </Badge>
+            </div>
+
+            <div>
+              <h2 className="text-base sm:text-lg font-extrabold text-foreground group-hover:text-primary transition-colors">
+                <T korean="6대 핀테크 기능 조작법 & AI 투자 진단" english="6 Core Features Guide & AI Profile Quiz" />
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                <T
+                  korean="주식 10-Depth 호가창, 복리 포켓, 직업 파밍, 메가시티 랜드의 실제 화면 스크린샷과 30초 맞춤형 포트폴리오 진단을 확인하세요."
+                  english="Explore live orderbooks, compound savings, career shifts, real estate with 30s personalized allocation."
+                />
+              </p>
+            </div>
+
+            {/* 6대 기능 미니 뱃지 */}
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-muted text-zinc-300">
+                📊 주식 거래소
+              </span>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-muted text-zinc-300">
+                🏦 복리 은행
+              </span>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-muted text-zinc-300">
+                🏢 메가시티 랜드
+              </span>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-muted text-zinc-300">
+                🎯 투자 성향 진단
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between text-xs font-bold text-primary">
+            <span><T korean="기능 조작법 및 AI 진단 열기" english="Explore Features & AI Quiz" /></span>
             <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
           </div>
         </Link>

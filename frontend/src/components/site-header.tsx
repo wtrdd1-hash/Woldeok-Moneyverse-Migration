@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, ChevronDown, Globe2, LogIn, LogOut, Menu, MessageSquare, ShieldCheck, Sliders, User, Wallet } from 'lucide-react';
+import { Bell, ChevronDown, Globe2, LogIn, LogOut, Menu, MessageSquare, ShieldCheck, Sliders, User, Wallet, Sparkles, ChevronRight } from 'lucide-react';
 import { logout } from '@/app/actions';
 import { Brand } from '@/components/brand';
 import { ThemeMenu, ThemePanel } from '@/components/theme-controls';
@@ -14,6 +14,7 @@ import { useLocale } from '@/components/locale-provider';
 import { useCurrency } from '@/components/currency-context';
 import { localeLabel, type Locale } from '@/lib/locale';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -100,6 +101,14 @@ export function SiteHeader() {
         </nav>
 
         <div className={cn('flex min-w-0 items-center gap-1 min-[400px]:gap-1.5 sm:gap-2 lg:gap-2 2xl:gap-3 shrink-0', 'ml-auto lg:ml-2.5 xl:ml-4')}>
+          <Link
+            href="/roadmap"
+            className="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold transition-all shadow-xs shrink-0"
+          >
+            <Sparkles className="size-3.5" />
+            <span>{localeLabel(locale, '실전 가이드', 'Quick Guide', '実践ガイド', '快速指南')}</span>
+            <Badge className="bg-emerald-500 text-black text-[9px] px-1 py-0 h-4 font-black">HOT</Badge>
+          </Link>
           <ServerClockPill className="hidden md:inline-flex lg:hidden 2xl:inline-flex" />
           <LanguageSwitcher compact className="flex shrink-0" />
           <div className="hidden sm:block">
@@ -128,6 +137,50 @@ export function SiteHeader() {
               <nav aria-label={localeLabel(locale, '주요 메뉴', 'Main menu', 'メインメニュー', '主菜单')} className="grid min-h-0 flex-1 gap-1 overflow-y-auto px-3 py-3">
                 {/* 1. 모바일 사이드 메뉴 최상단 4개 국어 원터치 세그먼트 탭 */}
                 <MobileLanguageSegment />
+
+                {/* 🌟 초보자 필수 가이드 & 튜토리얼 퀵 허브 */}
+                <div className="my-2 rounded-xl border border-emerald-500/30 bg-gradient-to-b from-emerald-950/40 via-card to-card p-3 shadow-sm space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 text-xs font-extrabold text-emerald-400">
+                      <Sparkles className="size-3.5" />
+                      {localeLabel(locale, '처음 시작하시나요?', 'New to Moneyverse?', '初めての方へ', '新手指南')}
+                    </span>
+                    <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[9px] px-1.5 py-0 font-bold">
+                      +170,000 WLD
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                    <Link
+                      href="/roadmap"
+                      className="flex flex-col rounded-lg border border-border/70 bg-muted/40 p-2 text-left hover:border-emerald-500/50 hover:bg-muted transition-colors"
+                    >
+                      <span className="text-[11px] font-bold text-foreground flex items-center gap-1">
+                        🎬 {localeLabel(locale, '실전 로드맵', 'Roadmap', 'ロードマップ', '成长路线')}
+                      </span>
+                      <span className="text-[9px] text-muted-foreground truncate">
+                        {localeLabel(locale, '초·중·후반 3단계', '3-Stage Guide', '3段階ガイド', '3阶段指南')}
+                      </span>
+                    </Link>
+                    <Link
+                      href="/features"
+                      className="flex flex-col rounded-lg border border-border/70 bg-muted/40 p-2 text-left hover:border-emerald-500/50 hover:bg-muted transition-colors"
+                    >
+                      <span className="text-[11px] font-bold text-foreground flex items-center gap-1">
+                        🖼️ {localeLabel(locale, '기능 사용법', 'Features', '機能操作', '功能指南')}
+                      </span>
+                      <span className="text-[9px] text-muted-foreground truncate">
+                        {localeLabel(locale, '실제 화면 조작법', 'Live UI Guide', '画面操作法', '实际操作法')}
+                      </span>
+                    </Link>
+                  </div>
+                  <Link
+                    href="/roadmap#quiz"
+                    className="flex items-center justify-between rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1.5 text-[10px] font-bold text-primary hover:bg-primary/20 transition-colors"
+                  >
+                    <span>🎯 {localeLabel(locale, '30초 내 투자 성향 진단받기', '30s Investor Profile Quiz', '30秒投資傾向診断', '30秒投资偏好诊断')}</span>
+                    <ChevronRight className="size-3" />
+                  </Link>
+                </div>
 
                 {viewer?.signedIn && (
                   <div className="flex items-center justify-around gap-2 px-3 py-2 my-1 rounded-xl bg-muted/40 border border-border/50 min-[360px]:hidden">
