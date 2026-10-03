@@ -130,6 +130,43 @@ export function softwareApplicationJsonLd(options: SoftwareAppOptions) {
   };
 }
 
+export interface StockJsonLdOptions {
+  readonly symbol: string;
+  readonly name: string;
+  readonly description: string;
+  readonly price?: number;
+  readonly currency?: string;
+  readonly sector?: string;
+}
+
+/**
+ * Schema.org FinancialProduct schema for virtual stock exchange listings
+ */
+export function stockJsonLd(options: StockJsonLdOptions) {
+  const url = canonicalUrl(`/stocks/${options.symbol}`);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FinancialProduct',
+    '@id': `${url}#stock`,
+    name: `${options.name} (${options.symbol})`,
+    identifier: options.symbol,
+    description: options.description,
+    category: options.sector || 'Virtual Stock',
+    url,
+    offers: {
+      '@type': 'Offer',
+      price: options.price?.toString() || '0',
+      priceCurrency: options.currency || 'WLD',
+      availability: 'https://schema.org/InStock',
+    },
+    provider: {
+      '@type': 'Organization',
+      '@id': `${APP_BASE_URL}/#organization`,
+      name: 'WDX 가상 증권거래소',
+    },
+  };
+}
+
 export interface ForumPostData {
   readonly postId: string;
   readonly title: string;

@@ -24,12 +24,21 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { TranslatedText as T } from '@/components/translated-text';
+import { StockDisclosureToastNotifier } from '@/components/stock-disclosure-toast-notifier';
 
 export function StockDisclosureTicker() {
   const [selectedDisclosure, setSelectedDisclosure] = useState<CorporateDisclosure | null>(null);
 
   return (
     <>
+      <StockDisclosureToastNotifier
+        onSelectDisclosure={(d) => {
+          const matched = CORPORATE_DISCLOSURES.find((item) => item.id === d.id);
+          if (matched) {
+            setSelectedDisclosure(matched);
+          }
+        }}
+      />
       <section aria-labelledby="stock-disclosure-heading" className="w-full">
         <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-card/90 p-4 sm:p-5 shadow-sm backdrop-blur-md">
           {/* Header */}

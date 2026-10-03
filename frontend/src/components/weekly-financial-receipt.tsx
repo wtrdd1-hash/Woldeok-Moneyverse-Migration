@@ -3,19 +3,15 @@
 import React, { useState } from 'react';
 import {
   Receipt,
-  TrendingUp,
-  Award,
   Sparkles,
-  Share2,
   CheckCircle2,
   Flame,
-  PieChart,
   ShieldCheck,
-  Calendar,
+  Download,
+  Copy,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { formatWld } from '@/lib/money';
 import { TranslatedText as T } from '@/components/translated-text';
 
 export interface WeeklyFinancialSummary {
@@ -38,6 +34,7 @@ export function WeeklyFinancialReceipt({
   readonly data?: WeeklyFinancialSummary;
 }) {
   const [isCopied, setIsCopied] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const summary: WeeklyFinancialSummary = data ?? {
     weekNumber: 40,
@@ -53,13 +50,165 @@ export function WeeklyFinancialReceipt({
     traderPersona: '철저한 분산 투자자 (Sage of Diversification)',
   };
 
-  const handleShare = () => {
+  const handleCopyText = () => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(
-        `[월덕 머니버스] 주간 금융 영수증 (W${summary.weekNumber})\n총 거래량: ${summary.totalTurnoverWld} WLD\n실현 손익: ${summary.realizedGainWld} WLD (${summary.returnRatePct})\n최고 효자 종목: ${summary.topStockSymbol} (${summary.topStockReturnPct})\n투자 페르소나: ${summary.traderPersona}\nhttps://easy-scraping.com/stocks/portfolio`,
+        `[월덕 머니버스] 주간 금융 영수증 (W${summary.weekNumber})\n기간: ${summary.periodLabel}\n총 거래량: ${summary.totalTurnoverWld} WLD\n실현 손익: ${summary.realizedGainWld} WLD (${summary.returnRatePct})\n최고 효자 종목: ${summary.topStockSymbol} (${summary.topStockReturnPct})\n체결 횟수: ${summary.tradeCount}회\n재화 소각: ${summary.feeBurnContributionWld} WLD\n투자 페르소나: ${summary.traderPersona}\nhttps://easy-scraping.com/stocks/portfolio`,
       );
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
+    }
+  };
+
+  const handleDownloadImage = () => {
+    setIsGenerating(true);
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 800;
+      canvas.height = 960;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // 1. Background
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, 960);
+      bgGrad.addColorStop(0, '#090d16');
+      bgGrad.addColorStop(0.5, '#0f172a');
+      bgGrad.addColorStop(1, '#05070d');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 800, 960);
+
+      // Card Border & Glow
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(30, 30, 740, 900);
+
+      // Header Tag
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = 'bold 20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(`제 ${summary.weekNumber}주차 주간 금융 영수증`, 400, 80);
+
+      // Main Brand Title
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 36px sans-serif';
+      ctx.fillText('WOLDEOK MONEYVERSE', 400, 130);
+
+      // Period
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '16px monospace';
+      ctx.fillText(summary.periodLabel, 400, 165);
+
+      // Persona Badge Box
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.15)';
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.4)';
+      ctx.beginPath();
+      ctx.roundRect(150, 190, 500, 44, 22);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillText(`✨ ${summary.traderPersona}`, 400, 218);
+
+      // Dashed Separator
+      ctx.strokeStyle = '#475569';
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      ctx.moveTo(60, 260);
+      ctx.lineTo(740, 260);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Highlight Box
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
+      ctx.beginPath();
+      ctx.roundRect(60, 280, 680, 200, 16);
+      ctx.fill();
+      ctx.strokeStyle = '#334155';
+      ctx.stroke();
+
+      // Net Profit
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '18px sans-serif';
+      ctx.fillText('주간 실현 손익 (Net Profit)', 90, 325);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#34d399';
+      ctx.font = '900 28px monospace';
+      ctx.fillText(`${summary.realizedGainWld} WLD (${summary.returnRatePct})`, 710, 325);
+
+      // Turnover
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '18px sans-serif';
+      ctx.fillText('주간 총 거래대금', 90, 380);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 22px monospace';
+      ctx.fillText(`${summary.totalTurnoverWld} WLD`, 710, 380);
+
+      // Top Stock
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '18px sans-serif';
+      ctx.fillText('최고 수익 효자 종목', 90, 435);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#34d399';
+      ctx.font = 'bold 22px monospace';
+      ctx.fillText(`${summary.topStockSymbol} (${summary.topStockReturnPct})`, 710, 435);
+
+      // Detailed Metrics Rows
+      const rows = [
+        { label: '체결 횟수 (Executed Trades)', val: `${summary.tradeCount}회`, color: '#f8fafc' },
+        { label: '재화 소각 기여액 (Burned Fees)', val: `🔥 ${summary.feeBurnContributionWld} WLD`, color: '#fbbf24' },
+        { label: '섹터 분산 건전성 점수', val: `🛡️ ${summary.diversificationScore}점 (A등급)`, color: '#34d399' },
+      ];
+
+      let startY = 525;
+      rows.forEach((r) => {
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '18px sans-serif';
+        ctx.fillText(r.label, 90, startY);
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = r.color;
+        ctx.font = 'bold 20px monospace';
+        ctx.fillText(r.val, 710, startY);
+
+        ctx.strokeStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.moveTo(90, startY + 15);
+        ctx.lineTo(710, startY + 15);
+        ctx.stroke();
+
+        startY += 60;
+      });
+
+      // Barcode Graphic
+      ctx.fillStyle = '#64748b';
+      ctx.textAlign = 'center';
+      ctx.font = '16px monospace';
+      ctx.fillText('||| | |||| | ||| ||||| |||| || ||| |||| | |||', 400, 750);
+
+      ctx.font = '14px sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('본 영수증은 가상 금융 원장(PostgreSQL)에 안전하게 기록된 공인 결산서입니다.', 400, 785);
+      ctx.font = '13px monospace';
+      ctx.fillStyle = '#64748b';
+      ctx.fillText('https://easy-scraping.com/stocks/portfolio', 400, 815);
+
+      // Download trigger
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `moneyverse-receipt-w${summary.weekNumber}.png`;
+      link.href = dataUrl;
+      link.click();
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -155,23 +304,35 @@ export function WeeklyFinancialReceipt({
           </p>
         </div>
 
-        {/* Share Action */}
-        <Button
-          onClick={handleShare}
-          className="w-full h-11 rounded-2xl font-bold text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-md transition-transform active:scale-[0.98] flex items-center justify-center gap-2"
-        >
-          {isCopied ? (
-            <>
-              <CheckCircle2 className="size-4 text-emerald-300" />
-              <span><T korean="영수증 클립보드 복사 완료!" english="Receipt Copied to Clipboard!" /></span>
-            </>
-          ) : (
-            <>
-              <Share2 className="size-4" />
-              <span><T korean="주간 금융 영수증 복사 및 공유하기" english="Share Weekly Receipt" /></span>
-            </>
-          )}
-        </Button>
+        {/* Dual Actions: Download PNG & Copy Text */}
+        <div className="grid grid-cols-2 gap-2 pt-1">
+          <Button
+            onClick={handleDownloadImage}
+            disabled={isGenerating}
+            variant="outline"
+            className="w-full h-11 rounded-2xl font-bold text-xs border-primary/40 hover:bg-primary/10 active:scale-[0.98] flex items-center justify-center gap-1.5"
+          >
+            <Download className="size-4 text-primary" />
+            <span><T korean="PNG 이미지 저장" english="Download PNG" /></span>
+          </Button>
+
+          <Button
+            onClick={handleCopyText}
+            className="w-full h-11 rounded-2xl font-bold text-xs bg-primary hover:bg-primary/90 text-primary-foreground shadow-md active:scale-[0.98] flex items-center justify-center gap-1.5"
+          >
+            {isCopied ? (
+              <>
+                <CheckCircle2 className="size-4 text-emerald-300" />
+                <span><T korean="복사 완료!" english="Copied!" /></span>
+              </>
+            ) : (
+              <>
+                <Copy className="size-4" />
+                <span><T korean="요약본 복사" english="Copy Text" /></span>
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </section>
   );
