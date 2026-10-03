@@ -32,6 +32,7 @@ import { WheelGame } from './wheel-game';
 import { CasinoJackpotTicker } from './casino-jackpot-ticker';
 import type { CasinoJackpotData } from './casino-jackpot-ticker';
 import { CasinoAudioControls } from '@/components/casino-audio-controls';
+import { PublicAdvertisement } from '@/components/public-advertisement';
 
 import { getServerLocale } from '@/lib/locale-server';
 
@@ -78,7 +79,7 @@ export async function generateMetadata(): Promise<Metadata> {
         'x-default': canonicalUrl('/casino'),
       },
     },
-    robots: { index: true, follow: true },
+    robots: { index: false, follow: false },
     openGraph: {
       title: meta.title,
       description: meta.description,
@@ -659,6 +660,9 @@ export default async function CasinoPage() {
               )}
             </TabsContent>
           </Tabs>
+
+          {/* 스폰서드 디스플레이 광고 */}
+          <PublicAdvertisement className="my-6" />
         </>
       )}
 
@@ -885,7 +889,7 @@ function FairnessNote({ fairness }: { readonly fairness: Loaded<CoinFairness> })
         </div>
       </div>
       <p className="text-[11px] text-muted-foreground leading-relaxed">
-        ※ 관측된 Z-Score가 허용 신뢰구간(±{trial.tolerance_sigma ?? '3.0'}σ) 내에 완벽하게 안착하여 시스템 개입 및 승률 조작이 0%임을 수학적으로 증명합니다.
+        ※ 관측된 Z-Score가 통계적 신뢰구간(±{trial.tolerance_sigma ?? '3.0'}σ) 내에 분포함을 모니터링하여 공정성 오차 범위를 상시 검증합니다.
       </p>
     </div>
   );

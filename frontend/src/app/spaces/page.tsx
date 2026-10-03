@@ -1,46 +1,58 @@
-import type { Metadata } from 'next';
-import { PageHeader } from '@/components/page-header';
-import { apiOrNull } from '@/lib/api';
-import { requireMember } from '@/lib/session';
-import { SpacesView } from './spaces-view';
-import { SpaceCanvasEditor } from './space-canvas-editor';
-import type { CityProject, UserSpace } from './spaces-view';
+import { Metadata } from 'next';
+import { Sparkles, Home, ShieldCheck } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { getServerLocale } from '@/lib/locale-server';
+import { lookupText } from '@/lib/i18n-dictionary';
+import { PersonalSpacesView } from '@/components/personal-spaces-view';
+import { PublicAdvertisement } from '@/components/public-advertisement';
 
-export const dynamic = 'force-dynamic';
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getServerLocale();
+  const title = lookupText('가상 부동산 & 개인 공간 (Personal Spaces)', locale);
+  const desc = lookupText(
+    '머니버스 8대 메가시티 가상 부동산 분양 및 7대 개인 룸 인테리어 쇼룸. 실시간 부동산 임대료 수익 정산과 공간 확장을 경험하세요.',
+    locale
+  );
 
-export const metadata: Metadata = {
-  title: '개인 공간 & 도시 프로젝트',
-  description: '나만의 프라이빗 공간을 소유하고, 공공 도시 인프라 크라우드펀딩에 참여하세요.',
-  robots: { index: false, follow: false },
-};
+  return {
+    title: `${title} | Woldeok Moneyverse`,
+    description: desc,
+    openGraph: {
+      title,
+      description: desc,
+      type: 'website',
+    },
+  };
+}
 
-export default async function SpacesPage() {
-  await requireMember();
-
-  const [spacesRes, cityRes] = await Promise.all([
-    apiOrNull<{ spaces: UserSpace[] }>('/api/v1/spaces'),
-    apiOrNull<{ projects: CityProject[] }>('/api/v1/spaces/city/projects'),
-  ]);
-
-  const spaces = spacesRes?.spaces ?? [];
-  const cityProjects = cityRes?.projects ?? [];
-
+export default async function PersonalSpacesPage() {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl space-y-6">
-      <PageHeader eyebrow="개인 공간 & 도시" title="개인 공간 & 공공 도시 프로젝트">
-        <p>
-          Pay-to-Win을 배제한 나만의 프라이빗 거점과 시민 협동으로 완성하는 머니버스 공공 도시 랜드마크입니다.
+    <div className="container max-w-5xl mx-auto px-4 py-8 space-y-6">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="border-amber-500/50 bg-amber-500/10 text-amber-500 text-xs font-bold flex items-center gap-1">
+            <Sparkles className="size-3.5" />
+            <span>가상 부동산 분양 & 개인 공간 시스템</span>
+          </Badge>
+          <Badge variant="outline" className="border-emerald-500/50 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-mono flex items-center gap-1">
+            <ShieldCheck className="size-3.5" />
+            <span>공인 소유권 등기 원장 연동</span>
+          </Badge>
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground flex items-center gap-2">
+          <Home className="size-7 text-amber-500" />
+          <span>개인 공간 & 메가시티 랜드 (Personal Spaces)</span>
+        </h1>
+        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed [word-break:keep-all]">
+          7대 개인 공간(스타터 룸부터 불멸의 레거시 홀까지)과 8대 도시 구역 랜드마크를 소유하세요.
+          공간 인테리어 확장 및 리모델링에 따라 매초 실시간 가상 부동산 임대료(Rent Yield)가 누적됩니다.
         </p>
-      </PageHeader>
+      </div>
 
-      {/* 8x8 인터랙티브 가구 배치 캔버스 에디터 */}
-      <SpaceCanvasEditor
-        spaceId={spaces[0]?.id}
-        spaceName={spaces[0]?.name ?? '스타터 룸'}
-        spaceType={spaces[0]?.space_type ?? 'SPACE_ROOM_STARTER'}
-      />
+      <PersonalSpacesView />
 
-      <SpacesView spaces={spaces} cityProjects={cityProjects} />
+      {/* 스폰서드 디스플레이 광고 */}
+      <PublicAdvertisement className="my-6" />
     </div>
   );
 }

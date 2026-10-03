@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/empty-state';
 import { cn } from '@/lib/cn';
+import { useLocale } from '@/components/locale-provider';
+import { localeLabel } from '@/lib/locale';
 import type { ChatConversation, ChatMessage } from './actions';
 import { ChatRoom } from './chat-room';
 
@@ -26,6 +28,7 @@ export function ChatView({
 }: ChatViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { locale } = useLocale();
   const [conversations] = useState<ChatConversation[]>([...initialConversations]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filter, setFilter] = useState<'active' | 'archived'>('active');
@@ -67,7 +70,13 @@ export function ChatView({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="대화 상대 또는 메시지 검색"
+              placeholder={localeLabel(
+                locale,
+                '대화 상대 또는 메시지 검색',
+                'Search contacts or messages…',
+                '相手やメッセージを検索…',
+                '搜索联系人或消息…',
+              )}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 h-9 text-sm"
@@ -80,7 +89,7 @@ export function ChatView({
               className="flex-1 text-xs h-7 font-bold"
               onClick={() => setFilter('active')}
             >
-              대화 목록
+              {localeLabel(locale, '대화 목록', 'Messages', 'メッセージ一覧', '消息列表')}
             </Button>
             <Button
               size="sm"
@@ -89,7 +98,7 @@ export function ChatView({
               onClick={() => setFilter('archived')}
             >
               <Archive className="size-3" />
-              보관함
+              {localeLabel(locale, '보관함', 'Archived', 'アーカイブ', '已归档')}
             </Button>
           </div>
         </div>
@@ -100,10 +109,18 @@ export function ChatView({
             <div className="p-6 text-center text-muted-foreground">
               <MessageSquare className="mx-auto size-8 opacity-40 mb-2" />
               <p className="text-sm font-semibold">
-                {filter === 'archived' ? '보관된 대화가 없어요.' : '주고받은 쪽지가 없어요.'}
+                {filter === 'archived'
+                  ? localeLabel(locale, '보관된 대화가 없어요.', 'No archived conversations.', 'アーカイブされたメッセージはありません。', '没有归档的对话。')
+                  : localeLabel(locale, '주고받은 쪽지가 없어요.', 'No messages yet.', 'メッセージ履歴はありません。', '暂无私信消息。')}
               </p>
               <p className="text-xs text-muted-foreground/80 mt-1">
-                회원 프로필에서 [쪽지 보내기]를 눌러 대화를 시작할 수 있습니다.
+                {localeLabel(
+                  locale,
+                  '회원 프로필에서 [쪽지 보내기]를 눌러 대화를 시작할 수 있습니다.',
+                  'Click [Send Message] on a user profile to start chatting.',
+                  '会員プロフィールから[メッセージ送信]を押して会話を開始できます。',
+                  '点击用户资料上的[发送私信]即可开始对话。',
+                )}
               </p>
             </div>
           ) : (
@@ -135,13 +152,13 @@ export function ChatView({
                         {item.muted && <BellOff className="size-3 text-muted-foreground shrink-0" />}
                         {item.is_peer_blocked && (
                           <Badge variant="outline" className="text-[9px] px-1 py-0 h-3.5 border-destructive/40 text-destructive shrink-0">
-                            차단
+                            {localeLabel(locale, '차단', 'Blocked', 'ブロック', '已屏蔽')}
                           </Badge>
                         )}
                       </div>
                       {item.last_message_at && (
                         <span className="text-[11px] text-muted-foreground shrink-0">
-                          {new Date(item.last_message_at).toLocaleDateString([], {
+                          {new Date(item.last_message_at).toLocaleDateString(locale === 'ko' ? 'ko-KR' : locale === 'ja' ? 'ja-JP' : locale === 'zh' ? 'zh-CN' : 'en-US', {
                             month: 'numeric',
                             day: 'numeric',
                           })}
@@ -149,7 +166,7 @@ export function ChatView({
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground truncate leading-relaxed">
-                      {item.last_message_body || '대화가 시작되었습니다.'}
+                      {item.last_message_body || localeLabel(locale, '대화가 시작되었습니다.', 'Conversation started.', '会話が開始されました。', '对话已开始。')}
                     </p>
                   </div>
 
@@ -186,8 +203,14 @@ export function ChatView({
         ) : (
           <div className="flex-1 flex items-center justify-center p-6">
             <EmptyState
-              title="대화방을 선택해 주세요"
-              description="좌측 목록에서 대화방을 선택하거나, 회원 프로필에서 [쪽지 보내기]를 눌러 1:1 쪽지를 시작해 보세요."
+              title={localeLabel(locale, '대화방을 선택해 주세요', 'Select a conversation', 'メッセージを選択してください', '请选择对话房间')}
+              description={localeLabel(
+                locale,
+                '좌측 목록에서 대화방을 선택하거나, 회원 프로필에서 [쪽지 보내기]를 눌러 1:1 쪽지를 시작해 보세요.',
+                'Choose a conversation from the list or click [Send Message] on a member profile.',
+                '左側のリストから会話を選択するか、会員プロフィールから[メッセージ送信]を押してください。',
+                '从左侧列表中选择对话，或在会员主页点击[发送私信]开始1对1私信。',
+              )}
             />
           </div>
         )}

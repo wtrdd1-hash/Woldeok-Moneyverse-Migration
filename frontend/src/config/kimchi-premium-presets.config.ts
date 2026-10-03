@@ -1,0 +1,161 @@
+export interface KimchiPremiumPreset {
+  slug: string;
+  symbol: string;
+  name: string;
+  nameEn: string;
+  koreanExchange: string; // 업비트 / 빗썸
+  globalExchange: string; // 바이낸스 / 바이비트
+  domesticPriceKrw: number; // 국내 가격 (KRW)
+  foreignPriceUsd: number; // 해외 가격 (USD)
+  usdKrwExchangeRate: number; // 기준 환율
+  transferFeeCoin: number; // 출금 수수료 (코인 단위)
+  description: string;
+  seoKeywords: string[];
+}
+
+export const KIMCHI_PREMIUM_PRESETS: KimchiPremiumPreset[] = [
+  {
+    slug: 'btc',
+    symbol: 'BTC',
+    name: '비트코인',
+    nameEn: 'Bitcoin',
+    koreanExchange: '업비트 (Upbit)',
+    globalExchange: '바이낸스 (Binance)',
+    domesticPriceKrw: 95400000,
+    foreignPriceUsd: 66200,
+    usdKrwExchangeRate: 1385,
+    transferFeeCoin: 0.0005,
+    description: '국내 대장주 비트코인의 실시간 김치프리미엄(김프) 및 해외 거래소 차익 계산',
+    seoKeywords: ['비트코인 김프 계산기', 'BTC 김치프리미엄', '업비트 바이낸스 비트코인 가격차이', '비트코인 환율 차익'],
+  },
+  {
+    slug: 'eth',
+    symbol: 'ETH',
+    name: '이더리움',
+    nameEn: 'Ethereum',
+    koreanExchange: '업비트 (Upbit)',
+    globalExchange: '바이낸스 (Binance)',
+    domesticPriceKrw: 3620000,
+    foreignPriceUsd: 2510,
+    usdKrwExchangeRate: 1385,
+    transferFeeCoin: 0.003,
+    description: '스마트 컨트랙트 대장 이더리움의 김치프리미엄 및 가스비 차감 후 순차익',
+    seoKeywords: ['이더리움 김프 계산기', 'ETH 김치프리미엄', '업비트 바이낸스 이더리움 차이', '코인 차익거래'],
+  },
+  {
+    slug: 'xrp',
+    symbol: 'XRP',
+    name: '리플',
+    nameEn: 'Ripple',
+    koreanExchange: '업비트 (Upbit)',
+    globalExchange: '바이낸스 (Binance)',
+    domesticPriceKrw: 835,
+    foreignPriceUsd: 0.578,
+    usdKrwExchangeRate: 1385,
+    transferFeeCoin: 0.2,
+    description: '해외 송금 대표 코인 리플의 초저수수료 김치프리미엄 차익 전송 시뮬레이션',
+    seoKeywords: ['리플 김프 계산기', 'XRP 김치프리미엄', '리플 해외송금 차익', '업비트 리플 김프'],
+  },
+  {
+    slug: 'sol',
+    symbol: 'SOL',
+    name: '솔라나',
+    nameEn: 'Solana',
+    koreanExchange: '업비트 (Upbit)',
+    globalExchange: '바이낸스 (Binance)',
+    domesticPriceKrw: 218000,
+    foreignPriceUsd: 151.2,
+    usdKrwExchangeRate: 1385,
+    transferFeeCoin: 0.01,
+    description: '초고속 레이어1 솔라나의 국내외 거래소 간 시세 차이 및 보따리 계산',
+    seoKeywords: ['솔라나 김프 계산기', 'SOL 김치프리미엄', '솔라나 업비트 바이낸스', '코인 역프 계산기'],
+  },
+  {
+    slug: 'doge',
+    symbol: 'DOGE',
+    name: '도지코인',
+    nameEn: 'Dogecoin',
+    koreanExchange: '업비트 (Upbit)',
+    globalExchange: '바이낸스 (Binance)',
+    domesticPriceKrw: 182,
+    foreignPriceUsd: 0.126,
+    usdKrwExchangeRate: 1385,
+    transferFeeCoin: 5,
+    description: '일론 머스크 밈코인 대표 도지코인의 국내 과열도 및 김치프리미엄 진단',
+    seoKeywords: ['도지코인 김프 계산기', 'DOGE 김치프리미엄', '도지코인 시세 차이', '밈코인 김프'],
+  },
+  {
+    slug: 'ada',
+    symbol: 'ADA',
+    name: '에이다',
+    nameEn: 'Cardano',
+    koreanExchange: '업비트 (Upbit)',
+    globalExchange: '바이낸스 (Binance)',
+    domesticPriceKrw: 525,
+    foreignPriceUsd: 0.364,
+    usdKrwExchangeRate: 1385,
+    transferFeeCoin: 1,
+    description: '카르다노 에이다의 국내외 가격 격차 및 김프 차익거래 시뮬레이터',
+    seoKeywords: ['에이다 김프 계산기', 'ADA 김치프리미엄', '카르다노 국내외 시세', '코인 재정거래'],
+  },
+  {
+    slug: 'avax',
+    symbol: 'AVAX',
+    name: '아발란체',
+    nameEn: 'Avalanche',
+    koreanExchange: '업비트 (Upbit)',
+    globalExchange: '바이낸스 (Binance)',
+    domesticPriceKrw: 42500,
+    foreignPriceUsd: 29.4,
+    usdKrwExchangeRate: 1385,
+    transferFeeCoin: 0.1,
+    description: '서브넷 생태계 아발란체의 김치프리미엄 분석 및 전송 마진 계산기',
+    seoKeywords: ['아발란체 김프 계산기', 'AVAX 김치프리미엄', '아발란체 차익거래', '코인 프리미엄'],
+  },
+  {
+    slug: 'sui',
+    symbol: 'SUI',
+    name: '수이',
+    nameEn: 'Sui',
+    koreanExchange: '업비트 (Upbit)',
+    globalExchange: '바이낸스 (Binance)',
+    domesticPriceKrw: 2680,
+    foreignPriceUsd: 1.86,
+    usdKrwExchangeRate: 1385,
+    transferFeeCoin: 0.05,
+    description: '신흥 레이어1 수이의 국내외 거래소 가격 갭 및 매매 차익 시뮬레이션',
+    seoKeywords: ['수이 코인 김프', 'SUI 김치프리미엄', '수이 업비트 바이낸스 차이', '수이 차익'],
+  },
+  {
+    slug: 'shib',
+    symbol: 'SHIB',
+    name: '시바이누',
+    nameEn: 'Shiba Inu',
+    koreanExchange: '업비트 (Upbit)',
+    globalExchange: '바이낸스 (Binance)',
+    domesticPriceKrw: 0.0264,
+    foreignPriceUsd: 0.0000183,
+    usdKrwExchangeRate: 1385,
+    transferFeeCoin: 500000,
+    description: '시바이누 밈코인의 국내 매수세 과열 여부와 실시간 프리미엄 산출',
+    seoKeywords: ['시바이누 김프 계산기', 'SHIB 김치프리미엄', '시바이누 가격 차이', '코인 차익'],
+  },
+  {
+    slug: 'pepe',
+    symbol: 'PEPE',
+    name: '페페',
+    nameEn: 'Pepe',
+    koreanExchange: '업비트 (Upbit)',
+    globalExchange: '바이낸스 (Binance)',
+    domesticPriceKrw: 0.0142,
+    foreignPriceUsd: 0.0000098,
+    usdKrwExchangeRate: 1385,
+    transferFeeCoin: 1000000,
+    description: '글로벌 탑 밈코인 페페의 국내 상장 가격 프리미엄 및 차익 분석',
+    seoKeywords: ['페페 코인 김프', 'PEPE 김치프리미엄', '페페 코인 시세 차이', '밈코인 보따리'],
+  },
+];
+
+export function getKimchiPremiumPreset(slug: string): KimchiPremiumPreset | undefined {
+  return KIMCHI_PREMIUM_PRESETS.find((p) => p.slug === slug);
+}

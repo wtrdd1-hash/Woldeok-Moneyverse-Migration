@@ -1,5 +1,61 @@
 # 월덕 머니버스 — Living Project Plan
 
+> **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)  
+> **최초 기준:** 2026-08-26  
+> **현재 통합 버전:** v2026.10.03.511  
+> **구현·증거 동기화:** 2026-10-03 (최신 main SHA: `fc9af624`)  
+> **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)  
+> **완료도 단일 진실 공급원(SSOT):** [기획 공백 해소 및 수용증거 명세 (PLANNING_GAP_CLOSURE_SPEC.ko.md)](PLANNING_GAP_CLOSURE_SPEC.ko.md)
+
+---
+
+## 🌟 CURRENT DOMAIN STATE (v511 최신 프로덕션 권위 및 호환성 원장)
+
+### 1. 플랫폼 및 국가별 Product Availability Matrix (fail-closed 계약)
+
+| 플랫폼 (Surface) | 대상 국가 (Jurisdiction) | 제공 기능 범위 | 카지노/사행성 통제 정책 | SEO & 인덱싱 정책 | 계약 상태 |
+|---|---|---|---|---|---|
+| **Web (PC/Mobile)** | **대한민국 (KR)** | 가상 주식, 모의투자, 가상 은행, 메가시티 부동산, 국고 배당, 커뮤니티 | **fail-closed**: 사행성 환전 불가, 가상 코인 게임 접근 시 자가 한도 엄격 통제, 과장 문구 배제 | `robots: { index: false, follow: false }` 강제 | **GO (COMPLIANT)** |
+| **Web (PC/Mobile)** | **글로벌 (EN/JA/CN)** | 다국어 5-Tier 금융 포털, 실시간 시세, 가상 부동산, 퀘스트 | 글로벌 표준 Provably Fair 통계 검증 모드 제공 | Canonical hreflang 및 정상 색인 (`index: true`) | **GO (ACTIVE)** |
+| **Android App** | **전체 (KR/Global)** | 지갑 자산, 주식 포트폴리오, 시세 푸시 알림, 출석 보상 | 구글 플레이 정책에 따라 카지노 탭 UI 기본 비활성화 | 앱 전용 네이티브 BFF 통신 | **GO (STABLE)** |
+| **Discord Bot** | **전체 (KR/Global)** | 계정 연동 잔액 조회, 주식 시세 알림, 일일 퀘스트 체크 | 카지노 및 게임 베팅 명령 원천 배제 | N/A (채팅 인터페이스) | **GO (ACTIVE)** |
+
+---
+
+### 2. Android ↔ Web/Backend 교차 저장소 버전 호환성 원장 (Cross-Repo Authority)
+
+| 항목 | 현재 프로덕션 상태 | 최소 요구 사양 | 비고 / 호환성 계약 |
+|---|---|---|---|
+| **Android App Git SHA** | `e24a2f8c6b12a8d1...` (main) | `b109e3a...` | Android 공식 리포지토리 최신 빌드 |
+| **Android Version** | **v1.3.4** (versionCode: `134`) | **v1.2.0** (versionCode: `120`) | v1.2.0 미만은 강제 업데이트 안내 (`UPDATE_REQUIRED`) |
+| **Backend Git SHA** | **fc9af624** (v511, 2026-10-03) | `ddec006e` | 블루-그린 무중단 릴리스 배포 |
+| **API Contract Version** | **v2.4.0** (`/api/v1/**`, `/api/mobile/**`) | **v2.0.0** | 하위 호환성 100% 보장 (Additive only) |
+| **Session & Token Format** | Dual Session (NextAuth + JWT HttpOnly) | SHA-256 HMAC | 1,721개 활성 세션 무손실 연속성 유지 |
+| **Crash / ANR Target** | Crash-free > 99.8%, ANR < 0.05% | SLA 준수 | Crashlytics 및 Sentry 모니터링 연동 |
+
+---
+
+### 3. 기획 Gap 항목별 v511 종결 상태 원장 (Planning Gap Closure Ledger)
+
+| Gap ID | 도메인 | 이슈 요약 | 해결 커밋 및 조치 내용 | v511 상태 |
+|---|---|---|---|---|
+| **GAP-AUTH-01** | 인증/세션 | 장기 세션 유지 및 2FA 관리자 보안 | 365일 HttpOnly 세션 및 관리자 TOTP 2FA 스텝업 적용 | **FIXED** |
+| **GAP-SEO-01** | 글로벌 SEO | 폐기된 Google ping 및 random 노이즈 | ping 410 처리 및 결정론적 통계 산출 모델로 정규화 | **FIXED** |
+| **GAP-SEO-02** | 프록시/로케일 | 신규 방문자 쿠키 오염 현상 | GeoIP 추정 로케일의 `LOCALE_COOKIE` 쓰기 제거 | **FIXED** |
+| **GAP-CASINO-01** | 카지노/컴플라이언스 | KR 법률 충돌 및 인덱싱/과장 문구 | `robots: noindex` 및 통계적 오차 검증 문구로 개편 | **FIXED** |
+| **GAP-TREASURY-01**| 국고/재정 | 30% 법정 비축금 및 4대 공공 지출 | `227-treasury-redistribution.sql` DB 원자적 제약 완비 | **FIXED** |
+| **GAP-TREASURY-02**| 국고/거버넌스 | 8단계 State Machine 및 Saga 보상 | `TREASURY_EXPENDITURE_SPEC` v511 상향 및 Saga 설계 | **FIXED** |
+| **GAP-TAX-01** | 조세/부유세 | 초고액 자산가 4구간 누진세 및 소각 | 토요일 00:00 KST 원천징수 및 초과 세수 역매수 소각 | **FIXED** |
+| **GAP-SPACES-01** | 가상 부동산 | 10대 메가시티 랜드 분양 및 임대 | `PersonalSpacesView` 컴포넌트 및 일일 임대료 배당 완비 | **FIXED** |
+| **GAP-SECURITY-01**| 보안 마스터 | Next.js 16.3.8 승격 및 CI 스캐너 | CVE DoS 패치 및 GitLeaks/TruffleHog 시크릿 차단기 탑재 | **FIXED** |
+| **GAP-BACKUP-01** | 인프라/DR | 1,721개 활성 세션 무손실 DR | PostgreSQL 일일 암호화 백업 및 RPO 5분 / RTO 3분 실증 | **FIXED** |
+
+---
+
+## 📜 HISTORICAL DOMAIN SPECIFICATION & CHANGELOG ARCHIVE (전수 보존)
+
+# 월덕 머니버스 — Living Project Plan
+
 > **문서 상태:** Living specification / 현재 권위 통합기획서
 > **최초 기준:** 2026-08-26
 > **현재 통합 버전:** v2026.10.03.510

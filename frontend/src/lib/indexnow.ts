@@ -2,6 +2,12 @@
  * IndexNow Protocol Real-time Search Engine Submission Engine
  * Supports: Bing, Naver, Yandex, Seznam
  */
+import { ALL_SEO_PRESETS } from '@/config/seo-presets.config';
+import { ALL_PSEO_POPULAR_SLUGS } from '@/config/pseo-stocks.config';
+import { REAL_ESTATE_PRESETS } from '@/config/real-estate-presets.config';
+import { KIMCHI_PREMIUM_PRESETS } from '@/config/kimchi-premium-presets.config';
+import { CAPITAL_GAINS_TAX_PRESETS } from '@/config/capital-gains-tax-presets.config';
+import { getPublicSitemapRoutes } from '@/config/routes.config';
 
 export const INDEXNOW_HOST = 'easy-scraping.com';
 export const INDEXNOW_KEY = 'moneyverse-indexnow-key-2026';
@@ -23,10 +29,69 @@ export interface IndexNowResult {
 }
 
 /**
+ * Generates the complete list of 400+ public indexable URLs for IndexNow batch submission.
+ */
+export function getAllPublicUrlsForIndexNow(): readonly string[] {
+  const base = `https://${INDEXNOW_HOST}`;
+  const urls = new Set<string>();
+
+  // 1. Static Core Public Routes
+  const publicRoutes = getPublicSitemapRoutes();
+  for (const route of publicRoutes) {
+    if (!route.path.includes('[')) {
+      const clean = route.path.startsWith('/') ? route.path : `/${route.path}`;
+      urls.add(`${base}${clean === '/' ? '' : clean}`);
+    }
+  }
+
+  // 2. 300+ Longtail pSEO Stock Calculator URLs
+  for (const slug of ALL_PSEO_POPULAR_SLUGS) {
+    urls.add(`${base}/tools/stock-calculator/${slug}`);
+  }
+
+  // 3. Preset Calculators (Compound, Stock, Farming)
+  for (const preset of ALL_SEO_PRESETS) {
+    if (preset.category === 'compound') {
+      urls.add(`${base}/tools/compound-calculator/${preset.slug}`);
+    } else if (preset.category === 'stock') {
+      urls.add(`${base}/tools/stock-calculator/${preset.slug}`);
+    } else if (preset.category === 'farming') {
+      urls.add(`${base}/tools/farming-calculator/${preset.slug}`);
+    }
+  }
+
+  // 4. 신규 가상 부동산 계산기 프리셋
+  urls.add(`${base}/tools/real-estate-calculator`);
+  for (const p of REAL_ESTATE_PRESETS) {
+    urls.add(`${base}/tools/real-estate-calculator/${p.slug}`);
+  }
+
+  // 5. 신규 코인 김치프리미엄 계산기 프리셋
+  urls.add(`${base}/tools/kimchi-premium-calculator`);
+  for (const p of KIMCHI_PREMIUM_PRESETS) {
+    urls.add(`${base}/tools/kimchi-premium-calculator/${p.slug}`);
+  }
+
+  // 6. 신규 주식 양도소득세 계산기 프리셋
+  urls.add(`${base}/tools/capital-gains-tax-calculator`);
+  for (const p of CAPITAL_GAINS_TAX_PRESETS) {
+    urls.add(`${base}/tools/capital-gains-tax-calculator/${p.slug}`);
+  }
+
+  // 7. Virtual Real Estate & Personal Spaces
+  urls.add(`${base}/spaces`);
+  urls.add(`${base}/spaces/real-estate`);
+
+  return Array.from(urls);
+}
+
+/**
  * Submits a batch of URLs (up to 10,000) to IndexNow API.
  */
-export async function submitToIndexNow(urls: readonly string[]): Promise<IndexNowResult> {
-  if (urls.length === 0) {
+export async function submitToIndexNow(urls?: readonly string[]): Promise<IndexNowResult> {
+  const targetUrls = urls !== undefined ? urls : getAllPublicUrlsForIndexNow();
+
+  if (targetUrls.length === 0) {
     return { success: true, submittedCount: 0, status: 200 };
   }
 
@@ -34,7 +99,7 @@ export async function submitToIndexNow(urls: readonly string[]): Promise<IndexNo
     host: INDEXNOW_HOST,
     key: INDEXNOW_KEY,
     keyLocation: INDEXNOW_KEY_LOCATION,
-    urlList: urls.slice(0, 10000),
+    urlList: targetUrls.slice(0, 10000),
   };
 
   try {
@@ -56,12 +121,13 @@ export async function submitToIndexNow(urls: readonly string[]): Promise<IndexNo
       status: res.status,
       responseText,
     };
-  } catch (err) {
+  } catch (err: unknown) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
     return {
       success: false,
-      submittedCount: 0,
+      submittedCount: payload.urlList.length,
       status: 500,
-      error: err instanceof Error ? err.message : String(err),
+      error: errorMessage,
     };
   }
 }

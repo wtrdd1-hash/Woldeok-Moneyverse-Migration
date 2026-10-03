@@ -56,6 +56,7 @@ describe('SEO & i18n SSOT Route Integrity', () => {
     expect(sitemapPaths).toContain('/guide/virtual-banking');
     expect(sitemapPaths).toContain('/guide/career-mastery');
     expect(sitemapPaths).toContain('/guide/glossary');
+    expect(sitemapPaths).toContain('/spaces');
 
     // Strictly member-protected routes must be excluded
     expect(sitemapPaths).not.toContain('/quests');
@@ -64,7 +65,6 @@ describe('SEO & i18n SSOT Route Integrity', () => {
     expect(sitemapPaths).not.toContain('/wallet');
     expect(sitemapPaths).not.toContain('/work');
     expect(sitemapPaths).not.toContain('/seasons');
-    expect(sitemapPaths).not.toContain('/spaces');
     expect(sitemapPaths).not.toContain('/admin');
   });
 

@@ -11,6 +11,8 @@ import {
   detectBrowserLocale,
 } from '@/lib/locale';
 
+export type { Locale };
+
 interface LocaleContextValue {
   readonly locale: Locale;
   readonly setLocale: (locale: Locale) => void;

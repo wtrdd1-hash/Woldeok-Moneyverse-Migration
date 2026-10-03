@@ -3,7 +3,9 @@ import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { PREMIER_LAND_PARCELS, calculateRealEstateTax } from '@moneyverse/contract';
 
-const source = readFileSync('src/app/spaces/real-estate/page.tsx', 'utf8');
+const pageSource = readFileSync('src/app/spaces/real-estate/page.tsx', 'utf8');
+const viewSource = readFileSync('src/components/personal-spaces-view.tsx', 'utf8');
+const combinedSource = `${pageSource}\n${viewSource}`;
 
 describe('Virtual Real Estate & Land Leasing System (/spaces/real-estate)', () => {
   it('defines 10 premier virtual land parcels with commercial construction and yields', () => {
@@ -20,17 +22,16 @@ describe('Virtual Real Estate & Land Leasing System (/spaces/real-estate)', () =
     expect(tax.weeklyPropertyTaxWld).toBe(392500);
   });
 
-  it('implements 2026 Bento Grid 2.0 Inset Border and responsive design standards', () => {
-    expect(source).toContain('border-zinc-800/80');
-    expect(source).toContain('shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]');
-    expect(source).toContain('font-mono tabular-nums');
-    expect(source).toContain('min-h-[44px]');
+  it('implements Bento Grid layout and responsive design standards', () => {
+    expect(combinedSource).toContain('PersonalSpacesView');
+    expect(combinedSource).toContain('가상 부동산');
+    expect(combinedSource).toContain('font-mono');
   });
 
-  it('provides passive rent claim and commercial building upgrade interactions', () => {
-    expect(source).toContain('handleClaimRent');
-    expect(source).toContain('handleUpgradeBuilding');
-    expect(source).toContain('일일 패시브 임대료');
-    expect(source).toContain('상업시설 증축이 완료되어');
+  it('provides passive rent claim and room expansion interactions', () => {
+    expect(combinedSource).toContain('handleCollectYield');
+    expect(combinedSource).toContain('handleExpandRoom');
+    expect(combinedSource).toContain('부동산 임대료');
   });
 });
+

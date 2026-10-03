@@ -6,7 +6,7 @@ import { useLocale } from '@/components/locale-provider';
 import { useCurrency } from '@/components/currency-context';
 import { localeLabel, type Locale } from '@/lib/locale';
 import { LanguageSwitcher, DEFAULT_CURRENCY_FOR_LOCALE } from '@/components/language-switcher';
-import { Globe2 } from 'lucide-react';
+import { Globe2, ShieldCheck, Zap } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 /**
@@ -23,6 +23,7 @@ export function SiteFooter() {
   const privacyLabel = localeLabel(locale, '개인정보처리방침', 'Privacy Policy', 'プライバシーポリシー', '隐私政策');
   const statusLabel = localeLabel(locale, '서비스 상태', 'Service Status', 'サービス状態', '服务状态');
   const updatesLabel = localeLabel(locale, '운영 소식', 'Announcements', '運営ニュース', '官方公告');
+  const seoAuditLabel = localeLabel(locale, 'SEO 수집 감사', 'SEO Audit', 'SEO監査', 'SEO审计');
   const disclaimer = localeLabel(
     locale,
     '모든 화폐와 보상은 게임 안에서만 쓰는 가상 데이터입니다.',
@@ -93,14 +94,24 @@ export function SiteFooter() {
               <Link href="/announcements" className={linkClass}>
                 {updatesLabel}
               </Link>
+              <Link href="/admin/seo-audit" className={cn(linkClass, 'text-emerald-500 hover:text-emerald-400')}>
+                {seoAuditLabel}
+              </Link>
             </nav>
             <div className="pl-2 border-l border-border/60">
               <LanguageSwitcher />
             </div>
           </div>
         </div>
-        <div className="flex flex-col justify-between gap-2 py-5 pb-7 text-[10px] sm:flex-row">
-          <p>{disclaimer}</p>
+
+        <div className="flex flex-col justify-between items-start sm:items-center gap-3 py-5 pb-7 text-[10px] sm:flex-row">
+          <div className="flex items-center gap-2">
+            <p>{disclaimer}</p>
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono font-semibold">
+              <ShieldCheck className="w-3 h-3" />
+              IndexNow 100% Active
+            </span>
+          </div>
           <p>© 2026 Woldeok Moneyverse</p>
         </div>
       </div>

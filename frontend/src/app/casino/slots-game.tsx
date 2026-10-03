@@ -30,6 +30,12 @@ import { groupDigits } from '@/lib/money';
 import { playSlots } from './actions';
 import { CASINO_IDLE } from './casino-state';
 import { synthSound } from '@/lib/audio/synth-sound';
+import {
+  playBetChipSound,
+  playReelTickSound,
+  playWinSound,
+  playJackpotSound,
+} from '@/lib/audio-effects';
 
 // Lucide SVG 기반 릴 기호 매핑 (이모지 글리치 및 텍스트 렌더링 결함 방지)
 export interface ReelSymbolInfo {
@@ -104,6 +110,7 @@ export function LuckySlotsGame({
     REEL_SYMBOLS[0]!,
     REEL_SYMBOLS[0]!,
   ]);
+  const [reelSpinning, setReelSpinning] = useState<[boolean, boolean, boolean]>([false, false, false]);
   const [isSpinning, setIsSpinning] = useState(false);
   const [demoResult, setDemoResult] = useState<{
     won: boolean;
@@ -115,7 +122,7 @@ export function LuckySlotsGame({
 
   const maxPlayable = minAmount(maxStake, remainingStake);
 
-  // 실베팅 결과 처리 & 애니메이션 동기화
+  // 실베팅 결과 처리 & 순차 정지 래칫 애니메이션
   useEffect(() => {
     if (state.status === 'ok') {
       const isWon = state.netAmount
@@ -129,34 +136,57 @@ export function LuckySlotsGame({
 
       const targetReels = FACE_TO_SYMBOLS_MAP[targetFace]!;
 
-      // 릴 순차 정지 애니메이션 시뮬레이션
+      // 릴 순차 회전 및 감속 정지 애니메이션
       setIsSpinning(true);
-      const interval = setInterval(() => {
-        setReels([
-          REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!,
-          REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!,
-          REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!,
+      setReelSpinning([true, true, true]);
+
+      const spinInterval = setInterval(() => {
+        playReelTickSound();
+        setReels((prev) => [
+          reelSpinning[0] ? REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]! : prev[0],
+          reelSpinning[1] ? REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]! : prev[1],
+          reelSpinning[2] ? REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]! : prev[2],
         ]);
       }, 70);
 
+      // 1번 릴 정지 (400ms)
       setTimeout(() => {
-        clearInterval(interval);
+        setReels((prev) => [targetReels[0], prev[1], prev[2]]);
+        setReelSpinning([false, true, true]);
+        playReelTickSound();
+      }, 400);
+
+      // 2번 릴 정지 (700ms)
+      setTimeout(() => {
+        setReels((prev) => [targetReels[0], targetReels[1], prev[2]]);
+        setReelSpinning([false, false, true]);
+        playReelTickSound();
+      }, 700);
+
+      // 3번 릴 최종 정지 (1000ms) 및 승패 사운드 연출
+      setTimeout(() => {
+        clearInterval(spinInterval);
         setReels(targetReels);
+        setReelSpinning([false, false, false]);
         setIsSpinning(false);
 
-        if (isWon) {
-          synthSound.playWin();
+        if (targetFace === 6 || (isWon && targetReels[0].id === 'seven')) {
+          playJackpotSound();
+        } else if (isWon) {
+          playWinSound();
         } else {
           synthSound.playLoss();
         }
-      }, 800);
+      }, 1000);
     } else if (state.status === 'error') {
       setIsSpinning(false);
+      setReelSpinning([false, false, false]);
     }
   }, [state]);
 
   // 퀵 베팅 프리셋 핸들러
   const handleQuickStake = (amount: number) => {
+    playBetChipSound();
     const current = BigInt(stake || '0');
     const max = BigInt(maxPlayable);
     const next = current + BigInt(amount);
@@ -164,6 +194,7 @@ export function LuckySlotsGame({
   };
 
   const handleMaxStake = () => {
+    playBetChipSound();
     setStake(maxPlayable);
   };
 
@@ -171,53 +202,66 @@ export function LuckySlotsGame({
   const handleDemoSpin = () => {
     if (isSpinning) return;
     setIsSpinning(true);
+    setReelSpinning([true, true, true]);
     setDemoResult(null);
 
     const spinInterval = setInterval(() => {
-      const r1 = REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!;
-      const r2 = REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!;
-      const r3 = REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!;
-      setReels([r1, r2, r3]);
-    }, 80);
+      playReelTickSound();
+      setReels([
+        REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!,
+        REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!,
+        REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!,
+      ]);
+    }, 70);
 
+    const rng = Math.random();
+    let finalReels: [ReelSymbolInfo, ReelSymbolInfo, ReelSymbolInfo];
+    let won = false;
+    let winningSymbol = '';
+    let multiplier = '0.0배';
+    let isJackpot = false;
+
+    if (rng < 0.166) {
+      finalReels = [REEL_SYMBOLS[0]!, REEL_SYMBOLS[0]!, REEL_SYMBOLS[0]!];
+      won = true;
+      winningSymbol = '777 잭팟';
+      multiplier = `${payoutMultiplier}배`;
+      isJackpot = true;
+    } else if (rng < 0.35) {
+      finalReels = [REEL_SYMBOLS[1]!, REEL_SYMBOLS[1]!, REEL_SYMBOLS[1]!];
+      won = true;
+      winningSymbol = '골든 스타 트리오';
+      multiplier = '5.0배';
+    } else {
+      const s1 = REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!;
+      let s2 = REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!;
+      while (s2.id === s1.id) {
+        s2 = REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!;
+      }
+      const s3 = REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!;
+      finalReels = [s1, s2, s3];
+      won = false;
+    }
+
+    // 1번 릴 정지 (400ms)
+    setTimeout(() => {
+      setReels((prev) => [finalReels[0], prev[1], prev[2]]);
+      setReelSpinning([false, true, true]);
+      playReelTickSound();
+    }, 400);
+
+    // 2번 릴 정지 (700ms)
+    setTimeout(() => {
+      setReels((prev) => [finalReels[0], finalReels[1], prev[2]]);
+      setReelSpinning([false, false, true]);
+      playReelTickSound();
+    }, 700);
+
+    // 3번 릴 정지 (1000ms)
     setTimeout(() => {
       clearInterval(spinInterval);
-
-      // 난수 기반 결과 결정 (시연용 1/6 확률 잭팟)
-      const rng = Math.random();
-      let finalReels: [ReelSymbolInfo, ReelSymbolInfo, ReelSymbolInfo];
-      let won = false;
-      let winningSymbol = '';
-      let multiplier = '0.0배';
-
-      if (rng < 0.166) {
-        // 잭팟 적중 (777)
-        finalReels = [REEL_SYMBOLS[0]!, REEL_SYMBOLS[0]!, REEL_SYMBOLS[0]!];
-        won = true;
-        winningSymbol = '777 잭팟';
-        multiplier = `${payoutMultiplier}배`;
-        synthSound.playWin();
-      } else if (rng < 0.35) {
-        // 스타 매칭
-        finalReels = [REEL_SYMBOLS[1]!, REEL_SYMBOLS[1]!, REEL_SYMBOLS[1]!];
-        won = true;
-        winningSymbol = '골든 스타 트리오';
-        multiplier = '5.0배';
-        synthSound.playWin();
-      } else {
-        // 불일치 낙첨
-        const s1 = REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!;
-        let s2 = REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!;
-        while (s2.id === s1.id) {
-          s2 = REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!;
-        }
-        const s3 = REEL_SYMBOLS[Math.floor(Math.random() * REEL_SYMBOLS.length)]!;
-        finalReels = [s1, s2, s3];
-        won = false;
-        synthSound.playLoss();
-      }
-
       setReels(finalReels);
+      setReelSpinning([false, false, false]);
       setIsSpinning(false);
       setTotalDemoSpins((prev) => prev + 1);
       setDemoResult({
@@ -225,7 +269,15 @@ export function LuckySlotsGame({
         symbol: winningSymbol,
         multiplier,
       });
-    }, 1100);
+
+      if (isJackpot) {
+        playJackpotSound();
+      } else if (won) {
+        playWinSound();
+      } else {
+        synthSound.playLoss();
+      }
+    }, 1000);
   };
 
   const isBusy = isSpinning || isServerPending;
@@ -283,19 +335,24 @@ export function LuckySlotsGame({
         {/* 슬롯 릴 디스플레이 스테이지 */}
         <div className="relative overflow-hidden rounded-2xl border border-amber-500/30 bg-black/70 p-3.5 min-[380px]:p-6 shadow-inner">
           <div className="flex justify-center gap-2 min-[380px]:gap-3 sm:gap-4">
-            {reels.map((symbol, index) => (
-              <div
-                key={index}
-                className={
-                  'flex size-16 min-[380px]:size-20 sm:size-24 select-none flex-col items-center justify-center rounded-xl border-2 font-mono shadow-lg transition-transform ' +
-                  symbol.color +
-                  (isBusy ? ' animate-pulse scale-95' : ' scale-100')
-                }
-              >
-                <span className="text-2xl min-[380px]:text-3xl sm:text-4xl font-black">{symbol.label}</span>
-                <span className="mt-0.5 min-[380px]:mt-1 text-[9px] min-[380px]:text-[10px] font-bold tracking-tight opacity-80">{symbol.name}</span>
-              </div>
-            ))}
+            {reels.map((symbol, index) => {
+              const isThisReelSpinning = reelSpinning[index];
+              return (
+                <div
+                  key={index}
+                  className={
+                    'flex size-16 min-[380px]:size-20 sm:size-24 select-none flex-col items-center justify-center rounded-xl border-2 font-mono shadow-lg transition-all duration-150 ' +
+                    symbol.color +
+                    (isThisReelSpinning
+                      ? ' animate-pulse scale-95 blur-[1px] -translate-y-0.5'
+                      : ' scale-100 blur-0 translate-y-0')
+                  }
+                >
+                  <span className="text-2xl min-[380px]:text-3xl sm:text-4xl font-black">{symbol.label}</span>
+                  <span className="mt-0.5 min-[380px]:mt-1 text-[9px] min-[380px]:text-[10px] font-bold tracking-tight opacity-80">{symbol.name}</span>
+                </div>
+              );
+            })}
           </div>
 
           {/* 모드 및 상태 표시 라벨 */}

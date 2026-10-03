@@ -131,14 +131,9 @@ export function proxy(request: NextRequest) {
   } else if (userSavedLocale) {
     finalLocale = userSavedLocale;
   } else {
-    // Brand new visitor: automatically apply detected GeoIP locale
+    // Brand new visitor: pass detected GeoIP locale via header & detected cookie only,
+    // without polluting LOCALE_COOKIE (which is strictly reserved for explicit user preference)
     finalLocale = detectedGeoLocale;
-    response.cookies.set(LOCALE_COOKIE, finalLocale, {
-      path: '/',
-      maxAge: 60 * 60 * 24 * 365,
-      sameSite: 'lax',
-      secure: true,
-    });
     response.cookies.set(DETECTED_LOCALE_COOKIE, finalLocale, {
       path: '/',
       maxAge: 60 * 60 * 24 * 30,
