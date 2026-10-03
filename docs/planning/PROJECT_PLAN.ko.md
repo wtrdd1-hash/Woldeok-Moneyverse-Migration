@@ -3,7 +3,7 @@
 > **문서 상태:** Living specification / 현재 권위 통합기획서 (AUTHORITATIVE)  
 > **최초 기준:** 2026-08-26  
 > **현재 통합 버전:** v2026.10.03.512  
-> **구현·증거 동기화:** 2026-10-03 (최신 main SHA: `fc9af624`)  
+> **구현·증거 동기화:** 2026-10-03 (기획 기준 main SHA: `6fc3adc20bf21c7a447c4693fa07625da014f336`)  
 > **영문 기준 문서:** [PROJECT_PLAN.md](PROJECT_PLAN.md)  
 > **완료도 단일 진실 공급원(SSOT):** [기획 공백 해소 및 수용증거 명세 (PLANNING_GAP_CLOSURE_SPEC.ko.md)](PLANNING_GAP_CLOSURE_SPEC.ko.md)
 
