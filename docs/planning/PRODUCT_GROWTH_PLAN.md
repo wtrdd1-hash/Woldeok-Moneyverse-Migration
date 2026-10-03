@@ -1,8 +1,9 @@
 # Woldeok Moneyverse — Product Growth & Retention Plan
 
-> Version: v2026.09.12.1
+> Version: v2026.10.02.507
 > Status: Living product-planning companion to `PROJECT_PLAN.md`
-> Date: 2026-09-12
+> Date: 2026-10-02
+> Authority adoption: v507 overseas growth decisions adopted into current planning authority by v2026.10.03.509.
 > Korean counterpart: [PRODUCT_GROWTH_PLAN.ko.md](PRODUCT_GROWTH_PLAN.ko.md)
 
 ## 1. Product objective
@@ -142,6 +143,19 @@ Generate opt-in cards for seasonal rank, collection completion, weekly recap and
 ### Community operations
 Run themed Discord/web events, creator challenge codes with capped non-cash cosmetics, and newcomer events that pair tutorial completion with community participation.
 
+### International acquisition and retention — v507
+
+Overseas growth combines search entry value with reasons to return:
+- locale-aware public calculators and virtual-economy simulators;
+- localized onboarding, date/time/number/currency formatting and event schedules;
+- user-selected language independent of jurisdiction;
+- labelled optional UGC translation and language/community discovery;
+- global/country/locale leagues or leaderboards with anti-abuse eligibility;
+- localized recap, comeback missions and share cards;
+- saved tools/presets and relevant next-action bridges from search landings.
+
+Start with Korean baseline, then proven English/Japanese families, then DE/FR/ES/pt-BR one locale at a time. Do not launch a full locale from raw machine translation. Search acquisition success is landing -> second useful page -> signup -> activation -> D7/D30 -> realized ad economics, not traffic alone.
+
 ## 9. Retention and reactivation
 
 The product should create reasons to return without relying on spam notifications.
@@ -260,6 +274,13 @@ Do not optimize only click-through or session count. Guardrails include economy 
 This plan uses current product patterns as directional evidence, not as requirements. TradingView's current Paper Trading product combines simulated funds, order/position tracking, multiple asset types, strategy practice, historical replay and recurring competition; this supports a learn → practice → measure → compete progression model. Current mobile-app retention benchmark material from Adjust emphasizes D1/D7/D30 measurement and shows the steepest drop occurs early, supporting first-session and first-week prioritization.
 
 ## 16. Version record
+
+### v2026.10.02.507 — international acquisition and retention
+- Added overseas public utilities, localized onboarding, timezone/event support, optional labelled UGC translation, international discovery/leaderboards and saved-tool loops.
+- Connected organic-search landings to second useful action, signup, activation, D7/D30 and realized ad economics.
+- Defined Korean baseline -> EN/JA -> DE/FR/ES/pt-BR phased rollout rather than full-site raw machine translation.
+
+Planning/docs only; no runtime implementation is claimed.
 
 ### v2026.09.12.1 — first growth-planning pass
 - Added explicit acquisition, activation, retention and long-term loops.

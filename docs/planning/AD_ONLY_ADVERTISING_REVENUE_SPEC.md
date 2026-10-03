@@ -1,8 +1,9 @@
 # Woldeok Moneyverse — Advertising-Only Revenue Specification
 
-> Version: v2026.09.30.487  
-> Status: PLANNING / cash monetization authority  
-> Date: 2026-09-30  
+> Version: v2026.10.02.507
+> Status: PLANNING / cash monetization authority
+> Date: 2026-10-02
+> Authority adoption: v507 international ad-economics decisions adopted into current planning authority by v2026.10.03.509.
 > Korean counterpart: [AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md](AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md)
 
 ## 1. Authority and business constraint
@@ -121,6 +122,20 @@ Required:
 - ad-serving policy status.
 
 The KRW 1,000,000 target is evaluated from finalized/realized data. Tax liabilities, infrastructure and other operating costs are tracked separately; gross ad revenue is not “profit.”
+
+## 7.1 International advertising economics — v507
+
+International growth is evaluated by country + locale + landing family + device + source + consent state.
+
+| Gross monthly target | RPM KRW 5,000 | RPM KRW 10,000 | RPM KRW 20,000 |
+|---:|---:|---:|---:|
+| KRW 1M | 200k PV | 100k PV | 50k PV |
+| KRW 5M | 1.0M PV | 500k PV | 250k PV |
+| KRW 10M | 2.0M PV | 1.0M PV | 500k PV |
+
+This is scenario arithmetic, not a forecast. Use observed Page RPM and revenue per 1,000 qualified organic sessions. Market investment requires incremental ad revenue to exceed localization, content, moderation, infrastructure, privacy/compliance and support cost while retention, CWV, task completion and invalid-traffic/policy guardrails remain healthy.
+
+Large US, Japanese and European digital-ad markets are macro context only; they do not imply a Moneyverse publisher RPM.
 
 ## 8. Tax/business evidence gate
 

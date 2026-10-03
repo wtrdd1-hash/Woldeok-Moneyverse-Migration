@@ -1,8 +1,9 @@
 # Woldeok Moneyverse — Search Discovery Operations Specification
 
-> Version: v2026.09.17.177
+> Version: v2026.10.02.507
 > Status: Living implementation-oriented SEO/search operations specification
-> Date: 2026-09-17
+> Date: 2026-10-02
+> Authority adoption: v507 global SEO decisions adopted into current planning authority by v2026.10.03.509.
 > Parent specs: `PROJECT_PLAN.md`, `PRODUCT_GROWTH_PLAN.md`, `PRODUCT_DESIGN_SPEC.md`, `MONETIZATION_COMPLIANCE_SEO_SPEC.md`
 > Korean counterpart: [SEARCH_DISCOVERY_OPERATIONS_SPEC.ko.md](SEARCH_DISCOVERY_OPERATIONS_SPEC.ko.md)
 
@@ -16,7 +17,8 @@ Search acquisition must never expose private account, balance, portfolio, modera
 
 Every route family must be registered with one of these states:
 
-- `INDEXABLE_PUBLIC`: intended for search discovery.
+- INDEXABLE_PUBLIC: intended for search discovery.
+- REDIRECT_ONLY: stable alias that permanently redirects to the canonical URL and is not itself indexed.
 - `PUBLIC_NOINDEX`: public but not useful as a search result.
 - `AUTH_REQUIRED`: protected by authentication and excluded from indexing.
 - `OPERATOR_ONLY`: admin/moderation/operations only.
@@ -26,8 +28,10 @@ Initial route policy:
 
 | Route family | State | Canonical policy |
 |---|---|---|
-| `/en/`, `/ko/` | INDEXABLE_PUBLIC | self-canonical |
-| `/en/guide/*`, `/ko/guide/*` | INDEXABLE_PUBLIC | locale self-canonical + reciprocal hreflang |
+| / | INDEXABLE_PUBLIC | Korean product root; self-canonical and current fallback/x-default |
+| /ko/* | REDIRECT_ONLY | 308 to the equivalent unprefixed Korean canonical URL |
+| /en/* and other published locale prefixes | INDEXABLE_PUBLIC | locale self-canonical after translation-quality gate |
+| `/guide/*`, `/en/guide/*` and other published locale guide prefixes | INDEXABLE_PUBLIC | unprefixed Korean or prefixed-locale self-canonical + reciprocal hreflang |
 | fictional company/lore pages | INDEXABLE_PUBLIC | stable ticker slug |
 | public season/archive pages | INDEXABLE_PUBLIC | stable season slug |
 | glossary/help/safety public pages | INDEXABLE_PUBLIC | stable content slug |
@@ -54,11 +58,11 @@ Canonical conflicts are a release-blocking SEO defect when they can create dupli
 
 ## 4. Multilingual localization and hreflang
 
-Initial supported locales are `en`, `ko`, `ja`, `de`, `fr`, `es`, and `pt-BR`. Each genuinely translated page uses a self-canonical URL and emits reciprocal `hreflang` only for localized equivalents that actually exist. There is no requirement to fabricate every locale for every page.
+Target publishable locales are `ko`, `en`, `ja`, `de`, `fr`, `es`, and `pt-BR`; deployed/source support may be a smaller subset until each locale passes its release gate. Each genuinely translated page uses the Korean unprefixed canonical or its prefixed-locale self-canonical URL and emits reciprocal `hreflang` only for localized equivalents that actually exist. There is no requirement to fabricate every locale for every page.
 
-- use independent URLs such as `/en/...`, `/ko/...`, `/ja/...`, `/de/...`, `/fr/...`, `/es/...`, `/pt-br/...`;
-- `x-default` points to a genuinely useful neutral language/country selector or default;
-- never force IP/browser-language redirects; provide crawlable language-switch links and optional non-blocking suggestions;
+- use the unprefixed Korean canonical path plus independent published locale URLs such as `/en/...`, `/ja/...`, `/de/...`, `/fr/...`, `/es/...`, `/pt-br/...`; `/ko/*` redirects to the equivalent Korean canonical;
+- x-default points to the Korean fallback root until a genuinely useful neutral selector exists;
+- never force crawlers or explicit locale URLs through IP/browser-language redirects; GeoIP may power a non-blocking language recommendation/chooser default;
 - title, description, H1, visible body and navigation primary language match the locale;
 - create regional variants only where visible content materially differs;
 - `DRAFT/STALE` translations and thin automated translations are noindex, sitemap-excluded and absent from hreflang clusters;
@@ -196,6 +200,16 @@ Minimum operator metrics:
 - accidental Test/private URL discovery count.
 
 Google and Naver metrics must remain separately identifiable.
+
+## 12.1 Search-demand and revenue opportunity queues — v507
+
+Operational search metrics carry provenance: LIVE_SEARCH_CONSOLE, LIVE_NAVER, KEYWORD_PLANNER_ESTIMATE, OTHER_PROVIDER_ESTIMATE, NO_DATA, NOT_CONNECTED or FETCH_ERROR. Synthetic values are test fixtures only.
+
+Prioritize high-impression/low-CTR pages; positions 5–20 with clear user-value improvement; rising validated query clusters; country/locale gaps on already-proven pages; cannibalizing same-intent URLs; high-traffic/low-activation landings; and high-activation/low-impression landings.
+
+Separate actual site performance from market search-volume estimates. Search Console impressions are not a generic keyword-volume substitute. Revenue prioritization uses realized revenue per qualified organic session and Page RPM with retention, CWV, invalid-traffic and policy guardrails.
+
+Text search, Images, video and supplemental Discover traffic are measured separately. See GLOBAL_GROWTH_SEO_REVENUE_SPEC.md for the complete overseas feature and market rollout contract.
 
 ## 13. Release gate
 

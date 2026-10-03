@@ -2,9 +2,10 @@
 
 **English canonical** | [한국어](INDEX.ko.md)
 
-> **Documentation Governance**: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)  
-> **Official Implementation Authority Release**: **v2026.09.28.477** (Synchronized with main)  
-> **Status**: **AUTHORITY_SYNCHRONIZED**
+> **Documentation Governance**: [DOCUMENTATION_POLICY.md](DOCUMENTATION_POLICY.md)
+> **Current Planning Authority**: **v2026.10.03.509**
+> **Latest main runtime/security evidence at integration start**: **v2026.10.02.508 / ddec006e**
+> **Status**: **PLANNING_AUTHORITY_INTEGRATED** — runtime implementation of v507/v509 global-growth design requires separate Test/Production evidence
 
 ---
 
@@ -23,12 +24,14 @@
 3. **[UI/UX Frontend Craftsmanship Principles](planning/PRODUCT_DESIGN_SPEC.md)**
 
 ### 03. 🌐 Growth & Programmatic SEO (pSEO) Engine
-1. **[pSEO 20,000+ Engine & Viral Growth Plan](planning/PRODUCT_GROWTH_PLAN.md)**
-2. **[Single Source of Truth Route Registry](../frontend/src/config/routes.config.ts)**
-3. **[Advertising-Only Revenue Specification v487](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md)** — direct-sale block, ad-only cash authority, KRW 1M Page-RPM/PV model, invalid-traffic and experiment gates
+1. **[Global Growth, International SEO & Advertising Revenue — v507 design / v509 authority](planning/GLOBAL_GROWTH_SEO_REVENUE_SPEC.md)** — Korean-default global locale design, overseas utility/retention features, search-demand provenance, quality-gated pSEO and ad economics
+2. **[Product Growth & Retention Plan](planning/PRODUCT_GROWTH_PLAN.md)**
+3. **[Search Discovery Operations](planning/SEARCH_DISCOVERY_OPERATIONS_SPEC.md)**
+4. **[Single Source of Truth Route Registry](../frontend/src/config/routes.config.ts)**
+5. **[Advertising-Only Revenue Specification — v507 design / v509 authority](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md)** — advertising-only cash authority, international Page-RPM/session economics, invalid-traffic and experiment gates
 
 ### 04. 📈 Virtual Stock Exchange & Market Dynamics
-1. **[Stock Portfolio & Real-time Orderbook Spec](2026-09-22-stocks-portfolio-and-trade-presets.md)**
+1. **[Stock Portfolio & Real-time Orderbook Spec](2026-09-22-stocks-portfolio-and-trade-presets-v2026.09.22.356.md)**
 2. **[Stock Trading Halt & Cost-Basis Settlement Governance](2026-09-22-stocks-halt-cost-basis-settlement-visibility-v2026.09.22.357.md)**
 
 ### 05. 🏦 Virtual Banking & Bonds
