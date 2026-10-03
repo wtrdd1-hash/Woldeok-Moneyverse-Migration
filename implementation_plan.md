@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v83)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v84)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v84**: 우측 하단 플로팅 위젯 충돌 박멸 및 프리미엄 다크 글래스모피즘 수직 스택 아키텍처(고객센터 + 온보딩 퀘스트 완벽 분리) 완비 (+80, -0)
 - **v83**: 8대 전문 직업 2.0 & 실전 급여 파밍 완벽 가이드 센터(`/guide/career-mastery`) 전면 쇄신 — 4단계 실습 시뮬레이터, 8대 직업 도감, 7대 승진 티어 및 기능 소개 딥링크 완비 (+190, -0)
 - **v82**: 온보딩 퀘스트 플로팅 위젯 고대비 원형 닫기(X) 버튼, 바깥 클릭/ESC 키 감지, 오늘 하루 닫기(24시간) 옵션 및 총 보상 170,000 WLD 동적 연동 완비 (+75, -0)
 - **v81**: 상단 헤더·모바일 사이드 드로어·메인 홈 전역 가이드 노출 극대화(Quick Guide 핫 칩 + 모바일 추천 배너 + 홈 온보딩 2열 벤토) 및 사용자 리텐션 강화 (+155, -0)
@@ -844,6 +845,39 @@
 - Vitest 185개 파일 1038개 테스트 100% ALL-PASS.
 - GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v521` 무중단 승격 배포.
 - 실제 도메인([https://easy-scraping.com/guide/career-mastery](https://easy-scraping.com/guide/career-mastery), `/features`) 렌더링 검증.
+
+---
+
+## 🚀 [v84 Specification] 우측 하단 플로팅 액션 스택 아키텍처 & 프리미엄 다크 글래스모피즘 UI 쇄신 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 피드백 및 문제 식별**:
+  - "디자인 좀잘해" 피드백 및 스크린샷 접수.
+  - 화면 우측 하단에 `1:1 채팅 · 고객지원` 위젯과 `온보딩 퀘스트 (0/7)` 플로팅 버튼이 동일한 좌표(`bottom-6 right-6`)에 고정되어 서로 심각하게 겹쳐 삐져나오는 Overlapping Collision 발생.
+- **개선 목표 및 조율 사양**:
+  1. **완벽한 수직 적층 스택(Vertical Offset Hierarchy) 분리**:
+     - 1층(바닥): `FloatingSupportChatWidget` (고객지원 원형 버튼, 모바일 `bottom-[74px]` / 데스크톱 `sm:bottom-6`)
+     - 2층(상단): `InteractiveOnboardingTracker` (온보딩 퀘스트 칩, 모바일 `bottom-[136px]` / 데스크톱 `sm:bottom-[84px]`)
+     - 10~12px 간격을 두고 완벽하게 수직 정렬되어 1픽셀도 겹치지 않음.
+  2. **Linear/Stripe 스타일 프리미엄 다크 글래스모피즘 칩 쇄신**:
+     - 둔탁한 초록색 거대 버튼에서 세련된 다크 에메랄드 글래스모피즘(`bg-zinc-950/90 hover:bg-zinc-900 border-emerald-500/40 text-white backdrop-blur-xl ring-1 ring-emerald-500/20`)으로 전면 리디자인.
+     - 컴팩트 모노스페이스 진행률 뱃지(`0/7`) 및 펄스 알림 인디케이터 탑재.
+  3. **고객지원 마이크로 툴팁 호버 전환**:
+     - 상시 떠서 간섭을 주던 툴팁을 마우스 호버 시 부드럽게 페이드인(`opacity-0 group-hover:opacity-100`)되도록 정돈.
+
+### 2. 컴포넌트 및 테스트 구현 명세
+1. **온보딩 트래커 (`frontend/src/components/interactive-onboarding-tracker.tsx`)**:
+   - `fixed bottom-[136px] sm:bottom-[84px] select-none` 및 프리미엄 글래스모피즘 버튼 렌더링.
+2. **고객지원 챗 위젯 (`frontend/src/components/floating-support-chat-widget.tsx`)**:
+   - `group/support` 호버 상태 기반 툴팁 인터랙션 적용.
+3. **단위 테스트 (`interactive-onboarding-tracker.test.tsx`, `floating-support-chat-widget.test.tsx`)**:
+   - 2개 파일 8개 테스트 100% 통과.
+
+### 3. 검증 및 배포 계획
+- Vitest 185개 파일 1041개 테스트 100% ALL-PASS.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v521` 무중단 승격 배포.
+- 실제 도메인([https://easy-scraping.com](https://easy-scraping.com)) 플로팅 UI 렌더링 및 겹침 제로 검증.
+
 
 
 

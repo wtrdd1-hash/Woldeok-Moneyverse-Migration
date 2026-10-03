@@ -122,7 +122,7 @@ export function InteractiveOnboardingTracker() {
   };
 
   return (
-    <div className="fixed bottom-20 right-4 z-40 sm:bottom-6 sm:right-6">
+    <div className="fixed bottom-[136px] right-3.5 z-40 sm:bottom-[84px] sm:right-6 select-none">
       {/* 플로팅 축하 알림 배너 */}
       {justClaimedReward && (
         <div className="mb-2 p-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl shadow-2xl border border-emerald-400 font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -277,26 +277,34 @@ export function InteractiveOnboardingTracker() {
           size="sm"
           variant="outline"
           title="온보딩 퀘스트 다시 열기"
-          className="h-9 px-3 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border-zinc-700 shadow-lg text-[11px] flex items-center gap-1.5 backdrop-blur-sm cursor-pointer"
+          className="h-9 px-3 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border-zinc-700 shadow-lg text-[11px] flex items-center gap-1.5 backdrop-blur-md ring-1 ring-white/10 cursor-pointer transition-all hover:scale-105"
         >
           <Gift className="w-3.5 h-3.5 text-emerald-400" />
           <span>퀘스트 ({completedCount}/{totalSteps})</span>
         </Button>
       ) : (
-        /* 일반 축소 상태 (Floating Pill Button) */
-        <Button
+        /* 프리미엄 다크 글래스모피즘 플로팅 칩 (Linear/Stripe 스타일) */
+        <button
+          type="button"
           onClick={() => setIsOpen(true)}
-          className="relative h-11 px-4 rounded-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-2xl border border-emerald-400/40 flex items-center gap-2 cursor-pointer transition-transform hover:scale-105"
+          className="group relative flex items-center gap-2 h-10 pl-3 pr-3.5 rounded-full bg-zinc-950/90 hover:bg-zinc-900 text-zinc-100 border border-emerald-500/40 hover:border-emerald-400/80 shadow-2xl backdrop-blur-xl ring-1 ring-emerald-500/20 hover:ring-emerald-400/40 transition-all duration-300 hover:scale-105 cursor-pointer"
         >
-          <Gift className="w-4 h-4 text-amber-300 animate-bounce" />
-          <span>온보딩 퀘스트 ({completedCount}/{totalSteps})</span>
+          <span className="p-1 rounded-full bg-emerald-500/20 text-emerald-400 group-hover:bg-emerald-500/30 transition-colors">
+            <Gift className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+          </span>
+
+          <span className="text-xs font-bold tracking-tight">온보딩 퀘스트</span>
+
+          <span className="px-1.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-500/30 text-emerald-300 font-mono text-[10px] font-bold">
+            {completedCount}/{totalSteps}
+          </span>
 
           {unclaimedCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 h-5 min-w-[20px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-extrabold flex items-center justify-center border-2 border-zinc-950 animate-pulse">
+            <span className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-extrabold flex items-center justify-center border-2 border-zinc-950 animate-bounce shadow-md">
               {unclaimedCount}
             </span>
           )}
-        </Button>
+        </button>
       )}
     </div>
   );
