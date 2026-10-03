@@ -2,11 +2,20 @@
 
 > Status: Living specification / current authoritative integrated plan
 > Original baseline: 2026-08-26
-> Current integrated version: v2026.10.03.509
+> Current integrated version: v2026.10.03.510
 > Implementation/evidence sync: 2026-09-23
 > Korean counterpart: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
 
 This is the current implementation-facing contract. Historical details remain recoverable from Git and versioned changelog/worklog files. A developer or agent must be able to derive scope, authority boundaries, user states, APIs, persistence, security, SEO, economics, QA, release gates and rollback from this document without treating an older draft as current truth.
+
+## Global-growth execution architecture and deep evidence — v2026.10.03.510 (2026-10-03)
+
+- **Scope:** expands the approved v507/v509 global-growth authority into implementation-ready locale, SEO, translation, pSEO, overseas-feature, market-readiness, advertising/consent, analytics, admin and QA contracts.
+- **Exact-main evidence:** inspected `origin/main=ac4dd484a90b266d945993d7bd8be57a74e8e1df`. Current runtime still has P0/P1 authority gaps including English default/fallback, inferred-locale preference pollution, fabricated GSC analytics, retired Google sitemap ping, mechanical hreflang/sitemap locale emission, release-timestamp `lastmod`, and config-only pSEO admission.
+- **New detailed authority:** [Global Growth Execution Specification v510](GLOBAL_GROWTH_EXECUTION_SPEC.md) defines `LocaleContext`, translation lifecycle, `SeoDocument`, route/indexability registry, sitemap/hreflang/lastmod contracts, search-evidence states, pSEO admission/retirement, market readiness, `AdPolicy`, analytics, admin tooling and release tests.
+- **Reference expansion:** new independent Crossref discovery cycle collected 210,000 raw records across 30 lanes and deduplicated 121,320 candidates within v510, manifest SHA-256 `f16c6deceb18fa96fdd7b1132b2fc58e13f908899d477c9ce252a897adae7704`; primary implementation rules are separately checked against current official sources. The v507 corpus remains independent and is not added into a false cross-cycle unique count.
+- **Implementation order:** truth repair -> server-owned SEO authority -> localization platform -> EN/JA overseas value -> search/pSEO operations -> compliant advertising measurement -> additional locales one at a time.
+- **Evidence boundary:** v510 is research/planning/docs only. Runtime implementation, Test verification and Production promotion are not claimed and require later exact-SHA evidence.
 
 ## Approved global-growth authority integration — v2026.10.03.509 (2026-10-03)
 

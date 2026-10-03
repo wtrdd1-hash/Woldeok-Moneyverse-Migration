@@ -1,11 +1,19 @@
 # Woldeok Moneyverse — Integrated Planning Master
 
-> Current ledger version: v2026.10.03.509
+> Current ledger version: v2026.10.03.510
 > Canonical implementation contract: [PROJECT_PLAN.md](PROJECT_PLAN.md)
 > Korean counterpart: [INTEGRATED_PLANNING_MASTER.ko.md](INTEGRATED_PLANNING_MASTER.ko.md)
 
 ## Mandatory cycle record
 Every planning review records start/mid-work `origin/main` exact SHA, authority-version drift, reviewed detailed specs and release/work records, gap IDs with severity, evidence and acceptance gates, EN/KO parity, and whether any implementation/Test/Production claim is actually evidenced. Historical decisions are preserved and superseded explicitly rather than deleted.
+
+## v2026.10.03.510 — 2026-10-03 — Global-growth execution design and reference expansion
+- Start/mid-work `origin/main=ac4dd484a90b266d945993d7bd8be57a74e8e1df`; isolated docs branch `docs/global-growth-deep-plan-v2026.10.03.510`.
+- Re-audited exact-main locale/proxy/layout/GSC/sitemap/pSEO source against the v509 authority and registered concrete P0/P1 implementation gaps instead of assuming the planning design already exists at runtime.
+- Added `GLOBAL_GROWTH_EXECUTION_SPEC.md` / `.ko.md` as implementation-ready detail for locale context, translation state, server SEO read model, pSEO admission/retirement, overseas feature epics, market readiness, ads/consent, analytics, admin and release QA.
+- New Crossref discovery cycle: 30 lanes, 210,000 raw records -> 121,320 within-v510 deduplicated candidates, 0 collection errors, SHA-256 `f16c6deceb18fa96fdd7b1132b2fc58e13f908899d477c9ce252a897adae7704`. v507 remains a separate corpus; no unverified cross-cycle unique total is claimed.
+- Current official-source constraints were refreshed separately from the corpus, including international URLs/hreflang, people-first/scaled-content policy, canonical/sitemap/lastmod, retired Google sitemap ping, JavaScript rendering, Core Web Vitals, BCP 47/CLDR, WCAG 2.2, IndexNow, consent/ad policy and minor/privacy controls.
+- Planning/docs-only cycle. No runtime, DB, Test or Production mutation/promotion is claimed.
 
 ## v2026.10.03.509 — 2026-10-03 — Global-growth authority integration onto latest main
 - User approval advanced the v507 written design from review-ready isolated planning into the current planning authority chain.

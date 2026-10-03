@@ -6,6 +6,7 @@
 > Authority adoption: integrated into current planning authority by v2026.10.03.509 on 2026-10-03.
 > Korean counterpart: [GLOBAL_GROWTH_SEO_REVENUE_SPEC.ko.md](GLOBAL_GROWTH_SEO_REVENUE_SPEC.ko.md)
 > Parent authority: [PROJECT_PLAN.md](PROJECT_PLAN.md)
+> Detailed v510 execution authority: [GLOBAL_GROWTH_EXECUTION_SPEC.md](GLOBAL_GROWTH_EXECUTION_SPEC.md)
 
 ## 1. Outcome and non-negotiable constraints
 

@@ -6,6 +6,7 @@
 > 권위 채택: 2026-10-03 v2026.10.03.509에서 현재 기획 권위로 통합됨.
 > 영문 정본: [GLOBAL_GROWTH_SEO_REVENUE_SPEC.md](GLOBAL_GROWTH_SEO_REVENUE_SPEC.md)
 > 상위 권위: [PROJECT_PLAN.ko.md](PROJECT_PLAN.ko.md)
+> v510 상세 실행 권위: [GLOBAL_GROWTH_EXECUTION_SPEC.ko.md](GLOBAL_GROWTH_EXECUTION_SPEC.ko.md)
 
 ## 1. 목표와 비타협 제약
 
