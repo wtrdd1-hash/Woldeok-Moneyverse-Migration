@@ -1118,6 +1118,88 @@ export const I18N_DICTIONARY: TranslationDictionary = {
     ja: '予測投票に参加する',
     zh: '参与预测投票',
   },
+
+  // ==========================================
+  // 18. Roadmap, Onboarding & Career Mastery (v86)
+  // ==========================================
+  'roadmap.title': {
+    ko: '초반·중반·후반 실전 성장 로드맵',
+    en: 'Early · Mid · Late Game Strategy Roadmap',
+    ja: '序盤・中盤・終盤 実戦成長ロードマップ',
+    zh: '初盘·中盘·后盘 实战成长攻略路线图',
+  },
+  'roadmap.stage1_title': {
+    ko: '1단계: 초반 시드 모으기 (1~3일)',
+    en: 'Stage 1: Seed Building (Day 1–3)',
+    ja: '第1段階：シード形成（1〜3日）',
+    zh: '第1阶段：初始本金（第1~3天）',
+  },
+  'roadmap.stage2_title': {
+    ko: '2단계: 중반 복리 & 주식 (4~14일)',
+    en: 'Stage 2: Compounding & Stocks (Day 4–14)',
+    ja: '第2段階：複利＆株式（4〜14日）',
+    zh: '第2阶段：复利与股票（第4~14天）',
+  },
+  'roadmap.stage3_title': {
+    ko: '3단계: 후반 부동산 건물주 (15일+)',
+    en: 'Stage 3: Real Estate Tycoon (Day 15+)',
+    ja: '第3段階：不動産オーナー（15日+）',
+    zh: '第3阶段：地产包租公（第15天+）',
+  },
+  'onboarding.title': {
+    ko: '온보딩 퀘스트 & 보너스',
+    en: 'Onboarding Quests & Bonuses',
+    ja: 'オンボーディングクエスト＆ボーナス',
+    zh: '新手引导任务与奖励',
+  },
+  'onboarding.bonus_total': {
+    ko: '총 170,000 WLD 웰컴 보너스',
+    en: 'Total 170,000 WLD Welcome Bonus',
+    ja: '合計170,000 WLD ウェルカムボーナス',
+    zh: '共计170,000 WLD新手欢迎大礼包',
+  },
+  'onboarding.claim_all': {
+    ko: '보상 일괄 수령',
+    en: 'Claim All Rewards',
+    ja: '報酬を一括受取',
+    zh: '一键领取全部奖励',
+  },
+  'career.mastery_guide': {
+    ko: '8대 전문 직업 완벽 가이드',
+    en: '8 Professional Careers Mastery Guide',
+    ja: '8大専門職業完全ガイド',
+    zh: '8大专业职业全能指南',
+  },
+  'career.job_switch': {
+    ko: '직업 전직 및 선택',
+    en: 'Job Switch & Selection',
+    ja: '職業選択・転職',
+    zh: '职业选择与转职',
+  },
+  'career.claim_shift': {
+    ko: '업무 수락 및 출근',
+    en: 'Claim Task / Clock In',
+    ja: '業務受託・出勤',
+    zh: '接取工作打卡上岗',
+  },
+  'career.cooldown_timer': {
+    ko: '실시간 업무 쿨다운',
+    en: 'Real-time Shift Cooldown',
+    ja: 'リアルタイム業務クールダウン',
+    zh: '实时工作倒计时',
+  },
+  'career.submit_shift': {
+    ko: '업무 완료 제출 & 급여 수령',
+    en: 'Submit Shift & Claim Salary',
+    ja: '業務完了提出＆給与受取',
+    zh: '提交工作并领薪',
+  },
+  'career.promotion_tiers': {
+    ko: '7대 숙련도 승진 로드맵',
+    en: '7 Mastery Promotion Tiers',
+    ja: '7大熟練度昇格ロードマップ',
+    zh: '7大熟练度晋升路线图',
+  },
 };
 
 /**

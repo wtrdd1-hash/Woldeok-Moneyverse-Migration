@@ -318,9 +318,16 @@ const FEATURE_DATA: readonly FeatureSection[] = [
 ];
 
 export function FeaturesView() {
-  const locale = useLocale();
+  const { locale } = useLocale();
   const [activeTab, setActiveTab] = useState<string>('stock-exchange');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  const t = (ko: string, en: string, ja: string, zh: string) => {
+    if (locale === 'en') return en;
+    if (locale === 'ja') return ja;
+    if (locale === 'zh') return zh;
+    return ko;
+  };
 
   const scrollToSection = (id: string) => {
     setActiveTab(id);
@@ -352,17 +359,32 @@ export function FeaturesView() {
         <div className="relative z-10 max-w-3xl space-y-4">
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400">
             <Sparkles className="h-3.5 w-3.5" />
-            <span>2026 머니버스 공식 기능 & 사용법 가이드</span>
+            <span>
+              {t(
+                '2026 머니버스 공식 기능 & 사용법 가이드',
+                '2026 Moneyverse Official Features & User Guide',
+                '2026 マネーバース公式機能＆利用ガイド',
+                '2026 Moneyverse官方核心功能与操作指南'
+              )}
+            </span>
           </div>
 
           <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl lg:text-5xl font-sans">
-            실제 화면으로 보는 <br className="hidden sm:inline" />
-            <span className="text-emerald-400">6대 핀테크 가상 경제</span> 완벽 조작법
+            {t('실제 화면으로 보는', 'Interactive Visual Guide to', '実際の画面で見る', '实景图解教程')}{' '}
+            <br className="hidden sm:inline" />
+            <span className="text-emerald-400">
+              {t('6대 핀테크 가상 경제', '6 Core Virtual Fintech Features', '6大フィンテック仮想経済', '6大虚拟金融科技经济')}
+            </span>{' '}
+            {t('완벽 조작법', 'Master Operation Guide', '完全操作法', '完整操作手册')}
           </h1>
 
           <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-2xl">
-            가상 주식 거래소부터 중앙은행 복리 예금, 직업 파밍, 부동산 메가시티, 5대 계산기까지!
-            실제 화면 스크린샷과 단계별 가이드로 1분 만에 마스터하고 나만의 금융 제국을 건설하세요.
+            {t(
+              '가상 주식 거래소부터 중앙은행 복리 예금, 직업 파밍, 부동산 메가시티, 5대 계산기까지! 실제 화면 스크린샷과 단계별 가이드로 1분 만에 마스터하고 나만의 금융 제국을 건설하세요.',
+              'From Virtual Stock Exchange to Central Bank Compounding, Careers, Real Estate, and 5 Calculators! Master everything in 1 minute and build your virtual wealth empire.',
+              '仮想株式取引所から中央銀行の複利預金、職業ファーミング、仮想不動産、5大計算機まで！実際の画面とステップバイステップガイドで完全マスター。',
+              '从虚拟股票交易所到中央银行复利储蓄、职业打卡、虚拟地产与5大计算器！跟随实景图解，1分钟轻松掌握，打造您的专属财富帝国。'
+            )}
           </p>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -370,16 +392,16 @@ export function FeaturesView() {
               onClick={() => scrollToSection('stock-exchange')}
               className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold h-11 px-5 shadow-lg shadow-emerald-950/40"
             >
-              기능별 사용법 살펴보기
+              {t('기능별 사용법 살펴보기', 'Explore Feature Tutorials', '機能別ガイドを見る', '查看各功能使用指南')}
               <ChevronRight className="ml-1.5 h-4 w-4" />
             </Button>
             <Button
               asChild
               variant="outline"
-              className="border-zinc-700 bg-zinc-900/80 hover:bg-zinc-800 text-zinc-200 h-11 px-5"
+              className="border-zinc-700 bg-zinc-900/80 hover:bg-zinc-850 text-zinc-200 h-11 px-5"
             >
               <Link href="/roadmap">
-                초·중·후반 로드맵 보기
+                {t('초·중·후반 로드맵 보기', 'View 3-Stage Roadmap', '3段階ロードマップを見る', '查看3阶段攻略路线图')}
                 <ArrowUpRight className="ml-1.5 h-4 w-4" />
               </Link>
             </Button>
@@ -394,7 +416,12 @@ export function FeaturesView() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="궁금한 기능이나 키워드를 검색하세요 (예: 호가창, 복리, 랜드, 계산기)"
+              placeholder={t(
+                '궁금한 기능이나 키워드를 검색하세요 (예: 호가창, 복리, 랜드, 계산기)',
+                'Search features or keywords (e.g. Orderbook, Compound, Land, Calculator)',
+                '機能を検索（例：気配値板、複利、ランド、計算機）',
+                '搜索功能或关键词（例：买卖盘、复利、地产、计算器）'
+              )}
               className="w-full rounded-xl border border-zinc-800 bg-zinc-900/80 pl-10 pr-10 py-2.5 text-xs text-white placeholder-zinc-500 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-colors"
             />
             {searchQuery && (

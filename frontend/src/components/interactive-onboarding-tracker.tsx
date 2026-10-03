@@ -18,10 +18,12 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useLocale } from '@/components/locale-provider';
 import {
   ONBOARDING_STEPS,
   getOnboardingState,
   claimOnboardingReward,
+  getLocalizedOnboardingStep,
   OnboardingState,
   OnboardingActionType,
 } from '@/lib/onboarding-tracker';
@@ -30,6 +32,7 @@ import { playWinSound, playCoinCollectSound } from '@/lib/audio-effects';
 const DISMISS_STORAGE_KEY = 'wdmv_onboarding_dismissed_until';
 
 export function InteractiveOnboardingTracker() {
+  const { locale } = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [state, setState] = useState<OnboardingState>({
@@ -39,6 +42,13 @@ export function InteractiveOnboardingTracker() {
   });
   const [justClaimedReward, setJustClaimedReward] = useState<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const t = (ko: string, en: string, ja: string, zh: string) => {
+    if (locale === 'en') return en;
+    if (locale === 'ja') return ja;
+    if (locale === 'zh') return zh;
+    return ko;
+  };
 
   const syncState = () => {
     setState(getOnboardingState());
@@ -127,7 +137,14 @@ export function InteractiveOnboardingTracker() {
       {justClaimedReward && (
         <div className="mb-2 p-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl shadow-2xl border border-emerald-400 font-bold text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Sparkles className="w-4 h-4 animate-spin text-amber-300" />
-          <span>보상 획득! +{justClaimedReward.toLocaleString()} WLD가 지갑에 입금되었습니다!</span>
+          <span>
+            {t(
+              `보상 획득! +${justClaimedReward.toLocaleString()} WLD가 지갑에 입금되었습니다!`,
+              `Reward Claimed! +${justClaimedReward.toLocaleString()} WLD deposited to wallet!`,
+              `報酬獲得！ +${justClaimedReward.toLocaleString()} WLDがウォレットに入金されました！`,
+              `奖励已领取！ +${justClaimedReward.toLocaleString()} WLD 已存入钱包！`
+            )}
+          </span>
         </div>
       )}
 
@@ -142,11 +159,16 @@ export function InteractiveOnboardingTracker() {
                     <Gift className="w-4 h-4" />
                   </span>
                   <CardTitle className="text-sm font-bold text-white tracking-tight">
-                    온보딩 퀘스트 & 보너스
+                    {t('온보딩 퀘스트 & 보너스', 'Onboarding Quests & Bonus', 'オンボーディングクエスト＆ボーナス', '新手引导任务与奖励')}
                   </CardTitle>
                 </div>
                 <CardDescription className="text-[11px] text-zinc-400 font-medium">
-                  {totalSteps}대 핵심 기능을 완료하고 총 {totalPossibleWld.toLocaleString()} WLD 획득!
+                  {t(
+                    `${totalSteps}대 핵심 기능을 완료하고 총 ${totalPossibleWld.toLocaleString()} WLD 획득!`,
+                    `Complete ${totalSteps} core steps to earn ${totalPossibleWld.toLocaleString()} WLD!`,
+                    `${totalSteps}大コア機能を完了して合計${totalPossibleWld.toLocaleString()} WLDを獲得！`,
+                    `完成${totalSteps}项核心体验，畅领${totalPossibleWld.toLocaleString()} WLD大礼！`
+                  )}
                 </CardDescription>
               </div>
 
@@ -156,8 +178,8 @@ export function InteractiveOnboardingTracker() {
                   size="sm"
                   variant="outline"
                   onClick={() => setIsOpen(false)}
-                  title="창 닫기 (ESC)"
-                  aria-label="온보딩 창 닫기"
+                  title={t('창 닫기 (ESC)', 'Close (ESC)', '閉じる (ESC)', '关闭 (ESC)')}
+                  aria-label="Close Onboarding Modal"
                   className="h-8 w-8 p-0 rounded-full bg-zinc-800 hover:bg-zinc-700 border-zinc-600 text-zinc-200 hover:text-white shadow-md flex items-center justify-center transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4 text-zinc-100" />
@@ -169,8 +191,12 @@ export function InteractiveOnboardingTracker() {
               {/* 프로그레스 바 */}
               <div className="space-y-1.5 font-mono text-xs p-2.5 rounded-xl bg-zinc-900/80 border border-zinc-800/80">
                 <div className="flex justify-between items-center text-[11px]">
-                  <span className="text-zinc-400 font-sans font-medium">온보딩 달성률</span>
-                  <span className="text-emerald-400 font-bold">{completedCount}/{totalSteps} 완료 ({progressPercent}%)</span>
+                  <span className="text-zinc-400 font-sans font-medium">
+                    {t('온보딩 달성률', 'Progress', '進捗率', '达成率')}
+                  </span>
+                  <span className="text-emerald-400 font-bold">
+                    {completedCount}/{totalSteps} {t('완료', 'Done', '完了', '已完成')} ({progressPercent}%)
+                  </span>
                 </div>
                 <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
                   <div
@@ -183,6 +209,7 @@ export function InteractiveOnboardingTracker() {
               {/* 퀘스트 목록 */}
               <div className="space-y-2">
                 {ONBOARDING_STEPS.map((step) => {
+                  const localized = getLocalizedOnboardingStep(step, locale);
                   const isCompleted = state.completed.includes(step.id);
                   const isClaimed = state.claimed.includes(step.id);
 
@@ -200,19 +227,19 @@ export function InteractiveOnboardingTracker() {
                       <div className="space-y-0.5 max-w-[210px]">
                         <div className="flex items-center gap-1.5">
                           <span className="text-[10px] px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-400 font-mono">
-                            {step.badge}
+                            {localized.badge}
                           </span>
                           <span className={`font-bold line-clamp-1 ${isCompleted ? 'text-white' : 'text-zinc-300'}`}>
-                            {step.title}
+                            {localized.title}
                           </span>
                         </div>
-                        <p className="text-[10px] text-zinc-400 line-clamp-1">{step.description}</p>
+                        <p className="text-[10px] text-zinc-400 line-clamp-1">{localized.description}</p>
                       </div>
 
                       <div className="shrink-0">
                         {isClaimed ? (
                           <span className="text-[10px] font-bold text-zinc-500 flex items-center gap-0.5">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-500/70" /> 수령완료
+                            <CheckCircle2 className="w-3 h-3 text-emerald-500/70" /> {t('수령완료', 'Claimed', '受取済', '已领取')}
                           </span>
                         ) : isCompleted ? (
                           <Button
@@ -220,7 +247,7 @@ export function InteractiveOnboardingTracker() {
                             onClick={() => handleClaim(step.id)}
                             className="h-7 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] shadow-md animate-pulse cursor-pointer"
                           >
-                            +{step.rewardWld.toLocaleString()} 받기
+                            +{step.rewardWld.toLocaleString()} {t('받기', 'Claim', '受取', '领取')}
                           </Button>
                         ) : (
                           <Button
@@ -230,7 +257,7 @@ export function InteractiveOnboardingTracker() {
                             className="h-7 px-2 border-zinc-700 bg-zinc-850 hover:bg-zinc-800 text-zinc-300 hover:text-white text-[10px] cursor-pointer"
                           >
                             <Link href={step.linkHref}>
-                              이동 <ArrowRight className="w-2.5 h-2.5 ml-0.5" />
+                              {t('이동', 'Go', '移動', '前往')} <ArrowRight className="w-2.5 h-2.5 ml-0.5" />
                             </Link>
                           </Button>
                         )}
@@ -243,70 +270,66 @@ export function InteractiveOnboardingTracker() {
               {/* 푸터 영역: 로드맵 링크 & 닫기 제어 */}
               <div className="pt-2 border-t border-zinc-800/80 space-y-2">
                 <div className="flex justify-between items-center text-[11px]">
-                  <span className="text-zinc-400">자세한 공략이 필요하신가요?</span>
+                  <span className="text-zinc-400">{t('자세한 공략이 필요하신가요?', 'Need full strategy?', '詳しい攻略が必要ですか？', '需要完整进阶攻略？')}</span>
                   <Link href="/roadmap" className="text-emerald-400 hover:underline font-bold inline-flex items-center gap-0.5">
-                    성장 로드맵 보기 <ChevronRight className="w-3 h-3" />
+                    {t('성장 로드맵 보기', 'View Roadmap', 'ロードマップを見る', '查看攻略路线图')} <ChevronRight className="w-3 h-3" />
                   </Link>
                 </div>
 
-                <div className="flex justify-between items-center pt-1 border-t border-zinc-900 text-[10px]">
+                <div className="flex items-center justify-between pt-1 text-[10px] text-zinc-500 border-t border-zinc-850">
                   <button
-                    type="button"
                     onClick={handleDismissToday}
-                    className="text-zinc-500 hover:text-zinc-300 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                    className="hover:text-zinc-300 flex items-center gap-1 transition-colors cursor-pointer"
                   >
-                    <EyeOff className="w-3 h-3" /> 오늘 하루 보지 않기
+                    <EyeOff className="w-3 h-3" />
+                    <span>{t('오늘 하루 보지 않기', 'Do not show for 24h', '今日一日非表示', '今日不再提示')}</span>
                   </button>
-
                   <button
-                    type="button"
                     onClick={() => setIsOpen(false)}
-                    className="text-zinc-400 hover:text-white font-medium inline-flex items-center gap-1 cursor-pointer"
+                    className="hover:text-zinc-300 transition-colors cursor-pointer"
                   >
-                    <Minus className="w-3 h-3" /> 닫기 / 최소화
+                    {t('최소화 접기', 'Minimize', '最小化', '最小化')}
                   </button>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
-      ) : isDismissed ? (
-        /* 오늘 하루 닫기 적용 시 작고 은은한 미니멀 재열기 버튼 */
-        <Button
-          onClick={handleUndismiss}
-          size="sm"
-          variant="outline"
-          title="온보딩 퀘스트 다시 열기"
-          className="h-9 px-3 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border-zinc-700 shadow-lg text-[11px] flex items-center gap-1.5 backdrop-blur-md ring-1 ring-white/10 cursor-pointer transition-all hover:scale-105"
-        >
-          <Gift className="w-3.5 h-3.5 text-emerald-400" />
-          <span>퀘스트 ({completedCount}/{totalSteps})</span>
-        </Button>
       ) : (
-        /* 프리미엄 다크 글래스모피즘 플로팅 칩 (Linear/Stripe 스타일) */
-        <button
-          type="button"
-          onClick={() => setIsOpen(true)}
-          className="group relative flex items-center gap-2 h-10 pl-3 pr-3.5 rounded-full bg-zinc-950/90 hover:bg-zinc-900 text-zinc-100 border border-emerald-500/40 hover:border-emerald-400/80 shadow-2xl backdrop-blur-xl ring-1 ring-emerald-500/20 hover:ring-emerald-400/40 transition-all duration-300 hover:scale-105 cursor-pointer"
-        >
-          <span className="p-1 rounded-full bg-emerald-500/20 text-emerald-400 group-hover:bg-emerald-500/30 transition-colors">
-            <Gift className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-          </span>
-
-          <span className="text-xs font-bold tracking-tight">온보딩 퀘스트</span>
-
-          <span className="px-1.5 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-500/30 text-emerald-300 font-mono text-[10px] font-bold">
-            {completedCount}/{totalSteps}
-          </span>
-
-          {unclaimedCount > 0 && (
-            <span className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-extrabold flex items-center justify-center border-2 border-zinc-950 animate-bounce shadow-md">
-              {unclaimedCount}
-            </span>
+        /* 접힌 상태 (Collapsed Floating Pill Chip) */
+        <div className="flex flex-col items-end gap-1.5">
+          {isDismissed ? (
+            <button
+              onClick={handleUndismiss}
+              className="text-[10px] font-mono text-zinc-400 hover:text-zinc-200 bg-zinc-950/80 px-2 py-0.5 rounded-md border border-zinc-800 backdrop-blur-sm shadow-sm transition-colors cursor-pointer flex items-center gap-1"
+            >
+              <Gift className="w-3 h-3 text-emerald-400" />
+              <span>{t('퀘스트 다시보기', 'Show Quests', 'クエスト再表示', '恢复任务卡')}</span>
+            </button>
+          ) : (
+            <Button
+              onClick={() => setIsOpen(true)}
+              className="h-10 px-3.5 rounded-full bg-zinc-950/90 hover:bg-zinc-900 border border-emerald-500/40 text-white font-bold text-xs shadow-xl backdrop-blur-xl flex items-center gap-2 ring-1 ring-emerald-500/20 active:scale-95 transition-all group/chip cursor-pointer"
+            >
+              <div className="relative">
+                <Gift className="w-4 h-4 text-emerald-400 group-hover/chip:rotate-12 transition-transform" />
+                {unclaimedCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+                )}
+              </div>
+              <span className="tracking-tight text-[11px] sm:text-xs">
+                {t('온보딩 퀘스트', 'Onboarding Quests', 'オンボーディングクエスト', '新手任务')}
+              </span>
+              <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] px-1.5 py-0 h-4 font-mono font-bold">
+                {completedCount}/{totalSteps}
+              </Badge>
+              {unclaimedCount > 0 && (
+                <span className="h-2 w-2 rounded-full bg-amber-400 ring-2 ring-zinc-950 animate-pulse" />
+              )}
+            </Button>
           )}
-        </button>
+        </div>
       )}
     </div>
   );
 }
-

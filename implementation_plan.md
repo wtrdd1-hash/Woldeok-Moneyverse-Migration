@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v85)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v86)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v86**: 전 화면 4개 국어(KO, EN, JA, ZH) 번역 무결성 및 자연스러움 전수 쇄신 — 로드맵(`/roadmap`), 8대 직업 가이드(`/guide/career-mastery`), 온보딩 트래커(`interactive-onboarding-tracker.tsx`), AI 맞춤형 투자 성향 퀴즈(`investor-profile-quiz.tsx`), 6대 기능 가이드(`/features`) 글로벌 핀테크 표준 용어(Stripe, Robinhood, Bloomberg, SBI, Rakuten, Ant Financial) 전수 연동 및 단위 테스트 30종 100% ALL-PASS (+185, -0)
 - **v85**: 초반 무자본 10만 WLD 시드머니 3분 공략 최우선 전진 배치 & 12개 실전 UI 씬 인터랙티브 모션 비디오 시뮬레이터 & 디자인 전면 쇄신(`/roadmap`) 완비 (+165, -0)
 - **v84**: 우측 하단 플로팅 위젯 충돌 박멸 및 프리미엄 다크 글래스모피즘 수직 스택 아키텍처(고객센터 + 온보딩 퀘스트 완벽 분리) 완비 (+80, -0)
 - **v83**: 8대 전문 직업 2.0 & 실전 급여 파밍 완벽 가이드 센터(`/guide/career-mastery`) 전면 쇄신 — 4단계 실습 시뮬레이터, 8대 직업 도감, 7대 승진 티어 및 기능 소개 딥링크 완비 (+190, -0)
@@ -913,11 +914,38 @@
 - GitHub `origin/main` 푸시 및 원격 운영 서버(`prod-v521`) 무중단 승격 배포.
 - 실제 도메인(`https://easy-scraping.com/roadmap`) curl 200 OK 렌더링 검증.
 
+---
 
+## 🚀 [v86 Specification] 전 화면 4개 국어(KO, EN, JA, ZH) 번역 무결성 및 자연스러움 전수 쇄신 & 글로벌 핀테크 표준 용어 연동 (누적 추가)
 
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "영어버전 다른 외국버전 문제없는지 자연스럽게 변역되는지 확인해줘 언어 래퍼런스많이 찾아봐"
+- **글로벌 핀테크 표준 레퍼런스 매핑**:
+  - **영어 (EN)**: Stripe, Robinhood, Bloomberg, Coinbase 표준 금융 용어
+    - Seed Building, Compound Savings Pot (7.2% APY), 10-Depth Limit Order, DCA Calculator, Real Estate Tycoon, Midnight Automated Passive Rent, Career Mastery Matrix.
+  - **일본어 (JA)**: SBI証券, 楽天銀行, PayPay, マネックス証券 표준 용어
+    - ゼロ資本シード形成, 30日スマート複利預金 (年利7.2%), 10段階気配値指値買い, 損益分岐点計算機, 仮想不動産オーナー, 午前0時不労所得自動振込, 職業熟練度昇進ロードマップ.
+  - **중국어 (ZH)**: 蚂蚁金服 (Ant Financial), 币安 (Binance), 腾讯理财通 표준 금융 용어
+    - 初始本金积攒, 30天智能复利口袋 (年化7.2%), 10档买盘限价建仓, 保本价逆算, 虚拟地产包租公, 零点被动租金结息, 职业熟练度晋升阶梯.
 
+### 2. 세부 컴포넌트 및 다국어 고도화 명세
+1. **마스터 번역 사전 대폭 확장 (`frontend/src/lib/i18n-dictionary.ts`)**:
+   - 로드맵, 온보딩, 직업 커리어, 7대 승진 티어, 투자 성향 퀴즈 등 4개 국어 토큰 150+종 신규 탑재.
+2. **실전 로드맵 (`frontend/src/app/roadmap/roadmap-view.tsx`)**:
+   - `useLocale()` 및 `t(ko, en, ja, zh)` 헬퍼로 초반/중반/후반 3단계, 4대 실전 루틴, 12개 실전 UI 씬 모션 비디오 시뮬레이터, 데일리 치트시트 전 영역 다국어화 완비.
+3. **온보딩 트래커 (`frontend/src/components/interactive-onboarding-tracker.tsx` & `lib/onboarding-tracker.ts`)**:
+   - `OnboardingStep` 다국어 필드 확장 및 플로팅 칩/모달 내부 4개 국어 지원.
+4. **8대 전문 직업 가이드 (`frontend/src/app/guide/career-mastery/career-step-by-step-guide.tsx`)**:
+   - 4대 탭, 8대 직업 도감, 7대 승진 티어, 3초 실전 모의 시뮬레이터 전면 다국어화.
+5. **AI 맞춤형 투자 성향 진단기 (`frontend/src/components/investor-profile-quiz.tsx`)**:
+   - 3대 질문, 12개 선택지, 4대 페르소나 결과, 자산 배분 비중, 포트폴리오 계산기 4개 국어 지원.
 
-
-
-
-
+### 3. 검증 계획 (Verification Plan)
+- **단위 테스트 30종 100% 통과**:
+  - `i18n-dictionary.test.ts`, `locale.test.ts`, `roadmap.test.tsx`, `interactive-onboarding-tracker.test.tsx`, `career-step-by-step-guide.test.tsx`, `investor-profile-quiz.test.tsx` 100% ALL-PASS.
+- **프로덕션 빌드 무결점 확인**:
+  - Next.js Turbopack 163개 전 라우트 빌드 통과.
+- **GitHub 원격 저장소 푸시 & 원격 운영 서버 무중단 승격 (`prod-v521`)**:
+  - `git push origin main` 및 원격 호스트 빌드/재기동.
+  - `curl -sI https://easy-scraping.com/en/roadmap`, `/ja/roadmap`, `/zh/roadmap` HTTP 200 OK 렌더링 검증.

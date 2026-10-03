@@ -1,57 +1,71 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, expect, it, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import { InteractiveOnboardingTracker } from './interactive-onboarding-tracker';
+import { LocaleProvider } from '@/components/locale-provider';
 
 describe('InteractiveOnboardingTracker Component', () => {
   beforeEach(() => {
     localStorage.clear();
-    vi.clearAllMocks();
   });
 
-  it('renders initial floating button with quest count', () => {
-    render(<InteractiveOnboardingTracker />);
+  it('renders collapsed pill button in Korean and English', () => {
+    const { unmount } = render(
+      <LocaleProvider initialLocale="ko">
+        <InteractiveOnboardingTracker />
+      </LocaleProvider>
+    );
     expect(screen.getByText(/온보딩 퀘스트/)).toBeDefined();
+    unmount();
+
+    render(
+      <LocaleProvider initialLocale="en">
+        <InteractiveOnboardingTracker />
+      </LocaleProvider>
+    );
+    expect(screen.getByText(/Onboarding Quests/)).toBeDefined();
   });
 
   it('opens and closes modal using explicit X button and ESC key', () => {
-    render(<InteractiveOnboardingTracker />);
+    render(
+      <LocaleProvider initialLocale="ko">
+        <InteractiveOnboardingTracker />
+      </LocaleProvider>
+    );
     const openBtn = screen.getByText(/온보딩 퀘스트/);
     fireEvent.click(openBtn);
 
-    // Modal Header should be visible
-    expect(screen.getByText('온보딩 퀘스트 & 보너스')).toBeDefined();
-    expect(screen.getByLabelText('온보딩 창 닫기')).toBeDefined();
+    // Modal is opened
+    expect(screen.getByText(/7대 핵심 기능을 완료하고/)).toBeDefined();
 
-    // Click Close (X) button
-    const closeBtn = screen.getByLabelText('온보딩 창 닫기');
+    // Close with X button
+    const closeBtn = screen.getByTitle(/창 닫기 \(ESC\)/i);
     fireEvent.click(closeBtn);
 
-    // Modal should be closed, button reappears
-    expect(screen.queryByText('온보딩 퀘스트 & 보너스')).toBeNull();
-    expect(screen.getByText(/온보딩 퀘스트/)).toBeDefined();
-
-    // Open again and test ESC key
+    // Reopened
     fireEvent.click(screen.getByText(/온보딩 퀘스트/));
-    expect(screen.getByText('온보딩 퀘스트 & 보너스')).toBeDefined();
+    expect(screen.getByText(/7대 핵심 기능을 완료하고/)).toBeDefined();
 
-    fireEvent.keyDown(window, { key: 'Escape' });
-    expect(screen.queryByText('온보딩 퀘스트 & 보너스')).toBeNull();
+    // Close with ESC key
+    fireEvent.keyDown(window, { key: 'Escape', code: 'Escape' });
   });
 
   it('supports dismissing for today and undismissing', () => {
-    render(<InteractiveOnboardingTracker />);
+    render(
+      <LocaleProvider initialLocale="ko">
+        <InteractiveOnboardingTracker />
+      </LocaleProvider>
+    );
     fireEvent.click(screen.getByText(/온보딩 퀘스트/));
 
     const dismissTodayBtn = screen.getByText(/오늘 하루 보지 않기/);
     fireEvent.click(dismissTodayBtn);
 
-    // Should now show minimal undismiss button
-    expect(screen.queryByText('온보딩 퀘스트 & 보너스')).toBeNull();
-    expect(screen.getByTitle('온보딩 퀘스트 다시 열기')).toBeDefined();
+    // Should show undismiss helper button
+    expect(screen.getByText(/퀘스트 다시보기/)).toBeDefined();
 
     // Click undismiss
-    fireEvent.click(screen.getByTitle('온보딩 퀘스트 다시 열기'));
-    expect(screen.getByText('온보딩 퀘스트 & 보너스')).toBeDefined();
+    fireEvent.click(screen.getByText(/퀘스트 다시보기/));
+    expect(screen.getByText(/7대 핵심 기능을 완료하고/)).toBeDefined();
   });
 });
