@@ -121,6 +121,42 @@ export default function GuidePage() {
           {/* 5 Pillar Deep Dive Links Grid */}
           <div className="pt-4 grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
             <Link
+              href="/roadmap"
+              className="flex items-center justify-between rounded-xl border border-emerald-500/50 bg-emerald-950/20 p-3.5 text-xs transition-all hover:border-emerald-400 hover:bg-emerald-950/40 hover:shadow-xs group"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400">
+                  <Sparkles className="size-4" />
+                </div>
+                <div>
+                  <div className="font-bold text-emerald-300 group-hover:text-white transition-colors">
+                    초반·중반·후반 실전 로드맵 🎬
+                  </div>
+                  <div className="text-[11px] text-zinc-400">실시간 화면 비디오 시뮬레이터</div>
+                </div>
+              </div>
+              <ChevronRight className="size-4 text-emerald-400" />
+            </Link>
+
+            <Link
+              href="/features"
+              className="flex items-center justify-between rounded-xl border border-cyan-500/50 bg-cyan-950/20 p-3.5 text-xs transition-all hover:border-cyan-400 hover:bg-cyan-950/40 hover:shadow-xs group"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-cyan-500/20 text-cyan-400">
+                  <Zap className="size-4" />
+                </div>
+                <div>
+                  <div className="font-bold text-cyan-300 group-hover:text-white transition-colors">
+                    6대 기능 시각 가이드 🖼️
+                  </div>
+                  <div className="text-[11px] text-zinc-400">실제 사이트 UI 스크린샷 완벽 조작법</div>
+                </div>
+              </div>
+              <ChevronRight className="size-4 text-cyan-400" />
+            </Link>
+
+            <Link
               href="/guide/stock-trading"
               className="flex items-center justify-between rounded-xl border border-border/80 bg-background/80 p-3.5 text-xs transition-all hover:border-primary/50 hover:bg-card hover:shadow-xs"
             >
@@ -128,6 +164,7 @@ export default function GuidePage() {
                 <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
                   <TrendingUp className="size-4" />
                 </div>
+
                 <div>
                   <div className="font-bold text-foreground">가상 주식 실전 매매</div>
                   <div className="text-[11px] text-muted-foreground">10-Depth 호가 & AI 감성 매매법</div>

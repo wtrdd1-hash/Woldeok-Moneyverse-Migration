@@ -40,8 +40,10 @@ const ENGLISH_LABELS: Readonly<Record<string, string>> = {
   '덕지갑': 'Wallet',
   '커뮤니티': 'Community',
   '안내': 'Guide',
+  '실전 성장 로드맵': 'Growth Roadmap',
   '핵심 기능 안내': 'Visual Features Guide',
   '기능 안내': 'Features Guide',
+
   '내 대시보드': 'Dashboard',
 
   '활동': 'Activity',
@@ -422,8 +424,10 @@ export const CATEGORY_NAV: readonly NavCategory[] = [
     icon: 'MessageSquare',
     description: '자유 토론 게시판, 사진 갤러리, 운영 소식 및 1:1 고객지원',
     entries: [
+      { href: '/roadmap', label: '실전 성장 로드맵', description: '초반·중반·후반 3단계 영상 시뮬레이터와 함께하는 완벽 입문 가이드', badge: 'HOT' },
       { href: '/features', label: '핵심 기능 안내', description: '실제 화면 스크린샷과 함께 보는 6대 기능 완벽 조작법', badge: 'NEW' },
       { href: '/board', label: '커뮤니티 게시판', description: '종목 토론, 자유 소통 및 정보 공유' },
+
       { href: '/gallery', label: '사진 갤러리', description: '유저 인증샷 및 미디어 갤러리' },
       { href: '/announcements', label: '운영 소식', description: '시스템 패치 노트 및 공식 공지사항' },
       { href: '/guide', label: '이용 가이드', description: '3분 입문 로드맵, 모의 자산 시뮬레이터 & 온보딩 퀘스트', badge: '인기' },
