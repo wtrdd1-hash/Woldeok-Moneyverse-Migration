@@ -14,7 +14,7 @@ The current product direction remains unlimited-by-default for ordinary job part
 ## 1. Core policy
 
 1. Ordinary participation and mastery remain unlimited by default.
-2. Newly minted WLD is paced by server-authoritative work duration, verification, settlement, and marginal reward curves.
+2. Newly minted WLD is paced by server-authoritative work duration, verification, settlement, and marginal reward curves, and every true issuance must consume an eligible Central Bank monetary order through the canonical Mint path.
 3. Client-side timers never authorize settlement.
 4. Transfers between users are not sinks; only destroyed currency counts as a hard sink.
 5. Economy control is based on multiple signals, never on one global faucet/sink ratio.

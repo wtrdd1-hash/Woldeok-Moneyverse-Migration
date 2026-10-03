@@ -6,7 +6,8 @@ Start here. Do not infer current product truth from the newest-looking filename,
 
 ## Current authority
 
-- [Implementation-facing project plan](planning/PROJECT_PLAN.md) / [한국어](planning/PROJECT_PLAN.ko.md) — **v2026.09.30.487**
+- [Implementation-facing project plan](planning/PROJECT_PLAN.md) / [한국어](planning/PROJECT_PLAN.ko.md) — **v2026.10.04.523**
+- [Central Bank, Mint, Treasury & Economy Core specification](planning/CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.md) / [한국어](planning/CENTRAL_BANK_MINT_TREASURY_ECONOMY_CORE_SPEC.ko.md) — **v2026.10.04.523**
 - [Integrated planning master](planning/INTEGRATED_PLANNING_MASTER.md) / [한국어](planning/INTEGRATED_PLANNING_MASTER.ko.md)
 - [Treasury Automated Social Recirculation Spec](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md) / [한국어](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md) — **v2026.10.04.522**
 - [Advertising-only revenue specification](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md) / [한국어](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md) — **v2026.09.30.487**
@@ -17,7 +18,7 @@ Start here. Do not infer current product truth from the newest-looking filename,
 
 ## Current documentation state
 
-Repository `main` was observed at **v2026.09.29.486**, while the implementation-facing product plan is **v2026.09.30.487**, with the v487 advertising-only cash-revenue superseding gate integrated. This is an explicit **AUTHORITY_DRIFT** condition. Runtime/source work after v444 must be reconciled into the authoritative plan before documentation may claim that those product decisions are fully integrated.
+For this v523 planning cycle, `origin/main` was rechecked at `065ee42204a4238c5010897212c7fc2a6c848f64` after a mid-work treasury-documentation drift was detected and preserved. The implementation-facing product plan is now **v2026.10.04.523** for the Central Bank/Mint/Treasury institutional decision. This is a planning-authority update only; runtime/source states that are not explicitly reconciled and evidenced remain subject to the repository's authority-drift rule.
 
 The v402 full-review document remains historical evidence and is no longer presented as the current full-review authority.
 
