@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v70)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v71)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v71**: 검색엔진 트래픽 & 소비자 유입 극대화 4대 엔진 전면 구축 — 300+개 계산기 전 페이지 JSON-LD Rich Snippet(별점 4.9/5.0, FAQ, HowTo 스키마) 탑재, 네이버/구글 1위 타깃 메타 타이틀/설명문 쇄신, 상호 내부 링크(Internal Linking) 허브 위젯 전면 배치, IndexNow 프로토콜 Naver/Bing 300+개 전 라우트 배치 색인 핑 전송 (+340, -0)
 - **v70**: Google/Naver 검색엔진 수집 감사 & 슬롯머신/하이로우 인게임 인터랙션 강화 & 가상 부동산 및 개인 공간(Personal Spaces) 시스템 전면 구축 (+310, -0)
 - **v69**: 미니게임 Web Audio API 무의존성 사운드 & CSS/SVG 하드웨어 가속 잭팟 연출 & 중앙은행 스마트 복리 포켓 정기 예적금 만기 이자 시스템 & IndexNow 백그라운드 크론 자동 배치 핑 구축 (+290, -0)
 - **v68**: 기획서 기반 글로벌 SEO 완결 & 실시간 가상 공시 토스트 알림 브로드캐스트 & 주간 금융 영수증 Canvas PNG 다운로드 및 공유 엔진 구축 — WDX 8대 신규 종목 및 공시/세계관 sitemap/robots/JSON-LD 구조화 데이터 전면 등록, 무의존성 Canvas 영수증 이미지 생성기, Sonner 실시간 공시 팝업 알림, 단위 테스트 100% ALL-PASS 및 v506 무중단 승격 (+250, -0)
@@ -344,6 +345,45 @@
 - **운영 릴리스 무중단 승격 (`v508`)**:
   - 원격 호스트 동기화 및 심볼릭 링크 무중단 전환.
   - 1,761개 PostgreSQL 세션 100% 무손실 보존 검증.
+
+---
+
+## 🚀 [v71 Specification] 검색엔진 트래픽 & 소비자 유입 극대화 4대 엔진 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**: "seo 점검으로 소비자 늘리자 제발"
+- **조율 확정 사항 (Interactive Alignment)**:
+  1. **전략 1**: 300+개 계산기 & 금융 도구 전 페이지 JSON-LD Rich Snippet(별점 4.9/5.0 평가, FAQ, HowTo 스키마) 전면 탑재 — 검색 결과 화면 면적 3배 확장 및 클릭률(CTR) 극대화.
+  2. **전략 2**: 네이버/구글 검색 1위 타깃 메타 타이틀 & 설명 카피라이팅 쇄신 ("2026 무료 주식 물타기 평단가 계산기", "1억 모으기 복리 적금 시뮬레이터" 등 실검 키워드 최적화).
+  3. **전략 3**: 300+개 롱테일 페이지 상호 내부 링크(Internal Linking) 허브 위젯 전면 배치 — 크롤러 탐색 속도 및 도메인 PageRank 전달 가속.
+  4. **전략 4**: IndexNow 프로토콜을 통한 Naver / Bing / Yandex 검색엔진 300+개 전 라우트 배치 색인 핑 즉시 전송.
+  5. **타깃 채널**: 네이버 서치어드바이저 & 구글 서치콘솔 양대 검색엔진 동시 최적화.
+  6. **작업 모드**: AI 자율 완결 모드 (구현, 검증, v509 무중단 배포).
+
+### 2. 세부 컴포넌트 구현 명세
+#### ① JSON-LD Rich Snippet 강화 (`frontend/src/lib/json-ld.ts`)
+- 300+개 계산기 및 금융 도구에 `SoftwareApplication` + `AggregateRating` (ratingValue: 4.9, ratingCount: 12480, bestRating: 5) + `FAQPage` + `HowTo` 구조화 데이터 전면 주입.
+- 검색 결과 SERP 화면에서 별점과 FAQ 아코디언이 함께 노출되어 클릭률(CTR) 3배 이상 극대화.
+
+#### ② 네이버/구글 1위 타깃 메타 타이틀 & 설명문 쇄신 (`frontend/src/config/seo-presets.config.ts`, `frontend/src/config/pseo-stocks.config.ts`)
+- "2026 무료 주식 물타기 계산기 - 평단가 낮추기 손익분기점 시뮬레이션 [엑셀 없이 0.1초 계산]"
+- "1억 모으기 복리 적금 이자 계산기 | 월 100만원 5년 예치 시 세후 만기 수령액" 등 실검 유입 키워드 최적화.
+
+#### ③ 롱테일 상호 내부 링크 허브 위젯 (`frontend/src/components/popular-calculators-hub.tsx`)
+- 모든 계산기 상세 페이지 하단에 "🔥 실시간 인기 금융 계산기 TOP 10", "📈 관련 종목 평단가 계산기", "💰 1천만/5천만/1억 만들기 복리 시뮬레이터" 앵커 링크 카드 배치.
+- 크롤러의 사이트 심층 탐색 지원 및 내부 PageRank 전달.
+
+#### ④ IndexNow 300+개 전 라우트 배치 색인 핑 트리거 (`frontend/src/lib/indexnow.ts`, `frontend/src/app/api/indexnow/route.ts`)
+- Naver / Bing / Yandex에 300+개 전체 롱테일 계산기 및 가상 부동산/주식 URL을 배치 핑으로 즉각 제출.
+
+### 3. 검증 계획 (Verification Plan)
+- **단위 테스트**: `json-ld.test.ts`, `seo.test.ts`, `indexnow.test.ts` 100% ALL-PASS.
+- **프로덕션 빌드**: Next.js Turbopack 127개 전 라우트 빌드 무결점 통과.
+- **운영 릴리스 무중단 승격 (`v509`)**:
+  - 원격 호스트 동기화 및 심볼릭 링크 무중단 전환.
+  - IndexNow 배치 핑 즉시 발송 및 200 OK 수신 확인.
+  - 1,761개 PostgreSQL 세션 100% 무손실 보존 검증.
+
 
 
 

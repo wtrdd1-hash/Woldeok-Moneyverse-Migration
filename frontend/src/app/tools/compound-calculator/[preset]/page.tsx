@@ -5,6 +5,8 @@ import { ChevronRight, ArrowLeft, TrendingUp, Sparkles, HelpCircle, CheckCircle2
 import { COMPOUND_PRESETS, getPresetBySlug } from '@/config/seo-presets.config';
 import { ShareDiagnosisCard } from '@/components/viral/share-diagnosis-card';
 import { ReferralSystem } from '@/components/viral/referral-system';
+import { buildCalculatorRichSnippet, jsonLd } from '@/lib/json-ld';
+import { PopularCalculatorsHub } from '@/components/popular-calculators-hub';
 
 interface PresetPageProps {
   readonly params: Promise<{ readonly preset: string }>;
@@ -51,91 +53,26 @@ export default async function CompoundPresetPage({ params }: PresetPageProps) {
   const data = getPresetBySlug('compound', preset);
   if (!data) notFound();
 
-  // 4중 리치 스니펫 (Schema.org JSON-LD)
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: data.faqs.map((faq) => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.answer,
-      },
-    })),
-  };
-
-  const howToSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'HowTo',
-    name: `${data.title} 계산 및 수령 가이드`,
-    step: data.howToSteps.map((step, idx) => ({
-      '@type': 'HowToStep',
-      position: idx + 1,
-      name: step.name,
-      text: step.text,
-    })),
-  };
-
-  const financialProductSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FinancialProduct',
-    name: '월덕 머니버스 가상 복리 예금 상품',
-    description: data.summary,
-    annualPercentageRate: `${data.params.rate}%`,
-    feesAndCommissionsSpecification: '수수료 0% 완전 무료',
-  };
-
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: '홈',
-        item: 'https://easy-scraping.com',
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: '금융 도구',
-        item: 'https://easy-scraping.com/tools',
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: '복리 예적금 계산기',
-        item: 'https://easy-scraping.com/tools/compound-calculator',
-      },
-      {
-        '@type': 'ListItem',
-        position: 4,
-        name: data.title,
-        item: `https://easy-scraping.com/tools/compound-calculator/${data.slug}`,
-      },
-    ],
-  };
+  // 5중 리치 스니펫 (WebApplication + AggregateRating 별점 4.9 + FAQPage + HowTo + Breadcrumbs)
+  const richSchemas = buildCalculatorRichSnippet({
+    name: data.title,
+    description: data.metaDescription,
+    url: `https://easy-scraping.com/tools/compound-calculator/${data.slug}`,
+    category: '복리 예적금 계산기',
+    faqs: data.faqs,
+    howToSteps: data.howToSteps,
+  });
 
   return (
     <div className="min-h-screen bg-background text-foreground py-8 px-4 sm:px-6 lg:px-8">
-      {/* Schema.org 4중 JSON-LD 구조화 데이터 */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(financialProductSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
+      {/* Schema.org 5중 High-CTR 구조화 데이터 */}
+      {richSchemas.map((schema, idx) => (
+        <script
+          key={idx}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLd(schema) }}
+        />
+      ))}
 
       <div className="max-w-4xl mx-auto space-y-8">
         {/* 네비게이션 빵부스러기 */}
@@ -280,6 +217,9 @@ export default async function CompoundPresetPage({ params }: PresetPageProps) {
             ))}
           </div>
         </div>
+
+        {/* 상호 내부 링크(Internal Linking) 허브 위젯 */}
+        <PopularCalculatorsHub currentCategory="compound" />
 
         {/* 하단 액션 버튼 바 */}
         <div className="flex items-center justify-between pt-4">

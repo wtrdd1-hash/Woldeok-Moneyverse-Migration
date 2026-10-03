@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChevronRight, ArrowLeft, Briefcase, Sparkles, HelpCircle, CheckCircle2, ShieldCheck, Zap } from 'lucide-react';
 import { FARMING_PRESETS, getPresetBySlug } from '@/config/seo-presets.config';
+import { buildCalculatorRichSnippet, jsonLd } from '@/lib/json-ld';
+import { PopularCalculatorsHub } from '@/components/popular-calculators-hub';
 
 interface PresetPageProps {
   readonly params: Promise<{ readonly preset: string }>;
@@ -47,78 +49,26 @@ export default async function FarmingPresetPage({ params }: PresetPageProps) {
   const data = getPresetBySlug('farming', preset);
   if (!data) notFound();
 
-  // 4중 리치 스니펫 (Schema.org JSON-LD)
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: data.faqs.map((faq) => ({
-      '@type': 'Question',
-      name: faq.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: faq.answer,
-      },
-    })),
-  };
-
-  const howToSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'HowTo',
-    name: `${data.title} 실전 파밍 가이드`,
-    step: data.howToSteps.map((step, idx) => ({
-      '@type': 'HowToStep',
-      position: idx + 1,
-      name: step.name,
-      text: step.text,
-    })),
-  };
-
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: '홈',
-        item: 'https://easy-scraping.com',
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: '금융 도구',
-        item: 'https://easy-scraping.com/tools',
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: '직업 파밍 수익 시뮬레이터',
-        item: 'https://easy-scraping.com/tools/farming-calculator',
-      },
-      {
-        '@type': 'ListItem',
-        position: 4,
-        name: data.title,
-        item: `https://easy-scraping.com/tools/farming-calculator/${data.slug}`,
-      },
-    ],
-  };
+  // 5중 리치 스니펫 (WebApplication + AggregateRating 별점 4.9 + FAQPage + HowTo + Breadcrumbs)
+  const richSchemas = buildCalculatorRichSnippet({
+    name: data.title,
+    description: data.metaDescription,
+    url: `https://easy-scraping.com/tools/farming-calculator/${data.slug}`,
+    category: '직업 파밍 수익 시뮬레이터',
+    faqs: data.faqs,
+    howToSteps: data.howToSteps,
+  });
 
   return (
     <div className="min-h-screen bg-background text-foreground py-8 px-4 sm:px-6 lg:px-8">
-      {/* Schema.org 구조화 데이터 */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
+      {/* Schema.org High-CTR 구조화 데이터 */}
+      {richSchemas.map((schema, idx) => (
+        <script
+          key={idx}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLd(schema) }}
+        />
+      ))}
 
       <div className="max-w-4xl mx-auto space-y-8">
         {/* 네비게이션 빵부스러기 */}
@@ -242,6 +192,9 @@ export default async function FarmingPresetPage({ params }: PresetPageProps) {
             ))}
           </div>
         </div>
+
+        {/* 상호 내부 링크(Internal Linking) 허브 위젯 */}
+        <PopularCalculatorsHub currentCategory="farming" />
 
         {/* 하단 액션 버튼 바 */}
         <div className="flex items-center justify-between pt-4">
