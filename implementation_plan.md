@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v69)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v70)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v70**: Google/Naver 검색엔진 수집 감사 & 슬롯머신/하이로우 인게임 인터랙션 강화 & 가상 부동산 및 개인 공간(Personal Spaces) 시스템 전면 구축 (+310, -0)
 - **v69**: 미니게임 Web Audio API 무의존성 사운드 & CSS/SVG 하드웨어 가속 잭팟 연출 & 중앙은행 스마트 복리 포켓 정기 예적금 만기 이자 시스템 & IndexNow 백그라운드 크론 자동 배치 핑 구축 (+290, -0)
 - **v68**: 기획서 기반 글로벌 SEO 완결 & 실시간 가상 공시 토스트 알림 브로드캐스트 & 주간 금융 영수증 Canvas PNG 다운로드 및 공유 엔진 구축 — WDX 8대 신규 종목 및 공시/세계관 sitemap/robots/JSON-LD 구조화 데이터 전면 등록, 무의존성 Canvas 영수증 이미지 생성기, Sonner 실시간 공시 팝업 알림, 단위 테스트 100% ALL-PASS 및 v506 무중단 승격 (+250, -0)
 - **v67**: 기획서(PRODUCT_DESIGN_SPEC.ko.md Section 5) 기반 WDX 주식 시장 고도화 완결 — WDX 8대 종목 및 10대 가상 주식 실시간 기업 공시/속보 피드 엔진(`CorporateDisclosureTicker`) 구축, 3섹터 분산 투자 진단 및 HHI 자산 집중도 분석기(`SectorDiversificationCard`, `portfolio-diagnostics.ts`), 투자 거래일지 & 매매 복기 다이어리(`TradeDiaryDrawer`, `trade-diary.ts`), 토스/뱅크샐러드 스타일 핀테크 주간 금융 결산 영수증(`WeeklyFinancialReceipt`), 단위 테스트 100% ALL-PASS 및 v505 무중단 승격 (+280, -0)
@@ -302,5 +303,47 @@
 - **운영 릴리스 무중단 승격 (`v507`)**:
   - 원격 호스트 동기화 및 심볼릭 링크 무중단 전환.
   - 1,761개 PostgreSQL 세션 100% 무손실 보존 검증.
+
+---
+
+## 🚀 [v70 Specification] Google/Naver 검색엔진 수집 감사 & 슬롯/하이로우 인터랙션 강화 & 가상 부동산·개인 공간 시스템 구축 사양
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  1. Google Search Console & 네이버 서치어드바이저 수집 현황 점검: 크롤링 감사 로그 및 실시간 색인 상태 확인
+  2. 슬롯머신/하이로우 인게임 인터랙션 강화: 베팅 시 칩 애니메이션 및 릴 스핀 모션 튜닝
+  3. 가상 부동산 및 개인 공간(Personal Spaces) 시스템 구축: 기획서 내 부동산 경매 및 가상 랜드 임대 시스템 확장
+- **핵심 목표**:
+  1. **검색엔진 수집 감사 & GSC/Naver/IndexNow 파이프라인 무결성 점검**:
+     - Nginx 액세스 로그의 `Googlebot`, `Yeti`, `bingbot` 크롤링 상태 분석.
+     - `/api/seo/crawl-audit`, `/api/seo/status`, `/api/seo/gsc/digest-report` 엔드포인트 헬스체크 및 감사 보고서 제공.
+  2. **슬롯머신 & 하이로우 인터랙티브 애니메이션 & 사운드 통합 바인딩**:
+     - 슬롯머신: 베팅 시 칩 사운드, 스핀 시 릴 블러(Motion Blur) 및 래칫 틱 사운드, 릴 순차 정지(Stagger 0.3s/0.6s/0.9s), 승리 시 골드 펄스 & 잭팟 팡파레.
+     - 하이로우: 카드 플립 3D 회전 애니메이션(`rotateY(180deg)`), 카드 스냅 사운드, 연승(Streak) 배수 게이지 시각화.
+  3. **가상 부동산 및 개인 공간(Personal Spaces) 시스템 구축 (`PERSONAL_SPACES_CITY_PROJECTS_SPEC.ko.md`)**:
+     - 기획서 명세 7대 공간 SKU: `스타터 룸(5,000 WLD)`, `스튜디오(25,000 WLD)`, `개인 갤러리(75,000 WLD)`, `개인 오피스(100,000 WLD)`, `펜트하우스(250,000 WLD)`, `기업 본사 HQ(1,500,000 WLD)`, `레거시 홀(2,000,000 WLD)`.
+     - 8대 주요 도시 구역: 강남 테헤란로, 여의도 금융가, 판교 밸리, 성수 아뜰리에, 한남 힐사이드, 송도 센트럴, 마포 크리에이티브, 부산 마린시티.
+     - 공간 구매, 방 확장(바닥 면적/전시 슬롯 증설), 테마 리모델링, 트로피/수집품 전시 슬롯 관리 및 임대료 수익(Rent Yield) 자동 정산.
+     - `frontend/src/lib/personal-spaces.ts`, `frontend/src/components/personal-spaces-view.tsx`, `frontend/src/app/spaces/page.tsx`, `frontend/src/app/spaces/real-estate/page.tsx` 연동.
+
+### 2. 세부 컴포넌트 구현 명세
+#### ① 가상 부동산 & 개인 공간 엔진 (`frontend/src/lib/personal-spaces.ts`)
+- 공간 유형별 메타데이터, 확장 비용 공식 `8,000 * 1.35^인덱스`, 도시 구역별 임대 수익률 산출.
+- 공간 구매(`purchaseSpace`), 방 확장(`upgradeSpace`), 테마 변경(`remodelSpace`), 전시품 등록(`placeExhibitionItem`) API 및 로컬/원장 저장소 영구 연동.
+
+#### ② 개인 공간 & 가상 랜드 쇼케이스 UI (`frontend/src/components/personal-spaces-view.tsx`)
+- 대표 공간 3D/모던 룸 인테리어 시각화, 보유 공간 그리드, 가상 부동산 도시 랜드 맵.
+- 원터치 공간 구매 및 확장 모달, Web Audio 사운드 연동.
+
+#### ③ 슬롯머신 & 하이로우 모션 튜닝 (`frontend/src/app/casino/slots-game.tsx`, `frontend/src/app/casino/hilo-game.tsx`)
+- CSS motion-blur 및 staggered reel stops, 3D 카드 플립 트랜지션 및 사운드 효과음 완전 바인딩.
+
+### 3. 검증 계획 (Verification Plan)
+- **단위 테스트**: `personal-spaces.test.ts`, `audio-effects.test.ts`, `savings-pot.test.ts` 100% ALL-PASS.
+- **프로덕션 빌드**: Next.js Turbopack 126개 전 라우트 컴파일 통과.
+- **운영 릴리스 무중단 승격 (`v508`)**:
+  - 원격 호스트 동기화 및 심볼릭 링크 무중단 전환.
+  - 1,761개 PostgreSQL 세션 100% 무손실 보존 검증.
+
 
 
