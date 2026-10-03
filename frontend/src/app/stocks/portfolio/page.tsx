@@ -14,6 +14,8 @@ import { requireMember } from '@/lib/session';
 import { MarketPricesProvider } from '@/lib/use-market-prices';
 import { analyzePortfolio, type PortfolioHoldingInput } from './analysis';
 import { PortfolioDonutChart } from './portfolio-donut-chart';
+import { SectorDiversificationCard } from '@/components/sector-diversification-card';
+import { WeeklyFinancialReceipt } from '@/components/weekly-financial-receipt';
 import { TradeDialog } from '../trade-dialog';
 
 export const dynamic = 'force-dynamic';
@@ -211,6 +213,9 @@ export default async function PortfolioAnalysisPage() {
               </CardContent>
             </Card>
 
+            {/* 2.5. 3섹터 분산 투자 & 포트폴리오 건전성 진단 (Section 5.7) */}
+            <SectorDiversificationCard holdings={response?.holdings ?? []} />
+
             {/* 3. 종목별 보유 상세 및 원터치 리밸런싱 주문 카드 목록 */}
             <Card className="border-border/80 bg-card/60 shadow-xs">
               <CardHeader className="p-4 sm:p-5 pb-3 border-b border-border/60 bg-muted/15">
@@ -340,6 +345,9 @@ export default async function PortfolioAnalysisPage() {
                 })}
               </CardContent>
             </Card>
+
+            {/* 3.5. 주간 금융 결산 영수증 & 인포그래픽 카드 (Weekly Financial Digest) */}
+            <WeeklyFinancialReceipt />
 
             {/* 4. 거래정지 원가환급 영수증 (STOCK_HALT_COST_BASIS_SETTLEMENT_SPEC) */}
             <HaltReceiptsCard receipts={haltReceipts} isEn={isEn} />
