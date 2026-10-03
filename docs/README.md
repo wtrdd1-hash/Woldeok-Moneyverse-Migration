@@ -8,6 +8,7 @@ Start here. Do not infer current product truth from the newest-looking filename,
 
 - [Implementation-facing project plan](planning/PROJECT_PLAN.md) / [한국어](planning/PROJECT_PLAN.ko.md) — **v2026.09.30.487**
 - [Integrated planning master](planning/INTEGRATED_PLANNING_MASTER.md) / [한국어](planning/INTEGRATED_PLANNING_MASTER.ko.md)
+- [Treasury Automated Social Recirculation Spec](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md) / [한국어](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md) — **v2026.10.04.522**
 - [Advertising-only revenue specification](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md) / [한국어](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md) — **v2026.09.30.487**
 - [Documentation governance](DOCUMENTATION_POLICY.md) / [한국어](DOCUMENTATION_POLICY.ko.md)
 - [Document catalog](DOCUMENT_CATALOG.md) / [한국어](DOCUMENT_CATALOG.ko.md)

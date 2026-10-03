@@ -8,6 +8,7 @@
 
 - [구현 기준 프로젝트 기획](planning/PROJECT_PLAN.ko.md) / [English](planning/PROJECT_PLAN.md) — **v2026.09.30.487**
 - [통합 기획 마스터](planning/INTEGRATED_PLANNING_MASTER.ko.md) / [English](planning/INTEGRATED_PLANNING_MASTER.md)
+- [국고 세수 자동 사회 환원 및 재정 선순환 기획](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.ko.md) / [English](planning/TREASURY_AUTOMATED_SOCIAL_RECIRCULATION_SPEC.en.md) — **v2026.10.04.522**
 - [광고 전용 수익화 명세](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md) / [English](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md) — **v2026.09.30.487**
 - [문서 거버넌스](DOCUMENTATION_POLICY.ko.md) / [English](DOCUMENTATION_POLICY.md)
 - [문서 카탈로그](DOCUMENT_CATALOG.ko.md) / [English](DOCUMENT_CATALOG.md)
