@@ -6,9 +6,9 @@ Start here. Do not infer current product truth from the newest-looking filename,
 
 ## Current authority
 
-- [Implementation-facing project plan](planning/PROJECT_PLAN.md) / [한국어](planning/PROJECT_PLAN.ko.md) — **v2026.09.30.487**
+- [Implementation-facing project plan](planning/PROJECT_PLAN.md) / [한국어](planning/PROJECT_PLAN.ko.md) — **v2026.10.03.512**
 - [Integrated planning master](planning/INTEGRATED_PLANNING_MASTER.md) / [한국어](planning/INTEGRATED_PLANNING_MASTER.ko.md)
-- [Advertising-only revenue specification](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md) / [한국어](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md) — **v2026.09.30.487**
+- [Advertising-only revenue specification](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.md) / [한국어](planning/AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md) — **v2026.10.03.512**
 - [Documentation governance](DOCUMENTATION_POLICY.md) / [한국어](DOCUMENTATION_POLICY.ko.md)
 - [Document catalog](DOCUMENT_CATALOG.md) / [한국어](DOCUMENT_CATALOG.ko.md)
 - [Current runtime / OS baseline](CURRENT_RUNTIME_BASELINE.md) / [한국어](CURRENT_RUNTIME_BASELINE.ko.md)
