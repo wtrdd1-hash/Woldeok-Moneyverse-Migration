@@ -1,9 +1,9 @@
 # Woldeok Moneyverse — Advertising-Only Revenue Specification
 
-> Version: v2026.10.02.507
+> Version: v2026.10.03.512
 > Status: PLANNING / cash monetization authority
-> Date: 2026-10-02
-> Authority adoption: v507 international ad-economics decisions adopted into current planning authority by v2026.10.03.509.
+> Date: 2026-10-03
+> Authority adoption: v507 international ad economics plus the v512 Search Console index-recovery prerequisite gate are adopted into current planning authority.
 > Korean counterpart: [AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md](AD_ONLY_ADVERTISING_REVENUE_SPEC.ko.md)
 
 ## 1. Authority and business constraint
@@ -136,6 +136,22 @@ International growth is evaluated by country + locale + landing family + device 
 This is scenario arithmetic, not a forecast. Use observed Page RPM and revenue per 1,000 qualified organic sessions. Market investment requires incremental ad revenue to exceed localization, content, moderation, infrastructure, privacy/compliance and support cost while retention, CWV, task completion and invalid-traffic/policy guardrails remain healthy.
 
 Large US, Japanese and European digital-ad markets are macro context only; they do not imply a Moneyverse publisher RPM.
+
+## 7.2 Search Console index recovery → advertising-revenue prerequisite gate — v512
+
+The user-provided 2026-10-03 observation snapshot shows Search Console total clicks 183, 46 indexed and 103 non-indexed pages, with recent daily clicks around 0–2. The same supplied material shows AdSense recent-7-day pageviews 236 (+17%), impressions 193 (+10%), Page RPM US$0.26 (-41%), clicks 0, page CTR 0.00%, and estimated revenue US$0.06. These values trigger diagnosis; alone they do not establish a long-term trend or causality.
+
+Advertising-revenue operations follow this fixed order:
+
+1. Export Search Console URL-level exclusion reasons and separate intentional exclusions from defects.
+2. Repair sitemap/robots/canonical/noindex/status/redirect/soft-404/internal-link/locale conflicts.
+3. Improve unique tools/content that fully satisfy search intent and remove orphan indexable URLs.
+4. Measure qualified organic sessions, impressions, clicks, CTR, average position, index cohorts and pageviews/session over 7/28/90 days.
+5. Only then run ad viewability/format/load experiments, evaluating Page RPM together with revenue per 1,000 organic sessions.
+
+**Prohibited:** forcing all 103 excluded URLs into the index, mass-producing thin pSEO unrelated to real demand, duplicate pages created for ad inventory, self/incentivized clicks, or optimizing the product around ad-click count.
+
+**Operating objective:** reduce defects among URLs that are supposed to be indexed and grow qualified organic sessions. Intentional non-indexing for login/account/wallet/trading/admin/private/sensitive-consent surfaces is treated as a correct state. Revenue changes are adopted only when search quality, policy compliance, CWV and user task completion remain healthy.
 
 ## 8. Tax/business evidence gate
 
