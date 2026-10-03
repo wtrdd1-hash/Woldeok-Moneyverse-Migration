@@ -1,6 +1,7 @@
-# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v82)
+# 주식 거래 UI 고도화 & AI Council 정책 모니터링 통합 구현 계획서 (현재: v83)
 
 ## 📜 누적 버전 히스토리 (Version Changelog & Diffs)
+- **v83**: 8대 전문 직업 2.0 & 실전 급여 파밍 완벽 가이드 센터(`/guide/career-mastery`) 전면 쇄신 — 4단계 실습 시뮬레이터, 8대 직업 도감, 7대 승진 티어 및 기능 소개 딥링크 완비 (+190, -0)
 - **v82**: 온보딩 퀘스트 플로팅 위젯 고대비 원형 닫기(X) 버튼, 바깥 클릭/ESC 키 감지, 오늘 하루 닫기(24시간) 옵션 및 총 보상 170,000 WLD 동적 연동 완비 (+75, -0)
 - **v81**: 상단 헤더·모바일 사이드 드로어·메인 홈 전역 가이드 노출 극대화(Quick Guide 핫 칩 + 모바일 추천 배너 + 홈 온보딩 2열 벤토) 및 사용자 리텐션 강화 (+155, -0)
 - **v80**: AI 맞춤형 투자 성향 진단기(`InvestorProfileQuiz`) & 1초 자산 배분 포트폴리오 설계 & 가이드 실시간 자연어 검색 & 온보딩 퀘스트 7종(+170,000 WLD) 연동 (+185, -0)
@@ -809,6 +810,41 @@
 - Vitest 온보딩 트래커 및 전역 테스트 100% ALL-PASS.
 - GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v521` 무중단 승격 배포.
 - 실제 도메인(`https://easy-scraping.com`) 렌더링 및 닫기 인터랙션 검증.
+
+---
+
+## 🚀 [v83 Specification] 8대 전문 직업 2.0 & 실전 급여 파밍 완벽 가이드 센터(`/guide/career-mastery`) 전면 쇄신 (누적 추가)
+
+### 1. 개요 및 배경 (Overview & Scope)
+- **사용자 요청**:
+  - "그리고 직업하는방법 부터 처음부터끝까지 다 설명해줘 이미지 그림 등활용해서 그 해줘 제발 설명페지이 제대로 만들어줘"
+  - "항상 미니 pc 에서 작업하고 작업끝나면 메인에합치고 브래치 정리하는거밎지? 운영에 무중단승격하고?"
+- **조율 확정 사양 (Interactive Alignment)**:
+  1. **인터랙티브 4대 탭 직업 가이드 엔진 (`career-step-by-step-guide.tsx`)**:
+     - **Tab 1: 4단계 수행 절차 (Flow)**: 직업 선택(Job Switch) ➔ 업무 수락(Claim) ➔ 실시간 쿨다운 타이머(30초~300초) ➔ 업무 완료 제출 & WorkReceipt 영수증 발급 + 실제 UI 배치 가이드.
+     - **Tab 2: 8대 직업군 도감 (Jobs Catalog)**: 핀테크 개발자, 퀀트 트레이더, 중앙은행가, 부동산 재벌, AI 연구원, 벤처 투자가, 보안 감사관, 언론 기자 8개 직무별 상세 설명, 기본급, 대표 업무, 시너지 공략 카드.
+     - **Tab 3: 7대 승진 티어 (Mastery Tiers)**: 견습(1.0x) ~ 숙련(1.2x) ~ 프로(1.5x) ~ 전문가(1.8x) ~ 엑스퍼트(2.1x) ~ 마스터(2.5x) ~ 레거시 명예(3.0x) 로드맵 및 단계별 혜택.
+     - **Tab 4: 실전 모의 체험 시뮬레이터 (Simulator)**: 레벨 슬라이더 & 공인 자격증 체크박스 실시간 보상 계산기 + 3초 업무 수락/타이머/제출/입금 사운드 모의 실습.
+  2. **직업 가이드 센터 페이지 전면 쇄신 (`frontend/src/app/guide/career-mastery/page.tsx`)**:
+     - 위 인터랙티브 컴포넌트 마운트, 일일 50,000 WLD / 주간 300,000 WLD 스마트 쿼터 설명, 무자본 10분 일일 파밍 루틴 4단계 및 CTA 배너 완비.
+  3. **6대 기능 소개 화면 동기화 (`frontend/src/app/features/features-view.tsx`)**:
+     - `career-farming` 섹션을 8대 전문 직업 2.0 및 4단계 프로세스로 쇄신.
+  4. **개발/배포 파이프라인 무결점 확립**:
+     - 로컬 미니 PC 개발 ➔ Vitest 전수 검증 ➔ Git main 브랜치 통합 및 푸시 ➔ 원격 운영 서버(`prod-v521`) 빌드 및 systemctl 무중단 승격 배포.
+
+### 2. 컴포넌트 및 테스트 구현 명세
+1. **인터랙티브 직업 가이드 컴포넌트 (`frontend/src/app/guide/career-mastery/career-step-by-step-guide.tsx`)**:
+   - `CAREER_GUIDE_JOBS` 8종 메타, `MASTERY_TIERS_GUIDE` 7단계 티어, 3초 타이머 및 Web Audio 사운드 연동.
+2. **직업 가이드 페이지 (`frontend/src/app/guide/career-mastery/page.tsx`)**:
+   - JSON-LD Article 구조화 데이터, 메타데이터, 일일 파밍 루틴, 구글 애드센스 인아티클/멀티플렉스 광고 슬롯 완비.
+3. **단위 테스트 (`frontend/src/app/guide/career-mastery/career-step-by-step-guide.test.tsx`)**:
+   - 4대 탭 전환, 8대 직업 선택, 7대 티어 로드맵, 모의 업무 시뮬레이션 4종 테스트 작성 및 100% 통과.
+
+### 3. 검증 및 배포 계획
+- Vitest 185개 파일 1038개 테스트 100% ALL-PASS.
+- GitHub `origin/main` 푸시 및 원격 운영 서버 `prod-v521` 무중단 승격 배포.
+- 실제 도메인([https://easy-scraping.com/guide/career-mastery](https://easy-scraping.com/guide/career-mastery), `/features`) 렌더링 검증.
+
 
 
 
