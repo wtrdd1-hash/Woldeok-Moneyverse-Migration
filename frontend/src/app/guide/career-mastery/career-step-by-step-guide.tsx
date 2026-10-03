@@ -162,7 +162,7 @@ export const MASTERY_TIERS_GUIDE = [
 ];
 
 export function CareerStepByStepGuide() {
-  const [selectedJob, setSelectedJob] = useState<JobMeta>(CAREER_GUIDE_JOBS[0]);
+  const [selectedJob, setSelectedJob] = useState<JobMeta>(CAREER_GUIDE_JOBS[0] as JobMeta);
   const [activeTab, setActiveTab] = useState<'flow' | 'jobs' | 'mastery' | 'simulator'>('flow');
 
   // 인터랙티브 시뮬레이터 상태
@@ -199,7 +199,9 @@ export function CareerStepByStepGuide() {
   };
 
   // 숙련도 티어 계산
-  const currentTier = MASTERY_TIERS_GUIDE.slice().reverse().find((t) => simLevel >= t.level) || MASTERY_TIERS_GUIDE[0];
+  const currentTier =
+    MASTERY_TIERS_GUIDE.slice().reverse().find((t) => simLevel >= t.level) ??
+    (MASTERY_TIERS_GUIDE[0] as (typeof MASTERY_TIERS_GUIDE)[0]);
   const certMultiplier = hasCert ? 1.25 : 1.0;
   const estimatedWld = Math.round(2500 * parseFloat(currentTier.mult) * certMultiplier);
 
